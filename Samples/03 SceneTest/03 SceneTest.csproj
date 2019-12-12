@@ -1,164 +1,132 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{CE29A59F-3400-4C87-8D53-320B9E365C6C}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SceneTest</RootNamespace>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
     <AssemblyName>SceneTest</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
-    <FileAlignment>512</FileAlignment>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
-    <PublishUrl>publish\</PublishUrl>
-    <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
-    <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
-    <UseApplicationTrust>false</UseApplicationTrust>
-    <BootstrapperEnabled>true</BootstrapperEnabled>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
-    <SonarQubeTestProject>
-    </SonarQubeTestProject>
+    <RootNamespace>SceneTest</RootNamespace>
+    <Platforms>AnyCPU;x64;x86</Platforms>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-    <PlatformTarget>x86</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\x86\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
-    <Prefer32Bit>false</Prefer32Bit>
-    <UseVSHostingProcess>true</UseVSHostingProcess>
-    <CodeAnalysisRuleSet>03 SceneTest.ruleset</CodeAnalysisRuleSet>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <CodeAnalysisRuleSet />
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
-    <PlatformTarget>x86</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\x86\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
-    <Prefer32Bit>false</Prefer32Bit>
-    <UseVSHostingProcess>true</UseVSHostingProcess>
-    <CodeAnalysisRuleSet>03 SceneTest.ruleset</CodeAnalysisRuleSet>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <CodeAnalysisRuleSet />
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <CodeAnalysisLogFile>bin\Debug\4 SceneTest.exe.CodeAnalysisLog.xml</CodeAnalysisLogFile>
-    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
-    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>03 SceneTest.ruleset</CodeAnalysisRuleSet>
-    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
-    <Prefer32Bit>false</Prefer32Bit>
-    <UseVSHostingProcess>true</UseVSHostingProcess>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <CodeAnalysisRuleSet />
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <CodeAnalysisLogFile>bin\Release\4 SceneTest.exe.CodeAnalysisLog.xml</CodeAnalysisLogFile>
-    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
-    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>03 SceneTest.ruleset</CodeAnalysisRuleSet>
-    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
-    <Prefer32Bit>false</Prefer32Bit>
-    <UseVSHostingProcess>true</UseVSHostingProcess>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <CodeAnalysisRuleSet />
   </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject>SceneTest.Program</StartupObject>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <CodeAnalysisRuleSet />
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x64\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <CodeAnalysisLogFile>bin\Debug\SceneTest.exe.CodeAnalysisLog.xml</CodeAnalysisLogFile>
-    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
-    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>03 SceneTest.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
-    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
-    <Prefer32Bit>false</Prefer32Bit>
-    <UseVSHostingProcess>true</UseVSHostingProcess>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <CodeAnalysisRuleSet />
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>bin\x64\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <CodeAnalysisLogFile>bin\Release\SceneTest.exe.CodeAnalysisLog.xml</CodeAnalysisLogFile>
-    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
-    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>03 SceneTest.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
-    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
-    <Prefer32Bit>false</Prefer32Bit>
-    <UseVSHostingProcess>true</UseVSHostingProcess>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="SharpDX, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpDX.4.2.0\lib\net45\SharpDX.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpDX.Mathematics, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpDX.Mathematics.4.2.0\lib\net45\SharpDX.Mathematics.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
+    <None Remove="Common\buttons.png" />
+    <None Remove="Common\LensFlare\lfFlare1.png" />
+    <None Remove="Common\LensFlare\lfFlare2.png" />
+    <None Remove="Common\LensFlare\lfFlare3.png" />
+    <None Remove="Common\LensFlare\lfFlare4.png" />
+    <None Remove="Common\LensFlare\lfGlow.png" />
+    <None Remove="Common\pointer.png" />
+    <None Remove="SceneLights\Buildings\Obelisk\diffus.dds" />
+    <None Remove="SceneLights\Buildings\Obelisk\normal.dds" />
+    <None Remove="SceneLights\Buildings\Obelisk\obelisk.dae" />
+    <None Remove="SceneLights\Buildings\Obelisk\obelisk.xml" />
+    <None Remove="SceneLights\Buildings\Obelisk\specular.dds" />
+    <None Remove="SceneLights\Floors\Asphalt\d_road_asphalt_stripes_diffuse.dds" />
+    <None Remove="SceneLights\Floors\Asphalt\d_road_asphalt_stripes_normal.dds" />
+    <None Remove="SceneLights\Floors\Asphalt\d_road_asphalt_stripes_specular.dds" />
+    <None Remove="SceneLights\Trees\bark_albedo.png" />
+    <None Remove="SceneLights\Trees\bark_normal.png" />
+    <None Remove="SceneLights\Trees\bark_specular.png" />
+    <None Remove="SceneLights\Trees\bushes_albedo.png" />
+    <None Remove="SceneLights\Trees\bushes_normal.png" />
+    <None Remove="SceneLights\Trees\bushes_specular.png" />
+    <None Remove="SceneLights\Trees\tree.dae" />
+    <None Remove="SceneLights\Trees\tree.xml" />
+    <None Remove="SceneMaterials\floor.png" />
+    <None Remove="SceneMaterials\nmap1.jpg" />
+    <None Remove="SceneMaterials\nmap2.png" />
+    <None Remove="SceneMaterials\white.png" />
+    <None Remove="SceneStart\backGround.jpg" />
+    <None Remove="SceneStart\SkyPlane.dae" />
+    <None Remove="SceneStart\SkyPlane.xml" />
+    <None Remove="SceneStencilPass\Buildings\Obelisk\diffus.dds" />
+    <None Remove="SceneStencilPass\Buildings\Obelisk\normal.dds" />
+    <None Remove="SceneStencilPass\Buildings\Obelisk\obelisk.dae" />
+    <None Remove="SceneStencilPass\Buildings\Obelisk\obelisk.xml" />
+    <None Remove="SceneStencilPass\Buildings\Obelisk\specular.dds" />
+    <None Remove="SceneStencilPass\Floors\Asphalt\d_road_asphalt_stripes_diffuse.dds" />
+    <None Remove="SceneStencilPass\Floors\Asphalt\d_road_asphalt_stripes_normal.dds" />
+    <None Remove="SceneStencilPass\Floors\Asphalt\d_road_asphalt_stripes_specular.dds" />
+    <None Remove="SceneTest\Buildings\Obelisk\diffus.dds" />
+    <None Remove="SceneTest\Buildings\Obelisk\normal.dds" />
+    <None Remove="SceneTest\Buildings\Obelisk\obelisk.dae" />
+    <None Remove="SceneTest\Buildings\Obelisk\obelisk.xml" />
+    <None Remove="SceneTest\Buildings\Obelisk\specular.dds" />
+    <None Remove="SceneTest\Character\Soldier\soldier0.jpg" />
+    <None Remove="SceneTest\Character\Soldier\Soldier1.jpg" />
+    <None Remove="SceneTest\Character\Soldier\soldier_anim2.dae" />
+    <None Remove="SceneTest\Character\Soldier\soldier_anim2.xml" />
+    <None Remove="SceneTest\Container\container.dae" />
+    <None Remove="SceneTest\Container\container.xml" />
+    <None Remove="SceneTest\Container\ikube azul-1.png" />
+    <None Remove="SceneTest\Container\ikube azul-2.png" />
+    <None Remove="SceneTest\Container\ikube azul-3.png" />
+    <None Remove="SceneTest\Container\ikube azul-4.png" />
+    <None Remove="SceneTest\Container\ikube azul-5.png" />
+    <None Remove="SceneTest\Floors\Asphalt\d_road_asphalt_stripes_diffuse.dds" />
+    <None Remove="SceneTest\Floors\Asphalt\d_road_asphalt_stripes_normal.dds" />
+    <None Remove="SceneTest\Floors\Asphalt\d_road_asphalt_stripes_specular.dds" />
+    <None Remove="SceneTest\Lamps\concrete.jpg" />
+    <None Remove="SceneTest\Lamps\Lamp.dae" />
+    <None Remove="SceneTest\Lamps\Lamp.png" />
+    <None Remove="SceneTest\Lamps\Lamp.xml" />
+    <None Remove="SceneTest\Lamps\metallic.jpg" />
+    <None Remove="SceneTest\Lamps\StreetLamp.dae" />
+    <None Remove="SceneTest\Lamps\StreetLamp.xml" />
+    <None Remove="SceneTest\Particles\explosion.png" />
+    <None Remove="SceneTest\Particles\fire.dds" />
+    <None Remove="SceneTest\Particles\fire.png" />
+    <None Remove="SceneTest\Particles\floor.png" />
+    <None Remove="SceneTest\Particles\smoke.png" />
+    <None Remove="SceneTest\Scenery\clif.dae" />
+    <None Remove="SceneTest\Scenery\clif.xml" />
+    <None Remove="SceneTest\Scenery\Diffuse.jpg" />
+    <None Remove="SceneTest\Scenery\Normal.jpg" />
+    <None Remove="SceneTest\Sky\cloud001.dds" />
+    <None Remove="SceneTest\Sky\perturb001.dds" />
+    <None Remove="SceneTest\Trees\Bark_d.png" />
+    <None Remove="SceneTest\Trees\Leafs_d.png" />
+    <None Remove="SceneTest\Trees\Tree.xml" />
+    <None Remove="SceneTest\Trees\tree_1.dae" />
+    <None Remove="SceneTest\Trees\tree_2.dae" />
+    <None Remove="SceneTest\Trees\tree_3.dae" />
+    <None Remove="SceneTest\UI\button_off.png" />
+    <None Remove="SceneTest\UI\button_on.png" />
+    <None Remove="SceneTest\Vehicles\Challenger\Challenger.bmp" />
+    <None Remove="SceneTest\Vehicles\Challenger\challenger.dae" />
+    <None Remove="SceneTest\Vehicles\Challenger\challenger.xml" />
+    <None Remove="SceneTest\Vehicles\Leopard\Leopard.bmp" />
+    <None Remove="SceneTest\Vehicles\Leopard\Leopard.dae" />
+    <None Remove="SceneTest\Vehicles\Leopard\Leopard.xml" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="SceneCascadedShadows.cs" />
-    <Compile Include="SceneLights.cs" />
-    <Compile Include="SceneMaterials.cs" />
-    <Compile Include="SceneStart.cs" />
-    <Compile Include="SceneWater.cs" />
-    <Compile Include="SceneStencilPass.cs" />
-    <Compile Include="SceneTest.cs" />
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Content Include="Common\buttons.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Common\LensFlare\lfFlare4.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Common\pointer.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Common\LensFlare\lfFlare1.png">
@@ -170,7 +138,13 @@
     <Content Include="Common\LensFlare\lfFlare3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Common\LensFlare\lfFlare4.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Common\LensFlare\lfGlow.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Common\pointer.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneLights\Buildings\Obelisk\diffus.dds">
@@ -178,6 +152,10 @@
     </Content>
     <Content Include="SceneLights\Buildings\Obelisk\normal.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneLights\Buildings\Obelisk\obelisk.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </Content>
     <Content Include="SceneLights\Buildings\Obelisk\obelisk.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -212,6 +190,9 @@
     <Content Include="SceneLights\Trees\bushes_specular.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="SceneLights\Trees\tree.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="SceneLights\Trees\tree.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -227,10 +208,13 @@
     <Content Include="SceneMaterials\white.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneStart\SkyPlane.xml">
+    <Content Include="SceneStart\backGround.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneStart\backGround.jpg">
+    <Content Include="SceneStart\SkyPlane.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStart\SkyPlane.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneStencilPass\Buildings\Obelisk\diffus.dds">
@@ -238,6 +222,10 @@
     </Content>
     <Content Include="SceneStencilPass\Buildings\Obelisk\normal.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStencilPass\Buildings\Obelisk\obelisk.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </Content>
     <Content Include="SceneStencilPass\Buildings\Obelisk\obelisk.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -254,6 +242,15 @@
     <Content Include="SceneStencilPass\Floors\Asphalt\d_road_asphalt_stripes_specular.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="SceneTest\Buildings\Obelisk\diffus.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Buildings\Obelisk\normal.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Buildings\Obelisk\obelisk.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="SceneTest\Buildings\Obelisk\obelisk.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -266,7 +263,16 @@
     <Content Include="SceneTest\Character\Soldier\Soldier1.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="SceneTest\Character\Soldier\soldier_anim2.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="SceneTest\Character\Soldier\soldier_anim2.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Container\container.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Container\container.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneTest\Container\ikube azul-1.png">
@@ -284,22 +290,35 @@
     <Content Include="SceneTest\Container\ikube azul-5.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneTest\Container\container.xml">
+    <Content Include="SceneTest\Floors\Asphalt\d_road_asphalt_stripes_diffuse.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Floors\Asphalt\d_road_asphalt_stripes_normal.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Floors\Asphalt\d_road_asphalt_stripes_specular.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneTest\Lamps\concrete.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="SceneTest\Lamps\Lamp.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="SceneTest\Lamps\Lamp.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Lamps\Lamp.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneTest\Lamps\metallic.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneTest\Lamps\StreetLamp.xml">
+    <Content Include="SceneTest\Lamps\StreetLamp.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </Content>
-    <Content Include="SceneTest\Lamps\Lamp.xml">
+    <Content Include="SceneTest\Lamps\StreetLamp.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneTest\Particles\explosion.png">
@@ -317,10 +336,13 @@
     <Content Include="SceneTest\Particles\smoke.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneTest\Scenery\Diffuse.jpg">
+    <Content Include="SceneTest\Scenery\clif.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneTest\Scenery\clif.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Scenery\Diffuse.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneTest\Scenery\Normal.jpg">
@@ -341,89 +363,6 @@
     <Content Include="SceneTest\Trees\Tree.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneTest\UI\button_off.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTest\UI\button_on.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTest\Vehicles\Challenger\Challenger.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTest\Vehicles\Challenger\challenger.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTest\Vehicles\Leopard\Leopard.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTest\Vehicles\Leopard\Leopard.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-    </Compile>
-    <None Include="03 SceneTest.ruleset" />
-    <None Include="app.config" />
-    <None Include="packages.config" />
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
-    <Content Include="SceneTest\Character\Soldier\soldier_anim2.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTest\Lamps\Lamp.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <SubType>
-      </SubType>
-    </Content>
-    <Content Include="SceneTest\Vehicles\Leopard\Leopard.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTest\Lamps\StreetLamp.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
-    </Content>
-    <Content Include="SceneTest\Buildings\Obelisk\obelisk.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneStencilPass\Buildings\Obelisk\obelisk.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
-    </Content>
-    <Content Include="SceneTest\Scenery\clif.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneStart\SkyPlane.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <SubType>
-      </SubType>
-    </Content>
-    <Content Include="SceneLights\Buildings\Obelisk\obelisk.dae">
-      <SubType>Designer</SubType>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTest\Container\container.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTest\Vehicles\Challenger\challenger.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneLights\Trees\tree.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="SceneTest\Trees\tree_1.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -433,48 +372,34 @@
     <Content Include="SceneTest\Trees\tree_3.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="SceneTest\UI\button_off.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\UI\button_on.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Vehicles\Challenger\Challenger.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Vehicles\Challenger\challenger.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Vehicles\Challenger\challenger.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Vehicles\Leopard\Leopard.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Vehicles\Leopard\Leopard.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Vehicles\Leopard\Leopard.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
+
   <ItemGroup>
-    <BootstrapperPackage Include=".NETFramework,Version=v4.5">
-      <Visible>False</Visible>
-      <ProductName>Microsoft .NET Framework 4.5 %28x86 and x64%29</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
+    <ProjectReference Include="..\..\Engine\Engine.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="SceneTest\Buildings\Obelisk\diffus.dds">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTest\Buildings\Obelisk\normal.dds">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTest\Floors\Asphalt\d_road_asphalt_stripes_diffuse.dds">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTest\Floors\Asphalt\d_road_asphalt_stripes_normal.dds">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTest\Floors\Asphalt\d_road_asphalt_stripes_specular.dds">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Engine\Engine.csproj">
-      <Project>{a4bac380-82cb-4db8-953f-a291f0bef559}</Project>
-      <Name>Engine</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
 </Project>
