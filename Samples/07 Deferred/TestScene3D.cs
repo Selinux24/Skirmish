@@ -96,8 +96,10 @@ namespace Deferred
                 return loadingText;
             });
 
+            string loadResult = loadTask.Result;
+
             this.title.Instance.Text = "Deferred Ligthning test";
-            this.load.Instance.Text = loadTask.Result;
+            this.load.Instance.Text = loadResult;
             this.help.Instance.Text = "";
             this.statistics.Instance.Text = "";
 
