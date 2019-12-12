@@ -28,11 +28,6 @@ namespace Engine.Collada.Types
 
         }
 
-        public BasicInt(int value)
-        {
-            this.Value = value;
-        }
-
         public override string ToString()
         {
             return string.Format("{0}", this.Value);

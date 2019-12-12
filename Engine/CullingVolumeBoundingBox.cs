@@ -3,17 +3,17 @@
 namespace Engine
 {
     /// <summary>
-    /// Sphere culling volume
+    /// Bounding box culling volume
     /// </summary>
-    public class CullingVolumeAABB : ICullingVolume
+    public class CullingVolumeBoundingBox : ICullingVolume
     {
         /// <summary>
-        /// Bounding sphere
+        /// Bounding box
         /// </summary>
         private readonly BoundingBox bbox;
 
         /// <summary>
-        /// Gets the center of the sphere
+        /// Gets the center of the box
         /// </summary>
         public Vector3 Position { get; private set; }
 
@@ -21,7 +21,7 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="bbox">Axis aligned bounding box</param>
-        public CullingVolumeAABB(BoundingBox bbox)
+        public CullingVolumeBoundingBox(BoundingBox bbox)
         {
             this.bbox = bbox;
 
@@ -32,7 +32,7 @@ namespace Engine
         /// </summary>
         /// <param name="min">Minimum point</param>
         /// <param name="max">Maximum point</param>
-        public CullingVolumeAABB(Vector3 min, Vector3 max)
+        public CullingVolumeBoundingBox(Vector3 min, Vector3 max)
         {
             this.bbox = new BoundingBox(min, max);
 

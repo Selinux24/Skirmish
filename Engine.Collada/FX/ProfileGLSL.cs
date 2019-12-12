@@ -4,7 +4,7 @@ using System.Xml.Serialization;
 namespace Engine.Collada.FX
 {
     [Serializable]
-    public class ProfileGLSL
+    public class ProfileGlsl
     {
         [XmlAttribute("id")]
         public string Id { get; set; }

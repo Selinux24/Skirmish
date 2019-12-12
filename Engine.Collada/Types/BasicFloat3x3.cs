@@ -3,16 +3,11 @@
 namespace Engine.Collada.Types
 {
     [Serializable]
-    public class BasicFloat3x3 : BasicFloatArray
+    public class BasicFloat3X3 : BasicFloatArray
     {
-        public BasicFloat3x3()
+        public BasicFloat3X3()
         {
 
-        }
-
-        public BasicFloat3x3(float m11, float m12, float m13, float m21, float m22, float m23, float m31, float m32, float m33)
-        {
-            this.Values = new float[] { m11, m12, m13, m21, m22, m23, m31, m32, m33 };
         }
 
         public override string ToString()

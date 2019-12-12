@@ -21,16 +21,11 @@ namespace Engine.Collada.Types
             }
         }
         [XmlIgnore]
-        public float Value { get; private set; }
+        public float Value { get; set; }
 
         public BasicFloat()
         {
 
-        }
-
-        public BasicFloat(float value)
-        {
-            this.Value = value;
         }
 
         public override string ToString()

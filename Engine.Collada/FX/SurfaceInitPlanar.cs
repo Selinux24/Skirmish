@@ -3,12 +3,12 @@ using System.Xml.Serialization;
 
 namespace Engine.Collada.FX
 {
-    using global::Engine.Collada.Types;
+    using Engine.Collada.Types;
 
     [Serializable]
     public class SurfaceInitPlanar
     {
-        [XmlElement("all", typeof(BasicIDREF))]
-        public BasicIDREF All { get; set; }
+        [XmlElement("all", typeof(BasicIdRef))]
+        public BasicIdRef All { get; set; }
     }
 }

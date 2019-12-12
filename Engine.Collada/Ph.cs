@@ -3,7 +3,7 @@ using System.Xml.Serialization;
 
 namespace Engine.Collada
 {
-    using global::Engine.Collada.Types;
+    using Engine.Collada.Types;
 
     [Serializable]
     public class Ph

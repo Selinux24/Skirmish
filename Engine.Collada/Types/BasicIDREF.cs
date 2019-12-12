@@ -4,21 +4,16 @@ using System.Xml.Serialization;
 namespace Engine.Collada.Types
 {
     [Serializable]
-    public class BasicIDREF
+    public class BasicIdRef
     {
         [XmlAttribute("sid")]
         public string SId { get; set; }
         [XmlAttribute("@ref", DataType = "IDREF")]
         public string Reference { get; set; }
 
-        public BasicIDREF()
+        public BasicIdRef()
         {
 
-        }
-
-        public BasicIDREF(string value)
-        {
-            this.Reference = value;
         }
 
         public override string ToString()

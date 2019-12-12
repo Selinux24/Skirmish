@@ -266,7 +266,7 @@
     <Compile Include="ShadowMap.cs" />
     <Compile Include="ShadowMapPoint.cs" />
     <Compile Include="CullingVolumeCamera.cs" />
-    <Compile Include="CullingVolumeAABB.cs" />
+    <Compile Include="CullingVolumeBoundingBox.cs" />
     <Compile Include="CullingVolumeSphere.cs" />
     <Compile Include="Effects\EffectDefaultFoliage.cs" />
     <Compile Include="Effects\EffectDefaultClouds.cs" />

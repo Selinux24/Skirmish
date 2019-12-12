@@ -241,17 +241,17 @@ namespace Engine.Content
                         {
                             throw new NotImplementedException();
                         }
-                        else if (effect.ProfileGLES != null)
+                        else if (effect.ProfileGles != null)
                         {
                             throw new NotImplementedException();
                         }
-                        else if (effect.ProfileGLSL != null)
+                        else if (effect.ProfileGlsl != null)
                         {
                             throw new NotImplementedException();
                         }
-                        else if (effect.ProfileCOMMON != null)
+                        else if (effect.ProfileCommon != null)
                         {
-                            info = ProcessTechniqueFX(effect.ProfileCOMMON);
+                            info = ProcessTechniqueFX(effect.ProfileCommon);
                         }
                     }
 
@@ -759,7 +759,7 @@ namespace Engine.Content
                     {
                         if (geo.BindMaterial != null)
                         {
-                            var m = geo.BindMaterial.TechniqueCOMMON[0].InstanceMaterial[0];
+                            var m = geo.BindMaterial.TechniqueCommon[0].InstanceMaterial[0];
                             if (string.Equals(material, m.Symbol, StringComparison.OrdinalIgnoreCase))
                             {
                                 return m.Target.Replace("#", "");
@@ -1085,9 +1085,9 @@ namespace Engine.Content
         /// </summary>
         /// <param name="profile">Profile</param>
         /// <returns>Returns material content</returns>
-        private static MaterialContent ProcessTechniqueFX(ProfileCOMMON profile)
+        private static MaterialContent ProcessTechniqueFX(ProfileCommon profile)
         {
-            TechniqueCOMMON technique = profile.Technique;
+            TechniqueCommon technique = profile.Technique;
 
             string algorithmName = null;
 
@@ -1257,7 +1257,7 @@ namespace Engine.Content
         /// <param name="profile">Profile</param>
         /// <param name="texture">Texture information</param>
         /// <returns>Returns texture name</returns>
-        private static string FindTexture(ProfileCOMMON profile, BasicTexture texture)
+        private static string FindTexture(ProfileCommon profile, BasicTexture texture)
         {
             if (texture != null)
             {
@@ -1303,7 +1303,7 @@ namespace Engine.Content
         /// <param name="profile">Profile</param>
         /// <param name="technique">Technique information</param>
         /// <returns>Returns texture name</returns>
-        private static string FindBumpMap(ProfileCOMMON profile, TechniqueCOMMON technique)
+        private static string FindBumpMap(ProfileCommon profile, TechniqueCommon technique)
         {
             if (technique.Extras?.Length > 0)
             {
@@ -1639,7 +1639,7 @@ namespace Engine.Content
         /// { ux, uz, uy, 0 }
         /// { px, pz, py, 1 }
         /// </remarks>
-        public static Matrix ToMatrix(this BasicFloat4x4 matrix)
+        public static Matrix ToMatrix(this BasicFloat4X4 matrix)
         {
             if (matrix.Values != null && matrix.Values.Length == 16)
             {
@@ -1745,7 +1745,7 @@ namespace Engine.Content
 
             for (int i = 0; i < length * stride; i += stride)
             {
-                string v = source.IDREFArray[i];
+                string v = source.IdRefArray[i];
 
                 names.Add(v);
             }
@@ -2004,11 +2004,11 @@ namespace Engine.Content
         /// </summary>
         /// <param name="matrix">Node matrix</param>
         /// <returns>Returns the parsed matrix</returns>
-        public static Matrix ReadMatrixFromTransform(BasicFloat4x4[] matrix)
+        public static Matrix ReadMatrixFromTransform(BasicFloat4X4[] matrix)
         {
             if (matrix != null)
             {
-                BasicFloat4x4 trn = Array.Find(matrix, t => string.Equals(t.SId, "transform"));
+                BasicFloat4X4 trn = Array.Find(matrix, t => string.Equals(t.SId, "transform"));
                 if (trn != null)
                 {
                     Matrix m = trn.ToMatrix();

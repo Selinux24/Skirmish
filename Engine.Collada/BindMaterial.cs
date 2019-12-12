@@ -8,8 +8,8 @@ namespace Engine.Collada
     {
         [XmlElement("param", typeof(Param))]
         public Param[] Param { get; set; }
-        [XmlElement("technique_common", typeof(BindMaterialTechniqueCOMMON))]
-        public BindMaterialTechniqueCOMMON[] TechniqueCOMMON { get; set; }
+        [XmlElement("technique_common", typeof(BindMaterialTechniqueCommon))]
+        public BindMaterialTechniqueCommon[] TechniqueCommon { get; set; }
         [XmlElement("technique", typeof(Technique))]
         public Technique[] Techniques { get; set; }
         [XmlElement("extra", typeof(Extra))]
@@ -17,7 +17,7 @@ namespace Engine.Collada
     }
 
     [Serializable]
-    public class BindMaterialTechniqueCOMMON
+    public class BindMaterialTechniqueCommon
     {
         [XmlElement("instance_material", typeof(InstanceMaterial))]
         public InstanceMaterial[] InstanceMaterial { get; set; }

@@ -10,11 +10,6 @@ namespace Engine.Collada.Types
 
         }
 
-        public BasicInt2(int a, int b)
-        {
-            this.Values = new int[] { a, b };
-        }
-
         public override string ToString()
         {
             if (this.Values != null && this.Values.Length == 2)

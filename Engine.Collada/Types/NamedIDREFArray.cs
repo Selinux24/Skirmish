@@ -4,7 +4,7 @@ using System.Xml.Serialization;
 namespace Engine.Collada.Types
 {
     [Serializable]
-    public class NamedIDREFArray : NamedArray
+    public class NamedIdRefArray : NamedArray
     {
         [XmlText(DataType = "IDREFS")]
         public string Value

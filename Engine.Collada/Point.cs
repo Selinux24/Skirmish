@@ -3,7 +3,7 @@ using System.Xml.Serialization;
 
 namespace Engine.Collada
 {
-    using global::Engine.Collada.Types;
+    using Engine.Collada.Types;
 
     [Serializable]
     public class Point
@@ -19,9 +19,9 @@ namespace Engine.Collada
 
         public Point()
         {
-            this.ConstantAttenuation = new BasicFloat(1);
-            this.LinearAttenuation = new BasicFloat(0);
-            this.QuadraticAttenuation = new BasicFloat(0);
+            this.ConstantAttenuation = new BasicFloat { Value = 1 };
+            this.LinearAttenuation = new BasicFloat { Value = 0 };
+            this.QuadraticAttenuation = new BasicFloat { Value = 0 };
         }
     }
 }

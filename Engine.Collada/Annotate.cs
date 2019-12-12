@@ -3,7 +3,7 @@ using System.Xml.Serialization;
 
 namespace Engine.Collada
 {
-    using global::Engine.Collada.Types;
+    using Engine.Collada.Types;
 
     [Serializable]
     public class Annotate
@@ -35,11 +35,11 @@ namespace Engine.Collada
         [XmlElement("float4")]
         public BasicFloat4 Float4 { get; set; }
         [XmlElement("float2x2")]
-        public BasicFloat2x2 Float2x2 { get; set; }
+        public BasicFloat2X2 Float2x2 { get; set; }
         [XmlElement("float3x3")]
-        public BasicFloat3x3 Float3x3 { get; set; }
+        public BasicFloat3X3 Float3x3 { get; set; }
         [XmlElement("float4x4")]
-        public BasicFloat4x4 Float4x4 { get; set; }
+        public BasicFloat4X4 Float4x4 { get; set; }
         [XmlElement("string")]
         public string String { get; set; }
     }

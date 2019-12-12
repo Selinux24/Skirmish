@@ -17,10 +17,10 @@ namespace Engine.Collada
         public string Layer { get; set; }
         [XmlElement("asset", typeof(Asset))]
         public Asset Asset { get; set; }
-        [XmlElement("lookat", typeof(BasicFloat4x4))]
-        public BasicFloat4x4[] LookAt { get; set; }
-        [XmlElement("matrix", typeof(BasicFloat4x4))]
-        public BasicFloat4x4[] Matrix { get; set; }
+        [XmlElement("lookat", typeof(BasicFloat4X4))]
+        public BasicFloat4X4[] LookAt { get; set; }
+        [XmlElement("matrix", typeof(BasicFloat4X4))]
+        public BasicFloat4X4[] Matrix { get; set; }
         [XmlElement("rotate", typeof(BasicFloat4))]
         public BasicFloat4[] Rotate { get; set; }
         [XmlElement("scale", typeof(BasicFloat3))]

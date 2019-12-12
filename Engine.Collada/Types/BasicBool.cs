@@ -21,16 +21,11 @@ namespace Engine.Collada.Types
             }
         }
         [XmlIgnore]
-        public bool Value { get; private set; }
+        public bool Value { get; set; }
 
         public BasicBool()
         {
 
-        }
-
-        public BasicBool(bool value)
-        {
-            this.Value = value;
         }
 
         public override string ToString()

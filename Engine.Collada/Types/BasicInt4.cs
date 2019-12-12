@@ -10,11 +10,6 @@ namespace Engine.Collada.Types
 
         }
 
-        public BasicInt4(int a, int b, int c, int d)
-        {
-            this.Values = new int[] { a, b, c, d };
-        }
-
         public override string ToString()
         {
             if (this.Values != null && this.Values.Length == 4)

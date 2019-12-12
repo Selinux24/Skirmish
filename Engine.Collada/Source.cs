@@ -11,8 +11,8 @@ namespace Engine.Collada
         [XmlElement("asset")]
         public Asset Asset { get; set; }
 
-        [XmlElement("IDREF_array", typeof(NamedIDREFArray))]
-        public NamedIDREFArray IDREFArray { get; set; }
+        [XmlElement("IDREF_array", typeof(NamedIdRefArray))]
+        public NamedIdRefArray IdRefArray { get; set; }
         [XmlElement("Name_array", typeof(NamedNameArray))]
         public NamedNameArray NameArray { get; set; }
         [XmlElement("bool_array", typeof(NamedBoolArray))]

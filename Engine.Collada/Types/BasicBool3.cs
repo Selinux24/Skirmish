@@ -10,11 +10,6 @@ namespace Engine.Collada.Types
 
         }
 
-        public BasicBool3(bool a, bool b, bool c)
-        {
-            this.Values = new bool[] { a, b, c };
-        }
-
         public override string ToString()
         {
             if (this.Values != null && this.Values.Length == 3)

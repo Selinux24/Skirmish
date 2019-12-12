@@ -10,11 +10,6 @@ namespace Engine.Collada.Types
 
         }
 
-        public BasicFloat2(float a, float b)
-        {
-            this.Values = new float[] { a, b };
-        }
-
         public override string ToString()
         {
             if (this.Values != null && this.Values.Length == 2)

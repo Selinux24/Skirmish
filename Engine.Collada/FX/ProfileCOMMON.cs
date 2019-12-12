@@ -4,14 +4,14 @@ using System.Xml.Serialization;
 namespace Engine.Collada.FX
 {
     [Serializable]
-    public class ProfileCOMMON
+    public class ProfileCommon
     {
         [XmlElement("image", typeof(Image))]
         public Image[] Images { get; set; }
         [XmlElement("newparam", typeof(NewParam))]
         public NewParam[] Params { get; set; }
-        [XmlElement("technique", typeof(TechniqueCOMMON))]
-        public TechniqueCOMMON Technique { get; set; }
+        [XmlElement("technique", typeof(TechniqueCommon))]
+        public TechniqueCommon Technique { get; set; }
         [XmlElement("extra", typeof(Extra))]
         public Extra[] Extras { get; set; }
         [XmlIgnore]

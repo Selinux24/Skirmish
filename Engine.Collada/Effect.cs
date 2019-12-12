@@ -17,14 +17,14 @@ namespace Engine.Collada
         public Image[] Images { get; set; }
         [XmlElement("newparam", typeof(NewParam))]
         public NewParam[] Params { get; set; }
-        [XmlElement("profile_COMMON", typeof(ProfileCOMMON))]
-        public ProfileCOMMON ProfileCOMMON { get; set; }
+        [XmlElement("profile_COMMON", typeof(ProfileCommon))]
+        public ProfileCommon ProfileCommon { get; set; }
         [XmlElement("profile_CG", typeof(ProfileCG))]
         public ProfileCG ProfileCG { get; set; }
-        [XmlElement("profile_GLES", typeof(ProfileGLES))]
-        public ProfileGLES ProfileGLES { get; set; }
-        [XmlElement("profile_GLSL", typeof(ProfileGLSL))]
-        public ProfileGLSL ProfileGLSL { get; set; }
+        [XmlElement("profile_GLES", typeof(ProfileGles))]
+        public ProfileGles ProfileGles { get; set; }
+        [XmlElement("profile_GLSL", typeof(ProfileGlsl))]
+        public ProfileGlsl ProfileGlsl { get; set; }
         [XmlElement("extra", typeof(Extra))]
         public Extra[] Extras { get; set; }
 

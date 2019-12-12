@@ -3,15 +3,15 @@ using System.Xml.Serialization;
 
 namespace Engine.Collada
 {
-    using global::Engine.Collada.Types;
+    using Engine.Collada.Types;
 
     [Serializable]
     public class Skin
     {
         [XmlAttribute("source")]
         public string SourceUri { get; set; }
-        [XmlElement("bind_shape_matrix", typeof(BasicFloat4x4))]
-        public BasicFloat4x4 BindShapeMatrix { get; set; }
+        [XmlElement("bind_shape_matrix", typeof(BasicFloat4X4))]
+        public BasicFloat4X4 BindShapeMatrix { get; set; }
         [XmlElement("source", typeof(Source))]
         public Source[] Sources { get; set; }
         [XmlElement("joints", typeof(Joints))]

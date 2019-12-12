@@ -3,9 +3,9 @@
 namespace Engine.Collada.Types
 {
     [Serializable]
-    public class BasicFloat4x4 : BasicFloatArray
+    public class BasicFloat4X4 : BasicFloatArray
     {
-        public BasicFloat4x4()
+        public BasicFloat4X4()
         {
 
         }
