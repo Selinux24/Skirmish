@@ -766,7 +766,7 @@
     <Content Include="Resources\IncTerrain.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ContentCollada\Engine.Collada.csproj">
+    <ProjectReference Include="..\Engine.Collada\Engine.Collada.csproj">
       <Project>{b5e51939-46dc-412d-a096-e1c892f95fb3}</Project>
       <Name>Engine.Collada</Name>
     </ProjectReference>
