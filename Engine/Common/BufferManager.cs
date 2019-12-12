@@ -317,7 +317,6 @@ namespace Engine.Common
                     return graphics.CreateVertexBuffer<VertexSkinnedPositionNormalTexture>(name, vertices, dynamic);
                 case VertexTypes.PositionNormalTextureTangentSkinned:
                     return graphics.CreateVertexBuffer<VertexSkinnedPositionNormalTextureTangent>(name, vertices, dynamic);
-                case VertexTypes.Unknown:
                 default:
                     throw new EngineException(string.Format("Unknown vertex type: {0}", vertexType));
             }

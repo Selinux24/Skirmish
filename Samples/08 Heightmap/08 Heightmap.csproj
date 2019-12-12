@@ -1,136 +1,155 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
-
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{5F35C198-01BF-48A9-887C-2A99390226E0}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-    <UseWindowsForms>true</UseWindowsForms>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Heightmap</RootNamespace>
     <AssemblyName>Heightmap</AssemblyName>
-    <Platforms>AnyCPU;x64;x86</Platforms>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <SonarQubeTestProject>
+    </SonarQubeTestProject>
   </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+    <Prefer32Bit>false</Prefer32Bit>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
     <CodeAnalysisRuleSet>08 Heightmap.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+    <Prefer32Bit>false</Prefer32Bit>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
     <CodeAnalysisRuleSet>08 Heightmap.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <CodeAnalysisRuleSet>08 Heightmap.ruleset</CodeAnalysisRuleSet>
+  <PropertyGroup>
+    <StartupObject>Heightmap.Program</StartupObject>
   </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisLogFile>bin\Debug\6 Terrain.exe.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>08 Heightmap.ruleset</CodeAnalysisRuleSet>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+    <Prefer32Bit>false</Prefer32Bit>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
   </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisLogFile>bin\Release\6 Terrain.exe.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>08 Heightmap.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+    <Prefer32Bit>false</Prefer32Bit>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
   </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <CodeAnalysisLogFile>bin\Debug\6 Terrain.exe.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>08 Heightmap.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+    <Prefer32Bit>false</Prefer32Bit>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
   </PropertyGroup>
-
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <CodeAnalysisLogFile>bin\Release\6 Terrain.exe.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>08 Heightmap.ruleset</CodeAnalysisRuleSet>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+    <Prefer32Bit>false</Prefer32Bit>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
+  </PropertyGroup>
   <ItemGroup>
-    <None Remove="Resources\Bradley\Bradley.dae" />
-    <None Remove="Resources\Bradley\Bradley.jpg" />
-    <None Remove="Resources\Bradley\Bradley.xml" />
-    <None Remove="Resources\Container\container.dae" />
-    <None Remove="Resources\Container\container.xml" />
-    <None Remove="Resources\Container\ikube azul-1.png" />
-    <None Remove="Resources\Container\ikube azul-2.png" />
-    <None Remove="Resources\Container\ikube azul-3.png" />
-    <None Remove="Resources\Container\ikube azul-4.png" />
-    <None Remove="Resources\Container\ikube azul-5.png" />
-    <None Remove="Resources\M24\m24.dae" />
-    <None Remove="Resources\M24\m24.dds" />
-    <None Remove="Resources\M24\m24.xml" />
-    <None Remove="Resources\Particles\dust.png" />
-    <None Remove="Resources\Particles\fire.png" />
-    <None Remove="Resources\Particles\smoke.png" />
-    <None Remove="Resources\Rocks\boulder.xml" />
-    <None Remove="Resources\Rocks\boulder_1.dae" />
-    <None Remove="Resources\Rocks\boulder_2.dae" />
-    <None Remove="Resources\Rocks\boulder_3.dae" />
-    <None Remove="Resources\Rocks\boulder_granite_grey_01_diffuse.dds" />
-    <None Remove="Resources\Rocks\boulder_granite_grey_01_normal.dds" />
-    <None Remove="Resources\Rocks\boulder_granite_grey_01_specular.dds" />
-    <None Remove="Resources\Scenery\Flare\lfFlare1.png" />
-    <None Remove="Resources\Scenery\Flare\lfFlare2.png" />
-    <None Remove="Resources\Scenery\Flare\lfFlare3.png" />
-    <None Remove="Resources\Scenery\Flare\lfGlow.png" />
-    <None Remove="Resources\Scenery\Foliage\Billboard\flower0.dds" />
-    <None Remove="Resources\Scenery\Foliage\Billboard\flower1.dds" />
-    <None Remove="Resources\Scenery\Foliage\Billboard\flower2.dds" />
-    <None Remove="Resources\Scenery\Foliage\Billboard\grass0.png" />
-    <None Remove="Resources\Scenery\Foliage\Billboard\grass1.png" />
-    <None Remove="Resources\Scenery\Foliage\Billboard\grass2.png" />
-    <None Remove="Resources\Scenery\Foliage\Billboard\grass_d0.dds" />
-    <None Remove="Resources\Scenery\Foliage\Billboard\grass_d1.dds" />
-    <None Remove="Resources\Scenery\Foliage\Billboard\grass_d2.dds" />
-    <None Remove="Resources\Scenery\Foliage\Billboard\grass_n0.dds" />
-    <None Remove="Resources\Scenery\Foliage\Billboard\grass_n1.dds" />
-    <None Remove="Resources\Scenery\Foliage\Billboard\grass_n2.dds" />
-    <None Remove="Resources\Scenery\Foliage\Billboard\grass_v0.dds" />
-    <None Remove="Resources\Scenery\Foliage\Billboard\grass_v1.dds" />
-    <None Remove="Resources\Scenery\Foliage\Billboard\grass_v2.dds" />
-    <None Remove="Resources\Scenery\Foliage\Billboard\map.png" />
-    <None Remove="Resources\Scenery\Foliage\Billboard\map_flowers.png" />
-    <None Remove="Resources\Scenery\Heightmap\desert0cm.bmp" />
-    <None Remove="Resources\Scenery\Heightmap\desert0hm.bmp" />
-    <None Remove="Resources\Scenery\Heightmap\Textures\alpha001.dds" />
-    <None Remove="Resources\Scenery\Heightmap\Textures\dirt001.dds" />
-    <None Remove="Resources\Scenery\Heightmap\Textures\dirt002.dds" />
-    <None Remove="Resources\Scenery\Heightmap\Textures\dirt004.dds" />
-    <None Remove="Resources\Scenery\Heightmap\Textures\dirt0hr.dds" />
-    <None Remove="Resources\Scenery\Heightmap\Textures\dirt0lr.dds" />
-    <None Remove="Resources\Scenery\Heightmap\Textures\dirt1lr.dds" />
-    <None Remove="Resources\Scenery\Heightmap\Textures\dirt2lr.dds" />
-    <None Remove="Resources\Scenery\Heightmap\Textures\normal001.dds" />
-    <None Remove="Resources\Scenery\Heightmap\Textures\normal002.dds" />
-    <None Remove="Resources\Scenery\Heightmap\Textures\specular001.dds" />
-    <None Remove="Resources\Scenery\Heightmap\Textures\specular002.dds" />
-    <None Remove="Resources\Scenery\Heightmap\Textures\stone001.dds" />
-    <None Remove="Resources\Scenery\Heightmap\UVtest 256.bmp" />
-    <None Remove="Resources\Scenery\Objects\torch.dae" />
-    <None Remove="Resources\Scenery\Objects\torch.xml" />
-    <None Remove="Resources\Sky\cloud001.dds" />
-    <None Remove="Resources\Sky\perturb001.dds" />
-    <None Remove="Resources\Soldier\soldier0.jpg" />
-    <None Remove="Resources\Soldier\Soldier1.jpg" />
-    <None Remove="Resources\Soldier\soldier_anim2.dae" />
-    <None Remove="Resources\Soldier\soldier_anim2.xml" />
-    <None Remove="Resources\target.png" />
-    <None Remove="Resources\Trees2\Bark_d.png" />
-    <None Remove="Resources\Trees2\Leafs_d.png" />
-    <None Remove="Resources\Trees2\Tree.xml" />
-    <None Remove="Resources\Trees2\tree_1.dae" />
-    <None Remove="Resources\Trees2\tree_2.dae" />
-    <None Remove="Resources\Trees2\tree_3.dae" />
-    <None Remove="Resources\Trees\Bark_d.png" />
-    <None Remove="Resources\Trees\Leafs_d.png" />
-    <None Remove="Resources\Trees\tree.xml" />
-    <None Remove="Resources\Trees\tree_1.dae" />
-    <None Remove="Resources\Trees\tree_2.dae" />
-    <None Remove="Resources\Trees\tree_3.dae" />
-    <None Remove="Resources\Watch Tower\Watch Tower.dae" />
-    <None Remove="Resources\Watch Tower\Watch Tower.xml" />
-    <None Remove="Resources\Watch Tower\Wood.jpg" />
+    <Reference Include="SharpDX, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpDX.4.2.0\lib\net45\SharpDX.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX.Mathematics, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpDX.Mathematics.4.2.0\lib\net45\SharpDX.Mathematics.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
-
   <ItemGroup>
-    <Content Include="Resources\Bradley\Bradley.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestScene3D.cs" />
     <Content Include="Resources\Bradley\Bradley.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Bradley\Bradley.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Container\container.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Container\container.xml">
@@ -151,13 +170,10 @@
     <Content Include="Resources\Container\ikube azul-5.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\M24\m24.dae">
+    <Content Include="Resources\M24\m24.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\M24\m24.dds">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\M24\m24.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Particles\dust.png">
@@ -169,19 +185,6 @@
     <Content Include="Resources\Particles\smoke.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Rocks\boulder.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Rocks\boulder_1.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
-    </Content>
-    <Content Include="Resources\Rocks\boulder_2.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Rocks\boulder_3.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="Resources\Rocks\boulder_granite_grey_01_diffuse.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -191,16 +194,7 @@
     <Content Include="Resources\Rocks\boulder_granite_grey_01_specular.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Scenery\Flare\lfFlare1.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Scenery\Flare\lfFlare2.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Scenery\Flare\lfFlare3.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Scenery\Flare\lfGlow.png">
+    <Content Include="Resources\Rocks\boulder.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Scenery\Foliage\Billboard\flower0.dds">
@@ -212,28 +206,19 @@
     <Content Include="Resources\Scenery\Foliage\Billboard\flower2.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Scenery\Foliage\Billboard\grass0.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Scenery\Foliage\Billboard\grass1.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Scenery\Foliage\Billboard\grass2.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="Resources\Scenery\Foliage\Billboard\grass_d0.dds">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Scenery\Foliage\Billboard\grass_d1.dds">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Scenery\Foliage\Billboard\grass_d2.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Scenery\Foliage\Billboard\grass_n0.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\Scenery\Foliage\Billboard\grass_d1.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\Scenery\Foliage\Billboard\grass_n1.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Scenery\Foliage\Billboard\grass_d2.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Scenery\Foliage\Billboard\grass_n2.dds">
@@ -254,12 +239,6 @@
     <Content Include="Resources\Scenery\Foliage\Billboard\map_flowers.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Scenery\Heightmap\desert0cm.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Scenery\Heightmap\desert0hm.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="Resources\Scenery\Heightmap\Textures\alpha001.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -270,12 +249,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Scenery\Heightmap\Textures\dirt004.dds">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Scenery\Heightmap\Textures\dirt0hr.dds">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Scenery\Heightmap\Textures\dirt0lr.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Scenery\Heightmap\Textures\dirt1lr.dds">
@@ -299,12 +272,6 @@
     <Content Include="Resources\Scenery\Heightmap\Textures\stone001.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Scenery\Heightmap\UVtest 256.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Scenery\Objects\torch.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="Resources\Scenery\Objects\torch.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -320,13 +287,46 @@
     <Content Include="Resources\Soldier\Soldier1.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Soldier\soldier_anim2.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="Resources\Soldier\soldier_anim2.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\target.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Scenery\Flare\lfFlare1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Scenery\Flare\lfFlare2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Scenery\Flare\lfFlare3.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Scenery\Flare\lfGlow.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Scenery\Foliage\Billboard\grass0.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Scenery\Foliage\Billboard\grass1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Scenery\Foliage\Billboard\grass2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Scenery\Heightmap\desert0cm.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Scenery\Heightmap\desert0hm.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Scenery\Heightmap\UVtest 256.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Scenery\Heightmap\Textures\dirt0hr.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Scenery\Heightmap\Textures\dirt0lr.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Trees2\Bark_d.png">
@@ -338,15 +338,6 @@
     <Content Include="Resources\Trees2\Tree.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Trees2\tree_1.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Trees2\tree_2.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Trees2\tree_3.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="Resources\Trees\Bark_d.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -354,6 +345,55 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Trees\tree.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Watch Tower\Watch Tower.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Watch Tower\Wood.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="08 Heightmap.ruleset" />
+    <None Include="app.config" />
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Content Include="Resources\Scenery\Objects\torch.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>
+      </SubType>
+    </Content>
+    <Content Include="Resources\Soldier\soldier_anim2.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\M24\m24.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Rocks\boulder_1.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Resources\Rocks\boulder_2.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Rocks\boulder_3.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Trees\tree_1.dae">
@@ -368,19 +408,44 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="Resources\Bradley\Bradley.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\Watch Tower\Watch Tower.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Watch Tower\Watch Tower.xml">
+    <Content Include="Resources\Container\container.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Watch Tower\Wood.jpg">
+    <Content Include="Resources\Trees2\tree_1.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Trees2\tree_2.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Trees2\tree_3.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\..\Engine\Engine.csproj" />
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
   </ItemGroup>
-
+  <ItemGroup>
+    <ProjectReference Include="..\..\Engine\Engine.csproj">
+      <Project>{a4bac380-82cb-4db8-953f-a291f0bef559}</Project>
+      <Name>Engine</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
 </Project>
