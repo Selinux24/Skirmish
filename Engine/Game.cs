@@ -4,12 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using System.Linq;
 
 namespace Engine
 {
     using Engine.Common;
     using Engine.Effects;
+    using System.Linq;
 
     /// <summary>
     /// Game class
