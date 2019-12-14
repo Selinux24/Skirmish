@@ -466,17 +466,16 @@ namespace Engine.Common
                     TextureWidth, TextureHeight);
 
                 //Creates the sprite
-                GeometryUtil.CreateSprite(
+                var s = GeometryUtil.CreateSprite(
                     pos,
                     chr.Width, chr.Height, 0, 0,
-                    uv,
-                    out Vector3[] cv, out Vector2[] cuv, out uint[] ci);
+                    uv);
 
                 //Add indices to word index list
-                ci.ToList().ForEach((i) => { indexList.Add(i + (uint)vertList.Count); });
+                s.Indices.ToList().ForEach((i) => { indexList.Add(i + (uint)vertList.Count); });
 
                 //Store the vertices
-                vertList.AddRange(VertexPositionTexture.Generate(cv, cuv));
+                vertList.AddRange(VertexPositionTexture.Generate(s.Vertices, s.Uvs));
 
                 //Move the cursor position to the next character
                 pos.X += chr.Width - (chr.Width * 0.3333f);

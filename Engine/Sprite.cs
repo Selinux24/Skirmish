@@ -266,32 +266,30 @@ namespace Engine
         /// <param name="textured">Use a textured buffer</param>
         private void InitializeBuffers(string name, bool textured, Vector4? uvMap)
         {
-            Vector3[] vData;
-            Vector2[] uvs;
-            uint[] iData;
+            GeometryDescriptor geom;
             if (textured)
             {
                 if (uvMap.HasValue)
                 {
-                    GeometryUtil.CreateSprite(Vector2.Zero, 1, 1, 0, 0, uvMap.Value, out vData, out uvs, out iData);
+                    geom = GeometryUtil.CreateSprite(Vector2.Zero, 1, 1, 0, 0, uvMap.Value);
                 }
                 else
                 {
-                    GeometryUtil.CreateSprite(Vector2.Zero, 1, 1, 0, 0, out vData, out uvs, out iData);
+                    geom = GeometryUtil.CreateSprite(Vector2.Zero, 1, 1, 0, 0);
                 }
 
-                var vertices = VertexPositionTexture.Generate(vData, uvs);
+                var vertices = VertexPositionTexture.Generate(geom.Vertices, geom.Uvs);
                 this.vertexBuffer = this.BufferManager.Add(name, vertices, false, 0);
             }
             else
             {
-                GeometryUtil.CreateSprite(Vector2.Zero, 1, 1, 0, 0, out vData, out uvs, out iData);
+                geom = GeometryUtil.CreateSprite(Vector2.Zero, 1, 1, 0, 0);
 
-                var vertices = VertexPositionColor.Generate(vData, Color4.White);
+                var vertices = VertexPositionColor.Generate(geom.Vertices, Color4.White);
                 this.vertexBuffer = this.BufferManager.Add(name, vertices, false, 0);
             }
 
-            this.indexBuffer = this.BufferManager.Add(name, iData, false);
+            this.indexBuffer = this.BufferManager.Add(name, geom.Indices, false);
         }
         /// <summary>
         /// Initialize textures

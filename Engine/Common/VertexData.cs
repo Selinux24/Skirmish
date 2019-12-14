@@ -584,6 +584,36 @@ namespace Engine.Common
         }
 
         /// <summary>
+        /// Generates a vertex data array from a geometry descriptor
+        /// </summary>
+        /// <param name="descriptor">Geometry descriptor</param>
+        /// <returns>Returns a vertex array</returns>
+        public static IEnumerable<VertexData> FromDescriptor(GeometryDescriptor descriptor)
+        {
+            List<VertexData> res = new List<VertexData>();
+
+            var vertices = descriptor.Vertices?.ToArray() ?? new Vector3[] { };
+            var normals = descriptor.Normals?.ToArray() ?? new Vector3[] { };
+            var uvs = descriptor.Uvs?.ToArray() ?? new Vector2[] { };
+            var tangents = descriptor.Tangents?.ToArray() ?? new Vector3[] { };
+            var binormals = descriptor.Binormals?.ToArray() ?? new Vector3[] { };
+
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                res.Add(new VertexData()
+                {
+                    Position = vertices[i],
+                    Normal = normals.Any() ? normals[i] : (Vector3?)null,
+                    Texture = uvs.Any() ? uvs[i] : (Vector2?)null,
+                    Tangent = tangents.Any() ? tangents[i] : (Vector3?)null,
+                    BiNormal = binormals.Any() ? binormals[i] : (Vector3?)null,
+                });
+            }
+
+            return res.ToArray();
+        }
+
+        /// <summary>
         /// Transforms helper by given matrix
         /// </summary>
         /// <param name="transform">Transformation matrix</param>

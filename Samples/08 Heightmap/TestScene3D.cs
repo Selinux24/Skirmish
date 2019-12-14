@@ -1258,17 +1258,20 @@ namespace Heightmap
         }
         private void UpdateFlyingCamera(GameTime gameTime, bool shift)
         {
-            bool rotateCamera = true;
 #if DEBUG
-            rotateCamera = this.Game.Input.RightMouseButtonPressed;
-#endif
-            if (rotateCamera)
+            if (this.Game.Input.RightMouseButtonPressed)
             {
                 this.Camera.RotateMouse(
-                    this.Game.GameTime,
+                    gameTime,
                     this.Game.Input.MouseXDelta,
                     this.Game.Input.MouseYDelta);
             }
+#else
+            this.Camera.RotateMouse(
+                gameTime,
+                this.Game.Input.MouseXDelta,
+                this.Game.Input.MouseYDelta);
+#endif
 
             if (this.Game.Input.KeyPressed(Keys.A))
             {
@@ -1292,16 +1295,20 @@ namespace Heightmap
         }
         private void UpdateWalkingCamera(GameTime gameTime, bool shift)
         {
-            bool rotateCamera = true;
 #if DEBUG
-            rotateCamera = this.Game.Input.RightMouseButtonPressed;
-#endif
-            if (rotateCamera)
+            if (this.Game.Input.RightMouseButtonPressed)
             {
-                this.soldier.Transform.Rotate(
-                    this.Game.Input.MouseXDelta * 0.001f,
-                    0, 0);
+                this.Camera.RotateMouse(
+                    this.Game.GameTime,
+                    this.Game.Input.MouseXDelta,
+                    this.Game.Input.MouseYDelta);
             }
+#else
+            this.Camera.RotateMouse(
+                this.Game.GameTime,
+                this.Game.Input.MouseXDelta,
+                this.Game.Input.MouseYDelta);
+#endif
 
             float delta = shift ? 8 : 4;
 

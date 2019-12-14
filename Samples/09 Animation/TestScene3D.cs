@@ -511,17 +511,20 @@ namespace Animation
         }
         private void UpdateInputCamera(GameTime gameTime, bool shift)
         {
-            bool rotateCamera = true;
 #if DEBUG
-            rotateCamera = this.Game.Input.RightMouseButtonPressed;
-#endif
-            if (rotateCamera)
+            if (this.Game.Input.RightMouseButtonPressed)
             {
                 this.Camera.RotateMouse(
                     gameTime,
                     this.Game.Input.MouseXDelta,
                     this.Game.Input.MouseYDelta);
             }
+#else
+            this.Camera.RotateMouse(
+                gameTime,
+                this.Game.Input.MouseXDelta,
+                this.Game.Input.MouseYDelta);
+#endif
 
             if (this.Game.Input.KeyPressed(Keys.A))
             {

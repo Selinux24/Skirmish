@@ -3,13 +3,13 @@ using SharpDX.Windows;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine
 {
     using Engine.Common;
     using Engine.Effects;
-    using System.Linq;
 
     /// <summary>
     /// Game class

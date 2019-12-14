@@ -178,22 +178,10 @@ namespace Skybox
             MaterialContent mat = MaterialContent.Default;
             mat.EmissionColor = Color.Yellow;
 
-            GeometryUtil.CreateSphere(
-                0.05f, 32, 32,
-                out Vector3[] v, out Vector3[] n, out Vector2[] uv, out uint[] ix);
-
-            VertexData[] vertices = new VertexData[v.Length];
-            for (int i = 0; i < v.Length; i++)
-            {
-                vertices[i] = new VertexData()
-                {
-                    Position = v[i],
-                    Normal = n[i],
-                    Texture = uv[i],
-                };
-            }
-
-            var content = ModelContent.GenerateTriangleList(vertices, ix, mat);
+            var sphere = GeometryUtil.CreateSphere(0.05f, 32, 32);
+            var vertices = VertexData.FromDescriptor(sphere);
+            var indices = sphere.Indices;
+            var content = ModelContent.GenerateTriangleList(vertices, indices, mat);
 
             var mFireDesc = new ModelDescription()
             {
@@ -400,17 +388,20 @@ namespace Skybox
                 }
             }
 
-            bool rotateCamera = true;
 #if DEBUG
-            rotateCamera = this.Game.Input.RightMouseButtonPressed;
-#endif
-            if (rotateCamera)
+            if (this.Game.Input.RightMouseButtonPressed)
             {
                 this.Camera.RotateMouse(
                     this.Game.GameTime,
                     this.Game.Input.MouseXDelta,
                     this.Game.Input.MouseYDelta);
             }
+#else
+            this.Camera.RotateMouse(
+                this.Game.GameTime,
+                this.Game.Input.MouseXDelta,
+                this.Game.Input.MouseYDelta);
+#endif
 
             if (this.Game.Input.KeyPressed(Keys.A))
             {

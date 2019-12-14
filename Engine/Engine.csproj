@@ -175,6 +175,8 @@
     <Compile Include="Audio\GameAudioPresets.cs" />
     <Compile Include="Audio\GameAudioSource.cs" />
     <Compile Include="Audio\ReverbPresets.cs" />
+    <Compile Include="Common\GeometryDescriptor.cs" />
+    <Compile Include="Common\NormalDescriptor.cs" />
     <Compile Include="Common\OrientedBoundingBox.cs" />
     <Compile Include="GameAudioManager.cs" />
     <Compile Include="Audio\GameAudio.cs" />

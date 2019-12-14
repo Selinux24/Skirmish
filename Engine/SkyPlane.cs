@@ -147,18 +147,18 @@ namespace Engine
             this.CloudsBaseColor = description.CloudBaseColor;
 
             //Create sky plane
-            GeometryUtil.CreateCurvePlane(
+            var cPlane = GeometryUtil.CreateCurvePlane(
                 description.Size,
                 description.Repeat,
                 description.PlaneWidth,
                 description.PlaneTop,
-                description.PlaneBottom,
-                out Vector3[] vData, out Vector2[] uvs, out uint[] iData);
+                description.PlaneBottom);
 
-            VertexPositionTexture[] vertices = VertexPositionTexture.Generate(vData, uvs);
+            var vertices = VertexPositionTexture.Generate(cPlane.Vertices, cPlane.Uvs);
+            var indices = cPlane.Indices;
 
             this.vertexBuffer = this.BufferManager.Add(description.Name, vertices, false, 0);
-            this.indexBuffer = this.BufferManager.Add(description.Name, iData, false);
+            this.indexBuffer = this.BufferManager.Add(description.Name, indices, false);
         }
         /// <summary>
         /// Destructor

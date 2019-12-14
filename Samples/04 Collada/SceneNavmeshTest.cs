@@ -205,17 +205,20 @@ namespace Collada
                 this.Camera.MoveBackward(this.Game.GameTime, slow);
             }
 
-            bool rotateCamera = true;
 #if DEBUG
-            rotateCamera = this.Game.Input.RightMouseButtonPressed;
-#endif
-            if (rotateCamera)
+            if (this.Game.Input.RightMouseButtonPressed)
             {
                 this.Camera.RotateMouse(
                     this.Game.GameTime,
                     this.Game.Input.MouseXDelta,
                     this.Game.Input.MouseYDelta);
             }
+#else
+            this.Camera.RotateMouse(
+                this.Game.GameTime,
+                this.Game.Input.MouseXDelta,
+                this.Game.Input.MouseYDelta);
+#endif
         }
         private void UpdateGraph()
         {

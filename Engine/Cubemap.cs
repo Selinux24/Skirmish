@@ -130,22 +130,16 @@ namespace Engine
         /// <param name="reverse">Reverse faces</param>
         protected void InitializeBuffers(string name, CubemapDescription.CubeMapGeometry geometry, bool reverse)
         {
-            Vector3[] vData;
-            uint[] iData;
-            if (geometry == CubemapDescription.CubeMapGeometry.Box) GeometryUtil.CreateBox(1, 10, 10, out vData, out iData);
-            else if (geometry == CubemapDescription.CubeMapGeometry.Sphere) GeometryUtil.CreateSphere(1, 10, 10, out vData, out iData);
+            GeometryDescriptor geom;
+            if (geometry == CubemapDescription.CubeMapGeometry.Box) geom = GeometryUtil.CreateBox(1, 10, 10);
+            else if (geometry == CubemapDescription.CubeMapGeometry.Sphere) geom = GeometryUtil.CreateSphere(1, 10, 10);
             else throw new ArgumentException("Bad geometry enum type");
 
-            var vertices = new List<VertexPosition>();
-            foreach (var v in vData)
-            {
-                vertices.Add(new VertexPosition() { Position = v });
-            }
+            var vertices = VertexPosition.Generate(geom.Vertices);
+            var indices = reverse ? GeometryUtil.ChangeCoordinate(geom.Indices) : geom.Indices;
 
-            if (reverse) iData = GeometryUtil.ChangeCoordinate(iData);
-
-            this.vertexBuffer = this.BufferManager.Add(name, vertices.ToArray(), false, 0);
-            this.indexBuffer = this.BufferManager.Add(name, iData, false);
+            this.vertexBuffer = this.BufferManager.Add(name, vertices, false, 0);
+            this.indexBuffer = this.BufferManager.Add(name, indices, false);
         }
         /// <summary>
         /// Initialize textures

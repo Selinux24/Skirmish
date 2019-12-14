@@ -150,25 +150,10 @@ namespace SceneTest
         }
         private SceneObject<Model> InitializeSphere(string name, MaterialContent material)
         {
-            GeometryUtil.CreateSphere(
-                radius, stacks, stacks,
-                out Vector3[] v,
-                out Vector3[] n,
-                out Vector2[] uv,
-                out uint[] ix);
-
-            VertexData[] vertices = new VertexData[v.Length];
-            for (int i = 0; i < v.Length; i++)
-            {
-                vertices[i] = new VertexData()
-                {
-                    Position = v[i],
-                    Normal = n[i],
-                    Texture = uv[i],
-                };
-            }
-
-            var content = ModelContent.GenerateTriangleList(vertices, ix, material);
+            var sphere = GeometryUtil.CreateSphere(radius, stacks, stacks);
+            var vertices = VertexData.FromDescriptor(sphere);
+            var indices = sphere.Indices;
+            var content = ModelContent.GenerateTriangleList(vertices, indices, material);
 
             var desc = new ModelDescription()
             {
@@ -254,13 +239,18 @@ namespace SceneTest
         {
 #if DEBUG
             if (rightBtn)
-#endif
             {
                 this.Camera.RotateMouse(
                     gameTime,
                     this.Game.Input.MouseXDelta,
                     this.Game.Input.MouseYDelta);
             }
+#else
+            this.Camera.RotateMouse(
+                gameTime,
+                this.Game.Input.MouseXDelta,
+                this.Game.Input.MouseYDelta);
+#endif
 
             if (this.Game.Input.KeyPressed(Keys.A))
             {

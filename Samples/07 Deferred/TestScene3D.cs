@@ -96,8 +96,10 @@ namespace Deferred
                 return loadingText;
             });
 
+            var loadText = loadTask.Result;
+
             this.title.Instance.Text = "Deferred Ligthning test";
-            this.load.Instance.Text = loadTask.Result;
+            this.load.Instance.Text = loadText;
             this.help.Instance.Text = "";
             this.statistics.Instance.Text = "";
 
@@ -520,17 +522,20 @@ namespace Deferred
         }
         private void UpdateInputCamera(GameTime gameTime, bool shift)
         {
-            bool rotateCamera = true;
 #if DEBUG
-            rotateCamera = this.Game.Input.RightMouseButtonPressed;
-#endif
-            if (rotateCamera)
+            if (this.Game.Input.RightMouseButtonPressed)
             {
                 this.Camera.RotateMouse(
-                    this.Game.GameTime,
+                    gameTime,
                     this.Game.Input.MouseXDelta,
                     this.Game.Input.MouseYDelta);
             }
+#else
+            this.Camera.RotateMouse(
+                gameTime,
+                this.Game.Input.MouseXDelta,
+                this.Game.Input.MouseYDelta);
+#endif
 
             if (this.Game.Input.KeyPressed(Keys.A))
             {

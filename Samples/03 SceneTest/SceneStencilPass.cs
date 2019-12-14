@@ -125,22 +125,10 @@ namespace SceneTest
             MaterialContent mat = MaterialContent.Default;
             mat.EmissionColor = Color.White;
 
-            GeometryUtil.CreateSphere(
-                0.1f, 16, 5,
-                out Vector3[] v, out Vector3[] n, out Vector2[] uv, out uint[] ix);
-
-            VertexData[] vertices = new VertexData[v.Length];
-            for (int i = 0; i < v.Length; i++)
-            {
-                vertices[i] = new VertexData()
-                {
-                    Position = v[i],
-                    Normal = n[i],
-                    Texture = uv[i],
-                };
-            }
-
-            var content = ModelContent.GenerateTriangleList(vertices, ix, mat);
+            var sphere = GeometryUtil.CreateSphere(0.1f, 16, 5);
+            var vertices = VertexData.FromDescriptor(sphere);
+            var indices = sphere.Indices;
+            var content = ModelContent.GenerateTriangleList(vertices, indices, mat);
 
             var desc = new ModelDescription()
             {
@@ -208,13 +196,18 @@ namespace SceneTest
         {
 #if DEBUG
             if (rightBtn)
-#endif
             {
                 this.Camera.RotateMouse(
                     gameTime,
                     this.Game.Input.MouseXDelta,
                     this.Game.Input.MouseYDelta);
             }
+#else
+            this.Camera.RotateMouse(
+                gameTime,
+                this.Game.Input.MouseXDelta,
+                this.Game.Input.MouseYDelta);
+#endif
 
             if (this.Game.Input.KeyPressed(Keys.A))
             {

@@ -95,59 +95,53 @@ namespace Engine
                         index3 = (y * width) + (x - 1);
                         pos2 = vertList[index2];
                         pos3 = vertList[index3];
-                        GeometryUtil.ComputeNormals(
+                        var n1 = GeometryUtil.ComputeNormals(
                             pos1.Position.Value, pos3.Position.Value, pos2.Position.Value,
-                            pos1.Texture.Value, pos3.Texture.Value, pos2.Texture.Value,
-                            out Vector3 tan1, out Vector3 biNorm1, out Vector3 norm1);
+                            pos1.Texture.Value, pos3.Texture.Value, pos2.Texture.Value);
 
                         index2 = (y * width) + (x - 1);
                         index3 = ((y + 1) * width) + (x - 1);
                         pos2 = vertList[index2];
                         pos3 = vertList[index3];
-                        GeometryUtil.ComputeNormals(
+                        var n2 = GeometryUtil.ComputeNormals(
                             pos1.Position.Value, pos3.Position.Value, pos2.Position.Value,
-                            pos1.Texture.Value, pos3.Texture.Value, pos2.Texture.Value,
-                            out Vector3 tan2, out Vector3 biNorm2, out Vector3 norm2);
+                            pos1.Texture.Value, pos3.Texture.Value, pos2.Texture.Value);
 
                         index2 = ((y + 1) * width) + (x - 1);
                         index3 = ((y + 1) * width) + x;
                         pos2 = vertList[index2];
                         pos3 = vertList[index3];
-                        GeometryUtil.ComputeNormals(
+                        var n3 = GeometryUtil.ComputeNormals(
                             pos1.Position.Value, pos3.Position.Value, pos2.Position.Value,
-                            pos1.Texture.Value, pos3.Texture.Value, pos2.Texture.Value,
-                            out Vector3 tan3, out Vector3 biNorm3, out Vector3 norm3);
+                            pos1.Texture.Value, pos3.Texture.Value, pos2.Texture.Value);
 
                         index2 = ((y + 1) * width) + x;
                         index3 = (y * width) + (x + 1);
                         pos2 = vertList[index2];
                         pos3 = vertList[index3];
-                        GeometryUtil.ComputeNormals(
+                        var n4 = GeometryUtil.ComputeNormals(
                             pos1.Position.Value, pos3.Position.Value, pos2.Position.Value,
-                            pos1.Texture.Value, pos3.Texture.Value, pos2.Texture.Value,
-                            out Vector3 tan4, out Vector3 biNorm4, out Vector3 norm4);
+                            pos1.Texture.Value, pos3.Texture.Value, pos2.Texture.Value);
 
                         index2 = (y * width) + (x + 1);
                         index3 = ((y - 1) * width) + (x + 1);
                         pos2 = vertList[index2];
                         pos3 = vertList[index3];
-                        GeometryUtil.ComputeNormals(
+                        var n5 = GeometryUtil.ComputeNormals(
                             pos1.Position.Value, pos3.Position.Value, pos2.Position.Value,
-                            pos1.Texture.Value, pos3.Texture.Value, pos2.Texture.Value,
-                            out Vector3 tan5, out Vector3 biNorm5, out Vector3 norm5);
+                            pos1.Texture.Value, pos3.Texture.Value, pos2.Texture.Value);
 
                         index2 = ((y - 1) * width) + (x + 1);
                         index3 = ((y - 1) * width) + x;
                         pos2 = vertList[index2];
                         pos3 = vertList[index3];
-                        GeometryUtil.ComputeNormals(
+                        var n6 = GeometryUtil.ComputeNormals(
                             pos1.Position.Value, pos3.Position.Value, pos2.Position.Value,
-                            pos1.Texture.Value, pos3.Texture.Value, pos2.Texture.Value,
-                            out Vector3 tan6, out Vector3 biNorm6, out Vector3 norm6);
+                            pos1.Texture.Value, pos3.Texture.Value, pos2.Texture.Value);
 
-                        Vector3 norm = (norm1 + norm2 + norm3 + norm4 + norm5 + norm6) / 6.0f;
-                        Vector3 tang = (tan1 + tan2 + tan3 + tan4 + tan5 + tan6) / 6.0f;
-                        Vector3 binorm = (biNorm1 + biNorm2 + biNorm3 + biNorm4 + biNorm5 + biNorm6) / 6.0f;
+                        Vector3 norm = (n1.Normal + n2.Normal + n3.Normal + n4.Normal + n5.Normal + n6.Normal) / 6.0f;
+                        Vector3 tang = (n1.Tangent + n2.Tangent + n3.Tangent + n4.Tangent + n5.Tangent + n6.Tangent) / 6.0f;
+                        Vector3 binorm = (n1.Binormal + n2.Binormal + n3.Binormal + n4.Binormal + n5.Binormal + n6.Binormal) / 6.0f;
 
                         normal = Vector3.Normalize(norm);
                         tangent = Vector3.Normalize(tang);

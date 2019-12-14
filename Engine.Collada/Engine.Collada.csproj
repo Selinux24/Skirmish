@@ -39,7 +39,7 @@
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>ContentCollada.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>Engine.Collada.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
@@ -225,10 +225,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ContentCollada.snk" />
     <None Include="Engine.Collada.Debug.ruleset" />
     <None Include="Engine.Collada.Release.ruleset" />
     <None Include="Engine.Collada.ruleset" />
+    <None Include="Engine.Collada.snk" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

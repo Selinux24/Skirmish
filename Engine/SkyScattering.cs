@@ -333,18 +333,12 @@ namespace Engine
         /// <param name="name">Buffer name</param>
         private void InitializeBuffers(string name)
         {
-            GeometryUtil.CreateSphere(1, 10, 75, out Vector3[] vData, out uint[] iData);
+            var sphere = GeometryUtil.CreateSphere(1, 10, 75);
 
-            var vertices = new List<VertexPosition>();
+            var vertices = VertexPosition.Generate(sphere.Vertices);
+            var indices = GeometryUtil.ChangeCoordinate(sphere.Indices);
 
-            foreach (var v in vData)
-            {
-                vertices.Add(new VertexPosition() { Position = v });
-            }
-
-            var indices = GeometryUtil.ChangeCoordinate(iData);
-
-            this.vertexBuffer = this.BufferManager.Add(name, vertices.ToArray(), false, 0);
+            this.vertexBuffer = this.BufferManager.Add(name, vertices, false, 0);
             this.indexBuffer = this.BufferManager.Add(name, indices, false);
         }
         /// <summary>

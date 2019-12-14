@@ -193,18 +193,17 @@ namespace Engine.Content
                         var v1 = this.Vertices[(int)this.Indices[i + 1]];
                         var v2 = this.Vertices[(int)this.Indices[i + 2]];
 
-                        GeometryUtil.ComputeNormals(
+                        var n = GeometryUtil.ComputeNormals(
                             v0.Position.Value, v1.Position.Value, v2.Position.Value,
-                            v0.Texture.Value, v1.Texture.Value, v2.Texture.Value,
-                            out Vector3 tangent, out Vector3 binormal, out Vector3 normal);
+                            v0.Texture.Value, v1.Texture.Value, v2.Texture.Value);
 
-                        v0.Tangent = tangent;
-                        v1.Tangent = tangent;
-                        v2.Tangent = tangent;
+                        v0.Tangent = n.Tangent;
+                        v1.Tangent = n.Tangent;
+                        v2.Tangent = n.Tangent;
 
-                        v0.BiNormal = binormal;
-                        v1.BiNormal = binormal;
-                        v2.BiNormal = binormal;
+                        v0.BiNormal = n.Binormal;
+                        v1.BiNormal = n.Binormal;
+                        v2.BiNormal = n.Binormal;
 
                         this.Vertices[(int)this.Indices[i + 0]] = v0;
                         this.Vertices[(int)this.Indices[i + 1]] = v1;
@@ -219,18 +218,17 @@ namespace Engine.Content
                         var v1 = this.Vertices[i + 1];
                         var v2 = this.Vertices[i + 2];
 
-                        GeometryUtil.ComputeNormals(
+                        var n = GeometryUtil.ComputeNormals(
                             v0.Position.Value, v1.Position.Value, v2.Position.Value,
-                            v0.Texture.Value, v1.Texture.Value, v2.Texture.Value,
-                            out Vector3 tangent, out Vector3 binormal, out Vector3 normal);
+                            v0.Texture.Value, v1.Texture.Value, v2.Texture.Value);
 
-                        v0.Tangent = tangent;
-                        v1.Tangent = tangent;
-                        v2.Tangent = tangent;
+                        v0.Tangent = n.Tangent;
+                        v1.Tangent = n.Tangent;
+                        v2.Tangent = n.Tangent;
 
-                        v0.BiNormal = binormal;
-                        v1.BiNormal = binormal;
-                        v2.BiNormal = binormal;
+                        v0.BiNormal = n.Binormal;
+                        v1.BiNormal = n.Binormal;
+                        v2.BiNormal = n.Binormal;
 
                         this.Vertices[i + 0] = v0;
                         this.Vertices[i + 1] = v1;

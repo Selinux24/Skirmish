@@ -3,6 +3,7 @@ using Engine.Common;
 using Engine.Content;
 using SharpDX;
 using System;
+using System.Linq;
 
 namespace SceneTest
 {
@@ -145,22 +146,10 @@ namespace SceneTest
             MaterialContent mat = MaterialContent.Default;
             mat.EmissionColor = Color.White;
 
-            GeometryUtil.CreateSphere(
-                0.1f, 16, 5,
-                out Vector3[] v, out Vector3[] n, out Vector2[] uv, out uint[] ix);
-
-            VertexData[] vertices = new VertexData[v.Length];
-            for (int i = 0; i < v.Length; i++)
-            {
-                vertices[i] = new VertexData()
-                {
-                    Position = v[i],
-                    Normal = n[i],
-                    Texture = uv[i],
-                };
-            }
-
-            var content = ModelContent.GenerateTriangleList(vertices, ix, mat);
+            var s = GeometryUtil.CreateSphere(0.1f, 16, 5);
+            var vertices = VertexData.FromDescriptor(s);
+            var indices = s.Indices;
+            var content = ModelContent.GenerateTriangleList(vertices, indices, mat);
 
             var desc = new ModelInstancedDescription()
             {
@@ -183,25 +172,22 @@ namespace SceneTest
         {
             MaterialContent mat = MaterialContent.Default;
 
-            GeometryUtil.CreateCone(
-                0.25f, 16, 0.5f,
-                out Vector3[] v, out uint[] ix);
+            var cone = GeometryUtil.CreateCone(0.25f, 16, 0.5f);
 
+            //Transform base position
             Matrix m = Matrix.RotationX(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.ForwardLH * 0.5f);
+            cone.Transform(m);
 
-            Vector3.TransformCoordinate(v, ref m, v);
-
-            VertexData[] vertices = new VertexData[v.Length];
-            for (int i = 0; i < v.Length; i++)
+            var vertices = VertexData.FromDescriptor(cone);
+            vertices = vertices.Select(v =>
             {
-                vertices[i] = new VertexData()
-                {
-                    Position = v[i],
-                    Color = Color.Gray,
-                };
-            }
+                v.Color = Color.Gray;
+                return v;
+            });
 
-            var content = ModelContent.GenerateTriangleList(vertices, ix, mat);
+            var indices = cone.Indices;
+
+            var content = ModelContent.GenerateTriangleList(vertices, indices, mat);
 
             var desc = new ModelInstancedDescription()
             {
@@ -311,13 +297,18 @@ namespace SceneTest
         {
 #if DEBUG
             if (rightBtn)
-#endif
             {
                 this.Camera.RotateMouse(
                     gameTime,
                     this.Game.Input.MouseXDelta,
                     this.Game.Input.MouseYDelta);
             }
+#else
+            this.Camera.RotateMouse(
+                gameTime,
+                this.Game.Input.MouseXDelta,
+                this.Game.Input.MouseYDelta);
+#endif
 
             if (this.Game.Input.KeyPressed(Keys.A))
             {
@@ -352,45 +343,37 @@ namespace SceneTest
             position.Y = hv * (float)Math.Sin(av * this.Game.GameTime.TotalSeconds);
             position.Z = r * (float)Math.Sin(av * this.Game.GameTime.TotalSeconds);
 
-            {
-                var pos = (position * +1) + new Vector3(0, h, 0);
-                this.lightEmitters.Instance[0].Manipulator.SetPosition(pos);
-                this.Lights.PointLights[0].Position = pos;
-            }
+            var pPos = (position * +1) + new Vector3(0, h, 0);
+            this.lightEmitters.Instance[0].Manipulator.SetPosition(pPos);
+            this.Lights.PointLights[0].Position = pPos;
 
-            {
-                var pos = (position * -1) + new Vector3(0, h, 0);
-                var dir = -Vector3.Normalize(new Vector3(pos.X, pos.Y, pos.Z));
-                this.lightEmitters.Instance[1].Manipulator.SetPosition(pos);
-                this.lanterns.Instance[0].Manipulator.SetPosition(pos);
-                this.lanterns.Instance[0].Manipulator.LookAt(pos + dir, false);
-                this.Lights.SpotLights[0].Position = pos;
-                this.Lights.SpotLights[0].Direction = dir;
-            }
+            var sPos1 = (position * -1) + new Vector3(0, h, 0);
+            var sDir1 = -Vector3.Normalize(new Vector3(sPos1.X, sPos1.Y, sPos1.Z));
+            this.lightEmitters.Instance[1].Manipulator.SetPosition(sPos1);
+            this.lanterns.Instance[0].Manipulator.SetPosition(sPos1);
+            this.lanterns.Instance[0].Manipulator.LookAt(sPos1 + sDir1, false);
+            this.Lights.SpotLights[0].Position = sPos1;
+            this.Lights.SpotLights[0].Direction = sDir1;
 
             position.X = r * (float)Math.Cos(av * (this.Game.GameTime.TotalSeconds + s));
             position.Y = hv * (float)Math.Sin(av * (this.Game.GameTime.TotalSeconds + s));
             position.Z = r * (float)Math.Sin(av * (this.Game.GameTime.TotalSeconds + s));
 
-            {
-                var pos = (position * +1) + new Vector3(0, h, 0);
-                var dir = -Vector3.Normalize(new Vector3(pos.X, pos.Y, pos.Z));
-                this.lightEmitters.Instance[2].Manipulator.SetPosition(pos);
-                this.lanterns.Instance[1].Manipulator.SetPosition(pos);
-                this.lanterns.Instance[1].Manipulator.LookAt(pos + dir, false);
-                this.Lights.SpotLights[1].Position = pos;
-                this.Lights.SpotLights[1].Direction = dir;
-            }
+            var sPos2 = (position * +1) + new Vector3(0, h, 0);
+            var sDir2 = -Vector3.Normalize(new Vector3(sPos2.X, sPos2.Y, sPos2.Z));
+            this.lightEmitters.Instance[2].Manipulator.SetPosition(sPos2);
+            this.lanterns.Instance[1].Manipulator.SetPosition(sPos2);
+            this.lanterns.Instance[1].Manipulator.LookAt(sPos2 + sDir2, false);
+            this.Lights.SpotLights[1].Position = sPos2;
+            this.Lights.SpotLights[1].Direction = sDir2;
 
-            {
-                var pos = (position * -1) + new Vector3(0, h, 0);
-                var dir = -Vector3.Normalize(new Vector3(pos.X, pos.Y, pos.Z));
-                this.lightEmitters.Instance[3].Manipulator.SetPosition(pos);
-                this.lanterns.Instance[2].Manipulator.SetPosition(pos);
-                this.lanterns.Instance[2].Manipulator.LookAt(pos + dir, false);
-                this.Lights.SpotLights[2].Position = pos;
-                this.Lights.SpotLights[2].Direction = dir;
-            }
+            var sPos3 = (position * -1) + new Vector3(0, h, 0);
+            var sDir3 = -Vector3.Normalize(new Vector3(sPos3.X, sPos3.Y, sPos3.Z));
+            this.lightEmitters.Instance[3].Manipulator.SetPosition(sPos3);
+            this.lanterns.Instance[2].Manipulator.SetPosition(sPos3);
+            this.lanterns.Instance[2].Manipulator.LookAt(sPos3 + sDir3, false);
+            this.Lights.SpotLights[2].Position = sPos3;
+            this.Lights.SpotLights[2].Direction = sDir3;
 
             if (this.Game.Input.KeyJustReleased(Keys.D1))
             {

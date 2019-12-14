@@ -2,6 +2,7 @@
 using Engine.Common;
 using Engine.Content;
 using SharpDX;
+using System.Linq;
 
 namespace Collada
 {
@@ -115,22 +116,10 @@ namespace Collada
             MaterialContent mat = MaterialContent.Default;
             mat.EmissionColor = Color.White;
 
-            GeometryUtil.CreateSphere(
-                0.05f, 16, 5,
-                out Vector3[] v, out Vector3[] n, out Vector2[] uv, out uint[] ix);
-
-            VertexData[] vertices = new VertexData[v.Length];
-            for (int i = 0; i < v.Length; i++)
-            {
-                vertices[i] = new VertexData()
-                {
-                    Position = v[i],
-                    Normal = n[i],
-                    Texture = uv[i],
-                };
-            }
-
-            var content = ModelContent.GenerateTriangleList(vertices, ix, mat);
+            var sphere = GeometryUtil.CreateSphere(0.05f, 16, 5);
+            var vertices = VertexData.FromDescriptor(sphere);
+            var indices = sphere.Indices;
+            var content = ModelContent.GenerateTriangleList(vertices, indices, mat);
 
             var desc = new ModelDescription()
             {
@@ -195,17 +184,20 @@ namespace Collada
                 this.Camera.MoveBackward(this.Game.GameTime, slow);
             }
 
-            bool rotateCamera = true;
 #if DEBUG
-            rotateCamera = this.Game.Input.RightMouseButtonPressed;
-#endif
-            if (rotateCamera)
+            if (this.Game.Input.RightMouseButtonPressed)
             {
                 this.Camera.RotateMouse(
                     this.Game.GameTime,
                     this.Game.Input.MouseXDelta,
                     this.Game.Input.MouseYDelta);
             }
+#else
+            this.Camera.RotateMouse(
+                this.Game.GameTime,
+                this.Game.Input.MouseXDelta,
+                this.Game.Input.MouseYDelta);
+#endif
         }
         private void UpdateLight(GameTime gameTime)
         {

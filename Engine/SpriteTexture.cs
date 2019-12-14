@@ -73,18 +73,13 @@ namespace Engine
         public SpriteTexture(Scene scene, SpriteTextureDescription description)
             : base(scene, description)
         {
-            GeometryUtil.CreateSprite(
-                Vector2.Zero,
-                1, 1,
-                0, 0,
-                out Vector3[] cv,
-                out Vector2[] cuv,
-                out uint[] ci);
+            var sprite = GeometryUtil.CreateSprite(Vector2.Zero, 1, 1);
 
-            var vertices = VertexPositionTexture.Generate(cv, cuv);
+            var vertices = VertexPositionTexture.Generate(sprite.Vertices, sprite.Uvs);
+            var indices = sprite.Indices;
 
             this.vertexBuffer = this.BufferManager.Add(description.Name, vertices, false, 0);
-            this.indexBuffer = this.BufferManager.Add(description.Name, ci, false);
+            this.indexBuffer = this.BufferManager.Add(description.Name, indices, false);
 
             this.Channels = description.Channel;
 

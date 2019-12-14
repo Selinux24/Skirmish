@@ -1,4 +1,7 @@
 ﻿using SharpDX;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Engine.Common
@@ -24,6 +27,31 @@ namespace Engine.Common
                 new InputElement("NORMAL", 0, SharpDX.DXGI.Format.R32G32B32_Float, 12, slot, InputClassification.PerVertexData, 0),
                 new InputElement("TEXCOORD", 0, SharpDX.DXGI.Format.R32G32_Float, 24, slot, InputClassification.PerVertexData, 0),
             };
+        }
+        /// <summary>
+        /// Generates a vertex array from specified components
+        /// </summary>
+        /// <param name="vertices">Vertices</param>
+        /// <param name="normals">Normals</param>
+        /// <param name="uvs">UV coordinates</param>
+        /// <returns>Returns the new generated vertex array</returns>
+        public static IEnumerable<VertexPositionNormalTexture> Generate(IEnumerable<Vector3> vertices, IEnumerable<Vector3> normals, IEnumerable<Vector2> uvs)
+        {
+            if (vertices.Count() != uvs.Count()) throw new ArgumentException("Vertices and uvs must have the same length");
+            if (vertices.Count() != normals.Count()) throw new ArgumentException("Vertices and normals must have the same length");
+
+            var vArray = vertices.ToArray();
+            var nArray = normals.ToArray();
+            var uvArray = uvs.ToArray();
+
+            VertexPositionNormalTexture[] res = new VertexPositionNormalTexture[vArray.Length];
+
+            for (int i = 0; i < vArray.Length; i++)
+            {
+                res[i] = new VertexPositionNormalTexture() { Position = vArray[i], Normal = nArray[i], Texture = uvArray[i] };
+            }
+
+            return res;
         }
 
         /// <summary>
