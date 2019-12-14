@@ -215,18 +215,6 @@ namespace Collada
                 return;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.Z))
-            {
-                if (currentMusic.State == AudioState.Playing)
-                {
-                    currentMusic.Pause();
-                }
-                else
-                {
-                    currentMusic.Resume();
-                }
-            }
-
             if (this.Game.Input.KeyJustReleased(Keys.L))
             {
                 music.UseMasteringLimiter = !music.UseMasteringLimiter;
@@ -258,14 +246,44 @@ namespace Collada
 
             if (this.Game.Input.KeyPressed(Keys.ControlKey))
             {
-                if (this.Game.Input.KeyJustReleased(Keys.Left))
-                {
-                    currentMusic.Pan = -1;
-                }
-                if (this.Game.Input.KeyJustReleased(Keys.Right))
-                {
-                    currentMusic.Pan = 1;
-                }
+                UpdateAudioPan();
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.Z))
+            {
+                UpdateAudioPlayback();
+            }
+        }
+        private void UpdateAudioPlayback()
+        {
+            if (currentMusic == null)
+            {
+                return;
+            }
+
+            if (currentMusic.State == AudioState.Playing)
+            {
+                currentMusic.Pause();
+            }
+            else
+            {
+                currentMusic.Resume();
+            }
+        }
+        private void UpdateAudioPan()
+        {
+            if (currentMusic == null)
+            {
+                return;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.Left))
+            {
+                currentMusic.Pan = -1;
+            }
+            if (this.Game.Input.KeyJustReleased(Keys.Right))
+            {
+                currentMusic.Pan = 1;
             }
         }
         private void UpdateListenerInput(GameTime gameTime)

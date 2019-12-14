@@ -200,17 +200,13 @@ namespace Instancing
 
             Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
 
-            {
-                var sp = new AnimationPath();
-                sp.AddLoop("idle1");
-                animations.Add("soldier_idle1", new AnimationPlan(sp));
-            }
+            var sp1 = new AnimationPath();
+            sp1.AddLoop("idle1");
+            animations.Add("soldier_idle1", new AnimationPlan(sp1));
 
-            {
-                var sp = new AnimationPath();
-                sp.AddLoop("idle2");
-                animations.Add("soldier_idle2", new AnimationPlan(sp));
-            }
+            var sp2 = new AnimationPath();
+            sp2.AddLoop("idle2");
+            animations.Add("soldier_idle2", new AnimationPlan(sp2));
 
             string[] anim = new[] { "soldier_idle1", "soldier_idle2" };
 
@@ -305,13 +301,18 @@ namespace Instancing
 
 #if DEBUG
             if (this.Game.Input.RightMouseButtonPressed)
-#endif
             {
                 this.Camera.RotateMouse(
                     this.Game.GameTime,
                     this.Game.Input.MouseXDelta,
                     this.Game.Input.MouseYDelta);
             }
+#else
+            this.Camera.RotateMouse(
+                this.Game.GameTime,
+                this.Game.Input.MouseXDelta,
+                this.Game.Input.MouseYDelta);
+#endif
 
             if (this.Game.Input.KeyPressed(Keys.A))
             {

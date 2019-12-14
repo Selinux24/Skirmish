@@ -35,8 +35,6 @@ namespace Skybox
             MaxSlope = 50,
         };
 
-        private SceneObject<Cursor> cursor;
-
         private SceneObject<TextDrawer> fps = null;
 
         private SceneObject<Scenery> ruins = null;
@@ -73,7 +71,7 @@ namespace Skybox
                 Width = 16,
                 Height = 16,
             };
-            this.cursor = this.AddComponent<Cursor>(cursorDesc, SceneObjectUsages.UI, layerHUD + 1);
+            this.AddComponent<Cursor>(cursorDesc, SceneObjectUsages.UI, layerHUD + 1);
 
             #endregion
 
@@ -363,13 +361,12 @@ namespace Skybox
 
 #if DEBUG
             this.fps.Instance.Text = string.Format(
-                "Mouse (X:{0}; Y:{1}, Wheel: {2}) Absolute (X:{3}; Y:{4}) Cursor ({5})",
+                "Mouse (X:{0}; Y:{1}, Wheel: {2}) Absolute (X:{3}; Y:{4})",
                 this.Game.Input.MouseXDelta,
                 this.Game.Input.MouseYDelta,
                 this.Game.Input.MouseWheelDelta,
                 this.Game.Input.MouseX,
-                this.Game.Input.MouseY,
-                this.cursor.Instance.CursorPosition);
+                this.Game.Input.MouseY);
 #else
             this.fps.Instance.Text = this.Game.RuntimeText;
 #endif
