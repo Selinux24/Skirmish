@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace Engine.Content
+namespace Engine.Content.FmtObj
 {
     /// <summary>
     /// Loader for .obj files

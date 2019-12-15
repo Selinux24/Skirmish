@@ -3,6 +3,7 @@ using Engine.Animation;
 using Engine.Audio;
 using Engine.Common;
 using Engine.Content;
+using Engine.Content.FmtObj;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
 using SharpDX;

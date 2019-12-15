@@ -281,9 +281,13 @@ namespace Collada
             {
                 currentMusic.Pan = -1;
             }
-            if (this.Game.Input.KeyJustReleased(Keys.Right))
+            else if (this.Game.Input.KeyJustReleased(Keys.Right))
             {
                 currentMusic.Pan = 1;
+            }
+            else if (this.Game.Input.KeyJustReleased(Keys.Down))
+            {
+                currentMusic.Pan = 0;
             }
         }
         private void UpdateListenerInput(GameTime gameTime)

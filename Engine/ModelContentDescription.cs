@@ -59,11 +59,11 @@ namespace Engine
         {
             if (string.Equals(Path.GetExtension(ModelFileName), ".dae", StringComparison.OrdinalIgnoreCase))
             {
-                return new LoaderCollada();
+                return new Content.FmtCollada.LoaderCollada();
             }
             else if (string.Equals(Path.GetExtension(ModelFileName), ".obj", StringComparison.OrdinalIgnoreCase))
             {
-                return new LoaderObj();
+                return new Content.FmtObj.LoaderObj();
             }
 
             return null;

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace Engine.Content
+namespace Engine.Content.FmtCollada
 {
     using Engine.Animation;
     using Engine.Collada;
@@ -399,7 +399,7 @@ namespace Engine.Content
             }
             else if (mesh.PolyList?.Length > 0)
             {
-                res = ProcessPolyList(mesh.PolyList, mesh.Sources, isVolume);
+                res = ProcessPolyLists(mesh.PolyList, mesh.Sources, isVolume);
             }
             else if (mesh.Polygons?.Length > 0)
             {
@@ -463,59 +463,10 @@ namespace Engine.Content
 
             foreach (var triangle in triangles)
             {
-                List<VertexData> verts = new List<VertexData>();
-
-                Input vertexInput = triangle[EnumSemantics.Vertex];
-                Input normalInput = triangle[EnumSemantics.Normal];
-                Input texCoordInput = triangle[EnumSemantics.TexCoord];
-
-                Vector3[] positions = vertexInput != null ? meshSources[vertexInput.Offset].ReadVector3() : null;
-                Vector3[] normals = normalInput != null ? meshSources[normalInput.Offset].ReadVector3() : null;
-                Vector2[] texCoords = texCoordInput != null ? meshSources[texCoordInput.Offset].ReadVector2() : null;
-
-                int inputCount = triangle.Inputs.Length;
-
-                for (int i = 0; i < triangle.Count; i++)
-                {
-                    for (int t = 0; t < 3; t++)
-                    {
-                        int index = (i * inputCount * 3) + (t * inputCount);
-
-                        VertexData vert = new VertexData()
-                        {
-                            FaceIndex = i,
-                        };
-
-                        if (vertexInput != null)
-                        {
-                            var vIndex = triangle.P[index + vertexInput.Offset];
-                            vert.VertexIndex = vIndex;
-                            vert.Position = positions[vIndex];
-                        }
-
-                        if (normalInput != null)
-                        {
-                            var nIndex = triangle.P[index + normalInput.Offset];
-                            vert.Normal = normals[nIndex];
-                        }
-
-                        if (texCoordInput != null)
-                        {
-                            var tIndex = triangle.P[index + texCoordInput.Offset];
-                            Vector2 tex = texCoords[tIndex];
-
-                            //Invert Vertical coordinate
-                            tex.Y = -tex.Y;
-
-                            vert.Texture = tex;
-                        }
-
-                        verts.Add(vert);
-                    }
-                }
+                var verts = ProcessTriangle(triangle, meshSources);
 
                 //Reorder vertices
-                VertexData[] data = new VertexData[verts.Count];
+                VertexData[] data = new VertexData[verts.Length];
                 for (int i = 0; i < data.Length; i += 3)
                 {
                     data[i + 0] = verts[i + 0];
@@ -531,6 +482,48 @@ namespace Engine.Content
             }
 
             return res.ToArray();
+        }
+        /// <summary>
+        /// Process a single triangle
+        /// </summary>
+        /// <param name="triangle">Triangle</param>
+        /// <param name="meshSources">Mesh sources</param>
+        /// <returns>Returns vertex data</returns>
+        private static VertexData[] ProcessTriangle(Triangles triangle, Source[] meshSources)
+        {
+            List<VertexData> verts = new List<VertexData>();
+
+            Input vertexInput = triangle[EnumSemantics.Vertex];
+            Input normalInput = triangle[EnumSemantics.Normal];
+            Input texCoordInput = triangle[EnumSemantics.TexCoord];
+
+            Vector3[] positions = vertexInput != null ? meshSources[vertexInput.Offset].ReadVector3() : null;
+            Vector3[] normals = normalInput != null ? meshSources[normalInput.Offset].ReadVector3() : null;
+            Vector2[] texCoords = texCoordInput != null ? meshSources[texCoordInput.Offset].ReadVector2() : null;
+
+            int inputCount = triangle.Inputs.Length;
+
+            for (int i = 0; i < triangle.Count; i++)
+            {
+                for (int t = 0; t < 3; t++)
+                {
+                    int index = (i * inputCount * 3) + (t * inputCount);
+
+                    VertexData vert = new VertexData()
+                    {
+                        FaceIndex = i,
+                    };
+
+                    vert = vert
+                        .UpdateVertexInput(vertexInput, positions, triangle.P, index)
+                        .UpdateNormalInput(normalInput, normals, triangle.P, index)
+                        .UpdateTexCoordInput(texCoordInput, texCoords, triangle.P, index);
+
+                    verts.Add(vert);
+                }
+            }
+
+            return verts.ToArray();
         }
         /// <summary>
         /// Process triangle fans
@@ -555,82 +548,22 @@ namespace Engine.Content
             throw new NotImplementedException();
         }
         /// <summary>
-        /// Process polygon list
+        /// Process polygon lists
         /// </summary>
-        /// <param name="polyLists">Polygon list</param>
+        /// <param name="polyLists">Polygon lists</param>
         /// <param name="meshSources">Mesh sources</param>
         /// <param name="isVolume">Current geometry is a volume mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessPolyList(PolyList[] polyLists, Source[] meshSources, bool isVolume)
+        private static SubMeshContent[] ProcessPolyLists(PolyList[] polyLists, Source[] meshSources, bool isVolume)
         {
             List<SubMeshContent> res = new List<SubMeshContent>();
 
             foreach (var polyList in polyLists)
             {
-                List<VertexData> verts = new List<VertexData>();
-
-                Input vertexInput = polyList[EnumSemantics.Vertex];
-                Input normalInput = polyList[EnumSemantics.Normal];
-                Input texCoordInput = polyList[EnumSemantics.TexCoord];
-                Input colorsInput = polyList[EnumSemantics.Color];
-
-                Vector3[] positions = vertexInput != null ? meshSources[vertexInput.Offset].ReadVector3() : null;
-                Vector3[] normals = normalInput != null ? meshSources[normalInput.Offset].ReadVector3() : null;
-                Vector2[] texCoords = texCoordInput != null ? meshSources[texCoordInput.Offset].ReadVector2() : null;
-                Color3[] colors = colorsInput != null ? meshSources[colorsInput.Offset].ReadColor3() : null;
-
-                int index = 0;
-                int inputCount = polyList.Inputs.Length;
-
-                for (int i = 0; i < polyList.Count; i++)
-                {
-                    int n = polyList.VCount[i];
-
-                    for (int v = 0; v < n; v++)
-                    {
-                        VertexData vert = new VertexData()
-                        {
-                            FaceIndex = i,
-                        };
-
-                        if (vertexInput != null)
-                        {
-                            int vIndex = polyList.P[index + vertexInput.Offset];
-                            vert.VertexIndex = vIndex;
-                            vert.Position = positions[vIndex];
-                        }
-
-                        if (normalInput != null)
-                        {
-                            int nIndex = polyList.P[index + normalInput.Offset];
-                            vert.Normal = normals[nIndex];
-                        }
-
-                        if (texCoordInput != null)
-                        {
-                            int tIndex = polyList.P[index + texCoordInput.Offset];
-                            Vector2 tex = texCoords[tIndex];
-
-                            //Invert Vertical coordinate
-                            tex.Y = -tex.Y;
-
-                            vert.Texture = tex;
-                        }
-
-                        if (colorsInput != null)
-                        {
-                            int cIndex = polyList.P[index + colorsInput.Offset];
-                            vert.Color = new Color4(colors[cIndex], 1);
-                        }
-
-                        verts.Add(vert);
-
-                        index += inputCount;
-                    }
-                }
+                var verts = ProcessPolyList(polyList, meshSources);
 
                 //Reorder vertices
-                VertexData[] data = new VertexData[verts.Count];
+                VertexData[] data = new VertexData[verts.Length];
                 for (int i = 0; i < data.Length; i += 3)
                 {
                     data[i + 0] = verts[i + 0];
@@ -648,6 +581,54 @@ namespace Engine.Content
             return res.ToArray();
         }
         /// <summary>
+        /// Process polygon list
+        /// </summary>
+        /// <param name="polyList">Polygon list</param>
+        /// <param name="meshSources">Mesh sources</param>
+        /// <returns>Return vertext data</returns>
+        private static VertexData[] ProcessPolyList(PolyList polyList, Source[] meshSources)
+        {
+            List<VertexData> verts = new List<VertexData>();
+
+            Input vertexInput = polyList[EnumSemantics.Vertex];
+            Input normalInput = polyList[EnumSemantics.Normal];
+            Input texCoordInput = polyList[EnumSemantics.TexCoord];
+            Input colorsInput = polyList[EnumSemantics.Color];
+
+            Vector3[] positions = vertexInput != null ? meshSources[vertexInput.Offset].ReadVector3() : null;
+            Vector3[] normals = normalInput != null ? meshSources[normalInput.Offset].ReadVector3() : null;
+            Vector2[] texCoords = texCoordInput != null ? meshSources[texCoordInput.Offset].ReadVector2() : null;
+            Color3[] colors = colorsInput != null ? meshSources[colorsInput.Offset].ReadColor3() : null;
+
+            int index = 0;
+            int inputCount = polyList.Inputs.Length;
+
+            for (int i = 0; i < polyList.Count; i++)
+            {
+                int n = polyList.VCount[i];
+
+                for (int v = 0; v < n; v++)
+                {
+                    VertexData vert = new VertexData()
+                    {
+                        FaceIndex = i,
+                    };
+
+                    vert = vert
+                        .UpdateVertexInput(vertexInput, positions, polyList.P, index)
+                        .UpdateNormalInput(normalInput, normals, polyList.P, index)
+                        .UpdateTexCoordInput(texCoordInput, texCoords, polyList.P, index)
+                        .UpdateColorsInput(colorsInput, colors, polyList.P, index);
+
+                    verts.Add(vert);
+
+                    index += inputCount;
+                }
+            }
+
+            return verts.ToArray();
+        }
+        /// <summary>
         /// Process polygons
         /// </summary>
         /// <param name="polygons">Polygons</param>
@@ -660,62 +641,10 @@ namespace Engine.Content
 
             foreach (var polygon in polygons)
             {
-                List<VertexData> verts = new List<VertexData>();
-
-                Input vertexInput = polygon[EnumSemantics.Vertex];
-                Input normalInput = polygon[EnumSemantics.Normal];
-                Input texCoordInput = polygon[EnumSemantics.TexCoord];
-
-                Vector3[] positions = vertexInput != null ? meshSources[vertexInput.Offset].ReadVector3() : null;
-                Vector3[] normals = normalInput != null ? meshSources[normalInput.Offset].ReadVector3() : null;
-                Vector2[] texCoords = texCoordInput != null ? meshSources[texCoordInput.Offset].ReadVector2() : null;
-
-                int inputCount = polygon.Inputs.Length;
-
-                for (int i = 0; i < polygon.Count; i++)
-                {
-                    var indices = polygon.P[i];
-                    var n = indices.Values.Length / inputCount;
-
-                    for (int v = 0; v < n; v++)
-                    {
-                        int index = (v * inputCount);
-
-                        VertexData vert = new VertexData()
-                        {
-                            FaceIndex = i,
-                        };
-
-                        if (vertexInput != null)
-                        {
-                            var vIndex = indices[index + vertexInput.Offset];
-                            vert.VertexIndex = vIndex;
-                            vert.Position = positions[vIndex];
-                        }
-
-                        if (normalInput != null)
-                        {
-                            var nIndex = indices[index + normalInput.Offset];
-                            vert.Normal = normals[nIndex];
-                        }
-
-                        if (texCoordInput != null)
-                        {
-                            var tIndex = indices[index + texCoordInput.Offset];
-                            Vector2 tex = texCoords[tIndex];
-
-                            //Invert Vertical coordinate
-                            tex.Y = -tex.Y;
-
-                            vert.Texture = tex;
-                        }
-
-                        verts.Add(vert);
-                    }
-                }
+                var verts = ProcessPolygon(polygon, meshSources);
 
                 //Reorder vertices
-                VertexData[] data = new VertexData[verts.Count];
+                VertexData[] data = new VertexData[verts.Length];
                 for (int i = 0; i < data.Length; i += 3)
                 {
                     data[i + 0] = verts[i + 0];
@@ -731,6 +660,51 @@ namespace Engine.Content
             }
 
             return res.ToArray();
+        }
+        /// <summary>
+        /// Process polygon
+        /// </summary>
+        /// <param name="polygon">Polygon</param>
+        /// <param name="meshSources">Mesh sources</param>
+        /// <returns>Returns vertex data</returns>
+        private static VertexData[] ProcessPolygon(Polygons polygon, Source[] meshSources)
+        {
+            List<VertexData> verts = new List<VertexData>();
+
+            Input vertexInput = polygon[EnumSemantics.Vertex];
+            Input normalInput = polygon[EnumSemantics.Normal];
+            Input texCoordInput = polygon[EnumSemantics.TexCoord];
+
+            Vector3[] positions = vertexInput != null ? meshSources[vertexInput.Offset].ReadVector3() : null;
+            Vector3[] normals = normalInput != null ? meshSources[normalInput.Offset].ReadVector3() : null;
+            Vector2[] texCoords = texCoordInput != null ? meshSources[texCoordInput.Offset].ReadVector2() : null;
+
+            int inputCount = polygon.Inputs.Length;
+
+            for (int i = 0; i < polygon.Count; i++)
+            {
+                var indices = polygon.P[i];
+                var n = indices.Values.Length / inputCount;
+
+                for (int v = 0; v < n; v++)
+                {
+                    int index = (v * inputCount);
+
+                    VertexData vert = new VertexData()
+                    {
+                        FaceIndex = i,
+                    };
+
+                    vert = vert
+                        .UpdateVertexInput(vertexInput, positions, indices, index)
+                        .UpdateNormalInput(normalInput, normals, indices, index)
+                        .UpdateTexCoordInput(texCoordInput, texCoords, indices, index);
+
+                    verts.Add(vert);
+                }
+            }
+
+            return verts.ToArray();
         }
 
         #endregion
@@ -755,21 +729,15 @@ namespace Engine.Content
             {
                 if (node.HasGeometry)
                 {
-                    foreach (var geo in node.InstanceGeometry)
-                    {
-                        if (geo.BindMaterial != null)
-                        {
-                            var m = geo.BindMaterial.TechniqueCommon[0].InstanceMaterial[0];
-                            if (string.Equals(material, m.Symbol, StringComparison.OrdinalIgnoreCase))
-                            {
-                                return m.Target.Replace("#", "");
-                            }
-                        }
-                    }
+                    //Look up on geometry
+                    string res = FindMaterialTarget(material, node.InstanceGeometry);
+
+                    if (res != null) return res;
                 }
 
                 if (node.Nodes != null)
                 {
+                    //Look up on child nodes
                     string res = FindMaterialTarget(material, node.Nodes);
 
                     if (res != null) return res;
@@ -777,6 +745,16 @@ namespace Engine.Content
             }
 
             return null;
+        }
+
+        private static string FindMaterialTarget(string material, InstanceGeometry[] instances)
+        {
+            var instanceMaterial = instances
+                .Where(g => g.BindMaterial?.TechniqueCommon?.Any(t => t.InstanceMaterial?.Any() == true) == true)
+                .Select(g => g.BindMaterial.TechniqueCommon[0].InstanceMaterial[0])
+                .FirstOrDefault(i => string.Equals(material, i.Symbol, StringComparison.OrdinalIgnoreCase));
+
+            return instanceMaterial?.Target.Replace("#", "");
         }
 
         #endregion
@@ -858,16 +836,10 @@ namespace Engine.Content
         /// <param name="weightList">Weight list result</param>
         private static void ProcessVertexWeights(string name, Skin skin, out Dictionary<string, Matrix> inverseBindMatrixList, out Weight[] weightList)
         {
-            var ibmList = new Dictionary<string, Matrix>();
-            var wgList = new List<Weight>();
-
+            //Joints & matrices
             int jointsOffset = -1;
-            int weightsOffset = -1;
-
             string[] joints = null;
             Matrix[] mats = null;
-            float[] weights = null;
-
             var jointsInput = skin.VertexWeights[EnumSemantics.Joint];
             if (jointsInput != null)
             {
@@ -885,14 +857,12 @@ namespace Engine.Content
                 if (mInput != null)
                 {
                     mats = skin[mInput.Source].ReadMatrix();
-                    for (int i = 0; i < mats.Length; i++)
-                    {
-                        mats[i] = Matrix.Transpose(mats[i]);
-                    }
                 }
             }
 
             //Weights
+            int weightsOffset = -1;
+            float[] weights = null;
             var weightsInput = skin.VertexWeights[EnumSemantics.Weight];
             if (weightsInput != null)
             {
@@ -900,6 +870,32 @@ namespace Engine.Content
 
                 weights = skin[weightsInput.Source].ReadFloat();
             }
+
+            weightList = BuildVertexWeigths(name, skin, jointsOffset, joints, weightsOffset, weights);
+            inverseBindMatrixList = BuildInverseBindMatrixList(name, joints, mats);
+        }
+        /// <summary>
+        /// Process vertext weight information
+        /// </summary>
+        /// <param name="morph">Morph information</param>
+        /// <param name="weightList">Weight list result</param>
+        private static void ProcessVertexWeights(Morph morph, out Weight[] weightList)
+        {
+            throw new NotImplementedException();
+        }
+        /// <summary>
+        /// Creates the vertex weights list
+        /// </summary>
+        /// <param name="name">Armature name</param>
+        /// <param name="skin">Skin data</param>
+        /// <param name="jointsOffset">Joints offset</param>
+        /// <param name="joints">Joints names list</param>
+        /// <param name="weightsOffset">Weights offset</param>
+        /// <param name="weights">Weight values list</param>
+        /// <returns>Returns the weights list</returns>
+        private static Weight[] BuildVertexWeigths(string name, Skin skin, int jointsOffset, string[] joints, int weightsOffset, float[] weights)
+        {
+            var wgList = new List<Weight>();
 
             int index = 0;
             int sources = skin.VertexWeights.Inputs.Length;
@@ -925,6 +921,7 @@ namespace Engine.Content
 
                     if (weightValue != 0.0f)
                     {
+                        //Adds weight only if has value
                         var wg = new Weight()
                         {
                             VertexIndex = i,
@@ -939,7 +936,20 @@ namespace Engine.Content
                 }
             }
 
-            if (weightsOffset >= 0)
+            return wgList.ToArray();
+        }
+        /// <summary>
+        /// Creates the inverse bind matrix dictionary
+        /// </summary>
+        /// <param name="name">Armature name</param>
+        /// <param name="joints">Joint names list</param>
+        /// <param name="mats">Inverse bind matrix list</param>
+        /// <returns>Returns the inverse bind matrix by joint name dictionary</returns>
+        private static Dictionary<string, Matrix> BuildInverseBindMatrixList(string name, string[] joints, Matrix[] mats)
+        {
+            var ibmList = new Dictionary<string, Matrix>();
+
+            if (mats != null)
             {
                 for (int i = 0; i < joints?.Length; i++)
                 {
@@ -947,17 +957,7 @@ namespace Engine.Content
                 }
             }
 
-            inverseBindMatrixList = ibmList;
-            weightList = wgList.ToArray();
-        }
-        /// <summary>
-        /// Process vertext weight information
-        /// </summary>
-        /// <param name="morph">Morph information</param>
-        /// <param name="weightList">Weight list result</param>
-        private static void ProcessVertexWeights(Morph morph, out Weight[] weightList)
-        {
-            throw new NotImplementedException();
+            return ibmList;
         }
 
         #endregion
@@ -986,60 +986,69 @@ namespace Engine.Content
 
                 foreach (var sampler in animationLibrary.Samplers)
                 {
-                    float[] inputs = null;
-                    Matrix[] outputs = null;
-                    string[] interpolations = null;
-
-                    //Keyframe times
-                    Input inputsInput = sampler[EnumSemantics.Input];
-                    if (inputsInput != null)
-                    {
-                        inputs = animationLibrary[inputsInput.Source].ReadFloat();
-                    }
-
-                    //Keyframe transform matrix
-                    Input outputsInput = sampler[EnumSemantics.Output];
-                    if (outputsInput != null)
-                    {
-                        outputs = animationLibrary[outputsInput.Source].ReadMatrix();
-                        for (int i = 0; i < outputs.Length; i++)
-                        {
-                            outputs[i] = Matrix.Transpose(outputs[i]);
-                        }
-                    }
-
-                    //Keyframe interpolation types
-                    Input interpolationsInput = sampler[EnumSemantics.Interpolation];
-                    if (interpolationsInput != null)
-                    {
-                        interpolations = animationLibrary[interpolationsInput.Source].ReadNames();
-                    }
-
-                    List<Keyframe> keyframes = new List<Keyframe>();
-
-                    for (int i = 0; i < inputs?.Length; i++)
-                    {
-                        Keyframe keyframe = new Keyframe()
-                        {
-                            Time = inputs[i],
-                            Transform = outputs != null ? outputs[i] : Matrix.Identity,
-                            Interpolation = interpolations?[i],
-                        };
-
-                        keyframes.Add(keyframe);
-                    }
-
-                    AnimationContent info = new AnimationContent()
-                    {
-                        Joint = jointName,
-                        Keyframes = keyframes.ToArray(),
-                    };
+                    var info = BuildAnimationContent(sampler, animationLibrary, jointName);
 
                     res.Add(info);
                 }
             }
 
             return res.ToArray();
+        }
+        /// <summary>
+        /// Reads animation data from the specified sampler and builds an AnimationContent instance
+        /// </summary>
+        /// <param name="sampler">Sampler</param>
+        /// <param name="animationLibrary">Animation library</param>
+        /// <param name="jointName">Joint name</param>
+        /// <returns>Returns an AnimationContent instance for the Joint</returns>
+        private static AnimationContent BuildAnimationContent(Sampler sampler, Animation animationLibrary, string jointName)
+        {
+            float[] inputs = null;
+            Matrix[] outputs = null;
+            string[] interpolations = null;
+
+            //Keyframe times
+            Input inputsInput = sampler[EnumSemantics.Input];
+            if (inputsInput != null)
+            {
+                inputs = animationLibrary[inputsInput.Source].ReadFloat();
+            }
+
+            //Keyframe transform matrix
+            Input outputsInput = sampler[EnumSemantics.Output];
+            if (outputsInput != null)
+            {
+                outputs = animationLibrary[outputsInput.Source].ReadMatrix();
+            }
+
+            //Keyframe interpolation types
+            Input interpolationsInput = sampler[EnumSemantics.Interpolation];
+            if (interpolationsInput != null)
+            {
+                interpolations = animationLibrary[interpolationsInput.Source].ReadNames();
+            }
+
+            List<Keyframe> keyframes = new List<Keyframe>();
+
+            for (int i = 0; i < inputs?.Length; i++)
+            {
+                Keyframe keyframe = new Keyframe()
+                {
+                    Time = inputs[i],
+                    Transform = outputs != null ? outputs[i] : Matrix.Identity,
+                    Interpolation = interpolations?[i],
+                };
+
+                keyframes.Add(keyframe);
+            }
+
+            AnimationContent info = new AnimationContent()
+            {
+                Joint = jointName,
+                Keyframes = keyframes.ToArray(),
+            };
+
+            return info;
         }
 
         #endregion
@@ -1150,78 +1159,30 @@ namespace Engine.Content
                 indexOfRefraction = algorithm.IndexOfRefraction;
             }
 
-            string emissionTexture = null;
-            string ambientTexture = null;
-            string diffuseTexture = null;
-            string reflectiveTexture = null;
-            string specularTexture = null;
+            string emissionTexture = GetTexture(profile, emission);
+            Color4 emissionColor = GetColor(emission, new Color4(0.0f, 0.0f, 0.0f, 1.0f));
 
-            Color4 emissionColor = new Color4(0.0f, 0.0f, 0.0f, 1.0f);
-            Color4 ambientColor = new Color4(0.0f, 0.0f, 0.0f, 1.0f);
-            Color4 diffuseColor = new Color4(0.8f, 0.8f, 0.8f, 1.0f);
-            Color4 reflectiveColor = new Color4(0.0f, 0.0f, 0.0f, 0.0f);
-            Color4 specularColor = new Color4(0.5f, 0.5f, 0.5f, 1.0f);
-            Color4 transparentColor = new Color4(0.0f, 0.0f, 0.0f, 0.0f);
+            string ambientTexture = GetTexture(profile, ambient);
+            Color4 ambientColor = GetColor(ambient, new Color4(0.0f, 0.0f, 0.0f, 1.0f));
 
-            float indexOfRefractionValue = 1.0f;
-            float reflectivityValue = 0.0f;
-            float shininessValue = 50.0f;
-            float transparencyValue = 0.0f;
+            string diffuseTexture = GetTexture(profile, diffuse);
+            Color4 diffuseColor = GetColor(diffuse, new Color4(0.8f, 0.8f, 0.8f, 1.0f));
 
-            if (emission != null)
-            {
-                emissionTexture = FindTexture(profile, emission.Texture);
-                emissionColor = emission.Texture != null ? emissionColor : emission.Color.ToColor4();
-            }
+            string reflectiveTexture = GetTexture(profile, reflective);
+            Color4 reflectiveColor = GetColor(reflective, new Color4(0.0f, 0.0f, 0.0f, 0.0f));
 
-            if (ambient != null)
-            {
-                ambientTexture = FindTexture(profile, ambient.Texture);
-                ambientColor = ambient.Texture != null ? ambientColor : ambient.Color.ToColor4();
-            }
+            string specularTexture = GetTexture(profile, specular);
+            Color4 specularColor = GetColor(specular, new Color4(0.5f, 0.5f, 0.5f, 1.0f));
 
-            if (diffuse != null)
-            {
-                diffuseTexture = FindTexture(profile, diffuse.Texture);
-                diffuseColor = diffuse.Texture != null ? diffuseColor : diffuse.Color.ToColor4();
-            }
+            float indexOfRefractionValue = indexOfRefraction?.Float.Value ?? 1.0f;
 
-            if (reflective != null)
-            {
-                reflectiveTexture = FindTexture(profile, reflective.Texture);
-                reflectiveColor = reflective.Texture != null ? reflectiveColor : reflective.Color.ToColor4();
-            }
+            float reflectivityValue = reflectivity?.Float.Value ?? 0.0f;
 
-            if (specular != null)
-            {
-                specularTexture = FindTexture(profile, specular.Texture);
-                specularColor = specular.Texture != null ? specularColor : specular.Color.ToColor4();
-            }
+            float shininessValue = shininess?.Float.Value ?? 50.0f;
 
-            if (indexOfRefraction != null)
-            {
-                indexOfRefractionValue = indexOfRefraction.Float.Value;
-            }
+            float transparencyValue = transparency?.Float.Value ?? 0.0f;
 
-            if (reflectivity != null)
-            {
-                reflectivityValue = reflectivity.Float.Value;
-            }
-
-            if (shininess != null)
-            {
-                shininessValue = shininess.Float.Value;
-            }
-
-            if (transparency != null)
-            {
-                transparencyValue = transparency.Float.Value;
-            }
-
-            if (transparent != null)
-            {
-                transparentColor = transparent.Opaque == EnumOpaque.AlphaOne ? new Color4(0.0f, 0.0f, 0.0f, 1.0f) : new Color4(0.0f, 0.0f, 0.0f, 0.0f);
-            }
+            Color4 transparentColor = transparent?.Opaque == EnumOpaque.AlphaOne ? new Color4(0.0f, 0.0f, 0.0f, 1.0f) : new Color4(0.0f, 0.0f, 0.0f, 0.0f);
 
             //Look for bump mappings
             string normalMapTexture = FindBumpMap(profile, technique);
@@ -1252,6 +1213,41 @@ namespace Engine.Content
             };
         }
         /// <summary>
+        /// Gets the texture name
+        /// </summary>
+        /// <param name="profile">Profile</param>
+        /// <param name="colorOrTexture">Color or texture value</param>
+        /// <returns>Returns the texture name</returns>
+        private static string GetTexture(ProfileCommon profile, VarColorOrTexture colorOrTexture)
+        {
+            if (colorOrTexture == null)
+            {
+                return null;
+            }
+
+            if (colorOrTexture.Texture != null)
+            {
+                return FindTexture(profile, colorOrTexture.Texture);
+            }
+
+            return null;
+        }
+        /// <summary>
+        /// Gets the color value
+        /// </summary>
+        /// <param name="colorOrTexture">Color or texture value</param>
+        /// <param name="defaultColor">Default color value</param>
+        /// <returns>Returns the color value</returns>
+        private static Color4 GetColor(VarColorOrTexture colorOrTexture, Color4 defaultColor)
+        {
+            if (colorOrTexture == null)
+            {
+                return defaultColor;
+            }
+
+            return colorOrTexture.Color?.ToColor4() ?? defaultColor;
+        }
+        /// <summary>
         /// Finds texture
         /// </summary>
         /// <param name="profile">Profile</param>
@@ -1259,40 +1255,46 @@ namespace Engine.Content
         /// <returns>Returns texture name</returns>
         private static string FindTexture(ProfileCommon profile, BasicTexture texture)
         {
-            if (texture != null)
+            if (texture == null)
             {
-                Sampler2D sampler = profile[texture.Texture].Sampler2D;
-                if (sampler != null)
-                {
-                    Surface surface = profile[sampler.Source].Surface;
-                    if (surface != null)
-                    {
-                        if (surface.InitFrom != null)
-                        {
-                            return surface.InitFrom.Value;
-                        }
-                        else if (surface.InitAsNull != null)
-                        {
-                            throw new NotImplementedException();
-                        }
-                        else if (surface.InitAsTarget != null)
-                        {
-                            throw new NotImplementedException();
-                        }
-                        else if (surface.InitPlanar != null)
-                        {
-                            throw new NotImplementedException();
-                        }
-                        else if (surface.InitCube != null)
-                        {
-                            throw new NotImplementedException();
-                        }
-                        else if (surface.InitVolume != null)
-                        {
-                            throw new NotImplementedException();
-                        }
-                    }
-                }
+                return null;
+            }
+
+            var sampler = profile[texture.Texture].Sampler2D;
+            if (sampler == null)
+            {
+                return null;
+            }
+
+            var surface = profile[sampler.Source].Surface;
+            if (surface == null)
+            {
+                return null;
+            }
+
+            if (surface.InitFrom != null)
+            {
+                return surface.InitFrom.Value;
+            }
+            else if (surface.InitAsNull != null)
+            {
+                throw new NotImplementedException();
+            }
+            else if (surface.InitAsTarget != null)
+            {
+                throw new NotImplementedException();
+            }
+            else if (surface.InitPlanar != null)
+            {
+                throw new NotImplementedException();
+            }
+            else if (surface.InitCube != null)
+            {
+                throw new NotImplementedException();
+            }
+            else if (surface.InitVolume != null)
+            {
+                throw new NotImplementedException();
             }
 
             return null;
@@ -1957,23 +1959,23 @@ namespace Engine.Content
                 Matrix m = new Matrix()
                 {
                     M11 = source.FloatArray[i + 0],
-                    M12 = source.FloatArray[i + 2],
-                    M13 = source.FloatArray[i + 1],
-                    M14 = source.FloatArray[i + 3],
+                    M12 = source.FloatArray[i + 8],
+                    M13 = source.FloatArray[i + 4],
+                    M14 = source.FloatArray[i + 12],
 
-                    M31 = source.FloatArray[i + 4],
-                    M32 = source.FloatArray[i + 6],
-                    M33 = source.FloatArray[i + 5],
-                    M34 = source.FloatArray[i + 7],
-
-                    M21 = source.FloatArray[i + 8],
+                    M21 = source.FloatArray[i + 2],
                     M22 = source.FloatArray[i + 10],
-                    M23 = source.FloatArray[i + 9],
-                    M24 = source.FloatArray[i + 11],
+                    M23 = source.FloatArray[i + 6],
+                    M24 = source.FloatArray[i + 14],
 
-                    M41 = source.FloatArray[i + 12],
-                    M42 = source.FloatArray[i + 14],
-                    M43 = source.FloatArray[i + 13],
+                    M31 = source.FloatArray[i + 1],
+                    M32 = source.FloatArray[i + 9],
+                    M33 = source.FloatArray[i + 5],
+                    M34 = source.FloatArray[i + 13],
+
+                    M41 = source.FloatArray[i + 3],
+                    M43 = source.FloatArray[i + 7],
+                    M42 = source.FloatArray[i + 11],
                     M44 = source.FloatArray[i + 15],
                 };
 
@@ -2069,6 +2071,89 @@ namespace Engine.Content
             }
 
             return finalScale * finalRotation * finalTranslation;
+        }
+
+        /// <summary>
+        /// Adds vertex input to vertex data
+        /// </summary>
+        /// <param name="vert">Vertex data instance</param>
+        /// <param name="vertexInput">Input</param>
+        /// <param name="positions">Positions list</param>
+        /// <param name="indices">Index list</param>
+        /// <param name="index">Current index</param>
+        /// <returns>Returns the updated vertex data in a new instance</returns>
+        internal static VertexData UpdateVertexInput(this VertexData vert, Input vertexInput, Vector3[] positions, BasicIntArray indices, int index)
+        {
+            if (vertexInput != null)
+            {
+                var vIndex = indices[index + vertexInput.Offset];
+                vert.VertexIndex = vIndex;
+                vert.Position = positions[vIndex];
+            }
+
+            return vert;
+        }
+        /// <summary>
+        /// Adds normal input to vertex data
+        /// </summary>
+        /// <param name="vert">Vertex data instance</param>
+        /// <param name="normalInput">Input</param>
+        /// <param name="normals">Normals list</param>
+        /// <param name="indices">Index list</param>
+        /// <param name="index">Current index</param>
+        /// <returns>Returns the updated vertex data in a new instance</returns>
+        internal static VertexData UpdateNormalInput(this VertexData vert, Input normalInput, Vector3[] normals, BasicIntArray indices, int index)
+        {
+            if (normalInput != null)
+            {
+                var nIndex = indices[index + normalInput.Offset];
+                vert.Normal = normals[nIndex];
+            }
+
+            return vert;
+        }
+        /// <summary>
+        /// Adds texture coordinates input to vertex data
+        /// </summary>
+        /// <param name="vert">Vertex data instance</param>
+        /// <param name="texCoordInput">Input</param>
+        /// <param name="texCoords">Coordinates list</param>
+        /// <param name="indices">Index list</param>
+        /// <param name="index">Current index</param>
+        /// <returns>Returns the updated vertex data in a new instance</returns>
+        internal static VertexData UpdateTexCoordInput(this VertexData vert, Input texCoordInput, Vector2[] texCoords, BasicIntArray indices, int index)
+        {
+            if (texCoordInput != null)
+            {
+                var tIndex = indices[index + texCoordInput.Offset];
+                Vector2 tex = texCoords[tIndex];
+
+                //Invert Vertical coordinate
+                tex.Y = -tex.Y;
+
+                vert.Texture = tex;
+            }
+
+            return vert;
+        }
+        /// <summary>
+        /// Adds color input to vertex data
+        /// </summary>
+        /// <param name="vert">Vertex data instance</param>
+        /// <param name="colorsInput">Input</param>
+        /// <param name="colors">Colors list</param>
+        /// <param name="indices">Index list</param>
+        /// <param name="index">Current index</param>
+        /// <returns>Returns the updated vertex data in a new instance</returns>
+        internal static VertexData UpdateColorsInput(this VertexData vert, Input colorsInput, Color3[] colors, BasicIntArray indices, int index)
+        {
+            if (colorsInput != null)
+            {
+                int cIndex = indices[index + colorsInput.Offset];
+                vert.Color = new Color4(colors[cIndex], 1);
+            }
+
+            return vert;
         }
     }
 }
