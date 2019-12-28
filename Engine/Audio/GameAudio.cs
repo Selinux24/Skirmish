@@ -5,6 +5,7 @@ using SharpDX.XAudio2;
 using SharpDX.XAudio2.Fx;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using MasteringLimiter = SharpDX.XAPO.Fx.MasteringLimiter;
 using MasteringLimiterParameters = SharpDX.XAPO.Fx.MasteringLimiterParameters;
@@ -26,10 +27,6 @@ namespace Engine.Audio
         public static float DopplerScale { get; set; } = 1f;
 
         /// <summary>
-        /// Device
-        /// </summary>
-        private readonly XAudio2 device = null;
-        /// <summary>
         /// 3D audio instance
         /// </summary>
         private X3DAudio x3DInstance = null;
@@ -38,42 +35,44 @@ namespace Engine.Audio
         /// </summary>
         private MasteringLimiter masteringLimiter = null;
         /// <summary>
-        /// Master volume (from 0 to 1)
-        /// </summary>
-        private float masterVolume = 1.0f;
-        /// <summary>
         /// Mastering limiter flag
         /// </summary>
         private bool useMasteringLimiter = false;
         /// <summary>
-        /// Reverb flag
+        /// Sound dictionary
         /// </summary>
-        private bool useReverb = false;
-        /// <summary>
-        /// Current reverb preset variable
-        /// </summary>
-        private ReverbPresets? reverbPreset = null;
-        /// <summary>
-        /// Audio 3D flag
-        /// </summary>
-        private bool useAudio3D = false;
-        /// <summary>
-        /// Effects dictionary
-        /// </summary>
-        private readonly Dictionary<string, GameAudioEffect> effects = new Dictionary<string, GameAudioEffect>();
+        private readonly Dictionary<string, GameAudioSound> sounds = new Dictionary<string, GameAudioSound>();
 
+        /// <summary>
+        /// Device
+        /// </summary>
+        internal XAudio2 Device { get; private set; }
         /// <summary>
         /// Mastering voice
         /// </summary>
-        internal MasteringVoice MasteringVoice { get; set; }
+        internal MasteringVoice MasteringVoice { get; private set; }
         /// <summary>
-        /// Reverb voice
+        /// Input sample rate
         /// </summary>
-        internal SubmixVoice ReverbVoice { get; set; }
+        public int InputSampleRate { get; private set; }
         /// <summary>
-        /// Speakers
+        /// Speakers configuration
         /// </summary>
-        internal Speakers Speakers { get; set; }
+        public Speakers Speakers { get; private set; }
+        /// <summary>
+        /// Output channels
+        /// </summary>
+        public int InputChannelCount { get; private set; }
+        /// <summary>
+        /// Use redirect to LFE
+        /// </summary>
+        public bool UseRedirectToLFE
+        {
+            get
+            {
+                return (Speakers & Speakers.LowFrequency) != 0;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the master volume value
@@ -83,20 +82,13 @@ namespace Engine.Audio
         {
             get
             {
+                this.MasteringVoice.GetVolume(out float masterVolume);
                 return masterVolume;
             }
             set
             {
-                value = MathUtil.Clamp(value, 0.0f, 1.0f);
-
-                if (MathUtil.NearEqual(masterVolume, value))
-                {
-                    return;
-                }
-
-                masterVolume = value;
-
-                this.MasteringVoice?.SetVolume(masterVolume);
+                float masterVolume = MathUtil.Clamp(value, 0.0f, 1.0f);
+                this.MasteringVoice.SetVolume(masterVolume);
             }
         }
         /// <summary>
@@ -122,109 +114,99 @@ namespace Engine.Audio
                 }
             }
         }
+
         /// <summary>
-        /// Gets or sets whether the sub-mix voice uses a reverb effect or not
+        /// Loads a file in the audio buffer
         /// </summary>
-        public bool UseReverb
+        /// <param name="name">Effect name</param>
+        /// <param name="fileName">File name</param>
+        public GameAudioSound LoadFromFile(string name, string fileName)
         {
-            get
-            {
-                return useReverb;
-            }
-            set
-            {
-                useReverb = value;
+            GameAudioSound sound = new GameAudioSound(this, name);
 
-                if (useReverb)
+            using (var stream = new SoundStream(File.OpenRead(fileName)))
+            {
+                var buffer = stream.ToDataStream();
+
+                sound.WaveFormat = stream.Format;
+                sound.DecodedPacketsInfo = stream.DecodedPacketsInfo;
+                sound.AudioBuffer = new AudioBuffer
                 {
-                    this.EnableReverb();
-                }
-                else
+                    Stream = buffer,
+                    AudioBytes = (int)buffer.Length,
+                    Flags = BufferFlags.EndOfStream
+                };
+                sound.LoopedAudioBuffer = new AudioBuffer
                 {
-                    this.DisableReverb();
-                }
-            }
-        }
-        /// <summary>
-        /// Gets or sets whether the reverb effect use filters or not
-        /// </summary>
-        public bool UseReverbFilter { get; set; } = true;
-        /// <summary>
-        /// Gets or sets the current reverb preset configuration
-        /// </summary>
-        public ReverbPresets? ReverbPreset
-        {
-            get
-            {
-                return reverbPreset;
-            }
-            set
-            {
-                if (reverbPreset == value)
+                    Stream = buffer,
+                    AudioBytes = (int)buffer.Length,
+                    Flags = BufferFlags.EndOfStream,
+                    LoopCount = AudioBuffer.LoopInfinite,
+                };
+                sound.Duration = TimeSpan.Zero;
+                if (stream.Format.SampleRate > 0)
                 {
-                    return;
-                }
+                    var samplesDuration = GameAudioSound.GetSamplesDuration(
+                        stream.Format,
+                        buffer.Length,
+                        stream.DecodedPacketsInfo);
 
-                reverbPreset = value;
+                    var milliseconds = samplesDuration * 1000 / stream.Format.SampleRate;
 
-                if (this.ReverbVoice == null)
-                {
-                    return;
-                }
-
-                var reverbParam = GameAudioPresets.Convert(reverbPreset ?? ReverbPresets.Default);
-
-                this.ReverbVoice.SetEffectParameters(0, reverbParam, 0);
-            }
-        }
-        /// <summary>
-        /// Gets or sets whether the master voice uses 3D audio or not
-        /// </summary>
-        public bool UseAudio3D
-        {
-            get
-            {
-                return useAudio3D;
-            }
-            set
-            {
-                useAudio3D = value;
-
-                if (useAudio3D)
-                {
-                    this.EnableAudio3D();
+                    sound.Duration = TimeSpan.FromMilliseconds(milliseconds);
                 }
             }
+
+            return sound;
         }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        internal GameAudio()
+        internal GameAudio(XAudio2Version version = XAudio2Version.Default, int sampleRate = 48000)
         {
             XAudio2Flags audio2Flags = XAudio2Flags.None;
 #if DEBUG
             audio2Flags = XAudio2Flags.DebugEngine;
 #endif
 
-            this.device = new XAudio2(audio2Flags, ProcessorSpecifier.DefaultProcessor);
-
+            this.Device = new XAudio2(audio2Flags, ProcessorSpecifier.DefaultProcessor, version);
+            this.Device.StopEngine();
 #if DEBUG
             DebugConfiguration debugConfiguration = new DebugConfiguration()
             {
                 TraceMask = (int)(LogType.Errors | LogType.Warnings),
                 BreakMask = (int)(LogType.Errors),
             };
-            this.device.SetDebugConfiguration(debugConfiguration, IntPtr.Zero);
+            this.Device.SetDebugConfiguration(debugConfiguration, IntPtr.Zero);
 #endif
 
-            this.MasteringVoice = new MasteringVoice(this.device);
-            this.MasteringVoice.GetChannelMask(out int channelMask);
-            this.Speakers = (Speakers)channelMask;
+            this.MasteringVoice = new MasteringVoice(this.Device, 2, sampleRate);
 
-            this.MasteringVoice.SetVolume(this.MasterVolume);
+            if (this.Device.Version == XAudio2Version.Version27)
+            {
+                var details = this.MasteringVoice.VoiceDetails;
+                this.InputSampleRate = details.InputSampleRate;
+                this.InputChannelCount = details.InputChannelCount;
+                int channelMask = this.MasteringVoice.ChannelMask;
+                this.Speakers = (Speakers)channelMask;
+            }
+            else
+            {
+                this.MasteringVoice.GetVoiceDetails(out var details);
+                this.InputSampleRate = details.InputSampleRate;
+                this.InputChannelCount = details.InputChannelCount;
+                this.MasteringVoice.GetChannelMask(out int channelMask);
+                this.Speakers = (Speakers)channelMask;
+            }
+
+            if (this.Speakers == Speakers.None)
+            {
+                this.Speakers = Speakers.FrontLeft | Speakers.FrontRight;
+            }
+
+            this.MasteringVoice.SetVolume(1f);
         }
-
         /// <summary>
         /// Destructor
         /// </summary>
@@ -249,14 +231,10 @@ namespace Engine.Audio
         {
             if (disposing)
             {
-                this.effects.Values.ToList().ForEach(e => e.Dispose());
-                this.effects.Clear();
+                this.sounds.Values.ToList().ForEach(e => e.Dispose());
+                this.sounds.Clear();
 
                 this.x3DInstance = null;
-
-                this.ReverbVoice?.DestroyVoice();
-                this.ReverbVoice?.Dispose();
-                this.ReverbVoice = null;
 
                 this.MasteringVoice?.DestroyVoice();
                 this.MasteringVoice?.Dispose();
@@ -265,9 +243,24 @@ namespace Engine.Audio
                 this.masteringLimiter?.Dispose();
                 this.masteringLimiter = null;
 
-                this.device?.StopEngine();
-                this.device?.Dispose();
+                this.Device?.StopEngine();
+                this.Device?.Dispose();
             }
+        }
+
+        /// <summary>
+        /// Starts the audio device
+        /// </summary>
+        public void Start()
+        {
+            Device.StartEngine();
+        }
+        /// <summary>
+        /// Stops the audio device
+        /// </summary>
+        public void Stop()
+        {
+            Device.StopEngine();
         }
 
         /// <summary>
@@ -275,44 +268,64 @@ namespace Engine.Audio
         /// </summary>
         internal void Update()
         {
-            effects?
+            sounds?
                 .ToList()
                 .ForEach(e => e.Value?.Update());
         }
 
         /// <summary>
-        /// Gets an effect from de audio
+        /// Creates a source voice
         /// </summary>
-        /// <param name="name">Effect name</param>
-        /// <param name="fileName">File name</param>
-        /// <returns>Returns the new created effect</returns>
-        internal GameAudioEffect GetEffect(string name, string fileName)
+        /// <param name="waveFormat">Wave format</param>
+        /// <returns>Returns the souce voice</returns>
+        internal SourceVoice CreateSourceVoice(WaveFormat waveFormat)
         {
-            if (effects.ContainsKey(name))
+            return new SourceVoice(Device, waveFormat);
+        }
+        /// <summary>
+        /// Creates a reverb effect
+        /// </summary>
+        /// <param name="isUsingDebuging">Use debug</param>
+        /// <returns>Returns the reverb effect</returns>
+        internal Reverb CreateReverb(bool isUsingDebuging = false)
+        {
+            return new Reverb(Device, isUsingDebuging);
+        }
+        /// <summary>
+        /// Creates a submix voice
+        /// </summary>
+        /// <param name="inputChannelCount">Input channels</param>
+        /// <param name="inputSampleRate">Input sample rate</param>
+        /// <param name="sendFlags">Send flags</param>
+        /// <param name="processingStage">Processing stage</param>
+        /// <returns>Returns the submix voice</returns>
+        internal SubmixVoice CreatesSubmixVoice(int inputChannelCount, int inputSampleRate, SubmixVoiceFlags sendFlags, int processingStage)
+        {
+            return new SubmixVoice(
+                Device,
+                inputChannelCount,
+                inputSampleRate,
+                sendFlags,
+                processingStage);
+        }
+        /// <summary>
+        /// Gets a sound
+        /// </summary>
+        /// <param name="name">Sound name</param>
+        /// <param name="fileName">File name</param>
+        /// <returns>Returns the new created sound</returns>
+        internal GameAudioSound GetSound(string name, string fileName)
+        {
+            if (sounds.ContainsKey(name))
             {
-                return effects[name];
+                return sounds[name];
             }
 
-            var effect = GameAudioEffect.Load(this, name, fileName);
+            var sound = LoadFromFile(name, fileName);
 
-            effects.Add(name, effect);
+            sounds.Add(name, sound);
 
-            return effect;
-        }
-
-        /// <summary>
-        /// Creates a new source voice
-        /// </summary>
-        /// <param name="format">Voice format</param>
-        /// <param name="voiceFlags">Voice flags</param>
-        /// <returns>Returns the new voice</returns>
-        internal SourceVoice CreateVoice(WaveFormat format, VoiceFlags voiceFlags)
-        {
-            return new SourceVoice(
-                this.device,
-                format,
-                voiceFlags,
-                XAudio2.MaximumFrequencyRatio);
+            return sound;
         }
 
         /// <summary>
@@ -350,7 +363,7 @@ namespace Engine.Audio
         {
             if (this.masteringLimiter == null)
             {
-                this.masteringLimiter = new MasteringLimiter(this.device);
+                this.masteringLimiter = new MasteringLimiter(this.Device);
                 this.MasteringVoice.SetEffectChain(new EffectDescriptor(this.masteringLimiter));
             }
 
@@ -365,57 +378,6 @@ namespace Engine.Audio
         }
 
         /// <summary>
-        /// Enables the reverb effect
-        /// </summary>
-        private void EnableReverb()
-        {
-            if (this.ReverbVoice == null)
-            {
-#if DEBUG
-                var reverbEffect = new Reverb(this.device, true);
-#else
-                var reverbEffect = new Reverb(this.device);
-#endif
-                using (reverbEffect)
-                {
-                    var masterDetails = this.MasteringVoice.VoiceDetails;
-                    var sendFlags = this.UseReverbFilter ? SubmixVoiceFlags.UseFilter : SubmixVoiceFlags.None;
-
-                    this.ReverbVoice = new SubmixVoice(
-                        this.device,
-                        masterDetails.InputChannelCount,
-                        masterDetails.InputSampleRate,
-                        sendFlags,
-                        0);
-
-                    this.ReverbVoice.SetEffectChain(new EffectDescriptor(reverbEffect, masterDetails.InputChannelCount)
-                    {
-                        InitialState = true,
-                    });
-                }
-            }
-
-            this.ReverbVoice.EnableEffect(0);
-        }
-        /// <summary>
-        /// Disables the reverb effect
-        /// </summary>
-        private void DisableReverb()
-        {
-            this.ReverbVoice?.DisableEffect(0);
-        }
-
-        /// <summary>
-        /// Enables the 3D audio instance
-        /// </summary>
-        private void EnableAudio3D(float speedOfSound = X3DAudio.SpeedOfSound)
-        {
-            if (this.x3DInstance == null)
-            {
-                this.x3DInstance = new X3DAudio(this.Speakers, speedOfSound);
-            }
-        }
-        /// <summary>
         /// Calculates the 3D audio effect
         /// </summary>
         /// <param name="listener">Listener</param>
@@ -424,7 +386,12 @@ namespace Engine.Audio
         /// <param name="dspSettings">DSP settings</param>
         internal void Calculate3D(Listener listener, Emitter emitter, CalculateFlags flags, DspSettings dspSettings)
         {
-            this.x3DInstance?.Calculate(listener, emitter, flags, dspSettings);
+            if (this.x3DInstance == null)
+            {
+                this.x3DInstance = new X3DAudio(this.Speakers, X3DAudio.SpeedOfSound);
+            }
+
+            this.x3DInstance.Calculate(listener, emitter, flags, dspSettings);
         }
     }
 }

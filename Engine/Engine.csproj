@@ -169,8 +169,8 @@
     <Compile Include="Audio\GameAudioConeDescription.cs" />
     <Compile Include="Audio\GameAudioEmitter.cs" />
     <Compile Include="Audio\GameAudioSourceDescription.cs" />
+    <Compile Include="Audio\GameAudioSound.cs" />
     <Compile Include="Audio\GameAudioEffect.cs" />
-    <Compile Include="Audio\GameAudioEffectInstance.cs" />
     <Compile Include="Audio\GameAudioListener.cs" />
     <Compile Include="Audio\GameAudioPresets.cs" />
     <Compile Include="Audio\GameAudioSource.cs" />

@@ -13,9 +13,27 @@ namespace Engine
     public class GameAudioManager : IDisposable
     {
         /// <summary>
-        /// Game audios dictionary
+        /// Game audio dictionary
         /// </summary>
         private readonly Dictionary<string, GameAudio> gameAudioList = new Dictionary<string, GameAudio>();
+
+        /// <summary>
+        /// Gets a game audio instance by name
+        /// </summary>
+        /// <param name="name">Game audio instance name</param>
+        /// <returns>Returns the named game audio, or null if not exists</returns>
+        public GameAudio this[string name]
+        {
+            get
+            {
+                if (gameAudioList.ContainsKey(name))
+                {
+                    return gameAudioList[name];
+                }
+
+                return null;
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -83,23 +101,6 @@ namespace Engine
             return audio;
         }
         /// <summary>
-        /// Creates a new effect
-        /// </summary>
-        /// <param name="audioName">Audio name</param>
-        /// <param name="effectName">Effect name</param>
-        /// <param name="contentFolder">Conten folder</param>
-        /// <param name="fileName">File name</param>
-        /// <returns></returns>
-        public GameAudioEffect CreateEffect(string audioName, string effectName, string contentFolder, string fileName)
-        {
-            var audio = gameAudioList[audioName];
-
-            var paths = ContentManager.FindPaths(contentFolder, fileName);
-
-            return audio.GetEffect(effectName, paths.FirstOrDefault());
-        }
-
-        /// <summary>
         /// Removes a single audio
         /// </summary>
         /// <param name="name">Audio to remove</param>
@@ -110,6 +111,28 @@ namespace Engine
                 gameAudioList[name].Dispose();
                 gameAudioList.Remove(name);
             }
+        }
+
+        /// <summary>
+        /// Creates a new sound
+        /// </summary>
+        /// <param name="audioName">Audio name</param>
+        /// <param name="soundName">Sound name</param>
+        /// <param name="contentFolder">Conten folder</param>
+        /// <param name="fileName">File name</param>
+        /// <returns>Returns the new created game sound</returns>
+        public GameAudioSound CreateSound(string audioName, string soundName, string contentFolder, string fileName)
+        {
+            if (!gameAudioList.ContainsKey(audioName))
+            {
+                CreateAudio(audioName);
+            }
+
+            var audio = gameAudioList[audioName];
+
+            var paths = ContentManager.FindPaths(contentFolder, fileName);
+
+            return audio.GetSound(soundName, paths.FirstOrDefault());
         }
     }
 }

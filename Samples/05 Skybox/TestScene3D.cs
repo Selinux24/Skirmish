@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.Audio;
 using Engine.Common;
 using Engine.Content;
 using Engine.PathFinding.RecastNavigation;
@@ -6,6 +7,7 @@ using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Skybox
 {
@@ -47,7 +49,12 @@ namespace Skybox
         private ParticleEmitter movingFireEmitter = null;
         private SceneLightPoint movingFireLight = null;
 
+        private readonly ParticleSystemDescription pBigFire = ParticleSystemDescription.InitializeFire("resources", "fire.png", 0.5f);
+        private readonly ParticleSystemDescription pFire = ParticleSystemDescription.InitializeFire("resources", "fire.png", 0.1f);
+        private readonly ParticleSystemDescription pPlume = ParticleSystemDescription.InitializeSmokePlume("resources", "smoke.png", 0.1f);
+
         private int directionalLightCount = 0;
+        private GameAudioEffect fireAudioEffect;
 
         public TestScene3D(Game game)
             : base(game, SceneModes.ForwardLigthning)
@@ -87,7 +94,7 @@ namespace Skybox
 #else
             help.Instance.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Move Mouse: View | Left Mouse: Pick";
 #endif
-            this.fps.Instance.Text = null;
+            this.fps.Instance.Text = "";
 
             title.Instance.Position = Vector2.Zero;
             help.Instance.Position = new Vector2(0, 24);
@@ -98,7 +105,7 @@ namespace Skybox
                 Name = "UI Back pannel",
                 AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
-                Height = this.fps.Instance.Top + this.fps.Instance.Height + 3,
+                Height = 120,
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
@@ -163,11 +170,7 @@ namespace Skybox
 
             #region Particle Systems
 
-            var pManager = this.AddComponent<ParticleManager>(new ParticleManagerDescription() { Name = "Particle Systems" });
-
-            var pBigFire = ParticleSystemDescription.InitializeFire("resources", "fire.png", 0.5f);
-            var pFire = ParticleSystemDescription.InitializeFire("resources", "fire.png", 0.1f);
-            var pPlume = ParticleSystemDescription.InitializeSmokePlume("resources", "smoke.png", 0.1f);
+            var pManager = this.AddComponent<ParticleManager>(new ParticleManagerDescription() { Name = "Particle Systems" }).Instance;
 
             #endregion
 
@@ -199,17 +202,7 @@ namespace Skybox
 
             this.movingFireEmitter = new ParticleEmitter() { EmissionRate = 0.1f, InfiniteDuration = true };
 
-            pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, pBigFire, this.movingFireEmitter);
-
-            #endregion
-
-            #region DEBUG drawers
-
-            this.volumesDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(new PrimitiveListDrawerDescription<Line3D>() { AlphaEnabled = true, Count = 10000 });
-            this.volumesDrawer.Visible = false;
-
-            this.graphDrawer = this.AddComponent<PrimitiveListDrawer<Triangle>>(new PrimitiveListDrawerDescription<Triangle>() { AlphaEnabled = true, Count = 10000 });
-            this.graphDrawer.Visible = false;
+            pManager.AddParticleSystem(ParticleSystemTypes.CPU, pBigFire, this.movingFireEmitter);
 
             #endregion
 
@@ -265,14 +258,37 @@ namespace Skybox
 
                 this.Lights.Add(torchLights[i]);
 
-                pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, pFire, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.1f });
-                pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, pPlume, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.5f });
+                pManager.AddParticleSystem(ParticleSystemTypes.CPU, pFire, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.1f });
+                pManager.AddParticleSystem(ParticleSystemTypes.CPU, pPlume, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.5f });
             }
 
             #endregion
 
-            #region Navigation Mesh
+            InitializeNavigationMesh();
 
+            #region DEBUG drawers
+
+            this.volumesDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(new PrimitiveListDrawerDescription<Line3D>() { AlphaEnabled = true, Count = 10000 });
+            this.volumesDrawer.Visible = false;
+
+            this.graphDrawer = this.AddComponent<PrimitiveListDrawer<Triangle>>(new PrimitiveListDrawerDescription<Triangle>() { AlphaEnabled = true, Count = 10000 });
+            this.graphDrawer.Visible = false;
+
+            #endregion
+
+            InitializeSound();
+        }
+        private void InitializeCamera()
+        {
+            this.Camera.NearPlaneDistance = 0.1f;
+            this.Camera.FarPlaneDistance = 5000.0f;
+            this.Camera.Goto(new Vector3(-6, this.walker.Height, 5));
+            this.Camera.LookTo(Vector3.UnitY + Vector3.UnitZ);
+            this.Camera.MovementDelta = 4f;
+            this.Camera.SlowMovementDelta = 2f;
+        }
+        private void InitializeNavigationMesh()
+        {
             var nvInput = new InputGeometry(GetTrianglesForNavigationGraph);
 
             var nvSettings = BuildSettings.Default;
@@ -283,17 +299,27 @@ namespace Skybox
             nvSettings.Agents[0] = this.walker;
 
             this.PathFinderDescription = new Engine.PathFinding.PathFinderDescription(nvSettings, nvInput);
-
-            #endregion
         }
-        private void InitializeCamera()
+        private void InitializeSound()
         {
-            this.Camera.NearPlaneDistance = 0.1f;
-            this.Camera.FarPlaneDistance = 5000.0f;
-            this.Camera.Goto(new Vector3(-6, this.walker.Height, 5));
-            this.Camera.LookTo(Vector3.UnitY + Vector3.UnitZ);
-            this.Camera.MovementDelta = 4f;
-            this.Camera.SlowMovementDelta = 2f;
+            var fireSound = this.AudioManager.CreateSound("Sound Effects", "Fire", "Resources/Audio/Effects", "loop_torch.wav");
+            fireAudioEffect = fireSound.CreateEffect(new GameAudioSourceDescription { Radius = 6 }, new GameAudioSourceDescription { });
+            fireAudioEffect.IsLooped = true;
+            fireAudioEffect.UseAudio3D = true;
+            fireAudioEffect.UseReverb = true;
+            fireAudioEffect.ReverbPreset = ReverbPresets.Default;
+            fireAudioEffect.Volume = 0.25f;
+            fireAudioEffect.Emitter.SetSource(this.movingFire);
+            fireAudioEffect.Listener.SetSource(this.Camera);
+            fireAudioEffect.Play();
+        }
+
+        public override void Initialized()
+        {
+            base.Initialized();
+
+            this.AudioManager["Sound Effects"].MasterVolume = 1f;
+            this.AudioManager["Sound Effects"].Start();
         }
 
         public override void Update(GameTime gameTime)
@@ -338,7 +364,6 @@ namespace Skybox
 
             base.Update(gameTime);
         }
-
         private void UpdateInput(bool shift)
         {
             if (this.Game.Input.KeyJustReleased(Keys.Escape))
@@ -360,13 +385,18 @@ namespace Skybox
             this.UpdateInputLights();
 
 #if DEBUG
-            this.fps.Instance.Text = string.Format(
-                "Mouse (X:{0}; Y:{1}, Wheel: {2}) Absolute (X:{3}; Y:{4})",
-                this.Game.Input.MouseXDelta,
-                this.Game.Input.MouseYDelta,
-                this.Game.Input.MouseWheelDelta,
-                this.Game.Input.MouseX,
-                this.Game.Input.MouseY);
+            var m = fireAudioEffect.GetOutputMatrix();
+            var ep = movingFire.Transform.Position.GetDescription(Vector3.Zero, "Zero");
+            var ev = movingFire.Transform.Velocity.GetDescription(Vector3.Zero, "Zero");
+            var lp = Camera.Position.GetDescription(Vector3.Zero, "Zero");
+            var lv = Camera.Velocity.GetDescription(Vector3.Zero, "Zero");
+            var d = Vector3.Distance(movingFire.Transform.Position, Camera.Position);
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"Mouse (X:{this.Game.Input.MouseXDelta}; Y:{this.Game.Input.MouseYDelta}, Wheel: {this.Game.Input.MouseWheelDelta}) Absolute (X:{this.Game.Input.MouseX}; Y:{this.Game.Input.MouseY})");
+            sb.AppendLine($"L {m[0]:0.000} R {m[1]:0.000} Distance {d}");
+            sb.AppendLine($"Emitter  pos: {ep} Emitter  vel: {ev}");
+            sb.AppendLine($"Listener pos: {lp} Listener vel: {lv}");
+            this.fps.Instance.Text = sb.ToString();
 #else
             this.fps.Instance.Text = this.Game.RuntimeText;
 #endif

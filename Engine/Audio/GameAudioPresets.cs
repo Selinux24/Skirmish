@@ -56,6 +56,9 @@ namespace Engine.Audio
             var reverbPreset = reverbPresetsList[(int)(preset)];
             var reverbParams = (ReverbParameters)reverbPreset;
 
+            //Why? I don't know - this parameter is refered to 48Khz sampling rate. Scale it? Otherwise, the effect mutes all.
+            reverbParams.RoomFilterFreq = 20;
+
             return reverbParams;
         }
 

@@ -23,7 +23,7 @@ namespace Collada
         private readonly Color exitButtonColor = Color.AdjustSaturation(Color.OrangeRed, 1.5f);
 
         private GameAudio music = null;
-        private GameAudioEffectInstance currentMusic = null;
+        private GameAudioEffect currentMusic = null;
         private readonly string[] musicList = new string[]
         {
             "Electro_1.wav",
@@ -32,7 +32,7 @@ namespace Collada
         private int musicIndex = 0;
         private int musicLoops = 0;
 
-        private GameAudioEffect pushButtonEffect = null;
+        private GameAudioSound pushButtonEffect = null;
 
         private readonly Manipulator3D emitterPosition = new Manipulator3D();
         private readonly Manipulator3D listenerPosition = new Manipulator3D();
@@ -196,7 +196,7 @@ namespace Collada
 
             var effects = this.AudioManager.CreateAudio("effects");
             effects.MasterVolume = 0.25f;
-            this.pushButtonEffect = this.AudioManager.CreateEffect("effects", "push", "Resources/Common", "push.wav");
+            this.pushButtonEffect = this.AudioManager.CreateSound("effects", "push", "Resources/Common", "push.wav");
         }
 
         public override void Update(GameTime gameTime)
@@ -222,16 +222,11 @@ namespace Collada
 
             if (this.Game.Input.KeyJustReleased(Keys.R))
             {
-                music.UseReverb = !music.UseReverb;
+                currentMusic.UseReverb = !currentMusic.UseReverb;
             }
             if (this.Game.Input.KeyJustReleased(Keys.H))
             {
-                music.ReverbPreset = ReverbPresets.Forest;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.P))
-            {
-                music.UseAudio3D = !music.UseAudio3D;
+                currentMusic.ReverbPreset = ReverbPresets.Forest;
             }
 
             if (this.Game.Input.KeyPressed(Keys.Subtract))
@@ -325,7 +320,7 @@ namespace Collada
         {
             Task.Run(async () =>
             {
-                this.pushButtonEffect.Create().Play();
+                this.pushButtonEffect.CreateEffect().Play();
 
                 await Task.Delay(this.pushButtonEffect.Duration);
 
@@ -351,7 +346,7 @@ namespace Collada
         {
             Task.Run(async () =>
             {
-                this.pushButtonEffect.Create().Play();
+                this.pushButtonEffect.CreateEffect().Play();
 
                 await Task.Delay(this.pushButtonEffect.Duration);
 
@@ -373,11 +368,10 @@ namespace Collada
             {
                 music = this.AudioManager.CreateAudio("music");
                 music.MasterVolume = 0.01f;
-                music.UseAudio3D = true;
             }
 
-            var musicEffect = this.AudioManager.CreateEffect("music", $"Music{musicIndex}", "Resources/Common", musicList[musicIndex]);
-            currentMusic = musicEffect.Create();
+            var musicEffect = this.AudioManager.CreateSound("music", $"Music{musicIndex}", "Resources/Common", musicList[musicIndex]);
+            currentMusic = musicEffect.CreateEffect();
             currentMusic.IsLooped = true;
 
             currentMusic.Emitter.SetSource(emitterPosition);

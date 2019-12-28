@@ -550,6 +550,8 @@ namespace Engine
         /// </summary>
         public void Update(GameTime gameTime)
         {
+            this.Velocity = Vector3.Zero;
+
             this.UpdateTranslations(gameTime);
 
             if (this.mode == CameraModes.Ortho)
