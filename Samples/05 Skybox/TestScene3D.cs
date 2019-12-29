@@ -54,6 +54,7 @@ namespace Skybox
         private readonly ParticleSystemDescription pPlume = ParticleSystemDescription.InitializeSmokePlume("resources", "smoke.png", 0.1f);
 
         private int directionalLightCount = 0;
+
         private GameAudioEffect fireAudioEffect;
 
         public TestScene3D(Game game)
@@ -302,7 +303,7 @@ namespace Skybox
         }
         private void InitializeSound()
         {
-            var fireSound = this.AudioManager.CreateSound("Sound Effects", "Fire", "Resources/Audio/Effects", "loop_torch.wav");
+            var fireSound = this.AudioManager.CreateSound("Sound Effects", "Fire", "Resources/Audio/Effects", "target_balls_single_loop.wav");
             fireAudioEffect = fireSound.CreateEffect(new GameAudioSourceDescription { Radius = 6 }, new GameAudioSourceDescription { });
             fireAudioEffect.IsLooped = true;
             fireAudioEffect.UseAudio3D = true;
@@ -384,7 +385,6 @@ namespace Skybox
 
             this.UpdateInputLights();
 
-#if DEBUG
             var m = fireAudioEffect.GetOutputMatrix();
             var ep = movingFire.Transform.Position.GetDescription(Vector3.Zero, "Zero");
             var ev = movingFire.Transform.Velocity.GetDescription(Vector3.Zero, "Zero");
@@ -397,9 +397,6 @@ namespace Skybox
             sb.AppendLine($"Emitter  pos: {ep} Emitter  vel: {ev}");
             sb.AppendLine($"Listener pos: {lp} Listener vel: {lv}");
             this.fps.Instance.Text = sb.ToString();
-#else
-            this.fps.Instance.Text = this.Game.RuntimeText;
-#endif
         }
         private void UpdateInputCamera(bool shift)
         {

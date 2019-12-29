@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 
 namespace Terrain
 {
+    using Engine.Audio;
     using Terrain.AI;
     using Terrain.AI.Agents;
     using Terrain.Controllers;
@@ -113,6 +114,15 @@ namespace Terrain
         private readonly Dictionary<string, double> initDurationDict = new Dictionary<string, double>();
         private int initDurationIndex = 0;
 
+        private GameAudioEffect heliEffect;
+        private GameAudioEffect heliDestroyedEffect;
+        private GameAudioEffect tank1Effect;
+        private GameAudioEffect tank2Effect;
+        private GameAudioEffect tankDestroyedEffect;
+        private GameAudioEffect tankShootingEffect;
+        private GameAudioEffect[] impactEffects;
+        private GameAudioEffect[] damageEffects;
+
         public TestScene3D(Game game)
             : base(game, SceneModes.ForwardLigthning)
         {
@@ -184,6 +194,8 @@ namespace Terrain
             initDurationIndex = initDurationDict.Keys.Count - 2;
 
             SetLoadText(initDurationIndex);
+
+            InitializeSounds();
 
             InitializeLights();
 
@@ -812,6 +824,143 @@ namespace Terrain
             sw.Stop();
             return Task.FromResult(sw.Elapsed.TotalSeconds);
         }
+        private void InitializeSounds()
+        {
+            var forestSound = this.AudioManager.CreateSound("Sound Effects", "Forest", "Resources/Audio/Effects", "wind_birds_forest_01.wav");
+            var forestEffect = forestSound.CreateEffect(false);
+            forestEffect.IsLooped = true;
+            forestEffect.UseReverb = true;
+            forestEffect.ReverbPreset = ReverbPresets.Forest;
+            forestEffect.Volume = 1f;
+            forestEffect.Play();
+
+            var heliSound = this.AudioManager.CreateSound("Sound Effects", "Helicopter", "Resources/Audio/Effects", "heli.wav");
+            heliEffect = heliSound.CreateEffect(new GameAudioSourceDescription { Radius = 250 }, new GameAudioSourceDescription { }, false);
+            heliEffect.IsLooped = true;
+            heliEffect.UseAudio3D = true;
+            heliEffect.UseReverb = true;
+            heliEffect.ReverbPreset = ReverbPresets.Forest;
+            heliEffect.Volume = 1f;
+            heliEffect.Emitter.SetSource(this.helicopter);
+            heliEffect.Listener.SetSource(this.Camera);
+            heliEffect.Play();
+
+            var heliDestroyedSound = this.AudioManager.CreateSound("Sound Effects", "HelicopterDestroyed", "Resources/Audio/Effects", "explosion_helicopter_close_01.wav");
+            heliDestroyedEffect = heliDestroyedSound.CreateEffect(new GameAudioSourceDescription { Radius = 300 }, new GameAudioSourceDescription { }, false);
+            heliDestroyedEffect.IsLooped = false;
+            heliDestroyedEffect.UseAudio3D = true;
+            heliDestroyedEffect.UseReverb = true;
+            heliDestroyedEffect.ReverbPreset = ReverbPresets.Forest;
+            heliDestroyedEffect.Volume = 1f;
+            heliDestroyedEffect.Emitter.SetSource(this.helicopter);
+            heliDestroyedEffect.Listener.SetSource(this.Camera);
+
+            var tankSound = this.AudioManager.CreateSound("Sound Effects", "Tank", "Resources/Audio/Effects", "tank_engine.wav");
+            tank1Effect = tankSound.CreateEffect(new GameAudioSourceDescription { Radius = 100 }, new GameAudioSourceDescription { }, false);
+            tank1Effect.IsLooped = true;
+            tank1Effect.UseAudio3D = true;
+            tank1Effect.UseReverb = true;
+            tank1Effect.ReverbPreset = ReverbPresets.Forest;
+            tank1Effect.Volume = 1f;
+            tank1Effect.Emitter.SetSource(this.tankP1);
+            tank1Effect.Listener.SetSource(this.Camera);
+            tank1Effect.Play();
+            tank2Effect = tankSound.CreateEffect(new GameAudioSourceDescription { Radius = 100 }, new GameAudioSourceDescription { }, false);
+            tank2Effect.IsLooped = true;
+            tank2Effect.UseAudio3D = true;
+            tank2Effect.UseReverb = true;
+            tank2Effect.ReverbPreset = ReverbPresets.Forest;
+            tank2Effect.Volume = 1f;
+            tank2Effect.Emitter.SetSource(this.tankP2);
+            tank2Effect.Listener.SetSource(this.Camera);
+            tank2Effect.Play();
+
+            var tankDestroyedSound = this.AudioManager.CreateSound("Sound Effects", "TankDestroyed", "Resources/Audio/Effects", "explosion_vehicle_small_close_01.wav");
+            tankDestroyedEffect = tankDestroyedSound.CreateEffect(new GameAudioSourceDescription { Radius = 300 }, new GameAudioSourceDescription { }, false);
+            tankDestroyedEffect.IsLooped = false;
+            tankDestroyedEffect.UseAudio3D = true;
+            tankDestroyedEffect.UseReverb = true;
+            tankDestroyedEffect.ReverbPreset = ReverbPresets.Forest;
+            tankDestroyedEffect.Volume = 1f;
+            tankDestroyedEffect.Listener.SetSource(this.Camera);
+
+            var tankShootingSound = this.AudioManager.CreateSound("Sound Effects", "TankShooting", "Resources/Audio/Effects", "machinegun-shooting.wav");
+            tankShootingEffect = tankShootingSound.CreateEffect(new GameAudioSourceDescription { Radius = 300 }, new GameAudioSourceDescription { }, false);
+            tankShootingEffect.IsLooped = false;
+            tankShootingEffect.UseAudio3D = true;
+            tankShootingEffect.UseReverb = true;
+            tankShootingEffect.ReverbPreset = ReverbPresets.Forest;
+            tankShootingEffect.Volume = 1f;
+            tankShootingEffect.Listener.SetSource(this.Camera);
+
+            var impact1Sound = this.AudioManager.CreateSound("Sound Effects", "Impact1", "Resources/Audio/Effects", "metal_grate_large_01.wav");
+            var impact1Effect = impact1Sound.CreateEffect(new GameAudioSourceDescription { Radius = 100 }, new GameAudioSourceDescription { }, false);
+            impact1Effect.IsLooped = false;
+            impact1Effect.UseAudio3D = true;
+            impact1Effect.UseReverb = true;
+            impact1Effect.ReverbPreset = ReverbPresets.Forest;
+            impact1Effect.Volume = 1f;
+            impact1Effect.Listener.SetSource(this.Camera);
+            var impact2Sound = this.AudioManager.CreateSound("Sound Effects", "Impact2", "Resources/Audio/Effects", "metal_grate_large_02.wav");
+            var impact2Effect = impact2Sound.CreateEffect(new GameAudioSourceDescription { Radius = 100 }, new GameAudioSourceDescription { }, false);
+            impact2Effect.IsLooped = false;
+            impact2Effect.UseAudio3D = true;
+            impact2Effect.UseReverb = true;
+            impact2Effect.ReverbPreset = ReverbPresets.Forest;
+            impact2Effect.Volume = 1f;
+            impact2Effect.Listener.SetSource(this.Camera);
+            var impact3Sound = this.AudioManager.CreateSound("Sound Effects", "Impact3", "Resources/Audio/Effects", "metal_grate_large_03.wav");
+            var impact3Effect = impact3Sound.CreateEffect(new GameAudioSourceDescription { Radius = 100 }, new GameAudioSourceDescription { }, false);
+            impact3Effect.IsLooped = false;
+            impact3Effect.UseAudio3D = true;
+            impact3Effect.UseReverb = true;
+            impact3Effect.ReverbPreset = ReverbPresets.Forest;
+            impact3Effect.Volume = 1f;
+            impact3Effect.Listener.SetSource(this.Camera);
+            var impact4Sound = this.AudioManager.CreateSound("Sound Effects", "Impact4", "Resources/Audio/Effects", "metal_grate_large_04.wav");
+            var impact4Effect = impact4Sound.CreateEffect(new GameAudioSourceDescription { Radius = 100 }, new GameAudioSourceDescription { }, false);
+            impact4Effect.IsLooped = false;
+            impact4Effect.UseAudio3D = true;
+            impact4Effect.UseReverb = true;
+            impact4Effect.ReverbPreset = ReverbPresets.Forest;
+            impact4Effect.Volume = 1f;
+            impact4Effect.Listener.SetSource(this.Camera);
+            impactEffects = new[] { impact1Effect, impact2Effect, impact3Effect, impact4Effect };
+
+            var damage1Sound = this.AudioManager.CreateSound("Sound Effects", "damage1", "Resources/Audio/Effects", "metal_pipe_large_01.wav");
+            var damage1Effect = damage1Sound.CreateEffect(new GameAudioSourceDescription { Radius = 100 }, new GameAudioSourceDescription { }, false);
+            damage1Effect.IsLooped = false;
+            damage1Effect.UseAudio3D = true;
+            damage1Effect.UseReverb = true;
+            damage1Effect.ReverbPreset = ReverbPresets.Forest;
+            damage1Effect.Volume = 1f;
+            damage1Effect.Listener.SetSource(this.Camera);
+            var damage2Sound = this.AudioManager.CreateSound("Sound Effects", "damage2", "Resources/Audio/Effects", "metal_pipe_large_02.wav");
+            var damage2Effect = damage2Sound.CreateEffect(new GameAudioSourceDescription { Radius = 100 }, new GameAudioSourceDescription { }, false);
+            damage2Effect.IsLooped = false;
+            damage2Effect.UseAudio3D = true;
+            damage2Effect.UseReverb = true;
+            damage2Effect.ReverbPreset = ReverbPresets.Forest;
+            damage2Effect.Volume = 1f;
+            damage2Effect.Listener.SetSource(this.Camera);
+            var damage3Sound = this.AudioManager.CreateSound("Sound Effects", "damage3", "Resources/Audio/Effects", "metal_pipe_large_03.wav");
+            var damage3Effect = damage3Sound.CreateEffect(new GameAudioSourceDescription { Radius = 100 }, new GameAudioSourceDescription { }, false);
+            damage3Effect.IsLooped = false;
+            damage3Effect.UseAudio3D = true;
+            damage3Effect.UseReverb = true;
+            damage3Effect.ReverbPreset = ReverbPresets.Forest;
+            damage3Effect.Volume = 1f;
+            damage3Effect.Listener.SetSource(this.Camera);
+            var damage4Sound = this.AudioManager.CreateSound("Sound Effects", "damage4", "Resources/Audio/Effects", "metal_pipe_large_04.wav");
+            var damage4Effect = damage4Sound.CreateEffect(new GameAudioSourceDescription { Radius = 100 }, new GameAudioSourceDescription { }, false);
+            damage4Effect.IsLooped = false;
+            damage4Effect.UseAudio3D = true;
+            damage4Effect.UseReverb = true;
+            damage4Effect.ReverbPreset = ReverbPresets.Forest;
+            damage4Effect.Volume = 1f;
+            damage4Effect.Listener.SetSource(this.Camera);
+            damageEffects = new[] { damage1Effect, damage2Effect, damage3Effect, damage4Effect };
+        }
         private void InitializePositionRocks(Random posRnd)
         {
             for (int i = 0; i < this.rocks.Count; i++)
@@ -922,6 +1071,9 @@ namespace Terrain
             this.Camera.LookTo(0, 10, 0);
 
             this.gardener.Instance.SetWind(this.windDirection, this.windStrength);
+
+            this.AudioManager["Sound Effects"].MasterVolume = 1f;
+            this.AudioManager["Sound Effects"].Start();
         }
         private void StartHelicopter()
         {
@@ -1666,10 +1818,28 @@ namespace Terrain
         }
         private void Agent_Attacking(object sender, BehaviorEventArgs e)
         {
+            int index = Helper.RandomGenerator.Next(0, 4);
+            index %= 3;
+            var impactEffect = impactEffects[index];
+            impactEffect.Emitter.SetSource(e.Passive.Manipulator);
+            impactEffect.Play();
+
             this.AddProjectileTrailSystem(e.Active, e.Passive, 50f);
         }
         private void Agent_Damaged(object sender, BehaviorEventArgs e)
         {
+            if (e.Passive == helicopterAgent)
+            {
+                tankShootingEffect.Emitter.SetSource(e.Active.Manipulator);
+                tankShootingEffect.Play();
+            }
+
+            int index = Helper.RandomGenerator.Next(0, 4);
+            index %= 3;
+            var damageEffect = damageEffects[index];
+            damageEffect.Emitter.SetSource(e.Passive.Manipulator);
+            damageEffect.Play();
+
             this.AddExplosionSystem(e.Passive);
             this.AddExplosionSystem(e.Passive);
             this.AddSmokeSystem(e.Passive, false);
@@ -1678,6 +1848,9 @@ namespace Terrain
         {
             if (e.Passive == this.helicopterAgent)
             {
+                heliEffect.Stop();
+                heliDestroyedEffect.Play();
+
                 this.AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
                 this.AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
                 this.AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
@@ -1693,6 +1866,11 @@ namespace Terrain
             }
             else
             {
+                if (e.Passive == this.tankP1Agent) tank1Effect.Stop();
+                if (e.Passive == this.tankP2Agent) tank2Effect.Stop();
+                tankDestroyedEffect.Emitter.SetSource(e.Passive.Manipulator);
+                tankDestroyedEffect.Play();
+
                 this.AddExplosionSystem(e.Passive);
                 this.AddExplosionSystem(e.Passive);
                 this.AddExplosionSystem(e.Passive);
