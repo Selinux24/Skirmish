@@ -25,6 +25,8 @@ namespace Collada
             catch(Exception ex)
             {
                 File.WriteAllText("dump.txt", ex.ToString());
+
+                throw;
             }
         }
     }

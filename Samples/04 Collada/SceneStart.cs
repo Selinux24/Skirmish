@@ -22,7 +22,6 @@ namespace Collada
         private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.RosyBrown, 1.5f);
         private readonly Color exitButtonColor = Color.AdjustSaturation(Color.OrangeRed, 1.5f);
 
-        private GameAudio music = null;
         private GameAudioEffect currentMusic = null;
         private readonly string[] musicList = new string[]
         {
@@ -31,8 +30,6 @@ namespace Collada
         };
         private int musicIndex = 0;
         private int musicLoops = 0;
-
-        private GameAudioSound pushButtonEffect = null;
 
         private readonly Manipulator3D emitterPosition = new Manipulator3D();
         private readonly Manipulator3D listenerPosition = new Manipulator3D();
@@ -51,8 +48,16 @@ namespace Collada
 
             GameEnvironment.Background = Color.Black;
 
-            #region Cursor
+            InitializeCursor();
 
+            InitializeBackGround();
+
+            InitializeControls();
+
+            InitializeAudio();
+        }
+        private void InitializeCursor()
+        {
             var cursorDesc = new CursorDescription()
             {
                 Name = "Cursor",
@@ -64,18 +69,16 @@ namespace Collada
                 Color = Color.White,
             };
             this.AddComponent<Cursor>(cursorDesc, SceneObjectUsages.UI, layerCursor);
-
-            #endregion
-
-            #region Background
-
+        }
+        private void InitializeBackGround()
+        {
             var backGroundDesc = ModelDescription.FromXml("Background", "Resources/SceneStart", "SkyPlane.xml");
             this.backGround = this.AddComponent<Model>(backGroundDesc, SceneObjectUsages.UI).Instance;
+        }
+        private void InitializeControls()
+        {
 
-            #endregion
-
-            #region Title text
-
+            //Title text
             var titleDesc = new TextDrawerDescription()
             {
                 Name = "Title",
@@ -87,10 +90,6 @@ namespace Collada
                 ShadowDelta = new Vector2(2, -3),
             };
             this.title = this.AddComponent<TextDrawer>(titleDesc, SceneObjectUsages.UI, layerHUD).Instance;
-
-            #endregion
-
-            #region Scene buttons
 
             var buttonDesc = new SpriteButtonDescription()
             {
@@ -122,10 +121,7 @@ namespace Collada
             this.sceneDungeonButton = this.AddComponent<SpriteButton>(buttonDesc, SceneObjectUsages.UI, layerHUD).Instance;
             this.sceneModularDungeonButton = this.AddComponent<SpriteButton>(buttonDesc, SceneObjectUsages.UI, layerHUD).Instance;
 
-            #endregion
-
-            #region Exit button
-
+            // Exit button
             var exitButtonDesc = new SpriteButtonDescription()
             {
                 Name = "Exit button",
@@ -152,19 +148,57 @@ namespace Collada
                 }
             };
             this.exitButton = this.AddComponent<SpriteButton>(exitButtonDesc, SceneObjectUsages.UI, layerHUD).Instance;
+        }
+        private void InitializeAudio()
+        {
+            //Sounds
+            for (int i = 0; i < musicList.Length; i++)
+            {
+                this.AudioManager.LoadSound($"Music{i}", "Resources/Common", musicList[i]);
+            }
 
-            #endregion
+            this.AudioManager.LoadSound("push", "Resources/Common", "push.wav");
+
+            //Effects
+            for (int i = 0; i < musicList.Length; i++)
+            {
+                this.AudioManager.AddEffectParams(
+                    $"Music{i}",
+                    new GameAudioEffectParameters
+                    {
+                        SoundName = $"Music{i}",
+                        IsLooped = false,
+                        UseAudio3D = true,
+                    });
+            }
+
+            this.AudioManager.AddEffectParams(
+                "push",
+                new GameAudioEffectParameters
+                {
+                    SoundName = "push",
+                });
         }
 
         public override void Initialized()
         {
             base.Initialized();
 
+            SetBackground();
+            SetControlPositions();
+
             this.Camera.Position = Vector3.BackwardLH * 8f;
             this.Camera.Interest = Vector3.Zero;
 
+            this.AudioManager.MasterVolume = 1;
+            this.AudioManager.Start();
+        }
+        private void SetBackground()
+        {
             this.backGround.Manipulator.SetScale(1.5f, 1.25f, 1.5f);
-
+        }
+        private void SetControlPositions()
+        {
             this.title.Text = "Collada Loader Test";
             this.title.CenterHorizontally();
             this.title.Top = this.Game.Form.RenderHeight / 4;
@@ -193,10 +227,6 @@ namespace Collada
             this.exitButton.Left = (this.Game.Form.RenderWidth / 6) * 5 - (this.exitButton.Width / 2);
             this.exitButton.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.exitButton.Height / 2);
             this.exitButton.Click += ExitButtonClick;
-
-            var effects = this.AudioManager.CreateAudio("effects");
-            effects.MasterVolume = 0.25f;
-            this.pushButtonEffect = this.AudioManager.CreateSound("effects", "push", "Resources/Common", "push.wav");
         }
 
         public override void Update(GameTime gameTime)
@@ -210,14 +240,9 @@ namespace Collada
         }
         private void UpdateAudioInput(GameTime gameTime)
         {
-            if (music == null)
-            {
-                return;
-            }
-
             if (this.Game.Input.KeyJustReleased(Keys.L))
             {
-                music.UseMasteringLimiter = !music.UseMasteringLimiter;
+                this.AudioManager.UseMasteringLimiter = !this.AudioManager.UseMasteringLimiter;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.R))
@@ -231,12 +256,12 @@ namespace Collada
 
             if (this.Game.Input.KeyPressed(Keys.Subtract))
             {
-                music.MasterVolume -= gameTime.ElapsedSeconds / 10;
+                this.AudioManager.MasterVolume -= gameTime.ElapsedSeconds / 10;
             }
 
             if (this.Game.Input.KeyPressed(Keys.Add))
             {
-                music.MasterVolume += gameTime.ElapsedSeconds / 10;
+                this.AudioManager.MasterVolume += gameTime.ElapsedSeconds / 10;
             }
 
             if (this.Game.Input.KeyPressed(Keys.ControlKey))
@@ -287,11 +312,6 @@ namespace Collada
         }
         private void UpdateListenerInput(GameTime gameTime)
         {
-            if (music == null)
-            {
-                return;
-            }
-
             bool shift = this.Game.Input.KeyPressed(Keys.Shift);
 
             var agentPosition = shift ? emitterPosition : listenerPosition;
@@ -320,9 +340,10 @@ namespace Collada
         {
             Task.Run(async () =>
             {
-                this.pushButtonEffect.CreateEffect().Play();
+                var effect = this.AudioManager.CreateEffectInstance("push");
+                effect.Play();
 
-                await Task.Delay(this.pushButtonEffect.Duration);
+                await Task.Delay(effect.Duration);
 
                 if (sender == this.sceneDungeonWallButton)
                 {
@@ -346,9 +367,10 @@ namespace Collada
         {
             Task.Run(async () =>
             {
-                this.pushButtonEffect.CreateEffect().Play();
+                var effect = this.AudioManager.CreateEffectInstance("push");
+                effect.Play();
 
-                await Task.Delay(this.pushButtonEffect.Duration);
+                await Task.Delay(effect.Duration);
 
                 this.Game.Exit();
             });
@@ -364,19 +386,10 @@ namespace Collada
             musicIndex++;
             musicIndex %= musicList.Length;
 
-            if (music == null)
-            {
-                music = this.AudioManager.CreateAudio("music");
-                music.MasterVolume = 0.01f;
-            }
-
-            var musicEffect = this.AudioManager.CreateSound("music", $"Music{musicIndex}", "Resources/Common", musicList[musicIndex]);
-            currentMusic = musicEffect.CreateEffect();
-            currentMusic.IsLooped = true;
-
+            string musicName = $"Music{musicIndex}";
+            currentMusic = this.AudioManager.CreateEffectInstance(musicName);
             currentMusic.Emitter.SetSource(emitterPosition);
             currentMusic.Listener.SetSource(listenerPosition);
-
             currentMusic.AudioEnd += AudioManager_AudioEnd;
             currentMusic.LoopEnd += AudioManager_LoopEnd;
             currentMusic.Play();

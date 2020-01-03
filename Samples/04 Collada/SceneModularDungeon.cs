@@ -28,21 +28,6 @@ namespace Collada
         private readonly Color ambientUp = new Color(137, 116, 104, 255);
 
         private Player agent = null;
-        private readonly GameAudioSourceDescription agentListener = new GameAudioSourceDescription()
-        {
-            Radius = 30,
-            Cone = new GameAudioConeDescription()
-            {
-                InnerAngle = MathUtil.Pi * 5.0f / 6.0f,
-                OuterAngle = MathUtil.Pi * 11.0f / 6.0f,
-                InnerVolume = 1.0f,
-                OuterVolume = 0.75f,
-                InnerLpf = 0.0f,
-                OuterLpf = 0.25f,
-                InnerReverb = 0.708f,
-                OuterReverb = 1.0f
-            }
-        };
         private readonly Color agentTorchLight = new Color(255, 249, 224, 255);
 
         private SceneLightPoint torch = null;
@@ -81,16 +66,16 @@ namespace Collada
 
         private readonly Color connectionColor = new Color(Color.LightBlue.ToColor3(), 1f);
 
-        private GameAudioSound soundDoor = null;
-        private GameAudioSound soundLadder = null;
-        private GameAudioSound soundTorch = null;
+        private string soundDoor = null;
+        private string soundLadder = null;
+        private string soundTorch = null;
 
-        private GameAudioSound[] soundWinds = null;
+        private string[] soundWinds = null;
         private Vector3 windPosition = new Vector3(60, 0, -20);
         private bool windCreated = false;
 
-        private GameAudioSound ratSoundMove = null;
-        private GameAudioSound ratSoundTalk = null;
+        private string ratSoundMove = null;
+        private string ratSoundTalk = null;
         private GameAudioEffect ratSoundInstance = null;
 
         private AgentType CurrentAgent
@@ -377,20 +362,98 @@ namespace Collada
         }
         private void InitializeAudio()
         {
-            var effects = this.AudioManager.CreateAudio("effects");
-            effects.MasterVolume = 0.005f;
-            effects.UseMasteringLimiter = true;
-            effects.SetMasteringLimit(15, 1500);
+            this.AudioManager.MasterVolume = 1;
+            this.AudioManager.UseMasteringLimiter = true;
+            this.AudioManager.SetMasteringLimit(15, 1500);
 
-            this.soundDoor = this.AudioManager.CreateSound("effects", "door", "Resources/SceneModularDungeon/Audio/Effects", "door.wav");
-            this.soundLadder = this.AudioManager.CreateSound("effects", "ladder", "Resources/SceneModularDungeon/Audio/Effects", "ladder.wav");
-            this.soundTorch = this.AudioManager.CreateSound("effects", "torch", "Resources/SceneModularDungeon/Audio/Effects", "loop_torch.wav");
-            var soundWind1 = this.AudioManager.CreateSound("effects", "wind1", "Resources/SceneModularDungeon/Audio/Effects", "Wind1_S.wav");
-            var soundWind2 = this.AudioManager.CreateSound("effects", "wind2", "Resources/SceneModularDungeon/Audio/Effects", "Wind2_S.wav");
-            var soundWind3 = this.AudioManager.CreateSound("effects", "wind3", "Resources/SceneModularDungeon/Audio/Effects", "Wind3_S.wav");
+            //Sounds
+            soundDoor = "door";
+            soundLadder = "ladder";
+            this.AudioManager.LoadSound(soundDoor, "Resources/SceneModularDungeon/Audio/Effects", "door.wav");
+            this.AudioManager.LoadSound(soundLadder, "Resources/SceneModularDungeon/Audio/Effects", "ladder.wav");
+
+            string soundWind1 = "wind1";
+            string soundWind2 = "wind2";
+            string soundWind3 = "wind3";
+            this.AudioManager.LoadSound(soundWind1, "Resources/SceneModularDungeon/Audio/Effects", "Wind1_S.wav");
+            this.AudioManager.LoadSound(soundWind2, "Resources/SceneModularDungeon/Audio/Effects", "Wind2_S.wav");
+            this.AudioManager.LoadSound(soundWind3, "Resources/SceneModularDungeon/Audio/Effects", "Wind3_S.wav");
             this.soundWinds = new[] { soundWind1, soundWind2, soundWind3 };
-            this.ratSoundMove = this.AudioManager.CreateSound("effects", "mouseMove", "Resources/SceneModularDungeon/Audio/Effects", "mouse1.wav");
-            this.ratSoundTalk = this.AudioManager.CreateSound("effects", "mouseTalk", "Resources/SceneModularDungeon/Audio/Effects", "mouse2.wav");
+
+            ratSoundMove = "mouseMove";
+            ratSoundTalk = "mouseTalk";
+            this.AudioManager.LoadSound(ratSoundMove, "Resources/SceneModularDungeon/Audio/Effects", "mouse1.wav");
+            this.AudioManager.LoadSound(ratSoundTalk, "Resources/SceneModularDungeon/Audio/Effects", "mouse2.wav");
+
+            soundTorch = "torch";
+            this.AudioManager.LoadSound(soundTorch, "Resources/SceneModularDungeon/Audio/Effects", "loop_torch.wav");
+
+            //Effects
+            this.AudioManager.AddEffectParams(
+                soundDoor,
+                new GameAudioEffectParameters
+                {
+                    SoundName = soundDoor,
+                    DestroyWhenFinished = true,
+                    Volume = 1f,
+                    UseAudio3D = true,
+                    EmitterRadius = 3,
+                    ListenerCone = GameAudioSourceDescription.DefaultListenerCone,
+                });
+
+            this.AudioManager.AddEffectParams(
+                soundLadder,
+                new GameAudioEffectParameters
+                {
+                    SoundName = soundLadder,
+                    DestroyWhenFinished = true,
+                    Volume = 1f,
+                    UseAudio3D = true,
+                    EmitterRadius = 3,
+                    ListenerCone = GameAudioSourceDescription.DefaultListenerCone,
+                });
+
+            for (int i = 0; i < soundWinds.Length; i++)
+            {
+                this.AudioManager.AddEffectParams(
+                    soundWinds[i],
+                    new GameAudioEffectParameters
+                    {
+                        DestroyWhenFinished = true,
+                        IsLooped = false,
+                        SoundName = soundWinds[i],
+                        Volume = 1f,
+                        UseAudio3D = true,
+                        EmitterRadius = 15,
+                        ListenerCone = GameAudioSourceDescription.DefaultListenerCone,
+                    });
+            }
+
+            this.AudioManager.AddEffectParams(
+                ratSoundMove,
+                new GameAudioEffectParameters
+                {
+                    SoundName = ratSoundMove,
+                    DestroyWhenFinished = false,
+                    Volume = 1f,
+                    IsLooped = true,
+                    UseAudio3D = true,
+                    EmitterRadius = 3,
+                    ListenerCone = GameAudioSourceDescription.DefaultListenerCone,
+                });
+
+            this.AudioManager.AddEffectParams(
+                ratSoundTalk,
+                new GameAudioEffectParameters
+                {
+                    SoundName = ratSoundTalk,
+                    DestroyWhenFinished = true,
+                    Volume = 1f,
+                    IsLooped = false,
+                    UseAudio3D = true,
+                    EmitterRadius = 3,
+                    ListenerCone = GameAudioSourceDescription.DefaultListenerCone,
+                });
         }
 
         public override void Initialized()
@@ -421,15 +484,15 @@ namespace Collada
             this.StartBigFires();
 
             //Rat sound
-            this.ratSoundInstance = ratSoundMove.CreateEffect(new GameAudioSourceDescription() { Radius = 15 }, agentListener, false);
-            this.ratSoundInstance.Volume = 1f;
-            this.ratSoundInstance.IsLooped = true;
+            this.ratSoundInstance = this.AudioManager.CreateEffectInstance(ratSoundMove);
             this.ratSoundInstance.Emitter.SetSource(this.rat);
             this.ratSoundInstance.Listener.SetSource(this.Camera);
 
             this.StartObstacles();
 
             this.StartCamera();
+
+            this.AudioManager.Start();
         }
         private void StartJails()
         {
@@ -482,11 +545,25 @@ namespace Collada
                 .GetObjectsByName("Dn_Torch")
                 .Select(o => o.Item);
 
+            int index = 0;
             foreach (var item in torchs)
             {
-                var efTorch = this.soundTorch.CreateEffect(new GameAudioSourceDescription() { Radius = 1 }, agentListener);
-                efTorch.Volume = 1f;
-                efTorch.IsLooped = true;
+                string effectName = $"torch{index++}";
+
+                this.AudioManager.AddEffectParams(
+                    effectName,
+                    new GameAudioEffectParameters
+                    {
+                        SoundName = soundTorch,
+                        DestroyWhenFinished = false,
+                        Volume = 0.05f,
+                        IsLooped = true,
+                        UseAudio3D = true,
+                        EmitterRadius = 2,
+                        ListenerCone = GameAudioSourceDescription.DefaultListenerCone,
+                    });
+
+                var efTorch = this.AudioManager.CreateEffectInstance(effectName);
                 efTorch.Emitter.SetSource(item);
                 efTorch.Listener.SetSource(this.Camera);
                 efTorch.Play();
@@ -498,11 +575,25 @@ namespace Collada
             fires.AddRange(this.scenery.GetObjectsByName("Dn_Temple_Fire_1").Select(o => o.Item));
             fires.AddRange(this.scenery.GetObjectsByName("Dn_Big_Lamp_1").Select(o => o.Item));
 
+            int index = 0;
             foreach (var item in fires)
             {
-                var efFire = this.soundTorch.CreateEffect(new GameAudioSourceDescription() { Radius = 25 }, agentListener);
-                efFire.Volume = 1f;
-                efFire.IsLooped = true;
+                string effectName = $"bigFire{index++}";
+
+                this.AudioManager.AddEffectParams(
+                    effectName,
+                    new GameAudioEffectParameters
+                    {
+                        SoundName = soundTorch,
+                        DestroyWhenFinished = false,
+                        Volume = 1,
+                        IsLooped = true,
+                        UseAudio3D = true,
+                        EmitterRadius = 5,
+                        ListenerCone = GameAudioSourceDescription.DefaultListenerCone,
+                    });
+
+                var efFire = this.AudioManager.CreateEffectInstance(effectName);
                 efFire.Emitter.SetSource(item);
                 efFire.Listener.SetSource(this.Camera);
                 efFire.Play();
@@ -621,7 +712,7 @@ namespace Collada
             {
                 Task.Run(() => { this.UpdateRatController(gameTime); }),
                 Task.Run(() => { this.UpdateEntities(); }),
-                //Task.Run(() => { this.UpdateWind(); })
+                Task.Run(() => { this.UpdateWind(); })
             };
 
             Task.WaitAll(asyncTasks);
@@ -885,8 +976,8 @@ namespace Collada
         }
         private void RatTalkPlay()
         {
-            var instance = this.ratSoundTalk.CreateEffect(new GameAudioSourceDescription() { Radius = 3 }, agentListener);
-            instance.Emitter.SetSource(this.rat.Instance.Manipulator);
+            var instance = this.AudioManager.CreateEffectInstance(ratSoundTalk);
+            instance.Emitter.SetSource(this.rat);
             instance.Listener.SetSource(this.Camera);
             instance.Play();
         }
@@ -1053,9 +1144,10 @@ namespace Collada
             {
                 Task.Run(async () =>
                 {
-                    this.soundDoor.CreateEffect().Play();
+                    var effect = this.AudioManager.CreateEffectInstance(soundDoor);
+                    effect.Play();
 
-                    await Task.Delay(this.soundDoor.Duration);
+                    await Task.Delay(effect.Duration);
 
                     string nextLevel = item.Object.NextLevel;
                     if (!string.IsNullOrEmpty(nextLevel))
@@ -1080,7 +1172,7 @@ namespace Collada
                 int keyIndex = ReadKeyIndex();
                 if (keyIndex > 0 && keyIndex <= triggers.Length)
                 {
-                    this.soundLadder.CreateEffect().Play();
+                    this.AudioManager.CreateEffectInstance(soundLadder).Play();
                     this.scenery.ExecuteTrigger(item, triggers[keyIndex - 1]);
                 }
             }
@@ -1316,19 +1408,28 @@ namespace Collada
 
         private void CreateWind(int index)
         {
+            if (AudioManager == null)
+            {
+                return;
+            }
+
+            int duration = 100;
+
             Manipulator3D man = new Manipulator3D();
             man.SetPosition(windPosition, true);
 
             var soundEffect = this.soundWinds[index];
 
-            float durationVariation = Helper.RandomGenerator.NextFloat(0.5f, 1.0f);
-            int duration = (int)(soundEffect.Duration.TotalMilliseconds * durationVariation);
+            var windInstance = AudioManager.CreateEffectInstance(soundEffect);
+            if (windInstance != null)
+            {
+                windInstance.Emitter.SetSource(man);
+                windInstance.Listener.SetSource(this.Camera);
+                windInstance.Play();
 
-            var windInstance = soundEffect.CreateEffect(new GameAudioSourceDescription() { Radius = 15 }, agentListener);
-            windInstance.Emitter.SetSource(man);
-            windInstance.Listener.SetSource(this.Camera);
-            windInstance.Volume = 1;
-            windInstance.Play();
+                float durationVariation = Helper.RandomGenerator.NextFloat(0.5f, 1.0f);
+                duration = (int)(windInstance.Duration.TotalMilliseconds * durationVariation);
+            }
 
             index = Helper.RandomGenerator.Next(0, soundWinds.Length + 1);
             index %= soundWinds.Length;

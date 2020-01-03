@@ -1,8 +1,6 @@
 ﻿using SharpDX.Multimedia;
 using SharpDX.XAudio2;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.Audio
 {
@@ -11,11 +9,6 @@ namespace Engine.Audio
     /// </summary>
     public class GameAudioSound : IDisposable
     {
-        /// <summary>
-        /// To delete effects list
-        /// </summary>
-        private readonly List<GameAudioEffect> toDelete = new List<GameAudioEffect>();
-
         /// <summary>
         /// Game audio
         /// </summary>
@@ -78,68 +71,12 @@ namespace Engine.Audio
         {
             if (disposing)
             {
-                toDelete.ForEach(i => i.Dispose());
-                toDelete.Clear();
-
                 AudioBuffer?.Stream.Dispose();
                 AudioBuffer = null;
 
                 AudioBuffer = null;
                 LoopedAudioBuffer = null;
             }
-        }
-
-        /// <summary>
-        /// Updates internal state
-        /// </summary>
-        internal void Update()
-        {
-            var toDispose = toDelete.FindAll(i => i.DueToDispose);
-            if (toDispose.Any())
-            {
-                toDelete.RemoveAll(i => i.DueToDispose);
-                toDispose.ForEach(i => i.Dispose());
-                toDispose.Clear();
-            }
-
-            toDelete.ForEach(i =>
-            {
-                if (i.State == AudioState.Playing)
-                {
-                    i.Update();
-                }
-            });
-        }
-
-        /// <summary>
-        /// Creates a new effect instance
-        /// </summary>
-        /// <param name="destroyWhenFinished">Sets whether the new instance must be disposed after it's play</param>
-        /// <returns>Returns the new created instance</returns>
-        public GameAudioEffect CreateEffect(bool destroyWhenFinished = true)
-        {
-            return CreateEffect(
-                new GameAudioSourceDescription() { Radius = float.MaxValue },
-                new GameAudioSourceDescription() { Radius = float.MaxValue },
-                destroyWhenFinished);
-        }
-        /// <summary>
-        /// Creates a new effect instance
-        /// </summary>
-        /// <param name="emitterDescription">Emitter description</param>
-        /// <param name="listenerDescription">Listener description</param>
-        /// <param name="destroyWhenFinished">Sets whether the new instance must be disposed after it's play</param>
-        /// <returns>Returns the new created instance</returns>
-        public GameAudioEffect CreateEffect(
-            GameAudioSourceDescription emitterDescription,
-            GameAudioSourceDescription listenerDescription,
-            bool destroyWhenFinished = true)
-        {
-            var instance = new GameAudioEffect(this, emitterDescription, listenerDescription, destroyWhenFinished);
-
-            toDelete.Add(instance);
-
-            return instance;
         }
 
         /// <summary>

@@ -303,24 +303,34 @@ namespace Skybox
         }
         private void InitializeSound()
         {
-            var fireSound = this.AudioManager.CreateSound("Sound Effects", "Fire", "Resources/Audio/Effects", "target_balls_single_loop.wav");
-            fireAudioEffect = fireSound.CreateEffect(new GameAudioSourceDescription { Radius = 6 }, new GameAudioSourceDescription { });
-            fireAudioEffect.IsLooped = true;
-            fireAudioEffect.UseAudio3D = true;
-            fireAudioEffect.UseReverb = true;
-            fireAudioEffect.ReverbPreset = ReverbPresets.Default;
-            fireAudioEffect.Volume = 0.25f;
-            fireAudioEffect.Emitter.SetSource(this.movingFire);
-            fireAudioEffect.Listener.SetSource(this.Camera);
-            fireAudioEffect.Play();
+            this.AudioManager.LoadSound("target_balls_single_loop", "Resources/Audio/Effects", "target_balls_single_loop.wav");
+
+            this.AudioManager.AddEffectParams(
+                "Sphere",
+                new GameAudioEffectParameters
+                {
+                    SoundName = "target_balls_single_loop",
+                    IsLooped = true,
+                    UseAudio3D = true,
+                    UseReverb = true,
+                    ReverbPreset = ReverbPresets.Default,
+                    Volume = 0.25f,
+                    EmitterRadius = 6,
+                    ListenerCone = GameAudioSourceDescription.DefaultListenerCone,
+                });
         }
 
         public override void Initialized()
         {
             base.Initialized();
 
-            this.AudioManager["Sound Effects"].MasterVolume = 1f;
-            this.AudioManager["Sound Effects"].Start();
+            fireAudioEffect = this.AudioManager.CreateEffectInstance("Sphere");
+            fireAudioEffect.Emitter.SetSource(this.movingFire);
+            fireAudioEffect.Listener.SetSource(this.Camera);
+            fireAudioEffect.Play();
+
+            this.AudioManager.MasterVolume = 1f;
+            this.AudioManager.Start();
         }
 
         public override void Update(GameTime gameTime)

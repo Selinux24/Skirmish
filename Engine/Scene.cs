@@ -380,7 +380,7 @@ namespace Engine
 
             this.TimeOfDay?.Update(gameTime);
 
-            this.AudioManager?.Update();
+            this.AudioManager?.Update(gameTime);
 
             this.NavigationGraph?.Update(gameTime);
 
@@ -1416,12 +1416,24 @@ namespace Engine
         /// <returns>Return path if exists</returns>
         public virtual PathFindingPath FindPath(AgentType agent, Vector3 from, Vector3 to, bool useGround = false, float delta = 0f)
         {
-            List<Vector3> positions = null;
-            List<Vector3> normals = null;
+            if (useGround)
+            {
+                if (FindNearestGroundPosition(from, out PickingResult<Triangle> rFrom))
+                {
+                    from = rFrom.Position;
+                }
+                if (FindNearestGroundPosition(to, out PickingResult<Triangle> rTo))
+                {
+                    to = rTo.Position;
+                }
+            }
 
             var path = this.NavigationGraph.FindPath(agent, from, to);
-            if (path?.Length > 1)
+            if (path.Length > 1)
             {
+                List<Vector3> positions;
+                List<Vector3> normals;
+
                 if (delta == 0)
                 {
                     positions = new List<Vector3>(path);
@@ -1436,9 +1448,11 @@ namespace Engine
                 {
                     ComputeGroundPositions(positions, normals);
                 }
+
+                return new PathFindingPath(positions, normals);
             }
 
-            return new PathFindingPath(positions, normals);
+            return null;
         }
         /// <summary>
         /// Compute path finding result

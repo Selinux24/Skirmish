@@ -1,8 +1,6 @@
 ﻿using SharpDX;
-using SharpDX.Multimedia;
 using SharpDX.X3DAudio;
 using SharpDX.XAudio2;
-using SharpDX.XAudio2.Fx;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -18,8 +16,7 @@ namespace Engine.Audio
         private Emitter emitter;
         private Listener listener;
         private float[] reverbLevels;
-        private bool isReverbSubmixEnabled;
-        private float[] outputMatrix;
+        private float[] panOutputMatrix;
 
         private float pan;
         private bool paused;
@@ -220,6 +217,16 @@ namespace Engine.Audio
                 this.submixVoice.SetEffectParameters(0, reverbParam);
             }
         }
+        /// <summary>
+        /// Gets the effect total duration
+        /// </summary>
+        public TimeSpan Duration
+        {
+            get
+            {
+                return Sound.Duration;
+            }
+        }
 
         /// <summary>
         /// Event fired when the audio starts
@@ -238,41 +245,40 @@ namespace Engine.Audio
         /// Constructor
         /// </summary>
         /// <param name="sound">Sound effect</param>
-        /// <param name="emitterDescription">Emitter description</param>
-        /// <param name="listenerDescription">Listener description</param>
-        /// <param name="destroyWhenFinished">Sets whether the instance must be disposed after it's finished</param>
-        internal GameAudioEffect(
-            GameAudioSound sound,
-            GameAudioSourceDescription emitterDescription,
-            GameAudioSourceDescription listenerDescription,
-            bool destroyWhenFinished)
+        /// <param name="effectParameters">Effect parameters</param>
+        public GameAudioEffect(GameAudioSound sound, GameAudioEffectParameters effectParameters)
         {
             Sound = sound;
-            paused = false;
-            IsLooped = false;
-            pan = 0.0f;
-            pitch = 0.0f;
-            outputMatrix = null;
-
-            Emitter = new GameAudioEmitter(emitterDescription);
-            Listener = new GameAudioListener(listenerDescription);
-
             sourceVoice = this.Sound.GameAudio.CreateSourceVoice(this.Sound.WaveFormat);
 
-            // Play the wave using a source voice that sends to both the submix and mastering voices
-            var sendDescriptors = new[]
-            {
-                // LPF direct-path
-                new VoiceSendDescriptor { Flags = VoiceSendFlags.UseFilter, OutputVoice = sound.GameAudio.MasteringVoice },
-            };
+            destroyWhenFinished = effectParameters.DestroyWhenFinished;
+            paused = false;
+            panOutputMatrix = null;
 
-            sourceVoice.SetOutputVoices(sendDescriptors);
+            IsLooped = effectParameters.IsLooped;
+            pan = effectParameters.Pan;
+            pitch = effectParameters.Pitch;
+            Volume = effectParameters.Volume;
+
+            UseAudio3D = effectParameters.UseAudio3D;
+            Emitter = new GameAudioEmitter(Vector3.Zero, effectParameters.EmitterRadius, effectParameters.EmitterCone);
+            Listener = new GameAudioListener(Vector3.Zero, effectParameters.ListenerRadius, effectParameters.ListenerCone);
+
+            useReverb = effectParameters.UseReverb;
+            if (useReverb)
+            {
+                EnableReverb();
+                UseReverbFilter = effectParameters.UseReverbFilter;
+                ReverbPreset = effectParameters.ReverbPreset;
+            }
+            else
+            {
+                DisableReverb();
+            }
 
             sourceVoice.BufferStart += SourceVoice_BufferStart;
             sourceVoice.BufferEnd += SourceVoice_BufferEnd;
             sourceVoice.LoopEnd += SourceVoice_LoopEnd;
-
-            this.destroyWhenFinished = destroyWhenFinished;
         }
         /// <summary>
         /// Destructor
@@ -307,11 +313,7 @@ namespace Engine.Audio
 
                 sourceVoice?.Stop(0);
                 sourceVoice?.FlushSourceBuffers();
-                if (isReverbSubmixEnabled)
-                {
-                    sourceVoice?.SetOutputVoices(null);
-                    isReverbSubmixEnabled = false;
-                }
+                sourceVoice?.SetOutputVoices(null);
                 sourceVoice?.DestroyVoice();
                 sourceVoice?.Dispose();
                 sourceVoice = null;
@@ -323,26 +325,11 @@ namespace Engine.Audio
         }
 
         /// <summary>
-        /// Updates internal state
-        /// </summary>
-        internal void Update()
-        {
-            if (this.UseAudio3D)
-            {
-                Apply3D();
-            }
-            else
-            {
-                SetPanOutputMatrix();
-            }
-        }
-
-        /// <summary>
         /// Applies the 3D effect to the current sound effect instance.
         /// </summary>
         /// <param name="listenerAgent">Listener</param>
         /// <param name="emitterAgent">Emitter</param>
-        private void Apply3D()
+        internal void Apply3D()
         {
             UpdateListener(Listener);
             UpdateEmitter(Emitter);
@@ -502,7 +489,7 @@ namespace Engine.Audio
                 CalculateFlags.Doppler |
                 CalculateFlags.LpfDirect;
 
-            if ((this.Sound.GameAudio.Speakers & Speakers.LowFrequency) > 0)
+            if (this.Sound.GameAudio.UseRedirectToLFE)
             {
                 // On devices with an LFE channel, allow the mono source data to be routed to the LFE destination channel.
                 flags |= CalculateFlags.RedirectToLfe;
@@ -527,7 +514,7 @@ namespace Engine.Audio
             }
             else
             {
-                return this.Sound.GameAudio.MasteringVoice;
+                return this.MasteringVoice;
             }
         }
 
@@ -557,9 +544,18 @@ namespace Engine.Audio
 
             sourceVoice.SubmitSourceBuffer(CurrentAudioBuffer, Sound.DecodedPacketsInfo);
 
-            sourceVoice.Start();
+            if (this.UseAudio3D)
+            {
+                //Updates emitter and listener parameters
+                this.Apply3D();
+            }
+            else
+            {
+                //Updates pan configuration
+                this.SetPanOutputMatrix();
+            }
 
-            this.Update();
+            sourceVoice.Start();
 
             paused = false;
         }
@@ -649,7 +645,7 @@ namespace Engine.Audio
             var sendDescriptors = new[]
             {
                 // LPF direct-path
-                new VoiceSendDescriptor { Flags = VoiceSendFlags.UseFilter, OutputVoice = this.Sound.GameAudio.MasteringVoice },
+                new VoiceSendDescriptor { Flags = VoiceSendFlags.UseFilter, OutputVoice = this.MasteringVoice },
                 // LPF reverb-path -- omit for better performance at the cost of less realistic occlusion
                 new VoiceSendDescriptor { Flags = VoiceSendFlags.UseFilter, OutputVoice = submixVoice },
             };
@@ -667,7 +663,7 @@ namespace Engine.Audio
             var sendDescriptors = new[]
             {
                 // LPF direct-path
-                new VoiceSendDescriptor { Flags = VoiceSendFlags.UseFilter, OutputVoice = this.Sound.GameAudio.MasteringVoice },
+                new VoiceSendDescriptor { Flags = VoiceSendFlags.UseFilter, OutputVoice = this.MasteringVoice },
             };
 
             sourceVoice.SetOutputVoices(sendDescriptors);
@@ -689,15 +685,15 @@ namespace Engine.Audio
 
             var outputMatrixSize = destinationChannels * sourceChannels;
 
-            if (outputMatrix == null || outputMatrix.Length != outputMatrixSize)
+            if (panOutputMatrix == null || panOutputMatrix.Length != outputMatrixSize)
             {
-                outputMatrix = new float[outputMatrixSize];
+                panOutputMatrix = new float[outputMatrixSize];
             }
 
             // Default to full volume for all channels/destinations
-            for (var i = 0; i < outputMatrix.Length; i++)
+            for (var i = 0; i < panOutputMatrix.Length; i++)
             {
-                outputMatrix[i] = 1.0f;
+                panOutputMatrix[i] = 1.0f;
             }
         }
         /// <summary>
@@ -716,30 +712,30 @@ namespace Engine.Audio
                 switch ((AudioSpeakers)this.Sound.GameAudio.Speakers)
                 {
                     case AudioSpeakers.Mono:
-                        outputMatrix[(sourceChannels * 0) + s] = 1;
+                        panOutputMatrix[(sourceChannels * 0) + s] = 1;
                         break;
 
                     case AudioSpeakers.Stereo:
                     case AudioSpeakers.Surround:
-                        outputMatrix[(sourceChannels * 0) + s] = panLeft;
-                        outputMatrix[(sourceChannels * 1) + s] = panRight;
+                        panOutputMatrix[(sourceChannels * 0) + s] = panLeft;
+                        panOutputMatrix[(sourceChannels * 1) + s] = panRight;
                         break;
 
                     case AudioSpeakers.Quad:
-                        outputMatrix[(sourceChannels * 0) + s] = outputMatrix[(sourceChannels * 2) + s] = panLeft;
-                        outputMatrix[(sourceChannels * 1) + s] = outputMatrix[(sourceChannels * 3) + s] = panRight;
+                        panOutputMatrix[(sourceChannels * 0) + s] = panOutputMatrix[(sourceChannels * 2) + s] = panLeft;
+                        panOutputMatrix[(sourceChannels * 1) + s] = panOutputMatrix[(sourceChannels * 3) + s] = panRight;
                         break;
 
                     case AudioSpeakers.FivePointOne:
                     case AudioSpeakers.FivePointOneSurround:
                     case AudioSpeakers.SevenPointOne:
-                        outputMatrix[(sourceChannels * 0) + s] = outputMatrix[(sourceChannels * 4) + s] = panLeft;
-                        outputMatrix[(sourceChannels * 1) + s] = outputMatrix[(sourceChannels * 5) + s] = panRight;
+                        panOutputMatrix[(sourceChannels * 0) + s] = panOutputMatrix[(sourceChannels * 4) + s] = panLeft;
+                        panOutputMatrix[(sourceChannels * 1) + s] = panOutputMatrix[(sourceChannels * 5) + s] = panRight;
                         break;
 
                     case AudioSpeakers.SevenPointOneSurround:
-                        outputMatrix[(sourceChannels * 0) + s] = outputMatrix[(sourceChannels * 4) + s] = outputMatrix[(sourceChannels * 6) + s] = panLeft;
-                        outputMatrix[(sourceChannels * 1) + s] = outputMatrix[(sourceChannels * 5) + s] = outputMatrix[(sourceChannels * 7) + s] = panRight;
+                        panOutputMatrix[(sourceChannels * 0) + s] = panOutputMatrix[(sourceChannels * 4) + s] = panOutputMatrix[(sourceChannels * 6) + s] = panLeft;
+                        panOutputMatrix[(sourceChannels * 1) + s] = panOutputMatrix[(sourceChannels * 5) + s] = panOutputMatrix[(sourceChannels * 7) + s] = panRight;
                         break;
 
                     default:
@@ -750,7 +746,7 @@ namespace Engine.Audio
 
             var voiceDst = this.GetDestinationVoice();
 
-            sourceVoice.SetOutputMatrix(voiceDst, sourceChannels, destinationChannels, outputMatrix);
+            sourceVoice.SetOutputMatrix(voiceDst, sourceChannels, destinationChannels, panOutputMatrix);
         }
 
         /// <summary>
@@ -818,10 +814,68 @@ namespace Engine.Audio
             }
             else
             {
-                rc = new ReadOnlyCollection<float>(outputMatrix);
+                rc = new ReadOnlyCollection<float>(panOutputMatrix);
             }
 
             return rc.ToArray();
         }
+    }
+
+    /// <summary>
+    /// Game audio effect parameters
+    /// </summary>
+    public class GameAudioEffectParameters
+    {
+        /// <summary>
+        /// Sound name
+        /// </summary>
+        public string SoundName { get; set; }
+        /// <summary>
+        /// Gets a value indicating whether this instance is looped.
+        /// </summary>
+        public bool IsLooped { get; set; }
+        /// <summary>
+        /// Gets or sets the pan value of the sound effect.
+        /// </summary>
+        /// <remarks>The value is clamped to (-1f, 1f) range.</remarks>
+        /// <exception cref="ObjectDisposedException">Is thrown if the current instance was already disposed.</exception>
+        public float Pan { get; set; }
+        /// <summary>
+        /// Gets or sets the pitch value of the sound effect.
+        /// </summary>
+        /// <remarks>The value is clamped to (-1f, 1f) range.</remarks>
+        /// <exception cref="ObjectDisposedException">Is thrown if the current instance was already disposed.</exception>
+        public float Pitch { get; set; }
+        /// <summary>
+        /// Gets or sets the volume of the current sound effect instance.
+        /// </summary>
+        /// <remarks>The value is clamped to (0f, 1f) range.</remarks>
+        /// <exception cref="ObjectDisposedException">Is thrown if the current instance was already disposed.</exception>
+        public float Volume { get; set; } = 1;
+        /// <summary>
+        /// Gets or sets whether the master voice uses 3D audio or not
+        /// </summary>
+        public bool UseAudio3D { get; set; } = false;
+        /// <summary>
+        /// Gets or sets whether the sub-mix voice uses a reverb effect or not
+        /// </summary>
+        public bool UseReverb { get; set; } = false;
+        /// <summary>
+        /// Gets or sets whether the reverb effect use filters or not
+        /// </summary>
+        public bool UseReverbFilter { get; set; } = false;
+        /// <summary>
+        /// Gets or sets the current reverb preset configuration
+        /// </summary>
+        public ReverbPresets? ReverbPreset { get; set; } = ReverbPresets.Default;
+        /// <summary>
+        /// Destroy when finished
+        /// </summary>
+        public bool DestroyWhenFinished { get; set; } = true;
+
+        public float EmitterRadius { get; set; } = float.MaxValue;
+        public GameAudioConeDescription? EmitterCone { get; set; } = null;
+        public float ListenerRadius { get; set; } = float.MaxValue;
+        public GameAudioConeDescription? ListenerCone { get; set; } = null;
     }
 }

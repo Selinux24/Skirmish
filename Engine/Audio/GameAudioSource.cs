@@ -64,11 +64,12 @@ namespace Engine.Audio
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="sourceDescription">Source description</param>
-        protected GameAudioSource(GameAudioSourceDescription sourceDescription)
+        /// <param name="radius">Source maximum radius</param>
+        /// <param name="cone">Source sound cone description</param>
+        protected GameAudioSource(float radius = float.MaxValue, GameAudioConeDescription? cone = null)
         {
-            Radius = sourceDescription.Radius;
-            Cone = sourceDescription.Cone;
+            Radius = radius;
+            Cone = cone;
         }
 
         /// <summary>
@@ -80,6 +81,14 @@ namespace Engine.Audio
             this.source = source;
         }
         /// <summary>
+        /// Sets the game audio emitter's source
+        /// </summary>
+        /// <param name="manipulator">Transformable instance</param>
+        public void SetSource(ITransformable3D source)
+        {
+            this.source = source?.Manipulator;
+        }
+        /// <summary>
         /// Sets the game audio source
         /// </summary>
         /// <param name="source">Scene object instance</param>
@@ -88,5 +97,4 @@ namespace Engine.Audio
             this.source = source?.Transform;
         }
     }
-
 }

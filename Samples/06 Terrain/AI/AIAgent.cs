@@ -525,18 +525,21 @@ namespace Terrain.AI
                     {
                         await Task.Delay(100);
 
-                        var r = this.Parent.Scene.FindPath(this.AgentType, this.Manipulator.Position, point, true, refineDelta);
-                        if (r != null)
+                        var path = this.Parent.Scene.FindPath(this.AgentType, this.Manipulator.Position, point, true, refineDelta);
+                        if (path != null)
                         {
-                            this.FollowPath(r, speed);
-                        }
+                            this.FollowPath(path, speed);
 
-                        this.lookingForRoute = false;
-                        this.lookingForRouteTicks = 0;
+                            this.lookingForRoute = false;
+                            this.lookingForRouteTicks = 0;
+                        }
                     });
                 }
 
-                this.lookingForRouteTicks++;
+                if (this.lookingForRoute)
+                {
+                    this.lookingForRouteTicks++;
+                }
             }
         }
         /// <summary>

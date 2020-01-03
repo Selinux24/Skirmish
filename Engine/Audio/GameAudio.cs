@@ -27,6 +27,10 @@ namespace Engine.Audio
         public static float DopplerScale { get; set; } = 1f;
 
         /// <summary>
+        /// Device
+        /// </summary>
+        private readonly XAudio2 device;
+        /// <summary>
         /// 3D audio instance
         /// </summary>
         private X3DAudio x3DInstance = null;
@@ -43,10 +47,6 @@ namespace Engine.Audio
         /// </summary>
         private readonly Dictionary<string, GameAudioSound> sounds = new Dictionary<string, GameAudioSound>();
 
-        /// <summary>
-        /// Device
-        /// </summary>
-        internal XAudio2 Device { get; private set; }
         /// <summary>
         /// Mastering voice
         /// </summary>
@@ -70,7 +70,7 @@ namespace Engine.Audio
         {
             get
             {
-                return (Speakers & Speakers.LowFrequency) != 0;
+                return this.Speakers.HasFlag(Speakers.LowFrequency);
             }
         }
 
@@ -170,20 +170,20 @@ namespace Engine.Audio
             audio2Flags = XAudio2Flags.DebugEngine;
 #endif
 
-            this.Device = new XAudio2(audio2Flags, ProcessorSpecifier.DefaultProcessor, version);
-            this.Device.StopEngine();
+            this.device = new XAudio2(audio2Flags, ProcessorSpecifier.DefaultProcessor, version);
+            this.device.StopEngine();
 #if DEBUG
             DebugConfiguration debugConfiguration = new DebugConfiguration()
             {
                 TraceMask = (int)(LogType.Errors | LogType.Warnings),
                 BreakMask = (int)(LogType.Errors),
             };
-            this.Device.SetDebugConfiguration(debugConfiguration, IntPtr.Zero);
+            this.device.SetDebugConfiguration(debugConfiguration, IntPtr.Zero);
 #endif
 
-            this.MasteringVoice = new MasteringVoice(this.Device, 2, sampleRate);
+            this.MasteringVoice = new MasteringVoice(this.device, 2, sampleRate);
 
-            if (this.Device.Version == XAudio2Version.Version27)
+            if (this.device.Version == XAudio2Version.Version27)
             {
                 var details = this.MasteringVoice.VoiceDetails;
                 this.InputSampleRate = details.InputSampleRate;
@@ -243,8 +243,8 @@ namespace Engine.Audio
                 this.masteringLimiter?.Dispose();
                 this.masteringLimiter = null;
 
-                this.Device?.StopEngine();
-                this.Device?.Dispose();
+                this.device?.StopEngine();
+                this.device?.Dispose();
             }
         }
 
@@ -253,24 +253,14 @@ namespace Engine.Audio
         /// </summary>
         public void Start()
         {
-            Device.StartEngine();
+            device.StartEngine();
         }
         /// <summary>
         /// Stops the audio device
         /// </summary>
         public void Stop()
         {
-            Device.StopEngine();
-        }
-
-        /// <summary>
-        /// Updates the internal state
-        /// </summary>
-        internal void Update()
-        {
-            sounds?
-                .ToList()
-                .ForEach(e => e.Value?.Update());
+            device.StopEngine();
         }
 
         /// <summary>
@@ -280,7 +270,7 @@ namespace Engine.Audio
         /// <returns>Returns the souce voice</returns>
         internal SourceVoice CreateSourceVoice(WaveFormat waveFormat)
         {
-            return new SourceVoice(Device, waveFormat);
+            return new SourceVoice(device, waveFormat);
         }
         /// <summary>
         /// Creates a reverb effect
@@ -289,7 +279,7 @@ namespace Engine.Audio
         /// <returns>Returns the reverb effect</returns>
         internal Reverb CreateReverb(bool isUsingDebuging = false)
         {
-            return new Reverb(Device, isUsingDebuging);
+            return new Reverb(device, isUsingDebuging);
         }
         /// <summary>
         /// Creates a submix voice
@@ -302,7 +292,7 @@ namespace Engine.Audio
         internal SubmixVoice CreatesSubmixVoice(int inputChannelCount, int inputSampleRate, SubmixVoiceFlags sendFlags, int processingStage)
         {
             return new SubmixVoice(
-                Device,
+                device,
                 inputChannelCount,
                 inputSampleRate,
                 sendFlags,
@@ -363,7 +353,7 @@ namespace Engine.Audio
         {
             if (this.masteringLimiter == null)
             {
-                this.masteringLimiter = new MasteringLimiter(this.Device);
+                this.masteringLimiter = new MasteringLimiter(this.device);
                 this.MasteringVoice.SetEffectChain(new EffectDescriptor(this.masteringLimiter));
             }
 
