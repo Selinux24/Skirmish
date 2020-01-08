@@ -43,11 +43,16 @@ namespace Engine.PathFinding.RecastNavigation
             foreach (var agent in graph.Settings.Agents)
             {
                 var nm = NavMesh.Build(this, graph.Settings, agent);
-                var mmQuery = new NavMeshQuery();
-                mmQuery.Init(nm, graph.Settings.MaxNodes);
 
-                graph.MeshQueryDictionary.Add(agent, mmQuery);
+                graph.AgentQueries.Add(new GraphAgentQuery
+                {
+                    Agent = agent,
+                    NavMesh = nm,
+                    MaxNodes = graph.Settings.MaxNodes,
+                });
             }
+
+            graph.Initialized = true;
 
             return graph;
         }

@@ -620,7 +620,7 @@ namespace Engine
             float dot = Vector2.Dot(one, two);
 
             // Divide the dot by the product of the magnitudes of the vectors
-            dot = dot / (one.Length() * two.Length());
+            dot /= (one.Length() * two.Length());
 
             //Get the arc cosin of the angle, you now have your angle in radians 
             return (float)Math.Acos(dot);
@@ -649,7 +649,7 @@ namespace Engine
             float dot = Vector3.Dot(one, two);
 
             // Divide the dot by the product of the magnitudes of the vectors
-            dot = dot / (one.Length() * two.Length());
+            dot /= (one.Length() * two.Length());
 
             //Get the arc cosin of the angle, you now have your angle in radians 
             return (float)Math.Acos(dot);
@@ -860,9 +860,7 @@ namespace Engine
             }
 
             // Divide by w, to move from homogeneous coordinates to 3D coordinates again 
-            projected.X = projected.X / projected.W;
-            projected.Y = projected.Y / projected.W;
-            projected.Z = projected.Z / projected.W;
+            projected /= projected.W;
 
             // Perform the viewport scaling, to get the appropiate coordinates inside the viewport 
             projected.X = ((float)(((projected.X + 1.0) * 0.5) * viewPort.Width)) + viewPort.X;
@@ -886,8 +884,8 @@ namespace Engine
             if (matrix.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 translation))
             {
                 return string.Format("S:{0,-30} T:{1,-30} R:{2,-30}",
-                    scale.GetDescription(Vector3.One, "None"),
-                    translation.GetDescription(Vector3.Zero, "Zero"),
+                    scale.GetDescription(),
+                    translation.GetDescription(),
                     rotation.GetDescription());
             }
             else
@@ -905,16 +903,14 @@ namespace Engine
             Vector3 axis = quaternion.Axis;
             float angle = quaternion.Angle;
 
-            return string.Format("Angle: {0:0.00} in axis {1}", angle, axis.GetDescription(Vector3.One, "None"));
+            return string.Format("Angle: {0:0.00} in axis {1}", angle, axis.GetDescription());
         }
         /// <summary>
         /// Gets vector description
         /// </summary>
         /// <param name="vector">Vector</param>
-        /// <param name="none">Sets the vector who means wath</param>
-        /// <param name="wath">Sets the string to write in description when the specified vector is near equal to none</param>
         /// <returns>Return vector description</returns>
-        public static string GetDescription(this Vector3 vector, Vector3 none, string wath)
+        public static string GetDescription(this Vector3 vector)
         {
             vector.X = (float)Math.Round(vector.X, 3);
             vector.Y = (float)Math.Round(vector.Y, 3);

@@ -1,64 +1,44 @@
-﻿using SharpDX;
-
+﻿
 namespace Engine.Audio
 {
     /// <summary>
     /// Game audio emitter
     /// </summary>
-    public class GameAudioEmitter : GameAudioSource
+    class GameAudioEmitter : GameAudioAgent, IGameAudioEmitter
     {
         /// <summary>
-        /// Constructor
+        /// Sound radius
         /// </summary>
-        /// <param name="position">Emitter position</param>
-        /// <param name="radius">Source maximum radius</param>
-        /// <param name="cone">Source sound cone description</param>
-        public GameAudioEmitter(Vector3 position, float radius = float.MaxValue, GameAudioConeDescription? cone = null) :
-            base(radius, cone)
-        {
-            Manipulator3D source = new Manipulator3D();
+        public float Radius { get; set; }
+        /// <summary>
+        /// Cone
+        /// </summary>
+        public GameAudioConeDescription? Cone { get; set; }
+        /// <summary>
+        /// Inner radius
+        /// </summary>
+        public float InnerRadius { get; set; }
+        /// <summary>
+        /// Inner radius angle
+        /// </summary>
+        public float InnerRadiusAngle { get; set; }
+        /// <summary>
+        /// Volume curve
+        /// </summary>
+        public GameAudioCurvePoint[] VolumeCurve { get; set; }
+        /// <summary>
+        /// LFE curve
+        /// </summary>
+        public GameAudioCurvePoint[] LfeCurve { get; set; }
+        /// <summary>
+        /// Reverb curve
+        /// </summary>
+        public GameAudioCurvePoint[] ReverbCurve { get; set; }
 
-            source.SetPosition(position);
-
-            SetSource(source);
-        }
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="transform">Emitter transform</param>
-        /// <param name="radius">Source maximum radius</param>
-        /// <param name="cone">Source sound cone description</param>
-        public GameAudioEmitter(IManipulator transform, float radius = float.MaxValue, GameAudioConeDescription? cone = null) :
-            base(radius, cone)
-        {
-            SetSource(transform);
-        }
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="source">Emitter instance</param>
-        /// <param name="radius">Source maximum radius</param>
-        /// <param name="cone">Source sound cone description</param>
-        public GameAudioEmitter(ITransformable3D source, float radius = float.MaxValue, GameAudioConeDescription? cone = null) :
-            base(radius, cone)
-        {
-            SetSource(source);
-        }
-    }
-
-    /// <summary>
-    /// Game audio emitter
-    /// </summary>
-    public class GameAudioEmitter<T> : GameAudioEmitter
-    {
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="source">Emitter instance</param>
-        /// <param name="radius">Source maximum radius</param>
-        /// <param name="cone">Source sound cone description</param>
-        public GameAudioEmitter(SceneObject<T> source, float radius = float.MaxValue, GameAudioConeDescription? cone = null) :
-            base(source.Transform, radius, cone)
+        public GameAudioEmitter() : base()
         {
 
         }

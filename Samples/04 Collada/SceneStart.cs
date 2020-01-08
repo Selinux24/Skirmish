@@ -166,8 +166,9 @@ namespace Collada
                     $"Music{i}",
                     new GameAudioEffectParameters
                     {
+                        DestroyWhenFinished = false,
                         SoundName = $"Music{i}",
-                        IsLooped = false,
+                        IsLooped = true,
                         UseAudio3D = true,
                     });
             }
@@ -189,6 +190,8 @@ namespace Collada
 
             this.Camera.Position = Vector3.BackwardLH * 8f;
             this.Camera.Interest = Vector3.Zero;
+
+            PlayAudio();
 
             this.AudioManager.MasterVolume = 1;
             this.AudioManager.Start();
@@ -235,8 +238,7 @@ namespace Collada
 
             UpdateAudioInput(gameTime);
             UpdateListenerInput(gameTime);
-
-            PlayAudio();
+            UpdateAudio();
         }
         private void UpdateAudioInput(GameTime gameTime)
         {
@@ -335,6 +337,15 @@ namespace Collada
 
             agentPosition.Update(gameTime);
         }
+        private void UpdateAudio()
+        {
+            if (currentMusic != null)
+            {
+                return;
+            }
+
+            PlayAudio();
+        }
 
         private void SceneButtonClick(object sender, EventArgs e)
         {
@@ -378,36 +389,25 @@ namespace Collada
 
         private void PlayAudio()
         {
-            if (currentMusic != null)
-            {
-                return;
-            }
-
             musicIndex++;
             musicIndex %= musicList.Length;
 
             string musicName = $"Music{musicIndex}";
-            currentMusic = this.AudioManager.CreateEffectInstance(musicName);
-            currentMusic.Emitter.SetSource(emitterPosition);
-            currentMusic.Listener.SetSource(listenerPosition);
-            currentMusic.AudioEnd += AudioManager_AudioEnd;
+            currentMusic = this.AudioManager.CreateEffectInstance(musicName, emitterPosition, listenerPosition);
             currentMusic.LoopEnd += AudioManager_LoopEnd;
             currentMusic.Play();
         }
 
-        private void AudioManager_AudioEnd(object sender, GameAudioEventArgs e)
-        {
-            currentMusic = null;
-        }
         private void AudioManager_LoopEnd(object sender, GameAudioEventArgs e)
         {
             musicLoops++;
 
-            if (musicLoops > 4)
+            if (musicLoops > 0)
             {
                 musicLoops = 0;
 
                 currentMusic.Stop(true);
+                currentMusic.LoopEnd -= AudioManager_LoopEnd;
                 currentMusic = null;
             }
         }

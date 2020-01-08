@@ -380,7 +380,7 @@ namespace Engine
 
             this.TimeOfDay?.Update(gameTime);
 
-            this.AudioManager?.Update(gameTime);
+            this.AudioManager?.Update();
 
             this.NavigationGraph?.Update(gameTime);
 
@@ -1416,6 +1416,11 @@ namespace Engine
         /// <returns>Return path if exists</returns>
         public virtual PathFindingPath FindPath(AgentType agent, Vector3 from, Vector3 to, bool useGround = false, float delta = 0f)
         {
+            if (this.NavigationGraph?.Initialized != true)
+            {
+                return null;
+            }
+
             if (useGround)
             {
                 if (FindNearestGroundPosition(from, out PickingResult<Triangle> rFrom))
@@ -1429,6 +1434,60 @@ namespace Engine
             }
 
             var path = this.NavigationGraph.FindPath(agent, from, to);
+            if (path.Length > 1)
+            {
+                List<Vector3> positions;
+                List<Vector3> normals;
+
+                if (delta == 0)
+                {
+                    positions = new List<Vector3>(path);
+                    normals = new List<Vector3>(Helper.CreateArray(path.Length, Vector3.Up));
+                }
+                else
+                {
+                    ComputePath(path, delta, out positions, out normals);
+                }
+
+                if (useGround)
+                {
+                    ComputeGroundPositions(positions, normals);
+                }
+
+                return new PathFindingPath(positions, normals);
+            }
+
+            return null;
+        }
+        /// <summary>
+        /// Find path from point to point
+        /// </summary>
+        /// <param name="agent">Agent</param>
+        /// <param name="from">Start point</param>
+        /// <param name="to">End point</param>
+        /// <param name="useGround">Use ground info</param>
+        /// <param name="delta">Delta amount for path refinement</param>
+        /// <returns>Return path if exists</returns>
+        public virtual async Task<PathFindingPath> FindPathAsync(AgentType agent, Vector3 from, Vector3 to, bool useGround = false, float delta = 0f)
+        {
+            if (this.NavigationGraph?.Initialized != true)
+            {
+                return null;
+            }
+
+            if (useGround)
+            {
+                if (FindNearestGroundPosition(from, out PickingResult<Triangle> rFrom))
+                {
+                    from = rFrom.Position;
+                }
+                if (FindNearestGroundPosition(to, out PickingResult<Triangle> rTo))
+                {
+                    to = rTo.Position;
+                }
+            }
+
+            var path = await this.NavigationGraph.FindPathAsync(agent, from, to);
             if (path.Length > 1)
             {
                 List<Vector3> positions;

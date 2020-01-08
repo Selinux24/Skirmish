@@ -316,7 +316,7 @@ namespace Skybox
                     ReverbPreset = ReverbPresets.Default,
                     Volume = 0.25f,
                     EmitterRadius = 6,
-                    ListenerCone = GameAudioSourceDescription.DefaultListenerCone,
+                    ListenerCone = GameAudioConeDescription.DefaultListenerCone,
                 });
         }
 
@@ -324,9 +324,7 @@ namespace Skybox
         {
             base.Initialized();
 
-            fireAudioEffect = this.AudioManager.CreateEffectInstance("Sphere");
-            fireAudioEffect.Emitter.SetSource(this.movingFire);
-            fireAudioEffect.Listener.SetSource(this.Camera);
+            fireAudioEffect = this.AudioManager.CreateEffectInstance("Sphere", this.movingFire, this.Camera);
             fireAudioEffect.Play();
 
             this.AudioManager.MasterVolume = 1f;
@@ -396,10 +394,10 @@ namespace Skybox
             this.UpdateInputLights();
 
             var m = fireAudioEffect.GetOutputMatrix();
-            var ep = movingFire.Transform.Position.GetDescription(Vector3.Zero, "Zero");
-            var ev = movingFire.Transform.Velocity.GetDescription(Vector3.Zero, "Zero");
-            var lp = Camera.Position.GetDescription(Vector3.Zero, "Zero");
-            var lv = Camera.Velocity.GetDescription(Vector3.Zero, "Zero");
+            var ep = movingFire.Transform.Position.GetDescription();
+            var ev = movingFire.Transform.Velocity.GetDescription();
+            var lp = Camera.Position.GetDescription();
+            var lv = Camera.Velocity.GetDescription();
             var d = Vector3.Distance(movingFire.Transform.Position, Camera.Position);
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"Mouse (X:{this.Game.Input.MouseXDelta}; Y:{this.Game.Input.MouseYDelta}, Wheel: {this.Game.Input.MouseWheelDelta}) Absolute (X:{this.Game.Input.MouseX}; Y:{this.Game.Input.MouseY})");

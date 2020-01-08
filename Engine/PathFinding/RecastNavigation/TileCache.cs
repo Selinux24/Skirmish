@@ -511,8 +511,6 @@ namespace Engine.PathFinding.RecastNavigation
         }
         public Status Update(float dt, NavMesh navmesh, out bool upToDate)
         {
-            upToDate = false;
-
             if (m_nupdate == 0)
             {
                 // Process requests.
@@ -721,7 +719,7 @@ namespace Engine.PathFinding.RecastNavigation
             if (bc.LMesh.NPolys == 0)
             {
                 // Remove existing tile.
-                navmesh.RemoveTile(navmesh.GetTileRefAt(tile.Header.TX, tile.Header.TY, tile.Header.TLayer), null, 0);
+                navmesh.RemoveTile(navmesh.GetTileRefAt(tile.Header.TX, tile.Header.TY, tile.Header.TLayer));
                 return true;
             }
 
@@ -758,7 +756,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Remove existing tile.
-            navmesh.RemoveTile(navmesh.GetTileRefAt(tile.Header.TX, tile.Header.TY, tile.Header.TLayer), null, 0);
+            navmesh.RemoveTile(navmesh.GetTileRefAt(tile.Header.TX, tile.Header.TY, tile.Header.TLayer));
 
             // Add new tile, or leave the location empty.
             if (navData != null && !navmesh.AddTile(navData, TileFlagTypes.DT_TILE_FREE_DATA, 0, out int result))

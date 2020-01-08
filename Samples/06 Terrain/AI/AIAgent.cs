@@ -67,7 +67,7 @@ namespace Terrain.AI
         {
             get
             {
-                return this.SceneObject.Get<ITransformable3D>().Manipulator;
+                return this.SceneObject.Get<ITransformable3D>()?.Manipulator;
             }
         }
         /// <summary>
@@ -97,6 +97,10 @@ namespace Terrain.AI
                 return null;
             }
         }
+        /// <summary>
+        /// Gets wether the agent AI is active
+        /// </summary>
+        public bool ActiveAI { get; set; }
         /// <summary>
         /// Gets wether the agent is active
         /// </summary>
@@ -204,6 +208,15 @@ namespace Terrain.AI
         /// <param name="context">Updating context</param>
         public void Update(UpdateContext context)
         {
+            this.Stats.Update(context.GameTime);
+
+            this.UpdateController(context);
+
+            if (!this.ActiveAI)
+            {
+                return;
+            }
+
             if (this.CurrentState != AIStates.None)
             {
                 this.currentBehavior?.Task(context.GameTime);
@@ -230,10 +243,6 @@ namespace Terrain.AI
                 // If it's alive, set idle state
                 this.ChangeState(AIStates.Idle);
             }
-
-            this.Stats.Update(context.GameTime);
-
-            this.UpdateController(context);
         }
         /// <summary>
         /// Updates agent state when on idle state
@@ -481,7 +490,7 @@ namespace Terrain.AI
         /// <param name="damage">Damage amount</param>
         public virtual void GetDamage(AIAgent attacker, float damage)
         {
-            if (this.AttackBehavior.Target == null)
+            if (this.EnemyOnAttackRange(attacker) && this.AttackBehavior.Target == null)
             {
                 this.AttackBehavior.SetTarget(attacker);
                 this.ChangeState(AIStates.Attacking);
@@ -523,9 +532,7 @@ namespace Terrain.AI
 
                     Task.Run(async () =>
                     {
-                        await Task.Delay(100);
-
-                        var path = this.Parent.Scene.FindPath(this.AgentType, this.Manipulator.Position, point, true, refineDelta);
+                        var path = await this.Parent.Scene.FindPathAsync(this.AgentType, this.Manipulator.Position, point, true, refineDelta);
                         if (path != null)
                         {
                             this.FollowPath(path, speed);
@@ -549,7 +556,7 @@ namespace Terrain.AI
         /// <param name="speed">Speed</param>
         public virtual void FollowPath(PathFindingPath path, float speed)
         {
-            this.Controller.Follow(new NormalPath(path.ReturnPath.ToArray(), path.Normals.ToArray()));
+            this.Controller.Follow(new NormalPath(path.ReturnPath, path.Normals));
             this.Controller.MaximumSpeed = speed;
         }
         /// <summary>

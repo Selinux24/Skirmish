@@ -21,7 +21,12 @@ namespace Terrain.AI.Agents
         public TankAIAgent(Brain parent, AgentType agentType, SceneObject sceneObject, AIStatsDescription stats) :
             base(parent, agentType, sceneObject, stats)
         {
-            this.Controller = new TankManipulatorController();
+            this.Controller = new TankManipulatorController()
+            {
+                ArrivingRadius = 1f,
+                ArrivingThreshold = 1f,
+                MaximumForce = 0.25f,
+            };
 
             this.AttackBehavior = new TankAttackBehavior(this);
         }

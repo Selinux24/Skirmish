@@ -137,13 +137,13 @@ namespace Engine.PathFinding.RecastNavigation
         {
             var meshFileDict = new Dictionary<Agent, NavMeshFile>();
 
-            foreach (var key in graph.MeshQueryDictionary.Keys)
+            foreach (var agentQ in graph.AgentQueries)
             {
-                var nm = graph.MeshQueryDictionary[key].GetAttachedNavMesh();
+                var nm = agentQ.NavMesh;
 
                 var rcFile = NavMeshFile.FromNavmesh(nm);
 
-                meshFileDict.Add(key, rcFile);
+                meshFileDict.Add(agentQ.Agent, rcFile);
             }
 
             return new GraphFile()
@@ -159,22 +159,26 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the graph</returns>
         public static Graph FromGraphFile(GraphFile file)
         {
-            var meshQueryDict = new Dictionary<Agent, NavMeshQuery>();
+            var agentQueries = new List<GraphAgentQuery>();
 
-            foreach (var key in file.Dictionary.Keys)
+            foreach (var agent in file.Dictionary.Keys)
             {
-                var rcFile = file.Dictionary[key];
+                var rcFile = file.Dictionary[agent];
                 var nm = NavMeshFile.FromNavmeshFile(rcFile);
-                var mmQuery = new NavMeshQuery();
-                mmQuery.Init(nm, file.Settings.MaxNodes);
 
-                meshQueryDict.Add(key, mmQuery);
+                agentQueries.Add(new GraphAgentQuery
+                {
+                    Agent = agent,
+                    NavMesh = nm,
+                    MaxNodes = file.Settings.MaxNodes,
+                });
             }
 
             return new Graph
             {
                 Settings = file.Settings,
-                MeshQueryDictionary = meshQueryDict,
+                AgentQueries = agentQueries,
+                Initialized = true,
             };
         }
         /// <summary>

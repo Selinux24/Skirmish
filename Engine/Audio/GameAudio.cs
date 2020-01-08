@@ -4,9 +4,6 @@ using SharpDX.X3DAudio;
 using SharpDX.XAudio2;
 using SharpDX.XAudio2.Fx;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using MasteringLimiter = SharpDX.XAPO.Fx.MasteringLimiter;
 using MasteringLimiterParameters = SharpDX.XAPO.Fx.MasteringLimiterParameters;
 
@@ -15,7 +12,7 @@ namespace Engine.Audio
     /// <summary>
     /// Game audio
     /// </summary>
-    public class GameAudio : IDisposable
+    class GameAudio : IDisposable
     {
         /// <summary>
         /// Gets or sets the distance scaling ratio. Default is 1f.
@@ -42,10 +39,6 @@ namespace Engine.Audio
         /// Mastering limiter flag
         /// </summary>
         private bool useMasteringLimiter = false;
-        /// <summary>
-        /// Sound dictionary
-        /// </summary>
-        private readonly Dictionary<string, GameAudioSound> sounds = new Dictionary<string, GameAudioSound>();
 
         /// <summary>
         /// Mastering voice
@@ -116,51 +109,6 @@ namespace Engine.Audio
         }
 
         /// <summary>
-        /// Loads a file in the audio buffer
-        /// </summary>
-        /// <param name="name">Effect name</param>
-        /// <param name="fileName">File name</param>
-        public GameAudioSound LoadFromFile(string name, string fileName)
-        {
-            GameAudioSound sound = new GameAudioSound(this, name);
-
-            using (var stream = new SoundStream(File.OpenRead(fileName)))
-            {
-                var buffer = stream.ToDataStream();
-
-                sound.WaveFormat = stream.Format;
-                sound.DecodedPacketsInfo = stream.DecodedPacketsInfo;
-                sound.AudioBuffer = new AudioBuffer
-                {
-                    Stream = buffer,
-                    AudioBytes = (int)buffer.Length,
-                    Flags = BufferFlags.EndOfStream
-                };
-                sound.LoopedAudioBuffer = new AudioBuffer
-                {
-                    Stream = buffer,
-                    AudioBytes = (int)buffer.Length,
-                    Flags = BufferFlags.EndOfStream,
-                    LoopCount = AudioBuffer.LoopInfinite,
-                };
-                sound.Duration = TimeSpan.Zero;
-                if (stream.Format.SampleRate > 0)
-                {
-                    var samplesDuration = GameAudioSound.GetSamplesDuration(
-                        stream.Format,
-                        buffer.Length,
-                        stream.DecodedPacketsInfo);
-
-                    var milliseconds = samplesDuration * 1000 / stream.Format.SampleRate;
-
-                    sound.Duration = TimeSpan.FromMilliseconds(milliseconds);
-                }
-            }
-
-            return sound;
-        }
-
-        /// <summary>
         /// Constructor
         /// </summary>
         internal GameAudio(XAudio2Version version = XAudio2Version.Default, int sampleRate = 48000)
@@ -176,7 +124,7 @@ namespace Engine.Audio
             DebugConfiguration debugConfiguration = new DebugConfiguration()
             {
                 TraceMask = (int)(LogType.Errors | LogType.Warnings),
-                BreakMask = (int)(LogType.Errors),
+                BreakMask = (int)LogType.Errors,
             };
             this.device.SetDebugConfiguration(debugConfiguration, IntPtr.Zero);
 #endif
@@ -231,9 +179,6 @@ namespace Engine.Audio
         {
             if (disposing)
             {
-                this.sounds.Values.ToList().ForEach(e => e.Dispose());
-                this.sounds.Clear();
-
                 this.x3DInstance = null;
 
                 this.MasteringVoice?.DestroyVoice();
@@ -297,25 +242,6 @@ namespace Engine.Audio
                 inputSampleRate,
                 sendFlags,
                 processingStage);
-        }
-        /// <summary>
-        /// Gets a sound
-        /// </summary>
-        /// <param name="name">Sound name</param>
-        /// <param name="fileName">File name</param>
-        /// <returns>Returns the new created sound</returns>
-        internal GameAudioSound GetSound(string name, string fileName)
-        {
-            if (sounds.ContainsKey(name))
-            {
-                return sounds[name];
-            }
-
-            var sound = LoadFromFile(name, fileName);
-
-            sounds.Add(name, sound);
-
-            return sound;
         }
 
         /// <summary>

@@ -1,5 +1,6 @@
 ﻿using Engine;
 using SharpDX;
+using System;
 
 namespace Terrain.Controllers
 {
@@ -74,18 +75,42 @@ namespace Terrain.Controllers
                 // Limit speed
                 newVelocity = newVelocity.Limit(maxSpeed);
 
-                var newTime = this.pathTime + newVelocity.Length();
-                var newPosition = this.path.GetPosition(newTime);
-                var newNormal = this.path.GetNormal(newTime);
-                var newTarget = newPosition + (newPosition - position);
+                //Calculates 2 seconds in future
+                var futureTime = this.pathTime + 2;
+                var futurePosition = this.path.GetPosition(futureTime);
+                var futureNormal = this.path.GetNormal(futureTime);
+                var futureTarget = futurePosition + (futurePosition - position);
 
-                manipulator.RotateTo(newTarget, newNormal, true, 0.01f, true);
-                if (Helper.Angle(rotation, manipulator.Rotation) <= 0.005f)
+                //Calculates a delta using the future angle
+                var futureRotation = Helper.LookAt(position, futureTarget, futureNormal, true);
+                float futureAngle = Helper.Angle(rotation, futureRotation);
+                float maxRot = MathUtil.PiOverTwo;
+                futureAngle = Math.Min(futureAngle, maxRot);
+                float velDelta = 1.0f - (futureAngle / maxRot);
+
+                //Apply delta to velocity
+                newVelocity *= velDelta;
+                this.Velocity = newVelocity;
+
+                if (velDelta == 0 && futureAngle != 0)
                 {
+                    //Rotates only
+                    manipulator.RotateTo(futureTarget, futureNormal, true, 0.01f);
+                }
+                else
+                {
+                    //Gets new time
+                    var newTime = this.pathTime + newVelocity.Length();
+                    var newPosition = this.path.GetPosition(newTime);
+                    var newNormal = this.path.GetNormal(newTime);
+                    var newTarget = newPosition + (newPosition - position);
+
+                    //Rotate and move
+                    manipulator.RotateTo(newTarget, newNormal, true, 0.01f);
                     manipulator.SetPosition(newPosition);
 
+                    //Updates new time in curve
                     this.pathTime = newTime;
-                    this.Velocity = newVelocity;
                 }
             }
         }

@@ -480,18 +480,18 @@ namespace Engine
 
             return lines;
         }
-        public static IEnumerable<Line3D> CreateArrow(Vector3 p, Vector3 q, float s)
+        public static IEnumerable<Line3D> CreateArrow(Vector3 position, Vector3 point, float edgeSize)
         {
             List<Line3D> lines = new List<Line3D>();
 
             float eps = 0.001f;
-            if (Vector3.DistanceSquared(p, q) >= eps * eps)
+            if (Vector3.DistanceSquared(point, position) >= eps * eps)
             {
-                var az = Vector3.Normalize(q - p);
+                var az = Vector3.Normalize(position - point);
                 var ax = Vector3.Cross(Vector3.Up, az);
 
-                lines.Add(new Line3D(p, new Vector3(p.X + az.X * s + ax.X * s / 3, p.Y + az.Y * s + ax.Y * s / 3, p.Z + az.Z * s + ax.Z * s / 3)));
-                lines.Add(new Line3D(p, new Vector3(p.X + az.X * s - ax.X * s / 3, p.Y + az.Y * s - ax.Y * s / 3, p.Z + az.Z * s - ax.Z * s / 3)));
+                lines.Add(new Line3D(point, new Vector3(point.X + az.X * edgeSize + ax.X * edgeSize / 3, point.Y + az.Y * edgeSize + ax.Y * edgeSize / 3, point.Z + az.Z * edgeSize + ax.Z * edgeSize / 3)));
+                lines.Add(new Line3D(point, new Vector3(point.X + az.X * edgeSize - ax.X * edgeSize / 3, point.Y + az.Y * edgeSize - ax.Y * edgeSize / 3, point.Z + az.Z * edgeSize - ax.Z * edgeSize / 3)));
             }
 
             return lines;

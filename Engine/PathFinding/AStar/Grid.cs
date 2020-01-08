@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Threading.Tasks;
 
 namespace Engine.PathFinding.AStar
 {
@@ -17,6 +18,10 @@ namespace Engine.PathFinding.AStar
         /// </summary>
         public event EventHandler Updated;
 
+        /// <summary>
+        /// Gets whether the graph is initialized
+        /// </summary>
+        public bool Initialized { get; set; }
         /// <summary>
         /// Geometry input
         /// </summary>
@@ -110,6 +115,42 @@ namespace Engine.PathFinding.AStar
             return AStarQuery.FindPath(this, from, to);
         }
         /// <summary>
+        /// Find path from point to point
+        /// </summary>
+        /// <param name="agent">Agent type</param>
+        /// <param name="from">Start point</param>
+        /// <param name="to">End point</param>
+        /// <returns>Return path if exists</returns>
+        public async Task<Vector3[]> FindPathAsync(AgentType agent, Vector3 from, Vector3 to)
+        {
+            Vector3[] result = new Vector3[] { };
+
+            await Task.Run(() =>
+            {
+                result = AStarQuery.FindPath(this, from, to);
+            });
+
+            return result;
+        }
+        /// <summary>
+        /// Gets wether the specified position is walkable
+        /// </summary>
+        /// <param name="agent">Agent type</param>
+        /// <param name="position">Position</param>
+        /// <returns>Returns true if the specified position is walkable</returns>
+        public bool IsWalkable(AgentType agent, Vector3 position)
+        {
+            for (int i = 0; i < this.Nodes.Length; i++)
+            {
+                if (this.Nodes[i].Contains(position))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        /// <summary>
         /// Gets wether the specified position is walkable
         /// </summary>
         /// <param name="agent">Agent type</param>
@@ -118,19 +159,25 @@ namespace Engine.PathFinding.AStar
         /// <returns>Returns true if the specified position is walkable</returns>
         public bool IsWalkable(AgentType agent, Vector3 position, out Vector3? nearest)
         {
+            bool contains = false;
             nearest = null;
+            float nearestDistance = float.MaxValue;
 
             for (int i = 0; i < this.Nodes.Length; i++)
             {
                 if (this.Nodes[i].Contains(position, out float distance))
                 {
-                    nearest = this.Nodes[i].Center;
+                    contains = true;
 
-                    return true;
+                    if (distance < nearestDistance)
+                    {
+                        nearestDistance = distance;
+                        nearest = this.Nodes[i].Center;
+                    }
                 }
             }
 
-            return false;
+            return contains;
         }
 
         /// <summary>

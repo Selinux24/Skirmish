@@ -398,7 +398,7 @@ namespace Collada
                     Volume = 1f,
                     UseAudio3D = true,
                     EmitterRadius = 3,
-                    ListenerCone = GameAudioSourceDescription.DefaultListenerCone,
+                    ListenerCone = GameAudioConeDescription.DefaultListenerCone,
                 });
 
             this.AudioManager.AddEffectParams(
@@ -410,7 +410,7 @@ namespace Collada
                     Volume = 1f,
                     UseAudio3D = true,
                     EmitterRadius = 3,
-                    ListenerCone = GameAudioSourceDescription.DefaultListenerCone,
+                    ListenerCone = GameAudioConeDescription.DefaultListenerCone,
                 });
 
             for (int i = 0; i < soundWinds.Length; i++)
@@ -425,7 +425,7 @@ namespace Collada
                         Volume = 1f,
                         UseAudio3D = true,
                         EmitterRadius = 15,
-                        ListenerCone = GameAudioSourceDescription.DefaultListenerCone,
+                        ListenerCone = GameAudioConeDescription.DefaultListenerCone,
                     });
             }
 
@@ -439,7 +439,7 @@ namespace Collada
                     IsLooped = true,
                     UseAudio3D = true,
                     EmitterRadius = 3,
-                    ListenerCone = GameAudioSourceDescription.DefaultListenerCone,
+                    ListenerCone = GameAudioConeDescription.DefaultListenerCone,
                 });
 
             this.AudioManager.AddEffectParams(
@@ -452,7 +452,7 @@ namespace Collada
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = 3,
-                    ListenerCone = GameAudioSourceDescription.DefaultListenerCone,
+                    ListenerCone = GameAudioConeDescription.DefaultListenerCone,
                 });
         }
 
@@ -462,6 +462,14 @@ namespace Collada
 
             this.scenery.TriggerEnd += TriggerEnds;
 
+            this.StartEntities();
+
+            this.StartCamera();
+
+            this.AudioManager.Start();
+        }
+        private void StartEntities()
+        {
             //Rat holes
             this.ratHoles = this.scenery
                 .GetObjectsByName("Dn_Rat_Hole_1")
@@ -469,32 +477,21 @@ namespace Collada
                 .ToArray();
 
             //Jails
-            this.StartJails();
+            this.StartEntitiesJails();
 
             //Doors
-            this.StartDoors();
+            this.StartEntitiesDoors();
 
             //Ladders
-            this.StartLadders();
+            this.StartEntitiesLadders();
 
-            //Torchs
-            this.StartTorchs();
+            //Furniture obstacles
+            this.StartEntitiesObstacles();
 
-            //Big fires
-            this.StartBigFires();
-
-            //Rat sound
-            this.ratSoundInstance = this.AudioManager.CreateEffectInstance(ratSoundMove);
-            this.ratSoundInstance.Emitter.SetSource(this.rat);
-            this.ratSoundInstance.Listener.SetSource(this.Camera);
-
-            this.StartObstacles();
-
-            this.StartCamera();
-
-            this.AudioManager.Start();
+            //Sounds
+            this.StartEntitiesAudio();
         }
-        private void StartJails()
+        private void StartEntitiesJails()
         {
             var jails = this.scenery
                 .GetObjectsByName("Dn_Jail_1")
@@ -509,7 +506,7 @@ namespace Collada
                 jail.InvalidateCache();
             }
         }
-        private void StartDoors()
+        private void StartEntitiesDoors()
         {
             var doors = this.scenery
                 .GetObjectsByName("Dn_Door_1")
@@ -524,7 +521,7 @@ namespace Collada
                 door.InvalidateCache();
             }
         }
-        private void StartLadders()
+        private void StartEntitiesLadders()
         {
             var ladders = this.scenery
                 .GetObjectsByName("Dn_Anim_Ladder")
@@ -539,7 +536,18 @@ namespace Collada
                 ladder.InvalidateCache();
             }
         }
-        private void StartTorchs()
+        private void StartEntitiesAudio()
+        {
+            //Rat sound
+            this.ratSoundInstance = this.AudioManager.CreateEffectInstance(ratSoundMove, this.rat, this.Camera);
+
+            //Torchs
+            this.StartEntitiesAudioTorchs();
+
+            //Big fires
+            this.StartEntitiesAudioBigFires();
+        }
+        private void StartEntitiesAudioTorchs()
         {
             var torchs = this.scenery
                 .GetObjectsByName("Dn_Torch")
@@ -560,16 +568,13 @@ namespace Collada
                         IsLooped = true,
                         UseAudio3D = true,
                         EmitterRadius = 2,
-                        ListenerCone = GameAudioSourceDescription.DefaultListenerCone,
+                        ListenerCone = GameAudioConeDescription.DefaultListenerCone,
                     });
 
-                var efTorch = this.AudioManager.CreateEffectInstance(effectName);
-                efTorch.Emitter.SetSource(item);
-                efTorch.Listener.SetSource(this.Camera);
-                efTorch.Play();
+                this.AudioManager.CreateEffectInstance(effectName, item, this.Camera).Play();
             }
         }
-        private void StartBigFires()
+        private void StartEntitiesAudioBigFires()
         {
             List<ModelInstance> fires = new List<ModelInstance>();
             fires.AddRange(this.scenery.GetObjectsByName("Dn_Temple_Fire_1").Select(o => o.Item));
@@ -590,16 +595,13 @@ namespace Collada
                         IsLooped = true,
                         UseAudio3D = true,
                         EmitterRadius = 5,
-                        ListenerCone = GameAudioSourceDescription.DefaultListenerCone,
+                        ListenerCone = GameAudioConeDescription.DefaultListenerCone,
                     });
 
-                var efFire = this.AudioManager.CreateEffectInstance(effectName);
-                efFire.Emitter.SetSource(item);
-                efFire.Listener.SetSource(this.Camera);
-                efFire.Play();
+                this.AudioManager.CreateEffectInstance(effectName, item, this.Camera).Play();
             }
         }
-        private void StartObstacles()
+        private void StartEntitiesObstacles()
         {
             //Furniture obstacles
             var furnitures = this.scenery
@@ -976,10 +978,7 @@ namespace Collada
         }
         private void RatTalkPlay()
         {
-            var instance = this.AudioManager.CreateEffectInstance(ratSoundTalk);
-            instance.Emitter.SetSource(this.rat);
-            instance.Listener.SetSource(this.Camera);
-            instance.Play();
+            this.AudioManager.CreateEffectInstance(ratSoundTalk, this.rat, this.Camera)?.Play();
         }
         private void UpdateEntities()
         {
@@ -1144,10 +1143,13 @@ namespace Collada
             {
                 Task.Run(async () =>
                 {
-                    var effect = this.AudioManager.CreateEffectInstance(soundDoor);
-                    effect.Play();
+                    var effect = this.AudioManager.CreateEffectInstance(soundDoor, item.Item, this.Camera);
+                    if (effect != null)
+                    {
+                        effect.Play();
 
-                    await Task.Delay(effect.Duration);
+                        await Task.Delay(effect.Duration);
+                    }
 
                     string nextLevel = item.Object.NextLevel;
                     if (!string.IsNullOrEmpty(nextLevel))
@@ -1172,7 +1174,7 @@ namespace Collada
                 int keyIndex = ReadKeyIndex();
                 if (keyIndex > 0 && keyIndex <= triggers.Length)
                 {
-                    this.AudioManager.CreateEffectInstance(soundLadder).Play();
+                    this.AudioManager.CreateEffectInstance(soundLadder)?.Play();
                     this.scenery.ExecuteTrigger(item, triggers[keyIndex - 1]);
                 }
             }
@@ -1271,6 +1273,11 @@ namespace Collada
             this.Lights.ClearSpotLights();
             this.scenery.LoadLevel(name);
             this.Lights.Add(this.torch);
+
+            this.AudioManager.Stop();
+            this.AudioManager.ClearEffects();
+            this.StartEntities();
+            this.AudioManager.Start();
 
             this.UpdateNavigationGraph();
             var pos = this.scenery.CurrentLevel.StartPosition;
@@ -1408,11 +1415,6 @@ namespace Collada
 
         private void CreateWind(int index)
         {
-            if (AudioManager == null)
-            {
-                return;
-            }
-
             int duration = 100;
 
             Manipulator3D man = new Manipulator3D();
@@ -1420,11 +1422,9 @@ namespace Collada
 
             var soundEffect = this.soundWinds[index];
 
-            var windInstance = AudioManager.CreateEffectInstance(soundEffect);
+            var windInstance = AudioManager.CreateEffectInstance(soundEffect, man, this.Camera);
             if (windInstance != null)
             {
-                windInstance.Emitter.SetSource(man);
-                windInstance.Listener.SetSource(this.Camera);
                 windInstance.Play();
 
                 float durationVariation = Helper.RandomGenerator.NextFloat(0.5f, 1.0f);
@@ -1437,7 +1437,11 @@ namespace Collada
             Task.Run(async () =>
             {
                 await Task.Delay(duration);
-                CreateWind(index);
+
+                if (AudioManager != null)
+                {
+                    CreateWind(index);
+                }
             }).ConfigureAwait(false);
         }
     }

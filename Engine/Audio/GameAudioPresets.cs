@@ -1,6 +1,4 @@
-﻿using SharpDX;
-using SharpDX.X3DAudio;
-using SharpDX.XAudio2.Fx;
+﻿using SharpDX.XAudio2.Fx;
 
 namespace Engine.Audio
 {
@@ -53,54 +51,12 @@ namespace Engine.Audio
         /// <returns>Returns the ReverbParameters type</returns>
         public static ReverbParameters Convert(ReverbPresets preset)
         {
-            var reverbPreset = reverbPresetsList[(int)(preset)];
-            var reverbParams = (ReverbParameters)reverbPreset;
+            var reverbParams = (ReverbParameters)reverbPresetsList[(int)preset];
 
             //Why? I don't know - this parameter is refered to 48Khz sampling rate. Scale it? Otherwise, the effect mutes all.
             reverbParams.RoomFilterFreq = 20;
 
             return reverbParams;
         }
-
-        /// <summary>
-        /// Default directional cone
-        /// </summary>
-        public static readonly Cone DefaultListenerDirectionalCone = new Cone()
-        {
-            InnerAngle = MathUtil.Pi * 5.0f / 6.0f,
-            OuterAngle = MathUtil.Pi * 11.0f / 6.0f,
-            InnerVolume = 1.0f,
-            OuterVolume = 0.75f,
-            InnerLpf = 0.0f,
-            OuterLpf = 0.25f,
-            InnerReverb = 0.708f,
-            OuterReverb = 1.0f
-        };
-        /// <summary>
-        /// Default linear curve
-        /// </summary>
-        public static readonly CurvePoint[] DefaultLinearCurve = new CurvePoint[]
-        {
-            new CurvePoint(){ Distance = 0.0f, DspSetting = 1.0f, },
-            new CurvePoint(){ Distance = 1.0f, DspSetting = 0.0f, },
-        };
-        /// <summary>
-        /// Default emitter lfe curve
-        /// </summary>
-        public static readonly CurvePoint[] DefaultEmitterLfeCurve = new CurvePoint[]
-        {
-            new CurvePoint(){ Distance = 0.0f, DspSetting = 1.0f, },
-            new CurvePoint(){ Distance = 0.25f, DspSetting = 0.0f, },
-            new CurvePoint(){ Distance = 1.0f, DspSetting = 0.0f, },
-        };
-        /// <summary>
-        /// Default emitter reverb curve
-        /// </summary>
-        public static readonly CurvePoint[] DefaultEmitterReverbCurve = new CurvePoint[]
-        {
-            new CurvePoint(){ Distance = 0.0f, DspSetting = 0.5f, },
-            new CurvePoint(){ Distance = 0.75f, DspSetting = 1.0f, },
-            new CurvePoint(){ Distance = 1.0f, DspSetting = 0.0f, },
-        };
     }
 }

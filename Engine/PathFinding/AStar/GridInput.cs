@@ -48,7 +48,7 @@ namespace Engine.PathFinding.AStar
             {
                 for (float z = bbox.Minimum.Z; z < bbox.Maximum.Z; z += grid.BuildSettings.NodeSize)
                 {
-                    GridCollisionInfo[] info = null;
+                    GridCollisionInfo[] info;
 
                     Ray ray = new Ray()
                     {
@@ -92,6 +92,7 @@ namespace Engine.PathFinding.AStar
             FillConnections(result);
 
             grid.Nodes = result.ToArray();
+            grid.Initialized = true;
 
             return grid;
         }

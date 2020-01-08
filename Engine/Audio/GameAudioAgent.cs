@@ -3,14 +3,14 @@
 namespace Engine.Audio
 {
     /// <summary>
-    /// Audio source
+    /// Audio agent
     /// </summary>
-    public abstract class GameAudioSource
+    class GameAudioAgent : IGameAudioAgent
     {
         /// <summary>
-        /// Audio source
+        /// Agent transform
         /// </summary>
-        protected IManipulator source;
+        protected IManipulator agentTransform = null;
 
         /// <summary>
         /// Forward vector
@@ -19,7 +19,7 @@ namespace Engine.Audio
         {
             get
             {
-                return source?.Forward ?? Vector3.ForwardLH;
+                return agentTransform?.Forward ?? Vector3.ForwardLH;
             }
         }
         /// <summary>
@@ -29,7 +29,7 @@ namespace Engine.Audio
         {
             get
             {
-                return source?.Up ?? Vector3.Up;
+                return agentTransform?.Up ?? Vector3.Up;
             }
         }
         /// <summary>
@@ -39,7 +39,7 @@ namespace Engine.Audio
         {
             get
             {
-                return source?.Position ?? Vector3.Zero;
+                return agentTransform?.Position ?? Vector3.Zero;
             }
         }
         /// <summary>
@@ -49,52 +49,52 @@ namespace Engine.Audio
         {
             get
             {
-                return source?.Velocity ?? Vector3.Zero;
+                return agentTransform?.Velocity ?? Vector3.Zero;
             }
         }
-        /// <summary>
-        /// Sound radius
-        /// </summary>
-        public float Radius { get; set; }
-        /// <summary>
-        /// Cone
-        /// </summary>
-        public GameAudioConeDescription? Cone { get; set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="radius">Source maximum radius</param>
-        /// <param name="cone">Source sound cone description</param>
-        protected GameAudioSource(float radius = float.MaxValue, GameAudioConeDescription? cone = null)
+        public GameAudioAgent()
         {
-            Radius = radius;
-            Cone = cone;
+
         }
 
         /// <summary>
-        /// Sets the game audio source
+        /// Sets the game audio agent position
+        /// </summary>
+        /// <param name="position">Fixed position</param>
+        public void SetSource(Vector3 position)
+        {
+            Manipulator3D source = new Manipulator3D();
+            source.SetPosition(position);
+
+            this.agentTransform = source;
+        }
+        /// <summary>
+        /// Sets the game audio agent source
         /// </summary>
         /// <param name="source">Manipulator instance</param>
         public void SetSource(IManipulator source)
         {
-            this.source = source;
+            this.agentTransform = source;
         }
         /// <summary>
-        /// Sets the game audio emitter's source
+        /// Sets the game audio agent source
         /// </summary>
         /// <param name="manipulator">Transformable instance</param>
         public void SetSource(ITransformable3D source)
         {
-            this.source = source?.Manipulator;
+            this.agentTransform = source?.Manipulator;
         }
         /// <summary>
-        /// Sets the game audio source
+        /// Sets the game audio agent source
         /// </summary>
         /// <param name="source">Scene object instance</param>
         public void SetSource<T>(SceneObject<T> source)
         {
-            this.source = source?.Transform;
+            this.agentTransform = source?.Transform;
         }
     }
 }

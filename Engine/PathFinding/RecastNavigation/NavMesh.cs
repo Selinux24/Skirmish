@@ -546,7 +546,7 @@ namespace Engine.PathFinding.RecastNavigation
                     if (data != null)
                     {
                         // Remove any previous data (navmesh owns and deletes the data).
-                        navMesh.RemoveTile(navMesh.GetTileRefAt(x, y, 0), data, 0);
+                        navMesh.RemoveTile(navMesh.GetTileRefAt(x, y, 0));
                         // Let the navmesh own the data.
                         navMesh.AddTile(data, TileFlagTypes.DT_TILE_FREE_DATA, 0, out int result);
                     }
@@ -1075,7 +1075,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             return true;
         }
-        public bool RemoveTile(MeshTile tile, MeshData data, int dataSize)
+        public bool RemoveTile(MeshTile tile)
         {
             if (tile == null)
             {
@@ -2114,7 +2114,7 @@ namespace Engine.PathFinding.RecastNavigation
             var data = BuildTileMesh(tx, ty, lastBuiltBbox, geom, settings, agent);
 
             // Remove any previous data (navmesh owns and deletes the data).
-            RemoveTile(GetTileRefAt(tx, ty, 0), data, 0);
+            RemoveTile(GetTileRefAt(tx, ty, 0));
 
             // Add tile, or leave the location empty.
             if (data != null && !AddTile(data, TileFlagTypes.DT_TILE_FREE_DATA, 0, out int res))
@@ -2149,7 +2149,7 @@ namespace Engine.PathFinding.RecastNavigation
             lastBuiltBbox.Maximum.Y = bbox.Maximum.Y;
             lastBuiltBbox.Maximum.Z = bbox.Minimum.Z + (ty + 1) * ts;
 
-            RemoveTile(GetTileRefAt(tx, ty, 0), null, 0);
+            RemoveTile(GetTileRefAt(tx, ty, 0));
         }
     }
 }

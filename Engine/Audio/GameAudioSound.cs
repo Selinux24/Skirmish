@@ -1,6 +1,7 @@
 ﻿using SharpDX.Multimedia;
 using SharpDX.XAudio2;
 using System;
+using System.IO;
 
 namespace Engine.Audio
 {
@@ -10,13 +11,9 @@ namespace Engine.Audio
     public class GameAudioSound : IDisposable
     {
         /// <summary>
-        /// Game audio
+        /// File name
         /// </summary>
-        public GameAudio GameAudio { get; set; }
-        /// <summary>
-        /// Effect name
-        /// </summary>
-        public string Name { get; set; }
+        public string FileName { get; private set; }
         /// <summary>
         /// Wave format
         /// </summary>
@@ -39,13 +36,58 @@ namespace Engine.Audio
         public TimeSpan Duration { get; set; }
 
         /// <summary>
+        /// Loads a file in the audio buffer
+        /// </summary>
+        /// <param name="fileName">File name</param>
+        public static GameAudioSound LoadFromFile(string fileName)
+        {
+            GameAudioSound sound = new GameAudioSound
+            {
+                FileName = fileName,
+            };
+
+            using (var stream = new SoundStream(File.OpenRead(fileName)))
+            {
+                var buffer = stream.ToDataStream();
+
+                sound.WaveFormat = stream.Format;
+                sound.DecodedPacketsInfo = stream.DecodedPacketsInfo;
+                sound.AudioBuffer = new AudioBuffer
+                {
+                    Stream = buffer,
+                    AudioBytes = (int)buffer.Length,
+                    Flags = BufferFlags.EndOfStream
+                };
+                sound.LoopedAudioBuffer = new AudioBuffer
+                {
+                    Stream = buffer,
+                    AudioBytes = (int)buffer.Length,
+                    Flags = BufferFlags.EndOfStream,
+                    LoopCount = AudioBuffer.LoopInfinite,
+                };
+                sound.Duration = TimeSpan.Zero;
+                if (stream.Format.SampleRate > 0)
+                {
+                    var samplesDuration = GameAudioSound.GetSamplesDuration(
+                        stream.Format,
+                        buffer.Length,
+                        stream.DecodedPacketsInfo);
+
+                    var milliseconds = samplesDuration * 1000 / stream.Format.SampleRate;
+
+                    sound.Duration = TimeSpan.FromMilliseconds(milliseconds);
+                }
+            }
+
+            return sound;
+        }
+
+        /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="name">Effect name</param>
-        internal GameAudioSound(GameAudio gameAudio, string name)
+        internal GameAudioSound()
         {
-            this.GameAudio = gameAudio;
-            this.Name = name;
+
         }
         /// <summary>
         /// Destructor

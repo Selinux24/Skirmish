@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
 
 namespace Engine.Common
 {
@@ -113,6 +114,15 @@ namespace Engine.Common
             {
                 this.PathEnd.Invoke(this, new EventArgs());
             }
+        }
+
+        /// <summary>
+        /// Gets the current controller path
+        /// </summary>
+        /// <returns>Returns the current controller path</returns>
+        public IEnumerable<Vector3> SamplePath(float sampleTime = 0.1f)
+        {
+            return this.path?.SamplePath(sampleTime);
         }
     }
 }

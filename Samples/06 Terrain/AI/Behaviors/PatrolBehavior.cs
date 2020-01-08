@@ -20,10 +20,6 @@ namespace Terrain.AI.Behaviors
         /// Time to wait in the check point
         /// </summary>
         private float checkPointTime;
-        /// <summary>
-        /// Patrolling velocity
-        /// </summary>
-        private float patrollVelocity;
 
         /// <summary>
         /// Last check point time
@@ -45,6 +41,10 @@ namespace Terrain.AI.Behaviors
                 return null;
             }
         }
+        /// <summary>
+        /// Patrolling velocity
+        /// </summary>
+        public float PatrollVelocity { get; set; }
 
         /// <summary>
         /// Constructor
@@ -67,7 +67,7 @@ namespace Terrain.AI.Behaviors
             this.currentCheckPoint = -1;
             this.checkPointTime = checkPointTime;
             this.LastCheckPointTime = 0;
-            this.patrollVelocity = patrolVelocity;
+            this.PatrollVelocity = patrolVelocity;
         }
 
         /// <summary>
@@ -127,7 +127,7 @@ namespace Terrain.AI.Behaviors
 
             if (navigate)
             {
-                this.Agent.SetRouteToPoint(this.checkPoints[this.currentCheckPoint], this.patrollVelocity, true);
+                this.Agent.SetRouteToPoint(this.checkPoints[this.currentCheckPoint], this.PatrollVelocity, true);
             }
         }
     }

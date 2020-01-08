@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Engine.PathFinding.RecastNavigation
 {
@@ -512,6 +513,10 @@ namespace Engine.PathFinding.RecastNavigation
         private readonly List<GraphItem> itemIndices = new List<GraphItem>();
 
         /// <summary>
+        /// Gets whether the graph is initialized
+        /// </summary>
+        public bool Initialized { get; set; }
+        /// <summary>
         /// Input geometry
         /// </summary>
         public InputGeometry Input { get; set; }
@@ -520,9 +525,9 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         public BuildSettings Settings { get; set; }
         /// <summary>
-        /// Navigation mesh query dictionary (by agent type)
+        /// Agent query list
         /// </summary>
-        public Dictionary<Agent, NavMeshQuery> MeshQueryDictionary { get; set; } = new Dictionary<Agent, NavMeshQuery>();
+        public List<GraphAgentQuery> AgentQueries { get; set; } = new List<GraphAgentQuery>();
 
         /// <summary>
         /// Constructor
@@ -555,13 +560,13 @@ namespace Engine.PathFinding.RecastNavigation
         {
             if (disposing)
             {
-                foreach (var item in this.MeshQueryDictionary)
+                foreach (var item in this.AgentQueries)
                 {
-                    item.Value?.Dispose();
+                    item?.Dispose();
                 }
 
-                this.MeshQueryDictionary.Clear();
-                this.MeshQueryDictionary = null;
+                this.AgentQueries.Clear();
+                this.AgentQueries = null;
             }
         }
 
@@ -573,9 +578,11 @@ namespace Engine.PathFinding.RecastNavigation
         {
             this.Updating?.Invoke(this, new EventArgs());
 
-            foreach (var agent in MeshQueryDictionary.Keys)
+            foreach (var agentQ in AgentQueries)
             {
-                MeshQueryDictionary[agent].GetAttachedNavMesh().BuildTile(position, Input, Settings, agent);
+                var navmesh = agentQ.NavMesh;
+
+                navmesh.BuildTile(position, Input, Settings, agentQ.Agent);
             }
 
             this.Updated?.Invoke(this, new EventArgs());
@@ -588,9 +595,11 @@ namespace Engine.PathFinding.RecastNavigation
         {
             this.Updating?.Invoke(this, new EventArgs());
 
-            foreach (var agent in MeshQueryDictionary.Keys)
+            foreach (var agentQ in AgentQueries)
             {
-                MeshQueryDictionary[agent].GetAttachedNavMesh().RemoveTile(position, Input, Settings);
+                var navmesh = agentQ.NavMesh;
+
+                navmesh.RemoveTile(position, Input, Settings);
             }
 
             this.Updated?.Invoke(this, new EventArgs());
@@ -613,7 +622,9 @@ namespace Engine.PathFinding.RecastNavigation
         {
             List<GraphNode> nodes = new List<GraphNode>();
 
-            nodes.AddRange(GraphNode.Build(MeshQueryDictionary[(Agent)agent].GetAttachedNavMesh()));
+            var navmesh = AgentQueries.Find(a => a.Agent == agent)?.NavMesh;
+
+            nodes.AddRange(GraphNode.Build(navmesh));
 
             return nodes.ToArray();
         }
@@ -631,8 +642,10 @@ namespace Engine.PathFinding.RecastNavigation
                 IncludeFlags = SamplePolyFlagTypes.SAMPLE_POLYFLAGS_WALK,
             };
 
+            var query = AgentQueries.Find(a => a.Agent == agent)?.CreateQuery();
+
             var status = CalcPath(
-                MeshQueryDictionary[(Agent)agent],
+                query,
                 filter, new Vector3(2, 4, 2), PathFindingMode.TOOLMODE_PATHFIND_FOLLOW,
                 from, to, out Vector3[] result);
 
@@ -646,6 +659,50 @@ namespace Engine.PathFinding.RecastNavigation
             }
         }
         /// <summary>
+        /// Find path from point to point for the specified agent type
+        /// </summary>
+        /// <param name="agent">Agent type</param>
+        /// <param name="from">Start point</param>
+        /// <param name="to">End point</param>
+        /// <returns>Return path if exists</returns>
+        public async Task<Vector3[]> FindPathAsync(AgentType agent, Vector3 from, Vector3 to)
+        {
+            Vector3[] result = new Vector3[] { };
+
+            await Task.Run(() =>
+            {
+                var filter = new QueryFilter()
+                {
+                    IncludeFlags = SamplePolyFlagTypes.SAMPLE_POLYFLAGS_WALK,
+                };
+
+                var query = AgentQueries.Find(a => a.Agent == agent)?.CreateQuery();
+
+                var status = CalcPath(
+                    query,
+                    filter, new Vector3(2, 4, 2), PathFindingMode.TOOLMODE_PATHFIND_FOLLOW,
+                    from, to, out Vector3[] res);
+
+                if (status.HasFlag(Status.DT_SUCCESS))
+                {
+                    result = res;
+                }
+            });
+
+            return result;
+        }
+
+        /// <summary>
+        /// Gets wether the specified position is walkable for the specified agent type
+        /// </summary>
+        /// <param name="agent">Agent type</param>
+        /// <param name="position">Position</param>
+        /// <returns>Returns true if the specified position is walkable</returns>
+        public bool IsWalkable(AgentType agent, Vector3 position)
+        {
+            return IsWalkable(agent, position, out var nearest);
+        }
+        /// <summary>
         /// Gets wether the specified position is walkable for the specified agent type
         /// </summary>
         /// <param name="agent">Agent type</param>
@@ -657,7 +714,7 @@ namespace Engine.PathFinding.RecastNavigation
             nearest = null;
 
             //Find agent query
-            var query = MeshQueryDictionary[(Agent)agent];
+            var query = AgentQueries.Find(a => a.Agent == agent)?.CreateQuery();
             if (query != null)
             {
                 var filter = new QueryFilter()
@@ -694,14 +751,14 @@ namespace Engine.PathFinding.RecastNavigation
 
             List<Tuple<Agent, int>> obstacles = new List<Tuple<Agent, int>>();
 
-            foreach (var agent in MeshQueryDictionary.Keys)
+            foreach (var agentQ in AgentQueries)
             {
-                var cache = MeshQueryDictionary[agent].GetAttachedNavMesh().TileCache;
+                var cache = agentQ.NavMesh.TileCache;
                 if (cache != null)
                 {
                     cache.AddObstacle(cylinder.Position, cylinder.Radius, cylinder.Height, out int res);
 
-                    obstacles.Add(new Tuple<Agent, int>(agent, res));
+                    obstacles.Add(new Tuple<Agent, int>(agentQ.Agent, res));
                 }
             }
 
@@ -730,14 +787,14 @@ namespace Engine.PathFinding.RecastNavigation
 
             List<Tuple<Agent, int>> obstacles = new List<Tuple<Agent, int>>();
 
-            foreach (var agent in MeshQueryDictionary.Keys)
+            foreach (var agentQ in AgentQueries)
             {
-                var cache = MeshQueryDictionary[agent].GetAttachedNavMesh().TileCache;
+                var cache = agentQ.NavMesh.TileCache;
                 if (cache != null)
                 {
                     cache.AddBoxObstacle(bbox.Minimum, bbox.Maximum, out int res);
 
-                    obstacles.Add(new Tuple<Agent, int>(agent, res));
+                    obstacles.Add(new Tuple<Agent, int>(agentQ.Agent, res));
                 }
             }
 
@@ -771,9 +828,9 @@ namespace Engine.PathFinding.RecastNavigation
             var halfExtents = obb.Extents;
             var yRotation = GetYRotation(obb.Transformation);
 
-            foreach (var agent in MeshQueryDictionary.Keys)
+            foreach (var agentQ in AgentQueries)
             {
-                var cache = MeshQueryDictionary[agent].GetAttachedNavMesh().TileCache;
+                var cache = agentQ.NavMesh.TileCache;
                 if (cache == null)
                 {
                     continue;
@@ -781,7 +838,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                 cache.AddBoxObstacle(position, halfExtents, yRotation, out int res);
 
-                obstacles.Add(new Tuple<Agent, int>(agent, res));
+                obstacles.Add(new Tuple<Agent, int>(agentQ.Agent, res));
             }
 
             if (obstacles.Count == 0)
@@ -854,7 +911,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 foreach (var item in instance.Indices)
                 {
-                    var cache = MeshQueryDictionary[item.Item1].GetAttachedNavMesh().TileCache;
+                    var cache = AgentQueries.Find(a => a.Agent == item.Item1)?.NavMesh.TileCache;
                     if (cache != null)
                     {
                         cache.RemoveObstacle(item.Item2);
@@ -877,14 +934,14 @@ namespace Engine.PathFinding.RecastNavigation
 
             List<Tuple<Agent, int>> offmeshConnections = new List<Tuple<Agent, int>>();
 
-            foreach (var agent in MeshQueryDictionary.Keys)
+            foreach (var agentQ in AgentQueries)
             {
-                var cache = MeshQueryDictionary[agent].GetAttachedNavMesh().TileCache;
+                var cache = agentQ.NavMesh.TileCache;
                 if (cache != null)
                 {
                     cache.AddOffmeshConnection(from, to, out int res);
 
-                    offmeshConnections.Add(new Tuple<Agent, int>(agent, res));
+                    offmeshConnections.Add(new Tuple<Agent, int>(agentQ.Agent, res));
                 }
             }
 
@@ -915,7 +972,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 foreach (var item in offmeshConnection.Indices)
                 {
-                    var cache = MeshQueryDictionary[item.Item1].GetAttachedNavMesh().TileCache;
+                    var cache = AgentQueries.Find(a => a.Agent == item.Item1)?.NavMesh.TileCache;
                     if (cache != null)
                     {
                         cache.RemoveOffmeshConnection(item.Item2);
@@ -932,9 +989,9 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="gameTime">Game time</param>
         public void Update(GameTime gameTime)
         {
-            foreach (var agent in MeshQueryDictionary.Keys)
+            foreach (var agentQ in AgentQueries)
             {
-                var nm = MeshQueryDictionary[agent].GetAttachedNavMesh();
+                var nm = agentQ.NavMesh;
                 if (nm.TileCache != null)
                 {
                     var status = nm.TileCache.Update(gameTime.TotalMilliseconds, nm, out bool upToDate);

@@ -346,6 +346,21 @@ namespace Engine.PathFinding.AStar
         /// </summary>
         /// <param name="point">Point to test</param>
         /// <returns>Returns whether this node contains specified point</returns>
+        public bool Contains(Vector3 point)
+        {
+            if (point.X >= this.SouthWest.X && point.Z >= this.SouthWest.Z &&
+                point.X <= this.NorthEast.X && point.Z <= this.NorthEast.Z)
+            {
+                return true;
+            }
+
+            return false;
+        }
+        /// <summary>
+        /// Gets whether this node contains specified point
+        /// </summary>
+        /// <param name="point">Point to test</param>
+        /// <returns>Returns whether this node contains specified point</returns>
         public bool Contains(Vector3 point, out float distance)
         {
             distance = float.MaxValue;

@@ -22,11 +22,12 @@ namespace Collada
                     cl.Run();
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 File.WriteAllText("dump.txt", ex.ToString());
-
+#if DEBUG
                 throw;
+#endif
             }
         }
     }

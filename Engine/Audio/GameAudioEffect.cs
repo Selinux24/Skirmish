@@ -10,8 +10,11 @@ namespace Engine.Audio
     /// <summary>
     /// Effect instance
     /// </summary>
-    public class GameAudioEffect : IDisposable
+    public sealed class GameAudioEffect : IDisposable
     {
+        private readonly GameAudio gameAudio;
+        private readonly GameAudioSound gameSound;
+
         private DspSettings dspSettings;
         private Emitter emitter;
         private Listener listener;
@@ -27,33 +30,6 @@ namespace Engine.Audio
         private ReverbPresets? reverbPreset = null;
         private readonly bool destroyWhenFinished;
 
-        /// <summary>
-        /// Gets the current audio buffer.
-        /// </summary>
-        protected AudioBuffer CurrentAudioBuffer
-        {
-            get
-            {
-                if (this.Sound == null || this.Sound.AudioBuffer == null)
-                {
-                    return null;
-                }
-
-                return this.IsLooped ? this.Sound.LoopedAudioBuffer : this.Sound.AudioBuffer;
-            }
-        }
-
-        /// <summary>
-        /// Gets the base sound.
-        /// </summary>
-        public GameAudioSound Sound { get; private set; }
-        /// <summary>
-        /// Attached mastering voice
-        /// </summary>
-        public MasteringVoice MasteringVoice
-        {
-            get { return this.Sound.GameAudio.MasteringVoice; }
-        }
         /// <summary>
         /// Gets a value indicating whether this instance is looped.
         /// </summary>
@@ -149,11 +125,11 @@ namespace Engine.Audio
         /// <summary>
         /// Emitter
         /// </summary>
-        public GameAudioEmitter Emitter { get; private set; }
+        public IGameAudioEmitter Emitter { get; private set; }
         /// <summary>
         /// Listener
         /// </summary>
-        public GameAudioListener Listener { get; private set; }
+        public IGameAudioListener Listener { get; private set; }
         /// <summary>
         /// The instance is due to dispose
         /// </summary>
@@ -224,7 +200,7 @@ namespace Engine.Audio
         {
             get
             {
-                return Sound.Duration;
+                return gameSound.Duration;
             }
         }
 
@@ -244,12 +220,14 @@ namespace Engine.Audio
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="audio">Game audio</param>
         /// <param name="sound">Sound effect</param>
         /// <param name="effectParameters">Effect parameters</param>
-        public GameAudioEffect(GameAudioSound sound, GameAudioEffectParameters effectParameters)
+        internal GameAudioEffect(GameAudio audio, GameAudioSound sound, GameAudioEffectParameters effectParameters)
         {
-            Sound = sound;
-            sourceVoice = this.Sound.GameAudio.CreateSourceVoice(this.Sound.WaveFormat);
+            gameAudio = audio;
+            gameSound = sound;
+            sourceVoice = audio.CreateSourceVoice(gameSound.WaveFormat);
 
             destroyWhenFinished = effectParameters.DestroyWhenFinished;
             paused = false;
@@ -261,8 +239,20 @@ namespace Engine.Audio
             Volume = effectParameters.Volume;
 
             UseAudio3D = effectParameters.UseAudio3D;
-            Emitter = new GameAudioEmitter(Vector3.Zero, effectParameters.EmitterRadius, effectParameters.EmitterCone);
-            Listener = new GameAudioListener(Vector3.Zero, effectParameters.ListenerRadius, effectParameters.ListenerCone);
+            Emitter = new GameAudioEmitter()
+            {
+                Radius = effectParameters.EmitterRadius,
+                Cone = effectParameters.EmitterCone,
+                InnerRadius = effectParameters.EmitterInnerRadius,
+                InnerRadiusAngle = effectParameters.EmitterInnerRadiusAngle,
+                VolumeCurve = effectParameters.EmitterVolumeCurve,
+                LfeCurve = effectParameters.EmitterLfeCurve,
+                ReverbCurve = effectParameters.EmitterReverbCurve,
+            };
+            Listener = new GameAudioListener()
+            {
+                Cone = effectParameters.ListenerCone,
+            };
 
             useReverb = effectParameters.UseReverb;
             if (useReverb)
@@ -300,7 +290,7 @@ namespace Engine.Audio
         /// Dispose resources
         /// </summary>
         /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
             if (disposing)
             {
@@ -309,14 +299,14 @@ namespace Engine.Audio
                     sourceVoice.BufferStart -= SourceVoice_BufferStart;
                     sourceVoice.BufferEnd -= SourceVoice_BufferEnd;
                     sourceVoice.LoopEnd -= SourceVoice_LoopEnd;
-                }
+                    sourceVoice.Stop(0);
+                    sourceVoice.FlushSourceBuffers();
+                    sourceVoice.SetOutputVoices(null);
+                    sourceVoice.DestroyVoice();
+                    sourceVoice.Dispose();
 
-                sourceVoice?.Stop(0);
-                sourceVoice?.FlushSourceBuffers();
-                sourceVoice?.SetOutputVoices(null);
-                sourceVoice?.DestroyVoice();
-                sourceVoice?.Dispose();
-                sourceVoice = null;
+                    sourceVoice = null;
+                }
 
                 this.submixVoice?.DestroyVoice();
                 this.submixVoice?.Dispose();
@@ -339,22 +329,22 @@ namespace Engine.Audio
             if (dspSettings == null)
             {
                 dspSettings = new DspSettings(
-                    this.Sound.WaveFormat.Channels,
-                    this.Sound.GameAudio.InputChannelCount);
+                    gameSound.WaveFormat.Channels,
+                    gameAudio.InputChannelCount);
             }
 
-            this.Sound.GameAudio.Calculate3D(listener, emitter, flags, dspSettings);
+            gameAudio.Calculate3D(listener, emitter, flags, dspSettings);
 
             sourceVoice.SetFrequencyRatio(dspSettings.DopplerFactor);
 
             sourceVoice.SetOutputMatrix(
-                this.MasteringVoice,
+                gameAudio.MasteringVoice,
                 dspSettings.SourceChannelCount,
                 dspSettings.DestinationChannelCount,
                 dspSettings.MatrixCoefficients);
 
             sourceVoice.SetOutputFilterParameters(
-                this.MasteringVoice,
+                gameAudio.MasteringVoice,
                 new FilterParameters
                 {
                     Type = FilterType.LowPassFilter,
@@ -367,9 +357,9 @@ namespace Engine.Audio
                 return;
             }
 
-            if (reverbLevels?.Length != this.Sound.WaveFormat.Channels)
+            if (reverbLevels?.Length != gameSound.WaveFormat.Channels)
             {
-                reverbLevels = new float[this.Sound.WaveFormat.Channels];
+                reverbLevels = new float[gameSound.WaveFormat.Channels];
             }
 
             for (int i = 0; i < reverbLevels.Length; i++)
@@ -377,7 +367,7 @@ namespace Engine.Audio
                 reverbLevels[i] = dspSettings.ReverbLevel;
             }
 
-            sourceVoice.SetOutputMatrix(this.submixVoice, this.Sound.WaveFormat.Channels, 1, reverbLevels);
+            sourceVoice.SetOutputMatrix(this.submixVoice, gameSound.WaveFormat.Channels, 1, reverbLevels);
 
             if (!this.UseReverbFilter)
             {
@@ -397,7 +387,7 @@ namespace Engine.Audio
         /// Updates listener state
         /// </summary>
         /// <param name="audioListener">Listener state</param>
-        private void UpdateListener(GameAudioListener audioListener)
+        private void UpdateListener(IGameAudioListener audioListener)
         {
             if (listener == null)
             {
@@ -426,12 +416,16 @@ namespace Engine.Audio
                 listener.Cone.OuterLpf = audioListener.Cone.Value.OuterLpf;
                 listener.Cone.OuterReverb = audioListener.Cone.Value.OuterReverb;
             }
+            else
+            {
+                listener.Cone = null;
+            }
         }
         /// <summary>
         /// Updates emitter state
         /// </summary>
         /// <param name="audioEmitter">Emitter state</param>
-        private void UpdateEmitter(GameAudioEmitter audioEmitter)
+        private void UpdateEmitter(IGameAudioEmitter audioEmitter)
         {
             if (emitter == null)
             {
@@ -443,19 +437,19 @@ namespace Engine.Audio
             emitter.OrientTop = audioEmitter.Up;
             emitter.Velocity = audioEmitter.Velocity;
 
-            emitter.ChannelCount = this.Sound.WaveFormat.Channels;
+            emitter.ChannelCount = gameSound.WaveFormat.Channels;
             emitter.ChannelRadius = 1;
             if (emitter.ChannelCount > 1)
             {
                 emitter.ChannelAzimuths = new float[emitter.ChannelCount];
             }
 
-            emitter.InnerRadius = 2;
-            emitter.InnerRadiusAngle = MathUtil.PiOverFour;
+            emitter.InnerRadius = audioEmitter.InnerRadius;
+            emitter.InnerRadiusAngle = audioEmitter.InnerRadiusAngle;
 
-            emitter.VolumeCurve = GameAudioPresets.DefaultLinearCurve;
-            emitter.LfeCurve = GameAudioPresets.DefaultEmitterLfeCurve;
-            emitter.ReverbCurve = GameAudioPresets.DefaultEmitterReverbCurve;
+            emitter.VolumeCurve = GameAudioCurvePoint.ConvertCurve(audioEmitter.VolumeCurve);
+            emitter.LfeCurve = GameAudioCurvePoint.ConvertCurve(audioEmitter.LfeCurve);
+            emitter.ReverbCurve = GameAudioCurvePoint.ConvertCurve(audioEmitter.ReverbCurve);
 
             emitter.CurveDistanceScaler = GameAudio.DistanceScale * audioEmitter.Radius;
             emitter.DopplerScaler = GameAudio.DopplerScale;
@@ -477,6 +471,10 @@ namespace Engine.Audio
                 emitter.Cone.OuterLpf = audioEmitter.Cone.Value.OuterLpf;
                 emitter.Cone.OuterReverb = audioEmitter.Cone.Value.OuterReverb;
             }
+            else
+            {
+                emitter.Cone = null;
+            }
         }
         /// <summary>
         /// Gets the 3D calculate flags
@@ -489,7 +487,7 @@ namespace Engine.Audio
                 CalculateFlags.Doppler |
                 CalculateFlags.LpfDirect;
 
-            if (this.Sound.GameAudio.UseRedirectToLFE)
+            if (gameAudio.UseRedirectToLFE)
             {
                 // On devices with an LFE channel, allow the mono source data to be routed to the LFE destination channel.
                 flags |= CalculateFlags.RedirectToLfe;
@@ -514,7 +512,7 @@ namespace Engine.Audio
             }
             else
             {
-                return this.MasteringVoice;
+                return gameAudio.MasteringVoice;
             }
         }
 
@@ -542,7 +540,9 @@ namespace Engine.Audio
                 sourceVoice.FlushSourceBuffers();
             }
 
-            sourceVoice.SubmitSourceBuffer(CurrentAudioBuffer, Sound.DecodedPacketsInfo);
+            var buffer = GetCurrentAudioBuffer();
+
+            sourceVoice.SubmitSourceBuffer(buffer, gameSound.DecodedPacketsInfo);
 
             if (this.UseAudio3D)
             {
@@ -576,9 +576,11 @@ namespace Engine.Audio
         {
             if (!IsLooped && sourceVoice.State.BuffersQueued == 0)
             {
+                var buffer = GetCurrentAudioBuffer();
+
                 sourceVoice.Stop();
                 sourceVoice.FlushSourceBuffers();
-                sourceVoice.SubmitSourceBuffer(CurrentAudioBuffer, Sound.DecodedPacketsInfo);
+                sourceVoice.SubmitSourceBuffer(buffer, gameSound.DecodedPacketsInfo);
             }
 
             sourceVoice.Start();
@@ -609,6 +611,19 @@ namespace Engine.Audio
 
             Stop();
         }
+        /// <summary>
+        /// Gets the current audio buffer.
+        /// </summary>
+        /// <returns>Returns the current audio buffer</returns>
+        private AudioBuffer GetCurrentAudioBuffer()
+        {
+            if (gameSound.AudioBuffer == null)
+            {
+                return null;
+            }
+
+            return this.IsLooped ? gameSound.LoopedAudioBuffer : gameSound.AudioBuffer;
+        }
 
         /// <summary>
         /// Enables the reverb effect
@@ -618,18 +633,18 @@ namespace Engine.Audio
             if (this.submixVoice == null)
             {
 #if DEBUG
-                var reverbEffect = this.Sound.GameAudio.CreateReverb(true);
+                var reverbEffect = gameAudio.CreateReverb(true);
 #else
-                var reverbEffect = this.Sound.GameAudio.CreateReverb();
+                var reverbEffect = gameAudio.CreateReverb();
 #endif
                 using (reverbEffect)
                 {
                     //Get input data from mastering voice
-                    int outputChannels = this.Sound.GameAudio.InputChannelCount;
-                    int outputSampleRate = this.Sound.GameAudio.InputSampleRate;
+                    int outputChannels = gameAudio.InputChannelCount;
+                    int outputSampleRate = gameAudio.InputSampleRate;
                     var sendFlags = this.UseReverbFilter ? SubmixVoiceFlags.UseFilter : SubmixVoiceFlags.None;
 
-                    this.submixVoice = this.Sound.GameAudio.CreatesSubmixVoice(
+                    this.submixVoice = gameAudio.CreatesSubmixVoice(
                         outputChannels,
                         outputSampleRate,
                         sendFlags,
@@ -645,7 +660,7 @@ namespace Engine.Audio
             var sendDescriptors = new[]
             {
                 // LPF direct-path
-                new VoiceSendDescriptor { Flags = VoiceSendFlags.UseFilter, OutputVoice = this.MasteringVoice },
+                new VoiceSendDescriptor { Flags = VoiceSendFlags.UseFilter, OutputVoice = gameAudio.MasteringVoice },
                 // LPF reverb-path -- omit for better performance at the cost of less realistic occlusion
                 new VoiceSendDescriptor { Flags = VoiceSendFlags.UseFilter, OutputVoice = submixVoice },
             };
@@ -663,7 +678,7 @@ namespace Engine.Audio
             var sendDescriptors = new[]
             {
                 // LPF direct-path
-                new VoiceSendDescriptor { Flags = VoiceSendFlags.UseFilter, OutputVoice = this.MasteringVoice },
+                new VoiceSendDescriptor { Flags = VoiceSendFlags.UseFilter, OutputVoice = gameAudio.MasteringVoice },
             };
 
             sourceVoice.SetOutputVoices(sendDescriptors);
@@ -709,7 +724,7 @@ namespace Engine.Audio
             //The level sent from source channel S to destination channel D is specified in the form outputMatrix[SourceChannels × D + S]
             for (int s = 0; s < sourceChannels; s++)
             {
-                switch ((AudioSpeakers)this.Sound.GameAudio.Speakers)
+                switch ((AudioSpeakers)gameAudio.Speakers)
                 {
                     case AudioSpeakers.Mono:
                         panOutputMatrix[(sourceChannels * 0) + s] = 1;
@@ -819,63 +834,5 @@ namespace Engine.Audio
 
             return rc.ToArray();
         }
-    }
-
-    /// <summary>
-    /// Game audio effect parameters
-    /// </summary>
-    public class GameAudioEffectParameters
-    {
-        /// <summary>
-        /// Sound name
-        /// </summary>
-        public string SoundName { get; set; }
-        /// <summary>
-        /// Gets a value indicating whether this instance is looped.
-        /// </summary>
-        public bool IsLooped { get; set; }
-        /// <summary>
-        /// Gets or sets the pan value of the sound effect.
-        /// </summary>
-        /// <remarks>The value is clamped to (-1f, 1f) range.</remarks>
-        /// <exception cref="ObjectDisposedException">Is thrown if the current instance was already disposed.</exception>
-        public float Pan { get; set; }
-        /// <summary>
-        /// Gets or sets the pitch value of the sound effect.
-        /// </summary>
-        /// <remarks>The value is clamped to (-1f, 1f) range.</remarks>
-        /// <exception cref="ObjectDisposedException">Is thrown if the current instance was already disposed.</exception>
-        public float Pitch { get; set; }
-        /// <summary>
-        /// Gets or sets the volume of the current sound effect instance.
-        /// </summary>
-        /// <remarks>The value is clamped to (0f, 1f) range.</remarks>
-        /// <exception cref="ObjectDisposedException">Is thrown if the current instance was already disposed.</exception>
-        public float Volume { get; set; } = 1;
-        /// <summary>
-        /// Gets or sets whether the master voice uses 3D audio or not
-        /// </summary>
-        public bool UseAudio3D { get; set; } = false;
-        /// <summary>
-        /// Gets or sets whether the sub-mix voice uses a reverb effect or not
-        /// </summary>
-        public bool UseReverb { get; set; } = false;
-        /// <summary>
-        /// Gets or sets whether the reverb effect use filters or not
-        /// </summary>
-        public bool UseReverbFilter { get; set; } = false;
-        /// <summary>
-        /// Gets or sets the current reverb preset configuration
-        /// </summary>
-        public ReverbPresets? ReverbPreset { get; set; } = ReverbPresets.Default;
-        /// <summary>
-        /// Destroy when finished
-        /// </summary>
-        public bool DestroyWhenFinished { get; set; } = true;
-
-        public float EmitterRadius { get; set; } = float.MaxValue;
-        public GameAudioConeDescription? EmitterCone { get; set; } = null;
-        public float ListenerRadius { get; set; } = float.MaxValue;
-        public GameAudioConeDescription? ListenerCone { get; set; } = null;
     }
 }

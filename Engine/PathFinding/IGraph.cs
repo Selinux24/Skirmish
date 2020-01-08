@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Threading.Tasks;
 
 namespace Engine.PathFinding
 {
@@ -8,6 +9,10 @@ namespace Engine.PathFinding
     /// </summary>
     public interface IGraph : IDisposable
     {
+        /// <summary>
+        /// Gets whether the graph is initialized
+        /// </summary>
+        bool Initialized { get; }
         /// <summary>
         /// Gets the node collection of the graph for the specified agent type
         /// </summary>
@@ -22,6 +27,21 @@ namespace Engine.PathFinding
         /// <param name="to">End point</param>
         /// <returns>Return path if exists</returns>
         Vector3[] FindPath(AgentType agent, Vector3 from, Vector3 to);
+        /// <summary>
+        /// Find path from point to point for the specified agent type
+        /// </summary>
+        /// <param name="agent">Agent type</param>
+        /// <param name="from">Start point</param>
+        /// <param name="to">End point</param>
+        /// <returns>Return path if exists</returns>
+        Task<Vector3[]> FindPathAsync(AgentType agent, Vector3 from, Vector3 to);
+        /// <summary>
+        /// Gets wether the specified position is walkable for the specified agent type
+        /// </summary>
+        /// <param name="agent">Agent type</param>
+        /// <param name="position">Position</param>
+        /// <returns>Returns true if the specified position is walkable</returns>
+        bool IsWalkable(AgentType agent, Vector3 position);
         /// <summary>
         /// Gets wether the specified position is walkable for the specified agent type
         /// </summary>

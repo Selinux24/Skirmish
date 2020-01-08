@@ -208,5 +208,24 @@ namespace Engine
                 return Vector3.Zero;
             }
         }
+        /// <summary>
+        /// Samples current path in a vector array
+        /// </summary>
+        /// <param name="sampleTime">Time delta</param>
+        /// <returns>Returns a vector array</returns>
+        public IEnumerable<Vector3> SamplePath(float sampleTime)
+        {
+            List<Vector3> returnPath = new List<Vector3>();
+
+            float time = 0;
+            while (time < this.Length)
+            {
+                returnPath.Add(this.GetPosition(time));
+
+                time += sampleTime;
+            }
+
+            return returnPath.ToArray();
+        }
     }
 }
