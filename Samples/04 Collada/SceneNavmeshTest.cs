@@ -6,6 +6,7 @@ using SharpDX;
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Collada
 {
@@ -32,9 +33,9 @@ namespace Collada
 
         }
 
-        public override void Initialize()
+        public override async Task Initialize()
         {
-            base.Initialize();
+            await base.Initialize();
 
 #if DEBUG
             this.Game.VisibleMouse = false;
@@ -48,22 +49,22 @@ namespace Collada
             this.Lights.BackLight.Enabled = false;
             this.Lights.FillLight.Enabled = false;
 
-            this.InitializeText();
+            await this.InitializeText();
             this.InitializeAgent();
-            this.InitializeNavmesh();
-            this.InitializeDebug();
+            await this.InitializeNavmesh();
+            await this.InitializeDebug();
         }
-        private void InitializeText()
+        private async Task InitializeText()
         {
-            var title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
+            var title = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
             title.Instance.Text = "Navigation Mesh Test Scene";
             title.Instance.Position = Vector2.Zero;
 
-            var help = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            var help = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
             help.Instance.Text = "Camera: WASD+Mouse. B: Change Build Mode. P: Change Partition Type. (SHIFT reverse). F5: Save. F6: Load. Space: Update current tile (SHIFT remove).";
             help.Instance.Position = new Vector2(0, 24);
 
-            this.debug = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.debug = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
             this.debug.Instance.Text = null;
             this.debug.Instance.Position = new Vector2(0, 48);
 
@@ -75,7 +76,7 @@ namespace Collada
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            await this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
         }
         private void InitializeAgent()
         {
@@ -95,9 +96,9 @@ namespace Collada
             this.Camera.MovementDelta = agent.Velocity;
             this.Camera.SlowMovementDelta = agent.VelocitySlow;
         }
-        private void InitializeNavmesh()
+        private async Task InitializeNavmesh()
         {
-            this.inputGeometry = this.AddComponent<Model>(
+            this.inputGeometry = await this.AddComponent<Model>(
                 new ModelDescription()
                 {
                     TextureIndex = 0,
@@ -134,7 +135,7 @@ namespace Collada
 
             this.PathFinderDescription = new PathFinderDescription(nmsettings, nminput);
         }
-        private void InitializeDebug()
+        private async Task InitializeDebug()
         {
             var graphDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
             {
@@ -142,7 +143,7 @@ namespace Collada
                 AlphaEnabled = true,
                 Count = 50000,
             };
-            this.graphDrawer = this.AddComponent<PrimitiveListDrawer<Triangle>>(graphDrawerDesc);
+            this.graphDrawer = await this.AddComponent<PrimitiveListDrawer<Triangle>>(graphDrawerDesc);
         }
 
         public override void Initialized()

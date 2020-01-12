@@ -6,6 +6,7 @@ using Engine.PathFinding.AStar;
 using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace GameLogic
 {
@@ -103,7 +104,7 @@ namespace GameLogic
 
         }
 
-        public override void Initialize()
+        public override async Task Initialize()
         {
             GameEnvironment.Background = Color.Black;
 
@@ -122,9 +123,9 @@ namespace GameLogic
 
             this.Lights.Add(this.spotLight);
 
-            this.InitializeModels();
+            await this.InitializeModels();
 
-            this.InitializeHUD();
+            await this.InitializeHUD();
 
             this.UpdateLayout();
 
@@ -132,13 +133,13 @@ namespace GameLogic
 
             this.InitializePositions();
 
-            this.InitializeDebug();
+            await this.InitializeDebug();
 
             this.GoToSoldier(this.skirmishGame.CurrentSoldier);
         }
-        private void InitializeModels()
+        private async Task InitializeModels()
         {
-            this.cursor3D = this.AddComponent<Model>(
+            this.cursor3D = (await this.AddComponent<Model>(
                 new ModelDescription()
                 {
                     CastShadow = false,
@@ -150,9 +151,9 @@ namespace GameLogic
                     }
                 },
                 SceneObjectUsages.UI,
-                layerHUD).Instance;
+                layerHUD)).Instance;
 
-            var troopsObj = this.AddComponent<ModelInstanced>(
+            var troopsObj = await this.AddComponent<ModelInstanced>(
                 new ModelInstancedDescription()
                 {
                     Instances = this.skirmishGame.AllSoldiers.Length,
@@ -167,7 +168,7 @@ namespace GameLogic
 
             this.troops = troopsObj.Instance;
 
-            var terrainObj = this.AddComponent<Scenery>(
+            var terrainObj = await this.AddComponent<Scenery>(
                 new GroundDescription()
                 {
                     CastShadow = true,
@@ -191,7 +192,7 @@ namespace GameLogic
             var pBottomRight = wRes / tRes * bottomRight;
             var q = pTopLeft + ((pBottomRight - pTopLeft - new Vector2(minimapWidth, minimapHeight)) * 0.5f);
 
-            this.AddComponent<Minimap>(
+            await this.AddComponent<Minimap>(
                 new MinimapDescription()
                 {
                     Top = (int)q.Y,
@@ -217,7 +218,7 @@ namespace GameLogic
             };
             this.PathFinderDescription = new Engine.PathFinding.PathFinderDescription(settings, input);
         }
-        private void InitializeHUD()
+        private async Task InitializeHUD()
         {
             SpriteBackgroundDescription bkDesc = new SpriteBackgroundDescription()
             {
@@ -225,16 +226,16 @@ namespace GameLogic
                 Textures = new[] { "HUD.png" },
                 Color = new Color4(1f, 1f, 1f, 1f),
             };
-            this.AddComponent<Sprite>(bkDesc, SceneObjectUsages.UI, layerHUD - 1);
+            await this.AddComponent<Sprite>(bkDesc, SceneObjectUsages.UI, layerHUD - 1);
 
-            this.txtTitle = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 24, Color.White, Color.Gray), SceneObjectUsages.UI, layerHUD).Instance;
-            this.txtGame = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.LightBlue, Color.DarkBlue), SceneObjectUsages.UI, layerHUD).Instance;
-            this.txtTeam = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD).Instance;
-            this.txtSoldier = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD).Instance;
-            this.txtActionList = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD).Instance;
-            this.txtAction = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD).Instance;
+            this.txtTitle = (await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 24, Color.White, Color.Gray), SceneObjectUsages.UI, layerHUD)).Instance;
+            this.txtGame = (await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.LightBlue, Color.DarkBlue), SceneObjectUsages.UI, layerHUD)).Instance;
+            this.txtTeam = (await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD)).Instance;
+            this.txtSoldier = (await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD)).Instance;
+            this.txtActionList = (await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD)).Instance;
+            this.txtAction = (await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD)).Instance;
 
-            this.butClose = this.AddComponent<SpriteButton>(new SpriteButtonDescription()
+            this.butClose = (await this.AddComponent<SpriteButton>(new SpriteButtonDescription()
             {
                 TwoStateButton = true,
                 TextureReleased = "button_on.png",
@@ -249,9 +250,9 @@ namespace GameLogic
                     ShadowColor = Color.Orange,
                 },
                 Text = "EXIT",
-            }, SceneObjectUsages.UI, layerHUD).Instance;
+            }, SceneObjectUsages.UI, layerHUD)).Instance;
 
-            this.butNext = this.AddComponent<SpriteButton>(new SpriteButtonDescription()
+            this.butNext = (await this.AddComponent<SpriteButton>(new SpriteButtonDescription()
             {
                 TwoStateButton = true,
                 TextureReleased = "button_on.png",
@@ -265,9 +266,9 @@ namespace GameLogic
                     TextColor = Color.Yellow,
                 },
                 Text = "Next",
-            }, SceneObjectUsages.UI, layerHUD).Instance;
+            }, SceneObjectUsages.UI, layerHUD)).Instance;
 
-            this.butPrevSoldier = this.AddComponent<SpriteButton>(new SpriteButtonDescription()
+            this.butPrevSoldier = (await this.AddComponent<SpriteButton>(new SpriteButtonDescription()
             {
                 TwoStateButton = true,
                 TextureReleased = "button_on.png",
@@ -281,9 +282,9 @@ namespace GameLogic
                     TextColor = Color.Yellow,
                 },
                 Text = "Prev.Soldier",
-            }, SceneObjectUsages.UI, layerHUD).Instance;
+            }, SceneObjectUsages.UI, layerHUD)).Instance;
 
-            this.butNextSoldier = this.AddComponent<SpriteButton>(new SpriteButtonDescription()
+            this.butNextSoldier = (await this.AddComponent<SpriteButton>(new SpriteButtonDescription()
             {
                 TwoStateButton = true,
                 TextureReleased = "button_on.png",
@@ -297,9 +298,9 @@ namespace GameLogic
                     TextColor = Color.Yellow,
                 },
                 Text = "Next Soldier",
-            }, SceneObjectUsages.UI, layerHUD).Instance;
+            }, SceneObjectUsages.UI, layerHUD)).Instance;
 
-            this.butPrevAction = this.AddComponent<SpriteButton>(new SpriteButtonDescription()
+            this.butPrevAction = (await this.AddComponent<SpriteButton>(new SpriteButtonDescription()
             {
                 TwoStateButton = true,
                 TextureReleased = "button_on.png",
@@ -313,9 +314,9 @@ namespace GameLogic
                     TextColor = Color.Yellow,
                 },
                 Text = "Prev.Action",
-            }, SceneObjectUsages.UI, layerHUD).Instance;
+            }, SceneObjectUsages.UI, layerHUD)).Instance;
 
-            this.butNextAction = this.AddComponent<SpriteButton>(new SpriteButtonDescription()
+            this.butNextAction = (await this.AddComponent<SpriteButton>(new SpriteButtonDescription()
             {
                 TwoStateButton = true,
                 TextureReleased = "button_on.png",
@@ -329,7 +330,7 @@ namespace GameLogic
                     TextColor = Color.Yellow,
                 },
                 Text = "Next Action",
-            }, SceneObjectUsages.UI, layerHUD).Instance;
+            }, SceneObjectUsages.UI, layerHUD)).Instance;
 
             this.butClose.Click += (sender, eventArgs) => { this.Game.Exit(); };
             this.butNext.Click += (sender, eventArgs) => { this.NextPhase(); };
@@ -340,9 +341,9 @@ namespace GameLogic
 
             this.txtTitle.Text = "Game Logic";
         }
-        private void InitializeDebug()
+        private async Task InitializeDebug()
         {
-            this.lineDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(new PrimitiveListDrawerDescription<Line3D>() { Count = 5000 });
+            this.lineDrawer = await this.AddComponent<PrimitiveListDrawer<Line3D>>(new PrimitiveListDrawerDescription<Line3D>() { Count = 5000 });
             this.lineDrawer.Visible = false;
         }
 

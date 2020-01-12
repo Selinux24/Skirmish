@@ -3,6 +3,7 @@ using Engine.Common;
 using Engine.Content;
 using SharpDX;
 using System;
+using System.Threading.Tasks;
 
 namespace SceneTest
 {
@@ -29,10 +30,8 @@ namespace SceneTest
 
         }
 
-        public override void Initialize()
+        public override async Task Initialize()
         {
-            base.Initialize();
-
 #if DEBUG
             this.Game.VisibleMouse = false;
             this.Game.LockMouse = false;
@@ -46,20 +45,20 @@ namespace SceneTest
             this.Camera.Goto(-10, 8, 20f);
             this.Camera.LookTo(0, 0, 0);
 
-            this.InitializeFloorAsphalt();
-            this.InitializeBuildingObelisk();
-            this.InitializeEmitter();
-            this.InitializeLights();
+            await this.InitializeFloorAsphalt();
+            await this.InitializeBuildingObelisk();
+            await this.InitializeEmitter();
+            await this.InitializeLights();
 
             var desc = new PrimitiveListDrawerDescription<Line3D>()
             {
                 DepthEnabled = true,
                 Count = 5000
             };
-            this.lightsVolumeDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(desc);
+            this.lightsVolumeDrawer = await this.AddComponent<PrimitiveListDrawer<Line3D>>(desc);
         }
 
-        private void InitializeFloorAsphalt()
+        private async Task InitializeFloorAsphalt()
         {
             float l = spaceSize;
             float h = 0f;
@@ -100,11 +99,11 @@ namespace SceneTest
                 }
             };
 
-            this.floorAsphalt = this.AddComponent<Model>(desc);
+            this.floorAsphalt = await this.AddComponent<Model>(desc);
         }
-        private void InitializeBuildingObelisk()
+        private async Task InitializeBuildingObelisk()
         {
-            this.buildingObelisk = this.AddComponent<Model>(
+            this.buildingObelisk = await this.AddComponent<Model>(
                 new ModelDescription()
                 {
                     Name = "Obelisk",
@@ -120,7 +119,7 @@ namespace SceneTest
 
             this.buildingObelisk.Transform.SetPosition(0, 0, 0);
         }
-        private void InitializeEmitter()
+        private async Task InitializeEmitter()
         {
             MaterialContent mat = MaterialContent.Default;
             mat.EmissionColor = Color.White;
@@ -144,10 +143,10 @@ namespace SceneTest
                 }
             };
 
-            this.lightEmitter1 = this.AddComponent<Model>(desc);
-            this.lightEmitter2 = this.AddComponent<Model>(desc);
+            this.lightEmitter1 = await this.AddComponent<Model>(desc);
+            this.lightEmitter2 = await this.AddComponent<Model>(desc);
         }
-        private void InitializeLights()
+        private async Task InitializeLights()
         {
             this.Lights.KeyLight.Enabled = false;
             this.Lights.BackLight.Enabled = false;
@@ -156,6 +155,8 @@ namespace SceneTest
             this.Lights.Add(new SceneLightPoint("Point1", false, Color.White, Color.White, true, SceneLightPointDescription.Create(Vector3.Zero, 5, 5)));
 
             this.Lights.Add(new SceneLightSpot("Spot1", false, Color.White, Color.White, true, SceneLightSpotDescription.Create(Vector3.Zero, Vector3.Down, 20, 5, 5)));
+
+            await Task.CompletedTask;
         }
 
         public override void Update(GameTime gameTime)

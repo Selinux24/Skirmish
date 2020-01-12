@@ -34,6 +34,10 @@ namespace Engine
         /// </summary>
         public string Name { get; set; } = null;
         /// <summary>
+        /// Buffer manager
+        /// </summary>
+        public BufferManager BufferManager { get; private set; }
+        /// <summary>
         /// Resource manager
         /// </summary>
         public GameResourceManager ResourceManager { get; private set; }
@@ -179,6 +183,8 @@ namespace Engine
 
             this.GameTime = new GameTime();
 
+            this.BufferManager = new BufferManager(this);
+
             this.ResourceManager = new GameResourceManager(this);
 
             this.CPUStats = new PerformanceCounter("Processor", "% Processor Time", "_Total");
@@ -262,6 +268,9 @@ namespace Engine
                 ResourceManager?.Dispose();
                 ResourceManager = null;
 
+                BufferManager?.Dispose();
+                BufferManager = null;
+
                 Graphics?.Dispose();
                 Graphics = null;
             }
@@ -274,61 +283,73 @@ namespace Engine
         {
             RenderLoop.Run(this.Form, this.Frame);
         }
-        /// <summary>
-        /// Adds a new scene to collection
-        /// </summary>
-        /// <typeparam name="T">Type of scene</typeparam>
-        /// <param name="active">Sets the new scene as active</param>
-        /// <param name="order">The processing order of the scene</param>
-        public void AddScene<T>(bool active = true, int order = 1) where T : Scene
-        {
-            Scene scene = (T)Activator.CreateInstance(typeof(T), new[] { this });
-            scene.Active = active;
-            scene.Order = order;
 
-            this.AddScene(scene);
-        }
         /// <summary>
         /// Creates a new scene and sets it as the unique active scene
         /// </summary>
         /// <typeparam name="T">Type of scene</typeparam>
         /// <remarks>Current scenes will be removed from internal scene collection</remarks>
-        public void SetScene<T>() where T : Scene
+        public void SetScene<T>(SceneModes sceneMode = SceneModes.ForwardLigthning) where T : Scene
         {
-            this.nextScene = (T)Activator.CreateInstance(typeof(T), new[] { this });
+            T scene;
+
+            try
+            {
+                scene = (T)Activator.CreateInstance(typeof(T), new object[] { this, sceneMode });
+            }
+            catch
+            {
+                scene = (T)Activator.CreateInstance(typeof(T), new object[] { this });
+            }
+
+            scene.Order = 1;
+
+            this.nextScene = scene;
         }
         /// <summary>
-        /// Adds a scene to the internal scene collection
+        /// Unloads the current scenes and loads the specified scene
         /// </summary>
-        /// <param name="scene">New scene</param>
-        private void AddScene(Scene scene)
+        /// <param name="sceneToLoad">Scene to load</param>
+        private void ChangeScene(Scene sceneToLoad)
         {
-            this.scenes.Add(scene);
+            //Deactivate scenes
+            this.scenes.ForEach(s => s.Active = false);
+
+            //Copy collection for disposing
+            List<Scene> toDispose = new List<Scene>(this.scenes);
+
+            //Clear scene collection
+            this.scenes.Clear();
+
+            toDispose.ForEach(s => s.Dispose());
+            toDispose.Clear();
+
+            Task.WhenAll(this.StartScene(sceneToLoad));
+
+            this.scenes.Add(sceneToLoad);
             this.scenes.Sort(
                 delegate (Scene p1, Scene p2)
                 {
                     return p2.Order.CompareTo(p1.Order);
                 });
+        }
+        /// <summary>
+        /// Adds a scene to the internal scene collection
+        /// </summary>
+        /// <param name="scene">New scene</param>
+        private async Task StartScene(Scene scene)
+        {
+            await scene.Initialize();
 
-            scene.Initialize();
+            scene.SceneInitialized = true;
 
             scene.Initialized();
 
-            scene.SetResources();
-        }
-        /// <summary>
-        /// Remove scene from collection
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        public void RemoveScene(Scene scene)
-        {
-            if (this.scenes.Contains(scene))
-            {
-                this.scenes.Remove(scene);
+            this.BufferManager.CreateBuffers();
 
-                scene.Dispose();
-            }
+            scene.Active = true;
         }
+
         /// <summary>
         /// Close game
         /// </summary>
@@ -342,7 +363,26 @@ namespace Engine
         /// </summary>
         private void Frame()
         {
+            if (this.exiting)
+            {
+                return;
+            }
+
             this.GameTime.Update();
+
+            if (this.nextScene != null)
+            {
+                this.ChangeScene(this.nextScene);
+                this.nextScene = null;
+
+                return;
+            }
+
+            var activeScenes = scenes.Where(s => s.SceneInitialized && s.Active);
+            if (!activeScenes.Any())
+            {
+                return;
+            }
 
             Stopwatch gSW = new Stopwatch();
             gSW.Start();
@@ -351,7 +391,7 @@ namespace Engine
 
             FrameBegin();
 
-            foreach (var scene in scenes.Where(s => s.Active))
+            foreach (var scene in activeScenes)
             {
                 FrameSceneUpdate(scene);
 
@@ -384,11 +424,6 @@ namespace Engine
             {
                 //Exit form
                 this.Form.Close();
-            }
-            else if (this.nextScene != null)
-            {
-                this.ChangeScene(this.nextScene);
-                this.nextScene = null;
             }
         }
         /// <summary>
@@ -431,11 +466,14 @@ namespace Engine
         /// <param name="scene">Scene</param>
         private void FrameSceneDraw(Scene scene)
         {
-            Stopwatch dSW = new Stopwatch();
-            dSW.Start();
-            scene.Draw(this.GameTime);
-            dSW.Stop();
-            GameStatus.Add($"Scene {scene}.Draw", dSW);
+            if (this.BufferManager.SetVertexBuffers())
+            {
+                Stopwatch dSW = new Stopwatch();
+                dSW.Start();
+                scene.Draw(this.GameTime);
+                dSW.Stop();
+                GameStatus.Add($"Scene {scene}.Draw", dSW);
+            }
         }
         /// <summary>
         /// End frame
@@ -485,33 +523,6 @@ namespace Engine
             GameStatusCollected?.Invoke(this, e);
 
             CollectGameStatus = false;
-        }
-
-        /// <summary>
-        /// Unloads the current scenes and loads the specified scene
-        /// </summary>
-        /// <param name="sceneToLoad">Scene to load</param>
-        private void ChangeScene(Scene sceneToLoad)
-        {
-            foreach (var s in this.scenes)
-            {
-                s.Active = false;
-            }
-
-            List<Scene> toDispose = new List<Scene>(this.scenes);
-            Task.Run(() =>
-            {
-                foreach (var s in toDispose)
-                {
-                    s.Dispose();
-                }
-
-                toDispose.Clear();
-            }).ConfigureAwait(false);
-
-            this.scenes.Clear();
-            this.AddScene(sceneToLoad);
-            sceneToLoad.Active = true;
         }
     }
 }

@@ -2,6 +2,7 @@
 using Engine.Content;
 using Engine.PathFinding.RecastNavigation;
 using SharpDX;
+using System.Threading.Tasks;
 
 namespace Collada
 {
@@ -19,9 +20,9 @@ namespace Collada
 
         }
 
-        public override void Initialize()
+        public override async Task Initialize()
         {
-            base.Initialize();
+            await base.Initialize();
 
 #if DEBUG
             this.Game.VisibleMouse = false;
@@ -31,15 +32,15 @@ namespace Collada
             this.Game.LockMouse = true;
 #endif
 
-            var title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
+            var title = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
             title.Instance.Text = "Collada Dungeon Scene";
             title.Instance.Position = Vector2.Zero;
 
-            this.fps = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.fps = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
             this.fps.Instance.Text = null;
             this.fps.Instance.Position = new Vector2(0, 24);
 
-            var picks = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            var picks = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
             picks.Instance.Text = null;
             picks.Instance.Position = new Vector2(0, 48);
 
@@ -51,7 +52,7 @@ namespace Collada
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            await this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
 
             this.agent = new Player()
             {
@@ -61,7 +62,7 @@ namespace Collada
                 MaxClimb = 0.225f,
             };
 
-            var dungeon = this.AddComponent<Scenery>(
+            var dungeon = await this.AddComponent<Scenery>(
                 new GroundDescription()
                 {
                     Name = "room1",

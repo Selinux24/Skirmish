@@ -2,6 +2,7 @@
 using Engine.Common;
 using Engine.Content;
 using SharpDX;
+using System.Threading.Tasks;
 
 namespace SceneTest
 {
@@ -27,9 +28,9 @@ namespace SceneTest
 
         }
 
-        public override void Initialize()
+        public override async Task Initialize()
         {
-            base.Initialize();
+            await base.Initialize();
 
 #if DEBUG
             this.Game.VisibleMouse = false;
@@ -48,17 +49,17 @@ namespace SceneTest
 
             GameEnvironment.Background = Color.CornflowerBlue;
 
-            this.InitializeTextBoxes();
-            this.InitializeSkyEffects();
-            this.InitializeFloor();
-            this.InitializeColorGroup(1, 0.1f, new Vector3(-10, 0, -10), false);
-            this.InitializeColorGroup(128, 1f, new Vector3(-10.5f, 0, -10), true);
+            await this.InitializeTextBoxes();
+            await this.InitializeSkyEffects();
+            await this.InitializeFloor();
+            await this.InitializeColorGroup(1, 0.1f, new Vector3(-10, 0, -10), false);
+            await this.InitializeColorGroup(128, 1f, new Vector3(-10.5f, 0, -10), true);
         }
 
-        private void InitializeTextBoxes()
+        private async Task InitializeTextBoxes()
         {
-            this.title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White, Color.Orange), SceneObjectUsages.UI, layerHUD);
-            this.runtime = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 10, Color.Yellow, Color.Orange), SceneObjectUsages.UI, layerHUD);
+            this.title = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White, Color.Orange), SceneObjectUsages.UI, layerHUD);
+            this.runtime = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 10, Color.Yellow, Color.Orange), SceneObjectUsages.UI, layerHUD);
 
             this.title.Instance.Text = "Scene Test - Materials";
             this.runtime.Instance.Text = "";
@@ -74,11 +75,11 @@ namespace SceneTest
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            this.backPannel = await this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
         }
-        private void InitializeSkyEffects()
+        private async Task InitializeSkyEffects()
         {
-            this.lensFlare = this.AddComponent<LensFlare>(new LensFlareDescription()
+            this.lensFlare = await this.AddComponent<LensFlare>(new LensFlareDescription()
             {
                 ContentPath = @"Common/lensFlare",
                 GlowTexture = "lfGlow.png",
@@ -99,7 +100,7 @@ namespace SceneTest
                 }
             });
         }
-        private void InitializeFloor()
+        private async Task InitializeFloor()
         {
             float l = spaceSize;
             float h = 0f;
@@ -146,9 +147,9 @@ namespace SceneTest
                 }
             };
 
-            this.floor = this.AddComponent<Model>(desc);
+            this.floor = await this.AddComponent<Model>(desc);
         }
-        private SceneObject<Model> InitializeSphere(string name, MaterialContent material)
+        private async Task<SceneObject<Model>> InitializeSphere(string name, MaterialContent material)
         {
             var sphere = GeometryUtil.CreateSphere(radius, stacks, stacks);
             var vertices = VertexData.FromDescriptor(sphere);
@@ -167,11 +168,11 @@ namespace SceneTest
                 }
             };
 
-            return this.AddComponent<Model>(desc);
+            return await this.AddComponent<Model>(desc);
         }
-        private MaterialContent GenerateMaterial(Color4 diffuse, Color4 specular, float shininess, bool nmap)
+        private async Task<MaterialContent> GenerateMaterial(Color4 diffuse, Color4 specular, float shininess, bool nmap)
         {
-            return new MaterialContent()
+            var mat = new MaterialContent()
             {
                 EmissionColor = new Color4(0f, 0f, 0f, 0f),
                 AmbientColor = new Color4(0.02f, 0.02f, 0.02f, 1f),
@@ -183,8 +184,10 @@ namespace SceneTest
                 SpecularColor = specular,
                 Shininess = shininess,
             };
+
+            return await Task.FromResult(mat);
         }
-        private void InitializeColorGroup(float shininess, float specularFactor, Vector3 position, bool nmap)
+        private async Task InitializeColorGroup(float shininess, float specularFactor, Vector3 position, bool nmap)
         {
             int n = 32;
 
@@ -199,8 +202,8 @@ namespace SceneTest
                         var diffuse = new Color4(r / 256f, g / 256f, b / 256f, 1);
                         var specular = new Color4(r / 256f * specularFactor, g / 256f * specularFactor, b / 256f * specularFactor, 1);
 
-                        var material = this.GenerateMaterial(diffuse, specular, shininess, nmap);
-                        var model = this.InitializeSphere(string.Format("Sphere {0}.{1}.{2}", r, g, b), material);
+                        var material = await this.GenerateMaterial(diffuse, specular, shininess, nmap);
+                        var model = await this.InitializeSphere(string.Format("Sphere {0}.{1}.{2}", r, g, b), material);
                         model.Transform.SetPosition(new Vector3(r * f, (g * f) + 1f, b * f) + position);
                     }
                 }

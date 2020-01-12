@@ -14,6 +14,11 @@ namespace Engine.Common
     public class DrawingData : IDisposable
     {
         /// <summary>
+        /// Game instance
+        /// </summary>
+        protected readonly Game Game = null;
+
+        /// <summary>
         /// Materials dictionary
         /// </summary>
         public MaterialDictionary Materials { get; set; } = new MaterialDictionary();
@@ -39,21 +44,15 @@ namespace Engine.Common
         public SceneLight[] Lights { get; set; } = null;
 
         /// <summary>
-        /// Buffer manager
-        /// </summary>
-        protected BufferManager BufferManager = null;
-
-        /// <summary>
         /// Model initialization
         /// </summary>
         /// <param name="game">Game</param>
-        /// <param name="bufferManager">Buffer manager</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="description">Data description</param>
         /// <returns>Returns the generated drawing data objects</returns>
-        public static DrawingData Build(Game game, BufferManager bufferManager, ModelContent modelContent, DrawingDataDescription description)
+        public static DrawingData Build(Game game, ModelContent modelContent, DrawingDataDescription description)
         {
-            DrawingData res = new DrawingData(bufferManager);
+            DrawingData res = new DrawingData(game);
 
             //Animation
             if (description.LoadAnimation)
@@ -71,7 +70,7 @@ namespace Engine.Common
             InitializeGeometry(ref res, modelContent, description);
 
             //Update meshes into device
-            InitializeMeshes(ref res, bufferManager, description.Instanced ? description.Instances : 0);
+            InitializeMeshes(ref res, game, description.Instanced ? description.Instances : 0);
 
             //Lights
             InitializeLights(ref res, modelContent);
@@ -449,19 +448,19 @@ namespace Engine.Common
         /// </summary>
         /// <param name="drw">Drawing data</param>
         /// <param name="game">Game</param>
-        private static void InitializeMeshes(ref DrawingData drw, BufferManager bufferManager, int instances)
+        private static void InitializeMeshes(ref DrawingData drw, Game game, int instances)
         {
             foreach (var dictionary in drw.Meshes.Values)
             {
                 foreach (var mesh in dictionary.Values)
                 {
                     //Vertices
-                    mesh.VertexBuffer = bufferManager.Add(mesh.Name, mesh.Vertices.ToArray(), false, instances);
+                    mesh.VertexBuffer = game.BufferManager.Add(mesh.Name, mesh.Vertices.ToArray(), false, instances);
 
                     if (mesh.Indexed)
                     {
                         //Indices
-                        mesh.IndexBuffer = bufferManager.Add(mesh.Name, mesh.Indices.ToArray(), false);
+                        mesh.IndexBuffer = game.BufferManager.Add(mesh.Name, mesh.Indices.ToArray(), false);
                     }
                     else
                     {
@@ -518,9 +517,9 @@ namespace Engine.Common
         /// Constructor
         /// </summary>
         /// <param name="bufferManager">Buffer manager</param>
-        public DrawingData(BufferManager bufferManager)
+        public DrawingData(Game game)
         {
-            this.BufferManager = bufferManager;
+            this.Game = game;
         }
         /// <summary>
         /// Destructor
@@ -551,8 +550,8 @@ namespace Engine.Common
                     foreach (var mesh in item.Values)
                     {
                         //Remove data from buffer manager
-                        this.BufferManager?.RemoveVertexData(mesh.VertexBuffer);
-                        this.BufferManager?.RemoveIndexData(mesh.IndexBuffer);
+                        this.Game.BufferManager?.RemoveVertexData(mesh.VertexBuffer);
+                        this.Game.BufferManager?.RemoveIndexData(mesh.IndexBuffer);
 
                         //Dispose the mesh
                         mesh.Dispose();

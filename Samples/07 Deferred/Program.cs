@@ -25,7 +25,7 @@ namespace Deferred
                     cl.LockMouse = true;
 #endif
 
-                    cl.AddScene<TestScene3D>();
+                    cl.SetScene<TestScene3D>();
 
                     cl.Run();
                 }

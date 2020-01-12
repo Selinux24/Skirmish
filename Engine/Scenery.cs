@@ -40,7 +40,7 @@ namespace Engine
             /// <param name="content">Content</param>
             /// <param name="node">Quadtree node</param>
             /// <returns>Returns the new generated patch</returns>
-            public static SceneryPatch CreatePatch(Game game, BufferManager bufferManager, ModelContent content, PickingQuadTreeNode<Triangle> node)
+            public static SceneryPatch CreatePatch(Game game, ModelContent content, PickingQuadTreeNode<Triangle> node)
             {
                 var desc = new DrawingDataDescription()
                 {
@@ -53,7 +53,7 @@ namespace Engine
                     Constraint = node.BoundingBox,
                 };
 
-                var drawingData = DrawingData.Build(game, bufferManager, content, desc);
+                var drawingData = DrawingData.Build(game, content, desc);
 
                 return new SceneryPatch(game, drawingData);
             }
@@ -299,7 +299,7 @@ namespace Engine
 
             foreach (var node in nodes)
             {
-                var patch = SceneryPatch.CreatePatch(this.Game, this.BufferManager, content, node);
+                var patch = SceneryPatch.CreatePatch(this.Game, content, node);
 
                 this.patchDictionary.Add(node.Id, patch);
             }

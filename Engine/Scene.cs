@@ -199,10 +199,6 @@ namespace Engine
         /// </summary>
         public Game Game { get; private set; }
         /// <summary>
-        /// Buffer manager
-        /// </summary>
-        internal BufferManager BufferManager = null;
-        /// <summary>
         /// Scene renderer
         /// </summary>
         protected ISceneRenderer Renderer = null;
@@ -228,6 +224,10 @@ namespace Engine
         protected GameAudioManager AudioManager { get; private set; }
 
         /// <summary>
+        /// Gets or sets whether the scene is initialized or not
+        /// </summary>
+        public bool SceneInitialized { get; internal set; } = false;
+        /// <summary>
         /// Camera
         /// </summary>
         public Camera Camera { get; protected set; }
@@ -238,7 +238,7 @@ namespace Engine
         /// <summary>
         /// Indicates whether the current scene is active
         /// </summary>
-        public bool Active { get; set; }
+        public bool Active { get; set; } = false;
         /// <summary>
         /// Scene processing order
         /// </summary>
@@ -256,13 +256,19 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game class</param>
-        public Scene(Game game, SceneModes sceneMode = SceneModes.ForwardLigthning)
+        public Scene(Game game) : this(game, SceneModes.ForwardLigthning)
+        {
+
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="game">Game class</param>
+        public Scene(Game game, SceneModes sceneMode)
         {
             this.Game = game;
 
             this.Game.Graphics.Resized += new EventHandler(Resized);
-
-            this.BufferManager = new BufferManager(game);
 
             this.TimeOfDay = new TimeOfDay();
 
@@ -311,9 +317,6 @@ namespace Engine
         {
             if (disposing)
             {
-                BufferManager?.Dispose();
-                BufferManager = null;
-
                 Renderer?.Dispose();
                 Renderer = null;
 
@@ -343,23 +346,19 @@ namespace Engine
         /// <summary>
         /// Initialize scene objects
         /// </summary>
-        public virtual void Initialize()
+        public virtual async Task Initialize()
         {
-
+            await Task.CompletedTask;
         }
         /// <summary>
         /// Scene objects initialized
         /// </summary>
         public virtual void Initialized()
         {
-            this.UpdateNavigationGraph();
-        }
-        /// <summary>
-        /// Generates scene resources
-        /// </summary>
-        public virtual void SetResources()
-        {
-            this.BufferManager.CreateBuffers();
+            Task.Run(() =>
+            {
+                this.UpdateNavigationGraph();
+            });
         }
         /// <summary>
         /// Update scene objects
@@ -373,8 +372,6 @@ namespace Engine
 
                 this.UpdateGlobalResources = false;
             }
-
-            this.BufferManager?.UpdateBuffers();
 
             this.Camera?.Update(gameTime);
 
@@ -422,8 +419,6 @@ namespace Engine
         {
             try
             {
-                this.BufferManager?.SetVertexBuffers();
-
                 this.Renderer?.Draw(gameTime, this);
             }
             catch (Exception ex)
@@ -527,6 +522,7 @@ namespace Engine
                 throw new EngineException("Resource creation error", ex);
             }
         }
+
         /// <summary>
         /// Adds component to collection
         /// </summary>
@@ -535,11 +531,11 @@ namespace Engine
         /// <param name="usage">Usage</param>
         /// <param name="order">Processing order</param>
         /// <returns></returns>
-        public SceneObject<T> AddComponent<T>(SceneObjectDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0) where T : BaseSceneObject
+        public async Task<SceneObject<T>> AddComponent<T>(SceneObjectDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0) where T : BaseSceneObject
         {
             T component = this.CreateResource<T>(description);
 
-            return this.AddComponent<T>(component, description, usage, order);
+            return await this.AddComponent(component, description, usage, order);
         }
         /// <summary>
         /// Adds component to collection
@@ -550,11 +546,14 @@ namespace Engine
         /// <param name="usage">Usage</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns the added component</returns>
-        public SceneObject<T> AddComponent<T>(T component, SceneObjectDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
+        public async Task<SceneObject<T>> AddComponent<T>(T component, SceneObjectDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
         {
             var sceneObject = new SceneObject<T>(component, description);
 
-            this.AddComponent(sceneObject, usage, order);
+            await Task.Run(() =>
+            {
+                this.AddComponent(sceneObject, usage, order);
+            });
 
             return sceneObject;
         }
@@ -597,6 +596,7 @@ namespace Engine
                 this.UpdateGlobalResources = true;
             }
         }
+
         /// <summary>
         /// Removes and disposes the specified component
         /// </summary>

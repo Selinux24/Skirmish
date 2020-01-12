@@ -17,7 +17,7 @@ namespace SpriteDrawing
                 using (Game cl = new Game("1 SpriteDrawing", true, 0, 0, true, 0, 4))
 #endif
                 {
-                    cl.AddScene<TestScene>();
+                    cl.SetScene<TestScene>();
 
                     cl.Run();
                 }

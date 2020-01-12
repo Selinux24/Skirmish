@@ -17,7 +17,7 @@ namespace Collada
                 using (Game cl = new Game("4 Collada", true, 0, 0, true, 0, 0))
 #endif
                 {
-                    cl.AddScene<SceneStart>();
+                    cl.SetScene<SceneStart>();
 
                     cl.Run();
                 }

@@ -112,7 +112,7 @@ namespace Engine.Common
 
                 if (description.Optimize) iGeo.Optimize();
 
-                var drawable = DrawingData.Build(this.Game, this.BufferManager, iGeo, desc);
+                var drawable = DrawingData.Build(this.Game, iGeo, desc);
 
                 this.meshesByLOD.Add(LevelOfDetail.High, drawable);
             }
@@ -127,7 +127,7 @@ namespace Engine.Common
                         this.defaultLevelOfDetail = lod;
                     }
 
-                    var drawable = DrawingData.Build(this.Game, this.BufferManager, content[lod], desc);
+                    var drawable = DrawingData.Build(this.Game, content[lod], desc);
 
                     this.meshesByLOD.Add(lod, drawable);
                 }

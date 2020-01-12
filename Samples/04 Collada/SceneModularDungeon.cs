@@ -78,6 +78,8 @@ namespace Collada
         private string ratSoundTalk = null;
         private GameAudioEffect ratSoundInstance = null;
 
+        private bool gameStarted = false;
+
         private AgentType CurrentAgent
         {
             get
@@ -92,9 +94,9 @@ namespace Collada
 
         }
 
-        public override void Initialize()
+        public override async Task Initialize()
         {
-            base.Initialize();
+            await base.Initialize();
 
 #if DEBUG
             this.Game.VisibleMouse = true;
@@ -104,17 +106,17 @@ namespace Collada
             this.Game.LockMouse = true;
 #endif
 
-            this.InitializeDebug();
-            this.InitializeUI();
-            this.InitializeModularScenery();
-            this.InitializePlayer();
-            this.InitializeRat();
-            this.InitializeHuman();
-            this.InitializeEnvironment();
-            this.InitializeLights();
-            this.InitializeAudio();
+            await this.InitializeDebug();
+            await this.InitializeUI();
+            await this.InitializeModularScenery();
+            await this.InitializePlayer();
+            await this.InitializeRat();
+            await this.InitializeHuman();
+            await this.InitializeEnvironment();
+            await this.InitializeLights();
+            await this.InitializeAudio();
         }
-        private void InitializeEnvironment()
+        private async Task InitializeEnvironment()
         {
             //Navigation settings
             var nmsettings = BuildSettings.Default;
@@ -149,8 +151,10 @@ namespace Collada
             this.PathFinderDescription = new PathFinderDescription(nmsettings, nminput);
 
             this.PaintConnections();
+
+            await Task.CompletedTask;
         }
-        private void InitializeLights()
+        private async Task InitializeLights()
         {
             this.Lights.HemisphericLigth = new SceneLightHemispheric("hemi_light", this.ambientDown, this.ambientUp, true);
             this.Lights.KeyLight.Enabled = false;
@@ -165,18 +169,20 @@ namespace Collada
 
             this.torch = new SceneLightPoint("player_torch", true, this.agentTorchLight, this.agentTorchLight, true, desc);
             this.Lights.Add(torch);
+
+            await Task.CompletedTask;
         }
-        private void InitializeUI()
+        private async Task InitializeUI()
         {
-            var title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
+            var title = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
             title.Instance.Text = "Collada Modular Dungeon Scene";
             title.Instance.Position = Vector2.Zero;
 
-            this.fps = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.fps = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
             this.fps.Instance.Text = null;
             this.fps.Instance.Position = new Vector2(0, 24);
 
-            this.info = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.info = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
             this.info.Instance.Text = null;
             this.info.Instance.Position = new Vector2(0, 48);
 
@@ -188,9 +194,9 @@ namespace Collada
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            await this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
 
-            this.messages = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 48, Color.Red, Color.DarkRed), SceneObjectUsages.UI, layerHUD);
+            this.messages = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 48, Color.Red, Color.DarkRed), SceneObjectUsages.UI, layerHUD);
             this.messages.Instance.Text = null;
             this.messages.Instance.Position = new Vector2(0, 0);
             this.messages.Visible = false;
@@ -202,10 +208,10 @@ namespace Collada
                 CastShadow = false,
                 Count = 50000,
             };
-            this.selectedItemDrawer = this.AddComponent<PrimitiveListDrawer<Triangle>>(drawerDesc, SceneObjectUsages.UI, layerHUD);
+            this.selectedItemDrawer = await this.AddComponent<PrimitiveListDrawer<Triangle>>(drawerDesc, SceneObjectUsages.UI, layerHUD);
             this.selectedItemDrawer.Visible = true;
         }
-        private void InitializeModularScenery()
+        private async Task InitializeModularScenery()
         {
             var desc = new ModularSceneryDescription()
             {
@@ -222,13 +228,15 @@ namespace Collada
                 LevelsFile = "levels.xml",
             };
 
-            var sceneryObject = this.AddComponent<ModularScenery>(desc, SceneObjectUsages.Ground);
+            var sceneryObject = await this.AddComponent<ModularScenery>(desc, SceneObjectUsages.Ground);
 
             this.SetGround(sceneryObject, true);
 
             this.scenery = sceneryObject.Instance;
+            this.scenery.TriggerEnd += TriggerEnds;
+            await this.scenery.Start();
         }
-        private void InitializePlayer()
+        private async Task InitializePlayer()
         {
             this.agent = new Player()
             {
@@ -240,10 +248,12 @@ namespace Collada
                 Velocity = 4f,
                 VelocitySlow = 1f,
             };
+
+            await Task.CompletedTask;
         }
-        private void InitializeRat()
+        private async Task InitializeRat()
         {
-            this.rat = this.AddComponent<Model>(
+            this.rat = await this.AddComponent<Model>(
                 new ModelDescription()
                 {
                     TextureIndex = 0,
@@ -281,9 +291,9 @@ namespace Collada
             this.rat.Instance.AnimationController.AddPath(ratPaths["walk"]);
             this.rat.Instance.AnimationController.TimeDelta = 1.5f;
         }
-        private void InitializeHuman()
+        private async Task InitializeHuman()
         {
-            this.human = this.AddComponent<ModelInstanced>(
+            this.human = await this.AddComponent<ModelInstanced>(
                 new ModelInstancedDescription()
                 {
                     CastShadow = true,
@@ -309,7 +319,7 @@ namespace Collada
                 this.human.Instance[i].AnimationController.TimeDelta = 0.5f + (i * 0.1f);
             }
         }
-        private void InitializeDebug()
+        private async Task InitializeDebug()
         {
             var graphDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
             {
@@ -317,7 +327,7 @@ namespace Collada
                 AlphaEnabled = true,
                 Count = 50000,
             };
-            this.graphDrawer = this.AddComponent<PrimitiveListDrawer<Triangle>>(graphDrawerDesc);
+            this.graphDrawer = await this.AddComponent<PrimitiveListDrawer<Triangle>>(graphDrawerDesc);
             this.graphDrawer.Visible = false;
 
             var bboxesDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
@@ -327,7 +337,7 @@ namespace Collada
                 Color = new Color4(1.0f, 0.0f, 0.0f, 0.25f),
                 Count = 10000,
             };
-            this.bboxesDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(bboxesDrawerDesc);
+            this.bboxesDrawer = await this.AddComponent<PrimitiveListDrawer<Line3D>>(bboxesDrawerDesc);
             this.bboxesDrawer.Visible = false;
 
             var ratDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
@@ -337,7 +347,7 @@ namespace Collada
                 Color = new Color4(0.0f, 1.0f, 1.0f, 0.25f),
                 Count = 10000,
             };
-            this.ratDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(ratDrawerDesc);
+            this.ratDrawer = await this.AddComponent<PrimitiveListDrawer<Line3D>>(ratDrawerDesc);
             this.ratDrawer.Visible = false;
 
             var obstacleDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
@@ -347,7 +357,7 @@ namespace Collada
                 DepthEnabled = false,
                 Count = 10000,
             };
-            this.obstacleDrawer = this.AddComponent<PrimitiveListDrawer<Triangle>>(obstacleDrawerDesc);
+            this.obstacleDrawer = await this.AddComponent<PrimitiveListDrawer<Triangle>>(obstacleDrawerDesc);
             this.obstacleDrawer.Visible = false;
 
             var connectionDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
@@ -357,10 +367,10 @@ namespace Collada
                 Color = connectionColor,
                 Count = 10000,
             };
-            this.connectionDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(connectionDrawerDesc);
+            this.connectionDrawer = await this.AddComponent<PrimitiveListDrawer<Line3D>>(connectionDrawerDesc);
             this.connectionDrawer.Visible = false;
         }
-        private void InitializeAudio()
+        private async Task InitializeAudio()
         {
             this.AudioManager.MasterVolume = 1;
             this.AudioManager.UseMasteringLimiter = true;
@@ -454,181 +464,17 @@ namespace Collada
                     EmitterRadius = 3,
                     ListenerCone = GameAudioConeDescription.DefaultListenerCone,
                 });
+
+            await Task.CompletedTask;
         }
 
         public override void Initialized()
         {
             base.Initialized();
 
-            this.scenery.TriggerEnd += TriggerEnds;
-
-            this.StartEntities();
-
             this.StartCamera();
 
             this.AudioManager.Start();
-        }
-        private void StartEntities()
-        {
-            //Rat holes
-            this.ratHoles = this.scenery
-                .GetObjectsByName("Dn_Rat_Hole_1")
-                .Select(o => o.Item.Manipulator.Position)
-                .ToArray();
-
-            //Jails
-            this.StartEntitiesJails();
-
-            //Doors
-            this.StartEntitiesDoors();
-
-            //Ladders
-            this.StartEntitiesLadders();
-
-            //Furniture obstacles
-            this.StartEntitiesObstacles();
-
-            //Sounds
-            this.StartEntitiesAudio();
-        }
-        private void StartEntitiesJails()
-        {
-            var jails = this.scenery
-                .GetObjectsByName("Dn_Jail_1")
-                .Select(o => o.Item);
-
-            AnimationPath def = new AnimationPath();
-            def.Add("default");
-
-            foreach (var jail in jails)
-            {
-                jail.AnimationController.SetPath(new AnimationPlan(def));
-                jail.InvalidateCache();
-            }
-        }
-        private void StartEntitiesDoors()
-        {
-            var doors = this.scenery
-                .GetObjectsByName("Dn_Door_1")
-                .Select(o => o.Item);
-
-            AnimationPath def = new AnimationPath();
-            def.Add("default");
-
-            foreach (var door in doors)
-            {
-                door.AnimationController.SetPath(new AnimationPlan(def));
-                door.InvalidateCache();
-            }
-        }
-        private void StartEntitiesLadders()
-        {
-            var ladders = this.scenery
-                .GetObjectsByName("Dn_Anim_Ladder")
-                .Select(o => o.Item);
-
-            AnimationPath def = new AnimationPath();
-            def.Add("pull");
-
-            foreach (var ladder in ladders)
-            {
-                ladder.AnimationController.SetPath(new AnimationPlan(def));
-                ladder.InvalidateCache();
-            }
-        }
-        private void StartEntitiesAudio()
-        {
-            //Rat sound
-            this.ratSoundInstance = this.AudioManager.CreateEffectInstance(ratSoundMove, this.rat, this.Camera);
-
-            //Torchs
-            this.StartEntitiesAudioTorchs();
-
-            //Big fires
-            this.StartEntitiesAudioBigFires();
-        }
-        private void StartEntitiesAudioTorchs()
-        {
-            var torchs = this.scenery
-                .GetObjectsByName("Dn_Torch")
-                .Select(o => o.Item);
-
-            int index = 0;
-            foreach (var item in torchs)
-            {
-                string effectName = $"torch{index++}";
-
-                this.AudioManager.AddEffectParams(
-                    effectName,
-                    new GameAudioEffectParameters
-                    {
-                        SoundName = soundTorch,
-                        DestroyWhenFinished = false,
-                        Volume = 0.05f,
-                        IsLooped = true,
-                        UseAudio3D = true,
-                        EmitterRadius = 2,
-                        ListenerCone = GameAudioConeDescription.DefaultListenerCone,
-                    });
-
-                this.AudioManager.CreateEffectInstance(effectName, item, this.Camera).Play();
-            }
-        }
-        private void StartEntitiesAudioBigFires()
-        {
-            List<ModelInstance> fires = new List<ModelInstance>();
-            fires.AddRange(this.scenery.GetObjectsByName("Dn_Temple_Fire_1").Select(o => o.Item));
-            fires.AddRange(this.scenery.GetObjectsByName("Dn_Big_Lamp_1").Select(o => o.Item));
-
-            int index = 0;
-            foreach (var item in fires)
-            {
-                string effectName = $"bigFire{index++}";
-
-                this.AudioManager.AddEffectParams(
-                    effectName,
-                    new GameAudioEffectParameters
-                    {
-                        SoundName = soundTorch,
-                        DestroyWhenFinished = false,
-                        Volume = 1,
-                        IsLooped = true,
-                        UseAudio3D = true,
-                        EmitterRadius = 5,
-                        ListenerCone = GameAudioConeDescription.DefaultListenerCone,
-                    });
-
-                this.AudioManager.CreateEffectInstance(effectName, item, this.Camera).Play();
-            }
-        }
-        private void StartEntitiesObstacles()
-        {
-            //Furniture obstacles
-            var furnitures = this.scenery
-                .GetObjectsByType(ModularSceneryObjectTypes.Furniture)
-                .Select(o => o.Item);
-
-            foreach (var item in furnitures)
-            {
-                var obb = OrientedBoundingBoxExtensions.FromPoints(item.GetPoints(), item.Manipulator.FinalTransform);
-
-                int index = this.AddObstacle(obb);
-
-                obstacles.Add(index, obb);
-            }
-
-            //Human obstacles
-            for (int i = 0; i < this.human.Count; i++)
-            {
-                var pos = this.human.Instance[i].Manipulator.Position;
-                var bc = new BoundingCylinder(pos, 0.8f, 1.5f);
-
-                int index = this.AddObstacle(bc);
-
-                obstacles.Add(index, bc);
-            }
-
-            PaintObstacles();
         }
         private void StartCamera()
         {
@@ -704,25 +550,25 @@ namespace Collada
                     SceneModes.ForwardLigthning);
             }
 
+            this.fps.Instance.Text = this.Game.RuntimeText;
+            this.info.Instance.Text = string.Format("{0}", this.GetRenderMode());
+
+            if (!gameStarted)
+            {
+                return;
+            }
+
             this.UpdateDebugInput();
             this.UpdateGraphInput();
             this.UpdateRatInput();
             this.UpdatePlayerInput();
             this.UpdateEntitiesInput();
 
-            var asyncTasks = new[]
-            {
-                Task.Run(() => { this.UpdateRatController(gameTime); }),
-                Task.Run(() => { this.UpdateEntities(); }),
-                Task.Run(() => { this.UpdateWind(); })
-            };
-
-            Task.WaitAll(asyncTasks);
+            this.UpdateRatController(gameTime);
+            this.UpdateEntities();
+            this.UpdateWind();
 
             this.UpdateSelection();
-
-            this.fps.Instance.Text = this.Game.RuntimeText;
-            this.info.Instance.Text = string.Format("{0}", this.GetRenderMode());
         }
         private void UpdatePlayerInput()
         {
@@ -1269,22 +1115,22 @@ namespace Collada
 
         private void ChangeToLevel(string name)
         {
+            gameStarted = false;
+
             this.Lights.ClearPointLights();
             this.Lights.ClearSpotLights();
-            this.scenery.LoadLevel(name);
             this.Lights.Add(this.torch);
 
             this.AudioManager.Stop();
             this.AudioManager.ClearEffects();
-            this.StartEntities();
             this.AudioManager.Start();
 
-            this.UpdateNavigationGraph();
-            var pos = this.scenery.CurrentLevel.StartPosition;
-            var dir = this.scenery.CurrentLevel.LookingVector;
-            pos.Y += agent.Height;
-            this.Camera.Position = pos;
-            this.Camera.Interest = pos + dir;
+            Task.Run(async () =>
+            {
+                await this.scenery.LoadLevel(name);
+
+                this.UpdateNavigationGraph();
+            });
         }
 
         private void PaintObstacles()
@@ -1366,6 +1212,19 @@ namespace Collada
         }
         public override void NavigationGraphUpdated()
         {
+            if (!gameStarted)
+            {
+                gameStarted = true;
+
+                this.StartEntities();
+
+                var pos = this.scenery.CurrentLevel.StartPosition;
+                var dir = this.scenery.CurrentLevel.LookingVector;
+                pos.Y += agent.Height;
+                this.Camera.Position = pos;
+                this.Camera.Interest = pos + dir;
+            }
+
             //Update active paths with the new graph configuration
             if (this.ratController.HasPath)
             {
@@ -1376,6 +1235,168 @@ namespace Collada
             }
 
             this.UpdateGraphDebug(this.CurrentAgent).ConfigureAwait(false);
+        }
+        private void StartEntities()
+        {
+            //Rat holes
+            this.ratHoles = this.scenery
+                .GetObjectsByName("Dn_Rat_Hole_1")
+                .Select(o => o.Item.Manipulator.Position)
+                .ToArray();
+
+            //Jails
+            this.StartEntitiesJails();
+
+            //Doors
+            this.StartEntitiesDoors();
+
+            //Ladders
+            this.StartEntitiesLadders();
+
+            //Furniture obstacles
+            this.StartEntitiesObstacles();
+
+            //Sounds
+            this.StartEntitiesAudio();
+        }
+        private void StartEntitiesJails()
+        {
+            var jails = this.scenery
+                .GetObjectsByName("Dn_Jail_1")
+                .Select(o => o.Item);
+
+            AnimationPath def = new AnimationPath();
+            def.Add("default");
+
+            foreach (var jail in jails)
+            {
+                jail.AnimationController.SetPath(new AnimationPlan(def));
+                jail.InvalidateCache();
+            }
+        }
+        private void StartEntitiesDoors()
+        {
+            var doors = this.scenery
+                .GetObjectsByName("Dn_Door_1")
+                .Select(o => o.Item);
+
+            AnimationPath def = new AnimationPath();
+            def.Add("default");
+
+            foreach (var door in doors)
+            {
+                door.AnimationController.SetPath(new AnimationPlan(def));
+                door.InvalidateCache();
+            }
+        }
+        private void StartEntitiesLadders()
+        {
+            var ladders = this.scenery
+                .GetObjectsByName("Dn_Anim_Ladder")
+                .Select(o => o.Item);
+
+            AnimationPath def = new AnimationPath();
+            def.Add("pull");
+
+            foreach (var ladder in ladders)
+            {
+                ladder.AnimationController.SetPath(new AnimationPlan(def));
+                ladder.InvalidateCache();
+            }
+        }
+        private void StartEntitiesAudio()
+        {
+            //Rat sound
+            this.ratSoundInstance = this.AudioManager.CreateEffectInstance(ratSoundMove, this.rat, this.Camera);
+
+            //Torchs
+            this.StartEntitiesAudioTorchs();
+
+            //Big fires
+            this.StartEntitiesAudioBigFires();
+        }
+        private void StartEntitiesAudioTorchs()
+        {
+            var torchs = this.scenery
+                .GetObjectsByName("Dn_Torch")
+                .Select(o => o.Item);
+
+            int index = 0;
+            foreach (var item in torchs)
+            {
+                string effectName = $"torch{index++}";
+
+                this.AudioManager.AddEffectParams(
+                    effectName,
+                    new GameAudioEffectParameters
+                    {
+                        SoundName = soundTorch,
+                        DestroyWhenFinished = false,
+                        Volume = 0.05f,
+                        IsLooped = true,
+                        UseAudio3D = true,
+                        EmitterRadius = 2,
+                        ListenerCone = GameAudioConeDescription.DefaultListenerCone,
+                    });
+
+                this.AudioManager.CreateEffectInstance(effectName, item, this.Camera).Play();
+            }
+        }
+        private void StartEntitiesAudioBigFires()
+        {
+            List<ModelInstance> fires = new List<ModelInstance>();
+            fires.AddRange(this.scenery.GetObjectsByName("Dn_Temple_Fire_1").Select(o => o.Item));
+            fires.AddRange(this.scenery.GetObjectsByName("Dn_Big_Lamp_1").Select(o => o.Item));
+
+            int index = 0;
+            foreach (var item in fires)
+            {
+                string effectName = $"bigFire{index++}";
+
+                this.AudioManager.AddEffectParams(
+                    effectName,
+                    new GameAudioEffectParameters
+                    {
+                        SoundName = soundTorch,
+                        DestroyWhenFinished = false,
+                        Volume = 1,
+                        IsLooped = true,
+                        UseAudio3D = true,
+                        EmitterRadius = 5,
+                        ListenerCone = GameAudioConeDescription.DefaultListenerCone,
+                    });
+
+                this.AudioManager.CreateEffectInstance(effectName, item, this.Camera).Play();
+            }
+        }
+        private void StartEntitiesObstacles()
+        {
+            //Furniture obstacles
+            var furnitures = this.scenery
+                .GetObjectsByType(ModularSceneryObjectTypes.Furniture)
+                .Select(o => o.Item);
+
+            foreach (var item in furnitures)
+            {
+                var obb = OrientedBoundingBoxExtensions.FromPoints(item.GetPoints(), item.Manipulator.FinalTransform);
+
+                int index = this.AddObstacle(obb);
+
+                obstacles.Add(index, obb);
+            }
+
+            //Human obstacles
+            for (int i = 0; i < this.human.Count; i++)
+            {
+                var pos = this.human.Instance[i].Manipulator.Position;
+                var bc = new BoundingCylinder(pos, 0.8f, 1.5f);
+
+                int index = this.AddObstacle(bc);
+
+                obstacles.Add(index, bc);
+            }
+
+            PaintObstacles();
         }
 
         private async Task UpdateGraphDebug(AgentType agent)

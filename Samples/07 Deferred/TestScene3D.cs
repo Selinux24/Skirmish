@@ -57,8 +57,10 @@ namespace Deferred
 
         }
 
-        public override void Initialize()
+        public override async Task Initialize()
         {
+            await base.Initialize();
+
             this.Lights.KeyLight.Enabled = false;
             this.Lights.BackLight.Enabled = false;
             this.Lights.FillLight.Enabled = true;
@@ -67,36 +69,31 @@ namespace Deferred
             this.Lights.BackLight.CastShadow = false;
             this.Lights.FillLight.CastShadow = false;
 
-            var loadTask = Task.Run(async () =>
-            {
-                await InitializeCursor();
-                await InitializeUI();
+            await InitializeCursor();
+            await InitializeUI();
 
-                var skydomTask = InitializeAndTrace(InitializeSkydom);
-                var helicopterTask = InitializeAndTrace(InitializeHelicopter);
-                var helicoptersTask = InitializeAndTrace(InitializeHelicopters);
-                var tanksTask = InitializeAndTrace(InitializeTanks);
-                var terrainTask = InitializeAndTrace(InitializeTerrain);
-                var gardenerTask = InitializeAndTrace(InitializeGardener);
-                var treeTask = InitializeAndTrace(InitializeTree);
-                var treesTask = InitializeAndTrace(InitializeTrees);
+            var skydomTask = InitializeAndTrace(InitializeSkydom);
+            var helicopterTask = InitializeAndTrace(InitializeHelicopter);
+            var helicoptersTask = InitializeAndTrace(InitializeHelicopters);
+            var tanksTask = InitializeAndTrace(InitializeTanks);
+            var terrainTask = InitializeAndTrace(InitializeTerrain);
+            var gardenerTask = InitializeAndTrace(InitializeGardener);
+            var treeTask = InitializeAndTrace(InitializeTree);
+            var treesTask = InitializeAndTrace(InitializeTrees);
 
-                string loadingText = null;
-                loadingText += string.Format("skydom: {0} ", await skydomTask);
-                loadingText += string.Format("helicopter: {0} ", await helicopterTask);
-                loadingText += string.Format("helicopters: {0} ", await helicoptersTask);
-                loadingText += string.Format("tank: {0} ", await tanksTask);
-                loadingText += string.Format("terrain: {0} ", await terrainTask);
-                loadingText += string.Format("gardener: {0} ", await gardenerTask);
-                loadingText += string.Format("tree: {0} ", await treeTask);
-                loadingText += string.Format("trees: {0} ", await treesTask);
+            string loadingText = null;
+            loadingText += string.Format("skydom: {0} ", await skydomTask);
+            loadingText += string.Format("helicopter: {0} ", await helicopterTask);
+            loadingText += string.Format("helicopters: {0} ", await helicoptersTask);
+            loadingText += string.Format("tank: {0} ", await tanksTask);
+            loadingText += string.Format("terrain: {0} ", await terrainTask);
+            loadingText += string.Format("gardener: {0} ", await gardenerTask);
+            loadingText += string.Format("tree: {0} ", await treeTask);
+            loadingText += string.Format("trees: {0} ", await treesTask);
 
-                await InitializeDebug();
+            await InitializeDebug();
 
-                return loadingText;
-            });
-
-            var loadText = loadTask.Result;
+            var loadText = loadingText;
 
             this.title.Instance.Text = "Deferred Ligthning test";
             this.load.Instance.Text = loadText;
@@ -123,9 +120,7 @@ namespace Deferred
                 Width = 16,
                 Height = 16,
             };
-            this.AddComponent<Cursor>(cursorDesc, SceneObjectUsages.UI, layerHUD + 1);
-
-            await Task.CompletedTask;
+            await this.AddComponent<Cursor>(cursorDesc, SceneObjectUsages.UI, layerHUD + 1);
         }
         private async Task InitializeSkydom()
         {
@@ -136,9 +131,7 @@ namespace Deferred
                 Radius = far,
                 Texture = "sunset.dds",
             };
-            this.AddComponent<Skydom>(desc);
-
-            await Task.CompletedTask;
+            await this.AddComponent<Skydom>(desc);
         }
         private async Task InitializeHelicopter()
         {
@@ -153,10 +146,8 @@ namespace Deferred
                     ModelContentFilename = "m24.xml",
                 }
             };
-            this.helicopter = this.AddComponent<Model>(desc);
+            this.helicopter = await this.AddComponent<Model>(desc);
             this.Lights.AddRange(this.helicopter.Instance.Lights);
-
-            await Task.CompletedTask;
         }
         private async Task InitializeHelicopters()
         {
@@ -171,7 +162,7 @@ namespace Deferred
                     ModelContentFilename = "m24.xml",
                 }
             };
-            this.helicopters = this.AddComponent<ModelInstanced>(desc);
+            this.helicopters = await this.AddComponent<ModelInstanced>(desc);
             for (int i = 0; i < this.helicopters.Count; i++)
             {
                 this.Lights.AddRange(this.helicopters.Instance[i].Lights);
@@ -191,9 +182,9 @@ namespace Deferred
                     ModelContentFilename = "leopard.xml",
                 }
             };
-            var tank1 = this.AddComponent<Model>(desc);
+            var tank1 = await this.AddComponent<Model>(desc);
             tank1.Transform.SetScale(0.2f, true);
-            var tank2 = this.AddComponent<Model>(desc);
+            var tank2 = await this.AddComponent<Model>(desc);
             tank2.Transform.SetScale(0.2f, true);
 
             var tankController1 = new SteerManipulatorController()
@@ -219,13 +210,11 @@ namespace Deferred
 
             var agent1 = new GameAgent<SteerManipulatorController>(this.tankAgentType, tank1, tankController1);
             var agent2 = new GameAgent<SteerManipulatorController>(this.tankAgentType, tank2, tankController2);
-            this.tankAgent1 = this.AddComponent(agent1, new SceneObjectDescription() { });
-            this.tankAgent2 = this.AddComponent(agent2, new SceneObjectDescription() { });
+            this.tankAgent1 = await this.AddComponent(agent1, new SceneObjectDescription() { });
+            this.tankAgent2 = await this.AddComponent(agent2, new SceneObjectDescription() { });
 
             this.Lights.AddRange(this.tankAgent1.Instance.Lights);
             this.Lights.AddRange(this.tankAgent2.Instance.Lights);
-
-            await Task.CompletedTask;
         }
         private async Task InitializeTerrain()
         {
@@ -242,9 +231,7 @@ namespace Deferred
                     ModelContentFilename = "terrain.xml",
                 }
             };
-            this.terrain = this.AddComponent<Scenery>(desc);
-
-            await Task.CompletedTask;
+            this.terrain = await this.AddComponent<Scenery>(desc);
         }
         private async Task InitializeGardener()
         {
@@ -261,9 +248,7 @@ namespace Deferred
                     MaxSize = Vector2.One * 0.25f,
                 }
             };
-            this.AddComponent<GroundGardener>(desc);
-
-            await Task.CompletedTask;
+            await this.AddComponent<GroundGardener>(desc);
         }
         private async Task InitializeTree()
         {
@@ -280,9 +265,7 @@ namespace Deferred
                     ModelContentFilename = "birch_a.xml",
                 }
             };
-            this.tree = this.AddComponent<Model>(desc);
-
-            await Task.CompletedTask;
+            this.tree = await this.AddComponent<Model>(desc);
         }
         private async Task InitializeTrees()
         {
@@ -300,9 +283,7 @@ namespace Deferred
                     ModelContentFilename = "birch_b.xml",
                 }
             };
-            this.trees = this.AddComponent<ModelInstanced>(desc);
-
-            await Task.CompletedTask;
+            this.trees = await this.AddComponent<ModelInstanced>(desc);
         }
         private async Task InitializeUI()
         {
@@ -311,10 +292,10 @@ namespace Deferred
             var dHelp = TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow);
             var dStats = TextDrawerDescription.Generate("Lucida Casual", 10, Color.Red);
 
-            this.title = this.AddComponent<TextDrawer>(dTitle, SceneObjectUsages.UI, layerHUD);
-            this.load = this.AddComponent<TextDrawer>(dLoad, SceneObjectUsages.UI, layerHUD);
-            this.help = this.AddComponent<TextDrawer>(dHelp, SceneObjectUsages.UI, layerHUD);
-            this.statistics = this.AddComponent<TextDrawer>(dStats, SceneObjectUsages.UI, layerHUD);
+            this.title = await this.AddComponent<TextDrawer>(dTitle, SceneObjectUsages.UI, layerHUD);
+            this.load = await this.AddComponent<TextDrawer>(dLoad, SceneObjectUsages.UI, layerHUD);
+            this.help = await this.AddComponent<TextDrawer>(dHelp, SceneObjectUsages.UI, layerHUD);
+            this.statistics = await this.AddComponent<TextDrawer>(dStats, SceneObjectUsages.UI, layerHUD);
 
             this.title.Instance.Position = Vector2.Zero;
             this.load.Instance.Position = new Vector2(0, this.title.Instance.Top + this.title.Instance.Height + 2);
@@ -328,9 +309,7 @@ namespace Deferred
                 Height = this.statistics.Instance.Top + this.statistics.Instance.Height + 3,
                 Color = new Color4(0, 0, 0, 0.75f),
             };
-            this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
-
-            await Task.CompletedTask;
+            await this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
         }
         private async Task InitializeDebug()
         {
@@ -339,7 +318,7 @@ namespace Deferred
             int smLeft = this.Game.Form.RenderWidth - width;
             int smTop = this.Game.Form.RenderHeight - height;
 
-            this.bufferDrawer = this.AddComponent<SpriteTexture>(
+            this.bufferDrawer = await this.AddComponent<SpriteTexture>(
                 new SpriteTextureDescription()
                 {
                     Left = smLeft,
@@ -352,7 +331,7 @@ namespace Deferred
                 layerEffects);
             this.bufferDrawer.Visible = false;
 
-            this.lineDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(
+            this.lineDrawer = await this.AddComponent<PrimitiveListDrawer<Line3D>>(
                 new PrimitiveListDrawerDescription<Line3D>()
                 {
                     DepthEnabled = true,
@@ -362,7 +341,7 @@ namespace Deferred
                 layerEffects);
             this.lineDrawer.Visible = false;
 
-            this.terrainGraphDrawer = this.AddComponent<PrimitiveListDrawer<Triangle>>(
+            this.terrainGraphDrawer = await this.AddComponent<PrimitiveListDrawer<Triangle>>(
                 new PrimitiveListDrawerDescription<Triangle>()
                 {
                     Count = MaxGridDrawer,
@@ -370,8 +349,6 @@ namespace Deferred
                 SceneObjectUsages.None,
                 layerEffects);
             this.terrainGraphDrawer.Visible = false;
-
-            await Task.CompletedTask;
         }
 
         public override void Initialized()

@@ -4,6 +4,7 @@ using Engine.Content;
 using SharpDX;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace SceneTest
 {
@@ -35,10 +36,8 @@ namespace SceneTest
 
         }
 
-        public override void Initialize()
+        public override async Task Initialize()
         {
-            base.Initialize();
-
 #if DEBUG
             this.Game.VisibleMouse = false;
             this.Game.LockMouse = false;
@@ -52,17 +51,17 @@ namespace SceneTest
             this.Camera.Goto(-10, 8, 20f);
             this.Camera.LookTo(0, 0, 0);
 
-            this.InitializeFloorAsphalt();
-            this.InitializeBuildingObelisk();
-            this.InitializeTree();
-            this.InitializeEmitter();
-            this.InitializeLanterns();
-            this.InitializeLights();
-            this.InitializeVolumeDrawer();
-            this.InitializeBufferDrawer();
+            await this.InitializeFloorAsphalt();
+            await this.InitializeBuildingObelisk();
+            await this.InitializeTree();
+            await this.InitializeEmitter();
+            await this.InitializeLanterns();
+            await this.InitializeLights();
+            await this.InitializeVolumeDrawer();
+            await this.InitializeBufferDrawer();
         }
 
-        private void InitializeFloorAsphalt()
+        private async Task InitializeFloorAsphalt()
         {
             float l = spaceSize;
             float h = 0f;
@@ -103,9 +102,9 @@ namespace SceneTest
                 }
             };
 
-            this.AddComponent<Model>(desc);
+            await this.AddComponent<Model>(desc);
         }
-        private void InitializeBuildingObelisk()
+        private async Task InitializeBuildingObelisk()
         {
             var desc = new ModelInstancedDescription()
             {
@@ -121,9 +120,9 @@ namespace SceneTest
                 }
             };
 
-            this.buildingObelisks = this.AddComponent<ModelInstanced>(desc);
+            this.buildingObelisks = await this.AddComponent<ModelInstanced>(desc);
         }
-        private void InitializeTree()
+        private async Task InitializeTree()
         {
             var desc = new ModelDescription()
             {
@@ -139,9 +138,9 @@ namespace SceneTest
                 }
             };
 
-            this.AddComponent<Model>(desc);
+            await this.AddComponent<Model>(desc);
         }
-        private void InitializeEmitter()
+        private async Task InitializeEmitter()
         {
             MaterialContent mat = MaterialContent.Default;
             mat.EmissionColor = Color.White;
@@ -166,9 +165,9 @@ namespace SceneTest
                 }
             };
 
-            this.lightEmitters = this.AddComponent<ModelInstanced>(desc);
+            this.lightEmitters = await this.AddComponent<ModelInstanced>(desc);
         }
-        private void InitializeLanterns()
+        private async Task InitializeLanterns()
         {
             MaterialContent mat = MaterialContent.Default;
 
@@ -204,9 +203,9 @@ namespace SceneTest
                 }
             };
 
-            this.lanterns = this.AddComponent<ModelInstanced>(desc);
+            this.lanterns = await this.AddComponent<ModelInstanced>(desc);
         }
-        private void InitializeLights()
+        private async Task InitializeLights()
         {
             this.Lights.KeyLight.Enabled = false;
             this.Lights.KeyLight.CastShadow = false;
@@ -221,17 +220,19 @@ namespace SceneTest
             this.Lights.Add(new SceneLightSpot("Spot1", true, Color.White, Color.White, true, spotDesc));
             this.Lights.Add(new SceneLightSpot("Spot2", true, Color.White, Color.White, true, spotDesc));
             this.Lights.Add(new SceneLightSpot("Spot3", true, Color.White, Color.White, true, spotDesc));
+
+            await Task.CompletedTask;
         }
-        private void InitializeVolumeDrawer()
+        private async Task InitializeVolumeDrawer()
         {
             var desc = new PrimitiveListDrawerDescription<Line3D>()
             {
                 DepthEnabled = true,
                 Count = 5000
             };
-            this.lightsVolumeDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(desc);
+            this.lightsVolumeDrawer = await this.AddComponent<PrimitiveListDrawer<Line3D>>(desc);
         }
-        private void InitializeBufferDrawer()
+        private async Task InitializeBufferDrawer()
         {
             int width = (int)(this.Game.Form.RenderWidth * 0.33f);
             int height = (int)(this.Game.Form.RenderHeight * 0.33f);
@@ -246,7 +247,7 @@ namespace SceneTest
                 Height = height,
                 Channel = SpriteTextureChannels.NoAlpha,
             };
-            this.bufferDrawer = this.AddComponent<SpriteTexture>(desc, SceneObjectUsages.UI, layerEffects);
+            this.bufferDrawer = await this.AddComponent<SpriteTexture>(desc, SceneObjectUsages.UI, layerEffects);
 
             this.bufferDrawer.Visible = false;
         }

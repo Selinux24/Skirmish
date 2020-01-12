@@ -31,5 +31,14 @@ namespace Engine.Common
             this.Offset = offset;
             this.Count = count;
         }
+
+        /// <summary>
+        /// Gets the text representation of the instance
+        /// </summary>
+        /// <returns>Returns the text representation of the instance</returns>
+        public override string ToString()
+        {
+            return $"Slot: {Slot}; Offset: {Offset}; Count: {Count}; Next: {Offset + Count};";
+        }
     }
 }

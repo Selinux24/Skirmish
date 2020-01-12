@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -110,12 +111,6 @@ namespace Engine
             {
                 this.Levels = Helper.DeserializeFromFile<ModularSceneryLevels>(Path.Combine(description.Content.ContentFolder, description.LevelsFile));
             }
-
-            this.InitializeParticles();
-
-            this.CurrentLevel = this.Levels.Levels[0];
-
-            this.LoadLevel(this.CurrentLevel);
         }
         /// <summary>
         /// Resource dispose
@@ -127,10 +122,22 @@ namespace Engine
         }
 
         /// <summary>
+        /// Start scenery
+        /// </summary>
+        public async Task Start()
+        {
+            await this.InitializeParticles();
+
+            this.CurrentLevel = this.Levels.Levels[0];
+
+            await this.LoadLevel(this.CurrentLevel);
+        }
+
+        /// <summary>
         /// Loads the level by name
         /// </summary>
         /// <param name="levelName">Level name</param>
-        public void LoadLevel(string levelName)
+        public async Task LoadLevel(string levelName)
         {
             //Removes previous level components from scene
             this.Scene.RemoveComponents(this.assets.Select(a => a.Value));
@@ -151,7 +158,7 @@ namespace Engine
                 this.CurrentLevel = level;
 
                 //Load the level
-                this.LoadLevel(level);
+                await this.LoadLevel(level);
             }
         }
 
@@ -196,12 +203,12 @@ namespace Engine
         /// Loads a level
         /// </summary>
         /// <param name="level">Level definition</param>
-        private void LoadLevel(ModularSceneryLevel level)
+        private async Task LoadLevel(ModularSceneryLevel level)
         {
             ModelContent content = LoadModelContent();
 
-            this.InitializeAssets(level, content);
-            this.InitializeObjects(level, content);
+            await this.InitializeAssets(level, content);
+            await this.InitializeObjects(level, content);
 
             this.ParseAssetsMap(level);
 
@@ -210,11 +217,11 @@ namespace Engine
         /// <summary>
         /// Initialize the particle system and the particle descriptions
         /// </summary>
-        private void InitializeParticles()
+        private async Task InitializeParticles()
         {
             if (this.Levels.ParticleSystems != null && this.Levels.ParticleSystems.Length > 0)
             {
-                this.particleManager = this.Scene.AddComponent<ParticleManager>(
+                this.particleManager = await this.Scene.AddComponent<ParticleManager>(
                     new ParticleManagerDescription()
                     {
                         Name = string.Format("{0}.{1}", this.Description.Name, "Particle Manager"),
@@ -236,7 +243,7 @@ namespace Engine
         /// Initialize all assets into asset dictionary 
         /// </summary>
         /// <param name="content">Assets model content</param>
-        private void InitializeAssets(ModularSceneryLevel level, ModelContent content)
+        private async Task InitializeAssets(ModularSceneryLevel level, ModelContent content)
         {
             // Get instance count for all single geometries from Map
             var instances = level.GetMapInstanceCounters(this.AssetConfiguration.Assets);
@@ -253,7 +260,7 @@ namespace Engine
                         var masks = this.Levels.GetMasksForAsset(assetName);
                         var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
 
-                        var model = this.Scene.AddComponent<ModelInstanced>(
+                        var model = await this.Scene.AddComponent<ModelInstanced>(
                             new ModelInstancedDescription()
                             {
                                 Name = string.Format("{0}.{1}.{2}", this.Description.Name, assetName, level.Name),
@@ -279,7 +286,7 @@ namespace Engine
         /// Initialize all objects into asset dictionary 
         /// </summary>
         /// <param name="content">Assets model content</param>
-        private void InitializeObjects(ModularSceneryLevel level, ModelContent content)
+        private async Task InitializeObjects(ModularSceneryLevel level, ModelContent content)
         {
             // Set auto-identifiers
             level.PopulateObjectIds();
@@ -305,7 +312,7 @@ namespace Engine
                 var masks = this.Levels.GetMasksForAsset(assetName);
                 var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
 
-                var model = this.Scene.AddComponent<ModelInstanced>(
+                var model = await this.Scene.AddComponent<ModelInstanced>(
                     new ModelInstancedDescription()
                     {
                         Name = string.Format("{0}.{1}.{2}", this.Description.Name, assetName, level.Name),

@@ -3,6 +3,7 @@ using Engine.Common;
 using Engine.Content;
 using SharpDX;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ModelDrawing
 {
@@ -32,10 +33,8 @@ namespace ModelDrawing
 
         }
 
-        public override void Initialize()
+        public override async Task Initialize()
         {
-            base.Initialize();
-
             GameEnvironment.Background = Color.CornflowerBlue;
 
             this.Camera.NearPlaneDistance = 0.1f;
@@ -43,17 +42,17 @@ namespace ModelDrawing
             this.Camera.Goto(Vector3.ForwardLH * -15f + Vector3.UnitY * 10f);
             this.Camera.LookTo(Vector3.Zero);
 
-            this.InitializeTexts();
-            this.InitializeFloor();
-            this.InitializeModels();
-            this.InitializeParticleVolumeDrawer();
+            await this.InitializeTexts();
+            await this.InitializeFloor();
+            await this.InitializeModels();
+            await this.InitializeParticleVolumeDrawer();
         }
-        private void InitializeTexts()
+        private async Task InitializeTexts()
         {
-            this.text = this.AddComponent<TextDrawer>(new TextDrawerDescription() { Font = "Arial", FontSize = 20, TextColor = Color.Yellow, ShadowColor = Color.OrangeRed }, SceneObjectUsages.UI, layerHUD);
-            this.statistics = this.AddComponent<TextDrawer>(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue }, SceneObjectUsages.UI, layerHUD);
-            this.text1 = this.AddComponent<TextDrawer>(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue }, SceneObjectUsages.UI, layerHUD);
-            this.text2 = this.AddComponent<TextDrawer>(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue }, SceneObjectUsages.UI, layerHUD);
+            this.text = await this.AddComponent<TextDrawer>(new TextDrawerDescription() { Font = "Arial", FontSize = 20, TextColor = Color.Yellow, ShadowColor = Color.OrangeRed }, SceneObjectUsages.UI, layerHUD);
+            this.statistics = await this.AddComponent<TextDrawer>(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue }, SceneObjectUsages.UI, layerHUD);
+            this.text1 = await this.AddComponent<TextDrawer>(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue }, SceneObjectUsages.UI, layerHUD);
+            this.text2 = await this.AddComponent<TextDrawer>(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue }, SceneObjectUsages.UI, layerHUD);
 
             this.text.Instance.Position = Vector2.One;
             this.statistics.Instance.Position = Vector2.One;
@@ -72,9 +71,9 @@ namespace ModelDrawing
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            await this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
         }
-        private void InitializeFloor()
+        private async Task InitializeFloor()
         {
             float l = 10f;
             float h = 0f;
@@ -108,9 +107,9 @@ namespace ModelDrawing
                 }
             };
 
-            this.AddComponent<Model>(desc, SceneObjectUsages.Ground);
+            await this.AddComponent<Model>(desc, SceneObjectUsages.Ground);
         }
-        private void InitializeModels()
+        private async Task InitializeModels()
         {
             this.pPlume = ParticleSystemDescription.InitializeSmokePlume("resources", "smoke.png");
             this.pFire = ParticleSystemDescription.InitializeFire("resources", "fire.png");
@@ -119,16 +118,16 @@ namespace ModelDrawing
             this.pExplosion = ParticleSystemDescription.InitializeExplosion("resources", "fire.png");
             this.pSmokeExplosion = ParticleSystemDescription.InitializeExplosion("resources", "smoke.png");
 
-            this.pManager = this.AddComponent<ParticleManager>(new ParticleManagerDescription());
+            this.pManager = await this.AddComponent<ParticleManager>(new ParticleManagerDescription());
         }
-        private void InitializeParticleVolumeDrawer()
+        private async Task InitializeParticleVolumeDrawer()
         {
             var desc = new PrimitiveListDrawerDescription<Line3D>()
             {
                 Count = 20000,
                 DepthEnabled = true,
             };
-            this.pManagerLineDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(desc, SceneObjectUsages.None, layerEffects);
+            this.pManagerLineDrawer = await this.AddComponent<PrimitiveListDrawer<Line3D>>(desc, SceneObjectUsages.None, layerEffects);
             this.pManagerLineDrawer.Visible = true;
         }
 

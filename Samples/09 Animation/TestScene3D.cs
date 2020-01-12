@@ -6,6 +6,7 @@ using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Animation
 {
@@ -92,28 +93,26 @@ namespace Animation
 
         }
 
-        public override void Initialize()
+        public override async Task Initialize()
         {
-            base.Initialize();
+            await this.InitializeLadder();
+            await this.InitializeLadder2();
+            await this.InitializeSoldier();
+            await this.InitializeRat();
+            await this.InitializeDoors();
+            await this.InitializeJails();
+            await this.InitializeFloor();
 
-            this.InitializeLadder();
-            this.InitializeLadder2();
-            this.InitializeSoldier();
-            this.InitializeRat();
-            this.InitializeDoors();
-            this.InitializeJails();
-            this.InitializeFloor();
+            await this.InitializeUI();
+            await this.InitializeEnvironment();
 
-            this.InitializeUI();
-            this.InitializeEnvironment();
-
-            this.InitializeDebug();
+            await this.InitializeDebug();
         }
-        private void InitializeUI()
+        private async Task InitializeUI()
         {
-            var title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
-            this.runtime = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            this.animText = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 15, Color.Orange), SceneObjectUsages.UI, layerHUD);
+            var title = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
+            this.runtime = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.animText = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 15, Color.Orange), SceneObjectUsages.UI, layerHUD);
 
             title.Instance.Text = "Animation test";
             this.runtime.Instance.Text = "";
@@ -131,9 +130,9 @@ namespace Animation
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            await this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
         }
-        private void InitializeFloor()
+        private async Task InitializeFloor()
         {
             float l = 15f;
             float h = 0f;
@@ -173,11 +172,11 @@ namespace Animation
                 }
             };
 
-            this.AddComponent<Model>(desc);
+            await this.AddComponent<Model>(desc);
         }
-        private void InitializeLadder()
+        private async Task InitializeLadder()
         {
-            var ladder = this.AddComponent<ModelInstanced>(
+            var ladder = await this.AddComponent<ModelInstanced>(
                 new ModelInstancedDescription()
                 {
                     Name = "Ladder",
@@ -216,9 +215,9 @@ namespace Animation
 
             this.animObjects.Add(ladder);
         }
-        private void InitializeLadder2()
+        private async Task InitializeLadder2()
         {
-            var ladder = this.AddComponent<ModelInstanced>(
+            var ladder = await this.AddComponent<ModelInstanced>(
                 new ModelInstancedDescription()
                 {
                     Name = "Ladder2",
@@ -232,7 +231,7 @@ namespace Animation
                     }
                 });
 
-            var ladder2 = this.AddComponent<ModelInstanced>(
+            var ladder2 = await this.AddComponent<ModelInstanced>(
                 new ModelInstancedDescription()
                 {
                     Name = "Ladder22",
@@ -281,9 +280,9 @@ namespace Animation
             this.animObjects.Add(ladder);
             this.animObjects.Add(ladder2);
         }
-        private void InitializeSoldier()
+        private async Task InitializeSoldier()
         {
-            var soldier = this.AddComponent<ModelInstanced>(
+            var soldier = await this.AddComponent<ModelInstanced>(
                 new ModelInstancedDescription()
                 {
                     Name = "Soldier",
@@ -334,9 +333,9 @@ namespace Animation
 
             this.animObjects.Add(soldier);
         }
-        private void InitializeRat()
+        private async Task InitializeRat()
         {
-            var rat = this.AddComponent<ModelInstanced>(
+            var rat = await this.AddComponent<ModelInstanced>(
                 new ModelInstancedDescription()
                 {
                     Name = "Rat",
@@ -363,9 +362,9 @@ namespace Animation
 
             this.animObjects.Add(rat);
         }
-        private void InitializeDoors()
+        private async Task InitializeDoors()
         {
-            var doors = this.AddComponent<ModelInstanced>(
+            var doors = await this.AddComponent<ModelInstanced>(
                 new ModelInstancedDescription()
                 {
                     Name = "Doors",
@@ -405,9 +404,9 @@ namespace Animation
 
             this.animObjects.Add(doors);
         }
-        private void InitializeJails()
+        private async Task InitializeJails()
         {
-            var doors = this.AddComponent<ModelInstanced>(
+            var doors = await this.AddComponent<ModelInstanced>(
                 new ModelInstancedDescription()
                 {
                     Name = "Jails",
@@ -448,7 +447,7 @@ namespace Animation
             this.animObjects.Add(doors);
         }
 
-        private void InitializeEnvironment()
+        private async Task InitializeEnvironment()
         {
             GameEnvironment.Background = Color.CornflowerBlue;
 
@@ -473,11 +472,13 @@ namespace Animation
             this.Camera.FarPlaneDistance = 500;
             this.Camera.Goto(0, playerHeight, -12f);
             this.Camera.LookTo(0, playerHeight * 0.6f, 0);
+
+            await Task.CompletedTask;
         }
-        private void InitializeDebug()
+        private async Task InitializeDebug()
         {
-            this.itemTris = this.AddComponent<PrimitiveListDrawer<Triangle>>(new PrimitiveListDrawerDescription<Triangle>() { Count = 5000, Color = itemTrisColor });
-            this.itemLines = this.AddComponent<PrimitiveListDrawer<Line3D>>(new PrimitiveListDrawerDescription<Line3D>() { Count = 1000, Color = itemLinesColor });
+            this.itemTris = await this.AddComponent<PrimitiveListDrawer<Triangle>>(new PrimitiveListDrawerDescription<Triangle>() { Count = 5000, Color = itemTrisColor });
+            this.itemLines = await this.AddComponent<PrimitiveListDrawer<Line3D>>(new PrimitiveListDrawerDescription<Line3D>() { Count = 1000, Color = itemLinesColor });
         }
 
         public override void Update(GameTime gameTime)

@@ -11,11 +11,11 @@ namespace Engine
         /// <summary>
         /// Game class
         /// </summary>
-        public Game Game { get { return this.Scene.Game; } }
+        protected Game Game { get { return this.Scene.Game; } }
         /// <summary>
         /// Buffer manager
         /// </summary>
-        public BufferManager BufferManager { get { return this.Scene.BufferManager; } }
+        protected BufferManager BufferManager { get { return this.Game.BufferManager; } }
 
         /// <summary>
         /// Constructor

@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Skybox
 {
@@ -63,10 +64,8 @@ namespace Skybox
 
         }
 
-        public override void Initialize()
+        public override async Task Initialize()
         {
-            base.Initialize();
-
             this.InitializeCamera();
 
             #region Cursor
@@ -79,15 +78,15 @@ namespace Skybox
                 Width = 16,
                 Height = 16,
             };
-            this.AddComponent<Cursor>(cursorDesc, SceneObjectUsages.UI, layerHUD + 1);
+            await this.AddComponent<Cursor>(cursorDesc, SceneObjectUsages.UI, layerHUD + 1);
 
             #endregion
 
             #region Text
 
-            var title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
-            var help = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            this.fps = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            var title = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
+            var help = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.fps = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
 
             title.Instance.Text = "Collada Scene with Skybox";
 #if DEBUG
@@ -110,13 +109,13 @@ namespace Skybox
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            await this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
 
             #endregion
 
             #region Skydom
 
-            this.AddComponent<Skydom>(new SkydomDescription()
+            await this.AddComponent<Skydom>(new SkydomDescription()
             {
                 Name = "Skydom",
                 ContentPath = "Resources",
@@ -128,7 +127,7 @@ namespace Skybox
 
             #region Torchs
 
-            this.torchs = this.AddComponent<ModelInstanced>(
+            this.torchs = await this.AddComponent<ModelInstanced>(
                 new ModelInstancedDescription()
                 {
                     Name = "Torchs",
@@ -155,14 +154,14 @@ namespace Skybox
                     ModelContentFilename = "ruins.xml",
                 }
             };
-            this.ruins = this.AddComponent<Scenery>(desc);
+            this.ruins = await this.AddComponent<Scenery>(desc);
 
             #endregion
 
             #region Water
 
             var waterDesc = WaterDescription.CreateCalm("Ocean", 5000f, -1f);
-            this.AddComponent<Water>(waterDesc, SceneObjectUsages.None);
+            await this.AddComponent<Water>(waterDesc, SceneObjectUsages.None);
 
             #endregion
 
@@ -171,7 +170,7 @@ namespace Skybox
 
             #region Particle Systems
 
-            var pManager = this.AddComponent<ParticleManager>(new ParticleManagerDescription() { Name = "Particle Systems" }).Instance;
+            var pManager = (await this.AddComponent<ParticleManager>(new ParticleManagerDescription() { Name = "Particle Systems" })).Instance;
 
             #endregion
 
@@ -199,7 +198,7 @@ namespace Skybox
                 }
             };
 
-            this.movingFire = this.AddComponent<Model>(mFireDesc);
+            this.movingFire = await this.AddComponent<Model>(mFireDesc);
 
             this.movingFireEmitter = new ParticleEmitter() { EmissionRate = 0.1f, InfiniteDuration = true };
 
@@ -269,10 +268,10 @@ namespace Skybox
 
             #region DEBUG drawers
 
-            this.volumesDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(new PrimitiveListDrawerDescription<Line3D>() { AlphaEnabled = true, Count = 10000 });
+            this.volumesDrawer = await this.AddComponent<PrimitiveListDrawer<Line3D>>(new PrimitiveListDrawerDescription<Line3D>() { AlphaEnabled = true, Count = 10000 });
             this.volumesDrawer.Visible = false;
 
-            this.graphDrawer = this.AddComponent<PrimitiveListDrawer<Triangle>>(new PrimitiveListDrawerDescription<Triangle>() { AlphaEnabled = true, Count = 10000 });
+            this.graphDrawer = await this.AddComponent<PrimitiveListDrawer<Triangle>>(new PrimitiveListDrawerDescription<Triangle>() { AlphaEnabled = true, Count = 10000 });
             this.graphDrawer.Visible = false;
 
             #endregion

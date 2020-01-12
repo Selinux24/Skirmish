@@ -5,6 +5,7 @@ using Engine.Content;
 using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Instancing
 {
@@ -23,36 +24,34 @@ namespace Instancing
 
         }
 
-        public override void Initialize()
+        public override async Task Initialize()
         {
-            base.Initialize();
-
             GameEnvironment.Background = Color.CornflowerBlue;
 
             //Texts
-            InitializeTexts();
+            await InitializeTexts();
 
             //Floor
-            InitializeFloor();
+            await InitializeFloor();
 
             //Trees
-            InitializeTrees();
+            await InitializeTrees();
 
             //Troops
-            InitializeTroops();
+            await InitializeTroops();
 
             //Wall
-            InitializeWall();
+            await InitializeWall();
 
             this.Camera.Goto(new Vector3(-45, 17, -30));
             this.Camera.LookTo(Vector3.Zero);
             this.Camera.FarPlaneDistance = 250;
         }
 
-        private void InitializeTexts()
+        private async Task InitializeTexts()
         {
-            var title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD).Instance;
-            runtimeText = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD).Instance;
+            var title = (await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD)).Instance;
+            runtimeText = (await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD)).Instance;
 
             title.Text = "Instancing test";
             runtimeText.Text = "";
@@ -68,9 +67,9 @@ namespace Instancing
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            await this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
         }
-        private void InitializeFloor()
+        private async Task InitializeFloor()
         {
             float l = 12f;
             float h = 0f;
@@ -112,7 +111,7 @@ namespace Instancing
                 }
             };
 
-            var floor = this.AddComponent<ModelInstanced>(desc);
+            var floor = await this.AddComponent<ModelInstanced>(desc);
 
             Vector3 delta = new Vector3(l * side, 0, l * side) - new Vector3(l, 0, l);
             int x = 0;
@@ -131,7 +130,7 @@ namespace Instancing
                 }
             }
         }
-        private void InitializeTrees()
+        private async Task InitializeTrees()
         {
             int instances = 40;
 
@@ -149,7 +148,7 @@ namespace Instancing
                     ModelContentFilename = @"tree.xml",
                 }
             };
-            var trees = this.AddComponent<ModelInstanced>(treeDesc, SceneObjectUsages.None, layerTerrain);
+            var trees = await this.AddComponent<ModelInstanced>(treeDesc, SceneObjectUsages.None, layerTerrain);
 
             int side = instances / 4;
             float groundSide = 55f;
@@ -181,7 +180,7 @@ namespace Instancing
                 trees.Instance[i].TextureIndex = (uint)(i % 2);
             }
         }
-        private void InitializeTroops()
+        private async Task InitializeTroops()
         {
             var tDesc = new ModelInstancedDescription()
             {
@@ -195,7 +194,7 @@ namespace Instancing
                     ModelContentFilename = @"soldier_anim2.xml",
                 }
             };
-            this.troops = this.AddComponent<ModelInstanced>(tDesc, SceneObjectUsages.Agent, layerObjects).Instance;
+            this.troops = (await this.AddComponent<ModelInstanced>(tDesc, SceneObjectUsages.Agent, layerObjects)).Instance;
             this.troops.MaximumCount = -1;
 
             Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
@@ -239,9 +238,9 @@ namespace Instancing
                 }
             }
         }
-        private void InitializeWall()
+        private async Task InitializeWall()
         {
-            var wall = this.AddComponent<ModelInstanced>(
+            var wall = await this.AddComponent<ModelInstanced>(
                 new ModelInstancedDescription()
                 {
                     Name = "wall",
@@ -253,33 +252,33 @@ namespace Instancing
                         ContentFolder = "Resources/Wall",
                         ModelContentFilename = "wall.xml",
                     }
-                }).Instance;
+                });
 
-            BoundingBox bbox = wall[0].GetBoundingBox();
+            BoundingBox bbox = wall.Instance[0].GetBoundingBox();
 
             float x = bbox.GetX() * (10f / 11f);
 
             for (int i = 0; i < 10; i++)
             {
-                wall[i].Manipulator.SetPosition(new Vector3((i - 5) * x, 0.01f, 60));
+                wall.Instance[i].Manipulator.SetPosition(new Vector3((i - 5) * x, 0.01f, 60));
             }
 
             for (int i = 10; i < 20; i++)
             {
-                wall[i].Manipulator.SetPosition(new Vector3(60, 0, (i - 9 - 5) * x));
-                wall[i].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+                wall.Instance[i].Manipulator.SetPosition(new Vector3(60, 0, (i - 9 - 5) * x));
+                wall.Instance[i].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
             }
 
             for (int i = 20; i < 30; i++)
             {
-                wall[i].Manipulator.SetPosition(new Vector3((i - 19 - 5) * x, 0.01f, -60));
-                wall[i].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
+                wall.Instance[i].Manipulator.SetPosition(new Vector3((i - 19 - 5) * x, 0.01f, -60));
+                wall.Instance[i].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
             }
 
             for (int i = 30; i < 40; i++)
             {
-                wall[i].Manipulator.SetPosition(new Vector3(-60, 0, (i - 30 - 5) * x));
-                wall[i].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
+                wall.Instance[i].Manipulator.SetPosition(new Vector3(-60, 0, (i - 30 - 5) * x));
+                wall.Instance[i].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
             }
         }
 

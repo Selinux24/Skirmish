@@ -25,7 +25,7 @@ namespace Instancing
                     cl.LockMouse = true;
 #endif
 
-                    cl.AddScene<TestScene>();
+                    cl.SetScene<TestScene>();
 
                     cl.Run();
                 }

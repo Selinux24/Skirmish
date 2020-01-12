@@ -1,6 +1,7 @@
 ﻿using Engine;
 using SharpDX;
 using System;
+using System.Threading.Tasks;
 
 namespace SceneTest
 {
@@ -18,10 +19,8 @@ namespace SceneTest
 
         }
 
-        public override void Initialize()
+        public override async Task Initialize()
         {
-            base.Initialize();
-
 #if DEBUG
             this.Game.VisibleMouse = false;
             this.Game.LockMouse = false;
@@ -37,7 +36,7 @@ namespace SceneTest
 
             this.Lights.BaseFogColor = Color.White;
 
-            this.water = this.AddComponent<Water>(new WaterDescription()
+            this.water = await this.AddComponent<Water>(new WaterDescription()
             {
                 Name = "Water",
                 PlaneSize = 1000f,
@@ -45,7 +44,7 @@ namespace SceneTest
                 GeometryIterations = 4,
                 ColorIterations = 8,
             });
-            this.sky = this.AddComponent<SkyScattering>(new SkyScatteringDescription()
+            this.sky = await this.AddComponent<SkyScattering>(new SkyScatteringDescription()
             {
                 Name = "Sky",
                 Resolution = SkyScatteringResolutions.High

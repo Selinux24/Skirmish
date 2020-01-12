@@ -25,7 +25,7 @@ namespace GameLogic
 
                     GameEnvironment.Background = Color.CornflowerBlue;
 
-                    game.AddScene<SceneObjects>();
+                    game.SetScene<SceneObjects>();
 
                     game.Run();
                 }

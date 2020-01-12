@@ -97,7 +97,7 @@ namespace Heightmap
 
         private readonly Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
 
-        private Dictionary<string, double> initDurationDict = new Dictionary<string, double>();
+        private readonly Dictionary<string, double> initDurationDict = new Dictionary<string, double>();
         private int initDurationIndex = 0;
 
         private SceneObject<SpriteTexture> bufferDrawer = null;
@@ -108,60 +108,54 @@ namespace Heightmap
 
         }
 
-        public override void Initialize()
+        public override async Task Initialize()
         {
-            var loadTask = Task.Run(async () =>
+            await InitializeDebug();
+
+            Stopwatch sw = Stopwatch.StartNew();
+            sw.Start();
+
+            await InitializeUI();
+
+            List<Task<double>> loadTasks = new List<Task<double>>()
             {
-                await InitializeDebug();
+                InitializeRocks(),
+                InitializeTrees(),
+                InitializeTrees2(),
+                InitializeSoldier(),
+                InitializeTroops(),
+                InitializeM24(),
+                InitializeBradley(),
+                InitializeWatchTower(),
+                InitializeContainers(),
+                InitializeTorchs(),
+                InitializeTerrain(),
+                InitializeGardener(),
+                InitializeGardener2(),
+                InitializeLensFlare(),
+                InitializeSkydom(),
+                InitializeClouds(),
+                InitializeParticles(),
+            };
 
-                Stopwatch sw = Stopwatch.StartNew();
-                sw.Start();
+            int total = loadTasks.Count;
+            float percent = 0;
+            while (loadTasks.Any())
+            {
+                var task = await Task.WhenAny(loadTasks.ToArray());
 
-                List<Task<double>> loadTasks = new List<Task<double>>()
-                {
-                    InitializeUI(),
-                    InitializeRocks(),
-                    InitializeTrees(),
-                    InitializeTrees2(),
-                    InitializeSoldier(),
-                    InitializeTroops(),
-                    InitializeM24(),
-                    InitializeBradley(),
-                    InitializeWatchTower(),
-                    InitializeContainers(),
-                    InitializeTorchs(),
-                    InitializeTerrain(),
-                    InitializeGardener(),
-                    InitializeGardener2(),
-                    InitializeLensFlare(),
-                    InitializeSkydom(),
-                    InitializeClouds(),
-                    InitializeParticles(),
-                };
+                loadTasks.Remove(task);
 
-                Dictionary<string, double> dict = new Dictionary<string, double>();
-                int total = loadTasks.Count;
-                float percent = 0;
-                while (loadTasks.Any())
-                {
-                    var task = await Task.WhenAny(loadTasks.ToArray());
+                percent = (1f - ((float)loadTasks.Count / total)) * 100f;
 
-                    loadTasks.Remove(task);
+                this.load.Instance.Text = $"{percent}%";
+            }
 
-                    percent = (1f - ((float)loadTasks.Count / total)) * 100f;
+            sw.Stop();
 
-                    this.load.Instance.Text = $"{percent}%";
-                }
+            initDurationDict.Add("TOTAL", initDurationDict.Select(i => i.Value).Sum());
+            initDurationDict.Add("REAL", sw.Elapsed.TotalSeconds);
 
-                sw.Stop();
-
-                dict.Add("TOTAL", dict.Select(i => i.Value).Sum());
-                dict.Add("REAL", sw.Elapsed.TotalSeconds);
-
-                return dict;
-            });
-
-            initDurationDict = loadTask.Result;
             initDurationIndex = initDurationDict.Keys.Count - 2;
             SetLoadText(initDurationIndex);
         }
@@ -181,17 +175,17 @@ namespace Heightmap
                 Height = 20,
             };
 
-            this.AddComponent<Cursor>(cursorDesc, SceneObjectUsages.UI, layerCursor);
+            await this.AddComponent<Cursor>(cursorDesc, SceneObjectUsages.UI, layerCursor);
 
             #endregion
 
             #region Texts
 
-            var title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
-            this.load = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            this.stats = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            this.help = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            this.help2 = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Orange), SceneObjectUsages.UI, layerHUD);
+            var title = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
+            this.load = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.stats = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.help = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.help2 = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Orange), SceneObjectUsages.UI, layerHUD);
 
             title.Instance.Text = "Heightmap Terrain test";
             this.load.Instance.Text = "";
@@ -214,7 +208,7 @@ namespace Heightmap
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            await this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
 
             #endregion
 
@@ -237,7 +231,7 @@ namespace Heightmap
                     ModelContentFilename = @"boulder.xml",
                 }
             };
-            this.rocks = this.AddComponent<ModelInstanced>(rDesc, SceneObjectUsages.None, layerObjects);
+            this.rocks = await this.AddComponent<ModelInstanced>(rDesc, SceneObjectUsages.None, layerObjects);
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -259,7 +253,7 @@ namespace Heightmap
                     ModelContentFilename = @"tree.xml",
                 }
             };
-            this.trees = this.AddComponent<ModelInstanced>(treeDesc, SceneObjectUsages.None, layerTerrain);
+            this.trees = await this.AddComponent<ModelInstanced>(treeDesc, SceneObjectUsages.None, layerTerrain);
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -281,7 +275,7 @@ namespace Heightmap
                     ModelContentFilename = @"tree.xml",
                 }
             };
-            this.trees2 = this.AddComponent<ModelInstanced>(tree2Desc, SceneObjectUsages.None, layerTerrain);
+            this.trees2 = await this.AddComponent<ModelInstanced>(tree2Desc, SceneObjectUsages.None, layerTerrain);
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -302,7 +296,7 @@ namespace Heightmap
                     ModelContentFilename = @"soldier_anim2.xml",
                 }
             };
-            this.soldier = this.AddComponent<Model>(sDesc, SceneObjectUsages.Agent, layerObjects);
+            this.soldier = await this.AddComponent<Model>(sDesc, SceneObjectUsages.Agent, layerObjects);
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -323,7 +317,7 @@ namespace Heightmap
                     ModelContentFilename = @"soldier_anim2.xml",
                 }
             };
-            this.troops = this.AddComponent<ModelInstanced>(tDesc, SceneObjectUsages.Agent, layerObjects);
+            this.troops = await this.AddComponent<ModelInstanced>(tDesc, SceneObjectUsages.Agent, layerObjects);
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -344,7 +338,7 @@ namespace Heightmap
                     ModelContentFilename = @"m24.xml",
                 },
             };
-            this.helicopterI = this.AddComponent<ModelInstanced>(mDesc, SceneObjectUsages.None, layerObjects);
+            this.helicopterI = await this.AddComponent<ModelInstanced>(mDesc, SceneObjectUsages.None, layerObjects);
             for (int i = 0; i < this.helicopterI.Count; i++)
             {
                 this.Lights.AddRange(this.helicopterI.Instance[i].Lights);
@@ -369,7 +363,7 @@ namespace Heightmap
                     ModelContentFilename = @"Bradley.xml",
                 }
             };
-            this.bradleyI = this.AddComponent<ModelInstanced>(mDesc, SceneObjectUsages.None, layerObjects);
+            this.bradleyI = await this.AddComponent<ModelInstanced>(mDesc, SceneObjectUsages.None, layerObjects);
             for (int i = 0; i < this.bradleyI.Count; i++)
             {
                 this.Lights.AddRange(this.bradleyI.Instance[i].Lights);
@@ -393,7 +387,7 @@ namespace Heightmap
                     ModelContentFilename = @"Watch Tower.xml",
                 }
             };
-            this.watchTower = this.AddComponent<Model>(mDesc, SceneObjectUsages.None, layerObjects);
+            this.watchTower = await this.AddComponent<Model>(mDesc, SceneObjectUsages.None, layerObjects);
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -403,7 +397,7 @@ namespace Heightmap
             Stopwatch sw = Stopwatch.StartNew();
 
             sw.Restart();
-            this.containers = this.AddComponent<ModelInstanced>(
+            this.containers = await this.AddComponent<ModelInstanced>(
                 new ModelInstancedDescription()
                 {
                     Name = "Container",
@@ -437,7 +431,7 @@ namespace Heightmap
                     ModelContentFilename = @"torch.xml",
                 }
             };
-            this.torchs = this.AddComponent<ModelInstanced>(tcDesc, SceneObjectUsages.None, layerObjects);
+            this.torchs = await this.AddComponent<ModelInstanced>(tcDesc, SceneObjectUsages.None, layerObjects);
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -447,7 +441,7 @@ namespace Heightmap
             Stopwatch sw = Stopwatch.StartNew();
 
             sw.Restart();
-            this.pManager = this.AddComponent<ParticleManager>(new ParticleManagerDescription() { Name = "Particle Systems" }, SceneObjectUsages.None, layerEffects);
+            this.pManager = await this.AddComponent<ParticleManager>(new ParticleManagerDescription() { Name = "Particle Systems" }, SceneObjectUsages.None, layerEffects);
 
             this.pFire = ParticleSystemDescription.InitializeFire("resources/particles", "fire.png", 0.5f);
             this.pPlume = ParticleSystemDescription.InitializeSmokePlume("resources/particles", "smoke.png", 0.5f);
@@ -513,7 +507,7 @@ namespace Heightmap
                     HeightmapDescription = hDesc,
                 }
             };
-            this.terrain = this.AddComponent<Terrain>(gDesc, SceneObjectUsages.None, layerTerrain);
+            this.terrain = await this.AddComponent<Terrain>(gDesc, SceneObjectUsages.None, layerTerrain);
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -573,7 +567,7 @@ namespace Heightmap
                     Count = 1,
                 },
             };
-            this.gardener = this.AddComponent<GroundGardener>(vDesc, SceneObjectUsages.None, layerFoliage);
+            this.gardener = await this.AddComponent<GroundGardener>(vDesc, SceneObjectUsages.None, layerFoliage);
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -624,7 +618,7 @@ namespace Heightmap
                     WindEffect = 1f,
                 },
             };
-            this.gardener2 = this.AddComponent<GroundGardener>(vDesc2, SceneObjectUsages.None, layerFoliage);
+            this.gardener2 = await this.AddComponent<GroundGardener>(vDesc2, SceneObjectUsages.None, layerFoliage);
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -655,7 +649,7 @@ namespace Heightmap
                     new LensFlareDescription.Flare( 2.0f, 1.4f, new Color( 25,  50, 100), "lfFlare3.png"),
                 }
             };
-            this.AddComponent<LensFlare>(lfDesc, SceneObjectUsages.None, layerEffects);
+            await this.AddComponent<LensFlare>(lfDesc, SceneObjectUsages.None, layerEffects);
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -669,7 +663,7 @@ namespace Heightmap
             {
                 Name = "Sky",
             };
-            this.skydom = this.AddComponent<SkyScattering>(skDesc);
+            this.skydom = await this.AddComponent<SkyScattering>(skDesc);
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -688,7 +682,7 @@ namespace Heightmap
                 SkyMode = SkyPlaneModes.Perturbed,
                 Direction = new Vector2(1, 1),
             };
-            this.AddComponent<SkyPlane>(scDesc);
+            await this.AddComponent<SkyPlane>(scDesc);
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -708,7 +702,7 @@ namespace Heightmap
                 Height = height,
                 Channel = SpriteTextureChannels.NoAlpha,
             };
-            this.bufferDrawer = this.AddComponent<SpriteTexture>(desc, SceneObjectUsages.UI, layerEffects);
+            this.bufferDrawer = await this.AddComponent<SpriteTexture>(desc, SceneObjectUsages.UI, layerEffects);
             this.bufferDrawer.Visible = false;
 
             await Task.CompletedTask;
@@ -750,22 +744,25 @@ namespace Heightmap
 
             SetPathFindingInfo();
 
-            this.lightsVolumeDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(
-                new PrimitiveListDrawerDescription<Line3D>()
-                {
-                    Name = "DEBUG++ Light Volumes",
-                    DepthEnabled = true,
-                    Count = 10000
-                });
+            Task.Run(async () =>
+            {
+                this.lightsVolumeDrawer = await this.AddComponent<PrimitiveListDrawer<Line3D>>(
+                    new PrimitiveListDrawerDescription<Line3D>()
+                    {
+                        Name = "DEBUG++ Light Volumes",
+                        DepthEnabled = true,
+                        Count = 10000
+                    });
 
-            this.graphDrawer = this.AddComponent<PrimitiveListDrawer<Triangle>>(
-                new PrimitiveListDrawerDescription<Triangle>()
-                {
-                    Name = "DEBUG++ Graph",
-                    AlphaEnabled = true,
-                    Count = 50000,
-                });
-            this.graphDrawer.Visible = false;
+                this.graphDrawer = await this.AddComponent<PrimitiveListDrawer<Triangle>>(
+                    new PrimitiveListDrawerDescription<Triangle>()
+                    {
+                        Name = "DEBUG++ Graph",
+                        AlphaEnabled = true,
+                        Count = 50000,
+                    });
+                this.graphDrawer.Visible = false;
+            });
         }
         private void SetAnimationDictionaries()
         {
@@ -1075,9 +1072,9 @@ namespace Heightmap
                 }
             }
         }
-        private void SetDebugInfo()
+        private async Task SetDebugInfo()
         {
-            this.bboxesDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(
+            this.bboxesDrawer = await this.AddComponent<PrimitiveListDrawer<Line3D>>(
                 new PrimitiveListDrawerDescription<Line3D>()
                 {
                     Name = "DEBUG++ Terrain nodes bounding boxes",
@@ -1099,7 +1096,7 @@ namespace Heightmap
             this.bboxesDrawer.Instance.AddPrimitives(new Color4(0.0f, 1.0f, 0.0f, 0.55f), a1Lines);
             this.bboxesDrawer.Instance.AddPrimitives(new Color4(0.0f, 0.0f, 1.0f, 0.55f), a2Lines);
 
-            this.bboxesTriDrawer = this.AddComponent<PrimitiveListDrawer<Triangle>>(
+            this.bboxesTriDrawer = await this.AddComponent<PrimitiveListDrawer<Triangle>>(
                 new PrimitiveListDrawerDescription<Triangle>()
                 {
                     Name = "DEBUG++ Terrain nodes bounding boxes faces",
@@ -1120,7 +1117,7 @@ namespace Heightmap
             this.bboxesTriDrawer.Instance.AddPrimitives(new Color4(0.0f, 0.0f, 1.0f, 0.35f), tris2);
             this.bboxesTriDrawer.Instance.AddPrimitives(new Color4(0.0f, 0.0f, 1.0f, 0.35f), Triangle.Reverse(tris2));
 
-            this.linesDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(
+            this.linesDrawer = await this.AddComponent<PrimitiveListDrawer<Line3D>>(
                 new PrimitiveListDrawerDescription<Line3D>()
                 {
                     DepthEnabled = true,
@@ -1517,13 +1514,16 @@ namespace Heightmap
                 var tris = this.soldier.Instance.GetTriangles(true);
                 if (this.soldierTris == null)
                 {
-                    var desc = new PrimitiveListDrawerDescription<Triangle>()
+                    Task.Run(async () =>
                     {
-                        DepthEnabled = false,
-                        Primitives = tris,
-                        Color = color
-                    };
-                    this.soldierTris = this.AddComponent<PrimitiveListDrawer<Triangle>>(desc);
+                        var desc = new PrimitiveListDrawerDescription<Triangle>()
+                        {
+                            DepthEnabled = false,
+                            Primitives = tris,
+                            Color = color
+                        };
+                        this.soldierTris = await this.AddComponent<PrimitiveListDrawer<Triangle>>(desc);
+                    }).ConfigureAwait(true);
                 }
                 else
                 {
@@ -1540,12 +1540,15 @@ namespace Heightmap
                 };
                 if (this.soldierLines == null)
                 {
-                    var desc = new PrimitiveListDrawerDescription<Line3D>()
+                    Task.Run(async () =>
                     {
-                        Primitives = Line3D.CreateWiredBox(bboxes).ToArray(),
-                        Color = color
-                    };
-                    this.soldierLines = this.AddComponent<PrimitiveListDrawer<Line3D>>(desc);
+                        var desc = new PrimitiveListDrawerDescription<Line3D>()
+                        {
+                            Primitives = Line3D.CreateWiredBox(bboxes).ToArray(),
+                            Color = color
+                        };
+                        this.soldierLines = await this.AddComponent<PrimitiveListDrawer<Line3D>>(desc);
+                    }).ConfigureAwait(true);
                 }
                 else
                 {

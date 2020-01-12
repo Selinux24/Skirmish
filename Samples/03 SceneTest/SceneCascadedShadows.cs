@@ -2,6 +2,7 @@
 using Engine.Common;
 using Engine.Content;
 using SharpDX;
+using System.Threading.Tasks;
 
 namespace SceneTest
 {
@@ -25,10 +26,8 @@ namespace SceneTest
 
         }
 
-        public override void Initialize()
+        public override async Task Initialize()
         {
-            base.Initialize();
-
 #if DEBUG
             this.Game.VisibleMouse = false;
             this.Game.LockMouse = false;
@@ -42,15 +41,15 @@ namespace SceneTest
             this.Camera.Goto(-10, 8, 20f);
             this.Camera.LookTo(0, 0, 0);
 
-            this.InitializeFloorAsphalt();
-            this.InitializeBuildingObelisk();
-            this.InitializeTree();
-            this.InitializeSkyEffects();
-            this.InitializeLights();
-            this.InitializeDebug();
+            await this.InitializeFloorAsphalt();
+            await this.InitializeBuildingObelisk();
+            await this.InitializeTree();
+            await this.InitializeSkyEffects();
+            await this.InitializeLights();
+            await this.InitializeDebug();
         }
 
-        private void InitializeFloorAsphalt()
+        private async Task InitializeFloorAsphalt()
         {
             float l = spaceSize;
             float h = 0f;
@@ -91,9 +90,9 @@ namespace SceneTest
                 }
             };
 
-            this.AddComponent<Model>(desc);
+            await this.AddComponent<Model>(desc);
         }
-        private void InitializeBuildingObelisk()
+        private async Task InitializeBuildingObelisk()
         {
             var desc = new ModelInstancedDescription()
             {
@@ -109,9 +108,9 @@ namespace SceneTest
                 }
             };
 
-            this.buildingObelisks = this.AddComponent<ModelInstanced>(desc);
+            this.buildingObelisks = await this.AddComponent<ModelInstanced>(desc);
         }
-        private void InitializeTree()
+        private async Task InitializeTree()
         {
             var desc = new ModelDescription()
             {
@@ -127,11 +126,11 @@ namespace SceneTest
                 }
             };
 
-            this.AddComponent<Model>(desc);
+            await this.AddComponent<Model>(desc);
         }
-        private void InitializeSkyEffects()
+        private async Task InitializeSkyEffects()
         {
-            this.AddComponent<LensFlare>(new LensFlareDescription()
+            await this.AddComponent<LensFlare>(new LensFlareDescription()
             {
                 ContentPath = @"Common/lensFlare",
                 GlowTexture = "lfGlow.png",
@@ -150,7 +149,7 @@ namespace SceneTest
                 }
             });
         }
-        private void InitializeLights()
+        private async Task InitializeLights()
         {
             GameEnvironment.Background = Color.CornflowerBlue;
 
@@ -160,8 +159,10 @@ namespace SceneTest
 
             this.Lights.BackLight.Enabled = true;
             this.Lights.FillLight.Enabled = true;
+
+            await Task.CompletedTask;
         }
-        private void InitializeDebug()
+        private async Task InitializeDebug()
         {
             int width = (int)(this.Game.Form.RenderWidth * 0.33f);
             int height = (int)(this.Game.Form.RenderHeight * 0.33f);
@@ -176,7 +177,7 @@ namespace SceneTest
                 Height = height,
                 Channel = SpriteTextureChannels.NoAlpha,
             };
-            this.bufferDrawer = this.AddComponent<SpriteTexture>(desc, SceneObjectUsages.UI, layerEffects);
+            this.bufferDrawer = await this.AddComponent<SpriteTexture>(desc, SceneObjectUsages.UI, layerEffects);
             this.bufferDrawer.Visible = false;
         }
 

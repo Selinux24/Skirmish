@@ -39,24 +39,24 @@ namespace Collada
 
         }
 
-        public override void Initialize()
+        public override async Task Initialize()
         {
-            base.Initialize();
+            await base.Initialize();
 
             this.Game.VisibleMouse = false;
             this.Game.LockMouse = false;
 
             GameEnvironment.Background = Color.Black;
 
-            InitializeCursor();
+            await InitializeCursor();
 
-            InitializeBackGround();
+            await InitializeBackGround();
 
-            InitializeControls();
+            await InitializeControls();
 
             InitializeAudio();
         }
-        private void InitializeCursor()
+        private async Task InitializeCursor()
         {
             var cursorDesc = new CursorDescription()
             {
@@ -68,16 +68,15 @@ namespace Collada
                 Centered = false,
                 Color = Color.White,
             };
-            this.AddComponent<Cursor>(cursorDesc, SceneObjectUsages.UI, layerCursor);
+            await this.AddComponent<Cursor>(cursorDesc, SceneObjectUsages.UI, layerCursor);
         }
-        private void InitializeBackGround()
+        private async Task InitializeBackGround()
         {
             var backGroundDesc = ModelDescription.FromXml("Background", "Resources/SceneStart", "SkyPlane.xml");
-            this.backGround = this.AddComponent<Model>(backGroundDesc, SceneObjectUsages.UI).Instance;
+            this.backGround = (await this.AddComponent<Model>(backGroundDesc, SceneObjectUsages.UI)).Instance;
         }
-        private void InitializeControls()
+        private async Task InitializeControls()
         {
-
             //Title text
             var titleDesc = new TextDrawerDescription()
             {
@@ -89,7 +88,7 @@ namespace Collada
                 ShadowColor = new Color4(Color.Brown.RGB(), 0.55f),
                 ShadowDelta = new Vector2(2, -3),
             };
-            this.title = this.AddComponent<TextDrawer>(titleDesc, SceneObjectUsages.UI, layerHUD).Instance;
+            this.title = (await this.AddComponent<TextDrawer>(titleDesc, SceneObjectUsages.UI, layerHUD)).Instance;
 
             var buttonDesc = new SpriteButtonDescription()
             {
@@ -116,10 +115,10 @@ namespace Collada
                     TextColor = Color.Gold,
                 }
             };
-            this.sceneDungeonWallButton = this.AddComponent<SpriteButton>(buttonDesc, SceneObjectUsages.UI, layerHUD).Instance;
-            this.sceneNavMeshTestButton = this.AddComponent<SpriteButton>(buttonDesc, SceneObjectUsages.UI, layerHUD).Instance;
-            this.sceneDungeonButton = this.AddComponent<SpriteButton>(buttonDesc, SceneObjectUsages.UI, layerHUD).Instance;
-            this.sceneModularDungeonButton = this.AddComponent<SpriteButton>(buttonDesc, SceneObjectUsages.UI, layerHUD).Instance;
+            this.sceneDungeonWallButton = (await this.AddComponent<SpriteButton>(buttonDesc, SceneObjectUsages.UI, layerHUD)).Instance;
+            this.sceneNavMeshTestButton = (await this.AddComponent<SpriteButton>(buttonDesc, SceneObjectUsages.UI, layerHUD)).Instance;
+            this.sceneDungeonButton = (await this.AddComponent<SpriteButton>(buttonDesc, SceneObjectUsages.UI, layerHUD)).Instance;
+            this.sceneModularDungeonButton = (await this.AddComponent<SpriteButton>(buttonDesc, SceneObjectUsages.UI, layerHUD)).Instance;
 
             // Exit button
             var exitButtonDesc = new SpriteButtonDescription()
@@ -147,7 +146,7 @@ namespace Collada
                     TextColor = Color.Gold,
                 }
             };
-            this.exitButton = this.AddComponent<SpriteButton>(exitButtonDesc, SceneObjectUsages.UI, layerHUD).Instance;
+            this.exitButton = (await this.AddComponent<SpriteButton>(exitButtonDesc, SceneObjectUsages.UI, layerHUD)).Instance;
         }
         private void InitializeAudio()
         {

@@ -1,5 +1,6 @@
 ﻿using Engine;
 using SharpDX;
+using System.Threading.Tasks;
 
 namespace SpriteDrawing
 {
@@ -23,25 +24,23 @@ namespace SpriteDrawing
 
         }
 
-        public override void Initialize()
+        public override async Task Initialize()
         {
-            base.Initialize();
-
-            InitializeBackground();
-            InitializePan();
-            InitializeSmiley();
-            InitializeTextDrawer();
+            await InitializeBackground();
+            await InitializePan();
+            await InitializeSmiley();
+            await InitializeTextDrawer();
         }
-        private void InitializeBackground()
+        private async Task InitializeBackground()
         {
             var desc = new SpriteBackgroundDescription()
             {
                 ContentPath = "Resources",
                 Textures = new[] { "background.jpg" },
             };
-            this.AddComponent<Sprite>(desc, SceneObjectUsages.UI, 1);
+            await this.AddComponent<Sprite>(desc, SceneObjectUsages.UI, 1);
         }
-        private void InitializeSmiley()
+        private async Task InitializeSmiley()
         {
             var desc = new SpriteDescription()
             {
@@ -51,12 +50,12 @@ namespace SpriteDrawing
                 Height = 256,
                 FitScreen = true,
             };
-            var sprite = this.AddComponent<Sprite>(desc, SceneObjectUsages.None, 3);
+            var sprite = await this.AddComponent<Sprite>(desc, SceneObjectUsages.None, 3);
             sprite.ScreenTransform.SetPosition(256, 0);
 
             this.spriteMov = sprite.Instance;
         }
-        private void InitializePan()
+        private async Task InitializePan()
         {
             var desc = new SpriteDescription()
             {
@@ -66,9 +65,9 @@ namespace SpriteDrawing
                 Height = 650,
                 FitScreen = true,
             };
-            textBackPanel = this.AddComponent<Sprite>(desc, SceneObjectUsages.UI, layerHUD).Instance;
+            textBackPanel = (await this.AddComponent<Sprite>(desc, SceneObjectUsages.UI, layerHUD)).Instance;
         }
-        private void InitializeTextDrawer()
+        private async Task InitializeTextDrawer()
         {
             var desc = new TextDrawerDescription()
             {
@@ -78,7 +77,7 @@ namespace SpriteDrawing
                 Style = FontMapStyles.Bold,
                 TextColor = Color.LightGoldenrodYellow,
             };
-            textDrawer = this.AddComponent<TextDrawer>(desc, SceneObjectUsages.UI, layerHUD).Instance;
+            textDrawer = (await this.AddComponent<TextDrawer>(desc, SceneObjectUsages.UI, layerHUD)).Instance;
         }
 
         public override void Initialized()
