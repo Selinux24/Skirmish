@@ -88,7 +88,7 @@ namespace Engine
         [XmlAttribute("duration")]
         public float Duration { get; set; }
         /// <summary>
-        /// Gets or sets wheter the emitter duration is infinite
+        /// Gets or sets whether the emitter duration is infinite
         /// </summary>
         [XmlAttribute("infiniteDuration")]
         public bool InfiniteDuration { get; set; }

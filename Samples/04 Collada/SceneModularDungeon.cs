@@ -105,16 +105,18 @@ namespace Collada
             this.Game.VisibleMouse = false;
             this.Game.LockMouse = true;
 #endif
-
-            await this.InitializeDebug();
             await this.InitializeUI();
-            await this.InitializeModularScenery();
-            await this.InitializePlayer();
-            await this.InitializeRat();
-            await this.InitializeHuman();
+
+            await Task.WhenAll(
+                this.InitializeDebug(),
+                this.InitializeModularScenery(),
+                this.InitializePlayer(),
+                this.InitializeRat(),
+                this.InitializeHuman(),
+                this.InitializeAudio());
+
             await this.InitializeEnvironment();
             await this.InitializeLights();
-            await this.InitializeAudio();
         }
         private async Task InitializeEnvironment()
         {
@@ -230,11 +232,11 @@ namespace Collada
 
             var sceneryObject = await this.AddComponent<ModularScenery>(desc, SceneObjectUsages.Ground);
 
-            this.SetGround(sceneryObject, true);
-
             this.scenery = sceneryObject.Instance;
             this.scenery.TriggerEnd += TriggerEnds;
             await this.scenery.Start();
+
+            this.SetGround(sceneryObject, true);
         }
         private async Task InitializePlayer()
         {
@@ -1113,7 +1115,7 @@ namespace Collada
             });
         }
 
-        private void ChangeToLevel(string name)
+        private async Task ChangeToLevel(string name)
         {
             gameStarted = false;
 
@@ -1125,12 +1127,9 @@ namespace Collada
             this.AudioManager.ClearEffects();
             this.AudioManager.Start();
 
-            Task.Run(async () =>
-            {
-                await this.scenery.LoadLevel(name);
+            await this.scenery.LoadLevel(name);
 
-                this.UpdateNavigationGraph();
-            });
+            this.UpdateNavigationGraph();
         }
 
         private void PaintObstacles()

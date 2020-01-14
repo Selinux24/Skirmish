@@ -622,9 +622,13 @@ namespace Engine.PathFinding.RecastNavigation
         {
             List<GraphNode> nodes = new List<GraphNode>();
 
-            var navmesh = AgentQueries.Find(a => a.Agent == agent)?.NavMesh;
+            var graphQuery = AgentQueries.Find(a => agent.Equals(a.Agent));
+            if (graphQuery == null)
+            {
+                return new IGraphNode[] { };
+            }
 
-            nodes.AddRange(GraphNode.Build(navmesh));
+            nodes.AddRange(GraphNode.Build(graphQuery.NavMesh));
 
             return nodes.ToArray();
         }
@@ -642,10 +646,14 @@ namespace Engine.PathFinding.RecastNavigation
                 IncludeFlags = SamplePolyFlagTypes.SAMPLE_POLYFLAGS_WALK,
             };
 
-            var query = AgentQueries.Find(a => a.Agent == agent)?.CreateQuery();
+            var graphQuery = AgentQueries.Find(a => agent.Equals(a.Agent));
+            if (graphQuery == null)
+            {
+                return new Vector3[] { };
+            }
 
             var status = CalcPath(
-                query,
+                graphQuery.CreateQuery(),
                 filter, new Vector3(2, 4, 2), PathFindingMode.TOOLMODE_PATHFIND_FOLLOW,
                 from, to, out Vector3[] result);
 
@@ -676,10 +684,14 @@ namespace Engine.PathFinding.RecastNavigation
                     IncludeFlags = SamplePolyFlagTypes.SAMPLE_POLYFLAGS_WALK,
                 };
 
-                var query = AgentQueries.Find(a => a.Agent == agent)?.CreateQuery();
+                var graphQuery = AgentQueries.Find(a => agent.Equals(a.Agent));
+                if (graphQuery == null)
+                {
+                    return;
+                }
 
                 var status = CalcPath(
-                    query,
+                    graphQuery.CreateQuery(),
                     filter, new Vector3(2, 4, 2), PathFindingMode.TOOLMODE_PATHFIND_FOLLOW,
                     from, to, out Vector3[] res);
 

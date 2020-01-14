@@ -34,7 +34,7 @@ namespace Engine.Animation
         /// </summary>
         public float TimeDelta { get; set; } = 1f;
         /// <summary>
-        /// Gets wheter the controller is currently playing an animation
+        /// Gets whether the controller is currently playing an animation
         /// </summary>
         public bool Playing { get; private set; } = false;
         /// <summary>

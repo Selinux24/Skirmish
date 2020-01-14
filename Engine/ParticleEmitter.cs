@@ -139,7 +139,7 @@ namespace Engine
         /// </summary>
         public float Duration { get; set; }
         /// <summary>
-        /// Gets or sets wheter the emitter duration is infinite
+        /// Gets or sets whether the emitter duration is infinite
         /// </summary>
         public bool InfiniteDuration { get; set; }
         /// <summary>
@@ -151,7 +151,7 @@ namespace Engine
         /// </summary>
         public float Distance { get; set; }
         /// <summary>
-        /// Gets wheter the emitter is active
+        /// Gets whether the emitter is active
         /// </summary>
         public bool Active
         {
@@ -161,11 +161,11 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Gets or sets wheter the emitter particles is visible
+        /// Gets or sets whether the emitter particles is visible
         /// </summary>
         public bool Visible { get; set; } = true;
         /// <summary>
-        /// Gets or sets wheter the emitter particles is culled
+        /// Gets or sets whether the emitter particles is culled
         /// </summary>
         public bool Culled { get; set; } = false;
         /// <summary>

@@ -133,7 +133,7 @@ namespace Engine
             return bbox.Maximum.Z - bbox.Minimum.Z;
         }
         /// <summary>
-        /// Gets wheter almost one of the instance attributes is not a number
+        /// Gets whether almost one of the instance attributes is not a number
         /// </summary>
         /// <param name="vector">Vector</param>
         /// <returns>Returns true if almost one of the instance attributes is not a number</returns>
@@ -142,7 +142,7 @@ namespace Engine
             return float.IsNaN(vector.X) || float.IsNaN(vector.Y) || float.IsNaN(vector.Z);
         }
         /// <summary>
-        /// Gets wheter almost one of the instance attributes is not a number
+        /// Gets whether almost one of the instance attributes is not a number
         /// </summary>
         /// <param name="vector">Vector</param>
         /// <returns>Returns true if almost one of the instance attributes is not a number</returns>
@@ -151,7 +151,7 @@ namespace Engine
             return float.IsNaN(vector.X) || float.IsNaN(vector.Y) || float.IsNaN(vector.Z) || float.IsNaN(vector.W);
         }
         /// <summary>
-        /// Gets wheter almost one of the instance attributes is not a number
+        /// Gets whether almost one of the instance attributes is not a number
         /// </summary>
         /// <param name="color">Color</param>
         /// <returns>Returns true if almost one of the instance attributes is not a number</returns>
@@ -160,7 +160,7 @@ namespace Engine
             return float.IsNaN(color.Red) || float.IsNaN(color.Green) || float.IsNaN(color.Blue) || float.IsNaN(color.Alpha);
         }
         /// <summary>
-        /// Gets wheter almost one of the instance attributes is infinity
+        /// Gets whether almost one of the instance attributes is infinity
         /// </summary>
         /// <param name="vector">Vector</param>
         /// <returns>Returns true if almost one of the instance attributes is infinity</returns>
@@ -169,7 +169,7 @@ namespace Engine
             return float.IsInfinity(vector.X) || float.IsInfinity(vector.Y) || float.IsInfinity(vector.Z);
         }
         /// <summary>
-        /// Gets wheter almost one of the instance attributes is infinity
+        /// Gets whether almost one of the instance attributes is infinity
         /// </summary>
         /// <param name="vector">Vector</param>
         /// <returns>Returns true if almost one of the instance attributes is infinity</returns>
@@ -178,7 +178,7 @@ namespace Engine
             return float.IsInfinity(vector.X) || float.IsInfinity(vector.Y) || float.IsInfinity(vector.Z) || float.IsInfinity(vector.W);
         }
         /// <summary>
-        /// Gets wheter almost one of the instance attributes is infinity
+        /// Gets whether almost one of the instance attributes is infinity
         /// </summary>
         /// <param name="color">Color</param>
         /// <returns>Returns true if almost one of the instance attributes is infinity</returns>

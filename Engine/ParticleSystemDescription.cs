@@ -530,12 +530,12 @@ namespace Engine
         public float MaxEndSize { get; set; }
 
         /// <summary>
-        /// Gets or sets wheter the particles were transparent
+        /// Gets or sets whether the particles were transparent
         /// </summary>
         [XmlElement("transparent")]
         public bool Transparent { get; set; }
         /// <summary>
-        /// Gets or sets wheter the particles were additive
+        /// Gets or sets whether the particles were additive
         /// </summary>
         [XmlElement("additive")]
         public bool Additive { get; set; }

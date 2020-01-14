@@ -268,11 +268,11 @@ namespace Engine
         }
 
         /// <summary>
-        /// Gets or sets wheter the particles were transparent
+        /// Gets or sets whether the particles were transparent
         /// </summary>
         public bool Transparent { get; set; }
         /// <summary>
-        /// Gets or sets wheter the particles were additive
+        /// Gets or sets whether the particles were additive
         /// </summary>
         public bool Additive { get; set; }
 

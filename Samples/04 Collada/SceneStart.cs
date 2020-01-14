@@ -393,8 +393,11 @@ namespace Collada
 
             string musicName = $"Music{musicIndex}";
             currentMusic = this.AudioManager.CreateEffectInstance(musicName, emitterPosition, listenerPosition);
-            currentMusic.LoopEnd += AudioManager_LoopEnd;
-            currentMusic.Play();
+            if (currentMusic != null)
+            {
+                currentMusic.LoopEnd += AudioManager_LoopEnd;
+                currentMusic.Play();
+            }
         }
 
         private void AudioManager_LoopEnd(object sender, GameAudioEventArgs e)

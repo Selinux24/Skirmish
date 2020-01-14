@@ -16,7 +16,7 @@ namespace Engine
         /// </summary>
         public bool Enabled { get; set; }
         /// <summary>
-        /// Gets or sets wheter the light casts shadow
+        /// Gets or sets whether the light casts shadow
         /// </summary>
         public bool CastShadow { get; set; }
         /// <summary>

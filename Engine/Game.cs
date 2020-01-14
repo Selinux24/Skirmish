@@ -387,6 +387,12 @@ namespace Engine
             Stopwatch gSW = new Stopwatch();
             gSW.Start();
 
+            if (this.BufferManager.IsDirty)
+            {
+                this.BufferManager.CreateBuffers();
+                Console.WriteLine("BufferManager: Recreating dirty buffers");
+            }
+
             FrameInput();
 
             FrameBegin();

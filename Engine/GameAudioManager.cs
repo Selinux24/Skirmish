@@ -218,7 +218,7 @@ namespace Engine
                 return null;
             }
 
-            if (effectInstances.Exists(i => i.Name == effectName))
+            if (effectInstances.Exists(i => i.Name == effectName && i.Effect.State != AudioState.Stopped))
             {
                 //Effect currently playing
                 return null;

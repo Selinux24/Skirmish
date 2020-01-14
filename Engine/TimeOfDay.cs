@@ -251,7 +251,7 @@ namespace Engine
         /// Sets time of day
         /// </summary>
         /// <param name="time">Time (0 to 1)</param>
-        /// <param name="update">Sets wheter update internal state or not</param>
+        /// <param name="update">Sets whether update internal state or not</param>
         public void SetTimeOfDay(float time, bool update = false)
         {
             this.TimeOfDayValue = Math.Abs(time) % 1.0f;
@@ -265,7 +265,7 @@ namespace Engine
         /// Sets time of day
         /// </summary>
         /// <param name="time">Time</param>
-        /// <param name="update">Sets wheter update internal state or not</param>
+        /// <param name="update">Sets whether update internal state or not</param>
         public void SetTimeOfDay(TimeSpan time, bool update = false)
         {
             this.SetTimeOfDay((float)time.TotalDays % 1.0f, update);

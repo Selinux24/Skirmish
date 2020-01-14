@@ -447,9 +447,31 @@ namespace Engine.Common
         }
 
         /// <summary>
-        /// 
+        /// Gets whether the manager is initialized or not
         /// </summary>
         public bool Initilialized { get; set; } = false;
+        /// <summary>
+        /// Gets whether any internal buffer descriptor is dirty
+        /// </summary>
+        /// <remarks>If not initialized, returns always false</remarks>
+        public bool IsDirty
+        {
+            get
+            {
+                if (!Initilialized)
+                {
+                    return false;
+                }
+
+                bool iDirty = this.indexData.Any(d => d.Dirty);
+                if (iDirty)
+                {
+                    return true;
+                }
+
+                return this.vertexData.Any(d => d.Dirty);
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -926,6 +948,12 @@ namespace Engine.Common
         /// </summary>
         public bool SetVertexBuffers()
         {
+            if (!Initilialized)
+            {
+                Console.WriteLine("Attempt to set vertex buffers to Input Assembler with no initialized manager");
+                return false;
+            }
+
             if (this.vertexData.Any(d => d.Dirty))
             {
                 return false;
@@ -941,11 +969,18 @@ namespace Engine.Common
         /// <param name="slot">Slot</param>
         public void SetIndexBuffer(int slot)
         {
+            if (!Initilialized)
+            {
+                Console.WriteLine("Attempt to set index buffers to Input Assembler with no initialized manager");
+                return;
+            }
+
             if (slot >= 0)
             {
                 var descriptor = this.indexData[slot];
                 if (descriptor.Dirty)
                 {
+                    Console.WriteLine($"Attempt to set index buffer in slot {slot} to Input Assembler with no allocated buffer");
                     return;
                 }
 
@@ -960,9 +995,16 @@ namespace Engine.Common
         /// <param name="topology">Topology</param>
         public void SetInputAssembler(EngineEffectTechnique technique, int slot, Topology topology)
         {
+            if (!Initilialized)
+            {
+                Console.WriteLine("Attempt to set technique to Input Assembler with no initialized manager");
+                return;
+            }
+
             var descriptor = this.vertexData[slot];
             if (descriptor.Dirty)
             {
+                Console.WriteLine($"Attempt to set technique in slot {slot} to Input Assembler with no allocated buffer");
                 return;
             }
 
@@ -986,8 +1028,15 @@ namespace Engine.Common
         /// <param name="data">Instancig data</param>
         public void WriteInstancingData(IEnumerable<VertexInstancingData> data)
         {
+            if (!Initilialized)
+            {
+                Console.WriteLine("Attempt to write instancing data with no initialized manager");
+                return;
+            }
+
             if (instancingBufferOffset < 0)
             {
+                Console.WriteLine("Attempt to write instancing data with no allocated buffer");
                 return;
             }
 
@@ -1006,9 +1055,16 @@ namespace Engine.Common
         /// <param name="data">Data to write</param>
         public void WriteBuffer<T>(int vertexBufferSlot, int vertexBufferOffset, IEnumerable<T> data) where T : struct, IVertexData
         {
+            if (!Initilialized)
+            {
+                Console.WriteLine($"Attempt to write vertex data in slot {vertexBufferSlot} with no initialized manager");
+                return;
+            }
+
             var descriptor = this.vertexData[vertexBufferSlot];
             if (descriptor.Dirty)
             {
+                Console.WriteLine($"Attempt to write vertex data in slot {vertexBufferSlot} with no allocated buffer");
                 return;
             }
 
@@ -1026,9 +1082,16 @@ namespace Engine.Common
         /// <param name="data">Data to write</param>
         public void WriteBuffer(int indexBufferSlot, int indexBufferOffset, IEnumerable<uint> data)
         {
+            if (!Initilialized)
+            {
+                Console.WriteLine($"Attempt to write index data in slot {indexBufferSlot} with no initialized manager");
+                return;
+            }
+
             var descriptor = this.indexData[indexBufferSlot];
             if (descriptor.Dirty)
             {
+                Console.WriteLine($"Attempt to write index data in slot {indexBufferSlot} with no allocated buffer");
                 return;
             }
 
