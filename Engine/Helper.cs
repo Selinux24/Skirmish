@@ -872,6 +872,49 @@ namespace Engine
 
         #endregion
 
+        #region Bounding Box
+
+        /// <summary>
+        /// Merges the array of bounding boxes into one bounding box
+        /// </summary>
+        /// <param name="boxes">Array of boxes</param>
+        /// <returns>Returns a bounding box containing all the boxes in the array</returns>
+        public static BoundingBox MergeBoundingBox(IEnumerable<BoundingBox> boxes)
+        {
+            BoundingBox fbbox = new BoundingBox();
+
+            if (boxes?.Any() != true)
+            {
+                return fbbox;
+            }
+
+            var defaultBox = new BoundingBox();
+
+            foreach (var bbox in boxes.Where(b => b != defaultBox))
+            {
+                fbbox = MergeBoundingBox(fbbox, bbox);
+            }
+
+            return fbbox;
+        }
+        /// <summary>
+        /// Merges the boxes
+        /// </summary>
+        /// <param name="sourceBox">Source box</param>
+        /// <param name="newBox">New box</param>
+        /// <returns>If source box is null or default, returns new box</returns>
+        private static BoundingBox MergeBoundingBox(BoundingBox? sourceBox, BoundingBox newBox)
+        {
+            if (!sourceBox.HasValue || sourceBox == new BoundingBox())
+            {
+                return newBox;
+            }
+
+            return BoundingBox.Merge(sourceBox.Value, newBox);
+        }
+
+        #endregion
+
         #region Debug Utils
 
         /// <summary>

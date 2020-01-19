@@ -319,9 +319,9 @@ namespace Skybox
                 });
         }
 
-        public override void Initialized()
+        public override async Task Initialized()
         {
-            base.Initialized();
+            await base.Initialized();
 
             fireAudioEffect = this.AudioManager.CreateEffectInstance("Sphere", this.movingFire, this.Camera);
             fireAudioEffect.Play();

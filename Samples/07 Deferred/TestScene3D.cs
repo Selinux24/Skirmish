@@ -351,9 +351,9 @@ namespace Deferred
             this.terrainGraphDrawer.Visible = false;
         }
 
-        public override void Initialized()
+        public override async Task Initialized()
         {
-            base.Initialized();
+            await base.Initialized();
 
             StartNodes();
 

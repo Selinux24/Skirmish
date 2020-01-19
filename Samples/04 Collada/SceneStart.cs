@@ -180,9 +180,9 @@ namespace Collada
                 });
         }
 
-        public override void Initialized()
+        public override async Task Initialized()
         {
-            base.Initialized();
+            await base.Initialized();
 
             SetBackground();
             SetControlPositions();

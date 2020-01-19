@@ -80,9 +80,9 @@ namespace SpriteDrawing
             textDrawer = (await this.AddComponent<TextDrawer>(desc, SceneObjectUsages.UI, layerHUD)).Instance;
         }
 
-        public override void Initialized()
+        public override async Task Initialized()
         {
-            base.Initialized();
+            await base.Initialized();
 
             textBackPanel.Manipulator.SetPosition(700, 100);
             textDrawer.Rectangle = new RectangleF(780, 140, 650, 550);

@@ -146,9 +146,9 @@ namespace Collada
             this.graphDrawer = await this.AddComponent<PrimitiveListDrawer<Triangle>>(graphDrawerDesc);
         }
 
-        public override void Initialized()
+        public override async Task Initialized()
         {
-            base.Initialized();
+            await base.Initialized();
 
             this.UpdateGraphNodes(this.agent);
 
@@ -160,11 +160,11 @@ namespace Collada
             this.Camera.Position = center + new Vector3(1, 0.8f, -1) * maxD * 0.8f;
         }
 
-        public override void UpdateNavigationGraph()
+        public override async Task UpdateNavigationGraph()
         {
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            base.UpdateNavigationGraph();
+            await base.UpdateNavigationGraph();
             sw.Stop();
             lastElapsedSeconds = sw.ElapsedMilliseconds / 1000.0f;
         }
@@ -277,7 +277,7 @@ namespace Collada
 
             if (updateGraph)
             {
-                this.UpdateNavigationGraph();
+                Task.WhenAll(this.UpdateNavigationGraph());
             }
 
             if (updateGraphDrawing)
@@ -304,13 +304,13 @@ namespace Collada
         {
             if (this.Game.Input.KeyJustReleased(Keys.F5))
             {
-                this.PathFinderDescription.Save(@"test.grf", this.NavigationGraph);
+                Task.Run(() => this.PathFinderDescription.Save(@"test.grf", this.NavigationGraph));
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F6))
             {
-                var graph = this.PathFinderDescription.Load(@"test.grf");
-                this.SetNavigationGraph(graph);
+                var graphTask = Task.Run(() => this.PathFinderDescription.Load(@"test.grf"));
+                this.SetNavigationGraph(graphTask.Result);
             }
         }
     }

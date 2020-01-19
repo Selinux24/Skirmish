@@ -2,6 +2,7 @@
 using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Engine.PathFinding.AStar
 {
@@ -24,7 +25,23 @@ namespace Engine.PathFinding.AStar
         /// </summary>
         /// <param name="settings">Settings</param>
         /// <returns>Returns the new graph</returns>
-        public override IGraph CreateGraph(PathFinderSettings settings)
+        public override async Task<IGraph> CreateGraph(PathFinderSettings settings)
+        {
+            IGraph grid = null;
+
+            await Task.Run(() =>
+            {
+                grid = CreateGrid(settings);
+            });
+
+            return grid;
+        }
+        /// <summary>
+        /// Creates a new grid
+        /// </summary>
+        /// <param name="settings">Settings</param>
+        /// <returns>Returns the new grid</returns>
+        private Grid CreateGrid(PathFinderSettings settings)
         {
             var grid = new Grid
             {
@@ -240,16 +257,16 @@ namespace Engine.PathFinding.AStar
         /// <summary>
         /// Refresh
         /// </summary>
-        public override void Refresh()
+        public override Task Refresh()
         {
-
+            throw new NotImplementedException();
         }
 
         /// <summary>
         /// Loads the graph from a file
         /// </summary>
         /// <param name="fileName">File name</param>
-        public override IGraph Load(string fileName)
+        public override Task<IGraph> Load(string fileName)
         {
             throw new NotImplementedException();
         }
@@ -258,7 +275,7 @@ namespace Engine.PathFinding.AStar
         /// </summary>
         /// <param name="fileName">File name</param>
         /// <param name="graph">Graph instance</param>
-        public override void Save(string fileName, IGraph graph)
+        public override Task Save(string fileName, IGraph graph)
         {
             throw new NotImplementedException();
         }

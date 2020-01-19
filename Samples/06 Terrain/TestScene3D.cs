@@ -1275,9 +1275,9 @@ namespace Terrain
             });
         }
 
-        public override void Initialized()
+        public override async Task Initialized()
         {
-            base.Initialized();
+            await base.Initialized();
 
             this.gardener.SetWind(this.windDirection, this.windStrength);
 

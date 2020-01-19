@@ -708,13 +708,9 @@ namespace Heightmap
             await Task.CompletedTask;
         }
 
-        public override void Initialized()
+        public override async Task Initialized()
         {
-            base.Initialized();
-
-            var taskAnimations = Task.Run(() => SetAnimationDictionaries());
-            var taskPositioning = Task.Run(() => SetPositionOverTerrain());
-            var taskDebugInfo = Task.Run(() => SetDebugInfo());
+            await base.Initialized();
 
             this.Camera.NearPlaneDistance = near;
             this.Camera.FarPlaneDistance = far;
@@ -735,58 +731,56 @@ namespace Heightmap
             this.lantern = new SceneLightSpot("lantern", true, Color.White, Color.White, true, lanternDesc);
             this.Lights.Add(this.lantern);
 
-            Task.WaitAll(new[]
-            {
-                taskAnimations,
-                taskPositioning,
-                taskDebugInfo,
-            });
+            await Task.WhenAll(
+                SetAnimationDictionaries(),
+                SetPositionOverTerrain(),
+                SetDebugInfo());
 
-            SetPathFindingInfo();
+            await SetPathFindingInfo();
 
-            Task.Run(async () =>
-            {
-                this.lightsVolumeDrawer = await this.AddComponent<PrimitiveListDrawer<Line3D>>(
-                    new PrimitiveListDrawerDescription<Line3D>()
-                    {
-                        Name = "DEBUG++ Light Volumes",
-                        DepthEnabled = true,
-                        Count = 10000
-                    });
+            this.lightsVolumeDrawer = await this.AddComponent<PrimitiveListDrawer<Line3D>>(
+                new PrimitiveListDrawerDescription<Line3D>()
+                {
+                    Name = "DEBUG++ Light Volumes",
+                    DepthEnabled = true,
+                    Count = 10000
+                });
 
-                this.graphDrawer = await this.AddComponent<PrimitiveListDrawer<Triangle>>(
-                    new PrimitiveListDrawerDescription<Triangle>()
-                    {
-                        Name = "DEBUG++ Graph",
-                        AlphaEnabled = true,
-                        Count = 50000,
-                    });
-                this.graphDrawer.Visible = false;
-            });
+            this.graphDrawer = await this.AddComponent<PrimitiveListDrawer<Triangle>>(
+                new PrimitiveListDrawerDescription<Triangle>()
+                {
+                    Name = "DEBUG++ Graph",
+                    AlphaEnabled = true,
+                    Count = 50000,
+                });
+            this.graphDrawer.Visible = false;
         }
-        private void SetAnimationDictionaries()
+        private async Task SetAnimationDictionaries()
         {
-            var hp = new AnimationPath();
-            hp.AddLoop("roll");
-            this.animations.Add("heli_default", new AnimationPlan(hp));
+            await Task.Run(() =>
+            {
+                var hp = new AnimationPath();
+                hp.AddLoop("roll");
+                this.animations.Add("heli_default", new AnimationPlan(hp));
 
-            var sp = new AnimationPath();
-            sp.AddLoop("stand");
-            this.animations.Add("soldier_stand", new AnimationPlan(sp));
+                var sp = new AnimationPath();
+                sp.AddLoop("stand");
+                this.animations.Add("soldier_stand", new AnimationPlan(sp));
 
-            var sp1 = new AnimationPath();
-            sp1.AddLoop("idle1");
-            this.animations.Add("soldier_idle", new AnimationPlan(sp1));
+                var sp1 = new AnimationPath();
+                sp1.AddLoop("idle1");
+                this.animations.Add("soldier_idle", new AnimationPlan(sp1));
 
-            var m24_1 = new AnimationPath();
-            m24_1.AddLoop("fly");
-            this.animations.Add("m24_idle", new AnimationPlan(m24_1));
+                var m24_1 = new AnimationPath();
+                m24_1.AddLoop("fly");
+                this.animations.Add("m24_idle", new AnimationPlan(m24_1));
 
-            var m24_2 = new AnimationPath();
-            m24_2.AddLoop("fly", 5);
-            this.animations.Add("m24_fly", new AnimationPlan(m24_2));
+                var m24_2 = new AnimationPath();
+                m24_2.AddLoop("fly", 5);
+                this.animations.Add("m24_fly", new AnimationPlan(m24_2));
+            });
         }
-        private void SetPositionOverTerrain()
+        private async Task SetPositionOverTerrain()
         {
             Random posRnd = new Random(1024);
 
@@ -794,11 +788,11 @@ namespace Heightmap
 
             this.SetGround(this.terrain, true);
 
-            this.SetRocksPosition(posRnd, bbox);
-            this.SetForestPosition(posRnd);
-            this.SetWatchTowerPosition();
-            this.SetContainersPosition();
-            this.SetTorchsPosition(posRnd, bbox);
+            await this.SetRocksPosition(posRnd, bbox);
+            await this.SetForestPosition(posRnd);
+            await this.SetWatchTowerPosition();
+            await this.SetContainersPosition();
+            await this.SetTorchsPosition(posRnd, bbox);
 
             this.AttachToGround(this.rocks, false);
             this.AttachToGround(this.trees, false);
@@ -806,19 +800,19 @@ namespace Heightmap
             this.AttachToGround(this.watchTower, true);
             this.AttachToGround(this.torchs, false);
 
-            this.SetM24Position();
-            this.SetBradleyPosition();
+            await this.SetM24Position();
+            await this.SetBradleyPosition();
 
             this.AttachToGround(this.helicopterI, true);
             this.AttachToGround(this.bradleyI, true);
 
             //Player soldier
-            this.SetPlayerPosition();
+            await this.SetPlayerPosition();
 
             //NPC soldiers
-            this.SetSoldiersPosition();
+            await this.SetSoldiersPosition();
         }
-        private void SetRocksPosition(Random posRnd, BoundingBox bbox)
+        private async Task SetRocksPosition(Random posRnd, BoundingBox bbox)
         {
             for (int i = 0; i < this.rocks.Count; i++)
             {
@@ -845,8 +839,10 @@ namespace Heightmap
                     this.rocks.Instance[i].Manipulator.SetScale(scale, true);
                 }
             }
+
+            await Task.CompletedTask;
         }
-        private void SetForestPosition(Random posRnd)
+        private async Task SetForestPosition(Random posRnd)
         {
             BoundingBox bbox = new BoundingBox(new Vector3(-400, 0, -400), new Vector3(-1000, 1000, -1000));
 
@@ -881,8 +877,10 @@ namespace Heightmap
                     this.trees2.Instance[i].Manipulator.SetScale(posRnd.NextFloat(1.5f, 2.5f), true);
                 }
             }
+
+            await Task.CompletedTask;
         }
-        private void SetWatchTowerPosition()
+        private async Task SetWatchTowerPosition()
         {
             if (this.FindTopGroundPosition(-40, -40, out PickingResult<Triangle> r))
             {
@@ -890,8 +888,10 @@ namespace Heightmap
                 this.watchTower.Transform.SetRotation(MathUtil.Pi / 3f, 0, 0, true);
                 this.watchTower.Transform.SetScale(1.5f, true);
             }
+
+            await Task.CompletedTask;
         }
-        private void SetContainersPosition()
+        private async Task SetContainersPosition()
         {
             var positions = new[]
             {
@@ -920,8 +920,10 @@ namespace Heightmap
 
                 this.containers.Instance[i].TextureIndex = (uint)i;
             }
+
+            await Task.CompletedTask;
         }
-        private void SetTorchsPosition(Random posRnd, BoundingBox bbox)
+        private async Task SetTorchsPosition(Random posRnd, BoundingBox bbox)
         {
             if (this.FindTopGroundPosition(15, 15, out PickingResult<Triangle> r))
             {
@@ -989,8 +991,10 @@ namespace Heightmap
                 this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pFire, new ParticleEmitter() { Position = pos, InfiniteDuration = true, EmissionRate = 0.1f });
                 this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, new ParticleEmitter() { Position = pos, InfiniteDuration = true, EmissionRate = 0.5f });
             }
+
+            await Task.CompletedTask;
         }
-        private void SetM24Position()
+        private async Task SetM24Position()
         {
             var hPositions = new[]
             {
@@ -1013,9 +1017,9 @@ namespace Heightmap
                 }
             }
 
-
+            await Task.CompletedTask;
         }
-        private void SetBradleyPosition()
+        private async Task SetBradleyPosition()
         {
             var bPositions = new[]
             {
@@ -1036,8 +1040,10 @@ namespace Heightmap
                     this.bradleyI.Instance[i].Manipulator.SetNormal(r.Item.Normal);
                 }
             }
+
+            await Task.CompletedTask;
         }
-        private void SetPlayerPosition()
+        private async Task SetPlayerPosition()
         {
             if (this.FindAllGroundPosition(-40, -40, out PickingResult<Triangle>[] res))
             {
@@ -1047,8 +1053,10 @@ namespace Heightmap
 
             this.soldier.Instance.AnimationController.AddPath(this.animations["soldier_idle"]);
             this.soldier.Instance.AnimationController.Start();
+
+            await Task.CompletedTask;
         }
-        private void SetSoldiersPosition()
+        private async Task SetSoldiersPosition()
         {
             Vector3[] iPos = new Vector3[]
             {
@@ -1071,6 +1079,8 @@ namespace Heightmap
                     this.troops.Instance[i].AnimationController.Start(Helper.RandomGenerator.NextFloat(0f, 8f));
                 }
             }
+
+            await Task.CompletedTask;
         }
         private async Task SetDebugInfo()
         {
@@ -1127,7 +1137,7 @@ namespace Heightmap
                 layerEffects);
             this.linesDrawer.Visible = false;
         }
-        private void SetPathFindingInfo()
+        private async Task SetPathFindingInfo()
         {
             //Player height
             var sbbox = this.soldier.Instance.GetBoundingBox();
@@ -1165,7 +1175,7 @@ namespace Heightmap
 
             this.PathFinderDescription = new PathFinderDescription(nmsettings, nminput);
 
-            this.UpdateNavigationGraph();
+            await this.UpdateNavigationGraph();
         }
         private void ToggleFog()
         {

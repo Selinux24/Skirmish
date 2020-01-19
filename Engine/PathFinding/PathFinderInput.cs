@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Engine.PathFinding
 {
@@ -166,23 +167,23 @@ namespace Engine.PathFinding
         /// </summary>
         /// <param name="settings">Creation settings</param>
         /// <returns>Returns the new created graph</returns>
-        public abstract IGraph CreateGraph(PathFinderSettings settings);
+        public abstract Task<IGraph> CreateGraph(PathFinderSettings settings);
         /// <summary>
         /// Refresh
         /// </summary>
-        public abstract void Refresh();
+        public abstract Task Refresh();
 
         /// <summary>
         /// Loads the graph from a file
         /// </summary>
         /// <param name="fileName">File name</param>
         /// <returns>Returns the loaded graph</returns>
-        public abstract IGraph Load(string fileName);
+        public abstract Task<IGraph> Load(string fileName);
         /// <summary>
         /// Saves the graph to a file
         /// </summary>
         /// <param name="fileName">File name</param>
         /// <param name="graph">Graph instance</param>
-        public abstract void Save(string fileName, IGraph graph);
+        public abstract Task Save(string fileName, IGraph graph);
     }
 }

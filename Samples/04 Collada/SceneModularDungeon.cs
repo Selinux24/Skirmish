@@ -78,7 +78,7 @@ namespace Collada
         private string ratSoundTalk = null;
         private GameAudioEffect ratSoundInstance = null;
 
-        private bool gameStarted = false;
+        private bool gameRuning = false;
 
         private AgentType CurrentAgent
         {
@@ -234,7 +234,6 @@ namespace Collada
 
             this.scenery = sceneryObject.Instance;
             this.scenery.TriggerEnd += TriggerEnds;
-            await this.scenery.Start();
 
             this.SetGround(sceneryObject, true);
         }
@@ -470,11 +469,15 @@ namespace Collada
             await Task.CompletedTask;
         }
 
-        public override void Initialized()
+        public override async Task Initialized()
         {
-            base.Initialized();
+            await base.Initialized();
 
             this.StartCamera();
+
+            await this.scenery.Start();
+
+            await this.ChangeToLevel(this.scenery.CurrentLevel.Name);
 
             this.AudioManager.Start();
         }
@@ -485,8 +488,8 @@ namespace Collada
             this.Camera.MovementDelta = this.agent.Velocity;
             this.Camera.SlowMovementDelta = this.agent.VelocitySlow;
             this.Camera.Mode = CameraModes.Free;
-            this.Camera.Position = new Vector3(-6, 5.5f, -26);
-            this.Camera.Interest = new Vector3(-4, 5.5f, -26);
+            this.Camera.Position = new Vector3(1000, 1000, 1000);
+            this.Camera.Interest = new Vector3(1001, 1000, 1000);
         }
         private void UpdateDebugInfo()
         {
@@ -555,7 +558,7 @@ namespace Collada
             this.fps.Instance.Text = this.Game.RuntimeText;
             this.info.Instance.Text = string.Format("{0}", this.GetRenderMode());
 
-            if (!gameStarted)
+            if (!gameRuning)
             {
                 return;
             }
@@ -659,12 +662,12 @@ namespace Collada
 
             if (this.Game.Input.KeyJustReleased(Keys.N))
             {
-                this.ChangeToLevel("Lvl1");
+                Task.WhenAll(this.ChangeToLevel("Lvl1"));
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.M))
             {
-                this.ChangeToLevel("Lvl3");
+                Task.WhenAll(this.ChangeToLevel("Lvl3"));
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F))
@@ -1002,7 +1005,7 @@ namespace Collada
                     string nextLevel = item.Object.NextLevel;
                     if (!string.IsNullOrEmpty(nextLevel))
                     {
-                        this.ChangeToLevel(nextLevel);
+                        await this.ChangeToLevel(nextLevel);
                     }
                     else
                     {
@@ -1089,7 +1092,7 @@ namespace Collada
                 File.Delete(fileName);
             }
 
-            this.UpdateNavigationGraph();
+            Task.WhenAll(this.UpdateNavigationGraph());
         }
         private void SaveGraphToFile()
         {
@@ -1117,7 +1120,7 @@ namespace Collada
 
         private async Task ChangeToLevel(string name)
         {
-            gameStarted = false;
+            gameRuning = false;
 
             this.Lights.ClearPointLights();
             this.Lights.ClearSpotLights();
@@ -1129,7 +1132,17 @@ namespace Collada
 
             await this.scenery.LoadLevel(name);
 
-            this.UpdateNavigationGraph();
+            await this.UpdateNavigationGraph();
+
+            this.StartEntities();
+
+            var pos = this.scenery.CurrentLevel.StartPosition;
+            var dir = this.scenery.CurrentLevel.LookingVector;
+            pos.Y += agent.Height;
+            this.Camera.Position = pos;
+            this.Camera.Interest = pos + dir;
+      
+            gameRuning = true;
         }
 
         private void PaintObstacles()
@@ -1185,17 +1198,26 @@ namespace Collada
             }
         }
 
-        public override void UpdateNavigationGraphAsync()
+        public override async Task UpdateNavigationGraph()
         {
+            if (this.scenery.CurrentLevel == null)
+            {
+                return;
+            }
+
             var fileName = this.scenery.CurrentLevel.Name + nmFile;
 
             if (File.Exists(fileName))
             {
                 try
                 {
-                    var graph = this.PathFinderDescription.Load(fileName);
+                    this.NavigationGraphUpdating();
+
+                    var graph = await this.PathFinderDescription.Load(fileName);
 
                     this.SetNavigationGraph(graph);
+
+                    this.NavigationGraphUpdated();
 
                     return;
                 }
@@ -1205,25 +1227,12 @@ namespace Collada
                 }
             }
 
-            base.UpdateNavigationGraphAsync();
+            await base.UpdateNavigationGraph();
 
-            this.PathFinderDescription.Save(fileName, this.NavigationGraph);
+            await this.PathFinderDescription.Save(fileName, this.NavigationGraph);
         }
         public override void NavigationGraphUpdated()
         {
-            if (!gameStarted)
-            {
-                gameStarted = true;
-
-                this.StartEntities();
-
-                var pos = this.scenery.CurrentLevel.StartPosition;
-                var dir = this.scenery.CurrentLevel.LookingVector;
-                pos.Y += agent.Height;
-                this.Camera.Position = pos;
-                this.Camera.Interest = pos + dir;
-            }
-
             //Update active paths with the new graph configuration
             if (this.ratController.HasPath)
             {

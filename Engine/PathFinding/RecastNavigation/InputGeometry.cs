@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Engine.PathFinding.RecastNavigation
 {
@@ -27,7 +28,23 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="settings">Settings</param>
         /// <returns>Returns the new graph</returns>
-        public override IGraph CreateGraph(PathFinderSettings settings)
+        public override async Task<IGraph> CreateGraph(PathFinderSettings settings)
+        {
+            Graph graph = null;
+
+            await Task.Run(() =>
+            {
+                graph = Create(settings);
+            });
+
+            return graph;
+        }
+        /// <summary>
+        /// Creates a new graph from current geometry input
+        /// </summary>
+        /// <param name="settings">Settings</param>
+        /// <returns>Returns the new graph</returns>
+        private Graph Create(PathFinderSettings settings)
         {
             // Prepare input data
             this.ChunkyMesh = ChunkyTriMesh.Build(this);
@@ -59,26 +76,38 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Refresh
         /// </summary>
-        public override void Refresh()
+        public override async Task Refresh()
         {
-            // Recreate the input data
-            this.ChunkyMesh = ChunkyTriMesh.Build(this);
+            ChunkyTriMesh mesh = null;
+
+            await Task.Run(() =>
+            {
+                // Recreate the input data
+                mesh = ChunkyTriMesh.Build(this);
+            });
+
+            this.ChunkyMesh = mesh;
         }
 
         /// <summary>
         /// Loads the graph from a file
         /// </summary>
         /// <param name="fileName">File name</param>
-        public override IGraph Load(string fileName)
+        public override async Task<IGraph> Load(string fileName)
         {
-            // Initialize the input data
-            this.ChunkyMesh = ChunkyTriMesh.Build(this);
+            Graph graph = null;
 
-            // Load file
-            var graph = GraphFile.Load(fileName);
+            await Task.Run(() =>
+            {
+                // Initialize the input data
+                this.ChunkyMesh = ChunkyTriMesh.Build(this);
 
-            // Set input data
-            graph.Input = this;
+                // Load file
+                graph = GraphFile.Load(fileName);
+
+                // Set input data
+                graph.Input = this;
+            });
 
             return graph;
         }
@@ -87,11 +116,11 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="fileName">File name</param>
         /// <param name="graph">Instance to save</param>
-        public override void Save(string fileName, IGraph graph)
+        public override async Task Save(string fileName, IGraph graph)
         {
             if (graph is Graph nmGraph)
             {
-                GraphFile.Save(fileName, nmGraph);
+                await Task.Run(() => GraphFile.Save(fileName, nmGraph));
             }
             else
             {

@@ -252,9 +252,9 @@ namespace SceneTest
             this.bufferDrawer.Visible = false;
         }
 
-        public override void Initialized()
+        public override async Task Initialized()
         {
-            base.Initialized();
+            await base.Initialized();
 
             this.buildingObelisks.Instance[0].Manipulator.SetPosition(+5, 0, +5);
             this.buildingObelisks.Instance[1].Manipulator.SetPosition(+5, 0, -5);

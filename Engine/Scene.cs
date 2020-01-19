@@ -353,12 +353,9 @@ namespace Engine
         /// <summary>
         /// Scene objects initialized
         /// </summary>
-        public virtual void Initialized()
+        public virtual async Task Initialized()
         {
-            Task.Run(() =>
-            {
-                this.UpdateNavigationGraph();
-            });
+            await this.UpdateNavigationGraph();
         }
         /// <summary>
         /// Update scene objects
@@ -410,7 +407,6 @@ namespace Engine
 
             if (!this.Game.Input.LeftMouseButtonPressed) this.capturedControl = null;
         }
-
         /// <summary>
         /// Draw scene objects
         /// </summary>
@@ -548,10 +544,12 @@ namespace Engine
         /// <returns>Returns the added component</returns>
         public async Task<SceneObject<T>> AddComponent<T>(T component, SceneObjectDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
         {
-            var sceneObject = new SceneObject<T>(component, description);
+            SceneObject<T> sceneObject = null;
 
             await Task.Run(() =>
             {
+                sceneObject = new SceneObject<T>(component, description);
+
                 this.AddComponent(sceneObject, usage, order);
             });
 
@@ -876,6 +874,11 @@ namespace Engine
         {
             var bbox = this.GetGroundBoundingBox();
 
+            if (!bbox.HasValue || bbox == new BoundingBox())
+            {
+                Console.WriteLine($"A ground must be defined into the scene in the first place.");
+            }
+
             float maxY = (bbox?.Maximum.Y + 1.0f) ?? float.MaxValue;
 
             return new Ray()
@@ -891,26 +894,10 @@ namespace Engine
         /// <param name="ray">Ray</param>
         /// <param name="maxDistance">Maximum distance for test</param>
         /// <param name="facingOnly">Select only facing triangles</param>
-        /// <param name="model">Gets the resulting ray pickable object</param>
-        /// <returns>Returns true if a pickable object in the ray path was found</returns>
-        public virtual bool PickNearest(Ray ray, float maxDistance, RayPickingParams rayPickingParams, out SceneObject model)
-        {
-            var usage = SceneObjectUsages.Agent &
-                SceneObjectUsages.CoarsePathFinding &
-                SceneObjectUsages.FullPathFinding;
-
-            return this.PickNearest(ray, maxDistance, rayPickingParams, usage, out model);
-        }
-        /// <summary>
-        /// Gets the nearest pickable object in the ray path
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        /// <param name="maxDistance">Maximum distance for test</param>
-        /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="usage">Object usage mask</param>
         /// <param name="model">Gets the resulting ray pickable object</param>
         /// <returns>Returns true if a pickable object in the ray path was found</returns>
-        public virtual bool PickNearest(Ray ray, float maxDistance, RayPickingParams rayPickingParams, SceneObjectUsages usage, out SceneObject model)
+        public bool PickNearest(Ray ray, float maxDistance, RayPickingParams rayPickingParams, SceneObjectUsages usage, out SceneObject model)
         {
             model = null;
 
@@ -1207,6 +1194,40 @@ namespace Engine
         /// <returns>Returns the whole ground bounding box.</returns>
         public BoundingBox? GetGroundBoundingBox()
         {
+            if (this.groundBoundingBox.HasValue && this.groundBoundingBox != new BoundingBox())
+            {
+                return this.groundBoundingBox;
+            }
+
+            //Try to get a bounding box from the current ground objects
+            var cmpList = this.components
+                .FindAll(c => c.Usage.HasFlag(SceneObjectUsages.Ground));
+
+            if (cmpList.Any())
+            {
+                List<BoundingBox> boxes = new List<BoundingBox>();
+
+                foreach (var obj in cmpList)
+                {
+                    if (obj.Is<IComposed>())
+                    {
+                        var pickComponents = obj.Get<IComposed>().GetComponents<IRayPickable<Triangle>>();
+                        foreach (var pickable in pickComponents)
+                        {
+                            boxes.Add(pickable.GetBoundingBox());
+                        }
+                    }
+                    else if (obj.Is<IRayPickable<Triangle>>())
+                    {
+                        var pickable = obj.Get<IRayPickable<Triangle>>();
+
+                        boxes.Add(pickable.GetBoundingBox());
+                    }
+                }
+
+                this.groundBoundingBox = Helper.MergeBoundingBox(boxes);
+            }
+
             return this.groundBoundingBox;
         }
         /// <summary>
@@ -1244,10 +1265,10 @@ namespace Engine
         /// <param name="fullGeometryPathFinding">Sets whether use full triangle list or volumes for navigation graphs</param>
         public void SetGround(SceneObject obj, bool fullGeometryPathFinding)
         {
-            this.groundBoundingBox = obj.Get<IRayPickable<Triangle>>().GetBoundingBox();
+            this.groundBoundingBox = null;
 
             obj.Usage |= SceneObjectUsages.Ground;
-            obj.Usage |= (fullGeometryPathFinding ? SceneObjectUsages.FullPathFinding : SceneObjectUsages.CoarsePathFinding);
+            obj.Usage |= fullGeometryPathFinding ? SceneObjectUsages.FullPathFinding : SceneObjectUsages.CoarsePathFinding;
         }
         /// <summary>
         /// Attach geometry to ground
@@ -1260,9 +1281,27 @@ namespace Engine
         /// <param name="fullGeometryPathFinding">Sets whether use full triangle list or volumes for navigation graphs</param>
         public void AttachToGround(SceneObject obj, bool fullGeometryPathFinding)
         {
-            obj.Usage |= (fullGeometryPathFinding ? SceneObjectUsages.FullPathFinding : SceneObjectUsages.CoarsePathFinding);
+            obj.Usage |= fullGeometryPathFinding ? SceneObjectUsages.FullPathFinding : SceneObjectUsages.CoarsePathFinding;
         }
 
+        /// <summary>
+        /// Updates the navigation graph
+        /// </summary>
+        public virtual async Task UpdateNavigationGraph()
+        {
+            if (this.PathFinderDescription == null)
+            {
+                this.SetNavigationGraph(null);
+
+                return;
+            }
+
+            var graph = await this.PathFinderDescription.Build();
+
+            this.SetNavigationGraph(graph);
+
+            this.NavigationGraphUpdated();
+        }
         /// <summary>
         /// Sets a navigation graph
         /// </summary>
@@ -1286,41 +1325,10 @@ namespace Engine
                 this.NavigationGraph.Updating += GraphUpdating;
                 this.NavigationGraph.Updated += GraphUpdated;
 
-                if (this.PathFinderDescription != null)
+                if (this.PathFinderDescription?.Input != null)
                 {
                     this.navigationBoundingBox = this.PathFinderDescription.Input.BoundingBox;
                 }
-            }
-        }
-        /// <summary>
-        /// Updates the navigation graph
-        /// </summary>
-        public virtual void UpdateNavigationGraph()
-        {
-            if (this.PathFinderDescription != null)
-            {
-                var graph = this.PathFinderDescription.Build();
-
-                this.SetNavigationGraph(graph);
-
-                this.NavigationGraphUpdated();
-            }
-        }
-        /// <summary>
-        /// Updates the navigation graph asynchronously
-        /// </summary>
-        public virtual async void UpdateNavigationGraphAsync()
-        {
-            if (this.PathFinderDescription != null)
-            {
-                await Task.Run(() =>
-                {
-                    var graph = this.PathFinderDescription.Build();
-
-                    this.SetNavigationGraph(graph);
-
-                    this.NavigationGraphUpdated();
-                }).ConfigureAwait(false);
             }
         }
 
@@ -1767,12 +1775,9 @@ namespace Engine
         /// <param name="position">Position</param>
         public virtual async void UpdateGraph(Vector3 position)
         {
-            await Task.Run(() =>
-            {
-                this.PathFinderDescription.Input.Refresh();
+            await this.PathFinderDescription.Input.Refresh();
 
-                this.NavigationGraph.UpdateAt(position);
-            }).ConfigureAwait(false);
+            this.NavigationGraph.UpdateAt(position);
         }
         /// <summary>
         /// Updates the graph at positions in the specified list
@@ -1782,15 +1787,12 @@ namespace Engine
         {
             if (positions?.Any() == true)
             {
-                await Task.Run(() =>
-                {
-                    this.PathFinderDescription.Input.Refresh();
+                await this.PathFinderDescription.Input.Refresh();
 
-                    foreach (var position in positions)
-                    {
-                        this.NavigationGraph.UpdateAt(position);
-                    }
-                }).ConfigureAwait(false);
+                foreach (var position in positions)
+                {
+                    this.NavigationGraph.UpdateAt(position);
+                }
             }
         }
 
@@ -1802,12 +1804,16 @@ namespace Engine
         /// <returns>Returns a position over the ground</returns>
         public Vector3 GetRandomPoint(Random rnd, Vector3 offset)
         {
-            if (!this.groundBoundingBox.HasValue)
+            var bbox = this.GetGroundBoundingBox();
+            if (!bbox.HasValue)
             {
-                throw new EngineException($"A ground must be defined into the scene in the first place.");
+                Vector3 min = Vector3.One * float.MinValue;
+                Vector3 max = Vector3.One * float.MaxValue;
+
+                return rnd.NextVector3(min, max);
             }
 
-            return GetRandomPoint(rnd, offset, this.groundBoundingBox.Value);
+            return GetRandomPoint(rnd, offset, bbox.Value);
         }
         /// <summary>
         /// Gets a random point over the ground

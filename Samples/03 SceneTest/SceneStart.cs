@@ -142,9 +142,9 @@ namespace SceneTest
 
             #endregion
         }
-        public override void Initialized()
+        public override async Task Initialized()
         {
-            base.Initialized();
+            await base.Initialized();
 
             this.backGround.Manipulator.SetScale(1.5f, 1.25f, 1.5f);
 

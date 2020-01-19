@@ -343,7 +343,7 @@ namespace Engine
 
             scene.SceneInitialized = true;
 
-            scene.Initialized();
+            await scene.Initialized();
 
             this.BufferManager.CreateBuffers();
 

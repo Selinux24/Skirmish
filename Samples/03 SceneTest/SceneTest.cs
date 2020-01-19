@@ -812,12 +812,12 @@ namespace SceneTest
             this.lightsVolumeDrawer = await this.AddComponent<PrimitiveListDrawer<Line3D>>(desc);
         }
 
-        public override void Initialized()
+        public override async Task Initialized()
         {
+            await base.Initialized();
+
             this.Camera.Goto(-20, 10, -40f);
             this.Camera.LookTo(0, 0, 0);
-
-            base.Initialized();
 
             this.RefreshUI();
         }

@@ -726,7 +726,7 @@ namespace Engine.PathFinding.RecastNavigation
             nearest = null;
 
             //Find agent query
-            var query = AgentQueries.Find(a => a.Agent == agent)?.CreateQuery();
+            var query = AgentQueries.Find(a => agent.Equals(a.Agent))?.CreateQuery();
             if (query != null)
             {
                 var filter = new QueryFilter()
@@ -923,7 +923,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 foreach (var item in instance.Indices)
                 {
-                    var cache = AgentQueries.Find(a => a.Agent == item.Item1)?.NavMesh.TileCache;
+                    var cache = AgentQueries.Find(a => a.Agent.Equals(item.Item1))?.NavMesh.TileCache;
                     if (cache != null)
                     {
                         cache.RemoveObstacle(item.Item2);
@@ -984,7 +984,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 foreach (var item in offmeshConnection.Indices)
                 {
-                    var cache = AgentQueries.Find(a => a.Agent == item.Item1)?.NavMesh.TileCache;
+                    var cache = AgentQueries.Find(a => a.Agent.Equals(item.Item1))?.NavMesh.TileCache;
                     if (cache != null)
                     {
                         cache.RemoveOffmeshConnection(item.Item2);

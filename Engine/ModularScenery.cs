@@ -273,7 +273,7 @@ namespace Engine
                                     ModelContent = modelContent,
                                 }
                             },
-                            SceneObjectUsages.Ground | (hasVolumes ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding));
+                            hasVolumes ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding);
 
                         model.HasParent = true;
 
@@ -325,7 +325,7 @@ namespace Engine
                             ModelContent = modelContent,
                         }
                     },
-                    SceneObjectUsages.None | (hasVolumes ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding));
+                    hasVolumes ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding);
 
                 //Get the object list to process
                 var objList = Array.FindAll(level.Objects, o => string.Equals(o.AssetName, assetName, StringComparison.OrdinalIgnoreCase));
