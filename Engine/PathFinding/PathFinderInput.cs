@@ -52,11 +52,16 @@ namespace Engine.PathFinding
         /// Gets the triangle list
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<Triangle> GetTriangles()
+        public async Task<IEnumerable<Triangle>> GetTriangles()
         {
             if (getTrianglesFnc != null)
             {
-                var tris = getTrianglesFnc();
+                IEnumerable<Triangle> tris = null;
+
+                await Task.Run(() =>
+                {
+                    tris = getTrianglesFnc();
+                });
 
                 BoundingBox = GeometryUtil.CreateBoundingBox(tris);
 

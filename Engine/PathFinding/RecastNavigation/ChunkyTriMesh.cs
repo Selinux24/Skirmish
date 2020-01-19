@@ -64,11 +64,10 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Builds a chunky mesh
         /// </summary>
-        /// <param name="input">Geometry input</param>
+        /// <param name="triangles">Triangle list</param>
         /// <returns>Returns the new chunky mesh</returns>
-        public static ChunkyTriMesh Build(InputGeometry input)
+        public static ChunkyTriMesh Build(IEnumerable<Triangle> triangles)
         {
-            var triangles = input.GetTriangles();
             if (triangles.Any() && CreateChunkyTriMesh(triangles, 256, out ChunkyTriMesh chunkyMesh))
             {
                 return chunkyMesh;

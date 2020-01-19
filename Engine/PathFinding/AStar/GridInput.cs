@@ -29,9 +29,11 @@ namespace Engine.PathFinding.AStar
         {
             IGraph grid = null;
 
+            var triangles = await this.GetTriangles();
+
             await Task.Run(() =>
             {
-                grid = CreateGrid(settings);
+                grid = CreateGrid(settings, triangles);
             });
 
             return grid;
@@ -41,15 +43,13 @@ namespace Engine.PathFinding.AStar
         /// </summary>
         /// <param name="settings">Settings</param>
         /// <returns>Returns the new grid</returns>
-        private Grid CreateGrid(PathFinderSettings settings)
+        private Grid CreateGrid(PathFinderSettings settings, IEnumerable<Triangle> triangles)
         {
             var grid = new Grid
             {
                 Input = this,
                 BuildSettings = settings as GridGenerationSettings
             };
-
-            var triangles = this.GetTriangles();
 
             var bbox = GeometryUtil.CreateBoundingBox(triangles);
 

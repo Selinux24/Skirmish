@@ -32,9 +32,11 @@ namespace Engine.PathFinding.RecastNavigation
         {
             Graph graph = null;
 
+            var triangles = await this.GetTriangles();
+
             await Task.Run(() =>
             {
-                graph = Create(settings);
+                graph = Create(settings, triangles);
             });
 
             return graph;
@@ -43,11 +45,12 @@ namespace Engine.PathFinding.RecastNavigation
         /// Creates a new graph from current geometry input
         /// </summary>
         /// <param name="settings">Settings</param>
+        /// <param name="triangles">Triangle list</param>
         /// <returns>Returns the new graph</returns>
-        private Graph Create(PathFinderSettings settings)
+        private Graph Create(PathFinderSettings settings, IEnumerable<Triangle> triangles)
         {
             // Prepare input data
-            this.ChunkyMesh = ChunkyTriMesh.Build(this);
+            this.ChunkyMesh = ChunkyTriMesh.Build(triangles);
 
             // Create graph
             var graph = new Graph()
@@ -80,10 +83,12 @@ namespace Engine.PathFinding.RecastNavigation
         {
             ChunkyTriMesh mesh = null;
 
+            var triangles = await this.GetTriangles();
+
             await Task.Run(() =>
             {
                 // Recreate the input data
-                mesh = ChunkyTriMesh.Build(this);
+                mesh = ChunkyTriMesh.Build(triangles);
             });
 
             this.ChunkyMesh = mesh;
@@ -97,10 +102,12 @@ namespace Engine.PathFinding.RecastNavigation
         {
             Graph graph = null;
 
+            var triangles = await this.GetTriangles();
+
             await Task.Run(() =>
             {
                 // Initialize the input data
-                this.ChunkyMesh = ChunkyTriMesh.Build(this);
+                this.ChunkyMesh = ChunkyTriMesh.Build(triangles);
 
                 // Load file
                 graph = GraphFile.Load(fileName);
