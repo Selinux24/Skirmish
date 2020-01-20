@@ -11,12 +11,9 @@ namespace SceneTest
     {
         private readonly float spaceSize = 10;
 
-        private SceneObject<Model> floorAsphalt = null;
-
-        private SceneObject<Model> buildingObelisk = null;
-
-        private SceneObject<Model> lightEmitter1 = null;
-        private SceneObject<Model> lightEmitter2 = null;
+        private Model buildingObelisk = null;
+        private Model lightEmitter1 = null;
+        private Model lightEmitter2 = null;
 
         private SceneObject<PrimitiveListDrawer<Line3D>> lightsVolumeDrawer = null;
         private bool drawDrawVolumes = false;
@@ -99,11 +96,11 @@ namespace SceneTest
                 }
             };
 
-            this.floorAsphalt = await this.AddComponent<Model>(desc);
+            await this.AddComponent<Model>(desc);
         }
         private async Task InitializeBuildingObelisk()
         {
-            this.buildingObelisk = await this.AddComponent<Model>(
+            var obj = await this.AddComponent<Model>(
                 new ModelDescription()
                 {
                     Name = "Obelisk",
@@ -117,7 +114,9 @@ namespace SceneTest
                     }
                 });
 
-            this.buildingObelisk.Transform.SetPosition(0, 0, 0);
+            this.buildingObelisk = obj.Instance;
+
+            this.buildingObelisk.Manipulator.SetPosition(0, 0, 0);
         }
         private async Task InitializeEmitter()
         {
@@ -143,8 +142,8 @@ namespace SceneTest
                 }
             };
 
-            this.lightEmitter1 = await this.AddComponent<Model>(desc);
-            this.lightEmitter2 = await this.AddComponent<Model>(desc);
+            this.lightEmitter1 = (await this.AddComponent<Model>(desc)).Instance;
+            this.lightEmitter2 = (await this.AddComponent<Model>(desc)).Instance;
         }
         private async Task InitializeLights()
         {
@@ -245,7 +244,7 @@ namespace SceneTest
             var pos1 = position + new Vector3(0, h, 0);
             var col1 = animateLightColors ? new Color4(pos1.X, pos1.Y, pos1.Z, 1.0f) : Color.White;
 
-            this.lightEmitter1.Transform.SetPosition(pos1);
+            this.lightEmitter1.Manipulator.SetPosition(pos1);
             this.Lights.PointLights[0].Position = pos1;
             this.Lights.PointLights[0].DiffuseColor = col1;
             this.Lights.PointLights[0].SpecularColor = col1;
@@ -253,7 +252,7 @@ namespace SceneTest
             var pos2 = (position * -1) + new Vector3(0, h, 0);
             var col2 = animateLightColors ? new Color4(pos2.X, pos2.Y, pos2.Z, 1.0f) : Color.White;
 
-            this.lightEmitter2.Transform.SetPosition(pos2);
+            this.lightEmitter2.Manipulator.SetPosition(pos2);
             this.Lights.SpotLights[0].Position = pos2;
             this.Lights.SpotLights[0].Direction = -Vector3.Normalize(new Vector3(pos2.X, 0, pos2.Z));
             this.Lights.SpotLights[0].DiffuseColor = col2;

@@ -278,8 +278,8 @@ namespace Collada
                 VelocitySlow = 1f,
             };
 
-            this.rat.Transform.SetScale(0.5f, true);
-            this.rat.Transform.SetPosition(0, 0, 0, true);
+            this.rat.Instance.Manipulator.SetScale(0.5f, true);
+            this.rat.Instance.Manipulator.SetPosition(0, 0, 0, true);
             this.rat.Visible = false;
 
             var ratPaths = new Dictionary<string, AnimationPlan>();
@@ -763,7 +763,7 @@ namespace Collada
 
             if (this.ratActive)
             {
-                this.ratController.UpdateManipulator(gameTime, this.rat.Transform);
+                this.ratController.UpdateManipulator(gameTime, this.rat.Instance.Manipulator);
                 if (!this.ratController.HasPath)
                 {
                     this.ratActive = false;
@@ -787,7 +787,7 @@ namespace Collada
 
                 if (CalcPath(this.ratAgentType, from, to))
                 {
-                    this.ratController.UpdateManipulator(gameTime, this.rat.Transform);
+                    this.ratController.UpdateManipulator(gameTime, this.rat.Instance.Manipulator);
 
                     this.ratSoundInstance?.Play();
                     this.RatTalkPlay();
@@ -1236,7 +1236,7 @@ namespace Collada
             //Update active paths with the new graph configuration
             if (this.ratController.HasPath)
             {
-                Vector3 from = this.rat.Transform.Position;
+                Vector3 from = this.rat.Instance.Manipulator.Position;
                 Vector3 to = this.ratController.Last;
 
                 CalcPath(this.ratAgentType, from, to);

@@ -51,7 +51,7 @@ namespace SpriteDrawing
                 FitScreen = true,
             };
             var sprite = await this.AddComponent<Sprite>(desc, SceneObjectUsages.None, 3);
-            sprite.ScreenTransform.SetPosition(256, 0);
+            sprite.Instance.Manipulator.SetPosition(256, 0);
 
             this.spriteMov = sprite.Instance;
         }

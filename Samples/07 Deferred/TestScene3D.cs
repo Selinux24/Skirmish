@@ -183,9 +183,9 @@ namespace Deferred
                 }
             };
             var tank1 = await this.AddComponent<Model>(desc);
-            tank1.Transform.SetScale(0.2f, true);
+            tank1.Instance.Manipulator.SetScale(0.2f, true);
             var tank2 = await this.AddComponent<Model>(desc);
-            tank2.Transform.SetScale(0.2f, true);
+            tank2.Instance.Manipulator.SetScale(0.2f, true);
 
             var tankController1 = new SteerManipulatorController()
             {
@@ -397,8 +397,8 @@ namespace Deferred
         {
             if (this.FindTopGroundPosition(20, -20, out PickingResult<Triangle> treePos))
             {
-                this.tree.Transform.SetPosition(treePos.Position);
-                this.tree.Transform.SetScale(0.5f);
+                this.tree.Instance.Manipulator.SetPosition(treePos.Position);
+                this.tree.Instance.Manipulator.SetScale(0.5f);
             }
 
             for (int i = 0; i < this.trees.Count; i++)
@@ -424,16 +424,16 @@ namespace Deferred
 
             if (this.FindTopGroundPosition(20, 40, out PickingResult<Triangle> t1Pos))
             {
-                this.tankAgent1.Transform.SetPosition(t1Pos.Position);
-                this.tankAgent1.Transform.SetNormal(t1Pos.Item.Normal);
+                this.tankAgent1.Instance.Manipulator.SetPosition(t1Pos.Position);
+                this.tankAgent1.Instance.Manipulator.SetNormal(t1Pos.Item.Normal);
                 cameraPosition += t1Pos.Position;
                 modelCount++;
             }
 
             if (this.FindTopGroundPosition(15, 35, out PickingResult<Triangle> t2Pos))
             {
-                this.tankAgent2.Transform.SetPosition(t2Pos.Position);
-                this.tankAgent2.Transform.SetNormal(t2Pos.Item.Normal);
+                this.tankAgent2.Instance.Manipulator.SetPosition(t2Pos.Position);
+                this.tankAgent2.Instance.Manipulator.SetNormal(t2Pos.Item.Normal);
                 cameraPosition += t2Pos.Position;
                 modelCount++;
             }
@@ -442,8 +442,8 @@ namespace Deferred
             {
                 var p = hPos.Position;
                 p.Y += 10f;
-                this.helicopter.Transform.SetPosition(p, true);
-                this.helicopter.Transform.SetScale(0.15f, true);
+                this.helicopter.Instance.Manipulator.SetPosition(p, true);
+                this.helicopter.Instance.Manipulator.SetScale(0.15f, true);
                 cameraPosition += p;
                 modelCount++;
             }
@@ -870,19 +870,19 @@ namespace Deferred
         }
         private void UpdateDebugBufferDrawer()
         {
-            if (this.bufferDrawer.ScreenTransform.Position == Vector2.Zero)
+            if (this.bufferDrawer.Instance.Manipulator.Position == Vector2.Zero)
             {
                 int width = (int)(this.Game.Form.RenderWidth * 0.33f);
                 int height = (int)(this.Game.Form.RenderHeight * 0.33f);
                 int smLeft = this.Game.Form.RenderWidth - width;
                 int smTop = this.Game.Form.RenderHeight - height;
 
-                this.bufferDrawer.ScreenTransform.SetPosition(smLeft, smTop);
+                this.bufferDrawer.Instance.Manipulator.SetPosition(smLeft, smTop);
                 this.bufferDrawer.Instance.ResizeSprite(width, height);
             }
             else
             {
-                this.bufferDrawer.ScreenTransform.SetPosition(Vector2.Zero);
+                this.bufferDrawer.Instance.Manipulator.SetPosition(Vector2.Zero);
                 this.bufferDrawer.Instance.ResizeSprite(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
             }
         }

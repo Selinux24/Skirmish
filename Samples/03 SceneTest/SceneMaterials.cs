@@ -14,13 +14,8 @@ namespace SceneTest
         private readonly float radius = 1;
         private readonly uint stacks = 40;
 
-        private SceneObject<TextDrawer> title = null;
-        private SceneObject<TextDrawer> runtime = null;
-        private SceneObject<Sprite> backPannel = null;
-
-        private SceneObject<LensFlare> lensFlare = null;
-
-        private SceneObject<Model> floor = null;
+        private TextDrawer title = null;
+        private TextDrawer runtime = null;
 
         public SceneMaterials(Game game)
             : base(game)
@@ -58,28 +53,28 @@ namespace SceneTest
 
         private async Task InitializeTextBoxes()
         {
-            this.title = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White, Color.Orange), SceneObjectUsages.UI, layerHUD);
-            this.runtime = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 10, Color.Yellow, Color.Orange), SceneObjectUsages.UI, layerHUD);
+            this.title = (await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White, Color.Orange), SceneObjectUsages.UI, layerHUD)).Instance;
+            this.runtime = (await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 10, Color.Yellow, Color.Orange), SceneObjectUsages.UI, layerHUD)).Instance;
 
-            this.title.Instance.Text = "Scene Test - Materials";
-            this.runtime.Instance.Text = "";
+            this.title.Text = "Scene Test - Materials";
+            this.runtime.Text = "";
 
-            this.title.Instance.Position = Vector2.Zero;
-            this.runtime.Instance.Position = new Vector2(5, this.title.Instance.Top + this.title.Instance.Height + 3);
+            this.title.Position = Vector2.Zero;
+            this.runtime.Position = new Vector2(5, this.title.Top + this.title.Height + 3);
 
             var spDesc = new SpriteDescription()
             {
                 AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
-                Height = this.runtime.Instance.Top + this.runtime.Instance.Height + 3,
+                Height = this.runtime.Top + this.runtime.Height + 3,
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            this.backPannel = await this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            await this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
         }
         private async Task InitializeSkyEffects()
         {
-            this.lensFlare = await this.AddComponent<LensFlare>(new LensFlareDescription()
+            await this.AddComponent<LensFlare>(new LensFlareDescription()
             {
                 ContentPath = @"Common/lensFlare",
                 GlowTexture = "lfGlow.png",
@@ -147,7 +142,7 @@ namespace SceneTest
                 }
             };
 
-            this.floor = await this.AddComponent<Model>(desc);
+            await this.AddComponent<Model>(desc);
         }
         private async Task<SceneObject<Model>> InitializeSphere(string name, MaterialContent material)
         {
@@ -204,7 +199,7 @@ namespace SceneTest
 
                         var material = await this.GenerateMaterial(diffuse, specular, shininess, nmap);
                         var model = await this.InitializeSphere(string.Format("Sphere {0}.{1}.{2}", r, g, b), material);
-                        model.Transform.SetPosition(new Vector3(r * f, (g * f) + 1f, b * f) + position);
+                        model.Instance.Manipulator.SetPosition(new Vector3(r * f, (g * f) + 1f, b * f) + position);
                     }
                 }
             }
@@ -235,7 +230,7 @@ namespace SceneTest
 
             base.Update(gameTime);
 
-            this.runtime.Instance.Text = this.Game.RuntimeText;
+            this.runtime.Text = this.Game.RuntimeText;
         }
 
         private void UpdateCamera(GameTime gameTime, bool shift, bool rightBtn)

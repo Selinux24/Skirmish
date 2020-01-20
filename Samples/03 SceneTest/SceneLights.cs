@@ -16,10 +16,9 @@ namespace SceneTest
         private const int layerEffects = 2;
         private const float spaceSize = 20;
 
-        private SceneObject<ModelInstanced> buildingObelisks = null;
-
-        private SceneObject<ModelInstanced> lightEmitters = null;
-        private SceneObject<ModelInstanced> lanterns = null;
+        private ModelInstanced buildingObelisks = null;
+        private ModelInstanced lightEmitters = null;
+        private ModelInstanced lanterns = null;
 
         private SceneObject<PrimitiveListDrawer<Line3D>> lightsVolumeDrawer = null;
         private bool drawDrawVolumes = false;
@@ -120,7 +119,7 @@ namespace SceneTest
                 }
             };
 
-            this.buildingObelisks = await this.AddComponent<ModelInstanced>(desc);
+            this.buildingObelisks = (await this.AddComponent<ModelInstanced>(desc)).Instance;
         }
         private async Task InitializeTree()
         {
@@ -165,7 +164,7 @@ namespace SceneTest
                 }
             };
 
-            this.lightEmitters = await this.AddComponent<ModelInstanced>(desc);
+            this.lightEmitters = (await this.AddComponent<ModelInstanced>(desc)).Instance;
         }
         private async Task InitializeLanterns()
         {
@@ -203,7 +202,7 @@ namespace SceneTest
                 }
             };
 
-            this.lanterns = await this.AddComponent<ModelInstanced>(desc);
+            this.lanterns = (await this.AddComponent<ModelInstanced>(desc)).Instance;
         }
         private async Task InitializeLights()
         {
@@ -256,10 +255,10 @@ namespace SceneTest
         {
             await base.Initialized();
 
-            this.buildingObelisks.Instance[0].Manipulator.SetPosition(+5, 0, +5);
-            this.buildingObelisks.Instance[1].Manipulator.SetPosition(+5, 0, -5);
-            this.buildingObelisks.Instance[2].Manipulator.SetPosition(-5, 0, +5);
-            this.buildingObelisks.Instance[3].Manipulator.SetPosition(-5, 0, -5);
+            this.buildingObelisks[0].Manipulator.SetPosition(+5, 0, +5);
+            this.buildingObelisks[1].Manipulator.SetPosition(+5, 0, -5);
+            this.buildingObelisks[2].Manipulator.SetPosition(-5, 0, +5);
+            this.buildingObelisks[3].Manipulator.SetPosition(-5, 0, -5);
         }
 
         public override void Update(GameTime gameTime)
@@ -345,14 +344,14 @@ namespace SceneTest
             position.Z = r * (float)Math.Sin(av * this.Game.GameTime.TotalSeconds);
 
             var pPos = (position * +1) + new Vector3(0, h, 0);
-            this.lightEmitters.Instance[0].Manipulator.SetPosition(pPos);
+            this.lightEmitters[0].Manipulator.SetPosition(pPos);
             this.Lights.PointLights[0].Position = pPos;
 
             var sPos1 = (position * -1) + new Vector3(0, h, 0);
             var sDir1 = -Vector3.Normalize(new Vector3(sPos1.X, sPos1.Y, sPos1.Z));
-            this.lightEmitters.Instance[1].Manipulator.SetPosition(sPos1);
-            this.lanterns.Instance[0].Manipulator.SetPosition(sPos1);
-            this.lanterns.Instance[0].Manipulator.LookAt(sPos1 + sDir1, false);
+            this.lightEmitters[1].Manipulator.SetPosition(sPos1);
+            this.lanterns[0].Manipulator.SetPosition(sPos1);
+            this.lanterns[0].Manipulator.LookAt(sPos1 + sDir1, false);
             this.Lights.SpotLights[0].Position = sPos1;
             this.Lights.SpotLights[0].Direction = sDir1;
 
@@ -362,17 +361,17 @@ namespace SceneTest
 
             var sPos2 = (position * +1) + new Vector3(0, h, 0);
             var sDir2 = -Vector3.Normalize(new Vector3(sPos2.X, sPos2.Y, sPos2.Z));
-            this.lightEmitters.Instance[2].Manipulator.SetPosition(sPos2);
-            this.lanterns.Instance[1].Manipulator.SetPosition(sPos2);
-            this.lanterns.Instance[1].Manipulator.LookAt(sPos2 + sDir2, false);
+            this.lightEmitters[2].Manipulator.SetPosition(sPos2);
+            this.lanterns[1].Manipulator.SetPosition(sPos2);
+            this.lanterns[1].Manipulator.LookAt(sPos2 + sDir2, false);
             this.Lights.SpotLights[1].Position = sPos2;
             this.Lights.SpotLights[1].Direction = sDir2;
 
             var sPos3 = (position * -1) + new Vector3(0, h, 0);
             var sDir3 = -Vector3.Normalize(new Vector3(sPos3.X, sPos3.Y, sPos3.Z));
-            this.lightEmitters.Instance[3].Manipulator.SetPosition(sPos3);
-            this.lanterns.Instance[2].Manipulator.SetPosition(sPos3);
-            this.lanterns.Instance[2].Manipulator.LookAt(sPos3 + sDir3, false);
+            this.lightEmitters[3].Manipulator.SetPosition(sPos3);
+            this.lanterns[2].Manipulator.SetPosition(sPos3);
+            this.lanterns[2].Manipulator.LookAt(sPos3 + sDir3, false);
             this.Lights.SpotLights[2].Position = sPos3;
             this.Lights.SpotLights[2].Direction = sDir3;
 

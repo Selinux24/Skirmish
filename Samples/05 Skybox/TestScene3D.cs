@@ -38,15 +38,15 @@ namespace Skybox
             MaxSlope = 50,
         };
 
-        private SceneObject<TextDrawer> fps = null;
+        private TextDrawer fps = null;
 
-        private SceneObject<Scenery> ruins = null;
+        private Scenery ruins = null;
         private SceneObject<PrimitiveListDrawer<Line3D>> volumesDrawer = null;
         private SceneObject<PrimitiveListDrawer<Triangle>> graphDrawer = null;
 
-        private SceneObject<ModelInstanced> torchs = null;
+        private ModelInstanced torchs = null;
 
-        private SceneObject<Model> movingFire = null;
+        private Model movingFire = null;
         private ParticleEmitter movingFireEmitter = null;
         private SceneLightPoint movingFireLight = null;
 
@@ -86,7 +86,7 @@ namespace Skybox
 
             var title = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
             var help = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            this.fps = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.fps = (await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD)).Instance;
 
             title.Instance.Text = "Collada Scene with Skybox";
 #if DEBUG
@@ -94,11 +94,11 @@ namespace Skybox
 #else
             help.Instance.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Move Mouse: View | Left Mouse: Pick";
 #endif
-            this.fps.Instance.Text = "";
+            this.fps.Text = "";
 
             title.Instance.Position = Vector2.Zero;
             help.Instance.Position = new Vector2(0, 24);
-            this.fps.Instance.Position = new Vector2(0, 40);
+            this.fps.Position = new Vector2(0, 40);
 
             var spDesc = new SpriteDescription()
             {
@@ -127,7 +127,7 @@ namespace Skybox
 
             #region Torchs
 
-            this.torchs = await this.AddComponent<ModelInstanced>(
+            var torchsObj = await this.AddComponent<ModelInstanced>(
                 new ModelInstancedDescription()
                 {
                     Name = "Torchs",
@@ -139,6 +139,9 @@ namespace Skybox
                         ModelContentFilename = "torch.xml",
                     }
                 });
+
+            this.torchs = torchsObj.Instance;
+            this.AttachToGround(torchsObj, true);
 
             #endregion
 
@@ -154,7 +157,9 @@ namespace Skybox
                     ModelContentFilename = "ruins.xml",
                 }
             };
-            this.ruins = await this.AddComponent<Scenery>(desc);
+            var ruinsObj = await this.AddComponent<Scenery>(desc);
+            this.ruins = ruinsObj.Instance;
+            this.SetGround(ruinsObj, true);
 
             #endregion
 
@@ -164,9 +169,6 @@ namespace Skybox
             await this.AddComponent<Water>(waterDesc, SceneObjectUsages.None);
 
             #endregion
-
-            this.SetGround(this.ruins, true);
-            this.AttachToGround(this.torchs, true);
 
             #region Particle Systems
 
@@ -198,7 +200,7 @@ namespace Skybox
                 }
             };
 
-            this.movingFire = await this.AddComponent<Model>(mFireDesc);
+            this.movingFire = (await this.AddComponent<Model>(mFireDesc)).Instance;
 
             this.movingFireEmitter = new ParticleEmitter() { EmissionRate = 0.1f, InfiniteDuration = true };
 
@@ -241,10 +243,10 @@ namespace Skybox
                     out PickingResult<Triangle> result);
                 firePositions3D[i] = result.Position;
 
-                this.torchs.Instance[i].Manipulator.SetScale(0.20f, true);
-                this.torchs.Instance[i].Manipulator.SetPosition(firePositions3D[i], true);
+                this.torchs[i].Manipulator.SetScale(0.20f, true);
+                this.torchs[i].Manipulator.SetPosition(firePositions3D[i], true);
 
-                BoundingBox bbox = this.torchs.Instance[i].GetBoundingBox();
+                BoundingBox bbox = this.torchs[i].GetBoundingBox();
 
                 firePositions3D[i].Y += (bbox.Maximum.Y - bbox.Minimum.Y) * 0.95f;
 
@@ -362,7 +364,7 @@ namespace Skybox
             position.Y = h + (0.25f * (1f + (float)Math.Sin(this.Game.GameTime.TotalSeconds)));
             position.Z = r * d * (float)Math.Sin(v * this.Game.GameTime.TotalSeconds);
 
-            this.movingFire.Transform.SetPosition(position);
+            this.movingFire.Manipulator.SetPosition(position);
             this.movingFireEmitter.Position = position;
             this.movingFireLight.Position = position;
 
@@ -393,17 +395,17 @@ namespace Skybox
             this.UpdateInputLights();
 
             var m = fireAudioEffect.GetOutputMatrix();
-            var ep = movingFire.Transform.Position.GetDescription();
-            var ev = movingFire.Transform.Velocity.GetDescription();
+            var ep = movingFire.Manipulator.Position.GetDescription();
+            var ev = movingFire.Manipulator.Velocity.GetDescription();
             var lp = Camera.Position.GetDescription();
             var lv = Camera.Velocity.GetDescription();
-            var d = Vector3.Distance(movingFire.Transform.Position, Camera.Position);
+            var d = Vector3.Distance(movingFire.Manipulator.Position, Camera.Position);
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"Mouse (X:{this.Game.Input.MouseXDelta}; Y:{this.Game.Input.MouseYDelta}, Wheel: {this.Game.Input.MouseWheelDelta}) Absolute (X:{this.Game.Input.MouseX}; Y:{this.Game.Input.MouseY})");
             sb.AppendLine($"L {m[0]:0.000} R {m[1]:0.000} Distance {d}");
             sb.AppendLine($"Emitter  pos: {ep} Emitter  vel: {ev}");
             sb.AppendLine($"Listener pos: {lp} Listener vel: {lv}");
-            this.fps.Instance.Text = sb.ToString();
+            this.fps.Text = sb.ToString();
         }
         private void UpdateInputCamera(bool shift)
         {
@@ -411,7 +413,7 @@ namespace Skybox
             {
                 var pRay = this.GetPickingRay();
 
-                if (this.ruins.Instance.PickNearest(pRay, out PickingResult<Triangle> r))
+                if (this.ruins.PickNearest(pRay, out PickingResult<Triangle> r))
                 {
                     var tri = Line3D.CreateWiredTriangle(r.Item);
 
@@ -514,12 +516,12 @@ namespace Skybox
 
         private void DEBUGUpdateVolumesDrawer()
         {
-            this.volumesDrawer.Instance.SetPrimitives(this.ruinsVolumeColor, Line3D.CreateWiredBox(this.ruins.Instance.GetBoundingBox()));
+            this.volumesDrawer.Instance.SetPrimitives(this.ruinsVolumeColor, Line3D.CreateWiredBox(this.ruins.GetBoundingBox()));
 
             List<Line3D> volumesTorchs = new List<Line3D>();
             for (int i = 0; i < this.torchs.Count; i++)
             {
-                volumesTorchs.AddRange(Line3D.CreateWiredBox(this.torchs.Instance[i].GetBoundingBox()));
+                volumesTorchs.AddRange(Line3D.CreateWiredBox(this.torchs[i].GetBoundingBox()));
             }
             this.volumesDrawer.Instance.SetPrimitives(this.torchVolumeColor, volumesTorchs.ToArray());
 

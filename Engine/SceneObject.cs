@@ -7,7 +7,7 @@ namespace Engine
     /// <summary>
     /// Scene object
     /// </summary>
-    public class SceneObject : IDisposable
+    public abstract class SceneObject : IDisposable
     {
         /// <summary>
         /// Internal object
@@ -30,10 +30,6 @@ namespace Engine
         /// Active
         /// </summary>
         public bool Active { get; set; }
-        /// <summary>
-        /// Gets or sets whether the object is static
-        /// </summary>
-        public bool Static { get; set; }
         /// <summary>
         /// Gets or sets whether the object cast shadow
         /// </summary>
@@ -88,7 +84,6 @@ namespace Engine
             this.Order = 0;
 
             this.Name = description.Name;
-            this.Static = description.Static;
             this.CastShadow = description.CastShadow;
             this.DeferredEnabled = description.DeferredEnabled;
             this.DepthEnabled = description.DepthEnabled;
@@ -236,36 +231,6 @@ namespace Engine
                 return (T)base.baseObject;
             }
         }
-        /// <summary>
-        /// Gets the geometry helper
-        /// </summary>
-        public IRayPickable<Triangle> Geometry
-        {
-            get
-            {
-                return this.Get<IRayPickable<Triangle>>();
-            }
-        }
-        /// <summary>
-        /// Gets the 3D manipulator helper
-        /// </summary>
-        public Manipulator3D Transform
-        {
-            get
-            {
-                return this.Get<ITransformable3D>()?.Manipulator;
-            }
-        }
-        /// <summary>
-        /// Gets the 2D manipulator helper
-        /// </summary>
-        public Manipulator2D ScreenTransform
-        {
-            get
-            {
-                return this.Get<ITransformable2D>()?.Manipulator;
-            }
-        }
 
         /// <summary>
         /// Constructor
@@ -275,27 +240,6 @@ namespace Engine
         public SceneObject(T obj, SceneObjectDescription description) : base(obj, description)
         {
 
-        }
-
-        /// <summary>
-        /// Gets the component by index
-        /// </summary>
-        /// <typeparam name="Y">Component type</typeparam>
-        /// <param name="index">Index</param>
-        /// <returns>Returns the component at index that implements type</returns>
-        public Y GetComponent<Y>(int index)
-        {
-            var cmpObj = this.Get<IComposed>();
-            if (cmpObj != null)
-            {
-                var components = cmpObj.GetComponents<Y>().ToArray();
-
-                return components[index];
-            }
-            else
-            {
-                return default(Y);
-            }
         }
     }
 }

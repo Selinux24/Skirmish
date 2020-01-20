@@ -39,15 +39,15 @@ namespace Heightmap
         private readonly float windStep = 0.001f;
         private float windDuration = 0;
 
-        private SceneObject<TextDrawer> load = null;
-        private SceneObject<TextDrawer> stats = null;
-        private SceneObject<TextDrawer> help = null;
-        private SceneObject<TextDrawer> help2 = null;
+        private TextDrawer load = null;
+        private TextDrawer stats = null;
+        private TextDrawer help = null;
+        private TextDrawer help2 = null;
 
-        private SceneObject<SkyScattering> skydom = null;
-        private SceneObject<Terrain> terrain = null;
-        private SceneObject<GroundGardener> gardener = null;
-        private SceneObject<GroundGardener> gardener2 = null;
+        private SkyScattering skydom = null;
+        private Terrain terrain = null;
+        private GroundGardener gardener = null;
+        private GroundGardener gardener2 = null;
         private SceneObject<PrimitiveListDrawer<Triangle>> bboxesTriDrawer = null;
         private SceneObject<PrimitiveListDrawer<Line3D>> bboxesDrawer = null;
         private SceneObject<PrimitiveListDrawer<Line3D>> linesDrawer = null;
@@ -55,11 +55,11 @@ namespace Heightmap
         private readonly BoundingBox? gardenerArea = new BoundingBox(new Vector3(-gardenerAreaSize * 2, -gardenerAreaSize, -gardenerAreaSize), new Vector3(0, gardenerAreaSize, gardenerAreaSize));
         private readonly BoundingBox? gardenerArea2 = new BoundingBox(new Vector3(0, -gardenerAreaSize, -gardenerAreaSize), new Vector3(gardenerAreaSize * 2, gardenerAreaSize, gardenerAreaSize));
 
-        private SceneObject<ModelInstanced> torchs = null;
+        private ModelInstanced torchs = null;
         private SceneLightSpot spotLight1 = null;
         private SceneLightSpot spotLight2 = null;
 
-        private SceneObject<ParticleManager> pManager = null;
+        private ParticleManager pManager = null;
         private ParticleSystemDescription pPlume = null;
         private ParticleSystemDescription pFire = null;
         private ParticleSystemDescription pDust = null;
@@ -67,21 +67,21 @@ namespace Heightmap
         private int nextDustHeli = 0;
         private readonly float dustTime = 0.33f;
 
-        private SceneObject<ModelInstanced> rocks = null;
-        private SceneObject<ModelInstanced> trees = null;
-        private SceneObject<ModelInstanced> trees2 = null;
+        private ModelInstanced rocks = null;
+        private ModelInstanced trees = null;
+        private ModelInstanced trees2 = null;
 
-        private SceneObject<Model> soldier = null;
+        private Model soldier = null;
         private SceneObject<PrimitiveListDrawer<Triangle>> soldierTris = null;
         private SceneObject<PrimitiveListDrawer<Line3D>> soldierLines = null;
         private bool showSoldierDEBUG = false;
 
-        private SceneObject<ModelInstanced> troops = null;
+        private ModelInstanced troops = null;
 
-        private SceneObject<ModelInstanced> helicopterI = null;
-        private SceneObject<ModelInstanced> bradleyI = null;
-        private SceneObject<Model> watchTower = null;
-        private SceneObject<ModelInstanced> containers = null;
+        private ModelInstanced helicopterI = null;
+        private ModelInstanced bradleyI = null;
+        private Model watchTower = null;
+        private ModelInstanced containers = null;
 
         private SceneObject<PrimitiveListDrawer<Line3D>> lightsVolumeDrawer = null;
         private bool drawDrawVolumes = false;
@@ -148,7 +148,7 @@ namespace Heightmap
 
                 percent = (1f - ((float)loadTasks.Count / total)) * 100f;
 
-                this.load.Instance.Text = $"{percent}%";
+                this.load.Text = $"{percent}%";
             }
 
             sw.Stop();
@@ -181,30 +181,30 @@ namespace Heightmap
 
             #region Texts
 
-            var title = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
-            this.load = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            this.stats = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            this.help = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            this.help2 = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Orange), SceneObjectUsages.UI, layerHUD);
+            var title = (await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD)).Instance;
+            this.load = (await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD)).Instance;
+            this.stats = (await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD)).Instance;
+            this.help = (await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD)).Instance;
+            this.help2 = (await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Orange), SceneObjectUsages.UI, layerHUD)).Instance;
 
-            title.Instance.Text = "Heightmap Terrain test";
-            this.load.Instance.Text = "";
-            this.stats.Instance.Text = "";
-            this.help.Instance.Text = "";
-            this.help2.Instance.Text = "";
+            title.Text = "Heightmap Terrain test";
+            this.load.Text = "";
+            this.stats.Text = "";
+            this.help.Text = "";
+            this.help2.Text = "";
 
-            title.Instance.Position = Vector2.Zero;
-            this.load.Instance.Position = new Vector2(5, title.Instance.Top + title.Instance.Height + 3);
-            this.stats.Instance.Position = new Vector2(5, this.load.Instance.Top + this.load.Instance.Height + 3);
-            this.help.Instance.Position = new Vector2(5, this.stats.Instance.Top + this.stats.Instance.Height + 3);
-            this.help2.Instance.Position = new Vector2(5, this.help.Instance.Top + this.help.Instance.Height + 3);
+            title.Position = Vector2.Zero;
+            this.load.Position = new Vector2(5, title.Top + title.Height + 3);
+            this.stats.Position = new Vector2(5, this.load.Top + this.load.Height + 3);
+            this.help.Position = new Vector2(5, this.stats.Top + this.stats.Height + 3);
+            this.help2.Position = new Vector2(5, this.help.Top + this.help.Height + 3);
 
             var spDesc = new SpriteDescription()
             {
                 Name = "Background",
                 AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
-                Height = this.help2.Instance.Top + this.help2.Instance.Height + 3,
+                Height = this.help2.Top + this.help2.Height + 3,
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
@@ -231,7 +231,9 @@ namespace Heightmap
                     ModelContentFilename = @"boulder.xml",
                 }
             };
-            this.rocks = await this.AddComponent<ModelInstanced>(rDesc, SceneObjectUsages.None, layerObjects);
+            var rocksObj = await this.AddComponent<ModelInstanced>(rDesc, SceneObjectUsages.None, layerObjects);
+            this.AttachToGround(rocksObj, false);
+            this.rocks = rocksObj.Instance;
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -253,7 +255,9 @@ namespace Heightmap
                     ModelContentFilename = @"tree.xml",
                 }
             };
-            this.trees = await this.AddComponent<ModelInstanced>(treeDesc, SceneObjectUsages.None, layerTerrain);
+            var treesObj = await this.AddComponent<ModelInstanced>(treeDesc, SceneObjectUsages.None, layerTerrain);
+            this.AttachToGround(treesObj, false);
+            this.trees = treesObj.Instance;
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -275,7 +279,9 @@ namespace Heightmap
                     ModelContentFilename = @"tree.xml",
                 }
             };
-            this.trees2 = await this.AddComponent<ModelInstanced>(tree2Desc, SceneObjectUsages.None, layerTerrain);
+            var trees2Obj = await this.AddComponent<ModelInstanced>(tree2Desc, SceneObjectUsages.None, layerTerrain);
+            this.AttachToGround(trees2Obj, false);
+            this.trees2 = trees2Obj.Instance;
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -296,7 +302,8 @@ namespace Heightmap
                     ModelContentFilename = @"soldier_anim2.xml",
                 }
             };
-            this.soldier = await this.AddComponent<Model>(sDesc, SceneObjectUsages.Agent, layerObjects);
+            var soldierObj = await this.AddComponent<Model>(sDesc, SceneObjectUsages.Agent, layerObjects);
+            this.soldier = soldierObj.Instance;
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -317,7 +324,8 @@ namespace Heightmap
                     ModelContentFilename = @"soldier_anim2.xml",
                 }
             };
-            this.troops = await this.AddComponent<ModelInstanced>(tDesc, SceneObjectUsages.Agent, layerObjects);
+            var troopsObj = await this.AddComponent<ModelInstanced>(tDesc, SceneObjectUsages.Agent, layerObjects);
+            this.troops = troopsObj.Instance;
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -338,10 +346,12 @@ namespace Heightmap
                     ModelContentFilename = @"m24.xml",
                 },
             };
-            this.helicopterI = await this.AddComponent<ModelInstanced>(mDesc, SceneObjectUsages.None, layerObjects);
+            var helicopterIObj = await this.AddComponent<ModelInstanced>(mDesc, SceneObjectUsages.None, layerObjects);
+            this.AttachToGround(helicopterIObj, true);
+            this.helicopterI = helicopterIObj.Instance;
             for (int i = 0; i < this.helicopterI.Count; i++)
             {
-                this.Lights.AddRange(this.helicopterI.Instance[i].Lights);
+                this.Lights.AddRange(this.helicopterI[i].Lights);
             }
             sw.Stop();
 
@@ -363,10 +373,12 @@ namespace Heightmap
                     ModelContentFilename = @"Bradley.xml",
                 }
             };
-            this.bradleyI = await this.AddComponent<ModelInstanced>(mDesc, SceneObjectUsages.None, layerObjects);
+            var bradleyIObj = await this.AddComponent<ModelInstanced>(mDesc, SceneObjectUsages.None, layerObjects);
+            this.AttachToGround(bradleyIObj, true);
+            this.bradleyI = bradleyIObj.Instance;
             for (int i = 0; i < this.bradleyI.Count; i++)
             {
-                this.Lights.AddRange(this.bradleyI.Instance[i].Lights);
+                this.Lights.AddRange(this.bradleyI[i].Lights);
             }
             sw.Stop();
 
@@ -387,7 +399,9 @@ namespace Heightmap
                     ModelContentFilename = @"Watch Tower.xml",
                 }
             };
-            this.watchTower = await this.AddComponent<Model>(mDesc, SceneObjectUsages.None, layerObjects);
+            var watchTowerObj = await this.AddComponent<Model>(mDesc, SceneObjectUsages.None, layerObjects);
+            this.AttachToGround(watchTowerObj, true);
+            this.watchTower = watchTowerObj.Instance;
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -397,7 +411,7 @@ namespace Heightmap
             Stopwatch sw = Stopwatch.StartNew();
 
             sw.Restart();
-            this.containers = await this.AddComponent<ModelInstanced>(
+            var containersObj = await this.AddComponent<ModelInstanced>(
                 new ModelInstancedDescription()
                 {
                     Name = "Container",
@@ -411,6 +425,8 @@ namespace Heightmap
                         ModelContentFilename = "Container.xml",
                     }
                 });
+            this.AttachToGround(containersObj, false);
+            this.containers = containersObj.Instance;
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -431,7 +447,9 @@ namespace Heightmap
                     ModelContentFilename = @"torch.xml",
                 }
             };
-            this.torchs = await this.AddComponent<ModelInstanced>(tcDesc, SceneObjectUsages.None, layerObjects);
+            var torchsObj = await this.AddComponent<ModelInstanced>(tcDesc, SceneObjectUsages.None, layerObjects);
+            this.AttachToGround(torchsObj, false);
+            this.torchs = torchsObj.Instance;
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -441,7 +459,8 @@ namespace Heightmap
             Stopwatch sw = Stopwatch.StartNew();
 
             sw.Restart();
-            this.pManager = await this.AddComponent<ParticleManager>(new ParticleManagerDescription() { Name = "Particle Systems" }, SceneObjectUsages.None, layerEffects);
+            var pManagerObj = await this.AddComponent<ParticleManager>(new ParticleManagerDescription() { Name = "Particle Systems" }, SceneObjectUsages.None, layerEffects);
+            this.pManager = pManagerObj.Instance;
 
             this.pFire = ParticleSystemDescription.InitializeFire("resources/particles", "fire.png", 0.5f);
             this.pPlume = ParticleSystemDescription.InitializeSmokePlume("resources/particles", "smoke.png", 0.5f);
@@ -507,7 +526,9 @@ namespace Heightmap
                     HeightmapDescription = hDesc,
                 }
             };
-            this.terrain = await this.AddComponent<Terrain>(gDesc, SceneObjectUsages.None, layerTerrain);
+            var terrainObj = await this.AddComponent<Terrain>(gDesc, SceneObjectUsages.None, layerTerrain);
+            this.SetGround(terrainObj, true);
+            this.terrain = terrainObj.Instance;
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -567,7 +588,7 @@ namespace Heightmap
                     Count = 1,
                 },
             };
-            this.gardener = await this.AddComponent<GroundGardener>(vDesc, SceneObjectUsages.None, layerFoliage);
+            this.gardener = (await this.AddComponent<GroundGardener>(vDesc, SceneObjectUsages.None, layerFoliage)).Instance;
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -618,7 +639,7 @@ namespace Heightmap
                     WindEffect = 1f,
                 },
             };
-            this.gardener2 = await this.AddComponent<GroundGardener>(vDesc2, SceneObjectUsages.None, layerFoliage);
+            this.gardener2 = (await this.AddComponent<GroundGardener>(vDesc2, SceneObjectUsages.None, layerFoliage)).Instance;
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -663,7 +684,8 @@ namespace Heightmap
             {
                 Name = "Sky",
             };
-            this.skydom = await this.AddComponent<SkyScattering>(skDesc);
+            var skydomObj = await this.AddComponent<SkyScattering>(skDesc);
+            this.skydom = skydomObj.Instance;
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -719,8 +741,8 @@ namespace Heightmap
             this.Camera.MovementDelta = 45f;
             this.Camera.SlowMovementDelta = 20f;
 
-            this.skydom.Instance.RayleighScattering *= 0.8f;
-            this.skydom.Instance.MieScattering *= 0.1f;
+            this.skydom.RayleighScattering *= 0.8f;
+            this.skydom.MieScattering *= 0.1f;
 
             this.TimeOfDay.BeginAnimation(new TimeSpan(8, 55, 00), 1f);
 
@@ -784,27 +806,18 @@ namespace Heightmap
         {
             Random posRnd = new Random(1024);
 
-            var bbox = this.terrain.Instance.GetBoundingBox();
+            var bbox = this.terrain.GetBoundingBox();
 
-            this.SetGround(this.terrain, true);
+            await Task.WhenAll(
+                this.SetRocksPosition(posRnd, bbox),
+                this.SetForestPosition(posRnd),
+                this.SetWatchTowerPosition(),
+                this.SetContainersPosition(),
+                this.SetTorchsPosition(posRnd, bbox));
 
-            await this.SetRocksPosition(posRnd, bbox);
-            await this.SetForestPosition(posRnd);
-            await this.SetWatchTowerPosition();
-            await this.SetContainersPosition();
-            await this.SetTorchsPosition(posRnd, bbox);
-
-            this.AttachToGround(this.rocks, false);
-            this.AttachToGround(this.trees, false);
-            this.AttachToGround(this.trees2, false);
-            this.AttachToGround(this.watchTower, true);
-            this.AttachToGround(this.torchs, false);
-
-            await this.SetM24Position();
-            await this.SetBradleyPosition();
-
-            this.AttachToGround(this.helicopterI, true);
-            this.AttachToGround(this.bradleyI, true);
+            await Task.WhenAll(
+                this.SetM24Position(),
+                this.SetBradleyPosition());
 
             //Player soldier
             await this.SetPlayerPosition();
@@ -834,9 +847,9 @@ namespace Heightmap
                         scale = posRnd.NextFloat(0.1f, 1f);
                     }
 
-                    this.rocks.Instance[i].Manipulator.SetPosition(r.Position, true);
-                    this.rocks.Instance[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), true);
-                    this.rocks.Instance[i].Manipulator.SetScale(scale, true);
+                    this.rocks[i].Manipulator.SetPosition(r.Position, true);
+                    this.rocks[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), true);
+                    this.rocks[i].Manipulator.SetScale(scale, true);
                 }
             }
 
@@ -855,9 +868,9 @@ namespace Heightmap
                     var treePosition = r.Position;
                     treePosition.Y -= posRnd.NextFloat(1f, 5f);
 
-                    this.trees.Instance[i].Manipulator.SetPosition(treePosition, true);
-                    this.trees.Instance[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(-MathUtil.PiOverFour * 0.5f, MathUtil.PiOverFour * 0.5f), 0, true);
-                    this.trees.Instance[i].Manipulator.SetScale(posRnd.NextFloat(1.5f, 2.5f), true);
+                    this.trees[i].Manipulator.SetPosition(treePosition, true);
+                    this.trees[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(-MathUtil.PiOverFour * 0.5f, MathUtil.PiOverFour * 0.5f), 0, true);
+                    this.trees[i].Manipulator.SetScale(posRnd.NextFloat(1.5f, 2.5f), true);
                 }
             }
 
@@ -872,9 +885,9 @@ namespace Heightmap
                     var treePosition = r.Position;
                     treePosition.Y -= posRnd.NextFloat(0f, 2f);
 
-                    this.trees2.Instance[i].Manipulator.SetPosition(treePosition, true);
-                    this.trees2.Instance[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(-MathUtil.PiOverFour * 0.15f, MathUtil.PiOverFour * 0.15f), 0, true);
-                    this.trees2.Instance[i].Manipulator.SetScale(posRnd.NextFloat(1.5f, 2.5f), true);
+                    this.trees2[i].Manipulator.SetPosition(treePosition, true);
+                    this.trees2[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(-MathUtil.PiOverFour * 0.15f, MathUtil.PiOverFour * 0.15f), 0, true);
+                    this.trees2[i].Manipulator.SetScale(posRnd.NextFloat(1.5f, 2.5f), true);
                 }
             }
 
@@ -884,9 +897,9 @@ namespace Heightmap
         {
             if (this.FindTopGroundPosition(-40, -40, out PickingResult<Triangle> r))
             {
-                this.watchTower.Transform.SetPosition(r.Position, true);
-                this.watchTower.Transform.SetRotation(MathUtil.Pi / 3f, 0, 0, true);
-                this.watchTower.Transform.SetScale(1.5f, true);
+                this.watchTower.Manipulator.SetPosition(r.Position, true);
+                this.watchTower.Manipulator.SetRotation(MathUtil.Pi / 3f, 0, 0, true);
+                this.watchTower.Manipulator.SetScale(1.5f, true);
             }
 
             await Task.CompletedTask;
@@ -911,14 +924,14 @@ namespace Heightmap
                     var pos = res.Position;
                     pos.Y -= 0.5f;
 
-                    this.containers.Instance[i].Manipulator.SetScale(5);
-                    this.containers.Instance[i].Manipulator.SetPosition(pos);
-                    this.containers.Instance[i].Manipulator.SetRotation(MathUtil.Pi / 16f * (i - 2), 0, 0);
-                    this.containers.Instance[i].Manipulator.SetNormal(res.Item.Normal);
-                    this.containers.Instance[i].Manipulator.UpdateInternals(true);
+                    this.containers[i].Manipulator.SetScale(5);
+                    this.containers[i].Manipulator.SetPosition(pos);
+                    this.containers[i].Manipulator.SetRotation(MathUtil.Pi / 16f * (i - 2), 0, 0);
+                    this.containers[i].Manipulator.SetNormal(res.Item.Normal);
+                    this.containers[i].Manipulator.UpdateInternals(true);
                 }
 
-                this.containers.Instance[i].TextureIndex = (uint)i;
+                this.containers[i].TextureIndex = (uint)i;
             }
 
             await Task.CompletedTask;
@@ -929,9 +942,9 @@ namespace Heightmap
             {
                 var position = r.Position;
 
-                this.torchs.Instance[0].Manipulator.SetScale(1f, 1f, 1f, true);
-                this.torchs.Instance[0].Manipulator.SetPosition(position, true);
-                var tbbox = this.torchs.Instance[0].GetBoundingBox();
+                this.torchs[0].Manipulator.SetScale(1f, 1f, 1f, true);
+                this.torchs[0].Manipulator.SetPosition(position, true);
+                var tbbox = this.torchs[0].GetBoundingBox();
 
                 position.Y += (tbbox.Maximum.Y - tbbox.Minimum.Y);
 
@@ -972,9 +985,9 @@ namespace Heightmap
                 this.FindTopGroundPosition(position.X, position.Z, out PickingResult<Triangle> res);
 
                 var pos = res.Position;
-                this.torchs.Instance[i].Manipulator.SetScale(0.20f, true);
-                this.torchs.Instance[i].Manipulator.SetPosition(pos, true);
-                BoundingBox tbbox = this.torchs.Instance[i].GetBoundingBox();
+                this.torchs[i].Manipulator.SetScale(0.20f, true);
+                this.torchs[i].Manipulator.SetPosition(pos, true);
+                BoundingBox tbbox = this.torchs[i].GetBoundingBox();
 
                 pos.Y += (tbbox.Maximum.Y - tbbox.Minimum.Y) * 0.95f;
 
@@ -988,8 +1001,8 @@ namespace Heightmap
 
                 this.Lights.Add(torchLights[i - 1]);
 
-                this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pFire, new ParticleEmitter() { Position = pos, InfiniteDuration = true, EmissionRate = 0.1f });
-                this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, new ParticleEmitter() { Position = pos, InfiniteDuration = true, EmissionRate = 0.5f });
+                this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pFire, new ParticleEmitter() { Position = pos, InfiniteDuration = true, EmissionRate = 0.1f });
+                this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, new ParticleEmitter() { Position = pos, InfiniteDuration = true, EmissionRate = 0.5f });
             }
 
             await Task.CompletedTask;
@@ -1007,13 +1020,13 @@ namespace Heightmap
             {
                 if (this.FindTopGroundPosition(hPositions[i].X, hPositions[i].Y, out PickingResult<Triangle> r))
                 {
-                    this.helicopterI.Instance[i].Manipulator.SetPosition(r.Position, true);
-                    this.helicopterI.Instance[i].Manipulator.SetRotation(hPositions[i].Z, 0, 0, true);
-                    this.helicopterI.Instance[i].Manipulator.SetNormal(r.Item.Normal);
+                    this.helicopterI[i].Manipulator.SetPosition(r.Position, true);
+                    this.helicopterI[i].Manipulator.SetRotation(hPositions[i].Z, 0, 0, true);
+                    this.helicopterI[i].Manipulator.SetNormal(r.Item.Normal);
 
-                    this.helicopterI.Instance[i].AnimationController.TimeDelta = 0.5f * (i + 1);
-                    this.helicopterI.Instance[i].AnimationController.AddPath(this.animations["m24_fly"]);
-                    this.helicopterI.Instance[i].AnimationController.Start();
+                    this.helicopterI[i].AnimationController.TimeDelta = 0.5f * (i + 1);
+                    this.helicopterI[i].AnimationController.AddPath(this.animations["m24_fly"]);
+                    this.helicopterI[i].AnimationController.Start();
                 }
             }
 
@@ -1034,10 +1047,10 @@ namespace Heightmap
             {
                 if (this.FindTopGroundPosition(bPositions[i].X, bPositions[i].Y, out PickingResult<Triangle> r))
                 {
-                    this.bradleyI.Instance[i].Manipulator.SetScale(1.2f, true);
-                    this.bradleyI.Instance[i].Manipulator.SetPosition(r.Position, true);
-                    this.bradleyI.Instance[i].Manipulator.SetRotation(bPositions[i].Z, 0, 0, true);
-                    this.bradleyI.Instance[i].Manipulator.SetNormal(r.Item.Normal);
+                    this.bradleyI[i].Manipulator.SetScale(1.2f, true);
+                    this.bradleyI[i].Manipulator.SetPosition(r.Position, true);
+                    this.bradleyI[i].Manipulator.SetRotation(bPositions[i].Z, 0, 0, true);
+                    this.bradleyI[i].Manipulator.SetNormal(r.Item.Normal);
                 }
             }
 
@@ -1047,12 +1060,12 @@ namespace Heightmap
         {
             if (this.FindAllGroundPosition(-40, -40, out PickingResult<Triangle>[] res))
             {
-                this.soldier.Transform.SetPosition(res[2].Position, true);
-                this.soldier.Transform.SetRotation(MathUtil.Pi, 0, 0, true);
+                this.soldier.Manipulator.SetPosition(res[2].Position, true);
+                this.soldier.Manipulator.SetRotation(MathUtil.Pi, 0, 0, true);
             }
 
-            this.soldier.Instance.AnimationController.AddPath(this.animations["soldier_idle"]);
-            this.soldier.Instance.AnimationController.Start();
+            this.soldier.AnimationController.AddPath(this.animations["soldier_idle"]);
+            this.soldier.AnimationController.Start();
 
             await Task.CompletedTask;
         }
@@ -1070,13 +1083,13 @@ namespace Heightmap
             {
                 if (this.FindTopGroundPosition(iPos[i].X, iPos[i].Y, out PickingResult<Triangle> r))
                 {
-                    this.troops.Instance[i].Manipulator.SetPosition(r.Position, true);
-                    this.troops.Instance[i].Manipulator.SetRotation(iPos[i].Z, 0, 0, true);
-                    this.troops.Instance[i].TextureIndex = 1;
+                    this.troops[i].Manipulator.SetPosition(r.Position, true);
+                    this.troops[i].Manipulator.SetRotation(iPos[i].Z, 0, 0, true);
+                    this.troops[i].TextureIndex = 1;
 
-                    this.troops.Instance[i].AnimationController.TimeDelta = (i + 1) * 0.2f;
-                    this.troops.Instance[i].AnimationController.AddPath(this.animations["soldier_idle"]);
-                    this.troops.Instance[i].AnimationController.Start(Helper.RandomGenerator.NextFloat(0f, 8f));
+                    this.troops[i].AnimationController.TimeDelta = (i + 1) * 0.2f;
+                    this.troops[i].AnimationController.AddPath(this.animations["soldier_idle"]);
+                    this.troops[i].AnimationController.Start(Helper.RandomGenerator.NextFloat(0f, 8f));
                 }
             }
 
@@ -1095,7 +1108,7 @@ namespace Heightmap
                 });
             this.bboxesDrawer.Visible = false;
 
-            var boxes = this.terrain.Instance.GetBoundingBoxes(5);
+            var boxes = this.terrain.GetBoundingBoxes(5);
             var listBoxes = Line3D.CreateWiredBox(boxes);
 
             this.bboxesDrawer.Instance.AddPrimitives(new Color4(1.0f, 0.0f, 0.0f, 0.55f), listBoxes);
@@ -1140,7 +1153,7 @@ namespace Heightmap
         private async Task SetPathFindingInfo()
         {
             //Player height
-            var sbbox = this.soldier.Instance.GetBoundingBox();
+            var sbbox = this.soldier.GetBoundingBox();
             this.playerHeight.Y = sbbox.Maximum.Y - sbbox.Minimum.Y;
             this.agent.Height = this.playerHeight.Y;
             this.agent.Radius = this.playerHeight.Y * 0.33f;
@@ -1206,7 +1219,6 @@ namespace Heightmap
             UpdatePlayer();
             UpdateInputDebugInfo(gameTime);
             UpdateInputBuffers(shift);
-            UpdateInputObjects();
 
             //Auto
             UpdateLights();
@@ -1215,7 +1227,7 @@ namespace Heightmap
             UpdateGraph(gameTime);
             UpdateDrawers();
 
-            this.help.Instance.Text = string.Format(
+            this.help.Text = string.Format(
                 "{0}. Wind {1} {2:0.000} - Next {3:0.000}; {4} Light brightness: {5:0.00}; CamPos {6}; CamDir {7};",
                 this.Renderer,
                 this.windDirection, this.windStrength, this.windNextStrength,
@@ -1223,10 +1235,10 @@ namespace Heightmap
                 this.Lights.KeyLight.Brightness,
                 this.Camera.Position, this.Camera.Direction);
 
-            this.help2.Instance.Text = string.Format("Picks: {0:0000}|{1:00.000}|{2:00.0000000}; Frustum tests: {3:000}|{4:00.000}|{5:00.00000000}; PlantingTaks: {6:000}",
+            this.help2.Text = string.Format("Picks: {0:0000}|{1:00.000}|{2:00.0000000}; Frustum tests: {3:000}|{4:00.000}|{5:00.00000000}; PlantingTaks: {6:000}",
                 Counters.PicksPerFrame, Counters.PickingTotalTimePerFrame, Counters.PickingAverageTime,
                 Counters.VolumeFrustumTestPerFrame, Counters.VolumeFrustumTestTotalTimePerFrame, Counters.VolumeFrustumTestAverageTime,
-                this.gardener.Instance.PlantingTasks + this.gardener2.Instance.PlantingTasks);
+                this.gardener.PlantingTasks + this.gardener2.PlantingTasks);
         }
         private void UpdatePlayer()
         {
@@ -1242,7 +1254,7 @@ namespace Heightmap
                 {
                     var offset = (this.playerHeight * 1.2f) + (Vector3.ForwardLH * 10f) + (Vector3.Left * 3f);
                     var view = (Vector3.BackwardLH * 4f) + Vector3.Down;
-                    this.Camera.Following = new CameraFollower(this.soldier.Transform, offset, view);
+                    this.Camera.Following = new CameraFollower(this.soldier.Manipulator, offset, view);
                 }
             }
 
@@ -1321,27 +1333,27 @@ namespace Heightmap
 
             if (this.Game.Input.KeyPressed(Keys.A))
             {
-                this.soldier.Transform.MoveLeft(gameTime, delta);
+                this.soldier.Manipulator.MoveLeft(gameTime, delta);
             }
 
             if (this.Game.Input.KeyPressed(Keys.D))
             {
-                this.soldier.Transform.MoveRight(gameTime, delta);
+                this.soldier.Manipulator.MoveRight(gameTime, delta);
             }
 
             if (this.Game.Input.KeyPressed(Keys.W))
             {
-                this.soldier.Transform.MoveForward(gameTime, delta);
+                this.soldier.Manipulator.MoveForward(gameTime, delta);
             }
 
             if (this.Game.Input.KeyPressed(Keys.S))
             {
-                this.soldier.Transform.MoveBackward(gameTime, delta);
+                this.soldier.Manipulator.MoveBackward(gameTime, delta);
             }
 
-            if (this.FindTopGroundPosition(this.soldier.Transform.Position.X, this.soldier.Transform.Position.Z, out PickingResult<Triangle> r))
+            if (this.FindTopGroundPosition(this.soldier.Manipulator.Position.X, this.soldier.Manipulator.Position.Z, out PickingResult<Triangle> r))
             {
-                this.soldier.Transform.SetPosition(r.Position);
+                this.soldier.Manipulator.SetPosition(r.Position);
             }
         }
         private void UpdateInputDebugInfo(GameTime gameTime)
@@ -1357,31 +1369,6 @@ namespace Heightmap
             this.UpdateInputTimeOfDay(gameTime);
 
             this.UpdateInputLoadText();
-        }
-        private void UpdateInputObjects()
-        {
-            if (this.Game.Input.KeyJustReleased(Keys.NumPad1))
-            {
-                this.helicopterI.Visible = !this.helicopterI.Visible;
-            }
-            if (this.Game.Input.KeyJustReleased(Keys.NumPad2))
-            {
-                this.trees.Visible = !this.trees.Visible;
-                this.trees2.Visible = !this.trees2.Visible;
-            }
-            if (this.Game.Input.KeyJustReleased(Keys.NumPad3))
-            {
-                this.rocks.Visible = !this.rocks.Visible;
-            }
-            if (this.Game.Input.KeyJustReleased(Keys.NumPad4))
-            {
-                this.containers.Visible = !this.containers.Visible;
-            }
-            if (this.Game.Input.KeyJustReleased(Keys.NumPad5))
-            {
-                this.bradleyI.Visible = !this.bradleyI.Visible;
-            }
-
         }
         private void UpdateInputWind()
         {
@@ -1521,7 +1508,7 @@ namespace Heightmap
             {
                 Color color = new Color(Color.Red.ToColor3(), 0.6f);
 
-                var tris = this.soldier.Instance.GetTriangles(true);
+                var tris = this.soldier.GetTriangles(true);
                 if (this.soldierTris == null)
                 {
                     Task.Run(async () =>
@@ -1542,11 +1529,11 @@ namespace Heightmap
 
                 BoundingBox[] bboxes = new BoundingBox[]
                 {
-                    this.soldier.Instance.GetBoundingBox(true),
-                    this.troops.Instance[0].GetBoundingBox(true),
-                    this.troops.Instance[1].GetBoundingBox(true),
-                    this.troops.Instance[2].GetBoundingBox(true),
-                    this.troops.Instance[3].GetBoundingBox(true),
+                    this.soldier.GetBoundingBox(true),
+                    this.troops[0].GetBoundingBox(true),
+                    this.troops[1].GetBoundingBox(true),
+                    this.troops[2].GetBoundingBox(true),
+                    this.troops[3].GetBoundingBox(true),
                 };
                 if (this.soldierLines == null)
                 {
@@ -1599,8 +1586,8 @@ namespace Heightmap
                 if (this.windNextStrength < this.windStrength) this.windStrength = this.windNextStrength;
             }
 
-            this.gardener.Instance.SetWind(this.windDirection, this.windStrength);
-            this.gardener2.Instance.SetWind(this.windDirection, this.windStrength);
+            this.gardener.SetWind(this.windDirection, this.windStrength);
+            this.gardener2.SetWind(this.windDirection, this.windStrength);
         }
         private void UpdateDust(GameTime gameTime)
         {
@@ -1610,7 +1597,7 @@ namespace Heightmap
             {
                 this.nextDust = this.dustTime;
 
-                var hbsph = this.helicopterI.Instance[nextDustHeli++].GetBoundingSphere();
+                var hbsph = this.helicopterI[nextDustHeli++].GetBoundingSphere();
 
                 nextDustHeli %= this.helicopterI.Count;
 
@@ -1637,7 +1624,7 @@ namespace Heightmap
 
             this.pDust.Gravity = (this.windStrength * this.windDirection);
 
-            this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pDust, emitter);
+            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pDust, emitter);
         }
         private void UpdateLights()
         {
@@ -1737,14 +1724,14 @@ namespace Heightmap
         {
             base.Draw(gameTime);
 
-            this.stats.Instance.Text = this.Game.RuntimeText;
+            this.stats.Text = this.Game.RuntimeText;
         }
         private void SetLoadText(int index)
         {
             var keys = initDurationDict.Keys.ToArray();
             if (index >= 0 && index < keys.Length)
             {
-                this.load.Instance.Text = string.Format("{0}: {1}", keys[index], initDurationDict[keys[index]]);
+                this.load.Text = string.Format("{0}: {1}", keys[index], initDurationDict[keys[index]]);
             }
         }
 

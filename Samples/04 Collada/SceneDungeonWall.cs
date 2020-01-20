@@ -10,9 +10,9 @@ namespace Collada
     {
         private const int layerHUD = 99;
 
-        private SceneObject<TextDrawer> fps = null;
+        private TextDrawer fps = null;
 
-        private SceneObject<Model> lightEmitter = null;
+        private Model lightEmitter = null;
 
         private SceneLightPoint pointLight = null;
 
@@ -64,9 +64,9 @@ namespace Collada
             title.Instance.Text = "Tiled Wall Test Scene";
             title.Instance.Position = Vector2.Zero;
 
-            this.fps = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            this.fps.Instance.Text = null;
-            this.fps.Instance.Position = new Vector2(0, 24);
+            this.fps = (await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD)).Instance;
+            this.fps.Text = null;
+            this.fps.Position = new Vector2(0, 24);
 
             var picks = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
             picks.Instance.Text = null;
@@ -135,7 +135,7 @@ namespace Collada
                 }
             };
 
-            this.lightEmitter = await this.AddComponent<Model>(desc);
+            this.lightEmitter = (await this.AddComponent<Model>(desc)).Instance;
         }
 
         public override void Update(GameTime gameTime)
@@ -158,7 +158,7 @@ namespace Collada
 
             this.UpdateLight(gameTime);
 
-            this.fps.Instance.Text = this.Game.RuntimeText;
+            this.fps.Text = this.Game.RuntimeText;
         }
         private void UpdateCamera()
         {
@@ -223,7 +223,7 @@ namespace Collada
                 pos.Z -= gameTime.ElapsedSeconds * 5f;
             }
 
-            this.lightEmitter.Transform.SetPosition(pos);
+            this.lightEmitter.Manipulator.SetPosition(pos);
             this.pointLight.Position = pos;
         }
     }

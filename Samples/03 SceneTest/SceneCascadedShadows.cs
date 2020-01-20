@@ -14,7 +14,8 @@ namespace SceneTest
         private const int layerEffects = 2;
         private const float spaceSize = 80;
 
-        private SceneObject<ModelInstanced> buildingObelisks = null;
+        private ModelInstanced buildingObelisks = null;
+
         private SceneObject<SpriteTexture> bufferDrawer = null;
 
         /// <summary>
@@ -108,7 +109,7 @@ namespace SceneTest
                 }
             };
 
-            this.buildingObelisks = await this.AddComponent<ModelInstanced>(desc);
+            this.buildingObelisks = (await this.AddComponent<ModelInstanced>(desc)).Instance;
         }
         private async Task InitializeTree()
         {
@@ -185,10 +186,10 @@ namespace SceneTest
         {
             await base.Initialized();
 
-            this.buildingObelisks.Instance[0].Manipulator.SetPosition(+5, 0, +5);
-            this.buildingObelisks.Instance[1].Manipulator.SetPosition(+5, 0, -5);
-            this.buildingObelisks.Instance[2].Manipulator.SetPosition(-5, 0, +5);
-            this.buildingObelisks.Instance[3].Manipulator.SetPosition(-5, 0, -5);
+            this.buildingObelisks[0].Manipulator.SetPosition(+5, 0, +5);
+            this.buildingObelisks[1].Manipulator.SetPosition(+5, 0, -5);
+            this.buildingObelisks[2].Manipulator.SetPosition(-5, 0, +5);
+            this.buildingObelisks[3].Manipulator.SetPosition(-5, 0, -5);
         }
 
         public override void Update(GameTime gameTime)

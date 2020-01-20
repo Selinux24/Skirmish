@@ -513,8 +513,8 @@ namespace Terrain
             };
             this.helicopter = await this.AddComponent<Model>(hDesc, SceneObjectUsages.Agent, this.layerObjects);
             this.helicopter.Visible = false;
-            this.helicopter.Transform.SetScale(0.15f);
-            this.helicopter.Transform.UpdateInternals(true);
+            this.helicopter.Instance.Manipulator.SetScale(0.15f);
+            this.helicopter.Instance.Manipulator.UpdateInternals(true);
 
             this.Lights.AddRange(this.helicopter.Instance.Lights);
 
@@ -1304,8 +1304,8 @@ namespace Terrain
             var ray = this.GetTopDownRay(this.heliport.Manipulator.Position);
             if (this.PickNearest(ray, RayPickingParams.Geometry, sceneryUsage, out PickingResult<Triangle> r))
             {
-                this.helicopter.Transform.SetPosition(r.Position);
-                this.helicopter.Transform.SetNormal(r.Item.Normal);
+                this.helicopter.Instance.Manipulator.SetPosition(r.Position);
+                this.helicopter.Instance.Manipulator.SetNormal(r.Item.Normal);
             }
 
             var hp = new AnimationPath();
@@ -1828,7 +1828,7 @@ namespace Terrain
         {
             if (!this.walkMode && this.terrain.PickNearest(pickingRay, out PickingResult<Triangle> r))
             {
-                this.cursor3D.Transform.SetPosition(r.Position);
+                this.cursor3D.Instance.Manipulator.SetPosition(r.Position);
             }
         }
         private void UpdateTanks(Ray pickingRay)
@@ -1898,7 +1898,7 @@ namespace Terrain
 
             if (this.curveLineDrawer.Visible)
             {
-                Matrix rot = Matrix.RotationQuaternion(this.helicopter.Transform.Rotation) * Matrix.Translation(this.helicopter.Transform.Position);
+                Matrix rot = Matrix.RotationQuaternion(this.helicopter.Instance.Manipulator.Rotation) * Matrix.Translation(this.helicopter.Instance.Manipulator.Position);
                 this.curveLineDrawer.Instance.SetPrimitives(this.hAxisColor, Line3D.CreateAxis(rot, 5f));
             }
 
@@ -1961,7 +1961,7 @@ namespace Terrain
             var picked = this.PickNearest(pickingRay, RayPickingParams.Default, out PickingResult<Triangle> r);
             if (picked)
             {
-                var t1Position = this.tankP1.Transform.Position;
+                var t1Position = this.tankP1.Instance.Manipulator.Position;
 
                 var result = this.FindPath(this.tankAgentType, t1Position, r.Position);
                 if (result != null)
@@ -1981,7 +1981,7 @@ namespace Terrain
             {
                 Task.Run(async () =>
                 {
-                    var path = await this.FindPathAsync(this.tankAgentType, this.tankP1.Transform.Position, r.Position, true, 0.25f);
+                    var path = await this.FindPathAsync(this.tankAgentType, this.tankP1.Instance.Manipulator.Position, r.Position, true, 0.25f);
                     if (path != null)
                     {
                         this.tankP1Agent.Clear();
@@ -2058,8 +2058,8 @@ namespace Terrain
             }
             else
             {
-                cPoints[0] = this.helicopter.Transform.Position;
-                cPoints[1] = this.helicopter.Transform.Position + (Vector3.Up * 5f) + (this.helicopter.Transform.Forward * 10f);
+                cPoints[0] = this.helicopter.Instance.Manipulator.Position;
+                cPoints[1] = this.helicopter.Instance.Manipulator.Position + (Vector3.Up * 5f) + (this.helicopter.Instance.Manipulator.Forward * 10f);
 
                 for (int i = 2; i < cPoints.Length - 2; i++)
                 {
@@ -2510,11 +2510,11 @@ namespace Terrain
         }
         private void DEBUGDrawMovingVolumes()
         {
-            var hsph = this.helicopter.Geometry.GetBoundingSphere();
+            var hsph = this.helicopter.Instance.GetBoundingSphere();
             this.movingObjLineDrawer.Instance.SetPrimitives(new Color4(Color.White.ToColor3(), 0.55f), Line3D.CreateWiredSphere(new[] { hsph, }, 50, 20));
 
-            var t1sph = this.tankP1.Geometry.GetBoundingBox();
-            var t2sph = this.tankP2.Geometry.GetBoundingBox();
+            var t1sph = this.tankP1.Instance.GetBoundingBox();
+            var t2sph = this.tankP2.Instance.GetBoundingBox();
             this.movingObjLineDrawer.Instance.SetPrimitives(new Color4(Color.YellowGreen.ToColor3(), 0.55f), Line3D.CreateWiredBox(new[] { t1sph, t2sph, }));
         }
     }

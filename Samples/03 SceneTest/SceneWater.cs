@@ -10,9 +10,6 @@ namespace SceneTest
         private const float fogStart = 150f;
         private const float fogRange = 200f;
 
-        private SceneObject<Water> water = null;
-        private SceneObject<SkyScattering> sky = null;
-
         public SceneWater(Game game)
             : base(game)
         {
@@ -36,7 +33,7 @@ namespace SceneTest
 
             this.Lights.BaseFogColor = Color.White;
 
-            this.water = await this.AddComponent<Water>(new WaterDescription()
+            await this.AddComponent<Water>(new WaterDescription()
             {
                 Name = "Water",
                 PlaneSize = 1000f,
@@ -44,7 +41,7 @@ namespace SceneTest
                 GeometryIterations = 4,
                 ColorIterations = 8,
             });
-            this.sky = await this.AddComponent<SkyScattering>(new SkyScatteringDescription()
+            await this.AddComponent<SkyScattering>(new SkyScatteringDescription()
             {
                 Name = "Sky",
                 Resolution = SkyScatteringResolutions.High
