@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -172,6 +173,34 @@ namespace Engine
         public virtual void ResizeSprite(float width, float height)
         {
             this.Manipulator.Update(new GameTime(), this.Game.Form.RelativeCenter, width, height);
+        }
+    }
+
+    /// <summary>
+    /// Sprite texture extensions
+    /// </summary>
+    public static class SpriteTextureExtensions
+    {
+        /// <summary>
+        /// Adds a component to the scene
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        /// <param name="description">Description</param>
+        /// <param name="usage">Component usage</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns the created component</returns>
+        public static async Task<SpriteTexture> AddComponentSpriteTexture(this Scene scene, SpriteTextureDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
+        {
+            SpriteTexture component = null;
+
+            await Task.Run(() =>
+            {
+                component = new SpriteTexture(scene, description);
+
+                scene.AddComponent(component, usage, order);
+            });
+
+            return component;
         }
     }
 }

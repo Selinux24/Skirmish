@@ -53,8 +53,8 @@ namespace SceneTest
 
         private async Task InitializeTextBoxes()
         {
-            this.title = (await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White, Color.Orange), SceneObjectUsages.UI, layerHUD)).Instance;
-            this.runtime = (await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 10, Color.Yellow, Color.Orange), SceneObjectUsages.UI, layerHUD)).Instance;
+            this.title = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 18, Color.White, Color.Orange), SceneObjectUsages.UI, layerHUD);
+            this.runtime = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 10, Color.Yellow, Color.Orange), SceneObjectUsages.UI, layerHUD);
 
             this.title.Text = "Scene Test - Materials";
             this.runtime.Text = "";
@@ -70,11 +70,11 @@ namespace SceneTest
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            await this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);
         }
         private async Task InitializeSkyEffects()
         {
-            await this.AddComponent<LensFlare>(new LensFlareDescription()
+            await this.AddComponentLensFlare(new LensFlareDescription()
             {
                 ContentPath = @"Common/lensFlare",
                 GlowTexture = "lfGlow.png",
@@ -141,9 +141,9 @@ namespace SceneTest
                 }
             };
 
-            await this.AddComponent<Model>(desc);
+            await this.AddComponentModel(desc);
         }
-        private async Task<SceneObject<Model>> InitializeSphere(string name, MaterialContent material)
+        private async Task<Model> InitializeSphere(string name, MaterialContent material)
         {
             var sphere = GeometryUtil.CreateSphere(radius, stacks, stacks);
             var vertices = VertexData.FromDescriptor(sphere);
@@ -161,7 +161,7 @@ namespace SceneTest
                 }
             };
 
-            return await this.AddComponent<Model>(desc);
+            return await this.AddComponentModel(desc);
         }
         private async Task<MaterialContent> GenerateMaterial(Color4 diffuse, Color4 specular, float shininess, bool nmap)
         {
@@ -197,7 +197,7 @@ namespace SceneTest
 
                         var material = await this.GenerateMaterial(diffuse, specular, shininess, nmap);
                         var model = await this.InitializeSphere(string.Format("Sphere {0}.{1}.{2}", r, g, b), material);
-                        model.Instance.Manipulator.SetPosition(new Vector3(r * f, (g * f) + 1f, b * f) + position);
+                        model.Manipulator.SetPosition(new Vector3(r * f, (g * f) + 1f, b * f) + position);
                     }
                 }
             }

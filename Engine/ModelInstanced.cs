@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -53,10 +54,6 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Maximum number of instances
-        /// </summary>
-        public int Count { get; } = 0;
-        /// <summary>
         /// Gets or sets the maximum number of instances to draw
         /// </summary>
         public int MaximumCount { get; set; }
@@ -69,12 +66,15 @@ namespace Engine
         public ModelInstanced(Scene scene, ModelInstancedDescription description)
             : base(scene, description)
         {
-            if (description.Instances <= 0) throw new ArgumentException(string.Format("Instances parameter must be more than 0: {0}", instances));
+            if (description.Instances <= 0)
+            {
+                throw new ArgumentException($"Instances parameter must be more than 0: {description.Instances}");
+            }
 
-            this.Count = description.Instances;
+            this.InstanceCount = description.Instances;
 
-            this.instances = Helper.CreateArray(this.Count, () => new ModelInstance(this));
-            this.instancingData = new VertexInstancingData[this.Count];
+            this.instances = Helper.CreateArray(this.InstanceCount, () => new ModelInstance(this));
+            this.instancingData = new VertexInstancingData[this.InstanceCount];
 
             this.MaximumCount = -1;
         }
@@ -330,8 +330,8 @@ namespace Engine
         private int GetMaxCount()
         {
             return this.MaximumCount >= 0 ?
-                Math.Min(this.MaximumCount, this.Count) :
-                this.Count;
+                Math.Min(this.MaximumCount, this.InstanceCount) :
+                this.InstanceCount;
         }
         /// <summary>
         /// Draws a mesh with a shadow map drawer
@@ -520,6 +520,34 @@ namespace Engine
 
             distance = float.MaxValue;
             return true;
+        }
+    }
+
+    /// <summary>
+    /// Instanced model extensions
+    /// </summary>
+    public static class ModelInstancedExtensions
+    {
+        /// <summary>
+        /// Adds a component to the scene
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        /// <param name="description">Description</param>
+        /// <param name="usage">Component usage</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns the created component</returns>
+        public static async Task<ModelInstanced> AddComponentModelInstanced(this Scene scene, ModelInstancedDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
+        {
+            ModelInstanced component = null;
+
+            await Task.Run(() =>
+            {
+                component = new ModelInstanced(scene, description);
+
+                scene.AddComponent(component, usage, order);
+            });
+
+            return component;
         }
     }
 }

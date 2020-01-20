@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System.Threading.Tasks;
 using Point = System.Drawing.Point;
 
 namespace Engine
@@ -118,6 +119,34 @@ namespace Engine
             }
 
             base.Update(context);
+        }
+    }
+
+    /// <summary>
+    /// Cursor extensions
+    /// </summary>
+    public static class CursorExtensions
+    {
+        /// <summary>
+        /// Adds a component to the scene
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        /// <param name="description">Description</param>
+        /// <param name="usage">Component usage</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns the created component</returns>
+        public static async Task<Cursor> AddComponentCursor(this Scene scene, CursorDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
+        {
+            Cursor component = null;
+
+            await Task.Run(() =>
+            {
+                component = new Cursor(scene, description);
+
+                scene.AddComponent(component, usage, order);
+            });
+
+            return component;
         }
     }
 }

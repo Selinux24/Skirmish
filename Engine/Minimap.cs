@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using SharpDX.DXGI;
+using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -189,6 +190,34 @@ namespace Engine
             this.drawContext.Lights.Cull(volume, this.drawContext.EyePosition);
 
             return base.Cull(volume, out distance);
+        }
+    }
+
+    /// <summary>
+    /// Minimap extensions
+    /// </summary>
+    public static class MinimapExtensions
+    {
+        /// <summary>
+        /// Adds a component to the scene
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        /// <param name="description">Description</param>
+        /// <param name="usage">Component usage</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns the created component</returns>
+        public static async Task<Minimap> AddComponentMinimap(this Scene scene, MinimapDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
+        {
+            Minimap component = null;
+
+            await Task.Run(() =>
+            {
+                component = new Minimap(scene, description);
+
+                scene.AddComponent(component, usage, order);
+            });
+
+            return component;
         }
     }
 }

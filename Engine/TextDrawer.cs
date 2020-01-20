@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -415,6 +416,34 @@ namespace Engine
             y += this.ShadowDelta.Y;
 
             this.localShadow = Matrix.Translation(x, y, 0f);
+        }
+    }
+
+    /// <summary>
+    /// Text drawer extensions
+    /// </summary>
+    public static class TextDrawerExtensions
+    {
+        /// <summary>
+        /// Adds a component to the scene
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        /// <param name="description">Description</param>
+        /// <param name="usage">Component usage</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns the created component</returns>
+        public static async Task<TextDrawer> AddComponentTextDrawer(this Scene scene, TextDrawerDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
+        {
+            TextDrawer component = null;
+
+            await Task.Run(() =>
+            {
+                component = new TextDrawer(scene, description);
+
+                scene.AddComponent(component, usage, order);
+            });
+
+            return component;
         }
     }
 }

@@ -33,7 +33,7 @@ namespace SceneTest
 
             this.Lights.BaseFogColor = Color.White;
 
-            await this.AddComponent<Water>(new WaterDescription()
+            await this.AddComponentWater(new WaterDescription()
             {
                 Name = "Water",
                 PlaneSize = 1000f,
@@ -41,7 +41,7 @@ namespace SceneTest
                 GeometryIterations = 4,
                 ColorIterations = 8,
             });
-            await this.AddComponent<SkyScattering>(new SkyScatteringDescription()
+            await this.AddComponentSkyScattering(new SkyScatteringDescription()
             {
                 Name = "Sky",
                 Resolution = SkyScatteringResolutions.High

@@ -48,14 +48,14 @@ namespace SceneTest
                 Delta = new Vector2(-14, -6),
                 Color = Color.White,
             };
-            await this.AddComponent<Cursor>(cursorDesc, SceneObjectUsages.UI, layerCursor);
+            await this.AddComponentCursor(cursorDesc, SceneObjectUsages.UI, layerCursor);
 
             #endregion
 
             #region Background
 
             var backGroundDesc = ModelDescription.FromXml("Background", "SceneStart", "SkyPlane.xml");
-            this.backGround = (await this.AddComponent<Model>(backGroundDesc, SceneObjectUsages.UI)).Instance;
+            this.backGround = await this.AddComponentModel(backGroundDesc, SceneObjectUsages.UI);
 
             #endregion
 
@@ -71,7 +71,7 @@ namespace SceneTest
                 ShadowColor = new Color4(Color.LightYellow.RGB(), 0.55f),
                 ShadowDelta = new Vector2(4, -4),
             };
-            this.title = (await this.AddComponent<TextDrawer>(titleDesc, SceneObjectUsages.UI, layerHUD)).Instance;
+            this.title = await this.AddComponentTextDrawer(titleDesc, SceneObjectUsages.UI, layerHUD);
 
             #endregion
 
@@ -102,12 +102,12 @@ namespace SceneTest
                     TextColor = Color.Gold,
                 }
             };
-            this.sceneMaterialsButton = (await this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsages.UI, layerHUD)).Instance;
-            this.sceneWaterButton = (await this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsages.UI, layerHUD)).Instance;
-            this.sceneStencilPassButton = (await this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsages.UI, layerHUD)).Instance;
-            this.sceneLightsButton = (await this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsages.UI, layerHUD)).Instance;
-            this.sceneCascadedShadowsButton = (await this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsages.UI, layerHUD)).Instance;
-            this.sceneTestButton = (await this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsages.UI, layerHUD)).Instance;
+            this.sceneMaterialsButton = await this.AddComponentSpriteButton(startButtonDesc, SceneObjectUsages.UI, layerHUD);
+            this.sceneWaterButton = await this.AddComponentSpriteButton(startButtonDesc, SceneObjectUsages.UI, layerHUD);
+            this.sceneStencilPassButton = await this.AddComponentSpriteButton(startButtonDesc, SceneObjectUsages.UI, layerHUD);
+            this.sceneLightsButton = await this.AddComponentSpriteButton(startButtonDesc, SceneObjectUsages.UI, layerHUD);
+            this.sceneCascadedShadowsButton = await this.AddComponentSpriteButton(startButtonDesc, SceneObjectUsages.UI, layerHUD);
+            this.sceneTestButton = await this.AddComponentSpriteButton(startButtonDesc, SceneObjectUsages.UI, layerHUD);
 
             #endregion
 
@@ -138,7 +138,7 @@ namespace SceneTest
                     TextColor = Color.Gold,
                 }
             };
-            this.exitButton = (await this.AddComponent<SpriteButton>(exitButtonDesc, SceneObjectUsages.UI, layerHUD)).Instance;
+            this.exitButton = await this.AddComponentSpriteButton(exitButtonDesc, SceneObjectUsages.UI, layerHUD);
 
             #endregion
         }

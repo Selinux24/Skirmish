@@ -24,32 +24,34 @@ namespace Deferred
         private const int layerEffects = 2;
         private const int layerHUD = 99;
 
-        private SceneObject<TextDrawer> title = null;
-        private SceneObject<TextDrawer> load = null;
-        private SceneObject<TextDrawer> help = null;
-        private SceneObject<TextDrawer> statistics = null;
+        private TextDrawer title = null;
+        private TextDrawer load = null;
+        private TextDrawer help = null;
+        private TextDrawer statistics = null;
 
         private Agent tankAgentType = null;
-        private SceneObject<GameAgent<SteerManipulatorController>> tankAgent1 = null;
-        private SceneObject<GameAgent<SteerManipulatorController>> tankAgent2 = null;
-        private SceneObject<Model> helicopter = null;
-        private SceneObject<ModelInstanced> helicopters = null;
-        private SceneObject<Scenery> terrain = null;
+        private GameAgent<SteerManipulatorController> tankAgent1 = null;
+        private GameAgent<SteerManipulatorController> tankAgent2 = null;
+        private Model helicopter = null;
+        private ModelInstanced helicopters = null;
+        private Scenery terrain = null;
 
-        private SceneObject<Model> tree = null;
-        private SceneObject<ModelInstanced> trees = null;
+        private Model tree = null;
+        private ModelInstanced trees = null;
 
-        private SceneObject<SpriteTexture> bufferDrawer = null;
+        private SpriteTexture bufferDrawer = null;
         private int textIntex = 0;
         private bool animateLights = false;
         private SceneLightSpot spotLight = null;
 
-        private SceneObject<PrimitiveListDrawer<Line3D>> lineDrawer = null;
-        private SceneObject<PrimitiveListDrawer<Triangle>> terrainGraphDrawer = null;
+        private PrimitiveListDrawer<Line3D> lineDrawer = null;
+        private PrimitiveListDrawer<Triangle> terrainGraphDrawer = null;
 
         private bool onlyModels = true;
 
         private readonly Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
+
+        private readonly List<IUpdatable> agents = new List<IUpdatable>();
 
         public TestScene3D(Game game)
             : base(game, SceneModes.DeferredLightning)
@@ -73,32 +75,28 @@ namespace Deferred
             await InitializeUI();
 
             var skydomTask = InitializeAndTrace(InitializeSkydom);
-            var helicopterTask = InitializeAndTrace(InitializeHelicopter);
             var helicoptersTask = InitializeAndTrace(InitializeHelicopters);
             var tanksTask = InitializeAndTrace(InitializeTanks);
             var terrainTask = InitializeAndTrace(InitializeTerrain);
             var gardenerTask = InitializeAndTrace(InitializeGardener);
-            var treeTask = InitializeAndTrace(InitializeTree);
             var treesTask = InitializeAndTrace(InitializeTrees);
 
             string loadingText = null;
             loadingText += string.Format("skydom: {0} ", await skydomTask);
-            loadingText += string.Format("helicopter: {0} ", await helicopterTask);
             loadingText += string.Format("helicopters: {0} ", await helicoptersTask);
             loadingText += string.Format("tank: {0} ", await tanksTask);
             loadingText += string.Format("terrain: {0} ", await terrainTask);
             loadingText += string.Format("gardener: {0} ", await gardenerTask);
-            loadingText += string.Format("tree: {0} ", await treeTask);
             loadingText += string.Format("trees: {0} ", await treesTask);
 
             await InitializeDebug();
 
             var loadText = loadingText;
 
-            this.title.Instance.Text = "Deferred Ligthning test";
-            this.load.Instance.Text = loadText;
-            this.help.Instance.Text = "";
-            this.statistics.Instance.Text = "";
+            this.title.Text = "Deferred Ligthning test";
+            this.load.Text = loadText;
+            this.help.Text = "";
+            this.statistics.Text = "";
 
             this.SetGround(this.terrain, true);
             this.AttachToGround(this.tree, false);
@@ -120,7 +118,7 @@ namespace Deferred
                 Width = 16,
                 Height = 16,
             };
-            await this.AddComponent<Cursor>(cursorDesc, SceneObjectUsages.UI, layerHUD + 1);
+            await this.AddComponentCursor(cursorDesc, SceneObjectUsages.UI, layerHUD + 1);
         }
         private async Task InitializeSkydom()
         {
@@ -131,11 +129,11 @@ namespace Deferred
                 Radius = far,
                 Texture = "sunset.dds",
             };
-            await this.AddComponent<Skydom>(desc);
+            await this.AddComponentSkydom(desc);
         }
-        private async Task InitializeHelicopter()
+        private async Task InitializeHelicopters()
         {
-            var desc = new ModelDescription()
+            var desc1 = new ModelDescription()
             {
                 Name = "Helicopter",
                 CastShadow = true,
@@ -146,12 +144,10 @@ namespace Deferred
                     ModelContentFilename = "m24.xml",
                 }
             };
-            this.helicopter = await this.AddComponent<Model>(desc);
-            this.Lights.AddRange(this.helicopter.Instance.Lights);
-        }
-        private async Task InitializeHelicopters()
-        {
-            var desc = new ModelInstancedDescription()
+            this.helicopter = await this.AddComponentModel(desc1);
+            this.Lights.AddRange(this.helicopter.Lights);
+
+            var desc2 = new ModelInstancedDescription()
             {
                 Name = "Bunch of Helicopters",
                 CastShadow = true,
@@ -162,10 +158,10 @@ namespace Deferred
                     ModelContentFilename = "m24.xml",
                 }
             };
-            this.helicopters = await this.AddComponent<ModelInstanced>(desc);
-            for (int i = 0; i < this.helicopters.Count; i++)
+            this.helicopters = await this.AddComponentModelInstanced(desc2);
+            for (int i = 0; i < this.helicopters.InstanceCount; i++)
             {
-                this.Lights.AddRange(this.helicopters.Instance[i].Lights);
+                this.Lights.AddRange(this.helicopters[i].Lights);
             }
 
             await Task.CompletedTask;
@@ -182,10 +178,10 @@ namespace Deferred
                     ModelContentFilename = "leopard.xml",
                 }
             };
-            var tank1 = await this.AddComponent<Model>(desc);
-            tank1.Instance.Manipulator.SetScale(0.2f, true);
-            var tank2 = await this.AddComponent<Model>(desc);
-            tank2.Instance.Manipulator.SetScale(0.2f, true);
+            var tank1 = await this.AddComponentModel(desc);
+            tank1.Manipulator.SetScale(0.2f, true);
+            var tank2 = await this.AddComponentModel(desc);
+            tank2.Manipulator.SetScale(0.2f, true);
 
             var tankController1 = new SteerManipulatorController()
             {
@@ -200,7 +196,7 @@ namespace Deferred
                 ArrivingRadius = 7.5f,
             };
 
-            var tankbbox = tank1.Instance.GetBoundingBox();
+            var tankbbox = tank1.GetBoundingBox();
             this.tankAgentType = new Agent()
             {
                 Height = tankbbox.GetY(),
@@ -208,13 +204,13 @@ namespace Deferred
                 MaxClimb = tankbbox.GetY() * 0.55f,
             };
 
-            var agent1 = new GameAgent<SteerManipulatorController>(this.tankAgentType, tank1, tankController1);
-            var agent2 = new GameAgent<SteerManipulatorController>(this.tankAgentType, tank2, tankController2);
-            this.tankAgent1 = await this.AddComponent(agent1, new SceneObjectDescription() { });
-            this.tankAgent2 = await this.AddComponent(agent2, new SceneObjectDescription() { });
+            this.tankAgent1 = new GameAgent<SteerManipulatorController>(this.tankAgentType, tank1, tankController1);
+            this.tankAgent2 = new GameAgent<SteerManipulatorController>(this.tankAgentType, tank2, tankController2);
+            agents.Add(this.tankAgent1);
+            agents.Add(this.tankAgent2);
 
-            this.Lights.AddRange(this.tankAgent1.Instance.Lights);
-            this.Lights.AddRange(this.tankAgent2.Instance.Lights);
+            this.Lights.AddRange(this.tankAgent1.Lights);
+            this.Lights.AddRange(this.tankAgent2.Lights);
         }
         private async Task InitializeTerrain()
         {
@@ -231,7 +227,7 @@ namespace Deferred
                     ModelContentFilename = "terrain.xml",
                 }
             };
-            this.terrain = await this.AddComponent<Scenery>(desc);
+            this.terrain = await this.AddComponentScenery(desc);
         }
         private async Task InitializeGardener()
         {
@@ -248,11 +244,11 @@ namespace Deferred
                     MaxSize = Vector2.One * 0.25f,
                 }
             };
-            await this.AddComponent<GroundGardener>(desc);
+            await this.AddComponentGroundGardener(desc);
         }
-        private async Task InitializeTree()
+        private async Task InitializeTrees()
         {
-            var desc = new ModelDescription()
+            var desc1 = new ModelDescription()
             {
                 Name = "Lonely tree",
                 CastShadow = true,
@@ -264,11 +260,9 @@ namespace Deferred
                     ModelContentFilename = "birch_a.xml",
                 }
             };
-            this.tree = await this.AddComponent<Model>(desc);
-        }
-        private async Task InitializeTrees()
-        {
-            var desc = new ModelInstancedDescription()
+            this.tree = await this.AddComponentModel(desc1);
+
+            var desc2 = new ModelInstancedDescription()
             {
                 Name = "Bunch of trees",
                 CastShadow = true,
@@ -281,7 +275,7 @@ namespace Deferred
                     ModelContentFilename = "birch_b.xml",
                 }
             };
-            this.trees = await this.AddComponent<ModelInstanced>(desc);
+            this.trees = await this.AddComponentModelInstanced(desc2);
         }
         private async Task InitializeUI()
         {
@@ -290,24 +284,24 @@ namespace Deferred
             var dHelp = TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow);
             var dStats = TextDrawerDescription.Generate("Lucida Casual", 10, Color.Red);
 
-            this.title = await this.AddComponent<TextDrawer>(dTitle, SceneObjectUsages.UI, layerHUD);
-            this.load = await this.AddComponent<TextDrawer>(dLoad, SceneObjectUsages.UI, layerHUD);
-            this.help = await this.AddComponent<TextDrawer>(dHelp, SceneObjectUsages.UI, layerHUD);
-            this.statistics = await this.AddComponent<TextDrawer>(dStats, SceneObjectUsages.UI, layerHUD);
+            this.title = await this.AddComponentTextDrawer(dTitle, SceneObjectUsages.UI, layerHUD);
+            this.load = await this.AddComponentTextDrawer(dLoad, SceneObjectUsages.UI, layerHUD);
+            this.help = await this.AddComponentTextDrawer(dHelp, SceneObjectUsages.UI, layerHUD);
+            this.statistics = await this.AddComponentTextDrawer(dStats, SceneObjectUsages.UI, layerHUD);
 
-            this.title.Instance.Position = Vector2.Zero;
-            this.load.Instance.Position = new Vector2(0, this.title.Instance.Top + this.title.Instance.Height + 2);
-            this.help.Instance.Position = new Vector2(0, this.load.Instance.Top + this.load.Instance.Height + 2);
-            this.statistics.Instance.Position = new Vector2(0, this.help.Instance.Top + this.help.Instance.Height + 2);
+            this.title.Position = Vector2.Zero;
+            this.load.Position = new Vector2(0, this.title.Top + this.title.Height + 2);
+            this.help.Position = new Vector2(0, this.load.Top + this.load.Height + 2);
+            this.statistics.Position = new Vector2(0, this.help.Top + this.help.Height + 2);
 
             var spDesc = new SpriteDescription()
             {
                 AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
-                Height = this.statistics.Instance.Top + this.statistics.Instance.Height + 3,
+                Height = this.statistics.Top + this.statistics.Height + 3,
                 Color = new Color4(0, 0, 0, 0.75f),
             };
-            await this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);
         }
         private async Task InitializeDebug()
         {
@@ -316,7 +310,7 @@ namespace Deferred
             int smLeft = this.Game.Form.RenderWidth - width;
             int smTop = this.Game.Form.RenderHeight - height;
 
-            this.bufferDrawer = await this.AddComponent<SpriteTexture>(
+            this.bufferDrawer = await this.AddComponentSpriteTexture(
                 new SpriteTextureDescription()
                 {
                     Left = smLeft,
@@ -329,7 +323,7 @@ namespace Deferred
                 layerEffects);
             this.bufferDrawer.Visible = false;
 
-            this.lineDrawer = await this.AddComponent<PrimitiveListDrawer<Line3D>>(
+            this.lineDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(
                 new PrimitiveListDrawerDescription<Line3D>()
                 {
                     DepthEnabled = true,
@@ -339,7 +333,7 @@ namespace Deferred
                 layerEffects);
             this.lineDrawer.Visible = false;
 
-            this.terrainGraphDrawer = await this.AddComponent<PrimitiveListDrawer<Triangle>>(
+            this.terrainGraphDrawer = await this.AddComponentPrimitiveListDrawer<Triangle>(
                 new PrimitiveListDrawerDescription<Triangle>()
                 {
                     Count = MaxGridDrawer,
@@ -381,7 +375,7 @@ namespace Deferred
 
                 foreach (var node in nodes)
                 {
-                    this.terrainGraphDrawer.Instance.AddPrimitives(node.Color, node.Triangles);
+                    this.terrainGraphDrawer.AddPrimitives(node.Color, node.Triangles);
                 }
             }
         }
@@ -395,16 +389,16 @@ namespace Deferred
         {
             if (this.FindTopGroundPosition(20, -20, out PickingResult<Triangle> treePos))
             {
-                this.tree.Instance.Manipulator.SetPosition(treePos.Position);
-                this.tree.Instance.Manipulator.SetScale(0.5f);
+                this.tree.Manipulator.SetPosition(treePos.Position);
+                this.tree.Manipulator.SetScale(0.5f);
             }
 
-            for (int i = 0; i < this.trees.Count; i++)
+            for (int i = 0; i < this.trees.InstanceCount; i++)
             {
                 if (this.FindTopGroundPosition((i * 10) - 35, 17, out PickingResult<Triangle> pos))
                 {
-                    this.trees.Instance[i].Manipulator.SetScale(0.5f, true);
-                    this.trees.Instance[i].Manipulator.SetPosition(pos.Position, true);
+                    this.trees[i].Manipulator.SetScale(0.5f, true);
+                    this.trees[i].Manipulator.SetPosition(pos.Position, true);
                 }
             }
 
@@ -422,16 +416,16 @@ namespace Deferred
 
             if (this.FindTopGroundPosition(20, 40, out PickingResult<Triangle> t1Pos))
             {
-                this.tankAgent1.Instance.Manipulator.SetPosition(t1Pos.Position);
-                this.tankAgent1.Instance.Manipulator.SetNormal(t1Pos.Item.Normal);
+                this.tankAgent1.Manipulator.SetPosition(t1Pos.Position);
+                this.tankAgent1.Manipulator.SetNormal(t1Pos.Item.Normal);
                 cameraPosition += t1Pos.Position;
                 modelCount++;
             }
 
             if (this.FindTopGroundPosition(15, 35, out PickingResult<Triangle> t2Pos))
             {
-                this.tankAgent2.Instance.Manipulator.SetPosition(t2Pos.Position);
-                this.tankAgent2.Instance.Manipulator.SetNormal(t2Pos.Item.Normal);
+                this.tankAgent2.Manipulator.SetPosition(t2Pos.Position);
+                this.tankAgent2.Manipulator.SetNormal(t2Pos.Item.Normal);
                 cameraPosition += t2Pos.Position;
                 modelCount++;
             }
@@ -440,31 +434,31 @@ namespace Deferred
             {
                 var p = hPos.Position;
                 p.Y += 10f;
-                this.helicopter.Instance.Manipulator.SetPosition(p, true);
-                this.helicopter.Instance.Manipulator.SetScale(0.15f, true);
+                this.helicopter.Manipulator.SetPosition(p, true);
+                this.helicopter.Manipulator.SetScale(0.15f, true);
                 cameraPosition += p;
                 modelCount++;
             }
 
-            this.helicopter.Instance.AnimationController.AddPath(this.animations["default"]);
-            this.helicopter.Instance.AnimationController.TimeDelta = 3f;
-            this.helicopter.Instance.AnimationController.Start();
+            this.helicopter.AnimationController.AddPath(this.animations["default"]);
+            this.helicopter.AnimationController.TimeDelta = 3f;
+            this.helicopter.AnimationController.Start();
 
-            for (int i = 0; i < this.helicopters.Count; i++)
+            for (int i = 0; i < this.helicopters.InstanceCount; i++)
             {
                 if (this.FindTopGroundPosition((i * 10) - 20, 20, out PickingResult<Triangle> r))
                 {
                     var p = r.Position;
                     p.Y += 10f;
-                    this.helicopters.Instance[i].Manipulator.SetPosition(p, true);
-                    this.helicopters.Instance[i].Manipulator.SetScale(0.15f, true);
+                    this.helicopters[i].Manipulator.SetPosition(p, true);
+                    this.helicopters[i].Manipulator.SetScale(0.15f, true);
                     cameraPosition += p;
                     modelCount++;
                 }
 
-                this.helicopters.Instance[i].AnimationController.AddPath(this.animations["default"]);
-                this.helicopters.Instance[i].AnimationController.TimeDelta = 3f;
-                this.helicopters.Instance[i].AnimationController.Start();
+                this.helicopters[i].AnimationController.AddPath(this.animations["default"]);
+                this.helicopters[i].AnimationController.TimeDelta = 3f;
+                this.helicopters[i].AnimationController.Start();
             }
         }
 
@@ -483,6 +477,8 @@ namespace Deferred
             }
 
             base.Update(gameTime);
+
+            this.agents.ForEach(a => a.Update(new Engine.Common.UpdateContext() { GameTime = gameTime }));
 
             bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
 
@@ -534,7 +530,7 @@ namespace Deferred
 
             if (this.Game.Input.KeyPressed(Keys.Space))
             {
-                this.lineDrawer.Instance.SetPrimitives(Color.Yellow, Line3D.CreateWiredFrustum(this.Camera.Frustum));
+                this.lineDrawer.SetPrimitives(Color.Yellow, Line3D.CreateWiredFrustum(this.Camera.Frustum));
                 this.lineDrawer.Visible = true;
             }
         }
@@ -607,12 +603,12 @@ namespace Deferred
 
             if (this.Game.Input.KeyJustReleased(Keys.T))
             {
-                this.helicopter.Instance.TextureIndex++;
+                this.helicopter.TextureIndex++;
 
-                if (this.helicopter.Instance.TextureIndex >= this.helicopter.Instance.TextureCount)
+                if (this.helicopter.TextureIndex >= this.helicopter.TextureCount)
                 {
                     //Loop
-                    this.helicopter.Instance.TextureIndex = 0;
+                    this.helicopter.TextureIndex = 0;
                 }
             }
         }
@@ -662,7 +658,7 @@ namespace Deferred
             {
                 this.UpdateSpotlight(gameTime);
 
-                this.lineDrawer.Instance.SetPrimitives(Color.White, this.spotLight.GetVolume(10));
+                this.lineDrawer.SetPrimitives(Color.White, this.spotLight.GetVolume(10));
             }
             else
             {
@@ -760,9 +756,9 @@ namespace Deferred
             var colorMap = this.Renderer.GetResource(SceneRendererResults.ColorMap);
 
             //Colors
-            this.bufferDrawer.Instance.Texture = colorMap;
-            this.bufferDrawer.Instance.Channels = SpriteTextureChannels.NoAlpha;
-            this.help.Instance.Text = "Colors";
+            this.bufferDrawer.Texture = colorMap;
+            this.bufferDrawer.Channels = SpriteTextureChannels.NoAlpha;
+            this.help.Text = "Colors";
 
             this.bufferDrawer.Visible = true;
         }
@@ -770,20 +766,20 @@ namespace Deferred
         {
             var normalMap = this.Renderer.GetResource(SceneRendererResults.NormalMap);
 
-            if (this.bufferDrawer.Instance.Texture == normalMap &&
-                this.bufferDrawer.Instance.Channels == SpriteTextureChannels.NoAlpha)
+            if (this.bufferDrawer.Texture == normalMap &&
+                this.bufferDrawer.Channels == SpriteTextureChannels.NoAlpha)
             {
                 //Specular Power
-                this.bufferDrawer.Instance.Texture = normalMap;
-                this.bufferDrawer.Instance.Channels = SpriteTextureChannels.Alpha;
-                this.help.Instance.Text = "Specular Power";
+                this.bufferDrawer.Texture = normalMap;
+                this.bufferDrawer.Channels = SpriteTextureChannels.Alpha;
+                this.help.Text = "Specular Power";
             }
             else
             {
                 //Normals
-                this.bufferDrawer.Instance.Texture = normalMap;
-                this.bufferDrawer.Instance.Channels = SpriteTextureChannels.NoAlpha;
-                this.help.Instance.Text = "Normals";
+                this.bufferDrawer.Texture = normalMap;
+                this.bufferDrawer.Channels = SpriteTextureChannels.NoAlpha;
+                this.help.Text = "Normals";
             }
             this.bufferDrawer.Visible = true;
         }
@@ -791,20 +787,20 @@ namespace Deferred
         {
             var depthMap = this.Renderer.GetResource(SceneRendererResults.DepthMap);
 
-            if (this.bufferDrawer.Instance.Texture == depthMap &&
-                this.bufferDrawer.Instance.Channels == SpriteTextureChannels.NoAlpha)
+            if (this.bufferDrawer.Texture == depthMap &&
+                this.bufferDrawer.Channels == SpriteTextureChannels.NoAlpha)
             {
                 //Specular Factor
-                this.bufferDrawer.Instance.Texture = depthMap;
-                this.bufferDrawer.Instance.Channels = SpriteTextureChannels.Alpha;
-                this.help.Instance.Text = "Specular Intensity";
+                this.bufferDrawer.Texture = depthMap;
+                this.bufferDrawer.Channels = SpriteTextureChannels.Alpha;
+                this.help.Text = "Specular Intensity";
             }
             else
             {
                 //Position
-                this.bufferDrawer.Instance.Texture = depthMap;
-                this.bufferDrawer.Instance.Channels = SpriteTextureChannels.NoAlpha;
-                this.help.Instance.Text = "Position";
+                this.bufferDrawer.Texture = depthMap;
+                this.bufferDrawer.Channels = SpriteTextureChannels.NoAlpha;
+                this.help.Text = "Position";
             }
             this.bufferDrawer.Visible = true;
         }
@@ -815,16 +811,16 @@ namespace Deferred
             if (shadowMap != null)
             {
                 //Shadow map
-                if (!this.help.Instance.Text.StartsWith("Shadow map"))
+                if (!this.help.Text.StartsWith("Shadow map"))
                 {
-                    this.bufferDrawer.Instance.Texture = shadowMap;
-                    this.bufferDrawer.Instance.TextureIndex = 0;
-                    this.bufferDrawer.Instance.Channels = SpriteTextureChannels.Red;
+                    this.bufferDrawer.Texture = shadowMap;
+                    this.bufferDrawer.TextureIndex = 0;
+                    this.bufferDrawer.Channels = SpriteTextureChannels.Red;
                     this.bufferDrawer.Visible = true;
                 }
                 else
                 {
-                    int tIndex = this.bufferDrawer.Instance.TextureIndex;
+                    int tIndex = this.bufferDrawer.TextureIndex;
                     if (!shift)
                     {
                         tIndex++;
@@ -839,14 +835,14 @@ namespace Deferred
                         }
                     }
 
-                    this.bufferDrawer.Instance.TextureIndex = tIndex;
+                    this.bufferDrawer.TextureIndex = tIndex;
                 }
 
-                this.help.Instance.Text = string.Format("Shadow map {0}", this.bufferDrawer.Instance.TextureIndex);
+                this.help.Text = string.Format("Shadow map {0}", this.bufferDrawer.TextureIndex);
             }
             else
             {
-                this.help.Instance.Text = "The Shadow map is empty";
+                this.help.Text = "The Shadow map is empty";
             }
         }
         private void UpdateDebugLightMap()
@@ -856,32 +852,32 @@ namespace Deferred
             if (lightMap != null)
             {
                 //Light map
-                this.bufferDrawer.Instance.Texture = lightMap;
-                this.bufferDrawer.Instance.Channels = SpriteTextureChannels.NoAlpha;
+                this.bufferDrawer.Texture = lightMap;
+                this.bufferDrawer.Channels = SpriteTextureChannels.NoAlpha;
                 this.bufferDrawer.Visible = true;
-                this.help.Instance.Text = "Light map";
+                this.help.Text = "Light map";
             }
             else
             {
-                this.help.Instance.Text = "The Light map is empty";
+                this.help.Text = "The Light map is empty";
             }
         }
         private void UpdateDebugBufferDrawer()
         {
-            if (this.bufferDrawer.Instance.Manipulator.Position == Vector2.Zero)
+            if (this.bufferDrawer.Manipulator.Position == Vector2.Zero)
             {
                 int width = (int)(this.Game.Form.RenderWidth * 0.33f);
                 int height = (int)(this.Game.Form.RenderHeight * 0.33f);
                 int smLeft = this.Game.Form.RenderWidth - width;
                 int smTop = this.Game.Form.RenderHeight - height;
 
-                this.bufferDrawer.Instance.Manipulator.SetPosition(smLeft, smTop);
-                this.bufferDrawer.Instance.ResizeSprite(width, height);
+                this.bufferDrawer.Manipulator.SetPosition(smLeft, smTop);
+                this.bufferDrawer.ResizeSprite(width, height);
             }
             else
             {
-                this.bufferDrawer.Instance.Manipulator.SetPosition(Vector2.Zero);
-                this.bufferDrawer.Instance.ResizeSprite(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
+                this.bufferDrawer.Manipulator.SetPosition(Vector2.Zero);
+                this.bufferDrawer.ResizeSprite(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
             }
         }
 
@@ -891,10 +887,10 @@ namespace Deferred
 
             if (this.Game.Form.IsFullscreen)
             {
-                this.load.Instance.Text = this.Game.RuntimeText;
+                this.load.Text = this.Game.RuntimeText;
             }
 
-            this.title.Instance.Text = string.Format(
+            this.title.Text = string.Format(
                 this.titleMask,
                 this.GetRenderMode(),
                 this.Lights.DirectionalLights.Length,
@@ -904,21 +900,21 @@ namespace Deferred
 
             if (Counters.Statistics.Length == 0)
             {
-                this.statistics.Instance.Text = "No statistics";
+                this.statistics.Text = "No statistics";
             }
             else if (this.textIntex < 0)
             {
-                this.statistics.Instance.Text = "Press . for more statistics";
+                this.statistics.Text = "Press . for more statistics";
                 this.textIntex = -1;
             }
             else if (this.textIntex >= Counters.Statistics.Length)
             {
-                this.statistics.Instance.Text = "Press , for more statistics";
+                this.statistics.Text = "Press , for more statistics";
                 this.textIntex = Counters.Statistics.Length;
             }
             else
             {
-                this.statistics.Instance.Text = string.Format(
+                this.statistics.Text = string.Format(
                     "{0} - {1}",
                     Counters.Statistics[this.textIntex],
                     Counters.GetStatistics(this.textIntex));
@@ -931,12 +927,12 @@ namespace Deferred
             this.Lights.ClearSpotLights();
             this.spotLight = null;
 
-            this.Lights.AddRange(this.tankAgent1.Instance.Lights);
-            this.Lights.AddRange(this.tankAgent2.Instance.Lights);
-            this.Lights.AddRange(this.helicopter.Instance.Lights);
-            for (int i = 0; i < this.helicopters.Count; i++)
+            this.Lights.AddRange(this.tankAgent1.Lights);
+            this.Lights.AddRange(this.tankAgent2.Lights);
+            this.Lights.AddRange(this.helicopter.Lights);
+            for (int i = 0; i < this.helicopters.InstanceCount; i++)
             {
-                this.Lights.AddRange(this.helicopters.Instance[i].Lights);
+                this.Lights.AddRange(this.helicopters[i].Lights);
             }
 
             if (!modelsOnly)

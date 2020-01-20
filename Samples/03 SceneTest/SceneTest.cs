@@ -18,8 +18,8 @@ namespace SceneTest
         private readonly float baseHeight = 0.1f;
         private readonly float spaceSize = 40;
 
-        private SceneObject<Cursor> cursor = null;
-        private SceneObject<SpriteButton> butClose = null;
+        private Cursor cursor = null;
+        private SpriteButton butClose = null;
 
         private Sprite spr = null;
         private TextDrawer title = null;
@@ -59,7 +59,7 @@ namespace SceneTest
 
         private readonly Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
 
-        private SceneObject<PrimitiveListDrawer<Line3D>> lightsVolumeDrawer = null;
+        private PrimitiveListDrawer<Line3D> lightsVolumeDrawer = null;
         private bool drawDrawVolumes = false;
         private bool drawCullVolumes = false;
 
@@ -114,16 +114,13 @@ namespace SceneTest
                 Delta = new Vector2(-14, -6),
                 Color = Color.White,
             };
-            cursor = await this.AddComponent<Cursor>(cursorDesc, SceneObjectUsages.UI, 100);
+            cursor = await this.AddComponentCursor(cursorDesc, SceneObjectUsages.UI, 100);
             cursor.Visible = false;
         }
         private async Task InitializeTextBoxes()
         {
-            var titleObj = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White, Color.Orange), SceneObjectUsages.UI, layerHUD);
-            var runtimeObj = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 10, Color.Yellow, Color.Orange), SceneObjectUsages.UI, layerHUD);
-
-            this.title = titleObj.Instance;
-            this.runtime = runtimeObj.Instance;
+            this.title = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 18, Color.White, Color.Orange), SceneObjectUsages.UI, layerHUD);
+            this.runtime = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 10, Color.Yellow, Color.Orange), SceneObjectUsages.UI, layerHUD);
 
             this.title.Text = "Scene Test - Textures";
             this.runtime.Text = "";
@@ -139,12 +136,11 @@ namespace SceneTest
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            var sprObj = await this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
-            this.spr = sprObj.Instance;
+            this.spr = await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);
         }
         private async Task InitializeSpriteButtons()
         {
-            this.butClose = await this.AddComponent<SpriteButton>(new SpriteButtonDescription()
+            this.butClose = await this.AddComponentSpriteButton(new SpriteButtonDescription()
             {
                 TwoStateButton = true,
                 TextureReleased = "SceneTest/UI/button_off.png",
@@ -162,12 +158,12 @@ namespace SceneTest
                 Text = "Close",
             }, SceneObjectUsages.UI, layerHUD);
 
-            this.butClose.Instance.Click += (sender, eventArgs) => { this.Game.SetScene<SceneStart>(); };
+            this.butClose.Click += (sender, eventArgs) => { this.Game.SetScene<SceneStart>(); };
             this.butClose.Visible = false;
         }
         private async Task InitializeSkyEffects()
         {
-            await this.AddComponent<LensFlare>(new LensFlareDescription()
+            await this.AddComponentLensFlare(new LensFlareDescription()
             {
                 Name = "Flares",
                 ContentPath = @"Common/lensFlare",
@@ -189,9 +185,9 @@ namespace SceneTest
                 }
             });
 
-            await this.AddComponent<SkyScattering>(new SkyScatteringDescription() { Name = "Sky" });
+            await this.AddComponentSkyScattering(new SkyScatteringDescription() { Name = "Sky" });
 
-            var skyPlaneObj = await this.AddComponent<SkyPlane>(new SkyPlaneDescription()
+            this.skyPlane = await this.AddComponentSkyPlane(new SkyPlaneDescription()
             {
                 Name = "Clouds",
                 ContentPath = "SceneTest/sky",
@@ -199,12 +195,10 @@ namespace SceneTest
                 Texture2Name = "cloud001.dds",
                 SkyMode = SkyPlaneModes.Perturbed,
             });
-
-            this.skyPlane = skyPlaneObj.Instance;
         }
         private async Task InitializeScenery()
         {
-            await this.AddComponent<Scenery>(
+            await this.AddComponentScenery(
                 new GroundDescription()
                 {
                     Name = "Clif",
@@ -218,7 +212,7 @@ namespace SceneTest
         }
         private async Task InitializeTrees()
         {
-            var treeObj = await this.AddComponent<Model>(
+            var tree = await this.AddComponentModel(
                 new ModelDescription()
                 {
                     Name = "Tree",
@@ -233,11 +227,10 @@ namespace SceneTest
                     }
                 });
 
-            var tree = treeObj.Instance;
             tree.Manipulator.SetPosition(350, baseHeight, 350);
             tree.Manipulator.SetScale(2);
 
-            var treesObj = await this.AddComponent<ModelInstanced>(
+            var trees = await this.AddComponentModelInstanced(
                 new ModelInstancedDescription()
                 {
                     Name = "TreeI",
@@ -252,8 +245,6 @@ namespace SceneTest
                         ModelContentFilename = "Tree.xml",
                     }
                 });
-
-            var trees = treesObj.Instance;
 
             float r = 0;
             foreach (var t in trees.GetInstances())
@@ -325,11 +316,9 @@ namespace SceneTest
                 }
             };
 
-            await this.AddComponent<Model>(desc);
+            await this.AddComponentModel(desc);
 
-            var floorAsphaltIObj = await this.AddComponent<ModelInstanced>(descI);
-
-            this.floorAsphaltI = floorAsphaltIObj.Instance;
+            this.floorAsphaltI = await this.AddComponentModelInstanced(descI);
 
             this.floorAsphaltI[0].Manipulator.SetPosition(-l * 2, 0, 0);
             this.floorAsphaltI[1].Manipulator.SetPosition(l * 2, 0, 0);
@@ -343,7 +332,7 @@ namespace SceneTest
         }
         private async Task InitializeBuildingObelisk()
         {
-            var buildingObeliskObj = await this.AddComponent<Model>(
+            this.buildingObelisk = await this.AddComponentModel(
                 new ModelDescription()
                 {
                     Name = "Obelisk",
@@ -357,9 +346,7 @@ namespace SceneTest
                     }
                 });
 
-            this.buildingObelisk = buildingObeliskObj.Instance;
-
-            var buildingObeliskIObj = await this.AddComponent<ModelInstanced>(
+            this.buildingObeliskI = await this.AddComponentModelInstanced(
                 new ModelInstancedDescription()
                 {
                     Name = "ObeliskI",
@@ -373,8 +360,6 @@ namespace SceneTest
                         ModelContentFilename = "Obelisk.xml",
                     }
                 });
-
-            this.buildingObeliskI = buildingObeliskIObj.Instance;
 
             this.buildingObelisk.Manipulator.SetPosition(0, baseHeight, 0);
             this.buildingObelisk.Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
@@ -397,7 +382,7 @@ namespace SceneTest
         }
         private async Task InitializeCharacterSoldier()
         {
-            var characterSoldierObj = await this.AddComponent<Model>(
+            this.characterSoldier = await this.AddComponentModel(
                 new ModelDescription()
                 {
                     Name = "Soldier",
@@ -410,9 +395,7 @@ namespace SceneTest
                     }
                 });
 
-            this.characterSoldier = characterSoldierObj.Instance;
-
-            var characterSoldierIObj = await this.AddComponent<ModelInstanced>(
+            this.characterSoldierI = await this.AddComponentModelInstanced(
                 new ModelInstancedDescription()
                 {
                     Name = "SoldierI",
@@ -424,8 +407,6 @@ namespace SceneTest
                         ModelContentFilename = "soldier_anim2.xml",
                     }
                 });
-
-            this.characterSoldierI = characterSoldierIObj.Instance;
 
             float s = spaceSize / 2f;
 
@@ -460,7 +441,7 @@ namespace SceneTest
         }
         private async Task InitializeVehicles()
         {
-            var vehicleObj = await this.AddComponent<Model>(
+            this.vehicle = await this.AddComponentModel(
                 new ModelDescription()
                 {
                     Name = "Challenger",
@@ -473,9 +454,7 @@ namespace SceneTest
                     }
                 });
 
-            this.vehicle = vehicleObj.Instance;
-
-            var vehicleIObj = await this.AddComponent<ModelInstanced>(
+            this.vehicleI = await this.AddComponentModelInstanced(
                 new ModelInstancedDescription()
                 {
                     Name = "LeopardI",
@@ -488,8 +467,6 @@ namespace SceneTest
                         ModelContentFilename = "Leopard.xml",
                     }
                 });
-
-            this.vehicleI = vehicleIObj.Instance;
 
             float s = -spaceSize / 2f;
 
@@ -510,7 +487,7 @@ namespace SceneTest
 
             lights.AddRange(this.vehicle.Lights);
 
-            for (int i = 0; i < this.vehicleI.Count; i++)
+            for (int i = 0; i < this.vehicleI.InstanceCount; i++)
             {
                 lights.AddRange(this.vehicleI[i].Lights);
             }
@@ -519,7 +496,7 @@ namespace SceneTest
         }
         private async Task InitializeLamps()
         {
-            var lampObj = await this.AddComponent<Model>(
+            this.lamp = await this.AddComponentModel(
                 new ModelDescription()
                 {
                     Name = "Lamp",
@@ -532,9 +509,7 @@ namespace SceneTest
                     }
                 });
 
-            this.lamp = lampObj.Instance;
-
-            var lampIObj = await this.AddComponent<ModelInstanced>(
+            this.lampI = await this.AddComponentModelInstanced(
                 new ModelInstancedDescription()
                 {
                     Name = "LampI",
@@ -547,8 +522,6 @@ namespace SceneTest
                         ModelContentFilename = "lamp.xml",
                     }
                 });
-
-            this.lampI = lampIObj.Instance;
 
             float dist = 0.23f;
             float pitch = MathUtil.DegreesToRadians(165) * -1;
@@ -570,7 +543,7 @@ namespace SceneTest
 
             lights.AddRange(this.lamp.Lights);
 
-            for (int i = 0; i < this.lampI.Count; i++)
+            for (int i = 0; i < this.lampI.InstanceCount; i++)
             {
                 lights.AddRange(this.lampI[i].Lights);
             }
@@ -579,7 +552,7 @@ namespace SceneTest
         }
         private async Task InitializeStreetLamps()
         {
-            var streetlampObj = await this.AddComponent<Model>(
+            this.streetlamp = await this.AddComponentModel(
                 new ModelDescription()
                 {
                     Name = "Street Lamp",
@@ -592,9 +565,7 @@ namespace SceneTest
                     }
                 });
 
-            this.streetlamp = streetlampObj.Instance;
-
-            var streetlampIObj = await this.AddComponent<ModelInstanced>(
+            this.streetlampI = await this.AddComponentModelInstanced(
                 new ModelInstancedDescription()
                 {
                     Name = "Street LampI",
@@ -607,8 +578,6 @@ namespace SceneTest
                         ModelContentFilename = "streetlamp.xml",
                     }
                 });
-
-            this.streetlampI = streetlampIObj.Instance;
 
             this.streetlamp.Manipulator.SetPosition(-spaceSize, baseHeight, -spaceSize * -2f);
 
@@ -633,7 +602,7 @@ namespace SceneTest
 
             lights.AddRange(this.streetlamp.Lights);
 
-            for (int i = 0; i < this.streetlampI.Count; i++)
+            for (int i = 0; i < this.streetlampI.InstanceCount; i++)
             {
                 lights.AddRange(this.streetlampI[i].Lights);
             }
@@ -642,7 +611,7 @@ namespace SceneTest
         }
         private async Task InitializeContainers()
         {
-            var containerObj = await this.AddComponent<Model>(
+            this.container = await this.AddComponentModel(
                 new ModelDescription()
                 {
                     Name = "Container",
@@ -655,9 +624,7 @@ namespace SceneTest
                     }
                 });
 
-            this.container = containerObj.Instance;
-
-            var containerIObj = await this.AddComponent<ModelInstanced>(
+            this.containerI = await this.AddComponentModelInstanced(
                 new ModelInstancedDescription()
                 {
                     Name = "ContainerI",
@@ -671,8 +638,6 @@ namespace SceneTest
                     }
                 });
 
-            this.containerI = containerIObj.Instance;
-
             float s = -spaceSize / 2f;
 
             Random prnd = new Random(1000);
@@ -684,7 +649,7 @@ namespace SceneTest
             this.container.Manipulator.SetPosition(s + 12, baseHeight, 30);
             this.container.Manipulator.SetRotation(MathUtil.PiOverTwo * 2.1f, 0, 0);
 
-            for (int i = 0; i < this.containerI.Count; i++)
+            for (int i = 0; i < this.containerI.InstanceCount; i++)
             {
                 uint textureIndex = (uint)prnd.Next(0, 6);
                 textureIndex %= 5;
@@ -729,7 +694,7 @@ namespace SceneTest
                 DepthEnabled = true,
             };
 
-            await this.AddComponent<PrimitiveListDrawer<Triangle>>(desc);
+            await this.AddComponentPrimitiveListDrawer<Triangle>(desc);
         }
         private async Task InitializeParticles()
         {
@@ -747,8 +712,7 @@ namespace SceneTest
             this.pDescriptions.Add("Explosion", pExplosion);
             this.pDescriptions.Add("SmokeExplosion", pSmokeExplosion);
 
-            var pManagerObj = await this.AddComponent<ParticleManager>(new ParticleManagerDescription() { Name = "Particle Manager" });
-            this.pManager = pManagerObj.Instance;
+            this.pManager = await this.AddComponentParticleManager(new ParticleManagerDescription() { Name = "Particle Manager" });
 
             float d = 500;
             var positions = new Vector3[]
@@ -788,12 +752,12 @@ namespace SceneTest
                 DepthEnabled = false,
                 AlphaEnabled = true,
             };
-            await this.AddComponent<PrimitiveListDrawer<Triangle>>(desc);
+            await this.AddComponentPrimitiveListDrawer<Triangle>(desc);
         }
         private async Task InitializaDebug()
         {
             var desc = new PrimitiveListDrawerDescription<Line3D>() { DepthEnabled = true, Count = 20000 };
-            this.lightsVolumeDrawer = await this.AddComponent<PrimitiveListDrawer<Line3D>>(desc);
+            this.lightsVolumeDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(desc);
         }
 
         public override async Task Initialized()
@@ -812,8 +776,8 @@ namespace SceneTest
             this.spr.Width = this.Game.Form.RenderWidth;
             this.spr.Height = this.runtime.Top + this.runtime.Height + 3;
 
-            this.butClose.Instance.Top = 1;
-            this.butClose.Instance.Left = this.Game.Form.RenderWidth - this.butClose.Instance.Width - 1;
+            this.butClose.Top = 1;
+            this.butClose.Left = this.Game.Form.RenderWidth - this.butClose.Width - 1;
         }
 
         public override void Update(GameTime gameTime)
@@ -909,48 +873,48 @@ namespace SceneTest
         }
         private void UpdateLightDrawingVolumes()
         {
-            this.lightsVolumeDrawer.Instance.Clear();
+            this.lightsVolumeDrawer.Clear();
 
             foreach (var spot in this.Lights.SpotLights)
             {
                 var lines = spot.GetVolume(10);
 
-                this.lightsVolumeDrawer.Instance.AddPrimitives(new Color4(spot.DiffuseColor.RGB(), 0.15f), lines);
+                this.lightsVolumeDrawer.AddPrimitives(new Color4(spot.DiffuseColor.RGB(), 0.15f), lines);
             }
 
             foreach (var point in this.Lights.PointLights)
             {
                 var lines = point.GetVolume(12, 5);
 
-                this.lightsVolumeDrawer.Instance.AddPrimitives(new Color4(point.DiffuseColor.RGB(), 0.15f), lines);
+                this.lightsVolumeDrawer.AddPrimitives(new Color4(point.DiffuseColor.RGB(), 0.15f), lines);
             }
 
             var pLines = new List<Line3D>();
-            var count = this.pManager.Count;
+            var count = this.pManager.SystemsCount;
             for (int i = 0; i < count; i++)
             {
                 pLines.AddRange(Line3D.CreateWiredBox(this.pManager.GetParticleSystem(i).Emitter.GetBoundingBox()));
             }
-            this.lightsVolumeDrawer.Instance.AddPrimitives(new Color4(0, 0, 1, 0.75f), pLines);
+            this.lightsVolumeDrawer.AddPrimitives(new Color4(0, 0, 1, 0.75f), pLines);
 
             this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = true;
         }
         private void UpdateLightCullingVolumes()
         {
-            this.lightsVolumeDrawer.Instance.Clear();
+            this.lightsVolumeDrawer.Clear();
 
             foreach (var spot in this.Lights.SpotLights)
             {
                 var lines = Line3D.CreateWiredSphere(spot.BoundingSphere, 12, 5);
 
-                this.lightsVolumeDrawer.Instance.AddPrimitives(new Color4(Color.Red.RGB(), 0.55f), lines);
+                this.lightsVolumeDrawer.AddPrimitives(new Color4(Color.Red.RGB(), 0.55f), lines);
             }
 
             foreach (var point in this.Lights.PointLights)
             {
                 var lines = Line3D.CreateWiredSphere(point.BoundingSphere, 12, 5);
 
-                this.lightsVolumeDrawer.Instance.AddPrimitives(new Color4(Color.Red.RGB(), 0.55f), lines);
+                this.lightsVolumeDrawer.AddPrimitives(new Color4(Color.Red.RGB(), 0.55f), lines);
             }
 
             this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = true;

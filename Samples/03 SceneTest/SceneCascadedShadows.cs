@@ -16,7 +16,7 @@ namespace SceneTest
 
         private ModelInstanced buildingObelisks = null;
 
-        private SceneObject<SpriteTexture> bufferDrawer = null;
+        private SpriteTexture bufferDrawer = null;
 
         /// <summary>
         /// Constructor
@@ -90,7 +90,7 @@ namespace SceneTest
                 }
             };
 
-            await this.AddComponent<Model>(desc);
+            await this.AddComponentModel(desc);
         }
         private async Task InitializeBuildingObelisk()
         {
@@ -107,7 +107,7 @@ namespace SceneTest
                 }
             };
 
-            this.buildingObelisks = (await this.AddComponent<ModelInstanced>(desc)).Instance;
+            this.buildingObelisks = await this.AddComponentModelInstanced(desc);
         }
         private async Task InitializeTree()
         {
@@ -124,11 +124,11 @@ namespace SceneTest
                 }
             };
 
-            await this.AddComponent<Model>(desc);
+            await this.AddComponentModel(desc);
         }
         private async Task InitializeSkyEffects()
         {
-            await this.AddComponent<LensFlare>(new LensFlareDescription()
+            await this.AddComponentLensFlare(new LensFlareDescription()
             {
                 ContentPath = @"Common/lensFlare",
                 GlowTexture = "lfGlow.png",
@@ -175,7 +175,7 @@ namespace SceneTest
                 Height = height,
                 Channel = SpriteTextureChannels.NoAlpha,
             };
-            this.bufferDrawer = await this.AddComponent<SpriteTexture>(desc, SceneObjectUsages.UI, layerEffects);
+            this.bufferDrawer = await this.AddComponentSpriteTexture(desc, SceneObjectUsages.UI, layerEffects);
             this.bufferDrawer.Visible = false;
         }
 
@@ -255,29 +255,28 @@ namespace SceneTest
                 var shadowMap = this.Renderer.GetResource(SceneRendererResults.ShadowMapDirectional);
                 if (shadowMap != null)
                 {
-                    this.bufferDrawer.Instance.Texture = shadowMap;
-                    this.bufferDrawer.Instance.TextureIndex = 0;
-                    this.bufferDrawer.Instance.Channels = SpriteTextureChannels.Red;
+                    this.bufferDrawer.Texture = shadowMap;
+                    this.bufferDrawer.TextureIndex = 0;
+                    this.bufferDrawer.Channels = SpriteTextureChannels.Red;
                     this.bufferDrawer.Visible = true;
                 }
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.Add))
             {
-                int tIndex = this.bufferDrawer.Instance.TextureIndex + 1;
+                int tIndex = this.bufferDrawer.TextureIndex + 1;
                 tIndex %= 3;
-                this.bufferDrawer.Instance.TextureIndex = tIndex;
+                this.bufferDrawer.TextureIndex = tIndex;
             }
             else if (this.Game.Input.KeyJustReleased(Keys.Subtract))
             {
-                int tIndex = this.bufferDrawer.Instance.TextureIndex - 1;
+                int tIndex = this.bufferDrawer.TextureIndex - 1;
                 if (tIndex < 0)
                 {
                     tIndex = 2;
                 }
-                this.bufferDrawer.Instance.TextureIndex = tIndex;
+                this.bufferDrawer.TextureIndex = tIndex;
             }
-
         }
     }
 }

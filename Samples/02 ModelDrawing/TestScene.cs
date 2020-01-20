@@ -12,10 +12,10 @@ namespace ModelDrawing
         private const int layerHUD = 99;
         private const int layerEffects = 2;
 
-        private SceneObject<TextDrawer> text = null;
-        private SceneObject<TextDrawer> statistics = null;
-        private SceneObject<TextDrawer> text1 = null;
-        private SceneObject<TextDrawer> text2 = null;
+        private TextDrawer text = null;
+        private TextDrawer statistics = null;
+        private TextDrawer text1 = null;
+        private TextDrawer text2 = null;
 
         private ParticleSystemDescription pPlume = null;
         private ParticleSystemDescription pFire = null;
@@ -24,8 +24,8 @@ namespace ModelDrawing
         private ParticleSystemDescription pExplosion = null;
         private ParticleSystemDescription pSmokeExplosion = null;
 
-        private SceneObject<ParticleManager> pManager = null;
-        private SceneObject<PrimitiveListDrawer<Line3D>> pManagerLineDrawer = null;
+        private ParticleManager pManager = null;
+        private PrimitiveListDrawer<Line3D> pManagerLineDrawer = null;
 
         public TestScene(Game game)
             : base(game, SceneModes.ForwardLigthning)
@@ -49,29 +49,29 @@ namespace ModelDrawing
         }
         private async Task InitializeTexts()
         {
-            this.text = await this.AddComponent<TextDrawer>(new TextDrawerDescription() { Font = "Arial", FontSize = 20, TextColor = Color.Yellow, ShadowColor = Color.OrangeRed }, SceneObjectUsages.UI, layerHUD);
-            this.statistics = await this.AddComponent<TextDrawer>(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue }, SceneObjectUsages.UI, layerHUD);
-            this.text1 = await this.AddComponent<TextDrawer>(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue }, SceneObjectUsages.UI, layerHUD);
-            this.text2 = await this.AddComponent<TextDrawer>(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue }, SceneObjectUsages.UI, layerHUD);
+            this.text = await this.AddComponentTextDrawer(new TextDrawerDescription() { Font = "Arial", FontSize = 20, TextColor = Color.Yellow, ShadowColor = Color.OrangeRed }, SceneObjectUsages.UI, layerHUD);
+            this.statistics = await this.AddComponentTextDrawer(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue }, SceneObjectUsages.UI, layerHUD);
+            this.text1 = await this.AddComponentTextDrawer(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue }, SceneObjectUsages.UI, layerHUD);
+            this.text2 = await this.AddComponentTextDrawer(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue }, SceneObjectUsages.UI, layerHUD);
 
-            this.text.Instance.Position = Vector2.One;
-            this.statistics.Instance.Position = Vector2.One;
-            this.text1.Instance.Position = Vector2.One;
-            this.text2.Instance.Position = Vector2.One;
+            this.text.Position = Vector2.One;
+            this.statistics.Position = Vector2.One;
+            this.text1.Position = Vector2.One;
+            this.text2.Position = Vector2.One;
 
-            this.statistics.Instance.Top = this.text.Instance.Top + this.text.Instance.Height + 5;
-            this.text1.Instance.Top = this.statistics.Instance.Top + this.statistics.Instance.Height + 5;
-            this.text2.Instance.Top = this.text1.Instance.Top + this.text1.Instance.Height + 5;
+            this.statistics.Top = this.text.Top + this.text.Height + 5;
+            this.text1.Top = this.statistics.Top + this.statistics.Height + 5;
+            this.text2.Top = this.text1.Top + this.text1.Height + 5;
 
             var spDesc = new SpriteDescription()
             {
                 AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
-                Height = this.text2.Instance.Top + this.text2.Instance.Height + 3,
+                Height = this.text2.Top + this.text2.Height + 3,
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            await this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);
         }
         private async Task InitializeFloor()
         {
@@ -107,7 +107,7 @@ namespace ModelDrawing
                 }
             };
 
-            await this.AddComponent<Model>(desc, SceneObjectUsages.Ground);
+            await this.AddComponentModel(desc, SceneObjectUsages.Ground);
         }
         private async Task InitializeModels()
         {
@@ -118,7 +118,7 @@ namespace ModelDrawing
             this.pExplosion = ParticleSystemDescription.InitializeExplosion("resources", "fire.png");
             this.pSmokeExplosion = ParticleSystemDescription.InitializeExplosion("resources", "smoke.png");
 
-            this.pManager = await this.AddComponent<ParticleManager>(new ParticleManagerDescription());
+            this.pManager = await this.AddComponentParticleManager(new ParticleManagerDescription());
         }
         private async Task InitializeParticleVolumeDrawer()
         {
@@ -127,7 +127,7 @@ namespace ModelDrawing
                 Count = 20000,
                 DepthEnabled = true,
             };
-            this.pManagerLineDrawer = await this.AddComponent<PrimitiveListDrawer<Line3D>>(desc, SceneObjectUsages.None, layerEffects);
+            this.pManagerLineDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(desc, SceneObjectUsages.None, layerEffects);
             this.pManagerLineDrawer.Visible = true;
         }
 
@@ -224,7 +224,7 @@ namespace ModelDrawing
 
             if (this.Game.Input.KeyJustPressed(Keys.Space))
             {
-                this.pManager.Instance.Clear();
+                this.pManager.Clear();
             }
         }
         private void AddSystem()
@@ -275,8 +275,8 @@ namespace ModelDrawing
                 MaximumDistance = 100f,
             };
 
-            this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pExplosion, emitter1);
-            this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pSmokeExplosion, emitter2);
+            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pExplosion, emitter1);
+            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pSmokeExplosion, emitter2);
         }
         private void AddProjectileTrailSystem()
         {
@@ -289,7 +289,7 @@ namespace ModelDrawing
                 MaximumDistance = 100f,
             };
 
-            this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pProjectile, emitter);
+            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pProjectile, emitter);
         }
         private void AddDustSystem()
         {
@@ -302,7 +302,7 @@ namespace ModelDrawing
                 MaximumDistance = 250f,
             };
 
-            this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pDust, emitter);
+            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pDust, emitter);
         }
         private void AddSmokePlumeSystem()
         {
@@ -331,8 +331,8 @@ namespace ModelDrawing
                 MaximumDistance = 500f,
             };
 
-            this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pFire, emitter1);
-            this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, emitter2);
+            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pFire, emitter1);
+            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, emitter2);
         }
         private void AddSmokePlumeSystemGPU(Vector3 positionCPU, Vector3 positionGPU)
         {
@@ -379,11 +379,11 @@ namespace ModelDrawing
                 MaximumDistance = 500f,
             };
 
-            this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pFire, emitter11);
-            this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.GPU, this.pFire, emitter12);
+            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pFire, emitter11);
+            this.pManager.AddParticleSystem(ParticleSystemTypes.GPU, this.pFire, emitter12);
 
-            this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, emitter21);
-            this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.GPU, this.pPlume, emitter22);
+            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, emitter21);
+            this.pManager.AddParticleSystem(ParticleSystemTypes.GPU, this.pPlume, emitter22);
         }
         private void AddSmokePlumeSystemWithWind(Vector3 wind, float force)
         {
@@ -396,7 +396,7 @@ namespace ModelDrawing
                 MaximumDistance = 1000f,
             };
 
-            var pSystem = this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, emitter);
+            var pSystem = this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, emitter);
 
             var parameters = pSystem.GetParameters();
 
@@ -410,26 +410,26 @@ namespace ModelDrawing
         {
             lines.Clear();
 
-            var count = this.pManager.Instance.Count;
+            var count = this.pManager.SystemsCount;
             for (int i = 0; i < count; i++)
             {
-                lines.AddRange(Line3D.CreateWiredBox(this.pManager.Instance.GetParticleSystem(i).Emitter.GetBoundingBox()));
+                lines.AddRange(Line3D.CreateWiredBox(this.pManager.GetParticleSystem(i).Emitter.GetBoundingBox()));
             }
 
-            this.pManagerLineDrawer.Instance.SetPrimitives(Color.Red, lines.ToArray());
+            this.pManagerLineDrawer.SetPrimitives(Color.Red, lines.ToArray());
         }
 
         public override void Draw(GameTime gameTime)
         {
             base.Draw(gameTime);
 
-            var particle1 = this.pManager.Instance.GetParticleSystem(0);
-            var particle2 = this.pManager.Instance.GetParticleSystem(1);
+            var particle1 = this.pManager.GetParticleSystem(0);
+            var particle2 = this.pManager.GetParticleSystem(1);
 
-            this.text.Instance.Text = "Model Drawing";
-            this.statistics.Instance.Text = this.Game.RuntimeText;
-            this.text1.Instance.Text = string.Format("P1 - {0}", particle1);
-            this.text2.Instance.Text = string.Format("P2 - {0}", particle2);
+            this.text.Text = "Model Drawing";
+            this.statistics.Text = this.Game.RuntimeText;
+            this.text1.Text = string.Format("P1 - {0}", particle1);
+            this.text2.Text = string.Format("P2 - {0}", particle2);
         }
     }
 }

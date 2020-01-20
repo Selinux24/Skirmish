@@ -21,8 +21,8 @@ namespace Collada
 
         private const float maxDistance = 35;
 
-        private SceneObject<TextDrawer> fps = null;
-        private SceneObject<TextDrawer> info = null;
+        private TextDrawer fps = null;
+        private TextDrawer info = null;
 
         private readonly Color ambientDown = new Color(127, 127, 127, 255);
         private readonly Color ambientUp = new Color(137, 116, 104, 255);
@@ -35,9 +35,9 @@ namespace Collada
         private ModularScenery scenery = null;
 
         private readonly float doorDistance = 3f;
-        private SceneObject<TextDrawer> messages = null;
+        private TextDrawer messages = null;
 
-        private SceneObject<Model> rat = null;
+        private Model rat = null;
         private BasicManipulatorController ratController = null;
         private Player ratAgentType = null;
         private bool ratActive = false;
@@ -45,16 +45,16 @@ namespace Collada
         private readonly float nextRatTime = 3f;
         private Vector3[] ratHoles = null;
 
-        private SceneObject<PrimitiveListDrawer<Triangle>> selectedItemDrawer = null;
+        private PrimitiveListDrawer<Triangle> selectedItemDrawer = null;
         private ModularSceneryItem selectedItem = null;
 
-        private SceneObject<ModelInstanced> human = null;
+        private ModelInstanced human = null;
 
-        private SceneObject<PrimitiveListDrawer<Line3D>> bboxesDrawer = null;
-        private SceneObject<PrimitiveListDrawer<Line3D>> ratDrawer = null;
-        private SceneObject<PrimitiveListDrawer<Triangle>> graphDrawer = null;
-        private SceneObject<PrimitiveListDrawer<Triangle>> obstacleDrawer = null;
-        private SceneObject<PrimitiveListDrawer<Line3D>> connectionDrawer = null;
+        private PrimitiveListDrawer<Line3D> bboxesDrawer = null;
+        private PrimitiveListDrawer<Line3D> ratDrawer = null;
+        private PrimitiveListDrawer<Triangle> graphDrawer = null;
+        private PrimitiveListDrawer<Triangle> obstacleDrawer = null;
+        private PrimitiveListDrawer<Line3D> connectionDrawer = null;
         private int currentGraph = 0;
 
         private readonly string nmFile = "nm.graph";
@@ -176,31 +176,31 @@ namespace Collada
         }
         private async Task InitializeUI()
         {
-            var title = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
-            title.Instance.Text = "Collada Modular Dungeon Scene";
-            title.Instance.Position = Vector2.Zero;
+            var title = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
+            title.Text = "Collada Modular Dungeon Scene";
+            title.Position = Vector2.Zero;
 
-            this.fps = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            this.fps.Instance.Text = null;
-            this.fps.Instance.Position = new Vector2(0, 24);
+            this.fps = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.fps.Text = null;
+            this.fps.Position = new Vector2(0, 24);
 
-            this.info = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            this.info.Instance.Text = null;
-            this.info.Instance.Position = new Vector2(0, 48);
+            this.info = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.info.Text = null;
+            this.info.Position = new Vector2(0, 48);
 
             var spDesc = new SpriteDescription()
             {
                 AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
-                Height = this.info.Instance.Top + this.info.Instance.Height + 3,
+                Height = this.info.Top + this.info.Height + 3,
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            await this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);
 
-            this.messages = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 48, Color.Red, Color.DarkRed), SceneObjectUsages.UI, layerHUD);
-            this.messages.Instance.Text = null;
-            this.messages.Instance.Position = new Vector2(0, 0);
+            this.messages = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 48, Color.Red, Color.DarkRed), SceneObjectUsages.UI, layerHUD);
+            this.messages.Text = null;
+            this.messages.Position = new Vector2(0, 0);
             this.messages.Visible = false;
 
             var drawerDesc = new PrimitiveListDrawerDescription<Triangle>()
@@ -210,7 +210,7 @@ namespace Collada
                 CastShadow = false,
                 Count = 50000,
             };
-            this.selectedItemDrawer = await this.AddComponent<PrimitiveListDrawer<Triangle>>(drawerDesc, SceneObjectUsages.UI, layerHUD);
+            this.selectedItemDrawer = await this.AddComponentPrimitiveListDrawer<Triangle>(drawerDesc, SceneObjectUsages.UI, layerHUD);
             this.selectedItemDrawer.Visible = true;
         }
         private async Task InitializeModularScenery()
@@ -230,12 +230,10 @@ namespace Collada
                 LevelsFile = "levels.xml",
             };
 
-            var sceneryObject = await this.AddComponent<ModularScenery>(desc, SceneObjectUsages.Ground);
-
-            this.scenery = sceneryObject.Instance;
+            this.scenery = await this.AddComponentModularScenery(desc, SceneObjectUsages.Ground);
             this.scenery.TriggerEnd += TriggerEnds;
 
-            this.SetGround(sceneryObject, true);
+            this.SetGround(this.scenery, true);
         }
         private async Task InitializePlayer()
         {
@@ -254,7 +252,7 @@ namespace Collada
         }
         private async Task InitializeRat()
         {
-            this.rat = await this.AddComponent<Model>(
+            this.rat = await this.AddComponentModel(
                 new ModelDescription()
                 {
                     TextureIndex = 0,
@@ -278,8 +276,8 @@ namespace Collada
                 VelocitySlow = 1f,
             };
 
-            this.rat.Instance.Manipulator.SetScale(0.5f, true);
-            this.rat.Instance.Manipulator.SetPosition(0, 0, 0, true);
+            this.rat.Manipulator.SetScale(0.5f, true);
+            this.rat.Manipulator.SetPosition(0, 0, 0, true);
             this.rat.Visible = false;
 
             var ratPaths = new Dictionary<string, AnimationPlan>();
@@ -289,12 +287,12 @@ namespace Collada
             p0.AddLoop("walk");
             ratPaths.Add("walk", new AnimationPlan(p0));
 
-            this.rat.Instance.AnimationController.AddPath(ratPaths["walk"]);
-            this.rat.Instance.AnimationController.TimeDelta = 1.5f;
+            this.rat.AnimationController.AddPath(ratPaths["walk"]);
+            this.rat.AnimationController.TimeDelta = 1.5f;
         }
         private async Task InitializeHuman()
         {
-            this.human = await this.AddComponent<ModelInstanced>(
+            this.human = await this.AddComponentModelInstanced(
                 new ModelInstancedDescription()
                 {
                     CastShadow = true,
@@ -310,14 +308,14 @@ namespace Collada
             AnimationPath p0 = new AnimationPath();
             p0.AddLoop("stand");
 
-            for (int i = 0; i < this.human.Count; i++)
+            for (int i = 0; i < this.human.InstanceCount; i++)
             {
-                this.human.Instance[i].Manipulator.SetPosition(31, 0, i == 0 ? -31 : -29, true);
-                this.human.Instance[i].Manipulator.SetRotation(-MathUtil.PiOverTwo, 0, 0, true);
+                this.human[i].Manipulator.SetPosition(31, 0, i == 0 ? -31 : -29, true);
+                this.human[i].Manipulator.SetRotation(-MathUtil.PiOverTwo, 0, 0, true);
 
-                this.human.Instance[i].AnimationController.AddPath(new AnimationPlan(p0));
-                this.human.Instance[i].AnimationController.Start(i * 1f);
-                this.human.Instance[i].AnimationController.TimeDelta = 0.5f + (i * 0.1f);
+                this.human[i].AnimationController.AddPath(new AnimationPlan(p0));
+                this.human[i].AnimationController.Start(i * 1f);
+                this.human[i].AnimationController.TimeDelta = 0.5f + (i * 0.1f);
             }
         }
         private async Task InitializeDebug()
@@ -328,7 +326,7 @@ namespace Collada
                 AlphaEnabled = true,
                 Count = 50000,
             };
-            this.graphDrawer = await this.AddComponent<PrimitiveListDrawer<Triangle>>(graphDrawerDesc);
+            this.graphDrawer = await this.AddComponentPrimitiveListDrawer<Triangle>(graphDrawerDesc);
             this.graphDrawer.Visible = false;
 
             var bboxesDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
@@ -338,7 +336,7 @@ namespace Collada
                 Color = new Color4(1.0f, 0.0f, 0.0f, 0.25f),
                 Count = 10000,
             };
-            this.bboxesDrawer = await this.AddComponent<PrimitiveListDrawer<Line3D>>(bboxesDrawerDesc);
+            this.bboxesDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(bboxesDrawerDesc);
             this.bboxesDrawer.Visible = false;
 
             var ratDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
@@ -348,7 +346,7 @@ namespace Collada
                 Color = new Color4(0.0f, 1.0f, 1.0f, 0.25f),
                 Count = 10000,
             };
-            this.ratDrawer = await this.AddComponent<PrimitiveListDrawer<Line3D>>(ratDrawerDesc);
+            this.ratDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(ratDrawerDesc);
             this.ratDrawer.Visible = false;
 
             var obstacleDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
@@ -358,7 +356,7 @@ namespace Collada
                 DepthEnabled = false,
                 Count = 10000,
             };
-            this.obstacleDrawer = await this.AddComponent<PrimitiveListDrawer<Triangle>>(obstacleDrawerDesc);
+            this.obstacleDrawer = await this.AddComponentPrimitiveListDrawer<Triangle>(obstacleDrawerDesc);
             this.obstacleDrawer.Visible = false;
 
             var connectionDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
@@ -368,7 +366,7 @@ namespace Collada
                 Color = connectionColor,
                 Count = 10000,
             };
-            this.connectionDrawer = await this.AddComponent<PrimitiveListDrawer<Line3D>>(connectionDrawerDesc);
+            this.connectionDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(connectionDrawerDesc);
             this.connectionDrawer.Visible = false;
         }
         private async Task InitializeAudio()
@@ -496,7 +494,7 @@ namespace Collada
             //Graph
             this.currentGraph++;
 
-            this.bboxesDrawer.Instance.Clear();
+            this.bboxesDrawer.Clear();
 
             //Boxes
             Random rndBoxes = new Random(1);
@@ -508,7 +506,7 @@ namespace Collada
                 var color = rndBoxes.NextColor().ToColor4();
                 color.Alpha = 0.40f;
 
-                this.bboxesDrawer.Instance.SetPrimitives(color, Line3D.CreateWiredBox(item.ToArray()));
+                this.bboxesDrawer.SetPrimitives(color, Line3D.CreateWiredBox(item.ToArray()));
             }
 
             //Objects
@@ -529,7 +527,7 @@ namespace Collada
                 lines.AddRange(Line3D.CreateWiredBox(bbox));
             }
 
-            this.bboxesDrawer.Instance.SetPrimitives(color, lines);
+            this.bboxesDrawer.SetPrimitives(color, lines);
         }
         private void TriggerEnds(object sender, ModularSceneryTriggerEventArgs e)
         {
@@ -555,8 +553,8 @@ namespace Collada
                     SceneModes.ForwardLigthning);
             }
 
-            this.fps.Instance.Text = this.Game.RuntimeText;
-            this.info.Instance.Text = string.Format("{0}", this.GetRenderMode());
+            this.fps.Text = this.Game.RuntimeText;
+            this.info.Text = string.Format("{0}", this.GetRenderMode());
 
             if (!gameRuning)
             {
@@ -675,7 +673,7 @@ namespace Collada
                 //Frustum
                 var frustum = Line3D.CreateWiredFrustum(this.Camera.Frustum);
 
-                this.bboxesDrawer.Instance.SetPrimitives(Color.White, frustum);
+                this.bboxesDrawer.SetPrimitives(Color.White, frustum);
             }
         }
         private void UpdateGraphInput()
@@ -754,7 +752,7 @@ namespace Collada
                 Color4 sItemColor = Color.LightYellow;
                 sItemColor.Alpha = 0.3333f;
 
-                this.selectedItemDrawer.Instance.SetPrimitives(sItemColor, tris);
+                this.selectedItemDrawer.SetPrimitives(sItemColor, tris);
             }
         }
         private void UpdateRatController(GameTime gameTime)
@@ -763,7 +761,7 @@ namespace Collada
 
             if (this.ratActive)
             {
-                this.ratController.UpdateManipulator(gameTime, this.rat.Instance.Manipulator);
+                this.ratController.UpdateManipulator(gameTime, this.rat.Manipulator);
                 if (!this.ratController.HasPath)
                 {
                     this.ratActive = false;
@@ -787,7 +785,7 @@ namespace Collada
 
                 if (CalcPath(this.ratAgentType, from, to))
                 {
-                    this.ratController.UpdateManipulator(gameTime, this.rat.Instance.Manipulator);
+                    this.ratController.UpdateManipulator(gameTime, this.rat.Manipulator);
 
                     this.ratSoundInstance?.Play();
                     this.RatTalkPlay();
@@ -796,9 +794,9 @@ namespace Collada
 
             if (this.rat.Visible && this.ratDrawer.Visible)
             {
-                var bbox = this.rat.Instance.GetBoundingBox();
+                var bbox = this.rat.GetBoundingBox();
 
-                this.ratDrawer.Instance.SetPrimitives(Color.White, Line3D.CreateWiredBox(bbox));
+                this.ratDrawer.SetPrimitives(Color.White, Line3D.CreateWiredBox(bbox));
             }
         }
         private bool CalcPath(AgentType agent, Vector3 from, Vector3 to)
@@ -812,12 +810,12 @@ namespace Collada
                 path.ReturnPath.Add(to);
                 path.Normals.Add(Vector3.Up);
 
-                this.ratDrawer.Instance.SetPrimitives(Color.Red, Line3D.CreateLineList(path.ReturnPath.ToArray()));
+                this.ratDrawer.SetPrimitives(Color.Red, Line3D.CreateLineList(path.ReturnPath.ToArray()));
 
                 this.ratController.Follow(new NormalPath(path.ReturnPath.ToArray(), path.Normals.ToArray()));
                 this.ratController.MaximumSpeed = this.ratAgentType.Velocity;
                 this.rat.Visible = true;
-                this.rat.Instance.AnimationController.Start(0);
+                this.rat.AnimationController.Start(0);
 
                 this.ratActive = true;
                 this.ratTime = this.nextRatTime;
@@ -912,7 +910,7 @@ namespace Collada
 
             if (item == null)
             {
-                this.selectedItemDrawer.Instance.Clear();
+                this.selectedItemDrawer.Clear();
 
                 PrepareMessage(false, null);
 
@@ -971,19 +969,19 @@ namespace Collada
         {
             if (show)
             {
-                if (messages.Instance.Text != text)
+                if (messages.Text != text)
                 {
-                    messages.Instance.Text = text;
-                    messages.Instance.CenterHorizontally();
-                    messages.Instance.CenterVertically();
+                    messages.Text = text;
+                    messages.CenterHorizontally();
+                    messages.CenterVertically();
                     messages.Visible = true;
                 }
             }
             else
             {
-                if (messages.Instance.Text != text)
+                if (messages.Text != text)
                 {
-                    messages.Instance.Text = text;
+                    messages.Text = text;
                     messages.Visible = false;
                 }
             }
@@ -1056,9 +1054,9 @@ namespace Collada
                     }
                 }
 
-                messages.Instance.Text = string.Format("Press space to {0} the light...", enabled ? "turn off" : "turn on");
-                messages.Instance.CenterHorizontally();
-                messages.Instance.CenterVertically();
+                messages.Text = string.Format("Press space to {0} the light...", enabled ? "turn off" : "turn on");
+                messages.CenterHorizontally();
+                messages.CenterVertically();
             }
         }
 
@@ -1141,13 +1139,13 @@ namespace Collada
             pos.Y += agent.Height;
             this.Camera.Position = pos;
             this.Camera.Interest = pos + dir;
-      
+
             gameRuning = true;
         }
 
         private void PaintObstacles()
         {
-            this.obstacleDrawer.Instance.Clear(obstacleColor);
+            this.obstacleDrawer.Clear(obstacleColor);
 
             foreach (var item in obstacles)
             {
@@ -1170,28 +1168,28 @@ namespace Collada
 
                 if (obstacleTris?.Any() == true)
                 {
-                    this.obstacleDrawer.Instance.AddPrimitives(obstacleColor, obstacleTris);
+                    this.obstacleDrawer.AddPrimitives(obstacleColor, obstacleTris);
                 }
             }
         }
         private void PaintConnections()
         {
-            this.connectionDrawer.Instance.Clear(connectionColor);
+            this.connectionDrawer.Clear(connectionColor);
 
             var conns = this.PathFinderDescription.Input.GetConnections();
 
             foreach (var conn in conns)
             {
                 var arclines = Line3D.CreateArc(conn.Start, conn.End, 0.25f, 8);
-                this.connectionDrawer.Instance.AddPrimitives(connectionColor, arclines);
+                this.connectionDrawer.AddPrimitives(connectionColor, arclines);
 
                 var cirlinesF = Line3D.CreateCircle(conn.Start, conn.Radius, 32);
-                this.connectionDrawer.Instance.AddPrimitives(connectionColor, cirlinesF);
+                this.connectionDrawer.AddPrimitives(connectionColor, cirlinesF);
 
                 if (conn.Direction == 1)
                 {
                     var cirlinesT = Line3D.CreateCircle(conn.End, conn.Radius, 32);
-                    this.connectionDrawer.Instance.AddPrimitives(connectionColor, cirlinesT);
+                    this.connectionDrawer.AddPrimitives(connectionColor, cirlinesT);
                 }
 
                 this.connectionDrawer.Visible = true;
@@ -1236,7 +1234,7 @@ namespace Collada
             //Update active paths with the new graph configuration
             if (this.ratController.HasPath)
             {
-                Vector3 from = this.rat.Instance.Manipulator.Position;
+                Vector3 from = this.rat.Manipulator.Position;
                 Vector3 to = this.ratController.Last;
 
                 CalcPath(this.ratAgentType, from, to);
@@ -1394,9 +1392,9 @@ namespace Collada
             }
 
             //Human obstacles
-            for (int i = 0; i < this.human.Count; i++)
+            for (int i = 0; i < this.human.InstanceCount; i++)
             {
-                var pos = this.human.Instance[i].Manipulator.Position;
+                var pos = this.human[i].Manipulator.Position;
                 var bc = new BoundingCylinder(pos, 0.8f, 1.5f);
 
                 int index = this.AddObstacle(bc);
@@ -1411,8 +1409,8 @@ namespace Collada
         {
             var nodes = await this.BuildGraphNodeDebugAreas(agent);
 
-            this.graphDrawer.Instance.Clear();
-            this.graphDrawer.Instance.SetPrimitives(nodes);
+            this.graphDrawer.Clear();
+            this.graphDrawer.SetPrimitives(nodes);
 
             this.UpdateDebugInfo();
         }

@@ -49,7 +49,7 @@ namespace GameLogic
             }
         }
 
-        private SceneObject<PrimitiveListDrawer<Line3D>> lineDrawer = null;
+        private PrimitiveListDrawer<Line3D> lineDrawer = null;
         private readonly Color4 bsphColor = new Color4(Color.LightYellow.ToColor3(), 0.25f);
         private readonly Color4 frstColor = new Color4(Color.Yellow.ToColor3(), 1f);
         private readonly int bsphSlices = 50;
@@ -139,7 +139,7 @@ namespace GameLogic
         }
         private async Task InitializeModels()
         {
-            this.cursor3D = (await this.AddComponent<Model>(
+            this.cursor3D = await this.AddComponentModel(
                 new ModelDescription()
                 {
                     CastShadow = false,
@@ -151,9 +151,9 @@ namespace GameLogic
                     }
                 },
                 SceneObjectUsages.UI,
-                layerHUD)).Instance;
+                layerHUD);
 
-            var troopsObj = await this.AddComponent<ModelInstanced>(
+            this.troops = await this.AddComponentModelInstanced(
                 new ModelInstancedDescription()
                 {
                     Instances = this.skirmishGame.AllSoldiers.Length,
@@ -166,9 +166,7 @@ namespace GameLogic
                 },
                 SceneObjectUsages.Agent);
 
-            this.troops = troopsObj.Instance;
-
-            var terrainObj = await this.AddComponent<Scenery>(
+            this.terrain = await this.AddComponentScenery(
                 new GroundDescription()
                 {
                     CastShadow = true,
@@ -180,8 +178,6 @@ namespace GameLogic
                 },
                 SceneObjectUsages.Ground);
 
-            this.terrain = terrainObj.Instance;
-
             int minimapHeight = (this.Game.Form.RenderHeight / 4) - 8;
             int minimapWidth = minimapHeight;
             var topLeft = new Vector2(593, 443);
@@ -192,7 +188,7 @@ namespace GameLogic
             var pBottomRight = wRes / tRes * bottomRight;
             var q = pTopLeft + ((pBottomRight - pTopLeft - new Vector2(minimapWidth, minimapHeight)) * 0.5f);
 
-            await this.AddComponent<Minimap>(
+            await this.AddComponentMinimap(
                 new MinimapDescription()
                 {
                     Top = (int)q.Y,
@@ -201,15 +197,15 @@ namespace GameLogic
                     Height = minimapHeight,
                     Drawables = new ISceneObject[]
                     {
-                        terrainObj,
-                        troopsObj,
+                        terrain,
+                        troops,
                     },
-                    MinimapArea = terrainObj.Instance.GetBoundingBox(),
+                    MinimapArea = terrain.GetBoundingBox(),
                 },
                 SceneObjectUsages.UI,
                 layerHUD);
 
-            this.SetGround(terrainObj, true);
+            this.SetGround(terrain, true);
 
             GridInput input = new GridInput(GetTrianglesForNavigationGraph);
             GridGenerationSettings settings = new GridGenerationSettings()
@@ -226,16 +222,16 @@ namespace GameLogic
                 Textures = new[] { "HUD.png" },
                 Color = new Color4(1f, 1f, 1f, 1f),
             };
-            await this.AddComponent<Sprite>(bkDesc, SceneObjectUsages.UI, layerHUD - 1);
+            await this.AddComponentSprite(bkDesc, SceneObjectUsages.UI, layerHUD - 1);
 
-            this.txtTitle = (await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 24, Color.White, Color.Gray), SceneObjectUsages.UI, layerHUD)).Instance;
-            this.txtGame = (await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.LightBlue, Color.DarkBlue), SceneObjectUsages.UI, layerHUD)).Instance;
-            this.txtTeam = (await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD)).Instance;
-            this.txtSoldier = (await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD)).Instance;
-            this.txtActionList = (await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD)).Instance;
-            this.txtAction = (await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD)).Instance;
+            this.txtTitle = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 24, Color.White, Color.Gray), SceneObjectUsages.UI, layerHUD);
+            this.txtGame = await this.AddComponentTextDrawer(TextDrawerDescription.Generate(this.fontName, 12, Color.LightBlue, Color.DarkBlue), SceneObjectUsages.UI, layerHUD);
+            this.txtTeam = await this.AddComponentTextDrawer(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.txtSoldier = await this.AddComponentTextDrawer(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.txtActionList = await this.AddComponentTextDrawer(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.txtAction = await this.AddComponentTextDrawer(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
 
-            this.butClose = (await this.AddComponent<SpriteButton>(new SpriteButtonDescription()
+            this.butClose = await this.AddComponentSpriteButton(new SpriteButtonDescription()
             {
                 TwoStateButton = true,
                 TextureReleased = "button_on.png",
@@ -250,9 +246,9 @@ namespace GameLogic
                     ShadowColor = Color.Orange,
                 },
                 Text = "EXIT",
-            }, SceneObjectUsages.UI, layerHUD)).Instance;
+            }, SceneObjectUsages.UI, layerHUD);
 
-            this.butNext = (await this.AddComponent<SpriteButton>(new SpriteButtonDescription()
+            this.butNext = await this.AddComponentSpriteButton(new SpriteButtonDescription()
             {
                 TwoStateButton = true,
                 TextureReleased = "button_on.png",
@@ -266,9 +262,9 @@ namespace GameLogic
                     TextColor = Color.Yellow,
                 },
                 Text = "Next",
-            }, SceneObjectUsages.UI, layerHUD)).Instance;
+            }, SceneObjectUsages.UI, layerHUD);
 
-            this.butPrevSoldier = (await this.AddComponent<SpriteButton>(new SpriteButtonDescription()
+            this.butPrevSoldier = await this.AddComponentSpriteButton(new SpriteButtonDescription()
             {
                 TwoStateButton = true,
                 TextureReleased = "button_on.png",
@@ -282,9 +278,9 @@ namespace GameLogic
                     TextColor = Color.Yellow,
                 },
                 Text = "Prev.Soldier",
-            }, SceneObjectUsages.UI, layerHUD)).Instance;
+            }, SceneObjectUsages.UI, layerHUD);
 
-            this.butNextSoldier = (await this.AddComponent<SpriteButton>(new SpriteButtonDescription()
+            this.butNextSoldier = await this.AddComponentSpriteButton(new SpriteButtonDescription()
             {
                 TwoStateButton = true,
                 TextureReleased = "button_on.png",
@@ -298,9 +294,9 @@ namespace GameLogic
                     TextColor = Color.Yellow,
                 },
                 Text = "Next Soldier",
-            }, SceneObjectUsages.UI, layerHUD)).Instance;
+            }, SceneObjectUsages.UI, layerHUD);
 
-            this.butPrevAction = (await this.AddComponent<SpriteButton>(new SpriteButtonDescription()
+            this.butPrevAction = await this.AddComponentSpriteButton(new SpriteButtonDescription()
             {
                 TwoStateButton = true,
                 TextureReleased = "button_on.png",
@@ -314,9 +310,9 @@ namespace GameLogic
                     TextColor = Color.Yellow,
                 },
                 Text = "Prev.Action",
-            }, SceneObjectUsages.UI, layerHUD)).Instance;
+            }, SceneObjectUsages.UI, layerHUD);
 
-            this.butNextAction = (await this.AddComponent<SpriteButton>(new SpriteButtonDescription()
+            this.butNextAction = await this.AddComponentSpriteButton(new SpriteButtonDescription()
             {
                 TwoStateButton = true,
                 TextureReleased = "button_on.png",
@@ -330,7 +326,7 @@ namespace GameLogic
                     TextColor = Color.Yellow,
                 },
                 Text = "Next Action",
-            }, SceneObjectUsages.UI, layerHUD)).Instance;
+            }, SceneObjectUsages.UI, layerHUD);
 
             this.butClose.Click += (sender, eventArgs) => { this.Game.Exit(); };
             this.butNext.Click += (sender, eventArgs) => { this.NextPhase(); };
@@ -343,7 +339,7 @@ namespace GameLogic
         }
         private async Task InitializeDebug()
         {
-            this.lineDrawer = await this.AddComponent<PrimitiveListDrawer<Line3D>>(new PrimitiveListDrawerDescription<Line3D>() { Count = 5000 });
+            this.lineDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(new PrimitiveListDrawerDescription<Line3D>() { Count = 5000 });
             this.lineDrawer.Visible = false;
         }
 
@@ -713,7 +709,7 @@ namespace GameLogic
 
         private void SetFrustum()
         {
-            this.lineDrawer.Instance.SetPrimitives(this.frstColor, Line3D.CreateWiredFrustum(this.Camera.Frustum));
+            this.lineDrawer.SetPrimitives(this.frstColor, Line3D.CreateWiredFrustum(this.Camera.Frustum));
         }
 
         protected void NewGame()
@@ -841,7 +837,7 @@ namespace GameLogic
             BoundingSphere bsph = this.soldierModels[soldier].GetBoundingSphere();
 
             this.Camera.LookTo(bsph.Center, CameraTranslations.Quick);
-            this.lineDrawer.Instance.SetPrimitives(this.bsphColor, Line3D.CreateWiredSphere(bsph, this.bsphSlices, this.bsphStacks));
+            this.lineDrawer.SetPrimitives(this.bsphColor, Line3D.CreateWiredSphere(bsph, this.bsphSlices, this.bsphStacks));
         }
         protected void UpdateSoldierStates()
         {

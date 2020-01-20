@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -24,9 +25,9 @@ namespace Engine
         /// </summary>
         public int AllocatedParticleCount { get; private set; }
         /// <summary>
-        /// Maximum number of instances
+        /// Number of active particle systems
         /// </summary>
-        public int Count
+        public int SystemsCount
         {
             get
             {
@@ -187,7 +188,7 @@ namespace Engine
         /// <returns>Returns the new particle system</returns>
         public IParticleSystem AddParticleSystem(string name, ParticleSystemTypes type, ParticleSystemDescription description, ParticleEmitter emitter)
         {
-            IParticleSystem pSystem = null;
+            IParticleSystem pSystem;
 
             if (type == ParticleSystemTypes.CPU)
             {
@@ -248,6 +249,34 @@ namespace Engine
         public override string ToString()
         {
             return string.Format("Particle systems: {0}; Allocated particles: {1}", ParticleSystems.Count, this.AllocatedParticleCount);
+        }
+    }
+
+    /// <summary>
+    /// Particle manager extensions
+    /// </summary>
+    public static class ParticleManagerExtensions
+    {
+        /// <summary>
+        /// Adds a component to the scene
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        /// <param name="description">Description</param>
+        /// <param name="usage">Component usage</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns the created component</returns>
+        public static async Task<ParticleManager> AddComponentParticleManager(this Scene scene, ParticleManagerDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
+        {
+            ParticleManager component = null;
+
+            await Task.Run(() =>
+            {
+                component = new ParticleManager(scene, description);
+
+                scene.AddComponent(component, usage, order);
+            });
+
+            return component;
         }
     }
 }

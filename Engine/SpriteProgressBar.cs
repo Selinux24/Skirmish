@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -210,6 +211,34 @@ namespace Engine
             if (this.left != null) this.left.Resize();
             if (this.right != null) this.right.Resize();
             if (this.textDrawer != null) this.textDrawer.Resize();
+        }
+    }
+
+    /// <summary>
+    /// Progress bar extensions
+    /// </summary>
+    public static class SpriteProgressBarExtensions
+    {
+        /// <summary>
+        /// Adds a component to the scene
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        /// <param name="description">Description</param>
+        /// <param name="usage">Component usage</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns the created component</returns>
+        public static async Task<SpriteProgressBar> AddComponentSpriteProgressBar(this Scene scene, SpriteProgressBarDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
+        {
+            SpriteProgressBar component = null;
+
+            await Task.Run(() =>
+            {
+                component = new SpriteProgressBar(scene, description);
+
+                scene.AddComponent(component, usage, order);
+            });
+
+            return component;
         }
     }
 }

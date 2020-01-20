@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -261,6 +262,34 @@ namespace Engine
                         this.vertexBuffer.Offset);
                 }
             }
+        }
+    }
+
+    /// <summary>
+    /// Sky plane extensions
+    /// </summary>
+    public static class SkyPlaneExtensions
+    {
+        /// <summary>
+        /// Adds a component to the scene
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        /// <param name="description">Description</param>
+        /// <param name="usage">Component usage</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns the created component</returns>
+        public static async Task<SkyPlane> AddComponentSkyPlane(this Scene scene, SkyPlaneDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
+        {
+            SkyPlane component = null;
+
+            await Task.Run(() =>
+            {
+                component = new SkyPlane(scene, description);
+
+                scene.AddComponent(component, usage, order);
+            });
+
+            return component;
         }
     }
 }

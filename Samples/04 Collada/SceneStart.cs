@@ -68,12 +68,12 @@ namespace Collada
                 Centered = false,
                 Color = Color.White,
             };
-            await this.AddComponent<Cursor>(cursorDesc, SceneObjectUsages.UI, layerCursor);
+            await this.AddComponentCursor(cursorDesc, SceneObjectUsages.UI, layerCursor);
         }
         private async Task InitializeBackGround()
         {
             var backGroundDesc = ModelDescription.FromXml("Background", "Resources/SceneStart", "SkyPlane.xml");
-            this.backGround = (await this.AddComponent<Model>(backGroundDesc, SceneObjectUsages.UI)).Instance;
+            this.backGround = await this.AddComponentModel(backGroundDesc, SceneObjectUsages.UI);
         }
         private async Task InitializeControls()
         {
@@ -88,7 +88,7 @@ namespace Collada
                 ShadowColor = new Color4(Color.Brown.RGB(), 0.55f),
                 ShadowDelta = new Vector2(2, -3),
             };
-            this.title = (await this.AddComponent<TextDrawer>(titleDesc, SceneObjectUsages.UI, layerHUD)).Instance;
+            this.title = await this.AddComponentTextDrawer(titleDesc, SceneObjectUsages.UI, layerHUD);
 
             var buttonDesc = new SpriteButtonDescription()
             {
@@ -115,10 +115,10 @@ namespace Collada
                     TextColor = Color.Gold,
                 }
             };
-            this.sceneDungeonWallButton = (await this.AddComponent<SpriteButton>(buttonDesc, SceneObjectUsages.UI, layerHUD)).Instance;
-            this.sceneNavMeshTestButton = (await this.AddComponent<SpriteButton>(buttonDesc, SceneObjectUsages.UI, layerHUD)).Instance;
-            this.sceneDungeonButton = (await this.AddComponent<SpriteButton>(buttonDesc, SceneObjectUsages.UI, layerHUD)).Instance;
-            this.sceneModularDungeonButton = (await this.AddComponent<SpriteButton>(buttonDesc, SceneObjectUsages.UI, layerHUD)).Instance;
+            this.sceneDungeonWallButton = await this.AddComponentSpriteButton(buttonDesc, SceneObjectUsages.UI, layerHUD);
+            this.sceneNavMeshTestButton = await this.AddComponentSpriteButton(buttonDesc, SceneObjectUsages.UI, layerHUD);
+            this.sceneDungeonButton = await this.AddComponentSpriteButton(buttonDesc, SceneObjectUsages.UI, layerHUD);
+            this.sceneModularDungeonButton = await this.AddComponentSpriteButton(buttonDesc, SceneObjectUsages.UI, layerHUD);
 
             // Exit button
             var exitButtonDesc = new SpriteButtonDescription()
@@ -146,7 +146,7 @@ namespace Collada
                     TextColor = Color.Gold,
                 }
             };
-            this.exitButton = (await this.AddComponent<SpriteButton>(exitButtonDesc, SceneObjectUsages.UI, layerHUD)).Instance;
+            this.exitButton = await this.AddComponentSpriteButton(exitButtonDesc, SceneObjectUsages.UI, layerHUD);
         }
         private void InitializeAudio()
         {

@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -234,6 +235,34 @@ namespace Engine
                     }
                 }
             }
+        }
+    }
+
+    /// <summary>
+    /// Lens flare extensions
+    /// </summary>
+    public static class LensFlareExtensions
+    {
+        /// <summary>
+        /// Adds a component to the scene
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        /// <param name="description">Description</param>
+        /// <param name="usage">Component usage</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns the created component</returns>
+        public static async Task<LensFlare> AddComponentLensFlare(this Scene scene, LensFlareDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
+        {
+            LensFlare component = null;
+
+            await Task.Run(() =>
+            {
+                component = new LensFlare(scene, description);
+
+                scene.AddComponent(component, usage, order);
+            });
+
+            return component;
         }
     }
 }

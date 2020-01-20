@@ -47,7 +47,7 @@ namespace Engine
         /// <summary>
         /// Maximum instance count
         /// </summary>
-        int Count { get; }
+        int InstanceCount { get; }
         /// <summary>
         /// Gets or sets if the current object has a parent
         /// </summary>

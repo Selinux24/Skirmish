@@ -53,13 +53,13 @@ namespace Engine
         /// <summary>
         /// Maximum instance count
         /// </summary>
-        public int Count
+        public int InstanceCount
         {
             get
             {
                 if (this.Is<IComposed>())
                 {
-                    return this.Get<IComposed>().Count;
+                    return this.Get<IComposed>().InstanceCount;
                 }
 
                 return 1;

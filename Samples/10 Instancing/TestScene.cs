@@ -50,8 +50,8 @@ namespace Instancing
 
         private async Task InitializeTexts()
         {
-            var title = (await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD)).Instance;
-            runtimeText = (await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD)).Instance;
+            var title = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
+            runtimeText = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD);
 
             title.Text = "Instancing test";
             runtimeText.Text = "";
@@ -67,7 +67,7 @@ namespace Instancing
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            await this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);
         }
         private async Task InitializeFloor()
         {
@@ -110,16 +110,16 @@ namespace Instancing
                 }
             };
 
-            var floor = await this.AddComponent<ModelInstanced>(desc);
+            var floor = await this.AddComponentModelInstanced(desc);
 
             Vector3 delta = new Vector3(l * side, 0, l * side) - new Vector3(l, 0, l);
             int x = 0;
             int y = 0;
-            for (int i = 0; i < floor.Count; i++)
+            for (int i = 0; i < floor.InstanceCount; i++)
             {
                 var iPos = new Vector3(x * l * 2, 0, y * l * 2) - delta;
 
-                floor.Instance[i].Manipulator.SetPosition(iPos, true);
+                floor[i].Manipulator.SetPosition(iPos, true);
 
                 x++;
                 if (x >= side)
@@ -146,12 +146,12 @@ namespace Instancing
                     ModelContentFilename = @"tree.xml",
                 }
             };
-            var trees = await this.AddComponent<ModelInstanced>(treeDesc, SceneObjectUsages.None, layerTerrain);
+            var trees = await this.AddComponentModelInstanced(treeDesc, SceneObjectUsages.None, layerTerrain);
 
             int side = instances / 4;
             float groundSide = 55f;
 
-            for (int i = 0; i < trees.Count; i++)
+            for (int i = 0; i < trees.InstanceCount; i++)
             {
                 var iPos = Vector3.Zero;
 
@@ -172,10 +172,10 @@ namespace Instancing
                     iPos = new Vector3(-groundSide, 0, (i - ((side * 3) + (side * 0.5f))) * side);
                 }
 
-                trees.Instance[i].Manipulator.SetPosition(iPos, true);
-                trees.Instance[i].Manipulator.SetRotation(iPos.Z + iPos.X, 0, 0, true);
-                trees.Instance[i].Manipulator.SetScale(2 + (i % 3 * 0.2f), true);
-                trees.Instance[i].TextureIndex = (uint)(i % 2);
+                trees[i].Manipulator.SetPosition(iPos, true);
+                trees[i].Manipulator.SetRotation(iPos.Z + iPos.X, 0, 0, true);
+                trees[i].Manipulator.SetScale(2 + (i % 3 * 0.2f), true);
+                trees[i].TextureIndex = (uint)(i % 2);
             }
         }
         private async Task InitializeTroops()
@@ -192,7 +192,7 @@ namespace Instancing
                     ModelContentFilename = @"soldier_anim2.xml",
                 }
             };
-            this.troops = (await this.AddComponent<ModelInstanced>(tDesc, SceneObjectUsages.Agent, layerObjects)).Instance;
+            this.troops = await this.AddComponentModelInstanced(tDesc, SceneObjectUsages.Agent, layerObjects);
             this.troops.MaximumCount = -1;
 
             Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
@@ -216,7 +216,7 @@ namespace Instancing
 
             int x = 0;
             int y = 0;
-            for (int i = 0; i < this.troops.Count; i++)
+            for (int i = 0; i < this.troops.InstanceCount; i++)
             {
                 var iPos = new Vector3(x * l * 2, 0, y * l * 2) - delta + rnd.NextVector3(vMin, vMax);
 
@@ -238,7 +238,7 @@ namespace Instancing
         }
         private async Task InitializeWall()
         {
-            var wall = await this.AddComponent<ModelInstanced>(
+            var wall = await this.AddComponentModelInstanced(
                 new ModelInstancedDescription()
                 {
                     Name = "wall",
@@ -252,31 +252,31 @@ namespace Instancing
                     }
                 });
 
-            BoundingBox bbox = wall.Instance[0].GetBoundingBox();
+            BoundingBox bbox = wall[0].GetBoundingBox();
 
             float x = bbox.GetX() * (10f / 11f);
 
             for (int i = 0; i < 10; i++)
             {
-                wall.Instance[i].Manipulator.SetPosition(new Vector3((i - 5) * x, 0.01f, 60));
+                wall[i].Manipulator.SetPosition(new Vector3((i - 5) * x, 0.01f, 60));
             }
 
             for (int i = 10; i < 20; i++)
             {
-                wall.Instance[i].Manipulator.SetPosition(new Vector3(60, 0, (i - 9 - 5) * x));
-                wall.Instance[i].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+                wall[i].Manipulator.SetPosition(new Vector3(60, 0, (i - 9 - 5) * x));
+                wall[i].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
             }
 
             for (int i = 20; i < 30; i++)
             {
-                wall.Instance[i].Manipulator.SetPosition(new Vector3((i - 19 - 5) * x, 0.01f, -60));
-                wall.Instance[i].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
+                wall[i].Manipulator.SetPosition(new Vector3((i - 19 - 5) * x, 0.01f, -60));
+                wall[i].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
             }
 
             for (int i = 30; i < 40; i++)
             {
-                wall.Instance[i].Manipulator.SetPosition(new Vector3(-60, 0, (i - 30 - 5) * x));
-                wall.Instance[i].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
+                wall[i].Manipulator.SetPosition(new Vector3(-60, 0, (i - 30 - 5) * x));
+                wall[i].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
             }
         }
 
@@ -340,7 +340,7 @@ namespace Instancing
 
             if (this.Game.Input.KeyJustReleased(Keys.Right))
             {
-                this.troops.MaximumCount = Math.Min(this.troops.Count, this.troops.MaximumCount + increment);
+                this.troops.MaximumCount = Math.Min(this.troops.InstanceCount, this.troops.MaximumCount + increment);
             }
 
             base.Update(gameTime);

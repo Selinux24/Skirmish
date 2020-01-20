@@ -19,11 +19,11 @@ namespace Engine
         /// <summary>
         /// Asset models dictionary
         /// </summary>
-        private readonly Dictionary<string, SceneObject<ModelInstanced>> assets = new Dictionary<string, SceneObject<ModelInstanced>>();
+        private readonly Dictionary<string, ModelInstanced> assets = new Dictionary<string, ModelInstanced>();
         /// <summary>
         /// Object models dictionary
         /// </summary>
-        private readonly Dictionary<string, SceneObject<ModelInstanced>> objects = new Dictionary<string, SceneObject<ModelInstanced>>();
+        private readonly Dictionary<string, ModelInstanced> objects = new Dictionary<string, ModelInstanced>();
         /// <summary>
         /// Particle descriptors dictionary
         /// </summary>
@@ -31,7 +31,7 @@ namespace Engine
         /// <summary>
         /// Particle manager
         /// </summary>
-        private SceneObject<ParticleManager> particleManager = null;
+        private ParticleManager particleManager = null;
         /// <summary>
         /// Asset map
         /// </summary>
@@ -148,7 +148,7 @@ namespace Engine
             this.objects.Clear();
             this.entities.Clear();
             this.assetMap = null;
-            this.particleManager.Instance.Clear();
+            this.particleManager.Clear();
 
             //Find the level
             var level = this.Levels.Levels
@@ -221,7 +221,7 @@ namespace Engine
         {
             if (this.Levels.ParticleSystems != null && this.Levels.ParticleSystems.Length > 0)
             {
-                this.particleManager = await this.Scene.AddComponent<ParticleManager>(
+                this.particleManager = await this.Scene.AddComponentParticleManager(
                     new ParticleManagerDescription()
                     {
                         Name = string.Format("{0}.{1}", this.Description.Name, "Particle Manager"),
@@ -260,7 +260,7 @@ namespace Engine
                         var masks = this.Levels.GetMasksForAsset(assetName);
                         var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
 
-                        var model = await this.Scene.AddComponent<ModelInstanced>(
+                        var model = await this.Scene.AddComponentModelInstanced(
                             new ModelInstancedDescription()
                             {
                                 Name = string.Format("{0}.{1}.{2}", this.Description.Name, assetName, level.Name),
@@ -312,7 +312,7 @@ namespace Engine
                 var masks = this.Levels.GetMasksForAsset(assetName);
                 var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
 
-                var model = await this.Scene.AddComponent<ModelInstanced>(
+                var model = await this.Scene.AddComponentModelInstanced(
                     new ModelInstancedDescription()
                     {
                         Name = string.Format("{0}.{1}.{2}", this.Description.Name, assetName, level.Name),
@@ -331,14 +331,14 @@ namespace Engine
                 var objList = Array.FindAll(level.Objects, o => string.Equals(o.AssetName, assetName, StringComparison.OrdinalIgnoreCase));
 
                 //Positioning
-                model.Instance.SetTransforms(objList.Select(o => o.GetTransform()).ToArray());
+                model.SetTransforms(objList.Select(o => o.GetTransform()).ToArray());
 
                 //Lights
-                for (int i = 0; i < model.Instance.Count; i++)
+                for (int i = 0; i < model.InstanceCount; i++)
                 {
-                    this.InitializeObjectLights(objList[i], model.Instance[i]);
+                    this.InitializeObjectLights(objList[i], model[i]);
 
-                    this.InitializeObjectAnimations(objList[i], model.Instance[i]);
+                    this.InitializeObjectAnimations(objList[i], model[i]);
                 }
 
                 this.objects.Add(assetName, model);
@@ -377,7 +377,7 @@ namespace Engine
                             Instance = instance,
                         };
 
-                        this.particleManager.Instance.AddParticleSystem(
+                        this.particleManager.AddParticleSystem(
                             ParticleSystemTypes.CPU,
                             this.particleDescriptors[emitterDesc.Name],
                             emitter);
@@ -479,7 +479,7 @@ namespace Engine
                 if (instance != null)
                 {
                     //Find emitters
-                    var emitters = this.particleManager.Instance.ParticleSystems
+                    var emitters = this.particleManager.ParticleSystems
                         .Where(p => p.Emitter.Instance == instance)
                         .Select(p => p.Emitter)
                         .ToArray();
@@ -515,7 +515,7 @@ namespace Engine
 
             foreach (var assetName in transforms.Keys)
             {
-                this.assets[assetName].Instance.SetTransforms(transforms[assetName].ToArray());
+                this.assets[assetName].SetTransforms(transforms[assetName].ToArray());
             }
 
             this.assetMap.Build(this.AssetConfiguration, this.assets);
@@ -596,7 +596,7 @@ namespace Engine
                 int index = this.CurrentLevel.GetMapInstanceIndex(this.AssetConfiguration.Assets, res.AssetName, mapId, id);
                 if (index >= 0)
                 {
-                    return this.assets[res.AssetName].Instance[index];
+                    return this.assets[res.AssetName][index];
                 }
             }
 
@@ -613,7 +613,7 @@ namespace Engine
             var index = this.CurrentLevel.GetObjectInstanceIndex(assetName, id);
             if (index >= 0)
             {
-                return this.objects[assetName].Instance[index];
+                return this.objects[assetName][index];
             }
 
             return null;
@@ -670,9 +670,9 @@ namespace Engine
                     continue;
                 }
 
-                for (int i = 0; i < model.Instance.Count; i++)
+                for (int i = 0; i < model.InstanceCount; i++)
                 {
-                    var bsph = model.Instance[i].GetBoundingSphere();
+                    var bsph = model[i].GetBoundingSphere();
 
                     if (!initialized)
                     {
@@ -705,9 +705,9 @@ namespace Engine
                     continue;
                 }
 
-                for (int i = 0; i < model.Instance.Count; i++)
+                for (int i = 0; i < model.InstanceCount; i++)
                 {
-                    var bbox = model.Instance[i].GetBoundingBox();
+                    var bbox = model[i].GetBoundingBox();
 
                     if (!initialized)
                     {
@@ -735,7 +735,7 @@ namespace Engine
 
             foreach (var asset in this.assets.Values)
             {
-                var instances = asset.Instance.GetInstances().Where(i => i.Visible);
+                var instances = asset.GetInstances().Where(i => i.Visible);
 
                 foreach (var instance in instances)
                 {
@@ -766,9 +766,9 @@ namespace Engine
             {
                 res.Add(item, new List<BoundingBox>());
 
-                for (int i = 0; i < this.assets[item].Instance.Count; i++)
+                for (int i = 0; i < this.assets[item].InstanceCount; i++)
                 {
-                    res[item].Add(this.assets[item].Instance[i].GetBoundingBox());
+                    res[item].Add(this.assets[item][i].GetBoundingBox());
                 }
             }
 
@@ -789,9 +789,9 @@ namespace Engine
                 {
                     res.Add(item, new List<BoundingBox>());
 
-                    for (int i = 0; i < model.Instance.Count; i++)
+                    for (int i = 0; i < model.InstanceCount; i++)
                     {
-                        res[item].Add(model.Instance[i].GetBoundingBox());
+                        res[item].Add(model[i].GetBoundingBox());
                     }
                 }
             }
@@ -1224,7 +1224,7 @@ namespace Engine
             /// </summary>
             /// <param name="assetConfiguration">Configuration</param>
             /// <param name="assets">Asset list</param>
-            public void Build(ModularSceneryAssetConfiguration assetConfiguration, Dictionary<string, SceneObject<ModelInstanced>> assets)
+            public void Build(ModularSceneryAssetConfiguration assetConfiguration, Dictionary<string, ModelInstanced> assets)
             {
                 //Fill per complex asset bounding boxes
                 Fill(assets);
@@ -1249,7 +1249,7 @@ namespace Engine
             /// Fills the full bounding volume of the assets in the map
             /// </summary>
             /// <param name="assets">Asset list</param>
-            private void Fill(Dictionary<string, SceneObject<ModelInstanced>> assets)
+            private void Fill(Dictionary<string, ModelInstanced> assets)
             {
                 for (int i = 0; i < this.assetMap.Count; i++)
                 {
@@ -1261,7 +1261,7 @@ namespace Engine
                     {
                         foreach (int assetIndex in item.Assets[assetName])
                         {
-                            var aBbox = assets[assetName].Instance[assetIndex].GetBoundingBox();
+                            var aBbox = assets[assetName][assetIndex].GetBoundingBox();
 
                             if (bbox == new BoundingBox())
                             {
@@ -1455,6 +1455,34 @@ namespace Engine
                 Trigger = trigger;
                 Item = item;
             }
+        }
+    }
+
+    /// <summary>
+    /// Modular scenery extensions
+    /// </summary>
+    public static class ModularSceneryExtensions
+    {
+        /// <summary>
+        /// Adds a component to the scene
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        /// <param name="description">Description</param>
+        /// <param name="usage">Component usage</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns the created component</returns>
+        public static async Task<ModularScenery> AddComponentModularScenery(this Scene scene, ModularSceneryDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
+        {
+            ModularScenery component = null;
+
+            await Task.Run(() =>
+            {
+                component = new ModularScenery(scene, description);
+
+                scene.AddComponent(component, usage, order);
+            });
+
+            return component;
         }
     }
 }

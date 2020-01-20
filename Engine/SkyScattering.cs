@@ -1,6 +1,6 @@
 ﻿using SharpDX;
 using System;
-using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -465,6 +465,34 @@ namespace Engine
             expColor.Normalize();
 
             outColor = new Color4(expColor, 1f);
+        }
+    }
+
+    /// <summary>
+    /// Sky scattering extensions
+    /// </summary>
+    public static class SkyScatteringExtensions
+    {
+        /// <summary>
+        /// Adds a component to the scene
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        /// <param name="description">Description</param>
+        /// <param name="usage">Component usage</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns the created component</returns>
+        public static async Task<SkyScattering> AddComponentSkyScattering(this Scene scene, SkyScatteringDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
+        {
+            SkyScattering component = null;
+
+            await Task.Run(() =>
+            {
+                component = new SkyScattering(scene, description);
+
+                scene.AddComponent(component, usage, order);
+            });
+
+            return component;
         }
     }
 }

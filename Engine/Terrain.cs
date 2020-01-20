@@ -993,4 +993,32 @@ namespace Engine
                 out vertices, out indices);
         }
     }
+
+    /// <summary>
+    /// Terrain extensions
+    /// </summary>
+    public static class TerrainExtensions
+    {
+        /// <summary>
+        /// Adds a component to the scene
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        /// <param name="description">Description</param>
+        /// <param name="usage">Component usage</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns the created component</returns>
+        public static async Task<Terrain> AddComponentTerrain(this Scene scene, GroundDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
+        {
+            Terrain component = null;
+
+            await Task.Run(() =>
+            {
+                component = new Terrain(scene, description);
+
+                scene.AddComponent(component, usage, order);
+            });
+
+            return component;
+        }
+    }
 }

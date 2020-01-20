@@ -502,60 +502,6 @@ namespace Engine
         }
 
         /// <summary>
-        /// Creates a new resource
-        /// </summary>
-        /// <typeparam name="T">Type of resource</typeparam>
-        /// <param name="description">Resource description</param>
-        /// <returns>Returns the new generated resource</returns>
-        private T CreateResource<T>(SceneObjectDescription description) where T : BaseSceneObject
-        {
-            try
-            {
-                return (T)Activator.CreateInstance(typeof(T), this, description);
-            }
-            catch (Exception ex)
-            {
-                throw new EngineException("Resource creation error", ex);
-            }
-        }
-
-        /// <summary>
-        /// Adds component to collection
-        /// </summary>
-        /// <typeparam name="T">Component type</typeparam>
-        /// <param name="description">Description</param>
-        /// <param name="usage">Usage</param>
-        /// <param name="order">Processing order</param>
-        /// <returns></returns>
-        public async Task<SceneObject<T>> AddComponent<T>(SceneObjectDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0) where T : BaseSceneObject
-        {
-            T component = this.CreateResource<T>(description);
-
-            return await this.AddComponent(component, description, usage, order);
-        }
-        /// <summary>
-        /// Adds component to collection
-        /// </summary>
-        /// <typeparam name="T">Component type</typeparam>
-        /// <param name="component">Component</param>
-        /// <param name="description">Description</param>
-        /// <param name="usage">Usage</param>
-        /// <param name="order">Processing order</param>
-        /// <returns>Returns the added component</returns>
-        public async Task<SceneObject<T>> AddComponent<T>(T component, SceneObjectDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
-        {
-            SceneObject<T> sceneObject = null;
-
-            await Task.Run(() =>
-            {
-                sceneObject = new SceneObject<T>(component, description);
-
-                this.AddComponent(sceneObject, usage, order);
-            });
-
-            return sceneObject;
-        }
-        /// <summary>
         /// Adds component to collection
         /// </summary>
         /// <typeparam name="T">Component type</typeparam>
@@ -563,7 +509,7 @@ namespace Engine
         /// <param name="usage">Usage</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns the added component</returns>
-        private void AddComponent<T>(SceneObject<T> component, SceneObjectUsages usage, int order)
+        public void AddComponent(ISceneObject component, SceneObjectUsages usage, int order)
         {
             if (!this.components.Contains(component))
             {
@@ -594,7 +540,6 @@ namespace Engine
                 this.UpdateGlobalResources = true;
             }
         }
-
         /// <summary>
         /// Removes and disposes the specified component
         /// </summary>

@@ -443,7 +443,7 @@ namespace Engine.Common
         {
             var graphics = this.Game.Graphics;
 
-            Counters.MaxInstancesPerFrame += c.Count;
+            Counters.MaxInstancesPerFrame += c.InstanceCount;
 
             graphics.SetRasterizerDefault();
 
@@ -469,7 +469,7 @@ namespace Engine.Common
         {
             var graphics = this.Game.Graphics;
 
-            Counters.MaxInstancesPerFrame += c.Count;
+            Counters.MaxInstancesPerFrame += c.InstanceCount;
 
             graphics.SetRasterizerDefault();
 

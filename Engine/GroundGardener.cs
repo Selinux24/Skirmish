@@ -1227,4 +1227,32 @@ namespace Engine
             return new QuadTreeNode[] { };
         }
     }
+
+    /// <summary>
+    /// Gardener extensions
+    /// </summary>
+    public static class GroundGardenerExtensions
+    {
+        /// <summary>
+        /// Adds a component to the scene
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        /// <param name="description">Description</param>
+        /// <param name="usage">Component usage</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns the created component</returns>
+        public static async Task<GroundGardener> AddComponentGroundGardener(this Scene scene, GroundGardenerDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
+        {
+            GroundGardener component = null;
+
+            await Task.Run(() =>
+            {
+                component = new GroundGardener(scene, description);
+
+                scene.AddComponent(component, usage, order);
+            });
+
+            return component;
+        }
+    }
 }

@@ -19,11 +19,11 @@ namespace Collada
 
         private Player agent = null;
 
-        private SceneObject<TextDrawer> debug = null;
+        private TextDrawer debug = null;
 
-        private SceneObject<PrimitiveListDrawer<Triangle>> graphDrawer = null;
+        private PrimitiveListDrawer<Triangle> graphDrawer = null;
 
-        private SceneObject<Model> inputGeometry = null;
+        private Model inputGeometry = null;
         private readonly BuildSettings nmsettings = BuildSettings.Default;
 
         private float? lastElapsedSeconds = null;
@@ -56,27 +56,27 @@ namespace Collada
         }
         private async Task InitializeText()
         {
-            var title = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
-            title.Instance.Text = "Navigation Mesh Test Scene";
-            title.Instance.Position = Vector2.Zero;
+            var title = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
+            title.Text = "Navigation Mesh Test Scene";
+            title.Position = Vector2.Zero;
 
-            var help = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            help.Instance.Text = "Camera: WASD+Mouse. B: Change Build Mode. P: Change Partition Type. (SHIFT reverse). F5: Save. F6: Load. Space: Update current tile (SHIFT remove).";
-            help.Instance.Position = new Vector2(0, 24);
+            var help = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            help.Text = "Camera: WASD+Mouse. B: Change Build Mode. P: Change Partition Type. (SHIFT reverse). F5: Save. F6: Load. Space: Update current tile (SHIFT remove).";
+            help.Position = new Vector2(0, 24);
 
-            this.debug = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            this.debug.Instance.Text = null;
-            this.debug.Instance.Position = new Vector2(0, 48);
+            this.debug = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.debug.Text = null;
+            this.debug.Position = new Vector2(0, 48);
 
             var spDesc = new SpriteDescription()
             {
                 AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
-                Height = this.debug.Instance.Top + this.debug.Instance.Height + 3,
+                Height = this.debug.Top + this.debug.Height + 3,
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            await this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);
         }
         private void InitializeAgent()
         {
@@ -98,7 +98,7 @@ namespace Collada
         }
         private async Task InitializeNavmesh()
         {
-            this.inputGeometry = await this.AddComponent<Model>(
+            this.inputGeometry = await this.AddComponentModel(
                 new ModelDescription()
                 {
                     TextureIndex = 0,
@@ -143,7 +143,7 @@ namespace Collada
                 AlphaEnabled = true,
                 Count = 50000,
             };
-            this.graphDrawer = await this.AddComponent<PrimitiveListDrawer<Triangle>>(graphDrawerDesc);
+            this.graphDrawer = await this.AddComponentPrimitiveListDrawer<Triangle>(graphDrawerDesc);
         }
 
         public override async Task Initialized()
@@ -152,7 +152,7 @@ namespace Collada
 
             this.UpdateGraphNodes(this.agent);
 
-            var bbox = inputGeometry.Instance.GetBoundingBox();
+            var bbox = inputGeometry.GetBoundingBox();
             var center = bbox.GetCenter();
             float maxD = Math.Max(Math.Max(bbox.GetX(), bbox.GetY()), bbox.GetZ());
 
@@ -285,18 +285,18 @@ namespace Collada
                 this.UpdateGraphNodes(this.agent);
             }
 
-            this.debug.Instance.Text = string.Format("Build Mode: {0}; Partition Type: {1}; Build Time: {2:0.00000} seconds", nmsettings.BuildMode, nmsettings.PartitionType, lastElapsedSeconds);
+            this.debug.Text = string.Format("Build Mode: {0}; Partition Type: {1}; Build Time: {2:0.00000} seconds", nmsettings.BuildMode, nmsettings.PartitionType, lastElapsedSeconds);
         }
         private void UpdateGraphNodes(AgentType agent)
         {
             var nodes = this.GetNodes(agent).OfType<GraphNode>();
             if (nodes.Any())
             {
-                this.graphDrawer.Instance.Clear();
+                this.graphDrawer.Clear();
 
                 foreach (var node in nodes)
                 {
-                    this.graphDrawer.Instance.AddPrimitives(node.Color, node.Triangles);
+                    this.graphDrawer.AddPrimitives(node.Color, node.Triangles);
                 }
             }
         }

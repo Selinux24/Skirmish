@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -271,6 +272,34 @@ namespace Engine
         protected virtual void OnClick(EventArgs e)
         {
             this.Click?.Invoke(this, e);
+        }
+    }
+
+    /// <summary>
+    /// Sprite button extensions
+    /// </summary>
+    public static class SpriteButtonExtensions
+    {
+        /// <summary>
+        /// Adds a component to the scene
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        /// <param name="description">Description</param>
+        /// <param name="usage">Component usage</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns the created component</returns>
+        public static async Task<SpriteButton> AddComponentSpriteButton(this Scene scene, SpriteButtonDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
+        {
+            SpriteButton component = null;
+
+            await Task.Run(() =>
+            {
+                component = new SpriteButton(scene, description);
+
+                scene.AddComponent(component, usage, order);
+            });
+
+            return component;
         }
     }
 }

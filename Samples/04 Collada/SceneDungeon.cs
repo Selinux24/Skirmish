@@ -10,7 +10,7 @@ namespace Collada
     {
         private const int layerHUD = 99;
 
-        private SceneObject<TextDrawer> fps = null;
+        private TextDrawer fps = null;
 
         private Player agent = null;
 
@@ -32,27 +32,27 @@ namespace Collada
             this.Game.LockMouse = true;
 #endif
 
-            var title = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
-            title.Instance.Text = "Collada Dungeon Scene";
-            title.Instance.Position = Vector2.Zero;
+            var title = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
+            title.Text = "Collada Dungeon Scene";
+            title.Position = Vector2.Zero;
 
-            this.fps = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            this.fps.Instance.Text = null;
-            this.fps.Instance.Position = new Vector2(0, 24);
+            this.fps = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.fps.Text = null;
+            this.fps.Position = new Vector2(0, 24);
 
-            var picks = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            picks.Instance.Text = null;
-            picks.Instance.Position = new Vector2(0, 48);
+            var picks = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            picks.Text = null;
+            picks.Position = new Vector2(0, 48);
 
             var spDesc = new SpriteDescription()
             {
                 AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
-                Height = picks.Instance.Top + picks.Instance.Height + 3,
+                Height = picks.Top + picks.Height + 3,
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            await this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);
 
             this.agent = new Player()
             {
@@ -62,7 +62,7 @@ namespace Collada
                 MaxClimb = 0.225f,
             };
 
-            var dungeon = await this.AddComponent<Scenery>(
+            var dungeon = await this.AddComponentScenery(
                 new GroundDescription()
                 {
                     Name = "room1",
@@ -88,7 +88,7 @@ namespace Collada
 
             this.PathFinderDescription = new Engine.PathFinding.PathFinderDescription(settings, input);
 
-            this.Lights.AddRange(dungeon.Instance.Lights);
+            this.Lights.AddRange(dungeon.Lights);
 
             this.InitializeCamera();
             this.InitializeEnvironment();
@@ -123,7 +123,7 @@ namespace Collada
 
             this.UpdateCamera();
 
-            this.fps.Instance.Text = this.Game.RuntimeText;
+            this.fps.Text = this.Game.RuntimeText;
         }
         private void UpdateCamera()
         {

@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -129,6 +130,34 @@ namespace Engine
 
             this.vertexBuffer = this.BufferManager.Add(name, vertices, false, 0);
             this.indexBuffer = this.BufferManager.Add(name, indices, false);
+        }
+    }
+
+    /// <summary>
+    /// Water extensions
+    /// </summary>
+    public static class WaterExtensions
+    {
+        /// <summary>
+        /// Adds a component to the scene
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        /// <param name="description">Description</param>
+        /// <param name="usage">Component usage</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns the created component</returns>
+        public static async Task<Water> AddComponentWater(this Scene scene, WaterDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
+        {
+            Water component = null;
+
+            await Task.Run(() =>
+            {
+                component = new Water(scene, description);
+
+                scene.AddComponent(component, usage, order);
+            });
+
+            return component;
         }
     }
 }

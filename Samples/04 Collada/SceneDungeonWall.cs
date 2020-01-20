@@ -60,31 +60,31 @@ namespace Collada
         }
         private async Task InitializeText()
         {
-            var title = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
-            title.Instance.Text = "Tiled Wall Test Scene";
-            title.Instance.Position = Vector2.Zero;
+            var title = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
+            title.Text = "Tiled Wall Test Scene";
+            title.Position = Vector2.Zero;
 
-            this.fps = (await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD)).Instance;
+            this.fps = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
             this.fps.Text = null;
             this.fps.Position = new Vector2(0, 24);
 
-            var picks = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            picks.Instance.Text = null;
-            picks.Instance.Position = new Vector2(0, 48);
+            var picks = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            picks.Text = null;
+            picks.Position = new Vector2(0, 48);
 
             var spDesc = new SpriteDescription()
             {
                 AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
-                Height = picks.Instance.Top + picks.Instance.Height + 3,
+                Height = picks.Top + picks.Height + 3,
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            await this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);
         }
         private async Task InitializeDungeon()
         {
-            var wall = await this.AddComponent<ModelInstanced>(
+            var wall = await this.AddComponentModelInstanced(
                 new ModelInstancedDescription()
                 {
                     Name = "wall",
@@ -98,18 +98,18 @@ namespace Collada
                     }
                 });
 
-            BoundingBox bbox = wall.Instance[0].GetBoundingBox();
+            BoundingBox bbox = wall[0].GetBoundingBox();
 
             float x = bbox.GetX() * (10f / 11f);
             float z = bbox.GetZ();
 
-            wall.Instance[0].Manipulator.SetPosition(new Vector3(+3 * x, 0, +0 * z));
-            wall.Instance[1].Manipulator.SetPosition(new Vector3(+2 * x, 0, +0 * z));
-            wall.Instance[2].Manipulator.SetPosition(new Vector3(+1 * x, 0, +0 * z));
-            wall.Instance[3].Manipulator.SetPosition(new Vector3(+0 * x, 0, +0 * z));
-            wall.Instance[4].Manipulator.SetPosition(new Vector3(-1 * x, 0, +0 * z));
-            wall.Instance[5].Manipulator.SetPosition(new Vector3(-2 * x, 0, +0 * z));
-            wall.Instance[6].Manipulator.SetPosition(new Vector3(-3 * x, 0, +0 * z));
+            wall[0].Manipulator.SetPosition(new Vector3(+3 * x, 0, +0 * z));
+            wall[1].Manipulator.SetPosition(new Vector3(+2 * x, 0, +0 * z));
+            wall[2].Manipulator.SetPosition(new Vector3(+1 * x, 0, +0 * z));
+            wall[3].Manipulator.SetPosition(new Vector3(+0 * x, 0, +0 * z));
+            wall[4].Manipulator.SetPosition(new Vector3(-1 * x, 0, +0 * z));
+            wall[5].Manipulator.SetPosition(new Vector3(-2 * x, 0, +0 * z));
+            wall[6].Manipulator.SetPosition(new Vector3(-3 * x, 0, +0 * z));
         }
         private async Task InitializeEmitter()
         {
@@ -134,7 +134,7 @@ namespace Collada
                 }
             };
 
-            this.lightEmitter = (await this.AddComponent<Model>(desc)).Instance;
+            this.lightEmitter = await this.AddComponentModel(desc);
         }
 
         public override void Update(GameTime gameTime)

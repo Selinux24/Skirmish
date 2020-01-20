@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -461,6 +462,34 @@ namespace Engine
             }
 
             return null;
+        }
+    }
+
+    /// <summary>
+    /// Scenery extensions
+    /// </summary>
+    public static class SceneryExtensions
+    {
+        /// <summary>
+        /// Adds a component to the scene
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        /// <param name="description">Description</param>
+        /// <param name="usage">Component usage</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns the created component</returns>
+        public static async Task<Scenery> AddComponentScenery(this Scene scene, GroundDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
+        {
+            Scenery component = null;
+
+            await Task.Run(() =>
+            {
+                component = new Scenery(scene, description);
+
+                scene.AddComponent(component, usage, order);
+            });
+
+            return component;
         }
     }
 }

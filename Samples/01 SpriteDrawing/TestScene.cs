@@ -38,7 +38,7 @@ namespace SpriteDrawing
                 ContentPath = "Resources",
                 Textures = new[] { "background.jpg" },
             };
-            await this.AddComponent<Sprite>(desc, SceneObjectUsages.UI, 1);
+            await this.AddComponentSprite(desc, SceneObjectUsages.UI, 1);
         }
         private async Task InitializeSmiley()
         {
@@ -50,10 +50,8 @@ namespace SpriteDrawing
                 Height = 256,
                 FitScreen = true,
             };
-            var sprite = await this.AddComponent<Sprite>(desc, SceneObjectUsages.None, 3);
-            sprite.Instance.Manipulator.SetPosition(256, 0);
-
-            this.spriteMov = sprite.Instance;
+            this.spriteMov = await this.AddComponentSprite(desc, SceneObjectUsages.None, 3);
+            this.spriteMov.Manipulator.SetPosition(256, 0);
         }
         private async Task InitializePan()
         {
@@ -65,7 +63,7 @@ namespace SpriteDrawing
                 Height = 650,
                 FitScreen = true,
             };
-            textBackPanel = (await this.AddComponent<Sprite>(desc, SceneObjectUsages.UI, layerHUD)).Instance;
+            this.textBackPanel = await this.AddComponentSprite(desc, SceneObjectUsages.UI, layerHUD);
         }
         private async Task InitializeTextDrawer()
         {
@@ -77,7 +75,7 @@ namespace SpriteDrawing
                 Style = FontMapStyles.Bold,
                 TextColor = Color.LightGoldenrodYellow,
             };
-            textDrawer = (await this.AddComponent<TextDrawer>(desc, SceneObjectUsages.UI, layerHUD)).Instance;
+            this.textDrawer = await this.AddComponentTextDrawer(desc, SceneObjectUsages.UI, layerHUD);
         }
 
         public override async Task Initialized()

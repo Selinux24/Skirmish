@@ -41,8 +41,8 @@ namespace Skybox
         private TextDrawer fps = null;
 
         private Scenery ruins = null;
-        private SceneObject<PrimitiveListDrawer<Line3D>> volumesDrawer = null;
-        private SceneObject<PrimitiveListDrawer<Triangle>> graphDrawer = null;
+        private PrimitiveListDrawer<Line3D> volumesDrawer = null;
+        private PrimitiveListDrawer<Triangle> graphDrawer = null;
 
         private ModelInstanced torchs = null;
 
@@ -78,26 +78,26 @@ namespace Skybox
                 Width = 16,
                 Height = 16,
             };
-            await this.AddComponent<Cursor>(cursorDesc, SceneObjectUsages.UI, layerHUD + 1);
+            await this.AddComponentCursor(cursorDesc, SceneObjectUsages.UI, layerHUD + 1);
 
             #endregion
 
             #region Text
 
-            var title = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
-            var help = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            this.fps = (await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD)).Instance;
+            var title = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
+            var help = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.fps = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
 
-            title.Instance.Text = "Collada Scene with Skybox";
+            title.Text = "Collada Scene with Skybox";
 #if DEBUG
-            help.Instance.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Right Mouse: Drag view | Left Mouse: Pick";
+            help.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Right Mouse: Drag view | Left Mouse: Pick";
 #else
-            help.Instance.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Move Mouse: View | Left Mouse: Pick";
+            help.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Move Mouse: View | Left Mouse: Pick";
 #endif
             this.fps.Text = "";
 
-            title.Instance.Position = Vector2.Zero;
-            help.Instance.Position = new Vector2(0, 24);
+            title.Position = Vector2.Zero;
+            help.Position = new Vector2(0, 24);
             this.fps.Position = new Vector2(0, 40);
 
             var spDesc = new SpriteDescription()
@@ -109,13 +109,13 @@ namespace Skybox
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            await this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);
 
             #endregion
 
             #region Skydom
 
-            await this.AddComponent<Skydom>(new SkydomDescription()
+            await this.AddComponentSkydom(new SkydomDescription()
             {
                 Name = "Skydom",
                 ContentPath = "Resources",
@@ -127,7 +127,7 @@ namespace Skybox
 
             #region Torchs
 
-            var torchsObj = await this.AddComponent<ModelInstanced>(
+            this.torchs = await this.AddComponentModelInstanced(
                 new ModelInstancedDescription()
                 {
                     Name = "Torchs",
@@ -140,8 +140,7 @@ namespace Skybox
                     }
                 });
 
-            this.torchs = torchsObj.Instance;
-            this.AttachToGround(torchsObj, true);
+            this.AttachToGround(this.torchs, true);
 
             #endregion
 
@@ -157,22 +156,21 @@ namespace Skybox
                     ModelContentFilename = "ruins.xml",
                 }
             };
-            var ruinsObj = await this.AddComponent<Scenery>(desc);
-            this.ruins = ruinsObj.Instance;
-            this.SetGround(ruinsObj, true);
+            this.ruins = await this.AddComponentScenery(desc);
+            this.SetGround(this.ruins, true);
 
             #endregion
 
             #region Water
 
             var waterDesc = WaterDescription.CreateCalm("Ocean", 5000f, -1f);
-            await this.AddComponent<Water>(waterDesc, SceneObjectUsages.None);
+            await this.AddComponentWater(waterDesc, SceneObjectUsages.None);
 
             #endregion
 
             #region Particle Systems
 
-            var pManager = (await this.AddComponent<ParticleManager>(new ParticleManagerDescription() { Name = "Particle Systems" })).Instance;
+            var pManager = await this.AddComponentParticleManager(new ParticleManagerDescription() { Name = "Particle Systems" });
 
             #endregion
 
@@ -199,7 +197,7 @@ namespace Skybox
                 }
             };
 
-            this.movingFire = (await this.AddComponent<Model>(mFireDesc)).Instance;
+            this.movingFire = await this.AddComponentModel(mFireDesc);
 
             this.movingFireEmitter = new ParticleEmitter() { EmissionRate = 0.1f, InfiniteDuration = true };
 
@@ -269,10 +267,10 @@ namespace Skybox
 
             #region DEBUG drawers
 
-            this.volumesDrawer = await this.AddComponent<PrimitiveListDrawer<Line3D>>(new PrimitiveListDrawerDescription<Line3D>() { AlphaEnabled = true, Count = 10000 });
+            this.volumesDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(new PrimitiveListDrawerDescription<Line3D>() { AlphaEnabled = true, Count = 10000 });
             this.volumesDrawer.Visible = false;
 
-            this.graphDrawer = await this.AddComponent<PrimitiveListDrawer<Triangle>>(new PrimitiveListDrawerDescription<Triangle>() { AlphaEnabled = true, Count = 10000 });
+            this.graphDrawer = await this.AddComponentPrimitiveListDrawer<Triangle>(new PrimitiveListDrawerDescription<Triangle>() { AlphaEnabled = true, Count = 10000 });
             this.graphDrawer.Visible = false;
 
             #endregion
@@ -416,7 +414,7 @@ namespace Skybox
                 {
                     var tri = Line3D.CreateWiredTriangle(r.Item);
 
-                    this.volumesDrawer.Instance.SetPrimitives(Color.White, tri);
+                    this.volumesDrawer.SetPrimitives(Color.White, tri);
                 }
             }
 
@@ -515,20 +513,20 @@ namespace Skybox
 
         private void DEBUGUpdateVolumesDrawer()
         {
-            this.volumesDrawer.Instance.SetPrimitives(this.ruinsVolumeColor, Line3D.CreateWiredBox(this.ruins.GetBoundingBox()));
+            this.volumesDrawer.SetPrimitives(this.ruinsVolumeColor, Line3D.CreateWiredBox(this.ruins.GetBoundingBox()));
 
             List<Line3D> volumesTorchs = new List<Line3D>();
-            for (int i = 0; i < this.torchs.Count; i++)
+            for (int i = 0; i < this.torchs.InstanceCount; i++)
             {
                 volumesTorchs.AddRange(Line3D.CreateWiredBox(this.torchs[i].GetBoundingBox()));
             }
-            this.volumesDrawer.Instance.SetPrimitives(this.torchVolumeColor, volumesTorchs.ToArray());
+            this.volumesDrawer.SetPrimitives(this.torchVolumeColor, volumesTorchs.ToArray());
 
             for (int i = 1; i < this.Lights.PointLights.Length; i++)
             {
                 var light = this.Lights.PointLights[i];
 
-                this.volumesDrawer.Instance.SetPrimitives(
+                this.volumesDrawer.SetPrimitives(
                     new Color4(light.DiffuseColor.RGB(), alpha),
                     Line3D.CreateWiredSphere(light.BoundingSphere, this.bsphSlices, this.bsphStacks));
             }
@@ -537,7 +535,7 @@ namespace Skybox
         {
             var light = this.Lights.PointLights[0];
 
-            this.volumesDrawer.Instance.SetPrimitives(
+            this.volumesDrawer.SetPrimitives(
                 new Color4(light.DiffuseColor.RGB(), alpha),
                 Line3D.CreateWiredSphere(light.BoundingSphere, this.bsphSlices, this.bsphStacks));
         }
@@ -546,11 +544,11 @@ namespace Skybox
             var nodes = this.GetNodes(this.walker).OfType<GraphNode>();
             if (nodes.Any())
             {
-                this.graphDrawer.Instance.Clear();
+                this.graphDrawer.Clear();
 
                 foreach (var node in nodes)
                 {
-                    this.graphDrawer.Instance.AddPrimitives(node.Color, node.Triangles);
+                    this.graphDrawer.AddPrimitives(node.Color, node.Triangles);
                 }
             }
         }

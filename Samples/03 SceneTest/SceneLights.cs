@@ -20,11 +20,11 @@ namespace SceneTest
         private ModelInstanced lightEmitters = null;
         private ModelInstanced lanterns = null;
 
-        private SceneObject<PrimitiveListDrawer<Line3D>> lightsVolumeDrawer = null;
+        private PrimitiveListDrawer<Line3D> lightsVolumeDrawer = null;
         private bool drawDrawVolumes = false;
         private bool drawCullVolumes = false;
 
-        private SceneObject<SpriteTexture> bufferDrawer = null;
+        private SpriteTexture bufferDrawer = null;
 
         /// <summary>
         /// Constructor
@@ -100,7 +100,7 @@ namespace SceneTest
                 }
             };
 
-            await this.AddComponent<Model>(desc);
+            await this.AddComponentModel(desc);
         }
         private async Task InitializeBuildingObelisk()
         {
@@ -117,7 +117,7 @@ namespace SceneTest
                 }
             };
 
-            this.buildingObelisks = (await this.AddComponent<ModelInstanced>(desc)).Instance;
+            this.buildingObelisks = await this.AddComponentModelInstanced(desc);
         }
         private async Task InitializeTree()
         {
@@ -134,7 +134,7 @@ namespace SceneTest
                 }
             };
 
-            await this.AddComponent<Model>(desc);
+            await this.AddComponentModel(desc);
         }
         private async Task InitializeEmitter()
         {
@@ -160,7 +160,7 @@ namespace SceneTest
                 }
             };
 
-            this.lightEmitters = (await this.AddComponent<ModelInstanced>(desc)).Instance;
+            this.lightEmitters = await this.AddComponentModelInstanced(desc);
         }
         private async Task InitializeLanterns()
         {
@@ -197,7 +197,7 @@ namespace SceneTest
                 }
             };
 
-            this.lanterns = (await this.AddComponent<ModelInstanced>(desc)).Instance;
+            this.lanterns = await this.AddComponentModelInstanced(desc);
         }
         private async Task InitializeLights()
         {
@@ -224,7 +224,7 @@ namespace SceneTest
                 DepthEnabled = true,
                 Count = 5000
             };
-            this.lightsVolumeDrawer = await this.AddComponent<PrimitiveListDrawer<Line3D>>(desc);
+            this.lightsVolumeDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(desc);
         }
         private async Task InitializeBufferDrawer()
         {
@@ -241,7 +241,7 @@ namespace SceneTest
                 Height = height,
                 Channel = SpriteTextureChannels.NoAlpha,
             };
-            this.bufferDrawer = await this.AddComponent<SpriteTexture>(desc, SceneObjectUsages.UI, layerEffects);
+            this.bufferDrawer = await this.AddComponentSpriteTexture(desc, SceneObjectUsages.UI, layerEffects);
 
             this.bufferDrawer.Visible = false;
         }
@@ -414,7 +414,7 @@ namespace SceneTest
         }
         private void UpdateLightVolumes()
         {
-            this.lightsVolumeDrawer.Instance.Clear();
+            this.lightsVolumeDrawer.Clear();
 
             if (this.drawDrawVolumes)
             {
@@ -424,7 +424,7 @@ namespace SceneTest
 
                     var lines = spot.GetVolume(30);
 
-                    this.lightsVolumeDrawer.Instance.AddPrimitives(color, lines);
+                    this.lightsVolumeDrawer.AddPrimitives(color, lines);
                 }
 
                 foreach (var point in this.Lights.PointLights)
@@ -433,7 +433,7 @@ namespace SceneTest
 
                     var lines = point.GetVolume(30, 30);
 
-                    this.lightsVolumeDrawer.Instance.AddPrimitives(color, lines);
+                    this.lightsVolumeDrawer.AddPrimitives(color, lines);
                 }
             }
 
@@ -446,14 +446,14 @@ namespace SceneTest
                 {
                     var lines = Line3D.CreateWiredSphere(spot.BoundingSphere, 24, 24);
 
-                    this.lightsVolumeDrawer.Instance.AddPrimitives(spotColor, lines);
+                    this.lightsVolumeDrawer.AddPrimitives(spotColor, lines);
                 }
 
                 foreach (var point in this.Lights.PointLights)
                 {
                     var lines = Line3D.CreateWiredSphere(point.BoundingSphere, 24, 24);
 
-                    this.lightsVolumeDrawer.Instance.AddPrimitives(pointColor, lines);
+                    this.lightsVolumeDrawer.AddPrimitives(pointColor, lines);
                 }
             }
 
@@ -478,19 +478,19 @@ namespace SceneTest
 
             if (this.Game.Input.KeyJustReleased(Keys.Add))
             {
-                this.bufferDrawer.Instance.TextureIndex++;
+                this.bufferDrawer.TextureIndex++;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.Subtract))
             {
-                if (this.bufferDrawer.Instance.TextureIndex > 0)
+                if (this.bufferDrawer.TextureIndex > 0)
                 {
-                    this.bufferDrawer.Instance.TextureIndex--;
+                    this.bufferDrawer.TextureIndex--;
                 }
 
                 if (shift)
                 {
-                    this.bufferDrawer.Instance.TextureIndex = 0;
+                    this.bufferDrawer.TextureIndex = 0;
                 }
             }
         }
@@ -498,9 +498,9 @@ namespace SceneTest
         {
             var buffer = this.Renderer.GetResource(resource);
 
-            this.bufferDrawer.Instance.Texture = buffer;
-            this.bufferDrawer.Instance.TextureIndex = 0;
-            this.bufferDrawer.Instance.Channels = SpriteTextureChannels.Red;
+            this.bufferDrawer.Texture = buffer;
+            this.bufferDrawer.TextureIndex = 0;
+            this.bufferDrawer.Channels = SpriteTextureChannels.Red;
             this.bufferDrawer.Visible = true;
         }
     }

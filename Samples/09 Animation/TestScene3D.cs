@@ -14,67 +14,67 @@ namespace Animation
     {
         private const int layerHUD = 99;
 
-        private SceneObject<TextDrawer> runtime = null;
-        private SceneObject<TextDrawer> animText = null;
+        private TextDrawer runtime = null;
+        private TextDrawer animText = null;
 
-        private SceneObject<PrimitiveListDrawer<Triangle>> itemTris = null;
-        private SceneObject<PrimitiveListDrawer<Line3D>> itemLines = null;
+        private PrimitiveListDrawer<Triangle> itemTris = null;
+        private PrimitiveListDrawer<Line3D> itemLines = null;
         private readonly Color itemTrisColor = new Color(Color.Yellow.ToColor3(), 0.6f);
         private readonly Color itemLinesColor = new Color(Color.Red.ToColor3(), 1f);
         private bool showItemDEBUG = false;
         private bool showItem = true;
         private int itemIndex = 0;
 
-        private static Action<SceneObject<ModelInstanced>> StartAnimation()
+        private static Action<ModelInstanced> StartAnimation()
         {
             return item =>
             {
-                for (int i = 0; i < item.Count; i++)
+                for (int i = 0; i < item.InstanceCount; i++)
                 {
-                    item.Instance[i].AnimationController.Start(0);
+                    item[i].AnimationController.Start(0);
                 }
             };
         }
-        private static Action<SceneObject<ModelInstanced>> PauseAnimation()
+        private static Action<ModelInstanced> PauseAnimation()
         {
             return item =>
             {
-                for (int i = 0; i < item.Count; i++)
+                for (int i = 0; i < item.InstanceCount; i++)
                 {
-                    item.Instance[i].AnimationController.Pause();
+                    item[i].AnimationController.Pause();
                 }
             };
         }
-        private static Action<SceneObject<ModelInstanced>> ResumeAnimation()
+        private static Action<ModelInstanced> ResumeAnimation()
         {
             return item =>
             {
-                for (int i = 0; i < item.Count; i++)
+                for (int i = 0; i < item.InstanceCount; i++)
                 {
-                    item.Instance[i].AnimationController.Resume();
+                    item[i].AnimationController.Resume();
                 }
             };
         }
-        private static Action<SceneObject<ModelInstanced>> IncreaseDelta()
+        private static Action<ModelInstanced> IncreaseDelta()
         {
             return item =>
             {
-                for (int i = 0; i < item.Count; i++)
+                for (int i = 0; i < item.InstanceCount; i++)
                 {
-                    var controller = item.Instance[i].AnimationController;
+                    var controller = item[i].AnimationController;
 
                     controller.TimeDelta += 0.1f;
                     controller.TimeDelta = Math.Min(5, controller.TimeDelta);
                 }
             };
         }
-        private static Action<SceneObject<ModelInstanced>> DecreaseDelta()
+        private static Action<ModelInstanced> DecreaseDelta()
         {
             return item =>
             {
-                for (int i = 0; i < item.Count; i++)
+                for (int i = 0; i < item.InstanceCount; i++)
                 {
-                    var controller = item.Instance[i].AnimationController;
+                    var controller = item[i].AnimationController;
 
                     controller.TimeDelta -= 0.1f;
                     controller.TimeDelta = Math.Max(0, controller.TimeDelta);
@@ -82,7 +82,7 @@ namespace Animation
             };
         }
 
-        private readonly List<SceneObject<ModelInstanced>> animObjects = new List<SceneObject<ModelInstanced>>();
+        private readonly List<ModelInstanced> animObjects = new List<ModelInstanced>();
 
         private readonly Dictionary<string, AnimationPlan> soldierPaths = new Dictionary<string, AnimationPlan>();
         private readonly Dictionary<string, AnimationPlan> ratPaths = new Dictionary<string, AnimationPlan>();
@@ -110,27 +110,27 @@ namespace Animation
         }
         private async Task InitializeUI()
         {
-            var title = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
-            this.runtime = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            this.animText = await this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 15, Color.Orange), SceneObjectUsages.UI, layerHUD);
+            var title = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
+            this.runtime = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.animText = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 15, Color.Orange), SceneObjectUsages.UI, layerHUD);
 
-            title.Instance.Text = "Animation test";
-            this.runtime.Instance.Text = "";
-            this.animText.Instance.Text = "";
+            title.Text = "Animation test";
+            this.runtime.Text = "";
+            this.animText.Text = "";
 
-            title.Instance.Position = Vector2.Zero;
-            this.runtime.Instance.Position = new Vector2(5, title.Instance.Top + title.Instance.Height + 3);
-            this.animText.Instance.Position = new Vector2(5, this.runtime.Instance.Top + this.runtime.Instance.Height + 3);
+            title.Position = Vector2.Zero;
+            this.runtime.Position = new Vector2(5, title.Top + title.Height + 3);
+            this.animText.Position = new Vector2(5, this.runtime.Top + this.runtime.Height + 3);
 
             var spDesc = new SpriteDescription()
             {
                 AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
-                Height = this.animText.Instance.Top + this.animText.Instance.Height + 3,
+                Height = this.animText.Top + this.animText.Height + 3,
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            await this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);
         }
         private async Task InitializeFloor()
         {
@@ -171,11 +171,11 @@ namespace Animation
                 }
             };
 
-            await this.AddComponent<Model>(desc);
+            await this.AddComponentModel(desc);
         }
         private async Task InitializeLadder()
         {
-            var ladder = await this.AddComponent<ModelInstanced>(
+            var ladder = await this.AddComponentModelInstanced(
                 new ModelInstancedDescription()
                 {
                     Name = "Ladder",
@@ -189,11 +189,11 @@ namespace Animation
                     }
                 });
 
-            ladder.Instance[0].Manipulator.SetPosition(-4f, 1, 0, true);
-            ladder.Instance[1].Manipulator.SetPosition(-4.5f, 1, 5, true);
+            ladder[0].Manipulator.SetPosition(-4f, 1, 0, true);
+            ladder[1].Manipulator.SetPosition(-4.5f, 1, 5, true);
 
-            ladder.Instance[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
-            ladder.Instance[1].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            ladder[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            ladder[1].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
 
             AnimationPath def = new AnimationPath();
             def.Add("default");
@@ -209,14 +209,14 @@ namespace Animation
                 { "push", new AnimationPlan(push) }
             };
 
-            ladder.Instance[0].AnimationController.AddPath(ladderPaths["pull"]);
-            ladder.Instance[1].AnimationController.AddPath(ladderPaths["pull"]);
+            ladder[0].AnimationController.AddPath(ladderPaths["pull"]);
+            ladder[1].AnimationController.AddPath(ladderPaths["pull"]);
 
             this.animObjects.Add(ladder);
         }
         private async Task InitializeLadder2()
         {
-            var ladder = await this.AddComponent<ModelInstanced>(
+            var ladder = await this.AddComponentModelInstanced(
                 new ModelInstancedDescription()
                 {
                     Name = "Ladder2",
@@ -230,7 +230,7 @@ namespace Animation
                     }
                 });
 
-            var ladder2 = await this.AddComponent<ModelInstanced>(
+            var ladder2 = await this.AddComponentModelInstanced(
                 new ModelInstancedDescription()
                 {
                     Name = "Ladder22",
@@ -244,17 +244,17 @@ namespace Animation
                     }
                 });
 
-            ladder.Instance[0].Manipulator.SetPosition(-3f, 1, 0, true);
-            ladder.Instance[1].Manipulator.SetPosition(-3.5f, 1, 5, true);
+            ladder[0].Manipulator.SetPosition(-3f, 1, 0, true);
+            ladder[1].Manipulator.SetPosition(-3.5f, 1, 5, true);
 
-            ladder.Instance[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
-            ladder.Instance[1].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            ladder[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            ladder[1].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
 
-            ladder2.Instance[0].Manipulator.SetPosition(-2f, 1, 0, true);
-            ladder2.Instance[1].Manipulator.SetPosition(-2.5f, 1, 5, true);
+            ladder2[0].Manipulator.SetPosition(-2f, 1, 0, true);
+            ladder2[1].Manipulator.SetPosition(-2.5f, 1, 5, true);
 
-            ladder2.Instance[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
-            ladder2.Instance[1].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            ladder2[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            ladder2[1].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
 
             AnimationPath def = new AnimationPath();
             def.Add("default");
@@ -270,18 +270,18 @@ namespace Animation
                 { "push", new AnimationPlan(push) }
             };
 
-            ladder.Instance[0].AnimationController.AddPath(ladder2Paths["pull"]);
-            ladder.Instance[1].AnimationController.AddPath(ladder2Paths["pull"]);
+            ladder[0].AnimationController.AddPath(ladder2Paths["pull"]);
+            ladder[1].AnimationController.AddPath(ladder2Paths["pull"]);
 
-            ladder2.Instance[0].AnimationController.AddPath(ladder2Paths["push"]);
-            ladder2.Instance[1].AnimationController.AddPath(ladder2Paths["push"]);
+            ladder2[0].AnimationController.AddPath(ladder2Paths["push"]);
+            ladder2[1].AnimationController.AddPath(ladder2Paths["push"]);
 
             this.animObjects.Add(ladder);
             this.animObjects.Add(ladder2);
         }
         private async Task InitializeSoldier()
         {
-            var soldier = await this.AddComponent<ModelInstanced>(
+            var soldier = await this.AddComponentModelInstanced(
                 new ModelInstancedDescription()
                 {
                     Name = "Soldier",
@@ -295,11 +295,11 @@ namespace Animation
                     }
                 });
 
-            soldier.Instance[0].Manipulator.SetPosition(0, 0, 0, true);
-            soldier.Instance[1].Manipulator.SetPosition(0.5f, 0, 5, true);
+            soldier[0].Manipulator.SetPosition(0, 0, 0, true);
+            soldier[1].Manipulator.SetPosition(0.5f, 0, 5, true);
 
-            soldier.Instance[0].AnimationController.PathEnding += SoldierControllerPathEnding;
-            soldier.Instance[1].AnimationController.PathEnding += SoldierControllerPathEnding;
+            soldier[0].AnimationController.PathEnding += SoldierControllerPathEnding;
+            soldier[1].AnimationController.PathEnding += SoldierControllerPathEnding;
 
             AnimationPath p0 = new AnimationPath();
             p0.Add("idle1");
@@ -327,14 +327,14 @@ namespace Animation
             this.soldierPaths.Add("idle2", new AnimationPlan(p2));
             this.soldierPaths.Add("stand", new AnimationPlan(p3));
 
-            soldier.Instance[0].AnimationController.AddPath(this.soldierPaths["complex"]);
-            soldier.Instance[1].AnimationController.AddPath(this.soldierPaths["complex"]);
+            soldier[0].AnimationController.AddPath(this.soldierPaths["complex"]);
+            soldier[1].AnimationController.AddPath(this.soldierPaths["complex"]);
 
             this.animObjects.Add(soldier);
         }
         private async Task InitializeRat()
         {
-            var rat = await this.AddComponent<ModelInstanced>(
+            var rat = await this.AddComponentModelInstanced(
                 new ModelInstancedDescription()
                 {
                     Name = "Rat",
@@ -348,22 +348,22 @@ namespace Animation
                     }
                 });
 
-            rat.Instance[0].Manipulator.SetPosition(2, 0, 0, true);
-            rat.Instance[1].Manipulator.SetPosition(2.5f, 0, 5, true);
+            rat[0].Manipulator.SetPosition(2, 0, 0, true);
+            rat[1].Manipulator.SetPosition(2.5f, 0, 5, true);
 
             AnimationPath p0 = new AnimationPath();
             p0.AddLoop("walk");
 
             this.ratPaths.Add("walk", new AnimationPlan(p0));
 
-            rat.Instance[0].AnimationController.AddPath(this.ratPaths["walk"]);
-            rat.Instance[1].AnimationController.AddPath(this.ratPaths["walk"]);
+            rat[0].AnimationController.AddPath(this.ratPaths["walk"]);
+            rat[1].AnimationController.AddPath(this.ratPaths["walk"]);
 
             this.animObjects.Add(rat);
         }
         private async Task InitializeDoors()
         {
-            var doors = await this.AddComponent<ModelInstanced>(
+            var doors = await this.AddComponentModelInstanced(
                 new ModelInstancedDescription()
                 {
                     Name = "Doors",
@@ -377,9 +377,9 @@ namespace Animation
                     },
                 });
 
-            doors.Instance[0].Manipulator.SetPosition(-10, 0, 8, true);
-            doors.Instance[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
-            doors.Instance[0].Manipulator.SetScale(2.5f);
+            doors[0].Manipulator.SetPosition(-10, 0, 8, true);
+            doors[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            doors[0].Manipulator.SetScale(2.5f);
 
             AnimationPath def = new AnimationPath();
             def.Add("default");
@@ -399,13 +399,13 @@ namespace Animation
                 { "rep", new AnimationPlan(rep) }
             };
 
-            doors.Instance[0].AnimationController.AddPath(doorsPaths["rep"]);
+            doors[0].AnimationController.AddPath(doorsPaths["rep"]);
 
             this.animObjects.Add(doors);
         }
         private async Task InitializeJails()
         {
-            var doors = await this.AddComponent<ModelInstanced>(
+            var doors = await this.AddComponentModelInstanced(
                 new ModelInstancedDescription()
                 {
                     Name = "Jails",
@@ -419,9 +419,9 @@ namespace Animation
                     }
                 });
 
-            doors.Instance[0].Manipulator.SetPosition(10, 0, 8, true);
-            doors.Instance[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
-            doors.Instance[0].Manipulator.SetScale(2.5f);
+            doors[0].Manipulator.SetPosition(10, 0, 8, true);
+            doors[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            doors[0].Manipulator.SetScale(2.5f);
 
             AnimationPath def = new AnimationPath();
             def.Add("default");
@@ -441,7 +441,7 @@ namespace Animation
                 { "rep", new AnimationPlan(rep) }
             };
 
-            doors.Instance[0].AnimationController.AddPath(jailsPaths["rep"]);
+            doors[0].AnimationController.AddPath(jailsPaths["rep"]);
 
             this.animObjects.Add(doors);
         }
@@ -460,9 +460,9 @@ namespace Animation
             BoundingBox bbox = new BoundingBox();
             animObjects.ForEach(item =>
             {
-                for (int i = 0; i < item.Count; i++)
+                for (int i = 0; i < item.InstanceCount; i++)
                 {
-                    bbox = BoundingBox.Merge(bbox, item.Instance[i].GetBoundingBox());
+                    bbox = BoundingBox.Merge(bbox, item[i].GetBoundingBox());
                 }
             });
             float playerHeight = bbox.Maximum.Y - bbox.Minimum.Y;
@@ -476,8 +476,8 @@ namespace Animation
         }
         private async Task InitializeDebug()
         {
-            this.itemTris = await this.AddComponent<PrimitiveListDrawer<Triangle>>(new PrimitiveListDrawerDescription<Triangle>() { Count = 5000, Color = itemTrisColor });
-            this.itemLines = await this.AddComponent<PrimitiveListDrawer<Line3D>>(new PrimitiveListDrawerDescription<Line3D>() { Count = 1000, Color = itemLinesColor });
+            this.itemTris = await this.AddComponentPrimitiveListDrawer<Triangle>(new PrimitiveListDrawerDescription<Triangle>() { Count = 5000, Color = itemTrisColor });
+            this.itemLines = await this.AddComponentPrimitiveListDrawer<Line3D>(new PrimitiveListDrawerDescription<Line3D>() { Count = 1000, Color = itemLinesColor });
         }
 
         public override void Update(GameTime gameTime)
@@ -497,10 +497,10 @@ namespace Animation
 
             this.UpdateDebugData();
 
-            var itemController = animObjects[itemIndex].Instance[0].AnimationController;
+            var itemController = animObjects[itemIndex][0].AnimationController;
 
-            this.runtime.Instance.Text = this.Game.RuntimeText;
-            this.animText.Instance.Text = string.Format(
+            this.runtime.Text = this.Game.RuntimeText;
+            this.animText.Text = string.Format(
                 "Paths: {0:00}; Delta: {1:0.0}; Index: {2}; Clip: {3}; Time: {4:0.00}; Item Time: {5:0.00}",
                 itemController.PathCount,
                 itemController.TimeDelta,
@@ -614,13 +614,13 @@ namespace Animation
         }
         private void UpdateDebugData()
         {
-            var selectedItem = animObjects[itemIndex].Instance[0];
+            var selectedItem = animObjects[itemIndex][0];
 
             animObjects.ForEach(item =>
             {
-                for (int i = 0; i < item.Count; i++)
+                for (int i = 0; i < item.InstanceCount; i++)
                 {
-                    item.Instance[i].Visible = !this.showItemDEBUG || this.showItem || (item.Instance[i] != selectedItem);
+                    item[i].Visible = !this.showItemDEBUG || this.showItem || (item[i] != selectedItem);
                 }
             });
 
@@ -629,8 +629,8 @@ namespace Animation
                 var tris = selectedItem.GetTriangles(true);
                 var bbox = selectedItem.GetBoundingBox(true);
 
-                this.itemTris.Instance.SetPrimitives(itemTrisColor, tris);
-                this.itemLines.Instance.SetPrimitives(itemLinesColor, Line3D.CreateWiredBox(bbox));
+                this.itemTris.SetPrimitives(itemTrisColor, tris);
+                this.itemLines.SetPrimitives(itemLinesColor, Line3D.CreateWiredBox(bbox));
 
                 this.itemTris.Active = this.itemTris.Visible = true;
                 this.itemLines.Active = this.itemLines.Visible = true;
