@@ -89,7 +89,6 @@ namespace SceneTest
             var desc = new ModelDescription()
             {
                 Name = "Floor",
-                Static = true,
                 CastShadow = true,
                 DeferredEnabled = true,
                 DepthEnabled = true,
@@ -110,7 +109,6 @@ namespace SceneTest
                 Name = "Obelisk",
                 Instances = 4,
                 CastShadow = true,
-                Static = true,
                 UseAnisotropicFiltering = true,
                 Content = new ContentDescription()
                 {
@@ -127,7 +125,6 @@ namespace SceneTest
             {
                 Name = "Tree",
                 CastShadow = true,
-                Static = true,
                 UseAnisotropicFiltering = true,
                 AlphaEnabled = true,
                 Content = new ContentDescription()
@@ -153,7 +150,6 @@ namespace SceneTest
             {
                 Name = "Emitter",
                 Instances = 4,
-                Static = false,
                 CastShadow = false,
                 DeferredEnabled = true,
                 DepthEnabled = true,
@@ -191,7 +187,6 @@ namespace SceneTest
             {
                 Name = "Lanterns",
                 Instances = 3,
-                Static = false,
                 CastShadow = false,
                 DeferredEnabled = true,
                 DepthEnabled = true,

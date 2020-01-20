@@ -130,7 +130,6 @@ namespace SceneTest
 
             var desc = new ModelDescription()
             {
-                Static = true,
                 CastShadow = true,
                 DeferredEnabled = true,
                 DepthEnabled = true,
@@ -154,7 +153,6 @@ namespace SceneTest
             var desc = new ModelDescription()
             {
                 Name = name,
-                Static = true,
                 CastShadow = true,
                 UseAnisotropicFiltering = true,
                 Content = new ContentDescription()

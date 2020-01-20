@@ -98,7 +98,6 @@ namespace Instancing
             var desc = new ModelInstancedDescription()
             {
                 Name = "Floor",
-                Static = true,
                 CastShadow = true,
                 DeferredEnabled = true,
                 DepthEnabled = true,
@@ -138,7 +137,6 @@ namespace Instancing
             {
                 Name = "Trees",
                 CastShadow = true,
-                Static = true,
                 Instances = instances,
                 AlphaEnabled = true,
                 UseAnisotropicFiltering = true,

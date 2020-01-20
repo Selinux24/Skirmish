@@ -38,7 +38,7 @@ namespace Engine
         /// <summary>
         /// Reference to the objects that we render in the minimap
         /// </summary>
-        public SceneObject[] Drawables { get; set; }
+        public ISceneObject[] Drawables { get; set; }
 
         /// <summary>
         /// Contructor

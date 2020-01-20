@@ -334,7 +334,7 @@ namespace Engine.Common
         /// <param name="index">Cull index</param>
         /// <param name="components">Component list</param>
         /// <returns>Returns the opaque components</returns>
-        protected virtual List<SceneObject> GetOpaques(int index, IEnumerable<SceneObject> components)
+        protected virtual List<ISceneObject> GetOpaques(int index, IEnumerable<ISceneObject> components)
         {
             var opaques = components.Where(c =>
             {
@@ -358,7 +358,7 @@ namespace Engine.Common
         /// <param name="c1">First component</param>
         /// <param name="c2">Second component</param>
         /// <returns>Returns sorting order (nearest first)</returns>
-        protected virtual int SortOpaques(int index, SceneObject c1, SceneObject c2)
+        protected virtual int SortOpaques(int index, ISceneObject c1, ISceneObject c2)
         {
             int res = c1.Order.CompareTo(c2.Order);
 
@@ -386,7 +386,7 @@ namespace Engine.Common
         /// <param name="index">Cull index</param>
         /// <param name="components">Component list</param>
         /// <returns>Returns the transparent components</returns>
-        protected virtual List<SceneObject> GetTransparents(int index, IEnumerable<SceneObject> components)
+        protected virtual List<ISceneObject> GetTransparents(int index, IEnumerable<ISceneObject> components)
         {
             var transparents = components.Where(c =>
             {
@@ -412,7 +412,7 @@ namespace Engine.Common
         /// <param name="c1">First component</param>
         /// <param name="c2">Second component</param>
         /// <returns>Returns sorting order (far first)</returns>
-        protected virtual int SortTransparents(int index, SceneObject c1, SceneObject c2)
+        protected virtual int SortTransparents(int index, ISceneObject c1, ISceneObject c2)
         {
             int res = c1.DepthEnabled.CompareTo(c2.DepthEnabled);
             if (res == 0)
@@ -439,7 +439,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="context">Drawing context</param>
         /// <param name="c">Component</param>
-        protected virtual void DrawOpaque(DrawContext context, SceneObject c)
+        protected virtual void DrawOpaque(DrawContext context, ISceneObject c)
         {
             var graphics = this.Game.Graphics;
 
@@ -465,7 +465,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="context">Drawing context</param>
         /// <param name="c">Component</param>
-        protected virtual void DrawTransparent(DrawContext context, SceneObject c)
+        protected virtual void DrawTransparent(DrawContext context, ISceneObject c)
         {
             var graphics = this.Game.Graphics;
 
@@ -822,7 +822,7 @@ namespace Engine.Common
         /// <param name="context">Context</param>
         /// <param name="index">Culling index</param>
         /// <param name="components">Components to draw</param>
-        protected void DrawShadowComponents(DrawContextShadows context, int index, IEnumerable<SceneObject> components)
+        protected void DrawShadowComponents(DrawContextShadows context, int index, IEnumerable<ISceneObject> components)
         {
             var graphics = this.Game.Graphics;
 
@@ -840,7 +840,7 @@ namespace Engine.Common
         /// <param name="c">Scene object</param>
         /// <param name="cullIndex">Cull index</param>
         /// <returns>Returns true if the object is not culled</returns>
-        private bool IsVisible(SceneObject c, int cullIndex)
+        private bool IsVisible(ISceneObject c, int cullIndex)
         {
             if (!c.Is<Drawable>()) return false;
 
@@ -859,7 +859,7 @@ namespace Engine.Common
         /// <param name="c2">Scene object two</param>
         /// <param name="cullIndex">Cull index</param>
         /// <returns></returns>
-        private int Sort(SceneObject c1, SceneObject c2, int cullIndex)
+        private int Sort(ISceneObject c1, ISceneObject c2, int cullIndex)
         {
             int res = c1.DepthEnabled.CompareTo(c2.DepthEnabled);
             if (res == 0)
@@ -886,7 +886,7 @@ namespace Engine.Common
         /// <param name="graphics">Graphics</param>
         /// <param name="context">Context</param>
         /// <param name="c">Scene object</param>
-        private void DrawShadows(Graphics graphics, DrawContextShadows context, SceneObject c)
+        private void DrawShadows(Graphics graphics, DrawContextShadows context, ISceneObject c)
         {
             graphics.SetRasterizerShadowMapping();
             graphics.SetDepthStencilShadowMapping();

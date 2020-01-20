@@ -26,7 +26,7 @@ namespace Engine
         /// <summary>
         /// Terrain to draw
         /// </summary>
-        public SceneObject[] Drawables { get; set; }
+        public ISceneObject[] Drawables { get; set; }
         /// <summary>
         /// Minimap render area
         /// </summary>
@@ -38,7 +38,6 @@ namespace Engine
         public MinimapDescription()
             : base()
         {
-            this.Static = true;
             this.CastShadow = false;
             this.DeferredEnabled = false;
             this.DepthEnabled = false;

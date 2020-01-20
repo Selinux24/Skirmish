@@ -199,7 +199,7 @@ namespace GameLogic
                     Left = (int)q.X,
                     Width = minimapWidth,
                     Height = minimapHeight,
-                    Drawables = new SceneObject[]
+                    Drawables = new ISceneObject[]
                     {
                         terrainObj,
                         troopsObj,

@@ -223,7 +223,6 @@ namespace SceneTest
                 {
                     Name = "Tree",
                     CastShadow = true,
-                    Static = true,
                     SphericVolume = false,
                     UseAnisotropicFiltering = true,
                     AlphaEnabled = true,
@@ -243,7 +242,6 @@ namespace SceneTest
                 {
                     Name = "TreeI",
                     CastShadow = true,
-                    Static = true,
                     SphericVolume = false,
                     UseAnisotropicFiltering = true,
                     AlphaEnabled = true,
@@ -299,7 +297,6 @@ namespace SceneTest
             var desc = new ModelDescription()
             {
                 Name = "Floor",
-                Static = true,
                 CastShadow = true,
                 DeferredEnabled = true,
                 DepthEnabled = true,
@@ -315,7 +312,6 @@ namespace SceneTest
             var descI = new ModelInstancedDescription()
             {
                 Name = "FloorI",
-                Static = true,
                 CastShadow = true,
                 DeferredEnabled = true,
                 DepthEnabled = true,
@@ -352,7 +348,6 @@ namespace SceneTest
                 {
                     Name = "Obelisk",
                     CastShadow = true,
-                    Static = true,
                     SphericVolume = false,
                     UseAnisotropicFiltering = true,
                     Content = new ContentDescription()
@@ -369,7 +364,6 @@ namespace SceneTest
                 {
                     Name = "ObeliskI",
                     CastShadow = true,
-                    Static = true,
                     SphericVolume = false,
                     UseAnisotropicFiltering = true,
                     Instances = 4,
@@ -409,7 +403,6 @@ namespace SceneTest
                     Name = "Soldier",
                     TextureIndex = 1,
                     CastShadow = true,
-                    Static = false,
                     Content = new ContentDescription()
                     {
                         ContentFolder = "SceneTest/character/soldier",
@@ -424,7 +417,6 @@ namespace SceneTest
                 {
                     Name = "SoldierI",
                     CastShadow = true,
-                    Static = false,
                     Instances = 4,
                     Content = new ContentDescription()
                     {
@@ -473,7 +465,6 @@ namespace SceneTest
                 {
                     Name = "Challenger",
                     CastShadow = true,
-                    Static = false,
                     SphericVolume = false,
                     Content = new ContentDescription()
                     {
@@ -489,7 +480,6 @@ namespace SceneTest
                 {
                     Name = "LeopardI",
                     CastShadow = true,
-                    Static = false,
                     SphericVolume = false,
                     Instances = 4,
                     Content = new ContentDescription()
@@ -534,7 +524,6 @@ namespace SceneTest
                 {
                     Name = "Lamp",
                     CastShadow = true,
-                    Static = true,
                     SphericVolume = false,
                     Content = new ContentDescription()
                     {
@@ -550,7 +539,6 @@ namespace SceneTest
                 {
                     Name = "LampI",
                     CastShadow = true,
-                    Static = true,
                     SphericVolume = false,
                     Instances = 4,
                     Content = new ContentDescription()
@@ -596,7 +584,6 @@ namespace SceneTest
                 {
                     Name = "Street Lamp",
                     CastShadow = true,
-                    Static = true,
                     SphericVolume = false,
                     Content = new ContentDescription()
                     {
@@ -612,7 +599,6 @@ namespace SceneTest
                 {
                     Name = "Street LampI",
                     CastShadow = true,
-                    Static = true,
                     SphericVolume = false,
                     Instances = 9,
                     Content = new ContentDescription()
@@ -661,7 +647,6 @@ namespace SceneTest
                 {
                     Name = "Container",
                     CastShadow = true,
-                    Static = true,
                     SphericVolume = false,
                     Content = new ContentDescription()
                     {
@@ -677,7 +662,6 @@ namespace SceneTest
                 {
                     Name = "ContainerI",
                     CastShadow = true,
-                    Static = true,
                     SphericVolume = false,
                     Instances = 96,
                     Content = new ContentDescription()

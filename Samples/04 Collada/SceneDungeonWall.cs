@@ -124,7 +124,6 @@ namespace Collada
             var desc = new ModelDescription()
             {
                 Name = "Emitter",
-                Static = false,
                 CastShadow = false,
                 DeferredEnabled = true,
                 DepthEnabled = true,

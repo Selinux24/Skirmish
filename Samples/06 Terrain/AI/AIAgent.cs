@@ -47,7 +47,7 @@ namespace Terrain.AI
         /// <summary>
         /// Scene object to manage
         /// </summary>
-        public SceneObject SceneObject { get; protected set; }
+        public ISceneObject SceneObject { get; protected set; }
         /// <summary>
         /// Agent type
         /// </summary>
@@ -185,7 +185,7 @@ namespace Terrain.AI
         /// <param name="agentType"></param>
         /// <param name="sceneObject"></param>
         /// <param name="stats"></param>
-        protected AIAgent(Brain parent, AgentType agentType, SceneObject sceneObject, AIStatsDescription stats)
+        protected AIAgent(Brain parent, AgentType agentType, ISceneObject sceneObject, AIStatsDescription stats)
         {
             this.Parent = parent;
             this.AgentType = agentType;

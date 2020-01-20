@@ -119,7 +119,6 @@ namespace Engine
         public WaterDescription()
             : base()
         {
-            this.Static = true;
             this.CastShadow = false;
             this.DeferredEnabled = true;
             this.DepthEnabled = true;

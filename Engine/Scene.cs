@@ -24,9 +24,9 @@ namespace Engine
         /// <param name="maxDistance">Maximum distance to test</param>
         /// <param name="list">Collection of objects to test</param>
         /// <returns>Returns a list of ray pickable objects order by distance to ray origin</returns>
-        private static List<Tuple<SceneObject, float>> PickCoarse(ref Ray ray, float maxDistance, IEnumerable<SceneObject> list)
+        private static List<Tuple<ISceneObject, float>> PickCoarse(ref Ray ray, float maxDistance, IEnumerable<ISceneObject> list)
         {
-            List<Tuple<SceneObject, float>> coarse = new List<Tuple<SceneObject, float>>();
+            List<Tuple<ISceneObject, float>> coarse = new List<Tuple<ISceneObject, float>>();
 
             foreach (var gObj in list)
             {
@@ -37,7 +37,7 @@ namespace Engine
                     {
                         if (TestCoarse(ref ray, pickable, maxDistance, out float d))
                         {
-                            coarse.Add(new Tuple<SceneObject, float>(gObj, d));
+                            coarse.Add(new Tuple<ISceneObject, float>(gObj, d));
                         }
                     }
                 }
@@ -47,7 +47,7 @@ namespace Engine
 
                     if (TestCoarse(ref ray, pickable, maxDistance, out float d))
                     {
-                        coarse.Add(new Tuple<SceneObject, float>(gObj, d));
+                        coarse.Add(new Tuple<ISceneObject, float>(gObj, d));
                     }
                 }
             }
@@ -112,7 +112,7 @@ namespace Engine
         /// <param name="bestDistance">Best distance</param>
         /// <param name="result">Resulting picking result</param>
         /// <returns>Returns true if the ray picks the object nearest to the specified best distance</returns>
-        private static bool PickNearestSingle(Ray ray, RayPickingParams rayPickingParams, SceneObject obj, float bestDistance, out PickingResult<Triangle> result)
+        private static bool PickNearestSingle(Ray ray, RayPickingParams rayPickingParams, ISceneObject obj, float bestDistance, out PickingResult<Triangle> result)
         {
             bool pickedNearest = false;
 
@@ -141,7 +141,7 @@ namespace Engine
         /// <param name="bestDistance">Best distance</param>
         /// <param name="result">Resulting picking result</param>
         /// <returns>Returns true if the ray picks the object nearest to the specified best distance</returns>
-        private static bool PickNearestComposed(Ray ray, RayPickingParams rayPickingParams, SceneObject obj, float bestDistance, out PickingResult<Triangle> result)
+        private static bool PickNearestComposed(Ray ray, RayPickingParams rayPickingParams, ISceneObject obj, float bestDistance, out PickingResult<Triangle> result)
         {
             bool pickedNearest = false;
 
@@ -175,7 +175,7 @@ namespace Engine
         /// <summary>
         /// Scene component list
         /// </summary>
-        private List<SceneObject> components = new List<SceneObject>();
+        private List<ISceneObject> components = new List<ISceneObject>();
         /// <summary>
         /// Control captured with mouse
         /// </summary>
@@ -599,7 +599,7 @@ namespace Engine
         /// Removes and disposes the specified component
         /// </summary>
         /// <param name="component">Component</param>
-        public void RemoveComponent(SceneObject component)
+        public void RemoveComponent(ISceneObject component)
         {
             if (this.components.Contains(component))
             {
@@ -614,7 +614,7 @@ namespace Engine
         /// Removes and disposes the specified component list
         /// </summary>
         /// <param name="components">List of components</param>
-        public void RemoveComponents(IEnumerable<SceneObject> components)
+        public void RemoveComponents(IEnumerable<ISceneObject> components)
         {
             foreach (var component in components)
             {
@@ -632,24 +632,24 @@ namespace Engine
         /// Gets full component collection
         /// </summary>
         /// <returns>Returns the full component collection</returns>
-        public ReadOnlyCollection<SceneObject> GetComponents()
+        public ReadOnlyCollection<ISceneObject> GetComponents()
         {
-            return new ReadOnlyCollection<SceneObject>(this.components);
+            return new ReadOnlyCollection<ISceneObject>(this.components);
         }
         /// <summary>
         /// Gets the component collection
         /// </summary>
         /// <param name="func">Filter</param>
         /// <returns>Returns the filtered component collection</returns>
-        public ReadOnlyCollection<SceneObject> GetComponents(Func<SceneObject, bool> func)
+        public ReadOnlyCollection<ISceneObject> GetComponents(Func<ISceneObject, bool> func)
         {
             if (func != null)
             {
-                return new ReadOnlyCollection<SceneObject>(this.components.FindAll(c => func(c)));
+                return new ReadOnlyCollection<ISceneObject>(this.components.FindAll(c => func(c)));
             }
             else
             {
-                return new ReadOnlyCollection<SceneObject>(this.components);
+                return new ReadOnlyCollection<ISceneObject>(this.components);
             }
         }
         /// <summary>
@@ -677,7 +677,7 @@ namespace Engine
         /// <typeparam name="T">Return type</typeparam>
         /// <param name="func">Filter</param>
         /// <returns>Returns the filtered component collection</returns>
-        public ReadOnlyCollection<T> GetComponents<T>(Func<SceneObject, bool> func)
+        public ReadOnlyCollection<T> GetComponents<T>(Func<ISceneObject, bool> func)
         {
             List<T> res = new List<T>();
 
@@ -897,7 +897,7 @@ namespace Engine
         /// <param name="usage">Object usage mask</param>
         /// <param name="model">Gets the resulting ray pickable object</param>
         /// <returns>Returns true if a pickable object in the ray path was found</returns>
-        public bool PickNearest(Ray ray, float maxDistance, RayPickingParams rayPickingParams, SceneObjectUsages usage, out SceneObject model)
+        public bool PickNearest(Ray ray, float maxDistance, RayPickingParams rayPickingParams, SceneObjectUsages usage, out ISceneObject model)
         {
             model = null;
 
@@ -1263,7 +1263,7 @@ namespace Engine
         /// <typeparam name="T">Object type</typeparam>
         /// <param name="obj">Object</param>
         /// <param name="fullGeometryPathFinding">Sets whether use full triangle list or volumes for navigation graphs</param>
-        public void SetGround(SceneObject obj, bool fullGeometryPathFinding)
+        public void SetGround(ISceneObject obj, bool fullGeometryPathFinding)
         {
             this.groundBoundingBox = null;
 
@@ -1279,7 +1279,7 @@ namespace Engine
         /// <param name="z">Z position</param>
         /// <param name="transform">Transform</param>
         /// <param name="fullGeometryPathFinding">Sets whether use full triangle list or volumes for navigation graphs</param>
-        public void AttachToGround(SceneObject obj, bool fullGeometryPathFinding)
+        public void AttachToGround(ISceneObject obj, bool fullGeometryPathFinding)
         {
             obj.Usage |= fullGeometryPathFinding ? SceneObjectUsages.FullPathFinding : SceneObjectUsages.CoarsePathFinding;
         }

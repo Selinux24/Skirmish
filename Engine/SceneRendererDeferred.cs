@@ -293,7 +293,7 @@ namespace Engine
         /// </summary>
         /// <param name="scene">Scene</param>
         /// <param name="deferredEnabledComponents">Components</param>
-        private void DoDeferred(Scene scene, IEnumerable<SceneObject> deferredEnabledComponents)
+        private void DoDeferred(Scene scene, IEnumerable<ISceneObject> deferredEnabledComponents)
         {
 #if DEBUG
             Stopwatch swCull = Stopwatch.StartNew();
@@ -370,7 +370,7 @@ namespace Engine
         /// </summary>
         /// <param name="scene">Scene</param>
         /// <param name="deferredDisabledComponents">Components</param>
-        private void DoForward(Scene scene, IEnumerable<SceneObject> deferredDisabledComponents)
+        private void DoForward(Scene scene, IEnumerable<ISceneObject> deferredDisabledComponents)
         {
 #if DEBUG
             Stopwatch swCull = Stopwatch.StartNew();
@@ -674,7 +674,7 @@ namespace Engine
         /// </summary>
         /// <param name="context">Context</param>
         /// <param name="components">Components</param>
-        private void DrawResultComponents(DrawContext context, int index, IEnumerable<SceneObject> components)
+        private void DrawResultComponents(DrawContext context, int index, IEnumerable<ISceneObject> components)
         {
             //Save current drawing mode
             var mode = context.DrawerMode;

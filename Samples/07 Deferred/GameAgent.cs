@@ -12,7 +12,7 @@ namespace Deferred
         /// <summary>
         /// Model
         /// </summary>
-        private readonly SceneObject model;
+        private readonly ISceneObject model;
         /// <summary>
         /// Controller
         /// </summary>
@@ -99,7 +99,7 @@ namespace Deferred
         /// <summary>
         /// Constructor
         /// </summary>
-        public GameAgent(AgentType agentType, SceneObject model, T controller)
+        public GameAgent(AgentType agentType, ISceneObject model, T controller)
         {
             this.model = model;
             this.controller = controller;

@@ -46,7 +46,6 @@ namespace Engine
         public GroundDescription()
             : base()
         {
-            this.Static = true;
             this.CastShadow = true;
             this.DeferredEnabled = true;
             this.DepthEnabled = true;

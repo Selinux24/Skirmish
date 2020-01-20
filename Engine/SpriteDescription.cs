@@ -46,7 +46,6 @@ namespace Engine
         public SpriteDescription()
             : base()
         {
-            this.Static = true;
             this.CastShadow = false;
             this.DeferredEnabled = false;
             this.DepthEnabled = false;

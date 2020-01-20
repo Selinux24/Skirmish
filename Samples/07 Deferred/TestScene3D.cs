@@ -255,7 +255,6 @@ namespace Deferred
             var desc = new ModelDescription()
             {
                 Name = "Lonely tree",
-                Static = true,
                 CastShadow = true,
                 AlphaEnabled = true,
                 DepthEnabled = true,
@@ -272,7 +271,6 @@ namespace Deferred
             var desc = new ModelInstancedDescription()
             {
                 Name = "Bunch of trees",
-                Static = true,
                 CastShadow = true,
                 AlphaEnabled = true,
                 DepthEnabled = true,

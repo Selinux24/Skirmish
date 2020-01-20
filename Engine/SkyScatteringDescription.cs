@@ -109,7 +109,6 @@ namespace Engine
             this.HDRExposure = 2.0f;
             this.Resolution = SkyScatteringResolutions.Low;
 
-            this.Static = true;
             this.CastShadow = false;
             this.DeferredEnabled = true;
             this.DepthEnabled = false;

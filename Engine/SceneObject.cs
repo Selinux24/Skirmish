@@ -7,13 +7,13 @@ namespace Engine
     /// <summary>
     /// Scene object
     /// </summary>
-    public abstract class SceneObject : IDisposable
+    /// <typeparam name="T">Internal instance type</typeparam>
+    public class SceneObject<T> : ISceneObject
     {
         /// <summary>
-        /// Internal object
+        /// Gets the instance
         /// </summary>
-        protected object baseObject = null;
-
+        public T Instance { get; private set; }
         /// <summary>
         /// Name
         /// </summary>
@@ -49,7 +49,7 @@ namespace Engine
         /// <summary>
         /// Object usage
         /// </summary>
-        public SceneObjectUsages Usage { get; internal set; }
+        public SceneObjectUsages Usage { get; set; }
         /// <summary>
         /// Maximum instance count
         /// </summary>
@@ -73,11 +73,11 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="obj">Object</param>
+        /// <param name="obj">Instance</param>
         /// <param name="description">Description</param>
-        protected SceneObject(object obj, SceneObjectDescription description)
+        public SceneObject(T obj, SceneObjectDescription description)
         {
-            this.baseObject = obj;
+            this.Instance = obj;
 
             this.Active = true;
             this.Visible = true;
@@ -114,12 +114,13 @@ namespace Engine
         {
             if (disposing)
             {
-                if (this.baseObject is IDisposable disposable)
+                //Dispose the instace
+                if (this.Instance is IDisposable disposable)
                 {
                     disposable.Dispose();
                 }
 
-                this.baseObject = null;
+                this.Instance = default;
             }
         }
 
@@ -128,23 +129,23 @@ namespace Engine
         /// </summary>
         /// <typeparam name="T">Result type</typeparam>
         /// <returns>Returns the instance as type</returns>
-        public T Get<T>()
+        public TType Get<TType>()
         {
-            if (this.baseObject is T typedObject)
+            if (this.Instance is TType typedObject)
             {
                 return typedObject;
             }
 
-            return default(T);
+            return default;
         }
         /// <summary>
         /// Gets if the instance implements type
         /// </summary>
         /// <typeparam name="T">Result type</typeparam>
         /// <returns>Returns true if the instance implements the type</returns>
-        public bool Is<T>()
+        public bool Is<TType>()
         {
-            return (this.baseObject is T);
+            return (this.Instance is TType);
         }
 
         /// <summary>
@@ -212,34 +213,6 @@ namespace Engine
         public override string ToString()
         {
             return string.Format("SceneObject: {0}", this.Name);
-        }
-    }
-
-    /// <summary>
-    /// Scene object
-    /// </summary>
-    /// <typeparam name="T">Internal instance type</typeparam>
-    public class SceneObject<T> : SceneObject
-    {
-        /// <summary>
-        /// Gets the instance
-        /// </summary>
-        public T Instance
-        {
-            get
-            {
-                return (T)base.baseObject;
-            }
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="obj">Instance</param>
-        /// <param name="description">Description</param>
-        public SceneObject(T obj, SceneObjectDescription description) : base(obj, description)
-        {
-
         }
     }
 }

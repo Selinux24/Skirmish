@@ -32,7 +32,7 @@ namespace Terrain
 
         private bool walkMode = false;
         private readonly float walkerVelocity = 8f;
-        private SceneObject followTarget;
+        private ISceneObject followTarget;
         private bool follow = false;
         private Agent walkerAgentType = null;
 
@@ -503,7 +503,6 @@ namespace Terrain
             {
                 Name = "Helicopter",
                 CastShadow = true,
-                Static = false,
                 TextureIndex = 0,
                 Content = new ContentDescription()
                 {
@@ -534,7 +533,6 @@ namespace Terrain
             {
                 Name = "Tank",
                 CastShadow = true,
-                Static = false,
                 Optimize = false,
                 Content = new ContentDescription()
                 {
@@ -590,7 +588,6 @@ namespace Terrain
             {
                 Name = "Heliport",
                 CastShadow = true,
-                Static = true,
                 Content = new ContentDescription()
                 {
                     ContentFolder = "resources/Heliport",
@@ -619,7 +616,6 @@ namespace Terrain
             {
                 Name = "Garage",
                 CastShadow = true,
-                Static = true,
                 Content = new ContentDescription()
                 {
                     ContentFolder = "resources/Garage",
@@ -647,7 +643,6 @@ namespace Terrain
             {
                 Name = "Obelisk",
                 CastShadow = true,
-                Static = true,
                 Instances = 4,
                 Content = new ContentDescription()
                 {
@@ -675,7 +670,6 @@ namespace Terrain
             {
                 Name = "Rocks",
                 CastShadow = true,
-                Static = true,
                 Instances = 250,
                 Content = new ContentDescription()
                 {
@@ -703,7 +697,6 @@ namespace Terrain
             {
                 Name = "birch_a",
                 CastShadow = true,
-                Static = true,
                 AlphaEnabled = true,
                 Instances = 100,
                 Content = new ContentDescription()
@@ -716,7 +709,6 @@ namespace Terrain
             {
                 Name = "birch_b",
                 CastShadow = true,
-                Static = true,
                 AlphaEnabled = true,
                 Instances = 100,
                 Content = new ContentDescription()
@@ -800,7 +792,6 @@ namespace Terrain
                     MaximumDepth = 1,
                 },
                 CastShadow = true,
-                Static = true,
                 Content = new ContentDescription()
                 {
                     ContentFolder = "resources/Terrain",
@@ -1662,7 +1653,7 @@ namespace Terrain
                     this.follow = false;
                 }
 
-                if (this.PickNearest(pickingRay, 0, RayPickingParams.Default, SceneObjectUsages.Agent, out SceneObject agent))
+                if (this.PickNearest(pickingRay, 0, RayPickingParams.Default, SceneObjectUsages.Agent, out ISceneObject agent))
                 {
                     this.followTarget = agent;
                     this.follow = true;

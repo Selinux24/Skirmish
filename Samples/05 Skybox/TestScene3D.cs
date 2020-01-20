@@ -189,7 +189,6 @@ namespace Skybox
             var mFireDesc = new ModelDescription()
             {
                 Name = "Emitter",
-                Static = false,
                 CastShadow = false,
                 DeferredEnabled = true,
                 DepthEnabled = true,

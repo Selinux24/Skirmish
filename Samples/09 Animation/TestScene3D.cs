@@ -160,7 +160,6 @@ namespace Animation
 
             var desc = new ModelDescription()
             {
-                Static = true,
                 CastShadow = true,
                 DeferredEnabled = true,
                 DepthEnabled = true,

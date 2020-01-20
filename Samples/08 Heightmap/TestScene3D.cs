@@ -223,7 +223,6 @@ namespace Heightmap
             {
                 Name = "Rocks",
                 CastShadow = true,
-                Static = true,
                 Instances = 250,
                 Content = new ContentDescription()
                 {
@@ -246,7 +245,6 @@ namespace Heightmap
             {
                 Name = "Trees",
                 CastShadow = true,
-                Static = true,
                 Instances = 200,
                 AlphaEnabled = true,
                 Content = new ContentDescription()
@@ -270,7 +268,6 @@ namespace Heightmap
             {
                 Name = "Trees2",
                 CastShadow = true,
-                Static = true,
                 Instances = 200,
                 AlphaEnabled = true,
                 Content = new ContentDescription()
@@ -416,7 +413,6 @@ namespace Heightmap
                 {
                     Name = "Container",
                     CastShadow = true,
-                    Static = true,
                     SphericVolume = false,
                     Instances = 5,
                     Content = new ContentDescription()

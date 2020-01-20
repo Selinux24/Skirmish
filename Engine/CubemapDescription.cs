@@ -48,7 +48,6 @@ namespace Engine
         public CubemapDescription()
             : base()
         {
-            this.Static = true;
             this.CastShadow = false;
             this.DeferredEnabled = true;
             this.DepthEnabled = false;

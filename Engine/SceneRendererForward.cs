@@ -86,7 +86,7 @@ namespace Engine
         /// </summary>
         /// <param name="scene">Scene</param>
         /// <param name="components">Components</param>
-        private void DoRender(Scene scene, IEnumerable<SceneObject> components)
+        private void DoRender(Scene scene, IEnumerable<ISceneObject> components)
         {
             #region Preparation
 #if DEBUG
@@ -165,7 +165,7 @@ namespace Engine
         /// <param name="context">Context</param>
         /// <param name="index">Cull results index</param>
         /// <param name="components">Components</param>
-        private void DrawResultComponents(DrawContext context, int index, IEnumerable<SceneObject> components)
+        private void DrawResultComponents(DrawContext context, int index, IEnumerable<ISceneObject> components)
         {
             //Save current drawer mode
             var mode = context.DrawerMode;

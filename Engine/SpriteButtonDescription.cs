@@ -69,7 +69,6 @@ namespace Engine
         public SpriteButtonDescription()
             : base()
         {
-            this.Static = true;
             this.CastShadow = false;
             this.DeferredEnabled = false;
             this.DepthEnabled = false;

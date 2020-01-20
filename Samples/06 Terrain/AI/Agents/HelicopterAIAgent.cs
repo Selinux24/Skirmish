@@ -24,7 +24,7 @@ namespace Terrain.AI.Agents
         /// <param name="agentType">Agent type</param>
         /// <param name="sceneObject">Scene object</param>
         /// <param name="stats">Agent stats</param>
-        public HelicopterAIAgent(Brain parent, AgentType agentType, SceneObject sceneObject, HelicopterAIStatsDescription stats) :
+        public HelicopterAIAgent(Brain parent, AgentType agentType, ISceneObject sceneObject, HelicopterAIStatsDescription stats) :
             base(parent, agentType, sceneObject, stats)
         {
             this.FlightHeight = stats.FlightHeight;

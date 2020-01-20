@@ -11,10 +11,6 @@ namespace Engine
         /// </summary>
         public string Name { get; set; } = null;
         /// <summary>
-        /// Is Static
-        /// </summary>
-        public bool Static { get; set; } = false;
-        /// <summary>
         /// Gets or sets whether the object cast shadow
         /// </summary>
         public bool CastShadow { get; set; } = false;

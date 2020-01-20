@@ -64,7 +64,6 @@ namespace Engine
         public LensFlareDescription()
             : base()
         {
-            this.Static = false;
             this.CastShadow = false;
             this.DeferredEnabled = false;
             this.DepthEnabled = false;

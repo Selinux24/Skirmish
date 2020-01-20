@@ -18,7 +18,7 @@ namespace Terrain.AI.Agents
         /// <param name="agentType">Agent type</param>
         /// <param name="sceneObject">Scene object</param>
         /// <param name="stats">Agent stats</param>
-        public TankAIAgent(Brain parent, AgentType agentType, SceneObject sceneObject, AIStatsDescription stats) :
+        public TankAIAgent(Brain parent, AgentType agentType, ISceneObject sceneObject, AIStatsDescription stats) :
             base(parent, agentType, sceneObject, stats)
         {
             this.Controller = new TankManipulatorController()

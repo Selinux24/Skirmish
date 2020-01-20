@@ -12,7 +12,6 @@ namespace Engine
         public SkydomDescription()
             : base()
         {
-            this.Static = true;
             this.CastShadow = false;
             this.DeferredEnabled = true;
             this.DepthEnabled = false;
