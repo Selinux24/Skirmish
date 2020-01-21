@@ -298,7 +298,7 @@ namespace Engine
 #if DEBUG
             Stopwatch swCull = Stopwatch.StartNew();
 #endif
-            var toCullDeferred = deferredEnabledComponents.Where(s => s.Is<ICullable>()).Select(s => s.Get<ICullable>());
+            var toCullDeferred = deferredEnabledComponents.OfType<ICullable>();
 
             bool draw = false;
             if (scene.PerformFrustumCulling)
@@ -375,7 +375,7 @@ namespace Engine
 #if DEBUG
             Stopwatch swCull = Stopwatch.StartNew();
 #endif
-            var toCullNotDeferred = deferredDisabledComponents.Where(s => s.Is<ICullable>()).Select(s => s.Get<ICullable>());
+            var toCullNotDeferred = deferredDisabledComponents.OfType<ICullable>();
 
             bool draw = false;
             if (scene.PerformFrustumCulling)

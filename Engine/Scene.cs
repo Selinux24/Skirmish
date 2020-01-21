@@ -30,9 +30,9 @@ namespace Engine
 
             foreach (var gObj in list)
             {
-                if (gObj.Is<IComposed>())
+                if (gObj is IComposed componsed)
                 {
-                    var pickComponents = gObj.Get<IComposed>().GetComponents<IRayPickable<Triangle>>();
+                    var pickComponents = componsed.GetComponents<IRayPickable<Triangle>>();
                     foreach (var pickable in pickComponents)
                     {
                         if (TestCoarse(ref ray, pickable, maxDistance, out float d))
@@ -41,14 +41,11 @@ namespace Engine
                         }
                     }
                 }
-                else if (gObj.Is<IRayPickable<Triangle>>())
+                else if (
+                    gObj is IRayPickable<Triangle> pickable &&
+                    TestCoarse(ref ray, pickable, maxDistance, out float d))
                 {
-                    var pickable = gObj.Get<IRayPickable<Triangle>>();
-
-                    if (TestCoarse(ref ray, pickable, maxDistance, out float d))
-                    {
-                        coarse.Add(new Tuple<ISceneObject, float>(gObj, d));
-                    }
+                    coarse.Add(new Tuple<ISceneObject, float>(gObj, d));
                 }
             }
 
@@ -112,7 +109,7 @@ namespace Engine
         /// <param name="bestDistance">Best distance</param>
         /// <param name="result">Resulting picking result</param>
         /// <returns>Returns true if the ray picks the object nearest to the specified best distance</returns>
-        private static bool PickNearestSingle(Ray ray, RayPickingParams rayPickingParams, ISceneObject obj, float bestDistance, out PickingResult<Triangle> result)
+        private static bool PickNearestSingle(Ray ray, RayPickingParams rayPickingParams, IRayPickable<Triangle> obj, float bestDistance, out PickingResult<Triangle> result)
         {
             bool pickedNearest = false;
 
@@ -121,9 +118,7 @@ namespace Engine
                 Distance = float.MaxValue,
             };
 
-            var pickable = obj.Get<IRayPickable<Triangle>>();
-
-            var picked = pickable.PickNearest(ray, rayPickingParams, out PickingResult<Triangle> r);
+            var picked = obj.PickNearest(ray, rayPickingParams, out PickingResult<Triangle> r);
             if (picked && r.Distance < bestDistance)
             {
                 result = r;
@@ -141,7 +136,7 @@ namespace Engine
         /// <param name="bestDistance">Best distance</param>
         /// <param name="result">Resulting picking result</param>
         /// <returns>Returns true if the ray picks the object nearest to the specified best distance</returns>
-        private static bool PickNearestComposed(Ray ray, RayPickingParams rayPickingParams, ISceneObject obj, float bestDistance, out PickingResult<Triangle> result)
+        private static bool PickNearestComposed(Ray ray, RayPickingParams rayPickingParams, IComposed obj, float bestDistance, out PickingResult<Triangle> result)
         {
             bool pickedNearest = false;
 
@@ -152,7 +147,7 @@ namespace Engine
 
             float dist = bestDistance;
 
-            var pickComponents = obj.Get<IComposed>().GetComponents<IRayPickable<Triangle>>();
+            var pickComponents = obj.GetComponents<IRayPickable<Triangle>>();
 
             foreach (var pickable in pickComponents)
             {
@@ -166,6 +161,70 @@ namespace Engine
             }
 
             return pickedNearest;
+        }
+        /// <summary>
+        /// Gets the current object triangle collection
+        /// </summary>
+        /// <returns>Returns the triangle list</returns>
+        private static IEnumerable<Triangle> GetTrianglesForNavigationGraph(ISceneObject obj)
+        {
+            List<Triangle> tris = new List<Triangle>();
+
+            List<IRayPickable<Triangle>> volumes = new List<IRayPickable<Triangle>>();
+
+            if (obj is IComposed composed)
+            {
+                volumes.AddRange(GetVolumesForNavigationGraph(composed));
+            }
+            else if (obj is IRayPickable<Triangle> pickable)
+            {
+                if (obj is ITransformable3D transformable)
+                {
+                    transformable.Manipulator.UpdateInternals(true);
+                }
+
+                volumes.Add(pickable);
+            }
+
+            for (int p = 0; p < volumes.Count; p++)
+            {
+                var full = obj.Usage.HasFlag(SceneObjectUsages.FullPathFinding);
+
+                var vTris = volumes[p].GetVolume(full);
+                if (vTris.Any())
+                {
+                    //Use volume mesh
+                    tris.AddRange(vTris);
+                }
+            }
+
+            return tris;
+        }
+        /// <summary>
+        /// Get volumes from composed object
+        /// </summary>
+        /// <param name="composed">Composed</param>
+        /// <returns>Returns a list of volumes</returns>
+        private static IEnumerable<IRayPickable<Triangle>> GetVolumesForNavigationGraph(IComposed composed)
+        {
+            List<IRayPickable<Triangle>> volumes = new List<IRayPickable<Triangle>>();
+
+            var trnChilds = composed.GetComponents<ITransformable3D>();
+            if (trnChilds.Any())
+            {
+                foreach (var child in trnChilds)
+                {
+                    child.Manipulator.UpdateInternals(true);
+                }
+            }
+
+            var pickableChilds = composed.GetComponents<IRayPickable<Triangle>>();
+            if (pickableChilds.Any())
+            {
+                volumes.AddRange(pickableChilds);
+            }
+
+            return volumes.ToArray();
         }
 
         /// <summary>
@@ -385,10 +444,13 @@ namespace Engine
             this.CapturedControl = this.capturedControl != null;
 
             //Process 2D controls
-            var ctrls = this.components.FindAll(c => c.Active && c.Is<IControl>());
-            for (int i = 0; i < ctrls.Count; i++)
+            var ctrls = this.components
+                .Where(c => c.Active)
+                .OfType<IControl>()
+                .ToArray();
+            for (int i = 0; i < ctrls.Length; i++)
             {
-                var ctrl = ctrls[i].Get<IControl>();
+                var ctrl = ctrls[i];
 
                 ctrl.MouseOver = ctrl.Rectangle.Contains(this.Game.Input.MouseX, this.Game.Input.MouseY);
 
@@ -478,8 +540,7 @@ namespace Engine
 
             for (int i = 0; i < this.components.Count; i++)
             {
-                var fitted = this.components[i].Get<IScreenFitted>();
-                if (fitted != null)
+                if (this.components[i] is IScreenFitted fitted)
                 {
                     fitted.Resize();
                 }
@@ -628,9 +689,9 @@ namespace Engine
 
             for (int i = 0; i < this.components.Count; i++)
             {
-                if ((func == null || func(this.components[i])) && this.components[i].Is<T>())
+                if ((func == null || func(this.components[i])) && this.components[i] is T)
                 {
-                    res.Add(this.components[i].Get<T>());
+                    res.Add((T)this.components[i]);
                 }
             }
 
@@ -660,11 +721,11 @@ namespace Engine
                 MeshMaterial.Default
             };
 
-            var matComponents = this.components.FindAll(c => c.Is<IUseMaterials>());
+            var matComponents = this.components.FindAll(c => c is IUseMaterials);
 
             foreach (var component in matComponents)
             {
-                var matList = component.Get<IUseMaterials>().Materials;
+                var matList = ((IUseMaterials)component).Materials;
                 if (matList.Any())
                 {
                     mats.AddRange(matList);
@@ -714,11 +775,11 @@ namespace Engine
         {
             List<SkinningData> skData = new List<SkinningData>();
 
-            var skComponents = this.components.FindAll(c => c.Is<IUseSkinningData>());
+            var skComponents = this.components.FindAll(c => c is IUseSkinningData);
 
             foreach (var component in skComponents)
             {
-                var cmpSkData = component.Get<IUseSkinningData>().SkinningData;
+                var cmpSkData = ((IUseSkinningData)component).SkinningData;
                 if (cmpSkData != null)
                 {
                     skData.Add(cmpSkData);
@@ -852,8 +913,7 @@ namespace Engine
 
             foreach (var obj in coarse)
             {
-                var pickable = obj.Item1.Get<IRayPickable<Triangle>>();
-                if (pickable != null && pickable.PickNearest(ray, rayPickingParams, out PickingResult<Triangle> r))
+                if (obj.Item1 is IRayPickable<Triangle> pickable && pickable.PickNearest(ray, rayPickingParams, out PickingResult<Triangle> r))
                 {
                     model = obj.Item1;
 
@@ -905,9 +965,9 @@ namespace Engine
                     break;
                 }
 
-                if (obj.Item1.Is<IComposed>())
+                if (obj.Item1 is IComposed composed)
                 {
-                    bool pickedComposed = PickNearestComposed(ray, rayPickingParams, obj.Item1, bestDistance, out var r);
+                    bool pickedComposed = PickNearestComposed(ray, rayPickingParams, composed, bestDistance, out var r);
                     if (pickedComposed)
                     {
                         result = r;
@@ -916,9 +976,9 @@ namespace Engine
                         picked = true;
                     }
                 }
-                else if (obj.Item1.Is<IRayPickable<Triangle>>())
+                else if (obj.Item1 is IRayPickable<Triangle> pickable)
                 {
-                    bool pickedSingle = PickNearestSingle(ray, rayPickingParams, obj.Item1, bestDistance, out var r);
+                    bool pickedSingle = PickNearestSingle(ray, rayPickingParams, pickable, bestDistance, out var r);
                     if (pickedSingle)
                     {
                         result = r;
@@ -965,9 +1025,9 @@ namespace Engine
 
             foreach (var obj in coarse)
             {
-                if (obj.Item1.Is<IComposed>())
+                if (obj.Item1 is IComposed composed)
                 {
-                    var pickComponents = obj.Item1.Get<IComposed>().GetComponents<IRayPickable<Triangle>>();
+                    var pickComponents = composed.GetComponents<IRayPickable<Triangle>>();
                     foreach (var pickable in pickComponents)
                     {
                         if (pickable.PickFirst(ray, rayPickingParams, out PickingResult<Triangle> r))
@@ -978,16 +1038,13 @@ namespace Engine
                         }
                     }
                 }
-                else if (obj.Item1.Is<IRayPickable<Triangle>>())
+                else if (
+                    obj.Item1 is IRayPickable<Triangle> pickable &&
+                    pickable.PickFirst(ray, rayPickingParams, out PickingResult<Triangle> r))
                 {
-                    var pickable = obj.Item1.Get<IRayPickable<Triangle>>();
+                    result = r;
 
-                    if (pickable.PickFirst(ray, rayPickingParams, out PickingResult<Triangle> r))
-                    {
-                        result = r;
-
-                        return true;
-                    }
+                    return true;
                 }
             }
 
@@ -1026,9 +1083,9 @@ namespace Engine
 
             foreach (var obj in coarse)
             {
-                if (obj.Item1.Is<IComposed>())
+                if (obj.Item1 is IComposed composed)
                 {
-                    var pickComponents = obj.Item1.Get<IComposed>().GetComponents<IRayPickable<Triangle>>();
+                    var pickComponents = composed.GetComponents<IRayPickable<Triangle>>();
                     foreach (var pickable in pickComponents)
                     {
                         if (pickable.PickAll(ray, rayPickingParams, out PickingResult<Triangle>[] r))
@@ -1037,14 +1094,11 @@ namespace Engine
                         }
                     }
                 }
-                else if (obj.Item1.Is<IRayPickable<Triangle>>())
+                else if (
+                    obj.Item1 is IRayPickable<Triangle> pickable &&
+                    pickable.PickAll(ray, rayPickingParams, out PickingResult<Triangle>[] r))
                 {
-                    var pickable = obj.Item1.Get<IRayPickable<Triangle>>();
-
-                    if (pickable.PickAll(ray, rayPickingParams, out PickingResult<Triangle>[] r))
-                    {
-                        lResults.AddRange(r);
-                    }
+                    lResults.AddRange(r);
                 }
             }
 
@@ -1154,18 +1208,16 @@ namespace Engine
 
                 foreach (var obj in cmpList)
                 {
-                    if (obj.Is<IComposed>())
+                    if (obj is IComposed composed)
                     {
-                        var pickComponents = obj.Get<IComposed>().GetComponents<IRayPickable<Triangle>>();
+                        var pickComponents = composed.GetComponents<IRayPickable<Triangle>>();
                         foreach (var pickable in pickComponents)
                         {
                             boxes.Add(pickable.GetBoundingBox());
                         }
                     }
-                    else if (obj.Is<IRayPickable<Triangle>>())
+                    else if (obj is IRayPickable<Triangle> pickable)
                     {
-                        var pickable = obj.Get<IRayPickable<Triangle>>();
-
                         boxes.Add(pickable.GetBoundingBox());
                     }
                 }
@@ -1191,8 +1243,8 @@ namespace Engine
         public ICullingVolume GetSceneVolume()
         {
             var ground = this.components
-                .Where(c => c.Usage.HasFlag(SceneObjectUsages.Ground) && c.Is<Ground>())
-                .Select(c => c.Get<Ground>())
+                .Where(c => c.Usage.HasFlag(SceneObjectUsages.Ground))
+                .OfType<Ground>()
                 .FirstOrDefault();
             if (ground != null)
             {
@@ -1328,7 +1380,7 @@ namespace Engine
 
             for (int i = 0; i < pfComponents.Count; i++)
             {
-                var currTris = pfComponents[i].GetTriangles(SceneObjectUsages.FullPathFinding);
+                var currTris = GetTrianglesForNavigationGraph(pfComponents[i]);
                 if (currTris.Any())
                 {
                     tris.AddRange(currTris);

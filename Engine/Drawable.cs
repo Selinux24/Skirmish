@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
+﻿
 namespace Engine
 {
     using Engine.Common;
@@ -107,86 +105,6 @@ namespace Engine
             distance = float.MaxValue;
 
             return false;
-        }
-
-        /// <summary>
-        /// Gets the internal instance as specified type
-        /// </summary>
-        /// <typeparam name="T">Result type</typeparam>
-        /// <returns>Returns the instance as type</returns>
-        public TType Get<TType>()
-        {
-            if (this is TType typedObject)
-            {
-                return typedObject;
-            }
-
-            return default;
-        }
-        /// <summary>
-        /// Gets if the instance implements type
-        /// </summary>
-        /// <typeparam name="T">Result type</typeparam>
-        /// <returns>Returns true if the instance implements the type</returns>
-        public bool Is<TType>()
-        {
-            return this is TType;
-        }
-
-        /// <summary>
-        /// Gets the current object triangle collection
-        /// </summary>
-        /// <param name="usage">Object usage</param>
-        /// <returns>Returns the triangle list</returns>
-        public IEnumerable<Triangle> GetTriangles(SceneObjectUsages usage)
-        {
-            List<Triangle> tris = new List<Triangle>();
-
-            List<IRayPickable<Triangle>> volumes = new List<IRayPickable<Triangle>>();
-
-            if (this is IComposed currComposed)
-            {
-                var trnChilds = currComposed.GetComponents<ITransformable3D>();
-                if (trnChilds.Any())
-                {
-                    foreach (var child in trnChilds)
-                    {
-                        child.Manipulator.UpdateInternals(true);
-                    }
-                }
-
-                var pickableChilds = currComposed.GetComponents<IRayPickable<Triangle>>();
-                if (pickableChilds.Any())
-                {
-                    volumes.AddRange(pickableChilds);
-                }
-            }
-            else
-            {
-                if (this is ITransformable3D transformable)
-                {
-                    transformable.Manipulator.UpdateInternals(true);
-                }
-
-                if (this is IRayPickable<Triangle> pickable)
-                {
-                    volumes.Add(pickable);
-                }
-            }
-
-            for (int p = 0; p < volumes.Count; p++)
-            {
-                var full = usage == SceneObjectUsages.None || this.Usage.HasFlag(usage);
-
-                var vTris = volumes[p].GetVolume(full);
-                if (vTris.Any())
-                {
-                    //Use volume mesh
-                    tris.AddRange(vTris);
-                }
-            }
-
-            return tris;
         }
     }
 }

@@ -338,10 +338,9 @@ namespace Engine.Common
         {
             var opaques = components.Where(c =>
             {
-                if (!c.Is<Drawable>()) return false;
+                if (!(c is Drawable)) return false;
 
-                var cull = c.Get<ICullable>();
-                if (cull != null)
+                if (c is ICullable cull)
                 {
                     return !this.cullManager.GetCullValue(index, cull).Culled;
                 }
@@ -369,11 +368,17 @@ namespace Engine.Common
 
             if (res == 0)
             {
-                var cull1 = c1.Get<ICullable>();
-                var cull2 = c2.Get<ICullable>();
+                float d1 = float.MaxValue;
+                if (c1 is ICullable cull1)
+                {
+                    d1 = this.cullManager.GetCullValue(index, cull1).Distance;
+                }
 
-                var d1 = cull1 != null ? this.cullManager.GetCullValue(index, cull1).Distance : float.MaxValue;
-                var d2 = cull2 != null ? this.cullManager.GetCullValue(index, cull2).Distance : float.MaxValue;
+                float d2 = float.MaxValue;
+                if (c2 is ICullable cull2)
+                {
+                    d2 = this.cullManager.GetCullValue(index, cull2).Distance;
+                }
 
                 res = -d1.CompareTo(d2);
             }
@@ -392,10 +397,9 @@ namespace Engine.Common
             {
                 if (!c.AlphaEnabled) return false;
 
-                if (!c.Is<Drawable>()) return false;
+                if (!(c is Drawable)) return false;
 
-                var cull = c.Get<ICullable>();
-                if (cull != null)
+                if (c is ICullable cull)
                 {
                     return !this.cullManager.GetCullValue(index, cull).Culled;
                 }
@@ -417,11 +421,17 @@ namespace Engine.Common
             int res = c1.DepthEnabled.CompareTo(c2.DepthEnabled);
             if (res == 0)
             {
-                var cull1 = c1.Get<ICullable>();
-                var cull2 = c2.Get<ICullable>();
+                float d1 = float.MaxValue;
+                if (c1 is ICullable cull1)
+                {
+                    d1 = this.cullManager.GetCullValue(index, cull1).Distance;
+                }
 
-                var d1 = cull1 != null ? this.cullManager.GetCullValue(index, cull1).Distance : float.MaxValue;
-                var d2 = cull2 != null ? this.cullManager.GetCullValue(index, cull2).Distance : float.MaxValue;
+                float d2 = float.MaxValue;
+                if (c2 is ICullable cull2)
+                {
+                    d2 = this.cullManager.GetCullValue(index, cull2).Distance;
+                }
 
                 res = -d1.CompareTo(d2);
             }
@@ -441,24 +451,27 @@ namespace Engine.Common
         /// <param name="c">Component</param>
         protected virtual void DrawOpaque(DrawContext context, ISceneObject c)
         {
-            var graphics = this.Game.Graphics;
-
-            Counters.MaxInstancesPerFrame += c.InstanceCount;
-
-            graphics.SetRasterizerDefault();
-
-            this.SetBlendStateOpaque(context);
-
-            if (c.DepthEnabled)
+            if (c is IDrawable drawable)
             {
-                graphics.SetDepthStencilZEnabled();
-            }
-            else
-            {
-                graphics.SetDepthStencilZDisabled();
-            }
+                var graphics = this.Game.Graphics;
 
-            c.Get<IDrawable>().Draw(context);
+                Counters.MaxInstancesPerFrame += c.InstanceCount;
+
+                graphics.SetRasterizerDefault();
+
+                this.SetBlendStateOpaque(context);
+
+                if (c.DepthEnabled)
+                {
+                    graphics.SetDepthStencilZEnabled();
+                }
+                else
+                {
+                    graphics.SetDepthStencilZDisabled();
+                }
+
+                drawable.Draw(context);
+            }
         }
         /// <summary>
         /// Draws an transparent object
@@ -467,24 +480,27 @@ namespace Engine.Common
         /// <param name="c">Component</param>
         protected virtual void DrawTransparent(DrawContext context, ISceneObject c)
         {
-            var graphics = this.Game.Graphics;
-
-            Counters.MaxInstancesPerFrame += c.InstanceCount;
-
-            graphics.SetRasterizerDefault();
-
-            this.SetBlendStateTransparent(context);
-
-            if (c.DepthEnabled)
+            if (c is IDrawable drawable)
             {
-                graphics.SetDepthStencilZEnabled();
-            }
-            else
-            {
-                graphics.SetDepthStencilZDisabled();
-            }
+                var graphics = this.Game.Graphics;
 
-            c.Get<IDrawable>().Draw(context);
+                Counters.MaxInstancesPerFrame += c.InstanceCount;
+
+                graphics.SetRasterizerDefault();
+
+                this.SetBlendStateTransparent(context);
+
+                if (c.DepthEnabled)
+                {
+                    graphics.SetDepthStencilZEnabled();
+                }
+                else
+                {
+                    graphics.SetDepthStencilZDisabled();
+                }
+
+                drawable.Draw(context);
+            }
         }
         /// <summary>
         /// Sets the opaque blend state
@@ -555,7 +571,7 @@ namespace Engine.Common
             }
 
             //Objects that cast shadows and suitable for culling test
-            var toCullShadowObjs = shadowObjs.Where(s => s.Is<ICullable>()).Select(s => s.Get<ICullable>());
+            var toCullShadowObjs = shadowObjs.OfType<ICullable>();
             if (toCullShadowObjs.Any())
             {
                 //All objects suitable for culling
@@ -653,9 +669,7 @@ namespace Engine.Common
                 return;
             }
 
-            var toCullShadowObjs = shadowObjs
-                .Where(s => s.Is<ICullable>())
-                .Select(s => s.Get<ICullable>());
+            var toCullShadowObjs = shadowObjs.OfType<ICullable>();
 
             //All objects suitable for culling
             bool allCullingObjects = shadowObjs.Count == toCullShadowObjs.Count();
@@ -751,9 +765,7 @@ namespace Engine.Common
                 return;
             }
 
-            var toCullShadowObjs = shadowObjs
-                .Where(s => s.Is<ICullable>())
-                .Select(s => s.Get<ICullable>());
+            var toCullShadowObjs = shadowObjs.OfType<ICullable>();
 
             //All objects suitable for culling
             bool allCullingObjects = shadowObjs.Count == toCullShadowObjs.Count();
@@ -842,10 +854,9 @@ namespace Engine.Common
         /// <returns>Returns true if the object is not culled</returns>
         private bool IsVisible(ISceneObject c, int cullIndex)
         {
-            if (!c.Is<Drawable>()) return false;
+            if (!(c is Drawable)) return false;
 
-            var cull = c.Get<ICullable>();
-            if (cull != null)
+            if (c is ICullable cull)
             {
                 return !this.cullManager.GetCullValue(cullIndex, cull).Culled;
             }
@@ -864,11 +875,17 @@ namespace Engine.Common
             int res = c1.DepthEnabled.CompareTo(c2.DepthEnabled);
             if (res == 0)
             {
-                var cull1 = c1.Get<ICullable>();
-                var cull2 = c2.Get<ICullable>();
+                float d1 = float.MaxValue;
+                if (c1 is ICullable cull1)
+                {
+                    d1 = this.cullManager.GetCullValue(cullIndex, cull1).Distance;
+                }
 
-                var d1 = cull1 != null ? this.cullManager.GetCullValue(cullIndex, cull1).Distance : float.MaxValue;
-                var d2 = cull2 != null ? this.cullManager.GetCullValue(cullIndex, cull2).Distance : float.MaxValue;
+                float d2 = float.MaxValue;
+                if (c2 is ICullable cull2)
+                {
+                    d2 = this.cullManager.GetCullValue(cullIndex, cull2).Distance;
+                }
 
                 res = -d1.CompareTo(d2);
             }
@@ -888,19 +905,22 @@ namespace Engine.Common
         /// <param name="c">Scene object</param>
         private void DrawShadows(Graphics graphics, DrawContextShadows context, ISceneObject c)
         {
-            graphics.SetRasterizerShadowMapping();
-            graphics.SetDepthStencilShadowMapping();
-
-            if (c.AlphaEnabled)
+            if (c is IDrawable drawable)
             {
-                graphics.SetBlendTransparent();
-            }
-            else
-            {
-                graphics.SetBlendDefault();
-            }
+                graphics.SetRasterizerShadowMapping();
+                graphics.SetDepthStencilShadowMapping();
 
-            c.Get<IDrawable>().DrawShadows(context);
+                if (c.AlphaEnabled)
+                {
+                    graphics.SetBlendTransparent();
+                }
+                else
+                {
+                    graphics.SetBlendDefault();
+                }
+
+                drawable.DrawShadows(context);
+            }
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Engine
 {
@@ -52,25 +51,5 @@ namespace Engine
         /// Gets or sets if the current object has a parent
         /// </summary>
         bool HasParent { get; }
-
-        /// <summary>
-        /// Gets the internal instance as specified type
-        /// </summary>
-        /// <typeparam name="T">Result type</typeparam>
-        /// <returns>Returns the instance as type</returns>
-        T Get<T>();
-        /// <summary>
-        /// Gets if the instance implements type
-        /// </summary>
-        /// <typeparam name="T">Result type</typeparam>
-        /// <returns>Returns true if the instance implements the type</returns>
-        bool Is<T>();
-
-        /// <summary>
-        /// Gets the current object triangle collection
-        /// </summary>
-        /// <param name="usage">Object usage</param>
-        /// <returns>Returns the triangle list</returns>
-        IEnumerable<Triangle> GetTriangles(SceneObjectUsages usage);
     }
 }

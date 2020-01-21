@@ -39,10 +39,5 @@ namespace Engine.Audio
         /// </summary>
         /// <param name="manipulator">Transformable instance</param>
         void SetSource(ITransformable3D source);
-        /// <summary>
-        /// Sets the game audio agent source
-        /// </summary>
-        /// <param name="source">Scene object instance</param>
-        void SetSource<T>(SceneObject<T> source) where T : ITransformable3D;
     }
 }

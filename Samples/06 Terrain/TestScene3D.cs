@@ -1526,7 +1526,7 @@ namespace Terrain
                 UpdateHelicopter();
                 UpdateDebug();
 
-                agents.ForEach(a => a.Update(new UpdateContext() { GameTime = gameTime }));
+                agents.ForEach(a => a.Update(gameTime));
             }
         }
         private void UpdateInputPlayer()
@@ -1674,11 +1674,10 @@ namespace Terrain
                 this.Camera.MoveBackward(gameTime, this.Game.Input.ShiftPressed);
             }
 
-            if (this.follow)
+            if (this.follow &&
+                this.followTarget is IRayPickable<Triangle> pickable &&
+                this.followTarget is ITransformable3D transform)
             {
-                var pickable = this.followTarget.Get<IRayPickable<Triangle>>();
-                var transform = this.followTarget.Get<ITransformable3D>();
-
                 var sph = pickable.GetBoundingSphere();
                 this.Camera.LookTo(sph.Center);
                 this.Camera.Goto(sph.Center + (transform.Manipulator.Backward * 15f) + (Vector3.UnitY * 5f), CameraTranslations.UseDelta);

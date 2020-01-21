@@ -88,13 +88,5 @@ namespace Engine.Audio
         {
             this.agentTransform = source?.Manipulator;
         }
-        /// <summary>
-        /// Sets the game audio agent source
-        /// </summary>
-        /// <param name="source">Scene object instance</param>
-        public void SetSource<T>(SceneObject<T> source) where T : ITransformable3D
-        {
-            this.agentTransform = source?.Instance.Manipulator;
-        }
     }
 }

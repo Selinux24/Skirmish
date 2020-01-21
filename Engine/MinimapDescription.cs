@@ -26,7 +26,7 @@ namespace Engine
         /// <summary>
         /// Terrain to draw
         /// </summary>
-        public ISceneObject[] Drawables { get; set; }
+        public IDrawable[] Drawables { get; set; }
         /// <summary>
         /// Minimap render area
         /// </summary>

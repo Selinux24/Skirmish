@@ -12,7 +12,7 @@ namespace Deferred
         /// <summary>
         /// Model
         /// </summary>
-        private readonly ISceneObject model;
+        private readonly Model model;
         /// <summary>
         /// Controller
         /// </summary>
@@ -68,7 +68,7 @@ namespace Deferred
         {
             get
             {
-                return this.model.Get<ITransformable3D>()?.Manipulator;
+                return this.model?.Manipulator;
             }
         }
         /// <summary>
@@ -92,14 +92,14 @@ namespace Deferred
         {
             get
             {
-                return this.model.Get<Model>()?.Lights;
+                return this.model?.Lights;
             }
         }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public GameAgent(AgentType agentType, ISceneObject model, T controller)
+        public GameAgent(AgentType agentType, Model model, T controller)
         {
             this.model = model;
             this.controller = controller;

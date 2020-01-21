@@ -110,7 +110,7 @@ namespace Engine
 #if DEBUG
                 Stopwatch swCull = Stopwatch.StartNew();
 #endif
-                var toCullVisible = components.Where(s => s.Is<ICullable>()).Select(s => s.Get<ICullable>());
+                var toCullVisible = components.OfType<ICullable>();
 
                 bool draw = false;
                 if (scene.PerformFrustumCulling)

@@ -289,23 +289,6 @@ namespace Engine
 
             return instance;
         }
-        /// <summary>
-        /// Creates an effect instance
-        /// </summary>
-        /// <param name="effectName">Effect name</param>
-        /// <param name="emitter">Emitter scene object</param>
-        /// <param name="listener">Listener transformable object</param>
-        /// <returns>Returns the new created instance. Returns null if the effect name not exists, o if the effect instance is currently playing</returns>
-        public GameAudioEffect CreateEffectInstance<T>(string effectName, SceneObject<T> emitter, IManipulator listener)
-            where T : ITransformable3D
-        {
-            var instance = CreateEffectInstance(effectName);
-
-            instance?.Emitter.SetSource(emitter.Instance);
-            instance?.Listener.SetSource(listener);
-
-            return instance;
-        }
 
         /// <summary>
         /// Starts the audio device

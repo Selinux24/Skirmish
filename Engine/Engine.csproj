@@ -458,7 +458,6 @@
     </Compile>
     <Compile Include="SceneCullManager.cs" />
     <Compile Include="SceneLightHemispheric.cs" />
-    <Compile Include="SceneObject.cs" />
     <Compile Include="SceneObjectDescription.cs" />
     <Compile Include="SceneObjectUsages.cs" />
     <Compile Include="SceneRendererDeferredLights.cs" />

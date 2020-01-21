@@ -25,7 +25,7 @@ namespace Terrain.AI.Behaviors
         {
             if (this.Target != null)
             {
-                var model = this.Agent.SceneObject.Get<Model>();
+                var model = this.Agent.SceneObject;
                 if (model != null)
                 {
                     model.Manipulator.RotateTo(this.Target.Value, Vector3.Up, true, 0.01f);

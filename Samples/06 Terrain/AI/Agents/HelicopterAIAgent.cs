@@ -24,11 +24,11 @@ namespace Terrain.AI.Agents
         /// <param name="agentType">Agent type</param>
         /// <param name="sceneObject">Scene object</param>
         /// <param name="stats">Agent stats</param>
-        public HelicopterAIAgent(Brain parent, AgentType agentType, ISceneObject sceneObject, HelicopterAIStatsDescription stats) :
+        public HelicopterAIAgent(Brain parent, AgentType agentType, Model sceneObject, HelicopterAIStatsDescription stats) :
             base(parent, agentType, sceneObject, stats)
         {
             this.FlightHeight = stats.FlightHeight;
-            this.Controller = new HeliManipulatorController(sceneObject.Get<ITransformable3D>().Manipulator);
+            this.Controller = new HeliManipulatorController(sceneObject.Manipulator);
             this.AttackBehavior = new HelicopterAttackBehavior(this);
         }
 
@@ -60,7 +60,7 @@ namespace Terrain.AI.Agents
         {
             base.FireDamaged(active, passive);
 
-            var model = this.SceneObject.Get<Model>();
+            var model = this.SceneObject;
             if (model != null)
             {
                 if (this.Stats.Damage > 0.9f)
@@ -84,7 +84,7 @@ namespace Terrain.AI.Agents
         /// <param name="passive">Passive</param>
         protected override void FireDestroyed(AIAgent active, AIAgent passive)
         {
-            var model = this.SceneObject.Get<Model>();
+            var model = this.SceneObject;
 
             //Find nearest ground position
             if (this.Parent.Scene.FindNearestGroundPosition(this.Manipulator.Position, out PickingResult<Triangle> r))
