@@ -195,7 +195,7 @@ namespace Engine.Common
                     //Generate the texture
                     fMap.bitmapStream = new MemoryStream();
                     bmp.Save(fMap.bitmapStream, ImageFormat.Png);
-                    fMap.Texture = game.ResourceManager.CreateResource(fMap.bitmapStream, false);
+                    fMap.Texture = game.ResourceManager.RequestResource(fMap.bitmapStream, false);
                 }
 
                 //Add map to the font cache

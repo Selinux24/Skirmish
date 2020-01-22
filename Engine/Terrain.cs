@@ -745,13 +745,13 @@ namespace Engine
             {
                 Paths = ContentManager.FindPaths(tContentPath, description.Content.HeightmapDescription.Textures.NormalMaps),
             };
-            this.terrainNormalMaps = this.Game.ResourceManager.CreateResource(normalMapTextures);
+            this.terrainNormalMaps = this.Game.ResourceManager.RequestResource(normalMapTextures);
 
             var specularMapTextures = new ImageContent()
             {
                 Paths = ContentManager.FindPaths(tContentPath, description.Content.HeightmapDescription.Textures.SpecularMaps),
             };
-            this.terrainSpecularMaps = this.Game.ResourceManager.CreateResource(specularMapTextures);
+            this.terrainSpecularMaps = this.Game.ResourceManager.RequestResource(specularMapTextures);
 
             if (description.Content.HeightmapDescription.Textures.UseSlopes)
             {
@@ -764,8 +764,8 @@ namespace Engine
                     Paths = ContentManager.FindPaths(tContentPath, description.Content.HeightmapDescription.Textures.TexturesHR),
                 };
 
-                this.terrainTexturesLR = this.Game.ResourceManager.CreateResource(texturesLR);
-                this.terrainTexturesHR = this.Game.ResourceManager.CreateResource(texturesHR);
+                this.terrainTexturesLR = this.Game.ResourceManager.RequestResource(texturesLR);
+                this.terrainTexturesHR = this.Game.ResourceManager.RequestResource(texturesHR);
                 this.slopeRanges = description.Content.HeightmapDescription.Textures.SlopeRanges;
             }
 
@@ -780,8 +780,8 @@ namespace Engine
                     Paths = ContentManager.FindPaths(tContentPath, description.Content.HeightmapDescription.Textures.AlphaMap),
                 };
 
-                this.colorTextures = this.Game.ResourceManager.CreateResource(colors);
-                this.alphaMap = this.Game.ResourceManager.CreateResource(aMap);
+                this.colorTextures = this.Game.ResourceManager.RequestResource(colors);
+                this.alphaMap = this.Game.ResourceManager.RequestResource(aMap);
             }
 
             this.useAlphaMap = description.Content.HeightmapDescription.Textures.UseAlphaMapping;

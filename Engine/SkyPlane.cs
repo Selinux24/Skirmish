@@ -128,13 +128,13 @@ namespace Engine
             {
                 Streams = ContentManager.FindContent(description.ContentPath, description.Texture1Name),
             };
-            this.skyTexture1 = this.Game.ResourceManager.CreateResource(img1);
+            this.skyTexture1 = this.Game.ResourceManager.RequestResource(img1);
 
             var img2 = new ImageContent()
             {
                 Streams = ContentManager.FindContent(description.ContentPath, description.Texture2Name),
             };
-            this.skyTexture2 = this.Game.ResourceManager.CreateResource(img2);
+            this.skyTexture2 = this.Game.ResourceManager.RequestResource(img2);
 
             this.skyMode = description.SkyMode;
             this.rotation = Matrix.Identity;

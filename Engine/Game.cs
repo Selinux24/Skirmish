@@ -346,6 +346,7 @@ namespace Engine
             await scene.Initialized();
 
             this.BufferManager.CreateBuffers();
+            this.ResourceManager.CreateResources();
 
             scene.Active = true;
         }

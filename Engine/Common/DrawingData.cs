@@ -92,7 +92,7 @@ namespace Engine.Common
                 {
                     var info = modelContent.Images[images];
 
-                    var view = game.ResourceManager.CreateResource(info);
+                    var view = game.ResourceManager.RequestResource(info);
                     if (view != null)
                     {
                         drw.Textures.Add(images, view);

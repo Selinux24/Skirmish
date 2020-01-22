@@ -1346,7 +1346,7 @@ namespace Engine
         /// <param name="description">Texture description</param>
         /// <param name="tryMipAutogen">Try to generate texture mips</param>
         /// <returns>Returns the new shader resource view</returns>
-        private ShaderResourceView1 CreateResource(TextureData description, bool tryMipAutogen)
+        internal ShaderResourceView1 CreateResource(TextureData description, bool tryMipAutogen)
         {
             bool mipAutogen = false;
 
@@ -1450,7 +1450,7 @@ namespace Engine
         /// <param name="descriptions">Texture description list</param>
         /// <param name="tryMipAutogen">Try to generate texture mips</param>
         /// <returns>Returns the new shader resource view</returns>
-        private ShaderResourceView1 CreateResource(IEnumerable<TextureData> descriptions, bool tryMipAutogen)
+        internal ShaderResourceView1 CreateResource(IEnumerable<TextureData> descriptions, bool tryMipAutogen)
         {
             var description = descriptions.First();
             int count = descriptions.Count();
@@ -1564,6 +1564,89 @@ namespace Engine
                 {
                     return new ShaderResourceView1(this.device, textureArray, desc);
                 }
+            }
+        }
+        /// <summary>
+        /// Creates a texture filled with specified values
+        /// </summary>
+        /// <param name="size">Texture size</param>
+        /// <param name="values">Color values</param>
+        /// <returns>Returns created texture</returns>
+        internal ShaderResourceView1 CreateTexture1D(int size, IEnumerable<Vector4> values)
+        {
+            try
+            {
+                Counters.Textures++;
+
+                using (var str = DataStream.Create(values.ToArray(), false, false))
+                {
+                    using (var randTex = new Texture1D(
+                        this.device,
+                        new Texture1DDescription()
+                        {
+                            Format = Format.R32G32B32A32_Float,
+                            Width = size,
+                            ArraySize = 1,
+                            MipLevels = 1,
+                            Usage = ResourceUsage.Immutable,
+                            BindFlags = BindFlags.ShaderResource,
+                            CpuAccessFlags = CpuAccessFlags.None,
+                            OptionFlags = ResourceOptionFlags.None,
+                        },
+                        str))
+                    {
+                        return new ShaderResourceView1(this.device, randTex);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new EngineException("CreateTexture1D from value array Error. See inner exception for details", ex);
+            }
+        }
+        /// <summary>
+        /// Creates a texture filled with specified values
+        /// </summary>
+        /// <param name="size">Texture size</param>
+        /// <param name="values">Color values</param>
+        /// <returns>Returns created texture</returns>
+        internal ShaderResourceView1 CreateTexture2D(int size, IEnumerable<Vector4> values)
+        {
+            try
+            {
+                Counters.Textures++;
+
+                var tmp = new Vector4[size * size];
+                Array.Copy(values.ToArray(), tmp, values.Count());
+
+                using (var str = DataStream.Create(tmp, false, false))
+                {
+                    var dBox = new DataBox(str.DataPointer, size * FormatHelper.SizeOfInBytes(Format.R32G32B32A32_Float), 0);
+
+                    using (var texture = new Texture2D1(
+                        this.device,
+                        new Texture2DDescription1()
+                        {
+                            Format = Format.R32G32B32A32_Float,
+                            Width = size,
+                            Height = size,
+                            ArraySize = 1,
+                            MipLevels = 1,
+                            SampleDescription = new SampleDescription(1, 0),
+                            Usage = ResourceUsage.Immutable,
+                            BindFlags = BindFlags.ShaderResource,
+                            CpuAccessFlags = CpuAccessFlags.None,
+                            OptionFlags = ResourceOptionFlags.None,
+                        },
+                        new[] { dBox }))
+                    {
+                        return new ShaderResourceView1(this.device, texture);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new EngineException("CreateTexture2D from value array Error. See inner exception for details", ex);
             }
         }
         /// <summary>
@@ -1681,242 +1764,6 @@ namespace Engine
             return new Texture2D1(this.device, description, data);
         }
 
-        /// <summary>
-        /// Loads a texture from memory in the graphics device
-        /// </summary>
-        /// <param name="buffer">Data buffer</param>
-        /// <param name="mipAutogen">Try to generate texture mips</param>
-        /// <returns>Returns the resource view</returns>
-        internal EngineShaderResourceView LoadTexture(byte[] buffer, bool mipAutogen)
-        {
-            try
-            {
-                Counters.Textures++;
-
-                using (var resource = Helper.Attempt(TextureData.ReadTexture, buffer, 5))
-                {
-                    return new EngineShaderResourceView(CreateResource(resource, mipAutogen));
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new EngineException("LoadTexture from byte array Error. See inner exception for details", ex);
-            }
-        }
-        /// <summary>
-        /// Loads a texture from file in the graphics device
-        /// </summary>
-        /// <param name="filename">Path to file</param>
-        /// <param name="mipAutogen">Try to generate texture mips</param>
-        /// <returns>Returns the resource view</returns>
-        internal EngineShaderResourceView LoadTexture(string filename, bool mipAutogen)
-        {
-            try
-            {
-                Counters.Textures++;
-
-                using (var resource = Helper.Attempt(TextureData.ReadTexture, filename, 5))
-                {
-                    return new EngineShaderResourceView(CreateResource(resource, mipAutogen));
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new EngineException("LoadTexture from file Error. See inner exception for details", ex);
-            }
-        }
-        /// <summary>
-        /// Loads a texture from file in the graphics device
-        /// </summary>
-        /// <param name="stream">Stream</param>
-        /// <param name="mipAutogen">Try to generate texture mips</param>
-        /// <returns>Returns the resource view</returns>
-        internal EngineShaderResourceView LoadTexture(MemoryStream stream, bool mipAutogen)
-        {
-            try
-            {
-                Counters.Textures++;
-
-                using (var resource = Helper.Attempt(TextureData.ReadTexture, stream, 5))
-                {
-                    return new EngineShaderResourceView(CreateResource(resource, mipAutogen));
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new EngineException("LoadTexture from stream Error. See inner exception for details", ex);
-            }
-        }
-        /// <summary>
-        /// Loads a texture array from a file collection in the graphics device
-        /// </summary>
-        /// <param name="filenames">Path file collection</param>
-        /// <param name="mipAutogen">Try to generate texture mips</param>
-        /// <returns>Returns the resource view</returns>
-        internal EngineShaderResourceView LoadTextureArray(IEnumerable<string> filenames, bool mipAutogen)
-        {
-            try
-            {
-                var textureList = Helper.Attempt(TextureData.ReadTexture, filenames, 5);
-
-                return LoadTextureArray(textureList, mipAutogen);
-            }
-            catch (Exception ex)
-            {
-                throw new EngineException("LoadTexture from file array Error. See inner exception for details", ex);
-            }
-        }
-        /// <summary>
-        /// Loads a texture array from a file collection in the graphics device
-        /// </summary>
-        /// <param name="streams">Stream collection</param>
-        /// <param name="mipAutogen">Try to generate texture mips</param>
-        /// <returns>Returns the resource view</returns>
-        internal EngineShaderResourceView LoadTextureArray(IEnumerable<MemoryStream> streams, bool mipAutogen)
-        {
-            try
-            {
-                var textureList = Helper.Attempt(TextureData.ReadTexture, streams, 5);
-
-                return LoadTextureArray(textureList, mipAutogen);
-            }
-            catch (Exception ex)
-            {
-                throw new EngineException("LoadTexture from stream array Error. See inner exception for details", ex);
-            }
-        }
-        /// <summary>
-        /// Loads a texture array in the graphics device
-        /// </summary>
-        /// <param name="textureList">Texture array</param>
-        /// <param name="mipAutogen">Try to generate texture mips</param>
-        /// <returns>Returns the resource view</returns>
-        private EngineShaderResourceView LoadTextureArray(IEnumerable<TextureData> textureList, bool mipAutogen)
-        {
-            Counters.Textures++;
-
-            var resource = this.CreateResource(textureList, mipAutogen);
-
-            foreach (var item in textureList)
-            {
-                item?.Dispose();
-            }
-
-            return new EngineShaderResourceView(resource);
-        }
-
-        /// <summary>
-        /// Creates a texture filled with specified values
-        /// </summary>
-        /// <param name="size">Texture size</param>
-        /// <param name="values">Color values</param>
-        /// <returns>Returns created texture</returns>
-        internal EngineShaderResourceView CreateTexture1D(int size, IEnumerable<Vector4> values)
-        {
-            try
-            {
-                Counters.Textures++;
-
-                using (var str = DataStream.Create(values.ToArray(), false, false))
-                {
-                    using (var randTex = new Texture1D(
-                        this.device,
-                        new Texture1DDescription()
-                        {
-                            Format = Format.R32G32B32A32_Float,
-                            Width = size,
-                            ArraySize = 1,
-                            MipLevels = 1,
-                            Usage = ResourceUsage.Immutable,
-                            BindFlags = BindFlags.ShaderResource,
-                            CpuAccessFlags = CpuAccessFlags.None,
-                            OptionFlags = ResourceOptionFlags.None,
-                        },
-                        str))
-                    {
-                        return new EngineShaderResourceView(new ShaderResourceView1(this.device, randTex));
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new EngineException("CreateTexture1D from value array Error. See inner exception for details", ex);
-            }
-        }
-        /// <summary>
-        /// Creates a texture filled with specified values
-        /// </summary>
-        /// <param name="size">Texture size</param>
-        /// <param name="values">Color values</param>
-        /// <returns>Returns created texture</returns>
-        internal EngineShaderResourceView CreateTexture2D(int size, IEnumerable<Vector4> values)
-        {
-            try
-            {
-                Counters.Textures++;
-
-                var tmp = new Vector4[size * size];
-                Array.Copy(values.ToArray(), tmp, values.Count());
-
-                using (var str = DataStream.Create(tmp, false, false))
-                {
-                    var dBox = new DataBox(str.DataPointer, size * FormatHelper.SizeOfInBytes(Format.R32G32B32A32_Float), 0);
-
-                    using (var texture = new Texture2D1(
-                        this.device,
-                        new Texture2DDescription1()
-                        {
-                            Format = Format.R32G32B32A32_Float,
-                            Width = size,
-                            Height = size,
-                            ArraySize = 1,
-                            MipLevels = 1,
-                            SampleDescription = new SampleDescription(1, 0),
-                            Usage = ResourceUsage.Immutable,
-                            BindFlags = BindFlags.ShaderResource,
-                            CpuAccessFlags = CpuAccessFlags.None,
-                            OptionFlags = ResourceOptionFlags.None,
-                        },
-                        new[] { dBox }))
-                    {
-                        return new EngineShaderResourceView(new ShaderResourceView1(this.device, texture));
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new EngineException("CreateTexture2D from value array Error. See inner exception for details", ex);
-            }
-        }
-        /// <summary>
-        /// Creates a random 1D texture
-        /// </summary>
-        /// <param name="size">Texture size</param>
-        /// <param name="min">Minimum value</param>
-        /// <param name="max">Maximum value</param>
-        /// <param name="seed">Random seed</param>
-        /// <returns>Returns created texture</returns>
-        internal EngineShaderResourceView CreateRandomTexture(int size, float min, float max, int seed = 0)
-        {
-            try
-            {
-                Counters.Textures++;
-
-                Random rnd = new Random(seed);
-
-                var randomValues = new List<Vector4>();
-                for (int i = 0; i < size; i++)
-                {
-                    randomValues.Add(rnd.NextVector4(new Vector4(min), new Vector4(max)));
-                }
-
-                return this.CreateTexture1D(size, randomValues.ToArray());
-            }
-            catch (Exception ex)
-            {
-                throw new EngineException("CreateRandomTexture Error. See inner exception for details", ex);
-            }
-        }
         /// <summary>
         /// Create depth stencil view
         /// </summary>
@@ -2444,12 +2291,19 @@ namespace Engine
             InputElement[] input,
             string profile)
         {
-            return LoadVertexShader(
+            var res = LoadVertexShader(
                 byteCode,
                 entryPoint,
                 input,
                 profile,
                 out string compilationErrors);
+
+            if (!string.IsNullOrEmpty(compilationErrors))
+            {
+                Console.WriteLine(compilationErrors);
+            }
+
+            return res;
         }
         /// <summary>
         /// Loads vertex shader from byte code
@@ -2507,11 +2361,18 @@ namespace Engine
             string entryPoint,
             string profile)
         {
-            return LoadPixelShader(
+            var res = LoadPixelShader(
                 File.ReadAllBytes(filename),
                 entryPoint,
                 profile,
                 out string compilationErrors);
+
+            if (!string.IsNullOrEmpty(compilationErrors))
+            {
+                Console.WriteLine(compilationErrors);
+            }
+
+            return res;
         }
         /// <summary>
         /// Loads a pixel shader from file
@@ -2546,11 +2407,18 @@ namespace Engine
             string entryPoint,
             string profile)
         {
-            return LoadPixelShader(
+            var res = LoadPixelShader(
                 byteCode,
                 entryPoint,
                 profile,
                 out string compilationErrors);
+
+            if (!string.IsNullOrEmpty(compilationErrors))
+            {
+                Console.WriteLine(compilationErrors);
+            }
+
+            return res;
         }
         /// <summary>
         /// Loads a pixel shader from byte code

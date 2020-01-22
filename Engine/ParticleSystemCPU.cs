@@ -102,7 +102,7 @@ namespace Engine
             {
                 Streams = ContentManager.FindContent(description.ContentPath, description.TextureName),
             };
-            this.Texture = game.ResourceManager.CreateResource(imgContent);
+            this.Texture = game.ResourceManager.RequestResource(imgContent);
             this.TextureCount = (uint)imgContent.Count;
 
             this.Emitter = emitter;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace Engine.Common
 {
@@ -157,17 +158,21 @@ namespace Engine.Common
             /// <returns>Returns the new registerd descriptor</returns>
             public BufferDescriptor AddDescriptor(int slot, IEnumerable<IVertexData> vertices, int instances)
             {
+                Monitor.Enter(this.data);
                 //Store current data index as descriptor offset
                 int offset = this.data.Count;
-
                 //Add items to data list
                 this.data.AddRange(vertices);
+                Monitor.Exit(this.data);
+
                 //Increment the instance count
                 this.Instances += instances;
 
                 //Create and add the new descriptor to main descriptor list
                 var descriptor = new BufferDescriptor(slot, offset, vertices.Count());
+                Monitor.Enter(this.descriptors);
                 this.descriptors.Add(descriptor);
+                Monitor.Exit(this.descriptors);
                 return descriptor;
             }
             /// <summary>
@@ -176,27 +181,17 @@ namespace Engine.Common
             /// <param name="descriptor">Buffer descriptor to remove</param>
             public void RemoveDescriptor(BufferDescriptor descriptor)
             {
-                var tmp1 = this.descriptors.ToList();
-                var tmp2 = this.data.ToList();
-
-                //Remove descriptor
-                this.descriptors.Remove(descriptor);
-
                 if (descriptor.Count > 0)
                 {
                     //If descriptor has items, remove from buffer descriptors
+                    Monitor.Enter(this.data);
                     this.data.RemoveRange(descriptor.Offset, descriptor.Count);
+                    Monitor.Exit(this.data);
                 }
 
-                int totalDataPrev = tmp1.Sum(d => d.Count);
-                int totalData = this.descriptors.Sum(d => d.Count);
-                if (totalData != this.data.Count)
-                {
-                    int diff1 = totalDataPrev - totalData;
-                    int diff2 = tmp2.Count - this.data.Count;
-
-                    throw new EngineException($"WTF!! {diff1} to {diff2}");
-                }
+                Monitor.Enter(this.descriptors);
+                //Remove descriptor
+                this.descriptors.Remove(descriptor);
 
                 if (this.descriptors.Any())
                 {
@@ -209,6 +204,13 @@ namespace Engine.Common
                         this.descriptors[i].Offset = prev.Offset + prev.Count;
                     }
                 }
+                Monitor.Exit(this.descriptors);
+            }
+
+
+            public override string ToString()
+            {
+                return $"[{Type}][{Dynamic}][{Name}] Instances: {Instances} AllocatedSize: {AllocatedSize} ToAllocateSize: {ToAllocateSize} Dirty: {Dirty}";
             }
         }
 
@@ -288,15 +290,18 @@ namespace Engine.Common
             /// <returns>Returns the new registerd descriptor</returns>
             public BufferDescriptor AddDescriptor(int slot, IEnumerable<uint> indices)
             {
+                Monitor.Enter(this.data);
                 //Store current data index as descriptor offset
                 int offset = this.data.Count;
-
                 //Add items to data list
                 this.data.AddRange(indices);
+                Monitor.Exit(this.data);
 
                 //Create and add the new descriptor to main descriptor list
                 var descriptor = new BufferDescriptor(slot, offset, indices.Count());
+                Monitor.Enter(this.descriptors);
                 this.descriptors.Add(descriptor);
+                Monitor.Exit(this.descriptors);
                 return descriptor;
             }
             /// <summary>
@@ -314,10 +319,13 @@ namespace Engine.Common
 
                 if (descriptor.Count > 0)
                 {
+                    Monitor.Enter(this.data);
                     //If descriptor has items, remove from buffer descriptors
                     this.data.RemoveRange(descriptor.Offset, descriptor.Count);
+                    Monitor.Exit(this.data);
                 }
 
+                Monitor.Enter(this.descriptors);
                 //Remove from descriptors list
                 this.descriptors.RemoveAt(index);
 
@@ -332,6 +340,12 @@ namespace Engine.Common
                         this.descriptors[i].Offset = prev.Offset + prev.Count;
                     }
                 }
+                Monitor.Exit(this.descriptors);
+            }
+
+            public override string ToString()
+            {
+                return $"[{Dynamic}][{Name}] AllocatedSize: {AllocatedSize} ToAllocateSize: {ToAllocateSize} Dirty: {Dirty}";
             }
         }
 

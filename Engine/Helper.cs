@@ -366,7 +366,7 @@ namespace Engine
         /// <returns>Return the maximum value of the collection</returns>
         public static T Max<T>(params T[] array) where T : IComparable<T>
         {
-            T res = default(T);
+            T res = default;
 
             for (int i = 0; i < array.Length; i++)
             {
@@ -390,7 +390,7 @@ namespace Engine
         /// <returns>Return the minimum value of the collection</returns>
         public static T Min<T>(params T[] array) where T : IComparable<T>
         {
-            T res = default(T);
+            T res = default;
 
             for (int i = 0; i < array.Length; i++)
             {

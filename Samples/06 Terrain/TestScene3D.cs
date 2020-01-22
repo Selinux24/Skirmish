@@ -359,7 +359,7 @@ namespace Terrain
             this.shadowMapDrawer.Visible = false;
             this.shadowMapDrawer.DeferredEnabled = false;
 
-            this.debugTex = this.Game.ResourceManager.CreateResource(@"Resources\uvtest.png");
+            this.debugTex = this.Game.ResourceManager.RequestResource(@"Resources\uvtest.png");
 
             #endregion
 
@@ -1267,10 +1267,9 @@ namespace Terrain
 
         public override void NavigationGraphUpdated()
         {
-            Task.WhenAll(
-                StartHelicopter(),
-                StartTanks(),
-                StartDebug()).ConfigureAwait(true);
+            StartHelicopter().ConfigureAwait(true);
+            StartTanks().ConfigureAwait(true);
+            StartDebug().ConfigureAwait(true);
 
             started = true;
         }

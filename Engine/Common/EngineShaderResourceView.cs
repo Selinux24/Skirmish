@@ -17,6 +17,13 @@ namespace Engine.Common
         /// <summary>
         /// Constructor
         /// </summary>
+        public EngineShaderResourceView()
+        {
+
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
         /// <param name="srv">Shader resource view</param>
         public EngineShaderResourceView(ShaderResourceView1 srv)
         {
@@ -58,6 +65,14 @@ namespace Engine.Common
         public ShaderResourceView1 GetResource()
         {
             return this.srv;
+        }
+        /// <summary>
+        /// Sets the internal shader resource view
+        /// </summary>
+        /// <param name="view">Resource view</param>
+        public void SetResource(ShaderResourceView1 view)
+        {
+            this.srv = view;
         }
     }
 }

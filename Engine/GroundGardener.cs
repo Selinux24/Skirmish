@@ -639,7 +639,7 @@ namespace Engine
                 throw new EngineException("A gardener description should be specified.");
             }
 
-            this.textureRandom = this.Game.ResourceManager.CreateResource(Guid.NewGuid(), 1024, -1, 1, 24);
+            this.textureRandom = this.Game.ResourceManager.RequestResource(Guid.NewGuid(), 1024, -1, 1, 24);
 
             this.foliageSphere = new BoundingSphere(Vector3.Zero, description.VisibleRadius);
 
@@ -749,7 +749,7 @@ namespace Engine
                     Streams = ContentManager.FindContent(contentPath, channel.VegetationTextures),
                 };
 
-                foliageTextures = this.Game.ResourceManager.CreateResource(image);
+                foliageTextures = this.Game.ResourceManager.RequestResource(image);
             }
 
             if (normalMapCount > 0)
@@ -759,7 +759,7 @@ namespace Engine
                     Streams = ContentManager.FindContent(contentPath, channel.VegetationNormalMaps),
                 };
 
-                foliageNormalMaps = this.Game.ResourceManager.CreateResource(image);
+                foliageNormalMaps = this.Game.ResourceManager.RequestResource(image);
             }
 
             return new FoliageMapChannel()

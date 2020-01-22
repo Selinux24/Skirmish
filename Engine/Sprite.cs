@@ -300,7 +300,7 @@ namespace Engine
         private void InitializeTexture(string contentPath, string[] textures)
         {
             var image = ImageContent.Array(contentPath, textures);
-            this.spriteTexture = this.Game.ResourceManager.CreateResource(image);
+            this.spriteTexture = this.Game.ResourceManager.RequestResource(image);
         }
         /// <summary>
         /// Resize

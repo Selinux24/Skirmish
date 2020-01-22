@@ -149,7 +149,7 @@ namespace Engine
         protected void InitializeTexture(string contentPath, params string[] textures)
         {
             var image = ImageContent.Cubic(contentPath, textures[0]);
-            this.cubeMapTexture = this.Game.ResourceManager.CreateResource(image);
+            this.cubeMapTexture = this.Game.ResourceManager.RequestResource(image);
         }
     }
 }
