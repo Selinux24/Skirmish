@@ -244,11 +244,16 @@
     <Compile Include="Effects\EffectTerrainState.cs" />
     <Compile Include="Effects\EffectWaterState.cs" />
     <Compile Include="FrameStatsForward.cs" />
+    <Compile Include="GameResourceImageContent.cs" />
+    <Compile Include="GameResourceRandomTexture.cs" />
+    <Compile Include="GameResourceValueArray.cs" />
     <Compile Include="GameStatus.cs" />
     <Compile Include="GameStatusCollectedEventArgs.cs" />
     <Compile Include="GameStatusCollectedHandler.cs" />
+    <Compile Include="IGameResourceRequest.cs" />
     <Compile Include="IManipulator.cs" />
     <Compile Include="ISceneLight.cs" />
+    <Compile Include="ISceneLightHemispheric.cs" />
     <Compile Include="ISceneLightSpot.cs" />
     <Compile Include="FrameStatsLight.cs" />
     <Compile Include="ISceneObject.cs" />

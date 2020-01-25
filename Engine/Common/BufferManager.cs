@@ -207,7 +207,10 @@ namespace Engine.Common
                 Monitor.Exit(this.descriptors);
             }
 
-
+            /// <summary>
+            /// Gets the text representation of the instance
+            /// </summary>
+            /// <returns>Returns a description of the instance</returns>
             public override string ToString()
             {
                 return $"[{Type}][{Dynamic}][{Name}] Instances: {Instances} AllocatedSize: {AllocatedSize} ToAllocateSize: {ToAllocateSize} Dirty: {Dirty}";
@@ -343,6 +346,10 @@ namespace Engine.Common
                 Monitor.Exit(this.descriptors);
             }
 
+            /// <summary>
+            /// Gets the text representation of the instance
+            /// </summary>
+            /// <returns>Returns a description of the instance</returns>
             public override string ToString()
             {
                 return $"[{Dynamic}][{Name}] AllocatedSize: {AllocatedSize} ToAllocateSize: {ToAllocateSize} Dirty: {Dirty}";
@@ -448,6 +455,10 @@ namespace Engine.Common
         /// Instancing buffer binding offset
         /// </summary>
         private int instancingBufferBindingOffset = -1;
+        /// <summary>
+        /// Allocating buffers flag
+        /// </summary>
+        private bool allocating = false;
 
         /// <summary>
         /// Total instances
@@ -686,10 +697,17 @@ namespace Engine.Common
         /// </summary>
         public void CreateBuffers()
         {
-            Console.WriteLine($"CreateBuffers Initilialized={Initilialized}");
+            if (allocating)
+            {
+                return;
+            }
+
+            allocating = true;
 
             if (!Initilialized)
             {
+                Console.WriteLine($"Creating buffers");
+
                 CreateVertexBuffers();
                 CreateInstancingBuffers();
                 CreateIndexBuffers();
@@ -698,8 +716,12 @@ namespace Engine.Common
             }
             else
             {
+                Console.WriteLine($"Reallocating buffers");
+
                 DoReallocation();
             }
+
+            allocating = false;
         }
 
         /// <summary>
@@ -800,7 +822,7 @@ namespace Engine.Common
         {
             if (vertexBufferAllocationNeeded)
             {
-                ReallocateVertexData(out bool reallocateInstances);
+                bool reallocateInstances = ReallocateVertexData();
 
                 vertexBufferAllocationNeeded = false;
 
@@ -821,9 +843,9 @@ namespace Engine.Common
         /// Reallocates the vertex data
         /// </summary>
         /// <param name="reallocateInstances">Returns wether instance reallocation is necessary</param>
-        private void ReallocateVertexData(out bool reallocateInstances)
+        private bool ReallocateVertexData()
         {
-            reallocateInstances = false;
+            bool reallocateInstances = false;
 
             for (int i = 0; i < this.vertexData.Count; i++)
             {
@@ -868,6 +890,8 @@ namespace Engine.Common
                     }
                 }
             }
+
+            return reallocateInstances;
         }
         /// <summary>
         /// Reallocates the instance data

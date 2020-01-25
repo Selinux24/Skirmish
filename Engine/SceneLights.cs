@@ -37,28 +37,28 @@ namespace Engine
         /// <summary>
         /// Directional lights
         /// </summary>
-        private readonly List<SceneLightDirectional> directionalLights = new List<SceneLightDirectional>();
+        private readonly List<ISceneLightDirectional> directionalLights = new List<ISceneLightDirectional>();
         /// <summary>
         /// Point lights
         /// </summary>
-        private readonly List<SceneLightPoint> pointLights = new List<SceneLightPoint>();
+        private readonly List<ISceneLightPoint> pointLights = new List<ISceneLightPoint>();
         /// <summary>
         /// Spot lights
         /// </summary>
-        private readonly List<SceneLightSpot> spotLights = new List<SceneLightSpot>();
+        private readonly List<ISceneLightSpot> spotLights = new List<ISceneLightSpot>();
         /// <summary>
         /// Visible lights
         /// </summary>
-        private readonly List<SceneLight> visibleLights = new List<SceneLight>();
+        private readonly List<ISceneLight> visibleLights = new List<ISceneLight>();
 
         /// <summary>
         /// Gets or sets the hemispheric ambient light
         /// </summary>
-        public SceneLightHemispheric HemisphericLigth { get; set; }
+        public ISceneLightHemispheric HemisphericLigth { get; set; }
         /// <summary>
         /// Gets or sets directional lights
         /// </summary>
-        public SceneLightDirectional[] DirectionalLights
+        public ISceneLightDirectional[] DirectionalLights
         {
             get
             {
@@ -68,7 +68,7 @@ namespace Engine
         /// <summary>
         /// Gets or sets point lights
         /// </summary>
-        public SceneLightPoint[] PointLights
+        public ISceneLightPoint[] PointLights
         {
             get
             {
@@ -78,7 +78,7 @@ namespace Engine
         /// <summary>
         /// Gets or sets spot lights
         /// </summary>
-        public SceneLightSpot[] SpotLights
+        public ISceneLightSpot[] SpotLights
         {
             get
             {
@@ -88,7 +88,7 @@ namespace Engine
         /// <summary>
         /// Key light
         /// </summary>
-        public SceneLightDirectional KeyLight
+        public ISceneLightDirectional KeyLight
         {
             get
             {
@@ -98,7 +98,7 @@ namespace Engine
         /// <summary>
         /// Fill light
         /// </summary>
-        public SceneLightDirectional FillLight
+        public ISceneLightDirectional FillLight
         {
             get
             {
@@ -108,7 +108,7 @@ namespace Engine
         /// <summary>
         /// Back light
         /// </summary>
-        public SceneLightDirectional BackLight
+        public ISceneLightDirectional BackLight
         {
             get
             {
@@ -147,11 +147,16 @@ namespace Engine
         /// - Spot lights
         /// Returns the first occurrence using that order
         /// </remarks>
-        public SceneLight this[string name]
+        public ISceneLight this[string name]
         {
             get
             {
-                SceneLight light = null;
+                ISceneLight light = null;
+
+                if (string.Equals(this.HemisphericLigth?.Name, name, StringComparison.OrdinalIgnoreCase))
+                {
+                    return this.HemisphericLigth;
+                }
 
                 light = this.directionalLights.Find(l => string.Equals(l.Name, name, StringComparison.OrdinalIgnoreCase));
                 if (light != null) return light;
@@ -210,7 +215,7 @@ namespace Engine
         /// Sets the hemispheric ambient light
         /// </summary>
         /// <param name="hemiLight">Hemispheric light</param>
-        public void SetAmbient(SceneLightHemispheric hemiLight)
+        public void SetAmbient(ISceneLightHemispheric hemiLight)
         {
             this.HemisphericLigth = hemiLight;
         }
@@ -218,7 +223,7 @@ namespace Engine
         /// Adds the specified new light to colection
         /// </summary>
         /// <param name="light">Directional light</param>
-        public void Add(SceneLightDirectional light)
+        public void Add(ISceneLightDirectional light)
         {
             this.directionalLights.Add(light);
         }
@@ -226,7 +231,7 @@ namespace Engine
         /// Adds the specified new light to colection
         /// </summary>
         /// <param name="light">Point light</param>
-        public void Add(SceneLightPoint light)
+        public void Add(ISceneLightPoint light)
         {
             this.pointLights.Add(light);
         }
@@ -234,31 +239,42 @@ namespace Engine
         /// Adds the specified new light to colection
         /// </summary>
         /// <param name="light">Spot light</param>
-        public void Add(SceneLightSpot light)
+        public void Add(ISceneLightSpot light)
         {
             this.spotLights.Add(light);
+        }
+        /// <summary>
+        /// Adds the specified new light to colection
+        /// </summary>
+        /// <param name="light">Light</param>
+        public void Add(ISceneLight light)
+        {
+            if (light is ISceneLightHemispheric hemLight) this.HemisphericLigth = hemLight;
+            else if (light is ISceneLightDirectional dirLight) this.directionalLights.Add(dirLight);
+            else if (light is ISceneLightPoint pointLight) this.pointLights.Add(pointLight);
+            else if (light is ISceneLightSpot spotLight) this.spotLights.Add(spotLight);
         }
         /// <summary>
         /// Adds the specified light list to colection
         /// </summary>
         /// <param name="sceneLights">Lights</param>
-        public void AddRange(IEnumerable<SceneLight> sceneLights)
+        public void AddRange(IEnumerable<ISceneLight> sceneLights)
         {
-            if (sceneLights != null)
+            if (sceneLights?.Any() != true)
             {
-                foreach (var light in sceneLights)
-                {
-                    if (light is SceneLightDirectional dirLight) this.directionalLights.Add(dirLight);
-                    else if (light is SceneLightPoint pointLight) this.pointLights.Add(pointLight);
-                    else if (light is SceneLightSpot spotLight) this.spotLights.Add(spotLight);
-                }
+                return;
+            }
+
+            foreach (var light in sceneLights)
+            {
+                Add(light);
             }
         }
         /// <summary>
         /// Removes the specified light
         /// </summary>
         /// <param name="light">Directional light</param>
-        public void Remove(SceneLightDirectional light)
+        public void Remove(ISceneLightDirectional light)
         {
             if (this.directionalLights.Contains(light))
             {
@@ -269,7 +285,7 @@ namespace Engine
         /// Removes the specified light
         /// </summary>
         /// <param name="light">Point light</param>
-        public void Remove(SceneLightPoint light)
+        public void Remove(ISceneLightPoint light)
         {
             if (this.pointLights.Contains(light))
             {
@@ -280,7 +296,7 @@ namespace Engine
         /// Removes the specified light
         /// </summary>
         /// <param name="light">Spot light</param>
-        public void Remove(SceneLightSpot light)
+        public void Remove(ISceneLightSpot light)
         {
             if (this.spotLights.Contains(light))
             {
@@ -288,10 +304,22 @@ namespace Engine
             }
         }
         /// <summary>
+        /// Removes the specified light
+        /// </summary>
+        /// <param name="light">Light</param>
+        public void Remove(ISceneLight light)
+        {
+            if (light == this.HemisphericLigth) this.HemisphericLigth = null;
+            else if (light is ISceneLightDirectional dirLight) Remove(dirLight);
+            else if (light is ISceneLightPoint pointLight) Remove(pointLight);
+            else if (light is ISceneLightSpot spotLight) Remove(spotLight);
+        }
+        /// <summary>
         /// Clear all lights
         /// </summary>
         public void Clear()
         {
+            this.HemisphericLigth = null;
             this.ClearDirectionalLights();
             this.ClearPointLights();
             this.ClearSpotLights();
@@ -415,7 +443,7 @@ namespace Engine
         /// Gets the visible hemispheric light
         /// </summary>
         /// <returns>Returns the visible hemispheric light</returns>
-        public SceneLightHemispheric GetVisibleHemisphericLight()
+        public ISceneLightHemispheric GetVisibleHemisphericLight()
         {
             return this.HemisphericLigth != null && this.HemisphericLigth.Enabled ? this.HemisphericLigth : null;
         }
@@ -423,7 +451,7 @@ namespace Engine
         /// Gets the visible directional lights
         /// </summary>
         /// <returns>Returns the visible directional lights array</returns>
-        public IEnumerable<SceneLightDirectional> GetVisibleDirectionalLights()
+        public IEnumerable<ISceneLightDirectional> GetVisibleDirectionalLights()
         {
             return this.visibleLights
                 .FindAll(l => l is SceneLightDirectional)
@@ -434,7 +462,7 @@ namespace Engine
         /// Gets the visible point lights
         /// </summary>
         /// <returns>Returns the visible point lights array</returns>
-        public IEnumerable<SceneLightPoint> GetVisiblePointLights()
+        public IEnumerable<ISceneLightPoint> GetVisiblePointLights()
         {
             return this.visibleLights
                 .FindAll(l => l is SceneLightPoint)
@@ -445,7 +473,7 @@ namespace Engine
         /// Gets the visible spot lights
         /// </summary>
         /// <returns>Returns the visible spot lights array</returns>
-        public IEnumerable<SceneLightSpot> GetVisibleSpotLights()
+        public IEnumerable<ISceneLightSpot> GetVisibleSpotLights()
         {
             return this.visibleLights
                 .FindAll(l => l is SceneLightSpot)

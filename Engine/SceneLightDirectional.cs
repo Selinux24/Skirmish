@@ -71,7 +71,7 @@ namespace Engine
         /// <summary>
         /// Base brightness
         /// </summary>
-        public float BaseBrightness { get; protected set; } = 1f;
+        public float BaseBrightness { get; set; } = 1f;
         /// <summary>
         /// Light brightness
         /// </summary>
@@ -92,11 +92,6 @@ namespace Engine
                 this.UpdateLocalTransform();
             }
         }
-
-        /// <summary>
-        /// First shadow map index
-        /// </summary>
-        public int ShadowMapIndex { get; set; } = 0;
         /// <summary>
         /// Shadow map count
         /// </summary>
@@ -156,31 +151,21 @@ namespace Engine
         /// <summary>
         /// Clears all light shadow parameters
         /// </summary>
-        public void ClearShadowParameters()
+        public override void ClearShadowParameters()
         {
-            this.ShadowMapIndex = -1;
+            base.ClearShadowParameters();
+
             this.ShadowMapCount = 0;
             this.ToShadowSpace = Matrix.Identity;
             this.ToCascadeOffsetX = Vector4.Zero;
             this.ToCascadeOffsetY = Vector4.Zero;
             this.ToCascadeScale = Vector4.Zero;
         }
-
-        /// <summary>
-        /// Gets light position at specified distance
-        /// </summary>
-        /// <param name="distance">Distance</param>
-        /// <returns>Returns light position at specified distance</returns>
-        public Vector3 GetPosition(float distance)
-        {
-            return distance * -2f * this.Direction;
-        }
-
         /// <summary>
         /// Clones current light
         /// </summary>
         /// <returns>Returns a new instante with same data</returns>
-        public override SceneLight Clone()
+        public override ISceneLight Clone()
         {
             return new SceneLightDirectional()
             {
@@ -198,6 +183,16 @@ namespace Engine
 
                 ParentTransform = this.ParentTransform,
             };
+        }
+
+        /// <summary>
+        /// Gets light position at specified distance
+        /// </summary>
+        /// <param name="distance">Distance</param>
+        /// <returns>Returns light position at specified distance</returns>
+        public Vector3 GetPosition(float distance)
+        {
+            return distance * -2f * this.Direction;
         }
     }
 }

@@ -386,10 +386,10 @@
     <Content Include="Resources\SceneModularDungeon\Characters\Human2\Human2.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\SceneNavmeshTest\modular_dungeon.obj">
+    <Content Include="Resources\SceneStart\SkyPlane.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\SceneStart\SkyPlane.dae">
+    <Content Include="Resources\SceneNavmeshTest\modular_dungeon.obj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

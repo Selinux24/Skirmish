@@ -30,16 +30,9 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the new graph</returns>
         public override async Task<IGraph> CreateGraph(PathFinderSettings settings)
         {
-            Graph graph = null;
-
             var triangles = await this.GetTriangles();
 
-            await Task.Run(() =>
-            {
-                graph = Create(settings, triangles);
-            });
-
-            return graph;
+            return Create(settings, triangles);
         }
         /// <summary>
         /// Creates a new graph from current geometry input

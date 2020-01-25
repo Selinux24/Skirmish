@@ -339,16 +339,29 @@ namespace Engine
         /// <param name="scene">New scene</param>
         private async Task StartScene(Scene scene)
         {
+            Console.WriteLine("Game: Begin StartScene");
+            scene.Active = false;
+
+            Console.WriteLine("Scene: Initialize start");
+            scene.SceneInitialized = false;
             await scene.Initialize();
-
             scene.SceneInitialized = true;
+            Console.WriteLine("Scene: Initialize end");
 
+            Console.WriteLine("Scene: Initialized start");
             await scene.Initialized();
+            Console.WriteLine("Scene: Initialized end");
 
+            Console.WriteLine("BufferManager: Creating buffers");
             this.BufferManager.CreateBuffers();
+            Console.WriteLine("BufferManager: Buffers created");
+
+            Console.WriteLine("ResourceManager: Creating resources");
             this.ResourceManager.CreateResources();
+            Console.WriteLine("ResourceManager: Resources created");
 
             scene.Active = true;
+            Console.WriteLine("Game: End StartScene");
         }
 
         /// <summary>
@@ -392,6 +405,12 @@ namespace Engine
             {
                 this.BufferManager.CreateBuffers();
                 Console.WriteLine("BufferManager: Recreating dirty buffers");
+            }
+
+            if (this.ResourceManager.HasRequests)
+            {
+                this.ResourceManager.CreateResources();
+                Console.WriteLine("ResourceManager: Creating new resources");
             }
 
             FrameInput();

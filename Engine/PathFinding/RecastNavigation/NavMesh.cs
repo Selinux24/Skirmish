@@ -196,7 +196,7 @@ namespace Engine.PathFinding.RecastNavigation
                     detailVertsCount = dmesh.nverts,
                     detailTris = dmesh.tris,
                     detailTriCount = dmesh.ntris,
-                    offMeshCon = geometry.GetConnections().ToArray(),
+                    offMeshCon = geometry.GetConnections()?.ToArray(),
                     offMeshConCount = geometry.GetConnectionCount(),
                     walkableHeight = agent.Height,
                     walkableRadius = agent.Radius,

@@ -145,7 +145,7 @@ namespace Engine
                 var tmpVerts = vertices.ToArray();
                 var tmpIndxs = indices.ToArray();
 
-                for (int i = 0; i < tmpVerts.Length; i += 3)
+                for (int i = 0; i < tmpIndxs.Length; i += 3)
                 {
                     Triangle tri = new Triangle(
                         tmpVerts[tmpIndxs[i + 0]],

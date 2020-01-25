@@ -483,7 +483,7 @@ namespace SceneTest
             this.vehicleI[2].Manipulator.SetRotation(MathUtil.PiOverTwo * 2, 0, 0);
             this.vehicleI[3].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
 
-            var lights = new List<SceneLight>();
+            List<ISceneLight> lights = new List<ISceneLight>();
 
             lights.AddRange(this.vehicle.Lights);
 
@@ -539,7 +539,7 @@ namespace SceneTest
             this.lampI[2].Manipulator.SetRotation(MathUtil.PiOverTwo, pitch, 0);
             this.lampI[3].Manipulator.SetRotation(MathUtil.PiOverTwo, pitch, 0);
 
-            var lights = new List<SceneLight>();
+            List<ISceneLight> lights = new List<ISceneLight>();
 
             lights.AddRange(this.lamp.Lights);
 
@@ -598,7 +598,7 @@ namespace SceneTest
             this.streetlampI[7].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
             this.streetlampI[8].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
 
-            var lights = new List<SceneLight>();
+            List<ISceneLight> lights = new List<ISceneLight>();
 
             lights.AddRange(this.streetlamp.Lights);
 

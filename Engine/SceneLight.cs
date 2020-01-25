@@ -5,7 +5,7 @@ namespace Engine
     /// <summary>
     /// Scene ligth
     /// </summary>
-    public abstract class SceneLight
+    public abstract class SceneLight : ISceneLight
     {
         /// <summary>
         /// Light name
@@ -38,6 +38,10 @@ namespace Engine
         /// Parent local transform matrix
         /// </summary>
         public virtual Matrix ParentTransform { get; set; } = Matrix.Identity;
+        /// <summary>
+        /// First shadow map index
+        /// </summary>
+        public int ShadowMapIndex { get; set; } = 0;
 
         /// <summary>
         /// Constructor
@@ -64,10 +68,17 @@ namespace Engine
         }
 
         /// <summary>
+        /// Clears all light shadow parameters
+        /// </summary>
+        public virtual void ClearShadowParameters()
+        {
+            this.ShadowMapIndex = -1;
+        }
+        /// <summary>
         /// Clones current light
         /// </summary>
         /// <returns>Returns a new instante with same data</returns>
-        public abstract SceneLight Clone();
+        public abstract ISceneLight Clone();
 
         /// <summary>
         /// Gets the text representation of the light

@@ -267,6 +267,10 @@ namespace Terrain
             this.t1ProgressBar.Left = 135;
             this.t2ProgressBar.Left = 270;
 
+            this.hProgressBar.Visible = false;
+            this.t1ProgressBar.Visible = false;
+            this.t2ProgressBar.Visible = false;
+
             var c3DDesc = new ModelDescription()
             {
                 Name = "Cursor3D",
@@ -1267,11 +1271,14 @@ namespace Terrain
 
         public override void NavigationGraphUpdated()
         {
-            StartHelicopter().ConfigureAwait(true);
-            StartTanks().ConfigureAwait(true);
-            StartDebug().ConfigureAwait(true);
+            Task.Run(async () =>
+            {
+                await StartHelicopter();
+                await StartTanks();
+                await StartDebug();
 
-            started = true;
+                started = true;
+            });
         }
         private async Task StartHelicopter()
         {
@@ -1926,7 +1933,7 @@ namespace Terrain
 
             if (centerInside || topInside)
             {
-                pb.Visible = true;
+                pb.Visible = agent.Stats.Life > 0;
 
                 screenPosition.X = top.X - (pb.Width * 0.5f);
                 screenPosition.Y = top.Y;

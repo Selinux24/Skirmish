@@ -8,8 +8,6 @@ namespace Engine
 {
     using Engine.Common;
     using Engine.Content;
-    using Engine.Helpers;
-    using SharpDX.Direct3D11;
 
     /// <summary>
     /// Engine resource manager
@@ -32,116 +30,19 @@ namespace Engine
         /// Global resources dictionary
         /// </summary>
         private readonly Dictionary<string, EngineShaderResourceView> globalResources = new Dictionary<string, EngineShaderResourceView>();
+        /// <summary>
+        /// Creating resources flag
+        /// </summary>
+        private bool creatingResources = false;
 
         /// <summary>
-        /// Requested resource interface
+        /// Gets wheter the resource manager has requests to process or not
         /// </summary>
-        interface IGameResourceRequest
+        public bool HasRequests
         {
-            /// <summary>
-            /// Engine resource view
-            /// </summary>
-            EngineShaderResourceView ResourceView { get; set; }
-
-            /// <summary>
-            /// Creates the resource
-            /// </summary>
-            /// <param name="resourceManager">Resource manager</param>
-            void Create(GameResourceManager resourceManager);
-        }
-
-        /// <summary>
-        /// Image content resource request
-        /// </summary>
-        class ResourceImageContent : IGameResourceRequest
-        {
-            /// <summary>
-            /// Engine resource view
-            /// </summary>
-            public EngineShaderResourceView ResourceView { get; set; }
-            /// <summary>
-            /// Image content
-            /// </summary>
-            public ImageContent ImageContent { get; set; }
-            /// <summary>
-            /// Mip autogen
-            /// </summary>
-            public bool MipAutogen { get; set; }
-
-            /// <summary>
-            /// Creates the resource
-            /// </summary>
-            /// <param name="resourceManager">Resource manager</param>
-            public void Create(GameResourceManager resourceManager)
+            get
             {
-                var srv = resourceManager.CreateResource(ImageContent, MipAutogen);
-                ResourceView.SetResource(srv);
-            }
-        }
-
-        /// <summary>
-        /// Vector4 value array resource request
-        /// </summary>
-        class ResourceValueArray : IGameResourceRequest
-        {
-            /// <summary>
-            /// Engine resource view
-            /// </summary>
-            public EngineShaderResourceView ResourceView { get; set; }
-            /// <summary>
-            /// Size
-            /// </summary>
-            public int Size { get; set; }
-            /// <summary>
-            /// Vector4 values
-            /// </summary>
-            public IEnumerable<Vector4> Values { get; set; }
-
-            /// <summary>
-            /// Creates the resource
-            /// </summary>
-            /// <param name="resourceManager">Resource manager</param>
-            public void Create(GameResourceManager resourceManager)
-            {
-                var srv = resourceManager.CreateResource(Values, Size);
-                ResourceView.SetResource(srv);
-            }
-        }
-
-        /// <summary>
-        /// Random texture resource request
-        /// </summary>
-        class ResourceRandomTexture : IGameResourceRequest
-        {
-            /// <summary>
-            /// Engine resource view
-            /// </summary>
-            public EngineShaderResourceView ResourceView { get; set; }
-            /// <summary>
-            /// Size
-            /// </summary>
-            public int Size { get; set; }
-            /// <summary>
-            /// Minimum value
-            /// </summary>
-            public float Min { get; set; }
-            /// <summary>
-            /// Maximum value
-            /// </summary>
-            public float Max { get; set; }
-            /// <summary>
-            /// Random seed
-            /// </summary>
-            public int Seed { get; set; }
-
-            /// <summary>
-            /// Creates the resource
-            /// </summary>
-            /// <param name="resourceManager">Resource manager</param>
-            public void Create(GameResourceManager resourceManager)
-            {
-                var srv = resourceManager.CreateResource(Size, Min, Max, Seed);
-                ResourceView.SetResource(srv);
+                return requestedResources.Any();
             }
         }
 
@@ -196,31 +97,86 @@ namespace Engine
         /// </summary>
         public void CreateResources()
         {
-            if (!requestedResources.Any())
+            if (!HasRequests)
             {
                 return;
             }
 
+            if (creatingResources)
+            {
+                return;
+            }
+
+            creatingResources = true;
+
             foreach (var resource in requestedResources)
             {
-                resource.Value.Create(this);
+                resource.Value.Create(this.game);
+
+                resources.Add(resource.Key, resource.Value.ResourceView);
             }
 
             requestedResources.Clear();
+
+            creatingResources = false;
         }
 
         /// <summary>
         /// Creates a new global resource by name
         /// </summary>
         /// <param name="name">Resource name</param>
-        /// <param name="bytes">Resource bytes</param>
+        /// <param name="imageContent">Image content</param>
+        /// <param name="mipAutogen">Try to generate texture mips</param>
+        /// <returns>Returns the created resource view</returns>
+        public EngineShaderResourceView CreateGlobalResource(string name, ImageContent imageContent, bool mipAutogen = true)
+        {
+            GameResourceImageContent resource = new GameResourceImageContent()
+            {
+                ImageContent = imageContent,
+                MipAutogen = mipAutogen,
+            };
+
+            resource.Create(this.game);
+            this.SetGlobalResource(name, resource.ResourceView);
+            return resource.ResourceView;
+        }
+        /// <summary>
+        /// Creates a new global resource by name
+        /// </summary>
+        /// <param name="name">Resource name</param>
+        /// <param name="path">Resource file path</param>
         /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <returns></returns>
-        public EngineShaderResourceView CreateGlobalResourceTexture(string name, byte[] bytes, bool mipAutogen = true)
+        public EngineShaderResourceView CreateGlobalResource(string name, string path, bool mipAutogen = true)
         {
-            var view = new EngineShaderResourceView(this.LoadTexture(bytes, mipAutogen));
-            this.SetGlobalResource(name, view);
-            return view;
+            GameResourceImageContent resource = new GameResourceImageContent()
+            {
+                ImageContent = new ImageContent() { Path = path },
+                MipAutogen = mipAutogen,
+            };
+
+            resource.Create(this.game);
+            this.SetGlobalResource(name, resource.ResourceView);
+            return resource.ResourceView;
+        }
+        /// <summary>
+        /// Creates a new global resource by name
+        /// </summary>
+        /// <param name="name">Resource name</param>
+        /// <param name="stream">Resource data stream</param>
+        /// <param name="mipAutogen">Try to generate texture mips</param>
+        /// <returns></returns>
+        public EngineShaderResourceView CreateGlobalResource(string name, MemoryStream stream, bool mipAutogen = true)
+        {
+            GameResourceImageContent resource = new GameResourceImageContent()
+            {
+                ImageContent = new ImageContent() { Stream = stream },
+                MipAutogen = mipAutogen,
+            };
+
+            resource.Create(this.game);
+            this.SetGlobalResource(name, resource.ResourceView);
+            return resource.ResourceView;
         }
         /// <summary>
         /// Creates a new global resource by name
@@ -229,11 +185,17 @@ namespace Engine
         /// <param name="values">Values</param>
         /// <param name="size">Texture size (total pixels = size * size)</param>
         /// <returns>Returns the created resource view</returns>
-        public EngineShaderResourceView CreateGlobalResourceTexture2D(string name, IEnumerable<Vector4> values, int size)
+        public EngineShaderResourceView CreateGlobalResource(string name, IEnumerable<Vector4> values, int size)
         {
-            var view = new EngineShaderResourceView(this.game.Graphics.CreateTexture2D(size, values));
-            this.SetGlobalResource(name, view);
-            return view;
+            GameResourceValueArray resource = new GameResourceValueArray()
+            {
+                Values = values,
+                Size = size,
+            };
+
+            resource.Create(this.game);
+            this.SetGlobalResource(name, resource.ResourceView);
+            return resource.ResourceView;
         }
         /// <summary>
         /// Creates a new global resource by name
@@ -244,11 +206,19 @@ namespace Engine
         /// <param name="max">Maximum value</param>
         /// <param name="seed">Random seed</param>
         /// <returns>Returns the created resource view</returns>
-        public EngineShaderResourceView CreateGlobalResourceRandomTexture(string name, int size, float min, float max, int seed = 0)
+        public EngineShaderResourceView CreateGlobalResource(string name, int size, float min, float max, int seed = 0)
         {
-            var view = new EngineShaderResourceView(this.CreateRandomTexture(size, min, max, seed));
-            this.SetGlobalResource(name, view);
-            return view;
+            GameResourceRandomTexture resource = new GameResourceRandomTexture()
+            {
+                Size = size,
+                Min = min,
+                Max = max,
+                Seed = seed,
+            };
+
+            resource.Create(this.game);
+            this.SetGlobalResource(name, resource.ResourceView);
+            return resource.ResourceView;
         }
         /// <summary>
         /// Set global resource by name
@@ -260,7 +230,8 @@ namespace Engine
             if (this.globalResources.ContainsKey(name))
             {
                 var cRes = this.globalResources[name];
-                cRes.GetResource().Dispose();
+                var srv = cRes.GetResource();
+                srv?.Dispose();
                 cRes.SetResource(resource.GetResource());
             }
             else
@@ -288,18 +259,15 @@ namespace Engine
                 return requestedResources[resourceKey].ResourceView;
             }
 
-            var srv = new EngineShaderResourceView();
-
-            var request = new ResourceImageContent
+            var request = new GameResourceImageContent
             {
                 ImageContent = imageContent,
                 MipAutogen = mipAutogen,
-                ResourceView = srv,
             };
 
             requestedResources.Add(resourceKey, request);
 
-            return srv;
+            return request.ResourceView;
         }
         /// <summary>
         /// Requests a new resource load
@@ -324,16 +292,6 @@ namespace Engine
         /// <summary>
         /// Requests a new resource load
         /// </summary>
-        /// <param name="values">Buffer</param>
-        /// <param name="mipAutogen">Try to generate texture mips</param>
-        /// <returns>Returns the engine shader resource view</returns>
-        public EngineShaderResourceView RequestResource(byte[] values, bool mipAutogen = true)
-        {
-            return RequestResource(new ImageContent { Stream = new MemoryStream(values) }, mipAutogen);
-        }
-        /// <summary>
-        /// Requests a new resource load
-        /// </summary>
         /// <param name="identifier">Resource identifier</param>
         /// <param name="values">Vector4 values</param>
         /// <param name="size">Texture size (total pixels = size * size)</param>
@@ -351,18 +309,15 @@ namespace Engine
                 return requestedResources[resourceKey].ResourceView;
             }
 
-            var srv = new EngineShaderResourceView();
-
-            var request = new ResourceValueArray
+            var request = new GameResourceValueArray
             {
                 Values = values,
                 Size = size,
-                ResourceView = srv,
             };
 
             requestedResources.Add(resourceKey, request);
 
-            return srv;
+            return request.ResourceView;
         }
         /// <summary>
         /// Requests a new resource load
@@ -386,20 +341,17 @@ namespace Engine
                 return requestedResources[resourceKey].ResourceView;
             }
 
-            var srv = new EngineShaderResourceView();
-
-            var request = new ResourceRandomTexture
+            var request = new GameResourceRandomTexture
             {
                 Size = size,
                 Min = min,
                 Max = max,
                 Seed = seed,
-                ResourceView = srv,
             };
 
             requestedResources.Add(resourceKey, request);
 
-            return srv;
+            return request.ResourceView;
         }
 
         /// <summary>
@@ -564,282 +516,6 @@ namespace Engine
             }
 
             return this.resources[key];
-        }
-
-        /// <summary>
-        /// Loads a texture from memory in the graphics device
-        /// </summary>
-        /// <param name="buffer">Data buffer</param>
-        /// <param name="mipAutogen">Try to generate texture mips</param>
-        /// <returns>Returns the resource view</returns>
-        internal ShaderResourceView1 LoadTexture(byte[] buffer, bool mipAutogen)
-        {
-            try
-            {
-                Counters.Textures++;
-
-                using (var resource = Helper.Attempt(TextureData.ReadTexture, buffer, 5))
-                {
-                    return this.game.Graphics.CreateResource(resource, mipAutogen);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new EngineException("LoadTexture from byte array Error. See inner exception for details", ex);
-            }
-        }
-        /// <summary>
-        /// Loads a texture from file in the graphics device
-        /// </summary>
-        /// <param name="filename">Path to file</param>
-        /// <param name="mipAutogen">Try to generate texture mips</param>
-        /// <returns>Returns the resource view</returns>
-        internal ShaderResourceView1 LoadTexture(string filename, bool mipAutogen)
-        {
-            try
-            {
-                Counters.Textures++;
-
-                using (var resource = Helper.Attempt(TextureData.ReadTexture, filename, 5))
-                {
-                    return this.game.Graphics.CreateResource(resource, mipAutogen);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new EngineException("LoadTexture from file Error. See inner exception for details", ex);
-            }
-        }
-        /// <summary>
-        /// Loads a texture from file in the graphics device
-        /// </summary>
-        /// <param name="stream">Stream</param>
-        /// <param name="mipAutogen">Try to generate texture mips</param>
-        /// <returns>Returns the resource view</returns>
-        internal ShaderResourceView1 LoadTexture(MemoryStream stream, bool mipAutogen)
-        {
-            try
-            {
-                Counters.Textures++;
-
-                using (var resource = Helper.Attempt(TextureData.ReadTexture, stream, 5))
-                {
-                    return this.game.Graphics.CreateResource(resource, mipAutogen);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new EngineException("LoadTexture from stream Error. See inner exception for details", ex);
-            }
-        }
-        /// <summary>
-        /// Loads a texture array from a file collection in the graphics device
-        /// </summary>
-        /// <param name="filenames">Path file collection</param>
-        /// <param name="mipAutogen">Try to generate texture mips</param>
-        /// <returns>Returns the resource view</returns>
-        internal ShaderResourceView1 LoadTextureArray(IEnumerable<string> filenames, bool mipAutogen)
-        {
-            try
-            {
-                var textureList = Helper.Attempt(TextureData.ReadTexture, filenames, 5);
-
-                return LoadTextureArray(textureList, mipAutogen);
-            }
-            catch (Exception ex)
-            {
-                throw new EngineException("LoadTexture from file array Error. See inner exception for details", ex);
-            }
-        }
-        /// <summary>
-        /// Loads a texture array from a file collection in the graphics device
-        /// </summary>
-        /// <param name="streams">Stream collection</param>
-        /// <param name="mipAutogen">Try to generate texture mips</param>
-        /// <returns>Returns the resource view</returns>
-        internal ShaderResourceView1 LoadTextureArray(IEnumerable<MemoryStream> streams, bool mipAutogen)
-        {
-            try
-            {
-                var textureList = Helper.Attempt(TextureData.ReadTexture, streams, 5);
-
-                return LoadTextureArray(textureList, mipAutogen);
-            }
-            catch (Exception ex)
-            {
-                throw new EngineException("LoadTexture from stream array Error. See inner exception for details", ex);
-            }
-        }
-        /// <summary>
-        /// Loads a texture array in the graphics device
-        /// </summary>
-        /// <param name="textureList">Texture array</param>
-        /// <param name="mipAutogen">Try to generate texture mips</param>
-        /// <returns>Returns the resource view</returns>
-        private ShaderResourceView1 LoadTextureArray(IEnumerable<TextureData> textureList, bool mipAutogen)
-        {
-            Counters.Textures++;
-
-            var resource = this.game.Graphics.CreateResource(textureList, mipAutogen);
-
-            foreach (var item in textureList)
-            {
-                item?.Dispose();
-            }
-
-            return resource;
-        }
-        /// <summary>
-        /// Creates a random 1D texture
-        /// </summary>
-        /// <param name="size">Texture size</param>
-        /// <param name="min">Minimum value</param>
-        /// <param name="max">Maximum value</param>
-        /// <param name="seed">Random seed</param>
-        /// <returns>Returns created texture</returns>
-        private ShaderResourceView1 CreateRandomTexture(int size, float min, float max, int seed = 0)
-        {
-            try
-            {
-                Counters.Textures++;
-
-                Random rnd = new Random(seed);
-
-                var randomValues = new List<Vector4>();
-                for (int i = 0; i < size; i++)
-                {
-                    randomValues.Add(rnd.NextVector4(new Vector4(min), new Vector4(max)));
-                }
-
-                return this.game.Graphics.CreateTexture1D(size, randomValues.ToArray());
-            }
-            catch (Exception ex)
-            {
-                throw new EngineException("CreateRandomTexture Error. See inner exception for details", ex);
-            }
-        }
-
-        /// <summary>
-        /// Generates the resource view
-        /// </summary>
-        /// <param name="imageContent">Image content</param>
-        /// <param name="mipAutogen">Try to generate texture mips</param>
-        /// <returns>Returns the created resource view</returns>
-        private ShaderResourceView1 CreateResource(ImageContent imageContent, bool mipAutogen = true)
-        {
-            if (imageContent.Stream != null)
-            {
-                byte[] buffer = imageContent.Stream.GetBuffer();
-                return this.LoadTexture(buffer, mipAutogen);
-            }
-            else
-            {
-                if (imageContent.IsCubic)
-                {
-                    return CreateResourceCubic(imageContent, mipAutogen);
-                }
-                else if (imageContent.IsArray)
-                {
-                    return CreateResourceArray(imageContent, mipAutogen);
-                }
-                else
-                {
-                    return CreateResourceDefault(imageContent, mipAutogen);
-                }
-            }
-        }
-        /// <summary>
-        /// Creates a 2d texture of Vector4 values
-        /// </summary>
-        /// <param name="values">Values</param>
-        /// <param name="size">Texture size (total pixels = size * size)</param>
-        /// <returns>Returns the created resource view</returns>
-        private ShaderResourceView1 CreateResource(IEnumerable<Vector4> values, int size)
-        {
-            return this.game.Graphics.CreateTexture2D(size, values);
-        }
-        /// <summary>
-        /// Creates a 1d texture of random values
-        /// </summary>
-        /// <param name="size">Texture size</param>
-        /// <param name="min">Minimum value</param>
-        /// <param name="max">Maximum value</param>
-        /// <param name="seed">Random seed</param>
-        /// <returns>Returns the created resource view</returns>
-        private ShaderResourceView1 CreateResource(int size, float min, float max, int seed = 0)
-        {
-            return this.CreateRandomTexture(size, min, max, seed);
-        }
-        /// <summary>
-        /// Creates a resource view from image content
-        /// </summary>
-        /// <param name="imageContent">Image content</param>
-        /// <param name="mipAutogen">Try to generate texture mips</param>
-        /// <returns>Returns the created resource view</returns>
-        private ShaderResourceView1 CreateResourceDefault(ImageContent imageContent, bool mipAutogen = true)
-        {
-            if (!string.IsNullOrWhiteSpace(imageContent.Path))
-            {
-                return this.LoadTexture(imageContent.Path, mipAutogen);
-            }
-            else if (imageContent.Stream != null)
-            {
-                return this.LoadTexture(imageContent.Stream, mipAutogen);
-            }
-
-            return null;
-        }
-        /// <summary>
-        /// Creates a resource view from image content array
-        /// </summary>
-        /// <param name="imageContent">Image content</param>
-        /// <param name="mipAutogen">Try to generate texture mips</param>
-        /// <returns>Returns the created resource view</returns>
-        private ShaderResourceView1 CreateResourceArray(ImageContent imageContent, bool mipAutogen = true)
-        {
-            if (imageContent.Paths.Any())
-            {
-                return this.LoadTextureArray(imageContent.Paths, mipAutogen);
-            }
-            else if (imageContent.Streams.Any())
-            {
-                return this.LoadTextureArray(imageContent.Streams, mipAutogen);
-            }
-
-            return null;
-        }
-        /// <summary>
-        /// Creates a resource view from cubic image content
-        /// </summary>
-        /// <param name="imageContent">Image content</param>
-        /// <param name="mipAutogen">Try to generate texture mips</param>
-        /// <returns>Returns the created resource view</returns>
-        private ShaderResourceView1 CreateResourceCubic(ImageContent imageContent, bool mipAutogen = true)
-        {
-            if (imageContent.IsArray)
-            {
-                if (imageContent.Paths.Any())
-                {
-                    return this.LoadTextureArray(imageContent.Paths, mipAutogen);
-                }
-                else if (imageContent.Streams.Any())
-                {
-                    return this.LoadTextureArray(imageContent.Streams, mipAutogen);
-                }
-            }
-            else
-            {
-                if (!string.IsNullOrWhiteSpace(imageContent.Path))
-                {
-                    return this.LoadTexture(imageContent.Path, mipAutogen);
-                }
-                else if (imageContent.Stream != null)
-                {
-                    return this.LoadTexture(imageContent.Stream, mipAutogen);
-                }
-            }
-
-            return null;
         }
     }
 }

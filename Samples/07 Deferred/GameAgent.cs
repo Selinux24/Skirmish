@@ -1,6 +1,7 @@
 ﻿using Engine;
 using Engine.Common;
 using Engine.PathFinding;
+using System.Collections.Generic;
 
 namespace Deferred
 {
@@ -88,11 +89,11 @@ namespace Deferred
         /// <summary>
         /// Gets the agent lights
         /// </summary>
-        public SceneLight[] Lights
+        public IEnumerable<ISceneLight> Lights
         {
             get
             {
-                return this.model?.Lights;
+                return this.model?.Lights ?? new ISceneLight[] { };
             }
         }
 

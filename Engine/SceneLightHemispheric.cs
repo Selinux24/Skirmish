@@ -5,7 +5,7 @@ namespace Engine
     /// <summary>
     /// Hemispheric light
     /// </summary>
-    public class SceneLightHemispheric : SceneLight
+    public class SceneLightHemispheric : SceneLight, ISceneLightHemispheric
     {
         /// <summary>
         /// Ambient down color
@@ -57,7 +57,7 @@ namespace Engine
         /// Clones current light
         /// </summary>
         /// <returns>Returns a new instante with same data</returns>
-        public override SceneLight Clone()
+        public override ISceneLight Clone()
         {
             return new SceneLightHemispheric()
             {

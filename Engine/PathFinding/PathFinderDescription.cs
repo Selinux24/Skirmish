@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace Engine.PathFinding
 {
@@ -33,7 +34,18 @@ namespace Engine.PathFinding
         /// <returns>Returns the generated graph</returns>
         public async Task<IGraph> Build()
         {
-            return await this.Input?.CreateGraph(this.Settings);
+            IGraph result = null;
+
+            try
+            {
+                result = await this.Input?.CreateGraph(this.Settings);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error creating the graph: {ex.Message}");
+            }
+
+            return result;
         }
 
         /// <summary>

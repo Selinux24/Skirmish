@@ -33,7 +33,7 @@ namespace Engine.Effects
         /// </summary>
         /// <param name="light">Light</param>
         /// <returns>Returns the new buffer</returns>
-        public static BufferLightHemispheric Build(SceneLightHemispheric light)
+        public static BufferLightHemispheric Build(ISceneLightHemispheric light)
         {
             if (light != null)
             {
@@ -56,7 +56,7 @@ namespace Engine.Effects
         /// Constructor
         /// </summary>
         /// <param name="light">Light</param>
-        public BufferLightHemispheric(SceneLightHemispheric light)
+        public BufferLightHemispheric(ISceneLightHemispheric light)
         {
             this.AmbientDown = light.AmbientDown;
             this.AmbientUp = light.AmbientUp;

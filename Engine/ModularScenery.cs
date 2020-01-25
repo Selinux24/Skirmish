@@ -359,7 +359,7 @@ namespace Engine
             var trn = instance.Manipulator.LocalTransform;
 
             var lights = instance.Lights;
-            if (lights?.Length > 0)
+            if (lights.Any())
             {
                 var emitterDesc = obj.ParticleLight;
 

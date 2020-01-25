@@ -14,6 +14,15 @@ namespace Engine.Common
     public class DrawingData : IDisposable
     {
         /// <summary>
+        /// Volume mesh triangle list
+        /// </summary>
+        private readonly List<Triangle> volumeMesh = new List<Triangle>();
+        /// <summary>
+        /// Light list
+        /// </summary>
+        private readonly List<ISceneLight> lights = new List<ISceneLight>();
+
+        /// <summary>
         /// Game instance
         /// </summary>
         protected readonly Game Game = null;
@@ -33,7 +42,13 @@ namespace Engine.Common
         /// <summary>
         /// Volume mesh
         /// </summary>
-        public Triangle[] VolumeMesh { get; set; } = null;
+        public IEnumerable<Triangle> VolumeMesh
+        {
+            get
+            {
+                return volumeMesh.ToArray();
+            }
+        }
         /// <summary>
         /// Datos de animación
         /// </summary>
@@ -41,7 +56,13 @@ namespace Engine.Common
         /// <summary>
         /// Lights collection
         /// </summary>
-        public SceneLight[] Lights { get; set; } = null;
+        public IEnumerable<ISceneLight> Lights
+        {
+            get
+            {
+                return lights.ToArray();
+            }
+        }
 
         /// <summary>
         /// Model initialization
@@ -57,23 +78,23 @@ namespace Engine.Common
             //Animation
             if (description.LoadAnimation)
             {
-                InitializeSkinningData(ref res, modelContent);
+                InitializeSkinningData(res, modelContent);
             }
 
             //Images
-            InitializeTextures(ref res, game, modelContent, description.TextureCount);
+            InitializeTextures(res, game, modelContent, description.TextureCount);
 
             //Materials
-            InitializeMaterials(ref res, modelContent);
+            InitializeMaterials(res, modelContent);
 
             //Skins & Meshes
-            InitializeGeometry(ref res, modelContent, description);
+            InitializeGeometry(res, modelContent, description);
 
             //Update meshes into device
-            InitializeMeshes(ref res, game, description.Instanced ? description.Instances : 0);
+            InitializeMeshes(res, game, description.Instanced ? description.Instances : 0);
 
             //Lights
-            InitializeLights(ref res, modelContent);
+            InitializeLights(res, modelContent);
 
             return res;
         }
@@ -84,7 +105,7 @@ namespace Engine.Common
         /// <param name="game">Game</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="textureCount">Texture count</param>
-        private static void InitializeTextures(ref DrawingData drw, Game game, ModelContent modelContent, int textureCount)
+        private static void InitializeTextures(DrawingData drw, Game game, ModelContent modelContent, int textureCount)
         {
             if (modelContent.Images != null)
             {
@@ -108,7 +129,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="drw">Drawing data</param>
         /// <param name="modelContent">Model content</param>
-        private static void InitializeMaterials(ref DrawingData drw, ModelContent modelContent)
+        private static void InitializeMaterials(DrawingData drw, ModelContent modelContent)
         {
             foreach (string mat in modelContent.Materials?.Keys)
             {
@@ -134,66 +155,77 @@ namespace Engine.Common
         /// <param name="drw">Drawing data</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="description">Description</param>
-        private static void InitializeGeometry(ref DrawingData drw, ModelContent modelContent, DrawingDataDescription description)
+        private static void InitializeGeometry(DrawingData drw, ModelContent modelContent, DrawingDataDescription description)
         {
-            List<Triangle> volumeMesh = new List<Triangle>();
-
             foreach (string meshName in modelContent.Geometry.Keys)
             {
-                //Get skinning data
-                var isSkinned = ReadSkinningData(
-                    description, modelContent, meshName,
-                    out var bindShapeMatrix, out var weights, out var jointNames);
+                InitializeGeometryMesh(drw, modelContent, description, meshName);
+            }
+        }
+        /// <summary>
+        /// Initialize geometry mesh
+        /// </summary>
+        /// <param name="drw">Drawing data</param>
+        /// <param name="modelContent">Model content</param>
+        /// <param name="description">Description</param>
+        /// <param name="meshName">Mesh name</param>
+        private static void InitializeGeometryMesh(DrawingData drw, ModelContent modelContent, DrawingDataDescription description, string meshName)
+        {
+            //Get skinning data
+            var isSkinned = ReadSkinningData(
+                description, modelContent, meshName,
+                out var bindShapeMatrix, out var weights, out var jointNames);
 
-                //Process the mesh geometry material by material
-                var dictGeometry = modelContent.Geometry[meshName];
+            //Process the mesh geometry material by material
+            var dictGeometry = modelContent.Geometry[meshName];
 
-                foreach (string material in dictGeometry.Keys)
+            foreach (string material in dictGeometry.Keys)
+            {
+                var geometry = dictGeometry[material];
+
+                if (geometry.IsVolume)
                 {
-                    var geometry = dictGeometry[material];
-                    if (geometry.IsVolume)
+                    //If volume, store position only
+                    drw.volumeMesh.AddRange(geometry.GetTriangles());
+
+                    continue;
+                }
+
+                //Get vertex type
+                var vertexType = GetVertexType(description, drw.Materials, geometry.VertexType, isSkinned, material);
+
+                //Process the vertex data
+                ProcessVertexData(
+                    description, geometry, vertexType,
+                    out var vertices, out var indices);
+
+                if (!bindShapeMatrix.IsIdentity)
+                {
+                    for (int i = 0; i < vertices.Length; i++)
                     {
-                        //If volume, store position only
-                        volumeMesh.AddRange(geometry.GetTriangles());
-                    }
-                    else
-                    {
-                        //Get vertex type
-                        var vertexType = GetVertexType(description, drw.Materials, geometry.VertexType, isSkinned, material);
-
-                        //Process the vertex data
-                        ProcessVertexData(
-                            description, geometry, vertexType,
-                            out var vertices, out var indices);
-
-                        for (int i = 0; i < vertices.Length; i++)
-                        {
-                            vertices[i] = vertices[i].Transform(bindShapeMatrix);
-                        }
-
-                        //Convert the vertex data to final mesh data
-                        var vertexList = VertexData.Convert(
-                            vertexType,
-                            vertices,
-                            weights,
-                            jointNames);
-
-                        if (vertexList.Any())
-                        {
-                            //Create and store the mesh into the drawing data
-                            Mesh nMesh = new Mesh(
-                                meshName,
-                                geometry.Topology,
-                                vertexList.ToArray(),
-                                indices);
-
-                            drw.Meshes.Add(meshName, geometry.Material, nMesh);
-                        }
+                        vertices[i] = vertices[i].Transform(bindShapeMatrix);
                     }
                 }
-            }
 
-            drw.VolumeMesh = volumeMesh.ToArray();
+                //Convert the vertex data to final mesh data
+                var vertexList = VertexData.Convert(
+                    vertexType,
+                    vertices,
+                    weights,
+                    jointNames);
+
+                if (vertexList.Any())
+                {
+                    //Create and store the mesh into the drawing data
+                    Mesh nMesh = new Mesh(
+                        meshName,
+                        geometry.Topology,
+                        vertexList,
+                        indices);
+
+                    drw.Meshes.Add(meshName, geometry.Material, nMesh);
+                }
+            }
         }
         /// <summary>
         /// Get vertex type from geometry
@@ -366,7 +398,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="drw">Drawing data</param>
         /// <param name="modelContent">Model content</param>
-        private static void InitializeSkinningData(ref DrawingData drw, ModelContent modelContent)
+        private static void InitializeSkinningData(DrawingData drw, ModelContent modelContent)
         {
             if (modelContent.SkinningInfo?.Count > 0)
             {
@@ -448,7 +480,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="drw">Drawing data</param>
         /// <param name="game">Game</param>
-        private static void InitializeMeshes(ref DrawingData drw, Game game, int instances)
+        private static void InitializeMeshes(DrawingData drw, Game game, int instances)
         {
             foreach (var dictionary in drw.Meshes.Values)
             {
@@ -492,25 +524,21 @@ namespace Engine.Common
         /// </summary>
         /// <param name="drw">Drawing data</param>
         /// <param name="modelContent">Model content</param>
-        private static void InitializeLights(ref DrawingData drw, ModelContent modelContent)
+        private static void InitializeLights(DrawingData drw, ModelContent modelContent)
         {
-            List<SceneLight> lights = new List<SceneLight>();
-
             foreach (var key in modelContent.Lights.Keys)
             {
                 var l = modelContent.Lights[key];
 
                 if (l.LightType == LightContentTypes.Point)
                 {
-                    lights.Add(l.CreatePointLight());
+                    drw.lights.Add(l.CreatePointLight());
                 }
                 else if (l.LightType == LightContentTypes.Spot)
                 {
-                    lights.Add(l.CreateSpotLight());
+                    drw.lights.Add(l.CreateSpotLight());
                 }
             }
-
-            drw.Lights = lights.ToArray();
         }
 
         /// <summary>

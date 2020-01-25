@@ -958,9 +958,9 @@ namespace Collada
         private void SetSelectedItemLight(ModularSceneryItem item)
         {
             var lights = item.Item.Lights;
-            if (lights?.Length > 0)
+            if (lights.Any())
             {
-                var msg = string.Format("Press space to {0} the light...", lights[0].Enabled ? "turn off" : "turn on");
+                var msg = string.Format("Press space to {0} the light...", lights.First().Enabled ? "turn off" : "turn on");
 
                 PrepareMessage(true, msg);
             }
@@ -1035,9 +1035,9 @@ namespace Collada
                 bool enabled = false;
 
                 var lights = item.Item.Lights;
-                if (lights?.Length > 0)
+                if (lights.Any())
                 {
-                    enabled = !lights[0].Enabled;
+                    enabled = !lights.First().Enabled;
 
                     foreach (var light in lights)
                     {
@@ -1099,19 +1099,27 @@ namespace Collada
                 if (!taskRunning)
                 {
                     taskRunning = true;
-
-                    var fileName = this.scenery.CurrentLevel.Name + ntFile;
-
-                    if (File.Exists(fileName))
+                    try
                     {
-                        File.Delete(fileName);
+                        var fileName = this.scenery.CurrentLevel.Name + ntFile;
+
+                        if (File.Exists(fileName))
+                        {
+                            File.Delete(fileName);
+                        }
+
+                        var loader = new LoaderObj();
+                        var tris = this.GetTrianglesForNavigationGraph();
+                        loader.Save(tris, fileName);
                     }
-
-                    var loader = new LoaderObj();
-                    var tris = this.GetTrianglesForNavigationGraph();
-                    loader.Save(tris, fileName);
-
-                    taskRunning = false;
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                    }
+                    finally
+                    {
+                        taskRunning = false;
+                    }
                 }
             });
         }

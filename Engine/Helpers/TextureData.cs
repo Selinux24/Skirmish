@@ -50,76 +50,6 @@ namespace Engine.Helpers
         public int ArraySize { get; private set; }
 
         /// <summary>
-        /// Reads a bitmap a file
-        /// </summary>
-        /// <param name="filename">File name</param>
-        /// <returns>Returns the bitmap source</returns>
-        private static BitmapSource ReadBitmap(string filename)
-        {
-            using (var factory = new ImagingFactory2())
-            {
-                var bitmapDecoder = new BitmapDecoder(factory, filename, DecodeOptions.CacheOnLoad);
-
-                var formatConverter = new FormatConverter(factory);
-
-                formatConverter.Initialize(
-                    bitmapDecoder.GetFrame(0),
-                    PixelFormat.Format32bppPRGBA,
-                    BitmapDitherType.None,
-                    null,
-                    0.0,
-                    BitmapPaletteType.Custom);
-
-                return formatConverter;
-            }
-        }
-        /// <summary>
-        /// Reads a bitmap from a stream
-        /// </summary>
-        /// <param name="stream">Stream</param>
-        /// <returns>Returns the bitmap source</returns>
-        private static BitmapSource ReadBitmap(Stream stream)
-        {
-            using (var factory = new ImagingFactory2())
-            {
-                stream.Seek(0, SeekOrigin.Begin);
-
-                var bitmapDecoder = new BitmapDecoder(factory, stream, DecodeOptions.CacheOnLoad);
-
-                var formatConverter = new FormatConverter(factory);
-
-                formatConverter.Initialize(
-                    bitmapDecoder.GetFrame(0),
-                    PixelFormat.Format32bppPRGBA,
-                    BitmapDitherType.None,
-                    null,
-                    0.0,
-                    BitmapPaletteType.Custom);
-
-                return formatConverter;
-            }
-        }
-        /// <summary>
-        /// Reads a texture data from a byte buffer
-        /// </summary>
-        /// <param name="buffer">Byte buffer</param>
-        /// <returns>Returns the texture data</returns>
-        public static TextureData ReadTexture(byte[] buffer)
-        {
-            if (DdsHeader.GetInfo(buffer, out DdsHeader header, out DdsHeaderDX10? header10, out int offset))
-            {
-                return new TextureData(header, header10, buffer, offset, 0);
-            }
-            else
-            {
-                using (var stream = new MemoryStream(buffer))
-                using (var bitmap = ReadBitmap(stream))
-                {
-                    return new TextureData(bitmap);
-                }
-            }
-        }
-        /// <summary>
         /// Reads a texture data from a file
         /// </summary>
         /// <param name="filename">File name</param>
@@ -128,14 +58,13 @@ namespace Engine.Helpers
         {
             if (DdsHeader.GetInfo(filename, out DdsHeader header, out DdsHeaderDX10? header10, out int offset, out byte[] buffer))
             {
-                return new TextureData(header, header10, buffer, offset, 0);
+                return new TextureData(header, header10, buffer, offset);
             }
             else
             {
-                using (var bitmap = ReadBitmap(filename))
-                {
-                    return new TextureData(bitmap);
-                }
+                ReadBitmap(filename, out int width, out int height, out byte[] dataBuffer);
+
+                return new TextureData(width, height, dataBuffer);
             }
         }
         /// <summary>
@@ -147,14 +76,13 @@ namespace Engine.Helpers
         {
             if (DdsHeader.GetInfo(stream, out DdsHeader header, out DdsHeaderDX10? header10, out int offset, out byte[] buffer))
             {
-                return new TextureData(header, header10, buffer, offset, 0);
+                return new TextureData(header, header10, buffer, offset);
             }
             else
             {
-                using (var bitmap = ReadBitmap(stream))
-                {
-                    return new TextureData(bitmap);
-                }
+                ReadBitmap(stream, out int width, out int height, out byte[] dataBuffer);
+
+                return new TextureData(width, height, dataBuffer);
             }
         }
         /// <summary>
@@ -189,29 +117,145 @@ namespace Engine.Helpers
 
             return textureList;
         }
+        /// <summary>
+        /// Reads a bitmap a file
+        /// </summary>
+        /// <param name="filename">File name</param>
+        /// <returns>Returns the bitmap source</returns>
+        private static void ReadBitmap(string filename, out int width, out int height, out byte[] buffer)
+        {
+            width = 0;
+            height = 0;
+            buffer = null;
+
+            using (var factory = new ImagingFactory2())
+            using (var bitmapDecoder = new BitmapDecoder(factory, filename, DecodeOptions.CacheOnLoad))
+            {
+                var frame = bitmapDecoder.GetFrame(0);
+
+                if (frame.PixelFormat == PixelFormat.Format32bppPRGBA)
+                {
+                    int stride = PixelFormat.GetStride(frame.PixelFormat, frame.Size.Width);
+
+                    // Allocate DataStream to receive the WIC image pixels
+                    byte[] dataBuffer = new byte[frame.Size.Height * stride];
+
+                    frame.CopyPixels(dataBuffer, stride);
+
+                    width = frame.Size.Width;
+                    height = frame.Size.Height;
+                    buffer = dataBuffer;
+                }
+                else
+                {
+                    using (var formatConverter = new FormatConverter(factory))
+                    {
+                        if (!formatConverter.CanConvert(frame.PixelFormat, PixelFormat.Format32bppPRGBA))
+                        {
+                            throw new ArgumentException($"Cannot convert to 32bppPRGBA: {filename}", nameof(filename));
+                        }
+
+                        formatConverter.Initialize(
+                            frame,
+                            PixelFormat.Format32bppPRGBA,
+                            BitmapDitherType.None,
+                            null,
+                            0.0,
+                            BitmapPaletteType.Custom);
+
+                        int stride = PixelFormat.GetStride(formatConverter.PixelFormat, formatConverter.Size.Width);
+
+                        // Allocate DataStream to receive the WIC image pixels
+                        byte[] dataBuffer = new byte[formatConverter.Size.Height * stride];
+
+                        // Copy the content of the WIC to the buffer
+                        formatConverter.CopyPixels(dataBuffer, stride);
+
+                        width = formatConverter.Size.Width;
+                        height = formatConverter.Size.Height;
+                        buffer = dataBuffer;
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// Reads a bitmap from a stream
+        /// </summary>
+        /// <param name="stream">Stream</param>
+        /// <returns>Returns the bitmap source</returns>
+        private static void ReadBitmap(Stream stream, out int width, out int height, out byte[] buffer)
+        {
+            width = 0;
+            height = 0;
+            buffer = null;
+
+            stream.Seek(0, SeekOrigin.Begin);
+
+            using (var factory = new ImagingFactory2())
+            using (var bitmapDecoder = new BitmapDecoder(factory, stream, DecodeOptions.CacheOnLoad))
+            {
+                var frame = bitmapDecoder.GetFrame(0);
+
+                if (frame.PixelFormat == PixelFormat.Format32bppPRGBA)
+                {
+                    int stride = PixelFormat.GetStride(frame.PixelFormat, frame.Size.Width);
+
+                    // Allocate DataStream to receive the WIC image pixels
+                    byte[] dataBuffer = new byte[frame.Size.Height * stride];
+
+                    frame.CopyPixels(dataBuffer, stride);
+
+                    width = frame.Size.Width;
+                    height = frame.Size.Height;
+                    buffer = dataBuffer;
+                }
+                else
+                {
+                    using (var formatConverter = new FormatConverter(factory))
+                    {
+                        if (!formatConverter.CanConvert(frame.PixelFormat, PixelFormat.Format32bppPRGBA))
+                        {
+                            throw new ArgumentException($"Cannot convert to 32bppPRGBA", nameof(stream));
+                        }
+
+                        formatConverter.Initialize(
+                            frame,
+                            PixelFormat.Format32bppPRGBA,
+                            BitmapDitherType.None,
+                            null,
+                            0.0,
+                            BitmapPaletteType.Custom);
+
+                        int stride = PixelFormat.GetStride(formatConverter.PixelFormat, formatConverter.Size.Width);
+
+                        // Allocate DataStream to receive the WIC image pixels
+                        byte[] dataBuffer = new byte[formatConverter.Size.Height * stride];
+
+                        // Copy the content of the WIC to the buffer
+                        formatConverter.CopyPixels(dataBuffer, stride);
+
+                        width = formatConverter.Size.Width;
+                        height = formatConverter.Size.Height;
+                        buffer = dataBuffer;
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="bitmap">Bitmap</param>
-        private TextureData(BitmapSource bitmap)
+        private TextureData(int width, int height, byte[] buffer)
         {
-            this.Width = bitmap.Size.Width;
-            this.Height = bitmap.Size.Height;
+            this.Width = width;
+            this.Height = height;
             this.Depth = 1;
             this.Format = Format.R8G8B8A8_UNorm;
             this.ArraySize = 1;
             this.IsCubeMap = false;
             this.MipMaps = 1;
-
-            // Allocate DataStream to receive the WIC image pixels
-            int stride = bitmap.Size.Width * 4;
-
-            // Copy the content of the WIC to the buffer
-            var bytes = new byte[bitmap.Size.Height * stride];
-            bitmap.CopyPixels(bytes, stride);
-
-            this.data = bytes;
+            this.data = buffer;
         }
         /// <summary>
         /// Constructor
@@ -220,8 +264,7 @@ namespace Engine.Helpers
         /// <param name="header10">DDSDX10 Header</param>
         /// <param name="bitData">Bit data</param>
         /// <param name="offset">Offset</param>
-        /// <param name="maxsize">Maximum size</param>
-        private TextureData(DdsHeader header, DdsHeaderDX10? header10, byte[] bitData, int offset, int maxsize)
+        private TextureData(DdsHeader header, DdsHeaderDX10? header10, byte[] bitData, int offset)
         {
             bool validFile = DdsHeader.ValidateTexture(
                 header, header10,
@@ -343,10 +386,6 @@ namespace Engine.Helpers
             size = 0;
             stride = 0;
 
-            int numBytes = 0;
-            int rowBytes = 0;
-            int numRows = 0;
-
             for (int j = 0; j < this.ArraySize; j++)
             {
                 int index = 0;
@@ -360,9 +399,9 @@ namespace Engine.Helpers
                         width,
                         height,
                         this.Format,
-                        out numBytes,
-                        out rowBytes,
-                        out numRows);
+                        out int numBytes,
+                        out int rowBytes,
+                        out int numRows);
 
                     if (slice == j && index == mip)
                     {
@@ -393,9 +432,9 @@ namespace Engine.Helpers
         /// <param name="depth">Depth</param>
         private static void GetMipMapBounds(ref int width, ref int height, ref int depth)
         {
-            width = width >> 1;
-            height = height >> 1;
-            depth = depth >> 1;
+            width >>= 1;
+            height >>= 1;
+            depth >>= 1;
             if (width == 0) width = 1;
             if (height == 0) height = 1;
             if (depth == 0) depth = 1;

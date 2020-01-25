@@ -414,7 +414,10 @@ namespace Engine
         /// </summary>
         public virtual async Task Initialized()
         {
-            await this.UpdateNavigationGraph();
+            //Fire and forget
+            _ = this.UpdateNavigationGraph();
+
+            await Task.CompletedTask;
         }
         /// <summary>
         /// Update scene objects
@@ -763,7 +766,7 @@ namespace Engine
 
             int texWidth = GetTextureSize(values.Count);
 
-            materialPalette = this.Game.ResourceManager.CreateGlobalResourceTexture2D("MaterialPalette", values.ToArray(), texWidth);
+            materialPalette = this.Game.ResourceManager.CreateGlobalResource("MaterialPalette", values.ToArray(), texWidth);
             materialPaletteWidth = (uint)texWidth;
         }
         /// <summary>
@@ -818,7 +821,7 @@ namespace Engine
 
             int texWidth = GetTextureSize(values.Count);
 
-            animationPalette = this.Game.ResourceManager.CreateGlobalResourceTexture2D("AnimationPalette", values.ToArray(), texWidth);
+            animationPalette = this.Game.ResourceManager.CreateGlobalResource("AnimationPalette", values.ToArray(), texWidth);
             animationPaletteWidth = (uint)texWidth;
         }
 

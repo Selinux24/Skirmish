@@ -387,7 +387,7 @@ namespace SceneTest
                 UpdateSingleLight(this.Lights.SpotLights[2], shift);
             }
         }
-        private void UpdateSingleLight(SceneLight light, bool shift)
+        private void UpdateSingleLight(ISceneLight light, bool shift)
         {
             if (shift)
             {

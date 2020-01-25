@@ -178,7 +178,7 @@ namespace Engine
         /// <param name="light">Key light</param>
         /// <param name="eyePosition">Eye position</param>
         /// <returns>Returns true if the flare is visible</returns>
-        private bool IsFlareVisible(SceneLightDirectional light, Vector3 eyePosition)
+        private bool IsFlareVisible(ISceneLightDirectional light, Vector3 eyePosition)
         {
             if (this.Scene != null)
             {

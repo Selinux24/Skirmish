@@ -150,8 +150,6 @@ namespace Collada
         {
             await base.Initialized();
 
-            this.UpdateGraphNodes(this.agent);
-
             var bbox = inputGeometry.GetBoundingBox();
             var center = bbox.GetCenter();
             float maxD = Math.Max(Math.Max(bbox.GetX(), bbox.GetY()), bbox.GetZ());
@@ -167,6 +165,10 @@ namespace Collada
             await base.UpdateNavigationGraph();
             sw.Stop();
             lastElapsedSeconds = sw.ElapsedMilliseconds / 1000.0f;
+        }
+        public override void NavigationGraphUpdated()
+        {
+            this.UpdateGraphNodes(this.agent);
         }
 
         public override void Update(GameTime gameTime)
@@ -275,29 +277,36 @@ namespace Collada
                 updateGraphDrawing = true;
             }
 
-            if (updateGraph)
-            {
-                Task.WhenAll(this.UpdateNavigationGraph());
-            }
-
             if (updateGraphDrawing)
             {
-                this.UpdateGraphNodes(this.agent);
+                this.graphDrawer.Clear();
+            }
+
+            if (updateGraph)
+            {
+                _ = this.UpdateNavigationGraph();
             }
 
             this.debug.Text = string.Format("Build Mode: {0}; Partition Type: {1}; Build Time: {2:0.00000} seconds", nmsettings.BuildMode, nmsettings.PartitionType, lastElapsedSeconds);
         }
         private void UpdateGraphNodes(AgentType agent)
         {
-            var nodes = this.GetNodes(agent).OfType<GraphNode>();
-            if (nodes.Any())
+            try
             {
-                this.graphDrawer.Clear();
-
-                foreach (var node in nodes)
+                var nodes = this.GetNodes(agent).OfType<GraphNode>();
+                if (nodes.Any())
                 {
-                    this.graphDrawer.AddPrimitives(node.Color, node.Triangles);
+                    this.graphDrawer.Clear();
+
+                    foreach (var node in nodes)
+                    {
+                        this.graphDrawer.AddPrimitives(node.Color, node.Triangles);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
         }
         private void UpdateFiles()

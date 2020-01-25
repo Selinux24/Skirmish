@@ -2,6 +2,7 @@
 using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation
 {
@@ -100,7 +101,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Node triangle list
         /// </summary>
-        public Triangle[] Triangles { get; set; }
+        public IEnumerable<Triangle> Triangles { get; private set; }
         /// <summary>
         /// Center point
         /// </summary>
@@ -115,7 +116,7 @@ namespace Engine.PathFinding.RecastNavigation
                     center += tri.Center;
                 }
 
-                return center / Math.Max(1, Triangles.Length);
+                return center / Math.Max(1, Triangles.Count());
             }
         }
         /// <summary>
@@ -153,7 +154,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// Gets node points (triangle list)
         /// </summary>
         /// <returns>Returns the node point list</returns>
-        public Vector3[] GetPoints()
+        public IEnumerable<Vector3> GetPoints()
         {
             List<Vector3> vList = new List<Vector3>();
 

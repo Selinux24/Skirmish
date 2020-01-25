@@ -1765,6 +1765,137 @@ namespace Engine
         }
 
         /// <summary>
+        /// Loads a texture from file in the graphics device
+        /// </summary>
+        /// <param name="filename">Path to file</param>
+        /// <param name="mipAutogen">Try to generate texture mips</param>
+        /// <returns>Returns the resource view</returns>
+        internal ShaderResourceView1 LoadTexture(string filename, bool mipAutogen)
+        {
+            try
+            {
+                Counters.Textures++;
+
+                using (var resource = TextureData.ReadTexture(filename))
+                {
+                    return this.CreateResource(resource, mipAutogen);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new EngineException("LoadTexture from file Error. See inner exception for details", ex);
+            }
+        }
+        /// <summary>
+        /// Loads a texture from file in the graphics device
+        /// </summary>
+        /// <param name="stream">Stream</param>
+        /// <param name="mipAutogen">Try to generate texture mips</param>
+        /// <returns>Returns the resource view</returns>
+        internal ShaderResourceView1 LoadTexture(MemoryStream stream, bool mipAutogen)
+        {
+            try
+            {
+                Counters.Textures++;
+
+                using (var resource = TextureData.ReadTexture(stream))
+                {
+                    return this.CreateResource(resource, mipAutogen);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new EngineException("LoadTexture from stream Error. See inner exception for details", ex);
+            }
+        }
+        /// <summary>
+        /// Loads a texture array from a file collection in the graphics device
+        /// </summary>
+        /// <param name="filenames">Path file collection</param>
+        /// <param name="mipAutogen">Try to generate texture mips</param>
+        /// <returns>Returns the resource view</returns>
+        internal ShaderResourceView1 LoadTextureArray(IEnumerable<string> filenames, bool mipAutogen)
+        {
+            try
+            {
+                var textureList = TextureData.ReadTexture(filenames);
+
+                return LoadTextureArray(textureList, mipAutogen);
+            }
+            catch (Exception ex)
+            {
+                throw new EngineException("LoadTexture from file array Error. See inner exception for details", ex);
+            }
+        }
+        /// <summary>
+        /// Loads a texture array from a file collection in the graphics device
+        /// </summary>
+        /// <param name="streams">Stream collection</param>
+        /// <param name="mipAutogen">Try to generate texture mips</param>
+        /// <returns>Returns the resource view</returns>
+        internal ShaderResourceView1 LoadTextureArray(IEnumerable<MemoryStream> streams, bool mipAutogen)
+        {
+            try
+            {
+                var textureList = TextureData.ReadTexture(streams);
+
+                return LoadTextureArray(textureList, mipAutogen);
+            }
+            catch (Exception ex)
+            {
+                throw new EngineException("LoadTexture from stream array Error. See inner exception for details", ex);
+            }
+        }
+        /// <summary>
+        /// Loads a texture array in the graphics device
+        /// </summary>
+        /// <param name="textureList">Texture array</param>
+        /// <param name="mipAutogen">Try to generate texture mips</param>
+        /// <returns>Returns the resource view</returns>
+        internal ShaderResourceView1 LoadTextureArray(IEnumerable<TextureData> textureList, bool mipAutogen)
+        {
+            Counters.Textures++;
+
+            var resource = this.CreateResource(textureList, mipAutogen);
+
+            foreach (var item in textureList)
+            {
+                item?.Dispose();
+            }
+
+            return resource;
+        }
+        /// <summary>
+        /// Creates a random 1D texture
+        /// </summary>
+        /// <param name="size">Texture size</param>
+        /// <param name="min">Minimum value</param>
+        /// <param name="max">Maximum value</param>
+        /// <param name="seed">Random seed</param>
+        /// <returns>Returns created texture</returns>
+        internal ShaderResourceView1 CreateRandomTexture(int size, float min, float max, int seed = 0)
+        {
+            try
+            {
+                Counters.Textures++;
+
+                Random rnd = new Random(seed);
+
+                var randomValues = new List<Vector4>();
+                for (int i = 0; i < size; i++)
+                {
+                    randomValues.Add(rnd.NextVector4(new Vector4(min), new Vector4(max)));
+                }
+
+                return this.CreateTexture1D(size, randomValues.ToArray());
+            }
+            catch (Exception ex)
+            {
+                throw new EngineException("CreateRandomTexture Error. See inner exception for details", ex);
+            }
+        }
+
+        /// <summary>
         /// Create depth stencil view
         /// </summary>
         /// <param name="format">Format</param>

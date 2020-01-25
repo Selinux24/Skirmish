@@ -98,11 +98,6 @@ namespace Engine
                 return Matrix.Scaling(radius) * Matrix.Translation(center);
             }
         }
-
-        /// <summary>
-        /// Shadow map index
-        /// </summary>
-        public int ShadowMapIndex { get; set; }
         /// <summary>
         /// Shadow map count
         /// </summary>
@@ -175,36 +170,18 @@ namespace Engine
         /// <summary>
         /// Clears all light shadow parameters
         /// </summary>
-        public void ClearShadowParameters()
+        public override void ClearShadowParameters()
         {
-            this.ShadowMapIndex = -1;
+            base.ClearShadowParameters();
+
             this.ShadowMapCount = 0;
             this.FromLightVP = new Matrix[1];
-        }
-
-        /// <summary>
-        /// Gets the light volume
-        /// </summary>
-        /// <param name="sliceCount">Cone slice count</param>
-        /// <returns>Returns a line list representing the light volume</returns>
-        public IEnumerable<Line3D> GetVolume(int sliceCount)
-        {
-            var coneLines = Line3D.CreateWiredConeAngle(this.AngleRadians, this.Radius, sliceCount);
-
-            //The wired cone has his basin on the XZ plane. Light points along the Z axis, we have to rotate 90 degrees around the X axis
-            Matrix rot = Matrix.RotationX(MathUtil.PiOverTwo);
-
-            //Then move and rotate the cone to light position and direction
-            float f = Math.Abs(Vector3.Dot(this.Direction, Vector3.Up));
-            Matrix trn = Helper.CreateWorld(this.Position, this.Direction, f == 1 ? Vector3.ForwardLH : Vector3.Up);
-
-            return Line3D.Transform(coneLines, rot * trn);
         }
         /// <summary>
         /// Clones current light
         /// </summary>
         /// <returns>Returns a new instante with same data</returns>
-        public override SceneLight Clone()
+        public override ISceneLight Clone()
         {
             return new SceneLightSpot()
             {
@@ -227,6 +204,24 @@ namespace Engine
 
                 ParentTransform = this.ParentTransform,
             };
+        }
+        /// <summary>
+        /// Gets the light volume
+        /// </summary>
+        /// <param name="sliceCount">Cone slice count</param>
+        /// <returns>Returns a line list representing the light volume</returns>
+        public IEnumerable<Line3D> GetVolume(int sliceCount)
+        {
+            var coneLines = Line3D.CreateWiredConeAngle(this.AngleRadians, this.Radius, sliceCount);
+
+            //The wired cone has his basin on the XZ plane. Light points along the Z axis, we have to rotate 90 degrees around the X axis
+            Matrix rot = Matrix.RotationX(MathUtil.PiOverTwo);
+
+            //Then move and rotate the cone to light position and direction
+            float f = Math.Abs(Vector3.Dot(this.Direction, Vector3.Up));
+            Matrix trn = Helper.CreateWorld(this.Position, this.Direction, f == 1 ? Vector3.ForwardLH : Vector3.Up);
+
+            return Line3D.Transform(coneLines, rot * trn);
         }
     }
 }

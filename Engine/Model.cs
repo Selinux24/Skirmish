@@ -101,7 +101,7 @@ namespace Engine
         /// <summary>
         /// Gets the current model lights collection
         /// </summary>
-        public SceneLight[] Lights { get; protected set; }
+        public IEnumerable<ISceneLight> Lights { get; protected set; } = new ISceneLight[] { };
         /// <summary>
         /// Gets the model part by name
         /// </summary>
@@ -174,7 +174,7 @@ namespace Engine
             }
 
             var drawData = this.GetDrawingData(LevelOfDetail.High);
-            this.Lights = drawData?.Lights?.Select(l => l.Clone()).ToArray();
+            this.Lights = drawData?.Lights.Select(l => l.Clone()).ToArray() ?? new ISceneLight[] { };
         }
 
         /// <summary>
@@ -203,9 +203,12 @@ namespace Engine
                 this.Manipulator.Update(context.GameTime);
             }
 
-            for (int i = 0; i < this.Lights?.Length; i++)
+            if (this.Lights.Any())
             {
-                this.Lights[i].ParentTransform = this.Manipulator.LocalTransform;
+                foreach (var light in this.Lights)
+                {
+                    light.ParentTransform = this.Manipulator.LocalTransform;
+                }
             }
         }
         /// <summary>

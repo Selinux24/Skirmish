@@ -379,7 +379,7 @@ namespace Engine.PathFinding.AStar
         /// Get four node corners
         /// </summary>
         /// <returns>Returns four node corners</returns>
-        public Vector3[] GetPoints()
+        public IEnumerable<Vector3> GetPoints()
         {
             return new[]
             {
