@@ -121,60 +121,17 @@ namespace Engine.Helpers
         /// Reads a bitmap a file
         /// </summary>
         /// <param name="filename">File name</param>
-        /// <returns>Returns the bitmap source</returns>
+        /// <param name="width">Resulting texture width</param>
+        /// <param name="height">Resulting texture height</param>
+        /// <param name="buffer">Resulting data buffer</param>
         private static void ReadBitmap(string filename, out int width, out int height, out byte[] buffer)
         {
-            width = 0;
-            height = 0;
-            buffer = null;
-
             using (var factory = new ImagingFactory2())
             using (var bitmapDecoder = new BitmapDecoder(factory, filename, DecodeOptions.CacheOnLoad))
             {
-                var frame = bitmapDecoder.GetFrame(0);
-
-                if (frame.PixelFormat == PixelFormat.Format32bppPRGBA)
+                if (!ReadBitmap(factory, bitmapDecoder, PixelFormat.Format32bppPRGBA, out width, out height, out buffer))
                 {
-                    int stride = PixelFormat.GetStride(frame.PixelFormat, frame.Size.Width);
-
-                    // Allocate DataStream to receive the WIC image pixels
-                    byte[] dataBuffer = new byte[frame.Size.Height * stride];
-
-                    frame.CopyPixels(dataBuffer, stride);
-
-                    width = frame.Size.Width;
-                    height = frame.Size.Height;
-                    buffer = dataBuffer;
-                }
-                else
-                {
-                    using (var formatConverter = new FormatConverter(factory))
-                    {
-                        if (!formatConverter.CanConvert(frame.PixelFormat, PixelFormat.Format32bppPRGBA))
-                        {
-                            throw new ArgumentException($"Cannot convert to 32bppPRGBA: {filename}", nameof(filename));
-                        }
-
-                        formatConverter.Initialize(
-                            frame,
-                            PixelFormat.Format32bppPRGBA,
-                            BitmapDitherType.None,
-                            null,
-                            0.0,
-                            BitmapPaletteType.Custom);
-
-                        int stride = PixelFormat.GetStride(formatConverter.PixelFormat, formatConverter.Size.Width);
-
-                        // Allocate DataStream to receive the WIC image pixels
-                        byte[] dataBuffer = new byte[formatConverter.Size.Height * stride];
-
-                        // Copy the content of the WIC to the buffer
-                        formatConverter.CopyPixels(dataBuffer, stride);
-
-                        width = formatConverter.Size.Width;
-                        height = formatConverter.Size.Height;
-                        buffer = dataBuffer;
-                    }
+                    throw new ArgumentException($"Cannot convert to 32bppPRGBA: {filename}", nameof(filename));
                 }
             }
         }
@@ -182,64 +139,85 @@ namespace Engine.Helpers
         /// Reads a bitmap from a stream
         /// </summary>
         /// <param name="stream">Stream</param>
-        /// <returns>Returns the bitmap source</returns>
+        /// <param name="width">Resulting texture width</param>
+        /// <param name="height">Resulting texture height</param>
+        /// <param name="buffer">Resulting data buffer</param>
         private static void ReadBitmap(Stream stream, out int width, out int height, out byte[] buffer)
         {
-            width = 0;
-            height = 0;
-            buffer = null;
-
             stream.Seek(0, SeekOrigin.Begin);
 
             using (var factory = new ImagingFactory2())
             using (var bitmapDecoder = new BitmapDecoder(factory, stream, DecodeOptions.CacheOnLoad))
             {
-                var frame = bitmapDecoder.GetFrame(0);
-
-                if (frame.PixelFormat == PixelFormat.Format32bppPRGBA)
+                if (!ReadBitmap(factory, bitmapDecoder, PixelFormat.Format32bppPRGBA, out width, out height, out buffer))
                 {
-                    int stride = PixelFormat.GetStride(frame.PixelFormat, frame.Size.Width);
-
-                    // Allocate DataStream to receive the WIC image pixels
-                    byte[] dataBuffer = new byte[frame.Size.Height * stride];
-
-                    frame.CopyPixels(dataBuffer, stride);
-
-                    width = frame.Size.Width;
-                    height = frame.Size.Height;
-                    buffer = dataBuffer;
-                }
-                else
-                {
-                    using (var formatConverter = new FormatConverter(factory))
-                    {
-                        if (!formatConverter.CanConvert(frame.PixelFormat, PixelFormat.Format32bppPRGBA))
-                        {
-                            throw new ArgumentException($"Cannot convert to 32bppPRGBA", nameof(stream));
-                        }
-
-                        formatConverter.Initialize(
-                            frame,
-                            PixelFormat.Format32bppPRGBA,
-                            BitmapDitherType.None,
-                            null,
-                            0.0,
-                            BitmapPaletteType.Custom);
-
-                        int stride = PixelFormat.GetStride(formatConverter.PixelFormat, formatConverter.Size.Width);
-
-                        // Allocate DataStream to receive the WIC image pixels
-                        byte[] dataBuffer = new byte[formatConverter.Size.Height * stride];
-
-                        // Copy the content of the WIC to the buffer
-                        formatConverter.CopyPixels(dataBuffer, stride);
-
-                        width = formatConverter.Size.Width;
-                        height = formatConverter.Size.Height;
-                        buffer = dataBuffer;
-                    }
+                    throw new ArgumentException($"Cannot convert to 32bppPRGBA", nameof(stream));
                 }
             }
+        }
+        /// <summary>
+        /// Reads a bitmap from a decoder
+        /// </summary>
+        /// <param name="factory">Imaging factory</param>
+        /// <param name="bitmapDecoder">Bitmap decoder</param>
+        /// <param name="format">Target format</param>
+        /// <param name="width">Resulting texture width</param>
+        /// <param name="height">Resulting texture height</param>
+        /// <param name="buffer">Resulting data buffer</param>
+        /// <returns>Returns true if the texture can be read</returns>
+        private static bool ReadBitmap(ImagingFactory factory, BitmapDecoder bitmapDecoder, Guid format, out int width, out int height, out byte[] buffer)
+        {
+            width = 0;
+            height = 0;
+            buffer = null;
+
+            var frame = bitmapDecoder.GetFrame(0);
+
+            if (frame.PixelFormat == format)
+            {
+                int stride = PixelFormat.GetStride(frame.PixelFormat, frame.Size.Width);
+
+                // Allocate DataStream to receive the WIC image pixels
+                byte[] dataBuffer = new byte[frame.Size.Height * stride];
+
+                frame.CopyPixels(dataBuffer, stride);
+
+                width = frame.Size.Width;
+                height = frame.Size.Height;
+                buffer = dataBuffer;
+            }
+            else
+            {
+                using (var formatConverter = new FormatConverter(factory))
+                {
+                    if (!formatConverter.CanConvert(frame.PixelFormat, format))
+                    {
+                        return false;
+                    }
+
+                    formatConverter.Initialize(
+                        frame,
+                        format,
+                        BitmapDitherType.ErrorDiffusion,
+                        null,
+                        0.0,
+                        BitmapPaletteType.MedianCut);
+
+                    int stride = PixelFormat.GetStride(formatConverter.PixelFormat, formatConverter.Size.Width);
+
+                    // Allocate DataStream to receive the WIC image pixels
+                    byte[] dataBuffer = new byte[formatConverter.Size.Height * stride];
+
+                    // Copy the content of the WIC to the buffer
+                    formatConverter.CopyPixels(dataBuffer, stride);
+
+                    width = formatConverter.Size.Width;
+                    height = formatConverter.Size.Height;
+                    buffer = dataBuffer;
+                }
+            }
+
+            return true;
         }
 
         /// <summary>

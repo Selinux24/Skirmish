@@ -294,7 +294,7 @@ namespace Engine
                     this.BufferManager.WriteBuffer(this.vertexBuffer.Slot, this.vertexBuffer.Offset, this.vertices);
                     this.BufferManager.WriteBuffer(this.indexBuffer.Slot, this.indexBuffer.Offset, this.indices);
 
-                    this.indexDrawCount = string.IsNullOrWhiteSpace(this.text) ? 0 : this.text.Length * 6;
+                    this.indexDrawCount = this.indices.Length;
 
                     this.updateBuffers = false;
                 }
