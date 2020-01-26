@@ -403,14 +403,16 @@ namespace Engine
 
             if (this.BufferManager.IsDirty)
             {
-                this.BufferManager.CreateBuffers();
                 Console.WriteLine("BufferManager: Recreating dirty buffers");
+                this.BufferManager.CreateBuffers();
+                Console.WriteLine("BufferManager: Dirty buffers recreated");
             }
 
             if (this.ResourceManager.HasRequests)
             {
-                this.ResourceManager.CreateResources();
                 Console.WriteLine("ResourceManager: Creating new resources");
+                this.ResourceManager.CreateResources();
+                Console.WriteLine("ResourceManager: New resources created");
             }
 
             FrameInput();

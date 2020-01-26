@@ -29,6 +29,8 @@ namespace Collada
 
         private Player agent = null;
         private readonly Color agentTorchLight = new Color(255, 249, 224, 255);
+        private readonly Vector3 cameraInitialPosition = new Vector3(1000, 1000, 1000);
+        private readonly Vector3 cameraInitialInterest = new Vector3(1001, 1000, 1000);
 
         private SceneLightPoint torch = null;
 
@@ -486,8 +488,8 @@ namespace Collada
             this.Camera.MovementDelta = this.agent.Velocity;
             this.Camera.SlowMovementDelta = this.agent.VelocitySlow;
             this.Camera.Mode = CameraModes.Free;
-            this.Camera.Position = new Vector3(1000, 1000, 1000);
-            this.Camera.Interest = new Vector3(1001, 1000, 1000);
+            this.Camera.Position = cameraInitialPosition;
+            this.Camera.Interest = cameraInitialInterest;
         }
         private void UpdateDebugInfo()
         {
@@ -660,7 +662,7 @@ namespace Collada
 
             if (this.Game.Input.KeyJustReleased(Keys.N))
             {
-                Task.WhenAll(this.ChangeToLevel("Lvl1"));
+                Task.WhenAll(this.ChangeToLevel("Lvl2"));
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.M))
@@ -692,7 +694,7 @@ namespace Collada
 
             if (this.Game.Input.KeyJustReleased(Keys.G))
             {
-                this.UpdateGraphDebug(this.CurrentAgent).ConfigureAwait(true);
+                this.UpdateGraphDebug(this.CurrentAgent);
                 this.currentGraph++;
                 this.currentGraph %= 2;
             }
@@ -1128,6 +1130,9 @@ namespace Collada
         {
             gameRuning = false;
 
+            this.Camera.Position = cameraInitialPosition;
+            this.Camera.Interest = cameraInitialInterest;
+
             this.Lights.ClearPointLights();
             this.Lights.ClearSpotLights();
             this.Lights.Add(this.torch);
@@ -1224,18 +1229,18 @@ namespace Collada
                     this.SetNavigationGraph(graph);
 
                     this.NavigationGraphUpdated();
-
-                    return;
                 }
                 catch (EngineException ex)
                 {
                     Console.WriteLine($"Bad graph file. Generating navigation mesh. {ex.Message}");
                 }
             }
+            else
+            {
+                await base.UpdateNavigationGraph();
 
-            await base.UpdateNavigationGraph();
-
-            await this.PathFinderDescription.Save(fileName, this.NavigationGraph);
+                await this.PathFinderDescription.Save(fileName, this.NavigationGraph);
+            }
         }
         public override void NavigationGraphUpdated()
         {
@@ -1248,7 +1253,7 @@ namespace Collada
                 CalcPath(this.ratAgentType, from, to);
             }
 
-            this.UpdateGraphDebug(this.CurrentAgent).ConfigureAwait(false);
+            this.UpdateGraphDebug(this.CurrentAgent);
         }
         private void StartEntities()
         {
@@ -1413,16 +1418,16 @@ namespace Collada
             PaintObstacles();
         }
 
-        private async Task UpdateGraphDebug(AgentType agent)
+        private void UpdateGraphDebug(AgentType agent)
         {
-            var nodes = await this.BuildGraphNodeDebugAreas(agent);
+            var nodes = this.BuildGraphNodeDebugAreas(agent);
 
             this.graphDrawer.Clear();
             this.graphDrawer.SetPrimitives(nodes);
 
             this.UpdateDebugInfo();
         }
-        private async Task<Dictionary<Color4, IEnumerable<Triangle>>> BuildGraphNodeDebugAreas(AgentType agent)
+        private Dictionary<Color4, IEnumerable<Triangle>> BuildGraphNodeDebugAreas(AgentType agent)
         {
             Dictionary<Color4, IEnumerable<Triangle>> res = new Dictionary<Color4, IEnumerable<Triangle>>();
 
@@ -1445,7 +1450,7 @@ namespace Collada
                 }
             }
 
-            return await Task.FromResult(res);
+            return res;
         }
 
         private void CreateWind(int index)

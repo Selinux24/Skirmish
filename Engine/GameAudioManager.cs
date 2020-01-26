@@ -129,18 +129,24 @@ namespace Engine
         public void Update()
         {
             //Extract a remove the effects due to dispose
-            var toDispose = effectInstances.FindAll(i => i.Effect.DueToDispose);
+            var toDispose = effectInstances
+                .FindAll(i => i.Effect.DueToDispose)
+                .ToArray();
+
             if (toDispose.Any())
             {
                 effectInstances.RemoveAll(i => i.Effect.DueToDispose);
                 Task.Run(() =>
                 {
-                    toDispose.ForEach(i => i.Effect.Dispose());
+                    toDispose.ToList().ForEach(i => i.Effect.Dispose());
                 }).ConfigureAwait(false);
             }
 
-            var toUpdate = effectInstances.FindAll(i => !i.Effect.DueToDispose && i.Effect.State == AudioState.Playing && i.Effect.UseAudio3D);
-            int effectCount = toUpdate.Count;
+            var toUpdate = effectInstances
+                .FindAll(i => !i.Effect.DueToDispose && i.Effect.State == AudioState.Playing && i.Effect.UseAudio3D)
+                .ToArray();
+
+            int effectCount = toUpdate.Length;
             if (effectCount == 0)
             {
                 return;

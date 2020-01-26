@@ -712,6 +712,8 @@ namespace Engine.Common
                 CreateInstancingBuffers();
                 CreateIndexBuffers();
 
+                Console.WriteLine($"Buffers created");
+
                 Initilialized = true;
             }
             else
@@ -719,6 +721,8 @@ namespace Engine.Common
                 Console.WriteLine($"Reallocating buffers");
 
                 DoReallocation();
+        
+                Console.WriteLine($"Buffers reallocated");
             }
 
             allocating = false;

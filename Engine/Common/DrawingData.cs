@@ -618,9 +618,13 @@ namespace Engine.Common
         {
             List<Vector3> points = new List<Vector3>();
 
-            foreach (var dictionary in this.Meshes.Values)
+            var meshMaterialList = this.Meshes.Values.ToArray();
+
+            foreach (var dictionary in meshMaterialList)
             {
-                foreach (var mesh in dictionary.Values)
+                var meshList = dictionary.Values.ToArray();
+
+                foreach (var mesh in meshList)
                 {
                     var meshPoints = mesh.GetPoints(refresh);
                     if (meshPoints != null && meshPoints.Length > 0)
@@ -655,9 +659,13 @@ namespace Engine.Common
         {
             List<Vector3> points = new List<Vector3>();
 
-            foreach (var dictionary in this.Meshes.Values)
+            var meshMaterialList = this.Meshes.Values.ToArray();
+
+            foreach (var dictionary in meshMaterialList)
             {
-                foreach (var mesh in dictionary.Values)
+                var meshList = dictionary.Values.ToArray();
+
+                foreach (var mesh in meshList)
                 {
                     var meshPoints = mesh.GetPoints(boneTransforms, refresh);
                     if (meshPoints != null && meshPoints.Length > 0)
@@ -690,9 +698,13 @@ namespace Engine.Common
         {
             List<Triangle> triangles = new List<Triangle>();
 
-            foreach (var dictionary in this.Meshes.Values)
+            var meshMaterialList = this.Meshes.Values.ToArray();
+
+            foreach (var dictionary in meshMaterialList)
             {
-                foreach (var mesh in dictionary.Values)
+                var meshList = dictionary.Values.ToArray();
+
+                foreach (var mesh in meshList)
                 {
                     var meshTriangles = mesh.GetTriangles(refresh);
                     triangles.AddRange(Triangle.Transform(meshTriangles, transform));
@@ -722,9 +734,13 @@ namespace Engine.Common
         {
             List<Triangle> triangles = new List<Triangle>();
 
-            foreach (var dictionary in this.Meshes.Values)
+            var meshMaterialList = this.Meshes.Values.ToArray();
+
+            foreach (var dictionary in meshMaterialList)
             {
-                foreach (var mesh in dictionary.Values)
+                var meshList = dictionary.Values.ToArray();
+
+                foreach (var mesh in meshList)
                 {
                     var meshTriangles = mesh.GetTriangles(boneTransforms, refresh);
                     triangles.AddRange(Triangle.Transform(meshTriangles, transform));
