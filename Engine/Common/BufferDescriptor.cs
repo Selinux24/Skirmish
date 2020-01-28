@@ -7,29 +7,28 @@ namespace Engine.Common
     public class BufferDescriptor
     {
         /// <summary>
+        /// Buffer Id
+        /// </summary>
+        public string Id { get; set; } = null;
+        /// <summary>
         /// Buffer slot index
         /// </summary>
-        public int Slot { get; set; }
+        public int Slot { get; set; } = -1;
         /// <summary>
         /// Buffer index offset
         /// </summary>
-        public int Offset { get; set; }
+        public int Offset { get; set; } = -1;
         /// <summary>
         /// Item Count
         /// </summary>
-        public int Count { get; set; }
+        public int Count { get; set; } = 0;
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="slot">Slot</param>
-        /// <param name="offset">Offset</param>
-        /// <param name="count">Count</param>
-        public BufferDescriptor(int slot, int offset, int count)
+        public BufferDescriptor()
         {
-            this.Slot = slot;
-            this.Offset = offset;
-            this.Count = count;
+
         }
 
         /// <summary>
@@ -38,7 +37,7 @@ namespace Engine.Common
         /// <returns>Returns the text representation of the instance</returns>
         public override string ToString()
         {
-            return $"Slot: {Slot}; Offset: {Offset}; Count: {Count}; Next: {Offset + Count};";
+            return $"Id: {Id ?? "Empty"}; Slot: {Slot}; Offset: {Offset}; Count: {Count}; Next: {Offset + Count};";
         }
     }
 }

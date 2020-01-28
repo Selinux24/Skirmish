@@ -192,7 +192,7 @@ namespace Engine
                         //Remove data from buffer manager
                         foreach (var vb in this.dictVB.Values)
                         {
-                            this.BufferManager.RemoveVertexData(vb);
+                            this.BufferManager.RemoveVertexData(vb, 0);
                         }
                         foreach (var ib in this.dictIB.Values)
                         {

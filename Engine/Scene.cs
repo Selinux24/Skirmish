@@ -482,9 +482,11 @@ namespace Engine
             {
                 this.Renderer?.Draw(gameTime, this);
             }
-            catch (Exception ex)
+            catch (EngineException ex)
             {
-                throw new EngineException("Drawing error", ex);
+                Console.WriteLine($"Drawing error {this.Renderer?.GetType()}: {ex.Message}");
+
+                throw;
             }
         }
 

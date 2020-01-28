@@ -121,6 +121,7 @@ namespace Engine
         {
             var spriteDesc = new SpriteDescription()
             {
+                Name = $"{description.Name}.Button",
                 Width = description.Width,
                 Height = description.Height,
                 Color = description.ColorReleased,
@@ -139,6 +140,7 @@ namespace Engine
             {
                 var spriteDesc2 = new SpriteDescription()
                 {
+                    Name = $"{description.Name}.Button2",
                     Width = description.Width,
                     Height = description.Height,
                     Color = description.ColorPressed,
@@ -156,6 +158,8 @@ namespace Engine
 
             if (description.TextDescription != null)
             {
+                description.TextDescription.Name = description.TextDescription.Name ?? $"{description.Name}.TextDrawer";
+
                 this.textDrawer = new TextDrawer(
                     scene,
                     description.TextDescription);

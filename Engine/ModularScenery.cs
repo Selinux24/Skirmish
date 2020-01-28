@@ -139,6 +139,11 @@ namespace Engine
         /// <param name="levelName">Level name</param>
         public async Task LoadLevel(string levelName)
         {
+            if (string.Equals(this.CurrentLevel?.Name, levelName, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
             //Removes previous level components from scene
             this.Scene.RemoveComponents(this.assets.Select(a => a.Value));
             this.Scene.RemoveComponents(this.objects.Select(o => o.Value));

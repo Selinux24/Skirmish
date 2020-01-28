@@ -57,7 +57,7 @@ namespace Engine
             if (disposing)
             {
                 //Remove data from buffer manager
-                this.BufferManager?.RemoveVertexData(this.vertexBuffer);
+                this.BufferManager?.RemoveVertexData(this.vertexBuffer, 0);
                 this.BufferManager?.RemoveIndexData(this.indexBuffer);
             }
         }
