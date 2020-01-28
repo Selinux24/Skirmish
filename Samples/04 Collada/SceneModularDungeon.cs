@@ -111,10 +111,9 @@ namespace Collada
 
             await Task.WhenAll(
                 this.InitializeDebug(),
-                this.InitializeModularScenery(),
+                this.InitializeDungeon(),
                 this.InitializePlayer(),
-                this.InitializeRat(),
-                this.InitializeHuman(),
+                this.InitializeNPCs(),
                 this.InitializeAudio());
 
             await this.InitializeEnvironment();
@@ -144,17 +143,7 @@ namespace Collada
 
             var nminput = new InputGeometry(GetTrianglesForNavigationGraph);
 
-            nminput.AddConnection(
-                new Vector3(-8.98233700f, 4.76837158e-07f, 0.0375497341f),
-                new Vector3(-11.0952349f, -4.76837158e-07f, 0.00710105896f),
-                1,
-                1,
-                GraphConnectionAreaTypes.Jump,
-                GraphConnectionFlagTypes.All);
-
             this.PathFinderDescription = new PathFinderDescription(nmsettings, nminput);
-
-            this.PaintConnections();
 
             await Task.CompletedTask;
         }
@@ -215,7 +204,7 @@ namespace Collada
             this.selectedItemDrawer = await this.AddComponentPrimitiveListDrawer<Triangle>(drawerDesc, SceneObjectUsages.UI, layerHUD);
             this.selectedItemDrawer.Visible = true;
         }
-        private async Task InitializeModularScenery()
+        private async Task InitializeDungeon()
         {
             var desc = new ModularSceneryDescription()
             {
@@ -251,6 +240,12 @@ namespace Collada
             };
 
             await Task.CompletedTask;
+        }
+        private async Task InitializeNPCs()
+        {
+            await Task.WhenAll(
+                this.InitializeRat(),
+                this.InitializeHuman());
         }
         private async Task InitializeRat()
         {
@@ -306,19 +301,6 @@ namespace Collada
                         ModelContentFilename = "Human2.xml",
                     }
                 });
-
-            AnimationPath p0 = new AnimationPath();
-            p0.AddLoop("stand");
-
-            for (int i = 0; i < this.human.InstanceCount; i++)
-            {
-                this.human[i].Manipulator.SetPosition(31, 0, i == 0 ? -31 : -29, true);
-                this.human[i].Manipulator.SetRotation(-MathUtil.PiOverTwo, 0, 0, true);
-
-                this.human[i].AnimationController.AddPath(new AnimationPlan(p0));
-                this.human[i].AnimationController.Start(i * 1f);
-                this.human[i].AnimationController.TimeDelta = 0.5f + (i * 0.1f);
-            }
         }
         private async Task InitializeDebug()
         {
@@ -475,9 +457,7 @@ namespace Collada
 
             this.StartCamera();
 
-            await this.scenery.Start();
-
-            await this.ChangeToLevel(this.scenery.CurrentLevel.Name);
+            await this.ChangeToLevel(this.scenery.FirstLevel?.Name);
 
             this.AudioManager.Start();
         }
@@ -563,15 +543,15 @@ namespace Collada
                 return;
             }
 
+            this.UpdateRatController(gameTime);
+            this.UpdateEntities();
+            this.UpdateWind();
+
             this.UpdateDebugInput();
             this.UpdateGraphInput();
             this.UpdateRatInput();
             this.UpdatePlayerInput();
             this.UpdateEntitiesInput();
-
-            this.UpdateRatController(gameTime);
-            this.UpdateEntities();
-            this.UpdateWind();
 
             this.UpdateSelection();
         }
@@ -658,6 +638,11 @@ namespace Collada
             if (this.Game.Input.KeyJustReleased(Keys.F4))
             {
                 this.ratDrawer.Visible = !this.ratDrawer.Visible;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.B))
+            {
+                Task.WhenAll(this.ChangeToLevel("Lvl1"));
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.N))
@@ -760,6 +745,11 @@ namespace Collada
         private void UpdateRatController(GameTime gameTime)
         {
             this.ratTime -= gameTime.ElapsedSeconds;
+
+            if (!this.ratHoles.Any())
+            {
+                return;
+            }
 
             if (this.ratActive)
             {
@@ -1135,13 +1125,18 @@ namespace Collada
 
             this.Lights.ClearPointLights();
             this.Lights.ClearSpotLights();
-            this.Lights.Add(this.torch);
 
             this.AudioManager.Stop();
             this.AudioManager.ClearEffects();
-            this.AudioManager.Start();
+
+            this.ClearNPCs();
+            this.ClearDebugDrawers();
+
+            this.SetSelectedItem(null);
 
             await this.scenery.LoadLevel(name);
+
+            this.ConfigureNavigationGraph();
 
             await this.UpdateNavigationGraph();
 
@@ -1153,62 +1148,30 @@ namespace Collada
             this.Camera.Position = pos;
             this.Camera.Interest = pos + dir;
 
+            this.Lights.Add(this.torch);
+
+            this.AudioManager.Start();
+
             gameRuning = true;
         }
 
-        private void PaintObstacles()
+        private void ConfigureNavigationGraph()
         {
-            this.obstacleDrawer.Clear(obstacleColor);
+            this.PathFinderDescription.Input.ClearConnections();
 
-            foreach (var item in obstacles)
+            if (this.scenery.CurrentLevel.Name == "Lvl1")
             {
-                var obstacle = item.Value;
-
-                IEnumerable<Triangle> obstacleTris = null;
-
-                if (obstacle is BoundingCylinder bc)
-                {
-                    obstacleTris = Triangle.ComputeTriangleList(Topology.TriangleList, bc, 32);
-                }
-                else if (obstacle is BoundingBox bbox)
-                {
-                    obstacleTris = Triangle.ComputeTriangleList(Topology.TriangleList, bbox);
-                }
-                else if (obstacle is OrientedBoundingBox obb)
-                {
-                    obstacleTris = Triangle.ComputeTriangleList(Topology.TriangleList, obb);
-                }
-
-                if (obstacleTris?.Any() == true)
-                {
-                    this.obstacleDrawer.AddPrimitives(obstacleColor, obstacleTris);
-                }
+                this.PathFinderDescription.Input.AddConnection(
+                    new Vector3(-8.98233700f, 4.76837158e-07f, 0.0375497341f),
+                    new Vector3(-11.0952349f, -4.76837158e-07f, 0.00710105896f),
+                    1,
+                    1,
+                    GraphConnectionAreaTypes.Jump,
+                    GraphConnectionFlagTypes.All);
             }
+
+            this.PaintConnections();
         }
-        private void PaintConnections()
-        {
-            this.connectionDrawer.Clear(connectionColor);
-
-            var conns = this.PathFinderDescription.Input.GetConnections();
-
-            foreach (var conn in conns)
-            {
-                var arclines = Line3D.CreateArc(conn.Start, conn.End, 0.25f, 8);
-                this.connectionDrawer.AddPrimitives(connectionColor, arclines);
-
-                var cirlinesF = Line3D.CreateCircle(conn.Start, conn.Radius, 32);
-                this.connectionDrawer.AddPrimitives(connectionColor, cirlinesF);
-
-                if (conn.Direction == 1)
-                {
-                    var cirlinesT = Line3D.CreateCircle(conn.End, conn.Radius, 32);
-                    this.connectionDrawer.AddPrimitives(connectionColor, cirlinesT);
-                }
-
-                this.connectionDrawer.Visible = true;
-            }
-        }
-
         public override async Task UpdateNavigationGraph()
         {
             if (this.scenery.CurrentLevel == null)
@@ -1272,6 +1235,9 @@ namespace Collada
             //Ladders
             this.StartEntitiesLadders();
 
+            //NPCs
+            this.StartNPCs();
+
             //Furniture obstacles
             this.StartEntitiesObstacles();
 
@@ -1322,6 +1288,28 @@ namespace Collada
                 ladder.AnimationController.SetPath(new AnimationPlan(def));
                 ladder.InvalidateCache();
             }
+        }
+        private void StartNPCs()
+        {
+            AnimationPath p0 = new AnimationPath();
+            p0.AddLoop("stand");
+
+            if (this.scenery.CurrentLevel.Name != "Lvl1")
+            {
+                this.human.Visible = false;
+            }
+
+            for (int i = 0; i < this.human.InstanceCount; i++)
+            {
+                this.human[i].Manipulator.SetPosition(31, 0, i == 0 ? -31 : -29, true);
+                this.human[i].Manipulator.SetRotation(-MathUtil.PiOverTwo, 0, 0, true);
+
+                this.human[i].AnimationController.AddPath(new AnimationPlan(p0));
+                this.human[i].AnimationController.Start(i * 1f);
+                this.human[i].AnimationController.TimeDelta = 0.5f + (i * 0.1f);
+            }
+
+            this.human.Visible = true;
         }
         private void StartEntitiesAudio()
         {
@@ -1390,6 +1378,8 @@ namespace Collada
         }
         private void StartEntitiesObstacles()
         {
+            obstacles.Clear();
+
             //Furniture obstacles
             var furnitures = this.scenery
                 .GetObjectsByType(ModularSceneryObjectTypes.Furniture)
@@ -1416,6 +1406,76 @@ namespace Collada
             }
 
             PaintObstacles();
+        }
+
+        private void ClearNPCs()
+        {
+            this.ratActive = false;
+            this.rat.Visible = false;
+            this.ratController.Clear();
+
+            this.human.Visible = false;
+        }
+        private void ClearDebugDrawers()
+        {
+            bboxesDrawer.Clear();
+            ratDrawer.Clear();
+            graphDrawer.Clear();
+            obstacleDrawer.Clear();
+            connectionDrawer.Clear();
+        }
+
+        private void PaintObstacles()
+        {
+            this.obstacleDrawer.Clear(obstacleColor);
+
+            foreach (var item in obstacles)
+            {
+                var obstacle = item.Value;
+
+                IEnumerable<Triangle> obstacleTris = null;
+
+                if (obstacle is BoundingCylinder bc)
+                {
+                    obstacleTris = Triangle.ComputeTriangleList(Topology.TriangleList, bc, 32);
+                }
+                else if (obstacle is BoundingBox bbox)
+                {
+                    obstacleTris = Triangle.ComputeTriangleList(Topology.TriangleList, bbox);
+                }
+                else if (obstacle is OrientedBoundingBox obb)
+                {
+                    obstacleTris = Triangle.ComputeTriangleList(Topology.TriangleList, obb);
+                }
+
+                if (obstacleTris?.Any() == true)
+                {
+                    this.obstacleDrawer.AddPrimitives(obstacleColor, obstacleTris);
+                }
+            }
+        }
+        private void PaintConnections()
+        {
+            this.connectionDrawer.Clear(connectionColor);
+
+            var conns = this.PathFinderDescription.Input.GetConnections();
+
+            foreach (var conn in conns)
+            {
+                var arclines = Line3D.CreateArc(conn.Start, conn.End, 0.25f, 8);
+                this.connectionDrawer.AddPrimitives(connectionColor, arclines);
+
+                var cirlinesF = Line3D.CreateCircle(conn.Start, conn.Radius, 32);
+                this.connectionDrawer.AddPrimitives(connectionColor, cirlinesF);
+
+                if (conn.Direction == 1)
+                {
+                    var cirlinesT = Line3D.CreateCircle(conn.End, conn.Radius, 32);
+                    this.connectionDrawer.AddPrimitives(connectionColor, cirlinesT);
+                }
+
+                this.connectionDrawer.Visible = true;
+            }
         }
 
         private void UpdateGraphDebug(AgentType agent)

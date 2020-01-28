@@ -63,6 +63,16 @@ namespace Engine
         protected ModularSceneryLevels Levels { get; set; }
 
         /// <summary>
+        /// First level
+        /// </summary>
+        public ModularSceneryLevel FirstLevel
+        {
+            get
+            {
+                return this.Levels.Levels.FirstOrDefault();
+            }
+        }
+        /// <summary>
         /// Current level
         /// </summary>
         public ModularSceneryLevel CurrentLevel { get; set; }
@@ -122,18 +132,6 @@ namespace Engine
         }
 
         /// <summary>
-        /// Start scenery
-        /// </summary>
-        public async Task Start()
-        {
-            await this.InitializeParticles();
-
-            this.CurrentLevel = this.Levels.Levels[0];
-
-            await this.LoadLevel(this.CurrentLevel);
-        }
-
-        /// <summary>
         /// Loads the level by name
         /// </summary>
         /// <param name="levelName">Level name</param>
@@ -153,7 +151,8 @@ namespace Engine
             this.objects.Clear();
             this.entities.Clear();
             this.assetMap = null;
-            this.particleManager.Clear();
+            this.particleManager?.Clear();
+            this.particleDescriptors.Clear();
 
             //Find the level
             var level = this.Levels.Levels
@@ -212,6 +211,7 @@ namespace Engine
         {
             ModelContent content = LoadModelContent();
 
+            await this.InitializeParticles();
             await this.InitializeAssets(level, content);
             await this.InitializeObjects(level, content);
 
@@ -224,7 +224,7 @@ namespace Engine
         /// </summary>
         private async Task InitializeParticles()
         {
-            if (this.Levels.ParticleSystems != null && this.Levels.ParticleSystems.Length > 0)
+            if (this.Levels.ParticleSystems?.Any() == true)
             {
                 this.particleManager = await this.Scene.AddComponentParticleManager(
                     new ParticleManagerDescription()

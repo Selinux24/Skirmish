@@ -81,18 +81,32 @@ namespace Engine.PathFinding
         /// <param name="minh">Minimum height</param>
         /// <param name="maxh">Maximum height</param>
         /// <param name="area">Area type</param>
-        public void AddArea(IEnumerable<Vector3> verts, int nverts, float minh, float maxh, GraphAreaTypes area)
+        /// <returns>Returns the area id</returns>
+        public int AddArea(IEnumerable<Vector3> verts, int nverts, float minh, float maxh, GraphAreaTypes area)
         {
-            if (areas.Count >= MaxAreas) return;
+            if (areas.Count >= MaxAreas) return -1;
 
-            areas.Add(new GraphArea
+            var graphArea = new GraphArea
             {
                 Vertices = verts?.ToArray(),
                 VertexCount = nverts,
                 MinHeight = minh,
                 MaxHeight = maxh,
                 AreaType = area,
-            });
+            };
+
+            areas.Add(graphArea);
+
+            return graphArea.Id;
+        }
+        /// <summary>
+        /// Gets an area by id
+        /// </summary>
+        /// <param name="id">Area id</param>
+        /// <returns>Returns an area</returns>
+        public IGraphArea GetArea(int id)
+        {
+            return areas.FirstOrDefault(a => a.Id == id);
         }
         /// <summary>
         /// Deletes area by id
@@ -109,6 +123,13 @@ namespace Engine.PathFinding
         public IEnumerable<IGraphArea> GetAreas()
         {
             return areas.ToArray();
+        }
+        /// <summary>
+        /// Clears all areas
+        /// </summary>
+        public void ClearAreas()
+        {
+            areas.Clear();
         }
         /// <summary>
         /// Gets the area count
@@ -128,11 +149,12 @@ namespace Engine.PathFinding
         /// <param name="bidir">Connection direction</param>
         /// <param name="area">Area type</param>
         /// <param name="flags">Area flags</param>
-        public void AddConnection(Vector3 spos, Vector3 epos, float rad, int bidir, GraphConnectionAreaTypes area, GraphConnectionFlagTypes flags)
+        /// <returns>Returns the connection id</returns>
+        public int AddConnection(Vector3 spos, Vector3 epos, float rad, int bidir, GraphConnectionAreaTypes area, GraphConnectionFlagTypes flags)
         {
-            if (connections.Count >= MaxConnections) return;
+            if (connections.Count >= MaxConnections) return -1;
 
-            connections.Add(new GraphConnection
+            var connection = new GraphConnection
             {
                 Radius = rad,
                 Direction = bidir,
@@ -140,7 +162,20 @@ namespace Engine.PathFinding
                 FlagTypes = flags,
                 Start = spos,
                 End = epos,
-            });
+            };
+
+            connections.Add(connection);
+
+            return connection.Id;
+        }
+        /// <summary>
+        /// Gets a connection by id
+        /// </summary>
+        /// <param name="id">Connection id</param>
+        /// <returns>Returns a connection</returns>
+        public IGraphConnection GetConnection(int id)
+        {
+            return connections.FirstOrDefault(c => c.Id == id);
         }
         /// <summary>
         /// Deletes a connection by id
@@ -157,6 +192,13 @@ namespace Engine.PathFinding
         public IEnumerable<IGraphConnection> GetConnections()
         {
             return connections.ToArray();
+        }
+        /// <summary>
+        /// Clears all connections
+        /// </summary>
+        public void ClearConnections()
+        {
+            connections.Clear();
         }
         /// <summary>
         /// Gets the connection count
