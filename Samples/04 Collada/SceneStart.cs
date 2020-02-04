@@ -34,6 +34,13 @@ namespace Collada
         private readonly Manipulator3D emitterPosition = new Manipulator3D();
         private readonly Manipulator3D listenerPosition = new Manipulator3D();
 
+        private bool userInterfaceInitialized = false;
+        private Guid userInterfaceId = Guid.NewGuid();
+        private bool gameAssetsInitialized = false;
+        private bool gameAssetsInitializing = false;
+        private Guid gameAssetsId = Guid.NewGuid();
+        private bool gameReady = false;
+
         public SceneStart(Game game) : base(game)
         {
 
@@ -41,20 +48,84 @@ namespace Collada
 
         public override async Task Initialize()
         {
-            await base.Initialize();
+            GameEnvironment.Background = Color.Black;
 
             this.Game.VisibleMouse = false;
             this.Game.LockMouse = false;
 
-            GameEnvironment.Background = Color.Black;
+            await LoadUserInteface();
+        }
+        protected override void GameResourcesLoaded(object sender, GameLoadResourcesEventArgs e)
+        {
+            if (e.Id == userInterfaceId && !userInterfaceInitialized)
+            {
+                userInterfaceInitialized = true;
 
-            await InitializeCursor();
+                SetBackground();
 
-            await InitializeBackGround();
+                this.Camera.Position = Vector3.BackwardLH * 8f;
+                this.Camera.Interest = Vector3.Zero;
 
-            await InitializeControls();
+                PlayAudio();
 
-            InitializeAudio();
+                this.AudioManager.MasterVolume = 1;
+                this.AudioManager.Start();
+
+                return;
+            }
+
+            if (e.Id == gameAssetsId && !gameAssetsInitialized)
+            {
+                gameAssetsInitialized = true;
+
+                SetControlPositions();
+
+                gameReady = true;
+            }
+        }
+        public override void Update(GameTime gameTime)
+        {
+            base.Update(gameTime);
+
+            if (!userInterfaceInitialized)
+            {
+                return;
+            }
+
+            if (!gameAssetsInitialized && !gameAssetsInitializing)
+            {
+                gameAssetsInitializing = true;
+
+                Task.WhenAll(this.LoadGameAssets());
+
+                return;
+            }
+
+            if (!gameReady)
+            {
+                return;
+            }
+
+            UpdateAudioInput(gameTime);
+            UpdateListenerInput(gameTime);
+            UpdateAudio();
+        }
+
+        private async Task LoadUserInteface()
+        {
+            this.userInterfaceInitialized = false;
+
+            await this.Game.LoadResourcesAsync(userInterfaceId,
+                InitializeAudio(),
+                InitializeBackGround());
+        }
+        private async Task LoadGameAssets()
+        {
+            gameAssetsInitialized = false;
+
+            await this.Game.LoadResourcesAsync(gameAssetsId,
+                InitializeCursor(),
+                InitializeControls());
         }
         private async Task InitializeCursor()
         {
@@ -148,7 +219,7 @@ namespace Collada
             };
             this.exitButton = await this.AddComponentSpriteButton(exitButtonDesc, SceneObjectUsages.UI, layerHUD);
         }
-        private void InitializeAudio()
+        private async Task InitializeAudio()
         {
             //Sounds
             for (int i = 0; i < musicList.Length; i++)
@@ -178,23 +249,10 @@ namespace Collada
                 {
                     SoundName = "push",
                 });
+
+            await Task.CompletedTask;
         }
 
-        public override async Task Initialized()
-        {
-            await base.Initialized();
-
-            SetBackground();
-            SetControlPositions();
-
-            this.Camera.Position = Vector3.BackwardLH * 8f;
-            this.Camera.Interest = Vector3.Zero;
-
-            PlayAudio();
-
-            this.AudioManager.MasterVolume = 1;
-            this.AudioManager.Start();
-        }
         private void SetBackground()
         {
             this.backGround.Manipulator.SetScale(1.5f, 1.25f, 1.5f);
@@ -231,14 +289,6 @@ namespace Collada
             this.exitButton.Click += ExitButtonClick;
         }
 
-        public override void Update(GameTime gameTime)
-        {
-            base.Update(gameTime);
-
-            UpdateAudioInput(gameTime);
-            UpdateListenerInput(gameTime);
-            UpdateAudio();
-        }
         private void UpdateAudioInput(GameTime gameTime)
         {
             if (this.Game.Input.KeyJustReleased(Keys.L))

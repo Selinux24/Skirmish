@@ -2,6 +2,7 @@
 using Engine.Common;
 using Engine.Content;
 using SharpDX;
+using System;
 using System.Threading.Tasks;
 
 namespace SceneTest
@@ -42,12 +43,14 @@ namespace SceneTest
             this.Camera.Goto(-10, 8, 20f);
             this.Camera.LookTo(0, 0, 0);
 
-            await this.InitializeFloorAsphalt();
-            await this.InitializeBuildingObelisk();
-            await this.InitializeTree();
-            await this.InitializeSkyEffects();
-            await this.InitializeLights();
-            await this.InitializeDebug();
+            await this.Game.LoadResourcesAsync(Guid.NewGuid(),
+                this.InitializeFloorAsphalt(),
+                this.InitializeBuildingObelisk(),
+                this.InitializeTree(),
+                this.InitializeSkyEffects(),
+                this.InitializeLights(),
+                this.InitializeDebug()
+            );
         }
 
         private async Task InitializeFloorAsphalt()
@@ -179,10 +182,8 @@ namespace SceneTest
             this.bufferDrawer.Visible = false;
         }
 
-        public override async Task Initialized()
+        protected override void GameResourcesLoaded(object sender, GameLoadResourcesEventArgs e)
         {
-            await base.Initialized();
-
             this.buildingObelisks[0].Manipulator.SetPosition(+5, 0, +5);
             this.buildingObelisks[1].Manipulator.SetPosition(+5, 0, -5);
             this.buildingObelisks[2].Manipulator.SetPosition(-5, 0, +5);

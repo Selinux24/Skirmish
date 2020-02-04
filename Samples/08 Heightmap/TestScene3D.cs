@@ -39,7 +39,6 @@ namespace Heightmap
         private readonly float windStep = 0.001f;
         private float windDuration = 0;
 
-        private TextDrawer load = null;
         private TextDrawer stats = null;
         private TextDrawer help = null;
         private TextDrawer help2 = null;
@@ -97,10 +96,10 @@ namespace Heightmap
 
         private readonly Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
 
-        private readonly Dictionary<string, double> initDurationDict = new Dictionary<string, double>();
-        private int initDurationIndex = 0;
-
         private SpriteTexture bufferDrawer = null;
+
+        private Guid assetsId = Guid.NewGuid();
+        private bool gameReady = false;
 
         public TestScene3D(Game game)
             : base(game, SceneModes.ForwardLigthning)
@@ -117,7 +116,7 @@ namespace Heightmap
 
             await InitializeUI();
 
-            List<Task<double>> loadTasks = new List<Task<double>>()
+            List<Task> loadTasks = new List<Task>()
             {
                 InitializeRocks(),
                 InitializeTrees(),
@@ -138,26 +137,7 @@ namespace Heightmap
                 InitializeParticles(),
             };
 
-            int total = loadTasks.Count;
-            float percent = 0;
-            while (loadTasks.Any())
-            {
-                var task = await Task.WhenAny(loadTasks.ToArray());
-
-                loadTasks.Remove(task);
-
-                percent = (1f - ((float)loadTasks.Count / total)) * 100f;
-
-                this.load.Text = $"{percent}%";
-            }
-
-            sw.Stop();
-
-            initDurationDict.Add("TOTAL", initDurationDict.Select(i => i.Value).Sum());
-            initDurationDict.Add("REAL", sw.Elapsed.TotalSeconds);
-
-            initDurationIndex = initDurationDict.Keys.Count - 2;
-            SetLoadText(initDurationIndex);
+            await this.Game.LoadResourcesAsync(assetsId, loadTasks.ToArray());
         }
         private async Task<double> InitializeUI()
         {
@@ -182,20 +162,17 @@ namespace Heightmap
             #region Texts
 
             var title = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
-            this.load = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD);
             this.stats = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD);
             this.help = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD);
             this.help2 = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 11, Color.Orange), SceneObjectUsages.UI, layerHUD);
 
             title.Text = "Heightmap Terrain test";
-            this.load.Text = "";
             this.stats.Text = "";
             this.help.Text = "";
             this.help2.Text = "";
 
             title.Position = Vector2.Zero;
-            this.load.Position = new Vector2(5, title.Top + title.Height + 3);
-            this.stats.Position = new Vector2(5, this.load.Top + this.load.Height + 3);
+            this.stats.Position = new Vector2(5, title.Top + title.Height + 3);
             this.help.Position = new Vector2(5, this.stats.Top + this.stats.Height + 3);
             this.help2.Position = new Vector2(5, this.help.Top + this.help.Height + 3);
 
@@ -710,39 +687,6 @@ namespace Heightmap
             this.bufferDrawer = await this.AddComponentSpriteTexture(desc, SceneObjectUsages.UI, layerEffects);
             this.bufferDrawer.Visible = false;
 
-            await Task.CompletedTask;
-        }
-
-        public override async Task Initialized()
-        {
-            await base.Initialized();
-
-            this.Camera.NearPlaneDistance = near;
-            this.Camera.FarPlaneDistance = far;
-            this.Camera.Position = new Vector3(24, 12, 14);
-            this.Camera.Interest = new Vector3(0, 10, 0);
-            this.Camera.MovementDelta = 45f;
-            this.Camera.SlowMovementDelta = 20f;
-
-            this.skydom.RayleighScattering *= 0.8f;
-            this.skydom.MieScattering *= 0.1f;
-
-            this.TimeOfDay.BeginAnimation(new TimeSpan(8, 55, 00), 1f);
-
-            this.Lights.BaseFogColor = new Color((byte)95, (byte)147, (byte)233) * 0.5f;
-            this.ToggleFog();
-
-            var lanternDesc = SceneLightSpotDescription.Create(this.Camera.Position, this.Camera.Direction, 25f, 100, 10000);
-            this.lantern = new SceneLightSpot("lantern", true, Color.White, Color.White, true, lanternDesc);
-            this.Lights.Add(this.lantern);
-
-            await Task.WhenAll(
-                SetAnimationDictionaries(),
-                SetPositionOverTerrain(),
-                SetDebugInfo());
-
-            await SetPathFindingInfo();
-
             this.lightsVolumeDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(
                 new PrimitiveListDrawerDescription<Line3D>()
                 {
@@ -759,6 +703,38 @@ namespace Heightmap
                     Count = 50000,
                 });
             this.graphDrawer.Visible = false;
+        }
+
+        protected override void GameResourcesLoaded(object sender, GameLoadResourcesEventArgs e)
+        {
+            if (e.Id == assetsId)
+            {
+                this.Camera.NearPlaneDistance = near;
+                this.Camera.FarPlaneDistance = far;
+                this.Camera.Position = new Vector3(24, 12, 14);
+                this.Camera.Interest = new Vector3(0, 10, 0);
+                this.Camera.MovementDelta = 45f;
+                this.Camera.SlowMovementDelta = 20f;
+
+                this.skydom.RayleighScattering *= 0.8f;
+                this.skydom.MieScattering *= 0.1f;
+
+                this.TimeOfDay.BeginAnimation(new TimeSpan(8, 55, 00), 1f);
+
+                this.Lights.BaseFogColor = new Color((byte)95, (byte)147, (byte)233) * 0.5f;
+                this.ToggleFog();
+
+                var lanternDesc = SceneLightSpotDescription.Create(this.Camera.Position, this.Camera.Direction, 25f, 100, 10000);
+                this.lantern = new SceneLightSpot("lantern", true, Color.White, Color.White, true, lanternDesc);
+                this.Lights.Add(this.lantern);
+
+                Task.WhenAll(
+                    SetAnimationDictionaries(),
+                    SetPositionOverTerrain(),
+                    SetDebugInfo());
+
+                Task.WhenAll(SetPathFindingInfo());
+            }
         }
         private async Task SetAnimationDictionaries()
         {
@@ -1195,6 +1171,11 @@ namespace Heightmap
 
             base.Update(gameTime);
 
+            if (!gameReady)
+            {
+                return;
+            }
+
             bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
 
             //Input driven
@@ -1350,8 +1331,6 @@ namespace Heightmap
             this.UpdateInputFog();
 
             this.UpdateInputTimeOfDay(gameTime);
-
-            this.UpdateInputLoadText();
         }
         private void UpdateInputWind()
         {
@@ -1438,24 +1417,6 @@ namespace Heightmap
             {
                 this.time += gameTime.ElapsedSeconds * 0.1f;
                 this.TimeOfDay.SetTimeOfDay(this.time % 1f, false);
-            }
-        }
-        private void UpdateInputLoadText()
-        {
-            if (this.Game.Input.KeyJustReleased(Keys.Up))
-            {
-                initDurationIndex++;
-                initDurationIndex = initDurationIndex < 0 ? 0 : initDurationIndex;
-                initDurationIndex %= initDurationDict.Keys.Count;
-                SetLoadText(initDurationIndex);
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.Down))
-            {
-                initDurationIndex--;
-                initDurationIndex = initDurationIndex < 0 ? initDurationDict.Keys.Count - 1 : initDurationIndex;
-                initDurationIndex %= initDurationDict.Keys.Count;
-                SetLoadText(initDurationIndex);
             }
         }
         private void UpdateInputBuffers(bool shift)
@@ -1709,18 +1670,12 @@ namespace Heightmap
 
             this.stats.Text = this.Game.RuntimeText;
         }
-        private void SetLoadText(int index)
-        {
-            var keys = initDurationDict.Keys.ToArray();
-            if (index >= 0 && index < keys.Length)
-            {
-                this.load.Text = string.Format("{0}: {1}", keys[index], initDurationDict[keys[index]]);
-            }
-        }
 
         public override void NavigationGraphUpdated()
         {
             this.RequestGraphUpdate(0.2f);
+
+            gameReady = true;
         }
     }
 }

@@ -887,7 +887,7 @@ namespace Engine.Common
         /// <summary>
         /// Creates and populates vertex, instancing and index buffers
         /// </summary>
-        public void CreateBuffers()
+        public void CreateBuffers(IProgress<float> progress)
         {
             if (allocating)
             {
@@ -900,25 +900,26 @@ namespace Engine.Common
             {
                 Console.WriteLine($"Creating buffers");
 
-                CreateVertexBuffers();
-                CreateInstancingBuffers();
-                CreateIndexBuffers();
+                CreateVertexBuffers(progress);
+                CreateInstancingBuffers(progress);
+                CreateIndexBuffers(progress);
 
                 Console.WriteLine($"Buffers created");
 
                 Initilialized = true;
             }
-            else
+
+            if (IsDirty)
             {
                 Console.WriteLine($"Processing descriptor requests");
 
-                DoProcessRequest();
+                DoProcessRequest(progress);
 
                 Console.WriteLine($"Descriptor requests processed");
 
                 Console.WriteLine($"Reallocating buffers");
 
-                DoReallocation();
+                DoReallocation(progress);
 
                 Console.WriteLine($"Buffers reallocated");
             }
@@ -929,8 +930,11 @@ namespace Engine.Common
         /// <summary>
         /// Creates the vertex buffers
         /// </summary>
-        private void CreateVertexBuffers()
+        private void CreateVertexBuffers(IProgress<float> progress)
         {
+            float total = this.vertexData.Count;
+            float current = 0;
+
             foreach (var descriptor in this.vertexData)
             {
                 int slot = vertexBuffers.Count;
@@ -963,6 +967,8 @@ namespace Engine.Common
                 descriptor.ReallocationNeeded = false;
 
                 Console.WriteLine($"Created {name} and binding. Size {descriptor.Data.Count()}");
+
+                progress?.Report(++current / total);
             }
 
             this.vertexBufferAllocationNeeded = false;
@@ -970,7 +976,7 @@ namespace Engine.Common
         /// <summary>
         /// Creates the instancing buffer
         /// </summary>
-        private void CreateInstancingBuffers()
+        private void CreateInstancingBuffers(IProgress<float> progress)
         {
             int instances = this.TotalInstances;
             if (instances <= 0)
@@ -999,12 +1005,17 @@ namespace Engine.Common
             }
 
             Console.WriteLine($"Created InstancingBuffer and binding. Size {data.Count()}");
+
+            progress?.Report(1);
         }
         /// <summary>
         /// Creates index buffers
         /// </summary>
-        private void CreateIndexBuffers()
+        private void CreateIndexBuffers(IProgress<float> progress)
         {
+            float total = this.indexData.Count;
+            float current = 0;
+
             foreach (var descriptor in this.indexData)
             {
                 int slot = indexBuffers.Count;
@@ -1019,6 +1030,8 @@ namespace Engine.Common
                 descriptor.ReallocationNeeded = false;
 
                 Console.WriteLine($"Created {name}. Size {descriptor.Data.Count()}");
+
+                progress?.Report(++current / total);
             }
 
             this.indexBufferAllocationNeeded = false;
@@ -1027,14 +1040,20 @@ namespace Engine.Common
         /// <summary>
         /// Do descriptor request processing
         /// </summary>
-        private void DoProcessRequest()
+        private void DoProcessRequest(IProgress<float> progress)
         {
             //Copy request collection
             var toAssign = this.requestedDescriptors.ToArray();
+            toAssign = toAssign.Where(r => !r.Processed).ToArray();
 
-            foreach (var request in toAssign.Where(r => !r.Processed))
+            float total = toAssign.Length;
+            float current = 0;
+
+            foreach (var request in toAssign)
             {
                 request.Update(this);
+
+                progress?.Report(++current / total);
             }
 
             Monitor.Enter(this.requestedDescriptors);
@@ -1045,23 +1064,23 @@ namespace Engine.Common
         /// <summary>
         /// Does the reallocation of the internal buffers in the device
         /// </summary>
-        private void DoReallocation()
+        private void DoReallocation(IProgress<float> progress)
         {
             if (vertexBufferAllocationNeeded)
             {
-                bool reallocateInstances = ReallocateVertexData();
+                bool reallocateInstances = ReallocateVertexData(progress);
 
                 vertexBufferAllocationNeeded = false;
 
                 if (reallocateInstances)
                 {
-                    ReallocateInstances();
+                    ReallocateInstances(progress);
                 }
             }
 
             if (indexBufferAllocationNeeded)
             {
-                ReallocateIndexData();
+                ReallocateIndexData(progress);
 
                 indexBufferAllocationNeeded = false;
             }
@@ -1070,18 +1089,18 @@ namespace Engine.Common
         /// Reallocates the vertex data
         /// </summary>
         /// <param name="reallocateInstances">Returns wether instance reallocation is necessary</param>
-        private bool ReallocateVertexData()
+        private bool ReallocateVertexData(IProgress<float> progress)
         {
             bool reallocateInstances = false;
 
-            for (int i = 0; i < this.vertexData.Count; i++)
-            {
-                var descriptor = this.vertexData[i];
+            var dirtyList = this.vertexData.Where(v => v.Dirty).ToArray();
 
-                if (!descriptor.Dirty)
-                {
-                    continue;
-                }
+            float total = dirtyList.Length;
+            float current = 0;
+
+            for (int i = 0; i < dirtyList.Length; i++)
+            {
+                var descriptor = dirtyList[i];
 
                 if (descriptor.Allocated)
                 {
@@ -1124,6 +1143,8 @@ namespace Engine.Common
                 descriptor.ReallocationNeeded = false;
 
                 reallocateInstances = true;
+
+                progress?.Report(++current / total);
             }
 
             return reallocateInstances;
@@ -1131,7 +1152,7 @@ namespace Engine.Common
         /// <summary>
         /// Reallocates the instance data
         /// </summary>
-        private void ReallocateInstances()
+        private void ReallocateInstances(IProgress<float> progress)
         {
             if (instancingBufferOffset >= 0)
             {
@@ -1194,20 +1215,22 @@ namespace Engine.Common
 
                 descriptor.AllocatedInstancing = true;
             }
+
+            progress?.Report(1);
         }
         /// <summary>
         /// Reallocates the index data
         /// </summary>
-        private void ReallocateIndexData()
+        private void ReallocateIndexData(IProgress<float> progress)
         {
-            for (int i = 0; i < this.indexData.Count; i++)
-            {
-                var descriptor = this.indexData[i];
+            var dirtyList = this.indexData.Where(v => v.Dirty).ToArray();
 
-                if (!descriptor.Dirty)
-                {
-                    continue;
-                }
+            float total = dirtyList.Length;
+            float current = 0;
+
+            for (int i = 0; i < dirtyList.Length; i++)
+            {
+                var descriptor = dirtyList[i];
 
                 //Recreate the buffer
                 string name = $"IndexBuffer.{i}.{(descriptor.Dynamic ? "dynamic" : "static")}";
@@ -1234,6 +1257,8 @@ namespace Engine.Common
                 descriptor.AllocatedSize = descriptor.Data.Count();
                 descriptor.Allocated = true;
                 descriptor.ReallocationNeeded = false;
+
+                progress?.Report(++current / total);
             }
         }
 
@@ -1263,14 +1288,14 @@ namespace Engine.Common
         /// <param name="slot">Slot</param>
         public bool SetIndexBuffer(int slot)
         {
-            if (!Initilialized)
+            if (slot < 0)
             {
-                Console.WriteLine("Attempt to set index buffers to Input Assembler with no initialized manager");
                 return false;
             }
 
-            if (slot < 0)
+            if (!Initilialized)
             {
+                Console.WriteLine("Attempt to set index buffers to Input Assembler with no initialized manager");
                 return false;
             }
 
@@ -1292,14 +1317,14 @@ namespace Engine.Common
         /// <param name="topology">Topology</param>
         public bool SetInputAssembler(EngineEffectTechnique technique, int slot, Topology topology)
         {
-            if (!Initilialized)
+            if (slot < 0)
             {
-                Console.WriteLine("Attempt to set technique to Input Assembler with no initialized manager");
                 return false;
             }
 
-            if (slot < 0)
+            if (!Initilialized)
             {
+                Console.WriteLine("Attempt to set technique to Input Assembler with no initialized manager");
                 return false;
             }
 
@@ -1363,6 +1388,16 @@ namespace Engine.Common
         /// <param name="data">Data to write</param>
         public void WriteBuffer<T>(int slot, int offset, IEnumerable<T> data) where T : struct, IVertexData
         {
+            if (slot < 0)
+            {
+                return;
+            }
+
+            if (offset < 0)
+            {
+                return;
+            }
+
             if (!Initilialized)
             {
                 Console.WriteLine($"Attempt to write vertex data in slot {slot} with no initialized manager");
@@ -1390,6 +1425,16 @@ namespace Engine.Common
         /// <param name="data">Data to write</param>
         public void WriteBuffer(int slot, int offset, IEnumerable<uint> data)
         {
+            if (slot < 0)
+            {
+                return;
+            }
+
+            if (offset < 0)
+            {
+                return;
+            }
+
             if (!Initilialized)
             {
                 Console.WriteLine($"Attempt to write index data in slot {slot} with no initialized manager");

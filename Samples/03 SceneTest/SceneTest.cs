@@ -63,6 +63,8 @@ namespace SceneTest
         private bool drawDrawVolumes = false;
         private bool drawCullVolumes = false;
 
+        private Guid loadId = Guid.NewGuid();
+
         public SceneTest(Game game) : base(game)
         {
 
@@ -79,7 +81,7 @@ namespace SceneTest
             this.Camera.SlowMovementDelta = 100f;
             this.Camera.MovementDelta = 500f;
 
-            await Task.WhenAll(new Task[]
+            var taskList = new Task[]
             {
                 InitializeSkyEffects(),
                 InitializeCursor(),
@@ -97,7 +99,9 @@ namespace SceneTest
                 InitializeParticles(),
                 InitializeSpriteButtons(),
                 InitializaDebug(),
-            });
+            };
+
+            await this.Game.LoadResourcesAsync(loadId, taskList);
 
             this.TimeOfDay.BeginAnimation(new TimeSpan(9, 00, 00), 0.1f);
         }
@@ -760,14 +764,15 @@ namespace SceneTest
             this.lightsVolumeDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(desc);
         }
 
-        public override async Task Initialized()
+        protected override void GameResourcesLoaded(object sender, GameLoadResourcesEventArgs e)
         {
-            await base.Initialized();
+            if (loadId == e.Id)
+            {
+                this.Camera.Goto(-20, 10, -40f);
+                this.Camera.LookTo(0, 0, 0);
 
-            this.Camera.Goto(-20, 10, -40f);
-            this.Camera.LookTo(0, 0, 0);
-
-            this.RefreshUI();
+                this.RefreshUI();
+            }
         }
         private void RefreshUI()
         {
@@ -966,7 +971,7 @@ namespace SceneTest
             this.Game.Input.LockMouse = !cursor.Visible;
         }
 
-        protected override void Resized(object sender, EventArgs e)
+        protected override void GameGraphicsResized(object sender, EventArgs e)
         {
             this.RefreshUI();
         }

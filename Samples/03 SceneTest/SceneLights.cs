@@ -50,14 +50,16 @@ namespace SceneTest
             this.Camera.Goto(-10, 8, 20f);
             this.Camera.LookTo(0, 0, 0);
 
-            await this.InitializeFloorAsphalt();
-            await this.InitializeBuildingObelisk();
-            await this.InitializeTree();
-            await this.InitializeEmitter();
-            await this.InitializeLanterns();
-            await this.InitializeLights();
-            await this.InitializeVolumeDrawer();
-            await this.InitializeBufferDrawer();
+            await this.Game.LoadResourcesAsync(Guid.NewGuid(),
+                this.InitializeFloorAsphalt(),
+                this.InitializeBuildingObelisk(),
+                this.InitializeTree(),
+                this.InitializeEmitter(),
+                this.InitializeLanterns(),
+                this.InitializeLights(),
+                this.InitializeVolumeDrawer(),
+                this.InitializeBufferDrawer()
+            );
         }
 
         private async Task InitializeFloorAsphalt()
@@ -246,10 +248,8 @@ namespace SceneTest
             this.bufferDrawer.Visible = false;
         }
 
-        public override async Task Initialized()
+        protected override void GameResourcesLoaded(object sender, GameLoadResourcesEventArgs e)
         {
-            await base.Initialized();
-
             this.buildingObelisks[0].Manipulator.SetPosition(+5, 0, +5);
             this.buildingObelisks[1].Manipulator.SetPosition(+5, 0, -5);
             this.buildingObelisks[2].Manipulator.SetPosition(-5, 0, +5);

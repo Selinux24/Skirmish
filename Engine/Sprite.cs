@@ -212,6 +212,7 @@ namespace Engine
                 this.BufferManager?.RemoveIndexData(this.indexBuffer);
             }
         }
+
         /// <summary>
         /// Update
         /// </summary>

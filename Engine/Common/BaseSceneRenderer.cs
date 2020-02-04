@@ -296,7 +296,9 @@ namespace Engine.Common
             //Update active components
             Stopwatch swUpdate = Stopwatch.StartNew();
             int uIndex = 0;
-            scene.GetComponents<IUpdatable>(c => c.Active)
+            scene.GetComponents()
+                .Where(c => c.Active)
+                .OfType<IUpdatable>()
                 .ToList().ForEach(c =>
                 {
                     Stopwatch swCUpdate = Stopwatch.StartNew();
@@ -561,7 +563,7 @@ namespace Engine.Common
 
             //Objects that cast shadows
             stopwatch.Restart();
-            var shadowObjs = scene.GetComponents(c => c.Visible && c.CastShadow);
+            var shadowObjs = scene.GetComponents().Where(c => c.Visible && c.CastShadow);
             stopwatch.Stop();
             dict.Add($"DoDirectionalShadowMapping Getting components", stopwatch.Elapsed.TotalMilliseconds);
 
@@ -575,7 +577,7 @@ namespace Engine.Common
             if (toCullShadowObjs.Any())
             {
                 //All objects suitable for culling
-                bool allCullingObjects = shadowObjs.Count == toCullShadowObjs.Count();
+                bool allCullingObjects = shadowObjs.Count() == toCullShadowObjs.Count();
                 var camVolume = this.DrawContext.CameraVolume;
 
                 stopwatch.Restart();
@@ -660,7 +662,7 @@ namespace Engine.Common
 
             //Draw components if drop shadow (opaque)
             stopwatch.Restart();
-            var shadowObjs = scene.GetComponents(c => c.Visible && c.CastShadow);
+            var shadowObjs = scene.GetComponents().Where(c => c.Visible && c.CastShadow);
             stopwatch.Stop();
             dict.Add($"DoPointShadowMapping Getting components", stopwatch.Elapsed.TotalMilliseconds);
 
@@ -672,7 +674,7 @@ namespace Engine.Common
             var toCullShadowObjs = shadowObjs.OfType<ICullable>();
 
             //All objects suitable for culling
-            bool allCullingObjects = shadowObjs.Count == toCullShadowObjs.Count();
+            bool allCullingObjects = shadowObjs.Count() == toCullShadowObjs.Count();
 
             var graphics = this.Game.Graphics;
             int assigned = 0;
@@ -756,7 +758,7 @@ namespace Engine.Common
 
             //Draw components if drop shadow (opaque)
             stopwatch.Restart();
-            var shadowObjs = scene.GetComponents(c => c.Visible && c.CastShadow);
+            var shadowObjs = scene.GetComponents().Where(c => c.Visible && c.CastShadow);
             stopwatch.Stop();
             dict.Add($"DoSpotShadowMapping Getting components", stopwatch.Elapsed.TotalMilliseconds);
 
@@ -768,7 +770,7 @@ namespace Engine.Common
             var toCullShadowObjs = shadowObjs.OfType<ICullable>();
 
             //All objects suitable for culling
-            bool allCullingObjects = shadowObjs.Count == toCullShadowObjs.Count();
+            bool allCullingObjects = shadowObjs.Count() == toCullShadowObjs.Count();
 
             var graphics = this.Game.Graphics;
             int assigned = 0;

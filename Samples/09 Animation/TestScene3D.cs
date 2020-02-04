@@ -87,6 +87,9 @@ namespace Animation
         private readonly Dictionary<string, AnimationPlan> soldierPaths = new Dictionary<string, AnimationPlan>();
         private readonly Dictionary<string, AnimationPlan> ratPaths = new Dictionary<string, AnimationPlan>();
 
+        private Guid assetsId = Guid.NewGuid();
+        private bool gameReady = false;
+
         public TestScene3D(Game game)
             : base(game, SceneModes.ForwardLigthning)
         {
@@ -95,19 +98,31 @@ namespace Animation
 
         public override async Task Initialize()
         {
-            await this.InitializeLadder();
-            await this.InitializeLadder2();
-            await this.InitializeSoldier();
-            await this.InitializeRat();
-            await this.InitializeDoors();
-            await this.InitializeJails();
-            await this.InitializeFloor();
+            await this.Game.LoadResourcesAsync(assetsId,
+                this.InitializeLadder(),
+                this.InitializeLadder2(),
+                this.InitializeSoldier(),
+                this.InitializeRat(),
+                this.InitializeDoors(),
+                this.InitializeJails(),
+                this.InitializeFloor(),
 
-            await this.InitializeUI();
-            await this.InitializeEnvironment();
+                this.InitializeUI(),
 
-            await this.InitializeDebug();
+                this.InitializeDebug()
+                );
         }
+        protected override void GameResourcesLoaded(object sender, GameLoadResourcesEventArgs e)
+        {
+            if (e.Id == assetsId)
+            {
+                InitializeEnvironment();
+
+                gameReady = true;
+            }
+        }
+
+
         private async Task InitializeUI()
         {
             var title = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
@@ -445,8 +460,13 @@ namespace Animation
 
             this.animObjects.Add(doors);
         }
+        private async Task InitializeDebug()
+        {
+            this.itemTris = await this.AddComponentPrimitiveListDrawer<Triangle>(new PrimitiveListDrawerDescription<Triangle>() { Count = 5000, Color = itemTrisColor });
+            this.itemLines = await this.AddComponentPrimitiveListDrawer<Line3D>(new PrimitiveListDrawerDescription<Line3D>() { Count = 1000, Color = itemLinesColor });
+        }
 
-        private async Task InitializeEnvironment()
+        private void InitializeEnvironment()
         {
             GameEnvironment.Background = Color.CornflowerBlue;
 
@@ -471,13 +491,6 @@ namespace Animation
             this.Camera.FarPlaneDistance = 500;
             this.Camera.Goto(0, playerHeight, -12f);
             this.Camera.LookTo(0, playerHeight * 0.6f, 0);
-
-            await Task.CompletedTask;
-        }
-        private async Task InitializeDebug()
-        {
-            this.itemTris = await this.AddComponentPrimitiveListDrawer<Triangle>(new PrimitiveListDrawerDescription<Triangle>() { Count = 5000, Color = itemTrisColor });
-            this.itemLines = await this.AddComponentPrimitiveListDrawer<Line3D>(new PrimitiveListDrawerDescription<Line3D>() { Count = 1000, Color = itemLinesColor });
         }
 
         public override void Update(GameTime gameTime)
@@ -485,6 +498,11 @@ namespace Animation
             if (this.Game.Input.KeyJustReleased(Keys.Escape))
             {
                 this.Game.Exit();
+            }
+
+            if (!gameReady)
+            {
+                return;
             }
 
             bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);

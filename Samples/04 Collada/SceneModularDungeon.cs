@@ -23,6 +23,7 @@ namespace Collada
 
         private TextDrawer fps = null;
         private TextDrawer info = null;
+        private SpriteProgressBar progressBar = null;
 
         private readonly Color ambientDown = new Color(127, 127, 127, 255);
         private readonly Color ambientUp = new Color(137, 116, 104, 255);
@@ -45,7 +46,7 @@ namespace Collada
         private bool ratActive = false;
         private float ratTime = 5f;
         private readonly float nextRatTime = 3f;
-        private Vector3[] ratHoles = null;
+        private Vector3[] ratHoles = new Vector3[] { };
 
         private PrimitiveListDrawer<Triangle> selectedItemDrawer = null;
         private ModularSceneryItem selectedItem = null;
@@ -80,7 +81,15 @@ namespace Collada
         private string ratSoundTalk = null;
         private GameAudioEffect ratSoundInstance = null;
 
-        private bool gameRuning = false;
+        private bool userInterfaceInitialized = false;
+        private Guid userInterfaceId = Guid.NewGuid();
+        private bool gameAssetsInitialized = false;
+        private bool gameAssetsInitializing = false;
+        private Guid gameAssetsId = Guid.NewGuid();
+        private bool levelInitialized = false;
+        private bool levelInitializing = false;
+        private Guid levelId = Guid.NewGuid();
+        private bool gameReady = false;
 
         private AgentType CurrentAgent
         {
@@ -107,19 +116,236 @@ namespace Collada
             this.Game.VisibleMouse = false;
             this.Game.LockMouse = true;
 #endif
-            await this.InitializeUI();
-
-            await Task.WhenAll(
-                this.InitializeDebug(),
-                this.InitializeDungeon(),
-                this.InitializePlayer(),
-                this.InitializeNPCs(),
-                this.InitializeAudio());
-
-            await this.InitializeEnvironment();
-            await this.InitializeLights();
+            await this.Game.LoadResourcesAsync(userInterfaceId, this.InitializeUI());
         }
-        private async Task InitializeEnvironment()
+        protected override void GameResourcesLoaded(object sender, GameLoadResourcesEventArgs e)
+        {
+            if (e.Id == userInterfaceId && !userInterfaceInitialized)
+            {
+                userInterfaceInitialized = true;
+
+                return;
+            }
+
+            if (e.Id == gameAssetsId && !gameAssetsInitialized)
+            {
+                gameAssetsInitialized = true;
+
+                this.InitializeEnvironment();
+                this.InitializeLights();
+
+                this.StartCamera();
+
+                this.AudioManager.Start();
+            }
+
+            if (e.Id == levelId && !levelInitialized)
+            {
+                levelInitialized = true;
+            }
+        }
+        public override void OnReportProgress(float value)
+        {
+            if (progressBar != null)
+            {
+                progressBar.ProgressValue = value;
+            }
+        }
+        public override async Task UpdateNavigationGraph()
+        {
+            if (this.scenery?.CurrentLevel == null)
+            {
+                return;
+            }
+
+            var fileName = this.scenery.CurrentLevel.Name + nmFile;
+
+            if (File.Exists(fileName))
+            {
+                try
+                {
+                    this.NavigationGraphUpdating();
+
+                    var graph = await this.PathFinderDescription.Load(fileName);
+
+                    this.SetNavigationGraph(graph);
+
+                    this.NavigationGraphUpdated();
+                }
+                catch (EngineException ex)
+                {
+                    Console.WriteLine($"Bad graph file. Generating navigation mesh. {ex.Message}");
+                }
+            }
+            else
+            {
+                await base.UpdateNavigationGraph();
+
+                await this.PathFinderDescription.Save(fileName, this.NavigationGraph);
+            }
+        }
+        public override void NavigationGraphUpdated()
+        {
+            if (!gameAssetsInitialized)
+            {
+                return;
+            }
+
+            //Update active paths with the new graph configuration
+            if (this.ratController.HasPath)
+            {
+                Vector3 from = this.rat.Manipulator.Position;
+                Vector3 to = this.ratController.Last;
+
+                CalcPath(this.ratAgentType, from, to);
+            }
+
+            this.UpdateGraphDebug(this.CurrentAgent);
+        }
+        public override void Update(GameTime gameTime)
+        {
+            base.Update(gameTime);
+
+            if (this.Game.Input.KeyJustReleased(Keys.Escape))
+            {
+                this.Game.SetScene<SceneStart>();
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.R))
+            {
+                this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
+                    SceneModes.DeferredLightning :
+                    SceneModes.ForwardLigthning);
+            }
+
+            if (!userInterfaceInitialized)
+            {
+                return;
+            }
+
+            this.fps.Text = this.Game.RuntimeText;
+            this.info.Text = string.Format("{0}", this.GetRenderMode());
+
+            if (!gameAssetsInitialized && !gameAssetsInitializing)
+            {
+                gameAssetsInitializing = true;
+
+                Task.WhenAll(this.InitializeAssets());
+
+                return;
+            }
+
+            if (!gameAssetsInitialized)
+            {
+                return;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.B))
+            {
+                this.Game.LoadResources(levelId, this.ChangeToLevel("Lvl1"));
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.N))
+            {
+                this.Game.LoadResources(levelId, this.ChangeToLevel("Lvl2"));
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.M))
+            {
+                this.Game.LoadResources(levelId, this.ChangeToLevel("Lvl3"));
+            }
+
+            if (!levelInitialized && !levelInitializing)
+            {
+                levelInitializing = true;
+
+                this.Game.LoadResources(levelId, this.ChangeToLevel("Lvl1"));
+            }
+
+            if (!gameReady)
+            {
+                return;
+            }
+
+            this.UpdateRatController(gameTime);
+            this.UpdateEntities();
+            this.UpdateWind();
+
+            this.UpdateDebugInput();
+            this.UpdateGraphInput();
+            this.UpdateRatInput();
+            this.UpdatePlayerInput();
+            this.UpdateEntitiesInput();
+
+            this.UpdateSelection();
+        }
+
+        private async Task InitializeUI()
+        {
+            var title = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
+            title.Text = "Collada Modular Dungeon Scene";
+            title.Position = Vector2.Zero;
+
+            this.fps = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.fps.Text = null;
+            this.fps.Position = new Vector2(0, 24);
+
+            this.info = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.info.Text = null;
+            this.info.Position = new Vector2(0, 48);
+
+            var spDesc = new SpriteDescription()
+            {
+                Name = "Back Panel",
+                AlphaEnabled = true,
+                Width = this.Game.Form.RenderWidth,
+                Height = this.info.Top + this.info.Height + 3,
+                Color = new Color4(0, 0, 0, 0.75f),
+            };
+
+            await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+
+            this.messages = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 48, Color.Red, Color.DarkRed), SceneObjectUsages.UI, layerHUD);
+            this.messages.Text = null;
+            this.messages.Position = new Vector2(0, 0);
+            this.messages.Visible = false;
+
+            var drawerDesc = new PrimitiveListDrawerDescription<Triangle>()
+            {
+                Name = "Seleced Items Drawer",
+                AlphaEnabled = true,
+                CastShadow = false,
+                Count = 50000,
+            };
+            this.selectedItemDrawer = await this.AddComponentPrimitiveListDrawer<Triangle>(drawerDesc, SceneObjectUsages.UI, layerHUD);
+            this.selectedItemDrawer.Visible = true;
+
+            var pbDesc = new SpriteProgressBarDescription
+            {
+                Name = "Progress Bar",
+                Top = this.Game.Form.RenderHeight - 20,
+                Left = 100,
+                Width = this.Game.Form.RenderWidth - 200,
+                Height = 10,
+                BaseColor = Color.Transparent,
+                ProgressColor = Color.Green,
+            };
+            this.progressBar = await this.AddComponentSpriteProgressBar(pbDesc, SceneObjectUsages.UI, layerHUD);
+        }
+        private async Task InitializeAssets()
+        {
+            List<Task> tasks = new List<Task>
+            {
+                InitializeDebug(),
+                InitializeDungeon(),
+                InitializePlayer(),
+                InitializeNPCs(),
+                InitializeAudio(),
+            };
+
+            await this.Game.LoadResourcesAsync(gameAssetsId, tasks.ToArray());
+        }
+        private void InitializeEnvironment()
         {
             //Navigation settings
             var nmsettings = BuildSettings.Default;
@@ -144,10 +370,8 @@ namespace Collada
             var nminput = new InputGeometry(GetTrianglesForNavigationGraph);
 
             this.PathFinderDescription = new PathFinderDescription(nmsettings, nminput);
-
-            await Task.CompletedTask;
         }
-        private async Task InitializeLights()
+        private void InitializeLights()
         {
             this.Lights.HemisphericLigth = new SceneLightHemispheric("hemi_light", this.ambientDown, this.ambientUp, true);
             this.Lights.KeyLight.Enabled = false;
@@ -162,47 +386,6 @@ namespace Collada
 
             this.torch = new SceneLightPoint("player_torch", true, this.agentTorchLight, this.agentTorchLight, true, desc);
             this.Lights.Add(torch);
-
-            await Task.CompletedTask;
-        }
-        private async Task InitializeUI()
-        {
-            var title = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
-            title.Text = "Collada Modular Dungeon Scene";
-            title.Position = Vector2.Zero;
-
-            this.fps = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            this.fps.Text = null;
-            this.fps.Position = new Vector2(0, 24);
-
-            this.info = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            this.info.Text = null;
-            this.info.Position = new Vector2(0, 48);
-
-            var spDesc = new SpriteDescription()
-            {
-                AlphaEnabled = true,
-                Width = this.Game.Form.RenderWidth,
-                Height = this.info.Top + this.info.Height + 3,
-                Color = new Color4(0, 0, 0, 0.75f),
-            };
-
-            await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);
-
-            this.messages = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 48, Color.Red, Color.DarkRed), SceneObjectUsages.UI, layerHUD);
-            this.messages.Text = null;
-            this.messages.Position = new Vector2(0, 0);
-            this.messages.Visible = false;
-
-            var drawerDesc = new PrimitiveListDrawerDescription<Triangle>()
-            {
-                Name = "Seleced Items Drawer",
-                AlphaEnabled = true,
-                CastShadow = false,
-                Count = 50000,
-            };
-            this.selectedItemDrawer = await this.AddComponentPrimitiveListDrawer<Triangle>(drawerDesc, SceneObjectUsages.UI, layerHUD);
-            this.selectedItemDrawer.Visible = true;
         }
         private async Task InitializeDungeon()
         {
@@ -252,6 +435,7 @@ namespace Collada
             this.rat = await this.AddComponentModel(
                 new ModelDescription()
                 {
+                    Name = "Rat",
                     TextureIndex = 0,
                     CastShadow = true,
                     UseAnisotropicFiltering = true,
@@ -292,6 +476,7 @@ namespace Collada
             this.human = await this.AddComponentModelInstanced(
                 new ModelInstancedDescription()
                 {
+                    Name = "Human Instanced",
                     CastShadow = true,
                     Instances = 2,
                     UseAnisotropicFiltering = true,
@@ -301,6 +486,8 @@ namespace Collada
                         ModelContentFilename = "Human2.xml",
                     }
                 });
+
+            this.human.Visible = false;
         }
         private async Task InitializeDebug()
         {
@@ -451,16 +638,6 @@ namespace Collada
             await Task.CompletedTask;
         }
 
-        public override async Task Initialized()
-        {
-            await base.Initialized();
-
-            this.StartCamera();
-
-            await this.ChangeToLevel(this.scenery.FirstLevel?.Name);
-
-            this.AudioManager.Start();
-        }
         private void StartCamera()
         {
             this.Camera.NearPlaneDistance = 0.1f;
@@ -519,42 +696,6 @@ namespace Collada
             }
         }
 
-        public override void Update(GameTime gameTime)
-        {
-            base.Update(gameTime);
-
-            if (this.Game.Input.KeyJustReleased(Keys.Escape))
-            {
-                this.Game.SetScene<SceneStart>();
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.R))
-            {
-                this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
-                    SceneModes.DeferredLightning :
-                    SceneModes.ForwardLigthning);
-            }
-
-            this.fps.Text = this.Game.RuntimeText;
-            this.info.Text = string.Format("{0}", this.GetRenderMode());
-
-            if (!gameRuning)
-            {
-                return;
-            }
-
-            this.UpdateRatController(gameTime);
-            this.UpdateEntities();
-            this.UpdateWind();
-
-            this.UpdateDebugInput();
-            this.UpdateGraphInput();
-            this.UpdateRatInput();
-            this.UpdatePlayerInput();
-            this.UpdateEntitiesInput();
-
-            this.UpdateSelection();
-        }
         private void UpdatePlayerInput()
         {
             bool slow = this.Game.Input.KeyPressed(Keys.LShiftKey);
@@ -638,21 +779,6 @@ namespace Collada
             if (this.Game.Input.KeyJustReleased(Keys.F4))
             {
                 this.ratDrawer.Visible = !this.ratDrawer.Visible;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.B))
-            {
-                Task.WhenAll(this.ChangeToLevel("Lvl1"));
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.N))
-            {
-                Task.WhenAll(this.ChangeToLevel("Lvl2"));
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.M))
-            {
-                Task.WhenAll(this.ChangeToLevel("Lvl3"));
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F))
@@ -995,7 +1121,7 @@ namespace Collada
                     string nextLevel = item.Object.NextLevel;
                     if (!string.IsNullOrEmpty(nextLevel))
                     {
-                        await this.ChangeToLevel(nextLevel);
+                        await this.Game.LoadResourcesAsync(Guid.NewGuid(), this.ChangeToLevel(nextLevel));
                     }
                     else
                     {
@@ -1118,7 +1244,7 @@ namespace Collada
 
         private async Task ChangeToLevel(string name)
         {
-            gameRuning = false;
+            gameReady = false;
 
             this.Camera.Position = cameraInitialPosition;
             this.Camera.Interest = cameraInitialInterest;
@@ -1152,7 +1278,7 @@ namespace Collada
 
             this.AudioManager.Start();
 
-            gameRuning = true;
+            gameReady = true;
         }
 
         private void ConfigureNavigationGraph()
@@ -1171,52 +1297,6 @@ namespace Collada
             }
 
             this.PaintConnections();
-        }
-        public override async Task UpdateNavigationGraph()
-        {
-            if (this.scenery.CurrentLevel == null)
-            {
-                return;
-            }
-
-            var fileName = this.scenery.CurrentLevel.Name + nmFile;
-
-            if (File.Exists(fileName))
-            {
-                try
-                {
-                    this.NavigationGraphUpdating();
-
-                    var graph = await this.PathFinderDescription.Load(fileName);
-
-                    this.SetNavigationGraph(graph);
-
-                    this.NavigationGraphUpdated();
-                }
-                catch (EngineException ex)
-                {
-                    Console.WriteLine($"Bad graph file. Generating navigation mesh. {ex.Message}");
-                }
-            }
-            else
-            {
-                await base.UpdateNavigationGraph();
-
-                await this.PathFinderDescription.Save(fileName, this.NavigationGraph);
-            }
-        }
-        public override void NavigationGraphUpdated()
-        {
-            //Update active paths with the new graph configuration
-            if (this.ratController.HasPath)
-            {
-                Vector3 from = this.rat.Manipulator.Position;
-                Vector3 to = this.ratController.Last;
-
-                CalcPath(this.ratAgentType, from, to);
-            }
-
-            this.UpdateGraphDebug(this.CurrentAgent);
         }
         private void StartEntities()
         {

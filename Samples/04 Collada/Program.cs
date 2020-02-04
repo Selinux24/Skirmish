@@ -1,6 +1,5 @@
 ﻿using Engine;
 using System;
-using System.IO;
 
 namespace Collada
 {
@@ -9,8 +8,6 @@ namespace Collada
         [STAThread]
         static void Main()
         {
-            try
-            {
 #if DEBUG
                 using (Game cl = new Game("4 Collada", false, 1600, 900, true, 0, 0))
 #else
@@ -21,14 +18,6 @@ namespace Collada
 
                     cl.Run();
                 }
-            }
-            catch (Exception ex)
-            {
-                File.WriteAllText("dump.txt", ex.ToString());
-#if DEBUG
-                throw;
-#endif
-            }
         }
     }
 }

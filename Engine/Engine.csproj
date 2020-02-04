@@ -245,6 +245,8 @@
     <Compile Include="Effects\EffectTerrainState.cs" />
     <Compile Include="Effects\EffectWaterState.cs" />
     <Compile Include="FrameStatsForward.cs" />
+    <Compile Include="GameLoadResourcesEventArgs.cs" />
+    <Compile Include="GameLoadResourcesEventHandler.cs" />
     <Compile Include="GameResourceImageContent.cs" />
     <Compile Include="GameResourceRandomTexture.cs" />
     <Compile Include="GameResourceValueArray.cs" />

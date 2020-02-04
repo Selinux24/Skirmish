@@ -2,6 +2,7 @@
 using Engine.Common;
 using Engine.Content;
 using SharpDX;
+using System;
 using System.Threading.Tasks;
 
 namespace SceneTest
@@ -16,6 +17,8 @@ namespace SceneTest
 
         private TextDrawer title = null;
         private TextDrawer runtime = null;
+
+        private bool gameReady = false;
 
         public SceneMaterials(Game game)
             : base(game)
@@ -44,11 +47,17 @@ namespace SceneTest
 
             GameEnvironment.Background = Color.CornflowerBlue;
 
-            await this.InitializeTextBoxes();
-            await this.InitializeSkyEffects();
-            await this.InitializeFloor();
-            await this.InitializeColorGroup(1, 0.1f, new Vector3(-10, 0, -10), false);
-            await this.InitializeColorGroup(128, 1f, new Vector3(-10.5f, 0, -10), true);
+            await this.Game.LoadResourcesAsync(Guid.NewGuid(),
+                this.InitializeTextBoxes(),
+                this.InitializeSkyEffects(),
+                this.InitializeFloor(),
+                this.InitializeColorGroup(1, 0.1f, new Vector3(-10, 0, -10), false),
+                this.InitializeColorGroup(128, 1f, new Vector3(-10.5f, 0, -10), true)
+            );
+        }
+        protected override void GameResourcesLoaded(object sender, GameLoadResourcesEventArgs e)
+        {
+            gameReady = true;
         }
 
         private async Task InitializeTextBoxes()
@@ -215,6 +224,11 @@ namespace SceneTest
                 this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
                     SceneModes.DeferredLightning :
                     SceneModes.ForwardLigthning);
+            }
+
+            if (!gameReady)
+            {
+                return;
             }
 
             bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);

@@ -1,7 +1,9 @@
 ﻿using Engine;
 using Engine.Content;
+using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
 using SharpDX;
+using System;
 using System.Threading.Tasks;
 
 namespace Collada
@@ -11,8 +13,16 @@ namespace Collada
         private const int layerHUD = 99;
 
         private TextDrawer fps = null;
+        private Scenery dungeon = null;
 
         private Player agent = null;
+
+        private bool userInterfaceInitialized = false;
+        private Guid userInterfaceId = Guid.NewGuid();
+        private bool gameAssetsInitialized = false;
+        private bool gameAssetsInitializing = false;
+        private Guid gameAssetsId = Guid.NewGuid();
+        private bool gameReady = false;
 
         public SceneDungeon(Game game)
             : base(game)
@@ -31,7 +41,97 @@ namespace Collada
             this.Game.VisibleMouse = false;
             this.Game.LockMouse = true;
 #endif
+            await this.LoadUserInteface();
+        }
+        protected override void GameResourcesLoaded(object sender, GameLoadResourcesEventArgs e)
+        {
+            if (e.Id == userInterfaceId && !userInterfaceInitialized)
+            {
+                userInterfaceInitialized = true;
 
+                this.InitializeEnvironment();
+
+                return;
+            }
+
+            if (e.Id == gameAssetsId && !gameAssetsInitialized)
+            {
+                gameAssetsInitialized = true;
+
+                this.Lights.AddRange(this.dungeon.Lights);
+
+                this.agent = new Player()
+                {
+                    Name = "Player",
+                    Height = 0.5f,
+                    Radius = 0.15f,
+                    MaxClimb = 0.225f,
+                };
+
+                this.InitializeCamera();
+
+                this.SetGround(this.dungeon, true);
+
+                var settings = new BuildSettings()
+                {
+                    Agents = new[] { agent },
+                };
+
+                var input = new InputGeometry(GetTrianglesForNavigationGraph);
+
+                this.PathFinderDescription = new PathFinderDescription(settings, input);
+
+                Task.WhenAll(this.UpdateNavigationGraph());
+            }
+        }
+        public override void NavigationGraphUpdated()
+        {
+            if (gameAssetsInitialized)
+            {
+                gameReady = true;
+            }
+        }
+        public override void Update(GameTime gameTime)
+        {
+            base.Update(gameTime);
+
+            if (this.Game.Input.KeyJustReleased(Keys.Escape))
+            {
+                this.Game.SetScene<SceneStart>();
+            }
+
+            if (!userInterfaceInitialized)
+            {
+                return;
+            }
+
+            this.fps.Text = this.Game.RuntimeText;
+
+            if (!gameAssetsInitialized && !gameAssetsInitializing)
+            {
+                gameAssetsInitializing = true;
+
+                Task.WhenAll(this.LoadGameAssets());
+
+                return;
+            }
+
+            if (!gameReady)
+            {
+                return;
+            }
+
+            this.UpdateCamera();
+        }
+
+        private async Task LoadUserInteface()
+        {
+            this.userInterfaceInitialized = false;
+
+            await this.Game.LoadResourcesAsync(userInterfaceId, InitializeUI());
+        }
+        private async Task InitializeUI()
+        {
             var title = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
             title.Text = "Collada Dungeon Scene";
             title.Position = Vector2.Zero;
@@ -53,16 +153,16 @@ namespace Collada
             };
 
             await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+        }
+        private async Task LoadGameAssets()
+        {
+            gameAssetsInitialized = false;
 
-            this.agent = new Player()
-            {
-                Name = "Player",
-                Height = 0.5f,
-                Radius = 0.15f,
-                MaxClimb = 0.225f,
-            };
-
-            var dungeon = await this.AddComponentScenery(
+            await this.Game.LoadResourcesAsync(gameAssetsId, InitializeDungeon());
+        }
+        private async Task InitializeDungeon()
+        {
+            this.dungeon = await this.AddComponentScenery(
                 new GroundDescription()
                 {
                     Name = "room1",
@@ -76,23 +176,8 @@ namespace Collada
                         ModelContentFilename = "Dungeon.xml",
                     },
                 });
-
-            this.SetGround(dungeon, true);
-
-            var settings = new BuildSettings()
-            {
-                Agents = new[] { agent },
-            };
-
-            var input = new InputGeometry(GetTrianglesForNavigationGraph);
-
-            this.PathFinderDescription = new Engine.PathFinding.PathFinderDescription(settings, input);
-
-            this.Lights.AddRange(dungeon.Lights);
-
-            this.InitializeCamera();
-            this.InitializeEnvironment();
         }
+
         private void InitializeCamera()
         {
             this.Camera.NearPlaneDistance = 0.1f;
@@ -105,26 +190,13 @@ namespace Collada
         }
         private void InitializeEnvironment()
         {
-            GameEnvironment.Background = Color.DarkGray;
+            GameEnvironment.Background = Color.Black;
 
             this.Lights.KeyLight.Enabled = false;
             this.Lights.BackLight.Enabled = false;
             this.Lights.FillLight.Enabled = true;
         }
 
-        public override void Update(GameTime gameTime)
-        {
-            base.Update(gameTime);
-
-            if (this.Game.Input.KeyJustReleased(Keys.Escape))
-            {
-                this.Game.SetScene<SceneStart>();
-            }
-
-            this.UpdateCamera();
-
-            this.fps.Text = this.Game.RuntimeText;
-        }
         private void UpdateCamera()
         {
             bool slow = this.Game.Input.KeyPressed(Keys.LShiftKey);

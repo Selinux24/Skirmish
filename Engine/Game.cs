@@ -138,14 +138,30 @@ namespace Engine
         /// </summary>
         public bool CollectGameStatus { get; set; }
         /// <summary>
+        /// Progress reporter
+        /// </summary>
+        public readonly IProgress<float> Progress;
+        /// <summary>
+        /// Gets wheter a resource loading is running
+        /// </summary>
+        public bool ResourceLoadRuning { get; private set; } = false;
+        /// <summary>
         /// Game status
         /// </summary>
-        internal readonly GameStatus GameStatus = new GameStatus();
+        public readonly GameStatus GameStatus = new GameStatus();
 
         /// <summary>
         /// Game status collected event
         /// </summary>
         public event GameStatusCollectedHandler GameStatusCollected;
+        /// <summary>
+        /// Fires when a resource load starts
+        /// </summary>
+        public event GameLoadResourcesEventHandler ResourcesLoading;
+        /// <summary>
+        /// Fires when a resource load ends
+        /// </summary>
+        public event GameLoadResourcesEventHandler ResourcesLoaded;
 
         /// <summary>
         /// Gets desktop mode description
@@ -182,6 +198,8 @@ namespace Engine
             this.Name = name;
 
             this.GameTime = new GameTime();
+
+            this.Progress = new Progress<float>(ReportProgress);
 
             this.BufferManager = new BufferManager(this);
 
@@ -343,25 +361,70 @@ namespace Engine
             scene.Active = false;
 
             Console.WriteLine("Scene: Initialize start");
-            scene.SceneInitialized = false;
             await scene.Initialize();
-            scene.SceneInitialized = true;
             Console.WriteLine("Scene: Initialize end");
-
-            Console.WriteLine("Scene: Initialized start");
-            await scene.Initialized();
-            Console.WriteLine("Scene: Initialized end");
-
-            Console.WriteLine("BufferManager: Creating buffers");
-            this.BufferManager.CreateBuffers();
-            Console.WriteLine("BufferManager: Buffers created");
-
-            Console.WriteLine("ResourceManager: Creating resources");
-            this.ResourceManager.CreateResources();
-            Console.WriteLine("ResourceManager: Resources created");
 
             scene.Active = true;
             Console.WriteLine("Game: End StartScene");
+        }
+
+        /// <summary>
+        /// Report progress callback
+        /// </summary>
+        /// <param name="value">Progress value from 0.0f to 1.0f</param>
+        public void ReportProgress(float value)
+        {
+            var activeScene = scenes.FirstOrDefault(s => s.Active);
+            activeScene?.OnReportProgress(value);
+        }
+
+        /// <summary>
+        /// Executes a list of resource load tasks
+        /// </summary>
+        /// <param name="tasks">Resource load tasks</param>
+        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
+        public bool LoadResources(Guid id, params Task[] tasks)
+        {
+            if (ResourceLoadRuning)
+            {
+                return false;
+            }
+
+            Task.WhenAll(LoadResourcesAsync(id, tasks));
+
+            return true;
+        }
+        /// <summary>
+        /// Executes a list of resource load tasks
+        /// </summary>
+        /// <param name="tasks">Resource load tasks</param>
+        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
+        public async Task<bool> LoadResourcesAsync(Guid id, params Task[] tasks)
+        {
+            if (ResourceLoadRuning)
+            {
+                return false;
+            }
+
+            ResourceLoadRuning = true;
+
+            await Task.WhenAll(tasks);
+
+            ResourcesLoading?.Invoke(this, new GameLoadResourcesEventArgs() { Id = id });
+
+            Console.WriteLine("BufferManager: Recreating buffers");
+            this.BufferManager.CreateBuffers(Progress);
+            Console.WriteLine("BufferManager: Buffers recreated");
+
+            Console.WriteLine("ResourceManager: Creating new resources");
+            this.ResourceManager.CreateResources();
+            Console.WriteLine("ResourceManager: New resources created");
+
+            ResourcesLoaded?.Invoke(this, new GameLoadResourcesEventArgs() { Id = id });
+
+            ResourceLoadRuning = false;
+
+            return true;
         }
 
         /// <summary>
@@ -392,8 +455,8 @@ namespace Engine
                 return;
             }
 
-            var activeScenes = scenes.Where(s => s.SceneInitialized && s.Active);
-            if (!activeScenes.Any())
+            var activeScene = scenes.FirstOrDefault(s => s.Active);
+            if (activeScene == null)
             {
                 return;
             }
@@ -401,30 +464,13 @@ namespace Engine
             Stopwatch gSW = new Stopwatch();
             gSW.Start();
 
-            if (this.BufferManager.IsDirty)
-            {
-                Console.WriteLine("BufferManager: Recreating dirty buffers");
-                this.BufferManager.CreateBuffers();
-                Console.WriteLine("BufferManager: Dirty buffers recreated");
-            }
-
-            if (this.ResourceManager.HasRequests)
-            {
-                Console.WriteLine("ResourceManager: Creating new resources");
-                this.ResourceManager.CreateResources();
-                Console.WriteLine("ResourceManager: New resources created");
-            }
-
             FrameInput();
 
             FrameBegin();
 
-            foreach (var scene in activeScenes)
-            {
-                FrameSceneUpdate(scene);
+            FrameSceneUpdate(activeScene);
 
-                FrameSceneDraw(scene);
-            }
+            FrameSceneDraw(activeScene);
 
             FrameEnd();
 

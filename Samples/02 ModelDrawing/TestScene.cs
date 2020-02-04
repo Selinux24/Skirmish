@@ -2,6 +2,7 @@
 using Engine.Common;
 using Engine.Content;
 using SharpDX;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -42,10 +43,11 @@ namespace ModelDrawing
             this.Camera.Goto(Vector3.ForwardLH * -15f + Vector3.UnitY * 10f);
             this.Camera.LookTo(Vector3.Zero);
 
-            await this.InitializeTexts();
-            await this.InitializeFloor();
-            await this.InitializeModels();
-            await this.InitializeParticleVolumeDrawer();
+            await this.Game.LoadResourcesAsync(Guid.NewGuid(),
+                this.InitializeTexts(),
+                this.InitializeFloor(),
+                this.InitializeModels(),
+                this.InitializeParticleVolumeDrawer());
         }
         private async Task InitializeTexts()
         {

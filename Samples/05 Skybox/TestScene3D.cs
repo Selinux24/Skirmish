@@ -58,6 +58,9 @@ namespace Skybox
 
         private GameAudioEffect fireAudioEffect;
 
+        private Guid assetsId = Guid.NewGuid();
+        private bool gameReady = false;
+
         public TestScene3D(Game game)
             : base(game, SceneModes.ForwardLigthning)
         {
@@ -68,6 +71,10 @@ namespace Skybox
         {
             this.InitializeCamera();
 
+            await this.Game.LoadResourcesAsync(assetsId, InitializeAssets());
+        }
+        private async Task InitializeAssets()
+        {
             #region Cursor
 
             var cursorDesc = new CursorDescription()
@@ -263,8 +270,6 @@ namespace Skybox
 
             #endregion
 
-            InitializeNavigationMesh();
-
             #region DEBUG drawers
 
             this.volumesDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(new PrimitiveListDrawerDescription<Line3D>() { AlphaEnabled = true, Count = 10000 });
@@ -274,8 +279,6 @@ namespace Skybox
             this.graphDrawer.Visible = false;
 
             #endregion
-
-            InitializeSound();
         }
         private void InitializeCamera()
         {
@@ -318,19 +321,35 @@ namespace Skybox
                 });
         }
 
-        public override async Task Initialized()
+        protected override void GameResourcesLoaded(object sender, GameLoadResourcesEventArgs e)
         {
-            await base.Initialized();
+            if (assetsId == e.Id)
+            {
+                InitializeNavigationMesh();
 
-            fireAudioEffect = this.AudioManager.CreateEffectInstance("Sphere", this.movingFire, this.Camera);
-            fireAudioEffect.Play();
+                Task.WhenAll(this.UpdateNavigationGraph());
 
-            this.AudioManager.MasterVolume = 1f;
-            this.AudioManager.Start();
+                InitializeSound();
+
+                fireAudioEffect = this.AudioManager.CreateEffectInstance("Sphere", this.movingFire, this.Camera);
+                fireAudioEffect.Play();
+
+                this.AudioManager.MasterVolume = 1f;
+                this.AudioManager.Start();
+            }
+        }
+        public override void NavigationGraphUpdated()
+        {
+            gameReady = true;
         }
 
         public override void Update(GameTime gameTime)
         {
+            if (!gameReady)
+            {
+                return;
+            }
+
             Vector3 previousPosition = this.Camera.Position;
             bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
 

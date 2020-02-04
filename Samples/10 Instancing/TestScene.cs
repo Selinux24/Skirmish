@@ -19,6 +19,9 @@ namespace Instancing
 
         private ModelInstanced troops = null;
 
+        private Guid assetsId = Guid.NewGuid();
+        private bool gameReady = false;
+
         public TestScene(Game game) : base(game, SceneModes.ForwardLigthning)
         {
 
@@ -28,24 +31,24 @@ namespace Instancing
         {
             GameEnvironment.Background = Color.CornflowerBlue;
 
-            //Texts
-            await InitializeTexts();
+            await this.Game.LoadResourcesAsync(assetsId,
+                InitializeTexts(),
+                InitializeFloor(),
+                InitializeTrees(),
+                InitializeTroops(),
+                InitializeWall()
+                );
+        }
+        protected override void GameResourcesLoaded(object sender, GameLoadResourcesEventArgs e)
+        {
+            if (e.Id == assetsId)
+            {
+                this.Camera.Goto(new Vector3(-45, 17, -30));
+                this.Camera.LookTo(Vector3.Zero);
+                this.Camera.FarPlaneDistance = 250;
 
-            //Floor
-            await InitializeFloor();
-
-            //Trees
-            await InitializeTrees();
-
-            //Troops
-            await InitializeTroops();
-
-            //Wall
-            await InitializeWall();
-
-            this.Camera.Goto(new Vector3(-45, 17, -30));
-            this.Camera.LookTo(Vector3.Zero);
-            this.Camera.FarPlaneDistance = 250;
+                gameReady = true;
+            }
         }
 
         private async Task InitializeTexts()
@@ -292,6 +295,11 @@ namespace Instancing
                 this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
                     SceneModes.DeferredLightning :
                     SceneModes.ForwardLigthning);
+            }
+
+            if (!gameReady)
+            {
+                return;
             }
 
             bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);

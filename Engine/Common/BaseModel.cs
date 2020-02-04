@@ -287,6 +287,16 @@ namespace Engine.Common
         }
 
         /// <summary>
+        /// Gets wheter the model is ready for drawing
+        /// </summary>
+        /// <returns>Returns true if the model has all his buffers ready in the buffer manager</returns>
+        protected bool IsReady()
+        {
+            bool any = this.meshesByLOD.Values.Any(v => v.Meshes.Values.Any(m => m.Values.Any(mv => (mv.Indexed && mv.IndexBuffer.Slot < 0) || mv.VertexBuffer.Slot < 0)));
+
+            return !any;
+        }
+        /// <summary>
         /// Gets the drawing effect for the current instance
         /// </summary>
         /// <param name="mode">Drawing mode</param>

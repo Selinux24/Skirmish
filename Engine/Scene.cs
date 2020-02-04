@@ -1,8 +1,8 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Engine
@@ -234,7 +234,7 @@ namespace Engine
         /// <summary>
         /// Scene component list
         /// </summary>
-        private List<ISceneObject> components = new List<ISceneObject>();
+        private List<ISceneObject> internalComponents = new List<ISceneObject>();
         /// <summary>
         /// Control captured with mouse
         /// </summary>
@@ -283,10 +283,6 @@ namespace Engine
         protected GameAudioManager AudioManager { get; private set; }
 
         /// <summary>
-        /// Gets or sets whether the scene is initialized or not
-        /// </summary>
-        public bool SceneInitialized { get; internal set; } = false;
-        /// <summary>
         /// Camera
         /// </summary>
         public Camera Camera { get; protected set; }
@@ -327,7 +323,9 @@ namespace Engine
         {
             this.Game = game;
 
-            this.Game.Graphics.Resized += new EventHandler(Resized);
+            this.Game.ResourcesLoading += GameResourcesLoading;
+            this.Game.ResourcesLoaded += GameResourcesLoaded;
+            this.Game.Graphics.Resized += GameGraphicsResized;
 
             this.TimeOfDay = new TimeOfDay();
 
@@ -385,16 +383,16 @@ namespace Engine
                 Camera?.Dispose();
                 Camera = null;
 
-                if (components != null)
+                if (internalComponents != null)
                 {
-                    for (int i = 0; i < components.Count; i++)
+                    for (int i = 0; i < internalComponents.Count; i++)
                     {
-                        components[i]?.Dispose();
-                        components[i] = null;
+                        internalComponents[i]?.Dispose();
+                        internalComponents[i] = null;
                     }
 
-                    components.Clear();
-                    components = null;
+                    internalComponents.Clear();
+                    internalComponents = null;
                 }
 
                 NavigationGraph?.Dispose();
@@ -403,21 +401,11 @@ namespace Engine
         }
 
         /// <summary>
-        /// Initialize scene objects
+        /// Initialize scene
         /// </summary>
-        public virtual async Task Initialize()
+        public virtual Task Initialize()
         {
-            await Task.CompletedTask;
-        }
-        /// <summary>
-        /// Scene objects initialized
-        /// </summary>
-        public virtual async Task Initialized()
-        {
-            //Fire and forget
-            _ = this.UpdateNavigationGraph();
-
-            await Task.CompletedTask;
+            return Task.CompletedTask;
         }
         /// <summary>
         /// Update scene objects
@@ -425,52 +413,59 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         public virtual void Update(GameTime gameTime)
         {
-            if (this.UpdateGlobalResources)
+            try
             {
-                this.UpdateGlobals();
-
-                this.UpdateGlobalResources = false;
-            }
-
-            this.Camera?.Update(gameTime);
-
-            this.TimeOfDay?.Update(gameTime);
-
-            this.AudioManager?.Update();
-
-            this.NavigationGraph?.Update(gameTime);
-
-            this.Lights?.UpdateLights(this.TimeOfDay);
-
-            this.Renderer?.Update(gameTime, this);
-
-            this.CapturedControl = this.capturedControl != null;
-
-            //Process 2D controls
-            var ctrls = this.components
-                .Where(c => c.Active)
-                .OfType<IControl>()
-                .ToArray();
-            for (int i = 0; i < ctrls.Length; i++)
-            {
-                var ctrl = ctrls[i];
-
-                ctrl.MouseOver = ctrl.Rectangle.Contains(this.Game.Input.MouseX, this.Game.Input.MouseY);
-
-                if (this.Game.Input.LeftMouseButtonJustPressed && ctrl.MouseOver)
+                if (this.UpdateGlobalResources)
                 {
-                    this.capturedControl = ctrl;
+                    this.UpdateGlobals();
+
+                    this.UpdateGlobalResources = false;
                 }
 
-                if (this.Game.Input.LeftMouseButtonJustReleased && ctrl.MouseOver && this.capturedControl == ctrl)
+                this.Camera?.Update(gameTime);
+
+                this.TimeOfDay?.Update(gameTime);
+
+                this.AudioManager?.Update();
+
+                this.NavigationGraph?.Update(gameTime);
+
+                this.Lights?.UpdateLights(this.TimeOfDay);
+
+                this.Renderer?.Update(gameTime, this);
+
+                this.CapturedControl = this.capturedControl != null;
+
+                //Process 2D controls
+                var ctrls = this.GetComponents()
+                    .Where(c => c.Active)
+                    .OfType<IControl>()
+                    .ToArray();
+                foreach (var ctrl in ctrls)
                 {
-                    ctrl.FireOnClickEvent();
+                    ctrl.MouseOver = ctrl.Rectangle.Contains(this.Game.Input.MouseX, this.Game.Input.MouseY);
+
+                    if (this.Game.Input.LeftMouseButtonJustPressed && ctrl.MouseOver)
+                    {
+                        this.capturedControl = ctrl;
+                    }
+
+                    if (this.Game.Input.LeftMouseButtonJustReleased && ctrl.MouseOver && this.capturedControl == ctrl)
+                    {
+                        ctrl.FireOnClickEvent();
+                    }
+
+                    ctrl.Pressed = this.Game.Input.LeftMouseButtonPressed && this.capturedControl == ctrl;
                 }
 
-                ctrl.Pressed = this.Game.Input.LeftMouseButtonPressed && this.capturedControl == ctrl;
+                if (!this.Game.Input.LeftMouseButtonPressed) this.capturedControl = null;
             }
+            catch (EngineException ex)
+            {
+                Console.WriteLine($"Scene Updating error: {ex.Message}");
 
-            if (!this.Game.Input.LeftMouseButtonPressed) this.capturedControl = null;
+                throw;
+            }
         }
         /// <summary>
         /// Draw scene objects
@@ -484,7 +479,7 @@ namespace Engine
             }
             catch (EngineException ex)
             {
-                Console.WriteLine($"Drawing error {this.Renderer?.GetType()}: {ex.Message}");
+                Console.WriteLine($"Scene Drawing error {this.Renderer?.GetType()}: {ex.Message}");
 
                 throw;
             }
@@ -532,24 +527,46 @@ namespace Engine
         }
 
         /// <summary>
-        /// Fires when render window resized
+        /// Fires when a requested resouce load process starts
+        /// </summary>
+        /// <param name="sender">Sender</param>
+        /// <param name="e">Event arguments</param>
+        protected virtual void GameResourcesLoading(object sender, GameLoadResourcesEventArgs e)
+        {
+
+        }
+        /// <summary>
+        /// Fires when a requested resouce load process ends
+        /// </summary>
+        /// <param name="sender">Sender</param>
+        /// <param name="e">Event arguments</param>
+        protected virtual void GameResourcesLoaded(object sender, GameLoadResourcesEventArgs e)
+        {
+
+        }
+        /// <summary>
+        /// Fires when the render window has been resized
         /// </summary>
         /// <param name="sender">Graphis device</param>
         /// <param name="e">Event arguments</param>
-        protected virtual void Resized(object sender, EventArgs e)
+        protected virtual void GameGraphicsResized(object sender, EventArgs e)
         {
-            if (this.Renderer != null)
-            {
-                this.Renderer.Resize();
-            }
+            this.Renderer?.Resize();
 
-            for (int i = 0; i < this.components.Count; i++)
+            var fittedComponents = this.GetComponents().OfType<IScreenFitted>();
+            if (fittedComponents.Any())
             {
-                if (this.components[i] is IScreenFitted fitted)
-                {
-                    fitted.Resize();
-                }
+                fittedComponents.ToList().ForEach(c => c.Resize());
             }
+        }
+
+        /// <summary>
+        /// Progress reporting
+        /// </summary>
+        /// <param name="value">Progress value from 0.0f to 1.0f</param>
+        public virtual void OnReportProgress(float value)
+        {
+
         }
 
         /// <summary>
@@ -577,34 +594,38 @@ namespace Engine
         /// <returns>Returns the added component</returns>
         public void AddComponent(ISceneObject component, SceneObjectUsages usage, int order)
         {
-            if (!this.components.Contains(component))
+            if (this.internalComponents.Contains(component))
             {
-                component.Usage |= usage;
-
-                if (order != 0)
-                {
-                    component.Order = order;
-                }
-
-                this.components.Add(component);
-                this.components.Sort((p1, p2) =>
-                {
-                    //First by order index
-                    int i = p1.Order.CompareTo(p2.Order);
-                    if (i != 0) return i;
-
-                    //Then opaques
-                    i = p1.AlphaEnabled.CompareTo(p2.AlphaEnabled);
-                    if (i != 0) return i;
-
-                    //Then z-buffer writers
-                    i = p1.DepthEnabled.CompareTo(p2.DepthEnabled);
-
-                    return i;
-                });
-
-                this.UpdateGlobalResources = true;
+                return;
             }
+
+            component.Usage |= usage;
+
+            if (order != 0)
+            {
+                component.Order = order;
+            }
+
+            Monitor.Enter(this.internalComponents);
+            this.internalComponents.Add(component);
+            this.internalComponents.Sort((p1, p2) =>
+            {
+                //First by order index
+                int i = p1.Order.CompareTo(p2.Order);
+                if (i != 0) return i;
+
+                //Then opaques
+                i = p1.AlphaEnabled.CompareTo(p2.AlphaEnabled);
+                if (i != 0) return i;
+
+                //Then z-buffer writers
+                i = p1.DepthEnabled.CompareTo(p2.DepthEnabled);
+
+                return i;
+            });
+            Monitor.Exit(this.internalComponents);
+
+            this.UpdateGlobalResources = true;
         }
         /// <summary>
         /// Removes and disposes the specified component
@@ -612,12 +633,16 @@ namespace Engine
         /// <param name="component">Component</param>
         public void RemoveComponent(ISceneObject component)
         {
-            if (this.components.Contains(component))
+            if (!this.internalComponents.Contains(component))
             {
-                this.components.Remove(component);
-
-                this.UpdateGlobalResources = true;
+                return;
             }
+
+            Monitor.Enter(this.internalComponents);
+            this.internalComponents.Remove(component);
+            Monitor.Exit(this.internalComponents);
+
+            this.UpdateGlobalResources = true;
 
             component.Dispose();
         }
@@ -627,80 +652,28 @@ namespace Engine
         /// <param name="components">List of components</param>
         public void RemoveComponents(IEnumerable<ISceneObject> components)
         {
+            Monitor.Enter(this.internalComponents);
             foreach (var component in components)
             {
-                if (this.components.Contains(component))
+                if (this.internalComponents.Contains(component))
                 {
-                    this.components.Remove(component);
+                    this.internalComponents.Remove(component);
 
                     this.UpdateGlobalResources = true;
                 }
 
                 component.Dispose();
             }
+            Monitor.Exit(this.internalComponents);
         }
+
         /// <summary>
         /// Gets full component collection
         /// </summary>
         /// <returns>Returns the full component collection</returns>
-        public ReadOnlyCollection<ISceneObject> GetComponents()
+        public IEnumerable<ISceneObject> GetComponents()
         {
-            return new ReadOnlyCollection<ISceneObject>(this.components);
-        }
-        /// <summary>
-        /// Gets the component collection
-        /// </summary>
-        /// <param name="func">Filter</param>
-        /// <returns>Returns the filtered component collection</returns>
-        public ReadOnlyCollection<ISceneObject> GetComponents(Func<ISceneObject, bool> func)
-        {
-            if (func != null)
-            {
-                return new ReadOnlyCollection<ISceneObject>(this.components.FindAll(c => func(c)));
-            }
-            else
-            {
-                return new ReadOnlyCollection<ISceneObject>(this.components);
-            }
-        }
-        /// <summary>
-        /// Gets full component collection
-        /// </summary>
-        /// <typeparam name="T">Return type</typeparam>
-        /// <returns>Returns the full component collection</returns>
-        public ReadOnlyCollection<T> GetComponents<T>()
-        {
-            List<T> res = new List<T>();
-
-            for (int i = 0; i < this.components.Count; i++)
-            {
-                if (this.components[i] is T)
-                {
-                    res.Add((T)(object)this.components[i]);
-                }
-            }
-
-            return new ReadOnlyCollection<T>(res);
-        }
-        /// <summary>
-        /// Gets the component collection
-        /// </summary>
-        /// <typeparam name="T">Return type</typeparam>
-        /// <param name="func">Filter</param>
-        /// <returns>Returns the filtered component collection</returns>
-        public ReadOnlyCollection<T> GetComponents<T>(Func<ISceneObject, bool> func)
-        {
-            List<T> res = new List<T>();
-
-            for (int i = 0; i < this.components.Count; i++)
-            {
-                if ((func == null || func(this.components[i])) && this.components[i] is T)
-                {
-                    res.Add((T)this.components[i]);
-                }
-            }
-
-            return new ReadOnlyCollection<T>(res);
+            return internalComponents.ToArray();
         }
 
         /// <summary>
@@ -726,11 +699,11 @@ namespace Engine
                 MeshMaterial.Default
             };
 
-            var matComponents = this.components.FindAll(c => c is IUseMaterials);
+            var matComponents = this.GetComponents().OfType<IUseMaterials>();
 
             foreach (var component in matComponents)
             {
-                var matList = ((IUseMaterials)component).Materials;
+                var matList = component.Materials;
                 if (matList.Any())
                 {
                     mats.AddRange(matList);
@@ -780,11 +753,11 @@ namespace Engine
         {
             List<SkinningData> skData = new List<SkinningData>();
 
-            var skComponents = this.components.FindAll(c => c is IUseSkinningData);
+            var skComponents = this.GetComponents().OfType<IUseSkinningData>();
 
             foreach (var component in skComponents)
             {
-                var cmpSkData = ((IUseSkinningData)component).SkinningData;
+                var cmpSkData = component.SkinningData;
                 if (cmpSkData != null)
                 {
                     skData.Add(cmpSkData);
@@ -912,7 +885,7 @@ namespace Engine
         {
             model = null;
 
-            var cmpList = this.components.FindAll(c => c.Usage.HasFlag(usage));
+            var cmpList = this.GetComponents().Where(c => c.Usage.HasFlag(usage));
 
             var coarse = PickCoarse(ref ray, maxDistance, cmpList);
 
@@ -954,9 +927,12 @@ namespace Engine
                 Distance = float.MaxValue,
             };
 
-            var cmpList = usage == SceneObjectUsages.None ?
-                this.components :
-                this.components.FindAll(c => (c.Usage & usage) != SceneObjectUsages.None);
+            IEnumerable<ISceneObject> cmpList = this.GetComponents();
+
+            if (usage != SceneObjectUsages.None)
+            {
+                cmpList = cmpList.Where(c => (c.Usage & usage) != SceneObjectUsages.None);
+            }
 
             var coarse = PickCoarse(ref ray, float.MaxValue, cmpList);
 
@@ -1022,9 +998,12 @@ namespace Engine
                 Distance = float.MaxValue,
             };
 
-            var cmpList = usage == SceneObjectUsages.None ?
-                this.components :
-                this.components.FindAll(c => (c.Usage & usage) != SceneObjectUsages.None);
+            IEnumerable<ISceneObject> cmpList = this.GetComponents();
+
+            if (usage != SceneObjectUsages.None)
+            {
+                cmpList = cmpList.Where(c => (c.Usage & usage) != SceneObjectUsages.None);
+            }
 
             var coarse = PickCoarse(ref ray, float.MaxValue, cmpList);
 
@@ -1078,9 +1057,12 @@ namespace Engine
         {
             results = null;
 
-            var cmpList = usage == SceneObjectUsages.None ?
-                this.components :
-                this.components.FindAll(c => (c.Usage & usage) != SceneObjectUsages.None);
+            IEnumerable<ISceneObject> cmpList = this.GetComponents();
+
+            if (usage != SceneObjectUsages.None)
+            {
+                cmpList = cmpList.Where(c => (c.Usage & usage) != SceneObjectUsages.None);
+            }
 
             var coarse = PickCoarse(ref ray, float.MaxValue, cmpList);
 
@@ -1204,8 +1186,7 @@ namespace Engine
             }
 
             //Try to get a bounding box from the current ground objects
-            var cmpList = this.components
-                .FindAll(c => c.Usage.HasFlag(SceneObjectUsages.Ground));
+            var cmpList = this.GetComponents().Where(c => c.Usage.HasFlag(SceneObjectUsages.Ground));
 
             if (cmpList.Any())
             {
@@ -1247,7 +1228,7 @@ namespace Engine
         /// <returns>Returns the scene volume</returns>
         public ICullingVolume GetSceneVolume()
         {
-            var ground = this.components
+            var ground = this.GetComponents()
                 .Where(c => c.Usage.HasFlag(SceneObjectUsages.Ground))
                 .OfType<Ground>()
                 .FirstOrDefault();
@@ -1375,7 +1356,7 @@ namespace Engine
         {
             List<Triangle> tris = new List<Triangle>();
 
-            var pfComponents = this.components.FindAll(c =>
+            var pfComponents = this.GetComponents().Where(c =>
             {
                 return
                     !c.HasParent &&
@@ -1383,9 +1364,9 @@ namespace Engine
                     (c.Usage.HasFlag(SceneObjectUsages.FullPathFinding) || c.Usage.HasFlag(SceneObjectUsages.CoarsePathFinding));
             });
 
-            for (int i = 0; i < pfComponents.Count; i++)
+            foreach (var cmp in pfComponents)
             {
-                var currTris = GetTrianglesForNavigationGraph(pfComponents[i]);
+                var currTris = GetTrianglesForNavigationGraph(cmp);
                 if (currTris.Any())
                 {
                     tris.AddRange(currTris);

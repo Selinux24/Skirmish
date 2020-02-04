@@ -33,6 +33,12 @@ namespace SceneTest
 
             this.Lights.BaseFogColor = Color.White;
 
+            await this.Game.LoadResourcesAsync(Guid.NewGuid(), InitializeAssets());
+
+            this.TimeOfDay.BeginAnimation(new TimeSpan(5, 00, 00), 10f);
+        }
+        private async Task InitializeAssets()
+        {
             await this.AddComponentWater(new WaterDescription()
             {
                 Name = "Water",
@@ -46,8 +52,6 @@ namespace SceneTest
                 Name = "Sky",
                 Resolution = SkyScatteringResolutions.High
             });
-
-            this.TimeOfDay.BeginAnimation(new TimeSpan(5, 00, 00), 10f);
         }
 
         public override void Update(GameTime gameTime)

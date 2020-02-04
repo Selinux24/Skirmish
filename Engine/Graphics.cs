@@ -2678,8 +2678,6 @@ namespace Engine
         internal void WriteDiscardBuffer<T>(Buffer buffer, long offset, IEnumerable<T> data)
             where T : struct
         {
-            Counters.BufferWrites++;
-
             if (data?.Any() == true)
             {
                 this.deviceContext.MapSubresource(buffer, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
@@ -2689,6 +2687,8 @@ namespace Engine
                     stream.WriteRange(data.ToArray());
                 }
                 this.deviceContext.UnmapSubresource(buffer, 0);
+
+                Counters.BufferWrites++;
             }
         }
         /// <summary>
@@ -2714,8 +2714,6 @@ namespace Engine
         internal void WriteNoOverwriteBuffer<T>(Buffer buffer, long offset, IEnumerable<T> data)
             where T : struct
         {
-            Counters.BufferWrites++;
-
             if (data?.Any() == true)
             {
                 this.deviceContext.MapSubresource(buffer, MapMode.WriteNoOverwrite, MapFlags.None, out DataStream stream);
@@ -2725,6 +2723,8 @@ namespace Engine
                     stream.WriteRange(data.ToArray());
                 }
                 this.deviceContext.UnmapSubresource(buffer, 0);
+
+                Counters.BufferWrites++;
             }
         }
 

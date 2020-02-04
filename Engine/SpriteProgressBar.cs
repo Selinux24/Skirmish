@@ -33,7 +33,7 @@ namespace Engine
         protected float RightScale { get { return 1f - this.ProgressValue; } }
 
         /// <summary>
-        /// Gets or sets the progress valur
+        /// Gets or sets the progress value
         /// </summary>
         public float ProgressValue { get; set; }
         /// <summary>

@@ -28,6 +28,13 @@ namespace Collada
 
         private float? lastElapsedSeconds = null;
 
+        private bool userInterfaceInitialized = false;
+        private Guid userInterfaceId = Guid.NewGuid();
+        private bool gameAssetsInitialized = false;
+        private bool gameAssetsInitializing = false;
+        private Guid gameAssetsId = Guid.NewGuid();
+        private bool gameReady = false;
+
         public SceneNavmeshTest(Game game) : base(game)
         {
 
@@ -44,15 +51,7 @@ namespace Collada
             this.Game.VisibleMouse = false;
             this.Game.LockMouse = true;
 #endif
-
-            this.Lights.KeyLight.CastShadow = false;
-            this.Lights.BackLight.Enabled = false;
-            this.Lights.FillLight.Enabled = false;
-
-            await this.InitializeText();
-            this.InitializeAgent();
-            await this.InitializeNavmesh();
-            await this.InitializeDebug();
+            await this.Game.LoadResourcesAsync(userInterfaceId, this.InitializeText());
         }
         private async Task InitializeText()
         {
@@ -77,6 +76,12 @@ namespace Collada
             };
 
             await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+        }
+        private void InitializeLights()
+        {
+            this.Lights.KeyLight.CastShadow = false;
+            this.Lights.BackLight.Enabled = false;
+            this.Lights.FillLight.Enabled = false;
         }
         private void InitializeAgent()
         {
@@ -146,16 +151,33 @@ namespace Collada
             this.graphDrawer = await this.AddComponentPrimitiveListDrawer<Triangle>(graphDrawerDesc);
         }
 
-        public override async Task Initialized()
+        protected override void GameResourcesLoaded(object sender, GameLoadResourcesEventArgs e)
         {
-            await base.Initialized();
+            if (e.Id == userInterfaceId && !userInterfaceInitialized)
+            {
+                userInterfaceInitialized = true;
 
-            var bbox = inputGeometry.GetBoundingBox();
-            var center = bbox.GetCenter();
-            float maxD = Math.Max(Math.Max(bbox.GetX(), bbox.GetY()), bbox.GetZ());
+                this.InitializeLights();
+                this.InitializeAgent();
 
-            this.Camera.Interest = center;
-            this.Camera.Position = center + new Vector3(1, 0.8f, -1) * maxD * 0.8f;
+                return;
+            }
+
+            if (e.Id == gameAssetsId && !gameAssetsInitialized)
+            {
+                gameAssetsInitialized = true;
+
+                var bbox = inputGeometry.GetBoundingBox();
+                var center = bbox.GetCenter();
+                float maxD = Math.Max(Math.Max(bbox.GetX(), bbox.GetY()), bbox.GetZ());
+
+                this.Camera.Interest = center;
+                this.Camera.Position = center + new Vector3(1, 0.8f, -1) * maxD * 0.8f;
+
+                Task.WhenAll(this.UpdateNavigationGraph());
+
+                gameReady = true;
+            }
         }
 
         public override async Task UpdateNavigationGraph()
@@ -178,6 +200,22 @@ namespace Collada
             if (this.Game.Input.KeyJustReleased(Keys.Escape))
             {
                 this.Game.SetScene<SceneStart>();
+            }
+
+            if (!gameAssetsInitialized && !gameAssetsInitializing)
+            {
+                gameAssetsInitializing = true;
+
+                this.Game.LoadResources(gameAssetsId,
+                    this.InitializeNavmesh(),
+                    this.InitializeDebug());
+
+                return;
+            }
+
+            if (!gameReady)
+            {
+                return;
             }
 
             this.UpdateCamera();

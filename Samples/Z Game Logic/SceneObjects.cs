@@ -74,6 +74,9 @@ namespace GameLogic
             }
         }
 
+        private Guid assetsId = Guid.NewGuid();
+        private bool gameReady = false;
+
         #region Keys
 
         private readonly Keys keyExit = Keys.Escape;
@@ -123,19 +126,11 @@ namespace GameLogic
 
             this.Lights.Add(this.spotLight);
 
-            await this.InitializeModels();
-
-            await this.InitializeHUD();
-
-            this.UpdateLayout();
-
-            this.InitializeAnimations();
-
-            this.InitializePositions();
-
-            await this.InitializeDebug();
-
-            this.GoToSoldier(this.skirmishGame.CurrentSoldier);
+            await this.Game.LoadResourcesAsync(assetsId,
+                this.InitializeModels(),
+                this.InitializeHUD(),
+                this.InitializeDebug()
+                );
         }
         private async Task InitializeModels()
         {
@@ -343,9 +338,36 @@ namespace GameLogic
             this.lineDrawer.Visible = false;
         }
 
+        protected override void GameResourcesLoaded(object sender, GameLoadResourcesEventArgs e)
+        {
+            if (e.Id == assetsId)
+            {
+                this.UpdateLayout();
+
+                this.InitializeAnimations();
+
+                this.InitializePositions();
+
+                this.GoToSoldier(this.skirmishGame.CurrentSoldier);
+
+                Task.WhenAll(this.UpdateNavigationGraph());
+
+                gameReady = true;
+            }
+        }
+        public override void NavigationGraphUpdated()
+        {
+            gameReady = true;
+        }
+
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
+
+            if (!gameReady)
+            {
+                return;
+            }
 
             foreach (var soldierC in this.soldierControllers.Keys)
             {
@@ -592,7 +614,7 @@ namespace GameLogic
                 this.Communications(this.skirmishGame.CurrentSoldier);
             }
         }
-        protected override void Resized(object sender, EventArgs e)
+        protected override void GameGraphicsResized(object sender, EventArgs e)
         {
             this.UpdateLayout();
         }
@@ -872,7 +894,7 @@ namespace GameLogic
 
                     //Folow
                     controller.Follow(path);
-                    controller.MaximumSpeed = 3;
+                    controller.MaximumSpeed = 1.4f;
 
                     this.GoToSoldier(active);
                 }
@@ -913,7 +935,7 @@ namespace GameLogic
 
                     //Folow
                     controller.Follow(path);
-                    controller.MaximumSpeed = 8;
+                    controller.MaximumSpeed = 4.0f;
 
                     this.GoToSoldier(active);
                 }

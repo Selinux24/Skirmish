@@ -42,7 +42,6 @@ namespace Terrain
         private EngineShaderResourceView debugTex = null;
         private int graphIndex = -1;
 
-        private TextDrawer load = null;
         private TextDrawer stats = null;
         private TextDrawer counters1 = null;
         private TextDrawer counters2 = null;
@@ -111,9 +110,6 @@ namespace Terrain
 
         private readonly Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
 
-        private readonly Dictionary<string, double> initDurationDict = new Dictionary<string, double>();
-        private int initDurationIndex = 0;
-
         private string heliEffect;
         private GameAudioEffect heliEffectInstance;
         private string heliDestroyedEffect;
@@ -130,6 +126,10 @@ namespace Terrain
 
         private bool started = false;
         private readonly List<AIAgent> agents = new List<AIAgent>();
+
+        private Guid uiId = Guid.NewGuid();
+        private Guid assetsId = Guid.NewGuid();
+        private bool gameReady = false;
 
         public TestScene3D(Game game)
             : base(game, SceneModes.ForwardLigthning)
@@ -156,9 +156,12 @@ namespace Terrain
             Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
 
-            await InitializeUI();
+            this.Camera.NearPlaneDistance = 0.1f;
+            this.Camera.FarPlaneDistance = 5000f;
 
-            List<Task<TaskResult>> loadTasks = new List<Task<TaskResult>>()
+            await this.Game.LoadResourcesAsync(uiId, InitializeUI());
+
+            List<Task> loadTasks = new List<Task>()
             {
                 InitializeWalker(),
                 InitializeDebug(),
@@ -177,40 +180,7 @@ namespace Terrain
                 InitializeGardener(),
             };
 
-            int total = loadTasks.Count;
-            float percent = 0;
-            while (loadTasks.Any())
-            {
-                var task = await Task.WhenAny(loadTasks.ToArray());
-
-                loadTasks.Remove(task);
-
-                percent = (1f - ((float)loadTasks.Count / total)) * 100f;
-
-                this.load.Text = $"{percent}%";
-                this.initDurationDict.Add(task.Result.Text, task.Result.Duration.TotalSeconds);
-            }
-
-            sw.Stop();
-
-            var taskPathFinding = await InitializePathFinding();
-            initDurationDict.Add(taskPathFinding.Text, taskPathFinding.Duration.TotalSeconds);
-
-            initDurationDict.Add("TOTAL", initDurationDict.Select(i => i.Value).Sum());
-            initDurationDict.Add("REAL", sw.Elapsed.TotalSeconds);
-
-            initDurationIndex = initDurationDict.Keys.Count - 2;
-
-            SetLoadText(initDurationIndex);
-
-            InitializeAudio();
-
-            InitializeLights();
-
-            this.agentManager = new Brain(this);
-
-            this.Camera.NearPlaneDistance = 0.1f;
-            this.Camera.FarPlaneDistance = 5000f;
+            await this.Game.LoadResourcesAsync(assetsId, loadTasks.ToArray());
         }
         private async Task<TaskResult> InitializeUI()
         {
@@ -218,19 +188,16 @@ namespace Terrain
             sw.Restart();
 
             var title = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, this.layerHud);
-            this.load = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, this.layerHud);
             this.stats = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, this.layerHud);
             this.counters1 = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 10, Color.GreenYellow), SceneObjectUsages.UI, this.layerHud);
             this.counters2 = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 10, Color.GreenYellow), SceneObjectUsages.UI, this.layerHud);
 
             title.Text = "Terrain collision and trajectories test";
-            this.load.Text = "";
             this.stats.Text = "";
             this.counters1.Text = "";
             this.counters2.Text = "";
 
             title.Position = Vector2.Zero;
-            this.load.Position = new Vector2(0, 24);
             this.stats.Position = new Vector2(0, 46);
             this.counters1.Position = new Vector2(0, 68);
             this.counters2.Position = new Vector2(0, 90);
@@ -881,6 +848,8 @@ namespace Terrain
 
             sw.Stop();
 
+            await this.UpdateNavigationGraph();
+
             return new TaskResult()
             {
                 Text = "PathFinding",
@@ -1256,21 +1225,32 @@ namespace Terrain
             });
         }
 
-        public override async Task Initialized()
+        protected override void GameResourcesLoaded(object sender, GameLoadResourcesEventArgs e)
         {
-            await base.Initialized();
+            if (e.Id == assetsId)
+            {
+                InitializeAudio();
 
-            this.gardener.SetWind(this.windDirection, this.windStrength);
+                InitializeLights();
 
-            this.AudioManager.MasterVolume = 1f;
-            this.AudioManager.Start();
+                this.agentManager = new Brain(this);
 
-            this.Camera.Goto(this.heliport.Manipulator.Position + Vector3.One * 25f);
-            this.Camera.LookTo(0, 10, 0);
+                this.gardener.SetWind(this.windDirection, this.windStrength);
+
+                this.AudioManager.MasterVolume = 1f;
+                this.AudioManager.Start();
+
+                this.Camera.Goto(this.heliport.Manipulator.Position + Vector3.One * 25f);
+                this.Camera.LookTo(0, 10, 0);
+
+                Task.WhenAll(InitializePathFinding());
+            }
         }
 
         public override void NavigationGraphUpdated()
         {
+            gameReady = true;
+
             Task.Run(async () =>
             {
                 await StartHelicopter();
@@ -1515,6 +1495,11 @@ namespace Terrain
             }
 
             base.Update(gameTime);
+
+            if (!gameReady)
+            {
+                return;
+            }
 
             var pickingRay = this.GetPickingRay();
 
@@ -1904,22 +1889,6 @@ namespace Terrain
                 this.DEBUGDrawMovingVolumes();
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.Up) && this.Game.Input.ShiftPressed)
-            {
-                initDurationIndex++;
-                initDurationIndex = initDurationIndex < 0 ? 0 : initDurationIndex;
-                initDurationIndex %= initDurationDict.Keys.Count;
-                SetLoadText(initDurationIndex);
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.Down) && this.Game.Input.ShiftPressed)
-            {
-                initDurationIndex--;
-                initDurationIndex = initDurationIndex < 0 ? initDurationDict.Keys.Count - 1 : initDurationIndex;
-                initDurationIndex %= initDurationDict.Keys.Count;
-                SetLoadText(initDurationIndex);
-            }
-
             var tp = this.helicopterAgent.Target;
             if (tp.HasValue)
             {
@@ -2019,14 +1988,6 @@ namespace Terrain
             this.t2ProgressBar.ProgressValue = (1f - this.tankP2Agent?.Stats.Damage ?? 0);
 
             #endregion
-        }
-        private void SetLoadText(int index)
-        {
-            var keys = initDurationDict.Keys.ToArray();
-            if (index >= 0 && index < keys.Length)
-            {
-                this.load.Text = string.Format("{0}: {1}", keys[index], initDurationDict[keys[index]]);
-            }
         }
 
         private Curve3D GenerateHelicopterPath()

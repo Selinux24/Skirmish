@@ -82,11 +82,11 @@ namespace Engine
         /// <summary>
         /// Button width
         /// </summary>
-        public int Width { get { return this.buttonReleased.Width; } }
+        public int Width { get { return this.buttonReleased?.Width ?? 0; } }
         /// <summary>
         /// Button height
         /// </summary>
-        public int Height { get { return this.buttonReleased.Height; } }
+        public int Height { get { return this.buttonReleased?.Height ?? 0; } }
         /// <summary>
         /// Gets or sets the button text
         /// </summary>

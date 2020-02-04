@@ -2,6 +2,7 @@
 using Engine.Common;
 using Engine.Content;
 using SharpDX;
+using System;
 using System.Threading.Tasks;
 
 namespace Collada
@@ -33,10 +34,11 @@ namespace Collada
             this.Game.VisibleMouse = false;
             this.Game.LockMouse = true;
 #endif
+            await this.Game.LoadResourcesAsync(Guid.NewGuid(),
+                this.InitializeText(),
+                this.InitializeDungeon(),
+                this.InitializeEmitter());
 
-            await this.InitializeText();
-            await this.InitializeDungeon();
-            await this.InitializeEmitter();
             this.InitializeCamera();
             this.InitializeEnvironment();
         }

@@ -1,0 +1,23 @@
+﻿using System;
+
+namespace Engine
+{
+    /// <summary>
+    /// Game load resources event arguments
+    /// </summary>
+    public class GameLoadResourcesEventArgs : EventArgs
+    {
+        /// <summary>
+        /// Load identifier
+        /// </summary>
+        public Guid Id { get; set; }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public GameLoadResourcesEventArgs() : base()
+        {
+
+        }
+    }
+}

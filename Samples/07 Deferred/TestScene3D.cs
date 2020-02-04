@@ -53,6 +53,10 @@ namespace Deferred
 
         private readonly List<IUpdatable> agents = new List<IUpdatable>();
 
+        private Guid uiId = Guid.NewGuid();
+        private Guid assetsId = Guid.NewGuid();
+        private bool gameReady = false;
+
         public TestScene3D(Game game)
             : base(game, SceneModes.DeferredLightning)
         {
@@ -74,33 +78,20 @@ namespace Deferred
             await InitializeCursor();
             await InitializeUI();
 
-            var skydomTask = InitializeAndTrace(InitializeSkydom);
-            var helicoptersTask = InitializeAndTrace(InitializeHelicopters);
-            var tanksTask = InitializeAndTrace(InitializeTanks);
-            var terrainTask = InitializeAndTrace(InitializeTerrain);
-            var gardenerTask = InitializeAndTrace(InitializeGardener);
-            var treesTask = InitializeAndTrace(InitializeTrees);
+            await this.Game.LoadResourcesAsync(uiId,
+                InitializeCursor(),
+                InitializeUI()
+                );
 
-            string loadingText = null;
-            loadingText += string.Format("skydom: {0} ", await skydomTask);
-            loadingText += string.Format("helicopters: {0} ", await helicoptersTask);
-            loadingText += string.Format("tank: {0} ", await tanksTask);
-            loadingText += string.Format("terrain: {0} ", await terrainTask);
-            loadingText += string.Format("gardener: {0} ", await gardenerTask);
-            loadingText += string.Format("trees: {0} ", await treesTask);
-
-            await InitializeDebug();
-
-            var loadText = loadingText;
-
-            this.title.Text = "Deferred Ligthning test";
-            this.load.Text = loadText;
-            this.help.Text = "";
-            this.statistics.Text = "";
-
-            this.SetGround(this.terrain, true);
-            this.AttachToGround(this.tree, false);
-            this.AttachToGround(this.trees, false);
+            await this.Game.LoadResourcesAsync(assetsId,
+                InitializeAndTrace(InitializeSkydom),
+                InitializeAndTrace(InitializeHelicopters),
+                InitializeAndTrace(InitializeTanks),
+                InitializeAndTrace(InitializeTerrain),
+                InitializeAndTrace(InitializeGardener),
+                InitializeAndTrace(InitializeTrees),
+                InitializeDebug()
+                );
         }
         private async Task<double> InitializeAndTrace(Func<Task> action)
         {
@@ -343,23 +334,37 @@ namespace Deferred
             this.terrainGraphDrawer.Visible = false;
         }
 
-        public override async Task Initialized()
+        protected override void GameResourcesLoaded(object sender, GameLoadResourcesEventArgs e)
         {
-            await base.Initialized();
+            if (e.Id == uiId)
+            {
+                this.title.Text = "Deferred Ligthning test";
+                this.help.Text = "";
+                this.statistics.Text = "";
+            }
 
-            StartNodes();
+            if (e.Id == assetsId)
+            {
+                this.SetGround(this.terrain, true);
+                this.AttachToGround(this.tree, false);
+                this.AttachToGround(this.trees, false);
 
-            StartAnimations();
+                StartNodes();
 
-            StartTerrain();
+                StartAnimations();
 
-            StartItems(out Vector3 cameraPosition, out int modelCount);
+                StartTerrain();
 
-            cameraPosition /= (float)modelCount;
-            this.Camera.Goto(cameraPosition + new Vector3(-30, 30, -30));
-            this.Camera.LookTo(cameraPosition + Vector3.Up);
-            this.Camera.NearPlaneDistance = near;
-            this.Camera.FarPlaneDistance = far;
+                StartItems(out Vector3 cameraPosition, out int modelCount);
+
+                cameraPosition /= (float)modelCount;
+                this.Camera.Goto(cameraPosition + new Vector3(-30, 30, -30));
+                this.Camera.LookTo(cameraPosition + Vector3.Up);
+                this.Camera.NearPlaneDistance = near;
+                this.Camera.FarPlaneDistance = far;
+
+                gameReady = true;
+            }
         }
         private void StartNodes()
         {
@@ -477,6 +482,11 @@ namespace Deferred
             }
 
             base.Update(gameTime);
+
+            if (!gameReady)
+            {
+                return;
+            }
 
             this.agents.ForEach(a => a.Update(new Engine.Common.UpdateContext() { GameTime = gameTime }));
 

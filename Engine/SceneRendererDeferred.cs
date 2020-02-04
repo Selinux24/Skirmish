@@ -221,7 +221,7 @@ namespace Engine
                 Stopwatch swTotal = Stopwatch.StartNew();
 #endif
                 //Draw visible components
-                var visibleComponents = scene.GetComponents(c => c.Visible);
+                var visibleComponents = scene.GetComponents().Where(c => c.Visible);
                 if (visibleComponents.Any())
                 {
                     //Initialize context data from update context

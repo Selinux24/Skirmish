@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Collections.Concurrent;
 
 namespace Engine
 {
@@ -21,7 +22,7 @@ namespace Engine
         /// <summary>
         /// Requested resources dictionary
         /// </summary>
-        private readonly Dictionary<string, IGameResourceRequest> requestedResources = new Dictionary<string, IGameResourceRequest>();
+        private readonly ConcurrentDictionary<string, IGameResourceRequest> requestedResources = new ConcurrentDictionary<string, IGameResourceRequest>();
         /// <summary>
         /// Resource dictionary
         /// </summary>
@@ -265,7 +266,10 @@ namespace Engine
                 MipAutogen = mipAutogen,
             };
 
-            requestedResources.Add(resourceKey, request);
+            if (!requestedResources.TryAdd(resourceKey, request))
+            {
+                return null;
+            }
 
             return request.ResourceView;
         }
@@ -315,7 +319,10 @@ namespace Engine
                 Size = size,
             };
 
-            requestedResources.Add(resourceKey, request);
+            if (!requestedResources.TryAdd(resourceKey, request))
+            {
+                return null;
+            }
 
             return request.ResourceView;
         }
@@ -349,7 +356,10 @@ namespace Engine
                 Seed = seed,
             };
 
-            requestedResources.Add(resourceKey, request);
+            if (!requestedResources.TryAdd(resourceKey, request))
+            {
+                return null;
+            }
 
             return request.ResourceView;
         }

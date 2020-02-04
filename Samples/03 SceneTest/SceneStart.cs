@@ -35,6 +35,11 @@ namespace SceneTest
 
             GameEnvironment.Background = Color.Black;
 
+            await this.Game.LoadResourcesAsync(Guid.NewGuid(), InitializeAssets());
+        }
+
+        private async Task InitializeAssets()
+        {
             #region Cursor
 
             var cursorDesc = new CursorDescription()
@@ -142,10 +147,8 @@ namespace SceneTest
 
             #endregion
         }
-        public override async Task Initialized()
+        protected override void GameResourcesLoaded(object sender, GameLoadResourcesEventArgs e)
         {
-            await base.Initialized();
-
             this.backGround.Manipulator.SetScale(1.5f, 1.25f, 1.5f);
 
             this.title.Text = "Scene Manager Test";

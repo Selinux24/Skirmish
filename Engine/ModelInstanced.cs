@@ -50,7 +50,7 @@ namespace Engine
         {
             get
             {
-                return Array.FindAll(this.instances, i => i.Visible).Length;
+                return this.Visible ? Array.FindAll(this.instances, i => i.Visible).Length : 0;
             }
         }
         /// <summary>
@@ -188,14 +188,15 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void DrawShadows(DrawContextShadows context)
         {
-            if (this.hasDataToWrite)
-            {
-                this.BufferManager.WriteInstancingData(this.instancingData);
-            }
-
-            if (this.VisibleCount <= 0)
+            if (!this.IsReady() || this.VisibleCount <= 0)
             {
                 return;
+            }
+
+            if (this.hasDataToWrite)
+            {
+                Console.WriteLine($"{this.Name} - DrawShadows WriteInstancingData");
+                this.BufferManager.WriteInstancingData(this.instancingData);
             }
 
             var effect = context.ShadowMap.GetEffect();
@@ -204,6 +205,15 @@ namespace Engine
                 return;
             }
 
+            this.DrawShadows(context, effect);
+        }
+        /// <summary>
+        /// Shadow drawing
+        /// </summary>
+        /// <param name="context">Context</param>
+        /// <param name="effect">Drawer</param>
+        private void DrawShadows(DrawContextShadows context, IShadowMapDrawer effect)
+        {
             int count = 0;
             int instanceCount = 0;
 
@@ -257,14 +267,15 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            if (this.hasDataToWrite)
-            {
-                this.BufferManager.WriteInstancingData(this.instancingData);
-            }
-
-            if (this.VisibleCount <= 0)
+            if (!this.IsReady() || this.VisibleCount <= 0)
             {
                 return;
+            }
+
+            if (this.hasDataToWrite)
+            {
+                Console.WriteLine($"{this.Name} - DrawShadows WriteInstancingData");
+                this.BufferManager.WriteInstancingData(this.instancingData);
             }
 
             var effect = this.GetEffect(context.DrawerMode);
@@ -273,6 +284,15 @@ namespace Engine
                 return;
             }
 
+            this.Draw(context, effect);
+        }
+        /// <summary>
+        /// Draw
+        /// </summary>
+        /// <param name="context">Context</param>
+        /// <param name="effect">Geometry drawer</param>
+        private void Draw(DrawContext context, IGeometryDrawer effect)
+        {
             int count = 0;
             int instanceCount = 0;
 

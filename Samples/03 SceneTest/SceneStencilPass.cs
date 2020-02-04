@@ -42,17 +42,14 @@ namespace SceneTest
             this.Camera.Goto(-10, 8, 20f);
             this.Camera.LookTo(0, 0, 0);
 
-            await this.InitializeFloorAsphalt();
-            await this.InitializeBuildingObelisk();
-            await this.InitializeEmitter();
-            await this.InitializeLights();
+            await this.Game.LoadResourcesAsync(Guid.NewGuid(),
+                this.InitializeFloorAsphalt(),
+                this.InitializeBuildingObelisk(),
+                this.InitializeEmitter(),
+                this.InitializeLights(),
+                this.InitializeLightsDrawer()
+            );
 
-            var desc = new PrimitiveListDrawerDescription<Line3D>()
-            {
-                DepthEnabled = true,
-                Count = 5000
-            };
-            this.lightsVolumeDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(desc);
         }
 
         private async Task InitializeFloorAsphalt()
@@ -150,6 +147,15 @@ namespace SceneTest
             this.Lights.Add(new SceneLightSpot("Spot1", false, Color.White, Color.White, true, SceneLightSpotDescription.Create(Vector3.Zero, Vector3.Down, 20, 5, 5)));
 
             await Task.CompletedTask;
+        }
+        private async Task InitializeLightsDrawer()
+        {
+            var desc = new PrimitiveListDrawerDescription<Line3D>()
+            {
+                DepthEnabled = true,
+                Count = 5000
+            };
+            this.lightsVolumeDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(desc);
         }
 
         public override void Update(GameTime gameTime)
