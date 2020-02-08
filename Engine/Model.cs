@@ -286,10 +286,10 @@ namespace Engine
 
                 effect.UpdatePerObject(this.AnimationOffset, material, this.TextureIndex);
 
-                this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
+                this.BufferManager.SetIndexBuffer(mesh.IndexBuffer);
 
                 var technique = effect.GetTechnique(mesh.VertextType, false, material.Material.IsTransparent);
-                this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
+                this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
 
                 count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
 
@@ -341,10 +341,10 @@ namespace Engine
 
                 effect.UpdatePerObject(this.AnimationOffset, material, this.TextureIndex, this.UseAnisotropicFiltering);
 
-                this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
+                this.BufferManager.SetIndexBuffer(mesh.IndexBuffer);
 
                 var technique = effect.GetTechnique(mesh.VertextType, false);
-                this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
+                this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
 
                 count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
 

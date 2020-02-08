@@ -188,15 +188,15 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void DrawShadows(DrawContextShadows context)
         {
-            if (InstancingBuffer.Slot < 0)
+            if (!this.InstancingBuffer.Ready)
             {
                 return;
             }
 
             if (this.hasDataToWrite)
             {
-                Console.WriteLine($"{this.Name} - DrawShadows WriteInstancingData: Slot {InstancingBuffer.Slot} Offset {InstancingBuffer.Offset}");
-                this.BufferManager.WriteInstancingData(InstancingBuffer.Slot, InstancingBuffer.Offset, this.instancingData);
+                Console.WriteLine($"{this.Name} - DrawShadows WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset}");
+                this.BufferManager.WriteInstancingData(this.InstancingBuffer, this.instancingData);
             }
 
             var effect = context.ShadowMap.GetEffect();
@@ -244,7 +244,7 @@ namespace Engine
                     continue;
                 }
 
-                var index = Array.IndexOf(this.instancesTmp, lodInstances[0]) + this.InstancingBuffer.Offset;
+                var index = Array.IndexOf(this.instancesTmp, lodInstances[0]) + this.InstancingBuffer.BufferOffset;
                 var length = Math.Min(maxCount, lodInstances.Length);
                 if (length <= 0)
                 {
@@ -267,15 +267,15 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            if (InstancingBuffer.Slot < 0)
+            if (!this.InstancingBuffer.Ready)
             {
                 return;
             }
 
             if (this.hasDataToWrite)
             {
-                Console.WriteLine($"{this.Name} - Draw WriteInstancingData: Slot {InstancingBuffer.Slot} Offset {InstancingBuffer.Offset} {context.DrawerMode}");
-                this.BufferManager.WriteInstancingData(InstancingBuffer.Slot, InstancingBuffer.Offset, this.instancingData);
+                Console.WriteLine($"{this.Name} - Draw WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset} {context.DrawerMode}");
+                this.BufferManager.WriteInstancingData(this.InstancingBuffer, this.instancingData);
             }
 
             var effect = this.GetEffect(context.DrawerMode);
@@ -323,7 +323,7 @@ namespace Engine
                     continue;
                 }
 
-                var index = Array.IndexOf(this.instancesTmp, lodInstances[0]) + this.InstancingBuffer.Offset;
+                var index = Array.IndexOf(this.instancesTmp, lodInstances[0]) + this.InstancingBuffer.BufferOffset;
                 var length = Math.Min(maxCount, lodInstances.Length);
                 if (length <= 0)
                 {
@@ -379,10 +379,10 @@ namespace Engine
 
                 effect.UpdatePerObject(0, material, 0);
 
-                this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
+                this.BufferManager.SetIndexBuffer(mesh.IndexBuffer);
 
                 var technique = effect.GetTechnique(mesh.VertextType, true, material.Material.IsTransparent);
-                this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
+                this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
 
                 for (int p = 0; p < technique.PassCount; p++)
                 {
@@ -431,10 +431,10 @@ namespace Engine
 
                 effect.UpdatePerObject(0, material, 0, this.UseAnisotropicFiltering);
 
-                this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
+                this.BufferManager.SetIndexBuffer(mesh.IndexBuffer);
 
                 var technique = effect.GetTechnique(mesh.VertextType, true);
-                this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
+                this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
 
                 for (int p = 0; p < technique.PassCount; p++)
                 {

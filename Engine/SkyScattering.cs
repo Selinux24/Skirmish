@@ -290,8 +290,8 @@ namespace Engine
                         technique = effect.SkyScatteringLow;
                     }
 
-                    this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
-                    this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, Topology.TriangleList);
+                    this.BufferManager.SetIndexBuffer(this.indexBuffer);
+                    this.BufferManager.SetInputAssembler(technique, this.vertexBuffer, Topology.TriangleList);
 
                     effect.UpdatePerFrame(
                         Matrix.Translation(context.EyePosition),
@@ -321,7 +321,7 @@ namespace Engine
                     {
                         graphics.EffectPassApply(technique, p, 0);
 
-                        graphics.DrawIndexed(this.indexBuffer.Count, this.indexBuffer.Offset, this.vertexBuffer.Offset);
+                        graphics.DrawIndexed(this.indexBuffer.Count, this.indexBuffer.BufferOffset, this.vertexBuffer.BufferOffset);
                     }
                 }
             }

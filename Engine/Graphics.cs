@@ -1311,7 +1311,7 @@ namespace Engine
                 return new Buffer(this.device, dstr, description);
             }
         }
-      
+
         /// <summary>
         /// Creates a new Input Layout for a Shader
         /// </summary>

@@ -185,6 +185,7 @@
     <Compile Include="Common\BufferDescriptorRequestVertices.cs" />
     <Compile Include="Common\GeometryDescriptor.cs" />
     <Compile Include="Common\IndexBufferDescription.cs" />
+    <Compile Include="Common\InstancingBufferDescription.cs" />
     <Compile Include="Common\NormalDescriptor.cs" />
     <Compile Include="Common\OrientedBoundingBox.cs" />
     <Compile Include="Common\VertexBufferDescription.cs" />

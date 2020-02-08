@@ -242,8 +242,8 @@ namespace Engine
                 Counters.InstancesPerFrame++;
                 Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
 
-                this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
-                this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, Topology.TriangleList);
+                this.BufferManager.SetIndexBuffer(this.indexBuffer);
+                this.BufferManager.SetInputAssembler(technique, this.vertexBuffer, Topology.TriangleList);
 
                 effect.UpdatePerFrame(this.Manipulator.LocalTransform, this.viewProjection);
                 effect.UpdatePerObject(this.Color, this.spriteTexture, this.TextureIndex);
@@ -256,8 +256,8 @@ namespace Engine
 
                     graphics.DrawIndexed(
                         this.indexBuffer.Count,
-                        this.indexBuffer.Offset,
-                        this.vertexBuffer.Offset);
+                        this.indexBuffer.BufferOffset,
+                        this.vertexBuffer.BufferOffset);
                 }
             }
         }

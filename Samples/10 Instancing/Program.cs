@@ -1,6 +1,5 @@
 ﻿using Engine;
 using System;
-using System.IO;
 
 namespace Instancing
 {

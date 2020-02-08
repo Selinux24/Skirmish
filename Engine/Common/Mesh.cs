@@ -125,7 +125,7 @@ namespace Engine.Common
                 {
                     graphics.DrawIndexed(
                         this.IndexBuffer.Count,
-                        this.IndexBuffer.Offset, this.VertexBuffer.Offset);
+                        this.IndexBuffer.BufferOffset, this.VertexBuffer.BufferOffset);
                 }
             }
             else
@@ -134,7 +134,7 @@ namespace Engine.Common
                 {
                     graphics.Draw(
                         this.VertexBuffer.Count,
-                        this.VertexBuffer.Offset);
+                        this.VertexBuffer.BufferOffset);
                 }
             }
         }
@@ -155,7 +155,7 @@ namespace Engine.Common
                         graphics.DrawIndexedInstanced(
                             this.IndexBuffer.Count,
                             count,
-                            this.IndexBuffer.Offset, this.VertexBuffer.Offset, startInstanceLocation);
+                            this.IndexBuffer.BufferOffset, this.VertexBuffer.BufferOffset, startInstanceLocation);
                     }
                 }
                 else
@@ -165,7 +165,7 @@ namespace Engine.Common
                         graphics.DrawInstanced(
                             this.VertexBuffer.Count,
                             count,
-                            this.VertexBuffer.Offset, startInstanceLocation);
+                            this.VertexBuffer.BufferOffset, startInstanceLocation);
                     }
                 }
             }

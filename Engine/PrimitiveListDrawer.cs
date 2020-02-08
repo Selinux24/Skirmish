@@ -125,7 +125,7 @@ namespace Engine
                     effect.UpdatePerObject(0, null, 0, false);
 
                     var technique = effect.GetTechnique(VertexTypes.PositionColor, false);
-                    this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, this.topology);
+                    this.BufferManager.SetInputAssembler(technique, this.vertexBuffer, this.topology);
 
                     var graphics = this.Game.Graphics;
 
@@ -138,7 +138,7 @@ namespace Engine
                     {
                         graphics.EffectPassApply(technique, p, 0);
 
-                        graphics.Draw(this.drawCount, this.vertexBuffer.Offset);
+                        graphics.Draw(this.drawCount, this.vertexBuffer.BufferOffset);
                     }
                 }
             }
@@ -289,7 +289,7 @@ namespace Engine
 
                 if (data.Count > 0)
                 {
-                    this.BufferManager.WriteBuffer(this.vertexBuffer.Slot, this.vertexBuffer.Offset, data.ToArray());
+                    this.BufferManager.WriteVertexBuffer(this.vertexBuffer, data.ToArray());
                 }
 
                 this.dictionaryChanged = false;

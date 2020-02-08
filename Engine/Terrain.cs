@@ -397,8 +397,8 @@ namespace Engine
                     var gNode = nodeList[i];
                     if (gNode.IBDesc.Count > 0)
                     {
-                        bufferManager.SetInputAssembler(terrainTechnique, gNode.VBDesc.Slot, Topology.TriangleList);
-                        bufferManager.SetIndexBuffer(gNode.IBDesc.Slot);
+                        bufferManager.SetInputAssembler(terrainTechnique, gNode.VBDesc, Topology.TriangleList);
+                        bufferManager.SetIndexBuffer(gNode.IBDesc);
 
                         if (!mode.HasFlag(DrawerModes.ShadowMap))
                         {
@@ -412,8 +412,8 @@ namespace Engine
 
                             graphics.DrawIndexed(
                                 gNode.IBDesc.Count,
-                                gNode.IBDesc.Offset,
-                                gNode.VBDesc.Offset);
+                                gNode.IBDesc.BufferOffset,
+                                gNode.VBDesc.BufferOffset);
                         }
                     }
                 }

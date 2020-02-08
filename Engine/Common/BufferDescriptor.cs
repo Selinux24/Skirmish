@@ -11,17 +11,27 @@ namespace Engine.Common
         /// </summary>
         public string Id { get; set; } = null;
         /// <summary>
-        /// Buffer slot index
+        /// Buffer description index in the buffer manager
         /// </summary>
-        public int Slot { get; set; } = -1;
+        public int BufferDescriptionIndex { get; set; } = -1;
         /// <summary>
-        /// Buffer index offset
+        /// Offset in the final graphics buffer
         /// </summary>
-        public int Offset { get; set; } = -1;
+        public int BufferOffset { get; set; } = -1;
         /// <summary>
         /// Item Count
         /// </summary>
         public int Count { get; set; } = 0;
+        /// <summary>
+        /// Gets wheter the descriptor is ready for use or not
+        /// </summary>
+        public bool Ready
+        {
+            get
+            {
+                return BufferDescriptionIndex >= 0 && BufferOffset >= 0;
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -37,7 +47,7 @@ namespace Engine.Common
         /// <returns>Returns the text representation of the instance</returns>
         public override string ToString()
         {
-            return $"Id: {Id ?? "Empty"}; Slot: {Slot}; Offset: {Offset}; Count: {Count}; Next: {Offset + Count};";
+            return $"Id: {Id ?? "Empty"}; Ready: {Ready} BufferDescriptionIndex: {BufferDescriptionIndex}; BufferOffset: {BufferOffset}; Count: {Count}; Next: {BufferOffset + Count};";
         }
     }
 }

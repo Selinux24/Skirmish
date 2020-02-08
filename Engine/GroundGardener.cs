@@ -474,10 +474,7 @@ namespace Engine
                     var data = patch.GetData(gameTime, eyePosition, transparent);
 
                     //Attach data
-                    bufferManager.WriteBuffer(
-                        this.VertexBuffer.Slot,
-                        this.VertexBuffer.Offset,
-                        data.ToArray());
+                    bufferManager.WriteVertexBuffer(this.VertexBuffer, data.ToArray());
 
                     this.vertexDrawCount = data.Count();
                     this.Attached = true;
@@ -498,7 +495,7 @@ namespace Engine
                     {
                         graphics.EffectPassApply(technique, p, 0);
 
-                        graphics.Draw(this.vertexDrawCount, this.VertexBuffer.Offset);
+                        graphics.Draw(this.vertexDrawCount, this.VertexBuffer.BufferOffset);
                     }
                 }
             }
@@ -519,7 +516,7 @@ namespace Engine
                     {
                         graphics.EffectPassApply(technique, p, 0);
 
-                        graphics.Draw(this.vertexDrawCount, this.VertexBuffer.Offset);
+                        graphics.Draw(this.vertexDrawCount, this.VertexBuffer.BufferOffset);
                     }
                 }
             }
@@ -1032,7 +1029,7 @@ namespace Engine
                     {
                         this.BufferManager.SetInputAssembler(
                             vegetationTechnique,
-                            buffer.VertexBuffer.Slot,
+                            buffer.VertexBuffer,
                             Topology.PointList);
 
                         buffer.DrawFoliageShadows(vegetationTechnique);
@@ -1085,7 +1082,7 @@ namespace Engine
                     {
                         this.BufferManager.SetInputAssembler(
                             vegetationTechnique,
-                            buffer.VertexBuffer.Slot,
+                            buffer.VertexBuffer,
                             Topology.PointList);
 
                         buffer.DrawFoliage(vegetationTechnique);

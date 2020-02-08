@@ -148,9 +148,9 @@ namespace Engine.Common
         /// </summary>
         /// <param name="descriptor">Descriptor</param>
         /// <param name="id">Id</param>
-        /// <param name="slot">Buffer slot</param>
+        /// <param name="bufferDescriptionIndex">Buffer description index</param>
         /// <param name="vertices">Vertex list</param>
-        public void AddDescriptor(BufferDescriptor descriptor, string id, int slot, IEnumerable<IVertexData> vertices)
+        public void AddDescriptor(BufferDescriptor descriptor, string id, int bufferDescriptionIndex, IEnumerable<IVertexData> vertices)
         {
             Monitor.Enter(this.data);
             //Store current data index as descriptor offset
@@ -161,8 +161,8 @@ namespace Engine.Common
 
             //Add the new descriptor to main descriptor list
             descriptor.Id = id;
-            descriptor.Slot = slot;
-            descriptor.Offset = offset;
+            descriptor.BufferDescriptionIndex = bufferDescriptionIndex;
+            descriptor.BufferOffset = offset;
             descriptor.Count = vertices.Count();
 
             Monitor.Enter(this.vertexDescriptors);
@@ -179,7 +179,7 @@ namespace Engine.Common
             {
                 //If descriptor has items, remove from buffer descriptors
                 Monitor.Enter(this.data);
-                this.data.RemoveRange(descriptor.Offset, descriptor.Count);
+                this.data.RemoveRange(descriptor.BufferOffset, descriptor.Count);
                 Monitor.Exit(this.data);
             }
 
@@ -190,12 +190,12 @@ namespace Engine.Common
             if (this.vertexDescriptors.Any())
             {
                 //Reallocate descriptor offsets
-                this.vertexDescriptors[0].Offset = 0;
+                this.vertexDescriptors[0].BufferOffset = 0;
                 for (int i = 1; i < this.vertexDescriptors.Count; i++)
                 {
                     var prev = this.vertexDescriptors[i - 1];
 
-                    this.vertexDescriptors[i].Offset = prev.Offset + prev.Count;
+                    this.vertexDescriptors[i].BufferOffset = prev.BufferOffset + prev.Count;
                 }
             }
             Monitor.Exit(this.vertexDescriptors);
@@ -208,134 +208,6 @@ namespace Engine.Common
         public override string ToString()
         {
             return $"[{Type}][{Dynamic}] Instances: {this.InstancingDescriptor?.Count ?? 0} AllocatedSize: {AllocatedSize} ToAllocateSize: {ToAllocateSize} Dirty: {Dirty}";
-        }
-    }
-
-    /// <summary>
-    /// Vertex buffer description
-    /// </summary>
-    class InstancingBufferDescription
-    {
-        /// <summary>
-        /// Instancing descriptor list
-        /// </summary>
-        private readonly List<BufferDescriptor> instancingDescriptors = new List<BufferDescriptor>();
-
-        /// <summary>
-        /// Dynamic buffer
-        /// </summary>
-        public readonly bool Dynamic;
-        /// <summary>
-        /// Instances
-        /// </summary>
-        public int Instances { get; set; } = 0;
-        /// <summary>
-        /// Vertex buffer index in the buffer manager list
-        /// </summary>
-        public int BufferIndex { get; set; } = -1;
-        /// <summary>
-        /// Vertex buffer binding index in the manager list
-        /// </summary>
-        public int BufferBindingIndex { get; set; } = -1;
-        /// <summary>
-        /// Allocated size into graphics device
-        /// </summary>
-        public int AllocatedSize { get; set; } = 0;
-        /// <summary>
-        /// Gets the size of the data to allocate
-        /// </summary>
-        public int ToAllocateSize
-        {
-            get
-            {
-                return this.Instances;
-            }
-        }
-        /// <summary>
-        /// Gets wether the internal buffer needs reallocation
-        /// </summary>
-        public bool ReallocationNeeded { get; set; } = false;
-        /// <summary>
-        /// Gets wether the internal buffer is currently allocated in the graphic device
-        /// </summary>
-        public bool Allocated { get; set; } = false;
-        /// <summary>
-        /// Gets wether the current buffer is dirty
-        /// </summary>
-        /// <remarks>A buffer is dirty when needs reallocation or if it's not allocated at all</remarks>
-        public bool Dirty
-        {
-            get
-            {
-                return !Allocated || ReallocationNeeded;
-            }
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public InstancingBufferDescription(bool dynamic)
-        {
-            this.Dynamic = dynamic;
-        }
-
-        /// <summary>
-        /// Gets the buffer format stride
-        /// </summary>
-        /// <returns>Returns the buffer format stride in bytes</returns>
-        public int GetStride()
-        {
-            return default(VertexInstancingData).GetStride();
-        }
-
-        public void AddDescriptor(BufferDescriptor descriptor, string id, int slot, int instances)
-        {
-            //Store current data index as descriptor offset
-            int offset = this.Instances;
-
-            //Increment the instance count
-            this.Instances += instances;
-
-            //Add the new descriptor to main descriptor list
-            descriptor.Id = id;
-            descriptor.Slot = slot;
-            descriptor.Offset = offset;
-            descriptor.Count = instances;
-
-            Monitor.Enter(this.instancingDescriptors);
-            this.instancingDescriptors.Add(descriptor);
-            Monitor.Exit(this.instancingDescriptors);
-        }
-
-        public void RemoveDescriptor(BufferDescriptor descriptor, int instances)
-        {
-            Monitor.Enter(this.instancingDescriptors);
-            //Remove descriptor
-            this.instancingDescriptors.Remove(descriptor);
-
-            if (this.instancingDescriptors.Any())
-            {
-                //Reallocate descriptor offsets
-                this.instancingDescriptors[0].Offset = 0;
-                for (int i = 1; i < this.instancingDescriptors.Count; i++)
-                {
-                    var prev = this.instancingDescriptors[i - 1];
-
-                    this.instancingDescriptors[i].Offset = prev.Offset + prev.Count;
-                }
-            }
-            Monitor.Exit(this.instancingDescriptors);
-
-            this.Instances -= instances;
-        }
-
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns a description of the instance</returns>
-        public override string ToString()
-        {
-            return $"[{typeof(VertexInstancingData)}][{Dynamic}] Instances: {Instances} AllocatedSize: {AllocatedSize} ToAllocateSize: {ToAllocateSize} Dirty: {Dirty}";
         }
     }
 }

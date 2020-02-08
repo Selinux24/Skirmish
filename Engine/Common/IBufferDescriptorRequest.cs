@@ -18,5 +18,10 @@ namespace Engine.Common
         /// Gets wheter the descriptor is processed into the buffer manager or not
         /// </summary>
         bool Processed { get; }
+        /// <summary>
+        /// Updates the buffer descriptor
+        /// </summary>
+        /// <param name="bufferManager">Buffer manager</param>
+        void Process(BufferManager bufferManager);
     }
 }

@@ -219,12 +219,12 @@ namespace Engine
                 Counters.InstancesPerFrame++;
                 Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
 
-                this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
+                this.BufferManager.SetIndexBuffer(this.indexBuffer);
 
                 var effect = DrawerPool.EffectDefaultClouds;
                 var technique = this.skyMode == SkyPlaneModes.Static ? effect.CloudsStatic : effect.CloudsPerturbed;
 
-                this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, Topology.TriangleList);
+                this.BufferManager.SetInputAssembler(technique, this.vertexBuffer, Topology.TriangleList);
 
                 effect.UpdatePerFrame(
                     this.rotation * Matrix.Translation(context.EyePosition),
@@ -258,8 +258,8 @@ namespace Engine
 
                     graphics.DrawIndexed(
                         this.indexBuffer.Count,
-                        this.indexBuffer.Offset,
-                        this.vertexBuffer.Offset);
+                        this.indexBuffer.BufferOffset,
+                        this.vertexBuffer.BufferOffset);
                 }
             }
         }

@@ -291,20 +291,20 @@ namespace Engine
             {
                 if (this.updateBuffers)
                 {
-                    this.BufferManager.WriteBuffer(this.vertexBuffer.Slot, this.vertexBuffer.Offset, this.vertices);
-                    this.BufferManager.WriteBuffer(this.indexBuffer.Slot, this.indexBuffer.Offset, this.indices);
+                    this.BufferManager.WriteVertexBuffer(this.vertexBuffer, this.vertices);
+                    this.BufferManager.WriteIndexBuffer(this.indexBuffer, this.indices);
 
                     this.indexDrawCount = this.indices.Length;
 
                     this.updateBuffers = false;
                 }
 
-                this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
+                this.BufferManager.SetIndexBuffer(this.indexBuffer);
 
                 var effect = DrawerPool.EffectDefaultFont;
                 var technique = effect.FontDrawer;
 
-                this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, Topology.TriangleList);
+                this.BufferManager.SetInputAssembler(technique, this.vertexBuffer, Topology.TriangleList);
 
                 if (this.ShadowColor != Color.Transparent)
                 {
@@ -365,7 +365,7 @@ namespace Engine
             {
                 graphics.EffectPassApply(technique, p, 0);
 
-                graphics.DrawIndexed(this.indexDrawCount, this.indexBuffer.Offset, this.vertexBuffer.Offset);
+                graphics.DrawIndexed(this.indexDrawCount, this.indexBuffer.BufferOffset, this.vertexBuffer.BufferOffset);
             }
         }
         /// <summary>
