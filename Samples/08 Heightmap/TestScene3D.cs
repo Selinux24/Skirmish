@@ -137,7 +137,7 @@ namespace Heightmap
                 InitializeParticles(),
             };
 
-            await this.Game.LoadResourcesAsync(assetsId, loadTasks.ToArray());
+            await this.LoadResourcesAsync(assetsId, loadTasks.ToArray());
         }
         private async Task<double> InitializeUI()
         {
@@ -705,9 +705,9 @@ namespace Heightmap
             this.graphDrawer.Visible = false;
         }
 
-        protected override void GameResourcesLoaded(object sender, GameLoadResourcesEventArgs e)
+        public override void GameResourcesLoaded(Guid id)
         {
-            if (e.Id == assetsId)
+            if (id == assetsId)
             {
                 this.Camera.NearPlaneDistance = near;
                 this.Camera.FarPlaneDistance = far;

@@ -43,9 +43,9 @@ namespace Collada
 #endif
             await this.LoadUserInteface();
         }
-        protected override void GameResourcesLoaded(object sender, GameLoadResourcesEventArgs e)
+        public override void GameResourcesLoaded(Guid id)
         {
-            if (e.Id == userInterfaceId && !userInterfaceInitialized)
+            if (id == userInterfaceId && !userInterfaceInitialized)
             {
                 userInterfaceInitialized = true;
 
@@ -54,7 +54,7 @@ namespace Collada
                 return;
             }
 
-            if (e.Id == gameAssetsId && !gameAssetsInitialized)
+            if (id == gameAssetsId && !gameAssetsInitialized)
             {
                 gameAssetsInitialized = true;
 
@@ -128,7 +128,7 @@ namespace Collada
         {
             this.userInterfaceInitialized = false;
 
-            await this.Game.LoadResourcesAsync(userInterfaceId, InitializeUI());
+            await this.LoadResourcesAsync(userInterfaceId, InitializeUI());
         }
         private async Task InitializeUI()
         {
@@ -158,7 +158,7 @@ namespace Collada
         {
             gameAssetsInitialized = false;
 
-            await this.Game.LoadResourcesAsync(gameAssetsId, InitializeDungeon());
+            await this.LoadResourcesAsync(gameAssetsId, InitializeDungeon());
         }
         private async Task InitializeDungeon()
         {

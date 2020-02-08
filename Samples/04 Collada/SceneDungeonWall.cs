@@ -34,7 +34,7 @@ namespace Collada
             this.Game.VisibleMouse = false;
             this.Game.LockMouse = true;
 #endif
-            await this.Game.LoadResourcesAsync(Guid.NewGuid(),
+            await this.LoadResourcesAsync(Guid.NewGuid(),
                 this.InitializeText(),
                 this.InitializeDungeon(),
                 this.InitializeEmitter());

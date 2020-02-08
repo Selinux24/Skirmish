@@ -11,6 +11,10 @@ namespace Engine
         /// Load identifier
         /// </summary>
         public Guid Id { get; set; }
+        /// <summary>
+        /// Scene
+        /// </summary>
+        public Scene Scene { get; set; }
 
         /// <summary>
         /// Constructor

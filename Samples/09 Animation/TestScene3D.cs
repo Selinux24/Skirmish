@@ -98,7 +98,7 @@ namespace Animation
 
         public override async Task Initialize()
         {
-            await this.Game.LoadResourcesAsync(assetsId,
+            await this.LoadResourcesAsync(assetsId,
                 this.InitializeLadder(),
                 this.InitializeLadder2(),
                 this.InitializeSoldier(),
@@ -112,9 +112,9 @@ namespace Animation
                 this.InitializeDebug()
                 );
         }
-        protected override void GameResourcesLoaded(object sender, GameLoadResourcesEventArgs e)
+        public override void GameResourcesLoaded(Guid id)
         {
-            if (e.Id == assetsId)
+            if (id == assetsId)
             {
                 InitializeEnvironment();
 

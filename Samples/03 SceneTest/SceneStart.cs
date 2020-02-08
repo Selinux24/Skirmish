@@ -35,7 +35,7 @@ namespace SceneTest
 
             GameEnvironment.Background = Color.Black;
 
-            await this.Game.LoadResourcesAsync(Guid.NewGuid(), InitializeAssets());
+            await this.LoadResourcesAsync(Guid.NewGuid(), InitializeAssets());
         }
 
         private async Task InitializeAssets()
@@ -147,7 +147,7 @@ namespace SceneTest
 
             #endregion
         }
-        protected override void GameResourcesLoaded(object sender, GameLoadResourcesEventArgs e)
+        public override void GameResourcesLoaded(Guid id)
         {
             this.backGround.Manipulator.SetScale(1.5f, 1.25f, 1.5f);
 

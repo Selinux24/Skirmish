@@ -323,9 +323,9 @@ namespace Engine
         {
             this.Game = game;
 
-            this.Game.ResourcesLoading += GameResourcesLoading;
-            this.Game.ResourcesLoaded += GameResourcesLoaded;
-            this.Game.Graphics.Resized += GameGraphicsResized;
+            this.Game.ResourcesLoading += FireResourcesLoading;
+            this.Game.ResourcesLoaded += FireResourcesLoaded;
+            this.Game.Graphics.Resized += FireGraphicsResized;
 
             this.TimeOfDay = new TimeOfDay();
 
@@ -527,29 +527,58 @@ namespace Engine
         }
 
         /// <summary>
+        /// Executes a list of resource load tasks
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        /// <param name="id">Load id</param>
+        /// <param name="tasks">Resource load tasks</param>
+        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
+        public bool LoadResources(Guid id, params Task[] tasks)
+        {
+            return this.Game.LoadResources(this, id, tasks);
+        }
+        /// <summary>
+        /// Executes a list of resource load tasks
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        /// <param name="id">Load id</param>
+        /// <param name="tasks">Resource load tasks</param>
+        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
+        public async Task<bool> LoadResourcesAsync(Guid id, params Task[] tasks)
+        {
+            return await this.Game.LoadResourcesAsync(this, id, tasks);
+        }
+
+        /// <summary>
         /// Fires when a requested resouce load process starts
         /// </summary>
         /// <param name="sender">Sender</param>
         /// <param name="e">Event arguments</param>
-        protected virtual void GameResourcesLoading(object sender, GameLoadResourcesEventArgs e)
+        private void FireResourcesLoading(object sender, GameLoadResourcesEventArgs e)
         {
-
+            if (e.Scene == this)
+            {
+                GameResourcesLoading(e.Id);
+            }
         }
         /// <summary>
         /// Fires when a requested resouce load process ends
         /// </summary>
         /// <param name="sender">Sender</param>
         /// <param name="e">Event arguments</param>
-        protected virtual void GameResourcesLoaded(object sender, GameLoadResourcesEventArgs e)
+        private void FireResourcesLoaded(object sender, GameLoadResourcesEventArgs e)
         {
-
+            if (e.Scene == this)
+            {
+                GameResourcesLoaded(e.Id);
+            }
         }
         /// <summary>
         /// Fires when the render window has been resized
         /// </summary>
         /// <param name="sender">Graphis device</param>
         /// <param name="e">Event arguments</param>
-        protected virtual void GameGraphicsResized(object sender, EventArgs e)
+        private void FireGraphicsResized(object sender, EventArgs e)
         {
             this.Renderer?.Resize();
 
@@ -558,6 +587,8 @@ namespace Engine
             {
                 fittedComponents.ToList().ForEach(c => c.Resize());
             }
+
+            GameGraphicsResized();
         }
 
         /// <summary>
@@ -565,6 +596,18 @@ namespace Engine
         /// </summary>
         /// <param name="value">Progress value from 0.0f to 1.0f</param>
         public virtual void OnReportProgress(float value)
+        {
+
+        }
+        public virtual void GameResourcesLoading(Guid id)
+        {
+
+        }
+        public virtual void GameResourcesLoaded(Guid id)
+        {
+
+        }
+        public virtual void GameGraphicsResized()
         {
 
         }

@@ -116,18 +116,18 @@ namespace Collada
             this.Game.VisibleMouse = false;
             this.Game.LockMouse = true;
 #endif
-            await this.Game.LoadResourcesAsync(userInterfaceId, this.InitializeUI());
+            await this.LoadResourcesAsync(userInterfaceId, this.InitializeUI());
         }
-        protected override void GameResourcesLoaded(object sender, GameLoadResourcesEventArgs e)
+        public override void GameResourcesLoaded(Guid id)
         {
-            if (e.Id == userInterfaceId && !userInterfaceInitialized)
+            if (id == userInterfaceId && !userInterfaceInitialized)
             {
                 userInterfaceInitialized = true;
 
                 return;
             }
 
-            if (e.Id == gameAssetsId && !gameAssetsInitialized)
+            if (id == gameAssetsId && !gameAssetsInitialized)
             {
                 gameAssetsInitialized = true;
 
@@ -139,7 +139,7 @@ namespace Collada
                 this.AudioManager.Start();
             }
 
-            if (e.Id == levelId && !levelInitialized)
+            if (id == levelId && !levelInitialized)
             {
                 levelInitialized = true;
             }
@@ -242,24 +242,24 @@ namespace Collada
 
             if (this.Game.Input.KeyJustReleased(Keys.B))
             {
-                this.Game.LoadResources(levelId, this.ChangeToLevel("Lvl1"));
+                this.LoadResources(levelId, this.ChangeToLevel("Lvl1"));
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.N))
             {
-                this.Game.LoadResources(levelId, this.ChangeToLevel("Lvl2"));
+                this.LoadResources(levelId, this.ChangeToLevel("Lvl2"));
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.M))
             {
-                this.Game.LoadResources(levelId, this.ChangeToLevel("Lvl3"));
+                this.LoadResources(levelId, this.ChangeToLevel("Lvl3"));
             }
 
             if (!levelInitialized && !levelInitializing)
             {
                 levelInitializing = true;
 
-                this.Game.LoadResources(levelId, this.ChangeToLevel("Lvl1"));
+                this.LoadResources(levelId, this.ChangeToLevel("Lvl1"));
             }
 
             if (!gameReady)
@@ -343,7 +343,7 @@ namespace Collada
                 InitializeAudio(),
             };
 
-            await this.Game.LoadResourcesAsync(gameAssetsId, tasks.ToArray());
+            await this.LoadResourcesAsync(gameAssetsId, tasks.ToArray());
         }
         private void InitializeEnvironment()
         {
@@ -1121,7 +1121,7 @@ namespace Collada
                     string nextLevel = item.Object.NextLevel;
                     if (!string.IsNullOrEmpty(nextLevel))
                     {
-                        await this.Game.LoadResourcesAsync(Guid.NewGuid(), this.ChangeToLevel(nextLevel));
+                        await this.LoadResourcesAsync(Guid.NewGuid(), this.ChangeToLevel(nextLevel));
                     }
                     else
                     {

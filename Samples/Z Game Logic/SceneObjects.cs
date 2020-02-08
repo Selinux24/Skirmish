@@ -126,7 +126,7 @@ namespace GameLogic
 
             this.Lights.Add(this.spotLight);
 
-            await this.Game.LoadResourcesAsync(assetsId,
+            await this.LoadResourcesAsync(assetsId,
                 this.InitializeModels(),
                 this.InitializeHUD(),
                 this.InitializeDebug()
@@ -338,9 +338,9 @@ namespace GameLogic
             this.lineDrawer.Visible = false;
         }
 
-        protected override void GameResourcesLoaded(object sender, GameLoadResourcesEventArgs e)
+        public override void GameResourcesLoaded(Guid id)
         {
-            if (e.Id == assetsId)
+            if (id == assetsId)
             {
                 this.UpdateLayout();
 
@@ -614,7 +614,7 @@ namespace GameLogic
                 this.Communications(this.skirmishGame.CurrentSoldier);
             }
         }
-        protected override void GameGraphicsResized(object sender, EventArgs e)
+        public override void GameGraphicsResized()
         {
             this.UpdateLayout();
         }

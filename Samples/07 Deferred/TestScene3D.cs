@@ -78,12 +78,12 @@ namespace Deferred
             await InitializeCursor();
             await InitializeUI();
 
-            await this.Game.LoadResourcesAsync(uiId,
+            await this.LoadResourcesAsync(uiId,
                 InitializeCursor(),
                 InitializeUI()
                 );
 
-            await this.Game.LoadResourcesAsync(assetsId,
+            await this.LoadResourcesAsync(assetsId,
                 InitializeAndTrace(InitializeSkydom),
                 InitializeAndTrace(InitializeHelicopters),
                 InitializeAndTrace(InitializeTanks),
@@ -334,16 +334,16 @@ namespace Deferred
             this.terrainGraphDrawer.Visible = false;
         }
 
-        protected override void GameResourcesLoaded(object sender, GameLoadResourcesEventArgs e)
+        public override void GameResourcesLoaded(Guid id)
         {
-            if (e.Id == uiId)
+            if (id == uiId)
             {
                 this.title.Text = "Deferred Ligthning test";
                 this.help.Text = "";
                 this.statistics.Text = "";
             }
 
-            if (e.Id == assetsId)
+            if (id == assetsId)
             {
                 this.SetGround(this.terrain, true);
                 this.AttachToGround(this.tree, false);

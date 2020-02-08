@@ -51,7 +51,7 @@ namespace Collada
             this.Game.VisibleMouse = false;
             this.Game.LockMouse = true;
 #endif
-            await this.Game.LoadResourcesAsync(userInterfaceId, this.InitializeText());
+            await this.LoadResourcesAsync(userInterfaceId, this.InitializeText());
         }
         private async Task InitializeText()
         {
@@ -151,9 +151,9 @@ namespace Collada
             this.graphDrawer = await this.AddComponentPrimitiveListDrawer<Triangle>(graphDrawerDesc);
         }
 
-        protected override void GameResourcesLoaded(object sender, GameLoadResourcesEventArgs e)
+        public override void GameResourcesLoaded(Guid id)
         {
-            if (e.Id == userInterfaceId && !userInterfaceInitialized)
+            if (id == userInterfaceId && !userInterfaceInitialized)
             {
                 userInterfaceInitialized = true;
 
@@ -163,7 +163,7 @@ namespace Collada
                 return;
             }
 
-            if (e.Id == gameAssetsId && !gameAssetsInitialized)
+            if (id == gameAssetsId && !gameAssetsInitialized)
             {
                 gameAssetsInitialized = true;
 
@@ -206,7 +206,7 @@ namespace Collada
             {
                 gameAssetsInitializing = true;
 
-                this.Game.LoadResources(gameAssetsId,
+                this.LoadResources(gameAssetsId,
                     this.InitializeNavmesh(),
                     this.InitializeDebug());
 

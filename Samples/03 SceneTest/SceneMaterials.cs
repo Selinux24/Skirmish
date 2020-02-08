@@ -47,7 +47,7 @@ namespace SceneTest
 
             GameEnvironment.Background = Color.CornflowerBlue;
 
-            await this.Game.LoadResourcesAsync(Guid.NewGuid(),
+            await this.LoadResourcesAsync(Guid.NewGuid(),
                 this.InitializeTextBoxes(),
                 this.InitializeSkyEffects(),
                 this.InitializeFloor(),
@@ -55,7 +55,7 @@ namespace SceneTest
                 this.InitializeColorGroup(128, 1f, new Vector3(-10.5f, 0, -10), true)
             );
         }
-        protected override void GameResourcesLoaded(object sender, GameLoadResourcesEventArgs e)
+        public override void GameResourcesLoaded(Guid id)
         {
             gameReady = true;
         }

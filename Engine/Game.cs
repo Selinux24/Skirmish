@@ -381,25 +381,29 @@ namespace Engine
         /// <summary>
         /// Executes a list of resource load tasks
         /// </summary>
+        /// <param name="scene">Scene</param>
+        /// <param name="id">Load id</param>
         /// <param name="tasks">Resource load tasks</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        public bool LoadResources(Guid id, params Task[] tasks)
+        internal bool LoadResources(Scene scene, Guid id, params Task[] tasks)
         {
             if (ResourceLoadRuning)
             {
                 return false;
             }
 
-            Task.WhenAll(LoadResourcesAsync(id, tasks));
+            Task.WhenAll(LoadResourcesAsync(scene, id, tasks));
 
             return true;
         }
         /// <summary>
         /// Executes a list of resource load tasks
         /// </summary>
+        /// <param name="scene">Scene</param>
+        /// <param name="id">Load id</param>
         /// <param name="tasks">Resource load tasks</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        public async Task<bool> LoadResourcesAsync(Guid id, params Task[] tasks)
+        internal async Task<bool> LoadResourcesAsync(Scene scene, Guid id, params Task[] tasks)
         {
             if (ResourceLoadRuning)
             {
@@ -410,7 +414,7 @@ namespace Engine
 
             await Task.WhenAll(tasks);
 
-            ResourcesLoading?.Invoke(this, new GameLoadResourcesEventArgs() { Id = id });
+            ResourcesLoading?.Invoke(this, new GameLoadResourcesEventArgs() { Id = id, Scene = scene });
 
             Console.WriteLine("BufferManager: Recreating buffers");
             this.BufferManager.CreateBuffers(Progress);
@@ -420,7 +424,7 @@ namespace Engine
             this.ResourceManager.CreateResources();
             Console.WriteLine("ResourceManager: New resources created");
 
-            ResourcesLoaded?.Invoke(this, new GameLoadResourcesEventArgs() { Id = id });
+            ResourcesLoaded?.Invoke(this, new GameLoadResourcesEventArgs() { Id = id, Scene = scene });
 
             ResourceLoadRuning = false;
 

@@ -159,7 +159,7 @@ namespace Terrain
             this.Camera.NearPlaneDistance = 0.1f;
             this.Camera.FarPlaneDistance = 5000f;
 
-            await this.Game.LoadResourcesAsync(uiId, InitializeUI());
+            await this.LoadResourcesAsync(uiId, InitializeUI());
 
             List<Task> loadTasks = new List<Task>()
             {
@@ -180,7 +180,7 @@ namespace Terrain
                 InitializeGardener(),
             };
 
-            await this.Game.LoadResourcesAsync(assetsId, loadTasks.ToArray());
+            await this.LoadResourcesAsync(assetsId, loadTasks.ToArray());
         }
         private async Task<TaskResult> InitializeUI()
         {
@@ -1225,9 +1225,9 @@ namespace Terrain
             });
         }
 
-        protected override void GameResourcesLoaded(object sender, GameLoadResourcesEventArgs e)
+        public override void GameResourcesLoaded(Guid id)
         {
-            if (e.Id == assetsId)
+            if (id == assetsId)
             {
                 InitializeAudio();
 

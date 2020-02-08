@@ -42,7 +42,7 @@ namespace SceneTest
             this.Camera.Goto(-10, 8, 20f);
             this.Camera.LookTo(0, 0, 0);
 
-            await this.Game.LoadResourcesAsync(Guid.NewGuid(),
+            await this.LoadResourcesAsync(Guid.NewGuid(),
                 this.InitializeFloorAsphalt(),
                 this.InitializeBuildingObelisk(),
                 this.InitializeEmitter(),

@@ -71,7 +71,7 @@ namespace Skybox
         {
             this.InitializeCamera();
 
-            await this.Game.LoadResourcesAsync(assetsId, InitializeAssets());
+            await this.LoadResourcesAsync(assetsId, InitializeAssets());
         }
         private async Task InitializeAssets()
         {
@@ -321,9 +321,9 @@ namespace Skybox
                 });
         }
 
-        protected override void GameResourcesLoaded(object sender, GameLoadResourcesEventArgs e)
+        public override void GameResourcesLoaded(Guid id)
         {
-            if (assetsId == e.Id)
+            if (assetsId == id)
             {
                 InitializeNavigationMesh();
 

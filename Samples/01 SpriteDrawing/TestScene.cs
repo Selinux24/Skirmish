@@ -39,16 +39,16 @@ namespace SpriteDrawing
         {
             return LoadUserInteface();
         }
-        protected override void GameResourcesLoaded(object sender, GameLoadResourcesEventArgs e)
+        public override void GameResourcesLoaded(Guid id)
         {
-            if (e.Id == userInterfaceId && !userInterfaceInitialized)
+            if (id == userInterfaceId && !userInterfaceInitialized)
             {
                 userInterfaceInitialized = true;
 
                 return;
             }
 
-            if (e.Id == gameAssetsId && !gameAssetsInitialized)
+            if (id == gameAssetsId && !gameAssetsInitialized)
             {
                 gameAssetsInitialized = true;
 
@@ -95,7 +95,7 @@ namespace SpriteDrawing
         {
             this.userInterfaceInitialized = false;
 
-            await this.Game.LoadResourcesAsync(userInterfaceId, InitializeBackground());
+            await this.LoadResourcesAsync(userInterfaceId, InitializeBackground());
         }
         private async Task LoadGameAssets()
         {
@@ -104,7 +104,7 @@ namespace SpriteDrawing
             this.progressBar.Visible = true;
             this.progressBar.ProgressValue = 0;
 
-            await this.Game.LoadResourcesAsync(gameAssetsId,
+            await this.LoadResourcesAsync(gameAssetsId,
                 InitializePan(),
                 InitializeSmiley(),
                 InitializeTextDrawer());

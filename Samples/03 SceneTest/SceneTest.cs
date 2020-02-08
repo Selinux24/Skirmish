@@ -101,7 +101,7 @@ namespace SceneTest
                 InitializaDebug(),
             };
 
-            await this.Game.LoadResourcesAsync(loadId, taskList);
+            await this.LoadResourcesAsync(loadId, taskList);
 
             this.TimeOfDay.BeginAnimation(new TimeSpan(9, 00, 00), 0.1f);
         }
@@ -764,9 +764,9 @@ namespace SceneTest
             this.lightsVolumeDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(desc);
         }
 
-        protected override void GameResourcesLoaded(object sender, GameLoadResourcesEventArgs e)
+        public override void GameResourcesLoaded(Guid id)
         {
-            if (loadId == e.Id)
+            if (loadId == id)
             {
                 this.Camera.Goto(-20, 10, -40f);
                 this.Camera.LookTo(0, 0, 0);
@@ -971,7 +971,7 @@ namespace SceneTest
             this.Game.Input.LockMouse = !cursor.Visible;
         }
 
-        protected override void GameGraphicsResized(object sender, EventArgs e)
+        public override void GameGraphicsResized()
         {
             this.RefreshUI();
         }

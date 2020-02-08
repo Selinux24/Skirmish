@@ -43,7 +43,7 @@ namespace ModelDrawing
             this.Camera.Goto(Vector3.ForwardLH * -15f + Vector3.UnitY * 10f);
             this.Camera.LookTo(Vector3.Zero);
 
-            await this.Game.LoadResourcesAsync(Guid.NewGuid(),
+            await this.LoadResourcesAsync(Guid.NewGuid(),
                 this.InitializeTexts(),
                 this.InitializeFloor(),
                 this.InitializeModels(),

@@ -31,7 +31,7 @@ namespace Instancing
         {
             GameEnvironment.Background = Color.CornflowerBlue;
 
-            await this.Game.LoadResourcesAsync(assetsId,
+            await this.LoadResourcesAsync(assetsId,
                 InitializeTexts(),
                 InitializeFloor(),
                 InitializeTrees(),
@@ -39,9 +39,9 @@ namespace Instancing
                 InitializeWall()
                 );
         }
-        protected override void GameResourcesLoaded(object sender, GameLoadResourcesEventArgs e)
+        public override void GameResourcesLoaded(Guid id)
         {
-            if (e.Id == assetsId)
+            if (id == assetsId)
             {
                 this.Camera.Goto(new Vector3(-45, 17, -30));
                 this.Camera.LookTo(Vector3.Zero);
