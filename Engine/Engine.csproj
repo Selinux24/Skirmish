@@ -180,9 +180,14 @@
     <Compile Include="Audio\IGameAudioListener.cs" />
     <Compile Include="Audio\ReverbPresets.cs" />
     <Compile Include="Common\BufferDescriptorRequestActions.cs" />
+    <Compile Include="Common\BufferDescriptorRequestIndices.cs" />
+    <Compile Include="Common\BufferDescriptorRequestInstancing.cs" />
+    <Compile Include="Common\BufferDescriptorRequestVertices.cs" />
     <Compile Include="Common\GeometryDescriptor.cs" />
+    <Compile Include="Common\IndexBufferDescription.cs" />
     <Compile Include="Common\NormalDescriptor.cs" />
     <Compile Include="Common\OrientedBoundingBox.cs" />
+    <Compile Include="Common\VertexBufferDescription.cs" />
     <Compile Include="GameAudioManager.cs" />
     <Compile Include="Audio\GameAudio.cs" />
     <Compile Include="Audio\GameAudioEventArgs.cs" />

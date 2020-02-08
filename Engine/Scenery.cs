@@ -55,7 +55,7 @@ namespace Engine
                     Constraint = node.BoundingBox,
                 };
 
-                var drawingData = DrawingData.Build(game, name, content, desc);
+                var drawingData = DrawingData.Build(game, name, content, desc, null);
 
                 return new SceneryPatch(game, drawingData);
             }

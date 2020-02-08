@@ -16,11 +16,16 @@ namespace Engine.Common
         /// <summary>
         /// Meshes by level of detail dictionary
         /// </summary>
-        private LevelOfDetailDictionary meshesByLOD = new LevelOfDetailDictionary();
+        private readonly LevelOfDetailDictionary meshesByLOD = new LevelOfDetailDictionary();
         /// <summary>
         /// Default level of detail
         /// </summary>
         private readonly LevelOfDetail defaultLevelOfDetail = LevelOfDetail.Minimum;
+
+        /// <summary>
+        /// Instancing buffer
+        /// </summary>
+        protected BufferDescriptor InstancingBuffer { get; private set; } = null;
 
         /// <summary>
         /// Gets the texture count for texture index
@@ -106,13 +111,18 @@ namespace Engine.Common
                 throw new EngineException("No geometry found in description.");
             }
 
+            if (desc.Instanced)
+            {
+                InstancingBuffer = this.BufferManager.AddInstancingData($"{description.Name}.Instances", true, desc.Instances);
+            }
+
             if (geo.Count() == 1)
             {
                 var iGeo = geo.First();
 
                 if (description.Optimize) iGeo.Optimize();
 
-                var drawable = DrawingData.Build(this.Game, description.Name, iGeo, desc);
+                var drawable = DrawingData.Build(this.Game, description.Name, iGeo, desc, InstancingBuffer);
 
                 this.meshesByLOD.Add(LevelOfDetail.High, drawable);
             }
@@ -127,7 +137,7 @@ namespace Engine.Common
                         this.defaultLevelOfDetail = lod;
                     }
 
-                    var drawable = DrawingData.Build(this.Game, description.Name, content[lod], desc);
+                    var drawable = DrawingData.Build(this.Game, description.Name, content[lod], desc, InstancingBuffer);
 
                     this.meshesByLOD.Add(lod, drawable);
                 }
@@ -150,11 +160,14 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                foreach (var mesh in this.meshesByLOD)
+                this.meshesByLOD.Values.ToList().ForEach(m => m?.Dispose());
+                this.meshesByLOD.Clear();
+
+                if (this.InstancingBuffer != null)
                 {
-                    mesh.Value?.Dispose();
+                    this.BufferManager.RemoveInstancingData(this.InstancingBuffer);
+                    this.InstancingBuffer = null;
                 }
-                this.meshesByLOD = null;
             }
         }
 
@@ -286,16 +299,6 @@ namespace Engine.Common
             return null;
         }
 
-        /// <summary>
-        /// Gets wheter the model is ready for drawing
-        /// </summary>
-        /// <returns>Returns true if the model has all his buffers ready in the buffer manager</returns>
-        protected bool IsReady()
-        {
-            bool any = this.meshesByLOD.Values.Any(v => v.Meshes.Values.Any(m => m.Values.Any(mv => (mv.Indexed && mv.IndexBuffer.Slot < 0) || mv.VertexBuffer.Slot < 0)));
-
-            return !any;
-        }
         /// <summary>
         /// Gets the drawing effect for the current instance
         /// </summary>

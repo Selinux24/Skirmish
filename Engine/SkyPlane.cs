@@ -158,8 +158,8 @@ namespace Engine
             var vertices = VertexPositionTexture.Generate(cPlane.Vertices, cPlane.Uvs);
             var indices = cPlane.Indices;
 
-            this.vertexBuffer = this.BufferManager.Add(description.Name, vertices, false, 0);
-            this.indexBuffer = this.BufferManager.Add(description.Name, indices, false);
+            this.vertexBuffer = this.BufferManager.AddVertexData(description.Name, false, vertices);
+            this.indexBuffer = this.BufferManager.AddIndexData(description.Name, false, indices);
         }
         /// <summary>
         /// Destructor
@@ -177,7 +177,7 @@ namespace Engine
             if (disposing)
             {
                 //Remove data from buffer manager
-                this.BufferManager?.RemoveVertexData(this.vertexBuffer, 0);
+                this.BufferManager?.RemoveVertexData(this.vertexBuffer);
                 this.BufferManager?.RemoveIndexData(this.indexBuffer);
             }
         }

@@ -241,7 +241,7 @@ namespace Engine
             if (disposing)
             {
                 //Remove data from buffer manager
-                this.BufferManager?.RemoveVertexData(this.vertexBuffer, 0);
+                this.BufferManager?.RemoveVertexData(this.vertexBuffer);
                 this.BufferManager?.RemoveIndexData(this.indexBuffer);
             }
         }
@@ -276,7 +276,7 @@ namespace Engine
 
                     var effect = DrawerPool.EffectDefaultSkyScattering;
 
-                    EngineEffectTechnique technique = null;
+                    EngineEffectTechnique technique;
                     if (this.Resolution == SkyScatteringResolutions.High)
                     {
                         technique = effect.SkyScatteringHigh;
@@ -338,8 +338,8 @@ namespace Engine
             var vertices = VertexPosition.Generate(sphere.Vertices);
             var indices = GeometryUtil.ChangeCoordinate(sphere.Indices);
 
-            this.vertexBuffer = this.BufferManager.Add(name, vertices, false, 0);
-            this.indexBuffer = this.BufferManager.Add(name, indices, false);
+            this.vertexBuffer = this.BufferManager.AddVertexData(name, false, vertices);
+            this.indexBuffer = this.BufferManager.AddIndexData(name, false, indices);
         }
         /// <summary>
         /// Calc current scattering scale from sphere radius values

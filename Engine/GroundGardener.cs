@@ -425,7 +425,7 @@ namespace Engine
                 this.Id = GetID();
                 this.Attached = false;
                 this.CurrentPatch = null;
-                this.VertexBuffer = bufferManager.Add(string.Format("{1}.{0}", this.Id, name), new VertexBillboard[FoliagePatch.MAX], true, 0);
+                this.VertexBuffer = bufferManager.AddVertexData(string.Format("{1}.{0}", this.Id, name), true, new VertexBillboard[FoliagePatch.MAX]);
             }
             /// <summary>
             /// Destructor
@@ -451,7 +451,7 @@ namespace Engine
                 if (disposing)
                 {
                     //Remove data from buffer manager
-                    this.BufferManager?.RemoveVertexData(this.VertexBuffer, 0);
+                    this.BufferManager?.RemoveVertexData(this.VertexBuffer);
                 }
             }
 

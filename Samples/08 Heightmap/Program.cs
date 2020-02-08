@@ -1,6 +1,5 @@
 ﻿using Engine;
 using System;
-using System.IO;
 
 namespace Heightmap
 {
@@ -9,30 +8,23 @@ namespace Heightmap
         [STAThread]
         static void Main()
         {
-            try
+#if DEBUG
+            using (Game cl = new Game("8 Heightmap", false, 1600, 900, true, 0, 0))
+#else
+            using (Game cl = new Game("8 Heightmap", true, 0, 0, true, 0, 4))
+#endif
             {
 #if DEBUG
-                using (Game cl = new Game("8 Heightmap", false, 1600, 900, true, 0, 0))
+                cl.VisibleMouse = false;
+                cl.LockMouse = false;
 #else
-                using (Game cl = new Game("8 Heightmap", true, 0, 0, true, 0, 4))
-#endif
-                {
-#if DEBUG
-                    cl.VisibleMouse = false;
-                    cl.LockMouse = false;
-#else
-                    cl.VisibleMouse = false;
-                    cl.LockMouse = true;
+                cl.VisibleMouse = false;
+                cl.LockMouse = true;
 #endif
 
-                    cl.SetScene<TestScene3D>();
+                cl.SetScene<TestScene3D>();
 
-                    cl.Run();
-                }
-            }
-            catch (Exception ex)
-            {
-                File.WriteAllText("dump.txt", ex.ToString());
+                cl.Run();
             }
         }
     }

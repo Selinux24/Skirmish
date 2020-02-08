@@ -1161,24 +1161,6 @@ namespace Engine
         }
 
         /// <summary>
-        /// Creates an index buffer
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="name">Buffer name</param>
-        /// <param name="data">Data to write in the buffer</param>
-        /// <returns>Returns created buffer initialized with the specified data</returns>
-        /// <param name="dynamic">Dynamic or Inmutable buffers</param>
-        internal Buffer CreateIndexBuffer<T>(string name, IEnumerable<T> data, bool dynamic)
-            where T : struct
-        {
-            return CreateBuffer<T>(
-                name,
-                data,
-                dynamic ? ResourceUsage.Dynamic : ResourceUsage.Immutable,
-                BindFlags.IndexBuffer,
-                dynamic ? CpuAccessFlags.Write : CpuAccessFlags.None);
-        }
-        /// <summary>
         /// Creates a vertex buffer
         /// </summary>
         /// <param name="name">Buffer name</param>
@@ -1192,37 +1174,37 @@ namespace Engine
             switch (vertexType)
             {
                 case VertexTypes.Billboard:
-                    return CreateVertexBuffer<VertexBillboard>(name, data, dynamic);
+                    return CreateVertexBuffer(name, data.OfType<VertexBillboard>(), dynamic);
                 case VertexTypes.CPUParticle:
-                    return CreateVertexBuffer<VertexCpuParticle>(name, data, dynamic);
+                    return CreateVertexBuffer(name, data.OfType<VertexCpuParticle>(), dynamic);
                 case VertexTypes.GPUParticle:
-                    return CreateVertexBuffer<VertexGpuParticle>(name, data, dynamic);
+                    return CreateVertexBuffer(name, data.OfType<VertexGpuParticle>(), dynamic);
                 case VertexTypes.Terrain:
-                    return CreateVertexBuffer<VertexTerrain>(name, data, dynamic);
+                    return CreateVertexBuffer(name, data.OfType<VertexTerrain>(), dynamic);
                 case VertexTypes.Position:
-                    return CreateVertexBuffer<VertexPosition>(name, data, dynamic);
+                    return CreateVertexBuffer(name, data.OfType<VertexPosition>(), dynamic);
                 case VertexTypes.PositionColor:
-                    return CreateVertexBuffer<VertexPositionColor>(name, data, dynamic);
+                    return CreateVertexBuffer(name, data.OfType<VertexPositionColor>(), dynamic);
                 case VertexTypes.PositionTexture:
-                    return CreateVertexBuffer<VertexPositionTexture>(name, data, dynamic);
+                    return CreateVertexBuffer(name, data.OfType<VertexPositionTexture>(), dynamic);
                 case VertexTypes.PositionNormalColor:
-                    return CreateVertexBuffer<VertexPositionNormalColor>(name, data, dynamic);
+                    return CreateVertexBuffer(name, data.OfType<VertexPositionNormalColor>(), dynamic);
                 case VertexTypes.PositionNormalTexture:
-                    return CreateVertexBuffer<VertexPositionNormalTexture>(name, data, dynamic);
+                    return CreateVertexBuffer(name, data.OfType<VertexPositionNormalTexture>(), dynamic);
                 case VertexTypes.PositionNormalTextureTangent:
-                    return CreateVertexBuffer<VertexPositionNormalTextureTangent>(name, data, dynamic);
+                    return CreateVertexBuffer(name, data.OfType<VertexPositionNormalTextureTangent>(), dynamic);
                 case VertexTypes.PositionSkinned:
-                    return CreateVertexBuffer<VertexSkinnedPosition>(name, data, dynamic);
+                    return CreateVertexBuffer(name, data.OfType<VertexSkinnedPosition>(), dynamic);
                 case VertexTypes.PositionColorSkinned:
-                    return CreateVertexBuffer<VertexSkinnedPositionColor>(name, data, dynamic);
+                    return CreateVertexBuffer(name, data.OfType<VertexSkinnedPositionColor>(), dynamic);
                 case VertexTypes.PositionTextureSkinned:
-                    return CreateVertexBuffer<VertexSkinnedPositionTexture>(name, data, dynamic);
+                    return CreateVertexBuffer(name, data.OfType<VertexSkinnedPositionTexture>(), dynamic);
                 case VertexTypes.PositionNormalColorSkinned:
-                    return CreateVertexBuffer<VertexSkinnedPositionNormalColor>(name, data, dynamic);
+                    return CreateVertexBuffer(name, data.OfType<VertexSkinnedPositionNormalColor>(), dynamic);
                 case VertexTypes.PositionNormalTextureSkinned:
-                    return CreateVertexBuffer<VertexSkinnedPositionNormalTexture>(name, data, dynamic);
+                    return CreateVertexBuffer(name, data.OfType<VertexSkinnedPositionNormalTexture>(), dynamic);
                 case VertexTypes.PositionNormalTextureTangentSkinned:
-                    return CreateVertexBuffer<VertexSkinnedPositionNormalTextureTangent>(name, data, dynamic);
+                    return CreateVertexBuffer(name, data.OfType<VertexSkinnedPositionNormalTextureTangent>(), dynamic);
                 default:
                     throw new EngineException(string.Format("Unknown vertex type: {0}", vertexType));
             }
@@ -1235,32 +1217,32 @@ namespace Engine
         /// <param name="data">Data to write in the buffer</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
-        internal Buffer CreateVertexBuffer<T>(string name, IEnumerable<IVertexData> data, bool dynamic)
+        internal Buffer CreateVertexBuffer<T>(string name, IEnumerable<T> data, bool dynamic)
             where T : struct
         {
             return CreateBuffer(
                 name,
-                data.OfType<T>(),
+                data,
                 dynamic ? ResourceUsage.Dynamic : ResourceUsage.Immutable,
                 BindFlags.VertexBuffer,
                 dynamic ? CpuAccessFlags.Write : CpuAccessFlags.None);
         }
         /// <summary>
-        /// Creates a vertex buffer
+        /// Creates an index buffer
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="name">Buffer name</param>
         /// <param name="data">Data to write in the buffer</param>
-        /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
-        internal Buffer CreateVertexBuffer<T>(string name, IEnumerable<T> data, bool dynamic)
+        /// <param name="dynamic">Dynamic or Inmutable buffers</param>
+        internal Buffer CreateIndexBuffer<T>(string name, IEnumerable<T> data, bool dynamic)
             where T : struct
         {
-            return CreateBuffer<T>(
+            return CreateBuffer(
                 name,
                 data,
                 dynamic ? ResourceUsage.Dynamic : ResourceUsage.Immutable,
-                BindFlags.VertexBuffer,
+                BindFlags.IndexBuffer,
                 dynamic ? CpuAccessFlags.Write : CpuAccessFlags.None);
         }
         /// <summary>
@@ -1329,6 +1311,7 @@ namespace Engine
                 return new Buffer(this.device, dstr, description);
             }
         }
+      
         /// <summary>
         /// Creates a new Input Layout for a Shader
         /// </summary>

@@ -40,7 +40,7 @@ namespace Engine
             {
                 var indexList = GeometryUtil.GenerateIndices(shapeId.LevelOfDetail, shapeId.Shape, trianglesPerNode);
 
-                return bufferManager.Add(string.Format("{0}.{1}", shapeId.LevelOfDetail, shapeId.Shape), indexList, false);
+                return bufferManager.AddIndexData(string.Format("{0}.{1}", shapeId.LevelOfDetail, shapeId.Shape), false, indexList);
             }
 
             /// <summary>
@@ -52,10 +52,6 @@ namespace Engine
             /// Game
             /// </summary>
             public Game Game = null;
-            /// <summary>
-            /// Buffer manager
-            /// </summary>
-            public BufferManager BufferManager = null;
             /// <summary>
             /// High resolution nodes
             /// </summary>
@@ -93,13 +89,12 @@ namespace Engine
             /// Constructor
             /// </summary>
             /// <param name="game">Game instance</param>
+            /// <param name="mapName">Map name</param>
             /// <param name="vertices">Vertices to map</param>
             /// <param name="trianglesPerNode">Triangles per terrain node</param>
-            /// <param name="bufferManager">Buffer manager</param>
-            public MapGrid(Game game, BufferManager bufferManager, IEnumerable<VertexData> vertices, int trianglesPerNode)
+            public MapGrid(Game game, string mapName, IEnumerable<VertexData> vertices, int trianglesPerNode)
             {
                 this.Game = game;
-                this.BufferManager = bufferManager;
 
                 //Populate collections
                 for (int i = 0; i < this.NodesHigh.Length; i++)
@@ -148,7 +143,7 @@ namespace Engine
                     {
                         var id = new MapGridShapeId() { LevelOfDetail = lod, Shape = shape };
 
-                        this.dictIB.Add(id, CreateDescriptor(id, trianglesPerNode, bufferManager));
+                        this.dictIB.Add(id, CreateDescriptor(id, trianglesPerNode, game.BufferManager));
                     }
                 }
 
@@ -160,7 +155,7 @@ namespace Engine
                 {
                     var data = VertexData.Convert(VertexTypes.Terrain, node.Items, null, null);
 
-                    this.dictVB.Add(node.Id, bufferManager.Add("", data.ToArray(), false, 1));
+                    this.dictVB.Add(node.Id, game.BufferManager.AddVertexData(mapName, false, data));
                 }
             }
             /// <summary>
@@ -187,17 +182,17 @@ namespace Engine
             {
                 if (disposing)
                 {
-                    if (this.BufferManager != null)
+                    if (this.Game.BufferManager != null)
                     {
                         //Remove data from buffer manager
                         foreach (var vb in this.dictVB.Values)
                         {
-                            this.BufferManager.RemoveVertexData(vb, 0);
+                            this.Game.BufferManager.RemoveVertexData(vb);
                         }
                         foreach (var ib in this.dictIB.Values)
                         {
                             //Remove data from buffer manager
-                            this.BufferManager.RemoveIndexData(ib);
+                            this.Game.BufferManager.RemoveIndexData(ib);
                         }
                     }
 
@@ -817,7 +812,7 @@ namespace Engine
                 //Initialize map
                 int trianglesPerNode = this.heightMap.CalcTrianglesPerNode(MapGrid.LODLevels);
 
-                this.Map = new MapGrid(this.Game, this.BufferManager, vertices, trianglesPerNode);
+                this.Map = new MapGrid(this.Game, $"Terrain.{this.Name}", vertices, trianglesPerNode);
             }
         }
         /// <summary>

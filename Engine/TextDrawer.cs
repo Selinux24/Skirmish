@@ -247,8 +247,8 @@ namespace Engine
             VertexPositionTexture[] verts = new VertexPositionTexture[FontMap.MAXTEXTLENGTH * 4];
             uint[] idx = new uint[FontMap.MAXTEXTLENGTH * 6];
 
-            this.vertexBuffer = this.BufferManager.Add(description.Name, verts, true, 0);
-            this.indexBuffer = this.BufferManager.Add(description.Name, idx, true);
+            this.vertexBuffer = this.BufferManager.AddVertexData(description.Name, true, verts);
+            this.indexBuffer = this.BufferManager.AddIndexData(description.Name, true, idx);
 
             this.TextColor = description.TextColor;
             this.ShadowColor = description.ShadowColor;
@@ -272,7 +272,7 @@ namespace Engine
             if (disposing)
             {
                 //Remove data from buffer manager
-                this.BufferManager?.RemoveVertexData(this.vertexBuffer, 0);
+                this.BufferManager?.RemoveVertexData(this.vertexBuffer);
                 this.BufferManager?.RemoveIndexData(this.indexBuffer);
 
                 //Remove the font map reference

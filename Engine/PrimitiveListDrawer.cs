@@ -98,7 +98,7 @@ namespace Engine
             if (disposing)
             {
                 //Remove data from buffer manager
-                this.BufferManager?.RemoveVertexData(this.vertexBuffer, 0);
+                this.BufferManager?.RemoveVertexData(this.vertexBuffer);
             }
         }
         /// <summary>
@@ -151,7 +151,7 @@ namespace Engine
         /// <param name="vertexCount">Vertex count</param>
         private void InitializeBuffers(string name, int vertexCount)
         {
-            this.vertexBuffer = this.BufferManager.Add(name, new VertexPositionColor[vertexCount], true, 0);
+            this.vertexBuffer = this.BufferManager.AddVertexData(name, true, new VertexPositionColor[vertexCount]);
         }
         /// <summary>
         /// Set primitive

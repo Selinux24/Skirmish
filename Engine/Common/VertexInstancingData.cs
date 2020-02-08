@@ -10,7 +10,7 @@ namespace Engine.Common
     /// Instancing data
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct VertexInstancingData : IBufferData
+    public struct VertexInstancingData : IInstacingData
     {
         /// <summary>
         /// Defined input colection
@@ -62,4 +62,9 @@ namespace Engine.Common
             return Marshal.SizeOf(typeof(VertexInstancingData));
         }
     };
+
+    public interface IInstacingData : IBufferData
+    {
+
+    }
 }

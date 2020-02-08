@@ -208,7 +208,7 @@ namespace Engine
             if (disposing)
             {
                 //Remove data from buffer manager
-                this.BufferManager?.RemoveVertexData(this.vertexBuffer, 0);
+                this.BufferManager?.RemoveVertexData(this.vertexBuffer);
                 this.BufferManager?.RemoveIndexData(this.indexBuffer);
             }
         }
@@ -281,17 +281,17 @@ namespace Engine
                 }
 
                 var vertices = VertexPositionTexture.Generate(geom.Vertices, geom.Uvs);
-                this.vertexBuffer = this.BufferManager.Add(name, vertices, false, 0);
+                this.vertexBuffer = this.BufferManager.AddVertexData(name, false, vertices);
             }
             else
             {
                 geom = GeometryUtil.CreateSprite(Vector2.Zero, 1, 1, 0, 0);
 
                 var vertices = VertexPositionColor.Generate(geom.Vertices, Color4.White);
-                this.vertexBuffer = this.BufferManager.Add(name, vertices, false, 0);
+                this.vertexBuffer = this.BufferManager.AddVertexData(name, false, vertices);
             }
 
-            this.indexBuffer = this.BufferManager.Add(name, geom.Indices, false);
+            this.indexBuffer = this.BufferManager.AddIndexData(name, false, geom.Indices);
         }
         /// <summary>
         /// Initialize textures

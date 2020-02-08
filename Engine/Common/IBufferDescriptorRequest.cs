@@ -11,10 +11,6 @@ namespace Engine.Common
         /// </summary>
         string Id { get; }
         /// <summary>
-        /// Descriptor
-        /// </summary>
-        BufferDescriptor Descriptor { get; }
-        /// <summary>
         /// Request action
         /// </summary>
         BufferDescriptorRequestActions Action { get; }
@@ -22,11 +18,5 @@ namespace Engine.Common
         /// Gets wheter the descriptor is processed into the buffer manager or not
         /// </summary>
         bool Processed { get; }
-
-        /// <summary>
-        /// Updates the specified buffer manager
-        /// </summary>
-        /// <param name="bufferManager">Buffer manager</param>
-        void Update(BufferManager bufferManager);
     }
 }

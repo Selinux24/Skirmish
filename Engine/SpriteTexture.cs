@@ -22,7 +22,7 @@ namespace Engine
         /// <summary>
         /// View * projection for 2D projection
         /// </summary>
-        private Matrix viewProjection = Matrix.Identity;
+        private Matrix viewProjection;
         /// <summary>
         /// Drawing channels
         /// </summary>
@@ -79,8 +79,8 @@ namespace Engine
             var vertices = VertexPositionTexture.Generate(sprite.Vertices, sprite.Uvs);
             var indices = sprite.Indices;
 
-            this.vertexBuffer = this.BufferManager.Add(description.Name, vertices, false, 0);
-            this.indexBuffer = this.BufferManager.Add(description.Name, indices, false);
+            this.vertexBuffer = this.BufferManager.AddVertexData(description.Name, false, vertices);
+            this.indexBuffer = this.BufferManager.AddIndexData(description.Name, false, indices);
 
             this.Channels = description.Channel;
 
@@ -115,7 +115,7 @@ namespace Engine
             if (disposing)
             {
                 //Remove data from buffer manager
-                this.BufferManager?.RemoveVertexData(this.vertexBuffer, 0);
+                this.BufferManager?.RemoveVertexData(this.vertexBuffer);
                 this.BufferManager?.RemoveIndexData(this.indexBuffer);
             }
         }

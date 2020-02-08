@@ -188,15 +188,15 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void DrawShadows(DrawContextShadows context)
         {
-            if (!this.IsReady() || this.VisibleCount <= 0)
+            if (InstancingBuffer.Slot < 0)
             {
                 return;
             }
 
             if (this.hasDataToWrite)
             {
-                Console.WriteLine($"{this.Name} - DrawShadows WriteInstancingData");
-                this.BufferManager.WriteInstancingData(this.instancingData);
+                Console.WriteLine($"{this.Name} - DrawShadows WriteInstancingData: Slot {InstancingBuffer.Slot} Offset {InstancingBuffer.Offset}");
+                this.BufferManager.WriteInstancingData(InstancingBuffer.Slot, InstancingBuffer.Offset, this.instancingData);
             }
 
             var effect = context.ShadowMap.GetEffect();
@@ -244,7 +244,7 @@ namespace Engine
                     continue;
                 }
 
-                var index = Array.IndexOf(this.instancesTmp, lodInstances[0]);
+                var index = Array.IndexOf(this.instancesTmp, lodInstances[0]) + this.InstancingBuffer.Offset;
                 var length = Math.Min(maxCount, lodInstances.Length);
                 if (length <= 0)
                 {
@@ -267,15 +267,15 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            if (!this.IsReady() || this.VisibleCount <= 0)
+            if (InstancingBuffer.Slot < 0)
             {
                 return;
             }
 
             if (this.hasDataToWrite)
             {
-                Console.WriteLine($"{this.Name} - DrawShadows WriteInstancingData");
-                this.BufferManager.WriteInstancingData(this.instancingData);
+                Console.WriteLine($"{this.Name} - Draw WriteInstancingData: Slot {InstancingBuffer.Slot} Offset {InstancingBuffer.Offset} {context.DrawerMode}");
+                this.BufferManager.WriteInstancingData(InstancingBuffer.Slot, InstancingBuffer.Offset, this.instancingData);
             }
 
             var effect = this.GetEffect(context.DrawerMode);
@@ -323,7 +323,7 @@ namespace Engine
                     continue;
                 }
 
-                var index = Array.IndexOf(this.instancesTmp, lodInstances[0]);
+                var index = Array.IndexOf(this.instancesTmp, lodInstances[0]) + this.InstancingBuffer.Offset;
                 var length = Math.Min(maxCount, lodInstances.Length);
                 if (length <= 0)
                 {

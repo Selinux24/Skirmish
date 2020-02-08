@@ -57,7 +57,7 @@ namespace Engine
             if (disposing)
             {
                 //Remove data from buffer manager
-                this.BufferManager?.RemoveVertexData(this.vertexBuffer, 0);
+                this.BufferManager?.RemoveVertexData(this.vertexBuffer);
                 this.BufferManager?.RemoveIndexData(this.indexBuffer);
             }
         }
@@ -128,8 +128,8 @@ namespace Engine
             var vertices = VertexPositionTexture.Generate(plane.Vertices, plane.Uvs);
             var indices = plane.Indices;
 
-            this.vertexBuffer = this.BufferManager.Add(name, vertices, false, 0);
-            this.indexBuffer = this.BufferManager.Add(name, indices, false);
+            this.vertexBuffer = this.BufferManager.AddVertexData(name, false, vertices);
+            this.indexBuffer = this.BufferManager.AddIndexData(name, false, indices);
         }
     }
 
