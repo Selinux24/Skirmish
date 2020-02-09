@@ -215,12 +215,17 @@ namespace Engine.Animation
                     current.UpdateSkinningData(skData);
 
                     bool? continuePath = UpdateItem(current, isLast, nextTime, ref time, out atEnd, out float t);
-                    if (continuePath == false)
+                    if (continuePath.HasValue)
                     {
-                        break;
+                        if (!continuePath.Value)
+                        {
+                            break;
+                        }
                     }
-
-                    clipTime -= t;
+                    else
+                    {
+                        clipTime -= t;
+                    }
                 }
             }
 
