@@ -1208,7 +1208,6 @@ namespace GameLogic
         private Soldier PickSoldierNearestToPosition(Ray cursorRay, Vector3 position, bool enemyOnly)
         {
             Soldier res = null;
-            float d = float.MaxValue;
 
             Team[] teams = enemyOnly ? this.skirmishGame.EnemyOf(this.skirmishGame.CurrentTeam) : this.skirmishGame.Teams;
 
@@ -1232,7 +1231,6 @@ namespace GameLogic
 
                         //Select nearest picked soldier
                         res = soldierC;
-                        d = r[0].Distance;
                     }
                 }
             }

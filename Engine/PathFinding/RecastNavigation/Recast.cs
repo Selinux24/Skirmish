@@ -1360,7 +1360,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             int w = chf.Width;
             int h = chf.Height;
-            startLevel = startLevel >> loglevelsPerStack;
+            startLevel >>= loglevelsPerStack;
 
             for (int j = 0; j < nbStacks; ++j)
             {

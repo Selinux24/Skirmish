@@ -560,8 +560,8 @@ namespace Engine.Common
                 return position;
             }
 
-            byte[] boneIndices = vertex.HasChannel(VertexDataChannels.BoneIndices) ? vertex.GetChannelValue<byte[]>(VertexDataChannels.BoneIndices) : null;
-            float[] boneWeights = vertex.HasChannel(VertexDataChannels.Weights) ? vertex.GetChannelValue<float[]>(VertexDataChannels.Weights) : null;
+            byte[] boneIndices = vertex.HasChannel(VertexDataChannels.BoneIndices) ? vertex.GetChannelValue<byte[]>(VertexDataChannels.BoneIndices) : new byte[] { };
+            float[] boneWeights = vertex.HasChannel(VertexDataChannels.Weights) ? vertex.GetChannelValue<float[]>(VertexDataChannels.Weights) : new float[] { };
             Matrix[] transforms = boneTransforms.ToArray();
 
             Vector3 t = Vector3.Zero;
@@ -619,45 +619,31 @@ namespace Engine.Common
         /// <param name="transform">Transformation matrix</param>
         public VertexData Transform(Matrix transform)
         {
+            if (transform.IsIdentity)
+            {
+                return this;
+            }
+
             VertexData result = this;
 
-            if (!transform.IsIdentity)
+            if (result.Position.HasValue)
             {
-                if (result.Position.HasValue)
-                {
-                    Vector3 position = result.Position.Value;
+                result.Position = Vector3.TransformCoordinate(result.Position.Value, transform);
+            }
 
-                    Vector3.TransformCoordinate(ref position, ref transform, out Vector3 p);
+            if (result.Normal.HasValue)
+            {
+                result.Normal = Vector3.TransformNormal(result.Normal.Value, transform);
+            }
 
-                    result.Position = p;
-                }
+            if (result.Tangent.HasValue)
+            {
+                result.Tangent = Vector3.TransformNormal(result.Tangent.Value, transform);
+            }
 
-                if (result.Normal.HasValue)
-                {
-                    Vector3 normal = this.Normal.Value;
-
-                    Vector3.TransformNormal(ref normal, ref transform, out normal);
-
-                    result.Normal = normal;
-                }
-
-                if (result.Tangent.HasValue)
-                {
-                    Vector3 tangent = result.Tangent.Value;
-
-                    Vector3.TransformNormal(ref tangent, ref transform, out tangent);
-
-                    result.Tangent = tangent;
-                }
-
-                if (result.BiNormal.HasValue)
-                {
-                    Vector3 biNormal = result.BiNormal.Value;
-
-                    Vector3.TransformNormal(ref biNormal, ref transform, out biNormal);
-
-                    result.BiNormal = biNormal;
-                }
+            if (result.BiNormal.HasValue)
+            {
+                result.BiNormal = Vector3.TransformNormal(result.BiNormal.Value, transform);
             }
 
             return result;

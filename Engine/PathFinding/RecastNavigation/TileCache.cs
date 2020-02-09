@@ -202,7 +202,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Allocate a tile.
-            CompressedTile tile = null;
+            CompressedTile tile;
             if (m_nextFreeTile != null)
             {
                 tile = m_nextFreeTile;
@@ -761,9 +761,6 @@ namespace Engine.PathFinding.RecastNavigation
             // Add new tile, or leave the location empty.
             if (navData != null && !navmesh.AddTile(navData, TileFlagTypes.DT_TILE_FREE_DATA, 0, out int result))
             {
-                // Let the navmesh own the data.
-                navData = null;
-
                 return false;
             }
 

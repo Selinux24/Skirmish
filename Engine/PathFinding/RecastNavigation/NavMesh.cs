@@ -339,11 +339,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                     for (int i = 0; i < ntiles; ++i)
                     {
-                        var tile = tileCache.AddTile(tiles[i], CompressedTileFlagTypes.DT_COMPRESSEDTILE_FREE_DATA);
-                        if (tile == null)
-                        {
-                            continue;
-                        }
+                        tileCache.AddTile(tiles[i], CompressedTileFlagTypes.DT_COMPRESSEDTILE_FREE_DATA);
                     }
                 }
             }
@@ -513,10 +509,6 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             return n;
-        }
-        public static int CalcLayerBufferSize(int gridWidth, int gridHeight)
-        {
-            return 0;
         }
         /*TILE MESH SAMPLE*/
         public static bool BuildAllTiles(InputGeometry geom, BuildSettings settings, Agent agent, NavMesh navMesh)
@@ -1122,7 +1114,9 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 nneis = GetNeighbourTilesAt(tile.Header.X, tile.Header.Y, i, neis, MAX_NEIS);
                 for (int j = 0; j < nneis; ++j)
+                {
                     UnconnectLinks(neis[j], tile);
+                }
             }
 
             // Reset tile.
@@ -1148,7 +1142,9 @@ namespace Engine.PathFinding.RecastNavigation
             // Update salt, salt should never be zero.
             tile.Salt = (tile.Salt + 1) & ((1 << m_saltBits) - 1);
             if (tile.Salt == 0)
+            {
                 tile.Salt++;
+            }
 
             // Add to free list.
             tile.Next = m_nextFree;
@@ -1567,8 +1563,7 @@ namespace Engine.PathFinding.RecastNavigation
                     float bpos = Detour.GetSlabCoord(vc, side);
 
                     // Segments are not close enough.
-                    if (Math.Abs(apos - bpos) > 0.01f)
-                        continue;
+                    if (Math.Abs(apos - bpos) > 0.01f) continue;
 
                     // Check if the segments touch.
                     Detour.CalcSlabEndPoints(vc, vd, out Vector2 bmin, out Vector2 bmax, side);
@@ -1646,8 +1641,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                 // Find polygon to connect to.
                 Vector3 p = con.start; // First vertex
-                Vector3 nearestPt = new Vector3();
-                int r = FindNearestPolyInTile(tile, p, halfExtents, nearestPt);
+                int r = FindNearestPolyInTile(tile, p, halfExtents, out Vector3 nearestPt);
                 if (r == 0) continue;
                 // findNearestPoly may return too optimistic results, further check to make sure. 
                 if (Math.Sqrt(nearestPt[0] - p[0]) + Math.Sqrt(nearestPt[2] - p[2]) > Math.Sqrt(con.rad))
@@ -1789,8 +1783,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                 // Find polygon to connect to.
                 Vector3 p = targetCon.end;
-                Vector3 nearestPt = new Vector3();
-                int r = FindNearestPolyInTile(tile, p, halfExtents, nearestPt);
+                int r = FindNearestPolyInTile(tile, p, halfExtents, out Vector3 nearestPt);
                 if (r == 0)
                 {
                     continue;
@@ -1972,8 +1965,10 @@ namespace Engine.PathFinding.RecastNavigation
                 return n;
             }
         }
-        private int FindNearestPolyInTile(MeshTile tile, Vector3 center, Vector3 halfExtents, Vector3 nearestPt)
+        private int FindNearestPolyInTile(MeshTile tile, Vector3 center, Vector3 halfExtents, out Vector3 nearestPt)
         {
+            nearestPt = Vector3.Zero;
+
             Vector3 bmin = Vector3.Subtract(center, halfExtents);
             Vector3 bmax = Vector3.Add(center, halfExtents);
 
@@ -2035,8 +2030,6 @@ namespace Engine.PathFinding.RecastNavigation
 
             // Clamp point to be inside the polygon.
             Vector3[] verts = new Vector3[Detour.DT_VERTS_PER_POLYGON];
-            float[] edged = new float[Detour.DT_VERTS_PER_POLYGON];
-            float[] edget = new float[Detour.DT_VERTS_PER_POLYGON];
             int nv = poly.VertCount;
             for (int i = 0; i < nv; ++i)
             {
@@ -2044,7 +2037,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             closest = pos;
-            if (!Detour.DistancePtPolyEdgesSqr(pos, verts, nv, out edged, out edget))
+            if (!Detour.DistancePtPolyEdgesSqr(pos, verts, nv, out float[] edged, out float[] edget))
             {
                 // Point is outside the polygon, dtClamp to nearest edge.
                 float dmin = edged[0];
@@ -2117,10 +2110,9 @@ namespace Engine.PathFinding.RecastNavigation
             RemoveTile(GetTileRefAt(tx, ty, 0));
 
             // Add tile, or leave the location empty.
-            if (data != null && !AddTile(data, TileFlagTypes.DT_TILE_FREE_DATA, 0, out int res))
+            if (data != null)
             {
-                // Let the navmesh own the data.
-                data = null;
+                AddTile(data, TileFlagTypes.DT_TILE_FREE_DATA, 0, out int res);
             }
         }
         public void GetTilePos(Vector3 pos, InputGeometry geom, BuildSettings settings, out int tx, out int ty)

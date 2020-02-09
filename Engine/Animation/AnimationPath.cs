@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Engine.Animation
 {
@@ -218,10 +219,6 @@ namespace Engine.Animation
                     {
                         break;
                     }
-                    if (continuePath == true)
-                    {
-                        continue;
-                    }
 
                     clipTime -= t;
                 }
@@ -229,7 +226,7 @@ namespace Engine.Animation
 
             this.Time = atEnd ? time : nextTime;
             this.Playing = !atEnd;
-            this.TotalItemTime = clipTime;
+            this.TotalItemTime = Math.Max(0, clipTime);
 
             this.currentIndex = itemIndex;
         }

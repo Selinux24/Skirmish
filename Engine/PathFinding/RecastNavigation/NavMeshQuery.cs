@@ -260,8 +260,8 @@ namespace Engine.PathFinding.RecastNavigation
                     }
 
                     // Calculate cost and heuristic.
-                    float cost = 0;
-                    float heuristic = 0;
+                    float cost;
+                    float heuristic;
 
                     // Special case for last node.
                     if (neighbourRef == endRef)
@@ -379,8 +379,6 @@ namespace Engine.PathFinding.RecastNavigation
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
 
-            Status stat = 0;
-
             // TODO: Should this be callers responsibility?
             if (ClosestPointOnPolyBoundary(path[0], startPos, out Vector3 closestStartPos).HasFlag(Status.DT_FAILURE))
             {
@@ -393,7 +391,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Add start point.
-            stat = AppendVertex(
+            Status stat = AppendVertex(
                 closestStartPos, StraightPathFlagTypes.DT_STRAIGHTPATH_START, path[0],
                 ref straightPath, ref straightPathFlags, ref straightPathRefs,
                 ref straightPathCount, maxStraightPath);
@@ -587,8 +585,6 @@ namespace Engine.PathFinding.RecastNavigation
 
                             // Restart
                             i = apexIndex;
-
-                            continue;
                         }
                     }
                 }
@@ -759,6 +755,14 @@ namespace Engine.PathFinding.RecastNavigation
                         grandpaRef = m_nodePool.GetNodeAtIdx(parentNode.PIdx).Id;
                     }
                 }
+                if (parentNode == null)
+                {
+                    // Bad node, fail.
+                    m_query.Status = Status.DT_FAILURE;
+                    doneIters = iter;
+                    return m_query.Status;
+                }
+
                 if (parentRef != 0)
                 {
                     bool invalidParent = !m_nav.GetTileAndPolyByRef(parentRef, out parentTile, out parentPoly);
@@ -825,8 +829,8 @@ namespace Engine.PathFinding.RecastNavigation
                     }
 
                     // Calculate cost and heuristic.
-                    float cost = 0;
-                    float heuristic = 0;
+                    float cost;
+                    float heuristic;
 
                     // raycast parent
                     bool foundShortCut = false;
@@ -870,7 +874,7 @@ namespace Engine.PathFinding.RecastNavigation
                             neighbourRef, neighbourTile, neighbourPoly,
                             0, null, null);
 
-                        cost = cost + endCost;
+                        cost += endCost;
                         heuristic = 0;
                     }
                     else
@@ -1505,7 +1509,7 @@ namespace Engine.PathFinding.RecastNavigation
             path = null;
             pathCount = 0;
 
-            if (!m_nav.IsValidPolyRef(endRef) || path == null || pathCount == 0 || maxPath < 0)
+            if (!m_nav.IsValidPolyRef(endRef) || maxPath < 0)
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
@@ -2078,17 +2082,13 @@ namespace Engine.PathFinding.RecastNavigation
 
             Status status = Status.DT_SUCCESS;
 
-            MeshTile prevTile, tile, nextTile;
-            Poly prevPoly, poly, nextPoly;
-            int curRef;
-
             // The API input has been checked already, skip checking internal data.
-            curRef = startRef;
-            tile = null;
-            poly = null;
-            m_nav.GetTileAndPolyByRefUnsafe(curRef, out tile, out poly);
-            nextTile = prevTile = tile;
-            nextPoly = prevPoly = poly;
+            int curRef = startRef;
+            m_nav.GetTileAndPolyByRefUnsafe(curRef, out MeshTile tile, out Poly poly);
+            MeshTile prevTile = tile;
+            MeshTile nextTile = tile;
+            Poly prevPoly = poly;
+            Poly nextPoly = poly;
             if (prevRef != 0)
             {
                 m_nav.GetTileAndPolyByRefUnsafe(prevRef, out prevTile, out prevPoly);
@@ -2337,15 +2337,13 @@ namespace Engine.PathFinding.RecastNavigation
 
                 // Get parent poly and tile.
                 int parentRef = 0;
-                MeshTile parentTile = null;
-                Poly parentPoly = null;
                 if (bestNode.PIdx != 0)
                 {
                     parentRef = m_nodePool.GetNodeAtIdx(bestNode.PIdx).Id;
                 }
                 if (parentRef != 0)
                 {
-                    m_nav.GetTileAndPolyByRefUnsafe(parentRef, out parentTile, out parentPoly);
+                    m_nav.GetTileAndPolyByRefUnsafe(parentRef, out MeshTile parentTile, out Poly parentPoly);
                 }
 
                 // Hit test walls.
@@ -2645,8 +2643,11 @@ namespace Engine.PathFinding.RecastNavigation
         /// <remarks>
         /// Polygons are chosen weighted by area. The search runs in linear related to number of polygon.
         /// </remarks>
-        public Status FindRandomPoint(QueryFilter filter, Random frand, int randomRef, Vector3 randomPt)
+        public Status FindRandomPoint(QueryFilter filter, Random frand, out int randomRef, out Vector3 randomPt)
         {
+            randomRef = -1;
+            randomPt = Vector3.Zero;
+
             // Randomly pick one tile. Assume that all tiles cover roughly the same area.
             MeshTile tile = null;
             float tsum = 0.0f;
@@ -2835,15 +2836,13 @@ namespace Engine.PathFinding.RecastNavigation
 
                 // Get parent poly and tile.
                 int parentRef = 0;
-                MeshTile parentTile = null;
-                Poly parentPoly = null;
                 if (bestNode.PIdx != 0)
                 {
                     parentRef = m_nodePool.GetNodeAtIdx(bestNode.PIdx).Id;
                 }
                 if (parentRef != 0)
                 {
-                    m_nav.GetTileAndPolyByRefUnsafe(parentRef, out parentTile, out parentPoly);
+                    m_nav.GetTileAndPolyByRefUnsafe(parentRef, out MeshTile parentTile, out Poly parentPoly);
                 }
 
                 for (int i = bestPoly.FirstLink; i != Detour.DT_NULL_LINK; i = bestTile.Links[i].next)
@@ -3443,22 +3442,6 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Returns edge mid point between two polygons.
         /// </summary>
-        private Status GetEdgeMidPoint(int from, int to, out Vector3 mid)
-        {
-            mid = new Vector3();
-
-            if (GetPortalPoints(from, to, out Vector3 left, out Vector3 right, out PolyTypes fromType, out PolyTypes toType).HasFlag(Status.DT_FAILURE))
-            {
-                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
-            }
-
-            mid = (left + right) * 0.5f;
-
-            return Status.DT_SUCCESS;
-        }
-        /// <summary>
-        /// Returns edge mid point between two polygons.
-        /// </summary>
         private Status GetEdgeMidPoint(int from, Poly fromPoly, MeshTile fromTile, int to, Poly toPoly, MeshTile toTile, out Vector3 mid)
         {
             mid = new Vector3();
@@ -3524,7 +3507,6 @@ namespace Engine.PathFinding.RecastNavigation
         {
             Vector3 startPos = straightPath[straightPathCount - 1];
             // Append or update last vertex
-            Status stat = 0;
             for (int i = startIdx; i < endIdx; i++)
             {
                 // Calculate portal
@@ -3557,7 +3539,7 @@ namespace Engine.PathFinding.RecastNavigation
                 {
                     Vector3 pt = Vector3.Lerp(left, right, t);
 
-                    stat = AppendVertex(
+                    Status stat = AppendVertex(
                         pt, 0, path[i + 1],
                         ref straightPath, ref straightPathFlags, ref straightPathRefs,
                         ref straightPathCount, maxStraightPath);
