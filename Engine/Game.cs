@@ -481,6 +481,13 @@ namespace Engine
             gSW.Stop();
             GameStatus.Add("TOTAL", gSW);
 
+            if (this.ResourceManager.HasRequests)
+            {
+                Console.WriteLine("ResourceManager: Creating new resources");
+                Task.Run(() => this.ResourceManager.CreateResources());
+                Console.WriteLine("ResourceManager: New resources created");
+            }
+
             Counters.FrameCount++;
             Counters.FrameTime += this.GameTime.ElapsedSeconds;
 
