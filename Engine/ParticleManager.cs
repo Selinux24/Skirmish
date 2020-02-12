@@ -176,7 +176,7 @@ namespace Engine
         /// <returns>Returns the new particle system</returns>
         public IParticleSystem AddParticleSystem(ParticleSystemTypes type, ParticleSystemDescription description, ParticleEmitter emitter)
         {
-            return this.AddParticleSystem(null, type, description, emitter);
+            return this.AddParticleSystem($"{this.Name}.{type}.{description.Name}", type, description, emitter);
         }
         /// <summary>
         /// Adds a new particle system to the collection

@@ -52,14 +52,14 @@ namespace Engine.Common
         /// <param name="request">Buffer request</param>
         private void Add(BufferManager bufferManager)
         {
-            InstancingBufferDescription descriptor;
+            BufferManagerInstances descriptor;
 
             Console.WriteLine($"Add BufferDescriptor {(this.Dynamic ? "dynamic" : "static")} {typeof(IInstacingData)} [{this.Id}]");
 
             var slot = bufferManager.FindInstancingBufferDescription(this.Dynamic);
             if (slot < 0)
             {
-                descriptor = new InstancingBufferDescription(this.Dynamic);
+                descriptor = new BufferManagerInstances(this.Dynamic);
                 slot = bufferManager.AddInstancingBufferDescription(descriptor);
             }
             else

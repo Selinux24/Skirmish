@@ -93,15 +93,15 @@ namespace Engine.Common
         /// <summary>
         /// Vertex buffer descriptors
         /// </summary>
-        private readonly List<VertexBufferDescription> vertexBufferDescriptors = new List<VertexBufferDescription>();
+        private readonly List<BufferManagerVertices> vertexBufferDescriptors = new List<BufferManagerVertices>();
         /// <summary>
         /// Instancing buffer descriptors
         /// </summary>
-        private readonly List<InstancingBufferDescription> instancingBufferDescriptors = new List<InstancingBufferDescription>();
+        private readonly List<BufferManagerInstances> instancingBufferDescriptors = new List<BufferManagerInstances>();
         /// <summary>
         /// Index buffer descriptors
         /// </summary>
-        private readonly List<IndexBufferDescription> indexBufferDescriptors = new List<IndexBufferDescription>();
+        private readonly List<BufferManagerIndices> indexBufferDescriptors = new List<BufferManagerIndices>();
         /// <summary>
         /// Input layouts by technique
         /// </summary>
@@ -144,7 +144,7 @@ namespace Engine.Common
 
             for (int i = 0; i < reservedSlots; i++)
             {
-                this.vertexBufferDescriptors.Add(new VertexBufferDescription(VertexTypes.Unknown, true));
+                this.vertexBufferDescriptors.Add(new BufferManagerVertices(VertexTypes.Unknown, true));
             }
         }
         /// <summary>
@@ -308,7 +308,7 @@ namespace Engine.Common
         /// <summary>
         /// Reallocates the instance data
         /// </summary>
-        private void ReallocateInstances(IProgress<float> progress, ref float current, float total, IEnumerable<InstancingBufferDescription> dirtyList)
+        private void ReallocateInstances(IProgress<float> progress, ref float current, float total, IEnumerable<BufferManagerInstances> dirtyList)
         {
             foreach (var descriptor in dirtyList)
             {
@@ -360,7 +360,7 @@ namespace Engine.Common
         /// Reallocates the vertex data
         /// </summary>
         /// <param name="reallocateInstances">Returns wether instance reallocation is necessary</param>
-        private void ReallocateVertexData(IProgress<float> progress, ref float current, float total, IEnumerable<VertexBufferDescription> dirtyList)
+        private void ReallocateVertexData(IProgress<float> progress, ref float current, float total, IEnumerable<BufferManagerVertices> dirtyList)
         {
             foreach (var descriptor in dirtyList)
             {
@@ -419,7 +419,7 @@ namespace Engine.Common
         /// <summary>
         /// Reallocates the index data
         /// </summary>
-        private void ReallocateIndexData(IProgress<float> progress, ref float current, float total, IEnumerable<IndexBufferDescription> dirtyList)
+        private void ReallocateIndexData(IProgress<float> progress, ref float current, float total, IEnumerable<BufferManagerIndices> dirtyList)
         {
             foreach (var descriptor in dirtyList)
             {
@@ -589,7 +589,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="description">Vertex buffer description</param>
         /// <returns>Returns the internal description index</returns>
-        internal int AddVertexBufferDescription(VertexBufferDescription description)
+        internal int AddVertexBufferDescription(BufferManagerVertices description)
         {
             int index = vertexBufferDescriptors.Count;
 
@@ -614,7 +614,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="index">Index</param>
         /// <returns>Returns the description</returns>
-        internal VertexBufferDescription GetVertexBufferDescription(int index)
+        internal BufferManagerVertices GetVertexBufferDescription(int index)
         {
             return vertexBufferDescriptors[index];
         }
@@ -623,7 +623,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="description">Instancing buffer description</param>
         /// <returns>Returns the internal description index</returns>
-        internal int AddInstancingBufferDescription(InstancingBufferDescription description)
+        internal int AddInstancingBufferDescription(BufferManagerInstances description)
         {
             int index = instancingBufferDescriptors.Count;
 
@@ -645,7 +645,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="index">Index</param>
         /// <returns>Returns the description</returns>
-        internal InstancingBufferDescription GetInstancingBufferDescription(int index)
+        internal BufferManagerInstances GetInstancingBufferDescription(int index)
         {
             return instancingBufferDescriptors[index];
         }
@@ -654,7 +654,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="description">Index buffer description</param>
         /// <returns>Returns the internal description index</returns>
-        internal int AddIndexBufferDescription(IndexBufferDescription description)
+        internal int AddIndexBufferDescription(BufferManagerIndices description)
         {
             int index = indexBufferDescriptors.Count;
 
@@ -676,7 +676,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="index">Index</param>
         /// <returns>Returns the description</returns>
-        internal IndexBufferDescription GetIndexBufferDescription(int index)
+        internal BufferManagerIndices GetIndexBufferDescription(int index)
         {
             return indexBufferDescriptors[index];
         }

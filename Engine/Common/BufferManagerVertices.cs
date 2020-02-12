@@ -9,7 +9,7 @@ namespace Engine.Common
     /// <summary>
     /// Vertex buffer description
     /// </summary>
-    class VertexBufferDescription
+    class BufferManagerVertices
     {
         /// <summary>
         /// Data list
@@ -89,7 +89,7 @@ namespace Engine.Common
         /// <summary>
         /// Constructor
         /// </summary>
-        public VertexBufferDescription(VertexTypes type, bool dynamic)
+        public BufferManagerVertices(VertexTypes type, bool dynamic)
         {
             this.Type = type;
             this.Dynamic = dynamic;

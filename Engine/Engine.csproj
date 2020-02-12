@@ -184,11 +184,11 @@
     <Compile Include="Common\BufferDescriptorRequestInstancing.cs" />
     <Compile Include="Common\BufferDescriptorRequestVertices.cs" />
     <Compile Include="Common\GeometryDescriptor.cs" />
-    <Compile Include="Common\IndexBufferDescription.cs" />
-    <Compile Include="Common\InstancingBufferDescription.cs" />
+    <Compile Include="Common\BufferManagerIndices.cs" />
+    <Compile Include="Common\BufferManagerInstances.cs" />
     <Compile Include="Common\NormalDescriptor.cs" />
     <Compile Include="Common\OrientedBoundingBox.cs" />
-    <Compile Include="Common\VertexBufferDescription.cs" />
+    <Compile Include="Common\BufferManagerVertices.cs" />
     <Compile Include="GameAudioManager.cs" />
     <Compile Include="Audio\GameAudio.cs" />
     <Compile Include="Audio\GameAudioEventArgs.cs" />

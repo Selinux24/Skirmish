@@ -62,14 +62,14 @@ namespace Engine.Common
                 return;
             }
 
-            IndexBufferDescription descriptor;
+            BufferManagerIndices descriptor;
 
             Console.WriteLine($"Add BufferDescriptor {(this.Dynamic ? "dynamic" : "static")} {typeof(uint)} [{this.Id}]");
 
             int slot = bufferManager.FindIndexBufferDescription(this.Dynamic);
             if (slot < 0)
             {
-                descriptor = new IndexBufferDescription(this.Dynamic);
+                descriptor = new BufferManagerIndices(this.Dynamic);
                 slot = bufferManager.AddIndexBufferDescription(descriptor);
             }
             else

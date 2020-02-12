@@ -374,6 +374,10 @@ namespace Engine
         {
             if (disposing)
             {
+                this.Game.ResourcesLoading -= FireResourcesLoading;
+                this.Game.ResourcesLoaded -= FireResourcesLoaded;
+                this.Game.Graphics.Resized -= FireGraphicsResized;
+
                 Renderer?.Dispose();
                 Renderer = null;
 

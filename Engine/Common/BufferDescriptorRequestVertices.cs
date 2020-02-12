@@ -66,7 +66,7 @@ namespace Engine.Common
                 return;
             }
 
-            VertexBufferDescription descriptor;
+            BufferManagerVertices descriptor;
 
             VertexTypes vType = this.Data.First().VertexType;
             bool instanced = this.InstancingDescriptor != null;
@@ -76,7 +76,7 @@ namespace Engine.Common
             int slot = bufferManager.FindVertexBufferDescription(vType, this.Dynamic);
             if (slot < 0)
             {
-                descriptor = new VertexBufferDescription(vType, this.Dynamic);
+                descriptor = new BufferManagerVertices(vType, this.Dynamic);
                 slot = bufferManager.AddVertexBufferDescription(descriptor);
             }
             else

@@ -18,15 +18,12 @@ namespace ModelDrawing
         private TextDrawer text1 = null;
         private TextDrawer text2 = null;
 
-        private ParticleSystemDescription pPlume = null;
-        private ParticleSystemDescription pFire = null;
-        private ParticleSystemDescription pDust = null;
-        private ParticleSystemDescription pProjectile = null;
-        private ParticleSystemDescription pExplosion = null;
-        private ParticleSystemDescription pSmokeExplosion = null;
-
+        private readonly Dictionary<string, ParticleSystemDescription> pDescriptions = new Dictionary<string, ParticleSystemDescription>();
         private ParticleManager pManager = null;
+
         private PrimitiveListDrawer<Line3D> pManagerLineDrawer = null;
+
+        private bool gameReady = false;
 
         public TestScene(Game game)
             : base(game, SceneModes.ForwardLigthning)
@@ -113,14 +110,21 @@ namespace ModelDrawing
         }
         private async Task InitializeModels()
         {
-            this.pPlume = ParticleSystemDescription.InitializeSmokePlume("resources", "smoke.png");
-            this.pFire = ParticleSystemDescription.InitializeFire("resources", "fire.png");
-            this.pDust = ParticleSystemDescription.InitializeDust("resources", "smoke.png");
-            this.pProjectile = ParticleSystemDescription.InitializeProjectileTrail("resources", "smoke.png");
-            this.pExplosion = ParticleSystemDescription.InitializeExplosion("resources", "fire.png");
-            this.pSmokeExplosion = ParticleSystemDescription.InitializeExplosion("resources", "smoke.png");
+            var pPlume = ParticleSystemDescription.InitializeSmokePlume("resources", "smoke.png");
+            var pFire = ParticleSystemDescription.InitializeFire("resources", "fire.png");
+            var pDust = ParticleSystemDescription.InitializeDust("resources", "smoke.png");
+            var pProjectile = ParticleSystemDescription.InitializeProjectileTrail("resources", "smoke.png");
+            var pExplosion = ParticleSystemDescription.InitializeExplosion("resources", "fire.png");
+            var pSmokeExplosion = ParticleSystemDescription.InitializeExplosion("resources", "smoke.png");
 
-            this.pManager = await this.AddComponentParticleManager(new ParticleManagerDescription());
+            this.pDescriptions.Add("Plume", pPlume);
+            this.pDescriptions.Add("Fire", pFire);
+            this.pDescriptions.Add("Dust", pDust);
+            this.pDescriptions.Add("Projectile", pProjectile);
+            this.pDescriptions.Add("Explosion", pExplosion);
+            this.pDescriptions.Add("SmokeExplosion", pSmokeExplosion);
+
+            this.pManager = await this.AddComponentParticleManager(new ParticleManagerDescription() { Name = "Particle Manager" });
         }
         private async Task InitializeParticleVolumeDrawer()
         {
@@ -129,13 +133,23 @@ namespace ModelDrawing
                 Count = 20000,
                 DepthEnabled = true,
             };
-            this.pManagerLineDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(desc, SceneObjectUsages.None, layerEffects);
+            this.pManagerLineDrawer = await this.AddComponentPrimitiveListDrawer(desc, SceneObjectUsages.None, layerEffects);
             this.pManagerLineDrawer.Visible = true;
+        }
+
+        public override void GameResourcesLoaded(Guid id)
+        {
+            gameReady = true;
         }
 
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
+
+            if (!gameReady)
+            {
+                return;
+            }
 
             if (this.Game.Input.KeyJustReleased(Keys.Escape)) { this.Game.Exit(); }
 
@@ -277,8 +291,8 @@ namespace ModelDrawing
                 MaximumDistance = 100f,
             };
 
-            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pExplosion, emitter1);
-            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pSmokeExplosion, emitter2);
+            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pDescriptions["Explosion"], emitter1);
+            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pDescriptions["SmokeExplosion"], emitter2);
         }
         private void AddProjectileTrailSystem()
         {
@@ -291,7 +305,7 @@ namespace ModelDrawing
                 MaximumDistance = 100f,
             };
 
-            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pProjectile, emitter);
+            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pDescriptions["Projectile"], emitter);
         }
         private void AddDustSystem()
         {
@@ -304,7 +318,7 @@ namespace ModelDrawing
                 MaximumDistance = 250f,
             };
 
-            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pDust, emitter);
+            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pDescriptions["Dust"], emitter);
         }
         private void AddSmokePlumeSystem()
         {
@@ -333,8 +347,8 @@ namespace ModelDrawing
                 MaximumDistance = 500f,
             };
 
-            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pFire, emitter1);
-            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, emitter2);
+            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pDescriptions["Fire"], emitter1);
+            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pDescriptions["Plume"], emitter2);
         }
         private void AddSmokePlumeSystemGPU(Vector3 positionCPU, Vector3 positionGPU)
         {
@@ -381,11 +395,11 @@ namespace ModelDrawing
                 MaximumDistance = 500f,
             };
 
-            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pFire, emitter11);
-            this.pManager.AddParticleSystem(ParticleSystemTypes.GPU, this.pFire, emitter12);
+            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pDescriptions["Fire"], emitter11);
+            this.pManager.AddParticleSystem(ParticleSystemTypes.GPU, this.pDescriptions["Fire"], emitter12);
 
-            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, emitter21);
-            this.pManager.AddParticleSystem(ParticleSystemTypes.GPU, this.pPlume, emitter22);
+            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pDescriptions["Plume"], emitter21);
+            this.pManager.AddParticleSystem(ParticleSystemTypes.GPU, this.pDescriptions["Plume"], emitter22);
         }
         private void AddSmokePlumeSystemWithWind(Vector3 wind, float force)
         {
@@ -398,7 +412,7 @@ namespace ModelDrawing
                 MaximumDistance = 1000f,
             };
 
-            var pSystem = this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, emitter);
+            var pSystem = this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pDescriptions["Plume"], emitter);
 
             var parameters = pSystem.GetParameters();
 
@@ -425,13 +439,18 @@ namespace ModelDrawing
         {
             base.Draw(gameTime);
 
+            if (!gameReady)
+            {
+                return;
+            }
+
             var particle1 = this.pManager.GetParticleSystem(0);
             var particle2 = this.pManager.GetParticleSystem(1);
 
             this.text.Text = "Model Drawing";
             this.statistics.Text = this.Game.RuntimeText;
-            this.text1.Text = string.Format("P1 - {0}", particle1);
-            this.text2.Text = string.Format("P2 - {0}", particle2);
+            this.text1.Text = $"P1 - {particle1}";
+            this.text2.Text = $"P2 - {particle2}";
         }
     }
 }
