@@ -243,7 +243,6 @@
     <Compile Include="Common\VertexCpuParticle.cs" />
     <Compile Include="Content\ContentDescription.cs" />
     <Compile Include="Content\ILoader.cs" />
-    <Compile Include="Content\FmtObj\LoaderObj.cs" />
     <Compile Include="Effects\BufferLightDirectional.cs" />
     <Compile Include="Effects\BufferLightHemispheric.cs" />
     <Compile Include="Effects\BufferLightPoint.cs" />
@@ -519,7 +518,6 @@
     <Compile Include="Content\MaterialContent.cs" />
     <Compile Include="Content\SubMeshContent.cs" />
     <Compile Include="Content\ImageContent.cs" />
-    <Compile Include="Content\FmtCollada\LoaderCollada.cs" />
     <Compile Include="Content\MeshContent.cs" />
     <Compile Include="Content\ModelContent.cs" />
     <Compile Include="Content\SkinningContent.cs" />
@@ -685,12 +683,6 @@
     <None Include="Resources\ShaderDefaultTerrain.fx" />
     <None Include="Resources\ShaderDefaultClouds.fx" />
     <Content Include="Resources\IncTerrain.hlsl" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Engine.Collada\Engine.Collada.csproj">
-      <Project>{b5e51939-46dc-412d-a096-e1c892f95fb3}</Project>
-      <Name>Engine.Collada</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

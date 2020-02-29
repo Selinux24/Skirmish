@@ -1,9 +1,9 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Collections.Concurrent;
 
 namespace Engine
 {
@@ -15,6 +15,89 @@ namespace Engine
     /// </summary>
     public class GameResourceManager : IDisposable
     {
+        /// <summary>
+        /// Content loaders dictionary
+        /// </summary>
+        private static readonly ConcurrentDictionary<string, Func<ILoader>> contentLoaders = new ConcurrentDictionary<string, Func<ILoader>>();
+
+        /// <summary>
+        /// Register content loader
+        /// </summary>
+        /// <typeparam name="T">Type of loader</typeparam>
+        /// <returns>Returns true if all extensions were registered</returns>
+        public static bool RegisterLoader<T>() where T : class, ILoader
+        {
+            T loader = Activator.CreateInstance<T>();
+
+            var extensions = loader.GetExtensions();
+            if (!extensions.Any())
+            {
+                return false;
+            }
+
+            bool allRegistered = true;
+
+            var loaderDelegate = loader.GetLoaderDelegate();
+
+            foreach (var extension in extensions)
+            {
+                if (!RegisterLoaderForFile(extension, loaderDelegate))
+                {
+                    allRegistered = false;
+                }
+            }
+
+            return allRegistered;
+        }
+        /// <summary>
+        /// Register a loader for the specified extension
+        /// </summary>
+        /// <param name="extension">Extension</param>
+        /// <param name="loaderDelegate">Delegate</param>
+        /// <returns>Returns true if the extension was registered</returns>
+        public static bool RegisterLoaderForFile(string extension, Func<ILoader> loaderDelegate)
+        {
+            if (contentLoaders.ContainsKey(extension))
+            {
+                Console.WriteLine($"Extension {extension} is currently registered.");
+                return false;
+            }
+
+            if (!contentLoaders.TryAdd(extension, loaderDelegate))
+            {
+                Console.WriteLine($"Cannot get {extension} loader delegate from concurrent delegate.");
+                return false;
+            }
+
+            return true;
+        }
+        /// <summary>
+        /// Gets a content loader for the specified file name
+        /// </summary>
+        /// <param name="fileName">File name</param>
+        /// <returns>Returns a loader, or null if not exists</returns>
+        public static ILoader GetLoaderForFile(string fileName)
+        {
+            string extension = Path.GetExtension(fileName);
+
+            if (!contentLoaders.ContainsKey(extension))
+            {
+                Console.WriteLine($"Extension {extension} is not registered. A valid content loader must be added first.");
+                return null;
+            }
+
+            if (contentLoaders.TryGetValue(extension, out var loaderDelegate))
+            {
+                return loaderDelegate.Invoke();
+            }
+            else
+            {
+                Console.WriteLine($"Cannot get {extension} loader delegate from concurrent delegate.");
+
+                return null;
+            }
+        }
+
         /// <summary>
         /// Game instance
         /// </summary>

@@ -1,11 +1,8 @@
 ﻿using System;
-using System.IO;
 using System.Xml.Serialization;
 
 namespace Engine
 {
-    using Engine.Content;
-
     /// <summary>
     /// Model content description
     /// </summary>
@@ -50,23 +47,5 @@ namespace Engine
         /// </summary>
         [XmlElement("use_controller_transform")]
         public bool UseControllerTransform { get; set; } = true;
-
-        /// <summary>
-        /// Gets the loader for the current file extension
-        /// </summary>
-        /// <returns>Returns a loader</returns>
-        public virtual ILoader GetLoader()
-        {
-            if (string.Equals(Path.GetExtension(ModelFileName), ".dae", StringComparison.OrdinalIgnoreCase))
-            {
-                return new Content.FmtCollada.LoaderCollada();
-            }
-            else if (string.Equals(Path.GetExtension(ModelFileName), ".obj", StringComparison.OrdinalIgnoreCase))
-            {
-                return new Content.FmtObj.LoaderObj();
-            }
-
-            return null;
-        }
     }
 }

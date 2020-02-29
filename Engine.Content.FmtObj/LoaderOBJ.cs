@@ -28,6 +28,24 @@ namespace Engine.Content.FmtObj
         }
 
         /// <summary>
+        /// Gets the loader delegate
+        /// </summary>
+        /// <returns>Returns a delegate wich creates a loader</returns>
+        public Func<ILoader> GetLoaderDelegate()
+        {
+            return () => { return new LoaderObj(); };
+        }
+
+        /// <summary>
+        /// Gets the extensions list which this loader is valid
+        /// </summary>
+        /// <returns>Returns a extension array list</returns>
+        public IEnumerable<string> GetExtensions()
+        {
+            return new string[] { ".obj" };
+        }
+
+        /// <summary>
         /// Loads a model content list from resources
         /// </summary>
         /// <param name="contentFolder">Content folder</param>

@@ -265,14 +265,15 @@ namespace Engine
             if (!string.IsNullOrEmpty(description.Content.ModelContentFilename))
             {
                 var contentDesc = Helper.DeserializeFromFile<ModelContentDescription>(Path.Combine(description.Content.ContentFolder, description.Content.ModelContentFilename));
-                var loader = contentDesc.GetLoader();
+                var loader = GameResourceManager.GetLoaderForFile(contentDesc.ModelFileName);
                 var t = loader.Load(description.Content.ContentFolder, contentDesc);
                 content = t.First();
             }
             else if (description.Content.ModelContentDescription != null)
             {
-                var loader = description.Content.ModelContentDescription.GetLoader();
-                var t = loader.Load(description.Content.ContentFolder, description.Content.ModelContentDescription);
+                var contentDesc = description.Content.ModelContentDescription;
+                var loader = GameResourceManager.GetLoaderForFile(contentDesc.ModelFileName);
+                var t = loader.Load(description.Content.ContentFolder, contentDesc);
                 content = t.First();
             }
             else if (description.Content.HeightmapDescription != null)

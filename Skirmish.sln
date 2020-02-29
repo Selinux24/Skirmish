@@ -3,9 +3,21 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29009.5
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E510EEF8-84D0-4A28-9E35-5B55A34893CC}"
+	ProjectSection(SolutionItems) = preProject
+		Effect Compile x64.cmd = Effect Compile x64.cmd
+		Effect Compile x86.cmd = Effect Compile x86.cmd
+	EndProjectSection
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine", "Engine\Engine.csproj", "{A4BAC380-82CB-4DB8-953F-A291F0BEF559}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine.Collada", "Engine.Collada\Engine.Collada.csproj", "{B5E51939-46DC-412D-A096-E1C892F95FB3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine.Content.FmtObj", "Engine.Content.FmtObj\Engine.Content.FmtObj.csproj", "{18852FDD-B099-4C91-A970-7B4A087B7554}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine.Content.FmtCollada", "Engine.Content.FmtCollada\Engine.Content.FmtCollada.csproj", "{B5E51939-46DC-412D-A096-E1C892F95FB3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine.PathFinding.AStar", "Engine.PathFinding.AStar\Engine.PathFinding.AStar.csproj", "{FCC9AE41-6562-41D4-AB28-FABB017634F9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine.PathFinding.RecastNavigation", "Engine.PathFinding.RecastNavigation\Engine.PathFinding.RecastNavigation.csproj", "{0D7D6C77-588E-4371-A815-A58B87653991}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Resources", "Resources\Resources.csproj", "{28391C85-9275-4E62-A159-3C67DFADC428}"
 EndProject
@@ -32,16 +44,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "10 Instancing", "Samples\10 Instancing\10 Instancing.csproj", "{826ACF60-EDC8-4941-9FF9-6BB05ECECA45}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Z Game Logic", "Samples\Z Game Logic\Z Game Logic.csproj", "{B2FD073B-C51B-4FD8-9EE2-7408E4F86B1C}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E510EEF8-84D0-4A28-9E35-5B55A34893CC}"
-	ProjectSection(SolutionItems) = preProject
-		Effect Compile x64.cmd = Effect Compile x64.cmd
-		Effect Compile x86.cmd = Effect Compile x86.cmd
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine.PathFinding.AStar", "Engine.PathFinding.AStar\Engine.PathFinding.AStar.csproj", "{FCC9AE41-6562-41D4-AB28-FABB017634F9}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine.PathFinding.RecastNavigation", "Engine.PathFinding.RecastNavigation\Engine.PathFinding.RecastNavigation.csproj", "{0D7D6C77-588E-4371-A815-A58B87653991}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -311,6 +313,22 @@ Global
 		{0D7D6C77-588E-4371-A815-A58B87653991}.Release|x64.Build.0 = Release|x64
 		{0D7D6C77-588E-4371-A815-A58B87653991}.Release|x86.ActiveCfg = Release|x86
 		{0D7D6C77-588E-4371-A815-A58B87653991}.Release|x86.Build.0 = Release|x86
+		{18852FDD-B099-4C91-A970-7B4A087B7554}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18852FDD-B099-4C91-A970-7B4A087B7554}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18852FDD-B099-4C91-A970-7B4A087B7554}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{18852FDD-B099-4C91-A970-7B4A087B7554}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{18852FDD-B099-4C91-A970-7B4A087B7554}.Debug|x64.ActiveCfg = Debug|x64
+		{18852FDD-B099-4C91-A970-7B4A087B7554}.Debug|x64.Build.0 = Debug|x64
+		{18852FDD-B099-4C91-A970-7B4A087B7554}.Debug|x86.ActiveCfg = Debug|x86
+		{18852FDD-B099-4C91-A970-7B4A087B7554}.Debug|x86.Build.0 = Debug|x86
+		{18852FDD-B099-4C91-A970-7B4A087B7554}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18852FDD-B099-4C91-A970-7B4A087B7554}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18852FDD-B099-4C91-A970-7B4A087B7554}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{18852FDD-B099-4C91-A970-7B4A087B7554}.Release|Mixed Platforms.Build.0 = Release|x86
+		{18852FDD-B099-4C91-A970-7B4A087B7554}.Release|x64.ActiveCfg = Release|x64
+		{18852FDD-B099-4C91-A970-7B4A087B7554}.Release|x64.Build.0 = Release|x64
+		{18852FDD-B099-4C91-A970-7B4A087B7554}.Release|x86.ActiveCfg = Release|x86
+		{18852FDD-B099-4C91-A970-7B4A087B7554}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
