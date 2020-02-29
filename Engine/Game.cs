@@ -484,7 +484,7 @@ namespace Engine
             if (this.ResourceManager.HasRequests)
             {
                 Console.WriteLine("ResourceManager: Creating new resources");
-                Task.Run(() => this.ResourceManager.CreateResources());
+                this.ResourceManager.CreateResources();
                 Console.WriteLine("ResourceManager: New resources created");
             }
 
