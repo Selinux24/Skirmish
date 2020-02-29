@@ -31,7 +31,8 @@
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
     <Prefer32Bit>false</Prefer32Bit>
     <UseVSHostingProcess>true</UseVSHostingProcess>
-    <CodeAnalysisRuleSet>Engine.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>
+    </CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -43,7 +44,8 @@
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
     <Prefer32Bit>false</Prefer32Bit>
     <UseVSHostingProcess>true</UseVSHostingProcess>
-    <CodeAnalysisRuleSet>Engine.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>
+    </CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
@@ -55,7 +57,8 @@
     <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
     <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
     <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>Engine.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>
+    </CodeAnalysisRuleSet>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
     <Prefer32Bit>false</Prefer32Bit>
     <UseVSHostingProcess>true</UseVSHostingProcess>
@@ -70,7 +73,8 @@
     <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
     <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
     <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>Engine.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>
+    </CodeAnalysisRuleSet>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
@@ -84,7 +88,8 @@
     <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
     <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
     <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>Engine.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>
+    </CodeAnalysisRuleSet>
     <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
     <Prefer32Bit>false</Prefer32Bit>
@@ -101,7 +106,8 @@
     <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
     <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
     <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>Engine.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>
+    </CodeAnalysisRuleSet>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
     <Prefer32Bit>false</Prefer32Bit>
     <UseVSHostingProcess>false</UseVSHostingProcess>
@@ -279,8 +285,6 @@
     <Compile Include="ModularSceneryTriggerEndHandler.cs" />
     <Compile Include="ModularSceneryTriggerEventArgs.cs" />
     <Compile Include="ModularSceneryTriggerStartHandler.cs" />
-    <Compile Include="PathFinding\RecastNavigation\GraphAgentQuery.cs" />
-    <Compile Include="PathFinding\RecastNavigation\SteerTarget.cs" />
     <Compile Include="PrimitiveListDrawer.cs" />
     <Compile Include="PrimitiveListDrawerDescription.cs" />
     <Compile Include="RayPickingFlags.cs" />
@@ -356,8 +360,6 @@
     <Compile Include="ParticleTypes.cs" />
     <Compile Include="Effects\EffectDefaultCpuParticles.cs" />
     <Compile Include="ParticleEmitter.cs" />
-    <Compile Include="PathFinding\AStar\GridCollisionInfo.cs" />
-    <Compile Include="PathFinding\AStar\GridInput.cs" />
     <Compile Include="PathFinding\GraphArea.cs" />
     <Compile Include="PathFinding\GraphAreaTypes.cs" />
     <Compile Include="PathFinding\GraphConnection.cs" />
@@ -367,102 +369,6 @@
     <Compile Include="PathFinding\IGraphArea.cs" />
     <Compile Include="PathFinding\IGraphConnection.cs" />
     <Compile Include="PathFinding\PathFinderInput.cs" />
-    <Compile Include="PathFinding\RecastNavigation\Agent.cs" />
-    <Compile Include="PathFinding\RecastNavigation\BoundsItem.cs" />
-    <Compile Include="PathFinding\RecastNavigation\BuildContoursFlagTypes.cs" />
-    <Compile Include="PathFinding\RecastNavigation\BuildModes.cs" />
-    <Compile Include="PathFinding\RecastNavigation\BVItem.cs" />
-    <Compile Include="PathFinding\RecastNavigation\BVNode.cs" />
-    <Compile Include="PathFinding\RecastNavigation\ChunkyTriMesh.cs" />
-    <Compile Include="PathFinding\RecastNavigation\ChunkyTriMeshNode.cs" />
-    <Compile Include="PathFinding\RecastNavigation\CollectPolysQuery.cs" />
-    <Compile Include="PathFinding\RecastNavigation\CompactCell.cs" />
-    <Compile Include="PathFinding\RecastNavigation\CompactHeightfield.cs" />
-    <Compile Include="PathFinding\RecastNavigation\CompactSpan.cs" />
-    <Compile Include="PathFinding\RecastNavigation\CompressedTile.cs" />
-    <Compile Include="PathFinding\RecastNavigation\CompressedTileFlagTypes.cs" />
-    <Compile Include="PathFinding\RecastNavigation\Config.cs" />
-    <Compile Include="PathFinding\RecastNavigation\Contour.cs" />
-    <Compile Include="PathFinding\RecastNavigation\ContourHole.cs" />
-    <Compile Include="PathFinding\RecastNavigation\ContourRegion.cs" />
-    <Compile Include="PathFinding\RecastNavigation\ContourSet.cs" />
-    <Compile Include="PathFinding\RecastNavigation\Detour.cs" />
-    <Compile Include="PathFinding\RecastNavigation\DetourTileCache.cs" />
-    <Compile Include="PathFinding\RecastNavigation\Edge.cs" />
-    <Compile Include="PathFinding\RecastNavigation\EdgeValues.cs" />
-    <Compile Include="PathFinding\RecastNavigation\FindNearestPolyQuery.cs" />
-    <Compile Include="PathFinding\RecastNavigation\FindPathOptions.cs" />
-    <Compile Include="PathFinding\RecastNavigation\Graph.cs" />
-    <Compile Include="PathFinding\RecastNavigation\GraphFile.cs" />
-    <Compile Include="PathFinding\RecastNavigation\GraphNode.cs" />
-    <Compile Include="PathFinding\RecastNavigation\InputGeometry.cs" />
-    <Compile Include="PathFinding\RecastNavigation\ObstacleRequest.cs" />
-    <Compile Include="PathFinding\RecastNavigation\ObstacleRequestAction.cs" />
-    <Compile Include="PathFinding\RecastNavigation\PathFindingMode.cs" />
-    <Compile Include="PathFinding\RecastNavigation\RaycastHit.cs" />
-    <Compile Include="PathFinding\RecastNavigation\RaycastOptions.cs" />
-    <Compile Include="PathFinding\RecastNavigation\Recast.cs" />
-    <Compile Include="PathFinding\RecastNavigation\SegInterval.cs" />
-    <Compile Include="PathFinding\RecastNavigation\Status.cs" />
-    <Compile Include="PathFinding\RecastNavigation\Heightfield.cs" />
-    <Compile Include="PathFinding\RecastNavigation\HeightfieldLayer.cs" />
-    <Compile Include="PathFinding\RecastNavigation\HeightfieldLayerSet.cs" />
-    <Compile Include="PathFinding\RecastNavigation\HeightPatch.cs" />
-    <Compile Include="PathFinding\RecastNavigation\LayerMonotoneRegion.cs" />
-    <Compile Include="PathFinding\RecastNavigation\LayerRegion.cs" />
-    <Compile Include="PathFinding\RecastNavigation\LayerSweepSpan.cs" />
-    <Compile Include="PathFinding\RecastNavigation\Link.cs" />
-    <Compile Include="PathFinding\RecastNavigation\MeshData.cs" />
-    <Compile Include="PathFinding\RecastNavigation\MeshHeader.cs" />
-    <Compile Include="PathFinding\RecastNavigation\MeshTile.cs" />
-    <Compile Include="PathFinding\RecastNavigation\NavMeshCreateParams.cs" />
-    <Compile Include="PathFinding\RecastNavigation\NavMeshParams.cs" />
-    <Compile Include="PathFinding\RecastNavigation\NavMeshQuery.cs" />
-    <Compile Include="PathFinding\RecastNavigation\NavMeshSetHeader.cs" />
-    <Compile Include="PathFinding\RecastNavigation\NavMeshTileBuildContext.cs" />
-    <Compile Include="PathFinding\RecastNavigation\Node.cs" />
-    <Compile Include="PathFinding\RecastNavigation\NodeFlagTypes.cs" />
-    <Compile Include="PathFinding\RecastNavigation\NodePool.cs" />
-    <Compile Include="PathFinding\RecastNavigation\NodeQueue.cs" />
-    <Compile Include="PathFinding\RecastNavigation\ObstacleState.cs" />
-    <Compile Include="PathFinding\RecastNavigation\ObstacleType.cs" />
-    <Compile Include="PathFinding\RecastNavigation\OffMeshConnection.cs" />
-    <Compile Include="PathFinding\RecastNavigation\Poly.cs" />
-    <Compile Include="PathFinding\RecastNavigation\PolyDetail.cs" />
-    <Compile Include="PathFinding\RecastNavigation\Polygoni.cs" />
-    <Compile Include="PathFinding\RecastNavigation\PolyMesh.cs" />
-    <Compile Include="PathFinding\RecastNavigation\PolyMeshDetail.cs" />
-    <Compile Include="PathFinding\RecastNavigation\PolyQuery.cs" />
-    <Compile Include="PathFinding\RecastNavigation\PolyTypes.cs" />
-    <Compile Include="PathFinding\RecastNavigation\PotentialDiagonal.cs" />
-    <Compile Include="PathFinding\RecastNavigation\QueryData.cs" />
-    <Compile Include="PathFinding\RecastNavigation\QueryFilter.cs" />
-    <Compile Include="PathFinding\RecastNavigation\RasterizationContext.cs" />
-    <Compile Include="PathFinding\RecastNavigation\BuildSettings.cs" />
-    <Compile Include="PathFinding\RecastNavigation\Region.cs" />
-    <Compile Include="PathFinding\RecastNavigation\SamplePartitionTypes.cs" />
-    <Compile Include="PathFinding\RecastNavigation\SamplePolyAreas.cs" />
-    <Compile Include="PathFinding\RecastNavigation\SamplePolyFlagTypes.cs" />
-    <Compile Include="PathFinding\RecastNavigation\Span.cs" />
-    <Compile Include="PathFinding\RecastNavigation\SpanPool.cs" />
-    <Compile Include="PathFinding\RecastNavigation\StraightPathFlagTypes.cs" />
-    <Compile Include="PathFinding\RecastNavigation\StraightPathOptions.cs" />
-    <Compile Include="PathFinding\RecastNavigation\SweepSpan.cs" />
-    <Compile Include="PathFinding\RecastNavigation\TempContour.cs" />
-    <Compile Include="PathFinding\RecastNavigation\TileCache.cs" />
-    <Compile Include="PathFinding\RecastNavigation\TileCacheAreas.cs" />
-    <Compile Include="PathFinding\RecastNavigation\TileCacheContour.cs" />
-    <Compile Include="PathFinding\RecastNavigation\TileCacheContourSet.cs" />
-    <Compile Include="PathFinding\RecastNavigation\TileCacheData.cs" />
-    <Compile Include="PathFinding\RecastNavigation\TileCacheLayer.cs" />
-    <Compile Include="PathFinding\RecastNavigation\TileCacheLayerData.cs" />
-    <Compile Include="PathFinding\RecastNavigation\TileCacheLayerHeader.cs" />
-    <Compile Include="PathFinding\RecastNavigation\TileCacheMeshProcess.cs" />
-    <Compile Include="PathFinding\RecastNavigation\TileCacheObstacle.cs" />
-    <Compile Include="PathFinding\RecastNavigation\TileCacheParams.cs" />
-    <Compile Include="PathFinding\RecastNavigation\TileCachePolyMesh.cs" />
-    <Compile Include="PathFinding\RecastNavigation\TileFlagTypes.cs" />
-    <Compile Include="PathFinding\RecastNavigation\NavMesh.cs" />
     <Compile Include="PathFinding\PathFinderDescription.cs" />
     <Compile Include="Collections\ProximityGrid.cs" />
     <Compile Include="PickingResult.cs" />
@@ -548,15 +454,11 @@
     <Compile Include="ModelInstance.cs" />
     <Compile Include="ModelInstancedDescription.cs" />
     <Compile Include="PathFinding\AgentType.cs" />
-    <Compile Include="PathFinding\AStar\GridAgentType.cs" />
-    <Compile Include="PathFinding\AStar\GridGenerationSettings.cs" />
     <Compile Include="Collections\BoundingVolumeTreeNode.cs" />
     <Compile Include="Collections\BoundingVolumeTree.cs" />
     <Compile Include="GeometricOrientation.cs" />
     <Compile Include="Common\VertexTerrain.cs" />
     <Compile Include="Common\GeometryUtil.cs" />
-    <Compile Include="PathFinding\AStar\Grid.cs" />
-    <Compile Include="PathFinding\AStar\GridNode.cs" />
     <Compile Include="BoundingBoxInt.cs" />
     <Compile Include="SkydomDescription.cs" />
     <Compile Include="SpriteBackgroundDescription.cs" />
@@ -568,7 +470,6 @@
     <Compile Include="Updatable.cs" />
     <Compile Include="Vector2Int.cs" />
     <Compile Include="Vector3Int.cs" />
-    <Compile Include="PathFinding\AStar\GridNodeStates.cs" />
     <Compile Include="HeightMap.cs" />
     <Compile Include="IBufferData.cs" />
     <Compile Include="IControl.cs" />
@@ -630,8 +531,6 @@
     <Compile Include="MouseButtons.cs" />
     <Compile Include="PathFinding\HeuristicMethods.cs" />
     <Compile Include="PathFinding\PathFindingPath.cs" />
-    <Compile Include="PathFinding\AStar\AStarQuery.cs" />
-    <Compile Include="PathFinding\AStar\AStarQueryData.cs" />
     <Compile Include="ShadowMapSpot.cs" />
     <Compile Include="SpriteButton.cs" />
     <Compile Include="Terrain.cs" />

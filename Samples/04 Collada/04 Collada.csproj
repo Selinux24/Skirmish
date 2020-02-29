@@ -419,6 +419,10 @@
     <Folder Include="Resources\SceneModularDungeon\Audio\Music\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Engine.PathFinding.RecastNavigation\Engine.PathFinding.RecastNavigation.csproj">
+      <Project>{0d7d6c77-588e-4371-a815-a58b87653991}</Project>
+      <Name>Engine.PathFinding.RecastNavigation</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Engine\Engine.csproj">
       <Project>{a4bac380-82cb-4db8-953f-a291f0bef559}</Project>
       <Name>Engine</Name>
