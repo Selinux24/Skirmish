@@ -231,8 +231,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Engine.Collada.Debug.ruleset" />
-    <None Include="Engine.Collada.Release.ruleset" />
     <None Include="Engine.Collada.ruleset" />
     <None Include="Engine.Collada.snk" />
   </ItemGroup>
