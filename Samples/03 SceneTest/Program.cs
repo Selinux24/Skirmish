@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.Content.FmtCollada;
 using System;
 using System.IO;
 
@@ -17,6 +18,8 @@ namespace SceneTest
                 using (Game cl = new Game("3 SceneTest", true, 0, 0, true, 0, 0))
 #endif
                 {
+                    GameResourceManager.RegisterLoader<LoaderCollada>();
+
                     cl.SetScene<SceneStart>();
 
                     cl.Run();

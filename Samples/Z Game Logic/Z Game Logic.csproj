@@ -218,6 +218,10 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Engine.Content.FmtCollada\Engine.Content.FmtCollada.csproj">
+      <Project>{B5E51939-46DC-412D-A096-E1C892F95FB3}</Project>
+      <Name>Engine.Content.FmtCollada</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Engine.PathFinding.AStar\Engine.PathFinding.AStar.csproj">
       <Project>{fcc9ae41-6562-41d4-ab28-fabb017634f9}</Project>
       <Name>Engine.PathFinding.AStar</Name>

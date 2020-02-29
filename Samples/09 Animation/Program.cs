@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.Content.FmtCollada;
 using System;
 using System.IO;
 
@@ -24,6 +25,8 @@ namespace Animation
                     cl.VisibleMouse = false;
                     cl.LockMouse = true;
 #endif
+
+                    GameResourceManager.RegisterLoader<LoaderCollada>();
 
                     cl.SetScene<TestScene3D>();
 

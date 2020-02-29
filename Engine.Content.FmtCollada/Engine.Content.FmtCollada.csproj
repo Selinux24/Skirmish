@@ -238,6 +238,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Engine.Content.FmtCollada.ruleset" />
     <None Include="Engine.Content.FmtCollada.snk" />
   </ItemGroup>
   <ItemGroup>

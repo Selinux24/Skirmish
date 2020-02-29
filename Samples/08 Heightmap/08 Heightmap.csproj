@@ -435,6 +435,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Engine.Content.FmtCollada\Engine.Content.FmtCollada.csproj">
+      <Project>{B5E51939-46DC-412D-A096-E1C892F95FB3}</Project>
+      <Name>Engine.Content.FmtCollada</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Engine.PathFinding.RecastNavigation\Engine.PathFinding.RecastNavigation.csproj">
       <Project>{0d7d6c77-588e-4371-a815-a58b87653991}</Project>
       <Name>Engine.PathFinding.RecastNavigation</Name>

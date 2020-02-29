@@ -7,8 +7,8 @@
     <ProjectGuid>{18852FDD-B099-4C91-A970-7B4A087B7554}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Engine.Content.LoaderObj</RootNamespace>
-    <AssemblyName>Engine.Content.LoaderObj</AssemblyName>
+    <RootNamespace>Engine.Content.FmtObj</RootNamespace>
+    <AssemblyName>Engine.Content.FmtObj</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -41,7 +41,7 @@
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>Engine.Content.LoaderObj.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>Engine.Content.FmtObj.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
@@ -103,8 +103,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Engine.Content.LoaderObj.ruleset" />
-    <None Include="Engine.Content.LoaderObj.snk" />
+    <None Include="Engine.Content.FmtObj.ruleset" />
+    <None Include="Engine.Content.FmtObj.snk" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Engine\Engine.csproj">

@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.Content.FmtCollada;
 using System;
 
 namespace Instancing
@@ -22,7 +23,9 @@ namespace Instancing
                     cl.LockMouse = true;
 #endif
 
-                    cl.SetScene<TestScene>();
+                GameResourceManager.RegisterLoader<LoaderCollada>();
+
+                cl.SetScene<TestScene>();
 
                     cl.Run();
                 }
