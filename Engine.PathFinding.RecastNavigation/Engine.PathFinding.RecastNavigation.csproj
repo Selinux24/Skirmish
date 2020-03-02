@@ -173,6 +173,7 @@
     <Compile Include="LayerMonotoneRegion.cs" />
     <Compile Include="LayerRegion.cs" />
     <Compile Include="LayerSweepSpan.cs" />
+    <Compile Include="LevelStackEntry.cs" />
     <Compile Include="Link.cs" />
     <Compile Include="MeshData.cs" />
     <Compile Include="MeshHeader.cs" />
@@ -213,6 +214,7 @@
     <Compile Include="RaycastHit.cs" />
     <Compile Include="RaycastOptions.cs" />
     <Compile Include="Recast.cs" />
+    <Compile Include="RecastRegionDirtyEntry.cs" />
     <Compile Include="Region.cs" />
     <Compile Include="SamplePartitionTypes.cs" />
     <Compile Include="SamplePolyAreas.cs" />

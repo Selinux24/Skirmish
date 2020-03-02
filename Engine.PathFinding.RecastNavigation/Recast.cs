@@ -1143,7 +1143,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             return dst;
         }
-        private static bool FloodRegion(int x, int y, int i, int level, int r, CompactHeightfield chf, int[] srcReg, int[] srcDist, List<int> stack)
+        private static bool FloodRegion(int x, int y, int i, int level, int r, CompactHeightfield chf, int[] srcReg, int[] srcDist, List<LevelStackEntry> stack)
         {
             int w = chf.Width;
 
@@ -1151,9 +1151,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             // Flood fill mark region.
             stack.Clear();
-            stack.Add(x);
-            stack.Add(y);
-            stack.Add(i);
+            stack.Add(new LevelStackEntry { X = x, Y = y, Index = i });
             srcReg[i] = r;
             srcDist[i] = 0;
 
@@ -1162,9 +1160,11 @@ namespace Engine.PathFinding.RecastNavigation
 
             while (stack.Count > 0)
             {
-                int ci = stack.Pop();
-                int cy = stack.Pop();
-                int cx = stack.Pop();
+                var back = stack.Pop();
+
+                int cx = back.X;
+                int cy = back.Y;
+                int ci = back.Index;
 
                 var cs = chf.Spans[ci];
 
@@ -1238,9 +1238,7 @@ namespace Engine.PathFinding.RecastNavigation
                         {
                             srcReg[ai] = r;
                             srcDist[ai] = 0;
-                            stack.Add(ax);
-                            stack.Add(ay);
-                            stack.Add(ai);
+                            stack.Add(new LevelStackEntry { X = ax, Y = ay, Index = ai });
                         }
                     }
                 }
@@ -1248,7 +1246,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             return count > 0;
         }
-        private static int[] ExpandRegions(int maxIter, int level, CompactHeightfield chf, int[] srcReg, int[] srcDist, int[] dstReg, int[] dstDist, List<int> stack, bool fillStack)
+        private static void ExpandRegions(int maxIter, int level, CompactHeightfield chf, int[] srcReg, int[] srcDist, List<LevelStackEntry> stack, bool fillStack)
         {
             int w = chf.Width;
             int h = chf.Height;
@@ -1266,9 +1264,7 @@ namespace Engine.PathFinding.RecastNavigation
                         {
                             if (chf.Dist[i] >= level && srcReg[i] == 0 && chf.Areas[i] != TileCacheAreas.RC_NULL_AREA)
                             {
-                                stack.Add(x);
-                                stack.Add(y);
-                                stack.Add(i);
+                                stack.Add(new LevelStackEntry { X = x, Y = y, Index = i });
                             }
                         }
                     }
@@ -1277,29 +1273,34 @@ namespace Engine.PathFinding.RecastNavigation
             else // use cells in the input stack
             {
                 // mark all cells which already have a region
-                for (int j = 0; j < stack.Count; j += 3)
+                for (int j = 0; j < stack.Count; j++)
                 {
-                    int i = stack[j + 2];
+                    var current = stack[j];
+
+                    int i = current.Index;
                     if (srcReg[i] != 0)
                     {
-                        stack[j + 2] = -1;
+                        current.Index = -1;
+
+                        stack[j] = current;
                     }
                 }
             }
 
+            List<RecastRegionDirtyEntry> dirtyEntries = new List<RecastRegionDirtyEntry>();
             int iter = 0;
             while (stack.Count > 0)
             {
                 int failed = 0;
+                dirtyEntries.Clear();
 
-                Array.Copy(srcReg, dstReg, chf.SpanCount);
-                Array.Copy(srcDist, dstDist, chf.SpanCount);
-
-                for (int j = 0; j < stack.Count; j += 3)
+                for (int j = 0; j < stack.Count; j++)
                 {
-                    int x = stack[j + 0];
-                    int y = stack[j + 1];
-                    int i = stack[j + 2];
+                    var current = stack[j];
+
+                    int x = current.X;
+                    int y = current.Y;
+                    int i = current.Index;
                     if (i < 0)
                     {
                         failed++;
@@ -1325,9 +1326,10 @@ namespace Engine.PathFinding.RecastNavigation
                     }
                     if (r != 0)
                     {
-                        stack[j + 2] = -1; // mark as used
-                        dstReg[i] = r;
-                        dstDist[i] = d2;
+                        current.Index = -1; // mark as used
+                        stack[j] = current;
+
+                        dirtyEntries.Add(new RecastRegionDirtyEntry { Index = i, Region = r, Distance2 = d2 });
                     }
                     else
                     {
@@ -1335,11 +1337,14 @@ namespace Engine.PathFinding.RecastNavigation
                     }
                 }
 
-                // rcSwap source and dest.
-                Helper.Swap(ref srcReg, ref dstReg);
-                Helper.Swap(ref srcDist, ref dstDist);
+                for (int i = 0; i < dirtyEntries.Count; i++)
+                {
+                    int idx = dirtyEntries[i].Index;
+                    srcReg[idx] = dirtyEntries[i].Region;
+                    srcDist[idx] = dirtyEntries[i].Distance2;
+                }
 
-                if (failed * 3 == stack.Count)
+                if (failed == stack.Count)
                 {
                     break;
                 }
@@ -1353,27 +1358,25 @@ namespace Engine.PathFinding.RecastNavigation
                     }
                 }
             }
-
-            return srcReg;
         }
-        private static void SortCellsByLevel(int startLevel, CompactHeightfield chf, int[] srcReg, int nbStacks, List<List<int>> stacks, int loglevelsPerStack) // the levels per stack (2 in our case) as a bit shift
+        private static void SortCellsByLevel(int startLevel, CompactHeightfield chf, int[] srcReg, int nbStacks, List<List<LevelStackEntry>> stacks, int loglevelsPerStack) // the levels per stack (2 in our case) as a bit shift
         {
             int w = chf.Width;
             int h = chf.Height;
             startLevel >>= loglevelsPerStack;
 
-            for (int j = 0; j < nbStacks; ++j)
+            for (int j = 0; j < nbStacks; j++)
             {
                 stacks[j].Clear();
             }
 
             // put all cells in the level range into the appropriate stacks
-            for (int y = 0; y < h; ++y)
+            for (int y = 0; y < h; y++)
             {
-                for (int x = 0; x < w; ++x)
+                for (int x = 0; x < w; x++)
                 {
                     var c = chf.Cells[x + y * w];
-                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
+                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; i++)
                     {
                         if (chf.Areas[i] == TileCacheAreas.RC_NULL_AREA || srcReg[i] != 0)
                         {
@@ -1391,25 +1394,21 @@ namespace Engine.PathFinding.RecastNavigation
                             sId = 0;
                         }
 
-                        stacks[sId].Add(x);
-                        stacks[sId].Add(y);
-                        stacks[sId].Add(i);
+                        stacks[sId].Add(new LevelStackEntry { X = x, Y = y, Index = i });
                     }
                 }
             }
         }
-        private static void AppendStacks(List<int> srcStack, List<int> dstStack, int[] srcReg)
+        private static void AppendStacks(List<LevelStackEntry> srcStack, List<LevelStackEntry> dstStack, int[] srcReg)
         {
-            for (int j = 0; j < srcStack.Count; j += 3)
+            for (int j = 0; j < srcStack.Count; j++)
             {
-                int i = srcStack[j + 2];
+                int i = srcStack[j].Index;
                 if ((i < 0) || (srcReg[i] != 0))
                 {
                     continue;
                 }
                 dstStack.Add(srcStack[j]);
-                dstStack.Add(srcStack[j + 1]);
-                dstStack.Add(srcStack[j + 2]);
             }
         }
         private static void RemoveAdjacentNeighbours(Region reg)
@@ -1679,12 +1678,12 @@ namespace Engine.PathFinding.RecastNavigation
             int h = chf.Height;
 
             int nreg = maxRegionId + 1;
-            Region[] regions = new Region[nreg];
+            List<Region> regions = new List<Region>(nreg);
 
             // Construct regions
             for (int i = 0; i < nreg; ++i)
             {
-                regions[i] = new Region(i);
+                regions.Add(new Region(i));
             }
 
             // Find edge of a region and find connections around the contour.
@@ -1988,20 +1987,18 @@ namespace Engine.PathFinding.RecastNavigation
 
             reg.connections.Add(n);
         }
-        private static bool MergeAndFilterLayerRegions(int minRegionArea, int maxRegionId, CompactHeightfield chf, int[] srcReg, out int[] overlaps, out int maxRegionIdResult)
+        private static bool MergeAndFilterLayerRegions(int minRegionArea, int maxRegionId, CompactHeightfield chf, int[] srcReg, out int maxRegionIdResult)
         {
-            overlaps = null;
-
             int w = chf.Width;
             int h = chf.Height;
 
             int nreg = maxRegionId + 1;
-            Region[] regions = new Region[nreg];
+            List<Region> regions = new List<Region>(nreg);
 
             // Construct regions
             for (int i = 0; i < nreg; ++i)
             {
-                regions[i] = new Region(i);
+                regions.Add(new Region(i));
             }
 
             // Find region neighbours and overlapping regions.
@@ -2282,9 +2279,9 @@ namespace Engine.PathFinding.RecastNavigation
                 PaintRectRegion(w - bw, w, 0, h, id | RC_BORDER_REG, chf, srcReg); id++;
                 PaintRectRegion(0, w, 0, bh, id | RC_BORDER_REG, chf, srcReg); id++;
                 PaintRectRegion(0, w, h - bh, h, id | RC_BORDER_REG, chf, srcReg); id++;
-
-                chf.BorderSize = borderSize;
             }
+
+            chf.BorderSize = borderSize;
 
             // Sweep one line at a time.
             for (int y = borderSize; y < h - borderSize; ++y)
@@ -2409,18 +2406,16 @@ namespace Engine.PathFinding.RecastNavigation
 
             int LOG_NB_STACKS = 3;
             int NB_STACKS = 1 << LOG_NB_STACKS;
-            List<List<int>> lvlStacks = new List<List<int>>();
-            for (int i = 0; i < NB_STACKS; ++i)
+            List<List<LevelStackEntry>> lvlStacks = new List<List<LevelStackEntry>>();
+            for (int i = 0; i < NB_STACKS; i++)
             {
-                lvlStacks.Add(new List<int>());
+                lvlStacks.Add(new List<LevelStackEntry>());
             }
 
-            List<int> stack = new List<int>();
+            List<LevelStackEntry> stack = new List<LevelStackEntry>();
 
             int[] srcReg = new int[chf.SpanCount];
             int[] srcDist = new int[chf.SpanCount];
-            int[] dstReg = new int[chf.SpanCount];
-            int[] dstDist = new int[chf.SpanCount];
 
             int regionId = 1;
             int level = (chf.MaxDistance + 1) & ~1;
@@ -2442,9 +2437,9 @@ namespace Engine.PathFinding.RecastNavigation
                 PaintRectRegion(w - bw, w, 0, h, (regionId | RC_BORDER_REG), chf, srcReg); regionId++;
                 PaintRectRegion(0, w, 0, bh, (regionId | RC_BORDER_REG), chf, srcReg); regionId++;
                 PaintRectRegion(0, w, h - bh, h, (regionId | RC_BORDER_REG), chf, srcReg); regionId++;
-
-                chf.BorderSize = borderSize;
             }
+
+            chf.BorderSize = borderSize;
 
             int sId = -1;
             while (level > 0)
@@ -2462,18 +2457,15 @@ namespace Engine.PathFinding.RecastNavigation
                 }
 
                 // Expand current regions until no empty connected cells found.
-                if (ExpandRegions(expandIters, level, chf, srcReg, srcDist, dstReg, dstDist, lvlStacks[sId], false) != srcReg)
-                {
-                    Helper.Swap(ref srcReg, ref dstReg);
-                    Helper.Swap(ref srcDist, ref dstDist);
-                }
+                ExpandRegions(expandIters, level, chf, srcReg, srcDist, lvlStacks[sId], false);
 
                 // Mark new regions with IDs.
-                for (int j = 0; j < lvlStacks[sId].Count; j += 3)
+                for (int j = 0; j < lvlStacks[sId].Count; j++)
                 {
-                    int x = lvlStacks[sId][j];
-                    int y = lvlStacks[sId][j + 1];
-                    int i = lvlStacks[sId][j + 2];
+                    var current = lvlStacks[sId][j];
+                    int x = current.X;
+                    int y = current.Y;
+                    int i = current.Index;
                     if (i >= 0 && srcReg[i] == 0)
                     {
                         var floodRes = FloodRegion(x, y, i, level, regionId, chf, srcReg, srcDist, stack);
@@ -2491,11 +2483,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Expand current regions until no empty connected cells found.
-            if (ExpandRegions(expandIters * 8, 0, chf, srcReg, srcDist, dstReg, dstDist, stack, true) != srcReg)
-            {
-                Helper.Swap(ref srcReg, ref dstReg);
-                Helper.Swap(ref srcDist, ref dstDist);
-            }
+            ExpandRegions(expandIters * 8, 0, chf, srcReg, srcDist, stack, true);
 
             // Merge regions and filter out smalle regions.
             chf.MaxRegions = regionId;
@@ -2542,9 +2530,9 @@ namespace Engine.PathFinding.RecastNavigation
                 PaintRectRegion(w - bw, w, 0, h, id | RC_BORDER_REG, chf, srcReg); id++;
                 PaintRectRegion(0, w, 0, bh, id | RC_BORDER_REG, chf, srcReg); id++;
                 PaintRectRegion(0, w, h - bh, h, id | RC_BORDER_REG, chf, srcReg); id++;
-
-                chf.BorderSize = borderSize;
             }
+
+            chf.BorderSize = borderSize;
 
             // Sweep one line at a time.
             for (int y = borderSize; y < h - borderSize; ++y)
@@ -2644,7 +2632,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             // Merge monotone regions to layers and remove small regions.
             chf.MaxRegions = id;
-            var merged = MergeAndFilterLayerRegions(minRegionArea, id, chf, srcReg, out int[] overlaps, out int maxRegionId);
+            var merged = MergeAndFilterLayerRegions(minRegionArea, id, chf, srcReg, out int maxRegionId);
             chf.MaxRegions = maxRegionId;
             if (!merged)
             {
@@ -6366,15 +6354,16 @@ namespace Engine.PathFinding.RecastNavigation
             }
             return (float)Math.Sqrt(minDist);
         }
-        public static void TriangulateHull(int nverts, Vector3[] verts, int nhull, int[] hull, List<Int4> tris)
+        public static void TriangulateHull(int nverts, Vector3[] verts, int nhull, int[] hull, int nin, List<Int4> tris)
         {
             int start = 0, left = 1, right = nhull - 1;
 
             // Start from an ear with shortest perimeter.
             // This tends to favor well formed triangles as starting point.
-            float dmin = 0;
+            float dmin = float.MaxValue;
             for (int i = 0; i < nhull; i++)
             {
+                if (hull[i] >= nin) continue; // Ears are triangles with original vertices as middle vertex while others are actually line segments on edges
                 int pi = Prev(i, nhull);
                 int ni = Next(i, nhull);
                 var pv = verts[hull[pi]];
@@ -6604,7 +6593,7 @@ namespace Engine.PathFinding.RecastNavigation
             // If the polygon minimum extent is small (sliver or small triangle), do not try to add internal points.
             if (minExtent < sampleDist * 2)
             {
-                TriangulateHull(nverts, verts, nhull, hull, tris);
+                TriangulateHull(nverts, verts, nhull, hull, ninp, tris);
 
                 outTris = tris.ToArray();
 
@@ -6615,7 +6604,7 @@ namespace Engine.PathFinding.RecastNavigation
             // We're using the triangulateHull instead of delaunayHull as it tends to
             // create a bit better triangulation for long thin triangles when there
             // are no internal points.
-            TriangulateHull(nverts, verts, nhull, hull, tris);
+            TriangulateHull(nverts, verts, nhull, hull, ninp, tris);
 
             if (tris.Count == 0)
             {
