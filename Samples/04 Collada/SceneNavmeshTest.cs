@@ -47,6 +47,7 @@ namespace Collada
 #if DEBUG
             this.Game.VisibleMouse = false;
             this.Game.LockMouse = false;
+            this.Camera.MovementDelta = 50f;
 #else
             this.Game.VisibleMouse = false;
             this.Game.LockMouse = true;
@@ -98,8 +99,6 @@ namespace Collada
 
             this.Camera.NearPlaneDistance = 0.01f;
             this.Camera.FarPlaneDistance *= 2;
-            this.Camera.MovementDelta = agent.Velocity;
-            this.Camera.SlowMovementDelta = agent.VelocitySlow;
         }
         private async Task InitializeNavmesh()
         {

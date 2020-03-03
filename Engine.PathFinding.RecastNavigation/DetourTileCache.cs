@@ -1056,7 +1056,7 @@ namespace Engine.PathFinding.RecastNavigation
                 // Tessellate only outer edges or edges between areas.
                 while (ci != endi)
                 {
-                    float d = Recast.DistancePtSeg(cont.verts[ci].X, cont.verts[ci].Z, ax, az, bx, bz);
+                    float d = Recast.DistancePtSeg2D(cont.verts[ci].X, cont.verts[ci].Z, ax, az, bx, bz);
                     if (d > maxd)
                     {
                         maxd = d;

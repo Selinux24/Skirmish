@@ -2538,7 +2538,7 @@ namespace Engine.PathFinding.RecastNavigation
             for (int y = borderSize; y < h - borderSize; ++y)
             {
                 // Collect spans from this row.
-                int[] prev = new int[256];
+                int[] prev = new int[1024];
                 int rid = 1;
 
                 for (int x = borderSize; x < w - borderSize; ++x)
@@ -3270,7 +3270,7 @@ namespace Engine.PathFinding.RecastNavigation
                 }
             }
         }
-        public static float DistancePtSeg(int x, int z, int px, int pz, int qx, int qz)
+        public static float DistancePtSeg2D(int x, int z, int px, int pz, int qx, int qz)
         {
             float pqx = (qx - px);
             float pqz = (qz - pz);
@@ -3406,7 +3406,7 @@ namespace Engine.PathFinding.RecastNavigation
                 {
                     while (ci != endi)
                     {
-                        float d = DistancePtSeg(points[ci].X, points[ci].Z, ax, az, bx, bz);
+                        float d = DistancePtSeg2D(points[ci].X, points[ci].Z, ax, az, bx, bz);
                         if (d > maxd)
                         {
                             maxd = d;
@@ -5149,7 +5149,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             // Count number of polygons to remove.
             int numRemovedVerts = 0;
-            for (int i = 0; i < mesh.NPolys; ++i)
+            for (int i = 0; i < mesh.NPolys; i++)
             {
                 var p = mesh.Polys[i];
                 int nv = CountPolyVerts(p);
@@ -5163,13 +5163,13 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             int nedges = 0;
-            Int4[] edges = new Int4[numRemovedVerts];
+            Int4[] edges = new Int4[numRemovedVerts * mesh.NVP];
             int nhole = 0;
-            int[] hole = new int[numRemovedVerts];
+            int[] hole = new int[numRemovedVerts * mesh.NVP];
             int nhreg = 0;
-            int[] hreg = new int[numRemovedVerts];
+            int[] hreg = new int[numRemovedVerts * mesh.NVP];
             int nharea = 0;
-            SamplePolyAreas[] harea = new SamplePolyAreas[numRemovedVerts];
+            SamplePolyAreas[] harea = new SamplePolyAreas[numRemovedVerts * mesh.NVP];
 
             for (int i = 0; i < mesh.NPolys; ++i)
             {
@@ -5317,6 +5317,7 @@ namespace Engine.PathFinding.RecastNavigation
                 var t = tris[j];
                 if (t.X != t.Y && t.X != t.Z && t.Y != t.Z)
                 {
+                    polys[npolys] = new Polygoni();
                     polys[npolys][0] = hole[t.X];
                     polys[npolys][1] = hole[t.Y];
                     polys[npolys][2] = hole[t.Z];
@@ -5393,7 +5394,8 @@ namespace Engine.PathFinding.RecastNavigation
             for (int i = 0; i < npolys; ++i)
             {
                 if (mesh.NPolys >= maxTris) break;
-                var p = mesh.Polys[mesh.NPolys];
+                var p = new Polygoni();
+                mesh.Polys[mesh.NPolys] = p;
                 for (int j = 0; j < nvp; ++j)
                 {
                     p[j] = polys[i][j];
@@ -5987,7 +5989,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
             return c ? -dmin : dmin;
         }
-        private static int GetHeight(float fx, float fy, float fz, float cs, float ics, float ch, int radius, HeightPatch hp)
+        private static int GetHeight(float fx, float fy, float fz, float ics, float ch, int radius, HeightPatch hp)
         {
             int ix = (int)Math.Floor(fx * ics + 0.01f);
             int iz = (int)Math.Floor(fz * ics + 0.01f);
@@ -6524,7 +6526,7 @@ namespace Engine.PathFinding.RecastNavigation
                             Y = vj.Y + dy * u,
                             Z = vj.Z + dz * u
                         };
-                        pos.Y = GetHeight(pos.X, pos.Y, pos.Z, cs, ics, chf.CH, heightSearchRadius, hp) * chf.CH;
+                        pos.Y = GetHeight(pos.X, pos.Y, pos.Z, ics, chf.CH, heightSearchRadius, hp) * chf.CH;
                         edge[k] = pos;
                     }
                     // Simplify samples.
@@ -6647,7 +6649,7 @@ namespace Engine.PathFinding.RecastNavigation
                         samples.Add(
                             new Int4(
                                 x,
-                                GetHeight(pt.X, pt.Y, pt.Z, cs, ics, chf.CH, heightSearchRadius, hp),
+                                GetHeight(pt.X, pt.Y, pt.Z, ics, chf.CH, heightSearchRadius, hp),
                                 z,
                                 0)); // Not added
                     }
@@ -7410,10 +7412,6 @@ namespace Engine.PathFinding.RecastNavigation
             // else P[i] is reflex.
             return !(LeftOn(pi, pj, pi1) && LeftOn(pj, pi, pin1));
         }
-        public static bool Diagonal(int i, int j, int n, Int4[] verts, int[] indices)
-        {
-            return InCone(i, j, n, verts, indices) && Diagonalie(i, j, n, verts, indices);
-        }
         public static bool InCone(int i, int n, Int4[] verts, Int4 pj)
         {
             var pi = verts[i];
@@ -7428,6 +7426,10 @@ namespace Engine.PathFinding.RecastNavigation
             // Assume (i-1,i,i+1) not collinear.
             // else P[i] is reflex.
             return !(LeftOn(pi, pj, pi1) && LeftOn(pj, pi, pin1));
+        }
+        public static bool Diagonal(int i, int j, int n, Int4[] verts, int[] indices)
+        {
+            return InCone(i, j, n, verts, indices) && Diagonalie(i, j, n, verts, indices);
         }
 
         #endregion

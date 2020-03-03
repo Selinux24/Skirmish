@@ -213,29 +213,33 @@ namespace Engine.PathFinding.RecastNavigation
         {
             h = float.MaxValue;
 
+            float EPS = 1e-6f;
             Vector3 v0 = Vector3.Subtract(c, a);
             Vector3 v1 = Vector3.Subtract(b, a);
             Vector3 v2 = Vector3.Subtract(p, a);
 
-            float dot00 = Vector3.Dot(v0, v0);
-            float dot01 = Vector3.Dot(v0, v1);
-            float dot02 = Vector3.Dot(v0, v2);
-            float dot11 = Vector3.Dot(v1, v1);
-            float dot12 = Vector3.Dot(v1, v2);
+            // Compute scaled barycentric coordinates
+            float denom = v0.X * v1.Z - v0.Z * v1.X;
+            if (Math.Abs(denom) < EPS)
+            {
+                return false;
+            }
 
-            // Compute barycentric coordinates
-            float invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
-            float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-            float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+            float u = v1.Z * v2.X - v1.X * v2.Z;
+            float v = v0.X * v2.Z - v0.Z * v2.X;
 
-            // The (sloppy) epsilon is needed to allow to get height of points which
-            // are interpolated along the edges of the triangles.
-            float EPS = 1e-4f;
+            if (denom < 0)
+            {
+                denom = -denom;
+                u = -u;
+                v = -v;
+            }
 
             // If point lies inside the triangle, return interpolated ycoord.
-            if (u >= -EPS && v >= -EPS && (u + v) <= 1 + EPS)
+            if (u >= 0.0f && v >= 0.0f && (u + v) <= denom)
             {
-                h = a.Y + v0.Y * u + v1.Y * v;
+                h = a.Y + (v0.Y * u + v1.Y * v) / denom;
+
                 return true;
             }
 
@@ -1245,6 +1249,16 @@ namespace Engine.PathFinding.RecastNavigation
         {
             tile.Links[link].next = tile.LinksFreeList;
             tile.LinksFreeList = link;
+        }
+        /// <summary>
+        /// Get flags for edge in detail triangle.
+        /// </summary>
+        /// <param name="triFlags">The flags for the triangle (last component of detail vertices above).</param>
+        /// <param name="edgeIndex">The index of the first vertex of the edge. For instance, if 0, returns flags for edge AB.</param>
+        /// <returns></returns>
+        public static DetailTriEdgeTypes GetDetailTriEdgeFlags(DetailTriEdgeTypes triFlags, int edgeIndex)
+        {
+            return (DetailTriEdgeTypes)(((int)triFlags >> (edgeIndex * 2)) & 0x3);
         }
 
         #endregion

@@ -64,7 +64,8 @@ namespace Engine.PathFinding.RecastNavigation
         private static Status CalcPath(
             NavMeshQuery navQuery, QueryFilter filter, Vector3 polyPickExt,
             PathFindingMode mode,
-            Vector3 startPos, Vector3 endPos, out Vector3[] resultPath)
+            Vector3 startPos, Vector3 endPos,
+            out Vector3[] resultPath)
         {
             resultPath = null;
 
@@ -115,18 +116,16 @@ namespace Engine.PathFinding.RecastNavigation
 
             navQuery.FindPath(
                 startRef, endRef, startPos, endPos, filter,
-                out int[] polys, out int npolys,
-                MAX_POLYS);
+                MAX_POLYS,
+                out var polys);
 
-            if (npolys != 0)
+            if (polys.Count != 0)
             {
                 // Iterate over the path to find smooth path on the detail mesh surface.
-                int[] iterPolys = new int[MAX_POLYS];
-                Array.Copy(polys, iterPolys, npolys);
-                int nIterPolys = npolys;
+                var iterPath = polys.Copy();
 
                 navQuery.ClosestPointOnPoly(startRef, startPos, out Vector3 iterPos, out bool iOver);
-                navQuery.ClosestPointOnPoly(iterPolys[nIterPolys - 1], endPos, out Vector3 targetPos, out bool eOver);
+                navQuery.ClosestPointOnPoly(iterPath.Path[iterPath.Count - 1], endPos, out Vector3 targetPos, out bool eOver);
 
                 float STEP_SIZE = 0.5f;
                 float SLOP = 0.01f;
@@ -138,12 +137,12 @@ namespace Engine.PathFinding.RecastNavigation
 
                 // Move towards target a small advancement at a time until target reached or
                 // when ran out of memory to store the path.
-                while (nIterPolys != 0 && smoothPath.Count < MAX_SMOOTH)
+                while (iterPath.Count != 0 && smoothPath.Count < MAX_SMOOTH)
                 {
                     // Find location to steer towards.
                     if (!GetSteerTarget(
                         navQuery, iterPos, targetPos, SLOP,
-                        iterPolys, nIterPolys, out var target))
+                        iterPath, out var target))
                     {
                         break;
                     }
@@ -167,13 +166,13 @@ namespace Engine.PathFinding.RecastNavigation
 
                     // Move
                     navQuery.MoveAlongSurface(
-                        iterPolys[0], iterPos, moveTgt, filter,
-                        out Vector3 result, out int[] visited, out int nvisited, 16);
+                        iterPath.Path[0], iterPos, moveTgt, filter, 16,
+                        out var result, out var visited, out var nvisited);
 
-                    nIterPolys = FixupCorridor(iterPolys, nIterPolys, MAX_POLYS, visited, nvisited);
-                    nIterPolys = FixupShortcuts(iterPolys, nIterPolys, navQuery);
+                    iterPath.Count = FixupCorridor(iterPath, MAX_POLYS, visited, nvisited);
+                    iterPath.Count = FixupShortcuts(iterPath, navQuery);
 
-                    navQuery.GetPolyHeight(iterPolys[0], result, out float h);
+                    navQuery.GetPolyHeight(iterPath.Path[0], result, out float h);
                     result.Y = h;
                     iterPos = result;
 
@@ -194,19 +193,19 @@ namespace Engine.PathFinding.RecastNavigation
 
                         // Advance the path up to and over the off-mesh connection.
                         int prevRef = 0;
-                        int polyRef = iterPolys[0];
+                        int polyRef = iterPath.Path[0];
                         int npos = 0;
-                        while (npos < nIterPolys && polyRef != target.Ref)
+                        while (npos < iterPath.Count && polyRef != target.Ref)
                         {
                             prevRef = polyRef;
-                            polyRef = iterPolys[npos];
+                            polyRef = iterPath.Path[npos];
                             npos++;
                         }
-                        for (int i = npos; i < nIterPolys; ++i)
+                        for (int i = npos; i < iterPath.Count; ++i)
                         {
-                            iterPolys[i - npos] = iterPolys[i];
+                            iterPath.Path[i - npos] = iterPath.Path[i];
                         }
-                        nIterPolys -= npos;
+                        iterPath.Count -= npos;
 
                         // Handle the connection.
                         if (navQuery.GetAttachedNavMesh().GetOffMeshConnectionPolyEndPoints(
@@ -223,7 +222,7 @@ namespace Engine.PathFinding.RecastNavigation
                             }
                             // Move position at the other side of the off-mesh link.
                             iterPos = ePos;
-                            navQuery.GetPolyHeight(iterPolys[0], iterPos, out float eh);
+                            navQuery.GetPolyHeight(iterPath.Path[0], iterPos, out float eh);
                             iterPos.Y = eh;
                         }
                     }
@@ -255,27 +254,26 @@ namespace Engine.PathFinding.RecastNavigation
             resultPath = null;
 
             navQuery.FindPath(
-                startRef, endRef, startPos, endPos, filter,
-                out int[] polys, out int npolys, MAX_POLYS);
+                startRef, endRef, startPos, endPos, filter, MAX_POLYS,
+                out SimplePath polys);
 
-            if (npolys != 0)
+            if (polys.Count != 0)
             {
                 // In case of partial path, make sure the end point is clamped to the last polygon.
                 Vector3 epos = endPos;
-                if (polys[npolys - 1] != endRef)
+                if (polys.Path[polys.Count - 1] != endRef)
                 {
-                    navQuery.ClosestPointOnPoly(polys[npolys - 1], endPos, out epos, out bool eOver);
+                    navQuery.ClosestPointOnPoly(polys.Path[polys.Count - 1], endPos, out epos, out bool eOver);
                 }
 
                 navQuery.FindStraightPath(
-                    startPos, epos, polys, npolys,
-                    out var straightPath, out var straightPathFlags,
-                    out var straightPathPolys, out var nstraightPath,
-                    MAX_POLYS, StraightPathOptions.DT_STRAIGHTPATH_ALL_CROSSINGS);
+                    startPos, epos, polys,
+                    MAX_POLYS, StraightPathOptions.DT_STRAIGHTPATH_ALL_CROSSINGS,
+                    out var straightPath);
 
-                if (nstraightPath > 0)
+                if (straightPath.Count > 0)
                 {
-                    resultPath = straightPath;
+                    resultPath = straightPath.Path;
 
                     return true;
                 }
@@ -292,14 +290,13 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="endPos">End position</param>
         /// <param name="minTargetDist">Miminum tangent distance</param>
         /// <param name="path">Current path</param>
-        /// <param name="pathSize">Current path size</param>
         /// <param name="target">Out target</param>
         /// <returns></returns>
         private static bool GetSteerTarget(
             NavMeshQuery navQuery,
             Vector3 startPos, Vector3 endPos,
             float minTargetDist,
-            int[] path, int pathSize,
+            SimplePath path,
             out SteerTarget target)
         {
             target = new SteerTarget
@@ -314,42 +311,42 @@ namespace Engine.PathFinding.RecastNavigation
             // Find steer target.
             int MAX_STEER_POINTS = 3;
             navQuery.FindStraightPath(
-                startPos, endPos, path, pathSize,
-                out Vector3[] steerPath, out StraightPathFlagTypes[] steerPathFlags, out int[] steerPathPolys, out int nsteerPath,
-                MAX_STEER_POINTS, StraightPathOptions.DT_STRAIGHTPATH_NONE);
+                startPos, endPos, path,
+                MAX_STEER_POINTS, StraightPathOptions.DT_STRAIGHTPATH_NONE,
+                out var steerPath);
 
-            if (nsteerPath == 0)
+            if (steerPath.Count == 0)
             {
                 return false;
             }
 
-            target.PointCount = nsteerPath;
-            target.Points = steerPath;
+            target.PointCount = steerPath.Count;
+            target.Points = steerPath.Path;
 
             // Find vertex far enough to steer to.
             int ns = 0;
-            while (ns < nsteerPath)
+            while (ns < steerPath.Count)
             {
                 // Stop at Off-Mesh link or when point is further than slop away.
-                if ((steerPathFlags[ns] & StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION) != 0 ||
-                    !InRange(steerPath[ns], startPos, minTargetDist, 1000.0f))
+                if ((steerPath.Flags[ns] & StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION) != 0 ||
+                    !InRange(steerPath.Path[ns], startPos, minTargetDist, 1000.0f))
                 {
                     break;
                 }
                 ns++;
             }
             // Failed to find good point to steer to.
-            if (ns >= nsteerPath)
+            if (ns >= steerPath.Count)
             {
                 return false;
             }
 
-            var pos = steerPath[ns];
+            var pos = steerPath.Path[ns];
             pos.Y = startPos.Y;
 
             target.Position = pos;
-            target.Flag = steerPathFlags[ns];
-            target.Ref = steerPathPolys[ns];
+            target.Flag = steerPath.Flags[ns];
+            target.Ref = steerPath.Refs[ns];
 
             return true;
         }
@@ -362,18 +359,18 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="visited">Visted references</param>
         /// <param name="nvisited">Number of visited references</param>
         /// <returns>Returns the new size of the path</returns>
-        private static int FixupCorridor(int[] path, int npath, int maxPath, int[] visited, int nvisited)
+        private static int FixupCorridor(SimplePath path, int maxPath, int[] visited, int nvisited)
         {
             int furthestPath = -1;
             int furthestVisited = -1;
 
             // Find furthest common polygon.
-            for (int i = npath - 1; i >= 0; --i)
+            for (int i = path.Count - 1; i >= 0; --i)
             {
                 bool found = false;
                 for (int j = nvisited - 1; j >= 0; --j)
                 {
-                    if (path[i] == visited[j])
+                    if (path.Path[i] == visited[j])
                     {
                         furthestPath = i;
                         furthestVisited = j;
@@ -389,28 +386,28 @@ namespace Engine.PathFinding.RecastNavigation
             // If no intersection found just return current path. 
             if (furthestPath == -1 || furthestVisited == -1)
             {
-                return npath;
+                return path.Count;
             }
 
             // Concatenate paths.	
 
             // Adjust beginning of the buffer to include the visited.
             int req = nvisited - furthestVisited;
-            int orig = Math.Min(furthestPath + 1, npath);
-            int size = Math.Max(0, npath - orig);
+            int orig = Math.Min(furthestPath + 1, path.Count);
+            int size = Math.Max(0, path.Count - orig);
             if (req + size > maxPath)
             {
                 size = maxPath - req;
             }
             if (size != 0)
             {
-                Array.Copy(path, orig, path, req, size);
+                Array.Copy(path.Path, orig, path.Path, req, size);
             }
 
             // Store visited
             for (int i = 0; i < req; ++i)
             {
-                path[i] = visited[(nvisited - 1) - i];
+                path.Path[i] = visited[(nvisited - 1) - i];
             }
 
             return req + size;
@@ -432,20 +429,20 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="npath">Current path size</param>
         /// <param name="navQuery">Navigation query</param>
         /// <returns>Returns the new size of the path</returns>
-        private static int FixupShortcuts(int[] path, int npath, NavMeshQuery navQuery)
+        private static int FixupShortcuts(SimplePath path, NavMeshQuery navQuery)
         {
-            if (npath < 3)
+            if (path.Count < 3)
             {
-                return npath;
+                return path.Count;
             }
 
             // Get connected polygons
             int maxNeis = 16;
             List<int> neis = new List<int>();
 
-            if (navQuery.GetAttachedNavMesh().GetTileAndPolyByRef(path[0], out MeshTile tile, out Poly poly))
+            if (navQuery.GetAttachedNavMesh().GetTileAndPolyByRef(path.Path[0], out MeshTile tile, out Poly poly))
             {
-                return npath;
+                return path.Count;
             }
 
             for (int k = poly.FirstLink; k != Detour.DT_NULL_LINK; k = tile.Links[k].next)
@@ -461,11 +458,11 @@ namespace Engine.PathFinding.RecastNavigation
             // in the path, short cut to that polygon directly.
             int maxLookAhead = 6;
             int cut = 0;
-            for (int i = Math.Min(maxLookAhead, npath) - 1; i > 1 && cut == 0; i--)
+            for (int i = Math.Min(maxLookAhead, path.Count) - 1; i > 1 && cut == 0; i--)
             {
                 for (int j = 0; j < neis.Count; j++)
                 {
-                    if (path[i] == neis[j])
+                    if (path.Path[i] == neis[j])
                     {
                         cut = i;
                         break;
@@ -475,14 +472,14 @@ namespace Engine.PathFinding.RecastNavigation
             if (cut > 1)
             {
                 int offset = cut - 1;
-                npath -= offset;
-                for (int i = 1; i < npath; i++)
+                path.Count -= offset;
+                for (int i = 1; i < path.Count; i++)
                 {
-                    path[i] = path[i + offset];
+                    path.Path[i] = path.Path[i + offset];
                 }
             }
 
-            return npath;
+            return path.Count;
         }
 
         private static bool InRange(Vector3 v1, Vector3 v2, float radius, float height)
@@ -582,7 +579,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 var navmesh = agentQ.NavMesh;
 
-                navmesh.BuildTile(position, Input, Settings, agentQ.Agent);
+                navmesh.BuildTileAtPosition(position, Input, Settings, agentQ.Agent);
             }
 
             this.Updated?.Invoke(this, new EventArgs());
@@ -599,7 +596,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 var navmesh = agentQ.NavMesh;
 
-                navmesh.RemoveTile(position, Input, Settings);
+                navmesh.RemoveTileAtPosition(position, Input, Settings);
             }
 
             this.Updated?.Invoke(this, new EventArgs());

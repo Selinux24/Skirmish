@@ -173,6 +173,15 @@ namespace Engine
         /// </summary>
         /// <param name="vector">Vector</param>
         /// <returns>Returns true if almost one of the instance attributes is infinity</returns>
+        public static bool IsInfinity(this Vector2 vector)
+        {
+            return float.IsInfinity(vector.X) || float.IsInfinity(vector.Y);
+        }
+        /// <summary>
+        /// Gets whether almost one of the instance attributes is infinity
+        /// </summary>
+        /// <param name="vector">Vector</param>
+        /// <returns>Returns true if almost one of the instance attributes is infinity</returns>
         public static bool IsInfinity(this Vector4 vector)
         {
             return float.IsInfinity(vector.X) || float.IsInfinity(vector.Y) || float.IsInfinity(vector.Z) || float.IsInfinity(vector.W);

@@ -155,6 +155,7 @@
     <Compile Include="ContourHole.cs" />
     <Compile Include="ContourRegion.cs" />
     <Compile Include="ContourSet.cs" />
+    <Compile Include="DetailTriEdgeFlags.cs" />
     <Compile Include="Detour.cs" />
     <Compile Include="DetourTileCache.cs" />
     <Compile Include="Edge.cs" />
@@ -220,10 +221,12 @@
     <Compile Include="SamplePolyAreas.cs" />
     <Compile Include="SamplePolyFlagTypes.cs" />
     <Compile Include="SegInterval.cs" />
+    <Compile Include="SimplePath.cs" />
     <Compile Include="Span.cs" />
     <Compile Include="SpanPool.cs" />
     <Compile Include="Status.cs" />
     <Compile Include="SteerTarget.cs" />
+    <Compile Include="StraightPath.cs" />
     <Compile Include="StraightPathFlagTypes.cs" />
     <Compile Include="StraightPathOptions.cs" />
     <Compile Include="SweepSpan.cs" />

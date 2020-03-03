@@ -63,7 +63,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns></returns>
         public virtual float GetCost(
             Vector3 pa, Vector3 pb,
-            int prevRef, MeshTile prevTile, Poly prevPoly,
+            int? prevRef, MeshTile prevTile, Poly prevPoly,
             int curRef, MeshTile curTile, Poly curPoly,
             int nextRef, MeshTile nextTile, Poly nextPoly)
         {

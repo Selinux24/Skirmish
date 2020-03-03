@@ -14,7 +14,7 @@ namespace Engine.PathFinding.RecastNavigation
 
         public static NavMesh Build(InputGeometry geometry, BuildSettings settings, Agent agent)
         {
-            NavMesh res = null;
+            NavMesh res;
 
             if (settings.BuildMode == BuildModes.Solo)
             {
@@ -2008,64 +2008,95 @@ namespace Engine.PathFinding.RecastNavigation
 
             return nearest;
         }
-        private void ClosestPointOnPoly(int r, Vector3 pos, out Vector3 closest, out bool posOverPoly)
+        private void ClosestPointOnDetailEdges(MeshTile tile, Poly poly, Vector3 pos, bool onlyBoundary, out Vector3 closest)
         {
-            GetTileAndPolyByRefUnsafe(r, out MeshTile tile, out Poly poly);
+            int ip = Array.IndexOf(tile.Polys, poly);
+            var pd = tile.DetailMeshes[ip];
 
-            // Off-mesh connections don't have detail polygons.
+            float dmin = float.MaxValue;
+            float tmin = 0;
+            Vector3 pmin = Vector3.Zero;
+            Vector3 pmax = Vector3.Zero;
+
+            for (int i = 0; i < pd.TriCount; i++)
+            {
+                var tris = tile.DetailTris[pd.TriBase + i];
+                int ANY_BOUNDARY_EDGE =
+                    ((int)DetailTriEdgeTypes.DT_DETAIL_EDGE_BOUNDARY << 0) |
+                    ((int)DetailTriEdgeTypes.DT_DETAIL_EDGE_BOUNDARY << 2) |
+                    ((int)DetailTriEdgeTypes.DT_DETAIL_EDGE_BOUNDARY << 4);
+                if (onlyBoundary && (tris.W & ANY_BOUNDARY_EDGE) == 0)
+                {
+                    continue;
+                }
+
+                Vector3[] v = new Vector3[3];
+                for (int j = 0; j < 3; ++j)
+                {
+                    if (tris[j] < poly.VertCount)
+                    {
+                        v[j] = tile.Verts[poly.Verts[tris[j]]];
+                    }
+                    else
+                    {
+                        v[j] = tile.DetailVerts[(pd.VertBase + (tris[j] - poly.VertCount))];
+                    }
+                }
+
+                for (int k = 0, j = 2; k < 3; j = k++)
+                {
+                    if ((Detour.GetDetailTriEdgeFlags((DetailTriEdgeTypes)tris.W, j) & DetailTriEdgeTypes.DT_DETAIL_EDGE_BOUNDARY) == 0 &&
+                        (onlyBoundary || tris[j] < tris[k]))
+                    {
+                        // Only looking at boundary edges and this is internal, or
+                        // this is an inner edge that we will see again or have already seen.
+                        continue;
+                    }
+
+                    float d = Detour.DistancePtSegSqr2D(pos, v[j], v[k], out var t);
+                    if (d < dmin)
+                    {
+                        dmin = d;
+                        tmin = t;
+                        pmin = v[j];
+                        pmax = v[k];
+                    }
+                }
+            }
+
+            closest = Vector3.Lerp(pmin, pmax, tmin);
+        }
+        internal bool GetPolyHeight(MeshTile tile, Poly poly, Vector3 pos, out float height)
+        {
+            height = 0;
+
+            // Off-mesh connections do not have detail polys and getting height
+            // over them does not make sense.
             if (poly.Type == PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
             {
-                Vector3 v0 = tile.Verts[poly.Verts[0]];
-                Vector3 v1 = tile.Verts[poly.Verts[1]];
-                float d0 = Vector3.Distance(pos, v0);
-                float d1 = Vector3.Distance(pos, v1);
-                float u = d0 / (d0 + d1);
-                closest = Vector3.Lerp(v0, v1, u);
-                posOverPoly = false;
-                return;
+                return false;
             }
 
             int ip = Array.IndexOf(tile.Polys, poly);
             var pd = tile.DetailMeshes[ip];
 
-            // Clamp point to be inside the polygon.
             Vector3[] verts = new Vector3[Detour.DT_VERTS_PER_POLYGON];
             int nv = poly.VertCount;
-            for (int i = 0; i < nv; ++i)
+            for (int i = 0; i < nv; i++)
             {
                 verts[i] = tile.Verts[poly.Verts[i]];
             }
 
-            closest = pos;
-            if (!Detour.DistancePtPolyEdgesSqr(pos, verts, nv, out float[] edged, out float[] edget))
+            if (!Detour.PointInPolygon(pos, verts, nv))
             {
-                // Point is outside the polygon, dtClamp to nearest edge.
-                float dmin = edged[0];
-                int imin = 0;
-                for (int i = 1; i < nv; ++i)
-                {
-                    if (edged[i] < dmin)
-                    {
-                        dmin = edged[i];
-                        imin = i;
-                    }
-                }
-                var va = verts[imin];
-                var vb = verts[((imin + 1) % nv)];
-                closest = Vector3.Lerp(va, vb, edget[imin]);
-
-                posOverPoly = false;
-            }
-            else
-            {
-                posOverPoly = true;
+                return false;
             }
 
             // Find height at the location.
-            for (int j = 0; j < pd.TriCount; ++j)
+            for (int j = 0; j < pd.TriCount; j++)
             {
-                var t = tile.DetailTris[(pd.TriBase + j)];
-                var v = new Vector3[3];
+                var t = tile.DetailTris[pd.TriBase + j];
+                Vector3[] v = new Vector3[3];
                 for (int k = 0; k < 3; ++k)
                 {
                     if (t[k] < poly.VertCount)
@@ -2077,16 +2108,54 @@ namespace Engine.PathFinding.RecastNavigation
                         v[k] = tile.DetailVerts[(pd.VertBase + (t[k] - poly.VertCount))];
                     }
                 }
-                if (Detour.ClosestHeightPointTriangle(closest, v[0], v[1], v[2], out float h))
+
+                if (Detour.ClosestHeightPointTriangle(pos, v[0], v[1], v[2], out float h))
                 {
-                    closest.Y = h;
-                    break;
+                    height = h;
+                    return true;
                 }
             }
+
+            // If all triangle checks failed above (can happen with degenerate triangles
+            // or larger floating point values) the point is on an edge, so just select
+            // closest. This should almost never happen so the extra iteration here is
+            // ok.
+            ClosestPointOnDetailEdges(tile, poly, pos, false, out var closest);
+
+            height = closest.Y;
+
+            return true;
+        }
+        internal void ClosestPointOnPoly(int r, Vector3 pos, out Vector3 closest, out bool posOverPoly)
+        {
+            closest = pos;
+            posOverPoly = false;
+
+            GetTileAndPolyByRefUnsafe(r, out MeshTile tile, out Poly poly);
+
+            if (GetPolyHeight(tile, poly, pos, out float h))
+            {
+                closest.Y = h;
+                posOverPoly = true;
+                return;
+            }
+
+            // Off-mesh connections don't have detail polygons.
+            if (poly.Type == PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
+            {
+                Vector3 v0 = tile.Verts[poly.Verts[0]];
+                Vector3 v1 = tile.Verts[poly.Verts[1]];
+                Detour.DistancePtSegSqr2D(pos, v0, v1, out var t);
+                closest = Vector3.Lerp(v0, v1, t);
+                return;
+            }
+
+            // Outside poly that is not an offmesh connection.
+            ClosestPointOnDetailEdges(tile, poly, pos, true, out closest);
         }
 
         /*TILE MESH SAMPLE*/
-        public void BuildTile(Vector3 pos, InputGeometry geom, BuildSettings settings, Agent agent)
+        public void BuildTileAtPosition(Vector3 pos, InputGeometry geom, BuildSettings settings, Agent agent)
         {
             var bbox = geom.BoundingBox;
 
@@ -2115,7 +2184,7 @@ namespace Engine.PathFinding.RecastNavigation
                 AddTile(data, TileFlagTypes.DT_TILE_FREE_DATA, 0, out int res);
             }
         }
-        public void GetTilePos(Vector3 pos, InputGeometry geom, BuildSettings settings, out int tx, out int ty)
+        public void GetTilePosition(Vector3 pos, InputGeometry geom, BuildSettings settings, out int tx, out int ty)
         {
             var bbox = geom.BoundingBox;
 
@@ -2123,7 +2192,7 @@ namespace Engine.PathFinding.RecastNavigation
             tx = (int)((pos.X - bbox.Minimum.X) / ts);
             ty = (int)((pos.Z - bbox.Minimum.Z) / ts);
         }
-        public void RemoveTile(Vector3 pos, InputGeometry geom, BuildSettings settings)
+        public void RemoveTileAtPosition(Vector3 pos, InputGeometry geom, BuildSettings settings)
         {
             var bbox = geom.BoundingBox;
 

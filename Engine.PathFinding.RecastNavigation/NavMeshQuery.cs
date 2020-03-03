@@ -143,25 +143,28 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="startPos">A position within the start polygon.</param>
         /// <param name="endPos">A position within the end polygon.</param>
         /// <param name="filter">The polygon filter to apply to the query.</param>
-        /// <param name="path">An ordered list of polygon references representing the path.</param>
-        /// <param name="pathCount">The number of polygons returned in the path array.</param>
         /// <param name="maxPath">The maximum number of polygons the @p path array can hold.</param>
+        /// <param name="resultPath">Result path</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FindPath(int startRef, int endRef, Vector3 startPos, Vector3 endPos, QueryFilter filter, out int[] path, out int pathCount, int maxPath)
+        public Status FindPath(int startRef, int endRef, Vector3 startPos, Vector3 endPos, QueryFilter filter, int maxPath, out SimplePath resultPath)
         {
-            path = new int[maxPath];
-            pathCount = 0;
+            resultPath = new SimplePath(maxPath);
 
             // Validate input
-            if (!m_nav.IsValidPolyRef(startRef) || !m_nav.IsValidPolyRef(endRef) || filter == null || maxPath <= 0)
+            if (!m_nav.IsValidPolyRef(startRef) ||
+                !m_nav.IsValidPolyRef(endRef) ||
+                startPos.IsInfinity() ||
+                endPos.IsInfinity() ||
+                filter == null ||
+                maxPath <= 0)
             {
-                return Status.DT_FAILURE;
+                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
 
             if (startRef == endRef)
             {
-                path[0] = startRef;
-                pathCount = 1;
+                resultPath.Path[0] = startRef;
+                resultPath.Count = 1;
                 return Status.DT_SUCCESS;
             }
 
@@ -251,10 +254,16 @@ namespace Engine.PathFinding.RecastNavigation
                     // If the node is visited the first time, calculate node position.
                     if (neighbourNode.Flags == NodeFlagTypes.DT_NODE_NONE)
                     {
-                        GetEdgeMidPoint(
+                        var midPointRes = GetEdgeMidPoint(
                             bestRef, bestPoly, bestTile,
                             neighbourRef, neighbourPoly, neighbourTile,
                             out var pos);
+
+                        if (midPointRes != Status.DT_SUCCESS)
+                        {
+                            Console.WriteLine($"FindPath GetEdgeMidPoint result: {midPointRes}");
+                            return midPointRes;
+                        }
 
                         neighbourNode.Pos = pos;
                     }
@@ -334,7 +343,7 @@ namespace Engine.PathFinding.RecastNavigation
                 }
             }
 
-            Status status = GetPathToNode(lastBestNode, out path, out pathCount, maxPath);
+            Status status = GetPathToNode(lastBestNode, maxPath, out resultPath);
 
             if (lastBestNode.Id != endRef)
             {
@@ -354,53 +363,43 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="startPos">Path start position.</param>
         /// <param name="endPos">Path end position.</param>
         /// <param name="path">An array of polygon references that represent the path corridor.</param>
-        /// <param name="pathSize">The number of polygons in the path array.</param>
-        /// <param name="straightPath">Points describing the straight path.</param>
-        /// <param name="straightPathFlags">Flags describing each point.</param>
-        /// <param name="straightPathRefs">The reference id of the polygon that is being entered at each point.</param>
-        /// <param name="straightPathCount">The number of points in the straight path.</param>
         /// <param name="maxStraightPath">The maximum number of points the straight path arrays can hold.</param>
         /// <param name="options">Query options.</param>
+        /// <param name="resultPath">Result path</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FindStraightPath(Vector3 startPos, Vector3 endPos, int[] path, int pathSize, out Vector3[] straightPath, out StraightPathFlagTypes[] straightPathFlags, out int[] straightPathRefs, out int straightPathCount, int maxStraightPath, StraightPathOptions options)
+        public Status FindStraightPath(Vector3 startPos, Vector3 endPos, SimplePath path, int maxStraightPath, StraightPathOptions options, out StraightPath resultPath)
         {
-            straightPath = new Vector3[maxStraightPath];
-            straightPathFlags = new StraightPathFlagTypes[maxStraightPath];
-            straightPathRefs = new int[maxStraightPath];
-            straightPathCount = 0;
+            resultPath = new StraightPath(maxStraightPath);
 
-            if (maxStraightPath == 0)
-            {
-                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
-            }
-
-            if (path == null || path.Length == 0)
+            if (startPos.IsInfinity() ||
+                endPos.IsInfinity() ||
+                path == null || path.Count <= 0 ||
+                maxStraightPath <= 0)
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
 
             // TODO: Should this be callers responsibility?
-            if (ClosestPointOnPolyBoundary(path[0], startPos, out Vector3 closestStartPos).HasFlag(Status.DT_FAILURE))
+            if (ClosestPointOnPolyBoundary(path.Path[0], startPos, out Vector3 closestStartPos).HasFlag(Status.DT_FAILURE))
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
 
-            if (ClosestPointOnPolyBoundary(path[pathSize - 1], endPos, out Vector3 closestEndPos).HasFlag(Status.DT_FAILURE))
+            if (ClosestPointOnPolyBoundary(path.Path[path.Count - 1], endPos, out Vector3 closestEndPos).HasFlag(Status.DT_FAILURE))
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
 
             // Add start point.
             Status stat = AppendVertex(
-                closestStartPos, StraightPathFlagTypes.DT_STRAIGHTPATH_START, path[0],
-                ref straightPath, ref straightPathFlags, ref straightPathRefs,
-                ref straightPathCount, maxStraightPath);
+                closestStartPos, StraightPathFlagTypes.DT_STRAIGHTPATH_START, path.Path[0], maxStraightPath,
+                ref resultPath);
             if (stat != Status.DT_IN_PROGRESS)
             {
                 return stat;
             }
 
-            if (pathSize > 1)
+            if (path.Count > 1)
             {
                 Vector3 portalApex = closestStartPos;
                 Vector3 portalLeft = portalApex;
@@ -412,24 +411,24 @@ namespace Engine.PathFinding.RecastNavigation
                 PolyTypes leftPolyType = 0;
                 PolyTypes rightPolyType = 0;
 
-                int leftPolyRef = path[0];
-                int rightPolyRef = path[0];
+                int leftPolyRef = path.Path[0];
+                int rightPolyRef = path.Path[0];
 
-                for (int i = 0; i < pathSize; ++i)
+                for (int i = 0; i < path.Count; ++i)
                 {
                     Vector3 left;
                     Vector3 right;
                     PolyTypes toType;
 
-                    if (i + 1 < pathSize)
+                    if (i + 1 < path.Count)
                     {
                         // Next portal.
-                        if (GetPortalPoints(path[i], path[i + 1], out left, out right, out PolyTypes fromType, out toType).HasFlag(Status.DT_FAILURE))
+                        if (GetPortalPoints(path.Path[i], path.Path[i + 1], out left, out right, out PolyTypes fromType, out toType).HasFlag(Status.DT_FAILURE))
                         {
                             // Failed to get portal points, in practice this means that path[i+1] is invalid polygon.
                             // Clamp the end point to path[i], and return the path so far.
 
-                            if (ClosestPointOnPolyBoundary(path[i], endPos, out closestEndPos).HasFlag(Status.DT_FAILURE))
+                            if (ClosestPointOnPolyBoundary(path.Path[i], endPos, out closestEndPos).HasFlag(Status.DT_FAILURE))
                             {
                                 // This should only happen when the first polygon is invalid.
                                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
@@ -439,18 +438,17 @@ namespace Engine.PathFinding.RecastNavigation
                             if ((options & (StraightPathOptions.DT_STRAIGHTPATH_AREA_CROSSINGS | StraightPathOptions.DT_STRAIGHTPATH_ALL_CROSSINGS)) != 0)
                             {
                                 // Ignore status return value as we're just about to return anyway.
-                                AppendPortals(apexIndex, i, closestEndPos, path,
-                                    ref straightPath, ref straightPathFlags, ref straightPathRefs,
-                                    ref straightPathCount, maxStraightPath, options);
+                                AppendPortals(
+                                    apexIndex, i, closestEndPos, path.Path, maxStraightPath, options,
+                                    ref resultPath);
                             }
 
                             // Ignore status return value as we're just about to return anyway.
                             AppendVertex(
-                                closestEndPos, 0, path[i],
-                                ref straightPath, ref straightPathFlags, ref straightPathRefs,
-                                ref straightPathCount, maxStraightPath);
+                                closestEndPos, 0, path.Path[i], maxStraightPath,
+                                ref resultPath);
 
-                            return Status.DT_SUCCESS | Status.DT_PARTIAL_RESULT | ((straightPathCount >= maxStraightPath) ? Status.DT_BUFFER_TOO_SMALL : 0);
+                            return Status.DT_SUCCESS | Status.DT_PARTIAL_RESULT | ((resultPath.Count >= maxStraightPath) ? Status.DT_BUFFER_TOO_SMALL : 0);
                         }
 
                         // If starting really close the portal, advance.
@@ -474,7 +472,7 @@ namespace Engine.PathFinding.RecastNavigation
                         if (Detour.Vequal(portalApex, portalRight) || Detour.TriArea2D(portalApex, portalLeft, right) > 0.0f)
                         {
                             portalRight = right;
-                            rightPolyRef = (i + 1 < pathSize) ? path[i + 1] : 0;
+                            rightPolyRef = (i + 1 < path.Count) ? path.Path[i + 1] : 0;
                             rightPolyType = toType;
                             rightIndex = i;
                         }
@@ -484,9 +482,9 @@ namespace Engine.PathFinding.RecastNavigation
                             if ((options & (StraightPathOptions.DT_STRAIGHTPATH_AREA_CROSSINGS | StraightPathOptions.DT_STRAIGHTPATH_ALL_CROSSINGS)) != 0)
                             {
                                 stat = AppendPortals(
-                                    apexIndex, leftIndex, portalLeft, path,
-                                    ref straightPath, ref straightPathFlags, ref straightPathRefs,
-                                    ref straightPathCount, maxStraightPath, options);
+                                    apexIndex, leftIndex, portalLeft, path.Path, maxStraightPath, options,
+                                    ref resultPath);
+
                                 if (stat != Status.DT_IN_PROGRESS)
                                 {
                                     return stat;
@@ -509,9 +507,9 @@ namespace Engine.PathFinding.RecastNavigation
 
                             // Append or update vertex
                             stat = AppendVertex(
-                                portalApex, flags, r,
-                                ref straightPath, ref straightPathFlags, ref straightPathRefs,
-                                ref straightPathCount, maxStraightPath);
+                                portalApex, flags, r, maxStraightPath,
+                                ref resultPath);
+
                             if (stat != Status.DT_IN_PROGRESS)
                             {
                                 return stat;
@@ -535,7 +533,7 @@ namespace Engine.PathFinding.RecastNavigation
                         if (Detour.Vequal(portalApex, portalLeft) || Detour.TriArea2D(portalApex, portalRight, left) < 0.0f)
                         {
                             portalLeft = left;
-                            leftPolyRef = (i + 1 < pathSize) ? path[i + 1] : 0;
+                            leftPolyRef = (i + 1 < path.Count) ? path.Path[i + 1] : 0;
                             leftPolyType = toType;
                             leftIndex = i;
                         }
@@ -545,9 +543,9 @@ namespace Engine.PathFinding.RecastNavigation
                             if ((options & (StraightPathOptions.DT_STRAIGHTPATH_AREA_CROSSINGS | StraightPathOptions.DT_STRAIGHTPATH_ALL_CROSSINGS)) != 0)
                             {
                                 stat = AppendPortals(
-                                    apexIndex, rightIndex, portalRight, path,
-                                    ref straightPath, ref straightPathFlags, ref straightPathRefs,
-                                    ref straightPathCount, maxStraightPath, options);
+                                    apexIndex, rightIndex, portalRight, path.Path, maxStraightPath, options,
+                                    ref resultPath);
+
                                 if (stat != Status.DT_IN_PROGRESS)
                                 {
                                     return stat;
@@ -570,9 +568,9 @@ namespace Engine.PathFinding.RecastNavigation
 
                             // Append or update vertex
                             stat = AppendVertex(
-                                portalApex, flags, r,
-                                ref straightPath, ref straightPathFlags, ref straightPathRefs,
-                                ref straightPathCount, maxStraightPath);
+                                portalApex, flags, r, maxStraightPath,
+                                ref resultPath);
+
                             if (stat != Status.DT_IN_PROGRESS)
                             {
                                 return stat;
@@ -593,9 +591,9 @@ namespace Engine.PathFinding.RecastNavigation
                 if ((options & (StraightPathOptions.DT_STRAIGHTPATH_AREA_CROSSINGS | StraightPathOptions.DT_STRAIGHTPATH_ALL_CROSSINGS)) != 0)
                 {
                     stat = AppendPortals(
-                        apexIndex, pathSize - 1, closestEndPos, path,
-                        ref straightPath, ref straightPathFlags, ref straightPathRefs,
-                        ref straightPathCount, maxStraightPath, options);
+                        apexIndex, path.Count - 1, closestEndPos, path.Path, maxStraightPath, options,
+                        ref resultPath);
+
                     if (stat != Status.DT_IN_PROGRESS)
                     {
                         return stat;
@@ -605,11 +603,10 @@ namespace Engine.PathFinding.RecastNavigation
 
             // Ignore status return value as we're just about to return anyway.
             AppendVertex(
-                closestEndPos, StraightPathFlagTypes.DT_STRAIGHTPATH_END, 0,
-                ref straightPath, ref straightPathFlags, ref straightPathRefs,
-                ref straightPathCount, maxStraightPath);
+                closestEndPos, StraightPathFlagTypes.DT_STRAIGHTPATH_END, 0, maxStraightPath,
+                ref resultPath);
 
-            return Status.DT_SUCCESS | ((straightPathCount >= maxStraightPath) ? Status.DT_BUFFER_TOO_SMALL : 0);
+            return Status.DT_SUCCESS | ((resultPath.Count >= maxStraightPath) ? Status.DT_BUFFER_TOO_SMALL : 0);
         }
         /// <summary>
         /// Intializes a sliced path query.
@@ -642,15 +639,14 @@ namespace Engine.PathFinding.RecastNavigation
                 RaycastLimitSqr = float.MaxValue
             };
 
-            if (startRef == 0 || endRef == 0)
-            {
-                return Status.DT_FAILURE;
-            }
-
             // Validate input
-            if (!m_nav.IsValidPolyRef(startRef) || !m_nav.IsValidPolyRef(endRef))
+            if (!m_nav.IsValidPolyRef(startRef) ||
+                !m_nav.IsValidPolyRef(endRef) ||
+                startPos.IsInfinity() ||
+                endPos.IsInfinity() ||
+                filter == null)
             {
-                return Status.DT_FAILURE;
+                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
 
             // trade quality with performance?
@@ -742,7 +738,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                 // Get parent and grand parent poly and tile.
                 int parentRef = 0;
-                int grandpaRef = 0;
+                int? grandpaRef = null;
                 MeshTile parentTile = null;
                 Poly parentPoly = null;
                 Node parentNode = null;
@@ -766,7 +762,7 @@ namespace Engine.PathFinding.RecastNavigation
                 if (parentRef != 0)
                 {
                     bool invalidParent = !m_nav.GetTileAndPolyByRef(parentRef, out parentTile, out parentPoly);
-                    if (invalidParent || (grandpaRef != 0 && !m_nav.IsValidPolyRef(grandpaRef)))
+                    if (invalidParent || (grandpaRef.HasValue && !m_nav.IsValidPolyRef(grandpaRef.Value)))
                     {
                         // The polygon has disappeared during the sliced query, fail.
                         m_query.Status = Status.DT_FAILURE;
@@ -820,10 +816,16 @@ namespace Engine.PathFinding.RecastNavigation
                     // If the node is visited the first time, calculate node position.
                     if (neighbourNode.Flags == NodeFlagTypes.DT_NODE_NONE)
                     {
-                        GetEdgeMidPoint(
+                        var midPointRes = GetEdgeMidPoint(
                             bestRef, bestPoly, bestTile,
                             neighbourRef, neighbourPoly, neighbourTile,
                             out var pos);
+
+                        if (midPointRes != Status.DT_SUCCESS)
+                        {
+                            Console.WriteLine($"UpdateSlicedFindPath GetEdgeMidPoint result: {midPointRes}");
+                            return midPointRes;
+                        }
 
                         neighbourNode.Pos = pos;
                     }
@@ -843,7 +845,10 @@ namespace Engine.PathFinding.RecastNavigation
                     };
                     if (tryLOS)
                     {
-                        Raycast(parentRef, parentNode.Pos, neighbourNode.Pos, m_query.Filter, RaycastOptions.DT_RAYCAST_USE_COSTS, 0, out rayHit, ref grandpaRef);
+                        Raycast(
+                            parentRef, parentNode.Pos, neighbourNode.Pos, m_query.Filter, RaycastOptions.DT_RAYCAST_USE_COSTS, 0,
+                            ref grandpaRef,
+                            out rayHit);
                         foundShortCut = rayHit.T >= 1.0f;
                     }
 
@@ -941,14 +946,17 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Finalizes and returns the results of a sliced path query.
         /// </summary>
-        /// <param name="path">An ordered list of polygon references representing the path. (Start to end.)</param>
-        /// <param name="pathCount">The number of polygons returned in the path array.</param>
         /// <param name="maxPath">The max number of polygons the path array can hold.</param>
+        /// <param name="path">An ordered list of polygon references representing the path. (Start to end.)</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FinalizeSlicedFindPath(out int[] path, out int pathCount, int maxPath)
+        public Status FinalizeSlicedFindPath(int maxPath, out SimplePath path)
         {
             path = null;
-            pathCount = 0;
+
+            if (maxPath <= 0)
+            {
+                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
+            }
 
             List<int> pathList = new List<int>();
 
@@ -995,7 +1003,9 @@ namespace Engine.PathFinding.RecastNavigation
                     Status status = 0;
                     if ((node.Flags & NodeFlagTypes.DT_NODE_PARENT_DETACHED) != 0)
                     {
-                        status = Raycast(node.Id, node.Pos, next.Pos, m_query.Filter, out float t, out Vector3 normal, out int[] rpath, out int m, maxPath - pathList.Count);
+                        status = Raycast(
+                            node.Id, node.Pos, next.Pos, m_query.Filter, maxPath - pathList.Count,
+                            out var t, out var normal, out var rpath, out var m);
                         if (status.HasFlag(Status.DT_SUCCESS))
                         {
                             pathList.AddRange(rpath);
@@ -1030,8 +1040,11 @@ namespace Engine.PathFinding.RecastNavigation
             // Reset query.
             m_query = new QueryData();
 
-            path = pathList.ToArray();
-            pathCount = pathList.Count;
+            path = new SimplePath(maxPath)
+            {
+                Path = pathList.ToArray(),
+                Count = pathList.Count,
+            };
 
             return Status.DT_SUCCESS | details;
         }
@@ -1040,18 +1053,16 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="existing">An array of polygon references for the existing path.</param>
         /// <param name="existingSize">The number of polygon in the existing array.</param>
-        /// <param name="path">An ordered list of polygon references representing the path. (Start to end.)</param>
-        /// <param name="pathCount">The number of polygons returned in the path array.</param>
         /// <param name="maxPath">The max number of polygons the @p path array can hold.</param>
+        /// <param name="path">An ordered list of polygon references representing the path. (Start to end.)</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FinalizeSlicedFindPathPartial(int[] existing, int existingSize, out int[] path, out int pathCount, int maxPath)
+        public Status FinalizeSlicedFindPathPartial(int maxPath, int[] existing, int existingSize, out SimplePath path)
         {
             path = null;
-            pathCount = 0;
 
-            if (existingSize == 0)
+            if (existing == null || existingSize <= 0 || maxPath <= 0)
             {
-                return Status.DT_FAILURE;
+                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
 
             if (m_query.Status.HasFlag(Status.DT_FAILURE))
@@ -1111,7 +1122,9 @@ namespace Engine.PathFinding.RecastNavigation
                     Status status = 0;
                     if ((node.Flags & NodeFlagTypes.DT_NODE_PARENT_DETACHED) != 0)
                     {
-                        status = Raycast(node.Id, node.Pos, next.Pos, m_query.Filter, out float t, out Vector3 normal, out int[] rpath, out int m, maxPath - pathList.Count);
+                        status = Raycast(
+                            node.Id, node.Pos, next.Pos, m_query.Filter, maxPath - pathList.Count,
+                            out var t, out var normal, out var rpath, out var m);
                         if (status.HasFlag(Status.DT_SUCCESS))
                         {
                             pathList.AddRange(rpath);
@@ -1146,8 +1159,11 @@ namespace Engine.PathFinding.RecastNavigation
             // Reset query.
             m_query = new QueryData();
 
-            path = pathList.ToArray();
-            pathCount = pathList.Count;
+            path = new SimplePath(maxPath)
+            {
+                Path = pathList.ToArray(),
+                Count = pathList.Count,
+            };
 
             return Status.DT_SUCCESS | details;
         }
@@ -1164,7 +1180,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="resultCount">The number of polygons found.</param>
         /// <param name="maxResult">The maximum number of polygons the result arrays can hold.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FindPolysAroundCircle(int startRef, Vector3 centerPos, float radius, QueryFilter filter, out int[] resultRef, out int[] resultParent, out float[] resultCost, out int resultCount, int maxResult)
+        public Status FindPolysAroundCircle(int startRef, Vector3 centerPos, float radius, QueryFilter filter, int maxResult, out int[] resultRef, out int[] resultParent, out float[] resultCost, out int resultCount)
         {
             resultRef = new int[maxResult];
             resultParent = new int[maxResult];
@@ -1172,7 +1188,11 @@ namespace Engine.PathFinding.RecastNavigation
             resultCount = 0;
 
             // Validate input
-            if (startRef == 0 || !m_nav.IsValidPolyRef(startRef))
+            if (!m_nav.IsValidPolyRef(startRef) ||
+                centerPos.IsInfinity() ||
+                radius < 0 || float.IsInfinity(radius) ||
+                filter == null ||
+                maxResult < 0)
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
@@ -1328,7 +1348,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="resultCount">The number of polygons found.</param>
         /// <param name="maxResult">The maximum number of polygons the result arrays can hold.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FindPolysAroundShape(int startRef, Vector3[] verts, int nverts, QueryFilter filter, out int[] resultRef, out int[] resultParent, out float[] resultCost, out int resultCount, int maxResult)
+        public Status FindPolysAroundShape(int startRef, Vector3[] verts, int nverts, QueryFilter filter, int maxResult, out int[] resultRef, out int[] resultParent, out float[] resultCost, out int resultCount)
         {
             resultRef = new int[maxResult];
             resultParent = new int[maxResult];
@@ -1336,7 +1356,10 @@ namespace Engine.PathFinding.RecastNavigation
             resultCount = 0;
 
             // Validate input
-            if (startRef == 0 || !m_nav.IsValidPolyRef(startRef))
+            if (!m_nav.IsValidPolyRef(startRef) ||
+                verts == null || nverts < 3 ||
+                filter == null ||
+                maxResult < 0)
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
@@ -1491,9 +1514,8 @@ namespace Engine.PathFinding.RecastNavigation
         /// Gets a path from the explored nodes in the previous search.
         /// </summary>
         /// <param name="endRef">The reference id of the end polygon.</param>
-        /// <param name="path">An ordered list of polygon references representing the path. (Start to end.)</param>
-        /// <param name="pathCount">The number of polygons returned in the path array.</param>
         /// <param name="maxPath">The maximum number of polygons the path array can hold.</param>
+        /// <param name="path">An ordered list of polygon references representing the path. (Start to end.)</param>
         /// <returns>
         /// The status flags. Returns DT_FAILURE | DT_INVALID_PARAM if any parameter is wrong, or if
         /// endRef was not explored in the previous search. Returns DT_SUCCESS | DT_BUFFER_TOO_SMALL
@@ -1504,10 +1526,9 @@ namespace Engine.PathFinding.RecastNavigation
         /// The result of this function depends on the state of the query object. For that reason it should only
         /// be used immediately after one of the two Dijkstra searches, findPolysAroundCircle or findPolysAroundShape.
         /// </remarks>
-        public Status GetPathFromDijkstraSearch(int endRef, out int[] path, out int pathCount, int maxPath)
+        public Status GetPathFromDijkstraSearch(int endRef, int maxPath, out SimplePath path)
         {
             path = null;
-            pathCount = 0;
 
             if (!m_nav.IsValidPolyRef(endRef) || maxPath < 0)
             {
@@ -1519,7 +1540,7 @@ namespace Engine.PathFinding.RecastNavigation
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
 
-            return GetPathToNode(endNodes[0], out path, out pathCount, maxPath);
+            return GetPathToNode(endNodes[0], maxPath, out path);
         }
         /// <summary>
         /// Finds the polygon nearest to the specified center point.
@@ -1534,6 +1555,8 @@ namespace Engine.PathFinding.RecastNavigation
         {
             nearestRef = 0;
             nearestPt = Vector3.Zero;
+
+            // queryPolygons below will check rest of params
 
             var query = new FindNearestPolyQuery(this, center);
 
@@ -1588,6 +1611,13 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>The status flags for the query.</returns>
         public Status QueryPolygons(Vector3 center, Vector3 halfExtents, QueryFilter filter, IPolyQuery query)
         {
+            if (center.IsInfinity() ||
+                halfExtents.IsInfinity() ||
+                filter == null || query == null)
+            {
+                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
+            }
+
             Vector3 bmin = Vector3.Subtract(center, halfExtents);
             Vector3 bmax = Vector3.Add(center, halfExtents);
 
@@ -1624,14 +1654,18 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="resultCount">The number of polygons found.</param>
         /// <param name="maxResult">The maximum number of polygons the result arrays can hold.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FindLocalNeighbourhood(int startRef, Vector3 centerPos, float radius, QueryFilter filter, out int[] resultRef, out int[] resultParent, out int resultCount, int maxResult)
+        public Status FindLocalNeighbourhood(int startRef, Vector3 centerPos, float radius, QueryFilter filter, int maxResult, out int[] resultRef, out int[] resultParent, out int resultCount)
         {
             resultRef = new int[maxResult];
             resultParent = new int[maxResult];
             resultCount = 0;
 
             // Validate input
-            if (startRef == 0 || !m_nav.IsValidPolyRef(startRef))
+            if (!m_nav.IsValidPolyRef(startRef) ||
+                centerPos.IsInfinity() ||
+                radius < 0 || float.IsInfinity(radius) ||
+                filter == null ||
+                maxResult < 0)
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
@@ -1820,18 +1854,18 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="visitedCount">The number of polygons visited during the move.</param>
         /// <param name="maxVisitedSize">The maximum number of polygons the visited array can hold.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status MoveAlongSurface(int startRef, Vector3 startPos, Vector3 endPos, QueryFilter filter, out Vector3 resultPos, out int[] visited, out int visitedCount, int maxVisitedSize)
+        public Status MoveAlongSurface(int startRef, Vector3 startPos, Vector3 endPos, QueryFilter filter, int maxVisitedSize, out Vector3 resultPos, out int[] visited, out int visitedCount)
         {
             resultPos = Vector3.Zero;
             visited = new int[maxVisitedSize];
             visitedCount = 0;
 
             // Validate input
-            if (startRef == 0)
-            {
-                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
-            }
-            if (!m_nav.IsValidPolyRef(startRef))
+            if (!m_nav.IsValidPolyRef(startRef) ||
+                startPos.IsInfinity() ||
+                endPos.IsInfinity() ||
+                filter == null ||
+                maxVisitedSize <= 0)
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
@@ -2028,10 +2062,10 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="pathCount">The number of visited polygons.</param>
         /// <param name="maxPath">The maximum number of polygons the path array can hold.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status Raycast(int startRef, Vector3 startPos, Vector3 endPos, QueryFilter filter, out float t, out Vector3 hitNormal, out int[] path, out int pathCount, int maxPath)
+        public Status Raycast(int startRef, Vector3 startPos, Vector3 endPos, QueryFilter filter, int maxPath, out float t, out Vector3 hitNormal, out int[] path, out int pathCount)
         {
-            int prevRef = 0;
-            Status status = Raycast(startRef, startPos, endPos, filter, 0, maxPath, out RaycastHit hit, ref prevRef);
+            int? prevRef = null;
+            Status status = Raycast(startRef, startPos, endPos, filter, 0, maxPath, ref prevRef, out RaycastHit hit);
 
             t = hit.T;
             path = hit.Path;
@@ -2052,7 +2086,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="hit">Pointer to a raycast hit structure which will be filled by the results.</param>
         /// <param name="prevRef">parent of start ref. Used during for cost calculation</param>
         /// <returns></returns>
-        public Status Raycast(int startRef, Vector3 startPos, Vector3 endPos, QueryFilter filter, RaycastOptions options, int maxPath, out RaycastHit hit, ref int prevRef)
+        public Status Raycast(int startRef, Vector3 startPos, Vector3 endPos, QueryFilter filter, RaycastOptions options, int maxPath, ref int? prevRef, out RaycastHit hit)
         {
             hit = new RaycastHit
             {
@@ -2063,11 +2097,11 @@ namespace Engine.PathFinding.RecastNavigation
             };
 
             // Validate input
-            if (startRef == 0 || !m_nav.IsValidPolyRef(startRef))
-            {
-                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
-            }
-            if (prevRef == 0 && !m_nav.IsValidPolyRef(prevRef))
+            if (!m_nav.IsValidPolyRef(startRef) ||
+                startPos.IsInfinity() ||
+                endPos.IsInfinity() ||
+                filter == null ||
+                prevRef.HasValue && !m_nav.IsValidPolyRef(prevRef.Value))
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
@@ -2089,9 +2123,9 @@ namespace Engine.PathFinding.RecastNavigation
             MeshTile nextTile = tile;
             Poly prevPoly = poly;
             Poly nextPoly = poly;
-            if (prevRef != 0)
+            if (prevRef.HasValue)
             {
-                m_nav.GetTileAndPolyByRefUnsafe(prevRef, out prevTile, out prevPoly);
+                m_nav.GetTileAndPolyByRefUnsafe(prevRef.Value, out prevTile, out prevPoly);
             }
 
             while (curRef != 0)
@@ -2303,7 +2337,10 @@ namespace Engine.PathFinding.RecastNavigation
             hitNormal = Vector3.Zero;
 
             // Validate input
-            if (startRef == 0 || !m_nav.IsValidPolyRef(startRef))
+            if (!m_nav.IsValidPolyRef(startRef) ||
+                centerPos.IsInfinity() ||
+                maxRadius < 0 || float.IsInfinity(maxRadius) ||
+                filter == null)
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
@@ -2453,10 +2490,16 @@ namespace Engine.PathFinding.RecastNavigation
                     // Cost
                     if (neighbourNode.Flags == 0)
                     {
-                        GetEdgeMidPoint(
+                        var midPointRes = GetEdgeMidPoint(
                             bestRef, bestPoly, bestTile,
                             neighbourRef, neighbourPoly, neighbourTile,
                             out var pos);
+
+                        if (midPointRes != Status.DT_SUCCESS)
+                        {
+                            Console.WriteLine($"FindPath GetEdgeMidPoint result: {midPointRes}");
+                            return midPointRes;
+                        }
 
                         neighbourNode.Pos = pos;
                     }
@@ -2504,13 +2547,18 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="segmentCount">The number of segments returned.</param>
         /// <param name="maxSegments">The maximum number of segments the result arrays can hold.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status GetPolyWallSegments(int r, QueryFilter filter, out Vector3[] segmentVerts, out int[] segmentRefs, out int segmentCount, int maxSegments)
+        public Status GetPolyWallSegments(int r, QueryFilter filter, int maxSegments, out Vector3[] segmentVerts, out int[] segmentRefs, out int segmentCount)
         {
             segmentVerts = new Vector3[maxSegments];
             segmentRefs = new int[maxSegments];
             segmentCount = 0;
 
             if (!m_nav.GetTileAndPolyByRef(r, out MeshTile tile, out Poly poly))
+            {
+                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
+            }
+
+            if (filter == null || maxSegments < 0)
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
@@ -2648,6 +2696,11 @@ namespace Engine.PathFinding.RecastNavigation
             randomRef = -1;
             randomPt = Vector3.Zero;
 
+            if (filter == null || frand == null)
+            {
+                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
+            }
+
             // Randomly pick one tile. Assume that all tiles cover roughly the same area.
             MeshTile tile = null;
             float tsum = 0.0f;
@@ -2768,7 +2821,10 @@ namespace Engine.PathFinding.RecastNavigation
             randomPt = new Vector3();
 
             // Validate input
-            if (startRef == 0 || !m_nav.IsValidPolyRef(startRef))
+            if (startRef == 0 || !m_nav.IsValidPolyRef(startRef) ||
+                centerPos.IsInfinity() ||
+                maxRadius < 0 || float.IsNaN(maxRadius) ||
+                filter == null || frand == null)
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
@@ -2965,86 +3021,12 @@ namespace Engine.PathFinding.RecastNavigation
             closest = Vector3.Zero;
             posOverPoly = false;
 
-            if (!m_nav.GetTileAndPolyByRef(r, out MeshTile tile, out Poly poly))
-            {
-                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
-            }
-            if (tile == null)
+            if (!m_nav.IsValidPolyRef(r) || pos.IsInfinity())
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
 
-            // Off-mesh connections don't have detail polygons.
-            if (poly.Type == PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
-            {
-                var v0 = tile.Verts[poly.Verts[0]];
-                var v1 = tile.Verts[poly.Verts[1]];
-                float d0 = Vector3.Distance(pos, v0);
-                float d1 = Vector3.Distance(pos, v1);
-                float u = d0 / (d0 + d1);
-
-                closest = Vector3.Lerp(v0, v1, u);
-                posOverPoly = false;
-                return Status.DT_SUCCESS;
-            }
-
-            int ip = Array.IndexOf(tile.Polys, poly);
-            PolyDetail pd = tile.DetailMeshes[ip];
-
-            // Clamp point to be inside the polygon.
-            Vector3[] verts = new Vector3[Detour.DT_VERTS_PER_POLYGON];
-            int nv = poly.VertCount;
-            for (int i = 0; i < nv; ++i)
-            {
-                verts[i] = tile.Verts[poly.Verts[i]];
-            }
-
-            closest = pos;
-            if (!Detour.DistancePtPolyEdgesSqr(pos, verts, nv, out float[] edged, out float[] edget))
-            {
-                // Point is outside the polygon, dtClamp to nearest edge.
-                float dmin = edged[0];
-                int imin = 0;
-                for (int i = 1; i < nv; ++i)
-                {
-                    if (edged[i] < dmin)
-                    {
-                        dmin = edged[i];
-                        imin = i;
-                    }
-                }
-                var va = verts[imin];
-                var vb = verts[((imin + 1) % nv)];
-                closest = Vector3.Lerp(va, vb, edget[imin]);
-                posOverPoly = false;
-            }
-            else
-            {
-                posOverPoly = true;
-            }
-
-            // Find height at the location.
-            for (int j = 0; j < pd.TriCount; ++j)
-            {
-                var t = tile.DetailTris[(pd.TriBase + j)];
-                Vector3[] v = new Vector3[3];
-                for (int k = 0; k < 3; ++k)
-                {
-                    if (t[k] < poly.VertCount)
-                    {
-                        v[k] = tile.Verts[poly.Verts[t[k]]];
-                    }
-                    else
-                    {
-                        v[k] = tile.DetailVerts[(pd.VertBase + (t[k] - poly.VertCount))];
-                    }
-                }
-                if (Detour.ClosestHeightPointTriangle(closest, v[0], v[1], v[2], out float h))
-                {
-                    closest.Y = h;
-                    break;
-                }
-            }
+            this.m_nav.ClosestPointOnPoly(r, pos, out closest, out posOverPoly);
 
             return Status.DT_SUCCESS;
         }
@@ -3060,6 +3042,10 @@ namespace Engine.PathFinding.RecastNavigation
             closest = new Vector3();
 
             if (!m_nav.GetTileAndPolyByRef(r, out MeshTile tile, out Poly poly))
+            {
+                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
+            }
+            if (pos.IsInfinity())
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
@@ -3114,45 +3100,26 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
+            if (pos.XZ().IsInfinity())
+            {
+                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
+            }
 
+            // We used to return success for offmesh connections, but the
+            // getPolyHeight in DetourNavMesh does not do this, so special
+            // case it here.
             if (poly.Type == PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
             {
                 var v0 = tile.Verts[poly.Verts[0]];
                 var v1 = tile.Verts[poly.Verts[1]];
-                float d0 = Recast.VDist2(pos, v0);
-                float d1 = Recast.VDist2(pos, v1);
-                float u = d0 / (d0 + d1);
-                height = v0.Y + (v1.Y - v0.Y) * u;
+                Detour.DistancePtSegSqr2D(pos, v0, v1, out float t);
+                height = v0.Y + (v1.Y - v0.Y) * t;
                 return Status.DT_SUCCESS;
             }
-            else
-            {
-                int ip = Array.IndexOf(tile.Polys, poly);
-                var pd = tile.DetailMeshes[ip];
-                for (int j = 0; j < pd.TriCount; ++j)
-                {
-                    var t = tile.DetailTris[(pd.TriBase + j)];
-                    Vector3[] v = new Vector3[3];
-                    for (int k = 0; k < 3; ++k)
-                    {
-                        if (t[k] < poly.VertCount)
-                        {
-                            v[k] = tile.Verts[poly.Verts[t[k]]];
-                        }
-                        else
-                        {
-                            v[k] = tile.DetailVerts[(pd.VertBase + (t[k] - poly.VertCount))];
-                        }
-                    }
-                    if (Detour.ClosestHeightPointTriangle(pos, v[0], v[1], v[2], out float h))
-                    {
-                        height = h;
-                        return Status.DT_SUCCESS;
-                    }
-                }
-            }
 
-            return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
+            return m_nav.GetPolyHeight(tile, poly, pos, out height) ?
+                Status.DT_SUCCESS :
+                Status.DT_FAILURE | Status.DT_INVALID_PARAM;
         }
         /// <summary>
         /// Returns true if the polygon reference is valid and passes the filter restrictions.
@@ -3458,36 +3425,36 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Appends vertex to a straight path
         /// </summary>
-        private Status AppendVertex(Vector3 pos, StraightPathFlagTypes flags, int r, ref Vector3[] straightPath, ref StraightPathFlagTypes[] straightPathFlags, ref int[] straightPathRefs, ref int straightPathCount, int maxStraightPath)
+        private Status AppendVertex(Vector3 pos, StraightPathFlagTypes flags, int r, int maxStraightPath, ref StraightPath straightPath)
         {
-            if ((straightPathCount) > 0 && Detour.Vequal(straightPath[((straightPathCount) - 1)], pos))
+            if ((straightPath.Count) > 0 && Detour.Vequal(straightPath.Path[straightPath.Count - 1], pos))
             {
                 // The vertices are equal, update flags and poly.
-                if (straightPathFlags != null)
+                if (straightPath.Flags != null)
                 {
-                    straightPathFlags[(straightPathCount) - 1] = flags;
+                    straightPath.Flags[straightPath.Count - 1] = flags;
                 }
-                if (straightPathRefs != null)
+                if (straightPath.Refs != null)
                 {
-                    straightPathRefs[(straightPathCount) - 1] = r;
+                    straightPath.Refs[straightPath.Count - 1] = r;
                 }
             }
             else
             {
                 // Append new vertex.
-                straightPath[(straightPathCount)] = pos;
-                if (straightPathFlags != null)
+                straightPath.Path[straightPath.Count] = pos;
+                if (straightPath.Flags != null)
                 {
-                    straightPathFlags[(straightPathCount)] = flags;
+                    straightPath.Flags[straightPath.Count] = flags;
                 }
-                if (straightPathRefs != null)
+                if (straightPath.Refs != null)
                 {
-                    straightPathRefs[(straightPathCount)] = r;
+                    straightPath.Refs[straightPath.Count] = r;
                 }
-                straightPathCount++;
+                straightPath.Count++;
 
                 // If there is no space to append more vertices, return.
-                if (straightPathCount >= maxStraightPath)
+                if (straightPath.Count >= maxStraightPath)
                 {
                     return Status.DT_SUCCESS | Status.DT_BUFFER_TOO_SMALL;
                 }
@@ -3503,9 +3470,9 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Appends intermediate portal points to a straight path.
         /// </summary>
-        private Status AppendPortals(int startIdx, int endIdx, Vector3 endPos, int[] path, ref Vector3[] straightPath, ref StraightPathFlagTypes[] straightPathFlags, ref int[] straightPathRefs, ref int straightPathCount, int maxStraightPath, StraightPathOptions options)
+        private Status AppendPortals(int startIdx, int endIdx, Vector3 endPos, int[] path, int maxStraightPath, StraightPathOptions options, ref StraightPath straightPath)
         {
-            Vector3 startPos = straightPath[straightPathCount - 1];
+            Vector3 startPos = straightPath.Path[straightPath.Count - 1];
             // Append or update last vertex
             for (int i = startIdx; i < endIdx; i++)
             {
@@ -3540,9 +3507,8 @@ namespace Engine.PathFinding.RecastNavigation
                     Vector3 pt = Vector3.Lerp(left, right, t);
 
                     Status stat = AppendVertex(
-                        pt, 0, path[i + 1],
-                        ref straightPath, ref straightPathFlags, ref straightPathRefs,
-                        ref straightPathCount, maxStraightPath);
+                        pt, 0, path[i + 1], maxStraightPath,
+                        ref straightPath);
                     if (stat != Status.DT_IN_PROGRESS)
                     {
                         return stat;
@@ -3554,9 +3520,9 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Gets the path leading to the specified end node.
         /// </summary>
-        private Status GetPathToNode(Node endNode, out int[] path, out int pathCount, int maxPath)
+        private Status GetPathToNode(Node endNode, int maxPath, out SimplePath path)
         {
-            path = new int[maxPath];
+            path = new SimplePath(maxPath);
 
             // Find the length of the entire path.
             Node curNode = endNode;
@@ -3578,11 +3544,11 @@ namespace Engine.PathFinding.RecastNavigation
             // Write path
             for (int i = writeCount - 1; i >= 0; i--)
             {
-                path[i] = curNode.Id;
+                path.Path[i] = curNode.Id;
                 curNode = m_nodePool.GetNodeAtIdx(curNode.PIdx);
             }
 
-            pathCount = Math.Min(length, maxPath);
+            path.Count = Math.Min(length, maxPath);
 
             if (length > maxPath)
             {
