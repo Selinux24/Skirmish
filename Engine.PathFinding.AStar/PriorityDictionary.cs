@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Engine.Collections
+namespace Engine.PathFinding.AStar
 {
     /// <summary>
     /// Priority queue

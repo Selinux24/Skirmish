@@ -1,5 +1,5 @@
 ﻿
-namespace Engine.Collections
+namespace Engine.PathFinding.AStar
 {
     /// <summary>
     /// Represents an element stored in a priority queue

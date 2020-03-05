@@ -624,7 +624,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// -# Call UpdateSlicedFindPath() until it returns complete.
         /// -# Call FinalizeSlicedFindPath() to get the path.
         /// </example>
-        public Status InitSlicedFindPath(int startRef, int endRef, Vector3 startPos, Vector3 endPos, QueryFilter filter, FindPathOptions options)
+        public Status InitSlicedFindPath(int startRef, int endRef, Vector3 startPos, Vector3 endPos, QueryFilter filter, FindPathOptions options = FindPathOptions.DT_FINDPATH_ANY_ANGLE)
         {
             // Init path state.
             m_query = new QueryData
@@ -1174,18 +1174,12 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="centerPos">The center of the search circle.</param>
         /// <param name="radius">The radius of the search circle.</param>
         /// <param name="filter">The polygon filter to apply to the query.</param>
-        /// <param name="resultRef">The reference ids of the polygons touched by the circle.</param>
-        /// <param name="resultParent">The reference ids of the parent polygons for each result. Zero if a result polygon has no parent.</param>
-        /// <param name="resultCost">The search cost from centerPos to the polygon.</param>
-        /// <param name="resultCount">The number of polygons found.</param>
         /// <param name="maxResult">The maximum number of polygons the result arrays can hold.</param>
+        /// <param name="result">The polygons touched by the circle.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FindPolysAroundCircle(int startRef, Vector3 centerPos, float radius, QueryFilter filter, int maxResult, out int[] resultRef, out int[] resultParent, out float[] resultCost, out int resultCount)
+        public Status FindPolysAroundCircle(int startRef, Vector3 centerPos, float radius, QueryFilter filter, int maxResult, out PolyRefs result)
         {
-            resultRef = new int[maxResult];
-            resultParent = new int[maxResult];
-            resultCost = new float[maxResult];
-            resultCount = 0;
+            result = new PolyRefs(maxResult);
 
             // Validate input
             if (!m_nav.IsValidPolyRef(startRef) ||
@@ -1241,9 +1235,9 @@ namespace Engine.PathFinding.RecastNavigation
 
                 if (n < maxResult)
                 {
-                    resultRef[n] = bestRef;
-                    resultParent[n] = parentRef;
-                    resultCost[n] = bestNode.Total;
+                    result.Refs[n] = bestRef;
+                    result.Parents[n] = parentRef;
+                    result.Costs[n] = bestNode.Total;
                     ++n;
                 }
                 else
@@ -1331,7 +1325,7 @@ namespace Engine.PathFinding.RecastNavigation
                 }
             }
 
-            resultCount = n;
+            result.Count = n;
 
             return status;
         }
@@ -1342,18 +1336,12 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="verts">The vertices describing the convex polygon.</param>
         /// <param name="nverts">The number of vertices in the polygon.</param>
         /// <param name="filter">The polygon filter to apply to the query.</param>
-        /// <param name="resultRef">The reference ids of the polygons touched by the search polygon.</param>
-        /// <param name="resultParent">The reference ids of the parent polygons for each result. Zero if a result polygon has no parent.</param>
-        /// <param name="resultCost">The search cost from the centroid point to the polygon.</param>
-        /// <param name="resultCount">The number of polygons found.</param>
         /// <param name="maxResult">The maximum number of polygons the result arrays can hold.</param>
+        /// <param name="result">The polygons touched by the circle.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FindPolysAroundShape(int startRef, Vector3[] verts, int nverts, QueryFilter filter, int maxResult, out int[] resultRef, out int[] resultParent, out float[] resultCost, out int resultCount)
+        public Status FindPolysAroundShape(int startRef, Vector3[] verts, int nverts, QueryFilter filter, int maxResult, out PolyRefs result)
         {
-            resultRef = new int[maxResult];
-            resultParent = new int[maxResult];
-            resultCost = new float[maxResult];
-            resultCount = 0;
+            result = new PolyRefs(maxResult);
 
             // Validate input
             if (!m_nav.IsValidPolyRef(startRef) ||
@@ -1413,9 +1401,9 @@ namespace Engine.PathFinding.RecastNavigation
 
                 if (n < maxResult)
                 {
-                    resultRef[n] = bestRef;
-                    resultParent[n] = parentRef;
-                    resultCost[n] = bestNode.Total;
+                    result.Refs[n] = bestRef;
+                    result.Parents[n] = parentRef;
+                    result.Costs[n] = bestNode.Total;
                     ++n;
                 }
                 else
@@ -1506,7 +1494,7 @@ namespace Engine.PathFinding.RecastNavigation
                 }
             }
 
-            resultCount = n;
+            result.Count = n;
 
             return status;
         }
@@ -1649,16 +1637,12 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="centerPos">The center of the query circle.</param>
         /// <param name="radius">The radius of the query circle.</param>
         /// <param name="filter">The polygon filter to apply to the query.</param>
-        /// <param name="resultRef">The reference ids of the polygons touched by the circle.</param>
-        /// <param name="resultParent">The reference ids of the parent polygons for each result. Zero if a result polygon has no parent.</param>
-        /// <param name="resultCount">The number of polygons found.</param>
         /// <param name="maxResult">The maximum number of polygons the result arrays can hold.</param>
+        /// <param name="result">The polygons in the local neighbourhood.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FindLocalNeighbourhood(int startRef, Vector3 centerPos, float radius, QueryFilter filter, int maxResult, out int[] resultRef, out int[] resultParent, out int resultCount)
+        public Status FindLocalNeighbourhood(int startRef, Vector3 centerPos, float radius, QueryFilter filter, int maxResult, out PolyRefs result)
         {
-            resultRef = new int[maxResult];
-            resultParent = new int[maxResult];
-            resultCount = 0;
+            result = new PolyRefs(maxResult);
 
             // Validate input
             if (!m_nav.IsValidPolyRef(startRef) ||
@@ -1692,8 +1676,8 @@ namespace Engine.PathFinding.RecastNavigation
             int n = 0;
             if (n < maxResult)
             {
-                resultRef[n] = startNode.Id;
-                resultParent[n] = 0;
+                result.Refs[n] = startNode.Id;
+                result.Parents[n] = 0;
                 ++n;
             }
             else
@@ -1783,7 +1767,7 @@ namespace Engine.PathFinding.RecastNavigation
                     bool overlap = false;
                     for (int j = 0; j < n; ++j)
                     {
-                        int pastRef = resultRef[j];
+                        int pastRef = result.Refs[j];
 
                         // Connected polys do not overlap.
                         bool connected = false;
@@ -1822,8 +1806,8 @@ namespace Engine.PathFinding.RecastNavigation
                     // This poly is fine, store and advance to the poly.
                     if (n < maxResult)
                     {
-                        resultRef[n] = neighbourRef;
-                        resultParent[n] = curRef;
+                        result.Refs[n] = neighbourRef;
+                        result.Parents[n] = curRef;
                         ++n;
                     }
                     else
@@ -1838,7 +1822,7 @@ namespace Engine.PathFinding.RecastNavigation
                 }
             }
 
-            resultCount = n;
+            result.Count = n;
 
             return status;
         }

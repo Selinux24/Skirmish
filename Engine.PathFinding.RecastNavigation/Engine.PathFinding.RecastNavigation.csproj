@@ -155,6 +155,17 @@
     <Compile Include="ContourHole.cs" />
     <Compile Include="ContourRegion.cs" />
     <Compile Include="ContourSet.cs" />
+    <Compile Include="Crowds\Crowd.cs" />
+    <Compile Include="Crowds\CrowdAgent.cs" />
+    <Compile Include="Crowds\CrowdAgentAnimation.cs" />
+    <Compile Include="Crowds\CrowdAgentDebugInfo.cs" />
+    <Compile Include="Crowds\CrowdAgentParams.cs" />
+    <Compile Include="Crowds\CrowdAgentState.cs" />
+    <Compile Include="Crowds\CrowdNeighbour.cs" />
+    <Compile Include="Crowds\MoveRequestState.cs" />
+    <Compile Include="Crowds\ObstacleCircle.cs" />
+    <Compile Include="Crowds\ObstacleSegment.cs" />
+    <Compile Include="Crowds\UpdateFlagTypes.cs" />
     <Compile Include="DetailTriEdgeFlags.cs" />
     <Compile Include="Detour.cs" />
     <Compile Include="DetourTileCache.cs" />
@@ -176,6 +187,7 @@
     <Compile Include="LayerSweepSpan.cs" />
     <Compile Include="LevelStackEntry.cs" />
     <Compile Include="Link.cs" />
+    <Compile Include="Crowds\LocalBoundary.cs" />
     <Compile Include="MeshData.cs" />
     <Compile Include="MeshHeader.cs" />
     <Compile Include="MeshTile.cs" />
@@ -189,18 +201,24 @@
     <Compile Include="NodeFlagTypes.cs" />
     <Compile Include="NodePool.cs" />
     <Compile Include="NodeQueue.cs" />
+    <Compile Include="Crowds\ObstacleAvoidanceDebugData.cs" />
+    <Compile Include="Crowds\ObstacleAvoidanceParams.cs" />
+    <Compile Include="Crowds\ObstacleAvoidanceQuery.cs" />
     <Compile Include="ObstacleRequest.cs" />
     <Compile Include="ObstacleRequestAction.cs" />
     <Compile Include="ObstacleState.cs" />
     <Compile Include="ObstacleType.cs" />
     <Compile Include="OffMeshConnection.cs" />
+    <Compile Include="Crowds\PathCorridor.cs" />
     <Compile Include="PathFindingMode.cs" />
+    <Compile Include="Crowds\PathQueue.cs" />
     <Compile Include="Poly.cs" />
     <Compile Include="PolyDetail.cs" />
     <Compile Include="Polygoni.cs" />
     <Compile Include="PolyMesh.cs" />
     <Compile Include="PolyMeshDetail.cs" />
     <Compile Include="PolyQuery.cs" />
+    <Compile Include="PolyRefs.cs" />
     <Compile Include="PolyTypes.cs" />
     <Compile Include="PotentialDiagonal.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -209,6 +227,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Crowds\ProximityGrid.cs" />
     <Compile Include="QueryData.cs" />
     <Compile Include="QueryFilter.cs" />
     <Compile Include="RasterizationContext.cs" />

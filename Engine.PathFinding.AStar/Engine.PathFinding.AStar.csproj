@@ -144,6 +144,8 @@
     <Compile Include="GridInput.cs" />
     <Compile Include="GridNode.cs" />
     <Compile Include="GridNodeStates.cs" />
+    <Compile Include="PriorityDictionary.cs" />
+    <Compile Include="PriorityDictionaryItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
