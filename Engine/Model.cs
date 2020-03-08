@@ -607,7 +607,7 @@ namespace Engine
             var bsph = this.GetBoundingSphere();
             if (bsph.Intersects(ref ray))
             {
-                bool facingOnly = !rayPickingParams.HasFlag(RayPickingParams.AllTriangles);
+                bool facingOnly = rayPickingParams.HasFlag(RayPickingParams.FacingOnly);
                 var triangles = this.GetVolume(rayPickingParams.HasFlag(RayPickingParams.Geometry));
 
                 if (triangles.Any() && Intersection.IntersectNearest(ray, triangles, facingOnly, out Vector3 pos, out Triangle tri, out float d))
@@ -649,7 +649,7 @@ namespace Engine
             var bsph = this.GetBoundingSphere();
             if (bsph.Intersects(ref ray))
             {
-                bool facingOnly = !rayPickingParams.HasFlag(RayPickingParams.AllTriangles);
+                bool facingOnly = rayPickingParams.HasFlag(RayPickingParams.FacingOnly);
                 var triangles = this.GetVolume(rayPickingParams.HasFlag(RayPickingParams.Geometry));
 
                 if (triangles.Any() && Intersection.IntersectFirst(ray, triangles, facingOnly, out Vector3 pos, out Triangle tri, out float d))
@@ -688,7 +688,7 @@ namespace Engine
             var bsph = this.GetBoundingSphere();
             if (bsph.Intersects(ref ray))
             {
-                bool facingOnly = !rayPickingParams.HasFlag(RayPickingParams.AllTriangles);
+                bool facingOnly = rayPickingParams.HasFlag(RayPickingParams.FacingOnly);
                 var triangles = this.GetVolume(rayPickingParams.HasFlag(RayPickingParams.Geometry));
 
                 if (triangles.Any() && Intersection.IntersectAll(ray, triangles, facingOnly, out Vector3[] pos, out Triangle[] tri, out float[] ds))

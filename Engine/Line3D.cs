@@ -398,17 +398,25 @@ namespace Engine
 
             return lines;
         }
+        public static IEnumerable<Line3D> CreateCross(Vector3 point, float size)
+        {
+            List<Line3D> lines = new List<Line3D>();
+
+            float h = size * 0.5f;
+            lines.Add(new Line3D(point + new Vector3(h, h, h), point - new Vector3(h, h, h)));
+            lines.Add(new Line3D(point + new Vector3(h, h, -h), point - new Vector3(h, h, -h)));
+            lines.Add(new Line3D(point + new Vector3(-h, h, h), point - new Vector3(-h, h, h)));
+            lines.Add(new Line3D(point + new Vector3(-h, h, -h), point - new Vector3(-h, h, -h)));
+
+            return lines;
+        }
         public static IEnumerable<Line3D> CreateCrossList(IEnumerable<Vector3> points, float size)
         {
             List<Line3D> lines = new List<Line3D>();
 
-            foreach (var p in points)
+            foreach (var point in points)
             {
-                float h = size * 0.5f;
-                lines.Add(new Line3D(p + new Vector3(h, h, h), p - new Vector3(h, h, h)));
-                lines.Add(new Line3D(p + new Vector3(h, h, -h), p - new Vector3(h, h, -h)));
-                lines.Add(new Line3D(p + new Vector3(-h, h, h), p - new Vector3(-h, h, h)));
-                lines.Add(new Line3D(p + new Vector3(-h, h, -h), p - new Vector3(-h, h, -h)));
+                lines.AddRange(CreateCross(point, size));
             }
 
             return lines;

@@ -22,6 +22,7 @@ namespace Collada
         private TextDrawer debug = null;
 
         private PrimitiveListDrawer<Triangle> graphDrawer = null;
+        private PrimitiveListDrawer<Line3D> volumesDrawer = null;
 
         private Model inputGeometry = null;
         private readonly BuildSettings nmsettings = BuildSettings.Default;
@@ -44,14 +45,10 @@ namespace Collada
         {
             await base.Initialize();
 
-#if DEBUG
-            this.Game.VisibleMouse = false;
+            this.Game.VisibleMouse = true;
             this.Game.LockMouse = false;
-            this.Camera.MovementDelta = 50f;
-#else
-            this.Game.VisibleMouse = false;
-            this.Game.LockMouse = true;
-#endif
+            this.Camera.MovementDelta = 25f;
+
             await this.LoadResourcesAsync(userInterfaceId, this.InitializeText());
         }
         private async Task InitializeText()
@@ -148,6 +145,13 @@ namespace Collada
                 Count = 50000,
             };
             this.graphDrawer = await this.AddComponentPrimitiveListDrawer<Triangle>(graphDrawerDesc);
+
+            var volumesDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
+            {
+                AlphaEnabled = true,
+                Count = 10000
+            };
+            this.volumesDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(volumesDrawerDesc);
         }
 
         public override void GameResourcesLoaded(Guid id)
@@ -264,27 +268,31 @@ namespace Collada
         {
             bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
 
+            if (this.Game.Input.LeftMouseButtonJustReleased)
+            {
+                var pRay = this.GetPickingRay();
+                var rayPParams = RayPickingParams.FacingOnly | RayPickingParams.Perfect;
 
-            bool updateGraph = false;
-            bool updateGraphDrawing = false;
+                if (this.PickNearest(pRay, rayPParams, out PickingResult<Triangle> r))
+                {
+                    var tri = Line3D.CreateWiredTriangle(r.Item);
+                    this.volumesDrawer.SetPrimitives(Color.White, tri);
+
+                    var cross = Line3D.CreateCross(r.Position, 0.25f);
+                    this.volumesDrawer.SetPrimitives(Color.Red, cross);
+
+                    BuildTile(shift, r.Position);
+                }
+            }
 
             if (this.Game.Input.KeyJustReleased(Keys.Space))
             {
-                Stopwatch sw = new Stopwatch();
-                sw.Start();
-                if (!shift)
-                {
-                    ((Graph)this.NavigationGraph).BuildTile(this.Camera.Position);
-                }
-                else
-                {
-                    ((Graph)this.NavigationGraph).RemoveTile(this.Camera.Position);
-                }
-                sw.Stop();
-                lastElapsedSeconds = sw.ElapsedMilliseconds / 1000.0f;
+                this.volumesDrawer.Clear();
 
-                updateGraphDrawing = true;
+                BuildTile(shift, this.Camera.Position);
             }
+
+            bool updateGraph = false;
 
             if (this.Game.Input.KeyJustReleased(Keys.B))
             {
@@ -297,7 +305,6 @@ namespace Collada
                     nmsettings.BuildMode = (BuildModes)Helper.Prev((int)nmsettings.BuildMode, 3);
                 }
                 updateGraph = true;
-                updateGraphDrawing = true;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.P))
@@ -311,12 +318,6 @@ namespace Collada
                     nmsettings.PartitionType = (SamplePartitionTypes)Helper.Prev((int)nmsettings.PartitionType, 3);
                 }
                 updateGraph = true;
-                updateGraphDrawing = true;
-            }
-
-            if (updateGraphDrawing)
-            {
-                this.graphDrawer.Clear();
             }
 
             if (updateGraph)
@@ -325,6 +326,23 @@ namespace Collada
             }
 
             this.debug.Text = string.Format("Build Mode: {0}; Partition Type: {1}; Build Time: {2:0.00000} seconds", nmsettings.BuildMode, nmsettings.PartitionType, lastElapsedSeconds);
+        }
+        private void BuildTile(bool shift, Vector3 tilePosition)
+        {
+            this.graphDrawer.Clear();
+
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            if (!shift)
+            {
+                ((Graph)this.NavigationGraph).BuildTile(tilePosition);
+            }
+            else
+            {
+                ((Graph)this.NavigationGraph).RemoveTile(tilePosition);
+            }
+            sw.Stop();
+            lastElapsedSeconds = sw.ElapsedMilliseconds / 1000.0f;
         }
         private void UpdateGraphNodes(AgentType agent)
         {

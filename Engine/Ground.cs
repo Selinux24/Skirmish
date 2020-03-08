@@ -87,7 +87,7 @@ namespace Engine
                 Distance = float.MaxValue,
             };
 
-            bool facingOnly = !rayPickingParams.HasFlag(RayPickingParams.AllTriangles);
+            bool facingOnly = rayPickingParams.HasFlag(RayPickingParams.FacingOnly);
 
             if (this.groundPickingQuadtree != null && this.groundPickingQuadtree.PickNearest(ray, facingOnly, out PickingResult<Triangle> gResult))
             {
@@ -127,7 +127,7 @@ namespace Engine
                 Distance = float.MaxValue,
             };
 
-            bool facingOnly = !rayPickingParams.HasFlag(RayPickingParams.AllTriangles);
+            bool facingOnly = rayPickingParams.HasFlag(RayPickingParams.FacingOnly);
 
             if (this.groundPickingQuadtree != null && this.groundPickingQuadtree.PickFirst(ray, facingOnly, out PickingResult<Triangle> gResult))
             {
@@ -164,7 +164,7 @@ namespace Engine
 
             results = null;
 
-            bool facingOnly = !rayPickingParams.HasFlag(RayPickingParams.AllTriangles);
+            bool facingOnly = rayPickingParams.HasFlag(RayPickingParams.FacingOnly);
 
             if (this.groundPickingQuadtree != null && this.groundPickingQuadtree.PickAll(ray, facingOnly, out PickingResult<Triangle>[] gResults))
             {
