@@ -2,6 +2,8 @@
 
 namespace Engine.PathFinding.RecastNavigation
 {
+    using Engine.PathFinding.RecastNavigation.Detour;
+
     /// <summary>
     /// Graph agent query
     /// </summary>

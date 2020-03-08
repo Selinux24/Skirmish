@@ -7,6 +7,9 @@ using System.Security.Permissions;
 
 namespace Engine.PathFinding.RecastNavigation
 {
+    using Engine.PathFinding.RecastNavigation.Detour;
+    using Engine.PathFinding.RecastNavigation.Detour.Tiles;
+
     /// <summary>
     /// Graph file
     /// </summary>
@@ -81,7 +84,7 @@ namespace Engine.PathFinding.RecastNavigation
                 for (int i = 0; i < file.NavMeshData.Count; i++)
                 {
                     var tile = file.NavMeshData[i];
-                    if (tile == null || tile.Header.Magic != Detour.DT_NAVMESH_MAGIC) continue;
+                    if (tile == null || tile.Header.Magic != DetourUtils.DT_NAVMESH_MAGIC) continue;
 
                     navmesh.AddTile(tile, TileFlagTypes.DT_TILE_FREE_DATA, 0, out int res);
                 }

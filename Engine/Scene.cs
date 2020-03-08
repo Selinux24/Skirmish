@@ -1751,7 +1751,7 @@ namespace Engine
         /// <returns>Returns the obstacle Id</returns>
         public virtual int AddObstacle(BoundingCylinder cylinder)
         {
-            return this.NavigationGraph.AddObstacle(cylinder);
+            return this.NavigationGraph?.AddObstacle(cylinder) ?? -1;
         }
         /// <summary>
         /// Adds AABB obstacle
@@ -1760,7 +1760,7 @@ namespace Engine
         /// <returns>Returns the obstacle Id</returns>
         public virtual int AddObstacle(BoundingBox bbox)
         {
-            return this.NavigationGraph.AddObstacle(bbox);
+            return this.NavigationGraph?.AddObstacle(bbox) ?? -1;
         }
         /// <summary>
         /// Adds OBB obstacle
@@ -1769,7 +1769,7 @@ namespace Engine
         /// <returns>Returns the obstacle Id</returns>
         public virtual int AddObstacle(OrientedBoundingBox obb)
         {
-            return this.NavigationGraph.AddObstacle(obb);
+            return this.NavigationGraph?.AddObstacle(obb) ?? -1;
         }
         /// <summary>
         /// Removes obstable by id
@@ -1777,26 +1777,7 @@ namespace Engine
         /// <param name="obstacle">Obstacle id</param>
         public virtual void RemoveObstacle(int obstacle)
         {
-            this.NavigationGraph.RemoveObstacle(obstacle);
-        }
-
-        /// <summary>
-        /// Adds a connection between points
-        /// </summary>
-        /// <param name="from">From point</param>
-        /// <param name="to">To point</param>
-        /// <returns>Returns the connection id</returns>
-        public virtual int AddConnection(Vector3 from, Vector3 to)
-        {
-            return this.NavigationGraph.AddConnection(from, to);
-        }
-        /// <summary>
-        /// Removes the conecction by id
-        /// </summary>
-        /// <param name="id"></param>
-        public virtual void RemoveConnection(int id)
-        {
-            this.NavigationGraph.RemoveConnection(id);
+            this.NavigationGraph?.RemoveObstacle(obstacle);
         }
 
         /// <summary>
@@ -1805,9 +1786,9 @@ namespace Engine
         /// <param name="position">Position</param>
         public virtual async void UpdateGraph(Vector3 position)
         {
-            await this.PathFinderDescription.Input.Refresh();
+            await this.PathFinderDescription?.Input.Refresh();
 
-            this.NavigationGraph.UpdateAt(position);
+            this.NavigationGraph?.UpdateAt(position);
         }
         /// <summary>
         /// Updates the graph at positions in the specified list
@@ -1817,11 +1798,11 @@ namespace Engine
         {
             if (positions?.Any() == true)
             {
-                await this.PathFinderDescription.Input.Refresh();
+                await this.PathFinderDescription?.Input.Refresh();
 
                 foreach (var position in positions)
                 {
-                    this.NavigationGraph.UpdateAt(position);
+                    this.NavigationGraph?.UpdateAt(position);
                 }
             }
         }

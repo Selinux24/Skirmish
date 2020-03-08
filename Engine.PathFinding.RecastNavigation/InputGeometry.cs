@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 
 namespace Engine.PathFinding.RecastNavigation
 {
+    using Engine.PathFinding.RecastNavigation.Detour;
+
     /// <summary>
     /// Input geometry
     /// </summary>

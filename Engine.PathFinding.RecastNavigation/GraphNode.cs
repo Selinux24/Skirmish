@@ -6,6 +6,8 @@ using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation
 {
+    using Engine.PathFinding.RecastNavigation.Detour;
+
     /// <summary>
     /// Graph node
     /// </summary>
@@ -23,7 +25,7 @@ namespace Engine.PathFinding.RecastNavigation
             for (int i = 0; i < mesh.MaxTiles; ++i)
             {
                 var tile = mesh.Tiles[i];
-                if (tile.Header.Magic != Detour.DT_NAVMESH_MAGIC) continue;
+                if (tile.Header.Magic != DetourUtils.DT_NAVMESH_MAGIC) continue;
 
                 for (int t = 0; t < tile.Header.PolyCount; t++)
                 {

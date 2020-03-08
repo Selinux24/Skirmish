@@ -3,6 +3,8 @@ using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation
 {
+    using Engine.PathFinding.RecastNavigation.Detour;
+
     /// <summary>
     /// Straight path
     /// </summary>

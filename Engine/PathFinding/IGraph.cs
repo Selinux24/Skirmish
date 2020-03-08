@@ -79,21 +79,8 @@ namespace Engine.PathFinding
         /// <summary>
         /// Removes an obstacle by obstacle id
         /// </summary>
-        /// <param name="obstacle">Obstacle id</param>
-        void RemoveObstacle(int obstacle);
-
-        /// <summary>
-        /// Adds a new connection
-        /// </summary>
-        /// <param name="from">From point</param>
-        /// <param name="to">To point</param>
-        /// <returns>Returns the connection id</returns>
-        int AddConnection(Vector3 from, Vector3 to);
-        /// <summary>
-        /// Removes a connection by id
-        /// </summary>
-        /// <param name="id">Connection id</param>
-        void RemoveConnection(int id);
+        /// <param name="obstacleId">Obstacle id</param>
+        void RemoveObstacle(int obstacleId);
 
         /// <summary>
         /// Updates internal state

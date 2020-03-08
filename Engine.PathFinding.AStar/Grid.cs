@@ -220,29 +220,10 @@ namespace Engine.PathFinding.AStar
         /// <summary>
         /// Removes an obstacle by obstacle id
         /// </summary>
-        /// <param name="obstacle">Obstacle id</param>
-        public void RemoveObstacle(int obstacle)
+        /// <param name="obstacleId">Obstacle id</param>
+        public void RemoveObstacle(int obstacleId)
         {
             //TODO: update grid state using obstacle
-        }
-
-        /// <summary>
-        /// Adds a new connection
-        /// </summary>
-        /// <param name="from">From point</param>
-        /// <param name="to">To point</param>
-        /// <returns>Returns the connection id</returns>
-        public int AddConnection(Vector3 from, Vector3 to)
-        {
-            return -1;
-        }
-        /// <summary>
-        /// Removes a connection by id
-        /// </summary>
-        /// <param name="id">Connection id</param>
-        public void RemoveConnection(int id)
-        {
-            //TODO: update grid state
         }
 
         /// <summary>

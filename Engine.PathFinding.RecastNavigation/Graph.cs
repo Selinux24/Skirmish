@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 
 namespace Engine.PathFinding.RecastNavigation
 {
+    using Engine.PathFinding.RecastNavigation.Detour;
+
     /// <summary>
     /// Navigation graph
     /// </summary>
@@ -445,12 +447,12 @@ namespace Engine.PathFinding.RecastNavigation
                 return path.Count;
             }
 
-            for (int k = poly.FirstLink; k != Detour.DT_NULL_LINK; k = tile.Links[k].next)
+            for (int k = poly.FirstLink; k != DetourUtils.DT_NULL_LINK; k = tile.Links[k].Next)
             {
                 var link = tile.Links[k];
-                if (link.nref != 0 && neis.Count < maxNeis)
+                if (link.NRef != 0 && neis.Count < maxNeis)
                 {
-                    neis.Add(link.nref);
+                    neis.Add(link.NRef);
                 }
             }
 
@@ -910,12 +912,12 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Removes an obstacle by obstacle id
         /// </summary>
-        /// <param name="obstacle">Obstacle id</param>
-        public void RemoveObstacle(int obstacle)
+        /// <param name="obstacleId">Obstacle id</param>
+        public void RemoveObstacle(int obstacleId)
         {
             this.updated = false;
 
-            var instance = itemIndices.Find(o => o.Id == obstacle);
+            var instance = itemIndices.Find(o => o.Id == obstacleId);
             if (instance != null)
             {
                 foreach (var item in instance.Indices)
@@ -932,67 +934,6 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
         /// <summary>
-        /// Adds a new off-mesh connection
-        /// </summary>
-        /// <param name="from">From point</param>
-        /// <param name="to">To point</param>
-        /// <returns>Returns the off-mesh connection id</returns>
-        public int AddConnection(Vector3 from, Vector3 to)
-        {
-            this.updated = false;
-
-            List<Tuple<Agent, int>> offmeshConnections = new List<Tuple<Agent, int>>();
-
-            foreach (var agentQ in AgentQueries)
-            {
-                var cache = agentQ.NavMesh.TileCache;
-                if (cache != null)
-                {
-                    cache.AddOffmeshConnection(from, to, out int res);
-
-                    offmeshConnections.Add(new Tuple<Agent, int>(agentQ.Agent, res));
-                }
-            }
-
-            if (offmeshConnections.Count > 0)
-            {
-                var o = new GraphItem()
-                {
-                    Indices = offmeshConnections.ToArray()
-                };
-
-                itemIndices.Add(o);
-
-                return o.Id;
-            }
-
-            return -1;
-        }
-        /// <summary>
-        /// Removes an off-mesh connection by off-mesh connection id
-        /// </summary>
-        /// <param name="id">Off-mesh connection id</param>
-        public void RemoveConnection(int id)
-        {
-            this.updated = false;
-
-            var offmeshConnection = itemIndices.Find(o => o.Id == id);
-            if (offmeshConnection != null)
-            {
-                foreach (var item in offmeshConnection.Indices)
-                {
-                    var cache = AgentQueries.Find(a => a.Agent.Equals(item.Item1))?.NavMesh.TileCache;
-                    if (cache != null)
-                    {
-                        cache.RemoveOffmeshConnection(item.Item2);
-                    }
-                }
-
-                itemIndices.Remove(offmeshConnection);
-            }
-        }
-
-        /// <summary>
         /// Updates internal state
         /// </summary>
         /// <param name="gameTime">Game time</param>
@@ -1003,7 +944,7 @@ namespace Engine.PathFinding.RecastNavigation
                 var nm = agentQ.NavMesh;
                 if (nm.TileCache != null)
                 {
-                    var status = nm.TileCache.Update(gameTime.TotalMilliseconds, nm, out bool upToDate);
+                    var status = nm.TileCache.Update(nm, out bool upToDate);
                     if (status.HasFlag(Status.DT_SUCCESS) && updated != upToDate)
                     {
                         updated = upToDate;
