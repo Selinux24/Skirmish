@@ -2,6 +2,7 @@
 using Engine.Animation;
 using Engine.Content;
 using Engine.PathFinding.RecastNavigation;
+using Engine.PathFinding.RecastNavigation.Detour.Crowds;
 using SharpDX;
 using System;
 using System.Collections.Generic;
@@ -32,9 +33,14 @@ namespace Deferred
         private Agent tankAgentType = null;
         private GameAgent<SteerManipulatorController> tankAgent1 = null;
         private GameAgent<SteerManipulatorController> tankAgent2 = null;
+        private int id1;
+        private int id2;
         private Model helicopter = null;
         private ModelInstanced helicopters = null;
         private Scenery terrain = null;
+
+        private Graph graph = null;
+        private Crowd crowd = null;
 
         private Model tree = null;
         private ModelInstanced trees = null;
@@ -46,6 +52,8 @@ namespace Deferred
 
         private PrimitiveListDrawer<Line3D> lineDrawer = null;
         private PrimitiveListDrawer<Triangle> terrainGraphDrawer = null;
+        private PrimitiveListDrawer<Triangle> graphDrawer = null;
+        private PrimitiveListDrawer<Line3D> volumesDrawer = null;
 
         private bool onlyModels = true;
 
@@ -332,6 +340,22 @@ namespace Deferred
                 SceneObjectUsages.None,
                 layerEffects);
             this.terrainGraphDrawer.Visible = false;
+
+            var graphDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
+            {
+                Name = "DEBUG++ Graph",
+                AlphaEnabled = true,
+                DepthEnabled = true,
+                Count = 50000,
+            };
+            this.graphDrawer = await this.AddComponentPrimitiveListDrawer<Triangle>(graphDrawerDesc);
+
+            var volumesDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
+            {
+                AlphaEnabled = true,
+                Count = 10000
+            };
+            this.volumesDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(volumesDrawerDesc);
         }
 
         public override void GameResourcesLoaded(Guid id)
@@ -362,6 +386,21 @@ namespace Deferred
                 this.Camera.LookTo(cameraPosition + Vector3.Up);
                 this.Camera.NearPlaneDistance = near;
                 this.Camera.FarPlaneDistance = far;
+
+                var nmsettings = BuildSettings.Default;
+                nmsettings.CellSize = 0.5f;
+                nmsettings.CellHeight = 0.25f;
+                nmsettings.Agents = new[] { this.tankAgentType };
+                nmsettings.PartitionType = SamplePartitionTypes.Watershed;
+                nmsettings.EdgeMaxError = 1.0f;
+                nmsettings.BuildMode = BuildModes.Tiled;
+                nmsettings.TileSize = 32;
+
+                var nmInput = new InputGeometry(GetTrianglesForNavigationGraph);
+
+                this.PathFinderDescription = new Engine.PathFinding.PathFinderDescription(nmsettings, nmInput);
+
+                Task.WhenAll(this.UpdateNavigationGraph());
 
                 gameReady = true;
             }
@@ -406,13 +445,6 @@ namespace Deferred
                     this.trees[i].Manipulator.SetPosition(pos.Position, true);
                 }
             }
-
-            var nvSettings = BuildSettings.Default;
-            nvSettings.Agents = new[] { this.tankAgentType };
-
-            var nvInput = new InputGeometry(GetTrianglesForNavigationGraph);
-
-            this.PathFinderDescription = new Engine.PathFinding.PathFinderDescription(nvSettings, nvInput);
         }
         private void StartItems(out Vector3 cameraPosition, out int modelCount)
         {
@@ -493,6 +525,7 @@ namespace Deferred
             bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
 
             UpdateInputCamera(gameTime, shift);
+            UpdateInputMouse();
             UpdayeInputLights(shift);
             UpdateInputObjectsVisibility();
             UpdateInputHelicopterTexture();
@@ -500,6 +533,14 @@ namespace Deferred
             UpdateInputDebug(shift);
 
             UpdateLights(gameTime);
+
+            if (crowd == null)
+            {
+                return;
+            }
+
+            this.tankAgent1.Manipulator.SetPosition(crowd.GetAgent(id1).NPos);
+            this.tankAgent2.Manipulator.SetPosition(crowd.GetAgent(id2).NPos);
         }
         private void UpdateInputCamera(GameTime gameTime, bool shift)
         {
@@ -542,6 +583,25 @@ namespace Deferred
             {
                 this.lineDrawer.SetPrimitives(Color.Yellow, Line3D.CreateWiredFrustum(this.Camera.Frustum));
                 this.lineDrawer.Visible = true;
+            }
+        }
+        private void UpdateInputMouse()
+        {
+            if (this.Game.Input.LeftMouseButtonJustReleased)
+            {
+                var pRay = this.GetPickingRay();
+                var rayPParams = RayPickingParams.FacingOnly | RayPickingParams.Perfect;
+
+                if (this.PickNearest(pRay, rayPParams, out PickingResult<Triangle> r))
+                {
+                    var tri = Line3D.CreateWiredTriangle(r.Item);
+                    this.volumesDrawer.SetPrimitives(Color.White, tri);
+
+                    var cross = Line3D.CreateCross(r.Position, 0.25f);
+                    this.volumesDrawer.SetPrimitives(Color.Red, cross);
+
+                    graph.RequestMoveCrowd(crowd, tankAgentType, r.Position);
+                }
             }
         }
         private void UpdayeInputLights(bool shift)
@@ -1003,6 +1063,56 @@ namespace Deferred
 
                 this.lineDrawer.Active = true;
                 this.lineDrawer.Visible = true;
+            }
+        }
+
+
+        public override void NavigationGraphUpdated()
+        {
+            this.UpdateGraphNodes(this.tankAgentType);
+
+            graph = this.NavigationGraph as Graph;
+            if (graph == null)
+            {
+                return;
+            }
+
+            crowd = graph.AddCrowd(10, tankAgentType);
+
+            var par = new CrowdAgentParams()
+            {
+                Radius = tankAgentType.Radius,
+                Height = tankAgentType.Height,
+                MaxAcceleration = 8,
+                MaxSpeed = 3.5f,
+                CollisionQueryRange = tankAgentType.Radius * 12,
+                PathOptimizationRange = tankAgentType.Radius * 30,
+                UpdateFlags = UpdateFlagTypes.DT_CROWD_OBSTACLE_AVOIDANCE,
+                ObstacleAvoidanceType = 0,
+                SeparationWeight = 2,
+            };
+
+            id1 = crowd.AddAgent(tankAgent1.Manipulator.Position, par);
+            id2 = crowd.AddAgent(tankAgent2.Manipulator.Position, par);
+        }
+        private void UpdateGraphNodes(Agent agent)
+        {
+            try
+            {
+                var nodes = this.GetNodes(agent).OfType<GraphNode>();
+                if (nodes.Any())
+                {
+                    this.graphDrawer.Clear();
+
+                    foreach (var node in nodes)
+                    {
+                        this.graphDrawer.AddPrimitives(node.Color, node.Triangles);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
         }
     }

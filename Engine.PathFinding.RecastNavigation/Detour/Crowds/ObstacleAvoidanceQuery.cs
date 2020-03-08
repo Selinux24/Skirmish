@@ -108,7 +108,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
         private ObstacleAvoidanceParams m_params;
         private float m_invHorizTime;
-        private float m_vmax;
         private float m_invVmax;
 
         private int m_maxCircles;
@@ -190,7 +189,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             m_params = param;
             m_invHorizTime = 1.0f / m_params.HorizTime;
-            m_vmax = vmax;
             m_invVmax = vmax > 0 ? 1.0f / vmax : float.MaxValue;
 
             nvel = Vector3.Zero;
@@ -246,7 +244,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             m_params = param;
             m_invHorizTime = 1.0f / m_params.HorizTime;
-            m_vmax = vmax;
             m_invVmax = vmax > 0 ? 1.0f / vmax : float.MaxValue;
 
             if (debug != null)

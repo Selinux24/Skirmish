@@ -52,7 +52,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
         private void Purge()
         {
-            m_navquery.Dispose();
+            m_navquery?.Dispose();
             m_navquery = null;
             for (int i = 0; i < MAX_QUEUE; ++i)
             {

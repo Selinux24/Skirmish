@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 namespace Engine.PathFinding.RecastNavigation
 {
     using Engine.PathFinding.RecastNavigation.Detour;
+    using Engine.PathFinding.RecastNavigation.Detour.Crowds;
 
     /// <summary>
     /// Navigation graph
@@ -527,6 +528,10 @@ namespace Engine.PathFinding.RecastNavigation
         /// Agent query list
         /// </summary>
         public List<GraphAgentQuery> AgentQueries { get; set; } = new List<GraphAgentQuery>();
+        /// <summary>
+        /// Crowd list
+        /// </summary>
+        public List<Crowd> Crowds { get; set; } = new List<Crowd>();
 
         /// <summary>
         /// Constructor
@@ -958,6 +963,42 @@ namespace Engine.PathFinding.RecastNavigation
                             this.Updating?.Invoke(this, new EventArgs());
                         }
                     }
+                }
+            }
+
+            foreach (var crowd in Crowds)
+            {
+                crowd.Update(gameTime.ElapsedMilliseconds, null);
+            }
+        }
+
+
+        public Crowd AddCrowd(int maxAgents, Agent agent)
+        {
+            var navMesh = AgentQueries.Find(a => agent.Equals(a.Agent))?.NavMesh;
+
+            Crowd cr = new Crowd();
+            cr.Init(maxAgents, agent.Radius, navMesh);
+
+            this.Crowds.Add(cr);
+
+            return cr;
+        }
+        public void RequestMoveCrowd(Crowd crowd, AgentType agent, Vector3 p)
+        {
+            //Find agent query
+            var query = AgentQueries.Find(a => agent.Equals(a.Agent))?.CreateQuery();
+            if (query != null)
+            {
+                Status status = query.FindNearestPoly(p, crowd.GetQueryExtents(), crowd.GetFilter(0), out int poly, out Vector3 nP);
+                if (status == Status.DT_FAILURE)
+                {
+                    return;
+                }
+
+                for (int i = 0; i < crowd.GetAgentCount(); i++)
+                {
+                    crowd.RequestMoveTarget(i, poly, nP);
                 }
             }
         }

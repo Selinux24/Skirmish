@@ -50,7 +50,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             // Allocate hashs buckets
             m_bucketsSize = NextPow2(poolSize);
-            m_buckets = new int[m_bucketsSize];
+            m_buckets = Helper.CreateArray(m_bucketsSize, int.MaxValue);
 
             // Allocate pool of items.
             m_poolSize = poolSize;
@@ -63,7 +63,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         }
         public void Clear()
         {
-            m_buckets = new int[m_bucketsSize];
+            m_buckets = Helper.CreateArray(m_bucketsSize, int.MaxValue);
             m_poolHead = 0;
             m_bounds[0] = int.MaxValue;
             m_bounds[1] = int.MaxValue;
@@ -96,6 +96,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                         item.Y = (short)y;
                         item.Id = id;
                         item.Next = m_buckets[h];
+                        m_pool[idx] = item;
                         m_buckets[h] = idx;
                     }
                 }

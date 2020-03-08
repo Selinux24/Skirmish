@@ -154,10 +154,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         public static int AddNeighbour(int idx, float dist, CrowdNeighbour[] neis, int nneis, int maxNeis)
         {
             // Insert neighbour based on the distance.
-            CrowdNeighbour nei = null;
+            CrowdNeighbour nei;
             if (nneis <= 0)
             {
-                nei = neis[nneis];
+                nei = new CrowdNeighbour();
+                neis[nneis] = nei;
             }
             else if (dist >= neis[nneis - 1].Dist)
             {
@@ -166,7 +167,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     return nneis;
                 }
 
-                nei = neis[nneis];
+                nei = new CrowdNeighbour();
+                neis[nneis] = nei;
             }
             else
             {
@@ -327,23 +329,22 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
 
         private int m_maxAgents = 0;
-        private List<CrowdAgent> m_agents = null;
-        private List<CrowdAgent> m_activeAgents = null;
-        private List<CrowdAgentAnimation> m_agentAnims = null;
+        private readonly List<CrowdAgent> m_agents = new List<CrowdAgent>();
+        private readonly List<CrowdAgent> m_activeAgents = new List<CrowdAgent>();
+        private readonly List<CrowdAgentAnimation> m_agentAnims = new List<CrowdAgentAnimation>();
 
-        private readonly PathQueue m_pathq = null;
+        private PathQueue m_pathq = null;
 
         private readonly ObstacleAvoidanceParams[] m_obstacleQueryParams = new ObstacleAvoidanceParams[DT_CROWD_MAX_OBSTAVOIDANCE_PARAMS];
         private ObstacleAvoidanceQuery m_obstacleQuery = null;
 
         private ProximityGrid m_grid = null;
 
-        private int[] m_pathResult = null;
         private int m_maxPathResult = 0;
 
         private Vector3 m_agentPlacementHalfExtents;
 
-        private readonly QueryFilter[] m_filters = new QueryFilter[DT_CROWD_MAX_QUERY_FILTER_TYPE];
+        private QueryFilter[] m_filters = null;
 
         private int m_velocitySampleCount = 0;
 
@@ -811,17 +812,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         }
         private void Purge()
         {
-            m_agents.Clear();
-            m_agents = null;
             m_maxAgents = 0;
-
+            m_agents.Clear();
             m_activeAgents.Clear();
-            m_activeAgents = null;
-
             m_agentAnims.Clear();
-            m_agentAnims = null;
-
-            m_pathResult = null;
 
             m_grid = null;
 
@@ -858,6 +852,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 return false;
             }
 
+            // Init filters
+            m_filters = Helper.CreateArray(DT_CROWD_MAX_QUERY_FILTER_TYPE, () => new QueryFilter()
+            {
+                IncludeFlags = SamplePolyFlagTypes.SAMPLE_POLYFLAGS_WALK,
+            });
+
             // Init obstacle query params.
             for (int i = 0; i < DT_CROWD_MAX_OBSTAVOIDANCE_PARAMS; ++i)
             {
@@ -880,18 +880,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             // Allocate temp buffer for merging paths.
             m_maxPathResult = 256;
-            m_pathResult = new int[m_maxPathResult];
-
+            m_pathq = new PathQueue();
             if (!m_pathq.Init(m_maxPathResult, MAX_PATHQUEUE_NODES, nav))
             {
                 return false;
             }
-
-            m_agents = new List<CrowdAgent>(m_maxAgents);
-
-            m_activeAgents = new List<CrowdAgent>(m_maxAgents);
-
-            m_agentAnims = new List<CrowdAgentAnimation>(m_maxAgents);
 
             for (int i = 0; i < m_maxAgents; ++i)
             {
@@ -905,12 +898,17 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     return false;
                 }
 
-                m_agents[i] = agent;
+                m_agents.Add(agent);
             }
 
             for (int i = 0; i < m_maxAgents; ++i)
             {
-                m_agentAnims[i].Active = false;
+                CrowdAgentAnimation anim = new CrowdAgentAnimation
+                {
+                    Active = false,
+                };
+
+                m_agentAnims.Add(anim);
             }
 
             // The navquery is mostly used for local searches, no need for large node pool.

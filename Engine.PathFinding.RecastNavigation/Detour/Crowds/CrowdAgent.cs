@@ -10,11 +10,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <summary>
         /// True if the agent is active, false if the agent is in an unused slot in the agent pool.
         /// </summary>
-        public bool Active { get; set; }
+        public bool Active { get; set; } = false;
         /// <summary>
         /// The type of mesh polygon the agent is traversing.
         /// </summary>
-        public CrowdAgentState State { get; set; }
+        public CrowdAgentState State { get; set; } = CrowdAgentState.DT_CROWDAGENT_STATE_INVALID;
         /// <summary>
         /// True if the agent has valid path (targetState == DT_CROWDAGENT_TARGET_VALID) and the path does not lead to the requested position, else false.
         /// </summary>
@@ -22,11 +22,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <summary>
         /// The path corridor the agent is using.
         /// </summary>
-        public PathCorridor Corridor { get; set; }
+        public PathCorridor Corridor { get; set; } = new PathCorridor();
         /// <summary>
         /// The local boundary data for the agent.
         /// </summary>
-        public LocalBoundary Boundary { get; set; }
+        public LocalBoundary Boundary { get; set; } = new LocalBoundary();
         /// <summary>
         /// Time since the agent's path corridor was optimized.
         /// </summary>
@@ -68,7 +68,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <summary>
         /// The agent's configuration parameters.
         /// </summary>
-        public CrowdAgentParams Params { get; set; }
+        public CrowdAgentParams Params { get; set; } = new CrowdAgentParams();
 
         /// <summary>
         /// The local path corridor corners for the agent. (Staight path.) [(x, y, z) * #ncorners]
@@ -93,7 +93,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <summary>
         /// State of the movement request.
         /// </summary>
-        public MoveRequestState TargetState { get; set; }
+        public MoveRequestState TargetState { get; set; } = MoveRequestState.DT_CROWDAGENT_TARGET_NONE;
         /// <summary>
         /// Target polyref of the movement request.
         /// </summary>
