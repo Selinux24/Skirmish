@@ -753,14 +753,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                         grandpaRef = m_nodePool.GetNodeAtIdx(parentNode.PIdx).Id;
                     }
                 }
-                if (parentNode == null)
-                {
-                    // Bad node, fail.
-                    m_query.Status = Status.DT_FAILURE;
-                    doneIters = iter;
-                    return m_query.Status;
-                }
-
                 if (parentRef != 0)
                 {
                     bool invalidParent = !m_nav.GetTileAndPolyByRef(parentRef, out parentTile, out parentPoly);
@@ -2078,7 +2070,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 MaxPath = maxPath,
                 T = 0,
-                PathCount = 0,
                 PathCost = 0
             };
 
@@ -2129,7 +2120,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 if (!DetourUtils.IntersectSegmentPoly2D(startPos, endPos, verts, nv, out float tmin, out float tmax, out int segMin, out int segMax))
                 {
                     // Could not hit the polygon, keep the old t and report hit.
-                    hit.PathCount = n;
+                    hit.CutPath(n);
                     return status;
                 }
 
@@ -2144,7 +2135,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 // Store visited polygons.
                 if (n < hit.MaxPath)
                 {
-                    hit.Path[n++] = curRef;
+                    hit.Add(curRef);
+
+                    n++;
                 }
                 else
                 {
@@ -2155,7 +2148,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 if (segMax == -1)
                 {
                     hit.T = float.MaxValue;
-                    hit.PathCount = n;
+                    hit.CutPath(n);
 
                     // add the cost
                     if ((options & RaycastOptions.DT_RAYCAST_USE_COSTS) != 0)
@@ -2288,7 +2281,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     float dx = vb.X - va.X;
                     float dz = vb.Z - va.Z;
                     hit.HitNormal = Vector3.Normalize(new Vector3(dz, 0, -dx));
-                    hit.PathCount = n;
+                    hit.CutPath(n);
                     return status;
                 }
 
@@ -2301,7 +2294,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 poly = nextPoly;
             }
 
-            hit.PathCount = n;
+            hit.CutPath(n);
 
             return status;
         }

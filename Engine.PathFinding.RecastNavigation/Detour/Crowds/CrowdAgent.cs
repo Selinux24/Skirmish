@@ -120,7 +120,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// </summary>
         public CrowdAgent()
         {
-
+            Corridor.Init(256);
         }
     }
 }

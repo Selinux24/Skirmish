@@ -1,4 +1,6 @@
 ﻿using SharpDX;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
@@ -7,6 +9,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
     /// </summary>
     public class RaycastHit
     {
+        private readonly List<int> path = new List<int>();
+
         /// <summary>
         /// The hit parameter. (FLT_MAX if no wall hit.)
         /// </summary>
@@ -22,11 +26,23 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Pointer to an array of reference ids of the visited polygons. [opt]
         /// </summary>
-        public int[] Path { get; set; }
+        public int[] Path
+        {
+            get
+            {
+                return path.ToArray();
+            }
+        }
         /// <summary>
         /// The number of visited polygons. [opt]
         /// </summary>
-        public int PathCount { get; set; }
+        public int PathCount
+        {
+            get
+            {
+                return path.Count;
+            }
+        }
         /// <summary>
         /// The maximum number of polygons the @p path array can hold.
         /// </summary>
@@ -35,5 +51,20 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// The cost of the path until hit.
         /// </summary>
         public float PathCost { get; set; }
+
+        public void Add(int r)
+        {
+            this.path.Add(r);
+        }
+        public void CutPath(int length)
+        {
+            if (this.path.Count > length)
+            {
+                var tmp = this.path.Take(length);
+
+                this.path.Clear();
+                this.path.AddRange(tmp);
+            }
+        }
     }
 }

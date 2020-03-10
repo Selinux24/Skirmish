@@ -455,7 +455,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                         qStatus = m_navquery.FinalizeSlicedFindPath(MAX_RES, out reqPath);
                     }
 
-                    if (qStatus == Status.DT_SUCCESS && reqPath.Count > 0)
+                    if (qStatus != Status.DT_FAILURE && reqPath.Count > 0)
                     {
                         // In progress or succeed.
                         if (reqPath.Path[reqPath.Count - 1] != ag.TargetRef)
@@ -472,12 +472,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                             reqPos = ag.TargetPos;
                         }
                     }
-                    else
-                    {
-                        reqPath.Count = 0;
-                    }
 
-                    if (reqPath.Count <= 0)
+                    if (reqPath?.Count <= 0)
                     {
                         // Could not find path, start the request from current location.
                         reqPos = ag.NPos;
@@ -489,7 +485,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     ag.Boundary.Reset();
                     ag.Partial = false;
 
-                    if (reqPath.Path[reqPath.Count - 1] == ag.TargetRef)
+                    if (reqPath?.Path[reqPath.Count - 1] == ag.TargetRef)
                     {
                         ag.TargetState = MoveRequestState.DT_CROWDAGENT_TARGET_VALID;
                         ag.TargetReplanTime = 0;

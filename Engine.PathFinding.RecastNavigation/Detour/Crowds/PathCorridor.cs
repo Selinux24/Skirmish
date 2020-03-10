@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 {
@@ -360,9 +361,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             return true;
         }
 
-        public bool TrimInvalidPath(
-            int safeRef, Vector3 safePos,
-            NavMeshQuery navquery, QueryFilter filter)
+        public bool TrimInvalidPath(int safeRef, Vector3 safePos, NavMeshQuery navquery, QueryFilter filter)
         {
             // Keep valid path as far as possible.
             int n = 0;
@@ -420,6 +419,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// @return Returns true if move succeeded.
         public bool MovePosition(Vector3 npos, NavMeshQuery navquery, QueryFilter filter)
         {
+            if (m_path.Count <= 0)
+            {
+                return false;
+            }
+
             // Move along navmesh and update new position.
             int MAX_VISITED = 16;
             Status status = navquery.MoveAlongSurface(
@@ -446,6 +450,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// @return Returns true if move succeeded.
         public bool MoveTargetPosition(Vector3 npos, NavMeshQuery navquery, QueryFilter filter)
         {
+            if (m_path.Count <= 0)
+            {
+                return false;
+            }
+
             // Move along navmesh and update new position.
             int MAX_VISITED = 16;
             Status status = navquery.MoveAlongSurface(
@@ -469,7 +478,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         public void SetCorridor(Vector3 target, SimplePath path)
         {
             m_target = target;
-            m_path = path;
+            m_path.Path = path?.Path ?? new int[m_maxPath];
+            m_path.Count = path?.Count ?? 0;
         }
         /// Gets the current position within the corridor. (In the first polygon.)
         /// @return The current position within the corridor.
@@ -499,7 +509,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// @return The corridor's path. [(polyRef) * #getPathCount()]
         public int[] GetPath()
         {
-            return m_path.Path;
+            return m_path.Path.ToArray();
         }
         /// The number of polygons in the current corridor path.
         /// @return The number of polygons in the current corridor path.

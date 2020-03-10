@@ -196,10 +196,11 @@ namespace Deferred
             };
 
             var tankbbox = tank1.GetBoundingBox();
+            var tanksph = tank1.GetBoundingSphere();
             this.tankAgentType = new Agent()
             {
                 Height = tankbbox.GetY(),
-                Radius = tankbbox.GetX() * 0.5f,
+                Radius = tanksph.Radius,
                 MaxClimb = tankbbox.GetY() * 0.55f,
             };
 
