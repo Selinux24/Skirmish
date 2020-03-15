@@ -95,5 +95,10 @@ There are several prototypes:
  
  ![screenshot](/Docs/Images/Z.png?raw=true)
  
+ ## Credits
+
+ This project contains a full c# conversion of the [Detour & Recast](https://github.com/recastnavigation/recastnavigation) libraries of Mikko Mononen:
  
+ > copyright (c) 2009 Mikko Mononen memon@inside.org.
  
+ Thanks a lot, Mikko. You are a genius!
