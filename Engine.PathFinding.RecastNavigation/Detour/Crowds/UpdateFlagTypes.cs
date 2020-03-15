@@ -1,9 +1,11 @@
-﻿
+﻿using System;
+
 namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 {
     /// <summary>
     /// Crowd agent update flags.
     /// </summary>
+    [Flags]
     public enum UpdateFlagTypes
     {
         DT_CROWD_ANTICIPATE_TURNS = 1,

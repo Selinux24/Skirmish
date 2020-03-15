@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 {
+    /// <summary>
+    /// Proximity grid
+    /// </summary>
     public class ProximityGrid
     {
         private static int NextPow2(int v)
@@ -20,30 +24,44 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             return ((x * 73856093) ^ (y * 19349663)) & (n - 1);
         }
 
+        /// <summary>
+        /// Grid pool item
+        /// </summary>
         struct Item
         {
+            /// <summary>
+            /// Item identifier
+            /// </summary>
             public int Id { get; set; }
+            /// <summary>
+            /// X position
+            /// </summary>
             public float X { get; set; }
+            /// <summary>
+            /// Y position
+            /// </summary>
             public float Y { get; set; }
+            /// <summary>
+            /// Next item in the pool
+            /// </summary>
             public int Next { get; set; }
         };
 
-        private float m_cellSize;
-        private float m_invCellSize;
-        private Item[] m_pool;
+        private readonly float m_cellSize;
+        private readonly float m_invCellSize;
+        private readonly Item[] m_pool;
         private int m_poolHead;
-        private int m_poolSize;
-        private int[] m_buckets;
-        private int m_bucketsSize;
-        private readonly int[] m_bounds = new int[4];
+        private readonly int m_poolSize;
+        private readonly int[] m_buckets;
+        private readonly int m_bucketsSize;
+        private readonly int[] m_bounds;
 
-
-        public ProximityGrid()
-        {
-
-        }
-
-        public bool Init(int poolSize, float cellSize)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="poolSize">Node pool size</param>
+        /// <param name="cellSize">Cell size</param>
+        public ProximityGrid(int poolSize, float cellSize)
         {
             m_cellSize = cellSize;
             m_invCellSize = 1.0f / m_cellSize;
@@ -57,14 +75,24 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             m_poolHead = 0;
             m_pool = new Item[m_poolSize];
 
-            Clear();
-
-            return true;
+            m_bounds = new[]
+            {
+                int.MaxValue,
+                int.MaxValue,
+                int.MinValue,
+                int.MinValue
+            };
         }
+
         public void Clear()
         {
-            m_buckets = Helper.CreateArray(m_bucketsSize, int.MaxValue);
+            for (int i = 0; i < m_bucketsSize; i++)
+            {
+                m_buckets[i] = int.MaxValue;
+            }
+
             m_poolHead = 0;
+
             m_bounds[0] = int.MaxValue;
             m_bounds[1] = int.MaxValue;
             m_bounds[2] = int.MinValue;
@@ -169,7 +197,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         }
         public int[] GetBounds()
         {
-            return m_bounds;
+            return m_bounds.ToArray();
         }
         public float GetCellSize()
         {

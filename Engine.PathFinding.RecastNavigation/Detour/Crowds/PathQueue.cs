@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 {

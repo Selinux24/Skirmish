@@ -186,7 +186,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
                 if (n > 0)
                 {
-                    Array.ConstrainedCopy(neis, tgt, neis, i, n);
+                    Array.ConstrainedCopy(neis, i, neis, tgt, n);
                 }
 
                 nei = neis[i];
@@ -213,8 +213,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             for (int i = 0; i < nids; ++i)
             {
-                CrowdAgent ag = agents[ids[i]];
-
+                var ag = agents[ids[i]];
                 if (ag == skip)
                 {
                     continue;
@@ -242,7 +241,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         public static int AddToOptQueue(CrowdAgent newag, CrowdAgent[] agents, int nagents, int maxAgents)
         {
             // Insert neighbour based on greatest time.
-            int slot = 0;
+            int slot;
             if (nagents <= 0)
             {
                 slot = nagents;
@@ -272,7 +271,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
                 if (n > 0)
                 {
-                    Array.ConstrainedCopy(agents, tgt, agents, i, n);
+                    Array.ConstrainedCopy(agents, i, agents, tgt, n);
                 }
 
                 slot = i;
@@ -286,7 +285,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         public static int AddToPathQueue(CrowdAgent newag, CrowdAgent[] agents, int nagents, int maxAgents)
         {
             // Insert neighbour based on greatest time.
-            int slot = 0;
+            int slot;
             if (nagents <= 0)
             {
                 slot = nagents;
@@ -316,7 +315,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
                 if (n > 0)
                 {
-                    Array.ConstrainedCopy(agents, tgt, agents, i, n);
+                    Array.ConstrainedCopy(agents, i, agents, tgt, n);
                 }
 
                 slot = i;
@@ -622,7 +621,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                                         bool samePoly = res.Path[j - 1] == res.Path[j + 1];
                                         if (samePoly)
                                         {
-                                            Array.ConstrainedCopy(res.Path, j - 1, res.Path, j + 1, res.Count - (j + 1));
+                                            Array.ConstrainedCopy(res.Path, j + 1, res.Path, j - 1, res.Count - (j + 1));
                                             res.Count -= 2;
                                             j -= 2;
                                         }
@@ -833,11 +832,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             // Larger than agent radius because it is also used for agent recovery.
             m_agentPlacementHalfExtents = new Vector3(maxAgentRadius * 2.0f, maxAgentRadius * 1.5f, maxAgentRadius * 2.0f);
 
-            m_grid = new ProximityGrid();
-            if (!m_grid.Init(m_maxAgents * 4, maxAgentRadius * 3))
-            {
-                return false;
-            }
+            m_grid = new ProximityGrid(m_maxAgents * 4, maxAgentRadius * 3);
 
             m_obstacleQuery = new ObstacleAvoidanceQuery();
             if (!m_obstacleQuery.Init(6, 8))
@@ -1186,7 +1181,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             int debugIdx = debug?.Idx ?? -1;
 
             CrowdAgent[] agents = GetActiveAgents(m_maxAgents).ToArray();
-            int nagents = agents.Count();
+            int nagents = agents.Length;
+            if (nagents == 0)
+            {
+                return;
+            }
 
             // Check that all agents still have valid paths.
             CheckPathValidity(agents, dt);

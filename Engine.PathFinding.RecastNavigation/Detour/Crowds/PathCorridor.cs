@@ -50,7 +50,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             }
             if (size > 0)
             {
-                Array.ConstrainedCopy(path, req, path, orig, size);
+                Array.ConstrainedCopy(path, orig, path, req, size);
             }
 
             // Store visited
@@ -153,7 +153,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             }
             if (size > 0)
             {
-                Array.ConstrainedCopy(path, req, path, orig, size);
+                Array.ConstrainedCopy(path, orig, path, req, size);
             }
 
             // Store visited

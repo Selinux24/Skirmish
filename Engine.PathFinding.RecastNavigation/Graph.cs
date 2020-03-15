@@ -1002,5 +1002,21 @@ namespace Engine.PathFinding.RecastNavigation
                 }
             }
         }
+        public void RequestMoveAgent(Crowd crowd, int crowdAgent, AgentType agent, Vector3 p)
+        {
+            //Find agent query
+            var query = AgentQueries.Find(a => agent.Equals(a.Agent))?.CreateQuery();
+            if (query != null)
+            {
+                Status status = query.FindNearestPoly(p, crowd.GetQueryExtents(), crowd.GetFilter(0), out int poly, out Vector3 nP);
+                if (status == Status.DT_FAILURE)
+                {
+                    return;
+                }
+
+                crowd.RequestMoveTarget(crowdAgent, poly, nP);
+            }
+        }
+
     }
 }

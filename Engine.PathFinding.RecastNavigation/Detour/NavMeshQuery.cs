@@ -2121,7 +2121,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 if (!DetourUtils.IntersectSegmentPoly2D(startPos, endPos, verts, nv, out float tmin, out float tmax, out int segMin, out int segMax))
                 {
                     // Could not hit the polygon, keep the old t and report hit.
-                    hit.CutPath(n);
+                    hit.Cut(n);
                     return status;
                 }
 
@@ -2149,7 +2149,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 if (segMax == -1)
                 {
                     hit.T = float.MaxValue;
-                    hit.CutPath(n);
+                    hit.Cut(n);
 
                     // add the cost
                     if ((options & RaycastOptions.DT_RAYCAST_USE_COSTS) != 0)
@@ -2282,7 +2282,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     float dx = vb.X - va.X;
                     float dz = vb.Z - va.Z;
                     hit.HitNormal = Vector3.Normalize(new Vector3(dz, 0, -dx));
-                    hit.CutPath(n);
+                    hit.Cut(n);
                     return status;
                 }
 
@@ -2295,7 +2295,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 poly = nextPoly;
             }
 
-            hit.CutPath(n);
+            hit.Cut(n);
 
             return status;
         }

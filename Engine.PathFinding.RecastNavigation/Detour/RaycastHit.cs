@@ -52,11 +52,19 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         public float PathCost { get; set; }
 
+        /// <summary>
+        /// Adds a polygon reference to the ray-cast path
+        /// </summary>
+        /// <param name="r">Polygin reference</param>
         public void Add(int r)
         {
             this.path.Add(r);
         }
-        public void CutPath(int length)
+        /// <summary>
+        /// Cuts the polygon reference list to the specified length
+        /// </summary>
+        /// <param name="length">Final length</param>
+        public void Cut(int length)
         {
             if (this.path.Count > length)
             {

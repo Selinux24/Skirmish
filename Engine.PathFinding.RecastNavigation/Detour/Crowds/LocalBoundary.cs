@@ -72,7 +72,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 int n = Math.Min(m_nsegs - i, MAX_LOCAL_SEGS - tgt);
                 if (n > 0)
                 {
-                    Array.ConstrainedCopy(m_segs, tgt, m_segs, i, n);
+                    Array.ConstrainedCopy(m_segs, i, m_segs, tgt, n);
                 }
                 seg = m_segs[i];
             }
