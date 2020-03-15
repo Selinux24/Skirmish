@@ -540,8 +540,11 @@ namespace Deferred
                 return;
             }
 
-            this.tankAgent1.Manipulator.SetPosition(crowd.GetAgent(id1).NPos);
-            this.tankAgent2.Manipulator.SetPosition(crowd.GetAgent(id2).NPos);
+            var cag1 = crowd.GetAgent(id1);
+            var cag2 = crowd.GetAgent(id2);
+
+            this.tankAgent1.Manipulator.SetPosition(cag1.NPos);
+            this.tankAgent2.Manipulator.SetPosition(cag2.NPos);
         }
         private void UpdateInputCamera(GameTime gameTime, bool shift)
         {

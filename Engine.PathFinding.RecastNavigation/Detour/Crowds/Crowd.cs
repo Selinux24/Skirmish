@@ -54,7 +54,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             {
                 dv *= maxDelta / ds;
             }
-            ag.Vel += ag.Vel * dv;
+            ag.Vel += dv;
 
             // Integrate
             if (ag.Vel.Length() > 0.0001f)
@@ -612,10 +612,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                                 }
 
                                 // Copy old path in the beginning.
-                                List<int> tmp = new List<int>(res.Path);
-                                tmp.InsertRange(0, path);
-                                res.Path = tmp.ToArray();
-                                res.Count += npath - 1;
+                                res.Insert(0, path, npath - 1);
 
                                 // Remove trackbacks
                                 for (int j = 0; j < res.Count; ++j)

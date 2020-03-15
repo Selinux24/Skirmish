@@ -209,13 +209,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     q.Status = 0;
 
                     // Copy path
-                    path = q.Path;
-
-                    if (path.Count > maxPath)
-                    {
-                        path.Path = path.Path.Take(maxPath).ToArray();
-                        path.Count = maxPath;
-                    }
+                    path = q.Path.Copy(maxPath);
 
                     return details | Status.DT_SUCCESS;
                 }

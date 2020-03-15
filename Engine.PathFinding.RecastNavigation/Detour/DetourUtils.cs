@@ -370,6 +370,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             return c;
         }
 
+        public static float DistancePtSegSqr2D(Vector3 pt, Vector3 p, Vector3 q)
+        {
+            return DistancePtSegSqr2D(pt, p, q, out _);
+        }
+
         public static float DistancePtSegSqr2D(Vector3 pt, Vector3 p, Vector3 q, out float t)
         {
             float pqx = q.X - p.X;

@@ -968,7 +968,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             foreach (var crowd in Crowds)
             {
-                crowd.Update(gameTime.ElapsedMilliseconds, null);
+                crowd.Update(gameTime.ElapsedSeconds, null);
             }
         }
 

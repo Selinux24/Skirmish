@@ -217,9 +217,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 cornerPolys.Count--;
                 if (cornerPolys.Count > 0)
                 {
-                    Array.ConstrainedCopy(cornerPolys.Flags, 0, cornerPolys.Flags, 1, cornerPolys.Count);
-                    Array.ConstrainedCopy(cornerPolys.Refs, 0, cornerPolys.Refs, 1, cornerPolys.Count);
-                    Array.ConstrainedCopy(cornerPolys.Path, 0, cornerPolys.Path, 1, cornerPolys.Count);
+                    Array.ConstrainedCopy(cornerPolys.Flags, 1, cornerPolys.Flags, 0, cornerPolys.Count);
+                    Array.ConstrainedCopy(cornerPolys.Refs, 1, cornerPolys.Refs, 0, cornerPolys.Count);
+                    Array.ConstrainedCopy(cornerPolys.Path, 1, cornerPolys.Path, 0, cornerPolys.Count);
                 }
             }
 
@@ -478,8 +478,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         public void SetCorridor(Vector3 target, SimplePath path)
         {
             m_target = target;
-            m_path.Path = path?.Path ?? new int[m_maxPath];
-            m_path.Count = path?.Count ?? 0;
+
+            int[] p = path?.Path ?? new int[m_maxPath];
+            int count = path?.Count ?? 0;
+            m_path.AddRange(p, count);
         }
         /// Gets the current position within the corridor. (In the first polygon.)
         /// @return The current position within the corridor.
