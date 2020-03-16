@@ -1042,7 +1042,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             m_query = new QueryData();
 
             path = new SimplePath(maxPath);
-            path.AddRange(pathList, pathList.Count);
+            path.AddRange(pathList);
 
             return Status.DT_SUCCESS | details;
         }
@@ -1158,7 +1158,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             m_query = new QueryData();
 
             path = new SimplePath(maxPath);
-            path.AddRange(pathList, pathList.Count);
+            path.AddRange(pathList);
 
             return Status.DT_SUCCESS | details;
         }

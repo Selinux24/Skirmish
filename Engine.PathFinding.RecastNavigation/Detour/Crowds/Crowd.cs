@@ -69,15 +69,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
         public static bool OverOffmeshConnection(CrowdAgent ag, float radius)
         {
-            if (ag.NCorners <= 0)
+            if (ag.Corners.Count <= 0)
             {
                 return false;
             }
 
-            bool offMeshConnection = ag.CornerFlags[ag.NCorners - 1].HasFlag(StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION);
+            bool offMeshConnection = ag.Corners.Flags[ag.Corners.Count - 1].HasFlag(StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION);
             if (offMeshConnection)
             {
-                float distSq = Vector2.DistanceSquared(ag.NPos.XZ(), ag.CornerVerts[ag.NCorners - 1].XZ());
+                float distSq = Vector2.DistanceSquared(ag.NPos.XZ(), ag.Corners.Path[ag.Corners.Count - 1].XZ());
                 if (distSq < radius * radius)
                 {
                     return true;
@@ -89,15 +89,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
         public static float GetDistanceToGoal(CrowdAgent ag, float range)
         {
-            if (ag.NCorners <= 0)
+            if (ag.Corners.Count <= 0)
             {
                 return range;
             }
 
-            bool endOfPath = ag.CornerFlags[ag.NCorners - 1].HasFlag(StraightPathFlagTypes.DT_STRAIGHTPATH_END);
+            bool endOfPath = ag.Corners.Flags[ag.Corners.Count - 1].HasFlag(StraightPathFlagTypes.DT_STRAIGHTPATH_END);
             if (endOfPath)
             {
-                return Math.Min(Vector2.Distance(ag.NPos.XZ(), ag.CornerVerts[ag.NCorners - 1].XZ()), range);
+                return Math.Min(Vector2.Distance(ag.NPos.XZ(), ag.Corners.Path[ag.Corners.Count - 1].XZ()), range);
             }
 
             return range;
@@ -107,15 +107,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         {
             dir = Vector3.Zero;
 
-            if (ag.NCorners <= 0)
+            if (ag.Corners.Count <= 0)
             {
                 return;
             }
 
             int ip0 = 0;
-            int ip1 = Math.Min(1, ag.NCorners - 1);
-            Vector3 p0 = ag.CornerVerts[ip0];
-            Vector3 p1 = ag.CornerVerts[ip1];
+            int ip1 = Math.Min(1, ag.Corners.Count - 1);
+            Vector3 p0 = ag.Corners.Path[ip0];
+            Vector3 p1 = ag.Corners.Path[ip1];
 
             Vector3 dir0 = p0 - ag.NPos;
             Vector3 dir1 = p1 - ag.NPos;
@@ -140,12 +140,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         {
             dir = Vector3.Zero;
 
-            if (ag.NCorners <= 0)
+            if (ag.Corners.Count <= 0)
             {
                 return;
             }
 
-            dir = ag.CornerVerts[0] - ag.NPos;
+            dir = ag.Corners.Path[0] - ag.NPos;
             dir.Y = 0;
 
             dir.Normalize();
@@ -1263,20 +1263,18 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 }
 
                 // Find corners for steering
-                ag.NCorners = ag.Corridor.FindCorners(
+                ag.Corridor.FindCorners(
                     m_navquery,
                     m_filters[ag.Params.QueryFilterType],
                     DT_CROWDAGENT_MAX_CORNERS,
                     out StraightPath straightPath);
 
-                ag.CornerVerts = straightPath.Path;
-                ag.CornerFlags = straightPath.Flags;
-                ag.CornerPolys = straightPath.Refs;
+                ag.Corners = straightPath.Copy();
 
                 // Check to see if the corner after the next corner is directly visible, and short cut to there.
-                if (ag.Params.UpdateFlags.HasFlag(UpdateFlagTypes.DT_CROWD_OPTIMIZE_VIS) && ag.NCorners > 0)
+                if (ag.Params.UpdateFlags.HasFlag(UpdateFlagTypes.DT_CROWD_OPTIMIZE_VIS) && ag.Corners.Count > 0)
                 {
-                    Vector3 target = ag.CornerVerts[Math.Min(1, ag.NCorners - 1)];
+                    Vector3 target = ag.Corners.Path[Math.Min(1, ag.Corners.Count - 1)];
                     ag.Corridor.OptimizePathVisibility(
                         target,
                         ag.Params.PathOptimizationRange,
@@ -1328,7 +1326,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     int[] refs = new int[2];
                     if (ag.Corridor.MoveOverOffmeshConnection(
                         m_navquery,
-                        ag.CornerPolys[ag.NCorners - 1],
+                        ag.Corners.Refs[ag.Corners.Count - 1],
                         refs,
                         out var startPos,
                         out var endPos))
@@ -1342,7 +1340,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                         anim.EndPos = endPos;
 
                         ag.State = CrowdAgentState.DT_CROWDAGENT_STATE_OFFMESH;
-                        ag.NCorners = 0;
+                        ag.Corners.Count = 0;
                         ag.NNeis = 0;
                     }
                     else

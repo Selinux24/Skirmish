@@ -4,6 +4,7 @@ using System.Linq;
 namespace Engine.PathFinding.RecastNavigation
 {
     using Engine.PathFinding.RecastNavigation.Detour;
+    using System;
 
     /// <summary>
     /// Straight path
@@ -64,6 +65,21 @@ namespace Engine.PathFinding.RecastNavigation
                 Refs = Refs.ToArray(),
                 Count = Count,
             };
+        }
+
+        public void RemoveFirst()
+        {
+            Count--;
+            if (Count > 0)
+            {
+                Array.ConstrainedCopy(Flags, 1, Flags, 0, Count);
+                Array.ConstrainedCopy(Refs, 1, Refs, 0, Count);
+                Array.ConstrainedCopy(Path, 1, Path, 0, Count);
+            }
+
+            Flags[Count] = 0;
+            Refs[Count] = 0;
+            Path[Count] = Vector3.Zero;
         }
     }
 }

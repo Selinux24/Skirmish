@@ -170,18 +170,22 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         private SimplePath m_path = null;
         private int m_maxPath = 0;
 
-        /// Allocates the corridor's path buffer. 
-        ///  @param[in]		maxPath		The maximum path size the corridor can handle.
-        /// @return True if the initialization succeeded.
+        /// <summary>
+        /// Allocates the corridor's path buffer.
+        /// </summary>
+        /// <param name="maxPath">The maximum path size the corridor can handle.</param>
+        /// <returns>True if the initialization succeeded.</returns>
         public bool Init(int maxPath)
         {
             m_path = new SimplePath(maxPath);
             m_maxPath = maxPath;
             return true;
         }
+        /// <summary>
         /// Resets the path corridor to the specified position.
-        ///  @param[in]		ref		The polygon reference containing the position.
-        ///  @param[in]		pos		The new position in the corridor. [(x, y, z)]
+        /// </summary>
+        /// <param name="r">The polygon reference containing the position.</param>
+        /// <param name="pos">The new position in the corridor. [(x, y, z)]</param>
         public void Reset(int r, Vector3 pos)
         {
             m_pos = pos;
@@ -189,16 +193,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             m_path.Path[0] = r;
             m_path.Count = 1;
         }
+        /// <summary>
         /// Finds the corners in the corridor from the position toward the target. (The straightened path.)
-        ///  @param[out]	cornerVerts		The corner vertices. [(x, y, z) * cornerCount] [Size: <= maxCorners]
-        ///  @param[out]	cornerFlags		The flag for each corner. [(flag) * cornerCount] [Size: <= maxCorners]
-        ///  @param[out]	cornerPolys		The polygon reference for each corner. [(polyRef) * cornerCount] 
-        ///  								[Size: <= @p maxCorners]
-        ///  @param[in]		maxCorners		The maximum number of corners the buffers can hold.
-        ///  @param[in]		navquery		The query object used to build the corridor.
-        ///  @param[in]		filter			The filter to apply to the operation.
-        /// @return The number of corners returned in the corner buffers. [0 <= value <= @p maxCorners]
-        public int FindCorners(
+        /// </summary>
+        /// <param name="navquery">The query object used to build the corridor.</param>
+        /// <param name="filter">The filter to apply to the operation.</param>
+        /// <param name="maxCorners">The maximum number of corners the buffers can hold.</param>
+        /// <param name="cornerPolys">The corner list.</param>
+        public void FindCorners(
             NavMeshQuery navquery, QueryFilter filter, int maxCorners,
             out StraightPath cornerPolys)
         {
@@ -213,14 +215,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             {
                 if (cornerPolys.Flags[0].HasFlag(StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION) ||
                     Vector2.DistanceSquared(cornerPolys.Path[0].XZ(), m_pos.XZ()) > (MIN_TARGET_DIST * MIN_TARGET_DIST))
-                    break;
-                cornerPolys.Count--;
-                if (cornerPolys.Count > 0)
                 {
-                    Array.ConstrainedCopy(cornerPolys.Flags, 1, cornerPolys.Flags, 0, cornerPolys.Count);
-                    Array.ConstrainedCopy(cornerPolys.Refs, 1, cornerPolys.Refs, 0, cornerPolys.Count);
-                    Array.ConstrainedCopy(cornerPolys.Path, 1, cornerPolys.Path, 0, cornerPolys.Count);
+                    break;
                 }
+
+                cornerPolys.RemoveFirst();
             }
 
             // Prune points after an off-mesh connection.
@@ -232,14 +231,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     break;
                 }
             }
-
-            return cornerPolys.Count;
         }
+        /// <summary>
         /// Attempts to optimize the path if the specified point is visible from the current position.
-        ///  @param[in]		next					The point to search toward. [(x, y, z])
-        ///  @param[in]		pathOptimizationRange	The maximum range to search. [Limit: > 0]
-        ///  @param[in]		navquery				The query object used to build the corridor.
-        ///  @param[in]		filter					The filter to apply to the operation.			
+        /// </summary>
+        /// <param name="next">The point to search toward. [(x, y, z])</param>
+        /// <param name="pathOptimizationRange">The maximum range to search. [Limit: > 0]</param>
+        /// <param name="navquery">The query object used to build the corridor.</param>
+        /// <param name="filter">The filter to apply to the operation.</param>
         public void OptimizePathVisibility(
             Vector3 next, float pathOptimizationRange,
             NavMeshQuery navquery, QueryFilter filter)
@@ -270,9 +269,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 m_path.Count = MergeCorridorStartShortcut(m_path.Path, m_path.Count, m_maxPath, res, nres);
             }
         }
+        /// <summary>
         /// Attempts to optimize the path using a local area search. (Partial replanning.) 
-        ///  @param[in]		navquery	The query object used to build the corridor.
-        ///  @param[in]		filter		The filter to apply to the operation.	
+        /// </summary>
+        /// <param name="navquery">The query object used to build the corridor.</param>
+        /// <param name="filter">The filter to apply to the operation.</param>
+        /// <returns></returns>
         public bool OptimizePathTopology(NavMeshQuery navquery, QueryFilter filter)
         {
             if (m_path.Count < 3)
@@ -393,10 +395,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             return true;
         }
-        /// Checks the current corridor path to see if its polygon references remain valid. 
-        ///  @param[in]		maxLookAhead	The number of polygons from the beginning of the corridor to search.
-        ///  @param[in]		navquery		The query object used to build the corridor.
-        ///  @param[in]		filter			The filter to apply to the operation.	
+        /// <summary>
+        /// Checks the current corridor path to see if its polygon references remain valid.
+        /// </summary>
+        /// <param name="maxLookAhead">The number of polygons from the beginning of the corridor to search.</param>
+        /// <param name="navquery">The query object used to build the corridor.</param>
+        /// <param name="filter">The filter to apply to the operation.</param>
+        /// <returns></returns>
         public bool IsValid(int maxLookAhead, NavMeshQuery navquery, QueryFilter filter)
         {
             // Check that all polygons still pass query filter.
@@ -411,12 +416,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             return true;
         }
-        /// Moves the position from the current location to the desired location, adjusting the corridor 
-        /// as needed to reflect the change.
-        ///  @param[in]		npos		The desired new position. [(x, y, z)]
-        ///  @param[in]		navquery	The query object used to build the corridor.
-        ///  @param[in]		filter		The filter to apply to the operation.
-        /// @return Returns true if move succeeded.
+        /// <summary>
+        /// Moves the position from the current location to the desired location, adjusting the corridor as needed to reflect the change.
+        /// </summary>
+        /// <param name="npos">The desired new position. [(x, y, z)]</param>
+        /// <param name="navquery">The query object used to build the corridor.</param>
+        /// <param name="filter">The filter to apply to the operation.</param>
+        /// <returns>Returns true if move succeeded.</returns>
         public bool MovePosition(Vector3 npos, NavMeshQuery navquery, QueryFilter filter)
         {
             if (m_path.Count <= 0)
@@ -442,12 +448,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             }
             return false;
         }
-        /// Moves the target from the curent location to the desired location, adjusting the corridor
-        /// as needed to reflect the change. 
-        ///  @param[in]		npos		The desired new target position. [(x, y, z)]
-        ///  @param[in]		navquery	The query object used to build the corridor.
-        ///  @param[in]		filter		The filter to apply to the operation.
-        /// @return Returns true if move succeeded.
+        /// <summary>
+        /// Moves the target from the curent location to the desired location, adjusting the corridor as needed to reflect the change.
+        /// </summary>
+        /// <param name="npos">The desired new target position. [(x, y, z)]</param>
+        /// <param name="navquery">The query object used to build the corridor.</param>
+        /// <param name="filter">The filter to apply to the operation.</param>
+        /// <returns>Returns true if move succeeded.</returns>
         public bool MoveTargetPosition(Vector3 npos, NavMeshQuery navquery, QueryFilter filter)
         {
             if (m_path.Count <= 0)
@@ -471,10 +478,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             return false;
         }
+        /// <summary>
         /// Loads a new path and target into the corridor.
-        ///  @param[in]		target		The target location within the last polygon of the path. [(x, y, z)]
-        ///  @param[in]		path		The path corridor. [(polyRef) * @p npolys]
-        ///  @param[in]		npath		The number of polygons in the path.
+        /// </summary>
+        /// <param name="target">The target location within the last polygon of the path. [(x, y, z)]</param>
+        /// <param name="path">The path corridor. [(polyRef) * @p npolys]</param>
         public void SetCorridor(Vector3 target, SimplePath path)
         {
             m_target = target;
@@ -483,38 +491,50 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             int count = path?.Count ?? 0;
             m_path.AddRange(p, count);
         }
+        /// <summary>
         /// Gets the current position within the corridor. (In the first polygon.)
-        /// @return The current position within the corridor.
+        /// </summary>
+        /// <returns>The current position within the corridor.</returns>
         public Vector3 GetPos()
         {
             return m_pos;
         }
+        /// <summary>
         /// Gets the current target within the corridor. (In the last polygon.)
-        /// @return The current target within the corridor.
+        /// </summary>
+        /// <returns>The current target within the corridor.</returns>
         public Vector3 GetTarget()
         {
             return m_target;
         }
+        /// <summary>
         /// The polygon reference id of the first polygon in the corridor, the polygon containing the position.
-        /// @return The polygon reference id of the first polygon in the corridor. (Or zero if there is no path.)
+        /// </summary>
+        /// <returns>The polygon reference id of the first polygon in the corridor. (Or zero if there is no path.)</returns>
         public int GetFirstPoly()
         {
             return m_path.Count > 0 ? m_path.Path[0] : 0;
         }
+        /// <summary>
         /// The polygon reference id of the last polygon in the corridor, the polygon containing the target.
-        /// @return The polygon reference id of the last polygon in the corridor. (Or zero if there is no path.)
+        /// </summary>
+        /// <returns>The polygon reference id of the last polygon in the corridor. (Or zero if there is no path.)</returns>
         public int GetLastPoly()
         {
             return m_path.Count > 0 ? m_path.Path[m_path.Count - 1] : 0;
         }
+        /// <summary>
         /// The corridor's path.
-        /// @return The corridor's path. [(polyRef) * #getPathCount()]
+        /// </summary>
+        /// <returns>The corridor's path. [(polyRef) * #getPathCount()]</returns>
         public int[] GetPath()
         {
             return m_path.Path.ToArray();
         }
+        /// <summary>
         /// The number of polygons in the current corridor path.
-        /// @return The number of polygons in the current corridor path.
+        /// </summary>
+        /// <returns>The number of polygons in the current corridor path.</returns>
         public int GetPathCount()
         {
             return m_path.Count;

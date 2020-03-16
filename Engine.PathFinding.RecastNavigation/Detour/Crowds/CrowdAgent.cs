@@ -71,24 +71,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         public CrowdAgentParams Params { get; set; } = new CrowdAgentParams();
 
         /// <summary>
-        /// The local path corridor corners for the agent. (Staight path.) [(x, y, z) * #ncorners]
+        /// The local path corridor corners for the agent.
         /// </summary>
-        public Vector3[] CornerVerts { get; set; } = new Vector3[Crowd.DT_CROWDAGENT_MAX_CORNERS];
-
-        /// <summary>
-        /// The local path corridor corner flags. (See: #dtStraightPathFlags) [(flags) * #ncorners]
-        /// </summary>
-        public StraightPathFlagTypes[] CornerFlags { get; set; } = new StraightPathFlagTypes[Crowd.DT_CROWDAGENT_MAX_CORNERS];
-
-        /// <summary>
-        /// The reference id of the polygon being entered at the corner. [(polyRef) * #ncorners]
-        /// </summary>
-        public int[] CornerPolys { get; set; } = new int[Crowd.DT_CROWDAGENT_MAX_CORNERS];
-
-        /// <summary>
-        /// The number of corners.
-        /// </summary>
-        public int NCorners { get; set; }
+        public StraightPath Corners { get; set; } = new StraightPath(Crowd.DT_CROWDAGENT_MAX_CORNERS);
 
         /// <summary>
         /// State of the movement request.
