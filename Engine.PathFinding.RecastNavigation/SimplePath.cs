@@ -41,6 +41,12 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
 
+        public void StartPath(int r)
+        {
+            Path[0] = r;
+            Count = 1;
+        }
+
         public void AddRange(IEnumerable<int> path)
         {
             AddRange(path, path.Count());
@@ -63,6 +69,12 @@ namespace Engine.PathFinding.RecastNavigation
             tmp.InsertRange(index, path);
             Path = tmp.ToArray();
             Count += count - 1;
+        }
+
+
+        public void Clear()
+        {
+            Count = 0;
         }
 
         /// <summary>

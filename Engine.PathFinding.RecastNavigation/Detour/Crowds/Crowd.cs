@@ -463,7 +463,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                             Status cStatus = m_navquery.ClosestPointOnPoly(reqPath.Path[reqPath.Count - 1], ag.TargetPos, out reqPos, out bool posOverPoly);
                             if (cStatus != Status.DT_SUCCESS)
                             {
-                                reqPath.Count = 0;
+                                reqPath.Clear();
                             }
                         }
                         else
@@ -476,8 +476,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     {
                         // Could not find path, start the request from current location.
                         reqPos = ag.NPos;
-                        reqPath.Path[0] = path[0];
-                        reqPath.Count = 1;
+                        reqPath.StartPath(path[0]);
                     }
 
                     ag.Corridor.SetCorridor(reqPos, reqPath);

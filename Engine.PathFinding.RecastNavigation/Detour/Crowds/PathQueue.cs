@@ -173,7 +173,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             q.EndRef = endRef;
 
             q.Status = 0;
-            q.Path.Count = 0;
+            q.Path.Clear();
             q.Filter = filter;
             q.KeepAlive = 0;
 

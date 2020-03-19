@@ -190,8 +190,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         {
             m_pos = pos;
             m_target = pos;
-            m_path.Path[0] = r;
-            m_path.Count = 1;
+            m_path.StartPath(r);
         }
         /// <summary>
         /// Finds the corners in the corridor from the position toward the target. (The straightened path.)
@@ -381,8 +380,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             {
                 // The first polyref is bad, use current safe values.
                 m_pos = safePos;
-                m_path.Path[0] = safeRef;
-                m_path.Count = 1;
+                m_path.StartPath(safeRef);
             }
             else
             {

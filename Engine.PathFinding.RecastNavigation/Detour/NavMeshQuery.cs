@@ -165,8 +165,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             if (startRef == endRef)
             {
-                resultPath.Path[0] = startRef;
-                resultPath.Count = 1;
+                resultPath.StartPath(startRef);
                 return Status.DT_SUCCESS;
             }
 
