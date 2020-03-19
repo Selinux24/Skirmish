@@ -1005,10 +1005,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     {
                         status = Raycast(
                             node.Id, node.Pos, next.Pos, m_query.Filter, maxPath - pathList.Count,
-                            out var t, out var normal, out var rpath);
+                            out var t, out var normal, out var rpath, out var m);
                         if (status.HasFlag(Status.DT_SUCCESS))
                         {
-                            pathList.AddRange(rpath.Path);
+                            pathList.AddRange(rpath);
                         }
                         // raycast ends on poly boundary and the path might include the next poly boundary.
                         if (pathList[pathList.Count - 1] == next.Id)
@@ -1121,10 +1121,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     {
                         status = Raycast(
                             node.Id, node.Pos, next.Pos, m_query.Filter, maxPath - pathList.Count,
-                            out var t, out var normal, out var rpath);
+                            out var t, out var normal, out var rpath, out var m);
                         if (status.HasFlag(Status.DT_SUCCESS))
                         {
-                            pathList.AddRange(rpath.Path);
+                            pathList.AddRange(rpath);
                         }
                         // raycast ends on poly boundary and the path might include the next poly boundary.
                         if (pathList[pathList.Count - 1] == next.Id)
@@ -1832,10 +1832,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="visitedCount">The number of polygons visited during the move.</param>
         /// <param name="maxVisitedSize">The maximum number of polygons the visited array can hold.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status MoveAlongSurface(int startRef, Vector3 startPos, Vector3 endPos, QueryFilter filter, int maxVisitedSize, out Vector3 resultPos, out SimplePath visited)
+        public Status MoveAlongSurface(int startRef, Vector3 startPos, Vector3 endPos, QueryFilter filter, int maxVisitedSize, out Vector3 resultPos, out int[] visited, out int visitedCount)
         {
             resultPos = Vector3.Zero;
-            visited = new SimplePath(maxVisitedSize);
+            visited = new int[maxVisitedSize];
+            visitedCount = 0;
 
             // Validate input
             if (!m_nav.IsValidPolyRef(startRef) ||
@@ -2009,7 +2010,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 node = prev;
                 do
                 {
-                    visited.Path[n++] = node.Id;
+                    visited[n++] = node.Id;
                     if (n >= maxVisitedSize)
                     {
                         status |= Status.DT_BUFFER_TOO_SMALL;
@@ -2022,7 +2023,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             resultPos = bestPos;
 
-            visited.Count = n;
+            visitedCount = n;
 
             return status;
         }
@@ -2036,17 +2037,18 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="t">The hit parameter. (FLT_MAX if no wall hit.)</param>
         /// <param name="hitNormal">The normal of the nearest wall hit.</param>
         /// <param name="path">The reference ids of the visited polygons.</param>
+        /// <param name="pathCount">The number of visited polygons.</param>
         /// <param name="maxPath">The maximum number of polygons the path array can hold.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status Raycast(int startRef, Vector3 startPos, Vector3 endPos, QueryFilter filter, int maxPath, out float t, out Vector3 hitNormal, out SimplePath path)
+        public Status Raycast(int startRef, Vector3 startPos, Vector3 endPos, QueryFilter filter, int maxPath, out float t, out Vector3 hitNormal, out int[] path, out int pathCount)
         {
             int? prevRef = null;
             Status status = Raycast(startRef, startPos, endPos, filter, 0, maxPath, ref prevRef, out RaycastHit hit);
 
             t = hit.T;
-            path = new SimplePath(maxPath);
-            path.AddRange(hit.Path, hit.PathCount);
+            path = hit.Path;
             hitNormal = hit.HitNormal;
+            pathCount = hit.PathCount;
 
             return status;
         }

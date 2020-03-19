@@ -170,10 +170,10 @@ namespace Engine.PathFinding.RecastNavigation
                     // Move
                     navQuery.MoveAlongSurface(
                         iterPath.Path[0], iterPos, moveTgt, filter, 16,
-                        out var result, out var visited);
+                        out var result, out var visited, out var nvisited);
 
-                    FixupCorridor(iterPath, visited);
-                    FixupShortcuts(iterPath, navQuery);
+                    iterPath.Count = FixupCorridor(iterPath, MAX_POLYS, visited, nvisited);
+                    iterPath.Count = FixupShortcuts(iterPath, navQuery);
 
                     navQuery.GetPolyHeight(iterPath.Path[0], result, out float h);
                     result.Y = h;
@@ -204,7 +204,11 @@ namespace Engine.PathFinding.RecastNavigation
                             polyRef = iterPath.Path[npos];
                             npos++;
                         }
-                        iterPath.Prune(npos);
+                        for (int i = npos; i < iterPath.Count; ++i)
+                        {
+                            iterPath.Path[i - npos] = iterPath.Path[i];
+                        }
+                        iterPath.Count -= npos;
 
                         // Handle the connection.
                         if (navQuery.GetAttachedNavMesh().GetOffMeshConnectionPolyEndPoints(
@@ -353,9 +357,12 @@ namespace Engine.PathFinding.RecastNavigation
         /// Fix ups corridor
         /// </summary>
         /// <param name="path">Current path</param>
+        /// <param name="npath">Current path size</param>
+        /// <param name="maxPath">Maximum path size</param>
         /// <param name="visited">Visted references</param>
+        /// <param name="nvisited">Number of visited references</param>
         /// <returns>Returns the new size of the path</returns>
-        private static void FixupCorridor(SimplePath path, SimplePath visited)
+        private static int FixupCorridor(SimplePath path, int maxPath, int[] visited, int nvisited)
         {
             int furthestPath = -1;
             int furthestVisited = -1;
@@ -364,9 +371,9 @@ namespace Engine.PathFinding.RecastNavigation
             for (int i = path.Count - 1; i >= 0; --i)
             {
                 bool found = false;
-                for (int j = visited.Count - 1; j >= 0; --j)
+                for (int j = nvisited - 1; j >= 0; --j)
                 {
-                    if (path.Path[i] == visited.Path[j])
+                    if (path.Path[i] == visited[j])
                     {
                         furthestPath = i;
                         furthestVisited = j;
@@ -382,11 +389,31 @@ namespace Engine.PathFinding.RecastNavigation
             // If no intersection found just return current path. 
             if (furthestPath == -1 || furthestVisited == -1)
             {
-                return;
+                return path.Count;
             }
 
             // Concatenate paths.	
-            path.Concatenate(visited, furthestPath, furthestVisited);
+
+            // Adjust beginning of the buffer to include the visited.
+            int req = nvisited - furthestVisited;
+            int orig = Math.Min(furthestPath + 1, path.Count);
+            int size = Math.Max(0, path.Count - orig);
+            if (req + size > maxPath)
+            {
+                size = maxPath - req;
+            }
+            if (size != 0)
+            {
+                Array.Copy(path.Path, orig, path.Path, req, size);
+            }
+
+            // Store visited
+            for (int i = 0; i < req; ++i)
+            {
+                path.Path[i] = visited[(nvisited - 1) - i];
+            }
+
+            return req + size;
         }
         /// <summary>
         /// This function checks if the path has a small U-turn, that is,
@@ -405,11 +432,11 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="npath">Current path size</param>
         /// <param name="navQuery">Navigation query</param>
         /// <returns>Returns the new size of the path</returns>
-        private static void FixupShortcuts(SimplePath path, NavMeshQuery navQuery)
+        private static int FixupShortcuts(SimplePath path, NavMeshQuery navQuery)
         {
             if (path.Count < 3)
             {
-                return;
+                return path.Count;
             }
 
             // Get connected polygons
@@ -418,7 +445,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (navQuery.GetAttachedNavMesh().GetTileAndPolyByRef(path.Path[0], out MeshTile tile, out Poly poly))
             {
-                return;
+                return path.Count;
             }
 
             for (int k = poly.FirstLink; k != DetourUtils.DT_NULL_LINK; k = tile.Links[k].Next)
@@ -454,6 +481,8 @@ namespace Engine.PathFinding.RecastNavigation
                     path.Path[i] = path.Path[i + offset];
                 }
             }
+
+            return path.Count;
         }
 
         private static bool InRange(Vector3 v1, Vector3 v2, float radius, float height)
