@@ -603,37 +603,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                             // Put the old path infront of the old path.
                             if (npath > 1)
                             {
-                                // Make space for the old path.
-                                if ((npath - 1) + res.Count > m_maxPathResult)
-                                {
-                                    res.Count = m_maxPathResult - (npath - 1);
-                                }
-
-                                // Copy old path in the beginning.
-                                res.Insert(0, path, npath - 1);
-
-                                // Remove trackbacks
-                                for (int j = 0; j < res.Count; ++j)
-                                {
-                                    if (j - 1 >= 0 && j + 1 < res.Count)
-                                    {
-                                        bool samePoly = res.Path[j - 1] == res.Path[j + 1];
-                                        if (samePoly)
-                                        {
-                                            Array.ConstrainedCopy(res.Path, j + 1, res.Path, j - 1, res.Count - (j + 1));
-                                            res.Count -= 2;
-                                            j -= 2;
-                                        }
-                                    }
-                                }
+                                res.Merge(path, npath);
                             }
 
                             // Check for partial path.
                             if (res.Path[res.Count - 1] != ag.TargetRef)
                             {
                                 // Partial path, constrain target position inside the last polygon.
-                                Vector3 nearest;
-                                Status cStatus = m_navquery.ClosestPointOnPoly(res.Path[res.Count - 1], targetPos, out nearest, out bool posOverPoly);
+                                Status cStatus = m_navquery.ClosestPointOnPoly(
+                                    res.Path[res.Count - 1], targetPos,
+                                    out Vector3 nearest, out bool posOverPoly);
                                 if (cStatus == Status.DT_SUCCESS)
                                 {
                                     targetPos = nearest;

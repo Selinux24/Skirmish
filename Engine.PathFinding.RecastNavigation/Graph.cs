@@ -204,11 +204,7 @@ namespace Engine.PathFinding.RecastNavigation
                             polyRef = iterPath.Path[npos];
                             npos++;
                         }
-                        for (int i = npos; i < iterPath.Count; ++i)
-                        {
-                            iterPath.Path[i - npos] = iterPath.Path[i];
-                        }
-                        iterPath.Count -= npos;
+                        iterPath.Prune(npos);
 
                         // Handle the connection.
                         if (navQuery.GetAttachedNavMesh().GetOffMeshConnectionPolyEndPoints(

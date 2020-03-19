@@ -321,12 +321,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             }
 
             // Prune path
-            for (int i = npos; i < m_path.Count; ++i)
-            {
-                m_path.Path[i - npos] = m_path.Path[i];
-            }
-
-            m_path.Count -= npos;
+            m_path.Prune(npos);
 
             refs[0] = prevRef;
             refs[1] = polyRef;
@@ -348,9 +343,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             m_pos = safePos;
             if (m_path.Count < 3 && m_path.Count > 0)
             {
-                m_path.Path[2] = m_path.Path[m_path.Count - 1];
                 m_path.Path[0] = safeRef;
                 m_path.Path[1] = 0;
+                m_path.Path[2] = m_path.Path[m_path.Count - 1];
                 m_path.Count = 3;
             }
             else
