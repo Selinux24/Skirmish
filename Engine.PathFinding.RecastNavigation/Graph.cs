@@ -128,7 +128,7 @@ namespace Engine.PathFinding.RecastNavigation
                 var iterPath = polys.Copy();
 
                 navQuery.ClosestPointOnPoly(startRef, startPos, out Vector3 iterPos, out bool iOver);
-                navQuery.ClosestPointOnPoly(iterPath.Path[iterPath.Count - 1], endPos, out Vector3 targetPos, out bool eOver);
+                navQuery.ClosestPointOnPoly(iterPath.End, endPos, out Vector3 targetPos, out bool eOver);
 
                 float STEP_SIZE = 0.5f;
                 float SLOP = 0.01f;
@@ -169,13 +169,13 @@ namespace Engine.PathFinding.RecastNavigation
 
                     // Move
                     navQuery.MoveAlongSurface(
-                        iterPath.Path[0], iterPos, moveTgt, filter, 16,
+                        iterPath.Start, iterPos, moveTgt, filter, 16,
                         out var result, out var visited, out var nvisited);
 
                     iterPath.Count = FixupCorridor(iterPath, MAX_POLYS, visited, nvisited);
                     iterPath.Count = FixupShortcuts(iterPath, navQuery);
 
-                    navQuery.GetPolyHeight(iterPath.Path[0], result, out float h);
+                    navQuery.GetPolyHeight(iterPath.Start, result, out float h);
                     result.Y = h;
                     iterPos = result;
 
@@ -196,7 +196,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                         // Advance the path up to and over the off-mesh connection.
                         int prevRef = 0;
-                        int polyRef = iterPath.Path[0];
+                        int polyRef = iterPath.Start;
                         int npos = 0;
                         while (npos < iterPath.Count && polyRef != target.Ref)
                         {
@@ -221,7 +221,7 @@ namespace Engine.PathFinding.RecastNavigation
                             }
                             // Move position at the other side of the off-mesh link.
                             iterPos = ePos;
-                            navQuery.GetPolyHeight(iterPath.Path[0], iterPos, out float eh);
+                            navQuery.GetPolyHeight(iterPath.Start, iterPos, out float eh);
                             iterPos.Y = eh;
                         }
                     }
@@ -260,9 +260,9 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 // In case of partial path, make sure the end point is clamped to the last polygon.
                 Vector3 epos = endPos;
-                if (polys.Path[polys.Count - 1] != endRef)
+                if (polys.End != endRef)
                 {
-                    navQuery.ClosestPointOnPoly(polys.Path[polys.Count - 1], endPos, out epos, out bool eOver);
+                    navQuery.ClosestPointOnPoly(polys.End, endPos, out epos, out bool eOver);
                 }
 
                 navQuery.FindStraightPath(
@@ -439,7 +439,7 @@ namespace Engine.PathFinding.RecastNavigation
             int maxNeis = 16;
             List<int> neis = new List<int>();
 
-            if (navQuery.GetAttachedNavMesh().GetTileAndPolyByRef(path.Path[0], out MeshTile tile, out Poly poly))
+            if (navQuery.GetAttachedNavMesh().GetTileAndPolyByRef(path.Start, out MeshTile tile, out Poly poly))
             {
                 return path.Count;
             }

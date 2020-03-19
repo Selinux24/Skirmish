@@ -24,6 +24,26 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         public int[] Path { get; private set; }
         /// <summary>
+        /// Start node value
+        /// </summary>
+        public int Start
+        {
+            get
+            {
+                return Count > 0 ? Path[0] : 0;
+            }
+        }
+        /// <summary>
+        /// End node value
+        /// </summary>
+        public int End
+        {
+            get
+            {
+                return Count > 0 ? Path[Count - 1] : 0;
+            }
+        }
+        /// <summary>
         /// Polygon count
         /// </summary>
         public int Count { get; set; }

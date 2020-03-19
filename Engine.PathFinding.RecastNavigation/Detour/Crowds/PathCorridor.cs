@@ -261,7 +261,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             int MAX_RES = 32;
             navquery.Raycast(
-                m_path.Path[0], m_pos, goal, filter, MAX_RES,
+                m_path.Start, m_pos, goal, filter, MAX_RES,
                 out float t, out Vector3 norm, out int[] res, out int nres);
             if (nres > 1 && t > 0.99f)
             {
@@ -284,7 +284,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             int MAX_ITER = 32;
             int MAX_RES = 32;
 
-            navquery.InitSlicedFindPath(m_path.Path[0], m_path.Path[m_path.Count - 1], m_pos, m_target, filter, FindPathOptions.DT_FINDPATH_ANY_ANGLE);
+            navquery.InitSlicedFindPath(m_path.Start, m_path.End, m_pos, m_target, filter, FindPathOptions.DT_FINDPATH_ANY_ANGLE);
             navquery.UpdateSlicedFindPath(MAX_ITER, out int doneIters);
             Status status = navquery.FinalizeSlicedFindPathPartial(MAX_RES, m_path.Path, m_path.Count, out SimplePath res);
 
@@ -306,7 +306,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             // Advance the path up to and over the off-mesh connection.
             int prevRef = 0;
-            int polyRef = m_path.Path[0];
+            int polyRef = m_path.Start;
             int npos = 0;
             while (npos < m_path.Count && polyRef != offMeshConRef)
             {
@@ -345,7 +345,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             {
                 m_path.Path[0] = safeRef;
                 m_path.Path[1] = 0;
-                m_path.Path[2] = m_path.Path[m_path.Count - 1];
+                m_path.Path[2] = m_path.End;
                 m_path.Count = 3;
             }
             else
@@ -384,7 +384,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             }
 
             // Clamp target pos to last poly
-            navquery.ClosestPointOnPolyBoundary(m_path.Path[m_path.Count - 1], m_target, out m_target);
+            navquery.ClosestPointOnPolyBoundary(m_path.End, m_target, out m_target);
 
             return true;
         }
@@ -426,7 +426,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             // Move along navmesh and update new position.
             int MAX_VISITED = 16;
             Status status = navquery.MoveAlongSurface(
-                m_path.Path[0], m_pos, npos, filter, MAX_VISITED,
+                m_path.Start, m_pos, npos, filter, MAX_VISITED,
                 out Vector3 result, out int[] visited, out int nvisited);
 
             if (status == Status.DT_SUCCESS)
@@ -434,7 +434,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 m_path.Count = MergeCorridorStartMoved(m_path.Path, m_path.Count, m_maxPath, visited, nvisited);
 
                 // Adjust the position to stay on top of the navmesh.
-                navquery.GetPolyHeight(m_path.Path[0], result, out float h);
+                navquery.GetPolyHeight(m_path.Start, result, out float h);
                 result.Y = h;
                 m_pos = result;
                 return true;
@@ -458,7 +458,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             // Move along navmesh and update new position.
             int MAX_VISITED = 16;
             Status status = navquery.MoveAlongSurface(
-                m_path.Path[m_path.Count - 1], m_target, npos, filter, MAX_VISITED,
+                m_path.End, m_target, npos, filter, MAX_VISITED,
                 out Vector3 result, out int[] visited, out int nvisited);
             if (status == Status.DT_SUCCESS)
             {
@@ -506,7 +506,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <returns>The polygon reference id of the first polygon in the corridor. (Or zero if there is no path.)</returns>
         public int GetFirstPoly()
         {
-            return m_path.Count > 0 ? m_path.Path[0] : 0;
+            return m_path.Start;
         }
         /// <summary>
         /// The polygon reference id of the last polygon in the corridor, the polygon containing the target.
@@ -514,7 +514,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <returns>The polygon reference id of the last polygon in the corridor. (Or zero if there is no path.)</returns>
         public int GetLastPoly()
         {
-            return m_path.Count > 0 ? m_path.Path[m_path.Count - 1] : 0;
+            return m_path.End;
         }
         /// <summary>
         /// The corridor's path.

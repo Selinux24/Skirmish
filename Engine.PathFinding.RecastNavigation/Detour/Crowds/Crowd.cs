@@ -457,10 +457,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     if (qStatus != Status.DT_FAILURE && reqPath.Count > 0)
                     {
                         // In progress or succeed.
-                        if (reqPath.Path[reqPath.Count - 1] != ag.TargetRef)
+                        if (reqPath.End != ag.TargetRef)
                         {
                             // Partial path, constrain target position inside the last polygon.
-                            Status cStatus = m_navquery.ClosestPointOnPoly(reqPath.Path[reqPath.Count - 1], ag.TargetPos, out reqPos, out bool posOverPoly);
+                            Status cStatus = m_navquery.ClosestPointOnPoly(reqPath.End, ag.TargetPos, out reqPos, out bool posOverPoly);
                             if (cStatus != Status.DT_SUCCESS)
                             {
                                 reqPath.Clear();
@@ -483,7 +483,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     ag.Boundary.Reset();
                     ag.Partial = false;
 
-                    if (reqPath?.Path[reqPath.Count - 1] == ag.TargetRef)
+                    if (reqPath?.End == ag.TargetRef)
                     {
                         ag.TargetState = MoveRequestState.DT_CROWDAGENT_TARGET_VALID;
                         ag.TargetReplanTime = 0;
@@ -593,7 +593,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
                         // The last ref in the old path should be the same as
                         // the location where the request was issued..
-                        if (valid && path[npath - 1] != res.Path[0])
+                        if (valid && path[npath - 1] != res.Start)
                         {
                             valid = false;
                         }
@@ -607,11 +607,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                             }
 
                             // Check for partial path.
-                            if (res.Path[res.Count - 1] != ag.TargetRef)
+                            if (res.End != ag.TargetRef)
                             {
                                 // Partial path, constrain target position inside the last polygon.
                                 Status cStatus = m_navquery.ClosestPointOnPoly(
-                                    res.Path[res.Count - 1], targetPos,
+                                    res.End, targetPos,
                                     out Vector3 nearest, out bool posOverPoly);
                                 if (cStatus == Status.DT_SUCCESS)
                                 {

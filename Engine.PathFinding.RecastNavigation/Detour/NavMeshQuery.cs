@@ -381,13 +381,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             // TODO: Should this be callers responsibility?
-            var fpStatus = ClosestPointOnPolyBoundary(path.Path[0], startPos, out Vector3 closestStartPos);
+            var fpStatus = ClosestPointOnPolyBoundary(path.Start, startPos, out Vector3 closestStartPos);
             if (fpStatus.HasFlag(Status.DT_FAILURE))
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
 
-            var lpStatus = ClosestPointOnPolyBoundary(path.Path[path.Count - 1], endPos, out Vector3 closestEndPos);
+            var lpStatus = ClosestPointOnPolyBoundary(path.End, endPos, out Vector3 closestEndPos);
             if (lpStatus.HasFlag(Status.DT_FAILURE))
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
@@ -395,7 +395,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             // Add start point.
             var startPStatus = AppendVertex(
-                closestStartPos, StraightPathFlagTypes.DT_STRAIGHTPATH_START, path.Path[0], maxStraightPath,
+                closestStartPos, StraightPathFlagTypes.DT_STRAIGHTPATH_START, path.Start, maxStraightPath,
                 ref resultPath);
             if (startPStatus != Status.DT_IN_PROGRESS)
             {
@@ -414,8 +414,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 PolyTypes leftPolyType = 0;
                 PolyTypes rightPolyType = 0;
 
-                int leftPolyRef = path.Path[0];
-                int rightPolyRef = path.Path[0];
+                int leftPolyRef = path.Start;
+                int rightPolyRef = path.Start;
 
                 for (int i = 0; i < path.Count; ++i)
                 {
