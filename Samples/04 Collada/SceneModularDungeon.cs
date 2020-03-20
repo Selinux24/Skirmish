@@ -47,6 +47,8 @@ namespace Collada
         private float ratTime = 5f;
         private readonly float nextRatTime = 3f;
         private Vector3[] ratHoles = new Vector3[] { };
+        private int holeFrom;
+        private int holeTo;
 
         private PrimitiveListDrawer<Triangle> selectedItemDrawer = null;
         private ModularSceneryItem selectedItem = null;
@@ -894,15 +896,20 @@ namespace Collada
 
             if (!this.ratActive && this.ratTime <= 0)
             {
-                var iFrom = Helper.RandomGenerator.Next(0, this.ratHoles.Length);
-                var iTo = Helper.RandomGenerator.Next(0, this.ratHoles.Length);
+                var iFrom = 1;// Helper.RandomGenerator.Next(0, this.ratHoles.Length);
+                var iTo = 4;// Helper.RandomGenerator.Next(0, this.ratHoles.Length);
                 if (iFrom == iTo) return;
 
                 var from = this.ratHoles[iFrom];
                 var to = this.ratHoles[iTo];
 
+                this.rat.Manipulator.SetPosition(from);
+
                 if (CalcPath(this.ratAgentType, from, to))
                 {
+                    this.holeFrom = iFrom;
+                    this.holeTo = iTo;
+
                     this.ratController.UpdateManipulator(gameTime, this.rat.Manipulator);
 
                     this.ratSoundInstance?.Play();

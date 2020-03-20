@@ -20,10 +20,9 @@ namespace Engine.PathFinding.RecastNavigation
         /// Fix ups corridor
         /// </summary>
         /// <param name="path">Current path</param>
-        /// <param name="maxPath">Maximum path size</param>
         /// <param name="visited">Visted references</param>
         /// <returns>Returns the new size of the path</returns>
-        public static void FixupCorridor(SimplePath path, int maxPath, SimplePath visited)
+        public static void FixupCorridor(SimplePath path, SimplePath visited)
         {
             int furthestPath = -1;
             int furthestVisited = -1;
@@ -59,9 +58,9 @@ namespace Engine.PathFinding.RecastNavigation
             int req = visited.Count - furthestVisited;
             int orig = Math.Min(furthestPath + 1, path.Count);
             int size = Math.Max(0, path.Count - orig);
-            if (req + size > maxPath)
+            if (req + size > path.maxSize)
             {
-                size = maxPath - req;
+                size = path.maxSize - req;
             }
             if (size != 0)
             {
@@ -382,15 +381,16 @@ namespace Engine.PathFinding.RecastNavigation
         /// Adds a reference list to the current path
         /// </summary>
         /// <param name="rlist">Reference list</param>
-        /// <param name="count">Number of elements of the reference list</param>
-        public void StartPath(IEnumerable<int> rlist, int count)
+        /// <param name="size">Number of elements of the reference list</param>
+        public void StartPath(IEnumerable<int> rlist, int size)
         {
-            int maxPath = referenceList.Length;
-            int[] newPath = new int[maxPath];
+            int count = size > maxSize ? maxSize : size;
 
-            Array.Copy(rlist.ToArray(), 0, newPath, 0, count);
+            int[] newPath = rlist.Take(count).ToArray();
+            int[] tmpPath = new int[maxSize];
+            Array.Copy(newPath, 0, tmpPath, 0, count);
 
-            referenceList = newPath;
+            referenceList = tmpPath;
             Count = count;
         }
         /// <summary>
@@ -505,36 +505,43 @@ namespace Engine.PathFinding.RecastNavigation
         /// Copies the instance
         /// </summary>
         /// <returns>Returns a new instance</returns>
-        public SimplePath Copy(int maxPath = 0)
+        public SimplePath Copy(int max = 0)
         {
-            if (maxPath == 0)
+            if (max == 0)
             {
-                return new SimplePath(referenceList.Length)
+                return new SimplePath(maxSize)
                 {
                     referenceList = referenceList.ToArray(),
                     Count = Count,
                 };
             }
 
-            if (referenceList.Length > maxPath)
+            if (Count > max)
             {
-                return new SimplePath(maxPath)
+                return new SimplePath(max)
                 {
-                    referenceList = referenceList.Take(maxPath).ToArray(),
-                    Count = Count,
+                    referenceList = referenceList.Take(max).ToArray(),
+                    Count = max,
                 };
             }
-            else
-            {
-                int[] tmp = new int[maxPath];
-                Array.Copy(referenceList, 0, tmp, 0, maxPath);
 
-                return new SimplePath(maxPath)
+            if (Count < max)
+            {
+                int[] tmp = new int[max];
+                Array.Copy(referenceList, 0, tmp, 0, Count);
+
+                return new SimplePath(max)
                 {
                     referenceList = tmp,
                     Count = Count,
                 };
             }
+
+            return new SimplePath(max)
+            {
+                referenceList = referenceList.ToArray(),
+                Count = Count,
+            };
         }
     }
 }

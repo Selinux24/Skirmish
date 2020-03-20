@@ -175,7 +175,7 @@ namespace Engine.PathFinding.RecastNavigation
                     iterPath.Start, iterPos, moveTgt, filter, 16,
                     out var result, out var visited);
 
-                SimplePath.FixupCorridor(iterPath, MAX_POLYS, visited);
+                SimplePath.FixupCorridor(iterPath, visited);
                 SimplePath.FixupShortcuts(iterPath, navQuery);
 
                 navQuery.GetPolyHeight(iterPath.Start, result, out float h);
