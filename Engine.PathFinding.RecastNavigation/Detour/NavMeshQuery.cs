@@ -417,6 +417,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 int leftPolyRef = path.Start;
                 int rightPolyRef = path.Start;
 
+                int[] pathNodes = path.GetPath();
+
                 for (int i = 0; i < path.Count; ++i)
                 {
                     Vector3 left;
@@ -427,8 +429,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     {
                         // Next portal.
                         var ppStatus = GetPortalPoints(
-                            path.Path[i],
-                            path.Path[i + 1],
+                            pathNodes[i],
+                            pathNodes[i + 1],
                             out left, out right, out _, out toType);
 
                         if (ppStatus.HasFlag(Status.DT_FAILURE))
@@ -436,7 +438,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                             // Failed to get portal points, in practice this means that path[i+1] is invalid polygon.
                             // Clamp the end point to path[i], and return the path so far.
 
-                            var cpBoundaryStatus = ClosestPointOnPolyBoundary(path.Path[i], endPos, out closestEndPos);
+                            var cpBoundaryStatus = ClosestPointOnPolyBoundary(pathNodes[i], endPos, out closestEndPos);
                             if (cpBoundaryStatus.HasFlag(Status.DT_FAILURE))
                             {
                                 // This should only happen when the first polygon is invalid.
@@ -448,13 +450,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                             {
                                 // Ignore status return value as we're just about to return anyway.
                                 AppendPortals(
-                                    apexIndex, i, closestEndPos, path.Path, maxStraightPath, options,
+                                    apexIndex, i, closestEndPos, pathNodes, maxStraightPath, options,
                                     ref resultPath);
                             }
 
                             // Ignore status return value as we're just about to return anyway.
                             AppendVertex(
-                                closestEndPos, 0, path.Path[i], maxStraightPath,
+                                closestEndPos, 0, pathNodes[i], maxStraightPath,
                                 ref resultPath);
 
                             return Status.DT_SUCCESS | Status.DT_PARTIAL_RESULT | ((resultPath.Count >= maxStraightPath) ? Status.DT_BUFFER_TOO_SMALL : 0);
@@ -481,7 +483,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                         if (DetourUtils.Vequal(portalApex, portalRight) || DetourUtils.TriArea2D(portalApex, portalLeft, right) > 0.0f)
                         {
                             portalRight = right;
-                            rightPolyRef = (i + 1 < path.Count) ? path.Path[i + 1] : 0;
+                            rightPolyRef = (i + 1 < path.Count) ? pathNodes[i + 1] : 0;
                             rightPolyType = toType;
                             rightIndex = i;
                         }
@@ -491,7 +493,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                             if ((options & (StraightPathOptions.DT_STRAIGHTPATH_AREA_CROSSINGS | StraightPathOptions.DT_STRAIGHTPATH_ALL_CROSSINGS)) != 0)
                             {
                                 var appendStatus = AppendPortals(
-                                    apexIndex, leftIndex, portalLeft, path.Path, maxStraightPath, options,
+                                    apexIndex, leftIndex, portalLeft, pathNodes, maxStraightPath, options,
                                     ref resultPath);
                                 if (appendStatus != Status.DT_IN_PROGRESS)
                                 {
@@ -541,7 +543,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                         if (DetourUtils.Vequal(portalApex, portalLeft) || DetourUtils.TriArea2D(portalApex, portalRight, left) < 0.0f)
                         {
                             portalLeft = left;
-                            leftPolyRef = (i + 1 < path.Count) ? path.Path[i + 1] : 0;
+                            leftPolyRef = (i + 1 < path.Count) ? pathNodes[i + 1] : 0;
                             leftPolyType = toType;
                             leftIndex = i;
                         }
@@ -551,7 +553,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                             if ((options & (StraightPathOptions.DT_STRAIGHTPATH_AREA_CROSSINGS | StraightPathOptions.DT_STRAIGHTPATH_ALL_CROSSINGS)) != 0)
                             {
                                 var appendStatus = AppendPortals(
-                                    apexIndex, rightIndex, portalRight, path.Path, maxStraightPath, options,
+                                    apexIndex, rightIndex, portalRight, pathNodes, maxStraightPath, options,
                                     ref resultPath);
 
                                 if (appendStatus != Status.DT_IN_PROGRESS)
@@ -599,7 +601,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 if ((options & (StraightPathOptions.DT_STRAIGHTPATH_AREA_CROSSINGS | StraightPathOptions.DT_STRAIGHTPATH_ALL_CROSSINGS)) != 0)
                 {
                     var stat = AppendPortals(
-                        apexIndex, path.Count - 1, closestEndPos, path.Path, maxStraightPath, options,
+                        apexIndex, path.Count - 1, closestEndPos, pathNodes, maxStraightPath, options,
                         ref resultPath);
 
                     if (stat != Status.DT_IN_PROGRESS)
@@ -1008,7 +1010,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                             out var t, out var normal, out var rpath);
                         if (status.HasFlag(Status.DT_SUCCESS))
                         {
-                            pathList.AddRange(rpath.Path);
+                            pathList.AddRange(rpath.GetPath());
                         }
                         // raycast ends on poly boundary and the path might include the next poly boundary.
                         if (pathList[pathList.Count - 1] == next.Id)
@@ -1124,7 +1126,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                             out var t, out var normal, out var rpath);
                         if (status.HasFlag(Status.DT_SUCCESS))
                         {
-                            pathList.AddRange(rpath.Path);
+                            pathList.AddRange(rpath.GetPath());
                         }
                         // raycast ends on poly boundary and the path might include the next poly boundary.
                         if (pathList[pathList.Count - 1] == next.Id)
@@ -2041,8 +2043,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             t = hit.T;
             hitNormal = hit.HitNormal;
-            path = new SimplePath(hit.PathCount);
-            path.StartPath(hit.Path, hit.PathCount);
+            path = new SimplePath(maxPath);
+            path.StartPath(hit.Path);
 
             return status;
         }

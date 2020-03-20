@@ -198,10 +198,11 @@ namespace Engine.PathFinding.RecastNavigation
                         int prevRef = 0;
                         int polyRef = iterPath.Start;
                         int npos = 0;
+                        int[] iterNodes = iterPath.GetPath();
                         while (npos < iterPath.Count && polyRef != target.Ref)
                         {
                             prevRef = polyRef;
-                            polyRef = iterPath.Path[npos];
+                            polyRef = iterNodes[npos];
                             npos++;
                         }
                         iterPath.Prune(npos);

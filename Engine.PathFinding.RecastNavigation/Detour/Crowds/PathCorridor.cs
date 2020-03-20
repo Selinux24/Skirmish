@@ -1,6 +1,5 @@
 ﻿using SharpDX;
 using System;
-using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 {
@@ -127,7 +126,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             navquery.InitSlicedFindPath(m_path.Start, m_path.End, m_pos, m_target, filter, FindPathOptions.DT_FINDPATH_ANY_ANGLE);
             navquery.UpdateSlicedFindPath(MAX_ITER, out int doneIters);
-            Status status = navquery.FinalizeSlicedFindPathPartial(MAX_RES, m_path.Path, m_path.Count, out var res);
+            Status status = navquery.FinalizeSlicedFindPathPartial(MAX_RES, m_path.GetPath(), m_path.Count, out var res);
 
             if (status == Status.DT_SUCCESS && res.Count > 0)
             {
@@ -149,10 +148,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             int prevRef = 0;
             int polyRef = m_path.Start;
             int npos = 0;
+            int[] path = m_path.GetPath();
             while (npos < m_path.Count && polyRef != offMeshConRef)
             {
                 prevRef = polyRef;
-                polyRef = m_path.Path[npos];
+                polyRef = path[npos];
                 npos++;
             }
             if (npos == m_path.Count)
@@ -191,7 +191,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         {
             // Keep valid path as far as possible.
             int n = 0;
-            while (n < m_path.Count && navquery.IsValidPolyRef(m_path.Path[n], filter))
+            int[] path = m_path.GetPath();
+            while (n < m_path.Count && navquery.IsValidPolyRef(path[n], filter))
             {
                 n++;
             }
@@ -229,9 +230,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         {
             // Check that all polygons still pass query filter.
             int n = Math.Min(m_path.Count, maxLookAhead);
+            int[] path = m_path.GetPath();
             for (int i = 0; i < n; ++i)
             {
-                if (!navquery.IsValidPolyRef(m_path.Path[i], filter))
+                if (!navquery.IsValidPolyRef(path[i], filter))
                 {
                     return false;
                 }
@@ -310,7 +312,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         {
             m_target = target;
 
-            int[] p = path?.Path ?? new int[m_maxPath];
+            int[] p = path?.GetPath() ?? new int[m_maxPath];
             int count = path?.Count ?? 0;
             m_path.StartPath(p, count);
         }
@@ -352,7 +354,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <returns>The corridor's path. [(polyRef) * #getPathCount()]</returns>
         public int[] GetPath()
         {
-            return m_path.Path.ToArray();
+            return m_path.GetPath();
         }
         /// <summary>
         /// The number of polygons in the current corridor path.
