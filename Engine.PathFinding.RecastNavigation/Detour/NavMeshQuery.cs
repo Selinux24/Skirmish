@@ -1990,7 +1990,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
             }
 
-            int n = 0;
             if (bestNode != null)
             {
                 // Reverse the path.
@@ -2009,8 +2008,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 node = prev;
                 do
                 {
-                    visited.Path[n++] = node.Id;
-                    if (n >= maxVisitedSize)
+                    if (!visited.Add(node.Id))
                     {
                         status |= Status.DT_BUFFER_TOO_SMALL;
                         break;
@@ -2021,8 +2019,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             resultPos = bestPos;
-
-            visited.Count = n;
 
             return status;
         }
@@ -3520,13 +3516,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             // Write path
+            List<int> tmp = new List<int>();
             for (int i = writeCount - 1; i >= 0; i--)
             {
-                path.Path[i] = curNode.Id;
+                tmp.Insert(0, curNode.Id);
                 curNode = m_nodePool.GetNodeAtIdx(curNode.PIdx);
             }
 
-            path.Count = Math.Min(length, maxPath);
+            path.Clear();
+            path.AddRange(tmp);
 
             if (length > maxPath)
             {

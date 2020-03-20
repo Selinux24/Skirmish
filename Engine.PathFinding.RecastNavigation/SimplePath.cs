@@ -204,6 +204,18 @@ namespace Engine.PathFinding.RecastNavigation
             Path[0] = r;
             Count = 1;
         }
+
+        public bool Add(int r)
+        {
+            if (Count >= maxSimplePath)
+            {
+                return false;
+            }
+
+            Path[Count++] = r;
+
+            return true;
+        }
         /// <summary>
         /// Adds a reference list to the current path
         /// </summary>
