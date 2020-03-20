@@ -6,165 +6,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 {
     public class PathCorridor
     {
-        private static int MergeCorridorStartMoved(
-            int[] path, int npath, int maxPath,
-            int[] visited, int nvisited)
-        {
-            int furthestPath = -1;
-            int furthestVisited = -1;
-
-            // Find furthest common polygon.
-            for (int i = npath - 1; i >= 0; --i)
-            {
-                bool found = false;
-                for (int j = nvisited - 1; j >= 0; --j)
-                {
-                    if (path[i] == visited[j])
-                    {
-                        furthestPath = i;
-                        furthestVisited = j;
-                        found = true;
-                    }
-                }
-                if (found)
-                {
-                    break;
-                }
-            }
-
-            // If no intersection found just return current path. 
-            if (furthestPath == -1 || furthestVisited == -1)
-            {
-                return npath;
-            }
-
-            // Concatenate paths.	
-
-            // Adjust beginning of the buffer to include the visited.
-            int req = nvisited - furthestVisited;
-            int orig = Math.Min(furthestPath + 1, npath);
-            int size = Math.Max(0, npath - orig);
-            if (req + size > maxPath)
-            {
-                size = maxPath - req;
-            }
-            if (size > 0)
-            {
-                Array.ConstrainedCopy(path, orig, path, req, size);
-            }
-
-            // Store visited
-            for (int i = 0; i < req; ++i)
-            {
-                path[i] = visited[(nvisited - 1) - i];
-            }
-
-            return req + size;
-        }
-        private static int MergeCorridorEndMoved(
-            int[] path, int npath, int maxPath,
-            int[] visited, int nvisited)
-        {
-            int furthestPath = -1;
-            int furthestVisited = -1;
-
-            // Find furthest common polygon.
-            for (int i = 0; i < npath; ++i)
-            {
-                bool found = false;
-                for (int j = nvisited - 1; j >= 0; --j)
-                {
-                    if (path[i] == visited[j])
-                    {
-                        furthestPath = i;
-                        furthestVisited = j;
-                        found = true;
-                    }
-                }
-                if (found)
-                {
-                    break;
-                }
-            }
-
-            // If no intersection found just return current path. 
-            if (furthestPath == -1 || furthestVisited == -1)
-            {
-                return npath;
-            }
-
-            // Concatenate paths.
-            int ppos = furthestPath + 1;
-            int vpos = furthestVisited + 1;
-            int count = Math.Min(nvisited - vpos, maxPath - ppos);
-            if (count > 0)
-            {
-                Array.ConstrainedCopy(path, ppos, visited, vpos, count);
-            }
-
-            return ppos + count;
-        }
-        private static int MergeCorridorStartShortcut(
-            int[] path, int npath, int maxPath,
-            int[] visited, int nvisited)
-        {
-            int furthestPath = -1;
-            int furthestVisited = -1;
-
-            // Find furthest common polygon.
-            for (int i = npath - 1; i >= 0; --i)
-            {
-                bool found = false;
-                for (int j = nvisited - 1; j >= 0; --j)
-                {
-                    if (path[i] == visited[j])
-                    {
-                        furthestPath = i;
-                        furthestVisited = j;
-                        found = true;
-                    }
-                }
-                if (found)
-                {
-                    break;
-                }
-            }
-
-            // If no intersection found just return current path. 
-            if (furthestPath == -1 || furthestVisited == -1)
-            {
-                return npath;
-            }
-
-            // Concatenate paths.	
-
-            // Adjust beginning of the buffer to include the visited.
-            int req = furthestVisited;
-            if (req <= 0)
-            {
-                return npath;
-            }
-
-            int orig = furthestPath;
-            int size = Math.Max(0, npath - orig);
-            if (req + size > maxPath)
-            {
-                size = maxPath - req;
-            }
-            if (size > 0)
-            {
-                Array.ConstrainedCopy(path, orig, path, req, size);
-            }
-
-            // Store visited
-            for (int i = 0; i < req; ++i)
-            {
-                path[i] = visited[i];
-            }
-
-            return req + size;
-        }
-
         private Vector3 m_pos;
         private Vector3 m_target;
         private SimplePath m_path = null;
@@ -262,10 +103,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             int MAX_RES = 32;
             navquery.Raycast(
                 m_path.Start, m_pos, goal, filter, MAX_RES,
-                out float t, out Vector3 norm, out int[] res, out int nres);
-            if (nres > 1 && t > 0.99f)
+                out var t, out var norm, out var res);
+            if (res.Count > 1 && t > 0.99f)
             {
-                m_path.Count = MergeCorridorStartShortcut(m_path.Path, m_path.Count, m_maxPath, res, nres);
+                SimplePath.MergeCorridorStartShortcut(m_path, m_maxPath, res);
             }
         }
         /// <summary>
@@ -286,11 +127,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             navquery.InitSlicedFindPath(m_path.Start, m_path.End, m_pos, m_target, filter, FindPathOptions.DT_FINDPATH_ANY_ANGLE);
             navquery.UpdateSlicedFindPath(MAX_ITER, out int doneIters);
-            Status status = navquery.FinalizeSlicedFindPathPartial(MAX_RES, m_path.Path, m_path.Count, out SimplePath res);
+            Status status = navquery.FinalizeSlicedFindPathPartial(MAX_RES, m_path.Path, m_path.Count, out var res);
 
             if (status == Status.DT_SUCCESS && res.Count > 0)
             {
-                m_path.Count = MergeCorridorStartShortcut(m_path.Path, m_path.Count, m_maxPath, res.Path, res.Count);
+                SimplePath.MergeCorridorStartShortcut(m_path, m_maxPath, res);
                 return true;
             }
 
@@ -340,19 +181,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
         public bool FixPathStart(int safeRef, Vector3 safePos)
         {
+            m_path.FixStart(safeRef);
             m_pos = safePos;
-            if (m_path.Count < 3 && m_path.Count > 0)
-            {
-                m_path.Path[0] = safeRef;
-                m_path.Path[1] = 0;
-                m_path.Path[2] = m_path.End;
-                m_path.Count = 3;
-            }
-            else
-            {
-                m_path.Path[0] = safeRef;
-                m_path.Path[1] = 0;
-            }
 
             return true;
         }
@@ -380,7 +210,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             else
             {
                 // The path is partially usable.
-                m_path.Count = n;
+                m_path.SetLength(n);
             }
 
             // Clamp target pos to last poly
@@ -431,7 +261,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             if (status == Status.DT_SUCCESS)
             {
-                m_path.Count = MergeCorridorStartMoved(m_path.Path, m_path.Count, m_maxPath, visited.Path, visited.Count);
+                SimplePath.MergeCorridorStartMoved(m_path, m_maxPath, visited);
 
                 // Adjust the position to stay on top of the navmesh.
                 navquery.GetPolyHeight(m_path.Start, result, out float h);
@@ -462,7 +292,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 out var result, out var visited);
             if (status == Status.DT_SUCCESS)
             {
-                m_path.Count = MergeCorridorEndMoved(m_path.Path, m_path.Count, m_maxPath, visited.Path, visited.Count);
+                SimplePath.MergeCorridorEndMoved(m_path, m_maxPath, visited);
 
                 m_target = result;
 
@@ -482,7 +312,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             int[] p = path?.Path ?? new int[m_maxPath];
             int count = path?.Count ?? 0;
-            m_path.AddRange(p, count);
+            m_path.StartPath(p, count);
         }
         /// <summary>
         /// Gets the current position within the corridor. (In the first polygon.)

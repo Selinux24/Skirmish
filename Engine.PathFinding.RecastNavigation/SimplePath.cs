@@ -5,6 +5,7 @@ using System.Linq;
 namespace Engine.PathFinding.RecastNavigation
 {
     using Engine.PathFinding.RecastNavigation.Detour;
+    using SharpDX;
 
     /// <summary>
     /// Simple path
@@ -142,6 +143,161 @@ namespace Engine.PathFinding.RecastNavigation
             }
         }
 
+        public static void MergeCorridorStartMoved(SimplePath path, int maxPath, SimplePath visited)
+        {
+            int furthestPath = -1;
+            int furthestVisited = -1;
+
+            // Find furthest common polygon.
+            for (int i = path.Count - 1; i >= 0; --i)
+            {
+                bool found = false;
+                for (int j = visited.Count - 1; j >= 0; --j)
+                {
+                    if (path.Path[i] == visited.Path[j])
+                    {
+                        furthestPath = i;
+                        furthestVisited = j;
+                        found = true;
+                    }
+                }
+                if (found)
+                {
+                    break;
+                }
+            }
+
+            // If no intersection found just return current path. 
+            if (furthestPath == -1 || furthestVisited == -1)
+            {
+                return;
+            }
+
+            // Concatenate paths.	
+
+            // Adjust beginning of the buffer to include the visited.
+            int req = visited.Count - furthestVisited;
+            int orig = Math.Min(furthestPath + 1, path.Count);
+            int size = Math.Max(0, path.Count - orig);
+            if (req + size > maxPath)
+            {
+                size = maxPath - req;
+            }
+            if (size > 0)
+            {
+                Array.ConstrainedCopy(path.Path, orig, path.Path, req, size);
+            }
+
+            // Store visited
+            for (int i = 0; i < req; ++i)
+            {
+                path.Path[i] = visited.Path[visited.Count - 1 - i];
+            }
+
+            path.Count = req + size;
+        }
+
+        public static void MergeCorridorEndMoved(SimplePath path, int maxPath, SimplePath visited)
+        {
+            int furthestPath = -1;
+            int furthestVisited = -1;
+
+            // Find furthest common polygon.
+            for (int i = 0; i < path.Count; ++i)
+            {
+                bool found = false;
+                for (int j = visited.Count - 1; j >= 0; --j)
+                {
+                    if (path.Path[i] == visited.Path[j])
+                    {
+                        furthestPath = i;
+                        furthestVisited = j;
+                        found = true;
+                    }
+                }
+                if (found)
+                {
+                    break;
+                }
+            }
+
+            // If no intersection found just return current path. 
+            if (furthestPath == -1 || furthestVisited == -1)
+            {
+                return;
+            }
+
+            // Concatenate paths.
+            int ppos = furthestPath + 1;
+            int vpos = furthestVisited + 1;
+            int count = Math.Min(visited.Count - vpos, maxPath - ppos);
+            if (count > 0)
+            {
+                Array.ConstrainedCopy(path.Path, ppos, visited.Path, vpos, count);
+            }
+
+            path.Count = ppos + count;
+        }
+
+        public static void MergeCorridorStartShortcut(SimplePath path, int maxPath, SimplePath visited)
+        {
+            int furthestPath = -1;
+            int furthestVisited = -1;
+
+            // Find furthest common polygon.
+            for (int i = path.Count - 1; i >= 0; --i)
+            {
+                bool found = false;
+                for (int j = visited.Count - 1; j >= 0; --j)
+                {
+                    if (path.Path[i] == visited.Path[j])
+                    {
+                        furthestPath = i;
+                        furthestVisited = j;
+                        found = true;
+                    }
+                }
+                if (found)
+                {
+                    break;
+                }
+            }
+
+            // If no intersection found just return current path. 
+            if (furthestPath == -1 || furthestVisited == -1)
+            {
+                return;
+            }
+
+            // Concatenate paths.	
+
+            // Adjust beginning of the buffer to include the visited.
+            int req = furthestVisited;
+            if (req <= 0)
+            {
+                return;
+            }
+
+            int orig = furthestPath;
+            int size = Math.Max(0, path.Count - orig);
+            if (req + size > maxPath)
+            {
+                size = maxPath - req;
+            }
+            if (size > 0)
+            {
+                Array.ConstrainedCopy(path.Path, orig, path.Path, req, size);
+            }
+
+            // Store visited
+            for (int i = 0; i < req; ++i)
+            {
+                path.Path[i] = visited.Path[i];
+            }
+
+            path.Count = req + size;
+        }
+
         /// <summary>
         /// Maximum path elements
         /// </summary>
@@ -174,7 +330,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Polygon count
         /// </summary>
-        public int Count { get; set; }
+        public int Count { get; private set; }
 
         /// <summary>
         /// Constructor
@@ -204,7 +360,33 @@ namespace Engine.PathFinding.RecastNavigation
             Path[0] = r;
             Count = 1;
         }
+        /// <summary>
+        /// Adds a reference list to the current path
+        /// </summary>
+        /// <param name="rlist">Reference list</param>
+        public void StartPath(IEnumerable<int> rlist)
+        {
+            StartPath(rlist, rlist.Count());
+        }
+        /// <summary>
+        /// Adds a reference list to the current path
+        /// </summary>
+        /// <param name="rlist">Reference list</param>
+        /// <param name="count">Number of elements of the reference list</param>
+        public void StartPath(IEnumerable<int> rlist, int count)
+        {
+            int maxPath = Path.Length;
+            int[] newPath = new int[maxPath];
 
+            Array.Copy(rlist.ToArray(), 0, newPath, 0, count);
+
+            Path = newPath;
+            Count = count;
+        }
+        /// <summary>
+        /// Adds a reference to the list
+        /// </summary>
+        /// <param name="r">Reference to add</param>
         public bool Add(int r)
         {
             if (Count >= maxSimplePath)
@@ -215,29 +397,6 @@ namespace Engine.PathFinding.RecastNavigation
             Path[Count++] = r;
 
             return true;
-        }
-        /// <summary>
-        /// Adds a reference list to the current path
-        /// </summary>
-        /// <param name="rlist">Reference list</param>
-        public void AddRange(IEnumerable<int> rlist)
-        {
-            AddRange(rlist, rlist.Count());
-        }
-        /// <summary>
-        /// Adds a reference list to the current path
-        /// </summary>
-        /// <param name="rlist">Reference list</param>
-        /// <param name="count">Number of elements of the reference list</param>
-        public void AddRange(IEnumerable<int> rlist, int count)
-        {
-            int maxPath = Path.Length;
-            int[] newPath = new int[maxPath];
-
-            Array.Copy(rlist.ToArray(), 0, newPath, 0, count);
-
-            Path = newPath;
-            Count = count;
         }
         /// <summary>
         /// Merges the specified reference list
@@ -297,6 +456,33 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             Count -= npos;
+        }
+        /// <summary>
+        /// Fix path start
+        /// </summary>
+        /// <param name="safeRef">Safe reference</param>
+        public void FixStart(int safeRef)
+        {
+            if (Count < 3 && Count > 0)
+            {
+                Path[0] = safeRef;
+                Path[1] = 0;
+                Path[2] = End;
+                Count = 3;
+            }
+            else
+            {
+                Path[0] = safeRef;
+                Path[1] = 0;
+            }
+        }
+        /// <summary>
+        /// Sets the path length
+        /// </summary>
+        /// <param name="length">New length</param>
+        public void SetLength(int length)
+        {
+            Count = length;
         }
         /// <summary>
         /// Clears the path

@@ -1005,10 +1005,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     {
                         status = Raycast(
                             node.Id, node.Pos, next.Pos, m_query.Filter, maxPath - pathList.Count,
-                            out var t, out var normal, out var rpath, out var m);
+                            out var t, out var normal, out var rpath);
                         if (status.HasFlag(Status.DT_SUCCESS))
                         {
-                            pathList.AddRange(rpath);
+                            pathList.AddRange(rpath.Path);
                         }
                         // raycast ends on poly boundary and the path might include the next poly boundary.
                         if (pathList[pathList.Count - 1] == next.Id)
@@ -1041,7 +1041,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             m_query = new QueryData();
 
             path = new SimplePath(maxPath);
-            path.AddRange(pathList);
+            path.StartPath(pathList);
 
             return Status.DT_SUCCESS | details;
         }
@@ -1121,10 +1121,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     {
                         status = Raycast(
                             node.Id, node.Pos, next.Pos, m_query.Filter, maxPath - pathList.Count,
-                            out var t, out var normal, out var rpath, out var m);
+                            out var t, out var normal, out var rpath);
                         if (status.HasFlag(Status.DT_SUCCESS))
                         {
-                            pathList.AddRange(rpath);
+                            pathList.AddRange(rpath.Path);
                         }
                         // raycast ends on poly boundary and the path might include the next poly boundary.
                         if (pathList[pathList.Count - 1] == next.Id)
@@ -1157,7 +1157,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             m_query = new QueryData();
 
             path = new SimplePath(maxPath);
-            path.AddRange(pathList);
+            path.StartPath(pathList);
 
             return Status.DT_SUCCESS | details;
         }
@@ -2032,18 +2032,17 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="t">The hit parameter. (FLT_MAX if no wall hit.)</param>
         /// <param name="hitNormal">The normal of the nearest wall hit.</param>
         /// <param name="path">The reference ids of the visited polygons.</param>
-        /// <param name="pathCount">The number of visited polygons.</param>
         /// <param name="maxPath">The maximum number of polygons the path array can hold.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status Raycast(int startRef, Vector3 startPos, Vector3 endPos, QueryFilter filter, int maxPath, out float t, out Vector3 hitNormal, out int[] path, out int pathCount)
+        public Status Raycast(int startRef, Vector3 startPos, Vector3 endPos, QueryFilter filter, int maxPath, out float t, out Vector3 hitNormal, out SimplePath path)
         {
             int? prevRef = null;
             Status status = Raycast(startRef, startPos, endPos, filter, 0, maxPath, ref prevRef, out RaycastHit hit);
 
             t = hit.T;
-            path = hit.Path;
             hitNormal = hit.HitNormal;
-            pathCount = hit.PathCount;
+            path = new SimplePath(hit.PathCount);
+            path.StartPath(hit.Path, hit.PathCount);
 
             return status;
         }
@@ -3524,7 +3523,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             path.Clear();
-            path.AddRange(tmp);
+            path.StartPath(tmp);
 
             if (length > maxPath)
             {
