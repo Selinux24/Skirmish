@@ -1832,11 +1832,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="visitedCount">The number of polygons visited during the move.</param>
         /// <param name="maxVisitedSize">The maximum number of polygons the visited array can hold.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status MoveAlongSurface(int startRef, Vector3 startPos, Vector3 endPos, QueryFilter filter, int maxVisitedSize, out Vector3 resultPos, out int[] visited, out int visitedCount)
+        public Status MoveAlongSurface(int startRef, Vector3 startPos, Vector3 endPos, QueryFilter filter, int maxVisitedSize, out Vector3 resultPos, out SimplePath visited)
         {
             resultPos = Vector3.Zero;
-            visited = new int[maxVisitedSize];
-            visitedCount = 0;
+            visited = new SimplePath(maxVisitedSize);
 
             // Validate input
             if (!m_nav.IsValidPolyRef(startRef) ||
@@ -2010,7 +2009,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 node = prev;
                 do
                 {
-                    visited[n++] = node.Id;
+                    visited.Path[n++] = node.Id;
                     if (n >= maxVisitedSize)
                     {
                         status |= Status.DT_BUFFER_TOO_SMALL;
@@ -2023,7 +2022,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             resultPos = bestPos;
 
-            visitedCount = n;
+            visited.Count = n;
 
             return status;
         }

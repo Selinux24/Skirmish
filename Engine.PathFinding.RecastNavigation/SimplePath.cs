@@ -4,6 +4,8 @@ using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation
 {
+    using Engine.PathFinding.RecastNavigation.Detour;
+
     /// <summary>
     /// Simple path
     /// </summary>
@@ -13,6 +15,132 @@ namespace Engine.PathFinding.RecastNavigation
         /// Maximum nodes
         /// </summary>
         public const int MaxSimplePath = 256;
+
+        /// <summary>
+        /// Fix ups corridor
+        /// </summary>
+        /// <param name="path">Current path</param>
+        /// <param name="npath">Current path size</param>
+        /// <param name="maxPath">Maximum path size</param>
+        /// <param name="visited">Visted references</param>
+        /// <param name="nvisited">Number of visited references</param>
+        /// <returns>Returns the new size of the path</returns>
+        public static void FixupCorridor(SimplePath path, int maxPath, SimplePath visited)
+        {
+            int furthestPath = -1;
+            int furthestVisited = -1;
+
+            // Find furthest common polygon.
+            for (int i = path.Count - 1; i >= 0; --i)
+            {
+                bool found = false;
+                for (int j = visited.Count - 1; j >= 0; --j)
+                {
+                    if (path.Path[i] == visited.Path[j])
+                    {
+                        furthestPath = i;
+                        furthestVisited = j;
+                        found = true;
+                    }
+                }
+                if (found)
+                {
+                    break;
+                }
+            }
+
+            // If no intersection found just return current path. 
+            if (furthestPath == -1 || furthestVisited == -1)
+            {
+                return;
+            }
+
+            // Concatenate paths.	
+
+            // Adjust beginning of the buffer to include the visited.
+            int req = visited.Count - furthestVisited;
+            int orig = Math.Min(furthestPath + 1, path.Count);
+            int size = Math.Max(0, path.Count - orig);
+            if (req + size > maxPath)
+            {
+                size = maxPath - req;
+            }
+            if (size != 0)
+            {
+                Array.Copy(path.Path, orig, path.Path, req, size);
+            }
+
+            // Store visited
+            for (int i = 0; i < req; ++i)
+            {
+                path.Path[i] = visited.Path[visited.Count - 1 - i];
+            }
+
+            path.Count = req + size;
+        }
+        /// <summary>
+        /// This function checks if the path has a small U-turn, that is,
+        /// a polygon further in the path is adjacent to the first polygon
+        /// in the path. If that happens, a shortcut is taken.
+        /// This can happen if the target (T) location is at tile boundary,
+        /// and we're (S) approaching it parallel to the tile edge.
+        /// The choice at the vertex can be arbitrary, 
+        ///  +---+---+
+        ///  |:::|:::|
+        ///  +-S-+-T-+
+        ///  |:::|   | -- the step can end up in here, resulting U-turn path.
+        ///  +---+---+
+        /// </summary>
+        /// <param name="path">Current path</param>
+        /// <param name="npath">Current path size</param>
+        /// <param name="navQuery">Navigation query</param>
+        /// <returns>Returns the new size of the path</returns>
+        public static void FixupShortcuts(SimplePath path, NavMeshQuery navQuery)
+        {
+            if (path.Count < 3)
+            {
+                return;
+            }
+
+            // Get connected polygons
+            int maxNeis = 16;
+            List<int> neis = new List<int>();
+
+            if (navQuery.GetAttachedNavMesh().GetTileAndPolyByRef(path.Start, out MeshTile tile, out Poly poly))
+            {
+                return;
+            }
+
+            for (int k = poly.FirstLink; k != DetourUtils.DT_NULL_LINK; k = tile.Links[k].Next)
+            {
+                var link = tile.Links[k];
+                if (link.NRef != 0 && neis.Count < maxNeis)
+                {
+                    neis.Add(link.NRef);
+                }
+            }
+
+            // If any of the neighbour polygons is within the next few polygons
+            // in the path, short cut to that polygon directly.
+            int maxLookAhead = 6;
+            int cut = 0;
+            for (int i = Math.Min(maxLookAhead, path.Count) - 1; i > 1 && cut == 0; i--)
+            {
+                for (int j = 0; j < neis.Count; j++)
+                {
+                    if (path.Path[i] == neis[j])
+                    {
+                        cut = i;
+                        break;
+                    }
+                }
+            }
+            if (cut > 1)
+            {
+                int offset = cut - 1;
+                path.Cut(offset);
+            }
+        }
 
         /// <summary>
         /// Maximum path elements
@@ -131,6 +259,18 @@ namespace Engine.PathFinding.RecastNavigation
                         j -= 2;
                     }
                 }
+            }
+        }
+        /// <summary>
+        /// Cuts the path
+        /// </summary>
+        /// <param name="offset">Cut offset</param>
+        public void Cut(int offset)
+        {
+            Count -= offset;
+            for (int i = 1; i < Count; i++)
+            {
+                Path[i] = Path[i + offset];
             }
         }
         /// <summary>
