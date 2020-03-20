@@ -427,11 +427,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             int MAX_VISITED = 16;
             Status status = navquery.MoveAlongSurface(
                 m_path.Start, m_pos, npos, filter, MAX_VISITED,
-                out Vector3 result, out int[] visited, out int nvisited);
+                out var result, out var visited);
 
             if (status == Status.DT_SUCCESS)
             {
-                m_path.Count = MergeCorridorStartMoved(m_path.Path, m_path.Count, m_maxPath, visited, nvisited);
+                m_path.Count = MergeCorridorStartMoved(m_path.Path, m_path.Count, m_maxPath, visited.Path, visited.Count);
 
                 // Adjust the position to stay on top of the navmesh.
                 navquery.GetPolyHeight(m_path.Start, result, out float h);
@@ -459,10 +459,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             int MAX_VISITED = 16;
             Status status = navquery.MoveAlongSurface(
                 m_path.End, m_target, npos, filter, MAX_VISITED,
-                out Vector3 result, out int[] visited, out int nvisited);
+                out var result, out var visited);
             if (status == Status.DT_SUCCESS)
             {
-                m_path.Count = MergeCorridorEndMoved(m_path.Path, m_path.Count, m_maxPath, visited, nvisited);
+                m_path.Count = MergeCorridorEndMoved(m_path.Path, m_path.Count, m_maxPath, visited.Path, visited.Count);
 
                 m_target = result;
 

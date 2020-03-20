@@ -170,9 +170,9 @@ namespace Engine.PathFinding.RecastNavigation
                     // Move
                     navQuery.MoveAlongSurface(
                         iterPath.Start, iterPos, moveTgt, filter, 16,
-                        out var result, out var visited, out var nvisited);
+                        out var result, out var visited);
 
-                    iterPath.Count = FixupCorridor(iterPath, MAX_POLYS, visited, nvisited);
+                    iterPath.Count = FixupCorridor(iterPath, MAX_POLYS, visited.Path, visited.Count);
                     iterPath.Count = FixupShortcuts(iterPath, navQuery);
 
                     navQuery.GetPolyHeight(iterPath.Start, result, out float h);
@@ -471,11 +471,7 @@ namespace Engine.PathFinding.RecastNavigation
             if (cut > 1)
             {
                 int offset = cut - 1;
-                path.Count -= offset;
-                for (int i = 1; i < path.Count; i++)
-                {
-                    path.Path[i] = path.Path[i + offset];
-                }
+                path.Cut(offset);
             }
 
             return path.Count;

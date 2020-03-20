@@ -134,6 +134,18 @@ namespace Engine.PathFinding.RecastNavigation
             }
         }
         /// <summary>
+        /// Cuts the path
+        /// </summary>
+        /// <param name="offset">Cut offset</param>
+        public void Cut(int offset)
+        {
+            Count -= offset;
+            for (int i = 1; i < Count; i++)
+            {
+                Path[i] = Path[i + offset];
+            }
+        }
+        /// <summary>
         /// Prune path at position
         /// </summary>
         /// <param name="npos">Position index</param>
