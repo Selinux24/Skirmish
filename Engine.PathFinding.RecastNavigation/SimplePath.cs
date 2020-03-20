@@ -139,7 +139,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
         }
 
-        public static void MergeCorridorStartMoved(SimplePath path, int maxPath, SimplePath visited)
+        public static void MergeCorridorStartMoved(SimplePath path, SimplePath visited)
         {
             int furthestPath = -1;
             int furthestVisited = -1;
@@ -175,9 +175,9 @@ namespace Engine.PathFinding.RecastNavigation
             int req = visited.Count - furthestVisited;
             int orig = Math.Min(furthestPath + 1, path.Count);
             int size = Math.Max(0, path.Count - orig);
-            if (req + size > maxPath)
+            if (req + size > path.maxSize)
             {
-                size = maxPath - req;
+                size = path.maxSize - req;
             }
             if (size > 0)
             {
@@ -193,7 +193,7 @@ namespace Engine.PathFinding.RecastNavigation
             path.Count = req + size;
         }
 
-        public static void MergeCorridorEndMoved(SimplePath path, int maxPath, SimplePath visited)
+        public static void MergeCorridorEndMoved(SimplePath path, SimplePath visited)
         {
             int furthestPath = -1;
             int furthestVisited = -1;
@@ -226,7 +226,7 @@ namespace Engine.PathFinding.RecastNavigation
             // Concatenate paths.
             int ppos = furthestPath + 1;
             int vpos = furthestVisited + 1;
-            int count = Math.Min(visited.Count - vpos, maxPath - ppos);
+            int count = Math.Min(visited.Count - vpos, path.maxSize - ppos);
             if (count > 0)
             {
                 Array.ConstrainedCopy(path.referenceList, ppos, visited.referenceList, vpos, count);
@@ -235,7 +235,7 @@ namespace Engine.PathFinding.RecastNavigation
             path.Count = ppos + count;
         }
 
-        public static void MergeCorridorStartShortcut(SimplePath path, int maxPath, SimplePath visited)
+        public static void MergeCorridorStartShortcut(SimplePath path, SimplePath visited)
         {
             int furthestPath = -1;
             int furthestVisited = -1;
@@ -276,9 +276,9 @@ namespace Engine.PathFinding.RecastNavigation
 
             int orig = furthestPath;
             int size = Math.Max(0, path.Count - orig);
-            if (req + size > maxPath)
+            if (req + size > path.maxSize)
             {
-                size = maxPath - req;
+                size = path.maxSize - req;
             }
             if (size > 0)
             {

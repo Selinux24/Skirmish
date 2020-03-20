@@ -776,6 +776,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 // decide whether to test raycast to previous nodes
                 bool tryLOS = false;
                 if ((m_query.Options & FindPathOptions.DT_FINDPATH_ANY_ANGLE) != 0 &&
+                    (parentNode != null) &&
                     (parentRef != 0) &&
                     (Vector3.DistanceSquared(parentNode.Pos, bestNode.Pos) < m_query.RaycastLimitSqr))
                 {

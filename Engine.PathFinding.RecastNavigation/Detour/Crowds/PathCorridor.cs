@@ -8,7 +8,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         private Vector3 m_pos;
         private Vector3 m_target;
         private SimplePath m_path = null;
-        private int m_maxPath = 0;
 
         /// <summary>
         /// Allocates the corridor's path buffer.
@@ -18,7 +17,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         public bool Init(int maxPath)
         {
             m_path = new SimplePath(maxPath);
-            m_maxPath = maxPath;
+
             return true;
         }
         /// <summary>
@@ -105,7 +104,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 out var t, out var norm, out var res);
             if (res.Count > 1 && t > 0.99f)
             {
-                SimplePath.MergeCorridorStartShortcut(m_path, m_maxPath, res);
+                SimplePath.MergeCorridorStartShortcut(m_path, res);
             }
         }
         /// <summary>
@@ -130,7 +129,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             if (status == Status.DT_SUCCESS && res.Count > 0)
             {
-                SimplePath.MergeCorridorStartShortcut(m_path, m_maxPath, res);
+                SimplePath.MergeCorridorStartShortcut(m_path, res);
+
                 return true;
             }
 
@@ -173,6 +173,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             if (status)
             {
                 m_pos = endPos;
+
                 return true;
             }
 
@@ -263,14 +264,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             if (status == Status.DT_SUCCESS)
             {
-                SimplePath.MergeCorridorStartMoved(m_path, m_maxPath, visited);
+                SimplePath.MergeCorridorStartMoved(m_path, visited);
 
                 // Adjust the position to stay on top of the navmesh.
                 navquery.GetPolyHeight(m_path.Start, result, out float h);
                 result.Y = h;
                 m_pos = result;
+
                 return true;
             }
+
             return false;
         }
         /// <summary>
@@ -292,9 +295,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             Status status = navquery.MoveAlongSurface(
                 m_path.End, m_target, npos, filter, MAX_VISITED,
                 out var result, out var visited);
+
             if (status == Status.DT_SUCCESS)
             {
-                SimplePath.MergeCorridorEndMoved(m_path, m_maxPath, visited);
+                SimplePath.MergeCorridorEndMoved(m_path, visited);
 
                 m_target = result;
 
@@ -311,10 +315,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         public void SetCorridor(Vector3 target, SimplePath path)
         {
             m_target = target;
-
-            int[] p = path?.GetPath() ?? new int[m_maxPath];
-            int count = path?.Count ?? 0;
-            m_path.StartPath(p, count);
+            m_path.StartPath(path.GetPath());
         }
         /// <summary>
         /// Gets the current position within the corridor. (In the first polygon.)
