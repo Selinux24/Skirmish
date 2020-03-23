@@ -47,8 +47,6 @@ namespace Collada
         private float ratTime = 5f;
         private readonly float nextRatTime = 3f;
         private Vector3[] ratHoles = new Vector3[] { };
-        private int holeFrom;
-        private int holeTo;
 
         private PrimitiveListDrawer<Triangle> selectedItemDrawer = null;
         private ModularSceneryItem selectedItem = null;
@@ -97,7 +95,7 @@ namespace Collada
         {
             get
             {
-                return this.currentGraph == 0 ? this.ratAgentType : this.agent;
+                return this.currentGraph == 0 ? this.agent : this.ratAgentType;
             }
         }
 
@@ -366,8 +364,9 @@ namespace Collada
             nmsettings.EdgeMaxError = 1.0f;
 
             //Tiling
-            nmsettings.BuildMode = BuildModes.TempObstacles;
+            nmsettings.BuildMode = BuildModes.Tiled;
             nmsettings.TileSize = 16;
+            nmsettings.UseTileCache = true;
 
             var nminput = new InputGeometry(GetTrianglesForNavigationGraph);
 
@@ -417,7 +416,7 @@ namespace Collada
             {
                 Name = "Player",
                 Height = 1.5f,
-                Radius = 0.2f,
+                Radius = 0.3f,
                 MaxClimb = 0.8f,
                 MaxSlope = 50f,
                 Velocity = 4f,
@@ -653,8 +652,6 @@ namespace Collada
         private void UpdateDebugInfo()
         {
             //Graph
-            this.currentGraph++;
-
             this.bboxesDrawer.Clear();
 
             //Boxes
@@ -807,9 +804,10 @@ namespace Collada
 
             if (this.Game.Input.KeyJustReleased(Keys.G))
             {
-                this.UpdateGraphDebug(this.CurrentAgent);
                 this.currentGraph++;
                 this.currentGraph %= 2;
+
+                this.UpdateGraphDebug(this.CurrentAgent);
             }
         }
         private void UpdateRatInput()
@@ -896,8 +894,8 @@ namespace Collada
 
             if (!this.ratActive && this.ratTime <= 0)
             {
-                var iFrom = 1;// Helper.RandomGenerator.Next(0, this.ratHoles.Length);
-                var iTo = 4;// Helper.RandomGenerator.Next(0, this.ratHoles.Length);
+                var iFrom = Helper.RandomGenerator.Next(0, this.ratHoles.Length);
+                var iTo = Helper.RandomGenerator.Next(0, this.ratHoles.Length);
                 if (iFrom == iTo) return;
 
                 var from = this.ratHoles[iFrom];
@@ -907,9 +905,6 @@ namespace Collada
 
                 if (CalcPath(this.ratAgentType, from, to))
                 {
-                    this.holeFrom = iFrom;
-                    this.holeTo = iTo;
-
                     this.ratController.UpdateManipulator(gameTime, this.rat.Manipulator);
 
                     this.ratSoundInstance?.Play();
@@ -1477,8 +1472,10 @@ namespace Collada
                 var obb = OrientedBoundingBoxExtensions.FromPoints(item.GetPoints(), item.Manipulator.FinalTransform);
 
                 int index = this.AddObstacle(obb);
-
-                obstacles.Add(index, obb);
+                if (index >= 0)
+                {
+                    obstacles.Add(index, obb);
+                }
             }
 
             //Human obstacles
@@ -1488,8 +1485,10 @@ namespace Collada
                 var bc = new BoundingCylinder(pos, 0.8f, 1.5f);
 
                 int index = this.AddObstacle(bc);
-
-                obstacles.Add(index, bc);
+                if (index >= 0)
+                {
+                    obstacles.Add(index, bc);
+                }
             }
 
             PaintObstacles();

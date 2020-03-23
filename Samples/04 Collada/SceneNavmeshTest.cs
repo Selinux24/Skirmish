@@ -296,26 +296,30 @@ namespace Collada
 
             if (this.Game.Input.KeyJustReleased(Keys.B))
             {
+                var buildModes = Enum.GetNames(typeof(BuildModes)).Length;
+
                 if (!shift)
                 {
-                    nmsettings.BuildMode = (BuildModes)Helper.Next((int)nmsettings.BuildMode, 3);
+                    nmsettings.BuildMode = (BuildModes)Helper.Next((int)nmsettings.BuildMode, buildModes);
                 }
                 else
                 {
-                    nmsettings.BuildMode = (BuildModes)Helper.Prev((int)nmsettings.BuildMode, 3);
+                    nmsettings.BuildMode = (BuildModes)Helper.Prev((int)nmsettings.BuildMode, buildModes);
                 }
                 updateGraph = true;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.P))
             {
+                var sampleTypes = Enum.GetNames(typeof(SamplePartitionTypes)).Length;
+
                 if (!shift)
                 {
-                    nmsettings.PartitionType = (SamplePartitionTypes)Helper.Next((int)nmsettings.PartitionType, 3);
+                    nmsettings.PartitionType = (SamplePartitionTypes)Helper.Next((int)nmsettings.PartitionType, sampleTypes);
                 }
                 else
                 {
-                    nmsettings.PartitionType = (SamplePartitionTypes)Helper.Prev((int)nmsettings.PartitionType, 3);
+                    nmsettings.PartitionType = (SamplePartitionTypes)Helper.Prev((int)nmsettings.PartitionType, sampleTypes);
                 }
                 updateGraph = true;
             }
@@ -335,33 +339,26 @@ namespace Collada
             sw.Start();
             if (!shift)
             {
-                ((Graph)this.NavigationGraph).BuildTile(tilePosition);
+                this.NavigationGraph.UpdateAt(tilePosition);
             }
             else
             {
-                ((Graph)this.NavigationGraph).RemoveTile(tilePosition);
+                this.NavigationGraph.RemoveAt(tilePosition);
             }
             sw.Stop();
             lastElapsedSeconds = sw.ElapsedMilliseconds / 1000.0f;
         }
         private void UpdateGraphNodes(AgentType agent)
         {
-            try
+            var nodes = this.GetNodes(agent).OfType<GraphNode>();
+            if (nodes.Any())
             {
-                var nodes = this.GetNodes(agent).OfType<GraphNode>();
-                if (nodes.Any())
-                {
-                    this.graphDrawer.Clear();
+                this.graphDrawer.Clear();
 
-                    foreach (var node in nodes)
-                    {
-                        this.graphDrawer.AddPrimitives(node.Color, node.Triangles);
-                    }
+                foreach (var node in nodes)
+                {
+                    this.graphDrawer.AddPrimitives(node.Color, node.Triangles);
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
             }
         }
         private void UpdateFiles()

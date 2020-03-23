@@ -4,8 +4,8 @@ using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
-    using Engine.PathFinding.RecastNavigation.Recast;
     using Engine.PathFinding.RecastNavigation.Detour.Tiles;
+    using Engine.PathFinding.RecastNavigation.Recast;
 
     public class NavMesh
     {
@@ -27,13 +27,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 res = BuildTiled(geometry, settings, agent);
             }
-            else if (settings.BuildMode == BuildModes.TempObstacles)
-            {
-                res = BuildTempObstacles(geometry, settings, agent);
-            }
             else
             {
-                throw new EngineException("Bad build mode for NavigationMesh2.");
+                throw new EngineException("Bad build mode for NavigationMesh.");
             }
 
             return res;
@@ -232,6 +228,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             int ts = (int)settings.TileSize;
             int tw = (gw + ts - 1) / ts;
             int th = (gh + ts - 1) / ts;
+            float tcs = settings.TileSize * settings.CellSize;
 
             int tileBits = Math.Min((int)Math.Log(Helper.NextPowerOfTwo(tw * th), 2), 14);
             if (tileBits > 14) tileBits = 14;
@@ -242,8 +239,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             var nmparams = new NavMeshParams()
             {
                 Origin = bbox.Minimum,
-                TileWidth = settings.TileSize * settings.CellSize,
-                TileHeight = settings.TileSize * settings.CellSize,
+                TileWidth = tcs,
+                TileHeight = tcs,
                 MaxTiles = maxTiles,
                 MaxPolys = maxPolysPerTile,
             };
@@ -251,20 +248,21 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             var nm = new NavMesh();
             nm.Init(nmparams);
 
-            BuildAllTiles(geometry, settings, agent, nm);
+            if (!BuildAllTiles(tw, th, tcs, bbox, geometry, settings, agent, nm))
+            {
+                return null;
+            }
+
+            if (settings.UseTileCache)
+            {
+                nm.TileCache = BuildTileCache(nm, tw, th, bbox, geometry, settings, agent);
+            }
 
             return nm;
         }
-        private static NavMesh BuildTempObstacles(InputGeometry geometry, BuildSettings settings, Agent agent)
+
+        private static TileCache BuildTileCache(NavMesh nm, int tw, int th, BoundingBox bbox, InputGeometry geometry, BuildSettings settings, Agent agent)
         {
-            var bbox = settings.Bounds ?? geometry.BoundingBox;
-
-            // Init cache
-            RecastUtils.CalcGridSize(bbox, settings.CellSize, out int gw, out int gh);
-            int ts = (int)settings.TileSize;
-            int tw = (gw + ts - 1) / ts;
-            int th = (gh + ts - 1) / ts;
-
             // Generation params.
             var walkableHeight = (int)Math.Ceiling(agent.Height / settings.CellHeight);
             var walkableClimb = (int)Math.Floor(agent.MaxClimb / settings.CellHeight);
@@ -313,27 +311,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             var tileCache = new TileCache();
             tileCache.Init(tcparams, tmproc);
 
-            int tileBits = Math.Min((int)Math.Log(Helper.NextPowerOfTwo(tw * th * EXPECTED_LAYERS_PER_TILE), 2), 14);
-            if (tileBits > 14) tileBits = 14;
-            int polyBits = 22 - tileBits;
-            int maxTiles = 1 << tileBits;
-            int maxPolysPerTile = 1 << polyBits;
-
-            var nmparams = new NavMeshParams()
-            {
-                Origin = bbox.Minimum,
-                TileWidth = settings.TileSize * settings.CellSize,
-                TileHeight = settings.TileSize * settings.CellSize,
-                MaxTiles = maxTiles,
-                MaxPolys = maxPolysPerTile,
-            };
-
-            var nm = new NavMesh()
-            {
-                TileCache = tileCache,
-            };
-            nm.Init(nmparams);
-
             for (int y = 0; y < th; y++)
             {
                 for (int x = 0; x < tw; x++)
@@ -356,11 +333,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
             }
 
-            return nm;
+            return tileCache;
         }
-
-        /*TEMP OBSTACLES SAMPLE*/
-        public static int RasterizeTileLayers(int tx, int ty, Config cfg, InputGeometry geometry, BuildSettings settings, out TileCacheData[] tiles)
+        private static int RasterizeTileLayers(int tx, int ty, Config cfg, InputGeometry geometry, BuildSettings settings, out TileCacheData[] tiles)
         {
             tiles = new TileCacheData[MAX_LAYERS];
 
@@ -513,29 +488,38 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             return n;
         }
-        /*TILE MESH SAMPLE*/
-        public static bool BuildAllTiles(InputGeometry geom, BuildSettings settings, Agent agent, NavMesh navMesh)
+
+        public static void GetTileAtPosition(Vector3 pos, InputGeometry geom, BuildSettings settings, out int tx, out int ty, out BoundingBox tbbox)
         {
-            var bbox = geom.BoundingBox;
-            RecastUtils.CalcGridSize(bbox, settings.CellSize, out int gw, out int gh);
-            int ts = (int)settings.TileSize;
-            int tw = (gw + ts - 1) / ts;
-            int th = (gh + ts - 1) / ts;
-            float tcs = settings.TileSize * settings.CellSize;
+            var bbox = settings.Bounds ?? geom.BoundingBox;
 
-            for (int y = 0; y < th; ++y)
+            float ts = settings.TileSize * settings.CellSize;
+            tx = (int)((pos.X - bbox.Minimum.X) / ts);
+            ty = (int)((pos.Z - bbox.Minimum.Z) / ts);
+
+            tbbox = GetTileBounds(tx, ty, ts, bbox);
+        }
+        public static BoundingBox GetTileBounds(int tx, int ty, float ts, BoundingBox bbox)
+        {
+            BoundingBox tbbox = new BoundingBox();
+
+            tbbox.Minimum.X = bbox.Minimum.X + tx * ts;
+            tbbox.Minimum.Y = bbox.Minimum.Y;
+            tbbox.Minimum.Z = bbox.Minimum.Z + ty * ts;
+
+            tbbox.Maximum.X = bbox.Minimum.X + (tx + 1) * ts;
+            tbbox.Maximum.Y = bbox.Maximum.Y;
+            tbbox.Maximum.Z = bbox.Minimum.Z + (ty + 1) * ts;
+
+            return tbbox;
+        }
+        private static bool BuildAllTiles(int tw, int th, float tcs, BoundingBox bbox, InputGeometry geom, BuildSettings settings, Agent agent, NavMesh navMesh)
+        {
+            for (int y = 0; y < th; y++)
             {
-                for (int x = 0; x < tw; ++x)
+                for (int x = 0; x < tw; x++)
                 {
-                    BoundingBox lastBuiltBbox = new BoundingBox();
-
-                    lastBuiltBbox.Minimum.X = bbox.Minimum.X + x * tcs;
-                    lastBuiltBbox.Minimum.Y = bbox.Minimum.Y;
-                    lastBuiltBbox.Minimum.Z = bbox.Minimum.Z + y * tcs;
-
-                    lastBuiltBbox.Maximum.X = bbox.Minimum.X + (x + 1) * tcs;
-                    lastBuiltBbox.Maximum.Y = bbox.Maximum.Y;
-                    lastBuiltBbox.Maximum.Z = bbox.Minimum.Z + (y + 1) * tcs;
+                    BoundingBox lastBuiltBbox = GetTileBounds(x, y, tcs, bbox);
 
                     var data = BuildTileMesh(x, y, lastBuiltBbox, geom, settings, agent);
                     if (data != null)
@@ -550,7 +534,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             return true;
         }
-        public static MeshData BuildTileMesh(int tx, int ty, BoundingBox bbox, InputGeometry geometry, BuildSettings settings, Agent agent)
+        private static MeshData BuildTileMesh(int tx, int ty, BoundingBox bbox, InputGeometry geometry, BuildSettings settings, Agent agent)
         {
             var chunkyMesh = geometry.ChunkyMesh;
 
@@ -825,6 +809,40 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             return null;
+        }
+
+        public void BuildTileAtPosition(int tx, int ty, BoundingBox tbbox, InputGeometry geom, BuildSettings settings, Agent agent)
+        {
+            if (settings.UseTileCache && TileCache != null)
+            {
+                TileCache.BuildNavMeshTilesAt(tx, ty, this);
+            }
+            else
+            {
+                var data = BuildTileMesh(tx, ty, tbbox, geom, settings, agent);
+
+                // Remove any previous data (navmesh owns and deletes the data).
+                RemoveTile(GetTileRefAt(tx, ty, 0));
+
+                // Add tile, or leave the location empty.
+                if (data != null)
+                {
+                    AddTile(data, TileFlagTypes.DT_TILE_FREE_DATA, 0, out int res);
+                }
+            }
+        }
+        public void RemoveTileAtPosition(int tx, int ty, BuildSettings settings)
+        {
+            if (settings.UseTileCache && TileCache != null)
+            {
+                var t = GetTileAt(tx, ty, 0);
+                int r = GetTileRef(t);
+                TileCache.RemoveTile(r, out _, out _);
+            }
+            else
+            {
+                RemoveTile(GetTileRefAt(tx, ty, 0));
+            }
         }
 
         private Vector3 m_orig;
@@ -2149,65 +2167,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             // Outside poly that is not an offmesh connection.
             ClosestPointOnDetailEdges(tile, poly, pos, true, out closest);
-        }
-
-        /*TILE MESH SAMPLE*/
-        public void BuildTileAtPosition(Vector3 pos, InputGeometry geom, BuildSettings settings, Agent agent)
-        {
-            var bbox = geom.BoundingBox;
-
-            float ts = settings.TileSize * settings.CellSize;
-            int tx = (int)((pos.X - bbox.Minimum.X) / ts);
-            int ty = (int)((pos.Z - bbox.Minimum.Z) / ts);
-
-            BoundingBox lastBuiltBbox = new BoundingBox();
-
-            lastBuiltBbox.Minimum.X = bbox.Minimum.X + tx * ts;
-            lastBuiltBbox.Minimum.Y = bbox.Minimum.Y;
-            lastBuiltBbox.Minimum.Z = bbox.Minimum.Z + ty * ts;
-
-            lastBuiltBbox.Maximum.X = bbox.Minimum.X + (tx + 1) * ts;
-            lastBuiltBbox.Maximum.Y = bbox.Maximum.Y;
-            lastBuiltBbox.Maximum.Z = bbox.Minimum.Z + (ty + 1) * ts;
-
-            var data = BuildTileMesh(tx, ty, lastBuiltBbox, geom, settings, agent);
-
-            // Remove any previous data (navmesh owns and deletes the data).
-            RemoveTile(GetTileRefAt(tx, ty, 0));
-
-            // Add tile, or leave the location empty.
-            if (data != null)
-            {
-                AddTile(data, TileFlagTypes.DT_TILE_FREE_DATA, 0, out int res);
-            }
-        }
-        public void GetTilePosition(Vector3 pos, InputGeometry geom, BuildSettings settings, out int tx, out int ty)
-        {
-            var bbox = geom.BoundingBox;
-
-            float ts = settings.TileSize * settings.CellSize;
-            tx = (int)((pos.X - bbox.Minimum.X) / ts);
-            ty = (int)((pos.Z - bbox.Minimum.Z) / ts);
-        }
-        public void RemoveTileAtPosition(Vector3 pos, InputGeometry geom, BuildSettings settings)
-        {
-            var bbox = geom.BoundingBox;
-
-            float ts = settings.TileSize * settings.CellSize;
-            int tx = (int)((pos.X - bbox.Minimum.X) / ts);
-            int ty = (int)((pos.Z - bbox.Minimum.Z) / ts);
-
-            BoundingBox lastBuiltBbox = new BoundingBox();
-
-            lastBuiltBbox.Minimum.X = bbox.Minimum.X + tx * ts;
-            lastBuiltBbox.Minimum.Y = bbox.Minimum.Y;
-            lastBuiltBbox.Minimum.Z = bbox.Minimum.Z + ty * ts;
-
-            lastBuiltBbox.Maximum.X = bbox.Minimum.X + (tx + 1) * ts;
-            lastBuiltBbox.Maximum.Y = bbox.Maximum.Y;
-            lastBuiltBbox.Maximum.Z = bbox.Minimum.Z + (ty + 1) * ts;
-
-            RemoveTile(GetTileRefAt(tx, ty, 0));
         }
     }
 }

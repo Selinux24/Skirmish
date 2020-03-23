@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Engine.PathFinding.AStar
@@ -185,6 +186,30 @@ namespace Engine.PathFinding.AStar
         /// </summary>
         /// <param name="position">Position</param>
         public void UpdateAt(Vector3 position)
+        {
+            //TODO: update grid state around position
+        }
+        /// <summary>
+        /// Updates the graph at specified position list
+        /// </summary>
+        /// <param name="positions">Position list</param>
+        public void UpdateAt(IEnumerable<Vector3> positions)
+        {
+            //TODO: update grid state around position list
+        }
+        /// <summary>
+        /// Removes the graph node at specified position
+        /// </summary>
+        /// <param name="position">Position</param>
+        public void RemoveAt(Vector3 position)
+        {
+            //TODO: update grid state around position
+        }
+        /// <summary>
+        /// Removes the graph node at specified position list
+        /// </summary>
+        /// <param name="positions">Position list</param>
+        public void RemoveAt(IEnumerable<Vector3> positions)
         {
             //TODO: update grid state around position
         }

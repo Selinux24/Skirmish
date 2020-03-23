@@ -76,6 +76,10 @@ namespace Engine.PathFinding.RecastNavigation
         /// Maximum number of nodes
         /// </summary>
         public int MaxNodes { get; set; } = 2048;
+        /// <summary>
+        /// Use tile cache
+        /// </summary>
+        public bool UseTileCache { get; set; } = false;
 
         /// <summary>
         /// Filter low hanging obstacles when generation

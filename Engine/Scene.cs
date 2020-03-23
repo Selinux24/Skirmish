@@ -1800,10 +1800,7 @@ namespace Engine
             {
                 await this.PathFinderDescription?.Input.Refresh();
 
-                foreach (var position in positions)
-                {
-                    this.NavigationGraph?.UpdateAt(position);
-                }
+                this.NavigationGraph?.UpdateAt(positions);
             }
         }
 

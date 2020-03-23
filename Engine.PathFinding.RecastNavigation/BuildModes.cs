@@ -5,6 +5,5 @@ namespace Engine.PathFinding.RecastNavigation
     {
         Solo,
         Tiled,
-        TempObstacles,
     }
 }

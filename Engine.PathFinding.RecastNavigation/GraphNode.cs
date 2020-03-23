@@ -25,12 +25,18 @@ namespace Engine.PathFinding.RecastNavigation
             for (int i = 0; i < mesh.MaxTiles; ++i)
             {
                 var tile = mesh.Tiles[i];
-                if (tile.Header.Magic != DetourUtils.DT_NAVMESH_MAGIC) continue;
+                if (tile.Header.Magic != DetourUtils.DT_NAVMESH_MAGIC)
+                {
+                    continue;
+                }
 
                 for (int t = 0; t < tile.Header.PolyCount; t++)
                 {
                     var p = tile.Polys[t];
-                    if (p.Type == PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION) continue;
+                    if (p.Type == PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
+                    {
+                        continue;
+                    }
 
                     var bse = mesh.GetTileRef(tile);
 

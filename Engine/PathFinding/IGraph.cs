@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Engine.PathFinding
@@ -56,6 +57,21 @@ namespace Engine.PathFinding
         /// </summary>
         /// <param name="position">Position</param>
         void UpdateAt(Vector3 position);
+        /// <summary>
+        /// Updates the graph at specified position list
+        /// </summary>
+        /// <param name="positions">Position list</param>
+        void UpdateAt(IEnumerable<Vector3> positions);
+        /// <summary>
+        /// Removes the graph node at specified position
+        /// </summary>
+        /// <param name="position">Position</param>
+        void RemoveAt(Vector3 position);
+        /// <summary>
+        /// Removes the graph node at specified position list
+        /// </summary>
+        /// <param name="positions">Position list</param>
+        void RemoveAt(IEnumerable<Vector3> positions);
 
         /// <summary>
         /// Adds a cylinder obstacle

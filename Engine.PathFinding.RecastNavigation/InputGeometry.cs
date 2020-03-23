@@ -126,7 +126,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
             else
             {
-                throw new EngineException(string.Format("Bad navigation mesh graph type: {0}", graph.GetType()));
+                throw new EngineException($"Bad navigation mesh graph type: {graph}");
             }
         }
     }

@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.PathFinding.RecastNavigation
@@ -51,6 +52,24 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 this.Id = GetNextId();
             }
+        }
+        /// <summary>
+        /// Data to update tiles
+        /// </summary>
+        class UpdateTileData
+        {
+            /// <summary>
+            /// X tile position
+            /// </summary>
+            public int X { get; set; }
+            /// <summary>
+            /// Y tile position
+            /// </summary>
+            public int Y { get; set; }
+            /// <summary>
+            /// Bounding box
+            /// </summary>
+            public BoundingBox BoundingBox { get; set; }
         }
 
         /// <summary>
@@ -146,9 +165,7 @@ namespace Engine.PathFinding.RecastNavigation
             while (iterPath.Count != 0 && smoothPath.Count < MAX_SMOOTH)
             {
                 // Find location to steer towards.
-                if (!GetSteerTarget(
-                    navQuery, iterPos, targetPos, SLOP,
-                    iterPath, out var target))
+                if (!GetSteerTarget(navQuery, iterPos, targetPos, SLOP, iterPath, out var target))
                 {
                     break;
                 }
@@ -446,7 +463,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// Builds the tile in the specified position
         /// </summary>
         /// <param name="position">Position</param>
-        public void BuildTile(Vector3 position)
+        public void BuildTile(IEnumerable<Vector3> positions)
         {
             this.Updating?.Invoke(this, new EventArgs());
 
@@ -454,16 +471,38 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 var navmesh = agentQ.NavMesh;
 
-                navmesh.BuildTileAtPosition(position, Input, Settings, agentQ.Agent);
+                List<UpdateTileData> tiles = new List<UpdateTileData>();
+
+                foreach (var position in positions)
+                {
+                    NavMesh.GetTileAtPosition(position, Input, Settings, out var tx, out var ty, out var bbox);
+
+                    if (!tiles.Any(t => t.X == tx && t.Y == ty))
+                    {
+                        UpdateTileData v = new UpdateTileData()
+                        {
+                            X = tx,
+                            Y = ty,
+                            BoundingBox = bbox,
+                        };
+
+                        tiles.Add(v);
+                    }
+                }
+
+                foreach (var tile in tiles)
+                {
+                    navmesh.BuildTileAtPosition(tile.X, tile.Y, tile.BoundingBox, Input, Settings, agentQ.Agent);
+                }
             }
 
             this.Updated?.Invoke(this, new EventArgs());
         }
         /// <summary>
-        /// Removes the tile in the specified position
+        /// Removes the tile in the specified position list
         /// </summary>
-        /// <param name="position">Position</param>
-        public void RemoveTile(Vector3 position)
+        /// <param name="positions">Position list</param>
+        public void RemoveTile(IEnumerable<Vector3> positions)
         {
             this.Updating?.Invoke(this, new EventArgs());
 
@@ -471,7 +510,29 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 var navmesh = agentQ.NavMesh;
 
-                navmesh.RemoveTileAtPosition(position, Input, Settings);
+                List<UpdateTileData> tiles = new List<UpdateTileData>();
+
+                foreach (var position in positions)
+                {
+                    NavMesh.GetTileAtPosition(position, Input, Settings, out var tx, out var ty, out var bbox);
+
+                    if (!tiles.Any(t => t.X == tx && t.Y == ty))
+                    {
+                        UpdateTileData v = new UpdateTileData()
+                        {
+                            X = tx,
+                            Y = ty,
+                            BoundingBox = bbox,
+                        };
+
+                        tiles.Add(v);
+                    }
+                }
+
+                foreach (var tile in tiles)
+                {
+                    navmesh.RemoveTileAtPosition(tile.X, tile.Y, Settings);
+                }
             }
 
             this.Updated?.Invoke(this, new EventArgs());
@@ -482,7 +543,31 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="position">Position</param>
         public void UpdateAt(Vector3 position)
         {
-            this.BuildTile(position);
+            this.BuildTile(new[] { position });
+        }
+        /// <summary>
+        /// Updates the graph at specified position list
+        /// </summary>
+        /// <param name="positions">Position list</param>
+        public void UpdateAt(IEnumerable<Vector3> positions)
+        {
+            this.BuildTile(positions);
+        }
+        /// <summary>
+        /// Removes the graph node at specified position
+        /// </summary>
+        /// <param name="position">Position</param>
+        public void RemoveAt(Vector3 position)
+        {
+            RemoveTile(new[] { position });
+        }
+        /// <summary>
+        /// Removes the graph node at specified position list
+        /// </summary>
+        /// <param name="positions">Position list</param>
+        public void RemoveAt(IEnumerable<Vector3> positions)
+        {
+            RemoveTile(positions);
         }
 
         /// <summary>
@@ -840,7 +925,12 @@ namespace Engine.PathFinding.RecastNavigation
             }
         }
 
-
+        /// <summary>
+        /// Adds a new crowd
+        /// </summary>
+        /// <param name="maxAgents">Max agents in the crowd</param>
+        /// <param name="agent">Agent type</param>
+        /// <returns>Returns the new crowd</returns>
         public Crowd AddCrowd(int maxAgents, Agent agent)
         {
             var navMesh = AgentQueries.Find(a => agent.Equals(a.Agent))?.NavMesh;
@@ -852,6 +942,12 @@ namespace Engine.PathFinding.RecastNavigation
 
             return cr;
         }
+        /// <summary>
+        /// Request move all agents in the crowd
+        /// </summary>
+        /// <param name="crowd">Crowd</param>
+        /// <param name="agent">Agent type</param>
+        /// <param name="p">Destination position</param>
         public void RequestMoveCrowd(Crowd crowd, AgentType agent, Vector3 p)
         {
             //Find agent query
@@ -870,6 +966,13 @@ namespace Engine.PathFinding.RecastNavigation
                 }
             }
         }
+        /// <summary>
+        /// Request move a single crowd agent
+        /// </summary>
+        /// <param name="crowd">Crowd</param>
+        /// <param name="crowdAgent">Agent</param>
+        /// <param name="agent">Agent type</param>
+        /// <param name="p">Destination position</param>
         public void RequestMoveAgent(Crowd crowd, int crowdAgent, AgentType agent, Vector3 p)
         {
             //Find agent query
@@ -885,6 +988,5 @@ namespace Engine.PathFinding.RecastNavigation
                 crowd.RequestMoveTarget(crowdAgent, poly, nP);
             }
         }
-
     }
 }

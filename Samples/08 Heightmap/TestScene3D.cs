@@ -1136,8 +1136,9 @@ namespace Heightmap
             nmsettings.EdgeMaxError = 1.0f;
 
             //Tiling
-            nmsettings.BuildMode = BuildModes.TempObstacles;
+            nmsettings.BuildMode = BuildModes.Tiled;
             nmsettings.TileSize = 16;
+            nmsettings.UseTileCache = false;
 
             nmsettings.Bounds = new BoundingBox(
                 new Vector3(-100, -100, -100),
