@@ -87,7 +87,7 @@ namespace Engine.PathFinding.RecastNavigation
             NavMeshQuery navQuery, QueryFilter filter, Vector3 polyPickExt,
             PathFindingMode mode,
             Vector3 startPos, Vector3 endPos,
-            out Vector3[] resultPath)
+            out IEnumerable<Vector3> resultPath)
         {
             resultPath = null;
 
@@ -268,7 +268,7 @@ namespace Engine.PathFinding.RecastNavigation
             NavMeshQuery navQuery, QueryFilter filter,
             Vector3 startPos, Vector3 endPos,
             int startRef, int endRef,
-            out Vector3[] resultPath)
+            out IEnumerable<Vector3> resultPath)
         {
             resultPath = null;
 
@@ -292,7 +292,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                 if (straightPath.Count > 0)
                 {
-                    resultPath = straightPath.Path;
+                    resultPath = straightPath.GetPaths();
 
                     return true;
                 }
@@ -340,15 +340,15 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             target.PointCount = steerPath.Count;
-            target.Points = steerPath.Path;
+            target.Points = steerPath.GetPaths().ToArray();
 
             // Find vertex far enough to steer to.
             int ns = 0;
             while (ns < steerPath.Count)
             {
                 // Stop at Off-Mesh link or when point is further than slop away.
-                if ((steerPath.Flags[ns] & StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION) != 0 ||
-                    !InRange(steerPath.Path[ns], startPos, minTargetDist, 1000.0f))
+                if ((steerPath.GetFlag(ns) & StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION) != 0 ||
+                    !InRange(steerPath.GetPath(ns), startPos, minTargetDist, 1000.0f))
                 {
                     break;
                 }
@@ -360,12 +360,12 @@ namespace Engine.PathFinding.RecastNavigation
                 return false;
             }
 
-            var pos = steerPath.Path[ns];
+            var pos = steerPath.GetPath(ns);
             pos.Y = startPos.Y;
 
             target.Position = pos;
-            target.Flag = steerPath.Flags[ns];
-            target.Ref = steerPath.Refs[ns];
+            target.Flag = steerPath.GetFlag(ns);
+            target.Ref = steerPath.GetRef(ns);
 
             return true;
         }
@@ -575,7 +575,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="agent">Agent type</param>
         /// <returns>Returns the node collection for the agent type</returns>
-        public IGraphNode[] GetNodes(AgentType agent)
+        public IEnumerable<IGraphNode> GetNodes(AgentType agent)
         {
             List<GraphNode> nodes = new List<GraphNode>();
 
@@ -596,7 +596,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="from">Start point</param>
         /// <param name="to">End point</param>
         /// <returns>Return path if exists</returns>
-        public Vector3[] FindPath(AgentType agent, Vector3 from, Vector3 to)
+        public IEnumerable<Vector3> FindPath(AgentType agent, Vector3 from, Vector3 to)
         {
             var filter = new QueryFilter()
             {
@@ -612,7 +612,7 @@ namespace Engine.PathFinding.RecastNavigation
             var status = CalcPath(
                 graphQuery.CreateQuery(),
                 filter, new Vector3(2, 4, 2), PathFindingMode.TOOLMODE_PATHFIND_FOLLOW,
-                from, to, out Vector3[] result);
+                from, to, out var result);
 
             if (status.HasFlag(Status.DT_SUCCESS))
             {
@@ -630,9 +630,9 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="from">Start point</param>
         /// <param name="to">End point</param>
         /// <returns>Return path if exists</returns>
-        public async Task<Vector3[]> FindPathAsync(AgentType agent, Vector3 from, Vector3 to)
+        public async Task<IEnumerable<Vector3>> FindPathAsync(AgentType agent, Vector3 from, Vector3 to)
         {
-            Vector3[] result = new Vector3[] { };
+            IEnumerable<Vector3> result = new Vector3[] { };
 
             await Task.Run(() =>
             {
@@ -650,7 +650,7 @@ namespace Engine.PathFinding.RecastNavigation
                 var status = CalcPath(
                     graphQuery.CreateQuery(),
                     filter, new Vector3(2, 4, 2), PathFindingMode.TOOLMODE_PATHFIND_FOLLOW,
-                    from, to, out Vector3[] res);
+                    from, to, out var res);
 
                 if (status.HasFlag(Status.DT_SUCCESS))
                 {

@@ -3403,31 +3403,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         private Status AppendVertex(Vector3 pos, StraightPathFlagTypes flags, int r, int maxStraightPath, ref StraightPath straightPath)
         {
-            if ((straightPath.Count) > 0 && DetourUtils.Vequal(straightPath.Path[straightPath.Count - 1], pos))
+            if (straightPath.Count > 0 && DetourUtils.Vequal(straightPath.EndPath, pos))
             {
                 // The vertices are equal, update flags and poly.
-                if (straightPath.Flags != null)
-                {
-                    straightPath.Flags[straightPath.Count - 1] = flags;
-                }
-                if (straightPath.Refs != null)
-                {
-                    straightPath.Refs[straightPath.Count - 1] = r;
-                }
+                straightPath.SetFlags(straightPath.Count - 1, flags);
+                straightPath.SetRef(straightPath.Count - 1, r);
             }
             else
             {
                 // Append new vertex.
-                straightPath.Path[straightPath.Count] = pos;
-                if (straightPath.Flags != null)
-                {
-                    straightPath.Flags[straightPath.Count] = flags;
-                }
-                if (straightPath.Refs != null)
-                {
-                    straightPath.Refs[straightPath.Count] = r;
-                }
-                straightPath.Count++;
+                straightPath.Append(pos, flags, r);
 
                 // If there is no space to append more vertices, return.
                 if (straightPath.Count >= maxStraightPath)
@@ -3448,7 +3433,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         private Status AppendPortals(int startIdx, int endIdx, Vector3 endPos, int[] path, int maxStraightPath, StraightPathOptions options, ref StraightPath straightPath)
         {
-            Vector3 startPos = straightPath.Path[straightPath.Count - 1];
+            Vector3 startPos = straightPath.EndPath;
             // Append or update last vertex
             for (int i = startIdx; i < endIdx; i++)
             {

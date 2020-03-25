@@ -74,10 +74,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 return false;
             }
 
-            bool offMeshConnection = ag.Corners.Flags[ag.Corners.Count - 1].HasFlag(StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION);
+            bool offMeshConnection = ag.Corners.EndFlags.HasFlag(StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION);
             if (offMeshConnection)
             {
-                float distSq = Vector2.DistanceSquared(ag.NPos.XZ(), ag.Corners.Path[ag.Corners.Count - 1].XZ());
+                float distSq = Vector2.DistanceSquared(ag.NPos.XZ(), ag.Corners.EndPath.XZ());
                 if (distSq < radius * radius)
                 {
                     return true;
@@ -94,10 +94,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 return range;
             }
 
-            bool endOfPath = ag.Corners.Flags[ag.Corners.Count - 1].HasFlag(StraightPathFlagTypes.DT_STRAIGHTPATH_END);
+            bool endOfPath = ag.Corners.EndFlags.HasFlag(StraightPathFlagTypes.DT_STRAIGHTPATH_END);
             if (endOfPath)
             {
-                return Math.Min(Vector2.Distance(ag.NPos.XZ(), ag.Corners.Path[ag.Corners.Count - 1].XZ()), range);
+                return Math.Min(Vector2.Distance(ag.NPos.XZ(), ag.Corners.EndPath.XZ()), range);
             }
 
             return range;
@@ -114,8 +114,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             int ip0 = 0;
             int ip1 = Math.Min(1, ag.Corners.Count - 1);
-            Vector3 p0 = ag.Corners.Path[ip0];
-            Vector3 p1 = ag.Corners.Path[ip1];
+            Vector3 p0 = ag.Corners.GetPath(ip0);
+            Vector3 p1 = ag.Corners.GetPath(ip1);
 
             Vector3 dir0 = p0 - ag.NPos;
             Vector3 dir1 = p1 - ag.NPos;
@@ -145,20 +145,22 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 return;
             }
 
-            dir = ag.Corners.Path[0] - ag.NPos;
+            dir = ag.Corners.StartPath - ag.NPos;
             dir.Y = 0;
 
             dir.Normalize();
         }
 
-        public static int AddNeighbour(int idx, float dist, CrowdNeighbour[] neis, int nneis, int maxNeis)
+        public static int AddNeighbour(int idx, float dist, int maxNeis, CrowdNeighbour[] neis, int nneis)
         {
             // Insert neighbour based on the distance.
-            CrowdNeighbour nei;
             if (nneis <= 0)
             {
-                nei = new CrowdNeighbour();
-                neis[nneis] = nei;
+                neis[nneis] = new CrowdNeighbour()
+                {
+                    Idx = idx,
+                    Dist = dist,
+                };
             }
             else if (dist >= neis[nneis - 1].Dist)
             {
@@ -167,8 +169,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     return nneis;
                 }
 
-                nei = new CrowdNeighbour();
-                neis[nneis] = nei;
+                neis[nneis] = new CrowdNeighbour()
+                {
+                    Idx = idx,
+                    Dist = dist,
+                };
             }
             else
             {
@@ -189,32 +194,31 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     Array.ConstrainedCopy(neis, i, neis, tgt, n);
                 }
 
-                nei = neis[i];
+                neis[i].Idx = idx;
+                neis[i].Dist = idx;
             }
-
-            nei.Idx = idx;
-            nei.Dist = dist;
 
             return Math.Min(nneis + 1, maxNeis);
         }
 
-        public static int GetNeighbours(Vector3 pos, float height, float range, CrowdAgent skip, CrowdNeighbour[] result, int maxResult, CrowdAgent[] agents, ProximityGrid grid)
+        public static void GetNeighbours(CrowdAgent agent, int maxResult, ProximityGrid grid, CrowdAgent[] agents)
         {
+            Vector3 pos = agent.NPos;
+            float height = agent.Params.Height;
+            float range = agent.Params.CollisionQueryRange;
+
             int n = 0;
 
-            int MAX_NEIS = 32;
-            int nids = grid.QueryItems(
+            int[] ids = grid.QueryItems(
                 pos.X - range,
                 pos.Z - range,
                 pos.X + range,
-                pos.Z + range,
-                MAX_NEIS,
-                out int[] ids);
+                pos.Z + range);
 
-            for (int i = 0; i < nids; ++i)
+            for (int i = 0; i < ids.Length; ++i)
             {
                 var ag = agents[ids[i]];
-                if (ag == skip)
+                if (ag == agent)
                 {
                     continue;
                 }
@@ -232,10 +236,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     continue;
                 }
 
-                n = AddNeighbour(ids[i], distSqr, result, n, maxResult);
+                n = AddNeighbour(ids[i], distSqr, maxResult, agent.Neis, n);
             }
 
-            return n;
+            agent.NNeis = n;
         }
 
         public static int AddToOptQueue(CrowdAgent newag, CrowdAgent[] agents, int nagents, int maxAgents)
@@ -1209,15 +1213,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 }
 
                 // Query neighbour agents
-                ag.NNeis = GetNeighbours(
-                    ag.NPos,
-                    ag.Params.Height,
-                    ag.Params.CollisionQueryRange,
+                GetNeighbours(
                     ag,
-                    ag.Neis,
                     DT_CROWDAGENT_MAX_NEIGHBOURS,
-                    agents,
-                    m_grid);
+                    m_grid,
+                    agents);
 
                 for (int j = 0; j < ag.NNeis; j++)
                 {
@@ -1252,7 +1252,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 // Check to see if the corner after the next corner is directly visible, and short cut to there.
                 if (ag.Params.UpdateFlags.HasFlag(UpdateFlagTypes.DT_CROWD_OPTIMIZE_VIS) && ag.Corners.Count > 0)
                 {
-                    Vector3 target = ag.Corners.Path[Math.Min(1, ag.Corners.Count - 1)];
+                    Vector3 target = ag.Corners.GetPath(Math.Min(1, ag.Corners.Count - 1));
                     ag.Corridor.OptimizePathVisibility(
                         target,
                         ag.Params.PathOptimizationRange,
@@ -1304,7 +1304,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     int[] refs = new int[2];
                     if (ag.Corridor.MoveOverOffmeshConnection(
                         m_navquery,
-                        ag.Corners.Refs[ag.Corners.Count - 1],
+                        ag.Corners.EndRef,
                         refs,
                         out var startPos,
                         out var endPos))
@@ -1318,7 +1318,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                         anim.EndPos = endPos;
 
                         ag.State = CrowdAgentState.DT_CROWDAGENT_STATE_OFFMESH;
-                        ag.Corners.Count = 0;
+                        ag.Corners.Clear();
                         ag.NNeis = 0;
                     }
                     else

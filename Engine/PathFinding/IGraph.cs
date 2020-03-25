@@ -19,7 +19,7 @@ namespace Engine.PathFinding
         /// </summary>
         /// <param name="agent">Agent type</param>
         /// <returns>Returns the node collection for the agent type</returns>
-        IGraphNode[] GetNodes(AgentType agent);
+        IEnumerable<IGraphNode> GetNodes(AgentType agent);
         /// <summary>
         /// Find path from point to point for the specified agent type
         /// </summary>
@@ -27,7 +27,7 @@ namespace Engine.PathFinding
         /// <param name="from">Start point</param>
         /// <param name="to">End point</param>
         /// <returns>Return path if exists</returns>
-        Vector3[] FindPath(AgentType agent, Vector3 from, Vector3 to);
+        IEnumerable<Vector3> FindPath(AgentType agent, Vector3 from, Vector3 to);
         /// <summary>
         /// Find path from point to point for the specified agent type
         /// </summary>
@@ -35,7 +35,7 @@ namespace Engine.PathFinding
         /// <param name="from">Start point</param>
         /// <param name="to">End point</param>
         /// <returns>Return path if exists</returns>
-        Task<Vector3[]> FindPathAsync(AgentType agent, Vector3 from, Vector3 to);
+        Task<IEnumerable<Vector3>> FindPathAsync(AgentType agent, Vector3 from, Vector3 to);
         /// <summary>
         /// Gets wether the specified position is walkable for the specified agent type
         /// </summary>

@@ -1472,7 +1472,7 @@ namespace Engine
             }
 
             var path = this.NavigationGraph.FindPath(agent, from, to);
-            if (path.Length > 1)
+            if (path.Count() > 1)
             {
                 List<Vector3> positions;
                 List<Vector3> normals;
@@ -1480,7 +1480,7 @@ namespace Engine
                 if (delta == 0)
                 {
                     positions = new List<Vector3>(path);
-                    normals = new List<Vector3>(Helper.CreateArray(path.Length, Vector3.Up));
+                    normals = new List<Vector3>(Helper.CreateArray(path.Count(), Vector3.Up));
                 }
                 else
                 {
@@ -1526,7 +1526,7 @@ namespace Engine
             }
 
             var path = await this.NavigationGraph.FindPathAsync(agent, from, to);
-            if (path.Length > 1)
+            if (path.Count() > 1)
             {
                 List<Vector3> positions;
                 List<Vector3> normals;
@@ -1534,7 +1534,7 @@ namespace Engine
                 if (delta == 0)
                 {
                     positions = new List<Vector3>(path);
-                    normals = new List<Vector3>(Helper.CreateArray(path.Length, Vector3.Up));
+                    normals = new List<Vector3>(Helper.CreateArray(path.Count(), Vector3.Up));
                 }
                 else
                 {
@@ -1558,19 +1558,21 @@ namespace Engine
         /// <param name="delta">Control point path deltas</param>
         /// <param name="positions">Resulting positions</param>
         /// <param name="normals">Resulting normals</param>
-        private void ComputePath(Vector3[] path, float delta, out List<Vector3> positions, out List<Vector3> normals)
+        private void ComputePath(IEnumerable<Vector3> path, float delta, out List<Vector3> positions, out List<Vector3> normals)
         {
             positions = new List<Vector3>();
             normals = new List<Vector3>();
 
-            positions.Add(path[0]);
+            Vector3[] positionArray = path.ToArray();
+
+            positions.Add(positionArray[0]);
             normals.Add(Vector3.Up);
 
-            var p0 = path[0];
-            var p1 = path[1];
+            var p0 = positionArray[0];
+            var p1 = positionArray[1];
 
             int index = 0;
-            while (index < path.Length - 1)
+            while (index < positionArray.Length - 1)
             {
                 var s = p1 - p0;
                 var v = Vector3.Normalize(s) * delta;
@@ -1581,10 +1583,10 @@ namespace Engine
                     //Into de segment
                     p0 += v;
                 }
-                else if (index < path.Length - 2)
+                else if (index < positionArray.Length - 2)
                 {
                     //Next segment
-                    var p2 = path[index + 2];
+                    var p2 = positionArray[index + 2];
                     p0 = p1 + ((p2 - p1) * l);
                     p1 = p2;
 
@@ -1593,7 +1595,7 @@ namespace Engine
                 else
                 {
                     //End
-                    p0 = path[index + 1];
+                    p0 = positionArray[index + 1];
 
                     index++;
                 }

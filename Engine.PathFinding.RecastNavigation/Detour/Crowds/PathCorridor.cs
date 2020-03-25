@@ -51,8 +51,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             // Prune points in the beginning of the path which are too close.
             while (cornerPolys.Count > 0)
             {
-                if (cornerPolys.Flags[0].HasFlag(StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION) ||
-                    Vector2.DistanceSquared(cornerPolys.Path[0].XZ(), m_pos.XZ()) > (MIN_TARGET_DIST * MIN_TARGET_DIST))
+                if (cornerPolys.StartFlags.HasFlag(StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION) ||
+                    Vector2.DistanceSquared(cornerPolys.StartPath.XZ(), m_pos.XZ()) > (MIN_TARGET_DIST * MIN_TARGET_DIST))
                 {
                     break;
                 }
@@ -63,9 +63,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             // Prune points after an off-mesh connection.
             for (int i = 0; i < cornerPolys.Count; ++i)
             {
-                if (cornerPolys.Flags[i].HasFlag(StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION))
+                if (cornerPolys.GetFlag(i).HasFlag(StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION))
                 {
-                    cornerPolys.Count = i + 1;
+                    cornerPolys.Prune(i + 1);
                     break;
                 }
             }

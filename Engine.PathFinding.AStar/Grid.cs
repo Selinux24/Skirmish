@@ -100,7 +100,7 @@ namespace Engine.PathFinding.AStar
         /// </summary>
         /// <param name="agent">Agent type</param>
         /// <returns>Returns the node collection of the grid</returns>
-        public IGraphNode[] GetNodes(AgentType agent)
+        public IEnumerable<IGraphNode> GetNodes(AgentType agent)
         {
             return Array.ConvertAll(this.Nodes, (n) => { return (IGraphNode)n; });
         }
@@ -111,7 +111,7 @@ namespace Engine.PathFinding.AStar
         /// <param name="from">Start point</param>
         /// <param name="to">End point</param>
         /// <returns>Return path if exists</returns>
-        public Vector3[] FindPath(AgentType agent, Vector3 from, Vector3 to)
+        public IEnumerable<Vector3> FindPath(AgentType agent, Vector3 from, Vector3 to)
         {
             return AStarQuery.FindPath(this, from, to);
         }
@@ -122,7 +122,7 @@ namespace Engine.PathFinding.AStar
         /// <param name="from">Start point</param>
         /// <param name="to">End point</param>
         /// <returns>Return path if exists</returns>
-        public async Task<Vector3[]> FindPathAsync(AgentType agent, Vector3 from, Vector3 to)
+        public async Task<IEnumerable<Vector3>> FindPathAsync(AgentType agent, Vector3 from, Vector3 to)
         {
             Vector3[] result = new Vector3[] { };
 

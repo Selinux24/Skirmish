@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
@@ -130,16 +131,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 }
             }
         }
-        public int QueryItems(float minx, float miny, float maxx, float maxy, int maxIds, out int[] ids)
+        public int[] QueryItems(float minx, float miny, float maxx, float maxy)
         {
-            ids = new int[maxIds];
+            List<int> ids = new List<int>();
 
             int iminx = (int)Math.Floor(minx * m_invCellSize);
             int iminy = (int)Math.Floor(miny * m_invCellSize);
             int imaxx = (int)Math.Floor(maxx * m_invCellSize);
             int imaxy = (int)Math.Floor(maxy * m_invCellSize);
-
-            int n = 0;
 
             for (int y = iminy; y <= imaxy; ++y)
             {
@@ -147,34 +146,22 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 {
                     int h = HashPos2(x, y, m_bucketsSize);
                     int idx = m_buckets[h];
+
                     while (idx != int.MaxValue)
                     {
-                        Item item = m_pool[idx];
-                        if ((int)item.X == x && (int)item.Y == y)
+                        var item = m_pool[idx];
+
+                        if ((int)item.X == x && (int)item.Y == y && !ids.Contains(item.Id))
                         {
-                            // Check if the id exists already.
-                            int end = Array.IndexOf(ids, n);
-                            int i = 0;
-                            while (i != end && i != item.Id)
-                            {
-                                ++i;
-                            }
-                            // Item not found, add it.
-                            if (i == end)
-                            {
-                                if (n >= maxIds)
-                                {
-                                    return n;
-                                }
-                                ids[n++] = item.Id;
-                            }
+                            ids.Add(item.Id);
                         }
+
                         idx = item.Next;
                     }
                 }
             }
 
-            return n;
+            return ids.ToArray();
         }
         public int GetItemCountAt(int x, int y)
         {
