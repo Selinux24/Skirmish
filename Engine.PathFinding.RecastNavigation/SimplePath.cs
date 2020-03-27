@@ -355,7 +355,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// Gets the current path
         /// </summary>
         /// <returns>Returns the reference list array</returns>
-        public int[] GetPath()
+        public IEnumerable<int> GetPath()
         {
             return referenceList.Take(Count).ToArray();
         }

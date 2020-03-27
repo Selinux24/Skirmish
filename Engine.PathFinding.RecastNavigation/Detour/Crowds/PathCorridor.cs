@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 {
@@ -148,11 +149,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             int prevRef = 0;
             int polyRef = m_path.Start;
             int npos = 0;
-            int[] path = m_path.GetPath();
+            var path = m_path.GetPath();
             while (npos < m_path.Count && polyRef != offMeshConRef)
             {
                 prevRef = polyRef;
-                polyRef = path[npos];
+                polyRef = path.ElementAt(npos);
                 npos++;
             }
             if (npos == m_path.Count)
@@ -192,8 +193,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         {
             // Keep valid path as far as possible.
             int n = 0;
-            int[] path = m_path.GetPath();
-            while (n < m_path.Count && navquery.IsValidPolyRef(path[n], filter))
+            var path = m_path.GetPath();
+            while (n < m_path.Count && navquery.IsValidPolyRef(path.ElementAt(n), filter))
             {
                 n++;
             }
@@ -231,10 +232,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         {
             // Check that all polygons still pass query filter.
             int n = Math.Min(m_path.Count, maxLookAhead);
-            int[] path = m_path.GetPath();
+            var path = m_path.GetPath();
             for (int i = 0; i < n; ++i)
             {
-                if (!navquery.IsValidPolyRef(path[i], filter))
+                if (!navquery.IsValidPolyRef(path.ElementAt(i), filter))
                 {
                     return false;
                 }
