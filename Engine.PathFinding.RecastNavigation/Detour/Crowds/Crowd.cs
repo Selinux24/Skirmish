@@ -223,19 +223,19 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <summary>
         /// Maximum path result count
         /// </summary>
-        private readonly int m_maxPathResult = 256;
+        private readonly int m_maxPathResult;
         /// <summary>
         /// Sample velocity adaptative
         /// </summary>
-        private readonly bool m_sampleVelocityAdaptative = true;
+        private readonly bool m_sampleVelocityAdaptative;
         /// <summary>
         /// Collision resolve iteration count
         /// </summary>
-        private readonly int m_collisionResolveIterations = 4;
+        private readonly int m_collisionResolveIterations;
         /// <summary>
         /// Collision resolve factor
         /// </summary>
-        private readonly float m_collisionResolveFactor = 0.7f;
+        private readonly float m_collisionResolveFactor;
         /// <summary>
         /// Agent placement extents
         /// </summary>
