@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -28,7 +29,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <summary>
         /// Grid pool item
         /// </summary>
-        struct Item
+        public class Item
         {
             /// <summary>
             /// Item identifier
@@ -37,25 +38,33 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             /// <summary>
             /// X position
             /// </summary>
-            public float X { get; set; }
+            public int X { get; set; }
             /// <summary>
             /// Y position
             /// </summary>
-            public float Y { get; set; }
+            public int Y { get; set; }
             /// <summary>
             /// Next item in the pool
             /// </summary>
             public int Next { get; set; }
+            /// <summary>
+            /// Real item position
+            /// </summary>
+            public Vector3 RealPosition { get; set; }
+            /// <summary>
+            /// Item radius
+            /// </summary>
+            public float Radius { get; set; }
         };
 
         private readonly float m_cellSize;
         private readonly float m_invCellSize;
-        private readonly Item[] m_pool;
         private int m_poolHead;
+        private Item[] m_pool;
         private readonly int m_poolSize;
         private readonly int[] m_buckets;
         private readonly int m_bucketsSize;
-        private readonly int[] m_bounds;
+        private RectangleF m_bounds;
 
         /// <summary>
         /// Constructor
@@ -76,12 +85,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             m_poolHead = 0;
             m_pool = new Item[m_poolSize];
 
-            m_bounds = new[]
+            m_bounds = new RectangleF()
             {
-                int.MaxValue,
-                int.MaxValue,
-                int.MinValue,
-                int.MinValue
+                Left = float.MaxValue,
+                Top = float.MaxValue,
+                Right = float.MinValue,
+                Bottom = float.MinValue
             };
         }
 
@@ -93,23 +102,33 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             }
 
             m_poolHead = 0;
+            m_pool = new Item[m_poolSize];
 
-            m_bounds[0] = int.MaxValue;
-            m_bounds[1] = int.MaxValue;
-            m_bounds[2] = int.MinValue;
-            m_bounds[3] = int.MinValue;
+            m_bounds = new RectangleF()
+            {
+                Left = float.MaxValue,
+                Top = float.MaxValue,
+                Right = float.MinValue,
+                Bottom = float.MinValue
+            };
         }
-        public void AddItem(int id, float minx, float miny, float maxx, float maxy)
+        public void AddItem(int id, Vector3 position, float radius)
         {
-            int iminx = (int)Math.Floor(minx * m_invCellSize);
-            int iminy = (int)Math.Floor(miny * m_invCellSize);
-            int imaxx = (int)Math.Floor(maxx * m_invCellSize);
-            int imaxy = (int)Math.Floor(maxy * m_invCellSize);
+            Vector2 min = new Vector2(position.X - radius, position.Z - radius);
+            Vector2 max = new Vector2(position.X + radius, position.Z + radius);
 
-            m_bounds[0] = Math.Min(m_bounds[0], iminx);
-            m_bounds[1] = Math.Min(m_bounds[1], iminy);
-            m_bounds[2] = Math.Max(m_bounds[2], imaxx);
-            m_bounds[3] = Math.Max(m_bounds[3], imaxy);
+            m_bounds = new RectangleF()
+            {
+                Left = Math.Min(m_bounds.Left, min.X),
+                Top = Math.Min(m_bounds.Top, min.Y),
+                Right = Math.Max(m_bounds.Right, max.X),
+                Bottom = Math.Max(m_bounds.Bottom, max.Y)
+            };
+
+            int iminx = (int)Math.Floor(min.X * m_invCellSize);
+            int iminy = (int)Math.Floor(min.Y * m_invCellSize);
+            int imaxx = (int)Math.Floor(max.X * m_invCellSize);
+            int imaxy = (int)Math.Floor(max.Y * m_invCellSize);
 
             for (int y = iminy; y <= imaxy; ++y)
             {
@@ -118,27 +137,39 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     if (m_poolHead < m_poolSize)
                     {
                         int h = HashPos2(x, y, m_bucketsSize);
-                        int idx = m_poolHead;
-                        m_poolHead++;
-                        Item item = m_pool[idx];
-                        item.X = (short)x;
-                        item.Y = (short)y;
-                        item.Id = id;
-                        item.Next = m_buckets[h];
-                        m_pool[idx] = item;
+                        int idx = m_poolHead++;
+
+                        m_pool[idx] = new Item()
+                        {
+                            Id = id,
+                            X = x,
+                            Y = y,
+                            RealPosition = position,
+                            Radius = radius,
+                            Next = m_buckets[h],
+                        };
+
                         m_buckets[h] = idx;
                     }
                 }
             }
         }
-        public int[] QueryItems(float minx, float miny, float maxx, float maxy)
+        public IEnumerable<int> QueryItems(Vector3 position, float range)
         {
-            List<int> ids = new List<int>();
+            return QueryItems(position, range, out _);
+        }
+        public IEnumerable<int> QueryItems(Vector3 position, float range, out IEnumerable<Item> items)
+        {
+            Vector2 min = new Vector2(position.X - range, position.Z - range);
+            Vector2 max = new Vector2(position.X + range, position.Z + range);
 
-            int iminx = (int)Math.Floor(minx * m_invCellSize);
-            int iminy = (int)Math.Floor(miny * m_invCellSize);
-            int imaxx = (int)Math.Floor(maxx * m_invCellSize);
-            int imaxy = (int)Math.Floor(maxy * m_invCellSize);
+            List<int> ids = new List<int>();
+            List<Item> itemList = new List<Item>();
+
+            int iminx = (int)Math.Floor(min.X * m_invCellSize);
+            int iminy = (int)Math.Floor(min.Y * m_invCellSize);
+            int imaxx = (int)Math.Floor(max.X * m_invCellSize);
+            int imaxy = (int)Math.Floor(max.Y * m_invCellSize);
 
             for (int y = iminy; y <= imaxy; ++y)
             {
@@ -151,15 +182,18 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     {
                         var item = m_pool[idx];
 
-                        if ((int)item.X == x && (int)item.Y == y && !ids.Contains(item.Id))
+                        if (item.X == x && item.Y == y && !ids.Contains(item.Id))
                         {
                             ids.Add(item.Id);
+                            itemList.Add(item);
                         }
 
                         idx = item.Next;
                     }
                 }
             }
+
+            items = itemList.ToArray();
 
             return ids.ToArray();
         }
@@ -169,10 +203,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             int h = HashPos2(x, y, m_bucketsSize);
             int idx = m_buckets[h];
+
             while (idx != int.MaxValue)
             {
                 Item item = m_pool[idx];
-                if ((int)item.X == x && (int)item.Y == y)
+
+                if (item.X == x && item.Y == y)
                 {
                     n++;
                 }
@@ -182,9 +218,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             return n;
         }
-        public int[] GetBounds()
+        public RectangleF GetBounds()
         {
-            return m_bounds.ToArray();
+            return m_bounds;
         }
         public float GetCellSize()
         {

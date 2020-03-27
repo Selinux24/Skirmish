@@ -1,4 +1,7 @@
 ﻿using SharpDX;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 {
@@ -7,6 +10,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
     /// </summary>
     public class CrowdAgent
     {
+        private readonly List<CrowdNeighbour> neighbours = new List<CrowdNeighbour>();
+
         /// <summary>
         /// True if the agent is active, false if the agent is in an unused slot in the agent pool.
         /// </summary>
@@ -31,14 +36,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// Time since the agent's path corridor was optimized.
         /// </summary>
         public float TopologyOptTime { get; set; }
-        /// <summary>
-        /// The known neighbors of the agent.
-        /// </summary>
-        public CrowdNeighbour[] Neis { get; set; } = new CrowdNeighbour[Crowd.DT_CROWDAGENT_MAX_NEIGHBOURS];
-        /// <summary>
-        /// The number of neighbors.
-        /// </summary>
-        public int NNeis { get; set; }
         /// <summary>
         /// The desired speed.
         /// </summary>
@@ -106,6 +103,55 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         public CrowdAgent()
         {
             Corridor.Init(256);
+        }
+
+        /// <summary>
+        /// The known neighbors of the agent.
+        /// </summary>
+        public IEnumerable<CrowdNeighbour> GetNeighbours()
+        {
+            return neighbours.ToArray();
+        }
+
+        public void AddNeighbour(int idx, float dist)
+        {
+            if (neighbours.Count <= 0)
+            {
+                neighbours.Add(new CrowdNeighbour()
+                {
+                    Idx = idx,
+                    Dist = dist,
+                });
+            }
+            else if (dist >= neighbours.Last().Dist)
+            {
+                neighbours.Add(new CrowdNeighbour()
+                {
+                    Idx = idx,
+                    Dist = dist,
+                });
+            }
+            else
+            {
+                for (int i = 0; i < neighbours.Count; ++i)
+                {
+                    if (dist <= neighbours.ElementAt(i).Dist)
+                    {
+                        neighbours.Insert(i, new CrowdNeighbour()
+                        {
+                            Idx = idx,
+                            Dist = dist,
+                        });
+
+                        break;
+                    }
+                }
+            }
+        }
+
+        public void ClearNeighbours()
+        {
+            neighbours.Clear();
         }
     }
 }

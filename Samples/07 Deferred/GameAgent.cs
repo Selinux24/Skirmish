@@ -13,7 +13,7 @@ namespace Deferred
         /// <summary>
         /// Model
         /// </summary>
-        private readonly Model model;
+        private readonly ModelInstance model;
         /// <summary>
         /// Controller
         /// </summary>
@@ -23,7 +23,10 @@ namespace Deferred
         /// Agent type
         /// </summary>
         public AgentType AgentType { get; set; }
-
+        /// <summary>
+        /// Agent identifier
+        /// </summary>
+        public int Id { get; set; }
         /// <summary>
         /// Gets or sets if the agent is active
         /// </summary>
@@ -100,7 +103,7 @@ namespace Deferred
         /// <summary>
         /// Constructor
         /// </summary>
-        public GameAgent(AgentType agentType, Model model, T controller)
+        public GameAgent(AgentType agentType, ModelInstance model, T controller)
         {
             this.model = model;
             this.controller = controller;

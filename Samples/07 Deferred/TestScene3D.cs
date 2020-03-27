@@ -31,10 +31,7 @@ namespace Deferred
         private TextDrawer statistics = null;
 
         private Agent tankAgentType = null;
-        private GameAgent<SteerManipulatorController> tankAgent1 = null;
-        private GameAgent<SteerManipulatorController> tankAgent2 = null;
-        private int id1;
-        private int id2;
+        private readonly List<GameAgent<SteerManipulatorController>> tankAgents = new List<GameAgent<SteerManipulatorController>>();
         private Model helicopter = null;
         private ModelInstanced helicopters = null;
         private Scenery terrain = null;
@@ -58,8 +55,6 @@ namespace Deferred
         private bool onlyModels = true;
 
         private readonly Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
-
-        private readonly List<IUpdatable> agents = new List<IUpdatable>();
 
         private Guid uiId = Guid.NewGuid();
         private Guid assetsId = Guid.NewGuid();
@@ -162,35 +157,22 @@ namespace Deferred
         }
         private async Task InitializeTanks()
         {
-            var desc = new ModelDescription()
+            var desc = new ModelInstancedDescription()
             {
-                Name = "Tank",
+                Name = "Tanks",
                 CastShadow = true,
                 Content = new ContentDescription()
                 {
                     ContentFolder = "Resources",
                     ModelContentFilename = "leopard.xml",
-                }
+                },
+                Instances = 5,
             };
-            var tank1 = await this.AddComponentModel(desc);
-            tank1.Manipulator.SetScale(0.2f, true);
-            var tank2 = await this.AddComponentModel(desc);
-            tank2.Manipulator.SetScale(0.2f, true);
+            var tanks = await this.AddComponentModelInstanced(desc);
 
-            var tankController1 = new SteerManipulatorController()
-            {
-                MaximumForce = 0.5f,
-                MaximumSpeed = 7.5f,
-                ArrivingRadius = 7.5f,
-            };
-            var tankController2 = new SteerManipulatorController()
-            {
-                MaximumForce = 0.5f,
-                MaximumSpeed = 7.5f,
-                ArrivingRadius = 7.5f,
-            };
+            tanks[0].Manipulator.SetScale(0.2f, true);
+            var tankbbox = tanks[0].GetBoundingBox();
 
-            var tankbbox = tank1.GetBoundingBox();
             this.tankAgentType = new Agent()
             {
                 Height = tankbbox.GetY(),
@@ -198,13 +180,27 @@ namespace Deferred
                 MaxClimb = tankbbox.GetY() * 0.55f,
             };
 
-            this.tankAgent1 = new GameAgent<SteerManipulatorController>(this.tankAgentType, tank1, tankController1);
-            this.tankAgent2 = new GameAgent<SteerManipulatorController>(this.tankAgentType, tank2, tankController2);
-            agents.Add(this.tankAgent1);
-            agents.Add(this.tankAgent2);
+            for (int i = 0; i < tanks.InstanceCount; i++)
+            {
+                InitializeTank(tanks[i]);
+            }
+        }
+        private void InitializeTank(ModelInstance tank)
+        {
+            tank.Manipulator.SetScale(0.2f, true);
 
-            this.Lights.AddRange(this.tankAgent1.Lights);
-            this.Lights.AddRange(this.tankAgent2.Lights);
+            var tankController = new SteerManipulatorController()
+            {
+                MaximumForce = 0.5f,
+                MaximumSpeed = 7.5f,
+                ArrivingRadius = 7.5f,
+            };
+
+            var tankAgent = new GameAgent<SteerManipulatorController>(this.tankAgentType, tank, tankController);
+            
+            tankAgents.Add(tankAgent);
+
+            this.Lights.AddRange(tankAgent.Lights);
         }
         private async Task InitializeTerrain()
         {
@@ -320,7 +316,7 @@ namespace Deferred
             this.lineDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(
                 new PrimitiveListDrawerDescription<Line3D>()
                 {
-                    DepthEnabled = true,
+                    DepthEnabled = false,
                     Count = 1000,
                 },
                 SceneObjectUsages.None,
@@ -446,20 +442,15 @@ namespace Deferred
             cameraPosition = Vector3.Zero;
             modelCount = 0;
 
-            if (this.FindTopGroundPosition(20, 40, out PickingResult<Triangle> t1Pos))
+            for (int i = 0; i < tankAgents.Count; i++)
             {
-                this.tankAgent1.Manipulator.SetPosition(t1Pos.Position);
-                this.tankAgent1.Manipulator.SetNormal(t1Pos.Item.Normal);
-                cameraPosition += t1Pos.Position;
-                modelCount++;
-            }
-
-            if (this.FindTopGroundPosition(15, 35, out PickingResult<Triangle> t2Pos))
-            {
-                this.tankAgent2.Manipulator.SetPosition(t2Pos.Position);
-                this.tankAgent2.Manipulator.SetNormal(t2Pos.Item.Normal);
-                cameraPosition += t2Pos.Position;
-                modelCount++;
+                if (this.FindTopGroundPosition((i * 10) - (tankAgents.Count * 10 / 2), 40, out PickingResult<Triangle> t1Pos))
+                {
+                    tankAgents[i].Manipulator.SetPosition(t1Pos.Position);
+                    tankAgents[i].Manipulator.SetNormal(t1Pos.Item.Normal);
+                    cameraPosition += t1Pos.Position;
+                    modelCount++;
+                }
             }
 
             if (this.FindTopGroundPosition(20, -20, out PickingResult<Triangle> hPos))
@@ -515,7 +506,7 @@ namespace Deferred
                 return;
             }
 
-            this.agents.ForEach(a => a.Update(new Engine.Common.UpdateContext() { GameTime = gameTime }));
+            this.tankAgents.ForEach(a => a.Update(new Engine.Common.UpdateContext() { GameTime = gameTime }));
 
             bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
 
@@ -526,6 +517,8 @@ namespace Deferred
             UpdateInputHelicopterTexture();
             UpdateInputGraph();
             UpdateInputDebug(shift);
+
+            UpdateDebugProximityGridDrawer();
 
             UpdateLights(gameTime);
             UpdateTanks();
@@ -590,7 +583,7 @@ namespace Deferred
 
                     if (shift)
                     {
-                        graph.RequestMoveAgent(crowd, id1, tankAgentType, r.Position);
+                        graph.RequestMoveAgent(crowd, tankAgents[0].Id, tankAgentType, r.Position);
                     }
                     else
                     {
@@ -640,8 +633,12 @@ namespace Deferred
 
             if (this.Game.Input.KeyJustReleased(Keys.F9))
             {
-                this.tankAgent1.Active = this.tankAgent1.Visible = !this.tankAgent1.Visible;
-                this.tankAgent2.Active = this.tankAgent2.Visible = this.tankAgent1.Visible;
+                this.tankAgents[0].Active = this.tankAgents[0].Visible = !this.tankAgents[0].Visible;
+
+                for (int i = 1; i < tankAgents.Count; i++)
+                {
+                    this.tankAgents[i].Active = this.tankAgents[i].Visible = this.tankAgents[0].Visible;
+                }
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F10))
@@ -723,24 +720,17 @@ namespace Deferred
                 return;
             }
 
-            var cag1 = crowd.GetAgent(id1);
-            var pPos1 = this.tankAgent1.Manipulator.Position;
-
-            if (!Vector3.NearEqual(cag1.NPos, pPos1, new Vector3(0.001f)))
+            for (int i = 0; i < tankAgents.Count; i++)
             {
-                var tDir1 = cag1.NPos - pPos1;
-                this.tankAgent1.Manipulator.SetPosition(cag1.NPos);
-                this.tankAgent1.Manipulator.LookAt(cag1.NPos + tDir1);
-            }
+                var cag = crowd.GetAgent(tankAgents[i].Id);
+                var pPos = tankAgents[i].Manipulator.Position;
 
-            var cag2 = crowd.GetAgent(id2);
-            var pPos2 = this.tankAgent2.Manipulator.Position;
-
-            if (!Vector3.NearEqual(cag2.NPos, pPos2, new Vector3(0.001f)))
-            {
-                var tDir2 = cag2.NPos - pPos2;
-                this.tankAgent2.Manipulator.SetPosition(cag2.NPos);
-                this.tankAgent2.Manipulator.LookAt(cag2.NPos + tDir2);
+                if (!Vector3.NearEqual(cag.NPos, pPos, new Vector3(0.001f)))
+                {
+                    var tDir = cag.NPos - pPos;
+                    tankAgents[i].Manipulator.SetPosition(cag.NPos);
+                    tankAgents[i].Manipulator.LookAt(cag.NPos + tDir);
+                }
             }
         }
 
@@ -754,7 +744,7 @@ namespace Deferred
             }
             else
             {
-                this.lineDrawer.Visible = false;
+                this.lineDrawer.Clear(Color.White);
             }
 
             if (this.animateLights && this.Lights.PointLights.Length > 0)
@@ -972,6 +962,46 @@ namespace Deferred
                 this.bufferDrawer.ResizeSprite(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
             }
         }
+        private void UpdateDebugProximityGridDrawer()
+        {
+            if (crowd == null)
+            {
+                return;
+            }
+
+            List<Line3D> lines = new List<Line3D>();
+
+            var grid = crowd.GetGrid();
+
+            var rect = grid.GetBounds();
+
+            Vector2 c0 = new Vector2(rect.Left, rect.Top);
+            Vector2 c1 = new Vector2(rect.Right, rect.Top);
+            Vector2 c2 = new Vector2(rect.Right, rect.Bottom);
+            Vector2 c3 = new Vector2(rect.Left, rect.Bottom);
+            Vector2 ct = rect.Center;
+
+            this.FindFirstGroundPosition(c0.X, c0.Y, out var r0);
+            this.FindFirstGroundPosition(c1.X, c1.Y, out var r1);
+            this.FindFirstGroundPosition(c2.X, c2.Y, out var r2);
+            this.FindFirstGroundPosition(c3.X, c3.Y, out var r3);
+            this.FindFirstGroundPosition(ct.X, ct.Y, out var rt);
+
+
+            lines.AddRange(Line3D.CreateWiredSquare(new[] { r0.Position, r1.Position, r2.Position, r3.Position }));
+
+            float r = Vector3.Distance(r0.Position, r2.Position) * 0.5f;
+            grid.QueryItems(rt.Position, r, out var items);
+            foreach (var item in items)
+            {
+                lines.AddRange(Line3D.CreateCircle(item.RealPosition, item.Radius, 16));
+            }
+
+            lines.AddRange(Line3D.CreateCircle(rt.Position, r, 16));
+
+            lineDrawer.SetPrimitives(Color.Red, lines);
+            lineDrawer.Visible = true;
+        }
 
         public override void Draw(GameTime gameTime)
         {
@@ -1019,50 +1049,54 @@ namespace Deferred
             this.Lights.ClearSpotLights();
             this.spotLight = null;
 
-            this.Lights.AddRange(this.tankAgent1.Lights);
-            this.Lights.AddRange(this.tankAgent2.Lights);
+            for (int i = 0; i < tankAgents.Count; i++)
+            {
+                this.Lights.AddRange(tankAgents[i].Lights);
+            }
             this.Lights.AddRange(this.helicopter.Lights);
             for (int i = 0; i < this.helicopters.InstanceCount; i++)
             {
                 this.Lights.AddRange(this.helicopters[i].Lights);
             }
 
-            if (!modelsOnly)
+            if (modelsOnly)
             {
-                this.SetLightsPosition(castShadows);
+                return;
+            }
 
-                int sep = 10;
-                int f = 12;
-                int l = (f - 1) * sep;
-                l -= (l / 2);
+            this.SetLightsPosition(castShadows);
 
-                for (int i = 0; i < f; i++)
+            int sep = 10;
+            int f = 12;
+            int l = (f - 1) * sep;
+            l -= (l / 2);
+
+            for (int i = 0; i < f; i++)
+            {
+                for (int x = 0; x < f; x++)
                 {
-                    for (int x = 0; x < f; x++)
+                    Vector3 lightPosition = new Vector3((i * sep) - l, 1f, (x * sep) - l);
+
+                    if (this.FindTopGroundPosition((i * sep) - l, (x * sep) - l, out PickingResult<Triangle> r))
                     {
-                        Vector3 lightPosition = new Vector3((i * sep) - l, 1f, (x * sep) - l);
-
-                        if (this.FindTopGroundPosition((i * sep) - l, (x * sep) - l, out PickingResult<Triangle> r))
-                        {
-                            lightPosition = r.Position;
-                            lightPosition.Y += 1f;
-                        }
-
-                        var color = new Color4(Helper.RandomGenerator.NextFloat(0, 1), Helper.RandomGenerator.NextFloat(0, 1), Helper.RandomGenerator.NextFloat(0, 1), 1.0f);
-
-                        var pointLight = new SceneLightPoint(
-                            string.Format("Point {0}", this.Lights.PointLights.Length),
-                            castShadows,
-                            color,
-                            color,
-                            true,
-                            SceneLightPointDescription.Create(lightPosition, 5f, 10f))
-                        {
-                            State = Helper.RandomGenerator.NextFloat(0, 1) >= 0.5f ? 1 : -1
-                        };
-
-                        this.Lights.Add(pointLight);
+                        lightPosition = r.Position;
+                        lightPosition.Y += 1f;
                     }
+
+                    var color = new Color4(Helper.RandomGenerator.NextFloat(0, 1), Helper.RandomGenerator.NextFloat(0, 1), Helper.RandomGenerator.NextFloat(0, 1), 1.0f);
+
+                    var pointLight = new SceneLightPoint(
+                        string.Format("Point {0}", this.Lights.PointLights.Length),
+                        castShadows,
+                        color,
+                        color,
+                        true,
+                        SceneLightPointDescription.Create(lightPosition, 5f, 10f))
+                    {
+                        State = Helper.RandomGenerator.NextFloat(0, 1) >= 0.5f ? 1 : -1
+                    };
+
+                    this.Lights.Add(pointLight);
                 }
             }
         }
@@ -1113,11 +1147,13 @@ namespace Deferred
                     UpdateFlagTypes.DT_CROWD_ANTICIPATE_TURNS,
                 SeparationWeight = 2,
                 ObstacleAvoidanceType = 0,
-                QueryFilterType = 0
+                QueryFilterTypeIndex = 0
             };
 
-            id1 = crowd.AddAgent(tankAgent1.Manipulator.Position, par);
-            id2 = crowd.AddAgent(tankAgent2.Manipulator.Position, par);
+            for (int i = 0; i < tankAgents.Count; i++)
+            {
+                tankAgents[i].Id = crowd.AddAgent(tankAgents[i].Manipulator.Position, par);
+            }
         }
         private void UpdateGraphNodes(Agent agent)
         {
