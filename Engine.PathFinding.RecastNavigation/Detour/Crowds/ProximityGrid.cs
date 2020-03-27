@@ -1,14 +1,13 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 {
     /// <summary>
     /// Proximity grid
     /// </summary>
-    public class ProximityGrid
+    public class ProximityGrid<T> where T : class
     {
         private static int NextPow2(int v)
         {
@@ -26,44 +25,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             return ((x * 73856093) ^ (y * 19349663)) & (n - 1);
         }
 
-        /// <summary>
-        /// Grid pool item
-        /// </summary>
-        public class Item
-        {
-            /// <summary>
-            /// Item identifier
-            /// </summary>
-            public int Id { get; set; }
-            /// <summary>
-            /// X position
-            /// </summary>
-            public int X { get; set; }
-            /// <summary>
-            /// Y position
-            /// </summary>
-            public int Y { get; set; }
-            /// <summary>
-            /// Next item in the pool
-            /// </summary>
-            public int Next { get; set; }
-            /// <summary>
-            /// Real item position
-            /// </summary>
-            public Vector3 RealPosition { get; set; }
-            /// <summary>
-            /// Item radius
-            /// </summary>
-            public float Radius { get; set; }
-        };
-
         private readonly float m_cellSize;
         private readonly float m_invCellSize;
-        private int m_poolHead;
-        private Item[] m_pool;
-        private readonly int m_poolSize;
-        private readonly int[] m_buckets;
         private readonly int m_bucketsSize;
+        private readonly int[] m_buckets;
+        private readonly int m_poolSize;
+        private readonly ProximityGridItem<T>[] m_pool;
+        private int m_poolHead;
         private RectangleF m_bounds;
 
         /// <summary>
@@ -82,8 +50,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             // Allocate pool of items.
             m_poolSize = poolSize;
+            m_pool = new ProximityGridItem<T>[m_poolSize];
             m_poolHead = 0;
-            m_pool = new Item[m_poolSize];
 
             m_bounds = new RectangleF()
             {
@@ -94,25 +62,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             };
         }
 
-        public void Clear()
-        {
-            for (int i = 0; i < m_bucketsSize; i++)
-            {
-                m_buckets[i] = int.MaxValue;
-            }
-
-            m_poolHead = 0;
-            m_pool = new Item[m_poolSize];
-
-            m_bounds = new RectangleF()
-            {
-                Left = float.MaxValue,
-                Top = float.MaxValue,
-                Right = float.MinValue,
-                Bottom = float.MinValue
-            };
-        }
-        public void AddItem(int id, Vector3 position, float radius)
+        /// <summary>
+        /// Adds an item to the grid
+        /// </summary>
+        /// <param name="item">Item</param>
+        /// <param name="position">Position</param>
+        /// <param name="radius">Radius</param>
+        public void AddItem(T item, Vector3 position, float radius)
         {
             Vector2 min = new Vector2(position.X - radius, position.Z - radius);
             Vector2 max = new Vector2(position.X + radius, position.Z + radius);
@@ -139,9 +95,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                         int h = HashPos2(x, y, m_bucketsSize);
                         int idx = m_poolHead++;
 
-                        m_pool[idx] = new Item()
+                        m_pool[idx] = new ProximityGridItem<T>()
                         {
-                            Id = id,
+                            Item = item,
                             X = x,
                             Y = y,
                             RealPosition = position,
@@ -154,17 +110,54 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 }
             }
         }
-        public IEnumerable<int> QueryItems(Vector3 position, float range)
+        /// <summary>
+        /// Clears the grid
+        /// </summary>
+        public void Clear()
+        {
+            for (int i = 0; i < m_bucketsSize; i++)
+            {
+                m_buckets[i] = int.MaxValue;
+            }
+
+            m_poolHead = 0;
+            for (int i = 0; i < m_poolSize; i++)
+            {
+                m_pool[i] = null;
+            }
+
+            m_bounds = new RectangleF()
+            {
+                Left = float.MaxValue,
+                Top = float.MaxValue,
+                Right = float.MinValue,
+                Bottom = float.MinValue
+            };
+        }
+        /// <summary>
+        /// Query the items at position by range
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="range">Range</param>
+        /// <returns>Returns the in range item list</returns>
+        public IEnumerable<T> QueryItems(Vector3 position, float range)
         {
             return QueryItems(position, range, out _);
         }
-        public IEnumerable<int> QueryItems(Vector3 position, float range, out IEnumerable<Item> items)
+        /// <summary>
+        /// Query the items at position by range
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="range">Range</param>
+        /// <param name="items">Resulting grid items</param>
+        /// <returns>Returns the in range item list</returns>
+        public IEnumerable<T> QueryItems(Vector3 position, float range, out IEnumerable<ProximityGridItem<T>> items)
         {
             Vector2 min = new Vector2(position.X - range, position.Z - range);
             Vector2 max = new Vector2(position.X + range, position.Z + range);
 
-            List<int> ids = new List<int>();
-            List<Item> itemList = new List<Item>();
+            List<T> itemList = new List<T>();
+            List<ProximityGridItem<T>> pItemList = new List<ProximityGridItem<T>>();
 
             int iminx = (int)Math.Floor(min.X * m_invCellSize);
             int iminy = (int)Math.Floor(min.Y * m_invCellSize);
@@ -182,10 +175,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     {
                         var item = m_pool[idx];
 
-                        if (item.X == x && item.Y == y && !ids.Contains(item.Id))
+                        if (item.X == x && item.Y == y && !itemList.Contains(item.Item))
                         {
-                            ids.Add(item.Id);
-                            itemList.Add(item);
+                            itemList.Add(item.Item);
+                            pItemList.Add(item);
                         }
 
                         idx = item.Next;
@@ -193,10 +186,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 }
             }
 
-            items = itemList.ToArray();
+            items = pItemList.ToArray();
 
-            return ids.ToArray();
+            return itemList.ToArray();
         }
+        /// <summary>
+        /// Gets the item count at proximity grid coordinates
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        /// <returns>Returns the number of items</returns>
         public int GetItemCountAt(int x, int y)
         {
             int n = 0;
@@ -206,7 +205,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             while (idx != int.MaxValue)
             {
-                Item item = m_pool[idx];
+                var item = m_pool[idx];
 
                 if (item.X == x && item.Y == y)
                 {
@@ -218,10 +217,18 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             return n;
         }
+        /// <summary>
+        /// Gets the proximity grid bounds
+        /// </summary>
+        /// <returns>Returns a rectangle</returns>
         public RectangleF GetBounds()
         {
             return m_bounds;
         }
+        /// <summary>
+        /// Gets the proximity grid size
+        /// </summary>
+        /// <returns>Returns the size</returns>
         public float GetCellSize()
         {
             return m_cellSize;

@@ -18,42 +18,6 @@ namespace Engine.PathFinding.RecastNavigation
         public const int MAX_SMOOTH = 2048;
 
         /// <summary>
-        /// Graph item
-        /// </summary>
-        [Serializable]
-        class GraphItem
-        {
-            /// <summary>
-            /// Id counter
-            /// </summary>
-            private static int ID = 0;
-            /// <summary>
-            /// Gets the next Id
-            /// </summary>
-            /// <returns>Returns the next Id</returns>
-            private static int GetNextId()
-            {
-                return ++ID;
-            }
-
-            /// <summary>
-            /// Graph item id
-            /// </summary>
-            public readonly int Id;
-            /// <summary>
-            /// Index list per agent
-            /// </summary>
-            public Tuple<Agent, int>[] Indices { get; set; }
-
-            /// <summary>
-            /// Constructor
-            /// </summary>
-            public GraphItem()
-            {
-                this.Id = GetNextId();
-            }
-        }
-        /// <summary>
         /// Data to update tiles
         /// </summary>
         class UpdateTileData
@@ -396,6 +360,10 @@ namespace Engine.PathFinding.RecastNavigation
         /// Item indices
         /// </summary>
         private readonly List<GraphItem> itemIndices = new List<GraphItem>();
+        /// <summary>
+        /// Debug info
+        /// </summary>
+        private readonly Dictionary<Crowd, List<CrowdAgentDebugInfo>> debugInfo = new Dictionary<Crowd, List<CrowdAgentDebugInfo>>();
 
         /// <summary>
         /// Gets whether the graph is initialized
@@ -921,22 +889,22 @@ namespace Engine.PathFinding.RecastNavigation
 
             foreach (var crowd in Crowds)
             {
-                crowd.Update(gameTime.ElapsedSeconds, null);
+                debugInfo.TryGetValue(crowd, out var debug);
+
+                crowd.Update(gameTime.ElapsedSeconds, debug);
             }
         }
 
         /// <summary>
         /// Adds a new crowd
         /// </summary>
-        /// <param name="maxAgents">Max agents in the crowd</param>
-        /// <param name="agent">Agent type</param>
+        /// <param name="settings">Settings</param>
         /// <returns>Returns the new crowd</returns>
-        public Crowd AddCrowd(int maxAgents, Agent agent)
+        public Crowd AddCrowd(CrowdParameters settings)
         {
-            var navMesh = AgentQueries.Find(a => agent.Equals(a.Agent))?.NavMesh;
+            var navMesh = AgentQueries.Find(a => settings.Agent.Equals(a.Agent))?.NavMesh;
 
-            Crowd cr = new Crowd();
-            cr.Init(maxAgents, agent.Radius, navMesh);
+            Crowd cr = new Crowd(navMesh, settings);
 
             this.Crowds.Add(cr);
 
@@ -960,9 +928,9 @@ namespace Engine.PathFinding.RecastNavigation
                     return;
                 }
 
-                for (int i = 0; i < crowd.GetAgentCount(); i++)
+                foreach (var ag in crowd.GetAgents())
                 {
-                    crowd.RequestMoveTarget(i, poly, nP);
+                    crowd.RequestMoveTarget(ag, poly, nP);
                 }
             }
         }
@@ -973,7 +941,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="crowdAgent">Agent</param>
         /// <param name="agent">Agent type</param>
         /// <param name="p">Destination position</param>
-        public void RequestMoveAgent(Crowd crowd, int crowdAgent, AgentType agent, Vector3 p)
+        public void RequestMoveAgent(Crowd crowd, CrowdAgent crowdAgent, AgentType agent, Vector3 p)
         {
             //Find agent query
             var query = AgentQueries.Find(a => agent.Equals(a.Agent))?.CreateQuery();
@@ -987,6 +955,38 @@ namespace Engine.PathFinding.RecastNavigation
 
                 crowd.RequestMoveTarget(crowdAgent, poly, nP);
             }
+        }
+
+        /// <summary>
+        /// Enables debug info for crowd and agent
+        /// </summary>
+        /// <param name="crowd">Crowd</param>
+        /// <param name="crowdAgent">Agent</param>
+        public void EnableDebugInfo(Crowd crowd, CrowdAgent crowdAgent)
+        {
+            if (!debugInfo.ContainsKey(crowd))
+            {
+                debugInfo.Add(crowd, new List<CrowdAgentDebugInfo>());
+            }
+
+            if (!debugInfo[crowd].Any(l => l.Agent == crowdAgent))
+            {
+                debugInfo[crowd].Add(new CrowdAgentDebugInfo { Agent = crowdAgent });
+            }
+        }
+        /// <summary>
+        /// Disables debug info for crowd and agent
+        /// </summary>
+        /// <param name="crowd">Crowd</param>
+        /// <param name="crowdAgent">Agent</param>
+        public void DisableDebugInfo(Crowd crowd, CrowdAgent crowdAgent)
+        {
+            if (!debugInfo.ContainsKey(crowd))
+            {
+                return;
+            }
+
+            debugInfo[crowd].RemoveAll(l => l.Agent == crowdAgent);
         }
     }
 }

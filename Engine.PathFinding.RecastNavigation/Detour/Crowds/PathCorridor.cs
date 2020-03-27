@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 {
@@ -35,11 +36,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// Finds the corners in the corridor from the position toward the target. (The straightened path.)
         /// </summary>
         /// <param name="navquery">The query object used to build the corridor.</param>
-        /// <param name="filter">The filter to apply to the operation.</param>
         /// <param name="maxCorners">The maximum number of corners the buffers can hold.</param>
         /// <param name="cornerPolys">The corner list.</param>
         public void FindCorners(
-            NavMeshQuery navquery, QueryFilter filter, int maxCorners,
+            NavMeshQuery navquery, int maxCorners,
             out StraightPath cornerPolys)
         {
             float MIN_TARGET_DIST = 0.01f;
@@ -125,7 +125,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             navquery.InitSlicedFindPath(m_path.Start, m_path.End, m_pos, m_target, filter, FindPathOptions.DT_FINDPATH_ANY_ANGLE);
             navquery.UpdateSlicedFindPath(MAX_ITER, out int doneIters);
-            Status status = navquery.FinalizeSlicedFindPathPartial(MAX_RES, m_path.GetPath(), m_path.Count, out var res);
+            Status status = navquery.FinalizeSlicedFindPathPartial(MAX_RES, m_path.GetPath(), out var res);
 
             if (status == Status.DT_SUCCESS && res.Count > 0)
             {
@@ -353,7 +353,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// The corridor's path.
         /// </summary>
         /// <returns>The corridor's path. [(polyRef) * #getPathCount()]</returns>
-        public int[] GetPath()
+        public IEnumerable<int> GetPath()
         {
             return m_path.GetPath();
         }

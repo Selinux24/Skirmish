@@ -112,43 +112,27 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         {
             return neighbours.ToArray();
         }
-
-        public void AddNeighbour(int idx, float dist)
+        /// <summary>
+        /// Adds new neighbour to list, based on distance (nearest first)
+        /// </summary>
+        /// <param name="ag">Agent</param>
+        /// <param name="dist">Distance</param>
+        public void AddNeighbour(CrowdAgent ag, float dist)
         {
-            if (neighbours.Count <= 0)
+            neighbours.Add(new CrowdNeighbour()
             {
-                neighbours.Add(new CrowdNeighbour()
-                {
-                    Idx = idx,
-                    Dist = dist,
-                });
-            }
-            else if (dist >= neighbours.Last().Dist)
-            {
-                neighbours.Add(new CrowdNeighbour()
-                {
-                    Idx = idx,
-                    Dist = dist,
-                });
-            }
-            else
-            {
-                for (int i = 0; i < neighbours.Count; ++i)
-                {
-                    if (dist <= neighbours.ElementAt(i).Dist)
-                    {
-                        neighbours.Insert(i, new CrowdNeighbour()
-                        {
-                            Idx = idx,
-                            Dist = dist,
-                        });
+                Agent = ag,
+                Dist = dist,
+            });
 
-                        break;
-                    }
-                }
+            if (neighbours.Count > 1)
+            {
+                neighbours.Sort((n1, n2) => n1.Dist.CompareTo(n2.Dist));
             }
         }
-
+        /// <summary>
+        /// Clears the neighbour list
+        /// </summary>
         public void ClearNeighbours()
         {
             neighbours.Clear();

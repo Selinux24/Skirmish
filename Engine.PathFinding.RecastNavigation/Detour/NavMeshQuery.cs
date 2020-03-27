@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
     using Engine.PathFinding.RecastNavigation.Recast;
+    using System.Linq;
 
     /// <summary>
     /// Provides the ability to perform pathfinding related queries against a navigation mesh.
@@ -1052,15 +1053,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// Finalizes and returns the results of an incomplete sliced path query, returning the path to the furthest polygon on the existing path that was visited during the search.
         /// </summary>
         /// <param name="existing">An array of polygon references for the existing path.</param>
-        /// <param name="existingSize">The number of polygon in the existing array.</param>
         /// <param name="maxPath">The max number of polygons the @p path array can hold.</param>
         /// <param name="path">An ordered list of polygon references representing the path. (Start to end.)</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FinalizeSlicedFindPathPartial(int maxPath, int[] existing, int existingSize, out SimplePath path)
+        public Status FinalizeSlicedFindPathPartial(int maxPath, IEnumerable<int> existing, out SimplePath path)
         {
             path = null;
 
-            if (existing == null || existingSize <= 0 || maxPath <= 0)
+            if (existing?.Any() != true || maxPath <= 0)
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
@@ -1084,9 +1084,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 // Find furthest existing node that was visited.
                 Node prev = null;
                 Node node = null;
-                for (int i = existingSize - 1; i >= 0; --i)
+                for (int i = existing.Count() - 1; i >= 0; --i)
                 {
-                    m_nodePool.FindNodes(existing[i], out Node[] nodes, 1);
+                    m_nodePool.FindNodes(existing.ElementAt(i), out Node[] nodes, 1);
                     if (nodes != null)
                     {
                         node = nodes[0];
@@ -2983,6 +2983,17 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             randomRef = randomPolyRef;
 
             return Status.DT_SUCCESS;
+        }
+        /// <summary>
+        /// Finds the closest point on the specified polygon.
+        /// </summary>
+        /// <param name="r">The reference id of the polygon.</param>
+        /// <param name="pos">The position to check.</param>
+        /// <param name="closest">The closest point on the polygon.</param>
+        /// <returns>The status flags for the query.</returns>
+        public Status ClosestPointOnPoly(int r, Vector3 pos, out Vector3 closest)
+        {
+            return ClosestPointOnPoly(r, pos, out closest, out _);
         }
         /// <summary>
         /// Finds the closest point on the specified polygon.

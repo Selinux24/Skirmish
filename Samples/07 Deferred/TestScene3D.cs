@@ -197,7 +197,7 @@ namespace Deferred
             };
 
             var tankAgent = new GameAgent<SteerManipulatorController>(this.tankAgentType, tank, tankController);
-            
+
             tankAgents.Add(tankAgent);
 
             this.Lights.AddRange(tankAgent.Lights);
@@ -583,7 +583,7 @@ namespace Deferred
 
                     if (shift)
                     {
-                        graph.RequestMoveAgent(crowd, tankAgents[0].Id, tankAgentType, r.Position);
+                        graph.RequestMoveAgent(crowd, tankAgents[0].CrowdAgent, tankAgentType, r.Position);
                     }
                     else
                     {
@@ -722,7 +722,7 @@ namespace Deferred
 
             for (int i = 0; i < tankAgents.Count; i++)
             {
-                var cag = crowd.GetAgent(tankAgents[i].Id);
+                var cag = tankAgents[i].CrowdAgent;
                 var pPos = tankAgents[i].Manipulator.Position;
 
                 if (!Vector3.NearEqual(cag.NPos, pPos, new Vector3(0.001f)))
@@ -1132,7 +1132,9 @@ namespace Deferred
                 return;
             }
 
-            crowd = graph.AddCrowd(10, tankAgentType);
+            CrowdParameters settings = new CrowdParameters(tankAgentType, tankAgents.Count);
+
+            crowd = graph.AddCrowd(settings);
 
             var par = new CrowdAgentParams()
             {
@@ -1152,7 +1154,9 @@ namespace Deferred
 
             for (int i = 0; i < tankAgents.Count; i++)
             {
-                tankAgents[i].Id = crowd.AddAgent(tankAgents[i].Manipulator.Position, par);
+                tankAgents[i].CrowdAgent = crowd.AddAgent(tankAgents[i].Manipulator.Position, par);
+
+                graph.EnableDebugInfo(crowd, tankAgents[i].CrowdAgent);
             }
         }
         private void UpdateGraphNodes(Agent agent)

@@ -1,6 +1,7 @@
 ﻿using Engine;
 using Engine.Common;
 using Engine.PathFinding;
+using Engine.PathFinding.RecastNavigation.Detour.Crowds;
 using System.Collections.Generic;
 
 namespace Deferred
@@ -26,7 +27,7 @@ namespace Deferred
         /// <summary>
         /// Agent identifier
         /// </summary>
-        public int Id { get; set; }
+        public CrowdAgent CrowdAgent { get; set; }
         /// <summary>
         /// Gets or sets if the agent is active
         /// </summary>

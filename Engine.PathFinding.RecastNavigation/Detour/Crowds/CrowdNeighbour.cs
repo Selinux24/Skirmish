@@ -7,9 +7,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
     public class CrowdNeighbour
     {
         /// <summary>
-        /// The index of the neighbor in the crowd.
+        /// The crowd agent.
         /// </summary>
-        public int Idx { get; set; }
+        public CrowdAgent Agent { get; set; }
         /// <summary>
         /// The distance between the current agent and the neighbor.
         /// </summary>

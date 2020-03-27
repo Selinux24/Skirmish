@@ -2,6 +2,9 @@
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 {
+    /// <summary>
+    /// Path queue
+    /// </summary>
     public class PathQueue
     {
         public const int DT_PATHQ_INVALID = 0;
@@ -9,13 +12,25 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
         struct PathQuery
         {
+            /// <summary>
+            /// Queue reference
+            /// </summary>
             public int R { get; set; }
             /// <summary>
-            /// Path find start and end location.
+            /// Path find start location.
             /// </summary>
             public Vector3 StartPos { get; set; }
+            /// <summary>
+            /// Path find end location.
+            /// </summary>
             public Vector3 EndPos { get; set; }
+            /// <summary>
+            /// Start polygon reference
+            /// </summary>
             public int StartRef { get; set; }
+            /// <summary>
+            /// End polygon reference
+            /// </summary>
             public int EndRef { get; set; }
             /// <summary>
             /// Result.
@@ -25,47 +40,51 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             /// State.
             /// </summary>
             public Status Status { get; set; }
+            /// <summary>
+            /// Keep query alive
+            /// </summary>
             public int KeepAlive { get; set; }
+            /// <summary>
+            /// Query filter
+            /// </summary>
             public QueryFilter Filter { get; set; }
         };
 
+        /// <summary>
+        /// Navigation mesh query
+        /// </summary>
+        private readonly NavMeshQuery m_navquery;
+        /// <summary>
+        /// Queue
+        /// </summary>
         private readonly PathQuery[] m_queue = new PathQuery[MAX_QUEUE];
+        /// <summary>
+        /// Maximum path size
+        /// </summary>
+        private readonly int m_maxPathSize;
+        /// <summary>
+        /// Next reference handle
+        /// </summary>
         private int m_nextHandle;
-        private int m_maxPathSize;
+        /// <summary>
+        /// Queue head
+        /// </summary>
         private int m_queueHead;
-        private NavMeshQuery m_navquery;
 
-
-        public PathQueue()
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="nav">Navigation mesh</param>
+        /// <param name="maxPathSize">Maximum path size</param>
+        /// <param name="maxSearchNodeCount">Maximum search node count</param>
+        public PathQueue(NavMesh nav, int maxPathSize, int maxSearchNodeCount)
         {
             m_nextHandle = 1;
-            m_maxPathSize = 0;
-            m_queueHead = 0;
-            m_navquery = null;
-
-            for (int i = 0; i < MAX_QUEUE; ++i)
-            {
-                m_queue[i].Path = null;
-            }
-        }
-
-        private void Purge()
-        {
-            m_navquery?.Dispose();
-            m_navquery = null;
-            for (int i = 0; i < MAX_QUEUE; ++i)
-            {
-                m_queue[i].Path = null;
-            }
-        }
-        public bool Init(int maxPathSize, int maxSearchNodeCount, NavMesh nav)
-        {
-            Purge();
 
             m_navquery = new NavMeshQuery();
             if (m_navquery.Init(nav, maxSearchNodeCount) != Status.DT_SUCCESS)
             {
-                return false;
+                throw new EngineException($"Error initializing the NavMeshQuery");
             }
 
             m_maxPathSize = maxPathSize;
@@ -76,9 +95,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             }
 
             m_queueHead = 0;
-
-            return true;
         }
+
+        /// <summary>
+        /// Updates the path queue
+        /// </summary>
+        /// <param name="maxIters">Maximum number of iterations</param>
         public void Update(int maxIters)
         {
             int MAX_KEEP_ALIVE = 2; // in update ticks.
@@ -141,6 +163,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 m_queueHead++;
             }
         }
+        /// <summary>
+        /// Requests a new path
+        /// </summary>
+        /// <param name="startRef">Starting reference</param>
+        /// <param name="endRef">Ending reference</param>
+        /// <param name="startPos">Starting position</param>
+        /// <param name="endPos">Ending position</param>
+        /// <param name="filter">Query filter</param>
+        /// <returns>Returns the path index</returns>
         public int Request(int startRef, int endRef, Vector3 startPos, Vector3 endPos, QueryFilter filter)
         {
             // Find empty slot
@@ -179,6 +210,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             return r;
         }
+        /// <summary>
+        /// Gets the request status
+        /// </summary>
+        /// <param name="r">Reference</param>
+        /// <returns>Returns the request status</returns>
         public Status GetRequestStatus(int r)
         {
             for (int i = 0; i < MAX_QUEUE; ++i)
@@ -191,6 +227,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             return Status.DT_FAILURE;
         }
+        /// <summary>
+        /// Gets the path result
+        /// </summary>
+        /// <param name="r">Reference</param>
+        /// <param name="maxPath">Maximum path count</param>
+        /// <param name="path">The resulting path</param>
+        /// <returns>Returns the resulting status</returns>
         public Status GetPathResult(int r, int maxPath, out SimplePath path)
         {
             path = null;
@@ -215,10 +258,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             }
 
             return Status.DT_FAILURE;
-        }
-        public NavMeshQuery GetNavQuery()
-        {
-            return m_navquery;
         }
     }
 }

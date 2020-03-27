@@ -10,10 +10,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
     /// </summary>
     public class Crowd
     {
-        /// The maximum number of neighbors that a crowd agent can take into account
-        /// for steering decisions.
-        /// @ingroup crowd
-        public const int DT_CROWDAGENT_MAX_NEIGHBOURS = 6;
         /// The maximum number of corners a crowd agent will look ahead in the path.
         /// This value is used for sizing the crowd agent corner buffers.
         /// Due to the behavior of the crowd manager, the actual number of useful
@@ -31,11 +27,17 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// @see dtQueryFilter, dtCrowd::getFilter() dtCrowd::getEditableFilter(),
         ///		dtCrowdAgentParams::queryFilterType
         public const int DT_CROWD_MAX_QUERY_FILTER_TYPE = 16;
-
+        /// <summary>
+        /// The maximum number of iterations per update
+        /// </summary>
         public const int MAX_ITERS_PER_UPDATE = 100;
-
+        /// <summary>
+        /// The maximum number of path queue nodes
+        /// </summary>
         public const int MAX_PATHQUEUE_NODES = 4096;
-
+        /// <summary>
+        /// The maximum number of navigation mesh query nodes
+        /// </summary>
         public const int MAX_COMMON_NODES = 512;
 
 
@@ -151,7 +153,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             dir.Normalize();
         }
 
-        public static void GetNeighbours(CrowdAgent agent, int maxResult, ProximityGrid grid, IEnumerable<CrowdAgent> agents)
+        public static void GetNeighbours(CrowdAgent agent, ProximityGrid<CrowdAgent> grid)
         {
             Vector3 pos = agent.NPos;
             float height = agent.Params.Height;
@@ -159,11 +161,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             agent.ClearNeighbours();
 
-            var ids = grid.QueryItems(pos, range);
+            var queryAgents = grid.QueryItems(pos, range);
 
-            foreach (var id in ids)
+            foreach (var ag in queryAgents)
             {
-                var ag = agents.ElementAt(id);
                 if (ag == agent)
                 {
                     continue;
@@ -183,376 +184,354 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 }
 
                 // Insert neighbour based on the distance.
-                agent.AddNeighbour(id, distSqr);
+                agent.AddNeighbour(ag, distSqr);
             }
         }
 
-        public static void AddToOptQueue(CrowdAgent newag, List<CrowdAgent> queue)
-        {
-            // Insert neighbour based on greatest time.
-            if (queue.Count <= 0)
-            {
-                queue.Add(newag);
-            }
-            else if (newag.TopologyOptTime <= queue.Last().TopologyOptTime)
-            {
-                queue.Add(newag);
-            }
-            else
-            {
-                for (int i = 0; i < queue.Count; ++i)
-                {
-                    if (newag.TopologyOptTime >= queue[i].TopologyOptTime)
-                    {
-                        queue.Insert(i, newag);
-                        break;
-                    }
-                }
-            }
-        }
-
-        public static void AddToPathQueue(CrowdAgent newag, List<CrowdAgent> queue)
-        {
-            // Insert neighbour based on greatest time.
-            if (queue.Count <= 0)
-            {
-                queue.Add(newag);
-            }
-            else if (newag.TargetReplanTime <= queue.Last().TargetReplanTime)
-            {
-                queue.Add(newag);
-            }
-            else
-            {
-                for (int i = 0; i < queue.Count; ++i)
-                {
-                    if (newag.TargetReplanTime >= queue[i].TargetReplanTime)
-                    {
-                        queue.Insert(i, newag);
-                        break;
-                    }
-                }
-            }
-        }
-
-
-        private int m_maxAgents = 0;
+        /// <summary>
+        /// Navigation query
+        /// </summary>
+        private readonly NavMeshQuery m_navquery = null;
+        /// <summary>
+        /// Agent list
+        /// </summary>
         private readonly List<CrowdAgent> m_agents = new List<CrowdAgent>();
-        private readonly List<CrowdAgent> m_activeAgents = new List<CrowdAgent>();
-        private readonly List<CrowdAgentAnimation> m_agentAnims = new List<CrowdAgentAnimation>();
-
-        private PathQueue m_pathq = null;
-
-        private readonly ObstacleAvoidanceParams[] m_obstacleQueryParams = new ObstacleAvoidanceParams[DT_CROWD_MAX_OBSTAVOIDANCE_PARAMS];
-        private ObstacleAvoidanceQuery m_obstacleQuery = null;
-
-        private ProximityGrid m_grid = null;
-
-        private int m_maxPathResult = 0;
-
-        private Vector3 m_agentPlacementHalfExtents;
-
-        private QueryFilter[] m_filters = null;
-
+        /// <summary>
+        /// Agent animation dictionary
+        /// </summary>
+        private readonly Dictionary<CrowdAgent, CrowdAgentAnimation> m_agentAnims = new Dictionary<CrowdAgent, CrowdAgentAnimation>();
+        /// <summary>
+        /// Filter list
+        /// </summary>
+        private readonly List<QueryFilter> m_filters = new List<QueryFilter>();
+        /// <summary>
+        /// Obstacle query list
+        /// </summary>
+        private readonly List<ObstacleAvoidanceParams> m_obstacleQueryParams = new List<ObstacleAvoidanceParams>();
+        /// <summary>
+        /// Path queue
+        /// </summary>
+        private readonly PathQueue m_pathq = null;
+        /// <summary>
+        /// Obstacle avoidance query
+        /// </summary>
+        private readonly ObstacleAvoidanceQuery m_obstacleQuery = null;
+        /// <summary>
+        /// Proximity grid
+        /// </summary>
+        private readonly ProximityGrid<CrowdAgent> m_grid = null;
+        /// <summary>
+        /// Maximum path result count
+        /// </summary>
+        private readonly int m_maxPathResult = 256;
+        /// <summary>
+        /// Sample velocity adaptative
+        /// </summary>
+        private readonly bool m_sampleVelocityAdaptative = true;
+        /// <summary>
+        /// Collision resolve iteration count
+        /// </summary>
+        private readonly int m_collisionResolveIterations = 4;
+        /// <summary>
+        /// Collision resolve factor
+        /// </summary>
+        private readonly float m_collisionResolveFactor = 0.7f;
+        /// <summary>
+        /// Agent placement extents
+        /// </summary>
+        private readonly Vector3 m_agentPlacementHalfExtents;
+        /// <summary>
+        /// Velocity sample count
+        /// </summary>
         private int m_velocitySampleCount = 0;
-
-        private NavMeshQuery m_navquery = null;
-
-        private bool m_sampleVelocityAdaptative = true;
-
-        private int m_collisionResolveIterations = 4;
-
-        private float m_collisionResolveFactor = 0.7f;
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public Crowd()
+        /// <param name="nav">The navigation mesh to use for planning.</param>
+        /// <param name="settings">Settings</param>
+        public Crowd(NavMesh nav, CrowdParameters settings)
         {
+            m_maxPathResult = settings.MaxPathResult;
+            m_sampleVelocityAdaptative = settings.SampleVelocityAdaptative;
+            m_collisionResolveIterations = settings.CollisionResolveIterations;
+            m_collisionResolveFactor = settings.CollisionResolveFactor;
 
+            // Larger than agent radius because it is also used for agent recovery.
+            m_agentPlacementHalfExtents = new Vector3(settings.MaxAgentRadius * 2.0f, settings.MaxAgentRadius * 1.5f, settings.MaxAgentRadius * 2.0f);
+
+            m_grid = new ProximityGrid<CrowdAgent>(1000, settings.MaxAgentRadius * 3);
+
+            m_obstacleQuery = new ObstacleAvoidanceQuery();
+            if (!m_obstacleQuery.Init(6, 8))
+            {
+                throw new EngineException($"Error initializing the ObstacleAvoidanceQuery");
+            }
+
+            // Init filters
+            for (int i = 0; i < DT_CROWD_MAX_QUERY_FILTER_TYPE; i++)
+            {
+                QueryFilter filter = new QueryFilter()
+                {
+                    IncludeFlags = SamplePolyFlagTypes.SAMPLE_POLYFLAGS_WALK,
+                };
+
+                m_filters.Add(filter);
+            }
+
+            // Init obstacle query params.
+            for (int i = 0; i < DT_CROWD_MAX_OBSTAVOIDANCE_PARAMS; i++)
+            {
+                ObstacleAvoidanceParams param = new ObstacleAvoidanceParams
+                {
+                    VelBias = 0.4f,
+                    WeightDesVel = 2.0f,
+                    WeightCurVel = 0.75f,
+                    WeightSide = 0.75f,
+                    WeightToi = 2.5f,
+                    HorizTime = 2.5f,
+                    GridSize = 33,
+                    AdaptiveDivs = 7,
+                    AdaptiveRings = 2,
+                    AdaptiveDepth = 5
+                };
+
+                m_obstacleQueryParams.Add(param);
+            }
+
+            // Allocate temp buffer for merging paths.
+            m_pathq = new PathQueue(nav, m_maxPathResult, MAX_PATHQUEUE_NODES);
+
+            // The navquery is mostly used for local searches, no need for large node pool.
+            m_navquery = new NavMeshQuery();
+            if (m_navquery.Init(nav, MAX_COMMON_NODES) != Status.DT_SUCCESS)
+            {
+                throw new EngineException($"Error initializing the NavMeshQuery");
+            }
         }
 
-
-        private void UpdateTopologyOptimization(IEnumerable<CrowdAgent> agents, float dt)
+        /// <summary>
+        /// Adds a new agent to the crowd.
+        /// </summary>
+        /// <param name="pos">The requested position of the agent.</param>
+        /// <param name="param">The configutation of the agent.</param>
+        /// <returns>The new agent.</returns>
+        public CrowdAgent AddAgent(Vector3 pos, CrowdAgentParams param)
         {
+            // Find nearest position on navmesh and place the agent there.
+            Status status = m_navquery.FindNearestPoly(
+                pos, m_agentPlacementHalfExtents, m_filters[param.QueryFilterTypeIndex],
+                out int r, out Vector3 nearest);
+            if (status != Status.DT_SUCCESS)
+            {
+                nearest = pos;
+                r = 0;
+            }
+
+            CrowdAgentState state;
+            if (r > 0)
+            {
+                state = CrowdAgentState.DT_CROWDAGENT_STATE_WALKING;
+            }
+            else
+            {
+                state = CrowdAgentState.DT_CROWDAGENT_STATE_INVALID;
+            }
+
+            CrowdAgent ag = new CrowdAgent()
+            {
+                Params = param,
+                Partial = false,
+                TopologyOptTime = 0,
+                TargetReplanTime = 0,
+                DVel = Vector3.Zero,
+                NVel = Vector3.Zero,
+                Vel = Vector3.Zero,
+                NPos = nearest,
+                DesiredSpeed = 0,
+                State = state,
+                TargetState = MoveRequestState.DT_CROWDAGENT_TARGET_NONE,
+                Active = true,
+            };
+
+            ag.Corridor.Init(m_maxPathResult);
+            ag.Corridor.Reset(r, nearest);
+            ag.Boundary.Reset();
+            ag.ClearNeighbours();
+
+            m_agents.Add(ag);
+
+            return ag;
+        }
+        /// <summary>
+        /// Removes the agent from the crowd.
+        /// </summary>
+        /// <param name="ag">Agent to remove</param>
+        public void RemoveAgent(CrowdAgent ag)
+        {
+            if (ag == null)
+            {
+                return;
+            }
+
+            if (m_agents.Contains(ag))
+            {
+                m_agents.Remove(ag);
+            }
+        }
+        /// <summary>
+        /// Submits a new move request for the specified agent.
+        /// </summary>
+        /// <param name="ag">The agent.</param>
+        /// <param name="r">The position's polygon reference.</param>
+        /// <param name="pos">The position within the polygon.</param>
+        /// <returns>True if the request was successfully submitted.</returns>
+        public bool RequestMoveTarget(CrowdAgent ag, int r, Vector3 pos)
+        {
+            if (ag == null)
+            {
+                return false;
+            }
+
+            if (r == 0)
+            {
+                return false;
+            }
+
+            // Initialize request.
+            ag.TargetRef = r;
+            ag.TargetPos = pos;
+            ag.TargetPathqRef = PathQueue.DT_PATHQ_INVALID;
+            ag.TargetReplan = false;
+            if (ag.TargetRef > 0)
+            {
+                ag.TargetState = MoveRequestState.DT_CROWDAGENT_TARGET_REQUESTING;
+            }
+            else
+            {
+                ag.TargetState = MoveRequestState.DT_CROWDAGENT_TARGET_FAILED;
+            }
+
+            return true;
+        }
+        /// <summary>
+        /// Submits a new move request for the specified agent.
+        /// </summary>
+        /// <param name="ag">The agent.</param>
+        /// <param name="vel">The movement velocity. [(x, y, z)]</param>
+        /// <returns>True if the request was successfully submitted.</returns>
+        public bool RequestMoveVelocity(CrowdAgent ag, Vector3 vel)
+        {
+            if (ag == null)
+            {
+                return false;
+            }
+
+            // Initialize request.
+            ag.TargetRef = 0;
+            ag.TargetPos = vel;
+            ag.TargetPathqRef = PathQueue.DT_PATHQ_INVALID;
+            ag.TargetReplan = false;
+            ag.TargetState = MoveRequestState.DT_CROWDAGENT_TARGET_VELOCITY;
+
+            return true;
+        }
+        /// <summary>
+        /// Resets any request for the specified agent.
+        /// </summary>
+        /// <param name="ag">The agent.</param>
+        /// <returns>True if the request was successfully reseted.</returns>
+        public bool ResetMoveTarget(CrowdAgent ag)
+        {
+            if (ag == null)
+            {
+                return false;
+            }
+
+            // Initialize request.
+            ag.TargetRef = 0;
+            ag.TargetPos = Vector3.Zero;
+            ag.DVel = Vector3.Zero;
+            ag.TargetPathqRef = PathQueue.DT_PATHQ_INVALID;
+            ag.TargetReplan = false;
+            ag.TargetState = MoveRequestState.DT_CROWDAGENT_TARGET_NONE;
+
+            return true;
+        }
+        /// <summary>
+        /// Gets the agents int the agent pool.
+        /// </summary>
+        /// <returns>The collection of agents.</returns>
+        public IEnumerable<CrowdAgent> GetAgents()
+        {
+            return m_agents.ToArray();
+        }
+        /// <summary>
+        /// Gets the active agents int the agent pool.
+        /// </summary>
+        /// <returns>The collection of active agents.</returns>
+        public IEnumerable<CrowdAgent> GetActiveAgents()
+        {
+            var agents = m_agents.Where(a => a.Active);
+
+            return agents.ToArray();
+        }
+
+        /// <summary>
+        /// Updates the steering and positions of all agents.
+        /// </summary>
+        /// <param name="dt">The time, in seconds, to update the simulation. [Limit: > 0]</param>
+        /// <param name="debug">A debug object to load with debug information. [Opt]</param>
+        public void Update(float dt, IEnumerable<CrowdAgentDebugInfo> debug)
+        {
+            m_velocitySampleCount = 0;
+
+            var agents = GetActiveAgents();
             if (!agents.Any())
             {
                 return;
             }
 
-            float OPT_TIME_THR = 0.5f; // seconds
-            List<CrowdAgent> queue = new List<CrowdAgent>();
+            // Check that all agents still have valid paths.
+            CheckPathValidity(agents, dt);
 
-            foreach (var ag in agents)
+            // Update async move request and path finder.
+            UpdateMoveRequest();
+
+            // Optimize path topology.
+            UpdateTopologyOptimization(agents, dt);
+
+            // Register agents to proximity grid.
+            GridRegisterAgents(agents);
+
+            // Get nearby navmesh segments and agents to collide with.
+            FindColliders(agents);
+
+            // Find next corner to steer to.
+            FindNextCorner(agents, debug);
+
+            // Trigger off-mesh connections (depends on corners).
+            TriggerOffMeshConnections(agents);
+
+            // Calculate steering.
+            CalculateSteering(agents);
+
+            // Velocity planning.	
+            VelocityPlanning(agents, debug);
+
+            // Integrate.
+            IntegrateAgents(agents, dt);
+
+            // Handle collisions.
+            for (int iter = 0; iter < m_collisionResolveIterations; iter++)
             {
-                if (ag.State != CrowdAgentState.DT_CROWDAGENT_STATE_WALKING)
-                {
-                    continue;
-                }
-                if (ag.TargetState == MoveRequestState.DT_CROWDAGENT_TARGET_NONE ||
-                    ag.TargetState == MoveRequestState.DT_CROWDAGENT_TARGET_VELOCITY)
-                {
-                    continue;
-                }
-                if (!ag.Params.UpdateFlags.HasFlag(UpdateFlagTypes.DT_CROWD_OPTIMIZE_TOPO))
-                {
-                    continue;
-                }
-
-                ag.TopologyOptTime += dt;
-                if (ag.TopologyOptTime >= OPT_TIME_THR)
-                {
-                    AddToOptQueue(ag, queue);
-                }
+                HandleCollisions(agents);
             }
 
-            foreach (var ag in queue)
-            {
-                ag.Corridor.OptimizePathTopology(m_navquery, m_filters[ag.Params.QueryFilterTypeIndex]);
-                ag.TopologyOptTime = 0;
-            }
-        }
-        private void UpdateMoveRequest()
-        {
-            // Fire off new requests.
-            var queue = FireNewRequests();
+            MoveAgents(agents);
 
-            foreach (var ag in queue)
-            {
-                ag.TargetPathqRef = m_pathq.Request(
-                    ag.Corridor.GetLastPoly(),
-                    ag.TargetRef,
-                    ag.Corridor.GetTarget(),
-                    ag.TargetPos,
-                    m_filters[ag.Params.QueryFilterTypeIndex]);
-
-                if (ag.TargetPathqRef != PathQueue.DT_PATHQ_INVALID)
-                {
-                    ag.TargetState = MoveRequestState.DT_CROWDAGENT_TARGET_WAITING_FOR_PATH;
-                }
-            }
-
-            // Update requests.
-            m_pathq.Update(MAX_ITERS_PER_UPDATE);
-
-            // Process path results.
-            ProcessPathResults();
-        }
-        private IEnumerable<CrowdAgent> FireNewRequests()
-        {
-            List<CrowdAgent> queue = new List<CrowdAgent>();
-
-            for (int i = 0; i < m_maxAgents; ++i)
-            {
-                CrowdAgent ag = m_agents[i];
-                if (!ag.Active)
-                {
-                    continue;
-                }
-                if (ag.State == CrowdAgentState.DT_CROWDAGENT_STATE_INVALID)
-                {
-                    continue;
-                }
-                if (ag.TargetState == MoveRequestState.DT_CROWDAGENT_TARGET_NONE ||
-                    ag.TargetState == MoveRequestState.DT_CROWDAGENT_TARGET_VELOCITY)
-                {
-                    continue;
-                }
-
-                if (ag.TargetState == MoveRequestState.DT_CROWDAGENT_TARGET_REQUESTING)
-                {
-                    int[] path = ag.Corridor.GetPath();
-                    int npath = ag.Corridor.GetPathCount();
-                    if (npath <= 0)
-                    {
-                        Console.WriteLine($"Crowd.UpdateMoveRequest {ag} no path assigned;");
-                    }
-
-                    const int MAX_RES = 32;
-                    Vector3 reqPos = Vector3.Zero;
-                    SimplePath reqPath;
-
-                    // Quick search towards the goal.
-                    const int MAX_ITER = 20;
-                    m_navquery.InitSlicedFindPath(path[0], ag.TargetRef, ag.NPos, ag.TargetPos, m_filters[ag.Params.QueryFilterTypeIndex], FindPathOptions.DT_FINDPATH_ANY_ANGLE);
-                    m_navquery.UpdateSlicedFindPath(MAX_ITER, out var doneIters);
-
-                    Status qStatus;
-                    if (ag.TargetReplan) // && npath > 10)
-                    {
-                        // Try to use existing steady path during replan if possible.
-                        qStatus = m_navquery.FinalizeSlicedFindPathPartial(MAX_RES, path, npath, out reqPath);
-                    }
-                    else
-                    {
-                        // Try to move towards target when goal changes.
-                        qStatus = m_navquery.FinalizeSlicedFindPath(MAX_RES, out reqPath);
-                    }
-
-                    if (qStatus != Status.DT_FAILURE && reqPath.Count > 0)
-                    {
-                        // In progress or succeed.
-                        if (reqPath.End != ag.TargetRef)
-                        {
-                            // Partial path, constrain target position inside the last polygon.
-                            Status cStatus = m_navquery.ClosestPointOnPoly(reqPath.End, ag.TargetPos, out reqPos, out bool posOverPoly);
-                            if (cStatus != Status.DT_SUCCESS)
-                            {
-                                reqPath.Clear();
-                            }
-                        }
-                        else
-                        {
-                            reqPos = ag.TargetPos;
-                        }
-                    }
-
-                    if (reqPath?.Count <= 0)
-                    {
-                        // Could not find path, start the request from current location.
-                        reqPos = ag.NPos;
-                        reqPath.StartPath(path[0]);
-                    }
-
-                    ag.Corridor.SetCorridor(reqPos, reqPath);
-                    ag.Boundary.Reset();
-                    ag.Partial = false;
-
-                    if (reqPath?.End == ag.TargetRef)
-                    {
-                        ag.TargetState = MoveRequestState.DT_CROWDAGENT_TARGET_VALID;
-                        ag.TargetReplanTime = 0;
-                    }
-                    else
-                    {
-                        // The path is longer or potentially unreachable, full plan.
-                        ag.TargetState = MoveRequestState.DT_CROWDAGENT_TARGET_WAITING_FOR_QUEUE;
-                    }
-                }
-
-                if (ag.TargetState == MoveRequestState.DT_CROWDAGENT_TARGET_WAITING_FOR_QUEUE)
-                {
-                    AddToPathQueue(ag, queue);
-                }
-            }
-
-            return queue;
-        }
-        private void ProcessPathResults()
-        {
-            // Process path results.
-            for (int i = 0; i < m_maxAgents; ++i)
-            {
-                CrowdAgent ag = m_agents[i];
-
-                if (!ag.Active)
-                {
-                    continue;
-                }
-
-                if (ag.TargetState == MoveRequestState.DT_CROWDAGENT_TARGET_NONE ||
-                    ag.TargetState == MoveRequestState.DT_CROWDAGENT_TARGET_VELOCITY)
-                {
-                    continue;
-                }
-
-                if (ag.TargetState == MoveRequestState.DT_CROWDAGENT_TARGET_WAITING_FOR_PATH)
-                {
-                    // Poll path queue.
-                    Status rStatus = m_pathq.GetRequestStatus(ag.TargetPathqRef);
-                    if (rStatus != Status.DT_SUCCESS)
-                    {
-                        // Path find failed, retry if the target location is still valid.
-                        ag.TargetPathqRef = PathQueue.DT_PATHQ_INVALID;
-                        if (ag.TargetRef > 0)
-                        {
-                            ag.TargetState = MoveRequestState.DT_CROWDAGENT_TARGET_REQUESTING;
-                        }
-                        else
-                        {
-                            ag.TargetState = MoveRequestState.DT_CROWDAGENT_TARGET_FAILED;
-                        }
-
-                        ag.TargetReplanTime = 0;
-                    }
-                    else if (rStatus == Status.DT_SUCCESS)
-                    {
-                        int[] path = ag.Corridor.GetPath();
-                        int npath = ag.Corridor.GetPathCount();
-                        if (npath <= 0)
-                        {
-                            Console.WriteLine($"Crowd.UpdateMoveRequest {ag} no path assigned;");
-                        }
-
-                        // Apply results.
-                        Vector3 targetPos = ag.TargetPos;
-
-                        bool valid = true;
-                        Status prStatus = m_pathq.GetPathResult(ag.TargetPathqRef, m_maxPathResult, out SimplePath res);
-                        if (prStatus != Status.DT_SUCCESS || res.Count <= 0)
-                        {
-                            valid = false;
-                        }
-
-                        ag.Partial = prStatus.HasFlag(Status.DT_PARTIAL_RESULT);
-
-                        // Merge result and existing path.
-                        // The agent might have moved whilst the request is
-                        // being processed, so the path may have changed.
-                        // We assume that the end of the path is at the same location
-                        // where the request was issued.
-
-                        // The last ref in the old path should be the same as
-                        // the location where the request was issued..
-                        if (valid && path[npath - 1] != res.Start)
-                        {
-                            valid = false;
-                        }
-
-                        if (valid)
-                        {
-                            // Put the old path infront of the old path.
-                            if (npath > 1)
-                            {
-                                res.Merge(path, npath);
-                            }
-
-                            // Check for partial path.
-                            if (res.End != ag.TargetRef)
-                            {
-                                // Partial path, constrain target position inside the last polygon.
-                                Status cStatus = m_navquery.ClosestPointOnPoly(
-                                    res.End, targetPos,
-                                    out Vector3 nearest, out bool posOverPoly);
-                                if (cStatus == Status.DT_SUCCESS)
-                                {
-                                    targetPos = nearest;
-                                }
-                                else
-                                {
-                                    valid = false;
-                                }
-                            }
-                        }
-
-                        if (valid)
-                        {
-                            // Set current corridor.
-                            ag.Corridor.SetCorridor(targetPos, res);
-                            // Force to update boundary.
-                            ag.Boundary.Reset();
-                            ag.TargetState = MoveRequestState.DT_CROWDAGENT_TARGET_VALID;
-                        }
-                        else
-                        {
-                            // Something went wrong.
-                            ag.TargetState = MoveRequestState.DT_CROWDAGENT_TARGET_FAILED;
-                        }
-
-                        ag.TargetReplanTime = 0;
-                    }
-                }
-            }
+            // Update agents using off-mesh connection.
+            AnimateAgentsOverOffMeshConnection(dt);
         }
 
         private void CheckPathValidity(IEnumerable<CrowdAgent> agents, float dt)
@@ -572,7 +551,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 bool replan = false;
 
                 // First check that the current location is valid.
-                int idx = GetAgentIndex(ag);
                 Vector3 agentPos = ag.NPos;
                 int agentRef = ag.Corridor.GetFirstPoly();
                 if (!m_navquery.IsValidPolyRef(agentRef, m_filters[ag.Params.QueryFilterTypeIndex]))
@@ -654,26 +632,20 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 // Try to replan path to goal.
                 if (replan && ag.TargetState != MoveRequestState.DT_CROWDAGENT_TARGET_NONE)
                 {
-                    bool requested = RequestMoveTargetReplan(idx, ag.TargetRef, ag.TargetPos);
+                    bool requested = RequestMoveTargetReplan(ag, ag.TargetRef, ag.TargetPos);
                     if (!requested)
                     {
-                        Console.WriteLine($"RequestMoveTargetReplan error: {idx} {ag.TargetRef} {ag.TargetPos}");
+                        Console.WriteLine($"RequestMoveTargetReplan error: {m_agents.IndexOf(ag)} {ag.TargetRef} {ag.TargetPos}");
                     }
                 }
             }
         }
-        private int GetAgentIndex(CrowdAgent agent)
+        private bool RequestMoveTargetReplan(CrowdAgent ag, int r, Vector3 pos)
         {
-            return m_agents.IndexOf(agent);
-        }
-        private bool RequestMoveTargetReplan(int idx, int r, Vector3 pos)
-        {
-            if (idx < 0 || idx >= m_maxAgents)
+            if (ag == null)
             {
                 return false;
             }
-
-            CrowdAgent ag = m_agents[idx];
 
             // Initialize request.
             ag.TargetRef = r;
@@ -691,439 +663,305 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             return true;
         }
-        private void Purge()
+
+        private void UpdateMoveRequest()
         {
-            m_maxAgents = 0;
-            m_agents.Clear();
-            m_activeAgents.Clear();
-            m_agentAnims.Clear();
+            // Fire off new requests.
+            var queue = FireNewRequests();
 
-            m_grid = null;
-
-            m_obstacleQuery = null;
-
-            m_navquery = null;
-        }
-
-        /// <summary>
-        /// Initializes the crowd.  
-        /// </summary>
-        /// <param name="maxAgents">The maximum number of agents the crowd can manage. [Limit: >= 1]</param>
-        /// <param name="maxAgentRadius">The maximum radius of any agent that will be added to the crowd. [Limit: > 0]</param>
-        /// <param name="nav">The navigation mesh to use for planning.</param>
-        /// <returns>True if the initialization succeeded.</returns>
-        public bool Init(int maxAgents, float maxAgentRadius, NavMesh nav)
-        {
-            Purge();
-
-            m_maxAgents = maxAgents;
-
-            // Larger than agent radius because it is also used for agent recovery.
-            m_agentPlacementHalfExtents = new Vector3(maxAgentRadius * 2.0f, maxAgentRadius * 1.5f, maxAgentRadius * 2.0f);
-
-            m_grid = new ProximityGrid(m_maxAgents * 4, maxAgentRadius * 3);
-
-            m_obstacleQuery = new ObstacleAvoidanceQuery();
-            if (!m_obstacleQuery.Init(6, 8))
+            foreach (var ag in queue)
             {
-                return false;
-            }
+                ag.TargetPathqRef = m_pathq.Request(
+                    ag.Corridor.GetLastPoly(),
+                    ag.TargetRef,
+                    ag.Corridor.GetTarget(),
+                    ag.TargetPos,
+                    m_filters[ag.Params.QueryFilterTypeIndex]);
 
-            // Init filters
-            m_filters = Helper.CreateArray(DT_CROWD_MAX_QUERY_FILTER_TYPE, () => new QueryFilter()
-            {
-                IncludeFlags = SamplePolyFlagTypes.SAMPLE_POLYFLAGS_WALK,
-            });
-
-            // Init obstacle query params.
-            for (int i = 0; i < DT_CROWD_MAX_OBSTAVOIDANCE_PARAMS; ++i)
-            {
-                ObstacleAvoidanceParams param = new ObstacleAvoidanceParams
+                if (ag.TargetPathqRef != PathQueue.DT_PATHQ_INVALID)
                 {
-                    VelBias = 0.4f,
-                    WeightDesVel = 2.0f,
-                    WeightCurVel = 0.75f,
-                    WeightSide = 0.75f,
-                    WeightToi = 2.5f,
-                    HorizTime = 2.5f,
-                    GridSize = 33,
-                    AdaptiveDivs = 7,
-                    AdaptiveRings = 2,
-                    AdaptiveDepth = 5
-                };
-
-                m_obstacleQueryParams[i] = param;
-            }
-
-            // Allocate temp buffer for merging paths.
-            m_maxPathResult = 256;
-            m_pathq = new PathQueue();
-            if (!m_pathq.Init(m_maxPathResult, MAX_PATHQUEUE_NODES, nav))
-            {
-                return false;
-            }
-
-            for (int i = 0; i < m_maxAgents; ++i)
-            {
-                CrowdAgent agent = new CrowdAgent
-                {
-                    Active = false
-                };
-
-                if (!agent.Corridor.Init(m_maxPathResult))
-                {
-                    return false;
-                }
-
-                m_agents.Add(agent);
-            }
-
-            for (int i = 0; i < m_maxAgents; ++i)
-            {
-                CrowdAgentAnimation anim = new CrowdAgentAnimation
-                {
-                    Active = false,
-                };
-
-                m_agentAnims.Add(anim);
-            }
-
-            // The navquery is mostly used for local searches, no need for large node pool.
-            m_navquery = new NavMeshQuery();
-            if (m_navquery.Init(nav, MAX_COMMON_NODES) != Status.DT_SUCCESS)
-            {
-                return false;
-            }
-
-            return true;
-        }
-        /// <summary>
-        /// Sets the shared avoidance configuration for the specified index.
-        /// </summary>
-        /// <param name="idx">The index. [Limits: 0 <= value < #DT_CROWD_MAX_OBSTAVOIDANCE_PARAMS]</param>
-        /// <param name="param">The new configuration.</param>
-        public void SetObstacleAvoidanceParams(int idx, ObstacleAvoidanceParams param)
-        {
-            if (idx >= 0 && idx < DT_CROWD_MAX_OBSTAVOIDANCE_PARAMS)
-            {
-                m_obstacleQueryParams[idx] = param;
-            }
-        }
-        /// <summary>
-        /// Gets the shared avoidance configuration for the specified index.
-        /// </summary>
-        /// <param name="idx">The index of the configuration to retreive. [Limits:  0 <= value < #DT_CROWD_MAX_OBSTAVOIDANCE_PARAMS]</param>
-        /// <returns>The requested configuration.</returns>
-        public ObstacleAvoidanceParams GetObstacleAvoidanceParams(int idx)
-        {
-            if (idx >= 0 && idx < DT_CROWD_MAX_OBSTAVOIDANCE_PARAMS)
-            {
-                return m_obstacleQueryParams[idx];
-            }
-
-            return null;
-        }
-        /// <summary>
-        /// Gets the specified agent from the pool.
-        /// </summary>
-        /// <param name="idx">The agent index. [Limits: 0 <= value < #getAgentCount()]</param>
-        /// <returns>The requested agent.</returns>
-        public CrowdAgent GetAgent(int idx)
-        {
-            if (idx < 0 || idx >= m_maxAgents)
-            {
-                return null;
-            }
-
-            return m_agents[idx];
-        }
-        /// <summary>
-        /// Gets the specified agent from the pool.
-        /// </summary>
-        /// <param name="idx">The agent index. [Limits: 0 <= value < #getAgentCount()]</param>
-        /// <returns>The requested agent.</returns>
-        public CrowdAgent GetEditableAgent(int idx)
-        {
-            if (idx < 0 || idx >= m_maxAgents)
-            {
-                return null;
-            }
-
-            var res = m_agents[idx];
-            if (res.Active)
-            {
-                return res;
-            }
-
-            return null;
-        }
-        /// <summary>
-        /// The maximum number of agents that can be managed by the object.
-        /// </summary>
-        /// <returns>The maximum number of agents.</returns>
-        public int GetAgentCount()
-        {
-            return m_maxAgents;
-        }
-        /// <summary>
-        /// Adds a new agent to the crowd.
-        /// </summary>
-        /// <param name="pos">The requested position of the agent.</param>
-        /// <param name="param">The configutation of the agent.</param>
-        /// <returns>The index of the agent in the agent pool. Or -1 if the agent could not be added.</returns>
-        public int AddAgent(Vector3 pos, CrowdAgentParams param)
-        {
-            // Find empty slot.
-            int idx = -1;
-            for (int i = 0; i < m_maxAgents; ++i)
-            {
-                if (!m_agents[i].Active)
-                {
-                    idx = i;
-                    break;
+                    ag.TargetState = MoveRequestState.DT_CROWDAGENT_TARGET_WAITING_FOR_PATH;
                 }
             }
-            if (idx == -1)
+
+            // Update requests.
+            m_pathq.Update(MAX_ITERS_PER_UPDATE);
+
+            // Process path results.
+            ProcessPathResults();
+        }
+        private IEnumerable<CrowdAgent> FireNewRequests()
+        {
+            List<CrowdAgent> queue = new List<CrowdAgent>();
+
+            foreach (var ag in m_agents)
             {
-                return -1;
+                if (!ag.Active)
+                {
+                    continue;
+                }
+                if (ag.State == CrowdAgentState.DT_CROWDAGENT_STATE_INVALID)
+                {
+                    continue;
+                }
+                if (ag.TargetState == MoveRequestState.DT_CROWDAGENT_TARGET_NONE ||
+                    ag.TargetState == MoveRequestState.DT_CROWDAGENT_TARGET_VELOCITY)
+                {
+                    continue;
+                }
+
+                if (ag.TargetState == MoveRequestState.DT_CROWDAGENT_TARGET_REQUESTING)
+                {
+                    FireNewRequest(ag);
+                }
+
+                if (ag.TargetState == MoveRequestState.DT_CROWDAGENT_TARGET_WAITING_FOR_QUEUE)
+                {
+                    queue.Add(ag);
+                }
             }
 
-            CrowdAgent ag = m_agents[idx];
-
-            UpdateAgentParameters(idx, param);
-
-            // Find nearest position on navmesh and place the agent there.
-            Status status = m_navquery.FindNearestPoly(
-                pos, m_agentPlacementHalfExtents, m_filters[ag.Params.QueryFilterTypeIndex],
-                out int r, out Vector3 nearest);
-            if (status != Status.DT_SUCCESS)
+            if (queue.Count > 1)
             {
-                nearest = pos;
-                r = 0;
+                // Sort neighbours based on greatest time.
+                queue.Sort((a1, a2) => -a1.TargetReplanTime.CompareTo(a2.TargetReplanTime));
             }
 
-            ag.Corridor.Reset(r, nearest);
+            return queue;
+        }
+        private void FireNewRequest(CrowdAgent ag)
+        {
+            var path = ag.Corridor.GetPath();
+            if (!path.Any())
+            {
+                Console.WriteLine($"Crowd.UpdateMoveRequest {ag} no path assigned;");
+            }
+
+            const int MAX_RES = 32;
+            Vector3 reqPos = Vector3.Zero;
+            SimplePath reqPath;
+
+            // Quick search towards the goal.
+            const int MAX_ITER = 20;
+            m_navquery.InitSlicedFindPath(path.First(), ag.TargetRef, ag.NPos, ag.TargetPos, m_filters[ag.Params.QueryFilterTypeIndex], FindPathOptions.DT_FINDPATH_ANY_ANGLE);
+            m_navquery.UpdateSlicedFindPath(MAX_ITER, out _);
+
+            Status qStatus;
+            if (ag.TargetReplan) // && npath > 10)
+            {
+                // Try to use existing steady path during replan if possible.
+                qStatus = m_navquery.FinalizeSlicedFindPathPartial(MAX_RES, path, out reqPath);
+            }
+            else
+            {
+                // Try to move towards target when goal changes.
+                qStatus = m_navquery.FinalizeSlicedFindPath(MAX_RES, out reqPath);
+            }
+
+            if (qStatus != Status.DT_FAILURE && reqPath.Count > 0)
+            {
+                // In progress or succeed.
+                if (reqPath.End != ag.TargetRef)
+                {
+                    // Partial path, constrain target position inside the last polygon.
+                    Status cStatus = m_navquery.ClosestPointOnPoly(reqPath.End, ag.TargetPos, out reqPos);
+                    if (cStatus != Status.DT_SUCCESS)
+                    {
+                        reqPath.Clear();
+                    }
+                }
+                else
+                {
+                    reqPos = ag.TargetPos;
+                }
+            }
+
+            if (reqPath?.Count <= 0)
+            {
+                // Could not find path, start the request from current location.
+                reqPos = ag.NPos;
+                reqPath.StartPath(path.First());
+            }
+
+            ag.Corridor.SetCorridor(reqPos, reqPath);
             ag.Boundary.Reset();
             ag.Partial = false;
 
-            ag.TopologyOptTime = 0;
-            ag.TargetReplanTime = 0;
-            ag.ClearNeighbours();
-
-            ag.DVel = Vector3.Zero;
-            ag.NVel = Vector3.Zero;
-            ag.Vel = Vector3.Zero;
-            ag.NPos = nearest;
-
-            ag.DesiredSpeed = 0;
-
-            if (r > 0)
+            if (reqPath?.End == ag.TargetRef)
             {
-                ag.State = CrowdAgentState.DT_CROWDAGENT_STATE_WALKING;
+                ag.TargetState = MoveRequestState.DT_CROWDAGENT_TARGET_VALID;
+                ag.TargetReplanTime = 0;
             }
             else
             {
-                ag.State = CrowdAgentState.DT_CROWDAGENT_STATE_INVALID;
-            }
-
-            ag.TargetState = MoveRequestState.DT_CROWDAGENT_TARGET_NONE;
-
-            ag.Active = true;
-
-            return idx;
-        }
-        /// <summary>
-        /// Updates the specified agent's configuration.
-        /// </summary>
-        /// <param name="idx">The agent index. [Limits: 0 <= value < #getAgentCount()]</param>
-        /// <param name="param">The new agent configuration.</param>
-        public void UpdateAgentParameters(int idx, CrowdAgentParams param)
-        {
-            if (idx < 0 || idx >= m_maxAgents)
-            {
-                return;
-            }
-
-            m_agents[idx].Params = param;
-        }
-        /// <summary>
-        /// Removes the agent from the crowd.
-        /// </summary>
-        /// <param name="idx">The agent index. [Limits: 0 <= value < #getAgentCount()]</param>
-        public void RemoveAgent(int idx)
-        {
-            if (idx >= 0 && idx < m_maxAgents)
-            {
-                m_agents[idx].Active = false;
+                // The path is longer or potentially unreachable, full plan.
+                ag.TargetState = MoveRequestState.DT_CROWDAGENT_TARGET_WAITING_FOR_QUEUE;
             }
         }
-        /// <summary>
-        /// Submits a new move request for the specified agent.
-        /// </summary>
-        /// <param name="idx">The agent index. [Limits: 0 <= value < #getAgentCount()]</param>
-        /// <param name="r">The position's polygon reference.</param>
-        /// <param name="pos">The position within the polygon.</param>
-        /// <returns>True if the request was successfully submitted.</returns>
-        public bool RequestMoveTarget(int idx, int r, Vector3 pos)
+        private void ProcessPathResults()
         {
-            if (idx < 0 || idx >= m_maxAgents)
+            // Process path results.
+            foreach (var ag in m_agents)
             {
-                return false;
-            }
+                if (!ag.Active)
+                {
+                    continue;
+                }
 
-            if (r == 0)
-            {
-                return false;
-            }
+                if (ag.TargetState == MoveRequestState.DT_CROWDAGENT_TARGET_NONE ||
+                    ag.TargetState == MoveRequestState.DT_CROWDAGENT_TARGET_VELOCITY)
+                {
+                    continue;
+                }
 
-            CrowdAgent ag = m_agents[idx];
+                if (ag.TargetState == MoveRequestState.DT_CROWDAGENT_TARGET_WAITING_FOR_PATH)
+                {
+                    // Poll path queue.
+                    Status rStatus = m_pathq.GetRequestStatus(ag.TargetPathqRef);
+                    if (rStatus != Status.DT_SUCCESS)
+                    {
+                        // Path find failed, retry if the target location is still valid.
+                        ag.TargetPathqRef = PathQueue.DT_PATHQ_INVALID;
+                        if (ag.TargetRef > 0)
+                        {
+                            ag.TargetState = MoveRequestState.DT_CROWDAGENT_TARGET_REQUESTING;
+                        }
+                        else
+                        {
+                            ag.TargetState = MoveRequestState.DT_CROWDAGENT_TARGET_FAILED;
+                        }
 
-            // Initialize request.
-            ag.TargetRef = r;
-            ag.TargetPos = pos;
-            ag.TargetPathqRef = PathQueue.DT_PATHQ_INVALID;
-            ag.TargetReplan = false;
-            if (ag.TargetRef > 0)
-            {
-                ag.TargetState = MoveRequestState.DT_CROWDAGENT_TARGET_REQUESTING;
-            }
-            else
-            {
-                ag.TargetState = MoveRequestState.DT_CROWDAGENT_TARGET_FAILED;
-            }
+                        ag.TargetReplanTime = 0;
+                    }
+                    else if (rStatus == Status.DT_SUCCESS)
+                    {
+                        var path = ag.Corridor.GetPath();
+                        if (!path.Any())
+                        {
+                            Console.WriteLine($"Crowd.UpdateMoveRequest {ag} no path assigned;");
+                        }
 
-            return true;
+                        // Apply results.
+                        Vector3 targetPos = ag.TargetPos;
+
+                        bool valid = true;
+                        Status prStatus = m_pathq.GetPathResult(ag.TargetPathqRef, m_maxPathResult, out SimplePath res);
+                        if (prStatus != Status.DT_SUCCESS || res.Count <= 0)
+                        {
+                            valid = false;
+                        }
+
+                        ag.Partial = prStatus.HasFlag(Status.DT_PARTIAL_RESULT);
+
+                        // Merge result and existing path.
+                        // The agent might have moved whilst the request is
+                        // being processed, so the path may have changed.
+                        // We assume that the end of the path is at the same location
+                        // where the request was issued.
+
+                        // The last ref in the old path should be the same as
+                        // the location where the request was issued..
+                        if (valid && path.Last() != res.Start)
+                        {
+                            valid = false;
+                        }
+
+                        if (valid)
+                        {
+                            // Put the old path infront of the old path.
+                            if (path.Count() > 1)
+                            {
+                                res.Merge(path, path.Count());
+                            }
+
+                            // Check for partial path.
+                            if (res.End != ag.TargetRef)
+                            {
+                                // Partial path, constrain target position inside the last polygon.
+                                Status cStatus = m_navquery.ClosestPointOnPoly(res.End, targetPos, out Vector3 nearest);
+                                if (cStatus == Status.DT_SUCCESS)
+                                {
+                                    targetPos = nearest;
+                                }
+                                else
+                                {
+                                    valid = false;
+                                }
+                            }
+                        }
+
+                        if (valid)
+                        {
+                            // Set current corridor.
+                            ag.Corridor.SetCorridor(targetPos, res);
+                            // Force to update boundary.
+                            ag.Boundary.Reset();
+                            ag.TargetState = MoveRequestState.DT_CROWDAGENT_TARGET_VALID;
+                        }
+                        else
+                        {
+                            // Something went wrong.
+                            ag.TargetState = MoveRequestState.DT_CROWDAGENT_TARGET_FAILED;
+                        }
+
+                        ag.TargetReplanTime = 0;
+                    }
+                }
+            }
         }
-        /// <summary>
-        /// Submits a new move request for the specified agent.
-        /// </summary>
-        /// <param name="idx">The agent index. [Limits: 0 <= value < #getAgentCount()]</param>
-        /// <param name="vel">The movement velocity. [(x, y, z)]</param>
-        /// <returns>True if the request was successfully submitted.</returns>
-        public bool RequestMoveVelocity(int idx, Vector3 vel)
+
+        private void UpdateTopologyOptimization(IEnumerable<CrowdAgent> agents, float dt)
         {
-            if (idx < 0 || idx >= m_maxAgents)
-            {
-                return false;
-            }
-
-            CrowdAgent ag = m_agents[idx];
-
-            // Initialize request.
-            ag.TargetRef = 0;
-            ag.TargetPos = vel;
-            ag.TargetPathqRef = PathQueue.DT_PATHQ_INVALID;
-            ag.TargetReplan = false;
-            ag.TargetState = MoveRequestState.DT_CROWDAGENT_TARGET_VELOCITY;
-
-            return true;
-        }
-        /// <summary>
-        /// Resets any request for the specified agent.
-        /// </summary>
-        /// <param name="idx">The agent index. [Limits: 0 <= value < #getAgentCount()]</param>
-        /// <returns>True if the request was successfully reseted.</returns>
-        public bool ResetMoveTarget(int idx)
-        {
-            if (idx < 0 || idx >= m_maxAgents)
-            {
-                return false;
-            }
-
-            CrowdAgent ag = m_agents[idx];
-
-            // Initialize request.
-            ag.TargetRef = 0;
-            ag.TargetPos = Vector3.Zero;
-            ag.DVel = Vector3.Zero;
-            ag.TargetPathqRef = PathQueue.DT_PATHQ_INVALID;
-            ag.TargetReplan = false;
-            ag.TargetState = MoveRequestState.DT_CROWDAGENT_TARGET_NONE;
-
-            return true;
-        }
-        /// <summary>
-        /// Gets the active agents int the agent pool.
-        /// </summary>
-        /// <param name="maxAgents">An array of agent pointers. [(#dtCrowdAgent *) * maxAgents]</param>
-        /// <returns>The number of agents returned in @p agents.</returns>
-        public IEnumerable<CrowdAgent> GetActiveAgents(int maxAgents)
-        {
-            var agents = m_agents.Where(a => a.Active);
-
-            if (agents.Count() > maxAgents)
-            {
-                agents = agents.Take(maxAgents);
-            }
-
-            return agents.ToArray();
-        }
-
-        /// <summary>
-        /// Updates the steering and positions of all agents.
-        /// </summary>
-        /// <param name="dt">The time, in seconds, to update the simulation. [Limit: > 0]</param>
-        /// <param name="debug">A debug object to load with debug information. [Opt]</param>
-        public void Update(float dt, CrowdAgentDebugInfo debug)
-        {
-            m_velocitySampleCount = 0;
-
-            var agents = GetActiveAgents(m_maxAgents);
             if (!agents.Any())
             {
                 return;
             }
 
-            // Check that all agents still have valid paths.
-            CheckPathValidity(agents, dt);
+            float OPT_TIME_THR = 0.5f; // seconds
+            List<CrowdAgent> queue = new List<CrowdAgent>();
 
-            // Update async move request and path finder.
-            UpdateMoveRequest();
-
-            // Optimize path topology.
-            UpdateTopologyOptimization(agents, dt);
-
-            // Register agents to proximity grid.
-            GridRegisterAgents(agents);
-
-            // Get nearby navmesh segments and agents to collide with.
-            FindColliders(agents);
-
-            // Find next corner to steer to.
-            FindNextCorner(agents, debug);
-
-            // Trigger off-mesh connections (depends on corners).
-            TriggerOffMeshConnections(agents);
-
-            // Calculate steering.
-            CalculateSteering(agents);
-
-            // Velocity planning.	
-            VelocityPlanning(agents, debug);
-
-            // Integrate.
-            IntegrateAgents(agents, dt);
-
-            // Handle collisions.
-            for (int iter = 0; iter < m_collisionResolveIterations; iter++)
+            foreach (var ag in agents)
             {
-                HandleCollisions(agents);
+                if (ag.State != CrowdAgentState.DT_CROWDAGENT_STATE_WALKING)
+                {
+                    continue;
+                }
+                if (ag.TargetState == MoveRequestState.DT_CROWDAGENT_TARGET_NONE ||
+                    ag.TargetState == MoveRequestState.DT_CROWDAGENT_TARGET_VELOCITY)
+                {
+                    continue;
+                }
+                if (!ag.Params.UpdateFlags.HasFlag(UpdateFlagTypes.DT_CROWD_OPTIMIZE_TOPO))
+                {
+                    continue;
+                }
+
+                ag.TopologyOptTime += dt;
+                if (ag.TopologyOptTime >= OPT_TIME_THR)
+                {
+                    queue.Add(ag);
+                }
             }
 
-            MoveAgents(agents);
+            if (queue.Count > 1)
+            {
+                queue.Sort((a1, a2) => -a1.TopologyOptTime.CompareTo(a2.TopologyOptTime));
+            }
 
-            // Update agents using off-mesh connection.
-            AnimateAgentsOverOffMeshConnection(agents, dt);
+            foreach (var ag in queue)
+            {
+                ag.Corridor.OptimizePathTopology(m_navquery, m_filters[ag.Params.QueryFilterTypeIndex]);
+                ag.TopologyOptTime = 0;
+            }
         }
 
         private void GridRegisterAgents(IEnumerable<CrowdAgent> agents)
         {
             m_grid.Clear();
 
-            int i = 0;
             foreach (var ag in agents)
             {
-                m_grid.AddItem(i++, ag.NPos, ag.Params.Radius);
+                m_grid.AddItem(ag, ag.NPos, ag.Params.Radius);
             }
         }
 
@@ -1152,20 +990,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 }
 
                 // Query neighbour agents
-                GetNeighbours(
-                    ag,
-                    DT_CROWDAGENT_MAX_NEIGHBOURS,
-                    m_grid,
-                    agents);
-
-                foreach (var crowdNei in ag.GetNeighbours())
-                {
-                    crowdNei.Idx = GetAgentIndex(agents.ElementAt(crowdNei.Idx));
-                }
+                GetNeighbours(ag, m_grid);
             }
         }
 
-        private void FindNextCorner(IEnumerable<CrowdAgent> agents, CrowdAgentDebugInfo debug)
+        private void FindNextCorner(IEnumerable<CrowdAgent> agents, IEnumerable<CrowdAgentDebugInfo> debug)
         {
             foreach (var ag in agents)
             {
@@ -1182,7 +1011,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 // Find corners for steering
                 ag.Corridor.FindCorners(
                     m_navquery,
-                    m_filters[ag.Params.QueryFilterTypeIndex],
                     DT_CROWDAGENT_MAX_CORNERS,
                     out StraightPath straightPath);
 
@@ -1199,19 +1027,21 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                         m_filters[ag.Params.QueryFilterTypeIndex]);
 
                     // Copy data for debug purposes.
-                    if (debug?.Idx == ag)
+                    var d = debug?.FirstOrDefault(a => a.Agent == ag);
+                    if (d != null)
                     {
-                        debug.OptStart = ag.Corridor.GetPos();
-                        debug.OptEnd = target;
+                        d.OptStart = ag.Corridor.GetPos();
+                        d.OptEnd = target;
                     }
                 }
                 else
                 {
                     // Copy data for debug purposes.
-                    if (debug?.Idx == ag)
+                    var d = debug?.FirstOrDefault(a => a.Agent == ag);
+                    if (d != null)
                     {
-                        debug.OptStart = Vector3.Zero;
-                        debug.OptEnd = Vector3.Zero;
+                        d.OptStart = Vector3.Zero;
+                        d.OptEnd = Vector3.Zero;
                     }
                 }
             }
@@ -1236,8 +1066,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 if (OverOffmeshConnection(ag, triggerRadius))
                 {
                     // Prepare to off-mesh connection.
-                    int idx = m_agents.IndexOf(ag);
-                    CrowdAgentAnimation anim = m_agentAnims[idx];
+                    CrowdAgentAnimation anim = m_agentAnims[ag];
 
                     // Adjust the path over the off-mesh connection.
                     int[] refs = new int[2];
@@ -1319,7 +1148,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
                     foreach (var crowdNei in ag.GetNeighbours())
                     {
-                        CrowdAgent nei = m_agents[crowdNei.Idx];
+                        var nei = crowdNei.Agent;
 
                         Vector3 diff = ag.NPos - nei.NPos;
                         diff.Y = 0;
@@ -1360,7 +1189,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             }
         }
 
-        private void VelocityPlanning(IEnumerable<CrowdAgent> agents, CrowdAgentDebugInfo debug)
+        private void VelocityPlanning(IEnumerable<CrowdAgent> agents, IEnumerable<CrowdAgentDebugInfo> debug)
         {
             foreach (var ag in agents)
             {
@@ -1376,7 +1205,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     // Add neighbours as obstacles.
                     foreach (var crowdNei in ag.GetNeighbours())
                     {
-                        CrowdAgent nei = m_agents[crowdNei.Idx];
+                        var nei = crowdNei.Agent;
                         m_obstacleQuery.AddCircle(nei.NPos, nei.Params.Radius, nei.Vel, nei.DVel);
                     }
 
@@ -1395,7 +1224,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     int ns;
 
                     var param = m_obstacleQueryParams[ag.Params.ObstacleAvoidanceType];
-                    var vod = debug?.Idx == ag ? debug.Vod : null;
+                    var vod = debug?.FirstOrDefault(a => a.Agent == ag).Vod;
 
                     if (m_sampleVelocityAdaptative)
                     {
@@ -1454,8 +1283,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         {
             foreach (var ag in agents)
             {
-                int idx0 = GetAgentIndex(ag);
-
                 if (ag.State != CrowdAgentState.DT_CROWDAGENT_STATE_WALKING)
                 {
                     continue;
@@ -1467,8 +1294,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
                 foreach (var crowdNei in ag.GetNeighbours())
                 {
-                    CrowdAgent nei = m_agents[crowdNei.Idx];
-                    int idx1 = GetAgentIndex(nei);
+                    var nei = crowdNei.Agent;
 
                     Vector3 diff = ag.NPos - nei.NPos;
                     diff.Y = 0;
@@ -1485,7 +1311,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     if (dist < 0.0001f)
                     {
                         // Agents on top of each other, try to choose diverging separation directions.
-                        if (idx0 > idx1)
+                        if (m_agents.IndexOf(ag) > m_agents.IndexOf(nei))
                         {
                             diff = new Vector3(-ag.DVel.Z, 0, ag.DVel.X);
                         }
@@ -1547,16 +1373,18 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             }
         }
 
-        private void AnimateAgentsOverOffMeshConnection(IEnumerable<CrowdAgent> agents, float dt)
+        private void AnimateAgentsOverOffMeshConnection(float dt)
         {
-            for (int i = 0; i < m_maxAgents; ++i)
+            foreach (var agentAnim in m_agentAnims)
             {
-                CrowdAgentAnimation anim = m_agentAnims[i];
+                CrowdAgentAnimation anim = agentAnim.Value;
+
                 if (!anim.Active)
                 {
                     continue;
                 }
-                CrowdAgent ag = agents.ElementAt(i);
+
+                CrowdAgent ag = agentAnim.Key;
 
                 anim.T += dt;
                 if (anim.T > anim.TMax)
@@ -1591,20 +1419,49 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <summary>
         /// Gets the filter used by the crowd.
         /// </summary>
-        /// <param name="i"></param>
+        /// <param name="i">Filter index</param>
         /// <returns>The filter used by the crowd.</returns>
         public QueryFilter GetFilter(int i)
         {
             return (i >= 0 && i < DT_CROWD_MAX_QUERY_FILTER_TYPE) ? m_filters[i] : null;
         }
         /// <summary>
-        /// Gets the filter used by the crowd.
+        /// Sets the filter for the specified index.
         /// </summary>
-        /// <param name="i"></param>
-        /// <returns>The filter used by the crowd.</returns>
-        public QueryFilter GetEditableFilter(int i)
+        /// <param name="i">The index</param>
+        /// <param name="filter">The new filter</param>
+        public void SetFilter(int i, QueryFilter filter)
         {
-            return (i >= 0 && i < DT_CROWD_MAX_QUERY_FILTER_TYPE) ? m_filters[i] : null;
+            if (i >= 0 && i < DT_CROWD_MAX_QUERY_FILTER_TYPE)
+            {
+                m_filters[i] = filter;
+            }
+        }
+        /// <summary>
+        /// Gets the shared avoidance configuration for the specified index.
+        /// </summary>
+        /// <param name="i">The index of the configuration to retreive. [Limits:  0 <= value < #DT_CROWD_MAX_OBSTAVOIDANCE_PARAMS]</param>
+        /// <returns>The requested configuration.</returns>
+        public ObstacleAvoidanceParams GetObstacleAvoidanceParams(int i)
+        {
+            if (i >= 0 && i < DT_CROWD_MAX_OBSTAVOIDANCE_PARAMS)
+            {
+                return m_obstacleQueryParams[i];
+            }
+
+            return null;
+        }
+        /// <summary>
+        /// Sets the shared avoidance configuration for the specified index.
+        /// </summary>
+        /// <param name="i">The index. [Limits: 0 <= value < #DT_CROWD_MAX_OBSTAVOIDANCE_PARAMS]</param>
+        /// <param name="param">The new configuration.</param>
+        public void SetObstacleAvoidanceParams(int i, ObstacleAvoidanceParams param)
+        {
+            if (i >= 0 && i < DT_CROWD_MAX_OBSTAVOIDANCE_PARAMS)
+            {
+                m_obstacleQueryParams[i] = param;
+            }
         }
         /// <summary>
         /// Gets the search halfExtents [(x, y, z)] used by the crowd for query operations. 
@@ -1634,7 +1491,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// Gets the crowd's proximity grid.
         /// </summary>
         /// <returns>The crowd's proximity grid.</returns>
-        public ProximityGrid GetGrid()
+        public ProximityGrid<CrowdAgent> GetGrid()
         {
             return m_grid;
         }
