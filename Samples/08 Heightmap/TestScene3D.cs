@@ -1454,6 +1454,7 @@ namespace Heightmap
                 Color color = new Color(Color.Red.ToColor3(), 0.6f);
 
                 var tris = this.soldier.GetTriangles(true);
+
                 if (this.soldierTris == null)
                 {
                     Task.Run(async () =>
@@ -1461,7 +1462,7 @@ namespace Heightmap
                         var desc = new PrimitiveListDrawerDescription<Triangle>()
                         {
                             DepthEnabled = false,
-                            Primitives = tris,
+                            Primitives = tris.ToArray(),
                             Color = color
                         };
                         this.soldierTris = await this.AddComponentPrimitiveListDrawer<Triangle>(desc);

@@ -55,8 +55,8 @@ namespace Engine.PathFinding.RecastNavigation
         {
             resultPath = null;
 
-            navQuery.FindNearestPoly(startPos, polyPickExt, filter, out int startRef, out Vector3 nsp);
-            navQuery.FindNearestPoly(endPos, polyPickExt, filter, out int endRef, out Vector3 nep);
+            navQuery.FindNearestPoly(startPos, polyPickExt, filter, out int startRef, out _);
+            navQuery.FindNearestPoly(endPos, polyPickExt, filter, out int endRef, out _);
 
             var endPointsDefined = (startRef != 0 && endRef != 0);
             if (!endPointsDefined)
@@ -113,8 +113,8 @@ namespace Engine.PathFinding.RecastNavigation
             // Iterate over the path to find smooth path on the detail mesh surface.
             var iterPath = polys.Copy();
 
-            navQuery.ClosestPointOnPoly(startRef, startPos, out Vector3 iterPos, out bool iOver);
-            navQuery.ClosestPointOnPoly(iterPath.End, endPos, out Vector3 targetPos, out bool eOver);
+            navQuery.ClosestPointOnPoly(startRef, startPos, out Vector3 iterPos, out _);
+            navQuery.ClosestPointOnPoly(iterPath.End, endPos, out Vector3 targetPos, out _);
 
             float STEP_SIZE = 0.5f;
             float SLOP = 0.01f;
@@ -246,7 +246,7 @@ namespace Engine.PathFinding.RecastNavigation
                 Vector3 epos = endPos;
                 if (polys.End != endRef)
                 {
-                    navQuery.ClosestPointOnPoly(polys.End, endPos, out epos, out bool eOver);
+                    navQuery.ClosestPointOnPoly(polys.End, endPos, out epos, out _);
                 }
 
                 navQuery.FindStraightPath(
@@ -637,7 +637,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns true if the specified position is walkable</returns>
         public bool IsWalkable(AgentType agent, Vector3 position)
         {
-            return IsWalkable(agent, position, out var nearest);
+            return IsWalkable(agent, position, out _);
         }
         /// <summary>
         /// Gets wether the specified position is walkable for the specified agent type
@@ -799,7 +799,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the Y axis angle, only if the rotation is in the Y axis</returns>
         private static float GetYRotation(Matrix transform)
         {
-            if (transform.Decompose(out var scale, out var rotation, out var translation))
+            if (transform.Decompose(out _, out var rotation, out _))
             {
                 return GetYRotation(rotation);
             }

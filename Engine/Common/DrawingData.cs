@@ -614,7 +614,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's point list</returns>
-        public Vector3[] GetPoints(bool refresh = false)
+        public IEnumerable<Vector3> GetPoints(bool refresh = false)
         {
             return this.GetPoints(Matrix.Identity, refresh);
         }
@@ -624,7 +624,7 @@ namespace Engine.Common
         /// <param name="transform">Transform to apply</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's point list</returns>
-        public Vector3[] GetPoints(Matrix transform, bool refresh = false)
+        public IEnumerable<Vector3> GetPoints(Matrix transform, bool refresh = false)
         {
             List<Vector3> points = new List<Vector3>();
 
@@ -637,10 +637,10 @@ namespace Engine.Common
                 foreach (var mesh in meshList)
                 {
                     var meshPoints = mesh.GetPoints(refresh);
-                    if (meshPoints != null && meshPoints.Length > 0)
+                    if (meshPoints.Any())
                     {
-                        var trnPoints = new Vector3[meshPoints.Length];
-                        Vector3.TransformCoordinate(meshPoints, ref transform, trnPoints);
+                        var trnPoints = meshPoints.ToArray();
+                        Vector3.TransformCoordinate(trnPoints, ref transform, trnPoints);
                         points.AddRange(trnPoints);
                     }
                 }
@@ -654,7 +654,7 @@ namespace Engine.Common
         /// <param name="boneTransforms">Bone transforms list</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's point list</returns>
-        public Vector3[] GetPoints(Matrix[] boneTransforms, bool refresh = false)
+        public IEnumerable<Vector3> GetPoints(Matrix[] boneTransforms, bool refresh = false)
         {
             return this.GetPoints(Matrix.Identity, boneTransforms, refresh);
         }
@@ -665,7 +665,7 @@ namespace Engine.Common
         /// <param name="boneTransforms">Bone transforms list</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's point list</returns>
-        public Vector3[] GetPoints(Matrix transform, Matrix[] boneTransforms, bool refresh = false)
+        public IEnumerable<Vector3> GetPoints(Matrix transform, Matrix[] boneTransforms, bool refresh = false)
         {
             List<Vector3> points = new List<Vector3>();
 
@@ -678,10 +678,10 @@ namespace Engine.Common
                 foreach (var mesh in meshList)
                 {
                     var meshPoints = mesh.GetPoints(boneTransforms, refresh);
-                    if (meshPoints != null && meshPoints.Length > 0)
+                    if (meshPoints.Any())
                     {
-                        var trnPoints = new Vector3[meshPoints.Length];
-                        Vector3.TransformCoordinate(meshPoints, ref transform, trnPoints);
+                        var trnPoints = meshPoints.ToArray();
+                        Vector3.TransformCoordinate(trnPoints, ref transform, trnPoints);
                         points.AddRange(trnPoints);
                     }
                 }
@@ -694,7 +694,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's triangle list</returns>
-        public Triangle[] GetTriangles(bool refresh = false)
+        public IEnumerable<Triangle> GetTriangles(bool refresh = false)
         {
             return this.GetTriangles(Matrix.Identity, refresh);
         }
@@ -704,7 +704,7 @@ namespace Engine.Common
         /// <param name="transform">Transform to apply</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's triangle list</returns>
-        public Triangle[] GetTriangles(Matrix transform, bool refresh = false)
+        public IEnumerable<Triangle> GetTriangles(Matrix transform, bool refresh = false)
         {
             List<Triangle> triangles = new List<Triangle>();
 
@@ -729,7 +729,7 @@ namespace Engine.Common
         /// <param name="boneTransforms">Bone transforms list</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's triangle list</returns>
-        public Triangle[] GetTriangles(Matrix[] boneTransforms, bool refresh = false)
+        public IEnumerable<Triangle> GetTriangles(Matrix[] boneTransforms, bool refresh = false)
         {
             return this.GetTriangles(Matrix.Identity, boneTransforms, refresh);
         }
@@ -740,7 +740,7 @@ namespace Engine.Common
         /// <param name="boneTransforms">Bone transforms list</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's triangle list</returns>
-        public Triangle[] GetTriangles(Matrix transform, Matrix[] boneTransforms, bool refresh = false)
+        public IEnumerable<Triangle> GetTriangles(Matrix transform, Matrix[] boneTransforms, bool refresh = false)
         {
             List<Triangle> triangles = new List<Triangle>();
 

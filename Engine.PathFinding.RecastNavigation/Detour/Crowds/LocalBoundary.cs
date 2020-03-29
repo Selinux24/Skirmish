@@ -115,14 +115,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             {
                 navquery.GetPolyWallSegments(
                     m_polys.Refs[j], filter, MAX_SEGS_PER_POLY,
-                    out Vector3[] segs, out var refs, out int nsegs);
+                    out Vector3[] segs, out _, out int nsegs);
 
                 for (int k = 0; k < nsegs; k += 2)
                 {
                     Vector3 s1 = segs[k];
                     Vector3 s2 = segs[k + 1];
                     // Skip too distant segments.
-                    float distSqr = DetourUtils.DistancePtSegSqr2D(pos, s1, s2, out float tseg);
+                    float distSqr = DetourUtils.DistancePtSegSqr2D(pos, s1, s2, out _);
                     if (distSqr > collisionQueryRange * collisionQueryRange)
                     {
                         continue;

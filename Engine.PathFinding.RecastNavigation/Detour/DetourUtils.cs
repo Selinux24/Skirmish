@@ -461,18 +461,17 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// Adapted from Graphics Gems article.
         /// </summary>
         /// <param name="pts"></param>
-        /// <param name="npts"></param>
         /// <param name="areas"></param>
         /// <param name="s"></param>
         /// <param name="t"></param>
         /// <param name="outPoint"></param>
-        public static void RandomPointInConvexPoly(Vector3[] pts, int npts, out float[] areas, float s, float t, out Vector3 outPoint)
+        public static void RandomPointInConvexPoly(Vector3[] pts, out float[] areas, float s, float t, out Vector3 outPoint)
         {
             areas = new float[DT_VERTS_PER_POLYGON];
 
             // Calc triangle araes
             float areasum = 0.0f;
-            for (int i = 2; i < npts; i++)
+            for (int i = 2; i < pts.Length; i++)
             {
                 areas[i] = TriArea2D(pts[0], pts[(i - 1)], pts[i]);
                 areasum += Math.Max(0.001f, areas[i]);
@@ -481,8 +480,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             float thr = s * areasum;
             float acc = 0.0f;
             float u = 1.0f;
-            int tri = npts - 1;
-            for (int i = 2; i < npts; i++)
+            int tri = pts.Length - 1;
+            for (int i = 2; i < pts.Length; i++)
             {
                 float dacc = areas[i];
                 if (thr >= acc && thr < (acc + dacc))

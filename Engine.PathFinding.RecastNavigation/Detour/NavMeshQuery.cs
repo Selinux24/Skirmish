@@ -1,11 +1,11 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
     using Engine.PathFinding.RecastNavigation.Recast;
-    using System.Linq;
 
     /// <summary>
     /// Provides the ability to perform pathfinding related queries against a navigation mesh.
@@ -1009,7 +1009,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     {
                         status = Raycast(
                             node.Id, node.Pos, next.Pos, m_query.Filter, maxPath - pathList.Count,
-                            out var t, out var normal, out var rpath);
+                            out _, out _, out var rpath);
                         if (status.HasFlag(Status.DT_SUCCESS))
                         {
                             pathList.AddRange(rpath.GetPath());
@@ -1124,7 +1124,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     {
                         status = Raycast(
                             node.Id, node.Pos, next.Pos, m_query.Filter, maxPath - pathList.Count,
-                            out var t, out var normal, out var rpath);
+                            out _, out _, out var rpath);
                         if (status.HasFlag(Status.DT_SUCCESS))
                         {
                             pathList.AddRange(rpath.GetPath());
@@ -1268,7 +1268,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     }
 
                     // If the circle is not touching the next polygon, skip it.
-                    float distSqr = DetourUtils.DistancePtSegSqr2D(centerPos, va, vb, out float tseg);
+                    float distSqr = DetourUtils.DistancePtSegSqr2D(centerPos, va, vb, out _);
                     if (distSqr > radiusSqr)
                     {
                         continue;
@@ -1434,7 +1434,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     }
 
                     // If the poly is not touching the edge to the next polygon, skip the connection it.
-                    if (!DetourUtils.IntersectSegmentPoly2D(va, vb, verts, nverts, out float tmin, out float tmax, out int segMin, out int segMax))
+                    if (!DetourUtils.IntersectSegmentPoly2D(va, vb, verts, nverts, out float tmin, out float tmax, out _, out _))
                     {
                         continue;
                     }
@@ -1741,7 +1741,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     }
 
                     // If the circle is not touching the next polygon, skip it.
-                    float distSqr = DetourUtils.DistancePtSegSqr2D(centerPos, va, vb, out float tseg);
+                    float distSqr = DetourUtils.DistancePtSegSqr2D(centerPos, va, vb, out _);
                     if (distSqr > radiusSqr)
                     {
                         continue;
@@ -1975,7 +1975,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                             // TODO: Maybe should use getPortalPoints(), but this one is way faster.
                             Vector3 vj = verts[j];
                             Vector3 vi = verts[i];
-                            float distSqr = DetourUtils.DistancePtSegSqr2D(searchPos, vj, vi, out float tseg);
+                            float distSqr = DetourUtils.DistancePtSegSqr2D(searchPos, vj, vi, out _);
                             if (distSqr > searchRadSqr)
                             {
                                 continue;
@@ -2114,7 +2114,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     nv++;
                 }
 
-                if (!DetourUtils.IntersectSegmentPoly2D(startPos, endPos, verts, nv, out float tmin, out float tmax, out int segMin, out int segMax))
+                if (!DetourUtils.IntersectSegmentPoly2D(startPos, endPos, verts, nv, out _, out float tmax, out _, out int segMax))
                 {
                     // Could not hit the polygon, keep the old t and report hit.
                     hit.Cut(n);
@@ -2356,7 +2356,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
                 if (parentRef != 0)
                 {
-                    m_nav.GetTileAndPolyByRefUnsafe(parentRef, out MeshTile parentTile, out Poly parentPoly);
+                    m_nav.GetTileAndPolyByRefUnsafe(parentRef, out _, out _);
                 }
 
                 // Hit test walls.
@@ -2438,7 +2438,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     // Calc distance to the edge.
                     Vector3 va = bestTile.Verts[bestPoly.Verts[link.Edge]];
                     Vector3 vb = bestTile.Verts[bestPoly.Verts[(link.Edge + 1) % bestPoly.VertCount]];
-                    float distSqr = DetourUtils.DistancePtSegSqr2D(centerPos, va, vb, out float tseg);
+                    float distSqr = DetourUtils.DistancePtSegSqr2D(centerPos, va, vb, out _);
 
                     // If the circle is not touching the next polygon, skip it.
                     if (distSqr > radiusSqr)
@@ -2724,14 +2724,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
 
                 // Calc area of the polygon.
-                float polyArea = 0.0f;
-                for (int j = 2; j < p.VertCount; ++j)
-                {
-                    var va = tile.Verts[p.Verts[0]];
-                    var vb = tile.Verts[p.Verts[j - 1]];
-                    var vc = tile.Verts[p.Verts[j]];
-                    polyArea += DetourUtils.TriArea2D(va, vb, vc);
-                }
+                float polyArea = tile.GetPolyArea(p);
 
                 // Choose random polygon weighted by area, using reservoi sampling.
                 areaSum += polyArea;
@@ -2749,19 +2742,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             // Randomly pick point on polygon.
-            var v = tile.Verts[poly.Verts[0]];
-            Vector3[] verts = new Vector3[DetourUtils.DT_VERTS_PER_POLYGON];
-            verts[0] = v;
-            for (int j = 1; j < poly.VertCount; ++j)
-            {
-                v = tile.Verts[poly.Verts[j]];
-                verts[j] = v;
-            }
+            Vector3[] verts = tile.GetPolyVerts(poly);
 
             float s = frand.NextFloat(0, 1);
             float t = frand.NextFloat(0, 1);
 
-            DetourUtils.RandomPointInConvexPoly(verts, poly.VertCount, out float[] areas, s, t, out Vector3 pt);
+            DetourUtils.RandomPointInConvexPoly(verts, out _, s, t, out Vector3 pt);
 
             Status status = GetPolyHeight(polyRef, pt, out float h);
             if (status.HasFlag(Status.DT_FAILURE))
@@ -2847,14 +2833,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 if (bestPoly.Type == PolyTypes.DT_POLYTYPE_GROUND)
                 {
                     // Calc area of the polygon.
-                    float polyArea = 0.0f;
-                    for (int j = 2; j < bestPoly.VertCount; ++j)
-                    {
-                        var va = bestTile.Verts[bestPoly.Verts[0]];
-                        var vb = bestTile.Verts[bestPoly.Verts[j - 1]];
-                        var vc = bestTile.Verts[bestPoly.Verts[j]];
-                        polyArea += DetourUtils.TriArea2D(va, vb, vc);
-                    }
+                    float polyArea = bestTile.GetPolyArea(bestPoly);
                     // Choose random polygon weighted by area, using reservoi sampling.
                     areaSum += polyArea;
                     float u = frand.NextFloat(0, 1);
@@ -2874,7 +2853,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
                 if (parentRef != 0)
                 {
-                    m_nav.GetTileAndPolyByRefUnsafe(parentRef, out MeshTile parentTile, out Poly parentPoly);
+                    m_nav.GetTileAndPolyByRefUnsafe(parentRef, out _, out _);
                 }
 
                 for (int i = bestPoly.FirstLink; i != DetourUtils.DT_NULL_LINK; i = bestTile.Links[i].Next)
@@ -2903,7 +2882,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     }
 
                     // If the circle is not touching the next polygon, skip it.
-                    float distSqr = DetourUtils.DistancePtSegSqr2D(centerPos, va, vb, out float tseg);
+                    float distSqr = DetourUtils.DistancePtSegSqr2D(centerPos, va, vb, out _);
                     if (distSqr > radiusSqr)
                     {
                         continue;
@@ -2958,19 +2937,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             // Randomly pick point on polygon.
-            var v = randomTile.Verts[randomPoly.Verts[0]];
-            Vector3[] verts = new Vector3[DetourUtils.DT_VERTS_PER_POLYGON];
-            verts[0] = v;
-            for (int j = 1; j < randomPoly.VertCount; ++j)
-            {
-                v = randomTile.Verts[randomPoly.Verts[j]];
-                verts[j] = v;
-            }
+            Vector3[] verts = randomTile.GetPolyVerts(randomPoly);
 
             float s = frand.NextFloat(0, 1);
             float t = frand.NextFloat(0, 1);
 
-            DetourUtils.RandomPointInConvexPoly(verts, randomPoly.VertCount, out float[] areas, s, t, out Vector3 pt);
+            DetourUtils.RandomPointInConvexPoly(verts, out _, s, t, out Vector3 pt);
 
             Status stat = GetPolyHeight(randomPolyRef, pt, out float h);
             if (stat.HasFlag(Status.DT_FAILURE))
@@ -3345,32 +3317,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             if (fromPoly.Type == PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
             {
                 // Find link that points to first vertex.
-                for (int i = fromPoly.FirstLink; i != DetourUtils.DT_NULL_LINK; i = fromTile.Links[i].Next)
-                {
-                    if (fromTile.Links[i].NRef == to)
-                    {
-                        int v = fromTile.Links[i].Edge;
-                        left = fromTile.Verts[fromPoly.Verts[v]];
-                        right = fromTile.Verts[fromPoly.Verts[v]];
-                        return Status.DT_SUCCESS;
-                    }
-                }
-                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
+                return fromTile.FindLinkToNeighbour(fromPoly, to, out left, out right);
             }
 
             if (toPoly.Type == PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
             {
-                for (int i = toPoly.FirstLink; i != DetourUtils.DT_NULL_LINK; i = toTile.Links[i].Next)
-                {
-                    if (toTile.Links[i].NRef == from)
-                    {
-                        int v = toTile.Links[i].Edge;
-                        left = toTile.Verts[toPoly.Verts[v]];
-                        right = toTile.Verts[toPoly.Verts[v]];
-                        return Status.DT_SUCCESS;
-                    }
-                }
-                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
+                return toTile.FindLinkToNeighbour(toPoly, from, out left, out right);
             }
 
             // Find portal vertices.
@@ -3474,7 +3426,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
 
                 // Append intersection
-                if (DetourUtils.IntersectSegSeg2D(startPos, endPos, left, right, out float s, out float t))
+                if (DetourUtils.IntersectSegSeg2D(startPos, endPos, left, right, out _, out float t))
                 {
                     Vector3 pt = Vector3.Lerp(left, right, t);
 

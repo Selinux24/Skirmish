@@ -475,7 +475,7 @@ namespace Engine
         /// <returns>Returns true if ray intersects with this triangle</returns>
         public bool Intersects(Ray ray)
         {
-            return this.Intersects(ray, false, out Vector3 position, out float distance);
+            return this.Intersects(ray, false, out _, out _);
         }
         /// <summary>
         /// Intersection test between ray and triangle
@@ -485,7 +485,7 @@ namespace Engine
         /// <returns>Returns true if ray intersects with this triangle</returns>
         public bool Intersects(Ray ray, out float distance)
         {
-            return this.Intersects(ray, false, out Vector3 position, out distance);
+            return this.Intersects(ray, false, out _, out distance);
         }
         /// <summary>
         /// Intersection test between ray and triangle
@@ -506,7 +506,7 @@ namespace Engine
         /// <returns>Returns true if ray intersects with this triangle</returns>
         public bool Intersects(Ray ray, bool facingOnly)
         {
-            return this.Intersects(ray, facingOnly, out Vector3 point, out float distance);
+            return this.Intersects(ray, facingOnly, out _, out _);
         }
         /// <summary>
         /// Intersection test between ray and triangle
@@ -517,7 +517,7 @@ namespace Engine
         /// <returns>Returns true if ray intersects with this triangle</returns>
         public bool Intersects(Ray ray, bool facingOnly, out float distance)
         {
-            return this.Intersects(ray, facingOnly, out Vector3 point, out distance);
+            return this.Intersects(ray, facingOnly, out _, out distance);
         }
         /// <summary>
         /// Intersection test between ray and triangle

@@ -464,10 +464,12 @@ namespace Engine
         /// </summary>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns null or position list</returns>
-        public Vector3[] GetPoints(bool refresh = false)
+        public IEnumerable<Vector3> GetPoints(bool refresh = false)
         {
             if (refresh || this.updatePoints)
             {
+                IEnumerable<Vector3> cache;
+
                 var drawingData = this.GetDrawingData(this.GetLODMinimum());
                 if (drawingData == null)
                 {
@@ -476,32 +478,36 @@ namespace Engine
 
                 if (drawingData.SkinningData != null)
                 {
-                    this.positionCache = drawingData.GetPoints(
+                    cache = drawingData.GetPoints(
                         this.Manipulator.LocalTransform,
                         this.AnimationController.GetCurrentPose(drawingData.SkinningData),
                         refresh);
                 }
                 else
                 {
-                    this.positionCache = drawingData.GetPoints(
+                    cache = drawingData.GetPoints(
                         this.Manipulator.LocalTransform,
                         refresh);
                 }
 
+                this.positionCache = cache.ToArray();
+
                 this.updatePoints = false;
             }
 
-            return this.positionCache ?? new Vector3[] { };
+            return this.positionCache?.ToArray() ?? new Vector3[] { };
         }
         /// <summary>
         /// Gets triangle list of mesh if the vertex type has position channel
         /// </summary>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns null or triangle list</returns>
-        public Triangle[] GetTriangles(bool refresh = false)
+        public IEnumerable<Triangle> GetTriangles(bool refresh = false)
         {
             if (refresh || this.updateTriangles)
             {
+                IEnumerable<Triangle> cache;
+
                 var drawingData = this.GetDrawingData(this.GetLODMinimum());
                 if (drawingData == null)
                 {
@@ -510,22 +516,24 @@ namespace Engine
 
                 if (drawingData.SkinningData != null)
                 {
-                    this.triangleCache = drawingData.GetTriangles(
+                    cache = drawingData.GetTriangles(
                         this.Manipulator.LocalTransform,
                         this.AnimationController.GetCurrentPose(drawingData.SkinningData),
                         refresh);
                 }
                 else
                 {
-                    this.triangleCache = drawingData.GetTriangles(
+                    cache = drawingData.GetTriangles(
                         this.Manipulator.LocalTransform,
                         refresh);
                 }
 
+                this.triangleCache = cache.ToArray();
+
                 this.updateTriangles = false;
             }
 
-            return this.triangleCache ?? new Triangle[] { };
+            return this.triangleCache?.ToArray() ?? new Triangle[] { };
         }
         /// <summary>
         /// Gets bounding sphere
@@ -547,7 +555,7 @@ namespace Engine
                 var points = this.GetPoints(refresh);
                 if (points.Any())
                 {
-                    this.boundingSphere = BoundingSphere.FromPoints(points);
+                    this.boundingSphere = BoundingSphere.FromPoints(points.ToArray());
                 }
             }
 
@@ -573,7 +581,7 @@ namespace Engine
                 var points = this.GetPoints(refresh);
                 if (points.Any())
                 {
-                    this.boundingBox = BoundingBox.FromPoints(points);
+                    this.boundingBox = BoundingBox.FromPoints(points.ToArray());
                 }
             }
 

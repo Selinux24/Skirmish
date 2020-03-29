@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
@@ -68,6 +69,69 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// The next free tile, or the next tile in the spatial grid.
         /// </summary>
         public MeshTile Next { get; set; }
+        /// <summary>
+        /// Gets the specified mesh polygon area
+        /// </summary>
+        /// <param name="p">Polygon</param>
+        /// <returns>Returns the area of the polygon</returns>
+        public float GetPolyArea(Poly p)
+        {
+            // Calc area of the polygon.
+            float polyArea = 0.0f;
+            for (int j = 2; j < p.VertCount; ++j)
+            {
+                var va = Verts[p.Verts[0]];
+                var vb = Verts[p.Verts[j - 1]];
+                var vc = Verts[p.Verts[j]];
+                polyArea += DetourUtils.TriArea2D(va, vb, vc);
+            }
+
+            return polyArea;
+        }
+        /// <summary>
+        /// Gets the polygon vertices
+        /// </summary>
+        /// <param name="poly">Polygon</param>
+        /// <returns>Returns the vertex list</returns>
+        public Vector3[] GetPolyVerts(Poly poly)
+        {
+            Vector3[] verts = new Vector3[poly.VertCount];
+
+            for (int j = 0; j < poly.VertCount; j++)
+            {
+                verts[j] = Verts[poly.Verts[j]];
+            }
+
+            return verts;
+        }
+        /// <summary>
+        /// Find link that points to neighbour reference.
+        /// </summary>
+        /// <param name="fromPoly">Polygon</param>
+        /// <param name="r">Neighbour reference</param>
+        /// <param name="left">Left position</param>
+        /// <param name="right">Right position</param>
+        /// <returns>Returns the status</returns>
+        public Status FindLinkToNeighbour(Poly fromPoly, int r, out Vector3 left, out Vector3 right)
+        {
+            left = Vector3.Zero;
+            right = Vector3.Zero;
+
+            for (int i = fromPoly.FirstLink; i != DetourUtils.DT_NULL_LINK; i = Links[i].Next)
+            {
+                if (Links[i].NRef == r)
+                {
+                    int v = Links[i].Edge;
+                    left = Verts[fromPoly.Verts[v]];
+                    right = Verts[fromPoly.Verts[v]];
+
+                    return Status.DT_SUCCESS;
+                }
+            }
+
+            return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
+        }
+
 
         /// <summary>
         /// Patch header pointers

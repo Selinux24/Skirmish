@@ -113,46 +113,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             {
                 PathQuery q = m_queue[m_queueHead % MAX_QUEUE];
 
-                // Skip inactive requests.
-                if (q.R == DT_PATHQ_INVALID)
+                if (!UpdateHeadQuery(ref q, ref iterCount, MAX_KEEP_ALIVE))
                 {
                     m_queueHead++;
+
                     continue;
-                }
-
-                // Handle completed request.
-                if (q.Status == Status.DT_SUCCESS || q.Status == Status.DT_FAILURE)
-                {
-                    // If the path result has not been read in few frames, free the slot.
-                    q.KeepAlive++;
-                    if (q.KeepAlive > MAX_KEEP_ALIVE)
-                    {
-                        q.R = DT_PATHQ_INVALID;
-                        q.Status = 0;
-                    }
-
-                    m_queueHead++;
-                    continue;
-                }
-
-                // Handle query start.
-                if (q.Status == 0)
-                {
-                    q.Status = m_navquery.InitSlicedFindPath(q.StartRef, q.EndRef, q.StartPos, q.EndPos, q.Filter);
-                }
-                // Handle query in progress.
-                if (q.Status == Status.DT_IN_PROGRESS)
-                {
-                    q.Status = m_navquery.UpdateSlicedFindPath(iterCount, out int iters);
-                    iterCount -= iters;
-                }
-                if (q.Status == Status.DT_SUCCESS)
-                {
-                    q.Status = m_navquery.FinalizeSlicedFindPath(m_maxPathSize, out var resPath);
-                    if (q.Status == Status.DT_SUCCESS)
-                    {
-                        q.Path = resPath;
-                    }
                 }
 
                 if (iterCount <= 0)
@@ -162,6 +127,60 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
                 m_queueHead++;
             }
+        }
+        /// <summary>
+        /// Updates a path query
+        /// </summary>
+        /// <param name="q">Path query</param>
+        /// <param name="iterCount">Iterations count</param>
+        /// <param name="maxKeepAlive">Maximum keep query alive value</param>
+        /// <returns>Returns true if the query returns a valid path (DT_IN_PROGRESS or DT_SUCCESS)</returns>
+        private bool UpdateHeadQuery(ref PathQuery q, ref int iterCount, int maxKeepAlive)
+        {
+            // Skip inactive requests.
+            if (q.R == DT_PATHQ_INVALID)
+            {
+                return false;
+            }
+
+            // Handle completed request.
+            if (q.Status == Status.DT_SUCCESS || q.Status == Status.DT_FAILURE)
+            {
+                // If the path result has not been read in few frames, free the slot.
+                q.KeepAlive++;
+                if (q.KeepAlive > maxKeepAlive)
+                {
+                    q.R = DT_PATHQ_INVALID;
+                    q.Status = 0;
+                }
+
+                return false;
+            }
+
+            // Handle query start.
+            if (q.Status == 0)
+            {
+                q.Status = m_navquery.InitSlicedFindPath(q.StartRef, q.EndRef, q.StartPos, q.EndPos, q.Filter);
+            }
+
+            // Handle query in progress.
+            if (q.Status == Status.DT_IN_PROGRESS)
+            {
+                q.Status = m_navquery.UpdateSlicedFindPath(iterCount, out int iters);
+                iterCount -= iters;
+            }
+
+            // Handle success query
+            if (q.Status == Status.DT_SUCCESS)
+            {
+                q.Status = m_navquery.FinalizeSlicedFindPath(m_maxPathSize, out var resPath);
+                if (q.Status == Status.DT_SUCCESS)
+                {
+                    q.Path = resPath;
+                }
+            }
+
+            return true;
         }
         /// <summary>
         /// Requests a new path

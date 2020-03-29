@@ -876,7 +876,7 @@ namespace Collada
             }
 
             var tris = this.selectedItem?.Item.GetTriangles(true);
-            if (tris?.Length > 0)
+            if (tris?.Any() == true)
             {
                 Color4 sItemColor = Color.LightYellow;
                 sItemColor.Alpha = 0.3333f;
