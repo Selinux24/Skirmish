@@ -46,7 +46,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             float MIN_TARGET_DIST = 0.01f;
 
             navquery.FindStraightPath(
-                m_pos, m_target, m_path, maxCorners, StraightPathOptions.DT_STRAIGHTPATH_NONE,
+                m_pos, m_target, m_path, maxCorners, StraightPathOptions.None,
                 out cornerPolys);
 
             // Prune points in the beginning of the path which are too close.

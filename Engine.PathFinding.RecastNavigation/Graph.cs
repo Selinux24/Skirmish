@@ -251,7 +251,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                 navQuery.FindStraightPath(
                     startPos, epos, polys,
-                    MAX_POLYS, StraightPathOptions.DT_STRAIGHTPATH_ALL_CROSSINGS,
+                    MAX_POLYS, StraightPathOptions.AllCrossings,
                     out var straightPath);
 
                 if (straightPath.Count > 0)
@@ -295,7 +295,7 @@ namespace Engine.PathFinding.RecastNavigation
             int MAX_STEER_POINTS = 3;
             navQuery.FindStraightPath(
                 startPos, endPos, path,
-                MAX_STEER_POINTS, StraightPathOptions.DT_STRAIGHTPATH_NONE,
+                MAX_STEER_POINTS, StraightPathOptions.None,
                 out var steerPath);
 
             if (steerPath.Count == 0)

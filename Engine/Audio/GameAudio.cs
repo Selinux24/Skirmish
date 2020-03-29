@@ -113,11 +113,12 @@ namespace Engine.Audio
         /// </summary>
         internal GameAudio(XAudio2Version version = XAudio2Version.Default, int sampleRate = 48000)
         {
-            XAudio2Flags audio2Flags = XAudio2Flags.None;
+            XAudio2Flags audio2Flags;
 #if DEBUG
             audio2Flags = XAudio2Flags.DebugEngine;
+#else
+            audio2Flags = XAudio2Flags.None;
 #endif
-
             this.device = new XAudio2(audio2Flags, ProcessorSpecifier.DefaultProcessor, version);
             this.device.StopEngine();
 #if DEBUG

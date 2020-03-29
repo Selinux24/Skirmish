@@ -875,8 +875,8 @@ namespace Collada
                 return;
             }
 
-            var tris = this.selectedItem?.Item.GetTriangles(true);
-            if (tris?.Any() == true)
+            var tris = this.selectedItem.Item.GetTriangles(true);
+            if (tris.Any())
             {
                 Color4 sItemColor = Color.LightYellow;
                 sItemColor.Alpha = 0.3333f;

@@ -9,16 +9,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour
     public enum StraightPathOptions
     {
         /// <summary>
-        /// None
+        /// DT_STRAIGHTPATH_NONE. None
         /// </summary>
-        DT_STRAIGHTPATH_NONE = 0x00,
+        None = 0x00,
         /// <summary>
-        /// Add a vertex at every polygon edge crossing where area changes.
+        /// DT_STRAIGHTPATH_AREA_CROSSINGS. Add a vertex at every polygon edge crossing where area changes.
         /// </summary>
-        DT_STRAIGHTPATH_AREA_CROSSINGS = 0x01,
+        AreaCrossings = 0x01,
         /// <summary>
-        /// Add a vertex at every polygon edge crossing.
+        /// DT_STRAIGHTPATH_ALL_CROSSINGS. Add a vertex at every polygon edge crossing.
         /// </summary>
-        DT_STRAIGHTPATH_ALL_CROSSINGS = 0x02,
+        AllCrossings = 0x02,
     }
 }

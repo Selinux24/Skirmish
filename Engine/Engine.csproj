@@ -304,8 +304,8 @@
     <Compile Include="GroundGardener.cs" />
     <Compile Include="GroundGardenerDescription.cs" />
     <Compile Include="Helpers\DDS\DdsPixelFormats.cs" />
-    <Compile Include="Helpers\DDS\DdsCaps2.cs" />
-    <Compile Include="Helpers\DDS\DdsCaps.cs" />
+    <Compile Include="Helpers\DDS\DdsCaps2Types.cs" />
+    <Compile Include="Helpers\DDS\DdsCapsTypes.cs" />
     <Compile Include="Helpers\DDS\DdsFlagsDX10.cs" />
     <Compile Include="Helpers\DDS\DdsFlagTypes.cs" />
     <Compile Include="Helpers\DDS\DdsHeader.cs" />
