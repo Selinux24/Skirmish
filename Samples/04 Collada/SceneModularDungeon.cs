@@ -28,7 +28,7 @@ namespace Collada
         private readonly Color ambientDown = new Color(127, 127, 127, 255);
         private readonly Color ambientUp = new Color(137, 116, 104, 255);
 
-        private Player agent = null;
+        private Player playerAgentType = null;
         private readonly Color agentTorchLight = new Color(255, 249, 224, 255);
         private readonly Vector3 cameraInitialPosition = new Vector3(1000, 1000, 1000);
         private readonly Vector3 cameraInitialInterest = new Vector3(1001, 1000, 1000);
@@ -64,7 +64,7 @@ namespace Collada
         private readonly string ntFile = "nm.obj";
         private bool taskRunning = false;
 
-        private readonly Dictionary<int, object> obstacles = new Dictionary<int, object>();
+        private readonly List<ObstacleInfo> obstacles = new List<ObstacleInfo>();
         private readonly Color obstacleColor = new Color(Color.Pink.ToColor3(), 0.5f);
 
         private readonly Color connectionColor = new Color(Color.LightBlue.ToColor3(), 1f);
@@ -95,7 +95,7 @@ namespace Collada
         {
             get
             {
-                return this.currentGraph == 0 ? this.agent : this.ratAgentType;
+                return this.currentGraph == 0 ? this.playerAgentType : this.ratAgentType;
             }
         }
 
@@ -164,25 +164,25 @@ namespace Collada
             {
                 try
                 {
-                    this.NavigationGraphUpdating();
-
                     var graph = await this.PathFinderDescription.Load(fileName);
+                    if (graph != null)
+                    {
+                        this.NavigationGraphUpdating();
 
-                    this.SetNavigationGraph(graph);
+                        this.SetNavigationGraph(graph);
 
-                    this.NavigationGraphUpdated();
+                        this.NavigationGraphUpdated();
+                    }
                 }
                 catch (EngineException ex)
                 {
                     Console.WriteLine($"Bad graph file. Generating navigation mesh. {ex.Message}");
                 }
             }
-            else
-            {
-                await base.UpdateNavigationGraph();
 
-                await this.PathFinderDescription.Save(fileName, this.NavigationGraph);
-            }
+            await base.UpdateNavigationGraph();
+
+            await this.PathFinderDescription.Save(fileName, this.NavigationGraph);
         }
         public override void NavigationGraphUpdated()
         {
@@ -352,13 +352,13 @@ namespace Collada
 
             //Rasterization
             nmsettings.CellSize = 0.2f;
-            nmsettings.CellHeight = 0.15f;
+            nmsettings.CellHeight = 0.2f;
 
             //Agents
-            nmsettings.Agents = new[] { agent, ratAgentType };
+            nmsettings.Agents = new[] { playerAgentType, ratAgentType };
 
             //Partitioning
-            nmsettings.PartitionType = SamplePartitionTypes.Watershed;
+            nmsettings.PartitionType = SamplePartitionTypes.Layers;
 
             //Polygonization
             nmsettings.EdgeMaxError = 1.0f;
@@ -412,11 +412,11 @@ namespace Collada
         }
         private async Task InitializePlayer()
         {
-            this.agent = new Player()
+            this.playerAgentType = new Player()
             {
                 Name = "Player",
                 Height = 1.5f,
-                Radius = 0.3f,
+                Radius = 0.2f,
                 MaxClimb = 0.8f,
                 MaxSlope = 50f,
                 Velocity = 4f,
@@ -643,8 +643,8 @@ namespace Collada
         {
             this.Camera.NearPlaneDistance = 0.1f;
             this.Camera.FarPlaneDistance = maxDistance;
-            this.Camera.MovementDelta = this.agent.Velocity;
-            this.Camera.SlowMovementDelta = this.agent.VelocitySlow;
+            this.Camera.MovementDelta = playerAgentType.Velocity;
+            this.Camera.SlowMovementDelta = playerAgentType.VelocitySlow;
             this.Camera.Mode = CameraModes.Free;
             this.Camera.Position = cameraInitialPosition;
             this.Camera.Interest = cameraInitialInterest;
@@ -680,7 +680,7 @@ namespace Collada
 
             foreach (var item in items)
             {
-                var bbox = item.GetBoundingBox();
+                var bbox = item.GetBoundingBox(true);
 
                 lines.AddRange(Line3D.CreateWiredBox(bbox));
             }
@@ -691,7 +691,23 @@ namespace Collada
         {
             if (e.Items.Any())
             {
-                this.UpdateGraph(e.Items?.Select(i => i.Item.Manipulator.Position));
+                var obs = obstacles.Where(o => e.Items.Select(i => i.Item).Contains(o.Item)).ToList();
+                if (obs.Any())
+                {
+                    //Refresh affected obstacles (if any)
+                    obs.ForEach(o =>
+                    {
+                        var obb = OrientedBoundingBoxExtensions.FromPoints(
+                            o.Item.GetPoints(true),
+                            o.Item.Manipulator.FinalTransform);
+
+                        this.RemoveObstacle(o.Index);
+                        o.Index = this.AddObstacle(obb);
+                        o.Obstacle = obb;
+                    });
+
+                    PaintObstacles();
+                }
             }
         }
 
@@ -736,7 +752,7 @@ namespace Collada
                 this.Game.Input.MouseYDelta);
 #endif
 
-            if (this.Walk(this.agent, prevPos, this.Camera.Position, out Vector3 walkerPos))
+            if (this.Walk(this.playerAgentType, prevPos, this.Camera.Position, out Vector3 walkerPos))
             {
                 this.Camera.Goto(walkerPos);
             }
@@ -1070,7 +1086,7 @@ namespace Collada
             if (triggers.Any())
             {
                 int index = 1;
-                var msg = string.Join(", ", triggers.Select(t => $"Press {index++} to {t.Name} the {item.Object.Id}"));
+                var msg = string.Join(", ", triggers.Select(t => $"Press {index++} to {t.Name} the {item.Object.Name}"));
 
                 PrepareMessage(true, msg);
             }
@@ -1272,7 +1288,7 @@ namespace Collada
 
             var pos = this.scenery.CurrentLevel.StartPosition;
             var dir = this.scenery.CurrentLevel.LookingVector;
-            pos.Y += agent.Height;
+            pos.Y += playerAgentType.Height;
             this.Camera.Position = pos;
             this.Camera.Interest = pos + dir;
 
@@ -1462,19 +1478,19 @@ namespace Collada
         {
             obstacles.Clear();
 
-            //Furniture obstacles
-            var furnitures = this.scenery
-                .GetObjectsByType(ModularSceneryObjectTypes.Furniture)
+            //Object obstacles
+            var sceneryObjects = this.scenery
+                .GetObjectsByType(ModularSceneryObjectTypes.Furniture | ModularSceneryObjectTypes.Door)
                 .Select(o => o.Item);
 
-            foreach (var item in furnitures)
+            foreach (var item in sceneryObjects)
             {
                 var obb = OrientedBoundingBoxExtensions.FromPoints(item.GetPoints(), item.Manipulator.FinalTransform);
 
                 int index = this.AddObstacle(obb);
                 if (index >= 0)
                 {
-                    obstacles.Add(index, obb);
+                    obstacles.Add(new ObstacleInfo { Index = index, Item = item, Obstacle = obb });
                 }
             }
 
@@ -1487,7 +1503,7 @@ namespace Collada
                 int index = this.AddObstacle(bc);
                 if (index >= 0)
                 {
-                    obstacles.Add(index, bc);
+                    obstacles.Add(new ObstacleInfo { Index = index, Item = this.human[i], Obstacle = bc });
                 }
             }
 
@@ -1517,7 +1533,7 @@ namespace Collada
 
             foreach (var item in obstacles)
             {
-                var obstacle = item.Value;
+                var obstacle = item.Obstacle;
 
                 IEnumerable<Triangle> obstacleTris = null;
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation
 {
@@ -11,6 +12,28 @@ namespace Engine.PathFinding.RecastNavigation
     /// </summary>
     public class InputGeometry : PathFinderInput
     {
+        public static string GetHash(IEnumerable<Triangle> triangles)
+        {
+            var serTris = triangles
+                .Select(t => new[]
+                {
+                    t.Point1.X,
+                    t.Point1.Y,
+                    t.Point1.Z,
+                    t.Point2.X,
+                    t.Point2.Y,
+                    t.Point2.Z,
+                    t.Point3.X,
+                    t.Point3.Y,
+                    t.Point3.Z,
+                })
+                .ToArray();
+
+            byte[] buffer = serTris.Serialize();
+
+            return buffer.GetMd5Sum();
+        }
+
         /// <summary>
         /// Chunky mesh
         /// </summary>
@@ -95,21 +118,21 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="fileName">File name</param>
         public override async Task<IGraph> Load(string fileName)
         {
-            Graph graph = null;
-
             var triangles = await this.GetTriangles();
+            var sourceHash = GetHash(triangles);
 
-            await Task.Run(() =>
+            // Load file
+            Graph graph = await GraphFile.Load(fileName, sourceHash);
+            if (graph == null)
             {
-                // Initialize the input data
-                this.ChunkyMesh = ChunkyTriMesh.Build(triangles);
+                return null;
+            }
 
-                // Load file
-                graph = GraphFile.Load(fileName);
+            // Set input data
+            graph.Input = this;
 
-                // Set input data
-                graph.Input = this;
-            });
+            // Initialize the input data
+            this.ChunkyMesh = ChunkyTriMesh.Build(triangles);
 
             return graph;
         }
@@ -122,7 +145,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             if (graph is Graph nmGraph)
             {
-                await Task.Run(() => GraphFile.Save(fileName, nmGraph));
+                await GraphFile.Save(fileName, nmGraph);
             }
             else
             {

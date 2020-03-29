@@ -122,9 +122,9 @@ namespace Engine
         /// </summary>
         /// <param name="assets">Asset list</param>
         /// <returns>Returns a dictionary with the instance count by unique asset name</returns>
-        public Dictionary<string, int> GetMapInstanceCounters(ModularSceneryAssetDescription[] assets)
+        public Dictionary<string, ModularSceneryAssetInstanceInfo> GetMapInstanceCounters(ModularSceneryAssetDescription[] assets)
         {
-            Dictionary<string, int> res = new Dictionary<string, int>();
+            Dictionary<string, ModularSceneryAssetInstanceInfo> res = new Dictionary<string, ModularSceneryAssetInstanceInfo>();
 
             foreach (var item in this.Map)
             {
@@ -138,10 +138,10 @@ namespace Engine
                     {
                         if (!res.ContainsKey(key))
                         {
-                            res.Add(key, 0);
+                            res.Add(key, new ModularSceneryAssetInstanceInfo { Count = 0 });
                         }
 
-                        res[key] += assetInstances[key];
+                        res[key].Count += assetInstances[key];
                     }
                 }
             }
@@ -152,9 +152,9 @@ namespace Engine
         /// Gets the instance counter dictionary
         /// </summary>
         /// <returns>Returns a dictionary with the instance count by unique asset name</returns>
-        public Dictionary<string, int> GetObjectsInstanceCounters()
+        public Dictionary<string, ModularSceneryObjectInstanceInfo> GetObjectsInstanceCounters()
         {
-            Dictionary<string, int> res = new Dictionary<string, int>();
+            Dictionary<string, ModularSceneryObjectInstanceInfo> res = new Dictionary<string, ModularSceneryObjectInstanceInfo>();
 
             foreach (var item in this.Objects)
             {
@@ -165,10 +165,10 @@ namespace Engine
 
                 if (!res.ContainsKey(item.AssetName))
                 {
-                    res.Add(item.AssetName, 0);
+                    res.Add(item.AssetName, new ModularSceneryObjectInstanceInfo { Count = 0, PathFinding = item.PathFinding });
                 }
 
-                res[item.AssetName] += 1;
+                res[item.AssetName].Count += 1;
             }
 
             return res;
@@ -261,5 +261,31 @@ namespace Engine
 
             return -1;
         }
+    }
+
+    /// <summary>
+    /// Asset instance info
+    /// </summary>
+    public class ModularSceneryAssetInstanceInfo
+    {
+        /// <summary>
+        /// Instance count
+        /// </summary>
+        public int Count { get; set; }
+    }
+
+    /// <summary>
+    /// Object instance info
+    /// </summary>
+    public class ModularSceneryObjectInstanceInfo
+    {
+        /// <summary>
+        /// Instance count
+        /// </summary>
+        public int Count { get; set; }
+        /// <summary>
+        /// Use of path finding
+        /// </summary>
+        public bool PathFinding { get; set; }
     }
 }

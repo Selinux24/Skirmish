@@ -184,7 +184,7 @@ namespace Engine
             else if (Description.Content.ModelContentDescription != null)
             {
                 var contentDesc = Description.Content.ModelContentDescription;
-                var loader = GameResourceManager.GetLoaderForFile(contentDesc.ModelFileName); 
+                var loader = GameResourceManager.GetLoaderForFile(contentDesc.ModelFileName);
                 var t = loader.Load(Description.Content.ContentFolder, contentDesc);
                 content = t.First();
             }
@@ -257,7 +257,7 @@ namespace Engine
             // Load all single geometries into single instanced model components
             foreach (var assetName in instances.Keys)
             {
-                var count = instances[assetName];
+                int count = instances[assetName].Count;
                 if (count > 0)
                 {
                     var modelContent = content.FilterMask(assetName);
@@ -303,7 +303,7 @@ namespace Engine
             // Load all single geometries into single instanced model components
             foreach (var assetName in instances.Keys)
             {
-                var count = instances[assetName];
+                var count = instances[assetName].Count;
                 if (count <= 0)
                 {
                     continue;
@@ -316,7 +316,13 @@ namespace Engine
                 }
 
                 var masks = this.Levels.GetMasksForAsset(assetName);
+                SceneObjectUsages usage = SceneObjectUsages.None;
                 var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
+                var pathFinding = instances[assetName].PathFinding;
+                if (pathFinding)
+                {
+                    usage = hasVolumes ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding;
+                }
 
                 var model = await this.Scene.AddComponentModelInstanced(
                     new ModelInstancedDescription()
@@ -331,7 +337,7 @@ namespace Engine
                             ModelContent = modelContent,
                         }
                     },
-                    hasVolumes ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding);
+                    usage);
 
                 //Get the object list to process
                 var objList = Array.FindAll(level.Objects, o => string.Equals(o.AssetName, assetName, StringComparison.OrdinalIgnoreCase));
@@ -838,7 +844,7 @@ namespace Engine
         public IEnumerable<ModularSceneryItem> GetObjectsByType(ModularSceneryObjectTypes objectType)
         {
             var res = this.entities
-                .Where(o => o.Object.Type == objectType);
+                .Where(o => objectType.HasFlag(o.Object.Type));
 
             return res.ToArray();
         }

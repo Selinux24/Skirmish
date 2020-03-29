@@ -26,6 +26,11 @@ namespace Engine
         [XmlAttribute("id")]
         public string Id { get; set; }
         /// <summary>
+        /// Item name
+        /// </summary>
+        [XmlAttribute("name")]
+        public string Name { get; set; }
+        /// <summary>
         /// Asset name
         /// </summary>
         [XmlAttribute("asset_name")]
@@ -35,6 +40,11 @@ namespace Engine
         /// </summary>
         [XmlAttribute("type")]
         public ModularSceneryObjectTypes Type { get; set; } = ModularSceneryObjectTypes.Default;
+        /// <summary>
+        /// Include object in path finding
+        /// </summary>
+        [XmlAttribute("path_finding")]
+        public bool PathFinding { get; set; } = false;
         /// <summary>
         /// Animation plan list
         /// </summary>

@@ -217,7 +217,7 @@ namespace Engine
                 this.updatePoints = false;
             }
 
-            return this.positionCache ?? new Vector3[] { };
+            return this.positionCache.ToArray() ?? new Vector3[] { };
         }
         /// <summary>
         /// Gets triangle list of mesh if the vertex type has position channel
@@ -251,7 +251,7 @@ namespace Engine
                 this.updateTriangles = false;
             }
 
-            return this.triangleCache ?? new Triangle[] { };
+            return this.triangleCache.ToArray() ?? new Triangle[] { };
         }
         /// <summary>
         /// Gets bounding sphere

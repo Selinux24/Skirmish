@@ -106,5 +106,14 @@ namespace Engine
 
             return false;
         }
+
+        /// <summary>
+        /// Gets a text representation of the instance
+        /// </summary>
+        /// <returns>Returns a string</returns>
+        public override string ToString()
+        {
+            return $"{this.GetType()}. {Name}";
+        }
     }
 }

@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ModularSceneryAssetConfiguration maintain_texture_direction="true">
   <assets>
-    <asset>
-      <name>EnteringCorridor1</name>
+    <asset name="EnteringCorridor1">
       <references>
         <asset asset_name="Dn_Floor_1" type="Floor">
           <position>2 0 0</position>
@@ -50,7 +49,10 @@
           <rotation>rot270</rotation>
         </asset>
 
-        <asset asset_name="Dn_Door_1" id="door" type="Wall">
+        <asset asset_name="Dn_Door_1" type="Wall">
+          <position>-3 0 0</position>
+        </asset>
+        <asset asset_name="Dn_WoodenDoor_1" type="Wall">
           <position>-3 0 0</position>
         </asset>
 
@@ -65,8 +67,7 @@
         </connection>
       </connections>
     </asset>
-    <asset>
-      <name>Corridor1</name>
+    <asset name="Corridor1">
       <references>
         <asset asset_name="Dn_Floor_1" type="Floor">
           <position>2 0 0</position>
@@ -129,8 +130,7 @@
         </connection>
       </connections>
     </asset>
-    <asset>
-      <name>Corridor2</name>
+    <asset name="Corridor2">
       <references>
         <asset asset_name="Dn_Floor_1" type="Floor">
           <position>2 0 0</position>
@@ -157,6 +157,10 @@
           <rotation>rot90</rotation>
         </asset>
         <asset asset_name="Dn_Door_1" type="Wall">
+          <position>0 0 1</position>
+          <rotation>rot90</rotation>
+        </asset>
+        <asset asset_name="Dn_WoodenDoor_1" type="Wall">
           <position>0 0 1</position>
           <rotation>rot90</rotation>
         </asset>
@@ -193,8 +197,7 @@
         </connection>
       </connections>
     </asset>
-    <asset>
-      <name>CorridorEnd1</name>
+    <asset name="CorridorEnd1">
       <references>
         <asset asset_name="Dn_LandSlide_1" type="Wall">
           <position>2 0 0</position>
@@ -251,8 +254,7 @@
         </connection>
       </connections>
     </asset>
-    <asset>
-      <name>CorridorEnd2</name>
+    <asset name="CorridorEnd2">
       <references>
         <asset asset_name="Dn_LandSlide_1" type="Wall">
           <position>2 0 0</position>
@@ -309,8 +311,7 @@
         </connection>
       </connections>
     </asset>
-    <asset>
-      <name>Stairs1</name>
+    <asset name="Stairs1">
       <references>
         <asset asset_name="Dn_Floor_1" type="Floor">
           <position>2 0 0</position>
@@ -363,8 +364,7 @@
         </connection>
       </connections>
     </asset>
-    <asset>
-      <name>ToStairs1</name>
+    <asset name="ToStairs1">
       <references>
         <asset asset_name="Dn_Floor_1" type="Floor">
           <position>-2 0 0</position>
@@ -422,8 +422,7 @@
         </connection>
       </connections>
     </asset>
-    <asset>
-      <name>ToStairs2</name>
+    <asset name="ToStairs2">
       <references>
         <asset asset_name="Dn_Floor_1" type="Floor">
           <position>-2 0 0</position>
@@ -468,6 +467,9 @@
         <asset asset_name="Dn_Door_1" type="Wall">
           <position>-3 0 0</position>
         </asset>
+        <asset asset_name="Dn_WoodenDoor_1" type="Wall">
+          <position>-3 0 0</position>
+        </asset>
         <asset asset_name="Dn_Wall_1" type="Wall">
           <position>3 0 0</position>
         </asset>
@@ -479,8 +481,7 @@
         </connection>
       </connections>
     </asset>
-    <asset>
-      <name>XCross1</name>
+    <asset name="XCross1">
       <references>
         <asset asset_name="Dn_Floor_1" type="Floor">
           <position>2 0 0</position>
@@ -571,8 +572,7 @@
         </connection>
       </connections>
     </asset>
-    <asset>
-      <name>TCross1</name>
+    <asset name="TCross1">
       <references>
         <asset asset_name="Dn_Floor_1" type="Floor">
           <position>2 0 0</position>
@@ -650,8 +650,7 @@
         </connection>
       </connections>
     </asset>
-    <asset>
-      <name>LCross1</name>
+    <asset name="LCross1">
       <references>
         <asset asset_name="Dn_Floor_1" type="Floor">
           <position>2 0 0</position>
@@ -714,8 +713,7 @@
         </connection>
       </connections>
     </asset>
-    <asset>
-      <name>Room3x3</name>
+    <asset name="Room3x3">
       <references>
         <asset asset_name="Dn_Floor_1" type="Floor">
           <position>2 0 -2</position>
@@ -833,8 +831,7 @@
         </connection>
       </connections>
     </asset>
-    <asset>
-      <name>Room3x5</name>
+    <asset name="Room3x5">
       <references>
         <asset asset_name="Dn_Floor_1" type="Floor">
           <position>0 0 -2</position>
@@ -1012,8 +1009,7 @@
         </connection>
       </connections>
     </asset>
-    <asset>
-      <name>Room5x5</name>
+    <asset name="Room5x5">
       <references>
         <asset asset_name="Dn_Floor_1" type="Floor">
           <position>4 0 -4</position>
@@ -1297,8 +1293,7 @@
         </connection>
       </connections>
     </asset>
-    <asset>
-      <name>Room5x5_2</name>
+    <asset name="Room5x5_2">
       <references>
         <asset asset_name="Dn_Floor_1" type="Floor">
           <position>4 0 -4</position>
@@ -1586,8 +1581,7 @@
         </connection>
       </connections>
     </asset>
-    <asset>
-      <name>Room5x5_3</name>
+    <asset name="Room5x5_3">
       <references>
         <asset asset_name="Dn_Floor_1" type="Floor">
           <position>4 0 -4</position>
@@ -1868,8 +1862,7 @@
         </connection>
       </connections>
     </asset>
-    <asset>
-      <name>BigRoom5x5</name>
+    <asset name="BigRoom5x5">
       <references>
         <asset asset_name="Dn_Floor_1" type="Floor">
           <position>4 0 -4</position>
@@ -2216,8 +2209,7 @@
         </connection>
       </connections>
     </asset>
-    <asset>
-      <name>OpenRoom3x3</name>
+    <asset name="OpenRoom3x3">
       <references>
         <asset asset_name="Dn_Floor_1" type="Floor">
           <position>0 0 -2</position>
@@ -2326,8 +2318,7 @@
         </connection>
       </connections>
     </asset>
-    <asset>
-      <name>Cliff1</name>
+    <asset name="Cliff1">
       <references>
         <asset asset_name="Dn_Cliff_1">
           <position>0 0 6</position>
@@ -2354,8 +2345,7 @@
         </connection>
       </connections>
     </asset>
-    <asset>
-      <name>Cliff2</name>
+    <asset name="Cliff2">
       <references>
         <asset asset_name="Dn_Cliff_4" type="Floor">
           <position>0 0 0</position>
@@ -2368,8 +2358,7 @@
         </connection>
       </connections>
     </asset>
-    <asset>
-      <name>Cliff3</name>
+    <asset name="Cliff3">
       <references>
         <asset asset_name="Dn_Cliff_5" type="Floor">
           <position>0 0 0</position>
@@ -2382,8 +2371,7 @@
         </connection>
       </connections>
     </asset>
-    <asset>
-      <name>PondRoom4x4</name>
+    <asset name="PondRoom4x4">
       <references>
         <asset asset_name="Dn_Floor_Big_1" type="Floor">
           <position>2 0 -2</position>
@@ -2503,9 +2491,7 @@
         </connection>
       </connections>
     </asset>
-
-    <asset>
-      <name>Stairs2</name>
+    <asset name="Stairs2">
       <references>
         <asset asset_name="Dn_Stairs_2" type="Stairs">
           <position>2 0 0</position>

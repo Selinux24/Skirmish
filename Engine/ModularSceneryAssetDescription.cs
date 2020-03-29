@@ -15,7 +15,7 @@ namespace Engine
         /// <summary>
         /// Asset name
         /// </summary>
-        [XmlElement("name")]
+        [XmlAttribute("name")]
         public string Name { get; set; }
         /// <summary>
         /// Assets list

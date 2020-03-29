@@ -177,7 +177,7 @@
         <item asset_map_id="entrance" asset_id="door" id="start" type="Entrance"></item>
         <item asset_map_id="exit" asset_id="door" id="end" type="Exit" next_level="Lvl2"></item>
 
-        <item asset_name="Dn_Anim_Ladder" asset_id="ladder" id="door_trigger_1" type="Trigger">
+        <item asset_name="Dn_Anim_Ladder" asset_id="ladder" id="door_trigger_1" name="lever" type="Trigger">
           <position>16.5 1.75 -12.9</position>
           <rotation>rot270</rotation>
           <animation_plans>
@@ -219,7 +219,7 @@
             </state>
           </states>
         </item>
-        <item asset_name="Dn_Anim_Ladder" asset_id="ladder" id="door_trigger_2" type="Trigger">
+        <item asset_name="Dn_Anim_Ladder" asset_id="ladder" id="door_trigger_2" name="lever" type="Trigger">
           <position>16.5 1.75 -15.1</position>
           <rotation>rot90</rotation>
           <animation_plans>
@@ -503,11 +503,11 @@
             <velocity>0 0 0</velocity>
           </particleLight>
         </item>
-        <item asset_name="Dn_Floor_Gap_1">
+        <item asset_name="Dn_Floor_Gap_1" path_finding="true">
           <position>36 0 -4</position>
         </item>
 
-        <item asset_name="Dn_Floor_Gap_1">
+        <item asset_name="Dn_Floor_Gap_1" path_finding="true">
           <position>18 0 -20</position>
         </item>
         <item asset_name="Dn_Chest_2" type="Furniture">
@@ -582,16 +582,16 @@
           <rotation>rot90</rotation>
         </item>
 
-        <item asset_name="Dn_Temple_Fire_1" type="Light">
+        <item asset_name="Dn_Temple_Fire_1" type="Light" path_finding="true">
           <position>53 0 -4</position>
           <particleLight name="torchFire" scale="1" infiniteDuration="true" emissionRate="0.001"></particleLight>
         </item>
-        <item asset_name="Dn_Temple_Fire_1" type="Light">
+        <item asset_name="Dn_Temple_Fire_1" type="Light" path_finding="true">
           <position>53 0 -38</position>
           <particleLight name="torchFire" scale="1" infiniteDuration="true" emissionRate="0.001"></particleLight>
         </item>
 
-        <item asset_name="Dn_Floor_Gap_1">
+        <item asset_name="Dn_Floor_Gap_1" path_finding="true">
           <position>34 0 -30</position>
         </item>
         <item asset_name="Dn_Big_Lamp_1" type="Light" cast_shadows="false">
@@ -674,67 +674,66 @@
           </particleLight>
         </item>
 
-        <item asset_name="Dn_Jail_Wall_Base_1">
+        <item asset_name="Dn_Jail_Wall_Base_1" path_finding="true">
           <position>32 0 -20</position>
           <rotation>rot90</rotation>
         </item>
-        <item asset_name="Dn_Jail_Wall_2">
+        <item asset_name="Dn_Jail_Wall_2" path_finding="true">
           <position>32 0 -20</position>
           <rotation>rot90</rotation>
         </item>
-        <item asset_name="Dn_Jail_Wall_Base_1">
+        <item asset_name="Dn_Jail_Wall_Base_1" path_finding="true">
           <position>34 0 -20</position>
           <rotation>rot90</rotation>
         </item>
-        <item asset_name="Dn_Jail_Wall_1">
+        <item asset_name="Dn_Jail_Wall_1" path_finding="true">
           <position>34 0 -20</position>
           <rotation>rot90</rotation>
         </item>
-        <item asset_name="Dn_Jail_Wall_Base_1">
+        <item asset_name="Dn_Jail_Wall_Base_1" path_finding="true">
           <position>36 0 -20</position>
           <rotation>rot90</rotation>
         </item>
-        <item asset_name="Dn_Jail_Wall_2">
+        <item asset_name="Dn_Jail_Wall_2" path_finding="true">
           <position>36 0 -20</position>
           <rotation>rot270</rotation>
         </item>
-        <item asset_name="Dn_Jail_Wall_Base_1">
+        <item asset_name="Dn_Jail_Wall_Base_1" path_finding="true">
           <position>38 0 -20</position>
           <rotation>rot90</rotation>
         </item>
-        <item asset_name="Dn_Jail_Wall_3">
+        <item asset_name="Dn_Jail_Wall_3" path_finding="true">
           <position>38 0 -20</position>
           <rotation>rot90</rotation>
         </item>
 
-
-        <item asset_name="Dn_Bridge_Stairs_1">
+        <item asset_name="Dn_Bridge_Stairs_1" path_finding="true">
           <position>54 0 -12</position>
           <rotation>rot90</rotation>
         </item>
-        <item asset_name="Dn_Bridge_Stairs_Foundation_2">
+        <item asset_name="Dn_Bridge_Stairs_Foundation_2" path_finding="true">
           <position>54 0 -12</position>
           <rotation>rot90</rotation>
         </item>
 
-        <item asset_name="Dn_Bridge_2">
+        <item asset_name="Dn_Bridge_2" path_finding="true">
           <position>55 0 -12</position>
           <rotation>rot90</rotation>
         </item>
-        <item asset_name="Dn_Bridge_Arch_1">
+        <item asset_name="Dn_Bridge_Arch_1" path_finding="true">
           <position>56 0 -12</position>
           <rotation>rot90</rotation>
         </item>
-        <item asset_name="Dn_Bridge_2">
+        <item asset_name="Dn_Bridge_2" path_finding="true">
           <position>57 0 -12</position>
           <rotation>rot90</rotation>
         </item>
 
-        <item asset_name="Dn_Bridge_Stairs_1">
+        <item asset_name="Dn_Bridge_Stairs_1" path_finding="true">
           <position>58 0 -12</position>
           <rotation>rot270</rotation>
         </item>
-        <item asset_name="Dn_Bridge_Stairs_Foundation_1">
+        <item asset_name="Dn_Bridge_Stairs_Foundation_1" path_finding="true">
           <position>58 0 -12</position>
           <rotation>rot270</rotation>
         </item>
@@ -817,7 +816,7 @@
         <item asset_map_id="entrance" asset_id="door" id="start" type="Entrance"></item>
         <item asset_map_id="exit" asset_id="door" id="end" type="Exit"></item>
 
-        <item asset_name="Dn_Floor_Gap_1">
+        <item asset_name="Dn_Floor_Gap_1" path_finding="true">
           <position>0 0 20</position>
         </item>
       </objects>

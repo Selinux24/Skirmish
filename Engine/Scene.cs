@@ -603,14 +603,25 @@ namespace Engine
         {
 
         }
+        /// <summary>
+        /// Game resources loading event
+        /// </summary>
+        /// <param name="id">Batch id</param>
         public virtual void GameResourcesLoading(Guid id)
         {
 
         }
+        /// <summary>
+        /// Game resources loaded event
+        /// </summary>
+        /// <param name="id">Batch id</param>
         public virtual void GameResourcesLoaded(Guid id)
         {
 
         }
+        /// <summary>
+        /// Grame graphics resized
+        /// </summary>
         public virtual void GameGraphicsResized()
         {
 

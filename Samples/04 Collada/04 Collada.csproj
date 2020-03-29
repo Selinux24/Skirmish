@@ -162,6 +162,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ObstacleInfo.cs" />
     <Compile Include="SceneDungeonWall.cs" />
     <Compile Include="SceneModularDungeon.cs" />
     <Compile Include="SceneNavmeshTest.cs" />

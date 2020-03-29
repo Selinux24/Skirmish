@@ -69,7 +69,7 @@ namespace Collada
                 PlayAudio();
 
                 this.AudioManager.MasterVolume = 1;
-                this.AudioManager.Start();
+                //this.AudioManager.Start();
 
                 return;
             }
