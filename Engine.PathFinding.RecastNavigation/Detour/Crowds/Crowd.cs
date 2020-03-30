@@ -262,11 +262,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             m_grid = new ProximityGrid<CrowdAgent>(1000, settings.MaxAgentRadius * 3);
 
-            m_obstacleQuery = new ObstacleAvoidanceQuery();
-            if (!m_obstacleQuery.Init(6, 8))
-            {
-                throw new EngineException($"Error initializing the ObstacleAvoidanceQuery");
-            }
+            m_obstacleQuery = new ObstacleAvoidanceQuery(6, 8);
 
             // Init filters
             for (int i = 0; i < DT_CROWD_MAX_QUERY_FILTER_TYPE; i++)
@@ -1241,31 +1237,26 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             var param = m_obstacleQueryParams[ag.Params.ObstacleAvoidanceType];
 
+            ObstacleAvoidanceSampleRequest req = new ObstacleAvoidanceSampleRequest
+            {
+                Pos = ag.NPos,
+                Rad = ag.Params.Radius,
+                VMax = ag.DesiredSpeed,
+                Vel = ag.Vel,
+                DVel = ag.DVel,
+                Param = param,
+                Debug = d?.Vod,
+            };
+
             if (m_sampleVelocityAdaptative)
             {
-                ns = m_obstacleQuery.SampleVelocityAdaptive(
-                    ag.NPos,
-                    ag.Params.Radius,
-                    ag.DesiredSpeed,
-                    ag.Vel,
-                    ag.DVel,
-                    out Vector3 nvel,
-                    param,
-                    d?.Vod);
+                ns = m_obstacleQuery.SampleVelocityAdaptive(req, out Vector3 nvel);
 
                 ag.NVel = nvel;
             }
             else
             {
-                ns = m_obstacleQuery.SampleVelocityGrid(
-                    ag.NPos,
-                    ag.Params.Radius,
-                    ag.DesiredSpeed,
-                    ag.Vel,
-                    ag.DVel,
-                    out Vector3 nvel,
-                    param,
-                    d?.Vod);
+                ns = m_obstacleQuery.SampleVelocityGrid(req, out Vector3 nvel);
 
                 ag.NVel = nvel;
             }

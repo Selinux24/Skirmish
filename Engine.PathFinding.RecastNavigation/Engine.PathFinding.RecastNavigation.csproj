@@ -132,6 +132,8 @@
     <Compile Include="Agent.cs" />
     <Compile Include="BoundsItem.cs" />
     <Compile Include="Detour\Crowds\CrowdParameters.cs" />
+    <Compile Include="Detour\Crowds\ObstacleAvoidanceProcessSampleRequest.cs" />
+    <Compile Include="Detour\Crowds\ObstacleAvoidanceSampleRequest.cs" />
     <Compile Include="Detour\Crowds\ProximityGridItem.cs" />
     <Compile Include="GraphItem.cs" />
     <Compile Include="Recast\BuildContoursFlagTypes.cs" />

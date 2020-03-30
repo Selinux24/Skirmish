@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 {
@@ -73,19 +74,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <returns></returns>
         public static Vector3 Normalize2D(Vector3 v)
         {
-            float d = (float)Math.Sqrt(v.X * v.X + v.Z * v.Z);
-            if (d == 0)
-            {
-                return v;
-            }
+            Vector2 n = Vector2.Normalize(v.XZ());
 
-            d = 1.0f / d;
-
-            Vector3 dest = Vector3.Zero;
-            dest.X *= d;
-            dest.Z *= d;
-
-            return dest;
+            return new Vector3(n.X, v.Y, n.Y);
         }
         /// <summary>
         /// vector normalization that ignores the y-component.
@@ -100,107 +91,97 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             Vector3 dest = Vector3.Zero;
             dest.X = v.X * c - v.Z * s;
-            dest.Z = v.X * s + v.Z * c;
             dest.Y = v.Y;
+            dest.Z = v.X * s + v.Z * c;
 
             return dest;
         }
+
+        private readonly int m_maxCircles;
+        private readonly List<ObstacleCircle> m_circles = new List<ObstacleCircle>();
+
+        private readonly int m_maxSegments;
+        private readonly List<ObstacleSegment> m_segments = new List<ObstacleSegment>();
 
         private ObstacleAvoidanceParams m_params;
         private float m_invHorizTime;
         private float m_invVmax;
 
-        private int m_maxCircles;
-        private ObstacleCircle[] m_circles;
-        private int m_ncircles;
-
-        private int m_maxSegments;
-        private ObstacleSegment[] m_segments;
-        private int m_nsegments;
-
-        public ObstacleAvoidanceQuery()
-        {
-
-        }
-
-        public bool Init(int maxCircles, int maxSegments)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="maxCircles">Max circles</param>
+        /// <param name="maxSegments">Max segments</param>
+        public ObstacleAvoidanceQuery(int maxCircles, int maxSegments)
         {
             m_maxCircles = maxCircles;
-            m_ncircles = 0;
-            m_circles = new ObstacleCircle[m_maxCircles];
-
             m_maxSegments = maxSegments;
-            m_nsegments = 0;
-            m_segments = new ObstacleSegment[m_maxSegments];
+        }
 
-            return true;
-        }
-        public void Reset()
-        {
-            m_ncircles = 0;
-            m_nsegments = 0;
-        }
         public void AddCircle(Vector3 pos, float rad, Vector3 vel, Vector3 dvel)
         {
-            if (m_ncircles >= m_maxCircles)
+            if (m_circles.Count >= m_maxCircles)
             {
                 return;
             }
 
-            if (m_circles[m_ncircles] == null)
+            ObstacleCircle cir = new ObstacleCircle
             {
-                m_circles[m_ncircles] = new ObstacleCircle();
-            }
+                P = pos,
+                Rad = rad,
+                Vel = vel,
+                DVel = dvel
+            };
 
-            ObstacleCircle cir = m_circles[m_ncircles];
-
-            cir.P = pos;
-            cir.Rad = rad;
-            cir.Vel = vel;
-            cir.DVel = dvel;
-
-            m_ncircles++;
+            m_circles.Add(cir);
         }
         public void AddSegment(Vector3 p, Vector3 q)
         {
-            if (m_nsegments >= m_maxSegments)
+            if (m_segments.Count >= m_maxSegments)
             {
                 return;
             }
 
-            if (m_segments[m_nsegments] == null)
+            ObstacleSegment seg = new ObstacleSegment
             {
-                m_segments[m_nsegments] = new ObstacleSegment();
-            }
+                P = p,
+                Q = q
+            };
 
-            ObstacleSegment seg = m_segments[m_nsegments];
-            seg.P = p;
-            seg.Q = q;
-
-            m_nsegments++;
+            m_segments.Add(seg);
         }
-        public int SampleVelocityGrid(
-            Vector3 pos, float rad, float vmax,
-            Vector3 vel, Vector3 dvel, out Vector3 nvel,
-            ObstacleAvoidanceParams param,
-            ObstacleAvoidanceDebugData debug = null)
+        public IEnumerable<ObstacleCircle> GetObstacleCircles()
         {
-            Prepare(pos, dvel);
+            return m_circles.ToArray();
+        }
+        public IEnumerable<ObstacleSegment> GetObstacleSegments()
+        {
+            return m_segments.ToArray();
+        }
+        public void Reset()
+        {
+            m_circles.Clear();
+            m_segments.Clear();
+        }
 
-            m_params = param;
+        public int SampleVelocityGrid(ObstacleAvoidanceSampleRequest req, out Vector3 nvel)
+        {
+            Prepare(req.Pos, req.DVel);
+
+            m_params = req.Param;
             m_invHorizTime = 1.0f / m_params.HorizTime;
-            m_invVmax = vmax > 0 ? 1.0f / vmax : float.MaxValue;
+            m_invVmax = req.VMax > 0 ? 1.0f / req.VMax : float.MaxValue;
 
             nvel = Vector3.Zero;
 
-            if (debug != null)
+            if (req.Debug != null)
             {
-                debug.Reset();
+                req.Debug.Reset();
             }
 
-            float cvx = dvel.X * m_params.VelBias;
-            float cvz = dvel.Z * m_params.VelBias;
-            float cs = vmax * 2 * (1 - m_params.VelBias) / (float)(m_params.GridSize - 1);
+            float cvx = req.DVel.X * m_params.VelBias;
+            float cvz = req.DVel.Z * m_params.VelBias;
+            float cs = req.VMax * 2 * (1 - m_params.VelBias) / (float)(m_params.GridSize - 1);
             float half = (m_params.GridSize - 1) * cs * 0.5f;
 
             float minPenalty = float.MaxValue;
@@ -214,14 +195,26 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     vcand.X = cvx + x * cs - half;
                     vcand.Z = cvz + y * cs - half;
 
-                    float vmaxCs = vmax + cs / 2;
+                    float vmaxCs = req.VMax + cs / 2;
 
                     if ((vcand.X * vcand.X) + (vcand.Z * vcand.Z) > (vmaxCs * vmaxCs))
                     {
                         continue;
                     }
 
-                    float penalty = ProcessSample(vcand, cs, pos, rad, vel, dvel, minPenalty, debug);
+                    ObstacleAvoidanceProcessSampleRequest sReq = new ObstacleAvoidanceProcessSampleRequest
+                    {
+                        VCand = vcand,
+                        Cs = cs,
+                        Pos = req.Pos,
+                        Rad = req.Rad,
+                        Vel = req.Vel,
+                        DVel = req.DVel,
+                        MinPenalty = minPenalty,
+                        Debug = req.Debug,
+                    };
+
+                    float penalty = ProcessSample(sReq);
 
                     ns++;
                     if (penalty < minPenalty)
@@ -234,30 +227,35 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             return ns;
         }
-        public int SampleVelocityAdaptive(
-            Vector3 pos, float rad, float vmax,
-            Vector3 vel, Vector3 dvel, out Vector3 nvel,
-            ObstacleAvoidanceParams param,
-            ObstacleAvoidanceDebugData debug = null)
+        public int SampleVelocityAdaptive(ObstacleAvoidanceSampleRequest req, out Vector3 nvel)
         {
-            Prepare(pos, dvel);
+            Prepare(req.Pos, req.DVel);
 
-            m_params = param;
+            m_params = req.Param;
             m_invHorizTime = 1.0f / m_params.HorizTime;
-            m_invVmax = vmax > 0 ? 1.0f / vmax : float.MaxValue;
+            m_invVmax = req.VMax > 0 ? 1.0f / req.VMax : float.MaxValue;
 
-            if (debug != null)
+            if (req.Debug != null)
             {
-                debug.Reset();
+                req.Debug.Reset();
             }
 
             // Build sampling pattern aligned to desired velocity.
+            Vector2[] pat = BuildSamplePattern(req.DVel, out int npat);
+
+            // Start sampling.
+            nvel = SamplePattern(req, pat, npat, out int ns);
+
+            return ns;
+        }
+        private Vector2[] BuildSamplePattern(Vector3 dvel, out int npat)
+        {
+            // Build sampling pattern aligned to desired velocity.
             Vector2[] pat = new Vector2[DT_MAX_PATTERN_DIVS * DT_MAX_PATTERN_RINGS + 1];
-            int npat = 0;
+            npat = 0;
 
             int ndivs = m_params.AdaptiveDivs;
             int nrings = m_params.AdaptiveRings;
-            int depth = m_params.AdaptiveDepth;
 
             int nd = MathUtil.Clamp(ndivs, 1, DT_MAX_PATTERN_DIVS);
             int nr = MathUtil.Clamp(nrings, 1, DT_MAX_PATTERN_RINGS);
@@ -313,10 +311,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 }
             }
 
+            return pat;
+        }
+        private Vector3 SamplePattern(ObstacleAvoidanceSampleRequest req, Vector2[] pat, int npat, out int ns)
+        {
+            ns = 0;
+
             // Start sampling.
-            float cr = vmax * (1.0f - m_params.VelBias);
-            Vector3 res = new Vector3(dvel.X * m_params.VelBias, 0, dvel[2] * m_params.VelBias);
-            int ns = 0;
+            float cr = req.VMax * (1.0f - m_params.VelBias);
+            Vector3 res = new Vector3(req.DVel.X * m_params.VelBias, 0, req.DVel.Z * m_params.VelBias);
+            int depth = m_params.AdaptiveDepth;
 
             for (int k = 0; k < depth; ++k)
             {
@@ -330,14 +334,27 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     vcand.Y = 0;
                     vcand.Z = res.Z + pat[i].Y * cr;
 
-                    float vmaxD = vmax + 0.001f;
+                    float vmaxD = req.VMax + 0.001f;
 
                     if ((vcand.X * vcand.X) + (vcand.Z * vcand.Z) > (vmaxD * vmaxD))
                     {
                         continue;
                     }
 
-                    float penalty = ProcessSample(vcand, cr / 10, pos, rad, vel, dvel, minPenalty, debug);
+                    ObstacleAvoidanceProcessSampleRequest sReq = new ObstacleAvoidanceProcessSampleRequest
+                    {
+                        VCand = vcand,
+                        Cs = cr / 10,
+                        Pos = req.Pos,
+                        Rad = req.Rad,
+                        Vel = req.Vel,
+                        DVel = req.DVel,
+                        MinPenalty = minPenalty,
+                        Debug = req.Debug,
+                    };
+
+                    float penalty = ProcessSample(sReq);
+
                     ns++;
                     if (penalty < minPenalty)
                     {
@@ -351,34 +368,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 cr *= 0.5f;
             }
 
-            nvel = res;
-
-            return ns;
+            return res;
         }
-        public int GetObstacleCircleCount()
-        {
-            return m_ncircles;
-        }
-        public ObstacleCircle GetObstacleCircle(int i)
-        {
-            return m_circles[i];
-        }
-        public int GetObstacleSegmentCount()
-        {
-            return m_nsegments;
-        }
-        public ObstacleSegment GetObstacleSegment(int i)
-        {
-            return m_segments[i];
-        }
-
         private void Prepare(Vector3 pos, Vector3 dvel)
         {
             // Prepare obstacles
-            for (int i = 0; i < m_ncircles; ++i)
+            foreach (var cir in m_circles)
             {
-                ObstacleCircle cir = m_circles[i];
-
                 // Side
                 Vector3 pa = pos;
                 Vector3 pb = cir.P;
@@ -409,66 +405,76 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 }
             }
 
-            for (int i = 0; i < m_nsegments; ++i)
+            foreach (var seg in m_segments)
             {
-                ObstacleSegment seg = m_segments[i];
-
                 // Precalc if the agent is really close to the segment.
-                float r = 0.01f;
-                seg.Touch = DetourUtils.DistancePtSegSqr2D(pos, seg.P, seg.Q, out float t) < (r * r);
+                seg.Touch = DetourUtils.DistancePtSegSqr2D(pos, seg.P, seg.Q, out _) < 0.0001f;
             }
         }
         /// <summary>
         /// Calculate the collision penalty for a given velocity vector
         /// </summary>
-        /// <param name="vcand">sampled velocity</param>
-        /// <param name="cs"></param>
-        /// <param name="pos"></param>
-        /// <param name="rad"></param>
-        /// <param name="vel"></param>
-        /// <param name="dvel">desired velocity</param>
-        /// <param name="minPenalty">threshold penalty for early out</param>
-        /// <param name="debug"></param>
-        /// <returns></returns>
-        private float ProcessSample(
-            Vector3 vcand, float cs,
-            Vector3 pos, float rad,
-            Vector3 vel, Vector3 dvel,
-            float minPenalty,
-            ObstacleAvoidanceDebugData debug)
+        /// <param name="req">Request</param>
+        /// <returns>Returns the penalty</returns>
+        private float ProcessSample(ObstacleAvoidanceProcessSampleRequest req)
         {
             // penalty for straying away from the desired and current velocities
-            float vpen = m_params.WeightDesVel * (Vector2.Distance(vcand.XZ(), dvel.XZ()) * m_invVmax);
-            float vcpen = m_params.WeightCurVel * (Vector2.Distance(vcand.XZ(), vel.XZ()) * m_invVmax);
+            float vpen = m_params.WeightDesVel * (Vector2.Distance(req.VCand.XZ(), req.DVel.XZ()) * m_invVmax);
+            float vcpen = m_params.WeightCurVel * (Vector2.Distance(req.VCand.XZ(), req.Vel.XZ()) * m_invVmax);
 
             // find the threshold hit time to bail out based on the early out penalty
             // (see how the penalty is calculated below to understnad)
-            float minPen = minPenalty - vpen - vcpen;
+            float minPen = req.MinPenalty - vpen - vcpen;
             float tThresold = (m_params.WeightToi / minPen - 0.1f) * m_params.HorizTime;
             if (tThresold - m_params.HorizTime > -float.Epsilon)
             {
-                return minPenalty; // already too much
+                return req.MinPenalty; // already too much
             }
 
             // Find min time of impact and exit amongst all obstacles.
             float tmin = m_params.HorizTime;
-            float side = 0;
+
+            if (!ProcessSampleCircles(req, tThresold, ref tmin, out float side))
+            {
+                return req.MinPenalty;
+            }
+
+            if (!ProcessSampleSegment(req, tThresold, ref tmin))
+            {
+                return req.MinPenalty;
+            }
+
+            float spen = m_params.WeightSide * side;
+            float tpen = m_params.WeightToi * (1.0f / (0.1f + tmin * m_invHorizTime));
+
+            float penalty = vpen + vcpen + spen + tpen;
+
+            // Store different penalties for debug viewing
+            if (req.Debug != null)
+            {
+                req.Debug.AddSample(req.VCand, req.Cs, penalty, vpen, vcpen, spen, tpen);
+            }
+
+            return penalty;
+        }
+        private bool ProcessSampleCircles(ObstacleAvoidanceProcessSampleRequest req, float tThresold, ref float tmin, out float side)
+        {
+            side = 0;
+
             int nside = 0;
 
-            for (int i = 0; i < m_ncircles; ++i)
+            foreach (var cir in m_circles)
             {
-                ObstacleCircle cir = m_circles[i];
-
                 // RVO
-                Vector3 vab = vcand * 2;
-                vab -= vel;
+                Vector3 vab = req.VCand * 2;
+                vab -= req.Vel;
                 vab -= cir.Vel;
 
                 // Side
                 side += MathUtil.Clamp(Math.Min(Vector2.Dot(cir.Dp.XZ(), vab.XZ()) * 0.5f + 0.5f, Vector2.Dot(cir.Np.XZ(), vab.XZ()) * 2), 0.0f, 1.0f);
                 nside++;
 
-                if (!SweepCircleCircle(pos, rad, vab, cir.P, cir.Rad, out float htmin, out float htmax))
+                if (!SweepCircleCircle(req.Pos, req.Rad, vab, cir.P, cir.Rad, out float htmin, out float htmax))
                 {
                     continue;
                 }
@@ -486,15 +492,24 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     tmin = htmin;
                     if (tmin < tThresold)
                     {
-                        return minPenalty;
+                        return false;
                     }
                 }
             }
 
-            for (int i = 0; i < m_nsegments; ++i)
+            // Normalize side bias, to prevent it dominating too much.
+            if (nside > 0)
             {
-                ObstacleSegment seg = m_segments[i];
-                float htmin = 0;
+                side /= nside;
+            }
+
+            return true;
+        }
+        private bool ProcessSampleSegment(ObstacleAvoidanceProcessSampleRequest req, float tThresold, ref float tmin)
+        {
+            foreach (var seg in m_segments)
+            {
+                float htmin;
 
                 if (seg.Touch)
                 {
@@ -502,7 +517,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     Vector3 sdir = seg.Q - seg.P;
                     Vector3 snorm = new Vector3(-sdir.Z, 0, sdir.X);
                     // If the velocity is pointing towards the segment, no collision.
-                    if (Vector2.Dot(snorm.XZ(), vcand.XZ()) < 0.0f)
+                    if (Vector2.Dot(snorm.XZ(), req.VCand.XZ()) < 0.0f)
                     {
                         continue;
                     }
@@ -511,7 +526,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 }
                 else
                 {
-                    if (!IsectRaySeg(pos, vcand, seg.P, seg.Q, out htmin))
+                    if (!IsectRaySeg(req.Pos, req.VCand, seg.P, seg.Q, out htmin))
                     {
                         continue;
                     }
@@ -526,29 +541,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     tmin = htmin;
                     if (tmin < tThresold)
                     {
-                        return minPenalty;
+                        return false;
                     }
                 }
             }
 
-            // Normalize side bias, to prevent it dominating too much.
-            if (nside > 0)
-            {
-                side /= nside;
-            }
-
-            float spen = m_params.WeightSide * side;
-            float tpen = m_params.WeightToi * (1.0f / (0.1f + tmin * m_invHorizTime));
-
-            float penalty = vpen + vcpen + spen + tpen;
-
-            // Store different penalties for debug viewing
-            if (debug != null)
-            {
-                debug.AddSample(vcand, cs, penalty, vpen, vcpen, spen, tpen);
-            }
-
-            return penalty;
+            return true;
         }
     }
 }
