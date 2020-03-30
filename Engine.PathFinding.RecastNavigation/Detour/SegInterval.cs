@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections.Generic;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
@@ -8,13 +8,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         public int TMin { get; set; }
         public int TMax { get; set; }
 
-        public static void InsertInterval(ref SegInterval[] ints, ref int nints, int maxInts, int tmin, int tmax, int r)
+        public static void InsertInterval(List<SegInterval> ints, int maxInts, int tmin, int tmax, int r)
         {
-            if (nints + 1 > maxInts) return;
+            if (ints.Count + 1 > maxInts) return;
 
             // Find insertion point.
             int idx = 0;
-            while (idx < nints)
+            while (idx < ints.Count)
             {
                 if (tmax <= ints[idx].TMin)
                 {
@@ -23,17 +23,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 idx++;
             }
 
-            // Move current results.
-            if (nints - idx != 0)
+            ints.Insert(idx, new SegInterval()
             {
-                Array.Copy(ints, idx, ints, idx + 1, (nints - idx));
-            }
-
-            // Store
-            ints[idx].R = r;
-            ints[idx].TMin = tmin;
-            ints[idx].TMax = tmax;
-            nints++;
+                TMin = tmin,
+                TMax = tmax,
+                R = r,
+            });
         }
     }
 }

@@ -2523,11 +2523,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="segmentCount">The number of segments returned.</param>
         /// <param name="maxSegments">The maximum number of segments the result arrays can hold.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status GetPolyWallSegments(int r, QueryFilter filter, int maxSegments, out Vector3[] segmentVerts, out int[] segmentRefs, out int segmentCount)
+        public Status GetPolyWallSegments(int r, QueryFilter filter, int maxSegments, out Segment[] segmentsRes)
         {
-            segmentVerts = new Vector3[maxSegments];
-            segmentRefs = new int[maxSegments];
-            segmentCount = 0;
+            segmentsRes = new Segment[] { };
+
+            List<Segment> segments = new List<Segment>();
 
             if (!m_nav.GetTileAndPolyByRef(r, out MeshTile tile, out Poly poly))
             {
@@ -2539,19 +2539,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
 
-            int n = 0;
             int MAX_INTERVAL = 16;
-            SegInterval[] ints = new SegInterval[MAX_INTERVAL];
-            int nints;
+            List<SegInterval> ints = new List<SegInterval>();
 
-            bool storePortals = segmentRefs != null;
+            bool storePortals = false;
 
             Status status = Status.DT_SUCCESS;
 
             for (int i = 0, j = poly.VertCount - 1; i < poly.VertCount; j = i++)
             {
                 // Skip non-solid edges.
-                nints = 0;
                 if ((poly.Neis[j] & DetourUtils.DT_EXT_LINK) != 0)
                 {
                     // Tile border.
@@ -2563,7 +2560,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                             m_nav.GetTileAndPolyByRefUnsafe(link.NRef, out MeshTile neiTile, out Poly neiPoly);
                             if (filter.PassFilter(link.NRef, neiTile, neiPoly))
                             {
-                                SegInterval.InsertInterval(ref ints, ref nints, MAX_INTERVAL, link.BMin, link.BMax, link.NRef);
+                                SegInterval.InsertInterval(ints, MAX_INTERVAL, link.BMin, link.BMax, link.NRef);
                             }
                         }
                     }
@@ -2588,12 +2585,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                         continue;
                     }
 
-                    if (n < maxSegments)
+                    if (segments.Count < maxSegments)
                     {
-                        segmentVerts[n + 0] = tile.Verts[poly.Verts[j]];
-                        segmentVerts[n + 1] = tile.Verts[poly.Verts[i]];
-                        segmentRefs[n] = neiRef;
-                        n++;
+                        segments.Add(new Segment
+                        {
+                            S1 = tile.Verts[poly.Verts[j]],
+                            S2 = tile.Verts[poly.Verts[i]],
+                            R = neiRef,
+                        });
                     }
                     else
                     {
@@ -2604,25 +2603,27 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
 
                 // Add sentinels
-                SegInterval.InsertInterval(ref ints, ref nints, MAX_INTERVAL, -1, 0, 0);
-                SegInterval.InsertInterval(ref ints, ref nints, MAX_INTERVAL, 255, 256, 0);
+                SegInterval.InsertInterval(ints, MAX_INTERVAL, -1, 0, 0);
+                SegInterval.InsertInterval(ints, MAX_INTERVAL, 255, 256, 0);
 
                 // Store segments.
                 Vector3 vj = tile.Verts[poly.Verts[j]];
                 Vector3 vi = tile.Verts[poly.Verts[i]];
-                for (int k = 1; k < nints; ++k)
+                for (int k = 1; k < ints.Count; ++k)
                 {
                     // Portal segment.
                     if (storePortals && ints[k].R != 0)
                     {
                         float tmin = ints[k].TMin / 255.0f;
                         float tmax = ints[k].TMax / 255.0f;
-                        if (n < maxSegments)
+                        if (segments.Count < maxSegments)
                         {
-                            segmentVerts[n + 0] = Vector3.Lerp(vj, vi, tmin);
-                            segmentVerts[n + 1] = Vector3.Lerp(vj, vi, tmax);
-                            segmentRefs[n] = ints[k].R;
-                            n++;
+                            segments.Add(new Segment
+                            {
+                                S1 = Vector3.Lerp(vj, vi, tmin),
+                                S2 = Vector3.Lerp(vj, vi, tmax),
+                                R = ints[k].R,
+                            });
                         }
                         else
                         {
@@ -2637,12 +2638,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     {
                         float tmin = imin / 255.0f;
                         float tmax = imax / 255.0f;
-                        if (n < maxSegments)
+                        if (segments.Count < maxSegments)
                         {
-                            segmentVerts[n + 0] = Vector3.Lerp(vj, vi, tmin);
-                            segmentVerts[n + 1] = Vector3.Lerp(vj, vi, tmax);
-                            segmentRefs[n] = 0;
-                            n++;
+                            segments.Add(new Segment
+                            {
+                                S1 = Vector3.Lerp(vj, vi, tmin),
+                                S2 = Vector3.Lerp(vj, vi, tmax),
+                                R = 0,
+                            });
                         }
                         else
                         {
@@ -2652,7 +2655,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
             }
 
-            segmentCount = n;
+            segmentsRes = segments.ToArray();
 
             return status;
         }

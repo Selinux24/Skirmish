@@ -1222,20 +1222,17 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             }
 
             // Append neighbour segments as obstacles.
-            for (int j = 0; j < ag.Boundary.GetSegmentCount(); ++j)
+            foreach (var s in ag.Boundary.GetSegments())
             {
-                Vector3[] s = ag.Boundary.GetSegment(j);
-                if (DetourUtils.TriArea2D(ag.NPos, s[0], s[1]) < 0.0f)
+                if (DetourUtils.TriArea2D(ag.NPos, s.S1, s.S2) < 0.0f)
                 {
                     continue;
                 }
-                m_obstacleQuery.AddSegment(s[0], s[1]);
+                m_obstacleQuery.AddSegment(s.S1, s.S2);
             }
 
             // Sample new safe velocity.
             int ns;
-
-            var param = m_obstacleQueryParams[ag.Params.ObstacleAvoidanceType];
 
             ObstacleAvoidanceSampleRequest req = new ObstacleAvoidanceSampleRequest
             {
@@ -1244,7 +1241,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 VMax = ag.DesiredSpeed,
                 Vel = ag.Vel,
                 DVel = ag.DVel,
-                Param = param,
+                Param = m_obstacleQueryParams[ag.Params.ObstacleAvoidanceType],
                 Debug = d?.Vod,
             };
 

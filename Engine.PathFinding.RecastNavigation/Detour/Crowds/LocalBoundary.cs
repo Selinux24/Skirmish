@@ -1,106 +1,35 @@
 ﻿using SharpDX;
-using System;
+using System.Collections.Generic;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 {
     public class LocalBoundary
     {
-        public const int MAX_LOCAL_SEGS = 8;
         public const int MAX_LOCAL_POLYS = 16;
 
-        struct Segment
-        {
-            /// <summary>
-            /// Segment start
-            /// </summary>
-            public Vector3 S1 { get; set; }
-            /// <summary>
-            /// Segment end
-            /// </summary>
-            public Vector3 S2 { get; set; }
-            /// <summary>
-            /// Distance for pruning.
-            /// </summary>
-            public float D { get; set; }
-        };
-
         private Vector3 m_center;
-        private readonly Segment[] m_segs = new Segment[MAX_LOCAL_SEGS];
-        private int m_nsegs;
+        private readonly List<LocalBoundarySegment> m_segs = new List<LocalBoundarySegment>();
 
         private PolyRefs m_polys = null;
-        private int m_npolys;
 
         public LocalBoundary()
         {
             m_center = new Vector3(float.MaxValue);
-            m_npolys = 0;
-            m_nsegs = 0;
         }
 
-        private void AddSegment(float dist, Vector3 s1, Vector3 s2)
-        {
-            // Insert neighbour based on the distance.
-            Segment seg;
-            if (m_nsegs < 0)
-            {
-                // First, trivial accept.
-                seg = m_segs[0];
-            }
-            else if (dist >= m_segs[m_nsegs - 1].D)
-            {
-                // Further than the last segment, skip.
-                if (m_nsegs >= MAX_LOCAL_SEGS)
-                {
-                    return;
-                }
-                // Last, trivial accept.
-                seg = m_segs[m_nsegs];
-            }
-            else
-            {
-                // Insert inbetween.
-                int i;
-                for (i = 0; i < m_nsegs; ++i)
-                {
-                    if (dist <= m_segs[i].D)
-                    {
-                        break;
-                    }
-                }
-                int tgt = i + 1;
-                int n = Math.Min(m_nsegs - i, MAX_LOCAL_SEGS - tgt);
-                if (n > 0)
-                {
-                    Array.ConstrainedCopy(m_segs, i, m_segs, tgt, n);
-                }
-                seg = m_segs[i];
-            }
-
-            seg.D = dist;
-            seg.S1 = s1;
-            seg.S2 = s2;
-
-            if (m_nsegs < MAX_LOCAL_SEGS)
-            {
-                m_nsegs++;
-            }
-        }
         public void Reset()
         {
             m_center = new Vector3(float.MaxValue);
-            m_npolys = 0;
-            m_nsegs = 0;
+            m_segs.Clear();
         }
         public void Update(int r, Vector3 pos, float collisionQueryRange, NavMeshQuery navquery, QueryFilter filter)
         {
             int MAX_SEGS_PER_POLY = DetourUtils.DT_VERTS_PER_POLYGON * 3;
+            float collisionQueryRangeSq = collisionQueryRange * collisionQueryRange;
 
-            if (r > 0)
+            if (r <= 0)
             {
                 m_center = new Vector3(float.MaxValue);
-                m_nsegs = 0;
-                m_npolys = 0;
                 return;
             }
 
@@ -110,36 +39,46 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             navquery.FindLocalNeighbourhood(r, pos, collisionQueryRange, filter, MAX_LOCAL_POLYS, out m_polys);
 
             // Secondly, store all polygon edges.
-            m_nsegs = 0;
-            for (int j = 0; j < m_npolys; ++j)
+            for (int j = 0; j < m_polys.Count; ++j)
             {
-                navquery.GetPolyWallSegments(
-                    m_polys.Refs[j], filter, MAX_SEGS_PER_POLY,
-                    out Vector3[] segs, out _, out int nsegs);
+                navquery.GetPolyWallSegments(m_polys.Refs[j], filter, MAX_SEGS_PER_POLY, out var segs);
 
-                for (int k = 0; k < nsegs; k += 2)
+                foreach (var seg in segs)
                 {
-                    Vector3 s1 = segs[k];
-                    Vector3 s2 = segs[k + 1];
                     // Skip too distant segments.
-                    float distSqr = DetourUtils.DistancePtSegSqr2D(pos, s1, s2, out _);
-                    if (distSqr > collisionQueryRange * collisionQueryRange)
+                    float distSqr = DetourUtils.DistancePtSegSqr2D(pos, seg.S1, seg.S2, out _);
+                    if (distSqr > collisionQueryRangeSq)
                     {
                         continue;
                     }
-                    AddSegment(distSqr, s1, s2);
+
+                    m_segs.Add(new LocalBoundarySegment
+                    {
+                        S1 = seg.S1,
+                        S2 = seg.S2,
+                        D = distSqr,
+                    });
                 }
+            }
+
+            if (m_segs.Count > 1)
+            {
+                // Sort neighbour based on the distance.
+                m_segs.Sort((s1, s2) =>
+                {
+                    return s1.D.CompareTo(s2.D);
+                });
             }
         }
         public bool IsValid(NavMeshQuery navquery, QueryFilter filter)
         {
-            if (m_npolys <= 0)
+            if (m_polys.Count <= 0)
             {
                 return false;
             }
 
             // Check that all polygons still pass query filter.
-            for (int i = 0; i < m_npolys; ++i)
+            for (int i = 0; i < m_polys.Count; ++i)
             {
                 if (!navquery.IsValidPolyRef(m_polys.Refs[i], filter))
                 {
@@ -149,21 +88,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             return true;
         }
+      
         public Vector3 GetCenter()
         {
             return m_center;
         }
-        public int GetSegmentCount()
+        public IEnumerable<LocalBoundarySegment> GetSegments()
         {
-            return m_nsegs;
-        }
-        public Vector3[] GetSegment(int i)
-        {
-            return new Vector3[]
-            {
-                m_segs[i].S1,
-                m_segs[i].S2,
-            };
+            return m_segs.ToArray();
         }
     }
 }
