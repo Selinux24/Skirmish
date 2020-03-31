@@ -469,11 +469,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             areas = new float[DT_VERTS_PER_POLYGON];
 
-            // Calc triangle araes
+            // Calc triangle areas
             float areasum = 0.0f;
             for (int i = 2; i < pts.Length; i++)
             {
-                areas[i] = TriArea2D(pts[0], pts[(i - 1)], pts[i]);
+                areas[i] = TriArea2D(pts[0], pts[i - 1], pts[i]);
                 areasum += Math.Max(0.001f, areas[i]);
             }
             // Find sub triangle weighted by area.
@@ -499,7 +499,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             float b = (1 - u) * v;
             float c = u * v;
             Vector3 pa = pts[0];
-            Vector3 pb = pts[(tri - 1)];
+            Vector3 pb = pts[tri - 1];
             Vector3 pc = pts[tri];
 
             outPoint = a * pa + b * pb + c * pc;

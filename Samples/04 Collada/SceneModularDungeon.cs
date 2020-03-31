@@ -1312,6 +1312,14 @@ namespace Collada
                     1,
                     GraphConnectionAreaTypes.Jump,
                     GraphConnectionFlagTypes.All);
+
+                this.PathFinderDescription.Input.AddConnection(
+                    new Vector3(17, 0, -14),
+                    new Vector3(16, 0, -15),
+                    0.15f,
+                    0,
+                    GraphConnectionAreaTypes.Ground,
+                    GraphConnectionFlagTypes.All);
             }
 
             this.PaintConnections();

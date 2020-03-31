@@ -69,25 +69,25 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             return true;
         }
-        public static bool MarkCylinderArea(NavMeshTileBuildContext tc, Vector3 orig, float cs, float ch, Vector3 pos, float radius, float height, AreaTypes areaId)
+        public static bool MarkCylinderArea(NavMeshTileBuildContext tc, Vector3 orig, float cs, float ch, ObstacleCylinder obstacle, AreaTypes areaId)
         {
             Vector3 bmin = new Vector3();
             Vector3 bmax = new Vector3();
-            bmin.X = pos.X - radius;
-            bmin.Y = pos.Y;
-            bmin.Z = pos.Z - radius;
-            bmax.X = pos.X + radius;
-            bmax.Y = pos.Y + height;
-            bmax.Z = pos.Z + radius;
-            float r2 = (float)Math.Pow(radius / cs + 0.5f, 2.0f);
+            bmin.X = obstacle.Pos.X - obstacle.Radius;
+            bmin.Y = obstacle.Pos.Y;
+            bmin.Z = obstacle.Pos.Z - obstacle.Radius;
+            bmax.X = obstacle.Pos.X + obstacle.Radius;
+            bmax.Y = obstacle.Pos.Y + obstacle.Height;
+            bmax.Z = obstacle.Pos.Z + obstacle.Radius;
+            float r2 = (float)Math.Pow(obstacle.Radius / cs + 0.5f, 2.0f);
 
             int w = tc.Layer.Header.Width;
             int h = tc.Layer.Header.Height;
             float ics = 1.0f / cs;
             float ich = 1.0f / ch;
 
-            float px = (pos.X - orig.X) * ics;
-            float pz = (pos.Z - orig.Z) * ics;
+            float px = (obstacle.Pos.X - orig.X) * ics;
+            float pz = (obstacle.Pos.Z - orig.Z) * ics;
 
             int minx = (int)Math.Floor((bmin.X - orig.X) * ics);
             int miny = (int)Math.Floor((bmin.Y - orig.Y) * ich);
@@ -127,23 +127,23 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             return true;
         }
-        public static bool MarkBoxArea(NavMeshTileBuildContext tc, Vector3 orig, float cs, float ch, Vector3 center, Vector3 halfExtents, Vector2 rotAux, AreaTypes areaId)
+        public static bool MarkBoxArea(NavMeshTileBuildContext tc, Vector3 orig, float cs, float ch, ObstacleOrientedBox obstacle, AreaTypes areaId)
         {
             int w = tc.Layer.Header.Width;
             int h = tc.Layer.Header.Height;
             float ics = 1.0f / cs;
             float ich = 1.0f / ch;
 
-            float cx = (center.X - orig.X) * ics;
-            float cz = (center.Z - orig.Z) * ics;
+            float cx = (obstacle.Center.X - orig.X) * ics;
+            float cz = (obstacle.Center.Z - orig.Z) * ics;
 
-            float maxr = 1.41f * Math.Max(halfExtents.X, halfExtents.Z);
+            float maxr = 1.41f * Math.Max(obstacle.HalfExtents.X, obstacle.HalfExtents.Z);
             int minx = (int)Math.Floor(cx - maxr * ics);
             int maxx = (int)Math.Floor(cx + maxr * ics);
             int minz = (int)Math.Floor(cz - maxr * ics);
             int maxz = (int)Math.Floor(cz + maxr * ics);
-            int miny = (int)Math.Floor((center.Y - halfExtents.Y - orig.Y) * ich);
-            int maxy = (int)Math.Floor((center.Y + halfExtents.Y - orig.Y) * ich);
+            int miny = (int)Math.Floor((obstacle.Center.Y - obstacle.HalfExtents.Y - orig.Y) * ich);
+            int maxy = (int)Math.Floor((obstacle.Center.Y + obstacle.HalfExtents.Y - orig.Y) * ich);
 
             if (maxx < 0) return true;
             if (minx >= w) return true;
@@ -155,8 +155,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             if (minz < 0) minz = 0;
             if (maxz >= h) maxz = h - 1;
 
-            float xhalf = halfExtents.X * ics + 0.5f;
-            float zhalf = halfExtents.Z * ics + 0.5f;
+            float xhalf = obstacle.HalfExtents.X * ics + 0.5f;
+            float zhalf = obstacle.HalfExtents.Z * ics + 0.5f;
 
             for (int z = minz; z <= maxz; ++z)
             {
@@ -164,12 +164,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 {
                     float x2 = 2.0f * (x - cx);
                     float z2 = 2.0f * (z - cz);
-                    float xrot = rotAux.Y * x2 + rotAux.X * z2;
+                    float xrot = obstacle.RotAux.Y * x2 + obstacle.RotAux.X * z2;
                     if (xrot > xhalf || xrot < -xhalf)
                     {
                         continue;
                     }
-                    float zrot = rotAux.Y * z2 - rotAux.X * x2;
+                    float zrot = obstacle.RotAux.Y * z2 - obstacle.RotAux.X * x2;
                     if (zrot > zhalf || zrot < -zhalf)
                     {
                         continue;
@@ -185,19 +185,19 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             return true;
         }
-        public static bool MarkBoxArea(NavMeshTileBuildContext tc, Vector3 orig, float cs, float ch, Vector3 bmin, Vector3 bmax, AreaTypes areaId)
+        public static bool MarkBoxArea(NavMeshTileBuildContext tc, Vector3 orig, float cs, float ch, ObstacleBox obstacle, AreaTypes areaId)
         {
             int w = tc.Layer.Header.Width;
             int h = tc.Layer.Header.Height;
             float ics = 1.0f / cs;
             float ich = 1.0f / ch;
 
-            int minx = (int)Math.Floor((bmin.X - orig.X) * ics);
-            int miny = (int)Math.Floor((bmin.Y - orig.Y) * ich);
-            int minz = (int)Math.Floor((bmin.Z - orig.Z) * ics);
-            int maxx = (int)Math.Floor((bmax.X - orig.X) * ics);
-            int maxy = (int)Math.Floor((bmax.Y - orig.Y) * ich);
-            int maxz = (int)Math.Floor((bmax.Z - orig.Z) * ics);
+            int minx = (int)Math.Floor((obstacle.BMin.X - orig.X) * ics);
+            int miny = (int)Math.Floor((obstacle.BMin.Y - orig.Y) * ich);
+            int minz = (int)Math.Floor((obstacle.BMin.Z - orig.Z) * ics);
+            int maxx = (int)Math.Floor((obstacle.BMax.X - orig.X) * ics);
+            int maxy = (int)Math.Floor((obstacle.BMax.Y - orig.Y) * ich);
+            int maxz = (int)Math.Floor((obstacle.BMax.Z - orig.Z) * ics);
 
             if (maxx < 0) return true;
             if (minx >= w) return true;
@@ -1781,15 +1781,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             uint h2 = 0xd8163841; // here arbitrarily chosen primes
             uint n = h1 * (uint)x + h2 * (uint)y;
             return (int)(n & mask);
-        }
-        public static bool Contains(CompressedTile[] a, int n, CompressedTile v)
-        {
-            for (int i = 0; i < n; ++i)
-            {
-                if (a[i] == v) return true;
-            }
-
-            return false;
         }
 
         #endregion

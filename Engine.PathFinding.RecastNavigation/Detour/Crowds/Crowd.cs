@@ -299,11 +299,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             m_pathq = new PathQueue(nav, m_maxPathResult, MAX_PATHQUEUE_NODES);
 
             // The navquery is mostly used for local searches, no need for large node pool.
-            m_navquery = new NavMeshQuery();
-            if (m_navquery.Init(nav, MAX_COMMON_NODES) != Status.DT_SUCCESS)
-            {
-                throw new EngineException($"Error initializing the NavMeshQuery");
-            }
+            m_navquery = new NavMeshQuery(nav, MAX_COMMON_NODES);
         }
 
         /// <summary>

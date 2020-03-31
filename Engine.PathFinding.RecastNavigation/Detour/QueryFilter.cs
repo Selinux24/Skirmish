@@ -38,36 +38,24 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Returns true if the polygon can be visited.  (I.e. Is traversable.)
         /// </summary>
-        /// <param name="r">The reference id of the polygon test.</param>
         /// <param name="tile">The tile containing the polygon.</param>
-        /// <param name="poly">The polygon to test.</param>
         /// <returns></returns>
-        public virtual bool PassFilter(int r, MeshTile tile, Poly poly)
+        public virtual bool PassFilter(TileRef tile)
         {
-            return (poly.Flags & IncludeFlags) != 0 && (poly.Flags & ExcludeFlags) == 0;
+            return (tile.Poly.Flags & IncludeFlags) != 0 && (tile.Poly.Flags & ExcludeFlags) == 0;
         }
         /// <summary>
         /// Returns cost to move from the beginning to the end of a line segment that is fully contained within a polygon.
         /// </summary>
         /// <param name="pa">The start position on the edge of the previous and current polygon. [(x, y, z)]</param>
         /// <param name="pb">The end position on the edge of the current and next polygon. [(x, y, z)]</param>
-        /// <param name="prevRef">The reference id of the previous polygon. [opt]</param>
-        /// <param name="prevTile">The tile containing the previous polygon. [opt]</param>
-        /// <param name="prevPoly">The previous polygon. [opt]</param>
-        /// <param name="curRef">The reference id of the current polygon.</param>
-        /// <param name="curTile">The tile containing the current polygon.</param>
-        /// <param name="curPoly">The current polygon.</param>
-        /// <param name="nextRef">The refernece id of the next polygon. [opt]</param>
-        /// <param name="nextTile">The tile containing the next polygon. [opt]</param>
-        /// <param name="nextPoly">The next polygon. [opt]</param>
+        /// <param name="prev">The tile containing the previous polygon. [opt]</param>
+        /// <param name="cur">The tile containing the current polygon.</param>
+        /// <param name="next">The tile containing the next polygon. [opt]</param>
         /// <returns></returns>
-        public virtual float GetCost(
-            Vector3 pa, Vector3 pb,
-            int? prevRef, MeshTile prevTile, Poly prevPoly,
-            int curRef, MeshTile curTile, Poly curPoly,
-            int nextRef, MeshTile nextTile, Poly nextPoly)
+        public virtual float GetCost(Vector3 pa, Vector3 pb, TileRef prev, TileRef cur, TileRef next)
         {
-            return Vector3.Distance(pa, pb) * AreaCost[(int)curPoly.Area];
+            return Vector3.Distance(pa, pb) * AreaCost[(int)cur.Poly.Area];
         }
 
         /// <summary>

@@ -581,6 +581,10 @@
           <position>16 0 -25</position>
           <rotation>rot90</rotation>
         </item>
+        <item asset_name="Dn_Rat_Hole_1">
+          <position>16 0 -15</position>
+          <rotation>rot270</rotation>
+        </item>
 
         <item asset_name="Dn_Temple_Fire_1" type="Light" path_finding="true">
           <position>53 0 -4</position>

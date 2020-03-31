@@ -132,7 +132,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
         }
 
-
         /// <summary>
         /// Patch header pointers
         /// </summary>

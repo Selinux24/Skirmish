@@ -3,8 +3,17 @@ namespace Engine.PathFinding.RecastNavigation
 {
     public enum PathFindingMode
     {
-        TOOLMODE_PATHFIND_FOLLOW,
-        TOOLMODE_PATHFIND_STRAIGHT,
-        TOOLMODE_PATHFIND_SLICED,
+        /// <summary>
+        /// TOOLMODE_PATHFIND_FOLLOW
+        /// </summary>
+        Follow,
+        /// <summary>
+        /// TOOLMODE_PATHFIND_STRAIGHT
+        /// </summary>
+        Straight,
+        /// <summary>
+        /// TOOLMODE_PATHFIND_SLICED
+        /// </summary>
+        Sliced,
     }
 }

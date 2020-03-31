@@ -64,9 +64,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the new navigation mesh query</returns>
         public NavMeshQuery CreateQuery()
         {
-            var nm = new NavMeshQuery();
-            nm.Init(this.NavMesh, this.MaxNodes);
-            return nm;
+            return new NavMeshQuery(this.NavMesh, this.MaxNodes);
         }
     }
 }

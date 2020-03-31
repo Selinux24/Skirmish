@@ -102,14 +102,15 @@ namespace Engine.PathFinding.RecastNavigation
             int maxNeis = 16;
             List<int> neis = new List<int>();
 
-            if (navQuery.GetAttachedNavMesh().GetTileAndPolyByRef(path.Start, out MeshTile tile, out Poly poly))
+            var cur = navQuery.GetAttachedNavMesh().GetTileAndPolyByRef(path.Start);
+            if (cur.Ref == 0)
             {
                 return;
             }
 
-            for (int k = poly.FirstLink; k != DetourUtils.DT_NULL_LINK; k = tile.Links[k].Next)
+            for (int k = cur.Poly.FirstLink; k != DetourUtils.DT_NULL_LINK; k = cur.Tile.Links[k].Next)
             {
-                var link = tile.Links[k];
+                var link = cur.Tile.Links[k];
                 if (link.NRef != 0 && neis.Count < maxNeis)
                 {
                     neis.Add(link.NRef);

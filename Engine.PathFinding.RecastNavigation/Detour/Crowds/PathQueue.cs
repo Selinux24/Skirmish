@@ -81,11 +81,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         {
             m_nextHandle = 1;
 
-            m_navquery = new NavMeshQuery();
-            if (m_navquery.Init(nav, maxSearchNodeCount) != Status.DT_SUCCESS)
-            {
-                throw new EngineException($"Error initializing the NavMeshQuery");
-            }
+            m_navquery = new NavMeshQuery(nav, maxSearchNodeCount);
 
             m_maxPathSize = maxPathSize;
             for (int i = 0; i < MAX_QUEUE; ++i)
