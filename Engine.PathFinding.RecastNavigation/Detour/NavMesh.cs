@@ -1310,33 +1310,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
             var poly = tile.Polys[ip];
 
-            // Make sure that the current poly is indeed off-mesh link.
-            if (poly.Type != PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
-            {
-                return false;
-            }
-
             // Figure out which way to hand out the vertices.
-            int idx0 = 0, idx1 = 1;
-
-            // Find link that points to first vertex.
-            for (int i = poly.FirstLink; i != DetourUtils.DT_NULL_LINK; i = tile.Links[i].Next)
-            {
-                if (tile.Links[i].Edge == 0)
-                {
-                    if (tile.Links[i].NRef != prevRef)
-                    {
-                        idx0 = 1;
-                        idx1 = 0;
-                    }
-                    break;
-                }
-            }
-
-            startPos = tile.Verts[poly.Verts[idx0]];
-            endPos = tile.Verts[poly.Verts[idx1]];
-
-            return true;
+            return tile.FindOffMeshConnectionEndpoints(poly, prevRef, out startPos, out endPos);
         }
         public OffMeshConnection GetOffMeshConnectionByRef(int r)
         {
@@ -1356,21 +1331,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 return null;
             }
             var tile = Tiles[it];
-            if (ip >= tile.Header.PolyCount)
-            {
-                return null;
-            }
-            var poly = tile.Polys[ip];
 
-            // Make sure that the current poly is indeed off-mesh link.
-            if (poly.Type != PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
-            {
-                return null;
-            }
-
-            int idx = ip - tile.Header.OffMeshBase;
-
-            return tile.OffMeshCons[idx];
+            return tile.GetOffMeshConnectionByPolygon(ip);
         }
         public bool SetPolyFlags(int r, SamplePolyFlagTypes flags)
         {
@@ -1541,68 +1503,76 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             return GetTilesAt(nx, ny, maxTiles);
         }
-        private int FindConnectingPolys(Vector3 va, Vector3 vb, MeshTile tile, int side, out int[] con, out float[] conarea, int maxcon)
+        private bool FindConnectingPolys(Vector3 va, Vector3 vb, MeshTile tile, int side, int maxcon, out IEnumerable<int> con, out IEnumerable<Vector2> conarea)
         {
-            con = new int[maxcon];
-            conarea = new float[maxcon * 2];
-
-            if (tile == null) return 0;
+            List<int> conList = new List<int>();
+            List<Vector2> conareaList = new List<Vector2>();
 
             DetourUtils.CalcSlabEndPoints(va, vb, out Vector2 amin, out Vector2 amax, side);
             float apos = DetourUtils.GetSlabCoord(va, side);
 
             // Remove links pointing to 'side' and compact the links array. 
             int m = DetourUtils.DT_EXT_LINK | side;
-            int n = 0;
-
             int bse = GetTileRef(tile);
 
-            for (int i = 0; i < tile.Header.PolyCount; ++i)
+            var polys = tile.GetPolys();
+            for (int i = 0; i < polys.Count(); ++i)
             {
-                Poly poly = tile.Polys[i];
+                var poly = tile.Polys[i];
                 int nv = poly.VertCount;
+
                 for (int j = 0; j < nv; ++j)
                 {
                     // Skip edges which do not point to the right side.
-                    if (poly.Neis[j] != m) continue;
+                    if (poly.Neis[j] != m)
+                    {
+                        continue;
+                    }
 
-                    Vector3 vc = tile.Verts[poly.Verts[j]];
-                    Vector3 vd = tile.Verts[poly.Verts[(j + 1) % nv]];
+                    Vector3 vc = tile.GetPolyVertex(poly, j);
+                    Vector3 vd = tile.GetPolyVertex(poly, (j + 1) % nv);
                     float bpos = DetourUtils.GetSlabCoord(vc, side);
 
                     // Segments are not close enough.
-                    if (Math.Abs(apos - bpos) > 0.01f) continue;
+                    if (Math.Abs(apos - bpos) > 0.01f)
+                    {
+                        continue;
+                    }
 
                     // Check if the segments touch.
                     DetourUtils.CalcSlabEndPoints(vc, vd, out Vector2 bmin, out Vector2 bmax, side);
 
-                    if (!DetourUtils.OverlapSlabs(amin, amax, bmin, bmax, 0.01f, tile.Header.WalkableClimb)) continue;
+                    if (!DetourUtils.OverlapSlabs(amin, amax, bmin, bmax, 0.01f, tile.Header.WalkableClimb))
+                    {
+                        continue;
+                    }
 
                     // Add return value.
-                    if (n < maxcon)
+                    if (conList.Count < maxcon)
                     {
-                        conarea[n * 2 + 0] = Math.Max(amin.X, bmin.X);
-                        conarea[n * 2 + 1] = Math.Min(amax.X, bmax.X);
-                        con[n] = bse | i;
-                        n++;
+                        conareaList.Add(new Vector2(Math.Max(amin.X, bmin.X), Math.Min(amax.X, bmax.X)));
+                        conList.Add(bse | i);
                     }
+
                     break;
                 }
             }
-            return n;
+
+            con = conList.ToArray();
+            conarea = conareaList.ToArray();
+
+            return true;
         }
         private void ConnectIntLinks(MeshTile tile)
         {
-            if (tile == null) return;
-
             int bse = GetTileRef(tile);
 
-            for (int i = 0; i < tile.Header.PolyCount; ++i)
+            var polys = tile.GetPolys();
+            foreach (var poly in polys)
             {
-                var poly = tile.Polys[i];
                 poly.FirstLink = DetourUtils.DT_NULL_LINK;
 
-                if (poly.Type == PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
+                if (poly.Type == PolyTypes.OffmeshConnection)
                 {
                     continue;
                 }
@@ -1635,29 +1605,30 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         }
         private void BaseOffMeshLinks(MeshTile tile)
         {
-            if (tile == null) return;
-
             int bse = GetTileRef(tile);
 
             // Base off-mesh connection start points.
-            for (int i = 0; i < tile.Header.OffMeshConCount; ++i)
+            var offmesCons = tile.GetOffMeshConnections();
+            foreach (var con in offmesCons)
             {
-                var con = tile.OffMeshCons[i];
-                var poly = tile.Polys[con.Poly];
+                var poly = tile.GetPoly(con.Poly);
 
                 Vector3 halfExtents = new Vector3(new float[] { con.Rad, tile.Header.WalkableClimb, con.Rad });
 
                 // Find polygon to connect to.
-                Vector3 p = con.Start; // First vertex
-                int r = FindNearestPolyInTile(tile, p, halfExtents, out Vector3 nearestPt);
-                if (r == 0) continue;
+                int r = FindNearestPolyInTile(tile, con.Start, halfExtents, out Vector3 nearestPt);
+                if (r == 0)
+                {
+                    continue;
+                }
+
                 // findNearestPoly may return too optimistic results, further check to make sure. 
-                if (Math.Sqrt(nearestPt[0] - p[0]) + Math.Sqrt(nearestPt[2] - p[2]) > Math.Sqrt(con.Rad))
+                if (Math.Sqrt(nearestPt.X - con.Start.X) + Math.Sqrt(nearestPt.Z - con.Start.Z) > Math.Sqrt(con.Rad))
                 {
                     continue;
                 }
                 // Make sure the location is on current mesh.
-                tile.Verts[poly.Verts[0]] = nearestPt;
+                tile.SetPolyVertex(poly, 0, nearestPt);
 
                 // Link off-mesh connection to target poly.
                 int idx = DetourUtils.AllocLink(tile);
@@ -1700,13 +1671,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         }
         private void ConnectExtLinks(MeshTile tile, MeshTile target, int side)
         {
-            if (tile == null) return;
-
             // Connect border links.
-            for (int i = 0; i < tile.Header.PolyCount; ++i)
+            var polys = tile.GetPolys();
+            foreach (var poly in polys)
             {
-                var poly = tile.Polys[i];
-
                 // Create new links.
                 int nv = poly.VertCount;
                 for (int j = 0; j < nv; ++j)
@@ -1717,24 +1685,28 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                         continue;
                     }
 
-                    int dir = (poly.Neis[j] & 0xff);
+                    int dir = poly.GetNeighbourDir(j);
                     if (side != -1 && dir != side)
                     {
                         continue;
                     }
 
                     // Create new links
-                    var va = tile.Verts[poly.Verts[j]];
-                    var vb = tile.Verts[poly.Verts[(j + 1) % nv]];
-                    int nnei = FindConnectingPolys(va, vb, target, DetourUtils.OppositeTile(dir), out int[] nei, out float[] neia, 4);
-                    for (int k = 0; k < nnei; ++k)
+                    var va = tile.GetPolyVertex(poly, j);
+                    var vb = tile.GetPolyVertex(poly, (j + 1) % nv);
+                    if (!FindConnectingPolys(va, vb, target, DetourUtils.OppositeTile(dir), 4, out var neis, out var neiareas))
+                    {
+                        continue;
+                    }
+
+                    for (int k = 0; k < neis.Count(); ++k)
                     {
                         int idx = DetourUtils.AllocLink(tile);
                         if (idx != DetourUtils.DT_NULL_LINK)
                         {
                             var link = new Link
                             {
-                                NRef = nei[k],
+                                NRef = neis.ElementAt(k),
                                 Edge = j,
                                 Side = dir,
                                 Next = poly.FirstLink
@@ -1744,16 +1716,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                             // Compress portal limits to an integer value.
                             if (dir == 0 || dir == 4)
                             {
-                                float tmin = (neia[k * 2 + 0] - va[2]) / (vb[2] - va[2]);
-                                float tmax = (neia[k * 2 + 1] - va[2]) / (vb[2] - va[2]);
+                                float tmin = (neiareas.ElementAt(k).X - va.Z) / (vb.Z - va.Z);
+                                float tmax = (neiareas.ElementAt(k).Y - va.Z) / (vb.Z - va.Z);
                                 if (tmin > tmax) Helper.Swap(ref tmin, ref tmax);
                                 link.BMin = (int)(MathUtil.Clamp(tmin, 0.0f, 1.0f) * 255.0f);
                                 link.BMax = (int)(MathUtil.Clamp(tmax, 0.0f, 1.0f) * 255.0f);
                             }
                             else if (dir == 2 || dir == 6)
                             {
-                                float tmin = (neia[k * 2 + 0] - va[0]) / (vb[0] - va[0]);
-                                float tmax = (neia[k * 2 + 1] - va[0]) / (vb[0] - va[0]);
+                                float tmin = (neiareas.ElementAt(k).X - va.X) / (vb.X - va.X);
+                                float tmax = (neiareas.ElementAt(k).Y - va.X) / (vb.X - va.X);
                                 if (tmin > tmax) Helper.Swap(ref tmin, ref tmax);
                                 link.BMin = (int)(MathUtil.Clamp(tmin, 0.0f, 1.0f) * 255.0f);
                                 link.BMax = (int)(MathUtil.Clamp(tmax, 0.0f, 1.0f) * 255.0f);
@@ -1766,15 +1738,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         }
         private void ConnectExtOffMeshLinks(MeshTile tile, MeshTile target, int side)
         {
-            if (tile == null) return;
-
             // Connect off-mesh links.
             // We are interested on links which land from target tile to this tile.
             int oppositeSide = (side == -1) ? 0xff : DetourUtils.OppositeTile(side);
 
-            for (int i = 0; i < target.Header.OffMeshConCount; ++i)
+            var offmeshCons = target.GetOffMeshConnections();
+            foreach (var targetCon in offmeshCons)
             {
-                var targetCon = target.OffMeshCons[i];
                 if (targetCon.Side != oppositeSide)
                 {
                     continue;
@@ -1797,12 +1767,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     continue;
                 }
                 // findNearestPoly may return too optimistic results, further check to make sure. 
-                if (Math.Sqrt(nearestPt[0] - p[0]) + Math.Sqrt(nearestPt[2] - p[2]) > Math.Sqrt(targetCon.Rad))
+                if (Math.Sqrt(nearestPt.X - p.X) + Math.Sqrt(nearestPt.Z - p.Z) > Math.Sqrt(targetCon.Rad))
                 {
                     continue;
                 }
                 // Make sure the location is on current mesh.
-                target.Verts[targetPoly.Verts[1]] = nearestPt;
+                target.SetPolyVertex(targetPoly, 1, nearestPt);
 
                 // Link off-mesh connection to target poly.
                 int idx = DetourUtils.AllocLink(target);
@@ -1848,13 +1818,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         }
         private void UnconnectLinks(MeshTile tile, MeshTile target)
         {
-            if (tile == null || target == null) return;
-
             int targetNum = DecodePolyIdTile(GetTileRef(target));
 
-            for (int i = 0; i < tile.Header.PolyCount; ++i)
+            var polys = tile.GetPolys();
+            foreach (var poly in polys)
             {
-                var poly = tile.Polys[i];
                 int j = poly.FirstLink;
                 int pj = DetourUtils.DT_NULL_LINK;
                 while (j != DetourUtils.DT_NULL_LINK)
@@ -1883,95 +1851,101 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
             }
         }
-        private int QueryPolygonsInTile(MeshTile tile, Vector3 qmin, Vector3 qmax, int[] polys, int maxPolys)
+        private IEnumerable<int> QueryPolygonsInTile(MeshTile tile, BoundingBox bounds, int maxPolys)
         {
-            if (tile.BvTree != null)
+            if (tile.BvTree?.Length > 0)
             {
-                int nodeIndex = 0;
-                int endIndex = tile.Header.BvNodeCount;
-                Vector3 tbmin = tile.Header.BMin;
-                Vector3 tbmax = tile.Header.BMax;
-                float qfac = tile.Header.BvQuantFactor;
-
-                // Calculate quantized box
-                Int3 bmin = new Int3();
-                Int3 bmax = new Int3();
-                // dtClamp query box to world box.
-                float minx = MathUtil.Clamp(qmin.X, tbmin.X, tbmax.X) - tbmin.X;
-                float miny = MathUtil.Clamp(qmin.Y, tbmin.Y, tbmax.Y) - tbmin.Y;
-                float minz = MathUtil.Clamp(qmin.Z, tbmin.Z, tbmax.Z) - tbmin.Z;
-                float maxx = MathUtil.Clamp(qmax.X, tbmin.X, tbmax.X) - tbmin.X;
-                float maxy = MathUtil.Clamp(qmax.Y, tbmin.Y, tbmax.Y) - tbmin.Y;
-                float maxz = MathUtil.Clamp(qmax.Z, tbmin.Z, tbmax.Z) - tbmin.Z;
-                // Quantize
-                bmin.X = (int)(qfac * minx) & 0xfffe;
-                bmin.Y = (int)(qfac * miny) & 0xfffe;
-                bmin.Z = (int)(qfac * minz) & 0xfffe;
-                bmax.X = (int)(qfac * maxx + 1) | 1;
-                bmax.Y = (int)(qfac * maxy + 1) | 1;
-                bmax.Z = (int)(qfac * maxz + 1) | 1;
-
-                // Traverse tree
-                int bse = GetTileRef(tile);
-                int n = 0;
-                while (nodeIndex < endIndex)
-                {
-                    var node = nodeIndex < tile.BvTree.Length ? tile.BvTree[nodeIndex] : new BVNode();
-
-                    bool overlap = DetourUtils.OverlapQuantBounds(bmin, bmax, node.BMin, node.BMax);
-                    bool isLeafNode = node.I >= 0;
-
-                    if (isLeafNode && overlap && n < maxPolys)
-                    {
-                        polys[n++] = bse | node.I;
-                    }
-
-                    if (overlap || isLeafNode)
-                    {
-                        nodeIndex++;
-                    }
-                    else
-                    {
-                        int escapeIndex = -node.I;
-                        nodeIndex += escapeIndex;
-                    }
-                }
-
-                return n;
+                return QueryPolygonsInTileBVTree(tile, bounds, maxPolys);
             }
             else
             {
-                Vector3 bmin;
-                Vector3 bmax;
-                int n = 0;
-                int bse = GetTileRef(tile);
-                for (int i = 0; i < tile.Header.PolyCount; ++i)
-                {
-                    var p = tile.Polys[i];
-                    // Do not return off-mesh connection polygons.
-                    if (p.Type == PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
-                    {
-                        continue;
-                    }
-                    // Calc polygon bounds.
-                    Vector3 v = tile.Verts[p.Verts[0]];
-                    bmin = v;
-                    bmax = v;
-                    for (int j = 1; j < p.VertCount; ++j)
-                    {
-                        v = tile.Verts[p.Verts[j]];
-                        bmin = Vector3.Min(bmin, v);
-                        bmax = Vector3.Max(bmax, v);
-                    }
+                return QueryPolygonsInTileByRefs(tile, bounds, maxPolys);
+            }
+        }
+        private IEnumerable<int> QueryPolygonsInTileBVTree(MeshTile tile, BoundingBox bounds, int maxPolys)
+        {
+            List<int> polys = new List<int>(maxPolys);
 
-                    if (RecastUtils.OverlapBounds(qmin, qmax, bmin, bmax) && n < maxPolys)
-                    {
-                        polys[n++] = bse | i;
-                    }
+            int nodeIndex = 0;
+            int endIndex = tile.Header.BvNodeCount;
+            Vector3 tbmin = tile.Header.BMin;
+            Vector3 tbmax = tile.Header.BMax;
+            float qfac = tile.Header.BvQuantFactor;
+
+            // Calculate quantized box
+            Int3 bmin = new Int3();
+            Int3 bmax = new Int3();
+            // dtClamp query box to world box.
+            float minx = MathUtil.Clamp(bounds.Minimum.X, tbmin.X, tbmax.X) - tbmin.X;
+            float miny = MathUtil.Clamp(bounds.Minimum.Y, tbmin.Y, tbmax.Y) - tbmin.Y;
+            float minz = MathUtil.Clamp(bounds.Minimum.Z, tbmin.Z, tbmax.Z) - tbmin.Z;
+            float maxx = MathUtil.Clamp(bounds.Maximum.X, tbmin.X, tbmax.X) - tbmin.X;
+            float maxy = MathUtil.Clamp(bounds.Maximum.Y, tbmin.Y, tbmax.Y) - tbmin.Y;
+            float maxz = MathUtil.Clamp(bounds.Maximum.Z, tbmin.Z, tbmax.Z) - tbmin.Z;
+            // Quantize
+            bmin.X = (int)(qfac * minx) & 0xfffe;
+            bmin.Y = (int)(qfac * miny) & 0xfffe;
+            bmin.Z = (int)(qfac * minz) & 0xfffe;
+            bmax.X = (int)(qfac * maxx + 1) | 1;
+            bmax.Y = (int)(qfac * maxy + 1) | 1;
+            bmax.Z = (int)(qfac * maxz + 1) | 1;
+
+            // Traverse tree
+            int bse = GetTileRef(tile);
+
+            while (nodeIndex < endIndex)
+            {
+                var node = nodeIndex < tile.BvTree.Length ?
+                    tile.BvTree[nodeIndex] :
+                    new BVNode();
+
+                bool overlap = DetourUtils.OverlapQuantBounds(bmin, bmax, node.BMin, node.BMax);
+                bool isLeafNode = node.I >= 0;
+
+                if (isLeafNode && overlap && polys.Count < maxPolys)
+                {
+                    polys.Add(bse | node.I);
                 }
 
-                return n;
+                if (overlap || isLeafNode)
+                {
+                    nodeIndex++;
+                }
+                else
+                {
+                    int escapeIndex = -node.I;
+                    nodeIndex += escapeIndex;
+                }
             }
+
+            return polys;
+        }
+        private IEnumerable<int> QueryPolygonsInTileByRefs(MeshTile tile, BoundingBox bounds, int maxPolys)
+        {
+            List<int> polys = new List<int>(maxPolys);
+
+            int bse = GetTileRef(tile);
+
+            for (int i = 0; i < tile.Header.PolyCount; i++)
+            {
+                var p = tile.Polys[i];
+
+                // Do not return off-mesh connection polygons.
+                if (p.Type == PolyTypes.OffmeshConnection)
+                {
+                    continue;
+                }
+
+                // Calc polygon bounds.
+                var tileBounds = tile.GetPolyBounds(p);
+
+                if (bounds.Contains(tileBounds) != ContainmentType.Disjoint && polys.Count < maxPolys)
+                {
+                    polys.Add(bse | i);
+                }
+            }
+
+            return polys;
         }
         private int FindNearestPolyInTile(MeshTile tile, Vector3 center, Vector3 halfExtents, out Vector3 nearestPt)
         {
@@ -1979,26 +1953,26 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             Vector3 bmin = Vector3.Subtract(center, halfExtents);
             Vector3 bmax = Vector3.Add(center, halfExtents);
+            BoundingBox bounds = new BoundingBox(bmin, bmax);
 
             // Get nearby polygons from proximity grid.
-            int[] polys = new int[128];
-            int polyCount = QueryPolygonsInTile(tile, bmin, bmax, polys, 128);
+            var polys = QueryPolygonsInTile(tile, bounds, 128);
 
             // Find nearest polygon amongst the nearby polygons.
             int nearest = 0;
             float nearestDistanceSqr = float.MaxValue;
-            for (int i = 0; i < polyCount; ++i)
+
+            foreach (var r in polys)
             {
-                int r = polys[i];
-                float d;
                 ClosestPointOnPoly(r, center, out Vector3 closestPtPoly, out bool posOverPoly);
 
                 // If a point is directly over a polygon and closer than
                 // climb height, favor that instead of straight line nearest point.
+                float d;
                 Vector3 diff = Vector3.Subtract(center, closestPtPoly);
                 if (posOverPoly)
                 {
-                    d = Math.Abs(diff[1]) - tile.Header.WalkableClimb;
+                    d = Math.Abs(diff.Y) - tile.Header.WalkableClimb;
                     d = d > 0 ? d * d : 0;
                 }
                 else
@@ -2018,8 +1992,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         }
         private void ClosestPointOnDetailEdges(MeshTile tile, Poly poly, Vector3 pos, bool onlyBoundary, out Vector3 closest)
         {
-            int ip = Array.IndexOf(tile.Polys, poly);
-            var pd = tile.DetailMeshes[ip];
+            var pd = tile.GetDetailMesh(poly);
 
             float dmin = float.MaxValue;
             float tmin = 0;
@@ -2033,6 +2006,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     ((int)DetailTriEdgeFlagTypes.DT_DETAIL_EDGE_BOUNDARY << 0) |
                     ((int)DetailTriEdgeFlagTypes.DT_DETAIL_EDGE_BOUNDARY << 2) |
                     ((int)DetailTriEdgeFlagTypes.DT_DETAIL_EDGE_BOUNDARY << 4);
+
                 if (onlyBoundary && (tris.W & ANY_BOUNDARY_EDGE) == 0)
                 {
                     continue;
@@ -2043,7 +2017,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 {
                     if (tris[j] < poly.VertCount)
                     {
-                        v[j] = tile.Verts[poly.Verts[tris[j]]];
+                        v[j] = tile.GetPolyVertex(poly, tris[j]);
                     }
                     else
                     {
@@ -2080,22 +2054,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             // Off-mesh connections do not have detail polys and getting height
             // over them does not make sense.
-            if (poly.Type == PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
+            if (poly.Type == PolyTypes.OffmeshConnection)
             {
                 return false;
             }
 
-            int ip = Array.IndexOf(tile.Polys, poly);
-            var pd = tile.DetailMeshes[ip];
+            var pd = tile.GetDetailMesh(poly);
 
-            Vector3[] verts = new Vector3[DetourUtils.DT_VERTS_PER_POLYGON];
-            int nv = poly.VertCount;
-            for (int i = 0; i < nv; i++)
-            {
-                verts[i] = tile.Verts[poly.Verts[i]];
-            }
+            var verts = tile.GetPolyVerts(poly);
 
-            if (!DetourUtils.PointInPolygon(pos, verts, nv))
+            if (!DetourUtils.PointInPolygon(pos, verts))
             {
                 return false;
             }
@@ -2149,7 +2117,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             // Off-mesh connections don't have detail polygons.
-            if (tileRef.Poly.Type == PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
+            if (tileRef.Poly.Type == PolyTypes.OffmeshConnection)
             {
                 Vector3 v0 = tileRef.Tile.Verts[tileRef.Poly.Verts[0]];
                 Vector3 v1 = tileRef.Tile.Verts[tileRef.Poly.Verts[1]];

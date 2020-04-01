@@ -1,5 +1,7 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
@@ -69,6 +71,21 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// The next free tile, or the next tile in the spatial grid.
         /// </summary>
         public MeshTile Next { get; set; }
+
+
+        public IEnumerable<Poly> GetPolys()
+        {
+            return Polys.Take(Header.PolyCount).ToArray();
+        }
+        /// <summary>
+        /// Gets the polygon specified by index
+        /// </summary>
+        /// <param name="index">Polygon index</param>
+        /// <returns>Returns the polygon</returns>
+        public Poly GetPoly(int index)
+        {
+            return Polys[index];
+        }
         /// <summary>
         /// Gets the specified mesh polygon area
         /// </summary>
@@ -93,7 +110,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         /// <param name="poly">Polygon</param>
         /// <returns>Returns the vertex list</returns>
-        public Vector3[] GetPolyVerts(Poly poly)
+        public IEnumerable<Vector3> GetPolyVerts(Poly poly)
         {
             Vector3[] verts = new Vector3[poly.VertCount];
 
@@ -104,6 +121,61 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             return verts;
         }
+        /// <summary>
+        /// Calculates the bounds of the Polygon
+        /// </summary>
+        /// <param name="p">Polygon</param>
+        /// <returns>Returns a bounding box</returns>
+        public BoundingBox GetPolyBounds(Poly p)
+        {
+            var v = Verts[p.Verts[0]];
+            Vector3 bmin = v;
+            Vector3 bmax = v;
+            for (int j = 1; j < p.VertCount; ++j)
+            {
+                v = Verts[p.Verts[j]];
+                bmin = Vector3.Min(bmin, v);
+                bmax = Vector3.Max(bmax, v);
+            }
+
+            return new BoundingBox(bmin, bmax);
+        }
+        /// <summary>
+        /// Gets the polygon vertex by Index
+        /// </summary>
+        /// <param name="poly">Polygon</param>
+        /// <param name="index">Index</param>
+        /// <returns>Returns the polygon vertex</returns>
+        public Vector3 GetPolyVertex(Poly poly, int index)
+        {
+            return Verts[poly.Verts[index]];
+        }
+        /// <summary>
+        /// Sets the vertex position
+        /// </summary>
+        /// <param name="poly">Polygon</param>
+        /// <param name="index">Index</param>
+        /// <param name="v">The new vertex value</param>
+        public void SetPolyVertex(Poly poly, int index, Vector3 v)
+        {
+            Verts[poly.Verts[index]] = v;
+        }
+
+
+        public IEnumerable<OffMeshConnection> GetOffMeshConnections()
+        {
+            return OffMeshCons.Take(Header.OffMeshConCount).ToArray();
+        }
+        /// <summary>
+        /// Gets the off-mesh connection by off-mesh connection index
+        /// </summary>
+        /// <param name="index">Off-mesh connection index</param>
+        /// <returns>Returns the off-mesh connection</returns>
+        public OffMeshConnection GetOffMeshConnection(int index)
+        {
+            return OffMeshCons[index];
+        }
+
         /// <summary>
         /// Find link that points to neighbour reference.
         /// </summary>
@@ -130,6 +202,77 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
+        }
+
+        /// <summary>
+        /// Gets whether the polygon is a off-mesh connection or not 
+        /// </summary>
+        /// <param name="index">Polygon index</param>
+        /// <returns>Returns true if the polygon is a off-mesh connection</returns>
+        public bool IsOffMeshConnectionByPolygon(int index)
+        {
+            if (index >= Header.PolyCount)
+            {
+                return false;
+            }
+
+            return Polys[index].Type == PolyTypes.OffmeshConnection;
+        }
+        /// <summary>
+        /// Gets the off-mesh connection by polygon index
+        /// </summary>
+        /// <param name="index">Polygon index</param>
+        /// <returns>Returns the off.mesh connection, or null if the polygon is not a off-mesh connection</returns>
+        public OffMeshConnection GetOffMeshConnectionByPolygon(int index)
+        {
+            // Make sure that the current poly is indeed off-mesh link.
+            if (!IsOffMeshConnectionByPolygon(index))
+            {
+                return null;
+            }
+
+            return OffMeshCons[index - Header.OffMeshBase];
+        }
+
+        public bool FindOffMeshConnectionEndpoints(Poly poly, int prevRef, out Vector3 startPos, out Vector3 endPos)
+        {
+            startPos = Vector3.Zero;
+            endPos = Vector3.Zero;
+
+            // Make sure that the current poly is indeed off-mesh link.
+            if (poly.Type != PolyTypes.OffmeshConnection)
+            {
+                return false;
+            }
+
+            int idx0 = 0;
+            int idx1 = 1;
+
+            // Find link that points to first vertex.
+            for (int i = poly.FirstLink; i != DetourUtils.DT_NULL_LINK; i = Links[i].Next)
+            {
+                if (Links[i].Edge == 0)
+                {
+                    if (Links[i].NRef != prevRef)
+                    {
+                        idx0 = 1;
+                        idx1 = 0;
+                    }
+                    break;
+                }
+            }
+
+            startPos = GetPolyVertex(poly, idx0);
+            endPos = GetPolyVertex(poly, idx1);
+
+            return true;
+        }
+
+
+        public PolyDetail GetDetailMesh(Poly poly)
+        {
+            int ip = Array.IndexOf(Polys, poly);
+            return DetailMeshes[ip];
         }
 
         /// <summary>

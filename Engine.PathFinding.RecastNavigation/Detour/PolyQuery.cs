@@ -1,4 +1,5 @@
-﻿
+﻿using System.Collections.Generic;
+
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
     /// <summary>
@@ -11,9 +12,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// This can be called multiple times for a single query.
         /// </summary>
         /// <param name="tile"></param>
-        /// <param name="polys"></param>
         /// <param name="refs"></param>
-        /// <param name="count"></param>
-        void Process(MeshTile tile, Poly[] polys, int[] refs, int count);
+        void Process(MeshTile tile, IEnumerable<int> refs);
     }
 }

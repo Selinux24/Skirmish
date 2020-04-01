@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
@@ -17,17 +19,17 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             Overflow = false;
         }
 
-        public void Process(MeshTile tile, Poly[] polys, int[] refs, int count)
+        public void Process(MeshTile tile, IEnumerable<int> refs)
         {
             int numLeft = MaxPolys - NumCollected;
-            int toCopy = count;
+            int toCopy = refs.Count();
             if (toCopy > numLeft)
             {
                 Overflow = true;
                 toCopy = numLeft;
             }
 
-            Array.Copy(Polys, NumCollected, refs, 0, toCopy);
+            Array.Copy(refs.ToArray(), 0, Polys, NumCollected, toCopy);
 
             NumCollected += toCopy;
         }

@@ -33,7 +33,7 @@ namespace Engine.PathFinding.RecastNavigation
                 for (int t = 0; t < tile.Header.PolyCount; t++)
                 {
                     var p = tile.Polys[t];
-                    if (p.Type == PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
+                    if (p.Type == PolyTypes.OffmeshConnection)
                     {
                         continue;
                     }

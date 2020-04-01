@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
@@ -23,11 +24,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         public int NearestRef() { return m_nearestRef; }
         public Vector3 NearestPoint() { return m_nearestPoint; }
 
-        public void Process(MeshTile tile, Poly[] polys, int[] refs, int count)
+        public void Process(MeshTile tile, IEnumerable<int> refs)
         {
-            for (int i = 0; i < count; ++i)
+            foreach (var r in refs)
             {
-                int r = refs[i];
                 m_query.ClosestPointOnPoly(r, m_center, out Vector3 closestPtPoly, out bool posOverPoly);
 
                 // If a point is directly over a polygon and closer than

@@ -2802,13 +2802,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
         #region RECASTRASTERIZATION
 
-        public static bool OverlapBounds(Vector3 amin, Vector3 amax, Vector3 bmin, Vector3 bmax)
-        {
-            return
-                !(amin.X > bmax.X || amax.X < bmin.X) &&
-                !(amin.Y > bmax.Y || amax.Y < bmin.Y) &&
-                !(amin.Z > bmax.Z || amax.Z < bmin.Z);
-        }
         public static bool OverlapInterval(int amin, int amax, int bmin, int bmax)
         {
             if (amax < bmin) return false;

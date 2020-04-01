@@ -327,15 +327,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// All points are projected onto the xz-plane, so the y-values are ignored.
         /// </summary>
         /// <param name="pt"></param>
-        /// <param name="verts"></param>
-        /// <param name="nverts"></param>
+        /// <param name="vertices"></param>
         /// <returns></returns>
-        public static bool PointInPolygon(Vector3 pt, Vector3[] verts, int nverts)
+        public static bool PointInPolygon(Vector3 pt, IEnumerable<Vector3> vertices)
         {
             // TODO: Replace pnpoly with triArea2D tests?
             int i, j;
             bool c = false;
-            for (i = 0, j = nverts - 1; i < nverts; j = i++)
+            var verts = vertices.ToArray();
+            for (i = 0, j = verts.Length - 1; i < verts.Length; j = i++)
             {
                 Vector3 vi = verts[i];
                 Vector3 vj = verts[j];
@@ -465,9 +465,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="s"></param>
         /// <param name="t"></param>
         /// <param name="outPoint"></param>
-        public static void RandomPointInConvexPoly(Vector3[] pts, out float[] areas, float s, float t, out Vector3 outPoint)
+        public static void RandomPointInConvexPoly(IEnumerable<Vector3> points, out float[] areas, float s, float t, out Vector3 outPoint)
         {
             areas = new float[DT_VERTS_PER_POLYGON];
+
+            var pts = points.ToArray();
 
             // Calc triangle areas
             float areasum = 0.0f;
@@ -957,7 +959,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     VertCount = 0,
                     Flags = param.PolyFlags[i],
                     Area = param.PolyAreas[i],
-                    Type = PolyTypes.DT_POLYTYPE_GROUND,
+                    Type = PolyTypes.Ground,
                 };
 
                 for (int j = 0; j < nvp; ++j)
@@ -1019,7 +1021,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     {
                         Flags = (SamplePolyFlagTypes)param.offMeshCon[i].FlagTypes,
                         Area = (SamplePolyAreas)param.offMeshCon[i].AreaType,
-                        Type = PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION
+                        Type = PolyTypes.OffmeshConnection
                     };
                     p.Verts[0] = (offMeshVertsBase + (n * 2) + 0);
                     p.Verts[1] = (offMeshVertsBase + (n * 2) + 1);

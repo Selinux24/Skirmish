@@ -38,6 +38,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         public PolyTypes Type { get; set; }
 
         /// <summary>
+        /// Gets the neighbour direction
+        /// </summary>
+        /// <param name="index">Neighbour index</param>
+        /// <returns></returns>
+        public int GetNeighbourDir(int index)
+        {
+            return Neis[index] & 0xff;
+        }
+
+        /// <summary>
         /// Gets the text representation of the polygon
         /// </summary>
         /// <returns>Returns the text representation of the polygon</returns>
