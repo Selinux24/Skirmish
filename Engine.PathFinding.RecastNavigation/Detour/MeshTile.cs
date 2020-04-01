@@ -72,7 +72,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         public MeshTile Next { get; set; }
 
-
+        /// <summary>
+        /// Gets the polygon list
+        /// </summary>
         public IEnumerable<Poly> GetPolys()
         {
             return Polys.Take(Header.PolyCount).ToArray();
@@ -85,6 +87,31 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         public Poly GetPoly(int index)
         {
             return Polys[index];
+        }
+        /// <summary>
+        /// Gets the center of the polygon
+        /// </summary>
+        /// <param name="poly">Polygon</param>
+        /// <returns>Returns de center position</returns>
+        public Vector3 GetPolyCenter(Poly poly)
+        {
+            Vector3 center = Vector3.Zero;
+
+            var verts = GetPolyVerts(poly);
+
+            if (!verts.Any())
+            {
+                return center;
+            }
+
+            foreach (var v in verts)
+            {
+                center += v;
+            }
+
+            center *= 1.0f / verts.Count();
+
+            return center;
         }
         /// <summary>
         /// Gets the specified mesh polygon area
@@ -161,7 +188,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             Verts[poly.Verts[index]] = v;
         }
 
-
+        /// <summary>
+        /// Gets the off-mesh connection list
+        /// </summary>
         public IEnumerable<OffMeshConnection> GetOffMeshConnections()
         {
             return OffMeshCons.Take(Header.OffMeshConCount).ToArray();
@@ -233,8 +262,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             return OffMeshCons[index - Header.OffMeshBase];
         }
-
-        public bool FindOffMeshConnectionEndpoints(Poly poly, int prevRef, out Vector3 startPos, out Vector3 endPos)
+        /// <summary>
+        /// Finds off-mesh connection end points
+        /// </summary>
+        /// <param name="poly">Polygon</param>
+        /// <param name="polyRef">Polygon reference</param>
+        /// <param name="startPos">Start position</param>
+        /// <param name="endPos">End position</param>
+        /// <returns>Returns true if the end points were found</returns>
+        public bool FindOffMeshConnectionEndpoints(Poly poly, int polyRef, out Vector3 startPos, out Vector3 endPos)
         {
             startPos = Vector3.Zero;
             endPos = Vector3.Zero;
@@ -253,7 +289,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 if (Links[i].Edge == 0)
                 {
-                    if (Links[i].NRef != prevRef)
+                    if (Links[i].NRef != polyRef)
                     {
                         idx0 = 1;
                         idx1 = 0;
@@ -268,7 +304,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             return true;
         }
 
-
+        /// <summary>
+        /// Gets the specified polygon detail mesh
+        /// </summary>
+        /// <param name="poly">Polygon</param>
         public PolyDetail GetDetailMesh(Poly poly)
         {
             int ip = Array.IndexOf(Polys, poly);

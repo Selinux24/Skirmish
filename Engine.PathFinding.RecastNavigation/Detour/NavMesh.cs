@@ -1,12 +1,12 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
     using Engine.PathFinding.RecastNavigation.Detour.Tiles;
     using Engine.PathFinding.RecastNavigation.Recast;
-    using System.Collections.Generic;
 
     public class NavMesh
     {
@@ -1057,10 +1057,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 var sideNeis = GetNeighbourTilesAt(header.X, header.Y, i, MAX_NEIS);
                 foreach (var nei in sideNeis)
                 {
+                    int opposite = DetourUtils.OppositeTile(i);
+
                     ConnectExtLinks(tile, nei, i);
-                    ConnectExtLinks(nei, tile, DetourUtils.OppositeTile(i));
+                    ConnectExtLinks(nei, tile, opposite);
                     ConnectExtOffMeshLinks(tile, nei, i);
-                    ConnectExtOffMeshLinks(nei, tile, DetourUtils.OppositeTile(i));
+                    ConnectExtOffMeshLinks(nei, tile, opposite);
                 }
             }
 
@@ -1699,7 +1701,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                         continue;
                     }
 
-                    for (int k = 0; k < neis.Count(); ++k)
+                    for (int k = 0; k < neis.Count(); k++)
                     {
                         int idx = DetourUtils.AllocLink(tile);
                         if (idx != DetourUtils.DT_NULL_LINK)
@@ -2003,9 +2005,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 var tris = tile.DetailTris[pd.TriBase + i];
                 int ANY_BOUNDARY_EDGE =
-                    ((int)DetailTriEdgeFlagTypes.DT_DETAIL_EDGE_BOUNDARY << 0) |
-                    ((int)DetailTriEdgeFlagTypes.DT_DETAIL_EDGE_BOUNDARY << 2) |
-                    ((int)DetailTriEdgeFlagTypes.DT_DETAIL_EDGE_BOUNDARY << 4);
+                    ((int)DetailTriEdgeFlagTypes.Boundary << 0) |
+                    ((int)DetailTriEdgeFlagTypes.Boundary << 2) |
+                    ((int)DetailTriEdgeFlagTypes.Boundary << 4);
 
                 if (onlyBoundary && (tris.W & ANY_BOUNDARY_EDGE) == 0)
                 {
@@ -2027,7 +2029,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                 for (int k = 0, j = 2; k < 3; j = k++)
                 {
-                    if ((DetourUtils.GetDetailTriEdgeFlags((DetailTriEdgeFlagTypes)tris.W, j) & DetailTriEdgeFlagTypes.DT_DETAIL_EDGE_BOUNDARY) == 0 &&
+                    var edgeFlags = DetourUtils.GetDetailTriEdgeFlags((DetailTriEdgeFlagTypes)tris.W, j);
+
+                    if ((edgeFlags & DetailTriEdgeFlagTypes.Boundary) == 0 &&
                         (onlyBoundary || tris[j] < tris[k]))
                     {
                         // Only looking at boundary edges and this is internal, or

@@ -246,7 +246,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             return false;
         }
 
-        public static bool IntersectSegmentPoly2D(Vector3 p0, Vector3 p1, Vector3[] verts, int nverts, out float tmin, out float tmax, out int segMin, out int segMax)
+        public static bool IntersectSegmentPoly2D(Vector3 p0, Vector3 p1, IEnumerable<Vector3> polyVerts, out float tmin, out float tmax, out int segMin, out int segMax)
         {
             float EPS = 0.00000001f;
 
@@ -256,8 +256,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             segMax = -1;
 
             Vector3 dir = Vector3.Subtract(p1, p0);
+            Vector3[] verts = polyVerts.ToArray();
 
-            for (int i = 0, j = nverts - 1; i < nverts; j = i++)
+            for (int i = 0, j = verts.Length - 1; i < verts.Length; j = i++)
             {
                 Vector3 edge = Vector3.Subtract(verts[i], verts[j]);
                 Vector3 diff = Vector3.Subtract(p0, verts[j]);
@@ -324,18 +325,17 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             return true;
         }
         /// <summary>
-        /// All points are projected onto the xz-plane, so the y-values are ignored.
+        /// Gets if a point is into a polygon.
         /// </summary>
-        /// <param name="pt"></param>
-        /// <param name="vertices"></param>
-        /// <returns></returns>
+        /// <param name="pt">Point to test</param>
+        /// <param name="vertices">Polygon vertex list</param>
+        /// <returns>Returns true if the point is into the polygon</returns>
+        /// <remarks>All points are projected onto the xz-plane, so the y-values are ignored.</remarks>
         public static bool PointInPolygon(Vector3 pt, IEnumerable<Vector3> vertices)
         {
-            // TODO: Replace pnpoly with triArea2D tests?
-            int i, j;
             bool c = false;
             var verts = vertices.ToArray();
-            for (i = 0, j = verts.Length - 1; i < verts.Length; j = i++)
+            for (int i = 0, j = verts.Length - 1; i < verts.Length; j = i++)
             {
                 Vector3 vi = verts[i];
                 Vector3 vj = verts[j];
@@ -347,19 +347,28 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
             return c;
         }
-
-        public static bool DistancePtPolyEdgesSqr(Vector3 pt, Vector3[] verts, int nverts, out float[] ed, out float[] et)
+        /// <summary>
+        /// Gets if a point is into a polygon, an all the distances to the polygon edges
+        /// </summary>
+        /// <param name="pt">Point to test</param>
+        /// <param name="verts">Polygon vertex list</param>
+        /// <param name="ed">Distance to edges array</param>
+        /// <param name="et">Distance from first edge point to closest point list</param>
+        /// <returns>Returns true if the point is into the polygon</returns>
+        /// <remarks>All points are projected onto the xz-plane, so the y-values are ignored.</remarks>
+        public static bool DistancePtPolyEdgesSqr(Vector3 pt, IEnumerable<Vector3> verts, out float[] ed, out float[] et)
         {
+            int nverts = verts.Count();
+
             ed = new float[nverts];
             et = new float[nverts];
 
-            // TODO: Replace pnpoly with triArea2D tests?
             int i, j;
             bool c = false;
             for (i = 0, j = nverts - 1; i < nverts; j = i++)
             {
-                var vi = verts[i];
-                var vj = verts[j];
+                var vi = verts.ElementAt(i);
+                var vj = verts.ElementAt(j);
                 if (((vi.Z > pt.Z) != (vj.Z > pt.Z)) &&
                     (pt.X < (vj.X - vi.X) * (pt.Z - vi.Z) / (vj.Z - vi.Z) + vi.X))
                 {
@@ -369,12 +378,27 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
             return c;
         }
-
+        /// <summary>
+        /// Gets the minimum distance from the pt point to the (p,q) segment
+        /// </summary>
+        /// <param name="pt">Point to test</param>
+        /// <param name="p">P segment point</param>
+        /// <param name="q">Q segment point</param>
+        /// <returns>Returns the distance from pt to closest point</returns>
+        /// <remarks>All points are projected onto the xz-plane, so the y-values are ignored.</remarks>
         public static float DistancePtSegSqr2D(Vector3 pt, Vector3 p, Vector3 q)
         {
             return DistancePtSegSqr2D(pt, p, q, out _);
         }
-
+        /// <summary>
+        /// Gets the minimum distance from the pt point to the (p,q) segment
+        /// </summary>
+        /// <param name="pt">Point to test</param>
+        /// <param name="p">P segment point</param>
+        /// <param name="q">Q segment point</param>
+        /// <param name="t">The distance from P to closest point</param>
+        /// <returns>Returns the distance from pt to closest point</returns>
+        /// <remarks>All points are projected onto the xz-plane, so the y-values are ignored.</remarks>
         public static float DistancePtSegSqr2D(Vector3 pt, Vector3 p, Vector3 q, out float t)
         {
             float pqx = q.X - p.X;
@@ -389,18 +413,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             dx = p.X + t * pqx - pt.X;
             dz = p.Z + t * pqz - pt.Z;
             return dx * dx + dz * dz;
-        }
-
-        public static void CalcPolyCenter(int[] idx, int nidx, Vector3[] verts, out Vector3 tc)
-        {
-            tc = Vector3.Zero;
-
-            for (int j = 0; j < nidx; ++j)
-            {
-                tc += verts[idx[j]];
-            }
-
-            tc *= 1.0f / nidx;
         }
 
         public static bool OverlapPolyPoly2D(Vector3[] polya, int npolya, Vector3[] polyb, int npolyb)
@@ -921,6 +933,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             int offMeshPolyBase = param.polyCount;
 
             // Store vertices
+
             // Mesh vertices
             for (int i = 0; i < param.VertCount; ++i)
             {
@@ -933,6 +946,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 };
                 data.NavVerts.Add(v);
             }
+
             // Off-mesh link vertices.
             int n = 0;
             for (int i = 0; i < param.offMeshConCount; ++i)
@@ -948,84 +962,34 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             // Store polygons
+
             // Mesh polys
-            int srcIndex = 0;
-            for (int i = 0; i < param.polyCount; ++i)
+            for (int i = 0; i < param.polyCount; i++)
             {
-                var src = param.Polys[srcIndex];
-
-                Poly p = new Poly
-                {
-                    VertCount = 0,
-                    Flags = param.PolyFlags[i],
-                    Area = param.PolyAreas[i],
-                    Type = PolyTypes.Ground,
-                };
-
-                for (int j = 0; j < nvp; ++j)
-                {
-                    if (src[j] == MESH_NULL_IDX)
-                    {
-                        break;
-                    }
-
-                    p.Verts[j] = src[j];
-
-                    if ((src[nvp + j] & 0x8000) != 0)
-                    {
-                        // Border or portal edge.
-                        var dir = src[nvp + j] & 0xf;
-                        if (dir == 0xf) // Border
-                        {
-                            p.Neis[j] = 0;
-                        }
-                        else if (dir == 0) // Portal x-
-                        {
-                            p.Neis[j] = DT_EXT_LINK | 4;
-                        }
-                        else if (dir == 1) // Portal z+
-                        {
-                            p.Neis[j] = DT_EXT_LINK | 2;
-                        }
-                        else if (dir == 2) // Portal x+
-                        {
-                            p.Neis[j] = DT_EXT_LINK;
-                        }
-                        else if (dir == 3) // Portal z-
-                        {
-                            p.Neis[j] = DT_EXT_LINK | 6;
-                        }
-                    }
-                    else
-                    {
-                        // Normal connection
-                        p.Neis[j] = src[nvp + j] + 1;
-                    }
-
-                    p.VertCount++;
-                }
+                var p = Poly.Create(
+                    param.Polys[i],
+                    param.PolyFlags[i],
+                    param.PolyAreas[i],
+                    nvp);
 
                 data.NavPolys.Add(p);
-
-                srcIndex++;
             }
 
             // Off-mesh connection vertices.
             n = 0;
-            for (int i = 0; i < param.offMeshConCount; ++i)
+            for (int i = 0; i < param.offMeshConCount; i++)
             {
                 // Only store connections which start from this tile.
                 if (offMeshConClass[i].X == 0xff)
                 {
-                    Poly p = new Poly
-                    {
-                        Flags = (SamplePolyFlagTypes)param.offMeshCon[i].FlagTypes,
-                        Area = (SamplePolyAreas)param.offMeshCon[i].AreaType,
-                        Type = PolyTypes.OffmeshConnection
-                    };
-                    p.Verts[0] = (offMeshVertsBase + (n * 2) + 0);
-                    p.Verts[1] = (offMeshVertsBase + (n * 2) + 1);
-                    p.VertCount = 2;
+                    int start = offMeshVertsBase + (n * 2) + 0;
+                    int end = offMeshVertsBase + (n * 2) + 1;
+
+                    var p = Poly.Create(
+                        start,
+                        end,
+                        param.offMeshCon[i].FlagTypes,
+                        param.offMeshCon[i].AreaType);
 
                     data.NavPolys.Add(p);
                     n++;

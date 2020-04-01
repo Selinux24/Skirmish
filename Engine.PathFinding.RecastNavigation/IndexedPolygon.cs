@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation
 {
@@ -46,21 +47,21 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
         /// <summary>
+        /// Gets the vertices list
+        /// </summary>
+        public int[] GetVertices()
+        {
+            return Vertices.ToArray();
+        }
+        /// <summary>
         /// Copy the current polygon to another instance
         /// </summary>
         /// <returns>Returns the new instance</returns>
         public IndexedPolygon Copy()
         {
-            int[] vertices = new int[Vertices.Length];
-
-            for (int i = 0; i < vertices.Length; i++)
-            {
-                vertices[i] = Vertices[i];
-            }
-
             return new IndexedPolygon(Vertices.Length)
             {
-                Vertices = vertices,
+                Vertices = Vertices.ToArray(),
             };
         }
 

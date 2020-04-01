@@ -5,8 +5,6 @@ using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
-    using Engine.PathFinding.RecastNavigation.Recast;
-
     /// <summary>
     /// Provides the ability to perform pathfinding related queries against a navigation mesh.
     /// </summary>
@@ -1280,13 +1278,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="maxResult">The maximum number of polygons the result arrays can hold.</param>
         /// <param name="result">The polygons touched by the circle.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FindPolysAroundShape(int startRef, Vector3[] verts, int nverts, QueryFilter filter, int maxResult, out PolyRefs result)
+        public Status FindPolysAroundShape(int startRef, IEnumerable<Vector3> verts, QueryFilter filter, int maxResult, out PolyRefs result)
         {
             result = new PolyRefs(maxResult);
 
             // Validate input
             if (!m_nav.IsValidPolyRef(startRef) ||
-                verts == null || nverts < 3 ||
+                verts?.Count() < 3 ||
                 filter == null ||
                 maxResult < 0)
             {
@@ -1297,11 +1295,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             m_openList.Clear();
 
             Vector3 centerPos = Vector3.Zero;
-            for (int i = 0; i < nverts; ++i)
+            foreach (var v in verts)
             {
-                centerPos += verts[i];
+                centerPos += v;
             }
-            centerPos *= (1.0f / nverts);
+            centerPos *= (1.0f / verts.Count());
 
             Node startNode = m_nodePool.GetNode(startRef, 0);
             startNode.Pos = centerPos;
@@ -1376,7 +1374,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     }
 
                     // If the poly is not touching the edge to the next polygon, skip the connection it.
-                    if (!DetourUtils.IntersectSegmentPoly2D(va, vb, verts, nverts, out float tmin, out float tmax, out _, out _))
+                    if (!DetourUtils.IntersectSegmentPoly2D(va, vb, verts, out float tmin, out float tmax, out _, out _))
                     {
                         continue;
                     }
@@ -2007,7 +2005,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             Vector3 dir, curPos, lastPos;
-            Vector3[] verts = new Vector3[DetourUtils.DT_VERTS_PER_POLYGON + 3];
             int n = 0;
 
             curPos = startPos;
@@ -2029,18 +2026,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             while (cur.Ref != 0)
             {
                 // Cast ray against current polygon.
+                next.Poly = cur.Poly;
 
                 // Collect vertices.
-                int nv = 0;
+                var verts = cur.Tile.GetPolyVerts(cur.Poly);
 
-                next.Poly = cur.Poly;
-                for (int i = 0; i < cur.Poly.VertCount; ++i)
-                {
-                    verts[nv] = cur.Tile.Verts[cur.Poly.Verts[i]];
-                    nv++;
-                }
-
-                if (!DetourUtils.IntersectSegmentPoly2D(startPos, endPos, verts, nv, out _, out float tmax, out _, out int segMax))
+                if (!DetourUtils.IntersectSegmentPoly2D(startPos, endPos, verts, out _, out float tmax, out _, out int segMax))
                 {
                     // Could not hit the polygon, keep the old t and report hit.
                     hit.Cut(n);
@@ -2180,8 +2171,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     // and correct the height (since the raycast moves in 2d)
                     lastPos = curPos;
                     curPos = Vector3.Add(startPos, dir) * hit.T;
-                    var e1 = verts[segMax];
-                    var e2 = verts[((segMax + 1) % nv)];
+                    var e1 = verts.ElementAt(segMax);
+                    var e2 = verts.ElementAt((segMax + 1) % verts.Count());
                     Vector3 eDir;
                     Vector3 diff;
                     eDir = Vector3.Subtract(e2, e1);
@@ -2198,9 +2189,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                     // Calculate hit normal.
                     int a = segMax;
-                    int b = segMax + 1 < nv ? segMax + 1 : 0;
-                    var va = verts[a];
-                    var vb = verts[b];
+                    int b = segMax + 1 < verts.Count() ? segMax + 1 : 0;
+                    var va = verts.ElementAt(a);
+                    var vb = verts.ElementAt(b);
                     float dx = vb.X - va.X;
                     float dz = vb.Z - va.Z;
                     hit.HitNormal = Vector3.Normalize(new Vector3(dz, 0, -dx));
@@ -2928,15 +2919,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             // Collect vertices.
-            Vector3[] verts = new Vector3[DetourUtils.DT_VERTS_PER_POLYGON];
-            int nv = 0;
-            for (int i = 0; i < cur.Poly.VertCount; ++i)
-            {
-                verts[nv] = cur.Tile.Verts[cur.Poly.Verts[i]];
-                nv++;
-            }
+            var verts = cur.Tile.GetPolyVerts(cur.Poly);
 
-            bool inside = DetourUtils.DistancePtPolyEdgesSqr(pos, verts, nv, out float[] edged, out float[] edget);
+            bool inside = DetourUtils.DistancePtPolyEdgesSqr(pos, verts, out float[] edged, out float[] edget);
             if (inside)
             {
                 // Point is inside the polygon, return the point.
@@ -2945,22 +2930,33 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             else
             {
                 // Point is outside the polygon, dtClamp to nearest edge.
-                float dmin = edged[0];
-                int imin = 0;
-                for (int i = 1; i < nv; ++i)
-                {
-                    if (edged[i] < dmin)
-                    {
-                        dmin = edged[i];
-                        imin = i;
-                    }
-                }
-                var va = verts[imin];
-                var vb = verts[((imin + 1) % nv)];
-                closest = Vector3.Lerp(va, vb, edget[imin]);
+                closest = GetClosestPointOutsidePoly(verts, edged, edget);
             }
 
             return Status.DT_SUCCESS;
+        }
+        /// <summary>
+        /// Gets the closest point on the closest edge
+        /// </summary>
+        /// <param name="verts">Vertex list</param>
+        /// <param name="edged">Distance to edges array</param>
+        /// <param name="edget">Distance from first edge point to closest point list</param>
+        /// <returns>Returns the closest position</returns>
+        private Vector3 GetClosestPointOutsidePoly(IEnumerable<Vector3> verts, float[] edged, float[] edget)
+        {
+            float dmin = edged[0];
+            int imin = 0;
+            for (int i = 1; i < verts.Count(); i++)
+            {
+                if (edged[i] < dmin)
+                {
+                    dmin = edged[i];
+                    imin = i;
+                }
+            }
+            var va = verts.ElementAt(imin);
+            var vb = verts.ElementAt((imin + 1) % verts.Count());
+            return Vector3.Lerp(va, vb, edget[imin]);
         }
         /// <summary>
         /// Gets the height of the polygon at the provided position using the height detail. (Most accurate.)
