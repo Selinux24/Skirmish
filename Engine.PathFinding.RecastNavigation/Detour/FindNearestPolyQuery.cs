@@ -27,7 +27,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
         public void Process(MeshTile tile, IEnumerable<int> refs)
         {
-            if (!refs?.Any() == true)
+            if (refs?.Any() != true)
             {
                 return;
             }
