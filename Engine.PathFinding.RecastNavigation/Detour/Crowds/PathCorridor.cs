@@ -102,7 +102,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             int MAX_RES = 32;
             navquery.Raycast(
                 m_path.Start, m_pos, goal, filter, MAX_RES,
-                out var t, out var norm, out var res);
+                out var t, out _, out var res);
             if (res.Count > 1 && t > 0.99f)
             {
                 SimplePath.MergeCorridorStartShortcut(m_path, res);
@@ -124,8 +124,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             int MAX_ITER = 32;
             int MAX_RES = 32;
 
-            navquery.InitSlicedFindPath(m_path.Start, m_path.End, m_pos, m_target, filter, FindPathOptions.DT_FINDPATH_ANY_ANGLE);
-            navquery.UpdateSlicedFindPath(MAX_ITER, out int doneIters);
+            navquery.InitSlicedFindPath(m_path.Start, m_path.End, m_pos, m_target, filter);
+            navquery.UpdateSlicedFindPath(MAX_ITER, out _);
             Status status = navquery.FinalizeSlicedFindPathPartial(MAX_RES, m_path.GetPath(), out var res);
 
             if (status == Status.DT_SUCCESS && res.Count > 0)

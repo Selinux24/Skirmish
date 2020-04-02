@@ -162,23 +162,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 if ((int)pmesh.Areas[i] == (int)AreaTypes.RC_WALKABLE_AREA)
                 {
-                    pmesh.Areas[i] = SamplePolyAreas.SAMPLE_POLYAREA_GROUND;
+                    pmesh.Areas[i] = SamplePolyAreas.Ground;
                 }
 
-                if (pmesh.Areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_GROUND ||
-                    pmesh.Areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_GRASS ||
-                    pmesh.Areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_ROAD)
-                {
-                    pmesh.Flags[i] = SamplePolyFlagTypes.SAMPLE_POLYFLAGS_WALK;
-                }
-                else if (pmesh.Areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_WATER)
-                {
-                    pmesh.Flags[i] = SamplePolyFlagTypes.SAMPLE_POLYFLAGS_SWIM;
-                }
-                else if (pmesh.Areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_DOOR)
-                {
-                    pmesh.Flags[i] = SamplePolyFlagTypes.SAMPLE_POLYFLAGS_WALK | SamplePolyFlagTypes.SAMPLE_POLYFLAGS_DOOR;
-                }
+                pmesh.Flags[i] = QueryFilter.EvaluateArea(pmesh.Areas[i]);
             }
 
             var param = new NavMeshCreateParams
@@ -772,23 +759,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 {
                     if ((int)pmesh.Areas[i] == (int)AreaTypes.RC_WALKABLE_AREA)
                     {
-                        pmesh.Areas[i] = SamplePolyAreas.SAMPLE_POLYAREA_GROUND;
+                        pmesh.Areas[i] = SamplePolyAreas.Ground;
                     }
 
-                    if (pmesh.Areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_GROUND ||
-                        pmesh.Areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_GRASS ||
-                        pmesh.Areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_ROAD)
-                    {
-                        pmesh.Flags[i] = SamplePolyFlagTypes.SAMPLE_POLYFLAGS_WALK;
-                    }
-                    else if (pmesh.Areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_WATER)
-                    {
-                        pmesh.Flags[i] = SamplePolyFlagTypes.SAMPLE_POLYFLAGS_SWIM;
-                    }
-                    else if (pmesh.Areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_DOOR)
-                    {
-                        pmesh.Flags[i] = SamplePolyFlagTypes.SAMPLE_POLYFLAGS_WALK | SamplePolyFlagTypes.SAMPLE_POLYFLAGS_DOOR;
-                    }
+                    pmesh.Flags[i] = QueryFilter.EvaluateArea(pmesh.Areas[i]);
                 }
 
                 var param = new NavMeshCreateParams
@@ -1250,6 +1224,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         public TileRef GetTileAndPolyByNode(Node node)
         {
             TileRef res = GetTileAndPolyByRef(node.Id);
+            res.Node = node;
+            return res;
+        }
+        public TileRef GetTileAndPolyByNodeUnsafe(Node node)
+        {
+            TileRef res = GetTileAndPolyByRefUnsafe(node.Id);
             res.Node = node;
             return res;
         }

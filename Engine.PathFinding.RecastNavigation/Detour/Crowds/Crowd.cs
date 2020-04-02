@@ -269,7 +269,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             {
                 QueryFilter filter = new QueryFilter()
                 {
-                    IncludeFlags = SamplePolyFlagTypes.SAMPLE_POLYFLAGS_WALK,
+                    IncludeFlags = SamplePolyFlagTypes.Walk,
                 };
 
                 m_filters.Add(filter);
@@ -741,7 +741,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             // Quick search towards the goal.
             const int MAX_ITER = 20;
-            m_navquery.InitSlicedFindPath(path.First(), ag.TargetRef, ag.NPos, ag.TargetPos, m_filters[ag.Params.QueryFilterTypeIndex], FindPathOptions.DT_FINDPATH_ANY_ANGLE);
+            m_navquery.InitSlicedFindPath(path.First(), ag.TargetRef, ag.NPos, ag.TargetPos, m_filters[ag.Params.QueryFilterTypeIndex]);
             m_navquery.UpdateSlicedFindPath(MAX_ITER, out _);
 
             Status qStatus;

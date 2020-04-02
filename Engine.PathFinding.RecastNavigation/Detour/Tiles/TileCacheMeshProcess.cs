@@ -18,23 +18,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             {
                 if ((int)bc.LMesh.Areas[i] == (int)AreaTypes.RC_WALKABLE_AREA)
                 {
-                    bc.LMesh.Areas[i] = SamplePolyAreas.SAMPLE_POLYAREA_GROUND;
+                    bc.LMesh.Areas[i] = SamplePolyAreas.Ground;
                 }
 
-                if (bc.LMesh.Areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_GROUND ||
-                    bc.LMesh.Areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_GRASS ||
-                    bc.LMesh.Areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_ROAD)
-                {
-                    bc.LMesh.Flags[i] = SamplePolyFlagTypes.SAMPLE_POLYFLAGS_WALK;
-                }
-                else if (bc.LMesh.Areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_WATER)
-                {
-                    bc.LMesh.Flags[i] = SamplePolyFlagTypes.SAMPLE_POLYFLAGS_SWIM;
-                }
-                else if (bc.LMesh.Areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_DOOR)
-                {
-                    bc.LMesh.Flags[i] = SamplePolyFlagTypes.SAMPLE_POLYFLAGS_WALK | SamplePolyFlagTypes.SAMPLE_POLYFLAGS_DOOR;
-                }
+                bc.LMesh.Flags[i] = QueryFilter.EvaluateArea(bc.LMesh.Areas[i]);
             }
 
             // Pass in off-mesh connections.

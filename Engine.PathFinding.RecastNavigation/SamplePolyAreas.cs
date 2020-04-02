@@ -3,11 +3,33 @@ namespace Engine.PathFinding.RecastNavigation
 {
     public enum SamplePolyAreas
     {
-        SAMPLE_POLYAREA_GROUND = GraphConnectionAreaTypes.Ground,
-        SAMPLE_POLYAREA_WATER = GraphConnectionAreaTypes.Water,
-        SAMPLE_POLYAREA_ROAD = GraphConnectionAreaTypes.Road,
-        SAMPLE_POLYAREA_DOOR = GraphConnectionAreaTypes.Door,
-        SAMPLE_POLYAREA_GRASS = GraphConnectionAreaTypes.Grass,
-        SAMPLE_POLYAREA_JUMP = GraphConnectionAreaTypes.Jump,
+        /// <summary>
+        /// None
+        /// </summary>
+        None = GraphConnectionAreaTypes.None,
+        /// <summary>
+        /// SAMPLE_POLYAREA_GROUND
+        /// </summary>
+        Ground = GraphConnectionAreaTypes.Ground,
+        /// <summary>
+        /// SAMPLE_POLYAREA_WATER
+        /// </summary>
+        Water = GraphConnectionAreaTypes.Water,
+        /// <summary>
+        /// SAMPLE_POLYAREA_ROAD
+        /// </summary>
+        Road = GraphConnectionAreaTypes.Road,
+        /// <summary>
+        /// SAMPLE_POLYAREA_DOOR
+        /// </summary>
+        Door = GraphConnectionAreaTypes.Door,
+        /// <summary>
+        /// SAMPLE_POLYAREA_GRASS
+        /// </summary>
+        Grass = GraphConnectionAreaTypes.Grass,
+        /// <summary>
+        /// SAMPLE_POLYAREA_JUMP
+        /// </summary>
+        Jump = GraphConnectionAreaTypes.Jump,
     }
 }

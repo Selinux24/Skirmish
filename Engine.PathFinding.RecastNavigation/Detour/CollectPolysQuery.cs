@@ -21,6 +21,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
         public void Process(MeshTile tile, IEnumerable<int> refs)
         {
+            if (!refs?.Any() == true)
+            {
+                return;
+            }
+
             int numLeft = MaxPolys - NumCollected;
             int toCopy = refs.Count();
             if (toCopy > numLeft)

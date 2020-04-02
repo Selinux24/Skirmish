@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
@@ -26,6 +27,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
         public void Process(MeshTile tile, IEnumerable<int> refs)
         {
+            if (!refs?.Any() == true)
+            {
+                return;
+            }
+
             foreach (var r in refs)
             {
                 m_query.ClosestPointOnPoly(r, m_center, out Vector3 closestPtPoly, out bool posOverPoly);

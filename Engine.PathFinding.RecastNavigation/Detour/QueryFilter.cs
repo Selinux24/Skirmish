@@ -27,22 +27,27 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             AreaCost = Helper.CreateArray(DetourUtils.DT_MAX_AREAS, 1.0f);
 
-            SetAreaCost(SamplePolyAreas.SAMPLE_POLYAREA_GROUND, 1.0f);
-            SetAreaCost(SamplePolyAreas.SAMPLE_POLYAREA_WATER, 10.0f);
-            SetAreaCost(SamplePolyAreas.SAMPLE_POLYAREA_ROAD, 1.0f);
-            SetAreaCost(SamplePolyAreas.SAMPLE_POLYAREA_DOOR, 1.0f);
-            SetAreaCost(SamplePolyAreas.SAMPLE_POLYAREA_GRASS, 2.0f);
-            SetAreaCost(SamplePolyAreas.SAMPLE_POLYAREA_JUMP, 1.5f);
+            SetAreaCost(SamplePolyAreas.Ground, 1.0f);
+            SetAreaCost(SamplePolyAreas.Water, 10.0f);
+            SetAreaCost(SamplePolyAreas.Road, 1.0f);
+            SetAreaCost(SamplePolyAreas.Door, 1.0f);
+            SetAreaCost(SamplePolyAreas.Grass, 2.0f);
+            SetAreaCost(SamplePolyAreas.Jump, 1.5f);
+
+            IncludeFlags = SamplePolyFlagTypes.Walk;
+            ExcludeFlags = SamplePolyFlagTypes.None;
         }
 
         /// <summary>
-        /// Returns true if the polygon can be visited.  (I.e. Is traversable.)
+        /// Returns true if the polygon can be visited. (I.e. Is traversable.)
         /// </summary>
-        /// <param name="tile">The tile containing the polygon.</param>
-        /// <returns></returns>
-        public virtual bool PassFilter(TileRef tile)
+        /// <param name="polyFlags">Sample polygon flags.</param>
+        /// <returns>Returns true if the filter pass</returns>
+        public virtual bool PassFilter(SamplePolyFlagTypes polyFlags)
         {
-            return (tile.Poly.Flags & IncludeFlags) != 0 && (tile.Poly.Flags & ExcludeFlags) == 0;
+            return
+                (polyFlags & IncludeFlags) != 0 &&
+                (polyFlags & ExcludeFlags) == 0;
         }
         /// <summary>
         /// Returns cost to move from the beginning to the end of a line segment that is fully contained within a polygon.
@@ -94,5 +99,30 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         /// <param name="flags">The new flags.</param>
         public void SetExcludeFlags(SamplePolyFlagTypes flags) { ExcludeFlags = flags; }
+
+        /// <summary>
+        /// Evaluates area type and returns spected flag type
+        /// </summary>
+        /// <param name="area">Area type</param>
+        /// <returns>Returns the flag type</returns>
+        public static SamplePolyFlagTypes EvaluateArea(SamplePolyAreas area)
+        {
+            if (area == SamplePolyAreas.Ground ||
+                area == SamplePolyAreas.Grass ||
+                area == SamplePolyAreas.Road)
+            {
+                return SamplePolyFlagTypes.Walk;
+            }
+            else if (area == SamplePolyAreas.Water)
+            {
+                return SamplePolyFlagTypes.Swim;
+            }
+            else if (area == SamplePolyAreas.Door)
+            {
+                return SamplePolyFlagTypes.Walk | SamplePolyFlagTypes.Door;
+            }
+
+            return SamplePolyFlagTypes.None;
+        }
     }
 }

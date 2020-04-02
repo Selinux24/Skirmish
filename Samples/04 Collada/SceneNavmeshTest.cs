@@ -267,6 +267,7 @@ namespace Collada
         private void UpdateGraph()
         {
             bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
+            bool ctrl = this.Game.Input.KeyPressed(Keys.LControlKey);
 
             if (this.Game.Input.LeftMouseButtonJustReleased)
             {
@@ -275,21 +276,38 @@ namespace Collada
 
                 if (this.PickNearest(pRay, rayPParams, out PickingResult<Triangle> r))
                 {
-                    var tri = Line3D.CreateWiredTriangle(r.Item);
-                    this.volumesDrawer.SetPrimitives(Color.White, tri);
+                    DrawPoint(r.Position, 0.25f, Color.Red);
+                    DrawTriangle(r.Item, Color.White);
 
-                    var cross = Line3D.CreateCross(r.Position, 0.25f);
-                    this.volumesDrawer.SetPrimitives(Color.Red, cross);
+                    if (ctrl)
+                    {
+                        float radius = 5;
 
-                    BuildTile(shift, r.Position);
+                        DrawCircle(r.Position, radius, Color.Orange);
+
+                        var pt = this.NavigationGraph.FindRandomPoint(agent, r.Position, radius);
+                        if (pt.HasValue)
+                        {
+                            float dist = Vector3.Distance(r.Position, pt.Value);
+                            Color color = dist < radius ? Color.LightGreen : Color.Pink;
+                            DrawPoint(pt.Value, 2.5f, color);
+                        }
+                    }
+                    else
+                    {
+
+                        BuildTile(shift, r.Position);
+                    }
                 }
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.Space))
             {
-                this.volumesDrawer.Clear();
-
-                BuildTile(shift, this.Camera.Position);
+                var pt = this.NavigationGraph.FindRandomPoint(agent);
+                if (pt.HasValue)
+                {
+                    DrawPoint(pt.Value, 2.5f, Color.LightGreen);
+                }
             }
 
             bool updateGraph = false;
@@ -330,6 +348,21 @@ namespace Collada
             }
 
             this.debug.Text = string.Format("Build Mode: {0}; Partition Type: {1}; Build Time: {2:0.00000} seconds", nmsettings.BuildMode, nmsettings.PartitionType, lastElapsedSeconds);
+        }
+        private void DrawPoint(Vector3 position, float size, Color color)
+        {
+            var cross = Line3D.CreateCross(position, size);
+            this.volumesDrawer.SetPrimitives(color, cross);
+        }
+        private void DrawTriangle(Triangle triangle, Color color)
+        {
+            var tri = Line3D.CreateWiredTriangle(triangle);
+            this.volumesDrawer.SetPrimitives(color, tri);
+        }
+        private void DrawCircle(Vector3 position, float radius, Color color)
+        {
+            var circle = Line3D.CreateCircle(position, radius, 12);
+            this.volumesDrawer.SetPrimitives(color, circle);
         }
         private void BuildTile(bool shift, Vector3 tilePosition)
         {

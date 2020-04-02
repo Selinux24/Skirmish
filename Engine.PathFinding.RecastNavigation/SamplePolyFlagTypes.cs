@@ -6,24 +6,28 @@ namespace Engine.PathFinding.RecastNavigation
     public enum SamplePolyFlagTypes
     {
         /// <summary>
-        /// Ability to walk (ground, grass, road)
+        /// None
         /// </summary>
-        SAMPLE_POLYFLAGS_WALK = 0x01,
+        None = 0x00,
         /// <summary>
-        /// Ability to swim (water).
+        /// SAMPLE_POLYFLAGS_WALK. Ability to walk (ground, grass, road)
         /// </summary>
-        SAMPLE_POLYFLAGS_SWIM = 0x02,
+        Walk = 0x01,
         /// <summary>
-        /// Ability to move through doors.
+        /// SAMPLE_POLYFLAGS_SWIM. Ability to swim (water).
         /// </summary>
-        SAMPLE_POLYFLAGS_DOOR = 0x04,
+        Swim = 0x02,
         /// <summary>
-        /// Ability to jump.
+        /// SAMPLE_POLYFLAGS_DOOR. Ability to move through doors.
         /// </summary>
-        SAMPLE_POLYFLAGS_JUMP = 0x08,
+        Door = 0x04,
         /// <summary>
-        /// Disabled polygon
+        /// SAMPLE_POLYFLAGS_JUMP. Ability to jump.
         /// </summary>
-        SAMPLE_POLYFLAGS_DISABLED = 0x10,
+        Jump = 0x08,
+        /// <summary>
+        /// SAMPLE_POLYFLAGS_DISABLED. Disabled polygon
+        /// </summary>
+        Disabled = 0x10,
     }
 }

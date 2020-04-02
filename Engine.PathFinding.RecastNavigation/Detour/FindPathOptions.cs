@@ -6,8 +6,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
     public enum FindPathOptions
     {
         /// <summary>
-        /// Use raycasts during pathfind to "shortcut" (raycast still consider costs)
+        /// DT_FINDPATH_ANY_ANGLE. Use raycasts during pathfind to "shortcut" (raycast still consider costs)
         /// </summary>
-        DT_FINDPATH_ANY_ANGLE = 0x02,
+        AnyAngle = 0x02,
     }
 }

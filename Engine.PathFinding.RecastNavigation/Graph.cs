@@ -84,9 +84,12 @@ namespace Engine.PathFinding.RecastNavigation
             }
             else if (mode == PathFindingMode.Sliced)
             {
-                return navQuery.InitSlicedFindPath(
-                    startRef, endRef, startPos, endPos, filter,
-                    FindPathOptions.DT_FINDPATH_ANY_ANGLE);
+                var status = navQuery.InitSlicedFindPath(startRef, endRef, startPos, endPos, filter);
+                if (status != Status.DT_SUCCESS)
+                {
+                    return status;
+                }
+                return navQuery.UpdateSlicedFindPath(20, out _);
             }
 
             return Status.DT_FAILURE;
@@ -470,6 +473,16 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
         /// <summary>
+        /// Gets a query for the specified agent
+        /// </summary>
+        /// <param name="agent">Agent</param>
+        /// <returns>Returns a new navigation mesh query</returns>
+        private GraphAgentQuery GetAgentQuery(AgentType agent)
+        {
+            return AgentQueries.Find(a => agent.Equals(a.Agent));
+        }
+
+        /// <summary>
         /// Builds the tile in the specified position
         /// </summary>
         /// <param name="position">Position</param>
@@ -589,7 +602,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             List<GraphNode> nodes = new List<GraphNode>();
 
-            var graphQuery = AgentQueries.Find(a => agent.Equals(a.Agent));
+            var graphQuery = GetAgentQuery(agent);
             if (graphQuery == null)
             {
                 return new IGraphNode[] { };
@@ -608,12 +621,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Return path if exists</returns>
         public IEnumerable<Vector3> FindPath(AgentType agent, Vector3 from, Vector3 to)
         {
-            var filter = new QueryFilter()
-            {
-                IncludeFlags = SamplePolyFlagTypes.SAMPLE_POLYFLAGS_WALK,
-            };
-
-            var graphQuery = AgentQueries.Find(a => agent.Equals(a.Agent));
+            var graphQuery = GetAgentQuery(agent);
             if (graphQuery == null)
             {
                 return new Vector3[] { };
@@ -621,7 +629,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             var status = CalcPath(
                 graphQuery.CreateQuery(),
-                filter, new Vector3(2, 4, 2), PathFindingMode.Follow,
+                new QueryFilter(), new Vector3(2, 4, 2), PathFindingMode.Follow,
                 from, to, out var result);
 
             if (status.HasFlag(Status.DT_SUCCESS))
@@ -646,12 +654,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             await Task.Run(() =>
             {
-                var filter = new QueryFilter()
-                {
-                    IncludeFlags = SamplePolyFlagTypes.SAMPLE_POLYFLAGS_WALK,
-                };
-
-                var graphQuery = AgentQueries.Find(a => agent.Equals(a.Agent));
+                var graphQuery = GetAgentQuery(agent);
                 if (graphQuery == null)
                 {
                     return;
@@ -659,7 +662,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                 var status = CalcPath(
                     graphQuery.CreateQuery(),
-                    filter, new Vector3(2, 4, 2), PathFindingMode.Follow,
+                    new QueryFilter(), new Vector3(2, 4, 2), PathFindingMode.Follow,
                     from, to, out var res);
 
                 if (status.HasFlag(Status.DT_SUCCESS))
@@ -693,19 +696,14 @@ namespace Engine.PathFinding.RecastNavigation
             nearest = null;
 
             //Find agent query
-            var query = AgentQueries.Find(a => agent.Equals(a.Agent))?.CreateQuery();
+            var query = GetAgentQuery(agent)?.CreateQuery();
             if (query != null)
             {
-                var filter = new QueryFilter()
-                {
-                    IncludeFlags = SamplePolyFlagTypes.SAMPLE_POLYFLAGS_WALK,
-                };
-
                 //Set extents based upon agent height
                 var agentExtents = new Vector3(agent.Height, agent.Height * 2, agent.Height);
 
                 var status = query.FindNearestPoly(
-                    position, agentExtents, filter,
+                    position, agentExtents, new QueryFilter(),
                     out int nRef, out Vector3 nPoint);
 
                 if (nRef != 0 && !status.HasFlag(Status.DT_FAILURE))
@@ -899,6 +897,56 @@ namespace Engine.PathFinding.RecastNavigation
 
                 itemIndices.Remove(instance);
             }
+        }
+
+        /// <summary>
+        /// Finds a random point over the graph
+        /// </summary>
+        /// <returns>Returns a valid random position over the graph</returns>
+        public Vector3? FindRandomPoint(AgentType agent)
+        {
+            var query = GetAgentQuery(agent)?.CreateQuery();
+            if (query != null)
+            {
+                var status = query.FindRandomPoint(new QueryFilter(), out _, out var pt);
+                if (status == Status.DT_SUCCESS)
+                {
+                    return pt;
+                }
+            }
+
+            return null;
+        }
+        /// <summary>
+        /// Finds a random point around a circle
+        /// </summary>
+        /// <param name="agent">Agent</param>
+        /// <param name="position">Position</param>
+        /// <param name="radius">Radius</param>
+        /// <returns>Returns a valid random position over the graph</returns>
+        public Vector3? FindRandomPoint(AgentType agent, Vector3 position, float radius)
+        {
+            var query = GetAgentQuery(agent)?.CreateQuery();
+            if (query != null)
+            {
+                QueryFilter filter = new QueryFilter();
+
+                var fStatus = query.FindNearestPoly(position, new Vector3(2, 4, 2), filter, out int startRef, out var nearestPt);
+                if (fStatus != Status.DT_SUCCESS)
+                {
+                    return null;
+                }
+
+                var pStatus = query.FindRandomPointAroundCircle(startRef, nearestPt, radius, filter, out _, out var pt);
+                if (pStatus != Status.DT_SUCCESS)
+                {
+                    return null;
+                }
+
+                return pt;
+            }
+
+            return null;
         }
 
         /// <summary>

@@ -2383,7 +2383,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             // Merge regions and filter out small regions.
             chf.MaxRegions = id;
-            var merged = MergeAndFilterRegions(minRegionArea, mergeRegionArea, id, chf, srcReg, out int[] overlaps, out var maxRegionId);
+            var merged = MergeAndFilterRegions(minRegionArea, mergeRegionArea, id, chf, srcReg, out _, out var maxRegionId);
             chf.MaxRegions = maxRegionId;
 
             if (!merged)
