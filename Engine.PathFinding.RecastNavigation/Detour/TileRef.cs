@@ -29,5 +29,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// Polygon data
         /// </summary>
         public Poly Poly { get; set; }
+        /// <summary>
+        /// Node data
+        /// </summary>
+        public Node Node { get; set; }
     }
 }

@@ -1247,6 +1247,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             return Tiles[i];
         }
+        public TileRef GetTileAndPolyByNode(Node node)
+        {
+            TileRef res = GetTileAndPolyByRef(node.Id);
+            res.Node = node;
+            return res;
+        }
         public TileRef GetTileAndPolyByRef(int r)
         {
             if (r == 0) return TileRef.Null;
@@ -2001,31 +2007,21 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             Vector3 pmin = Vector3.Zero;
             Vector3 pmax = Vector3.Zero;
 
+            int ANY_BOUNDARY_EDGE =
+                ((int)DetailTriEdgeFlagTypes.Boundary << 0) |
+                ((int)DetailTriEdgeFlagTypes.Boundary << 2) |
+                ((int)DetailTriEdgeFlagTypes.Boundary << 4);
+
             for (int i = 0; i < pd.TriCount; i++)
             {
                 var tris = tile.DetailTris[pd.TriBase + i];
-                int ANY_BOUNDARY_EDGE =
-                    ((int)DetailTriEdgeFlagTypes.Boundary << 0) |
-                    ((int)DetailTriEdgeFlagTypes.Boundary << 2) |
-                    ((int)DetailTriEdgeFlagTypes.Boundary << 4);
 
                 if (onlyBoundary && (tris.W & ANY_BOUNDARY_EDGE) == 0)
                 {
                     continue;
                 }
 
-                Vector3[] v = new Vector3[3];
-                for (int j = 0; j < 3; ++j)
-                {
-                    if (tris[j] < poly.VertCount)
-                    {
-                        v[j] = tile.GetPolyVertex(poly, tris[j]);
-                    }
-                    else
-                    {
-                        v[j] = tile.DetailVerts[(pd.VertBase + (tris[j] - poly.VertCount))];
-                    }
-                }
+                Vector3[] v = tile.GetDetailTri(poly, pd.VertBase, tris);
 
                 for (int k = 0, j = 2; k < 3; j = k++)
                 {

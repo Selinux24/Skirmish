@@ -117,7 +117,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
             return null;
         }
-        public int FindNodes(int id, out Node[] nodes, int maxNodes)
+        public int FindNodes(int id, int maxNodes, out Node[] nodes)
         {
             nodes = new Node[maxNodes];
 

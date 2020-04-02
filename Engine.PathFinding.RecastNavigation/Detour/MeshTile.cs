@@ -313,6 +313,61 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             int ip = Array.IndexOf(Polys, poly);
             return DetailMeshes[ip];
         }
+        /// <summary>
+        /// Gets the detail triangle by index
+        /// </summary>
+        /// <param name="poly">Polygon</param>
+        /// <param name="vertBase">Detail vertex base index</param>
+        /// <param name="tris">Triangle indexes</param>
+        /// <returns>Returns the triangle</returns>
+        public Vector3[] GetDetailTri(Poly poly, int vertBase, Int4 tris)
+        {
+            Vector3[] v = new Vector3[3];
+            for (int j = 0; j < 3; ++j)
+            {
+                if (tris[j] < poly.VertCount)
+                {
+                    v[j] = GetPolyVertex(poly, tris[j]);
+                }
+                else
+                {
+                    v[j] = DetailVerts[vertBase + (tris[j] - poly.VertCount)];
+                }
+            }
+
+            return v;
+        }
+        /// <summary>
+        /// Gets the detail triangle list
+        /// </summary>
+        /// <param name="p">Polygon</param>
+        /// <returns>Returns a triangle array</returns>
+        public IEnumerable<Triangle> GetDetailTris(Poly p)
+        {
+            var pd = GetDetailMesh(p);
+
+            List<Triangle> tris = new List<Triangle>();
+
+            for (int k = 0; k < pd.TriCount; k++)
+            {
+                var t = DetailTris[pd.TriBase + k];
+                Vector3[] tv = new Vector3[3];
+                for (int m = 0; m < 3; m++)
+                {
+                    if (t[m] < p.VertCount)
+                    {
+                        tv[m] = Verts[p.Verts[t[m]]];
+                    }
+                    else
+                    {
+                        tv[m] = DetailVerts[pd.VertBase + (t[m] - p.VertCount)];
+                    }
+                }
+                tris.Add(new Triangle(tv));
+            }
+
+            return tris;
+        }
 
         /// <summary>
         /// Patch header pointers

@@ -103,16 +103,14 @@ namespace Engine.PathFinding.RecastNavigation
             navQuery.FindPath(
                 startRef, endRef, startPos, endPos, filter,
                 MAX_POLYS,
-                out var polys);
+                out var iterPath);
 
-            if (polys.Count <= 0)
+            if (iterPath.Count <= 0)
             {
                 return false;
             }
 
             // Iterate over the path to find smooth path on the detail mesh surface.
-            var iterPath = polys.Copy();
-
             navQuery.ClosestPointOnPoly(startRef, startPos, out Vector3 iterPos, out _);
             navQuery.ClosestPointOnPoly(iterPath.End, endPos, out Vector3 targetPos, out _);
 
@@ -132,14 +130,9 @@ namespace Engine.PathFinding.RecastNavigation
                 }
             }
 
-            if (smoothPath.Count > 0)
-            {
-                resultPath = smoothPath.ToArray();
+            resultPath = smoothPath.ToArray();
 
-                return true;
-            }
-
-            return false;
+            return smoothPath.Count > 0;
         }
         private static bool IterPathFollow(
             NavMeshQuery navQuery, QueryFilter filter,
@@ -286,35 +279,32 @@ namespace Engine.PathFinding.RecastNavigation
             int startRef, int endRef,
             out IEnumerable<Vector3> resultPath)
         {
-            resultPath = null;
-
             navQuery.FindPath(
                 startRef, endRef, startPos, endPos, filter, MAX_POLYS,
-                out SimplePath polys);
+                out var polys);
 
-            if (polys.Count != 0)
+            if (polys.Count < 0)
             {
-                // In case of partial path, make sure the end point is clamped to the last polygon.
-                Vector3 epos = endPos;
-                if (polys.End != endRef)
-                {
-                    navQuery.ClosestPointOnPoly(polys.End, endPos, out epos, out _);
-                }
+                resultPath = new Vector3[] { };
 
-                navQuery.FindStraightPath(
-                    startPos, epos, polys,
-                    MAX_POLYS, StraightPathOptions.AllCrossings,
-                    out var straightPath);
-
-                if (straightPath.Count > 0)
-                {
-                    resultPath = straightPath.GetPaths();
-
-                    return true;
-                }
+                return false;
             }
 
-            return false;
+            // In case of partial path, make sure the end point is clamped to the last polygon.
+            Vector3 epos = endPos;
+            if (polys.End != endRef)
+            {
+                navQuery.ClosestPointOnPoly(polys.End, endPos, out epos, out _);
+            }
+
+            navQuery.FindStraightPath(
+                startPos, epos, polys,
+                MAX_POLYS, StraightPathOptions.AllCrossings,
+                out var straightPath);
+
+            resultPath = straightPath.GetPaths();
+
+            return straightPath.Count > 0;
         }
 
         /// <summary>

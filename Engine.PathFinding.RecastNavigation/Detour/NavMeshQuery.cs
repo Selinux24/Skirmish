@@ -342,7 +342,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
 
-            // TODO: Should this be callers responsibility?
             var fpStatus = ClosestPointOnPolyBoundary(path.Start, startPos, out Vector3 closestStartPos);
             if (fpStatus.HasFlag(Status.DT_FAILURE))
             {
@@ -699,7 +698,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                 // Get current poly and tile.
                 // The API input has been cheked already, skip checking internal data.
-                var best = m_nav.GetTileAndPolyByRef(bestNode.Id);
+                var best = m_nav.GetTileAndPolyByNode(bestNode);
                 if (best.Ref == 0)
                 {
                     // The polygon has disappeared during the sliced query, fail.
@@ -709,22 +708,21 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
 
                 // Get parent and grand parent poly and tile.
-                int parentRef = 0;
-                int? grandpaRef = null;
                 Node parentNode = null;
-                TileRef parent = TileRef.Null;
+                int? grandpaRef = null;
                 if (bestNode.PIdx != 0)
                 {
                     parentNode = m_nodePool.GetNodeAtIdx(bestNode.PIdx);
-                    parentRef = parentNode.Id;
                     if (parentNode.PIdx != 0)
                     {
                         grandpaRef = m_nodePool.GetNodeAtIdx(parentNode.PIdx).Id;
                     }
                 }
-                if (parentRef != 0)
+
+                TileRef parent = TileRef.Null;
+                if (parentNode?.Id > 0)
                 {
-                    parent = m_nav.GetTileAndPolyByRef(parentRef);
+                    parent = m_nav.GetTileAndPolyByNode(parentNode);
                     if (parent.Ref == 0 || (grandpaRef.HasValue && !m_nav.IsValidPolyRef(grandpaRef.Value)))
                     {
                         // The polygon has disappeared during the sliced query, fail.
@@ -738,7 +736,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 bool tryLOS = false;
                 if ((m_query.Options & FindPathOptions.DT_FINDPATH_ANY_ANGLE) != 0 &&
                     (parentNode != null) &&
-                    (parentRef != 0) &&
+                    (parentNode.Id != 0) &&
                     (Vector3.DistanceSquared(parentNode.Pos, bestNode.Pos) < m_query.RaycastLimitSqr))
                 {
                     tryLOS = true;
@@ -749,7 +747,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     int neighbourRef = best.Tile.Links[i].NRef;
 
                     // Skip invalid ids and do not expand back to where we came from.
-                    if (neighbourRef == 0 || neighbourRef == parentRef)
+                    if (neighbourRef == 0 || neighbourRef == parentNode?.Id)
                     {
                         continue;
                     }
@@ -777,110 +775,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                         continue;
                     }
 
-                    // If the node is visited the first time, calculate node position.
-                    if (neighbourNode.Flags == NodeFlagTypes.None)
-                    {
-                        var midPointRes = GetEdgeMidPoint(best, neighbour, out var pos);
-                        if (midPointRes != Status.DT_SUCCESS)
-                        {
-                            Console.WriteLine($"UpdateSlicedFindPath GetEdgeMidPoint result: {midPointRes}");
-                            return midPointRes;
-                        }
+                    neighbour.Node = neighbourNode;
 
-                        neighbourNode.Pos = pos;
-                    }
-
-                    // Calculate cost and heuristic.
-                    float cost;
-                    float heuristic;
-
-                    // raycast parent
-                    bool foundShortCut = false;
-
-                    RaycastHit rayHit = new RaycastHit
-                    {
-                        MaxPath = 0,
-                        PathCost = 0,
-                        T = 0,
-                    };
-                    if (tryLOS)
-                    {
-                        Raycast(
-                            parentRef, parentNode.Pos, neighbourNode.Pos, m_query.Filter, RaycastOptions.DT_RAYCAST_USE_COSTS, 0,
-                            ref grandpaRef,
-                            out rayHit);
-                        foundShortCut = rayHit.T >= 1.0f;
-                    }
-
-                    // update move cost
-                    if (foundShortCut)
-                    {
-                        // shortcut found using raycast. Using shorter cost instead
-                        cost = parentNode.Cost + rayHit.PathCost;
-                    }
-                    else
-                    {
-                        // No shortcut found.
-                        float curCost = m_query.Filter.GetCost(bestNode.Pos, neighbourNode.Pos, parent, best, neighbour);
-
-                        cost = bestNode.Cost + curCost;
-                    }
-
-                    // Special case for last node.
-                    if (neighbourRef == m_query.EndRef)
-                    {
-                        float endCost = m_query.Filter.GetCost(neighbourNode.Pos, m_query.EndPos, best, neighbour, TileRef.Null);
-
-                        cost += endCost;
-                        heuristic = 0;
-                    }
-                    else
-                    {
-                        heuristic = Vector3.Distance(neighbourNode.Pos, m_query.EndPos) * DetourUtils.H_SCALE;
-                    }
-
-                    float total = cost + heuristic;
-
-                    // The node is already in open list and the new result is worse, skip.
-                    if ((neighbourNode.Flags & NodeFlagTypes.Open) != 0 && total >= neighbourNode.Total)
-                    {
-                        continue;
-                    }
-                    // The node is already visited and process, and the new result is worse, skip.
-                    if ((neighbourNode.Flags & NodeFlagTypes.Closed) != 0 && total >= neighbourNode.Total)
-                    {
-                        continue;
-                    }
-
-                    // Add or update the node.
-                    neighbourNode.PIdx = foundShortCut ? bestNode.PIdx : m_nodePool.GetNodeIdx(bestNode);
-                    neighbourNode.Id = neighbourRef;
-                    neighbourNode.Flags = (neighbourNode.Flags & ~(NodeFlagTypes.Closed | NodeFlagTypes.ParentDetached));
-                    neighbourNode.Cost = cost;
-                    neighbourNode.Total = total;
-                    if (foundShortCut)
-                    {
-                        neighbourNode.Flags = (neighbourNode.Flags | NodeFlagTypes.ParentDetached);
-                    }
-
-                    if ((neighbourNode.Flags & NodeFlagTypes.Open) != 0)
-                    {
-                        // Already in open, update node location.
-                        m_openList.Modify(neighbourNode);
-                    }
-                    else
-                    {
-                        // Put the node in open list.
-                        neighbourNode.Flags |= NodeFlagTypes.Open;
-                        m_openList.Push(neighbourNode);
-                    }
-
-                    // Update nearest node to target so far.
-                    if (heuristic < m_query.LastBestNodeCost)
-                    {
-                        m_query.LastBestNodeCost = heuristic;
-                        m_query.LastBestNode = neighbourNode;
-                    }
+                    UpdateNeighbourNode(
+                        tryLOS,
+                        neighbour,
+                        parent,
+                        best,
+                        ref grandpaRef);
                 }
             }
 
@@ -894,6 +796,157 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             doneIters = iter;
 
             return m_query.Status;
+        }
+        /// <summary>
+        /// Updates the neighbour node cost
+        /// </summary>
+        /// <param name="tryLOS">Try line of sight</param>
+        /// <param name="neighbour">Neighbour</param>
+        /// <param name="parent">Parent</param>
+        /// <param name="best">Best</param>
+        /// <param name="grandpaRef">Grandparent reference</param>
+        private void UpdateNeighbourNode(bool tryLOS, TileRef neighbour, TileRef parent, TileRef best, ref int? grandpaRef)
+        {
+            // If the node is visited the first time, calculate node position.
+            if (neighbour.Node.Flags == NodeFlagTypes.None)
+            {
+                var midPointRes = GetEdgeMidPoint(best, neighbour, out var pos);
+                if (midPointRes != Status.DT_SUCCESS)
+                {
+                    Console.WriteLine($"UpdateSlicedFindPath GetEdgeMidPoint result: {midPointRes}");
+                    return;
+                }
+
+                neighbour.Node.Pos = pos;
+            }
+
+            // Calculate cost and heuristic.
+            float cost;
+            bool foundShortCut = false;
+            if (tryLOS)
+            {
+                cost = CalcCostLOS(neighbour, parent, best, ref grandpaRef, out foundShortCut);
+            }
+            else
+            {
+                cost = CalcCost(neighbour, parent, best);
+            }
+
+            float heuristic = CalcHeuristic(cost, neighbour, best);
+
+            float total = cost + heuristic;
+
+            // The node is already in open list and the new result is worse, skip.
+            if ((neighbour.Node.Flags & NodeFlagTypes.Open) != 0 && total >= neighbour.Node.Total)
+            {
+                return;
+            }
+            // The node is already visited and process, and the new result is worse, skip.
+            if ((neighbour.Node.Flags & NodeFlagTypes.Closed) != 0 && total >= neighbour.Node.Total)
+            {
+                return;
+            }
+
+            // Add or update the node.
+            neighbour.Node.PIdx = foundShortCut ? best.Node.PIdx : m_nodePool.GetNodeIdx(best.Node);
+            neighbour.Node.Id = neighbour.Ref;
+            neighbour.Node.Flags = (neighbour.Node.Flags & ~(NodeFlagTypes.Closed | NodeFlagTypes.ParentDetached));
+            neighbour.Node.Cost = cost;
+            neighbour.Node.Total = total;
+            if (foundShortCut)
+            {
+                neighbour.Node.Flags = (neighbour.Node.Flags | NodeFlagTypes.ParentDetached);
+            }
+
+            if ((neighbour.Node.Flags & NodeFlagTypes.Open) != 0)
+            {
+                // Already in open, update node location.
+                m_openList.Modify(neighbour.Node);
+            }
+            else
+            {
+                // Put the node in open list.
+                neighbour.Node.Flags |= NodeFlagTypes.Open;
+                m_openList.Push(neighbour.Node);
+            }
+
+            // Update nearest node to target so far.
+            if (heuristic < m_query.LastBestNodeCost)
+            {
+                m_query.LastBestNodeCost = heuristic;
+                m_query.LastBestNode = neighbour.Node;
+            }
+        }
+        /// <summary>
+        /// Calculates the node cost
+        /// </summary>
+        /// <param name="neighbour">Neighbour</param>
+        /// <param name="parent">Parent</param>
+        /// <param name="best">Best</param>
+        /// <returns>Returns the cost value</returns>
+        private float CalcCost(TileRef neighbour, TileRef parent, TileRef best)
+        {
+            // update move cost
+            float curCost = m_query.Filter.GetCost(best.Node.Pos, neighbour.Node.Pos, parent, best, neighbour);
+
+            return best.Node.Cost + curCost;
+        }
+        /// <summary>
+        /// Calculates the node cost using line of sight
+        /// </summary>
+        /// <param name="neighbour">Neighbour</param>
+        /// <param name="parent">Parent</param>
+        /// <param name="best">Best</param>
+        /// <param name="grandpaRef">Grandparent reference</param>
+        /// <param name="foundShortCut">Returns true if a shortcut was found</param>
+        /// <returns>Returns the cost value</returns>
+        private float CalcCostLOS(TileRef neighbour, TileRef parent, TileRef best, ref int? grandpaRef, out bool foundShortCut)
+        {
+            Raycast(
+                parent.Ref, parent.Node.Pos, neighbour.Node.Pos, m_query.Filter, RaycastOptions.DT_RAYCAST_USE_COSTS, 0,
+                ref grandpaRef,
+                out var rayHit);
+
+            // raycast parent
+            foundShortCut = rayHit.T >= 1.0f;
+
+            // update move cost
+            if (foundShortCut)
+            {
+                // shortcut found using raycast. Using shorter cost instead
+                return parent.Node.Cost + rayHit.PathCost;
+            }
+            else
+            {
+                // No shortcut found.
+                float curCost = m_query.Filter.GetCost(best.Node.Pos, neighbour.Node.Pos, parent, best, neighbour);
+
+                return best.Node.Cost + curCost;
+            }
+        }
+        /// <summary>
+        /// Calculates the node heuristic value
+        /// </summary>
+        /// <param name="cost">Node cost</param>
+        /// <param name="neighbour">Neighbour</param>
+        /// <param name="best">Best</param>
+        /// <returns>Returns the heuristic value</returns>
+        private float CalcHeuristic(float cost, TileRef neighbour, TileRef best)
+        {
+            // Special case for last node.
+            float heuristic;
+            if (neighbour.Ref == m_query.EndRef)
+            {
+                float endCost = m_query.Filter.GetCost(neighbour.Node.Pos, m_query.EndPos, best, neighbour, TileRef.Null);
+                cost += endCost;
+                heuristic = 0;
+            }
+            else
+            {
+                heuristic = Vector3.Distance(neighbour.Node.Pos, m_query.EndPos) * DetourUtils.H_SCALE;
+            }
+
+            return heuristic;
         }
         /// <summary>
         /// Finalizes and returns the results of a sliced path query.
@@ -932,59 +985,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     m_query.Status |= Status.DT_PARTIAL_RESULT;
                 }
 
-                Node prev = null;
-                Node node = m_query.LastBestNode;
-                NodeFlagTypes prevRay = 0;
-                do
-                {
-                    Node next = m_nodePool.GetNodeAtIdx(node.PIdx);
-                    node.PIdx = m_nodePool.GetNodeIdx(prev);
-                    prev = node;
-                    NodeFlagTypes nextRay = node.Flags & NodeFlagTypes.ParentDetached; // keep track of whether parent is not adjacent (i.e. due to raycast shortcut)
-                    node.Flags = (node.Flags & ~NodeFlagTypes.ParentDetached) | prevRay; // and store it in the reversed path's node
-                    prevRay = nextRay;
-                    node = next;
-                }
-                while (node != null);
+                Node node = ReversePath(m_query.LastBestNode);
 
-                // Store path
-                node = prev;
-                do
-                {
-                    Node next = m_nodePool.GetNodeAtIdx(node.PIdx);
-                    Status status = 0;
-                    if ((node.Flags & NodeFlagTypes.ParentDetached) != 0)
-                    {
-                        status = Raycast(
-                            node.Id, node.Pos, next.Pos, m_query.Filter, maxPath - pathList.Count,
-                            out _, out _, out var rpath);
-                        if (status.HasFlag(Status.DT_SUCCESS))
-                        {
-                            pathList.AddRange(rpath.GetPath());
-                        }
-                        // raycast ends on poly boundary and the path might include the next poly boundary.
-                        if (pathList[pathList.Count - 1] == next.Id)
-                        {
-                            pathList.RemoveAt(pathList.Count - 1); // remove to avoid duplicates
-                        }
-                    }
-                    else
-                    {
-                        pathList.Add(node.Id);
-                        if (pathList.Count >= maxPath)
-                        {
-                            status = Status.DT_BUFFER_TOO_SMALL;
-                        }
-                    }
-
-                    if ((status & Status.DT_STATUS_DETAIL_MASK) != 0)
-                    {
-                        m_query.Status |= status & Status.DT_STATUS_DETAIL_MASK;
-                        break;
-                    }
-                    node = next;
-                }
-                while (node != null);
+                pathList.AddRange(StorePath(node, maxPath));
             }
 
             Status details = m_query.Status & Status.DT_STATUS_DETAIL_MASK;
@@ -1030,11 +1033,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             else
             {
                 // Find furthest existing node that was visited.
-                Node prev = null;
                 Node node = null;
                 for (int i = existing.Count() - 1; i >= 0; --i)
                 {
-                    m_nodePool.FindNodes(existing.ElementAt(i), out Node[] nodes, 1);
+                    m_nodePool.FindNodes(existing.ElementAt(i), 1, out Node[] nodes);
                     if (nodes != null)
                     {
                         node = nodes[0];
@@ -1049,57 +1051,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
 
                 // Reverse the path.
-                NodeFlagTypes prevRay = 0;
-                do
-                {
-                    Node next = m_nodePool.GetNodeAtIdx(node.PIdx);
-                    node.PIdx = m_nodePool.GetNodeIdx(prev);
-                    prev = node;
-                    NodeFlagTypes nextRay = node.Flags & NodeFlagTypes.ParentDetached; // keep track of whether parent is not adjacent (i.e. due to raycast shortcut)
-                    node.Flags = (node.Flags & ~NodeFlagTypes.ParentDetached) | prevRay; // and store it in the reversed path's node
-                    prevRay = nextRay;
-                    node = next;
-                }
-                while (node != null);
+                node = ReversePath(node);
 
                 // Store path
-                node = prev;
-                do
-                {
-                    Node next = m_nodePool.GetNodeAtIdx(node.PIdx);
-                    Status status = 0;
-                    if ((node.Flags & NodeFlagTypes.ParentDetached) != 0)
-                    {
-                        status = Raycast(
-                            node.Id, node.Pos, next.Pos, m_query.Filter, maxPath - pathList.Count,
-                            out _, out _, out var rpath);
-                        if (status.HasFlag(Status.DT_SUCCESS))
-                        {
-                            pathList.AddRange(rpath.GetPath());
-                        }
-                        // raycast ends on poly boundary and the path might include the next poly boundary.
-                        if (pathList[pathList.Count - 1] == next.Id)
-                        {
-                            pathList.RemoveAt(pathList.Count); // remove to avoid duplicates
-                        }
-                    }
-                    else
-                    {
-                        pathList.Add(node.Id);
-                        if (pathList.Count >= maxPath)
-                        {
-                            status = Status.DT_BUFFER_TOO_SMALL;
-                        }
-                    }
-
-                    if ((status & Status.DT_STATUS_DETAIL_MASK) != 0)
-                    {
-                        m_query.Status |= status & Status.DT_STATUS_DETAIL_MASK;
-                        break;
-                    }
-                    node = next;
-                }
-                while (node != null);
+                pathList.AddRange(StorePath(node, maxPath));
             }
 
             Status details = m_query.Status & Status.DT_STATUS_DETAIL_MASK;
@@ -1111,6 +1066,82 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             path.StartPath(pathList);
 
             return Status.DT_SUCCESS | details;
+        }
+        /// <summary>
+        /// Reverses de path updating node PIdx references
+        /// </summary>
+        /// <param name="node">First node</param>
+        /// <returns>Returns the new first node</returns>
+        private Node ReversePath(Node node)
+        {
+            Node prev = null;
+            NodeFlagTypes prevRay = 0;
+            do
+            {
+                Node next = m_nodePool.GetNodeAtIdx(node.PIdx);
+                node.PIdx = m_nodePool.GetNodeIdx(prev);
+                prev = node;
+                NodeFlagTypes nextRay = node.Flags & NodeFlagTypes.ParentDetached; // keep track of whether parent is not adjacent (i.e. due to raycast shortcut)
+                node.Flags = (node.Flags & ~NodeFlagTypes.ParentDetached) | prevRay; // and store it in the reversed path's node
+                prevRay = nextRay;
+                node = next;
+            }
+            while (node != null);
+            node = prev;
+
+            return node;
+        }
+        /// <summary>
+        /// Stores the path
+        /// </summary>
+        /// <param name="node">Node</param>
+        /// <param name="maxPath">Max path length</param>
+        /// <returns>Returns the path reference list</returns>
+        private IEnumerable<int> StorePath(Node node, int maxPath)
+        {
+            List<int> pathList = new List<int>();
+
+            // Store path
+            do
+            {
+                Node next = m_nodePool.GetNodeAtIdx(node.PIdx);
+                Status status = 0;
+                if ((node.Flags & NodeFlagTypes.ParentDetached) != 0)
+                {
+                    status = Raycast(
+                        node.Id, node.Pos, next.Pos, m_query.Filter, maxPath - pathList.Count,
+                        out _, out _, out var rpath);
+
+                    if (status.HasFlag(Status.DT_SUCCESS))
+                    {
+                        pathList.AddRange(rpath.GetPath());
+                    }
+                    // raycast ends on poly boundary and the path might include the next poly boundary.
+                    if (pathList[pathList.Count - 1] == next.Id)
+                    {
+                        pathList.RemoveAt(pathList.Count - 1); // remove to avoid duplicates
+                    }
+                }
+                else
+                {
+                    pathList.Add(node.Id);
+                    if (pathList.Count >= maxPath)
+                    {
+                        status = Status.DT_BUFFER_TOO_SMALL;
+                    }
+                }
+
+                if ((status & Status.DT_STATUS_DETAIL_MASK) != 0)
+                {
+                    m_query.Status |= status & Status.DT_STATUS_DETAIL_MASK;
+                    break;
+                }
+
+                node = next;
+            }
+            while (node != null);
+
+            return pathList.ToArray();
         }
         /// <summary>
         /// Finds the polygons along the navigation graph that touch the specified circle.
@@ -1284,7 +1315,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             // Validate input
             if (!m_nav.IsValidPolyRef(startRef) ||
-                verts?.Count() < 3 ||
+                verts == null || verts.Count() < 3 ||
                 filter == null ||
                 maxResult < 0)
             {
@@ -1456,7 +1487,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
 
-            if (m_nodePool.FindNodes(endRef, out Node[] endNodes, 1) != 1 || (endNodes[0].Flags & NodeFlagTypes.Closed) == 0)
+            if (m_nodePool.FindNodes(endRef, 1, out Node[] endNodes) != 1 || (endNodes[0].Flags & NodeFlagTypes.Closed) == 0)
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
@@ -2202,6 +2233,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 // No hit, advance to neighbour polygon.
                 prev = cur;
                 cur = next;
+
+                // Maintain reference
+                prevRef = prev.Ref;
             }
 
             hit.Cut(n);
@@ -3025,7 +3059,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             if (m_nodePool == null) return false;
 
-            int n = m_nodePool.FindNodes(r, out Node[] nodes, DetourUtils.DT_MAX_STATES_PER_NODE);
+            int n = m_nodePool.FindNodes(r, DetourUtils.DT_MAX_STATES_PER_NODE, out Node[] nodes);
 
             for (int i = 0; i < n; i++)
             {

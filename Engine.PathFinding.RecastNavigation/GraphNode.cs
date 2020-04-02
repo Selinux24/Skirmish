@@ -18,7 +18,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="mesh">Navigation mesh</param>
         /// <returns>Returns graph node</returns>
-        public static GraphNode[] Build(NavMesh mesh)
+        public static IEnumerable<GraphNode> Build(NavMesh mesh)
         {
             List<GraphNode> nodes = new List<GraphNode>();
 
@@ -30,9 +30,9 @@ namespace Engine.PathFinding.RecastNavigation
                     continue;
                 }
 
-                for (int t = 0; t < tile.Header.PolyCount; t++)
+                var polys = tile.GetPolys();
+                foreach (var p in polys)
                 {
-                    var p = tile.Polys[t];
                     if (p.Type == PolyTypes.OffmeshConnection)
                     {
                         continue;
@@ -43,28 +43,7 @@ namespace Engine.PathFinding.RecastNavigation
                     int tileNum = mesh.DecodePolyIdTile(bse);
                     var tileColor = IntToCol(tileNum, 128);
 
-                    var pd = tile.DetailMeshes[t];
-
-                    List<Triangle> tris = new List<Triangle>();
-
-                    for (int j = 0; j < pd.TriCount; ++j)
-                    {
-                        var dt = tile.DetailTris[(pd.TriBase + j)];
-                        Vector3[] triVerts = new Vector3[3];
-                        for (int k = 0; k < 3; ++k)
-                        {
-                            if (dt[k] < p.VertCount)
-                            {
-                                triVerts[k] = tile.Verts[p.Verts[dt[k]]];
-                            }
-                            else
-                            {
-                                triVerts[k] = tile.DetailVerts[(pd.VertBase + dt[k] - p.VertCount)];
-                            }
-                        }
-
-                        tris.Add(new Triangle(triVerts[0], triVerts[1], triVerts[2]));
-                    }
+                    var tris = tile.GetDetailTris(p);
 
                     nodes.Add(new GraphNode()
                     {
@@ -75,7 +54,7 @@ namespace Engine.PathFinding.RecastNavigation
                 }
             }
 
-            return nodes.ToArray();
+            return nodes;
         }
         /// <summary>
         /// Bitwise secret wisdoms

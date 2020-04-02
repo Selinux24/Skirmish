@@ -459,6 +459,14 @@ namespace Engine
                 }
             }
         }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="points">Point array</param>
+        public Triangle(Vector3[] points) : this(points[0], points[1], points[2])
+        {
+
+        }
 
         /// <summary>
         /// Text representation
