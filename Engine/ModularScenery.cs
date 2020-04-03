@@ -1306,16 +1306,37 @@ namespace Engine
                     if (targetConf.Connections?.Length > 0)
                     {
                         //Transform connection positions and directions
-                        var sourcePositions = sourceConf.Connections.Select(i => Vector3.TransformCoordinate(i.Position, source.Transform));
-                        var targetPositions = targetConf.Connections.Select(i => Vector3.TransformCoordinate(i.Position, target.Transform));
+                        var sourcePositions = sourceConf.Connections.Select(i => ReadConnection(i, source.Transform));
+                        var targetPositions = targetConf.Connections.Select(i => ReadConnection(i, target.Transform));
 
-                        if (sourcePositions.Any(p1 => targetPositions.Contains(p1)))
+                        if (sourcePositions.Any(p1 =>
+                        {
+                            return targetPositions.Any(p2 =>
+                            {
+                                return ConnectorInfo.IsConnected(p1, p2);
+                            });
+                        }))
                         {
                             source.Connections.Add(t);
                             target.Connections.Add(s);
                         }
                     }
                 }
+            }
+            /// <summary>
+            /// Reads a connection from an asset, and transfoms it for portal detection
+            /// </summary>
+            /// <param name="connection">Connection</param>
+            /// <param name="transform">Transform to apply</param>
+            /// <returns>Returns the connector information</returns>
+            private ConnectorInfo ReadConnection(ModularSceneryAssetDescriptionConnection connection, Matrix transform)
+            {
+                return new ConnectorInfo
+                {
+                    OpenConection = connection.Type == ModularSceneryAssetDescriptionConnectionTypes.Open,
+                    Position = Vector3.TransformCoordinate(connection.Position, transform),
+                    Direction = Vector3.TransformNormal(connection.Direction, transform),
+                };
             }
 
             /// <summary>
@@ -1388,6 +1409,46 @@ namespace Engine
                     }
                 }
             }
+        }
+        /// <summary>
+        /// Conector information
+        /// </summary>
+        struct ConnectorInfo
+        {
+            /// <summary>
+            /// Gets whether the connectors were connected or not
+            /// </summary>
+            /// <param name="x">Connector x</param>
+            /// <param name="y">Connector y</param>
+            /// <returns>Returns true if the connectors were connected</returns>
+            public static bool IsConnected(ConnectorInfo x, ConnectorInfo y)
+            {
+                var a = x;
+                var b = y;
+
+                if (a.OpenConection)
+                {
+                    // True if oppsite directions
+                    return Vector3.Dot(a.Direction, b.Direction) == -1;
+                }
+                else
+                {
+                    return a.Position == b.Position;
+                }
+            }
+
+            /// <summary>
+            /// Open connection
+            /// </summary>
+            public bool OpenConection { get; set; }
+            /// <summary>
+            /// Position
+            /// </summary>
+            public Vector3 Position { get; set; }
+            /// <summary>
+            /// Direction
+            /// </summary>
+            public Vector3 Direction { get; set; }
         }
         /// <summary>
         /// Asset map item

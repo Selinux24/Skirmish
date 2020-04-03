@@ -11,6 +11,11 @@ namespace Engine
     public class ModularSceneryAssetDescriptionConnection
     {
         /// <summary>
+        /// Connection type
+        /// </summary>
+        [XmlAttribute("type")]
+        public ModularSceneryAssetDescriptionConnectionTypes Type { get; set; } = ModularSceneryAssetDescriptionConnectionTypes.None;
+        /// <summary>
         /// Position
         /// </summary>
         [XmlIgnore]

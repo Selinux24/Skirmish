@@ -2331,6 +2331,9 @@
         </asset>
       </references>
       <connections>
+        <connection type="Open">
+          <direction>Right</direction>
+        </connection>
         <connection>
           <position>-2 0 0</position>
           <direction>Left</direction>
@@ -2352,6 +2355,9 @@
         </asset>
       </references>
       <connections>
+        <connection type="Open">
+          <direction>Right</direction>
+        </connection>
         <connection>
           <position>0 0 -1</position>
           <direction>Backward</direction>
@@ -2365,6 +2371,9 @@
         </asset>
       </references>
       <connections>
+        <connection type="Open">
+          <direction>Right</direction>
+        </connection>
         <connection>
           <position>0 0 1</position>
           <direction>Forward</direction>
