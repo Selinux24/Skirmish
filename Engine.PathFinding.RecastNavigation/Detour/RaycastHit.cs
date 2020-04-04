@@ -74,5 +74,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 this.path.AddRange(tmp);
             }
         }
+        /// <summary>
+        /// Gets the simple path
+        /// </summary>
+        /// <returns>Returns a simple path</returns>
+        public SimplePath GetPath()
+        {
+            SimplePath path = new SimplePath(MaxPath);
+            path.StartPath(Path);
+
+            return path;
+        }
     }
 }

@@ -100,9 +100,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             goal = m_pos + delta * pathOptimizationRange / dist;
 
             int MAX_RES = 32;
-            navquery.Raycast(
-                m_path.Start, m_pos, goal, filter, MAX_RES,
-                out var t, out _, out var res);
+            RaycastRequest request = new RaycastRequest
+            {
+                StartRef = m_path.Start,
+                StartPos = m_pos,
+                EndPos = goal,
+                Filter = filter,
+                MaxPath = MAX_RES,
+            };
+            navquery.Raycast(request, out var t, out _, out var res);
             if (res.Count > 1 && t > 0.99f)
             {
                 SimplePath.MergeCorridorStartShortcut(m_path, res);

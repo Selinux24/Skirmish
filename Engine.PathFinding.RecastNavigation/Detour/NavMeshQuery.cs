@@ -901,10 +901,17 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <returns>Returns the cost value</returns>
         private float CalcCostLOS(TileRef neighbour, TileRef parent, TileRef best, ref int? grandpaRef, out bool foundShortCut)
         {
-            Raycast(
-                parent.Ref, parent.Node.Pos, neighbour.Node.Pos, m_query.Filter, RaycastOptions.DT_RAYCAST_USE_COSTS, 0,
-                ref grandpaRef,
-                out var rayHit);
+            RaycastRequest request = new RaycastRequest
+            {
+                StartRef = parent.Ref,
+                StartPos = parent.Node.Pos,
+                EndPos = neighbour.Node.Pos,
+                Filter = m_query.Filter,
+                Options = RaycastOptions.DT_RAYCAST_USE_COSTS,
+                MaxPath = 0,
+            };
+
+            Raycast(request, ref grandpaRef, out var rayHit);
 
             // raycast parent
             foundShortCut = rayHit.T >= 1.0f;
@@ -1107,14 +1114,21 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 Status status = 0;
                 if ((node.Flags & NodeFlagTypes.ParentDetached) != 0)
                 {
-                    status = Raycast(
-                        node.Id, node.Pos, next.Pos, m_query.Filter, maxPath - pathList.Count,
-                        out _, out _, out var rpath);
+                    RaycastRequest request = new RaycastRequest
+                    {
+                        StartRef = node.Id,
+                        StartPos = node.Pos,
+                        EndPos = node.Pos,
+                        Filter = m_query.Filter,
+                        MaxPath = maxPath - pathList.Count,
+                    };
 
+                    status = Raycast(request, out _, out _, out var rpath);
                     if (status.HasFlag(Status.DT_SUCCESS))
                     {
                         pathList.AddRange(rpath.GetPath());
                     }
+
                     // raycast ends on poly boundary and the path might include the next poly boundary.
                     if (pathList[pathList.Count - 1] == next.Id)
                     {
@@ -1991,14 +2005,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="path">The reference ids of the visited polygons.</param>
         /// <param name="maxPath">The maximum number of polygons the path array can hold.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status Raycast(int startRef, Vector3 startPos, Vector3 endPos, QueryFilter filter, int maxPath, out float t, out Vector3 hitNormal, out SimplePath path)
+        public Status Raycast(RaycastRequest request, out float t, out Vector3 hitNormal, out SimplePath path)
         {
             int? prevRef = null;
-            Status status = Raycast(startRef, startPos, endPos, filter, 0, maxPath, ref prevRef, out RaycastHit hit);
+            Status status = Raycast(request, ref prevRef, out RaycastHit hit);
 
             t = hit.T;
             hitNormal = hit.HitNormal;
-            path = new SimplePath(maxPath);
+            path = new SimplePath(hit.MaxPath);
             path.StartPath(hit.Path);
 
             return status;
@@ -2015,8 +2029,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="hit">Pointer to a raycast hit structure which will be filled by the results.</param>
         /// <param name="prevRef">parent of start ref. Used during for cost calculation</param>
         /// <returns></returns>
-        public Status Raycast(int startRef, Vector3 startPos, Vector3 endPos, QueryFilter filter, RaycastOptions options, int maxPath, ref int? prevRef, out RaycastHit hit)
+        public Status Raycast(RaycastRequest request, ref int? prevRef, out RaycastHit hit)
         {
+            int startRef = request.StartRef;
+            Vector3 startPos = request.StartPos;
+            Vector3 endPos = request.EndPos;
+            QueryFilter filter = request.Filter;
+            RaycastOptions options = request.Options;
+            int maxPath = request.MaxPath;
+
             hit = new RaycastHit
             {
                 MaxPath = maxPath,
@@ -2071,10 +2092,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 hit.HitEdgeIndex = segMax;
 
                 // Keep track of furthest t so far.
-                if (tmax > hit.T)
-                {
-                    hit.T = tmax;
-                }
+                hit.T = Math.Max(hit.T, tmax);
 
                 // Store visited polygons.
                 if (n < hit.MaxPath)
@@ -2241,6 +2259,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             return status;
         }
+
         /// <summary>
         /// Finds the distance from the specified position to the nearest polygon wall.
         /// </summary>

@@ -137,6 +137,7 @@
     <Compile Include="Detour\Crowds\ObstacleAvoidanceSampleRequest.cs" />
     <Compile Include="Detour\Crowds\ProximityGridItem.cs" />
     <Compile Include="Detour\NavMeshFile.cs" />
+    <Compile Include="Detour\RaycastRequest.cs" />
     <Compile Include="Detour\Segment.cs" />
     <Compile Include="Detour\TileParams.cs" />
     <Compile Include="Detour\TileRef.cs" />
