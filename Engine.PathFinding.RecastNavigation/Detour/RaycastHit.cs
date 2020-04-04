@@ -80,10 +80,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <returns>Returns a simple path</returns>
         public SimplePath GetPath()
         {
-            SimplePath path = new SimplePath(MaxPath);
-            path.StartPath(Path);
+            SimplePath res = new SimplePath(MaxPath);
+            res.StartPath(Path);
 
-            return path;
+            return res;
         }
     }
 }

@@ -5,6 +5,8 @@ using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
+    using Engine.PathFinding.RecastNavigation.Recast;
+
     /// <summary>
     /// Mesh tile
     /// </summary>
@@ -45,7 +47,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// The detail mesh's triangles. [(vertA, vertB, vertC) * dtMeshHeader::detailTriCount]
         /// </summary>
-        public Int4[] DetailTris { get; set; }
+        public PolyMeshTriangleIndices[] DetailTris { get; set; }
         /// <summary>
         /// The tile bounding volume nodes. [Size: dtMeshHeader::bvNodeCount]
         /// (Will be null if bounding volumes are disabled.)
@@ -311,6 +313,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         public PolyDetail GetDetailMesh(Poly poly)
         {
             int ip = Array.IndexOf(Polys, poly);
+
             return DetailMeshes[ip];
         }
         /// <summary>
@@ -320,9 +323,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="vertBase">Detail vertex base index</param>
         /// <param name="tris">Triangle indexes</param>
         /// <returns>Returns the triangle</returns>
-        public Vector3[] GetDetailTri(Poly poly, int vertBase, Int4 tris)
+        public Triangle GetDetailTri(Poly poly, int vertBase, PolyMeshTriangleIndices tris)
         {
             Vector3[] v = new Vector3[3];
+
             for (int j = 0; j < 3; ++j)
             {
                 if (tris[j] < poly.VertCount)
@@ -335,7 +339,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
             }
 
-            return v;
+            return new Triangle(v);
         }
         /// <summary>
         /// Gets the detail triangle list
@@ -344,26 +348,17 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <returns>Returns a triangle array</returns>
         public IEnumerable<Triangle> GetDetailTris(Poly p)
         {
-            var pd = GetDetailMesh(p);
+            PolyDetail pd = GetDetailMesh(p);
 
             List<Triangle> tris = new List<Triangle>();
 
             for (int k = 0; k < pd.TriCount; k++)
             {
-                var t = DetailTris[pd.TriBase + k];
-                Vector3[] tv = new Vector3[3];
-                for (int m = 0; m < 3; m++)
-                {
-                    if (t[m] < p.VertCount)
-                    {
-                        tv[m] = Verts[p.Verts[t[m]]];
-                    }
-                    else
-                    {
-                        tv[m] = DetailVerts[pd.VertBase + (t[m] - p.VertCount)];
-                    }
-                }
-                tris.Add(new Triangle(tv));
+                PolyMeshTriangleIndices pmt = DetailTris[pd.TriBase + k];
+
+                Triangle t = GetDetailTri(p, pd.VertBase, pmt);
+
+                tris.Add(t);
             }
 
             return tris;
@@ -380,7 +375,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             Links = new Link[header.MaxLinkCount];
             DetailMeshes = new PolyDetail[header.DetailMeshCount];
             DetailVerts = new Vector3[header.DetailVertCount];
-            DetailTris = new Int4[header.DetailTriCount];
+            DetailTris = new PolyMeshTriangleIndices[header.DetailTriCount];
             BvTree = new BVNode[header.BvNodeCount];
             OffMeshCons = new OffMeshConnection[header.OffMeshConCount];
         }

@@ -14,7 +14,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         public void Process(ref NavMeshCreateParams param, NavMeshTileBuildContext bc)
         {
             // Update poly flags from areas.
-            for (int i = 0; i < param.polyCount; ++i)
+            for (int i = 0; i < param.PolyCount; ++i)
             {
                 if ((int)bc.LMesh.Areas[i] == (int)AreaTypes.RC_WALKABLE_AREA)
                 {
@@ -27,8 +27,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             // Pass in off-mesh connections.
             if (m_geom != null)
             {
-                param.offMeshCon = m_geom.GetConnections().ToArray();
-                param.offMeshConCount = m_geom.GetConnectionCount();
+                param.OffMeshCon = m_geom.GetConnections().ToArray();
+                param.OffMeshConCount = m_geom.GetConnectionCount();
             }
         }
     }

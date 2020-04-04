@@ -172,6 +172,8 @@ namespace Collada
                         this.SetNavigationGraph(graph);
 
                         this.NavigationGraphUpdated();
+
+                        return;
                     }
                 }
                 catch (Exception ex)
@@ -182,7 +184,14 @@ namespace Collada
 
             await base.UpdateNavigationGraph();
 
-            await this.PathFinderDescription.Save(fileName, this.NavigationGraph);
+            try
+            {
+                await this.PathFinderDescription.Save(fileName, this.NavigationGraph);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error saving graph file. {ex.Message}");
+            }
         }
         public override void NavigationGraphUpdated()
         {

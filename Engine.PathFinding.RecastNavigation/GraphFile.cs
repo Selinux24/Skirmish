@@ -85,14 +85,21 @@ namespace Engine.PathFinding.RecastNavigation
         {
             byte[] buffer = File.ReadAllBytes(fileName);
 
-            var file = buffer.Decompress<GraphFile>();
-
-            if (file.Hash == hash)
+            try
             {
-                return await FromGraphFile(file);
-            }
+                var file = buffer.Decompress<GraphFile>();
 
-            return null;
+                if (file.Hash == hash)
+                {
+                    return await FromGraphFile(file);
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                throw new EngineException("Error loading the graph from a file.", ex);
+            }
         }
         /// <summary>
         /// Saves the graph to a file
@@ -103,9 +110,16 @@ namespace Engine.PathFinding.RecastNavigation
         {
             var file = await FromGraph(graph);
 
-            byte[] buffer = file.Compress();
+            try
+            {
+                byte[] buffer = file.Compress();
 
-            File.WriteAllBytes(fileName, buffer);
+                File.WriteAllBytes(fileName, buffer);
+            }
+            catch (Exception ex)
+            {
+                throw new EngineException("Error saving the graph to a file.", ex);
+            }
         }
 
         /// <summary>

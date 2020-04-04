@@ -5865,14 +5865,14 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return dx * dx + dz * dz;
         }
-        public static float DistToTriMesh(Vector3 p, Vector3[] verts, Int4[] tris, int ntris)
+        public static float DistToTriMesh(Vector3 p, Vector3[] verts, Int3[] triPoints, int ntris)
         {
             float dmin = float.MaxValue;
             for (int i = 0; i < ntris; ++i)
             {
-                var va = verts[tris[i].X];
-                var vb = verts[tris[i].Y];
-                var vc = verts[tris[i].Z];
+                var va = verts[triPoints[i].X];
+                var vb = verts[triPoints[i].Y];
+                var vc = verts[triPoints[i].Z];
                 float d = DistPtTri(p, va, vb, vc);
                 if (d < dmin)
                 {
@@ -6160,8 +6160,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 UpdateLeftFace(ref edges[e], s, t, (int)EdgeValues.EV_HULL);
             }
         }
-        public static void DelaunayHull(int npts, Vector3[] pts, int nhull, int[] hull, List<Int4> outTris, List<Int4> outEdges)
+        public static void DelaunayHull(Vector3[] pts, int nhull, int[] hull, List<Int3> outTris, List<Int4> outEdges)
         {
+            int npts = pts.Length;
             int nfaces = 0;
             int nedges = 0;
             int maxEdges = npts * 10;
@@ -6187,7 +6188,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             // Create tris
-            Int4[] tris = Helper.CreateArray(nfaces, new Int4(-1, -1, -1, -1));
+            Int3[] tris = Helper.CreateArray(nfaces, new Int3(-1, -1, -1));
 
             for (int i = 0; i < nedges; ++i)
             {
@@ -6247,16 +6248,16 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             outTris.AddRange(tris);
             outEdges.AddRange(edges);
         }
-        public static float PolyMinExtent(Vector3[] verts, int nverts)
+        public static float PolyMinExtent(Vector3[] verts)
         {
             float minDist = float.MaxValue;
-            for (int i = 0; i < nverts; i++)
+            for (int i = 0; i < verts.Length; i++)
             {
-                int ni = (i + 1) % nverts;
+                int ni = (i + 1) % verts.Length;
                 Vector3 p1 = verts[i];
                 Vector3 p2 = verts[ni];
                 float maxEdgeDist = 0;
-                for (int j = 0; j < nverts; j++)
+                for (int j = 0; j < verts.Length; j++)
                 {
                     if (j == i || j == ni) continue;
                     float d = DistancePtSeg2d(verts[j], p1, p2);
@@ -6266,7 +6267,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
             return (float)Math.Sqrt(minDist);
         }
-        public static void TriangulateHull(Vector3[] verts, int nhull, int[] hull, int nin, List<Int4> tris)
+        public static void TriangulateHull(Vector3[] verts, int nhull, int[] hull, int nin, List<Int3> tris)
         {
             int start = 0, left = 1, right = nhull - 1;
 
@@ -6295,12 +6296,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             // Add first triangle
-            tris.Add(new Int4()
+            tris.Add(new Int3()
             {
                 X = hull[start],
                 Y = hull[left],
                 Z = hull[right],
-                W = 0,
             });
 
             // Triangulate the polygon by moving left or right,
@@ -6327,24 +6327,22 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                 if (dleft < dright)
                 {
-                    tris.Add(new Int4()
+                    tris.Add(new Int3()
                     {
                         X = hull[left],
                         Y = hull[nleft],
                         Z = hull[right],
-                        W = 0,
                     });
 
                     left = nleft;
                 }
                 else
                 {
-                    tris.Add(new Int4()
+                    tris.Add(new Int3()
                     {
                         X = hull[left],
                         Y = hull[nright],
                         Z = hull[right],
-                        W = 0,
                     });
 
                     right = nright;
@@ -6359,11 +6357,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             return (((i * 0xd8163841) & 0xffff) / 65535.0f * 2.0f) - 1.0f;
         }
-        private static bool BuildPolyDetail(Vector3[] inp, int ninp, float sampleDist, float sampleMaxError, int heightSearchRadius, CompactHeightfield chf, HeightPatch hp, Vector3[] verts, out int nverts, out Int4[] outTris)
+        private static bool BuildPolyDetail(Vector3[] inp, int ninp, float sampleDist, float sampleMaxError, int heightSearchRadius, CompactHeightfield chf, HeightPatch hp, out Vector3[] outVerts, out Int3[] outTris)
         {
+            List<Vector3> verts = new List<Vector3>();
             List<Int4> edges = new List<Int4>();
             List<Int4> samples = new List<Int4>();
-            List<Int4> tris = new List<Int4>();
+            List<Int3> tris = new List<Int3>();
 
             int MAX_VERTS = 127;
             int MAX_TRIS = 255;    // Max tris for delaunay is 2n-2-k (n=num verts, k=num hull verts).
@@ -6372,11 +6371,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int[] hull = new int[MAX_VERTS];
             int nhull = 0;
 
-            nverts = ninp;
-
-            for (int i = 0; i < ninp; ++i)
+            for (int i = 0; i < ninp; i++)
             {
-                verts[i] = inp[i];
+                verts.Add(inp[i]);
             }
 
             edges.Clear();
@@ -6385,7 +6382,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             float ics = 1.0f / cs;
 
             // Calculate minimum extents of the polygon based on input data.
-            float minExtent = PolyMinExtent(verts, nverts);
+            float minExtent = PolyMinExtent(verts.ToArray());
 
             // Tessellate outlines.
             // This is done in separate pass in order to ensure
@@ -6399,9 +6396,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     bool swapped = false;
                     // Make sure the segments are always handled in same order
                     // using lexological sort or else there will be seams.
-                    if (Math.Abs(vj[0] - vi[0]) < 1e-6f)
+                    if (Math.Abs(vj.X - vi.X) < 1e-6f)
                     {
-                        if (vj[2] > vi[2])
+                        if (vj.Z > vi.Z)
                         {
                             Helper.Swap(ref vj, ref vi);
                             swapped = true;
@@ -6409,7 +6406,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     }
                     else
                     {
-                        if (vj[0] > vi[0])
+                        if (vj.X > vi.X)
                         {
                             Helper.Swap(ref vj, ref vi);
                             swapped = true;
@@ -6422,9 +6419,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     float d = (float)Math.Sqrt(dx * dx + dz * dz);
                     int nn = 1 + (int)Math.Floor(d / sampleDist);
                     if (nn >= MAX_VERTS_PER_EDGE) nn = MAX_VERTS_PER_EDGE - 1;
-                    if (nverts + nn >= MAX_VERTS)
+                    if (verts.Count + nn >= MAX_VERTS)
                     {
-                        nn = MAX_VERTS - 1 - nverts;
+                        nn = MAX_VERTS - 1 - verts.Count;
                     }
 
                     for (int k = 0; k <= nn; ++k)
@@ -6485,18 +6482,16 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     {
                         for (int k = nidx - 2; k > 0; --k)
                         {
-                            verts[nverts] = edge[idx[k]];
-                            hull[nhull++] = nverts;
-                            nverts++;
+                            verts.Add(edge[idx[k]]);
+                            hull[nhull++] = verts.Count - 1;
                         }
                     }
                     else
                     {
                         for (int k = 1; k < nidx - 1; ++k)
                         {
-                            verts[nverts] = edge[idx[k]];
-                            hull[nhull++] = nverts;
-                            nverts++;
+                            verts.Add(edge[idx[k]]);
+                            hull[nhull++] = verts.Count - 1;
                         }
                     }
                 }
@@ -6505,8 +6500,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             // If the polygon minimum extent is small (sliver or small triangle), do not try to add internal points.
             if (minExtent < sampleDist * 2)
             {
-                TriangulateHull(verts, nhull, hull, ninp, tris);
+                TriangulateHull(verts.ToArray(), nhull, hull, ninp, tris);
 
+                outVerts = verts.ToArray();
                 outTris = tris.ToArray();
 
                 return true;
@@ -6516,13 +6512,14 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             // We're using the triangulateHull instead of delaunayHull as it tends to
             // create a bit better triangulation for long thin triangles when there
             // are no internal points.
-            TriangulateHull(verts, nhull, hull, ninp, tris);
+            TriangulateHull(verts.ToArray(), nhull, hull, ninp, tris);
 
             if (tris.Count == 0)
             {
                 // Could not triangulate the poly, make sure there is some valid data there.
-                Console.WriteLine($"buildPolyDetail: Could not triangulate polygon ({nverts} verts).");
+                Console.WriteLine($"buildPolyDetail: Could not triangulate polygon ({verts.Count} verts).");
 
+                outVerts = verts.ToArray();
                 outTris = tris.ToArray();
 
                 return true;
@@ -6571,7 +6568,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 int nsamples = samples.Count;
                 for (int iter = 0; iter < nsamples; ++iter)
                 {
-                    if (nverts >= MAX_VERTS)
+                    if (verts.Count >= MAX_VERTS)
                     {
                         break;
                     }
@@ -6592,7 +6589,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                             Y = s.Y * chf.CH,
                             Z = s.Z * sampleDist + GetJitterY(i) * cs * 0.1f
                         };
-                        float d = DistToTriMesh(pt, verts, tris.ToArray(), tris.Count);
+                        float d = DistToTriMesh(pt, verts.ToArray(), tris.ToArray(), tris.Count);
                         if (d < 0) continue; // did not hit the mesh.
                         if (d > bestd)
                         {
@@ -6611,14 +6608,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     sb.W = 1;
                     samples[besti] = sb;
                     // Add the new sample point.
-                    verts[nverts] = bestpt;
-                    nverts++;
+                    verts.Add(bestpt);
 
                     // Create new triangulation.
                     // TODO: Incremental add instead of full rebuild.
                     edges.Clear();
                     tris.Clear();
-                    DelaunayHull(nverts, verts, nhull, hull, tris, edges);
+                    DelaunayHull(verts.ToArray(), nhull, hull, tris, edges);
                 }
             }
 
@@ -6629,6 +6625,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 Console.WriteLine($"rcBuildPolyMeshDetail: Shrinking triangle count from {ntris} to max {MAX_TRIS}.");
             }
 
+            outVerts = verts.ToArray();
             outTris = tris.ToArray();
 
             return true;
@@ -6781,14 +6778,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             var chs = chf.Spans[hdItem.I];
             hp.Data[hdItem.X - hp.Xmin + (hdItem.Y - hp.Ymin) * hp.Width] = chs.Y;
         }
-
-        class HeightDataItem
-        {
-            public int X { get; set; } = -1;
-            public int Y { get; set; } = -1;
-            public int I { get; set; } = -1;
-        }
-
         /// <summary>
         /// 
         /// </summary>
@@ -6965,7 +6954,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int borderSize = mesh.BorderSize;
             int heightSearchRadius = Math.Max(1, (int)Math.Ceiling(mesh.MaxEdgeError));
 
-            Vector3[] verts = new Vector3[256];
             HeightPatch hp = new HeightPatch();
             int nPolyVerts = 0;
             int maxhw = 0, maxhh = 0;
@@ -7003,18 +6991,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             hp.Data = new int[maxhw * maxhh];
 
-            int vcap = nPolyVerts + nPolyVerts / 2;
-            int tcap = vcap * 2;
-
-            dmesh = new PolyMeshDetail
-            {
-                nmeshes = mesh.NPolys,
-                meshes = new Int4[mesh.NPolys],
-                ntris = 0,
-                tris = new Int4[tcap],
-                nverts = 0,
-                verts = new Vector3[vcap]
-            };
+            dmesh = new PolyMeshDetail();
 
             for (int i = 0; i < mesh.NPolys; ++i)
             {
@@ -7044,13 +7021,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     poly, npoly,
                     sampleDist, sampleMaxError,
                     heightSearchRadius, chf, hp,
-                    verts, out int nverts, out Int4[] tris))
+                    out var verts, out var tris))
                 {
                     return false;
                 }
 
                 // Move detail verts to world space.
-                for (int j = 0; j < nverts; ++j)
+                for (int j = 0; j < verts.Length; ++j)
                 {
                     verts[j].X += orig.X;
                     verts[j].Y += orig.Y + chf.CH; // Is this offset necessary?
@@ -7065,58 +7042,27 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
 
                 // Store detail submesh.
-                int ntris = tris.Length;
-
-                dmesh.meshes[i].X = dmesh.nverts;
-                dmesh.meshes[i].Y = nverts;
-                dmesh.meshes[i].Z = dmesh.ntris;
-                dmesh.meshes[i].W = ntris;
-
-                // Store vertices, allocate more memory if necessary.
-                if (dmesh.nverts + nverts > vcap)
+                PolyMeshDetailIndices tmp = new PolyMeshDetailIndices
                 {
-                    while (dmesh.nverts + nverts > vcap)
-                    {
-                        vcap += 256;
-                    }
+                    VertBase = dmesh.Verts.Count,
+                    VertCount = verts.Length,
+                    TriBase = dmesh.Tris.Count,
+                    TriCount = tris.Length,
+                };
+                dmesh.Meshes.Add(tmp);
 
-                    Vector3[] newv = new Vector3[vcap];
-                    if (dmesh.nverts != 0)
-                    {
-                        Array.Copy(dmesh.verts, newv, dmesh.nverts);
-                    }
-                    dmesh.verts = newv;
-                }
-                for (int j = 0; j < nverts; ++j)
-                {
-                    dmesh.verts[dmesh.nverts].X = verts[j].X;
-                    dmesh.verts[dmesh.nverts].Y = verts[j].Y;
-                    dmesh.verts[dmesh.nverts].Z = verts[j].Z;
-                    dmesh.nverts++;
-                }
+                dmesh.Verts.AddRange(verts);
 
-                // Store triangles, allocate more memory if necessary.
-                if (dmesh.ntris + ntris > tcap)
+                // Store triangles
+                foreach (var t in tris)
                 {
-                    while (dmesh.ntris + ntris > tcap)
+                    dmesh.Tris.Add(new PolyMeshTriangleIndices
                     {
-                        tcap += 256;
-                    }
-                    Int4[] newt = new Int4[tcap];
-                    if (dmesh.ntris != 0)
-                    {
-                        Array.Copy(dmesh.tris, newt, dmesh.ntris);
-                    }
-                    dmesh.tris = newt;
-                }
-                for (int j = 0; j < ntris; ++j)
-                {
-                    var t = tris[j];
-                    dmesh.tris[dmesh.ntris].X = t.X;
-                    dmesh.tris[dmesh.ntris].Y = t.Y;
-                    dmesh.tris[dmesh.ntris].Z = t.Z;
-                    dmesh.tris[dmesh.ntris].W = GetTriFlags(verts[t.X], verts[t.Y], verts[t.Z], poly, npoly);
-                    dmesh.ntris++;
+                        Point1 = t.X,
+                        Point2 = t.Y,
+                        Point3 = t.Z,
+                        Flags = GetTriFlags(verts[t.X], verts[t.Y], verts[t.Z], poly, npoly),
+                    });
                 }
             }
 
@@ -7136,17 +7082,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 {
                     continue;
                 }
-                maxVerts += meshes[i].nverts;
-                maxTris += meshes[i].ntris;
-                maxMeshes += meshes[i].nmeshes;
+                maxVerts += meshes[i].Verts.Count;
+                maxTris += meshes[i].Tris.Count;
+                maxMeshes += meshes[i].Meshes.Count;
             }
-
-            mesh.nmeshes = 0;
-            mesh.meshes = new Int4[maxMeshes];
-            mesh.ntris = 0;
-            mesh.tris = new Int4[maxTris];
-            mesh.nverts = 0;
-            mesh.verts = new Vector3[maxVerts];
 
             // Merge datas.
             for (int i = 0; i < nmeshes; ++i)
@@ -7156,30 +7095,23 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 {
                     continue;
                 }
-                for (int j = 0; j < dm.nmeshes; ++j)
+
+                foreach (var src in dm.Meshes)
                 {
-                    var src = dm.meshes[j];
+                    var dst = new PolyMeshDetailIndices
+                    {
+                        VertBase = mesh.Verts.Count + src.VertBase,
+                        VertCount = src.VertCount,
+                        TriBase = mesh.Tris.Count + src.TriBase,
+                        TriCount = src.TriCount,
+                    };
 
-                    var dst = new Int4();
-                    dst[0] = mesh.nverts + src[0];
-                    dst[1] = src[1];
-                    dst[2] = mesh.ntris + src[2];
-                    dst[3] = src[3];
-
-                    mesh.meshes[mesh.nmeshes] = dst;
-                    mesh.nmeshes++;
+                    mesh.Meshes.Add(dst);
                 }
 
-                for (int k = 0; k < dm.nverts; ++k)
-                {
-                    mesh.verts[mesh.nverts] = dm.verts[k];
-                    mesh.nverts++;
-                }
-                for (int k = 0; k < dm.ntris; ++k)
-                {
-                    mesh.tris[mesh.ntris] = dm.tris[k];
-                    mesh.ntris++;
-                }
+                mesh.Verts.AddRange(dm.Verts);
+
+                mesh.Tris.AddRange(dm.Tris);
             }
 
             return true;

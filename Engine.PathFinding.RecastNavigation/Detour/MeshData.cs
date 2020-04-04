@@ -6,6 +6,8 @@ using System.Security.Permissions;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
+    using Engine.PathFinding.RecastNavigation.Recast;
+
     /// <summary>
     /// Mesh data
     /// </summary>
@@ -35,7 +37,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Navigation detail triangles
         /// </summary>
-        public List<Int4> NavDTris { get; set; } = new List<Int4>();
+        public List<PolyMeshTriangleIndices> NavDTris { get; set; } = new List<PolyMeshTriangleIndices>();
         /// <summary>
         /// Navigation BVTree
         /// </summary>
@@ -89,7 +91,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             var navDTrisCount = info.GetInt32("navDTris.Count");
             for (int i = 0; i < navDTrisCount; i++)
             {
-                NavDTris.Add(info.GetInt4(string.Format("navDTris.{0}", i)));
+                NavDTris.Add(info.GetValue<PolyMeshTriangleIndices>(string.Format("navDTris.{0}", i)));
             }
 
             var navBvtreeCount = info.GetInt32("navBvtree.Count");
@@ -141,7 +143,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             info.AddValue("navDTris.Count", NavDTris.Count);
             for (int i = 0; i < NavDTris.Count; i++)
             {
-                info.AddInt4(string.Format("navDTris.{0}", i), NavDTris[i]);
+                info.AddValue(string.Format("navDTris.{0}", i), NavDTris[i]);
             }
 
             info.AddValue("navBvtree.Count", NavBvtree.Count);

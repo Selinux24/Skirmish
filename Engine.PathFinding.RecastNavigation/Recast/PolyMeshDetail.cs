@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System.Collections.Generic;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
@@ -8,28 +9,16 @@ namespace Engine.PathFinding.RecastNavigation.Recast
     public class PolyMeshDetail
     {
         /// <summary>
-        /// The sub-mesh data. [Size: 4*#nmeshes] 
+        /// The sub-mesh data.
         /// </summary>
-        public Int4[] meshes { get; set; }
+        public List<PolyMeshDetailIndices> Meshes { get; set; } = new List<PolyMeshDetailIndices>();
         /// <summary>
-        /// The mesh vertices. [Size: 3*#nverts] 
+        /// The mesh vertices.
         /// </summary>
-        public Vector3[] verts { get; set; }
+        public List<Vector3> Verts { get; set; } = new List<Vector3>();
         /// <summary>
-        /// The mesh triangles. [Size: 4*#ntris] 
+        /// The mesh triangles.
         /// </summary>
-        public Int4[] tris { get; set; }
-        /// <summary>
-        /// The number of sub-meshes defined by #meshes.
-        /// </summary>
-        public int nmeshes { get; set; }
-        /// <summary>
-        /// The number of vertices in #verts.
-        /// </summary>
-        public int nverts { get; set; }
-        /// <summary>
-        /// The number of triangles in #tris.
-        /// </summary>
-        public int ntris { get; set; }
+        public List<PolyMeshTriangleIndices> Tris { get; set; } = new List<PolyMeshTriangleIndices>();
     }
 }

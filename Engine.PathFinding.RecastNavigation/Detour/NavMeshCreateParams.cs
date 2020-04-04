@@ -2,6 +2,8 @@
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
+    using Engine.PathFinding.RecastNavigation.Recast;
+
     /// <summary>
     /// Represents the source data used to build an navigation mesh tile.
     /// </summary>
@@ -35,11 +37,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Number of polygons in the mesh. [Limit: >= 1]
         /// </summary>
-        public int polyCount { get; set; }
+        public int PolyCount { get; set; }
         /// <summary>
         /// Number maximum number of vertices per polygon. [Limit: >= 3]
         /// </summary>
-        public int nvp { get; set; }
+        public int Nvp { get; set; }
 
         #endregion
 
@@ -50,23 +52,23 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// The height detail sub-mesh data. [Size: 4 * #polyCount]
         /// </summary>
-        public Int4[] detailMeshes { get; set; }
+        public PolyMeshDetailIndices[] DetailMeshes { get; set; }
         /// <summary>
         /// The detail mesh vertices. [Size: 3 * #detailVertsCount] [Unit: wu]
         /// </summary>
-        public Vector3[] detailVerts { get; set; }
+        public Vector3[] DetailVerts { get; set; }
         /// <summary>
         /// The number of vertices in the detail mesh.
         /// </summary>
-        public int detailVertsCount { get; set; }
+        public int DetailVertsCount { get; set; }
         /// <summary>
         /// The detail mesh triangles. [Size: 4 * #detailTriCount]
         /// </summary>
-        public Int4[] detailTris { get; set; }
+        public PolyMeshTriangleIndices[] DetailTris { get; set; }
         /// <summary>
         /// The number of triangles in the detail mesh.
         /// </summary>
-        public int detailTriCount { get; set; }
+        public int DetailTriCount { get; set; }
 
         #endregion
 
@@ -79,11 +81,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Off-mesh connections
         /// </summary>
-        public IGraphConnection[] offMeshCon { get; set; }
+        public IGraphConnection[] OffMeshCon { get; set; }
         /// <summary>
         /// The number of off-mesh connections. [Limit: >= 0]
         /// </summary>
-        public int offMeshConCount { get; set; }
+        public int OffMeshConCount { get; set; }
 
         #endregion
 
@@ -94,27 +96,27 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// The user defined id of the tile.
         /// </summary>
-        public int userId { get; set; }
+        public int UserId { get; set; }
         /// <summary>
         /// The tile's x-grid location within the multi-tile destination mesh. (Along the x-axis.)
         /// </summary>
-        public int tileX { get; set; }
+        public int TileX { get; set; }
         /// <summary>
         /// The tile's y-grid location within the multi-tile desitation mesh. (Along the z-axis.)
         /// </summary>
-        public int tileY { get; set; }
+        public int TileY { get; set; }
         /// <summary>
         /// The tile's layer within the layered destination mesh. [Limit: >= 0] (Along the y-axis.)
         /// </summary>
-        public int tileLayer { get; set; }
+        public int TileLayer { get; set; }
         /// <summary>
         /// The minimum bounds of the tile. [(x, y, z)] [Unit: wu]
         /// </summary>
-        public Vector3 bmin { get; set; }
+        public Vector3 BMin { get; set; }
         /// <summary>
         /// The maximum bounds of the tile. [(x, y, z)] [Unit: wu]
         /// </summary>
-        public Vector3 bmax { get; set; }
+        public Vector3 BMax { get; set; }
 
         #endregion
 
@@ -123,29 +125,29 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// The agent height. [Unit: wu]
         /// </summary>
-        public float walkableHeight { get; set; }
+        public float WalkableHeight { get; set; }
         /// <summary>
         /// The agent radius. [Unit: wu]
         /// </summary>
-        public float walkableRadius { get; set; }
+        public float WalkableRadius { get; set; }
         /// <summary>
         /// The agent maximum traversable ledge. (Up/Down) [Unit: wu]
         /// </summary>
-        public float walkableClimb { get; set; }
+        public float WalkableClimb { get; set; }
         /// <summary>
         /// The xz-plane cell size of the polygon mesh. [Limit: > 0] [Unit: wu]
         /// </summary>
-        public float cs { get; set; }
+        public float CS { get; set; }
         /// <summary>
         /// The y-axis cell height of the polygon mesh. [Limit: > 0] [Unit: wu]
         /// </summary>
-        public float ch { get; set; }
+        public float CH { get; set; }
 
         /// <summary>
         /// True if a bounding volume tree should be built for the tile.
         /// @note The BVTree is not normally needed for layered navigation meshes.
         /// </summary>
-        public bool buildBvTree { get; set; }
+        public bool BuildBvTree { get; set; }
 
         #endregion
     }

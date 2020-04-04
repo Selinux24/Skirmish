@@ -97,6 +97,22 @@ namespace Engine
                 return Helper.Angle(this.Normal, Vector3.Down);
             }
         }
+        /// <summary>
+        /// Returns the triangle vertex by index
+        /// </summary>
+        /// <param name="index">Index</param>
+        /// <returns>Returns a triangle vertex</returns>
+        public Vector3 this[int index]
+        {
+            get
+            {
+                if (index == 0) return Point1;
+                if (index == 1) return Point2;
+                if (index == 2) return Point3;
+
+                return Vector3.Zero;
+            }
+        }
 
         /// <summary>
         /// Generate a triangle list from vertices

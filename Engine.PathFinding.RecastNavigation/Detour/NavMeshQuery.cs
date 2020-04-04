@@ -1130,7 +1130,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     }
 
                     // raycast ends on poly boundary and the path might include the next poly boundary.
-                    if (pathList[pathList.Count - 1] == next.Id)
+                    if (pathList.Count > 0 && pathList[pathList.Count - 1] == next.Id)
                     {
                         pathList.RemoveAt(pathList.Count - 1); // remove to avoid duplicates
                     }

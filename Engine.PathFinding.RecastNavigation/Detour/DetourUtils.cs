@@ -5,6 +5,8 @@ using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
+    using Engine.PathFinding.RecastNavigation.Recast;
+
     static class DetourUtils
     {
         #region Constants
@@ -638,39 +640,39 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             nodes = new List<BVNode>();
 
             // Build tree
-            float quantFactor = 1 / param.cs;
-            BVItem[] items = new BVItem[param.polyCount];
-            for (int i = 0; i < param.polyCount; i++)
+            float quantFactor = 1 / param.CS;
+            BVItem[] items = new BVItem[param.PolyCount];
+            for (int i = 0; i < param.PolyCount; i++)
             {
                 var it = items[i];
                 it.I = i;
                 // Calc polygon bounds. Use detail meshes if available.
-                if (param.detailMeshes != null)
+                if (param.DetailMeshes != null)
                 {
-                    int vb = param.detailMeshes[i][0];
-                    int ndv = param.detailMeshes[i][1];
-                    var bmin = param.detailVerts[vb];
-                    var bmax = param.detailVerts[vb];
+                    int vb = param.DetailMeshes[i].VertBase;
+                    int ndv = param.DetailMeshes[i].VertCount;
+                    var bmin = param.DetailVerts[vb];
+                    var bmax = param.DetailVerts[vb];
 
                     for (int j = 1; j < ndv; j++)
                     {
-                        bmin = Vector3.Min(bmin, param.detailVerts[vb + j]);
-                        bmax = Vector3.Max(bmax, param.detailVerts[vb + j]);
+                        bmin = Vector3.Min(bmin, param.DetailVerts[vb + j]);
+                        bmax = Vector3.Max(bmax, param.DetailVerts[vb + j]);
                     }
 
                     // BV-tree uses cs for all dimensions
                     it.BMin = new Int3
                     {
-                        X = MathUtil.Clamp((int)((bmin.X - param.bmin.X) * quantFactor), 0, int.MaxValue),
-                        Y = MathUtil.Clamp((int)((bmin.Y - param.bmin.Y) * quantFactor), 0, int.MaxValue),
-                        Z = MathUtil.Clamp((int)((bmin.Z - param.bmin.Z) * quantFactor), 0, int.MaxValue)
+                        X = MathUtil.Clamp((int)((bmin.X - param.BMin.X) * quantFactor), 0, int.MaxValue),
+                        Y = MathUtil.Clamp((int)((bmin.Y - param.BMin.Y) * quantFactor), 0, int.MaxValue),
+                        Z = MathUtil.Clamp((int)((bmin.Z - param.BMin.Z) * quantFactor), 0, int.MaxValue)
                     };
 
                     it.BMax = new Int3
                     {
-                        X = MathUtil.Clamp((int)((bmax.X - param.bmin.X) * quantFactor), 0, int.MaxValue),
-                        Y = MathUtil.Clamp((int)((bmax.Y - param.bmin.Y) * quantFactor), 0, int.MaxValue),
-                        Z = MathUtil.Clamp((int)((bmax.Z - param.bmin.Z) * quantFactor), 0, int.MaxValue)
+                        X = MathUtil.Clamp((int)((bmax.X - param.BMin.X) * quantFactor), 0, int.MaxValue),
+                        Y = MathUtil.Clamp((int)((bmax.Y - param.BMin.Y) * quantFactor), 0, int.MaxValue),
+                        Z = MathUtil.Clamp((int)((bmax.Z - param.BMin.Z) * quantFactor), 0, int.MaxValue)
                     };
                 }
                 else
@@ -680,7 +682,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     var itBMin = param.Verts[p[0]];
                     var itBMax = param.Verts[p[0]];
 
-                    for (int j = 1; j < param.nvp; ++j)
+                    for (int j = 1; j < param.Nvp; ++j)
                     {
                         if (p[j] == MESH_NULL_IDX) break;
                         var x = param.Verts[p[j]].X;
@@ -696,8 +698,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                         if (z > it.BMax.Z) itBMax.Z = z;
                     }
                     // Remap y
-                    itBMin.Y = (int)Math.Floor(it.BMin.Y * param.ch / param.cs);
-                    itBMax.Y = (int)Math.Ceiling(it.BMax.Y * param.ch / param.cs);
+                    itBMin.Y = (int)Math.Floor(it.BMin.Y * param.CH / param.CS);
+                    itBMax.Y = (int)Math.Ceiling(it.BMax.Y * param.CH / param.CS);
 
                     it.BMin = itBMin;
                     it.BMax = itBMax;
@@ -706,7 +708,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             int curNode = 0;
-            Subdivide(items, param.polyCount, 0, param.polyCount, ref curNode, ref nodes);
+            Subdivide(items, param.PolyCount, 0, param.PolyCount, ref curNode, ref nodes);
 
             return curNode;
         }
@@ -738,7 +740,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             outData = null;
 
-            if (param.nvp > DT_VERTS_PER_POLYGON)
+            if (param.Nvp > DT_VERTS_PER_POLYGON)
             {
                 return false;
             }
@@ -746,12 +748,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 return false;
             }
-            if (param.polyCount == 0 || param.Polys == null)
+            if (param.PolyCount == 0 || param.Polys == null)
             {
                 return false;
             }
 
-            int nvp = param.nvp;
+            int nvp = param.Nvp;
 
             // Classify off-mesh connection points. We store only the connections
             // whose start point is inside the tile.
@@ -759,19 +761,19 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             int storedOffMeshConCount = 0;
             int offMeshConLinkCount = 0;
 
-            if (param.offMeshConCount > 0)
+            if (param.OffMeshConCount > 0)
             {
-                offMeshConClass = new Vector2Int[param.offMeshConCount];
+                offMeshConClass = new Vector2Int[param.OffMeshConCount];
 
                 // Find tight heigh bounds, used for culling out off-mesh start locations.
                 float hmin = float.MaxValue;
                 float hmax = float.MinValue;
 
-                if (param.detailVerts != null && param.detailVertsCount > 0)
+                if (param.DetailVerts != null && param.DetailVertsCount > 0)
                 {
-                    for (int i = 0; i < param.detailVertsCount; ++i)
+                    for (int i = 0; i < param.DetailVertsCount; ++i)
                     {
-                        var h = param.detailVerts[i].Y;
+                        var h = param.DetailVerts[i].Y;
                         hmin = Math.Min(hmin, h);
                         hmax = Math.Max(hmax, h);
                     }
@@ -781,22 +783,22 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     for (int i = 0; i < param.VertCount; ++i)
                     {
                         var iv = param.Verts[i];
-                        float h = param.bmin.Y + iv.Y * param.ch;
+                        float h = param.BMin.Y + iv.Y * param.CH;
                         hmin = Math.Min(hmin, h);
                         hmax = Math.Max(hmax, h);
                     }
                 }
-                hmin -= param.walkableClimb;
-                hmax += param.walkableClimb;
-                Vector3 bmin = param.bmin;
-                Vector3 bmax = param.bmax;
+                hmin -= param.WalkableClimb;
+                hmax += param.WalkableClimb;
+                Vector3 bmin = param.BMin;
+                Vector3 bmax = param.BMax;
                 bmin.Y = hmin;
                 bmax.Y = hmax;
 
-                for (int i = 0; i < param.offMeshConCount; ++i)
+                for (int i = 0; i < param.OffMeshConCount; ++i)
                 {
-                    var p0 = param.offMeshCon[i].Start;
-                    var p1 = param.offMeshCon[i].End;
+                    var p0 = param.OffMeshCon[i].Start;
+                    var p1 = param.OffMeshCon[i].End;
                     offMeshConClass[i].X = ClassifyOffMeshPoint(p0, bmin, bmax);
                     offMeshConClass[i].Y = ClassifyOffMeshPoint(p1, bmin, bmax);
 
@@ -824,13 +826,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             // Off-mesh connectionss are stored as polygons, adjust values.
-            int totPolyCount = param.polyCount + storedOffMeshConCount;
+            int totPolyCount = param.PolyCount + storedOffMeshConCount;
             int totVertCount = param.VertCount + storedOffMeshConCount * 2;
 
             // Find portal edges which are at tile borders.
             int edgeCount = 0;
             int portalCount = 0;
-            for (int i = 0; i < param.polyCount; ++i)
+            for (int i = 0; i < param.PolyCount; ++i)
             {
                 var p = param.Polys[i];
                 for (int j = 0; j < nvp; ++j)
@@ -858,14 +860,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Find unique detail vertices.
             int uniqueDetailVertCount = 0;
             int detailTriCount;
-            if (param.detailMeshes != null)
+            if (param.DetailMeshes != null)
             {
                 // Has detail mesh, count unique detail vertex count and use input detail tri count.
-                detailTriCount = param.detailTriCount;
-                for (int i = 0; i < param.polyCount; ++i)
+                detailTriCount = param.DetailTriCount;
+                for (int i = 0; i < param.PolyCount; ++i)
                 {
                     var p = param.Polys[i];
-                    var ndv = param.detailMeshes[i].Y;
+                    var ndv = param.DetailMeshes[i].VertCount;
                     int nv = 0;
                     for (int j = 0; j < nvp; ++j)
                     {
@@ -884,7 +886,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 // No input detail mesh, build detail mesh from nav polys.
                 uniqueDetailVertCount = 0; // No extra detail verts.
                 detailTriCount = 0;
-                for (int i = 0; i < param.polyCount; ++i)
+                for (int i = 0; i < param.PolyCount; ++i)
                 {
                     var p = param.Polys[i];
                     int nv = 0;
@@ -907,30 +909,30 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 {
                     Magic = DT_NAVMESH_MAGIC,
                     Version = DT_NAVMESH_VERSION,
-                    X = param.tileX,
-                    Y = param.tileY,
-                    Layer = param.tileLayer,
-                    UserId = param.userId,
+                    X = param.TileX,
+                    Y = param.TileY,
+                    Layer = param.TileLayer,
+                    UserId = param.UserId,
                     PolyCount = totPolyCount,
                     VertCount = totVertCount,
                     MaxLinkCount = maxLinkCount,
-                    BMin = param.bmin,
-                    BMax = param.bmax,
-                    DetailMeshCount = param.polyCount,
+                    BMin = param.BMin,
+                    BMax = param.BMax,
+                    DetailMeshCount = param.PolyCount,
                     DetailVertCount = uniqueDetailVertCount,
                     DetailTriCount = detailTriCount,
-                    BvQuantFactor = 1.0f / param.cs,
-                    OffMeshBase = param.polyCount,
-                    WalkableHeight = param.walkableHeight,
-                    WalkableRadius = param.walkableRadius,
-                    WalkableClimb = param.walkableClimb,
+                    BvQuantFactor = 1.0f / param.CS,
+                    OffMeshBase = param.PolyCount,
+                    WalkableHeight = param.WalkableHeight,
+                    WalkableRadius = param.WalkableRadius,
+                    WalkableClimb = param.WalkableClimb,
                     OffMeshConCount = storedOffMeshConCount,
-                    BvNodeCount = param.buildBvTree ? param.polyCount * 2 : 0
+                    BvNodeCount = param.BuildBvTree ? param.PolyCount * 2 : 0
                 }
             };
 
             int offMeshVertsBase = param.VertCount;
-            int offMeshPolyBase = param.polyCount;
+            int offMeshPolyBase = param.PolyCount;
 
             // Store vertices
 
@@ -940,21 +942,21 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 var iv = param.Verts[i];
                 var v = new Vector3
                 {
-                    X = param.bmin.X + iv.X * param.cs,
-                    Y = param.bmin.Y + iv.Y * param.ch,
-                    Z = param.bmin.Z + iv.Z * param.cs
+                    X = param.BMin.X + iv.X * param.CS,
+                    Y = param.BMin.Y + iv.Y * param.CH,
+                    Z = param.BMin.Z + iv.Z * param.CS
                 };
                 data.NavVerts.Add(v);
             }
 
             // Off-mesh link vertices.
             int n = 0;
-            for (int i = 0; i < param.offMeshConCount; ++i)
+            for (int i = 0; i < param.OffMeshConCount; ++i)
             {
                 // Only store connections which start from this tile.
                 if (offMeshConClass[i].X == 0xff)
                 {
-                    var linkv = param.offMeshCon[i];
+                    var linkv = param.OffMeshCon[i];
                     data.NavVerts.Add(linkv.Start);
                     data.NavVerts.Add(linkv.End);
                     n++;
@@ -964,7 +966,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Store polygons
 
             // Mesh polys
-            for (int i = 0; i < param.polyCount; i++)
+            for (int i = 0; i < param.PolyCount; i++)
             {
                 var p = Poly.Create(
                     param.Polys[i],
@@ -977,7 +979,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             // Off-mesh connection vertices.
             n = 0;
-            for (int i = 0; i < param.offMeshConCount; i++)
+            for (int i = 0; i < param.OffMeshConCount; i++)
             {
                 // Only store connections which start from this tile.
                 if (offMeshConClass[i].X == 0xff)
@@ -988,8 +990,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     var p = Poly.Create(
                         start,
                         end,
-                        param.offMeshCon[i].FlagTypes,
-                        param.offMeshCon[i].AreaType);
+                        param.OffMeshCon[i].FlagTypes,
+                        param.OffMeshCon[i].AreaType);
 
                     data.NavPolys.Add(p);
                     n++;
@@ -999,36 +1001,36 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Store detail meshes and vertices.
             // The nav polygon vertices are stored as the first vertices on each mesh.
             // We compress the mesh data by skipping them and using the navmesh coordinates.
-            if (param.detailMeshes != null)
+            if (param.DetailMeshes != null)
             {
-                for (int i = 0; i < param.polyCount; ++i)
+                for (int i = 0; i < param.PolyCount; ++i)
                 {
-                    int vb = param.detailMeshes[i][0];
-                    int ndv = param.detailMeshes[i][1];
+                    int vb = param.DetailMeshes[i].VertBase;
+                    int ndv = param.DetailMeshes[i].VertCount;
                     int nv = data.NavPolys[i].VertCount;
                     PolyDetail dtl = new PolyDetail
                     {
                         VertBase = data.NavDVerts.Count,
                         VertCount = (ndv - nv),
-                        TriBase = param.detailMeshes[i][2],
-                        TriCount = param.detailMeshes[i][3]
+                        TriBase = param.DetailMeshes[i].TriBase,
+                        TriCount = param.DetailMeshes[i].TriCount,
                     };
                     // Copy vertices except the first 'nv' verts which are equal to nav poly verts.
                     if (ndv - nv != 0)
                     {
-                        var verts = param.detailVerts.Skip(vb + nv).Take(ndv - nv);
+                        var verts = param.DetailVerts.Skip(vb + nv).Take(ndv - nv);
                         data.NavDVerts.AddRange(verts);
                     }
                     data.NavDMeshes.Add(dtl);
                 }
                 // Store triangles.
-                data.NavDTris.AddRange(param.detailTris);
+                data.NavDTris.AddRange(param.DetailTris);
             }
             else
             {
                 // Create dummy detail mesh by triangulating polys.
                 int tbase = 0;
-                for (int i = 0; i < param.polyCount; ++i)
+                for (int i = 0; i < param.PolyCount; ++i)
                 {
                     int nv = data.NavPolys[i].VertCount;
                     PolyDetail dtl = new PolyDetail
@@ -1041,16 +1043,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     // Triangulate polygon (local indices).
                     for (int j = 2; j < nv; ++j)
                     {
-                        var t = new Int4
+                        var t = new PolyMeshTriangleIndices
                         {
-                            X = 0,
-                            Y = (j - 1),
-                            Z = j,
+                            Point1 = 0,
+                            Point2 = j - 1,
+                            Point3 = j,
                             // Bit for each edge that belongs to poly boundary.
-                            W = (1 << 2)
+                            Flags = (1 << 2)
                         };
-                        if (j == 2) t.W |= (1 << 0);
-                        if (j == nv - 1) t.W |= (1 << 4);
+                        if (j == 2) t.Flags |= (1 << 0);
+                        if (j == nv - 1) t.Flags |= (1 << 4);
                         tbase++;
 
                         data.NavDTris.Add(t);
@@ -1060,7 +1062,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             // Store and create BVtree.
-            if (param.buildBvTree)
+            if (param.BuildBvTree)
             {
                 CreateBVTree(param, out var nodes);
 
@@ -1069,7 +1071,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             // Store Off-Mesh connections.
             n = 0;
-            for (int i = 0; i < param.offMeshConCount; ++i)
+            for (int i = 0; i < param.OffMeshConCount; ++i)
             {
                 // Only store connections which start from this tile.
                 if (offMeshConClass[i].X == 0xff)
@@ -1078,12 +1080,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     var con = new OffMeshConnection
                     {
                         Poly = offMeshPolyBase + n,
-                        Rad = param.offMeshCon[i].Radius,
-                        Flags = param.offMeshCon[i].Direction != 0 ? DT_OFFMESH_CON_BIDIR : 0,
+                        Rad = param.OffMeshCon[i].Radius,
+                        Flags = param.OffMeshCon[i].Direction != 0 ? DT_OFFMESH_CON_BIDIR : 0,
                         Side = offMeshConClass[i].Y,
-                        Start = param.offMeshCon[i].Start,
-                        End = param.offMeshCon[i].End,
-                        UserId = param.offMeshCon[i].Id,
+                        Start = param.OffMeshCon[i].Start,
+                        End = param.OffMeshCon[i].End,
+                        UserId = param.OffMeshCon[i].Id,
                     };
 
                     data.OffMeshCons.Add(con);
@@ -1212,16 +1214,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             tile.Links[link].Next = tile.LinksFreeList;
             tile.LinksFreeList = link;
-        }
-        /// <summary>
-        /// Get flags for edge in detail triangle.
-        /// </summary>
-        /// <param name="triFlags">The flags for the triangle (last component of detail vertices above).</param>
-        /// <param name="edgeIndex">The index of the first vertex of the edge. For instance, if 0, returns flags for edge AB.</param>
-        /// <returns></returns>
-        public static DetailTriEdgeFlagTypes GetDetailTriEdgeFlags(DetailTriEdgeFlagTypes triFlags, int edgeIndex)
-        {
-            return (DetailTriEdgeFlagTypes)(((int)triFlags >> (edgeIndex * 2)) & 0x3);
         }
 
         #endregion

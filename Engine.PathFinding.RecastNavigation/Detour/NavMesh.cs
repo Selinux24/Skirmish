@@ -175,23 +175,23 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 Polys = pmesh.Polys,
                 PolyAreas = pmesh.Areas,
                 PolyFlags = pmesh.Flags,
-                polyCount = pmesh.NPolys,
-                nvp = pmesh.NVP,
-                detailMeshes = dmesh.meshes,
-                detailVerts = dmesh.verts,
-                detailVertsCount = dmesh.nverts,
-                detailTris = dmesh.tris,
-                detailTriCount = dmesh.ntris,
-                offMeshCon = geometry.GetConnections()?.ToArray(),
-                offMeshConCount = geometry.GetConnectionCount(),
-                walkableHeight = agent.Height,
-                walkableRadius = agent.Radius,
-                walkableClimb = agent.MaxClimb,
-                bmin = pmesh.BMin,
-                bmax = pmesh.BMax,
-                cs = cfg.CellSize,
-                ch = cfg.CellHeight,
-                buildBvTree = true
+                PolyCount = pmesh.NPolys,
+                Nvp = pmesh.NVP,
+                DetailMeshes = dmesh.Meshes.ToArray(),
+                DetailVerts = dmesh.Verts.ToArray(),
+                DetailVertsCount = dmesh.Verts.Count,
+                DetailTris = dmesh.Tris.ToArray(),
+                DetailTriCount = dmesh.Tris.Count,
+                OffMeshCon = geometry.GetConnections()?.ToArray(),
+                OffMeshConCount = geometry.GetConnectionCount(),
+                WalkableHeight = agent.Height,
+                WalkableRadius = agent.Radius,
+                WalkableClimb = agent.MaxClimb,
+                BMin = pmesh.BMin,
+                BMax = pmesh.BMax,
+                CS = cfg.CellSize,
+                CH = cfg.CellHeight,
+                BuildBvTree = true
             };
 
             if (!DetourUtils.CreateNavMeshData(param, out MeshData navData))
@@ -757,26 +757,26 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     Polys = pmesh.Polys,
                     PolyAreas = pmesh.Areas,
                     PolyFlags = pmesh.Flags,
-                    polyCount = pmesh.NPolys,
-                    nvp = pmesh.NVP,
-                    detailMeshes = dmesh.meshes,
-                    detailVerts = dmesh.verts,
-                    detailVertsCount = dmesh.nverts,
-                    detailTris = dmesh.tris,
-                    detailTriCount = dmesh.ntris,
-                    offMeshCon = geometry.GetConnections().ToArray(),
-                    offMeshConCount = geometry.GetConnectionCount(),
-                    walkableHeight = agent.Height,
-                    walkableRadius = agent.Radius,
-                    walkableClimb = agent.MaxClimb,
-                    tileX = x,
-                    tileY = y,
-                    tileLayer = 0,
-                    bmin = pmesh.BMin,
-                    bmax = pmesh.BMax,
-                    cs = cfg.CellSize,
-                    ch = cfg.CellHeight,
-                    buildBvTree = true
+                    PolyCount = pmesh.NPolys,
+                    Nvp = pmesh.NVP,
+                    DetailMeshes = dmesh.Meshes.ToArray(),
+                    DetailVerts = dmesh.Verts.ToArray(),
+                    DetailVertsCount = dmesh.Verts.Count,
+                    DetailTris = dmesh.Tris.ToArray(),
+                    DetailTriCount = dmesh.Tris.Count,
+                    OffMeshCon = geometry.GetConnections().ToArray(),
+                    OffMeshConCount = geometry.GetConnectionCount(),
+                    WalkableHeight = agent.Height,
+                    WalkableRadius = agent.Radius,
+                    WalkableClimb = agent.MaxClimb,
+                    TileX = x,
+                    TileY = y,
+                    TileLayer = 0,
+                    BMin = pmesh.BMin,
+                    BMax = pmesh.BMax,
+                    CS = cfg.CellSize,
+                    CH = cfg.CellHeight,
+                    BuildBvTree = true
                 };
 
                 if (!DetourUtils.CreateNavMeshData(param, out MeshData navData))
@@ -1981,18 +1981,18 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 var tris = tile.DetailTris[pd.TriBase + i];
 
-                if (onlyBoundary && (tris.W & ANY_BOUNDARY_EDGE) == 0)
+                if (onlyBoundary && (tris.Flags & ANY_BOUNDARY_EDGE) == 0)
                 {
                     continue;
                 }
 
-                Vector3[] v = tile.GetDetailTri(poly, pd.VertBase, tris);
+                Triangle v = tile.GetDetailTri(poly, pd.VertBase, tris);
 
                 for (int k = 0, j = 2; k < 3; j = k++)
                 {
-                    var edgeFlags = DetourUtils.GetDetailTriEdgeFlags((DetailTriEdgeFlagTypes)tris.W, j);
+                    var edgeFlags = tris.GetDetailTriEdgeFlags(j);
 
-                    if ((edgeFlags & DetailTriEdgeFlagTypes.Boundary) == 0 &&
+                    if ((edgeFlags.HasFlag(DetailTriEdgeFlagTypes.Boundary)) &&
                         (onlyBoundary || tris[j] < tris[k]))
                     {
                         // Only looking at boundary edges and this is internal, or
