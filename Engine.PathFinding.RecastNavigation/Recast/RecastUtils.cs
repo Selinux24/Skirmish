@@ -6633,7 +6633,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return true;
         }
-        private static void SeedArrayWithPolyCenter(CompactHeightfield chf, IndexedPolygon poly, int npoly, Int3[] verts, int bs, HeightPatch hp, List<int> array)
+        private static void SeedArrayWithPolyCenter(CompactHeightfield chf, IndexedPolygon poly, int npoly, Int3[] verts, int bs, HeightPatch hp, List<HeightDataItem> array)
         {
             // Note: Reads to the compact heightfield are offset by border size (bs)
             // since border size offset is already removed from the polymesh vertices.
@@ -6677,19 +6677,22 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             // Find center of the polygon
             int pcx = 0, pcy = 0;
-            for (int j = 0; j < npoly; ++j)
+            for (int j = 0; j < npoly; j++)
             {
-                pcx += verts[poly[j]][0];
-                pcy += verts[poly[j]][2];
+                pcx += verts[poly[j]].X;
+                pcy += verts[poly[j]].Z;
             }
             pcx /= npoly;
             pcy /= npoly;
 
             // Use seeds array as a stack for DFS
             array.Clear();
-            array.Add(startCellX);
-            array.Add(startCellY);
-            array.Add(startSpanIndex);
+            array.Add(new HeightDataItem
+            {
+                X = startCellX,
+                Y = startCellY,
+                I = startSpanIndex
+            });
 
             int[] dirs = { 0, 1, 2, 3 };
             hp.Data = Helper.CreateArray(hp.Width * hp.Height, 0);
@@ -6697,20 +6700,18 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             // directly towards the center without recording intermediate nodes, even though the polygons
             // are convex. In very rare we can get stuck due to contour simplification if we do not
             // record nodes.
-            int cx = -1, cy = -1, ci = -1;
+            HeightDataItem hdItem = new HeightDataItem();
             while (true)
             {
-                if (array.Count < 3)
+                if (array.Count < 1)
                 {
                     Console.WriteLine("Walk towards polygon center failed to reach center");
                     break;
                 }
 
-                ci = array.Pop();
-                cy = array.Pop();
-                cx = array.Pop();
+                hdItem = array.Pop();
 
-                if (cx == pcx && cy == pcy)
+                if (hdItem.X == pcx && hdItem.Y == pcy)
                 {
                     break;
                 }
@@ -6719,19 +6720,19 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 // directly towards the center in the Y-axis; otherwise prefer
                 // direction in the X-axis
                 int directDir;
-                if (cx == pcx)
+                if (hdItem.X == pcx)
                 {
-                    directDir = GetDirForOffset(0, pcy > cy ? 1 : -1);
+                    directDir = GetDirForOffset(0, pcy > hdItem.Y ? 1 : -1);
                 }
                 else
                 {
-                    directDir = GetDirForOffset(pcx > cx ? 1 : -1, 0);
+                    directDir = GetDirForOffset(pcx > hdItem.X ? 1 : -1, 0);
                 }
 
                 // Push the direct dir last so we start with this on next iteration
                 Helper.Swap(ref dirs[directDir], ref dirs[3]);
 
-                var cs = chf.Spans[ci];
+                var cs = chf.Spans[hdItem.I];
                 for (int i = 0; i < 4; i++)
                 {
                     int dir = dirs[i];
@@ -6740,8 +6741,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         continue;
                     }
 
-                    int newX = cx + GetDirOffsetX(dir);
-                    int newY = cy + GetDirOffsetY(dir);
+                    int newX = hdItem.X + GetDirOffsetX(dir);
+                    int newY = hdItem.Y + GetDirOffsetY(dir);
 
                     int hpx = newX - hp.Xmin;
                     int hpy = newY - hp.Ymin;
@@ -6756,36 +6757,54 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     }
 
                     hp.Data[hpx + hpy * hp.Width] = 1;
-                    array.Add(newX);
-                    array.Add(newY);
-                    array.Add(chf.Cells[(newX + bs) + (newY + bs) * chf.Width].Index + GetCon(cs, dir));
+                    int index = chf.Cells[(newX + bs) + (newY + bs) * chf.Width].Index + GetCon(cs, dir);
+                    array.Add(new HeightDataItem
+                    {
+                        X = newX,
+                        Y = newY,
+                        I = index
+                    });
                 }
 
                 Helper.Swap(ref dirs[directDir], ref dirs[3]);
             }
-
             array.Clear();
             // getHeightData seeds are given in coordinates with borders
-            array.Add(cx + bs);
-            array.Add(cy + bs);
-            array.Add(ci);
+            array.Add(new HeightDataItem
+            {
+                X = hdItem.X + bs,
+                Y = hdItem.Y + bs,
+                I = hdItem.I,
+            });
 
             hp.Data = Helper.CreateArray(hp.Width * hp.Height, 0xff);
-            var chs = chf.Spans[ci];
-            hp.Data[cx - hp.Xmin + (cy - hp.Ymin) * hp.Width] = chs.Y;
+            var chs = chf.Spans[hdItem.I];
+            hp.Data[hdItem.X - hp.Xmin + (hdItem.Y - hp.Ymin) * hp.Width] = chs.Y;
         }
-        public static void Push3(List<int> queue, int v1, int v2, int v3)
-        {
-            queue.Add(v1);
-            queue.Add(v2);
-            queue.Add(v3);
-        }
-        private static void GetHeightData(CompactHeightfield chf, IndexedPolygon poly, int npoly, Int3[] verts, int bs, HeightPatch hp, List<int> queue, int region)
-        {
-            // Note: Reads to the compact heightfield are offset by border size (bs)
-            // since border size offset is already removed from the polymesh vertices.
 
-            queue.Clear();
+        class HeightDataItem
+        {
+            public int X { get; set; } = -1;
+            public int Y { get; set; } = -1;
+            public int I { get; set; } = -1;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="chf"></param>
+        /// <param name="poly"></param>
+        /// <param name="npoly"></param>
+        /// <param name="verts"></param>
+        /// <param name="bs"></param>
+        /// <param name="hp"></param>
+        /// <param name="region"></param>
+        /// <remarks>Reads to the compact heightfield are offset by border size (bs)
+        /// since border size offset is already removed from the polymesh vertices.</remarks>
+        private static void GetHeightData(CompactHeightfield chf, IndexedPolygon poly, int npoly, Int3[] verts, int bs, HeightPatch hp, int region)
+        {
+            List<HeightDataItem> queue = new List<HeightDataItem>(512);
+
             // Set all heights to RC_UNSET_HEIGHT.
             hp.Data = Helper.CreateArray(hp.Width * hp.Height, RC_UNSET_HEIGHT);
 
@@ -6834,7 +6853,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                                 }
                                 if (border)
                                 {
-                                    Push3(queue, x, y, i);
+                                    queue.Add(new HeightDataItem
+                                    {
+                                        X = x,
+                                        Y = y,
+                                        I = i
+                                    });
                                 }
                                 break;
                             }
@@ -6857,32 +6881,30 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             // We assume the seed is centered in the polygon, so a BFS to collect
             // height data will ensure we do not move onto overlapping polygons and
             // sample wrong heights.
-            while (head * 3 < queue.Count)
+            while (head < queue.Count)
             {
-                int cx = queue[head * 3 + 0];
-                int cy = queue[head * 3 + 1];
-                int ci = queue[head * 3 + 2];
+                var c = queue[head];
                 head++;
                 if (head >= RETRACT_SIZE)
                 {
                     head = 0;
-                    if (queue.Count > RETRACT_SIZE * 3)
+                    if (queue.Count > RETRACT_SIZE)
                     {
-                        queue.RemoveRange(0, RETRACT_SIZE * 3);
+                        queue.RemoveRange(0, RETRACT_SIZE);
                     }
                     queue.Clear();
                 }
 
-                var cs = chf.Spans[ci];
-                for (int dir = 0; dir < 4; ++dir)
+                var cs = chf.Spans[c.I];
+                for (int dir = 0; dir < 4; dir++)
                 {
                     if (GetCon(cs, dir) == RC_NOT_CONNECTED)
                     {
                         continue;
                     }
 
-                    int ax = cx + GetDirOffsetX(dir);
-                    int ay = cy + GetDirOffsetY(dir);
+                    int ax = c.X + GetDirOffsetX(dir);
+                    int ay = c.Y + GetDirOffsetY(dir);
                     int hx = ax - hp.Xmin - bs;
                     int hy = ay - hp.Ymin - bs;
 
@@ -6901,7 +6923,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                     hp.Data[hx + hy * hp.Width] = a.Y;
 
-                    Push3(queue, ax, ay, ai);
+                    queue.Add(new HeightDataItem { X = ax, Y = ay, I = ai });
                 }
             }
         }
@@ -6943,7 +6965,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int borderSize = mesh.BorderSize;
             int heightSearchRadius = Math.Max(1, (int)Math.Ceiling(mesh.MaxEdgeError));
 
-            List<int> arr = new List<int>(512);
             Vector3[] verts = new Vector3[256];
             HeightPatch hp = new HeightPatch();
             int nPolyVerts = 0;
@@ -7016,7 +7037,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 hp.Ymin = bounds[i].Z;
                 hp.Width = bounds[i].Y - bounds[i].X;
                 hp.Height = bounds[i].W - bounds[i].Z;
-                GetHeightData(chf, p, npoly, mesh.Verts, borderSize, hp, arr, mesh.Regs[i]);
+                GetHeightData(chf, p, npoly, mesh.Verts, borderSize, hp, mesh.Regs[i]);
 
                 // Build detail mesh.
                 if (!BuildPolyDetail(
