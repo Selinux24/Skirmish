@@ -133,6 +133,36 @@ namespace Engine
             return bbox.Maximum.Z - bbox.Minimum.Z;
         }
         /// <summary>
+        /// Gets the XY rectangle of the box
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        /// <returns>Returns the XY rectangle of the box</returns>
+        public static RectangleF GetRectangleXY(this BoundingBox bbox)
+        {
+            return new RectangleF
+            {
+                Left = bbox.Minimum.X,
+                Top = bbox.Minimum.Y,
+                Right = bbox.Maximum.X,
+                Bottom = bbox.Maximum.Y,
+            };
+        }
+        /// <summary>
+        /// Gets the XZ rectangle of the box
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        /// <returns>Returns the XZ rectangle of the box</returns>
+        public static RectangleF GetRectangleXZ(this BoundingBox bbox)
+        {
+            return new RectangleF
+            {
+                Left = bbox.Minimum.X,
+                Top = bbox.Minimum.Z,
+                Right = bbox.Maximum.X,
+                Bottom = bbox.Maximum.Z,
+            };
+        }
+        /// <summary>
         /// Gets whether almost one of the instance attributes is not a number
         /// </summary>
         /// <param name="vector">Vector</param>

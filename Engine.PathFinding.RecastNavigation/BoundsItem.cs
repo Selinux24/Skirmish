@@ -13,13 +13,9 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         public int Index;
         /// <summary>
-        /// XZ minimum bounds
+        /// Bounds
         /// </summary>
-        public Vector2 BMin;
-        /// <summary>
-        /// XZ maximum bounds
-        /// </summary>
-        public Vector2 BMax;
+        public RectangleF Bounds;
 
         /// <summary>
         /// Gets the text representation of the instance
@@ -27,7 +23,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the text representation of the instance</returns>
         public override string ToString()
         {
-            return string.Format("Index {0}; Min {1} Max {2}", Index, BMin, BMax);
+            return $"Index {Index}; Min {Bounds.TopLeft}; Max {Bounds.BottomRight};";
         }
     }
 
@@ -44,10 +40,10 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>A negative value if a is less than b; 0 if they are equal; a positive value of a is greater than b.</returns>
         public int Compare(BoundsItem x, BoundsItem y)
         {
-            if (x.BMin.X < y.BMin.X) return -1;
-            if (x.BMin.X > y.BMin.X) return 1;
-            if (x.BMax.X < y.BMax.X) return -1;
-            if (x.BMax.X > y.BMax.X) return 1;
+            if (x.Bounds.Left < y.Bounds.Left) return -1;
+            if (x.Bounds.Left > y.Bounds.Left) return 1;
+            if (x.Bounds.Right < y.Bounds.Right) return -1;
+            if (x.Bounds.Right > y.Bounds.Right) return 1;
             if (x.Index < y.Index) return -1;
             if (x.Index > y.Index) return 1;
             return 0;
@@ -67,10 +63,10 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>A negative value if a is less than b; 0 if they are equal; a positive value of a is greater than b.</returns>
         public int Compare(BoundsItem x, BoundsItem y)
         {
-            if (x.BMin.Y < y.BMin.Y) return -1;
-            if (x.BMin.Y > y.BMin.Y) return 1;
-            if (x.BMax.Y < y.BMax.Y) return -1;
-            if (x.BMax.Y > y.BMax.Y) return 1;
+            if (x.Bounds.Top < y.Bounds.Top) return -1;
+            if (x.Bounds.Top > y.Bounds.Top) return 1;
+            if (x.Bounds.Bottom < y.Bounds.Bottom) return -1;
+            if (x.Bounds.Bottom > y.Bounds.Bottom) return 1;
             if (x.Index < y.Index) return -1;
             if (x.Index > y.Index) return 1;
             return 0;

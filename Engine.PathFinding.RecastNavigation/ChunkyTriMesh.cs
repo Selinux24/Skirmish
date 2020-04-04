@@ -89,18 +89,14 @@ namespace Engine.PathFinding.RecastNavigation
             // Build tree
             List<BoundsItem> items = new List<BoundsItem>(triangles.Count());
 
-            for (int i = 0; i < triangles.Count(); i++)
+            foreach (var t in triangles)
             {
-                var t = triangles.ElementAt(i);
-
-                // Calc triangle XZ bounds.
                 var bbox = BoundingBox.FromPoints(t.GetVertices());
 
                 items.Add(new BoundsItem
                 {
-                    Index = i,
-                    BMin = bbox.Minimum.XZ(),
-                    BMax = bbox.Maximum.XZ(),
+                    Index = items.Count,
+                    Bounds = bbox.GetRectangleXZ(),
                 });
             }
 
@@ -112,6 +108,7 @@ namespace Engine.PathFinding.RecastNavigation
                 TrisPerChunk = trisPerChunk,
                 Items = items.ToArray(),
             };
+
             Subdivide(0, items.Count, data);
 
             return new ChunkyTriMesh
@@ -212,25 +209,14 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the items bounds</returns>
         private static RectangleF CalcExtends(BoundsItem[] items, int imin, int imax)
         {
-            Vector2 bmin = items[imin].BMin;
-            Vector2 bmax = items[imin].BMax;
+            var bounds = items[imin].Bounds;
 
             for (int i = imin + 1; i < imax; ++i)
             {
-                if (items[i].BMin.X < bmin.X) bmin.X = items[i].BMin.X;
-                if (items[i].BMin.Y < bmin.Y) bmin.Y = items[i].BMin.Y;
-
-                if (items[i].BMax.X > bmax.X) bmax.X = items[i].BMax.X;
-                if (items[i].BMax.Y > bmax.Y) bmax.Y = items[i].BMax.Y;
+                bounds = RectangleF.Union(bounds, items[i].Bounds);
             }
 
-            return new RectangleF()
-            {
-                Left = bmin.X,
-                Top = bmin.Y,
-                Right = bmax.X,
-                Bottom = bmax.Y,
-            };
+            return bounds;
         }
 
         /// <summary>

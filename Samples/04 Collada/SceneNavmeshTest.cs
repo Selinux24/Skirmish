@@ -46,7 +46,7 @@ namespace Collada
         {
             await base.Initialize();
 
-            GameEnvironment.Background = Color.CornflowerBlue;
+            GameEnvironment.Background = new Color4(0.09f, 0.09f, 0.09f, 1f);
 
             this.Game.VisibleMouse = true;
             this.Game.LockMouse = false;
