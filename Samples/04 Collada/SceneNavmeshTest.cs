@@ -20,6 +20,7 @@ namespace Collada
         private Player agent = null;
 
         private TextDrawer debug = null;
+        private TextDrawer help = null;
 
         private PrimitiveListDrawer<Triangle> graphDrawer = null;
         private PrimitiveListDrawer<Line3D> volumesDrawer = null;
@@ -45,6 +46,8 @@ namespace Collada
         {
             await base.Initialize();
 
+            GameEnvironment.Background = Color.CornflowerBlue;
+
             this.Game.VisibleMouse = true;
             this.Game.LockMouse = false;
             this.Camera.MovementDelta = 25f;
@@ -57,13 +60,22 @@ namespace Collada
             title.Text = "Navigation Mesh Test Scene";
             title.Position = Vector2.Zero;
 
-            var help = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            help.Text = "Camera: WASD+Mouse. B: Change Build Mode. P: Change Partition Type. (SHIFT reverse). F5: Save. F6: Load. Space: Update current tile (SHIFT remove).";
-            help.Position = new Vector2(0, 24);
-
-            this.debug = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.debug = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Green), SceneObjectUsages.UI, layerHUD);
             this.debug.Text = null;
-            this.debug.Position = new Vector2(0, 48);
+            this.debug.Position = new Vector2(0, title.Top + title.Height + 3);
+
+            this.help = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.help.Text = @"Camera: WASD+Mouse (Press right mouse in windowed mode to look). 
+B: Change Build Mode (SHIFT reverse).
+P: Change Partition Type (SHIFT reverse).
+T: Toggle using Tile Cache.
+F5: Saves the graph to a file.
+F6: Loads the graph from a file.
+Left Mouse: Update current tile (SHIFT remove).
+Middle Mouse: Finds random point around circle (5 units).
+Space: Finds random over navmesh";
+            this.help.Position = new Vector2(0, debug.Top + debug.Height + 3);
+            this.help.Visible = false;
 
             var spDesc = new SpriteDescription()
             {
@@ -123,7 +135,7 @@ namespace Collada
             nmsettings.Agents = new[] { this.agent };
 
             //Partitioning
-            nmsettings.PartitionType = SamplePartitionTypes.Watershed;
+            nmsettings.PartitionType = SamplePartitionTypes.Monotone;
 
             //Polygonization
             nmsettings.EdgeMaxError = 1.0f;
@@ -193,7 +205,7 @@ namespace Collada
         }
         public override void NavigationGraphUpdated()
         {
-            this.UpdateGraphNodes(this.agent);
+            this.DrawGraphNodes(this.agent);
         }
 
         public override void Update(GameTime gameTime)
@@ -221,11 +233,19 @@ namespace Collada
                 return;
             }
 
-            this.UpdateCamera();
-            this.UpdateGraph();
-            this.UpdateFiles();
+            bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
+
+            if (this.Game.Input.KeyJustReleased(Keys.F1))
+            {
+                this.help.Visible = !this.help.Visible;
+            }
+
+            this.UpdateCameraInput();
+            this.UpdateNavmeshInput();
+            this.UpdateGraphInput(shift);
+            this.UpdateFilesInput();
         }
-        private void UpdateCamera()
+        private void UpdateCameraInput()
         {
             bool slow = this.Game.Input.KeyPressed(Keys.LShiftKey);
 
@@ -264,12 +284,9 @@ namespace Collada
                 this.Game.Input.MouseYDelta);
 #endif
         }
-        private void UpdateGraph()
+        private void UpdateNavmeshInput()
         {
-            bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
-            bool ctrl = this.Game.Input.KeyPressed(Keys.LControlKey);
-
-            if (this.Game.Input.LeftMouseButtonJustReleased)
+            if (this.Game.Input.MiddleMouseButtonJustReleased)
             {
                 var pRay = this.GetPickingRay();
                 var rayPParams = RayPickingParams.FacingOnly | RayPickingParams.Perfect;
@@ -279,24 +296,16 @@ namespace Collada
                     DrawPoint(r.Position, 0.25f, Color.Red);
                     DrawTriangle(r.Item, Color.White);
 
-                    if (ctrl)
+                    float radius = 5;
+
+                    DrawCircle(r.Position, radius, Color.Orange);
+
+                    var pt = this.NavigationGraph.FindRandomPoint(agent, r.Position, radius);
+                    if (pt.HasValue)
                     {
-                        float radius = 5;
-
-                        DrawCircle(r.Position, radius, Color.Orange);
-
-                        var pt = this.NavigationGraph.FindRandomPoint(agent, r.Position, radius);
-                        if (pt.HasValue)
-                        {
-                            float dist = Vector3.Distance(r.Position, pt.Value);
-                            Color color = dist < radius ? Color.LightGreen : Color.Pink;
-                            DrawPoint(pt.Value, 2.5f, color);
-                        }
-                    }
-                    else
-                    {
-
-                        BuildTile(shift, r.Position);
+                        float dist = Vector3.Distance(r.Position, pt.Value);
+                        Color color = dist < radius ? Color.LightGreen : Color.Pink;
+                        DrawPoint(pt.Value, 2.5f, color);
                     }
                 }
             }
@@ -309,8 +318,24 @@ namespace Collada
                     DrawPoint(pt.Value, 2.5f, Color.LightGreen);
                 }
             }
-
+        }
+        private void UpdateGraphInput(bool shift)
+        {
             bool updateGraph = false;
+
+            if (this.Game.Input.LeftMouseButtonJustReleased)
+            {
+                var pRay = this.GetPickingRay();
+                var rayPParams = RayPickingParams.FacingOnly | RayPickingParams.Perfect;
+
+                if (this.PickNearest(pRay, rayPParams, out PickingResult<Triangle> r))
+                {
+                    DrawPoint(r.Position, 0.25f, Color.Red);
+                    DrawTriangle(r.Item, Color.White);
+
+                    BuildTile(shift, r.Position);
+                }
+            }
 
             if (this.Game.Input.KeyJustReleased(Keys.B))
             {
@@ -342,6 +367,13 @@ namespace Collada
                 updateGraph = true;
             }
 
+            if (this.Game.Input.KeyJustReleased(Keys.T))
+            {
+                nmsettings.UseTileCache = !nmsettings.UseTileCache;
+
+                updateGraph = true;
+            }
+
             if (updateGraph)
             {
                 _ = this.UpdateNavigationGraph();
@@ -349,6 +381,36 @@ namespace Collada
 
             this.debug.Text = string.Format("Build Mode: {0}; Partition Type: {1}; Build Time: {2:0.00000} seconds", nmsettings.BuildMode, nmsettings.PartitionType, lastElapsedSeconds);
         }
+        private void UpdateFilesInput()
+        {
+            if (this.Game.Input.KeyJustReleased(Keys.F5))
+            {
+                using (var dlg = new System.Windows.Forms.SaveFileDialog())
+                {
+                    dlg.FileName = @"test.grf";
+
+                    if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                    {
+                        Task.Run(() => this.PathFinderDescription.Save(dlg.FileName, this.NavigationGraph));
+                    }
+                }
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F6))
+            {
+                using (var dlg = new System.Windows.Forms.OpenFileDialog())
+                {
+                    dlg.FileName = @"test.grf";
+
+                    if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                    {
+                        var graphTask = Task.Run(() => this.PathFinderDescription.Load(dlg.FileName));
+                        this.SetNavigationGraph(graphTask.Result);
+                    }
+                }
+            }
+        }
+
         private void DrawPoint(Vector3 position, float size, Color color)
         {
             var cross = Line3D.CreateCross(position, size);
@@ -364,6 +426,20 @@ namespace Collada
             var circle = Line3D.CreateCircle(position, radius, 12);
             this.volumesDrawer.SetPrimitives(color, circle);
         }
+        private void DrawGraphNodes(AgentType agent)
+        {
+            var nodes = this.GetNodes(agent).OfType<GraphNode>();
+            if (nodes.Any())
+            {
+                this.graphDrawer.Clear();
+
+                foreach (var node in nodes)
+                {
+                    this.graphDrawer.AddPrimitives(node.Color, node.Triangles);
+                }
+            }
+        }
+
         private void BuildTile(bool shift, Vector3 tilePosition)
         {
             this.graphDrawer.Clear();
@@ -380,32 +456,6 @@ namespace Collada
             }
             sw.Stop();
             lastElapsedSeconds = sw.ElapsedMilliseconds / 1000.0f;
-        }
-        private void UpdateGraphNodes(AgentType agent)
-        {
-            var nodes = this.GetNodes(agent).OfType<GraphNode>();
-            if (nodes.Any())
-            {
-                this.graphDrawer.Clear();
-
-                foreach (var node in nodes)
-                {
-                    this.graphDrawer.AddPrimitives(node.Color, node.Triangles);
-                }
-            }
-        }
-        private void UpdateFiles()
-        {
-            if (this.Game.Input.KeyJustReleased(Keys.F5))
-            {
-                Task.Run(() => this.PathFinderDescription.Save(@"test.grf", this.NavigationGraph));
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F6))
-            {
-                var graphTask = Task.Run(() => this.PathFinderDescription.Load(@"test.grf"));
-                this.SetNavigationGraph(graphTask.Result);
-            }
         }
     }
 }

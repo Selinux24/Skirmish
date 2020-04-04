@@ -15,14 +15,13 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="amin">A minimum rectangle point</param>
         /// <param name="amax">A maximum rectangle point</param>
-        /// <param name="bmin">B minimum rectangle point</param>
-        /// <param name="bmax">B maximum rectangle point</param>
+        /// <param name="bounds">Bounds</param>
         /// <returns>Returns true if rectangles overlap</returns>
-        private static bool CheckOverlapRect(Vector2 amin, Vector2 amax, Vector2 bmin, Vector2 bmax)
+        private static bool CheckOverlapRect(Vector2 amin, Vector2 amax, RectangleF bounds)
         {
             bool overlap =
-                !(amin.X > bmax.X || amax.X < bmin.X) &&
-                !(amin.Y > bmax.Y || amax.Y < bmin.Y);
+                !(amin.X > bounds.BottomRight.X || amax.X < bounds.TopLeft.X) &&
+                !(amin.Y > bounds.BottomRight.Y || amax.Y < bounds.TopLeft.Y);
 
             return overlap;
         }
@@ -37,43 +36,41 @@ namespace Engine.PathFinding.RecastNavigation
         private static readonly BoundsItemComparerY yComparer = new BoundsItemComparerY();
 
         /// <summary>
-        /// Triangle list
+        /// Subdivision data
         /// </summary>
-        public Triangle[] Triangles { get; set; }
-        /// <summary>
-        /// Maximum number of triangles per chunk
-        /// </summary>
-        public int MaxTrisPerChunk { get; set; }
-        /// <summary>
-        /// Chunk nodes
-        /// </summary>
-        public ChunkyTriMeshNode[] Nodes { get; set; }
-        /// <summary>
-        /// Node count
-        /// </summary>
-        public int NNodes { get; set; }
-        /// <summary>
-        /// Chunk triangle indices
-        /// </summary>
-        public int[] Tris { get; set; }
-        /// <summary>
-        /// Triangle index count
-        /// </summary>
-        public int NTris { get; set; }
-
-        /// <summary>
-        /// Builds a chunky mesh
-        /// </summary>
-        /// <param name="triangles">Triangle list</param>
-        /// <returns>Returns the new chunky mesh</returns>
-        public static ChunkyTriMesh Build(IEnumerable<Triangle> triangles)
+        class SubdivideData
         {
-            if (triangles.Any() && CreateChunkyTriMesh(triangles, 256, out ChunkyTriMesh chunkyMesh))
-            {
-                return chunkyMesh;
-            }
-
-            return null;
+            public BoundsItem[] Items { get; set; }
+            /// <summary>
+            /// Max nodes
+            /// </summary>
+            public int MaxNodes { get; set; }
+            /// <summary>
+            /// Node list
+            /// </summary>
+            public List<ChunkyTriMeshNode> Nodes { get; set; } = new List<ChunkyTriMeshNode>();
+            /// <summary>
+            /// Indexed triangle list
+            /// </summary>
+            public List<int> OutTris { get; set; } = new List<int>();
+            /// <summary>
+            /// Tirangles per chunk
+            /// </summary>
+            public int TrisPerChunk { get; set; }
+        }
+        /// <summary>
+        /// Axis
+        /// </summary>
+        enum Axis
+        {
+            /// <summary>
+            /// X Axis
+            /// </summary>
+            X,
+            /// <summary>
+            /// Y Axis
+            /// </summary>
+            Y,
         }
 
         /// <summary>
@@ -81,155 +78,130 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="triangles">Triangles</param>
         /// <param name="trisPerChunk">Triangles per chunk</param>
-        /// <param name="cm">The resulting chunky mesh</param>
-        /// <returns>Returns true if the chunky mesh were correctly created</returns>
-        private static bool CreateChunkyTriMesh(IEnumerable<Triangle> triangles, int trisPerChunk, out ChunkyTriMesh cm)
+        /// <returns>The resulting chunky mesh</returns>
+        public static ChunkyTriMesh Build(IEnumerable<Triangle> triangles, int trisPerChunk = 256)
         {
-            Triangle[] tris = triangles.ToArray();
-            int ntris = tris.Count();
-            int nchunks = (ntris + trisPerChunk - 1) / trisPerChunk;
-
-            cm = new ChunkyTriMesh
+            if (triangles?.Any() != true)
             {
-                Triangles = tris,
-                Nodes = new ChunkyTriMeshNode[nchunks * 4],
-                Tris = new int[ntris],
-                NTris = ntris,
-            };
+                return null;
+            }
 
             // Build tree
-            BoundsItem[] items = new BoundsItem[ntris];
+            List<BoundsItem> items = new List<BoundsItem>(triangles.Count());
 
-            for (int i = 0; i < ntris; i++)
+            for (int i = 0; i < triangles.Count(); i++)
             {
-                var t = tris[i];
+                var t = triangles.ElementAt(i);
 
                 // Calc triangle XZ bounds.
                 var bbox = BoundingBox.FromPoints(t.GetVertices());
 
-                items[i].i = i;
-                items[i].bmin = new Vector2(bbox.Minimum.X, bbox.Minimum.Z);
-                items[i].bmax = new Vector2(bbox.Maximum.X, bbox.Maximum.Z);
-            }
-
-            int curNode = 0;
-            int curTri = 0;
-            Subdivide(
-                items,
-                0, ntris, trisPerChunk,
-                ref curNode, cm.Nodes, nchunks * 4,
-                ref curTri, cm.Tris, tris);
-
-            cm.NNodes = curNode;
-
-            // Calc max tris per node.
-            cm.MaxTrisPerChunk = 0;
-            for (int i = 0; i < cm.NNodes; ++i)
-            {
-                var node = cm.Nodes[i];
-
-                bool isLeaf = node.I >= 0;
-                if (!isLeaf) continue;
-                if (node.N > cm.MaxTrisPerChunk)
+                items.Add(new BoundsItem
                 {
-                    cm.MaxTrisPerChunk = node.N;
-                }
+                    Index = i,
+                    BMin = bbox.Minimum.XZ(),
+                    BMax = bbox.Maximum.XZ(),
+                });
             }
 
-            return true;
+            int maxNodes = (triangles.Count() + trisPerChunk - 1) / trisPerChunk * 4;
+
+            SubdivideData data = new SubdivideData
+            {
+                MaxNodes = maxNodes,
+                TrisPerChunk = trisPerChunk,
+                Items = items.ToArray(),
+            };
+            Subdivide(0, items.Count, data);
+
+            return new ChunkyTriMesh
+            {
+                triangles = triangles.ToArray(),
+                nodes = data.Nodes.ToArray(),
+                triangleIndices = data.OutTris.ToArray()
+            };
         }
         /// <summary>
         /// Subdivide items
         /// </summary>
-        /// <param name="items">Item list</param>
         /// <param name="imin">Minimum index</param>
         /// <param name="imax">Maximum index</param>
-        /// <param name="trisPerChunk">Triangles per chunk</param>
-        /// <param name="curNode">Current node</param>
-        /// <param name="nodes">Node list</param>
-        /// <param name="maxNodes">Maximum node count</param>
-        /// <param name="curTri">Current triangle index</param>
-        /// <param name="outTris">Resulting triangle index list</param>
-        /// <param name="inTris">Resulting triangle list</param>
-        private static void Subdivide(
-            BoundsItem[] items, int imin, int imax, int trisPerChunk,
-            ref int curNode, ChunkyTriMeshNode[] nodes, int maxNodes,
-            ref int curTri, int[] outTris, Triangle[] inTris)
+        /// <param name="data">Mesh data</param>
+        private static void Subdivide(int imin, int imax, SubdivideData data)
         {
             int inum = imax - imin;
-            int icur = curNode;
+            int icur = data.Nodes.Count;
 
-            if (curNode > maxNodes)
+            if (data.Nodes.Count > data.MaxNodes)
             {
                 return;
             }
 
-            int iNode = curNode++;
+            var bounds = CalcExtends(data.Items, imin, imax);
 
-            CalcExtends(items, imin, imax, out Vector2 bmin, out Vector2 bmax);
+            ChunkyTriMeshNode node = new ChunkyTriMeshNode
+            {
+                Bounds = bounds,
+            };
 
-            nodes[iNode].Bmin = bmin;
-            nodes[iNode].Bmax = bmax;
+            data.Nodes.Add(node);
 
-            if (inum <= trisPerChunk)
+            if (inum <= data.TrisPerChunk)
             {
                 // Leaf
 
                 // Copy triangles.
-                nodes[iNode].I = curTri;
-                nodes[iNode].N = inum;
+                node.Index = data.OutTris.Count;
+                node.Count = inum;
 
                 for (int i = imin; i < imax; ++i)
                 {
-                    outTris[curTri] = items[i].i;
-                    curTri++;
+                    data.OutTris.Add(data.Items[i].Index);
                 }
             }
             else
             {
                 // Split
-
-                int axis = LongestAxis(bmax.X - bmin.X, bmax.Y - bmin.Y);
-                if (axis == 0)
+                Axis axis = LongestAxis(bounds);
+                if (axis == Axis.X)
                 {
                     // Sort along x-axis
-                    Array.Sort(items, imin, inum, xComparer);
+                    Array.Sort(data.Items, imin, inum, xComparer);
                 }
-                else if (axis == 1)
+                else if (axis == Axis.Y)
                 {
                     // Sort along y-axis
-                    Array.Sort(items, imin, inum, yComparer);
+                    Array.Sort(data.Items, imin, inum, yComparer);
                 }
 
                 int isplit = imin + inum / 2;
 
                 // Left
-                Subdivide(
-                    items, imin, isplit, trisPerChunk,
-                    ref curNode, nodes, maxNodes,
-                    ref curTri, outTris, inTris);
+                Subdivide(imin, isplit, data);
 
                 // Right
-                Subdivide(
-                    items, isplit, imax, trisPerChunk,
-                    ref curNode, nodes, maxNodes,
-                    ref curTri, outTris, inTris);
+                Subdivide(isplit, imax, data);
 
-                int iescape = curNode - icur;
+                int iescape = data.Nodes.Count - icur;
 
                 // Negative index means escape.
-                nodes[iNode].I = -iescape;
+                node.Index = -iescape;
             }
         }
         /// <summary>
         /// Gets the longest axis
         /// </summary>
-        /// <param name="x">X magnitude</param>
-        /// <param name="y">Y magnitude</param>
-        /// <returns>Returns 0 if X is the longest axis, 1 otherwise</returns>
-        private static int LongestAxis(float x, float y)
+        /// <param name="bounds">Bounds</param>
+        /// <returns>Returns the longest axis</returns>
+        private static Axis LongestAxis(RectangleF bounds)
         {
-            return y > x ? 1 : 0;
+            Vector2 bmin = bounds.TopLeft;
+            Vector2 bmax = bounds.BottomRight;
+
+            float x = bmax.X - bmin.X;
+            float y = bmax.Y - bmin.Y;
+
+            return y > x ? Axis.Y : Axis.X;
         }
         /// <summary>
         /// Gets the extents of the specified item list
@@ -237,56 +209,80 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="items">Item list</param>
         /// <param name="imin">Minimum index</param>
         /// <param name="imax">Maximum index</param>
-        /// <param name="bmin">Resulting minimum extent</param>
-        /// <param name="bmax">Resulting maxumum extent</param>
-        private static void CalcExtends(BoundsItem[] items, int imin, int imax, out Vector2 bmin, out Vector2 bmax)
+        /// <returns>Returns the items bounds</returns>
+        private static RectangleF CalcExtends(BoundsItem[] items, int imin, int imax)
         {
-            bmin.X = items[imin].bmin.X;
-            bmin.Y = items[imin].bmin.Y;
-
-            bmax.X = items[imin].bmax.X;
-            bmax.Y = items[imin].bmax.Y;
+            Vector2 bmin = items[imin].BMin;
+            Vector2 bmax = items[imin].BMax;
 
             for (int i = imin + 1; i < imax; ++i)
             {
-                if (items[i].bmin.X < bmin.X) bmin.X = items[i].bmin.X;
-                if (items[i].bmin.Y < bmin.Y) bmin.Y = items[i].bmin.Y;
+                if (items[i].BMin.X < bmin.X) bmin.X = items[i].BMin.X;
+                if (items[i].BMin.Y < bmin.Y) bmin.Y = items[i].BMin.Y;
 
-                if (items[i].bmax.X > bmax.X) bmax.X = items[i].bmax.X;
-                if (items[i].bmax.Y > bmax.Y) bmax.Y = items[i].bmax.Y;
+                if (items[i].BMax.X > bmax.X) bmax.X = items[i].BMax.X;
+                if (items[i].BMax.Y > bmax.Y) bmax.Y = items[i].BMax.Y;
             }
+
+            return new RectangleF()
+            {
+                Left = bmin.X,
+                Top = bmin.Y,
+                Right = bmax.X,
+                Bottom = bmax.Y,
+            };
         }
 
+        /// <summary>
+        /// Triangle list
+        /// </summary>
+        private IEnumerable<Triangle> triangles;
+        /// <summary>
+        /// Chunk triangle indices
+        /// </summary>
+        private IEnumerable<int> triangleIndices;
+        /// <summary>
+        /// Chunk nodes
+        /// </summary>
+        private ChunkyTriMeshNode[] nodes;
+
+        /// <summary>
+        /// Gets all the triangles in the mesh
+        /// </summary>
+        /// <returns>Returns the triangle list</returns>
+        public IEnumerable<Triangle> GetTriangles()
+        {
+            return triangles?.ToArray() ?? new Triangle[] { };
+        }
         /// <summary>
         /// Gets the triangles in the specified node
         /// </summary>
         /// <param name="index">Node index</param>
         /// <returns>Returns the triangles in the specified node</returns>
-        public Triangle[] GetTriangles(int index)
+        public IEnumerable<Triangle> GetTriangles(int index)
         {
-            return GetTriangles(this.Nodes[index]);
+            return GetTriangles(this.nodes[index]);
         }
         /// <summary>
         /// Gets the triangles in the specified node
         /// </summary>
         /// <param name="node">Node</param>
         /// <returns>Returns the triangles in the specified node</returns>
-        public Triangle[] GetTriangles(ChunkyTriMeshNode node)
+        public IEnumerable<Triangle> GetTriangles(ChunkyTriMeshNode node)
         {
-            if (node.I >= 0)
-            {
-                int[] indices = new int[node.N];
-                Array.Copy(Tris.ToArray(), node.I, indices, 0, node.N);
+            List<Triangle> res = new List<Triangle>();
 
-                Triangle[] res = new Triangle[node.N];
-                for (int i = 0; i < node.N; i++)
+            if (node.Index >= 0)
+            {
+                var indices = triangleIndices.Skip(node.Index).Take(node.Count);
+
+                foreach (var index in indices)
                 {
-                    res[i] = Triangles[indices[i]];
+                    res.Add(triangles.ElementAt(index));
                 }
-                return res;
             }
 
-            return new Triangle[] { };
+            return res;
         }
 
         /// <summary>
@@ -301,11 +297,11 @@ namespace Engine.PathFinding.RecastNavigation
 
             // Traverse tree
             int i = 0;
-            while (i < NNodes)
+            while (i < nodes.Length)
             {
-                var node = Nodes[i];
-                bool overlap = CheckOverlapRect(bmin, bmax, node.Bmin, node.Bmax);
-                bool isLeafNode = node.I >= 0;
+                var node = nodes[i];
+                bool overlap = CheckOverlapRect(bmin, bmax, node.Bounds);
+                bool isLeafNode = node.Index >= 0;
 
                 if (isLeafNode && overlap)
                 {
@@ -318,7 +314,7 @@ namespace Engine.PathFinding.RecastNavigation
                 }
                 else
                 {
-                    int escapeIndex = -node.I;
+                    int escapeIndex = -node.Index;
                     i += escapeIndex;
                 }
             }

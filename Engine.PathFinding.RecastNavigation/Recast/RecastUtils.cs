@@ -108,26 +108,29 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 spans = new Span[width * height],
             };
         }
-        public static int MarkWalkableTriangles(float walkableSlopeAngle, Triangle[] tris, AreaTypes[] areas)
+        public static IEnumerable<AreaTypes> MarkWalkableTriangles(float walkableSlopeAngle, IEnumerable<Triangle> tris)
         {
+            List<AreaTypes> triareas = new List<AreaTypes>();
+
             float walkableThr = (float)Math.Cos(walkableSlopeAngle / 180.0f * MathUtil.Pi);
 
-            int count = 0;
-
-            for (int i = 0; i < tris.Length; i++)
+            for (int i = 0; i < tris.Count(); i++)
             {
-                var tri = tris[i];
+                var tri = tris.ElementAt(i);
                 Vector3 norm = tri.Normal;
 
                 // Check if the face is walkable.
                 if (norm.Y > walkableThr)
                 {
-                    areas[i] = AreaTypes.RC_WALKABLE_AREA;
-                    count++;
+                    triareas.Add(AreaTypes.RC_WALKABLE_AREA);
+                }
+                else
+                {
+                    triareas.Add(AreaTypes.RC_NULL_AREA);
                 }
             }
 
-            return count;
+            return triareas;
         }
         public static void ClearUnwalkableTriangles(float walkableSlopeAngle, Triangle[] tris, int nt, AreaTypes[] areas)
         {
@@ -2978,10 +2981,14 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
             }
         }
-        private static bool RasterizeTri(Triangle tri, AreaTypes area, Heightfield hf, BoundingBox b, float cs, float ics, float ich, int flagMergeThr)
+        public static bool RasterizeTriangle(Heightfield hf, int flagMergeThr, Triangle tri, AreaTypes area)
         {
+            float cs = hf.cs;
+            float ics = 1.0f / hf.cs;
+            float ich = 1.0f / hf.ch;
             int w = hf.width;
             int h = hf.height;
+            var b = hf.boundingBox;
             float by = b.GetY();
 
             // Calculate the bounding box of the triangle.
@@ -3069,28 +3076,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return true;
         }
-        public static bool RasterizeTriangle(Triangle tri, AreaTypes area, Heightfield solid, int flagMergeThr)
+        public static bool RasterizeTriangles(Heightfield solid, int flagMergeThr, IEnumerable<Triangle> tris, IEnumerable<AreaTypes> areas)
         {
-            float ics = 1.0f / solid.cs;
-            float ich = 1.0f / solid.ch;
-
-            if (!RasterizeTri(tri, area, solid, solid.boundingBox, solid.cs, ics, ich, flagMergeThr))
-            {
-                return false;
-            }
-
-            return true;
-        }
-        public static bool RasterizeTriangles(Heightfield solid, int flagMergeThr, Triangle[] tris, AreaTypes[] areas)
-        {
-            float ics = 1.0f / solid.cs;
-            float ich = 1.0f / solid.ch;
-
             // Rasterize triangles.
-            for (int i = 0; i < tris.Length; ++i)
+            for (int i = 0; i < tris.Count(); i++)
             {
                 // Rasterize.
-                if (!RasterizeTri(tris[i], areas[i], solid, solid.boundingBox, solid.cs, ics, ich, flagMergeThr))
+                if (!RasterizeTriangle(solid, flagMergeThr, tris.ElementAt(i), areas.ElementAt(i)))
                 {
                     throw new EngineException("rcRasterizeTriangles: Out of memory.");
                 }

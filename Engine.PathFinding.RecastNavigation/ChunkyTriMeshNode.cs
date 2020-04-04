@@ -5,24 +5,20 @@ namespace Engine.PathFinding.RecastNavigation
     /// <summary>
     /// Chunky TriMesh Node
     /// </summary>
-    public struct ChunkyTriMeshNode
+    public class ChunkyTriMeshNode
     {
         /// <summary>
-        /// Index
+        /// First index
         /// </summary>
-        public int I { get; set; }
+        public int Index { get; set; }
         /// <summary>
-        /// Node
+        /// Triangle count
         /// </summary>
-        public int N { get; set; }
+        public int Count { get; set; }
         /// <summary>
-        /// Bounding rectangle Min
+        /// Node Bounds
         /// </summary>
-        public Vector2 Bmin { get; set; }
-        /// <summary>
-        /// Bounding rectangle Max
-        /// </summary>
-        public Vector2 Bmax { get; set; }
+        public RectangleF Bounds { get; set; }
 
         /// <summary>
         /// Gets the text representation of the instance
@@ -30,7 +26,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the text representation of the instance</returns>
         public override string ToString()
         {
-            return string.Format("Index {0}; Count {1}; Min {2} Max {3}", this.I, this.N, this.Bmin, this.Bmax);
+            return $"Index {Index}; Count {Count}; Min {Bounds.TopLeft} Max {Bounds.BottomRight}";
         }
     }
 }

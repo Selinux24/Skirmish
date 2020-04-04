@@ -11,15 +11,15 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Item index
         /// </summary>
-        public int i;
+        public int Index;
         /// <summary>
         /// XZ minimum bounds
         /// </summary>
-        public Vector2 bmin;
+        public Vector2 BMin;
         /// <summary>
         /// XZ maximum bounds
         /// </summary>
-        public Vector2 bmax;
+        public Vector2 BMax;
 
         /// <summary>
         /// Gets the text representation of the instance
@@ -27,7 +27,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the text representation of the instance</returns>
         public override string ToString()
         {
-            return string.Format("Index {0}; Min {1} Max {2}", i, bmin, bmax);
+            return string.Format("Index {0}; Min {1} Max {2}", Index, BMin, BMax);
         }
     }
 
@@ -44,12 +44,12 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>A negative value if a is less than b; 0 if they are equal; a positive value of a is greater than b.</returns>
         public int Compare(BoundsItem x, BoundsItem y)
         {
-            if (x.bmin.X < y.bmin.X) return -1;
-            if (x.bmin.X > y.bmin.X) return 1;
-            if (x.bmax.X < y.bmax.X) return -1;
-            if (x.bmax.X > y.bmax.X) return 1;
-            if (x.i < y.i) return -1;
-            if (x.i > y.i) return 1;
+            if (x.BMin.X < y.BMin.X) return -1;
+            if (x.BMin.X > y.BMin.X) return 1;
+            if (x.BMax.X < y.BMax.X) return -1;
+            if (x.BMax.X > y.BMax.X) return 1;
+            if (x.Index < y.Index) return -1;
+            if (x.Index > y.Index) return 1;
             return 0;
         }
     }
@@ -67,12 +67,12 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>A negative value if a is less than b; 0 if they are equal; a positive value of a is greater than b.</returns>
         public int Compare(BoundsItem x, BoundsItem y)
         {
-            if (x.bmin.Y < y.bmin.Y) return -1;
-            if (x.bmin.Y > y.bmin.Y) return 1;
-            if (x.bmax.Y < y.bmax.Y) return -1;
-            if (x.bmax.Y > y.bmax.Y) return 1;
-            if (x.i < y.i) return -1;
-            if (x.i > y.i) return 1;
+            if (x.BMin.Y < y.BMin.Y) return -1;
+            if (x.BMin.Y > y.BMin.Y) return 1;
+            if (x.BMax.Y < y.BMax.Y) return -1;
+            if (x.BMax.Y > y.BMax.Y) return 1;
+            if (x.Index < y.Index) return -1;
+            if (x.Index > y.Index) return 1;
             return 0;
         }
     }

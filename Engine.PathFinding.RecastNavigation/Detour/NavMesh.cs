@@ -10,6 +10,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
     public class NavMesh
     {
+        /// <summary>
+        /// Maximum number of layers
+        /// </summary>
         public const int MAX_LAYERS = 32;
         /// <summary>
         /// This value specifies how many layers (or "floors") each navmesh tile is expected to have.
@@ -60,11 +63,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             var solid = RecastUtils.CreateHeightfield(cfg.Width, cfg.Height, cfg.BoundingBox, cfg.CellSize, cfg.CellHeight);
 
-            var ntris = geometry.ChunkyMesh.NTris;
-            var tris = geometry.ChunkyMesh.Triangles;
-            var triareas = new AreaTypes[ntris];
-
-            RecastUtils.MarkWalkableTriangles(cfg.WalkableSlopeAngle, tris, triareas);
+            var tris = geometry.ChunkyMesh.GetTriangles();
+            var triareas = RecastUtils.MarkWalkableTriangles(cfg.WalkableSlopeAngle, tris);
             if (!RecastUtils.RasterizeTriangles(solid, cfg.WalkableClimb, tris, triareas))
             {
                 return null;
@@ -377,12 +377,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 // Allocate voxel heightfield where we rasterize our input data to.
                 solid = solid,
-
-                // Allocate array that can hold triangle flags.
-                // If you have multiple meshes you need to process, allocate
-                // and array which can hold the max number of triangles you need to process.
-                triareas = new AreaTypes[chunkyMesh.MaxTrisPerChunk],
-
                 tiles = new TileCacheData[RasterizationContext.MaxLayers],
             };
 
@@ -399,9 +393,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 var tris = chunkyMesh.GetTriangles(id);
 
-                Helper.InitializeArray(rc.triareas, AreaTypes.RC_NULL_AREA);
-
-                RecastUtils.MarkWalkableTriangles(cfg.WalkableSlopeAngle, tris, rc.triareas);
+                rc.triareas = RecastUtils.MarkWalkableTriangles(cfg.WalkableSlopeAngle, tris).ToArray();
 
                 if (!RecastUtils.RasterizeTriangles(rc.solid, cfg.WalkableClimb, tris, rc.triareas))
                 {
@@ -603,11 +595,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Allocate voxel heightfield where we rasterize our input data to.
             var solid = RecastUtils.CreateHeightfield(cfg.Width, cfg.Height, cfg.BoundingBox, cfg.CellSize, cfg.CellHeight);
 
-            // Allocate array that can hold triangle flags.
-            // If you have multiple meshes you need to process, allocate
-            // and array which can hold the max number of triangles you need to process.
-            AreaTypes[] triareas = new AreaTypes[chunkyMesh.MaxTrisPerChunk];
-
             Vector2 tbmin = new Vector2(cfg.BoundingBox.Minimum.X, cfg.BoundingBox.Minimum.Z);
             Vector2 tbmax = new Vector2(cfg.BoundingBox.Maximum.X, cfg.BoundingBox.Maximum.Z);
             var cid = chunkyMesh.GetChunksOverlappingRect(tbmin, tbmax);
@@ -620,9 +607,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 var tris = chunkyMesh.GetTriangles(id);
 
-                Helper.InitializeArray(triareas, AreaTypes.RC_NULL_AREA);
-
-                RecastUtils.MarkWalkableTriangles(cfg.WalkableSlopeAngle, tris, triareas);
+                var triareas = RecastUtils.MarkWalkableTriangles(cfg.WalkableSlopeAngle, tris);
 
                 if (!RecastUtils.RasterizeTriangles(solid, cfg.WalkableClimb, tris, triareas))
                 {

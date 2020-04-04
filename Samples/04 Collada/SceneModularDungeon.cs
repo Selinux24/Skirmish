@@ -174,7 +174,7 @@ namespace Collada
                         this.NavigationGraphUpdated();
                     }
                 }
-                catch (EngineException ex)
+                catch (Exception ex)
                 {
                     Console.WriteLine($"Bad graph file. Generating navigation mesh. {ex.Message}");
                 }

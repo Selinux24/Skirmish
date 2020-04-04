@@ -17,15 +17,9 @@ namespace Engine.PathFinding.RecastNavigation
             var serTris = triangles
                 .Select(t => new[]
                 {
-                    t.Point1.X,
-                    t.Point1.Y,
-                    t.Point1.Z,
-                    t.Point2.X,
-                    t.Point2.Y,
-                    t.Point2.Z,
-                    t.Point3.X,
-                    t.Point3.Y,
-                    t.Point3.Z,
+                    t.Point1.X, t.Point1.Y, t.Point1.Z,
+                    t.Point2.X, t.Point2.Y, t.Point2.Z,
+                    t.Point3.X, t.Point3.Y, t.Point3.Z,
                 })
                 .ToArray();
 
