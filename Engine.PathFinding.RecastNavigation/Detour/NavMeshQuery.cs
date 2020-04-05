@@ -1118,7 +1118,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     {
                         StartRef = node.Id,
                         StartPos = node.Pos,
-                        EndPos = node.Pos,
+                        EndPos = next.Pos,
                         Filter = m_query.Filter,
                         MaxPath = maxPath - pathList.Count,
                     };

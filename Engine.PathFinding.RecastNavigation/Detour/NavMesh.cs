@@ -1992,7 +1992,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 {
                     var edgeFlags = tris.GetDetailTriEdgeFlags(j);
 
-                    if ((edgeFlags.HasFlag(DetailTriEdgeFlagTypes.Boundary)) &&
+                    if (!edgeFlags.HasFlag(DetailTriEdgeFlagTypes.Boundary) &&
                         (onlyBoundary || tris[j] < tris[k]))
                     {
                         // Only looking at boundary edges and this is internal, or
