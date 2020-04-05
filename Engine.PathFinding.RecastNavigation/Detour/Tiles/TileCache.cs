@@ -672,7 +672,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             if (bc.LMesh.NPolys == 0)
             {
                 // Remove existing tile.
-                navmesh.RemoveTile(navmesh.GetTileRefAt(tile.Header.TX, tile.Header.TY, tile.Header.TLayer));
+                navmesh.RemoveTile(navmesh.GetTileAt(tile.Header.TX, tile.Header.TY, tile.Header.TLayer));
                 return true;
             }
 
@@ -709,7 +709,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
 
             // Remove existing tile.
-            var tileRef = navmesh.GetTileRefAt(tile.Header.TX, tile.Header.TY, tile.Header.TLayer);
+            var tileRef = navmesh.GetTileAt(tile.Header.TX, tile.Header.TY, tile.Header.TLayer);
             navmesh.RemoveTile(tileRef);
 
             // Leave the location empty.

@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
@@ -64,5 +65,24 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Array containing area id data. [Size: spanCount] 
         /// </summary>
         public AreaTypes[] Areas { get; set; }
+
+        /// <summary>
+        /// Marks the geometry areas into the heightfield
+        /// </summary>
+        /// <param name="geometry">Geometry input</param>
+        public void MarkAreas(InputGeometry geometry)
+        {
+            var vols = geometry.GetAreas();
+            var vCount = geometry.GetAreaCount();
+            for (int i = 0; i < vCount; i++)
+            {
+                var vol = vols.ElementAt(i);
+
+                RecastUtils.MarkConvexPolyArea(
+                    vol.Vertices, vol.VertexCount,
+                    vol.MinHeight, vol.MaxHeight,
+                    (AreaTypes)vol.AreaType, this);
+            }
+        }
     }
 }
