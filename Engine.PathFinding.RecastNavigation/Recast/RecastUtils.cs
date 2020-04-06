@@ -1148,17 +1148,17 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return dst;
         }
-        private static bool FloodRegion(int x, int y, int i, int level, int r, CompactHeightfield chf, int[] srcReg, int[] srcDist, List<LevelStackEntry> stack)
+        private static bool FloodRegion(LevelStackEntry entry, int level, int r, CompactHeightfield chf, int[] srcReg, int[] srcDist, List<LevelStackEntry> stack)
         {
             int w = chf.Width;
 
-            var area = chf.Areas[i];
+            var area = chf.Areas[entry.Index];
 
             // Flood fill mark region.
             stack.Clear();
-            stack.Add(new LevelStackEntry { X = x, Y = y, Index = i });
-            srcReg[i] = r;
-            srcDist[i] = 0;
+            stack.Add(entry);
+            srcReg[entry.Index] = r;
+            srcDist[entry.Index] = 0;
 
             int lev = level >= 2 ? level - 2 : 0;
             int count = 0;
@@ -2473,7 +2473,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     int i = current.Index;
                     if (i >= 0 && srcReg[i] == 0)
                     {
-                        var floodRes = FloodRegion(x, y, i, level, regionId, chf, srcReg, srcDist, stack);
+                        var entry = new LevelStackEntry { X = x, Y = y, Index = i };
+                        var floodRes = FloodRegion(entry, level, regionId, chf, srcReg, srcDist, stack);
                         if (floodRes)
                         {
                             if (regionId == int.MaxValue)
