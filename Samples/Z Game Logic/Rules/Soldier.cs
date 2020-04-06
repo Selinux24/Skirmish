@@ -3,6 +3,7 @@
 namespace GameLogic.Rules
 {
     using GameLogic.Rules.Enum;
+    using System;
 
     public class Soldier
     {
@@ -124,6 +125,8 @@ namespace GameLogic.Rules
         public Weapon CurrentShootingWeapon { get; set; }
         public Weapon CurrentMeleeWeapon { get; set; }
         public Item CurrentItem { get; set; }
+
+        public Area CurrentArea { get; set; }
 
         public bool IsLeader
         {
@@ -336,32 +339,36 @@ namespace GameLogic.Rules
             }
         }
 
-        public void Move(int points)
+        public void Move(MovementModes mode, int points)
         {
             this.ConsumeMovingCapacity(points);
 
-            //Normal move
-            this.canMove = false;
-            this.canShoot = true;
-            this.canFight = false;
-        }
-        public void Run(int points)
-        {
-            this.ConsumeMovingCapacity(points);
+            switch (mode)
+            {
+                case MovementModes.Walk:
+                case MovementModes.Crawl:
+                    this.canMove = false;
+                    this.canShoot = true;
+                    this.canFight = false;
+                    break;
+                case MovementModes.Run:
+                    //Running
+                    this.canMove = false;
+                    this.canShoot = false;
+                    this.canFight = false;
+                    break;
+                case MovementModes.FindCover:
+                case MovementModes.RunAway:
+                    // Automatic movement to nearest cover
+                    this.turnMovingCapacity = 0;
 
-            //Running
-            this.canMove = false;
-            this.canShoot = false;
-            this.canFight = false;
-        }
-        public void Crawl(int points)
-        {
-            this.ConsumeMovingCapacity(points);
-
-            //Crawling move
-            this.canMove = false;
-            this.canShoot = true;
-            this.canFight = false;
+                    this.canMove = false;
+                    this.canShoot = false;
+                    this.canFight = false;
+                    break;
+                default:
+                    break;
+            }
         }
         public void Assault(int points)
         {
@@ -410,30 +417,22 @@ namespace GameLogic.Rules
             this.canShoot = false;
             this.canFight = false;
         }
-        public void FindCover()
-        {
-            // Automatic movement to nearest cover
-            this.turnMovingCapacity = 0;
 
-            this.canMove = false;
-            this.canShoot = false;
-            this.canFight = false;
-        }
-        public void RunAway()
-        {
-            // Automatic movement to nearest scenery exit
-            this.turnMovingCapacity = 0;
-
-            this.canMove = false;
-            this.canShoot = false;
-            this.canFight = false;
-        }
-
-        public bool ShootingTest(Weapon weapon, float distance, int points)
+        public bool ShootingTest(Weapon weapon, float distanceToTarget, int points)
         {
             this.ConsumeActionPoints(points);
 
-            return (Helper.RandomGenerator.Next(0, 6) >= 4);
+            if (weapon == null)
+            {
+                return false;
+            }
+
+            if (distanceToTarget > weapon.Range)
+            {
+                return false;
+            }
+
+            return (Helper.RandomGenerator.Next(0, 6) >= CurrentSmallWeapons);
         }
         public void SupportTest()
         {
@@ -480,6 +479,20 @@ namespace GameLogic.Rules
                 this.turnMovingCapacity = 0;
                 this.turnActionPoints = 0;
             }
+
+            switch (weapon?.WeaponType)
+            {
+                case WeaponTypes.Ranged:
+                    CurrentShootingWeapon = weapon;
+                    break;
+                case WeaponTypes.Melee:
+                    CurrentMeleeWeapon = weapon;
+                    break;
+                default:
+                    break;
+            }
+
+            CurrentArea = area;
         }
 
         public void UseItemForMovementPhase(Item item, int points)
@@ -532,11 +545,49 @@ namespace GameLogic.Rules
 
         public void AnimateHurt(Weapon weapon)
         {
-            // TODO: hurt animation
+            if (weapon == null)
+            {
+                return;
+            }
+
+            switch (weapon.WeaponType)
+            {
+                case WeaponTypes.Ranged:
+                    // Ranged impact animation and sound
+                    AnimateLib("RangedImpact");
+                    break;
+                case WeaponTypes.Melee:
+                    // Melee impact animation and sound
+                    AnimateLib("MeleeImpact");
+                    break;
+                default:
+                    break;
+            }
         }
         public void AnimateKill(Weapon weapon)
         {
-            // TODO: kill animation
+            if (weapon == null)
+            {
+                return;
+            }
+
+            switch (weapon.WeaponType)
+            {
+                case WeaponTypes.Ranged:
+                    // Ranged kill animation and sound
+                    AnimateLib("MeleeKill");
+                    break;
+                case WeaponTypes.Melee:
+                    // Melee kill animation and sound
+                    AnimateLib("MeleeKill");
+                    break;
+                default:
+                    break;
+            }
+        }
+        private void AnimateLib(string animation)
+        {
+            Console.WriteLine(animation);
         }
 
         public override string ToString()

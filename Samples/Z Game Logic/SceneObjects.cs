@@ -880,7 +880,7 @@ namespace GameLogic
 
         protected void Move(Soldier active, Vector3 destination)
         {
-            if (ActionsManager.Move(this.skirmishGame, active, active.CurrentMovingCapacity))
+            if (ActionsManager.Move(active, active.CurrentMovingCapacity))
             {
                 var model = this.soldierModels[active];
                 var controller = this.soldierControllers[active];
@@ -904,7 +904,7 @@ namespace GameLogic
         }
         protected void Crawl(Soldier active, Vector3 destination)
         {
-            if (ActionsManager.Crawl(this.skirmishGame, active, active.CurrentMovingCapacity))
+            if (ActionsManager.Crawl(active, active.CurrentMovingCapacity))
             {
                 //Run 3d actions
                 var path = this.SetPath(this.soldierAgent, this.soldierModels[active].Manipulator.Position, destination);
@@ -921,7 +921,7 @@ namespace GameLogic
         }
         protected void Run(Soldier active, Vector3 destination)
         {
-            if (ActionsManager.Run(this.skirmishGame, active, active.CurrentMovingCapacity))
+            if (ActionsManager.Run(active, active.CurrentMovingCapacity))
             {
                 var model = this.soldierModels[active];
                 var controller = this.soldierControllers[active];
@@ -945,7 +945,9 @@ namespace GameLogic
         }
         protected void Assault(Soldier active, Soldier passive)
         {
-            if (ActionsManager.Assault(this.skirmishGame, active, passive, active.CurrentMovingCapacity))
+            this.skirmishGame.JoinMelee(active, passive);
+
+            if (ActionsManager.Assault(active, passive, active.CurrentMovingCapacity))
             {
                 //Run 3d actions
                 Manipulator3D passiveMan = this.soldierModels[passive].Manipulator;
@@ -968,7 +970,7 @@ namespace GameLogic
         }
         protected void CoveringFire(Soldier active, Weapon weapon, Area area)
         {
-            if (ActionsManager.CoveringFire(this.skirmishGame, active, weapon, area, active.CurrentMovingCapacity))
+            if (ActionsManager.CoveringFire(active, weapon, area, active.CurrentMovingCapacity))
             {
                 //Run 3d actions
                 //...
@@ -979,7 +981,7 @@ namespace GameLogic
         }
         protected void Reload(Soldier active, Weapon weapon)
         {
-            if (ActionsManager.Reload(this.skirmishGame, active, weapon, active.CurrentMovingCapacity))
+            if (ActionsManager.Reload(active, weapon, active.CurrentMovingCapacity))
             {
                 //Run 3d actions
                 //...
@@ -990,7 +992,7 @@ namespace GameLogic
         }
         protected void Repair(Soldier active, Weapon weapon)
         {
-            if (ActionsManager.Repair(this.skirmishGame, active, weapon, active.CurrentMovingCapacity))
+            if (ActionsManager.Repair(active, weapon, active.CurrentMovingCapacity))
             {
                 //Run 3d actions
                 //...
@@ -1001,7 +1003,7 @@ namespace GameLogic
         }
         protected void Inventory(Soldier active)
         {
-            if (ActionsManager.Inventory(this.skirmishGame, active, active.CurrentMovingCapacity))
+            if (ActionsManager.Inventory(active, active.CurrentMovingCapacity))
             {
                 //Run 3d actions
                 //...
@@ -1014,7 +1016,7 @@ namespace GameLogic
         }
         protected void UseMovementItem(Soldier active)
         {
-            if (ActionsManager.UseMovementItem(this.skirmishGame, active, active.CurrentItem, active.CurrentMovingCapacity))
+            if (ActionsManager.UseMovementItem(active, active.CurrentItem, active.CurrentMovingCapacity))
             {
                 //Run 3d actions
                 //...
@@ -1025,7 +1027,7 @@ namespace GameLogic
         }
         protected void Communications(Soldier active)
         {
-            if (ActionsManager.Communications(this.skirmishGame, active))
+            if (ActionsManager.Communications(active))
             {
                 //Run 3d actions
                 //...
@@ -1036,7 +1038,7 @@ namespace GameLogic
         }
         protected void FindCover(Soldier active, Vector3 destination)
         {
-            if (ActionsManager.FindCover(this.skirmishGame, active))
+            if (ActionsManager.FindCover(active))
             {
                 //Run 3d actions
                 var path = this.SetPath(this.soldierAgent, this.soldierModels[active].Manipulator.Position, destination);
@@ -1053,7 +1055,7 @@ namespace GameLogic
         }
         protected void RunAway(Soldier active, Vector3 destination)
         {
-            if (ActionsManager.RunAway(this.skirmishGame, active))
+            if (ActionsManager.RunAway(active))
             {
                 //Run 3d actions
                 var path = this.SetPath(this.soldierAgent, this.soldierModels[active].Manipulator.Position, destination);
@@ -1075,7 +1077,7 @@ namespace GameLogic
 
             float distance = Vector3.Distance(passiveMan.Position, activeMan.Position);
 
-            if (ActionsManager.Shoot(this.skirmishGame, active, weapon, distance, passive, active.CurrentActionPoints))
+            if (ActionsManager.Shoot(active, weapon, distance, passive, active.CurrentActionPoints))
             {
                 //Run 3d actions
 
@@ -1097,7 +1099,7 @@ namespace GameLogic
         }
         protected void SupressingFire(Soldier active, Weapon weapon, Area area)
         {
-            if (ActionsManager.SupressingFire(this.skirmishGame, active, weapon, area, active.CurrentActionPoints))
+            if (ActionsManager.SupressingFire(active, weapon, area, active.CurrentActionPoints))
             {
                 //Run 3d actions
                 //...
@@ -1108,7 +1110,7 @@ namespace GameLogic
         }
         protected void Support(Soldier active)
         {
-            if (ActionsManager.Support(this.skirmishGame, active))
+            if (ActionsManager.Support(active))
             {
                 //Run 3d actions
                 //...
@@ -1119,7 +1121,7 @@ namespace GameLogic
         }
         protected void UseShootingItem(Soldier active)
         {
-            if (ActionsManager.UseShootingItem(this.skirmishGame, active, active.CurrentItem, active.CurrentActionPoints))
+            if (ActionsManager.UseShootingItem(active, active.CurrentItem, active.CurrentActionPoints))
             {
                 //Run 3d actions
                 //...
@@ -1130,7 +1132,7 @@ namespace GameLogic
         }
         protected void FirstAid(Soldier active, Soldier passive)
         {
-            if (ActionsManager.FirstAid(this.skirmishGame, active, passive, active.CurrentActionPoints))
+            if (ActionsManager.FirstAid(active, passive, active.CurrentActionPoints))
             {
                 //Run 3d actions
                 //...
@@ -1141,13 +1143,16 @@ namespace GameLogic
         }
         protected void LeaveCombat(Soldier active, Vector3 destination)
         {
-            if (ActionsManager.Leave(this.skirmishGame, active))
+            if (ActionsManager.Leave(active))
             {
+                Melee melee = this.skirmishGame.GetMelee(active);
+                melee.RemoveFighter(active);
+
                 //Run 3d actions
                 var path = this.SetPath(this.soldierAgent, this.soldierModels[active].Manipulator.Position, destination);
                 if (path != null)
                 {
-                    //TODO: Set run animation clip
+                    //Set run animation clip
                     this.soldierControllers[active].Follow(path);
 
                     this.GoToSoldier(active);
@@ -1158,7 +1163,7 @@ namespace GameLogic
         }
         protected void UseMeleeItem(Soldier active)
         {
-            if (ActionsManager.UseMeleeItem(this.skirmishGame, active, active.CurrentItem))
+            if (ActionsManager.UseMeleeItem(active, active.CurrentItem))
             {
                 //Run 3d actions
                 //...
@@ -1169,7 +1174,7 @@ namespace GameLogic
         }
         protected void TakeControl(Soldier active)
         {
-            if (ActionsManager.TakeControl(this.skirmishGame, active))
+            if (ActionsManager.TakeControl(active))
             {
                 //Run 3d actions
 
@@ -1180,7 +1185,7 @@ namespace GameLogic
         }
         protected void UseMoraleItem(Soldier active)
         {
-            if (ActionsManager.UseMoraleItem(this.skirmishGame, active, active.CurrentItem))
+            if (ActionsManager.UseMoraleItem(active, active.CurrentItem))
             {
                 //Run 3d actions
                 //...

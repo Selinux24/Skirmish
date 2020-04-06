@@ -138,6 +138,7 @@
     <Compile Include="Rules\Enum\ItemClasses.cs" />
     <Compile Include="Rules\Melee.cs" />
     <Compile Include="Rules\Enum\MoraleStates.cs" />
+    <Compile Include="Rules\MovementModes.cs" />
     <Compile Include="Rules\Phase.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -152,6 +153,7 @@
     <Compile Include="Rules\Enum\TeamRoles.cs" />
     <Compile Include="Rules\Victory.cs" />
     <Compile Include="Rules\Weapon.cs" />
+    <Compile Include="Rules\WeaponTypes.cs" />
     <Compile Include="SceneObjects.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
