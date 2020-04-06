@@ -2291,7 +2291,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 hitPos = HitTestWalls(best, filter, centerPos, radiusSqr);
 
                 // Process the links
-                ProcessLinksFindDistance(best, parentRef, centerPos, radiusSqr, filter, out status);
+                status = ProcessLinksFindDistance(best, parentRef, centerPos, radiusSqr, filter);
             }
 
             // Calc hit normal.
@@ -2302,7 +2302,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             return status;
         }
-
+        /// <summary>
+        /// Gets the closest hit position against a wall
+        /// </summary>
+        /// <param name="best">Tile</param>
+        /// <param name="filter">Query filter</param>
+        /// <param name="centerPos">Circle center position</param>
+        /// <param name="radiusSqr">Circle squared radius</param>
+        /// <returns>Returns the closest hit position</returns>
         private Vector3 HitTestWalls(TileRef best, QueryFilter filter, Vector3 centerPos, float radiusSqr)
         {
             Vector3 hitPos = Vector3.Zero;
@@ -2348,7 +2355,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             return hitPos;
         }
-
+        /// <summary>
+        /// Gets whether a border is solid or not
+        /// </summary>
+        /// <param name="best">Tile</param>
+        /// <param name="j">Border neighbour</param>
+        /// <param name="filter">Query filter</param>
+        /// <returns>Returns true if the border is solid</returns>
         private bool BorderIsSolid(TileRef best, int j, QueryFilter filter)
         {
             bool solid = true;
@@ -2372,10 +2385,18 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             return solid;
         }
-
-        private void ProcessLinksFindDistance(TileRef best, int parentRef, Vector3 centerPos, float radiusSqr, QueryFilter filter, out Status status)
+        /// <summary>
+        /// Process links
+        /// </summary>
+        /// <param name="best">Tile</param>
+        /// <param name="parentRef">Parent reference</param>
+        /// <param name="centerPos">Center position</param>
+        /// <param name="radiusSqr">Squared radius</param>
+        /// <param name="filter">Query filter</param>
+        /// <returns>Returns the partial status</returns>
+        private Status ProcessLinksFindDistance(TileRef best, int parentRef, Vector3 centerPos, float radiusSqr, QueryFilter filter)
         {
-            status = Status.DT_SUCCESS;
+            Status status = Status.DT_SUCCESS;
 
             for (int i = best.Poly.FirstLink; i != DetourUtils.DT_NULL_LINK; i = best.Tile.Links[i].Next)
             {
@@ -2384,20 +2405,30 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 // Skip invalid neighbours and do not follow back to parent.
                 if (link.NRef == 0 || link.NRef == parentRef)
                 {
-                    return;
+                    return status;
                 }
 
-                ProcessLinksNeighbourFindDistance(link, best, centerPos, radiusSqr, filter, out Status neiStatus);
+                Status neiStatus = ProcessLinksNeighbourFindDistance(link, best, centerPos, radiusSqr, filter);
                 if (neiStatus != Status.DT_SUCCESS)
                 {
                     status = neiStatus;
                 }
             }
-        }
 
-        private void ProcessLinksNeighbourFindDistance(Link link, TileRef best, Vector3 centerPos, float radiusSqr, QueryFilter filter, out Status status)
+            return status;
+        }
+        /// <summary>
+        /// Process neighbour link
+        /// </summary>
+        /// <param name="link">Link</param>
+        /// <param name="best">Tile</param>
+        /// <param name="centerPos">Center position</param>
+        /// <param name="radiusSqr">Squared radius</param>
+        /// <param name="filter">Query filter</param>
+        /// <returns>Returns the partial result</returns>
+        private Status ProcessLinksNeighbourFindDistance(Link link, TileRef best, Vector3 centerPos, float radiusSqr, QueryFilter filter)
         {
-            status = Status.DT_SUCCESS;
+            Status status = Status.DT_SUCCESS;
 
             // Expand to neighbour.
             var neighbour = m_nav.GetTileAndPolyByRefUnsafe(link.NRef);
@@ -2405,13 +2436,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Do not advance if the polygon is excluded by the filter.
             if (!filter.PassFilter(neighbour.Poly.Flags))
             {
-                return;
+                return status;
             }
 
             // Skip off-mesh connections.
             if (neighbour.Poly.Type == PolyTypes.OffmeshConnection)
             {
-                return;
+                return status;
             }
 
             // Calc distance to the edge.
@@ -2421,19 +2452,19 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             if (distSqr > radiusSqr)
             {
                 // If the circle is not touching the next polygon, skip it.
-                return;
+                return status;
             }
 
             neighbour.Node = m_nodePool.GetNode(neighbour.Ref, 0);
             if (neighbour.Node == null)
             {
                 status |= Status.DT_OUT_OF_NODES;
-                return;
+                return status;
             }
 
             if ((neighbour.Node.Flags & NodeFlagTypes.Closed) != 0)
             {
-                return;
+                return status;
             }
 
             // Cost
@@ -2444,7 +2475,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 {
                     Console.WriteLine($"FindPath GetEdgeMidPoint result: {midPointRes}");
                     status = midPointRes;
-                    return;
+                    return status;
                 }
 
                 neighbour.Node.Pos = pos;
@@ -2455,7 +2486,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // The node is already in open list and the new result is worse, skip.
             if ((neighbour.Node.Flags & NodeFlagTypes.Open) != 0 && total >= neighbour.Node.Total)
             {
-                return;
+                return status;
             }
 
             neighbour.Node.Id = neighbour.Ref;
@@ -2472,6 +2503,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 neighbour.Node.Flags |= NodeFlagTypes.Open;
                 m_openList.Push(neighbour.Node);
             }
+
+            return status;
         }
 
         /// <summary>
