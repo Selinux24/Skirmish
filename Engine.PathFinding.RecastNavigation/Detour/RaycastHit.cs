@@ -51,6 +51,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// The cost of the path until hit.
         /// </summary>
         public float PathCost { get; set; }
+        /// <summary>
+        /// Previous polygon reference
+        /// </summary>
+        public int PrevReference { get; set; }
 
         /// <summary>
         /// Adds a polygon reference to the ray-cast path
@@ -75,10 +79,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
         }
         /// <summary>
-        /// Gets the simple path
+        /// Creates a simple path
         /// </summary>
         /// <returns>Returns a simple path</returns>
-        public SimplePath GetPath()
+        public SimplePath CreateSimplePath()
         {
             SimplePath res = new SimplePath(MaxPath);
             res.StartPath(Path);

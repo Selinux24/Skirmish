@@ -74,16 +74,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <summary>
         /// Attempts to optimize the path if the specified point is visible from the current position.
         /// </summary>
-        /// <param name="next">The point to search toward. [(x, y, z])</param>
+        /// <param name="target">The point to search toward. [(x, y, z])</param>
         /// <param name="pathOptimizationRange">The maximum range to search. [Limit: > 0]</param>
         /// <param name="navquery">The query object used to build the corridor.</param>
         /// <param name="filter">The filter to apply to the operation.</param>
         public void OptimizePathVisibility(
-            Vector3 next, float pathOptimizationRange,
+            Vector3 target, float pathOptimizationRange,
             NavMeshQuery navquery, QueryFilter filter)
         {
             // Clamp the ray to max distance.
-            Vector3 goal = next;
+            Vector3 goal = target;
             float dist = Vector2.Distance(m_pos.XZ(), goal.XZ());
 
             // If too close to the goal, do not try to optimize.
@@ -99,19 +99,19 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             Vector3 delta = goal - m_pos;
             goal = m_pos + delta * pathOptimizationRange / dist;
 
-            int MAX_RES = 32;
             RaycastRequest request = new RaycastRequest
             {
                 StartRef = m_path.Start,
                 StartPos = m_pos,
                 EndPos = goal,
                 Filter = filter,
-                MaxPath = MAX_RES,
+                MaxPath = 32,
             };
-            navquery.Raycast(request, out var t, out _, out var res);
-            if (res.Count > 1 && t > 0.99f)
+            navquery.Raycast(request, out var res);
+
+            if (res.PathCount > 1 && res.T > 0.99f)
             {
-                SimplePath.MergeCorridorStartShortcut(m_path, res);
+                SimplePath.MergeCorridorStartShortcut(m_path, res.CreateSimplePath());
             }
         }
         /// <summary>

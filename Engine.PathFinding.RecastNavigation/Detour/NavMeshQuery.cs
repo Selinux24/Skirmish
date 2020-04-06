@@ -909,11 +909,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 Filter = m_query.Filter,
                 Options = RaycastOptions.DT_RAYCAST_USE_COSTS,
                 MaxPath = 0,
+                PrevReference = grandpaRef,
             };
 
-            Raycast(request, ref grandpaRef, out var rayHit);
+            Raycast(request, out var rayHit);
 
             // raycast parent
+            grandpaRef = rayHit.PrevReference;
             foundShortCut = rayHit.T >= 1.0f;
 
             // update move cost
@@ -1098,11 +1100,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             return node;
         }
         /// <summary>
-        /// Stores the path
+        /// Stores the path following the node chain
         /// </summary>
-        /// <param name="node">Node</param>
+        /// <param name="node">First Node</param>
         /// <param name="maxPath">Max path length</param>
-        /// <returns>Returns the path reference list</returns>
+        /// <returns>Returns the reference list path</returns>
         private IEnumerable<int> StorePath(Node node, int maxPath)
         {
             List<int> pathList = new List<int>();
@@ -1111,38 +1113,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             do
             {
                 Node next = m_nodePool.GetNodeAtIdx(node.PIdx);
-                Status status = 0;
-                if ((node.Flags & NodeFlagTypes.ParentDetached) != 0)
-                {
-                    RaycastRequest request = new RaycastRequest
-                    {
-                        StartRef = node.Id,
-                        StartPos = node.Pos,
-                        EndPos = next.Pos,
-                        Filter = m_query.Filter,
-                        MaxPath = maxPath - pathList.Count,
-                    };
 
-                    status = Raycast(request, out _, out _, out var rpath);
-                    if (status.HasFlag(Status.DT_SUCCESS))
-                    {
-                        pathList.AddRange(rpath.GetPath());
-                    }
+                Status status = BuildNodePath(node, next, maxPath - pathList.Count, out var partialPath);
 
-                    // raycast ends on poly boundary and the path might include the next poly boundary.
-                    if (pathList.Count > 0 && pathList[pathList.Count - 1] == next.Id)
-                    {
-                        pathList.RemoveAt(pathList.Count - 1); // remove to avoid duplicates
-                    }
-                }
-                else
-                {
-                    pathList.Add(node.Id);
-                    if (pathList.Count >= maxPath)
-                    {
-                        status = Status.DT_BUFFER_TOO_SMALL;
-                    }
-                }
+                pathList.AddRange(partialPath);
 
                 if ((status & Status.DT_STATUS_DETAIL_MASK) != 0)
                 {
@@ -1155,6 +1129,60 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             while (node != null);
 
             return pathList.ToArray();
+        }
+        /// <summary>
+        /// Builds the node partial path from node to next
+        /// </summary>
+        /// <param name="node">Current node</param>
+        /// <param name="next">Next node</param>
+        /// <param name="maxPath">Maximum partial path items</param>
+        /// <param name="partialPath">Resulting partial path node list</param>
+        /// <returns>Returns true </returns>
+        private Status BuildNodePath( Node node, Node next,int maxPath, out IEnumerable<int> partialPath)
+        {
+            Status status = 0;
+
+            partialPath = new int[] { };
+
+            List<int> pathList = new List<int>();
+
+            if (node.Flags.HasFlag(NodeFlagTypes.ParentDetached))
+            {
+                RaycastRequest request = new RaycastRequest
+                {
+                    StartRef = node.Id,
+                    StartPos = node.Pos,
+                    EndPos = next.Pos,
+                    Filter = m_query.Filter,
+                    MaxPath = maxPath,
+                };
+
+                status = Raycast(request, out var hit);
+                if (status.HasFlag(Status.DT_SUCCESS))
+                {
+                    var rPath = hit.CreateSimplePath();
+                    pathList.AddRange(rPath.GetPath());
+                }
+
+                // raycast ends on poly boundary and the path might include the next poly boundary.
+                if (pathList.Count > 0 && pathList[pathList.Count - 1] == next.Id)
+                {
+                    pathList.RemoveAt(pathList.Count - 1); // remove to avoid duplicates
+                }
+            }
+            else
+            {
+                pathList.Add(node.Id);
+
+                if (pathList.Count >= maxPath)
+                {
+                    status = Status.DT_BUFFER_TOO_SMALL;
+                }
+            }
+
+            partialPath = pathList.ToArray();
+
+            return status;
         }
         /// <summary>
         /// Finds the polygons along the navigation graph that touch the specified circle.
@@ -2000,36 +2028,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="startPos">A position within the start polygon representing the start of the ray.</param>
         /// <param name="endPos">The position to cast the ray toward.</param>
         /// <param name="filter">The polygon filter to apply to the query.</param>
-        /// <param name="t">The hit parameter. (FLT_MAX if no wall hit.)</param>
-        /// <param name="hitNormal">The normal of the nearest wall hit.</param>
-        /// <param name="path">The reference ids of the visited polygons.</param>
-        /// <param name="maxPath">The maximum number of polygons the path array can hold.</param>
-        /// <returns>The status flags for the query.</returns>
-        public Status Raycast(RaycastRequest request, out float t, out Vector3 hitNormal, out SimplePath path)
-        {
-            int? prevRef = null;
-            Status status = Raycast(request, ref prevRef, out RaycastHit hit);
-
-            t = hit.T;
-            hitNormal = hit.HitNormal;
-            path = new SimplePath(hit.MaxPath);
-            path.StartPath(hit.Path);
-
-            return status;
-        }
-        /// <summary>
-        /// Casts a 'walkability' ray along the surface of the navigation mesh from the start position toward the end position.
-        /// </summary>
-        /// <param name="startRef">The reference id of the start polygon.</param>
-        /// <param name="startPos">A position within the start polygon representing the start of the ray.</param>
-        /// <param name="endPos">The position to cast the ray toward.</param>
-        /// <param name="filter">The polygon filter to apply to the query.</param>
         /// <param name="options">Govern how the raycast behaves. See dtRaycastOptions</param>
         /// <param name="maxPath">The maximum number of polygons the path array can hold.</param>
         /// <param name="hit">Pointer to a raycast hit structure which will be filled by the results.</param>
         /// <param name="prevRef">parent of start ref. Used during for cost calculation</param>
         /// <returns></returns>
-        public Status Raycast(RaycastRequest request, ref int? prevRef, out RaycastHit hit)
+        public Status Raycast(RaycastRequest request, out RaycastHit hit)
         {
             int startRef = request.StartRef;
             Vector3 startPos = request.StartPos;
@@ -2050,7 +2054,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 startPos.IsInfinity() ||
                 endPos.IsInfinity() ||
                 filter == null ||
-                prevRef.HasValue && !m_nav.IsValidPolyRef(prevRef.Value))
+                request.PrevReference.HasValue && !m_nav.IsValidPolyRef(request.PrevReference.Value))
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
@@ -2069,9 +2073,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             TileRef prev = cur;
             TileRef next = cur;
 
-            if (prevRef.HasValue)
+            if (request.PrevReference.HasValue)
             {
-                prev = m_nav.GetTileAndPolyByRefUnsafe(prevRef.Value);
+                prev = m_nav.GetTileAndPolyByRefUnsafe(request.PrevReference.Value);
             }
 
             while (cur.Ref != 0)
@@ -2252,7 +2256,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 cur = next;
 
                 // Maintain reference
-                prevRef = prev.Ref;
+                hit.PrevReference = prev.Ref;
             }
 
             hit.Cut(n);

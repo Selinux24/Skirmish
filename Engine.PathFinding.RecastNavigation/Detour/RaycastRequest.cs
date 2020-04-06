@@ -31,5 +31,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// Maximum nodes in result path
         /// </summary>
         public int MaxPath { get; set; }
+        /// <summary>
+        /// Previous polygon reference
+        /// </summary>
+        public int? PrevReference { get; set; }
     }
 }
