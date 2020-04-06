@@ -31,10 +31,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         public int BMax { get; set; }
 
+        /// <summary>
+        /// Gets the text representation of the instance
+        /// </summary>
+        /// <returns>Returns a text representation of the instance</returns>
         public override string ToString()
         {
-            return string.Format("Ref {0}; Next {1}; Edge {2}; Side {3}; BMin {4}; BMax {5};",
-                NRef, Next, Edge, Side, BMin, BMax);
+            return $"Ref {NRef}; Next {Next}; Edge {Edge}; Side {Side}; BMin {BMin}; BMax {BMax};";
         }
     }
 }

@@ -136,6 +136,9 @@
     <Compile Include="Detour\Crowds\ObstacleAvoidanceProcessSampleRequest.cs" />
     <Compile Include="Detour\Crowds\ObstacleAvoidanceSampleRequest.cs" />
     <Compile Include="Detour\Crowds\ProximityGridItem.cs" />
+    <Compile Include="Detour\FindPolysAroundCircleQuery.cs" />
+    <Compile Include="Detour\FindPolysAroundShapeQuery.cs" />
+    <Compile Include="Detour\IFindPolysQuery.cs" />
     <Compile Include="Detour\NavMeshFile.cs" />
     <Compile Include="Detour\RaycastRequest.cs" />
     <Compile Include="Detour\Segment.cs" />
