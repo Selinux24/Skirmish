@@ -1576,9 +1576,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             if (nearestRef != 0)
             {
                 nearestPt = query.NearestPoint();
+
+                return Status.DT_SUCCESS;
             }
 
-            return Status.DT_SUCCESS;
+            return Status.DT_FAILURE;
         }
         /// <summary>
         /// Finds polygons that overlap the search box.

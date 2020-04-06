@@ -382,7 +382,7 @@ namespace Deferred
                 nmsettings.CellSize = 0.5f;
                 nmsettings.CellHeight = 0.25f;
                 nmsettings.Agents = new[] { this.tankAgentType };
-                nmsettings.PartitionType = SamplePartitionTypes.Watershed;
+                nmsettings.PartitionType = SamplePartitionTypes.Layers;
                 nmsettings.EdgeMaxError = 1.0f;
                 nmsettings.BuildMode = BuildModes.Tiled;
                 nmsettings.TileSize = 32;
@@ -1154,7 +1154,7 @@ namespace Deferred
 
             for (int i = 0; i < tankAgents.Count; i++)
             {
-                tankAgents[i].CrowdAgent = crowd.AddAgent(tankAgents[i].Manipulator.Position, par);
+                tankAgents[i].CrowdAgent = graph.AddCrowdAgent(crowd, tankAgents[i].Manipulator.Position, par);
 
                 graph.EnableDebugInfo(crowd, tankAgents[i].CrowdAgent);
             }

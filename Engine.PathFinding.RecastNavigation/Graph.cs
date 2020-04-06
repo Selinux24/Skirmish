@@ -486,10 +486,8 @@ namespace Engine.PathFinding.RecastNavigation
         /// Builds the tile in the specified position
         /// </summary>
         /// <param name="position">Position</param>
-        public void BuildTile(IEnumerable<Vector3> positions)
+        private void BuildTile(IEnumerable<Vector3> positions)
         {
-            this.Updating?.Invoke(this, new EventArgs());
-
             foreach (var agentQ in AgentQueries)
             {
                 var navmesh = agentQ.NavMesh;
@@ -515,20 +513,16 @@ namespace Engine.PathFinding.RecastNavigation
 
                 foreach (var tile in tiles)
                 {
-                    navmesh.BuildTileAtPosition(tile.X, tile.Y, tile.BoundingBox, Input, Settings, agentQ.Agent);
+                    navmesh.BuildTileAtPosition(tile.X, tile.Y, Input, Settings, agentQ.Agent, tile.BoundingBox);
                 }
             }
-
-            this.Updated?.Invoke(this, new EventArgs());
         }
         /// <summary>
         /// Removes the tile in the specified position list
         /// </summary>
         /// <param name="positions">Position list</param>
-        public void RemoveTile(IEnumerable<Vector3> positions)
+        private void RemoveTile(IEnumerable<Vector3> positions)
         {
-            this.Updating?.Invoke(this, new EventArgs());
-
             foreach (var agentQ in AgentQueries)
             {
                 var navmesh = agentQ.NavMesh;
@@ -557,8 +551,6 @@ namespace Engine.PathFinding.RecastNavigation
                     navmesh.RemoveTileAtPosition(tile.X, tile.Y, Settings);
                 }
             }
-
-            this.Updated?.Invoke(this, new EventArgs());
         }
         /// <summary>
         /// Updates the graph at specified position
@@ -566,7 +558,11 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="position">Position</param>
         public void UpdateAt(Vector3 position)
         {
+            this.Updating?.Invoke(this, new EventArgs());
+
             this.BuildTile(new[] { position });
+
+            this.Updated?.Invoke(this, new EventArgs());
         }
         /// <summary>
         /// Updates the graph at specified position list
@@ -574,7 +570,11 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="positions">Position list</param>
         public void UpdateAt(IEnumerable<Vector3> positions)
         {
+            this.Updating?.Invoke(this, new EventArgs());
+
             this.BuildTile(positions);
+
+            this.Updated?.Invoke(this, new EventArgs());
         }
         /// <summary>
         /// Removes the graph node at specified position
@@ -582,7 +582,11 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="position">Position</param>
         public void RemoveAt(Vector3 position)
         {
+            this.Updating?.Invoke(this, new EventArgs());
+
             RemoveTile(new[] { position });
+
+            this.Updated?.Invoke(this, new EventArgs());
         }
         /// <summary>
         /// Removes the graph node at specified position list
@@ -590,7 +594,11 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="positions">Position list</param>
         public void RemoveAt(IEnumerable<Vector3> positions)
         {
+            this.Updating?.Invoke(this, new EventArgs());
+
             RemoveTile(positions);
+
+            this.Updated?.Invoke(this, new EventArgs());
         }
 
         /// <summary>
@@ -999,6 +1007,11 @@ namespace Engine.PathFinding.RecastNavigation
             this.Crowds.Add(cr);
 
             return cr;
+        }
+
+        public CrowdAgent AddCrowdAgent(Crowd crowd, Vector3 pos, CrowdAgentParams param)
+        {
+            return crowd.AddAgent(pos, param);
         }
         /// <summary>
         /// Request move all agents in the crowd

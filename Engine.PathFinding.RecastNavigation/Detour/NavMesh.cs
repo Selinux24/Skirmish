@@ -14,16 +14,17 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// Maximum number of layers
         /// </summary>
         public const int MAX_LAYERS = 32;
-        /// <summary>
-        /// This value specifies how many layers (or "floors") each navmesh tile is expected to have.
-        /// </summary>
-        public const int EXPECTED_LAYERS_PER_TILE = 4;
 
         public static NavMesh Build(InputGeometry geometry, BuildSettings settings, Agent agent)
         {
             if (settings.BuildMode == BuildModes.Solo)
             {
-                return BuildSolo(geometry, settings, agent);
+                var bbox = settings.Bounds ?? geometry.BoundingBox;
+
+                // Generation params.
+                var cfg = settings.GetSoloConfig(agent, bbox);
+
+                return BuildSolo(geometry, cfg);
             }
             else if (settings.BuildMode == BuildModes.Tiled)
             {
@@ -34,33 +35,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 throw new EngineException("Bad build mode for NavigationMesh.");
             }
         }
-        private static NavMesh BuildSolo(InputGeometry geometry, BuildSettings settings, Agent agent)
+        private static NavMesh BuildSolo(InputGeometry geometry, Config cfg)
         {
-            var bbox = settings.Bounds ?? geometry.BoundingBox;
-
-            RecastUtils.CalcGridSize(bbox, settings.CellSize, out int width, out int height);
-
-            // Generation params.
-            var cfg = new Config()
-            {
-                CellSize = settings.CellSize,
-                CellHeight = settings.CellHeight,
-                WalkableSlopeAngle = agent.MaxSlope,
-                WalkableHeight = (int)Math.Ceiling(agent.Height / settings.CellHeight),
-                WalkableClimb = (int)Math.Floor(agent.MaxClimb / settings.CellHeight),
-                WalkableRadius = (int)Math.Ceiling(agent.Radius / settings.CellSize),
-                MaxEdgeLen = (int)(settings.EdgeMaxLength / settings.CellSize),
-                MaxSimplificationError = settings.EdgeMaxError,
-                MinRegionArea = (int)(settings.RegionMinSize * settings.RegionMinSize),
-                MergeRegionArea = (int)(settings.RegionMergeSize * settings.RegionMergeSize),
-                MaxVertsPerPoly = settings.VertsPerPoly,
-                DetailSampleDist = settings.DetailSampleDist < 0.9f ? 0 : settings.CellSize * settings.DetailSampleDist,
-                DetailSampleMaxError = settings.CellHeight * settings.DetailSampleMaxError,
-                BoundingBox = bbox,
-                Width = width,
-                Height = height,
-            };
-
             var solid = RecastUtils.CreateHeightfield(cfg.Width, cfg.Height, cfg.BoundingBox, cfg.CellSize, cfg.CellHeight);
 
             var tris = geometry.ChunkyMesh.GetTriangles();
@@ -71,7 +47,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             // Performs the heightfield filters
-            FilterHeightfield(solid, settings, cfg);
+            FilterHeightfield(solid, cfg);
 
             // Compact the heightfield so that it is faster to handle from now on.
             // This will result more cache coherent data as well as the neighbours
@@ -91,7 +67,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             chf.MarkAreas(geometry);
 
             // Sample partition
-            SamplePartition(settings.PartitionType, chf, cfg);
+            SamplePartition(chf, cfg);
 
             // Create contours.
             if (!RecastUtils.BuildContours(chf, cfg.MaxSimplificationError, cfg.MaxEdgeLen, BuildContoursFlagTypes.RC_CONTOUR_TESS_WALL_EDGES, out ContourSet cset))
@@ -134,9 +110,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 DetailTriCount = dmesh.Tris.Count,
                 OffMeshCon = geometry.GetConnections()?.ToArray(),
                 OffMeshConCount = geometry.GetConnectionCount(),
-                WalkableHeight = agent.Height,
-                WalkableRadius = agent.Radius,
-                WalkableClimb = agent.MaxClimb,
+                WalkableHeight = cfg.Agent.Height,
+                WalkableRadius = cfg.Agent.Radius,
+                WalkableClimb = cfg.Agent.MaxClimb,
                 BMin = pmesh.BMin,
                 BMax = pmesh.BMax,
                 CS = cfg.CellSize,
@@ -201,28 +177,41 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             var nm = new NavMesh(nmparams);
 
-            TileParams tileParams = new TileParams
-            {
-                Width = tileWidth,
-                Height = tileHeight,
-                CellSize = tileCellSize,
-                Bounds = bbox,
-            };
-
-            if (!BuildAllTiles(nm, tileParams, geometry, settings, agent))
-            {
-                return null;
-            }
-
             if (settings.UseTileCache)
             {
-                nm.TileCache = BuildTileCache(nm, tileWidth, tileHeight, bbox, geometry, settings, agent);
+                // Generation params.
+                var cfg = settings.GetTileCacheConfig(agent, bbox);
+
+                var tmproc = new TileCacheMeshProcess(geometry);
+
+                nm.TileCache = new TileCache(cfg.TileCacheParams, tmproc);
+
+                if (settings.BuildAllTiles)
+                {
+                    BuildTileCache(nm, geometry, nm.TileCache, tileWidth, tileHeight, cfg);
+                }
+            }
+            else
+            {
+                // Generation params.
+                TileParams tileParams = new TileParams
+                {
+                    Width = tileWidth,
+                    Height = tileHeight,
+                    CellSize = tileCellSize,
+                    Bounds = bbox,
+                };
+
+                if (settings.BuildAllTiles)
+                {
+                    BuildAllTiles(nm, geometry, settings, agent, tileParams);
+                }
             }
 
             return nm;
         }
 
-        private static bool BuildAllTiles(NavMesh navMesh, TileParams tileParams, InputGeometry geom, BuildSettings settings, Agent agent)
+        private static bool BuildAllTiles(NavMesh navMesh, InputGeometry geom, BuildSettings settings, Agent agent, TileParams tileParams)
         {
             for (int y = 0; y < tileParams.Height; y++)
             {
@@ -230,7 +219,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 {
                     BoundingBox tileBounds = GetTileBounds(x, y, tileParams.CellSize, tileParams.Bounds);
 
-                    var data = BuildTileMesh(x, y, tileBounds, geom, settings, agent);
+                    // Init build configuration
+                    Config cfg = settings.GetTiledConfig(agent, tileBounds);
+
+                    var data = BuildTileMesh(x, y, geom, cfg);
                     if (data != null)
                     {
                         // Remove any previous data (navmesh owns and deletes the data).
@@ -243,64 +235,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             return true;
         }
-        private static MeshData BuildTileMesh(int x, int y, BoundingBox tileBounds, InputGeometry geometry, BuildSettings settings, Agent agent)
+        private static MeshData BuildTileMesh(int x, int y, InputGeometry geometry, Config cfg)
         {
             var chunkyMesh = geometry.ChunkyMesh;
-
-            int walkableRadius = (int)Math.Ceiling(agent.Radius / settings.CellSize);
-            int tileSize = (int)settings.TileSize;
-            int borderSize = walkableRadius + 3;
-
-            // Init build configuration from GUI
-            Config cfg = new Config
-            {
-                CellSize = settings.CellSize,
-                CellHeight = settings.CellHeight,
-                WalkableSlopeAngle = agent.MaxSlope,
-                WalkableHeight = (int)Math.Ceiling(agent.Height / settings.CellHeight),
-                WalkableClimb = (int)Math.Floor(agent.MaxClimb / settings.CellHeight),
-                WalkableRadius = walkableRadius,
-                MaxEdgeLen = (int)(settings.EdgeMaxLength / settings.CellSize),
-                MaxSimplificationError = settings.EdgeMaxError,
-                MinRegionArea = (int)(settings.RegionMinSize * settings.RegionMinSize),     // Note: area = size*size
-                MergeRegionArea = (int)(settings.RegionMergeSize * settings.RegionMergeSize), // Note: area = size*size
-                MaxVertsPerPoly = settings.VertsPerPoly,
-                TileSize = tileSize,
-                BorderSize = borderSize, // Reserve enough padding.
-                Width = tileSize + borderSize * 2,
-                Height = tileSize + borderSize * 2,
-                DetailSampleDist = settings.DetailSampleDist < 0.9f ? 0 : settings.CellSize * settings.DetailSampleDist,
-                DetailSampleMaxError = settings.CellHeight * settings.DetailSampleMaxError,
-                BoundingBox = tileBounds,
-            };
-
-            // Expand the heighfield bounding box by border size to find the extents of geometry we need to build this tile.
-            //
-            // This is done in order to make sure that the navmesh tiles connect correctly at the borders,
-            // and the obstacles close to the border work correctly with the dilation process.
-            // No polygons (or contours) will be created on the border area.
-            //
-            // IMPORTANT!
-            //
-            //   :''''''''':
-            //   : +-----+ :
-            //   : |     | :
-            //   : |     |<--- tile to build
-            //   : |     | :  
-            //   : +-----+ :<-- geometry needed
-            //   :.........:
-            //
-            // You should use this bounding box to query your input geometry.
-            //
-            // For example if you build a navmesh for terrain, and want the navmesh tiles to match the terrain tile size
-            // you will need to pass in data from neighbour terrain tiles too! In a simple case, just pass in all the 8 neighbours,
-            // or use the bounding box below to only pass in a sliver of each of the 8 neighbours.
-            var tmpBbox = cfg.BoundingBox;
-            tmpBbox.Minimum.X -= borderSize * settings.CellSize;
-            tmpBbox.Minimum.Z -= borderSize * settings.CellSize;
-            tmpBbox.Maximum.X += borderSize * settings.CellSize;
-            tmpBbox.Maximum.Z += borderSize * settings.CellSize;
-            cfg.BoundingBox = tmpBbox;
 
             // Allocate voxel heightfield where we rasterize our input data to.
             var solid = RecastUtils.CreateHeightfield(cfg.Width, cfg.Height, cfg.BoundingBox, cfg.CellSize, cfg.CellHeight);
@@ -326,7 +263,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             // Performs the heightfield filters
-            FilterHeightfield(solid, settings, cfg);
+            FilterHeightfield(solid, cfg);
 
             // Compact the heightfield so that it is faster to handle from now on.
             // This will result more cache coherent data as well as the neighbours
@@ -346,7 +283,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             chf.MarkAreas(geometry);
 
             // Sample partition
-            SamplePartition(settings.PartitionType, chf, cfg);
+            SamplePartition(chf, cfg);
 
             // Create contours.
             if (!RecastUtils.BuildContours(chf, cfg.MaxSimplificationError, cfg.MaxEdgeLen, BuildContoursFlagTypes.RC_CONTOUR_TESS_WALL_EDGES, out ContourSet cset))
@@ -395,9 +332,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 DetailTriCount = dmesh.Tris.Count,
                 OffMeshCon = geometry.GetConnections().ToArray(),
                 OffMeshConCount = geometry.GetConnectionCount(),
-                WalkableHeight = agent.Height,
-                WalkableRadius = agent.Radius,
-                WalkableClimb = agent.MaxClimb,
+                WalkableHeight = cfg.Agent.Height,
+                WalkableRadius = cfg.Agent.Radius,
+                WalkableClimb = cfg.Agent.MaxClimb,
                 TileX = x,
                 TileY = y,
                 TileLayer = 0,
@@ -415,60 +352,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             return navData;
         }
-        private static TileCache BuildTileCache(NavMesh nm, int tileWidth, int tileHeight, BoundingBox bbox, InputGeometry geometry, BuildSettings settings, Agent agent)
+        private static void BuildTileCache(NavMesh navMesh, InputGeometry geometry, TileCache tileCache, int tileWidth, int tileHeight, Config cfg)
         {
-            // Generation params.
-            var walkableHeight = (int)Math.Ceiling(agent.Height / settings.CellHeight);
-            var walkableClimb = (int)Math.Floor(agent.MaxClimb / settings.CellHeight);
-            var walkableRadius = (int)Math.Ceiling(agent.Radius / settings.CellSize);
-            var tileSize = (int)settings.TileSize;
-            var borderSize = walkableRadius + 3;
-            var cfg = new Config()
-            {
-                CellSize = settings.CellSize,
-                CellHeight = settings.CellHeight,
-                WalkableSlopeAngle = agent.MaxSlope,
-                WalkableHeight = walkableHeight,
-                WalkableClimb = walkableClimb,
-                WalkableRadius = walkableRadius,
-                MaxEdgeLen = (int)(settings.EdgeMaxLength / settings.CellSize),
-                MaxSimplificationError = settings.EdgeMaxError,
-                MinRegionArea = (int)(settings.RegionMinSize * settings.RegionMinSize),
-                MergeRegionArea = (int)(settings.RegionMergeSize * settings.RegionMergeSize),
-                MaxVertsPerPoly = settings.VertsPerPoly,
-                TileSize = tileSize,
-                BorderSize = borderSize,
-                Width = tileSize + borderSize * 2,
-                Height = tileSize + borderSize * 2,
-                DetailSampleDist = settings.DetailSampleDist < 0.9f ? 0 : settings.CellSize * settings.DetailSampleDist,
-                DetailSampleMaxError = settings.CellHeight * settings.DetailSampleMaxError,
-                BoundingBox = bbox,
-            };
-
-            // Tile cache params.
-            var tcparams = new TileCacheParams()
-            {
-                Origin = bbox.Minimum,
-                CellSize = settings.CellSize,
-                CellHeight = settings.CellHeight,
-                Width = (int)settings.TileSize,
-                Height = (int)settings.TileSize,
-                WalkableHeight = agent.Height,
-                WalkableRadius = agent.Radius,
-                WalkableClimb = agent.MaxClimb,
-                MaxSimplificationError = settings.EdgeMaxError,
-                MaxTiles = tileWidth * tileHeight * EXPECTED_LAYERS_PER_TILE,
-                MaxObstacles = 128,
-            };
-            var tmproc = new TileCacheMeshProcess(geometry);
-
-            var tileCache = new TileCache(tcparams, tmproc);
-
             for (int y = 0; y < tileHeight; y++)
             {
                 for (int x = 0; x < tileWidth; x++)
                 {
-                    var tiles = RasterizeTileLayers(x, y, cfg, geometry, settings);
+                    var tiles = RasterizeTileLayers(x, y, geometry, cfg);
 
                     foreach (var tile in tiles)
                     {
@@ -482,13 +372,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 for (int x = 0; x < tileWidth; x++)
                 {
-                    tileCache.BuildNavMeshTilesAt(x, y, nm);
+                    tileCache.BuildNavMeshTilesAt(x, y, navMesh);
                 }
             }
-
-            return tileCache;
         }
-        private static IEnumerable<TileCacheData> RasterizeTileLayers(int x, int y, Config cfg, InputGeometry geometry, BuildSettings settings)
+        private static IEnumerable<TileCacheData> RasterizeTileLayers(int x, int y, InputGeometry geometry, Config cfg)
         {
             List<TileCacheData> tiles = new List<TileCacheData>();
 
@@ -547,7 +435,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Once all geometry is rasterized, we do initial pass of filtering to
             // remove unwanted overhangs caused by the conservative rasterization
             // as well as filter spans where the character cannot possibly stand.
-            FilterHeightfield(rc.solid, settings, cfg);
+            FilterHeightfield(rc.solid, cfg);
 
             if (!RecastUtils.BuildCompactHeightfield(cfg.WalkableHeight, cfg.WalkableClimb, rc.solid, out rc.chf))
             {
@@ -637,7 +525,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             return tbbox;
         }
-        public void BuildTileAtPosition(int x, int y, BoundingBox tbbox, InputGeometry geom, BuildSettings settings, Agent agent)
+        public void BuildTileAtPosition(int x, int y, InputGeometry geom, BuildSettings settings, Agent agent, BoundingBox tileBounds)
         {
             if (settings.UseTileCache && TileCache != null)
             {
@@ -645,7 +533,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
             else
             {
-                var data = BuildTileMesh(x, y, tbbox, geom, settings, agent);
+                var cfg = settings.GetTiledConfig(agent, tileBounds);
+
+                var data = BuildTileMesh(x, y, geom, cfg);
 
                 // Remove any previous data (navmesh owns and deletes the data).
                 RemoveTile(GetTileAt(x, y, 0));
@@ -671,20 +561,20 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
         }
 
-        private static void FilterHeightfield(Heightfield solid, BuildSettings settings, Config cfg)
+        private static void FilterHeightfield(Heightfield solid, Config cfg)
         {
             // Once all geometry is rasterized, we do initial pass of filtering to
             // remove unwanted overhangs caused by the conservative rasterization
             // as well as filter spans where the character cannot possibly stand.
-            if (settings.FilterLowHangingObstacles)
+            if (cfg.FilterLowHangingObstacles)
             {
                 RecastUtils.FilterLowHangingWalkableObstacles(cfg.WalkableClimb, solid);
             }
-            if (settings.FilterLedgeSpans)
+            if (cfg.FilterLedgeSpans)
             {
                 RecastUtils.FilterLedgeSpans(cfg.WalkableHeight, cfg.WalkableClimb, solid);
             }
-            if (settings.FilterWalkableLowHeightSpans)
+            if (cfg.FilterWalkableLowHeightSpans)
             {
                 RecastUtils.FilterWalkableLowHeightSpans(cfg.WalkableHeight, solid);
             }
@@ -692,7 +582,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Partition the heightfield so that we can use simple algorithm later to triangulate the walkable areas.
         /// </summary>
-        /// <param name="partitionType"></param>
         /// <param name="chf"></param>
         /// <param name="cfg"></param>
         /// <remarks>
@@ -721,9 +610,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         ///     if you have large open areas with small obstacles (not a problem if you use tiles)
         ///   * good choice to use for tiled navmesh with medium and small sized tiles
         /// </remarks>
-        private static void SamplePartition(SamplePartitionTypes partitionType, CompactHeightfield chf, Config cfg)
+        private static void SamplePartition(CompactHeightfield chf, Config cfg)
         {
-            if (partitionType == SamplePartitionTypes.Watershed)
+            if (cfg.PartitionType == SamplePartitionTypes.Watershed)
             {
                 // Prepare for region partitioning, by calculating distance field along the walkable surface.
                 if (!RecastUtils.BuildDistanceField(chf))
@@ -737,7 +626,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     throw new EngineException("buildNavigation: Could not build watershed regions.");
                 }
             }
-            else if (partitionType == SamplePartitionTypes.Monotone)
+            else if (cfg.PartitionType == SamplePartitionTypes.Monotone)
             {
                 // Partition the walkable surface into simple regions without holes.
                 // Monotone partitioning does not need distancefield.
@@ -746,7 +635,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     throw new EngineException("buildNavigation: Could not build monotone regions.");
                 }
             }
-            else if (partitionType == SamplePartitionTypes.Layers)
+            else if (cfg.PartitionType == SamplePartitionTypes.Layers)
             {
                 // Partition the walkable surface into simple regions without holes.
                 var hasLayers = RecastUtils.BuildLayerRegions(chf, cfg.BorderSize, cfg.MinRegionArea);

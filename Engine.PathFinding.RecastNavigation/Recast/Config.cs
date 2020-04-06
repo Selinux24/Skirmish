@@ -1,12 +1,19 @@
 ﻿using SharpDX;
 
-namespace Engine.PathFinding.RecastNavigation.Recast
+namespace Engine.PathFinding.RecastNavigation
 {
+    using Engine.PathFinding.RecastNavigation.Detour.Tiles;
+
     /// <summary>
     /// Config
     /// </summary>
-    public struct Config
+    struct Config
     {
+        /// <summary>
+        /// Agent type
+        /// </summary>
+        public Agent Agent { get; set; }
+
         /// <summary>
         /// The width of the field along the x-axis. [Limit: >= 0] [Units: vx]
         /// </summary>
@@ -79,5 +86,34 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// The maximum distance the detail mesh surface should deviate from heightfield data. (For height detail only.) [Limit: >=0] [Units: wu] 
         /// </summary>
         public float DetailSampleMaxError { get; set; }
+
+        /// <summary>
+        /// Filter low hanging obstacles when generation
+        /// </summary>
+        public bool FilterLowHangingObstacles { get; set; }
+        /// <summary>
+        /// Filter ledge spans when generation
+        /// </summary>
+        public bool FilterLedgeSpans { get; set; }
+        /// <summary>
+        /// Filter walkable low hight spans when generation
+        /// </summary>
+        public bool FilterWalkableLowHeightSpans { get; set; }
+        /// <summary>
+        /// Partition type
+        /// </summary>
+        public SamplePartitionTypes PartitionType { get; set; }
+        /// <summary>
+        /// Use tile cache
+        /// </summary>
+        public bool UseTileCache { get; set; }
+        /// <summary>
+        /// Build all tiles from the beginning
+        /// </summary>
+        public bool BuildAllTiles { get; set; }
+        /// <summary>
+        /// Tile cache parameters
+        /// </summary>
+        public TileCacheParams TileCacheParams { get; set; }
     }
 }
