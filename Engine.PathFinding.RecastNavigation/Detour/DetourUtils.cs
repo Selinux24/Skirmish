@@ -649,60 +649,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 // Calc polygon bounds. Use detail meshes if available.
                 if (param.DetailMeshes != null)
                 {
-                    int vb = param.DetailMeshes[i].VertBase;
-                    int ndv = param.DetailMeshes[i].VertCount;
-                    var bmin = param.DetailVerts[vb];
-                    var bmax = param.DetailVerts[vb];
-
-                    for (int j = 1; j < ndv; j++)
-                    {
-                        bmin = Vector3.Min(bmin, param.DetailVerts[vb + j]);
-                        bmax = Vector3.Max(bmax, param.DetailVerts[vb + j]);
-                    }
-
-                    // BV-tree uses cs for all dimensions
-                    it.BMin = new Int3
-                    {
-                        X = MathUtil.Clamp((int)((bmin.X - param.BMin.X) * quantFactor), 0, int.MaxValue),
-                        Y = MathUtil.Clamp((int)((bmin.Y - param.BMin.Y) * quantFactor), 0, int.MaxValue),
-                        Z = MathUtil.Clamp((int)((bmin.Z - param.BMin.Z) * quantFactor), 0, int.MaxValue)
-                    };
-
-                    it.BMax = new Int3
-                    {
-                        X = MathUtil.Clamp((int)((bmax.X - param.BMin.X) * quantFactor), 0, int.MaxValue),
-                        Y = MathUtil.Clamp((int)((bmax.Y - param.BMin.Y) * quantFactor), 0, int.MaxValue),
-                        Z = MathUtil.Clamp((int)((bmax.Z - param.BMin.Z) * quantFactor), 0, int.MaxValue)
-                    };
+                    CalcDetailBounds(ref it, param.DetailMeshes[i], param.DetailVerts, param.BMin, quantFactor);
                 }
                 else
                 {
-                    var p = param.Polys[i];
-
-                    var itBMin = param.Verts[p[0]];
-                    var itBMax = param.Verts[p[0]];
-
-                    for (int j = 1; j < param.Nvp; ++j)
-                    {
-                        if (p[j] == MESH_NULL_IDX) break;
-                        var x = param.Verts[p[j]].X;
-                        var y = param.Verts[p[j]].Y;
-                        var z = param.Verts[p[j]].Z;
-
-                        if (x < it.BMin.X) itBMin.X = x;
-                        if (y < it.BMin.Y) itBMin.Y = y;
-                        if (z < it.BMin.Z) itBMin.Z = z;
-
-                        if (x > it.BMax.X) itBMax.X = x;
-                        if (y > it.BMax.Y) itBMax.Y = y;
-                        if (z > it.BMax.Z) itBMax.Z = z;
-                    }
-                    // Remap y
-                    itBMin.Y = (int)Math.Floor(it.BMin.Y * param.CH / param.CS);
-                    itBMax.Y = (int)Math.Ceiling(it.BMax.Y * param.CH / param.CS);
-
-                    it.BMin = itBMin;
-                    it.BMax = itBMax;
+                    CalcPolygonBounds(ref it, param.Polys[i], param.Nvp, param.Verts, param.CS, param.CH);
                 }
                 items[i] = it;
             }
@@ -711,6 +662,64 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             Subdivide(items, param.PolyCount, 0, param.PolyCount, ref curNode, ref nodes);
 
             return curNode;
+        }
+        private static void CalcDetailBounds(ref BVItem it, PolyMeshDetailIndices dm, Vector3[] detailVerts, Vector3 bMin, float quantFactor)
+        {
+            int vb = dm.VertBase;
+            int ndv = dm.VertCount;
+            GetMinMaxBounds(detailVerts, vb, ndv, out var bmin, out var bmax);
+
+            // BV-tree uses cs for all dimensions
+            it.BMin = new Int3
+            {
+                X = MathUtil.Clamp((int)((bmin.X - bMin.X) * quantFactor), 0, int.MaxValue),
+                Y = MathUtil.Clamp((int)((bmin.Y - bMin.Y) * quantFactor), 0, int.MaxValue),
+                Z = MathUtil.Clamp((int)((bmin.Z - bMin.Z) * quantFactor), 0, int.MaxValue)
+            };
+
+            it.BMax = new Int3
+            {
+                X = MathUtil.Clamp((int)((bmax.X - bMin.X) * quantFactor), 0, int.MaxValue),
+                Y = MathUtil.Clamp((int)((bmax.Y - bMin.Y) * quantFactor), 0, int.MaxValue),
+                Z = MathUtil.Clamp((int)((bmax.Z - bMin.Z) * quantFactor), 0, int.MaxValue)
+            };
+        }
+        private static void GetMinMaxBounds(Vector3[] vectors, int vb, int ndv, out Vector3 bmin, out Vector3 bmax)
+        {
+            bmin = vectors[vb];
+            bmax = vectors[vb];
+            for (int j = 1; j < ndv; j++)
+            {
+                bmin = Vector3.Min(bmin, vectors[vb + j]);
+                bmax = Vector3.Max(bmax, vectors[vb + j]);
+            }
+        }
+        private static void CalcPolygonBounds(ref BVItem it, IndexedPolygon p, int nvp, Int3[] verts, float ch, float cs)
+        {
+            var itBMin = verts[p[0]];
+            var itBMax = verts[p[0]];
+
+            for (int j = 1; j < nvp; ++j)
+            {
+                if (p[j] == MESH_NULL_IDX) break;
+                var x = verts[p[j]].X;
+                var y = verts[p[j]].Y;
+                var z = verts[p[j]].Z;
+
+                if (x < it.BMin.X) itBMin.X = x;
+                if (y < it.BMin.Y) itBMin.Y = y;
+                if (z < it.BMin.Z) itBMin.Z = z;
+
+                if (x > it.BMax.X) itBMax.X = x;
+                if (y > it.BMax.Y) itBMax.Y = y;
+                if (z > it.BMax.Z) itBMax.Z = z;
+            }
+            // Remap y
+            itBMin.Y = (int)Math.Floor(it.BMin.Y * ch / cs);
+            itBMax.Y = (int)Math.Ceiling(it.BMax.Y * ch / cs);
+
+            it.BMin = itBMin;
+            it.BMax = itBMax;
         }
         public static int ClassifyOffMeshPoint(Vector3 pt, Vector3 bmin, Vector3 bmax)
         {

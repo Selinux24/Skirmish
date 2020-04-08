@@ -88,8 +88,6 @@ namespace Terrain.AI
                 var distance = Vector3.Distance(toPosition, fromPosition);
                 if (distance <= this.Range)
                 {
-                    //TODO: Ray picking
-
                     this.lastAttackTime = 0;
                     var damage = Helper.RandomGenerator.NextFloat(0, this.Damage);
                     if (Helper.RandomGenerator.NextFloat(0, 1) > 0.9f) { damage *= 2f; } //Critic
