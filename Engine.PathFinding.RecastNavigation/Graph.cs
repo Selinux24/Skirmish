@@ -34,6 +34,11 @@ namespace Engine.PathFinding.RecastNavigation
             /// Bounding box
             /// </summary>
             public BoundingBox BoundingBox { get; set; }
+
+            public override string ToString()
+            {
+                return $"X:{X}; Y:{Y};";
+            }
         }
 
         /// <summary>
@@ -483,75 +488,151 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
         /// <summary>
-        /// Builds the tile in the specified position
+        /// Look up tiles in a bounding box
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        /// <returns>Returns a list of tiles</returns>
+        private IEnumerable<UpdateTileData> LookupTiles(BoundingBox bbox)
+        {
+            var points = bbox.GetCorners();
+
+            var cornerTiles = LookupTiles(points).ToList();
+
+            int xMin = cornerTiles.Min(c => c.X);
+            int xMax = cornerTiles.Max(c => c.X);
+
+            int yMin = cornerTiles.Min(c => c.Y);
+            int yMax = cornerTiles.Max(c => c.Y);
+
+            cornerTiles.Clear();
+
+            for (int y = yMin; y <= yMax; y++)
+            {
+                for (int x = xMin; x <= xMax; x++)
+                {
+                    BoundingBox tileBounds = NavMesh.GetTileBounds(x, y, this.Input, this.Settings);
+
+                    cornerTiles.Add(new UpdateTileData
+                    {
+                        X = x,
+                        Y = y,
+                        BoundingBox = tileBounds,
+                    });
+                }
+            }
+
+            return cornerTiles;
+        }
+        /// <summary>
+        /// Look up for tiles in a position list
+        /// </summary>
+        /// <param name="positions">Position list</param>
+        /// <returns>Returns a list of tiles</returns>
+        private IEnumerable<UpdateTileData> LookupTiles(IEnumerable<Vector3> positions)
+        {
+            List<UpdateTileData> tiles = new List<UpdateTileData>();
+
+            foreach (var position in positions)
+            {
+                NavMesh.GetTileAtPosition(position, Input, Settings, out var tx, out var ty, out var bbox);
+
+                if (!tiles.Any(t => t.X == tx && t.Y == ty))
+                {
+                    UpdateTileData v = new UpdateTileData()
+                    {
+                        X = tx,
+                        Y = ty,
+                        BoundingBox = bbox,
+                    };
+
+                    tiles.Add(v);
+                }
+            }
+
+            return tiles;
+        }
+        /// <summary>
+        /// Builds the tiles in the specified position
         /// </summary>
         /// <param name="position">Position</param>
-        private void BuildTile(IEnumerable<Vector3> positions)
+        private void BuildTiles(IEnumerable<Vector3> positions)
         {
+            var tiles = LookupTiles(positions);
+
             foreach (var agentQ in AgentQueries)
             {
-                var navmesh = agentQ.NavMesh;
-
-                List<UpdateTileData> tiles = new List<UpdateTileData>();
-
-                foreach (var position in positions)
-                {
-                    NavMesh.GetTileAtPosition(position, Input, Settings, out var tx, out var ty, out var bbox);
-
-                    if (!tiles.Any(t => t.X == tx && t.Y == ty))
-                    {
-                        UpdateTileData v = new UpdateTileData()
-                        {
-                            X = tx,
-                            Y = ty,
-                            BoundingBox = bbox,
-                        };
-
-                        tiles.Add(v);
-                    }
-                }
-
-                foreach (var tile in tiles)
-                {
-                    navmesh.BuildTileAtPosition(tile.X, tile.Y, Input, Settings, agentQ.Agent, tile.BoundingBox);
-                }
+                BuildTiles(agentQ, tiles);
             }
         }
         /// <summary>
-        /// Removes the tile in the specified position list
+        /// Builds the tiles into the bounding box
         /// </summary>
-        /// <param name="positions">Position list</param>
-        private void RemoveTile(IEnumerable<Vector3> positions)
+        /// <param name="bbox">Bounding box</param>
+        private void BuildTiles(BoundingBox bbox)
         {
+            var tiles = LookupTiles(bbox);
+
             foreach (var agentQ in AgentQueries)
             {
-                var navmesh = agentQ.NavMesh;
-
-                List<UpdateTileData> tiles = new List<UpdateTileData>();
-
-                foreach (var position in positions)
-                {
-                    NavMesh.GetTileAtPosition(position, Input, Settings, out var tx, out var ty, out var bbox);
-
-                    if (!tiles.Any(t => t.X == tx && t.Y == ty))
-                    {
-                        UpdateTileData v = new UpdateTileData()
-                        {
-                            X = tx,
-                            Y = ty,
-                            BoundingBox = bbox,
-                        };
-
-                        tiles.Add(v);
-                    }
-                }
-
-                foreach (var tile in tiles)
-                {
-                    navmesh.RemoveTileAtPosition(tile.X, tile.Y, Settings);
-                }
+                BuildTiles(agentQ, tiles);
             }
         }
+        /// <summary>
+        /// Builds the tiles into the list
+        /// </summary>
+        /// <param name="agentQ">Agent query</param>
+        /// <param name="tiles">Tile list</param>
+        private void BuildTiles(GraphAgentQuery agentQ, IEnumerable<UpdateTileData> tiles)
+        {
+            foreach (var tile in tiles)
+            {
+                if (agentQ.NavMesh.HasTilesAt(tile.X, tile.Y))
+                {
+                    continue;
+                }
+
+                agentQ.NavMesh.BuildTileAtPosition(tile.X, tile.Y, Input, Settings, agentQ.Agent, tile.BoundingBox);
+            }
+        }
+        /// <summary>
+        /// Removes the tiles in the specified position list
+        /// </summary>
+        /// <param name="positions">Position list</param>
+        private void RemoveTiles(IEnumerable<Vector3> positions)
+        {
+            var tiles = LookupTiles(positions);
+
+            foreach (var agentQ in AgentQueries)
+            {
+                RemoveTiles(agentQ, tiles);
+            }
+        }
+        /// <summary>
+        /// Removes the tiles into the bounding box
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        private void RemoveTiles(BoundingBox bbox)
+        {
+            var tiles = LookupTiles(bbox);
+
+            foreach (var agentQ in AgentQueries)
+            {
+                RemoveTiles(agentQ, tiles);
+            }
+        }
+        /// <summary>
+        /// Removes the tiles in the list
+        /// </summary>
+        /// <param name="agentQ">Agent query</param>
+        /// <param name="tiles">Tile list</param>
+        private void RemoveTiles(GraphAgentQuery agentQ, IEnumerable<UpdateTileData> tiles)
+        {
+            foreach (var tile in tiles)
+            {
+                agentQ.NavMesh.RemoveTileAtPosition(tile.X, tile.Y, Settings);
+            }
+        }
+
         /// <summary>
         /// Updates the graph at specified position
         /// </summary>
@@ -560,7 +641,19 @@ namespace Engine.PathFinding.RecastNavigation
         {
             this.Updating?.Invoke(this, new EventArgs());
 
-            this.BuildTile(new[] { position });
+            this.BuildTiles(new[] { position });
+
+            this.Updated?.Invoke(this, new EventArgs());
+        }
+        /// <summary>
+        /// Updates the graph at specified box
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        public void UpdateAt(BoundingBox bbox)
+        {
+            this.Updating?.Invoke(this, new EventArgs());
+
+            this.BuildTiles(bbox);
 
             this.Updated?.Invoke(this, new EventArgs());
         }
@@ -572,7 +665,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             this.Updating?.Invoke(this, new EventArgs());
 
-            this.BuildTile(positions);
+            this.BuildTiles(positions);
 
             this.Updated?.Invoke(this, new EventArgs());
         }
@@ -584,7 +677,19 @@ namespace Engine.PathFinding.RecastNavigation
         {
             this.Updating?.Invoke(this, new EventArgs());
 
-            RemoveTile(new[] { position });
+            RemoveTiles(new[] { position });
+
+            this.Updated?.Invoke(this, new EventArgs());
+        }
+        /// <summary>
+        /// Removes the graph node at specified box
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        public void RemoveAt(BoundingBox bbox)
+        {
+            this.Updating?.Invoke(this, new EventArgs());
+
+            RemoveTiles(bbox);
 
             this.Updated?.Invoke(this, new EventArgs());
         }
@@ -596,7 +701,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             this.Updating?.Invoke(this, new EventArgs());
 
-            RemoveTile(positions);
+            RemoveTiles(positions);
 
             this.Updated?.Invoke(this, new EventArgs());
         }

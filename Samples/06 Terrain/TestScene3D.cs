@@ -1646,7 +1646,7 @@ namespace Terrain
                 this.Camera.MoveBackward(gameTime, this.Game.Input.ShiftPressed);
             }
 
-            if (this.Walk(this.walkerAgentType, prevPos, this.Camera.Position, out Vector3 walkerPos))
+            if (this.Walk(this.walkerAgentType, prevPos, this.Camera.Position, true, out Vector3 walkerPos))
             {
                 this.Camera.Goto(walkerPos);
             }

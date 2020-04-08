@@ -187,7 +187,15 @@ namespace Engine.PathFinding.AStar
         /// <param name="position">Position</param>
         public void UpdateAt(Vector3 position)
         {
-            //TODO: update grid state around position
+            throw new NotImplementedException();
+        }
+        /// <summary>
+        /// Updates the graph at specified box
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        public void UpdateAt(BoundingBox bbox)
+        {
+            throw new NotImplementedException();
         }
         /// <summary>
         /// Updates the graph at specified position list
@@ -195,7 +203,7 @@ namespace Engine.PathFinding.AStar
         /// <param name="positions">Position list</param>
         public void UpdateAt(IEnumerable<Vector3> positions)
         {
-            //TODO: update grid state around position list
+            throw new NotImplementedException();
         }
         /// <summary>
         /// Removes the graph node at specified position
@@ -203,7 +211,15 @@ namespace Engine.PathFinding.AStar
         /// <param name="position">Position</param>
         public void RemoveAt(Vector3 position)
         {
-            //TODO: update grid state around position
+            throw new NotImplementedException();
+        }
+        /// <summary>
+        /// Removes the graph node at specified box
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        public void RemoveAt(BoundingBox bbox)
+        {
+            throw new NotImplementedException();
         }
         /// <summary>
         /// Removes the graph node at specified position list
@@ -211,7 +227,7 @@ namespace Engine.PathFinding.AStar
         /// <param name="positions">Position list</param>
         public void RemoveAt(IEnumerable<Vector3> positions)
         {
-            //TODO: update grid state around position
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -221,7 +237,7 @@ namespace Engine.PathFinding.AStar
         /// <returns>Returns the obstacle id</returns>
         public int AddObstacle(BoundingCylinder cylinder)
         {
-            return -1;
+            throw new NotImplementedException();
         }
         /// <summary>
         /// Adds a bounding box obstacle
@@ -230,7 +246,7 @@ namespace Engine.PathFinding.AStar
         /// <returns>Returns the obstacle id</returns>
         public int AddObstacle(BoundingBox bbox)
         {
-            return -1;
+            throw new NotImplementedException();
         }
         /// <summary>
         /// Adds a oriented bounding box obstacle
@@ -240,7 +256,7 @@ namespace Engine.PathFinding.AStar
         /// <remarks>Only applies rotation if the obb's transform has rotation in the Y axis</remarks>
         public int AddObstacle(OrientedBoundingBox obb)
         {
-            return -1;
+            throw new NotImplementedException();
         }
         /// <summary>
         /// Removes an obstacle by obstacle id
@@ -248,7 +264,7 @@ namespace Engine.PathFinding.AStar
         /// <param name="obstacleId">Obstacle id</param>
         public void RemoveObstacle(int obstacleId)
         {
-            //TODO: update grid state using obstacle
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -258,7 +274,7 @@ namespace Engine.PathFinding.AStar
         /// <returns>Returns a valid random position over the graph</returns>
         public Vector3? FindRandomPoint(AgentType agent)
         {
-            return null;
+            throw new NotImplementedException();
         }
         /// <summary>
         /// Finds a random point around a circle
@@ -269,7 +285,7 @@ namespace Engine.PathFinding.AStar
         /// <returns>Returns a valid random position over the graph</returns>
         public Vector3? FindRandomPoint(AgentType agent, Vector3 position, float radius)
         {
-            return null;
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -278,7 +294,8 @@ namespace Engine.PathFinding.AStar
         /// <param name="gameTime">Game time</param>
         public void Update(GameTime gameTime)
         {
-            //TODO: update grid state
+            //Updates the internal state
+
         }
         /// <summary>
         /// Fires the updated event

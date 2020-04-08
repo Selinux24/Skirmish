@@ -1956,7 +1956,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                             }
 
                             // Skip the link if it is too far from search constraint.
-                            // TODO: Maybe should use getPortalPoints(), but this one is way faster.
                             Vector3 vj = verts.ElementAt(j);
                             Vector3 vi = verts.ElementAt(i);
                             float distSqr = DetourUtils.DistancePtSegSqr2D(searchPos, vj, vi, out _);

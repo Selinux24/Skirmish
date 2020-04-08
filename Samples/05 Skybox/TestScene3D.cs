@@ -357,7 +357,7 @@ namespace Skybox
 
             #region Walk
 
-            if (this.Walk(this.walker, previousPosition, this.Camera.Position, out Vector3 walkerPosition))
+            if (this.Walk(this.walker, previousPosition, this.Camera.Position, true, out Vector3 walkerPosition))
             {
                 this.Camera.Goto(walkerPosition);
             }

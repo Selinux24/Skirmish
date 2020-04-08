@@ -93,6 +93,16 @@ namespace Engine.PathFinding.RecastNavigation
         /// Build all tiles from the beginning
         /// </summary>
         public bool BuildAllTiles { get; set; } = true;
+        /// <summary>
+        /// Gets the tile * cell size
+        /// </summary>
+        public float TileCellSize
+        {
+            get
+            {
+                return TileSize * CellSize;
+            }
+        }
 
         /// <summary>
         /// Filter low hanging obstacles when generation

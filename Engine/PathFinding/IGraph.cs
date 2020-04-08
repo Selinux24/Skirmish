@@ -58,6 +58,11 @@ namespace Engine.PathFinding
         /// <param name="position">Position</param>
         void UpdateAt(Vector3 position);
         /// <summary>
+        /// Updates the graph at specified box
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        void UpdateAt(BoundingBox bbox);
+        /// <summary>
         /// Updates the graph at specified position list
         /// </summary>
         /// <param name="positions">Position list</param>
@@ -67,6 +72,11 @@ namespace Engine.PathFinding
         /// </summary>
         /// <param name="position">Position</param>
         void RemoveAt(Vector3 position);
+        /// <summary>
+        /// Removes the graph node at specified box
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        void RemoveAt(BoundingBox bbox);
         /// <summary>
         /// Removes the graph node at specified position list
         /// </summary>

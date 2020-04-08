@@ -1656,9 +1656,10 @@ namespace Engine
         /// <param name="agent">Agent</param>
         /// <param name="prevPosition">Previous position</param>
         /// <param name="newPosition">New position</param>
+        /// <param name="adjustHeight">Set whether use the agent height or not when resolving the final position. Usually true when the camera sets the agent's position</param>
         /// <param name="finalPosition">Returns the final position if exists</param>
         /// <returns>Returns true if final position found</returns>
-        public virtual bool Walk(AgentType agent, Vector3 prevPosition, Vector3 newPosition, out Vector3 finalPosition)
+        public virtual bool Walk(AgentType agent, Vector3 prevPosition, Vector3 newPosition, bool adjustHeight, out Vector3 finalPosition)
         {
             finalPosition = prevPosition;
 
@@ -1674,24 +1675,29 @@ namespace Engine
             }
 
             Vector3 newFeetPosition = newPosition;
-            newFeetPosition.Y -= agent.Height;
 
-            results = results
-                .Where(r => Vector3.Distance(r.Position, newFeetPosition) < agent.Height)
-                .OrderBy(r => r.Distance).ToArray();
+            if (adjustHeight)
+            {
+                float offset = agent.Height;
+                newFeetPosition.Y -= offset;
+
+                results = results
+                    .Where(r => Vector3.Distance(r.Position, newFeetPosition) < offset)
+                    .OrderBy(r => r.Distance).ToArray();
+            }
 
             for (int i = 0; i < results.Length; i++)
             {
                 if (this.IsWalkable(agent, results[i].Position, out Vector3? nearest))
                 {
-                    finalPosition = GetPositionWalkable(agent, prevPosition, newPosition, results[i].Position);
+                    finalPosition = GetPositionWalkable(agent, prevPosition, newPosition, results[i].Position, adjustHeight);
 
                     return true;
                 }
                 else if (nearest.HasValue)
                 {
                     //Not walkable but nearest position found
-                    finalPosition = GetPositionNonWalkable(agent, prevPosition, newPosition, nearest.Value);
+                    finalPosition = GetPositionNonWalkable(agent, prevPosition, newPosition, nearest.Value, adjustHeight);
 
                     return true;
                 }
@@ -1706,11 +1712,16 @@ namespace Engine
         /// <param name="prevPosition">Previous position</param>
         /// <param name="newPosition">New position</param>
         /// <param name="position">Test position</param>
+        /// <param name="adjustHeight">Set whether use the agent height or not when resolving the final position. Usually true when the camera sets the agent's position</param>
         /// <returns>Returns the new agent position</returns>
-        private Vector3 GetPositionWalkable(AgentType agent, Vector3 prevPosition, Vector3 newPosition, Vector3 position)
+        private Vector3 GetPositionWalkable(AgentType agent, Vector3 prevPosition, Vector3 newPosition, Vector3 position, bool adjustHeight)
         {
             Vector3 finalPosition = position;
-            finalPosition.Y += agent.Height;
+
+            if (adjustHeight)
+            {
+                finalPosition.Y += agent.Height;
+            }
 
             var moveP = newPosition - prevPosition;
             var moveV = finalPosition - prevPosition;
@@ -1728,8 +1739,9 @@ namespace Engine
         /// <param name="prevPosition">Previous position</param>
         /// <param name="newPosition">New position</param>
         /// <param name="position">Test position</param>
+        /// <param name="adjustHeight">Set whether use the agent height or not when resolving the final position. Usually true when the camera sets the agent's position</param>
         /// <returns>Returns the new agent position</returns>
-        private Vector3 GetPositionNonWalkable(AgentType agent, Vector3 prevPosition, Vector3 newPosition, Vector3 position)
+        private Vector3 GetPositionNonWalkable(AgentType agent, Vector3 prevPosition, Vector3 newPosition, Vector3 position, bool adjustHeight)
         {
             //Find nearest ground position
             Vector3 finalPosition;
@@ -1744,8 +1756,11 @@ namespace Engine
                 finalPosition = position;
             }
 
-            //Adjust height
-            finalPosition.Y += agent.Height;
+            if (adjustHeight)
+            {
+                //Adjust height
+                finalPosition.Y += agent.Height;
+            }
 
             var moveP = newPosition - prevPosition;
             var moveV = finalPosition - prevPosition;

@@ -158,7 +158,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             int tileSize = (int)settings.TileSize;
             int tileWidth = (gridWidth + tileSize - 1) / tileSize;
             int tileHeight = (gridHeight + tileSize - 1) / tileSize;
-            float tileCellSize = settings.TileSize * settings.CellSize;
+            float tileCellSize = settings.TileCellSize;
 
             int tileBits = Math.Min((int)Math.Log(Helper.NextPowerOfTwo(tileWidth * tileHeight), 2), 14);
             if (tileBits > 14) tileBits = 14;
@@ -503,13 +503,18 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             var bbox = settings.Bounds ?? geom.BoundingBox;
 
-            float tileCellSize = settings.TileSize * settings.CellSize;
-            x = (int)((pos.X - bbox.Minimum.X) / tileCellSize);
-            y = (int)((pos.Z - bbox.Minimum.Z) / tileCellSize);
+            x = (int)((pos.X - bbox.Minimum.X) / settings.TileCellSize);
+            y = (int)((pos.Z - bbox.Minimum.Z) / settings.TileCellSize);
 
-            tileBounds = GetTileBounds(x, y, tileCellSize, bbox);
+            tileBounds = GetTileBounds(x, y, settings.TileCellSize, bbox);
         }
-        private static BoundingBox GetTileBounds(int x, int y, float tileSize, BoundingBox bbox)
+        public static BoundingBox GetTileBounds(int x, int y, InputGeometry geom, BuildSettings settings)
+        {
+            var bbox = settings.Bounds ?? geom.BoundingBox;
+
+            return GetTileBounds(x, y, settings.TileCellSize, bbox);
+        }
+        public static BoundingBox GetTileBounds(int x, int y, float tileSize, BoundingBox bbox)
         {
             BoundingBox tbbox = new BoundingBox();
 
@@ -655,6 +660,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 pmesh.Flags[i] = QueryFilter.EvaluateArea(pmesh.Areas[i]);
             }
         }
+
 
         private Vector3 m_orig;
         private readonly float m_tileWidth;
@@ -1000,6 +1006,20 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             x = (int)Math.Floor((pos.X - m_orig.X) / m_tileWidth);
             y = (int)Math.Floor((pos.Z - m_orig.Z) / m_tileHeight);
+        }
+        /// <summary>
+        /// Gets whether exists or not tiles at location
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        /// <returns>Returns true if has tiles</returns>
+        public bool HasTilesAt(int x, int y)
+        {
+            // Find tile based on hash.
+            int h = DetourUtils.ComputeTileHash(x, y, m_tileLutMask);
+            var tile = m_posLookup[h];
+
+            return tile != null;
         }
         /// <summary>
         /// Gets the tile at specified coordinates

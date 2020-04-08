@@ -337,13 +337,11 @@ namespace Engine
         {
             get
             {
-                return this.Following != null ? this.Following.Position : this.position;
+                return this.Following?.Position ?? this.position;
             }
             set
             {
                 this.position = value;
-
-                if (this.Following != null) this.Following = null;
             }
         }
         /// <summary>
@@ -353,13 +351,11 @@ namespace Engine
         {
             get
             {
-                return this.Following != null ? this.Following.Interest : this.interest;
+                return this.Following?.Interest ?? this.interest;
             }
             set
             {
                 this.interest = value;
-
-                if (this.Following != null) this.Following = null;
             }
         }
         /// <summary>

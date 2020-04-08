@@ -28,7 +28,6 @@ namespace Heightmap
 
         private float time = 0.23f;
 
-        private Vector3 playerHeight = Vector3.UnitY * 5f;
         private bool playerFlying = true;
         private SceneLightSpot lantern = null;
         private bool lanternFixed = false;
@@ -1017,9 +1016,9 @@ namespace Heightmap
         }
         private async Task SetPlayerPosition()
         {
-            if (this.FindAllGroundPosition(-40, -40, out PickingResult<Triangle>[] res))
+            if (this.FindAllGroundPosition(-20, -40, out PickingResult<Triangle>[] res))
             {
-                this.soldier.Manipulator.SetPosition(res[2].Position, true);
+                this.soldier.Manipulator.SetPosition(res.Last().Position, true);
                 this.soldier.Manipulator.SetRotation(MathUtil.Pi, 0, 0, true);
             }
 
@@ -1113,10 +1112,9 @@ namespace Heightmap
         {
             //Player height
             var sbbox = this.soldier.GetBoundingBox();
-            this.playerHeight.Y = sbbox.Maximum.Y - sbbox.Minimum.Y;
-            this.agent.Height = this.playerHeight.Y;
-            this.agent.Radius = this.playerHeight.Y * 0.33f;
-            this.agent.MaxClimb = this.playerHeight.Y * 0.5f;
+            this.agent.Height = sbbox.GetY();
+            this.agent.Radius = sbbox.GetX() * 0.1f;
+            this.agent.MaxClimb = sbbox.GetY() * 0.5f;
             this.agent.MaxSlope = 45;
 
             //Navigation settings
@@ -1137,18 +1135,17 @@ namespace Heightmap
 
             //Tiling
             nmsettings.BuildMode = BuildModes.Tiled;
-            nmsettings.TileSize = 16;
+            nmsettings.TileSize = 32;
             nmsettings.UseTileCache = false;
-
-            nmsettings.Bounds = new BoundingBox(
-                new Vector3(-100, -100, -100),
-                new Vector3(+100, +100, +100));
+            nmsettings.BuildAllTiles = false;
 
             var nminput = new InputGeometry(GetTrianglesForNavigationGraph);
 
             this.PathFinderDescription = new PathFinderDescription(nmsettings, nminput);
 
             await this.UpdateNavigationGraph();
+
+            gameReady = true;
         }
         private void ToggleFog()
         {
@@ -1189,7 +1186,6 @@ namespace Heightmap
             UpdateLights();
             UpdateWind(gameTime);
             UpdateDust(gameTime);
-            UpdateGraph(gameTime);
             UpdateDrawers();
 
             this.help.Text = string.Format(
@@ -1217,7 +1213,7 @@ namespace Heightmap
                 }
                 else
                 {
-                    var offset = (this.playerHeight * 1.2f) + (Vector3.ForwardLH * 10f) + (Vector3.Left * 3f);
+                    var offset = (this.agent.Height * 1.2f) + (Vector3.ForwardLH * 10f) + (Vector3.Left * 10f);
                     var view = (Vector3.BackwardLH * 4f) + Vector3.Down;
                     this.Camera.Following = new CameraFollower(this.soldier.Manipulator, offset, view);
                 }
@@ -1231,16 +1227,20 @@ namespace Heightmap
         }
         private void UpdateCamera(GameTime gameTime, bool shift)
         {
+            Vector3 position;
             if (this.playerFlying)
             {
-                this.UpdateFlyingCamera(gameTime, shift);
+                position = this.UpdateFlyingCamera(gameTime, shift);
             }
             else
             {
-                this.UpdateWalkingCamera(gameTime, shift);
+                position = this.UpdateWalkingCamera(gameTime, shift);
             }
+
+            Vector3 extent = Vector3.One * 20f;
+            this.NavigationGraph.UpdateAt(new BoundingBox(position - extent, position + extent));
         }
-        private void UpdateFlyingCamera(GameTime gameTime, bool shift)
+        private Vector3 UpdateFlyingCamera(GameTime gameTime, bool shift)
         {
 #if DEBUG
             if (this.Game.Input.RightMouseButtonPressed)
@@ -1276,9 +1276,12 @@ namespace Heightmap
             {
                 this.Camera.MoveBackward(gameTime, !shift);
             }
+       
+            return this.Camera.Position;
         }
-        private void UpdateWalkingCamera(GameTime gameTime, bool shift)
+        private Vector3 UpdateWalkingCamera(GameTime gameTime, bool shift)
         {
+            var prevPosition = this.soldier.Manipulator.Position;
 #if DEBUG
             if (this.Game.Input.RightMouseButtonPressed)
             {
@@ -1316,10 +1319,16 @@ namespace Heightmap
                 this.soldier.Manipulator.MoveBackward(gameTime, delta);
             }
 
-            if (this.FindTopGroundPosition(this.soldier.Manipulator.Position.X, this.soldier.Manipulator.Position.Z, out PickingResult<Triangle> r))
+            if (Walk(agent, prevPosition, this.soldier.Manipulator.Position, false, out var finalPosition))
             {
-                this.soldier.Manipulator.SetPosition(r.Position);
+                this.soldier.Manipulator.SetPosition(finalPosition);
             }
+            else
+            {
+                this.soldier.Manipulator.SetPosition(prevPosition);
+            }
+
+            return this.soldier.Manipulator.Position;
         }
         private void UpdateInputDebugInfo(GameTime gameTime)
         {
@@ -1632,21 +1641,7 @@ namespace Heightmap
 
             this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = true;
         }
-        private void UpdateGraph(GameTime gameTime)
-        {
-            graphUpdateSeconds -= gameTime.ElapsedSeconds;
 
-            if (graphUpdateRequested && graphUpdateSeconds <= 0f)
-            {
-                graphUpdateRequested = false;
-                graphUpdateSeconds = 0;
-
-                this.UpdateGraphNodes(this.agent);
-            }
-        }
-
-        private bool graphUpdateRequested = false;
-        private float graphUpdateSeconds = 0;
         private void UpdateGraphNodes(AgentType agent)
         {
             var nodes = this.GetNodes(agent).OfType<GraphNode>();
@@ -1660,11 +1655,6 @@ namespace Heightmap
                 }
             }
         }
-        private void RequestGraphUpdate(float seconds)
-        {
-            graphUpdateRequested = true;
-            graphUpdateSeconds = seconds;
-        }
 
         public override void Draw(GameTime gameTime)
         {
@@ -1675,9 +1665,7 @@ namespace Heightmap
 
         public override void NavigationGraphUpdated()
         {
-            this.RequestGraphUpdate(0.2f);
-
-            gameReady = true;
+            this.UpdateGraphNodes(this.agent);
         }
     }
 }

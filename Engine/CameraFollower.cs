@@ -21,7 +21,9 @@ namespace Engine
         {
             get
             {
-                return this.Position + Vector3.TransformNormal(this.viewOffset, this.manipulator.LocalTransform);
+                var pos = Vector3.TransformCoordinate(this.positionOffset, this.manipulator.LocalTransform); 
+
+                return pos + Vector3.TransformNormal(this.viewOffset, this.manipulator.LocalTransform);
             }
         }
 

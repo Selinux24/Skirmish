@@ -238,7 +238,7 @@ namespace Collada
                 this.Game.Input.MouseYDelta);
 #endif
 
-            if (this.Walk(this.agent, prevPos, this.Camera.Position, out Vector3 walkerPos))
+            if (this.Walk(this.agent, prevPos, this.Camera.Position, true, out Vector3 walkerPos))
             {
                 this.Camera.Goto(walkerPos);
             }
