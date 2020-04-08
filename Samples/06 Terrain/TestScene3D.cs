@@ -68,6 +68,7 @@ namespace Terrain
 
         private Model heliport = null;
         private Model garage = null;
+        private Model building = null;
         private ModelInstanced obelisk = null;
         private ModelInstanced rocks = null;
         private ModelInstanced tree1 = null;
@@ -171,6 +172,7 @@ namespace Terrain
                 InitializeTanks(),
                 InitializeHeliport(),
                 InitializeGarage(),
+                InitializeBuildings(),
                 InitializeObelisk(),
                 InitializeRocks(),
                 InitializeTrees(),
@@ -599,6 +601,33 @@ namespace Terrain
                 Duration = sw.Elapsed,
             };
         }
+        private async Task<TaskResult> InitializeBuildings()
+        {
+            Stopwatch sw = Stopwatch.StartNew();
+            sw.Restart();
+
+            var gDesc = new ModelDescription()
+            {
+                Name = "Buildings",
+                CastShadow = true,
+                Content = new ContentDescription()
+                {
+                    ContentFolder = "resources/Buildings",
+                    ModelContentFilename = "Building_1.xml",
+                }
+            };
+            this.building = await this.AddComponentModel(gDesc, SceneObjectUsages.None, this.layerObjects);
+            this.AttachToGround(this.building, true);
+
+            this.Lights.AddRange(this.building.Lights);
+
+            sw.Stop();
+            return new TaskResult()
+            {
+                Text = "Buildings",
+                Duration = sw.Elapsed,
+            };
+        }
         private async Task<TaskResult> InitializeObelisk()
         {
             Stopwatch sw = Stopwatch.StartNew();
@@ -834,6 +863,7 @@ namespace Terrain
             await Task.WhenAll(
                 this.InitializePositionHeliport(),
                 this.InitializePositionGarage(),
+                this.InitializePositionBuildings(),
                 this.InitializePositionObelisk());
 
             var navSettings = BuildSettings.Default;
@@ -1201,6 +1231,18 @@ namespace Terrain
                     this.garage.Manipulator.SetPosition(r.Position);
                     this.garage.Manipulator.SetRotation(MathUtil.PiOverFour * 0.5f + MathUtil.Pi, 0, 0);
                     this.garage.Manipulator.UpdateInternals(true);
+                }
+            });
+        }
+        private async Task InitializePositionBuildings()
+        {
+            await Task.Run(() =>
+            {
+                if (this.FindTopGroundPosition(-30, -40, out PickingResult<Triangle> r))
+                {
+                    this.building.Manipulator.SetPosition(r.Position);
+                    this.building.Manipulator.SetRotation(MathUtil.PiOverFour * 0.5f + MathUtil.Pi, 0, 0);
+                    this.building.Manipulator.UpdateInternals(true);
                 }
             });
         }

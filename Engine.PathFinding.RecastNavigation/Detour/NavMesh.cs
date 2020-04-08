@@ -211,7 +211,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             return nm;
         }
 
-        private static bool BuildAllTiles(NavMesh navMesh, InputGeometry geom, BuildSettings settings, Agent agent, TileParams tileParams)
+        private static void BuildAllTiles(NavMesh navMesh, InputGeometry geom, BuildSettings settings, Agent agent, TileParams tileParams)
         {
             for (int y = 0; y < tileParams.Height; y++)
             {
@@ -232,8 +232,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     }
                 }
             }
-
-            return true;
         }
         private static MeshData BuildTileMesh(int x, int y, InputGeometry geometry, Config cfg)
         {

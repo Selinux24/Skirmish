@@ -92,7 +92,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Build all tiles from the beginning
         /// </summary>
-        public bool BuildAllTiles { get; set; } = false;
+        public bool BuildAllTiles { get; set; } = true;
 
         /// <summary>
         /// Filter low hanging obstacles when generation
