@@ -120,7 +120,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 BuildBvTree = true
             };
 
-            if (!DetourUtils.CreateNavMeshData(param, out MeshData navData))
+            MeshData navData = DetourUtils.CreateNavMeshData(param);
+            if (navData == null)
             {
                 throw new EngineException("Could not build Detour navmesh.");
             }
@@ -343,12 +344,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 BuildBvTree = true
             };
 
-            if (!DetourUtils.CreateNavMeshData(param, out MeshData navData))
-            {
-                return null;
-            }
-
-            return navData;
+            return DetourUtils.CreateNavMeshData(param);
         }
         private static void BuildTileCache(NavMesh navMesh, InputGeometry geometry, TileCache tileCache, int tileWidth, int tileHeight, Config cfg)
         {

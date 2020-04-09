@@ -703,7 +703,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 m_tmproc.Process(ref param, bc);
             }
 
-            if (!DetourUtils.CreateNavMeshData(param, out MeshData navData))
+            MeshData navData = DetourUtils.CreateNavMeshData(param);
+            if (navData == null)
             {
                 return false;
             }

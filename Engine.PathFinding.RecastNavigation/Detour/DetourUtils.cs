@@ -745,171 +745,30 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             return 0xff;
         }
-        public static bool CreateNavMeshData(NavMeshCreateParams param, out MeshData outData)
+        public static MeshData CreateNavMeshData(NavMeshCreateParams param)
         {
-            outData = null;
-
-            if (param.Nvp > DT_VERTS_PER_POLYGON)
+            if (param.Nvp > DT_VERTS_PER_POLYGON ||
+                param.VertCount == 0 || param.Verts == null ||
+                param.PolyCount == 0 || param.Polys == null)
             {
-                return false;
-            }
-            if (param.VertCount == 0 || param.Verts == null)
-            {
-                return false;
-            }
-            if (param.PolyCount == 0 || param.Polys == null)
-            {
-                return false;
+                return null;
             }
 
-            int nvp = param.Nvp;
-
-            // Classify off-mesh connection points. We store only the connections
-            // whose start point is inside the tile.
-            Vector2Int[] offMeshConClass = null;
-            int storedOffMeshConCount = 0;
-            int offMeshConLinkCount = 0;
-
-            if (param.OffMeshConCount > 0)
-            {
-                offMeshConClass = new Vector2Int[param.OffMeshConCount];
-
-                // Find tight heigh bounds, used for culling out off-mesh start locations.
-                float hmin = float.MaxValue;
-                float hmax = float.MinValue;
-
-                if (param.DetailVerts != null && param.DetailVertsCount > 0)
-                {
-                    for (int i = 0; i < param.DetailVertsCount; ++i)
-                    {
-                        var h = param.DetailVerts[i].Y;
-                        hmin = Math.Min(hmin, h);
-                        hmax = Math.Max(hmax, h);
-                    }
-                }
-                else
-                {
-                    for (int i = 0; i < param.VertCount; ++i)
-                    {
-                        var iv = param.Verts[i];
-                        float h = param.BMin.Y + iv.Y * param.CH;
-                        hmin = Math.Min(hmin, h);
-                        hmax = Math.Max(hmax, h);
-                    }
-                }
-                hmin -= param.WalkableClimb;
-                hmax += param.WalkableClimb;
-                Vector3 bmin = param.BMin;
-                Vector3 bmax = param.BMax;
-                bmin.Y = hmin;
-                bmax.Y = hmax;
-
-                for (int i = 0; i < param.OffMeshConCount; ++i)
-                {
-                    var p0 = param.OffMeshCon[i].Start;
-                    var p1 = param.OffMeshCon[i].End;
-                    offMeshConClass[i].X = ClassifyOffMeshPoint(p0, bmin, bmax);
-                    offMeshConClass[i].Y = ClassifyOffMeshPoint(p1, bmin, bmax);
-
-                    // Zero out off-mesh start positions which are not even potentially touching the mesh.
-                    if (offMeshConClass[i].X == 0xff && (p0.Y < bmin.Y || p0.Y > bmax.Y))
-                    {
-                        offMeshConClass[i].X = 0;
-                    }
-
-                    // Count how many links should be allocated for off-mesh connections.
-                    if (offMeshConClass[i].X == 0xff)
-                    {
-                        offMeshConLinkCount++;
-                    }
-                    if (offMeshConClass[i].Y == 0xff)
-                    {
-                        offMeshConLinkCount++;
-                    }
-
-                    if (offMeshConClass[i].X == 0xff)
-                    {
-                        storedOffMeshConCount++;
-                    }
-                }
-            }
+            // Classify off-mesh connection points. 
+            // We store only the connections whose start point is inside the tile.
+            ClassifyOffMeshConnections(param, out var offMeshConClass, out int storedOffMeshConCount, out int offMeshConLinkCount);
 
             // Off-mesh connectionss are stored as polygons, adjust values.
             int totPolyCount = param.PolyCount + storedOffMeshConCount;
             int totVertCount = param.VertCount + storedOffMeshConCount * 2;
 
             // Find portal edges which are at tile borders.
-            int edgeCount = 0;
-            int portalCount = 0;
-            for (int i = 0; i < param.PolyCount; ++i)
-            {
-                var p = param.Polys[i];
-                for (int j = 0; j < nvp; ++j)
-                {
-                    if (p[j] == MESH_NULL_IDX)
-                    {
-                        break;
-                    }
-
-                    edgeCount++;
-
-                    if ((p[nvp + j] & 0x8000) != 0)
-                    {
-                        var dir = p[nvp + j] & 0xf;
-                        if (dir != 0xf)
-                        {
-                            portalCount++;
-                        }
-                    }
-                }
-            }
+            FindPortalEdges(param, out int edgeCount, out int portalCount);
 
             int maxLinkCount = edgeCount + portalCount * 2 + offMeshConLinkCount * 2;
 
             // Find unique detail vertices.
-            int uniqueDetailVertCount = 0;
-            int detailTriCount;
-            if (param.DetailMeshes != null)
-            {
-                // Has detail mesh, count unique detail vertex count and use input detail tri count.
-                detailTriCount = param.DetailTriCount;
-                for (int i = 0; i < param.PolyCount; ++i)
-                {
-                    var p = param.Polys[i];
-                    var ndv = param.DetailMeshes[i].VertCount;
-                    int nv = 0;
-                    for (int j = 0; j < nvp; ++j)
-                    {
-                        if (p[j] == MESH_NULL_IDX)
-                        {
-                            break;
-                        }
-                        nv++;
-                    }
-                    ndv -= nv;
-                    uniqueDetailVertCount += ndv;
-                }
-            }
-            else
-            {
-                // No input detail mesh, build detail mesh from nav polys.
-                uniqueDetailVertCount = 0; // No extra detail verts.
-                detailTriCount = 0;
-                for (int i = 0; i < param.PolyCount; ++i)
-                {
-                    var p = param.Polys[i];
-                    int nv = 0;
-                    for (int j = 0; j < nvp; ++j)
-                    {
-                        if (p[j] == MESH_NULL_IDX)
-                        {
-                            break;
-                        }
-                        nv++;
-                    }
-                    detailTriCount += nv - 2;
-                }
-            }
+            FindUniqueDetailVertices(param, out int uniqueDetailVertCount, out int detailTriCount);
 
             MeshData data = new MeshData
             {
@@ -946,129 +805,23 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Store vertices
 
             // Mesh vertices
-            for (int i = 0; i < param.VertCount; ++i)
-            {
-                var iv = param.Verts[i];
-                var v = new Vector3
-                {
-                    X = param.BMin.X + iv.X * param.CS,
-                    Y = param.BMin.Y + iv.Y * param.CH,
-                    Z = param.BMin.Z + iv.Z * param.CS
-                };
-                data.NavVerts.Add(v);
-            }
+            data.StoreMeshVertices(param);
 
             // Off-mesh link vertices.
-            int n = 0;
-            for (int i = 0; i < param.OffMeshConCount; ++i)
-            {
-                // Only store connections which start from this tile.
-                if (offMeshConClass[i].X == 0xff)
-                {
-                    var linkv = param.OffMeshCon[i];
-                    data.NavVerts.Add(linkv.Start);
-                    data.NavVerts.Add(linkv.End);
-                    n++;
-                }
-            }
+            data.StoreOffMeshLinksVertices(param, offMeshConClass);
 
             // Store polygons
 
             // Mesh polys
-            for (int i = 0; i < param.PolyCount; i++)
-            {
-                var p = Poly.Create(
-                    param.Polys[i],
-                    param.PolyFlags[i],
-                    param.PolyAreas[i],
-                    nvp);
-
-                data.NavPolys.Add(p);
-            }
+            data.StoreMeshPolygons(param);
 
             // Off-mesh connection vertices.
-            n = 0;
-            for (int i = 0; i < param.OffMeshConCount; i++)
-            {
-                // Only store connections which start from this tile.
-                if (offMeshConClass[i].X == 0xff)
-                {
-                    int start = offMeshVertsBase + (n * 2) + 0;
-                    int end = offMeshVertsBase + (n * 2) + 1;
-
-                    var p = Poly.Create(
-                        start,
-                        end,
-                        param.OffMeshCon[i].FlagTypes,
-                        param.OffMeshCon[i].AreaType);
-
-                    data.NavPolys.Add(p);
-                    n++;
-                }
-            }
+            data.StoreOffMeshConnectionVertices(param, offMeshConClass, offMeshVertsBase);
 
             // Store detail meshes and vertices.
             // The nav polygon vertices are stored as the first vertices on each mesh.
             // We compress the mesh data by skipping them and using the navmesh coordinates.
-            if (param.DetailMeshes != null)
-            {
-                for (int i = 0; i < param.PolyCount; ++i)
-                {
-                    int vb = param.DetailMeshes[i].VertBase;
-                    int ndv = param.DetailMeshes[i].VertCount;
-                    int nv = data.NavPolys[i].VertCount;
-                    PolyDetail dtl = new PolyDetail
-                    {
-                        VertBase = data.NavDVerts.Count,
-                        VertCount = (ndv - nv),
-                        TriBase = param.DetailMeshes[i].TriBase,
-                        TriCount = param.DetailMeshes[i].TriCount,
-                    };
-                    // Copy vertices except the first 'nv' verts which are equal to nav poly verts.
-                    if (ndv - nv != 0)
-                    {
-                        var verts = param.DetailVerts.Skip(vb + nv).Take(ndv - nv);
-                        data.NavDVerts.AddRange(verts);
-                    }
-                    data.NavDMeshes.Add(dtl);
-                }
-                // Store triangles.
-                data.NavDTris.AddRange(param.DetailTris);
-            }
-            else
-            {
-                // Create dummy detail mesh by triangulating polys.
-                int tbase = 0;
-                for (int i = 0; i < param.PolyCount; ++i)
-                {
-                    int nv = data.NavPolys[i].VertCount;
-                    PolyDetail dtl = new PolyDetail
-                    {
-                        VertBase = 0,
-                        VertCount = 0,
-                        TriBase = tbase,
-                        TriCount = (nv - 2)
-                    };
-                    // Triangulate polygon (local indices).
-                    for (int j = 2; j < nv; ++j)
-                    {
-                        var t = new PolyMeshTriangleIndices
-                        {
-                            Point1 = 0,
-                            Point2 = j - 1,
-                            Point3 = j,
-                            // Bit for each edge that belongs to poly boundary.
-                            Flags = (1 << 2)
-                        };
-                        if (j == 2) t.Flags |= (1 << 0);
-                        if (j == nv - 1) t.Flags |= (1 << 4);
-                        tbase++;
-
-                        data.NavDTris.Add(t);
-                    }
-                    data.NavDMeshes.Add(dtl);
-                }
-            }
+            data.StoreDetailMeshes(param);
 
             // Store and create BVtree.
             if (param.BuildBvTree)
@@ -1079,32 +832,121 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             // Store Off-Mesh connections.
-            n = 0;
+            data.StoreOffMeshConnections(param, offMeshConClass, offMeshPolyBase);
+
+            return data;
+        }
+        private static void ClassifyOffMeshConnections(NavMeshCreateParams param, out Vector2Int[] offMeshConClass, out int storedOffMeshConCount, out int offMeshConLinkCount)
+        {
+            // Classify off-mesh connection points. We store only the connections
+            // whose start point is inside the tile.
+            offMeshConClass = null;
+            storedOffMeshConCount = 0;
+            offMeshConLinkCount = 0;
+
+            if (param.OffMeshConCount <= 0)
+            {
+                return;
+            }
+
+            offMeshConClass = new Vector2Int[param.OffMeshConCount];
+
+            // Find tight heigh bounds, used for culling out off-mesh start locations.
+            var bbox = param.FindBounds();
+            Vector3 bmin = bbox.Minimum;
+            Vector3 bmax = bbox.Maximum;
+
             for (int i = 0; i < param.OffMeshConCount; ++i)
             {
-                // Only store connections which start from this tile.
-                if (offMeshConClass[i].X == 0xff)
-                {
-                    // Copy connection end-points.
-                    var con = new OffMeshConnection
-                    {
-                        Poly = offMeshPolyBase + n,
-                        Rad = param.OffMeshCon[i].Radius,
-                        Flags = param.OffMeshCon[i].Direction != 0 ? DT_OFFMESH_CON_BIDIR : 0,
-                        Side = offMeshConClass[i].Y,
-                        Start = param.OffMeshCon[i].Start,
-                        End = param.OffMeshCon[i].End,
-                        UserId = param.OffMeshCon[i].Id,
-                    };
+                var p0 = param.OffMeshCon[i].Start;
+                var p1 = param.OffMeshCon[i].End;
+                int x = ClassifyOffMeshPoint(p0, bmin, bmax);
+                int y = ClassifyOffMeshPoint(p1, bmin, bmax);
 
-                    data.OffMeshCons.Add(con);
-                    n++;
+                // Zero out off-mesh start positions which are not even potentially touching the mesh and
+                // count how many links should be allocated for off-mesh connections.
+                if (x == 0xff)
+                {
+                    if (p0.Y < bmin.Y || p0.Y > bmax.Y)
+                    {
+                        x = 0;
+                    }
+
+                    offMeshConLinkCount++;
+                    storedOffMeshConCount++;
+                }
+
+                if (y == 0xff)
+                {
+                    offMeshConLinkCount++;
+                }
+
+                offMeshConClass[i].X = x;
+                offMeshConClass[i].Y = y;
+            }
+        }
+        private static void FindPortalEdges(NavMeshCreateParams param, out int edgeCount, out int portalCount)
+        {
+            edgeCount = 0;
+            portalCount = 0;
+
+            int nvp = param.Nvp;
+
+            for (int i = 0; i < param.PolyCount; ++i)
+            {
+                var p = param.Polys[i];
+
+                for (int j = 0; j < nvp; ++j)
+                {
+                    if (p[j] == MESH_NULL_IDX)
+                    {
+                        break;
+                    }
+
+                    edgeCount++;
+
+                    if ((p[nvp + j] & 0x8000) != 0)
+                    {
+                        var dir = p[nvp + j] & 0xf;
+                        if (dir != 0xf)
+                        {
+                            portalCount++;
+                        }
+                    }
                 }
             }
 
-            outData = data;
+        }
+        private static void FindUniqueDetailVertices(NavMeshCreateParams param, out int uniqueDetailVertCount, out int detailTriCount)
+        {
+            // Find unique detail vertices.
+            uniqueDetailVertCount = 0;
 
-            return true;
+            if (param.DetailMeshes != null)
+            {
+                // Has detail mesh, count unique detail vertex count and use input detail tri count.
+                detailTriCount = param.DetailTriCount;
+                for (int i = 0; i < param.PolyCount; ++i)
+                {
+                    var p = param.Polys[i];
+                    var ndv = param.DetailMeshes[i].VertCount;
+                    int nv = p.FindFirstFreeIndex();
+                    ndv -= nv;
+                    uniqueDetailVertCount += ndv;
+                }
+            }
+            else
+            {
+                // No input detail mesh, build detail mesh from nav polys.
+                uniqueDetailVertCount = 0; // No extra detail verts.
+                detailTriCount = 0;
+                for (int i = 0; i < param.PolyCount; ++i)
+                {
+                    var p = param.Polys[i];
+                    int nv = p.FindFirstFreeIndex();
+                    detailTriCount += nv - 2;
+                }
+            }
         }
 
         #endregion

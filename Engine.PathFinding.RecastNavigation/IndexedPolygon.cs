@@ -64,6 +64,24 @@ namespace Engine.PathFinding.RecastNavigation
                 Vertices = Vertices.ToArray(),
             };
         }
+        /// <summary>
+        /// Gets the first free index (-1 value)
+        /// </summary>
+        /// <returns>Returns the first free index</returns>
+        public int FindFirstFreeIndex()
+        {
+            int nv = 0;
+            for (int j = 0; j < Vertices.Length; ++j)
+            {
+                if (Vertices[j] == -1)
+                {
+                    break;
+                }
+                nv++;
+            }
+
+            return nv;
+        }
 
         /// <summary>
         /// Gets the text representation of the instance

@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
@@ -148,6 +149,48 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// @note The BVTree is not normally needed for layered navigation meshes.
         /// </summary>
         public bool BuildBvTree { get; set; }
+
+        #endregion
+
+        #region Utility Methods
+
+        /// <summary>
+        /// Find tight heigh bounds, used for culling out off-mesh start locations.
+        /// </summary>
+        /// <returns>Returns a bounding box</returns>
+        public BoundingBox FindBounds()
+        {
+            float hmin = float.MaxValue;
+            float hmax = float.MinValue;
+
+            if (DetailVerts != null && DetailVertsCount > 0)
+            {
+                for (int i = 0; i < DetailVertsCount; ++i)
+                {
+                    var h = DetailVerts[i].Y;
+                    hmin = Math.Min(hmin, h);
+                    hmax = Math.Max(hmax, h);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < VertCount; ++i)
+                {
+                    var iv = Verts[i];
+                    float h = BMin.Y + iv.Y * CH;
+                    hmin = Math.Min(hmin, h);
+                    hmax = Math.Max(hmax, h);
+                }
+            }
+            hmin -= WalkableClimb;
+            hmax += WalkableClimb;
+            Vector3 bmin = BMin;
+            Vector3 bmax = BMax;
+            bmin.Y = hmin;
+            bmax.Y = hmax;
+
+            return new BoundingBox(bmin, bmax);
+        }
 
         #endregion
     }
