@@ -82,7 +82,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 var tmproc = new TileCacheMeshProcess(null);
 
-                navmesh.TileCache = new TileCache(file.TileCacheParams, tmproc);
+                navmesh.TileCache = new TileCache(navmesh, tmproc, file.TileCacheParams);
 
                 foreach (var tile in file.TileCacheData)
                 {

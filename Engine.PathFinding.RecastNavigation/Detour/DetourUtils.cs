@@ -930,7 +930,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 {
                     var p = param.Polys[i];
                     var ndv = param.DetailMeshes[i].VertCount;
-                    int nv = p.FindFirstFreeIndex();
+                    int nv = p.FindFirstFreeIndex(param.Nvp);
                     ndv -= nv;
                     uniqueDetailVertCount += ndv;
                 }
@@ -943,7 +943,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 for (int i = 0; i < param.PolyCount; ++i)
                 {
                     var p = param.Polys[i];
-                    int nv = p.FindFirstFreeIndex();
+                    int nv = p.FindFirstFreeIndex(param.Nvp);
                     detailTriCount += nv - 2;
                 }
             }

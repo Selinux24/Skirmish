@@ -182,6 +182,30 @@ namespace Engine.PathFinding.AStar
         }
 
         /// <summary>
+        /// Creates the graph at specified position
+        /// </summary>
+        /// <param name="position">Position</param>
+        public void CreateAt(Vector3 position)
+        {
+            throw new NotImplementedException();
+        }
+        /// <summary>
+        /// Creates the graph at specified box
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        public void CreateAt(BoundingBox bbox)
+        {
+            throw new NotImplementedException();
+        }
+        /// <summary>
+        /// Creates the graph at specified position list
+        /// </summary>
+        /// <param name="positions">Position list</param>
+        public void CreateAt(IEnumerable<Vector3> positions)
+        {
+            throw new NotImplementedException();
+        }
+        /// <summary>
         /// Updates the graph at specified position
         /// </summary>
         /// <param name="position">Position</param>

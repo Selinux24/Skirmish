@@ -30,9 +30,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             data = new TileCacheLayerData()
             {
-                heights = heights,
-                areas = areas,
-                cons = cons,
+                Heights = heights,
+                Areas = areas,
+                Connections = cons,
             };
 
             return true;
@@ -49,177 +49,22 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 RegCount = 0,
             };
 
-            if (data.areas != null && data.areas.Length > 0)
+            if (data.Areas != null && data.Areas.Length > 0)
             {
-                layer.Areas = new AreaTypes[data.areas.Length];
-                Array.Copy(data.areas, layer.Areas, data.areas.Length);
+                layer.Areas = new AreaTypes[data.Areas.Length];
+                Array.Copy(data.Areas, layer.Areas, data.Areas.Length);
             }
 
-            if (data.heights != null && data.heights.Length > 0)
+            if (data.Heights != null && data.Heights.Length > 0)
             {
-                layer.Heights = new int[data.heights.Length];
-                Array.Copy(data.heights, layer.Heights, data.heights.Length);
+                layer.Heights = new int[data.Heights.Length];
+                Array.Copy(data.Heights, layer.Heights, data.Heights.Length);
             }
 
-            if (data.cons != null && data.cons.Length > 0)
+            if (data.Connections != null && data.Connections.Length > 0)
             {
-                layer.Cons = new int[data.cons.Length];
-                Array.Copy(data.cons, layer.Cons, data.cons.Length);
-            }
-
-            return true;
-        }
-        public static bool MarkCylinderArea(NavMeshTileBuildContext tc, Vector3 orig, float cs, float ch, ObstacleCylinder obstacle, AreaTypes areaId)
-        {
-            Vector3 bmin = new Vector3();
-            Vector3 bmax = new Vector3();
-            bmin.X = obstacle.Pos.X - obstacle.Radius;
-            bmin.Y = obstacle.Pos.Y;
-            bmin.Z = obstacle.Pos.Z - obstacle.Radius;
-            bmax.X = obstacle.Pos.X + obstacle.Radius;
-            bmax.Y = obstacle.Pos.Y + obstacle.Height;
-            bmax.Z = obstacle.Pos.Z + obstacle.Radius;
-            float r2 = (float)Math.Pow(obstacle.Radius / cs + 0.5f, 2.0f);
-
-            int w = tc.Layer.Header.Width;
-            int h = tc.Layer.Header.Height;
-            float ics = 1.0f / cs;
-            float ich = 1.0f / ch;
-
-            float px = (obstacle.Pos.X - orig.X) * ics;
-            float pz = (obstacle.Pos.Z - orig.Z) * ics;
-
-            int minx = (int)Math.Floor((bmin.X - orig.X) * ics);
-            int miny = (int)Math.Floor((bmin.Y - orig.Y) * ich);
-            int minz = (int)Math.Floor((bmin.Z - orig.Z) * ics);
-            int maxx = (int)Math.Floor((bmax.X - orig.X) * ics);
-            int maxy = (int)Math.Floor((bmax.Y - orig.Y) * ich);
-            int maxz = (int)Math.Floor((bmax.Z - orig.Z) * ics);
-
-            if (maxx < 0) return true;
-            if (minx >= w) return true;
-            if (maxz < 0) return true;
-            if (minz >= h) return true;
-
-            if (minx < 0) minx = 0;
-            if (maxx >= w) maxx = w - 1;
-            if (minz < 0) minz = 0;
-            if (maxz >= h) maxz = h - 1;
-
-            for (int z = minz; z <= maxz; ++z)
-            {
-                for (int x = minx; x <= maxx; ++x)
-                {
-                    float dx = (x + 0.5f) - px;
-                    float dz = (z + 0.5f) - pz;
-                    if (dx * dx + dz * dz > r2)
-                    {
-                        continue;
-                    }
-                    int y = tc.Layer.Heights[x + z * w];
-                    if (y < miny || y > maxy)
-                    {
-                        continue;
-                    }
-                    tc.Layer.Areas[x + z * w] = areaId;
-                }
-            }
-
-            return true;
-        }
-        public static bool MarkBoxArea(NavMeshTileBuildContext tc, Vector3 orig, float cs, float ch, ObstacleOrientedBox obstacle, AreaTypes areaId)
-        {
-            int w = tc.Layer.Header.Width;
-            int h = tc.Layer.Header.Height;
-            float ics = 1.0f / cs;
-            float ich = 1.0f / ch;
-
-            float cx = (obstacle.Center.X - orig.X) * ics;
-            float cz = (obstacle.Center.Z - orig.Z) * ics;
-
-            float maxr = 1.41f * Math.Max(obstacle.HalfExtents.X, obstacle.HalfExtents.Z);
-            int minx = (int)Math.Floor(cx - maxr * ics);
-            int maxx = (int)Math.Floor(cx + maxr * ics);
-            int minz = (int)Math.Floor(cz - maxr * ics);
-            int maxz = (int)Math.Floor(cz + maxr * ics);
-            int miny = (int)Math.Floor((obstacle.Center.Y - obstacle.HalfExtents.Y - orig.Y) * ich);
-            int maxy = (int)Math.Floor((obstacle.Center.Y + obstacle.HalfExtents.Y - orig.Y) * ich);
-
-            if (maxx < 0) return true;
-            if (minx >= w) return true;
-            if (maxz < 0) return true;
-            if (minz >= h) return true;
-
-            if (minx < 0) minx = 0;
-            if (maxx >= w) maxx = w - 1;
-            if (minz < 0) minz = 0;
-            if (maxz >= h) maxz = h - 1;
-
-            float xhalf = obstacle.HalfExtents.X * ics + 0.5f;
-            float zhalf = obstacle.HalfExtents.Z * ics + 0.5f;
-
-            for (int z = minz; z <= maxz; ++z)
-            {
-                for (int x = minx; x <= maxx; ++x)
-                {
-                    float x2 = 2.0f * (x - cx);
-                    float z2 = 2.0f * (z - cz);
-                    float xrot = obstacle.RotAux.Y * x2 + obstacle.RotAux.X * z2;
-                    if (xrot > xhalf || xrot < -xhalf)
-                    {
-                        continue;
-                    }
-                    float zrot = obstacle.RotAux.Y * z2 - obstacle.RotAux.X * x2;
-                    if (zrot > zhalf || zrot < -zhalf)
-                    {
-                        continue;
-                    }
-                    int y = tc.Layer.Heights[x + z * w];
-                    if (y < miny || y > maxy)
-                    {
-                        continue;
-                    }
-                    tc.Layer.Areas[x + z * w] = areaId;
-                }
-            }
-
-            return true;
-        }
-        public static bool MarkBoxArea(NavMeshTileBuildContext tc, Vector3 orig, float cs, float ch, ObstacleBox obstacle, AreaTypes areaId)
-        {
-            int w = tc.Layer.Header.Width;
-            int h = tc.Layer.Header.Height;
-            float ics = 1.0f / cs;
-            float ich = 1.0f / ch;
-
-            int minx = (int)Math.Floor((obstacle.BMin.X - orig.X) * ics);
-            int miny = (int)Math.Floor((obstacle.BMin.Y - orig.Y) * ich);
-            int minz = (int)Math.Floor((obstacle.BMin.Z - orig.Z) * ics);
-            int maxx = (int)Math.Floor((obstacle.BMax.X - orig.X) * ics);
-            int maxy = (int)Math.Floor((obstacle.BMax.Y - orig.Y) * ich);
-            int maxz = (int)Math.Floor((obstacle.BMax.Z - orig.Z) * ics);
-
-            if (maxx < 0) return true;
-            if (minx >= w) return true;
-            if (maxz < 0) return true;
-            if (minz >= h) return true;
-
-            if (minx < 0) minx = 0;
-            if (maxx >= w) maxx = w - 1;
-            if (minz < 0) minz = 0;
-            if (maxz >= h) maxz = h - 1;
-
-            for (int z = minz; z <= maxz; ++z)
-            {
-                for (int x = minx; x <= maxx; ++x)
-                {
-                    int y = tc.Layer.Heights[x + z * w];
-                    if (y < miny || y > maxy)
-                    {
-                        continue;
-                    }
-                    tc.Layer.Areas[x + z * w] = areaId;
-                }
+                layer.Cons = new int[data.Connections.Length];
+                Array.Copy(data.Connections, layer.Cons, data.Connections.Length);
             }
 
             return true;

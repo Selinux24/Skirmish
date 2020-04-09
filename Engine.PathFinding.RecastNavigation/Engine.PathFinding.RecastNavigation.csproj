@@ -144,6 +144,10 @@
     <Compile Include="Detour\Segment.cs" />
     <Compile Include="Detour\TileParams.cs" />
     <Compile Include="Detour\TileRef.cs" />
+    <Compile Include="Detour\Tiles\IObstacle.cs" />
+    <Compile Include="Detour\Tiles\ObstacleBox.cs" />
+    <Compile Include="Detour\Tiles\ObstacleCylinder.cs" />
+    <Compile Include="Detour\Tiles\ObstacleOrientedBox.cs" />
     <Compile Include="GraphItem.cs" />
     <Compile Include="Recast\BuildPolyDetailParams.cs" />
     <Compile Include="Recast\PolyMeshTriangleIndices.cs" />

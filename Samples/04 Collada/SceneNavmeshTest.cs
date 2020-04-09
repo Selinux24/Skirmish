@@ -333,7 +333,7 @@ Space: Finds random over navmesh";
                     DrawPoint(r.Position, 0.25f, Color.Red);
                     DrawTriangle(r.Item, Color.White);
 
-                    BuildTile(shift, r.Position);
+                    ToggleTile(shift, r.Position);
                 }
             }
 
@@ -440,7 +440,7 @@ Space: Finds random over navmesh";
             }
         }
 
-        private void BuildTile(bool shift, Vector3 tilePosition)
+        private void ToggleTile(bool shift, Vector3 tilePosition)
         {
             this.graphDrawer.Clear();
 
@@ -448,7 +448,7 @@ Space: Finds random over navmesh";
             sw.Start();
             if (!shift)
             {
-                this.NavigationGraph.UpdateAt(tilePosition);
+                this.NavigationGraph.CreateAt(tilePosition);
             }
             else
             {

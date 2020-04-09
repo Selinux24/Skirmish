@@ -1,43 +1,66 @@
 ﻿using SharpDX;
+using System.Collections.Generic;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
+    /// <summary>
+    /// Tile-cache obstacle processor
+    /// </summary>
     public class TileCacheObstacle
     {
-        public CompressedTile[] Touched { get; set; } = new CompressedTile[DetourTileCache.DT_MAX_TOUCHED_TILES];
-        public CompressedTile[] Pending { get; set; } = new CompressedTile[DetourTileCache.DT_MAX_TOUCHED_TILES];
-        public int Salt { get; set; }
-        public ObstacleType Type { get; set; }
-        public ObstacleState State { get; set; }
-        public int NTouched { get; set; }
-        public int NPending { get; set; }
-        public int Next { get; set; }
-
-        public ObstacleCylinder Cylinder { get; set; }
-        public ObstacleBox Box { get; set; }
-        public ObstacleOrientedBox OrientedBox { get; set; }
-    }
-
-    public struct ObstacleCylinder
-    {
-        public Vector3 Pos { get; set; }
-        public float Radius { get; set; }
-        public float Height { get; set; }
-    }
-
-    public struct ObstacleBox
-    {
-        public Vector3 BMin { get; set; }
-        public Vector3 BMax { get; set; }
-    }
-
-    public struct ObstacleOrientedBox
-    {
-        public Vector3 Center { get; set; }
-        public Vector3 HalfExtents { get; set; }
         /// <summary>
-        /// { cos(0.5f*angle)*sin(-0.5f*angle); cos(0.5f*angle)*cos(0.5f*angle) - 0.5 }
+        /// Touched tile list
         /// </summary>
-        public Vector2 RotAux { get; set; }
+        public List<CompressedTile> Touched { get; set; } = new List<CompressedTile>();
+        /// <summary>
+        /// Pending tile list
+        /// </summary>
+        public List<CompressedTile> Pending { get; set; } = new List<CompressedTile>();
+        /// <summary>
+        /// Salt
+        /// </summary>
+        public int Salt { get; set; }
+        /// <summary>
+        /// State
+        /// </summary>
+        public ObstacleState State { get; set; }
+        /// <summary>
+        /// Next obstacle in the queue
+        /// </summary>
+        public int Next { get; set; }
+        /// <summary>
+        /// Obstacle descriptor
+        /// </summary>
+        public IObstacle Obstacle { get; set; }
+
+        /// <summary>
+        /// Gets the obstacle descriptor bounds
+        /// </summary>
+        /// <returns></returns>
+        public BoundingBox GetObstacleBounds()
+        {
+            return Obstacle.GetBounds();
+        }
+        /// <summary>
+        /// Rasterizes the obstacle descriptor
+        /// </summary>
+        /// <param name="bc">Build context</param>
+        /// <param name="tile">Tile</param>
+        /// <param name="cellSize">Cell size</param>
+        /// <param name="cellHeight">Cell height</param>
+        public void Rasterize(NavMeshTileBuildContext bc, CompressedTile tile, float cellSize, float cellHeight)
+        {
+            if (State == ObstacleState.DT_OBSTACLE_EMPTY || State == ObstacleState.DT_OBSTACLE_REMOVING)
+            {
+                return;
+            }
+
+            if (!Touched.Contains(tile))
+            {
+                return;
+            }
+
+            Obstacle.MarkArea(bc, tile.Header.BBox.Minimum, cellSize, cellHeight, 0);
+        }
     }
 }

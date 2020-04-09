@@ -67,11 +67,13 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Gets the first free index (-1 value)
         /// </summary>
+        /// <param name="nvp">Vertex per polygon</param>
         /// <returns>Returns the first free index</returns>
-        public int FindFirstFreeIndex()
+        public int FindFirstFreeIndex(int nvp)
         {
             int nv = 0;
-            for (int j = 0; j < Vertices.Length; ++j)
+
+            for (int j = 0; j < nvp; ++j)
             {
                 if (Vertices[j] == -1)
                 {

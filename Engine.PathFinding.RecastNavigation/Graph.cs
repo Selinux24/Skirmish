@@ -8,6 +8,7 @@ namespace Engine.PathFinding.RecastNavigation
 {
     using Engine.PathFinding.RecastNavigation.Detour;
     using Engine.PathFinding.RecastNavigation.Detour.Crowds;
+    using Engine.PathFinding.RecastNavigation.Detour.Tiles;
 
     /// <summary>
     /// Navigation graph
@@ -555,26 +556,26 @@ namespace Engine.PathFinding.RecastNavigation
         /// Builds the tiles in the specified position
         /// </summary>
         /// <param name="position">Position</param>
-        private void BuildTiles(IEnumerable<Vector3> positions)
+        private void BuildTiles(IEnumerable<Vector3> positions, bool update)
         {
             var tiles = LookupTiles(positions);
 
             foreach (var agentQ in AgentQueries)
             {
-                BuildTiles(agentQ, tiles);
+                BuildTiles(agentQ, tiles, update);
             }
         }
         /// <summary>
         /// Builds the tiles into the bounding box
         /// </summary>
         /// <param name="bbox">Bounding box</param>
-        private void BuildTiles(BoundingBox bbox)
+        private void BuildTiles(BoundingBox bbox, bool update)
         {
             var tiles = LookupTiles(bbox);
 
             foreach (var agentQ in AgentQueries)
             {
-                BuildTiles(agentQ, tiles);
+                BuildTiles(agentQ, tiles, update);
             }
         }
         /// <summary>
@@ -582,11 +583,11 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="agentQ">Agent query</param>
         /// <param name="tiles">Tile list</param>
-        private void BuildTiles(GraphAgentQuery agentQ, IEnumerable<UpdateTileData> tiles)
+        private void BuildTiles(GraphAgentQuery agentQ, IEnumerable<UpdateTileData> tiles, bool update)
         {
             foreach (var tile in tiles)
             {
-                if (agentQ.NavMesh.HasTilesAt(tile.X, tile.Y))
+                if (update && agentQ.NavMesh.HasTilesAt(tile.X, tile.Y))
                 {
                     continue;
                 }
@@ -634,6 +635,42 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
         /// <summary>
+        /// Creates the graph at specified position
+        /// </summary>
+        /// <param name="position">Position</param>
+        public void CreateAt(Vector3 position)
+        {
+            this.Updating?.Invoke(this, new EventArgs());
+
+            this.BuildTiles(new[] { position }, false);
+
+            this.Updated?.Invoke(this, new EventArgs());
+        }
+        /// <summary>
+        /// Creates the graph at specified box
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        public void CreateAt(BoundingBox bbox)
+        {
+            this.Updating?.Invoke(this, new EventArgs());
+
+            this.BuildTiles(bbox, false);
+
+            this.Updated?.Invoke(this, new EventArgs());
+        }
+        /// <summary>
+        /// Creates the graph at specified position list
+        /// </summary>
+        /// <param name="positions">Position list</param>
+        public void CreateAt(IEnumerable<Vector3> positions)
+        {
+            this.Updating?.Invoke(this, new EventArgs());
+
+            this.BuildTiles(positions, false);
+
+            this.Updated?.Invoke(this, new EventArgs());
+        }
+        /// <summary>
         /// Updates the graph at specified position
         /// </summary>
         /// <param name="position">Position</param>
@@ -641,7 +678,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             this.Updating?.Invoke(this, new EventArgs());
 
-            this.BuildTiles(new[] { position });
+            this.BuildTiles(new[] { position }, true);
 
             this.Updated?.Invoke(this, new EventArgs());
         }
@@ -653,7 +690,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             this.Updating?.Invoke(this, new EventArgs());
 
-            this.BuildTiles(bbox);
+            this.BuildTiles(bbox, true);
 
             this.Updated?.Invoke(this, new EventArgs());
         }
@@ -665,7 +702,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             this.Updating?.Invoke(this, new EventArgs());
 
-            this.BuildTiles(positions);
+            this.BuildTiles(positions, true);
 
             this.Updated?.Invoke(this, new EventArgs());
         }
@@ -831,11 +868,11 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
         /// <summary>
-        /// Adds a cylinder obstacle
+        /// Adds an obstacle
         /// </summary>
-        /// <param name="cylinder">Bounding Cylinder</param>
+        /// <param name="obstacle">Obstacle</param>
         /// <returns>Returns the obstacle id</returns>
-        public int AddObstacle(BoundingCylinder cylinder)
+        public int AddObstacle(IObstacle obstacle)
         {
             this.updated = false;
 
@@ -846,89 +883,10 @@ namespace Engine.PathFinding.RecastNavigation
                 var cache = agentQ.NavMesh.TileCache;
                 if (cache != null)
                 {
-                    cache.AddObstacle(cylinder.Position, cylinder.Radius, cylinder.Height, out int res);
+                    cache.AddObstacle(obstacle, out int res);
 
                     obstacles.Add(new Tuple<Agent, int>(agentQ.Agent, res));
                 }
-            }
-
-            if (obstacles.Count > 0)
-            {
-                var o = new GraphItem()
-                {
-                    Indices = obstacles.ToArray()
-                };
-
-                itemIndices.Add(o);
-
-                return o.Id;
-            }
-
-            return -1;
-        }
-        /// <summary>
-        /// Adds a bounding box obstacle
-        /// </summary>
-        /// <param name="bbox">Bounding Box</param>
-        /// <returns>Returns the obstacle id</returns>
-        public int AddObstacle(BoundingBox bbox)
-        {
-            this.updated = false;
-
-            List<Tuple<Agent, int>> obstacles = new List<Tuple<Agent, int>>();
-
-            foreach (var agentQ in AgentQueries)
-            {
-                var cache = agentQ.NavMesh.TileCache;
-                if (cache != null)
-                {
-                    cache.AddBoxObstacle(bbox.Minimum, bbox.Maximum, out int res);
-
-                    obstacles.Add(new Tuple<Agent, int>(agentQ.Agent, res));
-                }
-            }
-
-            if (obstacles.Count > 0)
-            {
-                var o = new GraphItem()
-                {
-                    Indices = obstacles.ToArray()
-                };
-
-                itemIndices.Add(o);
-
-                return o.Id;
-            }
-
-            return -1;
-        }
-        /// <summary>
-        /// Adds a oriented bounding box obstacle
-        /// </summary>
-        /// <param name="obb">Oriented Bounding Box</param>
-        /// <returns>Returns the obstacle id</returns>
-        /// <remarks>Only applies rotation if the obb's transform has rotation in the Y axis</remarks>
-        public int AddObstacle(OrientedBoundingBox obb)
-        {
-            this.updated = false;
-
-            List<Tuple<Agent, int>> obstacles = new List<Tuple<Agent, int>>();
-
-            var position = obb.Center;
-            var halfExtents = obb.Extents;
-            var yRotation = GetYRotation(obb.Transformation);
-
-            foreach (var agentQ in AgentQueries)
-            {
-                var cache = agentQ.NavMesh.TileCache;
-                if (cache == null)
-                {
-                    continue;
-                }
-
-                cache.AddBoxObstacle(position, halfExtents, yRotation, out int res);
-
-                obstacles.Add(new Tuple<Agent, int>(agentQ.Agent, res));
             }
 
             if (obstacles.Count == 0)
@@ -946,47 +904,32 @@ namespace Engine.PathFinding.RecastNavigation
             return o.Id;
         }
         /// <summary>
-        /// Gets the Y axis rotation from a transform matrix
+        /// Adds a cylinder obstacle
         /// </summary>
-        /// <param name="transform">Transform matrix</param>
-        /// <returns>Returns the Y axis angle, only if the rotation is in the Y axis</returns>
-        private static float GetYRotation(Matrix transform)
+        /// <param name="cylinder">Bounding Cylinder</param>
+        /// <returns>Returns the obstacle id</returns>
+        public int AddObstacle(BoundingCylinder cylinder)
         {
-            if (transform.Decompose(out _, out var rotation, out _))
-            {
-                return GetYRotation(rotation);
-            }
-            else
-            {
-                throw new ArgumentException("Bad transform. Cannot decompose.", nameof(transform));
-            }
+            return AddObstacle(new ObstacleCylinder(cylinder));
         }
         /// <summary>
-        /// Gets the Y axis rotation from a rotation quaternion
+        /// Adds a bounding box obstacle
         /// </summary>
-        /// <param name="rotation">Rotation Quaternion</param>
-        /// <returns>Returns the Y axis angle, only if the rotation is in the Y axis</returns>
-        private static float GetYRotation(Quaternion rotation)
+        /// <param name="bbox">Bounding Box</param>
+        /// <returns>Returns the obstacle id</returns>
+        public int AddObstacle(BoundingBox bbox)
         {
-            var yRotation = 0f;
-
-            // Validates the angle and axis
-            if (rotation.Angle != 0)
-            {
-                Vector3 epsilon = Vector3.Up * 0.0001f;
-
-                if (Vector3.NearEqual(rotation.Axis, Vector3.Up, epsilon))
-                {
-                    yRotation = rotation.Angle;
-                }
-
-                if (Vector3.NearEqual(rotation.Axis, Vector3.Down, epsilon))
-                {
-                    yRotation = -rotation.Angle;
-                }
-            }
-
-            return yRotation;
+            return AddObstacle(new ObstacleBox(bbox));
+        }
+        /// <summary>
+        /// Adds a oriented bounding box obstacle
+        /// </summary>
+        /// <param name="obb">Oriented Bounding Box</param>
+        /// <returns>Returns the obstacle id</returns>
+        /// <remarks>Only applies rotation if the obb's transform has rotation in the Y axis</remarks>
+        public int AddObstacle(OrientedBoundingBox obb)
+        {
+            return AddObstacle(new ObstacleOrientedBox(obb));
         }
         /// <summary>
         /// Removes an obstacle by obstacle id
@@ -1073,7 +1016,7 @@ namespace Engine.PathFinding.RecastNavigation
                 var nm = agentQ.NavMesh;
                 if (nm.TileCache != null)
                 {
-                    var status = nm.TileCache.Update(nm, out bool upToDate);
+                    var status = nm.TileCache.Update(out bool upToDate);
                     if (status.HasFlag(Status.DT_SUCCESS) && updated != upToDate)
                     {
                         updated = upToDate;

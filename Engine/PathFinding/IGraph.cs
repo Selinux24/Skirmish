@@ -53,6 +53,21 @@ namespace Engine.PathFinding
         bool IsWalkable(AgentType agent, Vector3 position, out Vector3? nearest);
 
         /// <summary>
+        /// Creates the graph at specified position
+        /// </summary>
+        /// <param name="position">Position</param>
+        void CreateAt(Vector3 position);
+        /// <summary>
+        /// Creates the graph at specified box
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        void CreateAt(BoundingBox bbox);
+        /// <summary>
+        /// Creates the graph at specified position list
+        /// </summary>
+        /// <param name="positions">Position list</param>
+        void CreateAt(IEnumerable<Vector3> positions);
+        /// <summary>
         /// Updates the graph at specified position
         /// </summary>
         /// <param name="position">Position</param>

@@ -10,6 +10,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
     /// </summary>
     public class TileCache
     {
+        private readonly NavMesh m_navMesh;
         private TileCacheParams m_params;
         private readonly TileCacheMeshProcess m_tmproc;
         private readonly TileCacheObstacle[] m_obstacles = null;
@@ -26,10 +27,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <summary>
         /// Constructor
         /// </summary>
-        public TileCache(TileCacheParams tcparams, TileCacheMeshProcess tmproc)
+        public TileCache(NavMesh navMesh, TileCacheMeshProcess tmproc, TileCacheParams tcparams)
         {
-            m_params = tcparams;
+            m_navMesh = navMesh;
             m_tmproc = tmproc;
+            m_params = tcparams;
 
             // Alloc space for obstacles.
             m_obstacles = new TileCacheObstacle[tcparams.MaxObstacles];
@@ -73,41 +75,84 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
         }
 
-        public TileCacheParams GetParams() { return m_params; }
-        public int GetTileCount() { return m_params.MaxTiles; }
-        public CompressedTile GetTile(int i) { return m_tiles[i]; }
-        public int GetObstacleCount() { return m_params.MaxObstacles; }
-        public TileCacheObstacle GetObstacle(int i) { return m_obstacles[i]; }
-        public TileCacheObstacle GetObstacleByRef(int r)
+        /// <summary>
+        /// Gets the tile-cache parameters
+        /// </summary>
+        /// <returns>Returns the parameters used to create de tile-cache</returns>
+        public TileCacheParams GetParams()
+        {
+            return m_params;
+        }
+
+        /// <summary>
+        /// Gets maximum tile count
+        /// </summary>
+        /// <returns>Returns the maximum tile count</returns>
+        public int GetTileCount()
+        {
+            return m_params.MaxTiles;
+        }
+        /// <summary>
+        /// Gets a tile by index
+        /// </summary>
+        /// <param name="i">Index</param>
+        /// <returns>Returns a tile</returns>
+        public CompressedTile GetTile(int i)
+        {
+            return m_tiles[i];
+        }
+        /// <summary>
+        /// Gets a tile by reference
+        /// </summary>
+        /// <param name="r">Reference</param>
+        /// <returns>Returns a tile</returns>
+        public CompressedTile GetTileByRef(int r)
         {
             if (r == 0)
             {
                 return null;
             }
-            int idx = DecodeObstacleIdObstacle(r);
-            if (idx >= m_params.MaxObstacles)
-            {
-                return null;
-            }
-            var ob = m_obstacles[idx];
-            int salt = DecodeObstacleIdSalt(r);
-            if (ob.Salt != salt)
+
+            int idx = DecodeTileIdTile(r);
+            if (idx >= m_params.MaxTiles)
             {
                 return null;
             }
 
-            return ob;
+            var tile = m_tiles[idx];
+            int salt = DecodeTileIdSalt(r);
+            if (tile.Salt != salt)
+            {
+                return null;
+            }
+
+            return tile;
         }
-        public int GetObstacleRef(TileCacheObstacle ob)
+        /// <summary>
+        /// Gets the tile reference
+        /// </summary>
+        /// <param name="tile">Tile</param>
+        /// <returns>Returns the tile reference</returns>
+        public int GetTileRef(CompressedTile tile)
         {
-            if (ob == null) return 0;
+            if (tile == null)
+            {
+                return 0;
+            }
 
-            int idx = Array.IndexOf(m_obstacles, ob);
+            int idx = Array.IndexOf(m_tiles, tile);
 
-            return EncodeObstacleId(ob.Salt, idx);
+            return EncodeTileId(tile.Salt, idx);
         }
 
-        private IEnumerable<CompressedTile> GetTilesAt(int x, int y, int maxTiles)
+        /// <summary>
+        /// Gets the tiles at the specified coordinates
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        /// <param name="maxTiles">Maximum tiles to return</param>
+        /// <returns>Returns a list of tiles</returns>
+        public IEnumerable<CompressedTile> GetTilesAt(int x, int y, int maxTiles)
         {
             List<CompressedTile> tiles = new List<CompressedTile>();
 
@@ -116,9 +161,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             var tile = m_posLookup[h];
             while (tile != null)
             {
-                if (tile.Header.TX == x && tile.Header.TY == y && tiles.Count < maxTiles)
+                if (tile.Header.TX == x && tile.Header.TY == y)
                 {
                     tiles.Add(tile);
+                }
+
+                if (maxTiles > 0 && tiles.Count >= maxTiles)
+                {
+                    break;
                 }
 
                 tile = tile.Next;
@@ -126,25 +176,37 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             return tiles.ToArray();
         }
-        private CompressedTile GetTileAt(int tx, int ty, int tlayer)
+        /// <summary>
+        /// Gets the tile at coordinates
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        /// <param name="tlayer">Layer number</param>
+        /// <returns>Returns a tile</returns>
+        public CompressedTile GetTileAt(int x, int y, int tlayer)
         {
             // Find tile based on hash.
-            int h = DetourUtils.ComputeTileHash(tx, ty, m_tileLutMask);
+            int h = DetourUtils.ComputeTileHash(x, y, m_tileLutMask);
             var tile = m_posLookup[h];
             while (tile != null)
             {
-                if (tile.Header.TX == tx &&
-                    tile.Header.TY == ty &&
-                    tile.Header.TLayer == tlayer)
+                if (tile.Header.TX == x && tile.Header.TY == y && tile.Header.TLayer == tlayer)
                 {
                     return tile;
                 }
+
                 tile = tile.Next;
             }
 
             return null;
         }
 
+        /// <summary>
+        /// Adds a new tile to the tile cache
+        /// </summary>
+        /// <param name="data">Tile data</param>
+        /// <param name="flags">Tile flags</param>
+        /// <returns>Returns the new tile</returns>
         public CompressedTile AddTile(TileCacheData data, CompressedTileFlagTypes flags)
         {
             // Make sure the data is in right format.
@@ -189,26 +251,30 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             return tile;
         }
-        public Status RemoveTile(int r, out TileCacheLayerData data, out int dataSize)
+        /// <summary>
+        /// Removes a tile
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        /// <param name="tlayer">Layer number</param>
+        public Status RemoveTile(int x, int y, int tlayer)
+        {
+            var t = GetTileAt(x, y, tlayer);
+            if (t != null)
+            {
+                return RemoveTile(t, out _);
+            }
+
+            return Status.DT_SUCCESS;
+        }
+        /// <summary>
+        /// Removes a tile
+        /// </summary>
+        /// <param name="tile">Tile to remove</param>
+        /// <param name="data">Layer data</param>
+        public Status RemoveTile(CompressedTile tile, out TileCacheLayerData data)
         {
             data = TileCacheLayerData.Empty;
-            dataSize = 0;
-
-            if (r == 0)
-            {
-                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
-            }
-            int tileIndex = DecodeTileIdTile(r);
-            int tileSalt = DecodeTileIdSalt(r);
-            if (tileIndex >= m_params.MaxTiles)
-            {
-                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
-            }
-            var tile = m_tiles[tileIndex];
-            if (tile.Salt != tileSalt)
-            {
-                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
-            }
 
             // Remove tile from hash lookup.
             int h = DetourTileCache.ComputeTileHash(tile.Header.TX, tile.Header.TY, m_tileLutMask);
@@ -260,8 +326,101 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             return Status.DT_SUCCESS;
         }
+        /// <summary>
+        /// Removes a tile by reference
+        /// </summary>
+        /// <param name="r">Tile reference</param>
+        /// <param name="data">Returns the layer data</param>
+        public Status RemoveTile(int r, out TileCacheLayerData data)
+        {
+            data = TileCacheLayerData.Empty;
 
-        public Status AddObstacle(Vector3 pos, float radius, float height, out int result)
+            if (r == 0)
+            {
+                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
+            }
+            int tileIndex = DecodeTileIdTile(r);
+            int tileSalt = DecodeTileIdSalt(r);
+            if (tileIndex >= m_params.MaxTiles)
+            {
+                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
+            }
+            var tile = m_tiles[tileIndex];
+            if (tile.Salt != tileSalt)
+            {
+                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
+            }
+
+            return RemoveTile(tile, out data);
+        }
+
+        /// <summary>
+        /// Gets the maximum obstacle count
+        /// </summary>
+        /// <returns>Returns the maximum obstacle count</returns>
+        public int GetObstacleCount()
+        {
+            return m_params.MaxObstacles;
+        }
+        /// <summary>
+        /// Gets an obstacle by index
+        /// </summary>
+        /// <param name="i">Index</param>
+        /// <returns>Returns an obstacle</returns>
+        public TileCacheObstacle GetObstacle(int i)
+        {
+            return m_obstacles[i];
+        }
+        /// <summary>
+        /// Gets an obstacle by reference
+        /// </summary>
+        /// <param name="r">Reference</param>
+        /// <returns>Returns an obstacle</returns>
+        public TileCacheObstacle GetObstacleByRef(int r)
+        {
+            if (r == 0)
+            {
+                return null;
+            }
+
+            int idx = DecodeObstacleIdObstacle(r);
+            if (idx >= m_params.MaxObstacles)
+            {
+                return null;
+            }
+
+            var ob = m_obstacles[idx];
+            int salt = DecodeObstacleIdSalt(r);
+            if (ob.Salt != salt)
+            {
+                return null;
+            }
+
+            return ob;
+        }
+        /// <summary>
+        /// Gets the obstacle reference
+        /// </summary>
+        /// <param name="ob">Obstacle</param>
+        /// <returns>Returns the obstacle reference</returns>
+        public int GetObstacleRef(TileCacheObstacle ob)
+        {
+            if (ob == null)
+            {
+                return 0;
+            }
+
+            int idx = Array.IndexOf(m_obstacles, ob);
+
+            return EncodeObstacleId(ob.Salt, idx);
+        }
+
+        /// <summary>
+        /// Adds a new obstacle request
+        /// </summary>
+        /// <param name="obstacle">Obstacle</param>
+        /// <param name="result">Resulting obstacle reference</param>
+        public Status AddObstacle(IObstacle obstacle, out int result)
         {
             result = 0;
 
@@ -287,13 +446,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             {
                 Salt = salt,
                 State = ObstacleState.DT_OBSTACLE_PROCESSING,
-                Type = ObstacleType.DT_OBSTACLE_CYLINDER,
-                Cylinder = new ObstacleCylinder
-                {
-                    Pos = pos,
-                    Radius = radius,
-                    Height = height
-                }
+                Obstacle = obstacle,
             };
 
             var req = new ObstacleRequest
@@ -307,108 +460,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             return Status.DT_SUCCESS;
         }
-        public Status AddBoxObstacle(Vector3 bmin, Vector3 bmax, out int result)
-        {
-            result = 0;
-
-            if (m_reqs.Count >= DetourTileCache.MAX_REQUESTS)
-            {
-                return Status.DT_FAILURE | Status.DT_BUFFER_TOO_SMALL;
-            }
-
-            int ob = -1;
-            if (m_nextFreeObstacle >= 0)
-            {
-                ob = m_nextFreeObstacle;
-                m_nextFreeObstacle = m_obstacles[ob].Next;
-                m_obstacles[ob].Next = -1;
-            }
-            if (ob == -1)
-            {
-                return Status.DT_FAILURE;
-            }
-
-            int salt = m_obstacles[ob].Salt;
-            m_obstacles[ob] = new TileCacheObstacle
-            {
-                Salt = salt,
-                State = ObstacleState.DT_OBSTACLE_PROCESSING,
-                Type = ObstacleType.DT_OBSTACLE_BOX,
-                Box = new ObstacleBox
-                {
-                    BMin = bmin,
-                    BMax = bmax
-                }
-            };
-
-            var req = new ObstacleRequest
-            {
-                Action = ObstacleRequestAction.REQUEST_ADD,
-                NRef = GetObstacleRef(m_obstacles[ob])
-            };
-            m_reqs.Add(req);
-
-            result = req.NRef;
-
-            return Status.DT_SUCCESS;
-        }
-        public Status AddBoxObstacle(Vector3 center, Vector3 halfExtents, float yRadians, out int result)
-        {
-            result = 0;
-
-            if (m_reqs.Count >= DetourTileCache.MAX_REQUESTS)
-            {
-                return Status.DT_FAILURE | Status.DT_BUFFER_TOO_SMALL;
-            }
-
-            int ob = -1;
-            if (m_nextFreeObstacle >= 0)
-            {
-                ob = m_nextFreeObstacle;
-                m_nextFreeObstacle = m_obstacles[ob].Next;
-                m_obstacles[ob].Next = -1;
-            }
-            if (ob == -1)
-            {
-                return Status.DT_FAILURE;
-            }
-
-            float coshalf = (float)Math.Cos(0.5f * yRadians);
-            float sinhalf = (float)Math.Sin(-0.5f * yRadians);
-            var rotAux = new Vector2(coshalf * sinhalf, coshalf * coshalf - 0.5f);
-
-            int salt = m_obstacles[ob].Salt;
-            m_obstacles[ob] = new TileCacheObstacle
-            {
-                Salt = salt,
-                State = ObstacleState.DT_OBSTACLE_PROCESSING,
-                Type = ObstacleType.DT_OBSTACLE_ORIENTED_BOX,
-                OrientedBox = new ObstacleOrientedBox
-                {
-                    Center = center,
-                    HalfExtents = halfExtents,
-                    RotAux = rotAux,
-                }
-            };
-
-            var req = new ObstacleRequest
-            {
-                Action = ObstacleRequestAction.REQUEST_ADD,
-                NRef = GetObstacleRef(m_obstacles[ob])
-            };
-            m_reqs.Add(req);
-
-            result = req.NRef;
-
-            return Status.DT_SUCCESS;
-        }
+        /// <summary>
+        /// Adds a new remove request of an obstacle by reference
+        /// </summary>
+        /// <param name="r">Reference</param>
         public Status RemoveObstacle(int r)
         {
-            if (r == 0)
-            {
-                return Status.DT_SUCCESS;
-            }
-            if (m_reqs.Count >= DetourTileCache.MAX_REQUESTS)
+            if (r == 0 || m_reqs.Count >= DetourTileCache.MAX_REQUESTS)
             {
                 return Status.DT_FAILURE | Status.DT_BUFFER_TOO_SMALL;
             }
@@ -423,7 +481,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             return Status.DT_SUCCESS;
         }
 
-        public Status Update(NavMesh navmesh, out bool upToDate)
+        /// <summary>
+        /// Updates the tile-cache
+        /// </summary>
+        /// <param name="upToDate">Returns true if the instance is up to date (No requests to perform)</param>
+        public Status Update(out bool upToDate)
         {
             if (m_update.Count == 0)
             {
@@ -431,7 +493,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 ProcessRequests();
             }
 
-            Status status = ProcessUpdates(navmesh);
+            Status status = ProcessUpdates();
 
             upToDate = m_update.Count == 0 && m_reqs.Count == 0;
 
@@ -469,23 +531,22 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         private void ProcessRequestAdd(TileCacheObstacle ob)
         {
             // Find touched tiles.
-            GetObstacleBounds(ob, out Vector3 bmin, out Vector3 bmax);
+            var bbox = ob.GetObstacleBounds();
 
-            var touched = QueryTiles(bmin, bmax, DetourTileCache.DT_MAX_TOUCHED_TILES);
-            ob.Touched = touched.ToArray();
-            ob.NTouched = touched.Count();
+            var tiles = QueryTiles(bbox, DetourTileCache.DT_MAX_TOUCHED_TILES);
+            ob.Touched.AddRange(tiles);
 
             // Add tiles to update list.
-            ob.NPending = 0;
-            for (int j = 0; j < ob.NTouched; ++j)
+            ob.Pending.Clear();
+            foreach (var touched in ob.Touched)
             {
                 if (m_update.Count < DetourTileCache.MAX_UPDATE)
                 {
-                    if (!m_update.Contains(ob.Touched[j]))
+                    if (!m_update.Contains(touched))
                     {
-                        m_update.Add(ob.Touched[j]);
+                        m_update.Add(touched);
                     }
-                    ob.Pending[ob.NPending++] = ob.Touched[j];
+                    ob.Pending.Add(touched);
                 }
             }
         }
@@ -493,21 +554,22 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             // Prepare to remove obstacle.
             ob.State = ObstacleState.DT_OBSTACLE_REMOVING;
+
             // Add tiles to update list.
-            ob.NPending = 0;
-            for (int j = 0; j < ob.NTouched; ++j)
+            ob.Pending.Clear();
+            foreach (var touched in ob.Touched)
             {
                 if (m_update.Count < DetourTileCache.MAX_UPDATE)
                 {
-                    if (!m_update.Contains(ob.Touched[j]))
+                    if (!m_update.Contains(touched))
                     {
-                        m_update.Add(ob.Touched[j]);
+                        m_update.Add(touched);
                     }
-                    ob.Pending[ob.NPending++] = ob.Touched[j];
+                    ob.Pending.Add(touched);
                 }
             }
         }
-        private Status ProcessUpdates(NavMesh navmesh)
+        private Status ProcessUpdates()
         {
             Status status = Status.DT_SUCCESS;
 
@@ -516,7 +578,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             {
                 // Build mesh
                 var r = m_update[0];
-                if (!BuildNavMeshTile(r, navmesh))
+                if (!BuildTile(r))
                 {
                     status = Status.DT_FAILURE;
                 }
@@ -550,18 +612,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         private bool ProcessObstacleUpdate(TileCacheObstacle ob, CompressedTile r)
         {
             // Remove handled tile from pending list.
-            for (int j = 0; j < ob.NPending; j++)
-            {
-                if (ob.Pending[j] == r)
-                {
-                    ob.Pending[j] = ob.Pending[ob.NPending - 1];
-                    ob.NPending--;
-                    break;
-                }
-            }
+            ob.Pending.Remove(r);
 
             // If all pending tiles processed, change state.
-            if (ob.NPending == 0)
+            if (ob.Pending.Count == 0)
             {
                 if (ob.State == ObstacleState.DT_OBSTACLE_PROCESSING)
                 {
@@ -583,7 +637,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             return false;
         }
-        private IEnumerable<CompressedTile> QueryTiles(Vector3 bmin, Vector3 bmax, int maxResults)
+        private IEnumerable<CompressedTile> QueryTiles(BoundingBox bbox, int maxResults)
         {
             List<CompressedTile> results = new List<CompressedTile>();
 
@@ -591,10 +645,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             float tw = m_params.Width * m_params.CellSize;
             float th = m_params.Height * m_params.CellSize;
-            int tx0 = (int)Math.Floor((bmin.X - m_params.Origin.X) / tw);
-            int tx1 = (int)Math.Floor((bmax.X - m_params.Origin.X) / tw);
-            int ty0 = (int)Math.Floor((bmin.Z - m_params.Origin.Z) / th);
-            int ty1 = (int)Math.Floor((bmax.Z - m_params.Origin.Z) / th);
+            int tx0 = (int)Math.Floor((bbox.Minimum.X - m_params.Origin.X) / tw);
+            int tx1 = (int)Math.Floor((bbox.Maximum.X - m_params.Origin.X) / tw);
+            int ty0 = (int)Math.Floor((bbox.Minimum.Z - m_params.Origin.Z) / th);
+            int ty1 = (int)Math.Floor((bbox.Maximum.Z - m_params.Origin.Z) / th);
 
             for (int ty = ty0; ty <= ty1; ++ty)
             {
@@ -606,7 +660,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     {
                         CalcTightTileBounds(tile.Header, out Vector3 tbmin, out Vector3 tbmax);
 
-                        if (DetourUtils.OverlapBounds(bmin, bmax, tbmin, tbmax) && results.Count < maxResults)
+                        if (DetourUtils.OverlapBounds(bbox.Minimum, bbox.Maximum, tbmin, tbmax) && results.Count < maxResults)
                         {
                             results.Add(tile);
                         }
@@ -616,23 +670,42 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             return results.ToArray();
         }
-
-        public bool BuildNavMeshTilesAt(int x, int y, NavMesh navmesh)
+        private void CalcTightTileBounds(TileCacheLayerHeader header, out Vector3 bmin, out Vector3 bmax)
         {
-            int MAX_TILES = 32;
-            var tiles = GetTilesAt(x, y, MAX_TILES);
+            bmin = new Vector3();
+            bmax = new Vector3();
 
+            float cs = m_params.CellSize;
+            bmin.X = header.BBox.Minimum.X + header.MinX * cs;
+            bmin.Y = header.BBox.Minimum.Y;
+            bmin.Z = header.BBox.Minimum.Z + header.MinY * cs;
+            bmax.X = header.BBox.Minimum.X + (header.MaxX + 1) * cs;
+            bmax.Y = header.BBox.Maximum.Y;
+            bmax.Z = header.BBox.Minimum.Z + (header.MaxY + 1) * cs;
+        }
+
+        /// <summary>
+        /// Builds the tiles at the specified coordinates
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        public bool BuildTilesAt(int x, int y)
+        {
+            // Get all tiles
+            var tiles = GetTilesAt(x, y, 0);
+
+            bool res = true;
             foreach (var tile in tiles)
             {
-                if (!BuildNavMeshTile(tile, navmesh))
+                if (!BuildTile(tile))
                 {
-                    return false;
+                    res = false;
                 }
             }
 
-            return true;
+            return res;
         }
-        private bool BuildNavMeshTile(CompressedTile tile, NavMesh navmesh)
+        private bool BuildTile(CompressedTile tile)
         {
             // Decompress tile layer data.
             if (!DetourTileCache.DecompressTileCacheLayer(tile.Header, tile.Data, out var layer))
@@ -647,7 +720,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             // Rasterize obstacles.
             for (int i = 0; i < m_params.MaxObstacles; ++i)
             {
-                RasterizeObstacle(bc, tile, m_obstacles[i]);
+                m_obstacles[i].Rasterize(bc, tile, m_params.CellSize, m_params.CellHeight);
             }
 
             int walkableClimbVx = (int)(m_params.WalkableClimb / m_params.CellHeight);
@@ -672,7 +745,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             if (bc.LMesh.NPolys == 0)
             {
                 // Remove existing tile.
-                navmesh.RemoveTile(navmesh.GetTileAt(tile.Header.TX, tile.Header.TY, tile.Header.TLayer));
+                m_navMesh.RemoveTile(tile.Header.TX, tile.Header.TY, tile.Header.TLayer);
+
                 return true;
             }
 
@@ -703,108 +777,27 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 m_tmproc.Process(ref param, bc);
             }
 
+            // Remove existing tile.
+            m_navMesh.RemoveTile(tile.Header.TX, tile.Header.TY, tile.Header.TLayer);
+
             MeshData navData = DetourUtils.CreateNavMeshData(param);
             if (navData == null)
             {
-                return false;
-            }
-
-            // Remove existing tile.
-            var tileRef = navmesh.GetTileAt(tile.Header.TX, tile.Header.TY, tile.Header.TLayer);
-            navmesh.RemoveTile(tileRef);
-
-            // Leave the location empty.
-            if (navData == null)
-            {
+                // Leave the location empty.
                 return true;
             }
 
             // Add new tile
-            return navmesh.AddTile(navData, TileFlagTypes.DT_TILE_FREE_DATA, 0);
+            return m_navMesh.AddTile(navData, TileFlagTypes.DT_TILE_FREE_DATA, 0);
         }
-        private void RasterizeObstacle(NavMeshTileBuildContext bc, CompressedTile tile, TileCacheObstacle ob)
+
+        /// <summary>
+        /// Encodes a tile id.
+        /// </summary>
+        private int EncodeTileId(int salt, int it)
         {
-            if (ob.State == ObstacleState.DT_OBSTACLE_EMPTY || ob.State == ObstacleState.DT_OBSTACLE_REMOVING)
-            {
-                return;
-            }
-
-            if (!Array.Exists(ob.Touched, (t) => t == tile))
-            {
-                return;
-            }
-
-            switch (ob.Type)
-            {
-                case ObstacleType.DT_OBSTACLE_CYLINDER:
-                    DetourTileCache.MarkCylinderArea(
-                        bc,
-                        tile.Header.BBox.Minimum, m_params.CellSize, m_params.CellHeight,
-                        ob.Cylinder, 0);
-                    break;
-                case ObstacleType.DT_OBSTACLE_BOX:
-                    DetourTileCache.MarkBoxArea(
-                        bc,
-                        tile.Header.BBox.Minimum, m_params.CellSize, m_params.CellHeight,
-                        ob.Box, 0);
-                    break;
-                case ObstacleType.DT_OBSTACLE_ORIENTED_BOX:
-                    DetourTileCache.MarkBoxArea(
-                        bc,
-                        tile.Header.BBox.Minimum, m_params.CellSize, m_params.CellHeight,
-                        ob.OrientedBox, 0);
-                    break;
-            }
+            return (salt << m_tileBits) | it;
         }
-
-        private void CalcTightTileBounds(TileCacheLayerHeader header, out Vector3 bmin, out Vector3 bmax)
-        {
-            bmin = new Vector3();
-            bmax = new Vector3();
-
-            float cs = m_params.CellSize;
-            bmin.X = header.BBox.Minimum.X + header.MinX * cs;
-            bmin.Y = header.BBox.Minimum.Y;
-            bmin.Z = header.BBox.Minimum.Z + header.MinY * cs;
-            bmax.X = header.BBox.Minimum.X + (header.MaxX + 1) * cs;
-            bmax.Y = header.BBox.Maximum.Y;
-            bmax.Z = header.BBox.Minimum.Z + (header.MaxY + 1) * cs;
-        }
-        private void GetObstacleBounds(TileCacheObstacle ob, out Vector3 bmin, out Vector3 bmax)
-        {
-            bmin = new Vector3();
-            bmax = new Vector3();
-
-            if (ob.Type == ObstacleType.DT_OBSTACLE_CYLINDER)
-            {
-                var cl = ob.Cylinder;
-
-                bmin.X = cl.Pos.X - cl.Radius;
-                bmin.Y = cl.Pos.Y;
-                bmin.Z = cl.Pos.Z - cl.Radius;
-                bmax.X = cl.Pos.X + cl.Radius;
-                bmax.Y = cl.Pos.Y + cl.Height;
-                bmax.Z = cl.Pos.Z + cl.Radius;
-            }
-            else if (ob.Type == ObstacleType.DT_OBSTACLE_BOX)
-            {
-                bmin = ob.Box.BMin;
-                bmax = ob.Box.BMax;
-            }
-            else if (ob.Type == ObstacleType.DT_OBSTACLE_ORIENTED_BOX)
-            {
-                var orientedBox = ob.OrientedBox;
-
-                float maxr = 1.41f * Math.Max(orientedBox.HalfExtents.X, orientedBox.HalfExtents.Z);
-                bmin.X = orientedBox.Center.X - maxr;
-                bmax.X = orientedBox.Center.X + maxr;
-                bmin.Y = orientedBox.Center.Y - orientedBox.HalfExtents.Y;
-                bmax.Y = orientedBox.Center.Y + orientedBox.HalfExtents.Y;
-                bmin.Z = orientedBox.Center.Z - maxr;
-                bmax.Z = orientedBox.Center.Z + maxr;
-            }
-        }
-
         /// <summary>
         /// Decodes a tile salt.
         /// </summary>

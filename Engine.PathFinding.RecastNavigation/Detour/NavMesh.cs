@@ -185,11 +185,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                 var tmproc = new TileCacheMeshProcess(geometry);
 
-                nm.TileCache = new TileCache(cfg.TileCacheParams, tmproc);
+                nm.TileCache = new TileCache(nm, tmproc, cfg.TileCacheParams);
 
                 if (settings.BuildAllTiles)
                 {
-                    BuildTileCache(nm, geometry, nm.TileCache, tileWidth, tileHeight, cfg);
+                    BuildTileCache(nm.TileCache, geometry, tileWidth, tileHeight, cfg);
                 }
             }
             else
@@ -227,7 +227,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     if (data != null)
                     {
                         // Remove any previous data (navmesh owns and deletes the data).
-                        navMesh.RemoveTile(navMesh.GetTileAt(x, y, 0));
+                        navMesh.RemoveTile(x, y, 0);
                         // Let the navmesh own the data.
                         navMesh.AddTile(data, TileFlagTypes.DT_TILE_FREE_DATA, 0);
                     }
@@ -346,7 +346,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             return DetourUtils.CreateNavMeshData(param);
         }
-        private static void BuildTileCache(NavMesh navMesh, InputGeometry geometry, TileCache tileCache, int tileWidth, int tileHeight, Config cfg)
+        private static void BuildTileCache(TileCache tileCache, InputGeometry geometry, int tileWidth, int tileHeight, Config cfg)
         {
             for (int y = 0; y < tileHeight; y++)
             {
@@ -366,7 +366,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 for (int x = 0; x < tileWidth; x++)
                 {
-                    tileCache.BuildNavMeshTilesAt(x, y, navMesh);
+                    tileCache.BuildTilesAt(x, y);
                 }
             }
         }
@@ -526,37 +526,29 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         }
         public void BuildTileAtPosition(int x, int y, InputGeometry geom, BuildSettings settings, Agent agent, BoundingBox tileBounds)
         {
+            // Remove any previous data (navmesh owns and deletes the data).
+            RemoveTile(x, y, 0);
+
+            // Add tile, or leave the location empty.
+            var cfg = settings.GetTiledConfig(agent, tileBounds);
+            var data = BuildTileMesh(x, y, geom, cfg);
+            if (data != null)
+            {
+                AddTile(data, TileFlagTypes.DT_TILE_FREE_DATA, 0);
+            }
+
             if (settings.UseTileCache && TileCache != null)
             {
-                TileCache.BuildNavMeshTilesAt(x, y, this);
-            }
-            else
-            {
-                var cfg = settings.GetTiledConfig(agent, tileBounds);
-
-                var data = BuildTileMesh(x, y, geom, cfg);
-
-                // Remove any previous data (navmesh owns and deletes the data).
-                RemoveTile(GetTileAt(x, y, 0));
-
-                // Add tile, or leave the location empty.
-                if (data != null)
-                {
-                    AddTile(data, TileFlagTypes.DT_TILE_FREE_DATA, 0);
-                }
+                TileCache.BuildTilesAt(x, y);
             }
         }
         public void RemoveTileAtPosition(int x, int y, BuildSettings settings)
         {
+            RemoveTile(x, y, 0);
+
             if (settings.UseTileCache && TileCache != null)
             {
-                var t = GetTileAt(x, y, 0);
-                int r = GetTileRef(t);
-                TileCache.RemoveTile(r, out _, out _);
-            }
-            else
-            {
-                RemoveTile(GetTileAt(x, y, 0));
+                TileCache.RemoveTile(x, y, 0);
             }
         }
 
@@ -883,6 +875,23 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             return tile;
+        }
+        /// <summary>
+        /// Removes the tile from the navigation mesh
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        /// <param name="layer">Layer number</param>
+        /// <returns>Returns true if the tile was removed or if the tile not exists at all</returns>
+        public bool RemoveTile(int x, int y, int layer)
+        {
+            var meshTile = GetTileAt(x, y, layer);
+            if (meshTile == null)
+            {
+                return true;
+            }
+
+            return RemoveTile(meshTile);
         }
         /// <summary>
         /// Removes the tile from the navigation mesh
