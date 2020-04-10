@@ -142,30 +142,22 @@ namespace Engine
                 return;
             }
 
-            //Removes previous level components from scene
-            this.Scene.RemoveComponents(this.assets.Select(a => a.Value));
-            this.Scene.RemoveComponents(this.objects.Select(o => o.Value));
-
-            //Clear internal lists and data
-            this.assets.Clear();
-            this.objects.Clear();
-            this.entities.Clear();
-            this.assetMap = null;
-            this.particleManager?.Clear();
-            this.particleDescriptors.Clear();
-
             //Find the level
             var level = this.Levels.Levels
                 .FirstOrDefault(l => string.Equals(l.Name, levelName, StringComparison.OrdinalIgnoreCase));
             if (level != null)
             {
-                this.CurrentLevel = level;
-
                 //Load the level
                 await this.LoadLevel(level);
             }
         }
-
+        /// <summary>
+        /// Loads the first level
+        /// </summary>
+        public async Task LoadFirstLevel()
+        {
+            await LoadLevel(Levels.Levels.FirstOrDefault());
+        }
         /// <summary>
         /// Loads the model content
         /// </summary>
@@ -210,6 +202,20 @@ namespace Engine
         /// <param name="level">Level definition</param>
         private async Task LoadLevel(ModularSceneryLevel level)
         {
+            //Removes previous level components from scene
+            this.Scene.RemoveComponents(this.assets.Select(a => a.Value));
+            this.Scene.RemoveComponents(this.objects.Select(o => o.Value));
+
+            //Clear internal lists and data
+            this.assets.Clear();
+            this.objects.Clear();
+            this.entities.Clear();
+            this.assetMap = null;
+            this.particleManager?.Clear();
+            this.particleDescriptors.Clear();
+
+            this.CurrentLevel = level;
+
             ModelContent content = LoadModelContent();
 
             await this.InitializeParticles();
@@ -491,7 +497,7 @@ namespace Engine
                 if (instance != null)
                 {
                     //Find emitters
-                    var emitters = this.particleManager.ParticleSystems
+                    var emitters = this.particleManager?.ParticleSystems
                         .Where(p => p.Emitter.Instance == instance)
                         .Select(p => p.Emitter)
                         .ToArray();

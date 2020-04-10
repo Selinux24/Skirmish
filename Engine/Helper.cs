@@ -872,6 +872,27 @@ namespace Engine
 
         #endregion
 
+        #region Rectangle
+
+        public static Vector2Int TopLeft(this Rectangle rectangle)
+        {
+            return new Vector2Int(rectangle.Top, rectangle.Left);
+        }
+        public static Vector2Int TopRight(this Rectangle rectangle)
+        {
+            return new Vector2Int(rectangle.Top, rectangle.Right);
+        }
+        public static Vector2Int BottomLeft(this Rectangle rectangle)
+        {
+            return new Vector2Int(rectangle.Bottom, rectangle.Left);
+        }
+        public static Vector2Int BottomRight(this Rectangle rectangle)
+        {
+            return new Vector2Int(rectangle.Bottom, rectangle.Right);
+        }
+
+        #endregion
+
         #region Bounding Box
 
         /// <summary>

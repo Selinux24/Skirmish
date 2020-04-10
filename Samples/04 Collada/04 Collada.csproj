@@ -399,6 +399,12 @@
     <Content Include="Resources\SceneNavmeshTest\dungeon.obj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\ragerock_fortress.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\maze_of_the_purple_god.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0,Profile=Client">
@@ -433,6 +439,10 @@
     <ProjectReference Include="..\..\Engine.Content.FmtObj\Engine.Content.FmtObj.csproj">
       <Project>{18852FDD-B099-4C91-A970-7B4A087B7554}</Project>
       <Name>Engine.Content.FmtObj</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Engine.Content.OnePageDungeon\Engine.Content.OnePageDungeon.csproj">
+      <Project>{51447110-6f70-4c88-acf0-070daf4d3b18}</Project>
+      <Name>Engine.Content.OnePageDungeon</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Engine.PathFinding.RecastNavigation\Engine.PathFinding.RecastNavigation.csproj">
       <Project>{0d7d6c77-588e-4371-a815-a58b87653991}</Project>

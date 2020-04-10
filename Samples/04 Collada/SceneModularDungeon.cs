@@ -268,7 +268,7 @@ namespace Collada
             {
                 levelInitializing = true;
 
-                this.LoadResources(levelId, this.ChangeToLevel("Lvl1"));
+                this.LoadResources(levelId, this.ChangeToLevel(null));
             }
 
             if (!gameReady)
@@ -399,6 +399,80 @@ namespace Collada
         }
         private async Task InitializeDungeon()
         {
+            var dn = Engine.Content.OnePageDungeon.DungeonFile.Load(@"resources\maze_of_the_purple_god.json");
+            //var dn = Engine.Content.OnePageDungeon.DungeonFile.Load(@"resources\ragerock_fortress.json");
+
+            ModularSceneryObjectStateTransition toOpen = new ModularSceneryObjectStateTransition
+            {
+                State = "open",
+            };
+            ModularSceneryObjectStateTransition toClose = new ModularSceneryObjectStateTransition
+            {
+                State = "close",
+            };
+
+            ModularSceneryObjectState openState = new ModularSceneryObjectState
+            {
+                Name = "open",
+                Transitions = new[] { toClose },
+            };
+            ModularSceneryObjectState closeState = new ModularSceneryObjectState
+            {
+                Name = "close",
+                Transitions = new[] { toOpen },
+            };
+
+            ModularSceneryObjectAction openAction = new ModularSceneryObjectAction
+            {
+                Name = "open",
+                StateFrom = "close",
+                StateTo = "open",
+                AnimationPlan = "open",
+                Items = new[] { new ModularSceneryObjectActionItem { Action = "open" } },
+            };
+
+            ModularSceneryObjectAction closeAction = new ModularSceneryObjectAction
+            {
+                Name = "close",
+                StateFrom = "open",
+                StateTo = "close",
+                AnimationPlan = "close",
+                Items = new[] { new ModularSceneryObjectActionItem { Action = "close" } },
+            };
+
+            ModularSceneryObjectAnimationPlan openPlan = new ModularSceneryObjectAnimationPlan
+            {
+                Name = "open",
+                Paths = new[] { new ModularSceneryObjectAnimationPath { Name = "open" } }
+            };
+            ModularSceneryObjectAnimationPlan closePlan = new ModularSceneryObjectAnimationPlan
+            {
+                Name = "close",
+                Paths = new[] { new ModularSceneryObjectAnimationPath { Name = "close" } }
+            };
+
+            var config = new Engine.Content.OnePageDungeon.DungeonAssetConfiguration()
+            {
+                PositionDelta = 2,
+
+                Floors = new[] { "Dn_Floor_1" },
+                Ceilings = new[] { "Dn_Ceiling_1" },
+                Walls = new[] { "Dn_Wall_1", "Dn_Wall_1", "Dn_Wall_1", "Dn_Wall_2" },
+                Columns = new[] { "Dn_Column_1", "Dn_Column_1", "Dn_Column_2", "Dn_Column_2", "Dn_Column_1" },
+
+                Doors = new[] 
+                { 
+                    new[] { "Dn_WoodenDoor_1", "Dn_Door_1" },
+                    new[] { "Dn_WoodenDoor_1", "Dn_Door_1" },
+                    new[] { "Dn_WoodenDoor_1", "Dn_Door_1" }, 
+                    new[] { "Dn_Jail_1", "Dn_Door_2" },
+                    new[] { "Dn_WoodenDoor_1", "Dn_Door_1" },
+                },
+                DoorAnimationPlans = new[] { openPlan, closePlan },
+                DoorStates = new[] { closeState, openState },
+                DoorActions = new[] { closeAction, openAction },
+            };
+
             var desc = new ModularSceneryDescription()
             {
                 Name = "Dungeon",
@@ -410,8 +484,11 @@ namespace Collada
                     ContentFolder = "Resources/SceneModularDungeon",
                     ModelContentFilename = "assets.xml",
                 },
-                AssetsConfigurationFile = "assetsmap.xml",
-                LevelsFile = "levels.xml",
+                AssetsConfiguration = Engine.Content.OnePageDungeon.DungeonCreator.CreateAssets(dn, config),
+                Levels = Engine.Content.OnePageDungeon.DungeonCreator.CreateLevels(dn, config),
+
+                //AssetsConfigurationFile = "assetsmap.xml",
+                //LevelsFile = "levels.xml",
             };
 
             this.scenery = await this.AddComponentModularScenery(desc, SceneObjectUsages.Ground);
@@ -856,7 +933,8 @@ namespace Collada
                 UpdateEntityExit(this.selectedItem);
             }
 
-            if (this.selectedItem.Object.Type == ModularSceneryObjectTypes.Trigger)
+            if (this.selectedItem.Object.Type == ModularSceneryObjectTypes.Trigger ||
+                this.selectedItem.Object.Type == ModularSceneryObjectTypes.Door)
             {
                 UpdateEntityTrigger(this.selectedItem);
             }
@@ -1074,13 +1152,9 @@ namespace Collada
 
                 PrepareMessage(true, msg);
             }
-            else if (item.Object.Type == ModularSceneryObjectTypes.Door)
-            {
-                var msg = string.Format("Press space to {0} the door...", item.Item.Visible ? "open" : "close");
-
-                PrepareMessage(true, msg);
-            }
-            else if (item.Object.Type == ModularSceneryObjectTypes.Trigger)
+            else if (
+                item.Object.Type == ModularSceneryObjectTypes.Door ||
+                item.Object.Type == ModularSceneryObjectTypes.Trigger)
             {
                 SetSelectedItemTrigger(item);
             }
@@ -1287,7 +1361,14 @@ namespace Collada
 
             this.SetSelectedItem(null);
 
-            await this.scenery.LoadLevel(name);
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                await this.scenery.LoadFirstLevel();
+            }
+            else
+            {
+                await this.scenery.LoadLevel(name);
+            }
 
             this.ConfigureNavigationGraph();
 
@@ -1312,7 +1393,7 @@ namespace Collada
         {
             this.PathFinderDescription.Input.ClearConnections();
 
-            if (this.scenery.CurrentLevel.Name == "Lvl1")
+            if (this.scenery.CurrentLevel?.Name == "Lvl1")
             {
                 this.PathFinderDescription.Input.AddConnection(
                     new Vector3(-8.98233700f, 4.76837158e-07f, 0.0375497341f),
@@ -1409,7 +1490,7 @@ namespace Collada
             AnimationPath p0 = new AnimationPath();
             p0.AddLoop("stand");
 
-            if (this.scenery.CurrentLevel.Name != "Lvl1")
+            if (this.scenery.CurrentLevel?.Name != "Lvl1")
             {
                 this.human.Visible = false;
             }

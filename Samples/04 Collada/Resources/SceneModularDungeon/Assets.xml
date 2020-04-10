@@ -7,9 +7,9 @@
       <animation skeleton="Dn_Anim_Ladder_Armature" name="default" from="0" to="1" />
       <animation skeleton="Dn_Anim_Ladder_Armature" name="pull" from="1" to="2" />
       <animation skeleton="Dn_Anim_Ladder_Armature" name="push" from="2" to="3" />
-      <animation skeleton="Dn_Door_1_Armature" name="default" from="0" to="1" />
-      <animation skeleton="Dn_Door_1_Armature" name="open" from="1" to="2" />
-      <animation skeleton="Dn_Door_1_Armature" name="close" from="2" to="3" />
+      <animation skeleton="Dn_WoodenDoor_1_Armature" name="default" from="0" to="1" />
+      <animation skeleton="Dn_WoodenDoor_1_Armature" name="open" from="1" to="2" />
+      <animation skeleton="Dn_WoodenDoor_1_Armature" name="close" from="2" to="3" />
       <animation skeleton="Dn_Jail_1_Armature" name="default" from="0" to="1" />
       <animation skeleton="Dn_Jail_1_Armature" name="open" from="1" to="2" />
       <animation skeleton="Dn_Jail_1_Armature" name="close" from="2" to="3" />

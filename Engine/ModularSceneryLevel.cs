@@ -38,12 +38,12 @@ namespace Engine
         /// Position
         /// </summary>
         [XmlIgnore]
-        public Vector3 StartPosition { get; set; } = new Vector3(0, 0, 0);
+        public Vector3 StartPosition { get; set; } = Vector3.Zero;
         /// <summary>
         /// Looking vector
         /// </summary>
         [XmlIgnore]
-        public Vector3 LookingVector { get; set; } = new Vector3(0, 0, 0);
+        public Vector3 LookingVector { get; set; } = Vector3.ForwardLH;
         /// <summary>
         /// Assets map
         /// </summary>
