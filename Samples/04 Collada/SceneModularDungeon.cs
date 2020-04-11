@@ -399,25 +399,7 @@ namespace Collada
         }
         private async Task InitializeDungeon()
         {
-            var desc = LoadOnePageDungeon(@"resources\halls_of_pain.json");
-            //var desc = LoadOnePageDungeon(@"resources\resources\ragerock_fortress.json");
-            //var desc = LoadOnePageDungeon(@"resources\maze_of_the_purple_god.json");
-
-            //var desc = new ModularSceneryDescription()
-            //{
-            //    Name = "Dungeon",
-            //    UseAnisotropic = true,
-            //    CastShadow = true,
-            //    AlphaEnabled = true,
-            //    Content = new ContentDescription()
-            //    {
-            //        ContentFolder = "Resources/SceneModularDungeon",
-            //        ModelContentFilename = "assets.xml",
-            //    },
-
-            //    AssetsConfigurationFile = "assetsmap.xml",
-            //    LevelsFile = "levels.xml",
-            //};
+            var desc = LoadOnePageDungeon(@"resources\maze_of_the_purple_god.json");
 
             this.scenery = await this.AddComponentModularScenery(desc, SceneObjectUsages.Ground);
             this.scenery.TriggerEnd += TriggerEnds;
@@ -477,14 +459,16 @@ namespace Collada
                 Paths = new[] { new ModularSceneryObjectAnimationPath { Name = "close" } }
             };
 
-            Dictionary<Engine.Content.OnePageDungeon.DoorTypes, string[]> doors = new Dictionary<Engine.Content.OnePageDungeon.DoorTypes, string[]>();
-            doors.Add(Engine.Content.OnePageDungeon.DoorTypes.Normal, new[] { "Dn_WoodenDoor_1", "Dn_Door_1" });
-            doors.Add(Engine.Content.OnePageDungeon.DoorTypes.Archway, new[] { "Dn_WoodenDoor_1", "Dn_Door_1" });
-            doors.Add(Engine.Content.OnePageDungeon.DoorTypes.Stairs, new[] { "Dn_WoodenDoor_1", "Dn_Door_1" });
-            doors.Add(Engine.Content.OnePageDungeon.DoorTypes.Portcullis, new[] { "Dn_Jail_1", "Dn_Door_2" });
-            doors.Add(Engine.Content.OnePageDungeon.DoorTypes.Special, new[] { "Dn_WoodenDoor_1", "Dn_Door_1" });
-            doors.Add(Engine.Content.OnePageDungeon.DoorTypes.Secret, new[] { "Dn_Jail_1", "Dn_Door_2" });
-            doors.Add(Engine.Content.OnePageDungeon.DoorTypes.Barred, new[] { "Dn_Jail_1", "Dn_Door_2" });
+            Dictionary<Engine.Content.OnePageDungeon.DoorTypes, string[]> doors = new Dictionary<Engine.Content.OnePageDungeon.DoorTypes, string[]>
+            {
+                { Engine.Content.OnePageDungeon.DoorTypes.Normal, new[] { "Dn_WoodenDoor_1", "Dn_Door_1" } },
+                { Engine.Content.OnePageDungeon.DoorTypes.Archway, new[] { "Dn_WoodenDoor_1", "Dn_Door_1" } },
+                { Engine.Content.OnePageDungeon.DoorTypes.Stairs, new[] { "Dn_WoodenDoor_1", "Dn_Door_1" } },
+                { Engine.Content.OnePageDungeon.DoorTypes.Portcullis, new[] { "Dn_Jail_1", "Dn_Door_2" } },
+                { Engine.Content.OnePageDungeon.DoorTypes.Special, new[] { "Dn_WoodenDoor_1", "Dn_Door_1" } },
+                { Engine.Content.OnePageDungeon.DoorTypes.Secret, new[] { "Dn_Jail_1", "Dn_Door_2" } },
+                { Engine.Content.OnePageDungeon.DoorTypes.Barred, new[] { "Dn_Jail_1", "Dn_Door_2" } }
+            };
 
             var config = new Engine.Content.OnePageDungeon.DungeonAssetConfiguration()
             {

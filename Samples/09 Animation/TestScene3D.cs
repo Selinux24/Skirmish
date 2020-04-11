@@ -16,6 +16,7 @@ namespace Animation
 
         private TextDrawer runtime = null;
         private TextDrawer animText = null;
+        private TextDrawer messages = null;
 
         private PrimitiveListDrawer<Triangle> itemTris = null;
         private PrimitiveListDrawer<Line3D> itemLines = null;
@@ -100,16 +101,23 @@ namespace Animation
         {
             await this.InitializeUI();
 
-            await this.LoadResourcesAsync(assetsId,
-                this.InitializeLadder(),
-                this.InitializeLadder2(),
-                this.InitializeSoldier(),
-                this.InitializeRat(),
-                this.InitializeDoors(),
-                this.InitializeJails(),
-                this.InitializeFloor());
-
-            await this.InitializeDebug();
+            try
+            {
+                await this.LoadResourcesAsync(assetsId,
+                    this.InitializeLadder(),
+                    this.InitializeLadder2(),
+                    this.InitializeSoldier(),
+                    this.InitializeRat(),
+                    this.InitializeDoors(),
+                    this.InitializeJails(),
+                    this.InitializeFloor(),
+                    this.InitializeDebug());
+            }
+            catch (Exception ex)
+            {
+                messages.Text = ex.Message;
+                messages.Visible = true;
+            }
         }
         public override void GameResourcesLoaded(Guid id)
         {
@@ -121,26 +129,28 @@ namespace Animation
             }
         }
 
-
         private async Task InitializeUI()
         {
             var title = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
             this.runtime = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD);
             this.animText = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 15, Color.Orange), SceneObjectUsages.UI, layerHUD);
+            this.messages = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 15, Color.Orange), SceneObjectUsages.UI, layerHUD);
 
             title.Text = "Animation test";
             this.runtime.Text = "";
             this.animText.Text = "";
+            this.messages.Text = "";
 
             title.Position = Vector2.Zero;
             this.runtime.Position = new Vector2(5, title.Top + title.Height + 3);
             this.animText.Position = new Vector2(5, this.runtime.Top + this.runtime.Height + 3);
+            this.messages.Position = new Vector2(5, this.animText.Top + this.animText.Height + 3);
 
             var spDesc = new SpriteDescription()
             {
                 AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
-                Height = this.animText.Top + this.animText.Height + 3,
+                Height = this.messages.Top + this.messages.Height + 3,
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
@@ -401,7 +411,7 @@ namespace Animation
                     Content = new ContentDescription()
                     {
                         ContentFolder = "Resources/Doors",
-                        ModelContentFilename = "Dn_Walls.xml",
+                        ModelContentFilename = "Wall1.xml",
                     },
                 });
 
@@ -437,6 +447,24 @@ namespace Animation
         }
         private async Task InitializeJails()
         {
+            var walls = await this.AddComponentModelInstanced(
+                new ModelInstancedDescription()
+                {
+                    Name = "Walls",
+                    CastShadow = true,
+                    Instances = 1,
+                    UseAnisotropicFiltering = true,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "Resources/Doors",
+                        ModelContentFilename = "Wall2.xml",
+                    },
+                });
+
+            walls[0].Manipulator.SetPosition(10, 0, 8, true);
+            walls[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            walls[0].Manipulator.SetScale(2.5f);
+
             var doors = await this.AddComponentModelInstanced(
                 new ModelInstancedDescription()
                 {

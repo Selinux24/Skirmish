@@ -86,7 +86,7 @@ namespace Engine.Collada
             }
             else
             {
-                return default(T);
+                return default;
             }
         }
         internal static T[] ConvertArray<T>(string value)
