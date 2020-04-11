@@ -399,8 +399,34 @@ namespace Collada
         }
         private async Task InitializeDungeon()
         {
-            var dn = Engine.Content.OnePageDungeon.DungeonFile.Load(@"resources\maze_of_the_purple_god.json");
-            //var dn = Engine.Content.OnePageDungeon.DungeonFile.Load(@"resources\ragerock_fortress.json");
+            var desc = LoadOnePageDungeon(@"resources\halls_of_pain.json");
+            //var desc = LoadOnePageDungeon(@"resources\resources\ragerock_fortress.json");
+            //var desc = LoadOnePageDungeon(@"resources\maze_of_the_purple_god.json");
+
+            //var desc = new ModularSceneryDescription()
+            //{
+            //    Name = "Dungeon",
+            //    UseAnisotropic = true,
+            //    CastShadow = true,
+            //    AlphaEnabled = true,
+            //    Content = new ContentDescription()
+            //    {
+            //        ContentFolder = "Resources/SceneModularDungeon",
+            //        ModelContentFilename = "assets.xml",
+            //    },
+
+            //    AssetsConfigurationFile = "assetsmap.xml",
+            //    LevelsFile = "levels.xml",
+            //};
+
+            this.scenery = await this.AddComponentModularScenery(desc, SceneObjectUsages.Ground);
+            this.scenery.TriggerEnd += TriggerEnds;
+
+            this.SetGround(this.scenery, true);
+        }
+        private ModularSceneryDescription LoadOnePageDungeon(string fileName)
+        {
+            var dn = Engine.Content.OnePageDungeon.DungeonFile.Load(fileName);
 
             ModularSceneryObjectStateTransition toOpen = new ModularSceneryObjectStateTransition
             {
@@ -451,6 +477,15 @@ namespace Collada
                 Paths = new[] { new ModularSceneryObjectAnimationPath { Name = "close" } }
             };
 
+            Dictionary<Engine.Content.OnePageDungeon.DoorTypes, string[]> doors = new Dictionary<Engine.Content.OnePageDungeon.DoorTypes, string[]>();
+            doors.Add(Engine.Content.OnePageDungeon.DoorTypes.Normal, new[] { "Dn_WoodenDoor_1", "Dn_Door_1" });
+            doors.Add(Engine.Content.OnePageDungeon.DoorTypes.Archway, new[] { "Dn_WoodenDoor_1", "Dn_Door_1" });
+            doors.Add(Engine.Content.OnePageDungeon.DoorTypes.Stairs, new[] { "Dn_WoodenDoor_1", "Dn_Door_1" });
+            doors.Add(Engine.Content.OnePageDungeon.DoorTypes.Portcullis, new[] { "Dn_Jail_1", "Dn_Door_2" });
+            doors.Add(Engine.Content.OnePageDungeon.DoorTypes.Special, new[] { "Dn_WoodenDoor_1", "Dn_Door_1" });
+            doors.Add(Engine.Content.OnePageDungeon.DoorTypes.Secret, new[] { "Dn_Jail_1", "Dn_Door_2" });
+            doors.Add(Engine.Content.OnePageDungeon.DoorTypes.Barred, new[] { "Dn_Jail_1", "Dn_Door_2" });
+
             var config = new Engine.Content.OnePageDungeon.DungeonAssetConfiguration()
             {
                 PositionDelta = 2,
@@ -460,20 +495,13 @@ namespace Collada
                 Walls = new[] { "Dn_Wall_1", "Dn_Wall_1", "Dn_Wall_1", "Dn_Wall_2" },
                 Columns = new[] { "Dn_Column_1", "Dn_Column_1", "Dn_Column_2", "Dn_Column_2", "Dn_Column_1" },
 
-                Doors = new[] 
-                { 
-                    new[] { "Dn_WoodenDoor_1", "Dn_Door_1" },
-                    new[] { "Dn_WoodenDoor_1", "Dn_Door_1" },
-                    new[] { "Dn_WoodenDoor_1", "Dn_Door_1" }, 
-                    new[] { "Dn_Jail_1", "Dn_Door_2" },
-                    new[] { "Dn_WoodenDoor_1", "Dn_Door_1" },
-                },
+                Doors = doors,
                 DoorAnimationPlans = new[] { openPlan, closePlan },
                 DoorStates = new[] { closeState, openState },
                 DoorActions = new[] { closeAction, openAction },
             };
 
-            var desc = new ModularSceneryDescription()
+            return new ModularSceneryDescription()
             {
                 Name = "Dungeon",
                 UseAnisotropic = true,
@@ -486,15 +514,7 @@ namespace Collada
                 },
                 AssetsConfiguration = Engine.Content.OnePageDungeon.DungeonCreator.CreateAssets(dn, config),
                 Levels = Engine.Content.OnePageDungeon.DungeonCreator.CreateLevels(dn, config),
-
-                //AssetsConfigurationFile = "assetsmap.xml",
-                //LevelsFile = "levels.xml",
             };
-
-            this.scenery = await this.AddComponentModularScenery(desc, SceneObjectUsages.Ground);
-            this.scenery.TriggerEnd += TriggerEnds;
-
-            this.SetGround(this.scenery, true);
         }
         private async Task InitializePlayer()
         {
@@ -1422,68 +1442,14 @@ namespace Collada
                 .Select(o => o.Item.Manipulator.Position)
                 .ToArray();
 
-            //Jails
-            this.StartEntitiesJails();
-
-            //Doors
-            this.StartEntitiesDoors();
-
-            //Ladders
-            this.StartEntitiesLadders();
-
             //NPCs
             this.StartNPCs();
 
-            //Furniture obstacles
+            //Obstacles
             this.StartEntitiesObstacles();
 
             //Sounds
             this.StartEntitiesAudio();
-        }
-        private void StartEntitiesJails()
-        {
-            var jails = this.scenery
-                .GetObjectsByName("Dn_Jail_1")
-                .Select(o => o.Item);
-
-            AnimationPath def = new AnimationPath();
-            def.Add("default");
-
-            foreach (var jail in jails)
-            {
-                jail.AnimationController.SetPath(new AnimationPlan(def));
-                jail.InvalidateCache();
-            }
-        }
-        private void StartEntitiesDoors()
-        {
-            var doors = this.scenery
-                .GetObjectsByName("Dn_Door_1")
-                .Select(o => o.Item);
-
-            AnimationPath def = new AnimationPath();
-            def.Add("default");
-
-            foreach (var door in doors)
-            {
-                door.AnimationController.SetPath(new AnimationPlan(def));
-                door.InvalidateCache();
-            }
-        }
-        private void StartEntitiesLadders()
-        {
-            var ladders = this.scenery
-                .GetObjectsByName("Dn_Anim_Ladder")
-                .Select(o => o.Item);
-
-            AnimationPath def = new AnimationPath();
-            def.Add("pull");
-
-            foreach (var ladder in ladders)
-            {
-                ladder.AnimationController.SetPath(new AnimationPlan(def));
-                ladder.InvalidateCache();
-            }
         }
         private void StartNPCs()
         {

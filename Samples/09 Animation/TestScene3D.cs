@@ -98,6 +98,8 @@ namespace Animation
 
         public override async Task Initialize()
         {
+            await this.InitializeUI();
+
             await this.LoadResourcesAsync(assetsId,
                 this.InitializeLadder(),
                 this.InitializeLadder2(),
@@ -105,12 +107,9 @@ namespace Animation
                 this.InitializeRat(),
                 this.InitializeDoors(),
                 this.InitializeJails(),
-                this.InitializeFloor(),
+                this.InitializeFloor());
 
-                this.InitializeUI(),
-
-                this.InitializeDebug()
-                );
+            await this.InitializeDebug();
         }
         public override void GameResourcesLoaded(Guid id)
         {
@@ -392,9 +391,27 @@ namespace Animation
                     },
                 });
 
+            var walls = await this.AddComponentModelInstanced(
+                new ModelInstancedDescription()
+                {
+                    Name = "Walls",
+                    CastShadow = true,
+                    Instances = 1,
+                    UseAnisotropicFiltering = true,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "Resources/Doors",
+                        ModelContentFilename = "Dn_Walls.xml",
+                    },
+                });
+
             doors[0].Manipulator.SetPosition(-10, 0, 8, true);
             doors[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
             doors[0].Manipulator.SetScale(2.5f);
+
+            walls[0].Manipulator.SetPosition(-10, 0, 8, true);
+            walls[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            walls[0].Manipulator.SetScale(2.5f);
 
             AnimationPath def = new AnimationPath();
             def.Add("default");

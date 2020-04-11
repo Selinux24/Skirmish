@@ -181,7 +181,7 @@
           <position>16.5 1.75 -12.9</position>
           <rotation>rot270</rotation>
           <animation_plans>
-            <plan name="pull">
+            <plan name="pull" default="true">
               <paths>
                 <path name="pull"></path>
               </paths>
@@ -223,7 +223,7 @@
           <position>16.5 1.75 -15.1</position>
           <rotation>rot90</rotation>
           <animation_plans>
-            <plan name="pull">
+            <plan name="pull" default="true">
               <paths>
                 <path name="pull"></path>
               </paths>

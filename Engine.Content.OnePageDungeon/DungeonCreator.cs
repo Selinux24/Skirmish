@@ -376,19 +376,30 @@ namespace Engine.Content.OnePageDungeon
                 Volumes = configuration.Volumes.ToArray(),
             };
 
+            levels.Levels = new[] { CreateLevel(dungeon, configuration) };
+
+            return levels;
+        }
+
+        private static ModularSceneryLevel CreateLevel(Dungeon dungeon, DungeonAssetConfiguration configuration)
+        {
+            var maps = CreateMap(dungeon);
+            var objs = CreateDoors(dungeon, configuration);
+
+            var walls = MarkWalls(dungeon);
+            var startWall = walls.First(w => w.Cell.X == 0 && w.Cell.Y == 0);
+            var dir = startWall.GetFirstOpenDirection();
+
             ModularSceneryLevel level = new ModularSceneryLevel()
             {
                 Name = dungeon.Title,
                 StartPosition = Vector3.Zero,
-                LookingVector = Vector3.Right,
+                LookingVector = dir,
+                Map = maps.ToArray(),
+                Objects = objs.ToArray(),
             };
 
-            level.Map = CreateMap(dungeon).ToArray();
-            level.Objects = CreateDoors(dungeon, configuration).ToArray();
-
-            levels.Levels = new[] { level };
-
-            return levels;
+            return level;
         }
 
         private static IEnumerable<ModularSceneryAssetReference> CreateMap(Dungeon dungeon)
@@ -421,7 +432,7 @@ namespace Engine.Content.OnePageDungeon
                     continue;
                 }
 
-                var doorAssets = configuration.GetDoor(door.Type - 1);
+                var doorAssets = configuration.GetDoor((DoorTypes)door.Type);
                 if (!doorAssets.Any())
                 {
                     break;
@@ -429,7 +440,7 @@ namespace Engine.Content.OnePageDungeon
 
                 float vx = door.X * configuration.PositionDelta;
                 float vz = door.Y * configuration.PositionDelta;
-                Vector3 dir = new Vector3(door.Dir.X, 0, door.Dir.Y);
+                Vector3 dir = new Vector3(door.Dir.X, 0, -door.Dir.Y);
                 string rot = EvaluateRotation(dir);
 
                 ModularSceneryObjectReference obj = new ModularSceneryObjectReference
@@ -488,6 +499,28 @@ namespace Engine.Content.OnePageDungeon
         {
             public Rectangle Cell { get; set; }
             public WallDirections Dir { get; set; }
+
+            public Vector3 GetFirstOpenDirection()
+            {
+                if (!Dir.HasFlag(WallDirections.N))
+                {
+                    return -Vector3.ForwardLH;
+                }
+                else if (!Dir.HasFlag(WallDirections.S))
+                {
+                    return -Vector3.BackwardLH;
+                }
+                else if (!Dir.HasFlag(WallDirections.E))
+                {
+                    return Vector3.Left;
+                }
+                else if (!Dir.HasFlag(WallDirections.W))
+                {
+                    return Vector3.Right;
+                }
+
+                return -Vector3.ForwardLH;
+            }
         }
 
         [Flags]
@@ -500,15 +533,17 @@ namespace Engine.Content.OnePageDungeon
             W = 8,
             All = 15,
         }
+    }
 
-        enum DoorTypes
-        {
-            None = 0,
-            Wooden = 1,
-            Stone = 2,
-            Metal = 3,
-            Jail = 4,
-            KeyLocked = 5,
-        }
+    public enum DoorTypes
+    {
+        None = 0,
+        Normal = 1,
+        Archway = 2,
+        Stairs = 3,
+        Portcullis = 4,
+        Special = 5,
+        Secret = 6,
+        Barred = 7,
     }
 }

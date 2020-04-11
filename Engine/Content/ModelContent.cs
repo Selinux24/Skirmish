@@ -980,12 +980,14 @@ namespace Engine.Content
                     .Any(j => g.Key.StartsWith($"{j}_pose_matrix", StringComparison.OrdinalIgnoreCase));
             });
 
-            if (animations.Any())
+            if (!animations.Any())
             {
-                foreach (var a in animations)
-                {
-                    res.Animations.Add(a.Key, a.Value);
-                }
+                return;
+            }
+
+            foreach (var a in animations)
+            {
+                res.Animations.Add(a.Key, a.Value);
             }
 
             var clips = this.Animations.Definition.Clips

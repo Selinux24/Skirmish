@@ -437,6 +437,14 @@ namespace Engine
             if (animationDict.Count > 0)
             {
                 this.animations.Add(instance, animationDict);
+
+                var defaultPlan = obj.AnimationPlans.FirstOrDefault(a => a.Default)?.Name ?? "default";
+
+                AnimationPath def = new AnimationPath();
+                def.Add(defaultPlan);
+
+                instance.AnimationController.SetPath(new AnimationPlan(def));
+                instance.InvalidateCache();
             }
 
             List<ModularSceneryTrigger> instanceTriggers = new List<ModularSceneryTrigger>();
