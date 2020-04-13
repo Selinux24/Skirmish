@@ -37,11 +37,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         }
         private static NavMesh BuildSolo(InputGeometry geometry, Config cfg)
         {
-            var solid = RecastUtils.CreateHeightfield(cfg.Width, cfg.Height, cfg.BoundingBox, cfg.CellSize, cfg.CellHeight);
+            var solid = Heightfield.Build(cfg.Width, cfg.Height, cfg.BoundingBox, cfg.CellSize, cfg.CellHeight);
 
             var tris = geometry.ChunkyMesh.GetTriangles();
-            var triareas = RecastUtils.MarkWalkableTriangles(cfg.WalkableSlopeAngle, tris);
-            if (!RecastUtils.RasterizeTriangles(solid, cfg.WalkableClimb, tris, triareas))
+            var triareas = MarkWalkableTriangles(cfg.WalkableSlopeAngle, tris);
+            if (!solid.RasterizeTriangles(cfg.WalkableClimb, tris, triareas))
             {
                 return null;
             }
@@ -52,13 +52,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Compact the heightfield so that it is faster to handle from now on.
             // This will result more cache coherent data as well as the neighbours
             // between walkable cells will be calculated.
-            if (!RecastUtils.BuildCompactHeightfield(cfg.WalkableHeight, cfg.WalkableClimb, solid, out CompactHeightfield chf))
+            var chf = CompactHeightfield.Build(cfg.WalkableHeight, cfg.WalkableClimb, solid);
+            if (chf == null)
             {
                 throw new EngineException("buildNavigation: Could not build compact height field.");
             }
 
             // Erode the walkable area by agent radius.
-            if (!RecastUtils.ErodeWalkableArea(cfg.WalkableRadius, chf))
+            if (!chf.ErodeWalkableArea(cfg.WalkableRadius))
             {
                 throw new EngineException("buildNavigation: Could not erode.");
             }
@@ -70,18 +71,21 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             SamplePartition(chf, cfg);
 
             // Create contours.
-            if (!RecastUtils.BuildContours(chf, cfg.MaxSimplificationError, cfg.MaxEdgeLen, BuildContoursFlagTypes.RC_CONTOUR_TESS_WALL_EDGES, out ContourSet cset))
+            var cset = ContourSet.BuildContours(chf, cfg.MaxSimplificationError, cfg.MaxEdgeLen, BuildContoursFlagTypes.TessellateWallEdges);
+            if (cset == null)
             {
                 throw new EngineException("buildNavigation: Could not create contours.");
             }
 
-            if (!RecastUtils.BuildPolyMesh(cset, cfg.MaxVertsPerPoly, out PolyMesh pmesh))
+            var pmesh = PolyMesh.Build(cset, cfg.MaxVertsPerPoly);
+            if (pmesh == null)
             {
                 throw new EngineException("buildNavigation: Could not triangulate contours.");
             }
 
             // Build polygon navmesh from the contours.
-            if (!RecastUtils.BuildPolyMeshDetail(pmesh, chf, cfg.DetailSampleDist, cfg.DetailSampleMaxError, out PolyMeshDetail dmesh))
+            var dmesh = PolyMeshDetail.BuildPolyMeshDetail(pmesh, chf, cfg.DetailSampleDist, cfg.DetailSampleMaxError);
+            if (dmesh == null)
             {
                 throw new EngineException("buildNavigation: Could not build detail mesh.");
             }
@@ -147,7 +151,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             };
 
             var nm = new NavMesh(nvParams);
-            nm.AddTile(navData, TileFlagTypes.DT_TILE_FREE_DATA, 0);
+            nm.AddTile(navData, TileFlagTypes.FreeData, 0);
             return nm;
         }
         private static NavMesh BuildTiled(InputGeometry geometry, BuildSettings settings, Agent agent)
@@ -155,7 +159,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             var bbox = settings.Bounds ?? geometry.BoundingBox;
 
             // Init cache
-            RecastUtils.CalcGridSize(bbox, settings.CellSize, out int gridWidth, out int gridHeight);
+            BuildSettings.CalcGridSize(bbox, settings.CellSize, out int gridWidth, out int gridHeight);
             int tileSize = (int)settings.TileSize;
             int tileWidth = (gridWidth + tileSize - 1) / tileSize;
             int tileHeight = (gridHeight + tileSize - 1) / tileSize;
@@ -226,10 +230,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     var data = BuildTileMesh(x, y, geom, cfg);
                     if (data != null)
                     {
+
                         // Remove any previous data (navmesh owns and deletes the data).
                         navMesh.RemoveTile(x, y, 0);
                         // Let the navmesh own the data.
-                        navMesh.AddTile(data, TileFlagTypes.DT_TILE_FREE_DATA, 0);
+                        navMesh.AddTile(data, TileFlagTypes.FreeData, 0);
                     }
                 }
             }
@@ -239,7 +244,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             var chunkyMesh = geometry.ChunkyMesh;
 
             // Allocate voxel heightfield where we rasterize our input data to.
-            var solid = RecastUtils.CreateHeightfield(cfg.Width, cfg.Height, cfg.BoundingBox, cfg.CellSize, cfg.CellHeight);
+            var solid = Heightfield.Build(cfg.Width, cfg.Height, cfg.BoundingBox, cfg.CellSize, cfg.CellHeight);
 
             Vector2 tbmin = new Vector2(cfg.BoundingBox.Minimum.X, cfg.BoundingBox.Minimum.Z);
             Vector2 tbmax = new Vector2(cfg.BoundingBox.Maximum.X, cfg.BoundingBox.Maximum.Z);
@@ -253,9 +258,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 var tris = chunkyMesh.GetTriangles(id);
 
-                var triareas = RecastUtils.MarkWalkableTriangles(cfg.WalkableSlopeAngle, tris);
+                var triareas = MarkWalkableTriangles(cfg.WalkableSlopeAngle, tris);
 
-                if (!RecastUtils.RasterizeTriangles(solid, cfg.WalkableClimb, tris, triareas))
+                if (!solid.RasterizeTriangles(cfg.WalkableClimb, tris, triareas))
                 {
                     return null;
                 }
@@ -267,13 +272,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Compact the heightfield so that it is faster to handle from now on.
             // This will result more cache coherent data as well as the neighbours
             // between walkable cells will be calculated.
-            if (!RecastUtils.BuildCompactHeightfield(cfg.WalkableHeight, cfg.WalkableClimb, solid, out CompactHeightfield chf))
+            var chf = CompactHeightfield.Build(cfg.WalkableHeight, cfg.WalkableClimb, solid);
+            if (chf == null)
             {
                 return null;
             }
 
             // Erode the walkable area by agent radius.
-            if (!RecastUtils.ErodeWalkableArea(cfg.WalkableRadius, chf))
+            if (!chf.ErodeWalkableArea(cfg.WalkableRadius))
             {
                 return null;
             }
@@ -285,24 +291,27 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             SamplePartition(chf, cfg);
 
             // Create contours.
-            if (!RecastUtils.BuildContours(chf, cfg.MaxSimplificationError, cfg.MaxEdgeLen, BuildContoursFlagTypes.RC_CONTOUR_TESS_WALL_EDGES, out ContourSet cset))
+            var cset = ContourSet.BuildContours(chf, cfg.MaxSimplificationError, cfg.MaxEdgeLen, BuildContoursFlagTypes.TessellateWallEdges);
+            if (cset == null)
             {
                 return null;
             }
 
-            if (cset.nconts == 0)
+            if (cset.NConts == 0)
             {
                 return null;
             }
 
             // Build polygon navmesh from the contours.
-            if (!RecastUtils.BuildPolyMesh(cset, cfg.MaxVertsPerPoly, out PolyMesh pmesh))
+            var pmesh = PolyMesh.Build(cset, cfg.MaxVertsPerPoly);
+            if (pmesh == null)
             {
                 return null;
             }
 
             // Build detail mesh.
-            if (!RecastUtils.BuildPolyMeshDetail(pmesh, chf, cfg.DetailSampleDist, cfg.DetailSampleMaxError, out PolyMeshDetail dmesh))
+            var dmesh = PolyMeshDetail.BuildPolyMeshDetail(pmesh, chf, cfg.DetailSampleDist, cfg.DetailSampleMaxError);
+            if (dmesh == null)
             {
                 return null;
             }
@@ -356,7 +365,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                     foreach (var tile in tiles)
                     {
-                        tileCache.AddTile(tile, CompressedTileFlagTypes.DT_COMPRESSEDTILE_FREE_DATA);
+                        tileCache.AddTile(tile, CompressedTileFlagTypes.FreeData);
                     }
                 }
             }
@@ -396,13 +405,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             cfg.BoundingBox = bbox;
 
-            var solid = RecastUtils.CreateHeightfield(cfg.Width, cfg.Height, cfg.BoundingBox, cfg.CellSize, cfg.CellHeight);
+            var solid = Heightfield.Build(cfg.Width, cfg.Height, cfg.BoundingBox, cfg.CellSize, cfg.CellHeight);
 
             var rc = new RasterizationContext
             {
                 // Allocate voxel heightfield where we rasterize our input data to.
-                solid = solid,
-                tiles = new TileCacheData[RasterizationContext.MaxLayers],
+                Solid = solid,
+                Tiles = new TileCacheData[RasterizationContext.MaxLayers],
             };
 
             Vector2 tbmin = new Vector2(cfg.BoundingBox.Minimum.X, cfg.BoundingBox.Minimum.Z);
@@ -418,9 +427,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 var tris = chunkyMesh.GetTriangles(id);
 
-                rc.triareas = RecastUtils.MarkWalkableTriangles(cfg.WalkableSlopeAngle, tris).ToArray();
+                rc.TriAreas = MarkWalkableTriangles(cfg.WalkableSlopeAngle, tris).ToArray();
 
-                if (!RecastUtils.RasterizeTriangles(rc.solid, cfg.WalkableClimb, tris, rc.triareas))
+                if (!rc.Solid.RasterizeTriangles(cfg.WalkableClimb, tris, rc.TriAreas))
                 {
                     return tiles.ToArray();
                 }
@@ -429,30 +438,31 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Once all geometry is rasterized, we do initial pass of filtering to
             // remove unwanted overhangs caused by the conservative rasterization
             // as well as filter spans where the character cannot possibly stand.
-            FilterHeightfield(rc.solid, cfg);
+            FilterHeightfield(rc.Solid, cfg);
 
-            if (!RecastUtils.BuildCompactHeightfield(cfg.WalkableHeight, cfg.WalkableClimb, rc.solid, out rc.chf))
+            rc.CompactHeightField = CompactHeightfield.Build(cfg.WalkableHeight, cfg.WalkableClimb, rc.Solid);
+            if (rc.CompactHeightField == null)
             {
                 throw new EngineException("buildNavigation: Could not build compact height field.");
             }
 
             // Erode the walkable area by agent radius.
-            if (!RecastUtils.ErodeWalkableArea(cfg.WalkableRadius, rc.chf))
+            if (!rc.CompactHeightField.ErodeWalkableArea(cfg.WalkableRadius))
             {
                 throw new EngineException("buildNavigation: Could not erode.");
             }
 
             // Mark areas.
-            rc.chf.MarkAreas(geometry);
+            rc.CompactHeightField.MarkAreas(geometry);
 
-            RecastUtils.BuildHeightfieldLayers(rc.chf, cfg.BorderSize, cfg.WalkableHeight, out rc.lset);
+            rc.LayerSet = HeightfieldLayerSet.Build(rc.CompactHeightField, cfg.BorderSize, cfg.WalkableHeight);
 
-            rc.ntiles = 0;
-            for (int i = 0; i < Math.Min(rc.lset.NLayers, MAX_LAYERS); i++)
+            rc.NTiles = 0;
+            for (int i = 0; i < Math.Min(rc.LayerSet.NLayers, MAX_LAYERS); i++)
             {
-                var layer = rc.lset.Layers[i];
+                var layer = rc.LayerSet.Layers[i];
 
-                var tile = rc.tiles[rc.ntiles];
+                var tile = rc.Tiles[rc.NTiles];
 
                 // Store header
                 tile.Header = new TileCacheLayerHeader
@@ -478,18 +488,18 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 };
 
                 // Store data
-                DetourTileCache.BuildTileCacheLayer(layer.Heights, layer.Areas, layer.Cons, out var data);
+                DetourTileCache.BuildTileCacheLayer(layer.Heights, layer.Areas, layer.Connections, out var data);
 
                 tile.Data = data;
 
-                rc.tiles[rc.ntiles++] = tile;
+                rc.Tiles[rc.NTiles++] = tile;
             }
 
             // Transfer ownsership of tile data from build context to the caller.
-            for (int i = 0; i < Math.Min(rc.ntiles, MAX_LAYERS); i++)
+            for (int i = 0; i < Math.Min(rc.NTiles, MAX_LAYERS); i++)
             {
-                tiles.Add(rc.tiles[i]);
-                rc.tiles[i].Data = TileCacheLayerData.Empty;
+                tiles.Add(rc.Tiles[i]);
+                rc.Tiles[i].Data = TileCacheLayerData.Empty;
             }
 
             return tiles.ToArray();
@@ -534,7 +544,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             var data = BuildTileMesh(x, y, geom, cfg);
             if (data != null)
             {
-                AddTile(data, TileFlagTypes.DT_TILE_FREE_DATA, 0);
+                AddTile(data, TileFlagTypes.FreeData, 0);
             }
 
             if (settings.UseTileCache && TileCache != null)
@@ -559,15 +569,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // as well as filter spans where the character cannot possibly stand.
             if (cfg.FilterLowHangingObstacles)
             {
-                RecastUtils.FilterLowHangingWalkableObstacles(cfg.WalkableClimb, solid);
+                solid.FilterLowHangingWalkableObstacles(cfg.WalkableClimb);
             }
             if (cfg.FilterLedgeSpans)
             {
-                RecastUtils.FilterLedgeSpans(cfg.WalkableHeight, cfg.WalkableClimb, solid);
+                solid.FilterLedgeSpans(cfg.WalkableHeight, cfg.WalkableClimb);
             }
             if (cfg.FilterWalkableLowHeightSpans)
             {
-                RecastUtils.FilterWalkableLowHeightSpans(cfg.WalkableHeight, solid);
+                solid.FilterWalkableLowHeightSpans(cfg.WalkableHeight);
             }
         }
         /// <summary>
@@ -606,13 +616,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             if (cfg.PartitionType == SamplePartitionTypes.Watershed)
             {
                 // Prepare for region partitioning, by calculating distance field along the walkable surface.
-                if (!RecastUtils.BuildDistanceField(chf))
+                if (!chf.BuildDistanceField())
                 {
                     throw new EngineException("buildNavigation: Could not build distance field.");
                 }
 
                 // Partition the walkable surface into simple regions without holes.
-                if (!RecastUtils.BuildRegions(chf, cfg.BorderSize, cfg.MinRegionArea, cfg.MergeRegionArea))
+                if (!chf.BuildRegions(cfg.BorderSize, cfg.MinRegionArea, cfg.MergeRegionArea))
                 {
                     throw new EngineException("buildNavigation: Could not build watershed regions.");
                 }
@@ -621,7 +631,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 // Partition the walkable surface into simple regions without holes.
                 // Monotone partitioning does not need distancefield.
-                if (!RecastUtils.BuildRegionsMonotone(chf, cfg.BorderSize, cfg.MinRegionArea, cfg.MergeRegionArea))
+                if (!chf.BuildRegionsMonotone(cfg.BorderSize, cfg.MinRegionArea, cfg.MergeRegionArea))
                 {
                     throw new EngineException("buildNavigation: Could not build monotone regions.");
                 }
@@ -629,7 +639,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             else if (cfg.PartitionType == SamplePartitionTypes.Layers)
             {
                 // Partition the walkable surface into simple regions without holes.
-                var hasLayers = RecastUtils.BuildLayerRegions(chf, cfg.BorderSize, cfg.MinRegionArea);
+                var hasLayers = chf.BuildLayerRegions(cfg.BorderSize, cfg.MinRegionArea);
                 if (!hasLayers)
                 {
                     throw new EngineException("buildNavigation: Could not build layer regions.");
@@ -640,7 +650,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             for (int i = 0; i < pmesh.NPolys; ++i)
             {
-                if ((int)pmesh.Areas[i] == (int)AreaTypes.RC_WALKABLE_AREA)
+                if ((int)pmesh.Areas[i] == (int)AreaTypes.Walkable)
                 {
                     pmesh.Areas[i] = SamplePolyAreas.Ground;
                 }
@@ -648,7 +658,30 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 pmesh.Flags[i] = QueryFilter.EvaluateArea(pmesh.Areas[i]);
             }
         }
+        private static IEnumerable<AreaTypes> MarkWalkableTriangles(float walkableSlopeAngle, IEnumerable<Triangle> tris)
+        {
+            List<AreaTypes> triareas = new List<AreaTypes>();
 
+            float walkableThr = (float)Math.Cos(walkableSlopeAngle / 180.0f * MathUtil.Pi);
+
+            for (int i = 0; i < tris.Count(); i++)
+            {
+                var tri = tris.ElementAt(i);
+                Vector3 norm = tri.Normal;
+
+                // Check if the face is walkable.
+                if (norm.Y > walkableThr)
+                {
+                    triareas.Add(AreaTypes.Walkable);
+                }
+                else
+                {
+                    triareas.Add(AreaTypes.Unwalkable);
+                }
+            }
+
+            return triareas;
+        }
 
         private Vector3 m_orig;
         private readonly float m_tileWidth;
@@ -912,7 +945,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             RemoveConnections(tile);
 
             // Reset tile.
-            if ((tile.Flags & TileFlagTypes.DT_TILE_FREE_DATA) != 0)
+            if ((tile.Flags & TileFlagTypes.FreeData) != 0)
             {
                 // Owns data
                 tile.Data = null;
@@ -1502,7 +1535,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     // Skip hard and non-internal edges.
                     if (poly.Neis[j] == 0 || (poly.Neis[j] & DetourUtils.DT_EXT_LINK) != 0) continue;
 
-                    int idx = DetourUtils.AllocLink(tile);
+                    int idx = tile.AllocLink();
                     if (idx != DetourUtils.DT_NULL_LINK)
                     {
                         var link = new Link
@@ -1553,7 +1586,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 tile.SetPolyVertex(poly, 0, nearestPt);
 
                 // Link off-mesh connection to target poly.
-                int idx = DetourUtils.AllocLink(tile);
+                int idx = tile.AllocLink();
                 if (idx != DetourUtils.DT_NULL_LINK)
                 {
                     var link = new Link
@@ -1571,7 +1604,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
 
                 // Start end-point is always connect back to off-mesh connection. 
-                int tidx = DetourUtils.AllocLink(tile);
+                int tidx = tile.AllocLink();
                 if (tidx != DetourUtils.DT_NULL_LINK)
                 {
                     var landPolyIdx = DecodePolyIdPoly(r);
@@ -1639,7 +1672,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 for (int k = 0; k < neis.Count(); k++)
                 {
                     var nei = neis.ElementAt(k);
-                    int idx = DetourUtils.AllocLink(tile);
+                    int idx = tile.AllocLink();
                     if (idx != DetourUtils.DT_NULL_LINK)
                     {
                         var link = new Link
@@ -1771,7 +1804,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Make sure the location is on current mesh.
             target.SetPolyVertex(targetPoly, 1, nearestPt);
 
-            int idx = DetourUtils.AllocLink(target);
+            int idx = target.AllocLink();
             if (idx != DetourUtils.DT_NULL_LINK)
             {
                 var link = new Link
@@ -1791,7 +1824,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Link target poly to off-mesh connection.
             if ((targetCon.Flags & DetourUtils.DT_OFFMESH_CON_BIDIR) != 0)
             {
-                int tidx = DetourUtils.AllocLink(tile);
+                int tidx = tile.AllocLink();
                 if (tidx != DetourUtils.DT_NULL_LINK)
                 {
                     var landPolyIdx = DecodePolyIdPoly(r);
@@ -1839,7 +1872,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                         {
                             tile.Links[pj].Next = nj;
                         }
-                        DetourUtils.FreeLink(tile, j);
+                        tile.FreeLink(j);
                         j = nj;
                     }
                     else

@@ -34,7 +34,7 @@ namespace Engine.PathFinding
         /// <returns>Returns the generated graph</returns>
         public async Task<IGraph> Build()
         {
-            IGraph result = null;
+            IGraph result;
 
             try
             {
@@ -43,6 +43,7 @@ namespace Engine.PathFinding
             catch (Exception ex)
             {
                 Console.WriteLine($"Error creating the graph: {ex.Message}");
+                throw;
             }
 
             return result;

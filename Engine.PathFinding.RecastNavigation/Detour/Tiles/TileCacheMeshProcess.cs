@@ -4,11 +4,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
     public class TileCacheMeshProcess
     {
-        private readonly InputGeometry m_geom = null;
+        private readonly InputGeometry geometry = null;
 
         public TileCacheMeshProcess(InputGeometry geometry)
         {
-            this.m_geom = geometry;
+            this.geometry = geometry;
         }
 
         public void Process(ref NavMeshCreateParams param, NavMeshTileBuildContext bc)
@@ -16,7 +16,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             // Update poly flags from areas.
             for (int i = 0; i < param.PolyCount; ++i)
             {
-                if ((int)bc.LMesh.Areas[i] == (int)AreaTypes.RC_WALKABLE_AREA)
+                if ((int)bc.LMesh.Areas[i] == (int)AreaTypes.Walkable)
                 {
                     bc.LMesh.Areas[i] = SamplePolyAreas.Ground;
                 }
@@ -25,10 +25,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
 
             // Pass in off-mesh connections.
-            if (m_geom != null)
+            if (geometry != null)
             {
-                param.OffMeshCon = m_geom.GetConnections().ToArray();
-                param.OffMeshConCount = m_geom.GetConnectionCount();
+                param.OffMeshCon = geometry.GetConnections().ToArray();
+                param.OffMeshConCount = geometry.GetConnectionCount();
             }
         }
     }

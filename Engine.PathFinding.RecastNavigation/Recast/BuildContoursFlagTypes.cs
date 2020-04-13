@@ -9,12 +9,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
     public enum BuildContoursFlagTypes
     {
         /// <summary>
-        /// Tessellate solid (impassable) edges during contour simplification.
+        /// RC_CONTOUR_TESS_WALL_EDGES. Tessellate solid (impassable) edges during contour simplification.
         /// </summary>
-        RC_CONTOUR_TESS_WALL_EDGES = 0x01,
+        TessellateWallEdges = 0x01,
         /// <summary>
-        /// Tessellate edges between areas during contour simplification.
+        /// RC_CONTOUR_TESS_AREA_EDGES. Tessellate edges between areas during contour simplification.
         /// </summary>
-        RC_CONTOUR_TESS_AREA_EDGES = 0x02,
+        TessellateAreaEdges = 0x02,
     }
 }

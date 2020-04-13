@@ -51,10 +51,5 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// The index of the query filter used by this agent.
         /// </summary>
         public int QueryFilterTypeIndex { get; set; }
-
-        /// <summary>
-        /// User defined data attached to the agent.
-        /// </summary>
-        public object UserData { get; set; }
     }
 }

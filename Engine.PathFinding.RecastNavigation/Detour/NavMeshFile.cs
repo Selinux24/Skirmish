@@ -75,7 +75,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     continue;
                 }
 
-                navmesh.AddTile(tile, TileFlagTypes.DT_TILE_FREE_DATA, 0);
+                navmesh.AddTile(tile, TileFlagTypes.FreeData, 0);
             }
 
             if (file.HasTileCache)
@@ -91,7 +91,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                         continue;
                     }
 
-                    navmesh.TileCache.AddTile(tile, CompressedTileFlagTypes.DT_COMPRESSEDTILE_FREE_DATA);
+                    navmesh.TileCache.AddTile(tile, CompressedTileFlagTypes.FreeData);
                 }
             }
 
@@ -120,5 +120,4 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         public List<TileCacheData> TileCacheData { get; set; }
     }
-
 }

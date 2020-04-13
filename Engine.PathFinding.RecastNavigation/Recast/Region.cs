@@ -25,11 +25,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         public List<int> Connections { get; set; } = new List<int>();
         public List<int> Floors { get; set; } = new List<int>();
 
-        public Region(int i)
+        public Region(int id)
         {
             SpanCount = 0;
-            Id = i;
-            AreaType = AreaTypes.RC_NULL_AREA;
+            Id = id;
+            AreaType = AreaTypes.Unwalkable;
             Remap = false;
             Visited = false;
             Overlap = false;

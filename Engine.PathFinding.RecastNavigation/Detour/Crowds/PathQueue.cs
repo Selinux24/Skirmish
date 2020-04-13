@@ -140,7 +140,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             }
 
             // Handle completed request.
-            if (q.Status == Status.DT_SUCCESS || q.Status == Status.DT_FAILURE)
+            if (q.Status == Status.Success || q.Status == Status.Failure)
             {
                 // If the path result has not been read in few frames, free the slot.
                 q.KeepAlive++;
@@ -160,17 +160,17 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             }
 
             // Handle query in progress.
-            if (q.Status == Status.DT_IN_PROGRESS)
+            if (q.Status == Status.InProgress)
             {
                 q.Status = m_navquery.UpdateSlicedFindPath(iterCount, out int iters);
                 iterCount -= iters;
             }
 
             // Handle success query
-            if (q.Status == Status.DT_SUCCESS)
+            if (q.Status == Status.Success)
             {
                 q.Status = m_navquery.FinalizeSlicedFindPath(m_maxPathSize, out var resPath);
-                if (q.Status == Status.DT_SUCCESS)
+                if (q.Status == Status.Success)
                 {
                     q.Path = resPath;
                 }
@@ -240,7 +240,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 }
             }
 
-            return Status.DT_FAILURE;
+            return Status.Failure;
         }
         /// <summary>
         /// Gets the path result
@@ -259,7 +259,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 {
                     PathQuery q = m_queue[i];
 
-                    Status details = q.Status & Status.DT_STATUS_DETAIL_MASK;
+                    Status details = q.Status & Status.StatusDetailMask;
 
                     // Free request for reuse.
                     q.R = DT_PATHQ_INVALID;
@@ -268,11 +268,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     // Copy path
                     path = q.Path.Copy(maxPath);
 
-                    return details | Status.DT_SUCCESS;
+                    return details | Status.Success;
                 }
             }
 
-            return Status.DT_FAILURE;
+            return Status.Failure;
         }
     }
 }

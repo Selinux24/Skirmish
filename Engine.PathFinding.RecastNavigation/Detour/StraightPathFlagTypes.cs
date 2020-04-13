@@ -9,16 +9,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour
     public enum StraightPathFlagTypes
     {
         /// <summary>
-        /// The vertex is the start position in the path.
+        /// DT_STRAIGHTPATH_START. The vertex is the start position in the path.
         /// </summary>
-        DT_STRAIGHTPATH_START = 0x01,
+        Start = 0x01,
         /// <summary>
-        /// The vertex is the end position in the path.
+        /// DT_STRAIGHTPATH_END. The vertex is the end position in the path.
         /// </summary>
-        DT_STRAIGHTPATH_END = 0x02,
+        End = 0x02,
         /// <summary>
-        /// The vertex is the start of an off-mesh connection.
+        /// DT_STRAIGHTPATH_OFFMESH_CONNECTION. The vertex is the start of an off-mesh connection.
         /// </summary>
-        DT_STRAIGHTPATH_OFFMESH_CONNECTION = 0x04,
+        Offmesh = 0x04,
     }
 }

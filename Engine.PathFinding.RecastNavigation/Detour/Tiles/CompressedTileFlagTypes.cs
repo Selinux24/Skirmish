@@ -9,8 +9,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
     public enum CompressedTileFlagTypes
     {
         /// <summary>
-        /// Navmesh owns the tile memory and should free it.
+        /// DT_COMPRESSEDTILE_FREE_DATA. Navmesh owns the tile memory and should free it.
         /// </summary>
-        DT_COMPRESSEDTILE_FREE_DATA = 0x01,					
+        FreeData = 0x01,
     }
 }

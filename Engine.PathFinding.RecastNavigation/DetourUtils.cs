@@ -3,8 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Engine.PathFinding.RecastNavigation.Detour
+namespace Engine.PathFinding.RecastNavigation
 {
+    using Engine.PathFinding.RecastNavigation.Detour;
     using Engine.PathFinding.RecastNavigation.Recast;
 
     static class DetourUtils
@@ -1050,21 +1051,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             uint h2 = 0xd8163841; // here arbitrarily chosen primes
             uint n = (uint)(h1 * x + h2 * y);
             return (int)(n & mask);
-        }
-        public static int AllocLink(MeshTile tile)
-        {
-            if (tile.LinksFreeList == DT_NULL_LINK)
-            {
-                return DT_NULL_LINK;
-            }
-            int link = tile.LinksFreeList;
-            tile.LinksFreeList = tile.Links[link].Next;
-            return link;
-        }
-        public static void FreeLink(MeshTile tile, int link)
-        {
-            tile.Links[link].Next = tile.LinksFreeList;
-            tile.LinksFreeList = link;
         }
 
         #endregion

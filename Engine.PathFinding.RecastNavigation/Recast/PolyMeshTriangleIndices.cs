@@ -2,8 +2,6 @@
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
-    using Engine.PathFinding.RecastNavigation.Detour;
-
     /// <summary>
     /// Polygon mesh triangle indexes
     /// </summary>

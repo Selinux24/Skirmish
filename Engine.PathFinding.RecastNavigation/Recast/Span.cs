@@ -15,19 +15,19 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// The lower limit of the span
         /// </summary>
-        public int smin;
+        public int SMin;
         /// <summary>
         /// The upper limit of the span
         /// </summary>
-        public int smax;
+        public int SMax;
         /// <summary>
         /// The area id assigned to the span.
         /// </summary>
-        public AreaTypes area;
+        public AreaTypes Area;
         /// <summary>
         /// The next span higher up in column.
         /// </summary>
-        public Span next;
+        public Span Next;
 
         /// <summary>
         /// Gets the text representation of the instance
@@ -35,7 +35,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <returns>Returns the text representation of the instance</returns>
         public override string ToString()
         {
-            return string.Format("Min {0} Max {1} Area: {2}; Next Span {3};", this.smin, this.smax, this.area, this.next != null);
+            return string.Format("Min {0} Max {1} Area: {2}; Next Span {3};", this.SMin, this.SMax, this.Area, this.Next != null);
         }
     }
 }

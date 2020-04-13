@@ -17,7 +17,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <summary>
         /// The type of mesh polygon the agent is traversing.
         /// </summary>
-        public CrowdAgentState State { get; set; } = CrowdAgentState.DT_CROWDAGENT_STATE_INVALID;
+        public CrowdAgentState State { get; set; } = CrowdAgentState.Invalid;
         /// <summary>
         /// True if the agent has valid path (targetState == DT_CROWDAGENT_TARGET_VALID) and the path does not lead to the requested position, else false.
         /// </summary>
@@ -73,7 +73,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <summary>
         /// State of the movement request.
         /// </summary>
-        public MoveRequestState TargetState { get; set; } = MoveRequestState.DT_CROWDAGENT_TARGET_NONE;
+        public MoveRequestState TargetState { get; set; } = MoveRequestState.None;
         /// <summary>
         /// Target polyref of the movement request.
         /// </summary>

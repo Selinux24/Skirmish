@@ -3,7 +3,13 @@ namespace Engine.PathFinding.RecastNavigation
 {
     public enum ObstacleRequestAction
     {
-        REQUEST_ADD,
-		REQUEST_REMOVE,
+        /// <summary>
+        /// REQUEST_ADD
+        /// </summary>
+        Add,
+        /// <summary>
+        /// REQUEST_REMOVE
+        /// </summary>
+		Remove,
     }
 }

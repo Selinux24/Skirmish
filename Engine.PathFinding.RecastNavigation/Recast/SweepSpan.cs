@@ -8,13 +8,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         public int RId { get; set; }
         /// <summary>
-        /// region id
-        /// </summary>
-        public int Id { get; set; }
-        /// <summary>
         /// number samples
         /// </summary>
         public int NS { get; set; }
+        /// <summary>
+        /// region id
+        /// </summary>
+        public int Id { get; set; }
         /// <summary>
         /// neighbour id
         /// </summary>

@@ -265,7 +265,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 return RemoveTile(t, out _);
             }
 
-            return Status.DT_SUCCESS;
+            return Status.Success;
         }
         /// <summary>
         /// Removes a tile
@@ -277,7 +277,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             data = TileCacheLayerData.Empty;
 
             // Remove tile from hash lookup.
-            int h = DetourTileCache.ComputeTileHash(tile.Header.TX, tile.Header.TY, m_tileLutMask);
+            int h = DetourUtils.ComputeTileHash(tile.Header.TX, tile.Header.TY, m_tileLutMask);
             CompressedTile prev = null;
             CompressedTile cur = m_posLookup[h];
             while (cur != null)
@@ -299,7 +299,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
 
             // Reset tile.
-            if ((tile.Flags & CompressedTileFlagTypes.DT_COMPRESSEDTILE_FREE_DATA) != 0)
+            if ((tile.Flags & CompressedTileFlagTypes.FreeData) != 0)
             {
                 // Owns data
                 tile.Data = TileCacheLayerData.Empty;
@@ -324,7 +324,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             tile.Next = m_nextFreeTile;
             m_nextFreeTile = tile;
 
-            return Status.DT_SUCCESS;
+            return Status.Success;
         }
         /// <summary>
         /// Removes a tile by reference
@@ -337,18 +337,18 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             if (r == 0)
             {
-                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
+                return Status.Failure | Status.InvalidParam;
             }
             int tileIndex = DecodeTileIdTile(r);
             int tileSalt = DecodeTileIdSalt(r);
             if (tileIndex >= m_params.MaxTiles)
             {
-                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
+                return Status.Failure | Status.InvalidParam;
             }
             var tile = m_tiles[tileIndex];
             if (tile.Salt != tileSalt)
             {
-                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
+                return Status.Failure | Status.InvalidParam;
             }
 
             return RemoveTile(tile, out data);
@@ -426,7 +426,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             if (m_reqs.Count >= DetourTileCache.MAX_REQUESTS)
             {
-                return Status.DT_FAILURE | Status.DT_BUFFER_TOO_SMALL;
+                return Status.Failure | Status.BufferTooSmall;
             }
 
             int ob = -1;
@@ -438,27 +438,27 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
             if (ob == -1)
             {
-                return Status.DT_FAILURE;
+                return Status.Failure;
             }
 
             int salt = m_obstacles[ob].Salt;
             m_obstacles[ob] = new TileCacheObstacle
             {
                 Salt = salt,
-                State = ObstacleState.DT_OBSTACLE_PROCESSING,
+                State = ObstacleState.Processing,
                 Obstacle = obstacle,
             };
 
             var req = new ObstacleRequest
             {
-                Action = ObstacleRequestAction.REQUEST_ADD,
+                Action = ObstacleRequestAction.Add,
                 NRef = GetObstacleRef(m_obstacles[ob]),
             };
             m_reqs.Add(req);
 
             result = req.NRef;
 
-            return Status.DT_SUCCESS;
+            return Status.Success;
         }
         /// <summary>
         /// Adds a new remove request of an obstacle by reference
@@ -468,17 +468,17 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             if (r == 0 || m_reqs.Count >= DetourTileCache.MAX_REQUESTS)
             {
-                return Status.DT_FAILURE | Status.DT_BUFFER_TOO_SMALL;
+                return Status.Failure | Status.BufferTooSmall;
             }
 
             var req = new ObstacleRequest
             {
-                Action = ObstacleRequestAction.REQUEST_REMOVE,
+                Action = ObstacleRequestAction.Remove,
                 NRef = r
             };
             m_reqs.Add(req);
 
-            return Status.DT_SUCCESS;
+            return Status.Success;
         }
 
         /// <summary>
@@ -516,11 +516,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     continue;
                 }
 
-                if (req.Action == ObstacleRequestAction.REQUEST_ADD)
+                if (req.Action == ObstacleRequestAction.Add)
                 {
                     ProcessRequestAdd(ob);
                 }
-                else if (req.Action == ObstacleRequestAction.REQUEST_REMOVE)
+                else if (req.Action == ObstacleRequestAction.Remove)
                 {
                     ProcessRequestRemove(ob);
                 }
@@ -553,7 +553,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         private void ProcessRequestRemove(TileCacheObstacle ob)
         {
             // Prepare to remove obstacle.
-            ob.State = ObstacleState.DT_OBSTACLE_REMOVING;
+            ob.State = ObstacleState.Removing;
 
             // Add tiles to update list.
             ob.Pending.Clear();
@@ -571,7 +571,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         }
         private Status ProcessUpdates()
         {
-            Status status = Status.DT_SUCCESS;
+            Status status = Status.Success;
 
             // Process updates
             if (m_update.Count != 0)
@@ -580,7 +580,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 var r = m_update[0];
                 if (!BuildTile(r))
                 {
-                    status = Status.DT_FAILURE;
+                    status = Status.Failure;
                 }
 
                 if (m_update.Count > 0)
@@ -590,7 +590,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
                 // Update obstacle states.
                 var pendingObstacles = m_obstacles
-                    .Where(ob => ob.State == ObstacleState.DT_OBSTACLE_PROCESSING || ob.State == ObstacleState.DT_OBSTACLE_REMOVING)
+                    .Where(ob => ob.State == ObstacleState.Processing || ob.State == ObstacleState.Removing)
                     .ToArray();
 
                 for (int i = 0; i < pendingObstacles.Length; ++i)
@@ -617,13 +617,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             // If all pending tiles processed, change state.
             if (ob.Pending.Count == 0)
             {
-                if (ob.State == ObstacleState.DT_OBSTACLE_PROCESSING)
+                if (ob.State == ObstacleState.Processing)
                 {
-                    ob.State = ObstacleState.DT_OBSTACLE_PROCESSED;
+                    ob.State = ObstacleState.Processed;
                 }
-                else if (ob.State == ObstacleState.DT_OBSTACLE_REMOVING)
+                else if (ob.State == ObstacleState.Removing)
                 {
-                    ob.State = ObstacleState.DT_OBSTACLE_EMPTY;
+                    ob.State = ObstacleState.Empty;
                     // Update salt, salt should never be zero.
                     ob.Salt = (ob.Salt + 1) & ((1 << 16) - 1);
                     if (ob.Salt == 0)
@@ -788,7 +788,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
 
             // Add new tile
-            return m_navMesh.AddTile(navData, TileFlagTypes.DT_TILE_FREE_DATA, 0);
+            return m_navMesh.AddTile(navData, TileFlagTypes.FreeData, 0);
         }
 
         /// <summary>

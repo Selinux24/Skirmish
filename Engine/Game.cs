@@ -412,21 +412,30 @@ namespace Engine
 
             ResourceLoadRuning = true;
 
-            await Task.WhenAll(tasks);
+            try
+            {
+                await Task.WhenAll(tasks);
 
-            ResourcesLoading?.Invoke(this, new GameLoadResourcesEventArgs() { Id = id, Scene = scene });
+                ResourcesLoading?.Invoke(this, new GameLoadResourcesEventArgs() { Id = id, Scene = scene });
 
-            Console.WriteLine("BufferManager: Recreating buffers");
-            this.BufferManager.CreateBuffers(Progress);
-            Console.WriteLine("BufferManager: Buffers recreated");
+                Console.WriteLine("BufferManager: Recreating buffers");
+                this.BufferManager.CreateBuffers(Progress);
+                Console.WriteLine("BufferManager: Buffers recreated");
 
-            Console.WriteLine("ResourceManager: Creating new resources");
-            this.ResourceManager.CreateResources();
-            Console.WriteLine("ResourceManager: New resources created");
+                Console.WriteLine("ResourceManager: Creating new resources");
+                this.ResourceManager.CreateResources();
+                Console.WriteLine("ResourceManager: New resources created");
 
-            ResourcesLoaded?.Invoke(this, new GameLoadResourcesEventArgs() { Id = id, Scene = scene });
-
-            ResourceLoadRuning = false;
+                ResourcesLoaded?.Invoke(this, new GameLoadResourcesEventArgs() { Id = id, Scene = scene });
+            }
+            catch (EngineException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                ResourceLoadRuning = false;
+            }
 
             return true;
         }
