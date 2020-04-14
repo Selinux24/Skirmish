@@ -780,7 +780,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             // Remove existing tile.
             m_navMesh.RemoveTile(tile.Header.TX, tile.Header.TY, tile.Header.TLayer);
 
-            MeshData navData = DetourUtils.CreateNavMeshData(param);
+            MeshData navData = MeshData.CreateNavMeshData(param);
             if (navData == null)
             {
                 // Leave the location empty.

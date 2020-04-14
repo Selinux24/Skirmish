@@ -77,6 +77,10 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         public int VertsPerPoly { get; set; } = 6;
         /// <summary>
+        /// Maximum number of layers
+        /// </summary>
+        public int MaxLayers { get; set; } = 32;
+        /// <summary>
         /// Partition type
         /// </summary>
         public SamplePartitionTypes PartitionType { get; set; } = SamplePartitionTypes.Watershed;
@@ -167,6 +171,7 @@ namespace Engine.PathFinding.RecastNavigation
                 MinRegionArea = minRegionArea,
                 MergeRegionArea = mergeRegionArea,
                 MaxVertsPerPoly = this.VertsPerPoly,
+                MaxLayers = this.MaxLayers,
                 DetailSampleDist = detailSampleDist,
                 DetailSampleMaxError = detailSampleMaxError,
                 BoundingBox = generationBounds,
@@ -226,6 +231,7 @@ namespace Engine.PathFinding.RecastNavigation
                 MinRegionArea = minRegionArea,
                 MergeRegionArea = mergeRegionArea,
                 MaxVertsPerPoly = this.VertsPerPoly,
+                MaxLayers = this.MaxLayers,
                 DetailSampleDist = detailSampleDist,
                 DetailSampleMaxError = detailSampleMaxError,
                 BoundingBox = generationBounds,
@@ -320,6 +326,7 @@ namespace Engine.PathFinding.RecastNavigation
                 MinRegionArea = minRegionArea,
                 MergeRegionArea = mergeRegionArea,
                 MaxVertsPerPoly = this.VertsPerPoly,
+                MaxLayers = this.MaxLayers,
                 DetailSampleDist = detailSampleDist,
                 DetailSampleMaxError = detailSampleMaxError,
                 BoundingBox = generationBounds,

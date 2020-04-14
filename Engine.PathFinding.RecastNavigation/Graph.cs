@@ -880,12 +880,10 @@ namespace Engine.PathFinding.RecastNavigation
 
             foreach (var agentQ in AgentQueries)
             {
-                var cache = agentQ.NavMesh.TileCache;
-                if (cache != null)
+                int id = agentQ.NavMesh.AddObstacle(obstacle);
+                if (id >= 0)
                 {
-                    cache.AddObstacle(obstacle, out int res);
-
-                    obstacles.Add(new Tuple<Agent, int>(agentQ.Agent, res));
+                    obstacles.Add(new Tuple<Agent, int>(agentQ.Agent, id));
                 }
             }
 
@@ -944,11 +942,9 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 foreach (var item in instance.Indices)
                 {
-                    var cache = AgentQueries.Find(a => a.Agent.Equals(item.Item1))?.NavMesh.TileCache;
-                    if (cache != null)
-                    {
-                        cache.RemoveObstacle(item.Item2);
-                    }
+                    var navmesh = AgentQueries.Find(a => a.Agent.Equals(item.Item1))?.NavMesh;
+
+                    navmesh?.RemoveObstacle(item.Item2);
                 }
 
                 itemIndices.Remove(instance);
@@ -1014,21 +1010,19 @@ namespace Engine.PathFinding.RecastNavigation
             foreach (var agentQ in AgentQueries)
             {
                 var nm = agentQ.NavMesh;
-                if (nm.TileCache != null)
-                {
-                    var status = nm.TileCache.Update(out bool upToDate);
-                    if (status.HasFlag(Status.Success) && updated != upToDate)
-                    {
-                        updated = upToDate;
 
-                        if (updated)
-                        {
-                            this.Updated?.Invoke(this, new EventArgs());
-                        }
-                        else
-                        {
-                            this.Updating?.Invoke(this, new EventArgs());
-                        }
+                bool upToDate = nm.UpdateObstacles();
+                if (updated != upToDate)
+                {
+                    updated = upToDate;
+
+                    if (updated)
+                    {
+                        this.Updated?.Invoke(this, new EventArgs());
+                    }
+                    else
+                    {
+                        this.Updating?.Invoke(this, new EventArgs());
                     }
                 }
             }

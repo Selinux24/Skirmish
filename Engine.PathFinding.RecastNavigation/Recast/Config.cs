@@ -79,6 +79,10 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         public int MaxVertsPerPoly { get; set; }
         /// <summary>
+        /// Maximum number of layers
+        /// </summary>
+        public int MaxLayers { get; set; }
+        /// <summary>
         /// Sets the sampling distance to use when generating the detail mesh. (For height detail only.) [Limits: 0 or >= 0.9] [Units: wu] 
         /// </summary>
         public float DetailSampleDist { get; set; }

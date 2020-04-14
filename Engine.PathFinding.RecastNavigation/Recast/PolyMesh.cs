@@ -5,6 +5,8 @@ using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Recast
 {
+    using Engine.PathFinding.RecastNavigation.Detour;
+
     /// <summary>
     /// Represents a polygon mesh suitable for use in building a navigation mesh.
     /// </summary>
@@ -889,6 +891,22 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 {
                     tgt.UpdateAdjacency(src, this.NVP, isMinX, isMaxX, isMinZ, isMaxZ);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Updates the polygon intitial flags
+        /// </summary>
+        public void UpdatePolyFlags()
+        {
+            for (int i = 0; i < this.NPolys; ++i)
+            {
+                if ((int)this.Areas[i] == (int)AreaTypes.Walkable)
+                {
+                    this.Areas[i] = SamplePolyAreas.Ground;
+                }
+
+                this.Flags[i] = QueryFilter.EvaluateArea(this.Areas[i]);
             }
         }
     }

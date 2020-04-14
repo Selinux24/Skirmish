@@ -2756,9 +2756,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             MeshTile tile = null;
             float areaSum = 0.0f;
 
-            for (int i = 0; i < m_nav.MaxTiles; i++)
+            var tiles = m_nav.GetTiles();
+            for (int i = 0; i < tiles.Count(); i++)
             {
-                MeshTile tl = m_nav.Tiles[i];
+                var tl = tiles.ElementAt(i);
                 if (tl == null || tl.Header.Magic != DetourUtils.DT_NAVMESH_MAGIC)
                 {
                     continue;
