@@ -78,6 +78,7 @@ namespace Heightmap
 
         private ModelInstanced helicopterI = null;
         private ModelInstanced bradleyI = null;
+        private ModelInstanced buildings = null;
         private Model watchTower = null;
         private ModelInstanced containers = null;
 
@@ -124,6 +125,7 @@ namespace Heightmap
                 InitializeTroops(),
                 InitializeM24(),
                 InitializeBradley(),
+                InitializeBuildings(),
                 InitializeWatchTower(),
                 InitializeContainers(),
                 InitializeTorchs(),
@@ -345,6 +347,32 @@ namespace Heightmap
             for (int i = 0; i < this.bradleyI.InstanceCount; i++)
             {
                 this.Lights.AddRange(this.bradleyI[i].Lights);
+            }
+            sw.Stop();
+
+            return await Task.FromResult(sw.Elapsed.TotalSeconds);
+        }
+        private async Task<double> InitializeBuildings()
+        {
+            Stopwatch sw = Stopwatch.StartNew();
+
+            sw.Restart();
+            var mDesc = new ModelInstancedDescription()
+            {
+                Name = "Affgan buildings",
+                CastShadow = true,
+                Instances = 5,
+                Content = new ContentDescription()
+                {
+                    ContentFolder = @"Resources/buildings",
+                    ModelContentFilename = @"Affgan1.xml",
+                }
+            };
+            this.buildings = await this.AddComponentModelInstanced(mDesc, SceneObjectUsages.None, layerObjects);
+            this.AttachToGround(this.buildings, true);
+            for (int i = 0; i < this.buildings.InstanceCount; i++)
+            {
+                this.Lights.AddRange(this.buildings[i].Lights);
             }
             sw.Stop();
 
@@ -769,6 +797,7 @@ namespace Heightmap
             await Task.WhenAll(
                 this.SetRocksPosition(posRnd, bbox),
                 this.SetForestPosition(posRnd),
+                this.SetBuildingPosition(),
                 this.SetWatchTowerPosition(),
                 this.SetContainersPosition(),
                 this.SetTorchsPosition(posRnd, bbox));
@@ -1009,6 +1038,29 @@ namespace Heightmap
                     this.bradleyI[i].Manipulator.SetPosition(r.Position, true);
                     this.bradleyI[i].Manipulator.SetRotation(bPositions[i].Z, 0, 0, true);
                     this.bradleyI[i].Manipulator.SetNormal(r.Item.Normal);
+                }
+            }
+
+            await Task.CompletedTask;
+        }
+        private async Task SetBuildingPosition()
+        {
+            var bPositions = new[]
+            {
+                new Vector3(-160, -190, MathUtil.Pi),
+                new Vector3(-080, -190, MathUtil.Pi),
+                new Vector3(+000, -190, MathUtil.Pi),
+                new Vector3(+080, -190, MathUtil.Pi),
+                new Vector3(+160, -190, MathUtil.Pi),
+            };
+
+            for (int i = 0; i < bPositions.Length; i++)
+            {
+                if (this.FindTopGroundPosition(bPositions[i].X, bPositions[i].Y, out PickingResult<Triangle> r))
+                {
+                    this.buildings[i].Manipulator.SetScale(4, true);
+                    this.buildings[i].Manipulator.SetPosition(r.Position, true);
+                    this.buildings[i].Manipulator.SetRotation(bPositions[i].Z, 0, 0, true);
                 }
             }
 
@@ -1276,7 +1328,7 @@ namespace Heightmap
             {
                 this.Camera.MoveBackward(gameTime, !shift);
             }
-       
+
             return this.Camera.Position;
         }
         private Vector3 UpdateWalkingCamera(GameTime gameTime, bool shift)

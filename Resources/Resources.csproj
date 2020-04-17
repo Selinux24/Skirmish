@@ -106,7 +106,8 @@
     </StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="Blender\Buildings\Dungeon\Dungeon.blend" />
+    <None Include="Blender\Buildings\Affgan\Affgan1.blend" />
+    <None Include="Blender\Scenery\Dungeon\Dungeon.blend" />
     <None Include="Blender\Buildings\Imperial\Imperial_1.blend" />
     <None Include="Blender\Buildings\Obelisk\diffus.dds" />
     <None Include="Blender\Buildings\Obelisk\normal.dds" />
@@ -122,7 +123,13 @@
     <None Include="Blender\Environment\Trees\Tree1\tree_1.blend" />
     <None Include="Blender\Environment\Trees\Tree1\tree_2.blend" />
     <None Include="Blender\Environment\Trees\Tree1\tree_3.blend" />
-    <None Include="Blender\Scenery\Buildings\Building_1.blend" />
+    <None Include="Blender\Buildings\Bunker\Building_1.blend" />
+    <None Include="Blender\Scenery\ModularDungeon\Dn_Bookcase.blend" />
+    <None Include="Blender\Scenery\ModularDungeon\Dn_Corridor.blend" />
+    <None Include="Blender\Scenery\ModularDungeon\Dn_Cranes.blend" />
+    <None Include="Blender\Scenery\ModularDungeon\Dn_Doors_2.blend" />
+    <None Include="Blender\Scenery\ModularDungeon\Dn_Pilars.blend" />
+    <None Include="Blender\Scenery\ModularDungeon\Dn_Statues.blend" />
     <None Include="Blender\Scenery\ModularScyFy\corridor.blend" />
     <None Include="Blender\Scenery\ModularScyFy\crate.blend" />
     <None Include="Blender\Scenery\ModularScyFy\Crate_Diffuse.pdn" />
@@ -132,22 +139,23 @@
     <None Include="Blender\Characters\Human2\Human2.blend" />
     <None Include="Blender\Characters\Rat\Rat.blend" />
     <None Include="Blender\Characters\Rat\Rat_uv.pdn" />
-    <None Include="Blender\Foliage\Foliage.blend" />
+    <None Include="Blender\Environment\Foliage\Foliage.blend" />
     <None Include="Blender\Furniture\Container\container.blend" />
     <None Include="Blender\Furniture\Lamps\concrete.jpg" />
     <None Include="Blender\Buildings\Heliport\heliport.png" />
     <None Include="Blender\Furniture\StreetLamp\StreetLamp.blend" />
-    <None Include="Blender\Planes\SkyPlane.blend" />
+    <None Include="Blender\UI\Background\SkyPlane.blend" />
     <None Include="Blender\Scenery\Clif\clif.blend" />
     <None Include="Blender\Furniture\StreetLamp\Lamp.png" />
     <None Include="Blender\Furniture\StreetLamp\metallic.jpg" />
-    <None Include="Blender\Planes\background.jpg" />
-    <None Include="Blender\Foliage\grass_v0.dds" />
-    <None Include="Blender\Foliage\grass_v1.dds" />
-    <None Include="Blender\Foliage\grass_v2.dds" />
+    <None Include="Blender\UI\Background\background.jpg" />
+    <None Include="Blender\Environment\Foliage\grass_v0.dds" />
+    <None Include="Blender\Environment\Foliage\grass_v1.dds" />
+    <None Include="Blender\Environment\Foliage\grass_v2.dds" />
     <None Include="Blender\Characters\Rat\Rat_d.png" />
     <None Include="Blender\Furniture\Container\ikube azul.png" />
     <None Include="Blender\Buildings\Watch Tower\Wood.jpg" />
+    <None Include="Blender\Buildings\Affgan\afghan_building.jpg" />
     <Content Include="Blender\Characters\Rat\rat_run.png" />
     <Content Include="Blender\Characters\Rat\Rat_uv.png" />
     <None Include="Blender\Environment\Trees\Tree0\Brown_Bark_1_diffuse.PNG" />
@@ -247,6 +255,17 @@
     <None Include="Blender\Scenery\ModularScyFy\metal_rust.jpg" />
     <None Include="Blender\Scenery\ModularScyFy\seamless_metal.jpg" />
     <None Include="Blender\Scenery\ModularScyFy\space.jpg" />
+    <None Include="Blender\Scenery\ModularDungeon\bench_d.jpg" />
+    <None Include="Blender\Scenery\ModularDungeon\bookshelf_d.jpg" />
+    <None Include="Blender\Scenery\ModularDungeon\crane_1_d.png" />
+    <None Include="Blender\Scenery\ModularDungeon\crane_2_d.png" />
+    <None Include="Blender\Scenery\ModularDungeon\fire_d.png" />
+    <None Include="Blender\Scenery\ModularDungeon\pedestal_d.jpg" />
+    <None Include="Blender\Scenery\ModularDungeon\statue_d.jpg" />
+    <None Include="Blender\Scenery\ModularDungeon\wrack.png" />
+    <Content Include="Collada\Buildings\Affgan\afghan_building.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Collada\Buildings\Heliport\concrete.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -341,10 +360,34 @@
     <Content Include="Collada\Furniture\StreetLamp\metallic.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Collada\Planes\background.jpg">
+    <Content Include="Collada\Scenery\ModularDungeon\bench_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Scenery\ModularDungeon\bookshelf_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Scenery\ModularDungeon\crane_1_d.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Scenery\ModularDungeon\crane_2_d.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Scenery\ModularDungeon\fire_d.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Scenery\ModularDungeon\Pedestal_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Scenery\ModularDungeon\Statue_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Scenery\ModularDungeon\wrack1_d.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\UI\Background\background.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Collada\Planes\SkyPlane.xml">
+    <Content Include="Collada\UI\Background\SkyPlane.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\Clif\Diffuse.jpg">
@@ -354,88 +397,88 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\atlas1.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\bark_d.dds">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\bark_n.dds">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\brick_d.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\brick_n.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\bronze_d.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\bronze_n.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\crate_d.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\crate_n.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\floor_d.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\floor_n.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\furniture_atlas_1.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\green-algae.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\jewels_d.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\lava_d.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\lava_n.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\marble_d.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\metal_rust_d.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\oil_d.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\rag_d.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\rock_d.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\rock_n.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\rug.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\stuff_map.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\treasure_d.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\wall_d.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\wall_n.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\wood_d.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Vehicles\Bradley\Bradley.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -586,17 +629,17 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="Collada\Buildings\Dungeon\Dungeon.dae">
+    <Content Include="Collada\Scenery\Dungeon\Dungeon.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\Clif\clif.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Collada\Planes\SkyPlane.dae">
+    <Content Include="Collada\UI\Background\SkyPlane.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\Assets.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="Blender\Weapons\Dn_Weapons.blend" />
     <Content Include="Collada\Characters\Rat\Rat.dae">
@@ -708,13 +751,16 @@
     <Content Include="Collada\Vehicles\Bradley\Bradley.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Collada\Scenery\Buildings\Building_1.dae">
+    <Content Include="Collada\Buildings\Bunker\Building_1.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\Dn_Doors.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\Dn_Walls.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Buildings\Affgan\Affgan1.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="Collada\Vehicles\LandRaider\landraider.dae" />
