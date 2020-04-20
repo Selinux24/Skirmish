@@ -403,7 +403,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             return true;
         }
 
-        public bool RasterizeTriangle(int flagMergeThr, Triangle tri, AreaTypes area)
+        public bool RasterizeTriangle(int flagMergeThr, RasterizeTri tri)
         {
             float cellSize = this.CellSize;
             float ics = 1.0f / this.CellSize;
@@ -414,7 +414,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             float by = b.GetY();
 
             // Calculate the bounding box of the triangle.
-            var t = BoundingBox.FromPoints(tri.GetVertices());
+            var t = BoundingBox.FromPoints(tri.Tri.GetVertices());
 
             // If the triangle does not touch the bbox of the heightfield, skip the triagle.
             if (b.Contains(t) == ContainmentType.Disjoint)
@@ -429,7 +429,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             y1 = MathUtil.Clamp(y1, 0, h - 1);
 
             // Clip the triangle into all grid cells it touches.
-            List<Vector3> inb = new List<Vector3>(tri.GetVertices());
+            List<Vector3> inb = new List<Vector3>(tri.Tri.GetVertices());
             List<Vector3> zp1 = new List<Vector3>();
             List<Vector3> zp2 = new List<Vector3>();
             List<Vector3> xp1 = new List<Vector3>();
@@ -489,7 +489,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     int ismin = MathUtil.Clamp((int)Math.Floor(minY * ich), 0, Span.SpanMaxHeight);
                     int ismax = MathUtil.Clamp((int)Math.Ceiling(maxY * ich), ismin + 1, Span.SpanMaxHeight);
 
-                    if (!AddSpan(x, y, ismin, ismax, area, flagMergeThr))
+                    if (!AddSpan(x, y, ismin, ismax, tri.Area, flagMergeThr))
                     {
                         return false;
                     }
@@ -499,13 +499,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             return true;
         }
 
-        public bool RasterizeTriangles(int flagMergeThr, IEnumerable<Triangle> tris, IEnumerable<AreaTypes> areas)
+        public bool RasterizeTriangles(int flagMergeThr, IEnumerable<RasterizeTri> tris)
         {
             // Rasterize triangles.
-            for (int i = 0; i < tris.Count(); i++)
+            foreach (var tri in tris)
             {
                 // Rasterize.
-                if (!RasterizeTriangle(flagMergeThr, tris.ElementAt(i), areas.ElementAt(i)))
+                if (!RasterizeTriangle(flagMergeThr, tri))
                 {
                     throw new EngineException("rcRasterizeTriangles: Out of memory.");
                 }
@@ -513,5 +513,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return true;
         }
+    }
+
+    public struct RasterizeTri
+    {
+        public Triangle Tri { get; set; }
+        public AreaTypes Area { get; set; }
     }
 }

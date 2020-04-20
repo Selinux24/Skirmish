@@ -202,6 +202,23 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         }
 
         /// <summary>
+        /// Adds a tile list to the tile cache
+        /// </summary>
+        /// <param name="tiles">Tile list</param>
+        /// <param name="flags">Flags</param>
+        public void AddTiles(IEnumerable<TileCacheData> tiles, CompressedTileFlagTypes flags)
+        {
+            foreach (var tile in tiles)
+            {
+                if (tile.Header.Magic != DetourTileCache.DT_TILECACHE_MAGIC)
+                {
+                    continue;
+                }
+
+                AddTile(tile, CompressedTileFlagTypes.FreeData);
+            }
+        }
+        /// <summary>
         /// Adds a new tile to the tile cache
         /// </summary>
         /// <param name="data">Tile data</param>

@@ -181,28 +181,42 @@ namespace Engine
         /// </summary>
         public void CreateResources()
         {
-            if (!HasRequests)
+            if (creatingResources)
             {
                 return;
             }
 
-            if (creatingResources)
+            var pendingRequests = GetPendingRequests();
+            if (!pendingRequests.Any())
             {
                 return;
             }
 
             creatingResources = true;
 
-            foreach (var resource in requestedResources)
+            // Process requests
+            foreach (var resource in pendingRequests.ToArray())
             {
                 resource.Value.Create(this.game);
 
                 resources.Add(resource.Key, resource.Value.ResourceView);
             }
 
-            requestedResources.Clear();
+            // Remove requests
+            RemoveRequests(pendingRequests.Select(r => r.Key));
 
             creatingResources = false;
+        }
+        private IEnumerable<KeyValuePair<string, IGameResourceRequest>> GetPendingRequests()
+        {
+            return requestedResources.ToArray();
+        }
+        private void RemoveRequests(IEnumerable<string> requestKeys)
+        {
+            foreach (string key in requestKeys)
+            {
+                requestedResources.TryRemove(key, out _);
+            }
         }
 
         /// <summary>

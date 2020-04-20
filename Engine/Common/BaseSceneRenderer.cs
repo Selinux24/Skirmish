@@ -689,6 +689,9 @@ namespace Engine.Common
                     continue;
                 }
 
+                cullIndex++;
+                l++;
+
                 //Cull test
                 stopwatch.Restart();
                 var sph = new CullingVolumeSphere(light.Position, light.Radius);
@@ -717,10 +720,6 @@ namespace Engine.Common
                 light.ShadowMapIndex = assigned;
 
                 assigned++;
-
-                cullIndex++;
-
-                l++;
             }
 
             gStopwatch.Stop();

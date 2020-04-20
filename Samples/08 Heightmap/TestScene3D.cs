@@ -98,7 +98,14 @@ namespace Heightmap
 
         private SpriteTexture bufferDrawer = null;
 
-        private Guid assetsId = Guid.NewGuid();
+        private Guid userInterfaceId = Guid.NewGuid();
+        private bool userInterfaceInitialized = false;
+        private Guid gameAssetsId = Guid.NewGuid();
+        private bool gameAssetsInitializing = false;
+        private bool gameAssetsInitialized = false;
+        private Guid terrainId = Guid.NewGuid();
+        private bool terrainInitializing = false;
+        private bool terrainInitialized = false;
         private bool gameReady = false;
 
         public TestScene3D(Game game)
@@ -109,14 +116,19 @@ namespace Heightmap
 
         public override async Task Initialize()
         {
+            this.Camera.Position = new Vector3(10000, 10000, 10000);
+            this.Camera.Interest = new Vector3(10001, 10000, 10000);
+
             await InitializeDebug();
 
             Stopwatch sw = Stopwatch.StartNew();
             sw.Start();
 
-            await InitializeUI();
-
-            List<Task> loadTasks = new List<Task>()
+            await this.LoadResourcesAsync(userInterfaceId, this.InitializeUI());
+        }
+        private void InitializeGameAssets()
+        {
+            Task[] loadTasks = new[]
             {
                 InitializeRocks(),
                 InitializeTrees(),
@@ -130,16 +142,64 @@ namespace Heightmap
                 InitializeContainers(),
                 InitializeTorchs(),
                 InitializeTerrain(),
-                InitializeGardener(),
-                InitializeGardener2(),
                 InitializeLensFlare(),
                 InitializeSkydom(),
                 InitializeClouds(),
                 InitializeParticles(),
             };
 
-            await this.LoadResourcesAsync(assetsId, loadTasks.ToArray());
+            this.LoadResources(gameAssetsId, loadTasks);
         }
+        private void InitializeTerrainObjects()
+        {
+            Task[] loadTasks = new[]
+            {
+                InitializeGardener(),
+                InitializeGardener2(),
+                SetAnimationDictionaries(),
+                SetPositionOverTerrain(),
+                SetDebugInfo(),
+            };
+
+            this.LoadResources(terrainId, loadTasks);
+        }
+
+        private async Task InitializeDebug()
+        {
+            int width = (int)(this.Game.Form.RenderWidth * 0.33f);
+            int height = (int)(this.Game.Form.RenderHeight * 0.33f);
+            int smLeft = this.Game.Form.RenderWidth - width;
+            int smTop = this.Game.Form.RenderHeight - height;
+
+            var desc = new SpriteTextureDescription()
+            {
+                Left = smLeft,
+                Top = smTop,
+                Width = width,
+                Height = height,
+                Channel = SpriteTextureChannels.NoAlpha,
+            };
+            this.bufferDrawer = await this.AddComponentSpriteTexture(desc, SceneObjectUsages.UI, layerEffects);
+            this.bufferDrawer.Visible = false;
+
+            this.lightsVolumeDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(
+                new PrimitiveListDrawerDescription<Line3D>()
+                {
+                    Name = "DEBUG++ Light Volumes",
+                    DepthEnabled = true,
+                    Count = 10000
+                });
+
+            this.graphDrawer = await this.AddComponentPrimitiveListDrawer<Triangle>(
+                new PrimitiveListDrawerDescription<Triangle>()
+                {
+                    Name = "DEBUG++ Graph",
+                    AlphaEnabled = true,
+                    Count = 50000,
+                });
+            this.graphDrawer.Visible = false;
+        }
+
         private async Task<double> InitializeUI()
         {
             Stopwatch sw = Stopwatch.StartNew();
@@ -193,6 +253,7 @@ namespace Heightmap
             sw.Stop();
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
         }
+
         private async Task<double> InitializeRocks()
         {
             Stopwatch sw = Stopwatch.StartNew();
@@ -209,6 +270,7 @@ namespace Heightmap
                 }
             };
             this.rocks = await this.AddComponentModelInstanced(rDesc, SceneObjectUsages.None, layerObjects);
+            this.rocks.Visible = false;
             this.AttachToGround(this.rocks, false);
             sw.Stop();
 
@@ -231,6 +293,7 @@ namespace Heightmap
                 }
             };
             this.trees = await this.AddComponentModelInstanced(treeDesc, SceneObjectUsages.None, layerTerrain);
+            this.trees.Visible = false;
             this.AttachToGround(this.trees, false);
             sw.Stop();
 
@@ -253,6 +316,7 @@ namespace Heightmap
                 }
             };
             this.trees2 = await this.AddComponentModelInstanced(tree2Desc, SceneObjectUsages.None, layerTerrain);
+            this.trees2.Visible = false;
             this.AttachToGround(this.trees2, false);
             sw.Stop();
 
@@ -275,6 +339,7 @@ namespace Heightmap
                 }
             };
             this.soldier = await this.AddComponentModel(sDesc, SceneObjectUsages.Agent, layerObjects);
+            this.soldier.Visible = false;
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -296,6 +361,7 @@ namespace Heightmap
                 }
             };
             this.troops = await this.AddComponentModelInstanced(tDesc, SceneObjectUsages.Agent, layerObjects);
+            this.troops.Visible = false;
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -317,6 +383,7 @@ namespace Heightmap
                 },
             };
             this.helicopterI = await this.AddComponentModelInstanced(mDesc, SceneObjectUsages.None, layerObjects);
+            this.helicopterI.Visible = false;
             this.AttachToGround(this.helicopterI, true);
             for (int i = 0; i < this.helicopterI.InstanceCount; i++)
             {
@@ -343,6 +410,7 @@ namespace Heightmap
                 }
             };
             this.bradleyI = await this.AddComponentModelInstanced(mDesc, SceneObjectUsages.None, layerObjects);
+            this.bradleyI.Visible = false;
             this.AttachToGround(this.bradleyI, true);
             for (int i = 0; i < this.bradleyI.InstanceCount; i++)
             {
@@ -369,6 +437,7 @@ namespace Heightmap
                 }
             };
             this.buildings = await this.AddComponentModelInstanced(mDesc, SceneObjectUsages.None, layerObjects);
+            this.buildings.Visible = false;
             this.AttachToGround(this.buildings, true);
             for (int i = 0; i < this.buildings.InstanceCount; i++)
             {
@@ -394,6 +463,7 @@ namespace Heightmap
                 }
             };
             this.watchTower = await this.AddComponentModel(mDesc, SceneObjectUsages.None, layerObjects);
+            this.watchTower.Visible = false;
             this.AttachToGround(this.watchTower, true);
             sw.Stop();
 
@@ -404,19 +474,20 @@ namespace Heightmap
             Stopwatch sw = Stopwatch.StartNew();
 
             sw.Restart();
-            this.containers = await this.AddComponentModelInstanced(
-                new ModelInstancedDescription()
+            var desc = new ModelInstancedDescription()
+            {
+                Name = "Container",
+                CastShadow = true,
+                SphericVolume = false,
+                Instances = 5,
+                Content = new ContentDescription()
                 {
-                    Name = "Container",
-                    CastShadow = true,
-                    SphericVolume = false,
-                    Instances = 5,
-                    Content = new ContentDescription()
-                    {
-                        ContentFolder = @"Resources/container",
-                        ModelContentFilename = "Container.xml",
-                    }
-                });
+                    ContentFolder = @"Resources/container",
+                    ModelContentFilename = "Container.xml",
+                }
+            };
+            this.containers = await this.AddComponentModelInstanced(desc);
+            this.containers.Visible = false;
             this.AttachToGround(this.containers, false);
             sw.Stop();
 
@@ -439,6 +510,7 @@ namespace Heightmap
                 }
             };
             this.torchs = await this.AddComponentModelInstanced(tcDesc, SceneObjectUsages.None, layerObjects);
+            this.torchs.Visible = false;
             this.AttachToGround(this.torchs, false);
             sw.Stop();
 
@@ -696,52 +768,19 @@ namespace Heightmap
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private async Task InitializeDebug()
-        {
-            int width = (int)(this.Game.Form.RenderWidth * 0.33f);
-            int height = (int)(this.Game.Form.RenderHeight * 0.33f);
-            int smLeft = this.Game.Form.RenderWidth - width;
-            int smTop = this.Game.Form.RenderHeight - height;
-
-            var desc = new SpriteTextureDescription()
-            {
-                Left = smLeft,
-                Top = smTop,
-                Width = width,
-                Height = height,
-                Channel = SpriteTextureChannels.NoAlpha,
-            };
-            this.bufferDrawer = await this.AddComponentSpriteTexture(desc, SceneObjectUsages.UI, layerEffects);
-            this.bufferDrawer.Visible = false;
-
-            this.lightsVolumeDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(
-                new PrimitiveListDrawerDescription<Line3D>()
-                {
-                    Name = "DEBUG++ Light Volumes",
-                    DepthEnabled = true,
-                    Count = 10000
-                });
-
-            this.graphDrawer = await this.AddComponentPrimitiveListDrawer<Triangle>(
-                new PrimitiveListDrawerDescription<Triangle>()
-                {
-                    Name = "DEBUG++ Graph",
-                    AlphaEnabled = true,
-                    Count = 50000,
-                });
-            this.graphDrawer.Visible = false;
-        }
 
         public override void GameResourcesLoaded(Guid id)
         {
-            if (id == assetsId)
+            if (id == userInterfaceId && !userInterfaceInitialized)
             {
-                this.Camera.NearPlaneDistance = near;
-                this.Camera.FarPlaneDistance = far;
-                this.Camera.Position = new Vector3(24, 12, 14);
-                this.Camera.Interest = new Vector3(0, 10, 0);
-                this.Camera.MovementDelta = 45f;
-                this.Camera.SlowMovementDelta = 20f;
+                userInterfaceInitialized = true;
+
+                return;
+            }
+
+            if (id == gameAssetsId && !gameAssetsInitialized)
+            {
+                gameAssetsInitialized = true;
 
                 this.skydom.RayleighScattering *= 0.8f;
                 this.skydom.MieScattering *= 0.1f;
@@ -751,16 +790,25 @@ namespace Heightmap
                 this.Lights.BaseFogColor = new Color((byte)95, (byte)147, (byte)233) * 0.5f;
                 this.ToggleFog();
 
+                return;
+            }
+
+            if (id == terrainId && !terrainInitialized)
+            {
+                terrainInitialized = true;
+
+                this.Camera.NearPlaneDistance = near;
+                this.Camera.FarPlaneDistance = far;
+                this.Camera.Position = new Vector3(24, 12, 14);
+                this.Camera.Interest = new Vector3(0, 10, 0);
+                this.Camera.MovementDelta = 45f;
+                this.Camera.SlowMovementDelta = 20f;
+
                 var lanternDesc = SceneLightSpotDescription.Create(this.Camera.Position, this.Camera.Direction, 25f, 100, 10000);
                 this.lantern = new SceneLightSpot("lantern", true, Color.White, Color.White, true, lanternDesc);
                 this.Lights.Add(this.lantern);
 
-                Task.WhenAll(
-                    SetAnimationDictionaries(),
-                    SetPositionOverTerrain(),
-                    SetDebugInfo());
-
-                Task.WhenAll(SetPathFindingInfo());
+                this.SetPathFindingInfo();
             }
         }
         private async Task SetAnimationDictionaries()
@@ -840,6 +888,8 @@ namespace Heightmap
                 }
             }
 
+            this.rocks.Visible = true;
+
             await Task.CompletedTask;
         }
         private async Task SetForestPosition(Random posRnd)
@@ -878,6 +928,9 @@ namespace Heightmap
                 }
             }
 
+            this.trees.Visible = true;
+            this.trees2.Visible = true;
+
             await Task.CompletedTask;
         }
         private async Task SetWatchTowerPosition()
@@ -888,6 +941,8 @@ namespace Heightmap
                 this.watchTower.Manipulator.SetRotation(MathUtil.Pi / 3f, 0, 0, true);
                 this.watchTower.Manipulator.SetScale(1.5f, true);
             }
+
+            this.watchTower.Visible = true;
 
             await Task.CompletedTask;
         }
@@ -920,6 +975,8 @@ namespace Heightmap
 
                 this.containers[i].TextureIndex = (uint)i;
             }
+
+            this.containers.Visible = true;
 
             await Task.CompletedTask;
         }
@@ -992,21 +1049,24 @@ namespace Heightmap
                 this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, new ParticleEmitter() { Position = pos, InfiniteDuration = true, EmissionRate = 0.5f });
             }
 
+            this.torchs.Visible = true;
+
             await Task.CompletedTask;
         }
         private async Task SetM24Position()
         {
             var hPositions = new[]
             {
-                new Vector3(-100, -10, 0),
-                new Vector3(-180, -10, 0),
-                new Vector3(-260, -10, 0),
+                new Vector3(-120, -10, MathUtil.Pi * 0.1f),
+                new Vector3(-220, -8, MathUtil.Pi * 0.15f),
+                new Vector3(-320, -10, 0),
             };
 
             for (int i = 0; i < hPositions.Length; i++)
             {
                 if (this.FindTopGroundPosition(hPositions[i].X, hPositions[i].Y, out PickingResult<Triangle> r))
                 {
+                    this.helicopterI[i].Manipulator.SetScale(1.25f, true);
                     this.helicopterI[i].Manipulator.SetPosition(r.Position, true);
                     this.helicopterI[i].Manipulator.SetRotation(hPositions[i].Z, 0, 0, true);
                     this.helicopterI[i].Manipulator.SetNormal(r.Item.Normal);
@@ -1016,6 +1076,8 @@ namespace Heightmap
                     this.helicopterI[i].AnimationController.Start();
                 }
             }
+
+            this.helicopterI.Visible = true;
 
             await Task.CompletedTask;
         }
@@ -1041,6 +1103,8 @@ namespace Heightmap
                 }
             }
 
+            this.bradleyI.Visible = true;
+
             await Task.CompletedTask;
         }
         private async Task SetBuildingPosition()
@@ -1058,11 +1122,13 @@ namespace Heightmap
             {
                 if (this.FindTopGroundPosition(bPositions[i].X, bPositions[i].Y, out PickingResult<Triangle> r))
                 {
-                    this.buildings[i].Manipulator.SetScale(4, true);
+                    this.buildings[i].Manipulator.SetScale(3f, true);
                     this.buildings[i].Manipulator.SetPosition(r.Position, true);
                     this.buildings[i].Manipulator.SetRotation(bPositions[i].Z, 0, 0, true);
                 }
             }
+
+            this.buildings.Visible = true;
 
             await Task.CompletedTask;
         }
@@ -1076,6 +1142,7 @@ namespace Heightmap
 
             this.soldier.AnimationController.AddPath(this.animations["soldier_idle"]);
             this.soldier.AnimationController.Start();
+            this.soldier.Visible = true;
 
             await Task.CompletedTask;
         }
@@ -1102,6 +1169,8 @@ namespace Heightmap
                     this.troops[i].AnimationController.Start(Helper.RandomGenerator.NextFloat(0f, 8f));
                 }
             }
+
+            this.troops.Visible = true;
 
             await Task.CompletedTask;
         }
@@ -1160,13 +1229,13 @@ namespace Heightmap
                 layerEffects);
             this.linesDrawer.Visible = false;
         }
-        private async Task SetPathFindingInfo()
+        private void SetPathFindingInfo()
         {
             //Player height
             var sbbox = this.soldier.GetBoundingBox();
             this.agent.Height = sbbox.GetY();
-            this.agent.Radius = sbbox.GetX() * 0.1f;
-            this.agent.MaxClimb = sbbox.GetY() * 0.5f;
+            this.agent.Radius = sbbox.GetX() * 0.5f;
+            this.agent.MaxClimb = sbbox.GetY() * 0.75f;
             this.agent.MaxSlope = 45;
 
             //Navigation settings
@@ -1183,21 +1252,19 @@ namespace Heightmap
             nmsettings.PartitionType = SamplePartitionTypes.Watershed;
 
             //Polygonization
-            nmsettings.EdgeMaxError = 1.0f;
+            //nmsettings.EdgeMaxError = 1.0f;
 
             //Tiling
             nmsettings.BuildMode = BuildModes.Tiled;
-            nmsettings.TileSize = 32;
-            nmsettings.UseTileCache = false;
+            nmsettings.TileSize = 16;
+            nmsettings.UseTileCache = true;
             nmsettings.BuildAllTiles = false;
 
             var nminput = new InputGeometry(GetTrianglesForNavigationGraph);
 
             this.PathFinderDescription = new PathFinderDescription(nmsettings, nminput);
 
-            await this.UpdateNavigationGraph();
-
-            gameReady = true;
+            Task.Run(() => this.UpdateNavigationGraph());
         }
         private void ToggleFog()
         {
@@ -1205,8 +1272,52 @@ namespace Heightmap
             this.Lights.FogRange = this.Lights.FogRange == 0f ? fogRange : 0f;
         }
 
+
+        private bool udaptingGraph = false;
+
         public override void Update(GameTime gameTime)
         {
+            base.Update(gameTime);
+
+            if (!gameAssetsInitialized && !gameAssetsInitializing)
+            {
+                gameAssetsInitializing = true;
+
+                InitializeGameAssets();
+
+                return;
+            }
+
+            if (gameAssetsInitialized && !terrainInitialized && !terrainInitializing)
+            {
+                terrainInitializing = true;
+
+                InitializeTerrainObjects();
+
+                return;
+            }
+
+            if (userInterfaceInitialized)
+            {
+                this.help.Text = string.Format(
+                    "{0}. Wind {1} {2:0.000} - Next {3:0.000}; {4} Light brightness: {5:0.00}; CamPos {6}; CamDir {7};",
+                    this.Renderer,
+                    this.windDirection, this.windStrength, this.windNextStrength,
+                    this.TimeOfDay,
+                    this.Lights.KeyLight.Brightness,
+                    this.Camera.Position, this.Camera.Direction);
+
+                this.help2.Text = string.Format("Picks: {0:0000}|{1:00.000}|{2:00.0000000}; Frustum tests: {3:000}|{4:00.000}|{5:00.00000000}; PlantingTaks: {6:000}",
+                    Counters.PicksPerFrame, Counters.PickingTotalTimePerFrame, Counters.PickingAverageTime,
+                    Counters.VolumeFrustumTestPerFrame, Counters.VolumeFrustumTestTotalTimePerFrame, Counters.VolumeFrustumTestAverageTime,
+                    this.gardener?.PlantingTasks ?? 0 + this.gardener2?.PlantingTasks ?? 0);
+            }
+
+            if (!gameReady)
+            {
+                return;
+            }
+
             if (this.Game.Input.KeyJustReleased(Keys.Escape))
             {
                 this.Game.Exit();
@@ -1217,13 +1328,6 @@ namespace Heightmap
                 this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
                     SceneModes.DeferredLightning :
                     SceneModes.ForwardLigthning);
-            }
-
-            base.Update(gameTime);
-
-            if (!gameReady)
-            {
-                return;
             }
 
             bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
@@ -1239,19 +1343,6 @@ namespace Heightmap
             UpdateWind(gameTime);
             UpdateDust(gameTime);
             UpdateDrawers();
-
-            this.help.Text = string.Format(
-                "{0}. Wind {1} {2:0.000} - Next {3:0.000}; {4} Light brightness: {5:0.00}; CamPos {6}; CamDir {7};",
-                this.Renderer,
-                this.windDirection, this.windStrength, this.windNextStrength,
-                this.TimeOfDay,
-                this.Lights.KeyLight.Brightness,
-                this.Camera.Position, this.Camera.Direction);
-
-            this.help2.Text = string.Format("Picks: {0:0000}|{1:00.000}|{2:00.0000000}; Frustum tests: {3:000}|{4:00.000}|{5:00.00000000}; PlantingTaks: {6:000}",
-                Counters.PicksPerFrame, Counters.PickingTotalTimePerFrame, Counters.PickingAverageTime,
-                Counters.VolumeFrustumTestPerFrame, Counters.VolumeFrustumTestTotalTimePerFrame, Counters.VolumeFrustumTestAverageTime,
-                this.gardener.PlantingTasks + this.gardener2.PlantingTasks);
         }
         private void UpdatePlayer()
         {
@@ -1289,8 +1380,18 @@ namespace Heightmap
                 position = this.UpdateWalkingCamera(gameTime, shift);
             }
 
-            Vector3 extent = Vector3.One * 20f;
-            this.NavigationGraph.UpdateAt(new BoundingBox(position - extent, position + extent));
+            if (!udaptingGraph)
+            {
+                udaptingGraph = true;
+
+                Task.Run(() =>
+                {
+                    Vector3 extent = Vector3.One * 1f;
+                    this.NavigationGraph.UpdateAt(new BoundingBox(position - extent, position + extent));
+
+                    udaptingGraph = false;
+                });
+            }
         }
         private Vector3 UpdateFlyingCamera(GameTime gameTime, bool shift)
         {
@@ -1337,19 +1438,17 @@ namespace Heightmap
 #if DEBUG
             if (this.Game.Input.RightMouseButtonPressed)
             {
-                this.Camera.RotateMouse(
-                    this.Game.GameTime,
-                    this.Game.Input.MouseXDelta,
-                    this.Game.Input.MouseYDelta);
+                float amount = this.Game.Input.MouseXDelta;
+
+                this.soldier.Manipulator.Rotate(amount * gameTime.ElapsedSeconds, 0, 0);
             }
 #else
-            this.Camera.RotateMouse(
-                this.Game.GameTime,
-                this.Game.Input.MouseXDelta,
-                this.Game.Input.MouseYDelta);
+            float amount = this.Game.Input.MouseXDelta;
+
+            this.soldier.Manipulator.Rotate(amount * gameTime.ElapsedSeconds, 0, 0);
 #endif
 
-            float delta = shift ? 8 : 4;
+            float delta = shift ? 24 : 12;
 
             if (this.Game.Input.KeyPressed(Keys.A))
             {
@@ -1694,6 +1793,19 @@ namespace Heightmap
             this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = true;
         }
 
+        public override void Draw(GameTime gameTime)
+        {
+            base.Draw(gameTime);
+
+            this.stats.Text = this.Game.RuntimeText;
+        }
+
+        public override void NavigationGraphUpdated()
+        {
+            gameReady = true;
+
+            this.UpdateGraphNodes(this.agent);
+        }
         private void UpdateGraphNodes(AgentType agent)
         {
             var nodes = this.GetNodes(agent).OfType<GraphNode>();
@@ -1706,18 +1818,6 @@ namespace Heightmap
                     this.graphDrawer.AddPrimitives(node.Color, node.Triangles);
                 }
             }
-        }
-
-        public override void Draw(GameTime gameTime)
-        {
-            base.Draw(gameTime);
-
-            this.stats.Text = this.Game.RuntimeText;
-        }
-
-        public override void NavigationGraphUpdated()
-        {
-            this.UpdateGraphNodes(this.agent);
         }
     }
 }

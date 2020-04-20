@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 namespace Engine
 {
@@ -25,7 +26,7 @@ namespace Engine
         /// <summary>
         /// Triangle dictionary by color
         /// </summary>
-        private readonly Dictionary<Color4, List<T>> dictionary = new Dictionary<Color4, List<T>>();
+        private readonly ConcurrentDictionary<Color4, List<T>> dictionary = new ConcurrentDictionary<Color4, List<T>>();
         /// <summary>
         /// Dictionary changes flag
         /// </summary>
@@ -70,7 +71,7 @@ namespace Engine
             {
                 count = description.Primitives.Length * stride;
 
-                this.dictionary.Add(description.Color, new List<T>(description.Primitives));
+                this.dictionary.TryAdd(description.Color, new List<T>(description.Primitives));
                 this.dictionaryChanged = true;
             }
             else
@@ -173,7 +174,7 @@ namespace Engine
             {
                 if (!this.dictionary.ContainsKey(color))
                 {
-                    this.dictionary.Add(color, new List<T>());
+                    this.dictionary.TryAdd(color, new List<T>());
                 }
                 else
                 {
@@ -188,7 +189,7 @@ namespace Engine
             {
                 if (this.dictionary.ContainsKey(color))
                 {
-                    this.dictionary.Remove(color);
+                    this.dictionary.TryRemove(color, out _);
 
                     this.dictionaryChanged = true;
                 }
@@ -223,7 +224,7 @@ namespace Engine
         {
             if (!this.dictionary.ContainsKey(color))
             {
-                this.dictionary.Add(color, new List<T>());
+                this.dictionary.TryAdd(color, new List<T>());
             }
 
             this.dictionary[color].AddRange(primitives);
@@ -249,7 +250,7 @@ namespace Engine
         {
             if (this.dictionary.ContainsKey(color))
             {
-                this.dictionary.Remove(color);
+                this.dictionary.TryRemove(color, out _);
             }
 
             this.dictionaryChanged = true;
@@ -272,9 +273,13 @@ namespace Engine
             {
                 List<VertexPositionColor> data = new List<VertexPositionColor>();
 
-                foreach (var color in this.dictionary.Keys)
+                var copy = dictionary.ToArray();
+
+                foreach (var item in copy)
                 {
-                    var primitives = this.dictionary[color];
+                    var color = item.Key;
+                    var primitives = item.Value;
+
                     for (int i = 0; i < primitives.Count; i++)
                     {
                         var vList = primitives[i].GetVertices();
@@ -289,7 +294,7 @@ namespace Engine
 
                 if (data.Count > 0)
                 {
-                    this.BufferManager.WriteVertexBuffer(this.vertexBuffer, data.ToArray());
+                    this.BufferManager.WriteVertexBuffer(this.vertexBuffer, data);
                 }
 
                 this.dictionaryChanged = false;

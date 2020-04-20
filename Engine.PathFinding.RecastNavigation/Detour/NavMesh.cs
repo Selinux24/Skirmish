@@ -58,7 +58,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             var tris = geometry.ChunkyMesh.GetTriangles();
             var triareas = MarkWalkableTriangles(cfg.WalkableSlopeAngle, tris);
-            if (!solid.RasterizeTriangles(cfg.WalkableClimb, tris, triareas))
+            if (!solid.RasterizeTriangles(cfg.WalkableClimb, triareas))
             {
                 return null;
             }
@@ -285,9 +285,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Allocate voxel heightfield where we rasterize our input data to.
             var solid = Heightfield.Build(cfg.Width, cfg.Height, cfg.BoundingBox, cfg.CellSize, cfg.CellHeight);
 
-            Vector2 tbmin = new Vector2(cfg.BoundingBox.Minimum.X, cfg.BoundingBox.Minimum.Z);
-            Vector2 tbmax = new Vector2(cfg.BoundingBox.Maximum.X, cfg.BoundingBox.Maximum.Z);
-            var cid = chunkyMesh.GetChunksOverlappingRect(tbmin, tbmax);
+            var cid = chunkyMesh.GetChunksOverlappingRect(cfg.BoundingBox.GetRectangleXZ());
             if (!cid.Any())
             {
                 return null; // empty
@@ -299,7 +297,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                 var triareas = MarkWalkableTriangles(cfg.WalkableSlopeAngle, tris);
 
-                if (!solid.RasterizeTriangles(cfg.WalkableClimb, tris, triareas))
+                if (!solid.RasterizeTriangles(cfg.WalkableClimb, triareas))
                 {
                     return null;
                 }
@@ -400,10 +398,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 {
                     var tiles = RasterizeTileLayers(x, y, geometry, cfg);
 
-                    foreach (var tile in tiles)
-                    {
-                        tileCache.AddTile(tile, CompressedTileFlagTypes.FreeData);
-                    }
+                    tileCache.AddTiles(tiles, CompressedTileFlagTypes.FreeData);
                 }
             }
 
@@ -452,17 +447,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             var solid = Heightfield.Build(cfg.Width, cfg.Height, cfg.BoundingBox, cfg.CellSize, cfg.CellHeight);
 
-            var rc = new RasterizationContext
-            {
-                // Allocate voxel heightfield where we rasterize our input data to.
-                Solid = solid,
-                Tiles = new TileCacheData[RasterizationContext.MaxLayers],
-            };
-
-            Vector2 tbmin = new Vector2(cfg.BoundingBox.Minimum.X, cfg.BoundingBox.Minimum.Z);
-            Vector2 tbmax = new Vector2(cfg.BoundingBox.Maximum.X, cfg.BoundingBox.Maximum.Z);
-
-            var cid = chunkyMesh.GetChunksOverlappingRect(tbmin, tbmax);
+            var cid = chunkyMesh.GetChunksOverlappingRect(cfg.BoundingBox.GetRectangleXZ());
             if (!cid.Any())
             {
                 return tiles.ToArray(); // empty
@@ -472,9 +457,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 var tris = chunkyMesh.GetTriangles(id);
 
-                rc.TriAreas = MarkWalkableTriangles(cfg.WalkableSlopeAngle, tris).ToArray();
+                var triAreas = MarkWalkableTriangles(cfg.WalkableSlopeAngle, tris);
 
-                if (!rc.Solid.RasterizeTriangles(cfg.WalkableClimb, tris, rc.TriAreas))
+                if (!solid.RasterizeTriangles(cfg.WalkableClimb, triAreas))
                 {
                     return tiles.ToArray();
                 }
@@ -483,68 +468,61 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Once all geometry is rasterized, we do initial pass of filtering to
             // remove unwanted overhangs caused by the conservative rasterization
             // as well as filter spans where the character cannot possibly stand.
-            FilterHeightfield(rc.Solid, cfg);
+            FilterHeightfield(solid, cfg);
 
-            rc.CompactHeightField = CompactHeightfield.Build(cfg.WalkableHeight, cfg.WalkableClimb, rc.Solid);
-            if (rc.CompactHeightField == null)
+            var ch = CompactHeightfield.Build(cfg.WalkableHeight, cfg.WalkableClimb, solid);
+            if (ch == null)
             {
                 throw new EngineException("buildNavigation: Could not build compact height field.");
             }
 
             // Erode the walkable area by agent radius.
-            if (!rc.CompactHeightField.ErodeWalkableArea(cfg.WalkableRadius))
+            if (!ch.ErodeWalkableArea(cfg.WalkableRadius))
             {
                 throw new EngineException("buildNavigation: Could not erode.");
             }
 
             // Mark areas.
-            rc.CompactHeightField.MarkAreas(geometry);
+            ch.MarkAreas(geometry);
 
-            rc.LayerSet = HeightfieldLayerSet.Build(rc.CompactHeightField, cfg.BorderSize, cfg.WalkableHeight);
+            var lset = HeightfieldLayerSet.Build(ch, cfg.BorderSize, cfg.WalkableHeight);
 
-            rc.NTiles = 0;
-            for (int i = 0; i < Math.Min(rc.LayerSet.NLayers, cfg.MaxLayers); i++)
+            for (int i = 0; i < Math.Min(lset.NLayers, cfg.MaxLayers); i++)
             {
-                var layer = rc.LayerSet.Layers[i];
+                var layer = lset.Layers[i];
 
-                var tile = rc.Tiles[rc.NTiles];
-
-                // Store header
-                tile.Header = new TileCacheLayerHeader
-                {
-                    Magic = DetourTileCache.DT_TILECACHE_MAGIC,
-                    Version = DetourTileCache.DT_TILECACHE_VERSION,
-
-                    // Tile layer location in the navmesh.
-                    TX = x,
-                    TY = y,
-                    TLayer = i,
-                    BBox = layer.BoundingBox,
-
-                    // Tile info.
-                    Width = layer.Width,
-                    Height = layer.Height,
-                    MinX = layer.MinX,
-                    MaxX = layer.MaxX,
-                    MinY = layer.MinY,
-                    MaxY = layer.MaxY,
-                    HMin = layer.HMin,
-                    HMax = layer.HMax
-                };
-
-                // Store data
                 DetourTileCache.BuildTileCacheLayer(layer.Heights, layer.Areas, layer.Connections, out var data);
 
-                tile.Data = data;
+                var tile = new TileCacheData
+                {
+                    // Store header
+                    Header = new TileCacheLayerHeader
+                    {
+                        Magic = DetourTileCache.DT_TILECACHE_MAGIC,
+                        Version = DetourTileCache.DT_TILECACHE_VERSION,
 
-                rc.Tiles[rc.NTiles++] = tile;
-            }
+                        // Tile layer location in the navmesh.
+                        TX = x,
+                        TY = y,
+                        TLayer = i,
+                        BBox = layer.BoundingBox,
 
-            // Transfer ownsership of tile data from build context to the caller.
-            for (int i = 0; i < Math.Min(rc.NTiles, cfg.MaxLayers); i++)
-            {
-                tiles.Add(rc.Tiles[i]);
-                rc.Tiles[i].Data = TileCacheLayerData.Empty;
+                        // Tile info.
+                        Width = layer.Width,
+                        Height = layer.Height,
+                        MinX = layer.MinX,
+                        MaxX = layer.MaxX,
+                        MinY = layer.MinY,
+                        MaxY = layer.MaxY,
+                        HMin = layer.HMin,
+                        HMax = layer.HMax
+                    },
+
+                    // Store data
+                    Data = data
+                };
+
+                tiles.Add(tile);
             }
 
             return tiles.ToArray();
@@ -742,26 +720,18 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="walkableSlopeAngle">Slope angle</param>
         /// <param name="tris">Triangle list</param>
         /// <returns>Returns an array of area types</returns>
-        private static IEnumerable<AreaTypes> MarkWalkableTriangles(float walkableSlopeAngle, IEnumerable<Triangle> tris)
+        private static IEnumerable<RasterizeTri> MarkWalkableTriangles(float walkableSlopeAngle, IEnumerable<Triangle> tris)
         {
-            List<AreaTypes> triareas = new List<AreaTypes>();
+            List<RasterizeTri> triareas = new List<RasterizeTri>(tris.Count());
 
             float walkableThr = (float)Math.Cos(walkableSlopeAngle / 180.0f * MathUtil.Pi);
 
-            for (int i = 0; i < tris.Count(); i++)
+            foreach (var tri in tris)
             {
-                var tri = tris.ElementAt(i);
-                Vector3 norm = tri.Normal;
-
                 // Check if the face is walkable.
-                if (norm.Y > walkableThr)
-                {
-                    triareas.Add(AreaTypes.Walkable);
-                }
-                else
-                {
-                    triareas.Add(AreaTypes.Unwalkable);
-                }
+                AreaTypes area = tri.Normal.Y > walkableThr ? AreaTypes.Walkable : AreaTypes.Unwalkable;
+
+                triareas.Add(new RasterizeTri { Tri = tri, Area = area });
             }
 
             return triareas;
@@ -841,15 +811,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                 navmesh.tileCache = new TileCache(navmesh, tmproc, file.TileCacheParams);
 
-                foreach (var tile in file.TileCacheData)
-                {
-                    if (tile.Header.Magic != DetourTileCache.DT_TILECACHE_MAGIC)
-                    {
-                        continue;
-                    }
-
-                    navmesh.tileCache.AddTile(tile, CompressedTileFlagTypes.FreeData);
-                }
+                navmesh.tileCache.AddTiles(file.TileCacheData, CompressedTileFlagTypes.FreeData);
             }
 
             return navmesh;

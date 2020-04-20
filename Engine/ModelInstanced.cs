@@ -188,6 +188,11 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void DrawShadows(DrawContextShadows context)
         {
+            if (!this.Visible)
+            {
+                return;
+            }
+
             if (!this.InstancingBuffer.Ready)
             {
                 return;
@@ -267,6 +272,11 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
+            if (!this.Visible)
+            {
+                return;
+            }
+
             if (!this.InstancingBuffer.Ready)
             {
                 return;
@@ -524,6 +534,8 @@ namespace Engine
         /// <returns>Returns true if all of the instances were outside of the frustum</returns>
         public override bool Cull(ICullingVolume volume, out float distance)
         {
+            distance = float.MaxValue;
+
             if (this.instancesTmp?.Length > 0)
             {
                 var item = this.instancesTmp.FirstOrDefault(i =>
@@ -538,7 +550,6 @@ namespace Engine
                 }
             }
 
-            distance = float.MaxValue;
             return true;
         }
     }

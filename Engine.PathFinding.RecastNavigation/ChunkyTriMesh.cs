@@ -13,15 +13,14 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Checks wether the extents overlaps
         /// </summary>
-        /// <param name="amin">A minimum rectangle point</param>
-        /// <param name="amax">A maximum rectangle point</param>
-        /// <param name="bounds">Bounds</param>
+        /// <param name="rect1">Rectangle 1</param>
+        /// <param name="rect2">Rectangle 2</param>
         /// <returns>Returns true if rectangles overlap</returns>
-        private static bool CheckOverlapRect(Vector2 amin, Vector2 amax, RectangleF bounds)
+        private static bool CheckOverlapRect(RectangleF rect1, RectangleF rect2)
         {
-            bool overlap =
-                !(amin.X > bounds.BottomRight.X || amax.X < bounds.TopLeft.X) &&
-                !(amin.Y > bounds.BottomRight.Y || amax.Y < bounds.TopLeft.Y);
+            bool overlap = rect1.Intersects(rect2);
+            //!(amin.X > bounds.BottomRight.X || amax.X < bounds.TopLeft.X) &&
+            //!(amin.Y > bounds.BottomRight.Y || amax.Y < bounds.TopLeft.Y);
 
             return overlap;
         }
@@ -274,10 +273,9 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Gets the chunks overlapping the specified rectangle
         /// </summary>
-        /// <param name="bmin">Bounding box minimum</param>
-        /// <param name="bmax">Bounding box maximum</param>
+        /// <param name="bounds">Rectangle</param>
         /// <returns>Returns a list of indices</returns>
-        public IEnumerable<int> GetChunksOverlappingRect(Vector2 bmin, Vector2 bmax)
+        public IEnumerable<int> GetChunksOverlappingRect(RectangleF bounds)
         {
             List<int> ids = new List<int>();
 
@@ -286,7 +284,7 @@ namespace Engine.PathFinding.RecastNavigation
             while (i < nodes.Length)
             {
                 var node = nodes[i];
-                bool overlap = CheckOverlapRect(bmin, bmax, node.Bounds);
+                bool overlap = CheckOverlapRect(bounds, node.Bounds);
                 bool isLeafNode = node.Index >= 0;
 
                 if (isLeafNode && overlap)

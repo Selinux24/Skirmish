@@ -62,7 +62,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 int nx = ix + x;
                 int nz = iz + z;
 
-                h = FindNearestHeight(nx, nz, pos.Y, ch, h, ref dmin);
+                if (FindNearestHeight(nx, nz, pos.Y, ch, dmin, out int nh, out float nDmin))
+                {
+                    h = nh;
+                    dmin = nDmin;
+                }
 
                 // We are searching in a grid which looks approximately like this:
                 //  __________
@@ -103,10 +107,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
             return h;
         }
-        
-        private int FindNearestHeight(int nx, int nz, float fy, float ch, int height, ref float dmin)
+
+        private bool FindNearestHeight(int nx, int nz, float fy, float ch, float min, out int h, out float dmin)
         {
-            int h = height;
+            h = 0;
+            dmin = 0;
 
             if (nx >= 0 && nz >= 0 && nx < this.Bounds.Width && nz < this.Bounds.Height)
             {
@@ -114,15 +119,17 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 if (nh != RecastUtils.RC_UNSET_HEIGHT)
                 {
                     float d = Math.Abs(nh * ch - fy);
-                    if (d < dmin)
+                    if (d < min)
                     {
                         h = nh;
                         dmin = d;
+
+                        return true;
                     }
                 }
             }
 
-            return h;
+            return false;
         }
     }
 }
