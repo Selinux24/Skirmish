@@ -108,10 +108,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             return h;
         }
 
-        private bool FindNearestHeight(int nx, int nz, float fy, float ch, float min, out int h, out float dmin)
+        private bool FindNearestHeight(int nx, int nz, float fy, float ch, float dmin, out int newHeight, out float newDmin)
         {
-            h = 0;
-            dmin = 0;
+            newHeight = 0;
+            newDmin = 0;
 
             if (nx >= 0 && nz >= 0 && nx < this.Bounds.Width && nz < this.Bounds.Height)
             {
@@ -119,10 +119,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 if (nh != RecastUtils.RC_UNSET_HEIGHT)
                 {
                     float d = Math.Abs(nh * ch - fy);
-                    if (d < min)
+                    if (d < dmin)
                     {
-                        h = nh;
-                        dmin = d;
+                        newHeight = nh;
+                        newDmin = d;
 
                         return true;
                     }

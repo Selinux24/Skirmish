@@ -215,7 +215,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     continue;
                 }
 
-                AddTile(tile, CompressedTileFlagTypes.FreeData);
+                AddTile(tile, flags);
             }
         }
         /// <summary>

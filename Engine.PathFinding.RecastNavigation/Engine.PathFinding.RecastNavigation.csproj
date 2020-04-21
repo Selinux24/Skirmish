@@ -148,6 +148,7 @@
     <Compile Include="Detour\Tiles\ObstacleBox.cs" />
     <Compile Include="Detour\Tiles\ObstacleCylinder.cs" />
     <Compile Include="Detour\Tiles\ObstacleOrientedBox.cs" />
+    <Compile Include="DirectionUtils.cs" />
     <Compile Include="GraphItem.cs" />
     <Compile Include="Recast\BuildPolyDetailParams.cs" />
     <Compile Include="Recast\Hole.cs" />

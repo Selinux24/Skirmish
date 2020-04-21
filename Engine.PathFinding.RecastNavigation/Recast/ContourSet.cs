@@ -64,8 +64,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                             int r = 0;
                             if (s.GetCon(dir) != CompactSpan.RC_NOT_CONNECTED)
                             {
-                                int ax = x + RecastUtils.GetDirOffsetX(dir);
-                                int ay = y + RecastUtils.GetDirOffsetY(dir);
+                                int ax = x + DirectionUtils.GetDirOffsetX(dir);
+                                int ay = y + DirectionUtils.GetDirOffsetY(dir);
                                 int ai = chf.Cells[ax + ay * w].Index + s.GetCon(dir);
                                 r = chf.Spans[ai].Reg;
                             }

@@ -39,8 +39,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         // -x
                         if (s.GetCon(0) != CompactSpan.RC_NOT_CONNECTED)
                         {
-                            int ax = x + RecastUtils.GetDirOffsetX(0);
-                            int ay = y + RecastUtils.GetDirOffsetY(0);
+                            int ax = x + DirectionUtils.GetDirOffsetX(0);
+                            int ay = y + DirectionUtils.GetDirOffsetY(0);
                             int ai = chf.Cells[ax + ay * w].Index + s.GetCon(0);
                             if (chf.Areas[ai] != AreaTypes.Unwalkable && srcReg[ai] != 0xff)
                             {
@@ -58,8 +58,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         // -y
                         if (s.GetCon(3) != CompactSpan.RC_NOT_CONNECTED)
                         {
-                            int ax = x + RecastUtils.GetDirOffsetX(3);
-                            int ay = y + RecastUtils.GetDirOffsetY(3);
+                            int ax = x + DirectionUtils.GetDirOffsetX(3);
+                            int ay = y + DirectionUtils.GetDirOffsetY(3);
                             int ai = chf.Cells[ax + ay * w].Index + s.GetCon(3);
                             int nr = srcReg[ai];
                             if (nr != 0xff)
@@ -157,8 +157,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         {
                             if (s.GetCon(dir) != CompactSpan.RC_NOT_CONNECTED)
                             {
-                                int ax = x + RecastUtils.GetDirOffsetX(dir);
-                                int ay = y + RecastUtils.GetDirOffsetY(dir);
+                                int ax = x + DirectionUtils.GetDirOffsetX(dir);
+                                int ay = y + DirectionUtils.GetDirOffsetY(dir);
                                 int ai = chf.Cells[ax + ay * w].Index + s.GetCon(dir);
                                 int rai = srcReg[ai];
                                 if (rai != 0xff && rai != ri)
@@ -537,8 +537,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                             {
                                 if (s.GetCon(dir) != CompactSpan.RC_NOT_CONNECTED)
                                 {
-                                    int ax = cx + RecastUtils.GetDirOffsetX(dir);
-                                    int ay = cy + RecastUtils.GetDirOffsetY(dir);
+                                    int ax = cx + DirectionUtils.GetDirOffsetX(dir);
+                                    int ay = cy + DirectionUtils.GetDirOffsetY(dir);
                                     int ai = chf.Cells[ax + ay * w].Index + s.GetCon(dir);
                                     int alid = (srcReg[ai] != 0xff ? regs[srcReg[ai]].LayerId : 0xff);
                                     // Portal mask

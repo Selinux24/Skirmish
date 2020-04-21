@@ -389,8 +389,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         for (int dir = 0; dir < 4; dir++)
                         {
                             s.SetCon(dir, CompactSpan.RC_NOT_CONNECTED);
-                            int nx = x + RecastUtils.GetDirOffsetX(dir);
-                            int ny = y + RecastUtils.GetDirOffsetY(dir);
+                            int nx = x + DirectionUtils.GetDirOffsetX(dir);
+                            int ny = y + DirectionUtils.GetDirOffsetY(dir);
                             // First check that the neighbour cell is in bounds.
                             if (nx < 0 || ny < 0 || nx >= w || ny >= h)
                             {
@@ -472,8 +472,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                             {
                                 if (s.GetCon(dir) != CompactSpan.RC_NOT_CONNECTED)
                                 {
-                                    int nx = x + RecastUtils.GetDirOffsetX(dir);
-                                    int ny = y + RecastUtils.GetDirOffsetY(dir);
+                                    int nx = x + DirectionUtils.GetDirOffsetX(dir);
+                                    int ny = y + DirectionUtils.GetDirOffsetY(dir);
                                     int nidx = this.Cells[nx + ny * w].Index + s.GetCon(dir);
                                     if (this.Areas[nidx] != AreaTypes.Unwalkable)
                                     {
@@ -505,8 +505,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         if (s.GetCon(0) != CompactSpan.RC_NOT_CONNECTED)
                         {
                             // (-1,0)
-                            int ax = x + RecastUtils.GetDirOffsetX(0);
-                            int ay = y + RecastUtils.GetDirOffsetY(0);
+                            int ax = x + DirectionUtils.GetDirOffsetX(0);
+                            int ay = y + DirectionUtils.GetDirOffsetY(0);
                             int ai = this.Cells[ax + ay * w].Index + s.GetCon(0);
                             CompactSpan asp = this.Spans[ai];
                             nd = Math.Min(dist[ai] + 2, 255);
@@ -518,8 +518,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                             // (-1,-1)
                             if (asp.GetCon(3) != CompactSpan.RC_NOT_CONNECTED)
                             {
-                                int aax = ax + RecastUtils.GetDirOffsetX(3);
-                                int aay = ay + RecastUtils.GetDirOffsetY(3);
+                                int aax = ax + DirectionUtils.GetDirOffsetX(3);
+                                int aay = ay + DirectionUtils.GetDirOffsetY(3);
                                 int aai = this.Cells[aax + aay * w].Index + asp.GetCon(3);
                                 nd = Math.Min(dist[aai] + 3, 255);
                                 if (nd < dist[i])
@@ -531,8 +531,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         if (s.GetCon(3) != CompactSpan.RC_NOT_CONNECTED)
                         {
                             // (0,-1)
-                            int ax = x + RecastUtils.GetDirOffsetX(3);
-                            int ay = y + RecastUtils.GetDirOffsetY(3);
+                            int ax = x + DirectionUtils.GetDirOffsetX(3);
+                            int ay = y + DirectionUtils.GetDirOffsetY(3);
                             int ai = this.Cells[ax + ay * w].Index + s.GetCon(3);
                             CompactSpan asp = this.Spans[ai];
                             nd = Math.Min(dist[ai] + 2, 255);
@@ -544,8 +544,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                             // (1,-1)
                             if (asp.GetCon(2) != CompactSpan.RC_NOT_CONNECTED)
                             {
-                                int aax = ax + RecastUtils.GetDirOffsetX(2);
-                                int aay = ay + RecastUtils.GetDirOffsetY(2);
+                                int aax = ax + DirectionUtils.GetDirOffsetX(2);
+                                int aay = ay + DirectionUtils.GetDirOffsetY(2);
                                 int aai = this.Cells[aax + aay * w].Index + asp.GetCon(2);
                                 nd = Math.Min(dist[aai] + 3, 255);
                                 if (nd < dist[i])
@@ -570,8 +570,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         if (s.GetCon(2) != CompactSpan.RC_NOT_CONNECTED)
                         {
                             // (1,0)
-                            int ax = x + RecastUtils.GetDirOffsetX(2);
-                            int ay = y + RecastUtils.GetDirOffsetY(2);
+                            int ax = x + DirectionUtils.GetDirOffsetX(2);
+                            int ay = y + DirectionUtils.GetDirOffsetY(2);
                             int ai = this.Cells[ax + ay * w].Index + s.GetCon(2);
                             var asp = this.Spans[ai];
                             nd = Math.Min(dist[ai] + 2, 255);
@@ -583,8 +583,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                             // (1,1)
                             if (asp.GetCon(1) != CompactSpan.RC_NOT_CONNECTED)
                             {
-                                int aax = ax + RecastUtils.GetDirOffsetX(1);
-                                int aay = ay + RecastUtils.GetDirOffsetY(1);
+                                int aax = ax + DirectionUtils.GetDirOffsetX(1);
+                                int aay = ay + DirectionUtils.GetDirOffsetY(1);
                                 int aai = this.Cells[aax + aay * w].Index + asp.GetCon(1);
                                 nd = Math.Min(dist[aai] + 3, 255);
                                 if (nd < dist[i])
@@ -596,8 +596,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         if (s.GetCon(1) != CompactSpan.RC_NOT_CONNECTED)
                         {
                             // (0,1)
-                            int ax = x + RecastUtils.GetDirOffsetX(1);
-                            int ay = y + RecastUtils.GetDirOffsetY(1);
+                            int ax = x + DirectionUtils.GetDirOffsetX(1);
+                            int ay = y + DirectionUtils.GetDirOffsetY(1);
                             int ai = this.Cells[ax + ay * w].Index + s.GetCon(1);
                             var asp = this.Spans[ai];
                             nd = Math.Min(dist[ai] + 2, 255);
@@ -609,8 +609,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                             // (-1,1)
                             if (asp.GetCon(0) != CompactSpan.RC_NOT_CONNECTED)
                             {
-                                int aax = ax + RecastUtils.GetDirOffsetX(0);
-                                int aay = ay + RecastUtils.GetDirOffsetY(0);
+                                int aax = ax + DirectionUtils.GetDirOffsetX(0);
+                                int aay = ay + DirectionUtils.GetDirOffsetY(0);
                                 int aai = this.Cells[aax + aay * w].Index + asp.GetCon(0);
                                 nd = Math.Min(dist[aai] + 3, 255);
                                 if (nd < dist[i])
@@ -670,8 +670,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         {
                             if (s.GetCon(dir) != CompactSpan.RC_NOT_CONNECTED)
                             {
-                                int ax = x + RecastUtils.GetDirOffsetX(dir);
-                                int ay = y + RecastUtils.GetDirOffsetY(dir);
+                                int ax = x + DirectionUtils.GetDirOffsetX(dir);
+                                int ay = y + DirectionUtils.GetDirOffsetY(dir);
                                 int ai = this.Cells[ax + ay * w].Index + s.GetCon(dir);
                                 if (this.Areas[ai] != AreaTypes.Unwalkable)
                                 {
@@ -679,11 +679,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                                 }
 
                                 var a = this.Spans[ai];
-                                int dir2 = RecastUtils.RotateCW(dir);
+                                int dir2 = DirectionUtils.RotateCW(dir);
                                 if (a.GetCon(dir2) != CompactSpan.RC_NOT_CONNECTED)
                                 {
-                                    int ax2 = ax + RecastUtils.GetDirOffsetX(dir2);
-                                    int ay2 = ay + RecastUtils.GetDirOffsetY(dir2);
+                                    int ax2 = ax + DirectionUtils.GetDirOffsetX(dir2);
+                                    int ay2 = ay + DirectionUtils.GetDirOffsetY(dir2);
                                     int ai2 = this.Cells[ax2 + ay2 * w].Index + a.GetCon(dir2);
                                     if (this.Areas[ai2] != AreaTypes.Unwalkable)
                                     {
@@ -934,8 +934,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         {
                             if (s.GetCon(dir) != CompactSpan.RC_NOT_CONNECTED)
                             {
-                                int ax = x + RecastUtils.GetDirOffsetX(dir);
-                                int ay = y + RecastUtils.GetDirOffsetY(dir);
+                                int ax = x + DirectionUtils.GetDirOffsetX(dir);
+                                int ay = y + DirectionUtils.GetDirOffsetY(dir);
                                 int ai = this.Cells[ax + ay * w].Index + s.GetCon(dir);
                                 if (area == this.Areas[ai])
                                 {
@@ -964,8 +964,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         if (s.GetCon(0) != CompactSpan.RC_NOT_CONNECTED)
                         {
                             // (-1,0)
-                            int ax = x + RecastUtils.GetDirOffsetX(0);
-                            int ay = y + RecastUtils.GetDirOffsetY(0);
+                            int ax = x + DirectionUtils.GetDirOffsetX(0);
+                            int ay = y + DirectionUtils.GetDirOffsetY(0);
                             int ai = this.Cells[ax + ay * w].Index + s.GetCon(0);
                             var a = this.Spans[ai];
                             if (src[ai] + 2 < src[i])
@@ -976,8 +976,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                             // (-1,-1)
                             if (a.GetCon(3) != CompactSpan.RC_NOT_CONNECTED)
                             {
-                                int aax = ax + RecastUtils.GetDirOffsetX(3);
-                                int aay = ay + RecastUtils.GetDirOffsetY(3);
+                                int aax = ax + DirectionUtils.GetDirOffsetX(3);
+                                int aay = ay + DirectionUtils.GetDirOffsetY(3);
                                 int aai = this.Cells[aax + aay * w].Index + a.GetCon(3);
                                 if (src[aai] + 3 < src[i])
                                 {
@@ -988,8 +988,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         if (s.GetCon(3) != CompactSpan.RC_NOT_CONNECTED)
                         {
                             // (0,-1)
-                            int ax = x + RecastUtils.GetDirOffsetX(3);
-                            int ay = y + RecastUtils.GetDirOffsetY(3);
+                            int ax = x + DirectionUtils.GetDirOffsetX(3);
+                            int ay = y + DirectionUtils.GetDirOffsetY(3);
                             int ai = this.Cells[ax + ay * w].Index + s.GetCon(3);
                             var a = this.Spans[ai];
                             if (src[ai] + 2 < src[i])
@@ -1000,8 +1000,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                             // (1,-1)
                             if (a.GetCon(2) != CompactSpan.RC_NOT_CONNECTED)
                             {
-                                int aax = ax + RecastUtils.GetDirOffsetX(2);
-                                int aay = ay + RecastUtils.GetDirOffsetY(2);
+                                int aax = ax + DirectionUtils.GetDirOffsetX(2);
+                                int aay = ay + DirectionUtils.GetDirOffsetY(2);
                                 int aai = this.Cells[aax + aay * w].Index + a.GetCon(2);
                                 if (src[aai] + 3 < src[i])
                                 {
@@ -1026,8 +1026,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         if (s.GetCon(2) != CompactSpan.RC_NOT_CONNECTED)
                         {
                             // (1,0)
-                            int ax = x + RecastUtils.GetDirOffsetX(2);
-                            int ay = y + RecastUtils.GetDirOffsetY(2);
+                            int ax = x + DirectionUtils.GetDirOffsetX(2);
+                            int ay = y + DirectionUtils.GetDirOffsetY(2);
                             int ai = this.Cells[ax + ay * w].Index + s.GetCon(2);
                             var a = this.Spans[ai];
                             if (src[ai] + 2 < src[i])
@@ -1038,8 +1038,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                             // (1,1)
                             if (a.GetCon(1) != CompactSpan.RC_NOT_CONNECTED)
                             {
-                                int aax = ax + RecastUtils.GetDirOffsetX(1);
-                                int aay = ay + RecastUtils.GetDirOffsetY(1);
+                                int aax = ax + DirectionUtils.GetDirOffsetX(1);
+                                int aay = ay + DirectionUtils.GetDirOffsetY(1);
                                 int aai = this.Cells[aax + aay * w].Index + a.GetCon(1);
                                 if (src[aai] + 3 < src[i])
                                 {
@@ -1050,8 +1050,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         if (s.GetCon(1) != CompactSpan.RC_NOT_CONNECTED)
                         {
                             // (0,1)
-                            int ax = x + RecastUtils.GetDirOffsetX(1);
-                            int ay = y + RecastUtils.GetDirOffsetY(1);
+                            int ax = x + DirectionUtils.GetDirOffsetX(1);
+                            int ay = y + DirectionUtils.GetDirOffsetY(1);
                             int ai = this.Cells[ax + ay * w].Index + s.GetCon(1);
                             var a = this.Spans[ai];
                             if (src[ai] + 2 < src[i])
@@ -1062,8 +1062,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                             // (-1,1)
                             if (a.GetCon(0) != CompactSpan.RC_NOT_CONNECTED)
                             {
-                                int aax = ax + RecastUtils.GetDirOffsetX(0);
-                                int aay = ay + RecastUtils.GetDirOffsetY(0);
+                                int aax = ax + DirectionUtils.GetDirOffsetX(0);
+                                int aay = ay + DirectionUtils.GetDirOffsetY(0);
                                 int aai = this.Cells[aax + aay * w].Index + a.GetCon(0);
                                 if (src[aai] + 3 < src[i])
                                 {
@@ -1109,17 +1109,17 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         {
                             if (s.GetCon(dir) != CompactSpan.RC_NOT_CONNECTED)
                             {
-                                int ax = x + RecastUtils.GetDirOffsetX(dir);
-                                int ay = y + RecastUtils.GetDirOffsetY(dir);
+                                int ax = x + DirectionUtils.GetDirOffsetX(dir);
+                                int ay = y + DirectionUtils.GetDirOffsetY(dir);
                                 int ai = this.Cells[ax + ay * w].Index + s.GetCon(dir);
                                 d += src[ai];
 
                                 var a = this.Spans[ai];
-                                int dir2 = RecastUtils.RotateCW(dir);
+                                int dir2 = DirectionUtils.RotateCW(dir);
                                 if (a.GetCon(dir2) != CompactSpan.RC_NOT_CONNECTED)
                                 {
-                                    int ax2 = ax + RecastUtils.GetDirOffsetX(dir2);
-                                    int ay2 = ay + RecastUtils.GetDirOffsetY(dir2);
+                                    int ax2 = ax + DirectionUtils.GetDirOffsetX(dir2);
+                                    int ay2 = ay + DirectionUtils.GetDirOffsetY(dir2);
                                     int ai2 = this.Cells[ax2 + ay2 * w].Index + a.GetCon(dir2);
                                     d += src[ai2];
                                 }
@@ -1173,8 +1173,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     // 8 connected
                     if (cs.GetCon(dir) != CompactSpan.RC_NOT_CONNECTED)
                     {
-                        int ax = cx + RecastUtils.GetDirOffsetX(dir);
-                        int ay = cy + RecastUtils.GetDirOffsetY(dir);
+                        int ax = cx + DirectionUtils.GetDirOffsetX(dir);
+                        int ay = cy + DirectionUtils.GetDirOffsetY(dir);
                         int ai = this.Cells[ax + ay * w].Index + cs.GetCon(dir);
                         if (this.Areas[ai] != area)
                         {
@@ -1193,11 +1193,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                         var a = this.Spans[ai];
 
-                        int dir2 = RecastUtils.RotateCW(dir);
+                        int dir2 = DirectionUtils.RotateCW(dir);
                         if (a.GetCon(dir2) != CompactSpan.RC_NOT_CONNECTED)
                         {
-                            int ax2 = ax + RecastUtils.GetDirOffsetX(dir2);
-                            int ay2 = ay + RecastUtils.GetDirOffsetY(dir2);
+                            int ax2 = ax + DirectionUtils.GetDirOffsetX(dir2);
+                            int ay2 = ay + DirectionUtils.GetDirOffsetY(dir2);
                             int ai2 = this.Cells[ax2 + ay2 * w].Index + a.GetCon(dir2);
                             if (this.Areas[ai2] != area)
                             {
@@ -1225,8 +1225,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 {
                     if (cs.GetCon(dir) != CompactSpan.RC_NOT_CONNECTED)
                     {
-                        int ax = cx + RecastUtils.GetDirOffsetX(dir);
-                        int ay = cy + RecastUtils.GetDirOffsetY(dir);
+                        int ax = cx + DirectionUtils.GetDirOffsetX(dir);
+                        int ay = cy + DirectionUtils.GetDirOffsetY(dir);
                         int ai = this.Cells[ax + ay * w].Index + cs.GetCon(dir);
                         if (this.Areas[ai] != area)
                         {
@@ -1317,8 +1317,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                             continue;
                         }
 
-                        int ax = x + RecastUtils.GetDirOffsetX(dir);
-                        int ay = y + RecastUtils.GetDirOffsetY(dir);
+                        int ax = x + DirectionUtils.GetDirOffsetX(dir);
+                        int ay = y + DirectionUtils.GetDirOffsetY(dir);
                         int ai = this.Cells[ax + ay * w].Index + s.GetCon(dir);
                         if (this.Areas[ai] != area)
                         {
@@ -1414,8 +1414,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int r = 0;
             if (s.GetCon(dir) != CompactSpan.RC_NOT_CONNECTED)
             {
-                int ax = x + RecastUtils.GetDirOffsetX(dir);
-                int ay = y + RecastUtils.GetDirOffsetY(dir);
+                int ax = x + DirectionUtils.GetDirOffsetX(dir);
+                int ay = y + DirectionUtils.GetDirOffsetY(dir);
                 int ai = this.Cells[ax + ay * this.Width].Index + s.GetCon(dir);
                 r = srcReg[ai];
             }
@@ -1462,8 +1462,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     var s = this.Spans[i];
                     if (s.GetCon(dir) != CompactSpan.RC_NOT_CONNECTED)
                     {
-                        int ax = x + RecastUtils.GetDirOffsetX(dir);
-                        int ay = y + RecastUtils.GetDirOffsetY(dir);
+                        int ax = x + DirectionUtils.GetDirOffsetX(dir);
+                        int ay = y + DirectionUtils.GetDirOffsetY(dir);
                         int ai = this.Cells[ax + ay * this.Width].Index + s.GetCon(dir);
                         r = this.Spans[ai].Reg;
                         if (area != this.Areas[ai])
@@ -1483,13 +1483,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                     flags[i] &= ~(1 << dir); // Remove visited edges
                     // Rotate CW
-                    dir = RecastUtils.RotateCW(dir);
+                    dir = DirectionUtils.RotateCW(dir);
                 }
                 else
                 {
                     int ni = -1;
-                    int nx = x + RecastUtils.GetDirOffsetX(dir);
-                    int ny = y + RecastUtils.GetDirOffsetY(dir);
+                    int nx = x + DirectionUtils.GetDirOffsetX(dir);
+                    int ny = y + DirectionUtils.GetDirOffsetY(dir);
                     var s = this.Spans[i];
                     if (s.GetCon(dir) != CompactSpan.RC_NOT_CONNECTED)
                     {
@@ -1505,7 +1505,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     y = ny;
                     i = ni;
                     // Rotate CCW
-                    dir = RecastUtils.RotateCCW(dir);
+                    dir = DirectionUtils.RotateCCW(dir);
                 }
 
                 if (starti == i && startDir == dir)
@@ -1524,8 +1524,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int curReg = 0;
             if (ss.GetCon(dir) != CompactSpan.RC_NOT_CONNECTED)
             {
-                int ax = x + RecastUtils.GetDirOffsetX(dir);
-                int ay = y + RecastUtils.GetDirOffsetY(dir);
+                int ax = x + DirectionUtils.GetDirOffsetX(dir);
+                int ay = y + DirectionUtils.GetDirOffsetY(dir);
                 int ai = this.Cells[ax + ay * this.Width].Index + ss.GetCon(dir);
                 curReg = srcReg[ai];
             }
@@ -1542,8 +1542,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     int r = 0;
                     if (s.GetCon(dir) != CompactSpan.RC_NOT_CONNECTED)
                     {
-                        int ax = x + RecastUtils.GetDirOffsetX(dir);
-                        int ay = y + RecastUtils.GetDirOffsetY(dir);
+                        int ax = x + DirectionUtils.GetDirOffsetX(dir);
+                        int ay = y + DirectionUtils.GetDirOffsetY(dir);
                         int ai = this.Cells[ax + ay * this.Width].Index + s.GetCon(dir);
                         r = srcReg[ai];
                     }
@@ -1553,13 +1553,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         cont.Add(curReg);
                     }
                     // Rotate CW
-                    dir = RecastUtils.RotateCW(dir);
+                    dir = DirectionUtils.RotateCW(dir);
                 }
                 else
                 {
                     int ni = -1;
-                    int nx = x + RecastUtils.GetDirOffsetX(dir);
-                    int ny = y + RecastUtils.GetDirOffsetY(dir);
+                    int nx = x + DirectionUtils.GetDirOffsetX(dir);
+                    int ny = y + DirectionUtils.GetDirOffsetY(dir);
                     if (s.GetCon(dir) != CompactSpan.RC_NOT_CONNECTED)
                     {
                         var nc = this.Cells[nx + ny * this.Width];
@@ -1575,7 +1575,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     i = ni;
 
                     // Rotate CCW
-                    dir = RecastUtils.RotateCCW(dir);
+                    dir = DirectionUtils.RotateCCW(dir);
                 }
 
                 if (starti == i && startDir == dir)
@@ -1957,8 +1957,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         {
                             if (s.GetCon(dir) != CompactSpan.RC_NOT_CONNECTED)
                             {
-                                int ax = x + RecastUtils.GetDirOffsetX(dir);
-                                int ay = y + RecastUtils.GetDirOffsetY(dir);
+                                int ax = x + DirectionUtils.GetDirOffsetX(dir);
+                                int ay = y + DirectionUtils.GetDirOffsetY(dir);
                                 int ai = this.Cells[ax + ay * w].Index + s.GetCon(dir);
                                 int rai = srcReg[ai];
                                 if (rai > 0 && rai < nreg && rai != ri)
@@ -2232,8 +2232,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         int previd = 0;
                         if (s.GetCon(0) != CompactSpan.RC_NOT_CONNECTED)
                         {
-                            int ax = x + RecastUtils.GetDirOffsetX(0);
-                            int ay = y + RecastUtils.GetDirOffsetY(0);
+                            int ax = x + DirectionUtils.GetDirOffsetX(0);
+                            int ay = y + DirectionUtils.GetDirOffsetY(0);
                             int ai = this.Cells[ax + ay * w].Index + s.GetCon(0);
                             if ((srcReg[ai] & RecastUtils.RC_BORDER_REG) == 0 && this.Areas[i] == this.Areas[ai])
                             {
@@ -2252,8 +2252,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         // -y
                         if (s.GetCon(3) != CompactSpan.RC_NOT_CONNECTED)
                         {
-                            int ax = x + RecastUtils.GetDirOffsetX(3);
-                            int ay = y + RecastUtils.GetDirOffsetY(3);
+                            int ax = x + DirectionUtils.GetDirOffsetX(3);
+                            int ay = y + DirectionUtils.GetDirOffsetY(3);
                             int ai = this.Cells[ax + ay * w].Index + s.GetCon(3);
                             if (srcReg[ai] != 0 && (srcReg[ai] & RecastUtils.RC_BORDER_REG) == 0 && this.Areas[i] == this.Areas[ai])
                             {
@@ -2486,8 +2486,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         int previd = 0;
                         if (s.GetCon(0) != CompactSpan.RC_NOT_CONNECTED)
                         {
-                            int ax = x + RecastUtils.GetDirOffsetX(0);
-                            int ay = y + RecastUtils.GetDirOffsetY(0);
+                            int ax = x + DirectionUtils.GetDirOffsetX(0);
+                            int ay = y + DirectionUtils.GetDirOffsetY(0);
                             int ai = this.Cells[ax + ay * w].Index + s.GetCon(0);
                             if ((srcReg[ai] & RecastUtils.RC_BORDER_REG) == 0 && this.Areas[i] == this.Areas[ai])
                             {
@@ -2506,8 +2506,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         // -y
                         if (s.GetCon(3) != CompactSpan.RC_NOT_CONNECTED)
                         {
-                            int ax = x + RecastUtils.GetDirOffsetX(3);
-                            int ay = y + RecastUtils.GetDirOffsetY(3);
+                            int ax = x + DirectionUtils.GetDirOffsetX(3);
+                            int ay = y + DirectionUtils.GetDirOffsetY(3);
                             int ai = this.Cells[ax + ay * w].Index + s.GetCon(3);
                             if (srcReg[ai] != 0 && (srcReg[ai] & RecastUtils.RC_BORDER_REG) == 0 && this.Areas[i] == this.Areas[ai])
                             {
@@ -2583,7 +2583,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             var s = this.Spans[i];
             int ch = s.Y;
-            int dirp = RecastUtils.RotateCW(dir);
+            int dirp = DirectionUtils.RotateCW(dir);
 
             int[] regs = { 0, 0, 0, 0 };
 
@@ -2593,16 +2593,16 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             if (s.GetCon(dir) != CompactSpan.RC_NOT_CONNECTED)
             {
-                int ax = x + RecastUtils.GetDirOffsetX(dir);
-                int ay = y + RecastUtils.GetDirOffsetY(dir);
+                int ax = x + DirectionUtils.GetDirOffsetX(dir);
+                int ay = y + DirectionUtils.GetDirOffsetY(dir);
                 int ai = this.Cells[ax + ay * this.Width].Index + s.GetCon(dir);
                 var a = this.Spans[ai];
                 ch = Math.Max(ch, a.Y);
                 regs[1] = this.Spans[ai].Reg | ((int)this.Areas[ai] << 16);
                 if (a.GetCon(dirp) != CompactSpan.RC_NOT_CONNECTED)
                 {
-                    int ax2 = ax + RecastUtils.GetDirOffsetX(dirp);
-                    int ay2 = ay + RecastUtils.GetDirOffsetY(dirp);
+                    int ax2 = ax + DirectionUtils.GetDirOffsetX(dirp);
+                    int ay2 = ay + DirectionUtils.GetDirOffsetY(dirp);
                     int ai2 = this.Cells[ax2 + ay2 * this.Width].Index + a.GetCon(dirp);
                     var as2 = this.Spans[ai2];
                     ch = Math.Max(ch, as2.Y);
@@ -2611,16 +2611,16 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
             if (s.GetCon(dirp) != CompactSpan.RC_NOT_CONNECTED)
             {
-                int ax = x + RecastUtils.GetDirOffsetX(dirp);
-                int ay = y + RecastUtils.GetDirOffsetY(dirp);
+                int ax = x + DirectionUtils.GetDirOffsetX(dirp);
+                int ay = y + DirectionUtils.GetDirOffsetY(dirp);
                 int ai = this.Cells[ax + ay * this.Width].Index + s.GetCon(dirp);
                 var a = this.Spans[ai];
                 ch = Math.Max(ch, a.Y);
                 regs[3] = this.Spans[ai].Reg | ((int)this.Areas[ai] << 16);
                 if (a.GetCon(dir) != CompactSpan.RC_NOT_CONNECTED)
                 {
-                    int ax2 = ax + RecastUtils.GetDirOffsetX(dir);
-                    int ay2 = ay + RecastUtils.GetDirOffsetY(dir);
+                    int ax2 = ax + DirectionUtils.GetDirOffsetX(dir);
+                    int ay2 = ay + DirectionUtils.GetDirOffsetY(dir);
                     int ai2 = this.Cells[ax2 + ay2 * this.Width].Index + a.GetCon(dir);
                     var as2 = this.Spans[ai2];
                     ch = Math.Max(ch, as2.Y);

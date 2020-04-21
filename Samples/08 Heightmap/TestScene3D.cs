@@ -1251,9 +1251,6 @@ namespace Heightmap
             //Partitioning
             nmsettings.PartitionType = SamplePartitionTypes.Watershed;
 
-            //Polygonization
-            //nmsettings.EdgeMaxError = 1.0f;
-
             //Tiling
             nmsettings.BuildMode = BuildModes.Tiled;
             nmsettings.TileSize = 16;

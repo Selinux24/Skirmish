@@ -10,8 +10,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         public const int VERTEX_BUCKET_COUNT2 = (1 << 8);
         public const int MAX_REQUESTS = 64;
         public const int MAX_UPDATE = 64;
-        public const int MAX_VERTS_PER_POLY = 6;    // TODO: use the DT_VERTS_PER_POLYGON
-        public const int MAX_REM_EDGES = 48;        // TODO: make this an expression.
+        public const int MAX_REM_EDGES = 48; // TODO: make this an expression.
         public const int DT_LAYER_MAX_NEIS = 16;
         public const int DT_MAX_TOUCHED_TILES = 8;
         public const int DT_TILECACHE_MAGIC = 'D' << 24 | 'T' << 16 | 'L' << 8 | 'R'; ///< 'DTLR';
@@ -410,8 +409,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 maxVertsPerCont = Math.Max(maxVertsPerCont, bc.LCSet.Conts[i].NVerts);
             }
 
-            // TODO: warn about too many vertices?
-
             var mesh = new TileCachePolyMesh
             {
                 NVP = DetourUtils.DT_VERTS_PER_POLYGON,
@@ -574,16 +571,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             return true;
         }
-        public static int GetDirOffsetX(int dir)
-        {
-            int[] offset = new[] { -1, 0, 1, 0, };
-            return offset[dir & 0x03];
-        }
-        public static int GetDirOffsetY(int dir)
-        {
-            int[] offset = new[] { 0, 1, 0, -1 };
-            return offset[dir & 0x03];
-        }
         public static bool OverlapRangeExl(int amin, int amax, int bmin, int bmax)
         {
             return !(amin >= bmax || amax <= bmin);
@@ -689,8 +676,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 return 0xff;
             }
 
-            int bx = ax + RecastUtils.GetDirOffsetX(dir);
-            int by = ay + RecastUtils.GetDirOffsetY(dir);
+            int bx = ax + DirectionUtils.GetDirOffsetX(dir);
+            int by = ay + DirectionUtils.GetDirOffsetY(dir);
             int ib = bx + by * w;
 
             return layer.Regs[ib];
@@ -752,15 +739,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     }
 
                     // Rotate CW
-                    ndir = RecastUtils.RotateCW(dir);
+                    ndir = DirectionUtils.RotateCW(dir);
                 }
                 else
                 {
                     // Move to next.
-                    nx = x + RecastUtils.GetDirOffsetX(dir);
-                    ny = y + RecastUtils.GetDirOffsetY(dir);
+                    nx = x + DirectionUtils.GetDirOffsetX(dir);
+                    ny = y + DirectionUtils.GetDirOffsetY(dir);
                     // Rotate CCW
-                    ndir = RecastUtils.RotateCCW(dir);
+                    ndir = DirectionUtils.RotateCCW(dir);
                 }
 
                 if (iter > 0 && x == startX && y == startY && dir == startDir)

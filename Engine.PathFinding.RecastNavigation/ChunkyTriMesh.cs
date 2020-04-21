@@ -11,21 +11,6 @@ namespace Engine.PathFinding.RecastNavigation
     public class ChunkyTriMesh
     {
         /// <summary>
-        /// Checks wether the extents overlaps
-        /// </summary>
-        /// <param name="rect1">Rectangle 1</param>
-        /// <param name="rect2">Rectangle 2</param>
-        /// <returns>Returns true if rectangles overlap</returns>
-        private static bool CheckOverlapRect(RectangleF rect1, RectangleF rect2)
-        {
-            bool overlap = rect1.Intersects(rect2);
-            //!(amin.X > bounds.BottomRight.X || amax.X < bounds.TopLeft.X) &&
-            //!(amin.Y > bounds.BottomRight.Y || amax.Y < bounds.TopLeft.Y);
-
-            return overlap;
-        }
-
-        /// <summary>
         /// X comparer
         /// </summary>
         private static readonly BoundsItemComparerX xComparer = new BoundsItemComparerX();
@@ -257,7 +242,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             List<Triangle> res = new List<Triangle>();
 
-            if (node.Index >= 0)
+            if (node.IsLeaf)
             {
                 var indices = triangleIndices.Skip(node.Index).Take(node.Count);
 
@@ -273,9 +258,9 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Gets the chunks overlapping the specified rectangle
         /// </summary>
-        /// <param name="bounds">Rectangle</param>
+        /// <param name="rectangle">Rectangle</param>
         /// <returns>Returns a list of indices</returns>
-        public IEnumerable<int> GetChunksOverlappingRect(RectangleF bounds)
+        public IEnumerable<int> GetChunksOverlappingRect(RectangleF rectangle)
         {
             List<int> ids = new List<int>();
 
@@ -284,8 +269,9 @@ namespace Engine.PathFinding.RecastNavigation
             while (i < nodes.Length)
             {
                 var node = nodes[i];
-                bool overlap = CheckOverlapRect(bounds, node.Bounds);
-                bool isLeafNode = node.Index >= 0;
+
+                bool overlap = rectangle.Intersects(node.Bounds);
+                bool isLeafNode = node.IsLeaf;
 
                 if (isLeafNode && overlap)
                 {
@@ -294,10 +280,12 @@ namespace Engine.PathFinding.RecastNavigation
 
                 if (overlap || isLeafNode)
                 {
+                    // Move to next node
                     i++;
                 }
                 else
                 {
+                    // Move to next node branch
                     int escapeIndex = -node.Index;
                     i += escapeIndex;
                 }

@@ -422,8 +422,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                                 {
                                     if (s.GetCon(dir) != CompactSpan.RC_NOT_CONNECTED)
                                     {
-                                        int ax = x + RecastUtils.GetDirOffsetX(dir);
-                                        int ay = y + RecastUtils.GetDirOffsetY(dir);
+                                        int ax = x + DirectionUtils.GetDirOffsetX(dir);
+                                        int ay = y + DirectionUtils.GetDirOffsetY(dir);
                                         int ai = chf.Cells[ax + ay * chf.Width].Index + s.GetCon(dir);
                                         var a = chf.Spans[ai];
                                         if (a.Reg != region)
@@ -485,8 +485,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         continue;
                     }
 
-                    int ax = c.X + RecastUtils.GetDirOffsetX(dir);
-                    int ay = c.Y + RecastUtils.GetDirOffsetY(dir);
+                    int ax = c.X + DirectionUtils.GetDirOffsetX(dir);
+                    int ay = c.Y + DirectionUtils.GetDirOffsetY(dir);
                     int hx = ax - hp.Bounds.X - bs;
                     int hy = ay - hp.Bounds.Y - bs;
 
@@ -614,8 +614,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         continue;
                     }
 
-                    int newX = hdItem.X + RecastUtils.GetDirOffsetX(dir);
-                    int newY = hdItem.Y + RecastUtils.GetDirOffsetY(dir);
+                    int newX = hdItem.X + DirectionUtils.GetDirOffsetX(dir);
+                    int newY = hdItem.Y + DirectionUtils.GetDirOffsetY(dir);
 
                     int hpx = newX - hp.Bounds.X;
                     int hpy = newY - hp.Bounds.Y;
