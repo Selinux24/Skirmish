@@ -19,7 +19,7 @@ namespace Collada
                 GameResourceManager.RegisterLoader<LoaderObj>();
                 GameResourceManager.RegisterLoader<LoaderCollada>();
 
-                cl.SetScene<SceneStart>();
+                cl.SetScene<SceneNavmeshTest>();
 
                 cl.Run();
             }

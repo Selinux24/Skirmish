@@ -39,6 +39,28 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         public int H { get; set; }
 
         /// <summary>
+        /// Sets a connection in the specified direction
+        /// </summary>
+        /// <param name="dir">Direction</param>
+        /// <param name="i">Connection index</param>
+        public void SetCon(int dir, int i)
+        {
+            int shift = dir * 6;
+            int con = this.Con;
+            this.Con = (con & ~(0x3f << shift)) | ((i & 0x3f) << shift);
+        }
+        /// <summary>
+        /// Gets the connection index in the specified direction
+        /// </summary>
+        /// <param name="dir">Direction</param>
+        /// <returns>Returns the connection index</returns>
+        public int GetCon(int dir)
+        {
+            int shift = dir * 6;
+            return (this.Con >> shift) & 0x3f;
+        }
+
+        /// <summary>
         /// Gets the text representation of the instance
         /// </summary>
         /// <returns>Returns the text representation of the instance</returns>

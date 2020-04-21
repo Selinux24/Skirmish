@@ -37,11 +37,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         }
         private static NavMesh BuildSolo(InputGeometry geometry, Config cfg)
         {
-            var solid = RecastUtils.CreateHeightfield(cfg.Width, cfg.Height, cfg.BoundingBox, cfg.CellSize, cfg.CellHeight);
+            var solid = Heightfield.Build(cfg.Width, cfg.Height, cfg.BoundingBox, cfg.CellSize, cfg.CellHeight);
 
             var tris = geometry.ChunkyMesh.GetTriangles();
-            var triareas = RecastUtils.MarkWalkableTriangles(cfg.WalkableSlopeAngle, tris);
-            if (!RecastUtils.RasterizeTriangles(solid, cfg.WalkableClimb, tris, triareas))
+            var triareas = MarkWalkableTriangles(cfg.WalkableSlopeAngle, tris);
+            if (!RasterizeTriangles(solid, cfg.WalkableClimb, triareas))
             {
                 return null;
             }
@@ -52,13 +52,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Compact the heightfield so that it is faster to handle from now on.
             // This will result more cache coherent data as well as the neighbours
             // between walkable cells will be calculated.
-            if (!RecastUtils.BuildCompactHeightfield(cfg.WalkableHeight, cfg.WalkableClimb, solid, out CompactHeightfield chf))
-            {
-                throw new EngineException("buildNavigation: Could not build compact height field.");
-            }
+            var chf = CompactHeightfield.Build(solid, cfg.WalkableHeight, cfg.WalkableClimb);
 
             // Erode the walkable area by agent radius.
-            if (!RecastUtils.ErodeWalkableArea(cfg.WalkableRadius, chf))
+            if (!chf.ErodeWalkableArea(cfg.WalkableRadius))
             {
                 throw new EngineException("buildNavigation: Could not erode.");
             }
@@ -70,18 +67,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             SamplePartition(chf, cfg);
 
             // Create contours.
-            if (!RecastUtils.BuildContours(chf, cfg.MaxSimplificationError, cfg.MaxEdgeLen, BuildContoursFlagTypes.RC_CONTOUR_TESS_WALL_EDGES, out ContourSet cset))
-            {
-                throw new EngineException("buildNavigation: Could not create contours.");
-            }
+            var cset = ContourSet.Build(chf, cfg.MaxSimplificationError, cfg.MaxEdgeLen, BuildContoursFlagTypes.RC_CONTOUR_TESS_WALL_EDGES);
 
-            if (!RecastUtils.BuildPolyMesh(cset, cfg.MaxVertsPerPoly, out PolyMesh pmesh))
-            {
-                throw new EngineException("buildNavigation: Could not triangulate contours.");
-            }
+            var pmesh = PolyMesh.Build(cset, cfg.MaxVertsPerPoly);
 
             // Build polygon navmesh from the contours.
-            if (!RecastUtils.BuildPolyMeshDetail(pmesh, chf, cfg.DetailSampleDist, cfg.DetailSampleMaxError, out PolyMeshDetail dmesh))
+            var dmesh = PolyMeshDetail.Build(pmesh, chf, cfg.DetailSampleDist, cfg.DetailSampleMaxError);
+            if (dmesh == null)
             {
                 throw new EngineException("buildNavigation: Could not build detail mesh.");
             }
@@ -104,10 +96,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 PolyCount = pmesh.NPolys,
                 Nvp = pmesh.NVP,
                 DetailMeshes = dmesh.Meshes.ToArray(),
-                DetailVerts = dmesh.Verts.ToArray(),
-                DetailVertsCount = dmesh.Verts.Count,
-                DetailTris = dmesh.Tris.ToArray(),
-                DetailTriCount = dmesh.Tris.Count,
+                DetailVerts = dmesh.Vertices.ToArray(),
+                DetailVertsCount = dmesh.Vertices.Count,
+                DetailTris = dmesh.Triangles.ToArray(),
+                DetailTriCount = dmesh.Triangles.Count,
                 OffMeshCon = geometry.GetConnections()?.ToArray(),
                 OffMeshConCount = geometry.GetConnectionCount(),
                 WalkableHeight = cfg.Agent.Height,
@@ -155,7 +147,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             var bbox = settings.Bounds ?? geometry.BoundingBox;
 
             // Init cache
-            RecastUtils.CalcGridSize(bbox, settings.CellSize, out int gridWidth, out int gridHeight);
+            BuildSettings.CalcGridSize(bbox, settings.CellSize, out int gridWidth, out int gridHeight);
             int tileSize = (int)settings.TileSize;
             int tileWidth = (gridWidth + tileSize - 1) / tileSize;
             int tileHeight = (gridHeight + tileSize - 1) / tileSize;
@@ -239,7 +231,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             var chunkyMesh = geometry.ChunkyMesh;
 
             // Allocate voxel heightfield where we rasterize our input data to.
-            var solid = RecastUtils.CreateHeightfield(cfg.Width, cfg.Height, cfg.BoundingBox, cfg.CellSize, cfg.CellHeight);
+            var solid = Heightfield.Build(cfg.Width, cfg.Height, cfg.BoundingBox, cfg.CellSize, cfg.CellHeight);
 
             Vector2 tbmin = new Vector2(cfg.BoundingBox.Minimum.X, cfg.BoundingBox.Minimum.Z);
             Vector2 tbmax = new Vector2(cfg.BoundingBox.Maximum.X, cfg.BoundingBox.Maximum.Z);
@@ -252,10 +244,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             foreach (var id in cid)
             {
                 var tris = chunkyMesh.GetTriangles(id);
-
-                var triareas = RecastUtils.MarkWalkableTriangles(cfg.WalkableSlopeAngle, tris);
-
-                if (!RecastUtils.RasterizeTriangles(solid, cfg.WalkableClimb, tris, triareas))
+                var triareas = MarkWalkableTriangles(cfg.WalkableSlopeAngle, tris);
+                if (!RasterizeTriangles(solid, cfg.WalkableClimb, triareas))
                 {
                     return null;
                 }
@@ -267,13 +257,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Compact the heightfield so that it is faster to handle from now on.
             // This will result more cache coherent data as well as the neighbours
             // between walkable cells will be calculated.
-            if (!RecastUtils.BuildCompactHeightfield(cfg.WalkableHeight, cfg.WalkableClimb, solid, out CompactHeightfield chf))
-            {
-                return null;
-            }
+            var chf = CompactHeightfield.Build(solid, cfg.WalkableHeight, cfg.WalkableClimb);
 
             // Erode the walkable area by agent radius.
-            if (!RecastUtils.ErodeWalkableArea(cfg.WalkableRadius, chf))
+            if (!chf.ErodeWalkableArea(cfg.WalkableRadius))
             {
                 return null;
             }
@@ -285,24 +272,19 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             SamplePartition(chf, cfg);
 
             // Create contours.
-            if (!RecastUtils.BuildContours(chf, cfg.MaxSimplificationError, cfg.MaxEdgeLen, BuildContoursFlagTypes.RC_CONTOUR_TESS_WALL_EDGES, out ContourSet cset))
-            {
-                return null;
-            }
+            var cset = ContourSet.Build(chf, cfg.MaxSimplificationError, cfg.MaxEdgeLen, BuildContoursFlagTypes.RC_CONTOUR_TESS_WALL_EDGES);
 
-            if (cset.nconts == 0)
+            if (cset.NConts == 0)
             {
                 return null;
             }
 
             // Build polygon navmesh from the contours.
-            if (!RecastUtils.BuildPolyMesh(cset, cfg.MaxVertsPerPoly, out PolyMesh pmesh))
-            {
-                return null;
-            }
+            var pmesh = PolyMesh.Build(cset, cfg.MaxVertsPerPoly);
 
             // Build detail mesh.
-            if (!RecastUtils.BuildPolyMeshDetail(pmesh, chf, cfg.DetailSampleDist, cfg.DetailSampleMaxError, out PolyMeshDetail dmesh))
+            var dmesh = PolyMeshDetail.Build(pmesh, chf, cfg.DetailSampleDist, cfg.DetailSampleMaxError);
+            if (dmesh == null)
             {
                 return null;
             }
@@ -325,10 +307,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 PolyCount = pmesh.NPolys,
                 Nvp = pmesh.NVP,
                 DetailMeshes = dmesh.Meshes.ToArray(),
-                DetailVerts = dmesh.Verts.ToArray(),
-                DetailVertsCount = dmesh.Verts.Count,
-                DetailTris = dmesh.Tris.ToArray(),
-                DetailTriCount = dmesh.Tris.Count,
+                DetailVerts = dmesh.Vertices.ToArray(),
+                DetailVertsCount = dmesh.Vertices.Count,
+                DetailTris = dmesh.Triangles.ToArray(),
+                DetailTriCount = dmesh.Triangles.Count,
                 OffMeshCon = geometry.GetConnections().ToArray(),
                 OffMeshConCount = geometry.GetConnectionCount(),
                 WalkableHeight = cfg.Agent.Height,
@@ -396,7 +378,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             cfg.BoundingBox = bbox;
 
-            var solid = RecastUtils.CreateHeightfield(cfg.Width, cfg.Height, cfg.BoundingBox, cfg.CellSize, cfg.CellHeight);
+            var solid = Heightfield.Build(cfg.Width, cfg.Height, cfg.BoundingBox, cfg.CellSize, cfg.CellHeight);
 
             var rc = new RasterizationContext
             {
@@ -417,10 +399,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             foreach (var id in cid)
             {
                 var tris = chunkyMesh.GetTriangles(id);
-
-                rc.triareas = RecastUtils.MarkWalkableTriangles(cfg.WalkableSlopeAngle, tris).ToArray();
-
-                if (!RecastUtils.RasterizeTriangles(rc.solid, cfg.WalkableClimb, tris, rc.triareas))
+                var triareas = MarkWalkableTriangles(cfg.WalkableSlopeAngle, tris);
+                if (!RasterizeTriangles(rc.solid, cfg.WalkableClimb, triareas))
                 {
                     return tiles.ToArray();
                 }
@@ -431,13 +411,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // as well as filter spans where the character cannot possibly stand.
             FilterHeightfield(rc.solid, cfg);
 
-            if (!RecastUtils.BuildCompactHeightfield(cfg.WalkableHeight, cfg.WalkableClimb, rc.solid, out rc.chf))
-            {
-                throw new EngineException("buildNavigation: Could not build compact height field.");
-            }
+            rc.chf = CompactHeightfield.Build(rc.solid, cfg.WalkableHeight, cfg.WalkableClimb);
 
             // Erode the walkable area by agent radius.
-            if (!RecastUtils.ErodeWalkableArea(cfg.WalkableRadius, rc.chf))
+            if (!rc.chf.ErodeWalkableArea(cfg.WalkableRadius))
             {
                 throw new EngineException("buildNavigation: Could not erode.");
             }
@@ -445,7 +422,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Mark areas.
             rc.chf.MarkAreas(geometry);
 
-            RecastUtils.BuildHeightfieldLayers(rc.chf, cfg.BorderSize, cfg.WalkableHeight, out rc.lset);
+            rc.lset = HeightfieldLayerSet.Build(rc.chf, cfg.BorderSize, cfg.WalkableHeight);
 
             rc.ntiles = 0;
             for (int i = 0; i < Math.Min(rc.lset.NLayers, MAX_LAYERS); i++)
@@ -559,15 +536,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // as well as filter spans where the character cannot possibly stand.
             if (cfg.FilterLowHangingObstacles)
             {
-                RecastUtils.FilterLowHangingWalkableObstacles(cfg.WalkableClimb, solid);
+                solid.FilterLowHangingWalkableObstacles(cfg.WalkableClimb);
             }
             if (cfg.FilterLedgeSpans)
             {
-                RecastUtils.FilterLedgeSpans(cfg.WalkableHeight, cfg.WalkableClimb, solid);
+                solid.FilterLedgeSpans(cfg.WalkableHeight, cfg.WalkableClimb);
             }
             if (cfg.FilterWalkableLowHeightSpans)
             {
-                RecastUtils.FilterWalkableLowHeightSpans(cfg.WalkableHeight, solid);
+                solid.FilterWalkableLowHeightSpans(cfg.WalkableHeight);
             }
         }
         /// <summary>
@@ -606,13 +583,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             if (cfg.PartitionType == SamplePartitionTypes.Watershed)
             {
                 // Prepare for region partitioning, by calculating distance field along the walkable surface.
-                if (!RecastUtils.BuildDistanceField(chf))
-                {
-                    throw new EngineException("buildNavigation: Could not build distance field.");
-                }
+                chf.BuildDistanceField();
 
                 // Partition the walkable surface into simple regions without holes.
-                if (!RecastUtils.BuildRegions(chf, cfg.BorderSize, cfg.MinRegionArea, cfg.MergeRegionArea))
+                if (!chf.BuildRegions(cfg.BorderSize, cfg.MinRegionArea, cfg.MergeRegionArea))
                 {
                     throw new EngineException("buildNavigation: Could not build watershed regions.");
                 }
@@ -621,7 +595,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 // Partition the walkable surface into simple regions without holes.
                 // Monotone partitioning does not need distancefield.
-                if (!RecastUtils.BuildRegionsMonotone(chf, cfg.BorderSize, cfg.MinRegionArea, cfg.MergeRegionArea))
+                if (!chf.BuildRegionsMonotone(cfg.BorderSize, cfg.MinRegionArea, cfg.MergeRegionArea))
                 {
                     throw new EngineException("buildNavigation: Could not build monotone regions.");
                 }
@@ -629,8 +603,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             else if (cfg.PartitionType == SamplePartitionTypes.Layers)
             {
                 // Partition the walkable surface into simple regions without holes.
-                var hasLayers = RecastUtils.BuildLayerRegions(chf, cfg.BorderSize, cfg.MinRegionArea);
-                if (!hasLayers)
+                if (!chf.BuildLayerRegions(cfg.BorderSize, cfg.MinRegionArea))
                 {
                     throw new EngineException("buildNavigation: Could not build layer regions.");
                 }
@@ -649,6 +622,184 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
         }
 
+        struct RasterizeItem
+        {
+            public Triangle Triangle { get; set; }
+            public AreaTypes AreaType { get; set; }
+        }
+        private static IEnumerable<RasterizeItem> MarkWalkableTriangles(float walkableSlopeAngle, IEnumerable<Triangle> tris)
+        {
+            List<RasterizeItem> res = new List<RasterizeItem>();
+
+            float walkableThr = (float)Math.Cos(walkableSlopeAngle / 180.0f * MathUtil.Pi);
+
+            foreach (var tri in tris)
+            {
+                // Check if the face is walkable.
+                AreaTypes area = tri.Normal.Y > walkableThr ? AreaTypes.RC_WALKABLE_AREA : AreaTypes.RC_NULL_AREA;
+
+                res.Add(new RasterizeItem() { Triangle = tri, AreaType = area });
+            }
+
+            return res;
+        }
+        private static bool RasterizeTriangles(Heightfield solid, int flagMergeThr, IEnumerable<RasterizeItem> items)
+        {
+            // Rasterize triangles.
+            foreach (var item in items)
+            {
+                // Rasterize.
+                if (!RasterizeTriangle(solid, flagMergeThr, item))
+                {
+                    throw new EngineException("rcRasterizeTriangles: Out of memory.");
+                }
+            }
+
+            return true;
+        }
+        private static bool RasterizeTriangle(Heightfield hf, int flagMergeThr, RasterizeItem item)
+        {
+            float cs = hf.CellSize;
+            float ics = 1.0f / hf.CellSize;
+            float ich = 1.0f / hf.CellHeight;
+            int w = hf.Width;
+            int h = hf.Height;
+            var b = hf.BoundingBox;
+            float by = b.GetY();
+
+            // Calculate the bounding box of the triangle.
+            var triverts = item.Triangle.GetVertices();
+            var t = BoundingBox.FromPoints(triverts);
+
+            // If the triangle does not touch the bbox of the heightfield, skip the triagle.
+            if (b.Contains(t) == ContainmentType.Disjoint)
+            {
+                return true;
+            }
+
+            // Calculate the footprint of the triangle on the grid's y-axis
+            int y0 = (int)((t.Minimum.Z - b.Minimum.Z) * ics);
+            int y1 = (int)((t.Maximum.Z - b.Minimum.Z) * ics);
+            y0 = MathUtil.Clamp(y0, 0, h - 1);
+            y1 = MathUtil.Clamp(y1, 0, h - 1);
+
+            // Clip the triangle into all grid cells it touches.
+            List<Vector3> inb = new List<Vector3>(triverts);
+            List<Vector3> zp1 = new List<Vector3>();
+            List<Vector3> zp2 = new List<Vector3>();
+            List<Vector3> xp1 = new List<Vector3>();
+            List<Vector3> xp2 = new List<Vector3>();
+
+            for (int y = y0; y <= y1; ++y)
+            {
+                // Clip polygon to row. Store the remaining polygon as well
+                zp1.Clear();
+                zp2.Clear();
+                float cz = b.Minimum.Z + y * cs;
+                DividePoly(inb, zp1, zp2, cz + cs, 2);
+                Helper.Swap(ref inb, ref zp2);
+                if (zp1.Count < 3) continue;
+
+                // find the horizontal bounds in the row
+                float minX = zp1[0].X;
+                float maxX = zp1[0].X;
+                for (int i = 1; i < zp1.Count; i++)
+                {
+                    minX = Math.Min(minX, zp1[i].X);
+                    maxX = Math.Max(maxX, zp1[i].X);
+                }
+                int x0 = (int)((minX - b.Minimum.X) * ics);
+                int x1 = (int)((maxX - b.Minimum.X) * ics);
+                x0 = MathUtil.Clamp(x0, 0, w - 1);
+                x1 = MathUtil.Clamp(x1, 0, w - 1);
+
+                for (int x = x0; x <= x1; ++x)
+                {
+                    // Clip polygon to column. store the remaining polygon as well
+                    xp1.Clear();
+                    xp2.Clear();
+                    float cx = b.Minimum.X + x * cs;
+                    DividePoly(zp1, xp1, xp2, cx + cs, 0);
+                    Helper.Swap(ref zp1, ref xp2);
+                    if (xp1.Count < 3) continue;
+
+                    // Calculate min and max of the span.
+                    float minY = xp1[0].Y;
+                    float maxY = xp1[0].Y;
+                    for (int i = 1; i < xp1.Count; ++i)
+                    {
+                        minY = Math.Min(minY, xp1[i].Y);
+                        maxY = Math.Max(maxY, xp1[i].Y);
+                    }
+                    minY -= b.Minimum.Y;
+                    maxY -= b.Minimum.Y;
+                    // Skip the span if it is outside the heightfield bbox
+                    if (maxY < 0.0f) continue;
+                    if (minY > by) continue;
+                    // Clamp the span to the heightfield bbox.
+                    if (minY < 0.0f) minY = 0;
+                    if (maxY > by) maxY = by;
+
+                    // Snap the span to the heightfield height grid.
+                    int ismin = MathUtil.Clamp((int)Math.Floor(minY * ich), 0, Span.SpanMaxHeight);
+                    int ismax = MathUtil.Clamp((int)Math.Ceiling(maxY * ich), ismin + 1, Span.SpanMaxHeight);
+
+                    hf.AddSpan(x, y, ismin, ismax, item.AreaType, flagMergeThr);
+                }
+            }
+
+            return true;
+        }
+        private static void DividePoly(List<Vector3> inPoly, List<Vector3> outPoly1, List<Vector3> outPoly2, float x, int axis)
+        {
+            float[] d = new float[inPoly.Count];
+            for (int i = 0; i < inPoly.Count; i++)
+            {
+                d[i] = x - inPoly[i][axis];
+            }
+
+            for (int i = 0, j = inPoly.Count - 1; i < inPoly.Count; j = i, i++)
+            {
+                bool ina = d[j] >= 0;
+                bool inb = d[i] >= 0;
+                if (ina != inb)
+                {
+                    float s = d[j] / (d[j] - d[i]);
+                    Vector3 v;
+                    v.X = inPoly[j].X + (inPoly[i].X - inPoly[j].X) * s;
+                    v.Y = inPoly[j].Y + (inPoly[i].Y - inPoly[j].Y) * s;
+                    v.Z = inPoly[j].Z + (inPoly[i].Z - inPoly[j].Z) * s;
+                    outPoly1.Add(v);
+                    outPoly2.Add(v);
+
+                    // add the i'th point to the right polygon. Do NOT add points that are on the dividing line
+                    // since these were already added above
+                    if (d[i] > 0)
+                    {
+                        outPoly1.Add(inPoly[i]);
+                    }
+                    else if (d[i] < 0)
+                    {
+                        outPoly2.Add(inPoly[i]);
+                    }
+                }
+                else // same side
+                {
+                    // add the i'th point to the right polygon. Addition is done even for points on the dividing line
+                    if (d[i] >= 0)
+                    {
+                        outPoly1.Add(inPoly[i]);
+
+                        if (d[i] != 0)
+                        {
+                            continue;
+                        }
+                    }
+
+                    outPoly2.Add(inPoly[i]);
+                }
+            }
+        }
 
         private Vector3 m_orig;
         private readonly float m_tileWidth;

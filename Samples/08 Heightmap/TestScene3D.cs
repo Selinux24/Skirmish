@@ -1231,7 +1231,7 @@ namespace Heightmap
         }
         private void SetPathFindingInfo()
         {
-            //Player height
+            //Agent
             var sbbox = this.soldier.GetBoundingBox();
             this.agent.Height = sbbox.GetY();
             this.agent.Radius = sbbox.GetX() * 0.5f;
@@ -1242,8 +1242,8 @@ namespace Heightmap
             var nmsettings = BuildSettings.Default;
 
             //Rasterization
-            nmsettings.CellSize = 1f;
-            nmsettings.CellHeight = 1f;
+            nmsettings.CellSize = 0.2f;
+            nmsettings.CellHeight = 0.2f;
 
             //Agents
             nmsettings.Agents = new[] { agent };
@@ -1253,7 +1253,7 @@ namespace Heightmap
 
             //Tiling
             nmsettings.BuildMode = BuildModes.Tiled;
-            nmsettings.TileSize = 16;
+            nmsettings.TileSize = 64;
             nmsettings.UseTileCache = true;
             nmsettings.BuildAllTiles = false;
 
@@ -1353,8 +1353,13 @@ namespace Heightmap
                 }
                 else
                 {
-                    var offset = (this.agent.Height * 1.2f) + (Vector3.ForwardLH * 10f) + (Vector3.Left * 10f);
-                    var view = (Vector3.BackwardLH * 4f) + Vector3.Down;
+                    var eyePos = new Vector3(0, this.agent.Height, 0);
+                    var eyeView = -Vector3.ForwardLH * 4f;
+                    var interest = eyePos + eyeView;
+
+                    var offset = (eyePos * 1.1f) - (Vector3.Right * 1.5f) - (Vector3.BackwardLH * 4f);
+                    var view = Vector3.Normalize(interest - offset);
+
                     this.Camera.Following = new CameraFollower(this.soldier.Manipulator, offset, view);
                 }
             }
@@ -1383,7 +1388,7 @@ namespace Heightmap
 
                 Task.Run(() =>
                 {
-                    Vector3 extent = Vector3.One * 1f;
+                    Vector3 extent = Vector3.One * 20f;
                     this.NavigationGraph.UpdateAt(new BoundingBox(position - extent, position + extent));
 
                     udaptingGraph = false;
@@ -1437,7 +1442,7 @@ namespace Heightmap
             {
                 float amount = this.Game.Input.MouseXDelta;
 
-                this.soldier.Manipulator.Rotate(amount * gameTime.ElapsedSeconds, 0, 0);
+                this.soldier.Manipulator.Rotate(amount * gameTime.ElapsedSeconds * 0.5f, 0, 0);
             }
 #else
             float amount = this.Game.Input.MouseXDelta;
@@ -1475,6 +1480,8 @@ namespace Heightmap
             {
                 this.soldier.Manipulator.SetPosition(prevPosition);
             }
+
+            this.soldier.Manipulator.UpdateInternals(true);
 
             return this.soldier.Manipulator.Position;
         }

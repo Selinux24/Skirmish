@@ -9,7 +9,6 @@ namespace Engine.PathFinding.RecastNavigation
         public const int MaxLayers = 32;
 
         public Heightfield solid;
-        public AreaTypes[] triareas;
         public HeightfieldLayerSet lset;
         public CompactHeightfield chf;
         public TileCacheData[] tiles;

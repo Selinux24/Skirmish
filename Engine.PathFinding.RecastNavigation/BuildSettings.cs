@@ -4,7 +4,6 @@ using System;
 namespace Engine.PathFinding.RecastNavigation
 {
     using Engine.PathFinding.RecastNavigation.Detour.Tiles;
-    using Engine.PathFinding.RecastNavigation.Recast;
 
     /// <summary>
     /// Navigation mesh generation settings
@@ -16,6 +15,19 @@ namespace Engine.PathFinding.RecastNavigation
         /// This value specifies how many layers (or "floors") each navmesh tile is expected to have.
         /// </summary>
         public const int EXPECTED_LAYERS_PER_TILE = 4;
+
+        /// <summary>
+        /// Calculates the grid size
+        /// </summary>
+        /// <param name="bounds">Bounds</param>
+        /// <param name="cellSize">Cell size</param>
+        /// <param name="width">Resulting width</param>
+        /// <param name="height">Resulting height</param>
+        public static void CalcGridSize(BoundingBox bounds, float cellSize, out int width, out int height)
+        {
+            width = (int)((bounds.Maximum.X - bounds.Minimum.X) / cellSize + 0.5f);
+            height = (int)((bounds.Maximum.Z - bounds.Minimum.Z) / cellSize + 0.5f);
+        }
 
         /// <summary>
         /// Default settings
@@ -130,7 +142,7 @@ namespace Engine.PathFinding.RecastNavigation
             float detailSampleDist = this.DetailSampleDist < 0.9f ? 0 : this.CellSize * this.DetailSampleDist;
             float detailSampleMaxError = this.CellHeight * this.DetailSampleMaxError;
 
-            RecastUtils.CalcGridSize(generationBounds, this.CellSize, out int width, out int height);
+            BuildSettings.CalcGridSize(generationBounds, this.CellSize, out int width, out int height);
             int borderSize = walkableRadius + 3;
             int tileSize = 0;
 
@@ -302,7 +314,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (this.UseTileCache)
             {
-                RecastUtils.CalcGridSize(generationBounds, CellSize, out int gridWidth, out int gridHeight);
+                BuildSettings.CalcGridSize(generationBounds, CellSize, out int gridWidth, out int gridHeight);
                 int tileWidth = (gridWidth + tileSize - 1) / tileSize;
                 int tileHeight = (gridHeight + tileSize - 1) / tileSize;
 

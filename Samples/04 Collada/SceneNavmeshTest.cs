@@ -142,7 +142,7 @@ Space: Finds random over navmesh";
 
             //Tiling
             nmsettings.BuildMode = BuildModes.Tiled;
-            nmsettings.TileSize = 32;
+            nmsettings.TileSize = 64;
 
             var nminput = new InputGeometry(GetTrianglesForNavigationGraph);
 

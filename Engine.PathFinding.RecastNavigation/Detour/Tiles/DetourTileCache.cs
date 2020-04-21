@@ -501,7 +501,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                             for (int k = j + 1; k < npolys; ++k)
                             {
                                 var pk = polys[k];
-                                int v = RecastUtils.GetPolyMergeValue(pj, pk, mesh.Verts, out int ea, out int eb);
+                                int v = IndexedPolygon.GetMergeValue(pj, pk, mesh.Verts, out int ea, out int eb);
                                 if (v > bestMergeVal)
                                 {
                                     bestMergeVal = v;
@@ -516,7 +516,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                         if (bestMergeVal > 0)
                         {
                             // Found best, merge.
-                            polys[bestPa] = RecastUtils.MergePolys(polys[bestPa], polys[bestPb], bestEa, bestEb);
+                            polys[bestPa] = IndexedPolygon.Merge(polys[bestPa], polys[bestPb], bestEa, bestEb);
                             polys[bestPb] = polys[npolys - 1].Copy();
                             npolys--;
                         }
@@ -1261,7 +1261,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             for (int i = 0; i < mesh.NPolys; ++i)
             {
                 var p = mesh.Polys[i];
-                int nv = RecastUtils.CountPolyVerts(p);
+                int nv = p.CountPolyVerts();
                 int numRemoved = 0;
                 int numVerts = 0;
                 for (int j = 0; j < nv; ++j)
@@ -1303,7 +1303,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             for (int i = 0; i < mesh.NPolys; ++i)
             {
                 var p = mesh.Polys[i];
-                int nv = RecastUtils.CountPolyVerts(p);
+                int nv = p.CountPolyVerts();
 
                 // Collect edges which touches the removed vertex.
                 for (int j = 0, k = nv - 1; j < nv; k = j++)
@@ -1365,7 +1365,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             for (int i = 0; i < mesh.NPolys; ++i)
             {
                 var p = mesh.Polys[i];
-                int nv = RecastUtils.CountPolyVerts(p);
+                int nv = p.CountPolyVerts();
                 for (int j = 0; j < nv; ++j)
                 {
                     if (p[j] == rem)
@@ -1385,7 +1385,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             for (int i = 0; i < mesh.NPolys; ++i)
             {
                 var p = mesh.Polys[i];
-                int nv = RecastUtils.CountPolyVerts(p);
+                int nv = p.CountPolyVerts();
                 bool hasRem = false;
                 for (int j = 0; j < nv; ++j)
                 {
@@ -1427,7 +1427,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             for (int i = 0; i < mesh.NPolys; ++i)
             {
                 var p = mesh.Polys[i];
-                int nv = RecastUtils.CountPolyVerts(p);
+                int nv = p.CountPolyVerts();
                 for (int j = 0; j < nv; ++j)
                 {
                     if (p[j] > rem) p[j]--;
@@ -1566,7 +1566,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                         for (int k = j + 1; k < npolys; ++k)
                         {
                             var pk = polys[k];
-                            int v = RecastUtils.GetPolyMergeValue(pj, pk, mesh.Verts, out int ea, out int eb);
+                            int v = IndexedPolygon.GetMergeValue(pj, pk, mesh.Verts, out int ea, out int eb);
                             if (v > bestMergeVal)
                             {
                                 bestMergeVal = v;
@@ -1581,7 +1581,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     if (bestMergeVal > 0)
                     {
                         // Found best, merge.
-                        polys[bestPa] = RecastUtils.MergePolys(polys[bestPa], polys[bestPb], bestEa, bestEb);
+                        polys[bestPa] = IndexedPolygon.Merge(polys[bestPa], polys[bestPb], bestEa, bestEb);
                         polys[bestPb] = polys[npolys - 1];
                         pareas[bestPb] = pareas[npolys - 1];
                         npolys--;

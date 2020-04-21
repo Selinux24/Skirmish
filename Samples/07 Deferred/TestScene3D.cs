@@ -1145,8 +1145,8 @@ namespace Deferred
                 CollisionQueryRange = tankAgentType.Radius * 12,
                 PathOptimizationRange = tankAgentType.Radius * 30,
                 UpdateFlags =
-                    UpdateFlagTypes.ObstacleAvoidance |
-                    UpdateFlagTypes.AnticipateTurns,
+                    UpdateFlagTypes.DT_CROWD_OBSTACLE_AVOIDANCE |
+                    UpdateFlagTypes.DT_CROWD_ANTICIPATE_TURNS,
                 SeparationWeight = 2,
                 ObstacleAvoidanceType = 0,
                 QueryFilterTypeIndex = 0
