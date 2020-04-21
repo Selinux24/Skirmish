@@ -28,7 +28,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 var nm = agentQ.NavMesh;
 
-                var rcFile = NavMesh.FromNavmesh(nm);
+                var rcFile = NavMeshFile.FromNavmesh(nm);
 
                 meshFileDict.Add(agentQ.Agent, rcFile);
             }
@@ -57,7 +57,7 @@ namespace Engine.PathFinding.RecastNavigation
                 foreach (var agent in file.Dictionary.Keys)
                 {
                     var rcFile = file.Dictionary[agent];
-                    var nm = NavMesh.FromNavmeshFile(rcFile);
+                    var nm = NavMeshFile.FromNavmeshFile(rcFile);
 
                     agentQueries.Add(new GraphAgentQuery
                     {

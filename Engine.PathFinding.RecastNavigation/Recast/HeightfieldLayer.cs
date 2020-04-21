@@ -7,11 +7,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// The size of each cell. (On the xz-plane.)
         /// </summary>
-        public float CellSize { get; set; }
+        public float CS { get; set; }
         /// <summary>
         /// The height of each cell. (The minimum increment along the y-axis.)
         /// </summary>
-        public float CellHeight { get; set; }
+        public float CH { get; set; }
         /// <summary>
         /// The heightfield. [Size: width * height]
         /// </summary>
@@ -23,7 +23,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Packed neighbor connection information. [Size: Same as #heights]
         /// </summary>
-        public int[] Connections { get; set; }
+        public int[] Cons { get; set; }
         /// <summary>
         /// Bounding box
         /// </summary>

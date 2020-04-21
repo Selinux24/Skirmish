@@ -22,11 +22,10 @@ namespace Engine.PathFinding.RecastNavigation
         {
             List<GraphNode> nodes = new List<GraphNode>();
 
-            var tiles = mesh.GetTiles();
-            for (int i = 0; i < tiles.Count(); ++i)
+            for (int i = 0; i < mesh.MaxTiles; ++i)
             {
-                var tile = tiles.ElementAt(i);
-                if (tile == null || tile.Header.Magic != DetourUtils.DT_NAVMESH_MAGIC)
+                var tile = mesh.Tiles[i];
+                if (tile.Header.Magic != DetourUtils.DT_NAVMESH_MAGIC)
                 {
                     continue;
                 }

@@ -228,11 +228,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     left = Verts[fromPoly.Verts[v]];
                     right = Verts[fromPoly.Verts[v]];
 
-                    return Status.Success;
+                    return Status.DT_SUCCESS;
                 }
             }
 
-            return Status.Failure | Status.InvalidParam;
+            return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
         }
 
         /// <summary>
@@ -395,30 +395,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             if (data.NavDTris.Count > 0) DetailTris = data.NavDTris.ToArray();
             if (data.NavBvtree.Count > 0) BvTree = data.NavBvtree.ToArray();
             if (data.OffMeshCons.Count > 0) OffMeshCons = data.OffMeshCons.ToArray();
-        }
-
-        /// <summary>
-        /// Allocates a new link
-        /// </summary>
-        /// <returns>Allocated link index</returns>
-        public int AllocLink()
-        {
-            if (LinksFreeList == DetourUtils.DT_NULL_LINK)
-            {
-                return DetourUtils.DT_NULL_LINK;
-            }
-            int link = LinksFreeList;
-            LinksFreeList = Links[link].Next;
-            return link;
-        }
-        /// <summary>
-        /// Frees a link
-        /// </summary>
-        /// <param name="link">Link index</param>
-        public void FreeLink(int link)
-        {
-            Links[link].Next = LinksFreeList;
-            LinksFreeList = link;
         }
 
         /// <summary>

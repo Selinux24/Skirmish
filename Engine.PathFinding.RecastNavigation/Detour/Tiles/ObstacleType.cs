@@ -3,17 +3,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
     public enum ObstacleType
     {
+        DT_OBSTACLE_CYLINDER,
         /// <summary>
-        /// DT_OBSTACLE_CYLINDER
+        /// AABB
         /// </summary>
-        Cylinder,
+        DT_OBSTACLE_BOX,
         /// <summary>
-        /// DT_OBSTACLE_BOX. AABB
+        /// OBB
         /// </summary>
-        Box,
-        /// <summary>
-        /// DT_OBSTACLE_ORIENTED_BOX. OBB
-        /// </summary>
-        OrientedBox,
+        DT_OBSTACLE_ORIENTED_BOX,
     }
 }

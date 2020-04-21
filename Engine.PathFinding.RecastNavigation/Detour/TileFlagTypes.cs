@@ -9,8 +9,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
     public enum TileFlagTypes
     {
         /// <summary>
-        /// DT_TILE_FREE_DATA. The navigation mesh owns the tile memory and is responsible for freeing it.
+        /// The navigation mesh owns the tile memory and is responsible for freeing it.
         /// </summary>
-        FreeData = 0x01,
+        DT_TILE_FREE_DATA = 0x01,
     }
 }

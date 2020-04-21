@@ -1,5 +1,5 @@
 ﻿
-namespace Engine.PathFinding.RecastNavigation
+namespace Engine.PathFinding.RecastNavigation.Recast
 {
     public struct Edge
     {

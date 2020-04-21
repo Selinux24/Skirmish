@@ -7,16 +7,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
     public enum CrowdAgentState
     {
         /// <summary>
-        /// DT_CROWDAGENT_STATE_INVALID. The agent is not in a valid state.
+        /// The agent is not in a valid state.
         /// </summary>
-        Invalid,
+        DT_CROWDAGENT_STATE_INVALID,
         /// <summary>
-        /// DT_CROWDAGENT_STATE_WALKING. The agent is traversing a normal navigation mesh polygon.
+        /// The agent is traversing a normal navigation mesh polygon.
         /// </summary>
-        Walking,
+        DT_CROWDAGENT_STATE_WALKING,
         /// <summary>
-        /// DT_CROWDAGENT_STATE_OFFMESH. The agent is traversing an off-mesh connection.
+        /// The agent is traversing an off-mesh connection.
         /// </summary>
-        Offmesh,
+        DT_CROWDAGENT_STATE_OFFMESH,
     }
 }

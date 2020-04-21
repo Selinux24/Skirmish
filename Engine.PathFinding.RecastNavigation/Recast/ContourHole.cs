@@ -6,6 +6,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
     {
         public static readonly CompareHoles DefaultComparer = new CompareHoles();
 
+
         public Contour Contour { get; set; }
         public int MinX { get; set; }
         public int MinZ { get; set; }

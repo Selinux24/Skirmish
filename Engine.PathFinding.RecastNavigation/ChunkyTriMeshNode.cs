@@ -19,13 +19,6 @@ namespace Engine.PathFinding.RecastNavigation
         /// Node Bounds
         /// </summary>
         public RectangleF Bounds { get; set; }
-        /// <summary>
-        /// Is leaf node
-        /// </summary>
-        public bool IsLeaf
-        {
-            get { return Index >= 0; }
-        }
 
         /// <summary>
         /// Gets the text representation of the instance

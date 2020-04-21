@@ -4,6 +4,7 @@ using System;
 namespace Engine.PathFinding.RecastNavigation
 {
     using Engine.PathFinding.RecastNavigation.Detour.Tiles;
+    using Engine.PathFinding.RecastNavigation.Recast;
 
     /// <summary>
     /// Navigation mesh generation settings
@@ -15,19 +16,6 @@ namespace Engine.PathFinding.RecastNavigation
         /// This value specifies how many layers (or "floors") each navmesh tile is expected to have.
         /// </summary>
         public const int EXPECTED_LAYERS_PER_TILE = 4;
-
-        /// <summary>
-        /// Calculates the grid size
-        /// </summary>
-        /// <param name="b">Bounding box</param>
-        /// <param name="cellSize">Cell size</param>
-        /// <param name="w">Integer with</param>
-        /// <param name="h">Integer height</param>
-        public static void CalcGridSize(BoundingBox b, float cellSize, out int w, out int h)
-        {
-            w = (int)((b.Maximum.X - b.Minimum.X) / cellSize + 0.5f);
-            h = (int)((b.Maximum.Z - b.Minimum.Z) / cellSize + 0.5f);
-        }
 
         /// <summary>
         /// Default settings
@@ -76,10 +64,6 @@ namespace Engine.PathFinding.RecastNavigation
         /// Vertices per polygon
         /// </summary>
         public int VertsPerPoly { get; set; } = 6;
-        /// <summary>
-        /// Maximum number of layers
-        /// </summary>
-        public int MaxLayers { get; set; } = 32;
         /// <summary>
         /// Partition type
         /// </summary>
@@ -133,12 +117,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         public bool FilterWalkableLowHeightSpans { get; set; } = true;
 
-        /// <summary>
-        /// Gets the "Solo" build configuration
-        /// </summary>
-        /// <param name="agent">Agent</param>
-        /// <param name="generationBounds">Generation bounds</param>
-        /// <returns>Returns the configuration</returns>
+
         internal Config GetSoloConfig(Agent agent, BoundingBox generationBounds)
         {
             float walkableSlopeAngle = agent.MaxSlope;
@@ -151,7 +130,7 @@ namespace Engine.PathFinding.RecastNavigation
             float detailSampleDist = this.DetailSampleDist < 0.9f ? 0 : this.CellSize * this.DetailSampleDist;
             float detailSampleMaxError = this.CellHeight * this.DetailSampleMaxError;
 
-            CalcGridSize(generationBounds, this.CellSize, out int width, out int height);
+            RecastUtils.CalcGridSize(generationBounds, this.CellSize, out int width, out int height);
             int borderSize = walkableRadius + 3;
             int tileSize = 0;
 
@@ -171,7 +150,6 @@ namespace Engine.PathFinding.RecastNavigation
                 MinRegionArea = minRegionArea,
                 MergeRegionArea = mergeRegionArea,
                 MaxVertsPerPoly = this.VertsPerPoly,
-                MaxLayers = this.MaxLayers,
                 DetailSampleDist = detailSampleDist,
                 DetailSampleMaxError = detailSampleMaxError,
                 BoundingBox = generationBounds,
@@ -190,12 +168,6 @@ namespace Engine.PathFinding.RecastNavigation
 
             return cfg;
         }
-        /// <summary>
-        /// Gets the "Tiled" build configuration
-        /// </summary>
-        /// <param name="agent">Agent</param>
-        /// <param name="tileBounds">Tile bounds</param>
-        /// <returns>Returns the configuration</returns>
         internal Config GetTiledConfig(Agent agent, BoundingBox tileBounds)
         {
             float walkableSlopeAngle = agent.MaxSlope;
@@ -231,7 +203,6 @@ namespace Engine.PathFinding.RecastNavigation
                 MinRegionArea = minRegionArea,
                 MergeRegionArea = mergeRegionArea,
                 MaxVertsPerPoly = this.VertsPerPoly,
-                MaxLayers = this.MaxLayers,
                 DetailSampleDist = detailSampleDist,
                 DetailSampleMaxError = detailSampleMaxError,
                 BoundingBox = generationBounds,
@@ -250,13 +221,6 @@ namespace Engine.PathFinding.RecastNavigation
 
             return cfg;
         }
-        /// <summary>
-        /// Adjust the tile bounding box
-        /// </summary>
-        /// <param name="tileBounds">Actual tile bounds</param>
-        /// <param name="borderSize">Border size</param>
-        /// <param name="cellsize">Cell size</param>
-        /// <returns>Returns the adjusted bounds</returns>
         private static BoundingBox AdjustTileBBox(BoundingBox tileBounds, int borderSize, float cellsize)
         {
             // Expand the heighfield bounding box by border size to find the extents of geometry we need to build this tile.
@@ -288,12 +252,6 @@ namespace Engine.PathFinding.RecastNavigation
 
             return tileBounds;
         }
-        /// <summary>
-        /// Gets the tile-cache build configuration
-        /// </summary>
-        /// <param name="agent">Agent</param>
-        /// <param name="generationBounds">Generation bounds</param>
-        /// <returns>Returns the configuration</returns>
         internal Config GetTileCacheConfig(Agent agent, BoundingBox generationBounds)
         {
             float walkableSlopeAngle = agent.MaxSlope;
@@ -326,7 +284,6 @@ namespace Engine.PathFinding.RecastNavigation
                 MinRegionArea = minRegionArea,
                 MergeRegionArea = mergeRegionArea,
                 MaxVertsPerPoly = this.VertsPerPoly,
-                MaxLayers = this.MaxLayers,
                 DetailSampleDist = detailSampleDist,
                 DetailSampleMaxError = detailSampleMaxError,
                 BoundingBox = generationBounds,
@@ -345,7 +302,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (this.UseTileCache)
             {
-                CalcGridSize(generationBounds, CellSize, out int gridWidth, out int gridHeight);
+                RecastUtils.CalcGridSize(generationBounds, CellSize, out int gridWidth, out int gridHeight);
                 int tileWidth = (gridWidth + tileSize - 1) / tileSize;
                 int tileHeight = (gridHeight + tileSize - 1) / tileSize;
 

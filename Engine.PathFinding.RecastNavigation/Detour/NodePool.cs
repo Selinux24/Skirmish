@@ -8,25 +8,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
     /// </summary>
     public class NodePool : IDisposable
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="a"></param>
-        /// <returns></returns>
-        /// <remarks>
-        /// From Thomas Wang, https://gist.github.com/badboy/6267743
-        /// </remarks>
-        private static int HashRef(int a)
-        {
-            a += ~(a << 15);
-            a ^= (a >> 10);
-            a += (a << 3);
-            a ^= (a >> 6);
-            a += ~(a << 11);
-            a ^= (a >> 16);
-            return a;
-        }
-
         public int MaxNodes { get; set; }
         public int NodeCount { get; set; }
 
@@ -87,7 +68,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         }
         public Node GetNode(int id, int state)
         {
-            int bucket = HashRef(id) & (HashSize - 1);
+            int bucket = DetourUtils.HashRef(id) & (HashSize - 1);
             int i = First[bucket];
             while (i != DetourUtils.DT_NULL_IDX)
             {
@@ -124,7 +105,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         }
         public Node FindNode(int id, int state)
         {
-            int bucket = HashRef(id) & (HashSize - 1);
+            int bucket = DetourUtils.HashRef(id) & (HashSize - 1);
             int i = First[bucket];
             while (i != DetourUtils.DT_NULL_IDX)
             {
@@ -141,7 +122,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             nodes = new Node[maxNodes];
 
             int n = 0;
-            int bucket = HashRef(id) & (HashSize - 1);
+            int bucket = DetourUtils.HashRef(id) & (HashSize - 1);
             int i = First[bucket];
             while (i != DetourUtils.DT_NULL_IDX)
             {

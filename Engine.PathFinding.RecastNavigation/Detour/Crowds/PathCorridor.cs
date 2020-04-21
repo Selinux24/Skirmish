@@ -52,7 +52,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             // Prune points in the beginning of the path which are too close.
             while (cornerPolys.Count > 0)
             {
-                if (cornerPolys.StartFlags.HasFlag(StraightPathFlagTypes.Offmesh) ||
+                if (cornerPolys.StartFlags.HasFlag(StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION) ||
                     Vector2.DistanceSquared(cornerPolys.StartPath.XZ(), m_pos.XZ()) > (MIN_TARGET_DIST * MIN_TARGET_DIST))
                 {
                     break;
@@ -64,7 +64,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             // Prune points after an off-mesh connection.
             for (int i = 0; i < cornerPolys.Count; ++i)
             {
-                if (cornerPolys.GetFlag(i).HasFlag(StraightPathFlagTypes.Offmesh))
+                if (cornerPolys.GetFlag(i).HasFlag(StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION))
                 {
                     cornerPolys.Prune(i + 1);
                     break;
@@ -134,7 +134,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             navquery.UpdateSlicedFindPath(MAX_ITER, out _);
             Status status = navquery.FinalizeSlicedFindPathPartial(MAX_RES, m_path.GetPath(), out var res);
 
-            if (status == Status.Success && res.Count > 0)
+            if (status == Status.DT_SUCCESS && res.Count > 0)
             {
                 SimplePath.MergeCorridorStartShortcut(m_path, res);
 
@@ -269,7 +269,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 m_path.Start, m_pos, npos, filter, MAX_VISITED,
                 out var result, out var visited);
 
-            if (status == Status.Success)
+            if (status == Status.DT_SUCCESS)
             {
                 SimplePath.MergeCorridorStartMoved(m_path, visited);
 
@@ -303,7 +303,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 m_path.End, m_target, npos, filter, MAX_VISITED,
                 out var result, out var visited);
 
-            if (status == Status.Success)
+            if (status == Status.DT_SUCCESS)
             {
                 SimplePath.MergeCorridorEndMoved(m_path, visited);
 

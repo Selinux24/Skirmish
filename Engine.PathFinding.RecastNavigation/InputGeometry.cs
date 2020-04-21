@@ -12,11 +12,6 @@ namespace Engine.PathFinding.RecastNavigation
     /// </summary>
     public class InputGeometry : PathFinderInput
     {
-        /// <summary>
-        /// Calculates the hash of the specified triangle list
-        /// </summary>
-        /// <param name="triangles">Triangles</param>
-        /// <returns>Returns a hash into a string</returns>
         public static string GetHash(IEnumerable<Triangle> triangles)
         {
             var serTris = triangles

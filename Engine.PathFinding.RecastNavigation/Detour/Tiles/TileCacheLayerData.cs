@@ -53,7 +53,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             return string.Format("Heights {0}; Areas {1}; Connections {2};",
                 this.Heights?.Count(i => i != 0xff),
-                this.Areas?.Count(i => i != AreaTypes.Unwalkable),
+                this.Areas?.Count(i => i != AreaTypes.RC_NULL_AREA),
                 this.Connections?.Count(i => i != 0x00));
         }
     }

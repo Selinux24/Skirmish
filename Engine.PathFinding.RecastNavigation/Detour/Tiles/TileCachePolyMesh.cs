@@ -4,9 +4,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
     public struct TileCachePolyMesh
     {
-        /// <summary>
-        /// Vertex per polygon
-        /// </summary>
         public int NVP { get; set; }
         /// <summary>
         /// Number of vertices.

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Engine.PathFinding.RecastNavigation
+namespace Engine.PathFinding.RecastNavigation.Detour
 {
     [Flags]
     public enum DetailTriEdgeFlagTypes

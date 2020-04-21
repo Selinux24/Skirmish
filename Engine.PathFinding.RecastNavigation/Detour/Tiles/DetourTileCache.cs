@@ -3,6 +3,8 @@ using System;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
+    using Engine.PathFinding.RecastNavigation.Recast;
+
     static class DetourTileCache
     {
         #region Constants
@@ -10,7 +12,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         public const int VERTEX_BUCKET_COUNT2 = (1 << 8);
         public const int MAX_REQUESTS = 64;
         public const int MAX_UPDATE = 64;
-        public const int MAX_REM_EDGES = 48; // TODO: make this an expression.
+        public const int MAX_VERTS_PER_POLY = 6;    // TODO: use the DT_VERTS_PER_POLYGON
+        public const int MAX_REM_EDGES = 48;        // TODO: make this an expression.
         public const int DT_LAYER_MAX_NEIS = 16;
         public const int DT_MAX_TOUCHED_TILES = 8;
         public const int DT_TILECACHE_MAGIC = 'D' << 24 | 'T' << 16 | 'L' << 8 | 'R'; ///< 'DTLR';
@@ -94,7 +97,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 for (int x = 0; x < w; ++x)
                 {
                     int idx = x + y * w;
-                    if (bc.Layer.Areas[idx] == AreaTypes.Unwalkable)
+                    if (bc.Layer.Areas[idx] == AreaTypes.RC_NULL_AREA)
                     {
                         continue;
                     }
@@ -115,8 +118,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     if (sid == 0xff)
                     {
                         sid = sweepId++;
-                        sweeps[sid].Neigbour = 0xff;
-                        sweeps[sid].NSamples = 0;
+                        sweeps[sid].Nei = 0xff;
+                        sweeps[sid].NS = 0;
                     }
 
                     // -y
@@ -127,22 +130,22 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                         if (nr != 0xff)
                         {
                             // Set neighbour when first valid neighbour is encoutered.
-                            if (sweeps[sid].NSamples == 0)
+                            if (sweeps[sid].NS == 0)
                             {
-                                sweeps[sid].Neigbour = nr;
+                                sweeps[sid].Nei = nr;
                             }
 
-                            if (sweeps[sid].Neigbour == nr)
+                            if (sweeps[sid].Nei == nr)
                             {
                                 // Update existing neighbour
-                                sweeps[sid].NSamples++;
+                                sweeps[sid].NS++;
                                 prevCount[nr]++;
                             }
                             else
                             {
                                 // This is hit if there is nore than one neighbour.
                                 // Invalidate the neighbour.
-                                sweeps[sid].Neigbour = 0xff;
+                                sweeps[sid].Nei = 0xff;
                             }
                         }
                     }
@@ -155,9 +158,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 {
                     // If the neighbour is set and there is only one continuous connection to it,
                     // the sweep will be merged with the previous one, else new region is created.
-                    if (sweeps[i].Neigbour != 0xff && prevCount[sweeps[i].Neigbour] == sweeps[i].NSamples)
+                    if (sweeps[i].Nei != 0xff && prevCount[sweeps[i].Nei] == sweeps[i].NS)
                     {
-                        sweeps[i].Region = sweeps[i].Neigbour;
+                        sweeps[i].Id = sweeps[i].Nei;
                     }
                     else
                     {
@@ -166,7 +169,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                             // Region ID's overflow.
                             return false;
                         }
-                        sweeps[i].Region = regId++;
+                        sweeps[i].Id = regId++;
                     }
                 }
 
@@ -176,7 +179,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     int idx = x + y * w;
                     if (layerRegs[idx] != 0xff)
                     {
-                        layerRegs[idx] = sweeps[layerRegs[idx]].Region;
+                        layerRegs[idx] = sweeps[layerRegs[idx]].Id;
                     }
                 }
             }
@@ -191,7 +194,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     Neis = new int[DT_LAYER_MAX_NEIS],
                     NNeis = 0,
                     RegId = 0xff,
-                    AreaId = AreaTypes.Unwalkable,
+                    AreaId = AreaTypes.RC_NULL_AREA,
                 };
             });
 
@@ -352,15 +355,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     SimplifyContour(temp, maxError);
 
                     // Store contour.
-                    cont.NVerts = temp.NVerts;
+                    cont.NVerts = temp.nverts;
                     if (cont.NVerts > 0)
                     {
-                        cont.Verts = new Int4[temp.NVerts];
+                        cont.Verts = new Int4[temp.nverts];
 
-                        for (int i = 0, j = temp.NVerts - 1; i < temp.NVerts; j = i++)
+                        for (int i = 0, j = temp.nverts - 1; i < temp.nverts; j = i++)
                         {
-                            var v = temp.Verts[j];
-                            var vn = temp.Verts[i];
+                            var v = temp.verts[j];
+                            var vn = temp.verts[i];
                             int nei = vn.W; // The neighbour reg is stored at segment vertex of a segment. 
                             bool shouldRemove = false;
                             int lh = GetCornerHeight(bc.Layer, v.X, v.Y, v.Z, walkableClimb, ref shouldRemove);
@@ -409,6 +412,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 maxVertsPerCont = Math.Max(maxVertsPerCont, bc.LCSet.Conts[i].NVerts);
             }
 
+            // TODO: warn about too many vertices?
+
             var mesh = new TileCachePolyMesh
             {
                 NVP = DetourUtils.DT_VERTS_PER_POLYGON,
@@ -423,6 +428,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             int[] vflags = new int[maxVertices];
             int[] firstVert = Helper.CreateArray(VERTEX_BUCKET_COUNT2, DT_TILECACHE_NULL_IDX);
             int[] nextVert = Helper.CreateArray(maxVertices, 0);
+            int[] indices = new int[maxVertsPerCont];
 
             for (int i = 0; i < bc.LCSet.NConts; ++i)
             {
@@ -435,7 +441,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 }
 
                 // Triangulate contour
-                int ntris = RecastUtils.Triangulate(cont.Verts, out int[] indices, out Int3[] tris);
+                for (int j = 0; j < cont.NVerts; ++j)
+                {
+                    indices[j] = j;
+                }
+
+                int ntris = RecastUtils.Triangulate(cont.Verts, ref indices, out Int3[] tris);
                 if (ntris <= 0)
                 {
                     // TODO: issue warning!
@@ -490,7 +501,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                             for (int k = j + 1; k < npolys; ++k)
                             {
                                 var pk = polys[k];
-                                int v = pj.GetPolyMergeValue(pk, mesh.Verts, out int ea, out int eb);
+                                int v = RecastUtils.GetPolyMergeValue(pj, pk, mesh.Verts, out int ea, out int eb);
                                 if (v > bestMergeVal)
                                 {
                                     bestMergeVal = v;
@@ -505,7 +516,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                         if (bestMergeVal > 0)
                         {
                             // Found best, merge.
-                            polys[bestPa] = IndexedPolygon.Merge(polys[bestPa], polys[bestPb], bestEa, bestEb);
+                            polys[bestPa] = RecastUtils.MergePolys(polys[bestPa], polys[bestPb], bestEa, bestEb);
                             polys[bestPb] = polys[npolys - 1].Copy();
                             npolys--;
                         }
@@ -571,6 +582,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             return true;
         }
+        public static int GetDirOffsetX(int dir)
+        {
+            int[] offset = new[] { -1, 0, 1, 0, };
+            return offset[dir & 0x03];
+        }
+        public static int GetDirOffsetY(int dir)
+        {
+            int[] offset = new[] { 0, 1, 0, -1 };
+            return offset[dir & 0x03];
+        }
         public static bool OverlapRangeExl(int amin, int amax, int bmin, int bmax)
         {
             return !(amin >= bmax || amax <= bmin);
@@ -621,10 +642,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         public static bool AppendVertex(TempContour cont, int x, int y, int z, int r)
         {
             // Try to merge with existing segments.
-            if (cont.NVerts > 1)
+            if (cont.nverts > 1)
             {
-                var pa = cont.Verts[cont.NVerts - 2];
-                var pb = cont.Verts[cont.NVerts - 1];
+                var pa = cont.verts[cont.nverts - 2];
+                var pb = cont.verts[cont.nverts - 1];
                 if (pb.W == r)
                 {
                     if (pa.X == pb.X && pb.X == x)
@@ -632,7 +653,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                         // The verts are aligned aling x-axis, update z.
                         pb.Y = y;
                         pb.Z = z;
-                        cont.Verts[cont.NVerts - 1] = pb;
+                        cont.verts[cont.nverts - 1] = pb;
                         return true;
                     }
                     else if (pa.Z == pb.Z && pb.Z == z)
@@ -640,20 +661,20 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                         // The verts are aligned aling z-axis, update x.
                         pb.X = x;
                         pb.Y = y;
-                        cont.Verts[cont.NVerts - 1] = pb;
+                        cont.verts[cont.nverts - 1] = pb;
                         return true;
                     }
                 }
             }
 
             // Add new point.
-            if (cont.NVerts + 1 > cont.CVerts)
+            if (cont.nverts + 1 > cont.cverts)
             {
                 return false;
             }
 
-            cont.Verts[cont.NVerts] = new Int4(x, y, z, r);
-            cont.NVerts++;
+            cont.verts[cont.nverts] = new Int4(x, y, z, r);
+            cont.nverts++;
 
             return true;
         }
@@ -676,8 +697,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 return 0xff;
             }
 
-            int bx = ax + DirectionUtils.GetDirOffsetX(dir);
-            int by = ay + DirectionUtils.GetDirOffsetY(dir);
+            int bx = ax + RecastUtils.GetDirOffsetX(dir);
+            int by = ay + RecastUtils.GetDirOffsetY(dir);
             int ib = bx + by * w;
 
             return layer.Regs[ib];
@@ -687,7 +708,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             int w = layer.Header.Width;
             int h = layer.Header.Height;
 
-            cont.NVerts = 0;
+            cont.nverts = 0;
 
             int startX = x;
             int startY = y;
@@ -738,16 +759,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                         return false;
                     }
 
-                    // Rotate CW
-                    ndir = DirectionUtils.RotateCW(dir);
+                    ndir = (dir + 1) & 0x3;  // Rotate CW
                 }
                 else
                 {
                     // Move to next.
-                    nx = x + DirectionUtils.GetDirOffsetX(dir);
-                    ny = y + DirectionUtils.GetDirOffsetY(dir);
-                    // Rotate CCW
-                    ndir = DirectionUtils.RotateCCW(dir);
+                    nx = x + RecastUtils.GetDirOffsetX(dir);
+                    ny = y + RecastUtils.GetDirOffsetY(dir);
+                    ndir = (dir + 3) & 0x3; // Rotate CCW
                 }
 
                 if (iter > 0 && x == startX && y == startY && dir == startDir)
@@ -763,11 +782,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
 
             // Remove last vertex if it is duplicate of the first one.
-            var pa = cont.Verts[cont.NVerts - 1];
-            var pb = cont.Verts[0];
+            var pa = cont.verts[cont.nverts - 1];
+            var pb = cont.verts[0];
             if (pa[0] == pb[0] && pa[2] == pb[2])
             {
-                cont.NVerts--;
+                cont.nverts--;
             }
 
             return true;
@@ -800,34 +819,34 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         }
         public static void SimplifyContour(TempContour cont, float maxError)
         {
-            cont.NPoly = 0;
+            cont.npoly = 0;
 
-            for (int i = 0; i < cont.NVerts; ++i)
+            for (int i = 0; i < cont.nverts; ++i)
             {
-                int j = (i + 1) % cont.NVerts;
+                int j = (i + 1) % cont.nverts;
                 // Check for start of a wall segment.
-                int ra = cont.Verts[j].W;
-                int rb = cont.Verts[i].W;
+                int ra = cont.verts[j].W;
+                int rb = cont.verts[i].W;
                 if (ra != rb)
                 {
-                    cont.Poly[cont.NPoly++] = i;
+                    cont.poly[cont.npoly++] = i;
                 }
             }
-            if (cont.NPoly < 2)
+            if (cont.npoly < 2)
             {
                 // If there is no transitions at all,
                 // create some initial points for the simplification process. 
                 // Find lower-left and upper-right vertices of the contour.
-                int llx = cont.Verts[0].X;
-                int llz = cont.Verts[0].Z;
+                int llx = cont.verts[0].X;
+                int llz = cont.verts[0].Z;
                 int lli = 0;
-                int urx = cont.Verts[0].X;
-                int urz = cont.Verts[0].Z;
+                int urx = cont.verts[0].X;
+                int urz = cont.verts[0].Z;
                 int uri = 0;
-                for (int i = 1; i < cont.NVerts; ++i)
+                for (int i = 1; i < cont.nverts; ++i)
                 {
-                    int x = cont.Verts[i].X;
-                    int z = cont.Verts[i].Z;
+                    int x = cont.verts[i].X;
+                    int z = cont.verts[i].Z;
                     if (x < llx || (x == llx && z < llz))
                     {
                         llx = x;
@@ -841,24 +860,24 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                         uri = i;
                     }
                 }
-                cont.NPoly = 0;
-                cont.Poly[cont.NPoly++] = lli;
-                cont.Poly[cont.NPoly++] = uri;
+                cont.npoly = 0;
+                cont.poly[cont.npoly++] = lli;
+                cont.poly[cont.npoly++] = uri;
             }
 
             // Add points until all raw points are within
             // error tolerance to the simplified shape.
-            for (int i = 0; i < cont.NPoly;)
+            for (int i = 0; i < cont.npoly;)
             {
-                int ii = (i + 1) % cont.NPoly;
+                int ii = (i + 1) % cont.npoly;
 
-                int ai = cont.Poly[i];
-                int ax = cont.Verts[ai].X;
-                int az = cont.Verts[ai].Z;
+                int ai = cont.poly[i];
+                int ax = cont.verts[ai].X;
+                int az = cont.verts[ai].Z;
 
-                int bi = cont.Poly[ii];
-                int bx = cont.Verts[bi].X;
-                int bz = cont.Verts[bi].Z;
+                int bi = cont.poly[ii];
+                int bx = cont.verts[bi].X;
+                int bz = cont.verts[bi].Z;
 
                 // Find maximum deviation from the segment.
                 float maxd = 0;
@@ -871,38 +890,38 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 if (bx > ax || (bx == ax && bz > az))
                 {
                     cinc = 1;
-                    ci = (ai + cinc) % cont.NVerts;
+                    ci = (ai + cinc) % cont.nverts;
                     endi = bi;
                 }
                 else
                 {
-                    cinc = cont.NVerts - 1;
-                    ci = (bi + cinc) % cont.NVerts;
+                    cinc = cont.nverts - 1;
+                    ci = (bi + cinc) % cont.nverts;
                     endi = ai;
                 }
 
                 // Tessellate only outer edges or edges between areas.
                 while (ci != endi)
                 {
-                    float d = RecastUtils.DistancePtSeg2D(cont.Verts[ci].X, cont.Verts[ci].Z, ax, az, bx, bz);
+                    float d = RecastUtils.DistancePtSeg2D(cont.verts[ci].X, cont.verts[ci].Z, ax, az, bx, bz);
                     if (d > maxd)
                     {
                         maxd = d;
                         maxi = ci;
                     }
-                    ci = (ci + cinc) % cont.NVerts;
+                    ci = (ci + cinc) % cont.nverts;
                 }
 
                 // If the max deviation is larger than accepted error,
                 // add new point, else continue to next segment.
                 if (maxi != -1 && maxd > (maxError * maxError))
                 {
-                    cont.NPoly++;
-                    for (int j = cont.NPoly - 1; j > i; --j)
+                    cont.npoly++;
+                    for (int j = cont.npoly - 1; j > i; --j)
                     {
-                        cont.Poly[j] = cont.Poly[j - 1];
+                        cont.poly[j] = cont.poly[j - 1];
                     }
-                    cont.Poly[i + 1] = maxi;
+                    cont.poly[i + 1] = maxi;
                 }
                 else
                 {
@@ -912,20 +931,20 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             // Remap vertices
             int start = 0;
-            for (int i = 1; i < cont.NPoly; ++i)
+            for (int i = 1; i < cont.npoly; ++i)
             {
-                if (cont.Poly[i] < cont.Poly[start])
+                if (cont.poly[i] < cont.poly[start])
                 {
                     start = i;
                 }
             }
 
-            cont.NVerts = 0;
-            for (int i = 0; i < cont.NPoly; ++i)
+            cont.nverts = 0;
+            for (int i = 0; i < cont.npoly; ++i)
             {
-                int j = (start + i) % cont.NPoly;
-                var src = cont.Verts[cont.Poly[j]];
-                cont.Verts[cont.NVerts++] = new Int4()
+                int j = (start + i) % cont.npoly;
+                var src = cont.verts[cont.poly[j]];
+                cont.verts[cont.nverts++] = new Int4()
                 {
                     X = src.X,
                     Y = src.Y,
@@ -956,7 +975,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     {
                         int idx = px + pz * w;
                         int lh = layer.Heights[idx];
-                        if (Math.Abs(lh - y) <= walkableClimb && layer.Areas[idx] != AreaTypes.Unwalkable)
+                        if (Math.Abs(lh - y) <= walkableClimb && layer.Areas[idx] != AreaTypes.RC_NULL_AREA)
                         {
                             height = Math.Max(height, lh);
                             portal &= (layer.Cons[idx] >> 4);
@@ -1242,7 +1261,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             for (int i = 0; i < mesh.NPolys; ++i)
             {
                 var p = mesh.Polys[i];
-                int nv = p.CountPolyVerts();
+                int nv = RecastUtils.CountPolyVerts(p);
                 int numRemoved = 0;
                 int numVerts = 0;
                 for (int j = 0; j < nv; ++j)
@@ -1284,7 +1303,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             for (int i = 0; i < mesh.NPolys; ++i)
             {
                 var p = mesh.Polys[i];
-                int nv = p.CountPolyVerts();
+                int nv = RecastUtils.CountPolyVerts(p);
 
                 // Collect edges which touches the removed vertex.
                 for (int j = 0, k = nv - 1; j < nv; k = j++)
@@ -1346,7 +1365,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             for (int i = 0; i < mesh.NPolys; ++i)
             {
                 var p = mesh.Polys[i];
-                int nv = p.CountPolyVerts();
+                int nv = RecastUtils.CountPolyVerts(p);
                 for (int j = 0; j < nv; ++j)
                 {
                     if (p[j] == rem)
@@ -1366,7 +1385,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             for (int i = 0; i < mesh.NPolys; ++i)
             {
                 var p = mesh.Polys[i];
-                int nv = p.CountPolyVerts();
+                int nv = RecastUtils.CountPolyVerts(p);
                 bool hasRem = false;
                 for (int j = 0; j < nv; ++j)
                 {
@@ -1408,7 +1427,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             for (int i = 0; i < mesh.NPolys; ++i)
             {
                 var p = mesh.Polys[i];
-                int nv = p.CountPolyVerts();
+                int nv = RecastUtils.CountPolyVerts(p);
                 for (int j = 0; j < nv; ++j)
                 {
                     if (p[j] > rem) p[j]--;
@@ -1480,6 +1499,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
 
             var tverts = new Int4[nhole];
+            var thole = new int[nhole];
 
             // Generate temp vertex array for triangulation.
             for (int i = 0; i < nhole; ++i)
@@ -1489,14 +1509,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 tverts[i].Y = mesh.Verts[pi].Y;
                 tverts[i].Z = mesh.Verts[pi].Z;
                 tverts[i].W = 0;
+                thole[i] = i;
             }
 
             // Triangulate the hole.
-            int ntris = RecastUtils.Triangulate(tverts, out _, out Int3[] tris);
+            int ntris = RecastUtils.Triangulate(tverts, ref thole, out Int3[] tris);
             if (ntris < 0)
             {
-                // Bad triangulation, should not happen.
-                Console.WriteLine("removeVertex: triangulate() returned bad results.");
+                // TODO: issue warning!
                 ntris = -ntris;
             }
 
@@ -1546,7 +1566,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                         for (int k = j + 1; k < npolys; ++k)
                         {
                             var pk = polys[k];
-                            int v = pj.GetPolyMergeValue(pk, mesh.Verts, out int ea, out int eb);
+                            int v = RecastUtils.GetPolyMergeValue(pj, pk, mesh.Verts, out int ea, out int eb);
                             if (v > bestMergeVal)
                             {
                                 bestMergeVal = v;
@@ -1561,7 +1581,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     if (bestMergeVal > 0)
                     {
                         // Found best, merge.
-                        polys[bestPa] = IndexedPolygon.Merge(polys[bestPa], polys[bestPb], bestEa, bestEb);
+                        polys[bestPa] = RecastUtils.MergePolys(polys[bestPa], polys[bestPb], bestEa, bestEb);
                         polys[bestPb] = polys[npolys - 1];
                         pareas[bestPb] = pareas[npolys - 1];
                         npolys--;
@@ -1594,6 +1614,18 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
 
             return true;
+        }
+
+        #endregion
+
+        #region DETOURTILECAHE
+
+        public static int ComputeTileHash(int x, int y, int mask)
+        {
+            uint h1 = 0x8da6b343; // Large multiplicative constants
+            uint h2 = 0xd8163841; // here arbitrarily chosen primes
+            uint n = h1 * (uint)x + h2 * (uint)y;
+            return (int)(n & mask);
         }
 
         #endregion

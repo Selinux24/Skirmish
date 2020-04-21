@@ -67,7 +67,7 @@ namespace Engine.PathFinding.RecastNavigation
             var endPointsDefined = (startRef != 0 && endRef != 0);
             if (!endPointsDefined)
             {
-                return Status.Failure;
+                return Status.DT_FAILURE;
             }
 
             if (mode == PathFindingMode.Follow)
@@ -76,7 +76,7 @@ namespace Engine.PathFinding.RecastNavigation
                 {
                     resultPath = path;
 
-                    return Status.Success;
+                    return Status.DT_SUCCESS;
                 }
             }
             else if (mode == PathFindingMode.Straight)
@@ -85,20 +85,20 @@ namespace Engine.PathFinding.RecastNavigation
                 {
                     resultPath = path;
 
-                    return Status.Success;
+                    return Status.DT_SUCCESS;
                 }
             }
             else if (mode == PathFindingMode.Sliced)
             {
                 var status = navQuery.InitSlicedFindPath(startRef, endRef, startPos, endPos, filter);
-                if (status != Status.Success)
+                if (status != Status.DT_SUCCESS)
                 {
                     return status;
                 }
                 return navQuery.UpdateSlicedFindPath(20, out _);
             }
 
-            return Status.Failure;
+            return Status.DT_FAILURE;
         }
 
         private static bool CalcPathFollow(
@@ -158,8 +158,8 @@ namespace Engine.PathFinding.RecastNavigation
                 return true;
             }
 
-            bool endOfPath = (target.Flag & StraightPathFlagTypes.End) != 0;
-            bool offMeshConnection = (target.Flag & StraightPathFlagTypes.Offmesh) != 0;
+            bool endOfPath = (target.Flag & StraightPathFlagTypes.DT_STRAIGHTPATH_END) != 0;
+            bool offMeshConnection = (target.Flag & StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION) != 0;
 
             // Find movement delta.
             Vector3 moveTgt = FindMovementDelta(iterPos, target.Position, endOfPath || offMeshConnection);
@@ -362,7 +362,7 @@ namespace Engine.PathFinding.RecastNavigation
             while (ns < steerPath.Count)
             {
                 // Stop at Off-Mesh link or when point is further than slop away.
-                if ((steerPath.GetFlag(ns) & StraightPathFlagTypes.Offmesh) != 0 ||
+                if ((steerPath.GetFlag(ns) & StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION) != 0 ||
                     !InRange(steerPath.GetPath(ns), startPos, minTargetDist, 1000.0f))
                 {
                     break;
@@ -782,7 +782,7 @@ namespace Engine.PathFinding.RecastNavigation
                 new QueryFilter(), new Vector3(2, 4, 2), PathFindingMode.Follow,
                 from, to, out var result);
 
-            if (status.HasFlag(Status.Success))
+            if (status.HasFlag(Status.DT_SUCCESS))
             {
                 return result;
             }
@@ -815,7 +815,7 @@ namespace Engine.PathFinding.RecastNavigation
                     new QueryFilter(), new Vector3(2, 4, 2), PathFindingMode.Follow,
                     from, to, out var res);
 
-                if (status.HasFlag(Status.Success))
+                if (status.HasFlag(Status.DT_SUCCESS))
                 {
                     result = res;
                 }
@@ -856,7 +856,7 @@ namespace Engine.PathFinding.RecastNavigation
                     position, agentExtents, new QueryFilter(),
                     out int nRef, out Vector3 nPoint);
 
-                if (nRef != 0 && !status.HasFlag(Status.Failure))
+                if (nRef != 0 && !status.HasFlag(Status.DT_FAILURE))
                 {
                     nearest = nPoint;
 
@@ -880,10 +880,12 @@ namespace Engine.PathFinding.RecastNavigation
 
             foreach (var agentQ in AgentQueries)
             {
-                int id = agentQ.NavMesh.AddObstacle(obstacle);
-                if (id >= 0)
+                var cache = agentQ.NavMesh.TileCache;
+                if (cache != null)
                 {
-                    obstacles.Add(new Tuple<Agent, int>(agentQ.Agent, id));
+                    cache.AddObstacle(obstacle, out int res);
+
+                    obstacles.Add(new Tuple<Agent, int>(agentQ.Agent, res));
                 }
             }
 
@@ -942,9 +944,11 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 foreach (var item in instance.Indices)
                 {
-                    var navmesh = AgentQueries.Find(a => a.Agent.Equals(item.Item1))?.NavMesh;
-
-                    navmesh?.RemoveObstacle(item.Item2);
+                    var cache = AgentQueries.Find(a => a.Agent.Equals(item.Item1))?.NavMesh.TileCache;
+                    if (cache != null)
+                    {
+                        cache.RemoveObstacle(item.Item2);
+                    }
                 }
 
                 itemIndices.Remove(instance);
@@ -961,7 +965,7 @@ namespace Engine.PathFinding.RecastNavigation
             if (query != null)
             {
                 var status = query.FindRandomPoint(new QueryFilter(), out _, out var pt);
-                if (status == Status.Success)
+                if (status == Status.DT_SUCCESS)
                 {
                     return pt;
                 }
@@ -984,13 +988,13 @@ namespace Engine.PathFinding.RecastNavigation
                 QueryFilter filter = new QueryFilter();
 
                 var fStatus = query.FindNearestPoly(position, new Vector3(2, 4, 2), filter, out int startRef, out var nearestPt);
-                if (fStatus != Status.Success)
+                if (fStatus != Status.DT_SUCCESS)
                 {
                     return null;
                 }
 
                 var pStatus = query.FindRandomPointAroundCircle(startRef, nearestPt, radius, filter, out _, out var pt);
-                if (pStatus != Status.Success)
+                if (pStatus != Status.DT_SUCCESS)
                 {
                     return null;
                 }
@@ -1010,19 +1014,21 @@ namespace Engine.PathFinding.RecastNavigation
             foreach (var agentQ in AgentQueries)
             {
                 var nm = agentQ.NavMesh;
-
-                bool upToDate = nm.UpdateObstacles();
-                if (updated != upToDate)
+                if (nm.TileCache != null)
                 {
-                    updated = upToDate;
+                    var status = nm.TileCache.Update(out bool upToDate);
+                    if (status.HasFlag(Status.DT_SUCCESS) && updated != upToDate)
+                    {
+                        updated = upToDate;
 
-                    if (updated)
-                    {
-                        this.Updated?.Invoke(this, new EventArgs());
-                    }
-                    else
-                    {
-                        this.Updating?.Invoke(this, new EventArgs());
+                        if (updated)
+                        {
+                            this.Updated?.Invoke(this, new EventArgs());
+                        }
+                        else
+                        {
+                            this.Updating?.Invoke(this, new EventArgs());
+                        }
                     }
                 }
             }
@@ -1068,7 +1074,7 @@ namespace Engine.PathFinding.RecastNavigation
             if (query != null)
             {
                 Status status = query.FindNearestPoly(p, crowd.GetQueryExtents(), crowd.GetFilter(0), out int poly, out Vector3 nP);
-                if (status == Status.Failure)
+                if (status == Status.DT_FAILURE)
                 {
                     return;
                 }
@@ -1093,7 +1099,7 @@ namespace Engine.PathFinding.RecastNavigation
             if (query != null)
             {
                 Status status = query.FindNearestPoly(p, crowd.GetQueryExtents(), crowd.GetFilter(0), out int poly, out Vector3 nP);
-                if (status == Status.Failure)
+                if (status == Status.DT_FAILURE)
                 {
                     return;
                 }
