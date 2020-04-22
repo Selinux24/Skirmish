@@ -115,5 +115,33 @@ namespace Engine.PathFinding.RecastNavigation
         /// Tile cache parameters
         /// </summary>
         public TileCacheParams TileCacheParams { get; set; }
+
+        /// <summary>
+        /// Updates the tile bounds
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        public void UpdateTileBounds(int x, int y)
+        {
+            // Tile bounds.
+            float tcs = TileSize * CellSize;
+
+            BoundingBox bbox = new BoundingBox();
+
+            bbox.Minimum.X = BoundingBox.Minimum.X + x * tcs;
+            bbox.Minimum.Y = BoundingBox.Minimum.Y;
+            bbox.Minimum.Z = BoundingBox.Minimum.Z + y * tcs;
+
+            bbox.Maximum.X = BoundingBox.Minimum.X + (x + 1) * tcs;
+            bbox.Maximum.Y = BoundingBox.Maximum.Y;
+            bbox.Maximum.Z = BoundingBox.Minimum.Z + (y + 1) * tcs;
+
+            bbox.Minimum.X -= BorderSize * CellSize;
+            bbox.Minimum.Z -= BorderSize * CellSize;
+            bbox.Maximum.X += BorderSize * CellSize;
+            bbox.Maximum.Z += BorderSize * CellSize;
+
+            BoundingBox = bbox;
+        }
     }
 }

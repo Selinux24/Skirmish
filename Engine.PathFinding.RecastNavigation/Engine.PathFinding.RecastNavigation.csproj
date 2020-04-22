@@ -150,6 +150,7 @@
     <Compile Include="Detour\Tiles\ObstacleOrientedBox.cs" />
     <Compile Include="GraphItem.cs" />
     <Compile Include="Recast\BuildPolyDetailParams.cs" />
+    <Compile Include="Recast\DelaunayHull.cs" />
     <Compile Include="Recast\PolyMeshTriangleIndices.cs" />
     <Compile Include="Recast\BuildContoursFlagTypes.cs" />
     <Compile Include="BuildModes.cs" />
@@ -247,7 +248,6 @@
     <Compile Include="Detour\Crowds\ProximityGrid.cs" />
     <Compile Include="Detour\QueryData.cs" />
     <Compile Include="Detour\QueryFilter.cs" />
-    <Compile Include="RasterizationContext.cs" />
     <Compile Include="Detour\RaycastHit.cs" />
     <Compile Include="Detour\RaycastOptions.cs" />
     <Compile Include="Recast\RecastUtils.cs" />

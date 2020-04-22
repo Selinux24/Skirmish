@@ -3,6 +3,7 @@ using System;
 
 namespace Engine.PathFinding.RecastNavigation
 {
+    using Engine.PathFinding.RecastNavigation.Detour;
     using Engine.PathFinding.RecastNavigation.Detour.Tiles;
 
     /// <summary>
@@ -314,7 +315,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (this.UseTileCache)
             {
-                BuildSettings.CalcGridSize(generationBounds, CellSize, out int gridWidth, out int gridHeight);
+                CalcGridSize(generationBounds, CellSize, out int gridWidth, out int gridHeight);
                 int tileWidth = (gridWidth + tileSize - 1) / tileSize;
                 int tileHeight = (gridHeight + tileSize - 1) / tileSize;
 
@@ -331,11 +332,54 @@ namespace Engine.PathFinding.RecastNavigation
                     WalkableClimb = cfg.WalkableClimb,
                     MaxSimplificationError = cfg.MaxSimplificationError,
                     MaxTiles = tileWidth * tileHeight * EXPECTED_LAYERS_PER_TILE,
+                    TileWidth = tileWidth,
+                    TileHeight = tileHeight,
                     MaxObstacles = 128,
                 };
             }
 
             return cfg;
+        }
+
+        internal NavMeshParams GetNavMeshParams(BoundingBox generationBounds)
+        {
+            CalcGridSize(generationBounds, CellSize, out int gridWidth, out int gridHeight);
+            int tileSize = (int)TileSize;
+            int tileWidth = (gridWidth + tileSize - 1) / tileSize;
+            int tileHeight = (gridHeight + tileSize - 1) / tileSize;
+            float tileCellSize = TileCellSize;
+
+            int tileBits = Math.Min((int)Math.Log(Helper.NextPowerOfTwo(tileWidth * tileHeight), 2), 14);
+            if (tileBits > 14) tileBits = 14;
+            int polyBits = 22 - tileBits;
+            int maxTiles = 1 << tileBits;
+            int maxPolysPerTile = 1 << polyBits;
+
+            return new NavMeshParams()
+            {
+                Origin = generationBounds.Minimum,
+                TileWidth = tileCellSize,
+                TileHeight = tileCellSize,
+                MaxTiles = maxTiles,
+                MaxPolys = maxPolysPerTile,
+            };
+        }
+
+        internal TileParams GetTileParams(BoundingBox generationBounds)
+        {
+            CalcGridSize(generationBounds, CellSize, out int gridWidth, out int gridHeight);
+            int tileSize = (int)TileSize;
+            int tileWidth = (gridWidth + tileSize - 1) / tileSize;
+            int tileHeight = (gridHeight + tileSize - 1) / tileSize;
+            float tileCellSize = TileCellSize;
+
+            return new TileParams
+            {
+                Width = tileWidth,
+                Height = tileHeight,
+                CellSize = tileCellSize,
+                Bounds = generationBounds,
+            };
         }
     }
 }

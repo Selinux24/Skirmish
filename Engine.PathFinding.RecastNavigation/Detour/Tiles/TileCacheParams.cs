@@ -52,6 +52,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// </summary>
         public int MaxTiles { get; set; }
         /// <summary>
+        /// Tile width
+        /// </summary>
+        public int TileWidth { get; set; }
+        /// <summary>
+        /// Tile height
+        /// </summary>
+        public int TileHeight { get; set; }
+        /// <summary>
         /// Maximum obstacles
         /// </summary>
         public int MaxObstacles { get; set; }
@@ -73,6 +81,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             WalkableClimb = info.GetSingle("WalkableClimb");
             MaxSimplificationError = info.GetSingle("MaxSimplificationError");
             MaxTiles = info.GetInt32("MaxTiles");
+            TileWidth = info.GetInt32("TileWidth");
+            TileHeight = info.GetInt32("TileHeight");
             MaxObstacles = info.GetInt32("MaxObstacles");
         }
         /// <summary>
@@ -93,6 +103,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             info.AddValue("WalkableClimb", WalkableClimb);
             info.AddValue("MaxSimplificationError", MaxSimplificationError);
             info.AddValue("MaxTiles", MaxTiles);
+            info.AddValue("TileWidth", TileWidth);
+            info.AddValue("TileHeight", TileHeight);
             info.AddValue("MaxObstacles", MaxObstacles);
         }
 

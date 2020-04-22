@@ -15,16 +15,18 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         public const int MAX_LAYERS = 32;
 
+        /// <summary>
+        /// Builds a new navigation mesh
+        /// </summary>
+        /// <param name="geometry">Input geometry</param>
+        /// <param name="settings">Settings</param>
+        /// <param name="agent">Agent type</param>
+        /// <returns>Returns the new created navigation mesh</returns>
         public static NavMesh Build(InputGeometry geometry, BuildSettings settings, Agent agent)
         {
             if (settings.BuildMode == BuildModes.Solo)
             {
-                var bbox = settings.Bounds ?? geometry.BoundingBox;
-
-                // Generation params.
-                var cfg = settings.GetSoloConfig(agent, bbox);
-
-                return BuildSolo(geometry, cfg);
+                return BuildSolo(geometry, settings, agent);
             }
             else if (settings.BuildMode == BuildModes.Tiled)
             {
@@ -35,8 +37,20 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 throw new EngineException("Bad build mode for NavigationMesh.");
             }
         }
-        private static NavMesh BuildSolo(InputGeometry geometry, Config cfg)
+        /// <summary>
+        /// Builds a solo navigation mesh
+        /// </summary>
+        /// <param name="geometry">Input geometry</param>
+        /// <param name="settings">Settings</param>
+        /// <param name="agent">Agent type</param>
+        /// <returns>Returns the new created navigation mesh</returns>
+        private static NavMesh BuildSolo(InputGeometry geometry, BuildSettings settings, Agent agent)
         {
+            var bbox = settings.Bounds ?? geometry.BoundingBox;
+
+            // Generation params.
+            var cfg = settings.GetSoloConfig(agent, bbox);
+
             var solid = Heightfield.Build(cfg.Width, cfg.Height, cfg.BoundingBox, cfg.CellSize, cfg.CellHeight);
 
             var tris = geometry.ChunkyMesh.GetTriangles();
@@ -142,36 +156,24 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             nm.AddTile(navData, TileFlagTypes.DT_TILE_FREE_DATA, 0);
             return nm;
         }
+        /// <summary>
+        /// Builds a tiled navigation mesh
+        /// </summary>
+        /// <param name="geometry">Input geometry</param>
+        /// <param name="settings">Settings</param>
+        /// <param name="agent">Agent type</param>
+        /// <returns>Returns the new created navigation mesh</returns>
         private static NavMesh BuildTiled(InputGeometry geometry, BuildSettings settings, Agent agent)
         {
             var bbox = settings.Bounds ?? geometry.BoundingBox;
 
-            // Init cache
-            BuildSettings.CalcGridSize(bbox, settings.CellSize, out int gridWidth, out int gridHeight);
-            int tileSize = (int)settings.TileSize;
-            int tileWidth = (gridWidth + tileSize - 1) / tileSize;
-            int tileHeight = (gridHeight + tileSize - 1) / tileSize;
-            float tileCellSize = settings.TileCellSize;
-
-            int tileBits = Math.Min((int)Math.Log(Helper.NextPowerOfTwo(tileWidth * tileHeight), 2), 14);
-            if (tileBits > 14) tileBits = 14;
-            int polyBits = 22 - tileBits;
-            int maxTiles = 1 << tileBits;
-            int maxPolysPerTile = 1 << polyBits;
-
-            var nmparams = new NavMeshParams()
-            {
-                Origin = bbox.Minimum,
-                TileWidth = tileCellSize,
-                TileHeight = tileCellSize,
-                MaxTiles = maxTiles,
-                MaxPolys = maxPolysPerTile,
-            };
-
-            var nm = new NavMesh(nmparams);
+            var nmParams = settings.GetNavMeshParams(bbox);
+            var nm = new NavMesh(nmParams);
 
             if (settings.UseTileCache)
             {
+                // Init cache
+
                 // Generation params.
                 var cfg = settings.GetTileCacheConfig(agent, bbox);
 
@@ -181,31 +183,33 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                 if (settings.BuildAllTiles)
                 {
-                    BuildTileCache(nm.TileCache, geometry, tileWidth, tileHeight, cfg);
+                    BuildTileCache(nm.TileCache, geometry, cfg);
                 }
             }
             else
             {
-                // Generation params.
-                TileParams tileParams = new TileParams
-                {
-                    Width = tileWidth,
-                    Height = tileHeight,
-                    CellSize = tileCellSize,
-                    Bounds = bbox,
-                };
-
                 if (settings.BuildAllTiles)
                 {
-                    BuildAllTiles(nm, geometry, settings, agent, tileParams);
+                    nm.BuildAllTiles(geometry, settings, agent);
                 }
             }
 
             return nm;
         }
 
-        private static void BuildAllTiles(NavMesh navMesh, InputGeometry geom, BuildSettings settings, Agent agent, TileParams tileParams)
+        /// <summary>
+        /// Builds all the tiles in the mesh
+        /// </summary>
+        /// <param name="geometry">Input geometry</param>
+        /// <param name="settings">Build settings</param>
+        /// <param name="agent">Agent type</param>
+        private void BuildAllTiles(InputGeometry geometry, BuildSettings settings, Agent agent)
         {
+            var bbox = settings.Bounds ?? geometry.BoundingBox;
+
+            // Tile generation params.
+            var tileParams = settings.GetTileParams(bbox);
+
             for (int y = 0; y < tileParams.Height; y++)
             {
                 for (int x = 0; x < tileParams.Width; x++)
@@ -215,13 +219,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     // Init build configuration
                     Config cfg = settings.GetTiledConfig(agent, tileBounds);
 
-                    var data = BuildTileMesh(x, y, geom, cfg);
+                    var data = BuildTileMesh(x, y, geometry, cfg);
                     if (data != null)
                     {
                         // Remove any previous data (navmesh owns and deletes the data).
-                        navMesh.RemoveTile(x, y, 0);
+                        RemoveTile(x, y, 0);
                         // Let the navmesh own the data.
-                        navMesh.AddTile(data, TileFlagTypes.DT_TILE_FREE_DATA, 0);
+                        AddTile(data, TileFlagTypes.DT_TILE_FREE_DATA, 0);
                     }
                 }
             }
@@ -328,11 +332,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             return DetourUtils.CreateNavMeshData(param);
         }
-        private static void BuildTileCache(TileCache tileCache, InputGeometry geometry, int tileWidth, int tileHeight, Config cfg)
+        private static void BuildTileCache(TileCache tileCache, InputGeometry geometry, Config cfg)
         {
-            for (int y = 0; y < tileHeight; y++)
+            var settings = tileCache.GetParams();
+
+            for (int y = 0; y < settings.TileHeight; y++)
             {
-                for (int x = 0; x < tileWidth; x++)
+                for (int x = 0; x < settings.TileWidth; x++)
                 {
                     var tiles = RasterizeTileLayers(x, y, geometry, cfg);
 
@@ -344,9 +350,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             // Build initial meshes
-            for (int y = 0; y < tileHeight; y++)
+            for (int y = 0; y < settings.TileHeight; y++)
             {
-                for (int x = 0; x < tileWidth; x++)
+                for (int x = 0; x < settings.TileWidth; x++)
                 {
                     tileCache.BuildTilesAt(x, y);
                 }
@@ -354,38 +360,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         }
         private static IEnumerable<TileCacheData> RasterizeTileLayers(int x, int y, InputGeometry geometry, Config cfg)
         {
+            // Allocate voxel heightfield where we rasterize our input data to.
             List<TileCacheData> tiles = new List<TileCacheData>();
 
             ChunkyTriMesh chunkyMesh = geometry.ChunkyMesh;
 
-            // Tile bounds.
-            float tcs = cfg.TileSize * cfg.CellSize;
+            // Update tile bounds.
+            cfg.UpdateTileBounds(x, y);
 
-            BoundingBox bbox = new BoundingBox();
-
-            bbox.Minimum.X = cfg.BoundingBox.Minimum.X + x * tcs;
-            bbox.Minimum.Y = cfg.BoundingBox.Minimum.Y;
-            bbox.Minimum.Z = cfg.BoundingBox.Minimum.Z + y * tcs;
-
-            bbox.Maximum.X = cfg.BoundingBox.Minimum.X + (x + 1) * tcs;
-            bbox.Maximum.Y = cfg.BoundingBox.Maximum.Y;
-            bbox.Maximum.Z = cfg.BoundingBox.Minimum.Z + (y + 1) * tcs;
-
-            bbox.Minimum.X -= cfg.BorderSize * cfg.CellSize;
-            bbox.Minimum.Z -= cfg.BorderSize * cfg.CellSize;
-            bbox.Maximum.X += cfg.BorderSize * cfg.CellSize;
-            bbox.Maximum.Z += cfg.BorderSize * cfg.CellSize;
-
-            cfg.BoundingBox = bbox;
-
+            // Create heightfield
             var solid = Heightfield.Build(cfg.Width, cfg.Height, cfg.BoundingBox, cfg.CellSize, cfg.CellHeight);
-
-            var rc = new RasterizationContext
-            {
-                // Allocate voxel heightfield where we rasterize our input data to.
-                solid = solid,
-                tiles = new TileCacheData[RasterizationContext.MaxLayers],
-            };
 
             Vector2 tbmin = new Vector2(cfg.BoundingBox.Minimum.X, cfg.BoundingBox.Minimum.Z);
             Vector2 tbmax = new Vector2(cfg.BoundingBox.Maximum.X, cfg.BoundingBox.Maximum.Z);
@@ -400,7 +384,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 var tris = chunkyMesh.GetTriangles(id);
                 var triareas = MarkWalkableTriangles(cfg.WalkableSlopeAngle, tris);
-                if (!RasterizeTriangles(rc.solid, cfg.WalkableClimb, triareas))
+                if (!RasterizeTriangles(solid, cfg.WalkableClimb, triareas))
                 {
                     return tiles.ToArray();
                 }
@@ -409,64 +393,57 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Once all geometry is rasterized, we do initial pass of filtering to
             // remove unwanted overhangs caused by the conservative rasterization
             // as well as filter spans where the character cannot possibly stand.
-            FilterHeightfield(rc.solid, cfg);
+            FilterHeightfield(solid, cfg);
 
-            rc.chf = CompactHeightfield.Build(rc.solid, cfg.WalkableHeight, cfg.WalkableClimb);
+            var chf = CompactHeightfield.Build(solid, cfg.WalkableHeight, cfg.WalkableClimb);
 
             // Erode the walkable area by agent radius.
-            if (!rc.chf.ErodeWalkableArea(cfg.WalkableRadius))
+            if (!chf.ErodeWalkableArea(cfg.WalkableRadius))
             {
                 throw new EngineException("buildNavigation: Could not erode.");
             }
 
             // Mark areas.
-            rc.chf.MarkAreas(geometry);
+            chf.MarkAreas(geometry);
 
-            rc.lset = HeightfieldLayerSet.Build(rc.chf, cfg.BorderSize, cfg.WalkableHeight);
+            var lset = HeightfieldLayerSet.Build(chf, cfg.BorderSize, cfg.WalkableHeight);
 
-            rc.ntiles = 0;
-            for (int i = 0; i < Math.Min(rc.lset.NLayers, MAX_LAYERS); i++)
+            for (int i = 0; i < Math.Min(lset.NLayers, MAX_LAYERS); i++)
             {
-                var layer = rc.lset.Layers[i];
+                var layer = lset.Layers[i];
 
-                var tile = rc.tiles[rc.ntiles];
-
-                // Store header
-                tile.Header = new TileCacheLayerHeader
-                {
-                    Magic = DetourTileCache.DT_TILECACHE_MAGIC,
-                    Version = DetourTileCache.DT_TILECACHE_VERSION,
-
-                    // Tile layer location in the navmesh.
-                    TX = x,
-                    TY = y,
-                    TLayer = i,
-                    BBox = layer.BoundingBox,
-
-                    // Tile info.
-                    Width = layer.Width,
-                    Height = layer.Height,
-                    MinX = layer.MinX,
-                    MaxX = layer.MaxX,
-                    MinY = layer.MinY,
-                    MaxY = layer.MaxY,
-                    HMin = layer.HMin,
-                    HMax = layer.HMax
-                };
-
-                // Store data
                 DetourTileCache.BuildTileCacheLayer(layer.Heights, layer.Areas, layer.Cons, out var data);
 
-                tile.Data = data;
+                // Store data
+                var tile = new TileCacheData
+                {
+                    // Store header
+                    Header = new TileCacheLayerHeader
+                    {
+                        Magic = DetourTileCache.DT_TILECACHE_MAGIC,
+                        Version = DetourTileCache.DT_TILECACHE_VERSION,
 
-                rc.tiles[rc.ntiles++] = tile;
-            }
+                        // Tile layer location in the navmesh.
+                        TX = x,
+                        TY = y,
+                        TLayer = i,
+                        BBox = layer.BoundingBox,
 
-            // Transfer ownsership of tile data from build context to the caller.
-            for (int i = 0; i < Math.Min(rc.ntiles, MAX_LAYERS); i++)
-            {
-                tiles.Add(rc.tiles[i]);
-                rc.tiles[i].Data = TileCacheLayerData.Empty;
+                        // Tile info.
+                        Width = layer.Width,
+                        Height = layer.Height,
+                        MinX = layer.MinX,
+                        MaxX = layer.MaxX,
+                        MinY = layer.MinY,
+                        MaxY = layer.MaxY,
+                        HMin = layer.HMin,
+                        HMax = layer.HMax
+                    },
+
+                    Data = data
+                };
+
+                tiles.Add(tile);
             }
 
             return tiles.ToArray();
@@ -586,7 +563,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 chf.BuildDistanceField();
 
                 // Partition the walkable surface into simple regions without holes.
-                if (!chf.BuildRegions(cfg.BorderSize, cfg.MinRegionArea, cfg.MergeRegionArea))
+                bool built = chf.BuildRegions(cfg.BorderSize, cfg.MinRegionArea, cfg.MergeRegionArea);
+                if (!built)
                 {
                     throw new EngineException("buildNavigation: Could not build watershed regions.");
                 }
@@ -595,7 +573,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 // Partition the walkable surface into simple regions without holes.
                 // Monotone partitioning does not need distancefield.
-                if (!chf.BuildRegionsMonotone(cfg.BorderSize, cfg.MinRegionArea, cfg.MergeRegionArea))
+                bool built = chf.BuildRegionsMonotone(cfg.BorderSize, cfg.MinRegionArea, cfg.MergeRegionArea);
+                if (!built)
                 {
                     throw new EngineException("buildNavigation: Could not build monotone regions.");
                 }
@@ -603,7 +582,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             else if (cfg.PartitionType == SamplePartitionTypes.Layers)
             {
                 // Partition the walkable surface into simple regions without holes.
-                if (!chf.BuildLayerRegions(cfg.BorderSize, cfg.MinRegionArea))
+                bool built = chf.BuildLayerRegions(cfg.BorderSize, cfg.MinRegionArea);
+                if (!built)
                 {
                     throw new EngineException("buildNavigation: Could not build layer regions.");
                 }

@@ -72,32 +72,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             return dirs[((y + 1) << 1) + x];
         }
 
-        public static float DistancePtSeg2D(int x, int z, int px, int pz, int qx, int qz)
-        {
-            float pqx = (qx - px);
-            float pqz = (qz - pz);
-            float dx = (x - px);
-            float dz = (z - pz);
-            float d = pqx * pqx + pqz * pqz;
-            float t = pqx * dx + pqz * dz;
-            if (d > 0)
-            {
-                t /= d;
-            }
-            if (t < 0)
-            {
-                t = 0;
-            }
-            else if (t > 1)
-            {
-                t = 1;
-            }
-
-            dx = px + t * pqx - x;
-            dz = pz + t * pqz - z;
-
-            return dx * dx + dz * dz;
-        }
         public static int CalcAreaOfPolygon2D(Int4[] verts, int nverts)
         {
             int area = 0;
@@ -214,6 +188,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             return a.X == b.X && a.Z == b.Z;
         }
+        private static int Area2(Int4 a, Int4 b, Int4 c)
+        {
+            return (b.X - a.X) * (c.Z - a.Z) - (c.X - a.X) * (b.Z - a.Z);
+        }
 
         private static float DistPtTri(Vector3 p, Vector3 a, Vector3 b, Vector3 c)
         {
@@ -242,10 +220,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             return float.MaxValue;
-        }
-        private static int Area2(Int4 a, Int4 b, Int4 c)
-        {
-            return (b.X - a.X) * (c.Z - a.Z) - (c.X - a.X) * (b.Z - a.Z);
         }
         /// <summary>
         /// Exclusive or: true iff exactly one argument is true.
@@ -360,6 +334,29 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             return InCone(i, j, n, verts, indices) && Diagonalie(i, j, n, verts, indices);
         }
 
+        public static float VCross2(Vector3 p1, Vector3 p2, Vector3 p3)
+        {
+            float u1 = p2.X - p1.X;
+            float v1 = p2.Z - p1.Z;
+            float u2 = p3.X - p1.X;
+            float v2 = p3.Z - p1.Z;
+            return u1 * v2 - v1 * u2;
+        }
+        public static int OverlapSegSeg2d(Vector3 a, Vector3 b, Vector3 c, Vector3 d)
+        {
+            float a1 = VCross2(a, b, d);
+            float a2 = VCross2(a, b, c);
+            if (a1 * a2 < 0.0f)
+            {
+                float a3 = VCross2(c, d, a);
+                float a4 = a3 + a2 - a1;
+                if (a3 * a4 < 0.0f)
+                {
+                    return 1;
+                }
+            }
+            return 0;
+        }
         public static float DistancePtSeg(Vector3 pt, Vector3 p, Vector3 q)
         {
             float pqx = q.X - p.X;
@@ -419,6 +416,34 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return dx * dx + dz * dz;
         }
+        public static float DistancePtSeg2D(int ptx, int ptz, int px, int pz, int qx, int qz)
+        {
+            float pqx = (qx - px);
+            float pqz = (qz - pz);
+            float dx = (ptx - px);
+            float dz = (ptz - pz);
+            float d = pqx * pqx + pqz * pqz;
+            float t = pqx * dx + pqz * dz;
+
+            if (d > 0)
+            {
+                t /= d;
+            }
+
+            if (t < 0)
+            {
+                t = 0;
+            }
+            else if (t > 1)
+            {
+                t = 1;
+            }
+
+            dx = px + t * pqx - ptx;
+            dz = pz + t * pqz - ptz;
+
+            return dx * dx + dz * dz;
+        }
         public static float DistToTriMesh(IEnumerable<Vector3> verts, IEnumerable<Int3> triPoints, Vector3 p)
         {
             float dmin = float.MaxValue;
@@ -466,17 +491,25 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             for (int i = 0; i < verts.Length; i++)
             {
                 int ni = (i + 1) % verts.Length;
+
                 Vector3 p1 = verts[i];
                 Vector3 p2 = verts[ni];
+
                 float maxEdgeDist = 0;
                 for (int j = 0; j < verts.Length; j++)
                 {
-                    if (j == i || j == ni) continue;
+                    if (j == i || j == ni)
+                    {
+                        continue;
+                    }
+
                     float d = DistancePtSeg2D(verts[j], p1, p2);
                     maxEdgeDist = Math.Max(maxEdgeDist, d);
                 }
+
                 minDist = Math.Min(minDist, maxEdgeDist);
             }
+
             return (float)Math.Sqrt(minDist);
         }
         public static void TriangulateHull(Vector3[] verts, int nhull, int[] hull, int nin, List<Int3> tris)
@@ -488,12 +521,17 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             float dmin = float.MaxValue;
             for (int i = 0; i < nhull; i++)
             {
-                if (hull[i] >= nin) continue; // Ears are triangles with original vertices as middle vertex while others are actually line segments on edges
+                if (hull[i] >= nin)
+                {
+                    continue; // Ears are triangles with original vertices as middle vertex while others are actually line segments on edges
+                }
+
                 int pi = Prev(i, nhull);
                 int ni = Next(i, nhull);
                 var pv = verts[hull[pi]];
                 var cv = verts[hull[i]];
                 var nv = verts[hull[ni]];
+
                 float d =
                     Vector2.Distance(new Vector2(pv.X, pv.Z), new Vector2(cv.X, cv.Z)) +
                     Vector2.Distance(new Vector2(cv.X, cv.Z), new Vector2(nv.X, nv.Z)) +
@@ -572,12 +610,17 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         public static bool Intersect(Int4 a, Int4 b, Int4 c, Int4 d)
         {
             if (IntersectProp(a, b, c, d))
+            {
                 return true;
-            else if (Between(a, b, c) || Between(a, b, d) ||
-                     Between(c, d, a) || Between(c, d, b))
+            }
+            else if (Between(a, b, c) || Between(a, b, d) || Between(c, d, a) || Between(c, d, b))
+            {
                 return true;
+            }
             else
+            {
                 return false;
+            }
         }
         public static bool InCone(int i, int n, Int4[] verts, Int4 pj)
         {
