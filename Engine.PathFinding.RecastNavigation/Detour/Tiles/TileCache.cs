@@ -10,6 +10,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
     /// </summary>
     public class TileCache
     {
+        const int MAX_TILES = 32;
+
         private readonly NavMesh m_navMesh;
         private TileCacheParams m_params;
         private readonly TileCacheMeshProcess m_tmproc;
@@ -145,6 +147,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             return EncodeTileId(tile.Salt, idx);
         }
 
+        /// <summary>
+        /// Gets the tile list
+        /// </summary>
+        /// <returns>Returns a tile list</returns>
+        public IEnumerable<CompressedTile> GetTiles()
+        {
+            return m_tiles?.ToArray() ?? new CompressedTile[] { };
+        }
         /// <summary>
         /// Gets the tiles at the specified coordinates
         /// </summary>
@@ -352,6 +362,27 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
 
             return RemoveTile(tile, out data);
+        }
+        /// <summary>
+        /// Removes all the tile layers in the coordinates
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        public Status RemoveTiles(int x, int y)
+        {
+            Status res = Status.DT_SUCCESS;
+
+            var tiles = GetTilesAt(x, y, MAX_TILES);
+            foreach (var t in tiles)
+            {
+                var pStatus = RemoveTile(t, out _);
+                if (!pStatus.HasFlag(Status.DT_SUCCESS))
+                {
+                    res |= pStatus;
+                }
+            }
+
+            return res;
         }
 
         /// <summary>
@@ -641,8 +672,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             List<CompressedTile> results = new List<CompressedTile>();
 
-            int MAX_TILES = 32;
-
             float tw = m_params.Width * m_params.CellSize;
             float th = m_params.Height * m_params.CellSize;
             int tx0 = (int)Math.Floor((bbox.Minimum.X - m_params.Origin.X) / tw);
@@ -707,15 +736,18 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         }
         private bool BuildTile(CompressedTile tile)
         {
-            // Decompress tile layer data.
-            if (!DetourTileCache.DecompressTileCacheLayer(tile.Header, tile.Data, out var layer))
-            {
-                return false;
-            }
             NavMeshTileBuildContext bc = new NavMeshTileBuildContext
             {
-                Layer = layer
+                // Decompress tile layer data.
+                Layer = tile.Decompress(),
             };
+
+            // Reset untouched obstacles
+            var obs = m_obstacles.Where(o => o.State == ObstacleState.DT_OBSTACLE_PROCESSED && !o.Touched.Any());
+            foreach (var ob in obs)
+            {
+                ProcessRequestAdd(ob);
+            }
 
             // Rasterize obstacles.
             for (int i = 0; i < m_params.MaxObstacles; ++i)
@@ -759,17 +791,25 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 PolyFlags = bc.LMesh.Flags,
                 PolyCount = bc.LMesh.NPolys,
                 Nvp = DetourUtils.DT_VERTS_PER_POLYGON,
+                DetailMeshes = null,
+                DetailVerts = null,
+                DetailVertsCount = 0,
+                DetailTris = null,
+                DetailTriCount = 0,
+                OffMeshCon = null,
+                OffMeshConCount = 0,
                 WalkableHeight = m_params.WalkableHeight,
                 WalkableRadius = m_params.WalkableRadius,
                 WalkableClimb = m_params.WalkableClimb,
+                BMin = tile.Header.BBox.Minimum,
+                BMax = tile.Header.BBox.Maximum,
+                CellSize = m_params.CellSize,
+                CellHeight = m_params.CellHeight,
+                BuildBvTree = false,
+
                 TileX = tile.Header.TX,
                 TileY = tile.Header.TY,
                 TileLayer = tile.Header.TLayer,
-                CS = m_params.CellSize,
-                CH = m_params.CellHeight,
-                BuildBvTree = false,
-                BMin = tile.Header.BBox.Minimum,
-                BMax = tile.Header.BBox.Maximum,
             };
 
             if (m_tmproc != null)
@@ -788,7 +828,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
 
             // Add new tile
-            return m_navMesh.AddTile(navData, TileFlagTypes.DT_TILE_FREE_DATA, 0);
+            return m_navMesh.AddTile(navData, TileFlagTypes.DT_TILE_FREE_DATA);
         }
 
         /// <summary>

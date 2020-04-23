@@ -140,6 +140,7 @@
     <Compile Include="Detour\FindPolysAroundShapeQuery.cs" />
     <Compile Include="Detour\IFindPolysQuery.cs" />
     <Compile Include="Detour\NavMeshFile.cs" />
+    <Compile Include="Detour\Rasterizer.cs" />
     <Compile Include="Detour\RaycastRequest.cs" />
     <Compile Include="Detour\Segment.cs" />
     <Compile Include="Detour\TileParams.cs" />

@@ -7,6 +7,7 @@ using System.Linq;
 namespace Engine.PathFinding.RecastNavigation
 {
     using Engine.PathFinding.RecastNavigation.Detour;
+    using Engine.PathFinding.RecastNavigation.Detour.Tiles;
 
     /// <summary>
     /// Graph node
@@ -22,39 +23,76 @@ namespace Engine.PathFinding.RecastNavigation
         {
             List<GraphNode> nodes = new List<GraphNode>();
 
-            for (int i = 0; i < mesh.MaxTiles; ++i)
+            if (mesh.TileCache != null)
             {
-                var tile = mesh.Tiles[i];
-                if (tile.Header.Magic != DetourUtils.DT_NAVMESH_MAGIC)
-                {
-                    continue;
-                }
+                var tiles = mesh.TileCache.GetTiles();
 
-                var polys = tile.GetPolys();
-                foreach (var p in polys)
+                foreach (var tilec in tiles)
                 {
-                    if (p.Type == PolyTypes.OffmeshConnection)
+                    if (tilec.Header.Magic != DetourTileCache.DT_TILECACHE_MAGIC)
                     {
                         continue;
                     }
 
-                    var bse = mesh.GetTileRef(tile);
-
-                    int tileNum = mesh.DecodePolyIdTile(bse);
-                    var tileColor = IntToCol(tileNum, 128);
-
-                    var tris = tile.GetDetailTris(p);
-
-                    nodes.Add(new GraphNode()
+                    var tile = mesh.GetTileAt(tilec.Header.TX, tilec.Header.TY, tilec.Header.TLayer);
+                    if (tile == null)
                     {
-                        Triangles = tris.ToArray(),
-                        TotalCost = 1,
-                        Color = tileColor,
-                    });
+                        continue;
+                    }
+
+                    nodes.AddRange(BuildNodes(mesh, tile));
+                }
+            }
+            else
+            {
+                for (int i = 0; i < mesh.MaxTiles; ++i)
+                {
+                    var tile = mesh.Tiles[i];
+                    if (tile.Header.Magic != DetourUtils.DT_NAVMESH_MAGIC)
+                    {
+                        continue;
+                    }
+
+                    nodes.AddRange(BuildNodes(mesh, tile));
                 }
             }
 
             return nodes;
+        }
+        /// <summary>
+        /// Build graph nodes from tile
+        /// </summary>
+        /// <param name="mesh">Navigation mesh</param>
+        /// <param name="tile">Tile</param>
+        /// <returns>Returns a list of graph nodes</returns>
+        private static IEnumerable<GraphNode> BuildNodes(NavMesh mesh, MeshTile tile)
+        {
+            List<GraphNode> nodes = new List<GraphNode>();
+
+            var polys = tile.GetPolys();
+            foreach (var p in polys)
+            {
+                if (p.Type == PolyTypes.OffmeshConnection)
+                {
+                    continue;
+                }
+
+                var bse = mesh.GetTileRef(tile);
+
+                int tileNum = mesh.DecodePolyIdTile(bse);
+                var tileColor = IntToCol(tileNum, 128);
+
+                var tris = tile.GetDetailTris(p);
+
+                nodes.Add(new GraphNode()
+                {
+                    Triangles = tris.ToArray(),
+                    TotalCost = 1,
+                    Color = tileColor,
+                });
+            }
+
+            return nodes.ToArray();
         }
         /// <summary>
         /// Bitwise secret wisdoms

@@ -108,6 +108,8 @@ namespace Heightmap
         private bool terrainInitialized = false;
         private bool gameReady = false;
 
+        private bool udaptingGraph = false;
+
         public TestScene3D(Game game)
             : base(game, SceneModes.ForwardLigthning)
         {
@@ -1269,9 +1271,6 @@ namespace Heightmap
             this.Lights.FogRange = this.Lights.FogRange == 0f ? fogRange : 0f;
         }
 
-
-        private bool udaptingGraph = false;
-
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
@@ -1368,6 +1367,17 @@ namespace Heightmap
             {
                 this.lantern.Enabled = !this.lantern.Enabled;
                 this.lanternFixed = false;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.O))
+            {
+                foreach (var t in troops.GetInstances())
+                {
+                    var bbox = t.GetBoundingBox();
+                    BoundingCylinder bc = new BoundingCylinder(t.Manipulator.Position, 1.5f, bbox.GetY());
+
+                    this.NavigationGraph.AddObstacle(bc);
+                }
             }
         }
         private void UpdateCamera(GameTime gameTime, bool shift)

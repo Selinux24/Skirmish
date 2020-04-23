@@ -585,6 +585,8 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="tiles">Tile list</param>
         private void BuildTiles(GraphAgentQuery agentQ, IEnumerable<UpdateTileData> tiles, bool update)
         {
+            var bbox = Settings.Bounds ?? Input.BoundingBox;
+
             foreach (var tile in tiles)
             {
                 if (update && agentQ.NavMesh.HasTilesAt(tile.X, tile.Y))
@@ -592,7 +594,10 @@ namespace Engine.PathFinding.RecastNavigation
                     continue;
                 }
 
-                agentQ.NavMesh.BuildTileAtPosition(tile.X, tile.Y, Input, Settings, agentQ.Agent, tile.BoundingBox);
+                var tileCfg = Settings.GetTiledConfig(agentQ.Agent, tile.BoundingBox);
+                var tileCacheCfg = Settings.GetTileCacheConfig(agentQ.Agent, bbox);
+
+                agentQ.NavMesh.BuildTileAtPosition(tile.X, tile.Y, Input, tileCfg, tileCacheCfg);
             }
         }
         /// <summary>
@@ -630,7 +635,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             foreach (var tile in tiles)
             {
-                agentQ.NavMesh.RemoveTileAtPosition(tile.X, tile.Y, Settings);
+                agentQ.NavMesh.RemoveTilesAtPosition(tile.X, tile.Y);
             }
         }
 
@@ -1056,7 +1061,13 @@ namespace Engine.PathFinding.RecastNavigation
 
             return cr;
         }
-
+        /// <summary>
+        /// Adds a croud agent
+        /// </summary>
+        /// <param name="crowd">Crowd</param>
+        /// <param name="pos">Position</param>
+        /// <param name="param">Agent parameters</param>
+        /// <returns>Returns the agent</returns>
         public CrowdAgent AddCrowdAgent(Crowd crowd, Vector3 pos, CrowdAgentParams param)
         {
             return crowd.AddAgent(pos, param);

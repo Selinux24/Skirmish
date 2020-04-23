@@ -3201,19 +3201,18 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             int nodeIndex = 0;
             int endIndex = tile.Header.BvNodeCount;
-            var tbmin = tile.Header.BMin;
-            var tbmax = tile.Header.BMax;
+            var tb = tile.Header.Bounds;
             float qfac = tile.Header.BvQuantFactor;
 
             // Calculate quantized box
 
             // Clamp query box to world box.
-            float minx = MathUtil.Clamp(bounds.Minimum.X, tbmin.X, tbmax.X) - tbmin.X;
-            float miny = MathUtil.Clamp(bounds.Minimum.Y, tbmin.Y, tbmax.Y) - tbmin.Y;
-            float minz = MathUtil.Clamp(bounds.Minimum.Z, tbmin.Z, tbmax.Z) - tbmin.Z;
-            float maxx = MathUtil.Clamp(bounds.Maximum.X, tbmin.X, tbmax.X) - tbmin.X;
-            float maxy = MathUtil.Clamp(bounds.Maximum.Y, tbmin.Y, tbmax.Y) - tbmin.Y;
-            float maxz = MathUtil.Clamp(bounds.Maximum.Z, tbmin.Z, tbmax.Z) - tbmin.Z;
+            float minx = MathUtil.Clamp(bounds.Minimum.X, tb.Minimum.X, tb.Maximum.X) - tb.Minimum.X;
+            float miny = MathUtil.Clamp(bounds.Minimum.Y, tb.Minimum.Y, tb.Maximum.Y) - tb.Minimum.Y;
+            float minz = MathUtil.Clamp(bounds.Minimum.Z, tb.Minimum.Z, tb.Maximum.Z) - tb.Minimum.Z;
+            float maxx = MathUtil.Clamp(bounds.Maximum.X, tb.Minimum.X, tb.Maximum.X) - tb.Minimum.X;
+            float maxy = MathUtil.Clamp(bounds.Maximum.Y, tb.Minimum.Y, tb.Maximum.Y) - tb.Minimum.Y;
+            float maxz = MathUtil.Clamp(bounds.Maximum.Z, tb.Minimum.Z, tb.Maximum.Z) - tb.Minimum.Z;
 
             // Quantize
             Int3 bmin = new Int3();

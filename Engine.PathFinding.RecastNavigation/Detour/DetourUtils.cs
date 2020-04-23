@@ -640,7 +640,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             nodes = new List<BVNode>();
 
             // Build tree
-            float quantFactor = 1 / param.CS;
+            float quantFactor = 1 / param.CellSize;
             BVItem[] items = new BVItem[param.PolyCount];
             for (int i = 0; i < param.PolyCount; i++)
             {
@@ -653,7 +653,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
                 else
                 {
-                    CalcPolygonBounds(ref it, param.Polys[i], param.Nvp, param.Verts, param.CS, param.CH);
+                    CalcPolygonBounds(ref it, param.Polys[i], param.Nvp, param.Verts, param.CellSize, param.CellHeight);
                 }
                 items[i] = it;
             }
@@ -784,12 +784,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     PolyCount = totPolyCount,
                     VertCount = totVertCount,
                     MaxLinkCount = maxLinkCount,
-                    BMin = param.BMin,
-                    BMax = param.BMax,
+                    Bounds = new BoundingBox(param.BMin, param.BMax),
                     DetailMeshCount = param.PolyCount,
                     DetailVertCount = uniqueDetailVertCount,
                     DetailTriCount = detailTriCount,
-                    BvQuantFactor = 1.0f / param.CS,
+                    BvQuantFactor = 1.0f / param.CellSize,
                     OffMeshBase = param.PolyCount,
                     WalkableHeight = param.WalkableHeight,
                     WalkableRadius = param.WalkableRadius,

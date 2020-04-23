@@ -7,7 +7,7 @@ namespace Engine.PathFinding.RecastNavigation
     /// <summary>
     /// Config
     /// </summary>
-    struct Config
+    public struct Config
     {
         /// <summary>
         /// Agent type

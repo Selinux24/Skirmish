@@ -37,38 +37,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             return true;
         }
-        public static bool DecompressTileCacheLayer(TileCacheLayerHeader header, TileCacheLayerData data, out TileCacheLayer layer)
-        {
-            layer = new TileCacheLayer()
-            {
-                Header = header,
-                Areas = null,
-                Heights = null,
-                Cons = null,
-                Regs = null,
-                RegCount = 0,
-            };
-
-            if (data.Areas != null && data.Areas.Length > 0)
-            {
-                layer.Areas = new AreaTypes[data.Areas.Length];
-                Array.Copy(data.Areas, layer.Areas, data.Areas.Length);
-            }
-
-            if (data.Heights != null && data.Heights.Length > 0)
-            {
-                layer.Heights = new int[data.Heights.Length];
-                Array.Copy(data.Heights, layer.Heights, data.Heights.Length);
-            }
-
-            if (data.Connections != null && data.Connections.Length > 0)
-            {
-                layer.Cons = new int[data.Connections.Length];
-                Array.Copy(data.Connections, layer.Cons, data.Connections.Length);
-            }
-
-            return true;
-        }
         public static bool BuildTileCacheRegions(NavMeshTileBuildContext bc, int walkableClimb)
         {
             int w = bc.Layer.Header.Width;

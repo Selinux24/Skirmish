@@ -130,7 +130,12 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         public bool FilterWalkableLowHeightSpans { get; set; } = true;
 
-
+        /// <summary>
+        /// Gets the agent configuration for "solo" navigation mesh build
+        /// </summary>
+        /// <param name="agent">Agent</param>
+        /// <param name="generationBounds">Generation bounds</param>
+        /// <returns>Returns the new configuration</returns>
         internal Config GetSoloConfig(Agent agent, BoundingBox generationBounds)
         {
             float walkableSlopeAngle = agent.MaxSlope;
@@ -181,6 +186,12 @@ namespace Engine.PathFinding.RecastNavigation
 
             return cfg;
         }
+        /// <summary>
+        /// Gets the agent configuration for "tiled" navigation mesh build
+        /// </summary>
+        /// <param name="agent">Agent</param>
+        /// <param name="tileBounds">Tile bounds</param>
+        /// <returns>Returns the new configuration</returns>
         internal Config GetTiledConfig(Agent agent, BoundingBox tileBounds)
         {
             float walkableSlopeAngle = agent.MaxSlope;
@@ -234,30 +245,38 @@ namespace Engine.PathFinding.RecastNavigation
 
             return cfg;
         }
+        /// <summary>
+        /// Adjust tile bounds using border and cell size to expand
+        /// </summary>
+        /// <param name="tileBounds">Tile bounds</param>
+        /// <param name="borderSize">Border size</param>
+        /// <param name="cellsize">Cell size</param>
+        /// <returns>Returns the new bounds</returns>
+        /// <remarks>
+        /// Expand the heighfield bounding box by border size to find the extents of geometry we need to build this tile.
+        /// 
+        /// This is done in order to make sure that the navmesh tiles connect correctly at the borders,
+        /// and the obstacles close to the border work correctly with the dilation process.
+        /// No polygons (or contours) will be created on the border area.
+        /// 
+        /// IMPORTANT!
+        /// 
+        ///   :''''''''':
+        ///   : +-----+ :
+        ///   : |     | :
+        ///   : |     |<--- tile to build
+        ///   : |     | :  
+        ///   : +-----+ :<-- geometry needed
+        ///   :.........:
+        /// 
+        /// You should use this bounding box to query your input geometry.
+        /// 
+        /// For example if you build a navmesh for terrain, and want the navmesh tiles to match the terrain tile size
+        /// you will need to pass in data from neighbour terrain tiles too! In a simple case, just pass in all the 8 neighbours,
+        /// or use the bounding box below to only pass in a sliver of each of the 8 neighbours.
+        /// </remarks>
         private static BoundingBox AdjustTileBBox(BoundingBox tileBounds, int borderSize, float cellsize)
         {
-            // Expand the heighfield bounding box by border size to find the extents of geometry we need to build this tile.
-            //
-            // This is done in order to make sure that the navmesh tiles connect correctly at the borders,
-            // and the obstacles close to the border work correctly with the dilation process.
-            // No polygons (or contours) will be created on the border area.
-            //
-            // IMPORTANT!
-            //
-            //   :''''''''':
-            //   : +-----+ :
-            //   : |     | :
-            //   : |     |<--- tile to build
-            //   : |     | :  
-            //   : +-----+ :<-- geometry needed
-            //   :.........:
-            //
-            // You should use this bounding box to query your input geometry.
-            //
-            // For example if you build a navmesh for terrain, and want the navmesh tiles to match the terrain tile size
-            // you will need to pass in data from neighbour terrain tiles too! In a simple case, just pass in all the 8 neighbours,
-            // or use the bounding box below to only pass in a sliver of each of the 8 neighbours.
-
             tileBounds.Minimum.X -= borderSize * cellsize;
             tileBounds.Minimum.Z -= borderSize * cellsize;
             tileBounds.Maximum.X += borderSize * cellsize;
@@ -265,6 +284,12 @@ namespace Engine.PathFinding.RecastNavigation
 
             return tileBounds;
         }
+        /// <summary>
+        /// Gets the agent tile cache build configuration
+        /// </summary>
+        /// <param name="agent">Agent</param>
+        /// <param name="generationBounds">Generation bounds</param>
+        /// <returns>Returns the new configuration</returns>
         internal Config GetTileCacheConfig(Agent agent, BoundingBox generationBounds)
         {
             float walkableSlopeAngle = agent.MaxSlope;
@@ -327,9 +352,9 @@ namespace Engine.PathFinding.RecastNavigation
                     CellHeight = cfg.CellHeight,
                     Width = cfg.TileSize,
                     Height = cfg.TileSize,
-                    WalkableHeight = cfg.Height,
-                    WalkableRadius = cfg.WalkableRadius,
-                    WalkableClimb = cfg.WalkableClimb,
+                    WalkableHeight = agent.Height,
+                    WalkableRadius = agent.Radius,
+                    WalkableClimb = agent.MaxClimb,
                     MaxSimplificationError = cfg.MaxSimplificationError,
                     MaxTiles = tileWidth * tileHeight * EXPECTED_LAYERS_PER_TILE,
                     TileWidth = tileWidth,
@@ -341,7 +366,30 @@ namespace Engine.PathFinding.RecastNavigation
             return cfg;
         }
 
-        internal NavMeshParams GetNavMeshParams(BoundingBox generationBounds)
+        /// <summary>
+        /// Gets the navigation mesh parameters for "solo" creation
+        /// </summary>
+        /// <param name="generationBounds">Generation bounds</param>
+        /// <param name="polyCount">Maximum polygon count</param>
+        /// <returns>Returns the navigation mesh parameters</returns>
+        internal NavMeshParams GetSoloNavMeshParams(BoundingBox generationBounds, int polyCount)
+        {
+            return new NavMeshParams
+            {
+                Origin = generationBounds.Minimum,
+                TileWidth = generationBounds.Maximum.X - generationBounds.Minimum.X,
+                TileHeight = generationBounds.Maximum.Z - generationBounds.Minimum.Z,
+                MaxTiles = 1,
+                MaxPolys = polyCount
+            };
+        }
+
+        /// <summary>
+        /// Gets the navigation mesh parameters for "tiled" creation
+        /// </summary>
+        /// <param name="generationBounds">Generation bounds</param>
+        /// <returns>Returns the navigation mesh parameters</returns>
+        internal NavMeshParams GetTiledNavMeshParams(BoundingBox generationBounds)
         {
             CalcGridSize(generationBounds, CellSize, out int gridWidth, out int gridHeight);
             int tileSize = (int)TileSize;

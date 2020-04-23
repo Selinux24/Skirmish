@@ -54,8 +54,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             var solid = Heightfield.Build(cfg.Width, cfg.Height, cfg.BoundingBox, cfg.CellSize, cfg.CellHeight);
 
             var tris = geometry.ChunkyMesh.GetTriangles();
-            var triareas = MarkWalkableTriangles(cfg.WalkableSlopeAngle, tris);
-            if (!RasterizeTriangles(solid, cfg.WalkableClimb, triareas))
+            if (!Rasterizer.Rasterize(tris, cfg.WalkableSlopeAngle, cfg.WalkableClimb, solid))
             {
                 return null;
             }
@@ -121,9 +120,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 WalkableClimb = cfg.Agent.MaxClimb,
                 BMin = pmesh.BMin,
                 BMax = pmesh.BMax,
-                CS = cfg.CellSize,
-                CH = cfg.CellHeight,
-                BuildBvTree = true
+                CellSize = cfg.CellSize,
+                CellHeight = cfg.CellHeight,
+                BuildBvTree = true,
             };
 
             MeshData navData = DetourUtils.CreateNavMeshData(param);
@@ -143,17 +142,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 throw new EngineException("Bad header Version value");
             }
 
-            NavMeshParams nvParams = new NavMeshParams
-            {
-                Origin = header.BMin,
-                TileWidth = header.BMax[0] - header.BMin[0],
-                TileHeight = header.BMax[2] - header.BMin[2],
-                MaxTiles = 1,
-                MaxPolys = header.PolyCount
-            };
+            NavMeshParams nvParams = settings.GetSoloNavMeshParams(header.Bounds, header.PolyCount);
 
             var nm = new NavMesh(nvParams);
-            nm.AddTile(navData, TileFlagTypes.DT_TILE_FREE_DATA, 0);
+            nm.AddTile(navData, TileFlagTypes.DT_TILE_FREE_DATA);
             return nm;
         }
         /// <summary>
@@ -167,8 +159,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             var bbox = settings.Bounds ?? geometry.BoundingBox;
 
-            var nmParams = settings.GetNavMeshParams(bbox);
+            var nmParams = settings.GetTiledNavMeshParams(bbox);
             var nm = new NavMesh(nmParams);
+
+            if (settings.BuildAllTiles)
+            {
+                nm.BuildAllTiles(geometry, settings, agent);
+            }
 
             if (settings.UseTileCache)
             {
@@ -184,13 +181,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 if (settings.BuildAllTiles)
                 {
                     BuildTileCache(nm.TileCache, geometry, cfg);
-                }
-            }
-            else
-            {
-                if (settings.BuildAllTiles)
-                {
-                    nm.BuildAllTiles(geometry, settings, agent);
                 }
             }
 
@@ -225,7 +215,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                         // Remove any previous data (navmesh owns and deletes the data).
                         RemoveTile(x, y, 0);
                         // Let the navmesh own the data.
-                        AddTile(data, TileFlagTypes.DT_TILE_FREE_DATA, 0);
+                        AddTile(data, TileFlagTypes.DT_TILE_FREE_DATA);
                     }
                 }
             }
@@ -248,8 +238,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             foreach (var id in cid)
             {
                 var tris = chunkyMesh.GetTriangles(id);
-                var triareas = MarkWalkableTriangles(cfg.WalkableSlopeAngle, tris);
-                if (!RasterizeTriangles(solid, cfg.WalkableClimb, triareas))
+                if (!Rasterizer.Rasterize(tris, cfg.WalkableSlopeAngle, cfg.WalkableClimb, solid))
                 {
                     return null;
                 }
@@ -325,8 +314,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 TileLayer = 0,
                 BMin = pmesh.BMin,
                 BMax = pmesh.BMax,
-                CS = cfg.CellSize,
-                CH = cfg.CellHeight,
+                CellSize = cfg.CellSize,
+                CellHeight = cfg.CellHeight,
                 BuildBvTree = true
             };
 
@@ -383,8 +372,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             foreach (var id in cid)
             {
                 var tris = chunkyMesh.GetTriangles(id);
-                var triareas = MarkWalkableTriangles(cfg.WalkableSlopeAngle, tris);
-                if (!RasterizeTriangles(solid, cfg.WalkableClimb, triareas))
+                if (!Rasterizer.Rasterize(tris, cfg.WalkableSlopeAngle, cfg.WalkableClimb, solid))
                 {
                     return tiles.ToArray();
                 }
@@ -477,33 +465,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             tbbox.Maximum.Z = bbox.Minimum.Z + (y + 1) * tileSize;
 
             return tbbox;
-        }
-        public void BuildTileAtPosition(int x, int y, InputGeometry geom, BuildSettings settings, Agent agent, BoundingBox tileBounds)
-        {
-            // Remove any previous data (navmesh owns and deletes the data).
-            RemoveTile(x, y, 0);
-
-            // Add tile, or leave the location empty.
-            var cfg = settings.GetTiledConfig(agent, tileBounds);
-            var data = BuildTileMesh(x, y, geom, cfg);
-            if (data != null)
-            {
-                AddTile(data, TileFlagTypes.DT_TILE_FREE_DATA, 0);
-            }
-
-            if (settings.UseTileCache && TileCache != null)
-            {
-                TileCache.BuildTilesAt(x, y);
-            }
-        }
-        public void RemoveTileAtPosition(int x, int y, BuildSettings settings)
-        {
-            RemoveTile(x, y, 0);
-
-            if (settings.UseTileCache && TileCache != null)
-            {
-                TileCache.RemoveTile(x, y, 0);
-            }
         }
 
         private static void FilterHeightfield(Heightfield solid, Config cfg)
@@ -602,185 +563,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
         }
 
-        struct RasterizeItem
-        {
-            public Triangle Triangle { get; set; }
-            public AreaTypes AreaType { get; set; }
-        }
-        private static IEnumerable<RasterizeItem> MarkWalkableTriangles(float walkableSlopeAngle, IEnumerable<Triangle> tris)
-        {
-            List<RasterizeItem> res = new List<RasterizeItem>();
-
-            float walkableThr = (float)Math.Cos(walkableSlopeAngle / 180.0f * MathUtil.Pi);
-
-            foreach (var tri in tris)
-            {
-                // Check if the face is walkable.
-                AreaTypes area = tri.Normal.Y > walkableThr ? AreaTypes.RC_WALKABLE_AREA : AreaTypes.RC_NULL_AREA;
-
-                res.Add(new RasterizeItem() { Triangle = tri, AreaType = area });
-            }
-
-            return res;
-        }
-        private static bool RasterizeTriangles(Heightfield solid, int flagMergeThr, IEnumerable<RasterizeItem> items)
-        {
-            // Rasterize triangles.
-            foreach (var item in items)
-            {
-                // Rasterize.
-                if (!RasterizeTriangle(solid, flagMergeThr, item))
-                {
-                    throw new EngineException("rcRasterizeTriangles: Out of memory.");
-                }
-            }
-
-            return true;
-        }
-        private static bool RasterizeTriangle(Heightfield hf, int flagMergeThr, RasterizeItem item)
-        {
-            float cs = hf.CellSize;
-            float ics = 1.0f / hf.CellSize;
-            float ich = 1.0f / hf.CellHeight;
-            int w = hf.Width;
-            int h = hf.Height;
-            var b = hf.BoundingBox;
-            float by = b.GetY();
-
-            // Calculate the bounding box of the triangle.
-            var triverts = item.Triangle.GetVertices();
-            var t = BoundingBox.FromPoints(triverts);
-
-            // If the triangle does not touch the bbox of the heightfield, skip the triagle.
-            if (b.Contains(t) == ContainmentType.Disjoint)
-            {
-                return true;
-            }
-
-            // Calculate the footprint of the triangle on the grid's y-axis
-            int y0 = (int)((t.Minimum.Z - b.Minimum.Z) * ics);
-            int y1 = (int)((t.Maximum.Z - b.Minimum.Z) * ics);
-            y0 = MathUtil.Clamp(y0, 0, h - 1);
-            y1 = MathUtil.Clamp(y1, 0, h - 1);
-
-            // Clip the triangle into all grid cells it touches.
-            List<Vector3> inb = new List<Vector3>(triverts);
-            List<Vector3> zp1 = new List<Vector3>();
-            List<Vector3> zp2 = new List<Vector3>();
-            List<Vector3> xp1 = new List<Vector3>();
-            List<Vector3> xp2 = new List<Vector3>();
-
-            for (int y = y0; y <= y1; ++y)
-            {
-                // Clip polygon to row. Store the remaining polygon as well
-                zp1.Clear();
-                zp2.Clear();
-                float cz = b.Minimum.Z + y * cs;
-                DividePoly(inb, zp1, zp2, cz + cs, 2);
-                Helper.Swap(ref inb, ref zp2);
-                if (zp1.Count < 3) continue;
-
-                // find the horizontal bounds in the row
-                float minX = zp1[0].X;
-                float maxX = zp1[0].X;
-                for (int i = 1; i < zp1.Count; i++)
-                {
-                    minX = Math.Min(minX, zp1[i].X);
-                    maxX = Math.Max(maxX, zp1[i].X);
-                }
-                int x0 = (int)((minX - b.Minimum.X) * ics);
-                int x1 = (int)((maxX - b.Minimum.X) * ics);
-                x0 = MathUtil.Clamp(x0, 0, w - 1);
-                x1 = MathUtil.Clamp(x1, 0, w - 1);
-
-                for (int x = x0; x <= x1; ++x)
-                {
-                    // Clip polygon to column. store the remaining polygon as well
-                    xp1.Clear();
-                    xp2.Clear();
-                    float cx = b.Minimum.X + x * cs;
-                    DividePoly(zp1, xp1, xp2, cx + cs, 0);
-                    Helper.Swap(ref zp1, ref xp2);
-                    if (xp1.Count < 3) continue;
-
-                    // Calculate min and max of the span.
-                    float minY = xp1[0].Y;
-                    float maxY = xp1[0].Y;
-                    for (int i = 1; i < xp1.Count; ++i)
-                    {
-                        minY = Math.Min(minY, xp1[i].Y);
-                        maxY = Math.Max(maxY, xp1[i].Y);
-                    }
-                    minY -= b.Minimum.Y;
-                    maxY -= b.Minimum.Y;
-                    // Skip the span if it is outside the heightfield bbox
-                    if (maxY < 0.0f) continue;
-                    if (minY > by) continue;
-                    // Clamp the span to the heightfield bbox.
-                    if (minY < 0.0f) minY = 0;
-                    if (maxY > by) maxY = by;
-
-                    // Snap the span to the heightfield height grid.
-                    int ismin = MathUtil.Clamp((int)Math.Floor(minY * ich), 0, Span.SpanMaxHeight);
-                    int ismax = MathUtil.Clamp((int)Math.Ceiling(maxY * ich), ismin + 1, Span.SpanMaxHeight);
-
-                    hf.AddSpan(x, y, ismin, ismax, item.AreaType, flagMergeThr);
-                }
-            }
-
-            return true;
-        }
-        private static void DividePoly(List<Vector3> inPoly, List<Vector3> outPoly1, List<Vector3> outPoly2, float x, int axis)
-        {
-            float[] d = new float[inPoly.Count];
-            for (int i = 0; i < inPoly.Count; i++)
-            {
-                d[i] = x - inPoly[i][axis];
-            }
-
-            for (int i = 0, j = inPoly.Count - 1; i < inPoly.Count; j = i, i++)
-            {
-                bool ina = d[j] >= 0;
-                bool inb = d[i] >= 0;
-                if (ina != inb)
-                {
-                    float s = d[j] / (d[j] - d[i]);
-                    Vector3 v;
-                    v.X = inPoly[j].X + (inPoly[i].X - inPoly[j].X) * s;
-                    v.Y = inPoly[j].Y + (inPoly[i].Y - inPoly[j].Y) * s;
-                    v.Z = inPoly[j].Z + (inPoly[i].Z - inPoly[j].Z) * s;
-                    outPoly1.Add(v);
-                    outPoly2.Add(v);
-
-                    // add the i'th point to the right polygon. Do NOT add points that are on the dividing line
-                    // since these were already added above
-                    if (d[i] > 0)
-                    {
-                        outPoly1.Add(inPoly[i]);
-                    }
-                    else if (d[i] < 0)
-                    {
-                        outPoly2.Add(inPoly[i]);
-                    }
-                }
-                else // same side
-                {
-                    // add the i'th point to the right polygon. Addition is done even for points on the dividing line
-                    if (d[i] >= 0)
-                    {
-                        outPoly1.Add(inPoly[i]);
-
-                        if (d[i] != 0)
-                        {
-                            continue;
-                        }
-                    }
-
-                    outPoly2.Add(inPoly[i]);
-                }
-            }
-        }
-
+        private NavMeshParams m_params;
         private Vector3 m_orig;
         private readonly float m_tileWidth;
         private readonly float m_tileHeight;
@@ -790,11 +573,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         private readonly int m_tileBits;
         private readonly int m_polyBits;
         private readonly int m_saltBits;
-        private NavMeshParams m_params;
 
-        public MeshTile[] Tiles { get; set; }
-        public int MaxTiles { get; set; }
-        public TileCache TileCache { get; set; }
+        public MeshTile[] Tiles { get; private set; }
+        public int MaxTiles { get; private set; }
+        public TileCache TileCache { get; internal set; }
 
         /// <summary>
         /// Constructor
@@ -809,7 +591,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Init tiles
             MaxTiles = m_params.MaxTiles;
             var m_tileLutSize = Helper.NextPowerOfTwo(m_params.MaxTiles / 4);
-            if (m_tileLutSize == 0) m_tileLutSize = 1;
+            if (m_tileLutSize == 0)
+            {
+                m_tileLutSize = 1;
+            }
             m_tileLutMask = m_tileLutSize - 1;
 
             Tiles = new MeshTile[MaxTiles];
@@ -820,6 +605,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 Tiles[i] = new MeshTile
                 {
+                    Index = i,
                     Salt = 1,
                     Next = m_nextFree
                 };
@@ -846,13 +632,67 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             return m_params;
         }
         /// <summary>
+        /// Gets the maximum number of tiles in the navigation mesh
+        /// </summary>
+        public int GetMaxTiles()
+        {
+            return MaxTiles;
+        }
+
+        /// <summary>
+        /// Builds all tiles at specified tile coordinates
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        /// <param name="geometry">Input geometry</param>
+        /// <param name="tiledCfg">Tiled generation config</param>
+        /// <param name="tileCacheCfg">Tile cache generation config</param>
+        public void BuildTileAtPosition(int x, int y, InputGeometry geometry, Config tiledCfg, Config tileCacheCfg)
+        {
+            // Remove any previous data (navmesh owns and deletes the data).
+            RemoveTiles(x, y);
+
+            // Add tile, or leave the location empty.
+            var data = BuildTileMesh(x, y, geometry, tiledCfg);
+            if (data != null)
+            {
+                AddTile(data, TileFlagTypes.DT_TILE_FREE_DATA);
+            }
+
+            if (TileCache != null)
+            {
+                var tiles = RasterizeTileLayers(x, y, geometry, tileCacheCfg);
+
+                foreach (var tile in tiles)
+                {
+                    TileCache.AddTile(tile, CompressedTileFlagTypes.DT_COMPRESSEDTILE_FREE_DATA);
+                }
+
+                TileCache.BuildTilesAt(x, y);
+            }
+        }
+        /// <summary>
+        /// Removes all tiles at specified tile coordinates
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        public void RemoveTilesAtPosition(int x, int y)
+        {
+            RemoveTiles(x, y);
+
+            if (TileCache != null)
+            {
+                TileCache.RemoveTiles(x, y);
+            }
+        }
+
+        /// <summary>
         /// Adds a new tile to the navigation mesh
         /// </summary>
         /// <param name="data">Mesh data</param>
         /// <param name="flags">Tile flags</param>
-        /// <param name="lastRef">Last reference</param>
         /// <returns>Returns true if the tile was added</returns>
-        public bool AddTile(MeshData data, TileFlagTypes flags, int lastRef)
+        public bool AddTile(MeshData data, TileFlagTypes flags)
         {
             // Make sure the data is in right format.
             MeshHeader header = data.Header;
@@ -872,7 +712,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             // Allocate a tile.
-            MeshTile tile = AllocateTile(lastRef);
+            MeshTile tile = AllocateTile();
 
             // Make sure we could allocate a tile.
             if (tile == null)
@@ -950,63 +790,21 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Allocates a new tile
         /// </summary>
-        /// <param name="lastRef">Last reference</param>
         /// <returns>Returns the new tile</returns>
-        private MeshTile AllocateTile(int lastRef)
+        private MeshTile AllocateTile()
         {
             MeshTile tile = null;
 
-            if (lastRef == 0)
+            if (m_nextFree != null)
             {
-                if (m_nextFree != null)
-                {
-                    tile = m_nextFree;
-                    m_nextFree = tile.Next;
-                    tile.Next = null;
-                }
-
-                return tile;
-            }
-
-            // Try to relocate the tile to specific index with same salt.
-            int tileIndex = DecodePolyIdTile(lastRef);
-            if (tileIndex >= MaxTiles)
-            {
-                return null;
-            }
-
-            // Try to find the specific tile id from the free list.
-            MeshTile target = Tiles[tileIndex];
-            MeshTile prev = null;
-            tile = m_nextFree;
-            while (tile != null && tile != target)
-            {
-                prev = tile;
-                tile = tile.Next;
-            }
-
-            // Could not find the correct location.
-            if (tile == target)
-            {
-                // Remove from freelist
-                if (prev == null)
-                {
-                    m_nextFree = tile?.Next;
-                }
-                else
-                {
-                    prev.Next = tile?.Next;
-                }
-
-                // Restore salt.
-                if (tile != null)
-                {
-                    tile.Salt = DecodePolyIdSalt(lastRef);
-                }
+                tile = m_nextFree;
+                m_nextFree = tile.Next;
+                tile.Next = null;
             }
 
             return tile;
         }
+
         /// <summary>
         /// Removes the tile from the navigation mesh
         /// </summary>
@@ -1076,6 +874,27 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             return true;
         }
         /// <summary>
+        /// Removes all the tiles in the coordinates
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="y">Y coordinate</param>
+        /// <returns>Returns true if all the tiles were removed or if the tiles not exists at all</returns>
+        public bool RemoveTiles(int x, int y)
+        {
+            bool res = true;
+
+            var tiles = GetTilesAt(x, y, 32);
+            foreach (var t in tiles)
+            {
+                if (!RemoveTile(t))
+                {
+                    res = false;
+                }
+            }
+
+            return res;
+        }
+        /// <summary>
         /// Removes the tile from the lookup
         /// </summary>
         /// <param name="tile">Tile</param>
@@ -1132,6 +951,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
             }
         }
+
         /// <summary>
         /// Gets the tile location bt position
         /// </summary>
@@ -1243,13 +1063,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
             return tile;
         }
-        /// <summary>
-        /// Gets the maximum number of tiles in the navigation mesh
-        /// </summary>
-        public int GetMaxTiles()
-        {
-            return MaxTiles;
-        }
+
         /// <summary>
         /// Gets the tile descriptor by node
         /// </summary>
@@ -1307,6 +1121,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 Poly = Tiles[it].Polys[ip],
             };
         }
+
         /// <summary>
         /// Gets whether the reference is valid or not
         /// </summary>
@@ -1338,6 +1153,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             return true;
         }
+
         /// <summary>
         /// Gets the end points of the off-mesh connections
         /// </summary>
@@ -1378,6 +1194,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             var tile = Tiles[it];
             return tile.GetOffMeshConnectionByPolygon(ip);
         }
+
         /// <summary>
         /// Sets the polygon flags by reference
         /// </summary>
@@ -1419,6 +1236,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             return true;
         }
+
         /// <summary>
         /// Sets the polygon area by reference
         /// </summary>
@@ -1459,6 +1277,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             return true;
         }
+
         /// <summary>
         /// Encodes polygon
         /// </summary>
@@ -1513,6 +1332,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             int polyMask = (1 << m_polyBits) - 1;
             return r & polyMask;
         }
+
         /// <summary>
         /// Get neighbour tiles at the specified coordinates
         /// </summary>
@@ -1982,6 +1802,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
             }
         }
+
         /// <summary>
         /// Performs a query in the polygons of the specified tile
         /// </summary>
@@ -2013,20 +1834,19 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             int nodeIndex = 0;
             int endIndex = tile.Header.BvNodeCount;
-            Vector3 tbmin = tile.Header.BMin;
-            Vector3 tbmax = tile.Header.BMax;
+            BoundingBox tb = tile.Header.Bounds;
             float qfac = tile.Header.BvQuantFactor;
 
             // Calculate quantized box
             Int3 bmin = new Int3();
             Int3 bmax = new Int3();
             // dtClamp query box to world box.
-            float minx = MathUtil.Clamp(bounds.Minimum.X, tbmin.X, tbmax.X) - tbmin.X;
-            float miny = MathUtil.Clamp(bounds.Minimum.Y, tbmin.Y, tbmax.Y) - tbmin.Y;
-            float minz = MathUtil.Clamp(bounds.Minimum.Z, tbmin.Z, tbmax.Z) - tbmin.Z;
-            float maxx = MathUtil.Clamp(bounds.Maximum.X, tbmin.X, tbmax.X) - tbmin.X;
-            float maxy = MathUtil.Clamp(bounds.Maximum.Y, tbmin.Y, tbmax.Y) - tbmin.Y;
-            float maxz = MathUtil.Clamp(bounds.Maximum.Z, tbmin.Z, tbmax.Z) - tbmin.Z;
+            float minx = MathUtil.Clamp(bounds.Minimum.X, tb.Minimum.X, tb.Maximum.X) - tb.Minimum.X;
+            float miny = MathUtil.Clamp(bounds.Minimum.Y, tb.Minimum.Y, tb.Maximum.Y) - tb.Minimum.Y;
+            float minz = MathUtil.Clamp(bounds.Minimum.Z, tb.Minimum.Z, tb.Maximum.Z) - tb.Minimum.Z;
+            float maxx = MathUtil.Clamp(bounds.Maximum.X, tb.Minimum.X, tb.Maximum.X) - tb.Minimum.X;
+            float maxy = MathUtil.Clamp(bounds.Maximum.Y, tb.Minimum.Y, tb.Maximum.Y) - tb.Minimum.Y;
+            float maxz = MathUtil.Clamp(bounds.Maximum.Z, tb.Minimum.Z, tb.Maximum.Z) - tb.Minimum.Z;
             // Quantize
             bmin.X = (int)(qfac * minx) & 0xfffe;
             bmin.Y = (int)(qfac * miny) & 0xfffe;
@@ -2208,6 +2028,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             closest = Vector3.Lerp(pmin, pmax, tmin);
         }
+
         /// <summary>
         /// Gets the polygon height
         /// </summary>
@@ -2270,6 +2091,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             return true;
         }
+
         /// <summary>
         /// Gets the closest point in a polygon, from the specified position
         /// </summary>

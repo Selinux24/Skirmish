@@ -138,12 +138,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// The xz-plane cell size of the polygon mesh. [Limit: > 0] [Unit: wu]
         /// </summary>
-        public float CS { get; set; }
+        public float CellSize { get; set; }
         /// <summary>
         /// The y-axis cell height of the polygon mesh. [Limit: > 0] [Unit: wu]
         /// </summary>
-        public float CH { get; set; }
-
+        public float CellHeight { get; set; }
         /// <summary>
         /// True if a bounding volume tree should be built for the tile.
         /// @note The BVTree is not normally needed for layered navigation meshes.
@@ -177,7 +176,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 for (int i = 0; i < VertCount; ++i)
                 {
                     var iv = Verts[i];
-                    float h = BMin.Y + iv.Y * CH;
+                    float h = BMin.Y + iv.Y * CellHeight;
                     hmin = Math.Min(hmin, h);
                     hmax = Math.Max(hmax, h);
                 }

@@ -13,6 +13,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
     public class MeshTile
     {
         /// <summary>
+        /// Tile index
+        /// </summary>
+        public int Index { get; set; }
+        /// <summary>
         /// Counter describing modifications to the tile.
         /// </summary>
         public int Salt { get; set; }
@@ -403,8 +407,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <returns>Returns the text representation of the instance</returns>
         public override string ToString()
         {
-            return string.Format("Salt: {0}; Links: {1}; Flags: {2}; Header: {3}; Data: {4}",
-                Salt, LinksFreeList, Flags, Header, Data);
+            return $"Index: {Index}; Salt: {Salt}; Links: {LinksFreeList}; Flags: {Flags}; Header: {Header}; Data: {Data}";
         }
     }
 }

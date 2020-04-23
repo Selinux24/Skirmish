@@ -181,9 +181,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 var iv = param.Verts[i];
                 var v = new Vector3
                 {
-                    X = param.BMin.X + iv.X * param.CS,
-                    Y = param.BMin.Y + iv.Y * param.CH,
-                    Z = param.BMin.Z + iv.Z * param.CS
+                    X = param.BMin.X + iv.X * param.CellSize,
+                    Y = param.BMin.Y + iv.Y * param.CellHeight,
+                    Z = param.BMin.Z + iv.Z * param.CellSize
                 };
                 NavVerts.Add(v);
             }

@@ -75,7 +75,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     continue;
                 }
 
-                navmesh.AddTile(tile, TileFlagTypes.DT_TILE_FREE_DATA, 0);
+                navmesh.AddTile(tile, TileFlagTypes.DT_TILE_FREE_DATA);
             }
 
             if (file.HasTileCache)

@@ -84,13 +84,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         public float WalkableClimb { get; set; }
         /// <summary>
-        /// The minimum bounds of the tile's AABB. [(x, y, z)]
+        /// The bounds of the tile's AABB.
         /// </summary>
-        public Vector3 BMin { get; set; }
-        /// <summary>
-        /// The maximum bounds of the tile's AABB. [(x, y, z)]
-        /// </summary>
-        public Vector3 BMax { get; set; }
+        public BoundingBox Bounds { get; set; }
         /// <summary>
         /// The bounding volume quantization factor.
         /// </summary>
@@ -121,8 +117,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             WalkableHeight = info.GetSingle("walkableHeight");
             WalkableRadius = info.GetSingle("walkableRadius");
             WalkableClimb = info.GetSingle("walkableClimb");
-            BMin = info.GetVector3("bmin");
-            BMax = info.GetVector3("bmax");
+            Bounds = info.GetValue<BoundingBox>("bounds");
             BvQuantFactor = info.GetSingle("bvQuantFactor");
         }
         /// <summary>
@@ -151,8 +146,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             info.AddValue("walkableHeight", WalkableHeight);
             info.AddValue("walkableRadius", WalkableRadius);
             info.AddValue("walkableClimb", WalkableClimb);
-            info.AddVector3("bmin", BMin);
-            info.AddVector3("bmax", BMax);
+            info.AddValue("bounds", Bounds);
             info.AddValue("bvQuantFactor", BvQuantFactor);
         }
 
@@ -162,9 +156,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <returns>Returns the text representation of the instance</returns>
         public override string ToString()
         {
-            return string.Format("{0}.{1}.{2}; Id: {3}; Bbox: {4}{5}; Polys: {6}; Vertices: {7}; DMeshes: {8}; DTriangles: {9}; DVertices: {10}",
+            return string.Format("{0}.{1}.{2}; Id: {3}; Bbox: {4}; Polys: {5}; Vertices: {6}; DMeshes: {7}; DTriangles: {8}; DVertices: {9}",
                 X, Y, Layer, UserId,
-                BMin, BMax,
+                Bounds,
                 PolyCount, VertCount,
                 DetailMeshCount, DetailTriCount, DetailVertCount);
         }
