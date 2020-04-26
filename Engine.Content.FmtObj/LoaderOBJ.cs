@@ -67,52 +67,19 @@ namespace Engine.Content.FmtObj
 
                 foreach (var mat in materials)
                 {
-                    var matContent = MaterialContent.Default;
-
-                    if (mat.MapNs != null)
+                    if (!m.Materials.ContainsKey(mat.Name))
                     {
-                        matContent.SpecularTexture = mat.MapNs;
+                        var matContent = mat.CreateContent();
+
+                        m.Materials.Add(mat.Name, matContent);
+
+                        m.TryAddTexture(contentFolder, mat.MapKa);
+                        m.TryAddTexture(contentFolder, mat.MapKd);
+                        m.TryAddTexture(contentFolder, mat.MapKs);
+                        m.TryAddTexture(contentFolder, mat.MapNs);
+                        m.TryAddTexture(contentFolder, mat.MapD);
+                        m.TryAddTexture(contentFolder, mat.MapBump);
                     }
-                    else
-                    {
-                        matContent.Shininess = mat.Ns;
-                    }
-
-                    matContent.AmbientTexture = mat.MapKa;
-
-                    if (mat.MapKd != null)
-                    {
-                        matContent.DiffuseTexture = mat.MapKd;
-                    }
-                    else
-                    {
-                        matContent.DiffuseColor = new Color4(mat.Kd, 1);
-                    }
-
-                    if (mat.MapKs != null)
-                    {
-                        matContent.SpecularTexture = mat.MapKs;
-                    }
-                    else
-                    {
-                        matContent.SpecularColor = new Color4(mat.Ks, 1);
-                    }
-
-                    matContent.EmissionColor = new Color4(mat.Ke, 1);
-                    matContent.IndexOfRefraction = mat.Ni;
-
-                    matContent.Transparency = mat.D != 0 ? 1f / mat.D : 0;
-
-                    matContent.NormalMapTexture = mat.MapBump;
-
-                    m.Materials.Add(mat.Name, matContent);
-
-                    m.TryAddTexture(contentFolder, mat.MapKa);
-                    m.TryAddTexture(contentFolder, mat.MapKd);
-                    m.TryAddTexture(contentFolder, mat.MapKs);
-                    m.TryAddTexture(contentFolder, mat.MapNs);
-                    m.TryAddTexture(contentFolder, mat.MapD);
-                    m.TryAddTexture(contentFolder, mat.MapBump);
                 }
 
                 for (int i = 0; i < meshList.Count(); i++)
@@ -200,6 +167,49 @@ namespace Engine.Content.FmtObj
 
     static class ContentExtensions
     {
+        public static MaterialContent CreateContent(this Material mat)
+        {
+            var matContent = MaterialContent.Default;
+
+            if (mat.MapNs != null)
+            {
+                matContent.SpecularTexture = mat.MapNs;
+            }
+            else
+            {
+                matContent.Shininess = mat.Ns;
+            }
+
+            matContent.AmbientTexture = mat.MapKa;
+
+            if (mat.MapKd != null)
+            {
+                matContent.DiffuseTexture = mat.MapKd;
+            }
+            else
+            {
+                matContent.DiffuseColor = new Color4(mat.Kd, 1);
+            }
+
+            if (mat.MapKs != null)
+            {
+                matContent.SpecularTexture = mat.MapKs;
+            }
+            else
+            {
+                matContent.SpecularColor = new Color4(mat.Ks, 1);
+            }
+
+            matContent.EmissionColor = new Color4(mat.Ke, 1);
+            matContent.IndexOfRefraction = mat.Ni;
+
+            matContent.Transparency = mat.D != 0 ? 1f / mat.D : 0;
+
+            matContent.NormalMapTexture = mat.MapBump;
+
+            return matContent;
+        }
+
         public static void TryAddTexture(this ModelContent m, string contentFolder, string texture)
         {
             if (texture != null && !m.Images.ContainsKey(texture))

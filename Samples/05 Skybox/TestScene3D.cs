@@ -28,6 +28,20 @@ namespace Skybox
         private readonly Color4 torchVolumeColor = new Color4(Color.GreenYellow.RGB(), alpha);
         private readonly int bsphSlices = 20;
         private readonly int bsphStacks = 10;
+        private readonly Vector3[] obeliskPositions = new[]
+        {
+            new Vector3(+100, -0.2f, +100),
+            new Vector3(-100, 0, +100),
+            new Vector3(+100, 0, -100),
+            new Vector3(-100, 0, -100),
+        };
+        private readonly Quaternion[] obeliskRotations = new[]
+        {
+            Quaternion.RotationYawPitchRoll(-MathUtil.PiOverTwo * 0.93f, MathUtil.PiOverTwo*1.03f, 0.45f),
+            Quaternion.Identity,
+            Quaternion.Identity,
+            Quaternion.Identity,
+        };
 
         private readonly Agent walker = new Agent()
         {
@@ -46,6 +60,7 @@ namespace Skybox
 
         private ModelInstanced torchs = null;
         private ModelInstanced obelisks = null;
+        private Model fountain = null;
 
         private Model movingFire = null;
         private ParticleEmitter movingFireEmitter = null;
@@ -162,12 +177,28 @@ namespace Skybox
                     CastShadow = true,
                     Content = new ContentDescription()
                     {
-                        ContentFolder = "Resources/Fountain",
-                        ModelContentFilename = "fountain.xml",
+                        ContentFolder = "Resources/obelisk",
+                        ModelContentFilename = "obelisk.xml",
                     },
                 });
 
-            this.AttachToGround(this.obelisks, true);
+            #endregion
+
+            #region Fountain
+
+            this.fountain = await this.AddComponentModel(
+                new ModelDescription()
+                {
+                    Name = "Fountain",
+                    CastShadow = true,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "Resources/Fountain",
+                        ModelContentFilename = "Fountain.xml",
+                    },
+                });
+
+            this.AttachToGround(this.fountain, true);
 
             #endregion
 
@@ -288,7 +319,14 @@ namespace Skybox
                 pManager.AddParticleSystem(ParticleSystemTypes.CPU, pPlume, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.5f });
             }
 
-            this.obelisks[0].Manipulator.SetScale(2.3f);
+            for (int i = 0; i < this.obeliskPositions.Length; i++)
+            {
+                this.obelisks[i].Manipulator.SetPosition(obeliskPositions[i]);
+                this.obelisks[i].Manipulator.SetRotation(obeliskRotations[i]);
+                this.obelisks[i].Manipulator.SetScale(10f);
+            }
+
+            this.fountain.Manipulator.SetScale(2.3f);
 
             #endregion
 
