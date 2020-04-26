@@ -182,9 +182,6 @@
     <Content Include="Resources\Fountain\tLbZ9Jo.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Fountain\tLbZ9Jo_b.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="Resources\Obelisk\obelisk_d.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
