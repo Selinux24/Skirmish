@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Engine.Content.FmtObj
@@ -59,15 +60,65 @@ namespace Engine.Content.FmtObj
                 transform = Matrix.Scaling(content.Scale);
             }
 
-            var meshList = Load(contentFolder, content.ModelFileName, transform);
+            var meshList = Load(contentFolder, content.ModelFileName, transform, out var materials);
             if (meshList.Any())
             {
                 ModelContent m = new ModelContent();
 
+                foreach (var mat in materials)
+                {
+                    var matContent = MaterialContent.Default;
+
+                    if (mat.MapNs != null)
+                    {
+                        matContent.SpecularTexture = mat.MapNs;
+                    }
+                    else
+                    {
+                        matContent.Shininess = mat.Ns;
+                    }
+
+                    matContent.AmbientTexture = mat.MapKa;
+
+                    if (mat.MapKd != null)
+                    {
+                        matContent.DiffuseTexture = mat.MapKd;
+                    }
+                    else
+                    {
+                        matContent.DiffuseColor = new Color4(mat.Kd, 1);
+                    }
+
+                    if (mat.MapKs != null)
+                    {
+                        matContent.SpecularTexture = mat.MapKs;
+                    }
+                    else
+                    {
+                        matContent.SpecularColor = new Color4(mat.Ks, 1);
+                    }
+
+                    matContent.EmissionColor = new Color4(mat.Ke, 1);
+                    matContent.IndexOfRefraction = mat.Ni;
+
+                    matContent.Transparency = mat.D != 0 ? 1f / mat.D : 0;
+
+                    matContent.NormalMapTexture = mat.MapBump;
+
+                    m.Materials.Add(mat.Name, matContent);
+
+                    m.TryAddTexture(contentFolder, mat.MapKa);
+                    m.TryAddTexture(contentFolder, mat.MapKd);
+                    m.TryAddTexture(contentFolder, mat.MapKs);
+                    m.TryAddTexture(contentFolder, mat.MapNs);
+                    m.TryAddTexture(contentFolder, mat.MapD);
+                    m.TryAddTexture(contentFolder, mat.MapBump);
+                }
+
                 for (int i = 0; i < meshList.Count(); i++)
                 {
                     var mesh = meshList.ElementAt(i);
-                    m.Geometry.Add($"Mesh{i + 1}", ModelContent.NoMaterial, mesh);
+                    m.Geometry.Add($"Mesh{i + 1}", mesh.Material ?? ModelContent.NoMaterial, mesh);
                 }
 
                 return new[] { m };
@@ -81,9 +132,12 @@ namespace Engine.Content.FmtObj
         /// <param name="contentFolder">Content folder</param>
         /// <param name="fileName">File name</param>
         /// <param name="transform">Transform</param>
+        /// <param name="materials">Resulting material list</param>
         /// <returns>Returns a list of model contents</returns>
-        private IEnumerable<SubMeshContent> Load(string contentFolder, string fileName, Matrix transform)
+        private IEnumerable<SubMeshContent> Load(string contentFolder, string fileName, Matrix transform, out IEnumerable<Material> materials)
         {
+            List<Material> matList = new List<Material>();
+
             var modelList = ContentManager.FindContent(contentFolder, fileName);
             if (modelList.Any())
             {
@@ -91,10 +145,13 @@ namespace Engine.Content.FmtObj
 
                 foreach (var model in modelList)
                 {
-                    Reader.LoadObj(model, transform, out var contentList);
+                    Reader.LoadObj(model, contentFolder, transform, out var contentList, out var mats);
 
+                    matList.AddRange(mats);
                     res.AddRange(contentList);
                 }
+
+                materials = matList.ToArray();
 
                 return res.ToArray();
             }
@@ -103,7 +160,7 @@ namespace Engine.Content.FmtObj
                 throw new EngineException(string.Format("Model not found: {0}", fileName));
             }
         }
-        
+
         /// <summary>
         /// Saves a triangle list in a file
         /// </summary>
@@ -136,6 +193,21 @@ namespace Engine.Content.FmtObj
                             Writer.WriteObj(wr, s);
                         }
                     }
+                }
+            }
+        }
+    }
+
+    static class ContentExtensions
+    {
+        public static void TryAddTexture(this ModelContent m, string contentFolder, string texture)
+        {
+            if (texture != null && !m.Images.ContainsKey(texture))
+            {
+                string path = Path.Combine(contentFolder, texture);
+                if (File.Exists(path))
+                {
+                    m.Images.Add(texture, new ImageContent() { Path = path });
                 }
             }
         }

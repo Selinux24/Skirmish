@@ -1,5 +1,6 @@
 ﻿using Engine;
 using Engine.Content.FmtCollada;
+using Engine.Content.FmtObj;
 using System;
 using System.IO;
 
@@ -27,6 +28,7 @@ namespace Skybox
 #endif
 
                     GameResourceManager.RegisterLoader<LoaderCollada>();
+                    GameResourceManager.RegisterLoader<LoaderObj>();
 
                     cl.SetScene<TestScene3D>();
 

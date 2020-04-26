@@ -45,6 +45,7 @@ namespace Skybox
         private PrimitiveListDrawer<Triangle> graphDrawer = null;
 
         private ModelInstanced torchs = null;
+        private ModelInstanced obelisks = null;
 
         private Model movingFire = null;
         private ParticleEmitter movingFireEmitter = null;
@@ -148,6 +149,25 @@ namespace Skybox
                 });
 
             this.AttachToGround(this.torchs, true);
+
+            #endregion
+
+            #region Obelisks
+
+            this.obelisks = await this.AddComponentModelInstanced(
+                new ModelInstancedDescription()
+                {
+                    Name = "Obelisks",
+                    Instances = this.firePositions.Length,
+                    CastShadow = true,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "Resources/Fountain",
+                        ModelContentFilename = "fountain.xml",
+                    },
+                });
+
+            this.AttachToGround(this.obelisks, true);
 
             #endregion
 
@@ -267,6 +287,8 @@ namespace Skybox
                 pManager.AddParticleSystem(ParticleSystemTypes.CPU, pFire, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.1f });
                 pManager.AddParticleSystem(ParticleSystemTypes.CPU, pPlume, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.5f });
             }
+
+            this.obelisks[0].Manipulator.SetScale(2.3f);
 
             #endregion
 

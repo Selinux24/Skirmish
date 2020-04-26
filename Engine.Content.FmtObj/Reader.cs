@@ -16,7 +16,7 @@ namespace Engine.Content.FmtObj
         /// <param name="stream">Stream</param>
         /// <param name="transform">Transform to apply to all vertices</param>
         /// <param name="content">Result content</param>
-        public static void LoadObj(Stream stream, Matrix transform, out IEnumerable<SubMeshContent> content)
+        public static void LoadObj(Stream stream, string folder, Matrix transform, out IEnumerable<SubMeshContent> content, out IEnumerable<Material> mats)
         {
             List<SubMeshContent> models = new List<SubMeshContent>();
 
@@ -27,7 +27,9 @@ namespace Engine.Content.FmtObj
                 List<Vector3> points = new List<Vector3>();
                 List<Vector2> uvs = new List<Vector2>();
                 List<Vector3> normals = new List<Vector3>();
+                string material = null;
                 List<Face[]> indices = new List<Face[]>();
+                List<Material> materials = new List<Material>();
 
                 bool currIsPosition = false;
                 bool prevIsPosition = false;
@@ -41,39 +43,59 @@ namespace Engine.Content.FmtObj
                     {
                         prevIsPosition = currIsPosition;
 
+                        var matList = ReadMaterial(folder, strLine, "mtllib");
+                        materials.AddRange(matList);
+
                         var ps = ReadVector3(strLine, "v", doTransform, transform);
                         currIsPosition = ps.Any();
 
                         bool modelBegin = !prevIsPosition && currIsPosition;
                         if (modelBegin && points.Any())
                         {
-                            models.Add(CreateModel(points, uvs, normals, indices, offset));
+                            models.Add(CreateModel(material, points, uvs, normals, indices, offset));
 
                             offset += points.Count;
 
                             points.Clear();
                             uvs.Clear();
                             normals.Clear();
+                            material = null;
                             indices.Clear();
                         }
 
                         points.AddRange(ps);
-                        uvs.AddRange(ReadVector2(strLine, "vt"));
+                        uvs.AddRange(ReadVector2(strLine, "vt", true));
                         normals.AddRange(ReadVector3(strLine, "vn", doTransform, transform));
+                        if (material == null)
+                        {
+                            material = ReadUseMaterial(strLine, "usemtl");
+                        }
                         indices.AddRange(ReadIndices(strLine));
                     }
                 }
 
                 if (indices.Any())
                 {
-                    models.Add(CreateModel(points, uvs, normals, indices, offset));
+                    models.Add(CreateModel(material, points, uvs, normals, indices, offset));
                 }
+
+                mats = materials.ToArray();
             }
 
             content = models.ToArray();
         }
 
-        private static IEnumerable<Vector2> ReadVector2(string strLine, string dataType)
+        private static string ReadUseMaterial(string strLine, string dataType)
+        {
+            if (strLine.StartsWith(dataType + " ", StringComparison.OrdinalIgnoreCase))
+            {
+                return strLine.Split(" ".ToArray(), StringSplitOptions.None)[1];
+            }
+
+            return null;
+        }
+
+        private static IEnumerable<Vector2> ReadVector2(string strLine, string dataType, bool reverseY)
         {
             if (strLine.StartsWith(dataType + " ", StringComparison.OrdinalIgnoreCase))
             {
@@ -82,6 +104,11 @@ namespace Engine.Content.FmtObj
                 var v = new Vector2(
                     float.Parse(numbers[1], NumberStyles.Float, LoaderObj.Locale),
                     float.Parse(numbers[2], NumberStyles.Float, LoaderObj.Locale));
+
+                if (reverseY)
+                {
+                    v.Y = 1 - v.Y;
+                }
 
                 return new[] { v };
             }
@@ -147,17 +174,100 @@ namespace Engine.Content.FmtObj
             return new Face[][] { };
         }
 
+        private static IEnumerable<Material> ReadMaterial(string folder, string strLine, string dataType)
+        {
+            if (strLine.StartsWith(dataType + " ", StringComparison.OrdinalIgnoreCase))
+            {
+                var materials = strLine.Split(" ".ToArray(), StringSplitOptions.None);
+
+                return ReadMaterialsFromFile(Path.Combine(folder, materials[1]));
+            }
+
+            return new Material[] { };
+        }
+
+        public static int[] FindAllIndexOf(this IEnumerable<string> values, string val)
+        {
+            return values.Select((b, i) => b.StartsWith(val, StringComparison.OrdinalIgnoreCase) ? i : -1).Where(i => i != -1).ToArray();
+        }
+
+        public static string ReadString(string line, int index)
+        {
+            return line?.Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries).ElementAtOrDefault(index);
+        }
+
+        public static float ReadFloat(string line, int index, float defaultValue = 0)
+        {
+            var tValue = line?.Split(" ".ToCharArray()).ElementAtOrDefault(index);
+            if (float.TryParse(tValue, NumberStyles.Float, CultureInfo.InvariantCulture, out float res))
+            {
+                return res;
+            }
+
+            return defaultValue;
+        }
+
+        public static Color3 ReadColor3(string line, int index)
+        {
+            float r = ReadFloat(line, index + 0);
+            float g = ReadFloat(line, index + 1);
+            float b = ReadFloat(line, index + 2);
+
+            return new Color3(r, g, b);
+        }
+
+        private static IEnumerable<Material> ReadMaterialsFromFile(string fileName)
+        {
+            List<Material> materials = new List<Material>();
+
+            string[] matLines = File.ReadAllLines(fileName);
+
+            var matIndices = matLines.FindAllIndexOf("newmtl");
+            for (int i = 0; i < matIndices.Length; i++)
+            {
+                int size = i == matIndices.Length - 1 ?
+                    matLines.Length - i :
+                    matIndices[i + 1] - i;
+
+                var mat = ReadMaterial(matLines.Skip(i).Take(size));
+                materials.Add(mat);
+            }
+
+            return materials;
+        }
+
+        private static Material ReadMaterial(IEnumerable<string> lines)
+        {
+            return new Material()
+            {
+                Name = ReadString(lines.FirstOrDefault(l => l.StartsWith("newmtl ", StringComparison.OrdinalIgnoreCase)), 1),
+                ShaderProfile = ReadString(lines.FirstOrDefault(l => l.StartsWith("illum ", StringComparison.OrdinalIgnoreCase)), 1),
+
+                Ns = ReadFloat(lines.FirstOrDefault(l => l.StartsWith("ns ", StringComparison.OrdinalIgnoreCase)), 1),
+                MapNs = ReadString(lines.FirstOrDefault(l => l.StartsWith("map_ns ", StringComparison.OrdinalIgnoreCase)), 1),
+
+                Ka = ReadColor3(lines.FirstOrDefault(l => l.StartsWith("ka ", StringComparison.OrdinalIgnoreCase)), 1),
+                MapKa = ReadString(lines.FirstOrDefault(l => l.StartsWith("map_ka ", StringComparison.OrdinalIgnoreCase)), 1),
+
+                Kd = ReadColor3(lines.FirstOrDefault(l => l.StartsWith("kd ", StringComparison.OrdinalIgnoreCase)), 1),
+                MapKd = ReadString(lines.FirstOrDefault(l => l.StartsWith("map_kd ", StringComparison.OrdinalIgnoreCase)), 1),
+
+                Ks = ReadColor3(lines.FirstOrDefault(l => l.StartsWith("ks ", StringComparison.OrdinalIgnoreCase)), 1),
+                MapKs = ReadString(lines.FirstOrDefault(l => l.StartsWith("map_ks ", StringComparison.OrdinalIgnoreCase)), 1),
+
+                Ke = ReadColor3(lines.FirstOrDefault(l => l.StartsWith("ke ", StringComparison.OrdinalIgnoreCase)), 1),
+                Ni = ReadFloat(lines.FirstOrDefault(l => l.StartsWith("ni ", StringComparison.OrdinalIgnoreCase)), 1),
+
+                D = ReadFloat(lines.FirstOrDefault(l => l.StartsWith("d ", StringComparison.OrdinalIgnoreCase)), 1),
+                MapD = ReadString(lines.FirstOrDefault(l => l.StartsWith("map_d ", StringComparison.OrdinalIgnoreCase)), 1),
+
+                MapBump = ReadString(lines.FirstOrDefault(l => l.StartsWith("map_bump ", StringComparison.OrdinalIgnoreCase)), 1),
+            };
+        }
+
         private static IEnumerable<VertexData> CreateVertexData(List<Vector3> points, List<Vector2> uvs, List<Vector3> normals, List<Face[]> faces, int offset)
         {
             List<VertexData> vertexList = new List<VertexData>();
-
-            foreach (var vertex in points)
-            {
-                vertexList.Add(new VertexData
-                {
-                    Position = vertex,
-                });
-            }
 
             int faceIndex = 0;
             foreach (var face in faces)
@@ -169,14 +279,16 @@ namespace Engine.Content.FmtObj
                     int? uvIndex = faceVertex.GetUVIndex(offset);
                     int? nmIndex = faceVertex.GetNormalIndex(offset);
 
-                    VertexData v = vertexList[vIndex];
+                    VertexData v = new VertexData
+                    {
+                        Position = points[vIndex],
+                        Texture = uvIndex >= 0 ? (Vector2?)uvs[uvIndex.Value] : null,
+                        Normal = nmIndex >= 0 ? (Vector3?)normals[nmIndex.Value] : null,
+                        FaceIndex = faceIndex,
+                        VertexIndex = vertexIndex++
+                    };
 
-                    v.Texture = uvIndex >= 0 ? (Vector2?)uvs[uvIndex.Value] : null;
-                    v.Normal = nmIndex >= 0 ? (Vector3?)normals[nmIndex.Value] : null;
-                    v.FaceIndex = faceIndex;
-                    v.VertexIndex = vertexIndex++;
-
-                    vertexList[vIndex] = v;
+                    vertexList.Add(v);
                 }
 
                 faceIndex++;
@@ -185,21 +297,23 @@ namespace Engine.Content.FmtObj
             return vertexList.ToArray();
         }
 
-        private static SubMeshContent CreateModel(List<Vector3> points, List<Vector2> uvs, List<Vector3> normals, List<Face[]> faces, int offset)
+        private static SubMeshContent CreateModel(string material, List<Vector3> points, List<Vector2> uvs, List<Vector3> normals, List<Face[]> faces, int offset)
         {
             var vertexList = CreateVertexData(points, uvs, normals, faces, offset);
 
             List<uint> mIndices = new List<uint>();
 
             //Generate indices
-            foreach (var face in faces)
+            for (int f = 0; f < faces.Count; f++)
             {
-                int nv = face.Length;
+                int nv = faces[f].Length;
                 for (int i = 2; i < nv; i++)
                 {
-                    int a = face[0].GetPositionIndex(offset);
-                    int b = face[i - 1].GetPositionIndex(offset);
-                    int c = face[i].GetPositionIndex(offset);
+                    int iDelta = offset + (f * 3);
+
+                    int a = i - 2 + iDelta;
+                    int b = i - 1 + iDelta;
+                    int c = i + iDelta;
 
                     //Read From CW to CCW
                     mIndices.Add((uint)a);
@@ -213,7 +327,7 @@ namespace Engine.Content.FmtObj
                 vertexList = ComputeNormals(vertexList, mIndices);
             }
 
-            SubMeshContent content = new SubMeshContent(Topology.TriangleList, ModelContent.NoMaterial, false, false);
+            SubMeshContent content = new SubMeshContent(Topology.TriangleList, material ?? ModelContent.NoMaterial, uvs.Any(), false);
 
             content.SetVertices(vertexList);
             content.SetIndices(mIndices);

@@ -192,20 +192,29 @@ namespace Engine
                 return;
             }
 
-            creatingResources = true;
-
-            // Process requests
-            foreach (var resource in pendingRequests.ToArray())
+            try
             {
-                resource.Value.Create(this.game);
+                creatingResources = true;
 
-                resources.Add(resource.Key, resource.Value.ResourceView);
+                // Process requests
+                foreach (var resource in pendingRequests.ToArray())
+                {
+                    resource.Value.Create(this.game);
+
+                    resources.Add(resource.Key, resource.Value.ResourceView);
+                }
+
+                // Remove requests
+                RemoveRequests(pendingRequests.Select(r => r.Key));
             }
-
-            // Remove requests
-            RemoveRequests(pendingRequests.Select(r => r.Key));
-
-            creatingResources = false;
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error creating new resources: {ex.Message}");
+            }
+            finally
+            {
+                creatingResources = false;
+            }
         }
         private IEnumerable<KeyValuePair<string, IGameResourceRequest>> GetPendingRequests()
         {
