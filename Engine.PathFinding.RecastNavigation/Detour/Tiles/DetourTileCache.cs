@@ -12,11 +12,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         public const int VERTEX_BUCKET_COUNT2 = (1 << 8);
         public const int MAX_REQUESTS = 64;
         public const int MAX_UPDATE = 64;
-        public const int MAX_VERTS_PER_POLY = 6;    // TODO: use the DT_VERTS_PER_POLYGON
-        public const int MAX_REM_EDGES = 48;        // TODO: make this an expression.
+        public const int MAX_REM_EDGES = 48;
         public const int DT_LAYER_MAX_NEIS = 16;
         public const int DT_MAX_TOUCHED_TILES = 8;
-        public const int DT_TILECACHE_MAGIC = 'D' << 24 | 'T' << 16 | 'L' << 8 | 'R'; ///< 'DTLR';
+        public const int DT_TILECACHE_MAGIC = 'D' << 24 | 'T' << 16 | 'L' << 8 | 'R';
         public const int DT_TILECACHE_VERSION = 1;
         public const int DT_TILECACHE_NULL_AREA = 0;
         public const int DT_TILECACHE_WALKABLE_AREA = 63;
@@ -379,8 +378,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 maxTris += bc.LCSet.Conts[i].NVerts - 2;
                 maxVertsPerCont = Math.Max(maxVertsPerCont, bc.LCSet.Conts[i].NVerts);
             }
-
-            // TODO: warn about too many vertices?
 
             var mesh = new TileCachePolyMesh
             {

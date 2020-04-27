@@ -987,8 +987,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     // Add the new sample point.
                     verts.Add(bestpt);
 
-                    // Create new triangulation.
-                    // TODO: Incremental add instead of full rebuild.
+                    // Create new triangulation. Full rebuild.
                     DelaunayHull.Build(verts, hull.Take(nhull), out var dTris, out var dEdges);
                     edges.Clear();
                     edges.AddRange(dEdges);
@@ -1486,21 +1485,20 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             Vector3 bmin = verts[0];
             Vector3 bmax = verts[0];
-
             for (int i = 1; i < nverts; ++i)
             {
                 Vector3.Min(bmin, verts[i * 3]);
                 Vector3.Max(bmax, verts[i * 3]);
             }
-            bmin[1] = hmin;
-            bmax[1] = hmax;
+            bmin.Y = hmin;
+            bmax.Y = hmax;
 
-            int minx = (int)((bmin[0] - BoundingBox.Minimum[0]) / CellSize);
-            int miny = (int)((bmin[1] - BoundingBox.Minimum[1]) / CellHeight);
-            int minz = (int)((bmin[2] - BoundingBox.Minimum[2]) / CellSize);
-            int maxx = (int)((bmax[0] - BoundingBox.Minimum[0]) / CellSize);
-            int maxy = (int)((bmax[1] - BoundingBox.Minimum[1]) / CellHeight);
-            int maxz = (int)((bmax[2] - BoundingBox.Minimum[2]) / CellSize);
+            int minx = (int)((bmin.X - BoundingBox.Minimum.X) / CellSize);
+            int miny = (int)((bmin.Y - BoundingBox.Minimum.Y) / CellHeight);
+            int minz = (int)((bmin.Z - BoundingBox.Minimum.Z) / CellSize);
+            int maxx = (int)((bmax.X - BoundingBox.Minimum.X) / CellSize);
+            int maxy = (int)((bmax.Y - BoundingBox.Minimum.Y) / CellHeight);
+            int maxz = (int)((bmax.Z - BoundingBox.Minimum.Z) / CellSize);
 
             if (maxx < 0) return;
             if (minx >= Width) return;
@@ -1512,8 +1510,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             if (minz < 0) minz = 0;
             if (maxz >= Height) maxz = Height - 1;
 
-
-            // TODO: Optimize.
             for (int z = minz; z <= maxz; ++z)
             {
                 for (int x = minx; x <= maxx; ++x)
@@ -1529,10 +1525,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                         if (s.Y >= miny && s.Y <= maxy)
                         {
-                            Vector3 p = new Vector3();
-                            p[0] = BoundingBox.Minimum[0] + (x + 0.5f) * CellSize;
-                            p[1] = 0;
-                            p[2] = BoundingBox.Minimum[2] + (z + 0.5f) * CellSize;
+                            Vector3 p = new Vector3
+                            {
+                                X = BoundingBox.Minimum.X + (x + 0.5f) * CellSize,
+                                Y = 0,
+                                Z = BoundingBox.Minimum.Z + (z + 0.5f) * CellSize
+                            };
 
                             if (PointInPoly(nverts, verts, p))
                             {
@@ -1582,7 +1580,6 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             if (maxx >= Width) maxx = Width - 1;
             if (minz < 0) minz = 0;
             if (maxz >= Height) maxz = Height - 1;
-
 
             for (int z = minz; z <= maxz; ++z)
             {

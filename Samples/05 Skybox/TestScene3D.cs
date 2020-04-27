@@ -17,6 +17,12 @@ namespace Skybox
         private const int layerHUD = 99;
         private const float alpha = 0.25f;
 
+        private readonly Color4 ruinsVolumeColor = new Color4(Color.Green.RGB(), alpha);
+        private readonly Color4 torchVolumeColor = new Color4(Color.GreenYellow.RGB(), alpha);
+        private readonly Color4 obeliskVolumeColor = new Color4(Color.DarkGreen.RGB(), alpha);
+        private readonly Color4 fountainVolumeColor = new Color4(Color.DarkSeaGreen.RGB(), alpha);
+        private readonly int bsphSlices = 20;
+        private readonly int bsphStacks = 10;
         private readonly Vector2[] firePositions = new[]
         {
             new Vector2(+5, +5),
@@ -24,21 +30,17 @@ namespace Skybox
             new Vector2(+5, -5),
             new Vector2(-5, -5),
         };
-        private readonly Color4 ruinsVolumeColor = new Color4(Color.Green.RGB(), alpha);
-        private readonly Color4 torchVolumeColor = new Color4(Color.GreenYellow.RGB(), alpha);
-        private readonly int bsphSlices = 20;
-        private readonly int bsphStacks = 10;
         private readonly Vector3[] obeliskPositions = new[]
         {
             new Vector3(+100, -0.2f, +100),
-            new Vector3(-100, 0, +100),
-            new Vector3(+100, 0, -100),
-            new Vector3(-100, 0, -100),
+            new Vector3(-100, -10, +100),
+            new Vector3(+100, -1, -100),
+            new Vector3(-100, -1, -100),
         };
         private readonly Quaternion[] obeliskRotations = new[]
         {
-            Quaternion.RotationYawPitchRoll(-MathUtil.PiOverTwo * 0.93f, MathUtil.PiOverTwo*1.03f, 0.45f),
-            Quaternion.Identity,
+            Quaternion.RotationYawPitchRoll(-MathUtil.PiOverTwo * 0.75f, MathUtil.PiOverTwo*1.03f, 0.45f),
+            Quaternion.RotationYawPitchRoll(0, -0.15f, 0),
             Quaternion.Identity,
             Quaternion.Identity,
         };
@@ -48,8 +50,8 @@ namespace Skybox
             Name = "Walker",
             Height = 1.2f,
             Radius = 0.4f,
-            MaxClimb = 0.5f,
-            MaxSlope = 50,
+            MaxClimb = 1.2f,
+            MaxSlope = 45,
         };
 
         private TextDrawer fps = null;
@@ -599,7 +601,17 @@ namespace Skybox
             {
                 volumesTorchs.AddRange(Line3D.CreateWiredBox(this.torchs[i].GetBoundingBox()));
             }
-            this.volumesDrawer.SetPrimitives(this.torchVolumeColor, volumesTorchs.ToArray());
+            this.volumesDrawer.SetPrimitives(this.torchVolumeColor, volumesTorchs);
+
+            List<Line3D> volumesObelisks = new List<Line3D>();
+            for (int i = 0; i < this.obelisks.InstanceCount; i++)
+            {
+                volumesObelisks.AddRange(Line3D.CreateWiredBox(this.obelisks[i].GetBoundingBox()));
+            }
+            this.volumesDrawer.SetPrimitives(this.obeliskVolumeColor, volumesObelisks);
+
+            var volumeFountain = Line3D.CreateWiredBox(this.fountain.GetBoundingBox());
+            this.volumesDrawer.SetPrimitives(this.fountainVolumeColor, volumeFountain);
 
             for (int i = 1; i < this.Lights.PointLights.Length; i++)
             {

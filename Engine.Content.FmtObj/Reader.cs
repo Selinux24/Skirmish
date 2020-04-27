@@ -38,9 +38,13 @@ namespace Engine.Content.FmtObj
                 }
             }
 
+            //Read all materials libs file names
+            List<string> matLibFiles = new List<string>();
+            lines.ForEach(v => matLibFiles.AddRange(ReadMaterialFileName(folder, v, "mtllib")));
+
             //Read all materials
             List<Material> matLibs = new List<Material>();
-            lines.ForEach(v => matLibs.AddRange(ReadMaterial(folder, v, "mtllib")));
+            matLibs.AddRange(ReadMaterialsFromFile(matLibFiles));
 
             //Read all points
             List<Vector3> points = new List<Vector3>();
@@ -206,32 +210,43 @@ namespace Engine.Content.FmtObj
         {
             return strLine?.Split(" ".ToArray(), StringSplitOptions.None)?.ElementAtOrDefault(1);
         }
-        private static IEnumerable<Material> ReadMaterial(string folder, string strLine, string dataType)
+        private static IEnumerable<string> ReadMaterialFileName(string folder, string strLine, string dataType)
         {
             if (strLine.StartsWith(dataType + " ", StringComparison.OrdinalIgnoreCase))
             {
-                var materials = strLine.Split(" ".ToArray(), StringSplitOptions.None);
+                string materialFile = strLine.Split(" ".ToArray(), StringSplitOptions.None).ElementAtOrDefault(1);
+                if (string.IsNullOrWhiteSpace(materialFile))
+                {
+                    return new string[] { };
+                }
 
-                return ReadMaterialsFromFile(Path.Combine(folder, materials[1]));
+                string path = Path.Combine(folder, materialFile);
+                if (File.Exists(path))
+                {
+                    return new[] { path };
+                }
             }
 
-            return new Material[] { };
+            return new string[] { };
         }
-        private static IEnumerable<Material> ReadMaterialsFromFile(string fileName)
+        private static IEnumerable<Material> ReadMaterialsFromFile(IEnumerable<string> fileNames)
         {
             List<Material> materials = new List<Material>();
 
-            string[] matLines = File.ReadAllLines(fileName);
-
-            var matIndices = matLines.FindAllIndexOf("newmtl");
-            for (int i = 0; i < matIndices.Length; i++)
+            foreach (var fileName in fileNames.Distinct())
             {
-                int size = i == matIndices.Length - 1 ?
-                    matLines.Length - matIndices[i] :
-                    matIndices[i + 1] - matIndices[i];
+                string[] matLines = File.ReadAllLines(fileName);
 
-                var mat = ReadMaterial(matLines.Skip(matIndices[i]).Take(size));
-                materials.Add(mat);
+                var matIndices = matLines.FindAllIndexOf("newmtl");
+                for (int i = 0; i < matIndices.Length; i++)
+                {
+                    int size = i == matIndices.Length - 1 ?
+                        matLines.Length - matIndices[i] :
+                        matIndices[i + 1] - matIndices[i];
+
+                    var mat = ReadMaterial(matLines.Skip(matIndices[i]).Take(size));
+                    materials.Add(mat);
+                }
             }
 
             return materials;
