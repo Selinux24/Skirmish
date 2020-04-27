@@ -3,7 +3,6 @@ using Engine.Content;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
 using SharpDX;
-using System;
 using System.Threading.Tasks;
 
 namespace Collada

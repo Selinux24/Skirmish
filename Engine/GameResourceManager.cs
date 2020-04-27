@@ -9,7 +9,6 @@ namespace Engine
 {
     using Engine.Common;
     using Engine.Content;
-    using System.Drawing;
 
     /// <summary>
     /// Engine resource manager
@@ -204,8 +203,8 @@ namespace Engine
                 creatingResources = true;
 
                 // Get pending requests
-                int total = pendingRequests.Count() + 1;
-                int current = 0;
+                float total = pendingRequests.Count() + 1f;
+                float current = 0;
 
                 // Process requests
                 foreach (var resource in pendingRequests)

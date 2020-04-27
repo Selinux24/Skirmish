@@ -2,7 +2,6 @@
 using Engine.Common;
 using Engine.Content;
 using SharpDX;
-using System;
 using System.Threading.Tasks;
 
 namespace Collada
