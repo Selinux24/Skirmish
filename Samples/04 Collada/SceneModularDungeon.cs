@@ -82,13 +82,8 @@ namespace Collada
         private GameAudioEffect ratSoundInstance = null;
 
         private bool userInterfaceInitialized = false;
-        private Guid userInterfaceId = Guid.NewGuid();
         private bool gameAssetsInitialized = false;
-        private bool gameAssetsInitializing = false;
-        private Guid gameAssetsId = Guid.NewGuid();
         private bool levelInitialized = false;
-        private bool levelInitializing = false;
-        private Guid levelId = Guid.NewGuid();
         private bool gameReady = false;
 
         private AgentType CurrentAgent
@@ -116,33 +111,12 @@ namespace Collada
             this.Game.VisibleMouse = false;
             this.Game.LockMouse = true;
 #endif
-            await this.LoadResourcesAsync(userInterfaceId, this.InitializeUI());
-        }
-        public override void GameResourcesLoaded(Guid id)
-        {
-            if (id == userInterfaceId && !userInterfaceInitialized)
+            await this.LoadResourcesAsync(this.InitializeUI(), () =>
             {
                 userInterfaceInitialized = true;
 
-                return;
-            }
-
-            if (id == gameAssetsId && !gameAssetsInitialized)
-            {
-                gameAssetsInitialized = true;
-
-                this.InitializeEnvironment();
-                this.InitializeLights();
-
-                this.StartCamera();
-
-                this.AudioManager.Start();
-            }
-
-            if (id == levelId && !levelInitialized)
-            {
-                levelInitialized = true;
-            }
+                Task.WhenAll(this.InitializeAssets());
+            });
         }
         public override void OnReportProgress(float value)
         {
@@ -235,15 +209,6 @@ namespace Collada
             this.fps.Text = this.Game.RuntimeText;
             this.info.Text = string.Format("{0}", this.GetRenderMode());
 
-            if (!gameAssetsInitialized && !gameAssetsInitializing)
-            {
-                gameAssetsInitializing = true;
-
-                Task.WhenAll(this.InitializeAssets());
-
-                return;
-            }
-
             if (!gameAssetsInitialized)
             {
                 return;
@@ -251,24 +216,25 @@ namespace Collada
 
             if (this.Game.Input.KeyJustReleased(Keys.B))
             {
-                this.LoadResources(levelId, this.ChangeToLevel("Lvl1"));
+                levelInitialized = false;
+                _ = this.LoadResourcesAsync(this.ChangeToLevel("Lvl1"), () => { levelInitialized = true; });
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.N))
             {
-                this.LoadResources(levelId, this.ChangeToLevel("Lvl2"));
+                levelInitialized = false;
+                _ = this.LoadResourcesAsync(this.ChangeToLevel("Lvl2"), () => { levelInitialized = true; });
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.M))
             {
-                this.LoadResources(levelId, this.ChangeToLevel("Lvl3"));
+                levelInitialized = false;
+                _ = this.LoadResourcesAsync(this.ChangeToLevel("Lvl3"), () => { levelInitialized = true; });
             }
 
-            if (!levelInitialized && !levelInitializing)
+            if (!levelInitialized)
             {
-                levelInitializing = true;
-
-                this.LoadResources(levelId, this.ChangeToLevel(null));
+                return;
             }
 
             if (!gameReady)
@@ -352,7 +318,21 @@ namespace Collada
                 InitializeAudio(),
             };
 
-            await this.LoadResourcesAsync(gameAssetsId, tasks.ToArray());
+            await this.LoadResourcesAsync(tasks.ToArray(), () =>
+            {
+                gameAssetsInitialized = true;
+
+                this.InitializeEnvironment();
+                this.InitializeLights();
+
+                this.StartCamera();
+
+                this.AudioManager.Start();
+
+                levelInitialized = false;
+
+                _ = this.LoadResourcesAsync(this.ChangeToLevel(null), () => { levelInitialized = true; });
+            });
         }
         private void InitializeEnvironment()
         {
@@ -1226,7 +1206,9 @@ namespace Collada
                     string nextLevel = item.Object.NextLevel;
                     if (!string.IsNullOrEmpty(nextLevel))
                     {
-                        await this.LoadResourcesAsync(Guid.NewGuid(), this.ChangeToLevel(nextLevel));
+                        levelInitialized = false;
+
+                        await this.LoadResourcesAsync(this.ChangeToLevel(nextLevel), () => { levelInitialized = true; });
                     }
                     else
                     {

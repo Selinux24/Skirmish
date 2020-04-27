@@ -98,14 +98,7 @@ namespace Heightmap
 
         private SpriteTexture bufferDrawer = null;
 
-        private Guid userInterfaceId = Guid.NewGuid();
         private bool userInterfaceInitialized = false;
-        private Guid gameAssetsId = Guid.NewGuid();
-        private bool gameAssetsInitializing = false;
-        private bool gameAssetsInitialized = false;
-        private Guid terrainId = Guid.NewGuid();
-        private bool terrainInitializing = false;
-        private bool terrainInitialized = false;
         private bool gameReady = false;
 
         private bool udaptingGraph = false;
@@ -121,12 +114,17 @@ namespace Heightmap
             this.Camera.Position = new Vector3(10000, 10000, 10000);
             this.Camera.Interest = new Vector3(10001, 10000, 10000);
 
-            await InitializeDebug();
+            await this.LoadResourcesAsync(
+                new[]
+                {
+                    InitializeUI()
+                },
+                () =>
+                {
+                    userInterfaceInitialized = true;
 
-            Stopwatch sw = Stopwatch.StartNew();
-            sw.Start();
-
-            await this.LoadResourcesAsync(userInterfaceId, this.InitializeUI());
+                    InitializeGameAssets();
+                });
         }
         private void InitializeGameAssets()
         {
@@ -148,9 +146,23 @@ namespace Heightmap
                 InitializeSkydom(),
                 InitializeClouds(),
                 InitializeParticles(),
+                InitializeDebug(),
             };
 
-            this.LoadResources(gameAssetsId, loadTasks);
+            _ = this.LoadResourcesAsync(
+                loadTasks,
+                () =>
+                {
+                    this.skydom.RayleighScattering *= 0.8f;
+                    this.skydom.MieScattering *= 0.1f;
+
+                    this.TimeOfDay.BeginAnimation(new TimeSpan(8, 55, 00), 1f);
+
+                    this.Lights.BaseFogColor = new Color((byte)95, (byte)147, (byte)233) * 0.5f;
+                    this.ToggleFog();
+
+                    InitializeTerrainObjects();
+                });
         }
         private void InitializeTerrainObjects()
         {
@@ -163,43 +175,23 @@ namespace Heightmap
                 SetDebugInfo(),
             };
 
-            this.LoadResources(terrainId, loadTasks);
-        }
-
-        private async Task InitializeDebug()
-        {
-            int width = (int)(this.Game.Form.RenderWidth * 0.33f);
-            int height = (int)(this.Game.Form.RenderHeight * 0.33f);
-            int smLeft = this.Game.Form.RenderWidth - width;
-            int smTop = this.Game.Form.RenderHeight - height;
-
-            var desc = new SpriteTextureDescription()
-            {
-                Left = smLeft,
-                Top = smTop,
-                Width = width,
-                Height = height,
-                Channel = SpriteTextureChannels.NoAlpha,
-            };
-            this.bufferDrawer = await this.AddComponentSpriteTexture(desc, SceneObjectUsages.UI, layerEffects);
-            this.bufferDrawer.Visible = false;
-
-            this.lightsVolumeDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(
-                new PrimitiveListDrawerDescription<Line3D>()
+            _ = this.LoadResourcesAsync(
+                loadTasks,
+                () =>
                 {
-                    Name = "DEBUG++ Light Volumes",
-                    DepthEnabled = true,
-                    Count = 10000
-                });
+                    this.Camera.NearPlaneDistance = near;
+                    this.Camera.FarPlaneDistance = far;
+                    this.Camera.Position = new Vector3(24, 12, 14);
+                    this.Camera.Interest = new Vector3(0, 10, 0);
+                    this.Camera.MovementDelta = 45f;
+                    this.Camera.SlowMovementDelta = 20f;
 
-            this.graphDrawer = await this.AddComponentPrimitiveListDrawer<Triangle>(
-                new PrimitiveListDrawerDescription<Triangle>()
-                {
-                    Name = "DEBUG++ Graph",
-                    AlphaEnabled = true,
-                    Count = 50000,
+                    var lanternDesc = SceneLightSpotDescription.Create(this.Camera.Position, this.Camera.Direction, 25f, 100, 10000);
+                    this.lantern = new SceneLightSpot("lantern", true, Color.White, Color.White, false, lanternDesc);
+                    this.Lights.Add(this.lantern);
+
+                    this.SetPathFindingInfo();
                 });
-            this.graphDrawer.Visible = false;
         }
 
         private async Task<double> InitializeUI()
@@ -770,49 +762,42 @@ namespace Heightmap
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-
-        public override void GameResourcesLoaded(Guid id)
+        private async Task InitializeDebug()
         {
-            if (id == userInterfaceId && !userInterfaceInitialized)
+            int width = (int)(this.Game.Form.RenderWidth * 0.33f);
+            int height = (int)(this.Game.Form.RenderHeight * 0.33f);
+            int smLeft = this.Game.Form.RenderWidth - width;
+            int smTop = this.Game.Form.RenderHeight - height;
+
+            var desc = new SpriteTextureDescription()
             {
-                userInterfaceInitialized = true;
+                Left = smLeft,
+                Top = smTop,
+                Width = width,
+                Height = height,
+                Channel = SpriteTextureChannels.NoAlpha,
+            };
+            this.bufferDrawer = await this.AddComponentSpriteTexture(desc, SceneObjectUsages.UI, layerEffects);
+            this.bufferDrawer.Visible = false;
 
-                return;
-            }
+            this.lightsVolumeDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(
+                new PrimitiveListDrawerDescription<Line3D>()
+                {
+                    Name = "DEBUG++ Light Volumes",
+                    DepthEnabled = true,
+                    Count = 10000
+                });
 
-            if (id == gameAssetsId && !gameAssetsInitialized)
-            {
-                gameAssetsInitialized = true;
-
-                this.skydom.RayleighScattering *= 0.8f;
-                this.skydom.MieScattering *= 0.1f;
-
-                this.TimeOfDay.BeginAnimation(new TimeSpan(8, 55, 00), 1f);
-
-                this.Lights.BaseFogColor = new Color((byte)95, (byte)147, (byte)233) * 0.5f;
-                this.ToggleFog();
-
-                return;
-            }
-
-            if (id == terrainId && !terrainInitialized)
-            {
-                terrainInitialized = true;
-
-                this.Camera.NearPlaneDistance = near;
-                this.Camera.FarPlaneDistance = far;
-                this.Camera.Position = new Vector3(24, 12, 14);
-                this.Camera.Interest = new Vector3(0, 10, 0);
-                this.Camera.MovementDelta = 45f;
-                this.Camera.SlowMovementDelta = 20f;
-
-                var lanternDesc = SceneLightSpotDescription.Create(this.Camera.Position, this.Camera.Direction, 25f, 100, 10000);
-                this.lantern = new SceneLightSpot("lantern", true, Color.White, Color.White, true, lanternDesc);
-                this.Lights.Add(this.lantern);
-
-                this.SetPathFindingInfo();
-            }
+            this.graphDrawer = await this.AddComponentPrimitiveListDrawer<Triangle>(
+                new PrimitiveListDrawerDescription<Triangle>()
+                {
+                    Name = "DEBUG++ Graph",
+                    AlphaEnabled = true,
+                    Count = 50000,
+                });
+            this.graphDrawer.Visible = false;
         }
+
         private async Task SetAnimationDictionaries()
         {
             await Task.Run(() =>
@@ -1263,51 +1248,32 @@ namespace Heightmap
 
             this.PathFinderDescription = new PathFinderDescription(nmsettings, nminput);
 
-            Task.Run(() => this.UpdateNavigationGraph());
-        }
-        private void ToggleFog()
-        {
-            this.Lights.FogStart = this.Lights.FogStart == 0f ? fogStart : 0f;
-            this.Lights.FogRange = this.Lights.FogRange == 0f ? fogRange : 0f;
+            _ = this.UpdateNavigationGraph();
         }
 
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
 
-            if (!gameAssetsInitialized && !gameAssetsInitializing)
+            if (!userInterfaceInitialized)
             {
-                gameAssetsInitializing = true;
-
-                InitializeGameAssets();
-
                 return;
             }
 
-            if (gameAssetsInitialized && !terrainInitialized && !terrainInitializing)
-            {
-                terrainInitializing = true;
+            this.stats.Text = this.Game.RuntimeText;
 
-                InitializeTerrainObjects();
+            this.help.Text = string.Format(
+                "{0}. Wind {1} {2:0.000} - Next {3:0.000}; {4} Light brightness: {5:0.00}; CamPos {6}; CamDir {7};",
+                this.Renderer,
+                this.windDirection, this.windStrength, this.windNextStrength,
+                this.TimeOfDay,
+                this.Lights.KeyLight.Brightness,
+                this.Camera.Position, this.Camera.Direction);
 
-                return;
-            }
-
-            if (userInterfaceInitialized)
-            {
-                this.help.Text = string.Format(
-                    "{0}. Wind {1} {2:0.000} - Next {3:0.000}; {4} Light brightness: {5:0.00}; CamPos {6}; CamDir {7};",
-                    this.Renderer,
-                    this.windDirection, this.windStrength, this.windNextStrength,
-                    this.TimeOfDay,
-                    this.Lights.KeyLight.Brightness,
-                    this.Camera.Position, this.Camera.Direction);
-
-                this.help2.Text = string.Format("Picks: {0:0000}|{1:00.000}|{2:00.0000000}; Frustum tests: {3:000}|{4:00.000}|{5:00.00000000}; PlantingTaks: {6:000}",
-                    Counters.PicksPerFrame, Counters.PickingTotalTimePerFrame, Counters.PickingAverageTime,
-                    Counters.VolumeFrustumTestPerFrame, Counters.VolumeFrustumTestTotalTimePerFrame, Counters.VolumeFrustumTestAverageTime,
-                    this.gardener?.PlantingTasks ?? 0 + this.gardener2?.PlantingTasks ?? 0);
-            }
+            this.help2.Text = string.Format("Picks: {0:0000}|{1:00.000}|{2:00.0000000}; Frustum tests: {3:000}|{4:00.000}|{5:00.00000000}; PlantingTaks: {6:000}",
+                Counters.PicksPerFrame, Counters.PickingTotalTimePerFrame, Counters.PickingAverageTime,
+                Counters.VolumeFrustumTestPerFrame, Counters.VolumeFrustumTestTotalTimePerFrame, Counters.VolumeFrustumTestAverageTime,
+                this.gardener?.PlantingTasks ?? 0 + this.gardener2?.PlantingTasks ?? 0);
 
             if (!gameReady)
             {
@@ -1806,12 +1772,10 @@ namespace Heightmap
 
             this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = true;
         }
-
-        public override void Draw(GameTime gameTime)
+        private void ToggleFog()
         {
-            base.Draw(gameTime);
-
-            this.stats.Text = this.Game.RuntimeText;
+            this.Lights.FogStart = this.Lights.FogStart == 0f ? fogStart : 0f;
+            this.Lights.FogRange = this.Lights.FogRange == 0f ? fogRange : 0f;
         }
 
         public override void NavigationGraphUpdated()

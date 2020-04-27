@@ -9,6 +9,7 @@ namespace Engine
 {
     using Engine.Common;
     using Engine.Content;
+    using System.Drawing;
 
     /// <summary>
     /// Engine resource manager
@@ -179,16 +180,22 @@ namespace Engine
         /// <summary>
         /// Creates the requested resources
         /// </summary>
-        public void CreateResources()
+        /// <param name="progress">Progress helper</param>
+        /// <param name="callback">Callback</param>
+        public void CreateResources(IProgress<float> progress, Action callback = null)
         {
             if (creatingResources)
             {
+                callback?.Invoke();
+
                 return;
             }
 
             var pendingRequests = GetPendingRequests();
             if (!pendingRequests.Any())
             {
+                callback?.Invoke();
+
                 return;
             }
 
@@ -196,16 +203,24 @@ namespace Engine
             {
                 creatingResources = true;
 
+                // Get pending requests
+                int total = pendingRequests.Count() + 1;
+                int current = 0;
+
                 // Process requests
-                foreach (var resource in pendingRequests.ToArray())
+                foreach (var resource in pendingRequests)
                 {
                     resource.Value.Create(this.game);
 
                     resources.Add(resource.Key, resource.Value.ResourceView);
+
+                    progress?.Report(++current / total);
                 }
 
                 // Remove requests
                 RemoveRequests(pendingRequests.Select(r => r.Key));
+
+                progress?.Report(1);
             }
             catch (Exception ex)
             {
@@ -214,6 +229,8 @@ namespace Engine
             finally
             {
                 creatingResources = false;
+
+                callback?.Invoke();
             }
         }
         private IEnumerable<KeyValuePair<string, IGameResourceRequest>> GetPendingRequests()

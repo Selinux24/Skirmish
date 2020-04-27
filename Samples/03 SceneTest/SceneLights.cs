@@ -50,16 +50,25 @@ namespace SceneTest
             this.Camera.Goto(-10, 8, 20f);
             this.Camera.LookTo(0, 0, 0);
 
-            await this.LoadResourcesAsync(Guid.NewGuid(),
-                this.InitializeFloorAsphalt(),
-                this.InitializeBuildingObelisk(),
-                this.InitializeTree(),
-                this.InitializeEmitter(),
-                this.InitializeLanterns(),
-                this.InitializeLights(),
-                this.InitializeVolumeDrawer(),
-                this.InitializeBufferDrawer()
-            );
+            await this.LoadResourcesAsync(
+                new[]
+                {
+                    this.InitializeFloorAsphalt(),
+                    this.InitializeBuildingObelisk(),
+                    this.InitializeTree(),
+                    this.InitializeEmitter(),
+                    this.InitializeLanterns(),
+                    this.InitializeLights(),
+                    this.InitializeVolumeDrawer(),
+                    this.InitializeBufferDrawer()
+                },
+                () =>
+                {
+                    this.buildingObelisks[0].Manipulator.SetPosition(+5, 0, +5);
+                    this.buildingObelisks[1].Manipulator.SetPosition(+5, 0, -5);
+                    this.buildingObelisks[2].Manipulator.SetPosition(-5, 0, +5);
+                    this.buildingObelisks[3].Manipulator.SetPosition(-5, 0, -5);
+                });
         }
 
         private async Task InitializeFloorAsphalt()
@@ -246,14 +255,6 @@ namespace SceneTest
             this.bufferDrawer = await this.AddComponentSpriteTexture(desc, SceneObjectUsages.UI, layerEffects);
 
             this.bufferDrawer.Visible = false;
-        }
-
-        public override void GameResourcesLoaded(Guid id)
-        {
-            this.buildingObelisks[0].Manipulator.SetPosition(+5, 0, +5);
-            this.buildingObelisks[1].Manipulator.SetPosition(+5, 0, -5);
-            this.buildingObelisks[2].Manipulator.SetPosition(-5, 0, +5);
-            this.buildingObelisks[3].Manipulator.SetPosition(-5, 0, -5);
         }
 
         public override void Update(GameTime gameTime)

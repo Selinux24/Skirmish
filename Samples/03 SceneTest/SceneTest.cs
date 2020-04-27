@@ -63,8 +63,6 @@ namespace SceneTest
         private bool drawDrawVolumes = false;
         private bool drawCullVolumes = false;
 
-        private Guid loadId = Guid.NewGuid();
-
         public SceneTest(Game game) : base(game)
         {
 
@@ -101,7 +99,13 @@ namespace SceneTest
                 InitializaDebug(),
             };
 
-            await this.LoadResourcesAsync(loadId, taskList);
+            await this.LoadResourcesAsync(taskList, () =>
+            {
+                this.Camera.Goto(-20, 10, -40f);
+                this.Camera.LookTo(0, 0, 0);
+
+                this.RefreshUI();
+            });
 
             this.TimeOfDay.BeginAnimation(new TimeSpan(9, 00, 00), 0.1f);
         }
@@ -764,16 +768,6 @@ namespace SceneTest
             this.lightsVolumeDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(desc);
         }
 
-        public override void GameResourcesLoaded(Guid id)
-        {
-            if (loadId == id)
-            {
-                this.Camera.Goto(-20, 10, -40f);
-                this.Camera.LookTo(0, 0, 0);
-
-                this.RefreshUI();
-            }
-        }
         private void RefreshUI()
         {
             this.spr.Top = 0;

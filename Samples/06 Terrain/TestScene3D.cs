@@ -128,8 +128,6 @@ namespace Terrain
         private bool started = false;
         private readonly List<AIAgent> agents = new List<AIAgent>();
 
-        private Guid uiId = Guid.NewGuid();
-        private Guid assetsId = Guid.NewGuid();
         private bool gameReady = false;
 
         public TestScene3D(Game game)
@@ -160,7 +158,7 @@ namespace Terrain
             this.Camera.NearPlaneDistance = 0.1f;
             this.Camera.FarPlaneDistance = 5000f;
 
-            await this.LoadResourcesAsync(uiId, InitializeUI());
+            await this.LoadResourcesAsync(InitializeUI());
 
             List<Task> loadTasks = new List<Task>()
             {
@@ -182,7 +180,24 @@ namespace Terrain
                 InitializeGardener(),
             };
 
-            await this.LoadResourcesAsync(assetsId, loadTasks.ToArray());
+            await this.LoadResourcesAsync(loadTasks.ToArray(), () =>
+            {
+                InitializeAudio();
+
+                InitializeLights();
+
+                this.agentManager = new Brain(this);
+
+                this.gardener.SetWind(this.windDirection, this.windStrength);
+
+                this.AudioManager.MasterVolume = 1f;
+                this.AudioManager.Start();
+
+                this.Camera.Goto(this.heliport.Manipulator.Position + Vector3.One * 25f);
+                this.Camera.LookTo(0, 10, 0);
+
+                Task.WhenAll(InitializePathFinding());
+            });
         }
         private async Task<TaskResult> InitializeUI()
         {
@@ -563,6 +578,7 @@ namespace Terrain
                 }
             };
             this.heliport = await this.AddComponentModel(hpDesc, SceneObjectUsages.None, this.layerObjects);
+            this.heliport.Visible = false;
             this.AttachToGround(this.heliport, true);
 
             this.Lights.AddRange(this.heliport.Lights);
@@ -590,6 +606,7 @@ namespace Terrain
                 }
             };
             this.garage = await this.AddComponentModel(gDesc, SceneObjectUsages.None, this.layerObjects);
+            this.garage.Visible = false;
             this.AttachToGround(this.garage, true);
 
             this.Lights.AddRange(this.garage.Lights);
@@ -617,6 +634,7 @@ namespace Terrain
                 }
             };
             this.building = await this.AddComponentModel(gDesc, SceneObjectUsages.None, this.layerObjects);
+            this.building.Visible = false;
             this.AttachToGround(this.building, true);
 
             this.Lights.AddRange(this.building.Lights);
@@ -645,6 +663,7 @@ namespace Terrain
                 }
             };
             this.obelisk = await this.AddComponentModelInstanced(oDesc, SceneObjectUsages.None, this.layerObjects);
+            this.obelisk.Visible = false;
             this.AttachToGround(this.obelisk, true);
 
             sw.Stop();
@@ -671,6 +690,7 @@ namespace Terrain
                 }
             };
             this.rocks = await this.AddComponentModelInstanced(rDesc, SceneObjectUsages.None, this.layerObjects);
+            this.rocks.Visible = false;
             this.AttachToGround(this.rocks, false);
 
             sw.Stop();
@@ -711,6 +731,8 @@ namespace Terrain
             };
             this.tree1 = await this.AddComponentModelInstanced(t1Desc, SceneObjectUsages.None, this.layerTerrain);
             this.tree2 = await this.AddComponentModelInstanced(t2Desc, SceneObjectUsages.None, this.layerTerrain);
+            this.tree1.Visible = false;
+            this.tree2.Visible = false;
 
             this.AttachToGround(this.tree1, false);
             this.AttachToGround(this.tree2, false);
@@ -1174,6 +1196,7 @@ namespace Terrain
                         rockInstance.Manipulator.UpdateInternals(true);
                     }
                 }
+                this.rocks.Visible = true;
             });
         }
         private async Task InitializePositionTrees(Random posRnd)
@@ -1194,6 +1217,7 @@ namespace Terrain
                         treeInstance.Manipulator.UpdateInternals(true);
                     }
                 }
+                this.tree1.Visible = true;
 
                 for (int i = 0; i < this.tree2.InstanceCount; i++)
                 {
@@ -1209,6 +1233,7 @@ namespace Terrain
                         treeInstance.Manipulator.UpdateInternals(true);
                     }
                 }
+                this.tree2.Visible = true;
             });
         }
         private async Task InitializePositionHeliport()
@@ -1220,6 +1245,7 @@ namespace Terrain
                     this.heliport.Manipulator.SetPosition(r.Position);
                     this.heliport.Manipulator.UpdateInternals(true);
                 }
+                this.heliport.Visible = true;
             });
         }
         private async Task InitializePositionGarage()
@@ -1232,6 +1258,7 @@ namespace Terrain
                     this.garage.Manipulator.SetRotation(MathUtil.PiOverFour * 0.5f + MathUtil.Pi, 0, 0);
                     this.garage.Manipulator.UpdateInternals(true);
                 }
+                this.garage.Visible = true;
             });
         }
         private async Task InitializePositionBuildings()
@@ -1244,6 +1271,7 @@ namespace Terrain
                     this.building.Manipulator.SetRotation(MathUtil.PiOverFour * 0.5f + MathUtil.Pi, 0, 0);
                     this.building.Manipulator.UpdateInternals(true);
                 }
+                this.building.Visible = true;
             });
         }
         private async Task InitializePositionObelisk()
@@ -1264,29 +1292,8 @@ namespace Terrain
                         obeliskInstance.Manipulator.UpdateInternals(true);
                     }
                 }
+                this.obelisk.Visible = true;
             });
-        }
-
-        public override void GameResourcesLoaded(Guid id)
-        {
-            if (id == assetsId)
-            {
-                InitializeAudio();
-
-                InitializeLights();
-
-                this.agentManager = new Brain(this);
-
-                this.gardener.SetWind(this.windDirection, this.windStrength);
-
-                this.AudioManager.MasterVolume = 1f;
-                this.AudioManager.Start();
-
-                this.Camera.Goto(this.heliport.Manipulator.Position + Vector3.One * 25f);
-                this.Camera.LookTo(0, 10, 0);
-
-                Task.WhenAll(InitializePathFinding());
-            }
         }
 
         public override void NavigationGraphUpdated()

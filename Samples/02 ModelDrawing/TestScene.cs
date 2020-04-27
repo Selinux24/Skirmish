@@ -2,7 +2,6 @@
 using Engine.Common;
 using Engine.Content;
 using SharpDX;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -40,11 +39,18 @@ namespace ModelDrawing
             this.Camera.Goto(Vector3.ForwardLH * -15f + Vector3.UnitY * 10f);
             this.Camera.LookTo(Vector3.Zero);
 
-            await this.LoadResourcesAsync(Guid.NewGuid(),
-                this.InitializeTexts(),
-                this.InitializeFloor(),
-                this.InitializeModels(),
-                this.InitializeParticleVolumeDrawer());
+            await this.LoadResourcesAsync(
+                new[]
+                {
+                    this.InitializeTexts(),
+                    this.InitializeFloor(),
+                    this.InitializeModels(),
+                    this.InitializeParticleVolumeDrawer()
+                },
+                () =>
+                {
+                    gameReady = true;
+                });
         }
         private async Task InitializeTexts()
         {
@@ -135,11 +141,6 @@ namespace ModelDrawing
             };
             this.pManagerLineDrawer = await this.AddComponentPrimitiveListDrawer(desc, SceneObjectUsages.None, layerEffects);
             this.pManagerLineDrawer.Visible = true;
-        }
-
-        public override void GameResourcesLoaded(Guid id)
-        {
-            gameReady = true;
         }
 
         public override void Update(GameTime gameTime)

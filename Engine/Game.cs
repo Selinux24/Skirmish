@@ -382,17 +382,16 @@ namespace Engine
         /// Executes a list of resource load tasks
         /// </summary>
         /// <param name="scene">Scene</param>
-        /// <param name="id">Load id</param>
         /// <param name="tasks">Resource load tasks</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal bool LoadResources(Scene scene, Guid id, params Task[] tasks)
+        internal bool LoadResources(Scene scene, params Task[] tasks)
         {
             if (ResourceLoadRuning)
             {
                 return false;
             }
 
-            Task.WhenAll(LoadResourcesAsync(scene, id, tasks));
+            Task.WhenAll(LoadResourcesAsync(scene, tasks));
 
             return true;
         }
@@ -400,10 +399,10 @@ namespace Engine
         /// Executes a list of resource load tasks
         /// </summary>
         /// <param name="scene">Scene</param>
-        /// <param name="id">Load id</param>
         /// <param name="tasks">Resource load tasks</param>
+        /// <param name="callback">Callback</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal async Task<bool> LoadResourcesAsync(Scene scene, Guid id, params Task[] tasks)
+        internal async Task<bool> LoadResourcesAsync(Scene scene, Task[] tasks, Action callback = null)
         {
             if (ResourceLoadRuning)
             {
@@ -416,25 +415,27 @@ namespace Engine
             {
                 await Task.WhenAll(tasks);
 
-                ResourcesLoading?.Invoke(this, new GameLoadResourcesEventArgs() { Id = id, Scene = scene });
+                ResourcesLoading?.Invoke(this, new GameLoadResourcesEventArgs() { Scene = scene });
 
                 Console.WriteLine("BufferManager: Recreating buffers");
                 this.BufferManager.CreateBuffers(Progress);
                 Console.WriteLine("BufferManager: Buffers recreated");
 
                 Console.WriteLine("ResourceManager: Creating new resources");
-                this.ResourceManager.CreateResources();
+                this.ResourceManager.CreateResources(Progress);
                 Console.WriteLine("ResourceManager: New resources created");
 
-                ResourcesLoaded?.Invoke(this, new GameLoadResourcesEventArgs() { Id = id, Scene = scene });
+                ResourcesLoaded?.Invoke(this, new GameLoadResourcesEventArgs() { Scene = scene });
             }
-            catch (EngineException ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
             finally
             {
                 ResourceLoadRuning = false;
+
+                callback?.Invoke();
             }
 
             return true;
@@ -493,7 +494,7 @@ namespace Engine
             if (this.ResourceManager.HasRequests)
             {
                 Console.WriteLine("ResourceManager: Creating new resources");
-                this.ResourceManager.CreateResources();
+                this.ResourceManager.CreateResources(null);
                 Console.WriteLine("ResourceManager: New resources created");
             }
 

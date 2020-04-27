@@ -74,7 +74,6 @@ namespace GameLogic
             }
         }
 
-        private Guid assetsId = Guid.NewGuid();
         private bool gameReady = false;
 
         #region Keys
@@ -126,11 +125,27 @@ namespace GameLogic
 
             this.Lights.Add(this.spotLight);
 
-            await this.LoadResourcesAsync(assetsId,
-                this.InitializeModels(),
-                this.InitializeHUD(),
-                this.InitializeDebug()
-                );
+            await this.LoadResourcesAsync(
+                new[]
+                {
+                    this.InitializeModels(),
+                    this.InitializeHUD(),
+                    this.InitializeDebug()
+                },
+                () =>
+                {
+                    this.UpdateLayout();
+
+                    this.InitializeAnimations();
+
+                    this.InitializePositions();
+
+                    this.GoToSoldier(this.skirmishGame.CurrentSoldier);
+
+                    Task.WhenAll(this.UpdateNavigationGraph());
+
+                    gameReady = true;
+                });
         }
         private async Task InitializeModels()
         {
@@ -338,23 +353,6 @@ namespace GameLogic
             this.lineDrawer.Visible = false;
         }
 
-        public override void GameResourcesLoaded(Guid id)
-        {
-            if (id == assetsId)
-            {
-                this.UpdateLayout();
-
-                this.InitializeAnimations();
-
-                this.InitializePositions();
-
-                this.GoToSoldier(this.skirmishGame.CurrentSoldier);
-
-                Task.WhenAll(this.UpdateNavigationGraph());
-
-                gameReady = true;
-            }
-        }
         public override void NavigationGraphUpdated()
         {
             gameReady = true;

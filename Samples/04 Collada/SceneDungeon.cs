@@ -18,10 +18,6 @@ namespace Collada
         private Player agent = null;
 
         private bool userInterfaceInitialized = false;
-        private Guid userInterfaceId = Guid.NewGuid();
-        private bool gameAssetsInitialized = false;
-        private bool gameAssetsInitializing = false;
-        private Guid gameAssetsId = Guid.NewGuid();
         private bool gameReady = false;
 
         public SceneDungeon(Game game)
@@ -41,55 +37,13 @@ namespace Collada
             this.Game.VisibleMouse = false;
             this.Game.LockMouse = true;
 #endif
-            await this.LoadUserInteface();
-        }
-        public override void GameResourcesLoaded(Guid id)
-        {
-            if (id == userInterfaceId && !userInterfaceInitialized)
-            {
-                userInterfaceInitialized = true;
+            InitializeUI();
 
-                this.InitializeEnvironment();
-
-                return;
-            }
-
-            if (id == gameAssetsId && !gameAssetsInitialized)
-            {
-                gameAssetsInitialized = true;
-
-                this.Lights.AddRange(this.dungeon.Lights);
-
-                this.agent = new Player()
-                {
-                    Name = "Player",
-                    Height = 0.5f,
-                    Radius = 0.15f,
-                    MaxClimb = 0.225f,
-                };
-
-                this.InitializeCamera();
-
-                this.SetGround(this.dungeon, true);
-
-                var settings = new BuildSettings()
-                {
-                    Agents = new[] { agent },
-                };
-
-                var input = new InputGeometry(GetTrianglesForNavigationGraph);
-
-                this.PathFinderDescription = new PathFinderDescription(settings, input);
-
-                Task.WhenAll(this.UpdateNavigationGraph());
-            }
+            await Task.CompletedTask;
         }
         public override void NavigationGraphUpdated()
         {
-            if (gameAssetsInitialized)
-            {
-                gameReady = true;
-            }
+            gameReady = true;
         }
         public override void Update(GameTime gameTime)
         {
@@ -107,15 +61,6 @@ namespace Collada
 
             this.fps.Text = this.Game.RuntimeText;
 
-            if (!gameAssetsInitialized && !gameAssetsInitializing)
-            {
-                gameAssetsInitializing = true;
-
-                Task.WhenAll(this.LoadGameAssets());
-
-                return;
-            }
-
             if (!gameReady)
             {
                 return;
@@ -124,13 +69,53 @@ namespace Collada
             this.UpdateCamera();
         }
 
-        private async Task LoadUserInteface()
+        private void InitializeUI()
         {
-            this.userInterfaceInitialized = false;
+            _ = this.LoadResourcesAsync(
+                new[] { InitializeUIComponents() },
+                () =>
+                {
+                    userInterfaceInitialized = true;
 
-            await this.LoadResourcesAsync(userInterfaceId, InitializeUI());
+                    this.InitializeEnvironment();
+
+                    this.LoadGameAssets();
+                });
         }
-        private async Task InitializeUI()
+        private void LoadGameAssets()
+        {
+            _ = this.LoadResourcesAsync(
+                new[] { InitializeDungeon() },
+                () =>
+                {
+                    this.Lights.AddRange(this.dungeon.Lights);
+
+                    this.agent = new Player()
+                    {
+                        Name = "Player",
+                        Height = 0.5f,
+                        Radius = 0.15f,
+                        MaxClimb = 0.225f,
+                    };
+
+                    this.InitializeCamera();
+
+                    this.SetGround(this.dungeon, true);
+
+                    var settings = new BuildSettings()
+                    {
+                        Agents = new[] { agent },
+                    };
+
+                    var input = new InputGeometry(GetTrianglesForNavigationGraph);
+
+                    this.PathFinderDescription = new PathFinderDescription(settings, input);
+
+                    Task.WhenAll(this.UpdateNavigationGraph());
+                });
+        }
+
+        private async Task InitializeUIComponents()
         {
             var title = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
             title.Text = "Collada Dungeon Scene";
@@ -153,12 +138,6 @@ namespace Collada
             };
 
             await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);
-        }
-        private async Task LoadGameAssets()
-        {
-            gameAssetsInitialized = false;
-
-            await this.LoadResourcesAsync(gameAssetsId, InitializeDungeon());
         }
         private async Task InitializeDungeon()
         {

@@ -76,7 +76,6 @@ namespace Skybox
 
         private GameAudioEffect fireAudioEffect;
 
-        private Guid assetsId = Guid.NewGuid();
         private bool gameReady = false;
 
         public TestScene3D(Game game)
@@ -89,7 +88,22 @@ namespace Skybox
         {
             this.InitializeCamera();
 
-            await this.LoadResourcesAsync(assetsId, InitializeAssets());
+            await this.LoadResourcesAsync(
+                InitializeAssets(),
+                () =>
+                {
+                    InitializeNavigationMesh();
+
+                    Task.WhenAll(this.UpdateNavigationGraph());
+
+                    InitializeSound();
+
+                    fireAudioEffect = this.AudioManager.CreateEffectInstance("Sphere", this.movingFire, this.Camera);
+                    fireAudioEffect.Play();
+
+                    this.AudioManager.MasterVolume = 1f;
+                    this.AudioManager.Start();
+                });
         }
         private async Task InitializeAssets()
         {
@@ -383,23 +397,6 @@ namespace Skybox
                 });
         }
 
-        public override void GameResourcesLoaded(Guid id)
-        {
-            if (assetsId == id)
-            {
-                InitializeNavigationMesh();
-
-                Task.WhenAll(this.UpdateNavigationGraph());
-
-                InitializeSound();
-
-                fireAudioEffect = this.AudioManager.CreateEffectInstance("Sphere", this.movingFire, this.Camera);
-                fireAudioEffect.Play();
-
-                this.AudioManager.MasterVolume = 1f;
-                this.AudioManager.Start();
-            }
-        }
         public override void NavigationGraphUpdated()
         {
             gameReady = true;

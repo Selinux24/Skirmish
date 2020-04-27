@@ -33,7 +33,7 @@ namespace SceneTest
 
             this.Lights.BaseFogColor = Color.White;
 
-            await this.LoadResourcesAsync(Guid.NewGuid(), InitializeAssets());
+            await this.LoadResourcesAsync(InitializeAssets());
 
             this.TimeOfDay.BeginAnimation(new TimeSpan(5, 00, 00), 10f);
         }

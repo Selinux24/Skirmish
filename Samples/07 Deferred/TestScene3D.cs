@@ -56,8 +56,6 @@ namespace Deferred
 
         private readonly Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
 
-        private Guid uiId = Guid.NewGuid();
-        private Guid assetsId = Guid.NewGuid();
         private bool gameReady = false;
 
         public TestScene3D(Game game)
@@ -78,18 +76,67 @@ namespace Deferred
             this.Lights.BackLight.CastShadow = false;
             this.Lights.FillLight.CastShadow = false;
 
-            await this.LoadResourcesAsync(uiId,
-                InitializeCursor(),
-                InitializeUI());
+            _ = this.LoadResourcesAsync(
+                new[]
+                {
+                    InitializeCursor(),
+                    InitializeUI()
+                },
+                () =>
+                {
+                    this.title.Text = "Deferred Ligthning test";
+                    this.help.Text = "";
+                    this.statistics.Text = "";
 
-            await this.LoadResourcesAsync(assetsId,
-                InitializeAndTrace(InitializeSkydom),
-                InitializeAndTrace(InitializeHelicopters),
-                InitializeAndTrace(InitializeTanks),
-                InitializeAndTrace(InitializeTerrain),
-                InitializeAndTrace(InitializeGardener),
-                InitializeAndTrace(InitializeTrees),
-                InitializeDebug());
+                    _ = this.LoadResourcesAsync(
+                        new[]
+                        {
+                            InitializeAndTrace(InitializeSkydom),
+                            InitializeAndTrace(InitializeHelicopters),
+                            InitializeAndTrace(InitializeTanks),
+                            InitializeAndTrace(InitializeTerrain),
+                            InitializeAndTrace(InitializeGardener),
+                            InitializeAndTrace(InitializeTrees),
+                            InitializeDebug()
+                        },
+                        () =>
+                        {
+                            this.SetGround(this.terrain, true);
+                            this.AttachToGround(this.tree, false);
+                            this.AttachToGround(this.trees, false);
+
+                            StartNodes();
+
+                            StartAnimations();
+
+                            StartTerrain();
+
+                            StartItems(out Vector3 cameraPosition, out int modelCount);
+
+                            cameraPosition /= (float)modelCount;
+                            this.Camera.Goto(cameraPosition + new Vector3(-30, 30, -30));
+                            this.Camera.LookTo(cameraPosition + Vector3.Up);
+                            this.Camera.NearPlaneDistance = near;
+                            this.Camera.FarPlaneDistance = far;
+
+                            var nmsettings = BuildSettings.Default;
+                            nmsettings.CellSize = 0.5f;
+                            nmsettings.CellHeight = 0.25f;
+                            nmsettings.Agents = new[] { this.tankAgentType };
+                            nmsettings.PartitionType = SamplePartitionTypes.Layers;
+                            nmsettings.EdgeMaxError = 1.0f;
+                            nmsettings.BuildMode = BuildModes.Tiled;
+                            nmsettings.TileSize = 32;
+
+                            var nmInput = new InputGeometry(GetTrianglesForNavigationGraph);
+
+                            this.PathFinderDescription = new Engine.PathFinding.PathFinderDescription(nmsettings, nmInput);
+
+                            Task.WhenAll(this.UpdateNavigationGraph());
+
+                            gameReady = true;
+                        });
+                });
         }
         private async Task<double> InitializeAndTrace(Func<Task> action)
         {
@@ -349,53 +396,6 @@ namespace Deferred
             this.volumesDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(volumesDrawerDesc);
         }
 
-        public override void GameResourcesLoaded(Guid id)
-        {
-            if (id == uiId)
-            {
-                this.title.Text = "Deferred Ligthning test";
-                this.help.Text = "";
-                this.statistics.Text = "";
-            }
-
-            if (id == assetsId)
-            {
-                this.SetGround(this.terrain, true);
-                this.AttachToGround(this.tree, false);
-                this.AttachToGround(this.trees, false);
-
-                StartNodes();
-
-                StartAnimations();
-
-                StartTerrain();
-
-                StartItems(out Vector3 cameraPosition, out int modelCount);
-
-                cameraPosition /= (float)modelCount;
-                this.Camera.Goto(cameraPosition + new Vector3(-30, 30, -30));
-                this.Camera.LookTo(cameraPosition + Vector3.Up);
-                this.Camera.NearPlaneDistance = near;
-                this.Camera.FarPlaneDistance = far;
-
-                var nmsettings = BuildSettings.Default;
-                nmsettings.CellSize = 0.5f;
-                nmsettings.CellHeight = 0.25f;
-                nmsettings.Agents = new[] { this.tankAgentType };
-                nmsettings.PartitionType = SamplePartitionTypes.Layers;
-                nmsettings.EdgeMaxError = 1.0f;
-                nmsettings.BuildMode = BuildModes.Tiled;
-                nmsettings.TileSize = 32;
-
-                var nmInput = new InputGeometry(GetTrianglesForNavigationGraph);
-
-                this.PathFinderDescription = new Engine.PathFinding.PathFinderDescription(nmsettings, nmInput);
-
-                Task.WhenAll(this.UpdateNavigationGraph());
-
-                gameReady = true;
-            }
-        }
         private void StartNodes()
         {
             var nodes = this.GetNodes(this.tankAgentType).OfType<GraphNode>();

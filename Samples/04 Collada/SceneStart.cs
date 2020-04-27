@@ -34,11 +34,6 @@ namespace Collada
         private readonly Manipulator3D emitterPosition = new Manipulator3D();
         private readonly Manipulator3D listenerPosition = new Manipulator3D();
 
-        private bool userInterfaceInitialized = false;
-        private Guid userInterfaceId = Guid.NewGuid();
-        private bool gameAssetsInitialized = false;
-        private bool gameAssetsInitializing = false;
-        private Guid gameAssetsId = Guid.NewGuid();
         private bool gameReady = false;
 
         public SceneStart(Game game) : base(game)
@@ -53,53 +48,14 @@ namespace Collada
             this.Game.VisibleMouse = false;
             this.Game.LockMouse = false;
 
-            await LoadUserInteface();
+            LoadUserInteface();
+
+            await Task.CompletedTask;
         }
-        public override void GameResourcesLoaded(Guid id)
-        {
-            if (id == userInterfaceId && !userInterfaceInitialized)
-            {
-                userInterfaceInitialized = true;
-
-                SetBackground();
-
-                this.Camera.Position = Vector3.BackwardLH * 8f;
-                this.Camera.Interest = Vector3.Zero;
-
-                PlayAudio();
-
-                this.AudioManager.MasterVolume = 1;
-                this.AudioManager.Start();
-
-                return;
-            }
-
-            if (id == gameAssetsId && !gameAssetsInitialized)
-            {
-                gameAssetsInitialized = true;
-
-                SetControlPositions();
-
-                gameReady = true;
-            }
-        }
+        
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-
-            if (!userInterfaceInitialized)
-            {
-                return;
-            }
-
-            if (!gameAssetsInitialized && !gameAssetsInitializing)
-            {
-                gameAssetsInitializing = true;
-
-                Task.WhenAll(this.LoadGameAssets());
-
-                return;
-            }
 
             if (!gameReady)
             {
@@ -111,22 +67,37 @@ namespace Collada
             UpdateAudio();
         }
 
-        private async Task LoadUserInteface()
+        private void LoadUserInteface()
         {
-            this.userInterfaceInitialized = false;
+            _ = this.LoadResourcesAsync(
+                new[] { InitializeAudio(), InitializeBackGround() },
+                () =>
+                {
+                    SetBackground();
 
-            await this.LoadResourcesAsync(userInterfaceId,
-                InitializeAudio(),
-                InitializeBackGround());
+                    this.Camera.Position = Vector3.BackwardLH * 8f;
+                    this.Camera.Interest = Vector3.Zero;
+
+                    PlayAudio();
+
+                    this.AudioManager.MasterVolume = 1;
+                    this.AudioManager.Start();
+
+                    LoadGameAssets();
+                });
         }
-        private async Task LoadGameAssets()
+        private void LoadGameAssets()
         {
-            gameAssetsInitialized = false;
+            _ = this.LoadResourcesAsync(
+                new[] { InitializeCursor(), InitializeControls() },
+                () =>
+                {
+                    SetControlPositions();
 
-            await this.LoadResourcesAsync(gameAssetsId,
-                InitializeCursor(),
-                InitializeControls());
+                    gameReady = true;
+                });
         }
+        
         private async Task InitializeCursor()
         {
             var cursorDesc = new CursorDescription()

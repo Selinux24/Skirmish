@@ -1,6 +1,5 @@
 ﻿using Engine;
 using SharpDX;
-using System;
 using System.Threading.Tasks;
 
 namespace SpriteDrawing
@@ -22,11 +21,6 @@ namespace SpriteDrawing
         private float textTime = 0;
         private float textInterval = 200f;
 
-        private bool userInterfaceInitialized = false;
-        private Guid userInterfaceId = Guid.NewGuid();
-        private bool gameAssetsInitialized = false;
-        private bool gameAssetsInitializing = false;
-        private Guid gameAssetsId = Guid.NewGuid();
         private bool gameReady = false;
 
         public TestScene(Game game)
@@ -39,27 +33,7 @@ namespace SpriteDrawing
         {
             return LoadUserInteface();
         }
-        public override void GameResourcesLoaded(Guid id)
-        {
-            if (id == userInterfaceId && !userInterfaceInitialized)
-            {
-                userInterfaceInitialized = true;
 
-                return;
-            }
-
-            if (id == gameAssetsId && !gameAssetsInitialized)
-            {
-                gameAssetsInitialized = true;
-
-                progressBar.Visible = false;
-                textBackPanel.Manipulator.SetPosition(700, 100);
-                textDrawer.Rectangle = new RectangleF(780, 140, 650, 550);
-                textDrawer.Text = null;
-
-                gameReady = true;
-            }
-        }
         public override void OnReportProgress(float value)
         {
             if (this.progressBar != null)
@@ -73,15 +47,6 @@ namespace SpriteDrawing
 
             UpdateInput();
 
-            if (!gameAssetsInitialized && !gameAssetsInitializing)
-            {
-                gameAssetsInitializing = true;
-
-                Task.WhenAll(this.LoadGameAssets());
-
-                return;
-            }
-
             if (!gameReady)
             {
                 return;
@@ -93,21 +58,30 @@ namespace SpriteDrawing
 
         private async Task LoadUserInteface()
         {
-            this.userInterfaceInitialized = false;
+            await this.LoadResourcesAsync(
+                InitializeBackground(),
+                () =>
+                {
+                    progressBar.Visible = true;
+                    progressBar.ProgressValue = 0;
 
-            await this.LoadResourcesAsync(userInterfaceId, InitializeBackground());
-        }
-        private async Task LoadGameAssets()
-        {
-            gameAssetsInitialized = false;
+                    _ = this.LoadResourcesAsync(
+                        new[]
+                        {
+                            InitializePan(),
+                            InitializeSmiley(),
+                            InitializeTextDrawer()
+                        },
+                        () =>
+                        {
+                            progressBar.Visible = false;
+                            textBackPanel.Manipulator.SetPosition(700, 100);
+                            textDrawer.Rectangle = new RectangleF(780, 140, 650, 550);
+                            textDrawer.Text = null;
 
-            this.progressBar.Visible = true;
-            this.progressBar.ProgressValue = 0;
-
-            await this.LoadResourcesAsync(gameAssetsId,
-                InitializePan(),
-                InitializeSmiley(),
-                InitializeTextDrawer());
+                            gameReady = true;
+                        });
+                });
         }
         private async Task InitializeBackground()
         {

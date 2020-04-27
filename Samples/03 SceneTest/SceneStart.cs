@@ -35,9 +35,49 @@ namespace SceneTest
 
             GameEnvironment.Background = Color.Black;
 
-            await this.LoadResourcesAsync(Guid.NewGuid(), InitializeAssets());
-        }
+            await this.LoadResourcesAsync(InitializeAssets(), () =>
+             {
+                 this.backGround.Manipulator.SetScale(1.5f, 1.25f, 1.5f);
 
+                 this.title.Text = "Scene Manager Test";
+                 this.sceneMaterialsButton.Text = "Materials";
+                 this.sceneWaterButton.Text = "Water";
+                 this.sceneStencilPassButton.Text = "Stencil Pass";
+                 this.sceneLightsButton.Text = "Lights";
+                 this.sceneCascadedShadowsButton.Text = "Cascaded";
+                 this.sceneTestButton.Text = "Test";
+                 this.exitButton.Text = "Exit";
+
+                 var sceneButtons = new[]
+                 {
+                this.sceneMaterialsButton,
+                this.sceneWaterButton,
+                this.sceneStencilPassButton,
+                this.sceneLightsButton,
+                this.sceneCascadedShadowsButton,
+                this.sceneTestButton,
+             };
+
+                 int numButtons = sceneButtons.Length + 1;
+                 int div = numButtons + 1;
+                 int h = 4;
+                 int hv = h - 1;
+
+                 this.title.CenterHorizontally();
+                 this.title.Top = this.Game.Form.RenderHeight / h;
+
+                 for (int i = 0; i < sceneButtons.Length; i++)
+                 {
+                     sceneButtons[i].Left = ((this.Game.Form.RenderWidth / div) * (i + 1)) - (this.sceneMaterialsButton.Width / 2);
+                     sceneButtons[i].Top = (this.Game.Form.RenderHeight / h) * hv - (this.sceneMaterialsButton.Height / 2);
+                     sceneButtons[i].Click += SceneButtonClick;
+                 }
+
+                 this.exitButton.Left = (this.Game.Form.RenderWidth / div) * numButtons - (this.exitButton.Width / 2);
+                 this.exitButton.Top = (this.Game.Form.RenderHeight / h) * hv - (this.exitButton.Height / 2);
+                 this.exitButton.Click += ExitButtonClick;
+             });
+        }
         private async Task InitializeAssets()
         {
             #region Cursor
@@ -147,48 +187,7 @@ namespace SceneTest
 
             #endregion
         }
-        public override void GameResourcesLoaded(Guid id)
-        {
-            this.backGround.Manipulator.SetScale(1.5f, 1.25f, 1.5f);
 
-            this.title.Text = "Scene Manager Test";
-            this.sceneMaterialsButton.Text = "Materials";
-            this.sceneWaterButton.Text = "Water";
-            this.sceneStencilPassButton.Text = "Stencil Pass";
-            this.sceneLightsButton.Text = "Lights";
-            this.sceneCascadedShadowsButton.Text = "Cascaded";
-            this.sceneTestButton.Text = "Test";
-            this.exitButton.Text = "Exit";
-
-            var sceneButtons = new[]
-            {
-                this.sceneMaterialsButton,
-                this.sceneWaterButton,
-                this.sceneStencilPassButton,
-                this.sceneLightsButton,
-                this.sceneCascadedShadowsButton,
-                this.sceneTestButton,
-            };
-
-            int numButtons = sceneButtons.Length + 1;
-            int div = numButtons + 1;
-            int h = 4;
-            int hv = h - 1;
-
-            this.title.CenterHorizontally();
-            this.title.Top = this.Game.Form.RenderHeight / h;
-
-            for (int i = 0; i < sceneButtons.Length; i++)
-            {
-                sceneButtons[i].Left = ((this.Game.Form.RenderWidth / div) * (i + 1)) - (this.sceneMaterialsButton.Width / 2);
-                sceneButtons[i].Top = (this.Game.Form.RenderHeight / h) * hv - (this.sceneMaterialsButton.Height / 2);
-                sceneButtons[i].Click += SceneButtonClick;
-            }
-
-            this.exitButton.Left = (this.Game.Form.RenderWidth / div) * numButtons - (this.exitButton.Width / 2);
-            this.exitButton.Top = (this.Game.Form.RenderHeight / h) * hv - (this.exitButton.Height / 2);
-            this.exitButton.Click += ExitButtonClick;
-        }
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);

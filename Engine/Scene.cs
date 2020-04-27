@@ -533,24 +533,31 @@ namespace Engine
         /// <summary>
         /// Executes a list of resource load tasks
         /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Load id</param>
         /// <param name="tasks">Resource load tasks</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        public bool LoadResources(Guid id, params Task[] tasks)
+        public bool LoadResources(params Task[] tasks)
         {
-            return this.Game.LoadResources(this, id, tasks);
+            return this.Game.LoadResources(this, tasks);
+        }
+        /// <summary>
+        /// Executes a resource load task
+        /// </summary>
+        /// <param name="task">Resource load task</param>
+        /// <param name="callback">Callback</param>
+        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
+        public async Task<bool> LoadResourcesAsync(Task task, Action callback = null)
+        {
+            return await LoadResourcesAsync(new[] { task }, callback);
         }
         /// <summary>
         /// Executes a list of resource load tasks
         /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Load id</param>
         /// <param name="tasks">Resource load tasks</param>
+        /// <param name="callback">Callback</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        public async Task<bool> LoadResourcesAsync(Guid id, params Task[] tasks)
+        public async Task<bool> LoadResourcesAsync(Task[] tasks, Action callback = null)
         {
-            return await this.Game.LoadResourcesAsync(this, id, tasks);
+            return await this.Game.LoadResourcesAsync(this, tasks, callback);
         }
 
         /// <summary>

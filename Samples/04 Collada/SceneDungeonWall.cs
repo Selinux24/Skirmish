@@ -14,8 +14,9 @@ namespace Collada
         private TextDrawer fps = null;
 
         private Model lightEmitter = null;
-
         private SceneLightPoint pointLight = null;
+
+        private bool gameReady = false;
 
         public SceneDungeonWall(Game game)
             : base(game)
@@ -34,13 +35,17 @@ namespace Collada
             this.Game.VisibleMouse = false;
             this.Game.LockMouse = true;
 #endif
-            await this.LoadResourcesAsync(Guid.NewGuid(),
+            _ = this.LoadResourcesAsync(
+                new[] {
                 this.InitializeText(),
                 this.InitializeDungeon(),
-                this.InitializeEmitter());
-
-            this.InitializeCamera();
-            this.InitializeEnvironment();
+                this.InitializeEmitter() },
+                () =>
+                {
+                    this.InitializeCamera();
+                    this.InitializeEnvironment();
+                    this.gameReady = true;
+                });
         }
         private void InitializeCamera()
         {
@@ -142,6 +147,11 @@ namespace Collada
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
+
+            if (!gameReady)
+            {
+                return;
+            }
 
             if (this.Game.Input.KeyJustReleased(Keys.Escape))
             {

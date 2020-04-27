@@ -30,11 +30,6 @@ namespace Collada
 
         private float? lastElapsedSeconds = null;
 
-        private bool userInterfaceInitialized = false;
-        private Guid userInterfaceId = Guid.NewGuid();
-        private bool gameAssetsInitialized = false;
-        private bool gameAssetsInitializing = false;
-        private Guid gameAssetsId = Guid.NewGuid();
         private bool gameReady = false;
 
         public SceneNavmeshTest(Game game) : base(game)
@@ -52,7 +47,33 @@ namespace Collada
             this.Game.LockMouse = false;
             this.Camera.MovementDelta = 25f;
 
-            await this.LoadResourcesAsync(userInterfaceId, this.InitializeText());
+            await this.LoadResourcesAsync(
+                this.InitializeText(),
+                () =>
+                {
+                    this.InitializeLights();
+                    this.InitializeAgent();
+
+                    _= this.LoadResourcesAsync(
+                        new[]
+                        {
+                            this.InitializeNavmesh(),
+                            this.InitializeDebug()
+                        },
+                        ()=>
+                        {
+                            var bbox = inputGeometry.GetBoundingBox();
+                            var center = bbox.GetCenter();
+                            float maxD = Math.Max(Math.Max(bbox.GetX(), bbox.GetY()), bbox.GetZ());
+
+                            this.Camera.Interest = center;
+                            this.Camera.Position = center + new Vector3(1, 0.8f, -1) * maxD * 0.8f;
+
+                            Task.WhenAll(this.UpdateNavigationGraph());
+
+                            gameReady = true;
+                        });
+                });
         }
         private async Task InitializeText()
         {
@@ -166,35 +187,6 @@ Space: Finds random over navmesh";
             this.volumesDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(volumesDrawerDesc);
         }
 
-        public override void GameResourcesLoaded(Guid id)
-        {
-            if (id == userInterfaceId && !userInterfaceInitialized)
-            {
-                userInterfaceInitialized = true;
-
-                this.InitializeLights();
-                this.InitializeAgent();
-
-                return;
-            }
-
-            if (id == gameAssetsId && !gameAssetsInitialized)
-            {
-                gameAssetsInitialized = true;
-
-                var bbox = inputGeometry.GetBoundingBox();
-                var center = bbox.GetCenter();
-                float maxD = Math.Max(Math.Max(bbox.GetX(), bbox.GetY()), bbox.GetZ());
-
-                this.Camera.Interest = center;
-                this.Camera.Position = center + new Vector3(1, 0.8f, -1) * maxD * 0.8f;
-
-                Task.WhenAll(this.UpdateNavigationGraph());
-
-                gameReady = true;
-            }
-        }
-
         public override async Task UpdateNavigationGraph()
         {
             Stopwatch sw = new Stopwatch();
@@ -212,25 +204,14 @@ Space: Finds random over navmesh";
         {
             base.Update(gameTime);
 
-            if (this.Game.Input.KeyJustReleased(Keys.Escape))
-            {
-                this.Game.SetScene<SceneStart>();
-            }
-
-            if (!gameAssetsInitialized && !gameAssetsInitializing)
-            {
-                gameAssetsInitializing = true;
-
-                this.LoadResources(gameAssetsId,
-                    this.InitializeNavmesh(),
-                    this.InitializeDebug());
-
-                return;
-            }
-
             if (!gameReady)
             {
                 return;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.Escape))
+            {
+                this.Game.SetScene<SceneStart>();
             }
 
             bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);

@@ -47,17 +47,19 @@ namespace SceneTest
 
             GameEnvironment.Background = Color.CornflowerBlue;
 
-            await this.LoadResourcesAsync(Guid.NewGuid(),
-                this.InitializeTextBoxes(),
-                this.InitializeSkyEffects(),
-                this.InitializeFloor(),
-                this.InitializeColorGroup(1, 0.1f, new Vector3(-10, 0, -10), false),
-                this.InitializeColorGroup(128, 1f, new Vector3(-10.5f, 0, -10), true)
-            );
-        }
-        public override void GameResourcesLoaded(Guid id)
-        {
-            gameReady = true;
+            await this.LoadResourcesAsync(
+                new[]
+                {
+                    this.InitializeTextBoxes(),
+                    this.InitializeSkyEffects(),
+                    this.InitializeFloor(),
+                    this.InitializeColorGroup(1, 0.1f, new Vector3(-10, 0, -10), false),
+                    this.InitializeColorGroup(128, 1f, new Vector3(-10.5f, 0, -10), true)
+                },
+                () =>
+                {
+                    gameReady = true;
+                });
         }
 
         private async Task InitializeTextBoxes()

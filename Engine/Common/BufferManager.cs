@@ -194,71 +194,84 @@ namespace Engine.Common
         /// <summary>
         /// Creates and populates vertex, instancing and index buffers
         /// </summary>
-        internal void CreateBuffers(IProgress<float> progress)
+        /// <param name="progress">Progress helper</param>
+        /// <param name="callback">Callback</param>
+        internal void CreateBuffers(IProgress<float> progress, Action callback = null)
         {
             if (allocating)
             {
                 return;
             }
 
-            allocating = true;
-
-            if (!Initilialized)
+            try
             {
-                Console.WriteLine($"Creating reserved buffer descriptors");
+                allocating = true;
 
-                CreateReservedBuffers();
+                if (!Initilialized)
+                {
+                    Console.WriteLine($"Creating reserved buffer descriptors");
 
-                Console.WriteLine($"Reserved buffer descriptors created");
+                    CreateReservedBuffers();
 
-                Initilialized = true;
+                    Console.WriteLine($"Reserved buffer descriptors created");
+
+                    Initilialized = true;
+                }
+
+                if (HasPendingRequests)
+                {
+                    Console.WriteLine($"Processing descriptor requests");
+
+                    //Copy request collection
+                    var toAssign = this.requestedDescriptors
+                        .Where(r => !r.Processed)
+                        .ToArray();
+
+                    float current = 0;
+
+                    DoProcessRequest(progress, ref current, toAssign.Count(), toAssign);
+
+                    Console.WriteLine($"Descriptor requests processed");
+
+                    Console.WriteLine($"Reallocating buffers");
+
+                    var instancingList = this.instancingBufferDescriptors
+                        .Where(v => v.Dirty)
+                        .ToArray();
+
+                    var vertexList = this.vertexBufferDescriptors
+                        .Where(v => v.Dirty)
+                        .ToArray();
+
+                    var indexList = this.indexBufferDescriptors
+                        .Where(v => v.Dirty)
+                        .ToArray();
+
+                    float total =
+                        toAssign.Count() +
+                        instancingList.Count() +
+                        vertexList.Count() +
+                        indexList.Count();
+
+                    ReallocateInstances(progress, ref current, total, instancingList);
+
+                    ReallocateVertexData(progress, ref current, total, vertexList);
+
+                    ReallocateIndexData(progress, ref current, total, indexList);
+
+                    Console.WriteLine($"Buffers reallocated");
+                }
             }
-
-            if (HasPendingRequests)
+            catch (Exception ex)
             {
-                Console.WriteLine($"Processing descriptor requests");
-
-                //Copy request collection
-                var toAssign = this.requestedDescriptors
-                    .Where(r => !r.Processed)
-                    .ToArray();
-
-                float current = 0;
-
-                DoProcessRequest(progress, ref current, toAssign.Count(), toAssign);
-
-                Console.WriteLine($"Descriptor requests processed");
-
-                Console.WriteLine($"Reallocating buffers");
-
-                var instancingList = this.instancingBufferDescriptors
-                    .Where(v => v.Dirty)
-                    .ToArray();
-
-                var vertexList = this.vertexBufferDescriptors
-                    .Where(v => v.Dirty)
-                    .ToArray();
-
-                var indexList = this.indexBufferDescriptors
-                    .Where(v => v.Dirty)
-                    .ToArray();
-
-                float total =
-                    toAssign.Count() +
-                    instancingList.Count() +
-                    vertexList.Count() +
-                    indexList.Count();
-
-                ReallocateInstances(progress, ref current, total, instancingList);
-
-                ReallocateVertexData(progress, ref current, total, vertexList);
-
-                ReallocateIndexData(progress, ref current, total, indexList);
-
-                Console.WriteLine($"Buffers reallocated");
+                Console.WriteLine($"Error creating buffers: {ex.Message}");
             }
+            finally
+            {
+                allocating = false;
 
-            allocating = false;
+                callback?.Invoke();
+            }
         }
         /// <summary>
         /// Creates reserved buffers

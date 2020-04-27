@@ -88,7 +88,6 @@ namespace Animation
         private readonly Dictionary<string, AnimationPlan> soldierPaths = new Dictionary<string, AnimationPlan>();
         private readonly Dictionary<string, AnimationPlan> ratPaths = new Dictionary<string, AnimationPlan>();
 
-        private Guid assetsId = Guid.NewGuid();
         private bool gameReady = false;
 
         public TestScene3D(Game game)
@@ -103,29 +102,29 @@ namespace Animation
 
             try
             {
-                await this.LoadResourcesAsync(assetsId,
-                    this.InitializeLadder(),
-                    this.InitializeLadder2(),
-                    this.InitializeSoldier(),
-                    this.InitializeRat(),
-                    this.InitializeDoors(),
-                    this.InitializeJails(),
-                    this.InitializeFloor(),
-                    this.InitializeDebug());
+                await this.LoadResourcesAsync(
+                    new[]
+                    {
+                        this.InitializeLadder(),
+                        this.InitializeLadder2(),
+                        this.InitializeSoldier(),
+                        this.InitializeRat(),
+                        this.InitializeDoors(),
+                        this.InitializeJails(),
+                        this.InitializeFloor(),
+                        this.InitializeDebug()
+                    },
+                    () =>
+                    {
+                        InitializeEnvironment();
+
+                        gameReady = true;
+                    });
             }
             catch (Exception ex)
             {
                 messages.Text = ex.Message;
                 messages.Visible = true;
-            }
-        }
-        public override void GameResourcesLoaded(Guid id)
-        {
-            if (id == assetsId)
-            {
-                InitializeEnvironment();
-
-                gameReady = true;
             }
         }
 
