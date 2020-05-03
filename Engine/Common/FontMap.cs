@@ -96,10 +96,18 @@ namespace Engine.Common
                 for (uint i = 1; i < KeyCodes; i++)
                 {
                     char c = (char)i;
-                    if (!char.IsControl(c))
+
+                    if (char.IsWhiteSpace(c))
                     {
-                        cList.Add(c);
+                        continue;
                     }
+
+                    if (char.IsControl(c))
+                    {
+                        continue;
+                    }
+
+                    cList.Add(c);
                 }
 
                 return cList.ToArray();
@@ -158,17 +166,11 @@ namespace Engine.Common
                             int.MaxValue,
                             fmt);
 
-                        if (c == ' ')
-                        {
-                            //White space
-                            s.Width = fnt.SizeInPoints;
-                        }
-
-                        if (left + (int)s.Width + fMap.Delta + fMap.Delta >= width)
+                        if (left + s.Width + fMap.Delta >= width)
                         {
                             //Next texture line
                             left = fMap.Delta;
-                            top += (int)s.Height + fMap.Delta;
+                            top += s.Height + fMap.Delta;
                         }
 
                         gra.DrawString(
@@ -184,13 +186,26 @@ namespace Engine.Common
                             X = left,
                             Y = top,
                             Width = s.Width,
-                            Height = s.Height + (fMap.Delta / 2),
+                            Height = s.Height,
                         };
 
                         fMap.map.Add(c, chr);
 
-                        left += (int)s.Width + fMap.Delta + fMap.Delta;
+                        left += s.Width + fMap.Delta;
                     }
+
+                    fMap.GetSpaceSize(out float wsWidth, out float wsHeight);
+
+                    //Adds the white space
+                    var wsChr = new FontMapChar()
+                    {
+                        X = left,
+                        Y = top,
+                        Width = wsWidth,
+                        Height = wsHeight,
+                    };
+
+                    fMap.map.Add(' ', wsChr);
 
                     //Generate the texture
                     fMap.bitmapStream = new MemoryStream();
@@ -486,6 +501,16 @@ namespace Engine.Common
 
             vertices = vertList.ToArray();
             indices = indexList.ToArray();
+        }
+        /// <summary>
+        /// Gets the font's white space size
+        /// </summary>
+        /// <param name="width">White space width</param>
+        /// <param name="height">White space height</param>
+        private void GetSpaceSize(out float width, out float height)
+        {
+            width = map['X'].Width;
+            height = map['X'].Height;
         }
     }
 }

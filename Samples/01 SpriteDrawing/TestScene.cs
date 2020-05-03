@@ -140,6 +140,20 @@ namespace SpriteDrawing
                 TextColor = Color.LightGoldenrodYellow,
             };
             this.textDrawer = await this.AddComponentTextDrawer(desc, SceneObjectUsages.UI, layerHUD);
+
+            var descMono = new TextDrawerDescription()
+            {
+                Name = "Text",
+                Font = "Lucida Console",
+                FontSize = 18,
+                Style = FontMapStyles.Bold,
+                TextColor = Color.LightGoldenrodYellow,
+            };
+            var monoText = await this.AddComponentTextDrawer(descMono, SceneObjectUsages.UI, layerHUD);
+            monoText.Top = 300;
+            monoText.Left = 10;
+            monoText.Text = @"A B C D E FGHIJKLMNOPQRSTUVWXYZ
+aabbccddeefghijklmnopqrstuvwxyz";
         }
 
         private void UpdateInput()
