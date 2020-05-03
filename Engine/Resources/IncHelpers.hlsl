@@ -1,4 +1,6 @@
 
+static const float FLOAT_MAX = 3.402823466e+38F;
+
 SamplerState SamplerPoint
 {
     Filter = MIN_MAG_MIP_POINT;

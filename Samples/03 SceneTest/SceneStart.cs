@@ -113,7 +113,7 @@ namespace SceneTest
                 FontSize = 72,
                 Style = FontMapStyles.Bold,
                 TextColor = Color.Gold,
-                ShadowColor = new Color4(Color.LightYellow.RGB(), 0.55f),
+                ShadowColor = new Color4(Color.LightYellow.RGB(), 0.25f),
                 ShadowDelta = new Vector2(4, -4),
             };
             this.title = await this.AddComponentTextDrawer(titleDesc, SceneObjectUsages.UI, layerHUD);

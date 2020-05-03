@@ -127,8 +127,8 @@ namespace Collada
                 FontSize = 90,
                 Style = FontMapStyles.Bold,
                 TextColor = Color.IndianRed,
-                ShadowColor = new Color4(Color.Brown.RGB(), 0.55f),
-                ShadowDelta = new Vector2(2, -3),
+                ShadowColor = new Color4(Color.Brown.RGB(), 0.25f),
+                ShadowDelta = new Vector2(4, -4),
             };
             this.title = await this.AddComponentTextDrawer(titleDesc, SceneObjectUsages.UI, layerHUD);
 

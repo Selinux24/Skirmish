@@ -122,17 +122,19 @@ namespace Engine.Effects
         /// </summary>
         /// <param name="world">World matrix</param>
         /// <param name="viewProjection">View * projection matrix</param>
-        /// <param name="color">Color</param>
+        /// <param name="color">Text color</param>
+        /// <param name="alphaMult">Alpha multiplier</param>
         /// <param name="texture">Font texture</param>
         public void UpdatePerFrame(
             Matrix world,
             Matrix viewProjection,
-            Color4 color,
+            Color3 color,
+            float alphaMult,
             EngineShaderResourceView texture)
         {
             this.World = world;
             this.WorldViewProjection = world * viewProjection;
-            this.Color = color;
+            this.Color = new Color4(color, alphaMult);
             this.Texture = texture;
         }
     }

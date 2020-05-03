@@ -125,6 +125,10 @@ namespace Engine
         /// Gets or sets relative position of shadow
         /// </summary>
         public Vector2 ShadowDelta { get; set; }
+        /// <summary>
+        /// Gets or sets the text color alpha multiplier
+        /// </summary>
+        public float AlphaMultplier { get; set; } = 1.2f;
 
         /// <summary>
         /// Gets or sest text position in 2D screen
@@ -306,6 +310,8 @@ namespace Engine
 
                 this.BufferManager.SetInputAssembler(technique, this.vertexBuffer, Topology.TriangleList);
 
+                this.Game.Graphics.SetBlendDefaultAlpha();
+
                 if (this.ShadowColor != Color.Transparent)
                 {
                     //Draw shadow
@@ -350,13 +356,14 @@ namespace Engine
         /// <param name="effect">Effect</param>
         /// <param name="technique">Technique</param>
         /// <param name="local">Local transform</param>
-        /// <param name="color">Color</param>
+        /// <param name="color">Text color</param>
         private void DrawText(EffectDefaultFont effect, EngineEffectTechnique technique, Matrix local, Color4 color)
         {
             effect.UpdatePerFrame(
                 local,
                 this.viewProjection,
-                color,
+                color.RGB(),
+                color.Alpha * AlphaMultplier,
                 this.fontMap.Texture);
 
             var graphics = this.Game.Graphics;
