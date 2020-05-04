@@ -53,9 +53,21 @@ namespace Engine
         /// </summary>
         private Matrix viewProjection;
         /// <summary>
-        /// Text position in 2D screen
+        /// Top
         /// </summary>
-        private Vector2 position = Vector2.Zero;
+        private int top = 0;
+        /// <summary>
+        /// Left
+        /// </summary>
+        private int left = 0;
+        /// <summary>
+        /// Width
+        /// </summary>
+        private int width = 0;
+        /// <summary>
+        /// Height
+        /// </summary>
+        private int height = 0;
         /// <summary>
         /// Text area rectangle
         /// </summary>
@@ -137,11 +149,12 @@ namespace Engine
         {
             get
             {
-                return this.position;
+                return new Vector2(this.left, this.top);
             }
             set
             {
-                this.position = value;
+                this.left = (int)value.X;
+                this.top = (int)value.Y;
 
                 this.MapText();
                 this.UpdatePosition();
@@ -154,18 +167,13 @@ namespace Engine
         {
             get
             {
-                return (int)this.position.X;
+                return this.left;
             }
             set
             {
-                this.position.X = value;
+                this.left = value;
 
-                if (this.rectangle.HasValue)
-                {
-                    var rect = this.rectangle.Value;
-                    rect.Left = (int)this.position.X;
-                }
-
+                this.MapText();
                 this.UpdatePosition();
             }
         }
@@ -176,29 +184,50 @@ namespace Engine
         {
             get
             {
-                return (int)this.position.Y;
+                return this.top;
             }
             set
             {
-                this.position.Y = value;
+                this.top = value;
 
-                if (this.rectangle.HasValue)
-                {
-                    var rect = this.rectangle.Value;
-                    rect.Top = (int)this.position.Y;
-                }
-
+                this.MapText();
                 this.UpdatePosition();
             }
         }
         /// <summary>
         /// Gets text width
         /// </summary>
-        public int Width { get; private set; }
+        public int Width
+        {
+            get
+            {
+                return this.width;
+            }
+            private set
+            {
+                this.width = value;
+
+                this.MapText();
+                this.UpdatePosition();
+            }
+        }
         /// <summary>
         /// Gets text height
         /// </summary>
-        public int Height { get; private set; }
+        public int Height
+        {
+            get
+            {
+                return this.height;
+            }
+            private set
+            {
+                this.height = value;
+
+                this.MapText();
+                this.UpdatePosition();
+            }
+        }
         /// <summary>
         /// Gets or sets the rectangle were the text must be drawn
         /// </summary>
@@ -211,6 +240,14 @@ namespace Engine
             set
             {
                 this.rectangle = value;
+
+                if (this.rectangle.HasValue)
+                {
+                    this.left = this.rectangle.Value.X;
+                    this.top = this.rectangle.Value.Y;
+                    this.width = this.rectangle.Value.Width;
+                    this.height = this.rectangle.Value.Height;
+                }
 
                 this.MapText();
                 this.UpdatePosition();
@@ -254,6 +291,7 @@ namespace Engine
             this.ShadowDelta = description.ShadowDelta;
 
             this.MapText();
+            this.UpdatePosition();
         }
         /// <summary>
         /// Destructor
@@ -342,6 +380,7 @@ namespace Engine
         {
             this.centerVertically = true;
 
+            this.MapText();
             this.UpdatePosition();
         }
         /// <summary>
@@ -351,6 +390,61 @@ namespace Engine
         {
             this.centerHorizontally = true;
 
+            this.MapText();
+            this.UpdatePosition();
+        }
+        /// <summary>
+        /// Centers vertically the text
+        /// </summary>
+        /// <param name="top">Top position</param>
+        /// <param name="height">Height</param>
+        public void CenterVertically(int top, int height)
+        {
+            float topmove = (height * 0.5f) - (this.height * 0.5f);
+
+            this.top = top + (int)topmove;
+
+            this.MapText();
+            this.UpdatePosition();
+        }
+        /// <summary>
+        /// Centers horinzontally the text
+        /// </summary>
+        /// <param name="left">Left position</param>
+        /// <param name="width">Width</param>
+        public void CenterHorizontally(int left, int width)
+        {
+            float leftmove = (width * 0.5f) - (this.width * 0.5f);
+
+            this.left = left + (int)leftmove;
+
+            this.MapText();
+            this.UpdatePosition();
+        }
+        /// <summary>
+        /// Centers the text in the screen rectangle
+        /// </summary>
+        /// <param name="x">X position</param>
+        /// <param name="y">Y position</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        public void CenterRectangle(int x, int y, int width, int height)
+        {
+            CenterRectangle(new Rectangle(x, y, width, height));
+        }
+        /// <summary>
+        /// Centers the text in the screen rectangle
+        /// </summary>
+        /// <param name="rect">Rectangle</param>
+        public void CenterRectangle(Rectangle rect)
+        {
+            float topmove = (rect.Height * 0.5f) - (height * 0.5f);
+            float leftmove = (rect.Width * 0.5f) - (width * 0.5f);
+
+            this.top = rect.Top + (int)topmove;
+            this.left = rect.Left + (int)leftmove;
+
+            this.MapText();
             this.UpdatePosition();
         }
 
@@ -391,8 +485,8 @@ namespace Engine
                 rect,
                 out this.vertices, out this.indices, out Vector2 size);
 
-            this.Width = (int)size.X;
-            this.Height = (int)size.Y;
+            this.width = (int)size.X;
+            this.height = (int)size.Y;
 
             this.updateBuffers = true;
         }
@@ -404,21 +498,21 @@ namespace Engine
             float x;
             if (this.centerHorizontally)
             {
-                x = -(this.Width * 0.5f);
+                x = -(this.width * 0.5f);
             }
             else
             {
-                x = +this.position.X - this.Game.Form.RelativeCenter.X;
+                x = +this.left - this.Game.Form.RelativeCenter.X;
             }
 
             float y;
             if (this.centerVertically)
             {
-                y = +(this.Height * 0.5f);
+                y = +(this.height * 0.5f);
             }
             else
             {
-                y = -this.position.Y + this.Game.Form.RelativeCenter.Y;
+                y = -this.top + this.Game.Form.RelativeCenter.Y;
             }
 
             this.local = Matrix.Translation((int)x, (int)y, 0f);

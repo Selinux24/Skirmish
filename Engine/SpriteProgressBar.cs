@@ -170,12 +170,7 @@ namespace Engine
             if (!string.IsNullOrEmpty(this.Text))
             {
                 //Center text
-                float leftmove = ((float)this.Width * 0.5f) - ((float)this.textDrawer.Width * 0.5f);
-                float topmove = ((float)this.Height * 0.5f) - ((float)this.textDrawer.Height * 0.5f);
-
-                this.textDrawer.Left = this.Left + (int)leftmove;
-                this.textDrawer.Top = this.Top + (int)topmove;
-
+                this.textDrawer.CenterRectangle(this.Left, this.Top, this.Width, this.Height);
                 this.textDrawer.Update(context);
             }
 

@@ -76,11 +76,7 @@ namespace SpriteDrawing
                         {
                             progressBar.Visible = false;
                             textBackPanel.Manipulator.SetPosition(700, 100);
-                            //textDrawer.Rectangle = new Rectangle(780, 140, 650, 550);
-                            textDrawer.Rectangle = new Rectangle(0, 0, 650, 550);
-                            //textDrawer.Left = 780;
-                            //textDrawer.Top = 140;
-                            textDrawer.Position = new Vector2(780, 140);
+                            textDrawer.Rectangle = new Rectangle(780, 140, 650, 550);
                             textDrawer.Text = null;
 
                             gameReady = true;
@@ -139,7 +135,7 @@ namespace SpriteDrawing
             {
                 Name = "Text",
                 Font = "Viner Hand ITC",
-                FontSize = 18,
+                FontSize = 17,
                 Style = FontMapStyles.Bold,
                 TextColor = Color.LightGoldenrodYellow,
             };
