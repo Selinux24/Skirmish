@@ -59,7 +59,7 @@ namespace Engine
         /// <summary>
         /// Text area rectangle
         /// </summary>
-        private RectangleF? rectangle = null;
+        private Rectangle? rectangle = null;
         /// <summary>
         /// The text draws vertically centered on screen
         /// </summary>
@@ -143,13 +143,7 @@ namespace Engine
             {
                 this.position = value;
 
-                if (this.rectangle.HasValue)
-                {
-                    var rect = this.rectangle.Value;
-                    rect.Left = this.position.X;
-                    rect.Top = this.position.Y;
-                }
-
+                this.MapText();
                 this.UpdatePosition();
             }
         }
@@ -169,7 +163,7 @@ namespace Engine
                 if (this.rectangle.HasValue)
                 {
                     var rect = this.rectangle.Value;
-                    rect.Left = this.position.X;
+                    rect.Left = (int)this.position.X;
                 }
 
                 this.UpdatePosition();
@@ -191,7 +185,7 @@ namespace Engine
                 if (this.rectangle.HasValue)
                 {
                     var rect = this.rectangle.Value;
-                    rect.Top = this.position.Y;
+                    rect.Top = (int)this.position.Y;
                 }
 
                 this.UpdatePosition();
@@ -208,7 +202,7 @@ namespace Engine
         /// <summary>
         /// Gets or sets the rectangle were the text must be drawn
         /// </summary>
-        public RectangleF? Rectangle
+        public Rectangle? Rectangle
         {
             get
             {
@@ -218,17 +212,18 @@ namespace Engine
             {
                 this.rectangle = value;
 
-                if (rectangle.HasValue)
-                {
-                    position = new Vector2(rectangle.Value.Left, rectangle.Value.Top);
-                }
-                else
-                {
-                    position = Vector2.Zero;
-                }
-
                 this.MapText();
                 this.UpdatePosition();
+            }
+        }
+        /// <summary>
+        /// Gets whether the internal buffers were ready or not
+        /// </summary>
+        public bool BuffersReady
+        {
+            get
+            {
+                return this.vertexBuffer?.Ready == true && this.indexBuffer?.Ready == true;
             }
         }
 
@@ -283,16 +278,24 @@ namespace Engine
                 this.fontMap = null;
             }
         }
+
         /// <summary>
         /// Draw text
         /// </summary>
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
+            if (!BuffersReady)
+            {
+                return;
+            }
+
             var mode = context.DrawerMode;
 
             if (mode.HasFlag(DrawerModes.TransparentOnly) && !string.IsNullOrWhiteSpace(this.text))
             {
+                var graphics = this.Game.Graphics;
+
                 if (this.updateBuffers)
                 {
                     this.BufferManager.WriteVertexBuffer(this.vertexBuffer, this.vertices);
@@ -310,7 +313,8 @@ namespace Engine
 
                 this.BufferManager.SetInputAssembler(technique, this.vertexBuffer, Topology.TriangleList);
 
-                this.Game.Graphics.SetBlendDefaultAlpha();
+                graphics.SetBlendDefaultAlpha();
+                graphics.SetDepthStencilZDisabled();
 
                 if (this.ShadowColor != Color.Transparent)
                 {
@@ -380,7 +384,7 @@ namespace Engine
         /// </summary>
         private void MapText()
         {
-            var rect = rectangle ?? new RectangleF(0, 0, this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
+            var rect = rectangle ?? new Rectangle(0, 0, this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
 
             this.fontMap.MapSentence(
                 this.text,
@@ -417,12 +421,12 @@ namespace Engine
                 y = -this.position.Y + this.Game.Form.RelativeCenter.Y;
             }
 
-            this.local = Matrix.Translation(x, y, 0f);
+            this.local = Matrix.Translation((int)x, (int)y, 0f);
 
             x += this.ShadowDelta.X;
             y += this.ShadowDelta.Y;
 
-            this.localShadow = Matrix.Translation(x, y, 0f);
+            this.localShadow = Matrix.Translation((int)x, (int)y, 0f);
         }
     }
 

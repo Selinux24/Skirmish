@@ -76,7 +76,11 @@ namespace SpriteDrawing
                         {
                             progressBar.Visible = false;
                             textBackPanel.Manipulator.SetPosition(700, 100);
-                            textDrawer.Rectangle = new RectangleF(780, 140, 650, 550);
+                            //textDrawer.Rectangle = new Rectangle(780, 140, 650, 550);
+                            textDrawer.Rectangle = new Rectangle(0, 0, 650, 550);
+                            //textDrawer.Left = 780;
+                            //textDrawer.Top = 140;
+                            textDrawer.Position = new Vector2(780, 140);
                             textDrawer.Text = null;
 
                             gameReady = true;
@@ -140,20 +144,6 @@ namespace SpriteDrawing
                 TextColor = Color.LightGoldenrodYellow,
             };
             this.textDrawer = await this.AddComponentTextDrawer(desc, SceneObjectUsages.UI, layerHUD);
-
-            var descMono = new TextDrawerDescription()
-            {
-                Name = "Text",
-                Font = "Lucida Console",
-                FontSize = 18,
-                Style = FontMapStyles.Bold,
-                TextColor = Color.LightGoldenrodYellow,
-            };
-            var monoText = await this.AddComponentTextDrawer(descMono, SceneObjectUsages.UI, layerHUD);
-            monoText.Top = 300;
-            monoText.Left = 10;
-            monoText.Text = @"A B C D E FGHIJKLMNOPQRSTUVWXYZ
-aabbccddeefghijklmnopqrstuvwxyz";
         }
 
         private void UpdateInput()

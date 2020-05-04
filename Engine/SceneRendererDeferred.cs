@@ -29,7 +29,7 @@ namespace Engine
         /// <returns>Returns true if the renderer is valid</returns>
         public static bool Validate(Graphics graphics)
         {
-            return !graphics.MultiSampled;
+            return graphics != null && !graphics.MultiSampled;
         }
 
         /// <summary>

@@ -22,7 +22,7 @@ namespace Engine
         /// <returns>Returns true if the renderer is valid</returns>
         public static bool Validate(Graphics graphics)
         {
-            return true;
+            return graphics != null;
         }
 
         /// <summary>

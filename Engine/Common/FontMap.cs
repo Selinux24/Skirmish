@@ -13,7 +13,7 @@ namespace Engine.Common
     /// <summary>
     /// Font map
     /// </summary>
-    public class FontMap : IDisposable
+    class FontMap : IDisposable
     {
         /// <summary>
         /// Font cache
@@ -309,7 +309,7 @@ namespace Engine.Common
         /// <param name="size">Gets generated sentence total size</param>
         public void MapSentence(
             string text,
-            RectangleF? textArea,
+            Rectangle? textArea,
             out VertexPositionTexture[] vertices,
             out uint[] indices,
             out Vector2 size)
@@ -342,7 +342,7 @@ namespace Engine.Common
                 {
                     //Move the position to the new line
                     pos.X = 0;
-                    pos.Y -= spaceSize.Y;
+                    pos.Y -= (int)spaceSize.Y;
 
                     continue;
                 }
@@ -350,13 +350,13 @@ namespace Engine.Common
                 if (word == " ")
                 {
                     //Add a space
-                    pos.X += spaceSize.X;
+                    pos.X += (int)spaceSize.X;
 
                     continue;
                 }
 
                 //Store previous cursor position
-                var prevPos = pos;
+                Vector2 prevPos = pos;
 
                 //Map the word
                 MapWord(word, ref pos, out var wVerts, out var wIndices, out var wHeight);
@@ -367,8 +367,8 @@ namespace Engine.Common
                 if (textArea.HasValue && pos.X > textArea.Value.Width)
                 {
                     //Move the position to the last character of the new line
-                    pos.X -= prevPos.X;
-                    pos.Y -= wHeight;
+                    pos.X -= (int)prevPos.X;
+                    pos.Y -= (int)wHeight;
 
                     //Move the word to the next line
                     Vector3 diff = new Vector3(prevPos.X, wHeight, 0);
@@ -402,7 +402,7 @@ namespace Engine.Common
         private Vector2 MapSpace()
         {
             Vector2 tmpPos = Vector2.Zero;
-            MapWord(" ", ref tmpPos, out var tmpVerts, out var tmpIndices, out var tmpHeight);
+            MapWord(" ", ref tmpPos, out _, out _, out var tmpHeight);
 
             return new Vector2(tmpPos.X, tmpHeight);
         }
@@ -493,7 +493,8 @@ namespace Engine.Common
                 vertList.AddRange(VertexPositionTexture.Generate(s.Vertices, s.Uvs));
 
                 //Move the cursor position to the next character
-                pos.X += chr.Width - (chr.Width * 0.3333f);
+                float d = (float)(chr.Width - Math.Sqrt(chr.Width));
+                pos.X += d;
 
                 //Store maximum height
                 height = Math.Max(height, chr.Height);
