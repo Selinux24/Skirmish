@@ -6,6 +6,7 @@ using System.Security.Permissions;
 
 namespace Engine.Content
 {
+    using Engine.Animation;
     using Engine.Common;
 
     /// <summary>

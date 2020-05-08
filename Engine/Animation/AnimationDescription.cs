@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
-namespace Engine
+namespace Engine.Animation
 {
     /// <summary>
     /// Animation description class

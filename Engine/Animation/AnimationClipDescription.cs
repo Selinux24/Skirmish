@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Xml.Serialization;
 
-namespace Engine
+namespace Engine.Animation
 {
     /// <summary>
     /// Animation clip description

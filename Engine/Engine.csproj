@@ -156,10 +156,10 @@
   <ItemGroup>
     <Compile Include="Animation\AnimationClip.cs" />
     <Compile Include="Animation\AnimationController.cs" />
-    <Compile Include="AnimationDescription.cs" />
+    <Compile Include="Animation\AnimationDescription.cs" />
     <Compile Include="Animation\AnimationPath.cs" />
     <Compile Include="Animation\AnimationPathItem.cs" />
-    <Compile Include="AnimationClipDescription.cs" />
+    <Compile Include="Animation\AnimationClipDescription.cs" />
     <Compile Include="Animation\AnimationPlan.cs" />
     <Compile Include="Animation\Armature.cs" />
     <Compile Include="Animation\Skeleton.cs" />
@@ -586,7 +586,7 @@
     <Compile Include="Common\VertexPositionNormalTexture.cs" />
     <Compile Include="Common\VertexPositionNormalColor.cs" />
     <Compile Include="Common\VertexPositionColor.cs" />
-    <Compile Include="Drawable.cs" />
+    <Compile Include="Common\Drawable.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Helpers\HelperShaders.cs" />
     <Compile Include="Common\VertexSkinnedPositionNormalTexture.cs" />

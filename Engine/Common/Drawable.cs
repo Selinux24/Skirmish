@@ -1,8 +1,6 @@
 ﻿
-namespace Engine
+namespace Engine.Common
 {
-    using Engine.Common;
-
     /// <summary>
     /// Drawable object
     /// </summary>

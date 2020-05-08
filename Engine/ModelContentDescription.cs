@@ -3,6 +3,8 @@ using System.Xml.Serialization;
 
 namespace Engine
 {
+    using Engine.Animation;
+
     /// <summary>
     /// Model content description
     /// </summary>
