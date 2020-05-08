@@ -89,7 +89,7 @@ namespace SpriteDrawing
         }
         private async Task InitializeBackground()
         {
-            var desc = new SpriteBackgroundDescription()
+            var desc = new BackgroundDescription()
             {
                 ContentPath = "Resources",
                 Textures = new[] { "background.jpg" },

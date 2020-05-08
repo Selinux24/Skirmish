@@ -282,7 +282,7 @@ namespace Engine.UI
         /// <param name="game">Game</param>
         /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Button description</param>
-        public UIControl(Scene scene, UIControlDescription description)
+        protected UIControl(Scene scene, UIControlDescription description)
             : base(scene, description)
         {
             this.FitScreen = description.FitScreen;
@@ -307,21 +307,6 @@ namespace Engine.UI
             this.Color = description.Color;
 
             UpdateInternals();
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~UIControl()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <summary>
-        /// Releases used resources
-        /// </summary>
-        protected override void Dispose(bool disposing)
-        {
-
         }
 
         /// <summary>

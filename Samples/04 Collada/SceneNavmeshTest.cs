@@ -2,6 +2,7 @@
 using Engine.Content;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
+using Engine.UI;
 using SharpDX;
 using System;
 using System.Diagnostics;
@@ -54,13 +55,13 @@ namespace Collada
                     this.InitializeLights();
                     this.InitializeAgent();
 
-                    _= this.LoadResourcesAsync(
+                    _ = this.LoadResourcesAsync(
                         new[]
                         {
                             this.InitializeNavmesh(),
                             this.InitializeDebug()
                         },
-                        ()=>
+                        () =>
                         {
                             var bbox = inputGeometry.GetBoundingBox();
                             var center = bbox.GetCenter();

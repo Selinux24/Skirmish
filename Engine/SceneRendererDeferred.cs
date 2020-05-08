@@ -10,6 +10,7 @@ namespace Engine
 {
     using Engine.Common;
     using Engine.Effects;
+    using Engine.UI;
 
     /// <summary>
     /// Deferred renderer class
@@ -434,7 +435,7 @@ namespace Engine
 
             this.Viewport = new Viewport(0, 0, this.Width, this.Height, 0, 1.0f);
 
-            this.ViewProjection = Sprite.CreateViewOrthoProjection(this.Width, this.Height);
+            this.ViewProjection = UIControl.CreateViewOrthoProjection(this.Width, this.Height);
 
             this.lightDrawer.Update(this.Game.Graphics, this.Width, this.Height);
         }

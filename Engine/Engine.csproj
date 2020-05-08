@@ -450,7 +450,7 @@
     <Compile Include="Helpers\ResourceStatus.cs" />
     <Compile Include="Helpers\ResourceStatusItem.cs" />
     <Compile Include="LensFlareDescription.cs" />
-    <Compile Include="MinimapDescription.cs" />
+    <Compile Include="UI\UIMinimapDescription.cs" />
     <Compile Include="ModelContentDescription.cs" />
     <Compile Include="ModelDescription.cs" />
     <Compile Include="ModelInstance.cs" />
@@ -463,12 +463,12 @@
     <Compile Include="Common\GeometryUtil.cs" />
     <Compile Include="BoundingBoxInt.cs" />
     <Compile Include="SkydomDescription.cs" />
-    <Compile Include="SpriteBackgroundDescription.cs" />
+    <Compile Include="UI\BackgroundDescription.cs" />
     <Compile Include="UI\UIButtonDescription.cs" />
-    <Compile Include="SpriteDescription.cs" />
-    <Compile Include="SpriteTextureChannels.cs" />
+    <Compile Include="UI\SpriteDescription.cs" />
+    <Compile Include="UI\UITextureRendererChannels.cs" />
     <Compile Include="UI\UITextureRendererDescription.cs" />
-    <Compile Include="TextDrawerDescription.cs" />
+    <Compile Include="UI\TextDrawerDescription.cs" />
     <Compile Include="Updatable.cs" />
     <Compile Include="Vector2Int.cs" />
     <Compile Include="Vector3Int.cs" />
@@ -526,7 +526,7 @@
     <Compile Include="Common\Weight.cs" />
     <Compile Include="Cursor.cs" />
     <Compile Include="Keys.cs" />
-    <Compile Include="Minimap.cs" />
+    <Compile Include="UI\UIMinimap.cs" />
     <Compile Include="MouseButtons.cs" />
     <Compile Include="PathFinding\HeuristicMethods.cs" />
     <Compile Include="PathFinding\PathFindingPath.cs" />
@@ -553,7 +553,7 @@
     <Compile Include="SceneLightDirectional.cs" />
     <Compile Include="SceneLightPoint.cs" />
     <Compile Include="SceneLightSpot.cs" />
-    <Compile Include="Sprite.cs" />
+    <Compile Include="UI\Sprite.cs" />
     <Compile Include="Animation\JointAnimation.cs" />
     <Compile Include="Common\VertexPositionNormalTextureTangent.cs" />
     <Compile Include="Counters.cs" />
@@ -568,7 +568,7 @@
     <Compile Include="Input.cs" />
     <Compile Include="Scene.cs" />
     <Compile Include="SceneLights.cs" />
-    <Compile Include="TextDrawer.cs" />
+    <Compile Include="UI\TextDrawer.cs" />
     <Compile Include="Animation\Joint.cs" />
     <Compile Include="Common\Mesh.cs" />
     <Compile Include="Common\MeshMaterial.cs" />

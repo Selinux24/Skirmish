@@ -1,6 +1,6 @@
 ﻿using SharpDX;
 
-namespace Engine
+namespace Engine.UI
 {
     /// <summary>
     /// Text drawer description

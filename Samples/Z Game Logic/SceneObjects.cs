@@ -25,7 +25,8 @@ namespace GameLogic
         private TextDrawer txtActionList = null;
         private TextDrawer txtAction = null;
 
-        private readonly string fontName = "Lucida Sans";
+        private readonly string fontName = "Consolas";
+        private readonly int fontSize = 13;
         private UIButton butClose = null;
         private UIButton butNext = null;
         private UIButton butPrevSoldier = null;
@@ -199,8 +200,8 @@ namespace GameLogic
             var pBottomRight = wRes / tRes * bottomRight;
             var q = pTopLeft + ((pBottomRight - pTopLeft - new Vector2(minimapWidth, minimapHeight)) * 0.5f);
 
-            await this.AddComponentMinimap(
-                new MinimapDescription()
+            await this.AddComponentUIMinimap(
+                new UIMinimapDescription()
                 {
                     Top = (int)q.Y,
                     Left = (int)q.X,
@@ -213,7 +214,6 @@ namespace GameLogic
                     },
                     MinimapArea = terrain.GetBoundingBox(),
                 },
-                SceneObjectUsages.UI,
                 layerHUD);
 
             this.SetGround(terrain, true);
@@ -227,7 +227,7 @@ namespace GameLogic
         }
         private async Task InitializeHUD()
         {
-            SpriteBackgroundDescription bkDesc = new SpriteBackgroundDescription()
+            BackgroundDescription bkDesc = new BackgroundDescription()
             {
                 ContentPath = "Resources",
                 Textures = new[] { "HUD.png" },
@@ -235,12 +235,12 @@ namespace GameLogic
             };
             await this.AddComponentSprite(bkDesc, SceneObjectUsages.UI, layerHUD - 1);
 
-            this.txtTitle = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 24, Color.White, Color.Gray), SceneObjectUsages.UI, layerHUD);
-            this.txtGame = await this.AddComponentTextDrawer(TextDrawerDescription.Generate(this.fontName, 12, Color.LightBlue, Color.DarkBlue), SceneObjectUsages.UI, layerHUD);
-            this.txtTeam = await this.AddComponentTextDrawer(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            this.txtSoldier = await this.AddComponentTextDrawer(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            this.txtActionList = await this.AddComponentTextDrawer(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            this.txtAction = await this.AddComponentTextDrawer(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.txtTitle = await this.AddComponentTextDrawer(TextDrawerDescription.Generate(this.fontName, this.fontSize * 2, Color.White, Color.Gray), SceneObjectUsages.UI, layerHUD);
+            this.txtGame = await this.AddComponentTextDrawer(TextDrawerDescription.Generate(this.fontName, this.fontSize, Color.LightBlue, Color.DarkBlue), SceneObjectUsages.UI, layerHUD);
+            this.txtTeam = await this.AddComponentTextDrawer(TextDrawerDescription.Generate(this.fontName, this.fontSize, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.txtSoldier = await this.AddComponentTextDrawer(TextDrawerDescription.Generate(this.fontName, this.fontSize, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.txtActionList = await this.AddComponentTextDrawer(TextDrawerDescription.Generate(this.fontName, this.fontSize, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.txtAction = await this.AddComponentTextDrawer(TextDrawerDescription.Generate(this.fontName, this.fontSize, Color.Yellow), SceneObjectUsages.UI, layerHUD);
 
             this.butClose = await this.AddComponentUIButton(new UIButtonDescription()
             {
@@ -252,7 +252,7 @@ namespace GameLogic
                 TextDescription = new TextDrawerDescription()
                 {
                     Font = this.fontName,
-                    FontSize = 12,
+                    FontSize = this.fontSize - 2,
                     TextColor = Color.Yellow,
                     ShadowColor = Color.Orange,
                 },
@@ -269,7 +269,7 @@ namespace GameLogic
                 TextDescription = new TextDrawerDescription()
                 {
                     Font = this.fontName,
-                    FontSize = 10,
+                    FontSize = this.fontSize - 2,
                     TextColor = Color.Yellow,
                 },
                 Text = "Next",
@@ -285,7 +285,7 @@ namespace GameLogic
                 TextDescription = new TextDrawerDescription()
                 {
                     Font = this.fontName,
-                    FontSize = 10,
+                    FontSize = this.fontSize - 2,
                     TextColor = Color.Yellow,
                 },
                 Text = "Prev.Soldier",
@@ -301,7 +301,7 @@ namespace GameLogic
                 TextDescription = new TextDrawerDescription()
                 {
                     Font = this.fontName,
-                    FontSize = 10,
+                    FontSize = this.fontSize - 2,
                     TextColor = Color.Yellow,
                 },
                 Text = "Next Soldier",
@@ -317,7 +317,7 @@ namespace GameLogic
                 TextDescription = new TextDrawerDescription()
                 {
                     Font = this.fontName,
-                    FontSize = 10,
+                    FontSize = this.fontSize - 2,
                     TextColor = Color.Yellow,
                 },
                 Text = "Prev.Action",
@@ -333,7 +333,7 @@ namespace GameLogic
                 TextDescription = new TextDrawerDescription()
                 {
                     Font = this.fontName,
-                    FontSize = 10,
+                    FontSize = this.fontSize - 2,
                     TextColor = Color.Yellow,
                 },
                 Text = "Next Action",

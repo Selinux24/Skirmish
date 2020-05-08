@@ -1,10 +1,10 @@
 ﻿
-namespace Engine
+namespace Engine.UI
 {
     /// <summary>
     /// Channel color
     /// </summary>
-    public enum SpriteTextureChannels
+    public enum UITextureRendererChannels
     {
         /// <summary>
         /// No channel selected

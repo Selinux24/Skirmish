@@ -47,7 +47,7 @@ namespace Engine.UI
         /// <summary>
         /// Constructor
         /// </summary>
-        public UIControlDescription() : base()
+        protected UIControlDescription() : base()
         {
             this.CastShadow = false;
             this.DeferredEnabled = false;

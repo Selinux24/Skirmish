@@ -9,7 +9,7 @@ namespace Engine.UI
         /// <summary>
         /// Channel color
         /// </summary>
-        public SpriteTextureChannels Channel { get; set; } = SpriteTextureChannels.All;
+        public UITextureRendererChannels Channel { get; set; } = UITextureRendererChannels.All;
 
         /// <summary>
         /// Constructor

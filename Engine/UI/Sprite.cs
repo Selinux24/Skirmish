@@ -2,12 +2,11 @@
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Engine
+namespace Engine.UI
 {
     using Engine.Common;
     using Engine.Content;
     using Engine.Effects;
-    using Engine.UI;
 
     /// <summary>
     /// Sprite drawer
@@ -70,14 +69,6 @@ namespace Engine
             }
 
             this.viewProjection = CreateViewOrthoProjection(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~Sprite()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
         }
         /// <summary>
         /// Internal resources disposition
@@ -161,7 +152,7 @@ namespace Engine
                 var effect = DrawerPool.EffectDefaultSprite;
                 var technique = effect.GetTechnique(
                     this.Textured ? VertexTypes.PositionTexture : VertexTypes.PositionColor,
-                    SpriteTextureChannels.All);
+                    UITextureRendererChannels.All);
 
                 Counters.InstancesPerFrame++;
                 Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;

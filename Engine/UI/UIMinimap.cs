@@ -1,16 +1,16 @@
 ﻿using SharpDX;
 using SharpDX.DXGI;
+using System.Linq;
 using System.Threading.Tasks;
 
-namespace Engine
+namespace Engine.UI
 {
     using Engine.Common;
-    using Engine.UI;
 
     /// <summary>
     /// Minimap
     /// </summary>
-    public class Minimap : Drawable, IScreenFitted
+    public class UIMinimap : Drawable, IScreenFitted
     {
         /// <summary>
         /// Viewport to match the minimap texture size
@@ -47,7 +47,7 @@ namespace Engine
         /// </summary>
         /// <param name="scene">Scene</param>
         /// <param name="description">Minimap description</param>
-        public Minimap(Scene scene, MinimapDescription description)
+        public UIMinimap(Scene scene, UIMinimapDescription description)
             : base(scene, description)
         {
             this.Drawables = description.Drawables;
@@ -75,7 +75,7 @@ namespace Engine
         /// <summary>
         /// Destructor
         /// </summary>
-        ~Minimap()
+        ~UIMinimap()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -106,6 +106,7 @@ namespace Engine
                 }
             }
         }
+
         /// <summary>
         /// Initialize terrain context
         /// </summary>
@@ -115,7 +116,7 @@ namespace Engine
             float y = this.minimapArea.Maximum.Y - this.minimapArea.Minimum.Y;
             float z = this.minimapArea.Maximum.Z - this.minimapArea.Minimum.Z;
 
-            float aspect = this.minimapBox.Height / this.minimapBox.Width;
+            float aspect = (float)this.minimapBox.Height / this.minimapBox.Width;
             float near = 0.1f;
 
             Vector3 eyePos = new Vector3(0, y + near, 0);
@@ -141,37 +142,46 @@ namespace Engine
                 Lights = SceneLights.CreateDefault(),
             };
         }
+
         /// <summary>
         /// Draw objects
         /// </summary>
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
+            if (!Visible)
+            {
+                return;
+            }
+
+            if (this.Drawables?.Any() != true)
+            {
+                return;
+            }
+
+            this.drawContext.GameTime = context.GameTime;
+
             var graphics = this.Game.Graphics;
 
-            if (this.Drawables != null && this.Drawables.Length > 0)
+            graphics.SetViewport(this.viewport);
+
+            graphics.SetRenderTargets(
+                this.renderTarget, true, Color.Black,
+                null, false, false,
+                false);
+
+            foreach (var item in this.Drawables)
             {
-                this.drawContext.GameTime = context.GameTime;
-
-                graphics.SetViewport(this.viewport);
-
-                graphics.SetRenderTargets(
-                    this.renderTarget, true, Color.Black,
-                    null, false, false,
-                    false);
-
-                for (int i = 0; i < this.Drawables.Length; i++)
-                {
-                    this.Drawables[i].Draw(this.drawContext);
-                }
-
-                graphics.SetDefaultViewport();
-                graphics.SetDefaultRenderTarget(false, false, false);
+                item.Draw(this.drawContext);
             }
+
+            graphics.SetDefaultViewport();
+            graphics.SetDefaultRenderTarget(false, false, false);
 
             this.minimapBox.Texture = this.renderTexture;
             this.minimapBox.Draw(context);
         }
+
         /// <summary>
         /// Resize
         /// </summary>
@@ -179,6 +189,7 @@ namespace Engine
         {
             this.minimapBox.Resize();
         }
+
         /// <summary>
         /// Performs culling test
         /// </summary>
@@ -197,25 +208,24 @@ namespace Engine
     /// <summary>
     /// Minimap extensions
     /// </summary>
-    public static class MinimapExtensions
+    public static class UIMinimapExtensions
     {
         /// <summary>
         /// Adds a component to the scene
         /// </summary>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        /// <param name="usage">Component usage</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<Minimap> AddComponentMinimap(this Scene scene, MinimapDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
+        public static async Task<UIMinimap> AddComponentUIMinimap(this Scene scene, UIMinimapDescription description, int order = 0)
         {
-            Minimap component = null;
+            UIMinimap component = null;
 
             await Task.Run(() =>
             {
-                component = new Minimap(scene, description);
+                component = new UIMinimap(scene, description);
 
-                scene.AddComponent(component, usage, order);
+                scene.AddComponent(component, SceneObjectUsages.UI, order);
             });
 
             return component;

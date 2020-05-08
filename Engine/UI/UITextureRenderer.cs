@@ -26,7 +26,7 @@ namespace Engine.UI
         /// <summary>
         /// Drawing channels
         /// </summary>
-        private SpriteTextureChannels channels = SpriteTextureChannels.None;
+        private UITextureRendererChannels channels = UITextureRendererChannels.None;
 
         /// <summary>
         /// Texture
@@ -39,7 +39,7 @@ namespace Engine.UI
         /// <summary>
         /// Drawing channels
         /// </summary>
-        public SpriteTextureChannels Channels
+        public UITextureRendererChannels Channels
         {
             get
             {
@@ -83,14 +83,6 @@ namespace Engine.UI
             this.Channels = description.Channel;
 
             this.viewProjection = CreateViewOrthoProjection(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~UITextureRenderer()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
         }
         /// <summary>
         /// Dispose objects

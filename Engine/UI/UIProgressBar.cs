@@ -94,14 +94,6 @@ namespace Engine.UI
             this.Text = description.Text;
         }
         /// <summary>
-        /// Destructor
-        /// </summary>
-        ~UIProgressBar()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <summary>
         /// Releases used resources
         /// </summary>
         protected override void Dispose(bool disposing)

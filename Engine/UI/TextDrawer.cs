@@ -1,11 +1,10 @@
 ﻿using SharpDX;
 using System.Threading.Tasks;
 
-namespace Engine
+namespace Engine.UI
 {
     using Engine.Common;
     using Engine.Effects;
-    using Engine.UI;
 
     /// <summary>
     /// Text drawer
@@ -145,7 +144,7 @@ namespace Engine
             set
             {
                 this.textArea = value;
-                this.centered = value.HasValue ? this.centered : false;
+                this.centered = value.HasValue && this.centered;
 
                 this.MapText();
             }

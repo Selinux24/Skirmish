@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 namespace Engine
 {
     using Engine.Common;
+    using Engine.UI;
 
     /// <summary>
     /// Lens flare

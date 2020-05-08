@@ -342,7 +342,7 @@ namespace Terrain
                 Top = smTop,
                 Width = width,
                 Height = height,
-                Channel = SpriteTextureChannels.Red,
+                Channel = UITextureRendererChannels.Red,
             };
             this.shadowMapDrawer = await this.AddComponentUITextureRenderer(stDescription, this.layerHud);
             this.shadowMapDrawer.Visible = false;

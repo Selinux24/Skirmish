@@ -1,15 +1,15 @@
 ﻿
-namespace Engine
+namespace Engine.UI
 {
     /// <summary>
     /// Background description
     /// </summary>
-    public class SpriteBackgroundDescription : SpriteDescription
+    public class BackgroundDescription : SpriteDescription
     {
         /// <summary>
         /// Constructor
         /// </summary>
-        public SpriteBackgroundDescription()
+        public BackgroundDescription()
             : base()
         {
             this.Width = 0;

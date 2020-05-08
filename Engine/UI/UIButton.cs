@@ -176,14 +176,6 @@ namespace Engine.UI
             }
         }
         /// <summary>
-        /// Destructor
-        /// </summary>
-        ~UIButton()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <summary>
         /// Releases used resources
         /// </summary>
         protected override void Dispose(bool disposing)

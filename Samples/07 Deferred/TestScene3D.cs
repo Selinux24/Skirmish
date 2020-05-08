@@ -355,7 +355,7 @@ namespace Deferred
                     Top = 0,
                     Width = this.Game.Form.RenderWidth,
                     Height = this.Game.Form.RenderHeight,
-                    Channel = SpriteTextureChannels.NoAlpha,
+                    Channel = UITextureRendererChannels.NoAlpha,
                 },
                 layerEffects);
             this.bufferDrawer.Visible = false;
@@ -842,7 +842,7 @@ namespace Deferred
 
             //Colors
             this.bufferDrawer.Texture = colorMap;
-            this.bufferDrawer.Channels = SpriteTextureChannels.NoAlpha;
+            this.bufferDrawer.Channels = UITextureRendererChannels.NoAlpha;
             this.help.Text = "Colors";
 
             this.bufferDrawer.Visible = true;
@@ -852,18 +852,18 @@ namespace Deferred
             var normalMap = this.Renderer.GetResource(SceneRendererResults.NormalMap);
 
             if (this.bufferDrawer.Texture == normalMap &&
-                this.bufferDrawer.Channels == SpriteTextureChannels.NoAlpha)
+                this.bufferDrawer.Channels == UITextureRendererChannels.NoAlpha)
             {
                 //Specular Power
                 this.bufferDrawer.Texture = normalMap;
-                this.bufferDrawer.Channels = SpriteTextureChannels.Alpha;
+                this.bufferDrawer.Channels = UITextureRendererChannels.Alpha;
                 this.help.Text = "Specular Power";
             }
             else
             {
                 //Normals
                 this.bufferDrawer.Texture = normalMap;
-                this.bufferDrawer.Channels = SpriteTextureChannels.NoAlpha;
+                this.bufferDrawer.Channels = UITextureRendererChannels.NoAlpha;
                 this.help.Text = "Normals";
             }
             this.bufferDrawer.Visible = true;
@@ -873,18 +873,18 @@ namespace Deferred
             var depthMap = this.Renderer.GetResource(SceneRendererResults.DepthMap);
 
             if (this.bufferDrawer.Texture == depthMap &&
-                this.bufferDrawer.Channels == SpriteTextureChannels.NoAlpha)
+                this.bufferDrawer.Channels == UITextureRendererChannels.NoAlpha)
             {
                 //Specular Factor
                 this.bufferDrawer.Texture = depthMap;
-                this.bufferDrawer.Channels = SpriteTextureChannels.Alpha;
+                this.bufferDrawer.Channels = UITextureRendererChannels.Alpha;
                 this.help.Text = "Specular Intensity";
             }
             else
             {
                 //Position
                 this.bufferDrawer.Texture = depthMap;
-                this.bufferDrawer.Channels = SpriteTextureChannels.NoAlpha;
+                this.bufferDrawer.Channels = UITextureRendererChannels.NoAlpha;
                 this.help.Text = "Position";
             }
             this.bufferDrawer.Visible = true;
@@ -900,7 +900,7 @@ namespace Deferred
                 {
                     this.bufferDrawer.Texture = shadowMap;
                     this.bufferDrawer.TextureIndex = 0;
-                    this.bufferDrawer.Channels = SpriteTextureChannels.Red;
+                    this.bufferDrawer.Channels = UITextureRendererChannels.Red;
                     this.bufferDrawer.Visible = true;
                 }
                 else
@@ -938,7 +938,7 @@ namespace Deferred
             {
                 //Light map
                 this.bufferDrawer.Texture = lightMap;
-                this.bufferDrawer.Channels = SpriteTextureChannels.NoAlpha;
+                this.bufferDrawer.Channels = UITextureRendererChannels.NoAlpha;
                 this.bufferDrawer.Visible = true;
                 this.help.Text = "Light map";
             }

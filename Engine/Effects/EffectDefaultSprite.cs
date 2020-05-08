@@ -3,6 +3,7 @@
 namespace Engine.Effects
 {
     using Engine.Common;
+    using Engine.UI;
 
     /// <summary>
     /// Basic effect
@@ -172,7 +173,7 @@ namespace Engine.Effects
         /// <param name="vertexType">VertexType</param>
         /// <param name="channel">Color channel</param>
         /// <returns>Returns the technique to process the specified vertex type</returns>
-        public EngineEffectTechnique GetTechnique(VertexTypes vertexType, SpriteTextureChannels channel)
+        public EngineEffectTechnique GetTechnique(VertexTypes vertexType, UITextureRendererChannels channel)
         {
             if (vertexType == VertexTypes.PositionColor)
             {
@@ -180,12 +181,12 @@ namespace Engine.Effects
             }
             else if (vertexType == VertexTypes.PositionTexture)
             {
-                if (channel == SpriteTextureChannels.All) return this.PositionTexture;
-                else if (channel == SpriteTextureChannels.Red) return this.PositionTextureRED;
-                else if (channel == SpriteTextureChannels.Green) return this.PositionTextureGREEN;
-                else if (channel == SpriteTextureChannels.Blue) return this.PositionTextureBLUE;
-                else if (channel == SpriteTextureChannels.Alpha) return this.PositionTextureALPHA;
-                else if (channel == SpriteTextureChannels.NoAlpha) return this.PositionTextureNOALPHA;
+                if (channel == UITextureRendererChannels.All) return this.PositionTexture;
+                else if (channel == UITextureRendererChannels.Red) return this.PositionTextureRED;
+                else if (channel == UITextureRendererChannels.Green) return this.PositionTextureGREEN;
+                else if (channel == UITextureRendererChannels.Blue) return this.PositionTextureBLUE;
+                else if (channel == UITextureRendererChannels.Alpha) return this.PositionTextureALPHA;
+                else if (channel == UITextureRendererChannels.NoAlpha) return this.PositionTextureNOALPHA;
                 else return this.PositionTexture;
             }
             else

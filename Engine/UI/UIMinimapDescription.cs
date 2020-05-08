@@ -1,11 +1,11 @@
 ﻿using SharpDX;
 
-namespace Engine
+namespace Engine.UI
 {
     /// <summary>
     /// Minimap description
     /// </summary>
-    public class MinimapDescription : SceneObjectDescription
+    public class UIMinimapDescription : SceneObjectDescription
     {
         /// <summary>
         /// Top position
@@ -35,7 +35,7 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        public MinimapDescription()
+        public UIMinimapDescription()
             : base()
         {
             this.CastShadow = false;

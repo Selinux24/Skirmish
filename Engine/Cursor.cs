@@ -6,7 +6,7 @@ namespace Engine
     /// <summary>
     /// Game cursor
     /// </summary>
-    public class Cursor
+    public static class Cursor
     {
         /// <summary>
         /// Times Cursor.Show() were called

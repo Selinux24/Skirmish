@@ -1,7 +1,6 @@
-﻿using Engine.UI;
-using SharpDX;
+﻿using SharpDX;
 
-namespace Engine
+namespace Engine.UI
 {
     /// <summary>
     /// Sprite description

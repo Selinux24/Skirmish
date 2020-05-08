@@ -776,7 +776,7 @@ namespace Heightmap
                 Top = smTop,
                 Width = width,
                 Height = height,
-                Channel = SpriteTextureChannels.NoAlpha,
+                Channel = UITextureRendererChannels.NoAlpha,
             };
             this.bufferDrawer = await this.AddComponentUITextureRenderer(desc, layerEffects);
             this.bufferDrawer.Visible = false;
@@ -1569,7 +1569,7 @@ namespace Heightmap
                 if (shadowMap != null)
                 {
                     this.bufferDrawer.Texture = shadowMap;
-                    this.bufferDrawer.Channels = SpriteTextureChannels.Red;
+                    this.bufferDrawer.Channels = UITextureRendererChannels.Red;
 
                     if (shift)
                     {

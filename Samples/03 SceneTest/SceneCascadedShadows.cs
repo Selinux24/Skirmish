@@ -185,7 +185,7 @@ namespace SceneTest
                 Top = smTop,
                 Width = width,
                 Height = height,
-                Channel = SpriteTextureChannels.NoAlpha,
+                Channel = UITextureRendererChannels.NoAlpha,
             };
             this.bufferDrawer = await this.AddComponentUITextureRenderer(desc, layerEffects);
             this.bufferDrawer.Visible = false;
@@ -259,7 +259,7 @@ namespace SceneTest
                 {
                     this.bufferDrawer.Texture = shadowMap;
                     this.bufferDrawer.TextureIndex = 0;
-                    this.bufferDrawer.Channels = SpriteTextureChannels.Red;
+                    this.bufferDrawer.Channels = UITextureRendererChannels.Red;
                     this.bufferDrawer.Visible = true;
                 }
             }
