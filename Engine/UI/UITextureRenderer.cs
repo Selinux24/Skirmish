@@ -83,6 +83,13 @@ namespace Engine.UI
             this.Channels = description.Channel;
 
             this.viewProjection = CreateViewOrthoProjection(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
+
+            // Adjust to screen coordinates
+            float x = description.Left - this.Game.Form.RelativeCenter.X;
+            float y = description.Top - this.Game.Form.RelativeCenter.Y;
+
+            this.Manipulator.SetPosition(x, y);
+            this.Manipulator.SetScale(description.Width, description.Height);
         }
         /// <summary>
         /// Dispose objects
@@ -155,6 +162,13 @@ namespace Engine.UI
             base.Resize();
 
             this.viewProjection = CreateViewOrthoProjection(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
+
+            // Adjust to screen coordinates
+            float x = this.Left - this.Game.Form.RelativeCenter.X;
+            float y = this.Top - this.Game.Form.RelativeCenter.Y;
+
+            this.Manipulator.SetPosition(x, y);
+            this.Manipulator.SetScale(this.Width, this.Height);
         }
     }
 
