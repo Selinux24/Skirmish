@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.UI;
 using SharpDX;
 using System;
 using System.Threading.Tasks;
@@ -12,13 +13,13 @@ namespace SceneTest
 
         private Model backGround = null;
         private TextDrawer title = null;
-        private SpriteButton sceneMaterialsButton = null;
-        private SpriteButton sceneWaterButton = null;
-        private SpriteButton sceneStencilPassButton = null;
-        private SpriteButton sceneLightsButton = null;
-        private SpriteButton sceneCascadedShadowsButton = null;
-        private SpriteButton sceneTestButton = null;
-        private SpriteButton exitButton = null;
+        private UIButton sceneMaterialsButton = null;
+        private UIButton sceneWaterButton = null;
+        private UIButton sceneStencilPassButton = null;
+        private UIButton sceneLightsButton = null;
+        private UIButton sceneCascadedShadowsButton = null;
+        private UIButton sceneTestButton = null;
+        private UIButton exitButton = null;
 
         private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.CornflowerBlue, 1.5f);
         private readonly Color exitButtonColor = Color.AdjustSaturation(Color.Orange, 1.5f);
@@ -63,8 +64,9 @@ namespace SceneTest
                  int h = 4;
                  int hv = h - 1;
 
-                 this.title.CenterHorizontally();
-                 this.title.Top = this.Game.Form.RenderHeight / h;
+                 var rect = this.Game.Form.RenderRectangle;
+                 rect.Height /= 2;
+                 this.title.CenterRectangle(rect);
 
                  for (int i = 0; i < sceneButtons.Length; i++)
                  {
@@ -82,7 +84,7 @@ namespace SceneTest
         {
             #region Cursor
 
-            var cursorDesc = new CursorDescription()
+            var cursorDesc = new UICursorDescription()
             {
                 Name = "Cursor",
                 ContentPath = "Common",
@@ -93,7 +95,7 @@ namespace SceneTest
                 Delta = new Vector2(-14, -6),
                 Color = Color.White,
             };
-            await this.AddComponentCursor(cursorDesc, SceneObjectUsages.UI, layerCursor);
+            await this.AddComponentUICursor(cursorDesc, layerCursor);
 
             #endregion
 
@@ -122,7 +124,7 @@ namespace SceneTest
 
             #region Scene buttons
 
-            var startButtonDesc = new SpriteButtonDescription()
+            var startButtonDesc = new UIButtonDescription()
             {
                 Name = "Scene buttons",
 
@@ -147,18 +149,18 @@ namespace SceneTest
                     TextColor = Color.Gold,
                 }
             };
-            this.sceneMaterialsButton = await this.AddComponentSpriteButton(startButtonDesc, SceneObjectUsages.UI, layerHUD);
-            this.sceneWaterButton = await this.AddComponentSpriteButton(startButtonDesc, SceneObjectUsages.UI, layerHUD);
-            this.sceneStencilPassButton = await this.AddComponentSpriteButton(startButtonDesc, SceneObjectUsages.UI, layerHUD);
-            this.sceneLightsButton = await this.AddComponentSpriteButton(startButtonDesc, SceneObjectUsages.UI, layerHUD);
-            this.sceneCascadedShadowsButton = await this.AddComponentSpriteButton(startButtonDesc, SceneObjectUsages.UI, layerHUD);
-            this.sceneTestButton = await this.AddComponentSpriteButton(startButtonDesc, SceneObjectUsages.UI, layerHUD);
+            this.sceneMaterialsButton = await this.AddComponentUIButton(startButtonDesc, layerHUD);
+            this.sceneWaterButton = await this.AddComponentUIButton(startButtonDesc, layerHUD);
+            this.sceneStencilPassButton = await this.AddComponentUIButton(startButtonDesc, layerHUD);
+            this.sceneLightsButton = await this.AddComponentUIButton(startButtonDesc, layerHUD);
+            this.sceneCascadedShadowsButton = await this.AddComponentUIButton(startButtonDesc, layerHUD);
+            this.sceneTestButton = await this.AddComponentUIButton(startButtonDesc, layerHUD);
 
             #endregion
 
             #region Exit button
 
-            var exitButtonDesc = new SpriteButtonDescription()
+            var exitButtonDesc = new UIButtonDescription()
             {
                 Name = "Exit button",
 
@@ -183,7 +185,7 @@ namespace SceneTest
                     TextColor = Color.Gold,
                 }
             };
-            this.exitButton = await this.AddComponentSpriteButton(exitButtonDesc, SceneObjectUsages.UI, layerHUD);
+            this.exitButton = await this.AddComponentUIButton(exitButtonDesc, layerHUD);
 
             #endregion
         }

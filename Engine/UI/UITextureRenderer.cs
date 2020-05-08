@@ -1,15 +1,15 @@
 ﻿using SharpDX;
 using System.Threading.Tasks;
 
-namespace Engine
+namespace Engine.UI
 {
     using Engine.Common;
     using Engine.Effects;
 
     /// <summary>
-    /// Minimap
+    /// Render to texture control
     /// </summary>
-    public class SpriteTexture : Drawable, IScreenFitted, ITransformable2D
+    public class UITextureRenderer : UIControl
     {
         /// <summary>
         /// Vertex buffer descriptor
@@ -28,18 +28,6 @@ namespace Engine
         /// </summary>
         private SpriteTextureChannels channels = SpriteTextureChannels.None;
 
-        /// <summary>
-        /// Sprite initial width
-        /// </summary>
-        public float Width { get; private set; }
-        /// <summary>
-        /// Sprite initial height
-        /// </summary>
-        public float Height { get; private set; }
-        /// <summary>
-        /// Manipulator
-        /// </summary>
-        public Manipulator2D Manipulator { get; private set; }
         /// <summary>
         /// Texture
         /// </summary>
@@ -65,13 +53,23 @@ namespace Engine
                 }
             }
         }
+        /// <summary>
+        /// Gets whether the internal buffers were ready or not
+        /// </summary>
+        public bool BuffersReady
+        {
+            get
+            {
+                return this.vertexBuffer?.Ready == true && this.indexBuffer?.Ready == true;
+            }
+        }
 
         /// <summary>
         /// Contructor
         /// </summary>
         /// <param name="scene">Scene</param>
         /// <param name="description">Sprite texture description</param>
-        public SpriteTexture(Scene scene, SpriteTextureDescription description)
+        public UITextureRenderer(Scene scene, UITextureRendererDescription description)
             : base(scene, description)
         {
             var sprite = GeometryUtil.CreateSprite(Vector2.Zero, 1, 1);
@@ -84,25 +82,12 @@ namespace Engine
 
             this.Channels = description.Channel;
 
-            this.Manipulator = new Manipulator2D();
-            this.Manipulator.SetPosition(description.Left, description.Top);
-            this.Manipulator.Update(new GameTime(), this.Game.Form.RelativeCenter, description.Width, description.Height);
-
-            Sprite.CreateViewOrthoProjection(
-                this.Game.Form.RenderWidth,
-                this.Game.Form.RenderHeight,
-                out Matrix view,
-                out Matrix proj);
-
-            this.viewProjection = view * proj;
-
-            this.Width = description.Width;
-            this.Height = description.Height;
+            this.viewProjection = CreateViewOrthoProjection(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~SpriteTexture()
+        ~UITextureRenderer()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -119,12 +104,23 @@ namespace Engine
                 this.BufferManager?.RemoveIndexData(this.indexBuffer);
             }
         }
+
         /// <summary>
         /// Draw objects
         /// </summary>
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
+            if (!Visible)
+            {
+                return;
+            }
+
+            if (!BuffersReady)
+            {
+                return;
+            }
+
             var mode = context.DrawerMode;
             var draw = (mode.HasFlag(DrawerModes.OpaqueOnly) && !this.Description.AlphaEnabled) ||
                 (mode.HasFlag(DrawerModes.TransparentOnly) && this.Description.AlphaEnabled);
@@ -143,7 +139,7 @@ namespace Engine
                 this.BufferManager.SetInputAssembler(technique, this.vertexBuffer, Topology.TriangleList);
 
                 effect.UpdatePerFrame(this.Manipulator.LocalTransform, this.viewProjection);
-                effect.UpdatePerObject(Color.White, this.Texture, this.TextureIndex);
+                effect.UpdatePerObject(Color4.White, this.Texture, this.TextureIndex);
 
                 var graphics = this.Game.Graphics;
 
@@ -158,46 +154,39 @@ namespace Engine
                 }
             }
         }
+
         /// <summary>
         /// Screen resize
         /// </summary>
-        public virtual void Resize()
+        public override void Resize()
         {
-            this.viewProjection = Sprite.CreateViewOrthoProjection(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
-        }
-        /// <summary>
-        /// Object resize
-        /// </summary>
-        /// <param name="width">New width</param>
-        /// <param name="height">New height</param>
-        public virtual void ResizeSprite(float width, float height)
-        {
-            this.Manipulator.Update(new GameTime(), this.Game.Form.RelativeCenter, width, height);
+            base.Resize();
+
+            this.viewProjection = CreateViewOrthoProjection(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
         }
     }
 
     /// <summary>
     /// Sprite texture extensions
     /// </summary>
-    public static class SpriteTextureExtensions
+    public static class UITextureRendererExtensions
     {
         /// <summary>
         /// Adds a component to the scene
         /// </summary>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        /// <param name="usage">Component usage</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<SpriteTexture> AddComponentSpriteTexture(this Scene scene, SpriteTextureDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
+        public static async Task<UITextureRenderer> AddComponentUITextureRenderer(this Scene scene, UITextureRendererDescription description, int order = 0)
         {
-            SpriteTexture component = null;
+            UITextureRenderer component = null;
 
             await Task.Run(() =>
             {
-                component = new SpriteTexture(scene, description);
+                component = new UITextureRenderer(scene, description);
 
-                scene.AddComponent(component, usage, order);
+                scene.AddComponent(component, SceneObjectUsages.UI, order);
             });
 
             return component;

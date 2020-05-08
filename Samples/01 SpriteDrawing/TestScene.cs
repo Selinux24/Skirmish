@@ -1,5 +1,8 @@
 ﻿using Engine;
+using Engine.Tween;
+using Engine.UI;
 using SharpDX;
+using System;
 using System.Threading.Tasks;
 
 namespace SpriteDrawing
@@ -12,9 +15,9 @@ namespace SpriteDrawing
         private const float delta = 250f;
 
         private Sprite spriteMov = null;
-        private Sprite textBackPanel = null;
         private TextDrawer textDrawer = null;
-        private SpriteProgressBar progressBar = null;
+        private UIProgressBar progressBar = null;
+        private Sprite pan = null;
 
         private readonly string allText = Properties.Resources.Lorem;
         private string currentText = "";
@@ -44,6 +47,8 @@ namespace SpriteDrawing
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
+
+            FloatTweenManager.Update(gameTime.ElapsedSeconds);
 
             UpdateInput();
 
@@ -75,8 +80,7 @@ namespace SpriteDrawing
                         () =>
                         {
                             progressBar.Visible = false;
-                            textBackPanel.Manipulator.SetPosition(700, 100);
-                            textDrawer.Rectangle = new Rectangle(780, 140, 650, 550);
+
                             textDrawer.Text = null;
 
                             gameReady = true;
@@ -92,7 +96,7 @@ namespace SpriteDrawing
             };
             await this.AddComponentSprite(desc, SceneObjectUsages.UI, layerBackground);
 
-            var pbDesc = new SpriteProgressBarDescription
+            var pbDesc = new UIProgressBarDescription
             {
                 Name = "Progress Bar",
                 Top = this.Game.Form.RenderHeight - 20,
@@ -102,7 +106,7 @@ namespace SpriteDrawing
                 BaseColor = Color.Transparent,
                 ProgressColor = Color.Green,
             };
-            this.progressBar = await this.AddComponentSpriteProgressBar(pbDesc, SceneObjectUsages.UI, layerHUD);
+            this.progressBar = await this.AddComponentUIProgressBar(pbDesc, layerHUD);
         }
         private async Task InitializeSmiley()
         {
@@ -110,12 +114,13 @@ namespace SpriteDrawing
             {
                 ContentPath = "Resources",
                 Textures = new[] { "smiley.png" },
+                Top = 0,
+                Left = 0,
                 Width = 256,
                 Height = 256,
-                FitScreen = true,
+                FitScreen = false,
             };
             this.spriteMov = await this.AddComponentSprite(desc, SceneObjectUsages.None, layerObjects);
-            this.spriteMov.Manipulator.SetPosition(256, 0);
         }
         private async Task InitializePan()
         {
@@ -123,11 +128,27 @@ namespace SpriteDrawing
             {
                 ContentPath = "Resources",
                 Textures = new[] { "pan.jpg" },
+                Top = 100,
+                Left = 700,
                 Width = 800,
                 Height = 650,
-                FitScreen = true,
+                FitScreen = false,
             };
-            this.textBackPanel = await this.AddComponentSprite(desc, SceneObjectUsages.UI, layerHUD);
+            _ = await this.AddComponentSprite(desc, SceneObjectUsages.UI, layerHUD);
+
+            var descPan = new SpriteDescription()
+            {
+                ContentPath = "Resources",
+                Textures = new[] { "pan.jpg" },
+                Width = 800,
+                Height = 600,
+                CenterHorizontally = true,
+                CenterVertically = true,
+                FitScreen = false,
+                Color = Color.Red,
+            };
+            this.pan = await this.AddComponentSprite(descPan, SceneObjectUsages.UI, layerHUD);
+            this.pan.Visible = false;
         }
         private async Task InitializeTextDrawer()
         {
@@ -140,6 +161,17 @@ namespace SpriteDrawing
                 TextColor = Color.LightGoldenrodYellow,
             };
             this.textDrawer = await this.AddComponentTextDrawer(desc, SceneObjectUsages.UI, layerHUD);
+            this.textDrawer.TextArea = new Rectangle(780, 140, 650, 550);
+
+            var desc2 = new TextDrawerDescription()
+            {
+                Name = "Text",
+                Font = "Consolas",
+                FontSize = 14,
+                Style = FontMapStyles.Regular,
+                TextColor = Color.White,
+            };
+            _ = await this.AddComponentTextDrawer(desc2, SceneObjectUsages.UI, layerHUD);
         }
 
         private void UpdateInput()
@@ -151,7 +183,20 @@ namespace SpriteDrawing
 
             if (this.Game.Input.KeyJustReleased(Keys.Home))
             {
-                this.spriteMov.Manipulator.SetPosition(0, 0);
+                this.spriteMov.Left = 0;
+                this.spriteMov.Top = 0;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.Space))
+            {
+                if (!pan.Visible || pan.Scale == 0)
+                {
+                    pan.ShowRoll(2);
+                }
+                else if (pan.Scale == 1)
+                {
+                    pan.HideRoll(1);
+                }
             }
         }
         private void UpdateSprite(GameTime gameTime)

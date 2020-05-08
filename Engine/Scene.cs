@@ -239,7 +239,7 @@ namespace Engine
         /// Control captured with mouse
         /// </summary>
         /// <remarks>When mouse was pressed, the control beneath him was stored here. When mouse is released, if it is above this control, an click event occurs</remarks>
-        private IControl capturedControl = null;
+        private IUIControl capturedControl = null;
         /// <summary>
         /// Scene mode
         /// </summary>
@@ -443,7 +443,7 @@ namespace Engine
                 //Process 2D controls
                 var ctrls = this.GetComponents()
                     .Where(c => c.Active)
-                    .OfType<IControl>()
+                    .OfType<IUIControl>()
                     .ToArray();
                 foreach (var ctrl in ctrls)
                 {

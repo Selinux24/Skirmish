@@ -738,7 +738,7 @@ namespace Engine
             }
             else
             {
-                this.Game.Graphics.SetBlendTransparent();
+                this.Game.Graphics.SetBlendDefaultAlpha();
             }
         }
 

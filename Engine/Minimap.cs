@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 namespace Engine
 {
     using Engine.Common;
+    using Engine.UI;
 
     /// <summary>
     /// Minimap
@@ -18,7 +19,7 @@ namespace Engine
         /// <summary>
         /// Surface to draw
         /// </summary>
-        private SpriteTexture minimapBox;
+        private UITextureRenderer minimapBox;
         /// <summary>
         /// Minimap render target
         /// </summary>
@@ -53,7 +54,7 @@ namespace Engine
 
             this.minimapArea = description.MinimapArea;
 
-            this.minimapBox = new SpriteTexture(scene, new SpriteTextureDescription()
+            this.minimapBox = new UITextureRenderer(scene, new UITextureRendererDescription()
             {
                 Top = description.Top,
                 Left = description.Left,

@@ -3,6 +3,7 @@ using Engine.Animation;
 using Engine.Content;
 using Engine.PathFinding.RecastNavigation;
 using Engine.PathFinding.RecastNavigation.Detour.Crowds;
+using Engine.UI;
 using SharpDX;
 using System;
 using System.Collections.Generic;
@@ -42,7 +43,7 @@ namespace Deferred
         private Model tree = null;
         private ModelInstanced trees = null;
 
-        private SpriteTexture bufferDrawer = null;
+        private UITextureRenderer bufferDrawer = null;
         private int textIntex = 0;
         private bool animateLights = false;
         private SceneLightSpot spotLight = null;
@@ -148,13 +149,13 @@ namespace Deferred
         }
         private async Task InitializeCursor()
         {
-            var cursorDesc = new CursorDescription()
+            var cursorDesc = new UICursorDescription()
             {
                 Textures = new[] { "target.png" },
                 Width = 16,
                 Height = 16,
             };
-            await this.AddComponentCursor(cursorDesc, SceneObjectUsages.UI, layerHUD + 1);
+            await this.AddComponentUICursor(cursorDesc, layerHUD + 1);
         }
         private async Task InitializeSkydom()
         {
@@ -347,18 +348,20 @@ namespace Deferred
             int smLeft = this.Game.Form.RenderWidth - width;
             int smTop = this.Game.Form.RenderHeight - height;
 
-            this.bufferDrawer = await this.AddComponentSpriteTexture(
-                new SpriteTextureDescription()
+            this.bufferDrawer = await this.AddComponentUITextureRenderer(
+                new UITextureRendererDescription()
                 {
-                    Left = smLeft,
-                    Top = smTop,
-                    Width = width,
-                    Height = height,
+                    Left = 0,
+                    Top = 0,
+                    Width = this.Game.Form.RenderWidth,
+                    Height = this.Game.Form.RenderHeight,
                     Channel = SpriteTextureChannels.NoAlpha,
                 },
-                SceneObjectUsages.UI,
                 layerEffects);
             this.bufferDrawer.Visible = false;
+            this.bufferDrawer.Scale = 0.33f;
+            this.bufferDrawer.Left = smLeft;
+            this.bufferDrawer.Top = smTop;
 
             this.lineDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(
                 new PrimitiveListDrawerDescription<Line3D>()
@@ -946,20 +949,22 @@ namespace Deferred
         }
         private void UpdateDebugBufferDrawer()
         {
-            if (this.bufferDrawer.Manipulator.Position == Vector2.Zero)
+            if (this.bufferDrawer.Scale == 0.33f)
+            {
+                this.bufferDrawer.Left = 0;
+                this.bufferDrawer.Top = 0;
+                this.bufferDrawer.Scale = 1f;
+            }
+            else
             {
                 int width = (int)(this.Game.Form.RenderWidth * 0.33f);
                 int height = (int)(this.Game.Form.RenderHeight * 0.33f);
                 int smLeft = this.Game.Form.RenderWidth - width;
                 int smTop = this.Game.Form.RenderHeight - height;
 
-                this.bufferDrawer.Manipulator.SetPosition(smLeft, smTop);
-                this.bufferDrawer.ResizeSprite(width, height);
-            }
-            else
-            {
-                this.bufferDrawer.Manipulator.SetPosition(Vector2.Zero);
-                this.bufferDrawer.ResizeSprite(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
+                this.bufferDrawer.Left = smLeft;
+                this.bufferDrawer.Top = smTop;
+                this.bufferDrawer.Scale = 0.33f;
             }
         }
         private void UpdateDebugProximityGridDrawer()

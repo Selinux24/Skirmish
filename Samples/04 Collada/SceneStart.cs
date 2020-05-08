@@ -1,5 +1,6 @@
 ﻿using Engine;
 using Engine.Audio;
+using Engine.UI;
 using SharpDX;
 using System;
 using System.Threading.Tasks;
@@ -13,11 +14,11 @@ namespace Collada
 
         Model backGround = null;
         TextDrawer title = null;
-        SpriteButton sceneDungeonWallButton = null;
-        SpriteButton sceneNavMeshTestButton = null;
-        SpriteButton sceneDungeonButton = null;
-        SpriteButton sceneModularDungeonButton = null;
-        SpriteButton exitButton = null;
+        UIButton sceneDungeonWallButton = null;
+        UIButton sceneNavMeshTestButton = null;
+        UIButton sceneDungeonButton = null;
+        UIButton sceneModularDungeonButton = null;
+        UIButton exitButton = null;
 
         private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.RosyBrown, 1.5f);
         private readonly Color exitButtonColor = Color.AdjustSaturation(Color.OrangeRed, 1.5f);
@@ -52,7 +53,7 @@ namespace Collada
 
             await Task.CompletedTask;
         }
-        
+
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
@@ -97,10 +98,10 @@ namespace Collada
                     gameReady = true;
                 });
         }
-        
+
         private async Task InitializeCursor()
         {
-            var cursorDesc = new CursorDescription()
+            var cursorDesc = new UICursorDescription()
             {
                 Name = "Cursor",
                 ContentPath = "Resources/Common",
@@ -110,7 +111,7 @@ namespace Collada
                 Centered = false,
                 Color = Color.White,
             };
-            await this.AddComponentCursor(cursorDesc, SceneObjectUsages.UI, layerCursor);
+            await this.AddComponentUICursor(cursorDesc, layerCursor);
         }
         private async Task InitializeBackGround()
         {
@@ -132,7 +133,7 @@ namespace Collada
             };
             this.title = await this.AddComponentTextDrawer(titleDesc, SceneObjectUsages.UI, layerHUD);
 
-            var buttonDesc = new SpriteButtonDescription()
+            var buttonDesc = new UIButtonDescription()
             {
                 Name = "Scene buttons",
 
@@ -157,13 +158,13 @@ namespace Collada
                     TextColor = Color.Gold,
                 }
             };
-            this.sceneDungeonWallButton = await this.AddComponentSpriteButton(buttonDesc, SceneObjectUsages.UI, layerHUD);
-            this.sceneNavMeshTestButton = await this.AddComponentSpriteButton(buttonDesc, SceneObjectUsages.UI, layerHUD);
-            this.sceneDungeonButton = await this.AddComponentSpriteButton(buttonDesc, SceneObjectUsages.UI, layerHUD);
-            this.sceneModularDungeonButton = await this.AddComponentSpriteButton(buttonDesc, SceneObjectUsages.UI, layerHUD);
+            this.sceneDungeonWallButton = await this.AddComponentUIButton(buttonDesc, layerHUD);
+            this.sceneNavMeshTestButton = await this.AddComponentUIButton(buttonDesc, layerHUD);
+            this.sceneDungeonButton = await this.AddComponentUIButton(buttonDesc, layerHUD);
+            this.sceneModularDungeonButton = await this.AddComponentUIButton(buttonDesc, layerHUD);
 
             // Exit button
-            var exitButtonDesc = new SpriteButtonDescription()
+            var exitButtonDesc = new UIButtonDescription()
             {
                 Name = "Exit button",
 
@@ -188,7 +189,7 @@ namespace Collada
                     TextColor = Color.Gold,
                 }
             };
-            this.exitButton = await this.AddComponentSpriteButton(exitButtonDesc, SceneObjectUsages.UI, layerHUD);
+            this.exitButton = await this.AddComponentUIButton(exitButtonDesc, layerHUD);
         }
         private async Task InitializeAudio()
         {
@@ -231,7 +232,7 @@ namespace Collada
         private void SetControlPositions()
         {
             this.title.Text = "Collada Loader Test";
-            this.title.CenterHorizontally();
+            this.title.CenterScreen();
             this.title.Top = this.Game.Form.RenderHeight / 4;
 
             this.sceneDungeonWallButton.Text = "Dungeon Wall";

@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 
 namespace Terrain
 {
+    using Engine.UI;
     using Terrain.AI;
     using Terrain.AI.Agents;
     using Terrain.Controllers;
@@ -38,7 +39,7 @@ namespace Terrain
 
         private bool useDebugTex = false;
         private SceneRendererResults shadowResult = SceneRendererResults.ShadowMapDirectional;
-        private SpriteTexture shadowMapDrawer = null;
+        private UITextureRenderer shadowMapDrawer = null;
         private EngineShaderResourceView debugTex = null;
         private int graphIndex = -1;
 
@@ -46,12 +47,12 @@ namespace Terrain
         private TextDrawer counters1 = null;
         private TextDrawer counters2 = null;
 
-        private SpriteProgressBar hProgressBar = null;
-        private SpriteProgressBar t1ProgressBar = null;
-        private SpriteProgressBar t2ProgressBar = null;
+        private UIProgressBar hProgressBar = null;
+        private UIProgressBar t1ProgressBar = null;
+        private UIProgressBar t2ProgressBar = null;
 
         private Model cursor3D = null;
-        private Cursor cursor2D = null;
+        private UICursor cursor2D = null;
 
         private Model tankP1 = null;
         private Model tankP2 = null;
@@ -230,7 +231,7 @@ namespace Terrain
 
             await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHud - 1);
 
-            var spbDesc = new SpriteProgressBarDescription()
+            var spbDesc = new UIProgressBarDescription()
             {
                 Name = "Progress bar",
                 Width = 50,
@@ -239,9 +240,9 @@ namespace Terrain
                 ProgressColor = Color.Green,
             };
 
-            this.hProgressBar = await this.AddComponentSpriteProgressBar(spbDesc, SceneObjectUsages.UI, layerGameHud);
-            this.t1ProgressBar = await this.AddComponentSpriteProgressBar(spbDesc, SceneObjectUsages.UI, layerGameHud);
-            this.t2ProgressBar = await this.AddComponentSpriteProgressBar(spbDesc, SceneObjectUsages.UI, layerGameHud);
+            this.hProgressBar = await this.AddComponentUIProgressBar(spbDesc, layerGameHud);
+            this.t1ProgressBar = await this.AddComponentUIProgressBar(spbDesc, layerGameHud);
+            this.t2ProgressBar = await this.AddComponentUIProgressBar(spbDesc, layerGameHud);
 
             this.hProgressBar.Top = 120;
             this.t1ProgressBar.Top = 120;
@@ -269,7 +270,7 @@ namespace Terrain
             };
             this.cursor3D = await this.AddComponentModel(c3DDesc, SceneObjectUsages.UI, this.layerHud);
 
-            var c2DDesc = new CursorDescription()
+            var c2DDesc = new UICursorDescription()
             {
                 Name = "Cursor2D",
                 ContentPath = "resources/Cursor",
@@ -278,7 +279,7 @@ namespace Terrain
                 Width = 16,
                 Height = 16,
             };
-            this.cursor2D = await this.AddComponentCursor(c2DDesc, SceneObjectUsages.UI, this.layerHud + 1);
+            this.cursor2D = await this.AddComponentUICursor(c2DDesc, this.layerHud + 1);
             this.cursor2D.Color = Color.Red;
             this.cursor2D.Visible = false;
 
@@ -334,7 +335,7 @@ namespace Terrain
             int height = 300;
             int smLeft = this.Game.Form.RenderWidth - width;
             int smTop = this.Game.Form.RenderHeight - height;
-            var stDescription = new SpriteTextureDescription()
+            var stDescription = new UITextureRendererDescription()
             {
                 Name = "++DEBUG++ Shadow Map",
                 Left = smLeft,
@@ -343,7 +344,7 @@ namespace Terrain
                 Height = height,
                 Channel = SpriteTextureChannels.Red,
             };
-            this.shadowMapDrawer = await this.AddComponentSpriteTexture(stDescription, SceneObjectUsages.UI, this.layerHud);
+            this.shadowMapDrawer = await this.AddComponentUITextureRenderer(stDescription, this.layerHud);
             this.shadowMapDrawer.Visible = false;
             this.shadowMapDrawer.DeferredEnabled = false;
 
@@ -1944,7 +1945,7 @@ namespace Terrain
                 this.DEBUGPickingPosition(tp.Value);
             }
         }
-        private void SetStatsScreenPosition(AIAgent agent, float height, SpriteProgressBar pb)
+        private void SetStatsScreenPosition(AIAgent agent, float height, UIProgressBar pb)
         {
             var screenPosition = this.GetScreenCoordinates(agent.Manipulator.Position, out bool centerInside);
             var top = this.GetScreenCoordinates(agent.Manipulator.Position + new Vector3(0, height, 0), out bool topInside);

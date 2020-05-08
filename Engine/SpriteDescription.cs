@@ -1,44 +1,25 @@
-﻿using SharpDX;
+﻿using Engine.UI;
+using SharpDX;
 
 namespace Engine
 {
     /// <summary>
     /// Sprite description
     /// </summary>
-    public class SpriteDescription : SceneObjectDescription
+    public class SpriteDescription : UIControlDescription
     {
-        /// <summary>
-        /// Sprite color
-        /// </summary>
-        public Color4 Color { get; set; } = Color4.White;
         /// <summary>
         /// Sprite textures
         /// </summary>
         public string[] Textures { get; set; }
         /// <summary>
+        /// Initial texture index
+        /// </summary>
+        public int TextureIndex { get; set; } = 0;
+        /// <summary>
         /// UV map
         /// </summary>
         public Vector4? UVMap { get; set; } = null;
-        /// <summary>
-        /// Content path
-        /// </summary>
-        public string ContentPath { get; set; } = "Resources";
-        /// <summary>
-        /// Width
-        /// </summary>
-        public int Width { get; set; }
-        /// <summary>
-        /// Height
-        /// </summary>
-        public int Height { get; set; }
-        /// <summary>
-        /// Fit screen
-        /// </summary>
-        public bool FitScreen { get; set; }
-        /// <summary>
-        /// Centered
-        /// </summary>
-        public bool Centered { get; set; } = true;
 
         /// <summary>
         /// Constructor
@@ -46,10 +27,7 @@ namespace Engine
         public SpriteDescription()
             : base()
         {
-            this.CastShadow = false;
-            this.DeferredEnabled = false;
-            this.DepthEnabled = false;
-            this.AlphaEnabled = true;
+
         }
     }
 }

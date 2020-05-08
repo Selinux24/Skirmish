@@ -890,6 +890,10 @@ namespace Engine
         {
             return new Vector2Int(rectangle.Bottom, rectangle.Right);
         }
+        public static Vector2 Center(this Rectangle rectangle)
+        {
+            return new Vector2(rectangle.Left + (rectangle.Width / 2), rectangle.Top + (rectangle.Height / 2));
+        }
 
         #endregion
 

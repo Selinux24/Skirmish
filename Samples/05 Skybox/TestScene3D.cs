@@ -3,6 +3,7 @@ using Engine.Audio;
 using Engine.Common;
 using Engine.Content;
 using Engine.PathFinding.RecastNavigation;
+using Engine.UI;
 using SharpDX;
 using System;
 using System.Collections.Generic;
@@ -109,7 +110,7 @@ namespace Skybox
         {
             #region Cursor
 
-            var cursorDesc = new CursorDescription()
+            var cursorDesc = new UICursorDescription()
             {
                 Name = "Cursor",
                 Textures = new[] { "target.png" },
@@ -117,7 +118,7 @@ namespace Skybox
                 Width = 16,
                 Height = 16,
             };
-            await this.AddComponentCursor(cursorDesc, SceneObjectUsages.UI, layerHUD + 1);
+            await this.AddComponentUICursor(cursorDesc, layerHUD + 1);
 
             #endregion
 

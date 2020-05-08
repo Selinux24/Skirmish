@@ -5,6 +5,7 @@ namespace Engine
 {
     using Engine.Common;
     using Engine.Effects;
+    using Engine.UI;
 
     /// <summary>
     /// Text drawer
@@ -61,29 +62,18 @@ namespace Engine
         /// </summary>
         private int left = 0;
         /// <summary>
-        /// Width
+        /// Text area rectangle limit
         /// </summary>
-        private int width = 0;
-        /// <summary>
-        /// Height
-        /// </summary>
-        private int height = 0;
-        /// <summary>
-        /// Text area rectangle
-        /// </summary>
-        private Rectangle? rectangle = null;
-        /// <summary>
-        /// The text draws vertically centered on screen
-        /// </summary>
-        private bool centerVertically = false;
-        /// <summary>
-        /// The text draws horizontally centered on screen
-        /// </summary>
-        private bool centerHorizontally = false;
+        /// <remarks>Used for text positioning</remarks>
+        private Rectangle? textArea = null;
         /// <summary>
         /// Text
         /// </summary>
         private string text = null;
+        /// <summary>
+        /// Center text into the defined text area (if any)
+        /// </summary>
+        private bool centered = false;
 
         /// <summary>
         /// Font name
@@ -143,7 +133,25 @@ namespace Engine
         public float AlphaMultplier { get; set; } = 1.2f;
 
         /// <summary>
-        /// Gets or sest text position in 2D screen
+        /// Gets or sets the text area rectangle limit
+        /// </summary>
+        /// <remarks>Used for text positioning</remarks>
+        public Rectangle? TextArea
+        {
+            get
+            {
+                return this.textArea;
+            }
+            set
+            {
+                this.textArea = value;
+                this.centered = value.HasValue ? this.centered : false;
+
+                this.MapText();
+            }
+        }
+        /// <summary>
+        /// Gets or sets the text position
         /// </summary>
         public Vector2 Position
         {
@@ -155,9 +163,10 @@ namespace Engine
             {
                 this.left = (int)value.X;
                 this.top = (int)value.Y;
+                this.centered = false;
+                this.textArea = null;
 
                 this.MapText();
-                this.UpdatePosition();
             }
         }
         /// <summary>
@@ -172,9 +181,10 @@ namespace Engine
             set
             {
                 this.left = value;
+                this.centered = false;
+                this.textArea = null;
 
                 this.MapText();
-                this.UpdatePosition();
             }
         }
         /// <summary>
@@ -189,70 +199,20 @@ namespace Engine
             set
             {
                 this.top = value;
+                this.centered = false;
+                this.textArea = null;
 
                 this.MapText();
-                this.UpdatePosition();
             }
         }
         /// <summary>
         /// Gets text width
         /// </summary>
-        public int Width
-        {
-            get
-            {
-                return this.width;
-            }
-            private set
-            {
-                this.width = value;
-
-                this.MapText();
-                this.UpdatePosition();
-            }
-        }
+        public int Width { get; private set; }
         /// <summary>
         /// Gets text height
         /// </summary>
-        public int Height
-        {
-            get
-            {
-                return this.height;
-            }
-            private set
-            {
-                this.height = value;
-
-                this.MapText();
-                this.UpdatePosition();
-            }
-        }
-        /// <summary>
-        /// Gets or sets the rectangle were the text must be drawn
-        /// </summary>
-        public Rectangle? Rectangle
-        {
-            get
-            {
-                return this.rectangle;
-            }
-            set
-            {
-                this.rectangle = value;
-
-                if (this.rectangle.HasValue)
-                {
-                    this.left = this.rectangle.Value.X;
-                    this.top = this.rectangle.Value.Y;
-                    this.width = this.rectangle.Value.Width;
-                    this.height = this.rectangle.Value.Height;
-                }
-
-                this.MapText();
-                this.UpdatePosition();
-            }
-        }
+        public int Height { get; private set; }
         /// <summary>
         /// Gets whether the internal buffers were ready or not
         /// </summary>
@@ -274,7 +234,7 @@ namespace Engine
         {
             this.Font = string.Format("{0} {1}", description.Font, description.FontSize);
 
-            this.viewProjection = Sprite.CreateViewOrthoProjection(
+            this.viewProjection = UIControl.CreateViewOrthoProjection(
                 this.Game.Form.RenderWidth.NextPair(),
                 this.Game.Form.RenderHeight.NextPair());
 
@@ -289,9 +249,6 @@ namespace Engine
             this.TextColor = description.TextColor;
             this.ShadowColor = description.ShadowColor;
             this.ShadowDelta = description.ShadowDelta;
-
-            this.MapText();
-            this.UpdatePosition();
         }
         /// <summary>
         /// Destructor
@@ -323,6 +280,11 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
+            if (!Visible)
+            {
+                return;
+            }
+
             if (!BuffersReady)
             {
                 return;
@@ -332,8 +294,6 @@ namespace Engine
 
             if (mode.HasFlag(DrawerModes.TransparentOnly) && !string.IsNullOrWhiteSpace(this.text))
             {
-                var graphics = this.Game.Graphics;
-
                 if (this.updateBuffers)
                 {
                     this.BufferManager.WriteVertexBuffer(this.vertexBuffer, this.vertices);
@@ -351,9 +311,6 @@ namespace Engine
 
                 this.BufferManager.SetInputAssembler(technique, this.vertexBuffer, Topology.TriangleList);
 
-                graphics.SetBlendDefaultAlpha();
-                graphics.SetDepthStencilZDisabled();
-
                 if (this.ShadowColor != Color.Transparent)
                 {
                     //Draw shadow
@@ -364,90 +321,6 @@ namespace Engine
                 this.DrawText(effect, technique, this.local, this.TextColor);
             }
         }
-        /// <summary>
-        /// Resize
-        /// </summary>
-        public void Resize()
-        {
-            this.viewProjection = Sprite.CreateViewOrthoProjection(
-                this.Game.Form.RenderWidth.NextPair(),
-                this.Game.Form.RenderHeight.NextPair());
-        }
-        /// <summary>
-        /// Centers vertically the text
-        /// </summary>
-        public void CenterVertically()
-        {
-            this.centerVertically = true;
-
-            this.MapText();
-            this.UpdatePosition();
-        }
-        /// <summary>
-        /// Centers horinzontally the text
-        /// </summary>
-        public void CenterHorizontally()
-        {
-            this.centerHorizontally = true;
-
-            this.MapText();
-            this.UpdatePosition();
-        }
-        /// <summary>
-        /// Centers vertically the text
-        /// </summary>
-        /// <param name="top">Top position</param>
-        /// <param name="height">Height</param>
-        public void CenterVertically(int top, int height)
-        {
-            float topmove = (height * 0.5f) - (this.height * 0.5f);
-
-            this.top = top + (int)topmove;
-
-            this.MapText();
-            this.UpdatePosition();
-        }
-        /// <summary>
-        /// Centers horinzontally the text
-        /// </summary>
-        /// <param name="left">Left position</param>
-        /// <param name="width">Width</param>
-        public void CenterHorizontally(int left, int width)
-        {
-            float leftmove = (width * 0.5f) - (this.width * 0.5f);
-
-            this.left = left + (int)leftmove;
-
-            this.MapText();
-            this.UpdatePosition();
-        }
-        /// <summary>
-        /// Centers the text in the screen rectangle
-        /// </summary>
-        /// <param name="x">X position</param>
-        /// <param name="y">Y position</param>
-        /// <param name="width">Width</param>
-        /// <param name="height">Height</param>
-        public void CenterRectangle(int x, int y, int width, int height)
-        {
-            CenterRectangle(new Rectangle(x, y, width, height));
-        }
-        /// <summary>
-        /// Centers the text in the screen rectangle
-        /// </summary>
-        /// <param name="rect">Rectangle</param>
-        public void CenterRectangle(Rectangle rect)
-        {
-            float topmove = (rect.Height * 0.5f) - (height * 0.5f);
-            float leftmove = (rect.Width * 0.5f) - (width * 0.5f);
-
-            this.top = rect.Top + (int)topmove;
-            this.left = rect.Left + (int)leftmove;
-
-            this.MapText();
-            this.UpdatePosition();
-        }
-
         /// <summary>
         /// Draw text
         /// </summary>
@@ -473,54 +346,74 @@ namespace Engine
                 graphics.DrawIndexed(this.indexDrawCount, this.indexBuffer.BufferOffset, this.vertexBuffer.BufferOffset);
             }
         }
+
+        /// <summary>
+        /// Resize
+        /// </summary>
+        public void Resize()
+        {
+            this.viewProjection = UIControl.CreateViewOrthoProjection(
+                this.Game.Form.RenderWidth.NextPair(),
+                this.Game.Form.RenderHeight.NextPair());
+        }
+
+        /// <summary>
+        /// Centers the text into the screen
+        /// </summary>
+        public void CenterScreen()
+        {
+            CenterRectangle(this.Game.Form.RenderRectangle);
+        }
+        /// <summary>
+        /// Centers the text into the rectangle
+        /// </summary>
+        /// <param name="rectangle">Rectangle</param>
+        public void CenterRectangle(Rectangle rectangle)
+        {
+            this.textArea = rectangle;
+            this.centered = true;
+
+            this.MapText();
+        }
         /// <summary>
         /// Map text
         /// </summary>
         private void MapText()
         {
-            var rect = rectangle ?? new Rectangle(0, 0, this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
+            var rect = textArea ?? new Rectangle(this.left, this.top, this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
 
             this.fontMap.MapSentence(
                 this.text,
                 rect,
                 out this.vertices, out this.indices, out Vector2 size);
 
-            this.width = (int)size.X;
-            this.height = (int)size.Y;
-
             this.updateBuffers = true;
-        }
-        /// <summary>
-        /// Update text translation matrices
-        /// </summary>
-        private void UpdatePosition()
-        {
-            float x;
-            if (this.centerHorizontally)
+
+            // Adjust text bounds
+            this.Width = (int)size.X;
+            this.Height = (int)size.Y;
+
+            // Adjust position
+            if (centered && textArea.HasValue)
             {
-                x = -(this.width * 0.5f);
+                var targetCenter = textArea.Value.Center();
+
+                this.left = (int)targetCenter.X - (int)(Width * 0.5f);
+                this.top = (int)targetCenter.Y - (int)(Height * 0.5f);
             }
             else
             {
-                x = +this.left - this.Game.Form.RelativeCenter.X;
+                this.top = rect.Y;
+                this.left = rect.X;
             }
 
-            float y;
-            if (this.centerVertically)
-            {
-                y = +(this.height * 0.5f);
-            }
-            else
-            {
-                y = -this.top + this.Game.Form.RelativeCenter.Y;
-            }
+            // Adjust to screen
+            int x = +(this.left - this.Game.Form.RelativeCenter.X);
+            int y = -(this.top - this.Game.Form.RelativeCenter.Y);
 
-            this.local = Matrix.Translation((int)x, (int)y, 0f);
-
-            x += this.ShadowDelta.X;
-            y += this.ShadowDelta.Y;
-
-            this.localShadow = Matrix.Translation((int)x, (int)y, 0f);
+            // Calculate new transforms
+            this.local = Matrix.Translation(x, y, 0f);
+            this.localShadow = Matrix.Translation(x + this.ShadowDelta.X, y + this.ShadowDelta.Y, 0f);
         }
     }
 

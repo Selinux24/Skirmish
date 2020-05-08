@@ -8,6 +8,11 @@
     public abstract class Updatable : BaseSceneObject, IUpdatable
     {
         /// <summary>
+        /// Active
+        /// </summary>
+        public bool Active { get; set; } = true;
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="scene">Scene</param>
@@ -23,7 +28,7 @@
         /// <param name="context">Context</param>
         public virtual void Update(UpdateContext context)
         {
-
+            
         }
     }
 }

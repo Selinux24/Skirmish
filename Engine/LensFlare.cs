@@ -142,14 +142,18 @@ namespace Engine
                     //The light is in front of the camera.
                     this.drawFlares = true;
 
+                    var formCenter = this.Game.Form.RelativeCenter;
+
                     var lightProjectedPosition = new Vector2(projectedPosition.X, projectedPosition.Y);
-                    var lightProjectedDirection = lightProjectedPosition - this.Game.Form.RelativeCenter;
+                    var lightProjectedDirection = lightProjectedPosition - formCenter;
 
                     //Update glow sprite
-                    float glowScale = 50f / this.glowSprite.Width;
+                    float glowScale = (this.glowSprite.Width * 0.5f) * scale;
+                    Vector2 glowSpritePos = lightProjectedPosition - (this.glowSprite.RelativeCenter * glowScale) - formCenter;
+
                     this.glowSprite.Color = new Color4(keyLight.DiffuseColor.RGB(), 0.25f);
-                    this.glowSprite.Manipulator.SetPosition(lightProjectedPosition - (this.glowSprite.RelativeCenter * glowScale * scale));
-                    this.glowSprite.Manipulator.SetScale(glowScale * scale);
+                    this.glowSprite.Scale = glowScale;
+                    this.glowSprite.Manipulator.SetPosition(glowSpritePos);
                     this.glowSprite.Update(context);
 
                     //Update flares
@@ -160,12 +164,14 @@ namespace Engine
                             var flare = this.flares[i];
 
                             // Compute the position of this flare sprite.
-                            var flarePosition = (lightProjectedPosition + lightProjectedDirection * flare.Position);
+                            float flareScale = flare.Scale * scale;
+                            Vector2 flarePositionAlongRay = (lightProjectedPosition + lightProjectedDirection * flare.Position);
+                            Vector2 flareSpritePos = flarePositionAlongRay - (flare.FlareSprite.RelativeCenter * flareScale) - formCenter;
 
                             // Set the flare alpha based on the angle with view and light directions.
                             flare.FlareSprite.Color = new Color4(flare.Color.RGB(), 0.5f * transparency);
-                            flare.FlareSprite.Manipulator.SetPosition(flarePosition - (flare.FlareSprite.RelativeCenter * flare.Scale * scale));
-                            flare.FlareSprite.Manipulator.SetScale(flare.Scale * scale);
+                            flare.FlareSprite.Scale = flareScale;
+                            flare.FlareSprite.Manipulator.SetPosition(flareSpritePos);
                             flare.FlareSprite.Update(context);
                         }
                     }
@@ -194,7 +200,7 @@ namespace Engine
                     Vector3 lightPosition = light.GetPosition(maxZ);
                     Ray ray = new Ray(lightPosition, -light.Direction);
 
-                    if (!this.Scene.PickNearest(ray, RayPickingParams.Coarse, out var res))
+                    if (!this.Scene.PickNearest(ray, RayPickingParams.Coarse, out _))
                     {
                         return true;
                     }

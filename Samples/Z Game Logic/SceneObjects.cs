@@ -3,6 +3,7 @@ using Engine.Animation;
 using Engine.Common;
 using Engine.Content;
 using Engine.PathFinding.AStar;
+using Engine.UI;
 using SharpDX;
 using System;
 using System.Collections.Generic;
@@ -25,12 +26,12 @@ namespace GameLogic
         private TextDrawer txtAction = null;
 
         private readonly string fontName = "Lucida Sans";
-        private SpriteButton butClose = null;
-        private SpriteButton butNext = null;
-        private SpriteButton butPrevSoldier = null;
-        private SpriteButton butNextSoldier = null;
-        private SpriteButton butPrevAction = null;
-        private SpriteButton butNextAction = null;
+        private UIButton butClose = null;
+        private UIButton butNext = null;
+        private UIButton butPrevSoldier = null;
+        private UIButton butNextSoldier = null;
+        private UIButton butPrevAction = null;
+        private UIButton butNextAction = null;
 
         private Model cursor3D = null;
 
@@ -241,7 +242,7 @@ namespace GameLogic
             this.txtActionList = await this.AddComponentTextDrawer(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
             this.txtAction = await this.AddComponentTextDrawer(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
 
-            this.butClose = await this.AddComponentSpriteButton(new SpriteButtonDescription()
+            this.butClose = await this.AddComponentUIButton(new UIButtonDescription()
             {
                 TwoStateButton = true,
                 TextureReleased = "button_on.png",
@@ -256,9 +257,9 @@ namespace GameLogic
                     ShadowColor = Color.Orange,
                 },
                 Text = "EXIT",
-            }, SceneObjectUsages.UI, layerHUD);
+            }, layerHUD);
 
-            this.butNext = await this.AddComponentSpriteButton(new SpriteButtonDescription()
+            this.butNext = await this.AddComponentUIButton(new UIButtonDescription()
             {
                 TwoStateButton = true,
                 TextureReleased = "button_on.png",
@@ -272,9 +273,9 @@ namespace GameLogic
                     TextColor = Color.Yellow,
                 },
                 Text = "Next",
-            }, SceneObjectUsages.UI, layerHUD);
+            }, layerHUD);
 
-            this.butPrevSoldier = await this.AddComponentSpriteButton(new SpriteButtonDescription()
+            this.butPrevSoldier = await this.AddComponentUIButton(new UIButtonDescription()
             {
                 TwoStateButton = true,
                 TextureReleased = "button_on.png",
@@ -288,9 +289,9 @@ namespace GameLogic
                     TextColor = Color.Yellow,
                 },
                 Text = "Prev.Soldier",
-            }, SceneObjectUsages.UI, layerHUD);
+            }, layerHUD);
 
-            this.butNextSoldier = await this.AddComponentSpriteButton(new SpriteButtonDescription()
+            this.butNextSoldier = await this.AddComponentUIButton(new UIButtonDescription()
             {
                 TwoStateButton = true,
                 TextureReleased = "button_on.png",
@@ -304,9 +305,9 @@ namespace GameLogic
                     TextColor = Color.Yellow,
                 },
                 Text = "Next Soldier",
-            }, SceneObjectUsages.UI, layerHUD);
+            }, layerHUD);
 
-            this.butPrevAction = await this.AddComponentSpriteButton(new SpriteButtonDescription()
+            this.butPrevAction = await this.AddComponentUIButton(new UIButtonDescription()
             {
                 TwoStateButton = true,
                 TextureReleased = "button_on.png",
@@ -320,9 +321,9 @@ namespace GameLogic
                     TextColor = Color.Yellow,
                 },
                 Text = "Prev.Action",
-            }, SceneObjectUsages.UI, layerHUD);
+            }, layerHUD);
 
-            this.butNextAction = await this.AddComponentSpriteButton(new SpriteButtonDescription()
+            this.butNextAction = await this.AddComponentUIButton(new UIButtonDescription()
             {
                 TwoStateButton = true,
                 TextureReleased = "button_on.png",
@@ -336,7 +337,7 @@ namespace GameLogic
                     TextColor = Color.Yellow,
                 },
                 Text = "Next Action",
-            }, SceneObjectUsages.UI, layerHUD);
+            }, layerHUD);
 
             this.butClose.Click += (sender, eventArgs) => { this.Game.Exit(); };
             this.butNext.Click += (sender, eventArgs) => { this.NextPhase(); };
@@ -370,6 +371,11 @@ namespace GameLogic
             foreach (var soldierC in this.soldierControllers.Keys)
             {
                 this.soldierControllers[soldierC].UpdateManipulator(gameTime, this.soldierModels[soldierC].Manipulator);
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.Space))
+            {
+                butNext.Scale = 2;
             }
 
             if (!this.CapturedControl)
@@ -618,17 +624,14 @@ namespace GameLogic
         }
         private void UpdateLayout()
         {
-            this.txtTitle.Top = 0;
-            this.txtTitle.Left = 5;
-            this.txtGame.Top = this.txtTitle.Top + this.txtTitle.Height + 1;
-            this.txtGame.Left = 10;
-            this.txtTeam.Top = this.txtGame.Top + this.txtGame.Height + 1;
-            this.txtTeam.Left = this.txtGame.Left;
+            this.txtTitle.Position = new Vector2(5, 0);
+            this.txtGame.Position = new Vector2(10, this.txtTitle.Top + this.txtTitle.Height + 1);
+            this.txtTeam.Position = new Vector2(this.txtGame.Left, this.txtGame.Top + this.txtGame.Height + 1);
 
             this.butClose.Top = 1;
             this.butClose.Left = this.Game.Form.RenderWidth - 60 - 1;
 
-            this.butNext.Top = (int)((float)this.Game.Form.RenderHeight * 0.85f);
+            this.butNext.Top = (int)(this.Game.Form.RenderHeight * 0.85f);
             this.butNext.Left = 10;
             this.butPrevSoldier.Top = this.butNext.Top;
             this.butPrevSoldier.Left = this.butNext.Left + this.butNext.Width + 25;
@@ -639,12 +642,9 @@ namespace GameLogic
             this.butNextAction.Top = this.butNext.Top;
             this.butNextAction.Left = this.butPrevAction.Left + this.butPrevAction.Width + 10;
 
-            this.txtSoldier.Top = this.butNext.Top + this.butNext.Height + 1;
-            this.txtSoldier.Left = 10;
-            this.txtActionList.Top = this.txtSoldier.Top + this.txtSoldier.Height + 1;
-            this.txtActionList.Left = this.txtSoldier.Left;
-            this.txtAction.Top = this.txtActionList.Top + this.txtActionList.Height + 1;
-            this.txtAction.Left = this.txtSoldier.Left;
+            this.txtSoldier.Position = new Vector2(10, this.butNext.Top + this.butNext.Height + 1);
+            this.txtActionList.Position = new Vector2(this.txtSoldier.Left, this.txtSoldier.Top + this.txtSoldier.Height + 1);
+            this.txtAction.Position = new Vector2(this.txtSoldier.Left, this.txtActionList.Top + this.txtActionList.Height + 1);
         }
 
         private void InitializeAnimations()

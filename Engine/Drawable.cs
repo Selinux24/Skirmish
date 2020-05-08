@@ -30,10 +30,6 @@ namespace Engine
         /// </summary>
         public bool Visible { get; set; } = true;
         /// <summary>
-        /// Active
-        /// </summary>
-        public bool Active { get; set; } = true;
-        /// <summary>
         /// Gets or sets whether the object cast shadow
         /// </summary>
         public bool CastShadow { get; set; }
@@ -82,7 +78,7 @@ namespace Engine
         /// <param name="context">Context</param>
         public virtual void DrawShadows(DrawContextShadows context)
         {
-
+            
         }
         /// <summary>
         /// Draw
@@ -90,7 +86,7 @@ namespace Engine
         /// <param name="context">Context</param>
         public virtual void Draw(DrawContext context)
         {
-
+            
         }
 
         /// <summary>

@@ -3,6 +3,7 @@ using Engine.Animation;
 using Engine.Content;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
+using Engine.UI;
 using SharpDX;
 using System;
 using System.Collections.Generic;
@@ -96,7 +97,7 @@ namespace Heightmap
 
         private readonly Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
 
-        private SpriteTexture bufferDrawer = null;
+        private UITextureRenderer bufferDrawer = null;
 
         private bool userInterfaceInitialized = false;
         private bool gameReady = false;
@@ -201,7 +202,7 @@ namespace Heightmap
 
             #region Cursor
 
-            var cursorDesc = new CursorDescription()
+            var cursorDesc = new UICursorDescription()
             {
                 Name = "Cursor",
                 Textures = new[] { "target.png" },
@@ -210,7 +211,7 @@ namespace Heightmap
                 Height = 20,
             };
 
-            await this.AddComponentCursor(cursorDesc, SceneObjectUsages.UI, layerCursor);
+            await this.AddComponentUICursor(cursorDesc, layerCursor);
 
             #endregion
 
@@ -769,7 +770,7 @@ namespace Heightmap
             int smLeft = this.Game.Form.RenderWidth - width;
             int smTop = this.Game.Form.RenderHeight - height;
 
-            var desc = new SpriteTextureDescription()
+            var desc = new UITextureRendererDescription()
             {
                 Left = smLeft,
                 Top = smTop,
@@ -777,10 +778,10 @@ namespace Heightmap
                 Height = height,
                 Channel = SpriteTextureChannels.NoAlpha,
             };
-            this.bufferDrawer = await this.AddComponentSpriteTexture(desc, SceneObjectUsages.UI, layerEffects);
+            this.bufferDrawer = await this.AddComponentUITextureRenderer(desc, layerEffects);
             this.bufferDrawer.Visible = false;
 
-            this.lightsVolumeDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(
+            this.lightsVolumeDrawer = await this.AddComponentPrimitiveListDrawer(
                 new PrimitiveListDrawerDescription<Line3D>()
                 {
                     Name = "DEBUG++ Light Volumes",
@@ -788,7 +789,7 @@ namespace Heightmap
                     Count = 10000
                 });
 
-            this.graphDrawer = await this.AddComponentPrimitiveListDrawer<Triangle>(
+            this.graphDrawer = await this.AddComponentPrimitiveListDrawer(
                 new PrimitiveListDrawerDescription<Triangle>()
                 {
                     Name = "DEBUG++ Graph",

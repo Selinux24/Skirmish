@@ -1,20 +1,24 @@
 ﻿using SharpDX;
 
-namespace Engine
+namespace Engine.UI
 {
     /// <summary>
-    /// Sprite progress bar description
+    /// User interface control description
     /// </summary>
-    public class SpriteProgressBarDescription : SceneObjectDescription
+    public abstract class UIControlDescription : SceneObjectDescription
     {
         /// <summary>
-        /// Left position
+        /// Content path
         /// </summary>
-        public int Left { get; set; }
+        public string ContentPath { get; set; } = "Resources";
         /// <summary>
         /// Top position
         /// </summary>
         public int Top { get; set; }
+        /// <summary>
+        /// Left position
+        /// </summary>
+        public int Left { get; set; }
         /// <summary>
         /// Width
         /// </summary>
@@ -24,27 +28,26 @@ namespace Engine
         /// </summary>
         public int Height { get; set; }
         /// <summary>
-        /// Base color
+        /// Fit screen
         /// </summary>
-        public Color BaseColor { get; set; }
+        public bool FitScreen { get; set; } = false;
         /// <summary>
-        /// Progress color
+        /// Vertically centered
         /// </summary>
-        public Color ProgressColor { get; set; }
+        public bool CenterVertically { get; set; } = false;
         /// <summary>
-        /// Button text
+        /// Horizontally centered
         /// </summary>
-        public string Text { get; set; }
+        public bool CenterHorizontally { get; set; } = false;
         /// <summary>
-        /// Text description
+        /// Sprite color
         /// </summary>
-        public TextDrawerDescription TextDescription { get; set; }
+        public Color4 Color { get; set; } = Color4.White;
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public SpriteProgressBarDescription()
-            : base()
+        public UIControlDescription() : base()
         {
             this.CastShadow = false;
             this.DeferredEnabled = false;

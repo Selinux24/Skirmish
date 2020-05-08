@@ -2,6 +2,7 @@
 using Engine.Animation;
 using Engine.Common;
 using Engine.Content;
+using Engine.UI;
 using SharpDX;
 using System;
 using System.Collections.Generic;
@@ -18,8 +19,8 @@ namespace SceneTest
         private readonly float baseHeight = 0.1f;
         private readonly float spaceSize = 40;
 
-        private Cursor cursor = null;
-        private SpriteButton butClose = null;
+        private UICursor cursor = null;
+        private UIButton butClose = null;
 
         private Sprite spr = null;
         private TextDrawer title = null;
@@ -111,7 +112,7 @@ namespace SceneTest
         }
         private async Task InitializeCursor()
         {
-            var cursorDesc = new CursorDescription()
+            var cursorDesc = new UICursorDescription()
             {
                 Name = "Cursor",
                 ContentPath = "Common",
@@ -122,7 +123,7 @@ namespace SceneTest
                 Delta = new Vector2(-14, -6),
                 Color = Color.White,
             };
-            cursor = await this.AddComponentCursor(cursorDesc, SceneObjectUsages.UI, 100);
+            cursor = await this.AddComponentUICursor(cursorDesc, 100);
             cursor.Visible = false;
         }
         private async Task InitializeTextBoxes()
@@ -148,7 +149,7 @@ namespace SceneTest
         }
         private async Task InitializeSpriteButtons()
         {
-            this.butClose = await this.AddComponentSpriteButton(new SpriteButtonDescription()
+            this.butClose = await this.AddComponentUIButton(new UIButtonDescription()
             {
                 TwoStateButton = true,
                 TextureReleased = "SceneTest/UI/button_off.png",
@@ -164,7 +165,7 @@ namespace SceneTest
                     ShadowColor = Color.Orange,
                 },
                 Text = "Close",
-            }, SceneObjectUsages.UI, layerHUD);
+            }, layerHUD);
 
             this.butClose.Click += (sender, eventArgs) => { this.Game.SetScene<SceneStart>(); };
             this.butClose.Visible = false;

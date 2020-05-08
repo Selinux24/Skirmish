@@ -1,6 +1,7 @@
 ﻿using Engine;
 using Engine.Common;
 using Engine.Content;
+using Engine.UI;
 using SharpDX;
 using System.Threading.Tasks;
 
@@ -16,7 +17,7 @@ namespace SceneTest
 
         private ModelInstanced buildingObelisks = null;
 
-        private SpriteTexture bufferDrawer = null;
+        private UITextureRenderer bufferDrawer = null;
 
         /// <summary>
         /// Constructor
@@ -178,7 +179,7 @@ namespace SceneTest
             int smLeft = this.Game.Form.RenderWidth - width;
             int smTop = this.Game.Form.RenderHeight - height;
 
-            var desc = new SpriteTextureDescription()
+            var desc = new UITextureRendererDescription()
             {
                 Left = smLeft,
                 Top = smTop,
@@ -186,7 +187,7 @@ namespace SceneTest
                 Height = height,
                 Channel = SpriteTextureChannels.NoAlpha,
             };
-            this.bufferDrawer = await this.AddComponentSpriteTexture(desc, SceneObjectUsages.UI, layerEffects);
+            this.bufferDrawer = await this.AddComponentUITextureRenderer(desc, layerEffects);
             this.bufferDrawer.Visible = false;
         }
 

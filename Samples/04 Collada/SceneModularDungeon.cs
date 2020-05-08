@@ -6,6 +6,7 @@ using Engine.Content;
 using Engine.Content.FmtObj;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
+using Engine.UI;
 using SharpDX;
 using System;
 using System.Collections.Generic;
@@ -23,7 +24,7 @@ namespace Collada
 
         private TextDrawer fps = null;
         private TextDrawer info = null;
-        private SpriteProgressBar progressBar = null;
+        private UIProgressBar progressBar = null;
 
         private readonly Color ambientDown = new Color(127, 127, 127, 255);
         private readonly Color ambientUp = new Color(137, 116, 104, 255);
@@ -295,7 +296,7 @@ namespace Collada
             this.selectedItemDrawer = await this.AddComponentPrimitiveListDrawer<Triangle>(drawerDesc, SceneObjectUsages.UI, layerHUD);
             this.selectedItemDrawer.Visible = true;
 
-            var pbDesc = new SpriteProgressBarDescription
+            var pbDesc = new UIProgressBarDescription
             {
                 Name = "Progress Bar",
                 Top = this.Game.Form.RenderHeight - 20,
@@ -305,7 +306,7 @@ namespace Collada
                 BaseColor = Color.Transparent,
                 ProgressColor = Color.Green,
             };
-            this.progressBar = await this.AddComponentSpriteProgressBar(pbDesc, SceneObjectUsages.UI, layerHUD);
+            this.progressBar = await this.AddComponentUIProgressBar(pbDesc, layerHUD);
         }
         private async Task InitializeAssets()
         {
@@ -1175,8 +1176,7 @@ namespace Collada
                 if (messages.Text != text)
                 {
                     messages.Text = text;
-                    messages.CenterHorizontally();
-                    messages.CenterVertically();
+                    messages.CenterScreen();
                     messages.Visible = true;
                 }
             }
@@ -1260,8 +1260,7 @@ namespace Collada
                 }
 
                 messages.Text = string.Format("Press space to {0} the light...", enabled ? "turn off" : "turn on");
-                messages.CenterHorizontally();
-                messages.CenterVertically();
+                messages.CenterScreen();
             }
         }
 

@@ -1,14 +1,13 @@
-﻿using SharpDX;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
-namespace Engine
+namespace Engine.UI
 {
     using Engine.Common;
 
     /// <summary>
     /// Sprite progress bar
     /// </summary>
-    public class SpriteProgressBar : Drawable, IScreenFitted
+    public class UIProgressBar : UIControl
     {
         /// <summary>
         /// Left sprite
@@ -37,22 +36,6 @@ namespace Engine
         /// </summary>
         public float ProgressValue { get; set; }
         /// <summary>
-        /// Gets or sets text left position in 2D screen
-        /// </summary>
-        public int Top { get; set; }
-        /// <summary>
-        /// Gets or sets text top position in 2D screen
-        /// </summary>
-        public int Left { get; set; }
-        /// <summary>
-        /// Button width
-        /// </summary>
-        public int Width { get; set; }
-        /// <summary>
-        /// Button height
-        /// </summary>
-        public int Height { get; set; }
-        /// <summary>
         /// Gets or sets the button text
         /// </summary>
         public string Text
@@ -69,11 +52,6 @@ namespace Engine
                 }
             }
         }
-        /// <summary>
-        /// Gets bounding rectangle of button
-        /// </summary>
-        /// <remarks>Bounding rectangle without text</remarks>
-        public Rectangle Rectangle { get; private set; }
 
         /// <summary>
         /// Constructor
@@ -81,7 +59,7 @@ namespace Engine
         /// <param name="game">Game</param>
         /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Button description</param>
-        public SpriteProgressBar(Scene scene, SpriteProgressBarDescription description)
+        public UIProgressBar(Scene scene, UIProgressBarDescription description)
             : base(scene, description)
         {
             this.ProgressValue = 0;
@@ -113,17 +91,12 @@ namespace Engine
                     description.TextDescription);
             }
 
-            this.Left = description.Left;
-            this.Top = description.Top;
-            this.Width = description.Width;
-            this.Height = description.Height;
             this.Text = description.Text;
-            this.Rectangle = new Rectangle(description.Left, description.Top, description.Width, description.Height);
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~SpriteProgressBar()
+        ~UIProgressBar()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -152,37 +125,49 @@ namespace Engine
                 }
             }
         }
+
         /// <summary>
         /// Updates state
         /// </summary>
         /// <param name="context">Context</param>
         public override void Update(UpdateContext context)
         {
-            this.left.Manipulator.SetScale(LeftScale, 1f);
-            this.right.Manipulator.SetScale(RightScale, 1f);
+            if (!Active)
+            {
+                return;
+            }
+
+            this.left.Width = (int)(LeftScale * Width);
+            this.right.Width = (int)(RightScale * Width);
 
             this.left.Left = this.Left;
             this.left.Top = this.Top;
 
-            this.right.Left = this.Left + (int)(this.left.Width * LeftScale);
+            this.right.Left = this.Left + this.left.Width;
             this.right.Top = this.Top;
 
             if (!string.IsNullOrEmpty(this.Text))
             {
                 //Center text
-                this.textDrawer.CenterRectangle(this.Left, this.Top, this.Width, this.Height);
+                this.textDrawer.TextArea = this.Rectangle;
                 this.textDrawer.Update(context);
             }
 
             this.left.Update(context);
             this.right.Update(context);
         }
+
         /// <summary>
         /// Draws button
         /// </summary>
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
+            if (!Visible)
+            {
+                return;
+            }
+
             if (this.LeftScale > 0f)
             {
                 this.left.Draw(context);
@@ -198,14 +183,15 @@ namespace Engine
                 this.textDrawer.Draw(context);
             }
         }
+
         /// <summary>
         /// Resize
         /// </summary>
-        public virtual void Resize()
+        public override void Resize()
         {
-            if (this.left != null) this.left.Resize();
-            if (this.right != null) this.right.Resize();
-            if (this.textDrawer != null) this.textDrawer.Resize();
+            this.left?.Resize();
+            this.right?.Resize();
+            this.textDrawer?.Resize();
         }
     }
 
@@ -219,18 +205,17 @@ namespace Engine
         /// </summary>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        /// <param name="usage">Component usage</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<SpriteProgressBar> AddComponentSpriteProgressBar(this Scene scene, SpriteProgressBarDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
+        public static async Task<UIProgressBar> AddComponentUIProgressBar(this Scene scene, UIProgressBarDescription description, int order = 0)
         {
-            SpriteProgressBar component = null;
+            UIProgressBar component = null;
 
             await Task.Run(() =>
             {
-                component = new SpriteProgressBar(scene, description);
+                component = new UIProgressBar(scene, description);
 
-                scene.AddComponent(component, usage, order);
+                scene.AddComponent(component, SceneObjectUsages.UI, order);
             });
 
             return component;

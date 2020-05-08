@@ -1,21 +1,14 @@
-﻿using SharpDX;
-using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
-namespace Engine
+namespace Engine.UI
 {
     using Engine.Common;
 
     /// <summary>
     /// Sprite button
     /// </summary>
-    public class SpriteButton : Drawable, IControl, IScreenFitted
+    public class UIButton : UIControl
     {
-        /// <summary>
-        /// Click event
-        /// </summary>
-        public event EventHandler Click;
-
         /// <summary>
         /// Pressed sprite button
         /// </summary>
@@ -28,65 +21,83 @@ namespace Engine
         /// Button text drawer
         /// </summary>
         private TextDrawer textDrawer = null;
-        /// <summary>
-        /// Internal pressed button flag
-        /// </summary>
-        private bool pressed = false;
 
-        /// <summary>
-        /// Gets or sets if mouse button is pressed
-        /// </summary>
-        public bool Pressed
-        {
-            get
-            {
-                return this.pressed;
-            }
-            set
-            {
-                this.JustPressed = false;
-                this.JustReleased = false;
-
-                if (value && !this.pressed)
-                {
-                    this.JustPressed = true;
-                }
-                else if (!value && this.pressed)
-                {
-                    this.JustReleased = true;
-                }
-
-                this.pressed = value;
-            }
-        }
-        /// <summary>
-        /// Gest whether the button is just pressed
-        /// </summary>
-        public bool JustPressed { get; private set; }
-        /// <summary>
-        /// Gest whether the button is just released
-        /// </summary>
-        public bool JustReleased { get; private set; }
-        /// <summary>
-        /// Gets or sets whether the mouse is over the button rectangle
-        /// </summary>
-        public bool MouseOver { get; set; }
-        /// <summary>
-        /// Gets or sets text left position in 2D screen
-        /// </summary>
-        public int Top { get; set; }
         /// <summary>
         /// Gets or sets text top position in 2D screen
         /// </summary>
-        public int Left { get; set; }
+        public override int Top
+        {
+            get { return base.Top; }
+            set
+            {
+                base.Top = value;
+
+                if (buttonPressed != null) buttonPressed.Top = value;
+                if (buttonReleased != null) buttonReleased.Top = value;
+                if (textDrawer != null) textDrawer.CenterRectangle(this.Rectangle);
+            }
+        }
         /// <summary>
-        /// Button width
+        /// Gets or sets text left position in 2D screen
         /// </summary>
-        public int Width { get { return this.buttonReleased?.Width ?? 0; } }
+        public override int Left
+        {
+            get { return base.Left; }
+            set
+            {
+                base.Left = value;
+
+                if (buttonPressed != null) buttonPressed.Left = value;
+                if (buttonReleased != null) buttonReleased.Left = value;
+                if (textDrawer != null) textDrawer.CenterRectangle(this.Rectangle);
+            }
+        }
         /// <summary>
-        /// Button height
+        /// Width
         /// </summary>
-        public int Height { get { return this.buttonReleased?.Height ?? 0; } }
+        public override int Width
+        {
+            get { return base.Width; }
+            set
+            {
+                base.Width = value;
+
+                if (buttonPressed != null) buttonPressed.Width = value;
+                if (buttonReleased != null) buttonReleased.Width = value;
+                if (textDrawer != null) textDrawer.CenterRectangle(this.Rectangle);
+            }
+        }
+        /// <summary>
+        /// Height
+        /// </summary>
+        public override int Height
+        {
+            get { return base.Height; }
+            set
+            {
+                base.Height = value;
+
+                if (buttonPressed != null) buttonPressed.Height = value;
+                if (buttonReleased != null) buttonReleased.Height = value;
+                if (textDrawer != null) textDrawer.CenterRectangle(this.Rectangle);
+            }
+        }
+        /// <summary>
+        /// Scale
+        /// </summary>
+        public override float Scale
+        {
+            get { return base.Scale; }
+            set
+            {
+                base.Scale = value;
+
+                if (buttonPressed != null) buttonPressed.Scale = value;
+                if (buttonReleased != null) buttonReleased.Scale = value;
+                if (textDrawer != null) textDrawer.CenterRectangle(this.Rectangle);
+            }
+        }
+
         /// <summary>
         /// Gets or sets the button text
         /// </summary>
@@ -101,14 +112,10 @@ namespace Engine
                 if (this.textDrawer != null)
                 {
                     this.textDrawer.Text = value;
+                    this.textDrawer.CenterRectangle(this.Rectangle);
                 }
             }
         }
-        /// <summary>
-        /// Gets bounding rectangle of button
-        /// </summary>
-        /// <remarks>Bounding rectangle without text</remarks>
-        public Rectangle Rectangle { get { return this.buttonReleased.Rectangle; } }
 
         /// <summary>
         /// Constructor
@@ -116,7 +123,7 @@ namespace Engine
         /// <param name="game">Game</param>
         /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Button description</param>
-        public SpriteButton(Scene scene, SpriteButtonDescription description)
+        public UIButton(Scene scene, UIButtonDescription description)
             : base(scene, description)
         {
             var spriteDesc = new SpriteDescription()
@@ -160,19 +167,18 @@ namespace Engine
             {
                 description.TextDescription.Name = description.TextDescription.Name ?? $"{description.Name}.TextDrawer";
 
-                this.textDrawer = new TextDrawer(
-                    scene,
-                    description.TextDescription);
-            }
+                this.textDrawer = new TextDrawer(scene, description.TextDescription)
+                {
+                    Text = description.Text
+                };
 
-            this.Left = description.Left;
-            this.Top = description.Top;
-            this.Text = description.Text;
+                this.textDrawer.CenterRectangle(this.Rectangle);
+            }
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~SpriteButton()
+        ~UIButton()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -203,38 +209,35 @@ namespace Engine
                 }
             }
         }
+
         /// <summary>
         /// Updates state
         /// </summary>
         /// <param name="context">Context</param>
         public override void Update(UpdateContext context)
         {
-            this.buttonReleased.Left = this.Left;
-            this.buttonReleased.Top = this.Top;
-
-            if (this.buttonPressed != null)
+            if (!this.Active)
             {
-                this.buttonPressed.Left = this.Left;
-                this.buttonPressed.Top = this.Top;
+                return;
             }
 
-            if (!string.IsNullOrEmpty(this.Text))
-            {
-                //Center text
-                this.textDrawer.CenterRectangle(this.Left, this.Top, this.Width, this.Height);
-                this.textDrawer.Update(context);
-            }
-
-            this.buttonReleased.Update(context);
-            if (this.buttonPressed != null) this.buttonPressed.Update(context);
+            this.buttonReleased?.Update(context);
+            this.buttonPressed?.Update(context);
+            this.textDrawer?.Update(context);
         }
+
         /// <summary>
         /// Draws button
         /// </summary>
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            if (this.pressed && this.buttonPressed != null)
+            if (!this.Visible)
+            {
+                return;
+            }
+
+            if (this.Pressed && this.buttonPressed != null)
             {
                 this.buttonPressed.Draw(context);
             }
@@ -248,29 +251,37 @@ namespace Engine
                 this.textDrawer.Draw(context);
             }
         }
+
         /// <summary>
         /// Resize
         /// </summary>
-        public virtual void Resize()
+        public override void Resize()
         {
-            this.buttonReleased.Resize();
-            if (this.buttonPressed != null) this.buttonPressed.Resize();
-            if (this.textDrawer != null) this.textDrawer.Resize();
+            base.Resize();
+
+            this.buttonReleased?.Resize();
+            this.buttonPressed?.Resize();
+            this.textDrawer?.Resize();
         }
         /// <summary>
-        /// Fires on-click event
+        /// Centers horinzontally the text
         /// </summary>
-        public void FireOnClickEvent()
+        public override void CenterHorizontally()
         {
-            this.OnClick(new EventArgs());
+            base.CenterHorizontally();
+
+            buttonPressed?.CenterHorizontally();
+            buttonReleased?.CenterHorizontally();
         }
         /// <summary>
-        /// Launch on-click event
+        /// Centers vertically the text
         /// </summary>
-        /// <param name="e">Event arguments</param>
-        protected virtual void OnClick(EventArgs e)
+        public override void CenterVertically()
         {
-            this.Click?.Invoke(this, e);
+            base.CenterVertically();
+
+            buttonPressed?.CenterVertically();
+            buttonReleased?.CenterVertically();
         }
     }
 
@@ -284,18 +295,17 @@ namespace Engine
         /// </summary>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        /// <param name="usage">Component usage</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<SpriteButton> AddComponentSpriteButton(this Scene scene, SpriteButtonDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
+        public static async Task<UIButton> AddComponentUIButton(this Scene scene, UIButtonDescription description, int order = 0)
         {
-            SpriteButton component = null;
+            UIButton component = null;
 
             await Task.Run(() =>
             {
-                component = new SpriteButton(scene, description);
+                component = new UIButton(scene, description);
 
-                scene.AddComponent(component, usage, order);
+                scene.AddComponent(component, SceneObjectUsages.UI, order);
             });
 
             return component;

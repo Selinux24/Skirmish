@@ -518,7 +518,7 @@ namespace Engine.Common
         /// <param name="context">Drawing context</param>
         protected virtual void SetBlendStateTransparent(DrawContext context)
         {
-            this.Game.Graphics.SetBlendTransparent();
+            this.Game.Graphics.SetBlendDefaultAlpha();
         }
 
         /// <summary>

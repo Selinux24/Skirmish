@@ -25,6 +25,16 @@ namespace Engine
         /// </summary>
         public int RenderHeight { get; private set; }
         /// <summary>
+        /// Render rectangle
+        /// </summary>
+        public Rectangle RenderRectangle
+        {
+            get
+            {
+                return new Rectangle(0, 0, RenderWidth, RenderHeight);
+            }
+        }
+        /// <summary>
         /// Relative center
         /// </summary>
         public Point RelativeCenter { get; private set; }
