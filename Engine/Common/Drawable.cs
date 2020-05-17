@@ -18,43 +18,43 @@ namespace Engine.Common
         /// <summary>
         /// Name
         /// </summary>
-        public string Name { get; set; }
+        public virtual string Name { get; set; }
         /// <summary>
         /// Processing order
         /// </summary>
-        public int Order { get; set; } = 0;
+        public virtual int Order { get; set; } = 0;
         /// <summary>
         /// Visible
         /// </summary>
-        public bool Visible { get; set; } = true;
+        public virtual bool Visible { get; set; } = true;
         /// <summary>
         /// Gets or sets whether the object cast shadow
         /// </summary>
-        public bool CastShadow { get; set; }
+        public virtual bool CastShadow { get; set; }
         /// <summary>
         /// Gets or sets whether the object is enabled to draw with the deferred renderer
         /// </summary>
-        public bool DeferredEnabled { get; set; }
+        public virtual bool DeferredEnabled { get; set; }
         /// <summary>
         /// Uses depth info
         /// </summary>
-        public bool DepthEnabled { get; set; }
+        public virtual bool DepthEnabled { get; set; }
         /// <summary>
         /// Enables transparent blending
         /// </summary>
-        public bool AlphaEnabled { get; set; }
+        public virtual bool AlphaEnabled { get; set; }
         /// <summary>
         /// Object usage
         /// </summary>
-        public SceneObjectUsages Usage { get; set; } = SceneObjectUsages.None;
+        public virtual SceneObjectUsages Usage { get; set; } = SceneObjectUsages.None;
         /// <summary>
         /// Gets or sets if the current object has a parent
         /// </summary>
-        public bool HasParent { get; set; } = false;
+        public virtual bool HasParent { get; set; } = false;
         /// <summary>
         /// Maximum instance count
         /// </summary>
-        public int InstanceCount { get; protected set; } = 1;
+        public virtual int InstanceCount { get; protected set; } = 1;
 
         /// <summary>
         /// Constructor

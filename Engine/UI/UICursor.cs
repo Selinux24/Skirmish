@@ -1,9 +1,10 @@
-﻿using Engine.Common;
-using SharpDX;
+﻿using SharpDX;
 using System.Threading.Tasks;
 
 namespace Engine.UI
 {
+    using Engine.Common;
+
     /// <summary>
     /// User interface sprite cursor
     /// </summary>
@@ -50,27 +51,27 @@ namespace Engine.UI
 
             if (this.Centered)
             {
-                left = (this.Game.Input.MouseX - (this.Width * 0.5f));
-                top = (this.Game.Input.MouseY - (this.Height * 0.5f));
+                left = this.Game.Input.MouseX - (this.Width * 0.5f);
+                top = this.Game.Input.MouseY - (this.Height * 0.5f);
             }
             else
             {
-                left = (this.Game.Input.MouseX);
-                top = (this.Game.Input.MouseY);
+                left = this.Game.Input.MouseX;
+                top = this.Game.Input.MouseY;
             }
 
-            this.CursorPosition = new Vector2(left, top) + this.Delta;
+            this.CursorPosition = this.Game.Form.ToScreenSpace(new Vector2(left, top) + this.Delta);
 
             if (this.Centered && this.Game.Input.LockMouse)
             {
-                this.Manipulator.SetPosition(this.Game.Form.RelativeCenter);
+                this.Manipulator.SetPosition(Vector2.Zero);
             }
             else
             {
-                this.Manipulator.SetPosition(this.CursorPosition - this.Game.Form.RelativeCenter);
+                this.Manipulator.SetPosition(this.CursorPosition);
             }
 
-            base.Update(context);
+            this.Manipulator.Update();
         }
     }
 

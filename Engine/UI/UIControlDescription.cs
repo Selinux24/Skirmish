@@ -14,23 +14,23 @@ namespace Engine.UI
         /// <summary>
         /// Top position
         /// </summary>
-        public int Top { get; set; }
+        public int Top { get; set; } = 0;
         /// <summary>
         /// Left position
         /// </summary>
-        public int Left { get; set; }
+        public int Left { get; set; } = 0;
         /// <summary>
         /// Width
         /// </summary>
-        public int Width { get; set; }
+        public int Width { get; set; } = 200;
         /// <summary>
         /// Height
         /// </summary>
-        public int Height { get; set; }
+        public int Height { get; set; } = 50;
         /// <summary>
         /// Fit screen
         /// </summary>
-        public bool FitScreen { get; set; } = false;
+        public bool FitParent { get; set; } = false;
         /// <summary>
         /// Vertically centered
         /// </summary>

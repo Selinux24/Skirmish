@@ -17,7 +17,10 @@ namespace SpriteDrawing
         private Sprite spriteMov = null;
         private TextDrawer textDrawer = null;
         private UIProgressBar progressBar = null;
-        private Sprite pan = null;
+        private UIPanel pan = null;
+        private TextDrawer textDebug = null;
+
+        private PrimitiveListDrawer<Line3D> lineDrawer = null;
 
         private readonly string allText = Properties.Resources.Lorem;
         private string currentText = "";
@@ -75,7 +78,8 @@ namespace SpriteDrawing
                         {
                             InitializePan(),
                             InitializeSmiley(),
-                            InitializeTextDrawer()
+                            InitializeTextDrawer(),
+                            InitializeDrawer(),
                         },
                         () =>
                         {
@@ -87,14 +91,24 @@ namespace SpriteDrawing
                         });
                 });
         }
+        private async Task InitializeDrawer()
+        {
+            var desc = new PrimitiveListDrawerDescription<Line3D>()
+            {
+                Count = 20000,
+                DepthEnabled = true,
+            };
+            this.lineDrawer = await this.AddComponentPrimitiveListDrawer(desc, SceneObjectUsages.None, layerHUD);
+            this.lineDrawer.Visible = true;
+        }
         private async Task InitializeBackground()
         {
             var desc = new BackgroundDescription()
             {
-                ContentPath = "Resources",
                 Textures = new[] { "background.jpg" },
             };
-            await this.AddComponentSprite(desc, SceneObjectUsages.UI, layerBackground);
+            var p = await this.AddComponentSprite(desc, SceneObjectUsages.UI, layerBackground);
+            p.Active = p.Visible = false;
 
             var pbDesc = new UIProgressBarDescription
             {
@@ -107,48 +121,74 @@ namespace SpriteDrawing
                 ProgressColor = Color.Green,
             };
             this.progressBar = await this.AddComponentUIProgressBar(pbDesc, layerHUD);
+            this.progressBar.Active = this.progressBar.Visible = false;
         }
         private async Task InitializeSmiley()
         {
             var desc = new SpriteDescription()
             {
-                ContentPath = "Resources",
                 Textures = new[] { "smiley.png" },
                 Top = 0,
                 Left = 0,
                 Width = 256,
                 Height = 256,
-                FitScreen = false,
+                FitParent = false,
             };
             this.spriteMov = await this.AddComponentSprite(desc, SceneObjectUsages.None, layerObjects);
+            this.spriteMov.Active = this.spriteMov.Visible = false;
         }
         private async Task InitializePan()
         {
             var desc = new SpriteDescription()
             {
-                ContentPath = "Resources",
+                Name = "WoodPanel",
                 Textures = new[] { "pan.jpg" },
                 Top = 100,
                 Left = 700,
                 Width = 800,
                 Height = 650,
-                FitScreen = false,
             };
-            _ = await this.AddComponentSprite(desc, SceneObjectUsages.UI, layerHUD);
+            var p = await this.AddComponentSprite(desc, SceneObjectUsages.UI, layerHUD);
+            p.Active = p.Visible = false;
 
-            var descPan = new SpriteDescription()
+            var descPan = new UIPanelDescription
             {
-                ContentPath = "Resources",
-                Textures = new[] { "pan.jpg" },
+                Name = "Test Panel",
+
                 Width = 800,
                 Height = 600,
-                CenterHorizontally = true,
-                CenterVertically = true,
-                FitScreen = false,
-                Color = Color.Red,
+
+                Background = new SpriteDescription()
+                {
+                    Textures = new[] { "pan.jpg" },
+                    Color = Color.Red,
+                }
             };
-            this.pan = await this.AddComponentSprite(descPan, SceneObjectUsages.UI, layerHUD);
-            this.pan.Visible = false;
+            this.pan = await this.AddComponentUIPanel(descPan, layerHUD);
+            this.pan.Visible = true;
+
+            var descButClose = new UIButtonDescription
+            {
+                Name = "CloseButton",
+                Top = +290 - 25,
+                Left = -(380 - 25),
+                Width = 50,
+                Height = 50,
+
+                TwoStateButton = true,
+
+                //TextureReleased = "pan.jpg",
+                ColorReleased = Color.Blue,
+
+                //TexturePressed = "pan.jpg",
+                ColorPressed = Color.Green,
+            };
+            var butClose = await this.AddComponentUIButton(descButClose, layerHUD);
+            //butClose.Top = +290 - 25;
+            //butClose.Left = -(380 - 25);
+            //butClose.Width = 50;
+            //butClose.Height = 50;
+            this.pan.AddChild(butClose);
         }
         private async Task InitializeTextDrawer()
         {
@@ -165,13 +205,13 @@ namespace SpriteDrawing
 
             var desc2 = new TextDrawerDescription()
             {
-                Name = "Text",
+                Name = "Text Debug",
                 Font = "Consolas",
-                FontSize = 14,
+                FontSize = 13,
                 Style = FontMapStyles.Regular,
-                TextColor = Color.White,
+                TextColor = Color.LightGoldenrodYellow,
             };
-            _ = await this.AddComponentTextDrawer(desc2, SceneObjectUsages.UI, layerHUD);
+            this.textDebug = await this.AddComponentTextDrawer(desc2, SceneObjectUsages.UI, layerHUD);
         }
 
         private void UpdateInput()
@@ -189,14 +229,17 @@ namespace SpriteDrawing
 
             if (this.Game.Input.KeyJustReleased(Keys.Space))
             {
-                if (!pan.Visible || pan.Scale == 0)
-                {
-                    pan.ShowRoll(2);
-                }
-                else if (pan.Scale == 1)
-                {
-                    pan.HideRoll(1);
-                }
+                pan.Roll(25);
+            }
+
+            if (this.textDebug != null)
+            {
+                var screenCtr = this.Game.Form.RenderRectangle.Center();
+                var screenPos = new Vector2(
+                    this.Game.Input.MouseX - screenCtr.X,
+                    (this.Game.Input.MouseY - screenCtr.Y));
+
+                this.textDebug.Text = $"Pressed: {pan?.Pressed ?? false}; Rect: {pan.Rectangle}; Mouse {screenPos};";
             }
         }
         private void UpdateSprite(GameTime gameTime)
@@ -223,6 +266,8 @@ namespace SpriteDrawing
         }
         private void UpdateLorem(GameTime gameTime)
         {
+            return;
+
             if (textInterval == 0)
             {
                 return;

@@ -5,8 +5,10 @@ namespace Engine.UI
     /// <summary>
     /// User interface panel
     /// </summary>
-    public class UIPanel : Sprite
+    public class UIPanel : UIControl
     {
+        private readonly Sprite background;
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -14,7 +16,16 @@ namespace Engine.UI
         /// <param name="description">Description</param>
         public UIPanel(Scene scene, UIPanelDescription description) : base(scene, description)
         {
+            if (description.Background != null)
+            {
+                background = new Sprite(scene, description.Background)
+                {
+                    Name = $"{description.Name}.Background",
+                    FitParent = true,
+                };
 
+                this.AddChild(background);
+            }
         }
     }
 

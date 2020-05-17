@@ -10,7 +10,7 @@
         /// <summary>
         /// Active
         /// </summary>
-        public bool Active { get; set; } = true;
+        public virtual bool Active { get; set; } = true;
 
         /// <summary>
         /// Constructor

@@ -82,7 +82,7 @@ namespace Engine.UI
 
             this.Channels = description.Channel;
 
-            this.viewProjection = CreateViewOrthoProjection(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
+            this.viewProjection = this.Game.Form.GetOrthoProjectionMatrix();
 
             // Adjust to screen coordinates
             float x = description.Left - this.Game.Form.RelativeCenter.X;
@@ -161,7 +161,7 @@ namespace Engine.UI
         {
             base.Resize();
 
-            this.viewProjection = CreateViewOrthoProjection(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
+            this.viewProjection = this.Game.Form.GetOrthoProjectionMatrix();
 
             // Adjust to screen coordinates
             float x = this.Left - this.Game.Form.RelativeCenter.X;

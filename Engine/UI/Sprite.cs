@@ -68,7 +68,7 @@ namespace Engine.UI
                 this.InitializeTexture(description.ContentPath, description.Textures);
             }
 
-            this.viewProjection = CreateViewOrthoProjection(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
+            this.viewProjection = this.Game.Form.GetOrthoProjectionMatrix();
         }
         /// <summary>
         /// Internal resources disposition
@@ -95,11 +95,11 @@ namespace Engine.UI
             {
                 if (uvMap.HasValue)
                 {
-                    geom = GeometryUtil.CreateSprite(Vector2.Zero, 1, 1, 0, 0, uvMap.Value);
+                    geom = GeometryUtil.CreateUnitSprite(uvMap.Value);
                 }
                 else
                 {
-                    geom = GeometryUtil.CreateSprite(Vector2.Zero, 1, 1, 0, 0);
+                    geom = GeometryUtil.CreateUnitSprite();
                 }
 
                 var vertices = VertexPositionTexture.Generate(geom.Vertices, geom.Uvs);
@@ -107,7 +107,7 @@ namespace Engine.UI
             }
             else
             {
-                geom = GeometryUtil.CreateSprite(Vector2.Zero, 1, 1, 0, 0);
+                geom = GeometryUtil.CreateUnitSprite();
 
                 var vertices = VertexPositionColor.Generate(geom.Vertices, Color4.White);
                 this.vertexBuffer = this.BufferManager.AddVertexData(name, false, vertices);
@@ -184,7 +184,7 @@ namespace Engine.UI
         {
             base.Resize();
 
-            this.viewProjection = CreateViewOrthoProjection(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
+            this.viewProjection = this.Game.Form.GetOrthoProjectionMatrix();
         }
     }
 

@@ -12,15 +12,15 @@ namespace Engine.UI
         /// <summary>
         /// Pressed sprite button
         /// </summary>
-        private Sprite buttonPressed = null;
+        public readonly Sprite buttonPressed = null;
         /// <summary>
         /// Release sprite button
         /// </summary>
-        private Sprite buttonReleased = null;
+        public readonly Sprite buttonReleased = null;
         /// <summary>
         /// Button text drawer
         /// </summary>
-        private TextDrawer textDrawer = null;
+        public TextDrawer textDrawer = null;
 
         /// <summary>
         /// Gets or sets text top position in 2D screen
@@ -32,8 +32,6 @@ namespace Engine.UI
             {
                 base.Top = value;
 
-                if (buttonPressed != null) buttonPressed.Top = value;
-                if (buttonReleased != null) buttonReleased.Top = value;
                 if (textDrawer != null) textDrawer.CenterRectangle(this.Rectangle);
             }
         }
@@ -47,8 +45,6 @@ namespace Engine.UI
             {
                 base.Left = value;
 
-                if (buttonPressed != null) buttonPressed.Left = value;
-                if (buttonReleased != null) buttonReleased.Left = value;
                 if (textDrawer != null) textDrawer.CenterRectangle(this.Rectangle);
             }
         }
@@ -62,8 +58,6 @@ namespace Engine.UI
             {
                 base.Width = value;
 
-                if (buttonPressed != null) buttonPressed.Width = value;
-                if (buttonReleased != null) buttonReleased.Width = value;
                 if (textDrawer != null) textDrawer.CenterRectangle(this.Rectangle);
             }
         }
@@ -77,8 +71,6 @@ namespace Engine.UI
             {
                 base.Height = value;
 
-                if (buttonPressed != null) buttonPressed.Height = value;
-                if (buttonReleased != null) buttonReleased.Height = value;
                 if (textDrawer != null) textDrawer.CenterRectangle(this.Rectangle);
             }
         }
@@ -92,8 +84,6 @@ namespace Engine.UI
             {
                 base.Scale = value;
 
-                if (buttonPressed != null) buttonPressed.Scale = value;
-                if (buttonReleased != null) buttonReleased.Scale = value;
                 if (textDrawer != null) textDrawer.CenterRectangle(this.Rectangle);
             }
         }
@@ -128,11 +118,9 @@ namespace Engine.UI
         {
             var spriteDesc = new SpriteDescription()
             {
-                Name = $"{description.Name}.Button",
-                Width = description.Width,
-                Height = description.Height,
+                Name = $"{description.Name}.ReleasedButton",
                 Color = description.ColorReleased,
-                FitScreen = false,
+                FitParent = true,
             };
 
             if (!string.IsNullOrEmpty(description.TextureReleased))
@@ -142,16 +130,15 @@ namespace Engine.UI
             }
 
             this.buttonReleased = new Sprite(scene, spriteDesc);
+            this.AddChild(this.buttonReleased);
 
             if (description.TwoStateButton)
             {
                 var spriteDesc2 = new SpriteDescription()
                 {
-                    Name = $"{description.Name}.Button2",
-                    Width = description.Width,
-                    Height = description.Height,
+                    Name = $"{description.Name}.PressedButton",
                     Color = description.ColorPressed,
-                    FitScreen = false,
+                    FitParent = true,
                 };
 
                 if (!string.IsNullOrEmpty(description.TexturePressed))
@@ -161,11 +148,12 @@ namespace Engine.UI
                 }
 
                 this.buttonPressed = new Sprite(scene, spriteDesc2);
+                this.AddChild(this.buttonPressed);
             }
 
             if (description.TextDescription != null)
             {
-                description.TextDescription.Name = description.TextDescription.Name ?? $"{description.Name}.TextDrawer";
+                description.TextDescription.Name = description.TextDescription.Name ?? $"{description.Name}.TextButton";
 
                 this.textDrawer = new TextDrawer(scene, description.TextDescription)
                 {
@@ -182,23 +170,8 @@ namespace Engine.UI
         {
             if (disposing)
             {
-                if (this.buttonReleased != null)
-                {
-                    this.buttonReleased.Dispose();
-                    this.buttonReleased = null;
-                }
-
-                if (this.buttonPressed != null)
-                {
-                    this.buttonPressed.Dispose();
-                    this.buttonPressed = null;
-                }
-
-                if (this.textDrawer != null)
-                {
-                    this.textDrawer.Dispose();
-                    this.textDrawer = null;
-                }
+                this.textDrawer?.Dispose();
+                this.textDrawer = null;
             }
         }
 
@@ -208,13 +181,23 @@ namespace Engine.UI
         /// <param name="context">Context</param>
         public override void Update(UpdateContext context)
         {
+            base.Update(context);
+
             if (!this.Active)
             {
                 return;
             }
 
-            this.buttonReleased?.Update(context);
-            this.buttonPressed?.Update(context);
+            if (this.buttonPressed != null)
+            {
+                this.buttonPressed.Visible = this.Pressed;
+                this.buttonReleased.Visible = !this.Pressed;
+            }
+            else
+            {
+                this.buttonReleased.Visible = true;
+            }
+
             this.textDrawer?.Update(context);
         }
 
@@ -224,18 +207,11 @@ namespace Engine.UI
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
+            base.Draw(context);
+
             if (!this.Visible)
             {
                 return;
-            }
-
-            if (this.Pressed && this.buttonPressed != null)
-            {
-                this.buttonPressed.Draw(context);
-            }
-            else
-            {
-                this.buttonReleased.Draw(context);
             }
 
             if (!string.IsNullOrEmpty(this.Text))
@@ -251,29 +227,7 @@ namespace Engine.UI
         {
             base.Resize();
 
-            this.buttonReleased?.Resize();
-            this.buttonPressed?.Resize();
             this.textDrawer?.Resize();
-        }
-        /// <summary>
-        /// Centers horinzontally the text
-        /// </summary>
-        public override void CenterHorizontally()
-        {
-            base.CenterHorizontally();
-
-            buttonPressed?.CenterHorizontally();
-            buttonReleased?.CenterHorizontally();
-        }
-        /// <summary>
-        /// Centers vertically the text
-        /// </summary>
-        public override void CenterVertically()
-        {
-            base.CenterVertically();
-
-            buttonPressed?.CenterVertically();
-            buttonReleased?.CenterVertically();
         }
     }
 

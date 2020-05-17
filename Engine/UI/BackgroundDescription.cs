@@ -12,9 +12,7 @@ namespace Engine.UI
         public BackgroundDescription()
             : base()
         {
-            this.Width = 0;
-            this.Height = 0;
-            this.FitScreen = true;
+            this.FitParent = true;
         }
     }
 }

@@ -44,7 +44,7 @@ namespace Engine
         /// <summary>
         /// Indicates whether the sprite has to maintain proportion with window size
         /// </summary>
-        bool FitScreen { get; set; }
+        bool FitParent { get; set; }
         /// <summary>
         /// Base color
         /// </summary>

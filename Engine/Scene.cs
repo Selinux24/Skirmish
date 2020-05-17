@@ -447,7 +447,12 @@ namespace Engine
                     .ToArray();
                 foreach (var ctrl in ctrls)
                 {
-                    ctrl.MouseOver = ctrl.Rectangle.Contains(this.Game.Input.MouseX, this.Game.Input.MouseY);
+                    var screenCtr = this.Game.Form.RenderRectangle.Center();
+                    var screenPos = new Vector2(
+                        this.Game.Input.MouseX - screenCtr.X,
+                        (this.Game.Input.MouseY - screenCtr.Y));
+
+                    ctrl.MouseOver = ctrl.Rectangle.Contains(screenPos.X, screenPos.Y);
 
                     if (this.Game.Input.LeftMouseButtonJustPressed && ctrl.MouseOver)
                     {

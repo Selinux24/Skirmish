@@ -124,5 +124,44 @@ namespace Engine
             this.RelativeCenter = new Point(this.RenderWidth / 2, this.RenderHeight / 2);
             this.AbsoluteCenter = new Point(this.Location.X + this.RelativeCenter.X, this.Location.Y + this.RelativeCenter.Y);
         }
+
+        /// <summary>
+        /// Gets the render viewport
+        /// </summary>
+        /// <returns></returns>
+        public Viewport GetViewport()
+        {
+            return new Viewport(0, 0, this.Width, this.Height, 0, 1.0f);
+        }
+        /// <summary>
+        /// Gets the current ortho projection matrix
+        /// </summary>
+        /// <returns>Returns the current ortho projection matrix</returns>
+        public Matrix GetOrthoProjectionMatrix()
+        {
+            Matrix view = Matrix.LookAtLH(
+                Vector3.Zero,
+                Vector3.ForwardLH,
+                Vector3.Up);
+
+            Matrix projection = Matrix.OrthoLH(
+                RenderWidth,
+                RenderHeight,
+                0f, 100f);
+
+            return view * projection;
+        }
+        /// <summary>
+        /// Transform to screen space using the form view ortho projection matrix
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <returns>Returns the screen space position</returns>
+        /// <remarks>Screen space: Center = (0,0) Left = -X Up = +Y</remarks>
+        public Vector2 ToScreenSpace(Vector2 position)
+        {
+            var renderCenter = RenderRectangle.Center();
+
+            return new Vector2(position.X, -position.Y) - new Vector2(renderCenter.X, -renderCenter.Y);
+        }
     }
 }

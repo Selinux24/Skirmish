@@ -233,9 +233,7 @@ namespace Engine.UI
         {
             this.Font = string.Format("{0} {1}", description.Font, description.FontSize);
 
-            this.viewProjection = UIControl.CreateViewOrthoProjection(
-                this.Game.Form.RenderWidth.NextPair(),
-                this.Game.Form.RenderHeight.NextPair());
+            this.viewProjection = this.Game.Form.GetOrthoProjectionMatrix();
 
             this.fontMap = FontMap.Map(this.Game, description.Font, description.FontSize, description.Style);
 
@@ -351,9 +349,7 @@ namespace Engine.UI
         /// </summary>
         public void Resize()
         {
-            this.viewProjection = UIControl.CreateViewOrthoProjection(
-                this.Game.Form.RenderWidth.NextPair(),
-                this.Game.Form.RenderHeight.NextPair());
+            this.viewProjection = this.Game.Form.GetOrthoProjectionMatrix();
         }
 
         /// <summary>

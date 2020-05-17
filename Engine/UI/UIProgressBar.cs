@@ -71,7 +71,7 @@ namespace Engine.UI
                     Color = description.ProgressColor,
                     Width = description.Width,
                     Height = description.Height,
-                    FitScreen = false,
+                    FitParent = false,
                 });
 
             this.right = new Sprite(
@@ -81,7 +81,7 @@ namespace Engine.UI
                     Color = description.BaseColor,
                     Width = description.Width,
                     Height = description.Height,
-                    FitScreen = false,
+                    FitParent = false,
                 });
 
             if (description.TextDescription != null)

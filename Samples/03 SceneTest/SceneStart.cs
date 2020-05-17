@@ -92,7 +92,7 @@ namespace SceneTest
                 Height = 48,
                 Width = 48,
                 Centered = false,
-                Delta = new Vector2(-14, -6),
+                Delta = new Vector2(10f, 17f),
                 Color = Color.White,
             };
             await this.AddComponentUICursor(cursorDesc, layerCursor);
