@@ -235,7 +235,14 @@ namespace Engine.UI
 
             this.viewProjection = this.Game.Form.GetOrthoProjectionMatrix();
 
-            this.fontMap = FontMap.Map(this.Game, description.Font, description.FontSize, description.Style);
+            if (!string.IsNullOrWhiteSpace(description.Font))
+            {
+                this.fontMap = FontMap.Map(this.Game, description.Font, description.FontSize, description.Style);
+            }
+            else if (!string.IsNullOrWhiteSpace(description.FontFileName) && !string.IsNullOrWhiteSpace(description.ContentPath))
+            {
+                this.fontMap = FontMap.MapFromFile(this.Game, description.ContentPath, description.FontFileName, description.FontSize, description.Style);
+            }
 
             VertexPositionTexture[] verts = new VertexPositionTexture[FontMap.MAXTEXTLENGTH * 4];
             uint[] idx = new uint[FontMap.MAXTEXTLENGTH * 6];

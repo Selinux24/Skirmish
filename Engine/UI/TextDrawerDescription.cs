@@ -65,9 +65,17 @@ namespace Engine.UI
         }
 
         /// <summary>
+        /// Content path
+        /// </summary>
+        public string ContentPath { get; set; } = "Resources";
+        /// <summary>
         /// Font name
         /// </summary>
         public string Font { get; set; }
+        /// <summary>
+        /// Font file name
+        /// </summary>
+        public string FontFileName { get; set; }
         /// <summary>
         /// Font size
         /// </summary>

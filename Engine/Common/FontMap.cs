@@ -8,6 +8,7 @@ using System.Linq;
 
 namespace Engine.Common
 {
+    using Engine.Content;
     using SharpDX;
 
     /// <summary>
@@ -114,6 +115,34 @@ namespace Engine.Common
             }
         }
         /// <summary>
+        /// Creates a font map of the specified font file and size
+        /// </summary>
+        /// <param name="game">Game</param>
+        /// <param name="fontFileName">Font file name</param>
+        /// <param name="size">Size</param>
+        /// <param name="bold">Weight</param>
+        /// <returns>Returns created font map</returns>
+        public static FontMap MapFromFile(Game game, string contentPath, string fontFileName, float size, FontMapStyles style)
+        {
+            var fileNames = ContentManager.FindPaths(contentPath, fontFileName);
+            if (!fileNames.Any())
+            {
+                Console.WriteLine($"Font resource not found: {fontFileName}");
+
+                return null;
+            }
+
+            using (PrivateFontCollection collection = new PrivateFontCollection())
+            {
+                collection.AddFontFile(fileNames.FirstOrDefault());
+
+                using (FontFamily family = new FontFamily(collection.Families[0].Name, collection))
+                {
+                    return Map(game, family, size, style);
+                }
+            }
+        }
+        /// <summary>
         /// Creates a font map of the specified font and size
         /// </summary>
         /// <param name="game">Game</param>
@@ -123,18 +152,40 @@ namespace Engine.Common
         /// <returns>Returns created font map</returns>
         public static FontMap Map(Game game, string font, float size, FontMapStyles style)
         {
-            var fMap = gCache.Find(f => f.Font == font && f.Size == size && f.Style == style);
+            if (!FontFamily.Families.Any(f => string.Equals(f.Name, font, StringComparison.OrdinalIgnoreCase)))
+            {
+                Console.WriteLine($"Font not found: {font}");
+
+                return null;
+            }
+
+            using (FontFamily family = new FontFamily(font))
+            {
+                return Map(game, family, size, style);
+            }
+        }
+        /// <summary>
+        /// Creates a font map of the specified font and size
+        /// </summary>
+        /// <param name="game">Game</param>
+        /// <param name="family">Font family</param>
+        /// <param name="size">Size</param>
+        /// <param name="bold">Weight</param>
+        /// <returns>Returns created font map</returns>
+        private static FontMap Map(Game game, FontFamily family, float size, FontMapStyles style)
+        {
+            var fMap = gCache.Find(f => f.Font == family.Name && f.Size == size && f.Style == style);
             if (fMap == null)
             {
                 //Calc the destination texture width and height
-                MeasureMap(font, size, style, out int width, out int height);
+                MeasureMap(family, size, style, out int width, out int height);
 
                 //Calc the delta value for margins an new lines
                 float delta = (float)Math.Sqrt(size) + (size / 40f);
 
                 fMap = new FontMap()
                 {
-                    Font = font,
+                    Font = family.Name,
                     Size = size,
                     Style = style,
                     Delta = (int)delta,
@@ -145,7 +196,7 @@ namespace Engine.Common
                 using (var bmp = new Bitmap(width, height))
                 using (var gra = System.Drawing.Graphics.FromImage(bmp))
                 using (var fmt = StringFormat.GenericDefault)
-                using (var fnt = new Font(font, size, (FontStyle)style, GraphicsUnit.Pixel))
+                using (var fnt = new Font(family, size, (FontStyle)style, GraphicsUnit.Pixel))
                 {
                     gra.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
 
@@ -159,6 +210,7 @@ namespace Engine.Common
                     for (int i = 0; i < ValidKeys.Length; i++)
                     {
                         char c = ValidKeys[i];
+                        Console.Write(c);
 
                         var s = gra.MeasureString(
                             c.ToString(),
@@ -222,17 +274,17 @@ namespace Engine.Common
         /// <summary>
         /// Measures the map to return the destination width and height of the texture
         /// </summary>
-        /// <param name="font">Font name</param>
+        /// <param name="family">Font family</param>
         /// <param name="size">Font size</param>
         /// <param name="style">Font Style</param>
         /// <param name="width">Resulting width</param>
         /// <param name="height">Resulting height</param>
-        public static void MeasureMap(string font, float size, FontMapStyles style, out int width, out int height)
+        private static void MeasureMap(FontFamily family, float size, FontMapStyles style, out int width, out int height)
         {
             using (var bmp = new Bitmap(100, 100))
             using (var gra = System.Drawing.Graphics.FromImage(bmp))
             using (var fmt = StringFormat.GenericDefault)
-            using (var fnt = new Font(font, size, (FontStyle)style, GraphicsUnit.Pixel))
+            using (var fnt = new Font(family, size, (FontStyle)style, GraphicsUnit.Pixel))
             {
                 string str = new string(ValidKeys);
 

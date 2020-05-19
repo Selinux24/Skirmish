@@ -37,48 +37,51 @@ namespace SceneTest
             GameEnvironment.Background = Color.Black;
 
             await this.LoadResourcesAsync(InitializeAssets(), () =>
-             {
-                 this.backGround.Manipulator.SetScale(1.5f, 1.25f, 1.5f);
+            {
+                this.backGround.Manipulator.SetScale(1.5f, 1.25f, 1.5f);
 
-                 this.title.Text = "Scene Manager Test";
-                 this.sceneMaterialsButton.Text = "Materials";
-                 this.sceneWaterButton.Text = "Water";
-                 this.sceneStencilPassButton.Text = "Stencil Pass";
-                 this.sceneLightsButton.Text = "Lights";
-                 this.sceneCascadedShadowsButton.Text = "Cascaded";
-                 this.sceneTestButton.Text = "Test";
-                 this.exitButton.Text = "Exit";
+                this.title.Text = "Scene Manager Test";
+                this.sceneMaterialsButton.Text = "Materials";
+                this.sceneWaterButton.Text = "Water";
+                this.sceneStencilPassButton.Text = "Stencil Pass";
+                this.sceneLightsButton.Text = "Lights";
+                this.sceneCascadedShadowsButton.Text = "Cascaded";
+                this.sceneTestButton.Text = "Test";
+                this.exitButton.Text = "Exit";
 
-                 var sceneButtons = new[]
-                 {
-                this.sceneMaterialsButton,
-                this.sceneWaterButton,
-                this.sceneStencilPassButton,
-                this.sceneLightsButton,
-                this.sceneCascadedShadowsButton,
-                this.sceneTestButton,
-             };
+                var sceneButtons = new[]
+                {
+                    this.sceneMaterialsButton,
+                    this.sceneWaterButton,
+                    this.sceneStencilPassButton,
+                    this.sceneLightsButton,
+                    this.sceneCascadedShadowsButton,
+                    this.sceneTestButton,
+                };
 
-                 int numButtons = sceneButtons.Length + 1;
-                 int div = numButtons + 1;
-                 int h = 4;
-                 int hv = h - 1;
+                int numButtons = sceneButtons.Length + 1;
+                int div = numButtons + 1;
+                int h = 4;
+                int hv = h - 1;
 
-                 var rect = this.Game.Form.RenderRectangle;
-                 rect.Height /= 2;
-                 this.title.CenterRectangle(rect);
+                var rect = this.Game.Form.RenderRectangle;
+                rect.Height /= 2;
+                this.title.CenterRectangle(rect);
 
-                 for (int i = 0; i < sceneButtons.Length; i++)
-                 {
-                     sceneButtons[i].Left = ((this.Game.Form.RenderWidth / div) * (i + 1)) - (this.sceneMaterialsButton.Width / 2);
-                     sceneButtons[i].Top = (this.Game.Form.RenderHeight / h) * hv - (this.sceneMaterialsButton.Height / 2);
-                     sceneButtons[i].Click += SceneButtonClick;
-                 }
+                for (int i = 0; i < sceneButtons.Length; i++)
+                {
+                    sceneButtons[i].Left = ((this.Game.Form.RenderWidth / div) * (i + 1));// - (this.sceneMaterialsButton.Width / 2);
+                    sceneButtons[i].Top = (this.Game.Form.RenderHeight / h) * hv;// - (this.sceneMaterialsButton.Height / 2);
+                    sceneButtons[i].Click += SceneButtonClick;
+                }
 
-                 this.exitButton.Left = (this.Game.Form.RenderWidth / div) * numButtons - (this.exitButton.Width / 2);
-                 this.exitButton.Top = (this.Game.Form.RenderHeight / h) * hv - (this.exitButton.Height / 2);
-                 this.exitButton.Click += ExitButtonClick;
-             });
+                this.exitButton.Left = (this.Game.Form.RenderWidth / div) * numButtons;// - (this.exitButton.Width / 2);
+                this.exitButton.Top = (this.Game.Form.RenderHeight / h) * hv;// - (this.exitButton.Height / 2);
+                this.exitButton.Click += ExitButtonClick;
+
+                sceneButtons[0].Left = 0;
+                sceneButtons[0].Top = 0;
+            });
         }
         private async Task InitializeAssets()
         {

@@ -195,9 +195,9 @@ namespace SpriteDrawing
             var desc = new TextDrawerDescription()
             {
                 Name = "Text",
-                Font = "Viner Hand ITC",
-                FontSize = 17,
-                Style = FontMapStyles.Bold,
+                FontFileName = "SEASRN__.ttf",
+                FontSize = 20,
+                Style = FontMapStyles.Regular,
                 TextColor = Color.LightGoldenrodYellow,
             };
             this.textDrawer = await this.AddComponentTextDrawer(desc, SceneObjectUsages.UI, layerHUD);
@@ -266,7 +266,7 @@ namespace SpriteDrawing
         }
         private void UpdateLorem(GameTime gameTime)
         {
-            return;
+            //return;
 
             if (textInterval == 0)
             {
