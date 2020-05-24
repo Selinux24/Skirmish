@@ -73,6 +73,10 @@ namespace Engine.UI
         /// Maintain proportion with window size
         /// </summary>
         private bool fitParent = false;
+        /// <summary>
+        /// Update internals flag
+        /// </summary>
+        private bool updateInternals = false;
 
         /// <summary>
         /// Manipulator
@@ -179,7 +183,7 @@ namespace Engine.UI
                 this.left = value;
                 this.centerHorizontally = false;
 
-                UpdateInternals();
+                this.updateInternals = true;
             }
         }
         /// <summary>
@@ -196,7 +200,7 @@ namespace Engine.UI
                 this.top = value;
                 this.centerVertically = false;
 
-                UpdateInternals();
+                this.updateInternals = true;
             }
         }
         /// <summary>
@@ -212,7 +216,7 @@ namespace Engine.UI
             {
                 this.width = value;
 
-                UpdateInternals();
+                this.updateInternals = true;
             }
         }
         /// <summary>
@@ -228,7 +232,7 @@ namespace Engine.UI
             {
                 this.height = value;
 
-                UpdateInternals();
+                this.updateInternals = true;
             }
         }
         /// <summary>
@@ -244,7 +248,7 @@ namespace Engine.UI
             {
                 scale = value;
 
-                UpdateInternals();
+                this.updateInternals = true;
             }
         }
         /// <summary>
@@ -260,7 +264,7 @@ namespace Engine.UI
             {
                 rotation = value % MathUtil.TwoPi;
 
-                UpdateInternals();
+                this.updateInternals = true;
             }
         }
 
@@ -517,7 +521,7 @@ namespace Engine.UI
 
             this.color = description.Color;
 
-            UpdateInternals();
+            this.updateInternals = true;
         }
         /// <summary>
         /// Dispose resources
@@ -545,7 +549,13 @@ namespace Engine.UI
                 return;
             }
 
-            this.UpdateInternals();
+            if (this.updateInternals)
+            {
+                this.UpdateInternals();
+
+                this.updateInternals = false;
+            }
+
             this.UpdateInput();
 
             if (children.Any())
@@ -554,9 +564,39 @@ namespace Engine.UI
             }
         }
         /// <summary>
+        /// Updates the internal transform
+        /// </summary>
+        protected virtual void UpdateInternals()
+        {
+            if (this.centerHorizontally)
+            {
+                this.left = this.Game.Form.RenderCenter.X - (this.width / 2);
+            }
+
+            if (this.centerVertically)
+            {
+                this.top = this.Game.Form.RenderCenter.Y - (this.height / 2);
+            }
+
+            Vector2 sca = new Vector2(this.AbsoluteWidth, this.AbsoluteHeight) * AbsoluteScale;
+            float rot = this.AbsoluteRotation;
+            Vector2 pos = new Vector2(this.AbsoluteLeft, this.AbsoluteTop);
+            Vector2 rotCenter = new Vector2(this.GrandpaLeft + (this.GrandpaWidth * 0.5f), this.GrandpaTop + (this.GrandpaHeight * 0.5f));
+
+            this.Manipulator.SetScale(sca);
+            this.Manipulator.SetRotation(rot);
+            this.Manipulator.SetPosition(pos);
+            this.Manipulator.Update(rotCenter, this.GrandpaScale);
+
+            if (children.Any())
+            {
+                children.ForEach(c => c.updateInternals = true);
+            }
+        }
+        /// <summary>
         /// Updates the input state
         /// </summary>
-        private void UpdateInput()
+        protected virtual void UpdateInput()
         {
             if (this.IsMouseOver)
             {
@@ -632,7 +672,7 @@ namespace Engine.UI
         /// </summary>
         public virtual void Resize()
         {
-
+            children.ForEach(c => c.Resize());
         }
         /// <summary>
         /// Centers vertically the text
@@ -641,7 +681,7 @@ namespace Engine.UI
         {
             this.centerVertically = true;
 
-            this.UpdateInternals();
+            this.updateInternals = true;
         }
         /// <summary>
         /// Centers horinzontally the text
@@ -650,39 +690,7 @@ namespace Engine.UI
         {
             this.centerHorizontally = true;
 
-            this.UpdateInternals();
-        }
-        /// <summary>
-        /// Updates the internal transform
-        /// </summary>
-        protected virtual void UpdateInternals()
-        {
-            var type = this.GetType();
-
-            if (this.centerHorizontally)
-            {
-                this.left = this.Game.Form.RenderCenter.X - (this.width / 2);
-            }
-
-            if (this.centerVertically)
-            {
-                this.top = this.Game.Form.RenderCenter.Y - (this.height / 2);
-            }
-
-            Vector2 sca = new Vector2(this.AbsoluteWidth, this.AbsoluteHeight) * AbsoluteScale;
-            float rot = this.AbsoluteRotation;
-            Vector2 pos = new Vector2(this.AbsoluteLeft, this.AbsoluteTop);
-            Vector2 rotCenter = new Vector2(this.GrandpaLeft + (this.GrandpaWidth * 0.5f), this.GrandpaTop + (this.GrandpaHeight * 0.5f));
-
-            this.Manipulator.SetScale(sca);
-            this.Manipulator.SetRotation(rot);
-            this.Manipulator.SetPosition(pos);
-            this.Manipulator.Update(rotCenter, this.GrandpaScale);
-
-            if (children.Any())
-            {
-                children.ForEach(c => c.UpdateInternals());
-            }
+            this.updateInternals = true;
         }
 
         /// <summary>
@@ -815,7 +823,23 @@ namespace Engine.UI
             this.centerHorizontally = false;
             this.centerVertically = false;
 
-            this.UpdateInternals();
+            this.updateInternals = true;
+        }
+        /// <summary>
+        /// Sets the control rectangle area
+        /// </summary>
+        /// <param name="rectangle">Rectangle</param>
+        /// <remarks>Adjust the control left-top position and with and height properties</remarks>
+        public void SetRectangle(Rectangle rectangle)
+        {
+            this.left = rectangle.X;
+            this.top = rectangle.Y;
+            this.width = rectangle.Width;
+            this.height = rectangle.Height;
+            this.centerHorizontally = false;
+            this.centerVertically = false;
+
+            this.updateInternals = true;
         }
     }
 }

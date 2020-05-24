@@ -102,6 +102,8 @@ namespace Engine.UI
                 this.BufferManager?.RemoveVertexData(this.vertexBuffer);
                 this.BufferManager?.RemoveIndexData(this.indexBuffer);
             }
+
+            base.Dispose(disposing);
         }
 
         /// <summary>

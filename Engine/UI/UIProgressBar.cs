@@ -12,15 +12,15 @@ namespace Engine.UI
         /// <summary>
         /// Left sprite
         /// </summary>
-        private Sprite left = null;
+        private readonly Sprite left = null;
         /// <summary>
         /// Right sprite
         /// </summary>
-        private Sprite right = null;
+        private readonly Sprite right = null;
         /// <summary>
         /// Button text drawer
         /// </summary>
-        private TextDrawer textDrawer = null;
+        private readonly TextDrawer textDrawer = null;
 
         /// <summary>
         /// Left scale
@@ -103,18 +103,17 @@ namespace Engine.UI
                 if (left != null)
                 {
                     left.Dispose();
-                    left = null;
                 }
                 if (right != null)
                 {
                     right.Dispose();
-                    right = null;
                 }
                 if (textDrawer != null)
                 {
                     textDrawer.Dispose();
-                    textDrawer = null;
                 }
+
+                base.Dispose(disposing);
             }
         }
 
@@ -181,6 +180,8 @@ namespace Engine.UI
         /// </summary>
         public override void Resize()
         {
+            base.Resize();
+
             this.left?.Resize();
             this.right?.Resize();
             this.textDrawer?.Resize();

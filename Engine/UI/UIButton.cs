@@ -20,7 +20,7 @@ namespace Engine.UI
         /// <summary>
         /// Button text drawer
         /// </summary>
-        public TextDrawer textDrawer = null;
+        public readonly TextDrawer textDrawer = null;
 
         /// <summary>
         /// Gets or sets text top position in 2D screen
@@ -155,12 +155,9 @@ namespace Engine.UI
             {
                 description.TextDescription.Name = description.TextDescription.Name ?? $"{description.Name}.TextButton";
 
-                this.textDrawer = new TextDrawer(scene, description.TextDescription)
-                {
-                    Text = description.Text
-                };
-
+                this.textDrawer = new TextDrawer(scene, description.TextDescription);
                 this.textDrawer.CenterRectangle(this.Rectangle);
+                this.textDrawer.Text = description.Text;
             }
         }
         /// <summary>
@@ -171,8 +168,9 @@ namespace Engine.UI
             if (disposing)
             {
                 this.textDrawer?.Dispose();
-                this.textDrawer = null;
             }
+
+            base.Dispose(disposing);
         }
 
         /// <summary>

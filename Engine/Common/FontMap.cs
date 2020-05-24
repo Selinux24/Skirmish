@@ -74,10 +74,6 @@ namespace Engine.Common
         /// </summary>
         public float Size { get; private set; }
         /// <summary>
-        /// Character margin delta
-        /// </summary>
-        public int Delta { get; private set; }
-        /// <summary>
         /// Font style
         /// </summary>
         public FontMapStyles Style { get; private set; }
@@ -180,15 +176,11 @@ namespace Engine.Common
                 //Calc the destination texture width and height
                 MeasureMap(family, size, style, out int width, out int height);
 
-                //Calc the delta value for margins an new lines
-                float delta = (float)Math.Sqrt(size) + (size / 40f);
-
                 fMap = new FontMap()
                 {
                     Font = family.Name,
                     Size = size,
                     Style = style,
-                    Delta = (int)delta,
                     TextureWidth = width,
                     TextureHeight = height,
                 };
@@ -204,7 +196,7 @@ namespace Engine.Common
                         Brushes.Transparent,
                         new Region(new System.Drawing.RectangleF(0, 0, width, height)));
 
-                    float left = fMap.Delta;
+                    float left = 0f;
                     float top = 0f;
 
                     for (int i = 0; i < ValidKeys.Length; i++)
@@ -218,11 +210,11 @@ namespace Engine.Common
                             int.MaxValue,
                             fmt);
 
-                        if (left + s.Width + fMap.Delta >= width)
+                        if (left + s.Width >= width)
                         {
                             //Next texture line
-                            left = fMap.Delta;
-                            top += s.Height + fMap.Delta;
+                            left = 0;
+                            top += (int)(s.Height * 1.5f);
                         }
 
                         gra.DrawString(
@@ -243,7 +235,7 @@ namespace Engine.Common
 
                         fMap.map.Add(c, chr);
 
-                        left += s.Width + fMap.Delta;
+                        left += (int)s.Width;
                     }
 
                     fMap.GetSpaceSize(out float wsWidth, out float wsHeight);

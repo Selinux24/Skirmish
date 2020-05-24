@@ -1,6 +1,5 @@
 ﻿using SharpDX;
 using System;
-using System.Collections.Generic;
 
 namespace Engine
 {
@@ -132,5 +131,11 @@ namespace Engine
         /// <param name="position">Position</param>
         /// <remarks>Setting the position invalidates centering properties</remarks>
         void SetPosition(Vector2 position);
+        /// <summary>
+        /// Sets the control rectangle area
+        /// </summary>
+        /// <param name="rectangle">Rectangle</param>
+        /// <remarks>Adjust the control left-top position and with and height properties</remarks>
+        void SetRectangle(Rectangle rectangle);
     }
 }

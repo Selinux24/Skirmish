@@ -413,7 +413,18 @@ namespace Engine
 
             try
             {
-                await Task.WhenAll(tasks);
+                var taskList = tasks.ToList();
+
+                int totalTasks = taskList.Count;
+                int currentTask = 0;
+                while (taskList.Any())
+                {
+                    var t = await Task.WhenAny(taskList);
+
+                    taskList.Remove(t);
+
+                    Progress?.Report(++currentTask / (float)totalTasks);
+                }
 
                 ResourcesLoading?.Invoke(this, new GameLoadResourcesEventArgs() { Scene = scene });
 
