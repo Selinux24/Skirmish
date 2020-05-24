@@ -167,7 +167,7 @@ namespace SceneTest
                 Text = "Close",
             }, layerHUD);
 
-            this.butClose.Click += (sender, eventArgs) => { this.Game.SetScene<SceneStart>(); };
+            this.butClose.JustReleased += (sender, eventArgs) => { this.Game.SetScene<SceneStart>(); };
             this.butClose.Visible = false;
         }
         private async Task InitializeSkyEffects()

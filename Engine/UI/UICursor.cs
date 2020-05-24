@@ -60,11 +60,11 @@ namespace Engine.UI
                 top = this.Game.Input.MouseY;
             }
 
-            this.CursorPosition = this.Game.Form.ToScreenSpace(new Vector2(left, top) + this.Delta);
+            this.CursorPosition = new Vector2(left, top) + this.Delta;
 
-            if (this.Centered && this.Game.Input.LockMouse)
+            if (this.Game.Input.LockMouse)
             {
-                this.Manipulator.SetPosition(Vector2.Zero);
+                this.Manipulator.SetPosition(this.Game.Form.RenderCenter);
             }
             else
             {

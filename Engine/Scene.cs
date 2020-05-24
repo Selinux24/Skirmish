@@ -236,11 +236,6 @@ namespace Engine
         /// </summary>
         private List<ISceneObject> internalComponents = new List<ISceneObject>();
         /// <summary>
-        /// Control captured with mouse
-        /// </summary>
-        /// <remarks>When mouse was pressed, the control beneath him was stored here. When mouse is released, if it is above this control, an click event occurs</remarks>
-        private IUIControl capturedControl = null;
-        /// <summary>
         /// Scene mode
         /// </summary>
         private SceneModes sceneMode = SceneModes.Unknown;
@@ -261,10 +256,6 @@ namespace Engine
         /// Scene renderer
         /// </summary>
         protected ISceneRenderer Renderer = null;
-        /// <summary>
-        /// Gets or sets whether the scene was handling control captures
-        /// </summary>
-        protected bool CapturedControl { get; private set; }
         /// <summary>
         /// Flag to update the scene global resources
         /// </summary>
@@ -437,37 +428,6 @@ namespace Engine
                 this.Lights?.UpdateLights(this.TimeOfDay);
 
                 this.Renderer?.Update(gameTime, this);
-
-                this.CapturedControl = this.capturedControl != null;
-
-                //Process 2D controls
-                var ctrls = this.GetComponents()
-                    .Where(c => c.Active)
-                    .OfType<IUIControl>()
-                    .ToArray();
-                foreach (var ctrl in ctrls)
-                {
-                    var screenCtr = this.Game.Form.RenderRectangle.Center();
-                    var screenPos = new Vector2(
-                        this.Game.Input.MouseX - screenCtr.X,
-                        (this.Game.Input.MouseY - screenCtr.Y));
-
-                    ctrl.MouseOver = ctrl.Rectangle.Contains(screenPos.X, screenPos.Y);
-
-                    if (this.Game.Input.LeftMouseButtonJustPressed && ctrl.MouseOver)
-                    {
-                        this.capturedControl = ctrl;
-                    }
-
-                    if (this.Game.Input.LeftMouseButtonJustReleased && ctrl.MouseOver && this.capturedControl == ctrl)
-                    {
-                        ctrl.FireOnClickEvent();
-                    }
-
-                    ctrl.Pressed = this.Game.Input.LeftMouseButtonPressed && this.capturedControl == ctrl;
-                }
-
-                if (!this.Game.Input.LeftMouseButtonPressed) this.capturedControl = null;
             }
             catch (EngineException ex)
             {

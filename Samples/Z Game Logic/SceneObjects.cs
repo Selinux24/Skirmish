@@ -339,12 +339,12 @@ namespace GameLogic
                 Text = "Next Action",
             }, layerHUD);
 
-            this.butClose.Click += (sender, eventArgs) => { this.Game.Exit(); };
-            this.butNext.Click += (sender, eventArgs) => { this.NextPhase(); };
-            this.butPrevSoldier.Click += (sender, eventArgs) => { this.PrevSoldier(true); };
-            this.butNextSoldier.Click += (sender, eventArgs) => { this.NextSoldier(true); };
-            this.butPrevAction.Click += (sender, eventArgs) => { this.PrevAction(); };
-            this.butNextAction.Click += (sender, eventArgs) => { this.NextAction(); };
+            this.butClose.JustReleased += (sender, eventArgs) => { this.Game.Exit(); };
+            this.butNext.JustReleased += (sender, eventArgs) => { this.NextPhase(); };
+            this.butPrevSoldier.JustReleased += (sender, eventArgs) => { this.PrevSoldier(true); };
+            this.butNextSoldier.JustReleased += (sender, eventArgs) => { this.NextSoldier(true); };
+            this.butPrevAction.JustReleased += (sender, eventArgs) => { this.PrevAction(); };
+            this.butNextAction.JustReleased += (sender, eventArgs) => { this.NextAction(); };
 
             this.txtTitle.Text = "Game Logic";
         }
@@ -376,39 +376,42 @@ namespace GameLogic
             if (this.Game.Input.KeyJustReleased(Keys.Space))
             {
                 butNext.Scale = 2;
+
+                return;
             }
 
-            if (!this.CapturedControl)
+            if (this.Game.Input.KeyJustReleased(this.keyExit))
             {
-                if (this.Game.Input.KeyJustReleased(this.keyExit))
-                {
-                    this.Game.Exit();
-                }
+                this.Game.Exit();
 
-                if (this.Game.Input.KeyJustReleased(this.keyChangeMode))
-                {
-                    this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
-                        SceneModes.DeferredLightning :
-                        SceneModes.ForwardLigthning);
-                }
-
-                bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey) || this.Game.Input.KeyPressed(Keys.RShiftKey);
-
-                Ray cursorRay = this.GetPickingRay();
-                bool picked = this.PickNearest(cursorRay, RayPickingParams.Default, SceneObjectUsages.Ground, out PickingResult<Triangle> r);
-
-                //DEBUG
-                this.UpdateDebug();
-
-                //HUD
-                this.UpdateHUD(shift);
-
-                //3D
-                this.Update3D(gameTime, shift, cursorRay, picked, r);
-
-                //Actions
-                this.UpdateActions(cursorRay, picked, r);
+                return;
             }
+
+            if (this.Game.Input.KeyJustReleased(this.keyChangeMode))
+            {
+                this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
+                    SceneModes.DeferredLightning :
+                    SceneModes.ForwardLigthning);
+
+                return;
+            }
+
+            bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey) || this.Game.Input.KeyPressed(Keys.RShiftKey);
+
+            Ray cursorRay = this.GetPickingRay();
+            bool picked = this.PickNearest(cursorRay, RayPickingParams.Default, SceneObjectUsages.Ground, out PickingResult<Triangle> r);
+
+            //DEBUG
+            this.UpdateDebug();
+
+            //HUD
+            this.UpdateHUD(shift);
+
+            //3D
+            this.Update3D(gameTime, shift, cursorRay, picked, r);
+
+            //Actions
+            this.UpdateActions(cursorRay, picked, r);
         }
         private void UpdateDebug()
         {

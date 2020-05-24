@@ -238,27 +238,27 @@ namespace Collada
             this.sceneDungeonWallButton.Text = "Dungeon Wall";
             this.sceneDungeonWallButton.Left = ((this.Game.Form.RenderWidth / 6) * 1) - (this.sceneDungeonWallButton.Width / 2);
             this.sceneDungeonWallButton.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneDungeonWallButton.Height / 2);
-            this.sceneDungeonWallButton.Click += SceneButtonClick;
+            this.sceneDungeonWallButton.JustReleased += SceneButtonClick;
 
             this.sceneNavMeshTestButton.Text = "Navmesh Test";
             this.sceneNavMeshTestButton.Left = ((this.Game.Form.RenderWidth / 6) * 2) - (this.sceneNavMeshTestButton.Width / 2);
             this.sceneNavMeshTestButton.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneNavMeshTestButton.Height / 2);
-            this.sceneNavMeshTestButton.Click += SceneButtonClick;
+            this.sceneNavMeshTestButton.JustReleased += SceneButtonClick;
 
             this.sceneDungeonButton.Text = "Dungeon";
             this.sceneDungeonButton.Left = ((this.Game.Form.RenderWidth / 6) * 3) - (this.sceneDungeonButton.Width / 2);
             this.sceneDungeonButton.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneDungeonButton.Height / 2);
-            this.sceneDungeonButton.Click += SceneButtonClick;
+            this.sceneDungeonButton.JustReleased += SceneButtonClick;
 
             this.sceneModularDungeonButton.Text = "Modular Dungeon";
             this.sceneModularDungeonButton.Left = ((this.Game.Form.RenderWidth / 6) * 4) - (this.sceneModularDungeonButton.Width / 2);
             this.sceneModularDungeonButton.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneModularDungeonButton.Height / 2);
-            this.sceneModularDungeonButton.Click += SceneButtonClick;
+            this.sceneModularDungeonButton.JustReleased += SceneButtonClick;
 
             this.exitButton.Text = "Exit";
             this.exitButton.Left = (this.Game.Form.RenderWidth / 6) * 5 - (this.exitButton.Width / 2);
             this.exitButton.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.exitButton.Height / 2);
-            this.exitButton.Click += ExitButtonClick;
+            this.exitButton.JustReleased += ExitButtonClick;
         }
 
         private void UpdateAudioInput(GameTime gameTime)

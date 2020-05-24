@@ -1,6 +1,6 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Windows.Forms;
 
 namespace Engine
@@ -83,6 +83,10 @@ namespace Engine
         /// Absolute Mouse Y axis value
         /// </summary>
         public int MouseY { get; private set; }
+        /// <summary>
+        /// Absolute Mouse position
+        /// </summary>
+        public Point MousePosition { get; private set; }
         /// <summary>
         /// Gets if left mouse button is just released
         /// </summary>
@@ -242,7 +246,7 @@ namespace Engine
                 {
                     if (this.firstUpdate)
                     {
-                        this.SetMousePosition(this.form.AbsoluteCenter.X, this.form.AbsoluteCenter.Y);
+                        this.SetMousePosition(this.form.RenderCenter);
 
                         this.ClearInputData();
 
@@ -283,19 +287,21 @@ namespace Engine
         /// </summary>
         private void UpdateMousePositionState()
         {
-            Point mousePos = this.form.PointToClient(Cursor.ScreenPosition);
+            var mousePos = this.form.PointToClient(Cursor.ScreenPosition);
 
-            this.MouseXDelta = mousePos.X - this.lastMousePos.X;
-            this.MouseYDelta = mousePos.Y - this.lastMousePos.Y;
+            this.MousePosition = new Point(mousePos.X, mousePos.Y);
 
-            this.MouseX = mousePos.X;
-            this.MouseY = mousePos.Y;
+            this.MouseXDelta = this.MousePosition.X - this.lastMousePos.X;
+            this.MouseYDelta = this.MousePosition.Y - this.lastMousePos.Y;
 
-            this.lastMousePos = mousePos;
+            this.MouseX = this.MousePosition.X;
+            this.MouseY = this.MousePosition.Y;
+
+            this.lastMousePos = this.MousePosition;
 
             if (this.LockMouse)
             {
-                this.SetMousePosition(this.form.AbsoluteCenter.X, this.form.AbsoluteCenter.Y);
+                this.SetMousePosition(this.form.RenderCenter);
             }
         }
         /// <summary>
@@ -392,9 +398,10 @@ namespace Engine
         /// <param name="location">Position</param>
         public void SetMousePosition(Point location)
         {
-            Cursor.ScreenPosition = location;
+            Cursor.ScreenPosition = new System.Drawing.Point(location.X, location.Y);
 
-            this.lastMousePos = this.form.PointToClient(Cursor.ScreenPosition);
+            var mousePos = this.form.PointToClient(Cursor.ScreenPosition);
+            this.lastMousePos = new Point(mousePos.X, mousePos.Y);
         }
 
         /// <summary>

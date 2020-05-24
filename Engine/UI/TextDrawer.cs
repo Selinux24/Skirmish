@@ -410,8 +410,8 @@ namespace Engine.UI
             }
 
             // Adjust to screen
-            int x = +(this.left - this.Game.Form.RelativeCenter.X);
-            int y = -(this.top - this.Game.Form.RelativeCenter.Y);
+            int x = +(this.left - this.Game.Form.RenderCenter.X);
+            int y = -(this.top - this.Game.Form.RenderCenter.Y);
 
             // Calculate new transforms
             this.local = Matrix.Translation(x, y, 0f);

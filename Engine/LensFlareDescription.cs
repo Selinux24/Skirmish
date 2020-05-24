@@ -13,9 +13,9 @@ namespace Engine
         public class Flare
         {
             /// <summary>
-            /// Relative position
+            /// Distance from light source along light ray
             /// </summary>
-            public float Position { get; set; }
+            public float Distance { get; set; }
             /// <summary>
             /// Relative scale
             /// </summary>
@@ -32,13 +32,13 @@ namespace Engine
             /// <summary>
             /// Constructor
             /// </summary>
-            /// <param name="position">Relative position</param>
+            /// <param name="distance">Distance from light source along light ray</param>
             /// <param name="scale">Relative scale</param>
             /// <param name="color">Color</param>
             /// <param name="texture">Texture name</param>
-            public Flare(float position, float scale, Color color, string texture)
+            public Flare(float distance, float scale, Color color, string texture)
             {
-                this.Position = position;
+                this.Distance = distance;
                 this.Scale = scale;
                 this.Color = color;
                 this.Texture = texture;

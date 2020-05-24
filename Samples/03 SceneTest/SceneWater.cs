@@ -35,7 +35,8 @@ namespace SceneTest
 
             await this.LoadResourcesAsync(InitializeAssets());
 
-            this.TimeOfDay.BeginAnimation(new TimeSpan(5, 00, 00), 10f);
+            //this.TimeOfDay.BeginAnimation(new TimeSpan(5, 00, 00), 10f);
+            this.TimeOfDay.SetTimeOfDay(new TimeSpan(7, 00, 00));
         }
         private async Task InitializeAssets()
         {

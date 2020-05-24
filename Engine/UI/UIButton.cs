@@ -190,8 +190,8 @@ namespace Engine.UI
 
             if (this.buttonPressed != null)
             {
-                this.buttonPressed.Visible = this.Pressed;
-                this.buttonReleased.Visible = !this.Pressed;
+                this.buttonPressed.Visible = this.IsPressed;
+                this.buttonReleased.Visible = !this.IsPressed;
             }
             else
             {

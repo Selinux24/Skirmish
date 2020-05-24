@@ -436,20 +436,20 @@ namespace Engine.Common
         /// Creates a unit sprite
         /// </summary>
         /// <returns>Returns a geometry descriptor</returns>
-        /// <remarks>Unit size with then center in X=0;Y=0</remarks>
+        /// <remarks>Unit size with then center in X=0.5;Y=0.5</remarks>
         public static GeometryDescriptor CreateUnitSprite()
         {
-            return CreateSprite(new Vector2(-0.5f, +0.5f), 1, 1, 0, 0);
+            return CreateSprite(Vector2.Zero, 1, 1, 0, 0);
         }
         /// <summary>
         /// Creates a unit sprite
         /// </summary>
         /// <param name="uvMap">UV map</param>
         /// <returns>Returns a geometry descriptor</returns>
-        /// <remarks>Unit size with then center in X=0;Y=0</remarks>
+        /// <remarks>Unit size with then center in X=0.5;Y=0.5</remarks>
         public static GeometryDescriptor CreateUnitSprite(Vector4 uvMap)
         {
-            return CreateSprite(new Vector2(-0.5f, +0.5f), 1, 1, 0, 0, uvMap);
+            return CreateSprite(Vector2.Zero, 1, 1, 0, 0, uvMap);
         }
         /// <summary>
         /// Creates a sprite of VertexPositionTexture VertexData

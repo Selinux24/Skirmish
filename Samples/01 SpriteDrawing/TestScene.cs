@@ -2,7 +2,7 @@
 using Engine.Tween;
 using Engine.UI;
 using SharpDX;
-using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace SpriteDrawing
@@ -135,7 +135,7 @@ namespace SpriteDrawing
                 FitParent = false,
             };
             this.spriteMov = await this.AddComponentSprite(desc, SceneObjectUsages.None, layerObjects);
-            this.spriteMov.Active = this.spriteMov.Visible = false;
+            //this.spriteMov.Active = this.spriteMov.Visible = false;
         }
         private async Task InitializePan()
         {
@@ -157,6 +157,8 @@ namespace SpriteDrawing
 
                 Width = 800,
                 Height = 600,
+                CenterVertically = true,
+                CenterHorizontally = true,
 
                 Background = new SpriteDescription()
                 {
@@ -165,13 +167,19 @@ namespace SpriteDrawing
                 }
             };
             this.pan = await this.AddComponentUIPanel(descPan, layerHUD);
+            //this.pan.Top = 0;
+            //this.pan.Left = 0;
+            //this.pan.Width = 800;
+            //this.pan.Height = 600;
+            //this.pan.CenterVertically();
+            //this.pan.CenterHorizontally();
             this.pan.Visible = true;
 
             var descButClose = new UIButtonDescription
             {
                 Name = "CloseButton",
-                Top = +290 - 25,
-                Left = -(380 - 25),
+                Top = 25,
+                Left = 25,
                 Width = 50,
                 Height = 50,
 
@@ -184,12 +192,20 @@ namespace SpriteDrawing
                 ColorPressed = Color.Green,
             };
             var butClose = await this.AddComponentUIButton(descButClose, layerHUD);
-            //butClose.Top = +290 - 25;
-            //butClose.Left = -(380 - 25);
+            //butClose.Top = 25;
+            //butClose.Left = 25;
             //butClose.Width = 50;
             //butClose.Height = 50;
             this.pan.AddChild(butClose);
+
+            butClose.JustReleased += ButClose_Click;
         }
+
+        private void ButClose_Click(object sender, System.EventArgs e)
+        {
+            pan.HideRoll(1);
+        }
+
         private async Task InitializeTextDrawer()
         {
             var desc = new TextDrawerDescription()
@@ -229,45 +245,44 @@ namespace SpriteDrawing
 
             if (this.Game.Input.KeyJustReleased(Keys.Space))
             {
-                pan.Roll(25);
+                pan.ShowRoll(1);
             }
 
             if (this.textDebug != null)
             {
-                var screenCtr = this.Game.Form.RenderRectangle.Center();
-                var screenPos = new Vector2(
-                    this.Game.Input.MouseX - screenCtr.X,
-                    (this.Game.Input.MouseY - screenCtr.Y));
+                var mousePos = Cursor.ScreenPosition;
+                var but = pan.Children.OfType<UIButton>().FirstOrDefault();
 
-                this.textDebug.Text = $"Pressed: {pan?.Pressed ?? false}; Rect: {pan.Rectangle}; Mouse {screenPos};";
+                this.textDebug.Text = $@"PanPressed: {pan?.IsPressed ?? false}; PanRect: {pan.Rectangle}; 
+ButPressed: {but?.IsPressed ?? false}; ButRect: {but.Rectangle}; 
+MousePos: {mousePos}; InputMousePos: {new Vector2(this.Game.Input.MouseX, this.Game.Input.MouseY)}; 
+FormCenter: {this.Game.Form.RenderCenter} ScreenCenter: {this.Game.Form.ScreenCenter}";
             }
         }
         private void UpdateSprite(GameTime gameTime)
         {
             if (this.Game.Input.KeyPressed(Keys.A))
             {
-                this.spriteMov.Manipulator.MoveLeft(gameTime, delta);
+                this.spriteMov.MoveLeft(gameTime, delta);
             }
 
             if (this.Game.Input.KeyPressed(Keys.D))
             {
-                this.spriteMov.Manipulator.MoveRight(gameTime, delta);
+                this.spriteMov.MoveRight(gameTime, delta);
             }
 
             if (this.Game.Input.KeyPressed(Keys.W))
             {
-                this.spriteMov.Manipulator.MoveUp(gameTime, delta);
+                this.spriteMov.MoveUp(gameTime, delta);
             }
 
             if (this.Game.Input.KeyPressed(Keys.S))
             {
-                this.spriteMov.Manipulator.MoveDown(gameTime, delta);
+                this.spriteMov.MoveDown(gameTime, delta);
             }
         }
         private void UpdateLorem(GameTime gameTime)
         {
-            //return;
-
             if (textInterval == 0)
             {
                 return;

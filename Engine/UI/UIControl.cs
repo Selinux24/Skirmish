@@ -13,18 +13,26 @@ namespace Engine.UI
     public abstract class UIControl : Drawable, IUIControl, IScreenFitted
     {
         /// <summary>
-        /// Click event
+        /// Mouse over event
         /// </summary>
-        public event EventHandler Click;
+        public event EventHandler MouseOver;
+        /// <summary>
+        /// Mouse pressed
+        /// </summary>
+        public event EventHandler Pressed;
+        /// <summary>
+        /// Mouse just pressed
+        /// </summary>
+        public event EventHandler JustPressed;
+        /// <summary>
+        /// Mouse just released
+        /// </summary>
+        public event EventHandler JustReleased;
 
         /// <summary>
         /// Children collection
         /// </summary>
         private readonly List<UIControl> children = new List<UIControl>();
-        /// <summary>
-        /// Internal pressed button flag
-        /// </summary>
-        private bool pressed = false;
         /// <summary>
         /// Top position
         /// </summary>
@@ -42,11 +50,11 @@ namespace Engine.UI
         /// </summary>
         private int height;
         /// <summary>
-        /// Draws the sprite vertically centered on screen
+        /// Draws the sprite vertically centered on the render area
         /// </summary>
         private bool centerVertically = false;
         /// <summary>
-        /// Draws the sprite horizontally centered on screen
+        /// Draws the sprite horizontally centered on the render area
         /// </summary>
         private bool centerHorizontally = false;
         /// <summary>
@@ -67,8 +75,14 @@ namespace Engine.UI
         private bool fitParent = false;
 
         /// <summary>
+        /// Manipulator
+        /// </summary>
+        protected Manipulator2D Manipulator { get; private set; }
+
+        /// <summary>
         /// Parent control
         /// </summary>
+        /// <remarks>When a control has a parent, all the position, size, scale and rotation parameters, are relative to it.</remarks>
         public UIControl Parent { get; protected set; }
         /// <summary>
         /// Children collection
@@ -81,9 +95,7 @@ namespace Engine.UI
             }
         }
 
-        /// <summary>
-        /// Active
-        /// </summary>
+        /// <inheritdoc/>
         public override bool Active
         {
             get
@@ -97,9 +109,7 @@ namespace Engine.UI
                 children.ForEach(c => c.Active = value);
             }
         }
-        /// <summary>
-        /// Visible
-        /// </summary>
+        /// <inheritdoc/>
         public override bool Visible
         {
             get
@@ -115,48 +125,48 @@ namespace Engine.UI
         }
 
         /// <summary>
-        /// Gets or sets if mouse button is pressed
+        /// Gets whether the mouse is over the button rectangle or not
         /// </summary>
-        public bool Pressed
+        public bool IsMouseOver
         {
             get
             {
-                return this.pressed;
-            }
-            set
-            {
-                this.JustPressed = false;
-                this.JustReleased = false;
-
-                if (value && !this.pressed)
-                {
-                    this.JustPressed = true;
-                }
-                else if (!value && this.pressed)
-                {
-                    this.JustReleased = true;
-                }
-
-                this.pressed = value;
-
-                children.ForEach(c => c.Pressed = value);
+                return this.Contains(this.Game.Input.MousePosition);
             }
         }
         /// <summary>
-        /// Gest whether the button is just pressed
+        /// Gets whether the control is pressed or not
         /// </summary>
-        public bool JustPressed { get; private set; }
+        public bool IsPressed
+        {
+            get
+            {
+                return IsMouseOver && this.Game.Input.LeftMouseButtonPressed;
+            }
+        }
         /// <summary>
-        /// Gest whether the button is just released
+        /// Gets whether the control is just pressed or not
         /// </summary>
-        public bool JustReleased { get; private set; }
+        public bool IsJustPressed
+        {
+            get
+            {
+                return IsMouseOver && this.Game.Input.LeftMouseButtonJustPressed;
+            }
+        }
         /// <summary>
-        /// Gets or sets whether the mouse is over the button rectangle
+        /// Gets whether the control is just released or not
         /// </summary>
-        public bool MouseOver { get; set; }
+        public bool IsJustReleased
+        {
+            get
+            {
+                return IsMouseOver && this.Game.Input.LeftMouseButtonJustReleased;
+            }
+        }
 
         /// <summary>
-        /// Gets or sets text left position in 2D screen
+        /// Gets or sets the left position in the render area
         /// </summary>
         public virtual int Left
         {
@@ -173,7 +183,7 @@ namespace Engine.UI
             }
         }
         /// <summary>
-        /// Gets or sets text top position in 2D screen
+        /// Gets or sets the top position in the render area
         /// </summary>
         public virtual int Top
         {
@@ -190,7 +200,7 @@ namespace Engine.UI
             }
         }
         /// <summary>
-        /// Width
+        /// Gets or sets the width
         /// </summary>
         public virtual int Width
         {
@@ -206,7 +216,7 @@ namespace Engine.UI
             }
         }
         /// <summary>
-        /// Height
+        /// Gets or sets the height
         /// </summary>
         public virtual int Height
         {
@@ -222,7 +232,7 @@ namespace Engine.UI
             }
         }
         /// <summary>
-        /// Scale
+        /// Gets or sets the scale
         /// </summary>
         public virtual float Scale
         {
@@ -238,7 +248,7 @@ namespace Engine.UI
             }
         }
         /// <summary>
-        /// Rotation
+        /// Gets or sets the rotation
         /// </summary>
         public virtual float Rotation
         {
@@ -255,8 +265,9 @@ namespace Engine.UI
         }
 
         /// <summary>
-        /// Gets or sets text left position in 2D screen
+        /// Gets or sets the left position in the render area, taking account the parent control configuration
         /// </summary>
+        /// <remarks>Uses the parent position plus the actual relative position</remarks>
         protected int AbsoluteLeft
         {
             get
@@ -265,7 +276,7 @@ namespace Engine.UI
             }
         }
         /// <summary>
-        /// Gets or sets text top position in 2D screen
+        /// Gets or sets the top position in the render area, taking account the parent control configuration
         /// </summary>
         protected int AbsoluteTop
         {
@@ -275,7 +286,7 @@ namespace Engine.UI
             }
         }
         /// <summary>
-        /// Width
+        /// Gets or sets the width, taking account the parent control configuration
         /// </summary>
         protected int AbsoluteWidth
         {
@@ -292,7 +303,7 @@ namespace Engine.UI
             }
         }
         /// <summary>
-        /// Height
+        /// Gets or sets the height, taking account the parent control configuration
         /// </summary>
         protected int AbsoluteHeight
         {
@@ -309,7 +320,7 @@ namespace Engine.UI
             }
         }
         /// <summary>
-        /// Scale
+        /// Gets or sets the scale, taking account the parent control configuration
         /// </summary>
         protected float AbsoluteScale
         {
@@ -319,7 +330,7 @@ namespace Engine.UI
             }
         }
         /// <summary>
-        /// Rotation
+        /// Gets or sets the rotation, taking account the parent control configuration
         /// </summary>
         protected float AbsoluteRotation
         {
@@ -329,6 +340,9 @@ namespace Engine.UI
             }
         }
 
+        /// <summary>
+        /// Gets or sets the first's hierarchy item left position in the render area
+        /// </summary>
         protected int GrandpaLeft
         {
             get
@@ -336,7 +350,9 @@ namespace Engine.UI
                 return Parent?.GrandpaLeft ?? this.Left;
             }
         }
-
+        /// <summary>
+        /// Gets or sets the first's hierarchy item top position in the render area
+        /// </summary>
         protected int GrandpaTop
         {
             get
@@ -345,7 +361,7 @@ namespace Engine.UI
             }
         }
         /// <summary>
-        /// Width
+        /// Gets or sets the first's hierarchy item width
         /// </summary>
         protected int GrandpaWidth
         {
@@ -355,7 +371,7 @@ namespace Engine.UI
             }
         }
         /// <summary>
-        /// Height
+        /// Gets or sets the first's hierarchy item height
         /// </summary>
         protected int GrandpaHeight
         {
@@ -365,7 +381,7 @@ namespace Engine.UI
             }
         }
         /// <summary>
-        /// Scale
+        /// Gets or sets the first's hierarchy item scale
         /// </summary>
         protected float GrandpaScale
         {
@@ -374,19 +390,43 @@ namespace Engine.UI
                 return Parent?.GrandpaScale ?? this.scale;
             }
         }
+        /// <summary>
+        /// Gets or sets the first's hierarchy item rotation
+        /// </summary>
+        protected float GrandpaRotation
+        {
+            get
+            {
+                return Parent?.GrandpaRotation ?? this.scale;
+            }
+        }
 
         /// <summary>
-        /// Absolute center
+        /// Gets the control's rectangle coordinates in the render area
+        /// </summary>
+        public virtual Rectangle Rectangle
+        {
+            get
+            {
+                return new Rectangle(
+                    this.AbsoluteLeft,
+                    this.AbsoluteTop,
+                    (int)(this.AbsoluteWidth * this.AbsoluteScale),
+                    (int)(this.AbsoluteHeight * this.AbsoluteScale));
+            }
+        }
+        /// <summary>
+        /// Gets the control's center coordinates in the render area
         /// </summary>
         public virtual Vector2 AbsoluteCenter
         {
             get
             {
-                return RelativeCenter + new Vector2(left, top);
+                return Rectangle.Center();
             }
         }
         /// <summary>
-        /// Relative center
+        /// Gets the control's local center coordinates
         /// </summary>
         public virtual Vector2 RelativeCenter
         {
@@ -395,20 +435,7 @@ namespace Engine.UI
                 return new Vector2(this.width, this.height) * 0.5f;
             }
         }
-        /// <summary>
-        /// Sprite rectangle
-        /// </summary>
-        public virtual Rectangle Rectangle
-        {
-            get
-            {
-                return new Rectangle(
-                    (int)(this.left - (this.width * 0.5f)),
-                    (int)(this.top - (this.height * 0.5f)),
-                    (int)(this.width * scale),
-                    (int)(this.height * scale));
-            }
-        }
+
         /// <summary>
         /// Indicates whether the sprite has to maintain proportion with window size
         /// </summary>
@@ -457,11 +484,6 @@ namespace Engine.UI
                 children.ForEach(c => c.Alpha = value);
             }
         }
-
-        /// <summary>
-        /// Manipulator
-        /// </summary>
-        public Manipulator2D Manipulator { get; private set; }
 
         /// <summary>
         /// Constructor
@@ -524,10 +546,36 @@ namespace Engine.UI
             }
 
             this.UpdateInternals();
+            this.UpdateInput();
 
             if (children.Any())
             {
                 children.ForEach(c => c.Update(context));
+            }
+        }
+        /// <summary>
+        /// Updates the input state
+        /// </summary>
+        private void UpdateInput()
+        {
+            if (this.IsMouseOver)
+            {
+                this.FireMouseOverEvent();
+            }
+
+            if (this.IsPressed)
+            {
+                this.FirePressedEvent();
+            }
+
+            if (this.IsJustPressed)
+            {
+                this.FireJustPressedEvent();
+            }
+
+            if (this.IsJustReleased)
+            {
+                this.FireJustReleasedEvent();
             }
         }
 
@@ -551,19 +599,32 @@ namespace Engine.UI
         }
 
         /// <summary>
-        /// Fires on-click event
+        /// Fires on mouse over event
         /// </summary>
-        public void FireOnClickEvent()
+        protected void FireMouseOverEvent()
         {
-            this.OnClick(new EventArgs());
+            this.MouseOver?.Invoke(this, new EventArgs());
         }
         /// <summary>
-        /// Launch on-click event
+        /// Fires on pressed event
         /// </summary>
-        /// <param name="e">Event arguments</param>
-        protected virtual void OnClick(EventArgs e)
+        protected void FirePressedEvent()
         {
-            this.Click?.Invoke(this, e);
+            this.Pressed?.Invoke(this, new EventArgs());
+        }
+        /// <summary>
+        /// Fires on just pressed event
+        /// </summary>
+        protected void FireJustPressedEvent()
+        {
+            this.JustPressed?.Invoke(this, new EventArgs());
+        }
+        /// <summary>
+        /// Fires on just released event
+        /// </summary>
+        protected void FireJustReleasedEvent()
+        {
+            this.JustReleased?.Invoke(this, new EventArgs());
         }
 
         /// <summary>
@@ -600,18 +661,18 @@ namespace Engine.UI
 
             if (this.centerHorizontally)
             {
-                this.left = 0;
+                this.left = this.Game.Form.RenderCenter.X - (this.width / 2);
             }
 
             if (this.centerVertically)
             {
-                this.top = 0;
+                this.top = this.Game.Form.RenderCenter.Y - (this.height / 2);
             }
 
             Vector2 sca = new Vector2(this.AbsoluteWidth, this.AbsoluteHeight) * AbsoluteScale;
             float rot = this.AbsoluteRotation;
             Vector2 pos = new Vector2(this.AbsoluteLeft, this.AbsoluteTop);
-            Vector2 rotCenter = new Vector2(this.GrandpaLeft, this.GrandpaTop);
+            Vector2 rotCenter = new Vector2(this.GrandpaLeft + (this.GrandpaWidth * 0.5f), this.GrandpaTop + (this.GrandpaHeight * 0.5f));
 
             this.Manipulator.SetScale(sca);
             this.Manipulator.SetRotation(rot);
@@ -636,6 +697,7 @@ namespace Engine.UI
             }
 
             ctrl.Parent = this;
+            ctrl.HasParent = true;
 
             if (!children.Contains(ctrl))
             {
@@ -672,6 +734,7 @@ namespace Engine.UI
             if (children.Contains(ctrl))
             {
                 ctrl.Parent = null;
+                ctrl.HasParent = false;
 
                 children.Remove(ctrl);
             }
@@ -691,6 +754,68 @@ namespace Engine.UI
             {
                 RemoveChild(ctrl);
             }
+        }
+
+        /// <summary>
+        /// Gets whether the control contains the point or not
+        /// </summary>
+        /// <param name="point">Point to test</param>
+        /// <returns>Returns true if the point is contained into the control rectangle</returns>
+        public bool Contains(Point point)
+        {
+            return Rectangle.Contains(point.X, point.Y);
+        }
+
+        /// <summary>
+        /// Increments position component d distance along left vector
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="distance">Distance</param>
+        public void MoveLeft(GameTime gameTime, float distance = 1f)
+        {
+            this.Left -= (int)(1f * distance * gameTime.ElapsedSeconds);
+        }
+        /// <summary>
+        /// Increments position component d distance along right vector
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="distance">Distance</param>
+        public void MoveRight(GameTime gameTime, float distance = 1f)
+        {
+            this.Left += (int)(1f * distance * gameTime.ElapsedSeconds);
+        }
+        /// <summary>
+        /// Increments position component d distance along up vector
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="distance">Distance</param>
+        public void MoveUp(GameTime gameTime, float distance = 1f)
+        {
+            this.Top -= (int)(1f * distance * gameTime.ElapsedSeconds);
+        }
+        /// <summary>
+        /// Increments position component d distance along down vector
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="distance">Distance</param>
+        public void MoveDown(GameTime gameTime, float distance = 1f)
+        {
+            this.Top += (int)(1f * distance * gameTime.ElapsedSeconds);
+        }
+
+        /// <summary>
+        /// Sets the control left-top position
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <remarks>Setting the position invalidates centering properties</remarks>
+        public void SetPosition(Vector2 position)
+        {
+            this.left = (int)position.X;
+            this.top = (int)position.Y;
+            this.centerHorizontally = false;
+            this.centerVertically = false;
+
+            this.UpdateInternals();
         }
     }
 }

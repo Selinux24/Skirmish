@@ -70,17 +70,14 @@ namespace SceneTest
 
                 for (int i = 0; i < sceneButtons.Length; i++)
                 {
-                    sceneButtons[i].Left = ((this.Game.Form.RenderWidth / div) * (i + 1));// - (this.sceneMaterialsButton.Width / 2);
-                    sceneButtons[i].Top = (this.Game.Form.RenderHeight / h) * hv;// - (this.sceneMaterialsButton.Height / 2);
-                    sceneButtons[i].Click += SceneButtonClick;
+                    sceneButtons[i].Left = ((this.Game.Form.RenderWidth / div) * (i + 1)) - (this.sceneMaterialsButton.Width / 2);
+                    sceneButtons[i].Top = (this.Game.Form.RenderHeight / h) * hv - (this.sceneMaterialsButton.Height / 2);
+                    sceneButtons[i].JustReleased += SceneButtonClick;
                 }
 
-                this.exitButton.Left = (this.Game.Form.RenderWidth / div) * numButtons;// - (this.exitButton.Width / 2);
-                this.exitButton.Top = (this.Game.Form.RenderHeight / h) * hv;// - (this.exitButton.Height / 2);
-                this.exitButton.Click += ExitButtonClick;
-
-                sceneButtons[0].Left = 0;
-                sceneButtons[0].Top = 0;
+                this.exitButton.Left = (this.Game.Form.RenderWidth / div) * numButtons - (this.exitButton.Width / 2);
+                this.exitButton.Top = (this.Game.Form.RenderHeight / h) * hv - (this.exitButton.Height / 2);
+                this.exitButton.JustReleased += ExitButtonClick;
             });
         }
         private async Task InitializeAssets()
@@ -95,7 +92,7 @@ namespace SceneTest
                 Height = 48,
                 Width = 48,
                 Centered = false,
-                Delta = new Vector2(10f, 17f),
+                Delta = new Vector2(-14f, -7f),
                 Color = Color.White,
             };
             await this.AddComponentUICursor(cursorDesc, layerCursor);

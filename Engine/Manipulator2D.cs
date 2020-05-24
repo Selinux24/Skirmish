@@ -65,8 +65,11 @@ namespace Engine
                 return;
             }
 
+            parentPosition = game.Form.ToScreenSpace(parentPosition);
+            var localPosition = game.Form.ToScreenSpace(Position);
+
             var parentP = new Vector3(parentPosition.X, parentPosition.Y, 0);
-            var localP = new Vector3(Position.X, Position.Y, 0);
+            var localP = new Vector3(localPosition.X, localPosition.Y, 0);
 
             //Local scale (in origin)
             var lsca = Matrix.Scaling(new Vector3(Scale.X, Scale.Y, 0));

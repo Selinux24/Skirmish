@@ -35,13 +35,13 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Relative center
+        /// Rneder area center
         /// </summary>
-        public Point RelativeCenter { get; private set; }
+        public Point RenderCenter { get; private set; }
         /// <summary>
-        /// Absolute center
+        /// Screen center
         /// </summary>
-        public Point AbsoluteCenter { get; private set; }
+        public Point ScreenCenter { get; private set; }
         /// <summary>
         /// Gets or sets a value indicationg whether the current engine form is in fullscreen
         /// </summary>
@@ -121,8 +121,8 @@ namespace Engine
                 this.RenderHeight = this.ClientSize.Height;
             }
 
-            this.RelativeCenter = new Point(this.RenderWidth / 2, this.RenderHeight / 2);
-            this.AbsoluteCenter = new Point(this.Location.X + this.RelativeCenter.X, this.Location.Y + this.RelativeCenter.Y);
+            this.RenderCenter = new Point(this.RenderWidth / 2, this.RenderHeight / 2);
+            this.ScreenCenter = new Point(this.Location.X + this.RenderCenter.X, this.Location.Y + this.RenderCenter.Y);
         }
 
         /// <summary>
@@ -159,9 +159,11 @@ namespace Engine
         /// <remarks>Screen space: Center = (0,0) Left = -X Up = +Y</remarks>
         public Vector2 ToScreenSpace(Vector2 position)
         {
-            var renderCenter = RenderRectangle.Center();
+            var screenSpace = position - RenderRectangle.Center();
 
-            return new Vector2(position.X, -position.Y) - new Vector2(renderCenter.X, -renderCenter.Y);
+            screenSpace.Y *= -1f;
+
+            return screenSpace;
         }
     }
 }
