@@ -740,6 +740,11 @@ namespace Engine.UI
                 return;
             }
 
+            if (ctrl == this)
+            {
+                return;
+            }
+
             ctrl.Parent = this;
             ctrl.HasParent = true;
 

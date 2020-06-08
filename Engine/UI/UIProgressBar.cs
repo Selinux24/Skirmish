@@ -90,7 +90,7 @@ namespace Engine.UI
 
                 this.textDrawer = new TextDrawer(scene, description.TextDescription)
                 {
-                    Parent = this
+                    Parent = this,
                 };
                 this.textDrawer.CenterParent();
 
@@ -104,18 +104,7 @@ namespace Engine.UI
         {
             if (disposing)
             {
-                if (left != null)
-                {
-                    left.Dispose();
-                }
-                if (right != null)
-                {
-                    right.Dispose();
-                }
-                if (textDrawer != null)
-                {
-                    textDrawer.Dispose();
-                }
+                textDrawer?.Dispose();
 
                 base.Dispose(disposing);
             }
@@ -142,13 +131,11 @@ namespace Engine.UI
             this.right.Top = this.Top;
             this.right.Update(context);
 
-            if (!string.IsNullOrEmpty(this.Text))
+            if (!string.IsNullOrWhiteSpace(this.Text))
             {
-                //Center text
                 this.textDrawer?.CenterParent();
+                this.textDrawer?.Update(context);
             }
-
-            this.textDrawer?.Update(context);
         }
 
         /// <summary>
@@ -172,7 +159,7 @@ namespace Engine.UI
                 this.right.Draw(context);
             }
 
-            if (!string.IsNullOrEmpty(this.Text))
+            if (!string.IsNullOrWhiteSpace(this.Text))
             {
                 this.textDrawer?.Draw(context);
             }
@@ -185,8 +172,6 @@ namespace Engine.UI
         {
             base.Resize();
 
-            this.left?.Resize();
-            this.right?.Resize();
             this.textDrawer?.Resize();
         }
     }

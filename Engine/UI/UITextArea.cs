@@ -4,19 +4,8 @@ namespace Engine.UI
 {
     using Engine.Common;
 
-    /// <summary>
-    /// Sprite button
-    /// </summary>
-    public class UIButton : UIControl
+    public class UITextArea : UIControl
     {
-        /// <summary>
-        /// Pressed sprite button
-        /// </summary>
-        public readonly Sprite buttonPressed = null;
-        /// <summary>
-        /// Release sprite button
-        /// </summary>
-        public readonly Sprite buttonReleased = null;
         /// <summary>
         /// Button text drawer
         /// </summary>
@@ -43,56 +32,18 @@ namespace Engine.UI
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="game">Game</param>
-        /// <param name="bufferManager">Buffer manager</param>
-        /// <param name="description">Button description</param>
-        public UIButton(Scene scene, UIButtonDescription description)
-            : base(scene, description)
+        /// <param name="scene">Scene</param>
+        /// <param name="description">Description</param>
+        public UITextArea(Scene scene, UITextAreaDescription description) : base(scene, description)
         {
-            var spriteDesc = new SpriteDescription()
-            {
-                Name = $"{description.Name}.ReleasedButton",
-                Color = description.ColorReleased,
-                FitParent = true,
-            };
-
-            if (!string.IsNullOrEmpty(description.TextureReleased))
-            {
-                spriteDesc.Textures = new[] { description.TextureReleased };
-                spriteDesc.UVMap = description.TextureReleasedUVMap;
-            }
-
-            this.buttonReleased = new Sprite(scene, spriteDesc);
-            this.AddChild(this.buttonReleased);
-
-            if (description.TwoStateButton)
-            {
-                var spriteDesc2 = new SpriteDescription()
-                {
-                    Name = $"{description.Name}.PressedButton",
-                    Color = description.ColorPressed,
-                    FitParent = true,
-                };
-
-                if (!string.IsNullOrEmpty(description.TexturePressed))
-                {
-                    spriteDesc2.Textures = new[] { description.TexturePressed };
-                    spriteDesc2.UVMap = description.TexturePressedUVMap;
-                }
-
-                this.buttonPressed = new Sprite(scene, spriteDesc2);
-                this.AddChild(this.buttonPressed);
-            }
-
             if (description.TextDescription != null)
             {
-                description.TextDescription.Name = description.TextDescription.Name ?? $"{description.Name}.TextButton";
+                description.TextDescription.Name = description.TextDescription.Name ?? $"{description.Name}.TextArea";
 
                 this.textDrawer = new TextDrawer(scene, description.TextDescription)
                 {
                     Parent = this,
                 };
-                this.textDrawer.CenterParent();
 
                 this.Text = description.Text;
             }
@@ -121,16 +72,6 @@ namespace Engine.UI
             if (!this.Active)
             {
                 return;
-            }
-
-            if (this.buttonPressed != null)
-            {
-                this.buttonPressed.Visible = this.IsPressed;
-                this.buttonReleased.Visible = !this.IsPressed;
-            }
-            else
-            {
-                this.buttonReleased.Visible = true;
             }
 
             if (!string.IsNullOrWhiteSpace(this.Text))
@@ -172,7 +113,7 @@ namespace Engine.UI
     /// <summary>
     /// Sprite button extensions
     /// </summary>
-    public static class SpriteButtonExtensions
+    public static class UITextAreaExtensions
     {
         /// <summary>
         /// Adds a component to the scene
@@ -181,13 +122,13 @@ namespace Engine.UI
         /// <param name="description">Description</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<UIButton> AddComponentUIButton(this Scene scene, UIButtonDescription description, int order = 0)
+        public static async Task<UITextArea> AddComponentUITextArea(this Scene scene, UITextAreaDescription description, int order = 0)
         {
-            UIButton component = null;
+            UITextArea component = null;
 
             await Task.Run(() =>
             {
-                component = new UIButton(scene, description);
+                component = new UITextArea(scene, description);
 
                 scene.AddComponent(component, SceneObjectUsages.UI, order);
             });

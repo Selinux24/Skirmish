@@ -21,13 +21,13 @@ namespace Engine.UI
         {
             if (description.Background != null)
             {
-                Background = new Sprite(scene, description.Background)
+                this.Background = new Sprite(scene, description.Background)
                 {
                     Name = $"{description.Name}.Background",
                     FitParent = true,
                 };
 
-                this.AddChild(Background);
+                this.AddChild(this.Background);
             }
         }
     }

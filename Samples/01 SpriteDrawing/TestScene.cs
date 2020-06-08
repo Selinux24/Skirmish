@@ -16,12 +16,12 @@ namespace SpriteDrawing
         private const int layerHUDDialogs = 200;
         private const float delta = 250f;
 
-        private Sprite spriteMov = null;
-        private TextDrawer textDrawer = null;
+        private UITextArea textDebug = null;
         private UIProgressBar progressBar = null;
+        private Sprite spriteMov = null;
         private UIPanel staticPan = null;
+        private UITextArea textArea = null;
         private UIPanel pan = null;
-        private TextDrawer textDebug = null;
 
         private readonly string allText = Properties.Resources.TinyLorem;
         private string currentText = "";
@@ -40,39 +40,40 @@ namespace SpriteDrawing
 
         public override Task Initialize()
         {
-            return LoadUserInteface();
+            return LoadUserInterface();
         }
-        private async Task LoadUserInteface()
+    
+        private async Task LoadUserInterface()
         {
             await this.LoadResourcesAsync(
-                InitializeBackground(),
-                () =>
+                new Task[]
+                {
+                    InitializeConsole(),
+                    InitializeBackground(),
+                    InitializeProgressbar(),
+                },
+                async () =>
                 {
                     progressBar.Visible = true;
                     progressBar.ProgressValue = 0;
 
-                    _ = this.LoadResourcesAsync(
-                        new[]
-                        {
-                            InitializeSmiley(),
-                            InitializeStaticPan(),
-                            InitializePan(),
-                        },
-                        async () =>
-                        {
-                            this.spriteMov.Visible = true;
-                            this.staticPan.Visible = true;
-                            this.textDrawer.Visible = true;
-
-                            await Task.Delay(500);
-
-                            progressBar.Visible = false;
-
-                            textDrawer.Text = null;
-
-                            gameReady = true;
-                        });
+                    await InitializeControls();
                 });
+        }
+        private async Task InitializeConsole()
+        {
+            var desc = new UITextAreaDescription()
+            {
+                TextDescription = new TextDrawerDescription()
+                {
+                    Name = "Text Debug",
+                    Font = "Consolas",
+                    FontSize = 13,
+                    Style = FontMapStyles.Regular,
+                    TextColor = Color.Yellow,
+                }
+            };
+            this.textDebug = await this.AddComponentUITextArea(desc, layerHUD);
         }
         private async Task InitializeBackground()
         {
@@ -81,8 +82,10 @@ namespace SpriteDrawing
                 Textures = new[] { "background.jpg" },
             };
             await this.AddComponentSprite(desc, SceneObjectUsages.UI, layerBackground);
-
-            var pbDesc = new UIProgressBarDescription
+        }
+        private async Task InitializeProgressbar()
+        {
+            var desc = new UIProgressBarDescription
             {
                 Name = "Progress Bar",
                 Top = this.Game.Form.RenderHeight - 20,
@@ -99,27 +102,32 @@ namespace SpriteDrawing
                     TextColor = Color.White,
                 },
             };
-            this.progressBar = await this.AddComponentUIProgressBar(pbDesc, layerHUD);
-
-            var txtDesc = new TextDrawerDescription()
-            {
-                Name = "Text Debug",
-                Font = "Consolas",
-                FontSize = 13,
-                Style = FontMapStyles.Regular,
-                TextColor = Color.Yellow,
-            };
-            this.textDebug = await this.AddComponentTextDrawer(txtDesc, SceneObjectUsages.UI, layerHUD);
+            this.progressBar = await this.AddComponentUIProgressBar(desc, layerHUD);
         }
-        public override void OnReportProgress(float value)
-        {
-            progressValue = Math.Max(progressValue, value);
 
-            if (this.progressBar != null)
-            {
-                this.progressBar.ProgressValue = progressValue;
-                this.progressBar.Text = $"{progressValue * 100f}%";
-            }
+        private async Task InitializeControls()
+        {
+            await this.LoadResourcesAsync(
+                new[]
+                {
+                    InitializeSmiley(),
+                    InitializeStaticPan(),
+                    InitializePan(),
+                },
+                async () =>
+                {
+                    this.spriteMov.Visible = true;
+                    this.staticPan.Visible = true;
+                    this.textArea.Visible = true;
+
+                    await Task.Delay(500);
+
+                    progressBar.Visible = false;
+
+                    textArea.Text = null;
+
+                    gameReady = true;
+                });
         }
         private async Task InitializeSmiley()
         {
@@ -157,17 +165,21 @@ namespace SpriteDrawing
             this.staticPan = await this.AddComponentUIPanel(desc, layerHUD);
             this.staticPan.Visible = false;
 
-            var descText = new TextDrawerDescription()
+            var descText = new UITextAreaDescription()
             {
-                Name = "Text",
-                FontFileName = "LeagueSpartan-Bold.otf",
-                FontSize = 18,
-                Style = FontMapStyles.Regular,
-                TextColor = Color.LightGoldenrodYellow,
+                TextDescription = new TextDrawerDescription()
+                {
+                    Name = "Text",
+                    FontFileName = "LeagueSpartan-Bold.otf",
+                    FontSize = 18,
+                    Style = FontMapStyles.Regular,
+                    TextColor = Color.LightGoldenrodYellow,
+                }
             };
-            this.textDrawer = await this.AddComponentTextDrawer(descText, SceneObjectUsages.UI, layerHUD + 1);
-            this.textDrawer.Parent = this.staticPan;
-            this.textDrawer.Visible = false;
+            this.textArea = await this.AddComponentUITextArea(descText, layerHUD + 1);
+            this.textArea.Visible = false;
+
+            this.staticPan.AddChild(this.textArea);
         }
         private async Task InitializePan()
         {
@@ -216,6 +228,17 @@ namespace SpriteDrawing
             var butClose = new UIButton(this, descButClose);
             butClose.JustReleased += ButClose_Click;
             this.pan.AddChild(butClose);
+        }
+
+        public override void OnReportProgress(float value)
+        {
+            progressValue = Math.Max(progressValue, value);
+
+            if (this.progressBar != null)
+            {
+                this.progressBar.ProgressValue = progressValue;
+                this.progressBar.Text = $"{(int)(progressValue * 100f)}%";
+            }
         }
 
         public override void Update(GameTime gameTime)
@@ -321,7 +344,7 @@ Progress: {progressValue * 100f}%";
                     pan.ShowRoll(1);
                 }
 
-                textDrawer.Text = currentText;
+                textArea.Text = currentText;
             }
         }
 
