@@ -86,12 +86,16 @@ namespace Engine.UI
 
             if (description.TextDescription != null)
             {
-                this.textDrawer = new TextDrawer(
-                    scene,
-                    description.TextDescription);
-            }
+                description.TextDescription.Name = description.TextDescription.Name ?? $"{description.Name}.TextProgressBar";
 
-            this.Text = description.Text;
+                this.textDrawer = new TextDrawer(scene, description.TextDescription)
+                {
+                    Parent = this
+                };
+                this.textDrawer.CenterParent();
+
+                this.Text = description.Text;
+            }
         }
         /// <summary>
         /// Releases used resources
@@ -129,23 +133,22 @@ namespace Engine.UI
             }
 
             this.left.Width = (int)(LeftScale * Width);
-            this.right.Width = (int)(RightScale * Width);
-
             this.left.Left = this.Left;
             this.left.Top = this.Top;
+            this.left.Update(context);
 
+            this.right.Width = (int)(RightScale * Width);
             this.right.Left = this.Left + this.left.Width;
             this.right.Top = this.Top;
+            this.right.Update(context);
 
             if (!string.IsNullOrEmpty(this.Text))
             {
                 //Center text
-                this.textDrawer.TextArea = this.Rectangle;
-                this.textDrawer.Update(context);
+                this.textDrawer?.CenterParent();
             }
 
-            this.left.Update(context);
-            this.right.Update(context);
+            this.textDrawer?.Update(context);
         }
 
         /// <summary>
@@ -171,7 +174,7 @@ namespace Engine.UI
 
             if (!string.IsNullOrEmpty(this.Text))
             {
-                this.textDrawer.Draw(context);
+                this.textDrawer?.Draw(context);
             }
         }
 

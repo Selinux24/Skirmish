@@ -45,19 +45,19 @@ namespace Engine
         /// <summary>
         /// Gets or sets text left position in the render area
         /// </summary>
-        int Left { get; set; }
+        float Left { get; set; }
         /// <summary>
         /// Gets or sets text top position in the render area
         /// </summary>
-        int Top { get; set; }
+        float Top { get; set; }
         /// <summary>
         /// Gets or sets the width
         /// </summary>
-        int Width { get; set; }
+        float Width { get; set; }
         /// <summary>
         /// Gets or sets the height
         /// </summary>
-        int Height { get; set; }
+        float Height { get; set; }
         /// <summary>
         /// Gets or sets the scale
         /// </summary>
@@ -66,19 +66,14 @@ namespace Engine
         /// Gets or sets the rotation
         /// </summary>
         float Rotation { get; set; }
-
         /// <summary>
         /// Gets the control's rectangle coordinates in the render area
         /// </summary>
-        Rectangle Rectangle { get; }
-        /// <summary>
-        /// Gets the control's center coordinates in the render area
-        /// </summary>
-        Vector2 AbsoluteCenter { get; }
+        RectangleF Rectangle { get; }
         /// <summary>
         /// Gets the control's local center coordinates
         /// </summary>
-        Vector2 RelativeCenter { get; }
+        Vector2 Center { get; }
 
         /// <summary>
         /// Indicates whether the sprite has to maintain proportion with window size
@@ -136,6 +131,6 @@ namespace Engine
         /// </summary>
         /// <param name="rectangle">Rectangle</param>
         /// <remarks>Adjust the control left-top position and with and height properties</remarks>
-        void SetRectangle(Rectangle rectangle);
+        void SetRectangle(RectangleF rectangle);
     }
 }

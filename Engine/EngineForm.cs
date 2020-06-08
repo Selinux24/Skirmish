@@ -27,11 +27,11 @@ namespace Engine
         /// <summary>
         /// Render rectangle
         /// </summary>
-        public Rectangle RenderRectangle
+        public RectangleF RenderRectangle
         {
             get
             {
-                return new Rectangle(0, 0, RenderWidth, RenderHeight);
+                return new RectangleF(0, 0, RenderWidth, RenderHeight);
             }
         }
         /// <summary>
@@ -159,7 +159,7 @@ namespace Engine
         /// <remarks>Screen space: Center = (0,0) Left = -X Up = +Y</remarks>
         public Vector2 ToScreenSpace(Vector2 position)
         {
-            var screenSpace = position - RenderRectangle.Center();
+            var screenSpace = position - RenderRectangle.Center;
 
             screenSpace.Y *= -1f;
 

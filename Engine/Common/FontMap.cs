@@ -353,7 +353,7 @@ namespace Engine.Common
         /// <param name="size">Gets generated sentence total size</param>
         public void MapSentence(
             string text,
-            Rectangle? textArea,
+            RectangleF textArea,
             out VertexPositionTexture[] vertices,
             out uint[] indices,
             out Vector2 size)
@@ -408,7 +408,7 @@ namespace Engine.Common
                 //Store the indices adding last vertext index in the list
                 wIndices.ToList().ForEach((i) => { indexList.Add(i + (uint)vertList.Count); });
 
-                if (textArea.HasValue && pos.X > textArea.Value.Width)
+                if (pos.X > textArea.Width)
                 {
                     //Move the position to the last character of the new line
                     pos.X -= (int)prevPos.X;

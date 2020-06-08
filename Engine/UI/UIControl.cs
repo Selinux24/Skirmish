@@ -36,19 +36,19 @@ namespace Engine.UI
         /// <summary>
         /// Top position
         /// </summary>
-        private int top;
+        private float top;
         /// <summary>
         /// Left position
         /// </summary>
-        private int left;
+        private float left;
         /// <summary>
         /// Width
         /// </summary>
-        private int width;
+        private float width;
         /// <summary>
         /// Height
         /// </summary>
-        private int height;
+        private float height;
         /// <summary>
         /// Draws the sprite vertically centered on the render area
         /// </summary>
@@ -172,7 +172,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets the left position in the render area
         /// </summary>
-        public virtual int Left
+        public virtual float Left
         {
             get
             {
@@ -189,7 +189,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets the top position in the render area
         /// </summary>
-        public virtual int Top
+        public virtual float Top
         {
             get
             {
@@ -206,7 +206,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets the width
         /// </summary>
-        public virtual int Width
+        public virtual float Width
         {
             get
             {
@@ -222,7 +222,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets the height
         /// </summary>
-        public virtual int Height
+        public virtual float Height
         {
             get
             {
@@ -267,12 +267,36 @@ namespace Engine.UI
                 this.updateInternals = true;
             }
         }
+        /// <summary>
+        /// Gets the control's rectangle coordinates in the render area
+        /// </summary>
+        public virtual RectangleF Rectangle
+        {
+            get
+            {
+                return new RectangleF(
+                    this.Left,
+                    this.Top,
+                    this.Width,
+                    this.Height);
+            }
+        }
+        /// <summary>
+        /// Gets the control's local center coordinates
+        /// </summary>
+        public virtual Vector2 Center
+        {
+            get
+            {
+                return new Vector2(this.width, this.height) * 0.5f;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the left position in the render area, taking account the parent control configuration
         /// </summary>
         /// <remarks>Uses the parent position plus the actual relative position</remarks>
-        protected int AbsoluteLeft
+        public float AbsoluteLeft
         {
             get
             {
@@ -282,7 +306,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets the top position in the render area, taking account the parent control configuration
         /// </summary>
-        protected int AbsoluteTop
+        public float AbsoluteTop
         {
             get
             {
@@ -292,7 +316,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets the width, taking account the parent control configuration
         /// </summary>
-        protected int AbsoluteWidth
+        public float AbsoluteWidth
         {
             get
             {
@@ -309,7 +333,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets the height, taking account the parent control configuration
         /// </summary>
-        protected int AbsoluteHeight
+        public float AbsoluteHeight
         {
             get
             {
@@ -326,7 +350,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets the scale, taking account the parent control configuration
         /// </summary>
-        protected float AbsoluteScale
+        public float AbsoluteScale
         {
             get
             {
@@ -336,18 +360,42 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets the rotation, taking account the parent control configuration
         /// </summary>
-        protected float AbsoluteRotation
+        public float AbsoluteRotation
         {
             get
             {
                 return (Parent?.AbsoluteRotation ?? 0) + this.rotation;
             }
         }
+        /// <summary>
+        /// Gets or sets the parent rectangle
+        /// </summary>
+        public RectangleF AbsoluteRectangle
+        {
+            get
+            {
+                return new RectangleF(
+                    this.AbsoluteLeft,
+                    this.AbsoluteTop,
+                    this.AbsoluteWidth,
+                    this.AbsoluteHeight);
+            }
+        }
+        /// <summary>
+        /// Gets the parent center coordinates in the render area
+        /// </summary>
+        public virtual Vector2 AbsoluteCenter
+        {
+            get
+            {
+                return AbsoluteRectangle.Center;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the first's hierarchy item left position in the render area
         /// </summary>
-        protected int GrandpaLeft
+        public float GrandpaLeft
         {
             get
             {
@@ -357,7 +405,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets the first's hierarchy item top position in the render area
         /// </summary>
-        protected int GrandpaTop
+        public float GrandpaTop
         {
             get
             {
@@ -367,7 +415,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets the first's hierarchy item width
         /// </summary>
-        protected int GrandpaWidth
+        public float GrandpaWidth
         {
             get
             {
@@ -377,7 +425,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets the first's hierarchy item height
         /// </summary>
-        protected int GrandpaHeight
+        public float GrandpaHeight
         {
             get
             {
@@ -387,7 +435,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets the first's hierarchy item scale
         /// </summary>
-        protected float GrandpaScale
+        public float GrandpaScale
         {
             get
             {
@@ -397,46 +445,35 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets the first's hierarchy item rotation
         /// </summary>
-        protected float GrandpaRotation
+        public float GrandpaRotation
         {
             get
             {
                 return Parent?.GrandpaRotation ?? this.scale;
             }
         }
-
         /// <summary>
-        /// Gets the control's rectangle coordinates in the render area
+        /// Gets or sets the first's hierarchy item rectangle
         /// </summary>
-        public virtual Rectangle Rectangle
+        public RectangleF GrandpaRectangle
         {
             get
             {
-                return new Rectangle(
-                    this.AbsoluteLeft,
-                    this.AbsoluteTop,
-                    (int)(this.AbsoluteWidth * this.AbsoluteScale),
-                    (int)(this.AbsoluteHeight * this.AbsoluteScale));
+                return new RectangleF(
+                    this.GrandpaLeft,
+                    this.GrandpaTop,
+                    this.GrandpaWidth,
+                    this.GrandpaHeight);
             }
         }
         /// <summary>
-        /// Gets the control's center coordinates in the render area
+        /// Gets the first's hierarchy item center coordinates in the render area
         /// </summary>
-        public virtual Vector2 AbsoluteCenter
+        public virtual Vector2 GrandpaCenter
         {
             get
             {
-                return Rectangle.Center();
-            }
-        }
-        /// <summary>
-        /// Gets the control's local center coordinates
-        /// </summary>
-        public virtual Vector2 RelativeCenter
-        {
-            get
-            {
-                return new Vector2(this.width, this.height) * 0.5f;
+                return GrandpaRectangle.Center;
             }
         }
 
@@ -581,12 +618,11 @@ namespace Engine.UI
             Vector2 sca = new Vector2(this.AbsoluteWidth, this.AbsoluteHeight) * AbsoluteScale;
             float rot = this.AbsoluteRotation;
             Vector2 pos = new Vector2(this.AbsoluteLeft, this.AbsoluteTop);
-            Vector2 rotCenter = new Vector2(this.GrandpaLeft + (this.GrandpaWidth * 0.5f), this.GrandpaTop + (this.GrandpaHeight * 0.5f));
 
             this.Manipulator.SetScale(sca);
             this.Manipulator.SetRotation(rot);
             this.Manipulator.SetPosition(pos);
-            this.Manipulator.Update(rotCenter, this.GrandpaScale);
+            this.Manipulator.Update(this.GrandpaRectangle.Center, this.GrandpaScale);
 
             if (children.Any())
             {
@@ -771,7 +807,7 @@ namespace Engine.UI
         /// <returns>Returns true if the point is contained into the control rectangle</returns>
         public bool Contains(Point point)
         {
-            return Rectangle.Contains(point.X, point.Y);
+            return AbsoluteRectangle.Contains(point.X, point.Y);
         }
 
         /// <summary>
@@ -830,7 +866,7 @@ namespace Engine.UI
         /// </summary>
         /// <param name="rectangle">Rectangle</param>
         /// <remarks>Adjust the control left-top position and with and height properties</remarks>
-        public void SetRectangle(Rectangle rectangle)
+        public void SetRectangle(RectangleF rectangle)
         {
             this.left = rectangle.X;
             this.top = rectangle.Y;

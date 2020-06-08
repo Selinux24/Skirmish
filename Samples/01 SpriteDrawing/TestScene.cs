@@ -2,6 +2,7 @@
 using Engine.Tween;
 using Engine.UI;
 using SharpDX;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -22,7 +23,7 @@ namespace SpriteDrawing
         private UIPanel pan = null;
         private TextDrawer textDebug = null;
 
-        private readonly string allText = Properties.Resources.Lorem;
+        private readonly string allText = Properties.Resources.TinyLorem;
         private string currentText = "";
         private float textTime = 0;
         private float textInterval = 200f;
@@ -54,9 +55,8 @@ namespace SpriteDrawing
                         new[]
                         {
                             InitializeSmiley(),
-                            InitializePan(),
                             InitializeStaticPan(),
-                            InitializeTextDrawer(),
+                            InitializePan(),
                         },
                         async () =>
                         {
@@ -88,9 +88,16 @@ namespace SpriteDrawing
                 Top = this.Game.Form.RenderHeight - 20,
                 Left = 100,
                 Width = this.Game.Form.RenderWidth - 200,
-                Height = 10,
-                BaseColor = Color.Transparent,
+                Height = 15,
+                BaseColor = new Color(0, 0, 0, 0.5f),
                 ProgressColor = Color.Green,
+                TextDescription = new TextDrawerDescription
+                {
+                    FontFileName = "LeagueSpartan-Bold.otf",
+                    FontSize = 10,
+                    Style = FontMapStyles.Regular,
+                    TextColor = Color.White,
+                },
             };
             this.progressBar = await this.AddComponentUIProgressBar(pbDesc, layerHUD);
 
@@ -106,11 +113,12 @@ namespace SpriteDrawing
         }
         public override void OnReportProgress(float value)
         {
-            progressValue = value * 100f;
+            progressValue = Math.Max(progressValue, value);
 
             if (this.progressBar != null)
             {
-                this.progressBar.ProgressValue = value;
+                this.progressBar.ProgressValue = progressValue;
+                this.progressBar.Text = $"{progressValue * 100f}%";
             }
         }
         private async Task InitializeSmiley()
@@ -148,6 +156,18 @@ namespace SpriteDrawing
             };
             this.staticPan = await this.AddComponentUIPanel(desc, layerHUD);
             this.staticPan.Visible = false;
+
+            var descText = new TextDrawerDescription()
+            {
+                Name = "Text",
+                FontFileName = "LeagueSpartan-Bold.otf",
+                FontSize = 18,
+                Style = FontMapStyles.Regular,
+                TextColor = Color.LightGoldenrodYellow,
+            };
+            this.textDrawer = await this.AddComponentTextDrawer(descText, SceneObjectUsages.UI, layerHUD + 1);
+            this.textDrawer.Parent = this.staticPan;
+            this.textDrawer.Visible = false;
         }
         private async Task InitializePan()
         {
@@ -174,43 +194,28 @@ namespace SpriteDrawing
             var descButClose = new UIButtonDescription
             {
                 Name = "CloseButton",
-                Top = 25,
-                Left = this.pan.Width - 25 - 50,
-                Width = 50,
-                Height = 50,
+
+                Top = 10,
+                Left = this.pan.Width - 10 - 20,
+                Width = 20,
+                Height = 20,
 
                 TwoStateButton = true,
-
                 ColorReleased = Color.Blue,
-
                 ColorPressed = Color.Green,
 
                 TextDescription = new TextDrawerDescription
                 {
                     FontFileName = "LeagueSpartan-Bold.otf",
-                    FontSize = 16,
+                    FontSize = 12,
                     Style = FontMapStyles.Regular,
                     TextColor = Color.White,
                 },
-                Text = "X"
+                Text = "X",
             };
             var butClose = new UIButton(this, descButClose);
             butClose.JustReleased += ButClose_Click;
             this.pan.AddChild(butClose);
-        }
-        private async Task InitializeTextDrawer()
-        {
-            var desc = new TextDrawerDescription()
-            {
-                Name = "Text",
-                FontFileName = "LeagueSpartan-Bold.otf",
-                FontSize = 18,
-                Style = FontMapStyles.Regular,
-                TextColor = Color.LightGoldenrodYellow,
-            };
-            this.textDrawer = await this.AddComponentTextDrawer(desc, SceneObjectUsages.UI, layerHUD + 1);
-            this.textDrawer.TextArea = new Rectangle(780, 140, 650, 550);
-            this.textDrawer.Visible = false;
         }
 
         public override void Update(GameTime gameTime)
@@ -237,11 +242,11 @@ namespace SpriteDrawing
                 var mousePos = Cursor.ScreenPosition;
                 var but = pan?.Children.OfType<UIButton>().FirstOrDefault();
 
-                this.textDebug.Text = $@"PanPressed: {pan?.IsPressed ?? false}; PanRect: {pan?.Rectangle}; 
-ButPressed: {but?.IsPressed ?? false}; ButRect: {but?.Rectangle}; 
+                this.textDebug.Text = $@"PanPressed: {pan?.IsPressed ?? false}; PanRect: {pan?.AbsoluteRectangle}; 
+ButPressed: {but?.IsPressed ?? false}; ButRect: {but?.AbsoluteRectangle}; 
 MousePos: {mousePos}; InputMousePos: {this.Game.Input.MousePosition}; 
 FormCenter: {this.Game.Form.RenderCenter} ScreenCenter: {this.Game.Form.ScreenCenter}
-Progress: {progressValue}%";
+Progress: {progressValue * 100f}%";
             }
         }
         private void UpdateInput()
@@ -298,11 +303,20 @@ Progress: {progressValue}%";
                 if (allText.Length >= currentText.Length + chars)
                 {
                     currentText += allText.Substring(currentText.Length, chars);
+
+                    float progress = currentText.Length / (float)allText.Length;
+                    progressBar.ProgressValue = progress;
+                    progressBar.Text = $"Loading Lorem ipsum random text - {(int)(progress * 100f)}%";
+                    progressBar.Visible = true;
                 }
                 else
                 {
                     currentText = allText;
                     textInterval = 0;
+
+                    progressBar.ProgressValue = 1;
+                    progressBar.Text = null;
+                    progressBar.Visible = false;
 
                     pan.ShowRoll(1);
                 }
@@ -313,7 +327,7 @@ Progress: {progressValue}%";
 
         private void ButClose_Click(object sender, System.EventArgs e)
         {
-            pan.HideRoll(1);
+            pan.HideRoll(60);
         }
     }
 }

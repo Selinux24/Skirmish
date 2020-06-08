@@ -35,14 +35,6 @@ namespace Engine.UI
         /// Update buffers flag
         /// </summary>
         private bool updateBuffers = false;
-        /// <summary>
-        /// Text translation matrix
-        /// </summary>
-        private Matrix local;
-        /// <summary>
-        /// Text shadow translarion matrix
-        /// </summary>
-        private Matrix localShadow;
 
         /// <summary>
         /// Font map
@@ -55,16 +47,16 @@ namespace Engine.UI
         /// <summary>
         /// Top
         /// </summary>
-        private int top = 0;
+        private float top = 0;
         /// <summary>
         /// Left
         /// </summary>
-        private int left = 0;
+        private float left = 0;
         /// <summary>
         /// Text area rectangle limit
         /// </summary>
         /// <remarks>Used for text positioning</remarks>
-        private Rectangle? textArea = null;
+        private RectangleF? textArea = null;
         /// <summary>
         /// Text
         /// </summary>
@@ -73,6 +65,15 @@ namespace Engine.UI
         /// Center text into the defined text area (if any)
         /// </summary>
         private bool centered = false;
+
+        /// <summary>
+        /// Manipulator
+        /// </summary>
+        protected Manipulator2D Manipulator { get; private set; }
+        /// <summary>
+        /// Shadow manipulator
+        /// </summary>
+        protected Manipulator2D ShadowManipulator { get; private set; }
 
         /// <summary>
         /// Font name
@@ -132,24 +133,6 @@ namespace Engine.UI
         public float AlphaMultplier { get; set; } = 1.2f;
 
         /// <summary>
-        /// Gets or sets the text area rectangle limit
-        /// </summary>
-        /// <remarks>Used for text positioning</remarks>
-        public Rectangle? TextArea
-        {
-            get
-            {
-                return this.textArea;
-            }
-            set
-            {
-                this.textArea = value;
-                this.centered = value.HasValue && this.centered;
-
-                this.MapText();
-            }
-        }
-        /// <summary>
         /// Gets or sets the text position
         /// </summary>
         public Vector2 Position
@@ -160,8 +143,8 @@ namespace Engine.UI
             }
             set
             {
-                this.left = (int)value.X;
-                this.top = (int)value.Y;
+                this.left = value.X;
+                this.top = value.Y;
                 this.centered = false;
                 this.textArea = null;
 
@@ -171,7 +154,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets text left position in 2D screen
         /// </summary>
-        public int Left
+        public float Left
         {
             get
             {
@@ -189,7 +172,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets text top position in 2D screen
         /// </summary>
-        public int Top
+        public float Top
         {
             get
             {
@@ -207,11 +190,11 @@ namespace Engine.UI
         /// <summary>
         /// Gets text width
         /// </summary>
-        public int Width { get; private set; }
+        public float Width { get; private set; }
         /// <summary>
         /// Gets text height
         /// </summary>
-        public int Height { get; private set; }
+        public float Height { get; private set; }
         /// <summary>
         /// Gets whether the internal buffers were ready or not
         /// </summary>
@@ -224,6 +207,11 @@ namespace Engine.UI
         }
 
         /// <summary>
+        /// Parent control
+        /// </summary>
+        public UIControl Parent { get; set; }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="scene">Scene</param>
@@ -231,6 +219,9 @@ namespace Engine.UI
         public TextDrawer(Scene scene, TextDrawerDescription description)
             : base(scene, description)
         {
+            this.Manipulator = new Manipulator2D(this.Game);
+            this.ShadowManipulator = new Manipulator2D(this.Game);
+
             this.Font = string.Format("{0} {1}", description.Font, description.FontSize);
 
             this.viewProjection = this.Game.Form.GetOrthoProjectionMatrix();
@@ -279,6 +270,69 @@ namespace Engine.UI
         }
 
         /// <summary>
+        /// Updates state
+        /// </summary>
+        /// <param name="context">Context</param>
+        public override void Update(UpdateContext context)
+        {
+            base.Update(context);
+
+            if (!this.Active)
+            {
+                return;
+            }
+
+            RectangleF rect;
+            Vector2 sca;
+            Vector2 pos;
+            float rot;
+            Vector2 parentCenter;
+            float parentScale;
+
+            if (this.Parent != null)
+            {
+                rect = this.Parent.AbsoluteRectangle;
+                sca = Vector2.One * this.Parent.AbsoluteScale;
+                pos = new Vector2(this.Parent.AbsoluteLeft, this.Parent.AbsoluteTop);
+                rot = this.Parent.AbsoluteRotation;
+                parentCenter = this.Parent.GrandpaRectangle.Center;
+                parentScale = this.Parent.GrandpaScale;
+            }
+            else
+            {
+                rect = textArea ?? this.Game.Form.RenderRectangle;
+                sca = Vector2.One;
+                pos = Vector2.Zero;
+                rot = 0f;
+                parentCenter = Vector2.Zero;
+                parentScale = 1f;
+            }
+
+            // Adjust position
+            if (centered)
+            {
+                pos.X = rect.Center.X - (Width * 0.5f);
+                pos.Y = rect.Center.Y - (Height * 0.5f);
+            }
+            else
+            {
+                pos.X = rect.X;
+                pos.Y = rect.Y;
+            }
+
+            // Calculate new transforms
+            this.Manipulator.SetScale(sca);
+            this.Manipulator.SetRotation(rot);
+            this.Manipulator.SetPosition(pos);
+            this.Manipulator.Update(parentCenter, parentScale);
+
+            this.ShadowManipulator.SetScale(sca);
+            this.ShadowManipulator.SetRotation(rot);
+            this.ShadowManipulator.SetPosition(pos + this.ShadowDelta);
+            this.ShadowManipulator.Update(parentCenter, parentScale);
+        }
+
+        /// <summary>
         /// Draw text
         /// </summary>
         /// <param name="context">Context</param>
@@ -318,11 +372,11 @@ namespace Engine.UI
                 if (this.ShadowColor != Color.Transparent)
                 {
                     //Draw shadow
-                    this.DrawText(effect, technique, this.localShadow, this.ShadowColor);
+                    this.DrawText(effect, technique, this.ShadowManipulator.LocalTransform, this.ShadowColor);
                 }
 
                 //Draw text
-                this.DrawText(effect, technique, this.local, this.TextColor);
+                this.DrawText(effect, technique, this.Manipulator.LocalTransform, this.TextColor);
             }
         }
         /// <summary>
@@ -367,10 +421,17 @@ namespace Engine.UI
             CenterRectangle(this.Game.Form.RenderRectangle);
         }
         /// <summary>
+        /// Centers the text into the parent rectangle
+        /// </summary>
+        public void CenterParent()
+        {
+            CenterRectangle(this.Parent?.AbsoluteRectangle ?? this.Game.Form.RenderRectangle);
+        }
+        /// <summary>
         /// Centers the text into the rectangle
         /// </summary>
         /// <param name="rectangle">Rectangle</param>
-        public void CenterRectangle(Rectangle rectangle)
+        public void CenterRectangle(RectangleF rectangle)
         {
             this.textArea = rectangle;
             this.centered = true;
@@ -382,40 +443,16 @@ namespace Engine.UI
         /// </summary>
         private void MapText()
         {
-            var rect = textArea ?? new Rectangle(this.left, this.top, this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
-
             this.fontMap.MapSentence(
                 this.text,
-                rect,
+                this.Game.Form.RenderRectangle,
                 out this.vertices, out this.indices, out Vector2 size);
 
             this.updateBuffers = true;
 
             // Adjust text bounds
-            this.Width = (int)size.X;
-            this.Height = (int)size.Y;
-
-            // Adjust position
-            if (centered && textArea.HasValue)
-            {
-                var targetCenter = textArea.Value.Center();
-
-                this.left = (int)targetCenter.X - (int)(Width * 0.5f);
-                this.top = (int)targetCenter.Y - (int)(Height * 0.5f);
-            }
-            else
-            {
-                this.top = rect.Y;
-                this.left = rect.X;
-            }
-
-            // Adjust to screen
-            int x = +(this.left - this.Game.Form.RenderCenter.X);
-            int y = -(this.top - this.Game.Form.RenderCenter.Y);
-
-            // Calculate new transforms
-            this.local = Matrix.Translation(x, y, 0f);
-            this.localShadow = Matrix.Translation(x + this.ShadowDelta.X, y + this.ShadowDelta.Y, 0f);
+            this.Width = size.X;
+            this.Height = size.Y;
         }
     }
 

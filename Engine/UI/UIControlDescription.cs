@@ -14,19 +14,19 @@ namespace Engine.UI
         /// <summary>
         /// Top position
         /// </summary>
-        public int Top { get; set; } = 0;
+        public float Top { get; set; } = 0;
         /// <summary>
         /// Left position
         /// </summary>
-        public int Left { get; set; } = 0;
+        public float Left { get; set; } = 0;
         /// <summary>
         /// Width
         /// </summary>
-        public int Width { get; set; } = 200;
+        public float Width { get; set; } = 200;
         /// <summary>
         /// Height
         /// </summary>
-        public int Height { get; set; } = 50;
+        public float Height { get; set; } = 50;
         /// <summary>
         /// Fit screen
         /// </summary>

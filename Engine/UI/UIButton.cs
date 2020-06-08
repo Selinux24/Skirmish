@@ -23,72 +23,6 @@ namespace Engine.UI
         public readonly TextDrawer textDrawer = null;
 
         /// <summary>
-        /// Gets or sets text top position in 2D screen
-        /// </summary>
-        public override int Top
-        {
-            get { return base.Top; }
-            set
-            {
-                base.Top = value;
-
-                if (textDrawer != null) textDrawer.CenterRectangle(this.Rectangle);
-            }
-        }
-        /// <summary>
-        /// Gets or sets text left position in 2D screen
-        /// </summary>
-        public override int Left
-        {
-            get { return base.Left; }
-            set
-            {
-                base.Left = value;
-
-                if (textDrawer != null) textDrawer.CenterRectangle(this.Rectangle);
-            }
-        }
-        /// <summary>
-        /// Width
-        /// </summary>
-        public override int Width
-        {
-            get { return base.Width; }
-            set
-            {
-                base.Width = value;
-
-                if (textDrawer != null) textDrawer.CenterRectangle(this.Rectangle);
-            }
-        }
-        /// <summary>
-        /// Height
-        /// </summary>
-        public override int Height
-        {
-            get { return base.Height; }
-            set
-            {
-                base.Height = value;
-
-                if (textDrawer != null) textDrawer.CenterRectangle(this.Rectangle);
-            }
-        }
-        /// <summary>
-        /// Scale
-        /// </summary>
-        public override float Scale
-        {
-            get { return base.Scale; }
-            set
-            {
-                base.Scale = value;
-
-                if (textDrawer != null) textDrawer.CenterRectangle(this.Rectangle);
-            }
-        }
-
-        /// <summary>
         /// Gets or sets the button text
         /// </summary>
         public string Text
@@ -102,7 +36,6 @@ namespace Engine.UI
                 if (this.textDrawer != null)
                 {
                     this.textDrawer.Text = value;
-                    this.textDrawer.CenterRectangle(this.Rectangle);
                 }
             }
         }
@@ -155,9 +88,13 @@ namespace Engine.UI
             {
                 description.TextDescription.Name = description.TextDescription.Name ?? $"{description.Name}.TextButton";
 
-                this.textDrawer = new TextDrawer(scene, description.TextDescription);
-                this.textDrawer.CenterRectangle(this.Rectangle);
-                this.textDrawer.Text = description.Text;
+                this.textDrawer = new TextDrawer(scene, description.TextDescription)
+                {
+                    Parent = this,
+                };
+                this.textDrawer.CenterParent();
+
+                this.Text = description.Text;
             }
         }
         /// <summary>
@@ -196,7 +133,10 @@ namespace Engine.UI
                 this.buttonReleased.Visible = true;
             }
 
-            this.textDrawer?.Update(context);
+            if (!string.IsNullOrWhiteSpace(this.Text) && this.textDrawer != null)
+            {
+                this.textDrawer.Update(context);
+            }
         }
 
         /// <summary>
