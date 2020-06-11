@@ -170,7 +170,7 @@ namespace Engine.Common
         /// <returns>Returns created font map</returns>
         private static FontMap Map(Game game, FontFamily family, float size, FontMapStyles style)
         {
-            var fMap = gCache.Find(f => f.Font == family.Name && f.Size == size && f.Style == style);
+            var fMap = gCache.FirstOrDefault(f => f != null && f.Font == family.Name && f.Size == size && f.Style == style);
             if (fMap == null)
             {
                 //Calc the destination texture width and height

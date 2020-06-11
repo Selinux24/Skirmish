@@ -132,5 +132,11 @@ namespace Engine
         /// <param name="rectangle">Rectangle</param>
         /// <remarks>Adjust the control left-top position and with and height properties</remarks>
         void SetRectangle(RectangleF rectangle);
+
+        /// <summary>
+        /// Gets the text render area
+        /// </summary>
+        /// <returns>Returns the text render area</returns>
+        RectangleF GetRenderArea();
     }
 }

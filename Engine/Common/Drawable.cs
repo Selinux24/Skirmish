@@ -76,7 +76,7 @@ namespace Engine.Common
         /// <param name="context">Context</param>
         public virtual void DrawShadows(DrawContextShadows context)
         {
-            
+
         }
         /// <summary>
         /// Draw
@@ -84,7 +84,7 @@ namespace Engine.Common
         /// <param name="context">Context</param>
         public virtual void Draw(DrawContext context)
         {
-            
+
         }
 
         /// <summary>
@@ -101,13 +101,10 @@ namespace Engine.Common
             return false;
         }
 
-        /// <summary>
-        /// Gets a text representation of the instance
-        /// </summary>
-        /// <returns>Returns a string</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return $"{this.GetType()}. {Name}";
+            return $"{this.GetType()}.{Name ?? "NoName"}";
         }
     }
 }

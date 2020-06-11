@@ -504,6 +504,18 @@ namespace Engine
 
             return lines;
         }
+        public static IEnumerable<Line3D> CreateWiredRectangle(Vector3 v0, Vector3 v1, Vector3 v2, Vector3 v3)
+        {
+            List<Line3D> lines = new List<Line3D>
+            {
+                new Line3D(v0, v1),
+                new Line3D(v1, v2),
+                new Line3D(v2, v3),
+                new Line3D(v3, v0)
+            };
+
+            return lines;
+        }
 
         private static IEnumerable<Line3D> CreateFromVertices(IEnumerable<Vector3> vertices, IEnumerable<int> indices)
         {

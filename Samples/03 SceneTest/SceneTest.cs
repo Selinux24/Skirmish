@@ -157,12 +157,15 @@ namespace SceneTest
 
                 Width = 100,
                 Height = 40,
-                TextDescription = new TextDrawerDescription()
+                TextDescription = new UITextAreaDescription
                 {
-                    Font = "Lucida Console",
-                    FontSize = 12,
-                    TextColor = Color.Yellow,
-                    ShadowColor = Color.Orange,
+                    TextDescription = new TextDrawerDescription()
+                    {
+                        Font = "Lucida Console",
+                        FontSize = 12,
+                        TextColor = Color.Yellow,
+                        ShadowColor = Color.Orange,
+                    },
                 },
                 Text = "Close",
             }, layerHUD);

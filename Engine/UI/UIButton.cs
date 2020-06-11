@@ -20,7 +20,7 @@ namespace Engine.UI
         /// <summary>
         /// Button text drawer
         /// </summary>
-        public readonly TextDrawer textDrawer = null;
+        public readonly UITextArea textArea = null;
 
         /// <summary>
         /// Gets or sets the button text
@@ -29,13 +29,13 @@ namespace Engine.UI
         {
             get
             {
-                return this.textDrawer?.Text;
+                return this.textArea?.Text;
             }
             set
             {
-                if (this.textDrawer != null)
+                if (this.textArea != null)
                 {
-                    this.textDrawer.Text = value;
+                    this.textArea.Text = value;
                 }
             }
         }
@@ -88,26 +88,17 @@ namespace Engine.UI
             {
                 description.TextDescription.Name = description.TextDescription.Name ?? $"{description.Name}.TextButton";
 
-                this.textDrawer = new TextDrawer(scene, description.TextDescription)
+                this.textArea = new UITextArea(scene, description.TextDescription)
                 {
-                    Parent = this,
+                    FitParent = true,
                 };
-                this.textDrawer.CenterParent();
+                this.textArea.CenterHorizontally(CenterTargets.Parent);
+                this.textArea.CenterVertically(CenterTargets.Parent);
+
+                this.AddChild(this.textArea);
 
                 this.Text = description.Text;
             }
-        }
-        /// <summary>
-        /// Releases used resources
-        /// </summary>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                this.textDrawer?.Dispose();
-            }
-
-            base.Dispose(disposing);
         }
 
         /// <summary>
@@ -132,40 +123,6 @@ namespace Engine.UI
             {
                 this.buttonReleased.Visible = true;
             }
-
-            if (!string.IsNullOrWhiteSpace(this.Text))
-            {
-                this.textDrawer?.Update(context);
-            }
-        }
-
-        /// <summary>
-        /// Draws button
-        /// </summary>
-        /// <param name="context">Context</param>
-        public override void Draw(DrawContext context)
-        {
-            base.Draw(context);
-
-            if (!this.Visible)
-            {
-                return;
-            }
-
-            if (!string.IsNullOrWhiteSpace(this.Text))
-            {
-                this.textDrawer?.Draw(context);
-            }
-        }
-
-        /// <summary>
-        /// Resize
-        /// </summary>
-        public override void Resize()
-        {
-            base.Resize();
-
-            this.textDrawer?.Resize();
         }
     }
 

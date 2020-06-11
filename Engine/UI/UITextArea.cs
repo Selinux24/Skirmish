@@ -1,8 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using SharpDX;
+using System.Threading.Tasks;
 
 namespace Engine.UI
 {
     using Engine.Common;
+    using System;
 
     public class UITextArea : UIControl
     {
@@ -11,6 +13,30 @@ namespace Engine.UI
         /// </summary>
         public readonly TextDrawer textDrawer = null;
 
+        /// <inheritdoc/>
+        public override float Width
+        {
+            get
+            {
+                return Math.Max(base.Width, this.textDrawer?.Width ?? 0);
+            }
+            set
+            {
+                base.Width = value;
+            }
+        }
+        /// <inheritdoc/>
+        public override float Height
+        {
+            get
+            {
+                return Math.Max(base.Height, this.textDrawer?.Height ?? 0);
+            }
+            set
+            {
+                base.Height = value;
+            }
+        }
         /// <summary>
         /// Gets or sets the button text
         /// </summary>
@@ -28,6 +54,22 @@ namespace Engine.UI
                 }
             }
         }
+        /// <summary>
+        /// Gest or sets the left margin
+        /// </summary>
+        public float MarginLeft { get; set; }
+        /// <summary>
+        /// Gest or sets the top margin
+        /// </summary>
+        public float MarginTop { get; set; }
+        /// <summary>
+        /// Gest or sets the right margin
+        /// </summary>
+        public float MarginRight { get; set; }
+        /// <summary>
+        /// Gest or sets the bottom margin
+        /// </summary>
+        public float MarginBottom { get; set; }
 
         /// <summary>
         /// Constructor
@@ -36,6 +78,11 @@ namespace Engine.UI
         /// <param name="description">Description</param>
         public UITextArea(Scene scene, UITextAreaDescription description) : base(scene, description)
         {
+            this.MarginLeft = description.MarginLeft;
+            this.MarginTop = description.MarginTop;
+            this.MarginRight = description.MarginRight;
+            this.MarginBottom = description.MarginBottom;
+
             if (description.TextDescription != null)
             {
                 description.TextDescription.Name = description.TextDescription.Name ?? $"{description.Name}.TextArea";
@@ -48,9 +95,7 @@ namespace Engine.UI
                 this.Text = description.Text;
             }
         }
-        /// <summary>
-        /// Releases used resources
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -61,10 +106,7 @@ namespace Engine.UI
             base.Dispose(disposing);
         }
 
-        /// <summary>
-        /// Updates state
-        /// </summary>
-        /// <param name="context">Context</param>
+        /// <inheritdoc/>
         public override void Update(UpdateContext context)
         {
             base.Update(context);
@@ -80,10 +122,7 @@ namespace Engine.UI
             }
         }
 
-        /// <summary>
-        /// Draws button
-        /// </summary>
-        /// <param name="context">Context</param>
+        /// <inheritdoc/>
         public override void Draw(DrawContext context)
         {
             base.Draw(context);
@@ -99,14 +138,62 @@ namespace Engine.UI
             }
         }
 
-        /// <summary>
-        /// Resize
-        /// </summary>
+        /// <inheritdoc/>
         public override void Resize()
         {
             base.Resize();
 
             this.textDrawer?.Resize();
+        }
+
+        /// <inheritdoc/>
+        public override RectangleF GetRenderArea()
+        {
+            return new RectangleF(
+                AbsoluteLeft + MarginLeft,
+                AbsoluteTop + MarginTop,
+                AbsoluteWidth - (MarginLeft + MarginRight),
+                AbsoluteHeight - (MarginTop + MarginBottom));
+        }
+
+        /// <inheritdoc/>
+        public override void CenterHorizontally(CenterTargets target)
+        {
+            base.CenterHorizontally(target);
+
+            this.textDrawer.CenterHorizontally((TextCenteringTargets)target);
+        }
+        /// <inheritdoc/>
+        public override void CenterVertically(CenterTargets target)
+        {
+            base.CenterVertically(target);
+
+            this.textDrawer.CenterVertically((TextCenteringTargets)target);
+        }
+
+        /// <summary>
+        /// Sets the global margin
+        /// </summary>
+        /// <param name="margin">Margin value</param>
+        public void SetMargin(float margin)
+        {
+            MarginLeft = MarginRight = MarginTop = MarginBottom = margin;
+        }
+        /// <summary>
+        /// Sets the horizontal margin
+        /// </summary>
+        /// <param name="margin">Margin value</param>
+        public void SetMarginHorizontal(float margin)
+        {
+            MarginLeft = MarginRight = margin;
+        }
+        /// <summary>
+        /// Sets the vertical margin
+        /// </summary>
+        /// <param name="margin">Margin value</param>
+        public void SetMarginVertical(float margin)
+        {
+            MarginTop = MarginBottom = margin;
         }
     }
 

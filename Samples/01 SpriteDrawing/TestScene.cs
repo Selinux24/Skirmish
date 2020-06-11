@@ -16,21 +16,24 @@ namespace SpriteDrawing
         private const int layerHUDDialogs = 200;
         private const float delta = 250f;
 
+        private bool gameReady = false;
+
         private UITextArea textDebug = null;
         private UIProgressBar progressBar = null;
-        private Sprite spriteMov = null;
+        private float progressValue = 0;
+
+        private Sprite spriteSmiley = null;
+
         private UIPanel staticPan = null;
         private UITextArea textArea = null;
-        private UIPanel pan = null;
-
         private readonly string allText = Properties.Resources.TinyLorem;
         private string currentText = "";
         private float textTime = 0;
         private float textInterval = 200f;
 
-        private bool gameReady = false;
+        private UIPanel dynamicPan = null;
 
-        private float progressValue = 0;
+        private PrimitiveListDrawer<Line3D> lineDrawer = null;
 
         public TestScene(Game game)
             : base(game)
@@ -42,7 +45,7 @@ namespace SpriteDrawing
         {
             return LoadUserInterface();
         }
-    
+
         private async Task LoadUserInterface()
         {
             await this.LoadResourcesAsync(
@@ -51,6 +54,7 @@ namespace SpriteDrawing
                     InitializeConsole(),
                     InitializeBackground(),
                     InitializeProgressbar(),
+                    InitializeDebugDrawer(),
                 },
                 async () =>
                 {
@@ -64,14 +68,16 @@ namespace SpriteDrawing
         {
             var desc = new UITextAreaDescription()
             {
+                Width = this.Game.Form.RenderWidth * 0.5f,
+
                 TextDescription = new TextDrawerDescription()
                 {
                     Name = "Text Debug",
                     Font = "Consolas",
-                    FontSize = 13,
+                    FontSize = 12,
                     Style = FontMapStyles.Regular,
                     TextColor = Color.Yellow,
-                }
+                },
             };
             this.textDebug = await this.AddComponentUITextArea(desc, layerHUD);
         }
@@ -104,6 +110,16 @@ namespace SpriteDrawing
             };
             this.progressBar = await this.AddComponentUIProgressBar(desc, layerHUD);
         }
+        private async Task InitializeDebugDrawer()
+        {
+            var desc = new PrimitiveListDrawerDescription<Line3D>()
+            {
+                Count = 20000,
+                DepthEnabled = false,
+            };
+            this.lineDrawer = await this.AddComponentPrimitiveListDrawer(desc, SceneObjectUsages.None, layerHUDDialogs + 1);
+            this.lineDrawer.Visible = true;
+        }
 
         private async Task InitializeControls()
         {
@@ -112,19 +128,17 @@ namespace SpriteDrawing
                 {
                     InitializeSmiley(),
                     InitializeStaticPan(),
-                    InitializePan(),
+                    InitializeDynamicPan(),
                 },
                 async () =>
                 {
-                    this.spriteMov.Visible = true;
-                    this.staticPan.Visible = true;
-                    this.textArea.Visible = true;
+                    this.spriteSmiley.Show(2.5f);
 
                     await Task.Delay(500);
 
-                    progressBar.Visible = false;
+                    this.staticPan.Visible = true;
 
-                    textArea.Text = null;
+                    progressBar.Visible = false;
 
                     gameReady = true;
                 });
@@ -141,10 +155,10 @@ namespace SpriteDrawing
                 Width = 256,
                 Height = 256,
                 FitParent = false,
-                CenterVertically = true,
+                CenterVertically = CenterTargets.Screen,
             };
-            this.spriteMov = await this.AddComponentSprite(desc, SceneObjectUsages.None, layerObjects);
-            this.spriteMov.Visible = false;
+            this.spriteSmiley = await this.AddComponentSprite(desc, SceneObjectUsages.None, layerObjects);
+            this.spriteSmiley.Visible = false;
         }
         private async Task InitializeStaticPan()
         {
@@ -163,7 +177,6 @@ namespace SpriteDrawing
                 Height = 650,
             };
             this.staticPan = await this.AddComponentUIPanel(desc, layerHUD);
-            this.staticPan.Visible = false;
 
             var descText = new UITextAreaDescription()
             {
@@ -174,14 +187,19 @@ namespace SpriteDrawing
                     FontSize = 18,
                     Style = FontMapStyles.Regular,
                     TextColor = Color.LightGoldenrodYellow,
-                }
+                },
+                FitParent = true,
+                MarginLeft = 100,
+                MarginRight = 100,
+                MarginTop = 50,
+                MarginBottom = 50,
             };
             this.textArea = await this.AddComponentUITextArea(descText, layerHUD + 1);
-            this.textArea.Visible = false;
 
             this.staticPan.AddChild(this.textArea);
+            this.staticPan.Visible = false;
         }
-        private async Task InitializePan()
+        private async Task InitializeDynamicPan()
         {
             await Task.Delay(1500);
 
@@ -191,8 +209,8 @@ namespace SpriteDrawing
 
                 Width = 800,
                 Height = 600,
-                CenterVertically = true,
-                CenterHorizontally = true,
+                CenterVertically = CenterTargets.Screen,
+                CenterHorizontally = CenterTargets.Screen,
 
                 Background = new SpriteDescription()
                 {
@@ -200,15 +218,14 @@ namespace SpriteDrawing
                     Color = Color.Red,
                 }
             };
-            this.pan = await this.AddComponentUIPanel(descPan, layerHUDDialogs);
-            this.pan.Visible = false;
+            this.dynamicPan = await this.AddComponentUIPanel(descPan, layerHUDDialogs);
 
             var descButClose = new UIButtonDescription
             {
                 Name = "CloseButton",
 
                 Top = 10,
-                Left = this.pan.Width - 10 - 20,
+                Left = this.dynamicPan.Width - 10 - 20,
                 Width = 20,
                 Height = 20,
 
@@ -216,18 +233,23 @@ namespace SpriteDrawing
                 ColorReleased = Color.Blue,
                 ColorPressed = Color.Green,
 
-                TextDescription = new TextDrawerDescription
+                TextDescription = new UITextAreaDescription
                 {
-                    FontFileName = "LeagueSpartan-Bold.otf",
-                    FontSize = 12,
-                    Style = FontMapStyles.Regular,
-                    TextColor = Color.White,
+                    TextDescription = new TextDrawerDescription()
+                    {
+                        FontFileName = "LeagueSpartan-Bold.otf",
+                        FontSize = 72,
+                        Style = FontMapStyles.Regular,
+                        TextColor = Color.White,
+                    },
                 },
                 Text = "X",
             };
             var butClose = new UIButton(this, descButClose);
             butClose.JustReleased += ButClose_Click;
-            this.pan.AddChild(butClose);
+
+            this.dynamicPan.AddChild(butClose);
+            this.dynamicPan.Visible = false;
         }
 
         public override void OnReportProgress(float value)
@@ -263,13 +285,13 @@ namespace SpriteDrawing
             if (this.textDebug != null)
             {
                 var mousePos = Cursor.ScreenPosition;
-                var but = pan?.Children.OfType<UIButton>().FirstOrDefault();
+                var but = dynamicPan?.Children.OfType<UIButton>().FirstOrDefault();
 
-                this.textDebug.Text = $@"PanPressed: {pan?.IsPressed ?? false}; PanRect: {pan?.AbsoluteRectangle}; 
+                this.textDebug.Text = $@"PanPressed: {dynamicPan?.IsPressed ?? false}; PanRect: {dynamicPan?.AbsoluteRectangle}; 
 ButPressed: {but?.IsPressed ?? false}; ButRect: {but?.AbsoluteRectangle}; 
 MousePos: {mousePos}; InputMousePos: {this.Game.Input.MousePosition}; 
 FormCenter: {this.Game.Form.RenderCenter} ScreenCenter: {this.Game.Form.ScreenCenter}
-Progress: {progressValue * 100f}%";
+Progress: {(int)(progressValue * 100f)}%";
             }
         }
         private void UpdateInput()
@@ -281,30 +303,30 @@ Progress: {progressValue * 100f}%";
 
             if (this.Game.Input.KeyJustReleased(Keys.Home))
             {
-                this.spriteMov.Left = 0;
-                this.spriteMov.Top = 0;
+                this.spriteSmiley.Left = 0;
+                this.spriteSmiley.Top = 0;
             }
         }
         private void UpdateSprite(GameTime gameTime)
         {
             if (this.Game.Input.KeyPressed(Keys.A))
             {
-                this.spriteMov.MoveLeft(gameTime, delta);
+                this.spriteSmiley.MoveLeft(gameTime, delta);
             }
 
             if (this.Game.Input.KeyPressed(Keys.D))
             {
-                this.spriteMov.MoveRight(gameTime, delta);
+                this.spriteSmiley.MoveRight(gameTime, delta);
             }
 
             if (this.Game.Input.KeyPressed(Keys.W))
             {
-                this.spriteMov.MoveUp(gameTime, delta);
+                this.spriteSmiley.MoveUp(gameTime, delta);
             }
 
             if (this.Game.Input.KeyPressed(Keys.S))
             {
-                this.spriteMov.MoveDown(gameTime, delta);
+                this.spriteSmiley.MoveDown(gameTime, delta);
             }
         }
         private void UpdateLorem(GameTime gameTime)
@@ -341,7 +363,7 @@ Progress: {progressValue * 100f}%";
                     progressBar.Text = null;
                     progressBar.Visible = false;
 
-                    pan.ShowRoll(1);
+                    dynamicPan.ShowRoll(1);
                 }
 
                 textArea.Text = currentText;
@@ -350,7 +372,7 @@ Progress: {progressValue * 100f}%";
 
         private void ButClose_Click(object sender, System.EventArgs e)
         {
-            pan.HideRoll(60);
+            dynamicPan.HideRoll(60);
         }
     }
 }

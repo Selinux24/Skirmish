@@ -6,6 +6,16 @@ namespace SpriteDrawing
 {
     static class UIControlExtensions
     {
+        public static void Show(this UIControl ctrl, float time)
+        {
+            ctrl.TweenShow(time, ScaleFuncs.Linear);
+        }
+
+        public static void Hide(this UIControl ctrl, float time)
+        {
+            ctrl.TweenHide(time, ScaleFuncs.Linear);
+        }
+
         public static void Roll(this UIControl ctrl, float time)
         {
             ctrl.TweenRotate(MathUtil.TwoPi, time, ScaleFuncs.Linear);

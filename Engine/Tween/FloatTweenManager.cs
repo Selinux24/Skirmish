@@ -56,6 +56,11 @@ namespace Engine.Tween
         /// <param name="fnc">Scale function</param>
         public static void TweenScaleUp(this UIControl control, float duration, ScaleFunc fnc)
         {
+            if (control == null)
+            {
+                return;
+            }
+
             TweenScale(control, 0, 1, duration, fnc);
         }
         /// <summary>
@@ -66,6 +71,11 @@ namespace Engine.Tween
         /// <param name="fnc">Scale function</param>
         public static void TweenScaleDown(this UIControl control, float duration, ScaleFunc fnc)
         {
+            if (control == null)
+            {
+                return;
+            }
+
             TweenScale(control, 1, 0, duration, fnc);
         }
         /// <summary>
@@ -78,6 +88,11 @@ namespace Engine.Tween
         /// <param name="fnc">Scale function</param>
         public static void TweenScale(this UIControl control, float from, float to, float duration, ScaleFunc fnc)
         {
+            if (control == null)
+            {
+                return;
+            }
+
             FloatTween ftScale = new FloatTween();
 
             ftScale.Start(from, to, duration, fnc);
@@ -119,6 +134,11 @@ namespace Engine.Tween
         /// <param name="fnc">Scale function</param>
         public static void TweenRotate(this UIControl control, float targetAngle, float duration, ScaleFunc fnc)
         {
+            if (control == null)
+            {
+                return;
+            }
+
             FloatTween ftRotate = new FloatTween();
 
             ftRotate.Start(control.Rotation, targetAngle, duration, fnc);
@@ -159,6 +179,11 @@ namespace Engine.Tween
         /// <param name="fnc">Scale function</param>
         public static void TweenShow(this UIControl control, float duration, ScaleFunc fnc)
         {
+            if (control == null)
+            {
+                return;
+            }
+
             TweenAlpha(control, 0, 1, duration, fnc);
         }
         /// <summary>
@@ -169,6 +194,11 @@ namespace Engine.Tween
         /// <param name="fnc">Scale function</param>
         public static void TweenHide(this UIControl control, float duration, ScaleFunc fnc)
         {
+            if (control == null)
+            {
+                return;
+            }
+
             TweenAlpha(control, 1, 0, duration, fnc);
         }
         /// <summary>
@@ -181,6 +211,11 @@ namespace Engine.Tween
         /// <param name="fnc">Scale function</param>
         public static void TweenAlpha(this UIControl control, float from, float to, float duration, ScaleFunc fnc)
         {
+            if (control == null)
+            {
+                return;
+            }
+
             FloatTween ftAlpha = new FloatTween();
 
             ftAlpha.Start(from, to, duration, fnc);

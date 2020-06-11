@@ -52,11 +52,11 @@ namespace Engine.UI
         /// <summary>
         /// Draws the sprite vertically centered on the render area
         /// </summary>
-        private bool centerVertically = false;
+        private CenterTargets centerVertically = CenterTargets.None;
         /// <summary>
         /// Draws the sprite horizontally centered on the render area
         /// </summary>
-        private bool centerHorizontally = false;
+        private CenterTargets centerHorizontally = CenterTargets.None;
         /// <summary>
         /// Scale value
         /// </summary>
@@ -181,7 +181,7 @@ namespace Engine.UI
             set
             {
                 this.left = value;
-                this.centerHorizontally = false;
+                this.centerHorizontally = CenterTargets.None;
 
                 this.updateInternals = true;
             }
@@ -198,7 +198,7 @@ namespace Engine.UI
             set
             {
                 this.top = value;
-                this.centerVertically = false;
+                this.centerVertically = CenterTargets.None;
 
                 this.updateInternals = true;
             }
@@ -300,7 +300,7 @@ namespace Engine.UI
         {
             get
             {
-                return (Parent?.AbsoluteLeft ?? 0) + this.left;
+                return (Parent?.AbsoluteLeft ?? 0) + this.Left;
             }
         }
         /// <summary>
@@ -310,7 +310,7 @@ namespace Engine.UI
         {
             get
             {
-                return (Parent?.AbsoluteTop ?? 0) + this.top;
+                return (Parent?.AbsoluteTop ?? 0) + this.Top;
             }
         }
         /// <summary>
@@ -322,11 +322,11 @@ namespace Engine.UI
             {
                 if (this.fitParent)
                 {
-                    return Parent?.AbsoluteWidth ?? this.width;
+                    return Parent?.AbsoluteWidth ?? this.Width;
                 }
                 else
                 {
-                    return this.width;
+                    return this.Width;
                 }
             }
         }
@@ -339,11 +339,11 @@ namespace Engine.UI
             {
                 if (this.fitParent)
                 {
-                    return Parent?.AbsoluteHeight ?? this.height;
+                    return Parent?.AbsoluteHeight ?? this.Height;
                 }
                 else
                 {
-                    return this.height;
+                    return this.Height;
                 }
             }
         }
@@ -354,7 +354,7 @@ namespace Engine.UI
         {
             get
             {
-                return (Parent?.AbsoluteScale ?? 1) * this.scale;
+                return (Parent?.AbsoluteScale ?? 1) * this.Scale;
             }
         }
         /// <summary>
@@ -364,7 +364,7 @@ namespace Engine.UI
         {
             get
             {
-                return (Parent?.AbsoluteRotation ?? 0) + this.rotation;
+                return (Parent?.AbsoluteRotation ?? 0) + this.Rotation;
             }
         }
         /// <summary>
@@ -419,7 +419,7 @@ namespace Engine.UI
         {
             get
             {
-                return Parent?.GrandpaWidth ?? this.width;
+                return Parent?.GrandpaWidth ?? this.Width;
             }
         }
         /// <summary>
@@ -429,7 +429,7 @@ namespace Engine.UI
         {
             get
             {
-                return Parent?.GrandpaHeight ?? this.height;
+                return Parent?.GrandpaHeight ?? this.Height;
             }
         }
         /// <summary>
@@ -439,7 +439,7 @@ namespace Engine.UI
         {
             get
             {
-                return Parent?.GrandpaScale ?? this.scale;
+                return Parent?.GrandpaScale ?? this.Scale;
             }
         }
         /// <summary>
@@ -449,7 +449,7 @@ namespace Engine.UI
         {
             get
             {
-                return Parent?.GrandpaRotation ?? this.scale;
+                return Parent?.GrandpaRotation ?? this.Rotation;
             }
         }
         /// <summary>
@@ -484,13 +484,13 @@ namespace Engine.UI
         {
             get
             {
-                return fitParent;
+                return this.fitParent;
             }
             set
             {
-                fitParent = value;
+                this.fitParent = value;
 
-                children.ForEach(c => c.FitParent = value);
+                this.updateInternals = true;
             }
         }
         /// <summary>
@@ -560,10 +560,7 @@ namespace Engine.UI
 
             this.updateInternals = true;
         }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -573,10 +570,7 @@ namespace Engine.UI
             }
         }
 
-        /// <summary>
-        /// Update state
-        /// </summary>
-        /// <param name="context">Update context</param>
+        /// <inheritdoc/>
         public override void Update(UpdateContext context)
         {
             base.Update(context);
@@ -605,14 +599,16 @@ namespace Engine.UI
         /// </summary>
         protected virtual void UpdateInternals()
         {
-            if (this.centerHorizontally)
+            if (this.centerHorizontally != CenterTargets.None)
             {
-                this.left = this.Game.Form.RenderCenter.X - (this.width / 2);
+                var rect = this.GetCenteringArea(this.centerHorizontally);
+                this.left = rect.Center.X - (this.AbsoluteWidth * 0.5f);
             }
 
-            if (this.centerVertically)
+            if (this.centerVertically != CenterTargets.None)
             {
-                this.top = this.Game.Form.RenderCenter.Y - (this.height / 2);
+                var rect = this.GetCenteringArea(this.centerVertically);
+                this.top = rect.Center.Y - (this.AbsoluteHeight * 0.5f);
             }
 
             Vector2 sca = new Vector2(this.AbsoluteWidth, this.AbsoluteHeight) * AbsoluteScale;
@@ -655,10 +651,7 @@ namespace Engine.UI
             }
         }
 
-        /// <summary>
-        /// Draw components
-        /// </summary>
-        /// <param name="context">Draw context</param>
+        /// <inheritdoc/>
         public override void Draw(DrawContext context)
         {
             base.Draw(context);
@@ -713,18 +706,20 @@ namespace Engine.UI
         /// <summary>
         /// Centers vertically the text
         /// </summary>
-        public virtual void CenterVertically()
+        /// <param name="target">Center target</param>
+        public virtual void CenterVertically(CenterTargets target)
         {
-            this.centerVertically = true;
+            this.centerVertically = target;
 
             this.updateInternals = true;
         }
         /// <summary>
         /// Centers horinzontally the text
         /// </summary>
-        public virtual void CenterHorizontally()
+        /// <param name="target">Center target</param>
+        public virtual void CenterHorizontally(CenterTargets target)
         {
-            this.centerHorizontally = true;
+            this.centerHorizontally = target;
 
             this.updateInternals = true;
         }
@@ -857,12 +852,12 @@ namespace Engine.UI
         /// </summary>
         /// <param name="position">Position</param>
         /// <remarks>Setting the position invalidates centering properties</remarks>
-        public void SetPosition(Vector2 position)
+        public virtual void SetPosition(Vector2 position)
         {
             this.left = (int)position.X;
             this.top = (int)position.Y;
-            this.centerHorizontally = false;
-            this.centerVertically = false;
+            this.centerHorizontally = CenterTargets.None;
+            this.centerVertically = CenterTargets.None;
 
             this.updateInternals = true;
         }
@@ -871,16 +866,58 @@ namespace Engine.UI
         /// </summary>
         /// <param name="rectangle">Rectangle</param>
         /// <remarks>Adjust the control left-top position and with and height properties</remarks>
-        public void SetRectangle(RectangleF rectangle)
+        public virtual void SetRectangle(RectangleF rectangle)
         {
             this.left = rectangle.X;
             this.top = rectangle.Y;
             this.width = rectangle.Width;
             this.height = rectangle.Height;
-            this.centerHorizontally = false;
-            this.centerVertically = false;
+            this.centerHorizontally = CenterTargets.None;
+            this.centerVertically = CenterTargets.None;
 
             this.updateInternals = true;
         }
+
+        /// <summary>
+        /// Gets the render area
+        /// </summary>
+        /// <returns>Returns the render area</returns>
+        public virtual RectangleF GetRenderArea()
+        {
+            return this.AbsoluteRectangle;
+        }
+        /// <summary>
+        /// Gets the area used for centering calculation
+        /// </summary>
+        /// <param name="target">Center target</param>
+        /// <returns>Returns the centering area</returns>
+        public virtual RectangleF GetCenteringArea(CenterTargets target)
+        {
+            if (this.Parent != null && target == CenterTargets.Parent)
+            {
+                return new RectangleF(0, 0, this.Parent.AbsoluteWidth, this.Parent.AbsoluteHeight);
+            }
+
+            return this.Game.Form.RenderRectangle;
+        }
+    }
+
+    /// <summary>
+    /// Centering targets
+    /// </summary>
+    public enum CenterTargets
+    {
+        /// <summary>
+        /// None
+        /// </summary>
+        None = 0,
+        /// <summary>
+        /// Parent
+        /// </summary>
+        Parent = 1,
+        /// <summary>
+        /// Screen
+        /// </summary>
+        Screen = 2,
     }
 }

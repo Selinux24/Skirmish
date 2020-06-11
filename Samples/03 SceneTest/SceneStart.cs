@@ -141,13 +141,16 @@ namespace SceneTest
                 TexturePressedUVMap = new Vector4(44, 30, 556, 136) / 600f,
                 ColorPressed = new Color4(sceneButtonColor.RGB() * 1.2f, 0.9f),
 
-                TextDescription = new TextDrawerDescription()
+                TextDescription = new UITextAreaDescription
                 {
-                    Font = "Verdana",
-                    Style = FontMapStyles.Bold,
-                    FontSize = 20,
-                    TextColor = Color.Gold,
-                }
+                    TextDescription = new TextDrawerDescription()
+                    {
+                        Font = "Verdana",
+                        Style = FontMapStyles.Bold,
+                        FontSize = 20,
+                        TextColor = Color.Gold,
+                    },
+                },
             };
             this.sceneMaterialsButton = await this.AddComponentUIButton(startButtonDesc, layerHUD);
             this.sceneWaterButton = await this.AddComponentUIButton(startButtonDesc, layerHUD);
@@ -177,13 +180,16 @@ namespace SceneTest
                 TexturePressedUVMap = new Vector4(44, 30, 556, 136) / 600f,
                 ColorPressed = new Color4(exitButtonColor.RGB() * 1.2f, 0.9f),
 
-                TextDescription = new TextDrawerDescription()
+                TextDescription = new UITextAreaDescription
                 {
-                    Font = "Verdana",
-                    Style = FontMapStyles.Bold,
-                    FontSize = 20,
-                    TextColor = Color.Gold,
-                }
+                    TextDescription = new TextDrawerDescription()
+                    {
+                        Font = "Verdana",
+                        Style = FontMapStyles.Bold,
+                        FontSize = 20,
+                        TextColor = Color.Gold,
+                    },
+                },
             };
             this.exitButton = await this.AddComponentUIButton(exitButtonDesc, layerHUD);
 

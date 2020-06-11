@@ -22,11 +22,11 @@ namespace Engine.UI
         /// <summary>
         /// Width
         /// </summary>
-        public float Width { get; set; } = 200;
+        public float Width { get; set; } = 0;
         /// <summary>
         /// Height
         /// </summary>
-        public float Height { get; set; } = 50;
+        public float Height { get; set; } = 0;
         /// <summary>
         /// Fit screen
         /// </summary>
@@ -34,11 +34,11 @@ namespace Engine.UI
         /// <summary>
         /// Vertically centered
         /// </summary>
-        public bool CenterVertically { get; set; } = false;
+        public CenterTargets CenterVertically { get; set; } = CenterTargets.None;
         /// <summary>
         /// Horizontally centered
         /// </summary>
-        public bool CenterHorizontally { get; set; } = false;
+        public CenterTargets CenterHorizontally { get; set; } = CenterTargets.None;
         /// <summary>
         /// Sprite color
         /// </summary>

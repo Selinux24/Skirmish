@@ -1,10 +1,12 @@
 ﻿using SharpDX;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Engine.UI
 {
     using Engine.Common;
     using Engine.Effects;
+    using System.Linq;
 
     /// <summary>
     /// Text drawer
@@ -37,6 +39,10 @@ namespace Engine.UI
         private bool updateBuffers = false;
 
         /// <summary>
+        /// Parent control
+        /// </summary>
+        private UIControl parent = null;
+        /// <summary>
         /// Font map
         /// </summary>
         private FontMap fontMap = null;
@@ -62,9 +68,13 @@ namespace Engine.UI
         /// </summary>
         private string text = null;
         /// <summary>
-        /// Center text into the defined text area (if any)
+        /// Horizontal centering flag
         /// </summary>
-        private bool centered = false;
+        private TextCenteringTargets centerHorizontally = TextCenteringTargets.None;
+        /// <summary>
+        /// Vertical centering flag
+        /// </summary>
+        private TextCenteringTargets centerVertically = TextCenteringTargets.None;
 
         /// <summary>
         /// Manipulator
@@ -74,6 +84,23 @@ namespace Engine.UI
         /// Shadow manipulator
         /// </summary>
         protected Manipulator2D ShadowManipulator { get; private set; }
+
+        /// <summary>
+        /// Parent control
+        /// </summary>
+        public UIControl Parent
+        {
+            get
+            {
+                return this.parent;
+            }
+            set
+            {
+                this.parent = value;
+
+                this.MapText();
+            }
+        }
 
         /// <summary>
         /// Font name
@@ -145,7 +172,8 @@ namespace Engine.UI
             {
                 this.left = value.X;
                 this.top = value.Y;
-                this.centered = false;
+                this.centerHorizontally = TextCenteringTargets.None;
+                this.centerVertically = TextCenteringTargets.None;
                 this.textArea = null;
 
                 this.MapText();
@@ -163,7 +191,8 @@ namespace Engine.UI
             set
             {
                 this.left = value;
-                this.centered = false;
+                this.centerHorizontally = TextCenteringTargets.None;
+                this.centerVertically = TextCenteringTargets.None;
                 this.textArea = null;
 
                 this.MapText();
@@ -181,7 +210,8 @@ namespace Engine.UI
             set
             {
                 this.top = value;
-                this.centered = false;
+                this.centerHorizontally = TextCenteringTargets.None;
+                this.centerVertically = TextCenteringTargets.None;
                 this.textArea = null;
 
                 this.MapText();
@@ -205,11 +235,6 @@ namespace Engine.UI
                 return this.vertexBuffer?.Ready == true && this.indexBuffer?.Ready == true;
             }
         }
-
-        /// <summary>
-        /// Parent control
-        /// </summary>
-        public UIControl Parent { get; set; }
 
         /// <summary>
         /// Constructor
@@ -253,9 +278,7 @@ namespace Engine.UI
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Dispose
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -269,10 +292,7 @@ namespace Engine.UI
             }
         }
 
-        /// <summary>
-        /// Updates state
-        /// </summary>
-        /// <param name="context">Context</param>
+        /// <inheritdoc/>
         public override void Update(UpdateContext context)
         {
             base.Update(context);
@@ -282,7 +302,6 @@ namespace Engine.UI
                 return;
             }
 
-            RectangleF rect;
             Vector2 sca;
             Vector2 pos;
             float rot;
@@ -291,7 +310,6 @@ namespace Engine.UI
 
             if (this.Parent != null)
             {
-                rect = this.Parent.AbsoluteRectangle;
                 sca = Vector2.One * this.Parent.AbsoluteScale;
                 pos = new Vector2(this.Parent.AbsoluteLeft, this.Parent.AbsoluteTop);
                 rot = this.Parent.AbsoluteRotation;
@@ -300,7 +318,6 @@ namespace Engine.UI
             }
             else
             {
-                rect = textArea ?? this.Game.Form.RenderRectangle;
                 sca = Vector2.One;
                 pos = Vector2.Zero;
                 rot = 0f;
@@ -309,14 +326,25 @@ namespace Engine.UI
             }
 
             // Adjust position
-            if (centered)
+            if (centerHorizontally != TextCenteringTargets.None)
             {
-                pos.X = rect.Center.X - (Width * 0.5f);
-                pos.Y = rect.Center.Y - (Height * 0.5f);
+                var rectH = this.GetCenteringArea(centerHorizontally);
+                pos.X = rectH.Center.X - (Width * 0.5f);
             }
             else
             {
+                var rect = this.GetRenderArea();
                 pos.X = rect.X;
+            }
+
+            if (centerVertically != TextCenteringTargets.None)
+            {
+                var rectV = this.GetCenteringArea(centerVertically);
+                pos.Y = rectV.Center.Y - (Height * 0.5f);
+            }
+            else
+            {
+                var rect = this.GetRenderArea();
                 pos.Y = rect.Y;
             }
 
@@ -332,10 +360,7 @@ namespace Engine.UI
             this.ShadowManipulator.Update(parentCenter, parentScale);
         }
 
-        /// <summary>
-        /// Draw text
-        /// </summary>
-        /// <param name="context">Context</param>
+        /// <inheritdoc/>
         public override void Draw(DrawContext context)
         {
             if (!Visible)
@@ -344,6 +369,11 @@ namespace Engine.UI
             }
 
             if (!BuffersReady)
+            {
+                return;
+            }
+
+            if (fontMap == null)
             {
                 return;
             }
@@ -414,18 +444,42 @@ namespace Engine.UI
         }
 
         /// <summary>
+        /// Centers vertically the text
+        /// </summary>
+        /// <param name="target">Center target</param>
+        public void CenterVertically(TextCenteringTargets target)
+        {
+            this.centerVertically = target;
+        }
+        /// <summary>
+        /// Centers horinzontally the text
+        /// </summary>
+        /// <param name="target">Center target</param>
+        public void CenterHorizontally(TextCenteringTargets target)
+        {
+            this.centerHorizontally = target;
+        }
+        /// <summary>
         /// Centers the text into the screen
         /// </summary>
         public void CenterScreen()
         {
-            CenterRectangle(this.Game.Form.RenderRectangle);
+            this.textArea = null;
+            this.centerHorizontally = TextCenteringTargets.Screen;
+            this.centerVertically = TextCenteringTargets.Screen;
+
+            this.MapText();
         }
         /// <summary>
         /// Centers the text into the parent rectangle
         /// </summary>
         public void CenterParent()
         {
-            CenterRectangle(this.Parent?.AbsoluteRectangle ?? this.Game.Form.RenderRectangle);
+            this.textArea = null;
+            this.centerHorizontally = TextCenteringTargets.Parent;
+            this.centerVertically = TextCenteringTargets.Parent;
+
+            this.MapText();
         }
         /// <summary>
         /// Centers the text into the rectangle
@@ -434,18 +488,27 @@ namespace Engine.UI
         public void CenterRectangle(RectangleF rectangle)
         {
             this.textArea = rectangle;
-            this.centered = true;
+            this.centerHorizontally = TextCenteringTargets.Area;
+            this.centerVertically = TextCenteringTargets.Area;
 
             this.MapText();
         }
+
         /// <summary>
         /// Map text
         /// </summary>
         private void MapText()
         {
+            if (this.fontMap == null)
+            {
+                return;
+            }
+
+            var rect = this.GetRenderArea();
+
             this.fontMap.MapSentence(
                 this.text,
-                this.Game.Form.RenderRectangle,
+                rect,
                 out this.vertices, out this.indices, out Vector2 size);
 
             this.updateBuffers = true;
@@ -454,6 +517,57 @@ namespace Engine.UI
             this.Width = size.X;
             this.Height = size.Y;
         }
+        /// <summary>
+        /// Gets the text render area
+        /// </summary>
+        /// <returns>Returns the text render area</returns>
+        private RectangleF GetRenderArea()
+        {
+            return this.Parent?.GetRenderArea() ?? textArea ?? this.Game.Form.RenderRectangle;
+        }
+        /// <summary>
+        /// Gets the area used for text centering calculation
+        /// </summary>
+        /// <param name="target">Center target</param>
+        /// <returns>Returns the text centering area</returns>
+        private RectangleF GetCenteringArea(TextCenteringTargets target)
+        {
+            if (target == TextCenteringTargets.Parent)
+            {
+                return this.Parent?.GetRenderArea() ?? this.textArea ?? this.Game.Form.RenderRectangle;
+            }
+            else if (target == TextCenteringTargets.Area)
+            {
+                return this.textArea ?? this.Game.Form.RenderRectangle;
+            }
+            else
+            {
+                return this.Game.Form.RenderRectangle;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Text centering targets
+    /// </summary>
+    public enum TextCenteringTargets
+    {
+        /// <summary>
+        /// None
+        /// </summary>
+        None = 0,
+        /// <summary>
+        /// Parent
+        /// </summary>
+        Parent = 1,
+        /// <summary>
+        /// Screen
+        /// </summary>
+        Screen = 2,
+        /// <summary>
+        /// Area
+        /// </summary>
+        Area = 3,
     }
 
     /// <summary>

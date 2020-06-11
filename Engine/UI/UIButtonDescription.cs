@@ -45,7 +45,7 @@ namespace Engine.UI
         /// <summary>
         /// Text description
         /// </summary>
-        public TextDrawerDescription TextDescription { get; set; }
+        public UITextAreaDescription TextDescription { get; set; }
 
         /// <summary>
         /// Constructor
