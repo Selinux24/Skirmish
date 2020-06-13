@@ -4,39 +4,14 @@ using System.Threading.Tasks;
 namespace Engine.UI
 {
     using Engine.Common;
-    using System;
 
     public class UITextArea : UIControl
     {
         /// <summary>
         /// Button text drawer
         /// </summary>
-        public readonly TextDrawer textDrawer = null;
+        private readonly TextDrawer textDrawer = null;
 
-        /// <inheritdoc/>
-        public override float Width
-        {
-            get
-            {
-                return Math.Max(base.Width, this.textDrawer?.Width ?? 0);
-            }
-            set
-            {
-                base.Width = value;
-            }
-        }
-        /// <inheritdoc/>
-        public override float Height
-        {
-            get
-            {
-                return Math.Max(base.Height, this.textDrawer?.Height ?? 0);
-            }
-            set
-            {
-                base.Height = value;
-            }
-        }
         /// <summary>
         /// Gets or sets the button text
         /// </summary>
@@ -50,6 +25,14 @@ namespace Engine.UI
             {
                 if (this.textDrawer != null)
                 {
+                    float maxWidth = this.Width <= 0 ? float.PositiveInfinity : this.Width;
+
+                    var size = this.textDrawer.MeasureText(value, maxWidth);
+
+                    //Grow area
+                    if (this.Width <= 0) this.Width = size.X;
+                    if (this.Height <= 0) this.Height = size.Y;
+
                     this.textDrawer.Text = value;
                 }
             }
@@ -116,10 +99,7 @@ namespace Engine.UI
                 return;
             }
 
-            if (!string.IsNullOrWhiteSpace(this.Text))
-            {
-                this.textDrawer?.Update(context);
-            }
+            this.textDrawer?.Update(context);
         }
 
         /// <inheritdoc/>
@@ -132,10 +112,7 @@ namespace Engine.UI
                 return;
             }
 
-            if (!string.IsNullOrWhiteSpace(this.Text))
-            {
-                this.textDrawer?.Draw(context);
-            }
+            this.textDrawer?.Draw(context);
         }
 
         /// <inheritdoc/>
@@ -149,11 +126,14 @@ namespace Engine.UI
         /// <inheritdoc/>
         public override RectangleF GetRenderArea()
         {
+            float width = AbsoluteWidth == 0 ? this.Game.Form.RenderWidth : AbsoluteWidth;
+            float height = AbsoluteHeight == 0 ? this.Game.Form.RenderHeight : AbsoluteHeight;
+
             return new RectangleF(
                 AbsoluteLeft + MarginLeft,
                 AbsoluteTop + MarginTop,
-                AbsoluteWidth - (MarginLeft + MarginRight),
-                AbsoluteHeight - (MarginTop + MarginBottom));
+                width - (MarginLeft + MarginRight),
+                height - (MarginTop + MarginBottom));
         }
 
         /// <inheritdoc/>

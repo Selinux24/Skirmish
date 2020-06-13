@@ -13,7 +13,7 @@ namespace Collada
         private const int layerCursor = 100;
 
         Model backGround = null;
-        TextDrawer title = null;
+        UITextArea title = null;
         UIButton sceneDungeonWallButton = null;
         UIButton sceneNavMeshTestButton = null;
         UIButton sceneDungeonButton = null;
@@ -121,17 +121,23 @@ namespace Collada
         private async Task InitializeControls()
         {
             //Title text
-            var titleDesc = new TextDrawerDescription()
+            var titleDesc = new UITextAreaDescription
             {
-                Name = "Title",
-                Font = "Viner Hand ITC",
-                FontSize = 90,
-                Style = FontMapStyles.Bold,
-                TextColor = Color.IndianRed,
-                ShadowColor = new Color4(Color.Brown.RGB(), 0.25f),
-                ShadowDelta = new Vector2(4, -4),
+                Width = this.Game.Form.RenderWidth,
+                Height = this.Game.Form.RenderHeight,
+
+                TextDescription = new TextDrawerDescription()
+                {
+                    Name = "Title",
+                    Font = "Viner Hand ITC",
+                    FontSize = 90,
+                    Style = FontMapStyles.Bold,
+                    TextColor = Color.IndianRed,
+                    ShadowColor = new Color4(Color.Brown.RGB(), 0.25f),
+                    ShadowDelta = new Vector2(4, 4),
+                },
             };
-            this.title = await this.AddComponentTextDrawer(titleDesc, SceneObjectUsages.UI, layerHUD);
+            this.title = await this.AddComponentUITextArea(titleDesc, layerHUD);
 
             var buttonDesc = new UIButtonDescription()
             {
@@ -238,7 +244,8 @@ namespace Collada
         private void SetControlPositions()
         {
             this.title.Text = "Collada Loader Test";
-            this.title.CenterScreen();
+            this.title.CenterHorizontally(CenterTargets.Screen);
+            this.title.CenterVertically(CenterTargets.Screen);
             this.title.Top = this.Game.Form.RenderHeight / 4;
 
             this.sceneDungeonWallButton.Text = "Dungeon Wall";

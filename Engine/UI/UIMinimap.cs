@@ -116,7 +116,7 @@ namespace Engine.UI
             float y = this.minimapArea.Maximum.Y - this.minimapArea.Minimum.Y;
             float z = this.minimapArea.Maximum.Z - this.minimapArea.Minimum.Z;
 
-            float aspect = (float)this.minimapBox.Height / this.minimapBox.Width;
+            float aspect = this.minimapBox.Height / this.minimapBox.Width;
             float near = 0.1f;
 
             Vector3 eyePos = new Vector3(0, y + near, 0);

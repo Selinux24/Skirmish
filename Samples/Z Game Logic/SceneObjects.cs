@@ -423,7 +423,10 @@ namespace GameLogic
             this.UpdateDebug();
 
             //HUD
-            this.UpdateHUD(shift);
+            if (this.UpdateHUD(shift))
+            {
+                return;
+            }
 
             //3D
             this.Update3D(gameTime, shift, cursorRay, picked, r);
@@ -443,31 +446,38 @@ namespace GameLogic
                 this.lineDrawer.Visible = !this.lineDrawer.Visible;
             }
         }
-        private void UpdateHUD(bool shift)
+        private bool UpdateHUD(bool shift)
         {
+            bool capture = false;
+
             if (this.Game.Input.KeyJustReleased(this.keyHUDNextSoldier))
             {
                 this.NextSoldier(!shift);
+                capture = true;
             }
 
             if (this.Game.Input.KeyJustReleased(this.keyHUDPrevSoldier))
             {
                 this.PrevSoldier(!shift);
+                capture = true;
             }
 
             if (this.Game.Input.KeyJustReleased(this.keyHUDNextAction))
             {
                 this.NextAction();
+                capture = true;
             }
 
             if (this.Game.Input.KeyJustReleased(this.keyHUDPrevAction))
             {
                 this.PrevAction();
+                capture = true;
             }
 
             if (this.Game.Input.KeyJustReleased(this.keyHUDNextPhase))
             {
                 this.NextPhase();
+                capture = true;
             }
 
             if (!this.gameFinished)
@@ -478,6 +488,8 @@ namespace GameLogic
                 this.txtActionList.Text = string.Format("{0}", this.currentActions.Join(" | "));
                 this.txtAction.Text = string.Format("{0}", this.CurrentAction);
             }
+
+            return capture;
         }
         private void Update3D(GameTime gameTime, bool shift, Ray cursorRay, bool picked, PickingResult<Triangle> r)
         {

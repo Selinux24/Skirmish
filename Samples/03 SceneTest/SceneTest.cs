@@ -23,8 +23,8 @@ namespace SceneTest
         private UIButton butClose = null;
 
         private Sprite spr = null;
-        private TextDrawer title = null;
-        private TextDrawer runtime = null;
+        private UITextArea title = null;
+        private UITextArea runtime = null;
 
         private ModelInstanced floorAsphaltI = null;
 
@@ -128,14 +128,14 @@ namespace SceneTest
         }
         private async Task InitializeTextBoxes()
         {
-            this.title = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 18, Color.White, Color.Orange), SceneObjectUsages.UI, layerHUD);
-            this.runtime = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 10, Color.Yellow, Color.Orange), SceneObjectUsages.UI, layerHUD);
+            this.title = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Tahoma", 18, Color.White, Color.Orange) }, layerHUD);
+            this.runtime = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Tahoma", 10, Color.Yellow, Color.Orange) }, layerHUD);
 
             this.title.Text = "Scene Test - Textures";
             this.runtime.Text = "";
 
-            this.title.Position = Vector2.Zero;
-            this.runtime.Position = new Vector2(5, this.title.Top + this.title.Height + 3);
+            this.title.SetPosition(Vector2.Zero);
+            this.runtime.SetPosition(new Vector2(5, this.title.Top + this.title.Height + 3));
 
             var spDesc = new SpriteDescription()
             {

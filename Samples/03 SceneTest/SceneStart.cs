@@ -12,7 +12,7 @@ namespace SceneTest
         private const int layerCursor = 100;
 
         private Model backGround = null;
-        private TextDrawer title = null;
+        private UITextArea title = null;
         private UIButton sceneMaterialsButton = null;
         private UIButton sceneWaterButton = null;
         private UIButton sceneStencilPassButton = null;
@@ -66,7 +66,9 @@ namespace SceneTest
 
                 var rect = this.Game.Form.RenderRectangle;
                 rect.Height /= 2;
-                this.title.CenterRectangle(rect);
+                this.title.SetRectangle(rect);
+                this.title.CenterHorizontally(CenterTargets.Parent);
+                this.title.CenterVertically(CenterTargets.Parent);
 
                 for (int i = 0; i < sceneButtons.Length; i++)
                 {
@@ -108,17 +110,20 @@ namespace SceneTest
 
             #region Title text
 
-            var titleDesc = new TextDrawerDescription()
+            var titleDesc = new UITextAreaDescription
             {
-                Name = "Title",
-                Font = "Showcard Gothic",
-                FontSize = 72,
-                Style = FontMapStyles.Bold,
-                TextColor = Color.Gold,
-                ShadowColor = new Color4(Color.LightYellow.RGB(), 0.25f),
-                ShadowDelta = new Vector2(4, -4),
+                TextDescription = new TextDrawerDescription()
+                {
+                    Name = "Title",
+                    Font = "Showcard Gothic",
+                    FontSize = 72,
+                    Style = FontMapStyles.Bold,
+                    TextColor = Color.Gold,
+                    ShadowColor = new Color4(Color.LightYellow.RGB(), 0.25f),
+                    ShadowDelta = new Vector2(4, 4),
+                },
             };
-            this.title = await this.AddComponentTextDrawer(titleDesc, SceneObjectUsages.UI, layerHUD);
+            this.title = await this.AddComponentUITextArea(titleDesc, layerHUD);
 
             #endregion
 

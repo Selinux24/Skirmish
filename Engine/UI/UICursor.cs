@@ -64,14 +64,14 @@ namespace Engine.UI
 
             if (this.Game.Input.LockMouse)
             {
-                this.Manipulator.SetPosition(this.Game.Form.RenderCenter);
+                this.SetPosition(this.Game.Form.RenderCenter);
             }
             else
             {
-                this.Manipulator.SetPosition(this.CursorPosition);
+                this.SetPosition(this.CursorPosition);
             }
 
-            this.Manipulator.Update();
+            base.Update(context);
         }
     }
 

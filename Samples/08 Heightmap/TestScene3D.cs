@@ -39,9 +39,9 @@ namespace Heightmap
         private readonly float windStep = 0.001f;
         private float windDuration = 0;
 
-        private TextDrawer stats = null;
-        private TextDrawer help = null;
-        private TextDrawer help2 = null;
+        private UITextArea stats = null;
+        private UITextArea help = null;
+        private UITextArea help2 = null;
 
         private SkyScattering skydom = null;
         private Terrain terrain = null;
@@ -217,20 +217,20 @@ namespace Heightmap
 
             #region Texts
 
-            var title = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
-            this.stats = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            this.help = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            this.help2 = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 11, Color.Orange), SceneObjectUsages.UI, layerHUD);
+            var title = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Tahoma", 18, Color.White) }, layerHUD);
+            this.stats = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow) }, layerHUD);
+            this.help = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow) }, layerHUD);
+            this.help2 = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Tahoma", 11, Color.Orange) }, layerHUD);
 
             title.Text = "Heightmap Terrain test";
             this.stats.Text = "";
             this.help.Text = "";
             this.help2.Text = "";
 
-            title.Position = Vector2.Zero;
-            this.stats.Position = new Vector2(5, title.Top + title.Height + 3);
-            this.help.Position = new Vector2(5, this.stats.Top + this.stats.Height + 3);
-            this.help2.Position = new Vector2(5, this.help.Top + this.help.Height + 3);
+            title.SetPosition(Vector2.Zero);
+            this.stats.SetPosition(new Vector2(5, title.Top + title.Height + 3));
+            this.help.SetPosition(new Vector2(5, this.stats.Top + this.stats.Height + 3));
+            this.help2.SetPosition(new Vector2(5, this.help.Top + this.help.Height + 3));
 
             var spDesc = new SpriteDescription()
             {

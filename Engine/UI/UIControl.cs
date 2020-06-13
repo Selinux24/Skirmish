@@ -850,6 +850,16 @@ namespace Engine.UI
         /// <summary>
         /// Sets the control left-top position
         /// </summary>
+        /// <param name="x">Position X Component</param>
+        /// <param name="y">Position Y Component</param>
+        /// <remarks>Setting the position invalidates centering properties</remarks>
+        public virtual void SetPosition(float x, float y)
+        {
+            this.SetPosition(new Vector2(x, y));
+        }
+        /// <summary>
+        /// Sets the control left-top position
+        /// </summary>
         /// <param name="position">Position</param>
         /// <remarks>Setting the position invalidates centering properties</remarks>
         public virtual void SetPosition(Vector2 position)

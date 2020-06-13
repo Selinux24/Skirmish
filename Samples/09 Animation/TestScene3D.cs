@@ -15,9 +15,9 @@ namespace Animation
     {
         private const int layerHUD = 99;
 
-        private TextDrawer runtime = null;
-        private TextDrawer animText = null;
-        private TextDrawer messages = null;
+        private UITextArea runtime = null;
+        private UITextArea animText = null;
+        private UITextArea messages = null;
 
         private PrimitiveListDrawer<Triangle> itemTris = null;
         private PrimitiveListDrawer<Line3D> itemLines = null;
@@ -131,20 +131,20 @@ namespace Animation
 
         private async Task InitializeUI()
         {
-            var title = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
-            this.runtime = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            this.animText = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 15, Color.Orange), SceneObjectUsages.UI, layerHUD);
-            this.messages = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 15, Color.Orange), SceneObjectUsages.UI, layerHUD);
+            var title = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Tahoma", 18, Color.White) }, layerHUD);
+            this.runtime = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow) }, layerHUD);
+            this.animText = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Tahoma", 15, Color.Orange) }, layerHUD);
+            this.messages = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Tahoma", 15, Color.Orange) }, layerHUD);
 
             title.Text = "Animation test";
             this.runtime.Text = "";
             this.animText.Text = "";
             this.messages.Text = "";
 
-            title.Position = Vector2.Zero;
-            this.runtime.Position = new Vector2(5, title.Top + title.Height + 3);
-            this.animText.Position = new Vector2(5, this.runtime.Top + this.runtime.Height + 3);
-            this.messages.Position = new Vector2(5, this.animText.Top + this.animText.Height + 3);
+            title.SetPosition(Vector2.Zero);
+            this.runtime.SetPosition(new Vector2(5, title.Top + title.Height + 3));
+            this.animText.SetPosition(new Vector2(5, this.runtime.Top + this.runtime.Height + 3));
+            this.messages.SetPosition(new Vector2(5, this.animText.Top + this.animText.Height + 3));
 
             var spDesc = new SpriteDescription()
             {

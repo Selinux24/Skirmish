@@ -20,8 +20,8 @@ namespace Collada
 
         private Player agent = null;
 
-        private TextDrawer debug = null;
-        private TextDrawer help = null;
+        private UITextArea debug = null;
+        private UITextArea help = null;
 
         private PrimitiveListDrawer<Triangle> graphDrawer = null;
         private PrimitiveListDrawer<Line3D> volumesDrawer = null;
@@ -78,15 +78,15 @@ namespace Collada
         }
         private async Task InitializeText()
         {
-            var title = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
+            var title = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Tahoma", 18, Color.White) }, layerHUD);
             title.Text = "Navigation Mesh Test Scene";
-            title.Position = Vector2.Zero;
+            title.SetPosition(Vector2.Zero);
 
-            this.debug = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Green), SceneObjectUsages.UI, layerHUD);
+            this.debug = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Lucida Sans", 12, Color.Green) }, layerHUD);
             this.debug.Text = null;
-            this.debug.Position = new Vector2(0, title.Top + title.Height + 3);
+            this.debug.SetPosition(new Vector2(0, title.Top + title.Height + 3));
 
-            this.help = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.help = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Lucida Sans", 12, Color.Yellow) }, layerHUD);
             this.help.Text = @"Camera: WASD+Mouse (Press right mouse in windowed mode to look). 
 B: Change Build Mode (SHIFT reverse).
 P: Change Partition Type (SHIFT reverse).
@@ -96,7 +96,7 @@ F6: Loads the graph from a file.
 Left Mouse: Update current tile (SHIFT remove).
 Middle Mouse: Finds random point around circle (5 units).
 Space: Finds random over navmesh";
-            this.help.Position = new Vector2(0, debug.Top + debug.Height + 3);
+            this.help.SetPosition(new Vector2(0, debug.Top + debug.Height + 3));
             this.help.Visible = false;
 
             var spDesc = new SpriteDescription()

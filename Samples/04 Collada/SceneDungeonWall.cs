@@ -11,7 +11,7 @@ namespace Collada
     {
         private const int layerHUD = 99;
 
-        private TextDrawer fps = null;
+        private UITextArea fps = null;
 
         private Model lightEmitter = null;
         private SceneLightPoint pointLight = null;
@@ -67,17 +67,17 @@ namespace Collada
         }
         private async Task InitializeText()
         {
-            var title = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
+            var title = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Tahoma", 18, Color.White) }, layerHUD);
             title.Text = "Tiled Wall Test Scene";
-            title.Position = Vector2.Zero;
+            title.SetPosition(Vector2.Zero);
 
-            this.fps = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.fps = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Lucida Sans", 12, Color.Yellow) }, layerHUD);
             this.fps.Text = null;
-            this.fps.Position = new Vector2(0, 24);
+            this.fps.SetPosition(new Vector2(0, 24));
 
-            var picks = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            var picks = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Lucida Sans", 12, Color.Yellow) }, layerHUD);
             picks.Text = null;
-            picks.Position = new Vector2(0, 48);
+            picks.SetPosition(new Vector2(0, 48));
 
             var spDesc = new SpriteDescription()
             {

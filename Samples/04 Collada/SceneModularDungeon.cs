@@ -22,8 +22,8 @@ namespace Collada
 
         private const float maxDistance = 35;
 
-        private TextDrawer fps = null;
-        private TextDrawer info = null;
+        private UITextArea fps = null;
+        private UITextArea info = null;
         private UIProgressBar progressBar = null;
 
         private readonly Color ambientDown = new Color(127, 127, 127, 255);
@@ -39,7 +39,7 @@ namespace Collada
         private ModularScenery scenery = null;
 
         private readonly float doorDistance = 3f;
-        private TextDrawer messages = null;
+        private UITextArea messages = null;
 
         private Model rat = null;
         private BasicManipulatorController ratController = null;
@@ -258,17 +258,17 @@ namespace Collada
 
         private async Task InitializeUI()
         {
-            var title = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
+            var title = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Tahoma", 18, Color.White) }, layerHUD);
             title.Text = "Collada Modular Dungeon Scene";
-            title.Position = Vector2.Zero;
+            title.SetPosition(Vector2.Zero);
 
-            this.fps = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.fps = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Lucida Sans", 12, Color.Yellow) }, layerHUD);
             this.fps.Text = null;
-            this.fps.Position = new Vector2(0, 24);
+            this.fps.SetPosition(new Vector2(0, 24));
 
-            this.info = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.info = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Lucida Sans", 12, Color.Yellow) }, layerHUD);
             this.info.Text = null;
-            this.info.Position = new Vector2(0, 48);
+            this.info.SetPosition(new Vector2(0, 48));
 
             var spDesc = new SpriteDescription()
             {
@@ -281,9 +281,9 @@ namespace Collada
 
             await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);
 
-            this.messages = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 48, Color.Red, Color.DarkRed), SceneObjectUsages.UI, layerHUD);
+            this.messages = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Lucida Sans", 48, Color.Red, Color.DarkRed) }, layerHUD);
             this.messages.Text = null;
-            this.messages.Position = new Vector2(0, 0);
+            this.messages.SetPosition(new Vector2(0, 0));
             this.messages.Visible = false;
 
             var drawerDesc = new PrimitiveListDrawerDescription<Triangle>()
@@ -1176,7 +1176,8 @@ namespace Collada
                 if (messages.Text != text)
                 {
                     messages.Text = text;
-                    messages.CenterScreen();
+                    messages.CenterHorizontally(CenterTargets.Screen);
+                    messages.CenterVertically(CenterTargets.Screen);
                     messages.Visible = true;
                 }
             }
@@ -1260,7 +1261,8 @@ namespace Collada
                 }
 
                 messages.Text = string.Format("Press space to {0} the light...", enabled ? "turn off" : "turn on");
-                messages.CenterScreen();
+                messages.CenterHorizontally(CenterTargets.Screen);
+                messages.CenterVertically(CenterTargets.Screen);
             }
         }
 

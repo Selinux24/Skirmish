@@ -1,17 +1,14 @@
 ﻿using SharpDX;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Engine.UI
 {
     using Engine.Common;
     using Engine.Effects;
-    using System.Linq;
 
     /// <summary>
     /// Text drawer
     /// </summary>
-    public class TextDrawer : Drawable, IScreenFitted
+    class TextDrawer : Drawable, IScreenFitted
     {
         /// <summary>
         /// Vertex buffer descriptor
@@ -37,19 +34,28 @@ namespace Engine.UI
         /// Update buffers flag
         /// </summary>
         private bool updateBuffers = false;
-
         /// <summary>
-        /// Parent control
+        /// Update internals flag
         /// </summary>
-        private UIControl parent = null;
+        private bool updateInternals = false;
+        /// <summary>
+        /// View * projection matrix
+        /// </summary>
+        private Matrix viewProjection;
+
         /// <summary>
         /// Font map
         /// </summary>
         private FontMap fontMap = null;
         /// <summary>
-        /// View * projection matrix
+        /// Text
         /// </summary>
-        private Matrix viewProjection;
+        private string text = null;
+
+        /// <summary>
+        /// Parent control
+        /// </summary>
+        private UIControl parent = null;
         /// <summary>
         /// Top
         /// </summary>
@@ -63,10 +69,6 @@ namespace Engine.UI
         /// </summary>
         /// <remarks>Used for text positioning</remarks>
         private RectangleF? textArea = null;
-        /// <summary>
-        /// Text
-        /// </summary>
-        private string text = null;
         /// <summary>
         /// Horizontal centering flag
         /// </summary>
@@ -98,7 +100,7 @@ namespace Engine.UI
             {
                 this.parent = value;
 
-                this.MapText();
+                this.updateInternals = true;
             }
         }
 
@@ -121,7 +123,7 @@ namespace Engine.UI
                 {
                     this.text = value;
 
-                    this.MapText();
+                    this.updateInternals = true;
                 }
             }
         }
@@ -176,7 +178,7 @@ namespace Engine.UI
                 this.centerVertically = TextCenteringTargets.None;
                 this.textArea = null;
 
-                this.MapText();
+                this.updateInternals = true;
             }
         }
         /// <summary>
@@ -195,7 +197,7 @@ namespace Engine.UI
                 this.centerVertically = TextCenteringTargets.None;
                 this.textArea = null;
 
-                this.MapText();
+                this.updateInternals = true;
             }
         }
         /// <summary>
@@ -214,7 +216,7 @@ namespace Engine.UI
                 this.centerVertically = TextCenteringTargets.None;
                 this.textArea = null;
 
-                this.MapText();
+                this.updateInternals = true;
             }
         }
         /// <summary>
@@ -269,6 +271,8 @@ namespace Engine.UI
             this.TextColor = description.TextColor;
             this.ShadowColor = description.ShadowColor;
             this.ShadowDelta = description.ShadowDelta;
+
+            this.MapText();
         }
         /// <summary>
         /// Destructor
@@ -300,6 +304,13 @@ namespace Engine.UI
             if (!this.Active)
             {
                 return;
+            }
+
+            if (updateInternals)
+            {
+                this.MapText();
+
+                updateInternals = false;
             }
 
             Vector2 sca;
@@ -450,6 +461,8 @@ namespace Engine.UI
         public void CenterVertically(TextCenteringTargets target)
         {
             this.centerVertically = target;
+
+            this.updateInternals = true;
         }
         /// <summary>
         /// Centers horinzontally the text
@@ -458,6 +471,8 @@ namespace Engine.UI
         public void CenterHorizontally(TextCenteringTargets target)
         {
             this.centerHorizontally = target;
+
+            this.updateInternals = true;
         }
         /// <summary>
         /// Centers the text into the screen
@@ -468,7 +483,7 @@ namespace Engine.UI
             this.centerHorizontally = TextCenteringTargets.Screen;
             this.centerVertically = TextCenteringTargets.Screen;
 
-            this.MapText();
+            this.updateInternals = true;
         }
         /// <summary>
         /// Centers the text into the parent rectangle
@@ -479,7 +494,7 @@ namespace Engine.UI
             this.centerHorizontally = TextCenteringTargets.Parent;
             this.centerVertically = TextCenteringTargets.Parent;
 
-            this.MapText();
+            this.updateInternals = true;
         }
         /// <summary>
         /// Centers the text into the rectangle
@@ -491,7 +506,7 @@ namespace Engine.UI
             this.centerHorizontally = TextCenteringTargets.Area;
             this.centerVertically = TextCenteringTargets.Area;
 
-            this.MapText();
+            this.updateInternals = true;
         }
 
         /// <summary>
@@ -508,7 +523,7 @@ namespace Engine.UI
 
             this.fontMap.MapSentence(
                 this.text,
-                rect,
+                rect.Width,
                 out this.vertices, out this.indices, out Vector2 size);
 
             this.updateBuffers = true;
@@ -545,6 +560,27 @@ namespace Engine.UI
                 return this.Game.Form.RenderRectangle;
             }
         }
+
+        /// <summary>
+        /// Measures the specified text
+        /// </summary>
+        /// <param name="text">Text</param>
+        /// <param name="width">Maximum text width</param>
+        /// <returns>Returns a size vector where X is the width, and Y is the height</returns>
+        public Vector2 MeasureText(string text, float width)
+        {
+            if (this.fontMap == null)
+            {
+                return Vector2.Zero;
+            }
+
+            this.fontMap.MapSentence(
+                text,
+                width,
+                out _, out _, out Vector2 size);
+
+            return size;
+        }
     }
 
     /// <summary>
@@ -568,33 +604,5 @@ namespace Engine.UI
         /// Area
         /// </summary>
         Area = 3,
-    }
-
-    /// <summary>
-    /// Text drawer extensions
-    /// </summary>
-    public static class TextDrawerExtensions
-    {
-        /// <summary>
-        /// Adds a component to the scene
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="description">Description</param>
-        /// <param name="usage">Component usage</param>
-        /// <param name="order">Processing order</param>
-        /// <returns>Returns the created component</returns>
-        public static async Task<TextDrawer> AddComponentTextDrawer(this Scene scene, TextDrawerDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
-        {
-            TextDrawer component = null;
-
-            await Task.Run(() =>
-            {
-                component = new TextDrawer(scene, description);
-
-                scene.AddComponent(component, usage, order);
-            });
-
-            return component;
-        }
     }
 }

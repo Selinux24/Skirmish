@@ -26,10 +26,10 @@ namespace Deferred
         private const int layerEffects = 2;
         private const int layerHUD = 99;
 
-        private TextDrawer title = null;
-        private TextDrawer load = null;
-        private TextDrawer help = null;
-        private TextDrawer statistics = null;
+        private UITextArea title = null;
+        private UITextArea load = null;
+        private UITextArea help = null;
+        private UITextArea statistics = null;
 
         private Agent tankAgentType = null;
         private readonly List<GameAgent<SteerManipulatorController>> tankAgents = new List<GameAgent<SteerManipulatorController>>();
@@ -317,20 +317,20 @@ namespace Deferred
         }
         private async Task InitializeUI()
         {
-            var dTitle = TextDrawerDescription.Generate("Tahoma", 18, Color.White);
-            var dLoad = TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow);
-            var dHelp = TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow);
-            var dStats = TextDrawerDescription.Generate("Lucida Casual", 10, Color.Red);
+            var dTitle = new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Tahoma", 18, Color.White) };
+            var dLoad = new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Lucida Sans", 12, Color.Yellow) };
+            var dHelp = new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Lucida Sans", 12, Color.Yellow) };
+            var dStats = new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Lucida Sans", 10, Color.Red) };
 
-            this.title = await this.AddComponentTextDrawer(dTitle, SceneObjectUsages.UI, layerHUD);
-            this.load = await this.AddComponentTextDrawer(dLoad, SceneObjectUsages.UI, layerHUD);
-            this.help = await this.AddComponentTextDrawer(dHelp, SceneObjectUsages.UI, layerHUD);
-            this.statistics = await this.AddComponentTextDrawer(dStats, SceneObjectUsages.UI, layerHUD);
+            this.title = await this.AddComponentUITextArea(dTitle, layerHUD);
+            this.load = await this.AddComponentUITextArea(dLoad, layerHUD);
+            this.help = await this.AddComponentUITextArea(dHelp, layerHUD);
+            this.statistics = await this.AddComponentUITextArea(dStats, layerHUD);
 
-            this.title.Position = Vector2.Zero;
-            this.load.Position = new Vector2(0, this.title.Top + this.title.Height + 2);
-            this.help.Position = new Vector2(0, this.load.Top + this.load.Height + 2);
-            this.statistics.Position = new Vector2(0, this.help.Top + this.help.Height + 2);
+            this.title.SetPosition(Vector2.Zero);
+            this.load.SetPosition(new Vector2(0, this.title.Top + this.title.Height + 2));
+            this.help.SetPosition(new Vector2(0, this.load.Top + this.load.Height + 2));
+            this.statistics.SetPosition(new Vector2(0, this.help.Top + this.help.Height + 2));
 
             var spDesc = new SpriteDescription()
             {

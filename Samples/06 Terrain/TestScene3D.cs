@@ -43,9 +43,9 @@ namespace Terrain
         private EngineShaderResourceView debugTex = null;
         private int graphIndex = -1;
 
-        private TextDrawer stats = null;
-        private TextDrawer counters1 = null;
-        private TextDrawer counters2 = null;
+        private UITextArea stats = null;
+        private UITextArea counters1 = null;
+        private UITextArea counters2 = null;
 
         private UIProgressBar hProgressBar = null;
         private UIProgressBar t1ProgressBar = null;
@@ -205,20 +205,20 @@ namespace Terrain
             Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
 
-            var title = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, this.layerHud);
-            this.stats = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, this.layerHud);
-            this.counters1 = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 10, Color.GreenYellow), SceneObjectUsages.UI, this.layerHud);
-            this.counters2 = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 10, Color.GreenYellow), SceneObjectUsages.UI, this.layerHud);
+            var title = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Tahoma", 18, Color.White) }, this.layerHud);
+            this.stats = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Lucida Sans", 12, Color.Yellow) }, this.layerHud);
+            this.counters1 = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Lucida Sans", 10, Color.GreenYellow) }, this.layerHud);
+            this.counters2 = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Lucida Sans", 10, Color.GreenYellow) }, this.layerHud);
 
             title.Text = "Terrain collision and trajectories test";
             this.stats.Text = "";
             this.counters1.Text = "";
             this.counters2.Text = "";
 
-            title.Position = Vector2.Zero;
-            this.stats.Position = new Vector2(0, 46);
-            this.counters1.Position = new Vector2(0, 68);
-            this.counters2.Position = new Vector2(0, 90);
+            title.SetPosition(Vector2.Zero);
+            this.stats.SetPosition(new Vector2(0, 46));
+            this.counters1.SetPosition(new Vector2(0, 68));
+            this.counters2.SetPosition(new Vector2(0, 90));
 
             var spDesc = new SpriteDescription()
             {

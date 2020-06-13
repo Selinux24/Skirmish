@@ -13,10 +13,10 @@ namespace ModelDrawing
         private const int layerHUD = 99;
         private const int layerEffects = 2;
 
-        private TextDrawer text = null;
-        private TextDrawer statistics = null;
-        private TextDrawer text1 = null;
-        private TextDrawer text2 = null;
+        private UITextArea text = null;
+        private UITextArea statistics = null;
+        private UITextArea text1 = null;
+        private UITextArea text2 = null;
 
         private readonly Dictionary<string, ParticleSystemDescription> pDescriptions = new Dictionary<string, ParticleSystemDescription>();
         private ParticleManager pManager = null;
@@ -55,15 +55,15 @@ namespace ModelDrawing
         }
         private async Task InitializeTexts()
         {
-            this.text = await this.AddComponentTextDrawer(new TextDrawerDescription() { Font = "Arial", FontSize = 20, TextColor = Color.Yellow, ShadowColor = Color.OrangeRed }, SceneObjectUsages.UI, layerHUD);
-            this.statistics = await this.AddComponentTextDrawer(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue }, SceneObjectUsages.UI, layerHUD);
-            this.text1 = await this.AddComponentTextDrawer(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue }, SceneObjectUsages.UI, layerHUD);
-            this.text2 = await this.AddComponentTextDrawer(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue }, SceneObjectUsages.UI, layerHUD);
+            this.text = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = new TextDrawerDescription() { Font = "Arial", FontSize = 20, TextColor = Color.Yellow, ShadowColor = Color.OrangeRed } }, layerHUD);
+            this.statistics = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue } }, layerHUD);
+            this.text1 = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue } }, layerHUD);
+            this.text2 = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue } }, layerHUD);
 
-            this.text.Position = Vector2.One;
-            this.statistics.Position = Vector2.One;
-            this.text1.Position = Vector2.One;
-            this.text2.Position = Vector2.One;
+            this.text.SetPosition(Vector2.One);
+            this.statistics.SetPosition(Vector2.One);
+            this.text1.SetPosition(Vector2.One);
+            this.text2.SetPosition(Vector2.One);
 
             this.statistics.Top = this.text.Top + this.text.Height + 5;
             this.text1.Top = this.statistics.Top + this.statistics.Height + 5;

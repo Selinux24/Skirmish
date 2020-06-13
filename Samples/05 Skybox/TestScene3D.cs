@@ -55,7 +55,7 @@ namespace Skybox
             MaxSlope = 45,
         };
 
-        private TextDrawer fps = null;
+        private UITextArea fps = null;
 
         private Scenery ruins = null;
         private PrimitiveListDrawer<Line3D> volumesDrawer = null;
@@ -124,9 +124,9 @@ namespace Skybox
 
             #region Text
 
-            var title = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
-            var help = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            this.fps = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            var title = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Tahoma", 18, Color.White) }, layerHUD);
+            var help = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Lucida Sans", 12, Color.Yellow) }, layerHUD);
+            this.fps = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Lucida Sans", 12, Color.Yellow) }, layerHUD);
 
             title.Text = "Collada Scene with Skybox";
 #if DEBUG
@@ -136,9 +136,9 @@ namespace Skybox
 #endif
             this.fps.Text = "";
 
-            title.Position = Vector2.Zero;
-            help.Position = new Vector2(0, 24);
-            this.fps.Position = new Vector2(0, 40);
+            title.SetPosition(Vector2.Zero);
+            help.SetPosition(new Vector2(0, 24));
+            this.fps.SetPosition(new Vector2(0, 40));
 
             var spDesc = new SpriteDescription()
             {

@@ -20,6 +20,15 @@ namespace Engine.Common
         /// Font cache
         /// </summary>
         private static readonly List<FontMap> gCache = new List<FontMap>();
+        /// <summary>
+        /// Default line separation in pixels
+        /// </summary>
+        private const int lineSeparationPixels = 10;
+        /// <summary>
+        /// Character separation threshold, based on font size
+        /// </summary>
+        /// <remarks>Separation = Font size * Thr</remarks>
+        private const float charSeparationThr = 0.25f;
 
         /// <summary>
         /// Clears and dispose font cache
@@ -41,7 +50,7 @@ namespace Engine.Common
         /// <summary>
         /// Maximum texture size
         /// </summary>
-        public const int MAXTEXTURESIZE = 1024 * 8;
+        public const int MAXTEXTURESIZE = 1024 * 4;
         /// <summary>
         /// Key codes
         /// </summary>
@@ -181,8 +190,6 @@ namespace Engine.Common
                     Font = family.Name,
                     Size = size,
                     Style = style,
-                    TextureWidth = width,
-                    TextureHeight = height,
                 };
 
                 using (var bmp = new Bitmap(width, height))
@@ -198,11 +205,11 @@ namespace Engine.Common
 
                     float left = 0f;
                     float top = 0f;
+                    int charSeparationPixels = (int)(size * charSeparationThr);
 
                     for (int i = 0; i < ValidKeys.Length; i++)
                     {
                         char c = ValidKeys[i];
-                        Console.Write(c);
 
                         var s = gra.MeasureString(
                             c.ToString(),
@@ -212,9 +219,9 @@ namespace Engine.Common
 
                         if (left + s.Width >= width)
                         {
-                            //Next texture line
+                            //Next texture line with lineSeparationPixels
                             left = 0;
-                            top += (int)(s.Height * 1.5f);
+                            top += (int)s.Height + lineSeparationPixels;
                         }
 
                         gra.DrawString(
@@ -235,7 +242,7 @@ namespace Engine.Common
 
                         fMap.map.Add(c, chr);
 
-                        left += (int)s.Width;
+                        left += (int)s.Width + charSeparationPixels;
                     }
 
                     fMap.GetSpaceSize(out float wsWidth, out float wsHeight);
@@ -251,9 +258,13 @@ namespace Engine.Common
 
                     fMap.map.Add(' ', wsChr);
 
+                    fMap.TextureWidth = bmp.Width;
+                    fMap.TextureHeight = bmp.Height;
+
                     //Generate the texture
                     fMap.bitmapStream = new MemoryStream();
                     bmp.Save(fMap.bitmapStream, ImageFormat.Png);
+                    bmp.Save($@"D:\Users\Selinux\Desktop\Fonts\{family.Name}{size}.bmp", ImageFormat.Bmp);
                     fMap.Texture = game.ResourceManager.RequestResource(fMap.bitmapStream, false);
                 }
 
@@ -273,31 +284,47 @@ namespace Engine.Common
         /// <param name="height">Resulting height</param>
         private static void MeasureMap(FontFamily family, float size, FontMapStyles style, out int width, out int height)
         {
+            width = 0;
+            height = 0;
+
             using (var bmp = new Bitmap(100, 100))
             using (var gra = System.Drawing.Graphics.FromImage(bmp))
             using (var fmt = StringFormat.GenericDefault)
             using (var fnt = new Font(family, size, (FontStyle)style, GraphicsUnit.Pixel))
             {
-                string str = new string(ValidKeys);
+                float left = 0f;
+                float top = 0f;
+                int charSeparationPixels = (int)(size * charSeparationThr);
 
-                var s = gra.MeasureString(
-                    str,
-                    fnt,
-                    int.MaxValue,
-                    fmt);
+                for (int i = 0; i < ValidKeys.Length; i++)
+                {
+                    char c = ValidKeys[i];
 
-                if (s.Width <= MAXTEXTURESIZE)
-                {
-                    width = (int)s.Width + 1;
-                    height = (int)s.Height + 1;
-                }
-                else
-                {
-                    width = MAXTEXTURESIZE;
-                    int a = (int)s.Width / MAXTEXTURESIZE;
-                    height = ((int)s.Height + 1) * (a + 1);
+                    var s = gra.MeasureString(
+                        c.ToString(),
+                        fnt,
+                        int.MaxValue,
+                        fmt);
+
+                    if (left + s.Width >= MAXTEXTURESIZE)
+                    {
+                        //Next line with lineSeparationPixels
+                        left = 0;
+                        top += (int)s.Height + lineSeparationPixels;
+
+                        //Store height
+                        height = Math.Max(height, (int)top + (int)s.Height + 1);
+                    }
+
+                    //Store width
+                    width = Math.Max(width, (int)left + (int)s.Width);
+
+                    left += (int)s.Width + charSeparationPixels;
                 }
             }
+
+            width = Helper.NextPowerOfTwo(width);
+            height = Helper.NextPowerOfTwo(height);
         }
 
         /// <summary>
@@ -347,13 +374,13 @@ namespace Engine.Common
         /// Maps a sentence
         /// </summary>
         /// <param name="text">Sentence text</param>
-        /// <param name="textArea">Rectangle area</param>
+        /// <param name="maxLength">Maximum length</param>
         /// <param name="vertices">Gets generated vertices</param>
         /// <param name="indices">Gets generated indices</param>
         /// <param name="size">Gets generated sentence total size</param>
         public void MapSentence(
             string text,
-            RectangleF textArea,
+            float maxLength,
             out VertexPositionTexture[] vertices,
             out uint[] indices,
             out Vector2 size)
@@ -408,7 +435,7 @@ namespace Engine.Common
                 //Store the indices adding last vertext index in the list
                 wIndices.ToList().ForEach((i) => { indexList.Add(i + (uint)vertList.Count); });
 
-                if (pos.X > textArea.Width)
+                if (pos.X > maxLength)
                 {
                     //Move the position to the last character of the new line
                     pos.X -= (int)prevPos.X;

@@ -16,7 +16,7 @@ namespace Instancing
         private const int layerTerrain = 1;
         private const int layerHUD = 99;
 
-        private TextDrawer runtimeText = null;
+        private UITextArea runtimeText = null;
 
         private ModelInstanced troops = null;
 
@@ -52,14 +52,14 @@ namespace Instancing
 
         private async Task InitializeTexts()
         {
-            var title = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
-            runtimeText = await this.AddComponentTextDrawer(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            var title = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Tahoma", 18, Color.White) }, layerHUD);
+            runtimeText = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow) }, layerHUD);
 
             title.Text = "Instancing test";
             runtimeText.Text = "";
 
-            title.Position = Vector2.Zero;
-            runtimeText.Position = new Vector2(5, title.Top + title.Height + 3);
+            title.SetPosition(Vector2.Zero);
+            runtimeText.SetPosition(new Vector2(5, title.Top + title.Height + 3));
 
             var spDesc = new SpriteDescription()
             {
