@@ -46,7 +46,11 @@ namespace Engine.UI
         /// <summary>
         /// Font map
         /// </summary>
-        private FontMap fontMap = null;
+        private readonly FontMap fontMap = null;
+        /// <summary>
+        /// Base line threshold
+        /// </summary>
+        private readonly float baseLineThr = 0;
         /// <summary>
         /// Text
         /// </summary>
@@ -152,6 +156,10 @@ namespace Engine.UI
         /// Gets or sets text shadow color
         /// </summary>
         public Color4 ShadowColor { get; set; }
+        /// <summary>
+        /// Alpha color component
+        /// </summary>
+        public float Alpha { get; set; } = 1f;
         /// <summary>
         /// Gets or sets relative position of shadow
         /// </summary>
@@ -273,6 +281,9 @@ namespace Engine.UI
             this.ShadowDelta = description.ShadowDelta;
 
             this.MapText();
+
+            // Set base line threshold
+            this.baseLineThr = this.Height * 0.1666f; // --> 0.3333f * 0.5f;
         }
         /// <summary>
         /// Destructor
@@ -290,9 +301,6 @@ namespace Engine.UI
                 //Remove data from buffer manager
                 this.BufferManager?.RemoveVertexData(this.vertexBuffer);
                 this.BufferManager?.RemoveIndexData(this.indexBuffer);
-
-                //Remove the font map reference
-                this.fontMap = null;
             }
         }
 
@@ -359,16 +367,21 @@ namespace Engine.UI
                 pos.Y = rect.Y;
             }
 
+            pos.Y += this.baseLineThr;
+
             // Calculate new transforms
             this.Manipulator.SetScale(sca);
             this.Manipulator.SetRotation(rot);
             this.Manipulator.SetPosition(pos);
             this.Manipulator.Update(parentCenter, parentScale);
 
-            this.ShadowManipulator.SetScale(sca);
-            this.ShadowManipulator.SetRotation(rot);
-            this.ShadowManipulator.SetPosition(pos + this.ShadowDelta);
-            this.ShadowManipulator.Update(parentCenter, parentScale);
+            if (this.ShadowColor != Color.Transparent)
+            {
+                this.ShadowManipulator.SetScale(sca);
+                this.ShadowManipulator.SetRotation(rot);
+                this.ShadowManipulator.SetPosition(pos + this.ShadowDelta);
+                this.ShadowManipulator.Update(parentCenter, parentScale);
+            }
         }
 
         /// <inheritdoc/>
@@ -433,7 +446,7 @@ namespace Engine.UI
                 local,
                 this.viewProjection,
                 color.RGB(),
-                color.Alpha * AlphaMultplier,
+                color.Alpha * Alpha * AlphaMultplier,
                 this.fontMap.Texture);
 
             var graphics = this.Game.Graphics;
@@ -586,7 +599,7 @@ namespace Engine.UI
     /// <summary>
     /// Text centering targets
     /// </summary>
-    public enum TextCenteringTargets
+    enum TextCenteringTargets
     {
         /// <summary>
         /// None

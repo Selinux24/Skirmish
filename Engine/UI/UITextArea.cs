@@ -53,6 +53,20 @@ namespace Engine.UI
         /// Gest or sets the bottom margin
         /// </summary>
         public float MarginBottom { get; set; }
+        /// <inheritdoc/>
+        public override float Alpha
+        {
+            get
+            {
+                return base.Alpha;
+            }
+            set
+            {
+                base.Alpha = value;
+
+                this.textDrawer.Alpha = value;
+            }
+        }
 
         /// <summary>
         /// Constructor

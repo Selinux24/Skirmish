@@ -33,8 +33,6 @@ namespace SpriteDrawing
 
         private UIPanel dynamicPan = null;
 
-        private PrimitiveListDrawer<Line3D> lineDrawer = null;
-
         public TestScene(Game game)
             : base(game)
         {
@@ -54,14 +52,13 @@ namespace SpriteDrawing
                     InitializeConsole(),
                     InitializeBackground(),
                     InitializeProgressbar(),
-                    InitializeDebugDrawer(),
                 },
                 async () =>
                 {
                     progressBar.Visible = true;
                     progressBar.ProgressValue = 0;
 
-                    await InitializeControls();
+                    await LoadControls();
                 });
         }
         private async Task InitializeConsole()
@@ -110,18 +107,8 @@ namespace SpriteDrawing
             };
             this.progressBar = await this.AddComponentUIProgressBar(desc, layerHUD);
         }
-        private async Task InitializeDebugDrawer()
-        {
-            var desc = new PrimitiveListDrawerDescription<Line3D>()
-            {
-                Count = 20000,
-                DepthEnabled = false,
-            };
-            this.lineDrawer = await this.AddComponentPrimitiveListDrawer(desc, SceneObjectUsages.None, layerHUDDialogs + 1);
-            this.lineDrawer.Visible = true;
-        }
 
-        private async Task InitializeControls()
+        private async Task LoadControls()
         {
             await this.LoadResourcesAsync(
                 new[]
@@ -238,7 +225,7 @@ namespace SpriteDrawing
                     TextDescription = new TextDrawerDescription()
                     {
                         FontFileName = "LeagueSpartan-Bold.otf",
-                        FontSize = 72,
+                        FontSize = 16,
                         Style = FontMapStyles.Regular,
                         TextColor = Color.White,
                     },

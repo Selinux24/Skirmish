@@ -400,6 +400,7 @@ namespace Engine.Common
 
             var spaceSize = MapSpace();
             Vector2 pos = Vector2.Zero;
+            bool firstWord = true;
 
             foreach (var word in words)
             {
@@ -435,7 +436,7 @@ namespace Engine.Common
                 //Store the indices adding last vertext index in the list
                 wIndices.ToList().ForEach((i) => { indexList.Add(i + (uint)vertList.Count); });
 
-                if (pos.X > maxLength)
+                if (!firstWord && pos.X > maxLength)
                 {
                     //Move the position to the last character of the new line
                     pos.X -= (int)prevPos.X;
@@ -450,21 +451,30 @@ namespace Engine.Common
                 }
 
                 vertList.AddRange(wVerts);
+
+                firstWord = false;
             }
 
             vertices = vertList.ToArray();
             indices = indexList.ToArray();
 
             float maxX = float.MinValue;
-            float maxY = float.MaxValue;
+            float maxY = float.MinValue;
+
+            float minX = float.MaxValue;
+            float minY = float.MaxValue;
+
             foreach (var v in vertices)
             {
                 var p = v.Position;
                 maxX = Math.Max(maxX, p.X);
-                maxY = Math.Min(maxY, p.Y);
+                maxY = Math.Max(maxY, -p.Y);
+
+                minX = Math.Min(minX, p.X);
+                minY = Math.Min(minY, -p.Y);
             }
 
-            size = new Vector2(maxX, -maxY);
+            size = new Vector2(maxX - minX, maxY - minY);
         }
         /// <summary>
         /// Maps a space
