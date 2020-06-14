@@ -261,13 +261,13 @@ namespace Engine.UI
 
             this.viewProjection = this.Game.Form.GetOrthoProjectionMatrix();
 
-            if (!string.IsNullOrWhiteSpace(description.Font))
-            {
-                this.fontMap = FontMap.Map(this.Game, description.Font, description.FontSize, description.Style);
-            }
-            else if (!string.IsNullOrWhiteSpace(description.FontFileName) && !string.IsNullOrWhiteSpace(description.ContentPath))
+            if (!string.IsNullOrWhiteSpace(description.FontFileName) && !string.IsNullOrWhiteSpace(description.ContentPath))
             {
                 this.fontMap = FontMap.MapFromFile(this.Game, description.ContentPath, description.FontFileName, description.FontSize, description.Style);
+            }
+            else if (!string.IsNullOrWhiteSpace(description.Font))
+            {
+                this.fontMap = FontMap.Map(this.Game, description.Font, description.FontSize, description.Style);
             }
 
             VertexPositionTexture[] verts = new VertexPositionTexture[FontMap.MAXTEXTLENGTH * 4];
@@ -282,8 +282,11 @@ namespace Engine.UI
 
             this.MapText();
 
-            // Set base line threshold
-            this.baseLineThr = this.Height * 0.1666f; // --> 0.3333f * 0.5f;
+            if (description.LineAdjust)
+            {
+                // Set base line threshold
+                this.baseLineThr = this.Height * 0.1666f; // --> 0.3333f * 0.5f
+            }
         }
         /// <summary>
         /// Destructor

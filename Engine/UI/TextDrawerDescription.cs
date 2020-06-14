@@ -71,7 +71,7 @@ namespace Engine.UI
         /// <summary>
         /// Font name
         /// </summary>
-        public string Font { get; set; }
+        public string Font { get; set; } = "Consolas";
         /// <summary>
         /// Font file name
         /// </summary>
@@ -79,23 +79,27 @@ namespace Engine.UI
         /// <summary>
         /// Font size
         /// </summary>
-        public int FontSize { get; set; }
+        public int FontSize { get; set; } = 12;
         /// <summary>
         /// Font style
         /// </summary>
-        public FontMapStyles Style { get; set; }
+        public FontMapStyles Style { get; set; } = FontMapStyles.Regular;
         /// <summary>
         /// Text color
         /// </summary>
-        public Color4 TextColor { get; set; }
+        public Color4 TextColor { get; set; } = Color.White;
         /// <summary>
         /// Shadow color
         /// </summary>
-        public Color4 ShadowColor { get; set; }
+        public Color4 ShadowColor { get; set; } = Color.Transparent;
         /// <summary>
         /// Shadow position delta
         /// </summary>
-        public Vector2 ShadowDelta { get; set; }
+        public Vector2 ShadowDelta { get; set; } = new Vector2(1, 1);
+        /// <summary>
+        /// Perform line adjust
+        /// </summary>
+        public bool LineAdjust { get; set; } = false;
 
         /// <summary>
         /// Constructor
@@ -107,9 +111,6 @@ namespace Engine.UI
             this.DeferredEnabled = false;
             this.DepthEnabled = false;
             this.AlphaEnabled = true;
-
-            this.Style = FontMapStyles.Regular;
-            this.ShadowDelta = new Vector2(1, -1);
         }
     }
 }

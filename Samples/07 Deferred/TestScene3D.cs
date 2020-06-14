@@ -317,10 +317,10 @@ namespace Deferred
         }
         private async Task InitializeUI()
         {
-            var dTitle = new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Tahoma", 18, Color.White) };
-            var dLoad = new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Lucida Sans", 12, Color.Yellow) };
-            var dHelp = new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Lucida Sans", 12, Color.Yellow) };
-            var dStats = new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Lucida Sans", 10, Color.Red) };
+            var dTitle = new UITextAreaDescription { Font = TextDrawerDescription.Generate("Tahoma", 18, Color.White) };
+            var dLoad = new UITextAreaDescription { Font = TextDrawerDescription.Generate("Lucida Sans", 12, Color.Yellow) };
+            var dHelp = new UITextAreaDescription { Font = TextDrawerDescription.Generate("Lucida Sans", 12, Color.Yellow) };
+            var dStats = new UITextAreaDescription { Font = TextDrawerDescription.Generate("Lucida Sans", 10, Color.Red) };
 
             this.title = await this.AddComponentUITextArea(dTitle, layerHUD);
             this.load = await this.AddComponentUITextArea(dLoad, layerHUD);

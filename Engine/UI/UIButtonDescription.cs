@@ -10,7 +10,7 @@ namespace Engine.UI
         /// <summary>
         /// Two state button
         /// </summary>
-        public bool TwoStateButton { get; set; }
+        public bool TwoStateButton { get; set; } = false;
 
         /// <summary>
         /// Texture to show when released state
@@ -19,11 +19,11 @@ namespace Engine.UI
         /// <summary>
         /// Released button color
         /// </summary>
-        public Color4 ColorReleased { get; set; }
+        public Color4 ColorReleased { get; set; } = new Color4(1f, 1f, 1f, 1f);
         /// <summary>
         /// Texture released UV map
         /// </summary>
-        public Vector4 TextureReleasedUVMap { get; set; }
+        public Vector4 TextureReleasedUVMap { get; set; } = new Vector4(0, 0, 1, 1);
 
         /// <summary>
         /// Texture to show when pressed state
@@ -32,20 +32,20 @@ namespace Engine.UI
         /// <summary>
         /// Pressed button color
         /// </summary>
-        public Color4 ColorPressed { get; set; }
+        public Color4 ColorPressed { get; set; } = new Color4(1f, 1f, 1f, 1f);
         /// <summary>
         /// Texture pressed UV map
         /// </summary>
-        public Vector4 TexturePressedUVMap { get; set; }
+        public Vector4 TexturePressedUVMap { get; set; } = new Vector4(0, 0, 1, 1);
 
         /// <summary>
-        /// Button text
+        /// Text
         /// </summary>
         public string Text { get; set; }
         /// <summary>
-        /// Text description
+        /// Font description
         /// </summary>
-        public UITextAreaDescription TextDescription { get; set; }
+        public TextDrawerDescription Font { get; set; } = new TextDrawerDescription();
 
         /// <summary>
         /// Constructor
@@ -53,11 +53,7 @@ namespace Engine.UI
         public UIButtonDescription()
             : base()
         {
-            this.TwoStateButton = false;
-            this.ColorReleased = new Color4(1f, 1f, 1f, 1f);
-            this.ColorPressed = new Color4(1f, 1f, 1f, 1f);
-            this.TextureReleasedUVMap = new Vector4(0, 0, 1, 1);
-            this.TexturePressedUVMap = new Vector4(0, 0, 1, 1);
+
         }
     }
 }

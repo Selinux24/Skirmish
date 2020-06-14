@@ -26,7 +26,7 @@ namespace SpriteDrawing
 
         private UIPanel staticPan = null;
         private UITextArea textArea = null;
-        private readonly string allText = Properties.Resources.TinyLorem;
+        private readonly string allText = Properties.Resources.Lorem;
         private string currentText = "";
         private float textTime = 0;
         private float textInterval = 200f;
@@ -66,13 +66,8 @@ namespace SpriteDrawing
             var desc = new UITextAreaDescription()
             {
                 Width = this.Game.Form.RenderWidth * 0.5f,
-
-                TextDescription = new TextDrawerDescription()
+                Font = new TextDrawerDescription
                 {
-                    Name = "Text Debug",
-                    Font = "Consolas",
-                    FontSize = 12,
-                    Style = FontMapStyles.Regular,
                     TextColor = Color.Yellow,
                 },
             };
@@ -97,12 +92,11 @@ namespace SpriteDrawing
                 Height = 15,
                 BaseColor = new Color(0, 0, 0, 0.5f),
                 ProgressColor = Color.Green,
-                TextDescription = new TextDrawerDescription
+                Font = new TextDrawerDescription
                 {
                     FontFileName = "LeagueSpartan-Bold.otf",
                     FontSize = 10,
-                    Style = FontMapStyles.Regular,
-                    TextColor = Color.White,
+                    LineAdjust = true,
                 },
             };
             this.progressBar = await this.AddComponentUIProgressBar(desc, layerHUD);
@@ -119,8 +113,6 @@ namespace SpriteDrawing
                 },
                 async () =>
                 {
-                    this.spriteSmiley.Show(2.5f);
-
                     await Task.Delay(500);
 
                     this.staticPan.Visible = true;
@@ -134,15 +126,16 @@ namespace SpriteDrawing
         {
             await Task.Delay(500);
 
+            float size = this.Game.Form.RenderWidth * 0.3333f;
+
             var desc = new SpriteDescription()
             {
                 Textures = new[] { "smiley.png" },
                 Top = 0,
-                Left = 10,
-                Width = 256,
-                Height = 256,
+                Left = 0,
+                Width = size,
+                Height = size,
                 FitParent = false,
-                CenterVertically = CenterTargets.Screen,
             };
             this.spriteSmiley = await this.AddComponentSprite(desc, SceneObjectUsages.None, layerObjects);
             this.spriteSmiley.Visible = false;
@@ -167,19 +160,21 @@ namespace SpriteDrawing
 
             var descText = new UITextAreaDescription()
             {
-                TextDescription = new TextDrawerDescription()
+                Font = new TextDrawerDescription()
                 {
                     Name = "Text",
                     FontFileName = "LeagueSpartan-Bold.otf",
                     FontSize = 18,
-                    Style = FontMapStyles.Regular,
                     TextColor = Color.LightGoldenrodYellow,
+                    ShadowColor = new Color4(0, 0, 0, 0.2f),
+                    ShadowDelta = new Vector2(8, 5),
+                    LineAdjust = true,
                 },
                 FitParent = true,
-                MarginLeft = 100,
-                MarginRight = 100,
-                MarginTop = 50,
-                MarginBottom = 50,
+                MarginLeft = 90,
+                MarginRight = 90,
+                MarginTop = 40,
+                MarginBottom = 40,
             };
             this.textArea = await this.AddComponentUITextArea(descText, layerHUD + 1);
 
@@ -220,15 +215,11 @@ namespace SpriteDrawing
                 ColorReleased = Color.Blue,
                 ColorPressed = Color.Green,
 
-                TextDescription = new UITextAreaDescription
+                Font = new TextDrawerDescription()
                 {
-                    TextDescription = new TextDrawerDescription()
-                    {
-                        FontFileName = "LeagueSpartan-Bold.otf",
-                        FontSize = 16,
-                        Style = FontMapStyles.Regular,
-                        TextColor = Color.White,
-                    },
+                    FontFileName = "LeagueSpartan-Bold.otf",
+                    FontSize = 16,
+                    LineAdjust = true,
                 },
                 Text = "X",
             };
@@ -290,8 +281,8 @@ Progress: {(int)(progressValue * 100f)}%";
 
             if (this.Game.Input.KeyJustReleased(Keys.Home))
             {
-                this.spriteSmiley.Left = 0;
-                this.spriteSmiley.Top = 0;
+                this.spriteSmiley.CenterHorizontally(CenterTargets.Screen);
+                this.spriteSmiley.CenterVertically(CenterTargets.Screen);
             }
         }
         private void UpdateSprite(GameTime gameTime)
@@ -350,6 +341,7 @@ Progress: {(int)(progressValue * 100f)}%";
                     progressBar.Text = null;
                     progressBar.Visible = false;
 
+                    staticPan.Hide(1);
                     dynamicPan.ShowRoll(1);
                 }
 
@@ -359,7 +351,11 @@ Progress: {(int)(progressValue * 100f)}%";
 
         private void ButClose_Click(object sender, System.EventArgs e)
         {
-            dynamicPan.HideRoll(60);
+            dynamicPan.HideRoll(1);
+
+            spriteSmiley.CenterHorizontally(CenterTargets.Screen);
+            spriteSmiley.CenterVertically(CenterTargets.Screen);
+            spriteSmiley.Show(2.5f);
         }
     }
 }

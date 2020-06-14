@@ -5,6 +5,7 @@ using Engine.Common;
 using Engine.Content;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
+using Engine.UI;
 using SharpDX;
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,6 @@ using System.Threading.Tasks;
 
 namespace Terrain
 {
-    using Engine.UI;
     using Terrain.AI;
     using Terrain.AI.Agents;
     using Terrain.Controllers;
@@ -205,10 +205,10 @@ namespace Terrain
             Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
 
-            var title = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Tahoma", 18, Color.White) }, this.layerHud);
-            this.stats = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Lucida Sans", 12, Color.Yellow) }, this.layerHud);
-            this.counters1 = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Lucida Sans", 10, Color.GreenYellow) }, this.layerHud);
-            this.counters2 = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Lucida Sans", 10, Color.GreenYellow) }, this.layerHud);
+            var title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate("Tahoma", 18, Color.White) }, this.layerHud);
+            this.stats = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate("Lucida Sans", 12, Color.Yellow) }, this.layerHud);
+            this.counters1 = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate("Lucida Sans", 10, Color.GreenYellow) }, this.layerHud);
+            this.counters2 = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate("Lucida Sans", 10, Color.GreenYellow) }, this.layerHud);
 
             title.Text = "Terrain collision and trajectories test";
             this.stats.Text = "";

@@ -80,11 +80,11 @@ namespace Engine.UI
             this.MarginRight = description.MarginRight;
             this.MarginBottom = description.MarginBottom;
 
-            if (description.TextDescription != null)
+            if (description.Font != null)
             {
-                description.TextDescription.Name = description.TextDescription.Name ?? $"{description.Name}.TextArea";
+                description.Font.Name = description.Font.Name ?? $"{description.Name}.TextArea";
 
-                this.textDrawer = new TextDrawer(scene, description.TextDescription)
+                this.textDrawer = new TextDrawer(scene, description.Font)
                 {
                     Parent = this,
                 };

@@ -12,15 +12,15 @@ namespace Engine.UI
         /// <summary>
         /// Pressed sprite button
         /// </summary>
-        public readonly Sprite buttonPressed = null;
+        private readonly Sprite buttonPressed = null;
         /// <summary>
         /// Release sprite button
         /// </summary>
-        public readonly Sprite buttonReleased = null;
+        private readonly Sprite buttonReleased = null;
         /// <summary>
         /// Button text drawer
         /// </summary>
-        public readonly UITextArea textArea = null;
+        private readonly UITextArea textArea = null;
 
         /// <summary>
         /// Gets or sets the button text
@@ -84,11 +84,16 @@ namespace Engine.UI
                 this.AddChild(this.buttonPressed);
             }
 
-            if (description.TextDescription != null)
+            if (description.Font != null)
             {
-                description.TextDescription.Name = description.TextDescription.Name ?? $"{description.Name}.TextButton";
+                description.Font.Name = description.Font.Name ?? $"{description.Name}.TextButton";
 
-                this.textArea = new UITextArea(scene, description.TextDescription)
+                var textAreaDesc = new UITextAreaDescription
+                {
+                    Font = description.Font,
+                };
+
+                this.textArea = new UITextArea(scene, textAreaDesc)
                 {
                     FitParent = true,
                 };

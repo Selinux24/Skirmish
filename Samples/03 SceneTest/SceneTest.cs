@@ -128,8 +128,8 @@ namespace SceneTest
         }
         private async Task InitializeTextBoxes()
         {
-            this.title = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Tahoma", 18, Color.White, Color.Orange) }, layerHUD);
-            this.runtime = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Tahoma", 10, Color.Yellow, Color.Orange) }, layerHUD);
+            this.title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate("Tahoma", 18, Color.White, Color.Orange) }, layerHUD);
+            this.runtime = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate("Tahoma", 10, Color.Yellow, Color.Orange) }, layerHUD);
 
             this.title.Text = "Scene Test - Textures";
             this.runtime.Text = "";
@@ -154,18 +154,14 @@ namespace SceneTest
                 TwoStateButton = true,
                 TextureReleased = "SceneTest/UI/button_off.png",
                 TexturePressed = "SceneTest/UI/button_on.png",
-
                 Width = 100,
                 Height = 40,
-                TextDescription = new UITextAreaDescription
+                Font = new TextDrawerDescription()
                 {
-                    TextDescription = new TextDrawerDescription()
-                    {
-                        Font = "Lucida Console",
-                        FontSize = 12,
-                        TextColor = Color.Yellow,
-                        ShadowColor = Color.Orange,
-                    },
+                    Font = "Lucida Console",
+                    FontSize = 12,
+                    TextColor = Color.Yellow,
+                    ShadowColor = Color.Orange,
                 },
                 Text = "Close",
             }, layerHUD);

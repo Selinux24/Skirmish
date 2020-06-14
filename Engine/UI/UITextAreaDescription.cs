@@ -7,10 +7,6 @@ namespace Engine.UI
     public class UITextAreaDescription : UIControlDescription
     {
         /// <summary>
-        /// Text
-        /// </summary>
-        public string Text { get; set; }
-        /// <summary>
         /// Left margin
         /// </summary>
         public float MarginLeft { get; set; }
@@ -26,10 +22,15 @@ namespace Engine.UI
         /// Bottom margin
         /// </summary>
         public float MarginBottom { get; set; }
+
         /// <summary>
-        /// Text description
+        /// Text
         /// </summary>
-        public TextDrawerDescription TextDescription { get; set; }
+        public string Text { get; set; }
+        /// <summary>
+        /// Font description
+        /// </summary>
+        public TextDrawerDescription Font { get; set; } = new TextDrawerDescription();
 
         /// <summary>
         /// Constructor

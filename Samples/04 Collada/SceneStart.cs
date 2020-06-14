@@ -126,7 +126,7 @@ namespace Collada
                 Width = this.Game.Form.RenderWidth,
                 Height = this.Game.Form.RenderHeight,
 
-                TextDescription = new TextDrawerDescription()
+                Font = new TextDrawerDescription()
                 {
                     Name = "Title",
                     Font = "Viner Hand ITC",
@@ -156,15 +156,12 @@ namespace Collada
                 TexturePressedUVMap = new Vector4(44, 30, 556, 136) / 600f,
                 ColorPressed = new Color4(sceneButtonColor.RGB() * 1.2f, 0.9f),
 
-                TextDescription = new UITextAreaDescription
+                Font = new TextDrawerDescription()
                 {
-                    TextDescription = new TextDrawerDescription()
-                    {
-                        Font = "Buxton Sketch",
-                        Style = FontMapStyles.Regular,
-                        FontSize = 22,
-                        TextColor = Color.Gold,
-                    },
+                    Font = "Buxton Sketch",
+                    Style = FontMapStyles.Regular,
+                    FontSize = 22,
+                    TextColor = Color.Gold,
                 },
             };
             this.sceneDungeonWallButton = await this.AddComponentUIButton(buttonDesc, layerHUD);
@@ -190,15 +187,12 @@ namespace Collada
                 TexturePressedUVMap = new Vector4(44, 30, 556, 136) / 600f,
                 ColorPressed = new Color4(exitButtonColor.RGB() * 1.2f, 0.9f),
 
-                TextDescription = new UITextAreaDescription
+                Font = new TextDrawerDescription()
                 {
-                    TextDescription = new TextDrawerDescription()
-                    {
-                        Font = "Buxton Sketch",
-                        Style = FontMapStyles.Bold,
-                        FontSize = 22,
-                        TextColor = Color.Gold,
-                    },
+                    Font = "Buxton Sketch",
+                    Style = FontMapStyles.Bold,
+                    FontSize = 22,
+                    TextColor = Color.Gold,
                 },
             };
             this.exitButton = await this.AddComponentUIButton(exitButtonDesc, layerHUD);
@@ -246,7 +240,7 @@ namespace Collada
             this.title.Text = "Collada Loader Test";
             this.title.CenterHorizontally(CenterTargets.Screen);
             this.title.CenterVertically(CenterTargets.Screen);
-            this.title.Top = this.Game.Form.RenderHeight / 4;
+            this.title.Top = this.Game.Form.RenderHeight * 0.25f;
 
             this.sceneDungeonWallButton.Text = "Dungeon Wall";
             this.sceneDungeonWallButton.Left = ((this.Game.Form.RenderWidth / 6) * 1) - (this.sceneDungeonWallButton.Width / 2);

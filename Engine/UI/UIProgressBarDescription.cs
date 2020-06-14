@@ -10,19 +10,20 @@ namespace Engine.UI
         /// <summary>
         /// Base color
         /// </summary>
-        public Color BaseColor { get; set; }
+        public Color BaseColor { get; set; } = new Color(0f, 0f, 0f, 0.5f);
         /// <summary>
         /// Progress color
         /// </summary>
-        public Color ProgressColor { get; set; }
+        public Color ProgressColor { get; set; } = new Color(0f, 1f, 0f, 1f);
+
         /// <summary>
-        /// Button text
+        /// Text
         /// </summary>
         public string Text { get; set; }
         /// <summary>
-        /// Text description
+        /// Font description
         /// </summary>
-        public TextDrawerDescription TextDescription { get; set; }
+        public TextDrawerDescription Font { get; set; } = new TextDrawerDescription();
 
         /// <summary>
         /// Constructor

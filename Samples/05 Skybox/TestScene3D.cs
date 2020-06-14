@@ -124,9 +124,9 @@ namespace Skybox
 
             #region Text
 
-            var title = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Tahoma", 18, Color.White) }, layerHUD);
-            var help = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Lucida Sans", 12, Color.Yellow) }, layerHUD);
-            this.fps = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Lucida Sans", 12, Color.Yellow) }, layerHUD);
+            var title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate("Tahoma", 18, Color.White) }, layerHUD);
+            var help = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate("Lucida Sans", 12, Color.Yellow) }, layerHUD);
+            this.fps = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate("Lucida Sans", 12, Color.Yellow) }, layerHUD);
 
             title.Text = "Collada Scene with Skybox";
 #if DEBUG

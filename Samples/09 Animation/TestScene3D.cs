@@ -131,10 +131,10 @@ namespace Animation
 
         private async Task InitializeUI()
         {
-            var title = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Tahoma", 18, Color.White) }, layerHUD);
-            this.runtime = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow) }, layerHUD);
-            this.animText = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Tahoma", 15, Color.Orange) }, layerHUD);
-            this.messages = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Tahoma", 15, Color.Orange) }, layerHUD);
+            var title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate("Tahoma", 18, Color.White) }, layerHUD);
+            this.runtime = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow) }, layerHUD);
+            this.animText = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate("Tahoma", 15, Color.Orange) }, layerHUD);
+            this.messages = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate("Tahoma", 15, Color.Orange) }, layerHUD);
 
             title.Text = "Animation test";
             this.runtime.Text = "";

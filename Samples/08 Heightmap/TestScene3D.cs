@@ -217,10 +217,10 @@ namespace Heightmap
 
             #region Texts
 
-            var title = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Tahoma", 18, Color.White) }, layerHUD);
-            this.stats = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow) }, layerHUD);
-            this.help = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow) }, layerHUD);
-            this.help2 = await this.AddComponentUITextArea(new UITextAreaDescription { TextDescription = TextDrawerDescription.Generate("Tahoma", 11, Color.Orange) }, layerHUD);
+            var title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate("Tahoma", 18, Color.White) }, layerHUD);
+            this.stats = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow) }, layerHUD);
+            this.help = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow) }, layerHUD);
+            this.help2 = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate("Tahoma", 11, Color.Orange) }, layerHUD);
 
             title.Text = "Heightmap Terrain test";
             this.stats.Text = "";

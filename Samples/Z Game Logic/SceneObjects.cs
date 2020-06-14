@@ -235,12 +235,12 @@ namespace GameLogic
             };
             await this.AddComponentSprite(bkDesc, SceneObjectUsages.UI, layerHUD - 1);
 
-            this.txtTitle = await this.AddComponentUITextArea(new UITextAreaDescription { Width = 2000, TextDescription = TextDrawerDescription.Generate(this.fontName, this.fontSize * 2, Color.White, Color.Gray) }, layerHUD);
-            this.txtGame = await this.AddComponentUITextArea(new UITextAreaDescription { Width = 2000, TextDescription = TextDrawerDescription.Generate(this.fontName, this.fontSize, Color.LightBlue, Color.DarkBlue) }, layerHUD);
-            this.txtTeam = await this.AddComponentUITextArea(new UITextAreaDescription { Width = 2000, TextDescription = TextDrawerDescription.Generate(this.fontName, this.fontSize, Color.Yellow) }, layerHUD);
-            this.txtSoldier = await this.AddComponentUITextArea(new UITextAreaDescription { Width = 2000, TextDescription = TextDrawerDescription.Generate(this.fontName, this.fontSize, Color.Yellow) }, layerHUD);
-            this.txtActionList = await this.AddComponentUITextArea(new UITextAreaDescription { Width = 2000, TextDescription = TextDrawerDescription.Generate(this.fontName, this.fontSize, Color.Yellow) }, layerHUD);
-            this.txtAction = await this.AddComponentUITextArea(new UITextAreaDescription { Width = 2000, TextDescription = TextDrawerDescription.Generate(this.fontName, this.fontSize, Color.Yellow) }, layerHUD);
+            this.txtTitle = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate(this.fontName, this.fontSize * 2, Color.White, Color.Gray) }, layerHUD);
+            this.txtGame = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate(this.fontName, this.fontSize, Color.LightBlue, Color.DarkBlue) }, layerHUD);
+            this.txtTeam = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate(this.fontName, this.fontSize, Color.Yellow) }, layerHUD);
+            this.txtSoldier = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate(this.fontName, this.fontSize, Color.Yellow) }, layerHUD);
+            this.txtActionList = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate(this.fontName, this.fontSize, Color.Yellow) }, layerHUD);
+            this.txtAction = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate(this.fontName, this.fontSize, Color.Yellow) }, layerHUD);
 
             this.butClose = await this.AddComponentUIButton(new UIButtonDescription()
             {
@@ -249,15 +249,12 @@ namespace GameLogic
                 TexturePressed = "button_off.png",
                 Width = 60,
                 Height = 20,
-                TextDescription = new UITextAreaDescription
+                Font = new TextDrawerDescription()
                 {
-                    TextDescription = new TextDrawerDescription()
-                    {
-                        Font = this.fontName,
-                        FontSize = this.fontSize - 2,
-                        TextColor = Color.Yellow,
-                        ShadowColor = Color.Orange,
-                    }
+                    Font = this.fontName,
+                    FontSize = this.fontSize - 2,
+                    TextColor = Color.Yellow,
+                    ShadowColor = Color.Orange,
                 },
                 Text = "EXIT",
             }, layerHUD);
@@ -269,14 +266,11 @@ namespace GameLogic
                 TexturePressed = "button_off.png",
                 Width = 60,
                 Height = 20,
-                TextDescription = new UITextAreaDescription
+                Font = new TextDrawerDescription()
                 {
-                    TextDescription = new TextDrawerDescription()
-                    {
-                        Font = this.fontName,
-                        FontSize = this.fontSize - 2,
-                        TextColor = Color.Yellow,
-                    },
+                    Font = this.fontName,
+                    FontSize = this.fontSize - 2,
+                    TextColor = Color.Yellow,
                 },
                 Text = "Next",
             }, layerHUD);
@@ -288,14 +282,11 @@ namespace GameLogic
                 TexturePressed = "button_off.png",
                 Width = 90,
                 Height = 20,
-                TextDescription = new UITextAreaDescription
+                Font = new TextDrawerDescription()
                 {
-                    TextDescription = new TextDrawerDescription()
-                    {
-                        Font = this.fontName,
-                        FontSize = this.fontSize - 2,
-                        TextColor = Color.Yellow,
-                    },
+                    Font = this.fontName,
+                    FontSize = this.fontSize - 2,
+                    TextColor = Color.Yellow,
                 },
                 Text = "Prev.Soldier",
             }, layerHUD);
@@ -307,14 +298,11 @@ namespace GameLogic
                 TexturePressed = "button_off.png",
                 Width = 90,
                 Height = 20,
-                TextDescription = new UITextAreaDescription
+                Font = new TextDrawerDescription()
                 {
-                    TextDescription = new TextDrawerDescription()
-                    {
-                        Font = this.fontName,
-                        FontSize = this.fontSize - 2,
-                        TextColor = Color.Yellow,
-                    },
+                    Font = this.fontName,
+                    FontSize = this.fontSize - 2,
+                    TextColor = Color.Yellow,
                 },
                 Text = "Next Soldier",
             }, layerHUD);
@@ -326,14 +314,11 @@ namespace GameLogic
                 TexturePressed = "button_off.png",
                 Width = 90,
                 Height = 20,
-                TextDescription = new UITextAreaDescription
+                Font = new TextDrawerDescription()
                 {
-                    TextDescription = new TextDrawerDescription()
-                    {
-                        Font = this.fontName,
-                        FontSize = this.fontSize - 2,
-                        TextColor = Color.Yellow,
-                    },
+                    Font = this.fontName,
+                    FontSize = this.fontSize - 2,
+                    TextColor = Color.Yellow,
                 },
                 Text = "Prev.Action",
             }, layerHUD);
@@ -345,14 +330,11 @@ namespace GameLogic
                 TexturePressed = "button_off.png",
                 Width = 90,
                 Height = 20,
-                TextDescription = new UITextAreaDescription
+                Font = new TextDrawerDescription()
                 {
-                    TextDescription = new TextDrawerDescription()
-                    {
-                        Font = this.fontName,
-                        FontSize = this.fontSize - 2,
-                        TextColor = Color.Yellow,
-                    },
+                    Font = this.fontName,
+                    FontSize = this.fontSize - 2,
+                    TextColor = Color.Yellow,
                 },
                 Text = "Next Action",
             }, layerHUD);
@@ -389,13 +371,6 @@ namespace GameLogic
             foreach (var soldierC in this.soldierControllers.Keys)
             {
                 this.soldierControllers[soldierC].UpdateManipulator(gameTime, this.soldierModels[soldierC].Manipulator);
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.Space))
-            {
-                butNext.Scale = 2;
-
-                return;
             }
 
             if (this.Game.Input.KeyJustReleased(this.keyExit))
