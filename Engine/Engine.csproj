@@ -387,6 +387,7 @@
     <Compile Include="SkyScatteringDescription.cs" />
     <Compile Include="SkyScatteringResolutions.cs" />
     <Compile Include="Tween\FloatTween.cs" />
+    <Compile Include="Tween\FloatTweenExtensions.cs" />
     <Compile Include="Tween\FloatTweenManager.cs" />
     <Compile Include="Tween\ITween.cs" />
     <Compile Include="Tween\ScaleFuncs.cs" />

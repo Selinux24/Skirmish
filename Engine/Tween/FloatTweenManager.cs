@@ -14,7 +14,7 @@ namespace Engine.Tween
         /// <summary>
         /// Task list
         /// </summary>
-        private static readonly ConcurrentDictionary<Guid, Func<float, bool>> tasks = new ConcurrentDictionary<Guid, Func<float, bool>>();
+        private static readonly ConcurrentDictionary<UIControl, List<Func<float, bool>>> tasks = new ConcurrentDictionary<UIControl, List<Func<float, bool>>>();
 
         /// <summary>
         /// Updates the task list
@@ -27,90 +27,64 @@ namespace Engine.Tween
                 return;
             }
 
-            // Copy active tasks
-            var activeTasks = tasks.ToArray();
+            // Copy active controls
+            var activeControls = tasks.ToArray();
 
-            List<Guid> toDelete = new List<Guid>();
-
-            foreach (var task in activeTasks)
+            foreach (var task in activeControls)
             {
-                bool finished = task.Value.Invoke(elapsedTime);
-
-                if (finished)
+                // Copy active tasks
+                var activeTasks = task.Value.ToList();
+                if (!activeTasks.Any())
                 {
-                    toDelete.Add(task.Key);
+                    continue;
+                }
+
+                List<Func<float, bool>> toDelete = new List<Func<float, bool>>();
+
+                activeTasks.ForEach(t =>
+                {
+                    bool finished = t.Invoke(elapsedTime);
+                    if (finished)
+                    {
+                        toDelete.Add(t);
+                    }
+                });
+
+                if (toDelete.Any())
+                {
+                    toDelete.ForEach(t => task.Value.Remove(t));
                 }
             }
 
-            if (toDelete.Any())
+            var emptyControls = tasks.Where(t => t.Value.Count == 0).Select(t => t.Key).ToList();
+            if (emptyControls.Any())
             {
-                toDelete.ForEach(i => tasks.TryRemove(i, out _));
+                emptyControls.ForEach(c => tasks.TryRemove(c, out _));
             }
         }
 
         /// <summary>
-        /// Scale up a control
+        /// Clears all tweens
         /// </summary>
         /// <param name="control">Control</param>
-        /// <param name="duration">Duration</param>
-        /// <param name="fnc">Scale function</param>
-        public static void TweenScaleUp(this UIControl control, float duration, ScaleFunc fnc)
+        public static void ClearTween(UIControl control)
         {
-            if (control == null)
-            {
-                return;
-            }
-
-            TweenScale(control, 0, 1, duration, fnc);
+            tasks.TryRemove(control, out _);
         }
-        /// <summary>
-        /// Scales down a control
-        /// </summary>
-        /// <param name="control">Control</param>
-        /// <param name="duration">Duration</param>
-        /// <param name="fnc">Scale function</param>
-        public static void TweenScaleDown(this UIControl control, float duration, ScaleFunc fnc)
-        {
-            if (control == null)
-            {
-                return;
-            }
 
-            TweenScale(control, 1, 0, duration, fnc);
-        }
-        /// <summary>
-        /// Scales a control
-        /// </summary>
-        /// <param name="control">Control</param>
-        /// <param name="from">Start value</param>
-        /// <param name="to">End value</param>
-        /// <param name="duration">Duration</param>
-        /// <param name="fnc">Scale function</param>
-        public static void TweenScale(this UIControl control, float from, float to, float duration, ScaleFunc fnc)
-        {
-            if (control == null)
-            {
-                return;
-            }
-
-            FloatTween ftScale = new FloatTween();
-
-            ftScale.Start(from, to, duration, fnc);
-
-            AddScaleTween(control, ftScale);
-        }
         /// <summary>
         /// Adds a scale task to the internal task list
         /// </summary>
         /// <param name="control">Control</param>
         /// <param name="ftScale">Scale tween</param>
-        private static void AddScaleTween(UIControl control, FloatTween ftScale)
+        public static void AddScaleTween(UIControl control, FloatTween ftScale)
         {
             control.Scale = ftScale.StartValue;
             control.Active = true;
             control.Visible = true;
 
-            tasks.TryAdd(Guid.NewGuid(), (d) =>
+            var list = tasks.GetOrAdd(control, new List<Func<float, bool>>());
+            list.Add((d) =>
             {
                 ftScale.Update(d);
 
@@ -124,39 +98,48 @@ namespace Engine.Tween
                 return false;
             });
         }
-
         /// <summary>
-        /// Rotate a control
+        /// Adds a bouncing scale task to the internal task list
         /// </summary>
         /// <param name="control">Control</param>
-        /// <param name="targetAngle">Target angle</param>
-        /// <param name="duration">Duration</param>
-        /// <param name="fnc">Scale function</param>
-        public static void TweenRotate(this UIControl control, float targetAngle, float duration, ScaleFunc fnc)
+        /// <param name="ftScale">Scale tween</param>
+        public static void AddScaleBounce(UIControl control, FloatTween ftScale)
         {
-            if (control == null)
+            control.Scale = ftScale.StartValue;
+            control.Active = true;
+            control.Visible = true;
+
+            var list = tasks.GetOrAdd(control, new List<Func<float, bool>>());
+            list.Add((d) =>
             {
-                return;
-            }
+                ftScale.Update(d);
 
-            FloatTween ftRotate = new FloatTween();
+                control.Scale = ftScale.CurrentValue;
 
-            ftRotate.Start(control.Rotation, targetAngle, duration, fnc);
+                if (ftScale.CurrentValue == ftScale.EndValue)
+                {
+                    var start = ftScale.StartValue;
+                    var end = ftScale.EndValue;
 
-            AddRotateTween(control, ftRotate);
+                    ftScale.Restart(end, start);
+                }
+
+                return false;
+            });
         }
         /// <summary>
         /// Adds a rotation task to the internal task list
         /// </summary>
         /// <param name="control">Control</param>
         /// <param name="ftRotate">Rotation tween</param>
-        private static void AddRotateTween(UIControl control, FloatTween ftRotate)
+        public static void AddRotateTween(UIControl control, FloatTween ftRotate)
         {
             control.Rotation = ftRotate.StartValue;
             control.Active = true;
             control.Visible = true;
 
-            tasks.TryAdd(Guid.NewGuid(), (d) =>
+            var list = tasks.GetOrAdd(control, new List<Func<float, bool>>());
+            list.Add((d) =>
             {
                 ftRotate.Update(d);
 
@@ -170,70 +153,19 @@ namespace Engine.Tween
                 return false;
             });
         }
-
-        /// <summary>
-        /// Shows a control
-        /// </summary>
-        /// <param name="control">Control</param>
-        /// <param name="duration">Duration</param>
-        /// <param name="fnc">Scale function</param>
-        public static void TweenShow(this UIControl control, float duration, ScaleFunc fnc)
-        {
-            if (control == null)
-            {
-                return;
-            }
-
-            TweenAlpha(control, 0, 1, duration, fnc);
-        }
-        /// <summary>
-        /// Hides a control
-        /// </summary>
-        /// <param name="control">Control</param>
-        /// <param name="duration">Duration</param>
-        /// <param name="fnc">Scale function</param>
-        public static void TweenHide(this UIControl control, float duration, ScaleFunc fnc)
-        {
-            if (control == null)
-            {
-                return;
-            }
-
-            TweenAlpha(control, 1, 0, duration, fnc);
-        }
-        /// <summary>
-        /// Changes the alpha component of a control color
-        /// </summary>
-        /// <param name="control">Control</param>
-        /// <param name="from">Start value</param>
-        /// <param name="to">End value</param>
-        /// <param name="duration">Duration</param>
-        /// <param name="fnc">Scale function</param>
-        public static void TweenAlpha(this UIControl control, float from, float to, float duration, ScaleFunc fnc)
-        {
-            if (control == null)
-            {
-                return;
-            }
-
-            FloatTween ftAlpha = new FloatTween();
-
-            ftAlpha.Start(from, to, duration, fnc);
-
-            AddAlphaTween(control, ftAlpha);
-        }
         /// <summary>
         /// Adds an alpha task to the internal task list
         /// </summary>
         /// <param name="control">Control</param>
         /// <param name="ftAlpha">Alpha tween</param>
-        private static void AddAlphaTween(UIControl control, FloatTween ftAlpha)
+        public static void AddAlphaTween(UIControl control, FloatTween ftAlpha)
         {
             control.Alpha = ftAlpha.StartValue;
             control.Active = true;
             control.Visible = true;
 
-            tasks.TryAdd(Guid.NewGuid(), (d) =>
+            var list = tasks.GetOrAdd(control, new List<Func<float, bool>>());
+            list.Add((d) =>
             {
                 ftAlpha.Update(d);
 

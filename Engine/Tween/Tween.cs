@@ -77,6 +77,22 @@ namespace Engine.Tween
             UpdateValue();
         }
         /// <summary>
+        /// Restarts the tween
+        /// </summary>
+        public void Restart()
+        {
+            Start(StartValue, EndValue, Duration, scaleFunc);
+        }
+        /// <summary>
+        /// Restarts the tween
+        /// </summary>
+        /// <param name="start">Starting value</param>
+        /// <param name="end">End value</param>
+        public void Restart(T start, T end)
+        {
+            Start(start, end, Duration, scaleFunc);
+        }
+        /// <summary>
         /// Pauses the tween.
         /// </summary>
         public void Pause()

@@ -26,7 +26,7 @@ namespace SpriteDrawing
 
         private UIPanel staticPan = null;
         private UITextArea textArea = null;
-        private readonly string allText = Properties.Resources.Lorem;
+        private readonly string allText = Properties.Resources.TinyLorem;
         private string currentText = "";
         private float textTime = 0;
         private float textInterval = 200f;
@@ -306,6 +306,11 @@ Progress: {(int)(progressValue * 100f)}%";
             {
                 this.spriteSmiley.MoveDown(gameTime, delta);
             }
+
+            if (this.Game.Input.KeyPressed(Keys.X))
+            {
+                this.spriteSmiley.ClearTween();
+            }
         }
         private void UpdateLorem(GameTime gameTime)
         {
@@ -349,13 +354,14 @@ Progress: {(int)(progressValue * 100f)}%";
             }
         }
 
-        private void ButClose_Click(object sender, System.EventArgs e)
+        private void ButClose_Click(object sender, EventArgs e)
         {
             dynamicPan.HideRoll(1);
 
             spriteSmiley.CenterHorizontally(CenterTargets.Screen);
             spriteSmiley.CenterVertically(CenterTargets.Screen);
-            spriteSmiley.Show(2.5f);
+            spriteSmiley.Show(1);
+            spriteSmiley.ScaleInScaleOut(0.85f, 1f, 0.25f);
         }
     }
 }
