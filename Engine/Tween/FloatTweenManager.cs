@@ -118,10 +118,11 @@ namespace Engine.Tween
 
                 if (ftScale.CurrentValue == ftScale.EndValue)
                 {
-                    var start = ftScale.StartValue;
-                    var end = ftScale.EndValue;
+                    //Reverse de parameters
+                    var newEnd = ftScale.StartValue;
+                    var newStart = ftScale.EndValue;
 
-                    ftScale.Restart(end, start);
+                    ftScale.Restart(newStart, newEnd);
                 }
 
                 return false;

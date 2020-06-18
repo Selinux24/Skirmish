@@ -856,7 +856,7 @@ namespace Engine
 
         #endregion
 
-        #region Rectangle
+        #region Rectangle & RectangleF
 
         public static Vector2Int TopLeft(this Rectangle rectangle)
         {
@@ -874,9 +874,9 @@ namespace Engine
         {
             return new Vector2Int(rectangle.Bottom, rectangle.Right);
         }
-        public static Vector2 Center(this Rectangle rectangle)
+        public static Vector2Int Center(this Rectangle rectangle)
         {
-            return new Vector2(rectangle.Left + (rectangle.Width / 2), rectangle.Top + (rectangle.Height / 2));
+            return new Vector2Int(rectangle.Left + (rectangle.Width / 2), rectangle.Top + (rectangle.Height / 2));
         }
         public static Vector2Int[] GetVertices(this Rectangle rectangle)
         {
@@ -888,11 +888,16 @@ namespace Engine
                 new Vector2Int(rectangle.Left, rectangle.Bottom),
             };
         }
-
-        #endregion
-
-        #region RectangleF
-
+        public static Vector2[] GetVertices(this RectangleF rectangle)
+        {
+            return new[]
+            {
+                new Vector2(rectangle.Left, rectangle.Top),
+                new Vector2(rectangle.Right, rectangle.Top),
+                new Vector2(rectangle.Right, rectangle.Bottom),
+                new Vector2(rectangle.Left, rectangle.Bottom),
+            };
+        }
         public static RectangleF Scale(this RectangleF rectangle, float scale)
         {
             float width = rectangle.Width * scale;
@@ -905,16 +910,11 @@ namespace Engine
 
             return new RectangleF(left, top, width, height);
         }
-        public static Vector2[] GetVertices(this RectangleF rectangle)
-        {
-            return new[]
-            {
-                new Vector2(rectangle.Left, rectangle.Top),
-                new Vector2(rectangle.Right, rectangle.Top),
-                new Vector2(rectangle.Right, rectangle.Bottom),
-                new Vector2(rectangle.Left, rectangle.Bottom),
-            };
-        }
+
+        #endregion
+
+        #region RectangleF
+
 
         #endregion
 
