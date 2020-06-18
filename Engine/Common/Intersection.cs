@@ -1,7 +1,6 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.Common
 {
@@ -10,17 +9,6 @@ namespace Engine.Common
     /// </summary>
     public static class Intersection
     {
-        /// <summary>
-        /// Calculates the perpendicular dot product of two vectors projected onto the XZ plane.
-        /// </summary>
-        /// <param name="left">A vector.</param>
-        /// <param name="right">Another vector.</param>
-        /// <returns>The perpendicular dot product on the XZ plane.</returns>
-        private static float PerpendicularDotXZ(ref Vector3 left, ref Vector3 right)
-        {
-            return left.X * right.Z - left.Z * right.X;
-        }
-
         /// <summary>
         /// Containment test between this <see cref="BoundingFrustum"/> and specified <see cref="BoundingFrustum"/>.
         /// </summary>
@@ -69,40 +57,9 @@ namespace Engine.Common
         /// <param name="box">The box to test</param>
         /// <param name="distance">When the method completes, contains the distance of the intersection, or 0 if there was no intersection</param>
         /// <returns>Whether the two objects intersected</returns>
-        public static bool RayIntersectsBox(ref Ray ray, ref BoundingBox box, out float distance)
-        {
-            return Collision.RayIntersectsBox(ref ray, ref box, out distance);
-        }
-        /// <summary>
-        /// Determines whether there is an intersection between a Ray and a BoundingBox
-        /// </summary>
-        /// <param name="ray">The ray to test</param>
-        /// <param name="box">The box to test</param>
-        /// <param name="distance">When the method completes, contains the distance of the intersection, or 0 if there was no intersection</param>
-        /// <returns>Whether the two objects intersected</returns>
         public static bool RayIntersectsBox(Ray ray, BoundingBox box, out float distance)
         {
             return Collision.RayIntersectsBox(ref ray, ref box, out distance);
-        }
-        /// <summary>
-        /// Determines whether there is an intersection between a <see cref="Ray"/> and a triangle.
-        /// </summary>
-        /// <param name="ray">The ray to test.</param>
-        /// <param name="vertex1">The first vertex of the triangle to test.</param>
-        /// <param name="vertex2">The second vertex of the triangle to test.</param>
-        /// <param name="vertex3">The third vertex of the triangle to test.</param>
-        /// <param name="distance">Distance to point</param>
-        /// <returns>Whether the two objects intersected.</returns>
-        public static bool RayIntersectsTriangle(ref Ray ray, ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3, out float distance)
-        {
-            if (!Collision.RayIntersectsTriangle(ref ray, ref vertex1, ref vertex2, ref vertex3, out float d))
-            {
-                distance = float.MaxValue;
-                return false;
-            }
-
-            distance = d;
-            return true;
         }
         /// <summary>
         /// Determines whether there is an intersection between a <see cref="Ray"/> and a triangle.
@@ -125,43 +82,6 @@ namespace Engine.Common
 
             point = ray.Position + (ray.Direction * d);
             distance = d;
-            return true;
-        }
-        /// <summary>
-		/// Determine whether a ray is intersecting a segment AB.
-		/// </summary>
-        /// <param name="ray">Ray</param>
-		/// <param name="a">The endpoint A of segment AB.</param>
-		/// <param name="b">The endpoint B of segment AB.</param>
-		/// <param name="t">The parameter t</param>
-		/// <returns>A value indicating whether the ray is intersecting with the segment.</returns>
-		public static bool RayIntersectsSegment(ref Ray ray, ref Vector3 a, ref Vector3 b, out float t)
-        {
-            //default if not intersectng
-            t = 0;
-
-            Vector3 v = b - a;
-            Vector3 w = ray.Position - a;
-
-            float d = PerpendicularDotXZ(ref ray.Direction, ref v) * -1;
-            if (Math.Abs(d) < 1e-6f)
-            {
-                return false;
-            }
-
-            d = 1.0f / d;
-            t = PerpendicularDotXZ(ref v, ref w) * -d;
-            if (t < 0 || t > 1)
-            {
-                return false;
-            }
-
-            float s = PerpendicularDotXZ(ref ray.Direction, ref w) * -d;
-            if (s < 0 || s > 1)
-            {
-                return false;
-            }
-
             return true;
         }
         /// <summary>
@@ -206,34 +126,6 @@ namespace Engine.Common
 
             distance = float.MaxValue;
             return false;
-        }
-        /// <summary>
-        /// Determines whether a point is inside a polygon.
-        /// </summary>
-        /// <param name="point">A point.</param>
-        /// <param name="vertices">A set of vertices that define a polygon.</param>
-        /// <returns>A value indicating whether the point is contained within the polygon.</returns>
-        public static bool PointInPoly(Vector3 point, IEnumerable<Vector3> vertices)
-        {
-            bool c = false;
-
-            var vertsArray = vertices.ToArray();
-
-            int nverts = vertsArray.Length;
-
-            for (int i = 0, j = nverts - 1; i < nverts; j = i++)
-            {
-                Vector3 vi = vertsArray[i];
-                Vector3 vj = vertsArray[j];
-
-                if (((vi.Z > point.Z) != (vj.Z > point.Z)) &&
-                    (point.X < (vj.X - vi.X) * (point.Z - vi.Z) / (vj.Z - vi.Z) + vi.X))
-                {
-                    c = !c;
-                }
-            }
-
-            return c;
         }
 
         /// <summary>

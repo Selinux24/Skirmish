@@ -33,6 +33,8 @@ namespace SpriteDrawing
 
         private UIPanel dynamicPan = null;
 
+        private UIButton butTest = null;
+
         public TestScene(Game game)
             : base(game)
         {
@@ -110,6 +112,7 @@ namespace SpriteDrawing
                     InitializeSmiley(),
                     InitializeStaticPan(),
                     InitializeDynamicPan(),
+                    InitializeButtonTest(),
                 },
                 async () =>
                 {
@@ -228,6 +231,35 @@ namespace SpriteDrawing
 
             this.dynamicPan.AddChild(butClose);
             this.dynamicPan.Visible = false;
+        }
+        private async Task InitializeButtonTest()
+        {
+            var descButClose = new UIButtonDescription
+            {
+                Name = "Test Button",
+
+                Top = 250,
+                Left = 150,
+                Width = 200,
+                Height = 55,
+
+                TwoStateButton = true,
+                ColorReleased = Color.Blue,
+                ColorPressed = Color.Green,
+
+                Font = new TextDrawerDescription()
+                {
+                    FontFileName = "LeagueSpartan-Bold.otf",
+                    FontSize = 16,
+                    LineAdjust = true,
+                },
+                Text = "Press Me",
+            };
+            butTest = await this.AddComponentUIButton(descButClose, layerHUD);
+            butTest.JustReleased += ButTest_Click;
+            butTest.MouseEnter += ButTest_MouseEnter;
+            butTest.MouseLeave += ButTest_MouseLeave;
+            butTest.Visible = false;
         }
 
         public override void OnReportProgress(float value)
@@ -362,6 +394,27 @@ Progress: {(int)(progressValue * 100f)}%";
             spriteSmiley.CenterVertically(CenterTargets.Screen);
             spriteSmiley.Show(1);
             spriteSmiley.ScaleInScaleOut(0.85f, 1f, 0.25f);
+
+            butTest.Show(0.25f);
+        }
+
+        private void ButTest_Click(object sender, EventArgs e)
+        {
+            spriteSmiley.ClearTween();
+            spriteSmiley.Hide(0.5f);
+
+            butTest.ClearTween();
+            butTest.MouseLeave -= ButTest_MouseLeave;
+            butTest.MouseEnter -= ButTest_MouseEnter;
+            butTest.Hide(0.5f);
+        }
+        private void ButTest_MouseLeave(object sender, EventArgs e)
+        {
+            butTest.TweenScale(butTest.Scale, 1, 0.15f, ScaleFuncs.QuadraticEaseOut);
+        }
+        private void ButTest_MouseEnter(object sender, EventArgs e)
+        {
+            butTest.TweenScale(butTest.Scale, 2, 0.15f, ScaleFuncs.QuadraticEaseIn);
         }
     }
 }

@@ -343,22 +343,6 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Merge two arrays
-        /// </summary>
-        /// <typeparam name="T">Type of array</typeparam>
-        /// <param name="array1">First array</param>
-        /// <param name="array2">Second array</param>
-        /// <returns>Returns an array with both array values merged</returns>
-        public static T[] Merge<T>(this T[] array1, T[] array2)
-        {
-            T[] newArray = new T[array1.Length + array2.Length];
-
-            array1.CopyTo(newArray, 0);
-            array2.CopyTo(newArray, array1.Length);
-
-            return newArray;
-        }
-        /// <summary>
         /// Gets the maximum value of the collection 
         /// </summary>
         /// <typeparam name="T">Type</typeparam>
@@ -893,6 +877,43 @@ namespace Engine
         public static Vector2 Center(this Rectangle rectangle)
         {
             return new Vector2(rectangle.Left + (rectangle.Width / 2), rectangle.Top + (rectangle.Height / 2));
+        }
+        public static Vector2Int[] GetVertices(this Rectangle rectangle)
+        {
+            return new[]
+            {
+                new Vector2Int(rectangle.Left, rectangle.Top),
+                new Vector2Int(rectangle.Right, rectangle.Top),
+                new Vector2Int(rectangle.Right, rectangle.Bottom),
+                new Vector2Int(rectangle.Left, rectangle.Bottom),
+            };
+        }
+
+        #endregion
+
+        #region RectangleF
+
+        public static RectangleF Scale(this RectangleF rectangle, float scale)
+        {
+            float width = rectangle.Width * scale;
+            float height = rectangle.Height * scale;
+            float dWidth = width - rectangle.Width;
+            float dHeight = height - rectangle.Height;
+
+            float left = rectangle.Left - (dWidth * 0.5f);
+            float top = rectangle.Top - (dHeight * 0.5f);
+
+            return new RectangleF(left, top, width, height);
+        }
+        public static Vector2[] GetVertices(this RectangleF rectangle)
+        {
+            return new[]
+            {
+                new Vector2(rectangle.Left, rectangle.Top),
+                new Vector2(rectangle.Right, rectangle.Top),
+                new Vector2(rectangle.Right, rectangle.Bottom),
+                new Vector2(rectangle.Left, rectangle.Bottom),
+            };
         }
 
         #endregion

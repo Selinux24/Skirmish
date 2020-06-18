@@ -17,6 +17,14 @@ namespace Engine.UI
         /// </summary>
         public event EventHandler MouseOver;
         /// <summary>
+        /// Mouse enter event
+        /// </summary>
+        public event EventHandler MouseEnter;
+        /// <summary>
+        /// Mouse leave event
+        /// </summary>
+        public event EventHandler MouseLeave;
+        /// <summary>
         /// Mouse pressed
         /// </summary>
         public event EventHandler Pressed;
@@ -77,6 +85,10 @@ namespace Engine.UI
         /// Update internals flag
         /// </summary>
         private bool updateInternals = false;
+        /// <summary>
+        /// Indicates whether the mouse was previously pressed or not
+        /// </summary>
+        private bool prevIsMouseOver = false;
 
         /// <summary>
         /// Manipulator
@@ -630,10 +642,21 @@ namespace Engine.UI
         /// </summary>
         protected virtual void UpdateInput()
         {
-            if (this.IsMouseOver)
+            bool isMouseOver = this.IsMouseOver;
+            if (isMouseOver)
             {
                 this.FireMouseOverEvent();
+
+                if (!this.prevIsMouseOver)
+                {
+                    this.FireMouseEnterEvent();
+                }
             }
+            else if (prevIsMouseOver)
+            {
+                this.FireMouseLeaveEvent();
+            }
+            this.prevIsMouseOver = isMouseOver;
 
             if (this.IsPressed)
             {
@@ -673,6 +696,20 @@ namespace Engine.UI
         protected void FireMouseOverEvent()
         {
             this.MouseOver?.Invoke(this, new EventArgs());
+        }
+        /// <summary>
+        /// Fires on mouse enter event
+        /// </summary>
+        protected void FireMouseEnterEvent()
+        {
+            this.MouseEnter?.Invoke(this, new EventArgs());
+        }
+        /// <summary>
+        /// Fires on mouse leave event
+        /// </summary>
+        protected void FireMouseLeaveEvent()
+        {
+            this.MouseLeave?.Invoke(this, new EventArgs());
         }
         /// <summary>
         /// Fires on pressed event
@@ -807,7 +844,7 @@ namespace Engine.UI
         /// <returns>Returns true if the point is contained into the control rectangle</returns>
         public bool Contains(Point point)
         {
-            return AbsoluteRectangle.Contains(point.X, point.Y);
+            return AbsoluteRectangle.Scale(AbsoluteScale).Contains(point.X, point.Y);
         }
 
         /// <summary>

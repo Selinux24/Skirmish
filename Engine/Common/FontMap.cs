@@ -264,7 +264,6 @@ namespace Engine.Common
                     //Generate the texture
                     fMap.bitmapStream = new MemoryStream();
                     bmp.Save(fMap.bitmapStream, ImageFormat.Png);
-                    bmp.Save($@"D:\Users\Selinux\Desktop\Fonts\{family.Name}{size}.bmp", ImageFormat.Bmp);
                     fMap.Texture = game.ResourceManager.RequestResource(fMap.bitmapStream, false);
                 }
 

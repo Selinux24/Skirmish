@@ -36,7 +36,6 @@ namespace SpriteDrawing
             ctrl.TweenRotate(-MathUtil.TwoPi, time * 0.25f, ScaleFuncs.Linear);
         }
 
-
         public static void ScaleInScaleOut(this UIControl ctrl, float from, float to, float time)
         {
             ctrl.TweenScaleBounce(from, to, time, ScaleFuncs.Linear);
