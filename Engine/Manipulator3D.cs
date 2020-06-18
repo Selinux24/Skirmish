@@ -121,16 +121,6 @@ namespace Engine
         /// Gets the velocity vector
         /// </summary>
         public Vector3 Velocity { get; private set; }
-        /// <summary>
-        /// Returns the average scale magnitude (x+y+z)/3
-        /// </summary>
-        public float AveragingScale
-        {
-            get
-            {
-                return (this.scaling.X + this.scaling.Y + this.scaling.Z) * 0.3333f;
-            }
-        }
 
         /// <summary>
         /// Contructor

@@ -139,7 +139,7 @@ namespace Engine.UI
                 ViewProjection = view * proj,
                 EyePosition = eyePos,
                 EyeTarget = target,
-                Lights = SceneLights.CreateDefault(),
+                Lights = SceneLights.CreateDefault(this.Scene),
             };
         }
 

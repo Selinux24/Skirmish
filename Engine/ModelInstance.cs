@@ -494,8 +494,7 @@ namespace Engine
             this.LevelOfDetail = GameEnvironment.GetLOD(
                 origin,
                 this.coarseBoundingSphere,
-                this.Manipulator.LocalTransform,
-                this.Manipulator.AveragingScale);
+                this.Manipulator.LocalTransform);
         }
 
         /// <summary>

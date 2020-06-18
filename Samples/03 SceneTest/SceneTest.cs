@@ -108,7 +108,7 @@ namespace SceneTest
                 this.RefreshUI();
             });
 
-            this.TimeOfDay.BeginAnimation(new TimeSpan(9, 00, 00), 0.1f);
+            this.Environment.TimeOfDay.BeginAnimation(9, 00, 00, 0.1f);
         }
         private async Task InitializeCursor()
         {

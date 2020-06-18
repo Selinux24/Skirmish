@@ -399,8 +399,7 @@ namespace Engine
                 this.LevelOfDetail = GameEnvironment.GetLOD(
                     eyePosition,
                     this.coarseBoundingSphere,
-                    this.Manipulator.LocalTransform,
-                    this.Manipulator.AveragingScale);
+                    this.Manipulator.LocalTransform);
             }
 
             return cull;

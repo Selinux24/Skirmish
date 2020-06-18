@@ -11,6 +11,7 @@ namespace Engine
     using Engine.Common;
     using Engine.Effects;
     using Engine.PathFinding;
+    using Engine.Tween;
 
     /// <summary>
     /// Render scene
@@ -253,6 +254,10 @@ namespace Engine
         /// </summary>
         public Game Game { get; private set; }
         /// <summary>
+        /// Game environment
+        /// </summary>
+        public GameEnvironment Environment { get; private set; } = new GameEnvironment();
+        /// <summary>
         /// Scene renderer
         /// </summary>
         protected ISceneRenderer Renderer = null;
@@ -277,10 +282,6 @@ namespace Engine
         /// Camera
         /// </summary>
         public Camera Camera { get; protected set; }
-        /// <summary>
-        /// Time of day controller
-        /// </summary>
-        public TimeOfDay TimeOfDay { get; set; }
         /// <summary>
         /// Indicates whether the current scene is active
         /// </summary>
@@ -318,8 +319,6 @@ namespace Engine
             this.Game.ResourcesLoaded += FireResourcesLoaded;
             this.Game.Graphics.Resized += FireGraphicsResized;
 
-            this.TimeOfDay = new TimeOfDay();
-
             this.AudioManager = new GameAudioManager();
 
             this.Camera = Camera.CreateFree(
@@ -330,7 +329,7 @@ namespace Engine
                 this.Game.Form.RenderWidth,
                 this.Game.Form.RenderHeight);
 
-            this.Lights = SceneLights.CreateDefault();
+            this.Lights = SceneLights.CreateDefault(this);
 
             this.PerformFrustumCulling = true;
 
@@ -412,22 +411,29 @@ namespace Engine
             {
                 if (this.UpdateGlobalResources)
                 {
+                    Console.WriteLine("Updating global resources.");
+
                     this.UpdateGlobals();
 
                     this.UpdateGlobalResources = false;
                 }
 
-                this.Camera?.Update(gameTime);
+                this.Environment.Update(gameTime);
 
-                this.TimeOfDay?.Update(gameTime);
+                // Lights
+                this.Lights?.Update();
+
+                // Camera!
+                this.Camera?.Update(gameTime);
 
                 this.AudioManager?.Update();
 
                 this.NavigationGraph?.Update(gameTime);
 
-                this.Lights?.UpdateLights(this.TimeOfDay);
-
+                // Action!
                 this.Renderer?.Update(gameTime, this);
+
+                FloatTweenManager.Update(gameTime);
             }
             catch (EngineException ex)
             {

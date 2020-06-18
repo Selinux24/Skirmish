@@ -277,8 +277,6 @@ namespace SpriteDrawing
         {
             base.Update(gameTime);
 
-            FloatTweenManager.Update(gameTime.ElapsedSeconds);
-
             UpdateDebugInfo();
 
             if (!gameReady)

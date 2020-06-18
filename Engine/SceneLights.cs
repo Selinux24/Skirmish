@@ -15,8 +15,9 @@ namespace Engine
         /// <summary>
         /// Create default set of lights
         /// </summary>
+        /// <param name="scene">Scene</param>
         /// <returns>Returns default set of ligths</returns>
-        public static SceneLights CreateDefault()
+        public static SceneLights CreateDefault(Scene scene)
         {
             var lights = new[]
             {
@@ -25,7 +26,7 @@ namespace Engine
                 SceneLightDirectional.BackLight,
             };
 
-            var defLights = new SceneLights();
+            var defLights = new SceneLights(scene);
 
             defLights.AddRange(lights);
 
@@ -34,6 +35,10 @@ namespace Engine
 
         #endregion
 
+        /// <summary>
+        /// Scene
+        /// </summary>
+        private readonly Scene scene = null;
         /// <summary>
         /// Directional lights
         /// </summary>
@@ -190,8 +195,11 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        public SceneLights()
+        /// <param name="scene">Scene</param>
+        public SceneLights(Scene scene)
         {
+            this.scene = scene;
+
             this.FogStart = 0f;
             this.FogRange = 0;
             this.FarLightsDistance = 1000000f;
@@ -542,56 +550,59 @@ namespace Engine
         /// <summary>
         /// Update directional lights with time of day controller
         /// </summary>
-        /// <param name="timeOfDay">Time of day</param>
-        public void UpdateLights(TimeOfDay timeOfDay)
+        public void Update()
         {
-            if (timeOfDay.Updated)
+            var timeOfDay = this.scene.Environment.TimeOfDay;
+
+            if (!timeOfDay.Updated)
             {
-                float b = Math.Max(0, -(float)Math.Cos(timeOfDay.Elevation) + 0.15f) * 1.5f;
-                this.Intensity = Math.Min(b, 1f);
+                return;
+            }
 
-                Vector3 keyDir = timeOfDay.LightDirection;
-                Vector3 backDir = -Vector3.Reflect(keyDir, Vector3.Up);
+            float b = Math.Max(0, -(float)Math.Cos(timeOfDay.Elevation) + 0.15f) * 1.5f;
+            this.Intensity = Math.Min(b, 1f);
 
-                float tan = (float)Math.Tan(timeOfDay.Elevation);
-                Vector3 fillDir = tan >= 0f ? Vector3.Cross(keyDir, backDir) : Vector3.Cross(backDir, keyDir);
+            Vector3 keyDir = timeOfDay.LightDirection;
+            Vector3 backDir = -Vector3.Reflect(keyDir, Vector3.Up);
+
+            float tan = (float)Math.Tan(timeOfDay.Elevation);
+            Vector3 fillDir = tan >= 0f ? Vector3.Cross(keyDir, backDir) : Vector3.Cross(backDir, keyDir);
+
+            if (this.UseSunColorPalette)
+            {
+                this.SunColor = this.GetSunColor(timeOfDay);
+            }
+
+            var keyLight = this.KeyLight;
+            if (keyLight != null)
+            {
+                keyLight.Brightness = keyLight.BaseBrightness * b;
+
+                keyLight.Direction = keyDir;
 
                 if (this.UseSunColorPalette)
                 {
-                    this.SunColor = this.GetSunColor(timeOfDay);
+                    keyLight.SpecularColor = this.SunColor * b;
                 }
-
-                var keyLight = this.KeyLight;
-                if (keyLight != null)
-                {
-                    keyLight.Brightness = keyLight.BaseBrightness * b;
-
-                    keyLight.Direction = keyDir;
-
-                    if (this.UseSunColorPalette)
-                    {
-                        keyLight.SpecularColor = this.SunColor * b;
-                    }
-                }
-
-                var fillLight = this.FillLight;
-                if (fillLight != null)
-                {
-                    fillLight.Brightness = fillLight.BaseBrightness * b;
-
-                    fillLight.Direction = fillDir;
-                }
-
-                var backLight = this.BackLight;
-                if (backLight != null)
-                {
-                    backLight.Brightness = backLight.BaseBrightness * b;
-
-                    backLight.Direction = backDir;
-                }
-
-                this.FogColor = this.BaseFogColor * this.Intensity;
             }
+
+            var fillLight = this.FillLight;
+            if (fillLight != null)
+            {
+                fillLight.Brightness = fillLight.BaseBrightness * b;
+
+                fillLight.Direction = fillDir;
+            }
+
+            var backLight = this.BackLight;
+            if (backLight != null)
+            {
+                backLight.Brightness = backLight.BaseBrightness * b;
+
+                backLight.Direction = backDir;
+            }
+
+            this.FogColor = this.BaseFogColor * this.Intensity;
         }
         /// <summary>
         /// Gets the sun color based on time of day

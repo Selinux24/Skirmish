@@ -1,6 +1,5 @@
 ﻿using Engine;
 using SharpDX;
-using System;
 using System.Threading.Tasks;
 
 namespace SceneTest
@@ -35,8 +34,8 @@ namespace SceneTest
 
             await this.LoadResourcesAsync(InitializeAssets());
 
-            //this.TimeOfDay.BeginAnimation(new TimeSpan(5, 00, 00), 10f);
-            this.TimeOfDay.SetTimeOfDay(new TimeSpan(7, 00, 00));
+            this.Environment.TimeOfDay.BeginAnimation(5, 00, 00, 10f);
+            //this.Environment.TimeOfDay.SetTimeOfDay(7, 00, 00)
         }
         private async Task InitializeAssets()
         {

@@ -19,8 +19,8 @@ namespace Engine.Tween
         /// <summary>
         /// Updates the task list
         /// </summary>
-        /// <param name="elapsedTime">Elapsed time</param>
-        public static void Update(float elapsedTime)
+        /// <param name="gameTime">Game time</param>
+        public static void Update(GameTime gameTime)
         {
             if (!tasks.Any())
             {
@@ -43,7 +43,7 @@ namespace Engine.Tween
 
                 activeTasks.ForEach(t =>
                 {
-                    bool finished = t.Invoke(elapsedTime);
+                    bool finished = t.Invoke(gameTime.ElapsedSeconds);
                     if (finished)
                     {
                         toDelete.Add(t);
@@ -118,11 +118,10 @@ namespace Engine.Tween
 
                 if (ftScale.CurrentValue == ftScale.EndValue)
                 {
-                    //Reverse de parameters
-                    var newEnd = ftScale.StartValue;
-                    var newStart = ftScale.EndValue;
+                    var start = ftScale.StartValue;
+                    var end = ftScale.EndValue;
 
-                    ftScale.Restart(newStart, newEnd);
+                    ftScale.Restart(end, start);
                 }
 
                 return false;
