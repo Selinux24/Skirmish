@@ -250,13 +250,13 @@ namespace SpriteDrawing
                 CenterVertically = CenterTargets.Parent,
                 Text = @"Letters by Mara",
             };
-            var textArea = new UITextArea(this, descText)
+            var textMapped = new UITextArea(this, descText)
             {
                 Scale = 0.25f,
             };
 
             this.dynamicPan.AddChild(butClose, false);
-            this.dynamicPan.AddChild(textArea);
+            this.dynamicPan.AddChild(textMapped);
             this.dynamicPan.Visible = false;
         }
         private async Task InitializeButtonTest()

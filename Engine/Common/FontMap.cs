@@ -174,16 +174,16 @@ namespace Engine.Common
                 string fontMapName = Path.Combine(contentPath, fontMapping.MapFile);
 
                 string[] charMaps = File.ReadAllLines(fontMapName);
-                foreach (var map in charMaps)
+                foreach (var charMap in charMaps)
                 {
-                    if (string.IsNullOrWhiteSpace(map))
+                    if (string.IsNullOrWhiteSpace(charMap))
                     {
                         continue;
                     }
 
-                    if (map.StartsWith("size:", StringComparison.OrdinalIgnoreCase))
+                    if (charMap.StartsWith("size:", StringComparison.OrdinalIgnoreCase))
                     {
-                        Vector2 textureSize = FromMap(map.Substring(6));
+                        Vector2 textureSize = FromMap(charMap.Substring(6));
 
                         fMap.TextureWidth = (int)textureSize.X;
                         fMap.TextureHeight = (int)textureSize.Y;
@@ -191,12 +191,12 @@ namespace Engine.Common
                         continue;
                     }
 
-                    int leftTopIndex = map.IndexOf(":") + 1;
-                    int rightBottomIndex = map.IndexOf(";", leftTopIndex) + 1;
+                    int leftTopIndex = charMap.IndexOf(":") + 1;
+                    int rightBottomIndex = charMap.IndexOf(";", leftTopIndex) + 1;
 
-                    char c = map[0];
-                    Vector2 topLeft = FromMap(map.Substring(leftTopIndex, rightBottomIndex - leftTopIndex - 1));
-                    Vector2 bottomRight = FromMap(map.Substring(rightBottomIndex));
+                    char c = charMap[0];
+                    Vector2 topLeft = FromMap(charMap.Substring(leftTopIndex, rightBottomIndex - leftTopIndex - 1));
+                    Vector2 bottomRight = FromMap(charMap.Substring(rightBottomIndex));
 
                     var chr = new FontMapChar()
                     {
@@ -399,6 +399,10 @@ namespace Engine.Common
         private static Vector2 FromMap(string mapBitz)
         {
             string[] bitz = mapBitz?.Split(",".ToArray(), StringSplitOptions.RemoveEmptyEntries);
+            if (bitz?.Length < 2)
+            {
+                return new Vector2();
+            }
 
             return new Vector2(Convert.ToInt32(bitz[0]), Convert.ToInt32(bitz[1]));
         }
