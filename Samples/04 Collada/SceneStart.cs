@@ -238,8 +238,8 @@ namespace Collada
         private void SetControlPositions()
         {
             this.title.Text = "Collada Loader Test";
-            this.title.CenterHorizontally(CenterTargets.Screen);
-            this.title.CenterVertically(CenterTargets.Screen);
+            this.title.CenterHorizontally = CenterTargets.Screen;
+            this.title.CenterVertically = CenterTargets.Screen;
             this.title.Top = this.Game.Form.RenderHeight * 0.25f;
 
             this.sceneDungeonWallButton.Text = "Dungeon Wall";

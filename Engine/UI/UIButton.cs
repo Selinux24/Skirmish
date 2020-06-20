@@ -53,7 +53,6 @@ namespace Engine.UI
             {
                 Name = $"{description.Name}.ReleasedButton",
                 Color = description.ColorReleased,
-                FitParent = true,
             };
 
             if (!string.IsNullOrEmpty(description.TextureReleased))
@@ -63,7 +62,7 @@ namespace Engine.UI
             }
 
             this.buttonReleased = new Sprite(scene, spriteDesc);
-            this.AddChild(this.buttonReleased);
+            this.AddChild(this.buttonReleased, true);
 
             if (description.TwoStateButton)
             {
@@ -71,7 +70,6 @@ namespace Engine.UI
                 {
                     Name = $"{description.Name}.PressedButton",
                     Color = description.ColorPressed,
-                    FitParent = true,
                 };
 
                 if (!string.IsNullOrEmpty(description.TexturePressed))
@@ -81,7 +79,8 @@ namespace Engine.UI
                 }
 
                 this.buttonPressed = new Sprite(scene, spriteDesc2);
-                this.AddChild(this.buttonPressed);
+
+                this.AddChild(this.buttonPressed, true);
             }
 
             if (description.Font != null)
@@ -95,12 +94,11 @@ namespace Engine.UI
 
                 this.textArea = new UITextArea(scene, textAreaDesc)
                 {
-                    FitParent = true,
+                    CenterHorizontally = CenterTargets.Parent,
+                    CenterVertically = CenterTargets.Parent
                 };
-                this.textArea.CenterHorizontally(CenterTargets.Parent);
-                this.textArea.CenterVertically(CenterTargets.Parent);
 
-                this.AddChild(this.textArea);
+                this.AddChild(this.textArea, true);
 
                 this.Text = description.Text;
             }

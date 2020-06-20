@@ -9,6 +9,7 @@ using System.Linq;
 namespace Engine.Common
 {
     using Engine.Content;
+    using Engine.UI;
     using SharpDX;
 
     /// <summary>
@@ -119,14 +120,16 @@ namespace Engine.Common
                 return cList.ToArray();
             }
         }
+
         /// <summary>
         /// Creates a font map of the specified font file and size
         /// </summary>
         /// <param name="game">Game</param>
+        /// <param name="contentPath">Content path</param>
         /// <param name="fontFileName">Font file name</param>
         /// <param name="size">Size</param>
-        /// <param name="bold">Weight</param>
-        /// <returns>Returns created font map</returns>
+        /// <param name="style">Style</param>
+        /// <returns>Returns the created font map</returns>
         public static FontMap MapFromFile(Game game, string contentPath, string fontFileName, float size, FontMapStyles style)
         {
             var fileNames = ContentManager.FindPaths(contentPath, fontFileName);
@@ -148,13 +151,75 @@ namespace Engine.Common
             }
         }
         /// <summary>
+        /// Creates a font map of the specified font mapping
+        /// </summary>
+        /// <param name="game">Game</param>
+        /// <param name="contentPath">Content path</param>
+        /// <param name="fontMapping">Font mapping</param>
+        /// <returns>Returns the created font map</returns>
+        public static FontMap FromMap(Game game, string contentPath, FontMapping fontMapping)
+        {
+            string fontName = Path.Combine(contentPath, fontMapping.ImageFile);
+
+            var fMap = gCache.FirstOrDefault(f => f != null && f.Font == fontName);
+            if (fMap == null)
+            {
+                fMap = new FontMap()
+                {
+                    Font = fontName,
+                };
+
+                fMap.Texture = game.ResourceManager.RequestResource(fontName, false);
+
+                string fontMapName = Path.Combine(contentPath, fontMapping.MapFile);
+
+                string[] charMaps = File.ReadAllLines(fontMapName);
+                foreach (var map in charMaps)
+                {
+                    if (string.IsNullOrWhiteSpace(map))
+                    {
+                        continue;
+                    }
+
+                    if (map.StartsWith("size:", StringComparison.OrdinalIgnoreCase))
+                    {
+                        Vector2 textureSize = FromMap(map.Substring(6));
+
+                        fMap.TextureWidth = (int)textureSize.X;
+                        fMap.TextureHeight = (int)textureSize.Y;
+
+                        continue;
+                    }
+
+                    int leftTopIndex = map.IndexOf(":") + 1;
+                    int rightBottomIndex = map.IndexOf(";", leftTopIndex) + 1;
+
+                    char c = map[0];
+                    Vector2 topLeft = FromMap(map.Substring(leftTopIndex, rightBottomIndex - leftTopIndex - 1));
+                    Vector2 bottomRight = FromMap(map.Substring(rightBottomIndex));
+
+                    var chr = new FontMapChar()
+                    {
+                        X = topLeft.X,
+                        Y = topLeft.Y,
+                        Width = bottomRight.X - topLeft.X,
+                        Height = bottomRight.Y - topLeft.Y,
+                    };
+
+                    fMap.map.Add(c, chr);
+                }
+            }
+
+            return fMap;
+        }
+        /// <summary>
         /// Creates a font map of the specified font and size
         /// </summary>
         /// <param name="game">Game</param>
         /// <param name="font">Font name</param>
         /// <param name="size">Size</param>
-        /// <param name="bold">Weight</param>
-        /// <returns>Returns created font map</returns>
+        /// <param name="style">Style</param>
+        /// <returns>Returns the created font map</returns>
         public static FontMap Map(Game game, string font, float size, FontMapStyles style)
         {
             if (!FontFamily.Families.Any(f => string.Equals(f.Name, font, StringComparison.OrdinalIgnoreCase)))
@@ -175,8 +240,8 @@ namespace Engine.Common
         /// <param name="game">Game</param>
         /// <param name="family">Font family</param>
         /// <param name="size">Size</param>
-        /// <param name="bold">Weight</param>
-        /// <returns>Returns created font map</returns>
+        /// <param name="style">Style</param>
+        /// <returns>Returns the created font map</returns>
         private static FontMap Map(Game game, FontFamily family, float size, FontMapStyles style)
         {
             var fMap = gCache.FirstOrDefault(f => f != null && f.Font == family.Name && f.Size == size && f.Style == style);
@@ -273,6 +338,7 @@ namespace Engine.Common
 
             return fMap;
         }
+
         /// <summary>
         /// Measures the map to return the destination width and height of the texture
         /// </summary>
@@ -324,6 +390,17 @@ namespace Engine.Common
 
             width = Helper.NextPowerOfTwo(width);
             height = Helper.NextPowerOfTwo(height);
+        }
+        /// <summary>
+        /// Reads a vector from a font-map line
+        /// </summary>
+        /// <param name="mapBitz">Map text bitz</param>
+        /// <returns>Returns a vector</returns>
+        private static Vector2 FromMap(string mapBitz)
+        {
+            string[] bitz = mapBitz?.Split(",".ToArray(), StringSplitOptions.RemoveEmptyEntries);
+
+            return new Vector2(Convert.ToInt32(bitz[0]), Convert.ToInt32(bitz[1]));
         }
 
         /// <summary>

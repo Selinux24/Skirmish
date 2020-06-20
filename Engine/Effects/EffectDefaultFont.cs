@@ -27,6 +27,10 @@ namespace Engine.Effects
         /// </summary>
         private readonly EngineEffectVariableVector colorVar = null;
         /// <summary>
+        /// Use color effect variable
+        /// </summary>
+        private readonly EngineEffectVariableScalar useColorVar = null;
+        /// <summary>
         /// Texture effect variable
         /// </summary>
         private readonly EngineEffectVariableTexture textureVar = null;
@@ -79,6 +83,20 @@ namespace Engine.Effects
             }
         }
         /// <summary>
+        /// Use texture color
+        /// </summary>
+        protected bool UseColor
+        {
+            get
+            {
+                return this.useColorVar.GetBool();
+            }
+            set
+            {
+                this.useColorVar.Set(value);
+            }
+        }
+        /// <summary>
         /// Texture
         /// </summary>
         protected EngineShaderResourceView Texture
@@ -114,6 +132,7 @@ namespace Engine.Effects
             this.worldVar = this.Effect.GetVariableMatrix("gWorld");
             this.worldViewProjectionVar = this.Effect.GetVariableMatrix("gWorldViewProjection");
             this.colorVar = this.Effect.GetVariableVector("gColor");
+            this.useColorVar = this.Effect.GetVariableScalar("gUseColor");
             this.textureVar = this.Effect.GetVariableTexture("gTexture");
         }
 
@@ -124,17 +143,20 @@ namespace Engine.Effects
         /// <param name="viewProjection">View * projection matrix</param>
         /// <param name="color">Text color</param>
         /// <param name="alphaMult">Alpha multiplier</param>
+        /// <param name="useTextureColor">Use the texture color instead of the specified color</param>
         /// <param name="texture">Font texture</param>
         public void UpdatePerFrame(
             Matrix world,
             Matrix viewProjection,
             Color3 color,
             float alphaMult,
+            bool useTextureColor,
             EngineShaderResourceView texture)
         {
             this.World = world;
             this.WorldViewProjection = world * viewProjection;
             this.Color = new Color4(color, alphaMult);
+            this.UseColor = useTextureColor;
             this.Texture = texture;
         }
     }

@@ -32,6 +32,11 @@ namespace Engine.Tween
 
             foreach (var task in activeControls)
             {
+                if (!task.Key.Active)
+                {
+                    continue;
+                }
+
                 // Copy active tasks
                 var activeTasks = task.Value.ToList();
                 if (!activeTasks.Any())
@@ -80,8 +85,6 @@ namespace Engine.Tween
         public static void AddScaleTween(UIControl control, FloatTween ftScale)
         {
             control.Scale = ftScale.StartValue;
-            control.Active = true;
-            control.Visible = true;
 
             var list = tasks.GetOrAdd(control, new List<Func<float, bool>>());
             list.Add((d) =>
@@ -106,8 +109,6 @@ namespace Engine.Tween
         public static void AddScaleBounce(UIControl control, FloatTween ftScale)
         {
             control.Scale = ftScale.StartValue;
-            control.Active = true;
-            control.Visible = true;
 
             var list = tasks.GetOrAdd(control, new List<Func<float, bool>>());
             list.Add((d) =>
@@ -135,8 +136,6 @@ namespace Engine.Tween
         public static void AddRotateTween(UIControl control, FloatTween ftRotate)
         {
             control.Rotation = ftRotate.StartValue;
-            control.Active = true;
-            control.Visible = true;
 
             var list = tasks.GetOrAdd(control, new List<Func<float, bool>>());
             list.Add((d) =>
@@ -161,8 +160,6 @@ namespace Engine.Tween
         public static void AddAlphaTween(UIControl control, FloatTween ftAlpha)
         {
             control.Alpha = ftAlpha.StartValue;
-            control.Active = true;
-            control.Visible = true;
 
             var list = tasks.GetOrAdd(control, new List<Func<float, bool>>());
             list.Add((d) =>

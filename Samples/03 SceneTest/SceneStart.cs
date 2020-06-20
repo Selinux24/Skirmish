@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.Tween;
 using Engine.UI;
 using SharpDX;
 using System;
@@ -67,19 +68,23 @@ namespace SceneTest
                 var rect = this.Game.Form.RenderRectangle;
                 rect.Height /= 2;
                 this.title.SetRectangle(rect);
-                this.title.CenterHorizontally(CenterTargets.Parent);
-                this.title.CenterVertically(CenterTargets.Parent);
+                this.title.CenterHorizontally = CenterTargets.Parent;
+                this.title.CenterVertically = CenterTargets.Parent;
 
                 for (int i = 0; i < sceneButtons.Length; i++)
                 {
                     sceneButtons[i].Left = ((this.Game.Form.RenderWidth / div) * (i + 1)) - (this.sceneMaterialsButton.Width / 2);
                     sceneButtons[i].Top = (this.Game.Form.RenderHeight / h) * hv - (this.sceneMaterialsButton.Height / 2);
                     sceneButtons[i].JustReleased += SceneButtonClick;
+                    sceneButtons[i].MouseEnter += SceneButtonMouseEnter;
+                    sceneButtons[i].MouseLeave += SceneButtonMouseLeave;
                 }
 
                 this.exitButton.Left = (this.Game.Form.RenderWidth / div) * numButtons - (this.exitButton.Width / 2);
                 this.exitButton.Top = (this.Game.Form.RenderHeight / h) * hv - (this.exitButton.Height / 2);
                 this.exitButton.JustReleased += ExitButtonClick;
+                this.exitButton.MouseEnter += SceneButtonMouseEnter;
+                this.exitButton.MouseLeave += SceneButtonMouseLeave;
             });
         }
         private async Task InitializeAssets()
@@ -241,9 +246,63 @@ namespace SceneTest
                 this.Game.SetScene<SceneTest>();
             }
         }
+        private void SceneButtonMouseEnter(object sender, EventArgs e)
+        {
+            if (sender is UIControl ctrl)
+            {
+                ctrl.ScaleInScaleOut(1.0f, 1.10f, 0.25f);
+            }
+        }
+        private void SceneButtonMouseLeave(object sender, EventArgs e)
+        {
+            if (sender is UIControl ctrl)
+            {
+                ctrl.ClearTween();
+                ctrl.TweenScale(ctrl.Scale, 1.0f, 0.5f, ScaleFuncs.Linear);
+            }
+        }
+
         private void ExitButtonClick(object sender, EventArgs e)
         {
             this.Game.Exit();
+        }
+    }
+
+    static class UIControlExtensions
+    {
+        public static void Show(this UIControl ctrl, float time)
+        {
+            ctrl.TweenShow(time, ScaleFuncs.Linear);
+        }
+
+        public static void Hide(this UIControl ctrl, float time)
+        {
+            ctrl.TweenHide(time, ScaleFuncs.Linear);
+        }
+
+        public static void Roll(this UIControl ctrl, float time)
+        {
+            ctrl.TweenRotate(MathUtil.TwoPi, time, ScaleFuncs.Linear);
+            ctrl.TweenScale(1, 0.5f, time, ScaleFuncs.QuinticEaseOut);
+        }
+
+        public static void ShowRoll(this UIControl ctrl, float time)
+        {
+            ctrl.TweenScaleUp(time, ScaleFuncs.QuinticEaseOut);
+            ctrl.TweenShow(time * 0.25f, ScaleFuncs.Linear);
+            ctrl.TweenRotate(MathUtil.TwoPi, time * 0.25f, ScaleFuncs.Linear);
+        }
+
+        public static void HideRoll(this UIControl ctrl, float time)
+        {
+            ctrl.TweenScaleDown(time, ScaleFuncs.QuinticEaseOut);
+            ctrl.TweenHide(time * 0.25f, ScaleFuncs.Linear);
+            ctrl.TweenRotate(-MathUtil.TwoPi, time * 0.25f, ScaleFuncs.Linear);
+        }
+
+        public static void ScaleInScaleOut(this UIControl ctrl, float from, float to, float time)
+        {
+            ctrl.TweenScaleBounce(from, to, time, ScaleFuncs.Linear);
         }
     }
 }

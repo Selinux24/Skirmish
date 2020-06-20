@@ -238,33 +238,35 @@ namespace Engine
         {
             this.Elapsed += gameTime.ElapsedSeconds;
 
-            if (this.Elapsed >= InputTime)
+            if (this.Elapsed < InputTime)
             {
-                this.Elapsed -= InputTime;
+                return;
+            }
 
-                if (this.mouseIn)
+            this.Elapsed -= InputTime;
+
+            if (this.mouseIn)
+            {
+                if (this.firstUpdate)
                 {
-                    if (this.firstUpdate)
-                    {
-                        this.SetMousePosition(this.form.RenderCenter);
+                    this.SetMousePosition(this.form.RenderCenter);
 
-                        this.ClearInputData();
+                    this.ClearInputData();
 
-                        this.firstUpdate = false;
-                    }
-                    else
-                    {
-                        this.UpdateMousePositionState();
-
-                        this.UpdateMouseButtonsState();
-
-                        this.UpdateKeyboardState();
-                    }
+                    this.firstUpdate = false;
                 }
                 else
                 {
-                    this.ClearInputData();
+                    this.UpdateMousePositionState();
+
+                    this.UpdateMouseButtonsState();
+
+                    this.UpdateKeyboardState();
                 }
+            }
+            else
+            {
+                this.ClearInputData();
             }
         }
         /// <summary>

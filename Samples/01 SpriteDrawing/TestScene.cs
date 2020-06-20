@@ -118,8 +118,7 @@ namespace SpriteDrawing
                 {
                     await Task.Delay(500);
 
-                    this.staticPan.Visible = true;
-
+                    staticPan.Visible = true;
                     progressBar.Visible = false;
 
                     gameReady = true;
@@ -152,7 +151,8 @@ namespace SpriteDrawing
                 Name = "WoodPanel",
                 Background = new SpriteDescription
                 {
-                    Textures = new[] { "pan.jpg" },
+                    Textures = new[] { "pan_bw.png" },
+                    Color = new Color(176, 77, 45),
                 },
                 Top = 100,
                 Left = 700,
@@ -173,13 +173,12 @@ namespace SpriteDrawing
                     ShadowDelta = new Vector2(8, 5),
                     LineAdjust = true,
                 },
-                FitParent = true,
                 MarginLeft = 90,
                 MarginRight = 90,
                 MarginTop = 40,
                 MarginBottom = 40,
             };
-            this.textArea = await this.AddComponentUITextArea(descText, layerHUD + 1);
+            this.textArea = new UITextArea(this, descText);
 
             this.staticPan.AddChild(this.textArea);
             this.staticPan.Visible = false;
@@ -199,24 +198,30 @@ namespace SpriteDrawing
 
                 Background = new SpriteDescription()
                 {
-                    Textures = new[] { "pan.jpg" },
-                    Color = Color.Red,
+                    Textures = new[] { "pan_bw.png" },
+                    Color = Color.Pink,
                 }
             };
             this.dynamicPan = await this.AddComponentUIPanel(descPan, layerHUDDialogs);
+
+            float w = 0.3333f;
 
             var descButClose = new UIButtonDescription
             {
                 Name = "CloseButton",
 
                 Top = 10,
-                Left = this.dynamicPan.Width - 10 - 20,
-                Width = 20,
-                Height = 20,
+                Left = this.dynamicPan.Width - 10 - 40,
+                Width = 40,
+                Height = 40,
 
                 TwoStateButton = true,
-                ColorReleased = Color.Blue,
-                ColorPressed = Color.Green,
+
+                TextureReleased = "buttons.png",
+                TextureReleasedUVMap = new Vector4(0, 0, w, 1f),
+
+                TexturePressed = "buttons.png",
+                TexturePressedUVMap = new Vector4(w * 2f, 0, w * 3f, 1f),
 
                 Font = new TextDrawerDescription()
                 {
@@ -229,7 +234,29 @@ namespace SpriteDrawing
             var butClose = new UIButton(this, descButClose);
             butClose.JustReleased += ButClose_Click;
 
-            this.dynamicPan.AddChild(butClose);
+            var descText = new UITextAreaDescription()
+            {
+                Font = new TextDrawerDescription()
+                {
+                    Name = "MaraText",
+                    FontMapping = new FontMapping
+                    {
+                        ImageFile = "MaraFont.png",
+                        MapFile = "MaraFont.txt",
+                    },
+                    UseTextureColor = true,
+                },
+                CenterHorizontally = CenterTargets.Parent,
+                CenterVertically = CenterTargets.Parent,
+                Text = @"Letters by Mara",
+            };
+            var textArea = new UITextArea(this, descText)
+            {
+                Scale = 0.25f,
+            };
+
+            this.dynamicPan.AddChild(butClose, false);
+            this.dynamicPan.AddChild(textArea);
             this.dynamicPan.Visible = false;
         }
         private async Task InitializeButtonTest()
@@ -266,10 +293,10 @@ namespace SpriteDrawing
         {
             progressValue = Math.Max(progressValue, value);
 
-            if (this.progressBar != null)
+            if (progressBar != null)
             {
-                this.progressBar.ProgressValue = progressValue;
-                this.progressBar.Text = $"{(int)(progressValue * 100f)}%";
+                progressBar.ProgressValue = progressValue;
+                progressBar.Text = $"{(int)(progressValue * 100f)}%";
             }
         }
 
@@ -295,7 +322,7 @@ namespace SpriteDrawing
                 var mousePos = Cursor.ScreenPosition;
                 var but = dynamicPan?.Children.OfType<UIButton>().FirstOrDefault();
 
-                this.textDebug.Text = $@"PanPressed: {dynamicPan?.IsPressed ?? false}; PanRect: {dynamicPan?.AbsoluteRectangle}; 
+                textDebug.Text = $@"PanPressed: {dynamicPan?.IsPressed ?? false}; PanRect: {dynamicPan?.AbsoluteRectangle}; 
 ButPressed: {but?.IsPressed ?? false}; ButRect: {but?.AbsoluteRectangle}; 
 MousePos: {mousePos}; InputMousePos: {this.Game.Input.MousePosition}; 
 FormCenter: {this.Game.Form.RenderCenter} ScreenCenter: {this.Game.Form.ScreenCenter}
@@ -311,8 +338,8 @@ Progress: {(int)(progressValue * 100f)}%";
 
             if (this.Game.Input.KeyJustReleased(Keys.Home))
             {
-                this.spriteSmiley.CenterHorizontally(CenterTargets.Screen);
-                this.spriteSmiley.CenterVertically(CenterTargets.Screen);
+                this.spriteSmiley.CenterHorizontally = CenterTargets.Screen;
+                this.spriteSmiley.CenterVertically = CenterTargets.Screen;
             }
         }
         private void UpdateSprite(GameTime gameTime)
@@ -376,7 +403,9 @@ Progress: {(int)(progressValue * 100f)}%";
                     progressBar.Text = null;
                     progressBar.Visible = false;
 
+                    staticPan.Visible = true;
                     staticPan.Hide(1);
+                    dynamicPan.Visible = true;
                     dynamicPan.ShowRoll(1);
                 }
 
@@ -388,11 +417,13 @@ Progress: {(int)(progressValue * 100f)}%";
         {
             dynamicPan.HideRoll(1);
 
-            spriteSmiley.CenterHorizontally(CenterTargets.Screen);
-            spriteSmiley.CenterVertically(CenterTargets.Screen);
+            spriteSmiley.Visible = true;
+            spriteSmiley.CenterHorizontally = CenterTargets.Screen;
+            spriteSmiley.CenterVertically = CenterTargets.Screen;
             spriteSmiley.Show(1);
             spriteSmiley.ScaleInScaleOut(0.85f, 1f, 0.25f);
 
+            butTest.Visible = true;
             butTest.Show(0.25f);
         }
 

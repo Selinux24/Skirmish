@@ -149,6 +149,10 @@ namespace Engine.UI
             }
         }
         /// <summary>
+        /// Use the texure color flag
+        /// </summary>
+        public bool UseTextureColor { get; set; } = false;
+        /// <summary>
         /// Gets or sets text fore color
         /// </summary>
         public Color4 TextColor { get; set; }
@@ -265,6 +269,10 @@ namespace Engine.UI
             {
                 this.fontMap = FontMap.MapFromFile(this.Game, description.ContentPath, description.FontFileName, description.FontSize, description.Style);
             }
+            else if (description.FontMapping != null)
+            {
+                this.fontMap = FontMap.FromMap(this.Game, description.ContentPath, description.FontMapping);
+            }
             else if (!string.IsNullOrWhiteSpace(description.Font))
             {
                 this.fontMap = FontMap.Map(this.Game, description.Font, description.FontSize, description.Style);
@@ -277,6 +285,7 @@ namespace Engine.UI
             this.indexBuffer = this.BufferManager.AddIndexData(description.Name, true, idx);
 
             this.TextColor = description.TextColor;
+            this.UseTextureColor = description.UseTextureColor;
             this.ShadowColor = description.ShadowColor;
             this.ShadowDelta = description.ShadowDelta;
 
@@ -329,6 +338,8 @@ namespace Engine.UI
             float rot;
             Vector2 parentCenter;
             float parentScale;
+            TextCenteringTargets centerH;
+            TextCenteringTargets centerV;
 
             if (this.Parent != null)
             {
@@ -337,6 +348,8 @@ namespace Engine.UI
                 rot = this.Parent.AbsoluteRotation;
                 parentCenter = this.Parent.GrandpaRectangle.Center;
                 parentScale = this.Parent.GrandpaScale;
+                centerH = this.Parent.CenterHorizontally != CenterTargets.None ? (TextCenteringTargets)this.Parent.CenterHorizontally : centerHorizontally;
+                centerV = this.Parent.CenterHorizontally != CenterTargets.None ? (TextCenteringTargets)this.Parent.CenterVertically : centerVertically;
             }
             else
             {
@@ -345,12 +358,14 @@ namespace Engine.UI
                 rot = 0f;
                 parentCenter = Vector2.Zero;
                 parentScale = 1f;
+                centerH = centerHorizontally;
+                centerV = centerVertically;
             }
 
             // Adjust position
-            if (centerHorizontally != TextCenteringTargets.None)
+            if (centerH != TextCenteringTargets.None)
             {
-                var rectH = this.GetCenteringArea(centerHorizontally);
+                var rectH = this.GetCenteringArea(centerH);
                 pos.X = rectH.Center.X - (Width * 0.5f);
             }
             else
@@ -359,9 +374,9 @@ namespace Engine.UI
                 pos.X = rect.X;
             }
 
-            if (centerVertically != TextCenteringTargets.None)
+            if (centerV != TextCenteringTargets.None)
             {
-                var rectV = this.GetCenteringArea(centerVertically);
+                var rectV = this.GetCenteringArea(centerV);
                 pos.Y = rectV.Center.Y - (Height * 0.5f);
             }
             else
@@ -429,11 +444,11 @@ namespace Engine.UI
                 if (this.ShadowColor != Color.Transparent)
                 {
                     //Draw shadow
-                    this.DrawText(effect, technique, this.ShadowManipulator.LocalTransform, this.ShadowColor);
+                    this.DrawText(effect, technique, this.ShadowManipulator.LocalTransform, this.ShadowColor, false);
                 }
 
                 //Draw text
-                this.DrawText(effect, technique, this.Manipulator.LocalTransform, this.TextColor);
+                this.DrawText(effect, technique, this.Manipulator.LocalTransform, this.TextColor, this.UseTextureColor);
             }
         }
         /// <summary>
@@ -443,13 +458,15 @@ namespace Engine.UI
         /// <param name="technique">Technique</param>
         /// <param name="local">Local transform</param>
         /// <param name="color">Text color</param>
-        private void DrawText(EffectDefaultFont effect, EngineEffectTechnique technique, Matrix local, Color4 color)
+        /// <param name="useTextureColor">Use the texture color</param>
+        private void DrawText(EffectDefaultFont effect, EngineEffectTechnique technique, Matrix local, Color4 color, bool useTextureColor)
         {
             effect.UpdatePerFrame(
                 local,
                 this.viewProjection,
                 color.RGB(),
                 color.Alpha * Alpha * AlphaMultplier,
+                useTextureColor,
                 this.fontMap.Texture);
 
             var graphics = this.Game.Graphics;
@@ -545,6 +562,7 @@ namespace Engine.UI
             this.updateBuffers = true;
 
             // Adjust text bounds
+            size *= this.Parent?.Scale ?? 1f;
             this.Width = size.X;
             this.Height = size.Y;
         }

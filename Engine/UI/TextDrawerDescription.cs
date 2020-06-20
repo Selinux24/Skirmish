@@ -77,6 +77,10 @@ namespace Engine.UI
         /// </summary>
         public string FontFileName { get; set; }
         /// <summary>
+        /// Font mapping
+        /// </summary>
+        public FontMapping FontMapping { get; set; }
+        /// <summary>
         /// Font size
         /// </summary>
         public int FontSize { get; set; } = 12;
@@ -88,6 +92,10 @@ namespace Engine.UI
         /// Text color
         /// </summary>
         public Color4 TextColor { get; set; } = Color.White;
+        /// <summary>
+        /// Use the texture color instead of the specified Color
+        /// </summary>
+        public bool UseTextureColor { get; set; } = false;
         /// <summary>
         /// Shadow color
         /// </summary>
@@ -112,5 +120,20 @@ namespace Engine.UI
             this.DepthEnabled = false;
             this.AlphaEnabled = true;
         }
+    }
+
+    /// <summary>
+    /// Font mapping description
+    /// </summary>
+    public class FontMapping
+    {
+        /// <summary>
+        /// Image filename
+        /// </summary>
+        public string ImageFile { get; set; }
+        /// <summary>
+        /// Map filename
+        /// </summary>
+        public string MapFile { get; set; }
     }
 }

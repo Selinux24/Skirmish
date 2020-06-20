@@ -21,6 +21,7 @@ cbuffer cbPerFrame : register(b0)
 	float4x4 gWorldViewProjection;
 	float3 gColor;
     float gAlpha;
+    bool gUseColor;
 };
 
 Texture2D gTexture : register(t0);
@@ -44,9 +45,13 @@ float4 PSFont(PSVertexPositionTexture input) : SV_TARGET
 	{
 		litColor.a = 0.0f;
 	}
-	else
+    else if (gUseColor == true)
 	{
-		litColor.rgb = gColor;
+        litColor.a *= gAlpha;
+    }
+    else
+    {
+        litColor.rgb = gColor;
         litColor.a *= gAlpha;
     }
 

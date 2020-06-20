@@ -1176,8 +1176,8 @@ namespace Collada
                 if (messages.Text != text)
                 {
                     messages.Text = text;
-                    messages.CenterHorizontally(CenterTargets.Screen);
-                    messages.CenterVertically(CenterTargets.Screen);
+                    messages.CenterHorizontally = CenterTargets.Screen;
+                    messages.CenterVertically = CenterTargets.Screen;
                     messages.Visible = true;
                 }
             }
@@ -1261,8 +1261,8 @@ namespace Collada
                 }
 
                 messages.Text = string.Format("Press space to {0} the light...", enabled ? "turn off" : "turn on");
-                messages.CenterHorizontally(CenterTargets.Screen);
-                messages.CenterVertically(CenterTargets.Screen);
+                messages.CenterHorizontally = CenterTargets.Screen;
+                messages.CenterVertically = CenterTargets.Screen;
             }
         }
 

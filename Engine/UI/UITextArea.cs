@@ -67,6 +67,34 @@ namespace Engine.UI
                 this.textDrawer.Alpha = value;
             }
         }
+        /// <inheritdoc/>
+        public override CenterTargets CenterHorizontally
+        {
+            get
+            {
+                return base.CenterHorizontally;
+            }
+            set
+            {
+                base.CenterHorizontally = value;
+
+                this.textDrawer.CenterHorizontally((TextCenteringTargets)value);
+            }
+        }
+        /// <inheritdoc/>
+        public override CenterTargets CenterVertically
+        {
+            get
+            {
+                return base.CenterVertically;
+            }
+            set
+            {
+                base.CenterVertically = value;
+
+                this.textDrawer.CenterVertically((TextCenteringTargets)value);
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -148,21 +176,6 @@ namespace Engine.UI
                 AbsoluteTop + MarginTop,
                 width - (MarginLeft + MarginRight),
                 height - (MarginTop + MarginBottom));
-        }
-
-        /// <inheritdoc/>
-        public override void CenterHorizontally(CenterTargets target)
-        {
-            base.CenterHorizontally(target);
-
-            this.textDrawer.CenterHorizontally((TextCenteringTargets)target);
-        }
-        /// <inheritdoc/>
-        public override void CenterVertically(CenterTargets target)
-        {
-            base.CenterVertically(target);
-
-            this.textDrawer.CenterVertically((TextCenteringTargets)target);
         }
 
         /// <summary>

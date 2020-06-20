@@ -506,6 +506,41 @@ namespace Engine.UI
             }
         }
         /// <summary>
+        /// Centers vertically the text
+        /// </summary>
+        /// <param name="target">Center target</param>
+        public virtual CenterTargets CenterVertically
+        {
+            get
+            {
+                return this.centerVertically;
+            }
+            set
+            {
+                this.centerVertically = value;
+
+                this.updateInternals = true;
+            }
+        }
+        /// <summary>
+        /// Centers horinzontally the text
+        /// </summary>
+        /// <param name="target">Center target</param>
+        public virtual CenterTargets CenterHorizontally
+        {
+            get
+            {
+                return this.centerHorizontally;
+            }
+            set
+            {
+                this.centerHorizontally = value;
+
+                this.updateInternals = true;
+            }
+        }
+
+        /// <summary>
         /// Base color
         /// </summary>
         public virtual Color4 Color
@@ -740,32 +775,12 @@ namespace Engine.UI
         {
             children.ForEach(c => c.Resize());
         }
-        /// <summary>
-        /// Centers vertically the text
-        /// </summary>
-        /// <param name="target">Center target</param>
-        public virtual void CenterVertically(CenterTargets target)
-        {
-            this.centerVertically = target;
-
-            this.updateInternals = true;
-        }
-        /// <summary>
-        /// Centers horinzontally the text
-        /// </summary>
-        /// <param name="target">Center target</param>
-        public virtual void CenterHorizontally(CenterTargets target)
-        {
-            this.centerHorizontally = target;
-
-            this.updateInternals = true;
-        }
 
         /// <summary>
         /// Adds a child to the children collection
         /// </summary>
         /// <param name="ctrl">Control</param>
-        public void AddChild(UIControl ctrl)
+        public void AddChild(UIControl ctrl, bool fitToParent = true)
         {
             if (ctrl == null)
             {
@@ -779,6 +794,7 @@ namespace Engine.UI
 
             ctrl.Parent = this;
             ctrl.HasParent = true;
+            ctrl.FitParent = fitToParent;
 
             if (!children.Contains(ctrl))
             {
@@ -816,6 +832,7 @@ namespace Engine.UI
             {
                 ctrl.Parent = null;
                 ctrl.HasParent = false;
+                ctrl.FitParent = false;
 
                 children.Remove(ctrl);
             }
