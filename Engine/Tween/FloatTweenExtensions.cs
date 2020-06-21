@@ -1,4 +1,5 @@
 ﻿using Engine.UI;
+using SharpDX;
 
 namespace Engine.Tween
 {
@@ -67,7 +68,6 @@ namespace Engine.Tween
 
             FloatTweenManager.AddScaleTween(control, ftScale);
         }
-
         /// <summary>
         /// Bouncing scale a control
         /// </summary>
@@ -161,6 +161,57 @@ namespace Engine.Tween
             ftAlpha.Start(from, to, duration, fnc);
 
             FloatTweenManager.AddAlphaTween(control, ftAlpha);
+        }
+
+        /// <summary>
+        /// Changes the color of a control
+        /// </summary>
+        /// <param name="control">Control</param>
+        /// <param name="from">Start value</param>
+        /// <param name="to">End value</param>
+        /// <param name="duration">Duration</param>
+        /// <param name="fnc">Scale function</param>
+        public static void TweenColor(this UIControl control, Color4 from, Color4 to, float duration, ScaleFunc fnc)
+        {
+            if (control == null)
+            {
+                return;
+            }
+
+            FloatTween ftColorR = new FloatTween();
+            FloatTween ftColorG = new FloatTween();
+            FloatTween ftColorB = new FloatTween();
+
+            ftColorR.Start(from.Red, to.Red, duration, fnc);
+            ftColorG.Start(from.Green, to.Green, duration, fnc);
+            ftColorB.Start(from.Blue, to.Blue, duration, fnc);
+
+            FloatTweenManager.AddColorTween(control, ftColorR, ftColorG, ftColorB);
+        }
+        /// <summary>
+        /// Bouncing the color of a control
+        /// </summary>
+        /// <param name="control">Control</param>
+        /// <param name="from">Start value</param>
+        /// <param name="to">End value</param>
+        /// <param name="duration">Duration</param>
+        /// <param name="fnc">Scale function</param>
+        public static void TweenColorBounce(this UIControl control, Color4 from, Color4 to, float duration, ScaleFunc fnc)
+        {
+            if (control == null)
+            {
+                return;
+            }
+
+            FloatTween ftColorR = new FloatTween();
+            FloatTween ftColorG = new FloatTween();
+            FloatTween ftColorB = new FloatTween();
+
+            ftColorR.Start(from.Red, to.Red, duration, fnc);
+            ftColorG.Start(from.Green, to.Green, duration, fnc);
+            ftColorB.Start(from.Blue, to.Blue, duration, fnc);
+
+            FloatTweenManager.AddColorBounce(control, ftColorR, ftColorG, ftColorB);
         }
     }
 }

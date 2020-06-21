@@ -425,6 +425,7 @@ Progress: {(int)(progressValue * 100f)}%";
 
             butTest.Visible = true;
             butTest.Show(0.25f);
+            butTest.TweenColorBounce(Color.Yellow, Color.Red, 2, ScaleFuncs.Linear);
         }
 
         private void ButTest_Click(object sender, EventArgs e)

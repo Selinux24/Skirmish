@@ -1,4 +1,5 @@
 ﻿using Engine.UI;
+using SharpDX;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -171,6 +172,72 @@ namespace Engine.Tween
                 if (ftAlpha.CurrentValue == ftAlpha.EndValue)
                 {
                     return true;
+                }
+
+                return false;
+            });
+        }
+        /// <summary>
+        /// Adds a color tweening task to the internal task list
+        /// </summary>
+        /// <param name="control">Control</param>
+        /// <param name="ftColorR">Red tween</param>
+        /// <param name="ftColorG">Green tween</param>
+        /// <param name="ftColorB">Blue tween</param>
+        public static void AddColorTween(UIControl control, FloatTween ftColorR, FloatTween ftColorG, FloatTween ftColorB)
+        {
+            control.Color = new Color(ftColorR.StartValue, ftColorG.StartValue, ftColorB.StartValue);
+
+            var list = tasks.GetOrAdd(control, new List<Func<float, bool>>());
+            list.Add((d) =>
+            {
+                ftColorR.Update(d);
+                ftColorG.Update(d);
+                ftColorB.Update(d);
+
+                control.Color = new Color(ftColorR.CurrentValue, ftColorG.CurrentValue, ftColorB.CurrentValue);
+
+                if (ftColorR.CurrentValue == ftColorR.EndValue && ftColorG.CurrentValue == ftColorG.EndValue && ftColorB.CurrentValue == ftColorB.EndValue)
+                {
+                    return true;
+                }
+
+                return false;
+            });
+        }
+        /// <summary>
+        /// Adds a bouncing color tweening task to the internal task list
+        /// </summary>
+        /// <param name="control">Control</param>
+        /// <param name="ftColorR">Red tween</param>
+        /// <param name="ftColorG">Green tween</param>
+        /// <param name="ftColorB">Blue tween</param>
+        public static void AddColorBounce(UIControl control, FloatTween ftColorR, FloatTween ftColorG, FloatTween ftColorB)
+        {
+            control.Color = new Color(ftColorR.StartValue, ftColorG.StartValue, ftColorB.StartValue);
+
+            var list = tasks.GetOrAdd(control, new List<Func<float, bool>>());
+            list.Add((d) =>
+            {
+                ftColorR.Update(d);
+                ftColorG.Update(d);
+                ftColorB.Update(d);
+
+                control.Color = new Color(ftColorR.CurrentValue, ftColorG.CurrentValue, ftColorB.CurrentValue);
+
+                if (ftColorR.CurrentValue == ftColorR.EndValue && ftColorG.CurrentValue == ftColorG.EndValue && ftColorB.CurrentValue == ftColorB.EndValue)
+                {
+                    var newStartR = ftColorR.EndValue;
+                    var newStartG = ftColorG.EndValue;
+                    var newStartB = ftColorB.EndValue;
+
+                    var newEndR = ftColorR.StartValue;
+                    var newEndG = ftColorG.StartValue;
+                    var newEndB = ftColorB.StartValue;
+
+                    ftColorR.Restart(newStartR, newEndR);
+                    ftColorG.Restart(newStartG, newEndG);
+                    ftColorB.Restart(newStartB, newEndB);
                 }
 
                 return false;
