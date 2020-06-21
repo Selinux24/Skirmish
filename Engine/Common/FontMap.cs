@@ -195,7 +195,7 @@ namespace Engine.Common
                     int rightBottomIndex = charMap.IndexOf(";", leftTopIndex) + 1;
 
                     char c = charMap[0];
-                    Vector2 topLeft = FromMap(charMap.Substring(leftTopIndex, rightBottomIndex - leftTopIndex - 1));
+                    Vector2 topLeft = FromMap(charMap.Substring(leftTopIndex, rightBottomIndex - leftTopIndex));
                     Vector2 bottomRight = FromMap(charMap.Substring(rightBottomIndex));
 
                     var chr = new FontMapChar()
@@ -399,12 +399,26 @@ namespace Engine.Common
         private static Vector2 FromMap(string mapBitz)
         {
             string[] bitz = mapBitz?.Split(",".ToArray(), StringSplitOptions.RemoveEmptyEntries);
-            if (bitz?.Length < 2)
+            if (bitz?.Any() != true || bitz.Length < 2)
             {
-                return new Vector2();
+                return Vector2.Zero;
             }
 
-            return new Vector2(Convert.ToInt32(bitz[0]), Convert.ToInt32(bitz[1]));
+            //Clean ';'
+            string xValue = bitz[0].Replace(";", "");
+            string yValue = bitz[1].Replace(";", "");
+
+            if (!int.TryParse(xValue, out int x))
+            {
+                Console.WriteLine($"Bad coordinate descriptor for X value. Integer spected: {xValue}");
+            }
+
+            if (!int.TryParse(yValue, out int y))
+            {
+                Console.WriteLine($"Bad coordinate descriptor for Y value. Integer spected: {yValue}");
+            }
+
+            return new Vector2(x, y);
         }
 
         /// <summary>
