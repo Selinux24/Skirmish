@@ -1,6 +1,5 @@
 ﻿using Engine.Tween;
 using Engine.UI;
-using SharpDX;
 
 namespace Collada
 {
@@ -23,7 +22,7 @@ namespace Collada
         {
             ctrl.TweenAlpha(delay * time, 0, time, ScaleFuncs.Linear);
         }
-   
+
         public static void ScaleInScaleOut(this UIControl ctrl, float from, float to, float time)
         {
             ctrl.TweenScaleBounce(from, to, time, ScaleFuncs.Linear);
