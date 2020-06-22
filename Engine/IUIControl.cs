@@ -89,6 +89,11 @@ namespace Engine
         float Alpha { get; set; }
 
         /// <summary>
+        /// Tooltip text
+        /// </summary>
+        string TooltipText { get; set; }
+
+        /// <summary>
         /// Gets whether the control contains the point or not
         /// </summary>
         /// <param name="point">Point to test</param>

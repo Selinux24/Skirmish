@@ -574,6 +574,11 @@ namespace Engine.UI
         }
 
         /// <summary>
+        /// Tooltip text
+        /// </summary>
+        public string TooltipText { get; set; }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>

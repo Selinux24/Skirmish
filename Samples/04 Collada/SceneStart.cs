@@ -20,6 +20,8 @@ namespace Collada
         UIButton sceneDungeonButton = null;
         UIButton sceneModularDungeonButton = null;
         UIButton exitButton = null;
+        private UIButton[] sceneButtons = null;
+        UITextArea description = null;
 
         private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.RosyBrown, 1.5f);
         private readonly Color exitButtonColor = Color.AdjustSaturation(Color.OrangeRed, 1.5f);
@@ -166,7 +168,7 @@ namespace Collada
         }
         private async Task InitializeControls()
         {
-            //Title text
+            // Title text
             var titleDesc = new UITextAreaDescription
             {
                 Width = this.Game.Form.RenderWidth,
@@ -185,6 +187,7 @@ namespace Collada
             };
             this.title = await this.AddComponentUITextArea(titleDesc, layerHUD);
 
+            // Buttons
             var buttonDesc = new UIButtonDescription()
             {
                 Name = "Scene buttons",
@@ -204,9 +207,8 @@ namespace Collada
 
                 Font = new TextDrawerDescription()
                 {
-                    Font = "Buxton Sketch",
-                    Style = FontMapStyles.Regular,
-                    FontSize = 22,
+                    FontFileName = "common/HelveticaNeueHv.ttf",
+                    FontSize = 16,
                     TextColor = Color.Gold,
                 },
             };
@@ -235,13 +237,25 @@ namespace Collada
 
                 Font = new TextDrawerDescription()
                 {
-                    Font = "Buxton Sketch",
-                    Style = FontMapStyles.Bold,
-                    FontSize = 22,
+                    FontFileName = "common/HelveticaNeueHv.ttf",
+                    FontSize = 16,
                     TextColor = Color.Gold,
                 },
             };
             this.exitButton = await this.AddComponentUIButton(exitButtonDesc, layerHUD);
+
+            // Description text
+            var descriptionDesc = new UITextAreaDescription
+            {
+                Font = new TextDrawerDescription()
+                {
+                    Name = "Tooltip",
+                    FontFileName = "common/HelveticaNeue Medium.ttf",
+                    FontSize = 12,
+                    TextColor = Color.LightGray,
+                },
+            };
+            this.description = await this.AddComponentUITextArea(descriptionDesc, layerHUD);
         }
         private void SetControlPositions()
         {
@@ -256,34 +270,57 @@ namespace Collada
             this.title.ScaleInScaleOut(1f, 1.05f, 10);
 
             this.sceneDungeonWallButton.Text = "Dungeon Wall";
+            this.sceneDungeonWallButton.TooltipText = "Shows a basic normal map scene demo.";
             this.sceneDungeonWallButton.Left = ((this.Game.Form.RenderWidth / 6) * 1) - (this.sceneDungeonWallButton.Width / 2);
             this.sceneDungeonWallButton.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneDungeonWallButton.Height / 2);
             this.sceneDungeonWallButton.JustReleased += SceneButtonClick;
-            this.sceneDungeonWallButton.Show(tweenTime += tweenInc, tweenTime);
+            this.sceneDungeonWallButton.MouseOver += SceneButtonOver;
+            this.sceneDungeonWallButton.Show(tweenTime, tweenTime);
+            tweenTime += tweenInc;
 
             this.sceneNavMeshTestButton.Text = "Navmesh Test";
+            this.sceneNavMeshTestButton.TooltipText = "Shows a navigation mesh scene demo.";
             this.sceneNavMeshTestButton.Left = ((this.Game.Form.RenderWidth / 6) * 2) - (this.sceneNavMeshTestButton.Width / 2);
             this.sceneNavMeshTestButton.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneNavMeshTestButton.Height / 2);
             this.sceneNavMeshTestButton.JustReleased += SceneButtonClick;
-            this.sceneNavMeshTestButton.Show(tweenTime += tweenInc, tweenTime);
+            this.sceneNavMeshTestButton.MouseOver += SceneButtonOver;
+            this.sceneNavMeshTestButton.Show(tweenTime, tweenTime);
+            tweenTime += tweenInc;
 
             this.sceneDungeonButton.Text = "Dungeon";
+            this.sceneDungeonButton.TooltipText = "Shows a basic dungeon from a unique mesh scene demo.";
             this.sceneDungeonButton.Left = ((this.Game.Form.RenderWidth / 6) * 3) - (this.sceneDungeonButton.Width / 2);
             this.sceneDungeonButton.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneDungeonButton.Height / 2);
             this.sceneDungeonButton.JustReleased += SceneButtonClick;
-            this.sceneDungeonButton.Show(tweenTime += tweenInc, tweenTime);
+            this.sceneDungeonButton.MouseOver += SceneButtonOver;
+            this.sceneDungeonButton.Show(tweenTime, tweenTime);
+            tweenTime += tweenInc;
 
             this.sceneModularDungeonButton.Text = "Modular Dungeon";
+            this.sceneModularDungeonButton.TooltipText = "Shows a modular dungeon scene demo.";
             this.sceneModularDungeonButton.Left = ((this.Game.Form.RenderWidth / 6) * 4) - (this.sceneModularDungeonButton.Width / 2);
             this.sceneModularDungeonButton.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneModularDungeonButton.Height / 2);
             this.sceneModularDungeonButton.JustReleased += SceneButtonClick;
-            this.sceneModularDungeonButton.Show(tweenTime += tweenInc, tweenTime);
+            this.sceneModularDungeonButton.MouseOver += SceneButtonOver;
+            this.sceneModularDungeonButton.Show(tweenTime, tweenTime);
+            tweenTime += tweenInc;
 
             this.exitButton.Text = "Exit";
+            this.exitButton.TooltipText = "Closes the application.";
             this.exitButton.Left = (this.Game.Form.RenderWidth / 6) * 5 - (this.exitButton.Width / 2);
             this.exitButton.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.exitButton.Height / 2);
             this.exitButton.JustReleased += ExitButtonClick;
-            this.exitButton.Show(tweenTime += tweenInc, tweenTime);
+            this.exitButton.MouseOver += SceneButtonOver;
+            this.exitButton.Show(tweenTime, tweenTime);
+
+            this.sceneButtons = new[]
+            {
+                this.sceneDungeonWallButton,
+                this.sceneNavMeshTestButton,
+                this.sceneDungeonButton,
+                this.sceneModularDungeonButton,
+                this.exitButton,
+            };
         }
 
         private void UpdateAudioInput(GameTime gameTime)
@@ -395,9 +432,12 @@ namespace Collada
 
         private void SceneButtonClick(object sender, EventArgs e)
         {
+            var effect = this.AudioManager.CreateEffectInstance("push");
+
+            HideAllButButton(sender as UIButton, (float)effect.Duration.TotalSeconds);
+
             Task.Run(async () =>
             {
-                var effect = this.AudioManager.CreateEffectInstance("push");
                 effect.Play();
 
                 await Task.Delay(effect.Duration);
@@ -422,15 +462,42 @@ namespace Collada
         }
         private void ExitButtonClick(object sender, EventArgs e)
         {
+            var effect = this.AudioManager.CreateEffectInstance("push");
+
+            HideAllButButton(sender as UIButton, (float)effect.Duration.TotalSeconds);
+
             Task.Run(async () =>
             {
-                var effect = this.AudioManager.CreateEffectInstance("push");
                 effect.Play();
 
                 await Task.Delay(effect.Duration);
 
                 this.Game.Exit();
             });
+        }
+        private void HideAllButButton(UIButton button, float duration)
+        {
+            foreach (var but in sceneButtons)
+            {
+                if (but == button)
+                {
+                    continue;
+                }
+
+                but.ClearTween();
+                but.Hide(duration);
+            }
+        }
+
+        private void SceneButtonOver(object sender, EventArgs e)
+        {
+            if (sender is UIButton button)
+            {
+                description.Text = button.TooltipText;
+                description.SetPosition(button.Left, button.Top + button.Height + 25);
+                description.ClearTween();
+                description.Hide(1f, 3f);
+            }
         }
 
         private void PlayAudio()

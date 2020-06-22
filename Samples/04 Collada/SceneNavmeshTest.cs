@@ -46,6 +46,7 @@ namespace Collada
 
             this.Game.VisibleMouse = true;
             this.Game.LockMouse = false;
+
             this.Camera.MovementDelta = 25f;
 
             await this.LoadResourcesAsync(
@@ -251,7 +252,6 @@ Space: Finds random over navmesh";
                 this.Camera.MoveBackward(this.Game.GameTime, slow);
             }
 
-#if DEBUG
             if (this.Game.Input.RightMouseButtonPressed)
             {
                 this.Camera.RotateMouse(
@@ -259,12 +259,6 @@ Space: Finds random over navmesh";
                     this.Game.Input.MouseXDelta,
                     this.Game.Input.MouseYDelta);
             }
-#else
-            this.Camera.RotateMouse(
-                this.Game.GameTime,
-                this.Game.Input.MouseXDelta,
-                this.Game.Input.MouseYDelta);
-#endif
         }
         private void UpdateNavmeshInput()
         {

@@ -131,7 +131,7 @@ namespace Engine
         /// <returns></returns>
         public Viewport GetViewport()
         {
-            return new Viewport(0, 0, this.Width, this.Height, 0, 1.0f);
+            return new Viewport(0, 0, RenderWidth, RenderHeight, 0, 1.0f);
         }
         /// <summary>
         /// Gets the current ortho projection matrix
