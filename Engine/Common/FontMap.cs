@@ -38,7 +38,7 @@ namespace Engine.Common
         {
             foreach (var fmap in gCache)
             {
-                fmap.Dispose();
+                fmap?.Dispose();
             }
 
             gCache.Clear();

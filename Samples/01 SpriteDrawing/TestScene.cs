@@ -440,11 +440,15 @@ Progress: {(int)(progressValue * 100f)}%";
         }
         private void ButTest_MouseLeave(object sender, EventArgs e)
         {
+            butTest.ClearTween();
             butTest.TweenScale(butTest.Scale, 1, 0.15f, ScaleFuncs.QuadraticEaseOut);
+            butTest.TweenColorBounce(Color.Yellow, Color.Red, 2, ScaleFuncs.Linear);
         }
         private void ButTest_MouseEnter(object sender, EventArgs e)
         {
+            butTest.ClearTween();
             butTest.TweenScale(butTest.Scale, 2, 0.15f, ScaleFuncs.QuadraticEaseIn);
+            butTest.TweenColor(butTest.Color, Color.Yellow, 0.5f, ScaleFuncs.Linear);
         }
     }
 }
