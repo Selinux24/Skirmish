@@ -6,6 +6,7 @@ using Engine.Content;
 using Engine.Content.FmtObj;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
+using Engine.Tween;
 using Engine.UI;
 using SharpDX;
 using System;
@@ -1173,21 +1174,17 @@ namespace Collada
         {
             if (show)
             {
-                if (messages.Text != text)
-                {
-                    messages.Text = text;
-                    messages.CenterHorizontally = CenterTargets.Screen;
-                    messages.CenterVertically = CenterTargets.Screen;
-                    messages.Visible = true;
-                }
+                messages.Text = text;
+                messages.CenterHorizontally = CenterTargets.Screen;
+                messages.CenterVertically = CenterTargets.Screen;
+                messages.Visible = true;
+                messages.ClearTween();
+                messages.Show(1f);
             }
             else
             {
-                if (messages.Text != text)
-                {
-                    messages.Text = text;
-                    messages.Visible = false;
-                }
+                messages.ClearTween();
+                messages.Hide(0.25f);
             }
         }
         private void UpdateEntityExit(ModularSceneryItem item)

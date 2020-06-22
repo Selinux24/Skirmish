@@ -1,5 +1,6 @@
 ﻿using Engine;
 using Engine.Audio;
+using Engine.Tween;
 using Engine.UI;
 using SharpDX;
 using System;
@@ -71,7 +72,11 @@ namespace Collada
         private void LoadUserInteface()
         {
             _ = this.LoadResourcesAsync(
-                new[] { InitializeAudio(), InitializeBackGround() },
+                new[]
+                {
+                    InitializeAudio(),
+                    InitializeBackGround(),
+                },
                 () =>
                 {
                     SetBackground();
@@ -81,16 +86,63 @@ namespace Collada
 
                     PlayAudio();
 
-                    this.AudioManager.MasterVolume = 1;
+                    this.AudioManager.MasterVolume = 0;
                     this.AudioManager.Start();
 
                     LoadGameAssets();
                 });
         }
+        private async Task InitializeBackGround()
+        {
+            var backGroundDesc = ModelDescription.FromXml("Background", "Resources/SceneStart", "SkyPlane.xml");
+            this.backGround = await this.AddComponentModel(backGroundDesc, SceneObjectUsages.UI);
+        }
+        private async Task InitializeAudio()
+        {
+            //Sounds
+            for (int i = 0; i < musicList.Length; i++)
+            {
+                this.AudioManager.LoadSound($"Music{i}", "Resources/Common", musicList[i]);
+            }
+
+            this.AudioManager.LoadSound("push", "Resources/Common", "push.wav");
+
+            //Effects
+            for (int i = 0; i < musicList.Length; i++)
+            {
+                this.AudioManager.AddEffectParams(
+                    $"Music{i}",
+                    new GameAudioEffectParameters
+                    {
+                        DestroyWhenFinished = false,
+                        SoundName = $"Music{i}",
+                        IsLooped = true,
+                        UseAudio3D = true,
+                    });
+            }
+
+            this.AudioManager.AddEffectParams(
+                "push",
+                new GameAudioEffectParameters
+                {
+                    SoundName = "push",
+                });
+
+            await Task.CompletedTask;
+        }
+        private void SetBackground()
+        {
+            this.backGround.Manipulator.SetScale(1.5f, 1.25f, 1.5f);
+        }
+
         private void LoadGameAssets()
         {
             _ = this.LoadResourcesAsync(
-                new[] { InitializeCursor(), InitializeControls() },
+                new[]
+                {
+                    InitializeCursor(),
+                    InitializeControls(),
+                },
                 () =>
                 {
                     SetControlPositions();
@@ -98,7 +150,6 @@ namespace Collada
                     gameReady = true;
                 });
         }
-
         private async Task InitializeCursor()
         {
             var cursorDesc = new UICursorDescription()
@@ -112,11 +163,6 @@ namespace Collada
                 Color = Color.White,
             };
             await this.AddComponentUICursor(cursorDesc, layerCursor);
-        }
-        private async Task InitializeBackGround()
-        {
-            var backGroundDesc = ModelDescription.FromXml("Background", "Resources/SceneStart", "SkyPlane.xml");
-            this.backGround = await this.AddComponentModel(backGroundDesc, SceneObjectUsages.UI);
         }
         private async Task InitializeControls()
         {
@@ -197,75 +243,47 @@ namespace Collada
             };
             this.exitButton = await this.AddComponentUIButton(exitButtonDesc, layerHUD);
         }
-        private async Task InitializeAudio()
-        {
-            //Sounds
-            for (int i = 0; i < musicList.Length; i++)
-            {
-                this.AudioManager.LoadSound($"Music{i}", "Resources/Common", musicList[i]);
-            }
-
-            this.AudioManager.LoadSound("push", "Resources/Common", "push.wav");
-
-            //Effects
-            for (int i = 0; i < musicList.Length; i++)
-            {
-                this.AudioManager.AddEffectParams(
-                    $"Music{i}",
-                    new GameAudioEffectParameters
-                    {
-                        DestroyWhenFinished = false,
-                        SoundName = $"Music{i}",
-                        IsLooped = true,
-                        UseAudio3D = true,
-                    });
-            }
-
-            this.AudioManager.AddEffectParams(
-                "push",
-                new GameAudioEffectParameters
-                {
-                    SoundName = "push",
-                });
-
-            await Task.CompletedTask;
-        }
-
-        private void SetBackground()
-        {
-            this.backGround.Manipulator.SetScale(1.5f, 1.25f, 1.5f);
-        }
         private void SetControlPositions()
         {
+            float tweenTime = 1f;
+            float tweenInc = 0.25f;
+
             this.title.Text = "Collada Loader Test";
             this.title.CenterHorizontally = CenterTargets.Screen;
             this.title.CenterVertically = CenterTargets.Screen;
             this.title.Top = this.Game.Form.RenderHeight * 0.25f;
+            this.title.Show(2f);
+            this.title.ScaleInScaleOut(1f, 1.05f, 10);
 
             this.sceneDungeonWallButton.Text = "Dungeon Wall";
             this.sceneDungeonWallButton.Left = ((this.Game.Form.RenderWidth / 6) * 1) - (this.sceneDungeonWallButton.Width / 2);
             this.sceneDungeonWallButton.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneDungeonWallButton.Height / 2);
             this.sceneDungeonWallButton.JustReleased += SceneButtonClick;
+            this.sceneDungeonWallButton.Show(tweenTime += tweenInc, tweenTime);
 
             this.sceneNavMeshTestButton.Text = "Navmesh Test";
             this.sceneNavMeshTestButton.Left = ((this.Game.Form.RenderWidth / 6) * 2) - (this.sceneNavMeshTestButton.Width / 2);
             this.sceneNavMeshTestButton.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneNavMeshTestButton.Height / 2);
             this.sceneNavMeshTestButton.JustReleased += SceneButtonClick;
+            this.sceneNavMeshTestButton.Show(tweenTime += tweenInc, tweenTime);
 
             this.sceneDungeonButton.Text = "Dungeon";
             this.sceneDungeonButton.Left = ((this.Game.Form.RenderWidth / 6) * 3) - (this.sceneDungeonButton.Width / 2);
             this.sceneDungeonButton.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneDungeonButton.Height / 2);
             this.sceneDungeonButton.JustReleased += SceneButtonClick;
+            this.sceneDungeonButton.Show(tweenTime += tweenInc, tweenTime);
 
             this.sceneModularDungeonButton.Text = "Modular Dungeon";
             this.sceneModularDungeonButton.Left = ((this.Game.Form.RenderWidth / 6) * 4) - (this.sceneModularDungeonButton.Width / 2);
             this.sceneModularDungeonButton.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneModularDungeonButton.Height / 2);
             this.sceneModularDungeonButton.JustReleased += SceneButtonClick;
+            this.sceneModularDungeonButton.Show(tweenTime += tweenInc, tweenTime);
 
             this.exitButton.Text = "Exit";
             this.exitButton.Left = (this.Game.Form.RenderWidth / 6) * 5 - (this.exitButton.Width / 2);
             this.exitButton.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.exitButton.Height / 2);
             this.exitButton.JustReleased += ExitButtonClick;
+            this.exitButton.Show(tweenTime += tweenInc, tweenTime);
         }
 
         private void UpdateAudioInput(GameTime gameTime)
