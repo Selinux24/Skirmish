@@ -290,7 +290,7 @@ namespace SpriteDrawing
             butTest.Visible = false;
 
             butTest2 = await this.AddComponentUIButton(descButClose, layerHUD);
-            butTest2.JustReleased += ButTest_Click;
+            butTest2.JustReleased += ButTest2_Click;
             butTest2.MouseEnter += ButTest_MouseEnter;
             butTest2.MouseLeave += ButTest_MouseLeave;
             butTest2.Visible = false;
@@ -445,6 +445,16 @@ Progress: {(int)(progressValue * 100f)}%";
             spriteSmiley.ClearTween();
             spriteSmiley.Hide(0.5f);
 
+            if (sender is UIButton button)
+            {
+                button.ClearTween();
+                button.MouseLeave -= ButTest_MouseLeave;
+                button.MouseEnter -= ButTest_MouseEnter;
+                button.Hide(0.5f);
+            }
+        }
+        private void ButTest2_Click(object sender, EventArgs e)
+        {
             if (sender is UIButton button)
             {
                 button.ClearTween();

@@ -43,13 +43,17 @@ namespace Engine.UI
         public event EventHandler JustReleased;
 
         /// <summary>
-        /// Evaluates input over the specified control list
+        /// Evaluates input over the specified scene
         /// </summary>
-        /// <param name="controls">Controls to evaluate</param>
-        /// <returns>Returns true when a control capture a click</returns>
-        public static bool EvaluateInput(IEnumerable<UIControl> controls)
+        /// <param name="scene">Scene</param>
+        public static bool EvaluateInput(Scene scene)
         {
-            var sortedControls = controls.OrderBy(c => c.updateOrder).ToList();
+            var input = scene.Game.Input;
+
+            var sortedControls = scene.GetComponents()
+                .OfType<UIControl>()
+                .OrderBy(c => c.updateOrder)
+                .ToList();
 
             var mouseOverCtrls = sortedControls.Where(c => c.Active && c.Visible && c.EventsEnabled && c.IsMouseOver).ToList();
             if (!mouseOverCtrls.Any())

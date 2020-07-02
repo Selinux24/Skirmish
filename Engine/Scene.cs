@@ -435,7 +435,7 @@ namespace Engine
 
                 this.NavigationGraph?.Update(gameTime);
 
-                this.UICaptured = UIControl.EvaluateInput(this.GetComponents().OfType<UIControl>().ToArray());
+                this.UICaptured = UIControl.EvaluateInput(this);
 
                 FloatTweenManager.Update(gameTime);
 
