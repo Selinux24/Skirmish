@@ -34,6 +34,7 @@ namespace SpriteDrawing
         private UIPanel dynamicPan = null;
 
         private UIButton butTest = null;
+        private UIButton butTest2 = null;
 
         public TestScene(Game game)
             : base(game)
@@ -287,6 +288,12 @@ namespace SpriteDrawing
             butTest.MouseEnter += ButTest_MouseEnter;
             butTest.MouseLeave += ButTest_MouseLeave;
             butTest.Visible = false;
+
+            butTest2 = await this.AddComponentUIButton(descButClose, layerHUD);
+            butTest2.JustReleased += ButTest_Click;
+            butTest2.MouseEnter += ButTest_MouseEnter;
+            butTest2.MouseLeave += ButTest_MouseLeave;
+            butTest2.Visible = false;
         }
 
         public override void OnReportProgress(float value)
@@ -426,6 +433,11 @@ Progress: {(int)(progressValue * 100f)}%";
             butTest.Visible = true;
             butTest.Show(0.25f);
             butTest.TweenColorBounce(Color.Yellow, Color.Red, 2, ScaleFuncs.Linear);
+
+            butTest2.Text = "The other";
+            butTest2.Visible = true;
+            butTest2.Show(0.25f);
+            butTest2.TweenColorBounce(Color.Yellow, Color.Red, 2, ScaleFuncs.Linear);
         }
 
         private void ButTest_Click(object sender, EventArgs e)
@@ -433,22 +445,31 @@ Progress: {(int)(progressValue * 100f)}%";
             spriteSmiley.ClearTween();
             spriteSmiley.Hide(0.5f);
 
-            butTest.ClearTween();
-            butTest.MouseLeave -= ButTest_MouseLeave;
-            butTest.MouseEnter -= ButTest_MouseEnter;
-            butTest.Hide(0.5f);
+            if (sender is UIButton button)
+            {
+                button.ClearTween();
+                button.MouseLeave -= ButTest_MouseLeave;
+                button.MouseEnter -= ButTest_MouseEnter;
+                button.Hide(0.5f);
+            }
         }
         private void ButTest_MouseLeave(object sender, EventArgs e)
         {
-            butTest.ClearTween();
-            butTest.TweenScale(butTest.Scale, 1, 0.15f, ScaleFuncs.QuadraticEaseOut);
-            butTest.TweenColorBounce(Color.Yellow, Color.Red, 2, ScaleFuncs.Linear);
+            if (sender is UIButton button)
+            {
+                button.ClearTween();
+                button.TweenScale(button.Scale, 1, 0.15f, ScaleFuncs.QuadraticEaseOut);
+                button.TweenColorBounce(Color.Yellow, Color.Red, 2, ScaleFuncs.Linear);
+            }
         }
         private void ButTest_MouseEnter(object sender, EventArgs e)
         {
-            butTest.ClearTween();
-            butTest.TweenScale(butTest.Scale, 2, 0.15f, ScaleFuncs.QuadraticEaseIn);
-            butTest.TweenColor(butTest.Color, Color.Yellow, 0.5f, ScaleFuncs.Linear);
+            if (sender is UIButton button)
+            {
+                button.ClearTween();
+                button.TweenScale(button.Scale, 2, 0.15f, ScaleFuncs.QuadraticEaseIn);
+                button.TweenColor(button.Color, Color.Yellow, 0.5f, ScaleFuncs.Linear);
+            }
         }
     }
 }

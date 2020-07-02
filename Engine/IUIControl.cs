@@ -26,6 +26,10 @@ namespace Engine
         event EventHandler JustReleased;
 
         /// <summary>
+        /// Gets or sets whether the control is enabled for event processing
+        /// </summary>
+        bool EventsEnabled { get; set; }
+        /// <summary>
         /// Gets whether the mouse is over the button rectangle or not
         /// </summary>
         bool IsMouseOver { get; }

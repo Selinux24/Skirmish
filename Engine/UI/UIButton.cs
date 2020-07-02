@@ -53,6 +53,7 @@ namespace Engine.UI
             {
                 Name = $"{description.Name}.ReleasedButton",
                 Color = description.ColorReleased,
+                EventsEnabled = false,
             };
 
             if (!string.IsNullOrEmpty(description.TextureReleased))
@@ -70,6 +71,7 @@ namespace Engine.UI
                 {
                     Name = $"{description.Name}.PressedButton",
                     Color = description.ColorPressed,
+                    EventsEnabled = false,
                 };
 
                 if (!string.IsNullOrEmpty(description.TexturePressed))
@@ -90,13 +92,12 @@ namespace Engine.UI
                 var textAreaDesc = new UITextAreaDescription
                 {
                     Font = description.Font,
+                    CenterHorizontally = CenterTargets.Parent,
+                    CenterVertically = CenterTargets.Parent,
+                    EventsEnabled = false,
                 };
 
-                this.textArea = new UITextArea(scene, textAreaDesc)
-                {
-                    CenterHorizontally = CenterTargets.Parent,
-                    CenterVertically = CenterTargets.Parent
-                };
+                this.textArea = new UITextArea(scene, textAreaDesc);
 
                 this.AddChild(this.textArea, true);
 

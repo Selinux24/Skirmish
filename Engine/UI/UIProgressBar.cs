@@ -72,6 +72,7 @@ namespace Engine.UI
                     Width = description.Width,
                     Height = description.Height,
                     FitParent = false,
+                    EventsEnabled = false,
                 });
 
             this.right = new Sprite(
@@ -82,6 +83,7 @@ namespace Engine.UI
                     Width = description.Width,
                     Height = description.Height,
                     FitParent = false,
+                    EventsEnabled = false,
                 });
 
             if (description.Font != null)

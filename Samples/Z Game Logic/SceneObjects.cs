@@ -232,6 +232,7 @@ namespace GameLogic
                 ContentPath = "Resources",
                 Textures = new[] { "HUD.png" },
                 Color = new Color4(1f, 1f, 1f, 1f),
+                EventsEnabled = false,
             };
             await this.AddComponentSprite(bkDesc, SceneObjectUsages.UI, layerHUD - 1);
 
@@ -398,7 +399,9 @@ namespace GameLogic
             this.UpdateDebug();
 
             //HUD
-            if (this.UpdateHUD(shift))
+            this.UpdateHUD(shift);
+
+            if (this.UICaptured)
             {
                 return;
             }
@@ -421,38 +424,31 @@ namespace GameLogic
                 this.lineDrawer.Visible = !this.lineDrawer.Visible;
             }
         }
-        private bool UpdateHUD(bool shift)
+        private void UpdateHUD(bool shift)
         {
-            bool capture = false;
-
             if (this.Game.Input.KeyJustReleased(this.keyHUDNextSoldier))
             {
                 this.NextSoldier(!shift);
-                capture = true;
             }
 
             if (this.Game.Input.KeyJustReleased(this.keyHUDPrevSoldier))
             {
                 this.PrevSoldier(!shift);
-                capture = true;
             }
 
             if (this.Game.Input.KeyJustReleased(this.keyHUDNextAction))
             {
                 this.NextAction();
-                capture = true;
             }
 
             if (this.Game.Input.KeyJustReleased(this.keyHUDPrevAction))
             {
                 this.PrevAction();
-                capture = true;
             }
 
             if (this.Game.Input.KeyJustReleased(this.keyHUDNextPhase))
             {
                 this.NextPhase();
-                capture = true;
             }
 
             if (!this.gameFinished)
@@ -463,8 +459,6 @@ namespace GameLogic
                 this.txtActionList.Text = string.Format("{0}", this.currentActions.Join(" | "));
                 this.txtAction.Text = string.Format("{0}", this.CurrentAction);
             }
-
-            return capture;
         }
         private void Update3D(GameTime gameTime, bool shift, Ray cursorRay, bool picked, PickingResult<Triangle> r)
         {

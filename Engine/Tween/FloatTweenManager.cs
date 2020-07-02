@@ -93,6 +93,7 @@ namespace Engine.Tween
                 ftScale.Update(d);
 
                 control.Scale = ftScale.CurrentValue;
+                control.Visible = control.Scale != 0;
 
                 if (ftScale.CurrentValue == ftScale.EndValue)
                 {
@@ -117,6 +118,7 @@ namespace Engine.Tween
                 ftScale.Update(d);
 
                 control.Scale = ftScale.CurrentValue;
+                control.Visible = control.Scale != 0;
 
                 if (ftScale.CurrentValue == ftScale.EndValue)
                 {
@@ -146,30 +148,6 @@ namespace Engine.Tween
                 control.Rotation = ftRotate.CurrentValue;
 
                 if (ftRotate.CurrentValue == ftRotate.EndValue)
-                {
-                    return true;
-                }
-
-                return false;
-            });
-        }
-        /// <summary>
-        /// Adds an alpha task to the internal task list
-        /// </summary>
-        /// <param name="control">Control</param>
-        /// <param name="ftAlpha">Alpha tween</param>
-        public static void AddAlphaTween(UIControl control, FloatTween ftAlpha)
-        {
-            control.Alpha = ftAlpha.StartValue;
-
-            var list = tasks.GetOrAdd(control, new List<Func<float, bool>>());
-            list.Add((d) =>
-            {
-                ftAlpha.Update(d);
-
-                control.Alpha = ftAlpha.CurrentValue;
-
-                if (ftAlpha.CurrentValue == ftAlpha.EndValue)
                 {
                     return true;
                 }
@@ -238,6 +216,59 @@ namespace Engine.Tween
                     ftColorR.Restart(newStartR, newEndR);
                     ftColorG.Restart(newStartG, newEndG);
                     ftColorB.Restart(newStartB, newEndB);
+                }
+
+                return false;
+            });
+        }
+        /// <summary>
+        /// Adds an alpha task to the internal task list
+        /// </summary>
+        /// <param name="control">Control</param>
+        /// <param name="ftAlpha">Alpha tween</param>
+        public static void AddAlphaTween(UIControl control, FloatTween ftAlpha)
+        {
+            control.Alpha = ftAlpha.StartValue;
+
+            var list = tasks.GetOrAdd(control, new List<Func<float, bool>>());
+            list.Add((d) =>
+            {
+                ftAlpha.Update(d);
+
+                control.Alpha = ftAlpha.CurrentValue;
+                control.Visible = control.Alpha != 0;
+
+                if (ftAlpha.CurrentValue == ftAlpha.EndValue)
+                {
+                    return true;
+                }
+
+                return false;
+            });
+        }
+        /// <summary>
+        /// Adds a bouncing alpha task to the internal task list
+        /// </summary>
+        /// <param name="control">Control</param>
+        /// <param name="ftAlpha">Alpha tween</param>
+        public static void AddAlphaBounce(UIControl control, FloatTween ftAlpha)
+        {
+            control.Alpha = ftAlpha.StartValue;
+
+            var list = tasks.GetOrAdd(control, new List<Func<float, bool>>());
+            list.Add((d) =>
+            {
+                ftAlpha.Update(d);
+
+                control.Alpha = ftAlpha.CurrentValue;
+                control.Visible = control.Alpha != 0;
+
+                if (ftAlpha.CurrentValue == ftAlpha.EndValue)
+                {
+                    var newStart = ftAlpha.EndValue;
+                    var newEnd = ftAlpha.StartValue;
+
+                    ftAlpha.Restart(newStart, newEnd);
                 }
 
                 return false;

@@ -13,6 +13,11 @@ namespace Engine.UI
     public abstract class UIControl : Drawable, IUIControl, IScreenFitted
     {
         /// <summary>
+        /// Next update order
+        /// </summary>
+        private static int UpdateOrderSeed = 0;
+
+        /// <summary>
         /// Mouse over event
         /// </summary>
         public event EventHandler MouseOver;
@@ -37,6 +42,68 @@ namespace Engine.UI
         /// </summary>
         public event EventHandler JustReleased;
 
+        /// <summary>
+        /// Evaluates input over the specified control list
+        /// </summary>
+        /// <param name="controls">Controls to evaluate</param>
+        /// <returns>Returns true when a control capture a click</returns>
+        public static bool EvaluateInput(IEnumerable<UIControl> controls)
+        {
+            var sortedControls = controls.OrderBy(c => c.updateOrder).ToList();
+
+            var mouseOverCtrls = sortedControls.Where(c => c.Active && c.Visible && c.EventsEnabled && c.IsMouseOver).ToList();
+            if (!mouseOverCtrls.Any())
+            {
+                sortedControls.ToList().ForEach(c => c.prevIsMouseOver = false);
+
+                return false;
+            }
+
+            UIControl capturedParent = mouseOverCtrls.Last();
+            UIControl capturedControl = capturedParent;
+
+            if (capturedParent.Children.Any())
+            {
+                capturedControl = capturedParent.Children.LastOrDefault(c => c.EventsEnabled && c.IsMouseOver) ?? capturedParent;
+            }
+
+            capturedControl.FireMouseOverEvent();
+            if (!capturedControl.prevIsMouseOver)
+            {
+                capturedControl.FireMouseEnterEvent();
+            }
+            else if (capturedControl.prevIsMouseOver)
+            {
+                capturedControl.FireMouseLeaveEvent();
+            }
+
+            sortedControls.ToList().ForEach(c => c.prevIsMouseOver = false);
+            capturedControl.prevIsMouseOver = true;
+
+            if (capturedControl.IsPressed)
+            {
+                capturedControl.FirePressedEvent();
+            }
+
+            if (capturedControl.IsJustPressed)
+            {
+                capturedControl.FireJustPressedEvent();
+            }
+
+            if (capturedControl.IsJustReleased)
+            {
+                capturedControl.FireJustReleasedEvent();
+
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Update order value
+        /// </summary>
+        private readonly int updateOrder = -1;
         /// <summary>
         /// Children collection
         /// </summary>
@@ -140,6 +207,10 @@ namespace Engine.UI
             }
         }
 
+        /// <summary>
+        /// Gets or sets whether the control is enabled for event processing
+        /// </summary>
+        public virtual bool EventsEnabled { get; set; } = true;
         /// <summary>
         /// Gets whether the mouse is over the button rectangle or not
         /// </summary>
@@ -587,6 +658,8 @@ namespace Engine.UI
         protected UIControl(Scene scene, UIControlDescription description)
             : base(scene, description)
         {
+            this.updateOrder = ++UpdateOrderSeed;
+
             this.Manipulator = new Manipulator2D(this.Game);
 
             this.fitParent = description.FitParent;
@@ -609,6 +682,8 @@ namespace Engine.UI
             this.centerVertically = description.CenterVertically;
 
             this.color = description.Color;
+
+            this.EventsEnabled = description.EventsEnabled;
 
             this.updateInternals = true;
         }
@@ -639,7 +714,7 @@ namespace Engine.UI
                 this.updateInternals = false;
             }
 
-            this.UpdateInput();
+            //this.UpdateInput();
 
             if (children.Any())
             {

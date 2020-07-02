@@ -12,6 +12,7 @@ namespace Engine
     using Engine.Effects;
     using Engine.PathFinding;
     using Engine.Tween;
+    using Engine.UI;
 
     /// <summary>
     /// Render scene
@@ -298,6 +299,10 @@ namespace Engine
         /// Gets or sets if scene has to perform frustum culling with objects
         /// </summary>
         public bool PerformFrustumCulling { get; set; }
+        /// <summary>
+        /// Gets or sets if a UIControl captured the mouse left click button
+        /// </summary>
+        public bool UICaptured { get; protected set; }
 
         /// <summary>
         /// Constructor
@@ -430,10 +435,12 @@ namespace Engine
 
                 this.NavigationGraph?.Update(gameTime);
 
-                // Action!
-                this.Renderer?.Update(gameTime, this);
+                this.UICaptured = UIControl.EvaluateInput(this.GetComponents().OfType<UIControl>().ToArray());
 
                 FloatTweenManager.Update(gameTime);
+
+                // Action!
+                this.Renderer?.Update(gameTime, this);
             }
             catch (EngineException ex)
             {

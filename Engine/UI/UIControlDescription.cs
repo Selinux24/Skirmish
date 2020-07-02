@@ -43,6 +43,10 @@ namespace Engine.UI
         /// Sprite color
         /// </summary>
         public Color4 Color { get; set; } = Color4.White;
+        /// <summary>
+        /// Events enabled
+        /// </summary>
+        public bool EventsEnabled { get; set; } = true;
 
         /// <summary>
         /// Constructor

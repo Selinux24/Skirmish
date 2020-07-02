@@ -212,9 +212,8 @@ namespace GameLogic.Rules
                 else
                 {
                     this.currentSoldier = Array.IndexOf(this.Soldiers, selectables[0]);
+                    this.PrevSoldierIndex();
                 }
-
-                this.PrevSoldierIndex();
             }
 
             return this.CurrentSoldier;
