@@ -300,9 +300,13 @@ namespace Engine
         /// </summary>
         public bool PerformFrustumCulling { get; set; }
         /// <summary>
-        /// Gets or sets if a UIControl captured the mouse left click button
+        /// Gets whether a UIControl captured the mouse's click events or not
         /// </summary>
-        public bool UICaptured { get; protected set; }
+        public bool UICaptured { get { return UICapturedControl != null; } }
+        /// <summary>
+        /// Gets or sets the UIControl wich captured the mouse's click events
+        /// </summary>
+        public UIControl UICapturedControl { get; protected set; }
 
         /// <summary>
         /// Constructor
@@ -435,7 +439,7 @@ namespace Engine
 
                 this.NavigationGraph?.Update(gameTime);
 
-                this.UICaptured = UIControl.EvaluateInput(this);
+                this.UICapturedControl = UIControl.EvaluateInput(this);
 
                 FloatTweenManager.Update(gameTime);
 

@@ -235,7 +235,7 @@ namespace Engine.Tween
             {
                 ftAlpha.Update(d);
 
-                control.Alpha = ftAlpha.CurrentValue;
+                control.Alpha = MathUtil.Clamp(ftAlpha.CurrentValue, 0f, 1f);
                 control.Visible = control.Alpha != 0;
 
                 if (ftAlpha.CurrentValue == ftAlpha.EndValue)
@@ -260,7 +260,7 @@ namespace Engine.Tween
             {
                 ftAlpha.Update(d);
 
-                control.Alpha = ftAlpha.CurrentValue;
+                control.Alpha = MathUtil.Clamp(ftAlpha.CurrentValue, 0f, 1f);
                 control.Visible = control.Alpha != 0;
 
                 if (ftAlpha.CurrentValue == ftAlpha.EndValue)

@@ -25,6 +25,9 @@ namespace SceneTest
         private Sprite spr = null;
         private UITextArea title = null;
         private UITextArea runtime = null;
+        private UIPanel blackPan = null;
+        private UIProgressBar progressBar = null;
+        private float progressValue = 0;
 
         private ModelInstanced floorAsphaltI = null;
 
@@ -64,12 +67,19 @@ namespace SceneTest
         private bool drawDrawVolumes = false;
         private bool drawCullVolumes = false;
 
+        private bool gameReady = false;
+
         public SceneTest(Game game) : base(game)
         {
 
         }
 
-        public override async Task Initialize()
+        public override Task Initialize()
+        {
+            return LoadUserInterface();
+        }
+
+        public async Task LoadUserInterface()
         {
             this.Game.GameStatusCollected += GameStatusCollected;
             this.Game.VisibleMouse = false;
@@ -80,75 +90,36 @@ namespace SceneTest
             this.Camera.SlowMovementDelta = 100f;
             this.Camera.MovementDelta = 500f;
 
-            var taskList = new Task[]
-            {
-                InitializeSkyEffects(),
-                InitializeCursor(),
-                InitializeTextBoxes(),
-                InitializeScenery(),
-                InitializeTrees(),
-                InitializeFloorAsphalt(),
-                InitializeBuildingObelisk(),
-                InitializeCharacterSoldier(),
-                InitializeVehicles(),
-                InitializeLamps(),
-                InitializeStreetLamps(),
-                InitializeContainers(),
-                InitializeTestCube(),
-                InitializeParticles(),
-                InitializeSpriteButtons(),
-                InitializaDebug(),
-            };
+            await this.LoadResourcesAsync(
+                InitializeUI(),
+                async () =>
+                {
+                    this.RefreshUI();
 
-            await this.LoadResourcesAsync(taskList, () =>
-            {
-                this.Camera.Goto(-20, 10, -40f);
-                this.Camera.LookTo(0, 0, 0);
+                    progressBar.Visible = true;
+                    progressBar.ProgressValue = 0;
 
-                this.RefreshUI();
-            });
-
-            this.Environment.TimeOfDay.BeginAnimation(9, 00, 00, 0.1f);
+                    await LoadControls();
+                });
         }
-        private async Task InitializeCursor()
-        {
-            var cursorDesc = new UICursorDescription()
-            {
-                Name = "Cursor",
-                ContentPath = "Common",
-                Textures = new[] { "pointer.png" },
-                Height = 48,
-                Width = 48,
-                Centered = false,
-                Delta = new Vector2(-14, -6),
-                Color = Color.White,
-            };
-            cursor = await this.AddComponentUICursor(cursorDesc, 100);
-            cursor.Visible = false;
-        }
-        private async Task InitializeTextBoxes()
+        private async Task InitializeUI()
         {
             this.title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate("Tahoma", 18, Color.White, Color.Orange) }, layerHUD);
-            this.runtime = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate("Tahoma", 10, Color.Yellow, Color.Orange) }, layerHUD);
-
             this.title.Text = "Scene Test - Textures";
-            this.runtime.Text = "";
-
             this.title.SetPosition(Vector2.Zero);
+
+            this.runtime = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate("Tahoma", 10, Color.Yellow, Color.Orange) }, layerHUD);
+            this.runtime.Text = "";
             this.runtime.SetPosition(new Vector2(5, this.title.Top + this.title.Height + 3));
 
-            var spDesc = new SpriteDescription()
+            this.spr = await this.AddComponentSprite(new SpriteDescription()
             {
                 AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
                 Height = this.runtime.Top + this.runtime.Height + 3,
                 Color = new Color4(0, 0, 0, 0.75f),
-            };
+            }, SceneObjectUsages.UI, layerHUD - 1);
 
-            this.spr = await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);
-        }
-        private async Task InitializeSpriteButtons()
-        {
             this.butClose = await this.AddComponentUIButton(new UIButtonDescription()
             {
                 TwoStateButton = true,
@@ -165,9 +136,84 @@ namespace SceneTest
                 },
                 Text = "Close",
             }, layerHUD);
-
             this.butClose.JustReleased += (sender, eventArgs) => { this.Game.SetScene<SceneStart>(); };
             this.butClose.Visible = false;
+
+            this.blackPan = await this.AddComponentUIPanel(new UIPanelDescription
+            {
+                Background = new SpriteDescription
+                {
+                    Color = Color.Black,
+                },
+                Left = 0,
+                Top = 0,
+                Width = this.Game.Form.RenderWidth,
+                Height = this.Game.Form.RenderHeight,
+            }, layerHUD + 1);
+
+            this.progressBar = await this.AddComponentUIProgressBar(new UIProgressBarDescription
+            {
+                Name = "Progress Bar",
+                Top = this.Game.Form.RenderHeight - 60,
+                Left = 100,
+                Width = this.Game.Form.RenderWidth - 200,
+                Height = 30,
+                BaseColor = new Color(0, 0, 0, 0.5f),
+                ProgressColor = Color.Green,
+                Font = new TextDrawerDescription
+                {
+                    Font = "Consolas",
+                    FontSize = 18,
+                },
+            }, layerHUD + 2);
+
+            this.cursor = await this.AddComponentUICursor(new UICursorDescription()
+            {
+                Name = "Cursor",
+                ContentPath = "Common",
+                Textures = new[] { "pointer.png" },
+                Height = 48,
+                Width = 48,
+                Centered = false,
+                Delta = new Vector2(-14, -6),
+                Color = Color.White,
+            }, layerHUD * 2);
+            this.cursor.Visible = false;
+        }
+
+        private async Task LoadControls()
+        {
+            var taskList = new Task[]
+            {
+                InitializeSkyEffects(),
+                InitializeScenery(),
+                InitializeTrees(),
+                InitializeFloorAsphalt(),
+                InitializeBuildingObelisk(),
+                InitializeCharacterSoldier(),
+                InitializeVehicles(),
+                InitializeLamps(),
+                InitializeStreetLamps(),
+                InitializeContainers(),
+                InitializeTestCube(),
+                InitializeParticles(),
+                InitializaDebug(),
+            };
+
+            await this.LoadResourcesAsync(taskList, async () =>
+            {
+                this.Environment.TimeOfDay.BeginAnimation(9, 00, 00, 0.1f);
+
+                this.Camera.Goto(-20, 10, -40f);
+                this.Camera.LookTo(0, 0, 0);
+
+                this.blackPan.Hide(4);
+                this.progressBar.Hide(2);
+
+                await Task.Delay(1000);
+
+                this.gameReady = true;
+            });
         }
         private async Task InitializeSkyEffects()
         {
@@ -768,15 +814,15 @@ namespace SceneTest
             this.lightsVolumeDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(desc);
         }
 
-        private void RefreshUI()
+        public override void OnReportProgress(float value)
         {
-            this.spr.Top = 0;
-            this.spr.Left = 0;
-            this.spr.Width = this.Game.Form.RenderWidth;
-            this.spr.Height = this.runtime.Top + this.runtime.Height + 3;
+            progressValue = Math.Max(progressValue, value);
 
-            this.butClose.Top = 1;
-            this.butClose.Left = this.Game.Form.RenderWidth - this.butClose.Width - 1;
+            if (progressBar != null)
+            {
+                progressBar.ProgressValue = progressValue;
+                progressBar.Text = $"{(int)(progressValue * 100f)}%";
+            }
         }
 
         public override void Update(GameTime gameTime)
@@ -795,17 +841,22 @@ namespace SceneTest
 
             base.Update(gameTime);
 
+            if (!gameReady)
+            {
+                return;
+            }
+
             bool shift = this.Game.Input.ShiftPressed;
 
-            this.UpdateCamera(gameTime, shift);
+            this.UpdateInputCamera(gameTime, shift);
+            this.UpdateInputDebug();
+
             this.UpdateWind(gameTime);
             this.UpdateSkyEffects();
             this.UpdateParticles();
             this.UpdateDebug();
-
-            this.runtime.Text = this.Game.RuntimeText;
         }
-        private void UpdateCamera(GameTime gameTime, bool shift)
+        private void UpdateInputCamera(GameTime gameTime, bool shift)
         {
             if (!cursor.Visible)
             {
@@ -835,6 +886,36 @@ namespace SceneTest
                 this.Camera.MoveBackward(gameTime, !shift);
             }
         }
+        private void UpdateInputDebug()
+        {
+            if (this.Game.Input.KeyJustReleased(Keys.F1))
+            {
+                this.drawDrawVolumes = !this.drawDrawVolumes;
+                this.drawCullVolumes = false;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F2))
+            {
+                this.drawCullVolumes = !this.drawCullVolumes;
+                this.drawDrawVolumes = false;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F5))
+            {
+                this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = false;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F6))
+            {
+                this.Game.CollectGameStatus = true;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.Tab))
+            {
+                this.ToggleLockMouse();
+            }
+        }
+
         private void UpdateWind(GameTime gameTime)
         {
             if (this.nextWindChange <= 0)
@@ -920,32 +1001,7 @@ namespace SceneTest
         }
         private void UpdateDebug()
         {
-            if (this.Game.Input.KeyJustReleased(Keys.F1))
-            {
-                this.drawDrawVolumes = !this.drawDrawVolumes;
-                this.drawCullVolumes = false;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F2))
-            {
-                this.drawCullVolumes = !this.drawCullVolumes;
-                this.drawDrawVolumes = false;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F5))
-            {
-                this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = false;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F6))
-            {
-                this.Game.CollectGameStatus = true;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.Tab))
-            {
-                this.ToggleLockMouse();
-            }
+            this.runtime.Text = this.Game.RuntimeText;
 
             if (this.drawDrawVolumes)
             {
@@ -956,6 +1012,17 @@ namespace SceneTest
             {
                 this.UpdateLightCullingVolumes();
             }
+        }
+
+        private void RefreshUI()
+        {
+            this.spr.Top = 0;
+            this.spr.Left = 0;
+            this.spr.Width = this.Game.Form.RenderWidth;
+            this.spr.Height = this.runtime.Top + this.runtime.Height + 3;
+
+            this.butClose.Top = 1;
+            this.butClose.Left = this.Game.Form.RenderWidth - this.butClose.Width - 1;
         }
         private void ToggleLockMouse()
         {

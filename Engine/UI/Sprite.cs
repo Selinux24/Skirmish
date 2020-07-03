@@ -70,9 +70,7 @@ namespace Engine.UI
 
             this.viewProjection = this.Game.Form.GetOrthoProjectionMatrix();
         }
-        /// <summary>
-        /// Internal resources disposition
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -128,10 +126,7 @@ namespace Engine.UI
             this.spriteTexture = this.Game.ResourceManager.RequestResource(image);
         }
 
-        /// <summary>
-        /// Draw
-        /// </summary>
-        /// <param name="context">Context</param>
+        /// <inheritdoc/>
         public override void Draw(DrawContext context)
         {
             if (!Visible)
@@ -179,9 +174,7 @@ namespace Engine.UI
             }
         }
 
-        /// <summary>
-        /// Resizes internal components
-        /// </summary>
+        /// <inheritdoc/>
         public override void Resize()
         {
             base.Resize();

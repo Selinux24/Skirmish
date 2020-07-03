@@ -105,10 +105,7 @@ namespace Engine.UI
             }
         }
 
-        /// <summary>
-        /// Updates state
-        /// </summary>
-        /// <param name="context">Context</param>
+        /// <inheritdoc/>
         public override void Update(UpdateContext context)
         {
             base.Update(context);

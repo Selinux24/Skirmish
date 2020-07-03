@@ -52,6 +52,23 @@ namespace Engine.UI
                 }
             }
         }
+        /// <inheritdoc/>
+        public override float Alpha
+        {
+            get
+            {
+                return base.Alpha;
+            }
+            set
+            {
+                base.Alpha = value;
+
+                if (this.textDrawer != null)
+                {
+                    this.textDrawer.Alpha = value;
+                }
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -71,7 +88,6 @@ namespace Engine.UI
                     Color = description.ProgressColor,
                     Width = description.Width,
                     Height = description.Height,
-                    FitParent = false,
                     EventsEnabled = false,
                 });
 
@@ -82,9 +98,11 @@ namespace Engine.UI
                     Color = description.BaseColor,
                     Width = description.Width,
                     Height = description.Height,
-                    FitParent = false,
                     EventsEnabled = false,
                 });
+
+            this.AddChild(left, false);
+            this.AddChild(right, false);
 
             if (description.Font != null)
             {
@@ -99,9 +117,7 @@ namespace Engine.UI
                 this.Text = description.Text;
             }
         }
-        /// <summary>
-        /// Releases used resources
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -112,10 +128,7 @@ namespace Engine.UI
             }
         }
 
-        /// <summary>
-        /// Updates state
-        /// </summary>
-        /// <param name="context">Context</param>
+        /// <inheritdoc/>
         public override void Update(UpdateContext context)
         {
             if (!Active)
@@ -124,13 +137,13 @@ namespace Engine.UI
             }
 
             this.left.Width = (int)(LeftScale * Width);
-            this.left.Left = this.Left;
-            this.left.Top = this.Top;
+            this.left.Left = 0;
+            this.left.Top = 0;
             this.left.Update(context);
 
             this.right.Width = (int)(RightScale * Width);
-            this.right.Left = this.Left + this.left.Width;
-            this.right.Top = this.Top;
+            this.right.Left = this.left.Width;
+            this.right.Top = 0;
             this.right.Update(context);
 
             if (!string.IsNullOrWhiteSpace(this.Text))
@@ -140,10 +153,7 @@ namespace Engine.UI
             }
         }
 
-        /// <summary>
-        /// Draws button
-        /// </summary>
-        /// <param name="context">Context</param>
+        /// <inheritdoc/>
         public override void Draw(DrawContext context)
         {
             if (!Visible)
@@ -167,9 +177,7 @@ namespace Engine.UI
             }
         }
 
-        /// <summary>
-        /// Resize
-        /// </summary>
+        /// <inheritdoc/>
         public override void Resize()
         {
             base.Resize();

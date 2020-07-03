@@ -46,7 +46,8 @@ namespace Engine.UI
         /// Evaluates input over the specified scene
         /// </summary>
         /// <param name="scene">Scene</param>
-        public static bool EvaluateInput(Scene scene)
+        /// <param name="capturedControl">Returns the control wich captures the mouse event</param>
+        public static UIControl EvaluateInput(Scene scene)
         {
             var input = scene.Game.Input;
 
@@ -55,53 +56,104 @@ namespace Engine.UI
                 .OrderBy(c => c.updateOrder)
                 .ToList();
 
-            var mouseOverCtrls = sortedControls.Where(c => c.Active && c.Visible && c.EventsEnabled && c.IsMouseOver).ToList();
+            sortedControls.ForEach(c => InitControlState(input.MousePosition, c));
+
+            var mouseOverCtrls = sortedControls.Where(c => IsEvaluable(c)).ToList();
             if (!mouseOverCtrls.Any())
             {
-                sortedControls.ToList().ForEach(c => c.prevIsMouseOver = false);
+                return null;
+            }
 
+            var topMostParent = mouseOverCtrls.Last();
+
+            topMostParent.FireMouseOverEvent();
+            if (!topMostParent.prevIsMouseOver)
+            {
+                topMostParent.FireMouseEnterEvent();
+            }
+
+            mouseOverCtrls.ForEach(c => c.prevIsMouseOver = false);
+            topMostParent.prevIsMouseOver = true;
+
+            bool mouseCaptured = false;
+            var topMostControl = topMostParent.Children.LastOrDefault(c => IsEvaluable(c)) ?? topMostParent;
+
+            if (input.LeftMouseButtonPressed)
+            {
+                topMostControl.IsPressed = true;
+                topMostControl.FirePressedEvent();
+
+                mouseCaptured = true;
+            }
+
+            if (input.LeftMouseButtonJustPressed)
+            {
+                topMostControl.IsJustPressed = true;
+                topMostControl.FireJustPressedEvent();
+
+                mouseCaptured = true;
+            }
+
+            if (input.LeftMouseButtonJustReleased)
+            {
+                topMostControl.IsJustReleased = true;
+                topMostControl.FireJustReleasedEvent();
+
+                mouseCaptured = true;
+            }
+
+            if (mouseCaptured)
+            {
+                return topMostParent;
+            }
+
+            return null;
+        }
+        /// <summary>
+        /// Gets whether the specified UI control is event-evaluable or not
+        /// </summary>
+        /// <param name="ctrl">UI control</param>
+        /// <returns>Returns true if the control is evaluable for UI events</returns>
+        private static bool IsEvaluable(UIControl ctrl)
+        {
+            if (ctrl == null)
+            {
                 return false;
             }
 
-            UIControl capturedParent = mouseOverCtrls.Last();
-            UIControl capturedControl = capturedParent;
-
-            if (capturedParent.Children.Any())
+            return ctrl.Active && ctrl.Visible && ctrl.EventsEnabled && ctrl.IsMouseOver;
+        }
+        /// <summary>
+        /// Initializes the UI state
+        /// </summary>
+        /// <param name="mousePosition">Mouse position</param>
+        /// <param name="ctrl">Control</param>
+        private static void InitControlState(Point mousePosition, UIControl ctrl)
+        {
+            ctrl.IsMouseOver = ctrl.Contains(mousePosition);
+            if (!ctrl.IsMouseOver)
             {
-                capturedControl = capturedParent.Children.LastOrDefault(c => c.EventsEnabled && c.IsMouseOver) ?? capturedParent;
+                if (ctrl.prevIsMouseOver)
+                {
+                    ctrl.FireMouseLeaveEvent();
+                }
+
+                ctrl.prevIsMouseOver = false;
             }
 
-            capturedControl.FireMouseOverEvent();
-            if (!capturedControl.prevIsMouseOver)
-            {
-                capturedControl.FireMouseEnterEvent();
-            }
-            else if (capturedControl.prevIsMouseOver)
-            {
-                capturedControl.FireMouseLeaveEvent();
-            }
+            ctrl.IsPressed = false;
+            ctrl.IsJustPressed = false;
+            ctrl.IsJustReleased = false;
 
-            sortedControls.ToList().ForEach(c => c.prevIsMouseOver = false);
-            capturedControl.prevIsMouseOver = true;
-
-            if (capturedControl.IsPressed)
+            if (!ctrl.Children.Any())
             {
-                capturedControl.FirePressedEvent();
+                return;
             }
 
-            if (capturedControl.IsJustPressed)
+            foreach (var child in ctrl.Children)
             {
-                capturedControl.FireJustPressedEvent();
+                InitControlState(mousePosition, child);
             }
-
-            if (capturedControl.IsJustReleased)
-            {
-                capturedControl.FireJustReleasedEvent();
-
-                return true;
-            }
-
-            return false;
         }
 
         /// <summary>
@@ -218,43 +270,19 @@ namespace Engine.UI
         /// <summary>
         /// Gets whether the mouse is over the button rectangle or not
         /// </summary>
-        public bool IsMouseOver
-        {
-            get
-            {
-                return this.Contains(this.Game.Input.MousePosition);
-            }
-        }
+        public bool IsMouseOver { get; protected set; }
         /// <summary>
         /// Gets whether the control is pressed or not
         /// </summary>
-        public bool IsPressed
-        {
-            get
-            {
-                return IsMouseOver && this.Game.Input.LeftMouseButtonPressed;
-            }
-        }
+        public bool IsPressed { get; protected set; }
         /// <summary>
         /// Gets whether the control is just pressed or not
         /// </summary>
-        public bool IsJustPressed
-        {
-            get
-            {
-                return IsMouseOver && this.Game.Input.LeftMouseButtonJustPressed;
-            }
-        }
+        public bool IsJustPressed { get; protected set; }
         /// <summary>
         /// Gets whether the control is just released or not
         /// </summary>
-        public bool IsJustReleased
-        {
-            get
-            {
-                return IsMouseOver && this.Game.Input.LeftMouseButtonJustReleased;
-            }
-        }
+        public bool IsJustReleased { get; protected set; }
 
         /// <summary>
         /// Gets or sets the left position in the render area
@@ -718,8 +746,6 @@ namespace Engine.UI
                 this.updateInternals = false;
             }
 
-            //this.UpdateInput();
-
             if (children.Any())
             {
                 children.ForEach(c => c.Update(context));
@@ -754,42 +780,6 @@ namespace Engine.UI
             if (children.Any())
             {
                 children.ForEach(c => c.updateInternals = true);
-            }
-        }
-        /// <summary>
-        /// Updates the input state
-        /// </summary>
-        protected virtual void UpdateInput()
-        {
-            bool isMouseOver = this.IsMouseOver;
-            if (isMouseOver)
-            {
-                this.FireMouseOverEvent();
-
-                if (!this.prevIsMouseOver)
-                {
-                    this.FireMouseEnterEvent();
-                }
-            }
-            else if (prevIsMouseOver)
-            {
-                this.FireMouseLeaveEvent();
-            }
-            this.prevIsMouseOver = isMouseOver;
-
-            if (this.IsPressed)
-            {
-                this.FirePressedEvent();
-            }
-
-            if (this.IsJustPressed)
-            {
-                this.FireJustPressedEvent();
-            }
-
-            if (this.IsJustReleased)
-            {
-                this.FireJustReleasedEvent();
             }
         }
 

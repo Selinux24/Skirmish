@@ -91,9 +91,7 @@ namespace Engine.UI
             this.Manipulator.SetPosition(x, y);
             this.Manipulator.SetScale(description.Width, description.Height);
         }
-        /// <summary>
-        /// Dispose objects
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -106,10 +104,7 @@ namespace Engine.UI
             base.Dispose(disposing);
         }
 
-        /// <summary>
-        /// Draw objects
-        /// </summary>
-        /// <param name="context">Context</param>
+        /// <inheritdoc/>
         public override void Draw(DrawContext context)
         {
             if (!Visible)
@@ -156,9 +151,7 @@ namespace Engine.UI
             }
         }
 
-        /// <summary>
-        /// Screen resize
-        /// </summary>
+        /// <inheritdoc/>
         public override void Resize()
         {
             base.Resize();

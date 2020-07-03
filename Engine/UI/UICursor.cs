@@ -33,12 +33,10 @@ namespace Engine.UI
         {
             this.Centered = description.Centered;
             this.Delta = description.Delta;
+            this.EventsEnabled = false;
         }
 
-        /// <summary>
-        /// Update cursor state
-        /// </summary>
-        /// <param name="context">Context</param>
+        /// <inheritdoc/>
         public override void Update(UpdateContext context)
         {
             if (!Active)

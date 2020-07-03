@@ -80,9 +80,7 @@ namespace Engine.UI
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Dispose objects
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -143,10 +141,7 @@ namespace Engine.UI
             };
         }
 
-        /// <summary>
-        /// Draw objects
-        /// </summary>
-        /// <param name="context">Context</param>
+        /// <inheritdoc/>
         public override void Draw(DrawContext context)
         {
             if (!Visible)
@@ -190,13 +185,7 @@ namespace Engine.UI
             this.minimapBox.Resize();
         }
 
-        /// <summary>
-        /// Performs culling test
-        /// </summary>
-        /// <param name="volume">Culling volume</param>
-        /// <param name="distance">If the object is inside the volume, returns the distance</param>
-        /// <returns>Returns true if the object is outside of the frustum</returns>
-        /// <remarks>By default, returns true and distance = float.MaxValue</remarks>
+        /// <inheritdoc/>
         public override bool Cull(ICullingVolume volume, out float distance)
         {
             this.drawContext.Lights.Cull(volume, this.drawContext.EyePosition);
