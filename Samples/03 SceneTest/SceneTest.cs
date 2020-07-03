@@ -207,8 +207,8 @@ namespace SceneTest
                 this.Camera.Goto(-20, 10, -40f);
                 this.Camera.LookTo(0, 0, 0);
 
-                this.blackPan.Hide(4);
-                this.progressBar.Hide(2);
+                this.blackPan.Hide(4000);
+                this.progressBar.Hide(2000);
 
                 await Task.Delay(1000);
 

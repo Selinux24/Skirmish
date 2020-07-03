@@ -21,9 +21,9 @@ namespace Engine.Tween
         /// Scale up a control
         /// </summary>
         /// <param name="control">Control</param>
-        /// <param name="duration">Duration</param>
+        /// <param name="duration">Duration in milliseconds</param>
         /// <param name="fnc">Scale function</param>
-        public static void TweenScaleUp(this UIControl control, float duration, ScaleFunc fnc)
+        public static void TweenScaleUp(this UIControl control, long duration, ScaleFunc fnc)
         {
             if (control == null)
             {
@@ -36,9 +36,9 @@ namespace Engine.Tween
         /// Scales down a control
         /// </summary>
         /// <param name="control">Control</param>
-        /// <param name="duration">Duration</param>
+        /// <param name="duration">Duration in milliseconds</param>
         /// <param name="fnc">Scale function</param>
-        public static void TweenScaleDown(this UIControl control, float duration, ScaleFunc fnc)
+        public static void TweenScaleDown(this UIControl control, long duration, ScaleFunc fnc)
         {
             if (control == null)
             {
@@ -53,9 +53,9 @@ namespace Engine.Tween
         /// <param name="control">Control</param>
         /// <param name="from">Start value</param>
         /// <param name="to">End value</param>
-        /// <param name="duration">Duration</param>
+        /// <param name="duration">Duration in milliseconds</param>
         /// <param name="fnc">Scale function</param>
-        public static void TweenScale(this UIControl control, float from, float to, float duration, ScaleFunc fnc)
+        public static void TweenScale(this UIControl control, float from, float to, long duration, ScaleFunc fnc)
         {
             if (control == null)
             {
@@ -74,9 +74,9 @@ namespace Engine.Tween
         /// <param name="control">Control</param>
         /// <param name="from">Start value</param>
         /// <param name="to">End value</param>
-        /// <param name="duration">Duration</param>
+        /// <param name="duration">Duration in milliseconds</param>
         /// <param name="fnc">Scale function</param>
-        public static void TweenScaleBounce(this UIControl control, float from, float to, float duration, ScaleFunc fnc)
+        public static void TweenScaleBounce(this UIControl control, float from, float to, long duration, ScaleFunc fnc)
         {
             if (control == null)
             {
@@ -95,9 +95,9 @@ namespace Engine.Tween
         /// </summary>
         /// <param name="control">Control</param>
         /// <param name="targetAngle">Target angle</param>
-        /// <param name="duration">Duration</param>
+        /// <param name="duration">Duration in milliseconds</param>
         /// <param name="fnc">Scale function</param>
-        public static void TweenRotate(this UIControl control, float targetAngle, float duration, ScaleFunc fnc)
+        public static void TweenRotate(this UIControl control, float targetAngle, long duration, ScaleFunc fnc)
         {
             if (control == null)
             {
@@ -115,9 +115,9 @@ namespace Engine.Tween
         /// Shows a control
         /// </summary>
         /// <param name="control">Control</param>
-        /// <param name="duration">Duration</param>
+        /// <param name="duration">Duration in milliseconds</param>
         /// <param name="fnc">Scale function</param>
-        public static void TweenShow(this UIControl control, float duration, ScaleFunc fnc)
+        public static void TweenShow(this UIControl control, long duration, ScaleFunc fnc)
         {
             if (control == null)
             {
@@ -130,9 +130,9 @@ namespace Engine.Tween
         /// Hides a control
         /// </summary>
         /// <param name="control">Control</param>
-        /// <param name="duration">Duration</param>
+        /// <param name="duration">Duration in milliseconds</param>
         /// <param name="fnc">Scale function</param>
-        public static void TweenHide(this UIControl control, float duration, ScaleFunc fnc)
+        public static void TweenHide(this UIControl control, long duration, ScaleFunc fnc)
         {
             if (control == null)
             {
@@ -147,9 +147,9 @@ namespace Engine.Tween
         /// <param name="control">Control</param>
         /// <param name="from">Start value</param>
         /// <param name="to">End value</param>
-        /// <param name="duration">Duration</param>
+        /// <param name="duration">Duration in milliseconds</param>
         /// <param name="fnc">Scale function</param>
-        public static void TweenAlpha(this UIControl control, float from, float to, float duration, ScaleFunc fnc)
+        public static void TweenAlpha(this UIControl control, float from, float to, long duration, ScaleFunc fnc)
         {
             if (control == null)
             {
@@ -169,9 +169,9 @@ namespace Engine.Tween
         /// <param name="control">Control</param>
         /// <param name="from">Start value</param>
         /// <param name="to">End value</param>
-        /// <param name="duration">Duration</param>
+        /// <param name="duration">Duration in milliseconds</param>
         /// <param name="fnc">Scale function</param>
-        public static void TweenColor(this UIControl control, Color4 from, Color4 to, float duration, ScaleFunc fnc)
+        public static void TweenColor(this UIControl control, Color4 from, Color4 to, long duration, ScaleFunc fnc)
         {
             if (control == null)
             {
@@ -194,9 +194,9 @@ namespace Engine.Tween
         /// <param name="control">Control</param>
         /// <param name="from">Start value</param>
         /// <param name="to">End value</param>
-        /// <param name="duration">Duration</param>
+        /// <param name="duration">Duration in milliseconds</param>
         /// <param name="fnc">Scale function</param>
-        public static void TweenColorBounce(this UIControl control, Color4 from, Color4 to, float duration, ScaleFunc fnc)
+        public static void TweenColorBounce(this UIControl control, Color4 from, Color4 to, long duration, ScaleFunc fnc)
         {
             if (control == null)
             {

@@ -411,9 +411,9 @@ Progress: {(int)(progressValue * 100f)}%";
                     progressBar.Visible = false;
 
                     staticPan.Visible = true;
-                    staticPan.Hide(1);
+                    staticPan.Hide(1000);
                     dynamicPan.Visible = true;
-                    dynamicPan.ShowRoll(1);
+                    dynamicPan.ShowRoll(1000);
                 }
 
                 textArea.Text = currentText;
@@ -422,35 +422,35 @@ Progress: {(int)(progressValue * 100f)}%";
 
         private void ButClose_Click(object sender, EventArgs e)
         {
-            dynamicPan.HideRoll(1);
+            dynamicPan.HideRoll(1000);
 
             spriteSmiley.Visible = true;
             spriteSmiley.CenterHorizontally = CenterTargets.Screen;
             spriteSmiley.CenterVertically = CenterTargets.Screen;
-            spriteSmiley.Show(1);
-            spriteSmiley.ScaleInScaleOut(0.85f, 1f, 0.25f);
+            spriteSmiley.Show(1000);
+            spriteSmiley.ScaleInScaleOut(0.85f, 1f, 250);
 
             butTest.Visible = true;
-            butTest.Show(0.25f);
-            butTest.TweenColorBounce(Color.Yellow, Color.Red, 2, ScaleFuncs.Linear);
+            butTest.Show(250);
+            butTest.TweenColorBounce(Color.Yellow, Color.Red, 2000, ScaleFuncs.Linear);
 
             butTest2.Text = "The other";
             butTest2.Visible = true;
-            butTest2.Show(0.25f);
-            butTest2.TweenColorBounce(Color.Yellow, Color.Red, 2, ScaleFuncs.Linear);
+            butTest2.Show(250);
+            butTest2.TweenColorBounce(Color.Yellow, Color.Red, 2000, ScaleFuncs.Linear);
         }
 
         private void ButTest_Click(object sender, EventArgs e)
         {
             spriteSmiley.ClearTween();
-            spriteSmiley.Hide(0.5f);
+            spriteSmiley.Hide(500);
 
             if (sender is UIButton button)
             {
                 button.ClearTween();
                 button.MouseLeave -= ButTest_MouseLeave;
                 button.MouseEnter -= ButTest_MouseEnter;
-                button.Hide(0.5f);
+                button.Hide(500);
             }
         }
         private void ButTest2_Click(object sender, EventArgs e)
@@ -460,7 +460,7 @@ Progress: {(int)(progressValue * 100f)}%";
                 button.ClearTween();
                 button.MouseLeave -= ButTest_MouseLeave;
                 button.MouseEnter -= ButTest_MouseEnter;
-                button.Hide(0.5f);
+                button.Hide(500);
             }
         }
         private void ButTest_MouseLeave(object sender, EventArgs e)
@@ -468,8 +468,8 @@ Progress: {(int)(progressValue * 100f)}%";
             if (sender is UIButton button)
             {
                 button.ClearTween();
-                button.TweenScale(button.Scale, 1, 0.15f, ScaleFuncs.QuadraticEaseOut);
-                button.TweenColorBounce(Color.Yellow, Color.Red, 2, ScaleFuncs.Linear);
+                button.TweenScale(button.Scale, 1, 150, ScaleFuncs.QuadraticEaseOut);
+                button.TweenColorBounce(Color.Yellow, Color.Red, 2000, ScaleFuncs.Linear);
             }
         }
         private void ButTest_MouseEnter(object sender, EventArgs e)
@@ -477,8 +477,8 @@ Progress: {(int)(progressValue * 100f)}%";
             if (sender is UIButton button)
             {
                 button.ClearTween();
-                button.TweenScale(button.Scale, 2, 0.15f, ScaleFuncs.QuadraticEaseIn);
-                button.TweenColor(button.Color, Color.Yellow, 0.5f, ScaleFuncs.Linear);
+                button.TweenScale(button.Scale, 2, 150, ScaleFuncs.QuadraticEaseIn);
+                button.TweenColor(button.Color, Color.Yellow, 500, ScaleFuncs.Linear);
             }
         }
     }

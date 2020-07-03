@@ -13,15 +13,15 @@ namespace Collada
         private const int layerHUD = 99;
         private const int layerCursor = 100;
 
-        Model backGround = null;
-        UITextArea title = null;
-        UIButton sceneDungeonWallButton = null;
-        UIButton sceneNavMeshTestButton = null;
-        UIButton sceneDungeonButton = null;
-        UIButton sceneModularDungeonButton = null;
-        UIButton exitButton = null;
+        private Model backGround = null;
+        private UITextArea title = null;
+        private UIButton sceneDungeonWallButton = null;
+        private UIButton sceneNavMeshTestButton = null;
+        private UIButton sceneDungeonButton = null;
+        private UIButton sceneModularDungeonButton = null;
+        private UIButton exitButton = null;
         private UIButton[] sceneButtons = null;
-        UITextArea description = null;
+        private UITextArea description = null;
 
         private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.RosyBrown, 1.5f);
         private readonly Color exitButtonColor = Color.AdjustSaturation(Color.OrangeRed, 1.5f);
@@ -259,15 +259,15 @@ namespace Collada
         }
         private void SetControlPositions()
         {
-            float tweenTime = 1f;
-            float tweenInc = 0.25f;
+            long tweenTime = 1000;
+            long tweenInc = 250;
 
             this.title.Text = "Collada Loader Test";
             this.title.CenterHorizontally = CenterTargets.Screen;
             this.title.CenterVertically = CenterTargets.Screen;
             this.title.Top = this.Game.Form.RenderHeight * 0.25f;
-            this.title.Show(2f);
-            this.title.ScaleInScaleOut(1f, 1.05f, 10);
+            this.title.Show(2000);
+            this.title.ScaleInScaleOut(1f, 1.05f, 10000);
 
             this.sceneDungeonWallButton.Text = "Dungeon Wall";
             this.sceneDungeonWallButton.TooltipText = "Shows a basic normal map scene demo.";
@@ -434,7 +434,7 @@ namespace Collada
         {
             var effect = this.AudioManager.CreateEffectInstance("push");
 
-            HideAllButButton(sender as UIButton, (float)effect.Duration.TotalSeconds);
+            HideAllButButton(sender as UIButton, (long)effect.Duration.TotalMilliseconds);
 
             Task.Run(async () =>
             {
@@ -464,7 +464,7 @@ namespace Collada
         {
             var effect = this.AudioManager.CreateEffectInstance("push");
 
-            HideAllButButton(sender as UIButton, (float)effect.Duration.TotalSeconds);
+            HideAllButButton(sender as UIButton, (long)effect.Duration.TotalMilliseconds);
 
             Task.Run(async () =>
             {
@@ -475,7 +475,7 @@ namespace Collada
                 this.Game.Exit();
             });
         }
-        private void HideAllButButton(UIButton button, float duration)
+        private void HideAllButButton(UIButton button, long milliseconds)
         {
             foreach (var but in sceneButtons)
             {
@@ -485,7 +485,7 @@ namespace Collada
                 }
 
                 but.ClearTween();
-                but.Hide(duration);
+                but.Hide(milliseconds);
             }
         }
 
@@ -496,7 +496,7 @@ namespace Collada
                 description.Text = button.TooltipText;
                 description.SetPosition(button.Left, button.Top + button.Height + 25);
                 description.ClearTween();
-                description.Hide(1f, 3f);
+                description.Hide(1000, 3f);
             }
         }
 

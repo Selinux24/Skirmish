@@ -1179,12 +1179,12 @@ namespace Collada
                 messages.CenterVertically = CenterTargets.Screen;
                 messages.Visible = true;
                 messages.ClearTween();
-                messages.Show(1f);
+                messages.Show(1000);
             }
             else
             {
                 messages.ClearTween();
-                messages.Hide(0.25f);
+                messages.Hide(250);
             }
         }
         private void UpdateEntityExit(ModularSceneryItem item)

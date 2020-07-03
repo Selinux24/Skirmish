@@ -5,27 +5,27 @@ namespace Collada
 {
     static class UIControlExtensions
     {
-        public static void Show(this UIControl ctrl, float time)
+        public static void Show(this UIControl ctrl, long milliseconds)
         {
-            ctrl.TweenShow(time, ScaleFuncs.Linear);
+            ctrl.TweenShow(milliseconds, ScaleFuncs.Linear);
         }
-        public static void Show(this UIControl ctrl, float time, float delay)
+        public static void Show(this UIControl ctrl, long milliseconds, float delay)
         {
-            ctrl.TweenAlpha(-delay * time, 1, time, ScaleFuncs.Linear);
-        }
-
-        public static void Hide(this UIControl ctrl, float time)
-        {
-            ctrl.TweenHide(time, ScaleFuncs.Linear);
-        }
-        public static void Hide(this UIControl ctrl, float time, float delay)
-        {
-            ctrl.TweenAlpha(delay * time, 0, time, ScaleFuncs.Linear);
+            ctrl.TweenAlpha(-delay * milliseconds, 1, milliseconds, ScaleFuncs.Linear);
         }
 
-        public static void ScaleInScaleOut(this UIControl ctrl, float from, float to, float time)
+        public static void Hide(this UIControl ctrl, long milliseconds)
         {
-            ctrl.TweenScaleBounce(from, to, time, ScaleFuncs.Linear);
+            ctrl.TweenHide(milliseconds, ScaleFuncs.Linear);
+        }
+        public static void Hide(this UIControl ctrl, long milliseconds, float delay)
+        {
+            ctrl.TweenAlpha(delay * milliseconds, 0, milliseconds, ScaleFuncs.Linear);
+        }
+
+        public static void ScaleInScaleOut(this UIControl ctrl, float from, float to, long milliseconds)
+        {
+            ctrl.TweenScaleBounce(from, to, milliseconds, ScaleFuncs.Linear);
         }
     }
 }

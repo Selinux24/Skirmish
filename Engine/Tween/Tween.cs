@@ -16,9 +16,19 @@ namespace Engine.Tween
         /// </summary>
         public float CurrentTime { get; private set; }
         /// <summary>
-        /// Gets the duration of the tween.
+        /// Gets the duration of the tween in milliseconds.
         /// </summary>
-        public float Duration { get; private set; }
+        public long DurationMilliseconds { get; private set; }
+        /// <summary>
+        /// Gets the duration of the tween in seconds.
+        /// </summary>
+        public float Duration
+        {
+            get
+            {
+                return DurationMilliseconds / 1000f;
+            }
+        }
         /// <summary>
         /// Gets the current state of the tween.
         /// </summary>
@@ -55,9 +65,9 @@ namespace Engine.Tween
         /// </summary>
         /// <param name="start">The start value.</param>
         /// <param name="end">The end value.</param>
-        /// <param name="duration">The duration of the tween.</param>
+        /// <param name="duration">The duration of the tween in milliseconds.</param>
         /// <param name="scaleFunc">A function used to scale progress over time.</param>
-        public void Start(T start, T end, float duration, ScaleFunc scaleFunc)
+        public void Start(T start, T end, long duration, ScaleFunc scaleFunc)
         {
             CurrentTime = 0;
 
@@ -65,7 +75,7 @@ namespace Engine.Tween
             {
                 throw new ArgumentException("duration must be greater than 0", nameof(duration));
             }
-            this.Duration = duration;
+            this.DurationMilliseconds = duration;
 
             this.scaleFunc = scaleFunc ?? throw new ArgumentNullException(nameof(scaleFunc));
 
@@ -81,7 +91,7 @@ namespace Engine.Tween
         /// </summary>
         public void Restart()
         {
-            Start(StartValue, EndValue, Duration, scaleFunc);
+            Start(StartValue, EndValue, DurationMilliseconds, scaleFunc);
         }
         /// <summary>
         /// Restarts the tween
@@ -90,7 +100,7 @@ namespace Engine.Tween
         /// <param name="end">End value</param>
         public void Restart(T start, T end)
         {
-            Start(start, end, Duration, scaleFunc);
+            Start(start, end, DurationMilliseconds, scaleFunc);
         }
         /// <summary>
         /// Pauses the tween.
@@ -129,15 +139,15 @@ namespace Engine.Tween
         /// <summary>
         /// Updates the tween.
         /// </summary>
-        /// <param name="elapsedTime">The elapsed time to add to the tween.</param>
-        public void Update(float elapsedTime)
+        /// <param name="elapsedSeconds">The elapsed seconds to add to the tween.</param>
+        public void Update(float elapsedSeconds)
         {
             if (State != TweenState.Running)
             {
                 return;
             }
 
-            CurrentTime += elapsedTime;
+            CurrentTime += elapsedSeconds;
             if (CurrentTime >= Duration)
             {
                 CurrentTime = Duration;

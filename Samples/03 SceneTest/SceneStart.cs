@@ -250,7 +250,7 @@ namespace SceneTest
         {
             if (sender is UIControl ctrl)
             {
-                ctrl.ScaleInScaleOut(1.0f, 1.10f, 0.25f);
+                ctrl.ScaleInScaleOut(1.0f, 1.10f, 250);
             }
         }
         private void SceneButtonMouseLeave(object sender, EventArgs e)
@@ -258,7 +258,7 @@ namespace SceneTest
             if (sender is UIControl ctrl)
             {
                 ctrl.ClearTween();
-                ctrl.TweenScale(ctrl.Scale, 1.0f, 0.5f, ScaleFuncs.Linear);
+                ctrl.TweenScale(ctrl.Scale, 1.0f, 500, ScaleFuncs.Linear);
             }
         }
 
@@ -270,39 +270,39 @@ namespace SceneTest
 
     static class UIControlExtensions
     {
-        public static void Show(this UIControl ctrl, float time)
+        public static void Show(this UIControl ctrl, long milliseconds)
         {
-            ctrl.TweenShow(time, ScaleFuncs.Linear);
+            ctrl.TweenShow(milliseconds, ScaleFuncs.Linear);
         }
 
-        public static void Hide(this UIControl ctrl, float time)
+        public static void Hide(this UIControl ctrl, long milliseconds)
         {
-            ctrl.TweenHide(time, ScaleFuncs.Linear);
+            ctrl.TweenHide(milliseconds, ScaleFuncs.Linear);
         }
 
-        public static void Roll(this UIControl ctrl, float time)
+        public static void Roll(this UIControl ctrl, long milliseconds)
         {
-            ctrl.TweenRotate(MathUtil.TwoPi, time, ScaleFuncs.Linear);
-            ctrl.TweenScale(1, 0.5f, time, ScaleFuncs.QuinticEaseOut);
+            ctrl.TweenRotate(MathUtil.TwoPi, milliseconds, ScaleFuncs.Linear);
+            ctrl.TweenScale(1, 0.5f, milliseconds, ScaleFuncs.QuinticEaseOut);
         }
 
-        public static void ShowRoll(this UIControl ctrl, float time)
+        public static void ShowRoll(this UIControl ctrl, long milliseconds)
         {
-            ctrl.TweenScaleUp(time, ScaleFuncs.QuinticEaseOut);
-            ctrl.TweenShow(time * 0.25f, ScaleFuncs.Linear);
-            ctrl.TweenRotate(MathUtil.TwoPi, time * 0.25f, ScaleFuncs.Linear);
+            ctrl.TweenScaleUp(milliseconds, ScaleFuncs.QuinticEaseOut);
+            ctrl.TweenShow(milliseconds / 4, ScaleFuncs.Linear);
+            ctrl.TweenRotate(MathUtil.TwoPi, milliseconds / 4, ScaleFuncs.Linear);
         }
 
-        public static void HideRoll(this UIControl ctrl, float time)
+        public static void HideRoll(this UIControl ctrl, long milliseconds)
         {
-            ctrl.TweenScaleDown(time, ScaleFuncs.QuinticEaseOut);
-            ctrl.TweenHide(time * 0.25f, ScaleFuncs.Linear);
-            ctrl.TweenRotate(-MathUtil.TwoPi, time * 0.25f, ScaleFuncs.Linear);
+            ctrl.TweenScaleDown(milliseconds, ScaleFuncs.QuinticEaseOut);
+            ctrl.TweenHide(milliseconds / 4, ScaleFuncs.Linear);
+            ctrl.TweenRotate(-MathUtil.TwoPi, milliseconds / 4, ScaleFuncs.Linear);
         }
 
-        public static void ScaleInScaleOut(this UIControl ctrl, float from, float to, float time)
+        public static void ScaleInScaleOut(this UIControl ctrl, float from, float to, long milliseconds)
         {
-            ctrl.TweenScaleBounce(from, to, time, ScaleFuncs.Linear);
+            ctrl.TweenScaleBounce(from, to, milliseconds, ScaleFuncs.Linear);
         }
     }
 }

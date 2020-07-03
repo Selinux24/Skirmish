@@ -27,8 +27,8 @@ namespace Engine.Tween
         /// <summary>
         /// Updates the tween.
         /// </summary>
-        /// <param name="elapsedTime">The elapsed time to add to the tween.</param>
-        void Update(float elapsedTime);
+        /// <param name="elapsedSeconds">The elapsed seconds to add to the tween.</param>
+        void Update(float elapsedSeconds);
     }
 
     /// <summary>
@@ -47,8 +47,8 @@ namespace Engine.Tween
         /// </summary>
         /// <param name="start">The start value.</param>
         /// <param name="end">The end value.</param>
-        /// <param name="duration">The duration of the tween.</param>
+        /// <param name="duration">The duration of the tween in milliseconds.</param>
         /// <param name="scaleFunc">A function used to scale progress over time.</param>
-        void Start(T start, T end, float duration, ScaleFunc scaleFunc);
+        void Start(T start, T end, long duration, ScaleFunc scaleFunc);
     }
 }
