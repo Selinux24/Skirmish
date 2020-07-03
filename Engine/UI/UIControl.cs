@@ -16,6 +16,14 @@ namespace Engine.UI
         /// Next update order
         /// </summary>
         private static int UpdateOrderSeed = 0;
+        /// <summary>
+        /// Gets the next order
+        /// </summary>
+        /// <returns>Returns the next order</returns>
+        private static int GetNextUpdateOrder()
+        {
+            return ++UpdateOrderSeed;
+        }
 
         /// <summary>
         /// Mouse over event
@@ -159,7 +167,7 @@ namespace Engine.UI
         /// <summary>
         /// Update order value
         /// </summary>
-        private readonly int updateOrder = -1;
+        private readonly int updateOrder;
         /// <summary>
         /// Children collection
         /// </summary>
@@ -690,7 +698,7 @@ namespace Engine.UI
         protected UIControl(Scene scene, UIControlDescription description)
             : base(scene, description)
         {
-            this.updateOrder = ++UpdateOrderSeed;
+            this.updateOrder = GetNextUpdateOrder();
 
             this.Manipulator = new Manipulator2D(this.Game);
 

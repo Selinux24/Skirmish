@@ -129,7 +129,7 @@ namespace Engine.Common
             }
             else
             {
-                var content = new LevelOfDetailModelContent(geo, description.Optimize);
+                var content = LevelOfDetailModelContent.Build(geo, description.Optimize);
 
                 foreach (var lod in content.Keys)
                 {
