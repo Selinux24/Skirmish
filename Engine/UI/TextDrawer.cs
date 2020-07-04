@@ -485,6 +485,8 @@ namespace Engine.UI
         public void Resize()
         {
             this.viewProjection = this.Game.Form.GetOrthoProjectionMatrix();
+
+            this.updateInternals = true;
         }
 
         /// <summary>

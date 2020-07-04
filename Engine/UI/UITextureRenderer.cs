@@ -150,13 +150,6 @@ namespace Engine.UI
             base.Resize();
 
             this.viewProjection = this.Game.Form.GetOrthoProjectionMatrix();
-
-            // Adjust to screen coordinates
-            float x = this.Left - this.Game.Form.RenderCenter.X;
-            float y = this.Top - this.Game.Form.RenderCenter.Y;
-
-            this.Manipulator.SetPosition(x, y);
-            this.Manipulator.SetScale(this.Width, this.Height);
         }
     }
 

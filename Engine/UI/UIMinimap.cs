@@ -41,6 +41,10 @@ namespace Engine.UI
         /// Reference to the objects that we render in the minimap
         /// </summary>
         public IDrawable[] Drawables { get; set; }
+        /// <summary>
+        /// Back color
+        /// </summary>
+        public Color BackColor { get; set; } = Color.Black;
 
         /// <summary>
         /// Contructor
@@ -51,6 +55,7 @@ namespace Engine.UI
             : base(scene, description)
         {
             this.Drawables = description.Drawables;
+            this.BackColor = description.BackColor;
 
             this.minimapArea = description.MinimapArea;
 
@@ -169,7 +174,7 @@ namespace Engine.UI
             graphics.SetViewport(this.viewport);
 
             graphics.SetRenderTargets(
-                this.renderTarget, true, Color.Black,
+                this.renderTarget, true, this.BackColor,
                 null, false, false,
                 false);
 

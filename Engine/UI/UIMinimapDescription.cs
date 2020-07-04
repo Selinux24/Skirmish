@@ -28,6 +28,10 @@ namespace Engine.UI
         /// </summary>
         public IDrawable[] Drawables { get; set; }
         /// <summary>
+        /// Back color
+        /// </summary>
+        public Color BackColor { get; set; } = Color.Black;
+        /// <summary>
         /// Minimap render area
         /// </summary>
         public BoundingBox MinimapArea { get; set; }

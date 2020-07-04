@@ -25,8 +25,9 @@ namespace GameLogic
         private UITextArea txtActionList = null;
         private UITextArea txtAction = null;
 
-        private readonly string fontName = "Consolas";
-        private readonly int fontSize = 13;
+        private readonly string titleFontFileName = "ARMY RUST.TTF";
+        private readonly string fontFileName = "JOYSTIX.TTF";
+        private readonly int fontSize = 12;
         private UIButton butClose = null;
         private UIButton butNext = null;
         private UIButton butPrevSoldier = null;
@@ -209,9 +210,9 @@ namespace GameLogic
                     Height = minimapHeight,
                     Drawables = new IDrawable[]
                     {
-                        terrain,
                         troops,
                     },
+                    BackColor = Color.LightSlateGray,
                     MinimapArea = terrain.GetBoundingBox(),
                 },
                 layerHUD);
@@ -236,12 +237,39 @@ namespace GameLogic
             };
             await this.AddComponentSprite(bkDesc, SceneObjectUsages.UI, layerHUD - 1);
 
-            this.txtTitle = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate(this.fontName, this.fontSize * 2, Color.White, Color.Gray) }, layerHUD);
-            this.txtGame = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate(this.fontName, this.fontSize, Color.LightBlue, Color.DarkBlue) }, layerHUD);
-            this.txtTeam = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate(this.fontName, this.fontSize, Color.Yellow) }, layerHUD);
-            this.txtSoldier = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate(this.fontName, this.fontSize, Color.Yellow) }, layerHUD);
-            this.txtActionList = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate(this.fontName, this.fontSize, Color.Yellow) }, layerHUD);
-            this.txtAction = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate(this.fontName, this.fontSize, Color.Yellow) }, layerHUD);
+            var titleFont = new TextDrawerDescription
+            {
+                FontFileName = titleFontFileName,
+                FontSize = fontSize * 3,
+                TextColor = Color.White,
+                ShadowColor = Color.Gray,
+            };
+            var gameFont = new TextDrawerDescription()
+            {
+                FontFileName = fontFileName,
+                FontSize = (int)(fontSize * 1.25f),
+                TextColor = Color.LightBlue,
+                ShadowColor = Color.DarkBlue,
+            };
+            var textFont = new TextDrawerDescription()
+            {
+                FontFileName = fontFileName,
+                FontSize = fontSize,
+                TextColor = Color.Yellow,
+            };
+            var buttonsFont = new TextDrawerDescription()
+            {
+                FontFileName = fontFileName,
+                FontSize = (int)(fontSize * 0.85f),
+                TextColor = Color.Yellow,
+            };
+
+            this.txtTitle = await this.AddComponentUITextArea(new UITextAreaDescription { Font = titleFont }, layerHUD);
+            this.txtGame = await this.AddComponentUITextArea(new UITextAreaDescription { Font = gameFont }, layerHUD);
+            this.txtTeam = await this.AddComponentUITextArea(new UITextAreaDescription { Font = textFont }, layerHUD);
+            this.txtSoldier = await this.AddComponentUITextArea(new UITextAreaDescription { Font = textFont }, layerHUD);
+            this.txtActionList = await this.AddComponentUITextArea(new UITextAreaDescription { Font = textFont }, layerHUD);
+            this.txtAction = await this.AddComponentUITextArea(new UITextAreaDescription { Font = textFont }, layerHUD);
 
             this.butClose = await this.AddComponentUIButton(new UIButtonDescription()
             {
@@ -250,14 +278,8 @@ namespace GameLogic
                 TexturePressed = "button_off.png",
                 Width = 60,
                 Height = 20,
-                Font = new TextDrawerDescription()
-                {
-                    Font = this.fontName,
-                    FontSize = this.fontSize - 2,
-                    TextColor = Color.Yellow,
-                    ShadowColor = Color.Orange,
-                },
-                Text = "EXIT",
+                Font = buttonsFont,
+                Text = "Exit",
             }, layerHUD);
 
             this.butNext = await this.AddComponentUIButton(new UIButtonDescription()
@@ -265,15 +287,10 @@ namespace GameLogic
                 TwoStateButton = true,
                 TextureReleased = "button_on.png",
                 TexturePressed = "button_off.png",
-                Width = 60,
+                Width = 120,
                 Height = 20,
-                Font = new TextDrawerDescription()
-                {
-                    Font = this.fontName,
-                    FontSize = this.fontSize - 2,
-                    TextColor = Color.Yellow,
-                },
-                Text = "Next",
+                Font = buttonsFont,
+                Text = "Next Phase",
             }, layerHUD);
 
             this.butPrevSoldier = await this.AddComponentUIButton(new UIButtonDescription()
@@ -281,14 +298,9 @@ namespace GameLogic
                 TwoStateButton = true,
                 TextureReleased = "button_on.png",
                 TexturePressed = "button_off.png",
-                Width = 90,
+                Width = 150,
                 Height = 20,
-                Font = new TextDrawerDescription()
-                {
-                    Font = this.fontName,
-                    FontSize = this.fontSize - 2,
-                    TextColor = Color.Yellow,
-                },
+                Font = buttonsFont,
                 Text = "Prev.Soldier",
             }, layerHUD);
 
@@ -297,14 +309,9 @@ namespace GameLogic
                 TwoStateButton = true,
                 TextureReleased = "button_on.png",
                 TexturePressed = "button_off.png",
-                Width = 90,
+                Width = 150,
                 Height = 20,
-                Font = new TextDrawerDescription()
-                {
-                    Font = this.fontName,
-                    FontSize = this.fontSize - 2,
-                    TextColor = Color.Yellow,
-                },
+                Font = buttonsFont,
                 Text = "Next Soldier",
             }, layerHUD);
 
@@ -313,14 +320,9 @@ namespace GameLogic
                 TwoStateButton = true,
                 TextureReleased = "button_on.png",
                 TexturePressed = "button_off.png",
-                Width = 90,
+                Width = 150,
                 Height = 20,
-                Font = new TextDrawerDescription()
-                {
-                    Font = this.fontName,
-                    FontSize = this.fontSize - 2,
-                    TextColor = Color.Yellow,
-                },
+                Font = buttonsFont,
                 Text = "Prev.Action",
             }, layerHUD);
 
@@ -329,14 +331,9 @@ namespace GameLogic
                 TwoStateButton = true,
                 TextureReleased = "button_on.png",
                 TexturePressed = "button_off.png",
-                Width = 90,
+                Width = 150,
                 Height = 20,
-                Font = new TextDrawerDescription()
-                {
-                    Font = this.fontName,
-                    FontSize = this.fontSize - 2,
-                    TextColor = Color.Yellow,
-                },
+                Font = buttonsFont,
                 Text = "Next Action",
             }, layerHUD);
 
@@ -456,7 +453,7 @@ namespace GameLogic
                 this.txtGame.Text = string.Format("{0}", this.skirmishGame);
                 this.txtTeam.Text = string.Format("{0}", this.skirmishGame.CurrentTeam);
                 this.txtSoldier.Text = string.Format("{0}", this.skirmishGame.CurrentSoldier);
-                this.txtActionList.Text = string.Format("{0}", this.currentActions.Join(" | "));
+                this.txtActionList.Text = string.Format("{0}", this.currentActions.Join(" ++ "));
                 this.txtAction.Text = string.Format("{0}", this.CurrentAction);
             }
         }
@@ -667,10 +664,9 @@ namespace GameLogic
             BoundingBox bbox = this.terrain.GetBoundingBox();
 
             float terrainHeight = bbox.Maximum.Z - bbox.Minimum.Z;
-            float gameWidth = terrainHeight / (this.skirmishGame.Teams.Length + 1);
             float teamSeparation = terrainHeight / (this.skirmishGame.Teams.Length);
 
-            float soldierSeparation = 10f;
+            float soldierSeparation = 12f;
             int instanceIndex = 0;
             uint teamIndex = 0;
             foreach (Team team in this.skirmishGame.Teams)
@@ -688,7 +684,7 @@ namespace GameLogic
                     soldier.AnimationController.TimeDelta = 0.20f;
 
                     float x = (soldierIndex * soldierSeparation) - (teamWidth * 0.5f);
-                    float z = (teamIndex * teamSeparation) - (gameWidth * 0.5f);
+                    float z = (teamIndex * teamSeparation) - (teamSeparation * 0.5f);
 
                     if (this.FindTopGroundPosition(x, z, out PickingResult<Triangle> r))
                     {

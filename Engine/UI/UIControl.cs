@@ -855,6 +855,8 @@ namespace Engine.UI
         /// </summary>
         public virtual void Resize()
         {
+            this.updateInternals = true;
+
             children.ForEach(c => c.Resize());
         }
 

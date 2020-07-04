@@ -354,7 +354,7 @@ namespace GameLogic.Rules
         public override string ToString()
         {
             return string.Format(
-                "Battle -> {0} teams. Turn {1} | Phase {2}. Melees {3}",
+                "Battle -> {0} teams. Turn {1} ++ Phase {2}. Melees {3}",
                 this.teams.Count,
                 this.currentTurn,
                 this.CurrentPhase,
