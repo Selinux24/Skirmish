@@ -44,7 +44,7 @@ namespace Engine.UI
         /// <summary>
         /// Back color
         /// </summary>
-        public Color BackColor { get; set; } = Color.Black;
+        public Color BackColor { get; set; }
 
         /// <summary>
         /// Contructor
