@@ -83,13 +83,6 @@ namespace Engine.UI
             this.Channels = description.Channel;
 
             this.viewProjection = this.Game.Form.GetOrthoProjectionMatrix();
-
-            // Adjust to screen coordinates
-            float x = description.Left - this.Game.Form.RenderCenter.X;
-            float y = description.Top - this.Game.Form.RenderCenter.Y;
-
-            this.Manipulator.SetPosition(x, y);
-            this.Manipulator.SetScale(description.Width, description.Height);
         }
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)

@@ -142,6 +142,14 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
+        public override void Update(UpdateContext context)
+        {
+            base.Update(context);
+
+            this.minimapBox?.Update(context);
+        }
+
+        /// <inheritdoc/>
         public override void Draw(DrawContext context)
         {
             if (!Visible)
