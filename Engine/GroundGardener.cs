@@ -1004,7 +1004,7 @@ namespace Engine
             {
                 var graphics = this.Game.Graphics;
 
-                graphics.SetBlendDefaultAlpha();
+                graphics.SetBlendTransparent();
 
                 foreach (var item in this.visibleNodes)
                 {
@@ -1057,7 +1057,7 @@ namespace Engine
             {
                 var graphics = this.Game.Graphics;
 
-                graphics.SetBlendDefaultAlpha();
+                graphics.SetBlendTransparent();
 
                 foreach (var item in this.visibleNodes)
                 {

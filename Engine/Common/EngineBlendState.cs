@@ -111,7 +111,7 @@ namespace Engine.Common
         {
             BlendStateDescription1 desc = new BlendStateDescription1
             {
-                AlphaToCoverageEnable = false,
+                AlphaToCoverageEnable = true,
                 IndependentBlendEnable = false
             };
 
