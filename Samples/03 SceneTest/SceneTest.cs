@@ -19,6 +19,10 @@ namespace SceneTest
         private readonly float baseHeight = 0.1f;
         private readonly float spaceSize = 40;
 
+        private readonly float xDelta = 500f;
+        private readonly float yDelta = 7f;
+        private readonly float zDelta = 0f;
+
         private UICursor cursor = null;
         private UIButton butClose = null;
 
@@ -204,8 +208,8 @@ namespace SceneTest
             {
                 this.Environment.TimeOfDay.BeginAnimation(9, 00, 00, 0.1f);
 
-                this.Camera.Goto(-20, 10, -40f);
-                this.Camera.LookTo(0, 0, 0);
+                this.Camera.Goto(-20 + xDelta, 10 + yDelta, -40f + zDelta);
+                this.Camera.LookTo(0 + xDelta, 0 + yDelta, 0 + zDelta);
 
                 this.blackPan.Hide(4000);
                 this.progressBar.Hide(2000);
@@ -370,19 +374,20 @@ namespace SceneTest
                 }
             };
 
-            await this.AddComponentModel(desc);
+            var floorAsphalt = await this.AddComponentModel(desc);
+            floorAsphalt.Manipulator.SetPosition(xDelta, yDelta, zDelta);
 
             this.floorAsphaltI = await this.AddComponentModelInstanced(descI);
 
-            this.floorAsphaltI[0].Manipulator.SetPosition(-l * 2, 0, 0);
-            this.floorAsphaltI[1].Manipulator.SetPosition(l * 2, 0, 0);
-            this.floorAsphaltI[2].Manipulator.SetPosition(0, 0, -l * 2);
-            this.floorAsphaltI[3].Manipulator.SetPosition(0, 0, l * 2);
+            this.floorAsphaltI[0].Manipulator.SetPosition((-l * 2) + xDelta, yDelta, 0 + zDelta);
+            this.floorAsphaltI[1].Manipulator.SetPosition((+l * 2) + xDelta, yDelta, 0 + zDelta);
+            this.floorAsphaltI[2].Manipulator.SetPosition(0 + xDelta, yDelta, (-l * 2) + zDelta);
+            this.floorAsphaltI[3].Manipulator.SetPosition(0 + xDelta, yDelta, (+l * 2) + zDelta);
 
-            this.floorAsphaltI[4].Manipulator.SetPosition(-l * 2, 0, -l * 2);
-            this.floorAsphaltI[5].Manipulator.SetPosition(l * 2, 0, -l * 2);
-            this.floorAsphaltI[6].Manipulator.SetPosition(-l * 2, 0, l * 2);
-            this.floorAsphaltI[7].Manipulator.SetPosition(l * 2, 0, l * 2);
+            this.floorAsphaltI[4].Manipulator.SetPosition((-l * 2) + xDelta, yDelta, (-l * 2) + zDelta);
+            this.floorAsphaltI[5].Manipulator.SetPosition((+l * 2) + xDelta, yDelta, (-l * 2) + zDelta);
+            this.floorAsphaltI[6].Manipulator.SetPosition((-l * 2) + xDelta, yDelta, (+l * 2) + zDelta);
+            this.floorAsphaltI[7].Manipulator.SetPosition((+l * 2) + xDelta, yDelta, (+l * 2) + zDelta);
         }
         private async Task InitializeBuildingObelisk()
         {
@@ -415,14 +420,14 @@ namespace SceneTest
                     }
                 });
 
-            this.buildingObelisk.Manipulator.SetPosition(0, baseHeight, 0);
+            this.buildingObelisk.Manipulator.SetPosition(0 + xDelta, baseHeight + yDelta, 0 + zDelta);
             this.buildingObelisk.Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
             this.buildingObelisk.Manipulator.SetScale(10);
 
-            this.buildingObeliskI[0].Manipulator.SetPosition(-spaceSize * 2, baseHeight, 0);
-            this.buildingObeliskI[1].Manipulator.SetPosition(spaceSize * 2, baseHeight, 0);
-            this.buildingObeliskI[2].Manipulator.SetPosition(0, baseHeight, -spaceSize * 2);
-            this.buildingObeliskI[3].Manipulator.SetPosition(0, baseHeight, spaceSize * 2);
+            this.buildingObeliskI[0].Manipulator.SetPosition((-spaceSize * 2) + xDelta, baseHeight + yDelta, 0 + zDelta);
+            this.buildingObeliskI[1].Manipulator.SetPosition((+spaceSize * 2) + xDelta, baseHeight + yDelta, 0 + zDelta);
+            this.buildingObeliskI[2].Manipulator.SetPosition(0 + xDelta, baseHeight + yDelta, (-spaceSize * 2) + zDelta);
+            this.buildingObeliskI[3].Manipulator.SetPosition(0 + xDelta, baseHeight + yDelta, (+spaceSize * 2) + zDelta);
 
             this.buildingObeliskI[0].Manipulator.SetRotation(MathUtil.PiOverTwo * 0, 0, 0);
             this.buildingObeliskI[1].Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
@@ -468,15 +473,15 @@ namespace SceneTest
             p1.AddLoop("idle1");
             this.animations.Add("default", new AnimationPlan(p1));
 
-            this.characterSoldier.Manipulator.SetPosition(s - 10, baseHeight, -s);
+            this.characterSoldier.Manipulator.SetPosition((+s - 10) + xDelta, baseHeight + yDelta, -s + zDelta);
             this.characterSoldier.Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
             this.characterSoldier.AnimationController.AddPath(this.animations["default"]);
             this.characterSoldier.AnimationController.Start(0);
 
-            this.characterSoldierI[0].Manipulator.SetPosition(-spaceSize * 2 + s, baseHeight, -s);
-            this.characterSoldierI[1].Manipulator.SetPosition(spaceSize * 2 + s, baseHeight, -s);
-            this.characterSoldierI[2].Manipulator.SetPosition(s, baseHeight, -spaceSize * 2 - s);
-            this.characterSoldierI[3].Manipulator.SetPosition(s, baseHeight, spaceSize * 2 - s);
+            this.characterSoldierI[0].Manipulator.SetPosition((-spaceSize * 2 + s) + xDelta, baseHeight + yDelta, -s + zDelta);
+            this.characterSoldierI[1].Manipulator.SetPosition((+spaceSize * 2 + s) + xDelta, baseHeight + yDelta, -s + zDelta);
+            this.characterSoldierI[2].Manipulator.SetPosition(+s + xDelta, baseHeight + yDelta, (-spaceSize * 2 - s) + zDelta);
+            this.characterSoldierI[3].Manipulator.SetPosition(+s + xDelta, baseHeight + yDelta, (+spaceSize * 2 - s) + zDelta);
 
             this.characterSoldierI[0].Manipulator.SetRotation(MathUtil.PiOverTwo * 0, 0, 0);
             this.characterSoldierI[1].Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
@@ -524,13 +529,13 @@ namespace SceneTest
 
             float s = -spaceSize / 2f;
 
-            this.vehicle.Manipulator.SetPosition(s, baseHeight, -10);
+            this.vehicle.Manipulator.SetPosition(s + xDelta, baseHeight + yDelta, -10 + zDelta);
             this.vehicle.Manipulator.SetRotation(MathUtil.PiOverTwo * 2, 0, 0);
 
-            this.vehicleI[0].Manipulator.SetPosition(-spaceSize * 2, baseHeight, -spaceSize * 2);
-            this.vehicleI[1].Manipulator.SetPosition(spaceSize * 2, baseHeight, -spaceSize * 2);
-            this.vehicleI[2].Manipulator.SetPosition(-spaceSize * 2, baseHeight, spaceSize * 2);
-            this.vehicleI[3].Manipulator.SetPosition(spaceSize * 2, baseHeight, spaceSize * 2);
+            this.vehicleI[0].Manipulator.SetPosition(-spaceSize * 2 + xDelta, baseHeight + yDelta, -spaceSize * 2 + zDelta);
+            this.vehicleI[1].Manipulator.SetPosition(+spaceSize * 2 + xDelta, baseHeight + yDelta, -spaceSize * 2 + zDelta);
+            this.vehicleI[2].Manipulator.SetPosition(-spaceSize * 2 + xDelta, baseHeight + yDelta, +spaceSize * 2 + zDelta);
+            this.vehicleI[3].Manipulator.SetPosition(+spaceSize * 2 + xDelta, baseHeight + yDelta, +spaceSize * 2 + zDelta);
 
             this.vehicleI[0].Manipulator.SetRotation(MathUtil.PiOverTwo * 0, 0, 0);
             this.vehicleI[1].Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
@@ -580,13 +585,13 @@ namespace SceneTest
             float dist = 0.23f;
             float pitch = MathUtil.DegreesToRadians(165) * -1;
 
-            this.lamp.Manipulator.SetPosition(0, spaceSize, -spaceSize * dist);
+            this.lamp.Manipulator.SetPosition(0 + xDelta, spaceSize + yDelta, (-spaceSize * dist) + zDelta);
             this.lamp.Manipulator.SetRotation(0, pitch, 0);
 
-            this.lampI[0].Manipulator.SetPosition(-spaceSize * 2, spaceSize, -spaceSize * dist);
-            this.lampI[1].Manipulator.SetPosition(spaceSize * 2, spaceSize, -spaceSize * dist);
-            this.lampI[2].Manipulator.SetPosition(-spaceSize * dist, spaceSize, -spaceSize * 2);
-            this.lampI[3].Manipulator.SetPosition(-spaceSize * dist, spaceSize, spaceSize * 2);
+            this.lampI[0].Manipulator.SetPosition(-spaceSize * 2 + xDelta, spaceSize + yDelta, -spaceSize * dist + zDelta);
+            this.lampI[1].Manipulator.SetPosition(+spaceSize * 2 + xDelta, spaceSize + yDelta, -spaceSize * dist + zDelta);
+            this.lampI[2].Manipulator.SetPosition(-spaceSize * dist + xDelta, spaceSize + yDelta, -spaceSize * 2 + zDelta);
+            this.lampI[3].Manipulator.SetPosition(-spaceSize * dist + xDelta, spaceSize + yDelta, +spaceSize * 2 + zDelta);
 
             this.lampI[0].Manipulator.SetRotation(0, pitch, 0);
             this.lampI[1].Manipulator.SetRotation(0, pitch, 0);
@@ -633,18 +638,18 @@ namespace SceneTest
                     }
                 });
 
-            this.streetlamp.Manipulator.SetPosition(-spaceSize, baseHeight, -spaceSize * -2f);
+            this.streetlamp.Manipulator.SetPosition(-spaceSize + xDelta, baseHeight + yDelta, -spaceSize * -2f + zDelta);
 
-            this.streetlampI[0].Manipulator.SetPosition(-spaceSize, baseHeight, -spaceSize * -1f);
-            this.streetlampI[1].Manipulator.SetPosition(-spaceSize, baseHeight, 0);
-            this.streetlampI[2].Manipulator.SetPosition(-spaceSize, baseHeight, -spaceSize * 1f);
-            this.streetlampI[3].Manipulator.SetPosition(-spaceSize, baseHeight, -spaceSize * 2f);
+            this.streetlampI[0].Manipulator.SetPosition(-spaceSize + xDelta, baseHeight + yDelta, -spaceSize * -1f + zDelta);
+            this.streetlampI[1].Manipulator.SetPosition(-spaceSize + xDelta, baseHeight + yDelta, 0 + zDelta);
+            this.streetlampI[2].Manipulator.SetPosition(-spaceSize + xDelta, baseHeight + yDelta, -spaceSize * 1f + zDelta);
+            this.streetlampI[3].Manipulator.SetPosition(-spaceSize + xDelta, baseHeight + yDelta, -spaceSize * 2f + zDelta);
 
-            this.streetlampI[4].Manipulator.SetPosition(+spaceSize, baseHeight, -spaceSize * -2f);
-            this.streetlampI[5].Manipulator.SetPosition(+spaceSize, baseHeight, -spaceSize * -1f);
-            this.streetlampI[6].Manipulator.SetPosition(+spaceSize, baseHeight, 0);
-            this.streetlampI[7].Manipulator.SetPosition(+spaceSize, baseHeight, -spaceSize * 1f);
-            this.streetlampI[8].Manipulator.SetPosition(+spaceSize, baseHeight, -spaceSize * 2f);
+            this.streetlampI[4].Manipulator.SetPosition(+spaceSize + xDelta, baseHeight + yDelta, -spaceSize * -2f + zDelta);
+            this.streetlampI[5].Manipulator.SetPosition(+spaceSize + xDelta, baseHeight + yDelta, -spaceSize * -1f + zDelta);
+            this.streetlampI[6].Manipulator.SetPosition(+spaceSize + xDelta, baseHeight + yDelta, 0 + zDelta);
+            this.streetlampI[7].Manipulator.SetPosition(+spaceSize + xDelta, baseHeight + yDelta, -spaceSize * 1f + zDelta);
+            this.streetlampI[8].Manipulator.SetPosition(+spaceSize + xDelta, baseHeight + yDelta, -spaceSize * 2f + zDelta);
 
             this.streetlampI[4].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
             this.streetlampI[5].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
@@ -665,6 +670,18 @@ namespace SceneTest
         }
         private async Task InitializeContainers()
         {
+            int xSize = 12;
+            int zSize = 17;
+            int rows = 5;
+            int basementRows = 3;
+
+            int xCount = xSize + 1;
+            int zCount = zSize + 1;
+            int xRowCount = xCount * 2;
+            int zRowCount = zCount * 2;
+            int rowSize = xRowCount + zRowCount;
+            int instances = rowSize * rows;
+
             this.container = await this.AddComponentModel(
                 new ModelDescription()
                 {
@@ -684,7 +701,7 @@ namespace SceneTest
                     Name = "ContainerI",
                     CastShadow = true,
                     SphericVolume = false,
-                    Instances = 96,
+                    Instances = instances,
                     Content = new ContentDescription()
                     {
                         ContentFolder = "SceneTest/container",
@@ -693,44 +710,64 @@ namespace SceneTest
                 });
 
             float s = -spaceSize / 2f;
+            float areaSize = spaceSize * 3;
 
-            Random prnd = new Random(1000);
+            var bboxTmp = this.container.GetBoundingBox();
+            float scaleX = areaSize * 2 / xSize / bboxTmp.GetX();
+            float scaleZ = areaSize * 2 / zSize / bboxTmp.GetZ();
+            Vector3 scale = new Vector3(scaleX, (scaleX + scaleZ) / 2f, scaleZ);
 
-            this.container.Manipulator.SetScale(5f);
+            this.container.Manipulator.SetScale(scale);
             this.container.Manipulator.UpdateInternals(true);
             var bbox = this.container.GetBoundingBox();
+            float sx = bbox.GetX();
+            float sy = bbox.GetY();
+            float sz = bbox.GetZ();
 
-            this.container.Manipulator.SetPosition(s + 12, baseHeight, 30);
+            this.container.Manipulator.SetPosition(s + 12 + xDelta, baseHeight + yDelta, 30 + zDelta);
             this.container.Manipulator.SetRotation(MathUtil.PiOverTwo * 2.1f, 0, 0);
+
+            Random prnd = new Random(1000);
 
             for (int i = 0; i < this.containerI.InstanceCount; i++)
             {
                 uint textureIndex = (uint)prnd.Next(0, 6);
                 textureIndex %= 5;
 
-                float height = (i < 48 ? 0 : bbox.GetY()) + baseHeight;
+                float height = (i / rowSize * sy) + baseHeight + yDelta - (sy * basementRows);
 
-                if ((i % 48) < 24)
+                if ((i % rowSize) < zRowCount)
                 {
+                    float rx = (i % zRowCount < zCount ? -areaSize - (sx / 2f) : areaSize + (sx / 2f)) + prnd.NextFloat(-1f, 1f);
+                    float dz = i % zRowCount < zCount ? -(sz / 2f) : (sz / 2f);
+
+                    float x = rx + xDelta;
+                    float y = height;
+                    float z = (i % zCount * sz) - areaSize + zDelta + dz;
                     float angle = MathUtil.Pi * prnd.Next(0, 2);
-                    float x = ((i % 24) < 12 ? -120f : 120f) + prnd.NextFloat(-1f, 1f);
 
                     this.containerI[i].TextureIndex = textureIndex;
 
-                    this.containerI[i].Manipulator.SetPosition(x, height, ((i % 12) * bbox.GetZ()) - (120));
+                    this.containerI[i].Manipulator.SetPosition(x, y, z);
                     this.containerI[i].Manipulator.SetRotation(angle, 0, 0);
-                    this.containerI[i].Manipulator.SetScale(5f);
+                    this.containerI[i].Manipulator.SetScale(scale);
                 }
                 else
                 {
+                    int ci = i - zRowCount;
+                    float rz = (ci % xRowCount < xCount ? -areaSize - (sz / 2f) : areaSize + (sz / 2f)) + prnd.NextFloat(-1f, 1f);
+                    float dx = ci % xRowCount < xCount ? (sx / 2f) : -(sx / 2f);
+
+                    float x = (ci % xCount * sx) - areaSize + xDelta + dx;
+                    float y = height;
+                    float z = rz + zDelta;
                     float angle = MathUtil.Pi * prnd.Next(0, 2);
-                    float z = ((i % 24) < 12 ? -120f : 120f) + prnd.NextFloat(-1f, 1f);
 
                     this.containerI[i].TextureIndex = textureIndex;
 
-                    this.containerI[i].Manipulator.SetPosition(((i % 12) * bbox.GetX()) - (120), height, z);
+                    this.containerI[i].Manipulator.SetPosition(x, y, z);
                     this.containerI[i].Manipulator.SetRotation(angle, 0, 0);
-                    this.containerI[i].Manipulator.SetScale(5f);
+                    this.containerI[i].Manipulator.SetScale(scale);
                 }
             }
         }
@@ -738,7 +775,7 @@ namespace SceneTest
         {
             var bbox = new BoundingBox(Vector3.One * -0.5f, Vector3.One * 0.5f);
             var cubeTris = Triangle.ComputeTriangleList(Topology.TriangleList, bbox);
-            cubeTris = Triangle.Transform(cubeTris, Matrix.Translation(30, 0.5f, 0));
+            cubeTris = Triangle.Transform(cubeTris, Matrix.Translation(30 + xDelta, 0.5f + yDelta, 0 + zDelta));
 
             var desc = new PrimitiveListDrawerDescription<Triangle>()
             {
