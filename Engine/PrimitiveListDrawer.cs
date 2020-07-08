@@ -1,8 +1,8 @@
 ﻿using SharpDX;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Collections.Concurrent;
 
 namespace Engine
 {
@@ -108,6 +108,11 @@ namespace Engine
         /// <param name="context">Drawing context</param>
         public override void Draw(DrawContext context)
         {
+            if (this.vertexBuffer?.Ready != true)
+            {
+                return;
+            }
+
             var mode = context.DrawerMode;
 
             if ((mode.HasFlag(DrawerModes.OpaqueOnly) && !this.Description.AlphaEnabled) ||
@@ -269,36 +274,38 @@ namespace Engine
         /// </summary>
         public void WriteDataInBuffer()
         {
-            if (this.dictionaryChanged)
+            if (!this.dictionaryChanged)
             {
-                List<VertexPositionColor> data = new List<VertexPositionColor>();
+                return;
+            }
 
-                var copy = dictionary.ToArray();
+            List<VertexPositionColor> data = new List<VertexPositionColor>();
 
-                foreach (var item in copy)
+            var copy = dictionary.ToArray();
+
+            foreach (var item in copy)
+            {
+                var color = item.Key;
+                var primitives = item.Value;
+
+                for (int i = 0; i < primitives.Count; i++)
                 {
-                    var color = item.Key;
-                    var primitives = item.Value;
-
-                    for (int i = 0; i < primitives.Count; i++)
+                    var vList = primitives[i].GetVertices();
+                    for (int v = 0; v < vList.Length; v++)
                     {
-                        var vList = primitives[i].GetVertices();
-                        for (int v = 0; v < vList.Length; v++)
-                        {
-                            data.Add(new VertexPositionColor() { Position = vList[v], Color = color });
-                        }
+                        data.Add(new VertexPositionColor() { Position = vList[v], Color = color });
                     }
                 }
-
-                this.drawCount = data.Count;
-
-                if (data.Count > 0)
-                {
-                    this.BufferManager.WriteVertexBuffer(this.vertexBuffer, data);
-                }
-
-                this.dictionaryChanged = false;
             }
+
+            this.drawCount = data.Count;
+
+            if (data.Count > 0)
+            {
+                this.BufferManager.WriteVertexBuffer(this.vertexBuffer, data);
+            }
+
+            this.dictionaryChanged = false;
         }
     }
 
