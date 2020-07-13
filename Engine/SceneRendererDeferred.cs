@@ -138,47 +138,23 @@ namespace Engine
         {
             if (disposing)
             {
-                if (geometryBuffer != null)
-                {
-                    geometryBuffer.Dispose();
-                    geometryBuffer = null;
-                }
-                if (lightBuffer != null)
-                {
-                    lightBuffer.Dispose();
-                    lightBuffer = null;
-                }
-                if (lightDrawer != null)
-                {
-                    lightDrawer.Dispose();
-                    lightDrawer = null;
-                }
+                geometryBuffer?.Dispose();
+                geometryBuffer = null;
+                lightBuffer?.Dispose();
+                lightBuffer = null;
+                lightDrawer?.Dispose();
+                lightDrawer = null;
 
-                if (blendDeferredLighting != null)
-                {
-                    blendDeferredLighting.Dispose();
-                    blendDeferredLighting = null;
-                }
-                if (blendDeferredComposer != null)
-                {
-                    blendDeferredComposer.Dispose();
-                    blendDeferredComposer = null;
-                }
-                if (blendDeferredComposerTransparent != null)
-                {
-                    blendDeferredComposerTransparent.Dispose();
-                    blendDeferredComposerTransparent = null;
-                }
-                if (blendDeferredComposerAlpha != null)
-                {
-                    blendDeferredComposerAlpha.Dispose();
-                    blendDeferredComposerAlpha = null;
-                }
-                if (blendDeferredComposerAdditive != null)
-                {
-                    blendDeferredComposerAdditive.Dispose();
-                    blendDeferredComposerAdditive = null;
-                }
+                blendDeferredComposer?.Dispose();
+                blendDeferredComposer = null;
+                blendDeferredComposerTransparent?.Dispose();
+                blendDeferredComposerTransparent = null;
+                blendDeferredComposerAlpha?.Dispose();
+                blendDeferredComposerAlpha = null;
+                blendDeferredComposerAdditive?.Dispose();
+                blendDeferredComposerAdditive = null;
+                blendDeferredLighting?.Dispose();
+                blendDeferredLighting = null;
             }
 
             base.Dispose(disposing);
