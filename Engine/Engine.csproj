@@ -179,6 +179,7 @@
     <Compile Include="Audio\IGameAudioEmitter.cs" />
     <Compile Include="Audio\IGameAudioListener.cs" />
     <Compile Include="Audio\ReverbPresets.cs" />
+    <Compile Include="BlendModes.cs" />
     <Compile Include="Common\BufferDescriptorRequestActions.cs" />
     <Compile Include="Common\BufferDescriptorRequestIndices.cs" />
     <Compile Include="Common\BufferDescriptorRequestInstancing.cs" />

@@ -57,6 +57,14 @@ namespace Engine
         /// Blend state for transparent defered composer blending
         /// </summary>
         private EngineBlendState blendDeferredComposerTransparent = null;
+        /// <summary>
+        /// Blend state for alpha defered composer blending
+        /// </summary>
+        private EngineBlendState blendDeferredComposerAlpha = null;
+        /// <summary>
+        /// Blend state for additive defered composer blending
+        /// </summary>
+        private EngineBlendState blendDeferredComposerAdditive = null;
 
         /// <summary>
         /// View * OrthoProjection Matrix
@@ -113,6 +121,8 @@ namespace Engine
 
             this.blendDeferredComposer = EngineBlendState.DeferredComposer(game.Graphics, 3);
             this.blendDeferredComposerTransparent = EngineBlendState.DeferredComposerTransparent(game.Graphics, 3);
+            this.blendDeferredComposerAlpha = EngineBlendState.DeferredComposerAlpha(game.Graphics, 3);
+            this.blendDeferredComposerAdditive = EngineBlendState.DeferredComposerAdditive(game.Graphics, 3);
             this.blendDeferredLighting = EngineBlendState.DeferredLighting(game.Graphics);
         }
         /// <summary>
@@ -123,9 +133,7 @@ namespace Engine
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Dispose objects
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -161,14 +169,22 @@ namespace Engine
                     blendDeferredComposerTransparent.Dispose();
                     blendDeferredComposerTransparent = null;
                 }
+                if (blendDeferredComposerAlpha != null)
+                {
+                    blendDeferredComposerAlpha.Dispose();
+                    blendDeferredComposerAlpha = null;
+                }
+                if (blendDeferredComposerAdditive != null)
+                {
+                    blendDeferredComposerAdditive.Dispose();
+                    blendDeferredComposerAdditive = null;
+                }
             }
 
             base.Dispose(disposing);
         }
 
-        /// <summary>
-        /// Resizes buffers
-        /// </summary>
+        /// <inheritdoc/>
         public override void Resize()
         {
             this.UpdateRectangleAndView();
@@ -185,11 +201,7 @@ namespace Engine
 
             base.Resize();
         }
-        /// <summary>
-        /// Gets renderer resources
-        /// </summary>
-        /// <param name="result">Resource type</param>
-        /// <returns>Returns renderer specified resource, if renderer produces that resource.</returns>
+        /// <inheritdoc/>
         public override EngineShaderResourceView GetResource(SceneRendererResults result)
         {
             if (result == SceneRendererResults.LightMap) return this.LightMap[0];
@@ -205,11 +217,7 @@ namespace Engine
             return base.GetResource(result);
         }
 
-        /// <summary>
-        /// Draws scene components
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="scene">Scene</param>
+        /// <inheritdoc/>
         public override void Draw(GameTime gameTime, Scene scene)
         {
             if (this.Updated)
@@ -690,7 +698,7 @@ namespace Engine
                 opaques.Sort((c1, c2) => this.SortOpaques(index, c1, c2));
 
                 //Draw items
-                opaques.ForEach((c) => DrawOpaque(context, c));
+                opaques.ForEach((c) => this.Draw(context, c));
             }
 
             //Then transparents
@@ -704,44 +712,40 @@ namespace Engine
                 transparents.Sort((c1, c2) => this.SortTransparents(index, c1, c2));
 
                 //Draw items
-                transparents.ForEach((c) => this.DrawTransparent(context, c));
+                transparents.ForEach((c) => this.Draw(context, c));
             }
 
             //Restore drawing mode
             context.DrawerMode = mode;
         }
 
-        /// <summary>
-        /// Sets blend state for opaques rendering
-        /// </summary>
-        /// <param name="context">Drawing context</param>
-        protected override void SetBlendStateOpaque(DrawContext context)
+        /// <inheritdoc/>
+        protected override void SetBlendState(DrawContext context, BlendModes blendMode)
         {
             if (context.DrawerMode.HasFlag(DrawerModes.Deferred))
             {
-                this.SetBlendDeferredComposer();
+                if (blendMode.HasFlag(BlendModes.Additive))
+                {
+                    this.SetBlendDeferredComposerAdditive();
+                }
+                else if (blendMode.HasFlag(BlendModes.Transparent))
+                {
+                    this.SetBlendDeferredComposerTransparent();
+                }
+                else if (blendMode.HasFlag(BlendModes.Alpha))
+                {
+                    this.SetBlendDeferredComposerAlpha();
+                }
+                else
+                {
+                    this.SetBlendDeferredComposer();
+                }
             }
             else
             {
-                this.Game.Graphics.SetBlendDefault();
+                base.SetBlendState(context, blendMode);
             }
         }
-        /// <summary>
-        /// Sets blend state for transparents rendering
-        /// </summary>
-        /// <param name="context">Drawing context</param>
-        protected override void SetBlendStateTransparent(DrawContext context)
-        {
-            if (context.DrawerMode.HasFlag(DrawerModes.Deferred))
-            {
-                this.SetBlendDeferredComposerTransparent();
-            }
-            else
-            {
-                this.Game.Graphics.SetBlendTransparent();
-            }
-        }
-
         /// <summary>
         /// Sets deferred composer blend state
         /// </summary>
@@ -755,6 +759,20 @@ namespace Engine
         private void SetBlendDeferredComposerTransparent()
         {
             this.Game.Graphics.SetBlendState(this.blendDeferredComposerTransparent);
+        }
+        /// <summary>
+        /// Sets alpha deferred composer blend state
+        /// </summary>
+        private void SetBlendDeferredComposerAlpha()
+        {
+            this.Game.Graphics.SetBlendState(this.blendDeferredComposerAlpha);
+        }
+        /// <summary>
+        /// Sets additive deferred composer blend state
+        /// </summary>
+        private void SetBlendDeferredComposerAdditive()
+        {
+            this.Game.Graphics.SetBlendState(this.blendDeferredComposerAdditive);
         }
         /// <summary>
         /// Sets deferred lighting blend state

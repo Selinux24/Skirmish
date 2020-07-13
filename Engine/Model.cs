@@ -177,10 +177,7 @@ namespace Engine
             this.Lights = drawData?.Lights.Select(l => l.Clone()).ToArray() ?? new ISceneLight[] { };
         }
 
-        /// <summary>
-        /// Update
-        /// </summary>
-        /// <param name="context">Context</param>
+        /// <inheritdoc/>
         public override void Update(UpdateContext context)
         {
             if (this.DrawingData?.SkinningData != null)
@@ -211,12 +208,14 @@ namespace Engine
                 }
             }
         }
-        /// <summary>
-        /// Draw shadows
-        /// </summary>
-        /// <param name="context"></param>
+        /// <inheritdoc/>
         public override void DrawShadows(DrawContextShadows context)
         {
+            if (!Visible)
+            {
+                return;
+            }
+
             if (this.DrawingData == null)
             {
                 return;
@@ -234,12 +233,14 @@ namespace Engine
                 count += DrawMeshShadow(context, effect, meshName);
             }
         }
-        /// <summary>
-        /// Draw
-        /// </summary>
-        /// <param name="context">Context</param>
+        /// <inheritdoc/>
         public override void Draw(DrawContext context)
         {
+            if (!Visible)
+            {
+                return;
+            }
+
             if (this.DrawingData == null)
             {
                 return;
@@ -315,7 +316,6 @@ namespace Engine
             int count = 0;
 
             var graphics = this.Game.Graphics;
-            var mode = context.DrawerMode;
 
             var meshDict = this.DrawingData.Meshes[meshName];
 
@@ -328,13 +328,8 @@ namespace Engine
                 var mesh = meshDict[materialName];
                 var material = this.DrawingData.Materials[materialName];
 
-                bool transparent = material.Material.IsTransparent && this.Description.AlphaEnabled;
-
-                if (mode.HasFlag(DrawerModes.OpaqueOnly) && transparent)
-                {
-                    continue;
-                }
-                if (mode.HasFlag(DrawerModes.TransparentOnly) && !transparent)
+                bool draw = context.ValidateDraw(this.BlendMode, material.Material.IsTransparent);
+                if (!draw)
                 {
                     continue;
                 }
@@ -359,12 +354,7 @@ namespace Engine
             return count;
         }
 
-        /// <summary>
-        /// Performs culling test
-        /// </summary>
-        /// <param name="volume">Culling volume</param>
-        /// <param name="distance">If the object is inside the volume, returns the distance</param>
-        /// <returns>Returns true if the object is outside of the frustum</returns>
+        /// <inheritdoc/>
         public override bool Cull(ICullingVolume volume, out float distance)
         {
             bool cull;

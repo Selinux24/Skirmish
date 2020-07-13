@@ -148,7 +148,6 @@ namespace Animation
 
             var spDesc = new SpriteDescription()
             {
-                AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
                 Height = this.messages.Top + this.messages.Height + 3,
                 Color = new Color4(0, 0, 0, 0.75f),
@@ -187,7 +186,6 @@ namespace Animation
                 CastShadow = true,
                 DeferredEnabled = true,
                 DepthEnabled = true,
-                AlphaEnabled = false,
                 UseAnisotropicFiltering = true,
                 Content = new ContentDescription()
                 {

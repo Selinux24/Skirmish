@@ -109,10 +109,8 @@ namespace Engine
             this.HDRExposure = 2.0f;
             this.Resolution = SkyScatteringResolutions.Low;
 
-            this.CastShadow = false;
-            this.DeferredEnabled = true;
             this.DepthEnabled = false;
-            this.AlphaEnabled = false;
+            this.BlendMode = BlendModes.Opaque;
         }
     }
 }

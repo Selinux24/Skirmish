@@ -115,6 +115,31 @@ namespace Engine
         /// Gets or sets the clouds base color
         /// </summary>
         public Color4 CloudsBaseColor { get; set; }
+        /// <summary>
+        /// Returns true if the buffers were ready
+        /// </summary>
+        public bool BuffersReady
+        {
+            get
+            {
+                if (this.vertexBuffer?.Ready != true)
+                {
+                    return false;
+                }
+
+                if (this.indexBuffer?.Ready != true)
+                {
+                    return false;
+                }
+
+                if (this.indexBuffer.Count <= 0)
+                {
+                    return false;
+                }
+
+                return true;
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -209,58 +234,63 @@ namespace Engine
         /// <param name="context">Drawing context</param>
         public override void Draw(DrawContext context)
         {
-            var mode = context.DrawerMode;
-            var draw =
-                (mode.HasFlag(DrawerModes.OpaqueOnly) && !this.Description.AlphaEnabled) ||
-                (mode.HasFlag(DrawerModes.TransparentOnly) && this.Description.AlphaEnabled);
-
-            if (draw && this.indexBuffer.Count > 0)
+            if (!Visible)
             {
-                Counters.InstancesPerFrame++;
-                Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
+                return;
+            }
 
-                this.BufferManager.SetIndexBuffer(this.indexBuffer);
+            if (!BuffersReady)
+            {
+                return;
+            }
 
-                var effect = DrawerPool.EffectDefaultClouds;
-                var technique = this.skyMode == SkyPlaneModes.Static ? effect.CloudsStatic : effect.CloudsPerturbed;
+            bool draw = context.ValidateDraw(this.BlendMode);
+            if (!draw)
+            {
+                return;
+            }
 
-                this.BufferManager.SetInputAssembler(technique, this.vertexBuffer, Topology.TriangleList);
+            Counters.InstancesPerFrame++;
+            Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
 
-                effect.UpdatePerFrame(
-                    this.rotation * Matrix.Translation(context.EyePosition),
-                    context.ViewProjection,
-                    this.brightness,
-                    this.color,
-                    this.FadingDistance,
-                    this.skyTexture1,
-                    this.skyTexture2);
+            var effect = DrawerPool.EffectDefaultClouds;
+            var technique = this.skyMode == SkyPlaneModes.Static ? effect.CloudsStatic : effect.CloudsPerturbed;
 
-                if (this.skyMode == SkyPlaneModes.Static)
-                {
-                    effect.UpdatePerFrameStatic(
-                        this.firstLayerTranslation,
-                        this.secondLayerTranslation);
-                }
-                else
-                {
-                    effect.UpdatePerFramePerturbed(
-                        this.translation,
-                        this.PerturbationScale);
-                }
+            this.BufferManager.SetIndexBuffer(this.indexBuffer);
+            this.BufferManager.SetInputAssembler(technique, this.vertexBuffer, Topology.TriangleList);
 
-                var graphics = this.Game.Graphics;
+            effect.UpdatePerFrame(
+                this.rotation * Matrix.Translation(context.EyePosition),
+                context.ViewProjection,
+                this.brightness,
+                this.color,
+                this.FadingDistance,
+                this.skyTexture1,
+                this.skyTexture2);
 
-                graphics.SetBlendAdditive();
+            if (this.skyMode == SkyPlaneModes.Static)
+            {
+                effect.UpdatePerFrameStatic(
+                    this.firstLayerTranslation,
+                    this.secondLayerTranslation);
+            }
+            else
+            {
+                effect.UpdatePerFramePerturbed(
+                    this.translation,
+                    this.PerturbationScale);
+            }
 
-                for (int p = 0; p < technique.PassCount; p++)
-                {
-                    graphics.EffectPassApply(technique, p, 0);
+            var graphics = this.Game.Graphics;
 
-                    graphics.DrawIndexed(
-                        this.indexBuffer.Count,
-                        this.indexBuffer.BufferOffset,
-                        this.vertexBuffer.BufferOffset);
-                }
+            for (int p = 0; p < technique.PassCount; p++)
+            {
+                graphics.EffectPassApply(technique, p, 0);
+
+                graphics.DrawIndexed(
+                    this.indexBuffer.Count,
+                    this.indexBuffer.BufferOffset,
+                    this.vertexBuffer.BufferOffset);
             }
         }
     }

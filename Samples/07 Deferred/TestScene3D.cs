@@ -290,8 +290,8 @@ namespace Deferred
             {
                 Name = "Lonely tree",
                 CastShadow = true,
-                AlphaEnabled = true,
                 DepthEnabled = true,
+                BlendMode = BlendModes.DefaultTransparent,
                 Content = new ContentDescription()
                 {
                     ContentFolder = "resources/trees",
@@ -304,8 +304,8 @@ namespace Deferred
             {
                 Name = "Bunch of trees",
                 CastShadow = true,
-                AlphaEnabled = true,
                 DepthEnabled = true,
+                BlendMode = BlendModes.DefaultTransparent,
                 Instances = 10,
                 Content = new ContentDescription()
                 {
@@ -334,7 +334,6 @@ namespace Deferred
 
             var spDesc = new SpriteDescription()
             {
-                AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
                 Height = this.statistics.Top + this.statistics.Height + 3,
                 Color = new Color4(0, 0, 0, 0.75f),
@@ -385,7 +384,6 @@ namespace Deferred
             var graphDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
             {
                 Name = "DEBUG++ Graph",
-                AlphaEnabled = true,
                 DepthEnabled = true,
                 Count = 50000,
             };
@@ -393,7 +391,6 @@ namespace Deferred
 
             var volumesDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
             {
-                AlphaEnabled = true,
                 Count = 10000
             };
             this.volumesDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(volumesDrawerDesc);

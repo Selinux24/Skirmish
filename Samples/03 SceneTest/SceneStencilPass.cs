@@ -85,7 +85,6 @@ namespace SceneTest
                 CastShadow = true,
                 DeferredEnabled = true,
                 DepthEnabled = true,
-                AlphaEnabled = false,
                 UseAnisotropicFiltering = true,
                 Content = new ContentDescription()
                 {
@@ -127,7 +126,6 @@ namespace SceneTest
                 CastShadow = false,
                 DeferredEnabled = true,
                 DepthEnabled = true,
-                AlphaEnabled = false,
                 Content = new ContentDescription()
                 {
                     ModelContent = content,

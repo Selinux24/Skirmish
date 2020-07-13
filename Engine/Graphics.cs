@@ -113,7 +113,7 @@ namespace Engine
         /// <summary>
         /// Default alpha blend state
         /// </summary>
-        private EngineBlendState blendDefaultAlpha = null;
+        private EngineBlendState blendAlphaBlend = null;
         /// <summary>
         /// Blend state for transparent blending
         /// </summary>
@@ -910,14 +910,14 @@ namespace Engine
         /// <summary>
         /// Sets default alpha blend state
         /// </summary>
-        public void SetBlendDefaultAlpha()
+        public void SetBlendAlpha()
         {
-            if (this.blendDefaultAlpha == null)
+            if (this.blendAlphaBlend == null)
             {
-                this.blendDefaultAlpha = EngineBlendState.DefaultAlpha(this);
+                this.blendAlphaBlend = EngineBlendState.AlphaBlend(this);
             }
 
-            this.SetBlendState(this.blendDefaultAlpha);
+            this.SetBlendState(this.blendAlphaBlend);
         }
         /// <summary>
         /// Sets transparent blend state
@@ -1074,8 +1074,8 @@ namespace Engine
 
             this.blendDefault?.Dispose();
             this.blendDefault = null;
-            this.blendDefaultAlpha?.Dispose();
-            this.blendDefaultAlpha = null;
+            this.blendAlphaBlend?.Dispose();
+            this.blendAlphaBlend = null;
             this.blendTransparent?.Dispose();
             this.blendTransparent = null;
             this.blendAdditive?.Dispose();
@@ -1099,7 +1099,7 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Stes blend state
+        /// Sets blend state
         /// </summary>
         /// <param name="state">Blend state</param>
         internal void SetBlendState(EngineBlendState state)
@@ -1111,6 +1111,29 @@ namespace Engine
                 this.currentBlendState = state;
 
                 Counters.BlendStateChanges++;
+            }
+        }
+        /// <summary>
+        /// Sets blend state
+        /// </summary>
+        /// <param name="blendMode">Blend mode</param>
+        internal void SetBlendState(BlendModes blendMode)
+        {
+            if (blendMode.HasFlag(BlendModes.Additive))
+            {
+                this.SetBlendAdditive();
+            }
+            else if (blendMode.HasFlag(BlendModes.Transparent))
+            {
+                this.SetBlendTransparent();
+            }
+            else if (blendMode.HasFlag(BlendModes.Alpha))
+            {
+                this.SetBlendAlpha();
+            }
+            else
+            {
+                this.SetBlendDefault();
             }
         }
         /// <summary>

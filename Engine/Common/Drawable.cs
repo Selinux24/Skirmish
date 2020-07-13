@@ -40,9 +40,9 @@ namespace Engine.Common
         /// </summary>
         public virtual bool DepthEnabled { get; set; }
         /// <summary>
-        /// Enables transparent blending
+        /// Blend mode
         /// </summary>
-        public virtual bool AlphaEnabled { get; set; }
+        public virtual BlendModes BlendMode { get; set; }
         /// <summary>
         /// Object usage
         /// </summary>
@@ -67,7 +67,7 @@ namespace Engine.Common
             this.CastShadow = description.CastShadow;
             this.DeferredEnabled = description.DeferredEnabled;
             this.DepthEnabled = description.DepthEnabled;
-            this.AlphaEnabled = description.AlphaEnabled;
+            this.BlendMode = description.BlendMode;
         }
 
         /// <summary>

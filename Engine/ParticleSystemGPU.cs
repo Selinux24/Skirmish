@@ -252,50 +252,51 @@ namespace Engine
         /// <param name="context">Context</param>
         public void Draw(DrawContext context)
         {
-            var drawerMode = context.DrawerMode;
-
-            if ((drawerMode.HasFlag(DrawerModes.OpaqueOnly) && !this.parameters.Transparent) ||
-                (drawerMode.HasFlag(DrawerModes.TransparentOnly) && this.parameters.Transparent))
+            bool isTransparent = this.parameters.BlendMode.HasFlag(BlendModes.Alpha) || this.parameters.BlendMode.HasFlag(BlendModes.Transparent);
+            bool draw = context.ValidateDraw(BlendModes.Default, isTransparent);
+            if (!draw)
             {
-                var effect = DrawerPool.EffectDefaultGPUParticles;
-
-                #region Per frame update
-
-                var state = new EffectParticleState
-                {
-                    TotalTime = this.Emitter.TotalTime,
-                    ElapsedTime = this.Emitter.ElapsedTime,
-                    EmissionRate = this.Emitter.EmissionRate,
-                    VelocitySensitivity = this.parameters.EmitterVelocitySensitivity,
-                    HorizontalVelocity = this.parameters.HorizontalVelocity,
-                    VerticalVelocity = this.parameters.VerticalVelocity,
-                    RandomValues = Helper.RandomGenerator.NextVector4(Vector4.Zero, Vector4.One),
-                    MaxDuration = this.parameters.MaxDuration,
-                    MaxDurationRandomness = this.parameters.MaxDurationRandomness,
-                    EndVelocity = this.parameters.EndVelocity,
-                    Gravity = this.parameters.Gravity,
-                    StartSize = this.parameters.StartSize,
-                    EndSize = this.parameters.EndSize,
-                    MinColor = this.parameters.MinColor,
-                    MaxColor = this.parameters.MaxColor,
-                    RotateSpeed = this.parameters.RotateSpeed,
-                };
-
-                effect.UpdatePerFrame(
-                    context.ViewProjection,
-                    context.EyePosition,
-                    state,
-                    this.TextureCount,
-                    this.Texture);
-
-                #endregion
-
-                this.StreamOut(effect);
-
-                this.ToggleBuffers();
-
-                this.Draw(effect, context.DrawerMode);
+                return;
             }
+
+            var effect = DrawerPool.EffectDefaultGPUParticles;
+
+            #region Per frame update
+
+            var state = new EffectParticleState
+            {
+                TotalTime = this.Emitter.TotalTime,
+                ElapsedTime = this.Emitter.ElapsedTime,
+                EmissionRate = this.Emitter.EmissionRate,
+                VelocitySensitivity = this.parameters.EmitterVelocitySensitivity,
+                HorizontalVelocity = this.parameters.HorizontalVelocity,
+                VerticalVelocity = this.parameters.VerticalVelocity,
+                RandomValues = Helper.RandomGenerator.NextVector4(Vector4.Zero, Vector4.One),
+                MaxDuration = this.parameters.MaxDuration,
+                MaxDurationRandomness = this.parameters.MaxDurationRandomness,
+                EndVelocity = this.parameters.EndVelocity,
+                Gravity = this.parameters.Gravity,
+                StartSize = this.parameters.StartSize,
+                EndSize = this.parameters.EndSize,
+                MinColor = this.parameters.MinColor,
+                MaxColor = this.parameters.MaxColor,
+                RotateSpeed = this.parameters.RotateSpeed,
+            };
+
+            effect.UpdatePerFrame(
+                context.ViewProjection,
+                context.EyePosition,
+                state,
+                this.TextureCount,
+                this.Texture);
+
+            #endregion
+
+            this.StreamOut(effect);
+
+            this.ToggleBuffers();
+
+            this.Draw(effect, context.DrawerMode);
         }
 
         /// <summary>
@@ -387,19 +388,7 @@ namespace Engine
             graphics.IAPrimitiveTopology = PrimitiveTopology.PointList;
 
             graphics.SetDepthStencilRDZEnabled();
-
-            if (this.parameters.Additive)
-            {
-                graphics.SetBlendAdditive();
-            }
-            else if (this.parameters.Transparent)
-            {
-                graphics.SetBlendDefaultAlpha();
-            }
-            else
-            {
-                graphics.SetBlendDefault();
-            }
+            graphics.SetBlendState(this.parameters.BlendMode);
 
             for (int p = 0; p < techniqueForDrawing.PassCount; p++)
             {
@@ -409,10 +398,7 @@ namespace Engine
             }
         }
 
-        /// <summary>
-        /// Gets the text representation of the particle system
-        /// </summary>
-        /// <returns>Returns the text representation of the particle system</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
             return string.Format("Count: {0}; Total: {1:0.00}/{2:0.00}; ToEnd: {3:0.00};",

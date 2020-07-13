@@ -75,7 +75,6 @@ namespace SceneTest
 
             var spDesc = new SpriteDescription()
             {
-                AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
                 Height = this.runtime.Top + this.runtime.Height + 3,
                 Color = new Color4(0, 0, 0, 0.75f),
@@ -144,7 +143,6 @@ namespace SceneTest
                 CastShadow = true,
                 DeferredEnabled = true,
                 DepthEnabled = true,
-                AlphaEnabled = false,
                 UseAnisotropicFiltering = true,
                 Content = new ContentDescription()
                 {

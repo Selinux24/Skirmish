@@ -60,7 +60,7 @@ namespace Engine.UI
         {
             get
             {
-                return this.vertexBuffer?.Ready == true && this.indexBuffer?.Ready == true;
+                return this.vertexBuffer?.Ready == true && this.indexBuffer?.Ready == true && this.indexBuffer.Count > 0;
             }
         }
 
@@ -110,37 +110,36 @@ namespace Engine.UI
                 return;
             }
 
-            var mode = context.DrawerMode;
-            var draw = (mode.HasFlag(DrawerModes.OpaqueOnly) && !this.Description.AlphaEnabled) ||
-                (mode.HasFlag(DrawerModes.TransparentOnly) && this.Description.AlphaEnabled);
-
-            if (draw && this.indexBuffer.Count > 0)
+            bool draw = context.ValidateDraw(this.BlendMode);
+            if (!draw)
             {
-                var effect = DrawerPool.EffectDefaultSprite;
-                var technique = effect.GetTechnique(
-                    VertexTypes.PositionTexture,
-                    this.Channels);
+                return;
+            }
 
-                Counters.InstancesPerFrame++;
-                Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
+            var effect = DrawerPool.EffectDefaultSprite;
+            var technique = effect.GetTechnique(
+                VertexTypes.PositionTexture,
+                this.Channels);
 
-                this.BufferManager.SetIndexBuffer(this.indexBuffer);
-                this.BufferManager.SetInputAssembler(technique, this.vertexBuffer, Topology.TriangleList);
+            Counters.InstancesPerFrame++;
+            Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
 
-                effect.UpdatePerFrame(this.Manipulator.LocalTransform, this.viewProjection);
-                effect.UpdatePerObject(Color4.White, this.Texture, this.TextureIndex);
+            this.BufferManager.SetIndexBuffer(this.indexBuffer);
+            this.BufferManager.SetInputAssembler(technique, this.vertexBuffer, Topology.TriangleList);
 
-                var graphics = this.Game.Graphics;
+            effect.UpdatePerFrame(this.Manipulator.LocalTransform, this.viewProjection);
+            effect.UpdatePerObject(Color4.White, this.Texture, this.TextureIndex);
 
-                for (int p = 0; p < technique.PassCount; p++)
-                {
-                    graphics.EffectPassApply(technique, p, 0);
+            var graphics = this.Game.Graphics;
 
-                    graphics.DrawIndexed(
-                        this.indexBuffer.Count,
-                        this.indexBuffer.BufferOffset,
-                        this.vertexBuffer.BufferOffset);
-                }
+            for (int p = 0; p < technique.PassCount; p++)
+            {
+                graphics.EffectPassApply(technique, p, 0);
+
+                graphics.DrawIndexed(
+                    this.indexBuffer.Count,
+                    this.indexBuffer.BufferOffset,
+                    this.vertexBuffer.BufferOffset);
             }
         }
 

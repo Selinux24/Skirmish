@@ -36,9 +36,9 @@ namespace Engine
         /// </summary>
         bool DepthEnabled { get; set; }
         /// <summary>
-        /// Enables transparent blending
+        /// Blend mode
         /// </summary>
-        bool AlphaEnabled { get; set; }
+        BlendModes BlendMode { get; set; }
         /// <summary>
         /// Object usage
         /// </summary>

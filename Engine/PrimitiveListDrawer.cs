@@ -41,6 +41,22 @@ namespace Engine
         private readonly Topology topology;
 
         /// <summary>
+        /// Returns true if the buffers were ready
+        /// </summary>
+        public bool BuffersReady
+        {
+            get
+            {
+                if (this.vertexBuffer?.Ready != true)
+                {
+                    return false;
+                }
+
+                return true;
+            }
+        }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="scene">Scene</param>
@@ -91,9 +107,7 @@ namespace Engine
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Internal resources disposition
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -102,51 +116,50 @@ namespace Engine
                 this.BufferManager?.RemoveVertexData(this.vertexBuffer);
             }
         }
-        /// <summary>
-        /// Draw content
-        /// </summary>
-        /// <param name="context">Drawing context</param>
+        /// <inheritdoc/>
         public override void Draw(DrawContext context)
         {
-            if (this.vertexBuffer?.Ready != true)
+            if (!Visible)
             {
                 return;
             }
 
-            var mode = context.DrawerMode;
-
-            if ((mode.HasFlag(DrawerModes.OpaqueOnly) && !this.Description.AlphaEnabled) ||
-                (mode.HasFlag(DrawerModes.TransparentOnly) && this.Description.AlphaEnabled))
+            if (!BuffersReady)
             {
-                this.WriteDataInBuffer();
+                return;
+            }
 
-                if (this.drawCount > 0)
-                {
-                    var effect = DrawerPool.EffectDefaultBasic;
+            bool draw = context.ValidateDraw(this.BlendMode);
+            if (!draw)
+            {
+                return;
+            }
 
-                    Counters.InstancesPerFrame += this.dictionary.Count;
-                    Counters.PrimitivesPerFrame += this.drawCount / this.stride;
+            this.WriteDataInBuffer();
 
-                    effect.UpdatePerFrameBasic(Matrix.Identity, context);
-                    effect.UpdatePerObject(0, null, 0, false);
+            if (this.drawCount <= 0)
+            {
+                return;
+            }
 
-                    var technique = effect.GetTechnique(VertexTypes.PositionColor, false);
-                    this.BufferManager.SetInputAssembler(technique, this.vertexBuffer, this.topology);
+            Counters.InstancesPerFrame += this.dictionary.Count;
+            Counters.PrimitivesPerFrame += this.drawCount / this.stride;
 
-                    var graphics = this.Game.Graphics;
+            var effect = DrawerPool.EffectDefaultBasic;
+            var technique = effect.GetTechnique(VertexTypes.PositionColor, false);
 
-                    if (this.Description.AlphaEnabled)
-                    {
-                        graphics.SetBlendDefaultAlpha();
-                    }
+            this.BufferManager.SetInputAssembler(technique, this.vertexBuffer, this.topology);
 
-                    for (int p = 0; p < technique.PassCount; p++)
-                    {
-                        graphics.EffectPassApply(technique, p, 0);
+            effect.UpdatePerFrameBasic(Matrix.Identity, context);
+            effect.UpdatePerObject(0, null, 0, false);
 
-                        graphics.Draw(this.drawCount, this.vertexBuffer.BufferOffset);
-                    }
-                }
+            var graphics = this.Game.Graphics;
+
+            for (int p = 0; p < technique.PassCount; p++)
+            {
+                graphics.EffectPassApply(technique, p, 0);
+
+                graphics.Draw(this.drawCount, this.vertexBuffer.BufferOffset);
             }
         }
 

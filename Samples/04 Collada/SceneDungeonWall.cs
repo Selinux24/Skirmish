@@ -81,7 +81,6 @@ namespace Collada
 
             var spDesc = new SpriteDescription()
             {
-                AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
                 Height = picks.Top + picks.Height + 3,
                 Color = new Color4(0, 0, 0, 0.75f),
@@ -134,7 +133,6 @@ namespace Collada
                 CastShadow = false,
                 DeferredEnabled = true,
                 DepthEnabled = true,
-                AlphaEnabled = false,
                 Content = new ContentDescription()
                 {
                     ModelContent = content,

@@ -594,16 +594,17 @@ namespace Engine
             /// <returns>true if the current object is equal to the other parameter; otherwise, false</returns>
             public override bool Equals(object obj)
             {
-                if (obj == null) return false;
-
-                if (obj is MapGridShapeId)
-                {
-                    return this.Equals((MapGridShapeId)obj);
-                }
-                else
+                if (obj == null)
                 {
                     return false;
                 }
+
+                if (obj is MapGridShapeId shape)
+                {
+                    return this.Equals(shape);
+                }
+
+                return false;
             }
             /// <summary>
             /// Serves as the default hash function
@@ -823,9 +824,7 @@ namespace Engine
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Release of resources
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -851,41 +850,58 @@ namespace Engine
             }
         }
 
-        /// <summary>
-        /// Updates the state of the terrain components
-        /// </summary>
-        /// <param name="context">Update context</param>
+        /// <inheritdoc/>
         public override void Update(UpdateContext context)
         {
-            this.Map.Update(context.EyePosition);
+            if (!Active)
+            {
+                return;
+            }
+
+            this.Map?.Update(context.EyePosition);
         }
-        /// <summary>
-        /// Draws the terrain components shadows
-        /// </summary>
-        /// <param name="context">Draw context</param>
+        /// <inheritdoc/>
         public override void DrawShadows(DrawContextShadows context)
         {
+            if (!Visible)
+            {
+                return;
+            }
+
             var terrainTechnique = this.SetTechniqueTerrainShadowMap(context);
             if (terrainTechnique != null)
             {
-                this.Map.DrawShadows(context, this.BufferManager, terrainTechnique);
+                this.Map?.DrawShadows(context, this.BufferManager, terrainTechnique);
+            }
+        }
+        /// <inheritdoc/>
+        public override void Draw(DrawContext context)
+        {
+            if (!Visible)
+            {
+                return;
+            }
+
+            var terrainTechnique = this.SetTechniqueTerrain(context);
+            if (terrainTechnique != null)
+            {
+                this.Map?.Draw(context, this.BufferManager, terrainTechnique);
             }
         }
         /// <summary>
-        /// Draws the terrain components
+        /// Sets thecnique for terrain drawing
         /// </summary>
-        /// <param name="context">Draw context</param>
-        public override void Draw(DrawContext context)
+        /// <param name="context">Drawing context</param>
+        /// <returns>Returns the selected technique</returns>
+        private EngineEffectTechnique SetTechniqueTerrain(DrawContext context)
         {
             var mode = context.DrawerMode;
 
             EngineEffectTechnique terrainTechnique = null;
             if (mode.HasFlag(DrawerModes.Forward)) terrainTechnique = this.SetTechniqueTerrainDefault(context);
             if (mode.HasFlag(DrawerModes.Deferred)) terrainTechnique = this.SetTechniqueTerrainDeferred(context);
-            if (terrainTechnique != null)
-            {
-                this.Map.Draw(context, this.BufferManager, terrainTechnique);
-            }
+
+            return terrainTechnique;
         }
         /// <summary>
         /// Sets thecnique for terrain drawing with forward renderer

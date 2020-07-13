@@ -196,6 +196,31 @@ namespace Engine
         /// Resolution
         /// </summary>
         public SkyScatteringResolutions Resolution { get; set; }
+        /// <summary>
+        /// Returns true if the buffers were ready
+        /// </summary>
+        public bool BuffersReady
+        {
+            get
+            {
+                if (this.vertexBuffer?.Ready != true)
+                {
+                    return false;
+                }
+
+                if (this.indexBuffer?.Ready != true)
+                {
+                    return false;
+                }
+
+                if (this.indexBuffer.Count <= 0)
+                {
+                    return false;
+                }
+
+                return true;
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -233,9 +258,7 @@ namespace Engine
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Resource releasing
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -246,10 +269,7 @@ namespace Engine
             }
         }
 
-        /// <summary>
-        /// Updates internal state
-        /// </summary>
-        /// <param name="context">Updating context</param>
+        /// <inheritdoc/>
         public override void Update(UpdateContext context)
         {
             var keyLight = context.Lights.KeyLight;
@@ -258,73 +278,93 @@ namespace Engine
                 context.Lights.BaseFogColor = this.GetFogColor(keyLight.Direction);
             }
         }
-        /// <summary>
-        /// Draws content
-        /// </summary>
-        /// <param name="context">Drawing context</param>
+        /// <inheritdoc/>
         public override void Draw(DrawContext context)
         {
-            var mode = context.DrawerMode;
-
-            if (mode.HasFlag(DrawerModes.OpaqueOnly))
+            if (!Visible)
             {
-                var keyLight = context.Lights.KeyLight;
-                if (keyLight != null && this.indexBuffer.Count > 0)
-                {
-                    Counters.InstancesPerFrame++;
-                    Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
-
-                    var effect = DrawerPool.EffectDefaultSkyScattering;
-
-                    EngineEffectTechnique technique;
-                    if (this.Resolution == SkyScatteringResolutions.High)
-                    {
-                        technique = effect.SkyScatteringHigh;
-                    }
-                    else if (this.Resolution == SkyScatteringResolutions.Medium)
-                    {
-                        technique = effect.SkyScatteringMedium;
-                    }
-                    else
-                    {
-                        technique = effect.SkyScatteringLow;
-                    }
-
-                    this.BufferManager.SetIndexBuffer(this.indexBuffer);
-                    this.BufferManager.SetInputAssembler(technique, this.vertexBuffer, Topology.TriangleList);
-
-                    effect.UpdatePerFrame(
-                        Matrix.Translation(context.EyePosition),
-                        context.ViewProjection,
-                        keyLight.Direction,
-                        new EffectSkyScatterState
-                        {
-                            PlanetRadius = this.PlanetRadius,
-                            PlanetAtmosphereRadius = this.PlanetAtmosphereRadius,
-                            SphereOuterRadius = this.SphereOuterRadius,
-                            SphereInnerRadius = this.SphereInnerRadius,
-                            SkyBrightness = this.Brightness,
-                            RayleighScattering = this.RayleighScattering,
-                            RayleighScattering4PI = this.RayleighScattering4PI,
-                            MieScattering = this.MieScattering,
-                            MieScattering4PI = this.MieScattering4PI,
-                            InvWaveLength4 = this.InvWaveLength4,
-                            Scale = this.ScatteringScale,
-                            RayleighScaleDepth = this.RayleighScaleDepth,
-                            BackColor = context.Lights.FogColor,
-                            HdrExposure = this.HDRExposure,
-                        });
-
-                    var graphics = this.Game.Graphics;
-
-                    for (int p = 0; p < technique.PassCount; p++)
-                    {
-                        graphics.EffectPassApply(technique, p, 0);
-
-                        graphics.DrawIndexed(this.indexBuffer.Count, this.indexBuffer.BufferOffset, this.vertexBuffer.BufferOffset);
-                    }
-                }
+                return;
             }
+
+            var keyLight = context.Lights.KeyLight;
+            if (keyLight == null)
+            {
+                return;
+            }
+
+            if (!BuffersReady)
+            {
+                return;
+            }
+
+            bool draw = context.ValidateDraw(this.BlendMode);
+            if (!draw)
+            {
+                return;
+            }
+
+            Counters.InstancesPerFrame++;
+            Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
+
+            var effect = DrawerPool.EffectDefaultSkyScattering;
+            var technique = GetScatteringTechnique(effect);
+
+            this.BufferManager.SetIndexBuffer(this.indexBuffer);
+            this.BufferManager.SetInputAssembler(technique, this.vertexBuffer, Topology.TriangleList);
+
+            effect.UpdatePerFrame(
+                Matrix.Translation(context.EyePosition),
+                context.ViewProjection,
+                keyLight.Direction,
+                new EffectSkyScatterState
+                {
+                    PlanetRadius = this.PlanetRadius,
+                    PlanetAtmosphereRadius = this.PlanetAtmosphereRadius,
+                    SphereOuterRadius = this.SphereOuterRadius,
+                    SphereInnerRadius = this.SphereInnerRadius,
+                    SkyBrightness = this.Brightness,
+                    RayleighScattering = this.RayleighScattering,
+                    RayleighScattering4PI = this.RayleighScattering4PI,
+                    MieScattering = this.MieScattering,
+                    MieScattering4PI = this.MieScattering4PI,
+                    InvWaveLength4 = this.InvWaveLength4,
+                    Scale = this.ScatteringScale,
+                    RayleighScaleDepth = this.RayleighScaleDepth,
+                    BackColor = context.Lights.FogColor,
+                    HdrExposure = this.HDRExposure,
+                });
+
+            var graphics = this.Game.Graphics;
+
+            for (int p = 0; p < technique.PassCount; p++)
+            {
+                graphics.EffectPassApply(technique, p, 0);
+
+                graphics.DrawIndexed(this.indexBuffer.Count, this.indexBuffer.BufferOffset, this.vertexBuffer.BufferOffset);
+            }
+        }
+        /// <summary>
+        /// Gets the sky scatterfing effect technique base on resolution
+        /// </summary>
+        /// <param name="effect">Effect</param>
+        /// <returns>Returns the sky scatterfing effect technique</returns>
+        private EngineEffectTechnique GetScatteringTechnique(EffectDefaultSkyScattering effect)
+        {
+            EngineEffectTechnique technique;
+            if (this.Resolution == SkyScatteringResolutions.High)
+            {
+                technique = effect.SkyScatteringHigh;
+            }
+            else if (this.Resolution == SkyScatteringResolutions.Medium)
+            {
+                technique = effect.SkyScatteringMedium;
+            }
+            else
+            {
+                technique = effect.SkyScatteringLow;
+            }
+
+            return technique;
         }
 
         /// <summary>
@@ -358,10 +398,10 @@ namespace Engine
         {
             Color4 outColor = new Color4(0f, 0f, 0f, 0f);
 
-            Helper.GetAnglesFromVector(Vector3.ForwardLH, out float yaw, out float pitch);
+            Helper.GetAnglesFromVector(Vector3.ForwardLH, out float yaw, out _);
             float originalYaw = yaw;
 
-            pitch = MathUtil.DegreesToRadians(10.0f);
+            float pitch = MathUtil.DegreesToRadians(10.0f);
 
             uint samples = 10;
 

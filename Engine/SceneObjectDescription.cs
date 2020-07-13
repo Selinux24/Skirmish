@@ -23,10 +23,9 @@ namespace Engine
         /// </summary>
         public bool DepthEnabled { get; set; } = true;
         /// <summary>
-        /// Enables transparent blending
+        /// Blend mode
         /// </summary>
-        public bool AlphaEnabled { get; set; } = false;
-
+        public BlendModes BlendMode { get; set; } = BlendModes.Default;
         /// <summary>
         /// Use spheric volume for culling by default
         /// </summary>

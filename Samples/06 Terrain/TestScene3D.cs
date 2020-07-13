@@ -223,7 +223,6 @@ namespace Terrain
             var spDesc = new SpriteDescription()
             {
                 Name = "Back Pannel",
-                AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
                 Height = this.counters2.Top + this.counters2.Height + 3,
                 Color = new Color4(0, 0, 0, 0.75f),
@@ -710,7 +709,7 @@ namespace Terrain
             {
                 Name = "birch_a",
                 CastShadow = true,
-                AlphaEnabled = true,
+                BlendMode = BlendModes.DefaultTransparent,
                 Instances = 100,
                 Content = new ContentDescription()
                 {
@@ -722,7 +721,7 @@ namespace Terrain
             {
                 Name = "birch_b",
                 CastShadow = true,
-                AlphaEnabled = true,
+                BlendMode = BlendModes.DefaultTransparent,
                 Instances = 100,
                 Content = new ContentDescription()
                 {

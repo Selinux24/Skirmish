@@ -268,13 +268,9 @@ namespace Engine
         }
 
         /// <summary>
-        /// Gets or sets whether the particles were transparent
+        /// Gets or sets whether the blend mode
         /// </summary>
-        public bool Transparent { get; set; }
-        /// <summary>
-        /// Gets or sets whether the particles were additive
-        /// </summary>
-        public bool Additive { get; set; }
+        public BlendModes BlendMode { get; set; }
 
         /// <summary>
         /// Emitter velocity sensitivity
@@ -336,8 +332,7 @@ namespace Engine
             this.MinColor = description.MinColor;
             this.MaxColor = description.MaxColor;
 
-            this.Transparent = description.Transparent;
-            this.Additive = description.Additive;
+            this.BlendMode = description.BlendMode;
 
             this.EmitterVelocitySensitivity = description.EmitterVelocitySensitivity;
 

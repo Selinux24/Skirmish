@@ -71,7 +71,6 @@ namespace ModelDrawing
 
             var spDesc = new SpriteDescription()
             {
-                AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
                 Height = this.text2.Top + this.text2.Height + 3,
                 Color = new Color4(0, 0, 0, 0.75f),
@@ -272,7 +271,7 @@ namespace ModelDrawing
             Vector3 position = new Vector3(Helper.RandomGenerator.NextFloat(-10, 10), 0, Helper.RandomGenerator.NextFloat(-10, 10));
             Vector3 velocity = Vector3.Up;
             float duration = 0.5f;
-            float rate = 0.1f;
+            float rate = 0.01f;
 
             var emitter1 = new ParticleEmitter()
             {
@@ -287,8 +286,8 @@ namespace ModelDrawing
             {
                 Position = position,
                 Velocity = velocity,
-                Duration = duration,
-                EmissionRate = rate * 2f,
+                Duration = duration * 5f,
+                EmissionRate = rate * 10f,
                 InfiniteDuration = false,
                 MaximumDistance = 100f,
             };

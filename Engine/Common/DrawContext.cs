@@ -62,5 +62,45 @@ namespace Engine.Common
             this.Name = string.Empty;
             this.DrawerMode = DrawerModes.Forward;
         }
+
+        /// <summary>
+        /// Validates the drawing stage
+        /// </summary>
+        /// <param name="blendMode">Blend mode</param>
+        /// <returns>Returns true if the specified blend mode is valid for the current drawing stage</returns>
+        public bool ValidateDraw(BlendModes blendMode)
+        {
+            if (DrawerMode.HasFlag(DrawerModes.OpaqueOnly))
+            {
+                return blendMode.HasFlag(BlendModes.Opaque);
+            }
+
+            if (DrawerMode.HasFlag(DrawerModes.TransparentOnly))
+            {
+                return blendMode.HasFlag(BlendModes.Alpha) || blendMode.HasFlag(BlendModes.Transparent);
+            }
+
+            return false;
+        }
+        /// <summary>
+        /// Validates the drawing stage
+        /// </summary>
+        /// <param name="blendMode">Blend mode</param>
+        /// <param name="transparent">The component to draw is has transparency</param>
+        /// <returns>Returns true if the specified blend mode is valid for the current drawing stage</returns>
+        public bool ValidateDraw(BlendModes blendMode, bool transparent)
+        {
+            if (DrawerMode.HasFlag(DrawerModes.OpaqueOnly) && !transparent)
+            {
+                return blendMode.HasFlag(BlendModes.Opaque);
+            }
+
+            if (DrawerMode.HasFlag(DrawerModes.TransparentOnly) && transparent)
+            {
+                return blendMode.HasFlag(BlendModes.Alpha) || blendMode.HasFlag(BlendModes.Transparent);
+            }
+
+            return false;
+        }
     }
 }

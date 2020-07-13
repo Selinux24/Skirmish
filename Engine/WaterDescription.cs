@@ -119,10 +119,7 @@ namespace Engine
         public WaterDescription()
             : base()
         {
-            this.CastShadow = false;
-            this.DeferredEnabled = true;
-            this.DepthEnabled = true;
-            this.AlphaEnabled = false;
+            this.BlendMode = BlendModes.Opaque;
         }
     }
 }

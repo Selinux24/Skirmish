@@ -79,10 +79,7 @@ namespace Engine
             this.MaximumCount = -1;
         }
 
-        /// <summary>
-        /// Update
-        /// </summary>
-        /// <param name="context">Context</param>
+        /// <inheritdoc/>
         public override void Update(UpdateContext context)
         {
             if (this.instances.Any())
@@ -182,10 +179,7 @@ namespace Engine
                 return i;
             });
         }
-        /// <summary>
-        /// Shadow Drawing
-        /// </summary>
-        /// <param name="context">Context</param>
+        /// <inheritdoc/>
         public override void DrawShadows(DrawContextShadows context)
         {
             if (!this.Visible)
@@ -219,6 +213,11 @@ namespace Engine
         /// <param name="effect">Drawer</param>
         private void DrawShadows(DrawContextShadows context, IShadowMapDrawer effect)
         {
+            if (!this.Visible)
+            {
+                return;
+            }
+
             int count = 0;
             int instanceCount = 0;
 
@@ -266,10 +265,7 @@ namespace Engine
                 }
             }
         }
-        /// <summary>
-        /// Draw
-        /// </summary>
-        /// <param name="context">Context</param>
+        /// <inheritdoc/>
         public override void Draw(DrawContext context)
         {
             if (!this.Visible)
@@ -345,7 +341,7 @@ namespace Engine
 
                 foreach (string meshName in drawingData.Meshes.Keys)
                 {
-                    count += this.DrawMesh(effect, drawingData, context.DrawerMode, meshName, index, length);
+                    count += this.DrawMesh(context, effect, drawingData, meshName, index, length);
                     count *= instanceCount;
                 }
             }
@@ -407,14 +403,14 @@ namespace Engine
         /// <summary>
         /// Draws a mesh with a geometry drawer
         /// </summary>
+        /// <param name="context">Context</param>
         /// <param name="effect">Effect</param>
         /// <param name="drawingData">Drawing data</param>
-        /// <param name="mode">Drawer mode</param>
         /// <param name="meshName">Mesh name</param>
         /// <param name="index">Instance buffer index</param>
         /// <param name="length">Instance buffer length</param>
         /// <returns>Returns the number of drawn triangles</returns>
-        private int DrawMesh(IGeometryDrawer effect, DrawingData drawingData, DrawerModes mode, string meshName, int index, int length)
+        private int DrawMesh(DrawContext context, IGeometryDrawer effect, DrawingData drawingData, string meshName, int index, int length)
         {
             int count = 0;
 
@@ -427,12 +423,8 @@ namespace Engine
                 var mesh = meshDict[materialName];
                 var material = drawingData.Materials[materialName];
 
-                bool transparent = material.Material.IsTransparent && this.Description.AlphaEnabled;
-                if (mode.HasFlag(DrawerModes.OpaqueOnly) && transparent)
-                {
-                    continue;
-                }
-                if (mode.HasFlag(DrawerModes.TransparentOnly) && !transparent)
+                bool draw = context.ValidateDraw(this.BlendMode, material.Material.IsTransparent);
+                if (!draw)
                 {
                     continue;
                 }

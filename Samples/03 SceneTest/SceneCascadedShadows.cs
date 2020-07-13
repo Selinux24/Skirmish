@@ -94,7 +94,6 @@ namespace SceneTest
                 CastShadow = true,
                 DeferredEnabled = true,
                 DepthEnabled = true,
-                AlphaEnabled = false,
                 UseAnisotropicFiltering = true,
                 Content = new ContentDescription()
                 {
@@ -128,7 +127,7 @@ namespace SceneTest
                 Name = "Tree",
                 CastShadow = true,
                 UseAnisotropicFiltering = true,
-                AlphaEnabled = true,
+                BlendMode = BlendModes.DefaultTransparent,
                 Content = new ContentDescription()
                 {
                     ContentFolder = "SceneLights/trees",

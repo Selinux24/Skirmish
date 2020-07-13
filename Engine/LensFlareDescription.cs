@@ -64,10 +64,9 @@ namespace Engine
         public LensFlareDescription()
             : base()
         {
-            this.CastShadow = false;
             this.DeferredEnabled = false;
             this.DepthEnabled = false;
-            this.AlphaEnabled = true;
+            this.BlendMode = BlendModes.Alpha | BlendModes.Additive;
         }
     }
 }

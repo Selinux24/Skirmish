@@ -140,8 +140,7 @@ namespace Engine
         {
             this.CastShadow = true;
             this.DeferredEnabled = false;
-            this.DepthEnabled = true;
-            this.AlphaEnabled = true;
+            this.BlendMode = BlendModes.Transparent;
         }
     }
 }

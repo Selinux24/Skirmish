@@ -56,7 +56,7 @@ namespace Engine.UI
             this.CastShadow = false;
             this.DeferredEnabled = false;
             this.DepthEnabled = false;
-            this.AlphaEnabled = true;
+            this.BlendMode = BlendModes.Alpha;
         }
     }
 }

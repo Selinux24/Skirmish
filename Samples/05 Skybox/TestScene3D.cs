@@ -143,7 +143,6 @@ namespace Skybox
             var spDesc = new SpriteDescription()
             {
                 Name = "UI Back pannel",
-                AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
                 Height = 120,
                 Color = new Color4(0, 0, 0, 0.75f),
@@ -265,7 +264,6 @@ namespace Skybox
                 CastShadow = false,
                 DeferredEnabled = true,
                 DepthEnabled = true,
-                AlphaEnabled = false,
                 Content = new ContentDescription()
                 {
                     ModelContent = content,
@@ -349,10 +347,10 @@ namespace Skybox
 
             #region DEBUG drawers
 
-            this.volumesDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(new PrimitiveListDrawerDescription<Line3D>() { AlphaEnabled = true, Count = 10000 });
+            this.volumesDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(new PrimitiveListDrawerDescription<Line3D>() { Count = 10000 });
             this.volumesDrawer.Visible = false;
 
-            this.graphDrawer = await this.AddComponentPrimitiveListDrawer<Triangle>(new PrimitiveListDrawerDescription<Triangle>() { AlphaEnabled = true, Count = 10000 });
+            this.graphDrawer = await this.AddComponentPrimitiveListDrawer<Triangle>(new PrimitiveListDrawerDescription<Triangle>() { Count = 10000 });
             this.graphDrawer.Visible = false;
 
             #endregion

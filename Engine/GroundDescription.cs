@@ -47,9 +47,6 @@ namespace Engine
             : base()
         {
             this.CastShadow = true;
-            this.DeferredEnabled = true;
-            this.DepthEnabled = true;
-            this.AlphaEnabled = false;
         }
     }
 }

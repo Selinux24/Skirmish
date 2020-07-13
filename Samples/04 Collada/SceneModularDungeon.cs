@@ -274,7 +274,6 @@ namespace Collada
             var spDesc = new SpriteDescription()
             {
                 Name = "Back Panel",
-                AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
                 Height = this.info.Top + this.info.Height + 3,
                 Color = new Color4(0, 0, 0, 0.75f),
@@ -289,10 +288,10 @@ namespace Collada
 
             var drawerDesc = new PrimitiveListDrawerDescription<Triangle>()
             {
-                Name = "Seleced Items Drawer",
-                AlphaEnabled = true,
+                Name = "Selected Items Drawer",
                 CastShadow = false,
                 Count = 50000,
+                BlendMode = BlendModes.Opaque | BlendModes.Additive,
             };
             this.selectedItemDrawer = await this.AddComponentPrimitiveListDrawer<Triangle>(drawerDesc, SceneObjectUsages.UI, layerHUD);
             this.selectedItemDrawer.Visible = true;
@@ -472,7 +471,7 @@ namespace Collada
                 Name = "Dungeon",
                 UseAnisotropic = true,
                 CastShadow = true,
-                AlphaEnabled = true,
+                BlendMode = BlendModes.DefaultTransparent,
                 Content = new ContentDescription()
                 {
                     ContentFolder = "Resources/SceneModularDungeon",
@@ -567,7 +566,6 @@ namespace Collada
             var graphDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
             {
                 Name = "DEBUG++ Graph",
-                AlphaEnabled = true,
                 Count = 50000,
             };
             this.graphDrawer = await this.AddComponentPrimitiveListDrawer<Triangle>(graphDrawerDesc);
@@ -576,7 +574,6 @@ namespace Collada
             var bboxesDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
             {
                 Name = "DEBUG++ Bounding volumes",
-                AlphaEnabled = true,
                 Color = new Color4(1.0f, 0.0f, 0.0f, 0.25f),
                 Count = 10000,
             };
@@ -586,7 +583,6 @@ namespace Collada
             var ratDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
             {
                 Name = "DEBUG++ Rat",
-                AlphaEnabled = true,
                 Color = new Color4(0.0f, 1.0f, 1.0f, 0.25f),
                 Count = 10000,
             };
@@ -596,7 +592,6 @@ namespace Collada
             var obstacleDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
             {
                 Name = "DEBUG++ Obstacles",
-                AlphaEnabled = true,
                 DepthEnabled = false,
                 Count = 10000,
             };
@@ -606,7 +601,6 @@ namespace Collada
             var connectionDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
             {
                 Name = "DEBUG++ Connections",
-                AlphaEnabled = true,
                 Color = connectionColor,
                 Count = 10000,
             };

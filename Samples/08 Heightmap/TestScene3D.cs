@@ -235,7 +235,6 @@ namespace Heightmap
             var spDesc = new SpriteDescription()
             {
                 Name = "Background",
-                AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
                 Height = this.help2.Top + this.help2.Height + 3,
                 Color = new Color4(0, 0, 0, 0.75f),
@@ -280,7 +279,7 @@ namespace Heightmap
                 Name = "Trees",
                 CastShadow = true,
                 Instances = 200,
-                AlphaEnabled = true,
+                BlendMode = BlendModes.DefaultTransparent,
                 Content = new ContentDescription()
                 {
                     ContentFolder = @"Resources/Trees",
@@ -303,7 +302,7 @@ namespace Heightmap
                 Name = "Trees2",
                 CastShadow = true,
                 Instances = 200,
-                AlphaEnabled = true,
+                BlendMode = BlendModes.DefaultTransparent,
                 Content = new ContentDescription()
                 {
                     ContentFolder = @"Resources/Trees2",
@@ -793,7 +792,6 @@ namespace Heightmap
                 new PrimitiveListDrawerDescription<Triangle>()
                 {
                     Name = "DEBUG++ Graph",
-                    AlphaEnabled = true,
                     Count = 50000,
                 });
             this.graphDrawer.Visible = false;
@@ -1168,7 +1166,6 @@ namespace Heightmap
                 new PrimitiveListDrawerDescription<Line3D>()
                 {
                     Name = "DEBUG++ Terrain nodes bounding boxes",
-                    AlphaEnabled = true,
                     DepthEnabled = true,
                     Dynamic = true,
                     Count = 50000,
@@ -1190,7 +1187,6 @@ namespace Heightmap
                 new PrimitiveListDrawerDescription<Triangle>()
                 {
                     Name = "DEBUG++ Terrain nodes bounding boxes faces",
-                    AlphaEnabled = true,
                     DepthEnabled = true,
                     Count = 1000,
                 },

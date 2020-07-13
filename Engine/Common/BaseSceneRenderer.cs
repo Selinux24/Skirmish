@@ -342,6 +342,8 @@ namespace Engine.Common
             {
                 if (!(c is Drawable)) return false;
 
+                if (!c.BlendMode.HasFlag(BlendModes.Opaque)) return false;
+
                 if (c is ICullable cull)
                 {
                     return !this.cullManager.GetCullValue(index, cull).Culled;
@@ -382,7 +384,13 @@ namespace Engine.Common
                     d2 = this.cullManager.GetCullValue(index, cull2).Distance;
                 }
 
+                // Nearest first
                 res = -d1.CompareTo(d2);
+            }
+
+            if (res == 0)
+            {
+                res = c1.BlendMode.CompareTo(c2.BlendMode);
             }
 
             return res;
@@ -397,9 +405,9 @@ namespace Engine.Common
         {
             var transparents = components.Where(c =>
             {
-                if (!c.AlphaEnabled) return false;
-
                 if (!(c is Drawable)) return false;
+
+                if (!c.BlendMode.HasFlag(BlendModes.Alpha) && !c.BlendMode.HasFlag(BlendModes.Transparent)) return false;
 
                 if (c is ICullable cull)
                 {
@@ -420,7 +428,13 @@ namespace Engine.Common
         /// <returns>Returns sorting order (far first)</returns>
         protected virtual int SortTransparents(int index, ISceneObject c1, ISceneObject c2)
         {
-            int res = c1.DepthEnabled.CompareTo(c2.DepthEnabled);
+            int res = c1.Order.CompareTo(c2.Order);
+
+            if (res == 0)
+            {
+                res = c1.DepthEnabled.CompareTo(c2.DepthEnabled);
+            }
+
             if (res == 0)
             {
                 float d1 = float.MaxValue;
@@ -435,90 +449,70 @@ namespace Engine.Common
                     d2 = this.cullManager.GetCullValue(index, cull2).Distance;
                 }
 
-                res = -d1.CompareTo(d2);
+                // Far objects first
+                res = d1.CompareTo(d2);
             }
 
             if (res == 0)
             {
-                res = -c1.Order.CompareTo(c2.Order);
+                res = c1.BlendMode.CompareTo(c2.BlendMode);
             }
 
-            return -res;
+            return res;
         }
 
         /// <summary>
-        /// Draws an opaque object
+        /// Draws an object
         /// </summary>
         /// <param name="context">Drawing context</param>
         /// <param name="c">Component</param>
-        protected virtual void DrawOpaque(DrawContext context, ISceneObject c)
+        protected virtual void Draw(DrawContext context, ISceneObject c)
         {
             if (c is IDrawable drawable)
             {
-                var graphics = this.Game.Graphics;
-
                 Counters.MaxInstancesPerFrame += c.InstanceCount;
 
-                graphics.SetRasterizerDefault();
+                this.SetRasterizer(context);
 
-                this.SetBlendStateOpaque(context);
+                this.SetBlendState(context, c.BlendMode);
 
-                if (c.DepthEnabled)
-                {
-                    graphics.SetDepthStencilZEnabled();
-                }
-                else
-                {
-                    graphics.SetDepthStencilZDisabled();
-                }
+                this.SetDepthStencil(context, c.DepthEnabled);
 
                 drawable.Draw(context);
             }
         }
         /// <summary>
-        /// Draws an transparent object
+        /// Sets the rasterizer state
         /// </summary>
         /// <param name="context">Drawing context</param>
-        /// <param name="c">Component</param>
-        protected virtual void DrawTransparent(DrawContext context, ISceneObject c)
+        protected virtual void SetRasterizer(DrawContext context)
         {
-            if (c is IDrawable drawable)
+            this.Game.Graphics.SetRasterizerDefault();
+        }
+        /// <summary>
+        /// Sets the blend state
+        /// </summary>
+        /// <param name="context">Drawing context</param>
+        /// <param name="blendMode">Blend mode</param>
+        protected virtual void SetBlendState(DrawContext context, BlendModes blendMode)
+        {
+            this.Game.Graphics.SetBlendState(blendMode);
+        }
+        /// <summary>
+        /// Sets the depth-stencil buffer state
+        /// </summary>
+        /// <param name="context">Drawing context</param>
+        /// <param name="enable">Enables the z-buffer</param>
+        protected virtual void SetDepthStencil(DrawContext context, bool enable)
+        {
+            if (enable)
             {
-                var graphics = this.Game.Graphics;
-
-                Counters.MaxInstancesPerFrame += c.InstanceCount;
-
-                graphics.SetRasterizerDefault();
-
-                this.SetBlendStateTransparent(context);
-
-                if (c.DepthEnabled)
-                {
-                    graphics.SetDepthStencilZEnabled();
-                }
-                else
-                {
-                    graphics.SetDepthStencilZDisabled();
-                }
-
-                drawable.Draw(context);
+                this.Game.Graphics.SetDepthStencilZEnabled();
             }
-        }
-        /// <summary>
-        /// Sets the opaque blend state
-        /// </summary>
-        /// <param name="context">Drawing context</param>
-        protected virtual void SetBlendStateOpaque(DrawContext context)
-        {
-            this.Game.Graphics.SetBlendDefault();
-        }
-        /// <summary>
-        /// Sets the transparent blend state
-        /// </summary>
-        /// <param name="context">Drawing context</param>
-        protected virtual void SetBlendStateTransparent(DrawContext context)
-        {
-            this.Game.Graphics.SetBlendTransparent();
+            else
+            {
+                this.Game.Graphics.SetDepthStencilZDisabled();
+            }
         }
 
         /// <summary>
@@ -911,9 +905,9 @@ namespace Engine.Common
                 graphics.SetRasterizerShadowMapping();
                 graphics.SetDepthStencilShadowMapping();
 
-                if (c.AlphaEnabled)
+                if (c.BlendMode.HasFlag(BlendModes.Alpha) || c.BlendMode.HasFlag(BlendModes.Transparent))
                 {
-                    graphics.SetBlendTransparent();
+                    graphics.SetBlendAlpha();
                 }
                 else
                 {

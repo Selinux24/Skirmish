@@ -662,7 +662,7 @@ namespace Engine
                 if (i != 0) return i;
 
                 //Then opaques
-                i = p1.AlphaEnabled.CompareTo(p2.AlphaEnabled);
+                i = p1.BlendMode.CompareTo(p2.BlendMode);
                 if (i != 0) return i;
 
                 //Then z-buffer writers

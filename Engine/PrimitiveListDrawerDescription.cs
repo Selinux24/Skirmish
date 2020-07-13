@@ -26,10 +26,8 @@ namespace Engine
         public PrimitiveListDrawerDescription()
             : base()
         {
-            this.CastShadow = false;
             this.DeferredEnabled = false;
             this.DepthEnabled = false;
-            this.AlphaEnabled = true;
         }
     }
 }

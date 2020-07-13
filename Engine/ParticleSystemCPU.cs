@@ -175,12 +175,8 @@ namespace Engine
                 return;
             }
 
-            var mode = context.DrawerMode;
-            var draw =
-                (mode.HasFlag(DrawerModes.ShadowMap)) ||
-                (mode.HasFlag(DrawerModes.OpaqueOnly) && !this.parameters.Transparent) ||
-                (mode.HasFlag(DrawerModes.TransparentOnly) && this.parameters.Transparent);
-
+            bool isTransparent = this.parameters.BlendMode.HasFlag(BlendModes.Alpha) || this.parameters.BlendMode.HasFlag(BlendModes.Transparent);
+            bool draw = context.ValidateDraw(BlendModes.Default, isTransparent);
             if (!draw)
             {
                 return;
@@ -191,6 +187,7 @@ namespace Engine
             var effect = DrawerPool.EffectDefaultCPUParticles;
             var technique = rot ? effect.RotationDraw : effect.NonRotationDraw;
 
+            var mode = context.DrawerMode;
             if (!mode.HasFlag(DrawerModes.ShadowMap))
             {
                 Counters.InstancesPerFrame++;
@@ -204,19 +201,7 @@ namespace Engine
             graphics.IAPrimitiveTopology = PrimitiveTopology.PointList;
 
             graphics.SetDepthStencilRDZEnabled();
-
-            if (this.parameters.Additive)
-            {
-                graphics.SetBlendAdditive();
-            }
-            else if (this.parameters.Transparent)
-            {
-                graphics.SetBlendDefaultAlpha();
-            }
-            else
-            {
-                graphics.SetBlendDefault();
-            }
+            graphics.SetBlendState(this.parameters.BlendMode);
 
             var state = new EffectParticleState
             {
@@ -302,10 +287,7 @@ namespace Engine
             this.currentParticleIndex = nextFreeParticle;
         }
 
-        /// <summary>
-        /// Gets the text representation of the particle system
-        /// </summary>
-        /// <returns>Returns the text representation of the particle system</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
             return string.Format("Count: {0}; Total: {1:0.00}/{2:0.00}; ToEnd: {3:0.00};",

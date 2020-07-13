@@ -799,8 +799,10 @@ namespace Engine
             this.visibleNodes = this.GetFoliageNodes(context.CameraVolume, this.foliageSphere);
             if (this.visibleNodes.Any())
             {
+                bool transparent = this.BlendMode.HasFlag(BlendModes.Alpha) || this.BlendMode.HasFlag(BlendModes.Transparent);
+
                 //Sort nodes by distance from camera position
-                this.SortVisibleNodes(context.GameTime, context.EyePosition, this.Description.AlphaEnabled);
+                this.SortVisibleNodes(context.GameTime, context.EyePosition, transparent);
 
                 //Assign foliage patches
                 this.AssignPatches(context.GameTime, context.EyePosition, bbox.Value);
@@ -957,9 +959,11 @@ namespace Engine
                     return -d1.CompareTo(d2);
                 });
 
+                bool transparent = this.BlendMode.HasFlag(BlendModes.Alpha) || this.BlendMode.HasFlag(BlendModes.Transparent);
+
                 while (toAssign.Count > 0 && freeBuffers.Count > 0)
                 {
-                    freeBuffers[0].AttachFoliage(gameTime, eyePosition, this.Description.AlphaEnabled, toAssign[0], this.BufferManager);
+                    freeBuffers[0].AttachFoliage(gameTime, eyePosition, transparent, toAssign[0], this.BufferManager);
 
                     toAssign.RemoveAt(0);
                     freeBuffers.RemoveAt(0);
@@ -1000,16 +1004,19 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void DrawShadows(DrawContextShadows context)
         {
-            if (this.visibleNodes.Any())
+            if (!Visible)
             {
-                var graphics = this.Game.Graphics;
+                return;
+            }
 
-                graphics.SetBlendTransparent();
+            if (!this.visibleNodes.Any())
+            {
+                return;
+            }
 
-                foreach (var item in this.visibleNodes)
-                {
-                    this.DrawShadowsNode(context, item);
-                }
+            foreach (var item in this.visibleNodes)
+            {
+                this.DrawShadowsNode(context, item);
             }
         }
         /// <summary>
@@ -1043,26 +1050,25 @@ namespace Engine
         /// <param name="context">Drawing context</param>
         public override void Draw(DrawContext context)
         {
-            var mode = context.DrawerMode;
-            var draw =
-                (mode.HasFlag(DrawerModes.OpaqueOnly) && !this.Description.AlphaEnabled) ||
-                (mode.HasFlag(DrawerModes.TransparentOnly) && this.Description.AlphaEnabled);
+            if (!Visible)
+            {
+                return;
+            }
 
+            if (!this.visibleNodes.Any())
+            {
+                return;
+            }
+
+            bool draw = context.ValidateDraw(this.BlendMode);
             if (!draw)
             {
                 return;
             }
 
-            if (this.visibleNodes.Any())
+            foreach (var item in this.visibleNodes)
             {
-                var graphics = this.Game.Graphics;
-
-                graphics.SetBlendTransparent();
-
-                foreach (var item in this.visibleNodes)
-                {
-                    this.DrawNode(context, item);
-                }
+                this.DrawNode(context, item);
             }
         }
         /// <summary>

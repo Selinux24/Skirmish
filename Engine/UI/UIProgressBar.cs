@@ -141,7 +141,7 @@ namespace Engine.UI
             this.left.Top = 0;
             this.left.Update(context);
 
-            this.right.Width = (int)(RightScale * Width);
+            this.right.Width = Width - this.left.Width;
             this.right.Left = this.left.Width;
             this.right.Top = 0;
             this.right.Update(context);

@@ -48,10 +48,7 @@ namespace Engine
         public CubemapDescription()
             : base()
         {
-            this.CastShadow = false;
-            this.DeferredEnabled = true;
             this.DepthEnabled = false;
-            this.AlphaEnabled = false;
         }
     }
 }

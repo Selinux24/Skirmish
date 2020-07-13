@@ -38,7 +38,8 @@ namespace Engine
                 ContentPath = description.ContentPath,
                 Height = 100,
                 Width = 100,
-                Textures = new string[] { description.GlowTexture }
+                Textures = new string[] { description.GlowTexture },
+                BlendMode = description.BlendMode,
             });
 
             if (description.Flares != null && description.Flares.Length > 0)
@@ -54,7 +55,8 @@ namespace Engine
                         ContentPath = description.ContentPath,
                         Height = 100,
                         Width = 100,
-                        Textures = new string[] { flareDesc.Texture }
+                        Textures = new string[] { flareDesc.Texture },
+                        BlendMode = description.BlendMode,
                     };
 
                     this.flares[i] = new Flare()
@@ -75,9 +77,7 @@ namespace Engine
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Dispose of resources
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -101,10 +101,7 @@ namespace Engine
             }
         }
 
-        /// <summary>
-        /// Updates internal state
-        /// </summary>
-        /// <param name="context">Updating context</param>
+        /// <inheritdoc/>
         public override void Update(UpdateContext context)
         {
             // Don't draw any flares by default
@@ -184,59 +181,66 @@ namespace Engine
         /// <returns>Returns true if the flare is visible</returns>
         private bool IsFlareVisible(ISceneLightDirectional light, Vector3 eyePosition)
         {
-            if (this.Scene != null)
+            if (this.Scene == null)
             {
-                var frustum = this.Scene.Camera.Frustum;
-                float maxZ = this.Scene.Camera.FarPlaneDistance;
+                return false;
+            }
 
-                Vector3 lPositionUnit = eyePosition - light.Direction;
+            var frustum = this.Scene.Camera.Frustum;
+            float maxZ = this.Scene.Camera.FarPlaneDistance;
 
-                //Is the light into the vision cone?
-                if (frustum.Contains(lPositionUnit) != ContainmentType.Disjoint)
+            Vector3 lPositionUnit = eyePosition - light.Direction;
+
+            //Is the light into the vision cone?
+            if (frustum.Contains(lPositionUnit) != ContainmentType.Disjoint)
+            {
+                //Calculate the ray from light to position
+                Vector3 lightPosition = light.GetPosition(maxZ);
+                Ray ray = new Ray(lightPosition, -light.Direction);
+
+                if (!this.Scene.PickNearest(ray, RayPickingParams.Coarse, out _))
                 {
-                    //Calculate the ray from light to position
-                    Vector3 lightPosition = light.GetPosition(maxZ);
-                    Ray ray = new Ray(lightPosition, -light.Direction);
+                    return true;
+                }
 
-                    if (!this.Scene.PickNearest(ray, RayPickingParams.Coarse, out _))
-                    {
-                        return true;
-                    }
-
-                    if (this.Scene.PickNearest(ray, RayPickingParams.Perfect, out PickingResult<Triangle> result) &&
-                        Vector3.Distance(lightPosition, eyePosition) > result.Distance)
-                    {
-                        return false;
-                    }
+                if (this.Scene.PickNearest(ray, RayPickingParams.Perfect, out PickingResult<Triangle> result) &&
+                    Vector3.Distance(lightPosition, eyePosition) > result.Distance)
+                {
+                    return false;
                 }
             }
 
             return false;
         }
 
-        /// <summary>
-        /// Draws flare
-        /// </summary>
-        /// <param name="context">Drawing context</param>
+        /// <inheritdoc/>
         public override void Draw(DrawContext context)
         {
-            var mode = context.DrawerMode;
-
-            if (mode.HasFlag(DrawerModes.TransparentOnly) && this.drawFlares)
+            if (!Visible)
             {
-                // Draw the sprite using additive blending.
-                this.Game.Graphics.SetBlendAdditive();
+                return;
+            }
 
-                // Draw glow
-                this.glowSprite?.Draw(context);
+            if (!this.drawFlares)
+            {
+                return;
+            }
 
-                //Draw flares if any
-                if (this.flares?.Length > 0)
+            bool draw = context.ValidateDraw(this.BlendMode, true);
+            if (!draw)
+            {
+                return;
+            }
+
+            // Draw glow
+            this.glowSprite?.Draw(context);
+
+            //Draw flares if any
+            if (this.flares?.Length > 0)
+            {
+                for (int i = 0; i < this.flares.Length; i++)
                 {
-                    for (int i = 0; i < this.flares.Length; i++)
-                    {
-                        this.flares[i].FlareSprite.Draw(context);
-                    }
+                    this.flares[i].FlareSprite.Draw(context);
                 }
             }
         }

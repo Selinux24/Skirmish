@@ -55,7 +55,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="graphics">Graphics</param>
         /// <returns>Creates the alpha enabled blend state</returns>
-        public static EngineBlendState DefaultAlpha(Graphics graphics)
+        public static EngineBlendState AlphaBlend(Graphics graphics)
         {
             BlendStateDescription1 desc = new BlendStateDescription1
             {
@@ -80,6 +80,7 @@ namespace Engine.Common
         /// Creates a transparent enabled blend state
         /// </summary>
         /// <param name="graphics">Graphics</param>
+        /// <remarks>It's equal to AlphaBlend, but with AlphaToCoverageEnable enabled</remarks>
         /// <returns>Creates the transparent enabled blend state</returns>
         public static EngineBlendState Transparent(Graphics graphics)
         {
@@ -187,6 +188,84 @@ namespace Engine.Common
             desc.RenderTarget[0].DestinationBlend = BlendOption.InverseSourceAlpha;
             desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
             desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
+            desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
+
+            for (int i = 1; i < rtCount; i++)
+            {
+                desc.RenderTarget[i].IsBlendEnabled = true;
+                desc.RenderTarget[i].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+                desc.RenderTarget[i].BlendOperation = BlendOperation.Add;
+                desc.RenderTarget[i].SourceBlend = BlendOption.One;
+                desc.RenderTarget[i].DestinationBlend = BlendOption.Zero;
+                desc.RenderTarget[i].AlphaBlendOperation = BlendOperation.Add;
+                desc.RenderTarget[i].SourceAlphaBlend = BlendOption.One;
+                desc.RenderTarget[i].DestinationAlphaBlend = BlendOption.Zero;
+            }
+
+            return graphics.CreateBlendState(desc, Color.Transparent, -1);
+        }
+        /// <summary>
+        /// Creates a deferred composer alpha enabled blend state
+        /// </summary>
+        /// <param name="graphics">Graphics</param>
+        /// <param name="rtCount">Render target count</param>
+        /// <returns>Creates the deferred composer alpha enabled blend state</returns>
+        public static EngineBlendState DeferredComposerAlpha(Graphics graphics, int rtCount)
+        {
+            BlendStateDescription1 desc = new BlendStateDescription1
+            {
+                AlphaToCoverageEnable = false,
+                IndependentBlendEnable = true
+            };
+
+            //Additive blending only in first buffer
+            desc.RenderTarget[0].IsBlendEnabled = true;
+            desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+            desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
+            desc.RenderTarget[0].SourceBlend = BlendOption.SourceAlpha;
+            desc.RenderTarget[0].DestinationBlend = BlendOption.InverseSourceAlpha;
+            desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
+            desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
+            desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
+
+            for (int i = 1; i < rtCount; i++)
+            {
+                desc.RenderTarget[i].IsBlendEnabled = true;
+                desc.RenderTarget[i].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+                desc.RenderTarget[i].BlendOperation = BlendOperation.Add;
+                desc.RenderTarget[i].SourceBlend = BlendOption.One;
+                desc.RenderTarget[i].DestinationBlend = BlendOption.Zero;
+                desc.RenderTarget[i].AlphaBlendOperation = BlendOperation.Add;
+                desc.RenderTarget[i].SourceAlphaBlend = BlendOption.One;
+                desc.RenderTarget[i].DestinationAlphaBlend = BlendOption.Zero;
+            }
+
+            return graphics.CreateBlendState(desc, Color.Transparent, -1);
+        }
+        /// <summary>
+        /// Creates a deferred composer additive enabled blend state
+        /// </summary>
+        /// <param name="graphics">Graphics</param>
+        /// <param name="rtCount">Render target count</param>
+        /// <returns>Creates the deferred composer additive enabled blend state</returns>
+        public static EngineBlendState DeferredComposerAdditive(Graphics graphics, int rtCount)
+        {
+            BlendStateDescription1 desc = new BlendStateDescription1
+            {
+                AlphaToCoverageEnable = false,
+                IndependentBlendEnable = true
+            };
+
+            //Additive blending only in first buffer
+            desc.RenderTarget[0].IsBlendEnabled = true;
+            desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+
+            desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
+            desc.RenderTarget[0].SourceBlend = BlendOption.SourceAlpha;
+            desc.RenderTarget[0].DestinationBlend = BlendOption.One;
+
+            desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
+            desc.RenderTarget[0].SourceAlphaBlend = BlendOption.Zero;
             desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
 
             for (int i = 1; i < rtCount; i++)

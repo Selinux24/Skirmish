@@ -33,6 +33,8 @@ namespace SceneTest
         private UIProgressBar progressBar = null;
         private float progressValue = 0;
 
+        private Scenery scenery = null;
+
         private ModelInstanced floorAsphaltI = null;
 
         private Model buildingObelisk = null;
@@ -52,6 +54,9 @@ namespace SceneTest
 
         private Model container = null;
         private ModelInstanced containerI = null;
+
+        private Model tree = null;
+        private ModelInstanced treesI = null;
 
         private SkyPlane skyPlane = null;
 
@@ -118,7 +123,6 @@ namespace SceneTest
 
             this.spr = await this.AddComponentSprite(new SpriteDescription()
             {
-                AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
                 Height = this.runtime.Top + this.runtime.Height + 3,
                 Color = new Color4(0, 0, 0, 0.75f),
@@ -206,6 +210,8 @@ namespace SceneTest
 
             await this.LoadResourcesAsync(taskList, async () =>
             {
+                this.PlantTrees();
+
                 this.Environment.TimeOfDay.BeginAnimation(9, 00, 00, 0.1f);
 
                 this.Camera.Goto(-20 + xDelta, 10 + yDelta, -40f + zDelta);
@@ -256,7 +262,7 @@ namespace SceneTest
         }
         private async Task InitializeScenery()
         {
-            await this.AddComponentScenery(
+            scenery = await this.AddComponentScenery(
                 new GroundDescription()
                 {
                     Name = "Clif",
@@ -270,14 +276,14 @@ namespace SceneTest
         }
         private async Task InitializeTrees()
         {
-            var tree = await this.AddComponentModel(
+            tree = await this.AddComponentModel(
                 new ModelDescription()
                 {
                     Name = "Tree",
                     CastShadow = true,
                     SphericVolume = false,
                     UseAnisotropicFiltering = true,
-                    AlphaEnabled = true,
+                    BlendMode = BlendModes.DefaultTransparent,
                     Content = new ContentDescription()
                     {
                         ContentFolder = "SceneTest/Trees",
@@ -285,37 +291,22 @@ namespace SceneTest
                     }
                 });
 
-            tree.Manipulator.SetPosition(350, baseHeight, 350);
-            tree.Manipulator.SetScale(2);
-
-            var trees = await this.AddComponentModelInstanced(
-                new ModelInstancedDescription()
-                {
-                    Name = "TreeI",
-                    CastShadow = true,
-                    SphericVolume = false,
-                    UseAnisotropicFiltering = true,
-                    AlphaEnabled = true,
-                    Instances = 50,
-                    Content = new ContentDescription()
-                    {
-                        ContentFolder = "SceneTest/Trees",
-                        ModelContentFilename = "Tree.xml",
-                    }
-                });
-
-            float r = 0;
-            foreach (var t in trees.GetInstances())
+            var desc = new ModelInstancedDescription()
             {
-                float px = Helper.RandomGenerator.NextFloat(400, 600);
-                float pz = Helper.RandomGenerator.NextFloat(400, 600);
-                r += 0.01f;
-                float s = Helper.RandomGenerator.NextFloat(1.8f, 2.5f);
+                Name = "TreeI",
+                CastShadow = true,
+                SphericVolume = false,
+                UseAnisotropicFiltering = true,
+                BlendMode = BlendModes.DefaultTransparent,
+                Instances = 50,
+                Content = new ContentDescription()
+                {
+                    ContentFolder = "SceneTest/Trees",
+                    ModelContentFilename = "Tree.xml",
+                }
+            };
 
-                t.Manipulator.SetPosition(px, baseHeight, pz);
-                t.Manipulator.SetRotation(r, 0.001f, 0.001f);
-                t.Manipulator.SetScale(s);
-            }
+            treesI = await this.AddComponentModelInstanced(desc);
         }
         private async Task InitializeFloorAsphalt()
         {
@@ -349,7 +340,7 @@ namespace SceneTest
                 CastShadow = true,
                 DeferredEnabled = true,
                 DepthEnabled = true,
-                AlphaEnabled = false,
+                BlendMode = BlendModes.Opaque,
                 SphericVolume = false,
                 UseAnisotropicFiltering = true,
                 Content = new ContentDescription()
@@ -364,7 +355,7 @@ namespace SceneTest
                 CastShadow = true,
                 DeferredEnabled = true,
                 DepthEnabled = true,
-                AlphaEnabled = false,
+                BlendMode = BlendModes.Opaque,
                 SphericVolume = false,
                 UseAnisotropicFiltering = true,
                 Instances = 8,
@@ -840,8 +831,6 @@ namespace SceneTest
                 Name = "Marker Cubes",
                 Primitives = markers.ToArray(),
                 Color = new Color4(Color.Yellow.ToColor3(), 0.3333f),
-                DepthEnabled = false,
-                AlphaEnabled = true,
             };
             await this.AddComponentPrimitiveListDrawer<Triangle>(desc);
         }
@@ -849,6 +838,34 @@ namespace SceneTest
         {
             var desc = new PrimitiveListDrawerDescription<Line3D>() { DepthEnabled = true, Count = 20000 };
             this.lightsVolumeDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(desc);
+        }
+
+        private void PlantTrees()
+        {
+            Vector3 yDelta = Vector3.Down;
+
+            Ray topDownRay = new Ray(new Vector3(350, 1000, 350), Vector3.Down);
+
+            scenery.PickFirst(topDownRay, out var treePos);
+
+            tree.Manipulator.SetPosition(treePos.Position + yDelta);
+            tree.Manipulator.SetScale(2);
+
+            foreach (var t in treesI.GetInstances())
+            {
+                float px = Helper.RandomGenerator.NextFloat(400, 600);
+                float pz = Helper.RandomGenerator.NextFloat(400, 600);
+                float r = Helper.RandomGenerator.NextFloat(0, MathUtil.TwoPi);
+                float y = Helper.RandomGenerator.NextFloat(0, MathUtil.Pi / 16f);
+                float s = Helper.RandomGenerator.NextFloat(1.8f, 3.5f);
+
+                topDownRay = new Ray(new Vector3(px, 1000, pz), Vector3.Down);
+                scenery.PickFirst(topDownRay, out var treeIPos);
+
+                t.Manipulator.SetPosition(treeIPos.Position + yDelta);
+                t.Manipulator.SetRotation(r, y, y);
+                t.Manipulator.SetScale(s);
+            }
         }
 
         public override void OnReportProgress(float value)

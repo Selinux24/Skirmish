@@ -102,7 +102,6 @@ Space: Finds random over navmesh";
 
             var spDesc = new SpriteDescription()
             {
-                AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
                 Height = this.debug.Top + this.debug.Height + 3,
                 Color = new Color4(0, 0, 0, 0.75f),
@@ -176,14 +175,12 @@ Space: Finds random over navmesh";
             var graphDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
             {
                 Name = "DEBUG++ Graph",
-                AlphaEnabled = true,
                 Count = 50000,
             };
             this.graphDrawer = await this.AddComponentPrimitiveListDrawer<Triangle>(graphDrawerDesc);
 
             var volumesDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
             {
-                AlphaEnabled = true,
                 Count = 10000
             };
             this.volumesDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(volumesDrawerDesc);

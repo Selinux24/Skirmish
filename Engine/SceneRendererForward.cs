@@ -197,7 +197,7 @@ namespace Engine
                 {
                     Stopwatch stopwatch2 = new Stopwatch();
                     stopwatch2.Start();
-                    this.DrawOpaque(context, c);
+                    this.Draw(context, c);
                     stopwatch2.Stop();
                     dict.Add($"Opaque Draw {oDIndex++} {c.Name}", stopwatch2.Elapsed.TotalMilliseconds);
                 });
@@ -229,7 +229,7 @@ namespace Engine
                 {
                     Stopwatch stopwatch2 = new Stopwatch();
                     stopwatch2.Start();
-                    this.DrawTransparent(context, c);
+                    this.Draw(context, c);
                     stopwatch2.Stop();
                     dict.Add($"Transparent Draw {oTIndex++} {c.Name}", stopwatch2.Elapsed.TotalMilliseconds);
                 });

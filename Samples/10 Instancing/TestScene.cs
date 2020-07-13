@@ -63,7 +63,6 @@ namespace Instancing
 
             var spDesc = new SpriteDescription()
             {
-                AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
                 Height = this.runtimeText.Top + this.runtimeText.Height + 3,
                 Color = new Color4(0, 0, 0, 0.75f),
@@ -103,7 +102,6 @@ namespace Instancing
                 CastShadow = true,
                 DeferredEnabled = true,
                 DepthEnabled = true,
-                AlphaEnabled = false,
                 UseAnisotropicFiltering = true,
                 Instances = side * side,
                 Content = new ContentDescription()
@@ -140,7 +138,7 @@ namespace Instancing
                 Name = "Trees",
                 CastShadow = true,
                 Instances = instances,
-                AlphaEnabled = true,
+                BlendMode = BlendModes.DefaultTransparent,
                 UseAnisotropicFiltering = true,
                 Content = new ContentDescription()
                 {

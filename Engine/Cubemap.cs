@@ -34,6 +34,31 @@ namespace Engine
         /// Manipulator
         /// </summary>
         public Manipulator3D Manipulator { get; set; }
+        /// <summary>
+        /// Returns true if the buffers were ready
+        /// </summary>
+        public bool BuffersReady
+        {
+            get
+            {
+                if (this.vertexBuffer?.Ready != true)
+                {
+                    return false;
+                }
+
+                if (this.indexBuffer?.Ready != true)
+                {
+                    return false;
+                }
+
+                if (this.indexBuffer.Count <= 0)
+                {
+                    return false;
+                }
+
+                return true;
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -48,9 +73,7 @@ namespace Engine
             this.InitializeBuffers(description.Name, description.Geometry, description.ReverseFaces);
             this.InitializeTexture(description.ContentPath, description.Texture);
         }
-        /// <summary>
-        /// Resource releasing
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -61,55 +84,51 @@ namespace Engine
             }
         }
 
-        /// <summary>
-        /// Update
-        /// </summary>
-        /// <param name="context">Context</param>
+        /// <inheritdoc/>
         public override void Update(UpdateContext context)
         {
             this.Manipulator.Update(context.GameTime);
 
             this.local = this.Manipulator.LocalTransform;
         }
-        /// <summary>
-        /// Draw
-        /// </summary>
-        /// <param name="context">Context</param>
+        /// <inheritdoc/>
         public override void Draw(DrawContext context)
         {
-            var mode = context.DrawerMode;
-            var draw =
-                (mode.HasFlag(DrawerModes.OpaqueOnly) && !this.Description.AlphaEnabled) ||
-                (mode.HasFlag(DrawerModes.TransparentOnly) && this.Description.AlphaEnabled);
-
-            if (draw && this.indexBuffer.Count > 0)
+            if (!Visible)
             {
-                var effect = DrawerPool.EffectDefaultCubemap;
-                var technique = DrawerPool.EffectDefaultCubemap.ForwardCubemap;
+                return;
+            }
 
-                if (!mode.HasFlag(DrawerModes.ShadowMap))
-                {
-                    Counters.InstancesPerFrame++;
-                    Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
-                }
+            if (!BuffersReady)
+            {
+                return;
+            }
 
-                this.BufferManager.SetIndexBuffer(this.indexBuffer);
-                this.BufferManager.SetInputAssembler(technique, this.vertexBuffer, Topology.TriangleList);
+            bool draw = context.ValidateDraw(this.BlendMode);
+            if (!draw)
+            {
+                return;
+            }
 
-                effect.UpdatePerFrame(this.local, context.ViewProjection);
-                effect.UpdatePerObject(this.cubeMapTexture);
+            var effect = DrawerPool.EffectDefaultCubemap;
+            var technique = DrawerPool.EffectDefaultCubemap.ForwardCubemap;
 
-                var graphics = this.Game.Graphics;
+            this.BufferManager.SetIndexBuffer(this.indexBuffer);
+            this.BufferManager.SetInputAssembler(technique, this.vertexBuffer, Topology.TriangleList);
 
-                for (int p = 0; p < technique.PassCount; p++)
-                {
-                    graphics.EffectPassApply(technique, p, 0);
+            effect.UpdatePerFrame(this.local, context.ViewProjection);
+            effect.UpdatePerObject(this.cubeMapTexture);
 
-                    graphics.DrawIndexed(
-                        this.indexBuffer.Count,
-                        this.indexBuffer.BufferOffset,
-                        this.vertexBuffer.BufferOffset);
-                }
+            var graphics = this.Game.Graphics;
+
+            for (int p = 0; p < technique.PassCount; p++)
+            {
+                graphics.EffectPassApply(technique, p, 0);
+
+                graphics.DrawIndexed(
+                    this.indexBuffer.Count,
+                    this.indexBuffer.BufferOffset,
+                    this.vertexBuffer.BufferOffset);
             }
         }
 

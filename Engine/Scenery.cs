@@ -149,10 +149,10 @@ namespace Engine
             /// <summary>
             /// Draws the scenery patch
             /// </summary>
+            /// <param name="context">Context</param>
             /// <param name="sceneryEffect">Scenery effect</param>
-            /// <param name="techniqueFn">Function for technique</param>
             /// <param name="bufferManager">Buffer manager</param>
-            public void DrawScenery(IGeometryDrawer sceneryEffect, BufferManager bufferManager)
+            public void DrawScenery(DrawContext context, IGeometryDrawer sceneryEffect, BufferManager bufferManager)
             {
                 var graphics = this.Game.Graphics;
                 int count = 0;
@@ -165,6 +165,12 @@ namespace Engine
                     {
                         var mesh = meshDict[materialName];
                         var material = this.DrawingData.Materials[materialName];
+
+                        bool draw = context.ValidateDraw(BlendModes.Default, material.Material.IsTransparent);
+                        if (!draw)
+                        {
+                            continue;
+                        }
 
                         var technique = sceneryEffect.GetTechnique(mesh.VertextType, false);
 
@@ -339,9 +345,7 @@ namespace Engine
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Dispose of created resources
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -356,12 +360,7 @@ namespace Engine
             }
         }
 
-        /// <summary>
-        /// Performs culling test
-        /// </summary>
-        /// <param name="volume">Culling volume</param>
-        /// <param name="distance">If the object is inside the volume, returns the distance</param>
-        /// <returns>Returns true if the object is outside of the frustum</returns>
+        /// <inheritdoc/>
         public override bool Cull(ICullingVolume volume, out float distance)
         {
             distance = float.MaxValue;
@@ -394,57 +393,48 @@ namespace Engine
             return false;
         }
 
-        /// <summary>
-        /// Draw shadows
-        /// </summary>
-        /// <param name="context">Context</param>
+        /// <inheritdoc/>
         public override void DrawShadows(DrawContextShadows context)
         {
-            if (this.visibleNodes.Any())
+            if (!this.visibleNodes.Any())
             {
-                var graphics = this.Game.Graphics;
+                return;
+            }
 
-                var sceneryEffect = context.ShadowMap.GetEffect();
-                if (sceneryEffect != null)
-                {
-                    sceneryEffect.UpdatePerFrame(Matrix.Identity, context);
+            var sceneryEffect = context.ShadowMap.GetEffect();
+            if (sceneryEffect == null)
+            {
+                return;
+            }
 
-                    graphics.SetBlendDefault();
+            sceneryEffect.UpdatePerFrame(Matrix.Identity, context);
 
-                    foreach (var node in visibleNodes)
-                    {
-                        this.patchDictionary[node.Id].Current = node;
-                        this.patchDictionary[node.Id].DrawSceneryShadows(sceneryEffect, this.BufferManager);
-                    }
-                }
+            foreach (var node in visibleNodes)
+            {
+                this.patchDictionary[node.Id].Current = node;
+                this.patchDictionary[node.Id].DrawSceneryShadows(sceneryEffect, this.BufferManager);
             }
         }
-        /// <summary>
-        /// Objects drawing
-        /// </summary>
-        /// <param name="context">Context</param>
+        /// <inheritdoc/>
         public override void Draw(DrawContext context)
         {
-            var mode = context.DrawerMode;
-            var graphics = this.Game.Graphics;
-
-            if (mode.HasFlag(DrawerModes.OpaqueOnly) && visibleNodes.Any())
+            if (!visibleNodes.Any())
             {
-                var sceneryEffect = GetEffect(mode);
-                if (sceneryEffect == null)
-                {
-                    return;
-                }
+                return;
+            }
 
-                sceneryEffect.UpdatePerFrameFull(Matrix.Identity, context);
+            var sceneryEffect = GetEffect(context.DrawerMode);
+            if (sceneryEffect == null)
+            {
+                return;
+            }
 
-                graphics.SetBlendDefault();
+            sceneryEffect.UpdatePerFrameFull(Matrix.Identity, context);
 
-                foreach (var node in visibleNodes)
-                {
-                    this.patchDictionary[node.Id].Current = node;
-                    this.patchDictionary[node.Id].DrawScenery(sceneryEffect, this.BufferManager);
-                }
+            foreach (var node in visibleNodes)
+            {
+                this.patchDictionary[node.Id].Current = node;
+                this.patchDictionary[node.Id].DrawScenery(context, sceneryEffect, this.BufferManager);
             }
         }
         /// <summary>

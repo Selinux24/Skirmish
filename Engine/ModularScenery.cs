@@ -337,7 +337,7 @@ namespace Engine
                         CastShadow = this.Description.CastShadow,
                         UseAnisotropicFiltering = this.Description.UseAnisotropic,
                         Instances = count,
-                        AlphaEnabled = this.Description.AlphaEnabled,
+                        BlendMode = this.Description.BlendMode,
                         Content = new ContentDescription()
                         {
                             ModelContent = modelContent,

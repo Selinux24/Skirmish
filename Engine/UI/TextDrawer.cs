@@ -410,7 +410,7 @@ namespace Engine.UI
                 return;
             }
 
-            if (!BuffersReady)
+            if (string.IsNullOrWhiteSpace(this.text))
             {
                 return;
             }
@@ -420,36 +420,34 @@ namespace Engine.UI
                 return;
             }
 
-            var mode = context.DrawerMode;
-
-            if (mode.HasFlag(DrawerModes.TransparentOnly) && !string.IsNullOrWhiteSpace(this.text))
+            if (!BuffersReady)
             {
-                if (this.updateBuffers)
-                {
-                    this.BufferManager.WriteVertexBuffer(this.vertexBuffer, this.vertices);
-                    this.BufferManager.WriteIndexBuffer(this.indexBuffer, this.indices);
-
-                    this.indexDrawCount = this.indices.Length;
-
-                    this.updateBuffers = false;
-                }
-
-                this.BufferManager.SetIndexBuffer(this.indexBuffer);
-
-                var effect = DrawerPool.EffectDefaultFont;
-                var technique = effect.FontDrawer;
-
-                this.BufferManager.SetInputAssembler(technique, this.vertexBuffer, Topology.TriangleList);
-
-                if (this.ShadowColor != Color.Transparent)
-                {
-                    //Draw shadow
-                    this.DrawText(effect, technique, this.ShadowManipulator.LocalTransform, this.ShadowColor, false);
-                }
-
-                //Draw text
-                this.DrawText(effect, technique, this.Manipulator.LocalTransform, this.TextColor, this.UseTextureColor);
+                return;
             }
+
+            bool draw = context.ValidateDraw(this.BlendMode, true);
+            if (!draw)
+            {
+                return;
+            }
+
+            this.WriteBuffers();
+
+            this.BufferManager.SetIndexBuffer(this.indexBuffer);
+
+            var effect = DrawerPool.EffectDefaultFont;
+            var technique = effect.FontDrawer;
+
+            this.BufferManager.SetInputAssembler(technique, this.vertexBuffer, Topology.TriangleList);
+
+            if (this.ShadowColor != Color.Transparent)
+            {
+                //Draw shadow
+                this.DrawText(effect, technique, this.ShadowManipulator.LocalTransform, this.ShadowColor, false);
+            }
+
+            //Draw text
+            this.DrawText(effect, technique, this.Manipulator.LocalTransform, this.TextColor, this.UseTextureColor);
         }
         /// <summary>
         /// Draw text
@@ -477,6 +475,23 @@ namespace Engine.UI
 
                 graphics.DrawIndexed(this.indexDrawCount, this.indexBuffer.BufferOffset, this.vertexBuffer.BufferOffset);
             }
+        }
+        /// <summary>
+        /// Writes text data into buffers
+        /// </summary>
+        private void WriteBuffers()
+        {
+            if (!this.updateBuffers)
+            {
+                return;
+            }
+
+            this.BufferManager.WriteVertexBuffer(this.vertexBuffer, this.vertices);
+            this.BufferManager.WriteIndexBuffer(this.indexBuffer, this.indices);
+
+            this.indexDrawCount = this.indices.Length;
+
+            this.updateBuffers = false;
         }
 
         /// <summary>

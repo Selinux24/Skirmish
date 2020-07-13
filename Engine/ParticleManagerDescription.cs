@@ -13,7 +13,7 @@ namespace Engine
             : base()
         {
             this.DeferredEnabled = false;
-            this.AlphaEnabled = true;
+            this.BlendMode = BlendModes.Default;
         }
     }
 }
