@@ -145,6 +145,7 @@
     <Compile Include="SceneLights.cs" />
     <Compile Include="SceneMaterials.cs" />
     <Compile Include="SceneStart.cs" />
+    <Compile Include="SceneTanksGame.cs" />
     <Compile Include="SceneWater.cs" />
     <Compile Include="SceneStencilPass.cs" />
     <Compile Include="SceneTest.cs" />
@@ -430,6 +431,9 @@
     </Content>
     <Content Include="SceneTest\Trees\tree_3.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTanksGame\LeagueSpartan-Bold.otf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <ItemGroup>

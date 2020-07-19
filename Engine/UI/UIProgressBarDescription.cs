@@ -8,6 +8,27 @@ namespace Engine.UI
     public class UIProgressBarDescription : UIControlDescription
     {
         /// <summary>
+        /// Gets the screen centered progress bar description
+        /// </summary>
+        /// <param name="fontFileName">Font file name</param>
+        /// <param name="fontSize">Font size</param>
+        /// <param name="fontLineAdjust">Font line adjust</param>
+        public static UIProgressBarDescription ScreenCentered(string fontFileName, int fontSize, bool fontLineAdjust = false)
+        {
+            return new UIProgressBarDescription()
+            {
+                CenterHorizontally = CenterTargets.Screen,
+                CenterVertically = CenterTargets.Screen,
+                Font = new TextDrawerDescription
+                {
+                    FontFileName = fontFileName,
+                    FontSize = fontSize,
+                    LineAdjust = fontLineAdjust,
+                },
+            };
+        }
+
+        /// <summary>
         /// Base color
         /// </summary>
         public Color BaseColor { get; set; } = new Color(0f, 0f, 0f, 0.5f);

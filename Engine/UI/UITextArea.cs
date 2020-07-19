@@ -13,7 +13,7 @@ namespace Engine.UI
         private readonly TextDrawer textDrawer = null;
 
         /// <summary>
-        /// Gets or sets the button text
+        /// Gets or sets the control text
         /// </summary>
         public string Text
         {
@@ -34,6 +34,40 @@ namespace Engine.UI
                     if (this.Height <= 0) this.Height = size.Y;
 
                     this.textDrawer.Text = value;
+                }
+            }
+        }
+        /// <summary>
+        /// Gets or sets the text color
+        /// </summary>
+        public Color4 TextColor
+        {
+            get
+            {
+                return textDrawer?.TextColor ?? new Color4(0, 0, 0, 0);
+            }
+            set
+            {
+                if (textDrawer != null)
+                {
+                    textDrawer.TextColor = value;
+                }
+            }
+        }
+        /// <summary>
+        /// Gets or sets the shadow color
+        /// </summary>
+        public Color4 TextShadowColor
+        {
+            get
+            {
+                return textDrawer?.ShadowColor ?? new Color4(0, 0, 0, 0);
+            }
+            set
+            {
+                if (textDrawer != null)
+                {
+                    textDrawer.ShadowColor = value;
                 }
             }
         }

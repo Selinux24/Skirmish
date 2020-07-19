@@ -162,6 +162,27 @@ namespace Engine.Tween
 
             FloatTweenManager.AddAlphaTween(control, ftAlpha);
         }
+        /// <summary>
+        /// Bouncing the alpha of a control
+        /// </summary>
+        /// <param name="control">Control</param>
+        /// <param name="from">Start value</param>
+        /// <param name="to">End value</param>
+        /// <param name="duration">Duration in milliseconds</param>
+        /// <param name="fnc">Scale function</param>
+        public static void TweenAlphaBounce(this UIControl control, float from, float to, long duration, ScaleFunc fnc)
+        {
+            if (control == null)
+            {
+                return;
+            }
+
+            FloatTween ftAlpha = new FloatTween();
+
+            ftAlpha.Start(from, to, duration, fnc);
+
+            FloatTweenManager.AddAlphaBounce(control, ftAlpha);
+        }
 
         /// <summary>
         /// Changes the color of a control

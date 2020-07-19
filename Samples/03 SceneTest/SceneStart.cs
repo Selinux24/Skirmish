@@ -20,6 +20,7 @@ namespace SceneTest
         private UIButton sceneLightsButton = null;
         private UIButton sceneCascadedShadowsButton = null;
         private UIButton sceneTestButton = null;
+        private UIButton sceneTanksGameButton = null;
         private UIButton exitButton = null;
 
         private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.CornflowerBlue, 1.5f);
@@ -48,6 +49,7 @@ namespace SceneTest
                 this.sceneLightsButton.Text = "Lights";
                 this.sceneCascadedShadowsButton.Text = "Cascaded";
                 this.sceneTestButton.Text = "Test";
+                this.sceneTanksGameButton.Text = "Tanks Game";
                 this.exitButton.Text = "Exit";
 
                 var sceneButtons = new[]
@@ -58,6 +60,7 @@ namespace SceneTest
                     this.sceneLightsButton,
                     this.sceneCascadedShadowsButton,
                     this.sceneTestButton,
+                    this.sceneTanksGameButton,
                 };
 
                 int numButtons = sceneButtons.Length + 1;
@@ -138,8 +141,8 @@ namespace SceneTest
             {
                 Name = "Scene buttons",
 
-                Width = 185,
-                Height = 40,
+                Width = 150,
+                Height = 55,
 
                 TwoStateButton = true,
 
@@ -165,6 +168,7 @@ namespace SceneTest
             this.sceneLightsButton = await this.AddComponentUIButton(startButtonDesc, layerHUD);
             this.sceneCascadedShadowsButton = await this.AddComponentUIButton(startButtonDesc, layerHUD);
             this.sceneTestButton = await this.AddComponentUIButton(startButtonDesc, layerHUD);
+            this.sceneTanksGameButton = await this.AddComponentUIButton(startButtonDesc, layerHUD);
 
             #endregion
 
@@ -174,8 +178,8 @@ namespace SceneTest
             {
                 Name = "Exit button",
 
-                Width = 185,
-                Height = 40,
+                Width = 150,
+                Height = 55,
 
                 TwoStateButton = true,
 
@@ -244,6 +248,10 @@ namespace SceneTest
             else if (sender == this.sceneTestButton)
             {
                 this.Game.SetScene<SceneTest>();
+            }
+            else if (sender == this.sceneTanksGameButton)
+            {
+                this.Game.SetScene<SceneTanksGame>();
             }
         }
         private void SceneButtonMouseEnter(object sender, EventArgs e)

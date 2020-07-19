@@ -7,6 +7,25 @@ namespace Engine.UI
     public class UITextAreaDescription : UIControlDescription
     {
         /// <summary>
+        /// Gets the default text area description from a font file
+        /// </summary>
+        /// <param name="fileName">File name</param>
+        /// <param name="size">Size</param>
+        /// <param name="lineAdjust">Line adjust</param>
+        public static UITextAreaDescription FromFile(string fileName, int size, bool lineAdjust = false)
+        {
+            return new UITextAreaDescription()
+            {
+                Font = new TextDrawerDescription
+                {
+                    FontFileName = fileName,
+                    FontSize = size,
+                    LineAdjust = false,
+                },
+            };
+        }
+
+        /// <summary>
         /// Left margin
         /// </summary>
         public float MarginLeft { get; set; }

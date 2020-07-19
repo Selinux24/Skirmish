@@ -3,6 +3,7 @@
 namespace Engine.UI
 {
     using Engine.Common;
+    using SharpDX;
 
     /// <summary>
     /// Sprite progress bar
@@ -67,6 +68,34 @@ namespace Engine.UI
                 {
                     this.textDrawer.Alpha = value;
                 }
+            }
+        }
+        /// <summary>
+        /// Gets or sets the progress color
+        /// </summary>
+        public Color4 ProgressColor
+        {
+            get
+            {
+                return this.left.Color;
+            }
+            set
+            {
+                this.left.Color = value;
+            }
+        }
+        /// <summary>
+        /// Gets or sets the back color
+        /// </summary>
+        public Color4 BackgroundColor
+        {
+            get
+            {
+                return this.right.Color;
+            }
+            set
+            {
+                this.right.Color = value;
             }
         }
 
