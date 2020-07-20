@@ -101,34 +101,6 @@ namespace Engine.UI
                 this.textDrawer.Alpha = value;
             }
         }
-        /// <inheritdoc/>
-        public override CenterTargets CenterHorizontally
-        {
-            get
-            {
-                return base.CenterHorizontally;
-            }
-            set
-            {
-                base.CenterHorizontally = value;
-
-                this.textDrawer.CenterHorizontally((TextCenteringTargets)value);
-            }
-        }
-        /// <inheritdoc/>
-        public override CenterTargets CenterVertically
-        {
-            get
-            {
-                return base.CenterVertically;
-            }
-            set
-            {
-                base.CenterVertically = value;
-
-                this.textDrawer.CenterVertically((TextCenteringTargets)value);
-            }
-        }
 
         /// <summary>
         /// Constructor
@@ -236,6 +208,26 @@ namespace Engine.UI
         {
             MarginTop = MarginBottom = margin;
         }
+
+        /// <summary>
+        /// Justifies the text based on the control's rectangle
+        /// </summary>
+        /// <param name="align">Text align</param>
+        public void JustifyText(TextAlign align)
+        {
+            switch (align)
+            {
+                case TextAlign.Left:
+                    this.textDrawer.CenterHorizontally(TextCenteringTargets.None);
+                    break;
+                case TextAlign.Center:
+                    this.textDrawer.CenterHorizontally(TextCenteringTargets.Parent);
+                    break;
+                case TextAlign.Right:
+                    this.textDrawer.CenterHorizontally(TextCenteringTargets.None);
+                    break;
+            }
+        }
     }
 
     /// <summary>
@@ -263,5 +255,13 @@ namespace Engine.UI
 
             return component;
         }
+    }
+
+
+    public enum TextAlign
+    {
+        Left,
+        Center,
+        Right,
     }
 }

@@ -156,6 +156,34 @@ namespace Engine.Tween
             });
         }
         /// <summary>
+        /// Adds a bouncing rotation task to the internal task list
+        /// </summary>
+        /// <param name="control">Control</param>
+        /// <param name="ftRotate">Rotation tween</param>
+        public static void AddRotateBounce(UIControl control, FloatTween ftRotate)
+        {
+            control.Rotation = ftRotate.StartValue;
+
+            var list = tasks.GetOrAdd(control, new List<Func<float, bool>>());
+            list.Add((d) =>
+            {
+                ftRotate.Update(d);
+
+                control.Rotation = ftRotate.CurrentValue;
+                control.Visible = control.Scale != 0;
+
+                if (ftRotate.CurrentValue == ftRotate.EndValue)
+                {
+                    var newStart = ftRotate.EndValue;
+                    var newEnd = ftRotate.StartValue;
+
+                    ftRotate.Restart(newStart, newEnd);
+                }
+
+                return false;
+            });
+        }
+        /// <summary>
         /// Adds a color tweening task to the internal task list
         /// </summary>
         /// <param name="control">Control</param>

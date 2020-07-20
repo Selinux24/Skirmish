@@ -1,9 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using SharpDX;
+using System.Threading.Tasks;
 
 namespace Engine.UI
 {
     using Engine.Common;
-    using SharpDX;
 
     /// <summary>
     /// Sprite progress bar
@@ -11,13 +11,13 @@ namespace Engine.UI
     public class UIProgressBar : UIControl
     {
         /// <summary>
-        /// Left sprite
+        /// Progress sprite
         /// </summary>
-        private readonly Sprite left = null;
+        private readonly Sprite spriteProgress = null;
         /// <summary>
-        /// Right sprite
+        /// Base sprite
         /// </summary>
-        private readonly Sprite right = null;
+        private readonly Sprite spriteBase = null;
         /// <summary>
         /// Button text drawer
         /// </summary>
@@ -77,25 +77,59 @@ namespace Engine.UI
         {
             get
             {
-                return this.left.Color;
+                return this.spriteProgress.Color;
             }
             set
             {
-                this.left.Color = value;
+                this.spriteProgress.Color = value;
             }
         }
         /// <summary>
         /// Gets or sets the back color
         /// </summary>
-        public Color4 BackgroundColor
+        public Color4 BaseColor
         {
             get
             {
-                return this.right.Color;
+                return this.spriteBase.Color;
             }
             set
             {
-                this.right.Color = value;
+                this.spriteBase.Color = value;
+            }
+        }
+        /// <summary>
+        /// Gets or sets the text color
+        /// </summary>
+        public Color4 TextColor
+        {
+            get
+            {
+                return this.textDrawer?.TextColor ?? new Color4(0f, 0f, 0f, 0f);
+            }
+            set
+            {
+                if (textDrawer != null)
+                {
+                    this.textDrawer.TextColor = value;
+                }
+            }
+        }
+        /// <summary>
+        /// Gets or sets the text shadow color
+        /// </summary>
+        public Color4 ShadowColor
+        {
+            get
+            {
+                return this.textDrawer?.ShadowColor ?? new Color4(0f, 0f, 0f, 0f);
+            }
+            set
+            {
+                if (textDrawer != null)
+                {
+                    this.textDrawer.ShadowColor = value;
+                }
             }
         }
 
@@ -110,28 +144,31 @@ namespace Engine.UI
         {
             this.ProgressValue = 0;
 
-            this.left = new Sprite(
+            this.spriteBase = new Sprite(
                 scene,
                 new SpriteDescription()
                 {
-                    Color = description.ProgressColor,
-                    Width = description.Width,
-                    Height = description.Height,
-                    EventsEnabled = false,
-                });
-
-            this.right = new Sprite(
-                scene,
-                new SpriteDescription()
-                {
+                    Name = $"{description.Name}.SpriteBase",
                     Color = description.BaseColor,
                     Width = description.Width,
                     Height = description.Height,
                     EventsEnabled = false,
                 });
 
-            this.AddChild(left, false);
-            this.AddChild(right, false);
+            this.AddChild(spriteBase, false);
+
+            this.spriteProgress = new Sprite(
+                scene,
+                new SpriteDescription()
+                {
+                    Name = $"{description.Name}.SpriteProgress",
+                    Color = description.ProgressColor,
+                    Width = description.Width,
+                    Height = description.Height,
+                    EventsEnabled = false,
+                });
+
+            this.AddChild(spriteProgress, false);
 
             if (description.Font != null)
             {
@@ -165,21 +202,25 @@ namespace Engine.UI
                 return;
             }
 
-            this.left.Width = (int)(LeftScale * Width);
-            this.left.Left = 0;
-            this.left.Top = 0;
-            this.left.Update(context);
+            int width = (int)(LeftScale * Width);
 
-            this.right.Width = Width - this.left.Width;
-            this.right.Left = this.left.Width;
-            this.right.Top = 0;
-            this.right.Update(context);
+            this.spriteProgress.Width = width;
+            this.spriteProgress.Height = Height;
+            this.spriteProgress.Left = 0;
+            this.spriteProgress.Top = 0;
+
+            this.spriteBase.Width = Width - width;
+            this.spriteBase.Height = Height;
+            this.spriteBase.Left = width;
+            this.spriteBase.Top = 0;
 
             if (!string.IsNullOrWhiteSpace(this.Text))
             {
                 this.textDrawer?.CenterParent();
                 this.textDrawer?.Update(context);
             }
+
+            base.Update(context);
         }
 
         /// <inheritdoc/>
@@ -190,14 +231,14 @@ namespace Engine.UI
                 return;
             }
 
-            if (this.LeftScale > 0f)
-            {
-                this.left.Draw(context);
-            }
-
             if (this.RightScale > 0f)
             {
-                this.right.Draw(context);
+                this.spriteBase.Draw(context);
+            }
+
+            if (this.LeftScale > 0f)
+            {
+                this.spriteProgress.Draw(context);
             }
 
             if (!string.IsNullOrWhiteSpace(this.Text))

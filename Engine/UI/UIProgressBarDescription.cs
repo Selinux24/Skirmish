@@ -27,6 +27,19 @@ namespace Engine.UI
                 },
             };
         }
+        /// <summary>
+        /// Gets the screen centered progress bar description
+        /// </summary>
+        /// <param name="font">Font description</param>
+        public static UIProgressBarDescription ScreenCentered(TextDrawerDescription font)
+        {
+            return new UIProgressBarDescription()
+            {
+                CenterHorizontally = CenterTargets.Screen,
+                CenterVertically = CenterTargets.Screen,
+                Font = font,
+            };
+        }
 
         /// <summary>
         /// Base color
