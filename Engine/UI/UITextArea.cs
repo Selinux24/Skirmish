@@ -257,11 +257,22 @@ namespace Engine.UI
         }
     }
 
-
+    /// <summary>
+    /// Text align
+    /// </summary>
     public enum TextAlign
     {
+        /// <summary>
+        /// Align left
+        /// </summary>
         Left,
+        /// <summary>
+        /// Align center
+        /// </summary>
         Center,
+        /// <summary>
+        /// Align right
+        /// </summary>
         Right,
     }
 }

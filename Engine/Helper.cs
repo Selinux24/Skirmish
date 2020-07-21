@@ -671,7 +671,7 @@ namespace Engine
         /// <returns>Returns angle value</returns>
         public static float AngleSigned(Vector2 one, Vector2 two)
         {
-            return (float)Math.Atan2(Cross(one, two), Vector2.Dot(one, two)) * MathUtil.Pi;
+            return (float)Math.Atan2(Cross(one, two), Vector2.Dot(one, two));
         }
         /// <summary>
         /// Gets yaw and pitch values from vector

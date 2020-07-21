@@ -1,4 +1,5 @@
-﻿
+﻿using SharpDX;
+
 namespace Engine.UI
 {
     /// <summary>
@@ -6,6 +7,24 @@ namespace Engine.UI
     /// </summary>
     public class UIPanelDescription : UIControlDescription
     {
+        /// <summary>
+        /// Gets the default panel description
+        /// </summary>
+        public static UIPanelDescription Default
+        {
+            get
+            {
+                return new UIPanelDescription()
+                {
+                    Background = new SpriteDescription
+                    {
+                        Color = Color4.Black * 0.3333f,
+                        BlendMode = BlendModes.Alpha,
+                    },
+                };
+            }
+        }
+
         /// <summary>
         /// Gets a screen panel description
         /// </summary>

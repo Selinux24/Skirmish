@@ -8,6 +8,29 @@ namespace Engine.UI
     public class UIProgressBarDescription : UIControlDescription
     {
         /// <summary>
+        /// Gets the default progress bar description
+        /// </summary>
+        public static UIProgressBarDescription Default
+        {
+            get
+            {
+                return new UIProgressBarDescription();
+            }
+        }
+
+        public static UIProgressBarDescription WithText(string fontFileName, int fontSize, bool fontLineAdjust = false)
+        {
+            return new UIProgressBarDescription()
+            {
+                Font = new TextDrawerDescription
+                {
+                    FontFileName = fontFileName,
+                    FontSize = fontSize,
+                    LineAdjust = fontLineAdjust,
+                },
+            };
+        }
+        /// <summary>
         /// Gets the screen centered progress bar description
         /// </summary>
         /// <param name="fontFileName">Font file name</param>
