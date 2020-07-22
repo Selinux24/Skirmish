@@ -270,9 +270,12 @@ namespace Engine
 
             if (!string.IsNullOrEmpty(description.Content.ModelContentFilename))
             {
-                var contentDesc = Helper.DeserializeFromFile<ModelContentDescription>(Path.Combine(description.Content.ContentFolder, description.Content.ModelContentFilename));
+                string fileName = Path.GetFileName(description.Content.ModelContentFilename);
+                string directory = Path.Combine(description.Content.ContentFolder ?? "", Path.GetDirectoryName(description.Content.ModelContentFilename));
+
+                var contentDesc = Helper.DeserializeFromFile<ModelContentDescription>(Path.Combine(directory, fileName));
                 var loader = GameResourceManager.GetLoaderForFile(contentDesc.ModelFileName);
-                var t = loader.Load(description.Content.ContentFolder, contentDesc);
+                var t = loader.Load(directory, contentDesc);
                 content = t.First();
             }
             else if (description.Content.ModelContentDescription != null)

@@ -476,23 +476,22 @@ namespace Engine
         /// Look at target
         /// </summary>
         /// <param name="target">Target</param>
-        /// <param name="yAxisOnly">Rotate Y axis only</param>
+        /// <param name="axis">Relative rotation axis</param>
         /// <param name="interpolationAmount">Interpolation amount for linear interpolation</param>
         /// <param name="updateState">Update internal state</param>
-        public void LookAt(Vector3 target, bool yAxisOnly = true, float interpolationAmount = 0, bool updateState = false)
+        public void LookAt(Vector3 target, Axis axis = Axis.Y, float interpolationAmount = 0, bool updateState = false)
         {
-            LookAt(target, Vector3.Up, yAxisOnly, interpolationAmount, updateState);
+            LookAt(target, Vector3.Up, axis, interpolationAmount, updateState);
         }
-
         /// <summary>
         /// Look at target
         /// </summary>
         /// <param name="target">Target</param>
         /// <param name="up">Up vector</param>
-        /// <param name="yAxisOnly">Rotate Y axis only</param>
+        /// <param name="axis">Relative rotation axis</param>
         /// <param name="interpolationAmount">Interpolation amount for linear interpolation</param>
         /// <param name="updateState">Update internal state</param>
-        public void LookAt(Vector3 target, Vector3 up, bool yAxisOnly = true, float interpolationAmount = 0, bool updateState = false)
+        public void LookAt(Vector3 target, Vector3 up, Axis axis = Axis.Y, float interpolationAmount = 0, bool updateState = false)
         {
             if (this.Parent != null)
             {
@@ -504,7 +503,7 @@ namespace Engine
 
             if (!Vector3.NearEqual(this.position, target, new Vector3(MathUtil.ZeroTolerance)))
             {
-                var newRotation = Helper.LookAt(this.position, target, up, yAxisOnly);
+                var newRotation = Helper.LookAt(this.position, target, up, axis);
 
                 if (interpolationAmount > 0)
                 {
@@ -518,22 +517,22 @@ namespace Engine
         /// Rotate to target
         /// </summary>
         /// <param name="target">Target</param>
-        /// <param name="yAxisOnly">Rotate Y axis only</param>
+        /// <param name="axis">Relative rotation axis</param>
         /// <param name="interpolationAmount">Interpolation amount for linear interpolation</param>
         /// <param name="updateState">Update internal state</param>
-        public void RotateTo(Vector3 target, bool yAxisOnly = true, float interpolationAmount = 0, bool updateState = false)
+        public void RotateTo(Vector3 target, Axis axis = Axis.Y, float interpolationAmount = 0, bool updateState = false)
         {
-            RotateTo(target, Vector3.Up, yAxisOnly, interpolationAmount, updateState);
+            RotateTo(target, Vector3.Up, axis, interpolationAmount, updateState);
         }
         /// <summary>
         /// Rotate to target
         /// </summary>
         /// <param name="target">Target</param>
         /// <param name="up">Up vector</param>
-        /// <param name="yAxisOnly">Rotate Y axis only</param>
+        /// <param name="axis">Relative rotation axis</param>
         /// <param name="interpolationAmount">Interpolation amount for linear interpolation</param>
         /// <param name="updateState">Update internal state</param>
-        public void RotateTo(Vector3 target, Vector3 up, bool yAxisOnly = true, float interpolationAmount = 0, bool updateState = false)
+        public void RotateTo(Vector3 target, Vector3 up, Axis axis = Axis.Y, float interpolationAmount = 0, bool updateState = false)
         {
             if (this.Parent != null)
             {
@@ -545,9 +544,12 @@ namespace Engine
 
             if (!Vector3.NearEqual(this.position, target, new Vector3(MathUtil.ZeroTolerance)))
             {
-                var newRotation = Helper.LookAt(this.position, target, up, yAxisOnly);
+                var newRotation = Helper.LookAt(this.position, target, up, axis);
 
-                newRotation = Helper.RotateTowards(this.rotation, newRotation, interpolationAmount);
+                if (interpolationAmount > 0)
+                {
+                    newRotation = Helper.RotateTowards(this.rotation, newRotation, interpolationAmount);
+                }
 
                 this.SetRotation(newRotation, updateState);
             }
@@ -556,19 +558,30 @@ namespace Engine
         /// Set model aligned to normal
         /// </summary>
         /// <param name="normal">Normal</param>
-        public void SetNormal(Vector3 normal)
+        /// <param name="interpolationAmount">Interpolation amount for linear interpolation</param>
+        /// <param name="updateState">Update internal state</param>
+        public void SetNormal(Vector3 normal, float interpolationAmount = 0, bool updateState = false)
         {
-            float angle = Helper.Angle(Vector3.Up, normal);
+            Quaternion newRotation;
+
+            float angle = Helper.Angle(this.Up, normal);
             if (angle != 0)
             {
-                Vector3 axis = Vector3.Cross(Vector3.Up, normal);
+                Vector3 axis = Vector3.Cross(this.Up, normal);
 
-                this.SetRotation(Quaternion.RotationAxis(axis, angle) * this.rotation);
+                newRotation = Quaternion.RotationAxis(axis, angle) * this.rotation;
             }
             else
             {
-                this.SetRotation(Quaternion.RotationAxis(Vector3.Left, 0f) * this.rotation);
+                newRotation = Quaternion.RotationAxis(Vector3.Left, 0f) * this.rotation;
             }
+
+            if (interpolationAmount > 0)
+            {
+                newRotation = Quaternion.Lerp(this.rotation, newRotation, interpolationAmount);
+            }
+
+            this.SetRotation(newRotation, updateState);
         }
 
         /// <summary>

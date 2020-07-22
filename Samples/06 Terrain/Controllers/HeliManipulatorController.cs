@@ -11,7 +11,7 @@ namespace Terrain.Controllers
         /// Previous speed
         /// </summary>
         private float prevSpeed = 0;
-      
+
         /// <summary>
         /// Current acceleration
         /// </summary>
@@ -62,7 +62,7 @@ namespace Terrain.Controllers
 
             if (lookPos != pos)
             {
-                manipulator.LookAt(lookPos, false, 0.1f, true);
+                manipulator.LookAt(lookPos, Axis.None, 0.1f, true);
             }
         }
     }

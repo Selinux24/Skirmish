@@ -345,7 +345,7 @@ namespace SceneTest
             var sDir1 = -Vector3.Normalize(new Vector3(sPos1.X, sPos1.Y, sPos1.Z));
             this.lightEmitters[1].Manipulator.SetPosition(sPos1);
             this.lanterns[0].Manipulator.SetPosition(sPos1);
-            this.lanterns[0].Manipulator.LookAt(sPos1 + sDir1, false);
+            this.lanterns[0].Manipulator.LookAt(sPos1 + sDir1, Axis.None);
             this.Lights.SpotLights[0].Position = sPos1;
             this.Lights.SpotLights[0].Direction = sDir1;
 
@@ -357,7 +357,7 @@ namespace SceneTest
             var sDir2 = -Vector3.Normalize(new Vector3(sPos2.X, sPos2.Y, sPos2.Z));
             this.lightEmitters[2].Manipulator.SetPosition(sPos2);
             this.lanterns[1].Manipulator.SetPosition(sPos2);
-            this.lanterns[1].Manipulator.LookAt(sPos2 + sDir2, false);
+            this.lanterns[1].Manipulator.LookAt(sPos2 + sDir2, Axis.None);
             this.Lights.SpotLights[1].Position = sPos2;
             this.Lights.SpotLights[1].Direction = sDir2;
 
@@ -365,7 +365,7 @@ namespace SceneTest
             var sDir3 = -Vector3.Normalize(new Vector3(sPos3.X, sPos3.Y, sPos3.Z));
             this.lightEmitters[3].Manipulator.SetPosition(sPos3);
             this.lanterns[2].Manipulator.SetPosition(sPos3);
-            this.lanterns[2].Manipulator.LookAt(sPos3 + sDir3, false);
+            this.lanterns[2].Manipulator.LookAt(sPos3 + sDir3, Axis.None);
             this.Lights.SpotLights[2].Position = sPos3;
             this.Lights.SpotLights[2].Direction = sDir3;
 

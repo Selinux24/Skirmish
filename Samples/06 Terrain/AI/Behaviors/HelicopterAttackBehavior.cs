@@ -28,7 +28,7 @@ namespace Terrain.AI.Behaviors
                 var model = this.Agent.SceneObject;
                 if (model != null)
                 {
-                    model.Manipulator.RotateTo(this.Target.Value, Vector3.Up, true, 0.01f);
+                    model.Manipulator.RotateTo(this.Target.Value, Vector3.Up, Axis.Y, 0.01f);
                 }
             }
 

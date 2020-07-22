@@ -84,7 +84,7 @@ namespace Engine
                         var newNormal = this.path.GetNormal(this.pathTime);
 
                         manipulator.SetPosition(newPosition, true);
-                        manipulator.LookAt(newPosition + (newPosition - position), newNormal, true, 0.1f);
+                        manipulator.LookAt(newPosition + (newPosition - position), newNormal, Axis.Y, 0.1f);
                     }
                 }
                 else

@@ -29,7 +29,7 @@ namespace Terrain.AI.Behaviors
                 var model = this.Agent.SceneObject;
                 if (model?.ModelPartCount > 0)
                 {
-                    model["Turret-mesh"].Manipulator.RotateTo(this.Target.Value, Vector3.Up, true, 0.01f);
+                    model["Turret-mesh"].Manipulator.RotateTo(this.Target.Value, Vector3.Up, Axis.Y, 0.01f);
                 }
             }
 

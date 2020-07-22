@@ -31,6 +31,10 @@ namespace Engine
         /// Write instancing data to graphics flag
         /// </summary>
         private bool hasDataToWrite = false;
+        /// <summary>
+        /// Independant transforms flag
+        /// </summary>
+        private readonly bool hasIndependantTransforms = false;
 
         /// <summary>
         /// Gets manipulator per instance list
@@ -73,10 +77,12 @@ namespace Engine
 
             this.InstanceCount = description.Instances;
 
-            this.instances = Helper.CreateArray(this.InstanceCount, () => new ModelInstance(this));
+            this.instances = Helper.CreateArray(this.InstanceCount, () => new ModelInstance(this, description));
             this.instancingData = new VertexInstancingData[this.InstanceCount];
 
             this.MaximumCount = -1;
+
+            this.hasIndependantTransforms = (description.TransformDependences?.Any() == true);
         }
 
         /// <inheritdoc/>
@@ -152,6 +158,39 @@ namespace Engine
 
             //Mark to write instancing data
             hasDataToWrite = instanceIndex > 0;
+        }
+        /// <summary>
+        /// Updates independant transforms
+        /// </summary>
+        /// <param name="meshName">Mesh name</param>
+        private void UpdateIndependantTransforms(string meshName)
+        {
+            int instanceIndex = 0;
+
+            for (int i = 0; i < this.instancesTmp.Length; i++)
+            {
+                var current = this.instancesTmp[i];
+                if (current == null)
+                {
+                    continue;
+                }
+
+                var currentTransform = this.instancingData[instanceIndex].Local;
+                var localTransform = current.GetTransformByName(meshName);
+                if (currentTransform != localTransform)
+                {
+                    this.instancingData[instanceIndex].Local = localTransform;
+
+                    hasDataToWrite = true;
+                }
+
+                instanceIndex++;
+            }
+
+            if (hasDataToWrite)
+            {
+                this.BufferManager.WriteInstancingData(this.InstancingBuffer, this.instancingData);
+            }
         }
         /// <summary>
         /// Updates the instances order
@@ -260,6 +299,11 @@ namespace Engine
 
                 foreach (string meshName in drawingData.Meshes.Keys)
                 {
+                    if (hasIndependantTransforms)
+                    {
+                        this.UpdateIndependantTransforms(meshName);
+                    }
+
                     count += this.DrawMeshShadow(effect, drawingData, meshName, index, length);
                     count *= instanceCount;
                 }
@@ -341,6 +385,11 @@ namespace Engine
 
                 foreach (string meshName in drawingData.Meshes.Keys)
                 {
+                    if (hasIndependantTransforms)
+                    {
+                        this.UpdateIndependantTransforms(meshName);
+                    }
+
                     count += this.DrawMesh(context, effect, drawingData, meshName, index, length);
                     count *= instanceCount;
                 }

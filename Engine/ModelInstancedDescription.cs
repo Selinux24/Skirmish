@@ -9,6 +9,15 @@ namespace Engine
     public class ModelInstancedDescription : BaseModelDescription
     {
         /// <summary>
+        /// Transform names
+        /// </summary>
+        public string[] TransformNames { get; set; }
+        /// <summary>
+        /// Transform dependences
+        /// </summary>
+        public int[] TransformDependences { get; set; }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         public ModelInstancedDescription()

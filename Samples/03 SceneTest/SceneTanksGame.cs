@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.Content;
 using Engine.Tween;
 using Engine.UI;
 using SharpDX;
@@ -70,10 +71,8 @@ namespace SceneTest
         private Sprite windDirection;
 
         private Sprite landScape;
-        private Terrain terrain;
+        private Scenery terrain;
         private ModelInstanced tanks;
-        private ModelInstanced trees;
-        private ModelInstanced rocks;
 
         private Sprite trajectoryMarker;
         private Sprite tarjetMarker;
@@ -165,19 +164,20 @@ namespace SceneTest
                 taskList.ToArray(),
                 () =>
                 {
+                    this.Camera.Position = new Vector3(0, 100, -200) * 0.75f;
+                    this.Camera.Interest = Vector3.Zero;
+
                     this.PrepareUI();
                     this.PrepareModels();
 
                     Task.Run(async () =>
                     {
-                        fadePanel.ClearTween();
-                        fadePanel.Hide(8000);
                         loadingText.ClearTween();
                         loadingText.Hide(500);
                         loadingBar.ClearTween();
                         loadingBar.Hide(500);
 
-                        await Task.Delay(8000);
+                        await Task.Delay(1000);
 
                         gameMessage.Text = "Ready!";
                         gameMessage.TweenScale(0, 1, 500, ScaleFuncs.CubicEaseIn);
@@ -187,11 +187,14 @@ namespace SceneTest
 
                         gameMessage.ClearTween();
                         gameMessage.Hide(100);
+                        fadePanel.ClearTween();
+                        fadePanel.Hide(2000);
 
                         gameReady = true;
                     });
                 });
         }
+
         private Task[] InitializeUI()
         {
             return new[]
@@ -445,19 +448,75 @@ namespace SceneTest
             windDirection.Color = Color.Green;
             windDirection.Visible = true;
         }
-
-        private Task[] InitializeModels()
-        {
-            return new Task[] { };
-        }
-
         private void PrepareUI()
         {
 
         }
+
+        private Task[] InitializeModels()
+        {
+            return new Task[]
+            {
+                InitializeModelsTanks(),
+                InitializeModelsTerrain(),
+            };
+        }
+        private async Task InitializeModelsTanks()
+        {
+            var tDesc = new ModelInstancedDescription()
+            {
+                Name = "Tanks",
+                CastShadow = true,
+                Optimize = false,
+                Content = new ContentDescription()
+                {
+                    ContentFolder = "SceneTanksGame/Leopard",
+                    ModelContentFilename = "Leopard.xml",
+                },
+                Instances = 2,
+                TransformNames = new[] { "Barrel-mesh", "Turret-mesh", "Hull-mesh" },
+                TransformDependences = new[] { 1, 2, -1 },
+            };
+
+            tanks = await this.AddComponentModelInstanced(tDesc, SceneObjectUsages.Agent, layerModels);
+            tanks.Visible = false;
+        }
+        private async Task InitializeModelsTerrain()
+        {
+            terrain = await this.AddComponentScenery(GroundDescription.FromFile("SceneTanksGame/Terrain/terrain.xml"), SceneObjectUsages.Ground, layerModels);
+            terrain.Visible = false;
+
+            this.SetGround(terrain, true);
+        }
         private void PrepareModels()
         {
+            terrain.Visible = true;
 
+            Vector3 p1 = new Vector3(-100, 100, 10);
+            Vector3 n1 = Vector3.Up;
+            Vector3 p2 = new Vector3(+100, 100, 10);
+            Vector3 n2 = Vector3.Up;
+
+            if (this.FindTopGroundPosition(-100, 100, out var r1))
+            {
+                p1 = r1.Position - (Vector3.Up * 0.1f);
+                n1 = r1.Item.Normal;
+            }
+            if (this.FindTopGroundPosition(+100, 100, out var r2))
+            {
+                p2 = r2.Position - (Vector3.Up * 0.1f);
+                n2 = r2.Item.Normal;
+            }
+
+            tanks[0].Manipulator.SetPosition(p1);
+            tanks[0].Manipulator.RotateTo(p2);
+            tanks[0].Manipulator.SetNormal(n1);
+
+            tanks[1].Manipulator.SetPosition(p2);
+            tanks[1].Manipulator.RotateTo(p1);
+            tanks[1].Manipulator.SetNormal(n2);
+
+            tanks.Visible = true;
         }
 
         private void InitializePlayers()
@@ -504,6 +563,85 @@ namespace SceneTest
                 return;
             }
 
+            this.UpdateInputTanks(gameTime);
+            this.UpdateInputShoot(gameTime);
+        }
+        private void UpdateTurnStatus()
+        {
+            turnText.Text = $"Turn {currentTurn}";
+
+            if (currentPlayer == 0)
+            {
+                playerTurnMarker.Left = this.Game.Form.RenderCenter.X - 112 - 120;
+                playerTurnMarker.Rotation = 0;
+            }
+            else
+            {
+                playerTurnMarker.Left = this.Game.Form.RenderCenter.X + 120;
+                playerTurnMarker.Rotation = MathUtil.Pi;
+            }
+        }
+        private void UpdateWindVelocity()
+        {
+            windVelocity.ProgressValue = currentWindVelocity / maxWindVelocity;
+
+            windDirection.Rotation = Helper.AngleSigned(Vector2.UnitY, windForce);
+        }
+        private void UpdatePlayersStatus()
+        {
+            player1Name.Text = player1Status.Name;
+            player1Points.Text = $"{player1Status.Points} points";
+            player1Life.Text = $"{player1Status.CurrentLife}";
+            player1Life.ProgressValue = player1Status.Health;
+            tanks[0].TextureIndex = player1Status.TextureIndex;
+
+            player2Name.Text = player2Status.Name;
+            player2Points.Text = $"{player2Status.Points} points";
+            player2Life.Text = $"{player2Status.CurrentLife}";
+            player2Life.ProgressValue = player2Status.Health;
+            tanks[1].TextureIndex = player2Status.TextureIndex;
+        }
+        private void UpdateInputTanks(GameTime gameTime)
+        {
+            var tank = tanks[currentPlayer];
+            var other = tanks[(currentPlayer + 1) % 2];
+
+            if (this.Game.Input.KeyPressed(Keys.A))
+            {
+                tank.Manipulator.Rotate(-gameTime.ElapsedSeconds, 0, 0);
+            }
+            if (this.Game.Input.KeyPressed(Keys.D))
+            {
+                tank.Manipulator.Rotate(+gameTime.ElapsedSeconds, 0, 0);
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.W))
+            {
+                tank.Manipulator.MoveForward(gameTime, 10);
+            }
+            if (this.Game.Input.KeyPressed(Keys.S))
+            {
+                tank.Manipulator.MoveBackward(gameTime, 10);
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.Q))
+            {
+                tank["Barrel-mesh"].Manipulator.Rotate(0, gameTime.ElapsedSeconds, 0);
+            }
+            if (this.Game.Input.KeyPressed(Keys.Z))
+            {
+                tank["Barrel-mesh"].Manipulator.Rotate(0, -gameTime.ElapsedSeconds, 0);
+            }
+
+            if (this.FindTopGroundPosition(tank.Manipulator.Position.X, tank.Manipulator.Position.Z, out var r))
+            {
+                tank.Manipulator.SetPosition(r.Position - (Vector3.Up * 0.1f));
+                tank.Manipulator.SetNormal(r.Item.Normal, 0.05f);
+                tank["Turret-mesh"].Manipulator.RotateTo(other.Manipulator.Position, Vector3.Up, Axis.Y, 0.01f);
+            }
+        }
+        private void UpdateInputShoot(GameTime gameTime)
+        {
             if (this.Game.Input.KeyPressed(Keys.Space))
             {
                 pbFire.ProgressValue += gameTime.ElapsedSeconds;
@@ -550,39 +688,6 @@ namespace SceneTest
                 });
             }
         }
-        private void UpdateTurnStatus()
-        {
-            turnText.Text = $"Turn {currentTurn}";
-
-            if (currentPlayer == 0)
-            {
-                playerTurnMarker.Left = this.Game.Form.RenderCenter.X - 112 - 120;
-                playerTurnMarker.Rotation = 0;
-            }
-            else
-            {
-                playerTurnMarker.Left = this.Game.Form.RenderCenter.X + 120;
-                playerTurnMarker.Rotation = MathUtil.Pi;
-            }
-        }
-        private void UpdateWindVelocity()
-        {
-            windVelocity.ProgressValue = currentWindVelocity / maxWindVelocity;
-
-            windDirection.Rotation = Helper.AngleSigned(Vector2.UnitY, windForce);
-        }
-        private void UpdatePlayersStatus()
-        {
-            player1Name.Text = player1Status.Name;
-            player1Points.Text = $"{player1Status.Points} points";
-            player1Life.Text = $"{player1Status.CurrentLife}";
-            player1Life.ProgressValue = player1Status.Health;
-
-            player2Name.Text = player2Status.Name;
-            player2Points.Text = $"{player2Status.Points} points";
-            player2Life.Text = $"{player2Status.CurrentLife}";
-            player2Life.ProgressValue = player2Status.Health;
-        }
 
         private async Task ResolveShoot(PlayerStatus shooter, PlayerStatus target)
         {
@@ -613,6 +718,22 @@ namespace SceneTest
             get
             {
                 return (float)CurrentLife / MaxLife;
+            }
+        }
+        public uint TextureIndex
+        {
+            get
+            {
+                if (Health > 0.6666f)
+                {
+                    return 0;
+                }
+                else if (Health > 0)
+                {
+                    return 1;
+                }
+
+                return 2;
             }
         }
     }

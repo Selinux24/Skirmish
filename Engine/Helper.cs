@@ -633,7 +633,8 @@ namespace Engine
             float dot = Vector3.Dot(one, two);
 
             // Divide the dot by the product of the magnitudes of the vectors
-            dot /= (one.Length() * two.Length());
+            dot /= one.Length() * two.Length();
+            dot = MathUtil.Clamp(dot, 0, 1);
 
             //Get the arc cosin of the angle, you now have your angle in radians 
             return (float)Math.Acos(dot);
@@ -751,9 +752,9 @@ namespace Engine
         /// <param name="eyePosition">Eye position</param>
         /// <param name="target">Target</param>
         /// <param name="up">Up vector</param>
-        /// <param name="yAxisOnly">Restricts the rotation axis to Y only</param>
+        /// <param name="axis">Relative rotation axis</param>
         /// <returns>Returns rotation quaternion</returns>
-        public static Quaternion LookAt(Vector3 eyePosition, Vector3 target, Vector3 up, bool yAxisOnly = true)
+        public static Quaternion LookAt(Vector3 eyePosition, Vector3 target, Vector3 up, Axis axis = Axis.None)
         {
             if (Vector3.Dot(Vector3.Up, Vector3.Normalize(eyePosition - target)) == 1f)
             {
@@ -762,12 +763,38 @@ namespace Engine
 
             Quaternion q = Quaternion.Invert(Quaternion.LookAtLH(target, eyePosition, up));
 
-            if (yAxisOnly)
+            if (axis != Axis.None)
             {
-                q.X = 0;
-                q.Z = 0;
+                q = q.ClampToAxis(axis);
+            }
 
-                q.Normalize();
+            return q;
+        }
+        /// <summary>
+        /// Clamps the rotation to the specified axis
+        /// </summary>
+        /// <param name="q">Quaternion</param>
+        /// <param name="axis">Axis</param>
+        /// <returns>Returns the clamped quaternion</returns>
+        public static Quaternion ClampToAxis(this Quaternion q, Axis axis)
+        {
+            switch (axis)
+            {
+                case Axis.X:
+                    q.Y = 0;
+                    q.Z = 0;
+                    q.Normalize();
+                    break;
+                case Axis.Y:
+                    q.X = 0;
+                    q.Z = 0;
+                    q.Normalize();
+                    break;
+                case Axis.Z:
+                    q.X = 0;
+                    q.Y = 0;
+                    q.Normalize();
+                    break;
             }
 
             return q;

@@ -262,6 +262,18 @@
     <Content Include="SceneTanksGame\GameIcon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="SceneTanksGame\Leopard\Leopard.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTanksGame\Leopard\Leopard_0.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTanksGame\Leopard\Leopard_1.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTanksGame\Leopard\Leopard_2.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="SceneTanksGame\Move.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -270,6 +282,15 @@
     </Content>
     <Content Include="SceneTanksGame\Tank.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTanksGame\Terrain\terrain.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTanksGame\Terrain\terrain.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTanksGame\Terrain\terrain_nmap.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneTanksGame\Turn.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -458,6 +479,12 @@
     </Content>
     <Content Include="SceneTanksGame\LeagueSpartan-Bold.otf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTanksGame\Leopard\Leopard.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTanksGame\Terrain\terrain.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <ItemGroup>

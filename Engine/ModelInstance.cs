@@ -64,6 +64,10 @@ namespace Engine
         private LevelOfDetail levelOfDetail = LevelOfDetail.High;
 
         /// <summary>
+        /// Model parts collection
+        /// </summary>
+        protected List<ModelPart> ModelParts = new List<ModelPart>();
+        /// <summary>
         /// Gets if model has volumes
         /// </summary>
         protected bool HasVolumes
@@ -116,18 +120,76 @@ namespace Engine
         /// Gets the current instance lights collection
         /// </summary>
         public IEnumerable<ISceneLight> Lights { get; protected set; } = new ISceneLight[] { };
+        /// <summary>
+        /// Gets the model part by name
+        /// </summary>
+        /// <param name="name">Part name</param>
+        /// <returns>Returns the model part name</returns>
+        public ModelPart this[string name]
+        {
+            get
+            {
+                return this.ModelParts.Find(p => p.Name == name);
+            }
+        }
+        /// <summary>
+        /// Gets the model part count
+        /// </summary>
+        public int ModelPartCount
+        {
+            get
+            {
+                return this.ModelParts.Count;
+            }
+        }
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="model">Model</param>
-        public ModelInstance(BaseModel model)
+        /// <param name="description">Description</param>
+        public ModelInstance(BaseModel model, ModelInstancedDescription description)
         {
             this.Id = GetNextInstanceId();
             this.model = model;
 
-            this.Manipulator = new Manipulator3D();
-            this.Manipulator.Updated += new EventHandler(ManipulatorUpdated);
+            if (description.TransformDependences?.Any() == true)
+            {
+                var parents = Array.FindAll(description.TransformDependences, i => i == -1);
+                if (parents == null || parents.Length != 1)
+                {
+                    throw new EngineException("Model with transform dependences must have one (and only one) parent mesh identified by -1");
+                }
+
+                for (int i = 0; i < description.TransformNames.Length; i++)
+                {
+                    this.ModelParts.Add(new ModelPart(description.TransformNames[i]));
+                }
+
+                for (int i = 0; i < description.TransformNames.Length; i++)
+                {
+                    var thisName = description.TransformNames[i];
+                    var thisMan = this[thisName].Manipulator;
+                    thisMan.Updated += new EventHandler(ManipulatorUpdated);
+
+                    var parentIndex = description.TransformDependences[i];
+                    if (parentIndex >= 0)
+                    {
+                        var parentName = description.TransformNames[parentIndex];
+
+                        thisMan.Parent = this[parentName].Manipulator;
+                    }
+                    else
+                    {
+                        this.Manipulator = thisMan;
+                    }
+                }
+            }
+            else
+            {
+                this.Manipulator = new Manipulator3D();
+                this.Manipulator.Updated += new EventHandler(ManipulatorUpdated);
+            }
 
             var drawData = model.GetDrawingData(LevelOfDetail.High);
             this.Lights = drawData?.Lights.Select(l => l.Clone()).ToArray() ?? new ISceneLight[] { };
@@ -139,7 +201,14 @@ namespace Engine
         /// <param name="context">Context</param>
         public virtual void Update(UpdateContext context)
         {
-            this.Manipulator.Update(context.GameTime);
+            if (this.ModelParts.Count > 0)
+            {
+                this.ModelParts.ForEach(p => p.Manipulator.Update(context.GameTime));
+            }
+            else
+            {
+                this.Manipulator.Update(context.GameTime);
+            }
 
             if (this.Lights.Any())
             {
@@ -172,6 +241,24 @@ namespace Engine
             this.InvalidateCache();
 
             this.coarseBoundingSphere = this.GetBoundingSphere();
+        }
+
+        /// <summary>
+        /// Gets the transform by transform name
+        /// </summary>
+        /// <param name="name">Transform name</param>
+        /// <returns>Retusn the transform of the specified transform name</returns>
+        public Matrix GetTransformByName(string name)
+        {
+            var part = this.ModelParts.Find(p => p.Name == name);
+            if (part != null)
+            {
+                return part.Manipulator.FinalTransform;
+            }
+            else
+            {
+                return this.Manipulator.FinalTransform;
+            }
         }
 
         /// <summary>

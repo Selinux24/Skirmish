@@ -82,7 +82,7 @@ namespace Terrain.Controllers
                 var futureTarget = futurePosition + (futurePosition - position);
 
                 //Calculates a delta using the future angle
-                var futureRotation = Helper.LookAt(position, futureTarget, futureNormal, true);
+                var futureRotation = Helper.LookAt(position, futureTarget, futureNormal, Axis.Y);
                 float futureAngle = Helper.Angle(rotation, futureRotation);
                 float maxRot = MathUtil.PiOverTwo;
                 futureAngle = Math.Min(futureAngle, maxRot);
@@ -95,7 +95,7 @@ namespace Terrain.Controllers
                 if (velDelta == 0 && futureAngle != 0)
                 {
                     //Rotates only
-                    manipulator.RotateTo(futureTarget, futureNormal, true, 0.01f);
+                    manipulator.RotateTo(futureTarget, futureNormal, Axis.Y, 0.01f);
                 }
                 else
                 {
@@ -106,7 +106,7 @@ namespace Terrain.Controllers
                     var newTarget = newPosition + (newPosition - position);
 
                     //Rotate and move
-                    manipulator.RotateTo(newTarget, newNormal, true, 0.01f);
+                    manipulator.RotateTo(newTarget, newNormal, Axis.Y, 0.01f);
                     manipulator.SetPosition(newPosition);
 
                     //Updates new time in curve

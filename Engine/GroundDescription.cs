@@ -28,6 +28,22 @@ namespace Engine
         }
 
         /// <summary>
+        /// Gets a ground description from a file
+        /// </summary>
+        /// <param name="fileName">File name</param>
+        public static GroundDescription FromFile(string fileName)
+        {
+            return new GroundDescription()
+            {
+                CastShadow = true,
+                Content = new ContentDescription()
+                {
+                    ModelContentFilename = fileName,
+                }
+            };
+        }
+
+        /// <summary>
         /// Content
         /// </summary>
         public ContentDescription Content { get; set; } = new ContentDescription();
