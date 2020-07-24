@@ -52,8 +52,8 @@ namespace Instancing
 
         private async Task InitializeTexts()
         {
-            var title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate("Tahoma", 18, Color.White) }, layerHUD);
-            runtimeText = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow) }, layerHUD);
+            var title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Default("Tahoma", 18, Color.White) }, layerHUD);
+            runtimeText = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Default("Tahoma", 11, Color.Yellow) }, layerHUD);
 
             title.Text = "Instancing test";
             runtimeText.Text = "";

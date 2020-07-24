@@ -17,7 +17,12 @@ namespace Engine.UI
                 return new UIProgressBarDescription();
             }
         }
-
+        /// <summary>
+        /// Gets the default progress bar description with text
+        /// </summary>
+        /// <param name="fontFileName">Font file name</param>
+        /// <param name="fontSize">Font size</param>
+        /// <param name="fontLineAdjust">Font line adjust</param>
         public static UIProgressBarDescription WithText(string fontFileName, int fontSize, bool fontLineAdjust = false)
         {
             return new UIProgressBarDescription()
@@ -27,39 +32,19 @@ namespace Engine.UI
                     FontFileName = fontFileName,
                     FontSize = fontSize,
                     LineAdjust = fontLineAdjust,
+                    HorizontalAlign = TextAlign.Center,
+                    VerticalAlign = VerticalAlign.Middle,
                 },
             };
         }
         /// <summary>
-        /// Gets the screen centered progress bar description
-        /// </summary>
-        /// <param name="fontFileName">Font file name</param>
-        /// <param name="fontSize">Font size</param>
-        /// <param name="fontLineAdjust">Font line adjust</param>
-        public static UIProgressBarDescription ScreenCentered(string fontFileName, int fontSize, bool fontLineAdjust = false)
-        {
-            return new UIProgressBarDescription()
-            {
-                CenterHorizontally = CenterTargets.Screen,
-                CenterVertically = CenterTargets.Screen,
-                Font = new TextDrawerDescription
-                {
-                    FontFileName = fontFileName,
-                    FontSize = fontSize,
-                    LineAdjust = fontLineAdjust,
-                },
-            };
-        }
-        /// <summary>
-        /// Gets the screen centered progress bar description
+        /// Gets the default progress bar description with text
         /// </summary>
         /// <param name="font">Font description</param>
-        public static UIProgressBarDescription ScreenCentered(TextDrawerDescription font)
+        public static UIProgressBarDescription WithText(TextDrawerDescription font)
         {
             return new UIProgressBarDescription()
             {
-                CenterHorizontally = CenterTargets.Screen,
-                CenterVertically = CenterTargets.Screen,
                 Font = font,
             };
         }
@@ -80,7 +65,7 @@ namespace Engine.UI
         /// <summary>
         /// Font description
         /// </summary>
-        public TextDrawerDescription Font { get; set; } = new TextDrawerDescription();
+        public TextDrawerDescription Font { get; set; }
 
         /// <summary>
         /// Constructor

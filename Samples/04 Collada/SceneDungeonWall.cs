@@ -67,15 +67,15 @@ namespace Collada
         }
         private async Task InitializeText()
         {
-            var title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate("Tahoma", 18, Color.White) }, layerHUD);
+            var title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Default("Tahoma", 18, Color.White) }, layerHUD);
             title.Text = "Tiled Wall Test Scene";
             title.SetPosition(Vector2.Zero);
 
-            this.fps = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate("Lucida Sans", 12, Color.Yellow) }, layerHUD);
+            this.fps = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Default("Lucida Sans", 12, Color.Yellow) }, layerHUD);
             this.fps.Text = null;
             this.fps.SetPosition(new Vector2(0, 24));
 
-            var picks = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate("Lucida Sans", 12, Color.Yellow) }, layerHUD);
+            var picks = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Default("Lucida Sans", 12, Color.Yellow) }, layerHUD);
             picks.Text = null;
             picks.SetPosition(new Vector2(0, 48));
 

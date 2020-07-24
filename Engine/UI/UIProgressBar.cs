@@ -18,41 +18,15 @@ namespace Engine.UI
         /// Base sprite
         /// </summary>
         private readonly Sprite spriteBase = null;
-        /// <summary>
-        /// Button text drawer
-        /// </summary>
-        private readonly TextDrawer textDrawer = null;
-
-        /// <summary>
-        /// Left scale
-        /// </summary>
-        protected float LeftScale { get { return this.ProgressValue; } }
-        /// <summary>
-        /// Right scale
-        /// </summary>
-        protected float RightScale { get { return 1f - this.ProgressValue; } }
 
         /// <summary>
         /// Gets or sets the progress value
         /// </summary>
         public float ProgressValue { get; set; }
         /// <summary>
-        /// Gets or sets the button text
+        /// Gets the caption
         /// </summary>
-        public string Text
-        {
-            get
-            {
-                return this.textDrawer?.Text;
-            }
-            set
-            {
-                if (this.textDrawer != null)
-                {
-                    this.textDrawer.Text = value;
-                }
-            }
-        }
+        public UITextArea Caption { get; } = null;
         /// <inheritdoc/>
         public override float Alpha
         {
@@ -64,9 +38,9 @@ namespace Engine.UI
             {
                 base.Alpha = value;
 
-                if (this.textDrawer != null)
+                if (this.Caption != null)
                 {
-                    this.textDrawer.Alpha = value;
+                    this.Caption.Alpha = value;
                 }
             }
         }
@@ -96,40 +70,6 @@ namespace Engine.UI
             set
             {
                 this.spriteBase.Color = value;
-            }
-        }
-        /// <summary>
-        /// Gets or sets the text color
-        /// </summary>
-        public Color4 TextColor
-        {
-            get
-            {
-                return this.textDrawer?.TextColor ?? new Color4(0f, 0f, 0f, 0f);
-            }
-            set
-            {
-                if (textDrawer != null)
-                {
-                    this.textDrawer.TextColor = value;
-                }
-            }
-        }
-        /// <summary>
-        /// Gets or sets the text shadow color
-        /// </summary>
-        public Color4 ShadowColor
-        {
-            get
-            {
-                return this.textDrawer?.ShadowColor ?? new Color4(0f, 0f, 0f, 0f);
-            }
-            set
-            {
-                if (textDrawer != null)
-                {
-                    this.textDrawer.ShadowColor = value;
-                }
             }
         }
 
@@ -174,35 +114,33 @@ namespace Engine.UI
             {
                 description.Font.Name = description.Font.Name ?? $"{description.Name}.TextProgressBar";
 
-                this.textDrawer = new TextDrawer(scene, description.Font)
+                var textAreaDesc = new UITextAreaDescription
                 {
-                    Parent = this,
+                    Font = description.Font,
+                    CenterHorizontally = CenterTargets.Parent,
+                    CenterVertically = CenterTargets.Parent,
+                    EventsEnabled = false,
                 };
-                this.textDrawer.CenterParent();
 
-                this.Text = description.Text;
-            }
-        }
-        /// <inheritdoc/>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                textDrawer?.Dispose();
+                this.Caption = new UITextArea(scene, textAreaDesc);
 
-                base.Dispose(disposing);
+                this.AddChild(this.Caption, true);
+
+                this.Caption.Text = description.Text;
             }
         }
 
         /// <inheritdoc/>
         public override void Update(UpdateContext context)
         {
+            base.Update(context);
+
             if (!Active)
             {
                 return;
             }
 
-            int width = (int)(LeftScale * Width);
+            int width = (int)(ProgressValue * Width);
 
             this.spriteProgress.Width = width;
             this.spriteProgress.Height = Height;
@@ -213,53 +151,13 @@ namespace Engine.UI
             this.spriteBase.Height = Height;
             this.spriteBase.Left = width;
             this.spriteBase.Top = 0;
-
-            if (!string.IsNullOrWhiteSpace(this.Text))
-            {
-                this.textDrawer?.CenterParent();
-                this.textDrawer?.Update(context);
-            }
-
-            base.Update(context);
-        }
-
-        /// <inheritdoc/>
-        public override void Draw(DrawContext context)
-        {
-            if (!Visible)
-            {
-                return;
-            }
-
-            if (this.RightScale > 0f)
-            {
-                this.spriteBase.Draw(context);
-            }
-
-            if (this.LeftScale > 0f)
-            {
-                this.spriteProgress.Draw(context);
-            }
-
-            if (!string.IsNullOrWhiteSpace(this.Text))
-            {
-                this.textDrawer?.Draw(context);
-            }
-        }
-
-        /// <inheritdoc/>
-        public override void Resize()
-        {
-            base.Resize();
-
-            this.textDrawer?.Resize();
         }
     }
 
     /// <summary>
     /// Progress bar extensions
     /// </summary>
-    public static class SpriteProgressBarExtensions
+    public static class UIProgressBarExtensions
     {
         /// <summary>
         /// Adds a component to the scene

@@ -7,6 +7,24 @@ namespace Engine.UI
     public class UITextAreaDescription : UIControlDescription
     {
         /// <summary>
+        /// Gets the default text area description from a font family name
+        /// </summary>
+        /// <param name="fontFamilyName">Font family name</param>
+        /// <param name="size">Font size</param>
+        public static UITextAreaDescription FromFamily(string fontFamilyName, int size)
+        {
+            return new UITextAreaDescription
+            {
+                Font = new TextDrawerDescription()
+                {
+                    Font = fontFamilyName,
+                    FontSize = size,
+                    HorizontalAlign = TextAlign.Center,
+                    VerticalAlign = VerticalAlign.Middle,
+                },
+            };
+        }
+        /// <summary>
         /// Gets the default text area description from a font file
         /// </summary>
         /// <param name="fileName">File name</param>
@@ -20,7 +38,63 @@ namespace Engine.UI
                 {
                     FontFileName = fileName,
                     FontSize = size,
-                    LineAdjust = false,
+                    LineAdjust = lineAdjust,
+                    HorizontalAlign = TextAlign.Center,
+                    VerticalAlign = VerticalAlign.Middle,
+                },
+            };
+        }
+        /// <summary>
+        /// Gets the default text area description from a font map 
+        /// </summary>
+        /// <param name="fontImageFileName">Font image file name</param>
+        /// <param name="fontMapFileName">Font map file name</param>
+        public static UITextAreaDescription FromMap(string fontImageFileName, string fontMapFileName)
+        {
+            return new UITextAreaDescription
+            {
+                Font = new TextDrawerDescription()
+                {
+                    FontMapping = new FontMapping
+                    {
+                        ImageFile = fontImageFileName,
+                        MapFile = fontMapFileName,
+                    },
+                    HorizontalAlign = TextAlign.Center,
+                    VerticalAlign = VerticalAlign.Middle,
+                    UseTextureColor = true,
+                },
+            };
+        }
+        /// <summary>
+        /// Gets the default text area description from a font description
+        /// </summary>
+        /// <param name="font">Font description</param>
+        public static UITextAreaDescription Default(TextDrawerDescription font)
+        {
+            return new UITextAreaDescription
+            {
+                Font = font,
+            };
+        }
+        /// <summary>
+        /// Gets the default text area description
+        /// </summary>
+        public static UITextAreaDescription Default()
+        {
+            return new UITextAreaDescription();
+        }
+        /// <summary>
+        /// Gets the default text area description
+        /// </summary>
+        public static UITextAreaDescription DefaultTextCentered()
+        {
+            return new UITextAreaDescription
+            {
+                Font = new TextDrawerDescription
+                {
+                    HorizontalAlign = TextAlign.Center,
+                    VerticalAlign = VerticalAlign.Middle,
                 },
             };
         }

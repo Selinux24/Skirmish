@@ -224,7 +224,7 @@ namespace Engine.Common
 
                     //Copy request collection
                     var toAssign = this.requestedDescriptors
-                        .Where(r => !r.Processed)
+                        .Where(r => r?.Processed == false)
                         .ToArray();
 
                     float current = 0;

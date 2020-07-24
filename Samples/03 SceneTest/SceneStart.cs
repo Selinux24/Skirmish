@@ -43,14 +43,14 @@ namespace SceneTest
                 this.backGround.Manipulator.SetScale(1.5f, 1.25f, 1.5f);
 
                 this.title.Text = "Scene Manager Test";
-                this.sceneMaterialsButton.Text = "Materials";
-                this.sceneWaterButton.Text = "Water";
-                this.sceneStencilPassButton.Text = "Stencil Pass";
-                this.sceneLightsButton.Text = "Lights";
-                this.sceneCascadedShadowsButton.Text = "Cascaded";
-                this.sceneTestButton.Text = "Test";
-                this.sceneTanksGameButton.Text = "Tanks Game";
-                this.exitButton.Text = "Exit";
+                this.sceneMaterialsButton.Caption.Text = "Materials";
+                this.sceneWaterButton.Caption.Text = "Water";
+                this.sceneStencilPassButton.Caption.Text = "Stencil Pass";
+                this.sceneLightsButton.Caption.Text = "Lights";
+                this.sceneCascadedShadowsButton.Caption.Text = "Cascaded";
+                this.sceneTestButton.Caption.Text = "Test";
+                this.sceneTanksGameButton.Caption.Text = "Tanks Game";
+                this.exitButton.Caption.Text = "Exit";
 
                 var sceneButtons = new[]
                 {
@@ -118,50 +118,32 @@ namespace SceneTest
 
             #region Title text
 
-            var titleDesc = new UITextAreaDescription
-            {
-                Font = new TextDrawerDescription()
-                {
-                    Name = "Title",
-                    Font = "Showcard Gothic",
-                    FontSize = 72,
-                    Style = FontMapStyles.Bold,
-                    TextColor = Color.Gold,
-                    ShadowColor = new Color4(Color.LightYellow.RGB(), 0.25f),
-                    ShadowDelta = new Vector2(4, 4),
-                },
-            };
+            var titleFont = TextDrawerDescription.Default("Showcard Gothic", 72, FontMapStyles.Bold, Color.Gold);
+            titleFont.Name = "Title";
+            titleFont.ShadowColor = new Color4(Color.LightYellow.RGB(), 0.25f);
+            titleFont.ShadowDelta = new Vector2(4, 4);
+            titleFont.HorizontalAlign = TextAlign.Center;
+            titleFont.VerticalAlign = VerticalAlign.Middle;
+
+            var titleDesc = UITextAreaDescription.Default(titleFont);
+
             this.title = await this.AddComponentUITextArea(titleDesc, layerHUD);
 
             #endregion
 
             #region Scene buttons
 
-            var startButtonDesc = new UIButtonDescription()
-            {
-                Name = "Scene buttons",
+            var buttonsFont = TextDrawerDescription.Default("Verdana", 20, FontMapStyles.Bold, Color.Gold);
+            buttonsFont.HorizontalAlign = TextAlign.Center;
+            buttonsFont.VerticalAlign = VerticalAlign.Middle;
 
-                Width = 150,
-                Height = 55,
+            var startButtonDesc = UIButtonDescription.DefaultTwoStateButton("common/buttons.png", new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f, buttonsFont);
+            startButtonDesc.Name = "Scene buttons";
+            startButtonDesc.Width = 150;
+            startButtonDesc.Height = 55;
+            startButtonDesc.ColorReleased = new Color4(sceneButtonColor.RGB(), 0.8f);
+            startButtonDesc.ColorPressed = new Color4(sceneButtonColor.RGB() * 1.2f, 0.9f);
 
-                TwoStateButton = true,
-
-                TextureReleased = "common/buttons.png",
-                TextureReleasedUVMap = new Vector4(44, 30, 556, 136) / 600f,
-                ColorReleased = new Color4(sceneButtonColor.RGB(), 0.8f),
-
-                TexturePressed = "common/buttons.png",
-                TexturePressedUVMap = new Vector4(44, 30, 556, 136) / 600f,
-                ColorPressed = new Color4(sceneButtonColor.RGB() * 1.2f, 0.9f),
-
-                Font = new TextDrawerDescription()
-                {
-                    Font = "Verdana",
-                    Style = FontMapStyles.Bold,
-                    FontSize = 20,
-                    TextColor = Color.Gold,
-                },
-            };
             this.sceneMaterialsButton = await this.AddComponentUIButton(startButtonDesc, layerHUD);
             this.sceneWaterButton = await this.AddComponentUIButton(startButtonDesc, layerHUD);
             this.sceneStencilPassButton = await this.AddComponentUIButton(startButtonDesc, layerHUD);
@@ -174,31 +156,13 @@ namespace SceneTest
 
             #region Exit button
 
-            var exitButtonDesc = new UIButtonDescription()
-            {
-                Name = "Exit button",
+            var exitButtonDesc = UIButtonDescription.DefaultTwoStateButton("common/buttons.png", new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f, buttonsFont);
+            exitButtonDesc.Name = "Exit button";
+            exitButtonDesc.Width = 150;
+            exitButtonDesc.Height = 55;
+            exitButtonDesc.ColorReleased = new Color4(exitButtonColor.RGB(), 0.8f);
+            exitButtonDesc.ColorPressed = new Color4(exitButtonColor.RGB() * 1.2f, 0.9f);
 
-                Width = 150,
-                Height = 55,
-
-                TwoStateButton = true,
-
-                TextureReleased = "common/buttons.png",
-                TextureReleasedUVMap = new Vector4(44, 30, 556, 136) / 600f,
-                ColorReleased = new Color4(exitButtonColor.RGB(), 0.8f),
-
-                TexturePressed = "common/buttons.png",
-                TexturePressedUVMap = new Vector4(44, 30, 556, 136) / 600f,
-                ColorPressed = new Color4(exitButtonColor.RGB() * 1.2f, 0.9f),
-
-                Font = new TextDrawerDescription()
-                {
-                    Font = "Verdana",
-                    Style = FontMapStyles.Bold,
-                    FontSize = 20,
-                    TextColor = Color.Gold,
-                },
-            };
             this.exitButton = await this.AddComponentUIButton(exitButtonDesc, layerHUD);
 
             #endregion

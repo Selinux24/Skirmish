@@ -72,6 +72,41 @@ namespace Engine.UI
             }
         }
         /// <summary>
+        /// Gets or sets the text horizontal align
+        /// </summary>
+        public TextAlign HorizontalAlign
+        {
+            get
+            {
+                return this.textDrawer?.HorizontalAlign ?? TextAlign.Left;
+            }
+            set
+            {
+                if (this.textDrawer != null)
+                {
+                    this.textDrawer.HorizontalAlign = value;
+                }
+            }
+        }
+        /// <summary>
+        /// Gets or sets the text vertical align
+        /// </summary>
+        public VerticalAlign VerticalAlign
+        {
+            get
+            {
+                return this.textDrawer?.VerticalAlign ?? VerticalAlign.Top;
+            }
+            set
+            {
+                if (this.textDrawer != null)
+                {
+                    this.textDrawer.VerticalAlign = value;
+                }
+            }
+        }
+
+        /// <summary>
         /// Gest or sets the left margin
         /// </summary>
         public float MarginLeft { get; set; }
@@ -208,26 +243,6 @@ namespace Engine.UI
         {
             MarginTop = MarginBottom = margin;
         }
-
-        /// <summary>
-        /// Justifies the text based on the control's rectangle
-        /// </summary>
-        /// <param name="align">Text align</param>
-        public void JustifyText(TextAlign align)
-        {
-            switch (align)
-            {
-                case TextAlign.Left:
-                    this.textDrawer.CenterHorizontally(TextCenteringTargets.None);
-                    break;
-                case TextAlign.Center:
-                    this.textDrawer.CenterHorizontally(TextCenteringTargets.Parent);
-                    break;
-                case TextAlign.Right:
-                    this.textDrawer.CenterHorizontally(TextCenteringTargets.None);
-                    break;
-            }
-        }
     }
 
     /// <summary>
@@ -274,5 +289,24 @@ namespace Engine.UI
         /// Align right
         /// </summary>
         Right,
+    }
+
+    /// <summary>
+    /// Vertical align
+    /// </summary>
+    public enum VerticalAlign
+    {
+        /// <summary>
+        /// Align top
+        /// </summary>
+        Top,
+        /// <summary>
+        /// Align middle
+        /// </summary>
+        Middle,
+        /// <summary>
+        /// Align bottom
+        /// </summary>
+        Bottom,
     }
 }

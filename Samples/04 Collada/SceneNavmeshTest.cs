@@ -79,15 +79,15 @@ namespace Collada
         }
         private async Task InitializeText()
         {
-            var title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate("Tahoma", 18, Color.White) }, layerHUD);
+            var title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Default("Tahoma", 18, Color.White) }, layerHUD);
             title.Text = "Navigation Mesh Test Scene";
             title.SetPosition(Vector2.Zero);
 
-            this.debug = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate("Lucida Sans", 12, Color.Green) }, layerHUD);
+            this.debug = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Default("Lucida Sans", 12, Color.Green) }, layerHUD);
             this.debug.Text = null;
             this.debug.SetPosition(new Vector2(0, title.Top + title.Height + 3));
 
-            this.help = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate("Lucida Sans", 12, Color.Yellow) }, layerHUD);
+            this.help = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Default("Lucida Sans", 12, Color.Yellow) }, layerHUD);
             this.help.Text = @"Camera: WASD+Mouse (Press right mouse in windowed mode to look). 
 B: Change Build Mode (SHIFT reverse).
 P: Change Partition Type (SHIFT reverse).

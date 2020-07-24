@@ -66,14 +66,9 @@ namespace SpriteDrawing
         }
         private async Task InitializeConsole()
         {
-            var desc = new UITextAreaDescription()
-            {
-                Width = this.Game.Form.RenderWidth * 0.5f,
-                Font = new TextDrawerDescription
-                {
-                    TextColor = Color.Yellow,
-                },
-            };
+            var desc = UITextAreaDescription.Default();
+            desc.Width = this.Game.Form.RenderWidth * 0.5f;
+
             this.textDebug = await this.AddComponentUITextArea(desc, layerHUD);
         }
         private async Task InitializeBackground()
@@ -86,22 +81,15 @@ namespace SpriteDrawing
         }
         private async Task InitializeProgressbar()
         {
-            var desc = new UIProgressBarDescription
-            {
-                Name = "Progress Bar",
-                Top = this.Game.Form.RenderHeight - 20,
-                Left = 100,
-                Width = this.Game.Form.RenderWidth - 200,
-                Height = 15,
-                BaseColor = new Color(0, 0, 0, 0.5f),
-                ProgressColor = Color.Green,
-                Font = new TextDrawerDescription
-                {
-                    FontFileName = "LeagueSpartan-Bold.otf",
-                    FontSize = 10,
-                    LineAdjust = true,
-                },
-            };
+            var desc = UIProgressBarDescription.WithText("LeagueSpartan-Bold.otf", 10, true);
+            desc.Name = "Progress Bar";
+            desc.Top = this.Game.Form.RenderHeight - 20;
+            desc.Left = 100;
+            desc.Width = this.Game.Form.RenderWidth - 200;
+            desc.Height = 15;
+            desc.BaseColor = new Color(0, 0, 0, 0.5f);
+            desc.ProgressColor = Color.Green;
+
             this.progressBar = await this.AddComponentUIProgressBar(desc, layerHUD);
         }
 
@@ -207,50 +195,28 @@ namespace SpriteDrawing
 
             float w = 0.3333f;
 
-            var descButClose = new UIButtonDescription
-            {
-                Name = "CloseButton",
+            var font = TextDrawerDescription.FromFile("LeagueSpartan-Bold.otf", 16);
+            font.LineAdjust = true;
+            font.HorizontalAlign = TextAlign.Center;
+            font.VerticalAlign = VerticalAlign.Middle;
 
-                Top = 10,
-                Left = this.dynamicPan.Width - 10 - 40,
-                Width = 40,
-                Height = 40,
+            var descButClose = UIButtonDescription.DefaultTwoStateButton("buttons.png", new Vector4(0, 0, w, 1f), new Vector4(w * 2f, 0, w * 3f, 1f), font);
+            descButClose.Name = "CloseButton";
+            descButClose.Top = 10;
+            descButClose.Left = this.dynamicPan.Width - 10 - 40;
+            descButClose.Width = 40;
+            descButClose.Height = 40;
+            descButClose.Text = "X";
 
-                TwoStateButton = true,
-
-                TextureReleased = "buttons.png",
-                TextureReleasedUVMap = new Vector4(0, 0, w, 1f),
-
-                TexturePressed = "buttons.png",
-                TexturePressedUVMap = new Vector4(w * 2f, 0, w * 3f, 1f),
-
-                Font = new TextDrawerDescription()
-                {
-                    FontFileName = "LeagueSpartan-Bold.otf",
-                    FontSize = 16,
-                    LineAdjust = true,
-                },
-                Text = "X",
-            };
             var butClose = new UIButton(this, descButClose);
             butClose.JustReleased += ButClose_Click;
 
-            var descText = new UITextAreaDescription()
-            {
-                Font = new TextDrawerDescription()
-                {
-                    Name = "MaraText",
-                    FontMapping = new FontMapping
-                    {
-                        ImageFile = "MaraFont.png",
-                        MapFile = "MaraFont.txt",
-                    },
-                    UseTextureColor = true,
-                },
-                CenterHorizontally = CenterTargets.Parent,
-                CenterVertically = CenterTargets.Parent,
-                Text = @"Letters by Mara",
-            };
+            var descText = UITextAreaDescription.FromMap("MaraFont.png", "MaraFont.txt");
+            descText.Name = "MaraText";
+            descText.CenterHorizontally = CenterTargets.Parent;
+            descText.CenterVertically = CenterTargets.Parent;
+            descText.Text = @"Letters by Mara";
+
             var textMapped = new UITextArea(this, descText)
             {
                 Scale = 0.25f,
@@ -262,27 +228,19 @@ namespace SpriteDrawing
         }
         private async Task InitializeButtonTest()
         {
-            var descButClose = new UIButtonDescription
-            {
-                Name = "Test Button",
+            var font = TextDrawerDescription.FromFile("LeagueSpartan-Bold.otf", 16);
+            font.LineAdjust = true;
+            font.HorizontalAlign = TextAlign.Center;
+            font.VerticalAlign = VerticalAlign.Middle;
 
-                Top = 250,
-                Left = 150,
-                Width = 200,
-                Height = 55,
+            var descButClose = UIButtonDescription.DefaultTwoStateButton(Color.Blue, Color.Green, font);
+            descButClose.Name = "Test Button";
+            descButClose.Top = 250;
+            descButClose.Left = 150;
+            descButClose.Width = 200;
+            descButClose.Height = 55;
+            descButClose.Text = "Press Me";
 
-                TwoStateButton = true,
-                ColorReleased = Color.Blue,
-                ColorPressed = Color.Green,
-
-                Font = new TextDrawerDescription()
-                {
-                    FontFileName = "LeagueSpartan-Bold.otf",
-                    FontSize = 16,
-                    LineAdjust = true,
-                },
-                Text = "Press Me",
-            };
             butTest = await this.AddComponentUIButton(descButClose, layerHUD);
             butTest.JustReleased += ButTest_Click;
             butTest.MouseEnter += ButTest_MouseEnter;
@@ -303,7 +261,7 @@ namespace SpriteDrawing
             if (progressBar != null)
             {
                 progressBar.ProgressValue = progressValue;
-                progressBar.Text = $"{(int)(progressValue * 100f)}%";
+                progressBar.Caption.Text = $"{(int)(progressValue * 100f)}%";
             }
         }
 
@@ -398,7 +356,7 @@ Progress: {(int)(progressValue * 100f)}%";
 
                     float progress = currentText.Length / (float)allText.Length;
                     progressBar.ProgressValue = progress;
-                    progressBar.Text = $"Loading Lorem ipsum random text - {(int)(progress * 100f)}%";
+                    progressBar.Caption.Text = $"Loading Lorem ipsum random text - {(int)(progress * 100f)}%";
                     progressBar.Visible = true;
                 }
                 else
@@ -407,7 +365,7 @@ Progress: {(int)(progressValue * 100f)}%";
                     textInterval = 0;
 
                     progressBar.ProgressValue = 1;
-                    progressBar.Text = null;
+                    progressBar.Caption.Text = null;
                     progressBar.Visible = false;
 
                     staticPan.Visible = true;
@@ -434,7 +392,7 @@ Progress: {(int)(progressValue * 100f)}%";
             butTest.Show(250);
             butTest.TweenColorBounce(Color.Yellow, Color.Red, 2000, ScaleFuncs.Linear);
 
-            butTest2.Text = "The other";
+            butTest2.Caption.Text = "The other";
             butTest2.Visible = true;
             butTest2.Show(250);
             butTest2.TweenColorBounce(Color.Yellow, Color.Red, 2000, ScaleFuncs.Linear);

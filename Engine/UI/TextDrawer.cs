@@ -74,13 +74,13 @@ namespace Engine.UI
         /// <remarks>Used for text positioning</remarks>
         private RectangleF? textArea = null;
         /// <summary>
-        /// Horizontal centering flag
+        /// Horizontal align
         /// </summary>
-        private TextCenteringTargets centerHorizontally = TextCenteringTargets.None;
+        private TextAlign horizontalAlign = TextAlign.Left;
         /// <summary>
-        /// Vertical centering flag
+        /// Vertical align
         /// </summary>
-        private TextCenteringTargets centerVertically = TextCenteringTargets.None;
+        private VerticalAlign verticalAlign = VerticalAlign.Middle;
 
         /// <summary>
         /// Manipulator
@@ -186,8 +186,8 @@ namespace Engine.UI
             {
                 this.left = value.X;
                 this.top = value.Y;
-                this.centerHorizontally = TextCenteringTargets.None;
-                this.centerVertically = TextCenteringTargets.None;
+                this.HorizontalAlign = TextAlign.Left;
+                this.VerticalAlign = VerticalAlign.Top;
                 this.textArea = null;
 
                 this.updateInternals = true;
@@ -205,8 +205,7 @@ namespace Engine.UI
             set
             {
                 this.left = value;
-                this.centerHorizontally = TextCenteringTargets.None;
-                this.centerVertically = TextCenteringTargets.None;
+                this.HorizontalAlign = TextAlign.Left;
                 this.textArea = null;
 
                 this.updateInternals = true;
@@ -224,8 +223,7 @@ namespace Engine.UI
             set
             {
                 this.top = value;
-                this.centerHorizontally = TextCenteringTargets.None;
-                this.centerVertically = TextCenteringTargets.None;
+                this.VerticalAlign = VerticalAlign.Top;
                 this.textArea = null;
 
                 this.updateInternals = true;
@@ -239,6 +237,49 @@ namespace Engine.UI
         /// Gets text height
         /// </summary>
         public float Height { get; private set; }
+        /// <summary>
+        /// Gets or sets the horizontal align
+        /// </summary>
+        public TextAlign HorizontalAlign
+        {
+            get
+            {
+                return horizontalAlign;
+            }
+            set
+            {
+                if (horizontalAlign == value)
+                {
+                    return;
+                }
+
+                horizontalAlign = value;
+
+                updateInternals = true;
+            }
+        }
+        /// <summary>
+        /// Gets or sets the vertical align
+        /// </summary>
+        public VerticalAlign VerticalAlign
+        {
+            get
+            {
+                return verticalAlign;
+            }
+            set
+            {
+                if (verticalAlign == value)
+                {
+                    return;
+                }
+
+                verticalAlign = value;
+
+                updateInternals = true;
+            }
+        }
+
         /// <summary>
         /// Gets whether the internal buffers were ready or not
         /// </summary>
@@ -288,6 +329,8 @@ namespace Engine.UI
             this.UseTextureColor = description.UseTextureColor;
             this.ShadowColor = description.ShadowColor;
             this.ShadowDelta = description.ShadowDelta;
+            this.HorizontalAlign = description.HorizontalAlign;
+            this.VerticalAlign = description.VerticalAlign;
 
             this.MapText();
 
@@ -338,8 +381,6 @@ namespace Engine.UI
             float rot;
             Vector2 parentCenter;
             float parentScale;
-            TextCenteringTargets centerH;
-            TextCenteringTargets centerV;
 
             if (this.Parent != null)
             {
@@ -348,8 +389,6 @@ namespace Engine.UI
                 rot = this.Parent.AbsoluteRotation;
                 parentCenter = this.Parent.GrandpaRectangle.Center;
                 parentScale = this.Parent.GrandpaScale;
-                centerH = this.Parent.CenterHorizontally != CenterTargets.None ? (TextCenteringTargets)this.Parent.CenterHorizontally : centerHorizontally;
-                centerV = this.Parent.CenterHorizontally != CenterTargets.None ? (TextCenteringTargets)this.Parent.CenterVertically : centerVertically;
             }
             else
             {
@@ -358,30 +397,34 @@ namespace Engine.UI
                 rot = 0f;
                 parentCenter = Vector2.Zero;
                 parentScale = 1f;
-                centerH = centerHorizontally;
-                centerV = centerVertically;
             }
 
             // Adjust position
-            if (centerH != TextCenteringTargets.None)
+            var rect = this.GetRenderArea();
+
+            if (horizontalAlign == TextAlign.Center)
             {
-                var rectH = this.GetCenteringArea(centerH);
-                pos.X = rectH.Center.X - (Width * 0.5f);
+                pos.X = rect.Center.X - (Width * 0.5f);
+            }
+            else if (horizontalAlign == TextAlign.Right)
+            {
+                pos.X = rect.Right - Width;
             }
             else
             {
-                var rect = this.GetRenderArea();
                 pos.X = rect.X;
             }
 
-            if (centerV != TextCenteringTargets.None)
+            if (verticalAlign == VerticalAlign.Middle)
             {
-                var rectV = this.GetCenteringArea(centerV);
-                pos.Y = rectV.Center.Y - (Height * 0.5f);
+                pos.Y = rect.Center.Y - (Height * 0.5f);
+            }
+            else if (verticalAlign == VerticalAlign.Bottom)
+            {
+                pos.Y = rect.Bottom - Height;
             }
             else
             {
-                var rect = this.GetRenderArea();
                 pos.Y = rect.Y;
             }
 
@@ -505,44 +548,13 @@ namespace Engine.UI
         }
 
         /// <summary>
-        /// Centers vertically the text
-        /// </summary>
-        /// <param name="target">Center target</param>
-        public void CenterVertically(TextCenteringTargets target)
-        {
-            this.centerVertically = target;
-
-            this.updateInternals = true;
-        }
-        /// <summary>
-        /// Centers horinzontally the text
-        /// </summary>
-        /// <param name="target">Center target</param>
-        public void CenterHorizontally(TextCenteringTargets target)
-        {
-            this.centerHorizontally = target;
-
-            this.updateInternals = true;
-        }
-        /// <summary>
-        /// Centers the text into the screen
-        /// </summary>
-        public void CenterScreen()
-        {
-            this.textArea = null;
-            this.centerHorizontally = TextCenteringTargets.Screen;
-            this.centerVertically = TextCenteringTargets.Screen;
-
-            this.updateInternals = true;
-        }
-        /// <summary>
         /// Centers the text into the parent rectangle
         /// </summary>
         public void CenterParent()
         {
             this.textArea = null;
-            this.centerHorizontally = TextCenteringTargets.Parent;
-            this.centerVertically = TextCenteringTargets.Parent;
+            this.HorizontalAlign = TextAlign.Center;
+            this.VerticalAlign = VerticalAlign.Middle;
 
             this.updateInternals = true;
         }
@@ -553,8 +565,8 @@ namespace Engine.UI
         public void CenterRectangle(RectangleF rectangle)
         {
             this.textArea = rectangle;
-            this.centerHorizontally = TextCenteringTargets.Area;
-            this.centerVertically = TextCenteringTargets.Area;
+            this.HorizontalAlign = TextAlign.Center;
+            this.VerticalAlign = VerticalAlign.Middle;
 
             this.updateInternals = true;
         }
@@ -589,27 +601,7 @@ namespace Engine.UI
         /// <returns>Returns the text render area</returns>
         private RectangleF GetRenderArea()
         {
-            return this.Parent?.GetRenderArea() ?? textArea ?? this.Game.Form.RenderRectangle;
-        }
-        /// <summary>
-        /// Gets the area used for text centering calculation
-        /// </summary>
-        /// <param name="target">Center target</param>
-        /// <returns>Returns the text centering area</returns>
-        private RectangleF GetCenteringArea(TextCenteringTargets target)
-        {
-            if (target == TextCenteringTargets.Parent)
-            {
-                return this.Parent?.GetRenderArea() ?? this.textArea ?? this.Game.Form.RenderRectangle;
-            }
-            else if (target == TextCenteringTargets.Area)
-            {
-                return this.textArea ?? this.Game.Form.RenderRectangle;
-            }
-            else
-            {
-                return this.Game.Form.RenderRectangle;
-            }
+            return this.Parent?.GetRenderArea() ?? this.textArea ?? this.Game.Form.RenderRectangle;
         }
 
         /// <summary>
@@ -632,28 +624,5 @@ namespace Engine.UI
 
             return size;
         }
-    }
-
-    /// <summary>
-    /// Text centering targets
-    /// </summary>
-    enum TextCenteringTargets
-    {
-        /// <summary>
-        /// None
-        /// </summary>
-        None = 0,
-        /// <summary>
-        /// Parent
-        /// </summary>
-        Parent = 1,
-        /// <summary>
-        /// Screen
-        /// </summary>
-        Screen = 2,
-        /// <summary>
-        /// Area
-        /// </summary>
-        Area = 3,
     }
 }

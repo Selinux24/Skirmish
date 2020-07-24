@@ -269,7 +269,7 @@ namespace Collada
             this.title.Show(2000);
             this.title.ScaleInScaleOut(1f, 1.05f, 10000);
 
-            this.sceneDungeonWallButton.Text = "Dungeon Wall";
+            this.sceneDungeonWallButton.Caption.Text = "Dungeon Wall";
             this.sceneDungeonWallButton.TooltipText = "Shows a basic normal map scene demo.";
             this.sceneDungeonWallButton.Left = ((this.Game.Form.RenderWidth / 6) * 1) - (this.sceneDungeonWallButton.Width / 2);
             this.sceneDungeonWallButton.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneDungeonWallButton.Height / 2);
@@ -278,7 +278,7 @@ namespace Collada
             this.sceneDungeonWallButton.Show(tweenTime, tweenTime);
             tweenTime += tweenInc;
 
-            this.sceneNavMeshTestButton.Text = "Navmesh Test";
+            this.sceneNavMeshTestButton.Caption.Text = "Navmesh Test";
             this.sceneNavMeshTestButton.TooltipText = "Shows a navigation mesh scene demo.";
             this.sceneNavMeshTestButton.Left = ((this.Game.Form.RenderWidth / 6) * 2) - (this.sceneNavMeshTestButton.Width / 2);
             this.sceneNavMeshTestButton.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneNavMeshTestButton.Height / 2);
@@ -287,7 +287,7 @@ namespace Collada
             this.sceneNavMeshTestButton.Show(tweenTime, tweenTime);
             tweenTime += tweenInc;
 
-            this.sceneDungeonButton.Text = "Dungeon";
+            this.sceneDungeonButton.Caption.Text = "Dungeon";
             this.sceneDungeonButton.TooltipText = "Shows a basic dungeon from a unique mesh scene demo.";
             this.sceneDungeonButton.Left = ((this.Game.Form.RenderWidth / 6) * 3) - (this.sceneDungeonButton.Width / 2);
             this.sceneDungeonButton.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneDungeonButton.Height / 2);
@@ -296,7 +296,7 @@ namespace Collada
             this.sceneDungeonButton.Show(tweenTime, tweenTime);
             tweenTime += tweenInc;
 
-            this.sceneModularDungeonButton.Text = "Modular Dungeon";
+            this.sceneModularDungeonButton.Caption.Text = "Modular Dungeon";
             this.sceneModularDungeonButton.TooltipText = "Shows a modular dungeon scene demo.";
             this.sceneModularDungeonButton.Left = ((this.Game.Form.RenderWidth / 6) * 4) - (this.sceneModularDungeonButton.Width / 2);
             this.sceneModularDungeonButton.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneModularDungeonButton.Height / 2);
@@ -305,7 +305,7 @@ namespace Collada
             this.sceneModularDungeonButton.Show(tweenTime, tweenTime);
             tweenTime += tweenInc;
 
-            this.exitButton.Text = "Exit";
+            this.exitButton.Caption.Text = "Exit";
             this.exitButton.TooltipText = "Closes the application.";
             this.exitButton.Left = (this.Game.Form.RenderWidth / 6) * 5 - (this.exitButton.Width / 2);
             this.exitButton.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.exitButton.Height / 2);

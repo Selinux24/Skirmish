@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using SharpDX;
+using System.Threading.Tasks;
 
 namespace Engine.UI
 {
@@ -17,28 +18,11 @@ namespace Engine.UI
         /// Release sprite button
         /// </summary>
         private readonly Sprite buttonReleased = null;
-        /// <summary>
-        /// Button text drawer
-        /// </summary>
-        private readonly UITextArea textArea = null;
 
         /// <summary>
-        /// Gets or sets the button text
+        /// Gets the caption
         /// </summary>
-        public string Text
-        {
-            get
-            {
-                return this.textArea?.Text;
-            }
-            set
-            {
-                if (this.textArea != null)
-                {
-                    this.textArea.Text = value;
-                }
-            }
-        }
+        public UITextArea Caption { get; } = null;
 
         /// <summary>
         /// Constructor
@@ -63,6 +47,7 @@ namespace Engine.UI
             }
 
             this.buttonReleased = new Sprite(scene, spriteDesc);
+
             this.AddChild(this.buttonReleased, true);
 
             if (description.TwoStateButton)
@@ -97,11 +82,11 @@ namespace Engine.UI
                     EventsEnabled = false,
                 };
 
-                this.textArea = new UITextArea(scene, textAreaDesc);
+                this.Caption = new UITextArea(scene, textAreaDesc);
 
-                this.AddChild(this.textArea, true);
+                this.AddChild(this.Caption, true);
 
-                this.Text = description.Text;
+                this.Caption.Text = description.Text;
             }
         }
 

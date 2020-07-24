@@ -8,57 +8,234 @@ namespace Engine.UI
     public class TextDrawerDescription : SceneObjectDescription
     {
         /// <summary>
+        /// Default font family name
+        /// </summary>
+        public const string DefaultFontFamily = "Consolas";
+        /// <summary>
+        /// Default font size
+        /// </summary>
+        public const int DefaultSize = 12;
+
+        /// <summary>
         /// Generates a new description
         /// </summary>
-        /// <param name="font">Font name</param>
-        /// <param name="size">Size</param>
-        /// <param name="textColor">Text color</param>
         /// <returns>Returns the new generated description</returns>
-        public static TextDrawerDescription Generate(string font, int size, Color textColor)
+        public static TextDrawerDescription Default()
         {
-            return Generate(font, size, FontMapStyles.Regular, textColor, Color.Transparent);
+            return Default(DefaultFontFamily, DefaultSize, FontMapStyles.Regular, Color.White, Color.Transparent);
         }
         /// <summary>
         /// Generates a new description
         /// </summary>
-        /// <param name="font">Font name</param>
+        /// <param name="size">Size</param>
+        /// <returns>Returns the new generated description</returns>
+        public static TextDrawerDescription Default(int size)
+        {
+            return Default(DefaultFontFamily, size, FontMapStyles.Regular, Color.White, Color.Transparent);
+        }
+        /// <summary>
+        /// Generates a new description
+        /// </summary>
+        /// <param name="size">Size</param>
+        /// <param name="textColor">Text color</param>
+        /// <returns>Returns the new generated description</returns>
+        public static TextDrawerDescription Default(int size, Color textColor)
+        {
+            return Default(DefaultFontFamily, size, FontMapStyles.Regular, textColor, Color.Transparent);
+        }
+        /// <summary>
+        /// Generates a new description
+        /// </summary>
+        /// <param name="fontFamilyName">Font name</param>
+        /// <param name="size">Size</param>
+        /// <returns>Returns the new generated description</returns>
+        public static TextDrawerDescription Default(string fontFamilyName, int size)
+        {
+            return Default(fontFamilyName, size, FontMapStyles.Regular, Color.White, Color.Transparent);
+        }
+        /// <summary>
+        /// Generates a new description
+        /// </summary>
+        /// <param name="fontFamilyName">Font name</param>
+        /// <param name="size">Size</param>
+        /// <param name="textColor">Text color</param>
+        /// <returns>Returns the new generated description</returns>
+        public static TextDrawerDescription Default(string fontFamilyName, int size, Color textColor)
+        {
+            return Default(fontFamilyName, size, FontMapStyles.Regular, textColor, Color.Transparent);
+        }
+        /// <summary>
+        /// Generates a new description
+        /// </summary>
+        /// <param name="fontFamilyName">Font name</param>
         /// <param name="size">Size</param>
         /// <param name="style">Style</param>
         /// <param name="textColor">Text color</param>
         /// <returns>Returns the new generated description</returns>
-        public static TextDrawerDescription Generate(string font, int size, FontMapStyles style, Color textColor)
+        public static TextDrawerDescription Default(string fontFamilyName, int size, FontMapStyles style, Color textColor)
         {
-            return Generate(font, size, style, textColor, Color.Transparent);
+            return Default(fontFamilyName, size, style, textColor, Color.Transparent);
         }
         /// <summary>
         /// Generates a new description
         /// </summary>
-        /// <param name="font">Font name</param>
+        /// <param name="fontFamilyName">Font name</param>
         /// <param name="size">Size</param>
         /// <param name="textColor">Text color</param>
         /// <param name="shadowColor">Shadow color</param>
         /// <returns>Returns the new generated description</returns>
-        public static TextDrawerDescription Generate(string font, int size, Color textColor, Color shadowColor)
+        public static TextDrawerDescription Default(string fontFamilyName, int size, Color textColor, Color shadowColor)
         {
-            return Generate(font, size, FontMapStyles.Regular, textColor, shadowColor);
+            return Default(fontFamilyName, size, FontMapStyles.Regular, textColor, shadowColor);
         }
         /// <summary>
         /// Generates a new description
         /// </summary>
-        /// <param name="font">Font name</param>
+        /// <param name="fontFamilyName">Font name</param>
         /// <param name="size">Size</param>
         /// <param name="style">Style</param>
         /// <param name="textColor">Text color</param>
         /// <param name="shadowColor">Shadow color</param>
         /// <returns>Returns the new generated description</returns>
-        public static TextDrawerDescription Generate(string font, int size, FontMapStyles style, Color textColor, Color shadowColor)
+        public static TextDrawerDescription Default(string fontFamilyName, int size, FontMapStyles style, Color textColor, Color shadowColor)
         {
             return new TextDrawerDescription()
             {
-                Name = string.Format("TextBox {0} {1} {2}", font, size, style),
-                Font = font,
+                Name = string.Format("TextBox {0} {1} {2}", fontFamilyName, size, style),
+                Font = fontFamilyName,
                 FontSize = size,
                 Style = style,
+                TextColor = textColor,
+                ShadowColor = shadowColor,
+            };
+        }
+
+        /// <summary>
+        /// Generates a new description
+        /// </summary>
+        /// <param name="fontFileName">Font file name</param>
+        /// <returns>Returns the new generated description</returns>
+        public static TextDrawerDescription FromFile(string fontFileName)
+        {
+            return FromFile(fontFileName, DefaultSize, FontMapStyles.Regular, Color.White, Color.Transparent);
+        }
+        /// <summary>
+        /// Generates a new description
+        /// </summary>
+        /// <param name="fontFileName">Font file name</param>
+        /// <param name="size">Size</param>
+        /// <returns>Returns the new generated description</returns>
+        public static TextDrawerDescription FromFile(string fontFileName, int size)
+        {
+            return FromFile(fontFileName, size, FontMapStyles.Regular, Color.White, Color.Transparent);
+        }
+        /// <summary>
+        /// Generates a new description
+        /// </summary>
+        /// <param name="fontFileName">Font file name</param>
+        /// <param name="size">Size</param>
+        /// <param name="textColor">Text color</param>
+        /// <returns>Returns the new generated description</returns>
+        public static TextDrawerDescription FromFile(string fontFileName, int size, Color textColor)
+        {
+            return FromFile(fontFileName, size, FontMapStyles.Regular, textColor, Color.Transparent);
+        }
+        /// <summary>
+        /// Generates a new description
+        /// </summary>
+        /// <param name="fontFileName">Font file name</param>
+        /// <param name="size">Size</param>
+        /// <param name="textColor">Text color</param>
+        /// <param name="shadowColor">Shadow color</param>
+        /// <returns>Returns the new generated description</returns>
+        public static TextDrawerDescription FromFile(string fontFileName, int size, Color textColor, Color shadowColor)
+        {
+            return FromFile(fontFileName, size, FontMapStyles.Regular, textColor, shadowColor);
+        }
+        /// <summary>
+        /// Generates a new description
+        /// </summary>
+        /// <param name="fontFileName">Font file name</param>
+        /// <param name="size">Size</param>
+        /// <param name="style">Style</param>
+        /// <returns>Returns the new generated description</returns>
+        public static TextDrawerDescription FromFile(string fontFileName, int size, FontMapStyles style)
+        {
+            return FromFile(fontFileName, size, style, Color.White, Color.Transparent);
+        }
+        /// <summary>
+        /// Generates a new description
+        /// </summary>
+        /// <param name="fontFileName">Font file name</param>
+        /// <param name="size">Size</param>
+        /// <param name="style">Style</param>
+        /// <param name="textColor">Text color</param>
+        /// <returns>Returns the new generated description</returns>
+        public static TextDrawerDescription FromFile(string fontFileName, int size, FontMapStyles style, Color textColor)
+        {
+            return FromFile(fontFileName, size, style, textColor, Color.Transparent);
+        }
+        /// <summary>
+        /// Generates a new description
+        /// </summary>
+        /// <param name="fontFileName">Font file name</param>
+        /// <param name="size">Size</param>
+        /// <param name="style">Style</param>
+        /// <param name="textColor">Text color</param>
+        /// <param name="shadowColor">Shadow color</param>
+        /// <returns>Returns the new generated description</returns>
+        public static TextDrawerDescription FromFile(string fontFileName, int size, FontMapStyles style, Color textColor, Color shadowColor)
+        {
+            return new TextDrawerDescription()
+            {
+                Name = string.Format("TextBox {0} {1} {2}", fontFileName, size, style),
+                FontFileName = fontFileName,
+                FontSize = size,
+                Style = style,
+                TextColor = textColor,
+                ShadowColor = shadowColor,
+            };
+        }
+
+        /// <summary>
+        /// Generates a new description
+        /// </summary>
+        /// <param name="imageFileName">Font image file name</param>
+        /// <param name="mapFileName">Map file name</param>
+        /// <returns>Returns the new generated description</returns>
+        public static TextDrawerDescription FromMap(string imageFileName, string mapFileName)
+        {
+            return FromMap(imageFileName, mapFileName, Color.White, Color.Transparent);
+        }
+        /// <summary>
+        /// Generates a new description
+        /// </summary>
+        /// <param name="imageFileName">Font image file name</param>
+        /// <param name="mapFileName">Map file name</param>
+        /// <param name="textColor">Text color</param>
+        /// <returns>Returns the new generated description</returns>
+        public static TextDrawerDescription FromMap(string imageFileName, string mapFileName, Color textColor)
+        {
+            return FromMap(imageFileName, mapFileName, textColor, Color.Transparent);
+        }
+        /// <summary>
+        /// Generates a new description
+        /// </summary>
+        /// <param name="imageFileName">Font image file name</param>
+        /// <param name="mapFileName">Map file name</param>
+        /// <param name="textColor">Text color</param>
+        /// <param name="shadowColor">Shadow color</param>
+        /// <returns>Returns the new generated description</returns>
+        public static TextDrawerDescription FromMap(string imageFileName, string mapFileName, Color textColor, Color shadowColor)
+        {
+            return new TextDrawerDescription()
+            {
+                Name = string.Format("TextBox {0}", imageFileName),
+                FontMapping = new FontMapping
+                {
+                    ImageFile = imageFileName,
+                    MapFile = mapFileName,
+                },
                 TextColor = textColor,
                 ShadowColor = shadowColor,
             };
@@ -71,7 +248,7 @@ namespace Engine.UI
         /// <summary>
         /// Font name
         /// </summary>
-        public string Font { get; set; } = "Consolas";
+        public string Font { get; set; } = DefaultFontFamily;
         /// <summary>
         /// Font file name
         /// </summary>
@@ -83,7 +260,7 @@ namespace Engine.UI
         /// <summary>
         /// Font size
         /// </summary>
-        public int FontSize { get; set; } = 12;
+        public int FontSize { get; set; } = DefaultSize;
         /// <summary>
         /// Font style
         /// </summary>
@@ -108,6 +285,14 @@ namespace Engine.UI
         /// Perform line adjust
         /// </summary>
         public bool LineAdjust { get; set; } = false;
+        /// <summary>
+        /// Horizontal alignement
+        /// </summary>
+        public TextAlign HorizontalAlign { get; set; } = TextAlign.Left;
+        /// <summary>
+        /// Vertical alignement
+        /// </summary>
+        public VerticalAlign VerticalAlign { get; set; } = VerticalAlign.Top;
 
         /// <summary>
         /// Constructor

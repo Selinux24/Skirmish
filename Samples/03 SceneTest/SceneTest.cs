@@ -113,11 +113,11 @@ namespace SceneTest
         }
         private async Task InitializeUI()
         {
-            this.title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate("Tahoma", 18, Color.White, Color.Orange) }, layerHUD);
+            this.title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Default("Tahoma", 18, Color.White, Color.Orange) }, layerHUD);
             this.title.Text = "Scene Test - Textures";
             this.title.SetPosition(Vector2.Zero);
 
-            this.runtime = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Generate("Tahoma", 10, Color.Yellow, Color.Orange) }, layerHUD);
+            this.runtime = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Default("Tahoma", 10, Color.Yellow, Color.Orange) }, layerHUD);
             this.runtime.Text = "";
             this.runtime.SetPosition(new Vector2(5, this.title.Top + this.title.Height + 3));
 
@@ -875,7 +875,7 @@ namespace SceneTest
             if (progressBar != null)
             {
                 progressBar.ProgressValue = progressValue;
-                progressBar.Text = $"{(int)(progressValue * 100f)}%";
+                progressBar.Caption.Text = $"{(int)(progressValue * 100f)}%";
             }
         }
 
