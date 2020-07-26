@@ -161,6 +161,54 @@ namespace Engine.UI
                 Font = font,
             };
         }
+        /// <summary>
+        /// Gets the default two state button description
+        /// </summary>
+        /// <param name="releasedTextureFileName">Released texture file name</param>
+        /// <param name="pressedTextureFileName">Pressed texture file name</param>
+        /// <param name="font">Font description</param>
+        public static UIButtonDescription DefaultTwoStateButton(string releasedTextureFileName, string pressedTextureFileName, TextDrawerDescription font)
+        {
+            return new UIButtonDescription()
+            {
+                Width = 120,
+                Height = 50,
+
+                TwoStateButton = true,
+
+                TextureReleased = releasedTextureFileName,
+
+                TexturePressed = pressedTextureFileName,
+
+                Font = font,
+            };
+        }
+        /// <summary>
+        /// Gets the default two state button description
+        /// </summary>
+        /// <param name="releasedTextureFileName">Released texture file name</param>
+        /// <param name="releasedTextureRect">Released texture rectangle</param>
+        /// <param name="pressedTextureFileName">Pressed texture file name</param>
+        /// <param name="pressedTextureRect">Pressed texture rectangle</param>
+        /// <param name="font">Font description</param>
+        public static UIButtonDescription DefaultTwoStateButton(string releasedTextureFileName, Vector4 releasedTextureRect, string pressedTextureFileName, Vector4 pressedTextureRect, TextDrawerDescription font)
+        {
+            return new UIButtonDescription()
+            {
+                Width = 120,
+                Height = 50,
+
+                TwoStateButton = true,
+
+                TextureReleased = releasedTextureFileName,
+                TextureReleasedUVMap = releasedTextureRect,
+
+                TexturePressed = pressedTextureFileName,
+                TexturePressedUVMap = pressedTextureRect,
+
+                Font = font,
+            };
+        }
 
         /// <summary>
         /// Two state button

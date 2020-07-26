@@ -940,11 +940,6 @@ namespace Engine
 
         #endregion
 
-        #region RectangleF
-
-
-        #endregion
-
         #region Bounding Box
 
         /// <summary>

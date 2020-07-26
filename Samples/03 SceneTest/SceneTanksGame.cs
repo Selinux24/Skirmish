@@ -144,7 +144,7 @@ namespace SceneTest
             loadingText.Top = this.Game.Form.RenderCenter.Y - 75f;
             loadingText.Visible = false;
 
-            loadingBar = await this.AddComponentUIProgressBar(UIProgressBarDescription.WithText(fontFilename, 20, true), layerLoadingUI + 1);
+            loadingBar = await this.AddComponentUIProgressBar(UIProgressBarDescription.DefaultFromFile(fontFilename, 20, true), layerLoadingUI + 1);
             loadingBar.CenterHorizontally = CenterTargets.Screen;
             loadingBar.CenterVertically = CenterTargets.Screen;
             loadingBar.Width = this.Game.Form.RenderWidth * 0.8f;
@@ -212,10 +212,8 @@ namespace SceneTest
         private async Task InitializeUIGameMessages()
         {
             gameMessage = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 120, false), layerLoadingUI);
-            gameMessage.Top = 0;
-            gameMessage.Left = 0;
-            gameMessage.Width = this.Game.Form.RenderWidth;
-            gameMessage.Height = this.Game.Form.RenderHeight;
+            gameMessage.CenterHorizontally = CenterTargets.Screen;
+            gameMessage.CenterVertically = CenterTargets.Screen;
             gameMessage.TextColor = Color.Yellow;
             gameMessage.TextShadowColor = Color.Yellow * 0.5f;
             gameMessage.Text = " ";
@@ -228,6 +226,7 @@ namespace SceneTest
             player1Name = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 20, true), layerUI);
             player1Name.TextColor = player1Status.Color;
             player1Name.TextShadowColor = player1Status.Color * 0.5f;
+            player1Name.AdjustAreaWithText = false;
             player1Name.HorizontalAlign = TextAlign.Left;
             player1Name.Width = playerWidth;
             player1Name.Top = 10;
@@ -237,13 +236,14 @@ namespace SceneTest
             player1Points = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 25, true), layerUI);
             player1Points.TextColor = player1Status.Color;
             player1Points.TextShadowColor = player1Status.Color * 0.5f;
+            player1Points.AdjustAreaWithText = false;
             player1Points.HorizontalAlign = TextAlign.Center;
             player1Points.Width = playerWidth;
             player1Points.Top = 60;
             player1Points.Left = 10;
             player1Points.Visible = true;
 
-            player1Life = await this.AddComponentUIProgressBar(UIProgressBarDescription.WithText(fontFilename, 10, true), layerUI);
+            player1Life = await this.AddComponentUIProgressBar(UIProgressBarDescription.DefaultFromFile(fontFilename, 10, true), layerUI);
             player1Life.Width = playerWidth;
             player1Life.Height = 30;
             player1Life.Top = 100;
@@ -257,6 +257,7 @@ namespace SceneTest
             player2Name = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 20, true), layerUI);
             player2Name.TextColor = player2Status.Color;
             player2Name.TextShadowColor = player2Status.Color * 0.5f;
+            player2Name.AdjustAreaWithText = false;
             player2Name.HorizontalAlign = TextAlign.Right;
             player2Name.Width = playerWidth;
             player2Name.Top = 10;
@@ -266,13 +267,14 @@ namespace SceneTest
             player2Points = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 25, true), layerUI);
             player2Points.TextColor = player2Status.Color;
             player2Points.TextShadowColor = player2Status.Color * 0.5f;
+            player2Points.AdjustAreaWithText = false;
             player2Points.HorizontalAlign = TextAlign.Center;
             player2Points.Width = playerWidth;
             player2Points.Top = 60;
             player2Points.Left = this.Game.Form.RenderWidth - 10 - player2Points.Width;
             player2Points.Visible = true;
 
-            player2Life = await this.AddComponentUIProgressBar(UIProgressBarDescription.WithText(fontFilename, 10, true), layerUI);
+            player2Life = await this.AddComponentUIProgressBar(UIProgressBarDescription.DefaultFromFile(fontFilename, 10, true), layerUI);
             player2Life.Width = playerWidth;
             player2Life.Height = 30;
             player2Life.Top = 100;
@@ -390,7 +392,7 @@ namespace SceneTest
         }
         private async Task InitializeUIFire()
         {
-            pbFire = await this.AddComponentUIProgressBar(UIProgressBarDescription.Default, layerUI);
+            pbFire = await this.AddComponentUIProgressBar(UIProgressBarDescription.Default(), layerUI);
             pbFire.CenterHorizontally = CenterTargets.Screen;
             pbFire.Top = this.Game.Form.RenderHeight - 100;
             pbFire.Width = 500;
@@ -434,7 +436,7 @@ namespace SceneTest
             miniMapTank2.Color = Color.Red;
             miniMapTank2.Visible = true;
 
-            windVelocity = await this.AddComponentUIProgressBar(UIProgressBarDescription.WithText(fontFilename, 8), layerUI + 2);
+            windVelocity = await this.AddComponentUIProgressBar(UIProgressBarDescription.DefaultFromFile(fontFilename, 8), layerUI + 2);
             windVelocity.Caption.Text = "Wind velocity";
             windVelocity.Caption.TextColor = Color.Yellow * 0.85f;
             windVelocity.Width = 180;

@@ -81,7 +81,7 @@ namespace SpriteDrawing
         }
         private async Task InitializeProgressbar()
         {
-            var desc = UIProgressBarDescription.WithText("LeagueSpartan-Bold.otf", 10, true);
+            var desc = UIProgressBarDescription.DefaultFromFile("LeagueSpartan-Bold.otf", 10, true);
             desc.Name = "Progress Bar";
             desc.Top = this.Game.Form.RenderHeight - 20;
             desc.Left = 100;
@@ -213,17 +213,12 @@ namespace SpriteDrawing
 
             var descText = UITextAreaDescription.FromMap("MaraFont.png", "MaraFont.txt");
             descText.Name = "MaraText";
-            descText.CenterHorizontally = CenterTargets.Parent;
-            descText.CenterVertically = CenterTargets.Parent;
             descText.Text = @"Letters by Mara";
 
-            var textMapped = new UITextArea(this, descText)
-            {
-                Scale = 0.25f,
-            };
+            var textMapped = new UITextArea(this, descText);
 
-            this.dynamicPan.AddChild(butClose, false);
             this.dynamicPan.AddChild(textMapped);
+            this.dynamicPan.AddChild(butClose, false);
             this.dynamicPan.Visible = false;
         }
         private async Task InitializeButtonTest()

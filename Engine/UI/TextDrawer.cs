@@ -400,7 +400,7 @@ namespace Engine.UI
             }
 
             // Adjust position
-            var rect = this.GetRenderArea();
+            var rect = this.GetRenderArea().Scale(this.Parent?.Scale ?? 1f);
 
             if (horizontalAlign == TextAlign.Center)
             {
@@ -591,7 +591,6 @@ namespace Engine.UI
             this.updateBuffers = true;
 
             // Adjust text bounds
-            size *= this.Parent?.Scale ?? 1f;
             this.Width = size.X;
             this.Height = size.Y;
         }

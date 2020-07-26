@@ -259,15 +259,15 @@ namespace Collada
 
         private async Task InitializeUI()
         {
-            var title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Default("Tahoma", 18, Color.White) }, layerHUD);
+            var title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18, Color.White) }, layerHUD);
             title.Text = "Collada Modular Dungeon Scene";
             title.SetPosition(Vector2.Zero);
 
-            this.fps = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Default("Lucida Sans", 12, Color.Yellow) }, layerHUD);
+            this.fps = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12, Color.Yellow) }, layerHUD);
             this.fps.Text = null;
             this.fps.SetPosition(new Vector2(0, 24));
 
-            this.info = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Default("Lucida Sans", 12, Color.Yellow) }, layerHUD);
+            this.info = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12, Color.Yellow) }, layerHUD);
             this.info.Text = null;
             this.info.SetPosition(new Vector2(0, 48));
 
@@ -281,7 +281,7 @@ namespace Collada
 
             await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);
 
-            this.messages = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Default("Lucida Sans", 48, Color.Red, Color.DarkRed) }, layerHUD);
+            this.messages = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 48, Color.Red, Color.DarkRed) }, layerHUD);
             this.messages.Text = null;
             this.messages.SetPosition(new Vector2(0, 0));
             this.messages.Visible = false;

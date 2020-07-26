@@ -205,10 +205,10 @@ namespace Terrain
             Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
 
-            var title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Default("Tahoma", 18, Color.White) }, this.layerHud);
-            this.stats = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Default("Lucida Sans", 12, Color.Yellow) }, this.layerHud);
-            this.counters1 = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Default("Lucida Sans", 10, Color.GreenYellow) }, this.layerHud);
-            this.counters2 = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Default("Lucida Sans", 10, Color.GreenYellow) }, this.layerHud);
+            var title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18, Color.White) }, this.layerHud);
+            this.stats = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12, Color.Yellow) }, this.layerHud);
+            this.counters1 = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 10, Color.GreenYellow) }, this.layerHud);
+            this.counters2 = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 10, Color.GreenYellow) }, this.layerHud);
 
             title.Text = "Terrain collision and trajectories test";
             this.stats.Text = "";

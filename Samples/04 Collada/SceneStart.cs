@@ -154,108 +154,54 @@ namespace Collada
         }
         private async Task InitializeCursor()
         {
-            var cursorDesc = new UICursorDescription()
-            {
-                Name = "Cursor",
-                ContentPath = "Resources/Common",
-                Textures = new[] { "pointer.png" },
-                Height = 36,
-                Width = 36,
-                Centered = false,
-                Color = Color.White,
-            };
-            await this.AddComponentUICursor(cursorDesc, layerCursor);
+            await this.AddComponentUICursor(UICursorDescription.Default("Resources/Common/pointer.png", 36, 36), layerCursor);
         }
         private async Task InitializeControls()
         {
             // Title text
-            var titleDesc = new UITextAreaDescription
-            {
-                Width = this.Game.Form.RenderWidth,
-                Height = this.Game.Form.RenderHeight,
+            var titleDesc = UITextAreaDescription.FromFamily("Viner Hand ITC", 90, FontMapStyles.Bold);
+            titleDesc.Name = "Title";
+            titleDesc.Font.TextColor = Color.IndianRed;
+            titleDesc.Font.ShadowColor = new Color4(Color.Brown.RGB(), 0.25f);
+            titleDesc.Font.ShadowDelta = new Vector2(4, 4);
 
-                Font = new TextDrawerDescription()
-                {
-                    Name = "Title",
-                    Font = "Viner Hand ITC",
-                    FontSize = 90,
-                    Style = FontMapStyles.Bold,
-                    TextColor = Color.IndianRed,
-                    ShadowColor = new Color4(Color.Brown.RGB(), 0.25f),
-                    ShadowDelta = new Vector2(4, 4),
-                },
-            };
             this.title = await this.AddComponentUITextArea(titleDesc, layerHUD);
 
+            // Font description
+            var buttonFont = TextDrawerDescription.FromFile("common/HelveticaNeueHv.ttf", 16, Color.Gold);
+            buttonFont.HorizontalAlign = TextAlign.Center;
+            buttonFont.VerticalAlign = VerticalAlign.Middle;
+
             // Buttons
-            var buttonDesc = new UIButtonDescription()
-            {
-                Name = "Scene buttons",
+            var buttonDesc = UIButtonDescription.DefaultTwoStateButton("common/buttons.png", new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f, buttonFont);
+            buttonDesc.Name = "Scene buttons";
+            buttonDesc.Width = 200;
+            buttonDesc.Height = 36;
+            buttonDesc.ColorReleased = new Color4(sceneButtonColor.RGB(), 0.8f);
+            buttonDesc.ColorReleased = new Color4(sceneButtonColor.RGB() * 1.2f, 0.9f);
 
-                Width = 200,
-                Height = 36,
-
-                TwoStateButton = true,
-
-                TextureReleased = "common/buttons.png",
-                TextureReleasedUVMap = new Vector4(44, 30, 556, 136) / 600f,
-                ColorReleased = new Color4(sceneButtonColor.RGB(), 0.8f),
-
-                TexturePressed = "common/buttons.png",
-                TexturePressedUVMap = new Vector4(44, 30, 556, 136) / 600f,
-                ColorPressed = new Color4(sceneButtonColor.RGB() * 1.2f, 0.9f),
-
-                Font = new TextDrawerDescription()
-                {
-                    FontFileName = "common/HelveticaNeueHv.ttf",
-                    FontSize = 16,
-                    TextColor = Color.Gold,
-                },
-            };
             this.sceneDungeonWallButton = await this.AddComponentUIButton(buttonDesc, layerHUD);
             this.sceneNavMeshTestButton = await this.AddComponentUIButton(buttonDesc, layerHUD);
             this.sceneDungeonButton = await this.AddComponentUIButton(buttonDesc, layerHUD);
             this.sceneModularDungeonButton = await this.AddComponentUIButton(buttonDesc, layerHUD);
 
             // Exit button
-            var exitButtonDesc = new UIButtonDescription()
-            {
-                Name = "Exit button",
+            var exitButtonDesc = UIButtonDescription.DefaultTwoStateButton("common/buttons.png", new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f, buttonFont);
+            exitButtonDesc.Name = "Exit button";
+            exitButtonDesc.Width = 200;
+            exitButtonDesc.Height = 36;
+            exitButtonDesc.ColorReleased = new Color4(exitButtonColor.RGB(), 0.8f);
+            exitButtonDesc.ColorReleased = new Color4(exitButtonColor.RGB() * 1.2f, 0.9f);
 
-                Width = 200,
-                Height = 36,
-
-                TwoStateButton = true,
-
-                TextureReleased = "common/buttons.png",
-                TextureReleasedUVMap = new Vector4(44, 30, 556, 136) / 600f,
-                ColorReleased = new Color4(exitButtonColor.RGB(), 0.8f),
-
-                TexturePressed = "common/buttons.png",
-                TexturePressedUVMap = new Vector4(44, 30, 556, 136) / 600f,
-                ColorPressed = new Color4(exitButtonColor.RGB() * 1.2f, 0.9f),
-
-                Font = new TextDrawerDescription()
-                {
-                    FontFileName = "common/HelveticaNeueHv.ttf",
-                    FontSize = 16,
-                    TextColor = Color.Gold,
-                },
-            };
             this.exitButton = await this.AddComponentUIButton(exitButtonDesc, layerHUD);
 
             // Description text
-            var descriptionDesc = new UITextAreaDescription
-            {
-                Font = new TextDrawerDescription()
-                {
-                    Name = "Tooltip",
-                    FontFileName = "common/HelveticaNeue Medium.ttf",
-                    FontSize = 12,
-                    TextColor = Color.LightGray,
-                },
-            };
-            this.description = await this.AddComponentUITextArea(descriptionDesc, layerHUD);
+            var tooltipDesc = UITextAreaDescription.FromFile("common/HelveticaNeue Medium.ttf", 12);
+            tooltipDesc.Name = "Tooltip";
+            tooltipDesc.Font.TextColor = Color.LightGray;
+            tooltipDesc.Width = 250;
+
+            this.description = await this.AddComponentUITextArea(tooltipDesc, layerHUD);
         }
         private void SetControlPositions()
         {
@@ -264,7 +210,6 @@ namespace Collada
 
             this.title.Text = "Collada Loader Test";
             this.title.CenterHorizontally = CenterTargets.Screen;
-            this.title.CenterVertically = CenterTargets.Screen;
             this.title.Top = this.Game.Form.RenderHeight * 0.25f;
             this.title.Show(2000);
             this.title.ScaleInScaleOut(1f, 1.05f, 10000);

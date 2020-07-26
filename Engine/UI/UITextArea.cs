@@ -5,6 +5,9 @@ namespace Engine.UI
 {
     using Engine.Common;
 
+    /// <summary>
+    /// Text area
+    /// </summary>
     public class UITextArea : UIControl
     {
         /// <summary>
@@ -25,15 +28,24 @@ namespace Engine.UI
             {
                 if (this.textDrawer != null)
                 {
+                    this.textDrawer.Text = value;
+
                     float maxWidth = this.Width <= 0 ? float.PositiveInfinity : this.Width;
 
                     var size = this.textDrawer.MeasureText(value, maxWidth);
 
-                    //Grow area
-                    if (this.Width <= 0) this.Width = size.X;
-                    if (this.Height <= 0) this.Height = size.Y;
+                    //Set initial sizes
+                    if (this.Width == 0) this.Width = size.X;
+                    if (this.Height == 0) this.Height = size.Y;
 
-                    this.textDrawer.Text = value;
+                    if (!this.AdjustAreaWithText)
+                    {
+                        return;
+                    }
+
+                    //Grow area
+                    this.Width = size.X;
+                    this.Height = size.Y;
                 }
             }
         }
@@ -105,6 +117,10 @@ namespace Engine.UI
                 }
             }
         }
+        /// <summary>
+        /// Gets or sets whether the area must grow or shrinks with the text value
+        /// </summary>
+        public bool AdjustAreaWithText { get; set; } = true;
 
         /// <summary>
         /// Gest or sets the left margin
@@ -148,6 +164,7 @@ namespace Engine.UI
             this.MarginTop = description.MarginTop;
             this.MarginRight = description.MarginRight;
             this.MarginBottom = description.MarginBottom;
+            this.AdjustAreaWithText = description.Width == 0 && description.Height == 0;
 
             if (description.Font != null)
             {
@@ -182,7 +199,7 @@ namespace Engine.UI
                 return;
             }
 
-            this.textDrawer?.Update(context);
+            this.textDrawer.Update(context);
         }
 
         /// <inheritdoc/>

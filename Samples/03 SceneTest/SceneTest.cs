@@ -113,11 +113,19 @@ namespace SceneTest
         }
         private async Task InitializeUI()
         {
-            this.title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Default("Tahoma", 18, Color.White, Color.Orange) }, layerHUD);
+            var titleDesc = UITextAreaDescription.FromFamily("Tahoma", 18);
+            titleDesc.Font.TextColor = Color.Yellow;
+            titleDesc.Font.ShadowColor = Color.Orange;
+
+            this.title = await this.AddComponentUITextArea(titleDesc, layerHUD);
             this.title.Text = "Scene Test - Textures";
             this.title.SetPosition(Vector2.Zero);
 
-            this.runtime = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.Default("Tahoma", 10, Color.Yellow, Color.Orange) }, layerHUD);
+            var runtimeDesc = UITextAreaDescription.FromFamily("Tahoma", 10);
+            runtimeDesc.Font.TextColor = Color.Yellow;
+            runtimeDesc.Font.ShadowColor = Color.Orange;
+
+            this.runtime = await this.AddComponentUITextArea(runtimeDesc, layerHUD);
             this.runtime.Text = "";
             this.runtime.SetPosition(new Vector2(5, this.title.Top + this.title.Height + 3));
 
@@ -128,22 +136,15 @@ namespace SceneTest
                 Color = new Color4(0, 0, 0, 0.75f),
             }, SceneObjectUsages.UI, layerHUD - 1);
 
-            this.butClose = await this.AddComponentUIButton(new UIButtonDescription()
-            {
-                TwoStateButton = true,
-                TextureReleased = "SceneTest/UI/button_off.png",
-                TexturePressed = "SceneTest/UI/button_on.png",
-                Width = 100,
-                Height = 40,
-                Font = new TextDrawerDescription()
-                {
-                    Font = "Lucida Console",
-                    FontSize = 12,
-                    TextColor = Color.Yellow,
-                    ShadowColor = Color.Orange,
-                },
-                Text = "Close",
-            }, layerHUD);
+            var buttonFont = TextDrawerDescription.FromFamily("Lucida Console", 12, Color.Yellow, Color.Orange);
+            buttonFont.HorizontalAlign = TextAlign.Center;
+            buttonFont.VerticalAlign = VerticalAlign.Middle;
+            var buttonDesc = UIButtonDescription.DefaultTwoStateButton("SceneTest/UI/button_on.png", "SceneTest/UI/button_off.png", buttonFont);
+            buttonDesc.Width = 100;
+            buttonDesc.Height = 40;
+            buttonDesc.Text = "Close";
+
+            this.butClose = await this.AddComponentUIButton(buttonDesc, layerHUD);
             this.butClose.JustReleased += (sender, eventArgs) => { this.Game.SetScene<SceneStart>(); };
             this.butClose.Visible = false;
 
@@ -159,33 +160,21 @@ namespace SceneTest
                 Height = this.Game.Form.RenderHeight,
             }, layerHUD + 1);
 
-            this.progressBar = await this.AddComponentUIProgressBar(new UIProgressBarDescription
-            {
-                Name = "Progress Bar",
-                Top = this.Game.Form.RenderHeight - 60,
-                Left = 100,
-                Width = this.Game.Form.RenderWidth - 200,
-                Height = 30,
-                BaseColor = new Color(0, 0, 0, 0.5f),
-                ProgressColor = Color.Green,
-                Font = new TextDrawerDescription
-                {
-                    Font = "Consolas",
-                    FontSize = 18,
-                },
-            }, layerHUD + 2);
+            var pbDesc = UIProgressBarDescription.DefaultFromFamily("Consolas", 18);
+            pbDesc.Name = "Progress Bar";
+            pbDesc.Top = this.Game.Form.RenderHeight - 60;
+            pbDesc.Left = 100;
+            pbDesc.Width = this.Game.Form.RenderWidth - 200;
+            pbDesc.Height = 30;
+            pbDesc.BaseColor = new Color(0, 0, 0, 0.5f);
+            pbDesc.ProgressColor = Color.Green;
 
-            this.cursor = await this.AddComponentUICursor(new UICursorDescription()
-            {
-                Name = "Cursor",
-                ContentPath = "Common",
-                Textures = new[] { "pointer.png" },
-                Height = 48,
-                Width = 48,
-                Centered = false,
-                Delta = new Vector2(-14, -6),
-                Color = Color.White,
-            }, layerHUD * 2);
+            this.progressBar = await this.AddComponentUIProgressBar(pbDesc, layerHUD + 2);
+
+            var cursorDesc = UICursorDescription.Default("Common/pointer.png", 48, 48, new Vector2(-14, -6));
+            cursorDesc.Name = "Cursor";
+
+            this.cursor = await this.AddComponentUICursor(cursorDesc, layerHUD * 2);
             this.cursor.Visible = false;
         }
 

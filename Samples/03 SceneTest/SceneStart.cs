@@ -118,7 +118,7 @@ namespace SceneTest
 
             #region Title text
 
-            var titleFont = TextDrawerDescription.Default("Showcard Gothic", 72, FontMapStyles.Bold, Color.Gold);
+            var titleFont = TextDrawerDescription.FromFamily("Showcard Gothic", 72, FontMapStyles.Bold, Color.Gold);
             titleFont.Name = "Title";
             titleFont.ShadowColor = new Color4(Color.LightYellow.RGB(), 0.25f);
             titleFont.ShadowDelta = new Vector2(4, 4);
@@ -133,7 +133,7 @@ namespace SceneTest
 
             #region Scene buttons
 
-            var buttonsFont = TextDrawerDescription.Default("Verdana", 20, FontMapStyles.Bold, Color.Gold);
+            var buttonsFont = TextDrawerDescription.FromFamily("Verdana", 20, FontMapStyles.Bold, Color.Gold);
             buttonsFont.HorizontalAlign = TextAlign.Center;
             buttonsFont.VerticalAlign = VerticalAlign.Middle;
 

@@ -7,11 +7,45 @@ namespace Engine.UI
     public class UITextAreaDescription : UIControlDescription
     {
         /// <summary>
+        /// Gets the default text area description
+        /// </summary>
+        public static UITextAreaDescription Default()
+        {
+            return new UITextAreaDescription();
+        }
+        /// <summary>
+        /// Gets the default text area description
+        /// </summary>
+        public static UITextAreaDescription DefaultTextCentered()
+        {
+            return new UITextAreaDescription
+            {
+                Font = new TextDrawerDescription
+                {
+                    HorizontalAlign = TextAlign.Center,
+                    VerticalAlign = VerticalAlign.Middle,
+                },
+            };
+        }
+        /// <summary>
+        /// Gets the default text area description from a font description
+        /// </summary>
+        /// <param name="font">Font description</param>
+        public static UITextAreaDescription Default(TextDrawerDescription font)
+        {
+            return new UITextAreaDescription
+            {
+                Font = font,
+            };
+        }
+
+        /// <summary>
         /// Gets the default text area description from a font family name
         /// </summary>
         /// <param name="fontFamilyName">Font family name</param>
         /// <param name="size">Font size</param>
-        public static UITextAreaDescription FromFamily(string fontFamilyName, int size)
+        /// <param name="fontStyle">Font style</param>
+        public static UITextAreaDescription FromFamily(string fontFamilyName, int size, FontMapStyles fontStyle = FontMapStyles.Regular)
         {
             return new UITextAreaDescription
             {
@@ -21,6 +55,7 @@ namespace Engine.UI
                     FontSize = size,
                     HorizontalAlign = TextAlign.Center,
                     VerticalAlign = VerticalAlign.Middle,
+                    Style = fontStyle,
                 },
             };
         }
@@ -29,8 +64,9 @@ namespace Engine.UI
         /// </summary>
         /// <param name="fileName">File name</param>
         /// <param name="size">Size</param>
+        /// <param name="fontStyle">Font style</param>
         /// <param name="lineAdjust">Line adjust</param>
-        public static UITextAreaDescription FromFile(string fileName, int size, bool lineAdjust = false)
+        public static UITextAreaDescription FromFile(string fileName, int size, bool lineAdjust = false, FontMapStyles fontStyle = FontMapStyles.Regular)
         {
             return new UITextAreaDescription()
             {
@@ -41,6 +77,7 @@ namespace Engine.UI
                     LineAdjust = lineAdjust,
                     HorizontalAlign = TextAlign.Center,
                     VerticalAlign = VerticalAlign.Middle,
+                    Style = fontStyle,
                 },
             };
         }
@@ -63,38 +100,6 @@ namespace Engine.UI
                     HorizontalAlign = TextAlign.Center,
                     VerticalAlign = VerticalAlign.Middle,
                     UseTextureColor = true,
-                },
-            };
-        }
-        /// <summary>
-        /// Gets the default text area description from a font description
-        /// </summary>
-        /// <param name="font">Font description</param>
-        public static UITextAreaDescription Default(TextDrawerDescription font)
-        {
-            return new UITextAreaDescription
-            {
-                Font = font,
-            };
-        }
-        /// <summary>
-        /// Gets the default text area description
-        /// </summary>
-        public static UITextAreaDescription Default()
-        {
-            return new UITextAreaDescription();
-        }
-        /// <summary>
-        /// Gets the default text area description
-        /// </summary>
-        public static UITextAreaDescription DefaultTextCentered()
-        {
-            return new UITextAreaDescription
-            {
-                Font = new TextDrawerDescription
-                {
-                    HorizontalAlign = TextAlign.Center,
-                    VerticalAlign = VerticalAlign.Middle,
                 },
             };
         }

@@ -10,42 +10,72 @@ namespace Engine.UI
         /// <summary>
         /// Gets the default progress bar description
         /// </summary>
-        public static UIProgressBarDescription Default
+        public static UIProgressBarDescription Default()
         {
-            get
-            {
-                return new UIProgressBarDescription();
-            }
+            return new UIProgressBarDescription();
         }
         /// <summary>
-        /// Gets the default progress bar description with text
+        /// Gets the default progress bar description from a font family name
         /// </summary>
-        /// <param name="fontFileName">Font file name</param>
-        /// <param name="fontSize">Font size</param>
-        /// <param name="fontLineAdjust">Font line adjust</param>
-        public static UIProgressBarDescription WithText(string fontFileName, int fontSize, bool fontLineAdjust = false)
+        /// <param name="fontFamilyName">Font family name</param>
+        /// <param name="size">Font size</param>
+        /// <param name="fontStyle">Font style</param>
+        public static UIProgressBarDescription DefaultFromFamily(string fontFamilyName, int size, FontMapStyles fontStyle = FontMapStyles.Regular)
+        {
+            return new UIProgressBarDescription()
+            {
+                Font = new TextDrawerDescription()
+                {
+                    Font = fontFamilyName,
+                    FontSize = size,
+                    HorizontalAlign = TextAlign.Center,
+                    VerticalAlign = VerticalAlign.Middle,
+                    Style = fontStyle,
+                },
+            };
+        }
+        /// <summary>
+        /// Gets the default progress bar description from a font file
+        /// </summary>
+        /// <param name="fileName">File name</param>
+        /// <param name="size">Size</param>
+        /// <param name="fontStyle">Font style</param>
+        /// <param name="lineAdjust">Line adjust</param>
+        public static UIProgressBarDescription DefaultFromFile(string fileName, int size, bool lineAdjust = false, FontMapStyles fontStyle = FontMapStyles.Regular)
         {
             return new UIProgressBarDescription()
             {
                 Font = new TextDrawerDescription
                 {
-                    FontFileName = fontFileName,
-                    FontSize = fontSize,
-                    LineAdjust = fontLineAdjust,
+                    FontFileName = fileName,
+                    FontSize = size,
+                    LineAdjust = lineAdjust,
                     HorizontalAlign = TextAlign.Center,
                     VerticalAlign = VerticalAlign.Middle,
+                    Style = fontStyle,
                 },
             };
         }
         /// <summary>
-        /// Gets the default progress bar description with text
+        /// Gets the default progress bar description from a font map 
         /// </summary>
-        /// <param name="font">Font description</param>
-        public static UIProgressBarDescription WithText(TextDrawerDescription font)
+        /// <param name="fontImageFileName">Font image file name</param>
+        /// <param name="fontMapFileName">Font map file name</param>
+        public static UIProgressBarDescription DefaultFromMap(string fontImageFileName, string fontMapFileName)
         {
-            return new UIProgressBarDescription()
+            return new UIProgressBarDescription
             {
-                Font = font,
+                Font = new TextDrawerDescription()
+                {
+                    FontMapping = new FontMapping
+                    {
+                        ImageFile = fontImageFileName,
+                        MapFile = fontMapFileName,
+                    },
+                    HorizontalAlign = TextAlign.Center,
+                    VerticalAlign = VerticalAlign.Middle,
+                    UseTextureColor = true,
+                },
             };
         }
 
