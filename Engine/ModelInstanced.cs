@@ -165,6 +165,11 @@ namespace Engine
         /// <param name="meshName">Mesh name</param>
         private void UpdateIndependantTransforms(string meshName)
         {
+            if (!hasIndependantTransforms)
+            {
+                return;
+            }
+
             int instanceIndex = 0;
 
             for (int i = 0; i < this.instancesTmp.Length; i++)
@@ -218,6 +223,16 @@ namespace Engine
                 return i;
             });
         }
+        /// <summary>
+        /// Gets the limit of instances to draw
+        /// </summary>
+        /// <returns>Returns the number of maximum instances to draw</returns>
+        private int GetMaxCount()
+        {
+            return this.MaximumCount >= 0 ?
+                Math.Min(this.MaximumCount, this.InstanceCount) :
+                this.InstanceCount;
+        }
         /// <inheritdoc/>
         public override void DrawShadows(DrawContextShadows context)
         {
@@ -252,11 +267,6 @@ namespace Engine
         /// <param name="effect">Drawer</param>
         private void DrawShadows(DrawContextShadows context, IShadowMapDrawer effect)
         {
-            if (!this.Visible)
-            {
-                return;
-            }
-
             int count = 0;
             int instanceCount = 0;
 
@@ -299,15 +309,53 @@ namespace Engine
 
                 foreach (string meshName in drawingData.Meshes.Keys)
                 {
-                    if (hasIndependantTransforms)
-                    {
-                        this.UpdateIndependantTransforms(meshName);
-                    }
+                    this.UpdateIndependantTransforms(meshName);
 
-                    count += this.DrawMeshShadow(effect, drawingData, meshName, index, length);
+                    count += this.DrawShadowMesh(effect, drawingData, meshName, index, length);
                     count *= instanceCount;
                 }
             }
+        }
+        /// <summary>
+        /// Draws a mesh with a shadow map drawer
+        /// </summary>
+        /// <param name="effect">Effect</param>
+        /// <param name="drawingData">Drawing data</param>
+        /// <param name="meshName">Mesh name</param>
+        /// <param name="index">Instance buffer index</param>
+        /// <param name="length">Instance buffer length</param>
+        /// <returns>Returns the number of drawn triangles</returns>
+        private int DrawShadowMesh(IShadowMapDrawer effect, DrawingData drawingData, string meshName, int index, int length)
+        {
+            int count = 0;
+
+            var graphics = this.Game.Graphics;
+
+            var meshDict = drawingData.Meshes[meshName];
+
+            foreach (string materialName in meshDict.Keys)
+            {
+                var mesh = meshDict[materialName];
+                var material = drawingData.Materials[materialName];
+
+                count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
+
+                effect.UpdatePerObject(0, material, 0);
+
+                this.BufferManager.SetIndexBuffer(mesh.IndexBuffer);
+
+                var technique = effect.GetTechnique(mesh.VertextType, true, material.Material.IsTransparent);
+                this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
+
+                for (int p = 0; p < technique.PassCount; p++)
+                {
+                    graphics.EffectPassApply(technique, p, 0);
+
+                    mesh.Draw(graphics, index, length);
+                }
+            }
+
+            return count;
         }
         /// <inheritdoc/>
         public override void Draw(DrawContext context)
@@ -385,10 +433,7 @@ namespace Engine
 
                 foreach (string meshName in drawingData.Meshes.Keys)
                 {
-                    if (hasIndependantTransforms)
-                    {
-                        this.UpdateIndependantTransforms(meshName);
-                    }
+                    this.UpdateIndependantTransforms(meshName);
 
                     count += this.DrawMesh(context, effect, drawingData, meshName, index, length);
                     count *= instanceCount;
@@ -397,57 +442,6 @@ namespace Engine
 
             Counters.InstancesPerFrame += instanceCount;
             Counters.PrimitivesPerFrame += count;
-        }
-        /// <summary>
-        /// Gets the limit of instances to draw
-        /// </summary>
-        /// <returns>Returns the number of maximum instances to draw</returns>
-        private int GetMaxCount()
-        {
-            return this.MaximumCount >= 0 ?
-                Math.Min(this.MaximumCount, this.InstanceCount) :
-                this.InstanceCount;
-        }
-        /// <summary>
-        /// Draws a mesh with a shadow map drawer
-        /// </summary>
-        /// <param name="effect">Effect</param>
-        /// <param name="drawingData">Drawing data</param>
-        /// <param name="meshName">Mesh name</param>
-        /// <param name="index">Instance buffer index</param>
-        /// <param name="length">Instance buffer length</param>
-        /// <returns>Returns the number of drawn triangles</returns>
-        private int DrawMeshShadow(IShadowMapDrawer effect, DrawingData drawingData, string meshName, int index, int length)
-        {
-            int count = 0;
-
-            var graphics = this.Game.Graphics;
-
-            var meshDict = drawingData.Meshes[meshName];
-
-            foreach (string materialName in meshDict.Keys)
-            {
-                var mesh = meshDict[materialName];
-                var material = drawingData.Materials[materialName];
-
-                count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
-
-                effect.UpdatePerObject(0, material, 0);
-
-                this.BufferManager.SetIndexBuffer(mesh.IndexBuffer);
-
-                var technique = effect.GetTechnique(mesh.VertextType, true, material.Material.IsTransparent);
-                this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
-
-                for (int p = 0; p < technique.PassCount; p++)
-                {
-                    graphics.EffectPassApply(technique, p, 0);
-
-                    mesh.Draw(graphics, index, length);
-                }
-            }
-
-            return count;
         }
         /// <summary>
         /// Draws a mesh with a geometry drawer

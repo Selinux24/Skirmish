@@ -1,5 +1,4 @@
-﻿using SharpDX;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace Engine.UI
 {

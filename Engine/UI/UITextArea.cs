@@ -120,7 +120,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets whether the area must grow or shrinks with the text value
         /// </summary>
-        public bool AdjustAreaWithText { get; set; } = true;
+        public bool AdjustAreaWithText { get; set; }
 
         /// <summary>
         /// Gest or sets the left margin

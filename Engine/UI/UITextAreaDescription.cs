@@ -14,20 +14,6 @@ namespace Engine.UI
             return new UITextAreaDescription();
         }
         /// <summary>
-        /// Gets the default text area description
-        /// </summary>
-        public static UITextAreaDescription DefaultTextCentered()
-        {
-            return new UITextAreaDescription
-            {
-                Font = new TextDrawerDescription
-                {
-                    HorizontalAlign = TextAlign.Center,
-                    VerticalAlign = VerticalAlign.Middle,
-                },
-            };
-        }
-        /// <summary>
         /// Gets the default text area description from a font description
         /// </summary>
         /// <param name="font">Font description</param>
