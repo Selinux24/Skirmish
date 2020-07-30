@@ -308,7 +308,7 @@ namespace Engine.UI
 
             if (!string.IsNullOrWhiteSpace(description.FontFileName) && !string.IsNullOrWhiteSpace(description.ContentPath))
             {
-                this.fontMap = FontMap.MapFromFile(this.Game, description.ContentPath, description.FontFileName, description.FontSize, description.Style);
+                this.fontMap = FontMap.FromFile(this.Game, description.ContentPath, description.FontFileName, description.FontSize, description.Style);
             }
             else if (description.FontMapping != null)
             {
@@ -316,7 +316,7 @@ namespace Engine.UI
             }
             else if (!string.IsNullOrWhiteSpace(description.Font))
             {
-                this.fontMap = FontMap.Map(this.Game, description.Font, description.FontSize, description.Style);
+                this.fontMap = FontMap.FromFamily(this.Game, description.Font, description.FontSize, description.Style);
             }
 
             VertexPositionTexture[] verts = new VertexPositionTexture[FontMap.MAXTEXTLENGTH * 4];

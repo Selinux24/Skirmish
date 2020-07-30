@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 
@@ -130,7 +131,7 @@ namespace Engine.Common
         /// <param name="size">Size</param>
         /// <param name="style">Style</param>
         /// <returns>Returns the created font map</returns>
-        public static FontMap MapFromFile(Game game, string contentPath, string fontFileName, float size, FontMapStyles style)
+        public static FontMap FromFile(Game game, string contentPath, string fontFileName, float size, FontMapStyles style)
         {
             var fileNames = ContentManager.FindPaths(contentPath, fontFileName);
             if (!fileNames.Any())
@@ -146,7 +147,7 @@ namespace Engine.Common
 
                 using (FontFamily family = new FontFamily(collection.Families[0].Name, collection))
                 {
-                    return Map(game, family, size, style);
+                    return FromFamily(game, family, size, style);
                 }
             }
         }
@@ -220,7 +221,7 @@ namespace Engine.Common
         /// <param name="size">Size</param>
         /// <param name="style">Style</param>
         /// <returns>Returns the created font map</returns>
-        public static FontMap Map(Game game, string font, float size, FontMapStyles style)
+        public static FontMap FromFamily(Game game, string font, float size, FontMapStyles style)
         {
             if (!FontFamily.Families.Any(f => string.Equals(f.Name, font, StringComparison.OrdinalIgnoreCase)))
             {
@@ -231,7 +232,7 @@ namespace Engine.Common
 
             using (FontFamily family = new FontFamily(font))
             {
-                return Map(game, family, size, style);
+                return FromFamily(game, family, size, style);
             }
         }
         /// <summary>
@@ -242,7 +243,7 @@ namespace Engine.Common
         /// <param name="size">Size</param>
         /// <param name="style">Style</param>
         /// <returns>Returns the created font map</returns>
-        private static FontMap Map(Game game, FontFamily family, float size, FontMapStyles style)
+        private static FontMap FromFamily(Game game, FontFamily family, float size, FontMapStyles style)
         {
             var fMap = gCache.FirstOrDefault(f => f != null && f.Font == family.Name && f.Size == size && f.Style == style);
             if (fMap == null)
@@ -408,14 +409,14 @@ namespace Engine.Common
             string xValue = bitz[0].Replace(";", "");
             string yValue = bitz[1].Replace(";", "");
 
-            if (!int.TryParse(xValue, out int x))
+            if (!float.TryParse(xValue, NumberStyles.Float, CultureInfo.InvariantCulture, out float x))
             {
-                Console.WriteLine($"Bad coordinate descriptor for X value. Integer spected: {xValue}");
+                Console.WriteLine($"Bad coordinate descriptor for X value. Single spected: {xValue}");
             }
 
-            if (!int.TryParse(yValue, out int y))
+            if (!float.TryParse(yValue, NumberStyles.Float, CultureInfo.InvariantCulture, out float y))
             {
-                Console.WriteLine($"Bad coordinate descriptor for Y value. Integer spected: {yValue}");
+                Console.WriteLine($"Bad coordinate descriptor for Y value. Single spected: {yValue}");
             }
 
             return new Vector2(x, y);
