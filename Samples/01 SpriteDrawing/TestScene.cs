@@ -122,11 +122,8 @@ namespace SpriteDrawing
             var desc = new SpriteDescription()
             {
                 Textures = new[] { "smiley.png" },
-                Top = 0,
-                Left = 0,
                 Width = size,
                 Height = size,
-                FitParent = false,
             };
             this.spriteSmiley = await this.AddComponentSprite(desc, SceneObjectUsages.None, layerObjects);
             this.spriteSmiley.Visible = false;
@@ -134,6 +131,9 @@ namespace SpriteDrawing
         private async Task InitializeStaticPan()
         {
             await Task.Delay(1000);
+
+            float width = this.Game.Form.RenderWidth / 2.25f;
+            float height = width * 0.6666f;
 
             var desc = new UIPanelDescription()
             {
@@ -143,10 +143,10 @@ namespace SpriteDrawing
                     Textures = new[] { "pan_bw.png" },
                     Color = new Color(176, 77, 45),
                 },
-                Top = 100,
-                Left = 700,
-                Width = 800,
-                Height = 650,
+                Top = this.Game.Form.RenderHeight / 8f,
+                Left = this.Game.Form.RenderCenter.X,
+                Width = width,
+                Height = height,
             };
             this.staticPan = await this.AddComponentUIPanel(desc, layerHUD);
 
@@ -162,10 +162,10 @@ namespace SpriteDrawing
                     ShadowDelta = new Vector2(8, 5),
                     LineAdjust = true,
                 },
-                MarginLeft = 90,
-                MarginRight = 90,
-                MarginTop = 40,
-                MarginBottom = 40,
+                MarginLeft = width * 0.1f,
+                MarginRight = width * 0.1f,
+                MarginTop = height * 0.1f,
+                MarginBottom = height * 0.1f,
             };
             this.textArea = new UITextArea(this, descText);
 
@@ -176,12 +176,15 @@ namespace SpriteDrawing
         {
             await Task.Delay(1500);
 
+            float width = this.Game.Form.RenderWidth / 1.5f;
+            float height = width * 0.6666f;
+
             var descPan = new UIPanelDescription
             {
                 Name = "Test Panel",
 
-                Width = 800,
-                Height = 600,
+                Width = width,
+                Height = height,
                 CenterVertically = CenterTargets.Screen,
                 CenterHorizontally = CenterTargets.Screen,
 
@@ -214,6 +217,10 @@ namespace SpriteDrawing
             var descText = UITextAreaDescription.FromMap("MaraFont.png", "MaraFont.txt");
             descText.Name = "MaraText";
             descText.Text = @"Letters by Mara";
+            descText.MarginLeft = width * 0.1f;
+            descText.MarginRight = width * 0.1f;
+            descText.MarginTop = height * 0.1f;
+            descText.MarginBottom = height * 0.1f;
 
             var textMapped = new UITextArea(this, descText);
 
