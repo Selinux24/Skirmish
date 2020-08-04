@@ -470,12 +470,16 @@ namespace Engine.Common
         /// </summary>
         /// <param name="text">Sentence text</param>
         /// <param name="maxLength">Maximum length</param>
+        /// <param name="horizontalAlign">Horizontal align</param>
+        /// <param name="verticalAlign">Vertical align</param>
         /// <param name="vertices">Gets generated vertices</param>
         /// <param name="indices">Gets generated indices</param>
         /// <param name="size">Gets generated sentence total size</param>
         public void MapSentence(
             string text,
             float maxLength,
+            TextAlign horizontalAlign,
+            VerticalAlign verticalAlign,
             out VertexPositionTexture[] vertices,
             out uint[] indices,
             out Vector2 size)
@@ -550,9 +554,77 @@ namespace Engine.Common
                 firstWord = false;
             }
 
-            vertices = vertList.ToArray();
+            vertices = AlignVertices(vertList, maxLength, horizontalAlign).ToArray();
             indices = indexList.ToArray();
+            size = MeasureText(vertices);
+        }
 
+        private static IEnumerable<VertexPositionTexture> AlignVertices(IEnumerable<VertexPositionTexture> vertices, float maxLength, TextAlign horizontalAlign)
+        {
+            if (horizontalAlign == TextAlign.Left)
+            {
+                return vertices.ToArray();
+            }
+
+            var verts = vertices.ToArray();
+
+            //Separate lines
+            List<VertexPositionTexture[]> lines = new List<VertexPositionTexture[]>();
+            List<VertexPositionTexture> line = new List<VertexPositionTexture>();
+            for (int i = 0; i < verts.Length; i += 4)
+            {
+                if (verts[i].Position.X == 0)
+                {
+                    if (line.Count > 0)
+                    {
+                        lines.Add(line.ToArray());
+                    }
+
+                    line.Clear();
+                }
+
+                line.AddRange(verts.Skip(i).Take(4));
+            }
+
+            if (line.Count > 0)
+            {
+                lines.Add(line.ToArray());
+            }
+
+            //Relocate lines
+            List<VertexPositionTexture> res = new List<VertexPositionTexture>();
+            foreach (var l in lines)
+            {
+                var size = MeasureText(l);
+
+                float diff;
+
+                if (horizontalAlign == TextAlign.Center)
+                {
+                    diff = (maxLength - size.X) * 0.5f;
+                }
+                else if (horizontalAlign == TextAlign.Right)
+                {
+                    diff = maxLength - size.X;
+                }
+                else
+                {
+                    continue;
+                }
+
+                for (int i = 0; i < l.Length; i++)
+                {
+                    l[i].Position.X += diff;
+                }
+
+                res.AddRange(l);
+            }
+
+            return res;
+        }
+
+        private static Vector2 MeasureText(IEnumerable<VertexPositionTexture> vertices)
+        {
             float maxX = float.MinValue;
             float maxY = float.MinValue;
 
@@ -569,7 +641,7 @@ namespace Engine.Common
                 minY = Math.Min(minY, -p.Y);
             }
 
-            size = new Vector2(maxX - minX, maxY - minY);
+            return new Vector2(maxX - minX, maxY - minY);
         }
         /// <summary>
         /// Maps a space

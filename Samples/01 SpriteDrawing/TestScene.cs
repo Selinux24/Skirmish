@@ -33,7 +33,7 @@ namespace SpriteDrawing
 
         private UIPanel dynamicPan = null;
 
-        private UIButton butTest = null;
+        private UIButton butTest1 = null;
         private UIButton butTest2 = null;
 
         public TestScene(Game game)
@@ -243,17 +243,17 @@ namespace SpriteDrawing
             descButClose.Height = 55;
             descButClose.Text = "Press Me";
 
-            butTest = await this.AddComponentUIButton(descButClose, layerHUD);
-            butTest.JustReleased += ButTest_Click;
-            butTest.MouseEnter += ButTest_MouseEnter;
-            butTest.MouseLeave += ButTest_MouseLeave;
-            butTest.Visible = false;
-
             butTest2 = await this.AddComponentUIButton(descButClose, layerHUD);
             butTest2.JustReleased += ButTest2_Click;
             butTest2.MouseEnter += ButTest_MouseEnter;
             butTest2.MouseLeave += ButTest_MouseLeave;
             butTest2.Visible = false;
+
+            butTest1 = await this.AddComponentUIButton(descButClose, layerHUD);
+            butTest1.JustReleased += ButTest1_Click;
+            butTest1.MouseEnter += ButTest_MouseEnter;
+            butTest1.MouseLeave += ButTest_MouseLeave;
+            butTest1.Visible = false;
         }
 
         public override void OnReportProgress(float value)
@@ -373,7 +373,7 @@ Progress: {(int)(progressValue * 100f)}%";
                     staticPan.Visible = true;
                     staticPan.Hide(1000);
                     dynamicPan.Visible = true;
-                    dynamicPan.ShowRoll(1000);
+                    dynamicPan.ShowRoll(2000);
                 }
 
                 textArea.Text = currentText;
@@ -390,24 +390,22 @@ Progress: {(int)(progressValue * 100f)}%";
             spriteSmiley.Show(1000);
             spriteSmiley.ScaleInScaleOut(0.85f, 1f, 250);
 
-            butTest.Visible = true;
-            butTest.Show(250);
-            butTest.TweenColorBounce(Color.Yellow, Color.Red, 2000, ScaleFuncs.Linear);
-
-            butTest2.Caption.Text = "The other";
             butTest2.Visible = true;
             butTest2.Show(250);
             butTest2.TweenColorBounce(Color.Yellow, Color.Red, 2000, ScaleFuncs.Linear);
+
+            butTest1.Caption.Text = "The other";
+            butTest1.Visible = true;
+            butTest1.Show(250);
+            butTest1.TweenColorBounce(Color.Yellow, Color.Red, 2000, ScaleFuncs.Linear);
         }
 
-        private void ButTest_Click(object sender, EventArgs e)
+        private void ButTest1_Click(object sender, EventArgs e)
         {
-            spriteSmiley.ClearTween();
-            spriteSmiley.Hide(500);
-
             if (sender is UIButton button)
             {
                 button.ClearTween();
+                button.JustReleased -= ButTest1_Click;
                 button.MouseLeave -= ButTest_MouseLeave;
                 button.MouseEnter -= ButTest_MouseEnter;
                 button.Hide(500);
@@ -417,10 +415,20 @@ Progress: {(int)(progressValue * 100f)}%";
         {
             if (sender is UIButton button)
             {
+                spriteSmiley.ClearTween();
+                spriteSmiley.Hide(500);
+
                 button.ClearTween();
+                button.JustReleased -= ButTest2_Click;
                 button.MouseLeave -= ButTest_MouseLeave;
                 button.MouseEnter -= ButTest_MouseEnter;
                 button.Hide(500);
+
+                Task.Run(async () =>
+                {
+                    await Task.Delay(2000);
+                    this.Game.Exit();
+                });
             }
         }
         private void ButTest_MouseLeave(object sender, EventArgs e)

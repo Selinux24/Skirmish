@@ -30,7 +30,8 @@ namespace Engine.UI
                 {
                     this.textDrawer.Text = value;
 
-                    float maxWidth = this.Width <= 0 ? float.PositiveInfinity : this.Width;
+                    float maxWidth = System.Math.Min(this.GetMaximumTextAreaWidth(), this.Width);
+                    maxWidth = maxWidth <= 0 ? this.GetMaximumTextAreaWidth() : maxWidth;
 
                     var size = this.textDrawer.MeasureText(value, maxWidth);
 
@@ -259,6 +260,17 @@ namespace Engine.UI
         public void SetMarginVertical(float margin)
         {
             MarginTop = MarginBottom = margin;
+        }
+
+
+        protected float GetMaximumTextAreaWidth()
+        {
+            return this.Game.Form.RenderWidth;
+        }
+
+        protected float GetMaximumTextAreaHeight()
+        {
+            return this.Game.Form.RenderHeight - this.Top;
         }
     }
 

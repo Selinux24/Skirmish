@@ -35,10 +35,6 @@ namespace Engine.UI
         /// </summary>
         private bool updateBuffers = false;
         /// <summary>
-        /// Update internals flag
-        /// </summary>
-        private bool updateInternals = false;
-        /// <summary>
         /// View * projection matrix
         /// </summary>
         private Matrix viewProjection;
@@ -61,26 +57,18 @@ namespace Engine.UI
         /// </summary>
         private UIControl parent = null;
         /// <summary>
-        /// Top
+        /// Text width
         /// </summary>
-        private float top = 0;
+        private float width;
         /// <summary>
-        /// Left
+        /// Text height
         /// </summary>
-        private float left = 0;
+        private float height;
         /// <summary>
         /// Text area rectangle limit
         /// </summary>
         /// <remarks>Used for text positioning</remarks>
         private RectangleF? textArea = null;
-        /// <summary>
-        /// Horizontal align
-        /// </summary>
-        private TextAlign horizontalAlign = TextAlign.Left;
-        /// <summary>
-        /// Vertical align
-        /// </summary>
-        private VerticalAlign verticalAlign = VerticalAlign.Middle;
 
         /// <summary>
         /// Manipulator
@@ -94,19 +82,7 @@ namespace Engine.UI
         /// <summary>
         /// Parent control
         /// </summary>
-        public UIControl Parent
-        {
-            get
-            {
-                return this.parent;
-            }
-            set
-            {
-                this.parent = value;
-
-                this.updateInternals = true;
-            }
-        }
+        public UIControl Parent { get; set; }
 
         /// <summary>
         /// Font name
@@ -126,8 +102,6 @@ namespace Engine.UI
                 if (!string.Equals(this.text, value))
                 {
                     this.text = value;
-
-                    this.updateInternals = true;
                 }
             }
         }
@@ -172,113 +146,14 @@ namespace Engine.UI
         /// Gets or sets the text color alpha multiplier
         /// </summary>
         public float AlphaMultplier { get; set; } = 1.2f;
-
-        /// <summary>
-        /// Gets or sets the text position
-        /// </summary>
-        public Vector2 Position
-        {
-            get
-            {
-                return new Vector2(this.left, this.top);
-            }
-            set
-            {
-                this.left = value.X;
-                this.top = value.Y;
-                this.HorizontalAlign = TextAlign.Left;
-                this.VerticalAlign = VerticalAlign.Top;
-                this.textArea = null;
-
-                this.updateInternals = true;
-            }
-        }
-        /// <summary>
-        /// Gets or sets text left position in 2D screen
-        /// </summary>
-        public float Left
-        {
-            get
-            {
-                return this.left;
-            }
-            set
-            {
-                this.left = value;
-                this.HorizontalAlign = TextAlign.Left;
-                this.textArea = null;
-
-                this.updateInternals = true;
-            }
-        }
-        /// <summary>
-        /// Gets or sets text top position in 2D screen
-        /// </summary>
-        public float Top
-        {
-            get
-            {
-                return this.top;
-            }
-            set
-            {
-                this.top = value;
-                this.VerticalAlign = VerticalAlign.Top;
-                this.textArea = null;
-
-                this.updateInternals = true;
-            }
-        }
-        /// <summary>
-        /// Gets text width
-        /// </summary>
-        public float Width { get; private set; }
-        /// <summary>
-        /// Gets text height
-        /// </summary>
-        public float Height { get; private set; }
         /// <summary>
         /// Gets or sets the horizontal align
         /// </summary>
-        public TextAlign HorizontalAlign
-        {
-            get
-            {
-                return horizontalAlign;
-            }
-            set
-            {
-                if (horizontalAlign == value)
-                {
-                    return;
-                }
-
-                horizontalAlign = value;
-
-                updateInternals = true;
-            }
-        }
+        public TextAlign HorizontalAlign { get; set; } = TextAlign.Left;
         /// <summary>
         /// Gets or sets the vertical align
         /// </summary>
-        public VerticalAlign VerticalAlign
-        {
-            get
-            {
-                return verticalAlign;
-            }
-            set
-            {
-                if (verticalAlign == value)
-                {
-                    return;
-                }
-
-                verticalAlign = value;
-
-                updateInternals = true;
-            }
-        }
+        public VerticalAlign VerticalAlign { get; set; } = VerticalAlign.Middle;
 
         /// <summary>
         /// Gets whether the internal buffers were ready or not
@@ -337,7 +212,7 @@ namespace Engine.UI
             if (description.LineAdjust)
             {
                 // Set base line threshold
-                this.baseLineThr = this.Height * 0.1666f; // --> 0.3333f * 0.5f
+                this.baseLineThr = this.height * 0.1666f; // --> 0.3333f * 0.5f
             }
         }
         /// <summary>
@@ -369,12 +244,7 @@ namespace Engine.UI
                 return;
             }
 
-            if (updateInternals)
-            {
-                this.MapText();
-
-                updateInternals = false;
-            }
+            this.MapText();
 
             Vector2 sca;
             Vector2 pos;
@@ -402,26 +272,15 @@ namespace Engine.UI
             // Adjust position
             var rect = this.GetRenderArea().Scale(this.Parent?.Scale ?? 1f);
 
-            if (horizontalAlign == TextAlign.Center)
-            {
-                pos.X = rect.Center.X - (Width * 0.5f);
-            }
-            else if (horizontalAlign == TextAlign.Right)
-            {
-                pos.X = rect.Right - Width;
-            }
-            else
-            {
-                pos.X = rect.X;
-            }
+            pos.X = rect.X;
 
-            if (verticalAlign == VerticalAlign.Middle)
+            if (VerticalAlign == VerticalAlign.Middle)
             {
-                pos.Y = rect.Center.Y - (Height * 0.5f);
+                pos.Y = rect.Center.Y - (height * 0.5f);
             }
-            else if (verticalAlign == VerticalAlign.Bottom)
+            else if (VerticalAlign == VerticalAlign.Bottom)
             {
-                pos.Y = rect.Bottom - Height;
+                pos.Y = rect.Bottom - height;
             }
             else
             {
@@ -543,8 +402,6 @@ namespace Engine.UI
         public void Resize()
         {
             this.viewProjection = this.Game.Form.GetOrthoProjectionMatrix();
-
-            this.updateInternals = true;
         }
 
         /// <summary>
@@ -555,8 +412,6 @@ namespace Engine.UI
             this.textArea = null;
             this.HorizontalAlign = TextAlign.Center;
             this.VerticalAlign = VerticalAlign.Middle;
-
-            this.updateInternals = true;
         }
         /// <summary>
         /// Centers the text into the rectangle
@@ -567,8 +422,6 @@ namespace Engine.UI
             this.textArea = rectangle;
             this.HorizontalAlign = TextAlign.Center;
             this.VerticalAlign = VerticalAlign.Middle;
-
-            this.updateInternals = true;
         }
 
         /// <summary>
@@ -581,18 +434,18 @@ namespace Engine.UI
                 return;
             }
 
-            var rect = this.GetRenderArea();
-
             this.fontMap.MapSentence(
                 this.text,
-                rect.Width,
+                this.GetCurrentWidth(),
+                this.HorizontalAlign,
+                this.VerticalAlign,
                 out this.vertices, out this.indices, out Vector2 size);
 
             this.updateBuffers = true;
 
             // Adjust text bounds
-            this.Width = size.X;
-            this.Height = size.Y;
+            this.width = size.X;
+            this.height = size.Y;
         }
         /// <summary>
         /// Gets the text render area
@@ -619,9 +472,26 @@ namespace Engine.UI
             this.fontMap.MapSentence(
                 text,
                 width,
+                this.HorizontalAlign,
+                this.VerticalAlign,
                 out _, out _, out Vector2 size);
 
             return size;
+        }
+
+
+        private float GetCurrentWidth()
+        {
+            var rect = this.GetRenderArea();
+
+            return rect.Width * (this.Parent?.Scale ?? 1f);
+        }
+
+        private float GetCurrentHeight()
+        {
+            var rect = this.GetRenderArea();
+
+            return rect.Height * (this.Parent?.Scale ?? 1f);
         }
     }
 }

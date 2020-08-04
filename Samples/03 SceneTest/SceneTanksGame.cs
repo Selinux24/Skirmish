@@ -175,11 +175,11 @@ namespace SceneTest
                     Task.Run(async () =>
                     {
                         loadingText.ClearTween();
-                        loadingText.Hide(500);
+                        loadingText.Hide(1000);
                         loadingBar.ClearTween();
                         loadingBar.Hide(500);
 
-                        await Task.Delay(1000);
+                        await Task.Delay(1500);
 
                         gameMessage.Text = "Ready!";
                         gameMessage.TweenScale(0, 1, 500, ScaleFuncs.CubicEaseIn);
@@ -216,7 +216,6 @@ namespace SceneTest
             gameMessage.CenterVertically = CenterTargets.Screen;
             gameMessage.TextColor = Color.Yellow;
             gameMessage.TextShadowColor = Color.Yellow * 0.5f;
-            gameMessage.Text = " ";
             gameMessage.Visible = false;
         }
         private async Task InitializeUIPlayers()

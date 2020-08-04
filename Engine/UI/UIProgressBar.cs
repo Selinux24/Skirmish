@@ -112,17 +112,13 @@ namespace Engine.UI
 
             if (description.Font != null)
             {
-                description.Font.Name = description.Font.Name ?? $"{description.Name}.TextProgressBar";
-
-                var textAreaDesc = new UITextAreaDescription
-                {
-                    Font = description.Font,
-                    CenterHorizontally = CenterTargets.Parent,
-                    CenterVertically = CenterTargets.Parent,
-                    EventsEnabled = false,
-                };
-
-                this.Caption = new UITextArea(scene, textAreaDesc);
+                this.Caption = new UITextArea(
+                    scene,
+                    new UITextAreaDescription
+                    {
+                        Font = description.Font,
+                        EventsEnabled = false,
+                    });
 
                 this.AddChild(this.Caption, true);
 
