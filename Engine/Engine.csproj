@@ -397,6 +397,7 @@
     <Compile Include="Topology.cs" />
     <Compile Include="Tween\Tween.cs" />
     <Compile Include="Tween\TweenState.cs" />
+    <Compile Include="UI\HorizontalTextAlign.cs" />
     <Compile Include="UI\UICursorDescription.cs" />
     <Compile Include="UI\UICursor.cs" />
     <Compile Include="UI\UIPanel.cs" />
@@ -405,6 +406,7 @@
     <Compile Include="UI\UIPanelDescription.cs" />
     <Compile Include="UI\UITextArea.cs" />
     <Compile Include="UI\UITextAreaDescription.cs" />
+    <Compile Include="UI\VerticalTextAlign.cs" />
     <Compile Include="WaterDescription.cs" />
     <Compile Include="Water.cs" />
     <Compile Include="UI\UIProgressBar.cs" />

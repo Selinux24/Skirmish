@@ -10,6 +10,17 @@ namespace Engine.UI
         /// <summary>
         /// Gets a sprite description
         /// </summary>
+        /// <param name="baseColor">Base color</param>
+        public static SpriteDescription Default(Color4 baseColor)
+        {
+            return new SpriteDescription
+            {
+                TintColor = baseColor,
+            };
+        }
+        /// <summary>
+        /// Gets a sprite description
+        /// </summary>
         /// <param name="fileName">Texture file name</param>
         public static SpriteDescription FromFile(string fileName)
         {

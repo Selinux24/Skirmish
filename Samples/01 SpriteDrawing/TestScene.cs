@@ -107,7 +107,7 @@ namespace SpriteDrawing
                 {
                     await Task.Delay(500);
 
-                    staticPan.Visible = true;
+                    staticPan.Show(1000);
                     progressBar.Visible = false;
 
                     gameReady = true;
@@ -141,7 +141,7 @@ namespace SpriteDrawing
                 Background = new SpriteDescription
                 {
                     Textures = new[] { "pan_bw.png" },
-                    Color = new Color(176, 77, 45),
+                    TintColor = new Color(176, 77, 45),
                 },
                 Top = this.Game.Form.RenderHeight / 8f,
                 Left = this.Game.Form.RenderCenter.X,
@@ -191,7 +191,7 @@ namespace SpriteDrawing
                 Background = new SpriteDescription()
                 {
                     Textures = new[] { "pan_bw.png" },
-                    Color = Color.Pink,
+                    TintColor = Color.Pink,
                 }
             };
             this.dynamicPan = await this.AddComponentUIPanel(descPan, layerHUDDialogs);
@@ -200,8 +200,8 @@ namespace SpriteDrawing
 
             var font = TextDrawerDescription.FromFile("LeagueSpartan-Bold.otf", 16);
             font.LineAdjust = true;
-            font.HorizontalAlign = TextAlign.Center;
-            font.VerticalAlign = VerticalAlign.Middle;
+            font.HorizontalAlign = HorizontalTextAlign.Center;
+            font.VerticalAlign = VerticalTextAlign.Middle;
 
             var descButClose = UIButtonDescription.DefaultTwoStateButton("buttons.png", new Vector4(0, 0, w, 1f), new Vector4(w * 2f, 0, w * 3f, 1f), font);
             descButClose.Name = "CloseButton";
@@ -232,8 +232,8 @@ namespace SpriteDrawing
         {
             var font = TextDrawerDescription.FromFile("LeagueSpartan-Bold.otf", 16);
             font.LineAdjust = true;
-            font.HorizontalAlign = TextAlign.Center;
-            font.VerticalAlign = VerticalAlign.Middle;
+            font.HorizontalAlign = HorizontalTextAlign.Center;
+            font.VerticalAlign = VerticalTextAlign.Middle;
 
             var descButClose = UIButtonDescription.DefaultTwoStateButton(Color.Blue, Color.Green, font);
             descButClose.Name = "Test Button";
@@ -446,7 +446,7 @@ Progress: {(int)(progressValue * 100f)}%";
             {
                 button.ClearTween();
                 button.TweenScale(button.Scale, 2, 150, ScaleFuncs.QuadraticEaseIn);
-                button.TweenColor(button.Color, Color.Yellow, 500, ScaleFuncs.Linear);
+                button.TweenColor(button.TintColor, Color.Yellow, 500, ScaleFuncs.Linear);
             }
         }
     }

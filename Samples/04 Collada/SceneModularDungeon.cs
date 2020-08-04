@@ -276,7 +276,7 @@ namespace Collada
                 Name = "Back Panel",
                 Width = this.Game.Form.RenderWidth,
                 Height = this.info.Top + this.info.Height + 3,
-                Color = new Color4(0, 0, 0, 0.75f),
+                TintColor = new Color4(0, 0, 0, 0.75f),
             };
 
             await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);

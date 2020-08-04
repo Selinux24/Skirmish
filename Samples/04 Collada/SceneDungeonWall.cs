@@ -83,7 +83,7 @@ namespace Collada
             {
                 Width = this.Game.Form.RenderWidth,
                 Height = picks.Top + picks.Height + 3,
-                Color = new Color4(0, 0, 0, 0.75f),
+                TintColor = new Color4(0, 0, 0, 0.75f),
             };
 
             await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);

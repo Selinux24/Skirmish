@@ -133,12 +133,12 @@ namespace SceneTest
             {
                 Width = this.Game.Form.RenderWidth,
                 Height = this.runtime.Top + this.runtime.Height + 3,
-                Color = new Color4(0, 0, 0, 0.75f),
+                TintColor = new Color4(0, 0, 0, 0.75f),
             }, SceneObjectUsages.UI, layerHUD - 1);
 
             var buttonFont = TextDrawerDescription.FromFamily("Lucida Console", 12, Color.Yellow, Color.Orange);
-            buttonFont.HorizontalAlign = TextAlign.Center;
-            buttonFont.VerticalAlign = VerticalAlign.Middle;
+            buttonFont.HorizontalAlign = HorizontalTextAlign.Center;
+            buttonFont.VerticalAlign = VerticalTextAlign.Middle;
             var buttonDesc = UIButtonDescription.DefaultTwoStateButton("SceneTest/UI/button_on.png", "SceneTest/UI/button_off.png", buttonFont);
             buttonDesc.Width = 100;
             buttonDesc.Height = 40;
@@ -152,7 +152,7 @@ namespace SceneTest
             {
                 Background = new SpriteDescription
                 {
-                    Color = Color.Black,
+                    TintColor = Color.Black,
                 },
                 Left = 0,
                 Top = 0,

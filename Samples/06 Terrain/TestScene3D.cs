@@ -225,7 +225,7 @@ namespace Terrain
                 Name = "Back Pannel",
                 Width = this.Game.Form.RenderWidth,
                 Height = this.counters2.Top + this.counters2.Height + 3,
-                Color = new Color4(0, 0, 0, 0.75f),
+                TintColor = new Color4(0, 0, 0, 0.75f),
             };
 
             await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHud - 1);
@@ -274,12 +274,12 @@ namespace Terrain
                 Name = "Cursor2D",
                 ContentPath = "resources/Cursor",
                 Textures = new[] { "target.png" },
-                Color = Color.Red,
+                TintColor = Color.Red,
                 Width = 16,
                 Height = 16,
             };
             this.cursor2D = await this.AddComponentUICursor(c2DDesc, this.layerHud + 1);
-            this.cursor2D.Color = Color.Red;
+            this.cursor2D.TintColor = Color.Red;
             this.cursor2D.Visible = false;
 
             sw.Stop();

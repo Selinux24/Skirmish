@@ -18,7 +18,7 @@ namespace Engine.UI
                 {
                     Background = new SpriteDescription
                     {
-                        Color = Color4.Black * 0.3333f,
+                        TintColor = Color4.Black * 0.3333f,
                         BlendMode = BlendModes.Alpha,
                     },
                 };
@@ -36,7 +36,7 @@ namespace Engine.UI
             {
                 Background = new SpriteDescription
                 {
-                    Color = SharpDX.Color.Black,
+                    TintColor = SharpDX.Color.Black,
                 },
                 Left = 0,
                 Top = 0,

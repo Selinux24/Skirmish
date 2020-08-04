@@ -35,7 +35,7 @@ namespace Engine.UI
             var spriteDesc = new SpriteDescription()
             {
                 Name = $"{description.Name}.ReleasedButton",
-                Color = description.ColorReleased,
+                TintColor = description.ColorReleased,
                 EventsEnabled = false,
             };
 
@@ -54,7 +54,7 @@ namespace Engine.UI
                 var spriteDesc2 = new SpriteDescription()
                 {
                     Name = $"{description.Name}.PressedButton",
-                    Color = description.ColorPressed,
+                    TintColor = description.ColorPressed,
                     EventsEnabled = false,
                 };
 

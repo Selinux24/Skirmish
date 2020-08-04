@@ -84,9 +84,9 @@ namespace Engine
         /// </summary>
         bool FitParent { get; set; }
         /// <summary>
-        /// Base color
+        /// Gets or sets the tint color
         /// </summary>
-        Color4 Color { get; set; }
+        Color4 TintColor { get; set; }
         /// <summary>
         /// Alpha color component
         /// </summary>

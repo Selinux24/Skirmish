@@ -103,7 +103,7 @@ namespace SceneTest
                 Width = 48,
                 Centered = false,
                 Delta = new Vector2(-14f, -7f),
-                Color = Color.White,
+                TintColor = Color.White,
             };
             await this.AddComponentUICursor(cursorDesc, layerCursor);
 
@@ -122,8 +122,8 @@ namespace SceneTest
             titleFont.Name = "Title";
             titleFont.ShadowColor = new Color4(Color.LightYellow.RGB(), 0.25f);
             titleFont.ShadowDelta = new Vector2(4, 4);
-            titleFont.HorizontalAlign = TextAlign.Center;
-            titleFont.VerticalAlign = VerticalAlign.Middle;
+            titleFont.HorizontalAlign = HorizontalTextAlign.Center;
+            titleFont.VerticalAlign = VerticalTextAlign.Middle;
 
             var titleDesc = UITextAreaDescription.Default(titleFont);
 
@@ -134,8 +134,8 @@ namespace SceneTest
             #region Scene buttons
 
             var buttonsFont = TextDrawerDescription.FromFamily("Verdana", 20, FontMapStyles.Bold, Color.Gold);
-            buttonsFont.HorizontalAlign = TextAlign.Center;
-            buttonsFont.VerticalAlign = VerticalAlign.Middle;
+            buttonsFont.HorizontalAlign = HorizontalTextAlign.Center;
+            buttonsFont.VerticalAlign = VerticalTextAlign.Middle;
 
             var startButtonDesc = UIButtonDescription.DefaultTwoStateButton("common/buttons.png", new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f, buttonsFont);
             startButtonDesc.Name = "Scene buttons";

@@ -104,7 +104,7 @@ Space: Finds random over navmesh";
             {
                 Width = this.Game.Form.RenderWidth,
                 Height = this.debug.Top + this.debug.Height + 3,
-                Color = new Color4(0, 0, 0, 0.75f),
+                TintColor = new Color4(0, 0, 0, 0.75f),
             };
 
             await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);

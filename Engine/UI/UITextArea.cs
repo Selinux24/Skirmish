@@ -26,27 +26,11 @@ namespace Engine.UI
             }
             set
             {
-                if (this.textDrawer != null)
+                if (this.textDrawer != null && !string.Equals(value, this.textDrawer.Text))
                 {
                     this.textDrawer.Text = value;
 
-                    float maxWidth = System.Math.Min(this.GetMaximumTextAreaWidth(), this.Width);
-                    maxWidth = maxWidth <= 0 ? this.GetMaximumTextAreaWidth() : maxWidth;
-
-                    var size = this.textDrawer.MeasureText(value, maxWidth);
-
-                    //Set initial sizes
-                    if (this.Width == 0) this.Width = size.X;
-                    if (this.Height == 0) this.Height = size.Y;
-
-                    if (!this.AdjustAreaWithText)
-                    {
-                        return;
-                    }
-
-                    //Grow area
-                    this.Width = size.X;
-                    this.Height = size.Y;
+                    this.GrowControl();
                 }
             }
         }
@@ -61,9 +45,9 @@ namespace Engine.UI
             }
             set
             {
-                if (textDrawer != null)
+                if (this.textDrawer != null && this.textDrawer.TextColor != value)
                 {
-                    textDrawer.TextColor = value;
+                    this.textDrawer.TextColor = value;
                 }
             }
         }
@@ -78,24 +62,24 @@ namespace Engine.UI
             }
             set
             {
-                if (textDrawer != null)
+                if (this.textDrawer != null && this.textDrawer.ShadowColor != value)
                 {
-                    textDrawer.ShadowColor = value;
+                    this.textDrawer.ShadowColor = value;
                 }
             }
         }
         /// <summary>
         /// Gets or sets the text horizontal align
         /// </summary>
-        public TextAlign HorizontalAlign
+        public HorizontalTextAlign HorizontalAlign
         {
             get
             {
-                return this.textDrawer?.HorizontalAlign ?? TextAlign.Left;
+                return this.textDrawer?.HorizontalAlign ?? HorizontalTextAlign.Left;
             }
             set
             {
-                if (this.textDrawer != null)
+                if (this.textDrawer != null && this.textDrawer.HorizontalAlign != value)
                 {
                     this.textDrawer.HorizontalAlign = value;
                 }
@@ -104,24 +88,37 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets the text vertical align
         /// </summary>
-        public VerticalAlign VerticalAlign
+        public VerticalTextAlign VerticalAlign
         {
             get
             {
-                return this.textDrawer?.VerticalAlign ?? VerticalAlign.Top;
+                return this.textDrawer?.VerticalAlign ?? VerticalTextAlign.Top;
             }
             set
             {
-                if (this.textDrawer != null)
+                if (this.textDrawer != null && this.textDrawer.VerticalAlign != value)
                 {
                     this.textDrawer.VerticalAlign = value;
                 }
             }
         }
-        /// <summary>
-        /// Gets or sets whether the area must grow or shrinks with the text value
-        /// </summary>
-        public bool AdjustAreaWithText { get; set; }
+        /// <inheritdoc/>
+        public override float Alpha
+        {
+            get
+            {
+                return base.Alpha;
+            }
+            set
+            {
+                base.Alpha = value;
+
+                if (this.textDrawer != null && this.textDrawer.Alpha != value)
+                {
+                    this.textDrawer.Alpha = value;
+                }
+            }
+        }
 
         /// <summary>
         /// Gest or sets the left margin
@@ -139,20 +136,10 @@ namespace Engine.UI
         /// Gest or sets the bottom margin
         /// </summary>
         public float MarginBottom { get; set; }
-        /// <inheritdoc/>
-        public override float Alpha
-        {
-            get
-            {
-                return base.Alpha;
-            }
-            set
-            {
-                base.Alpha = value;
-
-                this.textDrawer.Alpha = value;
-            }
-        }
+        /// <summary>
+        /// Gets or sets whether the area must grow or shrinks with the text value
+        /// </summary>
+        public bool AdjustAreaWithText { get; set; }
 
         /// <summary>
         /// Constructor
@@ -200,7 +187,7 @@ namespace Engine.UI
                 return;
             }
 
-            this.textDrawer.Update(context);
+            this.textDrawer?.Update(context);
         }
 
         /// <inheritdoc/>
@@ -225,6 +212,7 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
+        /// <remarks>Applies margin configuration if any</remarks>
         public override RectangleF GetRenderArea()
         {
             float width = AbsoluteWidth == 0 ? this.Game.Form.RenderWidth : AbsoluteWidth;
@@ -262,15 +250,25 @@ namespace Engine.UI
             MarginTop = MarginBottom = margin;
         }
 
-
-        protected float GetMaximumTextAreaWidth()
+        /// <summary>
+        /// Grows the control using the current text
+        /// </summary>
+        private void GrowControl()
         {
-            return this.Game.Form.RenderWidth;
-        }
+            var size = this.textDrawer.MeasureText(this.Text, this.GetRenderArea(), this.HorizontalAlign, this.VerticalAlign);
 
-        protected float GetMaximumTextAreaHeight()
-        {
-            return this.Game.Form.RenderHeight - this.Top;
+            //Set initial sizes
+            if (this.Width == 0) this.Width = size.X;
+            if (this.Height == 0) this.Height = size.Y;
+
+            if (!this.AdjustAreaWithText)
+            {
+                return;
+            }
+
+            //Grow area
+            this.Width = size.X;
+            this.Height = size.Y;
         }
     }
 
@@ -299,43 +297,5 @@ namespace Engine.UI
 
             return component;
         }
-    }
-
-    /// <summary>
-    /// Text align
-    /// </summary>
-    public enum TextAlign
-    {
-        /// <summary>
-        /// Align left
-        /// </summary>
-        Left,
-        /// <summary>
-        /// Align center
-        /// </summary>
-        Center,
-        /// <summary>
-        /// Align right
-        /// </summary>
-        Right,
-    }
-
-    /// <summary>
-    /// Vertical align
-    /// </summary>
-    public enum VerticalAlign
-    {
-        /// <summary>
-        /// Align top
-        /// </summary>
-        Top,
-        /// <summary>
-        /// Align middle
-        /// </summary>
-        Middle,
-        /// <summary>
-        /// Align bottom
-        /// </summary>
-        Bottom,
     }
 }

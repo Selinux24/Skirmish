@@ -169,8 +169,8 @@ namespace Collada
 
             // Font description
             var buttonFont = TextDrawerDescription.FromFile("common/HelveticaNeueHv.ttf", 16, Color.Gold);
-            buttonFont.HorizontalAlign = TextAlign.Center;
-            buttonFont.VerticalAlign = VerticalAlign.Middle;
+            buttonFont.HorizontalAlign = HorizontalTextAlign.Center;
+            buttonFont.VerticalAlign = VerticalTextAlign.Middle;
 
             // Buttons
             var buttonDesc = UIButtonDescription.DefaultTwoStateButton("common/buttons.png", new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f, buttonFont);

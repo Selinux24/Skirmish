@@ -119,7 +119,7 @@ namespace SceneTest
                 InitializeLoadingUI(),
                 async () =>
                 {
-                    fadePanel.Color = Color.Black;
+                    fadePanel.TintColor = Color.Black;
                     fadePanel.Visible = true;
 
                     loadingText.Text = "Please wait...";
@@ -142,6 +142,8 @@ namespace SceneTest
             loadingText.TextShadowColor = Color.Orange;
             loadingText.CenterHorizontally = CenterTargets.Screen;
             loadingText.Top = this.Game.Form.RenderCenter.Y - 75f;
+            loadingText.Width = this.Game.Form.RenderWidth * 0.8f;
+            loadingText.AdjustAreaWithText = false;
             loadingText.Visible = false;
 
             loadingBar = await this.AddComponentUIProgressBar(UIProgressBarDescription.DefaultFromFile(fontFilename, 20, true), layerLoadingUI + 1);
@@ -226,7 +228,7 @@ namespace SceneTest
             player1Name.TextColor = player1Status.Color;
             player1Name.TextShadowColor = player1Status.Color * 0.5f;
             player1Name.AdjustAreaWithText = false;
-            player1Name.HorizontalAlign = TextAlign.Left;
+            player1Name.HorizontalAlign = HorizontalTextAlign.Left;
             player1Name.Width = playerWidth;
             player1Name.Top = 10;
             player1Name.Left = 10;
@@ -236,7 +238,7 @@ namespace SceneTest
             player1Points.TextColor = player1Status.Color;
             player1Points.TextShadowColor = player1Status.Color * 0.5f;
             player1Points.AdjustAreaWithText = false;
-            player1Points.HorizontalAlign = TextAlign.Center;
+            player1Points.HorizontalAlign = HorizontalTextAlign.Center;
             player1Points.Width = playerWidth;
             player1Points.Top = 60;
             player1Points.Left = 10;
@@ -257,7 +259,7 @@ namespace SceneTest
             player2Name.TextColor = player2Status.Color;
             player2Name.TextShadowColor = player2Status.Color * 0.5f;
             player2Name.AdjustAreaWithText = false;
-            player2Name.HorizontalAlign = TextAlign.Right;
+            player2Name.HorizontalAlign = HorizontalTextAlign.Right;
             player2Name.Width = playerWidth;
             player2Name.Top = 10;
             player2Name.Left = this.Game.Form.RenderWidth - 10 - player2Name.Width;
@@ -267,7 +269,7 @@ namespace SceneTest
             player2Points.TextColor = player2Status.Color;
             player2Points.TextShadowColor = player2Status.Color * 0.5f;
             player2Points.AdjustAreaWithText = false;
-            player2Points.HorizontalAlign = TextAlign.Center;
+            player2Points.HorizontalAlign = HorizontalTextAlign.Center;
             player2Points.Width = playerWidth;
             player2Points.Top = 60;
             player2Points.Left = this.Game.Form.RenderWidth - 10 - player2Points.Width;
@@ -289,13 +291,13 @@ namespace SceneTest
             turnText = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 40, true), layerUI);
             turnText.TextColor = Color.Yellow;
             turnText.TextShadowColor = Color.Yellow * 0.5f;
-            turnText.HorizontalAlign = TextAlign.Center;
+            turnText.HorizontalAlign = HorizontalTextAlign.Center;
             turnText.CenterHorizontally = CenterTargets.Screen;
             turnText.Width = 300;
             turnText.Visible = true;
 
             gameIcon = await this.AddComponentSprite(SpriteDescription.FromFile("SceneTanksGame/GameIcon.png"), SceneObjectUsages.UI, layerUI);
-            gameIcon.Color = Color.Yellow;
+            gameIcon.TintColor = Color.Yellow;
             gameIcon.Width = 92;
             gameIcon.Height = 82;
             gameIcon.Top = 55;
@@ -304,7 +306,7 @@ namespace SceneTest
             gameIcon.TweenRotateBounce(-0.1f, 0.1f, 500, ScaleFuncs.CubicEaseInOut);
 
             playerTurnMarker = await this.AddComponentSprite(SpriteDescription.FromFile("SceneTanksGame/Arrow.png"), SceneObjectUsages.UI, layerUI);
-            playerTurnMarker.Color = Color.Turquoise;
+            playerTurnMarker.TintColor = Color.Turquoise;
             playerTurnMarker.Width = 112;
             playerTurnMarker.Height = 75;
             playerTurnMarker.Top = 35;
@@ -328,7 +330,7 @@ namespace SceneTest
             keyRotate.Top = top + 25;
             keyRotate.Width = 372 * 0.25f;
             keyRotate.Height = 365 * 0.25f;
-            keyRotate.Color = Color.Turquoise;
+            keyRotate.TintColor = Color.Turquoise;
             keyRotate.Visible = true;
 
             keyMove = await this.AddComponentSprite(SpriteDescription.FromFile("SceneTanksGame/Move.png"), SceneObjectUsages.UI, layerUI + 1);
@@ -336,7 +338,7 @@ namespace SceneTest
             keyMove.Top = top + 25;
             keyMove.Width = 232 * 0.25f;
             keyMove.Height = 365 * 0.25f;
-            keyMove.Color = Color.Turquoise;
+            keyMove.TintColor = Color.Turquoise;
             keyMove.Visible = true;
 
             KeyPitch = await this.AddComponentSprite(SpriteDescription.FromFile("SceneTanksGame/Pitch.png"), SceneObjectUsages.UI, layerUI + 1);
@@ -344,7 +346,7 @@ namespace SceneTest
             KeyPitch.Top = top + 25;
             KeyPitch.Width = 322 * 0.25f;
             KeyPitch.Height = 365 * 0.25f;
-            KeyPitch.Color = Color.Turquoise;
+            KeyPitch.TintColor = Color.Turquoise;
             KeyPitch.Visible = true;
 
             keyRotateLeftText = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 15, true), layerUI + 2);
@@ -424,7 +426,7 @@ namespace SceneTest
             miniMapTank1.Height = 365 * 0.1f;
             miniMapTank1.Left = this.Game.Form.RenderWidth - 150 - 10;
             miniMapTank1.Top = this.Game.Form.RenderHeight - 150 - 10;
-            miniMapTank1.Color = Color.Blue;
+            miniMapTank1.TintColor = Color.Blue;
             miniMapTank1.Visible = true;
 
             miniMapTank2 = await this.AddComponentSprite(SpriteDescription.FromFile("SceneTanksGame/Tank.png"), SceneObjectUsages.UI, layerUI + 1);
@@ -432,7 +434,7 @@ namespace SceneTest
             miniMapTank2.Height = 365 * 0.1f;
             miniMapTank2.Left = this.Game.Form.RenderWidth - 85 - 10;
             miniMapTank2.Top = this.Game.Form.RenderHeight - 85 - 10;
-            miniMapTank2.Color = Color.Red;
+            miniMapTank2.TintColor = Color.Red;
             miniMapTank2.Visible = true;
 
             windVelocity = await this.AddComponentUIProgressBar(UIProgressBarDescription.DefaultFromFile(fontFilename, 8), layerUI + 2);
@@ -450,7 +452,7 @@ namespace SceneTest
             windDirection.Height = 100;
             windDirection.Left = miniMapBackground.AbsoluteCenter.X - 50;
             windDirection.Top = miniMapBackground.AbsoluteCenter.Y - 50;
-            windDirection.Color = Color.Green;
+            windDirection.TintColor = Color.Green;
             windDirection.Visible = true;
         }
         private void PrepareUI()

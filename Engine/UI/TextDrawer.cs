@@ -57,18 +57,17 @@ namespace Engine.UI
         /// </summary>
         private UIControl parent = null;
         /// <summary>
-        /// Text width
+        /// Horizontal align
         /// </summary>
-        private float width;
+        private HorizontalTextAlign horizontalAlign = HorizontalTextAlign.Left;
         /// <summary>
-        /// Text height
+        /// Vertical align
         /// </summary>
-        private float height;
+        private VerticalTextAlign verticalAlign = VerticalTextAlign.Middle;
         /// <summary>
-        /// Text area rectangle limit
+        /// Update internals flag
         /// </summary>
-        /// <remarks>Used for text positioning</remarks>
-        private RectangleF? textArea = null;
+        private bool updateInternals = false;
 
         /// <summary>
         /// Manipulator
@@ -80,14 +79,28 @@ namespace Engine.UI
         protected Manipulator2D ShadowManipulator { get; private set; }
 
         /// <summary>
-        /// Parent control
-        /// </summary>
-        public UIControl Parent { get; set; }
-
-        /// <summary>
         /// Font name
         /// </summary>
         public readonly string Font = null;
+        /// <summary>
+        /// Parent control
+        /// </summary>
+        public UIControl Parent
+        {
+            get
+            {
+                return parent;
+            }
+            set
+            {
+                if (parent != value)
+                {
+                    parent = value;
+
+                    updateInternals = true;
+                }
+            }
+        }
         /// <summary>
         /// Gets or sets text to draw
         /// </summary>
@@ -102,23 +115,46 @@ namespace Engine.UI
                 if (!string.Equals(this.text, value))
                 {
                     this.text = value;
+
+                    updateInternals = true;
                 }
             }
         }
         /// <summary>
-        /// Gets character count
+        /// Gets or sets the horizontal align
         /// </summary>
-        public int CharacterCount
+        public HorizontalTextAlign HorizontalAlign
         {
             get
             {
-                if (!string.IsNullOrEmpty(this.text))
+                return horizontalAlign;
+            }
+            set
+            {
+                if (horizontalAlign != value)
                 {
-                    return this.text.Length;
+                    horizontalAlign = value;
+
+                    updateInternals = true;
                 }
-                else
+            }
+        }
+        /// <summary>
+        /// Gets or sets the vertical align
+        /// </summary>
+        public VerticalTextAlign VerticalAlign
+        {
+            get
+            {
+                return verticalAlign;
+            }
+            set
+            {
+                if (verticalAlign != value)
                 {
-                    return 0;
+                    verticalAlign = value;
+
+                    updateInternals = true;
                 }
             }
         }
@@ -146,15 +182,6 @@ namespace Engine.UI
         /// Gets or sets the text color alpha multiplier
         /// </summary>
         public float AlphaMultplier { get; set; } = 1.2f;
-        /// <summary>
-        /// Gets or sets the horizontal align
-        /// </summary>
-        public TextAlign HorizontalAlign { get; set; } = TextAlign.Left;
-        /// <summary>
-        /// Gets or sets the vertical align
-        /// </summary>
-        public VerticalAlign VerticalAlign { get; set; } = VerticalAlign.Middle;
-
         /// <summary>
         /// Gets whether the internal buffers were ready or not
         /// </summary>
@@ -204,15 +231,18 @@ namespace Engine.UI
             this.UseTextureColor = description.UseTextureColor;
             this.ShadowColor = description.ShadowColor;
             this.ShadowDelta = description.ShadowDelta;
-            this.HorizontalAlign = description.HorizontalAlign;
-            this.VerticalAlign = description.VerticalAlign;
-
-            this.MapText();
+            this.horizontalAlign = description.HorizontalAlign;
+            this.verticalAlign = description.VerticalAlign;
 
             if (description.LineAdjust)
             {
+                string sampleChar = $"{this.fontMap.GetSampleCharacter()}";
+                RectangleF rect = this.Game.Form.RenderRectangle;
+
                 // Set base line threshold
-                this.baseLineThr = this.height * 0.1666f; // --> 0.3333f * 0.5f
+                var size = this.MeasureText(sampleChar, rect, HorizontalTextAlign.Left, VerticalTextAlign.Top);
+
+                this.baseLineThr = size.Y * 0.1666f; // --> 0.3333f * 0.5f
             }
         }
         /// <summary>
@@ -244,7 +274,12 @@ namespace Engine.UI
                 return;
             }
 
-            this.MapText();
+            if (updateInternals)
+            {
+                this.MapText();
+
+                updateInternals = false;
+            }
 
             Vector2 sca;
             Vector2 pos;
@@ -252,13 +287,13 @@ namespace Engine.UI
             Vector2 parentCenter;
             float parentScale;
 
-            if (this.Parent != null)
+            if (this.parent != null)
             {
-                sca = Vector2.One * this.Parent.AbsoluteScale;
-                pos = new Vector2(this.Parent.AbsoluteLeft, this.Parent.AbsoluteTop);
-                rot = this.Parent.AbsoluteRotation;
-                parentCenter = this.Parent.GrandpaRectangle.Center;
-                parentScale = this.Parent.GrandpaScale;
+                sca = Vector2.One * this.parent.AbsoluteScale;
+                pos = new Vector2(this.parent.AbsoluteLeft, this.parent.AbsoluteTop);
+                rot = this.parent.AbsoluteRotation;
+                parentCenter = this.parent.GrandpaRectangle.Center;
+                parentScale = this.parent.GrandpaScale;
             }
             else
             {
@@ -270,24 +305,9 @@ namespace Engine.UI
             }
 
             // Adjust position
-            var rect = this.GetRenderArea().Scale(this.Parent?.Scale ?? 1f);
-
+            var rect = this.GetRenderArea();
             pos.X = rect.X;
-
-            if (VerticalAlign == VerticalAlign.Middle)
-            {
-                pos.Y = rect.Center.Y - (height * 0.5f);
-            }
-            else if (VerticalAlign == VerticalAlign.Bottom)
-            {
-                pos.Y = rect.Bottom - height;
-            }
-            else
-            {
-                pos.Y = rect.Y;
-            }
-
-            pos.Y += this.baseLineThr;
+            pos.Y = rect.Y + this.baseLineThr;
 
             // Calculate new transforms
             this.Manipulator.SetScale(sca);
@@ -391,7 +411,7 @@ namespace Engine.UI
             this.BufferManager.WriteVertexBuffer(this.vertexBuffer, this.vertices);
             this.BufferManager.WriteIndexBuffer(this.indexBuffer, this.indices);
 
-            this.indexDrawCount = this.indices.Length;
+            this.indexDrawCount = this.indices?.Length ?? 0;
 
             this.updateBuffers = false;
         }
@@ -402,26 +422,6 @@ namespace Engine.UI
         public void Resize()
         {
             this.viewProjection = this.Game.Form.GetOrthoProjectionMatrix();
-        }
-
-        /// <summary>
-        /// Centers the text into the parent rectangle
-        /// </summary>
-        public void CenterParent()
-        {
-            this.textArea = null;
-            this.HorizontalAlign = TextAlign.Center;
-            this.VerticalAlign = VerticalAlign.Middle;
-        }
-        /// <summary>
-        /// Centers the text into the rectangle
-        /// </summary>
-        /// <param name="rectangle">Rectangle</param>
-        public void CenterRectangle(RectangleF rectangle)
-        {
-            this.textArea = rectangle;
-            this.HorizontalAlign = TextAlign.Center;
-            this.VerticalAlign = VerticalAlign.Middle;
         }
 
         /// <summary>
@@ -436,16 +436,12 @@ namespace Engine.UI
 
             this.fontMap.MapSentence(
                 this.text,
-                this.GetCurrentWidth(),
-                this.HorizontalAlign,
-                this.VerticalAlign,
-                out this.vertices, out this.indices, out Vector2 size);
+                this.GetRenderArea(),
+                this.horizontalAlign,
+                this.verticalAlign,
+                out this.vertices, out this.indices, out _);
 
             this.updateBuffers = true;
-
-            // Adjust text bounds
-            this.width = size.X;
-            this.height = size.Y;
         }
         /// <summary>
         /// Gets the text render area
@@ -453,16 +449,18 @@ namespace Engine.UI
         /// <returns>Returns the text render area</returns>
         private RectangleF GetRenderArea()
         {
-            return this.Parent?.GetRenderArea() ?? this.textArea ?? this.Game.Form.RenderRectangle;
+            return this.parent?.GetRenderArea() ?? this.Game.Form.RenderRectangle;
         }
 
         /// <summary>
         /// Measures the specified text
         /// </summary>
         /// <param name="text">Text</param>
-        /// <param name="width">Maximum text width</param>
+        /// <param name="rect">Drawing rectangle</param>
+        /// <param name="horizontalAlign">Horizontal align</param>
+        /// <param name="verticalAlign">Vertical align</param>
         /// <returns>Returns a size vector where X is the width, and Y is the height</returns>
-        public Vector2 MeasureText(string text, float width)
+        public Vector2 MeasureText(string text, RectangleF rect, HorizontalTextAlign horizontalAlign, VerticalTextAlign verticalAlign)
         {
             if (this.fontMap == null)
             {
@@ -471,27 +469,12 @@ namespace Engine.UI
 
             this.fontMap.MapSentence(
                 text,
-                width,
-                this.HorizontalAlign,
-                this.VerticalAlign,
+                rect,
+                horizontalAlign,
+                verticalAlign,
                 out _, out _, out Vector2 size);
 
             return size;
-        }
-
-
-        private float GetCurrentWidth()
-        {
-            var rect = this.GetRenderArea();
-
-            return rect.Width * (this.Parent?.Scale ?? 1f);
-        }
-
-        private float GetCurrentHeight()
-        {
-            var rect = this.GetRenderArea();
-
-            return rect.Height * (this.Parent?.Scale ?? 1f);
         }
     }
 }

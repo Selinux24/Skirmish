@@ -192,7 +192,7 @@ namespace Engine.Tween
         /// <param name="ftColorB">Blue tween</param>
         public static void AddColorTween(UIControl control, FloatTween ftColorR, FloatTween ftColorG, FloatTween ftColorB)
         {
-            control.Color = new Color(ftColorR.StartValue, ftColorG.StartValue, ftColorB.StartValue);
+            control.TintColor = new Color(ftColorR.StartValue, ftColorG.StartValue, ftColorB.StartValue);
 
             var list = tasks.GetOrAdd(control, new List<Func<float, bool>>());
             list.Add((d) =>
@@ -201,7 +201,7 @@ namespace Engine.Tween
                 ftColorG.Update(d);
                 ftColorB.Update(d);
 
-                control.Color = new Color(ftColorR.CurrentValue, ftColorG.CurrentValue, ftColorB.CurrentValue);
+                control.TintColor = new Color(ftColorR.CurrentValue, ftColorG.CurrentValue, ftColorB.CurrentValue);
 
                 if (ftColorR.CurrentValue == ftColorR.EndValue && ftColorG.CurrentValue == ftColorG.EndValue && ftColorB.CurrentValue == ftColorB.EndValue)
                 {
@@ -220,7 +220,7 @@ namespace Engine.Tween
         /// <param name="ftColorB">Blue tween</param>
         public static void AddColorBounce(UIControl control, FloatTween ftColorR, FloatTween ftColorG, FloatTween ftColorB)
         {
-            control.Color = new Color(ftColorR.StartValue, ftColorG.StartValue, ftColorB.StartValue);
+            control.TintColor = new Color(ftColorR.StartValue, ftColorG.StartValue, ftColorB.StartValue);
 
             var list = tasks.GetOrAdd(control, new List<Func<float, bool>>());
             list.Add((d) =>
@@ -229,7 +229,7 @@ namespace Engine.Tween
                 ftColorG.Update(d);
                 ftColorB.Update(d);
 
-                control.Color = new Color(ftColorR.CurrentValue, ftColorG.CurrentValue, ftColorB.CurrentValue);
+                control.TintColor = new Color(ftColorR.CurrentValue, ftColorG.CurrentValue, ftColorB.CurrentValue);
 
                 if (ftColorR.CurrentValue == ftColorR.EndValue && ftColorG.CurrentValue == ftColorG.EndValue && ftColorB.CurrentValue == ftColorB.EndValue)
                 {

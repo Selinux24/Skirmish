@@ -150,7 +150,7 @@ namespace Animation
             {
                 Width = this.Game.Form.RenderWidth,
                 Height = this.messages.Top + this.messages.Height + 3,
-                Color = new Color4(0, 0, 0, 0.75f),
+                TintColor = new Color4(0, 0, 0, 0.75f),
             };
 
             await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);

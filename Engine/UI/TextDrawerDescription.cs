@@ -304,11 +304,11 @@ namespace Engine.UI
         /// <summary>
         /// Horizontal alignement
         /// </summary>
-        public TextAlign HorizontalAlign { get; set; } = TextAlign.Left;
+        public HorizontalTextAlign HorizontalAlign { get; set; } = HorizontalTextAlign.Left;
         /// <summary>
         /// Vertical alignement
         /// </summary>
-        public VerticalAlign VerticalAlign { get; set; } = VerticalAlign.Top;
+        public VerticalTextAlign VerticalAlign { get; set; } = VerticalTextAlign.Top;
 
         /// <summary>
         /// Constructor

@@ -147,7 +147,7 @@ namespace Engine
                     float glowScale = scale;
                     var glowSpritePos = lightProjectedPosition;
 
-                    this.glowSprite.Color = new Color4(keyLight.DiffuseColor.RGB(), 0.25f);
+                    this.glowSprite.TintColor = new Color4(keyLight.DiffuseColor.RGB(), 0.25f);
                     this.glowSprite.Scale = glowScale;
                     this.glowSprite.SetPosition(glowSpritePos - this.glowSprite.Center);
                     this.glowSprite.Update(context);
@@ -164,7 +164,7 @@ namespace Engine
                             var flareSpritePos = lightProjectedPosition + (lightProjectedDirection * flare.Distance);
 
                             // Set the flare alpha based on the angle with view and light directions.
-                            flare.FlareSprite.Color = new Color4(flare.Color.RGB(), 0.5f * transparency);
+                            flare.FlareSprite.TintColor = new Color4(flare.Color.RGB(), 0.5f * transparency);
                             flare.FlareSprite.Scale = flareScale;
                             flare.FlareSprite.SetPosition(flareSpritePos - flare.FlareSprite.Center);
                             flare.FlareSprite.Update(context);

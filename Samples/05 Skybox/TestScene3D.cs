@@ -114,7 +114,7 @@ namespace Skybox
             {
                 Name = "Cursor",
                 Textures = new[] { "target.png" },
-                Color = Color.Purple,
+                TintColor = Color.Purple,
                 Width = 16,
                 Height = 16,
             };
@@ -145,7 +145,7 @@ namespace Skybox
                 Name = "UI Back pannel",
                 Width = this.Game.Form.RenderWidth,
                 Height = 120,
-                Color = new Color4(0, 0, 0, 0.75f),
+                TintColor = new Color4(0, 0, 0, 0.75f),
             };
 
             await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);

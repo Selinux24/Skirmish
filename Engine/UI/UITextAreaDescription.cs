@@ -39,8 +39,8 @@ namespace Engine.UI
                 {
                     Font = fontFamilyName,
                     FontSize = size,
-                    HorizontalAlign = TextAlign.Center,
-                    VerticalAlign = VerticalAlign.Middle,
+                    HorizontalAlign = HorizontalTextAlign.Center,
+                    VerticalAlign = VerticalTextAlign.Middle,
                     Style = fontStyle,
                 },
             };
@@ -61,8 +61,8 @@ namespace Engine.UI
                     FontFileName = fileName,
                     FontSize = size,
                     LineAdjust = lineAdjust,
-                    HorizontalAlign = TextAlign.Center,
-                    VerticalAlign = VerticalAlign.Middle,
+                    HorizontalAlign = HorizontalTextAlign.Center,
+                    VerticalAlign = VerticalTextAlign.Middle,
                     Style = fontStyle,
                 },
             };
@@ -83,8 +83,8 @@ namespace Engine.UI
                         ImageFile = fontImageFileName,
                         MapFile = fontMapFileName,
                     },
-                    HorizontalAlign = TextAlign.Center,
-                    VerticalAlign = VerticalAlign.Middle,
+                    HorizontalAlign = HorizontalTextAlign.Center,
+                    VerticalAlign = VerticalTextAlign.Middle,
                     UseTextureColor = true,
                 },
             };

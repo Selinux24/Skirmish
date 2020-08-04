@@ -206,7 +206,7 @@ namespace Heightmap
             {
                 Name = "Cursor",
                 Textures = new[] { "target.png" },
-                Color = Color.Red,
+                TintColor = Color.Red,
                 Width = 20,
                 Height = 20,
             };
@@ -237,7 +237,7 @@ namespace Heightmap
                 Name = "Background",
                 Width = this.Game.Form.RenderWidth,
                 Height = this.help2.Top + this.help2.Height + 3,
-                Color = new Color4(0, 0, 0, 0.75f),
+                TintColor = new Color4(0, 0, 0, 0.75f),
             };
 
             await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);

@@ -205,9 +205,9 @@ namespace Engine.UI
         /// </summary>
         private float rotation = 0f;
         /// <summary>
-        /// Color
+        /// Tint color
         /// </summary>
-        private Color4 color = Color4.Black;
+        private Color4 tintColor = Color4.Black;
         /// <summary>
         /// Maintain proportion with window size
         /// </summary>
@@ -652,19 +652,19 @@ namespace Engine.UI
         }
 
         /// <summary>
-        /// Base color
+        /// Gets or sets the tint color
         /// </summary>
-        public virtual Color4 Color
+        public virtual Color4 TintColor
         {
             get
             {
-                return color;
+                return tintColor;
             }
             set
             {
-                color = value;
+                tintColor = value;
 
-                children.ForEach(c => c.Color = value);
+                children.ForEach(c => c.TintColor = value);
             }
         }
         /// <summary>
@@ -674,11 +674,11 @@ namespace Engine.UI
         {
             get
             {
-                return color.Alpha;
+                return tintColor.Alpha;
             }
             set
             {
-                color.Alpha = value;
+                tintColor.Alpha = value;
 
                 children.ForEach(c => c.Alpha = value);
             }
@@ -721,7 +721,7 @@ namespace Engine.UI
             this.centerHorizontally = description.CenterHorizontally;
             this.centerVertically = description.CenterVertically;
 
-            this.color = description.Color;
+            this.tintColor = description.TintColor;
 
             this.EventsEnabled = description.EventsEnabled;
 

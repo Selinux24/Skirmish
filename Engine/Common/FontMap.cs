@@ -19,6 +19,19 @@ namespace Engine.Common
     class FontMap : IDisposable
     {
         /// <summary>
+        /// Maximum text length
+        /// </summary>
+        public const int MAXTEXTLENGTH = 1024;
+        /// <summary>
+        /// Maximum texture size
+        /// </summary>
+        public const int MAXTEXTURESIZE = 1024 * 4;
+        /// <summary>
+        /// Key codes
+        /// </summary>
+        public const uint KeyCodes = 512;
+
+        /// <summary>
         /// Font cache
         /// </summary>
         private static readonly List<FontMap> gCache = new List<FontMap>();
@@ -44,58 +57,10 @@ namespace Engine.Common
 
             gCache.Clear();
         }
-
         /// <summary>
-        /// Maximum text length
+        /// Gets the default key list
         /// </summary>
-        public const int MAXTEXTLENGTH = 1024;
-        /// <summary>
-        /// Maximum texture size
-        /// </summary>
-        public const int MAXTEXTURESIZE = 1024 * 4;
-        /// <summary>
-        /// Key codes
-        /// </summary>
-        public const uint KeyCodes = 512;
-
-        /// <summary>
-        /// Map
-        /// </summary>
-        private Dictionary<char, FontMapChar> map = new Dictionary<char, FontMapChar>();
-        /// <summary>
-        /// Bitmap stream
-        /// </summary>
-        private MemoryStream bitmapStream = null;
-
-        /// <summary>
-        /// Texure width
-        /// </summary>
-        protected int TextureWidth = 0;
-        /// <summary>
-        /// Texture height
-        /// </summary>
-        protected int TextureHeight = 0;
-
-        /// <summary>
-        /// Font name
-        /// </summary>
-        public string Font { get; private set; }
-        /// <summary>
-        /// Font size
-        /// </summary>
-        public float Size { get; private set; }
-        /// <summary>
-        /// Font style
-        /// </summary>
-        public FontMapStyles Style { get; private set; }
-        /// <summary>
-        /// Font texture
-        /// </summary>
-        public EngineShaderResourceView Texture { get; private set; }
-        /// <summary>
-        /// Gets map keys
-        /// </summary>
-        public static char[] ValidKeys
+        public static char[] DefaultKeys
         {
             get
             {
@@ -120,6 +85,203 @@ namespace Engine.Common
 
                 return cList.ToArray();
             }
+        }
+        /// <summary>
+        /// Aligns the vertices into the rectangle
+        /// </summary>
+        /// <param name="vertices">Vertex list</param>
+        /// <param name="rect">Rectangle</param>
+        /// <param name="horizontalAlign">Horizontal align</param>
+        /// <param name="verticalAlign">Vertical align</param>
+        /// <returns>Returns a new vertex list</returns>
+        private static IEnumerable<VertexPositionTexture> AlignVertices(IEnumerable<VertexPositionTexture> vertices, RectangleF rect, HorizontalTextAlign horizontalAlign, VerticalTextAlign verticalAlign)
+        {
+            if (horizontalAlign == HorizontalTextAlign.Left && verticalAlign == VerticalTextAlign.Top)
+            {
+                //Return a copy of the original enumerable
+                return vertices.ToArray();
+            }
+
+            //Separate lines
+            var lines = SeparateLines(vertices.ToArray());
+
+            //Find total height (the column height)
+            var textSize = MeasureText(vertices);
+
+            //Relocate lines
+            List<VertexPositionTexture> res = new List<VertexPositionTexture>();
+            foreach (var l in lines)
+            {
+                //Find this line width
+                var lineSize = MeasureText(l);
+
+                //Calculate displacement deltas
+                float diffX = GetDeltaX(horizontalAlign, rect.Width, lineSize.X);
+                float diffY = GetDeltaY(verticalAlign, rect.Height, textSize.Y);
+
+                if (diffX == 0 && diffY == 0)
+                {
+                    //No changes, add the line and skip the update
+                    res.AddRange(l);
+
+                    continue;
+                }
+
+                //Update all the coordinates
+                for (int i = 0; i < l.Length; i++)
+                {
+                    l[i].Position.X += diffX;
+                    l[i].Position.Y -= diffY;
+                }
+
+                //Add the updated line to the result
+                res.AddRange(l);
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Separate the vertex list into a list o vertex list by text line
+        /// </summary>
+        /// <param name="verts">Vertex list</param>
+        private static IEnumerable<VertexPositionTexture[]> SeparateLines(VertexPositionTexture[] verts)
+        {
+            List<VertexPositionTexture[]> lines = new List<VertexPositionTexture[]>();
+
+            List<VertexPositionTexture> line = new List<VertexPositionTexture>();
+
+            for (int i = 0; i < verts.Length; i += 4)
+            {
+                if (verts[i].Position.X == 0)
+                {
+                    if (line.Count > 0)
+                    {
+                        lines.Add(line.ToArray());
+                    }
+
+                    line.Clear();
+                }
+
+                line.AddRange(verts.Skip(i).Take(4));
+            }
+
+            if (line.Count > 0)
+            {
+                lines.Add(line.ToArray());
+            }
+
+            return lines;
+        }
+        /// <summary>
+        /// Gets the delta x
+        /// </summary>
+        /// <param name="horizontalAlign">Horizontal align</param>
+        /// <param name="maxWidth">Maximum width</param>
+        /// <param name="lineWidth">Line width</param>
+        private static float GetDeltaX(HorizontalTextAlign horizontalAlign, float maxWidth, float lineWidth)
+        {
+            float diffX;
+            if (horizontalAlign == HorizontalTextAlign.Center)
+            {
+                diffX = (maxWidth - lineWidth) * 0.5f;
+            }
+            else if (horizontalAlign == HorizontalTextAlign.Right)
+            {
+                diffX = maxWidth - lineWidth;
+            }
+            else
+            {
+                diffX = 0;
+            }
+
+            return diffX;
+        }
+        /// <summary>
+        /// Gets the delta x
+        /// </summary>
+        /// <param name="verticalAlign">Vertical align</param>
+        /// <param name="maxHeight">Maximum height</param>
+        /// <param name="columnHeight">Column height</param>
+        private static float GetDeltaY(VerticalTextAlign verticalAlign, float maxHeight, float columnHeight)
+        {
+            float diffY;
+            if (verticalAlign == VerticalTextAlign.Middle)
+            {
+                diffY = (maxHeight - columnHeight) * 0.5f;
+            }
+            else if (verticalAlign == VerticalTextAlign.Bottom)
+            {
+                diffY = maxHeight - columnHeight;
+            }
+            else
+            {
+                diffY = 0;
+            }
+
+            return diffY;
+        }
+        /// <summary>
+        /// Measures the vertex list
+        /// </summary>
+        /// <param name="vertices">Vertex list</param>
+        /// <returns>Returns a vector with the width in the x component, and the height in the y component</returns>
+        private static Vector2 MeasureText(IEnumerable<VertexPositionTexture> vertices)
+        {
+            float maxX = float.MinValue;
+            float maxY = float.MinValue;
+
+            float minX = float.MaxValue;
+            float minY = float.MaxValue;
+
+            foreach (var v in vertices)
+            {
+                var p = v.Position;
+                maxX = Math.Max(maxX, p.X);
+                maxY = Math.Max(maxY, -p.Y);
+
+                minX = Math.Min(minX, p.X);
+                minY = Math.Min(minY, -p.Y);
+            }
+
+            return new Vector2(maxX - minX, maxY - minY);
+        }
+        /// <summary>
+        /// Parses a sentence
+        /// </summary>
+        /// <param name="text">Text to parse</param>
+        /// <returns>Returns a list of words</returns>
+        private static string[] ParseSentence(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return new string[] { };
+            }
+
+            if (text.Length > MAXTEXTLENGTH)
+            {
+                text = text.Substring(0, MAXTEXTLENGTH);
+            }
+
+            List<string> sentenceParts = new List<string>();
+
+            //Find lines
+            var lines = text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+            foreach (var line in lines)
+            {
+                if (!string.IsNullOrEmpty(line))
+                {
+                    var words = line.Split(new[] { " " }, StringSplitOptions.None);
+                    foreach (var word in words)
+                    {
+                        sentenceParts.Add(word);
+                        sentenceParts.Add(" ");
+                    }
+                }
+
+                sentenceParts.Add(Environment.NewLine);
+            }
+
+            return sentenceParts.ToArray();
         }
 
         /// <summary>
@@ -273,9 +435,9 @@ namespace Engine.Common
                     float top = 0f;
                     int charSeparationPixels = (int)(size * charSeparationThr);
 
-                    for (int i = 0; i < ValidKeys.Length; i++)
+                    for (int i = 0; i < DefaultKeys.Length; i++)
                     {
-                        char c = ValidKeys[i];
+                        char c = DefaultKeys[i];
 
                         var s = gra.MeasureString(
                             c.ToString(),
@@ -362,9 +524,9 @@ namespace Engine.Common
                 float top = 0f;
                 int charSeparationPixels = (int)(size * charSeparationThr);
 
-                for (int i = 0; i < ValidKeys.Length; i++)
+                for (int i = 0; i < DefaultKeys.Length; i++)
                 {
-                    char c = ValidKeys[i];
+                    char c = DefaultKeys[i];
 
                     var s = gra.MeasureString(
                         c.ToString(),
@@ -423,6 +585,51 @@ namespace Engine.Common
         }
 
         /// <summary>
+        /// Map
+        /// </summary>
+        private Dictionary<char, FontMapChar> map = new Dictionary<char, FontMapChar>();
+        /// <summary>
+        /// Bitmap stream
+        /// </summary>
+        private MemoryStream bitmapStream = null;
+
+        /// <summary>
+        /// Texure width
+        /// </summary>
+        protected int TextureWidth = 0;
+        /// <summary>
+        /// Texture height
+        /// </summary>
+        protected int TextureHeight = 0;
+
+        /// <summary>
+        /// Font name
+        /// </summary>
+        public string Font { get; private set; }
+        /// <summary>
+        /// Font size
+        /// </summary>
+        public float Size { get; private set; }
+        /// <summary>
+        /// Font style
+        /// </summary>
+        public FontMapStyles Style { get; private set; }
+        /// <summary>
+        /// Font texture
+        /// </summary>
+        public EngineShaderResourceView Texture { get; private set; }
+        /// <summary>
+        /// Gets the map keys
+        /// </summary>
+        public char[] Keys
+        {
+            get
+            {
+                return map.Keys.ToArray();
+            }
+        }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         public FontMap()
@@ -469,7 +676,7 @@ namespace Engine.Common
         /// Maps a sentence
         /// </summary>
         /// <param name="text">Sentence text</param>
-        /// <param name="maxLength">Maximum length</param>
+        /// <param name="rect">Bounds rectangle</param>
         /// <param name="horizontalAlign">Horizontal align</param>
         /// <param name="verticalAlign">Vertical align</param>
         /// <param name="vertices">Gets generated vertices</param>
@@ -477,9 +684,9 @@ namespace Engine.Common
         /// <param name="size">Gets generated sentence total size</param>
         public void MapSentence(
             string text,
-            float maxLength,
-            TextAlign horizontalAlign,
-            VerticalAlign verticalAlign,
+            RectangleF rect,
+            HorizontalTextAlign horizontalAlign,
+            VerticalTextAlign verticalAlign,
             out VertexPositionTexture[] vertices,
             out uint[] indices,
             out Vector2 size)
@@ -535,7 +742,7 @@ namespace Engine.Common
                 //Store the indices adding last vertext index in the list
                 wIndices.ToList().ForEach((i) => { indexList.Add(i + (uint)vertList.Count); });
 
-                if (!firstWord && pos.X > maxLength)
+                if (!firstWord && pos.X > rect.Width)
                 {
                     //Move the position to the last character of the new line
                     pos.X -= (int)prevPos.X;
@@ -554,94 +761,9 @@ namespace Engine.Common
                 firstWord = false;
             }
 
-            vertices = AlignVertices(vertList, maxLength, horizontalAlign).ToArray();
+            vertices = AlignVertices(vertList, rect, horizontalAlign, verticalAlign).ToArray();
             indices = indexList.ToArray();
             size = MeasureText(vertices);
-        }
-
-        private static IEnumerable<VertexPositionTexture> AlignVertices(IEnumerable<VertexPositionTexture> vertices, float maxLength, TextAlign horizontalAlign)
-        {
-            if (horizontalAlign == TextAlign.Left)
-            {
-                return vertices.ToArray();
-            }
-
-            var verts = vertices.ToArray();
-
-            //Separate lines
-            List<VertexPositionTexture[]> lines = new List<VertexPositionTexture[]>();
-            List<VertexPositionTexture> line = new List<VertexPositionTexture>();
-            for (int i = 0; i < verts.Length; i += 4)
-            {
-                if (verts[i].Position.X == 0)
-                {
-                    if (line.Count > 0)
-                    {
-                        lines.Add(line.ToArray());
-                    }
-
-                    line.Clear();
-                }
-
-                line.AddRange(verts.Skip(i).Take(4));
-            }
-
-            if (line.Count > 0)
-            {
-                lines.Add(line.ToArray());
-            }
-
-            //Relocate lines
-            List<VertexPositionTexture> res = new List<VertexPositionTexture>();
-            foreach (var l in lines)
-            {
-                var size = MeasureText(l);
-
-                float diff;
-
-                if (horizontalAlign == TextAlign.Center)
-                {
-                    diff = (maxLength - size.X) * 0.5f;
-                }
-                else if (horizontalAlign == TextAlign.Right)
-                {
-                    diff = maxLength - size.X;
-                }
-                else
-                {
-                    continue;
-                }
-
-                for (int i = 0; i < l.Length; i++)
-                {
-                    l[i].Position.X += diff;
-                }
-
-                res.AddRange(l);
-            }
-
-            return res;
-        }
-
-        private static Vector2 MeasureText(IEnumerable<VertexPositionTexture> vertices)
-        {
-            float maxX = float.MinValue;
-            float maxY = float.MinValue;
-
-            float minX = float.MaxValue;
-            float minY = float.MaxValue;
-
-            foreach (var v in vertices)
-            {
-                var p = v.Position;
-                maxX = Math.Max(maxX, p.X);
-                maxY = Math.Max(maxY, -p.Y);
-
-                minX = Math.Min(minX, p.X);
-                minY = Math.Min(minY, -p.Y);
-            }
-
-            return new Vector2(maxX - minX, maxY - minY);
         }
         /// <summary>
         /// Maps a space
@@ -653,44 +775,6 @@ namespace Engine.Common
             MapWord(" ", ref tmpPos, out _, out _, out var tmpHeight);
 
             return new Vector2(tmpPos.X, tmpHeight);
-        }
-        /// <summary>
-        /// Parses a sentence
-        /// </summary>
-        /// <param name="text">Text to parse</param>
-        /// <returns>Returns a list of words</returns>
-        private static string[] ParseSentence(string text)
-        {
-            if (string.IsNullOrWhiteSpace(text))
-            {
-                return new[] { string.Empty.PadRight(MAXTEXTLENGTH) };
-            }
-
-            if (text.Length > MAXTEXTLENGTH)
-            {
-                text = text.Substring(0, MAXTEXTLENGTH);
-            }
-
-            List<string> sentenceParts = new List<string>();
-
-            //Find lines
-            var lines = text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
-            foreach (var line in lines)
-            {
-                if (!string.IsNullOrEmpty(line))
-                {
-                    var words = line.Split(new[] { " " }, StringSplitOptions.None);
-                    foreach (var word in words)
-                    {
-                        sentenceParts.Add(word);
-                        sentenceParts.Add(" ");
-                    }
-                }
-
-                sentenceParts.Add(Environment.NewLine);
-            }
-
-            return sentenceParts.ToArray();
         }
         /// <summary>
         /// Maps a word
@@ -758,8 +842,28 @@ namespace Engine.Common
         /// <param name="height">White space height</param>
         private void GetSpaceSize(out float width, out float height)
         {
-            width = map['X'].Width;
-            height = map['X'].Height;
+            char defChar = this.GetSampleCharacter();
+
+            var mapChar = map[defChar];
+
+            width = mapChar.Width;
+            height = mapChar.Height;
+        }
+        /// <summary>
+        /// Gets the sample character
+        /// </summary>
+        /// <returns>Returns the sample character</returns>
+        /// <remarks>Used for map the space if not specified</remarks>
+        public char GetSampleCharacter()
+        {
+            char defChar = 'X';
+
+            if (!this.Keys.Any(c => c == defChar))
+            {
+                defChar = this.Keys.FirstOrDefault();
+            }
+
+            return defChar;
         }
     }
 }
