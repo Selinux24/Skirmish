@@ -486,11 +486,11 @@ namespace Engine.UI
                 return 0;
             }
 
-            string text = $"{this.fontMap.GetSampleCharacter()}";
+            string sampleChar = $"{this.fontMap.GetSampleCharacter()}";
             RectangleF rect = this.Game.Form.RenderRectangle;
 
             this.fontMap.MapSentence(
-                text,
+                sampleChar,
                 rect,
                 HorizontalTextAlign.Left,
                 VerticalTextAlign.Top,

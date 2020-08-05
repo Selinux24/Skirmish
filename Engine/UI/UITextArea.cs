@@ -223,27 +223,29 @@ namespace Engine.UI
         /// <remarks>Applies margin configuration if any</remarks>
         public override RectangleF GetRenderArea()
         {
+            float left;
+            float top;
             float width;
             float height;
 
-            if (this.AdjustAreaWithText)
+            if (AdjustAreaWithText && !HasParent)
             {
-                var rect = this.Parent?.GetRenderArea();
-
-                width = rect?.Width ?? this.Game.Form.RenderWidth - AbsoluteLeft;
-                height = rect?.Height ?? this.Game.Form.RenderHeight - AbsoluteTop;
+                left = Left;
+                top = Top;
+                width = this.Game.Form.RenderWidth - left;
+                height = this.Game.Form.RenderHeight - top;
             }
             else
             {
-                var rect = this.Parent?.GetRenderArea();
-
-                width = AbsoluteWidth == 0 ? rect?.Width ?? this.Game.Form.RenderWidth - AbsoluteLeft : AbsoluteWidth;
-                height = AbsoluteHeight == 0 ? rect?.Height ?? this.Game.Form.RenderHeight - AbsoluteTop : AbsoluteHeight;
+                left = AbsoluteLeft;
+                top = AbsoluteTop;
+                width = AbsoluteWidth == 0 ? this.Game.Form.RenderWidth - AbsoluteLeft : AbsoluteWidth;
+                height = AbsoluteHeight == 0 ? this.Game.Form.RenderHeight - AbsoluteTop : AbsoluteHeight;
             }
 
             return new RectangleF(
-                AbsoluteLeft + MarginLeft,
-                AbsoluteTop + MarginTop,
+                left + MarginLeft,
+                top + MarginTop,
                 width - (MarginLeft + MarginRight),
                 height - (MarginTop + MarginBottom));
         }

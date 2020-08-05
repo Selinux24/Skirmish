@@ -260,8 +260,10 @@ namespace GameLogic
             var buttonsFont = new TextDrawerDescription()
             {
                 FontFileName = fontFileName,
-                FontSize = (int)(fontSize * 0.85f),
+                FontSize = fontSize,
                 TextColor = Color.Yellow,
+                HorizontalAlign = HorizontalTextAlign.Center,
+                VerticalAlign = VerticalTextAlign.Middle,
             };
 
             this.txtTitle = await this.AddComponentUITextArea(new UITextAreaDescription { Font = titleFont }, layerHUD);

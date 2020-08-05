@@ -448,7 +448,7 @@ namespace ModelDrawing
             var particle1 = this.pManager.GetParticleSystem(0);
             var particle2 = this.pManager.GetParticleSystem(1);
 
-            this.text.Text = "Model Drawing";
+            this.text.Text = "Particle System Drawing";
             this.statistics.Text = this.Game.RuntimeText;
             this.text1.Text = $"P1 - {particle1}";
             this.text2.Text = $"P2 - {particle2}";

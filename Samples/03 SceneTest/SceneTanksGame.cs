@@ -143,6 +143,8 @@ namespace SceneTest
             loadingText.CenterHorizontally = CenterTargets.Screen;
             loadingText.Top = this.Game.Form.RenderCenter.Y - 75f;
             loadingText.Width = this.Game.Form.RenderWidth * 0.8f;
+            loadingText.HorizontalAlign = HorizontalTextAlign.Center;
+            loadingText.VerticalAlign = VerticalTextAlign.Middle;
             loadingText.AdjustAreaWithText = false;
             loadingText.Visible = false;
 
@@ -195,6 +197,8 @@ namespace SceneTest
                         fadePanel.Hide(2000);
 
                         gameReady = true;
+
+                        UpdateGameControls(true);
                     });
                 });
         }
@@ -232,7 +236,7 @@ namespace SceneTest
             player1Name.Width = playerWidth;
             player1Name.Top = 10;
             player1Name.Left = 10;
-            player1Name.Visible = true;
+            player1Name.Visible = false;
 
             player1Points = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 25, true), layerUI);
             player1Points.TextColor = player1Status.Color;
@@ -242,7 +246,7 @@ namespace SceneTest
             player1Points.Width = playerWidth;
             player1Points.Top = 60;
             player1Points.Left = 10;
-            player1Points.Visible = true;
+            player1Points.Visible = false;
 
             player1Life = await this.AddComponentUIProgressBar(UIProgressBarDescription.DefaultFromFile(fontFilename, 10, true), layerUI);
             player1Life.Width = playerWidth;
@@ -253,7 +257,7 @@ namespace SceneTest
             player1Life.BaseColor = Color.Black;
             player1Life.Caption.TextColor = Color.White;
             player1Life.Caption.Text = "0%";
-            player1Life.Visible = true;
+            player1Life.Visible = false;
 
             player2Name = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 20, true), layerUI);
             player2Name.TextColor = player2Status.Color;
@@ -263,7 +267,7 @@ namespace SceneTest
             player2Name.Width = playerWidth;
             player2Name.Top = 10;
             player2Name.Left = this.Game.Form.RenderWidth - 10 - player2Name.Width;
-            player2Name.Visible = true;
+            player2Name.Visible = false;
 
             player2Points = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 25, true), layerUI);
             player2Points.TextColor = player2Status.Color;
@@ -273,7 +277,7 @@ namespace SceneTest
             player2Points.Width = playerWidth;
             player2Points.Top = 60;
             player2Points.Left = this.Game.Form.RenderWidth - 10 - player2Points.Width;
-            player2Points.Visible = true;
+            player2Points.Visible = false;
 
             player2Life = await this.AddComponentUIProgressBar(UIProgressBarDescription.DefaultFromFile(fontFilename, 10, true), layerUI);
             player2Life.Width = playerWidth;
@@ -284,7 +288,7 @@ namespace SceneTest
             player2Life.BaseColor = Color.Black;
             player2Life.Caption.TextColor = Color.White;
             player2Life.Caption.Text = "0%";
-            player2Life.Visible = true;
+            player2Life.Visible = false;
         }
         private async Task InitializeUITurn()
         {
@@ -292,9 +296,10 @@ namespace SceneTest
             turnText.TextColor = Color.Yellow;
             turnText.TextShadowColor = Color.Yellow * 0.5f;
             turnText.HorizontalAlign = HorizontalTextAlign.Center;
-            turnText.CenterHorizontally = CenterTargets.Screen;
             turnText.Width = 300;
-            turnText.Visible = true;
+            turnText.CenterHorizontally = CenterTargets.Screen;
+            turnText.AdjustAreaWithText = false;
+            turnText.Visible = false;
 
             gameIcon = await this.AddComponentSprite(SpriteDescription.FromFile("SceneTanksGame/GameIcon.png"), SceneObjectUsages.UI, layerUI);
             gameIcon.TintColor = Color.Yellow;
@@ -302,7 +307,7 @@ namespace SceneTest
             gameIcon.Height = 82;
             gameIcon.Top = 55;
             gameIcon.CenterHorizontally = CenterTargets.Screen;
-            gameIcon.Visible = true;
+            gameIcon.Visible = false;
             gameIcon.TweenRotateBounce(-0.1f, 0.1f, 500, ScaleFuncs.CubicEaseInOut);
 
             playerTurnMarker = await this.AddComponentSprite(SpriteDescription.FromFile("SceneTanksGame/Arrow.png"), SceneObjectUsages.UI, layerUI);
@@ -311,7 +316,7 @@ namespace SceneTest
             playerTurnMarker.Height = 75;
             playerTurnMarker.Top = 35;
             playerTurnMarker.Left = this.Game.Form.RenderCenter.X - 112 - 120;
-            playerTurnMarker.Visible = true;
+            playerTurnMarker.Visible = false;
             playerTurnMarker.TweenScaleBounce(1, 1.2f, 500, ScaleFuncs.CubicEaseInOut);
         }
         private async Task InitializeUIKeyPanel()
@@ -323,7 +328,7 @@ namespace SceneTest
             keyHelp.Top = top;
             keyHelp.Height = 150;
             keyHelp.Width = 250;
-            keyHelp.Visible = true;
+            keyHelp.Visible = false;
 
             keyRotate = await this.AddComponentSprite(SpriteDescription.FromFile("SceneTanksGame/Turn.png"), SceneObjectUsages.UI, layerUI + 1);
             keyRotate.Left = 0;
@@ -331,7 +336,7 @@ namespace SceneTest
             keyRotate.Width = 372 * 0.25f;
             keyRotate.Height = 365 * 0.25f;
             keyRotate.TintColor = Color.Turquoise;
-            keyRotate.Visible = true;
+            keyRotate.Visible = false;
 
             keyMove = await this.AddComponentSprite(SpriteDescription.FromFile("SceneTanksGame/Move.png"), SceneObjectUsages.UI, layerUI + 1);
             keyMove.Left = keyRotate.Width;
@@ -339,7 +344,7 @@ namespace SceneTest
             keyMove.Width = 232 * 0.25f;
             keyMove.Height = 365 * 0.25f;
             keyMove.TintColor = Color.Turquoise;
-            keyMove.Visible = true;
+            keyMove.Visible = false;
 
             KeyPitch = await this.AddComponentSprite(SpriteDescription.FromFile("SceneTanksGame/Pitch.png"), SceneObjectUsages.UI, layerUI + 1);
             KeyPitch.Left = keyRotate.Width + keyMove.Width;
@@ -347,49 +352,49 @@ namespace SceneTest
             KeyPitch.Width = 322 * 0.25f;
             KeyPitch.Height = 365 * 0.25f;
             KeyPitch.TintColor = Color.Turquoise;
-            KeyPitch.Visible = true;
+            KeyPitch.Visible = false;
 
             keyRotateLeftText = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 15, true), layerUI + 2);
             keyRotateLeftText.TextColor = Color.Yellow;
             keyRotateLeftText.Text = "A";
             keyRotateLeftText.Top = top + 20;
             keyRotateLeftText.Left = 10;
-            keyRotateLeftText.Visible = true;
+            keyRotateLeftText.Visible = false;
 
             keyRotateRightText = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 15, true), layerUI + 2);
             keyRotateRightText.TextColor = Color.Yellow;
             keyRotateRightText.Text = "D";
             keyRotateRightText.Top = top + 20;
             keyRotateRightText.Left = keyRotate.Width - 30;
-            keyRotateRightText.Visible = true;
+            keyRotateRightText.Visible = false;
 
             keyMoveForwardText = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 15, true), layerUI + 2);
             keyMoveForwardText.TextColor = Color.Yellow;
             keyMoveForwardText.Text = "W";
             keyMoveForwardText.Top = top + 20;
             keyMoveForwardText.Left = keyMove.AbsoluteCenter.X - 5;
-            keyMoveForwardText.Visible = true;
+            keyMoveForwardText.Visible = false;
 
             keyMoveBackwardText = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 15, true), layerUI + 2);
             keyMoveBackwardText.TextColor = Color.Yellow;
             keyMoveBackwardText.Text = "S";
             keyMoveBackwardText.Top = top + keyMove.Height + 10;
             keyMoveBackwardText.Left = keyMove.AbsoluteCenter.X - 5;
-            keyMoveBackwardText.Visible = true;
+            keyMoveBackwardText.Visible = false;
 
             keyPitchUpText = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 15, true), layerUI + 2);
             keyPitchUpText.TextColor = Color.Yellow;
             keyPitchUpText.Text = "Q";
             keyPitchUpText.Top = top + 20;
             keyPitchUpText.Left = KeyPitch.AbsoluteCenter.X - 15;
-            keyPitchUpText.Visible = true;
+            keyPitchUpText.Visible = false;
 
             keyPitchDownText = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 15, true), layerUI + 2);
             keyPitchDownText.TextColor = Color.Yellow;
             keyPitchDownText.Text = "Z";
             keyPitchDownText.Top = top + KeyPitch.Height + 10;
             keyPitchDownText.Left = KeyPitch.AbsoluteCenter.X + 10;
-            keyPitchDownText.Visible = true;
+            keyPitchDownText.Visible = false;
         }
         private async Task InitializeUIFire()
         {
@@ -399,16 +404,19 @@ namespace SceneTest
             pbFire.Width = 500;
             pbFire.Height = 40;
             pbFire.ProgressColor = Color.Yellow;
-            pbFire.Visible = true;
+            pbFire.Visible = false;
 
             fireKeyText = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 25, true), layerUI + 2);
             fireKeyText.TextColor = Color.Yellow;
             fireKeyText.Text = "Press space to fire!";
             fireKeyText.CenterHorizontally = CenterTargets.Screen;
-            fireKeyText.Top = this.Game.Form.RenderHeight - 40;
+            fireKeyText.Top = this.Game.Form.RenderHeight - 60;
             fireKeyText.Width = 500;
             fireKeyText.Height = 40;
-            fireKeyText.Visible = true;
+            fireKeyText.HorizontalAlign = HorizontalTextAlign.Center;
+            fireKeyText.VerticalAlign = VerticalTextAlign.Middle;
+            fireKeyText.AdjustAreaWithText = false;
+            fireKeyText.Visible = false;
             fireKeyText.TweenScaleBounce(1, 1.01f, 500, ScaleFuncs.CubicEaseInOut);
         }
         private async Task InitializeUIMinimap()
@@ -419,7 +427,7 @@ namespace SceneTest
             miniMapBackground.Left = this.Game.Form.RenderWidth - 200 - 10;
             miniMapBackground.Top = this.Game.Form.RenderHeight - 200 - 10;
             miniMapBackground.Alpha = 0.5f;
-            miniMapBackground.Visible = true;
+            miniMapBackground.Visible = false;
 
             miniMapTank1 = await this.AddComponentSprite(SpriteDescription.FromFile("SceneTanksGame/Tank.png"), SceneObjectUsages.UI, layerUI + 1);
             miniMapTank1.Width = 273 * 0.1f;
@@ -427,7 +435,7 @@ namespace SceneTest
             miniMapTank1.Left = this.Game.Form.RenderWidth - 150 - 10;
             miniMapTank1.Top = this.Game.Form.RenderHeight - 150 - 10;
             miniMapTank1.TintColor = Color.Blue;
-            miniMapTank1.Visible = true;
+            miniMapTank1.Visible = false;
 
             miniMapTank2 = await this.AddComponentSprite(SpriteDescription.FromFile("SceneTanksGame/Tank.png"), SceneObjectUsages.UI, layerUI + 1);
             miniMapTank2.Width = 273 * 0.1f;
@@ -435,7 +443,7 @@ namespace SceneTest
             miniMapTank2.Left = this.Game.Form.RenderWidth - 85 - 10;
             miniMapTank2.Top = this.Game.Form.RenderHeight - 85 - 10;
             miniMapTank2.TintColor = Color.Red;
-            miniMapTank2.Visible = true;
+            miniMapTank2.Visible = false;
 
             windVelocity = await this.AddComponentUIProgressBar(UIProgressBarDescription.DefaultFromFile(fontFilename, 8), layerUI + 2);
             windVelocity.Caption.Text = "Wind velocity";
@@ -445,7 +453,7 @@ namespace SceneTest
             windVelocity.Left = miniMapBackground.AbsoluteCenter.X - 90;
             windVelocity.Top = miniMapBackground.AbsoluteCenter.Y - 130;
             windVelocity.ProgressColor = Color.DeepSkyBlue;
-            windVelocity.Visible = true;
+            windVelocity.Visible = false;
 
             windDirection = await this.AddComponentSprite(SpriteDescription.FromFile("SceneTanksGame/Wind.png"), SceneObjectUsages.UI, layerUI + 1);
             windDirection.Width = 100;
@@ -453,7 +461,7 @@ namespace SceneTest
             windDirection.Left = miniMapBackground.AbsoluteCenter.X - 50;
             windDirection.Top = miniMapBackground.AbsoluteCenter.Y - 50;
             windDirection.TintColor = Color.Green;
-            windDirection.Visible = true;
+            windDirection.Visible = false;
         }
         private void PrepareUI()
         {
@@ -546,6 +554,39 @@ namespace SceneTest
                 Color = Color.Red,
             };
         }
+        private void UpdateGameControls(bool visible)
+        {
+            player1Name.Visible = visible;
+            player1Points.Visible = visible;
+            player1Life.Visible = visible;
+            player2Name.Visible = visible;
+            player2Points.Visible = visible;
+            player2Life.Visible = visible;
+
+            turnText.Visible = visible;
+            gameIcon.Visible = visible;
+            playerTurnMarker.Visible = visible;
+
+            keyHelp.Visible = visible;
+            keyRotate.Visible = visible;
+            keyMove.Visible = visible;
+            KeyPitch.Visible = visible;
+            keyRotateLeftText.Visible = visible;
+            keyRotateRightText.Visible = visible;
+            keyMoveForwardText.Visible = visible;
+            keyMoveBackwardText.Visible = visible;
+            keyPitchUpText.Visible = visible;
+            keyPitchDownText.Visible = visible;
+     
+            pbFire.Visible = visible;
+            fireKeyText.Visible = visible;
+
+            miniMapBackground.Visible = visible;
+            miniMapTank1.Visible = visible;
+            miniMapTank2.Visible = visible;
+            windVelocity.Visible = visible;
+            windDirection.Visible = visible;
+        }
 
         public override void Update(GameTime gameTime)
         {
@@ -570,8 +611,8 @@ namespace SceneTest
                 return;
             }
 
-            this.UpdateInputTanks(gameTime);
-            this.UpdateInputShoot(gameTime);
+            UpdateInputTanks(gameTime);
+            UpdateInputShoot(gameTime);
         }
         private void UpdateTurnStatus()
         {

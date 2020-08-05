@@ -49,12 +49,7 @@ namespace Collada
         {
             GameEnvironment.Background = Color.Black;
 
-            this.Game.VisibleMouse = false;
-            this.Game.LockMouse = false;
-
-            LoadUserInteface();
-
-            await Task.CompletedTask;
+            await LoadUserInteface();
         }
 
         public override void Update(GameTime gameTime)
@@ -71,9 +66,12 @@ namespace Collada
             UpdateAudio();
         }
 
-        private void LoadUserInteface()
+        private async Task LoadUserInteface()
         {
-            _ = this.LoadResourcesAsync(
+            this.Game.VisibleMouse = false;
+            this.Game.LockMouse = false;
+
+            await this.LoadResourcesAsync(
                 new[]
                 {
                     InitializeAudio(),

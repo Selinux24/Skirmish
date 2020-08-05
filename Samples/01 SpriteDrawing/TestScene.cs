@@ -221,6 +221,8 @@ namespace SpriteDrawing
             descText.MarginRight = width * 0.1f;
             descText.MarginTop = height * 0.1f;
             descText.MarginBottom = height * 0.1f;
+            descText.Font.HorizontalAlign = HorizontalTextAlign.Center;
+            descText.Font.VerticalAlign = VerticalTextAlign.Middle;
 
             var textMapped = new UITextArea(this, descText);
 
