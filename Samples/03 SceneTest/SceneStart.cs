@@ -71,8 +71,8 @@ namespace SceneTest
                 var rect = this.Game.Form.RenderRectangle;
                 rect.Height /= 2;
                 this.title.SetRectangle(rect);
-                this.title.CenterHorizontally = CenterTargets.Parent;
-                this.title.CenterVertically = CenterTargets.Parent;
+                this.title.CenterHorizontally = CenterTargets.Screen;
+                this.title.CenterVertically = CenterTargets.Screen;
 
                 for (int i = 0; i < sceneButtons.Length; i++)
                 {
@@ -128,6 +128,7 @@ namespace SceneTest
             var titleDesc = UITextAreaDescription.Default(titleFont);
 
             this.title = await this.AddComponentUITextArea(titleDesc, layerHUD);
+            this.title.AdjustAreaWithText = false;
 
             #endregion
 

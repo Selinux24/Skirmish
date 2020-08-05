@@ -476,5 +476,27 @@ namespace Engine.UI
 
             return size;
         }
+        /// <summary>
+        /// Gets the single line height
+        /// </summary>
+        public float GetLineHeight()
+        {
+            if (this.fontMap == null)
+            {
+                return 0;
+            }
+
+            string text = $"{this.fontMap.GetSampleCharacter()}";
+            RectangleF rect = this.Game.Form.RenderRectangle;
+
+            this.fontMap.MapSentence(
+                text,
+                rect,
+                HorizontalTextAlign.Left,
+                VerticalTextAlign.Top,
+                out _, out _, out Vector2 size);
+
+            return size.Y;
+        }
     }
 }

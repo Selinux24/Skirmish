@@ -106,6 +106,10 @@ namespace Engine.UI
         /// Bottom margin
         /// </summary>
         public float MarginBottom { get; set; }
+        /// <summary>
+        /// Gets or sets whether the area must grow or shrinks with the text value
+        /// </summary>
+        public bool AdjustAreaWithText { get; set; } = true;
 
         /// <summary>
         /// Text

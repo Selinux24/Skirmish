@@ -14,6 +14,10 @@ namespace Engine.UI
         /// Button text drawer
         /// </summary>
         private readonly TextDrawer textDrawer = null;
+        /// <summary>
+        /// Line height
+        /// </summary>
+        private readonly float lineHeight = 0;
 
         /// <summary>
         /// Gets or sets the control text
@@ -152,7 +156,7 @@ namespace Engine.UI
             this.MarginTop = description.MarginTop;
             this.MarginRight = description.MarginRight;
             this.MarginBottom = description.MarginBottom;
-            this.AdjustAreaWithText = description.Width == 0 && description.Height == 0;
+            this.AdjustAreaWithText = description.AdjustAreaWithText;
 
             if (description.Font != null)
             {
@@ -164,6 +168,10 @@ namespace Engine.UI
                 };
 
                 this.Text = description.Text;
+
+                this.lineHeight = this.textDrawer.GetLineHeight();
+
+                this.GrowControl();
             }
         }
         /// <inheritdoc/>
@@ -215,8 +223,23 @@ namespace Engine.UI
         /// <remarks>Applies margin configuration if any</remarks>
         public override RectangleF GetRenderArea()
         {
-            float width = AbsoluteWidth == 0 ? this.Game.Form.RenderWidth : AbsoluteWidth;
-            float height = AbsoluteHeight == 0 ? this.Game.Form.RenderHeight : AbsoluteHeight;
+            float width;
+            float height;
+
+            if (this.AdjustAreaWithText)
+            {
+                var rect = this.Parent?.GetRenderArea();
+
+                width = rect?.Width ?? this.Game.Form.RenderWidth - AbsoluteLeft;
+                height = rect?.Height ?? this.Game.Form.RenderHeight - AbsoluteTop;
+            }
+            else
+            {
+                var rect = this.Parent?.GetRenderArea();
+
+                width = AbsoluteWidth == 0 ? rect?.Width ?? this.Game.Form.RenderWidth - AbsoluteLeft : AbsoluteWidth;
+                height = AbsoluteHeight == 0 ? rect?.Height ?? this.Game.Form.RenderHeight - AbsoluteTop : AbsoluteHeight;
+            }
 
             return new RectangleF(
                 AbsoluteLeft + MarginLeft,
@@ -259,7 +282,7 @@ namespace Engine.UI
 
             //Set initial sizes
             if (this.Width == 0) this.Width = size.X;
-            if (this.Height == 0) this.Height = size.Y;
+            if (this.Height == 0) this.Height = size.Y == 0 ? this.lineHeight : size.Y;
 
             if (!this.AdjustAreaWithText)
             {
@@ -268,7 +291,7 @@ namespace Engine.UI
 
             //Grow area
             this.Width = size.X;
-            this.Height = size.Y;
+            this.Height = size.Y == 0 ? this.lineHeight : size.Y;
         }
     }
 

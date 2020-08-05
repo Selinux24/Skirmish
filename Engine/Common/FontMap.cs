@@ -618,16 +618,6 @@ namespace Engine.Common
         /// Font texture
         /// </summary>
         public EngineShaderResourceView Texture { get; private set; }
-        /// <summary>
-        /// Gets the map keys
-        /// </summary>
-        public char[] Keys
-        {
-            get
-            {
-                return map.Keys.ToArray();
-            }
-        }
 
         /// <summary>
         /// Constructor
@@ -858,12 +848,21 @@ namespace Engine.Common
         {
             char defChar = 'X';
 
-            if (!this.Keys.Any(c => c == defChar))
+            var keys = this.GetKeys();
+
+            if (!keys.Any(c => c == defChar))
             {
-                defChar = this.Keys.FirstOrDefault();
+                defChar = keys.FirstOrDefault();
             }
 
             return defChar;
+        }
+        /// <summary>
+        /// Gets the map keys
+        /// </summary>
+        public char[] GetKeys()
+        {
+            return map.Keys.ToArray();
         }
     }
 }
