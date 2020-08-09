@@ -55,10 +55,10 @@ namespace ModelDrawing
         }
         private async Task InitializeTexts()
         {
-            this.text = await this.AddComponentUITextArea(new UITextAreaDescription { Font = new TextDrawerDescription() { Font = "Arial", FontSize = 20, TextColor = Color.Yellow, ShadowColor = Color.OrangeRed } }, layerHUD);
-            this.statistics = await this.AddComponentUITextArea(new UITextAreaDescription { Font = new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue } }, layerHUD);
-            this.text1 = await this.AddComponentUITextArea(new UITextAreaDescription { Font = new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue } }, layerHUD);
-            this.text2 = await this.AddComponentUITextArea(new UITextAreaDescription { Font = new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue } }, layerHUD);
+            this.text = await this.AddComponentUITextArea(new UITextAreaDescription { Font = new TextDrawerDescription() { FontFamily = "Arial", FontSize = 20, TextColor = Color.Yellow, ShadowColor = Color.OrangeRed } }, layerHUD);
+            this.statistics = await this.AddComponentUITextArea(new UITextAreaDescription { Font = new TextDrawerDescription() { FontFamily = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue } }, layerHUD);
+            this.text1 = await this.AddComponentUITextArea(new UITextAreaDescription { Font = new TextDrawerDescription() { FontFamily = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue } }, layerHUD);
+            this.text2 = await this.AddComponentUITextArea(new UITextAreaDescription { Font = new TextDrawerDescription() { FontFamily = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue } }, layerHUD);
 
             this.text.SetPosition(Vector2.One);
             this.statistics.SetPosition(Vector2.One);

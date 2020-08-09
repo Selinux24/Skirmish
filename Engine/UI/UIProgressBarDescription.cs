@@ -26,7 +26,7 @@ namespace Engine.UI
             {
                 Font = new TextDrawerDescription()
                 {
-                    Font = fontFamilyName,
+                    FontFamily = fontFamilyName,
                     FontSize = size,
                     HorizontalAlign = HorizontalTextAlign.Center,
                     VerticalAlign = VerticalTextAlign.Middle,

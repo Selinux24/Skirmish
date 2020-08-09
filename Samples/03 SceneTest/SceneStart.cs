@@ -23,6 +23,8 @@ namespace SceneTest
         private UIButton sceneTanksGameButton = null;
         private UIButton exitButton = null;
 
+        private readonly string titleFonts = "Showcard Gothic, Verdana, Consolas";
+        private readonly string buttonFonts = "Verdana, Consolas";
         private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.CornflowerBlue, 1.5f);
         private readonly Color exitButtonColor = Color.AdjustSaturation(Color.Orange, 1.5f);
 
@@ -118,7 +120,7 @@ namespace SceneTest
 
             #region Title text
 
-            var titleFont = TextDrawerDescription.FromFamily("Showcard Gothic", 72, FontMapStyles.Bold, Color.Gold);
+            var titleFont = TextDrawerDescription.FromFamily(titleFonts, 72, FontMapStyles.Bold, Color.Gold);
             titleFont.Name = "Title";
             titleFont.ShadowColor = new Color4(Color.LightYellow.RGB(), 0.25f);
             titleFont.ShadowDelta = new Vector2(4, 4);
@@ -134,7 +136,7 @@ namespace SceneTest
 
             #region Scene buttons
 
-            var buttonsFont = TextDrawerDescription.FromFamily("Verdana", 20, FontMapStyles.Bold, Color.Gold);
+            var buttonsFont = TextDrawerDescription.FromFamily(buttonFonts, 20, FontMapStyles.Bold, Color.Gold);
             buttonsFont.HorizontalAlign = HorizontalTextAlign.Center;
             buttonsFont.VerticalAlign = VerticalTextAlign.Middle;
 

@@ -283,6 +283,26 @@ namespace Engine.Common
 
             return sentenceParts.ToArray();
         }
+        /// <summary>
+        /// Parses the specified font family string
+        /// </summary>
+        /// <param name="fontFamily">Comma separated font family string</param>
+        /// <returns>Returns an array of families</returns>
+        private static string[] ParseFontFamilies(string fontFamily)
+        {
+            string[] fonts = fontFamily.Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            if (!fonts.Any())
+            {
+                return new string[] { };
+            }
+
+            for (int i = 0; i < fonts.Length; i++)
+            {
+                fonts[i] = fonts[i].Trim();
+            }
+
+            return fonts;
+        }
 
         /// <summary>
         /// Creates a font map of the specified font file and size
@@ -376,18 +396,32 @@ namespace Engine.Common
             return fMap;
         }
         /// <summary>
-        /// Creates a font map of the specified font and size
+        /// Creates a font map of the specified font family and size
         /// </summary>
         /// <param name="game">Game</param>
-        /// <param name="font">Font name</param>
+        /// <param name="fontFamily">Font name</param>
         /// <param name="size">Size</param>
         /// <param name="style">Style</param>
         /// <returns>Returns the created font map</returns>
-        public static FontMap FromFamily(Game game, string font, float size, FontMapStyles style)
+        /// <remarks>The font family must exists in the FontFamily.Families collection</remarks>
+        public static FontMap FromFamily(Game game, string fontFamily, float size, FontMapStyles style)
         {
-            if (!FontFamily.Families.Any(f => string.Equals(f.Name, font, StringComparison.OrdinalIgnoreCase)))
+            string[] fonts = ParseFontFamilies(fontFamily);
+            if (!fonts.Any())
             {
-                Console.WriteLine($"Font not found: {font}");
+                Console.WriteLine("Font family not specified");
+
+                return null;
+            }
+
+            var font = fonts.FirstOrDefault(fnt =>
+            {
+                return FontFamily.Families.Any(f => string.Equals(f.Name, fnt, StringComparison.OrdinalIgnoreCase));
+            });
+
+            if (font == null)
+            {
+                Console.WriteLine($"Font familiy not found in the graphic context: {fontFamily}");
 
                 return null;
             }

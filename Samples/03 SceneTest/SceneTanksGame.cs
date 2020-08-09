@@ -65,7 +65,7 @@ namespace SceneTest
         private UIMinimap miniMap;
         private Sprite miniMapTank1;
         private Sprite miniMapTank2;
-        private float maxWindVelocity = 10;
+        private readonly float maxWindVelocity = 10;
         private float currentWindVelocity = 1;
         private Vector2 windForce = Vector2.Normalize(Vector2.One);
         private UIProgressBar windVelocity;
@@ -74,6 +74,7 @@ namespace SceneTest
         private Sprite landScape;
         private Scenery terrain;
         private ModelInstanced tanks;
+        private float tankHeight = 0;
 
         private Sprite[] trajectoryMarkerPool;
         private Sprite tarjetMarker;
@@ -481,8 +482,9 @@ namespace SceneTest
             }
 
             tarjetMarker = await this.AddComponentSprite(SpriteDescription.FromFile("SceneTanksGame/Dot.png"), SceneObjectUsages.UI, layerUI + 1);
-            tarjetMarker.Width = 80;
-            tarjetMarker.Height = 80;
+            tarjetMarker.Width = 60;
+            tarjetMarker.Height = 60;
+            tarjetMarker.Active = false;
             tarjetMarker.Visible = false;
         }
         private void PrepareUI()
@@ -517,6 +519,8 @@ namespace SceneTest
 
             tanks = await this.AddComponentModelInstanced(tDesc, SceneObjectUsages.Agent, layerModels);
             tanks.Visible = false;
+
+            tankHeight = tanks[0].GetBoundingBox().GetY() * 0.5f;
         }
         private async Task InitializeModelsTerrain()
         {
@@ -676,13 +680,11 @@ namespace SceneTest
             var tank = tanks[currentPlayer];
             var other = tanks[(currentPlayer + 1) % 2];
 
-            float tankH = tank.GetBoundingBox().GetY();
             Vector3 tankPos = tank.Manipulator.Position;
-            tankPos.Y += tankH;
+            tankPos.Y += tankHeight;
 
-            float otherH = other.GetBoundingBox().GetY();
             Vector3 otherPos = other.Manipulator.Position;
-            otherPos.Y += otherH;
+            otherPos.Y += tankHeight;
 
             PaintShot(tankPos, otherPos);
 
@@ -784,20 +786,21 @@ namespace SceneTest
             float sampleDist = 20;
             float distance = Vector3.Distance(from, to);
             Vector3 shootDirection = Vector3.Normalize(to - from);
-            int markers = (int)(distance / sampleDist);
+            int markers = Math.Min(trajectoryMarkerPool.Length, (int)(distance / sampleDist));
             if (markers == 0)
             {
                 return;
             }
 
-            float dist = sampleDist;
+            // Distribute sample dist
             sampleDist = distance / markers;
-            Vector3 markerPos;
-            Vector3 screenPos;
+
+            // Initialize sample dist
+            float dist = sampleDist;
             for (int i = 0; i < markers - 1; i++)
             {
-                markerPos = from + (shootDirection * dist);
-                screenPos = Vector3.Project(markerPos,
+                Vector3 markerPos = from + (shootDirection * dist);
+                Vector3 screenPos = Vector3.Project(markerPos,
                     this.Game.Graphics.Viewport.X,
                     this.Game.Graphics.Viewport.Y,
                     this.Game.Graphics.Viewport.Width,
@@ -817,7 +820,7 @@ namespace SceneTest
                 dist += sampleDist;
             }
 
-            screenPos = Vector3.Project(to,
+            var tarjetScreenPos = Vector3.Project(to,
                 this.Game.Graphics.Viewport.X,
                 this.Game.Graphics.Viewport.Y,
                 this.Game.Graphics.Viewport.Width,
@@ -825,11 +828,14 @@ namespace SceneTest
                 this.Game.Graphics.Viewport.MinDepth,
                 this.Game.Graphics.Viewport.MaxDepth,
                 this.Camera.View * this.Camera.Projection);
+            float tarjetScale = (1f - tarjetScreenPos.Z) * 1000f;
 
-            tarjetMarker.Left = screenPos.X;
-            tarjetMarker.Left = screenPos.Y;
+            tarjetMarker.Left = tarjetScreenPos.X - (tarjetMarker.Width * 0.5f);
+            tarjetMarker.Top = tarjetScreenPos.Y - (tarjetMarker.Height * 0.5f);
+            tarjetMarker.Scale = tarjetScale;
             tarjetMarker.Active = true;
             tarjetMarker.Visible = true;
+            tarjetMarker.TweenScaleBounce(1f, 1.1f, 1000, ScaleFuncs.QuadraticEaseInOut);
         }
         private async Task ResolveShoot(PlayerStatus shooter, PlayerStatus target)
         {

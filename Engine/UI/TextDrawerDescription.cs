@@ -44,7 +44,7 @@ namespace Engine.UI
             return new TextDrawerDescription()
             {
                 Name = string.Format("TextBox {0} {1} {2}", DefaultFontFamily, size, FontMapStyles.Regular),
-                Font = DefaultFontFamily,
+                FontFamily = DefaultFontFamily,
                 FontSize = size,
                 Style = FontMapStyles.Regular,
                 TextColor = textColor,
@@ -54,7 +54,7 @@ namespace Engine.UI
         /// <summary>
         /// Generates a new description
         /// </summary>
-        /// <param name="fontFamilyName">Font name</param>
+        /// <param name="fontFamilyName">Comma separated font family name list</param>
         /// <param name="size">Size</param>
         /// <returns>Returns the new generated description</returns>
         public static TextDrawerDescription FromFamily(string fontFamilyName, int size)
@@ -64,7 +64,7 @@ namespace Engine.UI
         /// <summary>
         /// Generates a new description
         /// </summary>
-        /// <param name="fontFamilyName">Font name</param>
+        /// <param name="fontFamilyName">Comma separated font family name list</param>
         /// <param name="size">Size</param>
         /// <param name="textColor">Text color</param>
         /// <returns>Returns the new generated description</returns>
@@ -75,7 +75,7 @@ namespace Engine.UI
         /// <summary>
         /// Generates a new description
         /// </summary>
-        /// <param name="fontFamilyName">Font name</param>
+        /// <param name="fontFamilyName">Comma separated font family name list</param>
         /// <param name="size">Size</param>
         /// <param name="style">Style</param>
         /// <param name="textColor">Text color</param>
@@ -87,7 +87,7 @@ namespace Engine.UI
         /// <summary>
         /// Generates a new description
         /// </summary>
-        /// <param name="fontFamilyName">Font name</param>
+        /// <param name="fontFamilyName">Comma separated font family name list</param>
         /// <param name="size">Size</param>
         /// <param name="textColor">Text color</param>
         /// <param name="shadowColor">Shadow color</param>
@@ -99,7 +99,7 @@ namespace Engine.UI
         /// <summary>
         /// Generates a new description
         /// </summary>
-        /// <param name="fontFamilyName">Font name</param>
+        /// <param name="fontFamilyName">Comma separated font family name list</param>
         /// <param name="size">Size</param>
         /// <param name="style">Style</param>
         /// <param name="textColor">Text color</param>
@@ -110,7 +110,7 @@ namespace Engine.UI
             return new TextDrawerDescription()
             {
                 Name = string.Format("TextBox {0} {1} {2}", fontFamilyName, size, style),
-                Font = fontFamilyName,
+                FontFamily = fontFamilyName,
                 FontSize = size,
                 Style = style,
                 TextColor = textColor,
@@ -262,9 +262,10 @@ namespace Engine.UI
         /// </summary>
         public string ContentPath { get; set; } = "Resources";
         /// <summary>
-        /// Font name
+        /// Font family comma separated name list
         /// </summary>
-        public string Font { get; set; } = DefaultFontFamily;
+        /// <remarks>For example: "Verdana, Consolas"</remarks>
+        public string FontFamily { get; set; } = DefaultFontFamily;
         /// <summary>
         /// Font file name
         /// </summary>

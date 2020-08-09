@@ -37,7 +37,7 @@ namespace Engine.UI
             {
                 Font = new TextDrawerDescription()
                 {
-                    Font = fontFamilyName,
+                    FontFamily = fontFamilyName,
                     FontSize = size,
                     Style = fontStyle,
                 },

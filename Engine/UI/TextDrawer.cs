@@ -204,7 +204,7 @@ namespace Engine.UI
             this.Manipulator = new Manipulator2D(this.Game);
             this.ShadowManipulator = new Manipulator2D(this.Game);
 
-            this.Font = string.Format("{0} {1}", description.Font, description.FontSize);
+            this.Font = string.Format("{0} {1}", description.FontFamily, description.FontSize);
 
             this.viewProjection = this.Game.Form.GetOrthoProjectionMatrix();
 
@@ -216,9 +216,9 @@ namespace Engine.UI
             {
                 this.fontMap = FontMap.FromMap(this.Game, description.ContentPath, description.FontMapping);
             }
-            else if (!string.IsNullOrWhiteSpace(description.Font))
+            else if (!string.IsNullOrWhiteSpace(description.FontFamily))
             {
-                this.fontMap = FontMap.FromFamily(this.Game, description.Font, description.FontSize, description.Style);
+                this.fontMap = FontMap.FromFamily(this.Game, description.FontFamily, description.FontSize, description.Style);
             }
 
             VertexPositionTexture[] verts = new VertexPositionTexture[FontMap.MAXTEXTLENGTH * 4];
