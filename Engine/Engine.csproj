@@ -279,6 +279,7 @@
     <Compile Include="ModularSceneryTriggerEndHandler.cs" />
     <Compile Include="ModularSceneryTriggerEventArgs.cs" />
     <Compile Include="ModularSceneryTriggerStartHandler.cs" />
+    <Compile Include="Perlin.cs" />
     <Compile Include="PrimitiveListDrawer.cs" />
     <Compile Include="PrimitiveListDrawerDescription.cs" />
     <Compile Include="RayPickingFlags.cs" />

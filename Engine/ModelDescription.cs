@@ -1,4 +1,5 @@
-﻿
+﻿using System.Collections.Generic;
+
 namespace Engine
 {
     using Engine.Common;
@@ -25,6 +26,31 @@ namespace Engine
                 {
                     ContentFolder = contentFolder,
                     ModelContentFilename = fileName,
+                }
+            };
+        }
+        /// <summary>
+        /// Creates a model description from a content description
+        /// </summary>
+        /// <param name="content">Content description</param>
+        /// <returns>Returns a new mode description</returns>
+        public static ModelDescription FromContent(ContentDescription content)
+        {
+            return new ModelDescription()
+            {
+                Content = content,
+            };
+        }
+
+        public static ModelDescription FromData(IEnumerable<VertexData> vertices, IEnumerable<uint> indices, MaterialContent material = null)
+        {
+            var content = ModelContent.GenerateTriangleList(vertices, indices, material);
+
+            return new ModelDescription
+            {
+                Content = new ContentDescription
+                {
+                    ModelContent = content,
                 }
             };
         }

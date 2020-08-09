@@ -13,7 +13,10 @@ namespace SceneTest
             try
             {
 #if DEBUG
-                using (Game cl = new Game("3 SceneTest", false, 1600, 900, true, 0, 0))
+                int sWidth = (int)(System.Windows.Forms.SystemInformation.VirtualScreen.Width * .8f);
+                int sHeight = (int)(System.Windows.Forms.SystemInformation.VirtualScreen.Height * .8f);
+
+                using (Game cl = new Game("3 SceneTest", false, sWidth, sHeight, true, 0, 0))
 #else
                 using (Game cl = new Game("3 SceneTest", true, 0, 0, true, 0, 0))
 #endif

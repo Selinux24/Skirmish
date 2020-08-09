@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.Common;
 using Engine.Content;
 using Engine.Tween;
 using Engine.UI;
@@ -6,7 +7,6 @@ using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace SceneTest
@@ -62,7 +62,6 @@ namespace SceneTest
         private UITextArea fireKeyText;
 
         private Sprite miniMapBackground;
-        private UIMinimap miniMap;
         private Sprite miniMapTank1;
         private Sprite miniMapTank2;
         private readonly float maxWindVelocity = 10;
@@ -71,7 +70,7 @@ namespace SceneTest
         private UIProgressBar windVelocity;
         private Sprite windDirection;
 
-        private Sprite landScape;
+        private Model landScape;
         private Scenery terrain;
         private ModelInstanced tanks;
         private float tankHeight = 0;
@@ -172,9 +171,6 @@ namespace SceneTest
                 taskList.ToArray(),
                 () =>
                 {
-                    this.Camera.Position = new Vector3(0, 100, -200) * 0.75f;
-                    this.Camera.Interest = Vector3.Zero;
-
                     this.PrepareUI();
                     this.PrepareModels();
 
@@ -498,6 +494,7 @@ namespace SceneTest
             {
                 InitializeModelsTanks(),
                 InitializeModelsTerrain(),
+                InitializeLandscape(),
             };
         }
         private async Task InitializeModelsTanks()
@@ -529,13 +526,46 @@ namespace SceneTest
 
             this.SetGround(terrain, true);
         }
+        private async Task InitializeLandscape()
+        {
+            float w = 1920f * 0.5f;
+            float h = 1080f * 0.5f;
+            float d = 2000f * 0.5f;
+            float elevation = 500 * 0.5f;
+
+            VertexData[] vertices = new VertexData[]
+            {
+                new VertexData{ Position = new Vector3(-w*3, +h+elevation, d), Normal = Vector3.Up, Texture = new Vector2(0f, 0f) },
+                new VertexData{ Position = new Vector3(+w*3, +h+elevation, d), Normal = Vector3.Up, Texture = new Vector2(3f, 0f) },
+                new VertexData{ Position = new Vector3(-w*3, -h+elevation, d), Normal = Vector3.Up, Texture = new Vector2(0f, 1f) },
+                new VertexData{ Position = new Vector3(+w*3, -h+elevation, d), Normal = Vector3.Up, Texture = new Vector2(3f, 1f) },
+            };
+
+            uint[] indices = new uint[]
+            {
+                0, 1, 2,
+                1, 3, 2,
+            };
+
+            var material = MaterialContent.Default;
+            material.DiffuseTexture = "SceneTanksGame/Landscape.png";
+
+            var content = ModelDescription.FromData(vertices, indices, material);
+
+            landScape = await this.AddComponentModel(content, SceneObjectUsages.UI, layerModels);
+            landScape.Visible = false;
+        }
         private void PrepareModels()
         {
+            this.Camera.Position = new Vector3(0, 100, -200) * (1000f / this.Game.Form.RenderWidth);
+            this.Camera.Interest = new Vector3(0, 0, 100);
+
+            landScape.Visible = true;
             terrain.Visible = true;
 
-            Vector3 p1 = new Vector3(-100, 100, 10);
+            Vector3 p1 = new Vector3(-100, 100, 0);
             Vector3 n1 = Vector3.Up;
-            Vector3 p2 = new Vector3(+100, 100, 10);
+            Vector3 p2 = new Vector3(+100, 100, 0);
             Vector3 n2 = Vector3.Up;
 
             if (this.FindTopGroundPosition(-100, 100, out var r1))
