@@ -1953,7 +1953,7 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Creates a new render tarjet and his texture
+        /// Creates a new render target and his texture
         /// </summary>
         /// <param name="format">Format</param>
         /// <param name="width">Width</param>

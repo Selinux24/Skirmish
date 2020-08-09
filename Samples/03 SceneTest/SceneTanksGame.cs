@@ -7,6 +7,7 @@ using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace SceneTest
@@ -30,6 +31,7 @@ namespace SceneTest
         private UIPanel fadePanel;
 
         private UITextArea gameMessage;
+        private UITextArea gameKeyHelp;
 
         private UITextArea player1Name;
         private UITextArea player1Points;
@@ -76,10 +78,13 @@ namespace SceneTest
         private float tankHeight = 0;
 
         private Sprite[] trajectoryMarkerPool;
-        private Sprite tarjetMarker;
+        private Sprite targetMarker;
 
         private bool shooting = false;
         private bool gameEnding = false;
+
+        private ModelInstance Shooter { get { return tanks[currentPlayer]; } }
+        private ModelInstance Target { get { return tanks[(currentPlayer + 1) % 2]; } }
 
         /// <summary>
         /// Constructor
@@ -197,6 +202,8 @@ namespace SceneTest
                         gameReady = true;
 
                         UpdateGameControls(true);
+
+                        PaintShot();
                     });
                 });
         }
@@ -216,12 +223,24 @@ namespace SceneTest
         }
         private async Task InitializeUIGameMessages()
         {
-            gameMessage = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 120, false), layerLoadingUI);
+            gameMessage = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 120, false), layerLoadingUI + 1);
             gameMessage.CenterHorizontally = CenterTargets.Screen;
             gameMessage.CenterVertically = CenterTargets.Screen;
             gameMessage.TextColor = Color.Yellow;
             gameMessage.TextShadowColor = Color.Yellow * 0.5f;
             gameMessage.Visible = false;
+
+            gameKeyHelp = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 25, true), layerLoadingUI + 1);
+            gameKeyHelp.TextColor = Color.Yellow;
+            gameKeyHelp.Text = "Press space to exit";
+            gameKeyHelp.CenterHorizontally = CenterTargets.Screen;
+            gameKeyHelp.Top = this.Game.Form.RenderHeight - 60;
+            gameKeyHelp.Width = 500;
+            gameKeyHelp.Height = 40;
+            gameKeyHelp.HorizontalAlign = HorizontalTextAlign.Center;
+            gameKeyHelp.VerticalAlign = VerticalTextAlign.Middle;
+            gameKeyHelp.AdjustAreaWithText = false;
+            gameKeyHelp.Visible = false;
         }
         private async Task InitializeUIPlayers()
         {
@@ -473,15 +492,17 @@ namespace SceneTest
                 trajectoryMarker.TintColor = Color.Red;
                 trajectoryMarker.Active = false;
                 trajectoryMarker.Visible = false;
+                trajectoryMarker.TweenRotateRepeat(0, MathUtil.TwoPi, 1000, ScaleFuncs.Linear);
 
                 trajectoryMarkerPool[i] = trajectoryMarker;
             }
 
-            tarjetMarker = await this.AddComponentSprite(SpriteDescription.FromFile("SceneTanksGame/Dot.png"), SceneObjectUsages.UI, layerUI + 1);
-            tarjetMarker.Width = 60;
-            tarjetMarker.Height = 60;
-            tarjetMarker.Active = false;
-            tarjetMarker.Visible = false;
+            targetMarker = await this.AddComponentSprite(SpriteDescription.FromFile("SceneTanksGame/Dot.png"), SceneObjectUsages.UI, layerUI + 1);
+            targetMarker.Width = 60;
+            targetMarker.Height = 60;
+            targetMarker.Active = false;
+            targetMarker.Visible = false;
+            targetMarker.TweenScaleBounce(1f, 1.5f, 1000, ScaleFuncs.QuadraticEaseInOut);
         }
         private void PrepareUI()
         {
@@ -664,6 +685,8 @@ namespace SceneTest
 
             if (gameEnding)
             {
+                UpdateInputEndGame();
+
                 return;
             }
 
@@ -707,50 +730,55 @@ namespace SceneTest
         }
         private void UpdateInputTanks(GameTime gameTime)
         {
-            var tank = tanks[currentPlayer];
-            var other = tanks[(currentPlayer + 1) % 2];
-
-            Vector3 tankPos = tank.Manipulator.Position;
-            tankPos.Y += tankHeight;
-
-            Vector3 otherPos = other.Manipulator.Position;
-            otherPos.Y += tankHeight;
-
-            PaintShot(tankPos, otherPos);
+            bool tankMoved = false;
 
             if (this.Game.Input.KeyPressed(Keys.A))
             {
-                tank.Manipulator.Rotate(-gameTime.ElapsedSeconds, 0, 0);
+                Shooter.Manipulator.Rotate(-gameTime.ElapsedSeconds, 0, 0);
+                tankMoved = true;
             }
             if (this.Game.Input.KeyPressed(Keys.D))
             {
-                tank.Manipulator.Rotate(+gameTime.ElapsedSeconds, 0, 0);
+                Shooter.Manipulator.Rotate(+gameTime.ElapsedSeconds, 0, 0);
+                tankMoved = true;
             }
 
             if (this.Game.Input.KeyPressed(Keys.W))
             {
-                tank.Manipulator.MoveForward(gameTime, 10);
+                Shooter.Manipulator.MoveForward(gameTime, 10);
+                tankMoved = true;
             }
             if (this.Game.Input.KeyPressed(Keys.S))
             {
-                tank.Manipulator.MoveBackward(gameTime, 10);
+                Shooter.Manipulator.MoveBackward(gameTime, 10);
+                tankMoved = true;
             }
 
             if (this.Game.Input.KeyPressed(Keys.Q))
             {
-                tank["Barrel-mesh"].Manipulator.Rotate(0, gameTime.ElapsedSeconds, 0);
+                Shooter["Barrel-mesh"].Manipulator.Rotate(0, gameTime.ElapsedSeconds, 0);
+                tankMoved = true;
             }
             if (this.Game.Input.KeyPressed(Keys.Z))
             {
-                tank["Barrel-mesh"].Manipulator.Rotate(0, -gameTime.ElapsedSeconds, 0);
+                Shooter["Barrel-mesh"].Manipulator.Rotate(0, -gameTime.ElapsedSeconds, 0);
+                tankMoved = true;
             }
 
-            if (this.FindTopGroundPosition(tank.Manipulator.Position.X, tank.Manipulator.Position.Z, out var r))
+            Shooter["Turret-mesh"].Manipulator.RotateTo(Target.Manipulator.Position, Vector3.Up, Axis.Y, 0.01f);
+
+            if (!tankMoved)
             {
-                tank.Manipulator.SetPosition(r.Position - (Vector3.Up * 0.1f));
-                tank.Manipulator.SetNormal(r.Item.Normal, 0.05f);
-                tank["Turret-mesh"].Manipulator.RotateTo(other.Manipulator.Position, Vector3.Up, Axis.Y, 0.01f);
+                return;
             }
+
+            if (this.FindTopGroundPosition(Shooter.Manipulator.Position.X, Shooter.Manipulator.Position.Z, out var r))
+            {
+                Shooter.Manipulator.SetPosition(r.Position - (Vector3.Up * 0.1f));
+                Shooter.Manipulator.SetNormal(r.Item.Normal, 0.05f);
+            }
+
+            PaintShot();
         }
         private void UpdateInputShoot(GameTime gameTime)
         {
@@ -759,6 +787,7 @@ namespace SceneTest
                 pbFire.ProgressValue += gameTime.ElapsedSeconds;
                 pbFire.ProgressValue %= 1f;
             }
+
             if (this.Game.Input.KeyJustReleased(Keys.Space))
             {
                 shooting = true;
@@ -768,50 +797,38 @@ namespace SceneTest
                     PlayerStatus shooter = currentPlayer == 0 ? player1Status : player2Status;
                     PlayerStatus target = currentPlayer == 0 ? player2Status : player1Status;
 
-                    await this.ResolveShoot(shooter, target);
+                    await ResolveShoot(shooter, target, pbFire.ProgressValue);
 
-                    pbFire.ProgressValue = 0;
-
-                    if (target.CurrentLife == 0)
-                    {
-                        gameMessage.Text = $"The winner is {shooter.Name}!";
-                        gameMessage.TextColor = target.Color;
-                        gameMessage.TextShadowColor = target.Color * 0.5f;
-                        gameMessage.Show(1000);
-                        gameMessage.TweenScale(0, 1, 1000, ScaleFuncs.CubicEaseIn);
-
-                        fadePanel.Show(3000);
-
-                        gameEnding = true;
-                    }
-
-                    currentPlayer++;
-                    currentPlayer %= 2;
-
-                    if (currentPlayer == 0)
-                    {
-                        currentTurn++;
-
-                        currentWindVelocity = Helper.RandomGenerator.NextFloat(0f, maxWindVelocity);
-                        windForce = Helper.RandomGenerator.NextVector2(-Vector2.One, Vector2.One);
-                    }
+                    await EvaluateTurn(shooter, target);
 
                     shooting = false;
                 });
             }
         }
-
-        private void PaintShot(Vector3 from, Vector3 to)
+        private void UpdateInputEndGame()
         {
+            if (this.Game.Input.KeyJustReleased(Keys.Space))
+            {
+                this.Game.SetScene<SceneStart>();
+            }
+        }
+
+        private void PaintShot()
+        {
+            Vector3 from = Shooter.Manipulator.Position;
+            from.Y += tankHeight;
+
+            Vector3 to = Target.Manipulator.Position;
+            to.Y += tankHeight;
+
             trajectoryMarkerPool.ToList().ForEach(m =>
             {
-                m.ClearTween();
                 m.Active = false;
                 m.Visible = false;
             });
 
-            tarjetMarker.Active = false;
-            tarjetMarker.Visible = false;
+            targetMarker.Active = false;
+            targetMarker.Visible = false;
 
             float sampleDist = 20;
             float distance = Vector3.Distance(from, to);
@@ -845,12 +862,11 @@ namespace SceneTest
                 trajectoryMarkerPool[i].Scale = scale;
                 trajectoryMarkerPool[i].Active = true;
                 trajectoryMarkerPool[i].Visible = true;
-                trajectoryMarkerPool[i].TweenRotateBounce(0, MathUtil.TwoPi, 1000, ScaleFuncs.Linear);
 
                 dist += sampleDist;
             }
 
-            var tarjetScreenPos = Vector3.Project(to,
+            var targetScreenPos = Vector3.Project(to,
                 this.Game.Graphics.Viewport.X,
                 this.Game.Graphics.Viewport.Y,
                 this.Game.Graphics.Viewport.Width,
@@ -858,16 +874,15 @@ namespace SceneTest
                 this.Game.Graphics.Viewport.MinDepth,
                 this.Game.Graphics.Viewport.MaxDepth,
                 this.Camera.View * this.Camera.Projection);
-            float tarjetScale = (1f - tarjetScreenPos.Z) * 1000f;
+            float targetScale = (1f - targetScreenPos.Z) * 1000f;
 
-            tarjetMarker.Left = tarjetScreenPos.X - (tarjetMarker.Width * 0.5f);
-            tarjetMarker.Top = tarjetScreenPos.Y - (tarjetMarker.Height * 0.5f);
-            tarjetMarker.Scale = tarjetScale;
-            tarjetMarker.Active = true;
-            tarjetMarker.Visible = true;
-            tarjetMarker.TweenScaleBounce(1f, 1.1f, 1000, ScaleFuncs.QuadraticEaseInOut);
+            targetMarker.Left = targetScreenPos.X - (targetMarker.Width * 0.5f);
+            targetMarker.Top = targetScreenPos.Y - (targetMarker.Height * 0.5f);
+            targetMarker.Scale = targetScale;
+            targetMarker.Active = true;
+            targetMarker.Visible = true;
         }
-        private async Task ResolveShoot(PlayerStatus shooter, PlayerStatus target)
+        private async Task ResolveShoot(PlayerStatus shooter, PlayerStatus target, float shotForce)
         {
             await Task.Delay(2000);
 
@@ -876,11 +891,46 @@ namespace SceneTest
                 return;
             }
 
-            int res = Helper.RandomGenerator.Next(10, 50);
+            int res = Helper.RandomGenerator.Next((int)(shotForce * 10), (int)(shotForce * 50));
 
             shooter.Points += res * 100;
 
             target.CurrentLife = MathUtil.Clamp(target.CurrentLife - res, 0, target.MaxLife);
+        }
+        private async Task EvaluateTurn(PlayerStatus shooter, PlayerStatus target)
+        {
+            pbFire.ProgressValue = 0;
+
+            if (target.CurrentLife == 0)
+            {
+                gameEnding = true;
+
+                gameMessage.Text = $"The winner is {shooter.Name}!";
+                gameMessage.TextColor = shooter.Color;
+                gameMessage.TextShadowColor = shooter.Color * 0.5f;
+                gameMessage.Show(1000);
+                gameMessage.TweenScale(0, 1, 1000, ScaleFuncs.CubicEaseIn);
+
+                fadePanel.Show(3000);
+
+                await Task.Delay(3000);
+
+                gameKeyHelp.Show(1000);
+                gameKeyHelp.TweenScaleBounce(1, 1.01f, 500, ScaleFuncs.CubicEaseInOut);
+            }
+
+            currentPlayer++;
+            currentPlayer %= 2;
+
+            PaintShot();
+
+            if (currentPlayer == 0)
+            {
+                currentTurn++;
+
+                currentWindVelocity = Helper.RandomGenerator.NextFloat(0f, maxWindVelocity);
+                windForce = Helper.RandomGenerator.NextVector2(-Vector2.One, Vector2.One);
+            }
         }
     }
 

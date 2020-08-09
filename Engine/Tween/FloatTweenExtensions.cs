@@ -111,6 +111,27 @@ namespace Engine.Tween
             FloatTweenManager.AddRotateTween(control, ftRotate);
         }
         /// <summary>
+        /// Rotate a control and repeat
+        /// </summary>
+        /// <param name="control">Control</param>
+        /// <param name="from">Start value</param>
+        /// <param name="to">End value</param>
+        /// <param name="duration">Duration in milliseconds</param>
+        /// <param name="fnc">Scale function</param>
+        public static void TweenRotateRepeat(this UIControl control, float from, float to, long duration, ScaleFunc fnc)
+        {
+            if (control == null)
+            {
+                return;
+            }
+
+            FloatTween ftRotate = new FloatTween();
+
+            ftRotate.Start(from, to, duration, fnc);
+
+            FloatTweenManager.AddRotateRepeat(control, ftRotate);
+        }
+        /// <summary>
         /// Bouncing rotate a control
         /// </summary>
         /// <param name="control">Control</param>
