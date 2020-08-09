@@ -259,6 +259,9 @@
     <Content Include="SceneTanksGame\Compass.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="SceneTanksGame\Dot.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="SceneTanksGame\GameIcon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

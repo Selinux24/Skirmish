@@ -5,6 +5,7 @@ using Engine.UI;
 using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
@@ -74,7 +75,7 @@ namespace SceneTest
         private Scenery terrain;
         private ModelInstanced tanks;
 
-        private Sprite trajectoryMarker;
+        private Sprite[] trajectoryMarkerPool;
         private Sprite tarjetMarker;
 
         private bool shooting = false;
@@ -207,12 +208,13 @@ namespace SceneTest
         {
             return new[]
             {
+                InitializeUIGameMessages(),
                 InitializeUIPlayers(),
                 InitializeUITurn(),
                 InitializeUIKeyPanel(),
                 InitializeUIFire(),
                 InitializeUIMinimap(),
-                InitializeUIGameMessages(),
+                InitializeUIShotPath(),
             };
         }
         private async Task InitializeUIGameMessages()
@@ -463,6 +465,26 @@ namespace SceneTest
             windDirection.TintColor = Color.Green;
             windDirection.Visible = false;
         }
+        private async Task InitializeUIShotPath()
+        {
+            trajectoryMarkerPool = new Sprite[100];
+            for (int i = 0; i < 100; i++)
+            {
+                var trajectoryMarker = await this.AddComponentSprite(SpriteDescription.FromFile("SceneTanksGame/Dot.png"), SceneObjectUsages.UI, layerUI + 1);
+                trajectoryMarker.Width = 50;
+                trajectoryMarker.Height = 50;
+                trajectoryMarker.TintColor = Color.Red;
+                trajectoryMarker.Active = false;
+                trajectoryMarker.Visible = false;
+
+                trajectoryMarkerPool[i] = trajectoryMarker;
+            }
+
+            tarjetMarker = await this.AddComponentSprite(SpriteDescription.FromFile("SceneTanksGame/Dot.png"), SceneObjectUsages.UI, layerUI + 1);
+            tarjetMarker.Width = 80;
+            tarjetMarker.Height = 80;
+            tarjetMarker.Visible = false;
+        }
         private void PrepareUI()
         {
 
@@ -577,7 +599,7 @@ namespace SceneTest
             keyMoveBackwardText.Visible = visible;
             keyPitchUpText.Visible = visible;
             keyPitchDownText.Visible = visible;
-     
+
             pbFire.Visible = visible;
             fireKeyText.Visible = visible;
 
@@ -653,6 +675,16 @@ namespace SceneTest
         {
             var tank = tanks[currentPlayer];
             var other = tanks[(currentPlayer + 1) % 2];
+
+            float tankH = tank.GetBoundingBox().GetY();
+            Vector3 tankPos = tank.Manipulator.Position;
+            tankPos.Y += tankH;
+
+            float otherH = other.GetBoundingBox().GetY();
+            Vector3 otherPos = other.Manipulator.Position;
+            otherPos.Y += otherH;
+
+            PaintShot(tankPos, otherPos);
 
             if (this.Game.Input.KeyPressed(Keys.A))
             {
@@ -737,6 +769,68 @@ namespace SceneTest
             }
         }
 
+        private void PaintShot(Vector3 from, Vector3 to)
+        {
+            trajectoryMarkerPool.ToList().ForEach(m =>
+            {
+                m.ClearTween();
+                m.Active = false;
+                m.Visible = false;
+            });
+
+            tarjetMarker.Active = false;
+            tarjetMarker.Visible = false;
+
+            float sampleDist = 20;
+            float distance = Vector3.Distance(from, to);
+            Vector3 shootDirection = Vector3.Normalize(to - from);
+            int markers = (int)(distance / sampleDist);
+            if (markers == 0)
+            {
+                return;
+            }
+
+            float dist = sampleDist;
+            sampleDist = distance / markers;
+            Vector3 markerPos;
+            Vector3 screenPos;
+            for (int i = 0; i < markers - 1; i++)
+            {
+                markerPos = from + (shootDirection * dist);
+                screenPos = Vector3.Project(markerPos,
+                    this.Game.Graphics.Viewport.X,
+                    this.Game.Graphics.Viewport.Y,
+                    this.Game.Graphics.Viewport.Width,
+                    this.Game.Graphics.Viewport.Height,
+                    this.Game.Graphics.Viewport.MinDepth,
+                    this.Game.Graphics.Viewport.MaxDepth,
+                    this.Camera.View * this.Camera.Projection);
+                float scale = (1f - screenPos.Z) * 1000f;
+
+                trajectoryMarkerPool[i].Left = screenPos.X - (trajectoryMarkerPool[i].Width * 0.5f);
+                trajectoryMarkerPool[i].Top = screenPos.Y - (trajectoryMarkerPool[i].Height * 0.5f);
+                trajectoryMarkerPool[i].Scale = scale;
+                trajectoryMarkerPool[i].Active = true;
+                trajectoryMarkerPool[i].Visible = true;
+                trajectoryMarkerPool[i].TweenRotateBounce(0, MathUtil.TwoPi, 1000, ScaleFuncs.Linear);
+
+                dist += sampleDist;
+            }
+
+            screenPos = Vector3.Project(to,
+                this.Game.Graphics.Viewport.X,
+                this.Game.Graphics.Viewport.Y,
+                this.Game.Graphics.Viewport.Width,
+                this.Game.Graphics.Viewport.Height,
+                this.Game.Graphics.Viewport.MinDepth,
+                this.Game.Graphics.Viewport.MaxDepth,
+                this.Camera.View * this.Camera.Projection);
+
+            tarjetMarker.Left = screenPos.X;
+            tarjetMarker.Left = screenPos.Y;
+            tarjetMarker.Active = true;
+            tarjetMarker.Visible = true;
+        }
         private async Task ResolveShoot(PlayerStatus shooter, PlayerStatus target)
         {
             await Task.Delay(2000);
