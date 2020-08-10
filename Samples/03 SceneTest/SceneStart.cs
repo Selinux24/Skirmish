@@ -28,6 +28,8 @@ namespace SceneTest
         private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.CornflowerBlue, 1.5f);
         private readonly Color exitButtonColor = Color.AdjustSaturation(Color.Orange, 1.5f);
 
+        private bool sceneReady = false;
+
         public SceneStart(Game game) : base(game)
         {
 
@@ -40,57 +42,7 @@ namespace SceneTest
 
             GameEnvironment.Background = Color.Black;
 
-            await this.LoadResourcesAsync(InitializeAssets(), () =>
-            {
-                this.backGround.Manipulator.SetScale(1.5f, 1.25f, 1.5f);
-
-                this.title.Text = "Scene Manager Test";
-                this.sceneMaterialsButton.Caption.Text = "Materials";
-                this.sceneWaterButton.Caption.Text = "Water";
-                this.sceneStencilPassButton.Caption.Text = "Stencil Pass";
-                this.sceneLightsButton.Caption.Text = "Lights";
-                this.sceneCascadedShadowsButton.Caption.Text = "Cascaded";
-                this.sceneTestButton.Caption.Text = "Test";
-                this.sceneTanksGameButton.Caption.Text = "Tanks Game";
-                this.exitButton.Caption.Text = "Exit";
-
-                var sceneButtons = new[]
-                {
-                    this.sceneMaterialsButton,
-                    this.sceneWaterButton,
-                    this.sceneStencilPassButton,
-                    this.sceneLightsButton,
-                    this.sceneCascadedShadowsButton,
-                    this.sceneTestButton,
-                    this.sceneTanksGameButton,
-                };
-
-                int numButtons = sceneButtons.Length + 1;
-                int div = numButtons + 1;
-                int h = 4;
-                int hv = h - 1;
-
-                var rect = this.Game.Form.RenderRectangle;
-                rect.Height /= 2;
-                this.title.SetRectangle(rect);
-                this.title.CenterHorizontally = CenterTargets.Screen;
-                this.title.CenterVertically = CenterTargets.Screen;
-
-                for (int i = 0; i < sceneButtons.Length; i++)
-                {
-                    sceneButtons[i].Left = ((this.Game.Form.RenderWidth / div) * (i + 1)) - (this.sceneMaterialsButton.Width / 2);
-                    sceneButtons[i].Top = (this.Game.Form.RenderHeight / h) * hv - (this.sceneMaterialsButton.Height / 2);
-                    sceneButtons[i].JustReleased += SceneButtonClick;
-                    sceneButtons[i].MouseEnter += SceneButtonMouseEnter;
-                    sceneButtons[i].MouseLeave += SceneButtonMouseLeave;
-                }
-
-                this.exitButton.Left = (this.Game.Form.RenderWidth / div) * numButtons - (this.exitButton.Width / 2);
-                this.exitButton.Top = (this.Game.Form.RenderHeight / h) * hv - (this.exitButton.Height / 2);
-                this.exitButton.JustReleased += ExitButtonClick;
-                this.exitButton.MouseEnter += SceneButtonMouseEnter;
-                this.exitButton.MouseLeave += SceneButtonMouseLeave;
-            });
+            await this.LoadResourcesAsync(InitializeAssets(), PrepareAssets);
         }
         private async Task InitializeAssets()
         {
@@ -170,6 +122,59 @@ namespace SceneTest
 
             #endregion
         }
+        private void PrepareAssets()
+        {
+            this.backGround.Manipulator.SetScale(1.5f, 1.25f, 1.5f);
+
+            this.title.Text = "Scene Manager Test";
+            this.sceneMaterialsButton.Caption.Text = "Materials";
+            this.sceneWaterButton.Caption.Text = "Water";
+            this.sceneStencilPassButton.Caption.Text = "Stencil Pass";
+            this.sceneLightsButton.Caption.Text = "Lights";
+            this.sceneCascadedShadowsButton.Caption.Text = "Cascaded";
+            this.sceneTestButton.Caption.Text = "Test";
+            this.sceneTanksGameButton.Caption.Text = "Tanks Game";
+            this.exitButton.Caption.Text = "Exit";
+
+            var sceneButtons = new[]
+            {
+                this.sceneMaterialsButton,
+                this.sceneWaterButton,
+                this.sceneStencilPassButton,
+                this.sceneLightsButton,
+                this.sceneCascadedShadowsButton,
+                this.sceneTestButton,
+                this.sceneTanksGameButton,
+            };
+
+            int numButtons = sceneButtons.Length + 1;
+            int div = numButtons + 1;
+            int h = 4;
+            int hv = h - 1;
+
+            var rect = this.Game.Form.RenderRectangle;
+            rect.Height /= 2;
+            this.title.SetRectangle(rect);
+            this.title.CenterHorizontally = CenterTargets.Screen;
+            this.title.CenterVertically = CenterTargets.Screen;
+
+            for (int i = 0; i < sceneButtons.Length; i++)
+            {
+                sceneButtons[i].Left = ((this.Game.Form.RenderWidth / div) * (i + 1)) - (this.sceneMaterialsButton.Width / 2);
+                sceneButtons[i].Top = (this.Game.Form.RenderHeight / h) * hv - (this.sceneMaterialsButton.Height / 2);
+                sceneButtons[i].JustReleased += SceneButtonClick;
+                sceneButtons[i].MouseEnter += SceneButtonMouseEnter;
+                sceneButtons[i].MouseLeave += SceneButtonMouseLeave;
+            }
+
+            this.exitButton.Left = (this.Game.Form.RenderWidth / div) * numButtons - (this.exitButton.Width / 2);
+            this.exitButton.Top = (this.Game.Form.RenderHeight / h) * hv - (this.exitButton.Height / 2);
+            this.exitButton.JustReleased += ExitButtonClick;
+            this.exitButton.MouseEnter += SceneButtonMouseEnter;
+            this.exitButton.MouseLeave += SceneButtonMouseLeave;
+
+            this.sceneReady = true;
+        }
 
         public override void Update(GameTime gameTime)
         {
@@ -192,6 +197,11 @@ namespace SceneTest
 
         private void SceneButtonClick(object sender, EventArgs e)
         {
+            if (!sceneReady)
+            {
+                return;
+            }
+
             if (sender == this.sceneMaterialsButton)
             {
                 this.Game.SetScene<SceneMaterials>();
@@ -239,6 +249,11 @@ namespace SceneTest
 
         private void ExitButtonClick(object sender, EventArgs e)
         {
+            if (!sceneReady)
+            {
+                return;
+            }
+
             this.Game.Exit();
         }
     }

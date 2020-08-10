@@ -993,7 +993,12 @@ namespace Engine.UI
         /// <remarks>Setting the position invalidates centering properties</remarks>
         public virtual void SetPosition(float x, float y)
         {
-            this.SetPosition(new Vector2(x, y));
+            this.left = x;
+            this.top = y;
+            this.centerHorizontally = CenterTargets.None;
+            this.centerVertically = CenterTargets.None;
+
+            this.updateInternals = true;
         }
         /// <summary>
         /// Sets the control left-top position
@@ -1002,12 +1007,7 @@ namespace Engine.UI
         /// <remarks>Setting the position invalidates centering properties</remarks>
         public virtual void SetPosition(Vector2 position)
         {
-            this.left = (int)position.X;
-            this.top = (int)position.Y;
-            this.centerHorizontally = CenterTargets.None;
-            this.centerVertically = CenterTargets.None;
-
-            this.updateInternals = true;
+            this.SetPosition(position.X, position.Y);
         }
         /// <summary>
         /// Sets the control rectangle area

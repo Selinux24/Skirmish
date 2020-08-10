@@ -176,8 +176,9 @@ namespace SceneTest
                 taskList.ToArray(),
                 () =>
                 {
-                    this.PrepareUI();
-                    this.PrepareModels();
+                    PrepareUI();
+                    PrepareModels();
+                    UpdateCamera(true);
 
                     Task.Run(async () =>
                     {
@@ -578,9 +579,6 @@ namespace SceneTest
         }
         private void PrepareModels()
         {
-            this.Camera.Position = new Vector3(0, 100, -200) * (1000f / this.Game.Form.RenderWidth);
-            this.Camera.Interest = new Vector3(0, 0, 100);
-
             landScape.Visible = true;
             terrain.Visible = true;
 
@@ -589,12 +587,12 @@ namespace SceneTest
             Vector3 p2 = new Vector3(+100, 100, 0);
             Vector3 n2 = Vector3.Up;
 
-            if (this.FindTopGroundPosition(-100, 100, out var r1))
+            if (this.FindTopGroundPosition(p1.X, p1.Z, out var r1))
             {
                 p1 = r1.Position - (Vector3.Up * 0.1f);
                 n1 = r1.Item.Normal;
             }
-            if (this.FindTopGroundPosition(+100, 100, out var r2))
+            if (this.FindTopGroundPosition(p2.X, p2.Z, out var r2))
             {
                 p2 = r2.Position - (Vector3.Up * 0.1f);
                 n2 = r2.Item.Normal;
@@ -675,7 +673,6 @@ namespace SceneTest
             }
 
             UpdateTurnStatus();
-            UpdateWindVelocity();
             UpdatePlayersStatus();
 
             if (shooting)
@@ -690,45 +687,14 @@ namespace SceneTest
                 return;
             }
 
-            UpdateInputTanks(gameTime);
-            UpdateInputShoot(gameTime);
-        }
-        private void UpdateTurnStatus()
-        {
-            turnText.Text = $"Turn {currentTurn}";
+            bool tankMoved = UpdateInputPlayer(gameTime);
+            UpdateInputShooting(gameTime);
 
-            if (currentPlayer == 0)
-            {
-                playerTurnMarker.Left = this.Game.Form.RenderCenter.X - 112 - 120;
-                playerTurnMarker.Rotation = 0;
-            }
-            else
-            {
-                playerTurnMarker.Left = this.Game.Form.RenderCenter.X + 120;
-                playerTurnMarker.Rotation = MathUtil.Pi;
-            }
+            UpdateTanks(tankMoved);
+            UpdateCamera(false);
         }
-        private void UpdateWindVelocity()
-        {
-            windVelocity.ProgressValue = currentWindVelocity / maxWindVelocity;
 
-            windDirection.Rotation = Helper.AngleSigned(Vector2.UnitY, windForce);
-        }
-        private void UpdatePlayersStatus()
-        {
-            player1Name.Text = player1Status.Name;
-            player1Points.Text = $"{player1Status.Points} points";
-            player1Life.Caption.Text = $"{player1Status.CurrentLife}";
-            player1Life.ProgressValue = player1Status.Health;
-            tanks[0].TextureIndex = player1Status.TextureIndex;
-
-            player2Name.Text = player2Status.Name;
-            player2Points.Text = $"{player2Status.Points} points";
-            player2Life.Caption.Text = $"{player2Status.CurrentLife}";
-            player2Life.ProgressValue = player2Status.Health;
-            tanks[1].TextureIndex = player2Status.TextureIndex;
-        }
-        private void UpdateInputTanks(GameTime gameTime)
+        private bool UpdateInputPlayer(GameTime gameTime)
         {
             bool tankMoved = false;
 
@@ -765,22 +731,9 @@ namespace SceneTest
                 tankMoved = true;
             }
 
-            Shooter["Turret-mesh"].Manipulator.RotateTo(Target.Manipulator.Position, Vector3.Up, Axis.Y, 0.01f);
-
-            if (!tankMoved)
-            {
-                return;
-            }
-
-            if (this.FindTopGroundPosition(Shooter.Manipulator.Position.X, Shooter.Manipulator.Position.Z, out var r))
-            {
-                Shooter.Manipulator.SetPosition(r.Position - (Vector3.Up * 0.1f));
-                Shooter.Manipulator.SetNormal(r.Item.Normal, 0.05f);
-            }
-
-            PaintShot();
+            return tankMoved;
         }
-        private void UpdateInputShoot(GameTime gameTime)
+        private void UpdateInputShooting(GameTime gameTime)
         {
             if (this.Game.Input.KeyPressed(Keys.Space))
             {
@@ -811,6 +764,82 @@ namespace SceneTest
             {
                 this.Game.SetScene<SceneStart>();
             }
+        }
+
+        private void UpdateTurnStatus()
+        {
+            turnText.Text = $"Turn {currentTurn}";
+
+            if (currentPlayer == 0)
+            {
+                playerTurnMarker.Left = this.Game.Form.RenderCenter.X - 112 - 120;
+                playerTurnMarker.Rotation = 0;
+            }
+            else
+            {
+                playerTurnMarker.Left = this.Game.Form.RenderCenter.X + 120;
+                playerTurnMarker.Rotation = MathUtil.Pi;
+            }
+        }
+        private void UpdatePlayersStatus()
+        {
+            player1Name.Text = player1Status.Name;
+            player1Points.Text = $"{player1Status.Points} points";
+            player1Life.Caption.Text = $"{player1Status.CurrentLife}";
+            player1Life.ProgressValue = player1Status.Health;
+            tanks[0].TextureIndex = player1Status.TextureIndex;
+
+            player2Name.Text = player2Status.Name;
+            player2Points.Text = $"{player2Status.Points} points";
+            player2Life.Caption.Text = $"{player2Status.CurrentLife}";
+            player2Life.ProgressValue = player2Status.Health;
+            tanks[1].TextureIndex = player2Status.TextureIndex;
+        }
+        private void UpdateTanks(bool tankMoved)
+        {
+            if (this.FindTopGroundPosition(Shooter.Manipulator.Position.X, Shooter.Manipulator.Position.Z, out var r))
+            {
+                Shooter.Manipulator.SetPosition(r.Position - (Vector3.Up * 0.1f));
+                Shooter.Manipulator.SetNormal(r.Item.Normal, 0.05f);
+            }
+
+            Shooter["Turret-mesh"].Manipulator.RotateTo(Target.Manipulator.Position, Vector3.Up, Axis.Y, 0.01f);
+
+            PaintMinimap();
+
+            if (!tankMoved)
+            {
+                return;
+            }
+
+            PaintShot();
+        }
+        private void UpdateCamera(bool firstUpdate)
+        {
+            // Find tanks distance vector
+            Vector3 diffV = tanks[1].Manipulator.Position - tanks[0].Manipulator.Position;
+            Vector3 distV = Vector3.Normalize(diffV);
+            float dist = diffV.Length();
+
+            // Interest to medium point
+            Vector3 interest = tanks[0].Manipulator.Position + (distV * dist * 0.5f);
+
+            // Perpendicular to diff
+            Vector3 perp = Vector3.Normalize(Vector3.Cross(Vector3.Up, diffV));
+            float y = Math.Max(100f, dist * 0.5f);
+            float z = Math.Max(200f, dist);
+            Vector3 position = interest + (perp * z) + (Vector3.Up * y);
+
+            if (firstUpdate)
+            {
+                this.Camera.Position = position;
+            }
+            else
+            {
+                this.Camera.Goto(position, CameraTranslations.Quick);
+            }
+
+            this.Camera.Interest = interest;
         }
 
         private void PaintShot()
@@ -882,6 +911,50 @@ namespace SceneTest
             targetMarker.Active = true;
             targetMarker.Visible = true;
         }
+        private void PaintMinimap()
+        {
+            // Set wind velocity and direction
+            windVelocity.ProgressValue = currentWindVelocity / maxWindVelocity;
+            windDirection.Rotation = Helper.AngleSigned(Vector2.UnitY, windForce);
+
+            // Get terrain minimap rectangle
+            BoundingBox bbox = terrain.GetBoundingBox();
+            RectangleF terrainRect = new RectangleF(bbox.Minimum.X, bbox.Minimum.Z, bbox.GetX(), bbox.GetZ());
+
+            // Get object space positions and transform to screen space
+            Vector2 tank1 = tanks[0].Manipulator.Position.XZ() - terrainRect.TopLeft;
+            Vector2 tank2 = tanks[1].Manipulator.Position.XZ() - terrainRect.TopLeft;
+
+            // Get the mini map rectangle
+            RectangleF miniMapRect = miniMapBackground.GrandpaRectangle;
+
+            // Get the marker sprite bounds
+            Vector2 markerBounds1 = new Vector2(miniMapTank1.Width, miniMapTank1.Height);
+            Vector2 markerBounds2 = new Vector2(miniMapTank2.Width, miniMapTank2.Height);
+
+            // Calculate proportional 2D locations (tank to terrain)
+            float tank1ToTerrainX = tank1.X / terrainRect.Width;
+            float tank1ToTerrainY = tank1.Y / terrainRect.Height;
+            float tank2ToTerrainX = tank2.X / terrainRect.Width;
+            float tank2ToTerrainY = tank2.Y / terrainRect.Height;
+
+            // Marker to minimap inverting Y coordinates
+            Vector2 markerToMinimap1 = new Vector2(miniMapRect.Width * tank1ToTerrainX, miniMapRect.Height * (1f - tank1ToTerrainY));
+            Vector2 markerToMinimap2 = new Vector2(miniMapRect.Width * tank2ToTerrainX, miniMapRect.Height * (1f - tank2ToTerrainY));
+
+            // Translate and center into the minimap
+            Vector2 mt1Position = markerToMinimap1 + miniMapRect.TopLeft - (markerBounds1 * 0.5f);
+            Vector2 mt2Position = markerToMinimap2 + miniMapRect.TopLeft - (markerBounds2 * 0.5f);
+
+            // Set marker position
+            miniMapTank1.SetPosition(mt1Position);
+            miniMapTank2.SetPosition(mt2Position);
+
+            // Set marker rotation
+            miniMapTank1.Rotation = Helper.AngleSigned(Vector2.UnitY, Vector2.Normalize(tanks[0].Manipulator.Forward.XZ()));
+            miniMapTank2.Rotation = Helper.AngleSigned(Vector2.UnitY, Vector2.Normalize(tanks[1].Manipulator.Forward.XZ()));
+        }
+
         private async Task ResolveShoot(PlayerStatus shooter, PlayerStatus target, float shotForce)
         {
             await Task.Delay(2000);
