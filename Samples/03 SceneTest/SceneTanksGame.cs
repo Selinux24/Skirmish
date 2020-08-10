@@ -76,6 +76,7 @@ namespace SceneTest
         private Scenery terrain;
         private ModelInstanced tanks;
         private float tankHeight = 0;
+        private Model projectile;
 
         private Sprite[] trajectoryMarkerPool;
         private Sprite targetMarker;
@@ -519,6 +520,7 @@ namespace SceneTest
                 InitializeModelsTanks(),
                 InitializeModelsTerrain(),
                 InitializeLandscape(),
+                InitializeModelProjectile(),
             };
         }
         private async Task InitializeModelsTanks()
@@ -578,6 +580,17 @@ namespace SceneTest
 
             landScape = await this.AddComponentModel(content, SceneObjectUsages.UI, layerModels);
             landScape.Visible = false;
+        }
+        private async Task InitializeModelProjectile()
+        {
+            var sphereDesc = GeometryUtil.CreateSphere(1, 5, 5);
+            var material = MaterialContent.Default;
+            material.DiffuseColor = Color.DarkGray;
+
+            var content = ModelDescription.FromData(sphereDesc, material);
+
+            projectile = await this.AddComponentModel(content, SceneObjectUsages.UI, layerModels);
+            projectile.Visible = false;
         }
         private void PrepareModels()
         {
@@ -681,8 +694,25 @@ namespace SceneTest
             UpdateTurnStatus();
             UpdatePlayersStatus();
 
-            if (shooting)
+            if (shooting && shot != null)
             {
+                Vector3 shotPos = shot.Integrate(gameTime);
+
+                projectile.Manipulator.SetPosition(Shooter.Manipulator.Position + shotPos);
+
+                if (projectile.Manipulator.Position.Y <= -100)
+                {
+                    ResolveShoot(false);
+                }
+
+                var projVolume = projectile.GetBoundingSphere();
+                var tarjetVolume = Target.GetBoundingBox();
+
+                if (projVolume.Contains(ref tarjetVolume) != ContainmentType.Disjoint)
+                {
+                    ResolveShoot(true);
+                }
+
                 return;
             }
 
@@ -761,16 +791,7 @@ namespace SceneTest
 
             if (this.Game.Input.KeyJustReleased(Keys.Space))
             {
-                shooting = true;
-
-                Task.Run(async () =>
-                {
-                    await ResolveShoot(ShooterStatus, TargetStatus, pbFire.ProgressValue);
-
-                    await EvaluateTurn(ShooterStatus, TargetStatus);
-
-                    shooting = false;
-                });
+                Shoot(pbFire.ProgressValue);
             }
         }
         private void UpdateInputEndGame()
@@ -970,20 +991,35 @@ namespace SceneTest
             miniMapTank2.Rotation = Helper.AngleSigned(Vector2.UnitY, Vector2.Normalize(tanks[1].Manipulator.Forward.XZ()));
         }
 
-        private async Task ResolveShoot(PlayerStatus shooter, PlayerStatus target, float shotForce)
-        {
-            await Task.Delay(2000);
+        ParabolicShot shot;
 
-            if (Helper.RandomGenerator.NextFloat(0, 1) < 0.4f)
+        private void Shoot(float shotForce)
+        {
+            var shotDirection = Shooter["Barrel-mesh"].Manipulator.FinalTransform.Forward;
+
+            shot = new ParabolicShot();
+            shot.Configure(this.Game.GameTime, shotDirection, shotForce * 200);
+            shooting = true;
+            projectile.Visible = true;
+        }
+        private void ResolveShoot(bool impact)
+        {
+            shot = null;
+            shooting = false;
+            projectile.Visible = false;
+
+            if (impact)
             {
-                return;
+                int res = Helper.RandomGenerator.Next(10, 50);
+
+                ShooterStatus.Points += res * 100;
+                TargetStatus.CurrentLife = MathUtil.Clamp(TargetStatus.CurrentLife - res, 0, TargetStatus.MaxLife);
             }
 
-            int res = Helper.RandomGenerator.Next((int)(shotForce * 10), (int)(shotForce * 50));
-
-            shooter.Points += res * 100;
-
-            target.CurrentLife = MathUtil.Clamp(target.CurrentLife - res, 0, target.MaxLife);
+            Task.Run(async () =>
+            {
+                await EvaluateTurn(ShooterStatus, TargetStatus);
+            });
         }
         private async Task EvaluateTurn(PlayerStatus shooter, PlayerStatus target)
         {
@@ -1022,6 +1058,69 @@ namespace SceneTest
                 currentWindVelocity = Helper.RandomGenerator.NextFloat(0f, maxWindVelocity);
                 windForce = Helper.RandomGenerator.NextVector2(-Vector2.One, Vector2.One);
             }
+        }
+    }
+
+    public class ParabolicShot
+    {
+        private readonly float g = 50f;
+
+        private TimeSpan initialTime;
+        public Vector3 initialVelocity;
+        public Vector2 horizontalVelocity;
+        public float verticalVelocity;
+
+        public void Configure(GameTime gameTime, Vector3 shotDirection, float shotForce)
+        {
+            initialTime = TimeSpan.FromMilliseconds(gameTime.TotalMilliseconds);
+            initialVelocity = shotDirection * shotForce;
+            horizontalVelocity = initialVelocity.XZ();
+            verticalVelocity = initialVelocity.Y;
+        }
+
+        public float GetTotalDistance()
+        {
+            return 0;
+        }
+
+        public Vector2 GetHorizontalDistance(float time)
+        {
+            return horizontalVelocity * time;
+        }
+        public float GetVerticalDistance(float time)
+        {
+            float h = 0;
+
+            return h + (verticalVelocity * time) - (g * time * time / 2f);
+        }
+
+        public Vector2 GetHorizontalVelocity()
+        {
+            return horizontalVelocity;
+        }
+        public float GetVerticalVelocity(float time)
+        {
+            return verticalVelocity - g * time;
+        }
+
+        public float GetHorizontalAcceleration()
+        {
+            return 0f;
+        }
+        public float GetVerticalAcceleration()
+        {
+            return -g;
+        }
+
+
+        public Vector3 Integrate(GameTime gameTime)
+        {
+            float time = (float)(gameTime.TotalSeconds - initialTime.TotalSeconds);
+
+            Vector2 horizontalDist = GetHorizontalDistance(time);
+            float verticalDist = GetVerticalDistance(time);
+
+            return new Vector3(horizontalDist.X, verticalDist, horizontalDist.Y);
         }
     }
 

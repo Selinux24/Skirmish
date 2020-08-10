@@ -55,6 +55,19 @@ namespace Engine
             };
         }
 
+        public static ModelDescription FromData(GeometryDescriptor geometry, MaterialContent material = null)
+        {
+            var content = ModelContent.GenerateTriangleList(geometry, material);
+
+            return new ModelDescription
+            {
+                Content = new ContentDescription
+                {
+                    ModelContent = content,
+                }
+            };
+        }
+
         /// <summary>
         /// Texture index
         /// </summary>

@@ -496,6 +496,13 @@ namespace Engine.Content
         {
             return Generate(Topology.TriangleList, vertices, indices, material);
         }
+
+        public static ModelContent GenerateTriangleList(GeometryDescriptor geometry, MaterialContent material = null)
+        {
+            var vertices = VertexData.FromDescriptor(geometry);
+
+            return Generate(Topology.TriangleList, vertices, geometry.Indices, material);
+        }
         /// <summary>
         /// Generate model content from scratch
         /// </summary>
