@@ -486,7 +486,7 @@ namespace Engine.Content
         /// </summary>
         public SkinningDictionary SkinningInfo { get; set; } = new SkinningDictionary();
         /// <summary>
-        /// Generate triangle list model content from scratch
+        /// Generates a triangle list model content from scratch
         /// </summary>
         /// <param name="vertices">Vertex list</param>
         /// <param name="indices">Index list</param>
@@ -496,7 +496,12 @@ namespace Engine.Content
         {
             return Generate(Topology.TriangleList, vertices, indices, material);
         }
-
+        /// <summary>
+        /// Generates a triangle list model content from geometry descriptor
+        /// </summary>
+        /// <param name="geometry">Geometry descriptor</param>
+        /// <param name="material">Material</param>
+        /// <returns>Returns new model content</returns>
         public static ModelContent GenerateTriangleList(GeometryDescriptor geometry, MaterialContent material = null)
         {
             var vertices = VertexData.FromDescriptor(geometry);

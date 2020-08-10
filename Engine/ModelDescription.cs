@@ -16,7 +16,7 @@ namespace Engine
         /// <param name="name">Name</param>
         /// <param name="contentFolder">Content folder</param>
         /// <param name="fileName">File name</param>
-        /// <returns>Returns a new mode description</returns>
+        /// <returns>Returns a new model description</returns>
         public static ModelDescription FromXml(string name, string contentFolder, string fileName)
         {
             return new ModelDescription()
@@ -41,7 +41,13 @@ namespace Engine
                 Content = content,
             };
         }
-
+        /// <summary>
+        /// Creates a model descriptor from scratch
+        /// </summary>
+        /// <param name="vertices">Vertex data</param>
+        /// <param name="indices">Index data</param>
+        /// <param name="material">Material</param>
+        /// <returns>Returns a new model description</returns>
         public static ModelDescription FromData(IEnumerable<VertexData> vertices, IEnumerable<uint> indices, MaterialContent material = null)
         {
             var content = ModelContent.GenerateTriangleList(vertices, indices, material);
@@ -54,7 +60,12 @@ namespace Engine
                 }
             };
         }
-
+        /// <summary>
+        /// Creates a model descriptor from a geometry descriptor
+        /// </summary>
+        /// <param name="geometry">Geometry descriptor</param>
+        /// <param name="material">Material</param>
+        /// <returns>Returns a new model description</returns>
         public static ModelDescription FromData(GeometryDescriptor geometry, MaterialContent material = null)
         {
             var content = ModelContent.GenerateTriangleList(geometry, material);

@@ -7,7 +7,6 @@ using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace SceneTest
@@ -68,9 +67,9 @@ namespace SceneTest
         private Sprite miniMapTank2;
         private readonly float maxWindVelocity = 10;
         private float currentWindVelocity = 1;
-        private Vector2 windForce = Vector2.Normalize(Vector2.One);
+        private Vector2 windDirection = Vector2.Normalize(Vector2.One);
         private UIProgressBar windVelocity;
-        private Sprite windDirection;
+        private Sprite windDirectionArrow;
 
         private Model landScape;
         private Scenery terrain;
@@ -477,13 +476,13 @@ namespace SceneTest
             windVelocity.ProgressColor = Color.DeepSkyBlue;
             windVelocity.Visible = false;
 
-            windDirection = await this.AddComponentSprite(SpriteDescription.FromFile("SceneTanksGame/Wind.png"), SceneObjectUsages.UI, layerUI + 1);
-            windDirection.Width = 100;
-            windDirection.Height = 100;
-            windDirection.Left = miniMapBackground.AbsoluteCenter.X - 50;
-            windDirection.Top = miniMapBackground.AbsoluteCenter.Y - 50;
-            windDirection.TintColor = Color.Green;
-            windDirection.Visible = false;
+            windDirectionArrow = await this.AddComponentSprite(SpriteDescription.FromFile("SceneTanksGame/Wind.png"), SceneObjectUsages.UI, layerUI + 1);
+            windDirectionArrow.Width = 100;
+            windDirectionArrow.Height = 100;
+            windDirectionArrow.Left = miniMapBackground.AbsoluteCenter.X - 50;
+            windDirectionArrow.Top = miniMapBackground.AbsoluteCenter.Y - 50;
+            windDirectionArrow.TintColor = Color.Green;
+            windDirectionArrow.Visible = false;
         }
         private async Task InitializeUIShotPath()
         {
@@ -679,7 +678,7 @@ namespace SceneTest
             miniMapTank1.Visible = visible;
             miniMapTank2.Visible = visible;
             windVelocity.Visible = visible;
-            windDirection.Visible = visible;
+            windDirectionArrow.Visible = visible;
         }
 
         public override void Update(GameTime gameTime)
@@ -951,7 +950,7 @@ namespace SceneTest
         {
             // Set wind velocity and direction
             windVelocity.ProgressValue = currentWindVelocity / maxWindVelocity;
-            windDirection.Rotation = Helper.AngleSigned(Vector2.UnitY, windForce);
+            windDirectionArrow.Rotation = Helper.AngleSigned(Vector2.UnitY, windDirection);
 
             // Get terrain minimap rectangle
             BoundingBox bbox = terrain.GetBoundingBox();
@@ -998,7 +997,7 @@ namespace SceneTest
             var shotDirection = Shooter["Barrel-mesh"].Manipulator.FinalTransform.Forward;
 
             shot = new ParabolicShot();
-            shot.Configure(this.Game.GameTime, shotDirection, shotForce * 200);
+            shot.Configure(this.Game.GameTime, shotDirection, shotForce * 200, windDirection, currentWindVelocity);
             shooting = true;
             projectile.Visible = true;
         }
@@ -1056,7 +1055,7 @@ namespace SceneTest
                 TargetStatus.NewTurn();
 
                 currentWindVelocity = Helper.RandomGenerator.NextFloat(0f, maxWindVelocity);
-                windForce = Helper.RandomGenerator.NextVector2(-Vector2.One, Vector2.One);
+                windDirection = Helper.RandomGenerator.NextVector2(-Vector2.One, Vector2.One);
             }
         }
     }
@@ -1069,13 +1068,15 @@ namespace SceneTest
         public Vector3 initialVelocity;
         public Vector2 horizontalVelocity;
         public float verticalVelocity;
+        public Vector3 wind;
 
-        public void Configure(GameTime gameTime, Vector3 shotDirection, float shotForce)
+        public void Configure(GameTime gameTime, Vector3 shotDirection, float shotForce, Vector2 windDirection, float windForce)
         {
             initialTime = TimeSpan.FromMilliseconds(gameTime.TotalMilliseconds);
             initialVelocity = shotDirection * shotForce;
             horizontalVelocity = initialVelocity.XZ();
             verticalVelocity = initialVelocity.Y;
+            wind = new Vector3(windDirection.X, 0, windDirection.Y) * windForce;
         }
 
         public float GetTotalDistance()
@@ -1112,7 +1113,6 @@ namespace SceneTest
             return -g;
         }
 
-
         public Vector3 Integrate(GameTime gameTime)
         {
             float time = (float)(gameTime.TotalSeconds - initialTime.TotalSeconds);
@@ -1120,7 +1120,7 @@ namespace SceneTest
             Vector2 horizontalDist = GetHorizontalDistance(time);
             float verticalDist = GetVerticalDistance(time);
 
-            return new Vector3(horizontalDist.X, verticalDist, horizontalDist.Y);
+            return new Vector3(horizontalDist.X, verticalDist, horizontalDist.Y) + (wind * time);
         }
     }
 
