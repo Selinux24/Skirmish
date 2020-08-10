@@ -32,6 +32,14 @@ namespace SceneTest
         private UITextArea gameMessage;
         private UITextArea gameKeyHelp;
 
+        private UIPanel dialog;
+        private UIButton dialogClose;
+        private UIButton dialogAccept;
+        private UITextArea dialogText;
+        private bool dialogActive = false;
+        private EventHandler lastOnCloseHandler;
+        private EventHandler lastOnAcceptHandler;
+
         private UITextArea player1Name;
         private UITextArea player1Points;
         private UIProgressBar player1Life;
@@ -87,6 +95,7 @@ namespace SceneTest
         private ModelInstance Target { get { return tanks[(currentPlayer + 1) % 2]; } }
         private PlayerStatus ShooterStatus { get { return currentPlayer == 0 ? player1Status : player2Status; } }
         private PlayerStatus TargetStatus { get { return currentPlayer == 0 ? player2Status : player1Status; } }
+        private ParabolicShot shot;
 
         /// <summary>
         /// Constructor
@@ -216,6 +225,7 @@ namespace SceneTest
             return new[]
             {
                 InitializeUIGameMessages(),
+                InitializeUIModalDialog(),
                 InitializeUIPlayers(),
                 InitializeUITurn(),
                 InitializeUIKeyPanel(),
@@ -244,6 +254,67 @@ namespace SceneTest
             gameKeyHelp.VerticalAlign = VerticalTextAlign.Middle;
             gameKeyHelp.AdjustAreaWithText = false;
             gameKeyHelp.Visible = false;
+        }
+        private async Task InitializeUIModalDialog()
+        {
+            float width = this.Game.Form.RenderWidth / 2f;
+            float height = width * 0.6666f;
+
+            var descPan = new UIPanelDescription
+            {
+                Name = "Modal Dialog",
+
+                Width = width,
+                Height = height,
+                CenterVertically = CenterTargets.Screen,
+                CenterHorizontally = CenterTargets.Screen,
+
+                Background = new SpriteDescription()
+                {
+                    TintColor = Color.DarkGreen,
+                }
+            };
+            dialog = await this.AddComponentUIPanel(descPan, layerLoadingUI + 2);
+
+            var font = TextDrawerDescription.FromFile(fontFilename, 20);
+            font.LineAdjust = true;
+            font.HorizontalAlign = HorizontalTextAlign.Center;
+            font.VerticalAlign = VerticalTextAlign.Middle;
+
+            var descButton = UIButtonDescription.DefaultTwoStateButton(Color.DarkGray * 0.6666f, Color.DarkGray * 0.7777f, font);
+
+            float butWidth = 150;
+            float butHeight = 55;
+            float butMargin = 15;
+
+            dialogAccept = new UIButton(this, descButton);
+            dialogAccept.Width = butWidth;
+            dialogAccept.Height = butHeight;
+            dialogAccept.Top = dialog.Height - butMargin - butHeight;
+            dialogAccept.Left = (dialog.Width * 0.5f) - (butWidth * 0.5f) - (butWidth * 0.6666f);
+            dialogAccept.Caption.Text = "Ok";
+
+            dialogClose = new UIButton(this, descButton);
+            dialogClose.Width = butWidth;
+            dialogClose.Height = butHeight;
+            dialogClose.Top = dialog.Height - butMargin - butHeight;
+            dialogClose.Left = (dialog.Width * 0.5f) - (butWidth * 0.5f) + (butWidth * 0.6666f);
+            dialogClose.Caption.Text = "Cancel";
+
+            var descText = UITextAreaDescription.FromFile(fontFilename, 28);
+            descText.MarginLeft = width * 0.1f;
+            descText.MarginRight = width * 0.1f;
+            descText.MarginTop = height * 0.1f;
+            descText.MarginBottom = butHeight + (butMargin * 2f);
+            descText.Font.HorizontalAlign = HorizontalTextAlign.Center;
+            descText.Font.VerticalAlign = VerticalTextAlign.Middle;
+
+            dialogText = new UITextArea(this, descText);
+
+            dialog.AddChild(dialogText);
+            dialog.AddChild(dialogClose, false);
+            dialog.AddChild(dialogAccept, false);
+            dialog.Visible = false;
         }
         private async Task InitializeUIPlayers()
         {
@@ -693,6 +764,13 @@ namespace SceneTest
             UpdateTurnStatus();
             UpdatePlayersStatus();
 
+            if (dialogActive)
+            {
+                return;
+            }
+
+            UpdateInputGame();
+
             if (shooting && shot != null)
             {
                 Vector3 shotPos = shot.Integrate(gameTime);
@@ -729,6 +807,21 @@ namespace SceneTest
             UpdateCamera(false);
         }
 
+        private void UpdateInputGame()
+        {
+            if (this.Game.Input.KeyJustReleased(Keys.Escape))
+            {
+                this.ShowDialog(
+                    @"Press Ok if you want to exit.
+
+You will lost all the game progress.",
+                    CloseDialog,
+                    () =>
+                    {
+                        this.Game.SetScene<SceneStart>();
+                    });
+            }
+        }
         private bool UpdateInputPlayer(GameTime gameTime)
         {
             bool tankMoved = false;
@@ -990,8 +1083,6 @@ namespace SceneTest
             miniMapTank2.Rotation = Helper.AngleSigned(Vector2.UnitY, Vector2.Normalize(tanks[1].Manipulator.Forward.XZ()));
         }
 
-        ParabolicShot shot;
-
         private void Shoot(float shotForce)
         {
             var shotDirection = Shooter["Barrel-mesh"].Manipulator.FinalTransform.Forward;
@@ -1057,6 +1148,58 @@ namespace SceneTest
                 currentWindVelocity = Helper.RandomGenerator.NextFloat(0f, maxWindVelocity);
                 windDirection = Helper.RandomGenerator.NextVector2(-Vector2.One, Vector2.One);
             }
+        }
+
+        private void ShowDialog(string message, Action onCloseCallback, Action onAcceptCallback)
+        {
+            dialogActive = true;
+
+            if (lastOnCloseHandler != null)
+            {
+                dialogClose.JustReleased -= lastOnCloseHandler;
+            }
+            if (onCloseCallback != null)
+            {
+                lastOnCloseHandler = (sender, args) =>
+                {
+                    onCloseCallback.Invoke();
+                };
+
+                dialogClose.JustReleased += lastOnCloseHandler;
+            }
+
+            if (lastOnAcceptHandler != null)
+            {
+                dialogAccept.JustReleased -= lastOnAcceptHandler;
+            }
+            if (onAcceptCallback != null)
+            {
+                lastOnAcceptHandler = (sender, args) =>
+                {
+                    onAcceptCallback.Invoke();
+                };
+
+                dialogAccept.JustReleased += lastOnAcceptHandler;
+            }
+
+            dialogText.Text = message;
+
+            dialog.Show(500);
+            fadePanel.TweenAlpha(0, 0.5f, 500, ScaleFuncs.Linear);
+            Game.VisibleMouse = true;
+        }
+        private void CloseDialog()
+        {
+            dialog.Hide(500);
+            fadePanel.TweenAlpha(0.5f, 0f, 500, ScaleFuncs.Linear);
+            Game.VisibleMouse = false;
+
+            Task.Run(async () =>
+            {
+                await Task.Delay(500);
+
+                dialogActive = false;
+            });
         }
     }
 

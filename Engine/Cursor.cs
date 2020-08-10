@@ -2,16 +2,13 @@
 namespace Engine
 {
     using Point = System.Drawing.Point;
+    using SystemCursor = System.Windows.Forms.Cursor;
 
     /// <summary>
     /// Game cursor
     /// </summary>
     public static class Cursor
     {
-        /// <summary>
-        /// Times Cursor.Show() were called
-        /// </summary>
-        private static int showCount = 1;
         /// <summary>
         /// Times Cursor.Hide() were called
         /// </summary>
@@ -24,11 +21,11 @@ namespace Engine
         {
             get
             {
-                return System.Windows.Forms.Cursor.Position;
+                return SystemCursor.Position;
             }
             set
             {
-                System.Windows.Forms.Cursor.Position = value;
+                SystemCursor.Position = value;
             }
         }
 
@@ -37,24 +34,19 @@ namespace Engine
         /// </summary>
         public static void Show()
         {
-            while (hideCount > 0)
+            for (int i = 0; i < hideCount; i++)
             {
-                hideCount--;
-                System.Windows.Forms.Cursor.Show();
+                SystemCursor.Show();
             }
 
-            showCount++;
+            hideCount = 0;
         }
         /// <summary>
         /// Hides the cursor
         /// </summary>
         public static void Hide()
         {
-            while (showCount > 0)
-            {
-                showCount--;
-                System.Windows.Forms.Cursor.Hide();
-            }
+            SystemCursor.Hide();
 
             hideCount++;
         }
