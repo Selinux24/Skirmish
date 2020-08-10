@@ -85,6 +85,8 @@ namespace SceneTest
 
         private ModelInstance Shooter { get { return tanks[currentPlayer]; } }
         private ModelInstance Target { get { return tanks[(currentPlayer + 1) % 2]; } }
+        private PlayerStatus ShooterStatus { get { return currentPlayer == 0 ? player1Status : player2Status; } }
+        private PlayerStatus TargetStatus { get { return currentPlayer == 0 ? player2Status : player1Status; } }
 
         /// <summary>
         /// Constructor
@@ -617,6 +619,8 @@ namespace SceneTest
                 Points = 0,
                 MaxLife = 100,
                 CurrentLife = 100,
+                MaxMove = 25,
+                CurrentMove = 25,
                 Color = Color.Blue,
             };
 
@@ -626,6 +630,8 @@ namespace SceneTest
                 Points = 0,
                 MaxLife = 100,
                 CurrentLife = 100,
+                MaxMove = 25,
+                CurrentMove = 25,
                 Color = Color.Red,
             };
         }
@@ -709,6 +715,24 @@ namespace SceneTest
                 tankMoved = true;
             }
 
+            if (this.Game.Input.KeyPressed(Keys.Q))
+            {
+                Shooter["Barrel-mesh"].Manipulator.Rotate(0, gameTime.ElapsedSeconds, 0);
+                tankMoved = true;
+            }
+            if (this.Game.Input.KeyPressed(Keys.Z))
+            {
+                Shooter["Barrel-mesh"].Manipulator.Rotate(0, -gameTime.ElapsedSeconds, 0);
+                tankMoved = true;
+            }
+
+            if (ShooterStatus.CurrentMove <= 0)
+            {
+                return tankMoved;
+            }
+
+            Vector3 prevPosition = Shooter.Manipulator.Position;
+
             if (this.Game.Input.KeyPressed(Keys.W))
             {
                 Shooter.Manipulator.MoveForward(gameTime, 10);
@@ -720,16 +744,10 @@ namespace SceneTest
                 tankMoved = true;
             }
 
-            if (this.Game.Input.KeyPressed(Keys.Q))
-            {
-                Shooter["Barrel-mesh"].Manipulator.Rotate(0, gameTime.ElapsedSeconds, 0);
-                tankMoved = true;
-            }
-            if (this.Game.Input.KeyPressed(Keys.Z))
-            {
-                Shooter["Barrel-mesh"].Manipulator.Rotate(0, -gameTime.ElapsedSeconds, 0);
-                tankMoved = true;
-            }
+            Vector3 position = Shooter.Manipulator.Position;
+
+            ShooterStatus.CurrentMove -= Vector3.Distance(prevPosition, position);
+            ShooterStatus.CurrentMove = Math.Max(0, ShooterStatus.CurrentMove);
 
             return tankMoved;
         }
@@ -747,12 +765,9 @@ namespace SceneTest
 
                 Task.Run(async () =>
                 {
-                    PlayerStatus shooter = currentPlayer == 0 ? player1Status : player2Status;
-                    PlayerStatus target = currentPlayer == 0 ? player2Status : player1Status;
+                    await ResolveShoot(ShooterStatus, TargetStatus, pbFire.ProgressValue);
 
-                    await ResolveShoot(shooter, target, pbFire.ProgressValue);
-
-                    await EvaluateTurn(shooter, target);
+                    await EvaluateTurn(ShooterStatus, TargetStatus);
 
                     shooting = false;
                 });
@@ -1001,6 +1016,9 @@ namespace SceneTest
             {
                 currentTurn++;
 
+                ShooterStatus.NewTurn();
+                TargetStatus.NewTurn();
+
                 currentWindVelocity = Helper.RandomGenerator.NextFloat(0f, maxWindVelocity);
                 windForce = Helper.RandomGenerator.NextVector2(-Vector2.One, Vector2.One);
             }
@@ -1013,6 +1031,8 @@ namespace SceneTest
         public int Points { get; set; }
         public int MaxLife { get; set; }
         public int CurrentLife { get; set; }
+        public int MaxMove { get; set; }
+        public float CurrentMove { get; set; }
         public Color Color { get; set; }
         public float Health
         {
@@ -1036,6 +1056,11 @@ namespace SceneTest
 
                 return 2;
             }
+        }
+
+        public void NewTurn()
+        {
+            CurrentMove = MaxMove;
         }
     }
 }
