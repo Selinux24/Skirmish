@@ -81,6 +81,7 @@ namespace SceneTest
 
         private Model landScape;
         private Scenery terrain;
+        private IEnumerable<Triangle> terrainMesh;
         private ModelInstanced tanks;
         private float tankHeight = 0;
         private Model projectile;
@@ -620,6 +621,8 @@ namespace SceneTest
             terrain = await this.AddComponentScenery(GroundDescription.FromFile("SceneTanksGame/Terrain/terrain.xml"), SceneObjectUsages.Ground, layerModels);
             terrain.Visible = false;
 
+            terrainMesh = terrain.GetVolume(true);
+
             this.SetGround(terrain, true);
         }
         private async Task InitializeLandscape()
@@ -773,22 +776,7 @@ namespace SceneTest
 
             if (shooting && shot != null)
             {
-                Vector3 shotPos = shot.Integrate(gameTime);
-
-                projectile.Manipulator.SetPosition(Shooter.Manipulator.Position + shotPos);
-
-                if (projectile.Manipulator.Position.Y <= -100)
-                {
-                    ResolveShoot(false);
-                }
-
-                var projVolume = projectile.GetBoundingSphere();
-                var tarjetVolume = Target.GetBoundingBox();
-
-                if (projVolume.Contains(ref tarjetVolume) != ContainmentType.Disjoint)
-                {
-                    ResolveShoot(true);
-                }
+                IntegrateShot(gameTime);
 
                 return;
             }
@@ -1092,6 +1080,38 @@ You will lost all the game progress.",
             shooting = true;
             projectile.Visible = true;
         }
+        private void IntegrateShot(GameTime gameTime)
+        {
+            Vector3 shotPos = shot.Integrate(gameTime);
+
+            projectile.Manipulator.SetPosition(Shooter.Manipulator.Position + shotPos);
+
+            var projVolume = projectile.GetBoundingSphere();
+            var tarjetVolume = Target.GetBoundingBox();
+            var terrainBox = terrain.GetBoundingBox();
+
+            // Test collision with target
+            if (projVolume.Contains(ref tarjetVolume) != ContainmentType.Disjoint)
+            {
+                ResolveShoot(true);
+
+                return;
+            }
+
+            // Test if projectile is under the terrain box
+            if (projVolume.Center.Y + projVolume.Radius < terrainBox.Minimum.Y)
+            {
+                ResolveShoot(false);
+
+                return;
+            }
+
+            // Test full collision with terrain mesh
+            if (Intersection.SphereIntersectsMesh(projVolume, terrainMesh, out _, out _))
+            {
+                ResolveShoot(false);
+            }
+        }
         private void ResolveShoot(bool impact)
         {
             shot = null;
@@ -1203,16 +1223,45 @@ You will lost all the game progress.",
         }
     }
 
+    /// <summary>
+    /// Paralbolic shot helper
+    /// </summary>
     public class ParabolicShot
     {
+        /// <summary>
+        /// Gravity acceleration
+        /// </summary>
         private readonly float g = 50f;
 
+        /// <summary>
+        /// Initial shot time
+        /// </summary>
         private TimeSpan initialTime;
+        /// <summary>
+        /// Initial velocity
+        /// </summary>
         public Vector3 initialVelocity;
+        /// <summary>
+        /// Horizontal velocity component
+        /// </summary>
         public Vector2 horizontalVelocity;
+        /// <summary>
+        /// Vertical velocity component
+        /// </summary>
         public float verticalVelocity;
+        /// <summary>
+        /// Wind force (direction plus magnitude)
+        /// </summary>
         public Vector3 wind;
 
+        /// <summary>
+        /// Configures the parabolic shot
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="shotDirection">Shot direction</param>
+        /// <param name="shotForce">Shot force</param>
+        /// <param name="windDirection">Wind direction</param>
+        /// <param name="windForce">Wind force</param>
         public void Configure(GameTime gameTime, Vector3 shotDirection, float shotForce, Vector2 windDirection, float windForce)
         {
             initialTime = TimeSpan.FromMilliseconds(gameTime.TotalMilliseconds);
@@ -1222,46 +1271,70 @@ You will lost all the game progress.",
             wind = new Vector3(windDirection.X, 0, windDirection.Y) * windForce;
         }
 
-        public float GetTotalDistance()
-        {
-            return 0;
-        }
-
+        /// <summary>
+        /// Gets the horizontal shot distance at the specified time
+        /// </summary>
+        /// <param name="time">Time</param>
         public Vector2 GetHorizontalDistance(float time)
         {
             return horizontalVelocity * time;
         }
-        public float GetVerticalDistance(float time)
+        /// <summary>
+        /// Gets the vertical shot distance at the specified time
+        /// </summary>
+        /// <param name="time">Time</param>
+        /// <param name="shooterPosition">Shooter position</param>
+        /// <param name="targetPosition">Target position</param>
+        /// <remarks>Shooter and target positions were used for height difference calculation</remarks>
+        public float GetVerticalDistance(float time, Vector3 shooterPosition, Vector3 targetPosition)
         {
-            float h = 0;
+            float h = shooterPosition.Y - targetPosition.Y;
 
             return h + (verticalVelocity * time) - (g * time * time / 2f);
         }
 
+        /// <summary>
+        /// Gets the horizontal velocity
+        /// </summary>
         public Vector2 GetHorizontalVelocity()
         {
             return horizontalVelocity;
         }
+        /// <summary>
+        /// Gets the vertical velocity at the specified time
+        /// </summary>
+        /// <param name="time">Time</param>
         public float GetVerticalVelocity(float time)
         {
             return verticalVelocity - g * time;
         }
 
+        /// <summary>
+        /// Gets the horizontal acceleration
+        /// </summary>
         public float GetHorizontalAcceleration()
         {
             return 0f;
         }
+        /// <summary>
+        /// Gets the vertical acceleration
+        /// </summary>
         public float GetVerticalAcceleration()
         {
             return -g;
         }
 
+        /// <summary>
+        /// Integrates the shot in time
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <returns>Returns the current parabolic shot position (relative to shooter position)</returns>
         public Vector3 Integrate(GameTime gameTime)
         {
             float time = (float)(gameTime.TotalSeconds - initialTime.TotalSeconds);
 
             Vector2 horizontalDist = GetHorizontalDistance(time);
-            float verticalDist = GetVerticalDistance(time);
+            float verticalDist = GetVerticalDistance(time, Vector3.Zero, Vector3.Zero);
 
             return new Vector3(horizontalDist.X, verticalDist, horizontalDist.Y) + (wind * time);
         }

@@ -85,7 +85,51 @@ namespace Engine.Common
             return true;
         }
         /// <summary>
-        /// Finds the distance between a point and triangle ABC.
+        /// Determines whether a sphere intersects with a triangle
+        /// </summary>
+        /// <param name="sphere">Sphere</param>
+        /// <param name="t">Triangle</param>
+        /// <param name="point">Returns the closest point in the triangle to the sphere center</param>
+        /// <param name="distance">Returns the distance from the closest point to the sphere center</param>
+        /// <returns>Returns true if the sphere intersects the triangle</returns>
+        public static bool SphereIntersectsTriangle(BoundingSphere sphere, Triangle t, out Vector3 point, out float distance)
+        {
+            ClosestPointInTriangle(sphere.Center, t, out point);
+
+            distance = Vector3.Distance(sphere.Center, point);
+
+            return distance <= sphere.Radius;
+        }
+        /// <summary>
+        /// Determines whether a sphere intersects with a triangle mesh
+        /// </summary>
+        /// <param name="sphere">Sphere</param>
+        /// <param name="mesh">Triangle mesh</param>
+        /// <param name="point">Returns the closest point in the triangle mesh to the sphere center</param>
+        /// <param name="distance">Returns the distance from the closest point to the sphere center</param>
+        /// <returns>Returns true if the sphere intersects the triangle mesh</returns>
+        public static bool SphereIntersectsMesh(BoundingSphere sphere, IEnumerable<Triangle> mesh, out Vector3 point, out float distance)
+        {
+            ClosestPointInMesh(sphere.Center, mesh, out point);
+
+            distance = Vector3.Distance(sphere.Center, point);
+
+            return distance <= sphere.Radius;
+        }
+
+        /// <summary>
+        /// Finds whether the point is contantained within the triangle, and the distance between the point and the triangle.
+        /// </summary>
+        /// <param name="p">A point.</param>
+        /// <param name="t">A triangle</param>
+        /// <param name="distance">The distance between the point and the triangle.</param>
+        /// <returns>A value indicating whether the point is contained within the triangle.</returns>
+        public static bool PointInTriangle(Vector3 p, Triangle t, out float distance)
+        {
+            return PointInTriangle(p, t.Point1, t.Point2, t.Point3, out distance);
+        }
+        /// <summary>
+        /// Finds whether the point is contantained within the triangle, and the distance between the point and the triangle.
         /// </summary>
         /// <param name="p">A point.</param>
         /// <param name="a">The first vertex of the triangle.</param>
@@ -125,6 +169,29 @@ namespace Engine.Common
             }
 
             distance = float.MaxValue;
+            return false;
+        }
+        /// <summary>
+        /// Finds whether the point is contantained within the triangle mesh, and the distance between the point and the closest triangle.
+        /// </summary>
+        /// <param name="p">A point.</param>
+        /// <param name="distance">The distance between the point and the closest triangle.</param>
+        /// <param name="distance"></param>
+        /// <returns>A value indicating whether the point is contained within the triangle mesh.</returns>
+        public static bool PointInMesh(Vector3 p, IEnumerable<Triangle> mesh, out float distance)
+        {
+            distance = float.MaxValue;
+
+            foreach (var tri in mesh)
+            {
+                if (PointInTriangle(p, tri, out float d))
+                {
+                    distance = d;
+
+                    return true;
+                }
+            }
+
             return false;
         }
 
@@ -283,6 +350,130 @@ namespace Engine.Common
             var linePoint = NearestPointOnLine(ray, point);
 
             return Vector3.Distance(linePoint, point);
+        }
+
+        /// <summary>
+        /// Gets the closest triangle point from the specified point p
+        /// </summary>
+        /// <param name="p">Point</param>
+        /// <param name="t">Triangle</param>
+        /// <param name="closest">Returns the closest point in the triangle from point p</param>
+        public static void ClosestPointInTriangle(Vector3 p, Triangle t, out Vector3 closest)
+        {
+            ClosestPointInTriangle(p, t.Point1, t.Point2, t.Point3, out closest);
+        }
+        /// <summary>
+        /// Gets the closest triangle point from the specified point p
+        /// </summary>
+        /// <param name="p">Point</param>
+        /// <param name="a">Triangle vertex A</param>
+        /// <param name="b">Triangle vertex B</param>
+        /// <param name="c">Triangle vertex C</param>
+        /// <param name="closest">Returns the closest point in the triangle from point p</param>
+        public static void ClosestPointInTriangle(Vector3 p, Vector3 a, Vector3 b, Vector3 c, out Vector3 closest)
+        {
+            // Check if P in vertex region outside A
+            Vector3 ab = Vector3.Subtract(b, a);
+            Vector3 ac = Vector3.Subtract(c, a);
+            Vector3 ap = Vector3.Subtract(p, a);
+            float d1 = Vector3.Dot(ab, ap);
+            float d2 = Vector3.Dot(ac, ap);
+            if (d1 <= 0.0f && d2 <= 0.0f)
+            {
+                // barycentric coordinates (1,0,0)
+                closest = a;
+                return;
+            }
+
+            // Check if P in vertex region outside B
+            Vector3 bp = Vector3.Subtract(p, b);
+            float d3 = Vector3.Dot(ab, bp);
+            float d4 = Vector3.Dot(ac, bp);
+            if (d3 >= 0.0f && d4 <= d3)
+            {
+                // barycentric coordinates (0,1,0)
+                closest = b;
+                return;
+            }
+
+            // Check if P in edge region of AB, if so return projection of P onto AB
+            float vc = d1 * d4 - d3 * d2;
+            if (vc <= 0.0f && d1 >= 0.0f && d3 <= 0.0f)
+            {
+                // barycentric coordinates (1-v,v,0)
+                float v = d1 / (d1 - d3);
+                closest.X = a.X + v * ab.X;
+                closest.Y = a.Y + v * ab.Y;
+                closest.Z = a.Z + v * ab.Z;
+                return;
+            }
+
+            // Check if P in vertex region outside C
+            Vector3 cp = Vector3.Subtract(p, c);
+            float d5 = Vector3.Dot(ab, cp);
+            float d6 = Vector3.Dot(ac, cp);
+            if (d6 >= 0.0f && d5 <= d6)
+            {
+                // barycentric coordinates (0,0,1)
+                closest = c;
+                return;
+            }
+
+            // Check if P in edge region of AC, if so return projection of P onto AC
+            float vb = d5 * d2 - d1 * d6;
+            if (vb <= 0.0f && d2 >= 0.0f && d6 <= 0.0f)
+            {
+                // barycentric coordinates (1-w,0,w)
+                float w = d2 / (d2 - d6);
+                closest.X = a.X + w * ac.X;
+                closest.Y = a.Y + w * ac.Y;
+                closest.Z = a.Z + w * ac.Z;
+                return;
+            }
+
+            // Check if P in edge region of BC, if so return projection of P onto BC
+            float va = d3 * d6 - d5 * d4;
+            if (va <= 0.0f && (d4 - d3) >= 0.0f && (d5 - d6) >= 0.0f)
+            {
+                // barycentric coordinates (0,1-w,w)
+                float w = (d4 - d3) / ((d4 - d3) + (d5 - d6));
+                closest.X = b.X + w * (c.X - b.X);
+                closest.Y = b.Y + w * (c.Y - b.Y);
+                closest.Z = b.Z + w * (c.Z - b.Z);
+                return;
+            }
+
+            // P inside face region. Compute Q through its barycentric coordinates (u,v,w)
+            float denom = 1.0f / (va + vb + vc);
+            float closestV = vb * denom;
+            float closestW = vc * denom;
+            closest.X = a.X + ab.X * closestV + ac.X * closestW;
+            closest.Y = a.Y + ab.Y * closestV + ac.Y * closestW;
+            closest.Z = a.Z + ab.Z * closestV + ac.Z * closestW;
+        }
+        /// <summary>
+        /// Gets the closest point in a triangle mesh from the specified point p
+        /// </summary>
+        /// <param name="p">Point</param>
+        /// <param name="mesh">Triangle mesh</param>
+        /// <param name="closest">Returns the closest point in the triangle from point p</param>
+        public static void ClosestPointInMesh(Vector3 p, IEnumerable<Triangle> mesh, out Vector3 closest)
+        {
+            closest = p;
+
+            float distance = float.MaxValue;
+            foreach (var t in mesh)
+            {
+                ClosestPointInTriangle(p, t.Point1, t.Point2, t.Point3, out Vector3 closestToTri);
+
+                float sqrDist = Vector3.DistanceSquared(p, closestToTri);
+
+                if (sqrDist < distance)
+                {
+                    distance = sqrDist;
+                    closest = closestToTri;
+                }
+            }
         }
     }
 }

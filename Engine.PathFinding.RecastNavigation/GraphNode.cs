@@ -161,19 +161,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns true if the current node contains the specified point</returns>
         public bool Contains(Vector3 point, out float distance)
         {
-            distance = float.MaxValue;
-
-            foreach (var tri in Triangles)
-            {
-                if (Intersection.PointInTriangle(point, tri.Point1, tri.Point2, tri.Point3, out float d))
-                {
-                    distance = d;
-
-                    return true;
-                }
-            }
-
-            return false;
+            return Intersection.PointInMesh(point, Triangles, out distance);
         }
         /// <summary>
         /// Gets node points (triangle list)
