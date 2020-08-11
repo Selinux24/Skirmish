@@ -1077,12 +1077,13 @@ You will lost all the game progress.",
 
             shot = new ParabolicShot();
             shot.Configure(this.Game.GameTime, shotDirection, shotForce * 200, windDirection, currentWindVelocity);
+
             shooting = true;
             projectile.Visible = true;
         }
         private void IntegrateShot(GameTime gameTime)
         {
-            Vector3 shotPos = shot.Integrate(gameTime);
+            Vector3 shotPos = shot.Integrate(gameTime, Shooter.Manipulator.Position, Target.Manipulator.Position);
 
             var terrainBox = terrain.GetBoundingBox();
             var tarjetVolume = Target.GetBoundingBox();
@@ -1403,16 +1404,61 @@ You will lost all the game progress.",
         }
 
         /// <summary>
+        /// Gets the total time of flight of the projectile, from shooter to target
+        /// </summary>
+        /// <param name="shooterPosition">Shooter position</param>
+        /// <param name="targetPosition">Target position</param>
+        /// <returns>Returns the total time of flight of the projectile</returns>
+        public float GetTimeOfFlight(Vector3 shooterPosition, Vector3 targetPosition)
+        {
+            float h = shooterPosition.Y - targetPosition.Y;
+            if (h == 0)
+            {
+                return 2f * verticalVelocity / g;
+            }
+            else
+            {
+                return (verticalVelocity + (float)Math.Sqrt((verticalVelocity * verticalVelocity) + 2f * g * h)) / g;
+            }
+        }
+
+        /// <summary>
+        /// Gets the trajectory curve of the shot
+        /// </summary>
+        /// <param name="shooterPosition">Shooter position</param>
+        /// <param name="targetPosition">Target position</param>
+        /// <returns>Returns the trajectory curve of the shot</returns>
+        public Curve3D ComputeCurve(Vector3 shooterPosition, Vector3 targetPosition)
+        {
+            Curve3D curve = new Curve3D();
+
+            float flightTime = GetTimeOfFlight(shooterPosition, targetPosition);
+            float sampleTime = 0.1f;
+            for (float time = 0; time < flightTime; time += sampleTime)
+            {
+                Vector2 horizontalDist = GetHorizontalDistance(time);
+                float verticalDist = GetVerticalDistance(time, shooterPosition, targetPosition);
+
+                Vector3 position = new Vector3(horizontalDist.X, verticalDist, horizontalDist.Y) + (wind * time);
+                curve.AddPosition(time, position);
+            }
+
+            return curve;
+        }
+
+        /// <summary>
         /// Integrates the shot in time
         /// </summary>
         /// <param name="gameTime">Game time</param>
+        /// <param name="shooter">Shooter position</param>
+        /// <param name="target">Target position</param>
         /// <returns>Returns the current parabolic shot position (relative to shooter position)</returns>
-        public Vector3 Integrate(GameTime gameTime)
+        public Vector3 Integrate(GameTime gameTime, Vector3 shooter, Vector3 target)
         {
             float time = (float)(gameTime.TotalSeconds - initialTime.TotalSeconds);
 
             Vector2 horizontalDist = GetHorizontalDistance(time);
-            float verticalDist = GetVerticalDistance(time, Vector3.Zero, Vector3.Zero);
+            float verticalDist = GetVerticalDistance(time, shooter, target);
 
             return new Vector3(horizontalDist.X, verticalDist, horizontalDist.Y) + (wind * time);
         }
