@@ -81,13 +81,16 @@ namespace SceneTest
 
         private Model landScape;
         private Scenery terrain;
+        private float terrainTop;
         private IEnumerable<Triangle> terrainMesh;
         private ModelInstanced tanks;
         private float tankHeight = 0;
         private Model projectile;
 
         private Sprite[] trajectoryMarkerPool;
-        private Sprite targetMarker;
+
+        private readonly Dictionary<string, ParticleSystemDescription> particleDescriptions = new Dictionary<string, ParticleSystemDescription>();
+        private ParticleManager particleManager = null;
 
         private bool shooting = false;
         private bool gameEnding = false;
@@ -558,7 +561,7 @@ namespace SceneTest
         }
         private async Task InitializeUIShotPath()
         {
-            trajectoryMarkerPool = new Sprite[100];
+            trajectoryMarkerPool = new Sprite[5];
             for (int i = 0; i < 100; i++)
             {
                 var trajectoryMarker = await this.AddComponentSprite(SpriteDescription.FromFile("SceneTanksGame/Dot.png"), SceneObjectUsages.UI, layerUI + 1);
@@ -571,13 +574,6 @@ namespace SceneTest
 
                 trajectoryMarkerPool[i] = trajectoryMarker;
             }
-
-            targetMarker = await this.AddComponentSprite(SpriteDescription.FromFile("SceneTanksGame/Dot.png"), SceneObjectUsages.UI, layerUI + 1);
-            targetMarker.Width = 60;
-            targetMarker.Height = 60;
-            targetMarker.Active = false;
-            targetMarker.Visible = false;
-            targetMarker.TweenScaleBounce(1f, 1.5f, 1000, ScaleFuncs.QuadraticEaseInOut);
         }
         private void PrepareUI()
         {
@@ -592,6 +588,7 @@ namespace SceneTest
                 InitializeModelsTerrain(),
                 InitializeLandscape(),
                 InitializeModelProjectile(),
+                InitializeParticleManager(),
             };
         }
         private async Task InitializeModelsTanks()
@@ -622,6 +619,7 @@ namespace SceneTest
             terrain.Visible = false;
 
             terrainMesh = terrain.GetVolume(true);
+            terrainTop = terrain.GetBoundingBox().Maximum.Y;
 
             this.SetGround(terrain, true);
         }
@@ -661,9 +659,28 @@ namespace SceneTest
             material.DiffuseColor = Color.DarkGray;
 
             var content = ModelDescription.FromData(sphereDesc, material);
+            content.DepthEnabled = false;
 
-            projectile = await this.AddComponentModel(content, SceneObjectUsages.UI, layerModels);
+            projectile = await this.AddComponentModel(content, SceneObjectUsages.None, layerModels + 100);
             projectile.Visible = false;
+        }
+        private async Task InitializeParticleManager()
+        {
+            particleManager = await this.AddComponentParticleManager(ParticleManagerDescription.Default());
+
+            var pPlume = ParticleSystemDescription.InitializeSmokePlume("SceneTanksGame/particles", "smoke.png");
+            var pFire = ParticleSystemDescription.InitializeFire("SceneTanksGame/particles", "fire.png");
+            var pDust = ParticleSystemDescription.InitializeDust("SceneTanksGame/particles", "smoke.png");
+            var pProjectile = ParticleSystemDescription.InitializeProjectileTrail("SceneTanksGame/particles", "smoke.png");
+            var pExplosion = ParticleSystemDescription.InitializeExplosion("SceneTanksGame/particles", "fire.png");
+            var pSmokeExplosion = ParticleSystemDescription.InitializeExplosion("SceneTanksGame/particles", "smoke.png");
+
+            particleDescriptions.Add("Plume", pPlume);
+            particleDescriptions.Add("Fire", pFire);
+            particleDescriptions.Add("Dust", pDust);
+            particleDescriptions.Add("Projectile", pProjectile);
+            particleDescriptions.Add("Explosion", pExplosion);
+            particleDescriptions.Add("SmokeExplosion", pSmokeExplosion);
         }
         private void PrepareModels()
         {
@@ -764,6 +781,13 @@ namespace SceneTest
                 return;
             }
 
+            if (gameEnding)
+            {
+                UpdateInputEndGame();
+
+                return;
+            }
+
             UpdateTurnStatus();
             UpdatePlayersStatus();
 
@@ -777,13 +801,6 @@ namespace SceneTest
             if (shooting && shot != null)
             {
                 IntegrateShot(gameTime);
-
-                return;
-            }
-
-            if (gameEnding)
-            {
-                UpdateInputEndGame();
 
                 return;
             }
@@ -963,17 +980,15 @@ You will lost all the game progress.",
             Vector3 from = Shooter.Manipulator.Position;
             from.Y += tankHeight;
 
-            Vector3 to = Target.Manipulator.Position;
-            to.Y += tankHeight;
+            var shotDirection = Shooter["Barrel-mesh"].Manipulator.FinalTransform.Forward;
+
+            Vector3 to = from + (shotDirection * 1000f);
 
             trajectoryMarkerPool.ToList().ForEach(m =>
             {
                 m.Active = false;
                 m.Visible = false;
             });
-
-            targetMarker.Active = false;
-            targetMarker.Visible = false;
 
             float sampleDist = 20;
             float distance = Vector3.Distance(from, to);
@@ -985,11 +1000,11 @@ You will lost all the game progress.",
             }
 
             // Distribute sample dist
-            sampleDist = distance / markers;
+            //sampleDist = distance / markers;
 
             // Initialize sample dist
             float dist = sampleDist;
-            for (int i = 0; i < markers - 1; i++)
+            for (int i = 0; i < markers; i++)
             {
                 Vector3 markerPos = from + (shootDirection * dist);
                 Vector3 screenPos = Vector3.Project(markerPos,
@@ -1005,27 +1020,12 @@ You will lost all the game progress.",
                 trajectoryMarkerPool[i].Left = screenPos.X - (trajectoryMarkerPool[i].Width * 0.5f);
                 trajectoryMarkerPool[i].Top = screenPos.Y - (trajectoryMarkerPool[i].Height * 0.5f);
                 trajectoryMarkerPool[i].Scale = scale;
+                trajectoryMarkerPool[i].Alpha = 1f - (i / (float)markers);
                 trajectoryMarkerPool[i].Active = true;
                 trajectoryMarkerPool[i].Visible = true;
 
                 dist += sampleDist;
             }
-
-            var targetScreenPos = Vector3.Project(to,
-                this.Game.Graphics.Viewport.X,
-                this.Game.Graphics.Viewport.Y,
-                this.Game.Graphics.Viewport.Width,
-                this.Game.Graphics.Viewport.Height,
-                this.Game.Graphics.Viewport.MinDepth,
-                this.Game.Graphics.Viewport.MaxDepth,
-                this.Camera.View * this.Camera.Projection);
-            float targetScale = (1f - targetScreenPos.Z) * 1000f;
-
-            targetMarker.Left = targetScreenPos.X - (targetMarker.Width * 0.5f);
-            targetMarker.Top = targetScreenPos.Y - (targetMarker.Height * 0.5f);
-            targetMarker.Scale = targetScale;
-            targetMarker.Active = true;
-            targetMarker.Visible = true;
         }
         private void PaintMinimap()
         {
@@ -1084,16 +1084,19 @@ You will lost all the game progress.",
         {
             Vector3 shotPos = shot.Integrate(gameTime);
 
-            projectile.Manipulator.SetPosition(Shooter.Manipulator.Position + shotPos);
-
-            var projVolume = projectile.GetBoundingSphere();
-            var tarjetVolume = Target.GetBoundingBox();
             var terrainBox = terrain.GetBoundingBox();
+            var tarjetVolume = Target.GetBoundingBox();
+
+            Vector3 projectilePosition = Shooter.Manipulator.Position + shotPos;
+            projectilePosition.Y += tankHeight;
+
+            projectile.Manipulator.SetPosition(projectilePosition);
+            var projVolume = projectile.GetBoundingSphere(true);
 
             // Test collision with target
             if (projVolume.Contains(ref tarjetVolume) != ContainmentType.Disjoint)
             {
-                ResolveShoot(true);
+                ResolveShot(true, projectilePosition);
 
                 return;
             }
@@ -1101,21 +1104,22 @@ You will lost all the game progress.",
             // Test if projectile is under the terrain box
             if (projVolume.Center.Y + projVolume.Radius < terrainBox.Minimum.Y)
             {
-                ResolveShoot(false);
+                ResolveShot(false, null);
 
                 return;
             }
 
             // Test full collision with terrain mesh
-            if (Intersection.SphereIntersectsMesh(projVolume, terrainMesh, out _, out _))
+            if (Intersection.SphereIntersectsMesh(projVolume, terrainMesh, out Vector3 impactPosition, out _))
             {
-                ResolveShoot(false);
+                ResolveShot(false, impactPosition);
             }
         }
-        private void ResolveShoot(bool impact)
+        private void ResolveShot(bool impact, Vector3? impactPosition)
         {
             shot = null;
             shooting = false;
+            projectile.Manipulator.SetPosition(Vector3.Up * terrainTop + 1);
             projectile.Visible = false;
 
             if (impact)
@@ -1130,7 +1134,14 @@ You will lost all the game progress.",
             {
                 await EvaluateTurn(ShooterStatus, TargetStatus);
             });
+
+            if (impactPosition.HasValue)
+            {
+                this.AddExplosionSystem(impactPosition.Value);
+                this.AddSmokePlumeSystem(impactPosition.Value);
+            }
         }
+
         private async Task EvaluateTurn(PlayerStatus shooter, PlayerStatus target)
         {
             pbFire.ProgressValue = 0;
@@ -1151,6 +1162,8 @@ You will lost all the game progress.",
 
                 gameKeyHelp.Show(1000);
                 gameKeyHelp.TweenScaleBounce(1, 1.01f, 500, ScaleFuncs.CubicEaseInOut);
+
+                return;
             }
 
             currentPlayer++;
@@ -1167,7 +1180,72 @@ You will lost all the game progress.",
 
                 currentWindVelocity = Helper.RandomGenerator.NextFloat(0f, maxWindVelocity);
                 windDirection = Helper.RandomGenerator.NextVector2(-Vector2.One, Vector2.One);
+
+                particleManager.ParticleSystems.ForEach(p =>
+                {
+                    var particleParams = p.GetParameters();
+                    particleParams.Gravity = new Vector3(windDirection.X, 0, windDirection.Y) * currentWindVelocity;
+                    p.SetParameters(particleParams);
+                });
             }
+        }
+
+        private void AddExplosionSystem(Vector3 position)
+        {
+            Vector3 velocity = Vector3.Up;
+            float duration = 0.5f;
+            float rate = 0.01f;
+
+            var emitter1 = new ParticleEmitter()
+            {
+                Position = position,
+                Velocity = velocity,
+                Duration = duration,
+                EmissionRate = rate,
+                InfiniteDuration = false,
+                MaximumDistance = 1000f,
+            };
+            var emitter2 = new ParticleEmitter()
+            {
+                Position = position,
+                Velocity = velocity,
+                Duration = duration * 5f,
+                EmissionRate = rate * 10f,
+                InfiniteDuration = false,
+                MaximumDistance = 1000f,
+            };
+
+            this.particleManager.AddParticleSystem(ParticleSystemTypes.CPU, this.particleDescriptions["Explosion"], emitter1);
+            this.particleManager.AddParticleSystem(ParticleSystemTypes.CPU, this.particleDescriptions["SmokeExplosion"], emitter2);
+        }
+        private void AddSmokePlumeSystem(Vector3 position)
+        {
+            Vector3 velocity = Vector3.Up;
+            float duration = Helper.RandomGenerator.NextFloat(10, 30);
+            float rate = Helper.RandomGenerator.NextFloat(0.1f, 1f);
+
+            var emitter1 = new ParticleEmitter()
+            {
+                Position = position,
+                Velocity = velocity,
+                Duration = duration,
+                EmissionRate = rate * 0.5f,
+                InfiniteDuration = false,
+                MaximumDistance = 1000f,
+            };
+
+            var emitter2 = new ParticleEmitter()
+            {
+                Position = position,
+                Velocity = velocity,
+                Duration = duration + (duration * 0.1f),
+                EmissionRate = rate,
+                InfiniteDuration = false,
+                MaximumDistance = 5000f,
+            };
+
+            this.particleManager.AddParticleSystem(ParticleSystemTypes.CPU, this.particleDescriptions["Fire"], emitter1);
+            this.particleManager.AddParticleSystem(ParticleSystemTypes.CPU, this.particleDescriptions["Plume"], emitter2);
         }
 
         private void ShowDialog(string message, Action onCloseCallback, Action onAcceptCallback)
