@@ -541,45 +541,78 @@ namespace Engine.Content
             return modelContent;
         }
         /// <summary>
-        /// Generates a new model content from an height map
+        /// Generates a new model content from an height map description
         /// </summary>
-        /// <param name="contentFolder">Content folder</param>
-        /// <param name="heightMap">Height map</param>
-        /// <param name="textures">Texture list</param>
-        /// <param name="cellSize">Cell size</param>
-        /// <param name="cellHeight">Cell height</param>
+        /// <param name="heightMap">Height map description</param>
         /// <returns>Returns a new model content</returns>
-        public static ModelContent FromHeightmap(string contentFolder, string heightMap, IEnumerable<string> textures, float cellSize, float cellHeight)
+        public static ModelContent FromHeightmap(HeightmapDescription heightMap)
         {
+            HeightMap hm;
+
+            if (heightMap.Heightmap != null)
+            {
+                hm = HeightMap.FromMap(heightMap.Heightmap, heightMap.Colormap);
+            }
+            else if (!string.IsNullOrEmpty(heightMap.HeightmapFileName))
+            {
+                ImageContent heightMapImage = new ImageContent()
+                {
+                    Streams = ContentManager.FindContent(heightMap.ContentPath, heightMap.HeightmapFileName),
+                };
+
+                hm = HeightMap.FromStream(heightMapImage.Stream, null);
+            }
+            else
+            {
+                return null;
+            }
+
             ModelContent modelContent = new ModelContent();
 
-            string texureName = "texture";
             string materialName = "material";
             string geoName = "geometry";
 
-            ImageContent heightMapImage = new ImageContent()
-            {
-                Streams = ContentManager.FindContent(contentFolder, heightMap),
-            };
-
-            ImageContent textureImage = new ImageContent()
-            {
-                Streams = ContentManager.FindContent(contentFolder, textures),
-            };
-
             MaterialContent material = MaterialContent.Default;
-            material.DiffuseTexture = texureName;
 
-            HeightMap hm = HeightMap.FromStream(heightMapImage.Stream, null);
-
-            hm.BuildGeometry(cellSize, cellHeight, out var vertices, out var indices);
+            hm.BuildGeometry(
+                heightMap.CellSize,
+                heightMap.MaximumHeight,
+                heightMap.Textures.Scale,
+                heightMap.Textures.Displacement,
+                out var vertices, out var indices);
 
             SubMeshContent geo = new SubMeshContent(Topology.TriangleList, materialName, true, false);
-
             geo.SetVertices(vertices);
             geo.SetIndices(indices);
 
-            modelContent.Images.Add(texureName, textureImage);
+            if (heightMap.Textures?.TexturesLR?.Any() == true)
+            {
+                string diffuseTexureName = "diffuse";
+
+                material.DiffuseTexture = diffuseTexureName;
+
+                ImageContent diffuseImage = new ImageContent()
+                {
+                    Streams = ContentManager.FindContent(heightMap.ContentPath, heightMap.Textures.TexturesLR),
+                };
+
+                modelContent.Images.Add(diffuseTexureName, diffuseImage);
+            }
+
+            if (heightMap.Textures?.NormalMaps?.Any() == true)
+            {
+                string nmapTexureName = "normal";
+
+                material.NormalMapTexture = nmapTexureName;
+
+                ImageContent nmapImage = new ImageContent()
+                {
+                    Streams = ContentManager.FindContent(heightMap.ContentPath, heightMap.Textures.NormalMaps),
+                };
+
+                modelContent.Images.Add(nmapTexureName, nmapImage);
+            }
+
             modelContent.Materials.Add(materialName, material);
             modelContent.Geometry.Add(geoName, materialName, geo);
 

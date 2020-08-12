@@ -633,5 +633,27 @@ namespace Engine
 
             return Color4.White;
         }
+
+        /// <summary>
+        /// Enables the fog
+        /// </summary>
+        /// <param name="start">Starting distance</param>
+        /// <param name="end">End distance</param>
+        /// <param name="color">Fog color</param>
+        public void EnableFog(float start, float end, Color color)
+        {
+            FogStart = start;
+            FogRange = end - start;
+            BaseFogColor = FogColor = color;
+        }
+        /// <summary>
+        /// Disables de fog
+        /// </summary>
+        public void DisableFog()
+        {
+            FogStart = 0;
+            FogRange = 0;
+            BaseFogColor = FogColor = Color.Black;
+        }
     }
 }

@@ -634,6 +634,14 @@ namespace Engine
         /// Heightmap maximum height
         /// </summary>
         private readonly float heightMapHeight;
+        /// <summary>
+        /// UV map scale
+        /// </summary>
+        private readonly float uvScale;
+        /// <summary>
+        /// UV map displacement
+        /// </summary>
+        private readonly Vector2 uvDisplacement;
 
         /// <summary>
         /// Heightmap texture resolution
@@ -783,6 +791,8 @@ namespace Engine
             this.useAlphaMap = description.Content.HeightmapDescription.Textures.UseAlphaMapping;
             this.useSlopes = description.Content.HeightmapDescription.Textures.UseSlopes;
             this.proportion = description.Content.HeightmapDescription.Textures.Proportion;
+            this.uvScale = description.Content.HeightmapDescription.Textures.Scale;
+            this.uvDisplacement = description.Content.HeightmapDescription.Textures.Displacement;
 
             #endregion
 
@@ -801,8 +811,8 @@ namespace Engine
             {
                 tris.Add(new Triangle(
                     tmpVerts[tmpIndex[i + 0]].Position.Value,
-                    tmpVerts[tmpIndex[i + 2]].Position.Value,
-                    tmpVerts[tmpIndex[i + 1]].Position.Value));
+                    tmpVerts[tmpIndex[i + 1]].Position.Value,
+                    tmpVerts[tmpIndex[i + 2]].Position.Value));
             }
 
             //Initialize quadtree for ray picking
@@ -1001,6 +1011,8 @@ namespace Engine
             this.heightMap.BuildGeometry(
                 this.heightMapCellSize,
                 this.heightMapHeight,
+                this.uvScale,
+                this.uvDisplacement,
                 out vertices, out indices);
         }
     }

@@ -94,6 +94,7 @@ namespace SceneTest
 
         private bool shooting = false;
         private bool gameEnding = false;
+        private bool freeCamera = false;
 
         private ModelInstance Shooter { get { return tanks[currentPlayer]; } }
         private ModelInstance Target { get { return tanks[(currentPlayer + 1) % 2]; } }
@@ -219,7 +220,7 @@ namespace SceneTest
 
                         UpdateGameControls(true);
 
-                        PaintShot();
+                        PaintShot(true);
                     });
                 });
         }
@@ -615,7 +616,27 @@ namespace SceneTest
         }
         private async Task InitializeModelsTerrain()
         {
-            terrain = await this.AddComponentScenery(GroundDescription.FromFile("SceneTanksGame/Terrain/terrain.xml"), SceneObjectUsages.Ground, layerModels);
+            // Generates a random terrain using perlin noise
+            int mapSize = 128;
+            NoiseMapDescriptor nmDesc = new NoiseMapDescriptor
+            {
+                MapWidth = mapSize,
+                MapHeight = mapSize,
+                Scale = 0.4f,
+            };
+            float[,] noiseMap = Perlin.CreateSimpleNoiseMap(nmDesc);
+
+            GroundDescription groundDesc = GroundDescription.FromHeightmap(noiseMap, 5f, 75f);
+            groundDesc.Content.HeightmapDescription.ContentPath = "SceneTanksGame/terrain";
+            groundDesc.Content.HeightmapDescription.Textures = new HeightmapDescription.TexturesDescription
+            {
+                TexturesLR = new[] { "terrain.png" },
+                NormalMaps = new[] { "terrain_nmap.png" },
+                Scale = 0.6666f,
+                Displacement = new Vector2(0.5f, 0.5f),
+            };
+
+            terrain = await this.AddComponentScenery(groundDesc, SceneObjectUsages.Ground, layerModels);
             terrain.Visible = false;
 
             terrainMesh = terrain.GetVolume(true);
@@ -805,15 +826,44 @@ namespace SceneTest
                 return;
             }
 
-            bool tankMoved = UpdateInputPlayer(gameTime);
+            if (freeCamera)
+            {
+                UpdateInputFree(gameTime);
+                PaintShot(true);
+
+                return;
+            }
+
+            UpdateInputPlayer(gameTime);
             UpdateInputShooting(gameTime);
 
-            UpdateTanks(tankMoved);
+            UpdateTanks();
             UpdateCamera(false);
         }
 
         private void UpdateInputGame()
         {
+            if (this.Game.Input.KeyJustReleased(Keys.F))
+            {
+                freeCamera = !freeCamera;
+
+                if (freeCamera)
+                {
+                    this.Camera.MovementDelta *= 10f;
+                    this.Game.LockMouse = true;
+                }
+                else
+                {
+                    this.Camera.MovementDelta /= 10f;
+                    this.Game.LockMouse = false;
+                }
+            }
+
+            if (freeCamera)
+            {
+                return;
+            }
+
             if (this.Game.Input.KeyJustReleased(Keys.Escape))
             {
                 this.ShowDialog(
@@ -827,35 +877,29 @@ You will lost all the game progress.",
                     });
             }
         }
-        private bool UpdateInputPlayer(GameTime gameTime)
+        private void UpdateInputPlayer(GameTime gameTime)
         {
-            bool tankMoved = false;
-
             if (this.Game.Input.KeyPressed(Keys.A))
             {
                 Shooter.Manipulator.Rotate(-gameTime.ElapsedSeconds, 0, 0);
-                tankMoved = true;
             }
             if (this.Game.Input.KeyPressed(Keys.D))
             {
                 Shooter.Manipulator.Rotate(+gameTime.ElapsedSeconds, 0, 0);
-                tankMoved = true;
             }
 
             if (this.Game.Input.KeyPressed(Keys.Q))
             {
                 Shooter["Barrel-mesh"].Manipulator.Rotate(0, gameTime.ElapsedSeconds, 0);
-                tankMoved = true;
             }
             if (this.Game.Input.KeyPressed(Keys.Z))
             {
                 Shooter["Barrel-mesh"].Manipulator.Rotate(0, -gameTime.ElapsedSeconds, 0);
-                tankMoved = true;
             }
 
             if (ShooterStatus.CurrentMove <= 0)
             {
-                return tankMoved;
+                return;
             }
 
             Vector3 prevPosition = Shooter.Manipulator.Position;
@@ -863,26 +907,22 @@ You will lost all the game progress.",
             if (this.Game.Input.KeyPressed(Keys.W))
             {
                 Shooter.Manipulator.MoveForward(gameTime, 10);
-                tankMoved = true;
             }
             if (this.Game.Input.KeyPressed(Keys.S))
             {
                 Shooter.Manipulator.MoveBackward(gameTime, 10);
-                tankMoved = true;
             }
 
             Vector3 position = Shooter.Manipulator.Position;
 
             ShooterStatus.CurrentMove -= Vector3.Distance(prevPosition, position);
             ShooterStatus.CurrentMove = Math.Max(0, ShooterStatus.CurrentMove);
-
-            return tankMoved;
         }
         private void UpdateInputShooting(GameTime gameTime)
         {
             if (this.Game.Input.KeyPressed(Keys.Space))
             {
-                pbFire.ProgressValue += gameTime.ElapsedSeconds;
+                pbFire.ProgressValue += gameTime.ElapsedSeconds * 0.5f;
                 pbFire.ProgressValue %= 1f;
             }
 
@@ -896,6 +936,43 @@ You will lost all the game progress.",
             if (this.Game.Input.KeyJustReleased(Keys.Space))
             {
                 this.Game.SetScene<SceneStart>();
+            }
+        }
+        private void UpdateInputFree(GameTime gameTime)
+        {
+#if DEBUG
+            if (this.Game.Input.RightMouseButtonPressed)
+            {
+                this.Camera.RotateMouse(
+                    gameTime,
+                    this.Game.Input.MouseXDelta,
+                    this.Game.Input.MouseYDelta);
+            }
+#else
+            this.Camera.RotateMouse(
+                gameTime,
+                this.Game.Input.MouseXDelta,
+                this.Game.Input.MouseYDelta);
+#endif
+
+            if (this.Game.Input.KeyPressed(Keys.A))
+            {
+                this.Camera.MoveLeft(gameTime, this.Game.Input.ShiftPressed);
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.D))
+            {
+                this.Camera.MoveRight(gameTime, this.Game.Input.ShiftPressed);
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.W))
+            {
+                this.Camera.MoveForward(gameTime, this.Game.Input.ShiftPressed);
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.S))
+            {
+                this.Camera.MoveBackward(gameTime, this.Game.Input.ShiftPressed);
             }
         }
 
@@ -928,7 +1005,7 @@ You will lost all the game progress.",
             player2Life.ProgressValue = player2Status.Health;
             tanks[1].TextureIndex = player2Status.TextureIndex;
         }
-        private void UpdateTanks(bool tankMoved)
+        private void UpdateTanks()
         {
             if (this.FindTopGroundPosition(Shooter.Manipulator.Position.X, Shooter.Manipulator.Position.Z, out var r))
             {
@@ -940,12 +1017,7 @@ You will lost all the game progress.",
 
             PaintMinimap();
 
-            if (!tankMoved)
-            {
-                return;
-            }
-
-            PaintShot();
+            PaintShot(true);
         }
         private void UpdateCamera(bool firstUpdate)
         {
@@ -975,20 +1047,25 @@ You will lost all the game progress.",
             this.Camera.Interest = interest;
         }
 
-        private void PaintShot()
+        private void PaintShot(bool visible)
         {
+            trajectoryMarkerPool.ToList().ForEach(m =>
+            {
+                m.Active = false;
+                m.Visible = false;
+            });
+
+            if (!visible)
+            {
+                return;
+            }
+
             Vector3 from = Shooter.Manipulator.Position;
             from.Y += tankHeight;
 
             var shotDirection = Shooter["Barrel-mesh"].Manipulator.FinalTransform.Forward;
 
             Vector3 to = from + (shotDirection * 1000f);
-
-            trajectoryMarkerPool.ToList().ForEach(m =>
-            {
-                m.Active = false;
-                m.Visible = false;
-            });
 
             float sampleDist = 20;
             float distance = Vector3.Distance(from, to);
@@ -998,9 +1075,6 @@ You will lost all the game progress.",
             {
                 return;
             }
-
-            // Distribute sample dist
-            //sampleDist = distance / markers;
 
             // Initialize sample dist
             float dist = sampleDist;
@@ -1079,20 +1153,20 @@ You will lost all the game progress.",
             shot.Configure(this.Game.GameTime, shotDirection, shotForce * 200, windDirection, currentWindVelocity);
 
             shooting = true;
-            projectile.Visible = true;
         }
         private void IntegrateShot(GameTime gameTime)
         {
-            Vector3 shotPos = shot.Integrate(gameTime, Shooter.Manipulator.Position, Target.Manipulator.Position);
+            Vector3 shotPos = shot.Integrate(gameTime, Vector3.Zero, Vector3.Zero);
 
             var terrainBox = terrain.GetBoundingBox();
             var tarjetVolume = Target.GetBoundingBox();
 
+            // Set projectile position
             Vector3 projectilePosition = Shooter.Manipulator.Position + shotPos;
             projectilePosition.Y += tankHeight;
-
-            projectile.Manipulator.SetPosition(projectilePosition);
+            projectile.Manipulator.SetPosition(projectilePosition, true);
             var projVolume = projectile.GetBoundingSphere(true);
+            projectile.Visible = true;
 
             // Test collision with target
             if (projVolume.Contains(ref tarjetVolume) != ContainmentType.Disjoint)
@@ -1120,7 +1194,10 @@ You will lost all the game progress.",
         {
             shot = null;
             shooting = false;
-            projectile.Manipulator.SetPosition(Vector3.Up * terrainTop + 1);
+
+            Vector3 outPosition = Vector3.Up * (terrainTop + 1);
+            projectile.Manipulator.SetPosition(outPosition, true);
+            var sph = projectile.GetBoundingSphere(true);
             projectile.Visible = false;
 
             if (impact)
@@ -1170,7 +1247,7 @@ You will lost all the game progress.",
             currentPlayer++;
             currentPlayer %= 2;
 
-            PaintShot();
+            PaintShot(true);
 
             if (currentPlayer == 0)
             {

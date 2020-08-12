@@ -35,9 +35,11 @@ namespace Engine
         /// <param name="x">X coordinate</param>
         public static float Noise(float x)
         {
-            var X = (int)Math.Floor(x) & 0xff;
-            x -= (float)Math.Floor(x);
+            var X = (int)x & 0xff;
+            x -= (int)x;
+
             var u = Fade(x);
+
             return Lerp(u, Grad(perm[X], x), Grad(perm[X + 1], x - 1)) * 2;
         }
         /// <summary>
@@ -47,16 +49,21 @@ namespace Engine
         /// <param name="y">Y coordinate</param>
         public static float Noise(float x, float y)
         {
-            var X = (int)Math.Floor(x) & 0xff;
-            var Y = (int)Math.Floor(y) & 0xff;
-            x -= (float)Math.Floor(x);
-            y -= (float)Math.Floor(y);
-            var u = Fade(x);
-            var v = Fade(y);
-            var A = (perm[X] + Y) & 0xff;
-            var B = (perm[X + 1] + Y) & 0xff;
-            return Lerp(v, Lerp(u, Grad(perm[A], x, y), Grad(perm[B], x - 1, y)),
-                           Lerp(u, Grad(perm[A + 1], x, y - 1), Grad(perm[B + 1], x - 1, y - 1)));
+            int X = (int)x & 0xff;
+            int Y = (int)y & 0xff;
+            x -= (int)x;
+            y -= (int)y;
+
+            float u = Fade(x);
+            float v = Fade(y);
+
+            int A = (perm[X + 0] + Y) & 0xff;
+            int B = (perm[X + 1] + Y) & 0xff;
+
+            float l1 = Lerp(u, Grad(perm[A + 0], x, y + 0), Grad(perm[B + 0], x - 1, y + 0));
+            float l2 = Lerp(u, Grad(perm[A + 1], x, y - 1), Grad(perm[B + 1], x - 1, y - 1));
+            float res = Lerp(v, l1, l2);
+            return res;
         }
         /// <summary>
         /// Gets a perlin noise value at 2D coordinate
@@ -74,24 +81,28 @@ namespace Engine
         /// <param name="z">Z coordinate</param>
         public static float Noise(float x, float y, float z)
         {
-            var X = (int)Math.Floor(x) & 0xff;
-            var Y = (int)Math.Floor(y) & 0xff;
-            var Z = (int)Math.Floor(z) & 0xff;
-            x -= (float)Math.Floor(x);
-            y -= (float)Math.Floor(y);
-            z -= (float)Math.Floor(z);
+            var X = (int)x & 0xff;
+            var Y = (int)y & 0xff;
+            var Z = (int)z & 0xff;
+            x -= (int)x;
+            y -= (int)y;
+            z -= (int)z;
+
             var u = Fade(x);
             var v = Fade(y);
             var w = Fade(z);
-            var A = (perm[X] + Y) & 0xff;
+
+            var A = (perm[X + 0] + Y) & 0xff;
             var B = (perm[X + 1] + Y) & 0xff;
-            var AA = (perm[A] + Z) & 0xff;
-            var BA = (perm[B] + Z) & 0xff;
+
+            var AA = (perm[A + 0] + Z) & 0xff;
+            var BA = (perm[B + 0] + Z) & 0xff;
             var AB = (perm[A + 1] + Z) & 0xff;
             var BB = (perm[B + 1] + Z) & 0xff;
-            return Lerp(w, Lerp(v, Lerp(u, Grad(perm[AA], x, y, z), Grad(perm[BA], x - 1, y, z)),
-                                   Lerp(u, Grad(perm[AB], x, y - 1, z), Grad(perm[BB], x - 1, y - 1, z))),
-                           Lerp(v, Lerp(u, Grad(perm[AA + 1], x, y, z - 1), Grad(perm[BA + 1], x - 1, y, z - 1)),
+
+            return Lerp(w, Lerp(v, Lerp(u, Grad(perm[AA + 0], x, y + 0, z + 0), Grad(perm[BA + 0], x - 1, y + 0, z + 0)),
+                                   Lerp(u, Grad(perm[AB + 0], x, y - 1, z + 0), Grad(perm[BB + 0], x - 1, y - 1, z + 0))),
+                           Lerp(v, Lerp(u, Grad(perm[AA + 1], x, y + 0, z - 1), Grad(perm[BA + 1], x - 1, y + 0, z - 1)),
                                    Lerp(u, Grad(perm[AB + 1], x, y - 1, z - 1), Grad(perm[BB + 1], x - 1, y - 1, z - 1))));
         }
         /// <summary>
@@ -176,6 +187,153 @@ namespace Engine
             return Fbm(new Vector3(x, y, z), octave);
         }
 
+        /// <summary>
+        /// Creates a simple noise map
+        /// </summary>
+        /// <param name="descriptor">Noise map descriptor</param>
+        /// <remarks>Taking account width, height and scale only</remarks>
+        public static float[,] CreateSimpleNoiseMap(NoiseMapDescriptor descriptor)
+        {
+            int mapWidth = descriptor.MapWidth;
+            int mapHeight = descriptor.MapHeight;
+            float scale = descriptor.Scale;
+
+            if (mapWidth < 1)
+            {
+                mapWidth = 1;
+            }
+            if (mapHeight < 1)
+            {
+                mapHeight = 1;
+            }
+            if (scale <= 0)
+            {
+                scale = 0.0001f;
+            }
+
+            float[,] noiseMap = new float[mapWidth, mapHeight];
+
+            float fX = 1f / mapWidth;
+            float fY = 1f / mapHeight;
+
+            for (int y = 0; y < mapHeight; y++)
+            {
+                for (int x = 0; x < mapWidth; x++)
+                {
+                    float sampleX = x * fX / scale;
+                    float sampleY = y * fY / scale;
+
+                    float perlinValue = Noise(sampleX, sampleY);
+                    noiseMap[x, y] = perlinValue;
+                }
+            }
+
+            return noiseMap;
+        }
+        /// <summary>
+        /// Creates a noise map
+        /// </summary>
+        /// <param name="descriptor">Noise map descriptor</param>
+        public static float[,] CreateNoiseMap(NoiseMapDescriptor descriptor)
+        {
+            int mapWidth = descriptor.MapWidth;
+            int mapHeight = descriptor.MapHeight;
+            float scale = descriptor.Scale;
+            int octaves = descriptor.Octaves;
+            float persistance = descriptor.Persistance;
+            float lacunarity = descriptor.Lacunarity;
+            int seed = descriptor.Seed;
+            Vector2 offset = descriptor.Offset;
+
+            if (mapWidth < 1)
+            {
+                mapWidth = 1;
+            }
+            if (mapHeight < 1)
+            {
+                mapHeight = 1;
+            }
+            if (scale <= 0)
+            {
+                scale = 0.0001f;
+            }
+            if (octaves < 0)
+            {
+                octaves = 0;
+            }
+            persistance = MathUtil.Clamp(persistance, 0, 1);
+            if (lacunarity < 1)
+            {
+                lacunarity = 1f;
+            }
+
+            float[,] noiseMap = new float[mapWidth, mapHeight];
+
+            Random rnd = new Random(seed);
+            Vector2[] octaveOffsets = new Vector2[octaves];
+            for (int i = 0; i < octaves; i++)
+            {
+                float sampleX = rnd.NextFloat(-1f, 1f) + offset.X;
+                float sampleY = rnd.NextFloat(-1f, 1f) + offset.Y;
+                octaveOffsets[i] = new Vector2(sampleX, sampleY);
+            }
+
+            float fX = 1f / mapWidth;
+            float fY = 1f / mapHeight;
+
+            float maxNoiseHeight = float.MinValue;
+            float minNoiseHeight = float.MaxValue;
+
+            for (int y = 0; y < mapHeight; y++)
+            {
+                for (int x = 0; x < mapWidth; x++)
+                {
+                    float amplitude = 1;
+                    float frequency = 1;
+                    float noiseHeight = 0;
+
+                    for (int i = 0; i < octaves; i++)
+                    {
+                        float sampleX = x * fX / scale * frequency + octaveOffsets[i].X;
+                        float sampleY = y * fY / scale * frequency + octaveOffsets[i].Y;
+
+                        float perlinValue = Noise(sampleX, sampleY) * 2f - 1f; //-0.5 to 0.5
+                        noiseHeight += perlinValue * amplitude;
+
+                        amplitude *= persistance;
+                        frequency *= lacunarity;
+                    }
+
+                    maxNoiseHeight = Math.Max(maxNoiseHeight, noiseHeight);
+                    minNoiseHeight = Math.Min(minNoiseHeight, noiseHeight);
+
+                    noiseMap[x, y] = noiseHeight;
+                }
+            }
+
+            for (int y = 0; y < mapHeight; y++)
+            {
+                for (int x = 0; x < mapWidth; x++)
+                {
+                    noiseMap[x, y] = InverseLerp(minNoiseHeight, maxNoiseHeight, noiseMap[x, y]);
+                }
+            }
+
+            return noiseMap;
+        }
+
+
+        static float InverseLerp(float a, float b, float value)
+        {
+            if (a != b)
+            {
+                return MathUtil.Clamp((value - a) / (b - a), 0f, 1f);
+            }
+            else
+            {
+                return 0.0f;
+            }
+        }
 
         static float Fade(float t)
         {
@@ -205,5 +363,44 @@ namespace Engine
             var v = h < 4 ? y : hv;
             return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
         }
+    }
+
+    /// <summary>
+    /// Noise map descriptor
+    /// </summary>
+    public class NoiseMapDescriptor
+    {
+        /// <summary>
+        /// Width
+        /// </summary>
+        public int MapWidth { get; set; }
+        /// <summary>
+        /// Height
+        /// </summary>
+        public int MapHeight { get; set; }
+        /// <summary>
+        /// Noise scale
+        /// </summary>
+        public float Scale { get; set; } = 1;
+        /// <summary>
+        /// Octaves
+        /// </summary>
+        public int Octaves { get; set; } = 4;
+        /// <summary>
+        /// Persistance
+        /// </summary>
+        public float Persistance { get; set; } = 0.5f;
+        /// <summary>
+        /// Lacunarity
+        /// </summary>
+        public float Lacunarity { get; set; } = 2f;
+        /// <summary>
+        /// Random seed
+        /// </summary>
+        public int Seed { get; set; } = 0;
+        /// <summary>
+        /// Position offset
+        /// </summary>
+        public Vector2 Offset { get; set; } = Vector2.Zero;
     }
 }

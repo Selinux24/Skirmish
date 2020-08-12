@@ -8,6 +8,22 @@ namespace Engine
     public class HeightmapDescription
     {
         /// <summary>
+        /// Creates a height map descripton from map data
+        /// </summary>
+        /// <param name="heightmap">Height map</param>
+        /// <param name="cellsize">Cell size</param>
+        /// <param name="maximumHeight">Maximum height</param>
+        public static HeightmapDescription FromMap(float[,] heightmap, float cellsize, float maximumHeight)
+        {
+            return new HeightmapDescription
+            {
+                Heightmap = heightmap,
+                CellSize = cellsize,
+                MaximumHeight = maximumHeight,
+            };
+        }
+
+        /// <summary>
         /// Terrain textures
         /// </summary>
         public class TexturesDescription
@@ -60,6 +76,14 @@ namespace Engine
             /// Lerping proportion between alpha mapping and slope texturing
             /// </summary>
             public float Proportion { get; set; } = 0f;
+            /// <summary>
+            /// UV texture scale
+            /// </summary>
+            public float Scale { get; set; } = 1;
+            /// <summary>
+            /// UV texture displacement
+            /// </summary>
+            public Vector2 Displacement { get; set; } = Vector2.Zero;
         }
 
         /// <summary>
@@ -67,9 +91,17 @@ namespace Engine
         /// </summary>
         public string ContentPath { get; set; } = "Resources";
         /// <summary>
+        /// Height map
+        /// </summary>
+        public float[,] Heightmap { get; set; } = null;
+        /// <summary>
         /// Height map file name
         /// </summary>
         public string HeightmapFileName { get; set; } = null;
+        /// <summary>
+        /// Color map
+        /// </summary>
+        public Color4[,] Colormap { get; set; } = null;
         /// <summary>
         /// Color map file name
         /// </summary>

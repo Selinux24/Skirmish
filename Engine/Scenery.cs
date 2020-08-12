@@ -287,12 +287,7 @@ namespace Engine
             }
             else if (description.Content.HeightmapDescription != null)
             {
-                content = ModelContent.FromHeightmap(
-                    description.Content.HeightmapDescription.ContentPath,
-                    description.Content.HeightmapDescription.HeightmapFileName,
-                    description.Content.HeightmapDescription.Textures.TexturesLR,
-                    description.Content.HeightmapDescription.CellSize,
-                    description.Content.HeightmapDescription.MaximumHeight);
+                content = ModelContent.FromHeightmap(description.Content.HeightmapDescription);
             }
             else if (description.Content.ModelContent != null)
             {

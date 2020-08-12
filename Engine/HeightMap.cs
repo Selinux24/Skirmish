@@ -14,6 +14,15 @@ namespace Engine
     public class HeightMap : IDisposable
     {
         /// <summary>
+        /// Generates a new hight map from map data
+        /// </summary>
+        /// <param name="heights">Height map</param>
+        /// <param name="colors">Color map</param>
+        public static HeightMap FromMap(float[,] heights, Color4[,] colors)
+        {
+            return new HeightMap(heights, colors);
+        }
+        /// <summary>
         /// Generates a new height map from a bitmap stream
         /// </summary>
         /// <param name="heightData">Height data stream</param>
@@ -51,7 +60,7 @@ namespace Engine
                         var height = heightBitmap.GetPixel(hh, ww);
                         var color = colorBitmap != null ? colorBitmap.GetPixel(hh, ww) : System.Drawing.Color.Gray;
 
-                        heights[w, h] = (float)height.B / 255f;
+                        heights[w, h] = height.B / 255f;
                         colors[w, h] = new SharpDX.Color(color.R, color.G, color.B, color.A);
                     }
                 }
@@ -228,6 +237,9 @@ namespace Engine
             this.m_HeightData = heightData;
             this.m_ColorData = colorData;
 
+            this.Min = float.MaxValue;
+            this.Max = float.MinValue;
+
             foreach (var height in heightData)
             {
                 if (height < this.Min)
@@ -276,8 +288,10 @@ namespace Engine
         /// <param name="cellSize">Cell size</param>
         /// <param name="cellHeight">Cell height</param>
         /// <param name="vertices">Result vertices</param>
+        /// <param name="textureScale">Texture scale</param>
+        /// <param name="textureDisplacement">Texture displacement</param>
         /// <param name="indices">Result indices</param>
-        public void BuildGeometry(float cellSize, float cellHeight, out IEnumerable<VertexData> vertices, out IEnumerable<uint> indices)
+        public void BuildGeometry(float cellSize, float cellHeight, float textureScale, Vector2 textureDisplacement, out IEnumerable<VertexData> vertices, out IEnumerable<uint> indices)
         {
             float totalWidth = cellSize * (this.Width - 1);
             float totalDepth = cellSize * (this.Depth - 1);
@@ -293,8 +307,11 @@ namespace Engine
             {
                 for (long width = 0; width < vertexCountX; width++)
                 {
+                    float h = this.m_HeightData[depth, width];
+                    Color4 c = this.m_ColorData != null ? this.m_ColorData[depth, width] : Color4.Lerp(Color4.Black, Color4.White, this.m_HeightData[depth, width]);
+
                     float posX = (depth * cellSize) - (totalDepth * 0.5f);
-                    float posY = this.m_HeightData[depth, width] * cellHeight;
+                    float posY = h * cellHeight;
                     float posZ = (width * cellSize) - (totalWidth * 0.5f);
 
                     float tu = width * cellSize / totalWidth;
@@ -303,8 +320,8 @@ namespace Engine
                     VertexData newVertex = new VertexData()
                     {
                         Position = new Vector3(posX, posY, posZ),
-                        Texture = new Vector2(tu, tv),
-                        Color = this.m_ColorData[depth, width],
+                        Texture = (new Vector2(tu, tv) + textureDisplacement) / textureScale,
+                        Color = c,
                     };
 
                     vertArray[vertexCount++] = newVertex;
@@ -323,12 +340,12 @@ namespace Engine
                     long index4 = (vertexCountZ * (depth + 1)) + (width + 1); // bottom right
 
                     indexList.Add((uint)index1);
-                    indexList.Add((uint)index3);
                     indexList.Add((uint)index2);
+                    indexList.Add((uint)index3);
 
                     indexList.Add((uint)index2);
-                    indexList.Add((uint)index3);
                     indexList.Add((uint)index4);
+                    indexList.Add((uint)index3);
                 }
             }
 

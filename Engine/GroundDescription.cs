@@ -28,6 +28,22 @@ namespace Engine
         }
 
         /// <summary>
+        /// Gets a ground description from data
+        /// </summary>
+        /// <param name="heightmap">Height map</param>
+        /// <param name="cellSize">Cell size</param>
+        /// <param name="maximumHeight">Maximum height</param>
+        public static GroundDescription FromHeightmap(float[,] heightmap, float cellSize, float maximumHeight)
+        {
+            return new GroundDescription()
+            {
+                Content = new ContentDescription()
+                {
+                    HeightmapDescription = HeightmapDescription.FromMap(heightmap, cellSize, maximumHeight),
+                }
+            };
+        }
+        /// <summary>
         /// Gets a ground description from a file
         /// </summary>
         /// <param name="fileName">File name</param>
