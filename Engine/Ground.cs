@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine
 {
@@ -234,6 +235,64 @@ namespace Engine
         public virtual ICullingVolume GetCullingVolume()
         {
             return null;
+        }
+
+        /// <summary>
+        /// Gets whether the sphere intersects with the ground
+        /// </summary>
+        /// <param name="sphere">Sphere</param>
+        /// <param name="result">Picking results</param>
+        /// <returns>Returns true if intersects</returns>
+        public bool Intersects(BoundingSphere sphere, out PickingResult<Triangle> result)
+        {
+            result = new PickingResult<Triangle>()
+            {
+                Distance = float.MaxValue,
+            };
+
+            if (groundPickingQuadtree != null)
+            {
+                var nodes = groundPickingQuadtree.GetNodesInVolume(new CullingVolumeSphere(sphere));
+                if (!nodes.Any())
+                {
+                    return false;
+                }
+
+                bool intersects = false;
+                float minDistance = float.MaxValue;
+                foreach (var node in nodes)
+                {
+                    if (Intersection.SphereIntersectsMesh(sphere, node.Items, out Triangle tri, out Vector3 position, out float distance))
+                    {
+                        intersects = true;
+
+                        if (distance < minDistance)
+                        {
+                            minDistance = distance;
+
+                            result.Distance = distance;
+                            result.Position = position;
+                            result.Item = tri;
+                        }
+                    }
+                }
+
+                return intersects;
+            }
+            else
+            {
+                var mesh = GetVolume(true);
+                if (Intersection.SphereIntersectsMesh(sphere, mesh, out Triangle tri, out Vector3 position, out float distance))
+                {
+                    result.Distance = distance;
+                    result.Position = position;
+                    result.Item = tri;
+
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

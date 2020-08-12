@@ -105,12 +105,13 @@ namespace Engine.Common
         /// </summary>
         /// <param name="sphere">Sphere</param>
         /// <param name="mesh">Triangle mesh</param>
+        /// <param name="triangle">Returns the closest trangle to the sphere center</param>
         /// <param name="point">Returns the closest point in the triangle mesh to the sphere center</param>
         /// <param name="distance">Returns the distance from the closest point to the sphere center</param>
         /// <returns>Returns true if the sphere intersects the triangle mesh</returns>
-        public static bool SphereIntersectsMesh(BoundingSphere sphere, IEnumerable<Triangle> mesh, out Vector3 point, out float distance)
+        public static bool SphereIntersectsMesh(BoundingSphere sphere, IEnumerable<Triangle> mesh, out Triangle triangle, out Vector3 point, out float distance)
         {
-            ClosestPointInMesh(sphere.Center, mesh, out point);
+            ClosestPointInMesh(sphere.Center, mesh, out triangle, out point);
 
             distance = Vector3.Distance(sphere.Center, point);
 
@@ -456,10 +457,12 @@ namespace Engine.Common
         /// </summary>
         /// <param name="p">Point</param>
         /// <param name="mesh">Triangle mesh</param>
-        /// <param name="closest">Returns the closest point in the triangle from point p</param>
-        public static void ClosestPointInMesh(Vector3 p, IEnumerable<Triangle> mesh, out Vector3 closest)
+        /// <param name="closest">Returns the closest triangle from point p</param>
+        /// <param name="contactPoint">Returns the closest point in the triangle from point p</param>
+        public static void ClosestPointInMesh(Vector3 p, IEnumerable<Triangle> mesh, out Triangle closest, out Vector3 contactPoint)
         {
-            closest = p;
+            closest = new Triangle();
+            contactPoint = p;
 
             float distance = float.MaxValue;
             foreach (var t in mesh)
@@ -471,7 +474,9 @@ namespace Engine.Common
                 if (sqrDist < distance)
                 {
                     distance = sqrDist;
-                    closest = closestToTri;
+
+                    closest = t;
+                    contactPoint = closestToTri;
                 }
             }
         }

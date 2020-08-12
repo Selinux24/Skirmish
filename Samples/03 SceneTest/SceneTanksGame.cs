@@ -82,7 +82,6 @@ namespace SceneTest
         private Model landScape;
         private Scenery terrain;
         private float terrainTop;
-        private IEnumerable<Triangle> terrainMesh;
         private ModelInstanced tanks;
         private float tankHeight = 0;
         private Model projectile;
@@ -617,7 +616,7 @@ namespace SceneTest
         private async Task InitializeModelsTerrain()
         {
             // Generates a random terrain using perlin noise
-            int mapSize = 128;
+            int mapSize = 256;
             NoiseMapDescriptor nmDesc = new NoiseMapDescriptor
             {
                 MapWidth = mapSize,
@@ -626,7 +625,7 @@ namespace SceneTest
             };
             float[,] noiseMap = Perlin.CreateSimpleNoiseMap(nmDesc);
 
-            GroundDescription groundDesc = GroundDescription.FromHeightmap(noiseMap, 5f, 75f);
+            GroundDescription groundDesc = GroundDescription.FromHeightmap(noiseMap, 4f, 75f);
             groundDesc.Content.HeightmapDescription.ContentPath = "SceneTanksGame/terrain";
             groundDesc.Content.HeightmapDescription.Textures = new HeightmapDescription.TexturesDescription
             {
@@ -639,7 +638,6 @@ namespace SceneTest
             terrain = await this.AddComponentScenery(groundDesc, SceneObjectUsages.Ground, layerModels);
             terrain.Visible = false;
 
-            terrainMesh = terrain.GetVolume(true);
             terrainTop = terrain.GetBoundingBox().Maximum.Y;
 
             this.SetGround(terrain, true);
@@ -1185,9 +1183,9 @@ You will lost all the game progress.",
             }
 
             // Test full collision with terrain mesh
-            if (Intersection.SphereIntersectsMesh(projVolume, terrainMesh, out Vector3 impactPosition, out _))
+            if (terrain.Intersects(projVolume, out var impact))
             {
-                ResolveShot(false, impactPosition);
+                ResolveShot(false, impact.Position);
             }
         }
         private void ResolveShot(bool impact, Vector3? impactPosition)
