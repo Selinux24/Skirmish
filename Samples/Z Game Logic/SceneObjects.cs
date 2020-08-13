@@ -180,15 +180,7 @@ namespace GameLogic
                 SceneObjectUsages.Agent);
 
             this.terrain = await this.AddComponentScenery(
-                new GroundDescription()
-                {
-                    CastShadow = true,
-                    Content = new ContentDescription()
-                    {
-                        ContentFolder = "Resources3D",
-                        ModelContentFilename = "terrain.xml",
-                    }
-                },
+                GroundDescription.FromFile("Resources3D", "terrain.xml"),
                 SceneObjectUsages.Ground);
 
             int minimapHeight = (this.Game.Form.RenderHeight / 4) - 8;

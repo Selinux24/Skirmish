@@ -795,20 +795,7 @@ namespace Terrain
             Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
 
-            var terrainDescription = new GroundDescription()
-            {
-                Name = "Terrain",
-                Quadtree = new GroundDescription.QuadtreeDescription()
-                {
-                    MaximumDepth = 1,
-                },
-                CastShadow = true,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = "resources/Terrain",
-                    ModelContentFilename = "two_levels.xml",
-                }
-            };
+            var terrainDescription = GroundDescription.FromFile("resources/Terrain", "two_levels.xml", 1);
             this.terrain = await this.AddComponentScenery(terrainDescription, SceneObjectUsages.Ground, this.layerTerrain);
             this.SetGround(this.terrain, true);
 

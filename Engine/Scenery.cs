@@ -275,64 +275,14 @@ namespace Engine
         public Scenery(Scene scene, GroundDescription description)
             : base(scene, description)
         {
-            // Read model content
-            if (!string.IsNullOrEmpty(description.Content.ModelContentFilename))
-            {
-                string fileName = Path.GetFileName(description.Content.ModelContentFilename);
-                string directory = Path.Combine(description.Content.ContentFolder ?? "", Path.GetDirectoryName(description.Content.ModelContentFilename));
+            // Generate model content
+            content = description.ReadModelContent();
 
-                var contentDesc = Helper.DeserializeFromFile<ModelContentDescription>(Path.Combine(directory, fileName));
-                var loader = GameResourceManager.GetLoaderForFile(contentDesc.ModelFileName);
-                var t = loader.Load(directory, contentDesc);
-                content = t.First();
-            }
-            else if (description.Content.ModelContentDescription != null)
-            {
-                var contentDesc = description.Content.ModelContentDescription;
-                var loader = GameResourceManager.GetLoaderForFile(contentDesc.ModelFileName);
-                var t = loader.Load(description.Content.ContentFolder, contentDesc);
-                content = t.First();
-            }
-            else if (description.Content.HeightmapDescription != null)
-            {
-                content = ModelContent.FromHeightmap(description.Content.HeightmapDescription);
-            }
-            else if (description.Content.ModelContent != null)
-            {
-                content = description.Content.ModelContent;
-            }
-            else
-            {
-                throw new EngineException("No geometry found in description.");
-            }
+            // Generate quadtree
+            groundPickingQuadtree = description.ReadQuadTree(content.GetTriangles());
 
-            if (description.Quadtree.MaximumDepth > 0)
-            {
-                // Generate quadtree
-                this.groundPickingQuadtree = new PickingQuadTree<Triangle>(content.GetTriangles(), description.Quadtree.MaximumDepth);
-            }
-
-            #region Lights
-
-            List<SceneLight> lights = new List<SceneLight>();
-
-            foreach (var key in content.Lights.Keys)
-            {
-                var l = content.Lights[key];
-
-                if (l.LightType == LightContentTypes.Point)
-                {
-                    lights.Add(l.CreatePointLight());
-                }
-                else if (l.LightType == LightContentTypes.Spot)
-                {
-                    lights.Add(l.CreateSpotLight());
-                }
-            }
-
-            this.Lights = lights.ToArray();
-
-            #endregion
+            // Retrieve lights from content
+            Lights = content.GetLights().ToArray();
         }
         /// <summary>
         /// Destructor
@@ -502,16 +452,22 @@ namespace Engine
             // Fire and forget
             Task.Run(async () =>
             {
-                await this.Scene.LoadResourcesAsync(
-                    taskList,
-                    (results) =>
-                    {
-                        foreach (var res in results)
+                bool loadResult = false;
+                while (!loadResult)
+                {
+                    loadResult = await this.Scene.LoadResourcesAsync(
+                        taskList,
+                        (results) =>
                         {
-                            // Assign patch to dictionary
-                            this.patchDictionary[res.Id] = res.Patch;
-                        }
-                    });
+                            foreach (var res in results)
+                            {
+                                // Assign patch to dictionary
+                                this.patchDictionary[res.Id] = res.Patch;
+                            }
+                        });
+
+                    await Task.Delay(100);
+                }
             });
         }
         /// <summary>

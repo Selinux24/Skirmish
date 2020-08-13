@@ -525,69 +525,64 @@ namespace Engine.Collections.Generic
             item = default;
             distance = float.MaxValue;
 
+            // Find children contacts by distance to hit in bounding box
             SortedDictionary<float, PickingQuadTreeNode<T>> boxHitsByDistance = new SortedDictionary<float, PickingQuadTreeNode<T>>();
-
-            #region Find children contacts by distance to hit in bounding box
-
+            
             foreach (var node in this.Children)
             {
-                if (Intersection.RayIntersectsBox(ray, node.BoundingBox, out float d))
+                if (!Intersection.RayIntersectsBox(ray, node.BoundingBox, out float d))
                 {
-                    while (boxHitsByDistance.ContainsKey(d))
-                    {
-                        // avoid duplicate keys
-                        d += 0.0001f;
-                    }
-
-                    boxHitsByDistance.Add(d, node);
+                    continue;
                 }
+
+                while (boxHitsByDistance.ContainsKey(d))
+                {
+                    // avoid duplicate keys
+                    d += 0.0001f;
+                }
+
+                boxHitsByDistance.Add(d, node);
             }
 
-            #endregion
-
-            if (boxHitsByDistance.Count > 0)
+            if (!boxHitsByDistance.Any())
             {
-                bool intersect = false;
-
-                #region Find closest item node by node, from closest to farthest
-
-                Vector3 bestHit = Vector3.Zero;
-                T bestTri = default;
-                float bestD = float.MaxValue;
-
-                foreach (var node in boxHitsByDistance.Values)
-                {
-                    // check that the intersection is closer than the nearest intersection found thus far
-                    var inItem = node.PickNearest(ray, facingOnly, out Vector3 thisHit, out T thisTri, out float thisD);
-                    if (!inItem)
-                    {
-                        continue;
-                    }
-
-                    if (thisD < bestD)
-                    {
-                        // if we have found a closer intersection store the new closest intersection
-                        bestHit = thisHit;
-                        bestTri = thisTri;
-                        bestD = thisD;
-                    }
-
-                    intersect = true;
-                }
-
-                if (intersect)
-                {
-                    position = bestHit;
-                    item = bestTri;
-                    distance = bestD;
-                }
-
-                #endregion
-
-                return intersect;
+                return false;
             }
 
-            return false;
+            // Find closest item node by node, from closest to farthest
+            bool intersect = false;
+            Vector3 bestHit = Vector3.Zero;
+            T bestTri = default;
+            float bestD = float.MaxValue;
+
+            foreach (var node in boxHitsByDistance.Values)
+            {
+                // check that the intersection is closer than the nearest intersection found thus far
+                var inItem = node.PickNearest(ray, facingOnly, out Vector3 thisHit, out T thisTri, out float thisD);
+                if (!inItem)
+                {
+                    continue;
+                }
+
+                if (thisD < bestD)
+                {
+                    // if we have found a closer intersection store the new closest intersection
+                    bestHit = thisHit;
+                    bestTri = thisTri;
+                    bestD = thisD;
+                }
+
+                intersect = true;
+            }
+
+            if (intersect)
+            {
+                position = bestHit;
+                item = bestTri;
+                distance = bestD;
+            }
+
+            return intersect;
         }
 
         /// <summary>

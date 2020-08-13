@@ -2,6 +2,7 @@
 using Engine.Content.FmtCollada;
 using Engine.Content.FmtObj;
 using System;
+using System.IO;
 
 namespace Collada
 {
@@ -10,18 +11,28 @@ namespace Collada
         [STAThread]
         static void Main()
         {
-#if DEBUG
-            using (Game cl = new Game("4 Collada", false, 1600, 900, true, 0, 0))
-#else
-            using (Game cl = new Game("4 Collada", true, 0, 0, true, 0, 0))
-#endif
+            try
             {
-                GameResourceManager.RegisterLoader<LoaderObj>();
-                GameResourceManager.RegisterLoader<LoaderCollada>();
+#if DEBUG
+                int sWidth = (int)(System.Windows.Forms.SystemInformation.VirtualScreen.Width * .8f);
+                int sHeight = (int)(System.Windows.Forms.SystemInformation.VirtualScreen.Height * .8f);
 
-                cl.SetScene<SceneStart>();
+                using (Game cl = new Game("4 Collada", false, sWidth, sHeight, true, 0, 0))
+#else
+                using (Game cl = new Game("4 Collada", true, 0, 0, true, 0, 0))
+#endif
+                {
+                    GameResourceManager.RegisterLoader<LoaderObj>();
+                    GameResourceManager.RegisterLoader<LoaderCollada>();
 
-                cl.Run();
+                    cl.SetScene<SceneStart>();
+
+                    cl.Run();
+                }
+            }
+            catch (Exception ex)
+            {
+                File.WriteAllText("dump.txt", ex.ToString());
             }
         }
     }

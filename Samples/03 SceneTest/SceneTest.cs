@@ -251,17 +251,7 @@ namespace SceneTest
         }
         private async Task InitializeScenery()
         {
-            scenery = await this.AddComponentScenery(
-                new GroundDescription()
-                {
-                    Name = "Clif",
-                    CastShadow = true,
-                    Content = new ContentDescription()
-                    {
-                        ContentFolder = "SceneTest/scenery",
-                        ModelContentFilename = "Clif.xml",
-                    }
-                });
+            scenery = await this.AddComponentScenery(GroundDescription.FromFile("SceneTest/scenery", "Clif.xml"));
         }
         private async Task InitializeTrees()
         {

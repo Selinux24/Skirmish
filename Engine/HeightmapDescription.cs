@@ -1,7 +1,10 @@
 ﻿using SharpDX;
+using System.Linq;
 
 namespace Engine
 {
+    using Engine.Content;
+
     /// <summary>
     /// Heightmap description
     /// </summary>
@@ -126,5 +129,83 @@ namespace Engine
         /// Terrain material
         /// </summary>
         public MaterialDescription Material { get; set; } = new MaterialDescription();
+
+        /// <summary>
+        /// Generates a new model content from an height map description
+        /// </summary>
+        /// <returns>Returns a new model content</returns>
+        public ModelContent ReadModelContent()
+        {
+            HeightMap hm;
+
+            if (Heightmap != null)
+            {
+                hm = HeightMap.FromMap(Heightmap, Colormap);
+            }
+            else if (!string.IsNullOrEmpty(HeightmapFileName))
+            {
+                ImageContent heightMapImage = new ImageContent()
+                {
+                    Streams = ContentManager.FindContent(ContentPath, HeightmapFileName),
+                };
+
+                hm = HeightMap.FromStream(heightMapImage.Stream, null);
+            }
+            else
+            {
+                throw new EngineException("No heightmap found in description.");
+            }
+
+            ModelContent modelContent = new ModelContent();
+
+            string materialName = "material";
+            string geoName = "geometry";
+
+            MaterialContent material = MaterialContent.Default;
+
+            hm.BuildGeometry(
+                CellSize,
+                MaximumHeight,
+                Textures.Scale,
+                Textures.Displacement,
+                out var vertices, out var indices);
+
+            SubMeshContent geo = new SubMeshContent(Topology.TriangleList, materialName, true, false);
+            geo.SetVertices(vertices);
+            geo.SetIndices(indices);
+
+            if (Textures?.TexturesLR?.Any() == true)
+            {
+                string diffuseTexureName = "diffuse";
+
+                material.DiffuseTexture = diffuseTexureName;
+
+                ImageContent diffuseImage = new ImageContent()
+                {
+                    Streams = ContentManager.FindContent(ContentPath, Textures.TexturesLR),
+                };
+
+                modelContent.Images.Add(diffuseTexureName, diffuseImage);
+            }
+
+            if (Textures?.NormalMaps?.Any() == true)
+            {
+                string nmapTexureName = "normal";
+
+                material.NormalMapTexture = nmapTexureName;
+
+                ImageContent nmapImage = new ImageContent()
+                {
+                    Streams = ContentManager.FindContent(ContentPath, Textures.NormalMaps),
+                };
+
+                modelContent.Images.Add(nmapTexureName, nmapImage);
+            }
+
+            modelContent.Materials.Add(materialName, material);
+            modelContent.Geometry.Add(geoName, materialName, geo);
+
+            return modelContent;
+        }
     }
 }

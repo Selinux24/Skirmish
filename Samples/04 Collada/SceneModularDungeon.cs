@@ -472,11 +472,7 @@ namespace Collada
                 UseAnisotropic = true,
                 CastShadow = true,
                 BlendMode = BlendModes.DefaultTransparent,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = "Resources/SceneModularDungeon",
-                    ModelContentFilename = "assets.xml",
-                },
+                ContentDescription = ContentDescription.FromFile("Resources/SceneModularDungeon", "assets.xml"),
                 AssetsConfiguration = Engine.Content.OnePageDungeon.DungeonCreator.CreateAssets(dn, config),
                 Levels = Engine.Content.OnePageDungeon.DungeonCreator.CreateLevels(dn, config),
             };

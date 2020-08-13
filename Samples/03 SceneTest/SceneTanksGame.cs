@@ -562,7 +562,7 @@ namespace SceneTest
         private async Task InitializeUIShotPath()
         {
             trajectoryMarkerPool = new Sprite[5];
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < trajectoryMarkerPool.Length; i++)
             {
                 var trajectoryMarker = await this.AddComponentSprite(SpriteDescription.FromFile("SceneTanksGame/Dot.png"), SceneObjectUsages.UI, layerUI + 1);
                 trajectoryMarker.Width = 50;
@@ -625,9 +625,9 @@ namespace SceneTest
             };
             float[,] noiseMap = Perlin.CreateSimpleNoiseMap(nmDesc);
 
-            GroundDescription groundDesc = GroundDescription.FromHeightmap(noiseMap, 4f, 75f);
-            groundDesc.Content.HeightmapDescription.ContentPath = "SceneTanksGame/terrain";
-            groundDesc.Content.HeightmapDescription.Textures = new HeightmapDescription.TexturesDescription
+            GroundDescription groundDesc = GroundDescription.FromHeightmap(noiseMap, 4f, 75f, 2);
+            groundDesc.HeightmapDescription.ContentPath = "SceneTanksGame/terrain";
+            groundDesc.HeightmapDescription.Textures = new HeightmapDescription.TexturesDescription
             {
                 TexturesLR = new[] { "terrain.png" },
                 NormalMaps = new[] { "terrain_nmap.png" },
@@ -841,38 +841,53 @@ namespace SceneTest
 
         private void UpdateInputGame()
         {
-            if (this.Game.Input.KeyJustReleased(Keys.F))
+            if (freeCamera)
             {
-                freeCamera = !freeCamera;
+                if (this.Game.Input.KeyJustReleased(Keys.F) ||
+                    this.Game.Input.KeyJustReleased(Keys.Escape) ||
+                    this.Game.Input.KeyJustReleased(Keys.Space))
+                {
+                    ToggleFreeCamera();
 
-                if (freeCamera)
-                {
-                    this.Camera.MovementDelta *= 10f;
-                    this.Game.LockMouse = true;
-                }
-                else
-                {
-                    this.Camera.MovementDelta /= 10f;
-                    this.Game.LockMouse = false;
+                    return;
                 }
             }
+            else
+            {
+                if (this.Game.Input.KeyJustReleased(Keys.F))
+                {
+                    ToggleFreeCamera();
+
+                    return;
+                }
+
+                if (this.Game.Input.KeyJustReleased(Keys.Escape))
+                {
+                    this.ShowDialog(
+                        @"Press Ok if you want to exit.
+
+You will lost all the game progress.",
+                        CloseDialog,
+                        () =>
+                        {
+                            this.Game.SetScene<SceneStart>();
+                        });
+                }
+            }
+        }
+        private void ToggleFreeCamera()
+        {
+            freeCamera = !freeCamera;
 
             if (freeCamera)
             {
-                return;
+                this.Camera.MovementDelta *= 10f;
+                this.Game.LockMouse = true;
             }
-
-            if (this.Game.Input.KeyJustReleased(Keys.Escape))
+            else
             {
-                this.ShowDialog(
-                    @"Press Ok if you want to exit.
-
-You will lost all the game progress.",
-                    CloseDialog,
-                    () =>
-                    {
-                        this.Game.SetScene<SceneStart>();
-                    });
+                this.Camera.MovementDelta /= 10f;
+                this.Game.LockMouse = false;
             }
         }
         private void UpdateInputPlayer(GameTime gameTime)

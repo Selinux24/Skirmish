@@ -220,17 +220,7 @@ namespace Skybox
 
             #region Terrain
 
-            GroundDescription desc = new GroundDescription()
-            {
-                Name = "Terrain",
-                CastShadow = true,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = "Resources",
-                    ModelContentFilename = "ruins.xml",
-                }
-            };
-            this.ruins = await this.AddComponentScenery(desc);
+            this.ruins = await this.AddComponentScenery(GroundDescription.FromFile("Resources", "ruins.xml"));
             this.SetGround(this.ruins, true);
 
             #endregion

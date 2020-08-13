@@ -540,84 +540,6 @@ namespace Engine.Content
 
             return modelContent;
         }
-        /// <summary>
-        /// Generates a new model content from an height map description
-        /// </summary>
-        /// <param name="heightMap">Height map description</param>
-        /// <returns>Returns a new model content</returns>
-        public static ModelContent FromHeightmap(HeightmapDescription heightMap)
-        {
-            HeightMap hm;
-
-            if (heightMap.Heightmap != null)
-            {
-                hm = HeightMap.FromMap(heightMap.Heightmap, heightMap.Colormap);
-            }
-            else if (!string.IsNullOrEmpty(heightMap.HeightmapFileName))
-            {
-                ImageContent heightMapImage = new ImageContent()
-                {
-                    Streams = ContentManager.FindContent(heightMap.ContentPath, heightMap.HeightmapFileName),
-                };
-
-                hm = HeightMap.FromStream(heightMapImage.Stream, null);
-            }
-            else
-            {
-                return null;
-            }
-
-            ModelContent modelContent = new ModelContent();
-
-            string materialName = "material";
-            string geoName = "geometry";
-
-            MaterialContent material = MaterialContent.Default;
-
-            hm.BuildGeometry(
-                heightMap.CellSize,
-                heightMap.MaximumHeight,
-                heightMap.Textures.Scale,
-                heightMap.Textures.Displacement,
-                out var vertices, out var indices);
-
-            SubMeshContent geo = new SubMeshContent(Topology.TriangleList, materialName, true, false);
-            geo.SetVertices(vertices);
-            geo.SetIndices(indices);
-
-            if (heightMap.Textures?.TexturesLR?.Any() == true)
-            {
-                string diffuseTexureName = "diffuse";
-
-                material.DiffuseTexture = diffuseTexureName;
-
-                ImageContent diffuseImage = new ImageContent()
-                {
-                    Streams = ContentManager.FindContent(heightMap.ContentPath, heightMap.Textures.TexturesLR),
-                };
-
-                modelContent.Images.Add(diffuseTexureName, diffuseImage);
-            }
-
-            if (heightMap.Textures?.NormalMaps?.Any() == true)
-            {
-                string nmapTexureName = "normal";
-
-                material.NormalMapTexture = nmapTexureName;
-
-                ImageContent nmapImage = new ImageContent()
-                {
-                    Streams = ContentManager.FindContent(heightMap.ContentPath, heightMap.Textures.NormalMaps),
-                };
-
-                modelContent.Images.Add(nmapTexureName, nmapImage);
-            }
-
-            modelContent.Materials.Add(materialName, material);
-            modelContent.Geometry.Add(geoName, materialName, geo);
-
-            return modelContent;
-        }
 
         /// <summary>
         /// Constructor
@@ -1234,6 +1156,30 @@ namespace Engine.Content
             }
 
             return count;
+        }
+
+        /// <summary>
+        /// Gets the content lights
+        /// </summary>
+        public IEnumerable<SceneLight> GetLights()
+        {
+            List<SceneLight> lights = new List<SceneLight>();
+
+            foreach (var key in Lights.Keys)
+            {
+                var l = Lights[key];
+
+                if (l.LightType == LightContentTypes.Point)
+                {
+                    lights.Add(l.CreatePointLight());
+                }
+                else if (l.LightType == LightContentTypes.Spot)
+                {
+                    lights.Add(l.CreateSpotLight());
+                }
+            }
+
+            return lights.ToArray();
         }
     }
 }

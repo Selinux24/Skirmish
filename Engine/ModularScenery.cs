@@ -110,7 +110,7 @@ namespace Engine
             }
             else if (!string.IsNullOrWhiteSpace(description.AssetsConfigurationFile))
             {
-                this.AssetConfiguration = Helper.DeserializeFromFile<ModularSceneryAssetConfiguration>(Path.Combine(description.Content.ContentFolder, description.AssetsConfigurationFile));
+                this.AssetConfiguration = Helper.DeserializeFromFile<ModularSceneryAssetConfiguration>(Path.Combine(description.ContentDescription.ContentFolder, description.AssetsConfigurationFile));
             }
 
             if (description.Levels != null)
@@ -119,7 +119,7 @@ namespace Engine
             }
             else if (!string.IsNullOrWhiteSpace(description.LevelsFile))
             {
-                this.Levels = Helper.DeserializeFromFile<ModularSceneryLevels>(Path.Combine(description.Content.ContentFolder, description.LevelsFile));
+                this.Levels = Helper.DeserializeFromFile<ModularSceneryLevels>(Path.Combine(description.ContentDescription.ContentFolder, description.LevelsFile));
             }
         }
         /// <summary>
@@ -164,32 +164,7 @@ namespace Engine
         /// <returns>Returns the model content</returns>
         private ModelContent LoadModelContent()
         {
-            ModelContent content = null;
-
-            if (!string.IsNullOrEmpty(Description.Content.ModelContentFilename))
-            {
-                var contentDesc = Helper.DeserializeFromFile<ModelContentDescription>(Path.Combine(Description.Content.ContentFolder, Description.Content.ModelContentFilename));
-                var loader = GameResourceManager.GetLoaderForFile(contentDesc.ModelFileName);
-                var t = loader.Load(Description.Content.ContentFolder, contentDesc);
-                content = t.First();
-            }
-            else if (Description.Content.ModelContentDescription != null)
-            {
-                var contentDesc = Description.Content.ModelContentDescription;
-                var loader = GameResourceManager.GetLoaderForFile(contentDesc.ModelFileName);
-                var t = loader.Load(Description.Content.ContentFolder, contentDesc);
-                content = t.First();
-            }
-            else if (Description.Content.HeightmapDescription != null)
-            {
-                content = ModelContent.FromHeightmap(Description.Content.HeightmapDescription);
-            }
-            else if (Description.Content.ModelContent != null)
-            {
-                content = Description.Content.ModelContent;
-            }
-
-            return content;
+            return Description.ReadModelContent();
         }
         /// <summary>
         /// Loads a level
@@ -238,7 +213,7 @@ namespace Engine
 
                 foreach (var item in this.Levels.ParticleSystems)
                 {
-                    item.ContentPath = item.ContentPath ?? this.Description.Content.ContentFolder;
+                    item.ContentPath = item.ContentPath ?? this.Description.ContentDescription.ContentFolder;
 
                     var pDesc = ParticleSystemDescription.Initialize(item);
 

@@ -10,6 +10,7 @@ namespace Engine
 {
     using Engine.Common;
     using Engine.Effects;
+    using System.Runtime.Remoting.Messaging;
 
     /// <summary>
     /// Game class
@@ -309,20 +310,28 @@ namespace Engine
         /// <remarks>Current scenes will be removed from internal scene collection</remarks>
         public void SetScene<T>(SceneModes sceneMode = SceneModes.ForwardLigthning) where T : Scene
         {
-            T scene;
+            try
+            {
+                T scene = (T)Activator.CreateInstance(typeof(T), new object[] { this, sceneMode });
+                scene.Order = 1;
+                this.nextScene = scene;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error setting scene with scene mode: {ex.Message}");
+            }
 
             try
             {
-                scene = (T)Activator.CreateInstance(typeof(T), new object[] { this, sceneMode });
+                T scene = (T)Activator.CreateInstance(typeof(T), new object[] { this });
+                scene.SetRenderMode(sceneMode);
+                scene.Order = 1;
+                this.nextScene = scene;
             }
-            catch
+            catch (Exception ex)
             {
-                scene = (T)Activator.CreateInstance(typeof(T), new object[] { this });
+                Console.WriteLine($"Error setting scene: {ex.Message}");
             }
-
-            scene.Order = 1;
-
-            this.nextScene = scene;
         }
         /// <summary>
         /// Unloads the current scenes and loads the specified scene

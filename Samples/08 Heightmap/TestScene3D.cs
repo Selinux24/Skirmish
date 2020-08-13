@@ -568,19 +568,7 @@ namespace Heightmap
                     SpecularColor = new Color4(0.1f, 0.1f, 0.1f, 1f),
                 },
             };
-            var gDesc = new GroundDescription()
-            {
-                Name = "Terrain",
-                UseAnisotropic = true,
-                Quadtree = new GroundDescription.QuadtreeDescription()
-                {
-                    MaximumDepth = 5,
-                },
-                Content = new ContentDescription()
-                {
-                    HeightmapDescription = hDesc,
-                }
-            };
+            var gDesc = GroundDescription.FromHeightmapDescription(hDesc, 5);
             this.terrain = await this.AddComponentTerrain(gDesc, SceneObjectUsages.None, layerTerrain);
             this.SetGround(this.terrain, true);
             sw.Stop();

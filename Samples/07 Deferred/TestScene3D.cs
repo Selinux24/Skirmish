@@ -252,20 +252,7 @@ namespace Deferred
         }
         private async Task InitializeTerrain()
         {
-            var desc = new GroundDescription()
-            {
-                Name = "Terrain",
-                Quadtree = new GroundDescription.QuadtreeDescription()
-                {
-                    MaximumDepth = 2,
-                },
-                Content = new ContentDescription()
-                {
-                    ContentFolder = "Resources",
-                    ModelContentFilename = "terrain.xml",
-                }
-            };
-            this.terrain = await this.AddComponentScenery(desc);
+            this.terrain = await this.AddComponentScenery(GroundDescription.FromFile("Resources", "terrain.xml", 2));
         }
         private async Task InitializeGardener()
         {

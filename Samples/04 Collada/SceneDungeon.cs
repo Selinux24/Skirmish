@@ -140,20 +140,7 @@ namespace Collada
         }
         private async Task InitializeDungeon()
         {
-            this.dungeon = await this.AddComponentScenery(
-                new GroundDescription()
-                {
-                    Name = "room1",
-                    Quadtree = new GroundDescription.QuadtreeDescription()
-                    {
-                        MaximumDepth = 2,
-                    },
-                    Content = new ContentDescription()
-                    {
-                        ContentFolder = "Resources/SceneDungeon",
-                        ModelContentFilename = "Dungeon.xml",
-                    },
-                });
+            this.dungeon = await this.AddComponentScenery(GroundDescription.FromFile("Resources/SceneDungeon", "Dungeon.xml", 2));
         }
 
         private void InitializeCamera()
