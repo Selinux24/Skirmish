@@ -513,15 +513,6 @@ namespace Engine
         }
 
         /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <param name="tasks">Resource load tasks</param>
-        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        public bool LoadResources(params Task[] tasks)
-        {
-            return this.Game.LoadResources(this, tasks);
-        }
-        /// <summary>
         /// Executes a resource load task
         /// </summary>
         /// <param name="task">Resource load task</param>
@@ -529,7 +520,7 @@ namespace Engine
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
         public async Task<bool> LoadResourcesAsync(Task task, Action callback = null)
         {
-            return await LoadResourcesAsync(new[] { task }, callback);
+            return await this.Game.LoadResourcesAsync(this, task, callback);
         }
         /// <summary>
         /// Executes a list of resource load tasks
@@ -537,7 +528,29 @@ namespace Engine
         /// <param name="tasks">Resource load tasks</param>
         /// <param name="callback">Callback</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        public async Task<bool> LoadResourcesAsync(Task[] tasks, Action callback = null)
+        public async Task<bool> LoadResourcesAsync(IEnumerable<Task> tasks, Action callback = null)
+        {
+            return await this.Game.LoadResourcesAsync(this, tasks, callback);
+        }
+        /// <summary>
+        /// Executes a resource load task
+        /// </summary>
+        /// <typeparam name="T">Result type</typeparam>
+        /// <param name="task">Resource load task</param>
+        /// <param name="callback">Callback</param>
+        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
+        public async Task<bool> LoadResourcesAsync<T>(Task<T> task, Action<T> callback = null)
+        {
+            return await this.Game.LoadResourcesAsync(this, task, callback);
+        }
+        /// <summary>
+        /// Executes a list of resource load tasks
+        /// </summary>
+        /// <typeparam name="T">Result type</typeparam>
+        /// <param name="tasks">Resource load tasks</param>
+        /// <param name="callback">Callback</param>
+        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
+        public async Task<bool> LoadResourcesAsync<T>(IEnumerable<Task<T>> tasks, Action<IEnumerable<T>> callback = null)
         {
             return await this.Game.LoadResourcesAsync(this, tasks, callback);
         }

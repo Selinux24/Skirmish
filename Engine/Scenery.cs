@@ -70,11 +70,6 @@ namespace Engine
             public DrawingData DrawingData = null;
 
             /// <summary>
-            /// Current quadtree node
-            /// </summary>
-            public PickingQuadTreeNode<Triangle> Current { get; set; }
-
-            /// <summary>
             /// Cosntructor
             /// </summary>
             /// <param name="game">Game</param>
@@ -215,9 +210,27 @@ namespace Engine
                 return matList;
             }
         }
+        /// <summary>
+        /// Path load task helper
+        /// </summary>
+        struct SceneryPatchTask
+        {
+            /// <summary>
+            /// Node id
+            /// </summary>
+            public int Id { get; set; }
+            /// <summary>
+            /// Created patch
+            /// </summary>
+            public SceneryPatch Patch { get; set; }
+        }
 
         #endregion
 
+        /// <summary>
+        /// Model content
+        /// </summary>
+        private readonly ModelContent content;
         /// <summary>
         /// Scenery patch list
         /// </summary>
@@ -225,7 +238,7 @@ namespace Engine
         /// <summary>
         /// Visible Nodes
         /// </summary>
-        private PickingQuadTreeNode<Triangle>[] visibleNodes = null;
+        private PickingQuadTreeNode<Triangle>[] visibleNodes = new PickingQuadTreeNode<Triangle>[] { };
 
         /// <summary>
         /// Gets the used material list
@@ -234,11 +247,7 @@ namespace Engine
         {
             get
             {
-                var nodes = this.groundPickingQuadtree.GetLeafNodes();
-
-                var matList = nodes
-                    .SelectMany(n => this.patchDictionary[n.Id].GetMaterials())
-                    .ToArray();
+                var matList = this.patchDictionary.Values.SelectMany(v => v?.GetMaterials() ?? new MeshMaterial[] { }).ToArray();
 
                 return matList;
             }
@@ -250,7 +259,7 @@ namespace Engine
         {
             get
             {
-                return this.visibleNodes != null ? this.visibleNodes.Length : 0;
+                return this.visibleNodes?.Length ?? 0;
             }
         }
         /// <summary>
@@ -266,8 +275,7 @@ namespace Engine
         public Scenery(Scene scene, GroundDescription description)
             : base(scene, description)
         {
-            ModelContent content;
-
+            // Read model content
             if (!string.IsNullOrEmpty(description.Content.ModelContentFilename))
             {
                 string fileName = Path.GetFileName(description.Content.ModelContentFilename);
@@ -298,20 +306,11 @@ namespace Engine
                 throw new EngineException("No geometry found in description.");
             }
 
-            #region Patches
-
-            this.groundPickingQuadtree = new PickingQuadTree<Triangle>(content.GetTriangles(), description.Quadtree.MaximumDepth);
-
-            var nodes = this.groundPickingQuadtree.GetLeafNodes();
-
-            foreach (var node in nodes)
+            if (description.Quadtree.MaximumDepth > 0)
             {
-                var patch = SceneryPatch.CreatePatch(this.Game, description.Name, content, node);
-
-                this.patchDictionary.Add(node.Id, patch);
+                // Generate quadtree
+                this.groundPickingQuadtree = new PickingQuadTree<Triangle>(content.GetTriangles(), description.Quadtree.MaximumDepth);
             }
-
-            #endregion
 
             #region Lights
 
@@ -368,16 +367,16 @@ namespace Engine
                 return true;
             }
 
-            this.visibleNodes = this.groundPickingQuadtree.GetNodesInVolume(volume).ToArray();
-            if (!this.visibleNodes.Any())
+            var nodes = this.groundPickingQuadtree.GetNodesInVolume(volume).ToArray();
+            if (!nodes.Any())
             {
                 return true;
             }
 
-            if (this.visibleNodes.Length > 1)
+            if (nodes.Length > 1)
             {
                 //Sort nodes by center distance to the culling volume position - nearest nodes first
-                Array.Sort(this.visibleNodes, (n1, n2) =>
+                Array.Sort(nodes, (n1, n2) =>
                 {
                     float d1 = (n1.Center - volume.Position).LengthSquared();
                     float d2 = (n2.Center - volume.Position).LengthSquared();
@@ -386,15 +385,46 @@ namespace Engine
                 });
             }
 
-            distance = Vector3.DistanceSquared(volume.Position, this.visibleNodes[0].Center);
+            distance = Vector3.DistanceSquared(volume.Position, nodes[0].Center);
 
             return false;
         }
 
         /// <inheritdoc/>
+        public override void Update(UpdateContext context)
+        {
+            base.Update(context);
+
+            CullingVolumeCamera camera = this.Scene.Camera.Frustum;
+            visibleNodes = this.groundPickingQuadtree.GetNodesInVolume(camera).ToArray();
+            if (visibleNodes?.Any() != true)
+            {
+                return;
+            }
+
+            // Detect nodes without assigned patch
+            List<Task<SceneryPatchTask>> taskList = new List<Task<SceneryPatchTask>>();
+
+            foreach (var node in visibleNodes)
+            {
+                if (!this.patchDictionary.ContainsKey(node.Id))
+                {
+                    // Reserve position
+                    this.patchDictionary.Add(node.Id, null);
+
+                    // Add creation task
+                    taskList.Add(LoadPatch(node));
+                }
+            }
+
+            // Launch creation tasks
+            LoadPatches(taskList);
+        }
+
+        /// <inheritdoc/>
         public override void DrawShadows(DrawContextShadows context)
         {
-            if (!this.visibleNodes.Any())
+            if (visibleNodes?.Any() != true)
             {
                 return;
             }
@@ -409,14 +439,16 @@ namespace Engine
 
             foreach (var node in visibleNodes)
             {
-                this.patchDictionary[node.Id].Current = node;
-                this.patchDictionary[node.Id].DrawSceneryShadows(sceneryEffect, this.BufferManager);
+                if (this.patchDictionary.ContainsKey(node.Id))
+                {
+                    this.patchDictionary[node.Id]?.DrawSceneryShadows(sceneryEffect, this.BufferManager);
+                }
             }
         }
         /// <inheritdoc/>
         public override void Draw(DrawContext context)
         {
-            if (!visibleNodes.Any())
+            if (visibleNodes?.Any() != true)
             {
                 return;
             }
@@ -431,8 +463,10 @@ namespace Engine
 
             foreach (var node in visibleNodes)
             {
-                this.patchDictionary[node.Id].Current = node;
-                this.patchDictionary[node.Id].DrawScenery(context, sceneryEffect, this.BufferManager);
+                if (this.patchDictionary.ContainsKey(node.Id))
+                {
+                    this.patchDictionary[node.Id]?.DrawScenery(context, sceneryEffect, this.BufferManager);
+                }
             }
         }
         /// <summary>
@@ -452,6 +486,44 @@ namespace Engine
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Launch an async resource load with the task list
+        /// </summary>
+        /// <param name="taskList">Task list to launch</param>
+        private void LoadPatches(IEnumerable<Task<SceneryPatchTask>> taskList)
+        {
+            if (!taskList.Any())
+            {
+                return;
+            }
+
+            // Fire and forget
+            Task.Run(async () =>
+            {
+                await this.Scene.LoadResourcesAsync(
+                    taskList,
+                    (results) =>
+                    {
+                        foreach (var res in results)
+                        {
+                            // Assign patch to dictionary
+                            this.patchDictionary[res.Id] = res.Patch;
+                        }
+                    });
+            });
+        }
+        /// <summary>
+        /// Loads a new patch
+        /// </summary>
+        /// <param name="node">Node to load in the patch</param>
+        private async Task<SceneryPatchTask> LoadPatch(PickingQuadTreeNode<Triangle> node)
+        {
+            // Create patch
+            var patch = SceneryPatch.CreatePatch(this.Game, this.Description.Name, content, node);
+
+            return await Task.FromResult(new SceneryPatchTask { Id = node.Id, Patch = patch });
         }
     }
 

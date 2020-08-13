@@ -395,6 +395,96 @@ namespace Engine
 
             return true;
         }
+
+        /// <summary>
+        /// Executes a resource load task
+        /// </summary>
+        /// <typeparam name="T">Response type</typeparam>
+        /// <param name="scene">Scene</param>
+        /// <param name="task">Resource load task</param>
+        /// <param name="callback">Callback</param>
+        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
+        internal async Task<bool> LoadResourcesAsync<T>(Scene scene, Task<T> task, Action<T> callback = null)
+        {
+            return await LoadResourcesAsync(scene, new[] { task }, (results) => { callback?.Invoke(results.FirstOrDefault()); });
+        }
+        /// <summary>
+        /// Executes a list of resource load tasks
+        /// </summary>
+        /// <typeparam name="T">Response type</typeparam>
+        /// <param name="scene">Scene</param>
+        /// <param name="tasks">Resource load tasks</param>
+        /// <param name="callback">Callback</param>
+        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
+        internal async Task<bool> LoadResourcesAsync<T>(Scene scene, IEnumerable<Task<T>> tasks, Action<IEnumerable<T>> callback = null)
+        {
+            if (ResourceLoadRuning)
+            {
+                return false;
+            }
+
+            ResourceLoadRuning = true;
+
+            List<T> taskResults = new List<T>();
+
+            try
+            {
+                var taskList = tasks.ToList();
+
+                int totalTasks = taskList.Count;
+                int currentTask = 0;
+                while (taskList.Any())
+                {
+                    var t = await Task.WhenAny(taskList);
+
+                    taskList.Remove(t);
+
+                    if (t.IsFaulted)
+                    {
+                        Console.WriteLine($"Faulted task {t.Exception}");
+                    }
+
+                    taskResults.Add(await t);
+
+                    Progress?.Report(++currentTask / (float)totalTasks);
+                }
+
+                ResourcesLoading?.Invoke(this, new GameLoadResourcesEventArgs() { Scene = scene });
+
+                Console.WriteLine("BufferManager: Recreating buffers");
+                this.BufferManager.CreateBuffers(Progress);
+                Console.WriteLine("BufferManager: Buffers recreated");
+
+                Console.WriteLine("ResourceManager: Creating new resources");
+                this.ResourceManager.CreateResources(Progress);
+                Console.WriteLine("ResourceManager: New resources created");
+
+                ResourcesLoaded?.Invoke(this, new GameLoadResourcesEventArgs() { Scene = scene });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                ResourceLoadRuning = false;
+
+                callback?.Invoke(taskResults.ToArray());
+            }
+
+            return true;
+        }
+        /// <summary>
+        /// Executes a resource load task
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        /// <param name="task">Resource load task</param>
+        /// <param name="callback">Callback</param>
+        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
+        internal async Task<bool> LoadResourcesAsync(Scene scene, Task task, Action callback = null)
+        {
+            return await LoadResourcesAsync(scene, new[] { task }, callback);
+        }
         /// <summary>
         /// Executes a list of resource load tasks
         /// </summary>
@@ -402,7 +492,7 @@ namespace Engine
         /// <param name="tasks">Resource load tasks</param>
         /// <param name="callback">Callback</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal async Task<bool> LoadResourcesAsync(Scene scene, Task[] tasks, Action callback = null)
+        internal async Task<bool> LoadResourcesAsync(Scene scene, IEnumerable<Task> tasks, Action callback = null)
         {
             if (ResourceLoadRuning)
             {

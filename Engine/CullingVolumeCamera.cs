@@ -1,8 +1,9 @@
-﻿using Engine.Common;
-using SharpDX;
+﻿using SharpDX;
 
 namespace Engine
 {
+    using Engine.Common;
+
     /// <summary>
     /// Culling volume for camera (Viewing frustum)
     /// </summary>
@@ -70,6 +71,21 @@ namespace Engine
         public ContainmentType Contains(BoundingBox bbox)
         {
             return this.frustum.Contains(bbox);
+        }
+
+        /// <summary>
+        /// Implicit conversion between BoundingFrustum and CullingVolumeCamera
+        /// </summary>
+        public static implicit operator BoundingFrustum(CullingVolumeCamera value)
+        {
+            return value.frustum;
+        }
+        /// <summary>
+        /// Implicit conversion between CullingVolumeCamera and BoundingFrustum
+        /// </summary>
+        public static implicit operator CullingVolumeCamera(BoundingFrustum value)
+        {
+            return new CullingVolumeCamera(value);
         }
     }
 }

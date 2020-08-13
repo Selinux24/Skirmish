@@ -91,14 +91,32 @@ namespace Engine
 
             bool facingOnly = rayPickingParams.HasFlag(RayPickingParams.FacingOnly);
 
-            if (this.groundPickingQuadtree != null && this.groundPickingQuadtree.PickNearest(ray, facingOnly, out PickingResult<Triangle> gResult))
+            if (this.groundPickingQuadtree != null)
             {
-                if (result.Distance > gResult.Distance)
+                // Use quadtree
+                if (this.groundPickingQuadtree.PickNearest(ray, facingOnly, out PickingResult<Triangle> gResult))
                 {
-                    result = gResult;
-                }
+                    if (result.Distance > gResult.Distance)
+                    {
+                        result = gResult;
+                    }
 
-                res = true;
+                    res = true;
+                }
+            }
+            else
+            {
+                // Brute force
+                var mesh = GetVolume(true);
+                var inItem = Intersection.IntersectNearest(ray, mesh, facingOnly, out var pos, out var tri, out var d);
+                if (inItem)
+                {
+                    result.Position = pos;
+                    result.Item = tri;
+                    result.Distance = d;
+
+                    res = true;
+                }
             }
 
             return res;
@@ -131,14 +149,32 @@ namespace Engine
 
             bool facingOnly = rayPickingParams.HasFlag(RayPickingParams.FacingOnly);
 
-            if (this.groundPickingQuadtree != null && this.groundPickingQuadtree.PickFirst(ray, facingOnly, out PickingResult<Triangle> gResult))
+            if (this.groundPickingQuadtree != null)
             {
-                if (result.Distance > gResult.Distance)
+                // Use quadtree
+                if (this.groundPickingQuadtree.PickFirst(ray, facingOnly, out PickingResult<Triangle> gResult))
                 {
-                    result = gResult;
-                }
+                    if (result.Distance > gResult.Distance)
+                    {
+                        result = gResult;
+                    }
 
-                res = true;
+                    res = true;
+                }
+            }
+            else
+            {
+                // Brute force
+                var mesh = GetVolume(true);
+                var inItem = Intersection.IntersectFirst(ray, mesh, facingOnly, out var pos, out var tri, out var d);
+                if (inItem)
+                {
+                    result.Position = pos;
+                    result.Item = tri;
+                    result.Distance = d;
+
+                    res = true;
+                }
             }
 
             return res;
@@ -168,11 +204,36 @@ namespace Engine
 
             bool facingOnly = rayPickingParams.HasFlag(RayPickingParams.FacingOnly);
 
-            if (this.groundPickingQuadtree != null && this.groundPickingQuadtree.PickAll(ray, facingOnly, out PickingResult<Triangle>[] gResults))
+            if (this.groundPickingQuadtree != null)
             {
-                results = gResults;
+                // Use quadtree
+                if (this.groundPickingQuadtree.PickAll(ray, facingOnly, out PickingResult<Triangle>[] gResults))
+                {
+                    results = gResults;
 
-                res = true;
+                    res = true;
+                }
+            }
+            else
+            {
+                // Brute force
+                var mesh = GetVolume(true);
+                var inItem = Intersection.IntersectAll(ray, mesh, facingOnly, out var pos, out var tris, out var ds);
+                if (inItem)
+                {
+                    results = new PickingResult<Triangle>[pos.Length];
+                    for (int i = 0; i < pos.Length; i++)
+                    {
+                        results[i] = new PickingResult<Triangle>
+                        {
+                            Position = pos[i],
+                            Item = tris[i],
+                            Distance = ds[i],
+                        };
+                    }
+
+                    res = true;
+                }
             }
 
             return res;
@@ -252,6 +313,7 @@ namespace Engine
 
             if (groundPickingQuadtree != null)
             {
+                // Use quadtree
                 var nodes = groundPickingQuadtree.GetNodesInVolume(new CullingVolumeSphere(sphere));
                 if (!nodes.Any())
                 {
@@ -281,6 +343,7 @@ namespace Engine
             }
             else
             {
+                // Brute force
                 var mesh = GetVolume(true);
                 if (Intersection.SphereIntersectsMesh(sphere, mesh, out Triangle tri, out Vector3 position, out float distance))
                 {
