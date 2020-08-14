@@ -539,7 +539,7 @@ namespace Engine
         /// <param name="task">Resource load task</param>
         /// <param name="callback">Callback</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        public async Task<bool> LoadResourcesAsync<T>(Task<T> task, Action<T> callback = null)
+        public async Task<bool> LoadResourcesAsync<T>(Task<T> task, Action<LoadResourceResult<T>> callback = null)
         {
             return await this.Game.LoadResourcesAsync(this, task, callback);
         }
@@ -550,7 +550,7 @@ namespace Engine
         /// <param name="tasks">Resource load tasks</param>
         /// <param name="callback">Callback</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        public async Task<bool> LoadResourcesAsync<T>(IEnumerable<Task<T>> tasks, Action<IEnumerable<T>> callback = null)
+        public async Task<bool> LoadResourcesAsync<T>(IEnumerable<Task<T>> tasks, Action<IEnumerable<LoadResourceResult<T>>> callback = null)
         {
             return await this.Game.LoadResourcesAsync(this, tasks, callback);
         }

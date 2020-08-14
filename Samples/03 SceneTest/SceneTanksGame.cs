@@ -204,14 +204,8 @@ namespace SceneTest
 
                         await Task.Delay(1500);
 
-                        gameMessage.Text = "Ready!";
-                        gameMessage.TweenScale(0, 1, 500, ScaleFuncs.CubicEaseIn);
-                        gameMessage.Show(500);
+                        await ShowMessage("Ready!", 2000);
 
-                        await Task.Delay(2000);
-
-                        gameMessage.ClearTween();
-                        gameMessage.Hide(100);
                         fadePanel.ClearTween();
                         fadePanel.Hide(2000);
 
@@ -513,7 +507,6 @@ namespace SceneTest
             fireKeyText.VerticalAlign = VerticalTextAlign.Middle;
             fireKeyText.AdjustAreaWithText = false;
             fireKeyText.Visible = false;
-            fireKeyText.TweenScaleBounce(1, 1.01f, 500, ScaleFuncs.CubicEaseInOut);
         }
         private async Task InitializeUIMinimap()
         {
@@ -564,10 +557,10 @@ namespace SceneTest
             trajectoryMarkerPool = new Sprite[5];
             for (int i = 0; i < trajectoryMarkerPool.Length; i++)
             {
-                var trajectoryMarker = await this.AddComponentSprite(SpriteDescription.FromFile("SceneTanksGame/Dot.png"), SceneObjectUsages.UI, layerUI + 1);
+                var trajectoryMarker = await this.AddComponentSprite(SpriteDescription.FromFile("SceneTanksGame/Dot_w.png"), SceneObjectUsages.UI, layerUI + 1);
                 trajectoryMarker.Width = 50;
                 trajectoryMarker.Height = 50;
-                trajectoryMarker.TintColor = Color.Red;
+                trajectoryMarker.TintColor = Color.Transparent;
                 trajectoryMarker.Active = false;
                 trajectoryMarker.Visible = false;
                 trajectoryMarker.TweenRotateRepeat(0, MathUtil.TwoPi, 1000, ScaleFuncs.Linear);
@@ -629,10 +622,9 @@ namespace SceneTest
             groundDesc.HeightmapDescription.ContentPath = "SceneTanksGame/terrain";
             groundDesc.HeightmapDescription.Textures = new HeightmapDescription.TexturesDescription
             {
-                TexturesLR = new[] { "terrain.png" },
-                NormalMaps = new[] { "terrain_nmap.png" },
-                Scale = 0.6666f,
-                Displacement = new Vector2(0.5f, 0.5f),
+                TexturesLR = new[] { "Diffuse.jpg" },
+                NormalMaps = new[] { "Normal.jpg" },
+                Scale = 0.2f,
             };
 
             terrain = await this.AddComponentScenery(groundDesc, SceneObjectUsages.Ground, layerModels);
@@ -783,6 +775,7 @@ namespace SceneTest
 
             pbFire.Visible = visible;
             fireKeyText.Visible = visible;
+            fireKeyText.TweenScaleBounce(1, 1.01f, 500, ScaleFuncs.CubicEaseInOut);
 
             miniMapBackground.Visible = visible;
             miniMapTank1.Visible = visible;
@@ -800,15 +793,15 @@ namespace SceneTest
                 return;
             }
 
+            UpdateTurnStatus();
+            UpdatePlayersStatus();
+
             if (gameEnding)
             {
                 UpdateInputEndGame();
 
                 return;
             }
-
-            UpdateTurnStatus();
-            UpdatePlayersStatus();
 
             if (dialogActive)
             {
@@ -1107,6 +1100,7 @@ You will lost all the game progress.",
                 trajectoryMarkerPool[i].Left = screenPos.X - (trajectoryMarkerPool[i].Width * 0.5f);
                 trajectoryMarkerPool[i].Top = screenPos.Y - (trajectoryMarkerPool[i].Height * 0.5f);
                 trajectoryMarkerPool[i].Scale = scale;
+                trajectoryMarkerPool[i].TintColor = ShooterStatus.Color;
                 trajectoryMarkerPool[i].Alpha = 1f - (i / (float)markers);
                 trajectoryMarkerPool[i].Active = true;
                 trajectoryMarkerPool[i].Visible = true;
@@ -1223,7 +1217,18 @@ You will lost all the game progress.",
 
             Task.Run(async () =>
             {
+                dialogActive = true;
+
+                await ShowMessage(impact ? "Impact!" : "You miss!", 2000);
+
                 await EvaluateTurn(ShooterStatus, TargetStatus);
+
+                if (!gameEnding)
+                {
+                    await ShowMessage($"Your turn {ShooterStatus.Name}", 2000);
+                }
+
+                dialogActive = false;
             });
 
             if (impactPosition.HasValue)
@@ -1337,6 +1342,20 @@ You will lost all the game progress.",
 
             this.particleManager.AddParticleSystem(ParticleSystemTypes.CPU, this.particleDescriptions["Fire"], emitter1);
             this.particleManager.AddParticleSystem(ParticleSystemTypes.CPU, this.particleDescriptions["Plume"], emitter2);
+        }
+
+        private async Task ShowMessage(string text, int delay)
+        {
+            gameMessage.Text = text;
+            gameMessage.TweenScale(0, 1, 500, ScaleFuncs.CubicEaseIn);
+            gameMessage.Show(500);
+
+            await Task.Delay(delay);
+
+            gameMessage.ClearTween();
+            gameMessage.Hide(100);
+
+            await Task.Delay(100);
         }
 
         private void ShowDialog(string message, Action onCloseCallback, Action onAcceptCallback)

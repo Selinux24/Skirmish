@@ -311,12 +311,12 @@ namespace Engine
                 }
             }
 
-            this.drawCount = data.Count;
-
-            if (data.Count > 0)
+            if (!this.BufferManager.WriteVertexBuffer(this.vertexBuffer, data))
             {
-                this.BufferManager.WriteVertexBuffer(this.vertexBuffer, data);
+                return;
             }
+
+            this.drawCount = data.Count;
 
             this.dictionaryChanged = false;
         }

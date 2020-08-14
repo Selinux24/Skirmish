@@ -283,6 +283,11 @@ namespace Engine
             foreach (string materialName in meshDict.Keys)
             {
                 var mesh = meshDict[materialName];
+                if (!mesh.Ready)
+                {
+                    continue;
+                }
+
                 var material = this.DrawingData.Materials[materialName];
 
                 effect.UpdatePerObject(this.AnimationOffset, material, this.TextureIndex);
@@ -292,7 +297,7 @@ namespace Engine
                 var technique = effect.GetTechnique(mesh.VertextType, false, material.Material.IsTransparent);
                 this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
 
-                count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
+                count += mesh.Count;
 
                 for (int p = 0; p < technique.PassCount; p++)
                 {
@@ -326,6 +331,11 @@ namespace Engine
             foreach (string materialName in meshDict.Keys)
             {
                 var mesh = meshDict[materialName];
+                if (!mesh.Ready)
+                {
+                    continue;
+                }
+
                 var material = this.DrawingData.Materials[materialName];
 
                 bool draw = context.ValidateDraw(this.BlendMode, material.Material.IsTransparent);
@@ -341,7 +351,7 @@ namespace Engine
                 var technique = effect.GetTechnique(mesh.VertextType, false);
                 this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
 
-                count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
+                count += mesh.Count;
 
                 for (int p = 0; p < technique.PassCount; p++)
                 {

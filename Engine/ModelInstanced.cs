@@ -336,9 +336,14 @@ namespace Engine
             foreach (string materialName in meshDict.Keys)
             {
                 var mesh = meshDict[materialName];
+                if (!mesh.Ready)
+                {
+                    continue;
+                }
+
                 var material = drawingData.Materials[materialName];
 
-                count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
+                count += mesh.Count;
 
                 effect.UpdatePerObject(0, material, 0);
 
@@ -464,6 +469,11 @@ namespace Engine
             foreach (string materialName in meshDict.Keys)
             {
                 var mesh = meshDict[materialName];
+                if (!mesh.Ready)
+                {
+                    continue;
+                }
+
                 var material = drawingData.Materials[materialName];
 
                 bool draw = context.ValidateDraw(this.BlendMode, material.Material.IsTransparent);
@@ -472,7 +482,7 @@ namespace Engine
                     continue;
                 }
 
-                count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
+                count += mesh.Count;
 
                 effect.UpdatePerObject(0, material, 0, this.UseAnisotropicFiltering);
 

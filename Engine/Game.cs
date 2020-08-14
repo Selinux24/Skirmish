@@ -412,9 +412,20 @@ namespace Engine
         /// <param name="task">Resource load task</param>
         /// <param name="callback">Callback</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal async Task<bool> LoadResourcesAsync<T>(Scene scene, Task<T> task, Action<T> callback = null)
+        internal async Task<bool> LoadResourcesAsync<T>(Scene scene, Task<T> task, Action<LoadResourceResult<T>> callback = null)
         {
-            return await LoadResourcesAsync(scene, new[] { task }, (results) => { callback?.Invoke(results.FirstOrDefault()); });
+            bool res = false;
+
+            while (!res)
+            {
+                res = await InternalLoadResourcesAsync(scene, new[] { task }, (results) => { callback?.Invoke(results.FirstOrDefault()); });
+
+                if (res) break;
+
+                await Task.Delay(100);
+            }
+
+            return res;
         }
         /// <summary>
         /// Executes a list of resource load tasks
@@ -424,7 +435,67 @@ namespace Engine
         /// <param name="tasks">Resource load tasks</param>
         /// <param name="callback">Callback</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal async Task<bool> LoadResourcesAsync<T>(Scene scene, IEnumerable<Task<T>> tasks, Action<IEnumerable<T>> callback = null)
+        internal async Task<bool> LoadResourcesAsync<T>(Scene scene, IEnumerable<Task<T>> tasks, Action<IEnumerable<LoadResourceResult<T>>> callback = null)
+        {
+            bool res = false;
+
+            while (!res)
+            {
+                res = await InternalLoadResourcesAsync(scene, tasks, callback);
+
+                if (res) break;
+
+                await Task.Delay(100);
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Executes a resource load task
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        /// <param name="task">Resource load task</param>
+        /// <param name="callback">Callback</param>
+        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
+        internal async Task<bool> LoadResourcesAsync(Scene scene, Task task, Action callback = null)
+        {
+            bool res = false;
+
+            while (!res)
+            {
+                res = await InternalLoadResourcesAsync(scene, new[] { task }, callback);
+
+                if (res) break;
+
+                await Task.Delay(100);
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Executes a list of resource load tasks
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        /// <param name="tasks">Resource load tasks</param>
+        /// <param name="callback">Callback</param>
+        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
+        internal async Task<bool> LoadResourcesAsync(Scene scene, IEnumerable<Task> tasks, Action callback = null)
+        {
+            bool res = false;
+
+            while (!res)
+            {
+                res = await InternalLoadResourcesAsync(scene, tasks, callback);
+
+                if (res) break;
+
+                await Task.Delay(100);
+            }
+
+            return res;
+        }
+
+        private async Task<bool> InternalLoadResourcesAsync<T>(Scene scene, IEnumerable<Task<T>> tasks, Action<IEnumerable<LoadResourceResult<T>>> callback = null)
         {
             if (ResourceLoadRuning)
             {
@@ -433,7 +504,58 @@ namespace Engine
 
             ResourceLoadRuning = true;
 
-            List<T> taskResults = new List<T>();
+            List<LoadResourceResult<T>> loadResult = new List<LoadResourceResult<T>>();
+
+            try
+            {
+                var taskList = tasks.ToList();
+
+                int totalTasks = taskList.Count;
+                int currentTask = 0;
+                while (taskList.Any())
+                {
+                    var t = await Task.WhenAny(taskList);
+
+                    taskList.Remove(t);
+
+                    LoadResourceResult<T> res = new LoadResourceResult<T>();
+                    res.Completed = t.IsCompleted;
+
+                    if (t.IsFaulted)
+                    {
+                        Console.WriteLine($"Faulted task {t.Exception}");
+                        res.Exception = t.Exception;
+                    }
+                    else
+                    {
+                        res.TaskResult = await t;
+                    }
+
+                    loadResult.Add(res);
+
+                    Progress?.Report(++currentTask / (float)totalTasks);
+                }
+
+                IntegrateResources(scene);
+            }
+            finally
+            {
+                ResourceLoadRuning = false;
+
+                callback?.Invoke(loadResult.ToArray());
+            }
+
+            return true;
+        }
+
+        private async Task<bool> InternalLoadResourcesAsync(Scene scene, IEnumerable<Task> tasks, Action callback = null)
+        {
+            if (ResourceLoadRuning)
+            {
+                return false;
+            }
+
+            ResourceLoadRuning = true;
 
             try
             {
@@ -452,93 +574,10 @@ namespace Engine
                         Console.WriteLine($"Faulted task {t.Exception}");
                     }
 
-                    taskResults.Add(await t);
-
                     Progress?.Report(++currentTask / (float)totalTasks);
                 }
 
-                ResourcesLoading?.Invoke(this, new GameLoadResourcesEventArgs() { Scene = scene });
-
-                Console.WriteLine("BufferManager: Recreating buffers");
-                this.BufferManager.CreateBuffers(Progress);
-                Console.WriteLine("BufferManager: Buffers recreated");
-
-                Console.WriteLine("ResourceManager: Creating new resources");
-                this.ResourceManager.CreateResources(Progress);
-                Console.WriteLine("ResourceManager: New resources created");
-
-                ResourcesLoaded?.Invoke(this, new GameLoadResourcesEventArgs() { Scene = scene });
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-            finally
-            {
-                ResourceLoadRuning = false;
-
-                callback?.Invoke(taskResults.ToArray());
-            }
-
-            return true;
-        }
-        /// <summary>
-        /// Executes a resource load task
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="task">Resource load task</param>
-        /// <param name="callback">Callback</param>
-        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal async Task<bool> LoadResourcesAsync(Scene scene, Task task, Action callback = null)
-        {
-            return await LoadResourcesAsync(scene, new[] { task }, callback);
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="tasks">Resource load tasks</param>
-        /// <param name="callback">Callback</param>
-        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal async Task<bool> LoadResourcesAsync(Scene scene, IEnumerable<Task> tasks, Action callback = null)
-        {
-            if (ResourceLoadRuning)
-            {
-                return false;
-            }
-
-            ResourceLoadRuning = true;
-
-            try
-            {
-                var taskList = tasks.ToList();
-
-                int totalTasks = taskList.Count;
-                int currentTask = 0;
-                while (taskList.Any())
-                {
-                    var t = await Task.WhenAny(taskList);
-
-                    taskList.Remove(t);
-
-                    Progress?.Report(++currentTask / (float)totalTasks);
-                }
-
-                ResourcesLoading?.Invoke(this, new GameLoadResourcesEventArgs() { Scene = scene });
-
-                Console.WriteLine("BufferManager: Recreating buffers");
-                this.BufferManager.CreateBuffers(Progress);
-                Console.WriteLine("BufferManager: Buffers recreated");
-
-                Console.WriteLine("ResourceManager: Creating new resources");
-                this.ResourceManager.CreateResources(Progress);
-                Console.WriteLine("ResourceManager: New resources created");
-
-                ResourcesLoaded?.Invoke(this, new GameLoadResourcesEventArgs() { Scene = scene });
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
+                IntegrateResources(scene);
             }
             finally
             {
@@ -548,6 +587,28 @@ namespace Engine
             }
 
             return true;
+        }
+
+        private void IntegrateResources(Scene scene)
+        {
+            try
+            {
+                ResourcesLoading?.Invoke(this, new GameLoadResourcesEventArgs() { Scene = scene });
+
+                Console.WriteLine("BufferManager: Recreating buffers");
+                this.BufferManager.CreateBuffers(Progress);
+                Console.WriteLine("BufferManager: Buffers recreated");
+
+                Console.WriteLine("ResourceManager: Creating new resources");
+                this.ResourceManager.CreateResources(Progress);
+                Console.WriteLine("ResourceManager: New resources created");
+
+                ResourcesLoaded?.Invoke(this, new GameLoadResourcesEventArgs() { Scene = scene });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
 
         /// <summary>
@@ -728,5 +789,12 @@ namespace Engine
 
             CollectGameStatus = false;
         }
+    }
+
+    public class LoadResourceResult<T>
+    {
+        public bool Completed { get; set; }
+        public Exception Exception { get; set; }
+        public T TaskResult { get; set; }
     }
 }

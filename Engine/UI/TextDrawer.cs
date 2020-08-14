@@ -408,8 +408,12 @@ namespace Engine.UI
                 return;
             }
 
-            this.BufferManager.WriteVertexBuffer(this.vertexBuffer, this.vertices);
-            this.BufferManager.WriteIndexBuffer(this.indexBuffer, this.indices);
+            bool vertsWrited = this.BufferManager.WriteVertexBuffer(this.vertexBuffer, this.vertices);
+            bool idxWrited = this.BufferManager.WriteIndexBuffer(this.indexBuffer, this.indices);
+            if (!vertsWrited || !idxWrited)
+            {
+                return;
+            }
 
             this.indexDrawCount = this.indices?.Length ?? 0;
 

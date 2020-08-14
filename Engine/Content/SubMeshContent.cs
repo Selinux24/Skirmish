@@ -290,6 +290,46 @@ namespace Engine.Content
         }
 
         /// <summary>
+        /// Process the vertex data
+        /// </summary>
+        /// <param name="description">Decription</param>
+        /// <param name="vertexType">Vertext type</param>
+        /// <param name="vertices">Resulting vertices</param>
+        /// <param name="indices">Resulting indices</param>
+        public void ProcessVertexData(VertexTypes vertexType, BoundingBox? constraint, out VertexData[] vertices, out uint[] indices)
+        {
+            if (VertexData.IsTangent(vertexType))
+            {
+                ComputeTangents();
+            }
+
+            if (!constraint.HasValue)
+            {
+                vertices = Vertices;
+                indices = Indices;
+
+                return;
+            }
+
+            if (Indices?.Length > 0)
+            {
+                GeometryUtil.ConstraintIndices(
+                    constraint.Value,
+                    Vertices, Indices,
+                    out vertices, out indices);
+            }
+            else
+            {
+                GeometryUtil.ConstraintVertices(
+                    constraint.Value,
+                    Vertices,
+                    out vertices);
+
+                indices = new uint[] { };
+            }
+        }
+
+        /// <summary>
         /// Gets text representation of instance
         /// </summary>
         /// <returns>Returns text representation of instance</returns>

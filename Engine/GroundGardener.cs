@@ -474,7 +474,10 @@ namespace Engine
                     var data = patch.GetData(gameTime, eyePosition, transparent);
 
                     //Attach data
-                    bufferManager.WriteVertexBuffer(this.VertexBuffer, data.ToArray());
+                    if (!bufferManager.WriteVertexBuffer(this.VertexBuffer, data.ToArray()))
+                    {
+                        return;
+                    }
 
                     this.vertexDrawCount = data.Count();
                     this.Attached = true;

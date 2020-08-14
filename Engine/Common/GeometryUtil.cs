@@ -1114,5 +1114,84 @@ namespace Engine.Common
 
             return bsph;
         }
+
+        /// <summary>
+        /// Computes constraints into vertices
+        /// </summary>
+        /// <param name="constraint">Constraint</param>
+        /// <param name="vertices">Vertices</param>
+        /// <param name="res">Resulting vertices</param>
+        public static void ConstraintVertices(BoundingBox constraint, VertexData[] vertices, out VertexData[] res)
+        {
+            List<VertexData> tmpVertices = new List<VertexData>();
+
+            for (int i = 0; i < vertices.Length; i += 3)
+            {
+                if (constraint.Contains(vertices[i + 0].Position.Value) != ContainmentType.Disjoint ||
+                    constraint.Contains(vertices[i + 1].Position.Value) != ContainmentType.Disjoint ||
+                    constraint.Contains(vertices[i + 2].Position.Value) != ContainmentType.Disjoint)
+                {
+                    tmpVertices.Add(vertices[i + 0]);
+                    tmpVertices.Add(vertices[i + 1]);
+                    tmpVertices.Add(vertices[i + 2]);
+                }
+            }
+
+            res = tmpVertices.ToArray();
+        }
+        /// <summary>
+        /// Computes constraints into vertices and indices
+        /// </summary>
+        /// <param name="constraint">Constraint</param>
+        /// <param name="vertices">Vertices</param>
+        /// <param name="indices">Indices</param>
+        /// <param name="resVertices">Resulting vertices</param>
+        /// <param name="resIndices">Resulting indices</param>
+        public static void ConstraintIndices(BoundingBox constraint, VertexData[] vertices, uint[] indices, out VertexData[] resVertices, out uint[] resIndices)
+        {
+            List<uint> tmpIndices = new List<uint>();
+
+            // Gets all triangle indices into the constraint
+            for (int i = 0; i < indices.Length; i += 3)
+            {
+                var i0 = indices[i + 0];
+                var i1 = indices[i + 1];
+                var i2 = indices[i + 2];
+
+                var v0 = vertices[i0];
+                var v1 = vertices[i1];
+                var v2 = vertices[i2];
+
+                if (constraint.Contains(v0.Position.Value) != ContainmentType.Disjoint ||
+                    constraint.Contains(v1.Position.Value) != ContainmentType.Disjoint ||
+                    constraint.Contains(v2.Position.Value) != ContainmentType.Disjoint)
+                {
+                    tmpIndices.Add(i0);
+                    tmpIndices.Add(i1);
+                    tmpIndices.Add(i2);
+                }
+            }
+
+            List<VertexData> tmpVertices = new List<VertexData>();
+            List<Tuple<uint, uint>> dict = new List<Tuple<uint, uint>>();
+
+            // Adds all the selected vertices for each unique index, and create a index traductor for the new vertext list
+            foreach (uint index in tmpIndices.Distinct())
+            {
+                tmpVertices.Add(vertices[index]);
+                dict.Add(new Tuple<uint, uint>(index, (uint)tmpVertices.Count - 1));
+            }
+
+            // Set the new index values
+            for (int i = 0; i < tmpIndices.Count; i++)
+            {
+                uint newIndex = dict.Find(d => d.Item1 == tmpIndices[i]).Item2;
+
+                tmpIndices[i] = newIndex;
+            }
+
+            resVertices = tmpVertices.ToArray();
+            resIndices = tmpIndices.ToArray();
+        }
     }
 }

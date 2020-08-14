@@ -77,7 +77,7 @@ namespace Engine.Common
         /// <param name="description">Data description</param>
         /// <param name="instancingBuffer">Instancing buffer descriptor</param>
         /// <returns>Returns the generated drawing data objects</returns>
-        public static DrawingData Build(Game game, string name, ModelContent modelContent, DrawingDataDescription description, BufferDescriptor instancingBuffer)
+        public static DrawingData Build(Game game, string name, ModelContent modelContent, DrawingDataDescription description, BufferDescriptor instancingBuffer = null)
         {
             DrawingData res = new DrawingData(game, description);
 
@@ -97,7 +97,7 @@ namespace Engine.Common
             InitializeGeometry(res, modelContent, description);
 
             //Update meshes into device
-            InitializeMeshes(res, game, name, instancingBuffer);
+            InitializeMeshes(res, game, name, description.DynamicBuffers, instancingBuffer);
 
             //Lights
             InitializeLights(res, modelContent);
@@ -198,11 +198,12 @@ namespace Engine.Common
                 }
 
                 //Get vertex type
-                var vertexType = GetVertexType(description, drw.Materials, geometry.VertexType, isSkinned, material);
+                var vertexType = GetVertexType(geometry.VertexType, isSkinned, description.LoadNormalMaps, drw.Materials, material);
 
                 //Process the vertex data
-                ProcessVertexData(
-                    description, geometry, vertexType,
+                geometry.ProcessVertexData(
+                    vertexType,
+                    description.Constraint,
                     out var vertices, out var indices);
 
                 if (!bindShapeMatrix.IsIdentity)
@@ -236,13 +237,13 @@ namespace Engine.Common
         /// <summary>
         /// Get vertex type from geometry
         /// </summary>
-        /// <param name="description">Description</param>
-        /// <param name="materials">Material dictionary</param>
         /// <param name="vertexType">Vertex type</param>
         /// <param name="isSkinned">Sets wether the current geometry has skinning data or not</param>
+        /// <param name="loadNormalMaps">Load normal maps flag</param>
+        /// <param name="materials">Material dictionary</param>
         /// <param name="material">Material name</param>
         /// <returns>Returns the vertex type</returns>
-        private static VertexTypes GetVertexType(DrawingDataDescription description, MaterialDictionary materials, VertexTypes vertexType, bool isSkinned, string material)
+        private static VertexTypes GetVertexType(VertexTypes vertexType, bool isSkinned, bool loadNormalMaps, MaterialDictionary materials, string material)
         {
             var res = vertexType;
             if (isSkinned)
@@ -251,7 +252,7 @@ namespace Engine.Common
                 res = VertexData.GetSkinnedEquivalent(res);
             }
 
-            if (!description.LoadNormalMaps)
+            if (!loadNormalMaps)
             {
                 return res;
             }
@@ -267,102 +268,6 @@ namespace Engine.Common
             }
 
             return res;
-        }
-        /// <summary>
-        /// Process the vertex data
-        /// </summary>
-        /// <param name="description">Decription</param>
-        /// <param name="geometry">Geometry</param>
-        /// <param name="vertexType">Vertext type</param>
-        /// <param name="vertices">Resulting vertices</param>
-        /// <param name="indices">Resulting indices</param>
-        private static void ProcessVertexData(DrawingDataDescription description, SubMeshContent geometry, VertexTypes vertexType, out VertexData[] vertices, out uint[] indices)
-        {
-            if (VertexData.IsTangent(vertexType))
-            {
-                geometry.ComputeTangents();
-            }
-
-            if (!description.Constraint.HasValue)
-            {
-                vertices = geometry.Vertices;
-                indices = geometry.Indices;
-
-                return;
-            }
-
-            if (geometry.Indices?.Length > 0)
-            {
-                ComputeConstraintIndices(
-                    description.Constraint.Value,
-                    geometry.Vertices, geometry.Indices,
-                    out vertices, out indices);
-            }
-            else
-            {
-                ComputeConstraintVertices(
-                    description.Constraint.Value,
-                    geometry.Vertices,
-                    out vertices);
-
-                indices = new uint[] { };
-            }
-        }
-        /// <summary>
-        /// Compute constraints into vertices
-        /// </summary>
-        /// <param name="constraint">Constraint</param>
-        /// <param name="vertices">Vertices</param>
-        /// <param name="res">Resulting vertices</param>
-        private static void ComputeConstraintVertices(BoundingBox constraint, VertexData[] vertices, out VertexData[] res)
-        {
-            List<VertexData> tmpVertices = new List<VertexData>();
-
-            for (int i = 0; i < vertices.Length; i += 3)
-            {
-                if (constraint.Contains(vertices[i + 0].Position.Value) != ContainmentType.Disjoint ||
-                    constraint.Contains(vertices[i + 1].Position.Value) != ContainmentType.Disjoint ||
-                    constraint.Contains(vertices[i + 2].Position.Value) != ContainmentType.Disjoint)
-                {
-                    tmpVertices.Add(vertices[i + 0]);
-                    tmpVertices.Add(vertices[i + 1]);
-                    tmpVertices.Add(vertices[i + 2]);
-                }
-            }
-
-            res = tmpVertices.ToArray();
-        }
-        /// <summary>
-        /// Compute constraints into vertices and indices
-        /// </summary>
-        /// <param name="constraint">Constraint</param>
-        /// <param name="vertices">Vertices</param>
-        /// <param name="indices">Indices</param>
-        /// <param name="resVertices">Resulting vertices</param>
-        /// <param name="resIndices">Resulting indices</param>
-        private static void ComputeConstraintIndices(BoundingBox constraint, VertexData[] vertices, uint[] indices, out VertexData[] resVertices, out uint[] resIndices)
-        {
-            List<VertexData> tmpVertices = new List<VertexData>();
-            List<uint> tmpIndices = new List<uint>();
-
-            uint index = 0;
-            for (int i = 0; i < indices.Length; i += 3)
-            {
-                if (constraint.Contains(vertices[indices[i + 0]].Position.Value) != ContainmentType.Disjoint ||
-                    constraint.Contains(vertices[indices[i + 1]].Position.Value) != ContainmentType.Disjoint ||
-                    constraint.Contains(vertices[indices[i + 2]].Position.Value) != ContainmentType.Disjoint)
-                {
-                    tmpVertices.Add(vertices[indices[i + 0]]);
-                    tmpVertices.Add(vertices[indices[i + 1]]);
-                    tmpVertices.Add(vertices[indices[i + 2]]);
-                    tmpIndices.Add(index++);
-                    tmpIndices.Add(index++);
-                    tmpIndices.Add(index++);
-                }
-            }
-
-            resVertices = tmpVertices.ToArray();
-            resIndices = tmpIndices.ToArray();
         }
         /// <summary>
         /// Reads skinning data
@@ -487,24 +392,21 @@ namespace Engine.Common
         /// <param name="drw">Drawing data</param>
         /// <param name="game">Game</param>
         /// <param name="name">Owner name</param>
+        /// <param name="dynamicBuffers">Create dynamic buffers</param>
         /// <param name="instancingBuffer">Instancing buffer descriptor</param>
-        private static void InitializeMeshes(DrawingData drw, Game game, string name, BufferDescriptor instancingBuffer)
+        private static void InitializeMeshes(DrawingData drw, Game game, string name, bool dynamicBuffers, BufferDescriptor instancingBuffer)
         {
             foreach (var dictionary in drw.Meshes.Values)
             {
                 foreach (var mesh in dictionary.Values)
                 {
                     //Vertices
-                    mesh.VertexBuffer = game.BufferManager.AddVertexData($"{name}.{mesh.Name}", false, mesh.Vertices.ToArray(), instancingBuffer);
+                    mesh.VertexBuffer = game.BufferManager.AddVertexData($"{name}.{mesh.Name}", dynamicBuffers, mesh.Vertices.ToArray(), instancingBuffer);
 
                     if (mesh.Indexed)
                     {
                         //Indices
-                        mesh.IndexBuffer = game.BufferManager.AddIndexData($"{name}.{mesh.Name}", false, mesh.Indices.ToArray());
-                    }
-                    else
-                    {
-                        mesh.IndexBuffer = new BufferDescriptor();
+                        mesh.IndexBuffer = game.BufferManager.AddIndexData($"{name}.{mesh.Name}", dynamicBuffers, mesh.Indices.ToArray());
                     }
                 }
             }
@@ -589,7 +491,11 @@ namespace Engine.Common
                     {
                         //Remove data from buffer manager
                         this.Game.BufferManager?.RemoveVertexData(mesh.VertexBuffer);
-                        this.Game.BufferManager?.RemoveIndexData(mesh.IndexBuffer);
+
+                        if (mesh.IndexBuffer != null)
+                        {
+                            this.Game.BufferManager?.RemoveIndexData(mesh.IndexBuffer);
+                        }
 
                         //Dispose the mesh
                         mesh.Dispose();

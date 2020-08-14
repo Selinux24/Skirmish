@@ -70,6 +70,35 @@ namespace Engine.Common
         /// Index buffer descriptor
         /// </summary>
         public BufferDescriptor IndexBuffer { get; set; } = null;
+        /// <summary>
+        /// Gets whether the internal state of the mesh is ready from drawing
+        /// </summary>
+        public bool Ready
+        {
+            get
+            {
+                return VertexBuffer.Ready && (IndexBuffer?.Ready ?? true);
+            }
+        }
+        /// <summary>
+        /// Gets the primitive count of the mesh
+        /// </summary>
+        public int Count
+        {
+            get
+            {
+                int count = IndexBuffer?.Count > 0 ? IndexBuffer.Count : VertexBuffer.Count;
+                switch (Topology)
+                {
+                    case Topology.LineList:
+                        return count / 2;
+                    case Topology.TriangleList:
+                        return count / 3;
+                    default:
+                        return count;
+                }
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -125,7 +154,8 @@ namespace Engine.Common
                 {
                     graphics.DrawIndexed(
                         this.IndexBuffer.Count,
-                        this.IndexBuffer.BufferOffset, this.VertexBuffer.BufferOffset);
+                        this.IndexBuffer.BufferOffset,
+                        this.VertexBuffer.BufferOffset);
                 }
             }
             else
@@ -155,7 +185,8 @@ namespace Engine.Common
                         graphics.DrawIndexedInstanced(
                             this.IndexBuffer.Count,
                             count,
-                            this.IndexBuffer.BufferOffset, this.VertexBuffer.BufferOffset, startInstanceLocation);
+                            this.IndexBuffer.BufferOffset,
+                            this.VertexBuffer.BufferOffset, startInstanceLocation);
                     }
                 }
                 else

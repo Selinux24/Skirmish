@@ -54,7 +54,7 @@ namespace Engine
                     Constraint = node.BoundingBox,
                 };
 
-                var drawingData = DrawingData.Build(game, name, content, desc, null);
+                var drawingData = DrawingData.Build(game, name, content, desc);
 
                 return new SceneryPatch(game, drawingData);
             }
@@ -122,6 +122,11 @@ namespace Engine
                     foreach (string materialName in meshDict.Keys)
                     {
                         var mesh = meshDict[materialName];
+                        if (!mesh.Ready)
+                        {
+                            continue;
+                        }
+
                         var material = this.DrawingData.Materials[materialName];
 
                         var technique = sceneryEffect.GetTechnique(mesh.VertextType, false, material.Material.IsTransparent);
@@ -158,6 +163,11 @@ namespace Engine
                     foreach (string materialName in meshDict.Keys)
                     {
                         var mesh = meshDict[materialName];
+                        if (!mesh.Ready)
+                        {
+                            continue;
+                        }
+
                         var material = this.DrawingData.Materials[materialName];
 
                         bool draw = context.ValidateDraw(BlendModes.Default, material.Material.IsTransparent);
@@ -173,7 +183,7 @@ namespace Engine
                         bufferManager.SetIndexBuffer(mesh.IndexBuffer);
                         bufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
 
-                        count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count : mesh.VertexBuffer.Count;
+                        count += mesh.Count;
 
                         for (int p = 0; p < technique.PassCount; p++)
                         {
@@ -185,7 +195,7 @@ namespace Engine
                 }
 
                 Counters.InstancesPerFrame++;
-                Counters.PrimitivesPerFrame += count / 3;
+                Counters.PrimitivesPerFrame += count;
             }
 
             /// <summary>
@@ -279,6 +289,15 @@ namespace Engine
 
             // Generate quadtree
             groundPickingQuadtree = description.ReadQuadTree(content.GetTriangles());
+
+            // Generate initial patches
+            var nodes = groundPickingQuadtree.GetLeafNodes();
+            foreach (var node in nodes)
+            {
+                var patch = SceneryPatch.CreatePatch(this.Game, description.Name, content, node);
+
+                this.patchDictionary.Add(node.Id, patch);
+            }
 
             // Retrieve lights from content
             Lights = content.GetLights().ToArray();
@@ -451,22 +470,24 @@ namespace Engine
             // Fire and forget
             Task.Run(async () =>
             {
-                bool loadResult = false;
-                while (!loadResult)
-                {
-                    loadResult = await this.Scene.LoadResourcesAsync(
-                        taskList,
-                        (results) =>
+                await this.Scene.LoadResourcesAsync(
+                    taskList,
+                    (results) =>
+                    {
+                        foreach (var res in results)
                         {
-                            foreach (var res in results)
+                            // Assign patch to dictionary
+                            if (res.Completed)
                             {
-                                // Assign patch to dictionary
-                                this.patchDictionary[res.Id] = res.Patch;
+                                this.patchDictionary[res.TaskResult.Id] = res.TaskResult.Patch;
                             }
-                        });
-
-                    await Task.Delay(100);
-                }
+                            else
+                            {
+                                this.patchDictionary.Remove(res.TaskResult.Id);
+                                Console.WriteLine($"Error creating patch {res.TaskResult.Id}: {res.Exception.Message}");
+                            }
+                        }
+                    });
             });
         }
         /// <summary>
@@ -476,9 +497,13 @@ namespace Engine
         private async Task<SceneryPatchTask> LoadPatch(PickingQuadTreeNode<Triangle> node)
         {
             // Create patch
-            var patch = SceneryPatch.CreatePatch(this.Game, this.Description.Name, content, node);
+            SceneryPatchTask res = new SceneryPatchTask
+            {
+                Id = node.Id,
+                Patch = SceneryPatch.CreatePatch(this.Game, this.Description.Name, content, node),
+            };
 
-            return await Task.FromResult(new SceneryPatchTask { Id = node.Id, Patch = patch });
+            return await Task.FromResult(res);
         }
     }
 
