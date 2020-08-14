@@ -10,7 +10,6 @@ namespace Engine
 {
     using Engine.Common;
     using Engine.Effects;
-    using System.Runtime.Remoting.Messaging;
 
     /// <summary>
     /// Game class

@@ -98,7 +98,6 @@ namespace Engine
                 throw new EngineException("No geometry found in description.");
             }
         }
-
         /// <summary>
         /// Reads a quadtree from description
         /// </summary>
