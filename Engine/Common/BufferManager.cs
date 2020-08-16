@@ -341,7 +341,6 @@ namespace Engine.Common
 
                     //Dispose old buffer
                     oldBuffer?.Dispose();
-                    oldBuffer = null;
 
                     Console.WriteLine($"Reallocated {name}. Size {descriptor.Instances}");
                 }
@@ -396,7 +395,6 @@ namespace Engine.Common
 
                     //Dispose old buffer
                     oldBuffer?.Dispose();
-                    oldBuffer = null;
 
                     Console.WriteLine($"Reallocated {name} and binding. Size {descriptor.Data.Count()}");
                 }
@@ -456,7 +454,6 @@ namespace Engine.Common
                     this.indexBuffers[descriptor.BufferIndex] = buffer;
                     //Dispose buffer
                     oldBuffer?.Dispose();
-                    oldBuffer = null;
 
                     Console.WriteLine($"Reallocated {name}. Size {descriptor.Data.Count()}");
                 }
