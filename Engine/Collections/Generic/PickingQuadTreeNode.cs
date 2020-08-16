@@ -525,27 +525,8 @@ namespace Engine.Collections.Generic
             item = default;
             distance = float.MaxValue;
 
-            SortedDictionary<float, PickingQuadTreeNode<T>> boxHitsByDistance = new SortedDictionary<float, PickingQuadTreeNode<T>>();
-
-            #region Find children contacts by distance to hit in bounding box
-
-            foreach (var node in this.Children)
-            {
-                if (Intersection.RayIntersectsBox(ray, node.BoundingBox, out float d))
-                {
-                    while (boxHitsByDistance.ContainsKey(d))
-                    {
-                        // avoid duplicate keys
-                        d += 0.0001f;
-                    }
-
-                    boxHitsByDistance.Add(d, node);
-                }
-            }
-
-            #endregion
-
-            if (boxHitsByDistance.Count > 0)
+            var boxHitsByDistance = FindContacts(ray);
+            if (boxHitsByDistance.Any())
             {
                 bool intersect = false;
 
@@ -588,6 +569,31 @@ namespace Engine.Collections.Generic
             }
 
             return false;
+        }
+        /// <summary>
+        /// Finds children contacts by distance to hit in bounding box
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <returns>Returns a sorted by distance node list</returns>
+        private SortedDictionary<float, PickingQuadTreeNode<T>> FindContacts(Ray ray)
+        {
+            SortedDictionary<float, PickingQuadTreeNode<T>> boxHitsByDistance = new SortedDictionary<float, PickingQuadTreeNode<T>>();
+
+            foreach (var node in this.Children)
+            {
+                if (Intersection.RayIntersectsBox(ray, node.BoundingBox, out float d))
+                {
+                    while (boxHitsByDistance.ContainsKey(d))
+                    {
+                        // avoid duplicate keys
+                        d += 0.0001f;
+                    }
+
+                    boxHitsByDistance.Add(d, node);
+                }
+            }
+
+            return boxHitsByDistance;
         }
 
         /// <summary>

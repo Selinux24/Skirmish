@@ -6,7 +6,7 @@ namespace Engine
     /// <summary>
     /// Camera 3D
     /// </summary>
-    public class Camera : IManipulator, IDisposable
+    public class Camera : IManipulator, IIntersectable, IDisposable
     {
         /// <summary>
         /// Creates an isometric camera
@@ -484,6 +484,10 @@ namespace Engine
         /// Gets or sets whether the camera must invert the Y-delta mouse coordinate
         /// </summary>
         public bool InvertY { get; set; }
+        /// <summary>
+        /// Gets or sets the camera radius, for collision detection
+        /// </summary>
+        public float CameraRadius { get; set; } = 1f;
 
         /// <summary>
         /// Constructor
@@ -1064,6 +1068,33 @@ namespace Engine
                     this.StopTranslations();
                 }
             }
+        }
+
+        /// <summary>
+        /// Gets whether the sphere intersects with the current object
+        /// </summary>
+        /// <param name="sphere">Sphere</param>
+        /// <param name="result">Picking results</param>
+        /// <returns>Returns true if intersects</returns>
+        public bool Intersects(IntersectionVolumeSphere sphere, out PickingResult<Triangle> result)
+        {
+            result = new PickingResult<Triangle>()
+            {
+                Distance = float.MaxValue,
+            };
+
+            var bsph = new BoundingSphere(this.position, Math.Max(1f, this.CameraRadius));
+            if (bsph.Intersects(sphere))
+            {
+                float distance = Vector3.Distance(this.position, sphere.Position);
+
+                result.Distance = distance;
+                result.Position = Vector3.Normalize(this.position - sphere.Position) * distance * 0.5f;
+
+                return true;
+            }
+
+            return false;
         }
     }
 }

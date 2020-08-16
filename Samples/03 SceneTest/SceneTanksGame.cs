@@ -837,8 +837,7 @@ namespace SceneTest
             if (freeCamera)
             {
                 if (this.Game.Input.KeyJustReleased(Keys.F) ||
-                    this.Game.Input.KeyJustReleased(Keys.Escape) ||
-                    this.Game.Input.KeyJustReleased(Keys.Space))
+                    this.Game.Input.KeyJustReleased(Keys.Escape))
                 {
                     ToggleFreeCamera();
 
@@ -961,6 +960,8 @@ You will lost all the game progress.",
                 this.Game.Input.MouseYDelta);
 #endif
 
+            Vector3 prevPosition = this.Camera.Position;
+
             if (this.Game.Input.KeyPressed(Keys.A))
             {
                 this.Camera.MoveLeft(gameTime, this.Game.Input.ShiftPressed);
@@ -979,6 +980,11 @@ You will lost all the game progress.",
             if (this.Game.Input.KeyPressed(Keys.S))
             {
                 this.Camera.MoveBackward(gameTime, this.Game.Input.ShiftPressed);
+            }
+
+            if (this.terrain.Intersects(new IntersectionVolumeSphere(this.Camera.Position, this.Camera.CameraRadius), out var res))
+            {
+                this.Camera.Position = prevPosition;
             }
         }
 
