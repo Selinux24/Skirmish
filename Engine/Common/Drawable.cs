@@ -94,7 +94,7 @@ namespace Engine.Common
         /// <param name="distance">If the object is inside the volume, returns the distance</param>
         /// <returns>Returns true if the object is outside of the frustum</returns>
         /// <remarks>By default, returns true and distance = float.MaxValue</remarks>
-        public virtual bool Cull(ICullingVolume volume, out float distance)
+        public virtual bool Cull(IIntersectionVolume volume, out float distance)
         {
             distance = float.MaxValue;
 

@@ -5,9 +5,9 @@ namespace Engine
     using Engine.Common;
 
     /// <summary>
-    /// Culling volume for camera (Viewing frustum)
+    /// Frustum intersection volume
     /// </summary>
-    public class CullingVolumeCamera : ICullingVolume
+    public class IntersectionVolumeFrustum : IIntersectionVolume
     {
         /// <summary>
         /// Internal volume
@@ -27,7 +27,7 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="frustum">Camera view frustum</param>
-        public CullingVolumeCamera(BoundingFrustum frustum)
+        public IntersectionVolumeFrustum(BoundingFrustum frustum)
         {
             this.frustum = frustum;
 
@@ -37,7 +37,7 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="viewProj">Camera view * projection matrix</param>
-        public CullingVolumeCamera(Matrix viewProj)
+        public IntersectionVolumeFrustum(Matrix viewProj)
         {
             this.frustum = new BoundingFrustum(viewProj);
 
@@ -74,18 +74,18 @@ namespace Engine
         }
 
         /// <summary>
-        /// Implicit conversion between BoundingFrustum and CullingVolumeCamera
+        /// Implicit conversion between BoundingFrustum and IntersectionVolumeFrustum
         /// </summary>
-        public static implicit operator BoundingFrustum(CullingVolumeCamera value)
+        public static implicit operator BoundingFrustum(IntersectionVolumeFrustum value)
         {
             return value.frustum;
         }
         /// <summary>
-        /// Implicit conversion between CullingVolumeCamera and BoundingFrustum
+        /// Implicit conversion between IntersectionVolumeFrustum and BoundingFrustum
         /// </summary>
-        public static implicit operator CullingVolumeCamera(BoundingFrustum value)
+        public static implicit operator IntersectionVolumeFrustum(BoundingFrustum value)
         {
-            return new CullingVolumeCamera(value);
+            return new IntersectionVolumeFrustum(value);
         }
     }
 }

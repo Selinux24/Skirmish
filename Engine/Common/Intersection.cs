@@ -209,7 +209,7 @@ namespace Engine.Common
         public static bool IntersectFirst<T>(Ray ray, IEnumerable<T> items, bool facingOnly, out Vector3 position, out T item, out float distance) where T : IRayIntersectable
         {
             position = Vector3.Zero;
-            item = default(T);
+            item = default;
             distance = float.MaxValue;
 
             foreach (var cItem in items)
@@ -239,7 +239,7 @@ namespace Engine.Common
         public static bool IntersectNearest<T>(Ray ray, IEnumerable<T> items, bool facingOnly, out Vector3 position, out T item, out float distance) where T : IRayIntersectable
         {
             position = Vector3.Zero;
-            item = default(T);
+            item = default;
             distance = float.MaxValue;
 
             if (IntersectAll(ray, items, facingOnly, out Vector3[] pickedPositions, out T[] pickedTriangles, out float[] pickedDistances))

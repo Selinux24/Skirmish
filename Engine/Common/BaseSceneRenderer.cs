@@ -286,7 +286,7 @@ namespace Engine.Common
             this.UpdateContext.EyePosition = scene.Camera.Position;
             this.UpdateContext.EyeDirection = scene.Camera.Direction;
             this.UpdateContext.Lights = scene.Lights;
-            this.UpdateContext.CameraVolume = new CullingVolumeCamera(viewProj);
+            this.UpdateContext.CameraVolume = new IntersectionVolumeFrustum(viewProj);
 
             //Cull lights
             Stopwatch swLights = Stopwatch.StartNew();
@@ -575,7 +575,7 @@ namespace Engine.Common
                 var camVolume = this.DrawContext.CameraVolume;
 
                 stopwatch.Restart();
-                var shadowSph = new CullingVolumeSphere(camVolume.Position, camVolume.Radius);
+                var shadowSph = new IntersectionVolumeSphere(camVolume.Position, camVolume.Radius);
                 var doShadows = this.cullManager.Cull(shadowSph, cullIndex, toCullShadowObjs);
                 stopwatch.Stop();
                 dict.Add($"DoDirectionalShadowMapping - Cull {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
@@ -688,7 +688,7 @@ namespace Engine.Common
 
                 //Cull test
                 stopwatch.Restart();
-                var sph = new CullingVolumeSphere(light.Position, light.Radius);
+                var sph = new IntersectionVolumeSphere(light.Position, light.Radius);
                 var doShadows = this.cullManager.Cull(sph, cullIndex, toCullShadowObjs);
                 stopwatch.Stop();
                 dict.Add($"DoPointShadowMapping {l} - Cull {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
@@ -780,7 +780,7 @@ namespace Engine.Common
 
                 //Cull test
                 stopwatch.Restart();
-                var sph = new CullingVolumeSphere(light.Position, light.Radius);
+                var sph = new IntersectionVolumeSphere(light.Position, light.Radius);
                 var doShadows = this.cullManager.Cull(sph, cullIndex, toCullShadowObjs);
                 stopwatch.Stop();
                 dict.Add($"DoSpotShadowMapping {l} - Cull {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);

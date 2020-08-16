@@ -735,7 +735,7 @@ namespace Engine
 
                 foreach (var instance in instances)
                 {
-                    triangles.AddRange(instance.GetVolume(false));
+                    triangles.AddRange(instance.GetVolume(full));
                 }
             }
 
@@ -1128,7 +1128,7 @@ namespace Engine
         /// Gets the culling volume for scene culling tests
         /// </summary>
         /// <returns>Return the culling volume</returns>
-        public override ICullingVolume GetCullingVolume()
+        public override IIntersectionVolume GetCullingVolume()
         {
             return this.assetMap;
         }
@@ -1136,7 +1136,7 @@ namespace Engine
         /// <summary>
         /// Asset map
         /// </summary>
-        class AssetMap : ICullingVolume
+        class AssetMap : IIntersectionVolume
         {
             /// <summary>
             /// Asset map
@@ -1350,7 +1350,7 @@ namespace Engine
             /// Updates internal visible volume collection
             /// </summary>
             /// <param name="camera">Camera volume</param>
-            public void Update(CullingVolumeCamera camera)
+            public void Update(IntersectionVolumeFrustum camera)
             {
                 //Find current box
                 var itemIndex = this.assetMap.FindIndex(b => b.Volume.Contains(camera.Position) != ContainmentType.Disjoint);
@@ -1376,7 +1376,7 @@ namespace Engine
             /// <param name="camera">Camera volume</param>
             /// <param name="itemIndex">Item index</param>
             /// <param name="visited">Visited list</param>
-            private void UpdateItem(CullingVolumeCamera camera, int itemIndex, List<int> visited)
+            private void UpdateItem(IntersectionVolumeFrustum camera, int itemIndex, List<int> visited)
             {
                 visited.Add(itemIndex);
 

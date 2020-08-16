@@ -1,9 +1,9 @@
-﻿
+﻿using System.Collections.Generic;
+
 namespace Engine
 {
     using Engine.Collections.Generic;
     using Engine.Content;
-    using System.Collections.Generic;
 
     /// <summary>
     /// Ground description
@@ -69,6 +69,10 @@ namespace Engine
         /// Use anisotropic filtering
         /// </summary>
         public bool UseAnisotropic { get; set; } = true;
+        /// <summary>
+        /// Collision detection mode
+        /// </summary>
+        public CollisionDetectionMode CollisionDetection { get; set; } = CollisionDetectionMode.Default;
 
         /// <summary>
         /// Constructor
@@ -111,37 +115,6 @@ namespace Engine
             }
 
             return null;
-        }
-    }
-
-    /// <summary>
-    /// Quadtree description
-    /// </summary>
-    public class QuadtreeDescription
-    {
-        /// <summary>
-        /// Creates a quadtree description
-        /// </summary>
-        /// <param name="depth">Depth</param>
-        public static QuadtreeDescription Default(int depth)
-        {
-            return new QuadtreeDescription
-            {
-                MaximumDepth = depth,
-            };
-        }
-
-        /// <summary>
-        /// Maximum depth
-        /// </summary>
-        public int MaximumDepth { get; set; }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public QuadtreeDescription()
-        {
-            this.MaximumDepth = 3;
         }
     }
 }

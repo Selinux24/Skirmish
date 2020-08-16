@@ -306,7 +306,7 @@ namespace Engine
         /// <param name="volume">Culling volume</param>
         /// <param name="distance">If the object is inside the volume, returns the distance</param>
         /// <returns>Returns true if the emitter is outside of the frustum</returns>
-        public bool Cull(ICullingVolume volume, out float distance)
+        public bool Cull(IIntersectionVolume volume, out float distance)
         {
             distance = float.MaxValue;
 

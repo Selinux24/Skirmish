@@ -11,7 +11,7 @@ namespace Engine
     /// <summary>
     /// Model instance
     /// </summary>
-    public class ModelInstance : ITransformable3D, IRayPickable<Triangle>, ICullable
+    public class ModelInstance : ITransformable3D, IRayPickable<Triangle>, IIntersectable, ICullable
     {
         /// <summary>
         /// Global id counter
@@ -538,7 +538,7 @@ namespace Engine
         /// <param name="volume">Culling volume</param>
         /// <param name="distance">If the object is inside the volume, returns the distance</param>
         /// <returns>Returns true if the object is outside of the frustum</returns>
-        public virtual bool Cull(ICullingVolume volume, out float distance)
+        public virtual bool Cull(IIntersectionVolume volume, out float distance)
         {
             bool cull;
             distance = float.MaxValue;
@@ -600,6 +600,36 @@ namespace Engine
 
             //Returns the actual triangles (yet transformed)
             return this.GetTriangles(true);
+        }
+
+        /// <summary>
+        /// Gets whether the sphere intersects with the current object
+        /// </summary>
+        /// <param name="sphere">Sphere</param>
+        /// <param name="result">Picking results</param>
+        /// <returns>Returns true if intersects</returns>
+        public bool Intersects(IntersectionVolumeSphere sphere, out PickingResult<Triangle> result)
+        {
+            result = new PickingResult<Triangle>()
+            {
+                Distance = float.MaxValue,
+            };
+
+            var bsph = this.GetBoundingSphere();
+            if (bsph.Intersects(sphere))
+            {
+                var mesh = GetVolume(false);
+                if (Intersection.SphereIntersectsMesh(sphere, mesh, out Triangle tri, out Vector3 position, out float distance))
+                {
+                    result.Distance = distance;
+                    result.Position = position;
+                    result.Item = tri;
+
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>

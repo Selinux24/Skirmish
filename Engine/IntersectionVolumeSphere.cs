@@ -3,9 +3,9 @@
 namespace Engine
 {
     /// <summary>
-    /// Sphere culling volume
+    /// Sphere intersection volume
     /// </summary>
-    public class CullingVolumeSphere : ICullingVolume
+    public class IntersectionVolumeSphere : IIntersectionVolume
     {
         /// <summary>
         /// Bounding sphere
@@ -21,7 +21,7 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="sph">Sphere</param>
-        public CullingVolumeSphere(BoundingSphere sph)
+        public IntersectionVolumeSphere(BoundingSphere sph)
         {
             this.sphere = sph;
 
@@ -32,7 +32,7 @@ namespace Engine
         /// </summary>
         /// <param name="center">Center position</param>
         /// <param name="radius">Sphere radius</param>
-        public CullingVolumeSphere(Vector3 center, float radius)
+        public IntersectionVolumeSphere(Vector3 center, float radius)
         {
             this.sphere = new BoundingSphere(center, radius);
 
@@ -65,6 +65,21 @@ namespace Engine
         public ContainmentType Contains(BoundingBox bbox)
         {
             return this.sphere.Contains(ref bbox);
+        }
+
+        /// <summary>
+        /// Implicit conversion between BoundingSphere and IntersectionVolumeSphere
+        /// </summary>
+        public static implicit operator BoundingSphere(IntersectionVolumeSphere value)
+        {
+            return value.sphere;
+        }
+        /// <summary>
+        /// Implicit conversion between IntersectionVolumeSphere and BoundingSphere
+        /// </summary>
+        public static implicit operator IntersectionVolumeSphere(BoundingSphere value)
+        {
+            return new IntersectionVolumeSphere(value);
         }
     }
 }

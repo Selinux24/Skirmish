@@ -679,12 +679,12 @@ namespace SceneTest
         {
             particleManager = await this.AddComponentParticleManager(ParticleManagerDescription.Default());
 
-            var pPlume = ParticleSystemDescription.InitializeSmokePlume("SceneTanksGame/particles", "smoke.png");
-            var pFire = ParticleSystemDescription.InitializeFire("SceneTanksGame/particles", "fire.png");
-            var pDust = ParticleSystemDescription.InitializeDust("SceneTanksGame/particles", "smoke.png");
-            var pProjectile = ParticleSystemDescription.InitializeProjectileTrail("SceneTanksGame/particles", "smoke.png");
-            var pExplosion = ParticleSystemDescription.InitializeExplosion("SceneTanksGame/particles", "fire.png");
-            var pSmokeExplosion = ParticleSystemDescription.InitializeExplosion("SceneTanksGame/particles", "smoke.png");
+            var pPlume = ParticleSystemDescription.InitializeSmokePlume("SceneTanksGame/particles", "smoke.png", 5);
+            var pFire = ParticleSystemDescription.InitializeFire("SceneTanksGame/particles", "fire.png", 5);
+            var pDust = ParticleSystemDescription.InitializeDust("SceneTanksGame/particles", "smoke.png", 5);
+            var pProjectile = ParticleSystemDescription.InitializeProjectileTrail("SceneTanksGame/particles", "smoke.png", 5);
+            var pExplosion = ParticleSystemDescription.InitializeExplosion("SceneTanksGame/particles", "fire.png", 5);
+            var pSmokeExplosion = ParticleSystemDescription.InitializeExplosion("SceneTanksGame/particles", "smoke.png", 5);
 
             particleDescriptions.Add("Plume", pPlume);
             particleDescriptions.Add("Fire", pFire);
@@ -1163,12 +1163,8 @@ You will lost all the game progress.",
         }
         private void IntegrateShot(GameTime gameTime)
         {
-            Vector3 shotPos = shot.Integrate(gameTime, Vector3.Zero, Vector3.Zero);
-
-            var terrainBox = terrain.GetBoundingBox();
-            var tarjetVolume = Target.GetBoundingBox();
-
             // Set projectile position
+            Vector3 shotPos = shot.Integrate(gameTime, Vector3.Zero, Vector3.Zero);
             Vector3 projectilePosition = Shooter.Manipulator.Position + shotPos;
             projectilePosition.Y += tankHeight;
             projectile.Manipulator.SetPosition(projectilePosition, true);
@@ -1176,14 +1172,15 @@ You will lost all the game progress.",
             projectile.Visible = true;
 
             // Test collision with target
-            if (projVolume.Contains(ref tarjetVolume) != ContainmentType.Disjoint)
+            if (Target.Intersects(projVolume, out var targetImpact))
             {
-                ResolveShot(true, projectilePosition);
+                ResolveShot(true, targetImpact.Position);
 
                 return;
             }
 
             // Test if projectile is under the terrain box
+            var terrainBox = terrain.GetBoundingBox();
             if (projVolume.Center.Y + projVolume.Radius < terrainBox.Minimum.Y)
             {
                 ResolveShot(false, null);
@@ -1192,9 +1189,9 @@ You will lost all the game progress.",
             }
 
             // Test full collision with terrain mesh
-            if (terrain.Intersects(projVolume, out var impact))
+            if (terrain.Intersects(projVolume, out var terrainImpact))
             {
-                ResolveShot(false, impact.Position);
+                ResolveShot(false, terrainImpact.Position);
             }
         }
         private void ResolveShot(bool impact, Vector3? impactPosition)
@@ -1233,8 +1230,14 @@ You will lost all the game progress.",
 
             if (impactPosition.HasValue)
             {
-                this.AddExplosionSystem(impactPosition.Value);
-                this.AddSmokePlumeSystem(impactPosition.Value);
+                if (impact)
+                {
+                    this.AddExplosionSystem(impactPosition.Value);
+                }
+                else
+                {
+                    this.AddSmokePlumeSystem(impactPosition.Value);
+                }
             }
         }
 

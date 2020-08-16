@@ -11,7 +11,7 @@ namespace Engine
     /// Ground class
     /// </summary>
     /// <remarks>Used for picking tests and navigation over surfaces</remarks>
-    public abstract class Ground : Drawable, IRayPickable<Triangle>
+    public abstract class Ground : Drawable, IRayPickable<Triangle>, IIntersectable
     {
         /// <summary>
         /// Ground description
@@ -27,6 +27,10 @@ namespace Engine
         /// Quadtree for base ground picking
         /// </summary>
         protected PickingQuadTree<Triangle> groundPickingQuadtree = null;
+        /// <summary>
+        /// Collision detection mode
+        /// </summary>
+        protected CollisionDetectionMode collisionDetection;
 
         /// <summary>
         /// Constructor
@@ -36,7 +40,7 @@ namespace Engine
         protected Ground(Scene scene, GroundDescription description)
             : base(scene, description)
         {
-
+            collisionDetection = description.CollisionDetection;
         }
 
         /// <summary>
@@ -45,7 +49,7 @@ namespace Engine
         /// <param name="volume">Culling volume</param>
         /// <param name="distance">If the object is inside the volume, returns the distance</param>
         /// <returns>Returns true if the object is outside of the frustum</returns>
-        public override bool Cull(ICullingVolume volume, out float distance)
+        public override bool Cull(IIntersectionVolume volume, out float distance)
         {
             distance = float.MaxValue;
 
@@ -104,7 +108,7 @@ namespace Engine
                     res = true;
                 }
             }
-            else
+            else if (collisionDetection == CollisionDetectionMode.BruteForce)
             {
                 // Brute force
                 var mesh = GetVolume(true);
@@ -162,7 +166,7 @@ namespace Engine
                     res = true;
                 }
             }
-            else
+            else if (collisionDetection == CollisionDetectionMode.BruteForce)
             {
                 // Brute force
                 var mesh = GetVolume(true);
@@ -214,7 +218,7 @@ namespace Engine
                     res = true;
                 }
             }
-            else
+            else if (collisionDetection == CollisionDetectionMode.BruteForce)
             {
                 // Brute force
                 var mesh = GetVolume(true);
@@ -293,18 +297,18 @@ namespace Engine
         /// Gets the culling volume for scene culling tests
         /// </summary>
         /// <returns>Return the culling volume</returns>
-        public virtual ICullingVolume GetCullingVolume()
+        public virtual IIntersectionVolume GetCullingVolume()
         {
             return null;
         }
 
         /// <summary>
-        /// Gets whether the sphere intersects with the ground
+        /// Gets whether the sphere intersects with the current object
         /// </summary>
         /// <param name="sphere">Sphere</param>
         /// <param name="result">Picking results</param>
         /// <returns>Returns true if intersects</returns>
-        public bool Intersects(BoundingSphere sphere, out PickingResult<Triangle> result)
+        public bool Intersects(IntersectionVolumeSphere sphere, out PickingResult<Triangle> result)
         {
             result = new PickingResult<Triangle>()
             {
@@ -314,7 +318,7 @@ namespace Engine
             if (groundPickingQuadtree != null)
             {
                 // Use quadtree
-                var nodes = groundPickingQuadtree.GetNodesInVolume(new CullingVolumeSphere(sphere));
+                var nodes = groundPickingQuadtree.GetNodesInVolume(sphere);
                 if (!nodes.Any())
                 {
                     return false;
@@ -341,7 +345,7 @@ namespace Engine
 
                 return intersects;
             }
-            else
+            else if (collisionDetection == CollisionDetectionMode.BruteForce)
             {
                 // Brute force
                 var mesh = GetVolume(true);

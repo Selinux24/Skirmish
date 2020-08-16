@@ -13,7 +13,7 @@ namespace Engine
     /// <summary>
     /// Basic Model
     /// </summary>
-    public class Model : BaseModel, ITransformable3D, IRayPickable<Triangle>, ICullable
+    public class Model : BaseModel, ITransformable3D, IRayPickable<Triangle>, IIntersectable, ICullable
     {
         /// <summary>
         /// Update point cache flag
@@ -365,7 +365,7 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override bool Cull(ICullingVolume volume, out float distance)
+        public override bool Cull(IIntersectionVolume volume, out float distance)
         {
             bool cull;
             distance = float.MaxValue;
@@ -732,6 +732,36 @@ namespace Engine
             }
 
             return this.GetTriangles(true);
+        }
+
+        /// <summary>
+        /// Gets whether the sphere intersects with the current object
+        /// </summary>
+        /// <param name="sphere">Sphere</param>
+        /// <param name="result">Picking results</param>
+        /// <returns>Returns true if intersects</returns>
+        public bool Intersects(IntersectionVolumeSphere sphere, out PickingResult<Triangle> result)
+        {
+            result = new PickingResult<Triangle>()
+            {
+                Distance = float.MaxValue,
+            };
+
+            var bsph = this.GetBoundingSphere();
+            if (bsph.Intersects(sphere))
+            {
+                var mesh = GetVolume(false);
+                if (Intersection.SphereIntersectsMesh(sphere, mesh, out Triangle tri, out Vector3 position, out float distance))
+                {
+                    result.Distance = distance;
+                    result.Position = position;
+                    result.Item = tri;
+
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 

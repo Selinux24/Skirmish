@@ -3,9 +3,9 @@
 namespace Engine
 {
     /// <summary>
-    /// Culling volume interface
+    /// Intersection volume interface
     /// </summary>
-    public interface ICullingVolume
+    public interface IIntersectionVolume
     {
         /// <summary>
         /// Gets the volume center position

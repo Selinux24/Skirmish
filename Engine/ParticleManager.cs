@@ -143,7 +143,7 @@ namespace Engine
         /// <param name="volume">Culling volume</param>
         /// <param name="distance">If the at least one of the internal emitters is visible, returns the distance to the item</param>
         /// <returns>Returns true if all emitters were culled</returns>
-        public override bool Cull(ICullingVolume volume, out float distance)
+        public override bool Cull(IIntersectionVolume volume, out float distance)
         {
             bool cull = true;
             distance = float.MaxValue;

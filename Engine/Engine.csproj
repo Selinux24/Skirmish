@@ -181,6 +181,7 @@
     <Compile Include="Audio\ReverbPresets.cs" />
     <Compile Include="Axis.cs" />
     <Compile Include="BlendModes.cs" />
+    <Compile Include="CollisionDetectionMode.cs" />
     <Compile Include="Common\BufferDescriptorRequestActions.cs" />
     <Compile Include="Common\BufferDescriptorRequestIndices.cs" />
     <Compile Include="Common\BufferDescriptorRequestInstancing.cs" />
@@ -260,6 +261,7 @@
     <Compile Include="GameStatusCollectedHandler.cs" />
     <Compile Include="Common\IBufferDescriptorRequest.cs" />
     <Compile Include="IGameResourceRequest.cs" />
+    <Compile Include="IIntersectable.cs" />
     <Compile Include="IManipulator.cs" />
     <Compile Include="ISceneLight.cs" />
     <Compile Include="ISceneLightHemispheric.cs" />
@@ -282,14 +284,15 @@
     <Compile Include="Perlin.cs" />
     <Compile Include="PrimitiveListDrawer.cs" />
     <Compile Include="PrimitiveListDrawerDescription.cs" />
+    <Compile Include="QuadtreeDescription.cs" />
     <Compile Include="RayPickingFlags.cs" />
     <Compile Include="SceneLightPointDescription.cs" />
     <Compile Include="SceneLightSpotDescription.cs" />
     <Compile Include="ShadowMap.cs" />
     <Compile Include="ShadowMapPoint.cs" />
-    <Compile Include="CullingVolumeCamera.cs" />
-    <Compile Include="CullingVolumeBoundingBox.cs" />
-    <Compile Include="CullingVolumeSphere.cs" />
+    <Compile Include="IntersectionVolumeFrustum.cs" />
+    <Compile Include="IntersectionVolumeAxisAlignedBox.cs" />
+    <Compile Include="IntersectionVolumeSphere.cs" />
     <Compile Include="Effects\EffectDefaultFoliage.cs" />
     <Compile Include="Effects\EffectDefaultClouds.cs" />
     <Compile Include="Effects\EffectDefaultWater.cs" />
@@ -319,7 +322,7 @@
     <Compile Include="IComposed.cs" />
     <Compile Include="IControllable.cs" />
     <Compile Include="ICullable.cs" />
-    <Compile Include="ICullingVolume.cs" />
+    <Compile Include="IIntersectionVolume.cs" />
     <Compile Include="IDrawable.cs" />
     <Compile Include="IParticleSystem.cs" />
     <Compile Include="IRayIntersectable.cs" />

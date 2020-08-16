@@ -525,64 +525,69 @@ namespace Engine.Collections.Generic
             item = default;
             distance = float.MaxValue;
 
-            // Find children contacts by distance to hit in bounding box
             SortedDictionary<float, PickingQuadTreeNode<T>> boxHitsByDistance = new SortedDictionary<float, PickingQuadTreeNode<T>>();
-            
+
+            #region Find children contacts by distance to hit in bounding box
+
             foreach (var node in this.Children)
             {
-                if (!Intersection.RayIntersectsBox(ray, node.BoundingBox, out float d))
+                if (Intersection.RayIntersectsBox(ray, node.BoundingBox, out float d))
                 {
-                    continue;
-                }
+                    while (boxHitsByDistance.ContainsKey(d))
+                    {
+                        // avoid duplicate keys
+                        d += 0.0001f;
+                    }
 
-                while (boxHitsByDistance.ContainsKey(d))
-                {
-                    // avoid duplicate keys
-                    d += 0.0001f;
+                    boxHitsByDistance.Add(d, node);
                 }
-
-                boxHitsByDistance.Add(d, node);
             }
 
-            if (!boxHitsByDistance.Any())
+            #endregion
+
+            if (boxHitsByDistance.Count > 0)
             {
-                return false;
-            }
+                bool intersect = false;
 
-            // Find closest item node by node, from closest to farthest
-            bool intersect = false;
-            Vector3 bestHit = Vector3.Zero;
-            T bestTri = default;
-            float bestD = float.MaxValue;
+                #region Find closest item node by node, from closest to farthest
 
-            foreach (var node in boxHitsByDistance.Values)
-            {
-                // check that the intersection is closer than the nearest intersection found thus far
-                var inItem = node.PickNearest(ray, facingOnly, out Vector3 thisHit, out T thisTri, out float thisD);
-                if (!inItem)
+                Vector3 bestHit = Vector3.Zero;
+                T bestTri = default;
+                float bestD = float.MaxValue;
+
+                foreach (var node in boxHitsByDistance.Values)
                 {
-                    continue;
+                    // check that the intersection is closer than the nearest intersection found thus far
+                    var inItem = node.PickNearest(ray, facingOnly, out Vector3 thisHit, out T thisTri, out float thisD);
+                    if (!inItem)
+                    {
+                        continue;
+                    }
+
+                    if (thisD < bestD)
+                    {
+                        // if we have found a closer intersection store the new closest intersection
+                        bestHit = thisHit;
+                        bestTri = thisTri;
+                        bestD = thisD;
+                    }
+
+                    intersect = true;
                 }
 
-                if (thisD < bestD)
+                if (intersect)
                 {
-                    // if we have found a closer intersection store the new closest intersection
-                    bestHit = thisHit;
-                    bestTri = thisTri;
-                    bestD = thisD;
+                    position = bestHit;
+                    item = bestTri;
+                    distance = bestD;
                 }
 
-                intersect = true;
+                #endregion
+
+                return intersect;
             }
 
-            if (intersect)
-            {
-                position = bestHit;
-                item = bestTri;
-                distance = bestD;
-            }
-
-            return intersect;
+            return false;
         }
 
         /// <summary>
@@ -947,7 +952,7 @@ namespace Engine.Collections.Generic
         /// </summary>
         /// <param name="volume">Volume</param>
         /// <returns>Returns the leaf nodes contained into the volume</returns>
-        public IEnumerable<PickingQuadTreeNode<T>> GetNodesInVolume(ICullingVolume volume)
+        public IEnumerable<PickingQuadTreeNode<T>> GetNodesInVolume(IIntersectionVolume volume)
         {
             List<PickingQuadTreeNode<T>> nodes = new List<PickingQuadTreeNode<T>>();
 

@@ -358,7 +358,7 @@ namespace Engine
         /// </summary>
         /// <param name="volume">Volume</param>
         /// <param name="viewerPosition">Viewer position</param>
-        public void Cull(ICullingVolume volume, Vector3 viewerPosition)
+        public void Cull(IIntersectionVolume volume, Vector3 viewerPosition)
         {
             this.visibleLights.Clear();
 
@@ -384,7 +384,7 @@ namespace Engine
         /// </summary>
         /// <param name="volume">Volume</param>
         /// <param name="viewerPosition">Viewer position</param>
-        private void CullPointLights(ICullingVolume volume, Vector3 viewerPosition)
+        private void CullPointLights(IIntersectionVolume volume, Vector3 viewerPosition)
         {
             var pLights = this.pointLights.FindAll(l =>
             {
@@ -418,7 +418,7 @@ namespace Engine
         /// </summary>
         /// <param name="volume">Volume</param>
         /// <param name="viewerPosition">Viewer position</param>
-        private void CullSpotLights(ICullingVolume volume, Vector3 viewerPosition)
+        private void CullSpotLights(IIntersectionVolume volume, Vector3 viewerPosition)
         {
             var sLights = this.spotLights.FindAll(l =>
             {

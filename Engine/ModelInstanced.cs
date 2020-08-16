@@ -577,7 +577,7 @@ namespace Engine
         /// <param name="volume">Culling volume</param>
         /// <param name="distance">If any instance is inside the volume, returns zero</param>
         /// <returns>Returns true if all of the instances were outside of the frustum</returns>
-        public override bool Cull(ICullingVolume volume, out float distance)
+        public override bool Cull(IIntersectionVolume volume, out float distance)
         {
             distance = float.MaxValue;
 

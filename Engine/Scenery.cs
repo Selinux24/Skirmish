@@ -326,7 +326,7 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override bool Cull(ICullingVolume volume, out float distance)
+        public override bool Cull(IIntersectionVolume volume, out float distance)
         {
             distance = float.MaxValue;
 
@@ -363,7 +363,7 @@ namespace Engine
         {
             base.Update(context);
 
-            CullingVolumeCamera camera = this.Scene.Camera.Frustum;
+            IntersectionVolumeFrustum camera = this.Scene.Camera.Frustum;
             visibleNodes = this.groundPickingQuadtree.GetNodesInVolume(camera).ToArray();
             if (visibleNodes?.Any() != true)
             {

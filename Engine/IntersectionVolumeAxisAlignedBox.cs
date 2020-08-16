@@ -3,9 +3,9 @@
 namespace Engine
 {
     /// <summary>
-    /// Bounding box culling volume
+    /// Bounding box intersection volume
     /// </summary>
-    public class CullingVolumeBoundingBox : ICullingVolume
+    public class IntersectionVolumeAxisAlignedBox : IIntersectionVolume
     {
         /// <summary>
         /// Bounding box
@@ -21,7 +21,7 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="bbox">Axis aligned bounding box</param>
-        public CullingVolumeBoundingBox(BoundingBox bbox)
+        public IntersectionVolumeAxisAlignedBox(BoundingBox bbox)
         {
             this.bbox = bbox;
 
@@ -32,7 +32,7 @@ namespace Engine
         /// </summary>
         /// <param name="min">Minimum point</param>
         /// <param name="max">Maximum point</param>
-        public CullingVolumeBoundingBox(Vector3 min, Vector3 max)
+        public IntersectionVolumeAxisAlignedBox(Vector3 min, Vector3 max)
         {
             this.bbox = new BoundingBox(min, max);
 
@@ -65,6 +65,21 @@ namespace Engine
         public ContainmentType Contains(BoundingBox bbox)
         {
             return this.bbox.Contains(ref bbox);
+        }
+
+        /// <summary>
+        /// Implicit conversion between BoundingBox and IntersectionVolumeAxisAlignedBox
+        /// </summary>
+        public static implicit operator BoundingBox(IntersectionVolumeAxisAlignedBox value)
+        {
+            return value.bbox;
+        }
+        /// <summary>
+        /// Implicit conversion between IntersectionVolumeAxisAlignedBox and BoundingBox
+        /// </summary>
+        public static implicit operator IntersectionVolumeAxisAlignedBox(BoundingBox value)
+        {
+            return new IntersectionVolumeAxisAlignedBox(value);
         }
     }
 }

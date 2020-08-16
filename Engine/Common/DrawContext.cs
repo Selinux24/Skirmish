@@ -27,7 +27,7 @@ namespace Engine.Common
         /// <summary>
         /// Camera culling volume
         /// </summary>
-        public CullingVolumeCamera CameraVolume { get; set; }
+        public IntersectionVolumeFrustum CameraVolume { get; set; }
         /// <summary>
         /// Eye position
         /// </summary>

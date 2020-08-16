@@ -1106,7 +1106,7 @@ namespace Engine
         /// <param name="volume">Culling volume</param>
         /// <param name="distance">If the object is inside the volume, returns the distance</param>
         /// <returns>Returns true if the object is outside of the frustum</returns>
-        public override bool Cull(ICullingVolume volume, out float distance)
+        public override bool Cull(IIntersectionVolume volume, out float distance)
         {
             distance = float.MaxValue;
 
@@ -1222,7 +1222,7 @@ namespace Engine
         /// <param name="volume">Culling volume</param>
         /// <param name="sph">Foliagle bounding sphere</param>
         /// <returns>Returns a node list</returns>
-        private IEnumerable<QuadTreeNode> GetFoliageNodes(ICullingVolume volume, BoundingSphere sph)
+        private IEnumerable<QuadTreeNode> GetFoliageNodes(IIntersectionVolume volume, BoundingSphere sph)
         {
             var nodes = this.foliageQuadtree.GetNodesInVolume(ref sph);
             if (nodes?.Any() == true)
