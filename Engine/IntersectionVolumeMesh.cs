@@ -37,7 +37,7 @@ namespace Engine
                     center += mesh.ElementAt(i).Center;
                 }
 
-                this.Position = center /= mesh.Count();
+                this.Position = center / mesh.Count();
             }
         }
 

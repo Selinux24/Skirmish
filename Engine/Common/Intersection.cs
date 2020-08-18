@@ -724,7 +724,7 @@ namespace Engine.Common
             if (axis == Axis.X)
             {
                 // a.X ^ b.X = (1,0,0) ^ edge
-                // axis = Vector3(0, -edge.Z, edge.Y);
+                // axis = Vector3(0, -edge.Z, edge.Y)
                 float dPoint1 = tri.Point1.Z * edge.Y - tri.Point1.Y * edge.Z;
                 float dPoint2 = tri.Point2.Z * edge.Y - tri.Point2.Y * edge.Z;
                 float dPoint3 = tri.Point3.Z * edge.Y - tri.Point3.Y * edge.Z;
@@ -742,7 +742,7 @@ namespace Engine.Common
             else if (axis == Axis.Y)
             {
                 // a.Y ^ b.X = (0,1,0) ^ edge
-                // axis = Vector3(edge.Z, 0, -edge.X);
+                // axis = Vector3(edge.Z, 0, -edge.X)
                 float dPoint1 = tri.Point1.X * edge.Z - tri.Point1.Z * edge.X;
                 float dPoint2 = tri.Point2.X * edge.Z - tri.Point2.Z * edge.X;
                 float dPoint3 = tri.Point3.X * edge.Z - tri.Point3.Z * edge.X;
@@ -760,7 +760,7 @@ namespace Engine.Common
             else if (axis == Axis.Z)
             {
                 // a.Y ^ b.X = (0,0,1) ^ edge
-                // axis = Vector3(-edge.Y, edge.X, 0);
+                // axis = Vector3(-edge.Y, edge.X, 0)
                 float dPoint1 = tri.Point1.Y * edge.X - tri.Point1.X * edge.Y;
                 float dPoint2 = tri.Point2.Y * edge.X - tri.Point2.X * edge.Y;
                 float dPoint3 = tri.Point3.Y * edge.X - tri.Point3.X * edge.Y;

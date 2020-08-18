@@ -1,4 +1,5 @@
-﻿
+﻿using SharpDX;
+
 namespace Engine.Common
 {
     /// <summary>
@@ -16,8 +17,8 @@ namespace Engine.Common
         /// <returns>Returns true if have intersection</returns>
         public static bool Intersects(IIntersectable one, IntersectDetectionMode detectionModeOne, IIntersectable two, IntersectDetectionMode detectionModeTwo)
         {
-            var oneVolume = one.GetIntersectionVolume(detectionModeOne);
-            var twoVolume = two.GetIntersectionVolume(detectionModeTwo);
+            var oneVolume = one?.GetIntersectionVolume(detectionModeOne);
+            var twoVolume = two?.GetIntersectionVolume(detectionModeTwo);
 
             return Intersects(oneVolume, twoVolume);
         }
@@ -30,7 +31,7 @@ namespace Engine.Common
         /// <returns>Returns true if have intersection</returns>
         public static bool Intersects(IIntersectable one, IntersectDetectionMode detectionModeOne, IIntersectionVolume twoVolume)
         {
-            var oneVolume = one.GetIntersectionVolume(detectionModeOne);
+            var oneVolume = one?.GetIntersectionVolume(detectionModeOne);
 
             return Intersects(oneVolume, twoVolume);
         }
@@ -42,81 +43,26 @@ namespace Engine.Common
         /// <returns>Returns true if have intersection</returns>
         public static bool Intersects(IIntersectionVolume one, IIntersectionVolume two)
         {
-            if (one is IntersectionVolumeSphere oneSph)
+            if (one == null || two == null)
             {
-                if (two is IntersectionVolumeSphere twoSph)
-                {
-                    return Intersection.SphereIntersectsSphere(oneSph, twoSph);
-                }
-                else if (two is IntersectionVolumeAxisAlignedBox twoBox)
-                {
-                    return Intersection.SphereIntersectsBox(oneSph, twoBox);
-                }
-                else if (two is IntersectionVolumeFrustum twoFrustum)
-                {
-                    return Intersection.SphereIntersectsFrustum(oneSph, twoFrustum);
-                }
-                else if (two is IntersectionVolumeMesh twoMesh)
-                {
-                    return Intersection.SphereIntersectsMesh(oneSph, (Triangle[])twoMesh, out Triangle _, out _, out _);
-                }
+                return false;
             }
-            else if (one is IntersectionVolumeAxisAlignedBox oneBox)
+
+            if (two is IntersectionVolumeSphere twoSph)
             {
-                if (two is IntersectionVolumeSphere twoSph)
-                {
-                    return Intersection.SphereIntersectsBox(twoSph, oneBox);
-                }
-                else if (two is IntersectionVolumeAxisAlignedBox twoBox)
-                {
-                    return Intersection.BoxIntersectsBox(oneBox, twoBox);
-                }
-                else if (two is IntersectionVolumeFrustum twoFrustum)
-                {
-                    return Intersection.BoxIntersectsFrustum(oneBox, twoFrustum);
-                }
-                else if (two is IntersectionVolumeMesh twoMesh)
-                {
-                    return Intersection.BoxIntersectsMesh(oneBox, (Triangle[])twoMesh, out _);
-                }
+                return one.Contains(twoSph) != ContainmentType.Disjoint;
             }
-            else if (one is IntersectionVolumeFrustum oneFrustum)
+            else if (two is IntersectionVolumeAxisAlignedBox twoBox)
             {
-                if (two is IntersectionVolumeSphere twoSph)
-                {
-                    return Intersection.SphereIntersectsFrustum(twoSph, oneFrustum);
-                }
-                else if (two is IntersectionVolumeAxisAlignedBox twoBox)
-                {
-                    return Intersection.BoxIntersectsFrustum(twoBox, oneFrustum);
-                }
-                else if (two is IntersectionVolumeFrustum twoFrustum)
-                {
-                    return Intersection.FrustumIntersectsFrustum(oneFrustum, twoFrustum);
-                }
-                else if (two is IntersectionVolumeMesh)
-                {
-                    return false;
-                }
+                return one.Contains(twoBox) != ContainmentType.Disjoint;
             }
-            else if (one is IntersectionVolumeMesh oneMesh)
+            else if (two is IntersectionVolumeFrustum twoFrustum)
             {
-                if (two is IntersectionVolumeSphere twoSph)
-                {
-                    return Intersection.SphereIntersectsMesh(twoSph, (Triangle[])oneMesh, out Triangle _, out _, out _);
-                }
-                else if (two is IntersectionVolumeAxisAlignedBox twoBox)
-                {
-                    return Intersection.BoxIntersectsMesh(twoBox, (Triangle[])oneMesh, out _);
-                }
-                else if (two is IntersectionVolumeFrustum)
-                {
-                    return false;
-                }
-                else if (two is IntersectionVolumeMesh twoMesh)
-                {
-                    return Intersection.MeshIntersectsMesh((Triangle[])oneMesh, (Triangle[])twoMesh, out _, out _);
-                }
+                return one.Contains(twoFrustum) != ContainmentType.Disjoint;
+            }
+            else if (two is IntersectionVolumeMesh twoMesh)
+            {
+                return one.Contains(twoMesh) != ContainmentType.Disjoint;
             }
 
             return false;

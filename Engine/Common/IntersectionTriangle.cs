@@ -692,7 +692,7 @@ namespace Engine.Common
                 r2 = t2.Point3.XY();
             }
 
-            return Overlap2D(p1, q1, r1, p2, q2, r2);
+            return Overlap2D(new Triangle2D(p1, q1, r1), new Triangle2D(p2, q2, r2));
         }
 
         private static bool CheckMinMax(
@@ -716,170 +716,229 @@ namespace Engine.Common
             return true;
         }
 
-        private static float Orient2D(Vector2 a, Vector2 b, Vector2 c)
+        private static float Orient2D(Triangle2D t)
         {
+            Vector2 a = t.Point1;
+            Vector2 b = t.Point2;
+            Vector2 c = t.Point3;
+
             return (a.X - c.X) * (b.Y - c.Y) - (a.Y - c.Y) * (b.X - c.X);
         }
         /// <summary>
         /// Two dimensional Triangle-Triangle Overlap Test
         /// </summary>
-        private static bool Overlap2D(
-            Vector2 p1, Vector2 q1, Vector2 r1,
-            Vector2 p2, Vector2 q2, Vector2 r2)
+        private static bool Overlap2D(Triangle2D t1, Triangle2D t2)
         {
-            if (Orient2D(p1, q1, r1) < 0.0f)
+            Vector2 p1 = t1.Point1;
+            Vector2 q1 = t1.Point2;
+            Vector2 r1 = t1.Point3;
+
+            Vector2 p2 = t2.Point1;
+            Vector2 q2 = t2.Point2;
+            Vector2 r2 = t2.Point3;
+
+            if (Orient2D(new Triangle2D(p1, q1, r1)) < 0.0f)
             {
-                if (Orient2D(p2, q2, r2) < 0.0f)
+                if (Orient2D(new Triangle2D(p2, q2, r2)) < 0.0f)
                 {
-                    return DetectIntersection2D(p1, r1, q1, p2, r2, q2);
+                    return DetectIntersection2D(new Triangle2D(p1, r1, q1), new Triangle2D(p2, r2, q2));
                 }
                 else
                 {
-                    return DetectIntersection2D(p1, r1, q1, p2, q2, r2);
+                    return DetectIntersection2D(new Triangle2D(p1, r1, q1), new Triangle2D(p2, q2, r2));
                 }
             }
             else
             {
-                if (Orient2D(p2, q2, r2) < 0.0f)
+                if (Orient2D(new Triangle2D(p2, q2, r2)) < 0.0f)
                 {
-                    return DetectIntersection2D(p1, q1, r1, p2, r2, q2);
+                    return DetectIntersection2D(new Triangle2D(p1, q1, r1), new Triangle2D(p2, r2, q2));
                 }
                 else
                 {
-                    return DetectIntersection2D(p1, q1, r1, p2, q2, r2);
+                    return DetectIntersection2D(new Triangle2D(p1, q1, r1), new Triangle2D(p2, q2, r2));
                 }
             }
         }
 
-        private static bool DetectIntersection2D(
-            Vector2 p1, Vector2 q1, Vector2 r1,
-            Vector2 p2, Vector2 q2, Vector2 r2)
+        private static bool DetectIntersection2D(Triangle2D t1, Triangle2D t2)
         {
-            if (Orient2D(p2, q2, p1) >= 0.0f)
+            Vector2 p1 = t1.Point1;
+            Vector2 q1 = t1.Point2;
+            Vector2 r1 = t1.Point3;
+
+            Vector2 p2 = t2.Point1;
+            Vector2 q2 = t2.Point2;
+            Vector2 r2 = t2.Point3;
+
+            if (Orient2D(new Triangle2D(p2, q2, p1)) >= 0.0f)
             {
-                if (Orient2D(q2, r2, p1) >= 0.0f)
+                if (Orient2D(new Triangle2D(q2, r2, p1)) >= 0.0f)
                 {
-                    if (Orient2D(r2, p2, p1) >= 0.0f)
+                    if (Orient2D(new Triangle2D(r2, p2, p1)) >= 0.0f)
                     {
                         return true;
                     }
                     else
                     {
-                        return IntersectionEdge(p1, q1, r1, p2, q2, r2);
+                        return IntersectionEdge(new Triangle2D(p1, q1, r1), new Triangle2D(p2, q2, r2));
                     }
                 }
                 else
                 {
-                    if (Orient2D(r2, p2, p1) >= 0.0f)
+                    if (Orient2D(new Triangle2D(r2, p2, p1)) >= 0.0f)
                     {
-                        return IntersectionEdge(p1, q1, r1, r2, p2, q2);
+                        return IntersectionEdge(new Triangle2D(p1, q1, r1), new Triangle2D(r2, p2, q2));
                     }
                     else
                     {
-                        return IntersectionVertex(p1, q1, r1, p2, q2, r2);
+                        return IntersectionVertex(new Triangle2D(p1, q1, r1), new Triangle2D(p2, q2, r2));
                     }
                 }
             }
             else
             {
-                if (Orient2D(q2, r2, p1) >= 0.0f)
+                if (Orient2D(new Triangle2D(q2, r2, p1)) >= 0.0f)
                 {
-                    if (Orient2D(r2, p2, p1) >= 0.0f)
+                    if (Orient2D(new Triangle2D(r2, p2, p1)) >= 0.0f)
                     {
-                        return IntersectionEdge(p1, q1, r1, q2, r2, p2);
+                        return IntersectionEdge(new Triangle2D(p1, q1, r1), new Triangle2D(q2, r2, p2));
                     }
                     else
                     {
-                        return IntersectionVertex(p1, q1, r1, q2, r2, p2);
+                        return IntersectionVertex(new Triangle2D(p1, q1, r1), new Triangle2D(q2, r2, p2));
                     }
                 }
                 else
                 {
-                    return IntersectionVertex(p1, q1, r1, r2, p2, q2);
+                    return IntersectionVertex(new Triangle2D(p1, q1, r1), new Triangle2D(r2, p2, q2));
                 }
             }
         }
 
-        private static bool IntersectionVertex(
-            Vector2 p1, Vector2 q1, Vector2 r1,
-            Vector2 p2, Vector2 q2, Vector2 r2)
+        private static bool IntersectionVertex(Triangle2D t1, Triangle2D t2)
         {
-            if (Orient2D(r2, p2, q1) >= 0.0f)
+            Vector2 p1 = t1.Point1;
+            Vector2 q1 = t1.Point2;
+            Vector2 r1 = t1.Point3;
+
+            Vector2 p2 = t2.Point1;
+            Vector2 q2 = t2.Point2;
+            Vector2 r2 = t2.Point3;
+
+            if (Orient2D(new Triangle2D(r2, p2, q1)) >= 0.0f)
             {
-                if (Orient2D(r2, q2, q1) <= 0.0f)
+                if (Orient2D(new Triangle2D(r2, q2, q1)) <= 0.0f)
                 {
-                    if (Orient2D(p1, p2, q1) > 0.0f)
+                    if (Orient2D(new Triangle2D(p1, p2, q1)) > 0.0f)
                     {
-                        return Orient2D(p1, q2, q1) <= 0.0f;
+                        return Orient2D(new Triangle2D(p1, q2, q1)) <= 0.0f;
                     }
                     else
                     {
-                        if (Orient2D(p1, p2, r1) >= 0.0f)
+                        if (Orient2D(new Triangle2D(p1, p2, r1)) >= 0.0f)
                         {
-                            return Orient2D(q1, r1, p2) >= 0.0f;
+                            return Orient2D(new Triangle2D(q1, r1, p2)) >= 0.0f;
                         }
                     }
                 }
-                else if (Orient2D(p1, q2, q1) <= 0.0f)
+                else if (Orient2D(new Triangle2D(p1, q2, q1)) <= 0.0f)
                 {
-                    if (Orient2D(r2, q2, r1) <= 0.0f)
+                    if (Orient2D(new Triangle2D(r2, q2, r1)) <= 0.0f)
                     {
-                        return Orient2D(q1, r1, q2) >= 0.0f;
+                        return Orient2D(new Triangle2D(q1, r1, q2)) >= 0.0f;
                     }
                 }
             }
-            else if (Orient2D(r2, p2, r1) >= 0.0f)
+            else if (Orient2D(new Triangle2D(r2, p2, r1)) >= 0.0f)
             {
-                if (Orient2D(q1, r1, r2) >= 0.0f)
+                if (Orient2D(new Triangle2D(q1, r1, r2)) >= 0.0f)
                 {
-                    return Orient2D(p1, p2, r1) >= 0.0f;
+                    return Orient2D(new Triangle2D(p1, p2, r1)) >= 0.0f;
                 }
-                else if (Orient2D(q1, r1, q2) >= 0.0f)
+                else if (Orient2D(new Triangle2D(q1, r1, q2)) >= 0.0f)
                 {
-                    return Orient2D(r2, r1, q2) >= 0.0f;
+                    return Orient2D(new Triangle2D(r2, r1, q2)) >= 0.0f;
                 }
             }
 
             return false;
         }
 
-        private static bool IntersectionEdge(
-            Vector2 p1, Vector2 q1, Vector2 r1,
-            Vector2 p2, Vector2 q2, Vector2 r2)
+        private static bool IntersectionEdge(Triangle2D t1, Triangle2D t2)
         {
-            if (Orient2D(r2, p2, q1) >= 0.0f)
+            Vector2 p1 = t1.Point1;
+            Vector2 q1 = t1.Point2;
+            Vector2 r1 = t1.Point3;
+
+            Vector2 p2 = t2.Point1;
+            Vector2 r2 = t2.Point3;
+
+            if (Orient2D(new Triangle2D(r2, p2, q1)) >= 0.0f)
             {
-                if (Orient2D(p1, p2, q1) >= 0.0f)
+                if (Orient2D(new Triangle2D(p1, p2, q1)) >= 0.0f)
                 {
-                    return Orient2D(p1, q1, r2) >= 0.0f;
+                    return Orient2D(new Triangle2D(p1, q1, r2)) >= 0.0f;
                 }
                 else
                 {
-                    if (Orient2D(q1, r1, p2) >= 0.0f)
+                    if (Orient2D(new Triangle2D(q1, r1, p2)) >= 0.0f)
                     {
-                        return Orient2D(r1, p1, p2) >= 0.0f;
+                        return Orient2D(new Triangle2D(r1, p1, p2)) >= 0.0f;
                     }
                 }
             }
             else
             {
-                if (Orient2D(r2, p2, r1) >= 0.0f)
+                if (Orient2D(new Triangle2D(r2, p2, r1)) >= 0.0f)
                 {
-                    if (Orient2D(p1, p2, r1) >= 0.0f)
+                    if (Orient2D(new Triangle2D(p1, p2, r1)) >= 0.0f)
                     {
-                        if (Orient2D(p1, r1, r2) >= 0.0f)
+                        if (Orient2D(new Triangle2D(p1, r1, r2)) >= 0.0f)
                         {
                             return true;
                         }
                         else
                         {
-                            return Orient2D(q1, r1, r2) >= 0.0f;
+                            return Orient2D(new Triangle2D(q1, r1, r2)) >= 0.0f;
                         }
                     }
                 }
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Triangle 2D
+        /// </summary>
+        struct Triangle2D
+        {
+            /// <summary>
+            /// Point 1
+            /// </summary>
+            public Vector2 Point1 { get; set; }
+            /// <summary>
+            /// Point 2
+            /// </summary>
+            public Vector2 Point2 { get; set; }
+            /// <summary>
+            /// Point 3
+            /// </summary>
+            public Vector2 Point3 { get; set; }
+
+            /// <summary>
+            /// Constructor
+            /// </summary>
+            /// <param name="point1">Point 1</param>
+            /// <param name="point2">Point 2</param>
+            /// <param name="point3">Point 3</param>
+            public Triangle2D(Vector2 point1, Vector2 point2, Vector2 point3)
+            {
+                Point1 = point1;
+                Point2 = point2;
+                Point3 = point3;
+            }
         }
     }
 }
