@@ -3,6 +3,8 @@ using System;
 
 namespace Engine
 {
+    using Engine.Common;
+
     /// <summary>
     /// Camera 3D
     /// </summary>
@@ -1095,6 +1097,47 @@ namespace Engine
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Gets whether the actual object have intersection with the intersectable or not
+        /// </summary>
+        /// <param name="detectionModeThis">Detection mode for this object</param>
+        /// <param name="other">Other intersectable</param>
+        /// <param name="detectionModeOther">Detection mode for the other object</param>
+        /// <returns>Returns true if have intersection</returns>
+        public bool Intersects(IntersectDetectionMode detectionModeThis, IIntersectable other, IntersectDetectionMode detectionModeOther)
+        {
+            return IntersectionHelper.Intersects(this, detectionModeThis, other, detectionModeOther);
+        }
+        /// <summary>
+        /// Gets whether the actual object have intersection with the volume or not
+        /// </summary>
+        /// <param name="detectionModeThis">Detection mode for this object</param>
+        /// <param name="volume">Volume</param>
+        /// <returns>Returns true if have intersection</returns>
+        public bool Intersects(IntersectDetectionMode detectionModeThis, IIntersectionVolume volume)
+        {
+            return IntersectionHelper.Intersects(this, detectionModeThis, volume);
+        }
+
+        /// <summary>
+        /// Gets the intersection volume based on the specified detection mode
+        /// </summary>
+        /// <param name="detectionMode">Detection mode</param>
+        /// <returns>Returns an intersection volume</returns>
+        public IIntersectionVolume GetIntersectionVolume(IntersectDetectionMode detectionMode)
+        {
+            if (detectionMode == IntersectDetectionMode.Sphere)
+            {
+                var bsph = new BoundingSphere(this.position, Math.Max(1f, this.CameraRadius));
+
+                return (IntersectionVolumeSphere)bsph;
+            }
+            else
+            {
+                return (IntersectionVolumeFrustum)this.Frustum;
+            }
         }
     }
 }

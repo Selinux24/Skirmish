@@ -106,8 +106,8 @@ namespace Collada
 
             BoundingBox bbox = wall[0].GetBoundingBox();
 
-            float x = bbox.GetX() * (10f / 11f);
-            float z = bbox.GetZ();
+            float x = bbox.Width * (10f / 11f);
+            float z = bbox.Depth;
 
             wall[0].Manipulator.SetPosition(new Vector3(+3 * x, 0, +0 * z));
             wall[1].Manipulator.SetPosition(new Vector3(+2 * x, 0, +0 * z));

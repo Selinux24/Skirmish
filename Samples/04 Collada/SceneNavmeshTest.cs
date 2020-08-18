@@ -66,7 +66,7 @@ namespace Collada
                         {
                             var bbox = inputGeometry.GetBoundingBox();
                             var center = bbox.GetCenter();
-                            float maxD = Math.Max(Math.Max(bbox.GetX(), bbox.GetY()), bbox.GetZ());
+                            float maxD = Math.Max(Math.Max(bbox.Width, bbox.Height), bbox.Depth);
 
                             this.Camera.Interest = center;
                             this.Camera.Position = center + new Vector3(1, 0.8f, -1) * maxD * 0.8f;

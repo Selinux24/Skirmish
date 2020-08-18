@@ -2,6 +2,8 @@
 
 namespace Engine
 {
+    using Engine.Common;
+
     /// <summary>
     /// Sphere intersection volume
     /// </summary>
@@ -40,22 +42,13 @@ namespace Engine
         }
 
         /// <summary>
-        /// Gets if the current volume contains the bounding frustum
-        /// </summary>
-        /// <param name="frustum">Bounding frustum</param>
-        /// <returns>Returns the containment type</returns>
-        public ContainmentType Contains(BoundingFrustum frustum)
-        {
-            return frustum.Contains(this.sphere);
-        }
-        /// <summary>
         /// Gets if the current volume contains the bounding box
         /// </summary>
         /// <param name="bbox">Bounding box</param>
         /// <returns>Returns the containment type</returns>
         public ContainmentType Contains(BoundingSphere sph)
         {
-            return this.sphere.Contains(ref sph);
+            return Intersection.SphereContainsSphere(this.sphere, sph);
         }
         /// <summary>
         /// Gets if the current volume contains the bounding sphere
@@ -64,7 +57,25 @@ namespace Engine
         /// <returns>Returns the containment type</returns>
         public ContainmentType Contains(BoundingBox bbox)
         {
-            return this.sphere.Contains(ref bbox);
+            return Intersection.SphereContainsBox(this.sphere, bbox);
+        }
+        /// <summary>
+        /// Gets if the current volume contains the bounding frustum
+        /// </summary>
+        /// <param name="frustum">Bounding frustum</param>
+        /// <returns>Returns the containment type</returns>
+        public ContainmentType Contains(BoundingFrustum frustum)
+        {
+            return Intersection.SphereContainsFrustum(this.sphere, frustum);
+        }
+        /// <summary>
+        /// Gets if the current volume contains the mesh
+        /// </summary>
+        /// <param name="mesh">Mesh</param>
+        /// <returns>Returns the containment type</returns>
+        public ContainmentType Contains(Triangle[] mesh)
+        {
+            return Intersection.SphereContainsMesh(this.sphere, mesh);
         }
 
         /// <summary>

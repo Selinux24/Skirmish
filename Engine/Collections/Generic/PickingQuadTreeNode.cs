@@ -57,7 +57,7 @@ namespace Engine.Collections.Generic
                     {
                         var tbox = BoundingBox.FromPoints(t.GetVertices());
 
-                        return Intersection.BoxContainsBox(ref bbox, ref tbox) != ContainmentType.Disjoint;
+                        return Intersection.BoxContainsBox(bbox, tbox) != ContainmentType.Disjoint;
                     })
                     .ToList(); //Break the reference
 

@@ -605,7 +605,7 @@ namespace Engine
         /// </summary>
         public override string ToString()
         {
-            return string.Format("Vertex 1 {0}; Vertex 2 {1};", this.Point1, this.Point2);
+            return $"P1({this.Point1}) -> P2({this.Point2});";
         }
     }
 }

@@ -254,7 +254,7 @@ namespace Instancing
 
             BoundingBox bbox = wall[0].GetBoundingBox();
 
-            float x = bbox.GetX() * (10f / 11f);
+            float x = bbox.Width * (10f / 11f);
 
             for (int i = 0; i < 10; i++)
             {

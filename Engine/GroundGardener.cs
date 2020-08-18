@@ -828,7 +828,7 @@ namespace Engine
             if (this.foliageQuadtree == null || this.foliageQuadtree.BoundingBox != bbox)
             {
                 //Creates the quadtree if not exists, or if the reference bounding box has changed
-                float sizeParts = Math.Max(bbox.GetX(), bbox.GetZ()) / nodeSize;
+                float sizeParts = Math.Max(bbox.Width, bbox.Depth) / nodeSize;
 
                 int levels = Math.Max(1, (int)Math.Log(sizeParts, 2));
 

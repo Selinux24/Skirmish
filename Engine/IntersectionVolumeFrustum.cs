@@ -46,6 +46,24 @@ namespace Engine
         }
 
         /// <summary>
+        /// Gets if the current volume contains the bounding box
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        /// <returns>Returns the containment type</returns>
+        public ContainmentType Contains(BoundingSphere sph)
+        {
+            return Intersection.FrustumContainsSphere(this.frustum, sph);
+        }
+        /// <summary>
+        /// Gets if the current volume contains the bounding sphere
+        /// </summary>
+        /// <param name="sph">Bounding sphere</param>
+        /// <returns>Returns the containment type</returns>
+        public ContainmentType Contains(BoundingBox bbox)
+        {
+            return Intersection.FrustumContainsBox(this.frustum, bbox);
+        }
+        /// <summary>
         /// Gets if the current volume contains the bounding frustum
         /// </summary>
         /// <param name="frustum">Bounding frustum</param>
@@ -55,22 +73,13 @@ namespace Engine
             return Intersection.FrustumContainsFrustum(this.frustum, frustum);
         }
         /// <summary>
-        /// Gets if the current volume contains the bounding box
+        /// Gets if the current volume contains the mesh
         /// </summary>
-        /// <param name="bbox">Bounding box</param>
+        /// <param name="mesh">Mesh</param>
         /// <returns>Returns the containment type</returns>
-        public ContainmentType Contains(BoundingSphere sph)
+        public ContainmentType Contains(Triangle[] mesh)
         {
-            return this.frustum.Contains(sph);
-        }
-        /// <summary>
-        /// Gets if the current volume contains the bounding sphere
-        /// </summary>
-        /// <param name="sph">Bounding sphere</param>
-        /// <returns>Returns the containment type</returns>
-        public ContainmentType Contains(BoundingBox bbox)
-        {
-            return this.frustum.Contains(bbox);
+            return ContainmentType.Disjoint;
         }
 
         /// <summary>

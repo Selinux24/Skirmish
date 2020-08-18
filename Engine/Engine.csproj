@@ -189,6 +189,8 @@
     <Compile Include="Common\GeometryDescriptor.cs" />
     <Compile Include="Common\BufferManagerIndices.cs" />
     <Compile Include="Common\BufferManagerInstances.cs" />
+    <Compile Include="Common\IntersectionHelper.cs" />
+    <Compile Include="Common\IntersectionTriangle.cs" />
     <Compile Include="Common\NormalDescriptor.cs" />
     <Compile Include="Common\OrientedBoundingBox.cs" />
     <Compile Include="Common\BufferManagerVertices.cs" />
@@ -263,6 +265,8 @@
     <Compile Include="IGameResourceRequest.cs" />
     <Compile Include="IIntersectable.cs" />
     <Compile Include="IManipulator.cs" />
+    <Compile Include="IntersectDetectionMode.cs" />
+    <Compile Include="IntersectionVolumeMesh.cs" />
     <Compile Include="ISceneLight.cs" />
     <Compile Include="ISceneLightHemispheric.cs" />
     <Compile Include="ISceneLightSpot.cs" />

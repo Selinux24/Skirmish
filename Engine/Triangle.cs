@@ -1,11 +1,12 @@
-﻿using Engine.Common;
-using SharpDX;
+﻿using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine
 {
+    using Engine.Common;
+
     /// <summary>
     /// Triangle
     /// </summary>
@@ -354,6 +355,7 @@ namespace Engine
 
             return triangleList.ToArray();
         }
+
         /// <summary>
         /// Generate a triangle list from polygon
         /// </summary>
@@ -585,6 +587,58 @@ namespace Engine
                 this.Point2,
                 this.Point3,
             };
+        }
+
+        /// <summary>
+        /// Gets the edge vector between points 2 and 1
+        /// </summary>
+        public Vector3 GetEdge1()
+        {
+            return Vector3.Subtract(Point2, Point1);
+        }
+        /// <summary>
+        /// Gets the edge vector between points 3 and 1
+        /// </summary>
+        public Vector3 GetEdge2()
+        {
+            return Vector3.Subtract(Point3, Point1);
+        }
+        /// <summary>
+        /// Gets the edge vector between points 2 and 3
+        /// </summary>
+        public Vector3 GetEdge3()
+        {
+            return Vector3.Subtract(Point2, Point3);
+        }
+        /// <summary>
+        /// Gets ray edgest by edge index (0 to 2)
+        /// </summary>
+        /// <param name="index">Edge index</param>
+        public Ray GetEdgeRay(int index)
+        {
+            if (index == 0)
+            {
+                var pos = Point1;
+                var dir = Vector3.Subtract(Point2, Point1);
+
+                return new Ray(pos, dir);
+            }
+            else if (index == 1)
+            {
+                var pos = Point1;
+                var dir = Vector3.Subtract(Point3, Point1);
+
+                return new Ray(pos, dir);
+            }
+            else if (index == 2)
+            {
+                var pos = Point3;
+                var dir = Vector3.Subtract(Point2, Point3);
+
+                return new Ray(pos, dir);
+            }
+
+            throw new ArgumentException($"Bad edge index", nameof(index));
         }
 
         /// <summary>

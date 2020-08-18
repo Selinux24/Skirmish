@@ -77,7 +77,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             int w = solid.Width;
             int h = solid.Height;
             var b = solid.BoundingBox;
-            float by = b.GetY();
+            float by = b.Height;
 
             // Calculate the bounding box of the triangle.
             var triverts = item.Triangle.GetVertices();

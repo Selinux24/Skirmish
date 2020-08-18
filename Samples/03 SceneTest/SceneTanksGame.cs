@@ -604,7 +604,7 @@ namespace SceneTest
             tanks = await this.AddComponentModelInstanced(tDesc, SceneObjectUsages.Agent, layerModels);
             tanks.Visible = false;
 
-            tankHeight = tanks[0].GetBoundingBox().GetY() * 0.5f;
+            tankHeight = tanks[0].GetBoundingBox().Height * 0.5f;
         }
         private async Task InitializeModelsTerrain()
         {
@@ -1122,7 +1122,7 @@ You will lost all the game progress.",
 
             // Get terrain minimap rectangle
             BoundingBox bbox = terrain.GetBoundingBox();
-            RectangleF terrainRect = new RectangleF(bbox.Minimum.X, bbox.Minimum.Z, bbox.GetX(), bbox.GetZ());
+            RectangleF terrainRect = new RectangleF(bbox.Minimum.X, bbox.Minimum.Z, bbox.Width, bbox.Depth);
 
             // Get object space positions and transform to screen space
             Vector2 tank1 = tanks[0].Manipulator.Position.XZ() - terrainRect.TopLeft;

@@ -683,16 +683,16 @@ namespace SceneTest
             float areaSize = spaceSize * 3;
 
             var bboxTmp = this.container.GetBoundingBox();
-            float scaleX = areaSize * 2 / xSize / bboxTmp.GetX();
-            float scaleZ = areaSize * 2 / zSize / bboxTmp.GetZ();
+            float scaleX = areaSize * 2 / xSize / bboxTmp.Width;
+            float scaleZ = areaSize * 2 / zSize / bboxTmp.Depth;
             Vector3 scale = new Vector3(scaleX, (scaleX + scaleZ) / 2f, scaleZ);
 
             this.container.Manipulator.SetScale(scale);
             this.container.Manipulator.UpdateInternals(true);
             var bbox = this.container.GetBoundingBox();
-            float sx = bbox.GetX();
-            float sy = bbox.GetY();
-            float sz = bbox.GetZ();
+            float sx = bbox.Width;
+            float sy = bbox.Height;
+            float sz = bbox.Depth;
 
             this.container.Manipulator.SetPosition(s + 12 + xDelta, baseHeight + yDelta, 30 + zDelta);
             this.container.Manipulator.SetRotation(MathUtil.PiOverTwo * 2.1f, 0, 0);

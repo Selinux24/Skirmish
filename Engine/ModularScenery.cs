@@ -1159,22 +1159,6 @@ namespace Engine
             }
 
             /// <summary>
-            /// Gets if the current volume contains the bounding frustum
-            /// </summary>
-            /// <param name="frustum">Bounding frustum</param>
-            /// <returns>Returns the containment type</returns>
-            public ContainmentType Contains(BoundingFrustum frustum)
-            {
-                for (int i = 0; i < this.visibleBoxes.Count; i++)
-                {
-                    var res = frustum.Contains(this.visibleBoxes[i]);
-
-                    if (res != ContainmentType.Disjoint) return res;
-                }
-
-                return ContainmentType.Disjoint;
-            }
-            /// <summary>
             /// Gets if the current volume contains the bounding box
             /// </summary>
             /// <param name="bbox">Bounding box</param>
@@ -1183,7 +1167,7 @@ namespace Engine
             {
                 for (int i = 0; i < this.visibleBoxes.Count; i++)
                 {
-                    var res = this.visibleBoxes[i].Contains(bbox);
+                    var res = Intersection.BoxContainsBox(this.visibleBoxes[i], bbox);
 
                     if (res != ContainmentType.Disjoint) return res;
                 }
@@ -1199,7 +1183,39 @@ namespace Engine
             {
                 for (int i = 0; i < this.visibleBoxes.Count; i++)
                 {
-                    var res = this.visibleBoxes[i].Contains(sph);
+                    var res = Intersection.BoxContainsSphere(this.visibleBoxes[i], sph);
+
+                    if (res != ContainmentType.Disjoint) return res;
+                }
+
+                return ContainmentType.Disjoint;
+            }
+            /// <summary>
+            /// Gets if the current volume contains the bounding frustum
+            /// </summary>
+            /// <param name="frustum">Bounding frustum</param>
+            /// <returns>Returns the containment type</returns>
+            public ContainmentType Contains(BoundingFrustum frustum)
+            {
+                for (int i = 0; i < this.visibleBoxes.Count; i++)
+                {
+                    var res = Intersection.BoxContainsFrustum(this.visibleBoxes[i], frustum);
+
+                    if (res != ContainmentType.Disjoint) return res;
+                }
+
+                return ContainmentType.Disjoint;
+            }
+            /// <summary>
+            /// Gets if the current volume contains the mesh
+            /// </summary>
+            /// <param name="mesh">Mesh</param>
+            /// <returns>Returns the containment type</returns>
+            public ContainmentType Contains(Triangle[] mesh)
+            {
+                for (int i = 0; i < this.visibleBoxes.Count; i++)
+                {
+                    var res = Intersection.BoxContainsMesh(this.visibleBoxes[i], mesh);
 
                     if (res != ContainmentType.Disjoint) return res;
                 }

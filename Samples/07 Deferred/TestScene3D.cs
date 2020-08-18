@@ -223,9 +223,9 @@ namespace Deferred
 
             this.tankAgentType = new Agent()
             {
-                Height = tankbbox.GetY(),
-                Radius = Math.Max(tankbbox.GetX(), tankbbox.GetZ()) * 0.5f,
-                MaxClimb = tankbbox.GetY() * 0.55f,
+                Height = tankbbox.Height,
+                Radius = Math.Max(tankbbox.Width, tankbbox.Depth) * 0.5f,
+                MaxClimb = tankbbox.Height * 0.55f,
             };
 
             for (int i = 0; i < tanks.InstanceCount; i++)

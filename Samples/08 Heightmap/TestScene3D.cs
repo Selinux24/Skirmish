@@ -1205,9 +1205,9 @@ namespace Heightmap
         {
             //Agent
             var sbbox = this.soldier.GetBoundingBox();
-            this.agent.Height = sbbox.GetY();
-            this.agent.Radius = sbbox.GetX() * 0.5f;
-            this.agent.MaxClimb = sbbox.GetY() * 0.75f;
+            this.agent.Height = sbbox.Height;
+            this.agent.Radius = sbbox.Width * 0.5f;
+            this.agent.MaxClimb = sbbox.Height * 0.75f;
             this.agent.MaxSlope = 45;
 
             //Navigation settings
@@ -1325,7 +1325,7 @@ namespace Heightmap
                 foreach (var t in troops.GetInstances())
                 {
                     var bbox = t.GetBoundingBox();
-                    BoundingCylinder bc = new BoundingCylinder(t.Manipulator.Position, 1.5f, bbox.GetY());
+                    BoundingCylinder bc = new BoundingCylinder(t.Manipulator.Position, 1.5f, bbox.Height);
 
                     this.NavigationGraph.AddObstacle(bc);
                 }

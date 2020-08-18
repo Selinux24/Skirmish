@@ -547,9 +547,9 @@ namespace Terrain
             this.tankAgentType = new Agent()
             {
                 Name = "Tank type",
-                Height = tankbbox.GetY(),
-                Radius = tankbbox.GetX() * 0.5f,
-                MaxClimb = tankbbox.GetY() * 0.1f,
+                Height = tankbbox.Height,
+                Radius = tankbbox.Width * 0.5f,
+                MaxClimb = tankbbox.Height * 0.1f,
             };
 
             this.Lights.AddRange(this.tankP1.Lights);
