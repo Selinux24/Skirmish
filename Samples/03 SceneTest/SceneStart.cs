@@ -122,8 +122,13 @@ namespace SceneTest
 
             #endregion
         }
-        private void PrepareAssets()
+        private void PrepareAssets(LoadResourcesResult res)
         {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
+
             this.backGround.Manipulator.SetScale(1.5f, 1.25f, 1.5f);
 
             this.title.Text = "Scene Manager Test";

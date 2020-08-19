@@ -53,8 +53,13 @@ namespace SceneTest
                     this.InitializeLights(),
                     this.InitializeDebug()
                 },
-                () =>
+                (res) =>
                 {
+                    if (!res.Completed)
+                    {
+                        res.ThrowExceptions();
+                    }
+
                     this.buildingObelisks[0].Manipulator.SetPosition(+5, 0, +5);
                     this.buildingObelisks[1].Manipulator.SetPosition(+5, 0, -5);
                     this.buildingObelisks[2].Manipulator.SetPosition(-5, 0, +5);

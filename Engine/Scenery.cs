@@ -472,19 +472,19 @@ namespace Engine
             {
                 await this.Scene.LoadResourcesAsync(
                     taskList,
-                    (results) =>
+                    (result) =>
                     {
-                        foreach (var res in results)
+                        foreach (var res in result.Results)
                         {
                             // Assign patch to dictionary
                             if (res.Completed)
                             {
-                                this.patchDictionary[res.TaskResult.Id] = res.TaskResult.Patch;
+                                this.patchDictionary[res.Result.Id] = res.Result.Patch;
                             }
                             else
                             {
-                                this.patchDictionary.Remove(res.TaskResult.Id);
-                                Console.WriteLine($"Error creating patch {res.TaskResult.Id}: {res.Exception.Message}");
+                                this.patchDictionary.Remove(res.Result.Id);
+                                Logger.WriteError($"Error creating patch {res.Result.Id}: {res.Exception}");
                             }
                         }
                     });

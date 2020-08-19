@@ -77,66 +77,76 @@ namespace Deferred
             this.Lights.BackLight.CastShadow = false;
             this.Lights.FillLight.CastShadow = false;
 
-            _ = this.LoadResourcesAsync(
+            await this.LoadResourcesAsync(
                 new[]
                 {
                     InitializeCursor(),
                     InitializeUI()
                 },
-                () =>
+                (res) =>
                 {
+                    if (!res.Completed)
+                    {
+                        res.ThrowExceptions();
+                    }
+
                     this.title.Text = "Deferred Ligthning test";
                     this.help.Text = "";
                     this.statistics.Text = "";
+                });
 
-                    _ = this.LoadResourcesAsync(
-                        new[]
-                        {
-                            InitializeAndTrace(InitializeSkydom),
-                            InitializeAndTrace(InitializeHelicopters),
-                            InitializeAndTrace(InitializeTanks),
-                            InitializeAndTrace(InitializeTerrain),
-                            InitializeAndTrace(InitializeGardener),
-                            InitializeAndTrace(InitializeTrees),
-                            InitializeDebug()
-                        },
-                        () =>
-                        {
-                            this.SetGround(this.terrain, true);
-                            this.AttachToGround(this.tree, false);
-                            this.AttachToGround(this.trees, false);
+            await this.LoadResourcesAsync(
+                new[]
+                {
+                    InitializeAndTrace(InitializeSkydom),
+                    InitializeAndTrace(InitializeHelicopters),
+                    InitializeAndTrace(InitializeTanks),
+                    InitializeAndTrace(InitializeTerrain),
+                    InitializeAndTrace(InitializeGardener),
+                    InitializeAndTrace(InitializeTrees),
+                    InitializeDebug()
+                },
+                (res) =>
+                {
+                    if (!res.Completed)
+                    {
+                        res.ThrowExceptions();
+                    }
 
-                            StartNodes();
+                    this.SetGround(this.terrain, true);
+                    this.AttachToGround(this.tree, false);
+                    this.AttachToGround(this.trees, false);
 
-                            StartAnimations();
+                    StartNodes();
 
-                            StartTerrain();
+                    StartAnimations();
 
-                            StartItems(out Vector3 cameraPosition, out int modelCount);
+                    StartTerrain();
 
-                            cameraPosition /= (float)modelCount;
-                            this.Camera.Goto(cameraPosition + new Vector3(-30, 30, -30));
-                            this.Camera.LookTo(cameraPosition + Vector3.Up);
-                            this.Camera.NearPlaneDistance = near;
-                            this.Camera.FarPlaneDistance = far;
+                    StartItems(out Vector3 cameraPosition, out int modelCount);
 
-                            var nmsettings = BuildSettings.Default;
-                            nmsettings.CellSize = 0.5f;
-                            nmsettings.CellHeight = 0.25f;
-                            nmsettings.Agents = new[] { this.tankAgentType };
-                            nmsettings.PartitionType = SamplePartitionTypes.Layers;
-                            nmsettings.EdgeMaxError = 1.0f;
-                            nmsettings.BuildMode = BuildModes.Tiled;
-                            nmsettings.TileSize = 32;
+                    cameraPosition /= (float)modelCount;
+                    this.Camera.Goto(cameraPosition + new Vector3(-30, 30, -30));
+                    this.Camera.LookTo(cameraPosition + Vector3.Up);
+                    this.Camera.NearPlaneDistance = near;
+                    this.Camera.FarPlaneDistance = far;
 
-                            var nmInput = new InputGeometry(GetTrianglesForNavigationGraph);
+                    var nmsettings = BuildSettings.Default;
+                    nmsettings.CellSize = 0.5f;
+                    nmsettings.CellHeight = 0.25f;
+                    nmsettings.Agents = new[] { this.tankAgentType };
+                    nmsettings.PartitionType = SamplePartitionTypes.Layers;
+                    nmsettings.EdgeMaxError = 1.0f;
+                    nmsettings.BuildMode = BuildModes.Tiled;
+                    nmsettings.TileSize = 32;
 
-                            this.PathFinderDescription = new Engine.PathFinding.PathFinderDescription(nmsettings, nmInput);
+                    var nmInput = new InputGeometry(GetTrianglesForNavigationGraph);
 
-                            Task.WhenAll(this.UpdateNavigationGraph());
+                    this.PathFinderDescription = new Engine.PathFinding.PathFinderDescription(nmsettings, nmInput);
 
-                            gameReady = true;
-                        });
+                    Task.WhenAll(this.UpdateNavigationGraph());
+
+                    gameReady = true;
                 });
         }
         private async Task<double> InitializeAndTrace(Func<Task> action)
@@ -1165,7 +1175,7 @@ namespace Deferred
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Logger.WriteError(ex.Message);
             }
         }
     }

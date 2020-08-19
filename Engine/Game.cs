@@ -318,7 +318,7 @@ namespace Engine
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error setting scene with scene mode: {ex.Message}");
+                Logger.WriteError($"Error setting scene with scene mode: {ex.Message}");
             }
 
             try
@@ -330,7 +330,7 @@ namespace Engine
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error setting scene: {ex.Message}");
+                Logger.WriteError($"Error setting scene: {ex.Message}");
             }
         }
         /// <summary>
@@ -366,15 +366,26 @@ namespace Engine
         /// <param name="scene">New scene</param>
         private async Task StartScene(Scene scene)
         {
-            Console.WriteLine("Game: Begin StartScene");
+            Logger.WriteDebug("Game: Begin StartScene");
             scene.Active = false;
 
-            Console.WriteLine("Scene: Initialize start");
-            await scene.Initialize();
-            Console.WriteLine("Scene: Initialize end");
+            try
+            {
+                Logger.WriteDebug("Scene: Initialize start");
+                await scene.Initialize();
+                Logger.WriteDebug("Scene: Initialize end");
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError($"Scene: Initialize error: {ex}");
+
+#if !DEBUG
+                throw;
+#endif
+            }
 
             scene.Active = true;
-            Console.WriteLine("Game: End StartScene");
+            Logger.WriteDebug("Game: End StartScene");
         }
 
         /// <summary>
@@ -388,24 +399,6 @@ namespace Engine
         }
 
         /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="tasks">Resource load tasks</param>
-        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal bool LoadResources(Scene scene, params Task[] tasks)
-        {
-            if (ResourceLoadRuning)
-            {
-                return false;
-            }
-
-            Task.WhenAll(LoadResourcesAsync(scene, tasks));
-
-            return true;
-        }
-
-        /// <summary>
         /// Executes a resource load task
         /// </summary>
         /// <typeparam name="T">Response type</typeparam>
@@ -413,13 +406,13 @@ namespace Engine
         /// <param name="task">Resource load task</param>
         /// <param name="callback">Callback</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal async Task<bool> LoadResourcesAsync<T>(Scene scene, Task<T> task, Action<LoadResourceResult<T>> callback = null)
+        internal async Task<bool> LoadResourcesAsync<T>(Scene scene, Task<T> task, Action<LoadResourcesResult<T>> callback = null)
         {
             bool res = false;
 
             while (!res)
             {
-                res = await InternalLoadResourcesAsync(scene, new[] { task }, (results) => { callback?.Invoke(results.FirstOrDefault()); });
+                res = await InternalLoadResourcesAsync(scene, new[] { task }, callback);
 
                 if (res) break;
 
@@ -436,7 +429,7 @@ namespace Engine
         /// <param name="tasks">Resource load tasks</param>
         /// <param name="callback">Callback</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal async Task<bool> LoadResourcesAsync<T>(Scene scene, IEnumerable<Task<T>> tasks, Action<IEnumerable<LoadResourceResult<T>>> callback = null)
+        internal async Task<bool> LoadResourcesAsync<T>(Scene scene, IEnumerable<Task<T>> tasks, Action<LoadResourcesResult<T>> callback = null)
         {
             bool res = false;
 
@@ -458,7 +451,7 @@ namespace Engine
         /// <param name="task">Resource load task</param>
         /// <param name="callback">Callback</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal async Task<bool> LoadResourcesAsync(Scene scene, Task task, Action callback = null)
+        internal async Task<bool> LoadResourcesAsync(Scene scene, Task task, Action<LoadResourcesResult> callback = null)
         {
             bool res = false;
 
@@ -480,7 +473,7 @@ namespace Engine
         /// <param name="tasks">Resource load tasks</param>
         /// <param name="callback">Callback</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal async Task<bool> LoadResourcesAsync(Scene scene, IEnumerable<Task> tasks, Action callback = null)
+        internal async Task<bool> LoadResourcesAsync(Scene scene, IEnumerable<Task> tasks, Action<LoadResourcesResult> callback = null)
         {
             bool res = false;
 
@@ -496,7 +489,7 @@ namespace Engine
             return res;
         }
 
-        private async Task<bool> InternalLoadResourcesAsync<T>(Scene scene, IEnumerable<Task<T>> tasks, Action<IEnumerable<LoadResourceResult<T>>> callback = null)
+        private async Task<bool> InternalLoadResourcesAsync<T>(Scene scene, IEnumerable<Task<T>> tasks, Action<LoadResourcesResult<T>> callback = null)
         {
             if (ResourceLoadRuning)
             {
@@ -505,7 +498,7 @@ namespace Engine
 
             ResourceLoadRuning = true;
 
-            List<LoadResourceResult<T>> loadResult = new List<LoadResourceResult<T>>();
+            List<TaskResult<T>> loadResult = new List<TaskResult<T>>();
 
             try
             {
@@ -519,20 +512,14 @@ namespace Engine
 
                     taskList.Remove(t);
 
-                    LoadResourceResult<T> res = new LoadResourceResult<T>
-                    {
-                        Completed = t.IsCompleted
-                    };
+                    bool completedOk = t.Status == TaskStatus.RanToCompletion;
 
-                    if (t.IsFaulted)
+                    TaskResult<T> res = new TaskResult<T>
                     {
-                        Console.WriteLine($"Faulted task {t.Exception}");
-                        res.Exception = t.Exception;
-                    }
-                    else
-                    {
-                        res.TaskResult = await t;
-                    }
+                        Completed = completedOk,
+                        Exception = t.Exception, // Store the excetion
+                        Result = completedOk ? (await t) : default, // Avoid throwing the exception now
+                    };
 
                     loadResult.Add(res);
 
@@ -545,13 +532,25 @@ namespace Engine
             {
                 ResourceLoadRuning = false;
 
-                callback?.Invoke(loadResult.ToArray());
+                var res = new LoadResourcesResult<T>
+                {
+                    Results = loadResult,
+                };
+
+                if (callback != null)
+                {
+                    callback.Invoke(res);
+                }
+                else
+                {
+                    res.ThrowExceptions();
+                }
             }
 
             return true;
         }
 
-        private async Task<bool> InternalLoadResourcesAsync(Scene scene, IEnumerable<Task> tasks, Action callback = null)
+        private async Task<bool> InternalLoadResourcesAsync(Scene scene, IEnumerable<Task> tasks, Action<LoadResourcesResult> callback = null)
         {
             if (ResourceLoadRuning)
             {
@@ -559,6 +558,8 @@ namespace Engine
             }
 
             ResourceLoadRuning = true;
+
+            List<TaskResult> loadResult = new List<TaskResult>();
 
             try
             {
@@ -572,10 +573,13 @@ namespace Engine
 
                     taskList.Remove(t);
 
-                    if (t.IsFaulted)
+                    TaskResult res = new TaskResult
                     {
-                        Console.WriteLine($"Faulted task {t.Exception}");
-                    }
+                        Completed = t.Status == TaskStatus.RanToCompletion,
+                        Exception = t.Exception, // Store the excetion
+                    };
+
+                    loadResult.Add(res);
 
                     Progress?.Report(++currentTask / (float)totalTasks);
                 }
@@ -586,7 +590,19 @@ namespace Engine
             {
                 ResourceLoadRuning = false;
 
-                callback?.Invoke();
+                var res = new LoadResourcesResult
+                {
+                    Results = loadResult,
+                };
+
+                if (callback != null)
+                {
+                    callback.Invoke(res);
+                }
+                else
+                {
+                    res.ThrowExceptions();
+                }
             }
 
             return true;
@@ -598,19 +614,19 @@ namespace Engine
             {
                 ResourcesLoading?.Invoke(this, new GameLoadResourcesEventArgs() { Scene = scene });
 
-                Console.WriteLine("BufferManager: Recreating buffers");
+                Logger.WriteDebug("BufferManager: Recreating buffers");
                 this.BufferManager.CreateBuffers(Progress);
-                Console.WriteLine("BufferManager: Buffers recreated");
+                Logger.WriteDebug("BufferManager: Buffers recreated");
 
-                Console.WriteLine("ResourceManager: Creating new resources");
+                Logger.WriteDebug("ResourceManager: Creating new resources");
                 this.ResourceManager.CreateResources(Progress);
-                Console.WriteLine("ResourceManager: New resources created");
+                Logger.WriteDebug("ResourceManager: New resources created");
 
                 ResourcesLoaded?.Invoke(this, new GameLoadResourcesEventArgs() { Scene = scene });
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Logger.WriteError($"ResourceManager error: {ex}");
             }
         }
 
@@ -666,9 +682,9 @@ namespace Engine
 
             if (this.ResourceManager.HasRequests)
             {
-                Console.WriteLine("ResourceManager: Creating new resources");
+                Logger.WriteDebug("ResourceManager: Creating new resources");
                 this.ResourceManager.CreateResources(null);
-                Console.WriteLine("ResourceManager: New resources created");
+                Logger.WriteDebug("ResourceManager: New resources created");
             }
 
             Counters.FrameCount++;
@@ -699,22 +715,38 @@ namespace Engine
         /// </summary>
         private void FrameInput()
         {
-            Stopwatch pSW = new Stopwatch();
-            pSW.Start();
-            this.Input.Update(this.GameTime);
-            pSW.Stop();
-            GameStatus.Add("Input", pSW);
+            try
+            {
+                Stopwatch pSW = new Stopwatch();
+                pSW.Start();
+                this.Input.Update(this.GameTime);
+                pSW.Stop();
+                GameStatus.Add("Input", pSW);
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError($"Frame: Input Update error: {ex}");
+            }
         }
         /// <summary>
         /// Begin frame
         /// </summary>
         private void FrameBegin()
         {
-            Stopwatch pSW = new Stopwatch();
-            pSW.Start();
-            this.Graphics.Begin();
-            pSW.Stop();
-            GameStatus.Add("Begin", pSW);
+            try
+            {
+                Stopwatch pSW = new Stopwatch();
+                pSW.Start();
+                this.Graphics.Begin();
+                pSW.Stop();
+                GameStatus.Add("Begin", pSW);
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError($"Frame: Graphics Begin error: {ex}");
+
+                throw;
+            }
         }
         /// <summary>
         /// Update scene state
@@ -722,11 +754,18 @@ namespace Engine
         /// <param name="scene">Scene</param>
         private void FrameSceneUpdate(Scene scene)
         {
-            Stopwatch uSW = new Stopwatch();
-            uSW.Start();
-            scene.Update(this.GameTime);
-            uSW.Stop();
-            GameStatus.Add($"Scene {scene}.Update", uSW);
+            try
+            {
+                Stopwatch uSW = new Stopwatch();
+                uSW.Start();
+                scene.Update(this.GameTime);
+                uSW.Stop();
+                GameStatus.Add($"Scene {scene}.Update", uSW);
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError($"Scene: Update error: {ex}");
+            }
         }
         /// <summary>
         /// Draw scene
@@ -734,7 +773,12 @@ namespace Engine
         /// <param name="scene">Scene</param>
         private void FrameSceneDraw(Scene scene)
         {
-            if (this.BufferManager.SetVertexBuffers())
+            if (!this.BufferManager.SetVertexBuffers())
+            {
+                return;
+            }
+
+            try
             {
                 Stopwatch dSW = new Stopwatch();
                 dSW.Start();
@@ -742,62 +786,127 @@ namespace Engine
                 dSW.Stop();
                 GameStatus.Add($"Scene {scene}.Draw", dSW);
             }
+            catch (Exception ex)
+            {
+                Logger.WriteError($"Scene: Draw error: {ex}");
+            }
         }
         /// <summary>
         /// End frame
         /// </summary>
         private void FrameEnd()
         {
-            Stopwatch pSW = new Stopwatch();
-            pSW.Start();
-            this.Graphics.End();
-            pSW.Stop();
-            GameStatus.Add("End", pSW);
+            try
+            {
+                Stopwatch pSW = new Stopwatch();
+                pSW.Start();
+                this.Graphics.End();
+                pSW.Stop();
+                GameStatus.Add("End", pSW);
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError($"Frame: Graphics End error: {ex}");
+
+                throw;
+            }
         }
         /// <summary>
         /// Refreshes frame counters
         /// </summary>
         private void FrameRefreshCounters()
         {
-            this.RuntimeText = string.Format(
-                "{0} - {1} - FPS: {2:000} Draw C/D: {3:00}:{4:00} Inst: {5:00} U: {6:00} S: {7}:{8}:{9} F. Time: {10:0.0000} (secs) T. Time: {11:0000} (secs) CPU: {12:0.00}%",
-                this.Graphics.DeviceDescription,
-                this.Name,
-                Counters.FrameCount,
-                Counters.DrawCallsPerFrame,
-                Counters.InstancesPerFrame,
-                Counters.MaxInstancesPerFrame,
-                Counters.UpdatesPerFrame,
-                Counters.RasterizerStateChanges, Counters.BlendStateChanges, Counters.DepthStencilStateChanges,
-                this.GameTime.ElapsedSeconds,
-                this.GameTime.TotalSeconds,
-                this.CPUStats.NextValue());
+            try
+            {
+                this.RuntimeText = string.Format(
+                    "{0} - {1} - FPS: {2:000} Draw C/D: {3:00}:{4:00} Inst: {5:00} U: {6:00} S: {7}:{8}:{9} F. Time: {10:0.0000} (secs) T. Time: {11:0000} (secs) CPU: {12:0.00}%",
+                    this.Graphics.DeviceDescription,
+                    this.Name,
+                    Counters.FrameCount,
+                    Counters.DrawCallsPerFrame,
+                    Counters.InstancesPerFrame,
+                    Counters.MaxInstancesPerFrame,
+                    Counters.UpdatesPerFrame,
+                    Counters.RasterizerStateChanges, Counters.BlendStateChanges, Counters.DepthStencilStateChanges,
+                    this.GameTime.ElapsedSeconds,
+                    this.GameTime.TotalSeconds,
+                    this.CPUStats.NextValue());
 #if DEBUG
-            this.Form.Text = this.RuntimeText;
+                this.Form.Text = this.RuntimeText;
 #endif
-            Counters.FrameCount = 0;
-            Counters.FrameTime = 0f;
+                Counters.FrameCount = 0;
+                Counters.FrameTime = 0f;
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError($"Frame: Refresh Counters error: {ex}");
+            }
         }
         /// <summary>
         /// Collects frame status
         /// </summary>
         private void FrameCollectGameStatus()
         {
-            GameStatusCollectedEventArgs e = new GameStatusCollectedEventArgs()
+            try
             {
-                Trace = GameStatus.Copy(),
-            };
+                GameStatusCollectedEventArgs e = new GameStatusCollectedEventArgs()
+                {
+                    Trace = GameStatus.Copy(),
+                };
 
-            GameStatusCollected?.Invoke(this, e);
+                GameStatusCollected?.Invoke(this, e);
 
-            CollectGameStatus = false;
+                CollectGameStatus = false;
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError($"Frame: Collecto Game Status error: {ex}");
+            }
         }
     }
 
-    public class LoadResourceResult<T>
+    public class LoadResourcesResult
+    {
+        public virtual IEnumerable<TaskResult> Results { get; set; }
+        public virtual bool Completed
+        {
+            get
+            {
+                return Results?.Any(r => !r.Completed) != true;
+            }
+        }
+
+        public virtual void ThrowExceptions()
+        {
+            var exList = Results?
+                .Where(r => r.Exception != null)
+                .Select(r => r.Exception)
+                .ToArray();
+
+            if (exList?.Any() != true)
+            {
+                return;
+            }
+
+            var aggregate = new AggregateException($"A load resource task list results in error.", exList);
+
+            throw aggregate.Flatten();
+        }
+    }
+
+    public class LoadResourcesResult<T> : LoadResourcesResult
+    {
+        public new IEnumerable<TaskResult<T>> Results { get; set; }
+    }
+
+    public class TaskResult
     {
         public bool Completed { get; set; }
         public Exception Exception { get; set; }
-        public T TaskResult { get; set; }
+    }
+
+    public class TaskResult<T> : TaskResult
+    {
+        public T Result { get; set; }
     }
 }

@@ -135,8 +135,13 @@ namespace GameLogic
                     this.InitializeHUD(),
                     this.InitializeDebug()
                 },
-                () =>
+                (res) =>
                 {
+                    if (!res.Completed)
+                    {
+                        res.ThrowExceptions();
+                    }
+
                     this.UpdateLayout();
 
                     this.InitializeAnimations();

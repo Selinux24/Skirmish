@@ -21,7 +21,7 @@ namespace Engine.UI
         /// <summary>
         /// Maximum text length
         /// </summary>
-        public const int MAXTEXTLENGTH = 1024;
+        public const int MAXTEXTLENGTH = 1024 * 10;
         /// <summary>
         /// Maximum texture size
         /// </summary>
@@ -302,7 +302,7 @@ namespace Engine.UI
             var fileNames = ContentManager.FindPaths(contentPath, fontFileName);
             if (!fileNames.Any())
             {
-                Console.WriteLine($"Font resource not found: {fontFileName}");
+                Logger.WriteWarning($"Font resource not found: {fontFileName}");
 
                 return null;
             }
@@ -393,7 +393,7 @@ namespace Engine.UI
             string[] fonts = ParseFontFamilies(fontFamily);
             if (!fonts.Any())
             {
-                Console.WriteLine("Font family not specified");
+                Logger.WriteWarning("Font family not specified");
 
                 return null;
             }
@@ -405,7 +405,7 @@ namespace Engine.UI
 
             if (font == null)
             {
-                Console.WriteLine($"Font familiy not found in the graphic context: {fontFamily}");
+                Logger.WriteWarning($"Font familiy not found in the graphic context: {fontFamily}");
 
                 return null;
             }
@@ -591,12 +591,12 @@ namespace Engine.UI
 
             if (!float.TryParse(xValue, NumberStyles.Float, CultureInfo.InvariantCulture, out float x))
             {
-                Console.WriteLine($"Bad coordinate descriptor for X value. Single spected: {xValue}");
+                Logger.WriteWarning($"Bad coordinate descriptor for X value. Single spected: {xValue}");
             }
 
             if (!float.TryParse(yValue, NumberStyles.Float, CultureInfo.InvariantCulture, out float y))
             {
-                Console.WriteLine($"Bad coordinate descriptor for Y value. Single spected: {yValue}");
+                Logger.WriteWarning($"Bad coordinate descriptor for Y value. Single spected: {yValue}");
             }
 
             return new Vector2(x, y);

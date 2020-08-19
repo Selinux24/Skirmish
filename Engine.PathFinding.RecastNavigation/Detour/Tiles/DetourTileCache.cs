@@ -1573,7 +1573,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 mesh.NPolys++;
                 if (mesh.NPolys > maxTris)
                 {
-                    Console.WriteLine($"removeVertex: Too many polygons {mesh.NPolys} (max:{maxTris}).");
+                    Logger.WriteWarning($"removeVertex: Too many polygons {mesh.NPolys} (max:{maxTris}).");
                     return false;
                 }
             }

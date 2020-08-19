@@ -281,7 +281,7 @@ namespace Engine
             this.particles[this.currentParticleIndex].RandomValues = randomValues;
             this.particles[this.currentParticleIndex].MaxAge = this.Emitter.TotalTime;
 
-            Console.WriteLine($"{this.Name} - AddParticle WriteDiscardBuffer");
+            Logger.WriteDebug($"{this.Name} - AddParticle WriteDiscardBuffer");
             this.Game.Graphics.WriteDiscardBuffer(this.buffer.VertexBuffer, this.particles);
 
             this.currentParticleIndex = nextFreeParticle;

@@ -56,8 +56,13 @@ namespace SceneTest
                     this.InitializeColorGroup(1, 0.1f, new Vector3(-10, 0, -10), false),
                     this.InitializeColorGroup(128, 1f, new Vector3(-10.5f, 0, -10), true)
                 },
-                () =>
+                (res) =>
                 {
+                    if (!res.Completed)
+                    {
+                        res.ThrowExceptions();
+                    }
+
                     gameReady = true;
                 });
         }

@@ -543,7 +543,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     bool requested = RequestMoveTargetReplan(ag, ag.TargetRef, ag.TargetPos);
                     if (!requested)
                     {
-                        Console.WriteLine($"RequestMoveTargetReplan error: {m_agents.IndexOf(ag)} {ag.TargetRef} {ag.TargetPos}");
+                        Logger.WriteError($"RequestMoveTargetReplan error: {m_agents.IndexOf(ag)} {ag.TargetRef} {ag.TargetPos}");
                     }
                 }
             }
@@ -732,7 +732,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             var path = ag.Corridor.GetPath();
             if (!path.Any())
             {
-                Console.WriteLine($"Crowd.UpdateMoveRequest {ag} no path assigned;");
+                Logger.WriteWarning($"Crowd.UpdateMoveRequest {ag} no path assigned;");
             }
 
             const int MAX_RES = 32;
@@ -832,7 +832,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             var path = ag.Corridor.GetPath();
             if (!path.Any())
             {
-                Console.WriteLine($"Crowd.UpdateMoveRequest {ag} no path assigned;");
+                Logger.WriteWarning($"Crowd.UpdateMoveRequest {ag} no path assigned;");
             }
 
             // Apply results.

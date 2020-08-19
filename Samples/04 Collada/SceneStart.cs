@@ -77,8 +77,13 @@ namespace Collada
                     InitializeAudio(),
                     InitializeBackGround(),
                 },
-                () =>
+                (res) =>
                 {
+                    if (!res.Completed)
+                    {
+                        res.ThrowExceptions();
+                    }
+
                     SetBackground();
 
                     this.Camera.Position = Vector3.BackwardLH * 8f;
@@ -143,8 +148,13 @@ namespace Collada
                     InitializeCursor(),
                     InitializeControls(),
                 },
-                () =>
+                (res) =>
                 {
+                    if (!res.Completed)
+                    {
+                        res.ThrowExceptions();
+                    }
+
                     SetControlPositions();
 
                     gameReady = true;

@@ -209,18 +209,18 @@ namespace Engine.Common
 
                 if (!Initilialized)
                 {
-                    Console.WriteLine($"Creating reserved buffer descriptors");
+                    Logger.WriteDebug($"Creating reserved buffer descriptors");
 
                     CreateReservedBuffers();
 
-                    Console.WriteLine($"Reserved buffer descriptors created");
+                    Logger.WriteDebug($"Reserved buffer descriptors created");
 
                     Initilialized = true;
                 }
 
                 if (HasPendingRequests)
                 {
-                    Console.WriteLine($"Processing descriptor requests");
+                    Logger.WriteDebug($"Processing descriptor requests");
 
                     //Copy request collection
                     var toAssign = this.requestedDescriptors
@@ -231,9 +231,9 @@ namespace Engine.Common
 
                     DoProcessRequest(progress, ref current, toAssign.Count(), toAssign);
 
-                    Console.WriteLine($"Descriptor requests processed");
+                    Logger.WriteDebug($"Descriptor requests processed");
 
-                    Console.WriteLine($"Reallocating buffers");
+                    Logger.WriteDebug($"Reallocating buffers");
 
                     var instancingList = this.instancingBufferDescriptors
                         .Where(v => v.Dirty)
@@ -259,12 +259,12 @@ namespace Engine.Common
 
                     ReallocateIndexData(progress, ref current, total, indexList);
 
-                    Console.WriteLine($"Buffers reallocated");
+                    Logger.WriteDebug($"Buffers reallocated");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error creating buffers: {ex.Message}");
+                Logger.WriteError($"Error creating buffers: {ex.Message}");
             }
             finally
             {
@@ -299,7 +299,7 @@ namespace Engine.Common
                 descriptor.Allocated = true;
                 descriptor.ReallocationNeeded = false;
 
-                Console.WriteLine($"Created {name} and binding. Size {descriptor.Data.Count()}");
+                Logger.WriteDebug($"Created {name} and binding. Size {descriptor.Data.Count()}");
             }
         }
         /// <summary>
@@ -342,7 +342,7 @@ namespace Engine.Common
                     //Dispose old buffer
                     oldBuffer?.Dispose();
 
-                    Console.WriteLine($"Reallocated {name}. Size {descriptor.Instances}");
+                    Logger.WriteDebug($"Reallocated {name}. Size {descriptor.Instances}");
                 }
                 else
                 {
@@ -361,7 +361,7 @@ namespace Engine.Common
                     descriptor.BufferIndex = bufferIndex;
                     descriptor.BufferBindingIndex = bindingIndex;
 
-                    Console.WriteLine($"Created {name} and binding. Size {descriptor.Instances}");
+                    Logger.WriteDebug($"Created {name} and binding. Size {descriptor.Instances}");
                 }
 
                 //Updates the allocated buffer size
@@ -396,7 +396,7 @@ namespace Engine.Common
                     //Dispose old buffer
                     oldBuffer?.Dispose();
 
-                    Console.WriteLine($"Reallocated {name} and binding. Size {descriptor.Data.Count()}");
+                    Logger.WriteDebug($"Reallocated {name} and binding. Size {descriptor.Data.Count()}");
                 }
                 else
                 {
@@ -416,7 +416,7 @@ namespace Engine.Common
                     descriptor.BufferIndex = bufferIndex;
                     descriptor.BufferBindingIndex = bindingIndex;
 
-                    Console.WriteLine($"Created {name} and binding. Size {descriptor.Data.Count()}");
+                    Logger.WriteDebug($"Created {name} and binding. Size {descriptor.Data.Count()}");
                 }
 
                 descriptor.ClearInstancingInputs();
@@ -455,7 +455,7 @@ namespace Engine.Common
                     //Dispose buffer
                     oldBuffer?.Dispose();
 
-                    Console.WriteLine($"Reallocated {name}. Size {descriptor.Data.Count()}");
+                    Logger.WriteDebug($"Reallocated {name}. Size {descriptor.Data.Count()}");
                 }
                 else
                 {
@@ -469,7 +469,7 @@ namespace Engine.Common
 
                     descriptor.BufferIndex = bufferIndex;
 
-                    Console.WriteLine($"Created {name}. Size {descriptor.Data.Count()}");
+                    Logger.WriteDebug($"Created {name}. Size {descriptor.Data.Count()}");
                 }
 
                 //Updates the allocated buffer size
@@ -710,7 +710,7 @@ namespace Engine.Common
         {
             if (!Initilialized)
             {
-                Console.WriteLine("Attempt to set vertex buffers to Input Assembler with no initialized manager");
+                Logger.WriteWarning("Attempt to set vertex buffers to Input Assembler with no initialized manager");
                 return false;
             }
 
@@ -736,14 +736,14 @@ namespace Engine.Common
 
             if (!Initilialized)
             {
-                Console.WriteLine("Attempt to set index buffers to Input Assembler with no initialized manager");
+                Logger.WriteWarning("Attempt to set index buffers to Input Assembler with no initialized manager");
                 return false;
             }
 
             var indexBufferDescriptor = this.indexBufferDescriptors[descriptor.BufferDescriptionIndex];
             if (indexBufferDescriptor.Dirty)
             {
-                Console.WriteLine($"Attempt to set index buffer in buffer description {descriptor.BufferDescriptionIndex} to Input Assembler with no allocated buffer");
+                Logger.WriteWarning($"Attempt to set index buffer in buffer description {descriptor.BufferDescriptionIndex} to Input Assembler with no allocated buffer");
                 return false;
             }
 
@@ -765,14 +765,14 @@ namespace Engine.Common
 
             if (!Initilialized)
             {
-                Console.WriteLine("Attempt to set technique to Input Assembler with no initialized manager");
+                Logger.WriteWarning("Attempt to set technique to Input Assembler with no initialized manager");
                 return false;
             }
 
             var vertexBufferDescriptor = this.vertexBufferDescriptors[descriptor.BufferDescriptionIndex];
             if (vertexBufferDescriptor.Dirty)
             {
-                Console.WriteLine($"Attempt to set technique in buffer description {descriptor.BufferDescriptionIndex} to Input Assembler with no allocated buffer");
+                Logger.WriteWarning($"Attempt to set technique in buffer description {descriptor.BufferDescriptionIndex} to Input Assembler with no allocated buffer");
                 return false;
             }
 
@@ -807,14 +807,14 @@ namespace Engine.Common
 
             if (!Initilialized)
             {
-                Console.WriteLine($"Attempt to write vertex data in buffer description {descriptor.BufferDescriptionIndex} with no initialized manager");
+                Logger.WriteWarning($"Attempt to write vertex data in buffer description {descriptor.BufferDescriptionIndex} with no initialized manager");
                 return false;
             }
 
             var vertexBufferDescriptor = this.vertexBufferDescriptors[descriptor.BufferDescriptionIndex];
             if (vertexBufferDescriptor.Dirty)
             {
-                Console.WriteLine($"Attempt to write vertex data in buffer description {descriptor.BufferDescriptionIndex} with no allocated buffer");
+                Logger.WriteWarning($"Attempt to write vertex data in buffer description {descriptor.BufferDescriptionIndex} with no allocated buffer");
                 return false;
             }
 
@@ -842,14 +842,14 @@ namespace Engine.Common
 
             if (!Initilialized)
             {
-                Console.WriteLine("Attempt to write instancing data with no initialized manager");
+                Logger.WriteWarning("Attempt to write instancing data with no initialized manager");
                 return false;
             }
 
             var instancingBufferDescriptor = this.instancingBufferDescriptors[descriptor.BufferDescriptionIndex];
             if (instancingBufferDescriptor.Dirty)
             {
-                Console.WriteLine($"Attempt to write instancing data in buffer description {descriptor.BufferDescriptionIndex} with no allocated buffer");
+                Logger.WriteWarning($"Attempt to write instancing data in buffer description {descriptor.BufferDescriptionIndex} with no allocated buffer");
                 return false;
             }
 
@@ -878,14 +878,14 @@ namespace Engine.Common
 
             if (!Initilialized)
             {
-                Console.WriteLine($"Attempt to write index data in buffer description {descriptor.BufferDescriptionIndex} with no initialized manager");
+                Logger.WriteWarning($"Attempt to write index data in buffer description {descriptor.BufferDescriptionIndex} with no initialized manager");
                 return false;
             }
 
             var indexBufferDescriptor = this.indexBufferDescriptors[descriptor.BufferDescriptionIndex];
             if (indexBufferDescriptor.Dirty)
             {
-                Console.WriteLine($"Attempt to write index data in buffer description {descriptor.BufferDescriptionIndex} with no allocated buffer");
+                Logger.WriteWarning($"Attempt to write index data in buffer description {descriptor.BufferDescriptionIndex} with no allocated buffer");
                 return false;
             }
 

@@ -101,8 +101,13 @@ namespace SceneTest
 
             await this.LoadResourcesAsync(
                 InitializeUI(),
-                async () =>
+                async (res) =>
                 {
+                    if (!res.Completed)
+                    {
+                        res.ThrowExceptions();
+                    }
+
                     this.RefreshUI();
 
                     progressBar.Visible = true;
@@ -197,8 +202,13 @@ namespace SceneTest
                 InitializaDebug(),
             };
 
-            await this.LoadResourcesAsync(taskList, async () =>
+            await this.LoadResourcesAsync(taskList, async (res) =>
             {
+                if (!res.Completed)
+                {
+                    res.ThrowExceptions();
+                }
+
                 this.PlantTrees();
 
                 this.Environment.TimeOfDay.BeginAnimation(9, 00, 00, 0.1f);

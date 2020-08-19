@@ -138,8 +138,13 @@ namespace SceneTest
         {
             await this.LoadResourcesAsync(
                 InitializeLoadingUI(),
-                async () =>
+                async (res) =>
                 {
+                    if (!res.Completed)
+                    {
+                        res.ThrowExceptions();
+                    }
+
                     fadePanel.TintColor = Color.Black;
                     fadePanel.Visible = true;
 
@@ -189,8 +194,13 @@ namespace SceneTest
 
             await this.LoadResourcesAsync(
                 taskList.ToArray(),
-                () =>
+                (res) =>
                 {
+                    if (!res.Completed)
+                    {
+                        res.ThrowExceptions();
+                    }
+
                     PrepareUI();
                     PrepareModels();
                     UpdateCamera(true);

@@ -116,12 +116,14 @@ namespace Heightmap
             this.Camera.Interest = new Vector3(10001, 10000, 10000);
 
             await this.LoadResourcesAsync(
-                new[]
+                InitializeUI(),
+                (res) =>
                 {
-                    InitializeUI()
-                },
-                () =>
-                {
+                    if (!res.Completed)
+                    {
+                        res.ThrowExceptions();
+                    }
+
                     userInterfaceInitialized = true;
 
                     InitializeGameAssets();
@@ -152,8 +154,13 @@ namespace Heightmap
 
             _ = this.LoadResourcesAsync(
                 loadTasks,
-                () =>
+                (res) =>
                 {
+                    if (!res.Completed)
+                    {
+                        res.ThrowExceptions();
+                    }
+
                     this.skydom.RayleighScattering *= 0.8f;
                     this.skydom.MieScattering *= 0.1f;
 
@@ -178,8 +185,13 @@ namespace Heightmap
 
             _ = this.LoadResourcesAsync(
                 loadTasks,
-                () =>
+                (res) =>
                 {
+                    if (!res.Completed)
+                    {
+                        res.ThrowExceptions();
+                    }
+
                     this.Camera.NearPlaneDistance = near;
                     this.Camera.FarPlaneDistance = far;
                     this.Camera.Position = new Vector3(24, 12, 14);

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Engine.Common
+﻿namespace Engine.Common
 {
     class BufferDescriptorRequestInstancing : IBufferDescriptorRequest
     {
@@ -54,7 +52,7 @@ namespace Engine.Common
         {
             BufferManagerInstances descriptor;
 
-            Console.WriteLine($"Add BufferDescriptor {(this.Dynamic ? "dynamic" : "static")} {typeof(IInstacingData)} [{this.Id}]");
+            Logger.WriteDebug($"Add BufferDescriptor {(this.Dynamic ? "dynamic" : "static")} {typeof(IInstacingData)} [{this.Id}]");
 
             var slot = bufferManager.FindInstancingBufferDescription(this.Dynamic);
             if (slot < 0)
@@ -80,7 +78,7 @@ namespace Engine.Common
             {
                 var descriptor = bufferManager.GetInstancingBufferDescription(this.Descriptor.BufferDescriptionIndex);
 
-                Console.WriteLine($"Remove BufferDescriptor {(descriptor.Dynamic ? "dynamic" : "static")} {typeof(VertexInstancingData)} [{this.Descriptor.Id}]");
+                Logger.WriteDebug($"Remove BufferDescriptor {(descriptor.Dynamic ? "dynamic" : "static")} {typeof(VertexInstancingData)} [{this.Descriptor.Id}]");
 
                 descriptor.RemoveDescriptor(this.Descriptor, this.Instances);
                 descriptor.ReallocationNeeded = true;

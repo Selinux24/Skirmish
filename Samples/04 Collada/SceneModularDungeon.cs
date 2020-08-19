@@ -113,8 +113,13 @@ namespace Collada
             this.Game.VisibleMouse = false;
             this.Game.LockMouse = true;
 #endif
-            await this.LoadResourcesAsync(this.InitializeUI(), () =>
+            await this.LoadResourcesAsync(this.InitializeUI(), (res) =>
             {
+                if (!res.Completed)
+                {
+                    res.ThrowExceptions();
+                }
+
                 userInterfaceInitialized = true;
 
                 Task.WhenAll(this.InitializeAssets());
@@ -154,7 +159,7 @@ namespace Collada
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Bad graph file. Generating navigation mesh. {ex.Message}");
+                    Logger.WriteError($"Bad graph file. Generating navigation mesh. {ex}");
                 }
             }
 
@@ -166,7 +171,7 @@ namespace Collada
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error saving graph file. {ex.Message}");
+                Logger.WriteError($"Error saving graph file. {ex}");
             }
         }
         public override void NavigationGraphUpdated()
@@ -219,19 +224,43 @@ namespace Collada
             if (this.Game.Input.KeyJustReleased(Keys.B))
             {
                 levelInitialized = false;
-                _ = this.LoadResourcesAsync(this.ChangeToLevel("Lvl1"), () => { levelInitialized = true; });
+                _ = this.LoadResourcesAsync(this.ChangeToLevel("Lvl1"), (res) =>
+                {
+                    if (!res.Completed)
+                    {
+                        res.ThrowExceptions();
+                    }
+
+                    levelInitialized = true;
+                });
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.N))
             {
                 levelInitialized = false;
-                _ = this.LoadResourcesAsync(this.ChangeToLevel("Lvl2"), () => { levelInitialized = true; });
+                _ = this.LoadResourcesAsync(this.ChangeToLevel("Lvl2"), (res) =>
+                {
+                    if (!res.Completed)
+                    {
+                        res.ThrowExceptions();
+                    }
+
+                    levelInitialized = true;
+                });
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.M))
             {
                 levelInitialized = false;
-                _ = this.LoadResourcesAsync(this.ChangeToLevel("Lvl3"), () => { levelInitialized = true; });
+                _ = this.LoadResourcesAsync(this.ChangeToLevel("Lvl3"), (res) =>
+                {
+                    if (!res.Completed)
+                    {
+                        res.ThrowExceptions();
+                    }
+
+                    levelInitialized = true;
+                });
             }
 
             if (!levelInitialized)
@@ -319,8 +348,13 @@ namespace Collada
                 InitializeAudio(),
             };
 
-            await this.LoadResourcesAsync(tasks.ToArray(), () =>
+            await this.LoadResourcesAsync(tasks.ToArray(), (res) =>
             {
+                if (!res.Completed)
+                {
+                    res.ThrowExceptions();
+                }
+
                 gameAssetsInitialized = true;
 
                 this.InitializeEnvironment();
@@ -332,7 +366,15 @@ namespace Collada
 
                 levelInitialized = false;
 
-                _ = this.LoadResourcesAsync(this.ChangeToLevel(null), () => { levelInitialized = true; });
+                _ = this.LoadResourcesAsync(this.ChangeToLevel(null), (reslv) =>
+                {
+                    if (!reslv.Completed)
+                    {
+                        reslv.ThrowExceptions();
+                    }
+
+                    levelInitialized = true;
+                });
             });
         }
         private void InitializeEnvironment()
@@ -1196,7 +1238,15 @@ namespace Collada
                     {
                         levelInitialized = false;
 
-                        await this.LoadResourcesAsync(this.ChangeToLevel(nextLevel), () => { levelInitialized = true; });
+                        await this.LoadResourcesAsync(this.ChangeToLevel(nextLevel), (res) =>
+                        {
+                            if (!res.Completed)
+                            {
+                                res.ThrowExceptions();
+                            }
+
+                            levelInitialized = true;
+                        });
                     }
                     else
                     {
@@ -1307,7 +1357,7 @@ namespace Collada
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine(ex.ToString());
+                        Logger.WriteError($"SaveGraphToFile: {ex}");
                     }
                     finally
                     {

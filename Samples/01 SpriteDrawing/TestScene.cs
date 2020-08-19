@@ -56,8 +56,13 @@ namespace SpriteDrawing
                     InitializeBackground(),
                     InitializeProgressbar(),
                 },
-                async () =>
+                async (res) =>
                 {
+                    if (!res.Completed)
+                    {
+                        res.ThrowExceptions();
+                    }
+
                     progressBar.Visible = true;
                     progressBar.ProgressValue = 0;
 
@@ -103,8 +108,13 @@ namespace SpriteDrawing
                     InitializeDynamicPan(),
                     InitializeButtonTest(),
                 },
-                async () =>
+                async (res) =>
                 {
+                    if (!res.Completed)
+                    {
+                        res.ThrowExceptions();
+                    }
+
                     await Task.Delay(500);
 
                     staticPan.Show(1000);

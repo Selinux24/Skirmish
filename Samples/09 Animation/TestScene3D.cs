@@ -115,8 +115,13 @@ namespace Animation
                         this.InitializeFloor(),
                         this.InitializeDebug()
                     },
-                    () =>
+                    (res) =>
                     {
+                        if (!res.Completed)
+                        {
+                            res.ThrowExceptions();
+                        }
+
                         InitializeEnvironment();
 
                         gameReady = true;

@@ -40,8 +40,13 @@ namespace Instancing
                     InitializeTroops(),
                     InitializeWall()
                 },
-                () =>
+                (res) =>
                 {
+                    if (!res.Completed)
+                    {
+                        res.ThrowExceptions();
+                    }
+
                     this.Camera.Goto(new Vector3(-45, 17, -30));
                     this.Camera.LookTo(Vector3.Zero);
                     this.Camera.FarPlaneDistance = 250;

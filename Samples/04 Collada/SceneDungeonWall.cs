@@ -36,12 +36,19 @@ namespace Collada
             this.Game.LockMouse = true;
 #endif
             _ = this.LoadResourcesAsync(
-                new[] {
-                this.InitializeText(),
-                this.InitializeDungeon(),
-                this.InitializeEmitter() },
-                () =>
+                new[] 
                 {
+                    this.InitializeText(),
+                    this.InitializeDungeon(),
+                    this.InitializeEmitter() 
+                },
+                (res) =>
+                {
+                    if (!res.Completed)
+                    {
+                        res.ThrowExceptions();
+                    }
+
                     this.InitializeCamera();
                     this.InitializeEnvironment();
                     this.gameReady = true;

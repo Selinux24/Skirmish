@@ -2437,7 +2437,7 @@ namespace Engine
 
             if (!string.IsNullOrEmpty(compilationErrors))
             {
-                Console.WriteLine(compilationErrors);
+                Logger.WriteError($"EngineVertexShader: {compilationErrors}");
             }
 
             return res;
@@ -2506,7 +2506,7 @@ namespace Engine
 
             if (!string.IsNullOrEmpty(compilationErrors))
             {
-                Console.WriteLine(compilationErrors);
+                Logger.WriteError($"EnginePixelShader: {compilationErrors}");
             }
 
             return res;
@@ -2552,7 +2552,7 @@ namespace Engine
 
             if (!string.IsNullOrEmpty(compilationErrors))
             {
-                Console.WriteLine(compilationErrors);
+                Logger.WriteError($"EnginePixelShader: {compilationErrors}");
             }
 
             return res;

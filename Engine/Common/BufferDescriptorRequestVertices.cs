@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Common
@@ -71,7 +70,7 @@ namespace Engine.Common
             VertexTypes vType = this.Data.First().VertexType;
             bool instanced = this.InstancingDescriptor != null;
 
-            Console.WriteLine($"Add BufferDescriptor {(this.Dynamic ? "dynamic" : "static")} {vType} Instanced {instanced} [{this.Id}]");
+            Logger.WriteDebug($"Add BufferDescriptor {(this.Dynamic ? "dynamic" : "static")} {vType} Instanced {instanced} [{this.Id}]");
 
             int slot = bufferManager.FindVertexBufferDescription(vType, this.Dynamic);
             if (slot < 0)
@@ -103,7 +102,7 @@ namespace Engine.Common
             {
                 var descriptor = bufferManager.GetVertexBufferDescription(this.VertexDescriptor.BufferDescriptionIndex);
 
-                Console.WriteLine($"Remove BufferDescriptor {(descriptor.Dynamic ? "dynamic" : "static")} {descriptor.Type} [{this.VertexDescriptor.Id}]");
+                Logger.WriteDebug($"Remove BufferDescriptor {(descriptor.Dynamic ? "dynamic" : "static")} {descriptor.Type} [{this.VertexDescriptor.Id}]");
 
                 descriptor.RemoveDescriptor(this.VertexDescriptor);
                 descriptor.ReallocationNeeded = true;

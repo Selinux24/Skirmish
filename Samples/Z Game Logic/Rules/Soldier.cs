@@ -3,7 +3,6 @@
 namespace GameLogic.Rules
 {
     using GameLogic.Rules.Enum;
-    using System;
 
     public class Soldier
     {
@@ -587,7 +586,7 @@ namespace GameLogic.Rules
         }
         private void AnimateLib(string animation)
         {
-            Console.WriteLine(animation);
+            Logger.WriteDebug(animation);
         }
 
         public override string ToString()

@@ -181,24 +181,31 @@ namespace Terrain
                 InitializeGardener(),
             };
 
-            await this.LoadResourcesAsync(loadTasks.ToArray(), () =>
-            {
-                InitializeAudio();
+            await this.LoadResourcesAsync(
+                loadTasks.ToArray(),
+                (res) =>
+                {
+                    if (!res.Completed)
+                    {
+                        res.ThrowExceptions();
+                    }
 
-                InitializeLights();
+                    InitializeAudio();
 
-                this.agentManager = new Brain(this);
+                    InitializeLights();
 
-                this.gardener.SetWind(this.windDirection, this.windStrength);
+                    this.agentManager = new Brain(this);
 
-                this.AudioManager.MasterVolume = 1f;
-                this.AudioManager.Start();
+                    this.gardener.SetWind(this.windDirection, this.windStrength);
 
-                this.Camera.Goto(this.heliport.Manipulator.Position + Vector3.One * 25f);
-                this.Camera.LookTo(0, 10, 0);
+                    this.AudioManager.MasterVolume = 1f;
+                    this.AudioManager.Start();
 
-                Task.WhenAll(InitializePathFinding());
-            });
+                    this.Camera.Goto(this.heliport.Manipulator.Position + Vector3.One * 25f);
+                    this.Camera.LookTo(0, 10, 0);
+
+                    Task.WhenAll(InitializePathFinding());
+                });
         }
         private async Task<TaskResult> InitializeUI()
         {

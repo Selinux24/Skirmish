@@ -17,12 +17,16 @@ namespace ModelDrawing
         private UITextArea statistics = null;
         private UITextArea text1 = null;
         private UITextArea text2 = null;
+        private UITextArea log = null;
+        private int logLines = 10;
+        private Sprite backPanel = null;
 
         private readonly Dictionary<string, ParticleSystemDescription> pDescriptions = new Dictionary<string, ParticleSystemDescription>();
         private ParticleManager pManager = null;
 
         private PrimitiveListDrawer<Line3D> pManagerLineDrawer = null;
 
+        private bool uiReady = false;
         private bool gameReady = false;
 
         public TestScene(Game game)
@@ -41,15 +45,31 @@ namespace ModelDrawing
             this.Camera.LookTo(Vector3.Zero);
 
             await this.LoadResourcesAsync(
+                this.InitializeTexts(),
+                (uiRes) =>
+                {
+                    if (!uiRes.Completed)
+                    {
+                        uiRes.ThrowExceptions();
+                    }
+
+                    uiReady = true;
+                });
+
+            await this.LoadResourcesAsync(
                 new[]
                 {
-                    this.InitializeTexts(),
-                    this.InitializeFloor(),
-                    this.InitializeModels(),
-                    this.InitializeParticleVolumeDrawer()
+                            this.InitializeFloor(),
+                            this.InitializeModels(),
+                            this.InitializeParticleVolumeDrawer()
                 },
-                () =>
+                (gameRes) =>
                 {
+                    if (!gameRes.Completed)
+                    {
+                        gameRes.ThrowExceptions();
+                    }
+
                     gameReady = true;
                 });
         }
@@ -59,15 +79,21 @@ namespace ModelDrawing
             this.statistics = await this.AddComponentUITextArea(new UITextAreaDescription { Font = new TextDrawerDescription() { FontFamily = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue } }, layerHUD);
             this.text1 = await this.AddComponentUITextArea(new UITextAreaDescription { Font = new TextDrawerDescription() { FontFamily = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue } }, layerHUD);
             this.text2 = await this.AddComponentUITextArea(new UITextAreaDescription { Font = new TextDrawerDescription() { FontFamily = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue } }, layerHUD);
+            this.log = await this.AddComponentUITextArea(new UITextAreaDescription { Font = new TextDrawerDescription() { FontFamily = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue } }, layerHUD);
 
             this.text.SetPosition(Vector2.One);
             this.statistics.SetPosition(Vector2.One);
             this.text1.SetPosition(Vector2.One);
             this.text2.SetPosition(Vector2.One);
+            this.log.SetPosition(Vector2.One);
 
             this.statistics.Top = this.text.Top + this.text.Height + 5;
             this.text1.Top = this.statistics.Top + this.statistics.Height + 5;
             this.text2.Top = this.text1.Top + this.text1.Height + 5;
+
+            this.log.Top = this.text2.Top + this.text2.Height + 5;
+            this.log.Height = this.text2.Height * logLines + 5;
+            this.log.Visible = false;
 
             var spDesc = new SpriteDescription()
             {
@@ -76,7 +102,7 @@ namespace ModelDrawing
                 TintColor = new Color4(0, 0, 0, 0.75f),
             };
 
-            await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            this.backPanel = await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);
         }
         private async Task InitializeFloor()
         {
@@ -147,12 +173,22 @@ namespace ModelDrawing
         {
             base.Update(gameTime);
 
-            if (!gameReady)
+            if (!uiReady)
             {
                 return;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.Escape)) { this.Game.Exit(); }
+
+            if (this.Game.Input.KeyJustReleased(Keys.L))
+            {
+                this.ToggleLog();
+            }
+
+            if (!gameReady)
+            {
+                return;
+            }
 
             if (this.Game.Input.KeyJustReleased(Keys.R))
             {
@@ -244,6 +280,7 @@ namespace ModelDrawing
                 this.pManager.Clear();
             }
         }
+
         private void AddSystem()
         {
             float percent = Helper.RandomGenerator.NextFloat(0, 1);
@@ -422,6 +459,31 @@ namespace ModelDrawing
             pSystem.SetParameters(parameters);
         }
 
+        private void ToggleLog()
+        {
+            if (!log.Visible)
+            {
+                log.Visible = true;
+                logLines = 10;
+            }
+            else if (logLines == 10)
+            {
+                logLines = 50;
+            }
+            else if (logLines == 50)
+            {
+                log.Visible = false;
+                logLines = 10;
+            }
+
+            this.log.Height = this.text2.Height * logLines + 5;
+
+            float top = log.Visible ? this.log.Top : this.text2.Top;
+            float hight = log.Visible ? this.log.Height : this.text2.Height;
+
+            this.backPanel.Height = top + hight + 3;
+        }
+
         private readonly List<Line3D> lines = new List<Line3D>();
         private void DrawVolumes()
         {
@@ -440,6 +502,17 @@ namespace ModelDrawing
         {
             base.Draw(gameTime);
 
+            if (!uiReady)
+            {
+                return;
+            }
+
+            this.text.Text = "Particle System Drawing";
+            this.statistics.Text = this.Game.RuntimeText;
+
+            string logText = Logger.ReadText(logLines);
+            this.log.Text = logText;
+
             if (!gameReady)
             {
                 return;
@@ -448,8 +521,6 @@ namespace ModelDrawing
             var particle1 = this.pManager.GetParticleSystem(0);
             var particle2 = this.pManager.GetParticleSystem(1);
 
-            this.text.Text = "Particle System Drawing";
-            this.statistics.Text = this.Game.RuntimeText;
             this.text1.Text = $"P1 - {particle1}";
             this.text2.Text = $"P2 - {particle2}";
         }

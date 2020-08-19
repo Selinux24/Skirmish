@@ -59,13 +59,13 @@ namespace Engine
         {
             if (contentLoaders.ContainsKey(extension))
             {
-                Console.WriteLine($"Extension {extension} is currently registered.");
+                Logger.WriteWarning($"Extension {extension} is currently registered.");
                 return false;
             }
 
             if (!contentLoaders.TryAdd(extension, loaderDelegate))
             {
-                Console.WriteLine($"Cannot get {extension} loader delegate from concurrent delegate.");
+                Logger.WriteWarning($"Cannot get {extension} loader delegate from concurrent delegate.");
                 return false;
             }
 
@@ -82,7 +82,7 @@ namespace Engine
 
             if (!contentLoaders.ContainsKey(extension))
             {
-                Console.WriteLine($"Extension {extension} is not registered. A valid content loader must be added first.");
+                Logger.WriteWarning($"Extension {extension} is not registered. A valid content loader must be added first.");
                 return null;
             }
 
@@ -92,7 +92,7 @@ namespace Engine
             }
             else
             {
-                Console.WriteLine($"Cannot get {extension} loader delegate from concurrent delegate.");
+                Logger.WriteWarning($"Cannot get {extension} loader delegate from concurrent delegate.");
 
                 return null;
             }
@@ -223,7 +223,7 @@ namespace Engine
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error creating new resources: {ex.Message}");
+                Logger.WriteError($"Error creating new resources: {ex.Message}");
             }
             finally
             {

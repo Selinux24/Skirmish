@@ -72,8 +72,13 @@ namespace Collada
         {
             _ = this.LoadResourcesAsync(
                 new[] { InitializeUIComponents() },
-                () =>
+                (res) =>
                 {
+                    if (!res.Completed)
+                    {
+                        res.ThrowExceptions();
+                    }
+
                     userInterfaceInitialized = true;
 
                     this.InitializeEnvironment();
@@ -85,8 +90,13 @@ namespace Collada
         {
             _ = this.LoadResourcesAsync(
                 new[] { InitializeDungeon() },
-                () =>
+                (res) =>
                 {
+                    if (!res.Completed)
+                    {
+                        res.ThrowExceptions();
+                    }
+
                     this.Lights.AddRange(this.dungeon.Lights);
 
                     this.agent = new Player()

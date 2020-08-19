@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Engine;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -109,7 +109,7 @@ namespace GameLogic.Rules
 
         private static IEnumerable<ActionSpecification> GetListForTeam(Team team)
         {
-            Console.WriteLine($"{team?.Name}");
+            Logger.WriteDebug($"{team?.Name}");
 
             return new ActionSpecification[] { };
         }

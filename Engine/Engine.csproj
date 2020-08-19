@@ -272,6 +272,9 @@
     <Compile Include="ISceneLightSpot.cs" />
     <Compile Include="FrameStatsLight.cs" />
     <Compile Include="ISceneObject.cs" />
+    <Compile Include="LogEntry.cs" />
+    <Compile Include="Logger.cs" />
+    <Compile Include="LogLevel.cs" />
     <Compile Include="ModularSceneryAssetDescriptionConnectionTypes.cs" />
     <Compile Include="ModularSceneryObjectState.cs" />
     <Compile Include="ModularSceneryObjectStateTransition.cs" />

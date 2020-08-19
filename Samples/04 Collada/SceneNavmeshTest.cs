@@ -51,8 +51,13 @@ namespace Collada
 
             await this.LoadResourcesAsync(
                 this.InitializeText(),
-                () =>
+                (resUi) =>
                 {
+                    if (!resUi.Completed)
+                    {
+                        resUi.ThrowExceptions();
+                    }
+
                     this.InitializeLights();
                     this.InitializeAgent();
 
@@ -62,8 +67,13 @@ namespace Collada
                             this.InitializeNavmesh(),
                             this.InitializeDebug()
                         },
-                        () =>
+                        (res) =>
                         {
+                            if (!res.Completed)
+                            {
+                                res.ThrowExceptions();
+                            }
+
                             var bbox = inputGeometry.GetBoundingBox();
                             var center = bbox.GetCenter();
                             float maxD = Math.Max(Math.Max(bbox.Width, bbox.Height), bbox.Depth);

@@ -420,7 +420,7 @@ namespace Engine
             {
                 if (this.UpdateGlobalResources)
                 {
-                    Console.WriteLine("Updating global resources.");
+                    Logger.WriteDebug("Updating global resources.");
 
                     this.UpdateGlobals();
 
@@ -448,7 +448,7 @@ namespace Engine
             }
             catch (EngineException ex)
             {
-                Console.WriteLine($"Scene Updating error: {ex.Message}");
+                Logger.WriteError($"Scene Updating error: {ex}");
 
                 throw;
             }
@@ -465,7 +465,7 @@ namespace Engine
             }
             catch (EngineException ex)
             {
-                Console.WriteLine($"Scene Drawing error {this.Renderer?.GetType()}: {ex.Message}");
+                Logger.WriteError($"Scene Drawing error {this.Renderer?.GetType()}: {ex}");
 
                 throw;
             }
@@ -518,7 +518,7 @@ namespace Engine
         /// <param name="task">Resource load task</param>
         /// <param name="callback">Callback</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        public async Task<bool> LoadResourcesAsync(Task task, Action callback = null)
+        public async Task<bool> LoadResourcesAsync(Task task, Action<LoadResourcesResult> callback = null)
         {
             return await this.Game.LoadResourcesAsync(this, task, callback);
         }
@@ -528,7 +528,7 @@ namespace Engine
         /// <param name="tasks">Resource load tasks</param>
         /// <param name="callback">Callback</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        public async Task<bool> LoadResourcesAsync(IEnumerable<Task> tasks, Action callback = null)
+        public async Task<bool> LoadResourcesAsync(IEnumerable<Task> tasks, Action<LoadResourcesResult> callback = null)
         {
             return await this.Game.LoadResourcesAsync(this, tasks, callback);
         }
@@ -539,7 +539,7 @@ namespace Engine
         /// <param name="task">Resource load task</param>
         /// <param name="callback">Callback</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        public async Task<bool> LoadResourcesAsync<T>(Task<T> task, Action<LoadResourceResult<T>> callback = null)
+        public async Task<bool> LoadResourcesAsync<T>(Task<T> task, Action<LoadResourcesResult<T>> callback = null)
         {
             return await this.Game.LoadResourcesAsync(this, task, callback);
         }
@@ -550,7 +550,7 @@ namespace Engine
         /// <param name="tasks">Resource load tasks</param>
         /// <param name="callback">Callback</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        public async Task<bool> LoadResourcesAsync<T>(IEnumerable<Task<T>> tasks, Action<IEnumerable<LoadResourceResult<T>>> callback = null)
+        public async Task<bool> LoadResourcesAsync<T>(IEnumerable<Task<T>> tasks, Action<LoadResourcesResult<T>> callback = null)
         {
             return await this.Game.LoadResourcesAsync(this, tasks, callback);
         }
@@ -920,7 +920,7 @@ namespace Engine
 
             if (!bbox.HasValue || bbox == new BoundingBox())
             {
-                Console.WriteLine($"A ground must be defined into the scene in the first place.");
+                Logger.WriteWarning($"Scene Picking test: A ground must be defined into the scene in the first place.");
             }
 
             float maxY = (bbox?.Maximum.Y + 1.0f) ?? float.MaxValue;

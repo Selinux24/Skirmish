@@ -91,8 +91,13 @@ namespace Skybox
 
             await this.LoadResourcesAsync(
                 InitializeAssets(),
-                () =>
+                (res) =>
                 {
+                    if (!res.Completed)
+                    {
+                        res.ThrowExceptions();
+                    }
+
                     InitializeNavigationMesh();
 
                     Task.WhenAll(this.UpdateNavigationGraph());

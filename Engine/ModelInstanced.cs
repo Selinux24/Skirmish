@@ -248,7 +248,7 @@ namespace Engine
 
             if (this.hasDataToWrite)
             {
-                Console.WriteLine($"{this.Name} - DrawShadows WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset}");
+                Logger.WriteDebug($"{this.Name} - DrawShadows WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset}");
                 this.BufferManager.WriteInstancingData(this.InstancingBuffer, this.instancingData);
             }
 
@@ -377,7 +377,7 @@ namespace Engine
 
             if (this.hasDataToWrite)
             {
-                Console.WriteLine($"{this.Name} - Draw WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset} {context.DrawerMode}");
+                Logger.WriteDebug($"{this.Name} - Draw WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset} {context.DrawerMode}");
                 this.BufferManager.WriteInstancingData(this.InstancingBuffer, this.instancingData);
             }
 
