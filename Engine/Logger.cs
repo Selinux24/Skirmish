@@ -130,8 +130,6 @@ namespace Engine
             string logText = new string(logEntries.Reverse().SelectMany(l => $"{l.EventDate:HH:mm:ss.fff}> {l.Text}" + Environment.NewLine).ToArray());
             var lines = logText.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
 
-            int take = maxLines <= 0 ? lines.Length : Math.Min(maxLines, lines.Length);
-
             return string.Join(Environment.NewLine, lines.Take(maxLines).ToArray());
         }
 
