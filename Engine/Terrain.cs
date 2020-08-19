@@ -635,6 +635,10 @@ namespace Engine
         /// </summary>
         private readonly float heightMapHeight;
         /// <summary>
+        /// Heightmap height curve
+        /// </summary>
+        private readonly Curve heightMapCurve;
+        /// <summary>
         /// UV map scale
         /// </summary>
         private readonly float uvScale;
@@ -732,6 +736,7 @@ namespace Engine
             this.heightMap = HeightMap.FromStream(heightMapImage.Stream, colorMapImage.Stream);
             this.heightMapCellSize = description.HeightmapDescription.CellSize;
             this.heightMapHeight = description.HeightmapDescription.MaximumHeight;
+            this.heightMapCurve = description.HeightmapDescription.HeightCurve;
             this.textureResolution = description.HeightmapDescription.TextureResolution;
 
             #endregion
@@ -1011,6 +1016,7 @@ namespace Engine
             this.heightMap.BuildGeometry(
                 this.heightMapCellSize,
                 this.heightMapHeight,
+                this.heightMapCurve,
                 this.uvScale,
                 this.uvDisplacement,
                 out vertices, out indices);

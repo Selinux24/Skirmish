@@ -250,13 +250,15 @@ namespace Engine
         /// <param name="name">Resource name</param>
         /// <param name="imageContent">Image content</param>
         /// <param name="mipAutogen">Try to generate texture mips</param>
+        /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the created resource view</returns>
-        public EngineShaderResourceView CreateGlobalResource(string name, ImageContent imageContent, bool mipAutogen = true)
+        public EngineShaderResourceView CreateGlobalResource(string name, ImageContent imageContent, bool mipAutogen = true, bool dynamic = false)
         {
             GameResourceImageContent resource = new GameResourceImageContent()
             {
                 ImageContent = imageContent,
                 MipAutogen = mipAutogen,
+                Dynamic = dynamic,
             };
 
             resource.Create(this.game);
@@ -269,13 +271,15 @@ namespace Engine
         /// <param name="name">Resource name</param>
         /// <param name="path">Resource file path</param>
         /// <param name="mipAutogen">Try to generate texture mips</param>
-        /// <returns></returns>
-        public EngineShaderResourceView CreateGlobalResource(string name, string path, bool mipAutogen = true)
+        /// <param name="dynamic">Generates a writable texture</param>
+        /// <returns>Returns the created resource view</returns>
+        public EngineShaderResourceView CreateGlobalResource(string name, string path, bool mipAutogen = true, bool dynamic = false)
         {
             GameResourceImageContent resource = new GameResourceImageContent()
             {
                 ImageContent = new ImageContent() { Path = path },
                 MipAutogen = mipAutogen,
+                Dynamic = dynamic,
             };
 
             resource.Create(this.game);
@@ -288,13 +292,15 @@ namespace Engine
         /// <param name="name">Resource name</param>
         /// <param name="stream">Resource data stream</param>
         /// <param name="mipAutogen">Try to generate texture mips</param>
-        /// <returns></returns>
-        public EngineShaderResourceView CreateGlobalResource(string name, MemoryStream stream, bool mipAutogen = true)
+        /// <param name="dynamic">Generates a writable texture</param>
+        /// <returns>Returns the created resource view</returns>
+        public EngineShaderResourceView CreateGlobalResource(string name, MemoryStream stream, bool mipAutogen = true, bool dynamic = false)
         {
             GameResourceImageContent resource = new GameResourceImageContent()
             {
                 ImageContent = new ImageContent() { Stream = stream },
                 MipAutogen = mipAutogen,
+                Dynamic = dynamic,
             };
 
             resource.Create(this.game);
@@ -307,13 +313,15 @@ namespace Engine
         /// <param name="name">Resource name</param>
         /// <param name="values">Values</param>
         /// <param name="size">Texture size (total pixels = size * size)</param>
+        /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the created resource view</returns>
-        public EngineShaderResourceView CreateGlobalResource(string name, IEnumerable<Vector4> values, int size)
+        public EngineShaderResourceView CreateGlobalResource(string name, IEnumerable<Vector4> values, int size, bool dynamic = false)
         {
             GameResourceValueArray resource = new GameResourceValueArray()
             {
                 Values = values,
                 Size = size,
+                Dynamic = dynamic,
             };
 
             resource.Create(this.game);
@@ -328,8 +336,9 @@ namespace Engine
         /// <param name="min">Minimum value</param>
         /// <param name="max">Maximum value</param>
         /// <param name="seed">Random seed</param>
+        /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the created resource view</returns>
-        public EngineShaderResourceView CreateGlobalResource(string name, int size, float min, float max, int seed = 0)
+        public EngineShaderResourceView CreateGlobalResource(string name, int size, float min, float max, int seed = 0, bool dynamic = false)
         {
             GameResourceRandomTexture resource = new GameResourceRandomTexture()
             {
@@ -337,6 +346,7 @@ namespace Engine
                 Min = min,
                 Max = max,
                 Seed = seed,
+                Dynamic = dynamic,
             };
 
             resource.Create(this.game);
@@ -368,8 +378,9 @@ namespace Engine
         /// </summary>
         /// <param name="imageContent">Image content</param>
         /// <param name="mipAutogen">Try to generate texture mips</param>
+        /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the engine shader resource view</returns>
-        public EngineShaderResourceView RequestResource(ImageContent imageContent, bool mipAutogen = true)
+        public EngineShaderResourceView RequestResource(ImageContent imageContent, bool mipAutogen = true, bool dynamic = false)
         {
             var existingResource = this.TryGetResource(imageContent, out string resourceKey);
             if (existingResource != null)
@@ -386,6 +397,7 @@ namespace Engine
             {
                 ImageContent = imageContent,
                 MipAutogen = mipAutogen,
+                Dynamic = dynamic,
             };
 
             if (!requestedResources.TryAdd(resourceKey, request))
@@ -400,20 +412,22 @@ namespace Engine
         /// </summary>
         /// <param name="path">Path to resource</param>
         /// <param name="mipAutogen">Try to generate texture mips</param>
+        /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the engine shader resource view</returns>
-        public EngineShaderResourceView RequestResource(string path, bool mipAutogen = true)
+        public EngineShaderResourceView RequestResource(string path, bool mipAutogen = true, bool dynamic = false)
         {
-            return RequestResource(new ImageContent { Path = path }, mipAutogen);
+            return RequestResource(new ImageContent { Path = path }, mipAutogen, dynamic);
         }
         /// <summary>
         /// Requests a new resource load
         /// </summary>
         /// <param name="stream">Data stream</param>
         /// <param name="mipAutogen">Try to generate texture mips</param>
+        /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the engine shader resource view</returns>
-        public EngineShaderResourceView RequestResource(MemoryStream stream, bool mipAutogen = true)
+        public EngineShaderResourceView RequestResource(MemoryStream stream, bool mipAutogen = true, bool dynamic = false)
         {
-            return RequestResource(new ImageContent { Stream = stream }, mipAutogen);
+            return RequestResource(new ImageContent { Stream = stream }, mipAutogen, dynamic);
         }
         /// <summary>
         /// Requests a new resource load
@@ -421,8 +435,9 @@ namespace Engine
         /// <param name="identifier">Resource identifier</param>
         /// <param name="values">Vector4 values</param>
         /// <param name="size">Texture size (total pixels = size * size)</param>
+        /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the engine shader resource view</returns>
-        public EngineShaderResourceView RequestResource(Guid identifier, IEnumerable<Vector4> values, int size)
+        public EngineShaderResourceView RequestResource(Guid identifier, IEnumerable<Vector4> values, int size, bool dynamic = false)
         {
             string resourceKey = identifier.ToByteArray().GetMd5Sum();
             if (this.resources.ContainsKey(resourceKey))
@@ -439,6 +454,7 @@ namespace Engine
             {
                 Values = values,
                 Size = size,
+                Dynamic = dynamic,
             };
 
             if (!requestedResources.TryAdd(resourceKey, request))
@@ -456,8 +472,9 @@ namespace Engine
         /// <param name="min">Minimum value</param>
         /// <param name="max">Maximum value</param>
         /// <param name="seed">Random seed</param>
+        /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the engine shader resource view</returns>
-        public EngineShaderResourceView RequestResource(Guid identifier, int size, float min, float max, int seed = 0)
+        public EngineShaderResourceView RequestResource(Guid identifier, int size, float min, float max, int seed = 0, bool dynamic = false)
         {
             string resourceKey = identifier.ToByteArray().GetMd5Sum();
             if (this.resources.ContainsKey(resourceKey))
@@ -476,6 +493,7 @@ namespace Engine
                 Min = min,
                 Max = max,
                 Seed = seed,
+                Dynamic = dynamic,
             };
 
             if (!requestedResources.TryAdd(resourceKey, request))

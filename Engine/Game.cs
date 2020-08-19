@@ -488,7 +488,14 @@ namespace Engine
 
             return res;
         }
-
+        /// <summary>
+        /// Executes a list of resource load tasks
+        /// </summary>
+        /// <typeparam name="T">Response type</typeparam>
+        /// <param name="scene">Scene</param>
+        /// <param name="tasks">Resource load tasks</param>
+        /// <param name="callback">Callback</param>
+        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
         private async Task<bool> InternalLoadResourcesAsync<T>(Scene scene, IEnumerable<Task<T>> tasks, Action<LoadResourcesResult<T>> callback = null)
         {
             if (ResourceLoadRuning)
@@ -549,7 +556,13 @@ namespace Engine
 
             return true;
         }
-
+        /// <summary>
+        /// Executes a list of resource load tasks
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        /// <param name="tasks">Resource load tasks</param>
+        /// <param name="callback">Callback</param>
+        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
         private async Task<bool> InternalLoadResourcesAsync(Scene scene, IEnumerable<Task> tasks, Action<LoadResourcesResult> callback = null)
         {
             if (ResourceLoadRuning)
@@ -607,7 +620,10 @@ namespace Engine
 
             return true;
         }
-
+        /// <summary>
+        /// Integrates the requested resources into the resource manager
+        /// </summary>
+        /// <param name="scene">Scene</param>
         private void IntegrateResources(Scene scene)
         {
             try
@@ -865,9 +881,18 @@ namespace Engine
         }
     }
 
+    /// <summary>
+    /// Load resource result
+    /// </summary>
     public class LoadResourcesResult
     {
+        /// <summary>
+        /// Task result list
+        /// </summary>
         public virtual IEnumerable<TaskResult> Results { get; set; }
+        /// <summary>
+        /// Gets whether all tasks completed correctly or not
+        /// </summary>
         public virtual bool Completed
         {
             get
@@ -876,6 +901,9 @@ namespace Engine
             }
         }
 
+        /// <summary>
+        /// Throw exceptions, if any
+        /// </summary>
         public virtual void ThrowExceptions()
         {
             var exList = Results?
@@ -894,19 +922,42 @@ namespace Engine
         }
     }
 
+    /// <summary>
+    /// Load resource result
+    /// </summary>
+    /// <typeparam name="T">Type of result</typeparam>
     public class LoadResourcesResult<T> : LoadResourcesResult
     {
+        /// <summary>
+        /// Task result list
+        /// </summary>
         public new IEnumerable<TaskResult<T>> Results { get; set; }
     }
 
+    /// <summary>
+    /// Task result
+    /// </summary>
     public class TaskResult
     {
+        /// <summary>
+        /// Gets whether the task completed correctly or not
+        /// </summary>
         public bool Completed { get; set; }
+        /// <summary>
+        /// Exception result
+        /// </summary>
         public Exception Exception { get; set; }
     }
 
+    /// <summary>
+    /// Task result
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class TaskResult<T> : TaskResult
     {
+        /// <summary>
+        /// Result
+        /// </summary>
         public T Result { get; set; }
     }
 }

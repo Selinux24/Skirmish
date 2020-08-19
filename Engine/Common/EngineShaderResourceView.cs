@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.Common
 {
+    using SharpDX;
+    using SharpDX.Direct3D;
     using SharpDX.Direct3D11;
 
     /// <summary>
@@ -45,6 +49,7 @@ namespace Engine.Common
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
         /// <summary>
         /// Dispose resources
         /// </summary>
@@ -73,6 +78,34 @@ namespace Engine.Common
         public void SetResource(ShaderResourceView1 view)
         {
             this.srv = view;
+        }
+
+        /// <summary>
+        /// Updates the texture data
+        /// </summary>
+        /// <param name="game">Game instance</param>
+        /// <param name="data">New data</param>
+        public void Update(Game game, IEnumerable<Vector4> data)
+        {
+            if (srv.Description1.Dimension == ShaderResourceViewDimension.Texture1D)
+            {
+                game.Graphics.UpdateTexture1D(this, data);
+            }
+            else if (srv.Description1.Dimension == ShaderResourceViewDimension.Texture2D)
+            {
+                game.Graphics.UpdateTexture2D(this, data);
+            }
+        }
+        /// <summary>
+        /// Updates the texture data
+        /// </summary>
+        /// <param name="game">Game instance</param>
+        /// <param name="colors">Colors</param>
+        public void Update(Game game, IEnumerable<Color4> colors)
+        {
+            var data = colors.Select(c => c.ToVector4());
+
+            Update(game, colors);
         }
     }
 }

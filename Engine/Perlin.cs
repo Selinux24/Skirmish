@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
 
 namespace Engine
 {
@@ -321,6 +322,43 @@ namespace Engine
 
             return noiseMap;
         }
+        /// <summary>
+        /// Creates a simple noise color map for a texture
+        /// </summary>
+        /// <param name="descriptor">Noise map descriptor</param>
+        public static IEnumerable<Color4> CreateSimpleNoiseTexture(NoiseMapDescriptor descriptor)
+        {
+            return CreateColors(CreateSimpleNoiseMap(descriptor));
+        }
+        /// <summary>
+        /// Creates a noise color map for a texture
+        /// </summary>
+        /// <param name="descriptor">Noise map descriptor</param>
+        public static IEnumerable<Color4> CreateNoiseTexture(NoiseMapDescriptor descriptor)
+        {
+            return CreateColors(CreateNoiseMap(descriptor));
+        }
+        /// <summary>
+        /// Creates a color map for a texture from a noise map
+        /// </summary>
+        /// <param name="noiseMap">Noise map</param>
+        private static IEnumerable<Color4> CreateColors(float[,] noiseMap)
+        {
+            int width = noiseMap.GetLength(0);
+            int height = noiseMap.GetLength(1);
+
+            Color4[] colors = new Color4[width * height];
+            int index = 0;
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    colors[index++] = Color4.Lerp(Color4.White, Color4.Black, noiseMap[x, y]);
+                }
+            }
+
+            return colors;
+        }
 
 
         static float InverseLerp(float a, float b, float value)
@@ -401,6 +439,6 @@ namespace Engine
         /// <summary>
         /// Position offset
         /// </summary>
-        public Vector2 Offset { get; set; } = Vector2.Zero;
+        public Vector2 Offset { get; set; } = Vector2.One;
     }
 }

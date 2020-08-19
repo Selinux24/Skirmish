@@ -22,6 +22,10 @@ namespace Engine
         /// Vector4 values
         /// </summary>
         public IEnumerable<Vector4> Values { get; set; }
+        /// <summary>
+        /// Dynamic resource
+        /// </summary>
+        public bool Dynamic { get; set; }
 
         /// <summary>
         /// Creates the resource
@@ -29,7 +33,7 @@ namespace Engine
         /// <param name="game">Game</param>
         public void Create(Game game)
         {
-            var srv = game.Graphics.CreateTexture2D(Size, Values);
+            var srv = game.Graphics.CreateTexture2D(Size, Values, Dynamic);
             ResourceView.SetResource(srv);
         }
     }

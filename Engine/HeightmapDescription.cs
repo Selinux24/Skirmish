@@ -16,13 +16,15 @@ namespace Engine
         /// <param name="heightmap">Height map</param>
         /// <param name="cellsize">Cell size</param>
         /// <param name="maximumHeight">Maximum height</param>
-        public static HeightmapDescription FromMap(float[,] heightmap, float cellsize, float maximumHeight)
+        /// <param name="heightCurve">Height curve</param>
+        public static HeightmapDescription FromMap(float[,] heightmap, float cellsize, float maximumHeight, Curve heightCurve)
         {
             return new HeightmapDescription
             {
                 Heightmap = heightmap,
                 CellSize = cellsize,
                 MaximumHeight = maximumHeight,
+                HeightCurve = heightCurve,
             };
         }
 
@@ -118,6 +120,10 @@ namespace Engine
         /// </summary>
         public float MaximumHeight { get; set; } = 1;
         /// <summary>
+        /// Height curve
+        /// </summary>
+        public Curve HeightCurve { get; set; }
+        /// <summary>
         /// Texture resolution
         /// </summary>
         public float TextureResolution { get; set; } = 10;
@@ -129,6 +135,16 @@ namespace Engine
         /// Terrain material
         /// </summary>
         public MaterialDescription Material { get; set; } = new MaterialDescription();
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public HeightmapDescription()
+        {
+            HeightCurve = new Curve();
+            HeightCurve.Keys.Add(new CurveKey(0f, 0f));
+            HeightCurve.Keys.Add(new CurveKey(1f, 1f));
+        }
 
         /// <summary>
         /// Generates a new model content from an height map description
@@ -166,6 +182,7 @@ namespace Engine
             hm.BuildGeometry(
                 CellSize,
                 MaximumHeight,
+                HeightCurve,
                 Textures.Scale,
                 Textures.Displacement,
                 out var vertices, out var indices);

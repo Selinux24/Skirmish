@@ -28,6 +28,10 @@ namespace Engine
         /// Random seed
         /// </summary>
         public int Seed { get; set; }
+        /// <summary>
+        /// Dynamic resource
+        /// </summary>
+        public bool Dynamic { get; set; }
 
         /// <summary>
         /// Creates the resource
@@ -35,7 +39,7 @@ namespace Engine
         /// <param name="game">Game</param>
         public void Create(Game game)
         {
-            var srv = game.Graphics.CreateRandomTexture(Size, Min, Max, Seed);
+            var srv = game.Graphics.CreateRandomTexture(Size, Min, Max, Seed, Dynamic);
             ResourceView.SetResource(srv);
         }
     }

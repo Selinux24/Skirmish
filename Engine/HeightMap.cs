@@ -287,11 +287,12 @@ namespace Engine
         /// </summary>
         /// <param name="cellSize">Cell size</param>
         /// <param name="cellHeight">Cell height</param>
-        /// <param name="vertices">Result vertices</param>
+        /// <param name="heightCurve">Height curve</param>
         /// <param name="textureScale">Texture scale</param>
         /// <param name="textureDisplacement">Texture displacement</param>
+        /// <param name="vertices">Result vertices</param>
         /// <param name="indices">Result indices</param>
-        public void BuildGeometry(float cellSize, float cellHeight, float textureScale, Vector2 textureDisplacement, out IEnumerable<VertexData> vertices, out IEnumerable<uint> indices)
+        public void BuildGeometry(float cellSize, float cellHeight, Curve heightCurve, float textureScale, Vector2 textureDisplacement, out IEnumerable<VertexData> vertices, out IEnumerable<uint> indices)
         {
             float totalWidth = cellSize * (this.Width - 1);
             float totalDepth = cellSize * (this.Depth - 1);
@@ -307,7 +308,8 @@ namespace Engine
             {
                 for (long width = 0; width < vertexCountX; width++)
                 {
-                    float h = this.m_HeightData[depth, width];
+                    float h = heightCurve.Evaluate(this.m_HeightData[depth, width]);
+
                     Color4 c = this.m_ColorData != null ? this.m_ColorData[depth, width] : Color4.Lerp(Color4.Black, Color4.White, this.m_HeightData[depth, width]);
 
                     float posX = (depth * cellSize) - (totalDepth * 0.5f);

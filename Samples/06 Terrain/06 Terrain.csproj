@@ -150,9 +150,11 @@
     <Compile Include="AI\WeaponDescription.cs" />
     <Compile Include="Controllers\HeliManipulatorController.cs" />
     <Compile Include="Emitters\MovingEmitter.cs" />
+    <Compile Include="PerlinNoiseScene.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TestScene3D.cs" />
+    <Compile Include="SceneStart.cs" />
+    <Compile Include="RTSScene.cs" />
     <Compile Include="AI\Weapon.cs" />
     <Content Include="Resources\Audio\Effects\explosion_helicopter_close_01.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -352,6 +354,18 @@
     <Content Include="Resources\uvtest.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="SceneStart\buttons.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStart\pointer.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStart\SkyPlane.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStart\backGround.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -416,6 +430,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Buildings\Building_1.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStart\SkyPlane.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

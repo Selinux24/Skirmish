@@ -16,13 +16,14 @@ namespace Engine
         /// <param name="heightmap">Height map</param>
         /// <param name="cellSize">Cell size</param>
         /// <param name="maximumHeight">Maximum height</param>
+        /// <param name="heightCurve">Height curve</param>
         /// <param name="quadtreeDepth">Quadtree depth</param>
-        public static GroundDescription FromHeightmap(float[,] heightmap, float cellSize, float maximumHeight, int quadtreeDepth = 3)
+        public static GroundDescription FromHeightmap(float[,] heightmap, float cellSize, float maximumHeight, Curve heightCurve, int quadtreeDepth = 3)
         {
             return new GroundDescription()
             {
                 QuadtreeDescription = QuadtreeDescription.Default(quadtreeDepth),
-                HeightmapDescription = HeightmapDescription.FromMap(heightmap, cellSize, maximumHeight),
+                HeightmapDescription = HeightmapDescription.FromMap(heightmap, cellSize, maximumHeight, heightCurve),
             };
         }
         /// <summary>

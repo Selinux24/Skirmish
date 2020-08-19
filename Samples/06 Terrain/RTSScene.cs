@@ -20,7 +20,7 @@ namespace Terrain
     using Terrain.Controllers;
     using Terrain.Emitters;
 
-    public class TestScene3D : Scene
+    public class RTSScene : Scene
     {
         private const int MaxPickingTest = 10000;
         private const int MaxGridDrawer = 10000;
@@ -131,12 +131,12 @@ namespace Terrain
 
         private bool gameReady = false;
 
-        public TestScene3D(Game game)
+        public RTSScene(Game game)
             : base(game, SceneModes.ForwardLigthning)
         {
 
         }
-        ~TestScene3D()
+        ~RTSScene()
         {
             Dispose(false);
         }
@@ -1527,7 +1527,7 @@ namespace Terrain
         {
             if (this.Game.Input.KeyJustReleased(Keys.Escape))
             {
-                this.Game.Exit();
+                this.Game.SetScene<SceneStart>();
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.R))

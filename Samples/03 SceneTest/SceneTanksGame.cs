@@ -624,11 +624,21 @@ namespace SceneTest
             {
                 MapWidth = mapSize,
                 MapHeight = mapSize,
-                Scale = 0.4f,
+                Scale = 0.5f,
+                Lacunarity = 2f,
+                Persistance = 0.5f,
+                Octaves = 5,
+                Offset = Vector2.One,
+                Seed = Helper.RandomGenerator.Next(),
             };
-            float[,] noiseMap = Perlin.CreateSimpleNoiseMap(nmDesc);
+            float[,] noiseMap = Perlin.CreateNoiseMap(nmDesc);
 
-            GroundDescription groundDesc = GroundDescription.FromHeightmap(noiseMap, 4f, 75f, 2);
+            Curve heightCurve = new Curve();
+            heightCurve.Keys.Add(0, 0);
+            heightCurve.Keys.Add(0.4f, 0f);
+            heightCurve.Keys.Add(1f, 1f);
+
+            GroundDescription groundDesc = GroundDescription.FromHeightmap(noiseMap, 4f, 75f, heightCurve, 2);
             groundDesc.HeightmapDescription.ContentPath = "SceneTanksGame/terrain";
             groundDesc.HeightmapDescription.Textures = new HeightmapDescription.TexturesDescription
             {

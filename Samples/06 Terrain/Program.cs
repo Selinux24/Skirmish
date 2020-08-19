@@ -31,7 +31,7 @@ namespace Terrain
 
                     GameResourceManager.RegisterLoader<LoaderCollada>();
 
-                    cl.SetScene<TestScene3D>();
+                    cl.SetScene<SceneStart>();
 
                     cl.Run();
                 }
