@@ -7,10 +7,10 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 
-namespace Engine.Common
+namespace Engine.UI
 {
+    using Engine.Common;
     using Engine.Content;
-    using Engine.UI;
     using SharpDX;
 
     /// <summary>
@@ -32,10 +32,6 @@ namespace Engine.Common
         public const uint KeyCodes = 512;
 
         /// <summary>
-        /// Font cache
-        /// </summary>
-        private static readonly List<FontMap> gCache = new List<FontMap>();
-        /// <summary>
         /// Default line separation in pixels
         /// </summary>
         private const int lineSeparationPixels = 10;
@@ -45,18 +41,6 @@ namespace Engine.Common
         /// <remarks>Separation = Font size * Thr</remarks>
         private const float charSeparationThr = 0.25f;
 
-        /// <summary>
-        /// Clears and dispose font cache
-        /// </summary>
-        internal static void ClearCache()
-        {
-            foreach (var fmap in gCache)
-            {
-                fmap?.Dispose();
-            }
-
-            gCache.Clear();
-        }
         /// <summary>
         /// Gets the default key list
         /// </summary>
@@ -344,7 +328,7 @@ namespace Engine.Common
         {
             string fontName = Path.Combine(contentPath, fontMapping.ImageFile);
 
-            var fMap = gCache.FirstOrDefault(f => f != null && f.Font == fontName);
+            var fMap = FontMapCache.Get(fontName);
             if (fMap == null)
             {
                 fMap = new FontMap()
@@ -441,7 +425,7 @@ namespace Engine.Common
         /// <returns>Returns the created font map</returns>
         private static FontMap FromFamily(Game game, FontFamily family, float size, FontMapStyles style)
         {
-            var fMap = gCache.FirstOrDefault(f => f != null && f.Font == family.Name && f.Size == size && f.Style == style);
+            var fMap = FontMapCache.Get(family, size, style);
             if (fMap == null)
             {
                 //Calc the destination texture width and height
@@ -530,7 +514,7 @@ namespace Engine.Common
                 }
 
                 //Add map to the font cache
-                gCache.Add(fMap);
+                FontMapCache.Add(fMap);
             }
 
             return fMap;

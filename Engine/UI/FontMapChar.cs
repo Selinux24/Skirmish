@@ -1,5 +1,5 @@
 ﻿
-namespace Engine.Common
+namespace Engine.UI
 {
     /// <summary>
     /// Font map character
@@ -29,7 +29,7 @@ namespace Engine.Common
         /// <returns>Returns text representation of character map</returns>
         public override string ToString()
         {
-            return string.Format("X: {0}; Y: {1}; Width: {2}; Height: {3}", this.X, this.Y, this.Width, this.Height);
+            return $"X: {X}; Y: {Y}; Width: {Width}; Height: {Height}";
         }
     }
 }

@@ -10,6 +10,7 @@ namespace Engine
 {
     using Engine.Common;
     using Engine.Effects;
+    using Engine.UI;
 
     /// <summary>
     /// Game class
@@ -275,7 +276,7 @@ namespace Engine
 
                 DrawerPool.DisposeResources();
 
-                FontMap.ClearCache();
+                FontMapCache.Clear();
 
                 Input?.Dispose();
                 Input = null;
@@ -518,8 +519,10 @@ namespace Engine
 
                     taskList.Remove(t);
 
-                    LoadResourceResult<T> res = new LoadResourceResult<T>();
-                    res.Completed = t.IsCompleted;
+                    LoadResourceResult<T> res = new LoadResourceResult<T>
+                    {
+                        Completed = t.IsCompleted
+                    };
 
                     if (t.IsFaulted)
                     {

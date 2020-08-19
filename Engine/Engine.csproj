@@ -405,6 +405,7 @@
     <Compile Include="Topology.cs" />
     <Compile Include="Tween\Tween.cs" />
     <Compile Include="Tween\TweenState.cs" />
+    <Compile Include="UI\FontMapCache.cs" />
     <Compile Include="UI\HorizontalTextAlign.cs" />
     <Compile Include="UI\UICursorDescription.cs" />
     <Compile Include="UI\UICursor.cs" />
@@ -435,8 +436,8 @@
     </Compile>
     <Compile Include="Common\DrawingData.cs" />
     <Compile Include="Common\DrawingDataDescription.cs" />
-    <Compile Include="Common\FontMap.cs" />
-    <Compile Include="Common\FontMapChar.cs" />
+    <Compile Include="UI\FontMap.cs" />
+    <Compile Include="UI\FontMapChar.cs" />
     <Compile Include="Common\LevelOfDetailDictionary.cs" />
     <Compile Include="Common\MaterialDictionary.cs" />
     <Compile Include="Common\MeshDictionary.cs" />
