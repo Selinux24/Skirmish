@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.Audio;
 using Engine.Common;
 using Engine.Content;
 using Engine.Tween;
@@ -100,6 +101,13 @@ namespace SceneTest
         private PlayerStatus ShooterStatus { get { return currentPlayer == 0 ? player1Status : player2Status; } }
         private PlayerStatus TargetStatus { get { return currentPlayer == 0 ? player2Status : player1Status; } }
         private ParabolicShot shot;
+
+        private string tankMoveEffect;
+        private GameAudioEffect tankMoveEffectInstance;
+        private string tankDestroyedEffect;
+        private string tankShootingEffect;
+        private string[] impactEffects;
+        private string[] damageEffects;
 
         /// <summary>
         /// Constructor
@@ -204,6 +212,9 @@ namespace SceneTest
                     PrepareUI();
                     PrepareModels();
                     UpdateCamera(true);
+
+                    AudioManager.MasterVolume = 1f;
+                    AudioManager.Start();
 
                     Task.Run(async () =>
                     {
@@ -592,6 +603,7 @@ namespace SceneTest
                 InitializeLandscape(),
                 InitializeModelProjectile(),
                 InitializeParticleManager(),
+                InitializeAudio(),
             };
         }
         private async Task InitializeModelsTanks()
@@ -712,6 +724,166 @@ namespace SceneTest
             particleDescriptions.Add("Projectile", pProjectile);
             particleDescriptions.Add("Explosion", pExplosion);
             particleDescriptions.Add("SmokeExplosion", pSmokeExplosion);
+        }
+        private async Task InitializeAudio()
+        {
+            tankMoveEffect = "TankMove";
+            tankDestroyedEffect = "TankDestroyed";
+            tankShootingEffect = "TankShooting";
+            impactEffects = new[] { "Impact1", "Impact2", "Impact3", "Impact4" };
+            damageEffects = new[] { "Damage1", "Damage2", "Damage3", "Damage4" };
+
+            AudioManager.LoadSound("Tank", "SceneTanksGame/Audio", "tank_engine.wav");
+            AudioManager.LoadSound("TankDestroyed", "SceneTanksGame/Audio", "explosion_vehicle_small_close_01.wav");
+            AudioManager.LoadSound("TankShooting", "SceneTanksGame/Audio", "machinegun-shooting.wav");
+            AudioManager.LoadSound(impactEffects[0], "SceneTanksGame/Audio", "metal_grate_large_01.wav");
+            AudioManager.LoadSound(impactEffects[1], "SceneTanksGame/Audio", "metal_grate_large_02.wav");
+            AudioManager.LoadSound(impactEffects[2], "SceneTanksGame/Audio", "metal_grate_large_03.wav");
+            AudioManager.LoadSound(impactEffects[3], "SceneTanksGame/Audio", "metal_grate_large_04.wav");
+            AudioManager.LoadSound(damageEffects[0], "SceneTanksGame/Audio", "metal_pipe_large_01.wav");
+            AudioManager.LoadSound(damageEffects[1], "SceneTanksGame/Audio", "metal_pipe_large_02.wav");
+            AudioManager.LoadSound(damageEffects[2], "SceneTanksGame/Audio", "metal_pipe_large_03.wav");
+            AudioManager.LoadSound(damageEffects[3], "SceneTanksGame/Audio", "metal_pipe_large_04.wav");
+
+            AudioManager.AddEffectParams(
+                tankMoveEffect,
+                new GameAudioEffectParameters
+                {
+                    SoundName = "Tank",
+                    DestroyWhenFinished = false,
+                    IsLooped = true,
+                    UseAudio3D = true,
+                    EmitterRadius = 150,
+                    UseReverb = true,
+                    ReverbPreset = ReverbPresets.Forest,
+                    Volume = 1f,
+                });
+
+            AudioManager.AddEffectParams(
+                tankDestroyedEffect,
+                new GameAudioEffectParameters
+                {
+                    SoundName = "TankDestroyed",
+                    IsLooped = false,
+                    UseAudio3D = true,
+                    EmitterRadius = 250,
+                    UseReverb = true,
+                    ReverbPreset = ReverbPresets.Forest,
+                    Volume = 1f,
+                });
+
+            AudioManager.AddEffectParams(
+                tankShootingEffect,
+                new GameAudioEffectParameters
+                {
+                    SoundName = "TankShooting",
+                    IsLooped = false,
+                    UseAudio3D = true,
+                    EmitterRadius = 250,
+                    UseReverb = true,
+                    ReverbPreset = ReverbPresets.Forest,
+                    Volume = 1f,
+                });
+
+            AudioManager.AddEffectParams(
+                impactEffects[0],
+                new GameAudioEffectParameters
+                {
+                    SoundName = impactEffects[0],
+                    IsLooped = false,
+                    UseAudio3D = true,
+                    EmitterRadius = 250,
+                    UseReverb = true,
+                    ReverbPreset = ReverbPresets.Forest,
+                    Volume = 1f,
+                });
+            AudioManager.AddEffectParams(
+                impactEffects[1],
+                new GameAudioEffectParameters
+                {
+                    SoundName = impactEffects[1],
+                    IsLooped = false,
+                    UseAudio3D = true,
+                    EmitterRadius = 250,
+                    UseReverb = true,
+                    ReverbPreset = ReverbPresets.Forest,
+                    Volume = 1f,
+                });
+            AudioManager.AddEffectParams(
+                impactEffects[2],
+                new GameAudioEffectParameters
+                {
+                    SoundName = impactEffects[2],
+                    IsLooped = false,
+                    UseAudio3D = true,
+                    EmitterRadius = 250,
+                    UseReverb = true,
+                    ReverbPreset = ReverbPresets.Forest,
+                    Volume = 1f,
+                });
+            AudioManager.AddEffectParams(
+                impactEffects[3],
+                new GameAudioEffectParameters
+                {
+                    SoundName = impactEffects[3],
+                    IsLooped = false,
+                    UseAudio3D = true,
+                    EmitterRadius = 250,
+                    UseReverb = true,
+                    ReverbPreset = ReverbPresets.Forest,
+                    Volume = 1f,
+                });
+
+            AudioManager.AddEffectParams(
+                damageEffects[0],
+                new GameAudioEffectParameters
+                {
+                    SoundName = damageEffects[0],
+                    IsLooped = false,
+                    UseAudio3D = true,
+                    EmitterRadius = 250,
+                    UseReverb = true,
+                    ReverbPreset = ReverbPresets.Forest,
+                    Volume = 1f,
+                });
+            AudioManager.AddEffectParams(
+                damageEffects[1],
+                new GameAudioEffectParameters
+                {
+                    SoundName = damageEffects[1],
+                    IsLooped = false,
+                    UseAudio3D = true,
+                    EmitterRadius = 250,
+                    UseReverb = true,
+                    ReverbPreset = ReverbPresets.Forest,
+                    Volume = 1f,
+                });
+            AudioManager.AddEffectParams(
+                damageEffects[2],
+                new GameAudioEffectParameters
+                {
+                    SoundName = damageEffects[2],
+                    IsLooped = false,
+                    UseAudio3D = true,
+                    EmitterRadius = 250,
+                    UseReverb = true,
+                    ReverbPreset = ReverbPresets.Forest,
+                    Volume = 1f,
+                });
+            AudioManager.AddEffectParams(
+                damageEffects[3],
+                new GameAudioEffectParameters
+                {
+                    SoundName = damageEffects[3],
+                    IsLooped = false,
+                    UseAudio3D = true,
+                    EmitterRadius = 250,
+                    UseReverb = true,
+                    ReverbPreset = ReverbPresets.Forest,
+                    Volume = 1f,
+                });
+
+            await Task.CompletedTask;
         }
         private void PrepareModels()
         {
@@ -907,10 +1079,14 @@ You will lost all the game progress.",
             if (this.Game.Input.KeyPressed(Keys.A))
             {
                 Shooter.Manipulator.Rotate(-gameTime.ElapsedSeconds, 0, 0);
+
+                PlayEffectMove(Shooter);
             }
             if (this.Game.Input.KeyPressed(Keys.D))
             {
                 Shooter.Manipulator.Rotate(+gameTime.ElapsedSeconds, 0, 0);
+
+                PlayEffectMove(Shooter);
             }
 
             if (this.Game.Input.KeyPressed(Keys.Q))
@@ -932,10 +1108,14 @@ You will lost all the game progress.",
             if (this.Game.Input.KeyPressed(Keys.W))
             {
                 Shooter.Manipulator.MoveForward(gameTime, 10);
+
+                PlayEffectMove(Shooter);
             }
             if (this.Game.Input.KeyPressed(Keys.S))
             {
                 Shooter.Manipulator.MoveBackward(gameTime, 10);
+
+                PlayEffectMove(Shooter);
             }
 
             Vector3 position = Shooter.Manipulator.Position;
@@ -1232,10 +1412,53 @@ You will lost all the game progress.",
 
             if (impact)
             {
-                int res = Helper.RandomGenerator.Next(10, 50);
+                int res = Helper.RandomGenerator.Next(10, 500);
 
                 ShooterStatus.Points += res * 100;
                 TargetStatus.CurrentLife = MathUtil.Clamp(TargetStatus.CurrentLife - res, 0, TargetStatus.MaxLife);
+
+                if (impactPosition.HasValue)
+                {
+                    this.AddExplosionSystem(impactPosition.Value);
+                    PlayEffectDamage(Target);
+                    PlayEffectImpact(Target);
+                }
+
+                if (TargetStatus.CurrentLife == 0)
+                {
+                    Task.Run(async () =>
+                    {
+                        Vector3 min = Vector3.One * -5f;
+                        Vector3 max = Vector3.One * +5f;
+
+                        this.AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
+                        PlayEffectDestroyed(Target);
+
+                        await Task.Delay(500);
+
+                        this.AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
+
+                        await Task.Delay(500);
+
+                        this.AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
+                        this.AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
+
+                        await Task.Delay(3000);
+
+                        this.AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
+                        this.AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
+                        this.AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
+                        PlayEffectDestroyed(Target);
+                    });
+                }
+            }
+            else
+            {
+                if (impactPosition.HasValue)
+                {
+                    this.AddSmokePlumeSystem(impactPosition.Value);
+                    PlayEffectDestroyed(impactPosition.Value);
+                }
             }
 
             Task.Run(async () =>
@@ -1253,18 +1476,6 @@ You will lost all the game progress.",
 
                 dialogActive = false;
             });
-
-            if (impactPosition.HasValue)
-            {
-                if (impact)
-                {
-                    this.AddExplosionSystem(impactPosition.Value);
-                }
-                else
-                {
-                    this.AddSmokePlumeSystem(impactPosition.Value);
-                }
-            }
         }
 
         private async Task EvaluateTurn(PlayerStatus shooter, PlayerStatus target)
@@ -1385,6 +1596,43 @@ You will lost all the game progress.",
             gameMessage.Hide(100);
 
             await Task.Delay(100);
+        }
+
+        private void PlayEffectMove(ITransformable3D emitter)
+        {
+            if (tankMoveEffectInstance == null)
+            {
+                tankMoveEffectInstance = AudioManager.CreateEffectInstance(tankMoveEffect, emitter, this.Camera);
+                tankMoveEffectInstance.Play();
+
+                Task.Run(async () =>
+                {
+                    await Task.Delay(10000);
+                    tankMoveEffectInstance.Stop();
+                    tankMoveEffectInstance.Dispose();
+                    tankMoveEffectInstance = null;
+                });
+            }
+        }
+        private void PlayEffectImpact(ITransformable3D emitter)
+        {
+            int index = Helper.RandomGenerator.Next(0, impactEffects.Length);
+            index %= impactEffects.Length - 1;
+            AudioManager.CreateEffectInstance(impactEffects[index], emitter, this.Camera)?.Play();
+        }
+        private void PlayEffectDamage(ITransformable3D emitter)
+        {
+            int index = Helper.RandomGenerator.Next(0, damageEffects.Length);
+            index %= damageEffects.Length - 1;
+            AudioManager.CreateEffectInstance(damageEffects[index], emitter, this.Camera)?.Play();
+        }
+        private void PlayEffectDestroyed(ITransformable3D emitter)
+        {
+            AudioManager.CreateEffectInstance(tankDestroyedEffect, emitter, this.Camera)?.Play();
+        }
+        private void PlayEffectDestroyed(Vector3 emitter)
+        {
+            AudioManager.CreateEffectInstance(tankDestroyedEffect, emitter, this.Camera)?.Play();
         }
 
         private void ShowDialog(string message, Action onCloseCallback, Action onAcceptCallback)

@@ -256,6 +256,42 @@
     <Content Include="SceneTanksGame\Arrow.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="SceneTanksGame\Audio\explosion_vehicle_small_close_01.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTanksGame\Audio\explosion_vehicle_small_distant_01.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTanksGame\Audio\machinegun-shooting.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTanksGame\Audio\metal_grate_large_01.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTanksGame\Audio\metal_grate_large_02.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTanksGame\Audio\metal_grate_large_03.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTanksGame\Audio\metal_grate_large_04.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTanksGame\Audio\metal_pipe_large_01.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTanksGame\Audio\metal_pipe_large_02.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTanksGame\Audio\metal_pipe_large_03.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTanksGame\Audio\metal_pipe_large_04.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTanksGame\Audio\tank_engine.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="SceneTanksGame\Compass.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
