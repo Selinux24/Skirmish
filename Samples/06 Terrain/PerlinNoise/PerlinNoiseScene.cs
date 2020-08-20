@@ -376,7 +376,7 @@ namespace Terrain.PerlinNoise
             txtHelpSeed.Height = 0;
             txtHelpSeed.Text = "Use X key to change the seed";
 
-            txtSeed.SetPosition(marginLeft, marginTop + (separation * lineIndex++));
+            txtSeed.SetPosition(marginLeft, marginTop + (separation * lineIndex));
 
             btnSave.Width = 200;
             btnSave.Height = 50;
