@@ -18,7 +18,7 @@ namespace Engine
         /// <param name="maximumHeight">Maximum height</param>
         /// <param name="heightCurve">Height curve</param>
         /// <param name="quadtreeDepth">Quadtree depth</param>
-        public static GroundDescription FromHeightmap(float[,] heightmap, float cellSize, float maximumHeight, Curve heightCurve, int quadtreeDepth = 3)
+        public static GroundDescription FromHeightmap(NoiseMap heightmap, float cellSize, float maximumHeight, Curve heightCurve, int quadtreeDepth = 3)
         {
             return new GroundDescription()
             {

@@ -5,6 +5,8 @@ using System.IO;
 
 namespace Terrain
 {
+    using Terrain.Start;
+
     static class Program
     {
         [STAThread]
@@ -31,7 +33,7 @@ namespace Terrain
 
                     GameResourceManager.RegisterLoader<LoaderCollada>();
 
-                    cl.SetScene<SceneStart>();
+                    cl.SetScene<StartScene>();
 
                     cl.Run();
                 }

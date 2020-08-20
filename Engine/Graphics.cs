@@ -1577,11 +1577,12 @@ namespace Engine
         /// <summary>
         /// Creates a texture filled with specified values
         /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
         /// <param name="size">Texture size</param>
-        /// <param name="values">Color values</param>
+        /// <param name="values">Texture values</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns created texture</returns>
-        internal ShaderResourceView1 CreateTexture1D(int size, IEnumerable<Vector4> values, bool dynamic)
+        internal ShaderResourceView1 CreateTexture1D<T>(int size, IEnumerable<T> values, bool dynamic) where T : struct
         {
             try
             {
@@ -1616,29 +1617,31 @@ namespace Engine
         /// <summary>
         /// Creates a texture filled with specified values
         /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
         /// <param name="size">Texture size</param>
-        /// <param name="values">Color values</param>
+        /// <param name="values">Texture values</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns created texture</returns>
-        internal ShaderResourceView1 CreateTexture2D(int size, IEnumerable<Vector4> values, bool dynamic)
+        internal ShaderResourceView1 CreateTexture2D<T>(int size, IEnumerable<T> values, bool dynamic) where T : struct
         {
             return CreateTexture2D(size, size, values, dynamic);
         }
         /// <summary>
         /// Creates a texture filled with specified values
         /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
-        /// <param name="values">Color values</param>
+        /// <param name="values">Texture values</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns created texture</returns>
-        internal ShaderResourceView1 CreateTexture2D(int width, int height, IEnumerable<Vector4> values, bool dynamic)
+        internal ShaderResourceView1 CreateTexture2D<T>(int width, int height, IEnumerable<T> values, bool dynamic) where T : struct
         {
             try
             {
                 Counters.Textures++;
 
-                var tmp = new Vector4[width * height];
+                T[] tmp = new T[width * height];
                 Array.Copy(values.ToArray(), tmp, values.Count());
 
                 using (var str = DataStream.Create(tmp, false, false))
@@ -1930,9 +1933,10 @@ namespace Engine
         /// <summary>
         /// Updates a texture
         /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
         /// <param name="texture">Texture to update</param>
         /// <param name="data">Data to write</param>
-        internal void UpdateTexture1D(EngineShaderResourceView texture, IEnumerable<Vector4> data)
+        internal void UpdateTexture1D<T>(EngineShaderResourceView texture, IEnumerable<T> data) where T : struct
         {
             if (data?.Any() == true)
             {
@@ -1953,9 +1957,10 @@ namespace Engine
         /// <summary>
         /// Updates a texture
         /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
         /// <param name="texture">Texture to update</param>
         /// <param name="data">Data to write</param>
-        internal void UpdateTexture2D(EngineShaderResourceView texture, IEnumerable<Vector4> data)
+        internal void UpdateTexture2D<T>(EngineShaderResourceView texture, IEnumerable<T> data) where T : struct
         {
             if (data?.Any() == true)
             {

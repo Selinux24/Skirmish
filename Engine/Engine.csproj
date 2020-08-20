@@ -288,6 +288,8 @@
     <Compile Include="ModularSceneryTriggerEndHandler.cs" />
     <Compile Include="ModularSceneryTriggerEventArgs.cs" />
     <Compile Include="ModularSceneryTriggerStartHandler.cs" />
+    <Compile Include="NoiseMap.cs" />
+    <Compile Include="NoiseMapDescriptor.cs" />
     <Compile Include="Perlin.cs" />
     <Compile Include="PrimitiveListDrawer.cs" />
     <Compile Include="PrimitiveListDrawerDescription.cs" />

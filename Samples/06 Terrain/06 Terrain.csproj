@@ -128,242 +128,242 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AI\AIAgent.cs" />
-    <Compile Include="AI\AIStates.cs" />
-    <Compile Include="AI\AIStats.cs" />
-    <Compile Include="AI\Behaviors\AttackBehavior.cs" />
-    <Compile Include="AI\Behavior.cs" />
-    <Compile Include="AI\Behaviors\IdleBehavior.cs" />
-    <Compile Include="AI\Behaviors\PatrolBehavior.cs" />
-    <Compile Include="AI\Behaviors\RetreatBehavior.cs" />
-    <Compile Include="AI\Agents\HelicopterAIStatsDescription.cs" />
-    <Compile Include="AI\AIStatsDescription.cs" />
-    <Compile Include="AI\BehaviorEventArgs.cs" />
-    <Compile Include="AI\BehaviorEventHandler.cs" />
-    <Compile Include="AI\Behaviors\HelicopterAttackBehavior.cs" />
-    <Compile Include="AI\Brain.cs" />
-    <Compile Include="AI\Agents\HelicopterAIAgent.cs" />
-    <Compile Include="AI\Agents\TankAIAgent.cs" />
-    <Compile Include="AI\Behaviors\TankAttackBehavior.cs" />
-    <Compile Include="Emitters\LinealEmitter.cs" />
-    <Compile Include="Controllers\TankManipulatorController.cs" />
-    <Compile Include="AI\WeaponDescription.cs" />
-    <Compile Include="Controllers\HeliManipulatorController.cs" />
-    <Compile Include="Emitters\MovingEmitter.cs" />
-    <Compile Include="PerlinNoiseScene.cs" />
+    <Compile Include="Rts\AI\AIAgent.cs" />
+    <Compile Include="Rts\AI\AIStates.cs" />
+    <Compile Include="Rts\AI\AIStats.cs" />
+    <Compile Include="Rts\AI\Behaviors\AttackBehavior.cs" />
+    <Compile Include="Rts\AI\Behavior.cs" />
+    <Compile Include="Rts\AI\Behaviors\IdleBehavior.cs" />
+    <Compile Include="Rts\AI\Behaviors\PatrolBehavior.cs" />
+    <Compile Include="Rts\AI\Behaviors\RetreatBehavior.cs" />
+    <Compile Include="Rts\AI\Agents\HelicopterAIStatsDescription.cs" />
+    <Compile Include="Rts\AI\AIStatsDescription.cs" />
+    <Compile Include="Rts\AI\BehaviorEventArgs.cs" />
+    <Compile Include="Rts\AI\BehaviorEventHandler.cs" />
+    <Compile Include="Rts\AI\Behaviors\HelicopterAttackBehavior.cs" />
+    <Compile Include="Rts\AI\Brain.cs" />
+    <Compile Include="Rts\AI\Agents\HelicopterAIAgent.cs" />
+    <Compile Include="Rts\AI\Agents\TankAIAgent.cs" />
+    <Compile Include="Rts\AI\Behaviors\TankAttackBehavior.cs" />
+    <Compile Include="Rts\Emitters\LinealEmitter.cs" />
+    <Compile Include="Rts\Controllers\TankManipulatorController.cs" />
+    <Compile Include="Rts\AI\WeaponDescription.cs" />
+    <Compile Include="Rts\Controllers\HeliManipulatorController.cs" />
+    <Compile Include="Rts\Emitters\MovingEmitter.cs" />
+    <Compile Include="PerlinNoise\PerlinNoiseScene.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SceneStart.cs" />
-    <Compile Include="RTSScene.cs" />
-    <Compile Include="AI\Weapon.cs" />
-    <Content Include="Resources\Audio\Effects\explosion_helicopter_close_01.wav">
+    <Compile Include="Start\StartScene.cs" />
+    <Compile Include="Rts\RtsScene.cs" />
+    <Compile Include="Rts\AI\Weapon.cs" />
+    <Content Include="Rts\Resources\Audio\Effects\explosion_helicopter_close_01.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Audio\Effects\explosion_helicopter_distant_01.wav">
+    <Content Include="Rts\Resources\Audio\Effects\explosion_helicopter_distant_01.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Audio\Effects\explosion_vehicle_small_close_01.wav">
+    <Content Include="Rts\Resources\Audio\Effects\explosion_vehicle_small_close_01.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Audio\Effects\explosion_vehicle_small_distant_01.wav">
+    <Content Include="Rts\Resources\Audio\Effects\explosion_vehicle_small_distant_01.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Audio\Effects\fire_vehicle_close_loop.wav">
+    <Content Include="Rts\Resources\Audio\Effects\fire_vehicle_close_loop.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Audio\Effects\fire_vehicle_distant_loop.wav">
+    <Content Include="Rts\Resources\Audio\Effects\fire_vehicle_distant_loop.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Audio\Effects\heli.wav">
+    <Content Include="Rts\Resources\Audio\Effects\heli.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Audio\Effects\machinegun-shooting.wav">
+    <Content Include="Rts\Resources\Audio\Effects\machinegun-shooting.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Audio\Effects\metal_grate_large_01.wav">
+    <Content Include="Rts\Resources\Audio\Effects\metal_grate_large_01.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Audio\Effects\metal_grate_large_02.wav">
+    <Content Include="Rts\Resources\Audio\Effects\metal_grate_large_02.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Audio\Effects\metal_grate_large_03.wav">
+    <Content Include="Rts\Resources\Audio\Effects\metal_grate_large_03.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Audio\Effects\metal_grate_large_04.wav">
+    <Content Include="Rts\Resources\Audio\Effects\metal_grate_large_04.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Audio\Effects\metal_pipe_large_01.wav">
+    <Content Include="Rts\Resources\Audio\Effects\metal_pipe_large_01.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Audio\Effects\metal_pipe_large_02.wav">
+    <Content Include="Rts\Resources\Audio\Effects\metal_pipe_large_02.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Audio\Effects\metal_pipe_large_03.wav">
+    <Content Include="Rts\Resources\Audio\Effects\metal_pipe_large_03.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Audio\Effects\metal_pipe_large_04.wav">
+    <Content Include="Rts\Resources\Audio\Effects\metal_pipe_large_04.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Audio\Effects\tank_engine.wav">
+    <Content Include="Rts\Resources\Audio\Effects\tank_engine.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Audio\Effects\wind_birds_forest_01.wav">
+    <Content Include="Rts\Resources\Audio\Effects\wind_birds_forest_01.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Buildings\Building_1.xml">
+    <Content Include="Rts\Resources\Buildings\Building_1.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Clouds\cloud001.dds">
+    <Content Include="Rts\Resources\Clouds\cloud001.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Clouds\perturb001.dds">
+    <Content Include="Rts\Resources\Clouds\perturb001.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Cursor\cursor.xml">
+    <Content Include="Rts\Resources\Cursor\cursor.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Flare\lfFlare1.png">
+    <Content Include="Rts\Resources\Flare\lfFlare1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Flare\lfFlare2.png">
+    <Content Include="Rts\Resources\Flare\lfFlare2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Flare\lfFlare3.png">
+    <Content Include="Rts\Resources\Flare\lfFlare3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Flare\lfGlow.png">
+    <Content Include="Rts\Resources\Flare\lfGlow.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Garage\concrete.jpg">
+    <Content Include="Rts\Resources\Garage\concrete.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Garage\garage.xml">
+    <Content Include="Rts\Resources\Garage\garage.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Helicopter\m24 - 1.dds">
+    <Content Include="Rts\Resources\Helicopter\m24 - 1.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Helicopter\m24 - 2.dds">
+    <Content Include="Rts\Resources\Helicopter\m24 - 2.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Helicopter\m24 - 3.dds">
+    <Content Include="Rts\Resources\Helicopter\m24 - 3.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Helicopter\m24.xml">
+    <Content Include="Rts\Resources\Helicopter\m24.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Heliport\concrete.jpg">
+    <Content Include="Rts\Resources\Heliport\concrete.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Heliport\heliport.png">
+    <Content Include="Rts\Resources\Heliport\heliport.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Heliport\heliport.xml">
+    <Content Include="Rts\Resources\Heliport\heliport.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Leopard\Leopard.xml">
+    <Content Include="Rts\Resources\Leopard\Leopard.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Cursor\target.png">
+    <Content Include="Rts\Resources\Cursor\target.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Leopard\Leopard_0.bmp">
+    <Content Include="Rts\Resources\Leopard\Leopard_0.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Leopard\Leopard_1.bmp">
+    <Content Include="Rts\Resources\Leopard\Leopard_1.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Leopard\Leopard_2.bmp">
+    <Content Include="Rts\Resources\Leopard\Leopard_2.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Obelisk\obelisk.xml">
+    <Content Include="Rts\Resources\Obelisk\obelisk.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Obelisk\diffus.dds">
+    <Content Include="Rts\Resources\Obelisk\diffus.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Obelisk\normal.dds">
+    <Content Include="Rts\Resources\Obelisk\normal.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Obelisk\specular.dds">
+    <Content Include="Rts\Resources\Obelisk\specular.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Particles\explosion.png">
+    <Content Include="Rts\Resources\Particles\explosion.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Particles\fire.dds">
+    <Content Include="Rts\Resources\Particles\fire.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Particles\fire.png">
+    <Content Include="Rts\Resources\Particles\fire.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Particles\floor.png">
+    <Content Include="Rts\Resources\Particles\floor.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Particles\smoke.png">
+    <Content Include="Rts\Resources\Particles\smoke.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Rocks\boulder_granite_grey_01_diffuse.dds">
+    <Content Include="Rts\Resources\Rocks\boulder_granite_grey_01_diffuse.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Rocks\boulder_granite_grey_01_normal.dds">
+    <Content Include="Rts\Resources\Rocks\boulder_granite_grey_01_normal.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Rocks\boulder_granite_grey_01_specular.dds">
+    <Content Include="Rts\Resources\Rocks\boulder_granite_grey_01_specular.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Rocks\boulder.xml">
+    <Content Include="Rts\Resources\Rocks\boulder.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Terrain\Foliage\Billboard\grass_v0.dds">
+    <Content Include="Rts\Resources\Terrain\Foliage\Billboard\grass_v0.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Terrain\Foliage\Billboard\grass_v1.dds">
+    <Content Include="Rts\Resources\Terrain\Foliage\Billboard\grass_v1.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Terrain\Foliage\Billboard\grass_v2.dds">
+    <Content Include="Rts\Resources\Terrain\Foliage\Billboard\grass_v2.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Terrain\two_levels.xml">
+    <Content Include="Rts\Resources\Terrain\two_levels.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Terrain\terrain.png">
+    <Content Include="Rts\Resources\Terrain\terrain.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Terrain\terrain_nmap.png">
+    <Content Include="Rts\Resources\Terrain\terrain_nmap.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Trees\birch_01_bark_diffuse.dds">
+    <Content Include="Rts\Resources\Trees\birch_01_bark_diffuse.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Trees\birch_01_bark_normal.dds">
+    <Content Include="Rts\Resources\Trees\birch_01_bark_normal.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Trees\birch_01_leaves_diffuse.dds">
+    <Content Include="Rts\Resources\Trees\birch_01_leaves_diffuse.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Trees\birch_01_leaves_normal.dds">
+    <Content Include="Rts\Resources\Trees\birch_01_leaves_normal.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Trees\birch_a.xml">
+    <Content Include="Rts\Resources\Trees\birch_a.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Trees\birch_b.xml">
+    <Content Include="Rts\Resources\Trees\birch_b.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\uvtest.png">
+    <Content Include="Rts\Resources\uvtest.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneStart\buttons.png">
+    <Content Include="Start\buttons.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneStart\pointer.png">
+    <Content Include="Start\pointer.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneStart\SkyPlane.xml">
+    <Content Include="Start\SkyPlane.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneStart\backGround.jpg">
+    <Content Include="Start\backGround.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -388,51 +388,51 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Content Include="Resources\Terrain\two_levels.dae">
+    <Content Include="Rts\Resources\Terrain\two_levels.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Cursor\cursor.dae">
+    <Content Include="Rts\Resources\Cursor\cursor.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Skydom\sunset.dds">
+    <Content Include="Rts\Resources\Skydom\sunset.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Obelisk\obelisk.dae">
+    <Content Include="Rts\Resources\Obelisk\obelisk.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Heliport\heliport.dae">
+    <Content Include="Rts\Resources\Heliport\heliport.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Garage\garage.dae">
+    <Content Include="Rts\Resources\Garage\garage.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Rocks\boulder_1.dae">
+    <Content Include="Rts\Resources\Rocks\boulder_1.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Rocks\boulder_2.dae">
+    <Content Include="Rts\Resources\Rocks\boulder_2.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Rocks\boulder_3.dae">
+    <Content Include="Rts\Resources\Rocks\boulder_3.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Trees\birch_a.dae">
+    <Content Include="Rts\Resources\Trees\birch_a.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>
       </SubType>
     </Content>
-    <Content Include="Resources\Trees\birch_b.dae">
+    <Content Include="Rts\Resources\Trees\birch_b.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Leopard\Leopard.dae">
+    <Content Include="Rts\Resources\Leopard\Leopard.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Helicopter\m24.dae">
+    <Content Include="Rts\Resources\Helicopter\m24.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Buildings\Building_1.dae">
+    <Content Include="Rts\Resources\Buildings\Building_1.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneStart\SkyPlane.dae">
+    <Content Include="Start\SkyPlane.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

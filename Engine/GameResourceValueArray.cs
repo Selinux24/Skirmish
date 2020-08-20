@@ -6,9 +6,9 @@ namespace Engine
     using Engine.Common;
 
     /// <summary>
-    /// Vector4 value array resource request
+    /// Value array resource request
     /// </summary>
-    public class GameResourceValueArray : IGameResourceRequest
+    public class GameResourceValueArray<T> : IGameResourceRequest where T : struct
     {
         /// <summary>
         /// Engine resource view
@@ -19,9 +19,9 @@ namespace Engine
         /// </summary>
         public int Size { get; set; }
         /// <summary>
-        /// Vector4 values
+        /// Values
         /// </summary>
-        public IEnumerable<Vector4> Values { get; set; }
+        public IEnumerable<T> Values { get; set; }
         /// <summary>
         /// Dynamic resource
         /// </summary>

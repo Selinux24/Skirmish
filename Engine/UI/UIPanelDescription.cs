@@ -10,38 +10,42 @@ namespace Engine.UI
         /// <summary>
         /// Gets the default panel description
         /// </summary>
-        public static UIPanelDescription Default
+        /// <param name="color">Tint color</param>
+        public static UIPanelDescription Default(Color4 color)
         {
-            get
-            {
-                return new UIPanelDescription()
-                {
-                    Background = new SpriteDescription
-                    {
-                        TintColor = Color4.Black * 0.3333f,
-                        BlendMode = BlendModes.Alpha,
-                    },
-                };
-            }
-        }
+            var blendMode = color.Alpha >= 1f ? BlendModes.Opaque : BlendModes.Alpha;
 
+            return new UIPanelDescription()
+            {
+                Background = new SpriteDescription
+                {
+                    TintColor = color,
+                    BlendMode = blendMode,
+                },
+                BlendMode = blendMode,
+            };
+        }
         /// <summary>
         /// Gets a screen panel description
         /// </summary>
         /// <param name="scene">Scene</param>
-        /// <returns></returns>
-        public static UIPanelDescription Screen(Scene scene)
+        /// <param name="color">Tint color</param>
+        public static UIPanelDescription Screen(Scene scene, Color4 color)
         {
+            var blendMode = color.Alpha >= 1f ? BlendModes.Opaque : BlendModes.Alpha;
+
             return new UIPanelDescription
             {
                 Background = new SpriteDescription
                 {
-                    TintColor = SharpDX.Color.Black,
+                    TintColor = color,
+                    BlendMode = blendMode,
                 },
                 Left = 0,
                 Top = 0,
                 Width = scene.Game.Form.RenderWidth,
                 Height = scene.Game.Form.RenderHeight,
+                BlendMode = blendMode,
             };
         }
 

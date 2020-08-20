@@ -1,5 +1,4 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -310,14 +309,15 @@ namespace Engine
         /// <summary>
         /// Creates a new global resource by name
         /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
         /// <param name="name">Resource name</param>
         /// <param name="values">Values</param>
         /// <param name="size">Texture size (total pixels = size * size)</param>
         /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the created resource view</returns>
-        public EngineShaderResourceView CreateGlobalResource(string name, IEnumerable<Vector4> values, int size, bool dynamic = false)
+        public EngineShaderResourceView CreateGlobalResource<T>(string name, IEnumerable<T> values, int size, bool dynamic = false) where T : struct
         {
-            GameResourceValueArray resource = new GameResourceValueArray()
+            GameResourceValueArray<T> resource = new GameResourceValueArray<T>()
             {
                 Values = values,
                 Size = size,
@@ -432,12 +432,13 @@ namespace Engine
         /// <summary>
         /// Requests a new resource load
         /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
         /// <param name="identifier">Resource identifier</param>
-        /// <param name="values">Vector4 values</param>
+        /// <param name="values">Values</param>
         /// <param name="size">Texture size (total pixels = size * size)</param>
         /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the engine shader resource view</returns>
-        public EngineShaderResourceView RequestResource(Guid identifier, IEnumerable<Vector4> values, int size, bool dynamic = false)
+        public EngineShaderResourceView RequestResource<T>(Guid identifier, IEnumerable<T> values, int size, bool dynamic = false) where T : struct
         {
             string resourceKey = identifier.ToByteArray().GetMd5Sum();
             if (this.resources.ContainsKey(resourceKey))
@@ -450,7 +451,7 @@ namespace Engine
                 return requestedResources[resourceKey].ResourceView;
             }
 
-            var request = new GameResourceValueArray
+            var request = new GameResourceValueArray<T>
             {
                 Values = values,
                 Size = size,

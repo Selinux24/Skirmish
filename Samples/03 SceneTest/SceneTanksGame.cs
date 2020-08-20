@@ -160,7 +160,7 @@ namespace SceneTest
         }
         private async Task InitializeLoadingUI()
         {
-            fadePanel = await this.AddComponentUIPanel(UIPanelDescription.Screen(this), layerLoadingUI);
+            fadePanel = await this.AddComponentUIPanel(UIPanelDescription.Screen(this, Color4.Black * 0.3333f), layerLoadingUI);
             fadePanel.Visible = false;
 
             loadingText = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 40, true), layerLoadingUI + 1);
@@ -423,7 +423,7 @@ namespace SceneTest
         {
             float top = this.Game.Form.RenderHeight - 150;
 
-            keyHelp = await this.AddComponentUIPanel(UIPanelDescription.Default, layerUI);
+            keyHelp = await this.AddComponentUIPanel(UIPanelDescription.Default(Color4.Black * 0.3333f), layerUI);
             keyHelp.Left = 0;
             keyHelp.Top = top;
             keyHelp.Height = 150;
@@ -631,7 +631,7 @@ namespace SceneTest
                 Offset = Vector2.One,
                 Seed = Helper.RandomGenerator.Next(),
             };
-            float[,] noiseMap = Perlin.CreateNoiseMap(nmDesc);
+            var noiseMap = NoiseMap.CreateNoiseMap(nmDesc);
 
             Curve heightCurve = new Curve();
             heightCurve.Keys.Add(0, 0);

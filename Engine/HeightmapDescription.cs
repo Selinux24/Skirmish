@@ -17,11 +17,11 @@ namespace Engine
         /// <param name="cellsize">Cell size</param>
         /// <param name="maximumHeight">Maximum height</param>
         /// <param name="heightCurve">Height curve</param>
-        public static HeightmapDescription FromMap(float[,] heightmap, float cellsize, float maximumHeight, Curve heightCurve)
+        public static HeightmapDescription FromMap(NoiseMap heightmap, float cellsize, float maximumHeight, Curve heightCurve)
         {
             return new HeightmapDescription
             {
-                Heightmap = heightmap,
+                Heightmap = heightmap.Map,
                 CellSize = cellsize,
                 MaximumHeight = maximumHeight,
                 HeightCurve = heightCurve,
