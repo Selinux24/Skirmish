@@ -6,7 +6,21 @@ namespace Engine.UI
     /// </summary>
     public class UITextureRendererDescription : UIControlDescription
     {
-
+        /// <summary>
+        /// Gets the default texture renderer description
+        /// </summary>
+        public static UITextureRendererDescription Default()
+        {
+            return new UITextureRendererDescription
+            {
+                Channel = UITextureRendererChannels.NoAlpha,
+            };
+        }
+        /// <summary>
+        /// Gets the default texture renderer description
+        /// </summary>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
         public static UITextureRendererDescription Default(float width, float height)
         {
             return new UITextureRendererDescription

@@ -5,6 +5,8 @@ using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using DialogResult = System.Windows.Forms.DialogResult;
+using SaveFileDialog = System.Windows.Forms.SaveFileDialog;
 
 namespace Terrain.PerlinNoise
 {
@@ -12,16 +14,29 @@ namespace Terrain.PerlinNoise
 
     class PerlinNoiseScene : Scene
     {
-        readonly string fontFamily = "Consolas";
+        readonly string fontFamily = "Microsoft Sans Serif";
 
+        UIPanel backGround;
+        UIButton btnExit;
+
+        UITextArea txtScale;
         UIProgressBar pbScale;
+        UITextArea txtLacunarity;
         UIProgressBar pbLacunarity;
+        UITextArea txtPersistance;
         UIProgressBar pbPersistance;
+        UITextArea txtOctaves;
         UIProgressBar pbOctaves;
+        UITextArea txtHelpOffset;
         UITextArea txtOffset;
+        UITextArea txtHelpSeed;
         UITextArea txtSeed;
 
+        UIButton btnSave;
+
+        UITextureRenderer perlinRenderer;
         EngineShaderResourceView texture;
+        NoiseMap noiseMap;
 
         readonly int mapSize = 256;
         readonly float maxScale = 10;
@@ -92,23 +107,31 @@ namespace Terrain.PerlinNoise
         {
             await base.Initialize();
 
-            Cursor.Show();
-
             await LoadResourcesAsync(InitializeUI());
 
             await LoadResourcesAsync(InitializeTextureRenderer());
+
+            ResizeTextureRenderer();
+            ResizeUI();
+
+            Cursor.Show();
         }
         public async Task InitializeUI()
         {
-            var backGround = await this.AddComponentUIPanel(UIPanelDescription.Screen(this, Color.SandyBrown));
+            Color4 bColor1 = Color.Brown;
+            Color4 bColor2 = Color4.AdjustSaturation(Color.Brown, 1.5f);
+            Color4 pColor = Color.DeepSkyBlue;
 
-            var txtScale = await this.AddComponentUITextArea(UITextAreaDescription.FromFamily(fontFamily, 16));
-            var txtLacunarity = await this.AddComponentUITextArea(UITextAreaDescription.FromFamily(fontFamily, 16));
-            var txtPersistance = await this.AddComponentUITextArea(UITextAreaDescription.FromFamily(fontFamily, 16));
-            var txtOctaves = await this.AddComponentUITextArea(UITextAreaDescription.FromFamily(fontFamily, 16));
-            var txtHelpOffset = await this.AddComponentUITextArea(UITextAreaDescription.FromFamily(fontFamily, 14));
+            backGround = await this.AddComponentUIPanel(UIPanelDescription.Screen(this, Color.SandyBrown));
+            btnExit = await this.AddComponentUIButton(UIButtonDescription.DefaultTwoStateButton(bColor1, bColor2, TextDrawerDescription.FromFamily(fontFamily, 16)));
+
+            txtScale = await this.AddComponentUITextArea(UITextAreaDescription.FromFamily(fontFamily, 16));
+            txtLacunarity = await this.AddComponentUITextArea(UITextAreaDescription.FromFamily(fontFamily, 16));
+            txtPersistance = await this.AddComponentUITextArea(UITextAreaDescription.FromFamily(fontFamily, 16));
+            txtOctaves = await this.AddComponentUITextArea(UITextAreaDescription.FromFamily(fontFamily, 16));
+            txtHelpOffset = await this.AddComponentUITextArea(UITextAreaDescription.FromFamily(fontFamily, 12));
             txtOffset = await this.AddComponentUITextArea(UITextAreaDescription.FromFamily(fontFamily, 14));
-            var txtHelpSeed = await this.AddComponentUITextArea(UITextAreaDescription.FromFamily(fontFamily, 14));
+            txtHelpSeed = await this.AddComponentUITextArea(UITextAreaDescription.FromFamily(fontFamily, 12));
             txtSeed = await this.AddComponentUITextArea(UITextAreaDescription.FromFamily(fontFamily, 14));
 
             pbScale = await this.AddComponentUIProgressBar(UIProgressBarDescription.DefaultFromFamily(fontFamily, 12));
@@ -116,93 +139,49 @@ namespace Terrain.PerlinNoise
             pbPersistance = await this.AddComponentUIProgressBar(UIProgressBarDescription.DefaultFromFamily(fontFamily, 12));
             pbOctaves = await this.AddComponentUIProgressBar(UIProgressBarDescription.DefaultFromFamily(fontFamily, 12));
 
-            Color pColor = Color.DeepSkyBlue;
+            btnSave = await this.AddComponentUIButton(UIButtonDescription.DefaultTwoStateButton(bColor1, bColor2, TextDrawerDescription.FromFamily(fontFamily, 16)));
 
-            float borderSize = (this.Game.Form.RenderWidth - (this.Game.Form.RenderHeight * 0.8f)) * 0.5f;
+            btnExit.JustReleased += BtnExit_JustReleased;
 
-            float marginLeft = 25;
-            float marginTop = this.Game.Form.RenderHeight * 0.1f;
-            float separation = 20;
-            float width = borderSize - (marginLeft * 2);
-            float height = 15;
-
-            int lineIndex = 0;
-
-            txtScale.SetPosition(marginLeft, marginTop + (separation * lineIndex++));
             txtScale.Text = "Scale";
 
-            pbScale.SetPosition(marginLeft, marginTop + (separation * lineIndex++));
-            pbScale.Width = width;
-            pbScale.Height = height;
             pbScale.ProgressColor = pColor;
             pbScale.ProgressValue = Scale;
             pbScale.JustPressed += PbJustPressed;
             pbScale.Pressed += PbPressed;
             pbScale.JustReleased += PbJustReleased;
 
-            txtLacunarity.SetPosition(marginLeft, marginTop + (separation * lineIndex++));
             txtLacunarity.Text = "Lacunarity";
 
-            pbLacunarity.SetPosition(marginLeft, marginTop + (separation * lineIndex++));
-            pbLacunarity.Width = width;
-            pbLacunarity.Height = height;
             pbLacunarity.ProgressColor = pColor;
             pbLacunarity.ProgressValue = Lacunarity;
             pbLacunarity.JustPressed += PbJustPressed;
             pbLacunarity.Pressed += PbPressed;
             pbLacunarity.JustReleased += PbJustReleased;
 
-            txtPersistance.SetPosition(marginLeft, marginTop + (separation * lineIndex++));
             txtPersistance.Text = "Persistance";
 
-            pbPersistance.SetPosition(marginLeft, marginTop + (separation * lineIndex++));
-            pbPersistance.Width = width;
-            pbPersistance.Height = height;
             pbPersistance.ProgressColor = pColor;
             pbPersistance.ProgressValue = Persistance;
             pbPersistance.JustPressed += PbJustPressed;
             pbPersistance.Pressed += PbPressed;
             pbPersistance.JustReleased += PbJustReleased;
 
-            txtOctaves.SetPosition(marginLeft, marginTop + (separation * lineIndex++));
             txtOctaves.Text = "Octaves";
 
-            pbOctaves.SetPosition(marginLeft, marginTop + (separation * lineIndex++));
-            pbOctaves.Width = width;
-            pbOctaves.Height = height;
             pbOctaves.ProgressColor = pColor;
             pbOctaves.ProgressValue = Octaves;
             pbOctaves.JustPressed += PbJustPressed;
             pbOctaves.Pressed += PbPressed;
             pbOctaves.JustReleased += PbJustReleased;
 
-            lineIndex++;
-
-            txtHelpOffset.SetPosition(marginLeft, marginTop + (separation * lineIndex++));
-            txtHelpOffset.AdjustAreaWithText = false;
-            txtHelpOffset.Width = width;
-            txtHelpOffset.Text = "Use W A S D keys to displace the Noise map";
-
-            txtOffset.SetPosition(marginLeft, marginTop + (separation * lineIndex++));
-
-            lineIndex++;
-
-            txtHelpSeed.SetPosition(marginLeft, marginTop + (separation * lineIndex++));
-            txtHelpSeed.AdjustAreaWithText = false;
-            txtHelpSeed.Width = width;
-            txtHelpSeed.Text = "Use X key to change the seed";
-
-            txtSeed.SetPosition(marginLeft, marginTop + (separation * lineIndex++));
+            btnSave.JustReleased += BtnSave_JustReleased;
         }
         public async Task InitializeTextureRenderer()
         {
             texture = this.Game.ResourceManager.RequestResource(Guid.NewGuid(), GenerateMap(), mapSize, true);
 
-            float size = this.Game.Form.RenderHeight * 0.8f;
-
-            var perlinRenderer = await this.AddComponentUITextureRenderer(UITextureRendererDescription.Default(size, size));
-            perlinRenderer.CenterHorizontally = CenterTargets.Screen;
-            perlinRenderer.CenterVertically = CenterTargets.Screen;
+            perlinRenderer = await this.AddComponentUITextureRenderer(UITextureRendererDescription.Default());
             perlinRenderer.Texture = texture;
         }
 
@@ -315,6 +294,98 @@ namespace Terrain.PerlinNoise
             return updateMap;
         }
 
+        public override void GameGraphicsResized()
+        {
+            base.GameGraphicsResized();
+
+            ResizeTextureRenderer();
+            ResizeUI();
+        }
+        public void ResizeTextureRenderer()
+        {
+            float size = Math.Min(this.Game.Form.RenderHeight, this.Game.Form.RenderWidth) * 0.8f;
+
+            perlinRenderer.Width = size;
+            perlinRenderer.Height = size;
+            perlinRenderer.CenterHorizontally = CenterTargets.Screen;
+            perlinRenderer.CenterVertically = CenterTargets.Screen;
+        }
+        public void ResizeUI()
+        {
+            backGround.Width = this.Game.Form.RenderWidth;
+            backGround.Height = this.Game.Form.RenderHeight;
+
+            float perlinRendererSize = Math.Min(this.Game.Form.RenderHeight, this.Game.Form.RenderWidth) * 0.8f;
+
+            float borderSize = (this.Game.Form.RenderWidth - perlinRendererSize) * 0.5f;
+
+            float marginLeft = 25;
+            float marginTop = this.Game.Form.RenderHeight * 0.1f;
+            float separation = 20;
+            float width = borderSize - (marginLeft * 2);
+            float height = 15;
+
+            int lineIndex = 0;
+
+            btnExit.SetPosition(this.Game.Form.RenderWidth - 30, 0);
+            btnExit.Width = 30;
+            btnExit.Height = 30;
+            btnExit.Caption.Text = "X";
+            btnExit.Caption.HorizontalAlign = HorizontalTextAlign.Center;
+            btnExit.Caption.VerticalAlign = VerticalTextAlign.Middle;
+
+            txtScale.SetPosition(marginLeft, marginTop + (separation * lineIndex++));
+
+            pbScale.SetPosition(marginLeft, marginTop + (separation * lineIndex++));
+            pbScale.Width = width;
+            pbScale.Height = height;
+
+            txtLacunarity.SetPosition(marginLeft, marginTop + (separation * lineIndex++));
+
+            pbLacunarity.SetPosition(marginLeft, marginTop + (separation * lineIndex++));
+            pbLacunarity.Width = width;
+            pbLacunarity.Height = height;
+
+            txtPersistance.SetPosition(marginLeft, marginTop + (separation * lineIndex++));
+
+            pbPersistance.SetPosition(marginLeft, marginTop + (separation * lineIndex++));
+            pbPersistance.Width = width;
+            pbPersistance.Height = height;
+
+            txtOctaves.SetPosition(marginLeft, marginTop + (separation * lineIndex++));
+
+            pbOctaves.SetPosition(marginLeft, marginTop + (separation * lineIndex++));
+            pbOctaves.Width = width;
+            pbOctaves.Height = height;
+
+            lineIndex++;
+
+            txtHelpOffset.SetPosition(marginLeft, marginTop + (separation * lineIndex++));
+            txtHelpOffset.AdjustAreaWithText = false;
+            txtHelpOffset.Width = width;
+            txtHelpOffset.Height = 0;
+            txtHelpOffset.Text = "Use W A S D keys to displace the Noise map";
+
+            txtOffset.SetPosition(marginLeft, marginTop + (separation * lineIndex++));
+
+            lineIndex++;
+
+            txtHelpSeed.SetPosition(marginLeft, marginTop + (separation * lineIndex++));
+            txtHelpSeed.AdjustAreaWithText = false;
+            txtHelpSeed.Width = width;
+            txtHelpSeed.Height = 0;
+            txtHelpSeed.Text = "Use X key to change the seed";
+
+            txtSeed.SetPosition(marginLeft, marginTop + (separation * lineIndex++));
+
+            btnSave.Width = 200;
+            btnSave.Height = 50;
+            btnSave.SetPosition(this.Game.Form.RenderCenter.X + (perlinRendererSize / 2) - btnSave.Width, this.Game.Form.RenderCenter.Y + (perlinRendererSize / 2));
+            btnSave.Caption.HorizontalAlign = HorizontalTextAlign.Center;
+            btnSave.Caption.VerticalAlign = VerticalTextAlign.Middle;
+            btnSave.Caption.Text = "Save to File";
+        }
+
         private void PbPressed(object sender, EventArgs e)
         {
             if (sender is UIProgressBar pb)
@@ -341,6 +412,28 @@ namespace Terrain.PerlinNoise
         {
             capturedCtrl = null;
         }
+        private void BtnSave_JustReleased(object sender, EventArgs e)
+        {
+            if (noiseMap == null)
+            {
+                return;
+            }
+
+            using (var dlg = new SaveFileDialog())
+            {
+                dlg.DefaultExt = ".png";
+                dlg.FileName = "Noisemap.png";
+
+                if (dlg.ShowDialog() == DialogResult.OK)
+                {
+                    noiseMap.SaveMapToFile(dlg.FileName);
+                }
+            }
+        }
+        private void BtnExit_JustReleased(object sender, EventArgs e)
+        {
+            this.Game.SetScene<StartScene>();
+        }
 
         private IEnumerable<Color4> GenerateMap()
         {
@@ -356,7 +449,9 @@ namespace Terrain.PerlinNoise
                 Seed = mapSeed,
             };
 
-            return NoiseMap.CreateNoiseTexture(nmDesc);
+            noiseMap = NoiseMap.CreateNoiseMap(nmDesc);
+
+            return noiseMap.CreateColors();
         }
     }
 }

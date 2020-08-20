@@ -1,9 +1,15 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine
 {
+    using Bitmap = System.Drawing.Bitmap;
+    using GCHandle = System.Runtime.InteropServices.GCHandle;
+    using GCHandleType = System.Runtime.InteropServices.GCHandleType;
+    using PixelFormat = System.Drawing.Imaging.PixelFormat;
+
     /// <summary>
     /// Noise map
     /// </summary>
@@ -211,6 +217,26 @@ namespace Engine
             }
 
             return colors;
+        }
+        /// <summary>
+        /// Saves the noise map to a file
+        /// </summary>
+        /// <param name="fileName">File name</param>
+        public void SaveMapToFile(string fileName)
+        {
+            int width = Map.GetLength(0);
+            int height = Map.GetLength(1);
+
+            var colors = CreateColors();
+
+            int stride = sizeof(int);
+            int[] bits = colors.Select(c => c.ToRgba()).ToArray();
+
+            var bitsHandle = GCHandle.Alloc(bits, GCHandleType.Pinned);
+            using (var bitmap = new Bitmap(width, height, width * stride, PixelFormat.Format32bppPArgb, bitsHandle.AddrOfPinnedObject()))
+            {
+                bitmap.Save(fileName);
+            }
         }
     }
 }
