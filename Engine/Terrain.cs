@@ -621,31 +621,11 @@ namespace Engine
         /// <summary>
         /// Grid
         /// </summary>
-        private MapGrid Map = null;
+        private MapGrid mapGrid = null;
         /// <summary>
         /// Height map
         /// </summary>
         private HeightMap heightMap = null;
-        /// <summary>
-        /// Heightmap cell size
-        /// </summary>
-        private readonly float heightMapCellSize;
-        /// <summary>
-        /// Heightmap maximum height
-        /// </summary>
-        private readonly float heightMapHeight;
-        /// <summary>
-        /// Heightmap height curve
-        /// </summary>
-        private readonly Curve heightMapCurve;
-        /// <summary>
-        /// UV map scale
-        /// </summary>
-        private readonly float uvScale;
-        /// <summary>
-        /// UV map displacement
-        /// </summary>
-        private readonly Vector2 uvDisplacement;
 
         /// <summary>
         /// Heightmap texture resolution
@@ -729,9 +709,25 @@ namespace Engine
 
             // Read heightmap
             this.heightMap = HeightMap.FromDescription(description.HeightmapDescription);
-            this.heightMapCellSize = description.HeightmapDescription.CellSize;
-            this.heightMapHeight = description.HeightmapDescription.MaximumHeight;
-            this.heightMapCurve = description.HeightmapDescription.HeightCurve;
+            float heightMapCellSize = description.HeightmapDescription.CellSize;
+            float heightMapHeight = description.HeightmapDescription.MaximumHeight;
+            Curve heightMapCurve = description.HeightmapDescription.HeightCurve;
+            float uvScale = 1;
+            Vector2 uvDisplacement = Vector2.Zero;
+
+            if (description.HeightmapDescription.Textures != null)
+            {
+                // Read texture data
+                uvScale = description.HeightmapDescription.Textures.Scale;
+                uvDisplacement = description.HeightmapDescription.Textures.Displacement;
+                this.useAlphaMap = description.HeightmapDescription.Textures.UseAlphaMapping;
+                this.useSlopes = description.HeightmapDescription.Textures.UseSlopes;
+                this.proportion = description.HeightmapDescription.Textures.Proportion;
+                this.textureResolution = description.HeightmapDescription.Textures.Resolution;
+                this.slopeRanges = description.HeightmapDescription.Textures.SlopeRanges;
+
+                this.ReadHeightmapTextures(description.HeightmapDescription.ContentPath, description.HeightmapDescription.Textures);
+            }
 
             // Read material
             this.terrainMaterial = new MeshMaterial()
@@ -739,27 +735,13 @@ namespace Engine
                 Material = description.HeightmapDescription.Material?.GetMaterial() ?? Material.Default
             };
 
-            if (description.HeightmapDescription.Textures != null)
-            {
-                // Read texture data
-                this.useAlphaMap = description.HeightmapDescription.Textures.UseAlphaMapping;
-                this.useSlopes = description.HeightmapDescription.Textures.UseSlopes;
-                this.proportion = description.HeightmapDescription.Textures.Proportion;
-                this.uvScale = description.HeightmapDescription.Textures.Scale;
-                this.uvDisplacement = description.HeightmapDescription.Textures.Displacement;
-                this.textureResolution = description.HeightmapDescription.Textures.Resolution;
-                this.slopeRanges = description.HeightmapDescription.Textures.SlopeRanges;
-
-                this.ReadHeightmapTextures(description.HeightmapDescription.ContentPath, description.HeightmapDescription.Textures);
-            }
-
             // Get vertices and indices from heightmap
             this.heightMap.BuildGeometry(
-                this.heightMapCellSize,
-                this.heightMapHeight,
-                this.heightMapCurve,
-                this.uvScale,
-                this.uvDisplacement,
+                heightMapCellSize,
+                heightMapHeight,
+                heightMapCurve,
+                uvScale,
+                uvDisplacement,
                 out var vertices, out var indices);
 
             // Compute triangles for ray - mesh picking
@@ -771,13 +753,9 @@ namespace Engine
             // Initialize quadtree for ray picking
             this.groundPickingQuadtree = description.ReadQuadTree(tris);
 
-            if (this.Map == null)
-            {
-                //Initialize map
-                int trianglesPerNode = this.heightMap.CalcTrianglesPerNode(MapGrid.LODLevels);
-
-                this.Map = new MapGrid(this.Game, $"Terrain.{this.Name}", vertices, trianglesPerNode);
-            }
+            //Initialize map
+            int trianglesPerNode = this.heightMap.CalcTrianglesPerNode(MapGrid.LODLevels);
+            this.mapGrid = new MapGrid(this.Game, $"Terrain.{this.Name}", vertices, trianglesPerNode);
         }
         /// <summary>
         /// Destructor
@@ -792,8 +770,8 @@ namespace Engine
         {
             if (disposing)
             {
-                Map?.Dispose();
-                Map = null;
+                mapGrid?.Dispose();
+                mapGrid = null;
 
                 heightMap?.Dispose();
                 heightMap = null;
@@ -821,7 +799,7 @@ namespace Engine
                 return;
             }
 
-            this.Map?.Update(context.EyePosition);
+            this.mapGrid?.Update(context.EyePosition);
         }
         /// <inheritdoc/>
         public override void DrawShadows(DrawContextShadows context)
@@ -834,7 +812,7 @@ namespace Engine
             var terrainTechnique = this.SetTechniqueTerrainShadowMap(context);
             if (terrainTechnique != null)
             {
-                this.Map?.DrawShadows(context, this.BufferManager, terrainTechnique);
+                this.mapGrid?.DrawShadows(context, this.BufferManager, terrainTechnique);
             }
         }
         /// <inheritdoc/>
@@ -848,7 +826,7 @@ namespace Engine
             var terrainTechnique = this.SetTechniqueTerrain(context);
             if (terrainTechnique != null)
             {
-                this.Map?.Draw(context, this.BufferManager, terrainTechnique);
+                this.mapGrid?.Draw(context, this.BufferManager, terrainTechnique);
             }
         }
         /// <summary>
