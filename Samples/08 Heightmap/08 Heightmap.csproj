@@ -326,9 +326,6 @@
     <Content Include="Resources\Scenery\Heightmap\desert0hm.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Scenery\Heightmap\UVtest 256.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="Resources\Scenery\Heightmap\Textures\dirt0hr.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

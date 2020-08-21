@@ -720,107 +720,55 @@ namespace Engine
         public Terrain(Scene scene, GroundDescription description)
             : base(scene, description)
         {
-            #region Read heightmap
+            this.useAnisotropic = description.UseAnisotropic;
 
-            string hmContentPath = description.HeightmapDescription.ContentPath;
-
-            var heightMapImage = new ImageContent()
+            if (description.HeightmapDescription == null)
             {
-                Streams = ContentManager.FindContent(hmContentPath, description.HeightmapDescription.HeightmapFileName),
-            };
-            var colorMapImage = new ImageContent()
-            {
-                Streams = ContentManager.FindContent(hmContentPath, description.HeightmapDescription.ColormapFileName),
-            };
+                throw new EngineException($"Terrain initialization error. Heightmap description not found.");
+            }
 
-            this.heightMap = HeightMap.FromStream(heightMapImage.Stream, colorMapImage.Stream);
+            // Read heightmap
+            this.heightMap = HeightMap.FromDescription(description.HeightmapDescription);
             this.heightMapCellSize = description.HeightmapDescription.CellSize;
             this.heightMapHeight = description.HeightmapDescription.MaximumHeight;
             this.heightMapCurve = description.HeightmapDescription.HeightCurve;
-            this.textureResolution = description.HeightmapDescription.TextureResolution;
 
-            #endregion
-
-            #region Read terrain data
-
-            string tContentPath = Path.Combine(description.HeightmapDescription.ContentPath, description.HeightmapDescription.Textures.ContentPath);
-
+            // Read material
             this.terrainMaterial = new MeshMaterial()
             {
-                Material = description.HeightmapDescription.Material != null ? description.HeightmapDescription.Material.GetMaterial() : Material.Default
+                Material = description.HeightmapDescription.Material?.GetMaterial() ?? Material.Default
             };
 
-            var normalMapTextures = new ImageContent()
+            if (description.HeightmapDescription.Textures != null)
             {
-                Paths = ContentManager.FindPaths(tContentPath, description.HeightmapDescription.Textures.NormalMaps),
-            };
-            this.terrainNormalMaps = this.Game.ResourceManager.RequestResource(normalMapTextures);
-
-            var specularMapTextures = new ImageContent()
-            {
-                Paths = ContentManager.FindPaths(tContentPath, description.HeightmapDescription.Textures.SpecularMaps),
-            };
-            this.terrainSpecularMaps = this.Game.ResourceManager.RequestResource(specularMapTextures);
-
-            if (description.HeightmapDescription.Textures.UseSlopes)
-            {
-                var texturesLR = new ImageContent()
-                {
-                    Paths = ContentManager.FindPaths(tContentPath, description.HeightmapDescription.Textures.TexturesLR),
-                };
-                var texturesHR = new ImageContent()
-                {
-                    Paths = ContentManager.FindPaths(tContentPath, description.HeightmapDescription.Textures.TexturesHR),
-                };
-
-                this.terrainTexturesLR = this.Game.ResourceManager.RequestResource(texturesLR);
-                this.terrainTexturesHR = this.Game.ResourceManager.RequestResource(texturesHR);
+                // Read texture data
+                this.useAlphaMap = description.HeightmapDescription.Textures.UseAlphaMapping;
+                this.useSlopes = description.HeightmapDescription.Textures.UseSlopes;
+                this.proportion = description.HeightmapDescription.Textures.Proportion;
+                this.uvScale = description.HeightmapDescription.Textures.Scale;
+                this.uvDisplacement = description.HeightmapDescription.Textures.Displacement;
+                this.textureResolution = description.HeightmapDescription.Textures.Resolution;
                 this.slopeRanges = description.HeightmapDescription.Textures.SlopeRanges;
+
+                this.ReadHeightmapTextures(description.HeightmapDescription.ContentPath, description.HeightmapDescription.Textures);
             }
 
-            if (description.HeightmapDescription.Textures.UseAlphaMapping)
-            {
-                var colors = new ImageContent()
-                {
-                    Paths = ContentManager.FindPaths(tContentPath, description.HeightmapDescription.Textures.ColorTextures),
-                };
-                var aMap = new ImageContent()
-                {
-                    Paths = ContentManager.FindPaths(tContentPath, description.HeightmapDescription.Textures.AlphaMap),
-                };
+            // Get vertices and indices from heightmap
+            this.heightMap.BuildGeometry(
+                this.heightMapCellSize,
+                this.heightMapHeight,
+                this.heightMapCurve,
+                this.uvScale,
+                this.uvDisplacement,
+                out var vertices, out var indices);
 
-                this.colorTextures = this.Game.ResourceManager.RequestResource(colors);
-                this.alphaMap = this.Game.ResourceManager.RequestResource(aMap);
-            }
+            // Compute triangles for ray - mesh picking
+            var tris = Triangle.ComputeTriangleList(
+                Topology.TriangleList,
+                vertices.Select(v => v.Position.Value).ToArray(),
+                indices.ToArray());
 
-            this.useAlphaMap = description.HeightmapDescription.Textures.UseAlphaMapping;
-            this.useSlopes = description.HeightmapDescription.Textures.UseSlopes;
-            this.proportion = description.HeightmapDescription.Textures.Proportion;
-            this.uvScale = description.HeightmapDescription.Textures.Scale;
-            this.uvDisplacement = description.HeightmapDescription.Textures.Displacement;
-
-            #endregion
-
-            this.useAlphaMap = description.UseAnisotropic;
-            this.useAnisotropic = description.UseAnisotropic;
-
-            //Get vertices and indices from heightmap
-            this.BuildGeometry(out var vertices, out var indices);
-
-            var tmpVerts = vertices.ToArray();
-            var tmpIndex = indices.ToArray();
-
-            List<Triangle> tris = new List<Triangle>();
-
-            for (int i = 0; i < tmpIndex.Length; i += 3)
-            {
-                tris.Add(new Triangle(
-                    tmpVerts[tmpIndex[i + 0]].Position.Value,
-                    tmpVerts[tmpIndex[i + 1]].Position.Value,
-                    tmpVerts[tmpIndex[i + 2]].Position.Value));
-            }
-
-            //Initialize quadtree for ray picking
+            // Initialize quadtree for ray picking
             this.groundPickingQuadtree = description.ReadQuadTree(tris);
 
             if (this.Map == null)
@@ -1007,19 +955,37 @@ namespace Engine
         }
 
         /// <summary>
-        /// Build geometry
+        /// Reads texture data
         /// </summary>
-        /// <param name="vertices">Geometry vertices</param>
-        /// <param name="indices">Geometry indices</param>
-        private void BuildGeometry(out IEnumerable<VertexData> vertices, out IEnumerable<uint> indices)
+        /// <param name="baseContentPath">Base content path</param>
+        /// <param name="description">Textures description</param>
+        private void ReadHeightmapTextures(string baseContentPath, HeightmapTexturesDescription description)
         {
-            this.heightMap.BuildGeometry(
-                this.heightMapCellSize,
-                this.heightMapHeight,
-                this.heightMapCurve,
-                this.uvScale,
-                this.uvDisplacement,
-                out vertices, out indices);
+            string tContentPath = Path.Combine(baseContentPath, description.ContentPath);
+
+            var normalMapTextures = ImageContent.Array(tContentPath, description.NormalMaps);
+            this.terrainNormalMaps = this.Game.ResourceManager.RequestResource(normalMapTextures);
+
+            var specularMapTextures = ImageContent.Array(tContentPath, description.SpecularMaps);
+            this.terrainSpecularMaps = this.Game.ResourceManager.RequestResource(specularMapTextures);
+
+            if (description.UseSlopes)
+            {
+                var texturesLR = ImageContent.Array(tContentPath, description.TexturesLR);
+                var texturesHR = ImageContent.Array(tContentPath, description.TexturesHR);
+
+                this.terrainTexturesLR = this.Game.ResourceManager.RequestResource(texturesLR);
+                this.terrainTexturesHR = this.Game.ResourceManager.RequestResource(texturesHR);
+            }
+
+            if (description.UseAlphaMapping)
+            {
+                var colors = ImageContent.Array(tContentPath, description.ColorTextures);
+                var aMap = ImageContent.Texture(tContentPath, description.AlphaMap);
+
+                this.colorTextures = this.Game.ResourceManager.RequestResource(colors);
+                this.alphaMap = this.Game.ResourceManager.RequestResource(aMap);
+            }
         }
     }
 

@@ -98,10 +98,7 @@ namespace Engine
 
             this.parameters = new ParticleSystemParams(description) * emitter.Scale;
 
-            var imgContent = new ImageContent()
-            {
-                Streams = ContentManager.FindContent(description.ContentPath, description.TextureName),
-            };
+            var imgContent = ImageContent.Texture(description.ContentPath, description.TextureName);
             this.Texture = game.ResourceManager.RequestResource(imgContent);
             this.TextureCount = (uint)imgContent.Count;
 

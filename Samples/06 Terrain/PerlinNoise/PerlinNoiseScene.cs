@@ -210,8 +210,6 @@ namespace Terrain.PerlinNoise
             if (noiseMapDirty)
             {
                 GenerateMap();
-
-                return;
             }
         }
         private bool UpdateInput(GameTime gameTime)
@@ -443,11 +441,11 @@ namespace Terrain.PerlinNoise
             this.Game.SetScene<StartScene>();
         }
 
-        private bool GenerateMap()
+        private void GenerateMap()
         {
             if (generatingMap)
             {
-                return false;
+                return;
             }
 
             generatingMap = true;
@@ -479,8 +477,6 @@ namespace Terrain.PerlinNoise
 
                 generatingMap = false;
             });
-
-            return true;
         }
     }
 }

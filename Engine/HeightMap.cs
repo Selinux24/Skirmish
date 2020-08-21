@@ -3,10 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 
 namespace Engine
 {
     using Engine.Common;
+    using Engine.Content;
 
     /// <summary>
     /// Height map
@@ -14,23 +16,31 @@ namespace Engine
     public class HeightMap : IDisposable
     {
         /// <summary>
-        /// Generates a new hight map from map data
+        /// Generates a new height map from a height map description
         /// </summary>
-        /// <param name="heights">Height map</param>
-        /// <param name="colors">Color map</param>
-        /// <param name="useFalloff">Use falloff map</param>
-        /// <param name="falloffCurveA">Falloff curve A</param>
-        /// <param name="falloffCurveB">Falloff curve B</param>
+        /// <param name="description">Height map description</param>
         /// <returns>Returns the new generated height map</returns>
-        public static HeightMap FromMap(float[,] heights, Color4[,] colors, bool useFalloff = false, float falloffCurveA = 0f, float falloffCurveB = 0f)
+        public static HeightMap FromDescription(HeightmapDescription description)
         {
-            float[,] falloffMap = null;
-            if (useFalloff)
+            if (description.Heightmap != null)
             {
-                falloffMap = GenerateFalloff(heights.GetLength(0), heights.GetLength(1), falloffCurveA, falloffCurveB);
+                return FromMap(description.Heightmap, description.Colormap, description.UseFalloff, description.FalloffCurve.X, description.FalloffCurve.Y);
             }
 
-            return new HeightMap(heights, colors, falloffMap);
+            if (string.IsNullOrEmpty(description.HeightmapFileName))
+            {
+                throw new EngineException("No heightmap found in description.");
+            }
+
+            Stream heightMapData = ContentManager.FindContent(description.ContentPath, description.HeightmapFileName).FirstOrDefault();
+
+            Stream colorMapData = null;
+            if (!string.IsNullOrEmpty(description.ColormapFileName))
+            {
+                colorMapData = ContentManager.FindContent(description.ContentPath, description.ColormapFileName).FirstOrDefault();
+            }
+
+            return FromStream(heightMapData, colorMapData, description.UseFalloff, description.FalloffCurve.X, description.FalloffCurve.Y);
         }
         /// <summary>
         /// Generates a new height map from a bitmap stream
@@ -41,14 +51,14 @@ namespace Engine
         /// <param name="falloffCurveA">Falloff curve A</param>
         /// <param name="falloffCurveB">Falloff curve B</param>
         /// <returns>Returns the new generated height map</returns>
-        public static HeightMap FromStream(Stream heightData, Stream colorData, bool useFalloff = false, float falloffCurveA = 0f, float falloffCurveB = 0f)
+        private static HeightMap FromStream(Stream heightData, Stream colorData, bool useFalloff = false, float falloffCurveA = 0f, float falloffCurveB = 0f)
         {
-            Bitmap heightBitmap = Bitmap.FromStream(heightData) as Bitmap;
+            Bitmap heightBitmap = Image.FromStream(heightData) as Bitmap;
 
             Bitmap colorBitmap = null;
             if (colorData != null)
             {
-                colorBitmap = Bitmap.FromStream(colorData) as Bitmap;
+                colorBitmap = Image.FromStream(colorData) as Bitmap;
 
                 if (colorBitmap.Height != heightBitmap.Height || colorBitmap.Width != heightBitmap.Width)
                 {
@@ -56,8 +66,21 @@ namespace Engine
                 }
             }
 
-            var heights = new float[heightBitmap.Height + 1, heightBitmap.Width + 1];
-            var colors = new Color4[heightBitmap.Height + 1, heightBitmap.Width + 1];
+            ReadImages(heightBitmap, colorBitmap, out var heights, out var colors);
+
+            return FromMap(heights, colors, useFalloff, falloffCurveA, falloffCurveB);
+        }
+        /// <summary>
+        /// Read images into data maps
+        /// </summary>
+        /// <param name="heightBitmap">Height image</param>
+        /// <param name="colorBitmap">Color image</param>
+        /// <param name="heights">Returns the height map</param>
+        /// <param name="colors">Returns the color map</param>
+        private static void ReadImages(Bitmap heightBitmap, Bitmap colorBitmap, out float[,] heights, out Color4[,] colors)
+        {
+            heights = new float[heightBitmap.Height + 1, heightBitmap.Width + 1];
+            colors = new Color4[heightBitmap.Height + 1, heightBitmap.Width + 1];
 
             using (colorBitmap)
             using (heightBitmap)
@@ -78,7 +101,18 @@ namespace Engine
                     }
                 }
             }
-
+        }
+        /// <summary>
+        /// Generates a new hight map from map data
+        /// </summary>
+        /// <param name="heights">Height map</param>
+        /// <param name="colors">Color map</param>
+        /// <param name="useFalloff">Use falloff map</param>
+        /// <param name="falloffCurveA">Falloff curve A</param>
+        /// <param name="falloffCurveB">Falloff curve B</param>
+        /// <returns>Returns the new generated height map</returns>
+        private static HeightMap FromMap(float[,] heights, Color4[,] colors, bool useFalloff = false, float falloffCurveA = 0f, float falloffCurveB = 0f)
+        {
             float[,] falloffMap = null;
             if (useFalloff)
             {
@@ -86,6 +120,42 @@ namespace Engine
             }
 
             return new HeightMap(heights, colors, falloffMap);
+        }
+        /// <summary>
+        /// Generates a falloff map
+        /// </summary>
+        /// <param name="width">Map width</param>
+        /// <param name="height">Map height</param>
+        /// <param name="a">Curve param A</param>
+        /// <param name="b">Curve param B</param>
+        public static float[,] GenerateFalloff(int width, int height, float a, float b)
+        {
+            float[,] res = new float[width, height];
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    float pX = x / (float)width * 2 - 1;
+                    float pY = y / (float)width * 2 - 1;
+
+                    float value = Math.Max(Math.Abs(pX), Math.Abs(pY));
+
+                    res[x, y] = EvaluateFalloff(value, a, b);
+                }
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Evaluates the falloff curve function
+        /// </summary>
+        /// <param name="value">Value</param>
+        /// <param name="a">Curve param A</param>
+        /// <param name="b">Curve param B</param>
+        private static float EvaluateFalloff(float value, float a, float b)
+        {
+            return (float)(Math.Pow(value, a) / (Math.Pow(value, a) + Math.Pow(b - b * value, a)));
         }
         /// <summary>
         /// Generates the height map normals
@@ -183,42 +253,6 @@ namespace Engine
                     vertList[index1].BiNormal = binormal;
                 }
             }
-        }
-        /// <summary>
-        /// Generates a falloff map
-        /// </summary>
-        /// <param name="width">Map width</param>
-        /// <param name="height">Map height</param>
-        /// <param name="a">Curve param A</param>
-        /// <param name="b">Curve param B</param>
-        private static float[,] GenerateFalloff(int width, int height, float a, float b)
-        {
-            float[,] res = new float[width, height];
-
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    float pX = x / (float)width * 2 - 1;
-                    float pY = y / (float)width * 2 - 1;
-
-                    float value = Math.Max(Math.Abs(pX), Math.Abs(pY));
-
-                    res[x, y] = EvaluateFalloff(value, a, b);
-                }
-            }
-
-            return res;
-        }
-        /// <summary>
-        /// Evaluates the falloff curve function
-        /// </summary>
-        /// <param name="value">Value</param>
-        /// <param name="a">Curve param A</param>
-        /// <param name="b">Curve param B</param>
-        private static float EvaluateFalloff(float value, float a, float b)
-        {
-            return (float)(Math.Pow(value, a) / (Math.Pow(value, a) + Math.Pow(b - b * value, a)));
         }
 
         /// <summary>

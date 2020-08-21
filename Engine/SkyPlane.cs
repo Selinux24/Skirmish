@@ -149,16 +149,10 @@ namespace Engine
         public SkyPlane(Scene scene, SkyPlaneDescription description)
             : base(scene, description)
         {
-            var img1 = new ImageContent()
-            {
-                Streams = ContentManager.FindContent(description.ContentPath, description.Texture1Name),
-            };
+            var img1 = ImageContent.Texture(description.ContentPath, description.Texture1Name);
             this.skyTexture1 = this.Game.ResourceManager.RequestResource(img1);
 
-            var img2 = new ImageContent()
-            {
-                Streams = ContentManager.FindContent(description.ContentPath, description.Texture2Name),
-            };
+            var img2 = ImageContent.Texture(description.ContentPath, description.Texture2Name);
             this.skyTexture2 = this.Game.ResourceManager.RequestResource(img2);
 
             this.skyMode = description.SkyMode;

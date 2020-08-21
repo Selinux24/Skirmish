@@ -17,7 +17,8 @@ namespace Engine
         /// <param name="cellsize">Cell size</param>
         /// <param name="maximumHeight">Maximum height</param>
         /// <param name="heightCurve">Height curve</param>
-        public static HeightmapDescription FromMap(NoiseMap heightmap, float cellsize, float maximumHeight, Curve heightCurve)
+        /// <param name="textures">Texture description</param>
+        public static HeightmapDescription FromMap(NoiseMap heightmap, float cellsize, float maximumHeight, Curve heightCurve, HeightmapTexturesDescription textures)
         {
             return new HeightmapDescription
             {
@@ -25,70 +26,8 @@ namespace Engine
                 CellSize = cellsize,
                 MaximumHeight = maximumHeight,
                 HeightCurve = heightCurve,
+                Textures = textures,
             };
-        }
-
-        /// <summary>
-        /// Terrain textures
-        /// </summary>
-        public class TexturesDescription
-        {
-            /// <summary>
-            /// Content path
-            /// </summary>
-            public string ContentPath { get; set; } = "Textures";
-
-            /// <summary>
-            /// Normal maps
-            /// </summary>
-            public string[] NormalMaps { get; set; } = null;
-            /// <summary>
-            /// Specular maps
-            /// </summary>
-            public string[] SpecularMaps { get; set; } = null;
-
-            /// <summary>
-            /// Gets or sets if use alpha mapping or not
-            /// </summary>
-            public bool UseAlphaMapping { get; set; } = false;
-            /// <summary>
-            /// Alpha map
-            /// </summary>
-            public string AlphaMap { get; set; } = null;
-            /// <summary>
-            /// Color textures for alpha map
-            /// </summary>
-            public string[] ColorTextures { get; set; } = null;
-
-            /// <summary>
-            /// Gets or sets if use slope texturing or not
-            /// </summary>
-            public bool UseSlopes { get; set; } = false;
-            /// <summary>
-            /// Slope ranges
-            /// </summary>
-            public Vector2 SlopeRanges { get; set; } = Vector2.Zero;
-            /// <summary>
-            /// High resolution textures
-            /// </summary>
-            public string[] TexturesHR { get; set; } = null;
-            /// <summary>
-            /// Low resolution textures
-            /// </summary>
-            public string[] TexturesLR { get; set; } = null;
-
-            /// <summary>
-            /// Lerping proportion between alpha mapping and slope texturing
-            /// </summary>
-            public float Proportion { get; set; } = 0f;
-            /// <summary>
-            /// UV texture scale
-            /// </summary>
-            public float Scale { get; set; } = 1;
-            /// <summary>
-            /// UV texture displacement
-            /// </summary>
-            public Vector2 Displacement { get; set; } = Vector2.Zero;
         }
 
         /// <summary>
@@ -124,13 +63,9 @@ namespace Engine
         /// </summary>
         public Curve HeightCurve { get; set; }
         /// <summary>
-        /// Texture resolution
-        /// </summary>
-        public float TextureResolution { get; set; } = 10;
-        /// <summary>
         /// Textures
         /// </summary>
-        public TexturesDescription Textures { get; set; } = new TexturesDescription();
+        public HeightmapTexturesDescription Textures { get; set; } = new HeightmapTexturesDescription();
         /// <summary>
         /// Terrain material
         /// </summary>
@@ -165,33 +100,7 @@ namespace Engine
         /// <returns>Returns a new model content</returns>
         public ModelContent ReadModelContent()
         {
-            HeightMap hm;
-
-            if (Heightmap != null)
-            {
-                hm = HeightMap.FromMap(Heightmap, Colormap, UseFalloff, FalloffCurve.X, FalloffCurve.Y);
-            }
-            else if (!string.IsNullOrEmpty(HeightmapFileName))
-            {
-                ImageContent heightMapImage = new ImageContent()
-                {
-                    Streams = ContentManager.FindContent(ContentPath, HeightmapFileName),
-                };
-
-                hm = HeightMap.FromStream(heightMapImage.Stream, null, UseFalloff, FalloffCurve.X, FalloffCurve.Y);
-            }
-            else
-            {
-                throw new EngineException("No heightmap found in description.");
-            }
-
-            ModelContent modelContent = new ModelContent();
-
-            string materialName = "material";
-            string geoName = "geometry";
-
-            MaterialContent material = MaterialContent.Default;
-
+            HeightMap hm = HeightMap.FromDescription(this);
             hm.BuildGeometry(
                 CellSize,
                 MaximumHeight,
@@ -199,6 +108,13 @@ namespace Engine
                 Textures.Scale,
                 Textures.Displacement,
                 out var vertices, out var indices);
+
+            ModelContent modelContent = new ModelContent();
+
+            string materialName = "material";
+            string geoName = "geometry";
+
+            MaterialContent material = MaterialContent.Default;
 
             SubMeshContent geo = new SubMeshContent(Topology.TriangleList, materialName, true, false);
             geo.SetVertices(vertices);
@@ -210,10 +126,7 @@ namespace Engine
 
                 material.DiffuseTexture = diffuseTexureName;
 
-                ImageContent diffuseImage = new ImageContent()
-                {
-                    Streams = ContentManager.FindContent(ContentPath, Textures.TexturesLR),
-                };
+                var diffuseImage = ImageContent.Array(Textures.ContentPath, Textures.TexturesLR);
 
                 modelContent.Images.Add(diffuseTexureName, diffuseImage);
             }
@@ -224,10 +137,7 @@ namespace Engine
 
                 material.NormalMapTexture = nmapTexureName;
 
-                ImageContent nmapImage = new ImageContent()
-                {
-                    Streams = ContentManager.FindContent(ContentPath, Textures.NormalMaps),
-                };
+                var nmapImage = ImageContent.Array(Textures.ContentPath, Textures.NormalMaps);
 
                 modelContent.Images.Add(nmapTexureName, nmapImage);
             }

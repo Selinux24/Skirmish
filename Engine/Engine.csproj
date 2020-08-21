@@ -262,6 +262,7 @@
     <Compile Include="GameStatusCollectedEventArgs.cs" />
     <Compile Include="GameStatusCollectedHandler.cs" />
     <Compile Include="Common\IBufferDescriptorRequest.cs" />
+    <Compile Include="HeightmapTexturesDescription.cs" />
     <Compile Include="IGameResourceRequest.cs" />
     <Compile Include="IIntersectable.cs" />
     <Compile Include="IManipulator.cs" />

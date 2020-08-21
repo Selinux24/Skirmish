@@ -654,14 +654,14 @@ namespace SceneTest
 
             float cellSize = terrainSize / mapSize;
 
-            GroundDescription groundDesc = GroundDescription.FromHeightmap(noiseMap, cellSize, terrainHeight, heightCurve, 2);
-            groundDesc.HeightmapDescription.ContentPath = "SceneTanksGame/terrain";
-            groundDesc.HeightmapDescription.Textures = new HeightmapDescription.TexturesDescription
+            var textures = new HeightmapTexturesDescription
             {
+                ContentPath = "SceneTanksGame/terrain",
                 TexturesLR = new[] { "Diffuse.jpg" },
                 NormalMaps = new[] { "Normal.jpg" },
                 Scale = 0.2f,
             };
+            GroundDescription groundDesc = GroundDescription.FromHeightmap(noiseMap, cellSize, terrainHeight, heightCurve, textures, 2);
             groundDesc.HeightmapDescription.UseFalloff = true;
 
             terrain = await this.AddComponentScenery(groundDesc, SceneObjectUsages.Ground, layerModels);

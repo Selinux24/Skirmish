@@ -556,8 +556,7 @@ namespace Heightmap
                 ColormapFileName = "desert0cm.bmp",
                 CellSize = 15,
                 MaximumHeight = 150,
-                TextureResolution = 100f,
-                Textures = new HeightmapDescription.TexturesDescription()
+                Textures = new HeightmapTexturesDescription()
                 {
                     ContentPath = "Textures",
                     NormalMaps = new[] { "normal001.dds", "normal002.dds" },
@@ -573,10 +572,12 @@ namespace Heightmap
                     TexturesHR = new[] { "dirt0hr.dds" },
 
                     Proportion = 0.25f,
+                    Resolution = 100f,
                 },
                 Material = new MaterialDescription
                 {
                     Shininess = 10f,
+                    DiffuseColor = new Color4(1f, 1f, 1f, 1f),
                     SpecularColor = new Color4(0.1f, 0.1f, 0.1f, 1f),
                 },
             };

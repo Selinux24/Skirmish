@@ -654,11 +654,8 @@ namespace Engine
 
             if (!string.IsNullOrEmpty(description.VegetationMap))
             {
-                var foliageMapImage = new ImageContent()
-                {
-                    Streams = ContentManager.FindContent(contentPath, description.VegetationMap),
-                };
-                this.foliageMap = FoliageMap.FromStream(foliageMapImage.Stream);
+                var foliageMapData = ContentManager.FindContent(contentPath, description.VegetationMap).FirstOrDefault();
+                this.foliageMap = FoliageMap.FromStream(foliageMapData);
             }
 
             for (int i = 0; i < description.Channels.Length; i++)
@@ -744,21 +741,13 @@ namespace Engine
 
             if (textureCount > 0)
             {
-                var image = new ImageContent()
-                {
-                    Streams = ContentManager.FindContent(contentPath, channel.VegetationTextures),
-                };
-
+                var image = ImageContent.Array(contentPath, channel.VegetationTextures);
                 foliageTextures = this.Game.ResourceManager.RequestResource(image);
             }
 
             if (normalMapCount > 0)
             {
-                var image = new ImageContent()
-                {
-                    Streams = ContentManager.FindContent(contentPath, channel.VegetationNormalMaps),
-                };
-
+                var image = ImageContent.Array(contentPath, channel.VegetationNormalMaps);
                 foliageNormalMaps = this.Game.ResourceManager.RequestResource(image);
             }
 
