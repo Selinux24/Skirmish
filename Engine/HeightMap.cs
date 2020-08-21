@@ -18,17 +18,30 @@ namespace Engine
         /// </summary>
         /// <param name="heights">Height map</param>
         /// <param name="colors">Color map</param>
-        public static HeightMap FromMap(float[,] heights, Color4[,] colors)
+        /// <param name="useFalloff">Use falloff map</param>
+        /// <param name="falloffCurveA">Falloff curve A</param>
+        /// <param name="falloffCurveB">Falloff curve B</param>
+        /// <returns>Returns the new generated height map</returns>
+        public static HeightMap FromMap(float[,] heights, Color4[,] colors, bool useFalloff = false, float falloffCurveA = 0f, float falloffCurveB = 0f)
         {
-            return new HeightMap(heights, colors);
+            float[,] falloffMap = null;
+            if (useFalloff)
+            {
+                falloffMap = GenerateFalloff(heights.GetLength(0), heights.GetLength(1), falloffCurveA, falloffCurveB);
+            }
+
+            return new HeightMap(heights, colors, falloffMap);
         }
         /// <summary>
         /// Generates a new height map from a bitmap stream
         /// </summary>
         /// <param name="heightData">Height data stream</param>
         /// <param name="colorData">Color data stream</param>
+        /// <param name="useFalloff">Use falloff map</param>
+        /// <param name="falloffCurveA">Falloff curve A</param>
+        /// <param name="falloffCurveB">Falloff curve B</param>
         /// <returns>Returns the new generated height map</returns>
-        public static HeightMap FromStream(Stream heightData, Stream colorData)
+        public static HeightMap FromStream(Stream heightData, Stream colorData, bool useFalloff = false, float falloffCurveA = 0f, float falloffCurveB = 0f)
         {
             Bitmap heightBitmap = Bitmap.FromStream(heightData) as Bitmap;
 
@@ -66,12 +79,20 @@ namespace Engine
                 }
             }
 
-            return new HeightMap(heights, colors);
+            float[,] falloffMap = null;
+            if (useFalloff)
+            {
+                falloffMap = GenerateFalloff(heights.GetLength(0), heights.GetLength(1), falloffCurveA, falloffCurveB);
+            }
+
+            return new HeightMap(heights, colors, falloffMap);
         }
         /// <summary>
         /// Generates the height map normals
         /// </summary>
-        /// <param name="cellSize">Cell size</param>
+        /// <param name="vertList">Vertex list</param>
+        /// <param name="width">Width</param>
+        /// <param name="depth">Depth</param>
         /// <returns>Returns the generated normals array</returns>
         private static void ComputeHeightMapNormals(VertexData[] vertList, long width, long depth)
         {
@@ -163,6 +184,42 @@ namespace Engine
                 }
             }
         }
+        /// <summary>
+        /// Generates a falloff map
+        /// </summary>
+        /// <param name="width">Map width</param>
+        /// <param name="height">Map height</param>
+        /// <param name="a">Curve param A</param>
+        /// <param name="b">Curve param B</param>
+        private static float[,] GenerateFalloff(int width, int height, float a, float b)
+        {
+            float[,] res = new float[width, height];
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    float pX = x / (float)width * 2 - 1;
+                    float pY = y / (float)width * 2 - 1;
+
+                    float value = Math.Max(Math.Abs(pX), Math.Abs(pY));
+
+                    res[x, y] = EvaluateFalloff(value, a, b);
+                }
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Evaluates the falloff curve function
+        /// </summary>
+        /// <param name="value">Value</param>
+        /// <param name="a">Curve param A</param>
+        /// <param name="b">Curve param B</param>
+        private static float EvaluateFalloff(float value, float a, float b)
+        {
+            return (float)(Math.Pow(value, a) / (Math.Pow(value, a) + Math.Pow(b - b * value, a)));
+        }
 
         /// <summary>
         /// Heights
@@ -172,6 +229,10 @@ namespace Engine
         /// Color map data
         /// </summary>
         private Color4[,] m_ColorData;
+        /// <summary>
+        /// Falloff map mada
+        /// </summary>
+        private float[,] m_FalloffData;
 
         /// <summary>
         /// Minimum height
@@ -232,10 +293,12 @@ namespace Engine
         /// </summary>
         /// <param name="heightData">Height map data</param>
         /// <param name="colorData">Color map data</param>
-        public HeightMap(float[,] heightData, Color4[,] colorData)
+        /// <param name="falloffData">Falloff map data</param>
+        public HeightMap(float[,] heightData, Color4[,] colorData, float[,] falloffData)
         {
             this.m_HeightData = heightData;
             this.m_ColorData = colorData;
+            this.m_FalloffData = falloffData;
 
             this.Min = float.MaxValue;
             this.Max = float.MinValue;
@@ -279,6 +342,7 @@ namespace Engine
             {
                 this.m_ColorData = null;
                 this.m_HeightData = null;
+                this.m_FalloffData = null;
             }
         }
 
@@ -309,8 +373,12 @@ namespace Engine
                 for (long width = 0; width < vertexCountX; width++)
                 {
                     float h = heightCurve.Evaluate(this.m_HeightData[depth, width]);
+                    if (m_FalloffData != null)
+                    {
+                        h = MathUtil.Clamp(h - this.m_FalloffData[depth, width], 0, 1);
+                    }
 
-                    Color4 c = this.m_ColorData != null ? this.m_ColorData[depth, width] : Color4.Lerp(Color4.Black, Color4.White, this.m_HeightData[depth, width]);
+                    Color4 c = this.m_ColorData != null ? this.m_ColorData[depth, width] : Color4.Lerp(Color4.Black, Color4.White, h);
 
                     float posX = (depth * cellSize) - (totalDepth * 0.5f);
                     float posY = h * cellHeight;

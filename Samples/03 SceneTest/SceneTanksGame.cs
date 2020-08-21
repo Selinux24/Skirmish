@@ -662,6 +662,7 @@ namespace SceneTest
                 NormalMaps = new[] { "Normal.jpg" },
                 Scale = 0.2f,
             };
+            groundDesc.HeightmapDescription.UseFalloff = true;
 
             terrain = await this.AddComponentScenery(groundDesc, SceneObjectUsages.Ground, layerModels);
             terrain.Visible = false;

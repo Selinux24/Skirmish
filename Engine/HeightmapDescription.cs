@@ -135,6 +135,19 @@ namespace Engine
         /// Terrain material
         /// </summary>
         public MaterialDescription Material { get; set; } = new MaterialDescription();
+        /// <summary>
+        /// Use falloff map
+        /// </summary>
+        public bool UseFalloff { get; set; } = false;
+        /// <summary>
+        /// Falloff curve params
+        /// </summary>
+        /// <remarks>
+        /// From https://www.youtube.com/watch?v=COmtTyLCd6I
+        /// f(x) = (x pow a) / ((x pow a) + ((b - bx) pow a))
+        /// Where a = FalloffCurve.X and b = FalloffCurve.Y
+        /// </remarks>
+        public Vector2 FalloffCurve { get; set; } = new Vector2(2, 2.7f);
 
         /// <summary>
         /// Constructor
@@ -156,7 +169,7 @@ namespace Engine
 
             if (Heightmap != null)
             {
-                hm = HeightMap.FromMap(Heightmap, Colormap);
+                hm = HeightMap.FromMap(Heightmap, Colormap, UseFalloff, FalloffCurve.X, FalloffCurve.Y);
             }
             else if (!string.IsNullOrEmpty(HeightmapFileName))
             {
@@ -165,7 +178,7 @@ namespace Engine
                     Streams = ContentManager.FindContent(ContentPath, HeightmapFileName),
                 };
 
-                hm = HeightMap.FromStream(heightMapImage.Stream, null);
+                hm = HeightMap.FromStream(heightMapImage.Stream, null, UseFalloff, FalloffCurve.X, FalloffCurve.Y);
             }
             else
             {
