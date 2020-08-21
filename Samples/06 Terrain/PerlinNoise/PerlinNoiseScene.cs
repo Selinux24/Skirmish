@@ -3,7 +3,6 @@ using Engine.Common;
 using Engine.UI;
 using SharpDX;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using DialogResult = System.Windows.Forms.DialogResult;
 using SaveFileDialog = System.Windows.Forms.SaveFileDialog;
@@ -37,12 +36,14 @@ namespace Terrain.PerlinNoise
         UITextureRenderer perlinRenderer;
         EngineShaderResourceView texture;
         NoiseMap noiseMap;
+        bool noiseMapDirty = true;
+        bool generatingMap = false;
 
-        readonly int mapSize = 256;
-        readonly float maxScale = 10;
+        readonly int mapSize = 128;
+        readonly float maxScale = 100;
         readonly float maxLacunarity = 20;
         readonly float maxPersistance = 1;
-        readonly int maxOctaves = 8;
+        readonly int maxOctaves = 16;
 
         float mapScale = 0.5f;
         float mapLacunarity = 2;
@@ -179,7 +180,7 @@ namespace Terrain.PerlinNoise
         }
         public async Task InitializeTextureRenderer()
         {
-            texture = this.Game.ResourceManager.RequestResource(Guid.NewGuid(), GenerateMap(), mapSize, true);
+            texture = this.Game.ResourceManager.RequestResource(Guid.NewGuid(), new Color4[] { }, mapSize, true);
 
             perlinRenderer = await this.AddComponentUITextureRenderer(UITextureRendererDescription.Default());
             perlinRenderer.Texture = texture;
@@ -194,29 +195,24 @@ namespace Terrain.PerlinNoise
                 this.Game.SetScene<StartScene>();
             }
 
-            bool updateMap = false;
-
             if (UpdateInput(gameTime))
             {
-                updateMap = true;
+                noiseMapDirty = true;
             }
 
             if (UpdateUI())
             {
-                updateMap = true;
+                noiseMapDirty = true;
             }
 
-            if (!updateMap)
+            texture.Update(this.Game, noiseMap?.CreateColors());
+
+            if (noiseMapDirty)
             {
+                GenerateMap();
+
                 return;
             }
-
-            mapScale = Math.Max(mapScale, 0);
-
-            mapOffset.X = Math.Max(mapOffset.X, 1f);
-            mapOffset.Y = Math.Max(mapOffset.Y, 1f);
-
-            texture.Update(this.Game, GenerateMap());
         }
         private bool UpdateInput(GameTime gameTime)
         {
@@ -248,11 +244,16 @@ namespace Terrain.PerlinNoise
                 updateMap = true;
             }
 
+            mapOffset.X = Math.Max(mapOffset.X, 1f);
+            mapOffset.Y = Math.Max(mapOffset.Y, 1f);
+
             if (this.Game.Input.KeyJustPressed(Keys.X))
             {
                 mapSeed += 100 + (int)(delta * 10000f);
                 updateMap = true;
             }
+
+            mapSeed = Math.Max(mapSeed, 0);
 
             return updateMap;
         }
@@ -398,7 +399,14 @@ namespace Terrain.PerlinNoise
                 var rect = pb.GetRenderArea();
                 var mouse = this.Game.Input.MouseX - rect.Left;
 
-                pb.ProgressValue = mouse / rect.Width;
+                if (pb == pbOctaves)
+                {
+                    pb.ProgressValue = (float)Math.Round(mouse / rect.Width, 1);
+                }
+                else
+                {
+                    pb.ProgressValue = mouse / rect.Width;
+                }
             }
         }
         private void PbJustPressed(object sender, EventArgs e)
@@ -435,23 +443,44 @@ namespace Terrain.PerlinNoise
             this.Game.SetScene<StartScene>();
         }
 
-        private IEnumerable<Color4> GenerateMap()
+        private bool GenerateMap()
         {
-            NoiseMapDescriptor nmDesc = new NoiseMapDescriptor
+            if (generatingMap)
             {
-                MapWidth = mapSize,
-                MapHeight = mapSize,
-                Scale = mapScale,
-                Lacunarity = mapLacunarity,
-                Persistance = mapPersistance,
-                Octaves = mapOctaves,
-                Offset = mapOffset,
-                Seed = mapSeed,
-            };
+                return false;
+            }
 
-            noiseMap = NoiseMap.CreateNoiseMap(nmDesc);
+            generatingMap = true;
 
-            return noiseMap.CreateColors();
+            Task.Run(() =>
+            {
+                try
+                {
+                    NoiseMapDescriptor nmDesc = new NoiseMapDescriptor
+                    {
+                        MapWidth = mapSize,
+                        MapHeight = mapSize,
+                        Scale = mapScale,
+                        Lacunarity = mapLacunarity,
+                        Persistance = mapPersistance,
+                        Octaves = mapOctaves,
+                        Offset = mapOffset,
+                        Seed = mapSeed,
+                    };
+
+                    noiseMap = NoiseMap.CreateNoiseMap(nmDesc);
+
+                    noiseMapDirty = false;
+                }
+                catch (Exception ex)
+                {
+                    Logger.WriteError(ex.Message);
+                }
+
+                generatingMap = false;
+            });
+
+            return true;
         }
     }
 }

@@ -83,6 +83,9 @@ namespace SceneTest
         private Model landScape;
         private Scenery terrain;
         private float terrainTop;
+        private readonly float terrainHeight = 100;
+        private readonly float terrainSize = 1024;
+        private readonly int mapSize = 256;
         private ModelInstanced tanks;
         private float tankHeight = 0;
         private Model projectile;
@@ -631,7 +634,6 @@ namespace SceneTest
         private async Task InitializeModelsTerrain()
         {
             // Generates a random terrain using perlin noise
-            int mapSize = 256;
             NoiseMapDescriptor nmDesc = new NoiseMapDescriptor
             {
                 MapWidth = mapSize,
@@ -639,7 +641,7 @@ namespace SceneTest
                 Scale = 0.5f,
                 Lacunarity = 2f,
                 Persistance = 0.5f,
-                Octaves = 5,
+                Octaves = 4,
                 Offset = Vector2.One,
                 Seed = Helper.RandomGenerator.Next(),
             };
@@ -650,7 +652,9 @@ namespace SceneTest
             heightCurve.Keys.Add(0.4f, 0f);
             heightCurve.Keys.Add(1f, 1f);
 
-            GroundDescription groundDesc = GroundDescription.FromHeightmap(noiseMap, 4f, 75f, heightCurve, 2);
+            float cellSize = terrainSize / mapSize;
+
+            GroundDescription groundDesc = GroundDescription.FromHeightmap(noiseMap, cellSize, terrainHeight, heightCurve, 2);
             groundDesc.HeightmapDescription.ContentPath = "SceneTanksGame/terrain";
             groundDesc.HeightmapDescription.Textures = new HeightmapDescription.TexturesDescription
             {
@@ -727,6 +731,9 @@ namespace SceneTest
         }
         private async Task InitializeAudio()
         {
+            float nearRadius = 1000;
+            ReverbPresets preset = ReverbPresets.Mountains;
+
             tankMoveEffect = "TankMove";
             tankDestroyedEffect = "TankDestroyed";
             tankShootingEffect = "TankShooting";
@@ -735,7 +742,7 @@ namespace SceneTest
 
             AudioManager.LoadSound("Tank", "SceneTanksGame/Audio", "tank_engine.wav");
             AudioManager.LoadSound("TankDestroyed", "SceneTanksGame/Audio", "explosion_vehicle_small_close_01.wav");
-            AudioManager.LoadSound("TankShooting", "SceneTanksGame/Audio", "machinegun-shooting.wav");
+            AudioManager.LoadSound("TankShooting", "SceneTanksGame/Audio", "cannon-shooting.wav");
             AudioManager.LoadSound(impactEffects[0], "SceneTanksGame/Audio", "metal_grate_large_01.wav");
             AudioManager.LoadSound(impactEffects[1], "SceneTanksGame/Audio", "metal_grate_large_02.wav");
             AudioManager.LoadSound(impactEffects[2], "SceneTanksGame/Audio", "metal_grate_large_03.wav");
@@ -753,10 +760,10 @@ namespace SceneTest
                     DestroyWhenFinished = false,
                     IsLooped = true,
                     UseAudio3D = true,
-                    EmitterRadius = 150,
+                    EmitterRadius = nearRadius,
                     UseReverb = true,
-                    ReverbPreset = ReverbPresets.Forest,
-                    Volume = 1f,
+                    ReverbPreset = preset,
+                    Volume = 0.5f,
                 });
 
             AudioManager.AddEffectParams(
@@ -766,9 +773,9 @@ namespace SceneTest
                     SoundName = "TankDestroyed",
                     IsLooped = false,
                     UseAudio3D = true,
-                    EmitterRadius = 250,
+                    EmitterRadius = nearRadius,
                     UseReverb = true,
-                    ReverbPreset = ReverbPresets.Forest,
+                    ReverbPreset = preset,
                     Volume = 1f,
                 });
 
@@ -779,9 +786,9 @@ namespace SceneTest
                     SoundName = "TankShooting",
                     IsLooped = false,
                     UseAudio3D = true,
-                    EmitterRadius = 250,
+                    EmitterRadius = nearRadius,
                     UseReverb = true,
-                    ReverbPreset = ReverbPresets.Forest,
+                    ReverbPreset = preset,
                     Volume = 1f,
                 });
 
@@ -792,9 +799,9 @@ namespace SceneTest
                     SoundName = impactEffects[0],
                     IsLooped = false,
                     UseAudio3D = true,
-                    EmitterRadius = 250,
+                    EmitterRadius = nearRadius,
                     UseReverb = true,
-                    ReverbPreset = ReverbPresets.Forest,
+                    ReverbPreset = preset,
                     Volume = 1f,
                 });
             AudioManager.AddEffectParams(
@@ -804,9 +811,9 @@ namespace SceneTest
                     SoundName = impactEffects[1],
                     IsLooped = false,
                     UseAudio3D = true,
-                    EmitterRadius = 250,
+                    EmitterRadius = nearRadius,
                     UseReverb = true,
-                    ReverbPreset = ReverbPresets.Forest,
+                    ReverbPreset = preset,
                     Volume = 1f,
                 });
             AudioManager.AddEffectParams(
@@ -816,9 +823,9 @@ namespace SceneTest
                     SoundName = impactEffects[2],
                     IsLooped = false,
                     UseAudio3D = true,
-                    EmitterRadius = 250,
+                    EmitterRadius = nearRadius,
                     UseReverb = true,
-                    ReverbPreset = ReverbPresets.Forest,
+                    ReverbPreset = preset,
                     Volume = 1f,
                 });
             AudioManager.AddEffectParams(
@@ -828,9 +835,9 @@ namespace SceneTest
                     SoundName = impactEffects[3],
                     IsLooped = false,
                     UseAudio3D = true,
-                    EmitterRadius = 250,
+                    EmitterRadius = nearRadius,
                     UseReverb = true,
-                    ReverbPreset = ReverbPresets.Forest,
+                    ReverbPreset = preset,
                     Volume = 1f,
                 });
 
@@ -841,9 +848,9 @@ namespace SceneTest
                     SoundName = damageEffects[0],
                     IsLooped = false,
                     UseAudio3D = true,
-                    EmitterRadius = 250,
+                    EmitterRadius = nearRadius,
                     UseReverb = true,
-                    ReverbPreset = ReverbPresets.Forest,
+                    ReverbPreset = preset,
                     Volume = 1f,
                 });
             AudioManager.AddEffectParams(
@@ -853,9 +860,9 @@ namespace SceneTest
                     SoundName = damageEffects[1],
                     IsLooped = false,
                     UseAudio3D = true,
-                    EmitterRadius = 250,
+                    EmitterRadius = nearRadius,
                     UseReverb = true,
-                    ReverbPreset = ReverbPresets.Forest,
+                    ReverbPreset = preset,
                     Volume = 1f,
                 });
             AudioManager.AddEffectParams(
@@ -865,9 +872,9 @@ namespace SceneTest
                     SoundName = damageEffects[2],
                     IsLooped = false,
                     UseAudio3D = true,
-                    EmitterRadius = 250,
+                    EmitterRadius = nearRadius,
                     UseReverb = true,
-                    ReverbPreset = ReverbPresets.Forest,
+                    ReverbPreset = preset,
                     Volume = 1f,
                 });
             AudioManager.AddEffectParams(
@@ -877,9 +884,9 @@ namespace SceneTest
                     SoundName = damageEffects[3],
                     IsLooped = false,
                     UseAudio3D = true,
-                    EmitterRadius = 250,
+                    EmitterRadius = nearRadius,
                     UseReverb = true,
-                    ReverbPreset = ReverbPresets.Forest,
+                    ReverbPreset = preset,
                     Volume = 1f,
                 });
 
@@ -1129,6 +1136,7 @@ You will lost all the game progress.",
             {
                 pbFire.ProgressValue += gameTime.ElapsedSeconds * 0.5f;
                 pbFire.ProgressValue %= 1f;
+                pbFire.ProgressColor = pbFire.ProgressValue < 0.75f ? Color.Yellow : Color4.Lerp(Color.Yellow, Color.Red, (pbFire.ProgressValue - 0.75f) / 0.25f);
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.Space))
@@ -1366,6 +1374,8 @@ You will lost all the game progress.",
             shot.Configure(this.Game.GameTime, shotDirection, shotForce * 200, windDirection, currentWindVelocity);
 
             shooting = true;
+
+            PlayEffectShooting(Shooter);
         }
         private void IntegrateShot(GameTime gameTime)
         {
@@ -1412,7 +1422,7 @@ You will lost all the game progress.",
 
             if (impact)
             {
-                int res = Helper.RandomGenerator.Next(10, 500);
+                int res = Helper.RandomGenerator.Next(10, 50);
 
                 ShooterStatus.Points += res * 100;
                 TargetStatus.CurrentLife = MathUtil.Clamp(TargetStatus.CurrentLife - res, 0, TargetStatus.MaxLife);
@@ -1613,6 +1623,10 @@ You will lost all the game progress.",
                     tankMoveEffectInstance = null;
                 });
             }
+        }
+        private void PlayEffectShooting(ITransformable3D emitter)
+        {
+            AudioManager.CreateEffectInstance(tankShootingEffect, emitter, this.Camera)?.Play();
         }
         private void PlayEffectImpact(ITransformable3D emitter)
         {

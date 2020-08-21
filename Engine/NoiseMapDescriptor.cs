@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 
 namespace Engine
 {
@@ -39,5 +40,20 @@ namespace Engine
         /// Position offset
         /// </summary>
         public Vector2 Offset { get; set; } = Vector2.One;
+
+        /// <summary>
+        /// Validates the noise map parameters
+        /// </summary>
+        public void Validate()
+        {
+            MapWidth = Math.Max(1, MapWidth);
+            MapHeight = Math.Max(1, MapHeight);
+            Scale = Math.Max(0.0001f, Scale);
+            Octaves = Math.Max(1, Octaves);
+            Persistance = MathUtil.Clamp(Persistance, 0, 1);
+            Lacunarity = Math.Max(1, Lacunarity);
+            Seed = Math.Max(0, Seed);
+            Offset = new Vector2(Math.Max(1, Offset.X), Math.Max(1, Offset.Y));
+        }
     }
 }
