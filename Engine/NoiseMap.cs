@@ -59,8 +59,8 @@ namespace Engine
 
                     for (int i = 0; i < octaves; i++)
                     {
-                        float sampleX = x * fX / scale * frequency + octaveOffsets[i].X;
-                        float sampleY = y * fY / scale * frequency + octaveOffsets[i].Y;
+                        float sampleX = (x * fX + octaveOffsets[i].X) / scale * frequency;
+                        float sampleY = (y * fY + octaveOffsets[i].Y) / scale * frequency;
 
                         float perlinValue = Perlin.Noise(sampleX, sampleY) * 2f - 1f; //-1 to 1
                         noiseHeight += perlinValue * amplitude;
