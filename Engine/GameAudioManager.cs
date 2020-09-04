@@ -113,7 +113,11 @@ namespace Engine
         {
             if (disposing)
             {
-                effectInstances.ForEach(i => i.Effect.Dispose());
+                effectInstances.ForEach(i =>
+                {
+                    i.Effect.Stop(true);
+                    i.Effect.Dispose();
+                });
                 effectInstances.Clear();
 
                 soundList.Values.ToList().ForEach(a => a.Dispose());
@@ -139,8 +143,12 @@ namespace Engine
                 effectInstances.RemoveAll(i => i.Effect.DueToDispose);
                 Task.Run(() =>
                 {
-                    toDispose.ToList().ForEach(i => i.Effect.Dispose());
-                }).ConfigureAwait(false);
+                    toDispose.ToList().ForEach(i =>
+                    {
+                        i.Effect.Stop(true);
+                        i.Effect.Dispose();
+                    });
+                });
             }
 
             var toUpdate = effectInstances

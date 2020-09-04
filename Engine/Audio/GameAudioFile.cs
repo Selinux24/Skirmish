@@ -8,7 +8,7 @@ using System.IO;
 
 namespace Engine.Audio
 {
-    class GameAudioFile : IAudioFile, IDisposable
+    class GameAudioFile : IAudioFile
     {
         private const int DefaultBufferCount = 3;
         private const int DefaulBuffertSize = 32 * 1024; // default size 32Kb
@@ -135,7 +135,7 @@ namespace Engine.Audio
                 return false;
             }
 
-            Console.WriteLine($"Sample: {currentSample++}");
+            Logger.WriteDebug($"Sample: {currentSample++}");
 
             var bufferPointer = sampleIterator.Current;
 

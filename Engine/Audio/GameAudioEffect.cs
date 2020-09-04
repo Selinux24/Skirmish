@@ -1,8 +1,6 @@
 ﻿using SharpDX;
-using SharpDX.Multimedia;
 using SharpDX.X3DAudio;
 using SharpDX.XAudio2;
-using SharpDX.XAudio2.Fx;
 using System;
 using System.Diagnostics;
 using System.Linq;
@@ -14,12 +12,12 @@ namespace Engine.Audio
     /// <summary>
     /// Game audio effect
     /// </summary>
-    class GameAudioEffect : IAudioEffect, IDisposable
+    class GameAudioEffect : IAudioEffect
     {
         private const int WaitPrecision = 1;
 
         private readonly GameAudio gameAudio;
-        private readonly IAudioFile voice;
+        private readonly IAudioFile audioFile;
 
         private readonly SourceVoice sourceVoice;
         private readonly int voiceInputChannels;
@@ -41,7 +39,6 @@ namespace Engine.Audio
         private readonly AutoResetEvent bufferEndEvent = new AutoResetEvent(false);
         private TimeSpan playPosition;
         private TimeSpan nextPlayPosition;
-        private TimeSpan playPositionStart;
         private int playCounter;
         private bool disposed = false;
 
@@ -137,7 +134,7 @@ namespace Engine.Audio
         /// <value>The duration.</value>
         public TimeSpan Duration
         {
-            get { return voice.Duration; }
+            get { return audioFile.Duration; }
         }
         /// <summary>
         /// Gets the state of this instance.
@@ -159,7 +156,6 @@ namespace Engine.Audio
             {
                 playPosition = value;
                 nextPlayPosition = value;
-                playPositionStart = value;
                 clock.Restart();
                 playCounter++;
             }
@@ -189,11 +185,11 @@ namespace Engine.Audio
             gameAudio = audioState;
 
             // Read in the file
-            voice = audioFile;// new GameAudioFile(fileName);
-            voiceInputChannels = voice.WaveFormat.Channels;
+            this.audioFile = audioFile;
+            voiceInputChannels = this.audioFile.WaveFormat.Channels;
 
             // Create the source voice
-            sourceVoice = audioState.CreateSourceVoice(voice.WaveFormat, true);
+            sourceVoice = audioState.CreateSourceVoice(this.audioFile.WaveFormat, true);
             sourceVoice.BufferEnd += SourceVoiceBufferEnd;
 
             // LPF direct-path
@@ -253,7 +249,7 @@ namespace Engine.Audio
             {
                 disposed = true;
 
-                Console.WriteLine("DisposePlayer Begin");
+                Logger.WriteDebug("DisposePlayer Begin");
 
                 submixVoice?.DestroyVoice();
                 submixVoice?.Dispose();
@@ -262,7 +258,7 @@ namespace Engine.Audio
                 sourceVoice?.DestroyVoice();
                 sourceVoice?.Dispose();
 
-                Console.WriteLine("DisposePlayer End");
+                Logger.WriteDebug("DisposePlayer End");
             }
         }
 
@@ -290,7 +286,7 @@ namespace Engine.Audio
         /// Stops the playback of the current instance indicating whether the stop should occur immediately of at the end of the sound.
         /// </summary>
         /// <param name="immediate">A value indicating whether the playback should be stopped immediately or at the end of the sound.</param>
-        public void Stop(bool inmediate = true)
+        public void Stop(bool immediate = true)
         {
             if (State != AudioState.Stopped)
             {
@@ -298,7 +294,6 @@ namespace Engine.Audio
 
                 playPosition = TimeSpan.Zero;
                 nextPlayPosition = TimeSpan.Zero;
-                playPositionStart = TimeSpan.Zero;
                 playCounter++;
 
                 clock.Stop();
@@ -354,47 +349,54 @@ namespace Engine.Audio
 
                 DueToDispose = false;
 
-                while (true)
-                {
-                    if (disposed)
-                    {
-                        break;
-                    }
-
-                    // Check that this instanced is not disposed
-                    while (true)
-                    {
-                        if (playEvent.WaitOne(WaitPrecision))
-                        {
-                            Console.WriteLine("playEvent.WaitOne - Waiting for play");
-                            break;
-                        }
-                    }
-
-                    // Playing all the samples
-                    PlayAllSamples(out bool endOfSong);
-
-                    // If the song is not looping (by default), then stop the audio player.
-                    if (State == AudioState.Playing && endOfSong)
-                    {
-                        if (!IsLooped)
-                        {
-                            AudioEnd?.Invoke(this, new GameAudioEventArgs());
-                            Stop();
-                            DueToDispose = true;
-                        }
-                        else
-                        {
-                            LoopEnd?.Invoke(this, new GameAudioEventArgs());
-                        }
-                    }
-                }
+                PlaySound();
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Logger.WriteError(ex.Message);
 
                 throw;
+            }
+        }
+        /// <summary>
+        /// Plays de sound
+        /// </summary>
+        private void PlaySound()
+        {
+            while (true)
+            {
+                // Check that this instanced is not disposed
+                if (disposed)
+                {
+                    break;
+                }
+
+                while (true)
+                {
+                    if (playEvent.WaitOne(WaitPrecision))
+                    {
+                        Logger.WriteDebug("playEvent.WaitOne - Waiting for play");
+                        break;
+                    }
+                }
+
+                // Playing all the samples
+                PlayAllSamples(out bool endOfSong);
+
+                // If the song is not looping (by default), then stop the audio player.
+                if (State == AudioState.Playing && endOfSong)
+                {
+                    if (!IsLooped)
+                    {
+                        AudioEnd?.Invoke(this, new GameAudioEventArgs());
+                        Stop();
+                        DueToDispose = true;
+                    }
+                    else
+                    {
+                        LoopEnd?.Invoke(this, new GameAudioEventArgs());
+                    }
+                }
             }
         }
         /// <summary>
@@ -403,96 +405,127 @@ namespace Engine.Audio
         /// <param name="endOfSound">End of sound flag</param>
         private void PlayAllSamples(out bool endOfSound)
         {
-            endOfSound = false;
-
             clock.Restart();
-            playPositionStart = nextPlayPosition;
+            var playPositionStart = nextPlayPosition;
             playPosition = playPositionStart;
             int currentPlayCounter = playCounter;
 
             // Get the decoded samples from the specified starting position.
-            voice.SetPosition(playPositionStart);
+            audioFile.SetPosition(playPositionStart);
 
             bool isFirstTime = true;
 
             while (true)
             {
-                if (disposed)
+                if (!Sample(isFirstTime, playPositionStart, currentPlayCounter, out endOfSound))
                 {
                     break;
                 }
 
-                while (State != AudioState.Stopped)
-                {
-                    // While the player is not stopped, wait for the play event
-                    if (playEvent.WaitOne(WaitPrecision))
-                    {
-                        Console.WriteLine("playEvent.WaitOne - Waiting for play");
-                        break;
-                    }
-                }
-
-                // If the player is stopped, then break of this loop
-                if (State == AudioState.Stopped)
-                {
-                    nextPlayPosition = TimeSpan.Zero;
-                    break;
-                }
-
-                // If there was a change in the play position, restart the sample iterator.
-                if (currentPlayCounter != playCounter)
-                {
-                    break;
-                }
-
-                // If the player is not stopped and the buffer queue is full, wait for the end of a buffer.
-                while (State != AudioState.Stopped && !disposed && sourceVoice.State.BuffersQueued == voice.BufferCount)
-                {
-                    bufferEndEvent.WaitOne(WaitPrecision);
-                }
-                Console.WriteLine("bufferEndEvent.WaitOne - Load new buffer");
-
-                // If the player is stopped or disposed, then break of this loop
-                if (State == AudioState.Stopped)
-                {
-                    nextPlayPosition = TimeSpan.Zero;
-                    break;
-                }
-
-                // If there was a change in the play position, restart the sample iterator.
-                if (currentPlayCounter != playCounter)
-                {
-                    break;
-                }
-
-                // Retrieve a pointer to the sample data
-                if (!voice.GetNextAudioBuffer(out var audioBuffer))
-                {
-                    endOfSound = true;
-                    break;
-                }
-
-                // If this is a first play, restart the clock and notify play method.
-                if (isFirstTime)
-                {
-                    clock.Restart();
-                    isFirstTime = false;
-
-                    Console.WriteLine("waitForPlayToOutput.Set (First time)");
-                    waitForPlayToOutput.Set();
-                }
-
-                // Update the current position used for sync
-                playPosition = playPositionStart + clock.Elapsed;
-
-                if (disposed)
-                {
-                    break;
-                }
-
-                // Submit the audio buffer to xaudio2
-                sourceVoice.SubmitSourceBuffer(audioBuffer, null);
+                isFirstTime = false;
             }
+        }
+        /// <summary>
+        /// Plays a sample
+        /// </summary>
+        /// <param name="isFirstTime">Is first time</param>
+        /// <param name="currentPlayCounter">Current play counter</param>
+        /// <param name="endOfSound">End of sound flag</param>
+        /// <returns>Returns true if there are more samples to play. Returns false otherwise.</returns>
+        private bool Sample(bool isFirstTime, TimeSpan playPositionStart, int currentPlayCounter, out bool endOfSound)
+        {
+            endOfSound = false;
+
+            if (disposed)
+            {
+                return false;
+            }
+
+            WaitForPlay();
+
+            // If the player is stopped, then break of this loop
+            if (State == AudioState.Stopped)
+            {
+                nextPlayPosition = TimeSpan.Zero;
+                return false;
+            }
+
+            // If there was a change in the play position, restart the sample iterator.
+            if (currentPlayCounter != playCounter)
+            {
+                return false;
+            }
+
+            // If the player is not stopped and the buffer queue is full, wait for the end of a buffer.
+            WaitBufferEnd();
+
+            // If the player is stopped or disposed, then break of this loop
+            if (State == AudioState.Stopped)
+            {
+                nextPlayPosition = TimeSpan.Zero;
+                return false;
+            }
+
+            // If there was a change in the play position, restart the sample iterator.
+            if (currentPlayCounter != playCounter)
+            {
+                return false;
+            }
+
+            // Retrieve a pointer to the sample data
+            if (!audioFile.GetNextAudioBuffer(out var audioBuffer))
+            {
+                endOfSound = true;
+                return false;
+            }
+
+            // If this is a first play, restart the clock and notify play method.
+            if (isFirstTime)
+            {
+                clock.Restart();
+
+                Logger.WriteDebug("waitForPlayToOutput.Set (First time)");
+                waitForPlayToOutput.Set();
+            }
+
+            // Update the current position used for sync
+            playPosition = playPositionStart + clock.Elapsed;
+
+            if (disposed)
+            {
+                return false;
+            }
+
+            // Submit the audio buffer to xaudio2
+            sourceVoice.SubmitSourceBuffer(audioBuffer, null);
+
+            return true;
+        }
+        /// <summary>
+        /// Waits for the play event
+        /// </summary>
+        private void WaitForPlay()
+        {
+            while (State != AudioState.Stopped)
+            {
+                // While the player is not stopped, wait for the play event
+                if (playEvent.WaitOne(WaitPrecision))
+                {
+                    Logger.WriteDebug("playEvent.WaitOne - Waiting for play");
+                    break;
+                }
+            }
+        }
+        /// <summary>
+        /// Waits for the buffer end event
+        /// </summary>
+        private void WaitBufferEnd()
+        {
+            while (State != AudioState.Stopped && !disposed && sourceVoice.State.BuffersQueued == audioFile.BufferCount)
+            {
+                bufferEndEvent.WaitOne(WaitPrecision);
+            }
+            Logger.WriteDebug("bufferEndEvent.WaitOne - Load new buffer");
         }
 
         /// <summary>
@@ -566,7 +599,7 @@ namespace Engine.Audio
             emitter.OrientTop = Emitter.Up;
             emitter.Velocity = Emitter.Velocity;
 
-            emitter.ChannelCount = voice.WaveFormat.Channels;
+            emitter.ChannelCount = audioFile.WaveFormat.Channels;
             emitter.ChannelRadius = 1;
             if (emitter.ChannelCount > 1)
             {
@@ -647,7 +680,7 @@ namespace Engine.Audio
             if (dspSettings == null)
             {
                 dspSettings = new DspSettings(
-                    voice.WaveFormat.Channels,
+                    audioFile.WaveFormat.Channels,
                     gameAudio.InputChannelCount);
             }
 
@@ -801,9 +834,9 @@ namespace Engine.Audio
                 return;
             }
 
-            var voice = reverbPreset.HasValue ? submixVoice : (Voice)gameAudio.MasteringVoice;
+            var activeVoice = reverbPreset.HasValue ? submixVoice : (Voice)gameAudio.MasteringVoice;
 
-            int destinationChannels = voice.VoiceDetails.InputChannelCount;
+            int destinationChannels = activeVoice.VoiceDetails.InputChannelCount;
             int sourceChannels = sourceVoice.VoiceDetails.InputChannelCount;
 
             panOutputMatrix = new float[destinationChannels * sourceChannels];
@@ -879,7 +912,7 @@ namespace Engine.Audio
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"{voice.FileName}";
+            return $"{audioFile.FileName}";
         }
     }
 }
