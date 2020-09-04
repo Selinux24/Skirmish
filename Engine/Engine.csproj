@@ -175,6 +175,7 @@
     <Compile Include="Audio\GameAudioEffect.cs" />
     <Compile Include="Audio\GameAudioPresets.cs" />
     <Compile Include="Audio\GameAudioAgent.cs" />
+    <Compile Include="Audio\IAudioEffect.cs" />
     <Compile Include="Audio\IGameAudioAgent.cs" />
     <Compile Include="Audio\IGameAudioEmitter.cs" />
     <Compile Include="Audio\IGameAudioListener.cs" />

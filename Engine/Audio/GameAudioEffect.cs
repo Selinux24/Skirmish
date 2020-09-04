@@ -10,7 +10,7 @@ namespace Engine.Audio
     /// <summary>
     /// Effect instance
     /// </summary>
-    public sealed class GameAudioEffect : IDisposable
+    public sealed class GameAudioEffect : IAudioEffect, IDisposable
     {
         private readonly GameAudio gameAudio;
         private readonly GameAudioSound gameSound;
@@ -125,11 +125,11 @@ namespace Engine.Audio
         /// <summary>
         /// Emitter
         /// </summary>
-        public IGameAudioEmitter Emitter { get; private set; }
+        public IGameAudioEmitter Emitter { get; set; }
         /// <summary>
         /// Listener
         /// </summary>
-        public IGameAudioListener Listener { get; private set; }
+        public IGameAudioListener Listener { get; set; }
         /// <summary>
         /// The instance is due to dispose
         /// </summary>
@@ -319,7 +319,7 @@ namespace Engine.Audio
         /// </summary>
         /// <param name="listenerAgent">Listener</param>
         /// <param name="emitterAgent">Emitter</param>
-        internal void Apply3D()
+        public void Apply3D()
         {
             UpdateListener(Listener);
             UpdateEmitter(Emitter);
@@ -517,14 +517,6 @@ namespace Engine.Audio
         }
 
         /// <summary>
-        /// Pauses the playback of the current instance.
-        /// </summary>
-        public void Pause()
-        {
-            sourceVoice.Stop();
-            paused = true;
-        }
-        /// <summary>
         /// Plays the current instance. If it is already playing - the call is ignored.
         /// </summary>
         public void Play()
@@ -560,14 +552,30 @@ namespace Engine.Audio
             paused = false;
         }
         /// <summary>
-        /// Resets the current instance.
+        /// Stops the playback of the current instance indicating whether the stop should occur immediately of at the end of the sound.
         /// </summary>
-        public void Reset()
+        /// <param name="immediate">A value indicating whether the playback should be stopped immediately or at the end of the sound.</param>
+        public void Stop(bool immediate = true)
         {
-            Volume = 1.0f;
-            Pitch = 0.0f;
-            Pan = 0.0f;
-            IsLooped = false;
+            if (immediate && IsLooped)
+            {
+                sourceVoice.ExitLoop();
+            }
+
+            sourceVoice.Stop(0);
+            sourceVoice.FlushSourceBuffers();
+
+            paused = false;
+
+            FireAudioEnd();
+        }
+        /// <summary>
+        /// Pauses the playback of the current instance.
+        /// </summary>
+        public void Pause()
+        {
+            sourceVoice.Stop();
+            paused = true;
         }
         /// <summary>
         /// Resumes playback of the current instance.
@@ -587,29 +595,14 @@ namespace Engine.Audio
             paused = false;
         }
         /// <summary>
-        /// Stops the playback of the current instance.
+        /// Resets the current instance.
         /// </summary>
-        public void Stop()
+        public void Reset()
         {
-            sourceVoice.Stop(0);
-            sourceVoice.FlushSourceBuffers();
-
-            paused = false;
-
-            FireAudioEnd();
-        }
-        /// <summary>
-        /// Stops the playback of the current instance indicating whether the stop should occur immediately of at the end of the sound.
-        /// </summary>
-        /// <param name="immediate">A value indicating whether the playback should be stopped immediately or at the end of the sound.</param>
-        public void Stop(bool immediate)
-        {
-            if (immediate && IsLooped)
-            {
-                sourceVoice.ExitLoop();
-            }
-
-            Stop();
+            Volume = 1.0f;
+            Pitch = 0.0f;
+            Pan = 0.0f;
+            IsLooped = false;
         }
         /// <summary>
         /// Gets the current audio buffer.
@@ -617,12 +610,7 @@ namespace Engine.Audio
         /// <returns>Returns the current audio buffer</returns>
         private AudioBuffer GetCurrentAudioBuffer()
         {
-            if (gameSound.AudioBuffer == null)
-            {
-                return null;
-            }
-
-            return this.IsLooped ? gameSound.LoopedAudioBuffer : gameSound.AudioBuffer;
+            return gameSound?.GetAudioBuffer(this.IsLooped);
         }
 
         /// <summary>
