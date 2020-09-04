@@ -48,15 +48,44 @@ namespace Engine.Audio
         /// Converts from presets enumeration to ReverbParameters type
         /// </summary>
         /// <param name="preset">Preset value</param>
+        /// <param name="sampleRate">Sample rate</param>
         /// <returns>Returns the ReverbParameters type</returns>
-        public static ReverbParameters Convert(ReverbPresets preset)
+        public static ReverbParameters Convert(ReverbPresets preset, int sampleRate)
         {
-            var reverbParams = (ReverbParameters)reverbPresetsList[(int)preset];
+            ReverbParameters reverbSettings = (ReverbParameters)reverbPresetsList[(int)preset];
 
-            //Why? I don't know - this parameter is refered to 48Khz sampling rate. Scale it? Otherwise, the effect mutes all.
-            reverbParams.RoomFilterFreq = 20;
+            // All parameters related to sampling rate or time are relative to a 48kHz voice and must be scaled for use with other sampling rates.
+            var timeScale = sampleRate / 48000f;
 
-            return reverbParams;
+            var result = new ReverbParameters
+            {
+                ReflectionsGain = reverbSettings.ReflectionsGain,
+                ReverbGain = reverbSettings.ReverbGain,
+                DecayTime = reverbSettings.DecayTime,
+                ReflectionsDelay = (int)(reverbSettings.ReflectionsDelay * timeScale),
+                ReverbDelay = (byte)(reverbSettings.ReverbDelay * timeScale),
+                RearDelay = (byte)(reverbSettings.RearDelay * timeScale),
+                SideDelay = (byte)(reverbSettings.SideDelay * timeScale),
+                RoomSize = reverbSettings.RoomSize,
+                Density = reverbSettings.Density,
+                LowEQGain = reverbSettings.LowEQGain,
+                LowEQCutoff = reverbSettings.LowEQCutoff,
+                HighEQGain = reverbSettings.HighEQGain,
+                HighEQCutoff = reverbSettings.HighEQCutoff,
+                PositionLeft = reverbSettings.PositionLeft,
+                PositionRight = reverbSettings.PositionRight,
+                PositionMatrixLeft = reverbSettings.PositionMatrixLeft,
+                PositionMatrixRight = reverbSettings.PositionMatrixRight,
+                EarlyDiffusion = reverbSettings.EarlyDiffusion,
+                LateDiffusion = reverbSettings.LateDiffusion,
+                RoomFilterMain = reverbSettings.RoomFilterMain,
+                RoomFilterFreq = reverbSettings.RoomFilterFreq * timeScale / 100f,
+                RoomFilterHF = reverbSettings.RoomFilterHF,
+                WetDryMix = reverbSettings.WetDryMix,
+                DisableLateField = reverbSettings.DisableLateField,
+            };
+
+            return result;
         }
     }
 }

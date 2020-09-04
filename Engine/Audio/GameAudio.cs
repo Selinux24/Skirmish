@@ -213,10 +213,18 @@ namespace Engine.Audio
         /// Creates a source voice
         /// </summary>
         /// <param name="waveFormat">Wave format</param>
+        /// <param name="useFilter">Use filters</param>
         /// <returns>Returns the souce voice</returns>
-        internal SourceVoice CreateSourceVoice(WaveFormat waveFormat)
+        internal SourceVoice CreateSourceVoice(WaveFormat waveFormat, bool useFilter = false)
         {
-            return new SourceVoice(device, waveFormat);
+            if (useFilter)
+            {
+                return new SourceVoice(device, waveFormat, VoiceFlags.UseFilter, XAudio2.MaximumFilterFrequency);
+            }
+            else
+            {
+                return new SourceVoice(device, waveFormat);
+            }
         }
         /// <summary>
         /// Creates a reverb effect
@@ -226,6 +234,19 @@ namespace Engine.Audio
         internal Reverb CreateReverb(bool isUsingDebuging = false)
         {
             return new Reverb(device, isUsingDebuging);
+        }
+        /// <summary>
+        /// Creates a submix voice
+        /// </summary>
+        /// <param name="inputChannelCount">Input channels</param>
+        /// <param name="inputSampleRate">Input sample rate</param>
+        /// <returns>Returns the submix voice</returns>
+        internal SubmixVoice CreatesSubmixVoice(int inputChannelCount, int inputSampleRate)
+        {
+            return new SubmixVoice(
+                device,
+                inputChannelCount,
+                inputSampleRate);
         }
         /// <summary>
         /// Creates a submix voice

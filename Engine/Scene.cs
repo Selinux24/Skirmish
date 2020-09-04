@@ -435,7 +435,7 @@ namespace Engine
                 // Camera!
                 this.Camera?.Update(gameTime);
 
-                this.AudioManager?.Update();
+                this.AudioManager?.Update(gameTime);
 
                 this.NavigationGraph?.Update(gameTime);
 

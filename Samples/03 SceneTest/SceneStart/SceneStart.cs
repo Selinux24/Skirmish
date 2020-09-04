@@ -29,7 +29,7 @@ namespace SceneTest.SceneStart
         private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.CornflowerBlue, 1.5f);
         private readonly Color exitButtonColor = Color.AdjustSaturation(Color.Orange, 1.5f);
 
-        private GameAudioEffect currentMusic = null;
+        private IAudioEffect currentMusic = null;
 
         private bool sceneReady = false;
 

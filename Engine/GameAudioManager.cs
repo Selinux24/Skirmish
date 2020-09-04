@@ -27,7 +27,7 @@ namespace Engine
             /// <summary>
             /// Effect instance
             /// </summary>
-            public GameAudioEffect Effect { get; set; }
+            public IAudioEffect Effect { get; set; }
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace Engine
         /// <summary>
         /// Sound dictionary
         /// </summary>
-        private readonly Dictionary<string, GameAudioSound> soundList = new Dictionary<string, GameAudioSound>();
+        private readonly Dictionary<string, IAudioFile> soundList = new Dictionary<string, IAudioFile>();
         /// <summary>
         /// Effect parameters library
         /// </summary>
@@ -126,7 +126,8 @@ namespace Engine
         /// <summary>
         /// Updates the internal state
         /// </summary>
-        public void Update()
+        /// <param name="gameTime">Game time</param>
+        public void Update(GameTime gameTime)
         {
             //Extract a remove the effects due to dispose
             var toDispose = effectInstances
@@ -154,7 +155,7 @@ namespace Engine
 
             for (int i = frameToUpdateAudio; i < effectCount; i += 2)
             {
-                toUpdate[i].Effect.Apply3D();
+                toUpdate[i].Effect.Apply3D(gameTime.ElapsedSeconds);
             }
 
             frameToUpdateAudio++;
@@ -178,7 +179,7 @@ namespace Engine
                 throw new EngineException($"The specified file not exists: [{contentFolder}][{fileName}]");
             }
 
-            var sound = GameAudioSound.LoadFromFile(path);
+            var sound = new GameAudioFile(path);
 
             if (soundList.ContainsKey(soundName))
             {
@@ -216,7 +217,7 @@ namespace Engine
         /// </summary>
         /// <param name="effectName">Effect name</param>
         /// <returns>Returns the new created instance. Returns null if the effect name not exists, o if the effect instance is currently playing</returns>
-        public GameAudioEffect CreateEffectInstance(string effectName)
+        public IAudioEffect CreateEffectInstance(string effectName)
         {
             if (!effectParamsLib.ContainsKey(effectName))
             {
@@ -256,7 +257,7 @@ namespace Engine
         /// <param name="emitter">Emitter fixed position</param>
         /// <param name="listener">Listener manipulator object</param>
         /// <returns>Returns the new created instance. Returns null if the effect name not exists, o if the effect instance is currently playing</returns>
-        public GameAudioEffect CreateEffectInstance(string effectName, Vector3 emitter, IManipulator listener)
+        public IAudioEffect CreateEffectInstance(string effectName, Vector3 emitter, IManipulator listener)
         {
             Manipulator3D emitterManipulator = new Manipulator3D();
             emitterManipulator.SetPosition(emitter);
@@ -270,7 +271,7 @@ namespace Engine
         /// <param name="emitter">Emitter manipulator object</param>
         /// <param name="listener">Listener manipulator object</param>
         /// <returns>Returns the new created instance. Returns null if the effect name not exists, o if the effect instance is currently playing</returns>
-        public GameAudioEffect CreateEffectInstance(string effectName, IManipulator emitter, IManipulator listener)
+        public IAudioEffect CreateEffectInstance(string effectName, IManipulator emitter, IManipulator listener)
         {
             var instance = CreateEffectInstance(effectName);
 
@@ -286,7 +287,7 @@ namespace Engine
         /// <param name="emitter">Emitter 3D transformable object</param>
         /// <param name="listener">Listener manipulator object</param>
         /// <returns>Returns the new created instance. Returns null if the effect name not exists, o if the effect instance is currently playing</returns>
-        public GameAudioEffect CreateEffectInstance(string effectName, ITransformable3D emitter, IManipulator listener)
+        public IAudioEffect CreateEffectInstance(string effectName, ITransformable3D emitter, IManipulator listener)
         {
             var instance = CreateEffectInstance(effectName);
 

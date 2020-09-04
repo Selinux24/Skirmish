@@ -26,7 +26,7 @@ namespace Collada
         private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.RosyBrown, 1.5f);
         private readonly Color exitButtonColor = Color.AdjustSaturation(Color.OrangeRed, 1.5f);
 
-        private GameAudioEffect currentMusic = null;
+        private IAudioEffect currentMusic = null;
         private readonly string[] musicList = new string[]
         {
             "Electro_1.wav",
@@ -285,11 +285,11 @@ namespace Collada
 
             if (this.Game.Input.KeyJustReleased(Keys.R))
             {
-                currentMusic.UseReverb = !currentMusic.UseReverb;
+                currentMusic.SetReverb(null);
             }
             if (this.Game.Input.KeyJustReleased(Keys.H))
             {
-                currentMusic.ReverbPreset = ReverbPresets.Forest;
+                currentMusic.SetReverb(ReverbPresets.Forest);
             }
 
             if (this.Game.Input.KeyPressed(Keys.Subtract))

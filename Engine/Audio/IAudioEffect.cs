@@ -5,7 +5,7 @@ namespace Engine.Audio
     /// <summary>
     /// Audio effect interface
     /// </summary>
-    public interface IAudioEffect
+    public interface IAudioEffect : IDisposable
     {
         /// <summary>
         /// Gets a value indicating whether this instance is looped.
@@ -42,19 +42,6 @@ namespace Engine.Audio
         /// Listener
         /// </summary>
         IGameAudioListener Listener { get; set; }
-
-        /// <summary>
-        /// Gets or sets whether the sub-mix voice uses a reverb effect or not
-        /// </summary>
-        bool UseReverb { get; set; }
-        /// <summary>
-        /// Gets or sets whether the reverb effect use filters or not
-        /// </summary>
-        bool UseReverbFilter { get; set; }
-        /// <summary>
-        /// Gets or sets the current reverb preset configuration
-        /// </summary>
-        ReverbPresets? ReverbPreset { get; set; }
 
         /// <summary>
         /// Gets the effect total duration
@@ -109,7 +96,17 @@ namespace Engine.Audio
         /// </summary>
         /// <param name="listenerAgent">Listener</param>
         /// <param name="emitterAgent">Emitter</param>
-        void Apply3D();
+        void Apply3D(float elapsedSeconds);
+
+        /// <summary>
+        /// Gets the reverb effect
+        /// </summary>
+        ReverbPresets? GetReverb();
+        /// <summary>
+        /// Set reverb to voice
+        /// </summary>
+        /// <param name="reverb">Reverb index</param>
+        bool SetReverb(ReverbPresets? reverb);
 
         /// <summary>
         /// Gets the output matrix configuration

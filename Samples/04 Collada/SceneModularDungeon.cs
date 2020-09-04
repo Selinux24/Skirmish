@@ -81,7 +81,7 @@ namespace Collada
 
         private string ratSoundMove = null;
         private string ratSoundTalk = null;
-        private GameAudioEffect ratSoundInstance = null;
+        private IAudioEffect ratSoundInstance = null;
 
         private bool userInterfaceInitialized = false;
         private bool gameAssetsInitialized = false;

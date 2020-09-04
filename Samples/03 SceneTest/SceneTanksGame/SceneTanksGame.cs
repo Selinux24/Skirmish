@@ -106,7 +106,7 @@ namespace SceneTest.SceneTanksGame
         private ParabolicShot shot;
 
         private string tankMoveEffect;
-        private GameAudioEffect tankMoveEffectInstance;
+        private IAudioEffect tankMoveEffectInstance;
         private string tankDestroyedEffect;
         private string tankShootingEffect;
         private string[] impactEffects;
