@@ -114,12 +114,12 @@ namespace Terrain.Rts
         private readonly Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
 
         private string heliEffect;
-        private GameAudioEffect heliEffectInstance;
+        private IAudioEffect heliEffectInstance;
         private string heliDestroyedEffect;
         private string tank1Effect;
         private string tank2Effect;
-        private GameAudioEffect tank1EffectInstance;
-        private GameAudioEffect tank2EffectInstance;
+        private IAudioEffect tank1EffectInstance;
+        private IAudioEffect tank2EffectInstance;
         private string tank1DestroyedEffect;
         private string tank2DestroyedEffect;
         private string tank1ShootingEffect;

@@ -75,7 +75,7 @@ namespace Skybox
 
         private int directionalLightCount = 0;
 
-        private GameAudioEffect fireAudioEffect;
+        private IAudioEffect fireAudioEffect;
 
         private bool gameReady = false;
 
