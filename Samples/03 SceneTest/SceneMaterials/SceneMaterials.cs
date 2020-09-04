@@ -5,7 +5,7 @@ using Engine.UI;
 using SharpDX;
 using System.Threading.Tasks;
 
-namespace SceneTest
+namespace SceneTest.SceneMaterials
 {
     public class SceneMaterials : Scene
     {
@@ -221,7 +221,7 @@ namespace SceneTest
         {
             if (this.Game.Input.KeyJustReleased(Keys.Escape))
             {
-                this.Game.SetScene<SceneStart>();
+                this.Game.SetScene<SceneStart.SceneStart>();
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.R))

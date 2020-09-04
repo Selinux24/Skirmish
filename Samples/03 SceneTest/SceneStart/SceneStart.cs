@@ -1,11 +1,12 @@
 ﻿using Engine;
+using Engine.Audio;
 using Engine.Tween;
 using Engine.UI;
 using SharpDX;
 using System;
 using System.Threading.Tasks;
 
-namespace SceneTest
+namespace SceneTest.SceneStart
 {
     class SceneStart : Scene
     {
@@ -27,6 +28,8 @@ namespace SceneTest
         private readonly string buttonFonts = "Verdana, Consolas";
         private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.CornflowerBlue, 1.5f);
         private readonly Color exitButtonColor = Color.AdjustSaturation(Color.Orange, 1.5f);
+
+        private GameAudioEffect currentMusic = null;
 
         private bool sceneReady = false;
 
@@ -121,6 +124,23 @@ namespace SceneTest
             this.exitButton = await this.AddComponentUIButton(exitButtonDesc, layerHUD);
 
             #endregion
+
+            #region Music
+
+            AudioManager.LoadSound("Music", "SceneStart", "anttisinstrumentals+icemanandangelinstrumental.mp3");
+            AudioManager.AddEffectParams(
+                "Music",
+                new GameAudioEffectParameters
+                {
+                    DestroyWhenFinished = false,
+                    SoundName = "Music",
+                    IsLooped = true,
+                    UseAudio3D = true,
+                });
+
+            currentMusic = AudioManager.CreateEffectInstance("Music");
+
+            #endregion
         }
         private void PrepareAssets(LoadResourcesResult res)
         {
@@ -128,6 +148,11 @@ namespace SceneTest
             {
                 res.ThrowExceptions();
             }
+
+            AudioManager.MasterVolume = 1f;
+            AudioManager.Start();
+
+            currentMusic?.Play();
 
             this.backGround.Manipulator.SetScale(1.5f, 1.25f, 1.5f);
 
@@ -209,31 +234,31 @@ namespace SceneTest
 
             if (sender == this.sceneMaterialsButton)
             {
-                this.Game.SetScene<SceneMaterials>();
+                this.Game.SetScene<SceneMaterials.SceneMaterials>();
             }
             else if (sender == this.sceneWaterButton)
             {
-                this.Game.SetScene<SceneWater>();
+                this.Game.SetScene<SceneWater.SceneWater>();
             }
             else if (sender == this.sceneStencilPassButton)
             {
-                this.Game.SetScene<SceneStencilPass>();
+                this.Game.SetScene<SceneStencilPass.SceneStencilPass>();
             }
             else if (sender == this.sceneLightsButton)
             {
-                this.Game.SetScene<SceneLights>();
+                this.Game.SetScene<SceneLights.SceneLights>();
             }
             else if (sender == this.sceneCascadedShadowsButton)
             {
-                this.Game.SetScene<SceneCascadedShadows>();
+                this.Game.SetScene<SceneCascadedShadows.SceneCascadedShadows>();
             }
             else if (sender == this.sceneTestButton)
             {
-                this.Game.SetScene<SceneTest>();
+                this.Game.SetScene<SceneTest.SceneTest>();
             }
             else if (sender == this.sceneTanksGameButton)
             {
-                this.Game.SetScene<SceneTanksGame>();
+                this.Game.SetScene<SceneTanksGame.SceneTanksGame>();
             }
         }
         private void SceneButtonMouseEnter(object sender, EventArgs e)
@@ -260,44 +285,6 @@ namespace SceneTest
             }
 
             this.Game.Exit();
-        }
-    }
-
-    static class UIControlExtensions
-    {
-        public static void Show(this UIControl ctrl, long milliseconds)
-        {
-            ctrl.TweenShow(milliseconds, ScaleFuncs.Linear);
-        }
-
-        public static void Hide(this UIControl ctrl, long milliseconds)
-        {
-            ctrl.TweenHide(milliseconds, ScaleFuncs.Linear);
-        }
-
-        public static void Roll(this UIControl ctrl, long milliseconds)
-        {
-            ctrl.TweenRotate(MathUtil.TwoPi, milliseconds, ScaleFuncs.Linear);
-            ctrl.TweenScale(1, 0.5f, milliseconds, ScaleFuncs.QuinticEaseOut);
-        }
-
-        public static void ShowRoll(this UIControl ctrl, long milliseconds)
-        {
-            ctrl.TweenScaleUp(milliseconds, ScaleFuncs.QuinticEaseOut);
-            ctrl.TweenShow(milliseconds / 4, ScaleFuncs.Linear);
-            ctrl.TweenRotate(MathUtil.TwoPi, milliseconds / 4, ScaleFuncs.Linear);
-        }
-
-        public static void HideRoll(this UIControl ctrl, long milliseconds)
-        {
-            ctrl.TweenScaleDown(milliseconds, ScaleFuncs.QuinticEaseOut);
-            ctrl.TweenHide(milliseconds / 4, ScaleFuncs.Linear);
-            ctrl.TweenRotate(-MathUtil.TwoPi, milliseconds / 4, ScaleFuncs.Linear);
-        }
-
-        public static void ScaleInScaleOut(this UIControl ctrl, float from, float to, long milliseconds)
-        {
-            ctrl.TweenScaleBounce(from, to, milliseconds, ScaleFuncs.Linear);
         }
     }
 }

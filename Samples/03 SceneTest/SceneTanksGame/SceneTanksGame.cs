@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SceneTest
+namespace SceneTest.SceneTanksGame
 {
     /// <summary>
     /// Tanks game scene
@@ -1062,7 +1062,7 @@ You will lost all the game progress.",
                         CloseDialog,
                         () =>
                         {
-                            this.Game.SetScene<SceneStart>();
+                            this.Game.SetScene<SceneStart.SceneStart>();
                         });
                 }
             }
@@ -1149,7 +1149,7 @@ You will lost all the game progress.",
         {
             if (this.Game.Input.KeyJustReleased(Keys.Space))
             {
-                this.Game.SetScene<SceneStart>();
+                this.Game.SetScene<SceneStart.SceneStart>();
             }
         }
         private void UpdateInputFree(GameTime gameTime)

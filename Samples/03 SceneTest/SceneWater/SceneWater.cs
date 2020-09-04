@@ -2,7 +2,7 @@
 using SharpDX;
 using System.Threading.Tasks;
 
-namespace SceneTest
+namespace SceneTest.SceneWater
 {
     public class SceneWater : Scene
     {
@@ -81,7 +81,7 @@ namespace SceneTest
         {
             if (this.Game.Input.KeyJustReleased(Keys.Escape))
             {
-                this.Game.SetScene<SceneStart>();
+                this.Game.SetScene<SceneStart.SceneStart>();
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F))

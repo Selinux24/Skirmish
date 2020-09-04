@@ -91,7 +91,7 @@ namespace Collada
 
                     PlayAudio();
 
-                    this.AudioManager.MasterVolume = 0;
+                    this.AudioManager.MasterVolume = 1;
                     this.AudioManager.Start();
 
                     LoadGameAssets();

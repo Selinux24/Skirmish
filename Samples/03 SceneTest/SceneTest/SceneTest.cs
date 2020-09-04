@@ -10,7 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SceneTest
+namespace SceneTest.SceneTest
 {
     public class SceneTest : Scene
     {
@@ -150,7 +150,7 @@ namespace SceneTest
             buttonDesc.Text = "Close";
 
             this.butClose = await this.AddComponentUIButton(buttonDesc, layerHUD);
-            this.butClose.JustReleased += (sender, eventArgs) => { this.Game.SetScene<SceneStart>(); };
+            this.butClose.JustReleased += (sender, eventArgs) => { this.Game.SetScene<SceneStart.SceneStart>(); };
             this.butClose.Visible = false;
 
             this.blackPan = await this.AddComponentUIPanel(new UIPanelDescription
@@ -872,7 +872,7 @@ namespace SceneTest
         {
             if (this.Game.Input.KeyJustReleased(Keys.Escape))
             {
-                this.Game.SetScene<SceneStart>();
+                this.Game.SetScene<SceneStart.SceneStart>();
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.R))

@@ -7,7 +7,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SceneTest
+namespace SceneTest.SceneLights
 {
     /// <summary>
     /// Lights scene test
@@ -264,7 +264,7 @@ namespace SceneTest
         {
             if (this.Game.Input.KeyJustReleased(Keys.Escape))
             {
-                this.Game.SetScene<SceneStart>();
+                this.Game.SetScene<SceneStart.SceneStart>();
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.R))

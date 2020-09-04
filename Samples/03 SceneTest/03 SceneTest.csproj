@@ -141,16 +141,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SceneCascadedShadows.cs" />
-    <Compile Include="SceneLights.cs" />
-    <Compile Include="SceneMaterials.cs" />
-    <Compile Include="SceneStart.cs" />
-    <Compile Include="SceneTanksGame.cs" />
-    <Compile Include="SceneWater.cs" />
-    <Compile Include="SceneStencilPass.cs" />
-    <Compile Include="SceneTest.cs" />
+    <Compile Include="SceneCascadedShadows\SceneCascadedShadows.cs" />
+    <Compile Include="SceneLights\SceneLights.cs" />
+    <Compile Include="SceneMaterials\SceneMaterials.cs" />
+    <Compile Include="SceneStart\SceneStart.cs" />
+    <Compile Include="SceneTanksGame\SceneTanksGame.cs" />
+    <Compile Include="SceneWater\SceneWater.cs" />
+    <Compile Include="SceneStencilPass\SceneStencilPass.cs" />
+    <Compile Include="SceneTest\SceneTest.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UIControlExtensions.cs" />
     <Content Include="Common\buttons.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -225,6 +226,9 @@
     </Content>
     <Content Include="SceneMaterials\white.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStart\anttisinstrumentals+icemanandangelinstrumental.mp3">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneStart\SkyPlane.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

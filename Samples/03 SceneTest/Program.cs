@@ -23,7 +23,7 @@ namespace SceneTest
                 {
                     GameResourceManager.RegisterLoader<LoaderCollada>();
 
-                    cl.SetScene<SceneStart>();
+                    cl.SetScene<SceneStart.SceneStart>();
 
                     cl.Run();
                 }
