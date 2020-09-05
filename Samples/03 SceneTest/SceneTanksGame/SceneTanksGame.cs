@@ -762,7 +762,6 @@ namespace SceneTest.SceneTanksGame
                     IsLooped = true,
                     UseAudio3D = true,
                     EmitterRadius = nearRadius,
-                    UseReverb = true,
                     ReverbPreset = preset,
                     Volume = 0.5f,
                 });
@@ -775,7 +774,6 @@ namespace SceneTest.SceneTanksGame
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = nearRadius,
-                    UseReverb = true,
                     ReverbPreset = preset,
                     Volume = 1f,
                 });
@@ -788,7 +786,6 @@ namespace SceneTest.SceneTanksGame
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = nearRadius,
-                    UseReverb = true,
                     ReverbPreset = preset,
                     Volume = 1f,
                 });
@@ -801,7 +798,6 @@ namespace SceneTest.SceneTanksGame
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = nearRadius,
-                    UseReverb = true,
                     ReverbPreset = preset,
                     Volume = 1f,
                 });
@@ -813,7 +809,6 @@ namespace SceneTest.SceneTanksGame
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = nearRadius,
-                    UseReverb = true,
                     ReverbPreset = preset,
                     Volume = 1f,
                 });
@@ -825,7 +820,6 @@ namespace SceneTest.SceneTanksGame
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = nearRadius,
-                    UseReverb = true,
                     ReverbPreset = preset,
                     Volume = 1f,
                 });
@@ -837,7 +831,6 @@ namespace SceneTest.SceneTanksGame
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = nearRadius,
-                    UseReverb = true,
                     ReverbPreset = preset,
                     Volume = 1f,
                 });
@@ -850,7 +843,6 @@ namespace SceneTest.SceneTanksGame
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = nearRadius,
-                    UseReverb = true,
                     ReverbPreset = preset,
                     Volume = 1f,
                 });
@@ -862,7 +854,6 @@ namespace SceneTest.SceneTanksGame
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = nearRadius,
-                    UseReverb = true,
                     ReverbPreset = preset,
                     Volume = 1f,
                 });
@@ -874,7 +865,6 @@ namespace SceneTest.SceneTanksGame
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = nearRadius,
-                    UseReverb = true,
                     ReverbPreset = preset,
                     Volume = 1f,
                 });
@@ -886,7 +876,6 @@ namespace SceneTest.SceneTanksGame
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = nearRadius,
-                    UseReverb = true,
                     ReverbPreset = preset,
                     Volume = 1f,
                 });

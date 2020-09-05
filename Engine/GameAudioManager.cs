@@ -37,7 +37,7 @@ namespace Engine
         /// <summary>
         /// Sound dictionary
         /// </summary>
-        private readonly Dictionary<string, IAudioFile> soundList = new Dictionary<string, IAudioFile>();
+        private readonly Dictionary<string, string> soundList = new Dictionary<string, string>();
         /// <summary>
         /// Effect parameters library
         /// </summary>
@@ -120,7 +120,6 @@ namespace Engine
                 });
                 effectInstances.Clear();
 
-                soundList.Values.ToList().ForEach(a => a.Dispose());
                 soundList.Clear();
 
                 gameAudio.Dispose();
@@ -163,7 +162,7 @@ namespace Engine
 
             for (int i = frameToUpdateAudio; i < effectCount; i += 2)
             {
-                toUpdate[i].Effect.Apply3D(gameTime.ElapsedSeconds);
+                toUpdate[i].Effect.Update(gameTime);
             }
 
             frameToUpdateAudio++;
@@ -187,15 +186,12 @@ namespace Engine
                 throw new EngineException($"The specified file not exists: [{contentFolder}][{fileName}]");
             }
 
-            var sound = new GameAudioFile(path);
-
             if (soundList.ContainsKey(soundName))
             {
                 if (replaceIfExists)
                 {
                     //Replaces the sound
-                    soundList[soundName].Dispose();
-                    soundList[soundName] = sound;
+                    soundList[soundName] = path;
                 }
                 else
                 {
@@ -205,7 +201,7 @@ namespace Engine
             else
             {
                 //Adds the sound to the collection
-                soundList.Add(soundName, sound);
+                soundList.Add(soundName, path);
             }
         }
         /// <summary>
@@ -247,11 +243,8 @@ namespace Engine
                 return null;
             }
 
-            //Gets the sound
-            var sound = soundList[effectParams.SoundName];
-
             //Creates the effect
-            var instance = new GameAudioEffect(gameAudio, sound, effectParams);
+            var instance = new GameAudioEffect(gameAudio, soundList[effectParams.SoundName], effectParams);
 
             //Adds effect to "to delete" effect list
             effectInstances.Add(new EffectInstance { Name = effectName, Effect = instance });

@@ -180,13 +180,13 @@ namespace Engine.Audio
         /// <param name="audioState">Audio state</param>
         /// <param name="fileName">File name</param>
         /// <param name="effectParameters">Effect parameters</param>
-        public GameAudioEffect(GameAudio audioState, IAudioFile audioFile, GameAudioEffectParameters effectParameters)
+        public GameAudioEffect(GameAudio audioState, string fileName, GameAudioEffectParameters effectParameters)
         {
             gameAudio = audioState;
 
             // Read in the file
-            this.audioFile = audioFile;
-            voiceInputChannels = this.audioFile.WaveFormat.Channels;
+            audioFile = new GameAudioFile(fileName);
+            voiceInputChannels = audioFile.WaveFormat.Channels;
 
             // Create the source voice
             sourceVoice = audioState.CreateSourceVoice(this.audioFile.WaveFormat, true);
@@ -220,6 +220,13 @@ namespace Engine.Audio
             Pitch = effectParameters.Pitch;
             Volume = effectParameters.Volume;
 
+            if (effectParameters.ReverbPreset.HasValue)
+            {
+                SetReverb(effectParameters.ReverbPreset);
+            }
+
+            InitializeOutputMatrix();
+
             // Starts the playing thread
             Task.Factory.StartNew(PlayAsync, TaskCreationOptions.LongRunning);
         }
@@ -249,16 +256,24 @@ namespace Engine.Audio
             {
                 disposed = true;
 
-                Logger.WriteDebug("DisposePlayer Begin");
+                Logger.WriteDebug($"{audioFile.FileName} Dispose Begin");
 
-                submixVoice?.DestroyVoice();
-                submixVoice?.Dispose();
+                if (sourceVoice?.IsDisposed != true)
+                {
+                    sourceVoice?.Stop(0);
+                    sourceVoice?.DestroyVoice();
+                    sourceVoice?.Dispose();
+                }
 
-                sourceVoice?.Stop(0);
-                sourceVoice?.DestroyVoice();
-                sourceVoice?.Dispose();
+                if (submixVoice?.IsDisposed != true)
+                {
+                    submixVoice?.DestroyVoice();
+                    submixVoice?.Dispose();
+                }
 
-                Logger.WriteDebug("DisposePlayer End");
+                audioFile?.Dispose();
+
+                Logger.WriteDebug($"{audioFile.FileName} Dispose End");
             }
         }
 
@@ -267,8 +282,18 @@ namespace Engine.Audio
         /// </summary>
         public void Play()
         {
+            Play(TimeSpan.Zero);
+        }
+        /// <summary>
+        /// Plays the current instance. If it is already playing - the call is ignored.
+        /// </summary>
+        /// <param name="start">Start position</param>
+        public void Play(TimeSpan start)
+        {
             if (State == AudioState.Stopped)
             {
+                nextPlayPosition = start;
+
                 sourceVoice.Start(0);
 
                 playCounter++;
@@ -529,37 +554,48 @@ namespace Engine.Audio
         }
 
         /// <summary>
-        /// Apply 3d configuration to voice
+        /// Applies the 3D effect to the current sound effect instance.
         /// </summary>
-        public void Apply3D(float elapsedSeconds)
+        /// <param name="gameTime">Game time</param>
+        public void Update(GameTime gameTime)
         {
             if (!UseAudio3D)
             {
                 return;
             }
 
-            UpdateListener();
-            UpdateEmitter();
+            UpdateListener(gameTime.ElapsedSeconds);
+            UpdateEmitter(gameTime.ElapsedSeconds);
 
-            Calculate3D(elapsedSeconds);
+            Calculate3D();
 
             UpdateVoices();
         }
         /// <summary>
         /// Updates listener state
         /// </summary>
-        /// <param name="audioListener">Listener state</param>
-        private void UpdateListener()
+        /// <param name="elapsedSeconds">Elapsed seconds</param>
+        private void UpdateListener(float elapsedSeconds)
         {
             if (listener == null)
             {
-                listener = new Listener();
+                listener = new Listener()
+                {
+                    OrientFront = Listener.Forward,
+                    OrientTop = Listener.Up,
+                    Position = Listener.Position,
+                    Velocity = Vector3.Zero,
+                };
+            }
+
+            if (elapsedSeconds > 0)
+            {
+                listener.Velocity = (Listener.Position - listener.Position) / elapsedSeconds;
             }
 
             listener.OrientFront = Listener.Forward;
             listener.OrientTop = Listener.Up;
             listener.Position = Listener.Position;
-            listener.Velocity = Listener.Velocity;
 
             if (Listener.Cone.HasValue)
             {
@@ -586,18 +622,28 @@ namespace Engine.Audio
         /// <summary>
         /// Updates emitter state
         /// </summary>
-        /// <param name="audioEmitter">Emitter state</param>
-        private void UpdateEmitter()
+        /// <param name="elapsedSeconds">Elapsed seconds</param>
+        private void UpdateEmitter(float elapsedSeconds)
         {
             if (emitter == null)
             {
-                emitter = new Emitter();
+                emitter = new Emitter()
+                {
+                    OrientFront = Emitter.Forward,
+                    OrientTop = Emitter.Up,
+                    Position = Emitter.Position,
+                    Velocity = Vector3.Zero,
+                };
+            }
+
+            if (elapsedSeconds > 0)
+            {
+                emitter.Velocity = (Emitter.Position - emitter.Position) / elapsedSeconds;
             }
 
             emitter.Position = Emitter.Position;
             emitter.OrientFront = Emitter.Forward;
             emitter.OrientTop = Emitter.Up;
-            emitter.Velocity = Emitter.Velocity;
 
             emitter.ChannelCount = audioFile.WaveFormat.Channels;
             emitter.ChannelRadius = 1;
@@ -666,15 +712,8 @@ namespace Engine.Audio
         /// Calculates instance positions
         /// </summary>
         /// <param name="elapsedSeconds">Elpased time</param>
-        private void Calculate3D(float elapsedSeconds)
+        private void Calculate3D()
         {
-            if (elapsedSeconds > 0)
-            {
-                listener.Velocity = (Listener.Position - listener.Position) / elapsedSeconds;
-
-                emitter.Velocity = (Emitter.Position - emitter.Position) / elapsedSeconds;
-            }
-
             var flags = Calculate3DFlags();
 
             if (dspSettings == null)
@@ -698,6 +737,8 @@ namespace Engine.Audio
 
             UpdateOutputMatrix();
 
+            var outputMatrix = GetOutputMatrix();
+
             // Apply X3DAudio generated DSP settings to XAudio2
             sourceVoice.SetFrequencyRatio(dspSettings.DopplerFactor);
 
@@ -705,7 +746,7 @@ namespace Engine.Audio
                 gameAudio.MasteringVoice,
                 voiceInputChannels,
                 gameAudio.InputChannelCount,
-                GetOutputMatrix());
+                outputMatrix);
 
             sourceVoice.SetOutputFilterParameters(
                 gameAudio.MasteringVoice,
@@ -730,7 +771,7 @@ namespace Engine.Audio
                 submixVoice,
                 voiceInputChannels,
                 gameAudio.InputChannelCount,
-                GetOutputMatrix());
+                outputMatrix);
 
             sourceVoice.SetOutputFilterParameters(
                 submixVoice,
@@ -742,28 +783,6 @@ namespace Engine.Audio
                 });
         }
 
-        /// <summary>
-        /// Creates a new reverb voice
-        /// </summary>
-        private void CreateReverbVoice()
-        {
-            // Create reverb effect
-            using (var reverbEffect = gameAudio.CreateReverb())
-            {
-                // Create a submix voice
-                submixVoice = gameAudio.CreatesSubmixVoice(gameAudio.InputChannelCount, gameAudio.InputSampleRate);
-
-                // Performance tip: you need not run global FX with the sample number
-                // of channels as the final mix.  For example, this sample runs
-                // the reverb in mono mode, thus reducing CPU overhead.
-                var desc = new EffectDescriptor(reverbEffect)
-                {
-                    InitialState = true,
-                    OutputChannelCount = gameAudio.InputChannelCount,
-                };
-                submixVoice.SetEffectChain(desc);
-            }
-        }
         /// <summary>
         /// Gets the reverb effect
         /// </summary>
@@ -779,10 +798,10 @@ namespace Engine.Audio
         {
             if (submixVoice == null)
             {
-                CreateReverbVoice();
+                submixVoice = gameAudio.CreateReverbVoice();
             }
 
-            if (reverb.HasValue)
+            if (!reverbPreset.HasValue && reverb.HasValue)
             {
                 // Play the wave using a source voice that sends to both the submix and mastering voices
                 VoiceSendDescriptor[] sendDescriptors = new[]
@@ -793,12 +812,8 @@ namespace Engine.Audio
                     new VoiceSendDescriptor { Flags = VoiceSendFlags.UseFilter, OutputVoice = submixVoice },
                 };
                 sourceVoice.SetOutputVoices(sendDescriptors);
-
-                var native = GameAudioPresets.Convert(reverb.Value, submixVoice.VoiceDetails.InputSampleRate);
-                submixVoice.SetEffectParameters(0, native);
-                submixVoice.EnableEffect(0);
             }
-            else
+            else if (!reverb.HasValue)
             {
                 // Play the wave using a source voice that sends to both the submix and mastering voices
                 VoiceSendDescriptor[] sendDescriptors = new[]
@@ -809,6 +824,13 @@ namespace Engine.Audio
                 sourceVoice.SetOutputVoices(sendDescriptors);
 
                 submixVoice.DisableEffect(0);
+            }
+
+            if (reverb.HasValue)
+            {
+                var native = GameAudioPresets.Convert(reverb.Value, submixVoice.VoiceDetails.InputSampleRate);
+                submixVoice.SetEffectParameters(0, native);
+                submixVoice.EnableEffect(0);
             }
 
             reverbPreset = reverb;

@@ -39,14 +39,6 @@ namespace Engine.Audio
         /// </summary>
         public bool UseAudio3D { get; set; } = false;
         /// <summary>
-        /// Gets or sets whether the sub-mix voice uses a reverb effect or not
-        /// </summary>
-        public bool UseReverb { get; set; } = false;
-        /// <summary>
-        /// Gets or sets whether the reverb effect use filters or not
-        /// </summary>
-        public bool UseReverbFilter { get; set; } = false;
-        /// <summary>
         /// Gets or sets the current reverb preset configuration
         /// </summary>
         public ReverbPresets? ReverbPreset { get; set; } = ReverbPresets.Default;

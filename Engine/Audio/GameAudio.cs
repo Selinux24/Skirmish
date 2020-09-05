@@ -180,17 +180,26 @@ namespace Engine.Audio
         {
             if (disposing)
             {
-                this.x3DInstance = null;
+                x3DInstance = null;
 
-                this.MasteringVoice?.DestroyVoice();
-                this.MasteringVoice?.Dispose();
-                this.MasteringVoice = null;
+                if (MasteringVoice?.IsDisposed != true)
+                {
+                    MasteringVoice?.DestroyVoice();
+                    MasteringVoice?.Dispose();
+                    MasteringVoice = null;
+                }
 
-                this.masteringLimiter?.Dispose();
-                this.masteringLimiter = null;
+                if (masteringLimiter?.IsDisposed != true)
+                {
+                    masteringLimiter?.Dispose();
+                    masteringLimiter = null;
+                }
 
-                this.device?.StopEngine();
-                this.device?.Dispose();
+                if (device?.IsDisposed != true)
+                {
+                    device?.StopEngine();
+                    device?.Dispose();
+                }
             }
         }
 
@@ -249,21 +258,28 @@ namespace Engine.Audio
                 inputSampleRate);
         }
         /// <summary>
-        /// Creates a submix voice
+        /// Creates a new reverb voice
         /// </summary>
-        /// <param name="inputChannelCount">Input channels</param>
-        /// <param name="inputSampleRate">Input sample rate</param>
-        /// <param name="sendFlags">Send flags</param>
-        /// <param name="processingStage">Processing stage</param>
-        /// <returns>Returns the submix voice</returns>
-        internal SubmixVoice CreatesSubmixVoice(int inputChannelCount, int inputSampleRate, SubmixVoiceFlags sendFlags, int processingStage)
+        internal SubmixVoice CreateReverbVoice()
         {
-            return new SubmixVoice(
-                device,
-                inputChannelCount,
-                inputSampleRate,
-                sendFlags,
-                processingStage);
+            // Create reverb effect
+            using (var reverbEffect = CreateReverb())
+            {
+                // Create a submix voice
+                var submixVoice = CreatesSubmixVoice(InputChannelCount, InputSampleRate);
+
+                // Performance tip: you need not run global FX with the sample number
+                // of channels as the final mix.  For example, this sample runs
+                // the reverb in mono mode, thus reducing CPU overhead.
+                var desc = new EffectDescriptor(reverbEffect)
+                {
+                    InitialState = true,
+                    OutputChannelCount = InputChannelCount,
+                };
+                submixVoice.SetEffectChain(desc);
+
+                return submixVoice;
+            }
         }
 
         /// <summary>

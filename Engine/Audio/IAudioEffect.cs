@@ -74,6 +74,11 @@ namespace Engine.Audio
         /// </summary>
         void Play();
         /// <summary>
+        /// Plays the current instance. If it is already playing - the call is ignored.
+        /// </summary>
+        /// <param name="start">Start position</param>
+        void Play(TimeSpan start);
+        /// <summary>
         /// Stops the playback of the current instance indicating whether the stop should occur immediately of at the end of the sound.
         /// </summary>
         /// <param name="immediate">A value indicating whether the playback should be stopped immediately or at the end of the sound.</param>
@@ -94,9 +99,8 @@ namespace Engine.Audio
         /// <summary>
         /// Applies the 3D effect to the current sound effect instance.
         /// </summary>
-        /// <param name="listenerAgent">Listener</param>
-        /// <param name="emitterAgent">Emitter</param>
-        void Apply3D(float elapsedSeconds);
+        /// <param name="gameTime">Game time</param>
+        void Update(GameTime gameTime);
 
         /// <summary>
         /// Gets the reverb effect

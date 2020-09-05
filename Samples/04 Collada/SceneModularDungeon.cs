@@ -645,6 +645,7 @@ namespace Collada
                     DestroyWhenFinished = true,
                     Volume = 1f,
                     UseAudio3D = true,
+                    ReverbPreset = ReverbPresets.StoneRoom,
                     EmitterRadius = 3,
                     ListenerCone = GameAudioConeDescription.DefaultListenerCone,
                 });
@@ -657,6 +658,7 @@ namespace Collada
                     DestroyWhenFinished = true,
                     Volume = 1f,
                     UseAudio3D = true,
+                    ReverbPreset = ReverbPresets.StoneRoom,
                     EmitterRadius = 3,
                     ListenerCone = GameAudioConeDescription.DefaultListenerCone,
                 });
@@ -672,6 +674,7 @@ namespace Collada
                         SoundName = soundWinds[i],
                         Volume = 1f,
                         UseAudio3D = true,
+                        ReverbPreset = ReverbPresets.StoneRoom,
                         EmitterRadius = 15,
                         ListenerCone = GameAudioConeDescription.DefaultListenerCone,
                     });
@@ -686,6 +689,7 @@ namespace Collada
                     Volume = 1f,
                     IsLooped = true,
                     UseAudio3D = true,
+                    ReverbPreset = ReverbPresets.StoneRoom,
                     EmitterRadius = 3,
                     ListenerCone = GameAudioConeDescription.DefaultListenerCone,
                 });
@@ -699,6 +703,7 @@ namespace Collada
                     Volume = 1f,
                     IsLooped = false,
                     UseAudio3D = true,
+                    ReverbPreset = ReverbPresets.StoneRoom,
                     EmitterRadius = 3,
                     ListenerCone = GameAudioConeDescription.DefaultListenerCone,
                 });

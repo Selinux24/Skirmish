@@ -946,7 +946,6 @@ namespace Terrain.Rts
                     SoundName = forestEffect,
                     DestroyWhenFinished = false,
                     IsLooped = true,
-                    UseReverb = true,
                     ReverbPreset = ReverbPresets.Forest,
                     Volume = 1f,
                 });
@@ -960,7 +959,6 @@ namespace Terrain.Rts
                     IsLooped = true,
                     UseAudio3D = true,
                     EmitterRadius = 200,
-                    UseReverb = true,
                     ReverbPreset = ReverbPresets.Forest,
                     Volume = 1f,
                 });
@@ -973,7 +971,6 @@ namespace Terrain.Rts
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = 250,
-                    UseReverb = true,
                     ReverbPreset = ReverbPresets.Forest,
                     Volume = 1f,
                 });
@@ -987,7 +984,6 @@ namespace Terrain.Rts
                     IsLooped = true,
                     UseAudio3D = true,
                     EmitterRadius = 150,
-                    UseReverb = true,
                     ReverbPreset = ReverbPresets.Forest,
                     Volume = 1f,
                 });
@@ -1001,7 +997,6 @@ namespace Terrain.Rts
                     IsLooped = true,
                     UseAudio3D = true,
                     EmitterRadius = 150,
-                    UseReverb = true,
                     ReverbPreset = ReverbPresets.Forest,
                     Volume = 1f,
                 });
@@ -1014,7 +1009,6 @@ namespace Terrain.Rts
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = 250,
-                    UseReverb = true,
                     ReverbPreset = ReverbPresets.Forest,
                     Volume = 1f,
                 });
@@ -1027,7 +1021,6 @@ namespace Terrain.Rts
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = 250,
-                    UseReverb = true,
                     ReverbPreset = ReverbPresets.Forest,
                     Volume = 1f,
                 });
@@ -1040,7 +1033,6 @@ namespace Terrain.Rts
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = 250,
-                    UseReverb = true,
                     ReverbPreset = ReverbPresets.Forest,
                     Volume = 1f,
                 });
@@ -1053,7 +1045,6 @@ namespace Terrain.Rts
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = 250,
-                    UseReverb = true,
                     ReverbPreset = ReverbPresets.Forest,
                     Volume = 1f,
                 });
@@ -1066,7 +1057,6 @@ namespace Terrain.Rts
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = 250,
-                    UseReverb = true,
                     ReverbPreset = ReverbPresets.Forest,
                     Volume = 1f,
                 });
@@ -1078,7 +1068,6 @@ namespace Terrain.Rts
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = 250,
-                    UseReverb = true,
                     ReverbPreset = ReverbPresets.Forest,
                     Volume = 1f,
                 });
@@ -1090,7 +1079,6 @@ namespace Terrain.Rts
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = 250,
-                    UseReverb = true,
                     ReverbPreset = ReverbPresets.Forest,
                     Volume = 1f,
                 });
@@ -1102,7 +1090,6 @@ namespace Terrain.Rts
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = 250,
-                    UseReverb = true,
                     ReverbPreset = ReverbPresets.Forest,
                     Volume = 1f,
                 });
@@ -1115,7 +1102,6 @@ namespace Terrain.Rts
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = 250,
-                    UseReverb = true,
                     ReverbPreset = ReverbPresets.Forest,
                     Volume = 1f,
                 });
@@ -1127,7 +1113,6 @@ namespace Terrain.Rts
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = 250,
-                    UseReverb = true,
                     ReverbPreset = ReverbPresets.Forest,
                     Volume = 1f,
                 });
@@ -1139,7 +1124,6 @@ namespace Terrain.Rts
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = 250,
-                    UseReverb = true,
                     ReverbPreset = ReverbPresets.Forest,
                     Volume = 1f,
                 });
@@ -1151,7 +1135,6 @@ namespace Terrain.Rts
                     IsLooped = false,
                     UseAudio3D = true,
                     EmitterRadius = 250,
-                    UseReverb = true,
                     ReverbPreset = ReverbPresets.Forest,
                     Volume = 1f,
                 });
