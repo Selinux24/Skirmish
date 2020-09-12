@@ -1,7 +1,5 @@
 ﻿using SharpDX;
 using System;
-using System.Runtime.Serialization;
-using System.Security.Permissions;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
@@ -9,7 +7,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
     /// Bounding volume node.
     /// </summary>
     [Serializable]
-    public class BVNode : ISerializable
+    public class BVNode
     {
         /// <summary>
         /// Minimum bounds of the node's AABB. [(x, y, z)]
@@ -30,30 +28,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         public BVNode()
         {
 
-        }
-
-        /// <summary>
-        /// Serialization constructor
-        /// </summary>
-        /// <param name="info">Serialization information</param>
-        /// <param name="context">Serializatio context</param>
-        protected BVNode(SerializationInfo info, StreamingContext context)
-        {
-            BMin = info.GetInt3("bmin");
-            BMax = info.GetInt3("bmax");
-            I = info.GetInt32("i");
-        }
-        /// <summary>
-        /// Populates a SerializationInfo with the data needed to serialize the target object.
-        /// </summary>
-        /// <param name="info">The SerializationInfo to populate with data.</param>
-        /// <param name="context">The destination for this serialization.</param>
-        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
-        public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            info.AddInt3("bmin", BMin);
-            info.AddInt3("bmax", BMax);
-            info.AddValue("i", I);
         }
 
         /// <summary>

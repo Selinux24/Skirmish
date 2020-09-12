@@ -312,17 +312,21 @@ namespace Engine
         {
             try
             {
+                Logger.WriteDebug("Game: Setting scene with the scene-mode constructor");
+
                 T scene = (T)Activator.CreateInstance(typeof(T), new object[] { this, sceneMode });
                 scene.Order = 1;
                 this.nextScene = scene;
             }
             catch (Exception ex)
             {
-                Logger.WriteError($"Error setting scene with scene mode: {ex.Message}");
+                Logger.WriteWarning($"Game: Cannot instantiate the scene with the scene-mode constructor: {ex.Message}");
             }
 
             try
             {
+                Logger.WriteDebug("Game: Setting scene with the default constructor");
+
                 T scene = (T)Activator.CreateInstance(typeof(T), new object[] { this });
                 scene.SetRenderMode(sceneMode);
                 scene.Order = 1;
@@ -330,7 +334,7 @@ namespace Engine
             }
             catch (Exception ex)
             {
-                Logger.WriteError($"Error setting scene: {ex.Message}");
+                Logger.WriteError($"Game: Error setting scene: {ex.Message}");
             }
         }
         /// <summary>
@@ -367,24 +371,24 @@ namespace Engine
         private async Task StartScene(Scene scene)
         {
             Logger.WriteDebug("Game: Begin StartScene");
-            scene.Active = false;
 
             try
             {
+                scene.Active = false;
+
                 Logger.WriteDebug("Scene: Initialize start");
                 await scene.Initialize();
                 Logger.WriteDebug("Scene: Initialize end");
+
+                scene.Active = true;
             }
             catch (Exception ex)
             {
                 Logger.WriteError($"Scene: Initialize error: {ex}");
 
-#if !DEBUG
                 throw;
-#endif
             }
 
-            scene.Active = true;
             Logger.WriteDebug("Game: End StartScene");
         }
 

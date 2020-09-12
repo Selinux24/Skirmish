@@ -292,6 +292,11 @@ namespace Engine.Audio
         /// <param name="start">Start position</param>
         public void Play(TimeSpan start)
         {
+            if (disposed)
+            {
+                return;
+            }
+
             if (State == AudioState.Stopped)
             {
                 nextPlayPosition = start;
@@ -315,6 +320,11 @@ namespace Engine.Audio
         /// <param name="immediate">A value indicating whether the playback should be stopped immediately or at the end of the sound.</param>
         public void Stop(bool immediate = true)
         {
+            if (disposed)
+            {
+                return;
+            }
+
             if (State != AudioState.Stopped)
             {
                 sourceVoice.Stop(0);
@@ -333,6 +343,11 @@ namespace Engine.Audio
         /// </summary>
         public void Pause()
         {
+            if (disposed)
+            {
+                return;
+            }
+
             if (State == AudioState.Playing)
             {
                 sourceVoice.Stop();
@@ -347,6 +362,11 @@ namespace Engine.Audio
         /// </summary>
         public void Resume()
         {
+            if (disposed)
+            {
+                return;
+            }
+
             if (State == AudioState.Paused)
             {
                 sourceVoice.Start();

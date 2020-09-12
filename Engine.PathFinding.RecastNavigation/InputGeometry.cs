@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Engine.PathFinding.RecastNavigation
 {
@@ -12,9 +12,20 @@ namespace Engine.PathFinding.RecastNavigation
     /// </summary>
     public class InputGeometry : PathFinderInput
     {
+        /// <summary>
+        /// Calculates a hash string from a list of triangles
+        /// </summary>
+        /// <param name="triangles">Triangle list</param>
+        /// <returns>Returns the hash string</returns>
         public static string GetHash(IEnumerable<Triangle> triangles)
         {
-            var serTris = triangles
+            var tris = triangles.ToList();
+            tris.Sort((t1, t2) =>
+            {
+                return $"{t1}".CompareTo($"{t2}");
+            });
+
+            var serTris = tris
                 .Select(t => new[]
                 {
                     t.Point1.X, t.Point1.Y, t.Point1.Z,

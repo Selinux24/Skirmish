@@ -1,7 +1,5 @@
 ﻿using SharpDX;
 using System;
-using System.Runtime.Serialization;
-using System.Security.Permissions;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
@@ -10,7 +8,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
     /// An off-mesh connection is a user defined traversable connection made up to two vertices.
     /// </summary>
     [Serializable]
-    public class OffMeshConnection : ISerializable
+    public class OffMeshConnection
     {
         /// <summary>
         /// The start endpoint of the connection. [(ax, ay, az)]
@@ -43,46 +41,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// The id of the offmesh connection. (User assigned when the navigation mesh is built.)
         /// </summary>
         public int UserId { get; set; }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public OffMeshConnection()
-        {
-
-        }
-
-        /// <summary>
-        /// Serialization constructor
-        /// </summary>
-        /// <param name="info">Serialization info</param>
-        /// <param name="context">Serialization context</param>
-        protected OffMeshConnection(SerializationInfo info, StreamingContext context)
-        {
-            Start = info.GetVector3("start");
-            End = info.GetVector3("end");
-            Rad = info.GetSingle("rad");
-            Poly = info.GetInt32("poly");
-            Flags = info.GetInt32("flags");
-            Side = info.GetInt32("side");
-            UserId = info.GetInt32("userId");
-        }
-        /// <summary>
-        /// Populates a SerializationInfo with the data needed to serialize the target object.
-        /// </summary>
-        /// <param name="info">The SerializationInfo to populate with data.</param>
-        /// <param name="context">The destination for this serialization.</param>
-        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
-        public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            info.AddVector3("start", Start);
-            info.AddVector3("end", End);
-            info.AddValue("rad", Rad);
-            info.AddValue("poly", Poly);
-            info.AddValue("flags", Flags);
-            info.AddValue("side", Side);
-            info.AddValue("userId", UserId);
-        }
 
         /// <summary>
         /// Gets the text representation of the instance

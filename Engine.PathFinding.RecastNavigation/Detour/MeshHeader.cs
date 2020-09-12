@@ -1,7 +1,5 @@
 ﻿using SharpDX;
 using System;
-using System.Runtime.Serialization;
-using System.Security.Permissions;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
@@ -9,7 +7,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
     /// Provides high level information related to a dtMeshTile object.
     /// </summary>
     [Serializable]
-    public struct MeshHeader : ISerializable
+    public struct MeshHeader
     {
         /// <summary>
         /// Tile magic number. (Used to identify the data format.)
@@ -91,64 +89,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// The bounding volume quantization factor.
         /// </summary>
         public float BvQuantFactor { get; set; }
-
-        /// <summary>
-        /// Serialization constructor
-        /// </summary>
-        /// <param name="info">Serialization information</param>
-        /// <param name="context">Serializatio context</param>
-        internal MeshHeader(SerializationInfo info, StreamingContext context)
-        {
-            Magic = info.GetInt32("magic");
-            Version = info.GetInt32("version");
-            X = info.GetInt32("x");
-            Y = info.GetInt32("y");
-            Layer = info.GetInt32("layer");
-            UserId = info.GetInt32("userId");
-            PolyCount = info.GetInt32("polyCount");
-            VertCount = info.GetInt32("vertCount");
-            MaxLinkCount = info.GetInt32("maxLinkCount");
-            DetailMeshCount = info.GetInt32("detailMeshCount");
-            DetailVertCount = info.GetInt32("detailVertCount");
-            DetailTriCount = info.GetInt32("detailTriCount");
-            BvNodeCount = info.GetInt32("bvNodeCount");
-            OffMeshConCount = info.GetInt32("offMeshConCount");
-            OffMeshBase = info.GetInt32("offMeshBase");
-            WalkableHeight = info.GetSingle("walkableHeight");
-            WalkableRadius = info.GetSingle("walkableRadius");
-            WalkableClimb = info.GetSingle("walkableClimb");
-            Bounds = info.GetValue<BoundingBox>("bounds");
-            BvQuantFactor = info.GetSingle("bvQuantFactor");
-        }
-        /// <summary>
-        /// Populates a SerializationInfo with the data needed to serialize the target object.
-        /// </summary>
-        /// <param name="info">The SerializationInfo to populate with data.</param>
-        /// <param name="context">The destination for this serialization.</param>
-        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            info.AddValue("magic", Magic);
-            info.AddValue("version", Version);
-            info.AddValue("x", X);
-            info.AddValue("y", Y);
-            info.AddValue("layer", Layer);
-            info.AddValue("userId", UserId);
-            info.AddValue("polyCount", PolyCount);
-            info.AddValue("vertCount", VertCount);
-            info.AddValue("maxLinkCount", MaxLinkCount);
-            info.AddValue("detailMeshCount", DetailMeshCount);
-            info.AddValue("detailVertCount", DetailVertCount);
-            info.AddValue("detailTriCount", DetailTriCount);
-            info.AddValue("bvNodeCount", BvNodeCount);
-            info.AddValue("offMeshConCount", OffMeshConCount);
-            info.AddValue("offMeshBase", OffMeshBase);
-            info.AddValue("walkableHeight", WalkableHeight);
-            info.AddValue("walkableRadius", WalkableRadius);
-            info.AddValue("walkableClimb", WalkableClimb);
-            info.AddValue("bounds", Bounds);
-            info.AddValue("bvQuantFactor", BvQuantFactor);
-        }
 
         /// <summary>
         /// Gets the text representation of the instance

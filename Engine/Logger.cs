@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace Engine
@@ -84,10 +85,24 @@ namespace Engine
 
             log.Enqueue(new LogEntry { EventDate = DateTime.Now, LogLevel = logLevel, Text = text });
 
+            if (LogStackSize <= 0)
+            {
+                // The stack never empties
+                return;
+            }
+
             while (log.Count > LogStackSize)
             {
                 log.TryDequeue(out _);
             }
+        }
+
+        /// <summary>
+        /// Gets whether the log has any errors or not
+        /// </summary>
+        public static bool HasErrors()
+        {
+            return log.Any(l => l.LogLevel == LogLevel.Error);
         }
 
         /// <summary>
@@ -119,7 +134,8 @@ namespace Engine
         /// Gets the last maxLines lines of the log
         /// </summary>
         /// <param name="maxLines">Maximum number of lines</param>
-        public static string ReadText(int maxLines = 0)
+        /// <param name="reverse">Reverse entry order</param>
+        public static string ReadText(int maxLines = 0, bool reverse = true)
         {
             var logEntries = Read();
             if (!logEntries.Any())
@@ -127,10 +143,20 @@ namespace Engine
                 return string.Empty;
             }
 
-            string logText = new string(logEntries.Reverse().SelectMany(l => $"{l.EventDate:HH:mm:ss.fff}> {l.Text}" + Environment.NewLine).ToArray());
+            if (reverse)
+            {
+                logEntries = logEntries.Reverse();
+            }
+
+            string logText = new string(logEntries.SelectMany(l => $"{l.EventDate:HH:mm:ss.fff} [{l.LogLevel}]> {l.Text}" + Environment.NewLine).ToArray());
             var lines = logText.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
 
-            return string.Join(Environment.NewLine, lines.Take(maxLines).ToArray());
+            if (maxLines > 0 && lines.Length > maxLines)
+            {
+                lines = lines.Take(maxLines).ToArray();
+            }
+
+            return string.Join(Environment.NewLine, lines);
         }
 
         /// <summary>
@@ -142,6 +168,16 @@ namespace Engine
             {
                 log.TryDequeue(out _);
             }
+        }
+
+        /// <summary>
+        /// Dumps the log to a file
+        /// </summary>
+        /// <param name="fileName">File name</param>
+        public static void Dump(string fileName)
+        {
+            string dumpText = ReadText(0, false);
+            File.WriteAllText(fileName, dumpText);
         }
     }
 }

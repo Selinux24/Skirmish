@@ -1,10 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Content.OnePageDungeon
 {
     public class DungeonAssetConfiguration
     {
+        private Random randomGenerator = Helper.RandomGenerator;
+        private int randomSeed = 0;
+
         public float PositionDelta { get; set; } = 1;
 
         public IEnumerable<string> Volumes { get; set; } = new[] { "volume", "_volume", "_volume", "_volumes" };
@@ -18,6 +22,21 @@ namespace Engine.Content.OnePageDungeon
         public IEnumerable<ModularSceneryObjectAnimationPlan> DoorAnimationPlans { get; set; }
         public IEnumerable<ModularSceneryObjectAction> DoorActions { get; set; }
         public IEnumerable<ModularSceneryObjectState> DoorStates { get; set; }
+
+        public int RandomSeed
+        {
+            get
+            {
+                return randomSeed;
+            }
+            set
+            {
+                randomSeed = value;
+
+                randomGenerator = Helper.SetRandomGeneratorSeed(randomSeed);
+            }
+        }
+
 
         public string GetRandonFloor()
         {
@@ -56,7 +75,7 @@ namespace Engine.Content.OnePageDungeon
                 return default;
             }
 
-            int index = Helper.RandomGenerator.Next(0, list.Count());
+            int index = randomGenerator.Next(0, list.Count());
 
             return list.ElementAt(index);
         }

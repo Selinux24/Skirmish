@@ -22,10 +22,22 @@ namespace Engine
         /// </summary>
         public const float Radian = 0.0174532924f;
 
+        #region Random
+
         /// <summary>
         /// Random number generator
         /// </summary>
         public static readonly Random RandomGenerator = new Random();
+        /// <summary>
+        /// Gets a new random generator
+        /// </summary>
+        /// <param name="seed">Seed</param>
+        public static Random SetRandomGeneratorSeed(int seed)
+        {
+            return new Random(seed);
+        }
+
+        #endregion
 
         #region Memory
 

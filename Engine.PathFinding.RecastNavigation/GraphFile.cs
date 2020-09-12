@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.Serialization;
-using System.Security.Permissions;
 using System.Threading.Tasks;
 
 namespace Engine.PathFinding.RecastNavigation
@@ -13,7 +11,7 @@ namespace Engine.PathFinding.RecastNavigation
     /// Graph file
     /// </summary>
     [Serializable]
-    public struct GraphFile : ISerializable
+    public struct GraphFile
     {
         /// <summary>
         /// Creates a graph file from a graph
@@ -134,29 +132,5 @@ namespace Engine.PathFinding.RecastNavigation
         /// File source hash
         /// </summary>
         public string Hash { get; set; }
-
-        /// <summary>
-        /// Serialization constructor
-        /// </summary>
-        /// <param name="info">Serialization info</param>
-        /// <param name="context">Serialization context</param>
-        internal GraphFile(SerializationInfo info, StreamingContext context)
-        {
-            Settings = info.GetValue<BuildSettings>("Settings");
-            Dictionary = info.GetValue<Dictionary<Agent, NavMeshFile>>("Dictionary");
-            Hash = info.GetValue<string>("Hash");
-        }
-        /// <summary>
-        /// Gets the object data for serialization
-        /// </summary>
-        /// <param name="info">Serialization info</param>
-        /// <param name="context">Serialization context</param>
-        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            info.AddValue("Settings", Settings);
-            info.AddValue("Dictionary", Dictionary);
-            info.AddValue("Hash", Hash);
-        }
     }
 }

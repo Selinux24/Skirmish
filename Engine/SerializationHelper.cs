@@ -47,6 +47,27 @@ namespace Engine
         }
 
         /// <summary>
+        /// Creates a new binary formatter for serialization
+        /// </summary>
+        /// <remarks>Includes all the Serialization Surrogates for SharpDX native structs</remarks>
+        private static IFormatter CreateBinaryFormatter()
+        {
+            var ss = new SurrogateSelector();
+            ss.AddSurrogate(typeof(Vector3), new StreamingContext(StreamingContextStates.All), new Vector3SerializationSurrogate());
+            ss.AddSurrogate(typeof(Vector4), new StreamingContext(StreamingContextStates.All), new Vector4SerializationSurrogate());
+            ss.AddSurrogate(typeof(BoundingBox), new StreamingContext(StreamingContextStates.All), new BoundingBoxSerializationSurrogate());
+            ss.AddSurrogate(typeof(Int3), new StreamingContext(StreamingContextStates.All), new Int3SerializationSurrogate());
+            ss.AddSurrogate(typeof(Int4), new StreamingContext(StreamingContextStates.All), new Int4SerializationSurrogate());
+
+            IFormatter formatter = new BinaryFormatter
+            {
+                SurrogateSelector = ss
+            };
+
+            return formatter;
+        }
+
+        /// <summary>
         /// Serialize into bytes
         /// </summary>
         /// <typeparam name="T">Object type</typeparam>
@@ -56,7 +77,7 @@ namespace Engine
         {
             using (var tmp = new MemoryStream())
             {
-                new BinaryFormatter().Serialize(tmp, obj);
+                CreateBinaryFormatter().Serialize(tmp, obj);
                 tmp.Position = 0;
 
                 return tmp.ToArray();
@@ -74,7 +95,7 @@ namespace Engine
             {
                 buffer.Position = 0;
 
-                return (T)new BinaryFormatter().Deserialize(buffer);
+                return (T)CreateBinaryFormatter().Deserialize(buffer);
             }
         }
 
@@ -88,7 +109,7 @@ namespace Engine
         {
             using (var tmp = new MemoryStream())
             {
-                new BinaryFormatter().Serialize(tmp, obj);
+                CreateBinaryFormatter().Serialize(tmp, obj);
                 tmp.Position = 0;
 
                 using (var cmp = CompressStream(tmp))
@@ -112,7 +133,7 @@ namespace Engine
                 dec.CopyTo(tmp);
                 tmp.Position = 0;
 
-                return (T)new BinaryFormatter().Deserialize(tmp);
+                return (T)CreateBinaryFormatter().Deserialize(tmp);
             }
         }
 
@@ -127,113 +148,113 @@ namespace Engine
         {
             return (T)info.GetValue(name, typeof(T));
         }
+    }
 
-        /// <summary>
-        /// Adds a Vector3 instance to a serialization info object
-        /// </summary>
-        /// <param name="info">Serialization info</param>
-        /// <param name="name">Name</param>
-        /// <param name="value">Value</param>
-        public static void AddVector3(this SerializationInfo info, string name, Vector3 value)
+    /// <summary>
+    /// Vector3 serialization surrogate
+    /// </summary>
+    sealed class Vector3SerializationSurrogate : ISerializationSurrogate
+    {
+        public void GetObjectData(object obj, SerializationInfo info, StreamingContext context)
         {
-            info.AddValue(string.Format("{0}.X", name), value.X);
-            info.AddValue(string.Format("{0}.Y", name), value.Y);
-            info.AddValue(string.Format("{0}.Z", name), value.Z);
+            var v = (Vector3)obj;
+            info.AddValue("X", v.X);
+            info.AddValue("Y", v.Y);
+            info.AddValue("Z", v.Z);
         }
-        /// <summary>
-        /// Gets a Vector3 instance from a serialization info object
-        /// </summary>
-        /// <param name="info">Serialization info</param>
-        /// <param name="name">Name</param>
-        /// <returns>Returns a Vector3 instance</returns>
-        public static Vector3 GetVector3(this SerializationInfo info, string name)
+        public object SetObjectData(object obj, SerializationInfo info, StreamingContext context, ISurrogateSelector selector)
         {
-            var vX = info.GetSingle(string.Format("{0}.X", name));
-            var vY = info.GetSingle(string.Format("{0}.Y", name));
-            var vZ = info.GetSingle(string.Format("{0}.Z", name));
-
-            return new Vector3(vX, vY, vZ);
+            var v = (Vector3)obj;
+            v.X = info.GetSingle("X");
+            v.Y = info.GetSingle("Y");
+            v.Z = info.GetSingle("Z");
+            return v;
         }
-
-        /// <summary>
-        /// Adds a Int3 instance to a serialization info object
-        /// </summary>
-        /// <param name="info">Serialization info</param>
-        /// <param name="name">Name</param>
-        /// <param name="value">Value</param>
-        public static void AddInt3(this SerializationInfo info, string name, Int3 value)
+    }
+    /// <summary>
+    /// Vector4 serialization surrogate
+    /// </summary>
+    sealed class Vector4SerializationSurrogate : ISerializationSurrogate
+    {
+        public void GetObjectData(object obj, SerializationInfo info, StreamingContext context)
         {
-            info.AddValue(string.Format("{0}.X", name), value.X);
-            info.AddValue(string.Format("{0}.Y", name), value.Y);
-            info.AddValue(string.Format("{0}.Z", name), value.Z);
+            var v = (Vector4)obj;
+            info.AddValue("X", v.X);
+            info.AddValue("Y", v.Y);
+            info.AddValue("Z", v.Z);
+            info.AddValue("W", v.W);
         }
-        /// <summary>
-        /// Gets a Int3 instance from a serialization info object
-        /// </summary>
-        /// <param name="info">Serialization info</param>
-        /// <param name="name">Name</param>
-        /// <returns>Returns a Int3 instance</returns>
-        public static Int3 GetInt3(this SerializationInfo info, string name)
+        public object SetObjectData(object obj, SerializationInfo info, StreamingContext context, ISurrogateSelector selector)
         {
-            var vX = info.GetInt32(string.Format("{0}.X", name));
-            var vY = info.GetInt32(string.Format("{0}.Y", name));
-            var vZ = info.GetInt32(string.Format("{0}.Z", name));
-
-            return new Int3(vX, vY, vZ);
+            var v = (Vector4)obj;
+            v.X = info.GetSingle("X");
+            v.Y = info.GetSingle("Y");
+            v.Z = info.GetSingle("Z");
+            v.W = info.GetSingle("W");
+            return v;
         }
-
-        /// <summary>
-        /// Adds a Int4 instance to a serialization info object
-        /// </summary>
-        /// <param name="info">Serialization info</param>
-        /// <param name="name">Name</param>
-        /// <param name="value">Value</param>
-        public static void AddInt4(this SerializationInfo info, string name, Int4 value)
+    }
+    /// <summary>
+    /// Int3 serialization surrogate
+    /// </summary>
+    sealed class Int3SerializationSurrogate : ISerializationSurrogate
+    {
+        public void GetObjectData(object obj, SerializationInfo info, StreamingContext context)
         {
-            info.AddValue(string.Format("{0}.X", name), value.X);
-            info.AddValue(string.Format("{0}.Y", name), value.Y);
-            info.AddValue(string.Format("{0}.Z", name), value.Z);
-            info.AddValue(string.Format("{0}.W", name), value.W);
+            var v = (Int3)obj;
+            info.AddValue("X", v.X);
+            info.AddValue("Y", v.Y);
+            info.AddValue("Z", v.Z);
         }
-        /// <summary>
-        /// Gets a Int4 instance from a serialization info object
-        /// </summary>
-        /// <param name="info">Serialization info</param>
-        /// <param name="name">Name</param>
-        /// <returns>Returns a Int4 instance</returns>
-        public static Int4 GetInt4(this SerializationInfo info, string name)
+        public object SetObjectData(object obj, SerializationInfo info, StreamingContext context, ISurrogateSelector selector)
         {
-            var vX = info.GetInt32(string.Format("{0}.X", name));
-            var vY = info.GetInt32(string.Format("{0}.Y", name));
-            var vZ = info.GetInt32(string.Format("{0}.Z", name));
-            var vW = info.GetInt32(string.Format("{0}.W", name));
-
-            return new Int4(vX, vY, vZ, vW);
+            var v = (Int3)obj;
+            v.X = info.GetInt32("X");
+            v.Y = info.GetInt32("Y");
+            v.Z = info.GetInt32("Z");
+            return v;
         }
-
-        /// <summary>
-        /// Adds a BoundingBox instance to a serialization info object
-        /// </summary>
-        /// <param name="info">Serialization info</param>
-        /// <param name="name">Name</param>
-        /// <param name="value">Value</param>
-        public static void AddBoundingBox(this SerializationInfo info, string name, BoundingBox value)
+    }
+    /// <summary>
+    /// Int4 serialization surrogate
+    /// </summary>
+    sealed class Int4SerializationSurrogate : ISerializationSurrogate
+    {
+        public void GetObjectData(object obj, SerializationInfo info, StreamingContext context)
         {
-            info.AddVector3(string.Format("{0}.Min", name), value.Minimum);
-            info.AddVector3(string.Format("{0}.Max", name), value.Maximum);
+            var v = (Int4)obj;
+            info.AddValue("X", v.X);
+            info.AddValue("Y", v.Y);
+            info.AddValue("Z", v.Z);
+            info.AddValue("W", v.W);
         }
-        /// <summary>
-        /// Gets a BoundingBox instance from a serialization info object
-        /// </summary>
-        /// <param name="info">Serialization info</param>
-        /// <param name="name">Name</param>
-        /// <returns>Returns a BoundingBox instance</returns>
-        public static BoundingBox GetBoundingBox(this SerializationInfo info, string name)
+        public object SetObjectData(object obj, SerializationInfo info, StreamingContext context, ISurrogateSelector selector)
         {
-            var vMin = info.GetVector3(string.Format("{0}.Min", name));
-            var vMax = info.GetVector3(string.Format("{0}.Max", name));
-
-            return new BoundingBox(vMin, vMax);
+            var v = (Int4)obj;
+            v.X = info.GetInt32("X");
+            v.Y = info.GetInt32("Y");
+            v.Z = info.GetInt32("Z");
+            v.W = info.GetInt32("W");
+            return v;
+        }
+    }
+    /// <summary>
+    /// BoundingBox serialization surrogate
+    /// </summary>
+    sealed class BoundingBoxSerializationSurrogate : ISerializationSurrogate
+    {
+        public void GetObjectData(object obj, SerializationInfo info, StreamingContext context)
+        {
+            var b = (BoundingBox)obj;
+            info.AddValue("Minimum", b.Minimum);
+            info.AddValue("Maximum", b.Maximum);
+        }
+        public object SetObjectData(object obj, SerializationInfo info, StreamingContext context, ISurrogateSelector selector)
+        {
+            var b = (BoundingBox)obj;
+            b.Minimum = info.GetValue<Vector3>("Minimum");
+            b.Maximum = info.GetValue<Vector3>("Maximum");
+            return b;
         }
     }
 }

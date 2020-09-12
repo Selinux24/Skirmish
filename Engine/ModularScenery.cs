@@ -234,9 +234,11 @@ namespace Engine
             foreach (var assetName in instances.Keys)
             {
                 int count = instances[assetName].Count;
+
                 if (count > 0)
                 {
                     var modelContent = content.FilterMask(assetName);
+
                     if (modelContent != null)
                     {
                         var masks = this.Levels.GetMasksForAsset(assetName);
@@ -732,7 +734,6 @@ namespace Engine
             foreach (var asset in this.assets.Values)
             {
                 var instances = asset.GetInstances().Where(i => i.Visible);
-
                 foreach (var instance in instances)
                 {
                     triangles.AddRange(instance.GetVolume(full));

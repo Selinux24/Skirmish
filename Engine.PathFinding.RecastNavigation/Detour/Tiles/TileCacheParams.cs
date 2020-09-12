@@ -1,7 +1,5 @@
 ﻿using SharpDX;
 using System;
-using System.Runtime.Serialization;
-using System.Security.Permissions;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
@@ -9,7 +7,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
     /// Tile cache parameters
     /// </summary>
     [Serializable]
-    public struct TileCacheParams : ISerializable
+    public struct TileCacheParams
     {
         /// <summary>
         /// Origin
@@ -63,50 +61,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// Maximum obstacles
         /// </summary>
         public int MaxObstacles { get; set; }
-
-        /// <summary>
-        /// Serialization constructor
-        /// </summary>
-        /// <param name="info">Serialization information</param>
-        /// <param name="context">Serializatio context</param>
-        internal TileCacheParams(SerializationInfo info, StreamingContext context)
-        {
-            Origin = info.GetVector3("Origin");
-            CellSize = info.GetSingle("CellSize");
-            CellHeight = info.GetSingle("CellHeight");
-            Width = info.GetInt32("Width");
-            Height = info.GetInt32("Height");
-            WalkableHeight = info.GetSingle("WalkableHeight");
-            WalkableRadius = info.GetSingle("WalkableRadius");
-            WalkableClimb = info.GetSingle("WalkableClimb");
-            MaxSimplificationError = info.GetSingle("MaxSimplificationError");
-            MaxTiles = info.GetInt32("MaxTiles");
-            TileWidth = info.GetInt32("TileWidth");
-            TileHeight = info.GetInt32("TileHeight");
-            MaxObstacles = info.GetInt32("MaxObstacles");
-        }
-        /// <summary>
-        /// Populates a SerializationInfo with the data needed to serialize the target object.
-        /// </summary>
-        /// <param name="info">The SerializationInfo to populate with data.</param>
-        /// <param name="context">The destination for this serialization.</param>
-        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            info.AddVector3("Origin", Origin);
-            info.AddValue("CellSize", CellSize);
-            info.AddValue("CellHeight", CellHeight);
-            info.AddValue("Width", Width);
-            info.AddValue("Height", Height);
-            info.AddValue("WalkableHeight", WalkableHeight);
-            info.AddValue("WalkableRadius", WalkableRadius);
-            info.AddValue("WalkableClimb", WalkableClimb);
-            info.AddValue("MaxSimplificationError", MaxSimplificationError);
-            info.AddValue("MaxTiles", MaxTiles);
-            info.AddValue("TileWidth", TileWidth);
-            info.AddValue("TileHeight", TileHeight);
-            info.AddValue("MaxObstacles", MaxObstacles);
-        }
 
         /// <summary>
         /// Gets the text representation of the instance

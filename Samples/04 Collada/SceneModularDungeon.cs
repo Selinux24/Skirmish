@@ -385,14 +385,14 @@ namespace Collada
         }
         private async Task InitializeDungeon()
         {
-            var desc = LoadOnePageDungeon(@"resources\maze_of_the_purple_god.json");
+            var desc = await LoadOnePageDungeon(@"resources\maze_of_the_purple_god.json");
 
             this.scenery = await this.AddComponentModularScenery(desc, SceneObjectUsages.Ground);
             this.scenery.TriggerEnd += TriggerEnds;
 
             this.SetGround(this.scenery, true);
         }
-        private ModularSceneryDescription LoadOnePageDungeon(string fileName)
+        private async Task<ModularSceneryDescription> LoadOnePageDungeon(string fileName)
         {
             var dn = Engine.Content.OnePageDungeon.DungeonFile.Load(fileName);
 
@@ -469,9 +469,11 @@ namespace Collada
                 DoorAnimationPlans = new[] { openPlan, closePlan },
                 DoorStates = new[] { closeState, openState },
                 DoorActions = new[] { closeAction, openAction },
+
+                RandomSeed = 1000,
             };
 
-            return new ModularSceneryDescription()
+            var res = new ModularSceneryDescription()
             {
                 Name = "Dungeon",
                 UseAnisotropic = true,
@@ -481,6 +483,8 @@ namespace Collada
                 AssetsConfiguration = Engine.Content.OnePageDungeon.DungeonCreator.CreateAssets(dn, config),
                 Levels = Engine.Content.OnePageDungeon.DungeonCreator.CreateLevels(dn, config),
             };
+
+            return await Task.FromResult(res);
         }
         private async Task InitializePlayer()
         {
