@@ -187,6 +187,8 @@
     <Compile Include="Audio\IGameAudioEmitter.cs" />
     <Compile Include="Audio\IGameAudioListener.cs" />
     <Compile Include="Audio\ReverbPresets.cs" />
+    <Compile Include="Audio\Tween\AudioEffectTweenCollection.cs" />
+    <Compile Include="Audio\Tween\AudioEffectTweenExtensions.cs" />
     <Compile Include="Axis.cs" />
     <Compile Include="BlendModes.cs" />
     <Compile Include="CollisionDetectionMode.cs" />
@@ -411,7 +413,9 @@
     <Compile Include="SkyScatteringDescription.cs" />
     <Compile Include="SkyScatteringResolutions.cs" />
     <Compile Include="Tween\FloatTween.cs" />
-    <Compile Include="Tween\FloatTweenExtensions.cs" />
+    <Compile Include="Tween\ITweenCollection.cs" />
+    <Compile Include="UI\Tween\UIControlTweenCollection.cs" />
+    <Compile Include="UI\Tween\UIControlTweenExtensions.cs" />
     <Compile Include="Tween\FloatTweenManager.cs" />
     <Compile Include="Tween\ITween.cs" />
     <Compile Include="Tween\ScaleFuncs.cs" />

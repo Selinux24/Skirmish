@@ -1,7 +1,9 @@
 ﻿using Engine;
 using Engine.Audio;
+using Engine.Audio.Tween;
 using Engine.Tween;
 using Engine.UI;
+using Engine.UI.Tween;
 using SharpDX;
 using System;
 using System.Threading.Tasks;
@@ -464,6 +466,7 @@ namespace Collada
             {
                 currentMusic.LoopEnd += AudioManager_LoopEnd;
                 currentMusic.Play();
+                currentMusic.TweenVolumeUp(15000, ScaleFuncs.Linear);
             }
         }
 
