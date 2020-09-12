@@ -256,7 +256,9 @@ namespace Engine.Audio
             {
                 disposed = true;
 
-                Logger.WriteDebug($"{audioFile.FileName} Dispose Begin");
+                string fileName = audioFile?.FileName ?? "Already disposed file";
+
+                Logger.WriteDebug($"{fileName} Dispose Begin");
 
                 if (sourceVoice?.IsDisposed != true)
                 {
@@ -273,7 +275,7 @@ namespace Engine.Audio
 
                 audioFile?.Dispose();
 
-                Logger.WriteDebug($"{audioFile.FileName} Dispose End");
+                Logger.WriteDebug($"{fileName} Dispose End");
             }
         }
 
