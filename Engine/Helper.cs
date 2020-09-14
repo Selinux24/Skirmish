@@ -8,7 +8,6 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
 
 namespace Engine
 {
@@ -68,6 +67,104 @@ namespace Engine
             T stuff = (T)Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(T));
             handle.Free();
             return stuff;
+        }
+        /// <summary>
+        /// Writes stream to memory
+        /// </summary>
+        /// <param name="stream">Stream</param>
+        /// <returns>Returns a memory stream</returns>
+        public static MemoryStream CopyToMemory(this Stream stream)
+        {
+            MemoryStream ms = new MemoryStream();
+
+            stream.CopyTo(ms);
+
+            ms.Position = 0;
+
+            return ms;
+        }
+        /// <summary>
+        /// Writes file to memory
+        /// </summary>
+        /// <param name="fileName">File name</param>
+        /// <returns>Returns a memory stream</returns>
+        public static MemoryStream CopyToMemory(this string fileName)
+        {
+            using (var stream = File.OpenRead(fileName))
+            {
+                return stream.CopyToMemory();
+            }
+        }
+
+        #endregion
+
+        #region Security
+
+        /// <summary>
+        /// Create the md5 sum string of the specified buffer
+        /// </summary>
+        /// <param name="buffer">Buffer</param>
+        /// <returns>Returns the md5 sum string of the specified buffer</returns>
+        public static string GetMd5Sum(this byte[] buffer)
+        {
+            byte[] result = null;
+            using (MD5 md5 = new MD5CryptoServiceProvider())
+            {
+                result = md5.ComputeHash(buffer);
+            }
+
+            StringBuilder sb = new StringBuilder();
+            Array.ForEach(result, r => sb.Append(r.ToString("X2")));
+            return sb.ToString();
+        }
+        /// <summary>
+        /// Create the md5 sum string of the specified string
+        /// </summary>
+        /// <param name="content">String</param>
+        /// <returns>Returns the md5 sum string of the specified string</returns>
+        public static string GetMd5Sum(this string content)
+        {
+            byte[] tmp = new byte[content.Length * 2];
+            Encoding.Unicode.GetEncoder().GetBytes(content.ToCharArray(), 0, content.Length, tmp, 0, true);
+
+            return tmp.GetMd5Sum();
+        }
+        /// <summary>
+        /// Create the md5 sum string of the specified string list
+        /// </summary>
+        /// <param name="content">String list</param>
+        /// <returns>Returns the md5 sum string of the specified string</returns>
+        public static string GetMd5Sum(this IEnumerable<string> content)
+        {
+            string md5 = null;
+            content
+                .ToList()
+                .ForEach(p => md5 += p.GetMd5Sum());
+
+            return md5;
+        }
+        /// <summary>
+        /// Create the md5 sum string of the specified stream
+        /// </summary>
+        /// <param name="stream">Stream</param>
+        /// <returns>Returns the md5 sum string of the specified stream</returns>
+        public static string GetMd5Sum(this MemoryStream stream)
+        {
+            return stream.ToArray().GetMd5Sum();
+        }
+        /// <summary>
+        /// Create the md5 sum string of the specified stream list
+        /// </summary>
+        /// <param name="streams">Stream list</param>
+        /// <returns>Returns the md5 sum string of the specified stream list</returns>
+        public static string GetMd5Sum(this IEnumerable<MemoryStream> streams)
+        {
+            string md5 = null;
+            streams
+                .ToList()
+                .ForEach(p => md5 += p.GetMd5Sum());
+
+            return md5;
         }
 
         #endregion
@@ -164,136 +261,6 @@ namespace Engine
             while (attempts > 0);
 
             throw lastEx;
-        }
-
-        #endregion
-
-        #region Serialization
-
-        /// <summary>
-        /// Serializes the specified object to XML file
-        /// </summary>
-        /// <typeparam name="T">Object type</typeparam>
-        /// <param name="obj">Object to serialize</param>
-        /// <param name="fileName">File name</param>
-        /// <param name="nameSpace">Name space</param>
-        public static void SerializeToFile<T>(T obj, string fileName, string nameSpace = null)
-        {
-            using (StreamWriter wr = new StreamWriter(fileName, false, Encoding.Default))
-            {
-                XmlSerializer sr = new XmlSerializer(typeof(T), nameSpace);
-
-                sr.Serialize(wr, obj);
-            }
-        }
-        /// <summary>
-        /// Deserializes an object from a XML file
-        /// </summary>
-        /// <typeparam name="T">Object type</typeparam>
-        /// <param name="fileName">File name</param>
-        /// <param name="nameSpace">Name space</param>
-        /// <returns>Returns the deserialized object</returns>
-        public static T DeserializeFromFile<T>(string fileName, string nameSpace = null)
-        {
-            using (StreamReader rd = new StreamReader(fileName, Encoding.Default))
-            {
-                XmlSerializer sr = new XmlSerializer(typeof(T), nameSpace);
-
-                return (T)sr.Deserialize(rd);
-            }
-        }
-        /// <summary>
-        /// Writes stream to memory
-        /// </summary>
-        /// <param name="stream">Stream</param>
-        /// <returns>Returns a memory stream</returns>
-        public static MemoryStream WriteToMemory(this Stream stream)
-        {
-            MemoryStream ms = new MemoryStream();
-
-            stream.CopyTo(ms);
-
-            ms.Position = 0;
-
-            return ms;
-        }
-        /// <summary>
-        /// Writes file to memory
-        /// </summary>
-        /// <param name="fileName">File name</param>
-        /// <returns>Returns a memory stream</returns>
-        public static MemoryStream WriteToMemory(this string fileName)
-        {
-            using (var stream = File.OpenRead(fileName))
-            {
-                return stream.WriteToMemory();
-            }
-        }
-        /// <summary>
-        /// Create the md5 sum string of the specified buffer
-        /// </summary>
-        /// <param name="buffer">Buffer</param>
-        /// <returns>Returns the md5 sum string of the specified buffer</returns>
-        public static string GetMd5Sum(this byte[] buffer)
-        {
-            byte[] result = null;
-            using (MD5 md5 = new MD5CryptoServiceProvider())
-            {
-                result = md5.ComputeHash(buffer);
-            }
-
-            StringBuilder sb = new StringBuilder();
-            Array.ForEach(result, r => sb.Append(r.ToString("X2")));
-            return sb.ToString();
-        }
-        /// <summary>
-        /// Create the md5 sum string of the specified string
-        /// </summary>
-        /// <param name="content">String</param>
-        /// <returns>Returns the md5 sum string of the specified string</returns>
-        public static string GetMd5Sum(this string content)
-        {
-            byte[] tmp = new byte[content.Length * 2];
-            Encoding.Unicode.GetEncoder().GetBytes(content.ToCharArray(), 0, content.Length, tmp, 0, true);
-
-            return tmp.GetMd5Sum();
-        }
-        /// <summary>
-        /// Create the md5 sum string of the specified string list
-        /// </summary>
-        /// <param name="content">String list</param>
-        /// <returns>Returns the md5 sum string of the specified string</returns>
-        public static string GetMd5Sum(this IEnumerable<string> content)
-        {
-            string md5 = null;
-            content
-                .ToList()
-                .ForEach(p => md5 += p.GetMd5Sum());
-
-            return md5;
-        }
-        /// <summary>
-        /// Create the md5 sum string of the specified stream
-        /// </summary>
-        /// <param name="stream">Stream</param>
-        /// <returns>Returns the md5 sum string of the specified stream</returns>
-        public static string GetMd5Sum(this MemoryStream stream)
-        {
-            return stream.ToArray().GetMd5Sum();
-        }
-        /// <summary>
-        /// Create the md5 sum string of the specified stream list
-        /// </summary>
-        /// <param name="streams">Stream list</param>
-        /// <returns>Returns the md5 sum string of the specified stream list</returns>
-        public static string GetMd5Sum(this IEnumerable<MemoryStream> streams)
-        {
-            string md5 = null;
-            streams
-                .ToList()
-                .ForEach(p => md5 += p.GetMd5Sum());
-
-            return md5;
         }
 
         #endregion

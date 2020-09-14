@@ -110,7 +110,7 @@ namespace Engine
             }
             else if (!string.IsNullOrWhiteSpace(description.AssetsConfigurationFile))
             {
-                this.AssetConfiguration = Helper.DeserializeFromFile<ModularSceneryAssetConfiguration>(Path.Combine(description.ContentDescription.ContentFolder, description.AssetsConfigurationFile));
+                this.AssetConfiguration = SerializationHelper.DeserializeXmlFromFile<ModularSceneryAssetConfiguration>(Path.Combine(description.ContentDescription.ContentFolder ?? "", description.AssetsConfigurationFile));
             }
 
             if (description.Levels != null)
@@ -119,7 +119,7 @@ namespace Engine
             }
             else if (!string.IsNullOrWhiteSpace(description.LevelsFile))
             {
-                this.Levels = Helper.DeserializeFromFile<ModularSceneryLevels>(Path.Combine(description.ContentDescription.ContentFolder, description.LevelsFile));
+                this.Levels = SerializationHelper.DeserializeXmlFromFile<ModularSceneryLevels>(Path.Combine(description.ContentDescription.ContentFolder ?? "", description.LevelsFile));
             }
         }
         /// <summary>
@@ -206,18 +206,25 @@ namespace Engine
                 this.particleManager = await this.Scene.AddComponentParticleManager(
                     new ParticleManagerDescription()
                     {
-                        Name = string.Format("{0}.{1}", this.Description.Name, "Particle Manager"),
+                        Name = $"{this.Description.Name ?? nameof(ModularScenery)}.Particle Manager",
                     },
                     SceneObjectUsages.None,
                     98);
 
                 foreach (var item in this.Levels.ParticleSystems)
                 {
-                    item.ContentPath = item.ContentPath ?? this.Description.ContentDescription.ContentFolder;
+                    try
+                    {
+                        item.ContentPath = item.ContentPath ?? this.Description.ContentDescription.ContentFolder;
 
-                    var pDesc = ParticleSystemDescription.Initialize(item);
+                        var pDesc = ParticleSystemDescription.Initialize(item);
 
-                    this.particleDescriptors.Add(item.Name, pDesc);
+                        this.particleDescriptors.Add(item.Name, pDesc);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.WriteError($"{nameof(ModularScenery)}. Error loading particle system {item.Name}: {ex}");
+                    }
                 }
             }
         }
@@ -234,36 +241,53 @@ namespace Engine
             foreach (var assetName in instances.Keys)
             {
                 int count = instances[assetName].Count;
-
-                if (count > 0)
+                if (count <= 0)
                 {
-                    var modelContent = content.FilterMask(assetName);
-
-                    if (modelContent != null)
-                    {
-                        var masks = this.Levels.GetMasksForAsset(assetName);
-                        var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
-
-                        var model = await this.Scene.AddComponentModelInstanced(
-                            new ModelInstancedDescription()
-                            {
-                                Name = string.Format("{0}.{1}.{2}", this.Description.Name, assetName, level.Name),
-                                CastShadow = this.Description.CastShadow,
-                                UseAnisotropicFiltering = this.Description.UseAnisotropic,
-                                Instances = count,
-                                LoadAnimation = false,
-                                Content = new ContentDescription()
-                                {
-                                    ModelContent = modelContent,
-                                }
-                            },
-                            hasVolumes ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding);
-
-                        model.HasParent = true;
-
-                        this.assets.Add(assetName, model);
-                    }
+                    return;
                 }
+
+                var modelContent = content.FilterMask(assetName);
+                if (modelContent == null)
+                {
+                    continue;
+                }
+
+                var modelName = $"{this.Description.Name ?? nameof(ModularScenery)}.{assetName}.{level.Name}";
+                var masks = this.Levels.GetMasksForAsset(assetName);
+                var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
+                var usage = hasVolumes ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding;
+                ModelInstanced model = null;
+
+                try
+                {
+                    model = await this.Scene.AddComponentModelInstanced(
+                        new ModelInstancedDescription()
+                        {
+                            Name = modelName,
+                            CastShadow = this.Description.CastShadow,
+                            UseAnisotropicFiltering = this.Description.UseAnisotropic,
+                            Instances = count,
+                            LoadAnimation = false,
+                            Content = new ContentDescription()
+                            {
+                                ModelContent = modelContent,
+                            }
+                        },
+                        usage);
+
+                    model.HasParent = true;
+                }
+                catch (Exception ex)
+                {
+                    Logger.WriteError($"{nameof(ModularScenery)}. Error loading asset {modelName}: {ex}");
+                }
+
+                if (model == null)
+                {
+                    continue;
+                }
+
+                this.assets.Add(assetName, model);
             }
         }
         /// <summary>
@@ -302,33 +326,48 @@ namespace Engine
                     usage = hasVolumes ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding;
                 }
 
-                var model = await this.Scene.AddComponentModelInstanced(
-                    new ModelInstancedDescription()
-                    {
-                        Name = string.Format("{0}.{1}.{2}", this.Description.Name, assetName, level.Name),
-                        CastShadow = this.Description.CastShadow,
-                        UseAnisotropicFiltering = this.Description.UseAnisotropic,
-                        Instances = count,
-                        BlendMode = this.Description.BlendMode,
-                        Content = new ContentDescription()
-                        {
-                            ModelContent = modelContent,
-                        }
-                    },
-                    usage);
+                string modelName = $"{this.Description.Name ?? nameof(ModularScenery)}.{assetName}.{level.Name}";
+                ModelInstanced model = null;
 
-                //Get the object list to process
-                var objList = Array.FindAll(level.Objects, o => string.Equals(o.AssetName, assetName, StringComparison.OrdinalIgnoreCase));
-
-                //Positioning
-                model.SetTransforms(objList.Select(o => o.GetTransform()).ToArray());
-
-                //Lights
-                for (int i = 0; i < model.InstanceCount; i++)
+                try
                 {
-                    this.InitializeObjectLights(objList[i], model[i]);
+                    model = await this.Scene.AddComponentModelInstanced(
+                        new ModelInstancedDescription()
+                        {
+                            Name = modelName,
+                            CastShadow = this.Description.CastShadow,
+                            UseAnisotropicFiltering = this.Description.UseAnisotropic,
+                            Instances = count,
+                            BlendMode = this.Description.BlendMode,
+                            Content = new ContentDescription()
+                            {
+                                ModelContent = modelContent,
+                            }
+                        },
+                        usage);
 
-                    this.InitializeObjectAnimations(objList[i], model[i]);
+                    //Get the object list to process
+                    var objList = Array.FindAll(level.Objects, o => string.Equals(o.AssetName, assetName, StringComparison.OrdinalIgnoreCase));
+
+                    //Positioning
+                    model.SetTransforms(objList.Select(o => o.GetTransform()).ToArray());
+
+                    //Lights
+                    for (int i = 0; i < model.InstanceCount; i++)
+                    {
+                        this.InitializeObjectLights(objList[i], model[i]);
+
+                        this.InitializeObjectAnimations(objList[i], model[i]);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.WriteError($"{nameof(ModularScenery)}. Error loading object {modelName}: {ex}");
+                }
+
+                if (model == null)
+                {
+                    continue;
                 }
 
                 this.objects.Add(assetName, model);
@@ -349,33 +388,49 @@ namespace Engine
             var trn = instance.Manipulator.LocalTransform;
 
             var lights = instance.Lights;
-            if (lights.Any())
+            if (lights?.Any() != true)
             {
-                var emitterDesc = obj.ParticleLight;
+                return;
+            }
 
-                foreach (var light in lights)
+            foreach (var light in lights)
+            {
+                light.CastShadow = obj.CastShadows;
+
+                if (obj.ParticleLight == null)
                 {
-                    light.CastShadow = obj.CastShadows;
-
-                    if (emitterDesc != null && light is SceneLightPoint pointL)
-                    {
-                        var pos = Vector3.TransformCoordinate(pointL.Position, trn);
-
-                        var emitter = new ParticleEmitter(emitterDesc)
-                        {
-                            Position = pos,
-                            Instance = instance,
-                        };
-
-                        this.particleManager.AddParticleSystem(
-                            ParticleSystemTypes.CPU,
-                            this.particleDescriptors[emitterDesc.Name],
-                            emitter);
-                    }
+                    continue;
                 }
 
-                this.Scene.Lights.AddRange(lights);
+                Vector3 lightPosition;
+                if (light is SceneLightPoint pointL)
+                {
+                    lightPosition = pointL.Position;
+                }
+                else if (light is SceneLightSpot spotL)
+                {
+                    lightPosition = spotL.Position;
+                }
+                else
+                {
+                    Logger.WriteWarning($"{nameof(ModularScenery)}. Light type not allowed {light.GetType()}");
+
+                    continue;
+                }
+
+                var emitter = new ParticleEmitter(obj.ParticleLight)
+                {
+                    Position = Vector3.TransformCoordinate(lightPosition, trn),
+                    Instance = instance,
+                };
+
+                this.particleManager.AddParticleSystem(
+                    ParticleSystemTypes.CPU,
+                    this.particleDescriptors[obj.ParticleLight.Name],
+                    emitter);
             }
+
+            this.Scene.Lights.AddRange(lights);
         }
         /// <summary>
         /// Initialize animations and triggers
@@ -505,7 +560,7 @@ namespace Engine
                 var assetIndex = Array.FindIndex(this.AssetConfiguration.Assets, a => a.Name == item.AssetName);
                 if (assetIndex < 0)
                 {
-                    throw new EngineException(string.Format("Modular Scenery asset not found: {0}", item.AssetName));
+                    throw new EngineException($"Modular Scenery asset not found: {item.AssetName}");
                 }
 
                 this.ParseAssetReference(item, assetIndex, transforms);
@@ -1487,7 +1542,7 @@ namespace Engine
             /// <returns>Returns the instance text representation</returns>
             public override string ToString()
             {
-                return string.Format("{0}; Index: {1}; Connections: {2};", this.Name, this.Index, this.Connections.Count);
+                return $"{this.Name}; Index: {this.Index}; Connections: {this.Connections.Count};";
             }
         }
         /// <summary>

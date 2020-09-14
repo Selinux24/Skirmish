@@ -3,6 +3,8 @@ using System.IO;
 using System.IO.Compression;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Text;
+using System.Xml.Serialization;
 
 namespace Engine
 {
@@ -45,60 +47,6 @@ namespace Engine
 
             return mso;
         }
-
-        /// <summary>
-        /// Creates a new binary formatter for serialization
-        /// </summary>
-        /// <remarks>Includes all the Serialization Surrogates for SharpDX native structs</remarks>
-        private static IFormatter CreateBinaryFormatter()
-        {
-            var ss = new SurrogateSelector();
-            ss.AddSurrogate(typeof(Vector3), new StreamingContext(StreamingContextStates.All), new Vector3SerializationSurrogate());
-            ss.AddSurrogate(typeof(Vector4), new StreamingContext(StreamingContextStates.All), new Vector4SerializationSurrogate());
-            ss.AddSurrogate(typeof(BoundingBox), new StreamingContext(StreamingContextStates.All), new BoundingBoxSerializationSurrogate());
-            ss.AddSurrogate(typeof(Int3), new StreamingContext(StreamingContextStates.All), new Int3SerializationSurrogate());
-            ss.AddSurrogate(typeof(Int4), new StreamingContext(StreamingContextStates.All), new Int4SerializationSurrogate());
-
-            IFormatter formatter = new BinaryFormatter
-            {
-                SurrogateSelector = ss
-            };
-
-            return formatter;
-        }
-
-        /// <summary>
-        /// Serialize into bytes
-        /// </summary>
-        /// <typeparam name="T">Object type</typeparam>
-        /// <param name="obj">Object</param>
-        /// <returns>Returns a byte array</returns>
-        public static byte[] Serialize<T>(this T obj)
-        {
-            using (var tmp = new MemoryStream())
-            {
-                CreateBinaryFormatter().Serialize(tmp, obj);
-                tmp.Position = 0;
-
-                return tmp.ToArray();
-            }
-        }
-        /// <summary>
-        /// Deserialize from a byte array
-        /// </summary>
-        /// <typeparam name="T">Object type</typeparam>
-        /// <param name="data">Byte array</param>
-        /// <returns>Returns the deserialized object</returns>
-        public static T Deserialize<T>(this byte[] data)
-        {
-            using (var buffer = new MemoryStream(data))
-            {
-                buffer.Position = 0;
-
-                return (T)CreateBinaryFormatter().Deserialize(buffer);
-            }
-        }
-
         /// <summary>
         /// Compress the object to a byte array
         /// </summary>
@@ -134,6 +82,155 @@ namespace Engine
                 tmp.Position = 0;
 
                 return (T)CreateBinaryFormatter().Deserialize(tmp);
+            }
+        }
+
+        /// <summary>
+        /// Creates a new binary formatter for serialization
+        /// </summary>
+        /// <remarks>Includes all the Serialization Surrogates for SharpDX native structs</remarks>
+        private static IFormatter CreateBinaryFormatter()
+        {
+            var ss = new SurrogateSelector();
+            ss.AddSurrogate(typeof(Vector3), new StreamingContext(StreamingContextStates.All), new Vector3SerializationSurrogate());
+            ss.AddSurrogate(typeof(Vector4), new StreamingContext(StreamingContextStates.All), new Vector4SerializationSurrogate());
+            ss.AddSurrogate(typeof(BoundingBox), new StreamingContext(StreamingContextStates.All), new BoundingBoxSerializationSurrogate());
+            ss.AddSurrogate(typeof(Int3), new StreamingContext(StreamingContextStates.All), new Int3SerializationSurrogate());
+            ss.AddSurrogate(typeof(Int4), new StreamingContext(StreamingContextStates.All), new Int4SerializationSurrogate());
+
+            IFormatter formatter = new BinaryFormatter
+            {
+                SurrogateSelector = ss
+            };
+
+            return formatter;
+        }
+        /// <summary>
+        /// Serialize into bytes
+        /// </summary>
+        /// <typeparam name="T">Object type</typeparam>
+        /// <param name="obj">Object</param>
+        /// <returns>Returns a byte array</returns>
+        public static byte[] SerializeBinary<T>(this T obj)
+        {
+            using (var tmp = new MemoryStream())
+            {
+                CreateBinaryFormatter().Serialize(tmp, obj);
+                tmp.Position = 0;
+
+                return tmp.ToArray();
+            }
+        }
+        /// <summary>
+        /// Serialize into file
+        /// </summary>
+        /// <typeparam name="T">Object type</typeparam>
+        /// <param name="obj">Object</param>
+        /// <param name="fileName">File name</param>
+        public static void SerializeBinaryToFile<T>(this T obj, string fileName)
+        {
+            var data = SerializeBinary(obj);
+
+            File.WriteAllBytes(fileName, data);
+        }
+        /// <summary>
+        /// Deserialize from a byte array
+        /// </summary>
+        /// <typeparam name="T">Object type</typeparam>
+        /// <param name="data">Byte array</param>
+        /// <returns>Returns the deserialized object</returns>
+        public static T DeserializeBinary<T>(this byte[] data)
+        {
+            using (var buffer = new MemoryStream(data))
+            {
+                buffer.Position = 0;
+
+                return (T)CreateBinaryFormatter().Deserialize(buffer);
+            }
+        }
+        /// <summary>
+        /// Deserialize from a file
+        /// </summary>
+        /// <typeparam name="T">Object type</typeparam>
+        /// <param name="fileName">File name</param>
+        /// <returns>Returns the deserialized object</returns>
+        public static T DeserializeBinaryFromFile<T>(string fileName)
+        {
+            return DeserializeBinary<T>(File.ReadAllBytes(fileName));
+        }
+
+        /// <summary>
+        /// Serialize into bytes
+        /// </summary>
+        /// <typeparam name="T">Object type</typeparam>
+        /// <param name="obj">Object</param>
+        /// <param name="nameSpace">Name space</param>
+        /// <returns>Returns a byte array</returns>
+        public static byte[] SerializeXml<T>(this T obj, string nameSpace = null)
+        {
+            byte[] data = null;
+
+            using (MemoryStream mso = new MemoryStream())
+            using (StreamWriter wr = new StreamWriter(mso, Encoding.Default))
+            {
+                XmlSerializer sr = new XmlSerializer(typeof(T), nameSpace);
+
+                sr.Serialize(wr, obj);
+
+                mso.Position = 0;
+
+                data = mso.ToArray();
+            }
+
+            return data;
+        }
+        /// <summary>
+        /// Serialize into file
+        /// </summary>
+        /// <typeparam name="T">Object type</typeparam>
+        /// <param name="obj">Object</param>
+        /// <param name="fileName">File name</param>
+        /// <param name="nameSpace">Name space</param>
+        public static void SerializeXmlToFile<T>(this T obj, string fileName, string nameSpace = null)
+        {
+            using (StreamWriter wr = new StreamWriter(fileName, false, Encoding.Default))
+            {
+                XmlSerializer sr = new XmlSerializer(typeof(T), nameSpace);
+
+                sr.Serialize(wr, obj);
+            }
+        }
+        /// <summary>
+        /// Deserialize from a byte array 
+        /// </summary>
+        /// <typeparam name="T">Object type</typeparam>
+        /// <param name="data">Byte array</param>
+        /// <param name="nameSpace">Name space</param>
+        /// <returns>Returns the deserialized object</returns>
+        public static T DeserializeXml<T>(this byte[] data, string nameSpace = null)
+        {
+            using (MemoryStream mso = new MemoryStream(data))
+            using (StreamReader rd = new StreamReader(mso, Encoding.Default))
+            {
+                XmlSerializer sr = new XmlSerializer(typeof(T), nameSpace);
+
+                return (T)sr.Deserialize(rd);
+            }
+        }
+        /// <summary>
+        /// Deserialize from a file
+        /// </summary>
+        /// <typeparam name="T">Object type</typeparam>
+        /// <param name="fileName">File name</param>
+        /// <param name="nameSpace">Name space</param>
+        /// <returns>Returns the deserialized object</returns>
+        public static T DeserializeXmlFromFile<T>(string fileName, string nameSpace = null)
+        {
+            using (StreamReader rd = new StreamReader(fileName, Encoding.Default))
+            {
+                XmlSerializer sr = new XmlSerializer(typeof(T), nameSpace);
+
+                return (T)sr.Deserialize(rd);
             }
         }
 

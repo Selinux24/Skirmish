@@ -256,7 +256,7 @@ namespace Engine.Audio
             {
                 disposed = true;
 
-                string fileName = audioFile?.FileName ?? "Already disposed file";
+                string fileName = audioFile?.FileName ?? "AlreadyDisposed.file";
 
                 Logger.WriteDebug($"{fileName} Dispose Begin");
 

@@ -72,7 +72,7 @@ namespace Engine.Content
                 string fileName = Path.GetFileName(ModelContentFilename);
                 string directory = Path.Combine(ContentFolder ?? "", Path.GetDirectoryName(ModelContentFilename));
 
-                var contentDesc = Helper.DeserializeFromFile<ModelContentDescription>(Path.Combine(directory, fileName));
+                var contentDesc = SerializationHelper.DeserializeXmlFromFile<ModelContentDescription>(Path.Combine(directory, fileName));
                 var loader = GameResourceManager.GetLoaderForFile(contentDesc.ModelFileName);
                 var t = loader.Load(directory, contentDesc);
                 return t.First();

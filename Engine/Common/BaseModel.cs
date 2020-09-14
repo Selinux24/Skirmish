@@ -93,7 +93,7 @@ namespace Engine.Common
             if (!string.IsNullOrEmpty(description.Content.ModelContentFilename))
             {
                 string contentFile = Path.Combine(description.Content.ContentFolder, description.Content.ModelContentFilename);
-                var contentDesc = Helper.DeserializeFromFile<ModelContentDescription>(contentFile);
+                var contentDesc = SerializationHelper.DeserializeXmlFromFile<ModelContentDescription>(contentFile);
                 var loader = GameResourceManager.GetLoaderForFile(contentDesc.ModelFileName);
                 geo = loader.Load(description.Content.ContentFolder, contentDesc);
             }

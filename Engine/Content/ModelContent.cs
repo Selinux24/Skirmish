@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Security.Permissions;
 
 namespace Engine.Content
 {
@@ -403,28 +402,6 @@ namespace Engine.Content
                 : base()
             {
 
-            }
-            /// <summary>
-            /// Constructor de serialización
-            /// </summary>
-            /// <param name="info">Info</param>
-            /// <param name="context">Context</param>
-            protected AnimationDictionary(SerializationInfo info, StreamingContext context)
-                : base(info, context)
-            {
-                Definition = info.GetValue<AnimationDescription>("Definition");
-            }
-            /// <summary>
-            /// Populates a SerializationInfo with the data needed to serialize the target object.
-            /// </summary>
-            /// <param name="info">The SerializationInfo to populate with data.</param>
-            /// <param name="context">The destination for this serialization.</param>
-            [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
-            public override void GetObjectData(SerializationInfo info, StreamingContext context)
-            {
-                info.AddValue("Definition", Definition);
-
-                base.GetObjectData(info, context);
             }
 
             /// <summary>
