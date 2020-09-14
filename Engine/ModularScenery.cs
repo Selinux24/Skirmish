@@ -252,36 +252,7 @@ namespace Engine
                     continue;
                 }
 
-                var modelName = $"{this.Description.Name ?? nameof(ModularScenery)}.{assetName}.{level.Name}";
-                var masks = this.Levels.GetMasksForAsset(assetName);
-                var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
-                var usage = hasVolumes ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding;
-                ModelInstanced model = null;
-
-                try
-                {
-                    model = await this.Scene.AddComponentModelInstanced(
-                        new ModelInstancedDescription()
-                        {
-                            Name = modelName,
-                            CastShadow = this.Description.CastShadow,
-                            UseAnisotropicFiltering = this.Description.UseAnisotropic,
-                            Instances = count,
-                            LoadAnimation = false,
-                            Content = new ContentDescription()
-                            {
-                                ModelContent = modelContent,
-                            }
-                        },
-                        usage);
-
-                    model.HasParent = true;
-                }
-                catch (Exception ex)
-                {
-                    Logger.WriteError($"{nameof(ModularScenery)}. Error loading asset {modelName}: {ex}");
-                }
-
+                var model = await InitializeAsset(assetName, count, level, modelContent);
                 if (model == null)
                 {
                     continue;
@@ -289,6 +260,46 @@ namespace Engine
 
                 this.assets.Add(assetName, model);
             }
+        }
+        /// <summary>
+        /// Creates a new instanced model for the asset
+        /// </summary>
+        /// <param name="assetName">Asset name</param>
+        /// <param name="count">Instance count</param>
+        /// <param name="level">Level</param>
+        /// <param name="modelContent">Model content</param>
+        private async Task<ModelInstanced> InitializeAsset(string assetName, int count, ModularSceneryLevel level, ModelContent modelContent)
+        {
+            var masks = this.Levels.GetMasksForAsset(assetName);
+            var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
+            var usage = hasVolumes ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding;
+
+            var modelName = $"{this.Description.Name ?? nameof(ModularScenery)}.{assetName}.{level.Name}";
+            ModelInstanced model = null;
+
+            try
+            {
+                model = await this.Scene.AddComponentModelInstanced(
+                    new ModelInstancedDescription()
+                    {
+                        Name = modelName,
+                        CastShadow = this.Description.CastShadow,
+                        UseAnisotropicFiltering = this.Description.UseAnisotropic,
+                        Instances = count,
+                        LoadAnimation = false,
+                        BlendMode = this.Description.BlendMode,
+                        Content = ContentDescription.FromModelContent(modelContent),
+                    },
+                    usage);
+
+                model.HasParent = true;
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError($"{nameof(ModularScenery)}. Error loading asset {modelName}: {ex}");
+            }
+
+            return model;
         }
         /// <summary>
         /// Initialize all objects into asset dictionary 
@@ -317,54 +328,7 @@ namespace Engine
                     continue;
                 }
 
-                var masks = this.Levels.GetMasksForAsset(assetName);
-                SceneObjectUsages usage = SceneObjectUsages.None;
-                var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
-                var pathFinding = instances[assetName].PathFinding;
-                if (pathFinding)
-                {
-                    usage = hasVolumes ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding;
-                }
-
-                string modelName = $"{this.Description.Name ?? nameof(ModularScenery)}.{assetName}.{level.Name}";
-                ModelInstanced model = null;
-
-                try
-                {
-                    model = await this.Scene.AddComponentModelInstanced(
-                        new ModelInstancedDescription()
-                        {
-                            Name = modelName,
-                            CastShadow = this.Description.CastShadow,
-                            UseAnisotropicFiltering = this.Description.UseAnisotropic,
-                            Instances = count,
-                            BlendMode = this.Description.BlendMode,
-                            Content = new ContentDescription()
-                            {
-                                ModelContent = modelContent,
-                            }
-                        },
-                        usage);
-
-                    //Get the object list to process
-                    var objList = Array.FindAll(level.Objects, o => string.Equals(o.AssetName, assetName, StringComparison.OrdinalIgnoreCase));
-
-                    //Positioning
-                    model.SetTransforms(objList.Select(o => o.GetTransform()).ToArray());
-
-                    //Lights
-                    for (int i = 0; i < model.InstanceCount; i++)
-                    {
-                        this.InitializeObjectLights(objList[i], model[i]);
-
-                        this.InitializeObjectAnimations(objList[i], model[i]);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Logger.WriteError($"{nameof(ModularScenery)}. Error loading object {modelName}: {ex}");
-                }
-
+                var model = await InitializeObject(assetName, count, instances[assetName].PathFinding, level, modelContent);
                 if (model == null)
                 {
                     continue;
@@ -372,6 +336,67 @@ namespace Engine
 
                 this.objects.Add(assetName, model);
             }
+        }
+        /// <summary>
+        /// Creates a new instanced model for the object
+        /// </summary>
+        /// <param name="assetName">Asset name</param>
+        /// <param name="count">Instance count</param>
+        /// <param name="pathFinding">Path finding enabled flag</param>
+        /// <param name="level">Level</param>
+        /// <param name="modelContent">Model content</param>
+        private async Task<ModelInstanced> InitializeObject(string assetName, int count, bool pathFinding, ModularSceneryLevel level, ModelContent modelContent)
+        {
+            var masks = this.Levels.GetMasksForAsset(assetName);
+            var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
+            SceneObjectUsages usage = SceneObjectUsages.None;
+            if (pathFinding)
+            {
+                usage = hasVolumes ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding;
+            }
+
+            var modelName = $"{this.Description.Name ?? nameof(ModularScenery)}.{assetName}.{level.Name}";
+            ModelInstanced model = null;
+
+            try
+            {
+                model = await this.Scene.AddComponentModelInstanced(
+                    new ModelInstancedDescription()
+                    {
+                        Name = modelName,
+                        CastShadow = this.Description.CastShadow,
+                        UseAnisotropicFiltering = this.Description.UseAnisotropic,
+                        Instances = count,
+                        BlendMode = this.Description.BlendMode,
+                        Content = ContentDescription.FromModelContent(modelContent),
+                    },
+                    usage);
+
+                model.HasParent = true;
+
+                //Get the object list to process
+                var objList = level.Objects
+                    .Where(o => string.Equals(o.AssetName, assetName, StringComparison.OrdinalIgnoreCase))
+                    .ToArray();
+
+                //Positioning
+                var transforms = objList.Select(o => o.GetTransform());
+                model.SetTransforms(transforms);
+
+                //Lights
+                for (int i = 0; i < model.InstanceCount; i++)
+                {
+                    this.InitializeObjectLights(objList[i], model[i]);
+
+                    this.InitializeObjectAnimations(objList[i], model[i]);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError($"{nameof(ModularScenery)}. Error loading object {modelName}: {ex}");
+            }
+
+            return model;
         }
         /// <summary>
         /// Initialize lights attached to the specified object
@@ -568,7 +593,7 @@ namespace Engine
 
             foreach (var assetName in transforms.Keys)
             {
-                this.assets[assetName].SetTransforms(transforms[assetName].ToArray());
+                this.assets[assetName].SetTransforms(transforms[assetName]);
             }
 
             this.assetMap.Build(this.AssetConfiguration, this.assets);

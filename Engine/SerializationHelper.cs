@@ -170,7 +170,7 @@ namespace Engine
         {
             byte[] data = null;
 
-            using (MemoryStream mso = new MemoryStream())
+            MemoryStream mso = new MemoryStream();
             using (StreamWriter wr = new StreamWriter(mso, Encoding.Default))
             {
                 XmlSerializer sr = new XmlSerializer(typeof(T), nameSpace);

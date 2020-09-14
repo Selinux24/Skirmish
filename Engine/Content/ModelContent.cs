@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Security.Permissions;
 
 namespace Engine.Content
 {
@@ -348,7 +349,9 @@ namespace Engine.Content
                 return null;
             }
         }
-
+        /// <summary>
+        /// Skinning dictionary by armature name
+        /// </summary>
         [Serializable]
         public class SkinningDictionary : Dictionary<string, SkinningContent>
         {
@@ -371,6 +374,10 @@ namespace Engine.Content
 
             }
 
+            /// <summary>
+            /// Gets whether the specified joint has skinning data attached or not
+            /// </summary>
+            /// <param name="jointName">Joint name</param>
             public bool HasJointData(string jointName)
             {
                 foreach (var value in this.Values)
@@ -402,6 +409,29 @@ namespace Engine.Content
                 : base()
             {
 
+            }
+
+            /// <summary>
+            /// Constructor de serialización
+            /// </summary>
+            /// <param name="info">Info</param>
+            /// <param name="context">Context</param>
+            protected AnimationDictionary(SerializationInfo info, StreamingContext context)
+                : base(info, context)
+            {
+                Definition = info.GetValue<AnimationDescription>(nameof(Definition));
+            }
+            /// <summary>
+            /// Populates a SerializationInfo with the data needed to serialize the target object.
+            /// </summary>
+            /// <param name="info">The SerializationInfo to populate with data.</param>
+            /// <param name="context">The destination for this serialization.</param>
+            [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
+            public override void GetObjectData(SerializationInfo info, StreamingContext context)
+            {
+                base.GetObjectData(info, context);
+
+                info.AddValue(nameof(Definition), Definition);
             }
 
             /// <summary>

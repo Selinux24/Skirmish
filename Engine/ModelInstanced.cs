@@ -506,17 +506,17 @@ namespace Engine
         /// Set instance positions
         /// </summary>
         /// <param name="positions">New positions</param>
-        public void SetPositions(Vector3[] positions)
+        public void SetPositions(IEnumerable<Vector3> positions)
         {
-            if (positions?.Length > 0 && this.instances?.Length > 0)
+            if (positions?.Any() == true && this.instances?.Length > 0)
             {
                 for (int i = 0; i < this.instances.Length; i++)
                 {
                     var instance = this.instances[i];
 
-                    if (i < positions.Length)
+                    if (i < positions.Count())
                     {
-                        instance.Manipulator.SetPosition(positions[i], true);
+                        instance.Manipulator.SetPosition(positions.ElementAt(i), true);
                         instance.Active = true;
                         instance.Visible = true;
                     }
@@ -532,17 +532,17 @@ namespace Engine
         /// Sets instance transforms
         /// </summary>
         /// <param name="transforms">Transform matrix list</param>
-        public void SetTransforms(Matrix[] transforms)
+        public void SetTransforms(IEnumerable<Matrix> transforms)
         {
-            if (transforms?.Length > 0 && this.instances?.Length > 0)
+            if (transforms?.Any() == true && this.instances?.Length > 0)
             {
                 for (int i = 0; i < this.instances.Length; i++)
                 {
                     var instance = this.instances[i];
 
-                    if (i < transforms.Length)
+                    if (i < transforms.Count())
                     {
-                        instance.Manipulator.SetTransform(transforms[i]);
+                        instance.Manipulator.SetTransform(transforms.ElementAt(i));
                         instance.Active = true;
                         instance.Visible = true;
                     }
