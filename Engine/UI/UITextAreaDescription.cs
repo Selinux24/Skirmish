@@ -9,19 +9,26 @@ namespace Engine.UI
         /// <summary>
         /// Gets the default text area description
         /// </summary>
-        public static UITextAreaDescription Default()
+        /// <param name="text">Text</param>
+        public static UITextAreaDescription Default(string text = null)
         {
-            return new UITextAreaDescription();
+            return new UITextAreaDescription()
+            {
+                Font = TextDrawerDescription.Default(),
+                Text = text,
+            };
         }
         /// <summary>
         /// Gets the default text area description from a font description
         /// </summary>
         /// <param name="font">Font description</param>
-        public static UITextAreaDescription Default(TextDrawerDescription font)
+        /// <param name="text">Text</param>
+        public static UITextAreaDescription Default(TextDrawerDescription font, string text = null)
         {
             return new UITextAreaDescription
             {
                 Font = font,
+                Text = text,
             };
         }
 
@@ -112,7 +119,7 @@ namespace Engine.UI
         /// <summary>
         /// Font description
         /// </summary>
-        public TextDrawerDescription Font { get; set; } = new TextDrawerDescription();
+        public TextDrawerDescription Font { get; set; }
 
         /// <summary>
         /// Constructor

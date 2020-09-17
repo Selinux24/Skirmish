@@ -33,7 +33,7 @@ namespace Engine.UI
     }
 
     /// <summary>
-    /// Sprite button extensions
+    /// UI Panel extensions
     /// </summary>
     public static class UIPanelExtensions
     {

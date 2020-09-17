@@ -13,29 +13,35 @@ namespace Engine.UI
         /// <param name="color">Button color</param>
         public static UIButtonDescription Default(Color4 color)
         {
+            var blendMode = color.Alpha >= 1f ? BlendModes.Default : BlendModes.DefaultTransparent;
+
             return new UIButtonDescription()
             {
                 Width = 120,
                 Height = 50,
 
                 ColorReleased = color,
+                BlendMode = blendMode,
             };
         }
         /// <summary>
         /// Gets the default button description
         /// </summary>
         /// <param name="color">Button color</param>
-        /// <param name="font">Font description</param>
-        public static UIButtonDescription Default(Color4 color, TextDrawerDescription font)
+        /// <param name="caption">Caption description</param>
+        public static UIButtonDescription Default(Color4 color, UITextAreaDescription caption)
         {
+            var blendMode = color.Alpha >= 1f ? BlendModes.Default : BlendModes.DefaultTransparent;
+
             return new UIButtonDescription()
             {
                 Width = 120,
                 Height = 50,
 
                 ColorReleased = color,
+                BlendMode = blendMode,
 
-                Font = font,
+                Caption = caption,
             };
         }
         /// <summary>
@@ -59,8 +65,8 @@ namespace Engine.UI
         /// </summary>
         /// <param name="textureFileName">Texture file name</param>
         /// <param name="textureRect">Texture rectangle</param>
-        /// <param name="font">Font description</param>
-        public static UIButtonDescription Default(string textureFileName, Vector4 textureRect, TextDrawerDescription font)
+        /// <param name="caption">Caption description</param>
+        public static UIButtonDescription Default(string textureFileName, Vector4 textureRect, UITextAreaDescription caption)
         {
             return new UIButtonDescription()
             {
@@ -70,7 +76,7 @@ namespace Engine.UI
                 TextureReleased = textureFileName,
                 TextureReleasedUVMap = textureRect,
 
-                Font = font,
+                Caption = caption,
             };
         }
         /// <summary>
@@ -80,6 +86,8 @@ namespace Engine.UI
         /// <param name="pressedColor">Pressed button color</param>
         public static UIButtonDescription DefaultTwoStateButton(Color4 releasedColor, Color4 pressedColor)
         {
+            var blendMode = releasedColor.Alpha >= 1f && pressedColor.Alpha > 1f ? BlendModes.Default : BlendModes.DefaultTransparent;
+
             return new UIButtonDescription()
             {
                 Width = 120,
@@ -90,6 +98,8 @@ namespace Engine.UI
                 ColorReleased = releasedColor,
 
                 ColorPressed = pressedColor,
+
+                BlendMode = blendMode,
             };
         }
         /// <summary>
@@ -97,9 +107,11 @@ namespace Engine.UI
         /// </summary>
         /// <param name="releasedColor">Released button color</param>
         /// <param name="pressedColor">Pressed button color</param>
-        /// <param name="font">Font description</param>
-        public static UIButtonDescription DefaultTwoStateButton(Color4 releasedColor, Color4 pressedColor, TextDrawerDescription font)
+        /// <param name="caption">Caption description</param>
+        public static UIButtonDescription DefaultTwoStateButton(Color4 releasedColor, Color4 pressedColor, UITextAreaDescription caption)
         {
+            var blendMode = releasedColor.Alpha >= 1f && pressedColor.Alpha > 1f ? BlendModes.Default : BlendModes.DefaultTransparent;
+
             return new UIButtonDescription()
             {
                 Width = 120,
@@ -111,7 +123,9 @@ namespace Engine.UI
 
                 ColorPressed = pressedColor,
 
-                Font = font,
+                BlendMode = blendMode,
+
+                Caption = caption,
             };
         }
         /// <summary>
@@ -142,8 +156,8 @@ namespace Engine.UI
         /// <param name="textureFileName">Texture file name</param>
         /// <param name="releasedTextureRect">Released texture rectangle</param>
         /// <param name="pressedTextureRect">Pressed texture rectangle</param>
-        /// <param name="font">Font description</param>
-        public static UIButtonDescription DefaultTwoStateButton(string textureFileName, Vector4 releasedTextureRect, Vector4 pressedTextureRect, TextDrawerDescription font)
+        /// <param name="caption">Caption description</param>
+        public static UIButtonDescription DefaultTwoStateButton(string textureFileName, Vector4 releasedTextureRect, Vector4 pressedTextureRect, UITextAreaDescription caption)
         {
             return new UIButtonDescription()
             {
@@ -158,7 +172,7 @@ namespace Engine.UI
                 TexturePressed = textureFileName,
                 TexturePressedUVMap = pressedTextureRect,
 
-                Font = font,
+                Caption = caption,
             };
         }
         /// <summary>
@@ -166,8 +180,8 @@ namespace Engine.UI
         /// </summary>
         /// <param name="releasedTextureFileName">Released texture file name</param>
         /// <param name="pressedTextureFileName">Pressed texture file name</param>
-        /// <param name="font">Font description</param>
-        public static UIButtonDescription DefaultTwoStateButton(string releasedTextureFileName, string pressedTextureFileName, TextDrawerDescription font)
+        /// <param name="caption">Caption description</param>
+        public static UIButtonDescription DefaultTwoStateButton(string releasedTextureFileName, string pressedTextureFileName, UITextAreaDescription caption)
         {
             return new UIButtonDescription()
             {
@@ -180,7 +194,7 @@ namespace Engine.UI
 
                 TexturePressed = pressedTextureFileName,
 
-                Font = font,
+                Caption = caption,
             };
         }
         /// <summary>
@@ -190,8 +204,8 @@ namespace Engine.UI
         /// <param name="releasedTextureRect">Released texture rectangle</param>
         /// <param name="pressedTextureFileName">Pressed texture file name</param>
         /// <param name="pressedTextureRect">Pressed texture rectangle</param>
-        /// <param name="font">Font description</param>
-        public static UIButtonDescription DefaultTwoStateButton(string releasedTextureFileName, Vector4 releasedTextureRect, string pressedTextureFileName, Vector4 pressedTextureRect, TextDrawerDescription font)
+        /// <param name="caption">Caption description</param>
+        public static UIButtonDescription DefaultTwoStateButton(string releasedTextureFileName, Vector4 releasedTextureRect, string pressedTextureFileName, Vector4 pressedTextureRect, UITextAreaDescription caption)
         {
             return new UIButtonDescription()
             {
@@ -206,7 +220,7 @@ namespace Engine.UI
                 TexturePressed = pressedTextureFileName,
                 TexturePressedUVMap = pressedTextureRect,
 
-                Font = font,
+                Caption = caption,
             };
         }
 
@@ -222,7 +236,7 @@ namespace Engine.UI
         /// <summary>
         /// Released button color
         /// </summary>
-        public Color4 ColorReleased { get; set; } = new Color4(1f, 1f, 1f, 1f);
+        public Color4 ColorReleased { get; set; } = new Color4(0, 0, 0, 0);
         /// <summary>
         /// Texture released UV map
         /// </summary>
@@ -235,20 +249,16 @@ namespace Engine.UI
         /// <summary>
         /// Pressed button color
         /// </summary>
-        public Color4 ColorPressed { get; set; } = new Color4(1f, 1f, 1f, 1f);
+        public Color4 ColorPressed { get; set; } = new Color4(0, 0, 0, 0);
         /// <summary>
         /// Texture pressed UV map
         /// </summary>
         public Vector4 TexturePressedUVMap { get; set; } = new Vector4(0, 0, 1, 1);
 
         /// <summary>
-        /// Text
+        /// Caption description
         /// </summary>
-        public string Text { get; set; }
-        /// <summary>
-        /// Font description
-        /// </summary>
-        public TextDrawerDescription Font { get; set; } = new TextDrawerDescription();
+        public UITextAreaDescription Caption { get; set; } = UITextAreaDescription.Default();
 
         /// <summary>
         /// Constructor

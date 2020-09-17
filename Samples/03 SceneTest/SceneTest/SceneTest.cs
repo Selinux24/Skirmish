@@ -144,10 +144,11 @@ namespace SceneTest.SceneTest
             var buttonFont = TextDrawerDescription.FromFamily("Lucida Console", 12, Color.Yellow, Color.Orange);
             buttonFont.HorizontalAlign = HorizontalTextAlign.Center;
             buttonFont.VerticalAlign = VerticalTextAlign.Middle;
-            var buttonDesc = UIButtonDescription.DefaultTwoStateButton("SceneTest/UI/button_on.png", "SceneTest/UI/button_off.png", buttonFont);
+
+            var buttonCaption = UITextAreaDescription.Default(buttonFont, "Close");
+            var buttonDesc = UIButtonDescription.DefaultTwoStateButton("SceneTest/UI/button_on.png", "SceneTest/UI/button_off.png", buttonCaption);
             buttonDesc.Width = 100;
             buttonDesc.Height = 40;
-            buttonDesc.Text = "Close";
 
             this.butClose = await this.AddComponentUIButton(buttonDesc, layerHUD);
             this.butClose.JustReleased += (sender, eventArgs) => { this.Game.SetScene<SceneStart.SceneStart>(); };

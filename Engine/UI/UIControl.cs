@@ -905,7 +905,8 @@ namespace Engine.UI
         /// Removes a child from the children collection
         /// </summary>
         /// <param name="ctrl">Control</param>
-        public void RemoveChild(UIControl ctrl)
+        /// <param name="dispose">Removes from collection and disposes</param>
+        public void RemoveChild(UIControl ctrl, bool dispose = false)
         {
             if (ctrl == null)
             {
@@ -919,13 +920,16 @@ namespace Engine.UI
                 ctrl.FitParent = false;
 
                 children.Remove(ctrl);
+
+                if (dispose) ctrl.Dispose();
             }
         }
         /// <summary>
         /// Removes a children list from the children collection
         /// </summary>
         /// <param name="controls">Control list</param>
-        public void RemoveChildren(IEnumerable<UIControl> controls)
+        /// <param name="dispose">Removes from collection and disposes</param>
+        public void RemoveChildren(IEnumerable<UIControl> controls, bool dispose = false)
         {
             if (!controls.Any())
             {
@@ -934,7 +938,7 @@ namespace Engine.UI
 
             foreach (var ctrl in controls)
             {
-                RemoveChild(ctrl);
+                RemoveChild(ctrl, dispose);
             }
         }
 

@@ -13,9 +13,12 @@ namespace Engine.UI
         /// <param name="baseColor">Base color</param>
         public static SpriteDescription Default(Color4 baseColor)
         {
+            var blendMode = baseColor.Alpha >= 1f ? BlendModes.Default : BlendModes.DefaultTransparent;
+
             return new SpriteDescription
             {
                 TintColor = baseColor,
+                BlendMode = blendMode,
             };
         }
         /// <summary>

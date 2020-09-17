@@ -214,13 +214,14 @@ namespace SpriteDrawing
             font.HorizontalAlign = HorizontalTextAlign.Center;
             font.VerticalAlign = VerticalTextAlign.Middle;
 
-            var descButClose = UIButtonDescription.DefaultTwoStateButton("buttons.png", new Vector4(0, 0, w, 1f), new Vector4(w * 2f, 0, w * 3f, 1f), font);
+            var descButClose = UIButtonDescription.DefaultTwoStateButton(
+                "buttons.png", new Vector4(0, 0, w, 1f), new Vector4(w * 2f, 0, w * 3f, 1f),
+                UITextAreaDescription.Default(font, "X"));
             descButClose.Name = "CloseButton";
             descButClose.Top = 10;
             descButClose.Left = this.dynamicPan.Width - 10 - 40;
             descButClose.Width = 40;
             descButClose.Height = 40;
-            descButClose.Text = "X";
 
             var butClose = new UIButton(this, descButClose);
             butClose.JustReleased += ButClose_Click;
@@ -248,13 +249,12 @@ namespace SpriteDrawing
             font.HorizontalAlign = HorizontalTextAlign.Center;
             font.VerticalAlign = VerticalTextAlign.Middle;
 
-            var descButClose = UIButtonDescription.DefaultTwoStateButton(Color.Blue, Color.Green, font);
+            var descButClose = UIButtonDescription.DefaultTwoStateButton(Color.Blue, Color.Green, UITextAreaDescription.Default(font, "Press Me"));
             descButClose.Name = "Test Button";
             descButClose.Top = 250;
             descButClose.Left = 150;
             descButClose.Width = 200;
             descButClose.Height = 55;
-            descButClose.Text = "Press Me";
 
             butTest2 = await this.AddComponentUIButton(descButClose, layerHUD);
             butTest2.JustReleased += ButTest2_Click;

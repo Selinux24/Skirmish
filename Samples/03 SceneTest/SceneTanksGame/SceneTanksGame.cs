@@ -304,7 +304,7 @@ namespace SceneTest.SceneTanksGame
             font.HorizontalAlign = HorizontalTextAlign.Center;
             font.VerticalAlign = VerticalTextAlign.Middle;
 
-            var descButton = UIButtonDescription.DefaultTwoStateButton(Color.DarkGray * 0.6666f, Color.DarkGray * 0.7777f, font);
+            var descButton = UIButtonDescription.DefaultTwoStateButton(Color.DarkGray * 0.6666f, Color.DarkGray * 0.7777f, UITextAreaDescription.Default(font));
 
             float butWidth = 150;
             float butHeight = 55;

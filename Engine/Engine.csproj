@@ -432,6 +432,8 @@
     <Compile Include="UI\UIControl.cs" />
     <Compile Include="UI\UIControlDescription.cs" />
     <Compile Include="UI\UIPanelDescription.cs" />
+    <Compile Include="UI\UITabPanel.cs" />
+    <Compile Include="UI\UITabPanelDescription.cs" />
     <Compile Include="UI\UITextArea.cs" />
     <Compile Include="UI\UITextAreaDescription.cs" />
     <Compile Include="UI\VerticalTextAlign.cs" />

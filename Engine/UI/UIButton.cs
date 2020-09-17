@@ -69,19 +69,13 @@ namespace Engine.UI
                 this.AddChild(this.buttonPressed, true);
             }
 
-            if (description.Font != null)
+            if (description.Caption != null)
             {
-                this.Caption = new UITextArea(
-                    scene,
-                    new UITextAreaDescription
-                    {
-                        Font = description.Font,
-                        EventsEnabled = false,
-                    });
+                description.Caption.EventsEnabled = false;
+
+                this.Caption = new UITextArea(scene, description.Caption);
 
                 this.AddChild(this.Caption, true);
-
-                this.Caption.Text = description.Text;
             }
         }
 
