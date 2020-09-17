@@ -123,8 +123,10 @@ namespace Terrain.PerlinNoise
             Color4 bColor2 = Color4.AdjustSaturation(Color.Brown, 1.5f);
             Color4 pColor = Color.DeepSkyBlue;
 
+            var font = TextDrawerDescription.FromFamily(fontFamily, 16);
+
             backGround = await this.AddComponentUIPanel(UIPanelDescription.Screen(this, Color.SandyBrown));
-            btnExit = await this.AddComponentUIButton(UIButtonDescription.DefaultTwoStateButton(bColor1, bColor2, TextDrawerDescription.FromFamily(fontFamily, 16)));
+            btnExit = await this.AddComponentUIButton(UIButtonDescription.DefaultTwoStateButton(bColor1, bColor2, UITextAreaDescription.Default(font)));
 
             txtScale = await this.AddComponentUITextArea(UITextAreaDescription.FromFamily(fontFamily, 16));
             txtLacunarity = await this.AddComponentUITextArea(UITextAreaDescription.FromFamily(fontFamily, 16));
@@ -140,7 +142,7 @@ namespace Terrain.PerlinNoise
             pbPersistance = await this.AddComponentUIProgressBar(UIProgressBarDescription.DefaultFromFamily(fontFamily, 12));
             pbOctaves = await this.AddComponentUIProgressBar(UIProgressBarDescription.DefaultFromFamily(fontFamily, 12));
 
-            btnSave = await this.AddComponentUIButton(UIButtonDescription.DefaultTwoStateButton(bColor1, bColor2, TextDrawerDescription.FromFamily(fontFamily, 16)));
+            btnSave = await this.AddComponentUIButton(UIButtonDescription.DefaultTwoStateButton(bColor1, bColor2, UITextAreaDescription.Default(font)));
 
             btnExit.JustReleased += BtnExit_JustReleased;
 

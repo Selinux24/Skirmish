@@ -236,7 +236,7 @@ namespace Engine.UI
         /// <summary>
         /// Released button color
         /// </summary>
-        public Color4 ColorReleased { get; set; } = new Color4(0, 0, 0, 0);
+        public Color4 ColorReleased { get; set; } = new Color4(1, 1, 1, 1);
         /// <summary>
         /// Texture released UV map
         /// </summary>
@@ -249,7 +249,7 @@ namespace Engine.UI
         /// <summary>
         /// Pressed button color
         /// </summary>
-        public Color4 ColorPressed { get; set; } = new Color4(0, 0, 0, 0);
+        public Color4 ColorPressed { get; set; } = new Color4(1, 1, 1, 1);
         /// <summary>
         /// Texture pressed UV map
         /// </summary>

@@ -270,16 +270,11 @@ namespace GameLogic
             this.txtActionList = await this.AddComponentUITextArea(new UITextAreaDescription { Font = textFont }, layerHUD);
             this.txtAction = await this.AddComponentUITextArea(new UITextAreaDescription { Font = textFont }, layerHUD);
 
-            this.butClose = await this.AddComponentUIButton(new UIButtonDescription()
-            {
-                TwoStateButton = true,
-                TextureReleased = "button_on.png",
-                TexturePressed = "button_off.png",
-                Width = 60,
-                Height = 20,
-                Font = buttonsFont,
-                Text = "Exit",
-            }, layerHUD);
+            var butCloseDesc = UIButtonDescription.DefaultTwoStateButton("button_on.png", "button_off.png", UITextAreaDescription.Default(buttonsFont, "Exit"));
+            butCloseDesc.Width = 60;
+            butCloseDesc.Height = 20;
+
+            this.butClose = await this.AddComponentUIButton(butCloseDesc, layerHUD);
 
             this.butNext = await this.AddComponentUIButton(new UIButtonDescription()
             {
@@ -288,8 +283,7 @@ namespace GameLogic
                 TexturePressed = "button_off.png",
                 Width = 120,
                 Height = 20,
-                Font = buttonsFont,
-                Text = "Next Phase",
+                Caption = UITextAreaDescription.Default(buttonsFont, "Next Phase"),
             }, layerHUD);
 
             this.butPrevSoldier = await this.AddComponentUIButton(new UIButtonDescription()
@@ -299,8 +293,7 @@ namespace GameLogic
                 TexturePressed = "button_off.png",
                 Width = 150,
                 Height = 20,
-                Font = buttonsFont,
-                Text = "Prev.Soldier",
+                Caption = UITextAreaDescription.Default(buttonsFont, "Prev.Soldier"),
             }, layerHUD);
 
             this.butNextSoldier = await this.AddComponentUIButton(new UIButtonDescription()
@@ -310,8 +303,7 @@ namespace GameLogic
                 TexturePressed = "button_off.png",
                 Width = 150,
                 Height = 20,
-                Font = buttonsFont,
-                Text = "Next Soldier",
+                Caption = UITextAreaDescription.Default(buttonsFont, "Next Soldier"),
             }, layerHUD);
 
             this.butPrevAction = await this.AddComponentUIButton(new UIButtonDescription()
@@ -321,8 +313,7 @@ namespace GameLogic
                 TexturePressed = "button_off.png",
                 Width = 150,
                 Height = 20,
-                Font = buttonsFont,
-                Text = "Prev.Action",
+                Caption = UITextAreaDescription.Default(buttonsFont, "Prev.Action"),
             }, layerHUD);
 
             this.butNextAction = await this.AddComponentUIButton(new UIButtonDescription()
@@ -332,8 +323,7 @@ namespace GameLogic
                 TexturePressed = "button_off.png",
                 Width = 150,
                 Height = 20,
-                Font = buttonsFont,
-                Text = "Next Action",
+                Caption = UITextAreaDescription.Default(buttonsFont, "Next Action"),
             }, layerHUD);
 
             this.butClose.JustReleased += (sender, eventArgs) => { this.Game.Exit(); };

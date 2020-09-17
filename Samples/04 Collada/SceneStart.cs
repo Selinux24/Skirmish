@@ -183,7 +183,7 @@ namespace Collada
             buttonFont.VerticalAlign = VerticalTextAlign.Middle;
 
             // Buttons
-            var buttonDesc = UIButtonDescription.DefaultTwoStateButton("common/buttons.png", new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f, buttonFont);
+            var buttonDesc = UIButtonDescription.DefaultTwoStateButton("common/buttons.png", new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f, UITextAreaDescription.Default(buttonFont));
             buttonDesc.Name = "Scene buttons";
             buttonDesc.Width = 200;
             buttonDesc.Height = 36;
@@ -196,7 +196,7 @@ namespace Collada
             this.sceneModularDungeonButton = await this.AddComponentUIButton(buttonDesc, layerHUD);
 
             // Exit button
-            var exitButtonDesc = UIButtonDescription.DefaultTwoStateButton("common/buttons.png", new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f, buttonFont);
+            var exitButtonDesc = UIButtonDescription.DefaultTwoStateButton("common/buttons.png", new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f, UITextAreaDescription.Default(buttonFont));
             exitButtonDesc.Name = "Exit button";
             exitButtonDesc.Width = 200;
             exitButtonDesc.Height = 36;

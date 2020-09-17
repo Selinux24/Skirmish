@@ -91,7 +91,7 @@ namespace Terrain.Start
             buttonsFont.HorizontalAlign = HorizontalTextAlign.Center;
             buttonsFont.VerticalAlign = VerticalTextAlign.Middle;
 
-            var startButtonDesc = UIButtonDescription.DefaultTwoStateButton("Start/buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f, buttonsFont);
+            var startButtonDesc = UIButtonDescription.DefaultTwoStateButton("Start/buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f, UITextAreaDescription.Default(buttonsFont));
             startButtonDesc.Name = "Scene buttons";
             startButtonDesc.Width = 275;
             startButtonDesc.Height = 65;
@@ -105,7 +105,7 @@ namespace Terrain.Start
 
             #region Exit button
 
-            var exitButtonDesc = UIButtonDescription.DefaultTwoStateButton("Start/buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f, buttonsFont);
+            var exitButtonDesc = UIButtonDescription.DefaultTwoStateButton("Start/buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f, UITextAreaDescription.Default(buttonsFont));
             exitButtonDesc.Name = "Exit button";
             exitButtonDesc.Width = 275;
             exitButtonDesc.Height = 65;
