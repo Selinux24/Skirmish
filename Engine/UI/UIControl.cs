@@ -213,10 +213,6 @@ namespace Engine.UI
         /// </summary>
         private bool fitParent = false;
         /// <summary>
-        /// Update internals flag
-        /// </summary>
-        private bool updateInternals = false;
-        /// <summary>
         /// Indicates whether the mouse was previously pressed or not
         /// </summary>
         private bool prevIsMouseOver = false;
@@ -225,6 +221,10 @@ namespace Engine.UI
         /// Manipulator
         /// </summary>
         protected Manipulator2D Manipulator { get; private set; }
+        /// <summary>
+        /// Update internals flag
+        /// </summary>
+        protected bool UpdateInternals = false;
 
         /// <summary>
         /// Parent control
@@ -306,7 +306,7 @@ namespace Engine.UI
                 this.left = value;
                 this.centerHorizontally = CenterTargets.None;
 
-                this.updateInternals = true;
+                this.UpdateInternals = true;
             }
         }
         /// <summary>
@@ -323,7 +323,7 @@ namespace Engine.UI
                 this.top = value;
                 this.centerVertically = CenterTargets.None;
 
-                this.updateInternals = true;
+                this.UpdateInternals = true;
             }
         }
         /// <summary>
@@ -339,7 +339,7 @@ namespace Engine.UI
             {
                 this.width = value;
 
-                this.updateInternals = true;
+                this.UpdateInternals = true;
             }
         }
         /// <summary>
@@ -355,7 +355,7 @@ namespace Engine.UI
             {
                 this.height = value;
 
-                this.updateInternals = true;
+                this.UpdateInternals = true;
             }
         }
         /// <summary>
@@ -371,7 +371,7 @@ namespace Engine.UI
             {
                 scale = value;
 
-                this.updateInternals = true;
+                this.UpdateInternals = true;
             }
         }
         /// <summary>
@@ -387,7 +387,7 @@ namespace Engine.UI
             {
                 rotation = value % MathUtil.TwoPi;
 
-                this.updateInternals = true;
+                this.UpdateInternals = true;
             }
         }
         /// <summary>
@@ -613,7 +613,7 @@ namespace Engine.UI
             {
                 this.fitParent = value;
 
-                this.updateInternals = true;
+                this.UpdateInternals = true;
             }
         }
         /// <summary>
@@ -630,7 +630,7 @@ namespace Engine.UI
             {
                 this.centerVertically = value;
 
-                this.updateInternals = true;
+                this.UpdateInternals = true;
             }
         }
         /// <summary>
@@ -647,7 +647,7 @@ namespace Engine.UI
             {
                 this.centerHorizontally = value;
 
-                this.updateInternals = true;
+                this.UpdateInternals = true;
             }
         }
 
@@ -725,7 +725,7 @@ namespace Engine.UI
 
             this.EventsEnabled = description.EventsEnabled;
 
-            this.updateInternals = true;
+            this.UpdateInternals = true;
         }
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
@@ -747,11 +747,11 @@ namespace Engine.UI
                 return;
             }
 
-            if (this.updateInternals)
+            if (this.UpdateInternals)
             {
-                this.UpdateInternals();
+                this.UpdateInternalState();
 
-                this.updateInternals = false;
+                this.UpdateInternals = false;
             }
 
             if (children.Any())
@@ -762,7 +762,7 @@ namespace Engine.UI
         /// <summary>
         /// Updates the internal transform
         /// </summary>
-        protected virtual void UpdateInternals()
+        protected virtual void UpdateInternalState()
         {
             if (this.centerHorizontally != CenterTargets.None)
             {
@@ -787,7 +787,7 @@ namespace Engine.UI
 
             if (children.Any())
             {
-                children.ForEach(c => c.updateInternals = true);
+                children.ForEach(c => c.UpdateInternals = true);
             }
         }
 
@@ -855,7 +855,7 @@ namespace Engine.UI
         /// </summary>
         public virtual void Resize()
         {
-            this.updateInternals = true;
+            this.UpdateInternals = true;
 
             children.ForEach(c => c.Resize());
         }
@@ -1002,7 +1002,7 @@ namespace Engine.UI
             this.centerHorizontally = CenterTargets.None;
             this.centerVertically = CenterTargets.None;
 
-            this.updateInternals = true;
+            this.UpdateInternals = true;
         }
         /// <summary>
         /// Sets the control left-top position
@@ -1027,7 +1027,7 @@ namespace Engine.UI
             this.centerHorizontally = CenterTargets.None;
             this.centerVertically = CenterTargets.None;
 
-            this.updateInternals = true;
+            this.UpdateInternals = true;
         }
 
         /// <summary>

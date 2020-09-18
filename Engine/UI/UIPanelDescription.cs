@@ -66,6 +66,10 @@ namespace Engine.UI
         /// Background
         /// </summary>
         public SpriteDescription Background { get; set; }
+        /// <summary>
+        /// Grid layout
+        /// </summary>
+        public GridLayout GridLayout { get; set; }
 
         /// <summary>
         /// Constructor

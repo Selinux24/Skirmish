@@ -415,6 +415,10 @@
     <Compile Include="SkyScatteringResolutions.cs" />
     <Compile Include="Tween\FloatTween.cs" />
     <Compile Include="Tween\ITweenCollection.cs" />
+    <Compile Include="UI\GridFitTypes.cs" />
+    <Compile Include="UI\GridLayout.cs" />
+    <Compile Include="UI\Padding.cs" />
+    <Compile Include="UI\Spacing.cs" />
     <Compile Include="UI\Tween\UIControlTweenCollection.cs" />
     <Compile Include="UI\Tween\UIControlTweenExtensions.cs" />
     <Compile Include="Tween\FloatTweenManager.cs" />

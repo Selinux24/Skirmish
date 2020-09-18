@@ -32,11 +32,11 @@ namespace Engine.UI
         /// <summary>
         /// Margin size
         /// </summary>
-        private float margin = 5f;
+        private float margin;
         /// <summary>
         /// Spacing size
         /// </summary>
-        private float spacing = 5f;
+        private float spacing;
         /// <summary>
         /// Button area size
         /// </summary>
@@ -314,9 +314,9 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        protected override void UpdateInternals()
+        protected override void UpdateInternalState()
         {
-            base.UpdateInternals();
+            base.UpdateInternalState();
 
             updateLayout = true;
         }

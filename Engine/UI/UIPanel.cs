@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 
 namespace Engine.UI
 {
@@ -10,7 +11,28 @@ namespace Engine.UI
         /// <summary>
         /// Background
         /// </summary>
-        public Sprite Background { get; private set; }
+        private readonly Sprite background;
+        /// <summary>
+        /// Grid layout
+        /// </summary>
+        private GridLayout gridLayout = GridLayout.Default;
+
+        /// <summary>
+        /// Gets or sets the grid layout
+        /// </summary>
+        public GridLayout GridLayout
+        {
+            get
+            {
+                return gridLayout;
+            }
+            set
+            {
+                gridLayout = value;
+
+                UpdateInternals = true;
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -21,14 +43,26 @@ namespace Engine.UI
         {
             if (description.Background != null)
             {
-                this.Background = new Sprite(scene, description.Background)
+                background = new Sprite(scene, description.Background)
                 {
                     Name = $"{description.Name}.Background",
                     FitParent = true,
                 };
 
-                this.AddChild(this.Background);
+                this.AddChild(background);
             }
+
+            gridLayout = description.GridLayout;
+        }
+
+        /// <inheritdoc/>
+        protected override void UpdateInternalState()
+        {
+            var childs = Children.ToArray().Where(c => c != background);
+
+            GridLayout.UpdateLayout(this, childs, GridLayout);
+
+            base.UpdateInternalState();
         }
     }
 

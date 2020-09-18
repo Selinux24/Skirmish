@@ -6,6 +6,7 @@ using Engine.UI;
 using Engine.UI.Tween;
 using SharpDX;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace SceneTest.SceneStart
@@ -146,18 +147,7 @@ namespace SceneTest.SceneStart
 
             #region Tabs
 
-            Color4 baseColor = Color.CornflowerBlue;
-            Color4 highLightColor = new Color4(baseColor.RGB() * 1.25f, 1f);
-            var tabDesc = UITabPanelDescription.Default(3, Color.Transparent, baseColor, highLightColor);
-            tabDesc.Captions = new[] { "But 1", "But 2", "But 3" };
-
-            tabsPanel = await this.AddComponentUITabPanel(tabDesc, layerHUD);
-            tabsPanel.Visible = false;
-            tabsPanel.TabJustReleased += TabsPanelTabJustReleased;
-
-            var pan1Desc = UIPanelDescription.Default(@"SceneStart/TanksGame.png");
-            pan1Desc.Name = "DEBUG";
-            tabsPanel.SetTabPanel(1, pan1Desc);
+            await InitializeTabPanel();
 
             #endregion
 
@@ -177,6 +167,56 @@ namespace SceneTest.SceneStart
             currentMusic = AudioManager.CreateEffectInstance("Music");
 
             #endregion
+        }
+        private async Task InitializeTabPanel()
+        {
+            Color4 baseColor = Color.CornflowerBlue;
+            Color4 highLightColor = new Color4(baseColor.RGB() * 1.25f, 1f);
+            var tabDesc = UITabPanelDescription.Default(3, Color.Transparent, baseColor, highLightColor);
+            tabDesc.Captions = new[] { "But 1", "But 2", "But 3" };
+
+            tabsPanel = await this.AddComponentUITabPanel(tabDesc, layerHUD);
+            tabsPanel.Visible = false;
+            tabsPanel.TabJustReleased += TabsPanelTabJustReleased;
+
+            var pan1Desc = UIPanelDescription.Default(@"SceneStart/TanksGame.png");
+            tabsPanel.SetTabPanel(1, pan1Desc);
+
+            var p = GridLayout.FixedRows(1);
+            p.Spacing = 10;
+            p.Padding = 15;
+            tabsPanel.TabPanels[0].GridLayout = p;
+            tabsPanel.TabPanels[0].TintColor = new Color4(1, 1, 1, 0.25f);
+            for (int i = 0; i < 5; i++)
+            {
+                var panDesc = UIPanelDescription.Default(new Color4(Helper.RandomGenerator.NextVector3(Vector3.Zero, Vector3.One), 1f));
+                var pan = new UIPanel(this, panDesc);
+                tabsPanel.TabPanels[0].AddChild(pan, false);
+            }
+
+            var lastPan = tabsPanel.TabPanels[0].Children.OfType<UIPanel>().Last();
+            var p2 = GridLayout.FixedColumns(1);
+            p2.Spacing = 10;
+            lastPan.GridLayout = p2;
+            lastPan.TintColor = Color.Transparent;
+            for (int i = 0; i < 2; i++)
+            {
+                var panDesc = UIPanelDescription.Default(new Color4(Helper.RandomGenerator.NextVector3(Vector3.Zero, Vector3.One), 1f));
+                var pan = new UIPanel(this, panDesc);
+                lastPan.AddChild(pan, false);
+            }
+
+            var lastPan2 = lastPan.Children.OfType<UIPanel>().Last();
+            var p3 = GridLayout.Uniform;
+            p3.Spacing = 10;
+            lastPan2.GridLayout = p3;
+            lastPan2.TintColor = Color.Transparent;
+            for (int i = 0; i < 4; i++)
+            {
+                var panDesc = UIPanelDescription.Default(new Color4(Helper.RandomGenerator.NextVector3(Vector3.Zero, Vector3.One), 1f));
+                var pan = new UIPanel(this, panDesc);
+                lastPan2.AddChild(pan, false);
+            }
         }
 
         private void PrepareAssets(LoadResourcesResult res)
