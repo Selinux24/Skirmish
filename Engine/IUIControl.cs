@@ -80,9 +80,9 @@ namespace Engine
         Vector2 Center { get; }
 
         /// <summary>
-        /// Indicates whether the sprite has to maintain proportion with window size
+        /// Indicates whether the control has to maintain proportion with parent size
         /// </summary>
-        bool FitParent { get; set; }
+        bool FitWithParent { get; set; }
         /// <summary>
         /// Gets or sets the tint color
         /// </summary>

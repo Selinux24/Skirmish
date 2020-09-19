@@ -209,9 +209,9 @@ namespace Engine.UI
         /// </summary>
         private Color4 tintColor = Color4.Black;
         /// <summary>
-        /// Maintain proportion with window size
+        /// Maintain proportion with parent size
         /// </summary>
-        private bool fitParent = false;
+        private bool fitWithParent = false;
         /// <summary>
         /// Indicates whether the mouse was previously pressed or not
         /// </summary>
@@ -443,7 +443,7 @@ namespace Engine.UI
         {
             get
             {
-                if (this.fitParent)
+                if (this.fitWithParent)
                 {
                     return Parent?.AbsoluteWidth ?? this.Width;
                 }
@@ -460,7 +460,7 @@ namespace Engine.UI
         {
             get
             {
-                if (this.fitParent)
+                if (this.fitWithParent)
                 {
                     return Parent?.AbsoluteHeight ?? this.Height;
                 }
@@ -601,17 +601,17 @@ namespace Engine.UI
         }
 
         /// <summary>
-        /// Indicates whether the sprite has to maintain proportion with window size
+        /// Indicates whether the control has to maintain proportion with parent size
         /// </summary>
-        public virtual bool FitParent
+        public virtual bool FitWithParent
         {
             get
             {
-                return this.fitParent;
+                return this.fitWithParent;
             }
             set
             {
-                this.fitParent = value;
+                this.fitWithParent = value;
 
                 this.UpdateInternals = true;
             }
@@ -702,8 +702,8 @@ namespace Engine.UI
 
             this.Manipulator = new Manipulator2D(this.Game);
 
-            this.fitParent = description.FitParent;
-            if (fitParent)
+            this.fitWithParent = description.FitParent;
+            if (fitWithParent)
             {
                 this.top = 0;
                 this.left = 0;
@@ -878,7 +878,7 @@ namespace Engine.UI
 
             ctrl.Parent = this;
             ctrl.HasParent = true;
-            ctrl.FitParent = fitToParent;
+            ctrl.FitWithParent = fitToParent;
 
             if (!children.Contains(ctrl))
             {
@@ -917,7 +917,7 @@ namespace Engine.UI
             {
                 ctrl.Parent = null;
                 ctrl.HasParent = false;
-                ctrl.FitParent = false;
+                ctrl.FitWithParent = false;
 
                 children.Remove(ctrl);
 
@@ -939,6 +939,28 @@ namespace Engine.UI
             foreach (var ctrl in controls)
             {
                 RemoveChild(ctrl, dispose);
+            }
+        }
+
+        public void InsertChildren(int index, UIControl ctrl, bool fitToParent = true)
+        {
+            if (ctrl == null)
+            {
+                return;
+            }
+
+            if (ctrl == this)
+            {
+                return;
+            }
+
+            ctrl.Parent = this;
+            ctrl.HasParent = true;
+            ctrl.FitWithParent = fitToParent;
+
+            if (!children.Contains(ctrl))
+            {
+                children.Insert(index, ctrl);
             }
         }
 

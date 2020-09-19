@@ -27,6 +27,7 @@ namespace SceneTest.SceneStart
         private UIButton sceneTestButton = null;
         private UIButton sceneTanksGameButton = null;
         private UIButton exitButton = null;
+        private UIButton optsButton = null;
         private UITabPanel tabsPanel = null;
 
         private readonly string titleFonts = "Showcard Gothic, Verdana, Consolas";
@@ -145,6 +146,16 @@ namespace SceneTest.SceneStart
 
             #endregion
 
+            #region Options Button
+
+            optsButton = await this.AddComponentUIButton(UIButtonDescription.Default("SceneStart/ui_options.png"));
+            optsButton.JustReleased += OptsButtonJustReleased;
+            var optsBackground = new Sprite(this, SpriteDescription.Default(Color.White));
+            optsBackground.EventsEnabled = false;
+            optsButton.InsertChildren(0, optsBackground);
+
+            #endregion
+
             #region Tabs
 
             await InitializeTabPanel();
@@ -217,6 +228,8 @@ namespace SceneTest.SceneStart
                 var pan = new UIPanel(this, panDesc);
                 lastPan2.AddChild(pan, false);
             }
+
+            tabsPanel.Visible = false;
         }
 
         private void PrepareAssets(LoadResourcesResult res)
@@ -232,21 +245,19 @@ namespace SceneTest.SceneStart
             currentMusic?.Play();
             currentMusic?.TweenVolumeUp((long)(currentMusic?.Duration.TotalMilliseconds * 0.2f), ScaleFuncs.Linear);
 
-            this.backGround.Manipulator.SetScale(1.5f, 1.25f, 1.5f);
+            backGround.Manipulator.SetScale(1.5f, 1.25f, 1.5f);
 
-            this.title.Text = "Scene Manager Test";
-            this.sceneMaterialsButton.Caption.Text = "Materials";
-            this.sceneWaterButton.Caption.Text = "Water";
-            this.sceneStencilPassButton.Caption.Text = "Stencil Pass";
-            this.sceneLightsButton.Caption.Text = "Lights";
-            this.sceneCascadedShadowsButton.Caption.Text = "Cascaded";
-            this.sceneTestButton.Caption.Text = "Test";
-            this.sceneTanksGameButton.Caption.Text = "Tanks Game";
-            this.exitButton.Caption.Text = "Exit";
+            title.Text = "Scene Manager Test";
+            sceneMaterialsButton.Caption.Text = "Materials";
+            sceneWaterButton.Caption.Text = "Water";
+            sceneStencilPassButton.Caption.Text = "Stencil Pass";
+            sceneLightsButton.Caption.Text = "Lights";
+            sceneCascadedShadowsButton.Caption.Text = "Cascaded";
+            sceneTestButton.Caption.Text = "Test";
+            sceneTanksGameButton.Caption.Text = "Tanks Game";
+            exitButton.Caption.Text = "Exit";
 
             UpdateLayout();
-
-            this.tabsPanel.TweenScaleUp(2000, ScaleFuncs.CubicEaseIn);
 
             this.sceneReady = true;
         }
@@ -256,6 +267,7 @@ namespace SceneTest.SceneStart
             base.Update(gameTime);
 
             UpdateCamera();
+            UpdateInput();
         }
         private void UpdateCamera()
         {
@@ -272,6 +284,13 @@ namespace SceneTest.SceneStart
 
             this.Camera.Position = new Vector3(0, 0, -5f);
             this.Camera.LookTo(position);
+        }
+        private void UpdateInput()
+        {
+            if (Game.Input.KeyJustReleased(Keys.Escape))
+            {
+                ClosePanel();
+            }
         }
 
         public override void GameGraphicsResized()
@@ -303,19 +322,44 @@ namespace SceneTest.SceneStart
             {
                 sceneButtons[i].Left = ((Game.Form.RenderWidth / div) * (i + 1)) - (sceneMaterialsButton.Width / 2);
                 sceneButtons[i].Top = (Game.Form.RenderHeight / h) * hv - (sceneMaterialsButton.Height / 2);
-                sceneButtons[i].JustReleased += SceneButtonClick;
+                sceneButtons[i].JustReleased += SceneButtonJustReleased;
                 sceneButtons[i].MouseEnter += SceneButtonMouseEnter;
                 sceneButtons[i].MouseLeave += SceneButtonMouseLeave;
             }
 
             exitButton.Left = (Game.Form.RenderWidth / div) * numButtons - (exitButton.Width / 2);
             exitButton.Top = (Game.Form.RenderHeight / h) * hv - (exitButton.Height / 2);
-            exitButton.JustReleased += ExitButtonClick;
+            exitButton.JustReleased += ExitButtonJustReleased;
             exitButton.MouseEnter += SceneButtonMouseEnter;
             exitButton.MouseLeave += SceneButtonMouseLeave;
+
+            optsButton.Width = 50;
+            optsButton.Height = 50;
+            optsButton.SetPosition(Game.Form.RenderWidth - 10 - optsButton.Width, 10);
         }
 
-        private void SceneButtonClick(object sender, EventArgs e)
+        private void OpenPanel()
+        {
+            if (tabsPanel.Visible)
+            {
+                return;
+            }
+
+            optsButton.Hide(100);
+            tabsPanel.Show(100);
+        }
+        private void ClosePanel()
+        {
+            if (!tabsPanel.Visible)
+            {
+                return;
+            }
+
+            optsButton.Show(100);
+            tabsPanel.Hide(100);
+        }
+
+        private void SceneButtonJustReleased(object sender, EventArgs e)
         {
             if (!sceneReady)
             {
@@ -369,13 +413,8 @@ namespace SceneTest.SceneStart
         private void TabsPanelTabJustReleased(object sender, UITabPanelEventArgs e)
         {
             Logger.WriteDebug($"Clicked button {e.TabButton.Caption.Text}");
-
-            if (e.TabIndex == 2)
-            {
-                tabsPanel.Hide(1000);
-            }
         }
-        private void ExitButtonClick(object sender, EventArgs e)
+        private void ExitButtonJustReleased(object sender, EventArgs e)
         {
             if (!sceneReady)
             {
@@ -383,6 +422,10 @@ namespace SceneTest.SceneStart
             }
 
             this.Game.Exit();
+        }
+        private void OptsButtonJustReleased(object sender, EventArgs e)
+        {
+            OpenPanel();
         }
     }
 }

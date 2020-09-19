@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 namespace Engine.UI
 {
     /// <summary>
@@ -27,19 +26,19 @@ namespace Engine.UI
         /// <summary>
         /// Padding left
         /// </summary>
-        public float Left;
+        public float Left { get; set; }
         /// <summary>
         /// Pading top
         /// </summary>
-        public float Top;
+        public float Top { get; set; }
         /// <summary>
         /// Padding botton
         /// </summary>
-        public float Bottom;
+        public float Bottom { get; set; }
         /// <summary>
         /// Padding right
         /// </summary>
-        public float Right;
+        public float Right { get; set; }
 
         public static implicit operator Padding(int value)
         {
@@ -64,7 +63,7 @@ namespace Engine.UI
                 };
             }
 
-            if (value.Length == 2)
+            if (value?.Length == 2)
             {
                 return new Padding
                 {
@@ -75,7 +74,7 @@ namespace Engine.UI
                 };
             }
 
-            if (value.Length == 4)
+            if (value?.Length == 4)
             {
                 return new Padding
                 {
@@ -86,7 +85,13 @@ namespace Engine.UI
                 };
             }
 
-            throw new ArgumentException(nameof(value));
+            return new Padding
+            {
+                Left = float.NaN,
+                Top = float.NaN,
+                Bottom = float.NaN,
+                Right = float.NaN,
+            };
         }
     }
 }

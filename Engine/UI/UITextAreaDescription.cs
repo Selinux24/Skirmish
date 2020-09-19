@@ -92,21 +92,9 @@ namespace Engine.UI
         }
 
         /// <summary>
-        /// Left margin
+        /// Padding
         /// </summary>
-        public float MarginLeft { get; set; }
-        /// <summary>
-        /// Top margin
-        /// </summary>
-        public float MarginTop { get; set; }
-        /// <summary>
-        /// Right margin
-        /// </summary>
-        public float MarginRight { get; set; }
-        /// <summary>
-        /// Bottom margin
-        /// </summary>
-        public float MarginBottom { get; set; }
+        public Padding Padding { get; set; }
         /// <summary>
         /// Gets or sets whether the area must grow or shrinks with the text value
         /// </summary>

@@ -48,6 +48,20 @@ namespace Engine.UI
         /// Gets the default button description
         /// </summary>
         /// <param name="textureFileName">Texture file name</param>
+        public static UIButtonDescription Default(string textureFileName)
+        {
+            return new UIButtonDescription()
+            {
+                Width = 120,
+                Height = 50,
+
+                TextureReleased = textureFileName,
+            };
+        }
+        /// <summary>
+        /// Gets the default button description
+        /// </summary>
+        /// <param name="textureFileName">Texture file name</param>
         /// <param name="textureRect">Texture rectangle</param>
         public static UIButtonDescription Default(string textureFileName, Vector4 textureRect)
         {

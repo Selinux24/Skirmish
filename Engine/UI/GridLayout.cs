@@ -126,35 +126,35 @@ namespace Engine.UI
         /// <summary>
         /// Spacing
         /// </summary>
-        public Spacing Spacing;
+        public Spacing Spacing { get; set; }
         /// <summary>
         /// Padding
         /// </summary>
-        public Padding Padding;
+        public Padding Padding { get; set; }
         /// <summary>
         /// Fit type
         /// </summary>
-        public GridFitTypes FitType;
+        public GridFitTypes FitType { get; set; }
         /// <summary>
         /// Number of rows
         /// </summary>
-        public int Rows;
+        public int Rows { get; set; }
         /// <summary>
         /// Number of columns
         /// </summary>
-        public int Columns;
+        public int Columns { get; set; }
         /// <summary>
         /// Fixed cell size
         /// </summary>
-        public Vector2 CellSize;
+        public Vector2 CellSize { get; set; }
         /// <summary>
         /// Fit the x component
         /// </summary>
-        public bool FitX;
+        public bool FitX { get; set; }
         /// <summary>
         /// Fit the y component
         /// </summary>
-        public bool FitY;
+        public bool FitY { get; set; }
 
         /// <summary>
         /// Updates the grid layout

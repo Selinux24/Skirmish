@@ -125,21 +125,9 @@ namespace Engine.UI
         }
 
         /// <summary>
-        /// Gest or sets the left margin
+        /// Padding
         /// </summary>
-        public float MarginLeft { get; set; }
-        /// <summary>
-        /// Gest or sets the top margin
-        /// </summary>
-        public float MarginTop { get; set; }
-        /// <summary>
-        /// Gest or sets the right margin
-        /// </summary>
-        public float MarginRight { get; set; }
-        /// <summary>
-        /// Gest or sets the bottom margin
-        /// </summary>
-        public float MarginBottom { get; set; }
+        public Padding Padding { get; set; }
         /// <summary>
         /// Gets or sets whether the area must grow or shrinks with the text value
         /// </summary>
@@ -152,10 +140,7 @@ namespace Engine.UI
         /// <param name="description">Description</param>
         public UITextArea(Scene scene, UITextAreaDescription description) : base(scene, description)
         {
-            this.MarginLeft = description.MarginLeft;
-            this.MarginTop = description.MarginTop;
-            this.MarginRight = description.MarginRight;
-            this.MarginBottom = description.MarginBottom;
+            this.Padding = description.Padding;
             this.AdjustAreaWithText = description.AdjustAreaWithText;
 
             if (description.Font != null)
@@ -244,35 +229,10 @@ namespace Engine.UI
             }
 
             return new RectangleF(
-                left + MarginLeft,
-                top + MarginTop,
-                width - (MarginLeft + MarginRight),
-                height - (MarginTop + MarginBottom));
-        }
-
-        /// <summary>
-        /// Sets the global margin
-        /// </summary>
-        /// <param name="margin">Margin value</param>
-        public void SetMargin(float margin)
-        {
-            MarginLeft = MarginRight = MarginTop = MarginBottom = margin;
-        }
-        /// <summary>
-        /// Sets the horizontal margin
-        /// </summary>
-        /// <param name="margin">Margin value</param>
-        public void SetMarginHorizontal(float margin)
-        {
-            MarginLeft = MarginRight = margin;
-        }
-        /// <summary>
-        /// Sets the vertical margin
-        /// </summary>
-        /// <param name="margin">Margin value</param>
-        public void SetMarginVertical(float margin)
-        {
-            MarginTop = MarginBottom = margin;
+                left + Padding.Left,
+                top + Padding.Top,
+                width - (Padding.Left + Padding.Right),
+                height - (Padding.Top + Padding.Bottom));
         }
 
         /// <summary>

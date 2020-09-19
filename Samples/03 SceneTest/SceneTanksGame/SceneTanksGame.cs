@@ -325,10 +325,13 @@ namespace SceneTest.SceneTanksGame
             dialogClose.Caption.Text = "Cancel";
 
             var descText = UITextAreaDescription.FromFile(fontFilename, 28);
-            descText.MarginLeft = width * 0.1f;
-            descText.MarginRight = width * 0.1f;
-            descText.MarginTop = height * 0.1f;
-            descText.MarginBottom = butHeight + (butMargin * 2f);
+            descText.Padding = new Padding
+            {
+                Left = width * 0.1f,
+                Right = width * 0.1f,
+                Top = height * 0.1f,
+                Bottom = butHeight + (butMargin * 2f),
+            };
             descText.Font.HorizontalAlign = HorizontalTextAlign.Center;
             descText.Font.VerticalAlign = VerticalTextAlign.Middle;
 

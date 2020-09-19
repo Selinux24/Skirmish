@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 namespace Engine.UI
 {
     /// <summary>
@@ -25,11 +24,11 @@ namespace Engine.UI
         /// <summary>
         /// Horizontal spacing
         /// </summary>
-        public float Horizontal;
+        public float Horizontal { get; set; }
         /// <summary>
         /// Vertical spacing
         /// </summary>
-        public float Vertical;
+        public float Vertical { get; set; }
 
         public static implicit operator Spacing(int value)
         {
@@ -50,7 +49,7 @@ namespace Engine.UI
                 };
             }
 
-            if (value.Length == 2)
+            if (value?.Length == 2)
             {
                 return new Spacing
                 {
@@ -59,7 +58,11 @@ namespace Engine.UI
                 };
             }
 
-            throw new ArgumentException(nameof(value));
+            return new Spacing
+            {
+                Horizontal = float.NaN,
+                Vertical = float.NaN,
+            };
         }
     }
 }

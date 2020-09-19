@@ -15,7 +15,7 @@ namespace Engine.UI
         /// <summary>
         /// Grid layout
         /// </summary>
-        private GridLayout gridLayout = GridLayout.Default;
+        private GridLayout gridLayout;
 
         /// <summary>
         /// Gets or sets the grid layout
@@ -46,7 +46,7 @@ namespace Engine.UI
                 background = new Sprite(scene, description.Background)
                 {
                     Name = $"{description.Name}.Background",
-                    FitParent = true,
+                    FitWithParent = true,
                 };
 
                 this.AddChild(background);
@@ -58,9 +58,11 @@ namespace Engine.UI
         /// <inheritdoc/>
         protected override void UpdateInternalState()
         {
-            var childs = Children.ToArray().Where(c => c != background);
-
-            GridLayout.UpdateLayout(this, childs, GridLayout);
+            var childs = Children.Where(c => c != background).ToArray();
+            if (childs.Any())
+            {
+                GridLayout.UpdateLayout(this, childs, GridLayout);
+            }
 
             base.UpdateInternalState();
         }
