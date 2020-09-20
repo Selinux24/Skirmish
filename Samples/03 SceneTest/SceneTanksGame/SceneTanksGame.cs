@@ -310,18 +310,22 @@ namespace SceneTest.SceneTanksGame
             float butHeight = 55;
             float butMargin = 15;
 
-            dialogAccept = new UIButton(this, descButton);
-            dialogAccept.Width = butWidth;
-            dialogAccept.Height = butHeight;
-            dialogAccept.Top = dialog.Height - butMargin - butHeight;
-            dialogAccept.Left = (dialog.Width * 0.5f) - (butWidth * 0.5f) - (butWidth * 0.6666f);
+            dialogAccept = new UIButton(this, descButton)
+            {
+                Width = butWidth,
+                Height = butHeight,
+                Top = dialog.Height - butMargin - butHeight,
+                Left = (dialog.Width * 0.5f) - (butWidth * 0.5f) - (butWidth * 0.6666f)
+            };
             dialogAccept.Caption.Text = "Ok";
 
-            dialogClose = new UIButton(this, descButton);
-            dialogClose.Width = butWidth;
-            dialogClose.Height = butHeight;
-            dialogClose.Top = dialog.Height - butMargin - butHeight;
-            dialogClose.Left = (dialog.Width * 0.5f) - (butWidth * 0.5f) + (butWidth * 0.6666f);
+            dialogClose = new UIButton(this, descButton)
+            {
+                Width = butWidth,
+                Height = butHeight,
+                Top = dialog.Height - butMargin - butHeight,
+                Left = (dialog.Width * 0.5f) - (butWidth * 0.5f) + (butWidth * 0.6666f)
+            };
             dialogClose.Caption.Text = "Cancel";
 
             var descText = UITextAreaDescription.FromFile(fontFilename, 28);

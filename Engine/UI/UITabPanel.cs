@@ -190,6 +190,26 @@ namespace Engine.UI
             }
         }
 
+        /// <inheritdoc/>
+        public override bool Visible
+        {
+            get
+            {
+                return base.Visible;
+            }
+            set
+            {
+                base.Visible = value;
+
+                var selected = tabPanels.ElementAtOrDefault(selectedTabIndex);
+                if (selected != null)
+                {
+                    tabPanels.ForEach(p => p.Visible = false);
+                    selected.Visible = value;
+                }
+            }
+        }
+
         /// <summary>
         /// Mouse pressed
         /// </summary>

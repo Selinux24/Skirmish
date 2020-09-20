@@ -67,6 +67,14 @@ namespace Engine.UI
         /// </summary>
         public SpriteDescription Background { get; set; }
         /// <summary>
+        /// Spacing
+        /// </summary>
+        public Spacing Spacing { get; set; }
+        /// <summary>
+        /// Padding
+        /// </summary>
+        public Padding Padding { get; set; }
+        /// <summary>
         /// Grid layout
         /// </summary>
         public GridLayout GridLayout { get; set; }

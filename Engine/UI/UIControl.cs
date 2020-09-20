@@ -74,48 +74,80 @@ namespace Engine.UI
 
             var topMostParent = mouseOverCtrls.Last();
 
-            topMostParent.FireMouseOverEvent();
-            if (!topMostParent.prevIsMouseOver)
-            {
-                topMostParent.FireMouseEnterEvent();
-            }
-
-            mouseOverCtrls.ForEach(c => c.prevIsMouseOver = false);
-            topMostParent.prevIsMouseOver = true;
-
-            bool mouseCaptured = false;
-            var topMostControl = topMostParent.Children.LastOrDefault(c => IsEvaluable(c)) ?? topMostParent;
-
-            if (input.LeftMouseButtonPressed)
-            {
-                topMostControl.IsPressed = true;
-                topMostControl.FirePressedEvent();
-
-                mouseCaptured = true;
-            }
-
-            if (input.LeftMouseButtonJustPressed)
-            {
-                topMostControl.IsJustPressed = true;
-                topMostControl.FireJustPressedEvent();
-
-                mouseCaptured = true;
-            }
-
-            if (input.LeftMouseButtonJustReleased)
-            {
-                topMostControl.IsJustReleased = true;
-                topMostControl.FireJustReleasedEvent();
-
-                mouseCaptured = true;
-            }
-
+            bool mouseCaptured = EvaluateInputControl(scene, topMostParent, mouseOverCtrls);
             if (mouseCaptured)
             {
+                mouseOverCtrls.ForEach(c => c.prevIsMouseOver = false);
+                topMostParent.prevIsMouseOver = true;
+
                 return topMostParent;
             }
 
             return null;
+        }
+        /// <summary>
+        /// Evaluates input over the specified scene control
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        /// <param name="ctrl">Controls</param>
+        /// <param name="mouseOverCtrls">Mouse over controls</param>
+        /// <returns>Returns true if any control fires a mouse click event</returns>
+        private static bool EvaluateInputControl(Scene scene, UIControl ctrl, List<UIControl> mouseOverCtrls)
+        {
+            var input = scene.Game.Input;
+
+            bool mouseCaptured = false;
+            UIControl topChildren = ctrl;
+            while (topChildren != null)
+            {
+                topChildren.FireMouseOverEvent();
+                if (!topChildren.prevIsMouseOver)
+                {
+                    topChildren.FireMouseEnterEvent();
+                }
+
+                mouseOverCtrls.ForEach(c => c.prevIsMouseOver = false);
+                topChildren.prevIsMouseOver = true;
+
+                if (input.LeftMouseButtonPressed)
+                {
+                    topChildren.IsPressed = true;
+                    topChildren.FirePressedEvent();
+
+                    mouseCaptured = true;
+                }
+
+                if (input.LeftMouseButtonJustPressed)
+                {
+                    topChildren.IsJustPressed = true;
+                    topChildren.FireJustPressedEvent();
+
+                    mouseCaptured = true;
+                }
+
+                if (input.LeftMouseButtonJustReleased)
+                {
+                    topChildren.IsJustReleased = true;
+                    topChildren.FireJustReleasedEvent();
+
+                    mouseCaptured = true;
+                }
+
+                mouseOverCtrls = topChildren.Children.Where(c => IsEvaluable(c)).ToList();
+                topChildren = mouseOverCtrls.LastOrDefault();
+            }
+
+            return mouseCaptured;
+        }
+        /// <summary>
+        /// Clears mouse over property in the hierarchy
+        /// </summary>
+        /// <param name="ctrl">Control</param>
+        private static void ClearPrevMouseOver(UIControl ctrl)
+        {
+            ctrl.prevIsMouseOver = false;
+
+            ctrl.Children.ToList().ForEach(c => ClearPrevMouseOver(c));
         }
         /// <summary>
         /// Gets whether the specified UI control is event-evaluable or not
@@ -864,6 +896,7 @@ namespace Engine.UI
         /// Adds a child to the children collection
         /// </summary>
         /// <param name="ctrl">Control</param>
+        /// <param name="fitToParent">Fit control to parent</param>
         public void AddChild(UIControl ctrl, bool fitToParent = true)
         {
             if (ctrl == null)
@@ -889,7 +922,8 @@ namespace Engine.UI
         /// Adds a children list to the children collection
         /// </summary>
         /// <param name="controls">Control list</param>
-        public void AddChildren(IEnumerable<UIControl> controls)
+        /// <param name="fitToParent">Fit control to parent</param>
+        public void AddChildren(IEnumerable<UIControl> controls, bool fitToParent = true)
         {
             if (!controls.Any())
             {
@@ -898,7 +932,7 @@ namespace Engine.UI
 
             foreach (var ctrl in controls)
             {
-                AddChild(ctrl);
+                AddChild(ctrl, fitToParent);
             }
         }
         /// <summary>
@@ -941,8 +975,13 @@ namespace Engine.UI
                 RemoveChild(ctrl, dispose);
             }
         }
-
-        public void InsertChildren(int index, UIControl ctrl, bool fitToParent = true)
+        /// <summary>
+        /// Inserts a child at the specified index
+        /// </summary>
+        /// <param name="index">Index</param>
+        /// <param name="ctrl">Control</param>
+        /// <param name="fitToParent">Fit control to parent</param>
+        public void InsertChild(int index, UIControl ctrl, bool fitToParent = true)
         {
             if (ctrl == null)
             {
@@ -1074,24 +1113,5 @@ namespace Engine.UI
 
             return this.Game.Form.RenderRectangle;
         }
-    }
-
-    /// <summary>
-    /// Centering targets
-    /// </summary>
-    public enum CenterTargets
-    {
-        /// <summary>
-        /// None
-        /// </summary>
-        None = 0,
-        /// <summary>
-        /// Parent
-        /// </summary>
-        Parent = 1,
-        /// <summary>
-        /// Screen
-        /// </summary>
-        Screen = 2,
     }
 }

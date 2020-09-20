@@ -1,10 +1,11 @@
-﻿
+﻿using System;
+
 namespace Engine.UI
 {
     /// <summary>
     /// Spacing
     /// </summary>
-    public struct Spacing
+    public struct Spacing : IEquatable<Spacing>
     {
         /// <summary>
         /// Gets the 0 spacing
@@ -29,6 +30,46 @@ namespace Engine.UI
         /// Vertical spacing
         /// </summary>
         public float Vertical { get; set; }
+
+        /// <inheritdoc/>
+        public bool Equals(Spacing other)
+        {
+            return
+                other.Horizontal == Horizontal &&
+                other.Vertical == Vertical;
+        }
+        /// <inheritdoc/>
+        public override bool Equals(object value)
+        {
+            if (value is Spacing spacing)
+            {
+                return Equals(spacing);
+            }
+
+            return false;
+        }
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (Horizontal.GetHashCode() * 397) ^ Vertical.GetHashCode();
+            }
+        }
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"Horizontal: {Horizontal}; Vertical: {Vertical};";
+        }
+
+        public static bool operator ==(Spacing left, Spacing right)
+        {
+            return left.Equals(right);
+        }
+        public static bool operator !=(Spacing left, Spacing right)
+        {
+            return !left.Equals(right);
+        }
 
         public static implicit operator Spacing(int value)
         {

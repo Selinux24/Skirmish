@@ -26,8 +26,6 @@ namespace Engine.UI
             {
                 return new GridLayout
                 {
-                    Spacing = Spacing.Zero,
-                    Padding = Padding.Zero,
                     FitType = GridFitTypes.Uniform,
                     FitX = true,
                     FitY = true,
@@ -40,8 +38,6 @@ namespace Engine.UI
             {
                 return new GridLayout
                 {
-                    Spacing = Spacing.Zero,
-                    Padding = Padding.Zero,
                     FitType = GridFitTypes.Width,
                     FitX = true,
                     FitY = true,
@@ -54,8 +50,6 @@ namespace Engine.UI
             {
                 return new GridLayout
                 {
-                    Spacing = Spacing.Zero,
-                    Padding = Padding.Zero,
                     FitType = GridFitTypes.Height,
                     FitX = true,
                     FitY = true,
@@ -66,8 +60,6 @@ namespace Engine.UI
         {
             return new GridLayout
             {
-                Spacing = Spacing.Zero,
-                Padding = Padding.Zero,
                 FitType = GridFitTypes.Uniform,
                 FitX = false,
                 FitY = false,
@@ -78,8 +70,6 @@ namespace Engine.UI
         {
             return new GridLayout
             {
-                Spacing = Spacing.Zero,
-                Padding = Padding.Zero,
                 FitType = GridFitTypes.Uniform,
                 FitX = false,
                 FitY = true,
@@ -90,8 +80,6 @@ namespace Engine.UI
         {
             return new GridLayout
             {
-                Spacing = Spacing.Zero,
-                Padding = Padding.Zero,
                 FitType = GridFitTypes.Uniform,
                 FitX = true,
                 FitY = false,
@@ -102,8 +90,6 @@ namespace Engine.UI
         {
             return new GridLayout
             {
-                Spacing = Spacing.Zero,
-                Padding = Padding.Zero,
                 FitType = GridFitTypes.FixedRows,
                 Rows = rows,
                 FitX = true,
@@ -114,8 +100,6 @@ namespace Engine.UI
         {
             return new GridLayout
             {
-                Spacing = Spacing.Zero,
-                Padding = Padding.Zero,
                 FitType = GridFitTypes.FixedColumns,
                 Columns = columns,
                 FitX = true,
@@ -123,14 +107,6 @@ namespace Engine.UI
             };
         }
 
-        /// <summary>
-        /// Spacing
-        /// </summary>
-        public Spacing Spacing { get; set; }
-        /// <summary>
-        /// Padding
-        /// </summary>
-        public Padding Padding { get; set; }
         /// <summary>
         /// Fit type
         /// </summary>
@@ -179,8 +155,8 @@ namespace Engine.UI
                 return;
             }
 
-            Spacing spacing = parameters.Spacing;
-            Padding padding = parameters.Padding;
+            Spacing spacing = panel.Spacing;
+            Padding padding = panel.Padding;
             GridFitTypes fitType = parameters.FitType;
             int rows = parameters.Rows;
             int cols = parameters.Columns;

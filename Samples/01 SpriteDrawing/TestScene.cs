@@ -173,10 +173,13 @@ namespace SpriteDrawing
                     ShadowDelta = new Vector2(8, 5),
                     LineAdjust = true,
                 },
-                MarginLeft = width * 0.1f,
-                MarginRight = width * 0.1f,
-                MarginTop = height * 0.1f,
-                MarginBottom = height * 0.1f,
+                Padding = new Padding
+                {
+                    Left = width * 0.1f,
+                    Right = width * 0.1f,
+                    Top = height * 0.1f,
+                    Bottom = height * 0.1f,
+                }
             };
             this.textArea = new UITextArea(this, descText);
 
@@ -229,10 +232,13 @@ namespace SpriteDrawing
             var descText = UITextAreaDescription.FromMap("MaraFont.png", "MaraFont.txt");
             descText.Name = "MaraText";
             descText.Text = @"Letters by Mara";
-            descText.MarginLeft = width * 0.1f;
-            descText.MarginRight = width * 0.1f;
-            descText.MarginTop = height * 0.1f;
-            descText.MarginBottom = height * 0.1f;
+            descText.Padding = new Padding
+            {
+                Left = width * 0.1f,
+                Right = width * 0.1f,
+                Top = height * 0.1f,
+                Bottom = height * 0.1f,
+            };
             descText.Font.HorizontalAlign = HorizontalTextAlign.Center;
             descText.Font.VerticalAlign = VerticalTextAlign.Middle;
 

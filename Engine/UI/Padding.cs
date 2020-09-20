@@ -1,10 +1,11 @@
-﻿
+﻿using System;
+
 namespace Engine.UI
 {
     /// <summary>
     /// Padding
     /// </summary>
-    public struct Padding
+    public struct Padding : IEquatable<Padding>
     {
         /// <summary>
         /// Gets the 0 padding
@@ -39,6 +40,52 @@ namespace Engine.UI
         /// Padding right
         /// </summary>
         public float Right { get; set; }
+
+        /// <inheritdoc/>
+        public bool Equals(Padding other)
+        {
+            return
+                other.Left == Left &&
+                other.Top == Top &&
+                other.Bottom == Bottom &&
+                other.Right == Right;
+        }
+        /// <inheritdoc/>
+        public override bool Equals(object value)
+        {
+            if (value is Padding padding)
+            {
+                return Equals(padding);
+            }
+
+            return false;
+        }
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = Left.GetHashCode();
+                hashCode = (hashCode * 397) ^ Top.GetHashCode();
+                hashCode = (hashCode * 397) ^ Bottom.GetHashCode();
+                hashCode = (hashCode * 397) ^ Right.GetHashCode();
+                return hashCode;
+            }
+        }
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"Left: {Left}; Top: {Top}; Bottom: {Bottom}; Right: {Right};";
+        }
+
+        public static bool operator ==(Padding left, Padding right)
+        {
+            return left.Equals(right);
+        }
+        public static bool operator !=(Padding left, Padding right)
+        {
+            return !left.Equals(right);
+        }
 
         public static implicit operator Padding(int value)
         {

@@ -415,6 +415,7 @@
     <Compile Include="SkyScatteringResolutions.cs" />
     <Compile Include="Tween\FloatTween.cs" />
     <Compile Include="Tween\ITweenCollection.cs" />
+    <Compile Include="UI\CenterTargets.cs" />
     <Compile Include="UI\GridFitTypes.cs" />
     <Compile Include="UI\GridLayout.cs" />
     <Compile Include="UI\Padding.cs" />
