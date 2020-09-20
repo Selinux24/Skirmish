@@ -229,7 +229,7 @@ namespace GameLogic
             {
                 ContentPath = "Resources",
                 Textures = new[] { "HUD.png" },
-                TintColor = new Color4(1f, 1f, 1f, 1f),
+                BaseColor = new Color4(1f, 1f, 1f, 1f),
                 EventsEnabled = false,
             };
             await this.AddComponentSprite(bkDesc, SceneObjectUsages.UI, layerHUD - 1);

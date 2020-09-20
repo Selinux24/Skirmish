@@ -40,6 +40,10 @@ namespace Engine.UI
         /// </summary>
         public CenterTargets CenterHorizontally { get; set; } = CenterTargets.None;
         /// <summary>
+        /// Base color
+        /// </summary>
+        public Color4 BaseColor { get; set; } = Color4.White;
+        /// <summary>
         /// Tint color
         /// </summary>
         public Color4 TintColor { get; set; } = Color4.White;

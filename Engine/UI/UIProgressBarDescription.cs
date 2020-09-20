@@ -80,10 +80,6 @@ namespace Engine.UI
         }
 
         /// <summary>
-        /// Base color
-        /// </summary>
-        public Color BaseColor { get; set; } = new Color(0f, 0f, 0f, 0.5f);
-        /// <summary>
         /// Progress color
         /// </summary>
         public Color ProgressColor { get; set; } = new Color(0f, 1f, 0f, 1f);

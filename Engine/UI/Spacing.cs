@@ -39,9 +39,9 @@ namespace Engine.UI
                 other.Vertical == Vertical;
         }
         /// <inheritdoc/>
-        public override bool Equals(object value)
+        public override bool Equals(object obj)
         {
-            if (value is Spacing spacing)
+            if (obj is Spacing spacing)
             {
                 return Equals(spacing);
             }

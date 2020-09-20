@@ -248,7 +248,7 @@ namespace Engine.UI.Tween
         /// <param name="to">End value</param>
         /// <param name="duration">Duration in milliseconds</param>
         /// <param name="fnc">Scale function</param>
-        public static void TweenColor(this UIControl control, Color4 from, Color4 to, long duration, ScaleFunc fnc)
+        public static void TweenBaseColor(this UIControl control, Color4 from, Color4 to, long duration, ScaleFunc fnc)
         {
             if (control == null)
             {
@@ -263,7 +263,7 @@ namespace Engine.UI.Tween
             ftColorG.Start(from.Green, to.Green, duration, fnc);
             ftColorB.Start(from.Blue, to.Blue, duration, fnc);
 
-            AddColorTween(control, ftColorR, ftColorG, ftColorB);
+            AddBaseColorTween(control, ftColorR, ftColorG, ftColorB);
         }
         /// <summary>
         /// Bouncing the color of a control
@@ -273,7 +273,7 @@ namespace Engine.UI.Tween
         /// <param name="to">End value</param>
         /// <param name="duration">Duration in milliseconds</param>
         /// <param name="fnc">Scale function</param>
-        public static void TweenColorBounce(this UIControl control, Color4 from, Color4 to, long duration, ScaleFunc fnc)
+        public static void TweenBaseColorBounce(this UIControl control, Color4 from, Color4 to, long duration, ScaleFunc fnc)
         {
             if (control == null)
             {
@@ -288,7 +288,7 @@ namespace Engine.UI.Tween
             ftColorG.Start(from.Green, to.Green, duration, fnc);
             ftColorB.Start(from.Blue, to.Blue, duration, fnc);
 
-            AddColorBounce(control, ftColorR, ftColorG, ftColorB);
+            AddBaseColorBounce(control, ftColorR, ftColorG, ftColorB);
         }
 
         /// <summary>
@@ -424,9 +424,9 @@ namespace Engine.UI.Tween
         /// <param name="ftColorR">Red tween</param>
         /// <param name="ftColorG">Green tween</param>
         /// <param name="ftColorB">Blue tween</param>
-        public static void AddColorTween(this UIControl control, FloatTween ftColorR, FloatTween ftColorG, FloatTween ftColorB)
+        public static void AddBaseColorTween(this UIControl control, FloatTween ftColorR, FloatTween ftColorG, FloatTween ftColorB)
         {
-            control.TintColor = new Color(ftColorR.StartValue, ftColorG.StartValue, ftColorB.StartValue);
+            control.BaseColor = new Color(ftColorR.StartValue, ftColorG.StartValue, ftColorB.StartValue);
 
             collection.AddTween(control, (d) =>
             {
@@ -434,7 +434,7 @@ namespace Engine.UI.Tween
                 ftColorG.Update(d);
                 ftColorB.Update(d);
 
-                control.TintColor = new Color(ftColorR.CurrentValue, ftColorG.CurrentValue, ftColorB.CurrentValue);
+                control.BaseColor = new Color(ftColorR.CurrentValue, ftColorG.CurrentValue, ftColorB.CurrentValue);
 
                 if (ftColorR.CurrentValue == ftColorR.EndValue && ftColorG.CurrentValue == ftColorG.EndValue && ftColorB.CurrentValue == ftColorB.EndValue)
                 {
@@ -451,9 +451,9 @@ namespace Engine.UI.Tween
         /// <param name="ftColorR">Red tween</param>
         /// <param name="ftColorG">Green tween</param>
         /// <param name="ftColorB">Blue tween</param>
-        public static void AddColorBounce(this UIControl control, FloatTween ftColorR, FloatTween ftColorG, FloatTween ftColorB)
+        public static void AddBaseColorBounce(this UIControl control, FloatTween ftColorR, FloatTween ftColorG, FloatTween ftColorB)
         {
-            control.TintColor = new Color(ftColorR.StartValue, ftColorG.StartValue, ftColorB.StartValue);
+            control.BaseColor = new Color(ftColorR.StartValue, ftColorG.StartValue, ftColorB.StartValue);
 
             collection.AddTween(control, (d) =>
             {
@@ -461,7 +461,7 @@ namespace Engine.UI.Tween
                 ftColorG.Update(d);
                 ftColorB.Update(d);
 
-                control.TintColor = new Color(ftColorR.CurrentValue, ftColorG.CurrentValue, ftColorB.CurrentValue);
+                control.BaseColor = new Color(ftColorR.CurrentValue, ftColorG.CurrentValue, ftColorB.CurrentValue);
 
                 if (ftColorR.CurrentValue == ftColorR.EndValue && ftColorG.CurrentValue == ftColorG.EndValue && ftColorB.CurrentValue == ftColorB.EndValue)
                 {

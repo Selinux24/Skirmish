@@ -157,7 +157,7 @@ namespace SceneTest.SceneTanksGame
                         res.ThrowExceptions();
                     }
 
-                    fadePanel.TintColor = Color.Black;
+                    fadePanel.BaseColor = Color.Black;
                     fadePanel.Visible = true;
 
                     loadingText.Text = "Please wait...";
@@ -294,7 +294,7 @@ namespace SceneTest.SceneTanksGame
 
                 Background = new SpriteDescription()
                 {
-                    TintColor = Color.DarkGreen,
+                    BaseColor = Color.DarkGreen,
                 }
             };
             dialog = await this.AddComponentUIPanel(descPan, layerLoadingUI + 2);
@@ -424,7 +424,7 @@ namespace SceneTest.SceneTanksGame
             turnText.Visible = false;
 
             gameIcon = await this.AddComponentSprite(SpriteDescription.FromFile("SceneTanksGame/GameIcon.png"), SceneObjectUsages.UI, layerUI);
-            gameIcon.TintColor = Color.Yellow;
+            gameIcon.BaseColor = Color.Yellow;
             gameIcon.Width = 92;
             gameIcon.Height = 82;
             gameIcon.Top = 55;
@@ -433,7 +433,7 @@ namespace SceneTest.SceneTanksGame
             gameIcon.TweenRotateBounce(-0.1f, 0.1f, 500, ScaleFuncs.CubicEaseInOut);
 
             playerTurnMarker = await this.AddComponentSprite(SpriteDescription.FromFile("SceneTanksGame/Arrow.png"), SceneObjectUsages.UI, layerUI);
-            playerTurnMarker.TintColor = Color.Turquoise;
+            playerTurnMarker.BaseColor = Color.Turquoise;
             playerTurnMarker.Width = 112;
             playerTurnMarker.Height = 75;
             playerTurnMarker.Top = 35;
@@ -457,7 +457,7 @@ namespace SceneTest.SceneTanksGame
             keyRotate.Top = top + 25;
             keyRotate.Width = 372 * 0.25f;
             keyRotate.Height = 365 * 0.25f;
-            keyRotate.TintColor = Color.Turquoise;
+            keyRotate.BaseColor = Color.Turquoise;
             keyRotate.Visible = false;
 
             keyMove = await this.AddComponentSprite(SpriteDescription.FromFile("SceneTanksGame/Move.png"), SceneObjectUsages.UI, layerUI + 1);
@@ -465,7 +465,7 @@ namespace SceneTest.SceneTanksGame
             keyMove.Top = top + 25;
             keyMove.Width = 232 * 0.25f;
             keyMove.Height = 365 * 0.25f;
-            keyMove.TintColor = Color.Turquoise;
+            keyMove.BaseColor = Color.Turquoise;
             keyMove.Visible = false;
 
             KeyPitch = await this.AddComponentSprite(SpriteDescription.FromFile("SceneTanksGame/Pitch.png"), SceneObjectUsages.UI, layerUI + 1);
@@ -473,7 +473,7 @@ namespace SceneTest.SceneTanksGame
             KeyPitch.Top = top + 25;
             KeyPitch.Width = 322 * 0.25f;
             KeyPitch.Height = 365 * 0.25f;
-            KeyPitch.TintColor = Color.Turquoise;
+            KeyPitch.BaseColor = Color.Turquoise;
             KeyPitch.Visible = false;
 
             keyRotateLeftText = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 15, true), layerUI + 2);
@@ -555,7 +555,7 @@ namespace SceneTest.SceneTanksGame
             miniMapTank1.Height = 365 * 0.1f;
             miniMapTank1.Left = this.Game.Form.RenderWidth - 150 - 10;
             miniMapTank1.Top = this.Game.Form.RenderHeight - 150 - 10;
-            miniMapTank1.TintColor = Color.Blue;
+            miniMapTank1.BaseColor = Color.Blue;
             miniMapTank1.Visible = false;
 
             miniMapTank2 = await this.AddComponentSprite(SpriteDescription.FromFile("SceneTanksGame/Tank.png"), SceneObjectUsages.UI, layerUI + 1);
@@ -563,7 +563,7 @@ namespace SceneTest.SceneTanksGame
             miniMapTank2.Height = 365 * 0.1f;
             miniMapTank2.Left = this.Game.Form.RenderWidth - 85 - 10;
             miniMapTank2.Top = this.Game.Form.RenderHeight - 85 - 10;
-            miniMapTank2.TintColor = Color.Red;
+            miniMapTank2.BaseColor = Color.Red;
             miniMapTank2.Visible = false;
 
             windVelocity = await this.AddComponentUIProgressBar(UIProgressBarDescription.DefaultFromFile(fontFilename, 8), layerUI + 2);
@@ -581,7 +581,7 @@ namespace SceneTest.SceneTanksGame
             windDirectionArrow.Height = 100;
             windDirectionArrow.Left = miniMapBackground.AbsoluteCenter.X - 50;
             windDirectionArrow.Top = miniMapBackground.AbsoluteCenter.Y - 50;
-            windDirectionArrow.TintColor = Color.Green;
+            windDirectionArrow.BaseColor = Color.Green;
             windDirectionArrow.Visible = false;
         }
         private async Task InitializeUIShotPath()
@@ -592,7 +592,7 @@ namespace SceneTest.SceneTanksGame
                 var trajectoryMarker = await this.AddComponentSprite(SpriteDescription.FromFile("SceneTanksGame/Dot_w.png"), SceneObjectUsages.UI, layerUI + 1);
                 trajectoryMarker.Width = 50;
                 trajectoryMarker.Height = 50;
-                trajectoryMarker.TintColor = Color.Transparent;
+                trajectoryMarker.BaseColor = Color.Transparent;
                 trajectoryMarker.Active = false;
                 trajectoryMarker.Visible = false;
                 trajectoryMarker.TweenRotateRepeat(0, MathUtil.TwoPi, 1000, ScaleFuncs.Linear);
@@ -1312,7 +1312,7 @@ You will lost all the game progress.",
                 trajectoryMarkerPool[i].Left = screenPos.X - (trajectoryMarkerPool[i].Width * 0.5f);
                 trajectoryMarkerPool[i].Top = screenPos.Y - (trajectoryMarkerPool[i].Height * 0.5f);
                 trajectoryMarkerPool[i].Scale = scale;
-                trajectoryMarkerPool[i].TintColor = ShooterStatus.Color;
+                trajectoryMarkerPool[i].BaseColor = ShooterStatus.Color;
                 trajectoryMarkerPool[i].Alpha = 1f - (i / (float)markers);
                 trajectoryMarkerPool[i].Active = true;
                 trajectoryMarkerPool[i].Visible = true;

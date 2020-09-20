@@ -17,7 +17,7 @@ namespace Engine.UI
         public static UITabPanelDescription Default(int tabs, Color4 backgroundColor, Color4 baseColor, Color4 selectedColor)
         {
             var backgroundDesc = SpriteDescription.Default(backgroundColor);
-            var buttonDesc = UIButtonDescription.Default(baseColor);
+            var buttonDesc = UIButtonDescription.DefaultTwoStateButton(baseColor, selectedColor);
             var panelDesc = UIPanelDescription.Default(baseColor);
 
             buttonDesc.Caption.Font.VerticalAlign = VerticalTextAlign.Middle;
@@ -29,9 +29,7 @@ namespace Engine.UI
                 ButtonDescription = buttonDesc,
                 PanelDescription = panelDesc,
                 Tabs = tabs,
-                TintColor = Color.Transparent,
-                BaseColor = baseColor,
-                SelectedColor = selectedColor,
+                BaseColor = Color.Transparent,
             };
         }
 
@@ -63,14 +61,6 @@ namespace Engine.UI
         /// Spacing value
         /// </summary>
         public float Spacing { get; set; } = 5f;
-        /// <summary>
-        /// Base control color
-        /// </summary>
-        public Color4 BaseColor { get; set; } = Color.White;
-        /// <summary>
-        /// Selected color
-        /// </summary>
-        public Color4 SelectedColor { get; set; } = Color.White;
         /// <summary>
         /// Button area size
         /// </summary>

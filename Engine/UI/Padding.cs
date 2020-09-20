@@ -51,9 +51,9 @@ namespace Engine.UI
                 other.Right == Right;
         }
         /// <inheritdoc/>
-        public override bool Equals(object value)
+        public override bool Equals(object obj)
         {
-            if (value is Padding padding)
+            if (obj is Padding padding)
             {
                 return Equals(padding);
             }

@@ -51,25 +51,25 @@ namespace Engine.UI
         {
             get
             {
-                return this.spriteProgress.TintColor;
+                return this.spriteProgress.BaseColor;
             }
             set
             {
-                this.spriteProgress.TintColor = value;
+                this.spriteProgress.BaseColor = value;
             }
         }
         /// <summary>
         /// Gets or sets the back color
         /// </summary>
-        public Color4 BaseColor
+        public override Color4 BaseColor
         {
             get
             {
-                return this.spriteBase.TintColor;
+                return this.spriteBase.BaseColor;
             }
             set
             {
-                this.spriteBase.TintColor = value;
+                this.spriteBase.BaseColor = value;
             }
         }
 
@@ -89,7 +89,7 @@ namespace Engine.UI
                 new SpriteDescription()
                 {
                     Name = $"{description.Name}.SpriteBase",
-                    TintColor = description.BaseColor,
+                    BaseColor = description.BaseColor,
                     Width = description.Width,
                     Height = description.Height,
                     EventsEnabled = false,
@@ -102,7 +102,7 @@ namespace Engine.UI
                 new SpriteDescription()
                 {
                     Name = $"{description.Name}.SpriteProgress",
-                    TintColor = description.ProgressColor,
+                    BaseColor = description.ProgressColor,
                     Width = description.Width,
                     Height = description.Height,
                     EventsEnabled = false,

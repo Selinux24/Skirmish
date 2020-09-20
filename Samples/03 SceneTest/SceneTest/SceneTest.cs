@@ -138,7 +138,7 @@ namespace SceneTest.SceneTest
             {
                 Width = this.Game.Form.RenderWidth,
                 Height = this.runtime.Top + this.runtime.Height + 3,
-                TintColor = new Color4(0, 0, 0, 0.75f),
+                BaseColor = new Color4(0, 0, 0, 0.75f),
             }, SceneObjectUsages.UI, layerHUD - 1);
 
             var buttonFont = TextDrawerDescription.FromFamily("Lucida Console", 12, Color.Yellow, Color.Orange);
@@ -158,7 +158,7 @@ namespace SceneTest.SceneTest
             {
                 Background = new SpriteDescription
                 {
-                    TintColor = Color.Black,
+                    BaseColor = Color.Black,
                 },
                 Left = 0,
                 Top = 0,

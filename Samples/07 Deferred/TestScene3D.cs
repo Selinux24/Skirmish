@@ -333,7 +333,7 @@ namespace Deferred
             {
                 Width = this.Game.Form.RenderWidth,
                 Height = this.statistics.Top + this.statistics.Height + 3,
-                TintColor = new Color4(0, 0, 0, 0.75f),
+                BaseColor = new Color4(0, 0, 0, 0.75f),
             };
             await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);
         }

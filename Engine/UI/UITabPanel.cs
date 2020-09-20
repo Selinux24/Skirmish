@@ -42,10 +42,6 @@ namespace Engine.UI
         /// </summary>
         private float buttonAreaSize;
         /// <summary>
-        /// Base control color
-        /// </summary>
-        private Color4 baseColor;
-        /// <summary>
         /// Selected button color
         /// </summary>
         private Color4 selectedColor;
@@ -123,27 +119,6 @@ namespace Engine.UI
                 }
 
                 buttonAreaSize = value;
-
-                updateLayout = true;
-            }
-        }
-        /// <summary>
-        /// Gets or sets the base color
-        /// </summary>
-        public Color4 BaseColor
-        {
-            get
-            {
-                return baseColor;
-            }
-            set
-            {
-                if (baseColor == value)
-                {
-                    return;
-                }
-
-                baseColor = value;
 
                 updateLayout = true;
             }
@@ -232,8 +207,6 @@ namespace Engine.UI
         {
             margin = description.Margin;
             spacing = description.Spacing;
-            baseColor = description.BaseColor;
-            selectedColor = description.SelectedColor;
             buttonAreaSize = description.ButtonAreaSize;
 
             if (description.Background != null)
@@ -248,8 +221,8 @@ namespace Engine.UI
 
             if (description.Tabs > 0)
             {
-                var buttonDesc = description.ButtonDescription ?? UIButtonDescription.Default(description.TintColor);
-                var panelDesc = description.PanelDescription ?? UIPanelDescription.Default(description.TintColor);
+                var buttonDesc = description.ButtonDescription ?? UIButtonDescription.Default(description.BaseColor);
+                var panelDesc = description.PanelDescription ?? UIPanelDescription.Default(description.BaseColor);
 
                 for (int i = 0; i < description.Tabs; i++)
                 {
@@ -321,8 +294,8 @@ namespace Engine.UI
             tabPanels.ForEach(p => p.Visible = false);
             tabPanels[selectedTabIndex].Visible = true;
 
-            tabButtons.ForEach(b => b.TintColor = baseColor);
-            tabButtons[selectedTabIndex].TintColor = SelectedColor;
+            tabButtons.ForEach(b => b.State = UIButtonState.Released);
+            tabButtons[selectedTabIndex].State = UIButtonState.Pressed;
         }
 
         /// <inheritdoc/>

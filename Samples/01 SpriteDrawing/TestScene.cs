@@ -152,7 +152,7 @@ namespace SpriteDrawing
                 Background = new SpriteDescription
                 {
                     Textures = new[] { "pan_bw.png" },
-                    TintColor = new Color(176, 77, 45),
+                    BaseColor = new Color(176, 77, 45),
                 },
                 Top = this.Game.Form.RenderHeight / 8f,
                 Left = this.Game.Form.RenderCenter.X,
@@ -205,7 +205,7 @@ namespace SpriteDrawing
                 Background = new SpriteDescription()
                 {
                     Textures = new[] { "pan_bw.png" },
-                    TintColor = Color.Pink,
+                    BaseColor = Color.Pink,
                 }
             };
             this.dynamicPan = await this.AddComponentUIPanel(descPan, layerHUDDialogs);
@@ -411,12 +411,12 @@ Progress: {(int)(progressValue * 100f)}%";
 
             butTest2.Visible = true;
             butTest2.Show(250);
-            butTest2.TweenColorBounce(Color.Yellow, Color.Red, 2000, ScaleFuncs.Linear);
+            butTest2.TweenBaseColorBounce(Color.Yellow, Color.Red, 2000, ScaleFuncs.Linear);
 
             butTest1.Caption.Text = "The other";
             butTest1.Visible = true;
             butTest1.Show(250);
-            butTest1.TweenColorBounce(Color.Yellow, Color.Red, 2000, ScaleFuncs.Linear);
+            butTest1.TweenBaseColorBounce(Color.Yellow, Color.Red, 2000, ScaleFuncs.Linear);
         }
 
         private void ButTest1_Click(object sender, EventArgs e)
@@ -456,7 +456,7 @@ Progress: {(int)(progressValue * 100f)}%";
             {
                 button.ClearTween();
                 button.TweenScale(button.Scale, 1, 150, ScaleFuncs.QuadraticEaseOut);
-                button.TweenColorBounce(Color.Yellow, Color.Red, 2000, ScaleFuncs.Linear);
+                button.TweenBaseColorBounce(Color.Yellow, Color.Red, 2000, ScaleFuncs.Linear);
             }
         }
         private void ButTest_MouseEnter(object sender, EventArgs e)
@@ -465,7 +465,7 @@ Progress: {(int)(progressValue * 100f)}%";
             {
                 button.ClearTween();
                 button.TweenScale(button.Scale, 2, 150, ScaleFuncs.QuadraticEaseIn);
-                button.TweenColor(button.TintColor, Color.Yellow, 500, ScaleFuncs.Linear);
+                button.TweenBaseColor(button.BaseColor, Color.Yellow, 500, ScaleFuncs.Linear);
             }
         }
     }

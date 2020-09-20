@@ -157,7 +157,11 @@ namespace Engine.UI
             this.BufferManager.SetInputAssembler(technique, this.vertexBuffer, Topology.TriangleList);
 
             effect.UpdatePerFrame(this.Manipulator.LocalTransform, this.viewProjection);
-            effect.UpdatePerObject(this.TintColor, this.spriteTexture, this.TextureIndex);
+
+            var color = Color4.AdjustSaturation(BaseColor * TintColor, 1f);
+            color.Alpha *= Alpha;
+
+            effect.UpdatePerObject(color, this.spriteTexture, this.TextureIndex);
 
             var graphics = this.Game.Graphics;
 

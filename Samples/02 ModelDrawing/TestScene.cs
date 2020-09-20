@@ -99,7 +99,7 @@ namespace ModelDrawing
             {
                 Width = this.Game.Form.RenderWidth,
                 Height = this.text2.Top + this.text2.Height + 3,
-                TintColor = new Color4(0, 0, 0, 0.75f),
+                BaseColor = new Color4(0, 0, 0, 0.75f),
             };
 
             this.backPanel = await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);

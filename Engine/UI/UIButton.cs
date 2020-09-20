@@ -17,11 +17,38 @@ namespace Engine.UI
         /// Release sprite button
         /// </summary>
         private readonly Sprite buttonReleased = null;
+        /// <summary>
+        /// Button state
+        /// </summary>
+        private UIButtonState state = UIButtonState.Released;
 
         /// <summary>
         /// Gets the caption
         /// </summary>
         public UITextArea Caption { get; } = null;
+        /// <summary>
+        /// Gets whether this buttons is a two-state button or not
+        /// </summary>
+        public bool TwoStateButton { get; }
+        /// <summary>
+        /// Gets or sets the button state
+        /// </summary>
+        public UIButtonState State
+        {
+            get
+            {
+                return state;
+            }
+            set
+            {
+                if (state != value)
+                {
+                    state = value;
+
+                    UpdateInternals = true;
+                }
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -32,10 +59,12 @@ namespace Engine.UI
         public UIButton(Scene scene, UIButtonDescription description)
             : base(scene, description)
         {
+            TwoStateButton = description.TwoStateButton;
+
             var spriteDesc = new SpriteDescription()
             {
                 Name = $"{description.Name}.ReleasedButton",
-                TintColor = description.ColorReleased,
+                BaseColor = description.ColorReleased,
                 EventsEnabled = false,
             };
 
@@ -54,7 +83,7 @@ namespace Engine.UI
                 var spriteDesc2 = new SpriteDescription()
                 {
                     Name = $"{description.Name}.PressedButton",
-                    TintColor = description.ColorPressed,
+                    BaseColor = description.ColorPressed,
                     EventsEnabled = false,
                 };
 
@@ -89,16 +118,33 @@ namespace Engine.UI
                 return;
             }
 
+            bool pressed = IsPressed || (State == UIButtonState.Pressed);
+
             if (this.buttonPressed != null)
             {
-                this.buttonPressed.Visible = this.IsPressed;
-                this.buttonReleased.Visible = !this.IsPressed;
+                this.buttonPressed.Visible = pressed;
+                this.buttonReleased.Visible = !pressed;
             }
             else
             {
                 this.buttonReleased.Visible = true;
             }
         }
+    }
+
+    /// <summary>
+    /// UI button state
+    /// </summary>
+    public enum UIButtonState
+    {
+        /// <summary>
+        /// Pressed
+        /// </summary>
+        Pressed,
+        /// <summary>
+        /// Released
+        /// </summary>
+        Released,
     }
 
     /// <summary>

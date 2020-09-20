@@ -77,7 +77,7 @@ namespace SceneTest.SceneStart
                 Width = 48,
                 Centered = false,
                 Delta = new Vector2(-14f, -7f),
-                TintColor = Color.White,
+                BaseColor = Color.White,
             };
             await this.AddComponentUICursor(cursorDesc, layerCursor);
         }
@@ -191,7 +191,7 @@ namespace SceneTest.SceneStart
             tabsPanel.TabPanels[0].SetGridLayout(p);
             tabsPanel.TabPanels[0].Spacing = 10;
             tabsPanel.TabPanels[0].Padding = 15;
-            tabsPanel.TabPanels[0].TintColor = new Color4(1, 1, 1, 0.25f);
+            tabsPanel.TabPanels[0].BaseColor = new Color4(1, 1, 1, 0.25f);
             for (int i = 0; i < 5; i++)
             {
                 var panDesc = UIPanelDescription.Default(new Color4(Helper.RandomGenerator.NextVector3(Vector3.Zero, Vector3.One), 1f));
@@ -203,7 +203,7 @@ namespace SceneTest.SceneStart
             var p2 = GridLayout.FixedColumns(1);
             lastPan.SetGridLayout(p2);
             lastPan.Spacing = 10;
-            lastPan.TintColor = Color.Transparent;
+            lastPan.BaseColor = Color.Transparent;
             for (int i = 0; i < 2; i++)
             {
                 var panDesc = UIPanelDescription.Default(new Color4(Helper.RandomGenerator.NextVector3(Vector3.Zero, Vector3.One), 1f));
@@ -215,7 +215,7 @@ namespace SceneTest.SceneStart
             var p3 = GridLayout.Uniform;
             lastPan2.SetGridLayout(p3);
             lastPan2.Spacing = 10;
-            lastPan2.TintColor = Color.Transparent;
+            lastPan2.BaseColor = Color.Transparent;
             for (int i = 0; i < 4; i++)
             {
                 var panDesc = UIPanelDescription.Default(new Color4(Helper.RandomGenerator.NextVector3(Vector3.Zero, Vector3.One), 1f));
@@ -345,7 +345,7 @@ namespace SceneTest.SceneStart
             }
 
             optsButton.Hide(100);
-            tabsPanel.Show(5000);
+            tabsPanel.Show(100);
         }
         private void ClosePanel()
         {
@@ -355,7 +355,7 @@ namespace SceneTest.SceneStart
             }
 
             optsButton.Show(100);
-            tabsPanel.Hide(5000);
+            tabsPanel.Hide(100);
         }
 
         private void SceneButtonJustReleased(object sender, EventArgs e)

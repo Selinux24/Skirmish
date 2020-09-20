@@ -17,7 +17,7 @@ namespace Engine.UI
 
             return new SpriteDescription
             {
-                TintColor = baseColor,
+                BaseColor = baseColor,
                 BlendMode = blendMode,
             };
         }

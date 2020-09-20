@@ -237,9 +237,17 @@ namespace Engine.UI
         /// </summary>
         private float rotation = 0f;
         /// <summary>
+        /// Base color
+        /// </summary>
+        private Color4 baseColor;
+        /// <summary>
         /// Tint color
         /// </summary>
-        private Color4 tintColor = Color4.Black;
+        private Color4 tintColor;
+        /// <summary>
+        /// Alpha color component
+        /// </summary>
+        private float alpha = 1f;
         /// <summary>
         /// Maintain proportion with parent size
         /// </summary>
@@ -310,19 +318,19 @@ namespace Engine.UI
         /// <summary>
         /// Gets whether the mouse is over the button rectangle or not
         /// </summary>
-        public bool IsMouseOver { get; protected set; }
+        public virtual bool IsMouseOver { get; protected set; }
         /// <summary>
         /// Gets whether the control is pressed or not
         /// </summary>
-        public bool IsPressed { get; protected set; }
+        public virtual bool IsPressed { get; protected set; }
         /// <summary>
         /// Gets whether the control is just pressed or not
         /// </summary>
-        public bool IsJustPressed { get; protected set; }
+        public virtual bool IsJustPressed { get; protected set; }
         /// <summary>
         /// Gets whether the control is just released or not
         /// </summary>
-        public bool IsJustReleased { get; protected set; }
+        public virtual bool IsJustReleased { get; protected set; }
 
         /// <summary>
         /// Gets or sets the left position in the render area
@@ -684,6 +692,25 @@ namespace Engine.UI
         }
 
         /// <summary>
+        /// Gets or sets the base color
+        /// </summary>
+        public virtual Color4 BaseColor
+        {
+            get
+            {
+                return baseColor;
+            }
+            set
+            {
+                if (baseColor != value)
+                {
+                    baseColor = value;
+                }
+
+                children.ForEach(c => c.BaseColor = value);
+            }
+        }
+        /// <summary>
         /// Gets or sets the tint color
         /// </summary>
         public virtual Color4 TintColor
@@ -694,7 +721,10 @@ namespace Engine.UI
             }
             set
             {
-                tintColor = value;
+                if (tintColor != value)
+                {
+                    tintColor = value;
+                }
 
                 children.ForEach(c => c.TintColor = value);
             }
@@ -706,11 +736,14 @@ namespace Engine.UI
         {
             get
             {
-                return tintColor.Alpha;
+                return alpha;
             }
             set
             {
-                tintColor.Alpha = value;
+                if (alpha != value)
+                {
+                    alpha = value;
+                }
 
                 children.ForEach(c => c.Alpha = value);
             }
@@ -753,6 +786,7 @@ namespace Engine.UI
             this.centerHorizontally = description.CenterHorizontally;
             this.centerVertically = description.CenterVertically;
 
+            this.baseColor = description.BaseColor;
             this.tintColor = description.TintColor;
 
             this.EventsEnabled = description.EventsEnabled;

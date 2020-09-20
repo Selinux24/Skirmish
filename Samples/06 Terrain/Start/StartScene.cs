@@ -56,7 +56,7 @@ namespace Terrain.Start
                 Width = 48,
                 Centered = false,
                 Delta = new Vector2(-14f, -7f),
-                TintColor = Color.White,
+                BaseColor = Color.White,
             };
             await this.AddComponentUICursor(cursorDesc, layerCursor);
 
