@@ -105,7 +105,7 @@ namespace Heightmap
         private bool udaptingGraph = false;
 
         public TestScene3D(Game game)
-            : base(game, SceneModes.ForwardLigthning)
+            : base(game)
         {
 
         }

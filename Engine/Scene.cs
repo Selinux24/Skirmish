@@ -312,15 +312,7 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game class</param>
-        public Scene(Game game) : this(game, SceneModes.ForwardLigthning)
-        {
-
-        }
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="game">Game class</param>
-        public Scene(Game game, SceneModes sceneMode)
+        public Scene(Game game)
         {
             this.Game = game;
 
@@ -341,11 +333,6 @@ namespace Engine
             this.Lights = SceneLights.CreateDefault(this);
 
             this.PerformFrustumCulling = true;
-
-            if (!this.SetRenderMode(sceneMode))
-            {
-                throw new EngineException($"Bad render mode: {sceneMode}");
-            }
 
             this.UpdateGlobalResources = true;
         }

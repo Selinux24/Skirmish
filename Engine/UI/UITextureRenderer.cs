@@ -43,13 +43,13 @@ namespace Engine.UI
         {
             get
             {
-                return this.channels;
+                return channels;
             }
             set
             {
-                if (this.channels != value)
+                if (channels != value)
                 {
-                    this.channels = value;
+                    channels = value;
                 }
             }
         }
@@ -60,7 +60,7 @@ namespace Engine.UI
         {
             get
             {
-                return this.vertexBuffer?.Ready == true && this.indexBuffer?.Ready == true && this.indexBuffer.Count > 0;
+                return vertexBuffer?.Ready == true && indexBuffer?.Ready == true && indexBuffer.Count > 0;
             }
         }
 
@@ -77,12 +77,12 @@ namespace Engine.UI
             var vertices = VertexPositionTexture.Generate(sprite.Vertices, sprite.Uvs);
             var indices = sprite.Indices;
 
-            this.vertexBuffer = this.BufferManager.AddVertexData(description.Name, false, vertices);
-            this.indexBuffer = this.BufferManager.AddIndexData(description.Name, false, indices);
+            vertexBuffer = BufferManager.AddVertexData(description.Name, false, vertices);
+            indexBuffer = BufferManager.AddIndexData(description.Name, false, indices);
 
-            this.Channels = description.Channel;
+            Channels = description.Channel;
 
-            this.viewProjection = this.Game.Form.GetOrthoProjectionMatrix();
+            viewProjection = Game.Form.GetOrthoProjectionMatrix();
         }
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
@@ -90,8 +90,8 @@ namespace Engine.UI
             if (disposing)
             {
                 //Remove data from buffer manager
-                this.BufferManager?.RemoveVertexData(this.vertexBuffer);
-                this.BufferManager?.RemoveIndexData(this.indexBuffer);
+                BufferManager?.RemoveVertexData(vertexBuffer);
+                BufferManager?.RemoveIndexData(indexBuffer);
             }
 
             base.Dispose(disposing);
@@ -110,7 +110,7 @@ namespace Engine.UI
                 return;
             }
 
-            bool draw = context.ValidateDraw(this.BlendMode);
+            bool draw = context.ValidateDraw(BlendMode);
             if (!draw)
             {
                 return;
@@ -119,27 +119,27 @@ namespace Engine.UI
             var effect = DrawerPool.EffectDefaultSprite;
             var technique = effect.GetTechnique(
                 VertexTypes.PositionTexture,
-                this.Channels);
+                Channels);
 
             Counters.InstancesPerFrame++;
-            Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
+            Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
 
-            this.BufferManager.SetIndexBuffer(this.indexBuffer);
-            this.BufferManager.SetInputAssembler(technique, this.vertexBuffer, Topology.TriangleList);
+            BufferManager.SetIndexBuffer(indexBuffer);
+            BufferManager.SetInputAssembler(technique, vertexBuffer, Topology.TriangleList);
 
-            effect.UpdatePerFrame(this.Manipulator.LocalTransform, this.viewProjection);
-            effect.UpdatePerObject(Color4.White, this.Texture, this.TextureIndex);
+            effect.UpdatePerFrame(Manipulator.LocalTransform, viewProjection);
+            effect.UpdatePerObject(Color4.White, Texture, TextureIndex);
 
-            var graphics = this.Game.Graphics;
+            var graphics = Game.Graphics;
 
             for (int p = 0; p < technique.PassCount; p++)
             {
                 graphics.EffectPassApply(technique, p, 0);
 
                 graphics.DrawIndexed(
-                    this.indexBuffer.Count,
-                    this.indexBuffer.BufferOffset,
-                    this.vertexBuffer.BufferOffset);
+                    indexBuffer.Count,
+                    indexBuffer.BufferOffset,
+                    vertexBuffer.BufferOffset);
             }
         }
 
@@ -148,7 +148,7 @@ namespace Engine.UI
         {
             base.Resize();
 
-            this.viewProjection = this.Game.Form.GetOrthoProjectionMatrix();
+            viewProjection = Game.Form.GetOrthoProjectionMatrix();
         }
     }
 

@@ -30,6 +30,7 @@ namespace Deferred
         private UITextArea load = null;
         private UITextArea help = null;
         private UITextArea statistics = null;
+        private Sprite upperPanel = null;
 
         private Agent tankAgentType = null;
         private readonly List<GameAgent<SteerManipulatorController>> tankAgents = new List<GameAgent<SteerManipulatorController>>();
@@ -44,6 +45,8 @@ namespace Deferred
         private ModelInstanced trees = null;
 
         private UITextureRenderer bufferDrawer = null;
+        private bool bufferDrawerFullscreen = false;
+        private SceneRendererResults bufferType = SceneRendererResults.None;
         private int textIntex = 0;
         private bool animateLights = false;
         private SceneLightSpot spotLight = null;
@@ -60,7 +63,7 @@ namespace Deferred
         private bool gameReady = false;
 
         public TestScene3D(Game game)
-            : base(game, SceneModes.DeferredLightning)
+            : base(game)
         {
 
         }
@@ -69,15 +72,15 @@ namespace Deferred
         {
             await base.Initialize();
 
-            this.Lights.KeyLight.Enabled = false;
-            this.Lights.BackLight.Enabled = false;
-            this.Lights.FillLight.Enabled = true;
+            Lights.KeyLight.Enabled = false;
+            Lights.BackLight.Enabled = false;
+            Lights.FillLight.Enabled = true;
 
-            this.Lights.KeyLight.CastShadow = false;
-            this.Lights.BackLight.CastShadow = false;
-            this.Lights.FillLight.CastShadow = false;
+            Lights.KeyLight.CastShadow = false;
+            Lights.BackLight.CastShadow = false;
+            Lights.FillLight.CastShadow = false;
 
-            await this.LoadResourcesAsync(
+            await LoadResourcesAsync(
                 new[]
                 {
                     InitializeCursor(),
@@ -90,12 +93,14 @@ namespace Deferred
                         res.ThrowExceptions();
                     }
 
-                    this.title.Text = "Deferred Ligthning test";
-                    this.help.Text = "";
-                    this.statistics.Text = "";
+                    title.Text = "Deferred Ligthning test";
+                    help.Text = "";
+                    statistics.Text = "";
+
+                    UpdateLayout();
                 });
 
-            await this.LoadResourcesAsync(
+            await LoadResourcesAsync(
                 new[]
                 {
                     InitializeAndTrace(InitializeSkydom),
@@ -113,9 +118,9 @@ namespace Deferred
                         res.ThrowExceptions();
                     }
 
-                    this.SetGround(this.terrain, true);
-                    this.AttachToGround(this.tree, false);
-                    this.AttachToGround(this.trees, false);
+                    SetGround(terrain, true);
+                    AttachToGround(tree, false);
+                    AttachToGround(trees, false);
 
                     StartNodes();
 
@@ -125,16 +130,16 @@ namespace Deferred
 
                     StartItems(out Vector3 cameraPosition, out int modelCount);
 
-                    cameraPosition /= (float)modelCount;
-                    this.Camera.Goto(cameraPosition + new Vector3(-30, 30, -30));
-                    this.Camera.LookTo(cameraPosition + Vector3.Up);
-                    this.Camera.NearPlaneDistance = near;
-                    this.Camera.FarPlaneDistance = far;
+                    cameraPosition /= modelCount;
+                    Camera.Goto(cameraPosition + new Vector3(-30, 30, -30));
+                    Camera.LookTo(cameraPosition + Vector3.Up);
+                    Camera.NearPlaneDistance = near;
+                    Camera.FarPlaneDistance = far;
 
                     var nmsettings = BuildSettings.Default;
                     nmsettings.CellSize = 0.5f;
                     nmsettings.CellHeight = 0.25f;
-                    nmsettings.Agents = new[] { this.tankAgentType };
+                    nmsettings.Agents = new[] { tankAgentType };
                     nmsettings.PartitionType = SamplePartitionTypes.Layers;
                     nmsettings.EdgeMaxError = 1.0f;
                     nmsettings.BuildMode = BuildModes.Tiled;
@@ -142,9 +147,9 @@ namespace Deferred
 
                     var nmInput = new InputGeometry(GetTrianglesForNavigationGraph);
 
-                    this.PathFinderDescription = new Engine.PathFinding.PathFinderDescription(nmsettings, nmInput);
+                    PathFinderDescription = new Engine.PathFinding.PathFinderDescription(nmsettings, nmInput);
 
-                    Task.WhenAll(this.UpdateNavigationGraph());
+                    Task.WhenAll(UpdateNavigationGraph());
 
                     gameReady = true;
                 });
@@ -191,8 +196,8 @@ namespace Deferred
                     ModelContentFilename = "m24.xml",
                 }
             };
-            this.helicopter = await this.AddComponentModel(desc1);
-            this.Lights.AddRange(this.helicopter.Lights);
+            helicopter = await this.AddComponentModel(desc1);
+            Lights.AddRange(helicopter.Lights);
 
             var desc2 = new ModelInstancedDescription()
             {
@@ -205,10 +210,10 @@ namespace Deferred
                     ModelContentFilename = "m24.xml",
                 }
             };
-            this.helicopters = await this.AddComponentModelInstanced(desc2);
-            for (int i = 0; i < this.helicopters.InstanceCount; i++)
+            helicopters = await this.AddComponentModelInstanced(desc2);
+            for (int i = 0; i < helicopters.InstanceCount; i++)
             {
-                this.Lights.AddRange(this.helicopters[i].Lights);
+                Lights.AddRange(helicopters[i].Lights);
             }
 
             await Task.CompletedTask;
@@ -231,7 +236,7 @@ namespace Deferred
             tanks[0].Manipulator.SetScale(0.2f, true);
             var tankbbox = tanks[0].GetBoundingBox();
 
-            this.tankAgentType = new Agent()
+            tankAgentType = new Agent()
             {
                 Height = tankbbox.Height,
                 Radius = Math.Max(tankbbox.Width, tankbbox.Depth) * 0.5f,
@@ -254,15 +259,15 @@ namespace Deferred
                 ArrivingRadius = 7.5f,
             };
 
-            var tankAgent = new GameAgent<SteerManipulatorController>(this.tankAgentType, tank, tankController);
+            var tankAgent = new GameAgent<SteerManipulatorController>(tankAgentType, tank, tankController);
 
             tankAgents.Add(tankAgent);
 
-            this.Lights.AddRange(tankAgent.Lights);
+            Lights.AddRange(tankAgent.Lights);
         }
         private async Task InitializeTerrain()
         {
-            this.terrain = await this.AddComponentScenery(GroundDescription.FromFile("Resources", "terrain.xml", 2));
+            terrain = await this.AddComponentScenery(GroundDescription.FromFile("Resources", "terrain.xml", 2));
         }
         private async Task InitializeGardener()
         {
@@ -295,7 +300,7 @@ namespace Deferred
                     ModelContentFilename = "birch_a.xml",
                 }
             };
-            this.tree = await this.AddComponentModel(desc1);
+            tree = await this.AddComponentModel(desc1);
 
             var desc2 = new ModelInstancedDescription()
             {
@@ -310,7 +315,7 @@ namespace Deferred
                     ModelContentFilename = "birch_b.xml",
                 }
             };
-            this.trees = await this.AddComponentModelInstanced(desc2);
+            trees = await this.AddComponentModelInstanced(desc2);
         }
         private async Task InitializeUI()
         {
@@ -319,64 +324,37 @@ namespace Deferred
             var dHelp = new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12, Color.Yellow) };
             var dStats = new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 10, Color.Red) };
 
-            this.title = await this.AddComponentUITextArea(dTitle, layerHUD);
-            this.load = await this.AddComponentUITextArea(dLoad, layerHUD);
-            this.help = await this.AddComponentUITextArea(dHelp, layerHUD);
-            this.statistics = await this.AddComponentUITextArea(dStats, layerHUD);
+            title = await this.AddComponentUITextArea(dTitle, layerHUD);
+            load = await this.AddComponentUITextArea(dLoad, layerHUD);
+            help = await this.AddComponentUITextArea(dHelp, layerHUD);
+            statistics = await this.AddComponentUITextArea(dStats, layerHUD);
 
-            this.title.SetPosition(Vector2.Zero);
-            this.load.SetPosition(new Vector2(0, this.title.Top + this.title.Height + 2));
-            this.help.SetPosition(new Vector2(0, this.load.Top + this.load.Height + 2));
-            this.statistics.SetPosition(new Vector2(0, this.help.Top + this.help.Height + 2));
+            var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
+            upperPanel = await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);
 
-            var spDesc = new SpriteDescription()
+            var bufferDrawerDesc = new UITextureRendererDescription()
             {
-                Width = this.Game.Form.RenderWidth,
-                Height = this.statistics.Top + this.statistics.Height + 3,
-                BaseColor = new Color4(0, 0, 0, 0.75f),
+                Channel = UITextureRendererChannels.NoAlpha,
             };
-            await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            bufferDrawer = await this.AddComponentUITextureRenderer(bufferDrawerDesc, layerEffects);
+            bufferDrawer.Visible = false;
         }
         private async Task InitializeDebug()
         {
-            int width = (int)(this.Game.Form.RenderWidth * 0.33f);
-            int height = (int)(this.Game.Form.RenderHeight * 0.33f);
-            int smLeft = this.Game.Form.RenderWidth - width;
-            int smTop = this.Game.Form.RenderHeight - height;
+            var lineDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
+            {
+                DepthEnabled = false,
+                Count = 1000,
+            };
+            lineDrawer = await this.AddComponentPrimitiveListDrawer(lineDrawerDesc, SceneObjectUsages.None, layerEffects);
+            lineDrawer.Visible = false;
 
-            this.bufferDrawer = await this.AddComponentUITextureRenderer(
-                new UITextureRendererDescription()
-                {
-                    Left = 0,
-                    Top = 0,
-                    Width = this.Game.Form.RenderWidth,
-                    Height = this.Game.Form.RenderHeight,
-                    Channel = UITextureRendererChannels.NoAlpha,
-                },
-                layerEffects);
-            this.bufferDrawer.Visible = false;
-            this.bufferDrawer.Scale = 0.33f;
-            this.bufferDrawer.Left = smLeft;
-            this.bufferDrawer.Top = smTop;
-
-            this.lineDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(
-                new PrimitiveListDrawerDescription<Line3D>()
-                {
-                    DepthEnabled = false,
-                    Count = 1000,
-                },
-                SceneObjectUsages.None,
-                layerEffects);
-            this.lineDrawer.Visible = false;
-
-            this.terrainGraphDrawer = await this.AddComponentPrimitiveListDrawer<Triangle>(
-                new PrimitiveListDrawerDescription<Triangle>()
-                {
-                    Count = MaxGridDrawer,
-                },
-                SceneObjectUsages.None,
-                layerEffects);
-            this.terrainGraphDrawer.Visible = false;
+            var terrainGraphDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
+            {
+                Count = MaxGridDrawer,
+            };
+            terrainGraphDrawer = await this.AddComponentPrimitiveListDrawer(terrainGraphDrawerDesc, SceneObjectUsages.None, layerEffects);
+            terrainGraphDrawer.Visible = false;
 
             var graphDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
             {
@@ -384,18 +362,18 @@ namespace Deferred
                 DepthEnabled = true,
                 Count = 50000,
             };
-            this.graphDrawer = await this.AddComponentPrimitiveListDrawer<Triangle>(graphDrawerDesc);
+            graphDrawer = await this.AddComponentPrimitiveListDrawer(graphDrawerDesc);
 
             var volumesDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
             {
                 Count = 10000
             };
-            this.volumesDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(volumesDrawerDesc);
+            volumesDrawer = await this.AddComponentPrimitiveListDrawer(volumesDrawerDesc);
         }
 
         private void StartNodes()
         {
-            var nodes = this.GetNodes(this.tankAgentType).OfType<GraphNode>();
+            var nodes = GetNodes(tankAgentType).OfType<GraphNode>();
             if (nodes.Any())
             {
                 Random clrRnd = new Random(1);
@@ -407,7 +385,7 @@ namespace Deferred
 
                 foreach (var node in nodes)
                 {
-                    this.terrainGraphDrawer.AddPrimitives(node.Color, node.Triangles);
+                    terrainGraphDrawer.AddPrimitives(node.Color, node.Triangles);
                 }
             }
         }
@@ -415,22 +393,22 @@ namespace Deferred
         {
             var ap = new AnimationPath();
             ap.AddLoop("roll");
-            this.animations.Add("default", new AnimationPlan(ap));
+            animations.Add("default", new AnimationPlan(ap));
         }
         private void StartTerrain()
         {
-            if (this.FindTopGroundPosition(20, -20, out PickingResult<Triangle> treePos))
+            if (FindTopGroundPosition(20, -20, out var treePos))
             {
-                this.tree.Manipulator.SetPosition(treePos.Position);
-                this.tree.Manipulator.SetScale(0.5f);
+                tree.Manipulator.SetPosition(treePos.Position);
+                tree.Manipulator.SetScale(0.5f);
             }
 
-            for (int i = 0; i < this.trees.InstanceCount; i++)
+            for (int i = 0; i < trees.InstanceCount; i++)
             {
-                if (this.FindTopGroundPosition((i * 10) - 35, 17, out PickingResult<Triangle> pos))
+                if (FindTopGroundPosition((i * 10) - 35, 17, out var pos))
                 {
-                    this.trees[i].Manipulator.SetScale(0.5f, true);
-                    this.trees[i].Manipulator.SetPosition(pos.Position, true);
+                    trees[i].Manipulator.SetScale(0.5f, true);
+                    trees[i].Manipulator.SetPosition(pos.Position, true);
                 }
             }
         }
@@ -441,7 +419,7 @@ namespace Deferred
 
             for (int i = 0; i < tankAgents.Count; i++)
             {
-                if (this.FindTopGroundPosition((i * 10) - (tankAgents.Count * 10 / 2), 40, out PickingResult<Triangle> t1Pos))
+                if (FindTopGroundPosition((i * 10) - (tankAgents.Count * 10 / 2), 40, out var t1Pos))
                 {
                     tankAgents[i].Manipulator.SetPosition(t1Pos.Position);
                     tankAgents[i].Manipulator.SetNormal(t1Pos.Item.Normal);
@@ -450,48 +428,48 @@ namespace Deferred
                 }
             }
 
-            if (this.FindTopGroundPosition(20, -20, out PickingResult<Triangle> hPos))
+            if (FindTopGroundPosition(20, -20, out var hPos))
             {
                 var p = hPos.Position;
                 p.Y += 10f;
-                this.helicopter.Manipulator.SetPosition(p, true);
-                this.helicopter.Manipulator.SetScale(0.15f, true);
+                helicopter.Manipulator.SetPosition(p, true);
+                helicopter.Manipulator.SetScale(0.15f, true);
                 cameraPosition += p;
                 modelCount++;
             }
 
-            this.helicopter.AnimationController.AddPath(this.animations["default"]);
-            this.helicopter.AnimationController.TimeDelta = 3f;
-            this.helicopter.AnimationController.Start();
+            helicopter.AnimationController.AddPath(animations["default"]);
+            helicopter.AnimationController.TimeDelta = 3f;
+            helicopter.AnimationController.Start();
 
-            for (int i = 0; i < this.helicopters.InstanceCount; i++)
+            for (int i = 0; i < helicopters.InstanceCount; i++)
             {
-                if (this.FindTopGroundPosition((i * 10) - 20, 20, out PickingResult<Triangle> r))
+                if (FindTopGroundPosition((i * 10) - 20, 20, out var r))
                 {
                     var p = r.Position;
                     p.Y += 10f;
-                    this.helicopters[i].Manipulator.SetPosition(p, true);
-                    this.helicopters[i].Manipulator.SetScale(0.15f, true);
+                    helicopters[i].Manipulator.SetPosition(p, true);
+                    helicopters[i].Manipulator.SetScale(0.15f, true);
                     cameraPosition += p;
                     modelCount++;
                 }
 
-                this.helicopters[i].AnimationController.AddPath(this.animations["default"]);
-                this.helicopters[i].AnimationController.TimeDelta = 3f;
-                this.helicopters[i].AnimationController.Start();
+                helicopters[i].AnimationController.AddPath(animations["default"]);
+                helicopters[i].AnimationController.TimeDelta = 3f;
+                helicopters[i].AnimationController.Start();
             }
         }
 
         public override void Update(GameTime gameTime)
         {
-            if (this.Game.Input.KeyJustReleased(Keys.Escape))
+            if (Game.Input.KeyJustReleased(Keys.Escape))
             {
-                this.Game.Exit();
+                Game.Exit();
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.R))
+            if (Game.Input.KeyJustReleased(Keys.R))
             {
-                this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
+                SetRenderMode(GetRenderMode() == SceneModes.ForwardLigthning ?
                     SceneModes.DeferredLightning :
                     SceneModes.ForwardLigthning);
             }
@@ -503,9 +481,9 @@ namespace Deferred
                 return;
             }
 
-            this.tankAgents.ForEach(a => a.Update(new Engine.Common.UpdateContext() { GameTime = gameTime }));
+            tankAgents.ForEach(a => a.Update(new Engine.Common.UpdateContext() { GameTime = gameTime }));
 
-            bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
+            bool shift = Game.Input.KeyPressed(Keys.LShiftKey);
 
             UpdateInputCamera(gameTime, shift);
             UpdateInputMouse(shift);
@@ -523,60 +501,60 @@ namespace Deferred
         private void UpdateInputCamera(GameTime gameTime, bool shift)
         {
 #if DEBUG
-            if (this.Game.Input.RightMouseButtonPressed)
+            if (Game.Input.RightMouseButtonPressed)
             {
-                this.Camera.RotateMouse(
+                Camera.RotateMouse(
                     gameTime,
-                    this.Game.Input.MouseXDelta,
-                    this.Game.Input.MouseYDelta);
+                    Game.Input.MouseXDelta,
+                    Game.Input.MouseYDelta);
             }
 #else
-            this.Camera.RotateMouse(
+            Camera.RotateMouse(
                 gameTime,
-                this.Game.Input.MouseXDelta,
-                this.Game.Input.MouseYDelta);
+                Game.Input.MouseXDelta,
+                Game.Input.MouseYDelta);
 #endif
 
-            if (this.Game.Input.KeyPressed(Keys.A))
+            if (Game.Input.KeyPressed(Keys.A))
             {
-                this.Camera.MoveLeft(gameTime, shift);
+                Camera.MoveLeft(gameTime, shift);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.D))
+            if (Game.Input.KeyPressed(Keys.D))
             {
-                this.Camera.MoveRight(gameTime, shift);
+                Camera.MoveRight(gameTime, shift);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.W))
+            if (Game.Input.KeyPressed(Keys.W))
             {
-                this.Camera.MoveForward(gameTime, shift);
+                Camera.MoveForward(gameTime, shift);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.S))
+            if (Game.Input.KeyPressed(Keys.S))
             {
-                this.Camera.MoveBackward(gameTime, shift);
+                Camera.MoveBackward(gameTime, shift);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.Space))
+            if (Game.Input.KeyPressed(Keys.Space))
             {
-                this.lineDrawer.SetPrimitives(Color.Yellow, Line3D.CreateWiredFrustum(this.Camera.Frustum));
-                this.lineDrawer.Visible = true;
+                lineDrawer.SetPrimitives(Color.Yellow, Line3D.CreateWiredFrustum(Camera.Frustum));
+                lineDrawer.Visible = true;
             }
         }
         private void UpdateInputMouse(bool shift)
         {
-            if (this.Game.Input.LeftMouseButtonJustReleased)
+            if (Game.Input.LeftMouseButtonJustReleased)
             {
-                var pRay = this.GetPickingRay();
+                var pRay = GetPickingRay();
                 var rayPParams = RayPickingParams.FacingOnly | RayPickingParams.Perfect;
 
-                if (this.PickNearest(pRay, rayPParams, out PickingResult<Triangle> r))
+                if (PickNearest(pRay, rayPParams, out var r))
                 {
                     var tri = Line3D.CreateWiredTriangle(r.Item);
-                    this.volumesDrawer.SetPrimitives(Color.White, tri);
+                    volumesDrawer.SetPrimitives(Color.White, tri);
 
                     var cross = Line3D.CreateCross(r.Position, 0.25f);
-                    this.volumesDrawer.SetPrimitives(Color.Red, cross);
+                    volumesDrawer.SetPrimitives(Color.Red, cross);
 
                     if (shift)
                     {
@@ -591,123 +569,123 @@ namespace Deferred
         }
         private void UpdayeInputLights(bool shift)
         {
-            if (this.Game.Input.KeyJustReleased(Keys.F))
+            if (Game.Input.KeyJustReleased(Keys.F))
             {
-                this.Lights.BaseFogColor = new Color((byte)54, (byte)56, (byte)68);
-                this.Lights.FogStart = this.Lights.FogStart == 0f ? far * fogStart : 0f;
-                this.Lights.FogRange = this.Lights.FogRange == 0f ? far * fogRange : 0f;
+                Lights.BaseFogColor = new Color((byte)54, (byte)56, (byte)68);
+                Lights.FogStart = Lights.FogStart == 0f ? far * fogStart : 0f;
+                Lights.FogRange = Lights.FogRange == 0f ? far * fogRange : 0f;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.G))
+            if (Game.Input.KeyJustReleased(Keys.G))
             {
-                this.Lights.DirectionalLights[0].CastShadow = !this.Lights.DirectionalLights[0].CastShadow;
+                Lights.DirectionalLights[0].CastShadow = !Lights.DirectionalLights[0].CastShadow;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.L))
+            if (Game.Input.KeyJustReleased(Keys.L))
             {
-                this.onlyModels = !this.onlyModels;
+                onlyModels = !onlyModels;
 
-                this.CreateLights(this.onlyModels, !shift);
+                CreateLights(onlyModels, !shift);
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.P))
+            if (Game.Input.KeyJustReleased(Keys.P))
             {
-                this.animateLights = !this.animateLights;
+                animateLights = !animateLights;
             }
         }
         private void UpdateInputObjectsVisibility()
         {
-            if (this.Game.Input.KeyJustReleased(Keys.F7))
+            if (Game.Input.KeyJustReleased(Keys.F7))
             {
-                this.bufferDrawer.Visible = !this.bufferDrawer.Visible;
-                this.help.Visible = this.bufferDrawer.Visible;
+                bufferDrawer.Visible = !bufferDrawer.Visible;
+                help.Visible = bufferDrawer.Visible;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F8))
+            if (Game.Input.KeyJustReleased(Keys.F8))
             {
-                this.terrain.Active = this.terrain.Visible = !this.terrain.Visible;
+                terrain.Active = terrain.Visible = !terrain.Visible;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F9))
+            if (Game.Input.KeyJustReleased(Keys.F9))
             {
-                this.tankAgents[0].Active = this.tankAgents[0].Visible = !this.tankAgents[0].Visible;
+                tankAgents[0].Active = tankAgents[0].Visible = !tankAgents[0].Visible;
 
                 for (int i = 1; i < tankAgents.Count; i++)
                 {
-                    this.tankAgents[i].Active = this.tankAgents[i].Visible = this.tankAgents[0].Visible;
+                    tankAgents[i].Active = tankAgents[i].Visible = tankAgents[0].Visible;
                 }
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F10))
+            if (Game.Input.KeyJustReleased(Keys.F10))
             {
-                this.helicopter.Active = this.helicopter.Visible = !this.helicopter.Visible;
+                helicopter.Active = helicopter.Visible = !helicopter.Visible;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F11))
+            if (Game.Input.KeyJustReleased(Keys.F11))
             {
-                this.helicopters.Active = this.helicopters.Visible = !this.helicopters.Visible;
+                helicopters.Active = helicopters.Visible = !helicopters.Visible;
             }
         }
         private void UpdateInputHelicopterTexture()
         {
-            if (this.Game.Input.KeyJustReleased(Keys.Oemcomma))
+            if (Game.Input.KeyJustReleased(Keys.Oemcomma))
             {
-                this.textIntex--;
+                textIntex--;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.OemPeriod))
+            if (Game.Input.KeyJustReleased(Keys.OemPeriod))
             {
-                this.textIntex++;
+                textIntex++;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.T))
+            if (Game.Input.KeyJustReleased(Keys.T))
             {
-                this.helicopter.TextureIndex++;
+                helicopter.TextureIndex++;
 
-                if (this.helicopter.TextureIndex >= this.helicopter.TextureCount)
+                if (helicopter.TextureIndex >= helicopter.TextureCount)
                 {
                     //Loop
-                    this.helicopter.TextureIndex = 0;
+                    helicopter.TextureIndex = 0;
                 }
             }
         }
         private void UpdateInputGraph()
         {
-            if (this.Game.Input.KeyJustReleased(Keys.F4))
+            if (Game.Input.KeyJustReleased(Keys.F4))
             {
-                this.terrainGraphDrawer.Visible = !this.terrainGraphDrawer.Visible;
+                terrainGraphDrawer.Visible = !terrainGraphDrawer.Visible;
             }
         }
         private void UpdateInputDebug(bool shift)
         {
-            if (this.Game.Input.KeyJustReleased(Keys.F1))
+            if (Game.Input.KeyJustReleased(Keys.F1))
             {
-                this.UpdateDebugColorMap();
+                UpdateDebugColorMap();
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F2))
+            if (Game.Input.KeyJustReleased(Keys.F2))
             {
-                this.UpdateDebugNormalMap();
+                UpdateDebugNormalMap();
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F3))
+            if (Game.Input.KeyJustReleased(Keys.F3))
             {
-                this.UpdateDebugDepthMap();
+                UpdateDebugDepthMap();
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F5))
+            if (Game.Input.KeyJustReleased(Keys.F5))
             {
-                this.UpdateDebugShadowMap(shift);
+                UpdateDebugShadowMap(shift);
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F6))
+            if (Game.Input.KeyJustReleased(Keys.F6))
             {
-                this.UpdateDebugLightMap();
+                UpdateDebugLightMap();
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F12))
+            if (Game.Input.KeyJustReleased(Keys.F12))
             {
-                this.UpdateDebugBufferDrawer();
+                UpdateDebugBufferDrawer();
             }
         }
         private void UpdateTanks()
@@ -733,83 +711,83 @@ namespace Deferred
 
         private void UpdateLights(GameTime gameTime)
         {
-            if (this.spotLight != null)
+            if (spotLight != null)
             {
-                this.UpdateSpotlight(gameTime);
+                UpdateSpotlight(gameTime);
 
-                this.lineDrawer.SetPrimitives(Color.White, this.spotLight.GetVolume(10));
+                lineDrawer.SetPrimitives(Color.White, spotLight.GetVolume(10));
             }
             else
             {
-                this.lineDrawer.Clear(Color.White);
+                lineDrawer.Clear(Color.White);
             }
 
-            if (this.animateLights && this.Lights.PointLights.Length > 0)
+            if (animateLights && Lights.PointLights.Length > 0)
             {
-                this.UpdatePointLightsAnimation(gameTime);
+                UpdatePointLightsAnimation(gameTime);
             }
         }
         private void UpdateSpotlight(GameTime gameTime)
         {
-            if (this.Game.Input.KeyPressed(Keys.Left))
+            if (Game.Input.KeyPressed(Keys.Left))
             {
-                var v = this.Camera.Left;
+                var v = Camera.Left;
                 v.Y = 0;
                 v.Normalize();
-                this.spotLight.Position += (v) * gameTime.ElapsedSeconds * 10f;
+                spotLight.Position += (v) * gameTime.ElapsedSeconds * 10f;
             }
 
-            if (this.Game.Input.KeyPressed(Keys.Right))
+            if (Game.Input.KeyPressed(Keys.Right))
             {
-                var v = this.Camera.Right;
+                var v = Camera.Right;
                 v.Y = 0;
                 v.Normalize();
-                this.spotLight.Position += (v) * gameTime.ElapsedSeconds * 10f;
+                spotLight.Position += (v) * gameTime.ElapsedSeconds * 10f;
             }
 
-            if (this.Game.Input.KeyPressed(Keys.Up))
+            if (Game.Input.KeyPressed(Keys.Up))
             {
-                var v = this.Camera.Forward;
+                var v = Camera.Forward;
                 v.Y = 0;
                 v.Normalize();
-                this.spotLight.Position += (v) * gameTime.ElapsedSeconds * 10f;
+                spotLight.Position += (v) * gameTime.ElapsedSeconds * 10f;
             }
 
-            if (this.Game.Input.KeyPressed(Keys.Down))
+            if (Game.Input.KeyPressed(Keys.Down))
             {
-                var v = this.Camera.Backward;
+                var v = Camera.Backward;
                 v.Y = 0;
                 v.Normalize();
-                this.spotLight.Position += (v) * gameTime.ElapsedSeconds * 10f;
+                spotLight.Position += (v) * gameTime.ElapsedSeconds * 10f;
             }
 
-            if (this.Game.Input.KeyPressed(Keys.PageUp))
+            if (Game.Input.KeyPressed(Keys.PageUp))
             {
-                this.spotLight.Position += (Vector3.Up) * gameTime.ElapsedSeconds * 10f;
+                spotLight.Position += (Vector3.Up) * gameTime.ElapsedSeconds * 10f;
             }
 
-            if (this.Game.Input.KeyPressed(Keys.PageDown))
+            if (Game.Input.KeyPressed(Keys.PageDown))
             {
-                this.spotLight.Position += (Vector3.Down) * gameTime.ElapsedSeconds * 10f;
+                spotLight.Position += (Vector3.Down) * gameTime.ElapsedSeconds * 10f;
             }
 
-            if (this.Game.Input.KeyPressed(Keys.Add))
+            if (Game.Input.KeyPressed(Keys.Add))
             {
-                this.spotLight.Intensity += gameTime.ElapsedSeconds * 10f;
+                spotLight.Intensity += gameTime.ElapsedSeconds * 10f;
             }
 
-            if (this.Game.Input.KeyPressed(Keys.Subtract))
+            if (Game.Input.KeyPressed(Keys.Subtract))
             {
-                this.spotLight.Intensity -= gameTime.ElapsedSeconds * 10f;
+                spotLight.Intensity -= gameTime.ElapsedSeconds * 10f;
 
-                this.spotLight.Intensity = Math.Max(0f, this.spotLight.Intensity);
+                spotLight.Intensity = Math.Max(0f, spotLight.Intensity);
             }
         }
         private void UpdatePointLightsAnimation(GameTime gameTime)
         {
-            for (int i = 1; i < this.Lights.PointLights.Length; i++)
+            for (int i = 1; i < Lights.PointLights.Length; i++)
             {
-                var l = this.Lights.PointLights[i];
+                var l = Lights.PointLights[i];
 
                 if ((int?)l.State == 1) l.Radius += (0.5f * gameTime.ElapsedSeconds * 50f);
                 if ((int?)l.State == -1) l.Radius -= (2f * gameTime.ElapsedSeconds * 50f);
@@ -830,76 +808,95 @@ namespace Deferred
             }
         }
 
+        private void UpdateDebugMap()
+        {
+            if (bufferType == SceneRendererResults.None)
+            {
+                bufferDrawer.Texture = null;
+            }
+            else
+            {
+                bufferDrawer.Texture = Renderer.GetResource(bufferType);
+            }
+        }
         private void UpdateDebugColorMap()
         {
-            var colorMap = this.Renderer.GetResource(SceneRendererResults.ColorMap);
+            bufferType = SceneRendererResults.ColorMap;
+
+            var colorMap = Renderer.GetResource(bufferType);
 
             //Colors
-            this.bufferDrawer.Texture = colorMap;
-            this.bufferDrawer.Channels = UITextureRendererChannels.NoAlpha;
-            this.help.Text = "Colors";
+            bufferDrawer.Texture = colorMap;
+            bufferDrawer.Channels = UITextureRendererChannels.NoAlpha;
+            help.Text = "Colors";
 
-            this.bufferDrawer.Visible = true;
+            bufferDrawer.Visible = true;
         }
         private void UpdateDebugNormalMap()
         {
-            var normalMap = this.Renderer.GetResource(SceneRendererResults.NormalMap);
+            bufferType = SceneRendererResults.NormalMap;
 
-            if (this.bufferDrawer.Texture == normalMap &&
-                this.bufferDrawer.Channels == UITextureRendererChannels.NoAlpha)
+            var normalMap = Renderer.GetResource(bufferType);
+
+            if (bufferDrawer.Texture == normalMap &&
+                bufferDrawer.Channels == UITextureRendererChannels.NoAlpha)
             {
                 //Specular Power
-                this.bufferDrawer.Texture = normalMap;
-                this.bufferDrawer.Channels = UITextureRendererChannels.Alpha;
-                this.help.Text = "Specular Power";
+                bufferDrawer.Texture = normalMap;
+                bufferDrawer.Channels = UITextureRendererChannels.Alpha;
+                help.Text = "Specular Power";
             }
             else
             {
                 //Normals
-                this.bufferDrawer.Texture = normalMap;
-                this.bufferDrawer.Channels = UITextureRendererChannels.NoAlpha;
-                this.help.Text = "Normals";
+                bufferDrawer.Texture = normalMap;
+                bufferDrawer.Channels = UITextureRendererChannels.NoAlpha;
+                help.Text = "Normals";
             }
-            this.bufferDrawer.Visible = true;
+            bufferDrawer.Visible = true;
         }
         private void UpdateDebugDepthMap()
         {
-            var depthMap = this.Renderer.GetResource(SceneRendererResults.DepthMap);
+            bufferType = SceneRendererResults.DepthMap;
 
-            if (this.bufferDrawer.Texture == depthMap &&
-                this.bufferDrawer.Channels == UITextureRendererChannels.NoAlpha)
+            var depthMap = Renderer.GetResource(bufferType);
+
+            if (bufferDrawer.Texture == depthMap &&
+                bufferDrawer.Channels == UITextureRendererChannels.NoAlpha)
             {
                 //Specular Factor
-                this.bufferDrawer.Texture = depthMap;
-                this.bufferDrawer.Channels = UITextureRendererChannels.Alpha;
-                this.help.Text = "Specular Intensity";
+                bufferDrawer.Texture = depthMap;
+                bufferDrawer.Channels = UITextureRendererChannels.Alpha;
+                help.Text = "Specular Intensity";
             }
             else
             {
                 //Position
-                this.bufferDrawer.Texture = depthMap;
-                this.bufferDrawer.Channels = UITextureRendererChannels.NoAlpha;
-                this.help.Text = "Position";
+                bufferDrawer.Texture = depthMap;
+                bufferDrawer.Channels = UITextureRendererChannels.NoAlpha;
+                help.Text = "Position";
             }
-            this.bufferDrawer.Visible = true;
+            bufferDrawer.Visible = true;
         }
         private void UpdateDebugShadowMap(bool shift)
         {
-            var shadowMap = this.Renderer.GetResource(SceneRendererResults.ShadowMapDirectional);
+            bufferType = SceneRendererResults.ShadowMapDirectional;
+
+            var shadowMap = Renderer.GetResource(bufferType);
 
             if (shadowMap != null)
             {
                 //Shadow map
-                if (!this.help.Text.StartsWith("Shadow map"))
+                if (!help.Text.StartsWith("Shadow map"))
                 {
-                    this.bufferDrawer.Texture = shadowMap;
-                    this.bufferDrawer.TextureIndex = 0;
-                    this.bufferDrawer.Channels = UITextureRendererChannels.Red;
-                    this.bufferDrawer.Visible = true;
+                    bufferDrawer.Texture = shadowMap;
+                    bufferDrawer.TextureIndex = 0;
+                    bufferDrawer.Channels = UITextureRendererChannels.Red;
+                    bufferDrawer.Visible = true;
                 }
                 else
                 {
-                    int tIndex = this.bufferDrawer.TextureIndex;
+                    int tIndex = bufferDrawer.TextureIndex;
                     if (!shift)
                     {
                         tIndex++;
@@ -914,52 +911,40 @@ namespace Deferred
                         }
                     }
 
-                    this.bufferDrawer.TextureIndex = tIndex;
+                    bufferDrawer.TextureIndex = tIndex;
                 }
 
-                this.help.Text = string.Format("Shadow map {0}", this.bufferDrawer.TextureIndex);
+                help.Text = string.Format("Shadow map {0}", bufferDrawer.TextureIndex);
             }
             else
             {
-                this.help.Text = "The Shadow map is empty";
+                help.Text = "The Shadow map is empty";
             }
         }
         private void UpdateDebugLightMap()
         {
-            var lightMap = this.Renderer.GetResource(SceneRendererResults.LightMap);
+            bufferType = SceneRendererResults.LightMap;
+
+            var lightMap = Renderer.GetResource(bufferType);
 
             if (lightMap != null)
             {
                 //Light map
-                this.bufferDrawer.Texture = lightMap;
-                this.bufferDrawer.Channels = UITextureRendererChannels.NoAlpha;
-                this.bufferDrawer.Visible = true;
-                this.help.Text = "Light map";
+                bufferDrawer.Texture = lightMap;
+                bufferDrawer.Channels = UITextureRendererChannels.NoAlpha;
+                bufferDrawer.Visible = true;
+                help.Text = "Light map";
             }
             else
             {
-                this.help.Text = "The Light map is empty";
+                help.Text = "The Light map is empty";
             }
         }
         private void UpdateDebugBufferDrawer()
         {
-            if (this.bufferDrawer.Scale == 0.33f)
-            {
-                this.bufferDrawer.Left = 0;
-                this.bufferDrawer.Top = 0;
-                this.bufferDrawer.Scale = 1f;
-            }
-            else
-            {
-                int width = (int)(this.Game.Form.RenderWidth * 0.33f);
-                int height = (int)(this.Game.Form.RenderHeight * 0.33f);
-                int smLeft = this.Game.Form.RenderWidth - width;
-                int smTop = this.Game.Form.RenderHeight - height;
+            bufferDrawerFullscreen = !bufferDrawerFullscreen;
 
-                this.bufferDrawer.Left = smLeft;
-                this.bufferDrawer.Top = smTop;
-                this.bufferDrawer.Scale = 0.33f;
-            }
+            UpdateLayout();
         }
         private void UpdateDebugProximityGridDrawer()
         {
@@ -980,12 +965,11 @@ namespace Deferred
             Vector2 c3 = new Vector2(rect.Left, rect.Bottom);
             Vector2 ct = rect.Center;
 
-            this.FindFirstGroundPosition(c0.X, c0.Y, out var r0);
-            this.FindFirstGroundPosition(c1.X, c1.Y, out var r1);
-            this.FindFirstGroundPosition(c2.X, c2.Y, out var r2);
-            this.FindFirstGroundPosition(c3.X, c3.Y, out var r3);
-            this.FindFirstGroundPosition(ct.X, ct.Y, out var rt);
-
+            FindFirstGroundPosition(c0.X, c0.Y, out var r0);
+            FindFirstGroundPosition(c1.X, c1.Y, out var r1);
+            FindFirstGroundPosition(c2.X, c2.Y, out var r2);
+            FindFirstGroundPosition(c3.X, c3.Y, out var r3);
+            FindFirstGroundPosition(ct.X, ct.Y, out var rt);
 
             lines.AddRange(Line3D.CreateWiredSquare(new[] { r0.Position, r1.Position, r2.Position, r3.Position }));
 
@@ -1006,56 +990,90 @@ namespace Deferred
         {
             base.Draw(gameTime);
 
-            if (this.Game.Form.IsFullscreen)
+            if (Game.Form.IsFullscreen)
             {
-                this.load.Text = this.Game.RuntimeText;
+                load.Text = Game.RuntimeText;
             }
 
-            this.title.Text = string.Format(
-                this.titleMask,
-                this.GetRenderMode(),
-                this.Lights.DirectionalLights.Length,
-                this.Lights.PointLights.Length,
-                this.Lights.SpotLights.Length,
-                this.Lights.GetDirectionalShadowCastingLights().Count());
+            title.Text = string.Format(
+                titleMask,
+                GetRenderMode(),
+                Lights.DirectionalLights.Length,
+                Lights.PointLights.Length,
+                Lights.SpotLights.Length,
+                Lights.GetDirectionalShadowCastingLights().Count());
 
             if (Counters.Statistics.Length == 0)
             {
-                this.statistics.Text = "No statistics";
+                statistics.Text = "No statistics";
             }
-            else if (this.textIntex < 0)
+            else if (textIntex < 0)
             {
-                this.statistics.Text = "Press . for more statistics";
-                this.textIntex = -1;
+                statistics.Text = "Press . for more statistics";
+                textIntex = -1;
             }
-            else if (this.textIntex >= Counters.Statistics.Length)
+            else if (textIntex >= Counters.Statistics.Length)
             {
-                this.statistics.Text = "Press , for more statistics";
-                this.textIntex = Counters.Statistics.Length;
+                statistics.Text = "Press , for more statistics";
+                textIntex = Counters.Statistics.Length;
             }
             else
             {
-                this.statistics.Text = string.Format(
+                statistics.Text = string.Format(
                     "{0} - {1}",
-                    Counters.Statistics[this.textIntex],
-                    Counters.GetStatistics(this.textIntex));
+                    Counters.Statistics[textIntex],
+                    Counters.GetStatistics(textIntex));
+            }
+        }
+
+        public override void GameGraphicsResized()
+        {
+            base.GameGraphicsResized();
+
+            UpdateLayout();
+
+            UpdateDebugMap();
+        }
+        private void UpdateLayout()
+        {
+            title.SetPosition(Vector2.Zero);
+            load.SetPosition(new Vector2(0, title.Top + title.Height + 2));
+            help.SetPosition(new Vector2(0, load.Top + load.Height + 2));
+            statistics.SetPosition(new Vector2(0, help.Top + help.Height + 2));
+
+            upperPanel.Width = Game.Form.RenderWidth;
+            upperPanel.Height = statistics.Top + statistics.Height + 3;
+
+            if (bufferDrawerFullscreen)
+            {
+                bufferDrawer.Width = Game.Form.RenderWidth;
+                bufferDrawer.Height = Game.Form.RenderHeight;
+                bufferDrawer.Left = 0;
+                bufferDrawer.Top = 0;
+            }
+            else
+            {
+                bufferDrawer.Width = (int)(Game.Form.RenderWidth * 0.33f);
+                bufferDrawer.Height = (int)(Game.Form.RenderHeight * 0.33f);
+                bufferDrawer.Left = Game.Form.RenderWidth - bufferDrawer.Width;
+                bufferDrawer.Top = Game.Form.RenderHeight - bufferDrawer.Height;
             }
         }
 
         private void CreateLights(bool modelsOnly, bool castShadows)
         {
-            this.Lights.ClearPointLights();
-            this.Lights.ClearSpotLights();
-            this.spotLight = null;
+            Lights.ClearPointLights();
+            Lights.ClearSpotLights();
+            spotLight = null;
 
             for (int i = 0; i < tankAgents.Count; i++)
             {
-                this.Lights.AddRange(tankAgents[i].Lights);
+                Lights.AddRange(tankAgents[i].Lights);
             }
-            this.Lights.AddRange(this.helicopter.Lights);
-            for (int i = 0; i < this.helicopters.InstanceCount; i++)
+            Lights.AddRange(helicopter.Lights);
+            for (int i = 0; i < helicopters.InstanceCount; i++)
             {
-                this.Lights.AddRange(this.helicopters[i].Lights);
+                Lights.AddRange(helicopters[i].Lights);
             }
 
             if (modelsOnly)
@@ -1063,7 +1081,7 @@ namespace Deferred
                 return;
             }
 
-            this.SetLightsPosition(castShadows);
+            SetLightsPosition(castShadows);
 
             int sep = 10;
             int f = 12;
@@ -1076,7 +1094,7 @@ namespace Deferred
                 {
                     Vector3 lightPosition = new Vector3((i * sep) - l, 1f, (x * sep) - l);
 
-                    if (this.FindTopGroundPosition((i * sep) - l, (x * sep) - l, out PickingResult<Triangle> r))
+                    if (FindTopGroundPosition((i * sep) - l, (x * sep) - l, out PickingResult<Triangle> r))
                     {
                         lightPosition = r.Position;
                         lightPosition.Y += 1f;
@@ -1085,7 +1103,7 @@ namespace Deferred
                     var color = new Color4(Helper.RandomGenerator.NextFloat(0, 1), Helper.RandomGenerator.NextFloat(0, 1), Helper.RandomGenerator.NextFloat(0, 1), 1.0f);
 
                     var pointLight = new SceneLightPoint(
-                        string.Format("Point {0}", this.Lights.PointLights.Length),
+                        string.Format("Point {0}", Lights.PointLights.Length),
                         castShadows,
                         color,
                         color,
@@ -1095,18 +1113,18 @@ namespace Deferred
                         State = Helper.RandomGenerator.NextFloat(0, 1) >= 0.5f ? 1 : -1
                     };
 
-                    this.Lights.Add(pointLight);
+                    Lights.Add(pointLight);
                 }
             }
         }
         private void SetLightsPosition(bool castShadows)
         {
-            if (this.FindTopGroundPosition(0, 1, out PickingResult<Triangle> r))
+            if (FindTopGroundPosition(0, 1, out PickingResult<Triangle> r))
             {
                 var lightPosition = r.Position;
                 lightPosition.Y += 10f;
 
-                this.spotLight = new SceneLightSpot(
+                spotLight = new SceneLightSpot(
                     "Spot the dog",
                     castShadows,
                     Color.Yellow,
@@ -1114,18 +1132,18 @@ namespace Deferred
                     true,
                     SceneLightSpotDescription.Create(lightPosition, Vector3.Down, 25, 25, 25f));
 
-                this.Lights.Add(this.spotLight);
+                Lights.Add(spotLight);
 
-                this.lineDrawer.Active = true;
-                this.lineDrawer.Visible = true;
+                lineDrawer.Active = true;
+                lineDrawer.Visible = true;
             }
         }
 
         public override void NavigationGraphUpdated()
         {
-            this.UpdateGraphNodes(this.tankAgentType);
+            UpdateGraphNodes(tankAgentType);
 
-            graph = this.NavigationGraph as Graph;
+            graph = NavigationGraph as Graph;
             if (graph == null)
             {
                 return;
@@ -1162,14 +1180,14 @@ namespace Deferred
         {
             try
             {
-                var nodes = this.GetNodes(agent).OfType<GraphNode>();
+                var nodes = GetNodes(agent).OfType<GraphNode>();
                 if (nodes.Any())
                 {
-                    this.graphDrawer.Clear();
+                    graphDrawer.Clear();
 
                     foreach (var node in nodes)
                     {
-                        this.graphDrawer.AddPrimitives(node.Color, node.Triangles);
+                        graphDrawer.AddPrimitives(node.Color, node.Triangles);
                     }
                 }
             }

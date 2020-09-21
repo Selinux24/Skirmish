@@ -133,7 +133,7 @@ namespace Terrain.Rts
         private bool gameReady = false;
 
         public RtsScene(Game game)
-            : base(game, SceneModes.ForwardLigthning)
+            : base(game)
         {
 
         }

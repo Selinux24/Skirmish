@@ -312,19 +312,6 @@ namespace Engine
         {
             try
             {
-                Logger.WriteDebug("Game: Setting scene with the scene-mode constructor");
-
-                T scene = (T)Activator.CreateInstance(typeof(T), new object[] { this, sceneMode });
-                scene.Order = 1;
-                this.nextScene = scene;
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteWarning($"Game: Cannot instantiate the scene with the scene-mode constructor: {ex.Message}");
-            }
-
-            try
-            {
                 Logger.WriteDebug("Game: Setting scene with the default constructor");
 
                 T scene = (T)Activator.CreateInstance(typeof(T), new object[] { this });

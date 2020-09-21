@@ -80,7 +80,7 @@ namespace Skybox
         private bool gameReady = false;
 
         public TestScene3D(Game game)
-            : base(game, SceneModes.ForwardLigthning)
+            : base(game)
         {
 
         }

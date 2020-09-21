@@ -30,7 +30,7 @@ namespace ModelDrawing
         private bool gameReady = false;
 
         public TestScene(Game game)
-            : base(game, SceneModes.ForwardLigthning)
+            : base(game)
         {
 
         }

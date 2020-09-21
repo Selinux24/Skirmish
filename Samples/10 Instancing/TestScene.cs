@@ -22,7 +22,7 @@ namespace Instancing
 
         private bool gameReady = false;
 
-        public TestScene(Game game) : base(game, SceneModes.ForwardLigthning)
+        public TestScene(Game game) : base(game)
         {
 
         }

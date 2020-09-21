@@ -63,11 +63,11 @@ namespace Engine.Common
         /// <param name="description">Description</param>
         protected Drawable(Scene scene, SceneObjectDescription description) : base(scene, description)
         {
-            this.Name = description.Name;
-            this.CastShadow = description.CastShadow;
-            this.DeferredEnabled = description.DeferredEnabled;
-            this.DepthEnabled = description.DepthEnabled;
-            this.BlendMode = description.BlendMode;
+            Name = description.Name;
+            CastShadow = description.CastShadow;
+            DeferredEnabled = description.DeferredEnabled;
+            DepthEnabled = description.DepthEnabled;
+            BlendMode = description.BlendMode;
         }
 
         /// <summary>
@@ -104,7 +104,7 @@ namespace Engine.Common
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"{this.GetType()}.{Name ?? "NoName"}";
+            return $"{GetType()}.{Name ?? "NoName"}";
         }
     }
 }

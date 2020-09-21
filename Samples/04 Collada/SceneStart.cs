@@ -411,7 +411,7 @@ namespace Collada
                 }
                 else if (sender == this.sceneModularDungeonButton)
                 {
-                    this.Game.SetScene<SceneModularDungeon>();
+                    this.Game.SetScene<SceneModularDungeon>(SceneModes.DeferredLightning);
                 }
             });
         }

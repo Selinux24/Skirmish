@@ -40,7 +40,7 @@ namespace SceneTest.SceneStart
 
         private bool sceneReady = false;
 
-        public SceneStart(Game game, SceneModes sceneModes) : base(game, sceneModes)
+        public SceneStart(Game game) : base(game)
         {
 
         }

@@ -97,7 +97,7 @@ namespace Collada
         }
 
         public SceneModularDungeon(Game game)
-            : base(game, SceneModes.DeferredLightning)
+            : base(game)
         {
 
         }
