@@ -133,7 +133,7 @@ namespace Engine
         public Model(Scene scene, ModelDescription description)
             : base(scene, description)
         {
-            this.TextureIndex = description.TextureIndex;
+            TextureIndex = description.TextureIndex;
 
             if (description.TransformDependences?.Any() == true)
             {
@@ -145,7 +145,7 @@ namespace Engine
 
                 for (int i = 0; i < description.TransformNames.Length; i++)
                 {
-                    this.ModelParts.Add(new ModelPart(description.TransformNames[i]));
+                    ModelParts.Add(new ModelPart(description.TransformNames[i]));
                 }
 
                 for (int i = 0; i < description.TransformNames.Length; i++)
@@ -163,48 +163,48 @@ namespace Engine
                     }
                     else
                     {
-                        this.Manipulator = thisMan;
+                        Manipulator = thisMan;
                     }
                 }
             }
             else
             {
-                this.Manipulator = new Manipulator3D();
-                this.Manipulator.Updated += new EventHandler(ManipulatorUpdated);
+                Manipulator = new Manipulator3D();
+                Manipulator.Updated += new EventHandler(ManipulatorUpdated);
             }
 
-            var drawData = this.GetDrawingData(LevelOfDetail.High);
-            this.Lights = drawData?.Lights.Select(l => l.Clone()).ToArray() ?? new ISceneLight[] { };
+            var drawData = GetDrawingData(LevelOfDetail.High);
+            Lights = drawData?.Lights.Select(l => l.Clone()).ToArray() ?? new ISceneLight[] { };
         }
 
         /// <inheritdoc/>
         public override void Update(UpdateContext context)
         {
-            if (this.DrawingData?.SkinningData != null)
+            if (DrawingData?.SkinningData != null)
             {
-                if (this.AnimationController.Playing)
+                if (AnimationController.Playing)
                 {
-                    this.InvalidateCache();
+                    InvalidateCache();
                 }
 
-                this.AnimationController.Update(context.GameTime.ElapsedSeconds, this.DrawingData.SkinningData);
-                this.AnimationOffset = this.AnimationController.GetAnimationOffset(this.DrawingData.SkinningData);
+                AnimationController.Update(context.GameTime.ElapsedSeconds, DrawingData.SkinningData);
+                AnimationOffset = AnimationController.GetAnimationOffset(DrawingData.SkinningData);
             }
 
-            if (this.ModelParts.Count > 0)
+            if (ModelParts.Count > 0)
             {
-                this.ModelParts.ForEach(p => p.Manipulator.Update(context.GameTime));
+                ModelParts.ForEach(p => p.Manipulator.Update(context.GameTime));
             }
             else
             {
-                this.Manipulator.Update(context.GameTime);
+                Manipulator.Update(context.GameTime);
             }
 
-            if (this.Lights.Any())
+            if (Lights.Any())
             {
-                foreach (var light in this.Lights)
+                foreach (var light in Lights)
                 {
-                    light.ParentTransform = this.Manipulator.LocalTransform;
+                    light.ParentTransform = Manipulator.LocalTransform;
                 }
             }
         }
@@ -216,7 +216,7 @@ namespace Engine
                 return;
             }
 
-            if (this.DrawingData == null)
+            if (DrawingData == null)
             {
                 return;
             }
@@ -228,7 +228,7 @@ namespace Engine
             }
 
             int count = 0;
-            foreach (string meshName in this.DrawingData.Meshes.Keys)
+            foreach (string meshName in DrawingData.Meshes.Keys)
             {
                 count += DrawMeshShadow(context, effect, meshName);
             }
@@ -241,21 +241,21 @@ namespace Engine
                 return;
             }
 
-            if (this.DrawingData == null)
+            if (DrawingData == null)
             {
                 return;
             }
 
-            var effect = this.GetEffect(context.DrawerMode);
+            var effect = GetEffect(context.DrawerMode);
             if (effect == null)
             {
                 return;
             }
 
             int count = 0;
-            foreach (string meshName in this.DrawingData.Meshes.Keys)
+            foreach (string meshName in DrawingData.Meshes.Keys)
             {
-                count += this.DrawMesh(context, effect, meshName);
+                count += DrawMesh(context, effect, meshName);
             }
 
             Counters.InstancesPerFrame++;
@@ -272,11 +272,11 @@ namespace Engine
         {
             int count = 0;
 
-            var graphics = this.Game.Graphics;
+            var graphics = Game.Graphics;
 
-            var meshDict = this.DrawingData.Meshes[meshName];
+            var meshDict = DrawingData.Meshes[meshName];
 
-            var localTransform = this.GetTransformByName(meshName);
+            var localTransform = GetTransformByName(meshName);
 
             effect.UpdatePerFrame(localTransform, context);
 
@@ -288,14 +288,14 @@ namespace Engine
                     continue;
                 }
 
-                var material = this.DrawingData.Materials[materialName];
+                var material = DrawingData.Materials[materialName];
 
-                effect.UpdatePerObject(this.AnimationOffset, material, this.TextureIndex);
+                effect.UpdatePerObject(AnimationOffset, material, TextureIndex);
 
-                this.BufferManager.SetIndexBuffer(mesh.IndexBuffer);
+                BufferManager.SetIndexBuffer(mesh.IndexBuffer);
 
                 var technique = effect.GetTechnique(mesh.VertextType, false, material.Material.IsTransparent);
-                this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
+                BufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
 
                 count += mesh.Count;
 
@@ -320,11 +320,11 @@ namespace Engine
         {
             int count = 0;
 
-            var graphics = this.Game.Graphics;
+            var graphics = Game.Graphics;
 
-            var meshDict = this.DrawingData.Meshes[meshName];
+            var meshDict = DrawingData.Meshes[meshName];
 
-            var localTransform = this.GetTransformByName(meshName);
+            var localTransform = GetTransformByName(meshName);
 
             effect.UpdatePerFrameFull(localTransform, context);
 
@@ -336,20 +336,20 @@ namespace Engine
                     continue;
                 }
 
-                var material = this.DrawingData.Materials[materialName];
+                var material = DrawingData.Materials[materialName];
 
-                bool draw = context.ValidateDraw(this.BlendMode, material.Material.IsTransparent);
+                bool draw = context.ValidateDraw(BlendMode, material.Material.IsTransparent);
                 if (!draw)
                 {
                     continue;
                 }
 
-                effect.UpdatePerObject(this.AnimationOffset, material, this.TextureIndex, this.UseAnisotropicFiltering);
+                effect.UpdatePerObject(AnimationOffset, material, TextureIndex, UseAnisotropicFiltering);
 
-                this.BufferManager.SetIndexBuffer(mesh.IndexBuffer);
+                BufferManager.SetIndexBuffer(mesh.IndexBuffer);
 
                 var technique = effect.GetTechnique(mesh.VertextType, false);
-                this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
+                BufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
 
                 count += mesh.Count;
 
@@ -370,19 +370,19 @@ namespace Engine
             bool cull;
             distance = float.MaxValue;
 
-            if (this.HasVolumes)
+            if (HasVolumes)
             {
-                if (this.coarseBoundingSphere.HasValue)
+                if (coarseBoundingSphere.HasValue)
                 {
-                    cull = volume.Contains(this.coarseBoundingSphere.Value) == ContainmentType.Disjoint;
+                    cull = volume.Contains(coarseBoundingSphere.Value) == ContainmentType.Disjoint;
                 }
-                else if (this.SphericVolume)
+                else if (SphericVolume)
                 {
-                    cull = volume.Contains(this.GetBoundingSphere()) == ContainmentType.Disjoint;
+                    cull = volume.Contains(GetBoundingSphere()) == ContainmentType.Disjoint;
                 }
                 else
                 {
-                    cull = volume.Contains(this.GetBoundingBox()) == ContainmentType.Disjoint;
+                    cull = volume.Contains(GetBoundingBox()) == ContainmentType.Disjoint;
                 }
             }
             else
@@ -394,12 +394,12 @@ namespace Engine
             {
                 var eyePosition = volume.Position;
 
-                distance = Vector3.DistanceSquared(this.Manipulator.Position, eyePosition);
+                distance = Vector3.DistanceSquared(Manipulator.Position, eyePosition);
 
-                this.LevelOfDetail = GameEnvironment.GetLOD(
+                LevelOfDetail = GameEnvironment.GetLOD(
                     eyePosition,
-                    this.coarseBoundingSphere,
-                    this.Manipulator.LocalTransform);
+                    coarseBoundingSphere,
+                    Manipulator.LocalTransform);
             }
 
             return cull;
@@ -411,11 +411,11 @@ namespace Engine
         /// <param name="manipulator">Manipulator</param>
         public void SetManipulator(Manipulator3D manipulator)
         {
-            this.Manipulator.Updated -= ManipulatorUpdated;
-            this.Manipulator = null;
+            Manipulator.Updated -= ManipulatorUpdated;
+            Manipulator = null;
 
-            this.Manipulator = manipulator;
-            this.Manipulator.Updated += ManipulatorUpdated;
+            Manipulator = manipulator;
+            Manipulator.Updated += ManipulatorUpdated;
         }
         /// <summary>
         /// Occurs when manipulator transform updated
@@ -424,9 +424,9 @@ namespace Engine
         /// <param name="e">Event arguments</param>
         private void ManipulatorUpdated(object sender, EventArgs e)
         {
-            this.InvalidateCache();
+            InvalidateCache();
 
-            this.coarseBoundingSphere = this.GetBoundingSphere();
+            coarseBoundingSphere = GetBoundingSphere();
         }
 
         /// <summary>
@@ -436,14 +436,14 @@ namespace Engine
         /// <returns>Retusn the transform of the specified transform name</returns>
         public Matrix GetTransformByName(string name)
         {
-            var part = this.ModelParts.Find(p => p.Name == name);
+            var part = ModelParts.Find(p => p.Name == name);
             if (part != null)
             {
                 return part.Manipulator.FinalTransform;
             }
             else
             {
-                return this.Manipulator.FinalTransform;
+                return Manipulator.FinalTransform;
             }
         }
 
@@ -452,11 +452,11 @@ namespace Engine
         /// </summary>
         private void InvalidateCache()
         {
-            this.updatePoints = true;
-            this.updateTriangles = true;
+            updatePoints = true;
+            updateTriangles = true;
 
-            this.boundingSphere = null;
-            this.boundingBox = null;
+            boundingSphere = null;
+            boundingBox = null;
         }
         /// <summary>
         /// Gets point list of mesh if the vertex type has position channel
@@ -465,11 +465,11 @@ namespace Engine
         /// <returns>Returns null or position list</returns>
         public IEnumerable<Vector3> GetPoints(bool refresh = false)
         {
-            if (refresh || this.updatePoints)
+            if (refresh || updatePoints)
             {
                 IEnumerable<Vector3> cache;
 
-                var drawingData = this.GetDrawingData(this.GetLODMinimum());
+                var drawingData = GetDrawingData(GetLODMinimum());
                 if (drawingData == null)
                 {
                     return new Vector3[] { };
@@ -478,23 +478,23 @@ namespace Engine
                 if (drawingData.SkinningData != null)
                 {
                     cache = drawingData.GetPoints(
-                        this.Manipulator.LocalTransform,
-                        this.AnimationController.GetCurrentPose(drawingData.SkinningData),
+                        Manipulator.LocalTransform,
+                        AnimationController.GetCurrentPose(drawingData.SkinningData),
                         refresh);
                 }
                 else
                 {
                     cache = drawingData.GetPoints(
-                        this.Manipulator.LocalTransform,
+                        Manipulator.LocalTransform,
                         refresh);
                 }
 
-                this.positionCache = cache.ToArray();
+                positionCache = cache.ToArray();
 
-                this.updatePoints = false;
+                updatePoints = false;
             }
 
-            return this.positionCache?.ToArray() ?? new Vector3[] { };
+            return positionCache?.ToArray() ?? new Vector3[] { };
         }
         /// <summary>
         /// Gets triangle list of mesh if the vertex type has position channel
@@ -503,11 +503,11 @@ namespace Engine
         /// <returns>Returns null or triangle list</returns>
         public IEnumerable<Triangle> GetTriangles(bool refresh = false)
         {
-            if (refresh || this.updateTriangles)
+            if (refresh || updateTriangles)
             {
                 IEnumerable<Triangle> cache;
 
-                var drawingData = this.GetDrawingData(this.GetLODMinimum());
+                var drawingData = GetDrawingData(GetLODMinimum());
                 if (drawingData == null)
                 {
                     return new Triangle[] { };
@@ -516,23 +516,23 @@ namespace Engine
                 if (drawingData.SkinningData != null)
                 {
                     cache = drawingData.GetTriangles(
-                        this.Manipulator.LocalTransform,
-                        this.AnimationController.GetCurrentPose(drawingData.SkinningData),
+                        Manipulator.LocalTransform,
+                        AnimationController.GetCurrentPose(drawingData.SkinningData),
                         refresh);
                 }
                 else
                 {
                     cache = drawingData.GetTriangles(
-                        this.Manipulator.LocalTransform,
+                        Manipulator.LocalTransform,
                         refresh);
                 }
 
-                this.triangleCache = cache.ToArray();
+                triangleCache = cache.ToArray();
 
-                this.updateTriangles = false;
+                updateTriangles = false;
             }
 
-            return this.triangleCache?.ToArray() ?? new Triangle[] { };
+            return triangleCache?.ToArray() ?? new Triangle[] { };
         }
         /// <summary>
         /// Gets bounding sphere
@@ -540,7 +540,7 @@ namespace Engine
         /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
         public BoundingSphere GetBoundingSphere()
         {
-            return this.GetBoundingSphere(false);
+            return GetBoundingSphere(false);
         }
         /// <summary>
         /// Gets bounding sphere
@@ -549,16 +549,16 @@ namespace Engine
         /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
         public BoundingSphere GetBoundingSphere(bool refresh)
         {
-            if (refresh || this.boundingSphere == null)
+            if (refresh || boundingSphere == null)
             {
-                var points = this.GetPoints(refresh);
+                var points = GetPoints(refresh);
                 if (points.Any())
                 {
-                    this.boundingSphere = BoundingSphere.FromPoints(points.ToArray());
+                    boundingSphere = BoundingSphere.FromPoints(points.ToArray());
                 }
             }
 
-            return this.boundingSphere ?? new BoundingSphere(this.Manipulator.Position, 0f);
+            return boundingSphere ?? new BoundingSphere(Manipulator.Position, 0f);
         }
         /// <summary>
         /// Gets bounding box
@@ -566,7 +566,7 @@ namespace Engine
         /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
         public BoundingBox GetBoundingBox()
         {
-            return this.GetBoundingBox(false);
+            return GetBoundingBox(false);
         }
         /// <summary>
         /// Gets bounding box
@@ -575,16 +575,16 @@ namespace Engine
         /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
         public BoundingBox GetBoundingBox(bool refresh)
         {
-            if (refresh || this.boundingBox == null)
+            if (refresh || boundingBox == null)
             {
-                var points = this.GetPoints(refresh);
+                var points = GetPoints(refresh);
                 if (points.Any())
                 {
-                    this.boundingBox = BoundingBox.FromPoints(points.ToArray());
+                    boundingBox = BoundingBox.FromPoints(points.ToArray());
                 }
             }
 
-            return this.boundingBox ?? new BoundingBox(this.Manipulator.Position, this.Manipulator.Position);
+            return boundingBox ?? new BoundingBox(Manipulator.Position, Manipulator.Position);
         }
 
         /// <summary>
@@ -611,11 +611,11 @@ namespace Engine
                 Distance = float.MaxValue,
             };
 
-            var bsph = this.GetBoundingSphere();
+            var bsph = GetBoundingSphere();
             if (bsph.Intersects(ref ray))
             {
                 bool facingOnly = rayPickingParams.HasFlag(RayPickingParams.FacingOnly);
-                var triangles = this.GetVolume(rayPickingParams.HasFlag(RayPickingParams.Geometry));
+                var triangles = GetVolume(rayPickingParams.HasFlag(RayPickingParams.Geometry));
 
                 if (triangles.Any() && Intersection.IntersectNearest(ray, triangles, facingOnly, out Vector3 pos, out Triangle tri, out float d))
                 {
@@ -653,11 +653,11 @@ namespace Engine
                 Distance = float.MaxValue,
             };
 
-            var bsph = this.GetBoundingSphere();
+            var bsph = GetBoundingSphere();
             if (bsph.Intersects(ref ray))
             {
                 bool facingOnly = rayPickingParams.HasFlag(RayPickingParams.FacingOnly);
-                var triangles = this.GetVolume(rayPickingParams.HasFlag(RayPickingParams.Geometry));
+                var triangles = GetVolume(rayPickingParams.HasFlag(RayPickingParams.Geometry));
 
                 if (triangles.Any() && Intersection.IntersectFirst(ray, triangles, facingOnly, out Vector3 pos, out Triangle tri, out float d))
                 {
@@ -692,11 +692,11 @@ namespace Engine
         {
             results = null;
 
-            var bsph = this.GetBoundingSphere();
+            var bsph = GetBoundingSphere();
             if (bsph.Intersects(ref ray))
             {
                 bool facingOnly = rayPickingParams.HasFlag(RayPickingParams.FacingOnly);
-                var triangles = this.GetVolume(rayPickingParams.HasFlag(RayPickingParams.Geometry));
+                var triangles = GetVolume(rayPickingParams.HasFlag(RayPickingParams.Geometry));
 
                 if (triangles.Any() && Intersection.IntersectAll(ray, triangles, facingOnly, out Vector3[] pos, out Triangle[] tri, out float[] ds))
                 {
@@ -726,12 +726,12 @@ namespace Engine
         /// <returns>Returns internal volume</returns>
         public IEnumerable<Triangle> GetVolume(bool full)
         {
-            if (!full && this.DrawingData?.VolumeMesh?.Any() == true)
+            if (!full && DrawingData?.VolumeMesh?.Any() == true)
             {
-                return Triangle.Transform(this.DrawingData.VolumeMesh, this.Manipulator.LocalTransform);
+                return Triangle.Transform(DrawingData.VolumeMesh, Manipulator.LocalTransform);
             }
 
-            return this.GetTriangles(true);
+            return GetTriangles(true);
         }
 
         /// <summary>
@@ -747,7 +747,7 @@ namespace Engine
                 Distance = float.MaxValue,
             };
 
-            var bsph = this.GetBoundingSphere();
+            var bsph = GetBoundingSphere();
             if (bsph.Intersects(sphere))
             {
                 var mesh = GetVolume(false);
@@ -795,15 +795,15 @@ namespace Engine
         {
             if (detectionMode == IntersectDetectionMode.Box)
             {
-                return (IntersectionVolumeAxisAlignedBox)this.GetBoundingBox();
+                return (IntersectionVolumeAxisAlignedBox)GetBoundingBox();
             }
             else if (detectionMode == IntersectDetectionMode.Sphere)
             {
-                return (IntersectionVolumeSphere)this.GetBoundingSphere();
+                return (IntersectionVolumeSphere)GetBoundingSphere();
             }
             else
             {
-                return (IntersectionVolumeMesh)this.GetVolume(true).ToArray();
+                return (IntersectionVolumeMesh)GetVolume(true).ToArray();
             }
         }
     }

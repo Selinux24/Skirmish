@@ -24,7 +24,8 @@ namespace Engine.Common
                 new InputElement("localTransform", 2, Format.R32G32B32A32_Float, 32, slot, InputClassification.PerInstanceData, 1),
                 new InputElement("localTransform", 3, Format.R32G32B32A32_Float, 48, slot, InputClassification.PerInstanceData, 1),
                 new InputElement("textureIndex", 0, Format.R32_UInt, 64, slot, InputClassification.PerInstanceData, 1),
-                new InputElement("animationOffset", 0, Format.R32_UInt, 68, slot, InputClassification.PerInstanceData, 1),
+                new InputElement("materialIndex", 0, Format.R32_UInt, 68, slot, InputClassification.PerInstanceData, 1),
+                new InputElement("animationOffset", 0, Format.R32_UInt, 72, slot, InputClassification.PerInstanceData, 1),
             };
         }
 
@@ -37,6 +38,10 @@ namespace Engine.Common
         /// </summary>
         public uint TextureIndex;
         /// <summary>
+        /// Material index
+        /// </summary>
+        public uint MaterialIndex;
+        /// <summary>
         /// Animation offset in current clip
         /// </summary>
         public uint AnimationOffset;
@@ -46,12 +51,14 @@ namespace Engine.Common
         /// </summary>
         /// <param name="local">Local transform</param>
         /// <param name="textureIndex">Texture index</param>
+        /// <param name="materialIndex">Material index</param>
         /// <param name="animationOffset">Animation offset</param>
-        public VertexInstancingData(Matrix local, uint textureIndex = 0, uint animationOffset = 0)
+        public VertexInstancingData(Matrix local, uint textureIndex = 0, uint materialIndex = 0, uint animationOffset = 0)
         {
-            this.Local = local;
-            this.TextureIndex = textureIndex;
-            this.AnimationOffset = animationOffset;
+            Local = local;
+            TextureIndex = textureIndex;
+            MaterialIndex = materialIndex;
+            AnimationOffset = animationOffset;
         }
 
         /// <summary>
@@ -63,6 +70,9 @@ namespace Engine.Common
         }
     };
 
+    /// <summary>
+    /// Instancing data interface
+    /// </summary>
     public interface IInstacingData : IBufferData
     {
 

@@ -1,5 +1,5 @@
-﻿using System.IO;
-using System.Linq;
+﻿using System.Collections.Generic;
+using System.IO;
 
 namespace Engine.Content
 {
@@ -65,7 +65,7 @@ namespace Engine.Content
         /// Reads the model content file
         /// </summary>
         /// <returns></returns>
-        public ModelContent ReadModelContent()
+        public IEnumerable<ModelContent> ReadModelContent()
         {
             if (!string.IsNullOrEmpty(ModelContentFilename))
             {
@@ -74,19 +74,17 @@ namespace Engine.Content
 
                 var contentDesc = SerializationHelper.DeserializeXmlFromFile<ModelContentDescription>(Path.Combine(directory, fileName));
                 var loader = GameResourceManager.GetLoaderForFile(contentDesc.ModelFileName);
-                var t = loader.Load(directory, contentDesc);
-                return t.First();
+                return loader.Load(directory, contentDesc);
             }
             else if (ModelContentDescription != null)
             {
                 var contentDesc = ModelContentDescription;
                 var loader = GameResourceManager.GetLoaderForFile(contentDesc.ModelFileName);
-                var t = loader.Load(ContentFolder, contentDesc);
-                return t.First();
+                return loader.Load(ContentFolder, contentDesc);
             }
             else if (ModelContent != null)
             {
-                return ModelContent;
+                return new[] { ModelContent };
             }
             else
             {

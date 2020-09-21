@@ -3,6 +3,9 @@ using Engine.Common;
 using Engine.Content;
 using Engine.UI;
 using SharpDX;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace SceneTest.SceneMaterials
@@ -31,30 +34,30 @@ namespace SceneTest.SceneMaterials
             await base.Initialize();
 
 #if DEBUG
-            this.Game.VisibleMouse = false;
-            this.Game.LockMouse = false;
+            Game.VisibleMouse = false;
+            Game.LockMouse = false;
 #else
-            this.Game.VisibleMouse = false;
-            this.Game.LockMouse = true;
+            Game.VisibleMouse = false;
+            Game.LockMouse = true;
 #endif
 
-            this.Camera.NearPlaneDistance = 0.1f;
-            this.Camera.FarPlaneDistance = 500;
-            this.Camera.Goto(-20, 10, -40f);
-            this.Camera.LookTo(0, 0, 0);
+            Camera.NearPlaneDistance = 0.1f;
+            Camera.FarPlaneDistance = 500;
+            Camera.Goto(-20, 10, -40f);
+            Camera.LookTo(0, 0, 0);
 
-            this.Lights.DirectionalLights[0].CastShadow = false;
+            Lights.DirectionalLights[0].CastShadow = false;
 
             GameEnvironment.Background = Color.CornflowerBlue;
 
-            await this.LoadResourcesAsync(
+            await LoadResourcesAsync(
                 new[]
                 {
-                    this.InitializeTextBoxes(),
-                    this.InitializeSkyEffects(),
-                    this.InitializeFloor(),
-                    this.InitializeColorGroup(1, 0.1f, new Vector3(-10, 0, -10), false),
-                    this.InitializeColorGroup(128, 1f, new Vector3(-10.5f, 0, -10), true)
+                    InitializeTextBoxes(),
+                    InitializeSkyEffects(),
+                    InitializeFloor(),
+                    InitializeColorGroup("Spheres soft", 1, 0.1f, new Vector3(-10, 0, -10), false),
+                    InitializeColorGroup("Spheres rought", 128, 1f, new Vector3(-10.5f, 0, -10), true)
                 },
                 (res) =>
                 {
@@ -69,19 +72,19 @@ namespace SceneTest.SceneMaterials
 
         private async Task InitializeTextBoxes()
         {
-            this.title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18, Color.White, Color.Orange) }, layerHUD);
-            this.runtime = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 10, Color.Yellow, Color.Orange) }, layerHUD);
+            title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18, Color.White, Color.Orange) }, layerHUD);
+            runtime = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 10, Color.Yellow, Color.Orange) }, layerHUD);
 
-            this.title.Text = "Scene Test - Materials";
-            this.runtime.Text = "";
+            title.Text = "Scene Test - Materials";
+            runtime.Text = "";
 
-            this.title.SetPosition(Vector2.Zero);
-            this.runtime.SetPosition(new Vector2(5, this.title.Top + this.title.Height + 3));
+            title.SetPosition(Vector2.Zero);
+            runtime.SetPosition(new Vector2(5, title.Top + title.Height + 3));
 
             var spDesc = new SpriteDescription()
             {
-                Width = this.Game.Form.RenderWidth,
-                Height = this.runtime.Top + this.runtime.Height + 3,
+                Width = Game.Form.RenderWidth,
+                Height = runtime.Top + runtime.Height + 3,
                 BaseColor = new Color4(0, 0, 0, 0.75f),
             };
 
@@ -157,29 +160,75 @@ namespace SceneTest.SceneMaterials
 
             await this.AddComponentModel(desc);
         }
-        private async Task<Model> InitializeSphere(string name, MaterialContent material)
+        private async Task<ModelInstanced> InitializeSphereInstanced(string name, int count, IEnumerable<MaterialContent> materials)
         {
             var sphere = GeometryUtil.CreateSphere(radius, stacks, stacks);
             var vertices = VertexData.FromDescriptor(sphere);
             var indices = sphere.Indices;
-            var content = ModelContent.GenerateTriangleList(vertices, indices, material);
+            var content = ModelContent.GenerateTriangleList(vertices, indices, materials);
 
-            var desc = new ModelDescription()
+            var desc = new ModelInstancedDescription()
             {
                 Name = name,
                 CastShadow = true,
                 UseAnisotropicFiltering = true,
+                Instances = count,
                 Content = new ContentDescription()
                 {
                     ModelContent = content,
                 }
             };
 
-            return await this.AddComponentModel(desc);
+            var model = await this.AddComponentModelInstanced(desc);
+
+            for (int i = 0; i < count; i++)
+            {
+                model[i].MaterialIndex = (uint)i;
+            }
+
+            return model;
         }
-        private async Task<MaterialContent> GenerateMaterial(Color4 diffuse, Color4 specular, float shininess, bool nmap)
+        private async Task InitializeColorGroup(string name, float shininess, float specularFactor, Vector3 position, bool nmap)
         {
-            var mat = new MaterialContent()
+            int n = 32;
+            int colorCount = 256;
+            int totalSpheres = (int)Math.Pow(colorCount / n, 3);
+
+            List<MaterialContent> materials = new List<MaterialContent>();
+            for (int r = 0; r < colorCount; r += n)
+            {
+                for (int g = 0; g < colorCount; g += n)
+                {
+                    for (int b = 0; b < colorCount; b += n)
+                    {
+                        var diffuse = new Color4(r / (float)colorCount, g / (float)colorCount, b / (float)colorCount, 1);
+                        var specular = new Color4(r / (float)colorCount * specularFactor, g / (float)colorCount * specularFactor, b / (float)colorCount * specularFactor, 1f);
+
+                        materials.Add(GenerateMaterial(diffuse, specular, shininess, nmap));
+                    }
+                }
+            }
+
+            var modelInstanced = await InitializeSphereInstanced(name, totalSpheres, materials);
+
+            int instanceIndex = 0;
+            for (int r = 0; r < colorCount; r += n)
+            {
+                for (int g = 0; g < colorCount; g += n)
+                {
+                    for (int b = 0; b < colorCount; b += n)
+                    {
+                        float f = 1f / n * 4f;
+
+                        var instance = modelInstanced[instanceIndex++];
+                        instance.Manipulator.SetPosition(new Vector3(r * f, (g * f) + 1f, b * f) + position);
+                    }
+                }
+            }
+        }
+        private MaterialContent GenerateMaterial(Color4 diffuse, Color4 specular, float shininess, bool nmap)
+        {
+            return new MaterialContent()
             {
                 EmissionColor = new Color4(0f, 0f, 0f, 0f),
                 AmbientColor = new Color4(0.02f, 0.02f, 0.02f, 1f),
@@ -191,42 +240,18 @@ namespace SceneTest.SceneMaterials
                 SpecularColor = specular,
                 Shininess = shininess,
             };
-
-            return await Task.FromResult(mat);
-        }
-        private async Task InitializeColorGroup(float shininess, float specularFactor, Vector3 position, bool nmap)
-        {
-            int n = 32;
-
-            for (int r = 0; r < 256; r += n)
-            {
-                for (int g = 0; g < 256; g += n)
-                {
-                    for (int b = 0; b < 256; b += n)
-                    {
-                        float f = 1f / (float)n * 4f;
-
-                        var diffuse = new Color4(r / 256f, g / 256f, b / 256f, 1);
-                        var specular = new Color4(r / 256f * specularFactor, g / 256f * specularFactor, b / 256f * specularFactor, 1);
-
-                        var material = await this.GenerateMaterial(diffuse, specular, shininess, nmap);
-                        var model = await this.InitializeSphere(string.Format("Sphere {0}.{1}.{2}", r, g, b), material);
-                        model.Manipulator.SetPosition(new Vector3(r * f, (g * f) + 1f, b * f) + position);
-                    }
-                }
-            }
         }
 
         public override void Update(GameTime gameTime)
         {
-            if (this.Game.Input.KeyJustReleased(Keys.Escape))
+            if (Game.Input.KeyJustReleased(Keys.Escape))
             {
-                this.Game.SetScene<SceneStart.SceneStart>();
+                Game.SetScene<SceneStart.SceneStart>();
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.R))
+            if (Game.Input.KeyJustReleased(Keys.R))
             {
-                this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
+                SetRenderMode(GetRenderMode() == SceneModes.ForwardLigthning ?
                     SceneModes.DeferredLightning :
                     SceneModes.ForwardLigthning);
             }
@@ -236,18 +261,14 @@ namespace SceneTest.SceneMaterials
                 return;
             }
 
-            bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
-            bool rightBtn = this.Game.Input.RightMouseButtonPressed;
+            bool shift = Game.Input.KeyPressed(Keys.LShiftKey);
+            bool rightBtn = Game.Input.RightMouseButtonPressed;
 
-            #region Camera
-
-            this.UpdateCamera(gameTime, shift, rightBtn);
-
-            #endregion
+            UpdateCamera(gameTime, shift, rightBtn);
 
             base.Update(gameTime);
 
-            this.runtime.Text = this.Game.RuntimeText;
+            runtime.Text = Game.RuntimeText;
         }
 
         private void UpdateCamera(GameTime gameTime, bool shift, bool rightBtn)
@@ -255,36 +276,36 @@ namespace SceneTest.SceneMaterials
 #if DEBUG
             if (rightBtn)
             {
-                this.Camera.RotateMouse(
+                Camera.RotateMouse(
                     gameTime,
-                    this.Game.Input.MouseXDelta,
-                    this.Game.Input.MouseYDelta);
+                    Game.Input.MouseXDelta,
+                    Game.Input.MouseYDelta);
             }
 #else
-            this.Camera.RotateMouse(
+            Camera.RotateMouse(
                 gameTime,
-                this.Game.Input.MouseXDelta,
-                this.Game.Input.MouseYDelta);
+                Game.Input.MouseXDelta,
+                Game.Input.MouseYDelta);
 #endif
 
-            if (this.Game.Input.KeyPressed(Keys.A))
+            if (Game.Input.KeyPressed(Keys.A))
             {
-                this.Camera.MoveLeft(gameTime, shift);
+                Camera.MoveLeft(gameTime, shift);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.D))
+            if (Game.Input.KeyPressed(Keys.D))
             {
-                this.Camera.MoveRight(gameTime, shift);
+                Camera.MoveRight(gameTime, shift);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.W))
+            if (Game.Input.KeyPressed(Keys.W))
             {
-                this.Camera.MoveForward(gameTime, shift);
+                Camera.MoveForward(gameTime, shift);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.S))
+            if (Game.Input.KeyPressed(Keys.S))
             {
-                this.Camera.MoveBackward(gameTime, shift);
+                Camera.MoveBackward(gameTime, shift);
             }
         }
     }

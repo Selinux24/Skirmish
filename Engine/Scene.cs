@@ -759,7 +759,7 @@ namespace Engine
                 MeshMaterial.Default
             };
 
-            var matComponents = this.GetComponents().OfType<IUseMaterials>();
+            var matComponents = GetComponents().OfType<IUseMaterials>();
 
             foreach (var component in matComponents)
             {
@@ -770,38 +770,23 @@ namespace Engine
                 }
             }
 
-            List<MeshMaterial> addedMats = new List<MeshMaterial>();
-
             List<Vector4> values = new List<Vector4>();
 
             for (int i = 0; i < mats.Count; i++)
             {
                 var mat = mats[i];
-                if (!addedMats.Contains(mat))
-                {
-                    var matV = mat.Pack();
+                var matV = mat.Pack();
 
-                    mat.ResourceIndex = (uint)addedMats.Count;
-                    mat.ResourceOffset = (uint)values.Count;
-                    mat.ResourceSize = (uint)matV.Length;
+                mat.ResourceIndex = (uint)i;
+                mat.ResourceOffset = (uint)values.Count;
+                mat.ResourceSize = (uint)matV.Length;
 
-                    values.AddRange(matV);
-
-                    addedMats.Add(mat);
-                }
-                else
-                {
-                    var cMat = addedMats.Find(m => m.Equals(mat));
-
-                    mat.ResourceIndex = cMat.ResourceIndex;
-                    mat.ResourceOffset = cMat.ResourceOffset;
-                    mat.ResourceSize = cMat.ResourceSize;
-                }
+                values.AddRange(matV);
             }
 
             int texWidth = GetTextureSize(values.Count);
 
-            materialPalette = this.Game.ResourceManager.CreateGlobalResource("MaterialPalette", values.ToArray(), texWidth);
+            materialPalette = Game.ResourceManager.CreateGlobalResource("MaterialPalette", values, texWidth);
             materialPaletteWidth = (uint)texWidth;
         }
         /// <summary>

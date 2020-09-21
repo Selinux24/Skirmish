@@ -91,6 +91,10 @@ namespace Engine
         /// </summary>
         public uint TextureIndex { get; set; } = 0;
         /// <summary>
+        /// Material index
+        /// </summary>
+        public uint MaterialIndex { get; set; } = 0;
+        /// <summary>
         /// Active
         /// </summary>
         public bool Active { get; set; } = true;

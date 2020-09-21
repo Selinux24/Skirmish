@@ -458,8 +458,8 @@ namespace Engine.Common
         /// <param name="description">Description</param>
         public DrawingData(Game game, DrawingDataDescription description)
         {
-            this.Game = game;
-            this.Description = description;
+            Game = game;
+            Description = description;
         }
         /// <summary>
         /// Destructor
@@ -485,33 +485,33 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                foreach (var item in this.Meshes?.Values)
+                foreach (var item in Meshes?.Values)
                 {
                     foreach (var mesh in item.Values)
                     {
                         //Remove data from buffer manager
-                        this.Game.BufferManager?.RemoveVertexData(mesh.VertexBuffer);
+                        Game.BufferManager?.RemoveVertexData(mesh.VertexBuffer);
 
                         if (mesh.IndexBuffer != null)
                         {
-                            this.Game.BufferManager?.RemoveIndexData(mesh.IndexBuffer);
+                            Game.BufferManager?.RemoveIndexData(mesh.IndexBuffer);
                         }
 
                         //Dispose the mesh
                         mesh.Dispose();
                     }
                 }
-                this.Meshes?.Clear();
-                this.Meshes = null;
+                Meshes?.Clear();
+                Meshes = null;
 
-                this.Materials?.Clear();
-                this.Materials = null;
+                Materials?.Clear();
+                Materials = null;
 
                 //Don't dispose textures!
-                this.Textures?.Clear();
-                this.Textures = null;
+                Textures?.Clear();
+                Textures = null;
 
-                this.SkinningData = null;
+                SkinningData = null;
             }
         }
 
@@ -522,7 +522,7 @@ namespace Engine.Common
         /// <returns>Returns the drawing data's point list</returns>
         public IEnumerable<Vector3> GetPoints(bool refresh = false)
         {
-            return this.GetPoints(Matrix.Identity, refresh);
+            return GetPoints(Matrix.Identity, refresh);
         }
         /// <summary>
         /// Gets the drawing data's point list
@@ -534,7 +534,7 @@ namespace Engine.Common
         {
             List<Vector3> points = new List<Vector3>();
 
-            var meshMaterialList = this.Meshes.Values.ToArray();
+            var meshMaterialList = Meshes.Values.ToArray();
 
             foreach (var dictionary in meshMaterialList)
             {
@@ -562,7 +562,7 @@ namespace Engine.Common
         /// <returns>Returns the drawing data's point list</returns>
         public IEnumerable<Vector3> GetPoints(Matrix[] boneTransforms, bool refresh = false)
         {
-            return this.GetPoints(Matrix.Identity, boneTransforms, refresh);
+            return GetPoints(Matrix.Identity, boneTransforms, refresh);
         }
         /// <summary>
         /// Gets the drawing data's point list
@@ -575,7 +575,7 @@ namespace Engine.Common
         {
             List<Vector3> points = new List<Vector3>();
 
-            var meshMaterialList = this.Meshes.Values.ToArray();
+            var meshMaterialList = Meshes.Values.ToArray();
 
             foreach (var dictionary in meshMaterialList)
             {
@@ -602,7 +602,7 @@ namespace Engine.Common
         /// <returns>Returns the drawing data's triangle list</returns>
         public IEnumerable<Triangle> GetTriangles(bool refresh = false)
         {
-            return this.GetTriangles(Matrix.Identity, refresh);
+            return GetTriangles(Matrix.Identity, refresh);
         }
         /// <summary>
         /// Gets the drawing data's triangle list
@@ -614,7 +614,7 @@ namespace Engine.Common
         {
             List<Triangle> triangles = new List<Triangle>();
 
-            var meshMaterialList = this.Meshes.Values.ToArray();
+            var meshMaterialList = Meshes.Values.ToArray();
 
             foreach (var dictionary in meshMaterialList)
             {
@@ -637,7 +637,7 @@ namespace Engine.Common
         /// <returns>Returns the drawing data's triangle list</returns>
         public IEnumerable<Triangle> GetTriangles(Matrix[] boneTransforms, bool refresh = false)
         {
-            return this.GetTriangles(Matrix.Identity, boneTransforms, refresh);
+            return GetTriangles(Matrix.Identity, boneTransforms, refresh);
         }
         /// <summary>
         /// Gets the drawing data's triangle list
@@ -650,7 +650,7 @@ namespace Engine.Common
         {
             List<Triangle> triangles = new List<Triangle>();
 
-            var meshMaterialList = this.Meshes.Values.ToArray();
+            var meshMaterialList = Meshes.Values.ToArray();
 
             foreach (var dictionary in meshMaterialList)
             {

@@ -492,6 +492,7 @@ namespace Engine.Content
         /// Skinning information
         /// </summary>
         public SkinningDictionary SkinningInfo { get; set; } = new SkinningDictionary();
+
         /// <summary>
         /// Generates a triangle list model content from scratch
         /// </summary>
@@ -501,7 +502,9 @@ namespace Engine.Content
         /// <returns>Returns new model content</returns>
         public static ModelContent GenerateTriangleList(IEnumerable<VertexData> vertices, IEnumerable<uint> indices, MaterialContent material = null)
         {
-            return Generate(Topology.TriangleList, vertices, indices, material);
+            var materials = new[] { material ?? MaterialContent.Default };
+
+            return Generate(Topology.TriangleList, vertices, indices, materials);
         }
         /// <summary>
         /// Generates a triangle list model content from geometry descriptor
@@ -512,8 +515,20 @@ namespace Engine.Content
         public static ModelContent GenerateTriangleList(GeometryDescriptor geometry, MaterialContent material = null)
         {
             var vertices = VertexData.FromDescriptor(geometry);
+            var materials = new[] { material ?? MaterialContent.Default };
 
-            return Generate(Topology.TriangleList, vertices, geometry.Indices, material);
+            return Generate(Topology.TriangleList, vertices, geometry.Indices, materials);
+        }
+        /// <summary>
+        /// Generates a triangle list model content from scratch
+        /// </summary>
+        /// <param name="vertices">Vertex list</param>
+        /// <param name="indices">Index list</param>
+        /// <param name="materials">Material list</param>
+        /// <returns>Returns new model content</returns>
+        public static ModelContent GenerateTriangleList(IEnumerable<VertexData> vertices, IEnumerable<uint> indices, IEnumerable<MaterialContent> materials)
+        {
+            return Generate(Topology.TriangleList, vertices, indices, materials);
         }
         /// <summary>
         /// Generate model content from scratch
@@ -521,28 +536,40 @@ namespace Engine.Content
         /// <param name="topology">Topology</param>
         /// <param name="vertices">Vertex list</param>
         /// <param name="indices">Index list</param>
-        /// <param name="material">Material</param>
+        /// <param name="materials">Material list</param>
         /// <returns>Returns new model content</returns>
-        private static ModelContent Generate(Topology topology, IEnumerable<VertexData> vertices, IEnumerable<uint> indices, MaterialContent material = null)
+        private static ModelContent Generate(Topology topology, IEnumerable<VertexData> vertices, IEnumerable<uint> indices, IEnumerable<MaterialContent> materials)
         {
             ModelContent modelContent = new ModelContent();
+            string materialName = NoMaterial;
+            bool textured = false;
 
-            if (material != null)
+            if (materials.Count() == 1)
             {
-                modelContent.Images.Import(ref material);
+                modelContent.AddMaterial(DefaultMaterial, materials.First());
 
-                modelContent.Materials.Add(ModelContent.DefaultMaterial, material);
+                materialName = DefaultMaterial;
+                textured = materials.First().DiffuseTexture != null;
             }
+            else if (materials.Count() > 1)
+            {
+                for (int i = 0; i < materials.Count(); i++)
+                {
+                    string name = i == 0 ? DefaultMaterial : $"{DefaultMaterial}_{i}";
 
-            var materialName = material != null ? ModelContent.DefaultMaterial : ModelContent.NoMaterial;
-            var textured = modelContent.Materials[materialName].DiffuseTexture != null;
+                    modelContent.AddMaterial(name, materials.ElementAt(i));
+                }
+
+                materialName = DefaultMaterial;
+                textured = materials.First().DiffuseTexture != null;
+            }
 
             SubMeshContent geo = new SubMeshContent(topology, materialName, textured, false);
 
             geo.SetVertices(vertices);
             geo.SetIndices(indices);
 
-            modelContent.Geometry.Add(ModelContent.StaticMesh, material != null ? ModelContent.DefaultMaterial : ModelContent.NoMaterial, geo);
+            modelContent.Geometry.Add(StaticMesh, materialName, geo);
             modelContent.Optimize();
 
             return modelContent;
@@ -1187,6 +1214,22 @@ namespace Engine.Content
             }
 
             return lights.ToArray();
+        }
+
+        /// <summary>
+        /// Adds a material content to the model content
+        /// </summary>
+        /// <param name="name">Material name</param>
+        /// <param name="material">Material content</param>
+        public void AddMaterial(string name, MaterialContent material)
+        {
+            if (material == null)
+            {
+                return;
+            }
+
+            Images.Import(ref material);
+            Materials.Add(name, material);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine
 {
@@ -97,7 +98,7 @@ namespace Engine
             }
             else if (ContentDescription != null)
             {
-                return ContentDescription.ReadModelContent();
+                return ContentDescription.ReadModelContent().FirstOrDefault();
             }
             else
             {

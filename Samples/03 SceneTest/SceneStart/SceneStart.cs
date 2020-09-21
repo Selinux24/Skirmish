@@ -40,23 +40,19 @@ namespace SceneTest.SceneStart
 
         private bool sceneReady = false;
 
-        public SceneStart(Game game) : base(game)
+        public SceneStart(Game game, SceneModes sceneModes) : base(game, sceneModes)
         {
 
         }
 
         public override async Task Initialize()
         {
-            this.Game.VisibleMouse = false;
-            this.Game.LockMouse = false;
+            Game.VisibleMouse = false;
+            Game.LockMouse = false;
 
             GameEnvironment.Background = Color.Black;
 
-            await this.LoadResourcesAsync(InitializeAssets(), PrepareAssets);
-        }
-        private Task[] InitializeAssets()
-        {
-            return new[] {
+            var assetTasks = new[] {
                 InitializeCursor(),
                 InitializeBackground(),
                 InitializeTitle(),
@@ -65,6 +61,8 @@ namespace SceneTest.SceneStart
                 InitializeTabPanel(),
                 InitializeMusic(),
             };
+
+            await LoadResourcesAsync(assetTasks, PrepareAssets);
         }
         private async Task InitializeCursor()
         {
@@ -242,7 +240,6 @@ namespace SceneTest.SceneStart
 
             await Task.CompletedTask;
         }
-
         private void PrepareAssets(LoadResourcesResult res)
         {
             if (!res.Completed)
@@ -270,7 +267,7 @@ namespace SceneTest.SceneStart
 
             UpdateLayout();
 
-            this.sceneReady = true;
+            sceneReady = true;
         }
 
         public override void Update(GameTime gameTime)
@@ -282,19 +279,19 @@ namespace SceneTest.SceneStart
         }
         private void UpdateCamera()
         {
-            float xmouse = (((float)this.Game.Input.MouseX / (float)this.Game.Form.RenderWidth) - 0.5f) * 2f;
-            float ymouse = (((float)this.Game.Input.MouseY / (float)this.Game.Form.RenderHeight) - 0.5f) * 2f;
+            float xmouse = ((Game.Input.MouseX / (float)Game.Form.RenderWidth) - 0.5f) * 2f;
+            float ymouse = ((Game.Input.MouseY / (float)Game.Form.RenderHeight) - 0.5f) * 2f;
 
             float d = 0.25f;
             float vx = 0.5f;
             float vy = 0.25f;
 
             Vector3 position = Vector3.Zero;
-            position.X = +((xmouse * d) + (0.2f * (float)Math.Cos(vx * this.Game.GameTime.TotalSeconds)));
-            position.Y = -((ymouse * d) + (0.1f * (float)Math.Sin(vy * this.Game.GameTime.TotalSeconds)));
+            position.X = +((xmouse * d) + (0.2f * (float)Math.Cos(vx * Game.GameTime.TotalSeconds)));
+            position.Y = -((ymouse * d) + (0.1f * (float)Math.Sin(vy * Game.GameTime.TotalSeconds)));
 
-            this.Camera.Position = new Vector3(0, 0, -5f);
-            this.Camera.LookTo(position);
+            Camera.Position = new Vector3(0, 0, -5f);
+            Camera.LookTo(position);
         }
         private void UpdateInput()
         {
@@ -365,33 +362,33 @@ namespace SceneTest.SceneStart
                 return;
             }
 
-            if (sender == this.sceneMaterialsButton)
+            if (sender == sceneMaterialsButton)
             {
-                this.Game.SetScene<SceneMaterials.SceneMaterials>();
+                Game.SetScene<SceneMaterials.SceneMaterials>();
             }
-            else if (sender == this.sceneWaterButton)
+            else if (sender == sceneWaterButton)
             {
-                this.Game.SetScene<SceneWater.SceneWater>();
+                Game.SetScene<SceneWater.SceneWater>();
             }
-            else if (sender == this.sceneStencilPassButton)
+            else if (sender == sceneStencilPassButton)
             {
-                this.Game.SetScene<SceneStencilPass.SceneStencilPass>();
+                Game.SetScene<SceneStencilPass.SceneStencilPass>();
             }
-            else if (sender == this.sceneLightsButton)
+            else if (sender == sceneLightsButton)
             {
-                this.Game.SetScene<SceneLights.SceneLights>();
+                Game.SetScene<SceneLights.SceneLights>();
             }
-            else if (sender == this.sceneCascadedShadowsButton)
+            else if (sender == sceneCascadedShadowsButton)
             {
-                this.Game.SetScene<SceneCascadedShadows.SceneCascadedShadows>();
+                Game.SetScene<SceneCascadedShadows.SceneCascadedShadows>();
             }
-            else if (sender == this.sceneTestButton)
+            else if (sender == sceneTestButton)
             {
-                this.Game.SetScene<SceneTest.SceneTest>();
+                Game.SetScene<SceneTest.SceneTest>();
             }
-            else if (sender == this.sceneTanksGameButton)
+            else if (sender == sceneTanksGameButton)
             {
-                this.Game.SetScene<SceneTanksGame.SceneTanksGame>();
+                Game.SetScene<SceneTanksGame.SceneTanksGame>();
             }
         }
         private void SceneButtonMouseEnter(object sender, EventArgs e)
@@ -420,7 +417,7 @@ namespace SceneTest.SceneStart
                 return;
             }
 
-            this.Game.Exit();
+            Game.Exit();
         }
         private void OptsButtonJustReleased(object sender, EventArgs e)
         {

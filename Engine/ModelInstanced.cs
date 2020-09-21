@@ -75,22 +75,22 @@ namespace Engine
                 throw new ArgumentException($"Instances parameter must be more than 0: {description.Instances}");
             }
 
-            this.InstanceCount = description.Instances;
+            InstanceCount = description.Instances;
 
-            this.instances = Helper.CreateArray(this.InstanceCount, () => new ModelInstance(this, description));
-            this.instancingData = new VertexInstancingData[this.InstanceCount];
+            instances = Helper.CreateArray(InstanceCount, () => new ModelInstance(this, description));
+            instancingData = new VertexInstancingData[InstanceCount];
 
-            this.MaximumCount = -1;
+            MaximumCount = -1;
 
-            this.hasIndependantTransforms = (description.TransformDependences?.Any() == true);
+            hasIndependantTransforms = (description.TransformDependences?.Any() == true);
         }
 
         /// <inheritdoc/>
         public override void Update(UpdateContext context)
         {
-            if (this.instances.Any())
+            if (instances.Any())
             {
-                Array.ForEach(this.instances, i =>
+                Array.ForEach(instances, i =>
                 {
                     if (i.Active)
                     {
@@ -99,11 +99,11 @@ namespace Engine
                     }
                 });
 
-                this.instancesTmp = Array.FindAll(this.instances, i => i.Visible && i.LevelOfDetail != LevelOfDetail.None);
+                instancesTmp = instances.Where(i => i.Visible && i.LevelOfDetail != LevelOfDetail.None).ToArray();
             }
 
             //Process only visible instances
-            this.UpdateInstancingData(context);
+            UpdateInstancingData(context);
         }
         /// <summary>
         /// Updates instancing data buffer
@@ -111,20 +111,20 @@ namespace Engine
         /// <param name="context">Update context</param>
         private void UpdateInstancingData(UpdateContext context)
         {
-            if (!this.instancesTmp.Any())
+            if (!instancesTmp.Any())
             {
                 return;
             }
 
-            this.SortInstances(context.EyePosition);
+            SortInstances(context.EyePosition);
 
             LevelOfDetail lastLod = LevelOfDetail.None;
             DrawingData drawingData = null;
             int instanceIndex = 0;
 
-            for (int i = 0; i < this.instancesTmp.Length; i++)
+            for (int i = 0; i < instancesTmp.Length; i++)
             {
-                var current = this.instancesTmp[i];
+                var current = instancesTmp[i];
                 if (current == null)
                 {
                     continue;
@@ -133,7 +133,7 @@ namespace Engine
                 if (lastLod != current.LevelOfDetail)
                 {
                     lastLod = current.LevelOfDetail;
-                    drawingData = this.GetDrawingData(lastLod);
+                    drawingData = GetDrawingData(lastLod);
                 }
 
                 uint animationOffset = 0;
@@ -149,9 +149,10 @@ namespace Engine
                     animationOffset = current.AnimationController.GetAnimationOffset(drawingData.SkinningData);
                 }
 
-                this.instancingData[instanceIndex].Local = current.Manipulator.LocalTransform;
-                this.instancingData[instanceIndex].TextureIndex = current.TextureIndex;
-                this.instancingData[instanceIndex].AnimationOffset = animationOffset;
+                instancingData[instanceIndex].Local = current.Manipulator.LocalTransform;
+                instancingData[instanceIndex].TextureIndex = current.TextureIndex;
+                instancingData[instanceIndex].MaterialIndex = current.MaterialIndex;
+                instancingData[instanceIndex].AnimationOffset = animationOffset;
 
                 instanceIndex++;
             }
@@ -172,19 +173,19 @@ namespace Engine
 
             int instanceIndex = 0;
 
-            for (int i = 0; i < this.instancesTmp.Length; i++)
+            for (int i = 0; i < instancesTmp.Length; i++)
             {
-                var current = this.instancesTmp[i];
+                var current = instancesTmp[i];
                 if (current == null)
                 {
                     continue;
                 }
 
-                var currentTransform = this.instancingData[instanceIndex].Local;
+                var currentTransform = instancingData[instanceIndex].Local;
                 var localTransform = current.GetTransformByName(meshName);
                 if (currentTransform != localTransform)
                 {
-                    this.instancingData[instanceIndex].Local = localTransform;
+                    instancingData[instanceIndex].Local = localTransform;
 
                     hasDataToWrite = true;
                 }
@@ -194,7 +195,7 @@ namespace Engine
 
             if (hasDataToWrite)
             {
-                this.BufferManager.WriteInstancingData(this.InstancingBuffer, this.instancingData);
+                BufferManager.WriteInstancingData(InstancingBuffer, instancingData);
             }
         }
         /// <summary>
@@ -204,7 +205,7 @@ namespace Engine
         private void SortInstances(Vector3 eyePosition)
         {
             //Sort by LOD, distance and id
-            Array.Sort(this.instancesTmp, (i1, i2) =>
+            Array.Sort(instancesTmp, (i1, i2) =>
             {
                 var i = i1.LevelOfDetail.CompareTo(i2.LevelOfDetail);
 
@@ -229,27 +230,27 @@ namespace Engine
         /// <returns>Returns the number of maximum instances to draw</returns>
         private int GetMaxCount()
         {
-            return this.MaximumCount >= 0 ?
-                Math.Min(this.MaximumCount, this.InstanceCount) :
+            return MaximumCount >= 0 ?
+                Math.Min(MaximumCount, InstanceCount) :
                 this.InstanceCount;
         }
         /// <inheritdoc/>
         public override void DrawShadows(DrawContextShadows context)
         {
-            if (!this.Visible)
+            if (!Visible)
             {
                 return;
             }
 
-            if (!this.InstancingBuffer.Ready)
+            if (!InstancingBuffer.Ready)
             {
                 return;
             }
 
-            if (this.hasDataToWrite)
+            if (hasDataToWrite)
             {
                 Logger.WriteDebug($"{this.Name} - DrawShadows WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset}");
-                this.BufferManager.WriteInstancingData(this.InstancingBuffer, this.instancingData);
+                BufferManager.WriteInstancingData(InstancingBuffer, instancingData);
             }
 
             var effect = context.ShadowMap.GetEffect();
@@ -258,7 +259,7 @@ namespace Engine
                 return;
             }
 
-            this.DrawShadows(context, effect);
+            DrawShadows(context, effect);
         }
         /// <summary>
         /// Shadow drawing
@@ -272,7 +273,7 @@ namespace Engine
 
             effect.UpdatePerFrame(Matrix.Identity, context);
 
-            int maxCount = this.GetMaxCount();
+            int maxCount = GetMaxCount();
 
             //Render by level of detail
             for (int l = 1; l < (int)LevelOfDetail.Minimum + 1; l *= 2)
@@ -285,19 +286,19 @@ namespace Engine
                 LevelOfDetail lod = (LevelOfDetail)l;
 
                 //Get instances in this LOD
-                var lodInstances = Array.FindAll(this.instancesTmp, i => i != null && i.LevelOfDetail == lod);
+                var lodInstances = Array.FindAll(instancesTmp, i => i != null && i.LevelOfDetail == lod);
                 if (lodInstances.Length <= 0)
                 {
                     continue;
                 }
 
-                var drawingData = this.GetDrawingData(lod);
+                var drawingData = GetDrawingData(lod);
                 if (drawingData == null)
                 {
                     continue;
                 }
 
-                var index = Array.IndexOf(this.instancesTmp, lodInstances[0]) + this.InstancingBuffer.BufferOffset;
+                var index = Array.IndexOf(instancesTmp, lodInstances[0]) + InstancingBuffer.BufferOffset;
                 var length = Math.Min(maxCount, lodInstances.Length);
                 if (length <= 0)
                 {
@@ -309,9 +310,9 @@ namespace Engine
 
                 foreach (string meshName in drawingData.Meshes.Keys)
                 {
-                    this.UpdateIndependantTransforms(meshName);
+                    UpdateIndependantTransforms(meshName);
 
-                    count += this.DrawShadowMesh(effect, drawingData, meshName, index, length);
+                    count += DrawShadowMesh(effect, drawingData, meshName, index, length);
                     count *= instanceCount;
                 }
             }
@@ -329,7 +330,7 @@ namespace Engine
         {
             int count = 0;
 
-            var graphics = this.Game.Graphics;
+            var graphics = Game.Graphics;
 
             var meshDict = drawingData.Meshes[meshName];
 
@@ -347,10 +348,10 @@ namespace Engine
 
                 effect.UpdatePerObject(0, material, 0);
 
-                this.BufferManager.SetIndexBuffer(mesh.IndexBuffer);
+                BufferManager.SetIndexBuffer(mesh.IndexBuffer);
 
                 var technique = effect.GetTechnique(mesh.VertextType, true, material.Material.IsTransparent);
-                this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
+                BufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
 
                 for (int p = 0; p < technique.PassCount; p++)
                 {
@@ -365,29 +366,29 @@ namespace Engine
         /// <inheritdoc/>
         public override void Draw(DrawContext context)
         {
-            if (!this.Visible)
+            if (!Visible)
             {
                 return;
             }
 
-            if (!this.InstancingBuffer.Ready)
+            if (!InstancingBuffer.Ready)
             {
                 return;
             }
 
-            if (this.hasDataToWrite)
+            if (hasDataToWrite)
             {
-                Logger.WriteDebug($"{this.Name} - Draw WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset} {context.DrawerMode}");
-                this.BufferManager.WriteInstancingData(this.InstancingBuffer, this.instancingData);
+                Logger.WriteDebug($"{Name} - Draw WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset} {context.DrawerMode}");
+                BufferManager.WriteInstancingData(InstancingBuffer, instancingData);
             }
 
-            var effect = this.GetEffect(context.DrawerMode);
+            var effect = GetEffect(context.DrawerMode);
             if (effect == null)
             {
                 return;
             }
 
-            this.Draw(context, effect);
+            Draw(context, effect);
         }
         /// <summary>
         /// Draw
@@ -401,7 +402,7 @@ namespace Engine
 
             effect.UpdatePerFrameFull(Matrix.Identity, context);
 
-            int maxCount = this.GetMaxCount();
+            int maxCount = GetMaxCount();
 
             //Render by level of detail
             for (int l = 1; l < (int)LevelOfDetail.Minimum + 1; l *= 2)
@@ -414,20 +415,20 @@ namespace Engine
                 LevelOfDetail lod = (LevelOfDetail)l;
 
                 //Get instances in this LOD
-                var lodInstances = Array.FindAll(this.instancesTmp, i => i != null && i.LevelOfDetail == lod);
-                if (lodInstances.Length <= 0)
+                var lodInstances = instancesTmp.Where(i => i?.LevelOfDetail == lod);
+                if (!lodInstances.Any())
                 {
                     continue;
                 }
 
-                var drawingData = this.GetDrawingData(lod);
+                var drawingData = GetDrawingData(lod);
                 if (drawingData == null)
                 {
                     continue;
                 }
 
-                var index = Array.IndexOf(this.instancesTmp, lodInstances[0]) + this.InstancingBuffer.BufferOffset;
-                var length = Math.Min(maxCount, lodInstances.Length);
+                var index = Array.IndexOf(instancesTmp, lodInstances.First()) + InstancingBuffer.BufferOffset;
+                var length = Math.Min(maxCount, lodInstances.Count());
                 if (length <= 0)
                 {
                     continue;
@@ -438,9 +439,9 @@ namespace Engine
 
                 foreach (string meshName in drawingData.Meshes.Keys)
                 {
-                    this.UpdateIndependantTransforms(meshName);
+                    UpdateIndependantTransforms(meshName);
 
-                    count += this.DrawMesh(context, effect, drawingData, meshName, index, length);
+                    count += DrawMesh(context, effect, drawingData, meshName, index, length);
                     count *= instanceCount;
                 }
             }
@@ -462,7 +463,7 @@ namespace Engine
         {
             int count = 0;
 
-            var graphics = this.Game.Graphics;
+            var graphics = Game.Graphics;
 
             var meshDict = drawingData.Meshes[meshName];
 
@@ -476,7 +477,7 @@ namespace Engine
 
                 var material = drawingData.Materials[materialName];
 
-                bool draw = context.ValidateDraw(this.BlendMode, material.Material.IsTransparent);
+                bool draw = context.ValidateDraw(BlendMode, material.Material.IsTransparent);
                 if (!draw)
                 {
                     continue;
@@ -484,12 +485,12 @@ namespace Engine
 
                 count += mesh.Count;
 
-                effect.UpdatePerObject(0, material, 0, this.UseAnisotropicFiltering);
+                effect.UpdatePerObject(0, material, 0, UseAnisotropicFiltering);
 
-                this.BufferManager.SetIndexBuffer(mesh.IndexBuffer);
+                BufferManager.SetIndexBuffer(mesh.IndexBuffer);
 
                 var technique = effect.GetTechnique(mesh.VertextType, true);
-                this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
+                BufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
 
                 for (int p = 0; p < technique.PassCount; p++)
                 {
@@ -508,11 +509,11 @@ namespace Engine
         /// <param name="positions">New positions</param>
         public void SetPositions(IEnumerable<Vector3> positions)
         {
-            if (positions?.Any() == true && this.instances?.Length > 0)
+            if (positions?.Any() == true && instances?.Length > 0)
             {
-                for (int i = 0; i < this.instances.Length; i++)
+                for (int i = 0; i < instances.Length; i++)
                 {
-                    var instance = this.instances[i];
+                    var instance = instances[i];
 
                     if (i < positions.Count())
                     {
@@ -534,11 +535,11 @@ namespace Engine
         /// <param name="transforms">Transform matrix list</param>
         public void SetTransforms(IEnumerable<Matrix> transforms)
         {
-            if (transforms?.Any() == true && this.instances?.Length > 0)
+            if (transforms?.Any() == true && instances?.Length > 0)
             {
-                for (int i = 0; i < this.instances.Length; i++)
+                for (int i = 0; i < instances.Length; i++)
                 {
-                    var instance = this.instances[i];
+                    var instance = instances[i];
 
                     if (i < transforms.Count())
                     {
@@ -560,7 +561,7 @@ namespace Engine
         /// <returns>Returns an array with the instance list</returns>
         public IEnumerable<ModelInstance> GetInstances()
         {
-            return new ReadOnlyCollection<ModelInstance>(this.instances);
+            return new ReadOnlyCollection<ModelInstance>(instances);
         }
         /// <summary>
         /// Gets all components
@@ -568,7 +569,7 @@ namespace Engine
         /// <returns>Returns a collection of components</returns>
         public IEnumerable<T> GetComponents<T>()
         {
-            return new ReadOnlyCollection<T>(this.instances.Where(i => i.Visible).OfType<T>().ToArray());
+            return new ReadOnlyCollection<T>(instances.Where(i => i.Visible).OfType<T>().ToArray());
         }
 
         /// <summary>
@@ -581,9 +582,9 @@ namespace Engine
         {
             distance = float.MaxValue;
 
-            if (this.instancesTmp?.Length > 0)
+            if (instancesTmp?.Length > 0)
             {
-                var item = this.instancesTmp.FirstOrDefault(i =>
+                var item = instancesTmp.FirstOrDefault(i =>
                 {
                     return i.Visible && !i.Cull(volume, out float iDistance);
                 });
