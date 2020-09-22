@@ -44,7 +44,7 @@ namespace Terrain.Rts.AI
         {
             get
             {
-                return 1f - (this.Life / this.initialLife);
+                return 1f - (Life / initialLife);
             }
         }
 
@@ -54,14 +54,14 @@ namespace Terrain.Rts.AI
         /// <param name="description">Description</param>
         public AIStats(AIStatsDescription description)
         {
-            this.PrimaryWeapon = new Weapon(description.PrimaryWeapon);
-            this.SecondaryWeapon = new Weapon(description.SecondaryWeapon);
-            this.initialLife = description.Life;
-            this.Life = description.Life;
-            this.SightDistance = description.SightDistance;
-            this.SightAngle = MathUtil.DegreesToRadians(description.SightAngle);
+            PrimaryWeapon = new Weapon(description.PrimaryWeapon);
+            SecondaryWeapon = new Weapon(description.SecondaryWeapon);
+            initialLife = description.Life;
+            Life = description.Life;
+            SightDistance = description.SightDistance;
+            SightAngle = MathUtil.DegreesToRadians(description.SightAngle);
 
-            this.CurrentWeapon = this.PrimaryWeapon;
+            CurrentWeapon = PrimaryWeapon;
         }
 
         /// <summary>
@@ -70,8 +70,8 @@ namespace Terrain.Rts.AI
         /// <param name="gameTime">Game time</param>
         public void Update(GameTime gameTime)
         {
-            this.PrimaryWeapon?.Update(gameTime);
-            this.SecondaryWeapon?.Update(gameTime);
+            PrimaryWeapon?.Update(gameTime);
+            SecondaryWeapon?.Update(gameTime);
         }
     }
 }

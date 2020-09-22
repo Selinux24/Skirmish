@@ -182,7 +182,7 @@ namespace Terrain.PerlinNoise
         }
         public async Task InitializeTextureRenderer()
         {
-            texture = this.Game.ResourceManager.RequestResource(Guid.NewGuid(), new Color4[] { }, mapSize, true);
+            texture = Game.ResourceManager.RequestResource(Guid.NewGuid(), new Color4[] { }, mapSize, true);
 
             perlinRenderer = await this.AddComponentUITextureRenderer(UITextureRendererDescription.Default());
             perlinRenderer.Texture = texture;
@@ -192,9 +192,9 @@ namespace Terrain.PerlinNoise
         {
             base.Update(gameTime);
 
-            if (this.Game.Input.KeyJustReleased(Keys.Escape))
+            if (Game.Input.KeyJustReleased(Keys.Escape))
             {
-                this.Game.SetScene<StartScene>();
+                Game.SetScene<StartScene>();
             }
 
             if (UpdateInput(gameTime))
@@ -207,7 +207,7 @@ namespace Terrain.PerlinNoise
                 noiseMapDirty = true;
             }
 
-            texture.Update(this.Game, noiseMap?.CreateColors());
+            texture.Update(Game, noiseMap?.CreateColors());
 
             if (noiseMapDirty)
             {
@@ -220,25 +220,25 @@ namespace Terrain.PerlinNoise
 
             float delta = gameTime.ElapsedSeconds;
 
-            if (this.Game.Input.KeyPressed(Keys.W))
+            if (Game.Input.KeyPressed(Keys.W))
             {
                 mapOffset.Y -= delta;
                 updateMap = true;
             }
 
-            if (this.Game.Input.KeyPressed(Keys.S))
+            if (Game.Input.KeyPressed(Keys.S))
             {
                 mapOffset.Y += delta;
                 updateMap = true;
             }
 
-            if (this.Game.Input.KeyPressed(Keys.A))
+            if (Game.Input.KeyPressed(Keys.A))
             {
                 mapOffset.X -= delta;
                 updateMap = true;
             }
 
-            if (this.Game.Input.KeyPressed(Keys.D))
+            if (Game.Input.KeyPressed(Keys.D))
             {
                 mapOffset.X += delta;
                 updateMap = true;
@@ -247,7 +247,7 @@ namespace Terrain.PerlinNoise
             mapOffset.X = Math.Max(mapOffset.X, 1f);
             mapOffset.Y = Math.Max(mapOffset.Y, 1f);
 
-            if (this.Game.Input.KeyJustPressed(Keys.X))
+            if (Game.Input.KeyJustPressed(Keys.X))
             {
                 mapSeed += 100 + (int)(delta * 10000f);
                 updateMap = true;
@@ -304,7 +304,7 @@ namespace Terrain.PerlinNoise
         }
         public void ResizeTextureRenderer()
         {
-            float size = Math.Min(this.Game.Form.RenderHeight, this.Game.Form.RenderWidth) * 0.8f;
+            float size = Math.Min(Game.Form.RenderHeight, Game.Form.RenderWidth) * 0.8f;
 
             perlinRenderer.Width = size;
             perlinRenderer.Height = size;
@@ -313,22 +313,22 @@ namespace Terrain.PerlinNoise
         }
         public void ResizeUI()
         {
-            backGround.Width = this.Game.Form.RenderWidth;
-            backGround.Height = this.Game.Form.RenderHeight;
+            backGround.Width = Game.Form.RenderWidth;
+            backGround.Height = Game.Form.RenderHeight;
 
-            float perlinRendererSize = Math.Min(this.Game.Form.RenderHeight, this.Game.Form.RenderWidth) * 0.8f;
+            float perlinRendererSize = Math.Min(Game.Form.RenderHeight, Game.Form.RenderWidth) * 0.8f;
 
-            float borderSize = (this.Game.Form.RenderWidth - perlinRendererSize) * 0.5f;
+            float borderSize = (Game.Form.RenderWidth - perlinRendererSize) * 0.5f;
 
             float marginLeft = 25;
-            float marginTop = this.Game.Form.RenderHeight * 0.1f;
+            float marginTop = Game.Form.RenderHeight * 0.1f;
             float separation = 20;
             float width = borderSize - (marginLeft * 2);
             float height = 15;
 
             int lineIndex = 0;
 
-            btnExit.SetPosition(this.Game.Form.RenderWidth - 30, 0);
+            btnExit.SetPosition(Game.Form.RenderWidth - 30, 0);
             btnExit.Width = 30;
             btnExit.Height = 30;
             btnExit.Caption.Text = "X";
@@ -381,7 +381,7 @@ namespace Terrain.PerlinNoise
 
             btnSave.Width = 200;
             btnSave.Height = 50;
-            btnSave.SetPosition(this.Game.Form.RenderCenter.X + (perlinRendererSize / 2) - btnSave.Width, this.Game.Form.RenderCenter.Y + (perlinRendererSize / 2));
+            btnSave.SetPosition(Game.Form.RenderCenter.X + (perlinRendererSize / 2) - btnSave.Width, Game.Form.RenderCenter.Y + (perlinRendererSize / 2));
             btnSave.Caption.HorizontalAlign = HorizontalTextAlign.Center;
             btnSave.Caption.VerticalAlign = VerticalTextAlign.Middle;
             btnSave.Caption.Text = "Save to File";
@@ -397,7 +397,7 @@ namespace Terrain.PerlinNoise
                 }
 
                 var rect = pb.GetRenderArea();
-                var mouse = this.Game.Input.MouseX - rect.Left;
+                var mouse = Game.Input.MouseX - rect.Left;
 
                 if (pb == pbOctaves)
                 {
@@ -440,7 +440,7 @@ namespace Terrain.PerlinNoise
         }
         private void BtnExit_JustReleased(object sender, EventArgs e)
         {
-            this.Game.SetScene<StartScene>();
+            Game.SetScene<StartScene>();
         }
 
         private void GenerateMap()

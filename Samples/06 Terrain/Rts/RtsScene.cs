@@ -145,8 +145,8 @@ namespace Terrain.Rts
         {
             if (disposing)
             {
-                this.debugTex?.Dispose();
-                this.debugTex = null;
+                debugTex?.Dispose();
+                debugTex = null;
             }
 
             base.Dispose(disposing);
@@ -157,10 +157,10 @@ namespace Terrain.Rts
             Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
 
-            this.Camera.NearPlaneDistance = 0.1f;
-            this.Camera.FarPlaneDistance = 5000f;
+            Camera.NearPlaneDistance = 0.1f;
+            Camera.FarPlaneDistance = 5000f;
 
-            await this.LoadResourcesAsync(InitializeUI());
+            await LoadResourcesAsync(InitializeUI());
 
             List<Task> loadTasks = new List<Task>()
             {
@@ -182,7 +182,7 @@ namespace Terrain.Rts
                 InitializeGardener(),
             };
 
-            await this.LoadResourcesAsync(
+            await LoadResourcesAsync(
                 loadTasks.ToArray(),
                 (res) =>
                 {
@@ -195,15 +195,15 @@ namespace Terrain.Rts
 
                     InitializeLights();
 
-                    this.agentManager = new Brain(this);
+                    agentManager = new Brain(this);
 
-                    this.gardener.SetWind(this.windDirection, this.windStrength);
+                    gardener.SetWind(windDirection, windStrength);
 
-                    this.AudioManager.MasterVolume = 1f;
-                    this.AudioManager.Start();
+                    AudioManager.MasterVolume = 1f;
+                    AudioManager.Start();
 
-                    this.Camera.Goto(this.heliport.Manipulator.Position + Vector3.One * 25f);
-                    this.Camera.LookTo(0, 10, 0);
+                    Camera.Goto(heliport.Manipulator.Position + Vector3.One * 25f);
+                    Camera.LookTo(0, 10, 0);
 
                     Task.WhenAll(InitializePathFinding());
                 });
@@ -213,26 +213,26 @@ namespace Terrain.Rts
             Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
 
-            var title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18, Color.White) }, this.layerHud);
-            this.stats = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12, Color.Yellow) }, this.layerHud);
-            this.counters1 = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 10, Color.GreenYellow) }, this.layerHud);
-            this.counters2 = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 10, Color.GreenYellow) }, this.layerHud);
+            var title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18, Color.White) }, layerHud);
+            stats = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12, Color.Yellow) }, layerHud);
+            counters1 = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 10, Color.GreenYellow) }, layerHud);
+            counters2 = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 10, Color.GreenYellow) }, layerHud);
 
             title.Text = "Terrain collision and trajectories test";
-            this.stats.Text = "";
-            this.counters1.Text = "";
-            this.counters2.Text = "";
+            stats.Text = "";
+            counters1.Text = "";
+            counters2.Text = "";
 
             title.SetPosition(Vector2.Zero);
-            this.stats.SetPosition(new Vector2(0, 46));
-            this.counters1.SetPosition(new Vector2(0, 68));
-            this.counters2.SetPosition(new Vector2(0, 90));
+            stats.SetPosition(new Vector2(0, 46));
+            counters1.SetPosition(new Vector2(0, 68));
+            counters2.SetPosition(new Vector2(0, 90));
 
             var spDesc = new SpriteDescription()
             {
                 Name = "Back Pannel",
-                Width = this.Game.Form.RenderWidth,
-                Height = this.counters2.Top + this.counters2.Height + 3,
+                Width = Game.Form.RenderWidth,
+                Height = counters2.Top + counters2.Height + 3,
                 BaseColor = new Color4(0, 0, 0, 0.75f),
             };
 
@@ -247,21 +247,21 @@ namespace Terrain.Rts
                 ProgressColor = Color.Green,
             };
 
-            this.hProgressBar = await this.AddComponentUIProgressBar(spbDesc, layerGameHud);
-            this.t1ProgressBar = await this.AddComponentUIProgressBar(spbDesc, layerGameHud);
-            this.t2ProgressBar = await this.AddComponentUIProgressBar(spbDesc, layerGameHud);
+            hProgressBar = await this.AddComponentUIProgressBar(spbDesc, layerGameHud);
+            t1ProgressBar = await this.AddComponentUIProgressBar(spbDesc, layerGameHud);
+            t2ProgressBar = await this.AddComponentUIProgressBar(spbDesc, layerGameHud);
 
-            this.hProgressBar.Top = 120;
-            this.t1ProgressBar.Top = 120;
-            this.t2ProgressBar.Top = 120;
+            hProgressBar.Top = 120;
+            t1ProgressBar.Top = 120;
+            t2ProgressBar.Top = 120;
 
-            this.hProgressBar.Left = 5;
-            this.t1ProgressBar.Left = 135;
-            this.t2ProgressBar.Left = 270;
+            hProgressBar.Left = 5;
+            t1ProgressBar.Left = 135;
+            t2ProgressBar.Left = 270;
 
-            this.hProgressBar.Visible = false;
-            this.t1ProgressBar.Visible = false;
-            this.t2ProgressBar.Visible = false;
+            hProgressBar.Visible = false;
+            t1ProgressBar.Visible = false;
+            t2ProgressBar.Visible = false;
 
             var c3DDesc = new ModelDescription()
             {
@@ -275,7 +275,7 @@ namespace Terrain.Rts
                     ModelContentFilename = "cursor.xml",
                 }
             };
-            this.cursor3D = await this.AddComponentModel(c3DDesc, SceneObjectUsages.UI, this.layerHud);
+            cursor3D = await this.AddComponentModel(c3DDesc, SceneObjectUsages.UI, layerHud);
 
             var c2DDesc = new UICursorDescription()
             {
@@ -286,9 +286,9 @@ namespace Terrain.Rts
                 Width = 16,
                 Height = 16,
             };
-            this.cursor2D = await this.AddComponentUICursor(c2DDesc, this.layerHud + 1);
-            this.cursor2D.BaseColor = Color.Red;
-            this.cursor2D.Visible = false;
+            cursor2D = await this.AddComponentUICursor(c2DDesc, layerHud + 1);
+            cursor2D.BaseColor = Color.Red;
+            cursor2D.Visible = false;
 
             sw.Stop();
             return new TaskResult()
@@ -304,7 +304,7 @@ namespace Terrain.Rts
 
             await Task.Run(() =>
             {
-                this.walkerAgentType = new Agent()
+                walkerAgentType = new Agent()
                 {
                     Name = "Walker type",
                     Height = 1f,
@@ -325,7 +325,7 @@ namespace Terrain.Rts
             Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
 
-            this.lightsVolumeDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(
+            lightsVolumeDrawer = await this.AddComponentPrimitiveListDrawer(
                 new PrimitiveListDrawerDescription<Line3D>()
                 {
                     Name = "++DEBUG++ Lights",
@@ -333,15 +333,15 @@ namespace Terrain.Rts
                     Count = 5000,
                 },
                 SceneObjectUsages.None,
-                this.layerEffects);
-            this.lightsVolumeDrawer.Visible = false;
+                layerEffects);
+            lightsVolumeDrawer.Visible = false;
 
             #region DEBUG Shadow Map
 
             int width = 300;
             int height = 300;
-            int smLeft = this.Game.Form.RenderWidth - width;
-            int smTop = this.Game.Form.RenderHeight - height;
+            int smLeft = Game.Form.RenderWidth - width;
+            int smTop = Game.Form.RenderHeight - height;
             var stDescription = new UITextureRendererDescription()
             {
                 Name = "++DEBUG++ Shadow Map",
@@ -351,73 +351,73 @@ namespace Terrain.Rts
                 Height = height,
                 Channel = UITextureRendererChannels.Red,
             };
-            this.shadowMapDrawer = await this.AddComponentUITextureRenderer(stDescription, this.layerHud);
-            this.shadowMapDrawer.Visible = false;
-            this.shadowMapDrawer.DeferredEnabled = false;
+            shadowMapDrawer = await this.AddComponentUITextureRenderer(stDescription, layerHud);
+            shadowMapDrawer.Visible = false;
+            shadowMapDrawer.DeferredEnabled = false;
 
-            this.debugTex = this.Game.ResourceManager.RequestResource(@"Rts/resources/uvtest.png");
+            debugTex = Game.ResourceManager.RequestResource(@"Rts/resources/uvtest.png");
 
             #endregion
 
             #region DEBUG Path finding Graph
 
-            this.terrainGraphDrawer = await this.AddComponentPrimitiveListDrawer<Triangle>(
+            terrainGraphDrawer = await this.AddComponentPrimitiveListDrawer(
                 new PrimitiveListDrawerDescription<Triangle>()
                 {
                     Name = "++DEBUG++ Path finding Graph",
                     Count = MaxGridDrawer
                 },
                 SceneObjectUsages.None,
-                this.layerEffects);
-            this.terrainGraphDrawer.Visible = false;
+                layerEffects);
+            terrainGraphDrawer.Visible = false;
 
             #endregion
 
             #region DEBUG Picking test
 
-            this.terrainPointDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(
+            terrainPointDrawer = await this.AddComponentPrimitiveListDrawer(
                 new PrimitiveListDrawerDescription<Line3D>()
                 {
                     Name = "++DEBUG++ Picking test",
                     Count = MaxPickingTest
                 },
                 SceneObjectUsages.None,
-                this.layerEffects);
-            this.terrainPointDrawer.Visible = false;
+                layerEffects);
+            terrainPointDrawer.Visible = false;
 
             #endregion
 
             #region DEBUG Trajectory
 
-            this.curveLineDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(
+            curveLineDrawer = await this.AddComponentPrimitiveListDrawer(
                 new PrimitiveListDrawerDescription<Line3D>()
                 {
                     Name = "++DEBUG++ Trajectory",
                     Count = 20000
                 },
                 SceneObjectUsages.None,
-                this.layerEffects);
-            this.curveLineDrawer.Visible = false;
+                layerEffects);
+            curveLineDrawer.Visible = false;
 
             #endregion
 
             #region DEBUG Helicopter manipulator
 
-            this.movingObjLineDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(
+            movingObjLineDrawer = await this.AddComponentPrimitiveListDrawer(
                 new PrimitiveListDrawerDescription<Line3D>()
                 {
                     Name = "++DEBUG++ Helicopter manipulator",
                     Count = 1000
                 },
                 SceneObjectUsages.None,
-                this.layerEffects);
-            this.movingObjLineDrawer.Visible = false;
+                layerEffects);
+            movingObjLineDrawer.Visible = false;
 
             #endregion
 
             #region DEBUG static volumes
 
-            this.staticObjLineDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(
+            staticObjLineDrawer = await this.AddComponentPrimitiveListDrawer(
                 new PrimitiveListDrawerDescription<Line3D>()
                 {
                     Name = "++DEBUG++ Static Volumes",
@@ -425,21 +425,21 @@ namespace Terrain.Rts
                 },
                 SceneObjectUsages.None,
                 layerEffects);
-            this.staticObjLineDrawer.Visible = false;
+            staticObjLineDrawer.Visible = false;
 
             #endregion
 
             #region DEBUG Ground position test
 
-            this.terrainLineDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(
+            terrainLineDrawer = await this.AddComponentPrimitiveListDrawer(
                 new PrimitiveListDrawerDescription<Line3D>()
                 {
                     Name = "++DEBUG++ Ground position test",
                     Count = 10000
                 },
                 SceneObjectUsages.None,
-                this.layerEffects);
-            this.terrainLineDrawer.Visible = false;
+                layerEffects);
+            terrainLineDrawer.Visible = false;
 
             #endregion
 
@@ -476,7 +476,7 @@ namespace Terrain.Rts
                     new LensFlareDescription.Flare( 2.0f, 1.4f, new Color( 25,  50, 100), "lfFlare3.png"),
                 }
             };
-            await this.AddComponentLensFlare(lfDesc, SceneObjectUsages.None, this.layerEffects);
+            await this.AddComponentLensFlare(lfDesc, SceneObjectUsages.None, layerEffects);
 
             sw.Stop();
             return new TaskResult()
@@ -501,12 +501,12 @@ namespace Terrain.Rts
                     ModelContentFilename = "M24.xml",
                 }
             };
-            this.helicopter = await this.AddComponentModel(hDesc, SceneObjectUsages.Agent, this.layerObjects);
-            this.helicopter.Visible = false;
-            this.helicopter.Manipulator.SetScale(0.15f);
-            this.helicopter.Manipulator.UpdateInternals(true);
+            helicopter = await this.AddComponentModel(hDesc, SceneObjectUsages.Agent, layerObjects);
+            helicopter.Visible = false;
+            helicopter.Manipulator.SetScale(0.15f);
+            helicopter.Manipulator.UpdateInternals(true);
 
-            this.Lights.AddRange(this.helicopter.Lights);
+            Lights.AddRange(helicopter.Lights);
 
             sw.Stop();
             return new TaskResult()
@@ -533,26 +533,26 @@ namespace Terrain.Rts
                 TransformNames = new[] { "Barrel-mesh", "Turret-mesh", "Hull-mesh" },
                 TransformDependences = new[] { 1, 2, -1 },
             };
-            this.tankP1 = await this.AddComponentModel(tDesc, SceneObjectUsages.Agent, this.layerObjects);
-            this.tankP2 = await this.AddComponentModel(tDesc, SceneObjectUsages.Agent, this.layerObjects);
+            tankP1 = await this.AddComponentModel(tDesc, SceneObjectUsages.Agent, layerObjects);
+            tankP2 = await this.AddComponentModel(tDesc, SceneObjectUsages.Agent, layerObjects);
 
-            this.tankP1.Visible = false;
-            this.tankP2.Visible = false;
+            tankP1.Visible = false;
+            tankP2.Visible = false;
 
-            this.tankP1.Manipulator.SetScale(0.2f, true);
-            this.tankP1.Manipulator.UpdateInternals(true);
+            tankP1.Manipulator.SetScale(0.2f, true);
+            tankP1.Manipulator.UpdateInternals(true);
 
-            this.tankP2.Manipulator.SetScale(0.2f, true);
-            this.tankP2.Manipulator.UpdateInternals(true);
+            tankP2.Manipulator.SetScale(0.2f, true);
+            tankP2.Manipulator.UpdateInternals(true);
 
-            var tankbbox = this.tankP1.GetBoundingBox();
+            var tankbbox = tankP1.GetBoundingBox();
 
             // Initialize dust generation relative positions
-            this.tankLeftCat = new Vector3(tankbbox.Maximum.X, tankbbox.Minimum.Y, tankbbox.Maximum.Z);
-            this.tankRightCat = new Vector3(tankbbox.Minimum.X, tankbbox.Minimum.Y, tankbbox.Maximum.Z);
+            tankLeftCat = new Vector3(tankbbox.Maximum.X, tankbbox.Minimum.Y, tankbbox.Maximum.Z);
+            tankRightCat = new Vector3(tankbbox.Minimum.X, tankbbox.Minimum.Y, tankbbox.Maximum.Z);
 
             // Initialize agent
-            this.tankAgentType = new Agent()
+            tankAgentType = new Agent()
             {
                 Name = "Tank type",
                 Height = tankbbox.Height,
@@ -560,8 +560,8 @@ namespace Terrain.Rts
                 MaxClimb = tankbbox.Height * 0.1f,
             };
 
-            this.Lights.AddRange(this.tankP1.Lights);
-            this.Lights.AddRange(this.tankP2.Lights);
+            Lights.AddRange(tankP1.Lights);
+            Lights.AddRange(tankP2.Lights);
 
             sw.Stop();
             return new TaskResult()
@@ -585,11 +585,11 @@ namespace Terrain.Rts
                     ModelContentFilename = "Heliport.xml",
                 }
             };
-            this.heliport = await this.AddComponentModel(hpDesc, SceneObjectUsages.None, this.layerObjects);
-            this.heliport.Visible = false;
-            this.AttachToGround(this.heliport, true);
+            heliport = await this.AddComponentModel(hpDesc, SceneObjectUsages.None, layerObjects);
+            heliport.Visible = false;
+            AttachToGround(heliport, true);
 
-            this.Lights.AddRange(this.heliport.Lights);
+            Lights.AddRange(heliport.Lights);
 
             sw.Stop();
             return new TaskResult()
@@ -613,11 +613,11 @@ namespace Terrain.Rts
                     ModelContentFilename = "Garage.xml",
                 }
             };
-            this.garage = await this.AddComponentModel(gDesc, SceneObjectUsages.None, this.layerObjects);
-            this.garage.Visible = false;
-            this.AttachToGround(this.garage, true);
+            garage = await this.AddComponentModel(gDesc, SceneObjectUsages.None, layerObjects);
+            garage.Visible = false;
+            AttachToGround(garage, true);
 
-            this.Lights.AddRange(this.garage.Lights);
+            Lights.AddRange(garage.Lights);
 
             sw.Stop();
             return new TaskResult()
@@ -641,11 +641,11 @@ namespace Terrain.Rts
                     ModelContentFilename = "Building_1.xml",
                 }
             };
-            this.building = await this.AddComponentModel(gDesc, SceneObjectUsages.None, this.layerObjects);
-            this.building.Visible = false;
-            this.AttachToGround(this.building, true);
+            building = await this.AddComponentModel(gDesc, SceneObjectUsages.None, layerObjects);
+            building.Visible = false;
+            AttachToGround(building, true);
 
-            this.Lights.AddRange(this.building.Lights);
+            Lights.AddRange(building.Lights);
 
             sw.Stop();
             return new TaskResult()
@@ -670,9 +670,9 @@ namespace Terrain.Rts
                     ModelContentFilename = "Obelisk.xml",
                 }
             };
-            this.obelisk = await this.AddComponentModelInstanced(oDesc, SceneObjectUsages.None, this.layerObjects);
-            this.obelisk.Visible = false;
-            this.AttachToGround(this.obelisk, true);
+            obelisk = await this.AddComponentModelInstanced(oDesc, SceneObjectUsages.None, layerObjects);
+            obelisk.Visible = false;
+            AttachToGround(obelisk, true);
 
             sw.Stop();
             return new TaskResult()
@@ -697,9 +697,9 @@ namespace Terrain.Rts
                     ModelContentFilename = "boulder.xml",
                 }
             };
-            this.rocks = await this.AddComponentModelInstanced(rDesc, SceneObjectUsages.None, this.layerObjects);
-            this.rocks.Visible = false;
-            this.AttachToGround(this.rocks, false);
+            rocks = await this.AddComponentModelInstanced(rDesc, SceneObjectUsages.None, layerObjects);
+            rocks.Visible = false;
+            AttachToGround(rocks, false);
 
             sw.Stop();
             return new TaskResult()
@@ -737,13 +737,13 @@ namespace Terrain.Rts
                     ModelContentFilename = "birch_b.xml",
                 }
             };
-            this.tree1 = await this.AddComponentModelInstanced(t1Desc, SceneObjectUsages.None, this.layerTerrain);
-            this.tree2 = await this.AddComponentModelInstanced(t2Desc, SceneObjectUsages.None, this.layerTerrain);
-            this.tree1.Visible = false;
-            this.tree2.Visible = false;
+            tree1 = await this.AddComponentModelInstanced(t1Desc, SceneObjectUsages.None, layerTerrain);
+            tree2 = await this.AddComponentModelInstanced(t2Desc, SceneObjectUsages.None, layerTerrain);
+            tree1.Visible = false;
+            tree2.Visible = false;
 
-            this.AttachToGround(this.tree1, false);
-            this.AttachToGround(this.tree2, false);
+            AttachToGround(tree1, false);
+            AttachToGround(tree2, false);
 
             sw.Stop();
             return new TaskResult()
@@ -762,7 +762,7 @@ namespace Terrain.Rts
                 Name = "Skydom",
                 ContentPath = "Rts/resources/Skydom",
                 Texture = "sunset.dds",
-                Radius = this.Camera.FarPlaneDistance,
+                Radius = Camera.FarPlaneDistance,
             });
 
             sw.Stop();
@@ -804,8 +804,8 @@ namespace Terrain.Rts
             sw.Restart();
 
             var terrainDescription = GroundDescription.FromFile("Rts/resources/Terrain", "two_levels.xml", 1);
-            this.terrain = await this.AddComponentScenery(terrainDescription, SceneObjectUsages.Ground, this.layerTerrain);
-            this.SetGround(this.terrain, true);
+            terrain = await this.AddComponentScenery(terrainDescription, SceneObjectUsages.Ground, layerTerrain);
+            SetGround(terrain, true);
 
             sw.Stop();
             return new TaskResult()
@@ -837,7 +837,7 @@ namespace Terrain.Rts
                     Count = 4,
                 }
             };
-            this.gardener = await this.AddComponentGroundGardener(grDesc, SceneObjectUsages.None, this.layerTerrain);
+            gardener = await this.AddComponentGroundGardener(grDesc, SceneObjectUsages.None, layerTerrain);
 
             sw.Stop();
             return new TaskResult()
@@ -851,14 +851,14 @@ namespace Terrain.Rts
             Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
 
-            this.pPlume = ParticleSystemDescription.InitializeSmokePlume("Rts/resources/particles", "smoke.png");
-            this.pFire = ParticleSystemDescription.InitializeFire("Rts/resources/particles", "fire.png");
-            this.pDust = ParticleSystemDescription.InitializeDust("Rts/resources/particles", "smoke.png");
-            this.pProjectile = ParticleSystemDescription.InitializeProjectileTrail("Rts/resources/particles", "smoke.png");
-            this.pExplosion = ParticleSystemDescription.InitializeExplosion("Rts/resources/particles", "fire.png");
-            this.pSmokeExplosion = ParticleSystemDescription.InitializeExplosion("Rts/resources/particles", "smoke.png");
+            pPlume = ParticleSystemDescription.InitializeSmokePlume("Rts/resources/particles", "smoke.png");
+            pFire = ParticleSystemDescription.InitializeFire("Rts/resources/particles", "fire.png");
+            pDust = ParticleSystemDescription.InitializeDust("Rts/resources/particles", "smoke.png");
+            pProjectile = ParticleSystemDescription.InitializeProjectileTrail("Rts/resources/particles", "smoke.png");
+            pExplosion = ParticleSystemDescription.InitializeExplosion("Rts/resources/particles", "fire.png");
+            pSmokeExplosion = ParticleSystemDescription.InitializeExplosion("Rts/resources/particles", "smoke.png");
 
-            this.pManager = await this.AddComponentParticleManager(new ParticleManagerDescription() { Name = "Particle Manager" }, SceneObjectUsages.None, layerEffects);
+            pManager = await this.AddComponentParticleManager(new ParticleManagerDescription() { Name = "Particle Manager" }, SceneObjectUsages.None, layerEffects);
 
             sw.Stop();
             return new TaskResult()
@@ -874,14 +874,14 @@ namespace Terrain.Rts
 
             Random posRnd = new Random(1);
 
-            await this.InitializePositionRocks(posRnd);
-            await this.InitializePositionTrees(posRnd);
+            await InitializePositionRocks(posRnd);
+            await InitializePositionTrees(posRnd);
 
             await Task.WhenAll(
-                this.InitializePositionHeliport(),
-                this.InitializePositionGarage(),
-                this.InitializePositionBuildings(),
-                this.InitializePositionObelisk());
+                InitializePositionHeliport(),
+                InitializePositionGarage(),
+                InitializePositionBuildings(),
+                InitializePositionObelisk());
 
             var navSettings = BuildSettings.Default;
             navSettings.Agents = new[]
@@ -891,11 +891,11 @@ namespace Terrain.Rts
             };
             var nvInput = new InputGeometry(GetTrianglesForNavigationGraph);
 
-            this.PathFinderDescription = new PathFinderDescription(navSettings, nvInput);
+            PathFinderDescription = new PathFinderDescription(navSettings, nvInput);
 
             sw.Stop();
 
-            await this.UpdateNavigationGraph();
+            await UpdateNavigationGraph();
 
             return new TaskResult()
             {
@@ -905,10 +905,10 @@ namespace Terrain.Rts
         }
         private void InitializeLights()
         {
-            this.Lights.DirectionalLights[0].Enabled = true;
-            this.Lights.DirectionalLights[0].CastShadow = true;
-            this.Lights.DirectionalLights[1].Enabled = true;
-            this.Lights.DirectionalLights[2].Enabled = true;
+            Lights.DirectionalLights[0].Enabled = true;
+            Lights.DirectionalLights[0].CastShadow = true;
+            Lights.DirectionalLights[1].Enabled = true;
+            Lights.DirectionalLights[2].Enabled = true;
         }
         private void InitializeAudio()
         {
@@ -1146,11 +1146,11 @@ namespace Terrain.Rts
         {
             await Task.Run(() =>
             {
-                for (int i = 0; i < this.rocks.InstanceCount; i++)
+                for (int i = 0; i < rocks.InstanceCount; i++)
                 {
-                    var pos = this.GetRandomPoint(posRnd, Vector3.Zero);
+                    var pos = GetRandomPoint(posRnd, Vector3.Zero);
 
-                    if (this.FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
+                    if (FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
                     {
                         float scale;
                         if (i < 5)
@@ -1166,7 +1166,7 @@ namespace Terrain.Rts
                             scale = posRnd.NextFloat(0.1f, 0.2f);
                         }
 
-                        var rockInstance = this.rocks[i];
+                        var rockInstance = rocks[i];
 
                         rockInstance.Manipulator.SetPosition(r.Position);
                         rockInstance.Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi));
@@ -1174,20 +1174,20 @@ namespace Terrain.Rts
                         rockInstance.Manipulator.UpdateInternals(true);
                     }
                 }
-                this.rocks.Visible = true;
+                rocks.Visible = true;
             });
         }
         private async Task InitializePositionTrees(Random posRnd)
         {
             await Task.Run(() =>
             {
-                for (int i = 0; i < this.tree1.InstanceCount; i++)
+                for (int i = 0; i < tree1.InstanceCount; i++)
                 {
-                    var pos = this.GetRandomPoint(posRnd, Vector3.Zero);
+                    var pos = GetRandomPoint(posRnd, Vector3.Zero);
 
-                    if (this.FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
+                    if (FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
                     {
-                        var treeInstance = this.tree1[i];
+                        var treeInstance = tree1[i];
 
                         treeInstance.Manipulator.SetPosition(r.Position);
                         treeInstance.Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0);
@@ -1195,15 +1195,15 @@ namespace Terrain.Rts
                         treeInstance.Manipulator.UpdateInternals(true);
                     }
                 }
-                this.tree1.Visible = true;
+                tree1.Visible = true;
 
-                for (int i = 0; i < this.tree2.InstanceCount; i++)
+                for (int i = 0; i < tree2.InstanceCount; i++)
                 {
-                    var pos = this.GetRandomPoint(posRnd, Vector3.Zero);
+                    var pos = GetRandomPoint(posRnd, Vector3.Zero);
 
-                    if (this.FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
+                    if (FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
                     {
-                        var treeInstance = this.tree2[i];
+                        var treeInstance = tree2[i];
 
                         treeInstance.Manipulator.SetPosition(r.Position);
                         treeInstance.Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0);
@@ -1211,66 +1211,66 @@ namespace Terrain.Rts
                         treeInstance.Manipulator.UpdateInternals(true);
                     }
                 }
-                this.tree2.Visible = true;
+                tree2.Visible = true;
             });
         }
         private async Task InitializePositionHeliport()
         {
             await Task.Run(() =>
             {
-                if (this.FindTopGroundPosition(75, 75, out PickingResult<Triangle> r))
+                if (FindTopGroundPosition(75, 75, out PickingResult<Triangle> r))
                 {
-                    this.heliport.Manipulator.SetPosition(r.Position);
-                    this.heliport.Manipulator.UpdateInternals(true);
+                    heliport.Manipulator.SetPosition(r.Position);
+                    heliport.Manipulator.UpdateInternals(true);
                 }
-                this.heliport.Visible = true;
+                heliport.Visible = true;
             });
         }
         private async Task InitializePositionGarage()
         {
             await Task.Run(() =>
             {
-                if (this.FindTopGroundPosition(-10, -40, out PickingResult<Triangle> r))
+                if (FindTopGroundPosition(-10, -40, out PickingResult<Triangle> r))
                 {
-                    this.garage.Manipulator.SetPosition(r.Position);
-                    this.garage.Manipulator.SetRotation(MathUtil.PiOverFour * 0.5f + MathUtil.Pi, 0, 0);
-                    this.garage.Manipulator.UpdateInternals(true);
+                    garage.Manipulator.SetPosition(r.Position);
+                    garage.Manipulator.SetRotation(MathUtil.PiOverFour * 0.5f + MathUtil.Pi, 0, 0);
+                    garage.Manipulator.UpdateInternals(true);
                 }
-                this.garage.Visible = true;
+                garage.Visible = true;
             });
         }
         private async Task InitializePositionBuildings()
         {
             await Task.Run(() =>
             {
-                if (this.FindTopGroundPosition(-30, -40, out PickingResult<Triangle> r))
+                if (FindTopGroundPosition(-30, -40, out PickingResult<Triangle> r))
                 {
-                    this.building.Manipulator.SetPosition(r.Position);
-                    this.building.Manipulator.SetRotation(MathUtil.PiOverFour * 0.5f + MathUtil.Pi, 0, 0);
-                    this.building.Manipulator.UpdateInternals(true);
+                    building.Manipulator.SetPosition(r.Position);
+                    building.Manipulator.SetRotation(MathUtil.PiOverFour * 0.5f + MathUtil.Pi, 0, 0);
+                    building.Manipulator.UpdateInternals(true);
                 }
-                this.building.Visible = true;
+                building.Visible = true;
             });
         }
         private async Task InitializePositionObelisk()
         {
             await Task.Run(() =>
             {
-                for (int i = 0; i < this.obelisk.InstanceCount; i++)
+                for (int i = 0; i < obelisk.InstanceCount; i++)
                 {
                     int ox = i == 0 || i == 2 ? 1 : -1;
                     int oy = i == 0 || i == 1 ? 1 : -1;
 
-                    if (this.FindTopGroundPosition(ox * 50, oy * 50, out PickingResult<Triangle> r))
+                    if (FindTopGroundPosition(ox * 50, oy * 50, out PickingResult<Triangle> r))
                     {
-                        var obeliskInstance = this.obelisk[i];
+                        var obeliskInstance = obelisk[i];
 
                         obeliskInstance.Manipulator.SetPosition(r.Position);
                         obeliskInstance.Manipulator.SetScale(1.5f);
                         obeliskInstance.Manipulator.UpdateInternals(true);
                     }
                 }
-                this.obelisk.Visible = true;
+                obelisk.Visible = true;
             });
         }
 
@@ -1293,26 +1293,26 @@ namespace Terrain.Rts
             {
                 // Set position
                 var sceneryUsage = SceneObjectUsages.CoarsePathFinding | SceneObjectUsages.FullPathFinding;
-                var ray = this.GetTopDownRay(this.heliport.Manipulator.Position);
-                if (this.PickNearest(ray, RayPickingParams.Geometry, sceneryUsage, out PickingResult<Triangle> r))
+                var ray = GetTopDownRay(heliport.Manipulator.Position);
+                if (PickNearest(ray, RayPickingParams.Geometry, sceneryUsage, out PickingResult<Triangle> r))
                 {
-                    this.helicopter.Manipulator.SetPosition(r.Position);
-                    this.helicopter.Manipulator.SetNormal(r.Item.Normal);
+                    helicopter.Manipulator.SetPosition(r.Position);
+                    helicopter.Manipulator.SetNormal(r.Item.Normal);
                 }
 
                 var hp = new AnimationPath();
                 hp.AddLoop("roll");
-                this.animations.Add("heli_default", new AnimationPlan(hp));
+                animations.Add("heli_default", new AnimationPlan(hp));
 
                 // Register animation paths
                 AnimationPath ap = new AnimationPath();
                 ap.AddLoop("default");
-                this.animations.Add("default", new AnimationPlan(ap));
+                animations.Add("default", new AnimationPlan(ap));
 
                 // Set animation
-                this.helicopter.AnimationController.SetPath(this.animations["heli_default"]);
-                this.helicopter.AnimationController.TimeDelta = 3f;
-                this.helicopter.AnimationController.Start();
+                helicopter.AnimationController.SetPath(animations["heli_default"]);
+                helicopter.AnimationController.TimeDelta = 3f;
+                helicopter.AnimationController.Start();
 
                 // Define weapons
                 var h1W = new WeaponDescription() { Name = "Missile", Damage = 100, Cadence = 5f, Range = 100 };
@@ -1329,19 +1329,19 @@ namespace Terrain.Rts
                     FlightHeight = 25,
                 };
 
-                this.helicopterAgent = new HelicopterAIAgent(this.agentManager, null, this.helicopter, hStats);
+                helicopterAgent = new HelicopterAIAgent(agentManager, null, helicopter, hStats);
 
                 // Adds agent to scene
-                agents.Add(this.helicopterAgent);
+                agents.Add(helicopterAgent);
 
                 // Register events
-                this.helicopterAgent.Moving += Agent_Moving;
-                this.helicopterAgent.Attacking += Agent_Attacking;
-                this.helicopterAgent.Damaged += Agent_Damaged;
-                this.helicopterAgent.Destroyed += Agent_Destroyed;
+                helicopterAgent.Moving += Agent_Moving;
+                helicopterAgent.Attacking += Agent_Attacking;
+                helicopterAgent.Damaged += Agent_Damaged;
+                helicopterAgent.Destroyed += Agent_Destroyed;
 
                 // Adds agent to agent manager to team 0
-                this.agentManager.AddAgent(0, this.helicopterAgent);
+                agentManager.AddAgent(0, helicopterAgent);
 
                 // Define patrolling check points
                 Vector3[] hCheckPoints = new Vector3[]
@@ -1354,13 +1354,13 @@ namespace Terrain.Rts
                 };
 
                 // Define behaviors
-                this.helicopterAgent.PatrolBehavior.InitPatrollingBehavior(hCheckPoints, 5, 8);
-                this.helicopterAgent.AttackBehavior.InitAttackingBehavior(15, 10);
-                this.helicopterAgent.RetreatBehavior.InitRetreatingBehavior(new Vector3(75, 0, 75), 12);
-                this.helicopterAgent.ActiveAI = true;
+                helicopterAgent.PatrolBehavior.InitPatrollingBehavior(hCheckPoints, 5, 8);
+                helicopterAgent.AttackBehavior.InitAttackingBehavior(15, 10);
+                helicopterAgent.RetreatBehavior.InitRetreatingBehavior(new Vector3(75, 0, 75), 12);
+                helicopterAgent.ActiveAI = true;
 
                 //Show
-                this.helicopter.Visible = true;
+                helicopter.Visible = true;
             });
         }
         private async Task StartTanks()
@@ -1369,16 +1369,16 @@ namespace Terrain.Rts
             {
                 var sceneryUsage = SceneObjectUsages.CoarsePathFinding | SceneObjectUsages.FullPathFinding;
 
-                if (this.PickNearest(this.GetTopDownRay(-60, -60), RayPickingParams.Geometry, sceneryUsage, out PickingResult<Triangle> r1))
+                if (PickNearest(GetTopDownRay(-60, -60), RayPickingParams.Geometry, sceneryUsage, out PickingResult<Triangle> r1))
                 {
-                    this.tankP1.Manipulator.SetPosition(r1.Position);
-                    this.tankP1.Manipulator.SetNormal(r1.Item.Normal);
+                    tankP1.Manipulator.SetPosition(r1.Position);
+                    tankP1.Manipulator.SetNormal(r1.Item.Normal);
                 }
 
-                if (this.PickNearest(this.GetTopDownRay(-70, 70), RayPickingParams.Geometry, sceneryUsage, out PickingResult<Triangle> r2))
+                if (PickNearest(GetTopDownRay(-70, 70), RayPickingParams.Geometry, sceneryUsage, out PickingResult<Triangle> r2))
                 {
-                    this.tankP2.Manipulator.SetPosition(r2.Position);
-                    this.tankP2.Manipulator.SetNormal(r2.Item.Normal);
+                    tankP2.Manipulator.SetPosition(r2.Position);
+                    tankP2.Manipulator.SetNormal(r2.Item.Normal);
                 }
 
                 // Define weapons
@@ -1396,27 +1396,27 @@ namespace Terrain.Rts
                 };
 
                 // Initialize agents
-                this.tankP1Agent = new TankAIAgent(this.agentManager, this.tankAgentType, this.tankP1, tStats);
-                this.tankP2Agent = new TankAIAgent(this.agentManager, this.tankAgentType, this.tankP2, tStats);
+                tankP1Agent = new TankAIAgent(agentManager, tankAgentType, tankP1, tStats);
+                tankP2Agent = new TankAIAgent(agentManager, tankAgentType, tankP2, tStats);
 
-                this.tankP1Agent.SceneObject.Name = "Tank1";
-                this.tankP2Agent.SceneObject.Name = "Tank2";
+                tankP1Agent.SceneObject.Name = "Tank1";
+                tankP2Agent.SceneObject.Name = "Tank2";
 
-                agents.Add(this.tankP1Agent);
-                agents.Add(this.tankP2Agent);
+                agents.Add(tankP1Agent);
+                agents.Add(tankP2Agent);
 
                 // Register events
-                this.tankP1Agent.Moving += Agent_Moving;
-                this.tankP1Agent.Attacking += Agent_Attacking;
-                this.tankP1Agent.Damaged += Agent_Damaged;
-                this.tankP1Agent.Destroyed += Agent_Destroyed;
-                this.agentManager.AddAgent(1, this.tankP1Agent);
+                tankP1Agent.Moving += Agent_Moving;
+                tankP1Agent.Attacking += Agent_Attacking;
+                tankP1Agent.Damaged += Agent_Damaged;
+                tankP1Agent.Destroyed += Agent_Destroyed;
+                agentManager.AddAgent(1, tankP1Agent);
 
-                this.tankP2Agent.Moving += Agent_Moving;
-                this.tankP2Agent.Attacking += Agent_Attacking;
-                this.tankP2Agent.Damaged += Agent_Damaged;
-                this.tankP2Agent.Destroyed += Agent_Destroyed;
-                this.agentManager.AddAgent(1, this.tankP2Agent);
+                tankP2Agent.Moving += Agent_Moving;
+                tankP2Agent.Attacking += Agent_Attacking;
+                tankP2Agent.Damaged += Agent_Damaged;
+                tankP2Agent.Destroyed += Agent_Destroyed;
+                agentManager.AddAgent(1, tankP2Agent);
 
                 // Define check-points
                 Vector3[] t1CheckPoints = new Vector3[]
@@ -1439,7 +1439,7 @@ namespace Terrain.Rts
                 //Adjust check-points
                 for (int i = 0; i < t1CheckPoints.Length; i++)
                 {
-                    if (this.FindNearestGroundPosition(t1CheckPoints[i], out PickingResult<Triangle> r))
+                    if (FindNearestGroundPosition(t1CheckPoints[i], out PickingResult<Triangle> r))
                     {
                         t1CheckPoints[i] = r.Position;
                     }
@@ -1447,26 +1447,26 @@ namespace Terrain.Rts
 
                 for (int i = 0; i < t2CheckPoints.Length; i++)
                 {
-                    if (this.FindNearestGroundPosition(t2CheckPoints[i], out PickingResult<Triangle> r))
+                    if (FindNearestGroundPosition(t2CheckPoints[i], out PickingResult<Triangle> r))
                     {
                         t2CheckPoints[i] = r.Position;
                     }
                 }
 
                 // Initialize behaviors
-                this.tankP1Agent.PatrolBehavior.InitPatrollingBehavior(t1CheckPoints, 10, 5);
-                this.tankP1Agent.AttackBehavior.InitAttackingBehavior(7, 10);
-                this.tankP1Agent.RetreatBehavior.InitRetreatingBehavior(new Vector3(-10, 0, -40), 10);
-                this.tankP1Agent.ActiveAI = true;
+                tankP1Agent.PatrolBehavior.InitPatrollingBehavior(t1CheckPoints, 10, 5);
+                tankP1Agent.AttackBehavior.InitAttackingBehavior(7, 10);
+                tankP1Agent.RetreatBehavior.InitRetreatingBehavior(new Vector3(-10, 0, -40), 10);
+                tankP1Agent.ActiveAI = true;
 
-                this.tankP2Agent.PatrolBehavior.InitPatrollingBehavior(t2CheckPoints, 10, 5);
-                this.tankP2Agent.AttackBehavior.InitAttackingBehavior(7, 10);
-                this.tankP2Agent.RetreatBehavior.InitRetreatingBehavior(new Vector3(-10, 0, -40), 10);
-                this.tankP2Agent.ActiveAI = true;
+                tankP2Agent.PatrolBehavior.InitPatrollingBehavior(t2CheckPoints, 10, 5);
+                tankP2Agent.AttackBehavior.InitAttackingBehavior(7, 10);
+                tankP2Agent.RetreatBehavior.InitRetreatingBehavior(new Vector3(-10, 0, -40), 10);
+                tankP2Agent.ActiveAI = true;
 
                 //Show
-                this.tankP1.Visible = true;
-                this.tankP2.Visible = true;
+                tankP1.Visible = true;
+                tankP2.Visible = true;
             });
         }
         private async Task StartDebug()
@@ -1474,49 +1474,49 @@ namespace Terrain.Rts
             await Task.Run(() =>
             {
                 // Ground position test
-                var bbox = this.terrain.GetBoundingBox();
+                var bbox = terrain.GetBoundingBox();
 
                 float sep = 2.1f;
                 for (float x = bbox.Minimum.X + 1; x < bbox.Maximum.X - 1; x += sep)
                 {
                     for (float z = bbox.Minimum.Z + 1; z < bbox.Maximum.Z - 1; z += sep)
                     {
-                        if (this.FindTopGroundPosition(x, z, out PickingResult<Triangle> r))
+                        if (FindTopGroundPosition(x, z, out PickingResult<Triangle> r))
                         {
-                            this.oks.Add(new Line3D(r.Position, r.Position + Vector3.Up));
+                            oks.Add(new Line3D(r.Position, r.Position + Vector3.Up));
                         }
                         else
                         {
-                            this.errs.Add(new Line3D(x, 10, z, x, -10, z));
+                            errs.Add(new Line3D(x, 10, z, x, -10, z));
                         }
                     }
                 }
 
-                if (this.oks.Count > 0)
+                if (oks.Count > 0)
                 {
-                    this.terrainLineDrawer.AddPrimitives(Color.Green, this.oks.ToArray());
+                    terrainLineDrawer.AddPrimitives(Color.Green, oks.ToArray());
                 }
-                if (this.errs.Count > 0)
+                if (errs.Count > 0)
                 {
-                    this.terrainLineDrawer.AddPrimitives(Color.Red, this.errs.ToArray());
+                    terrainLineDrawer.AddPrimitives(Color.Red, errs.ToArray());
                 }
 
                 // Axis
-                this.curveLineDrawer.SetPrimitives(this.wAxisColor, Line3D.CreateAxis(Matrix.Identity, 20f));
-                this.curveLineDrawer.Visible = false;
+                curveLineDrawer.SetPrimitives(wAxisColor, Line3D.CreateAxis(Matrix.Identity, 20f));
+                curveLineDrawer.Visible = false;
             });
         }
 
         public override void Update(GameTime gameTime)
         {
-            if (this.Game.Input.KeyJustReleased(Keys.Escape))
+            if (Game.Input.KeyJustReleased(Keys.Escape))
             {
-                this.Game.SetScene<StartScene>();
+                Game.SetScene<StartScene>();
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.R))
+            if (Game.Input.KeyJustReleased(Keys.R))
             {
-                this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
+                SetRenderMode(GetRenderMode() == SceneModes.ForwardLigthning ?
                     SceneModes.DeferredLightning :
                     SceneModes.ForwardLigthning);
             }
@@ -1528,7 +1528,7 @@ namespace Terrain.Rts
                 return;
             }
 
-            var pickingRay = this.GetPickingRay();
+            var pickingRay = GetPickingRay();
 
             UpdateInputPlayer();
             UpdateInputCamera(gameTime, pickingRay);
@@ -1549,327 +1549,327 @@ namespace Terrain.Rts
         }
         private void UpdateInputPlayer()
         {
-            if (this.Game.Input.KeyJustReleased(Keys.Z))
+            if (Game.Input.KeyJustReleased(Keys.Z))
             {
-                this.walkMode = !this.walkMode;
+                walkMode = !walkMode;
 
-                if (this.walkMode)
+                if (walkMode)
                 {
-                    this.Camera.Mode = CameraModes.FirstPerson;
-                    this.Camera.MovementDelta = this.walkerVelocity;
-                    this.Camera.SlowMovementDelta = this.walkerVelocity * 0.05f;
-                    this.cursor3D.Visible = false;
-                    this.cursor2D.Visible = true;
+                    Camera.Mode = CameraModes.FirstPerson;
+                    Camera.MovementDelta = walkerVelocity;
+                    Camera.SlowMovementDelta = walkerVelocity * 0.05f;
+                    cursor3D.Visible = false;
+                    cursor2D.Visible = true;
 
-                    var pos = this.heliport.Manipulator.Position;
-                    if (this.FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
+                    var pos = heliport.Manipulator.Position;
+                    if (FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
                     {
                         var pPos = r.Position;
-                        pPos.Y += this.walkerAgentType.Height;
-                        this.Camera.Position = pPos;
+                        pPos.Y += walkerAgentType.Height;
+                        Camera.Position = pPos;
                     }
                 }
                 else
                 {
-                    this.Camera.Mode = CameraModes.Free;
-                    this.Camera.MovementDelta = 20.5f;
-                    this.Camera.SlowMovementDelta = 1f;
-                    this.cursor3D.Visible = true;
-                    this.cursor2D.Visible = false;
+                    Camera.Mode = CameraModes.Free;
+                    Camera.MovementDelta = 20.5f;
+                    Camera.SlowMovementDelta = 1f;
+                    cursor3D.Visible = true;
+                    cursor2D.Visible = false;
                 }
 
-                this.DEBUGUpdateGraphDrawer();
+                DEBUGUpdateGraphDrawer();
             }
         }
         private void UpdateInputCamera(GameTime gameTime, Ray pickingRay)
         {
-            if (this.walkMode)
+            if (walkMode)
             {
-                this.UpdateInputWalker(gameTime);
+                UpdateInputWalker(gameTime);
             }
             else
             {
-                this.UpdateInputFree(gameTime, pickingRay);
+                UpdateInputFree(gameTime, pickingRay);
             }
         }
         private void UpdateInputWalker(GameTime gameTime)
         {
 #if DEBUG
-            if (this.Game.Input.RightMouseButtonPressed)
+            if (Game.Input.RightMouseButtonPressed)
             {
-                this.Camera.RotateMouse(
+                Camera.RotateMouse(
                     gameTime,
-                    this.Game.Input.MouseXDelta,
-                    this.Game.Input.MouseYDelta);
+                    Game.Input.MouseXDelta,
+                    Game.Input.MouseYDelta);
             }
 #else
-            this.Camera.RotateMouse(
+            Camera.RotateMouse(
                 gameTime,
-                this.Game.Input.MouseXDelta,
-                this.Game.Input.MouseYDelta);
+                Game.Input.MouseXDelta,
+                Game.Input.MouseYDelta);
 #endif
 
-            var prevPos = this.Camera.Position;
+            var prevPos = Camera.Position;
 
-            if (this.Game.Input.KeyPressed(Keys.A))
+            if (Game.Input.KeyPressed(Keys.A))
             {
-                this.Camera.MoveLeft(gameTime, this.Game.Input.ShiftPressed);
+                Camera.MoveLeft(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.D))
+            if (Game.Input.KeyPressed(Keys.D))
             {
-                this.Camera.MoveRight(gameTime, this.Game.Input.ShiftPressed);
+                Camera.MoveRight(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.W))
+            if (Game.Input.KeyPressed(Keys.W))
             {
-                this.Camera.MoveForward(gameTime, this.Game.Input.ShiftPressed);
+                Camera.MoveForward(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.S))
+            if (Game.Input.KeyPressed(Keys.S))
             {
-                this.Camera.MoveBackward(gameTime, this.Game.Input.ShiftPressed);
+                Camera.MoveBackward(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Walk(this.walkerAgentType, prevPos, this.Camera.Position, true, out Vector3 walkerPos))
+            if (Walk(walkerAgentType, prevPos, Camera.Position, true, out Vector3 walkerPos))
             {
-                this.Camera.Goto(walkerPos);
+                Camera.Goto(walkerPos);
             }
             else
             {
-                this.Camera.Goto(prevPos);
+                Camera.Goto(prevPos);
             }
         }
         private void UpdateInputFree(GameTime gameTime, Ray pickingRay)
         {
 #if DEBUG
-            if (this.Game.Input.RightMouseButtonPressed)
+            if (Game.Input.RightMouseButtonPressed)
             {
-                this.Camera.RotateMouse(
+                Camera.RotateMouse(
                     gameTime,
-                    this.Game.Input.MouseXDelta,
-                    this.Game.Input.MouseYDelta);
+                    Game.Input.MouseXDelta,
+                    Game.Input.MouseYDelta);
             }
 #else
-            this.Camera.RotateMouse(
+            Camera.RotateMouse(
                 gameTime,
-                this.Game.Input.MouseXDelta,
-                this.Game.Input.MouseYDelta);
+                Game.Input.MouseXDelta,
+                Game.Input.MouseYDelta);
 #endif
 
-            if (this.Game.Input.KeyJustReleased(Keys.Space))
+            if (Game.Input.KeyJustReleased(Keys.Space))
             {
-                if (this.follow)
+                if (follow)
                 {
-                    this.followTarget = null;
-                    this.follow = false;
+                    followTarget = null;
+                    follow = false;
                 }
 
-                if (this.PickNearest(pickingRay, 0, RayPickingParams.Default, SceneObjectUsages.Agent, out ISceneObject agent))
+                if (PickNearest(pickingRay, 0, RayPickingParams.Default, SceneObjectUsages.Agent, out ISceneObject agent))
                 {
-                    this.followTarget = agent;
-                    this.follow = true;
+                    followTarget = agent;
+                    follow = true;
                 }
             }
 
-            if (this.Game.Input.KeyPressed(Keys.A))
+            if (Game.Input.KeyPressed(Keys.A))
             {
-                this.Camera.MoveLeft(gameTime, this.Game.Input.ShiftPressed);
+                Camera.MoveLeft(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.D))
+            if (Game.Input.KeyPressed(Keys.D))
             {
-                this.Camera.MoveRight(gameTime, this.Game.Input.ShiftPressed);
+                Camera.MoveRight(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.W))
+            if (Game.Input.KeyPressed(Keys.W))
             {
-                this.Camera.MoveForward(gameTime, this.Game.Input.ShiftPressed);
+                Camera.MoveForward(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.S))
+            if (Game.Input.KeyPressed(Keys.S))
             {
-                this.Camera.MoveBackward(gameTime, this.Game.Input.ShiftPressed);
+                Camera.MoveBackward(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.follow &&
-                this.followTarget is IRayPickable<Triangle> pickable &&
-                this.followTarget is ITransformable3D transform)
+            if (follow &&
+                followTarget is IRayPickable<Triangle> pickable &&
+                followTarget is ITransformable3D transform)
             {
                 var sph = pickable.GetBoundingSphere();
-                this.Camera.LookTo(sph.Center);
-                this.Camera.Goto(sph.Center + (transform.Manipulator.Backward * 15f) + (Vector3.UnitY * 5f), CameraTranslations.UseDelta);
+                Camera.LookTo(sph.Center);
+                Camera.Goto(sph.Center + (transform.Manipulator.Backward * 15f) + (Vector3.UnitY * 5f), CameraTranslations.UseDelta);
             }
         }
         private void UpdateInputHelicopterTexture()
         {
-            if (this.Game.Input.KeyJustReleased(Keys.Right))
+            if (Game.Input.KeyJustReleased(Keys.Right))
             {
-                this.helicopter.TextureIndex++;
-                if (this.helicopter.TextureIndex > 2) this.helicopter.TextureIndex = 2;
+                helicopter.TextureIndex++;
+                if (helicopter.TextureIndex > 2) helicopter.TextureIndex = 2;
             }
-            if (this.Game.Input.KeyJustReleased(Keys.Left))
+            if (Game.Input.KeyJustReleased(Keys.Left))
             {
-                this.helicopter.TextureIndex--;
-                if (this.helicopter.TextureIndex < 0) this.helicopter.TextureIndex = 0;
+                helicopter.TextureIndex--;
+                if (helicopter.TextureIndex < 0) helicopter.TextureIndex = 0;
             }
         }
         private void UpdateInputDebug(Ray pickingRay)
         {
-            if (this.Game.Input.KeyJustReleased(Keys.C))
+            if (Game.Input.KeyJustReleased(Keys.C))
             {
-                this.Lights.KeyLight.CastShadow = !this.Lights.KeyLight.CastShadow;
+                Lights.KeyLight.CastShadow = !Lights.KeyLight.CastShadow;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.Up) && !this.Game.Input.ShiftPressed)
+            if (Game.Input.KeyJustReleased(Keys.Up) && !Game.Input.ShiftPressed)
             {
-                this.shadowResult = SceneRendererResults.ShadowMapDirectional;
+                shadowResult = SceneRendererResults.ShadowMapDirectional;
             }
-            if (this.Game.Input.KeyJustReleased(Keys.Down) && !this.Game.Input.ShiftPressed)
+            if (Game.Input.KeyJustReleased(Keys.Down) && !Game.Input.ShiftPressed)
             {
-                this.shadowResult = SceneRendererResults.ShadowMapDirectional;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.D1))
-            {
-                this.walkMode = !this.walkMode;
-                this.DEBUGUpdateGraphDrawer();
-                this.walkMode = !this.walkMode;
+                shadowResult = SceneRendererResults.ShadowMapDirectional;
             }
 
-            if (this.Game.Input.LeftMouseButtonPressed)
+            if (Game.Input.KeyJustReleased(Keys.D1))
             {
-                var visible = this.terrainGraphDrawer.Visible;
+                walkMode = !walkMode;
+                DEBUGUpdateGraphDrawer();
+                walkMode = !walkMode;
+            }
+
+            if (Game.Input.LeftMouseButtonPressed)
+            {
+                var visible = terrainGraphDrawer.Visible;
                 if (visible)
                 {
-                    this.terrainPointDrawer.Clear();
+                    terrainPointDrawer.Clear();
 
-                    if (this.PickNearest(pickingRay, RayPickingParams.Default, out PickingResult<Triangle> r))
+                    if (PickNearest(pickingRay, RayPickingParams.Default, out PickingResult<Triangle> r))
                     {
-                        this.DEBUGPickingPosition(r.Position);
+                        DEBUGPickingPosition(r.Position);
                     }
                 }
             }
         }
         private void UpdateInputDrawers()
         {
-            if (this.Game.Input.KeyJustReleased(Keys.F1))
+            if (Game.Input.KeyJustReleased(Keys.F1))
             {
-                this.terrainLineDrawer.Visible = !this.terrainLineDrawer.Visible;
+                terrainLineDrawer.Visible = !terrainLineDrawer.Visible;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F2))
+            if (Game.Input.KeyJustReleased(Keys.F2))
             {
-                this.terrainGraphDrawer.Visible = !this.terrainGraphDrawer.Visible;
+                terrainGraphDrawer.Visible = !terrainGraphDrawer.Visible;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F3))
+            if (Game.Input.KeyJustReleased(Keys.F3))
             {
-                this.terrainPointDrawer.Visible = !this.terrainPointDrawer.Visible;
+                terrainPointDrawer.Visible = !terrainPointDrawer.Visible;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F4))
+            if (Game.Input.KeyJustReleased(Keys.F4))
             {
-                this.curveLineDrawer.Visible = !this.curveLineDrawer.Visible;
+                curveLineDrawer.Visible = !curveLineDrawer.Visible;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F5))
+            if (Game.Input.KeyJustReleased(Keys.F5))
             {
-                this.movingObjLineDrawer.Visible = !this.movingObjLineDrawer.Visible;
+                movingObjLineDrawer.Visible = !movingObjLineDrawer.Visible;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F7))
+            if (Game.Input.KeyJustReleased(Keys.F7))
             {
-                this.shadowMapDrawer.Visible = !this.shadowMapDrawer.Visible;
-                this.shadowResult = SceneRendererResults.ShadowMapDirectional;
+                shadowMapDrawer.Visible = !shadowMapDrawer.Visible;
+                shadowResult = SceneRendererResults.ShadowMapDirectional;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F8))
+            if (Game.Input.KeyJustReleased(Keys.F8))
             {
-                this.useDebugTex = !this.useDebugTex;
+                useDebugTex = !useDebugTex;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F9))
+            if (Game.Input.KeyJustReleased(Keys.F9))
             {
-                this.staticObjLineDrawer.Visible = !this.staticObjLineDrawer.Visible;
+                staticObjLineDrawer.Visible = !staticObjLineDrawer.Visible;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F11))
+            if (Game.Input.KeyJustReleased(Keys.F11))
             {
-                if (!this.drawDrawVolumes && !this.drawCullVolumes)
+                if (!drawDrawVolumes && !drawCullVolumes)
                 {
-                    this.drawDrawVolumes = true;
-                    this.drawCullVolumes = false;
+                    drawDrawVolumes = true;
+                    drawCullVolumes = false;
                 }
-                else if (this.drawDrawVolumes && !this.drawCullVolumes)
+                else if (drawDrawVolumes && !drawCullVolumes)
                 {
-                    this.drawDrawVolumes = false;
-                    this.drawCullVolumes = true;
+                    drawDrawVolumes = false;
+                    drawCullVolumes = true;
                 }
-                else if (!this.drawDrawVolumes)
+                else if (!drawDrawVolumes)
                 {
-                    this.drawDrawVolumes = false;
-                    this.drawCullVolumes = false;
+                    drawDrawVolumes = false;
+                    drawCullVolumes = false;
                 }
             }
         }
         private void UpdateInputGraph()
         {
-            if (this.Game.Input.KeyJustReleased(Keys.Add))
+            if (Game.Input.KeyJustReleased(Keys.Add))
             {
-                this.graphIndex++;
-                this.DEBUGUpdateGraphDrawer();
+                graphIndex++;
+                DEBUGUpdateGraphDrawer();
             }
-            if (this.Game.Input.KeyJustReleased(Keys.Subtract))
+            if (Game.Input.KeyJustReleased(Keys.Subtract))
             {
-                this.graphIndex--;
-                this.DEBUGUpdateGraphDrawer();
+                graphIndex--;
+                DEBUGUpdateGraphDrawer();
             }
         }
         private void UpdateCursor(Ray pickingRay)
         {
-            if (!this.walkMode && this.terrain.PickNearest(pickingRay, out PickingResult<Triangle> r))
+            if (!walkMode && terrain.PickNearest(pickingRay, out PickingResult<Triangle> r))
             {
-                this.cursor3D.Manipulator.SetPosition(r.Position);
+                cursor3D.Manipulator.SetPosition(r.Position);
             }
         }
         private void UpdateTanks(Ray pickingRay)
         {
-            if (this.Game.Input.LeftMouseButtonPressed)
+            if (Game.Input.LeftMouseButtonPressed)
             {
                 //Draw path before set it to the agent
                 DrawTankPath(pickingRay);
             }
 
-            if (this.Game.Input.LeftMouseButtonJustReleased && !this.Game.Input.RightMouseButtonPressed)
+            if (Game.Input.LeftMouseButtonJustReleased && !Game.Input.RightMouseButtonPressed)
             {
                 //Calc path and set it to the agent
                 UpdateTankPath(pickingRay);
             }
 
-            bool shift = this.Game.Input.KeyPressed(Keys.ShiftKey);
+            bool shift = Game.Input.KeyPressed(Keys.ShiftKey);
             if (shift)
             {
-                if (this.Game.Input.KeyJustReleased(Keys.D1))
+                if (Game.Input.KeyJustReleased(Keys.D1))
                 {
-                    this.tankP1Agent.ActiveAI = !this.tankP1Agent.ActiveAI;
+                    tankP1Agent.ActiveAI = !tankP1Agent.ActiveAI;
                 }
-                if (this.Game.Input.KeyJustReleased(Keys.D2))
+                if (Game.Input.KeyJustReleased(Keys.D2))
                 {
-                    this.tankP2Agent.ActiveAI = !this.tankP2Agent.ActiveAI;
+                    tankP2Agent.ActiveAI = !tankP2Agent.ActiveAI;
                 }
             }
 
-            this.SetStatsScreenPosition(this.tankP1Agent, 4, this.t1ProgressBar);
-            this.SetStatsScreenPosition(this.tankP2Agent, 4, this.t2ProgressBar);
+            SetStatsScreenPosition(tankP1Agent, 4, t1ProgressBar);
+            SetStatsScreenPosition(tankP2Agent, 4, t2ProgressBar);
 
-            this.DEBUGDrawTankPath(
+            DEBUGDrawTankPath(
                 tankP1Agent.Manipulator.Position,
                 tankP1Agent.Manipulator.Forward * 10f,
                 tankP1Agent.Controller.SamplePath().ToArray(),
                 Color.Yellow, Color.GreenYellow);
 
-            this.DEBUGDrawTankPath(
+            DEBUGDrawTankPath(
                 tankP2Agent.Manipulator.Position,
                 tankP2Agent.Manipulator.Forward * 10f,
                 tankP2Agent.Controller.SamplePath().ToArray(),
@@ -1877,55 +1877,55 @@ namespace Terrain.Rts
         }
         private void UpdateHelicopter()
         {
-            if (this.Game.Input.KeyJustReleased(Keys.Home))
+            if (Game.Input.KeyJustReleased(Keys.Home))
             {
-                Curve3D curve = this.GenerateHelicopterPath();
-                this.helicopter.AnimationController.SetPath(this.animations["heli_default"]);
-                this.DEBUGDrawHelicopterPath(curve);
+                Curve3D curve = GenerateHelicopterPath();
+                helicopter.AnimationController.SetPath(animations["heli_default"]);
+                DEBUGDrawHelicopterPath(curve);
             }
 
-            this.SetStatsScreenPosition(this.helicopterAgent, 4, this.hProgressBar);
+            SetStatsScreenPosition(helicopterAgent, 4, hProgressBar);
         }
         private void UpdateDebug()
         {
-            if (this.drawDrawVolumes)
+            if (drawDrawVolumes)
             {
-                this.DEBUGDrawLightMarks();
+                DEBUGDrawLightMarks();
             }
 
-            if (this.drawCullVolumes)
+            if (drawCullVolumes)
             {
-                this.DEBUGDrawLightVolumes();
+                DEBUGDrawLightVolumes();
             }
 
-            if (this.curveLineDrawer.Visible)
+            if (curveLineDrawer.Visible)
             {
-                Matrix rot = Matrix.RotationQuaternion(this.helicopter.Manipulator.Rotation) * Matrix.Translation(this.helicopter.Manipulator.Position);
-                this.curveLineDrawer.SetPrimitives(this.hAxisColor, Line3D.CreateAxis(rot, 5f));
+                Matrix rot = Matrix.RotationQuaternion(helicopter.Manipulator.Rotation) * Matrix.Translation(helicopter.Manipulator.Position);
+                curveLineDrawer.SetPrimitives(hAxisColor, Line3D.CreateAxis(rot, 5f));
             }
 
-            if (this.staticObjLineDrawer.Visible && objNotSet)
+            if (staticObjLineDrawer.Visible && objNotSet)
             {
                 DEBUGDrawStaticVolumes();
 
                 objNotSet = false;
             }
 
-            if (this.movingObjLineDrawer.Visible)
+            if (movingObjLineDrawer.Visible)
             {
-                this.DEBUGDrawMovingVolumes();
+                DEBUGDrawMovingVolumes();
             }
 
-            var tp = this.helicopterAgent.Target;
+            var tp = helicopterAgent.Target;
             if (tp.HasValue)
             {
-                this.DEBUGPickingPosition(tp.Value);
+                DEBUGPickingPosition(tp.Value);
             }
         }
         private void SetStatsScreenPosition(AIAgent agent, float height, UIProgressBar pb)
         {
-            var screenPosition = this.GetScreenCoordinates(agent.Manipulator.Position, out bool centerInside);
-            var top = this.GetScreenCoordinates(agent.Manipulator.Position + new Vector3(0, height, 0), out bool topInside);
+            var screenPosition = GetScreenCoordinates(agent.Manipulator.Position, out bool centerInside);
+            var top = GetScreenCoordinates(agent.Manipulator.Position + new Vector3(0, height, 0), out bool topInside);
 
             if (centerInside || topInside)
             {
@@ -1944,34 +1944,36 @@ namespace Terrain.Rts
         }
         private void DrawTankPath(Ray pickingRay)
         {
-            var picked = this.PickNearest(pickingRay, RayPickingParams.Default, out PickingResult<Triangle> r);
+            var picked = PickNearest(pickingRay, RayPickingParams.Default, out PickingResult<Triangle> r);
             if (picked)
             {
-                var t1Position = this.tankP1.Manipulator.Position;
+                var t1Position = tankP1.Manipulator.Position;
 
-                var result = this.FindPath(this.tankAgentType, t1Position, r.Position);
+                var result = FindPath(tankAgentType, t1Position, r.Position);
                 if (result != null)
                 {
-                    this.DEBUGDrawTankPath(
+                    DEBUGDrawTankPath(
                         null,
                         null,
-                        result.ReturnPath.ToArray(),
+                        result.Positions,
                         Color.Red, Color.IndianRed);
                 }
             }
         }
         private void UpdateTankPath(Ray pickingRay)
         {
-            var picked = this.PickNearest(pickingRay, RayPickingParams.Default, out PickingResult<Triangle> r);
+            var picked = PickNearest(pickingRay, RayPickingParams.Default, out PickingResult<Triangle> r);
             if (picked)
             {
                 Task.Run(async () =>
                 {
-                    var path = await this.FindPathAsync(this.tankAgentType, this.tankP1.Manipulator.Position, r.Position, true, 0.25f);
+                    var path = await FindPathAsync(tankAgentType, tankP1.Manipulator.Position, r.Position, true);
                     if (path != null)
                     {
-                        this.tankP1Agent.Clear();
-                        this.tankP1Agent.FollowPath(path, 10);
+                        path.RefinePath(0.25f);
+
+                        tankP1Agent.Clear();
+                        tankP1Agent.FollowPath(path, 10);
                     }
                 });
             }
@@ -1981,11 +1983,11 @@ namespace Terrain.Rts
         {
             base.Draw(gameTime);
 
-            this.shadowMapDrawer.Texture = this.useDebugTex ? this.debugTex : this.Renderer.GetResource(this.shadowResult);
+            shadowMapDrawer.Texture = useDebugTex ? debugTex : Renderer.GetResource(shadowResult);
 
             #region Texts
 
-            this.stats.Text = this.Game.RuntimeText;
+            stats.Text = Game.RuntimeText;
 
             string txt1 = string.Format(
                 "Buffers active: {0} {1} Kbs, reads: {2}, writes: {3}; {4} - Result: {5}; Primitives: {6}",
@@ -1993,10 +1995,10 @@ namespace Terrain.Rts
                 Counters.BufferBytes / 1024,
                 Counters.BufferReads,
                 Counters.BufferWrites,
-                this.GetRenderMode(),
-                this.shadowResult,
+                GetRenderMode(),
+                shadowResult,
                 Counters.PrimitivesPerFrame);
-            this.counters1.Text = txt1;
+            counters1.Text = txt1;
 
             string txt2 = string.Format(
                 "IA Input Layouts: {0}, Primitives: {1}, VB: {2}, IB: {3}, Terrain Patches: {4}; T1.{5}  /  T2.{6}  /  H.{7}",
@@ -2004,15 +2006,15 @@ namespace Terrain.Rts
                 Counters.IAPrimitiveTopologySets,
                 Counters.IAVertexBuffersSets,
                 Counters.IAIndexBufferSets,
-                this.terrain.VisiblePatchesCount,
-                this.tankP1Agent,
-                this.tankP2Agent,
-                this.helicopterAgent);
-            this.counters2.Text = txt2;
+                terrain.VisiblePatchesCount,
+                tankP1Agent,
+                tankP2Agent,
+                helicopterAgent);
+            counters2.Text = txt2;
 
-            this.hProgressBar.ProgressValue = (1f - this.helicopterAgent?.Stats.Damage ?? 0);
-            this.t1ProgressBar.ProgressValue = (1f - this.tankP1Agent?.Stats.Damage ?? 0);
-            this.t2ProgressBar.ProgressValue = (1f - this.tankP2Agent?.Stats.Damage ?? 0);
+            hProgressBar.ProgressValue = (1f - helicopterAgent?.Stats.Damage ?? 0);
+            t1ProgressBar.ProgressValue = (1f - tankP1Agent?.Stats.Damage ?? 0);
+            t2ProgressBar.ProgressValue = (1f - tankP2Agent?.Stats.Damage ?? 0);
 
             #endregion
         }
@@ -2027,28 +2029,28 @@ namespace Terrain.Rts
 
             Vector3[] cPoints = new Vector3[15];
 
-            if (this.helicopterController != null && this.helicopterController.HasPath)
+            if (helicopterController != null && helicopterController.HasPath)
             {
                 for (int i = 0; i < cPoints.Length - 2; i++)
                 {
-                    cPoints[i] = this.GetRandomPoint(Helper.RandomGenerator, this.helicopterHeightOffset);
+                    cPoints[i] = GetRandomPoint(Helper.RandomGenerator, helicopterHeightOffset);
                 }
             }
             else
             {
-                cPoints[0] = this.helicopter.Manipulator.Position;
-                cPoints[1] = this.helicopter.Manipulator.Position + (Vector3.Up * 5f) + (this.helicopter.Manipulator.Forward * 10f);
+                cPoints[0] = helicopter.Manipulator.Position;
+                cPoints[1] = helicopter.Manipulator.Position + (Vector3.Up * 5f) + (helicopter.Manipulator.Forward * 10f);
 
                 for (int i = 2; i < cPoints.Length - 2; i++)
                 {
-                    cPoints[i] = this.GetRandomPoint(Helper.RandomGenerator, this.helicopterHeightOffset);
+                    cPoints[i] = GetRandomPoint(Helper.RandomGenerator, helicopterHeightOffset);
                 }
             }
 
-            var hPos = this.heliport.Manipulator.Position;
-            if (this.FindTopGroundPosition(hPos.X, hPos.Z, out PickingResult<Triangle> r))
+            var hPos = heliport.Manipulator.Position;
+            if (FindTopGroundPosition(hPos.X, hPos.Z, out PickingResult<Triangle> r))
             {
-                cPoints[cPoints.Length - 2] = r.Position + this.helicopterHeightOffset;
+                cPoints[cPoints.Length - 2] = r.Position + helicopterHeightOffset;
                 cPoints[cPoints.Length - 1] = r.Position;
             }
 
@@ -2069,26 +2071,26 @@ namespace Terrain.Rts
         {
             if (Helper.RandomGenerator.NextFloat(0, 1) > 0.8f)
             {
-                this.AddDustSystem(e.Active, this.tankLeftCat);
-                this.AddDustSystem(e.Active, this.tankRightCat);
+                AddDustSystem(e.Active, tankLeftCat);
+                AddDustSystem(e.Active, tankRightCat);
             }
 
             //Start sounds
             if (e.Active == helicopterAgent && heliEffectInstance == null)
             {
-                heliEffectInstance = AudioManager.CreateEffectInstance(heliEffect, this.helicopter, this.Camera);
+                heliEffectInstance = AudioManager.CreateEffectInstance(heliEffect, helicopter, Camera);
                 heliEffectInstance.Play();
             }
 
             if (e.Active == tankP1Agent && tank1EffectInstance == null)
             {
-                tank1EffectInstance = AudioManager.CreateEffectInstance(tank1Effect, this.tankP1, this.Camera);
+                tank1EffectInstance = AudioManager.CreateEffectInstance(tank1Effect, tankP1, Camera);
                 tank1EffectInstance?.Play();
             }
 
             if (e.Active == tankP2Agent && tank2EffectInstance == null)
             {
-                tank2EffectInstance = AudioManager.CreateEffectInstance(tank2Effect, this.tankP2, this.Camera);
+                tank2EffectInstance = AudioManager.CreateEffectInstance(tank2Effect, tankP2, Camera);
                 tank2EffectInstance?.Play();
             }
         }
@@ -2096,70 +2098,70 @@ namespace Terrain.Rts
         {
             int index = Helper.RandomGenerator.Next(0, 4);
             index %= 3;
-            AudioManager.CreateEffectInstance(impactEffects[index], e.Passive.Manipulator, this.Camera)?.Play();
+            AudioManager.CreateEffectInstance(impactEffects[index], e.Passive.Manipulator, Camera)?.Play();
 
-            this.AddProjectileTrailSystem(e.Active, e.Passive, 50f);
+            AddProjectileTrailSystem(e.Active, e.Passive, 50f);
         }
         private void Agent_Damaged(object sender, BehaviorEventArgs e)
         {
             if (e.Active == tankP1Agent)
             {
-                AudioManager.CreateEffectInstance(tank1ShootingEffect, e.Active.Manipulator, this.Camera)?.Play();
+                AudioManager.CreateEffectInstance(tank1ShootingEffect, e.Active.Manipulator, Camera)?.Play();
             }
             if (e.Active == tankP2Agent)
             {
-                AudioManager.CreateEffectInstance(tank2ShootingEffect, e.Active.Manipulator, this.Camera)?.Play();
+                AudioManager.CreateEffectInstance(tank2ShootingEffect, e.Active.Manipulator, Camera)?.Play();
             }
 
             int index = Helper.RandomGenerator.Next(0, 4);
             index %= 3;
-            AudioManager.CreateEffectInstance(damageEffects[index], e.Passive.Manipulator, this.Camera)?.Play();
+            AudioManager.CreateEffectInstance(damageEffects[index], e.Passive.Manipulator, Camera)?.Play();
 
-            this.AddExplosionSystem(e.Passive);
-            this.AddExplosionSystem(e.Passive);
-            this.AddSmokeSystem(e.Passive, false);
+            AddExplosionSystem(e.Passive);
+            AddExplosionSystem(e.Passive);
+            AddSmokeSystem(e.Passive, false);
         }
         private void Agent_Destroyed(object sender, BehaviorEventArgs e)
         {
-            if (e.Passive == this.helicopterAgent)
+            if (e.Passive == helicopterAgent)
             {
                 heliEffectInstance?.Stop();
 
-                AudioManager.CreateEffectInstance(heliDestroyedEffect, e.Passive.Manipulator, this.Camera)?.Play();
+                AudioManager.CreateEffectInstance(heliDestroyedEffect, e.Passive.Manipulator, Camera)?.Play();
 
-                this.AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
-                this.AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
-                this.AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
-                this.AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
-                this.AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
-                this.AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
-                this.AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
-                this.AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
-                this.AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
-                this.AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
-                this.AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
-                this.AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
+                AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
+                AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
+                AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
+                AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
+                AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
+                AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
+                AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
+                AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
+                AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
+                AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
+                AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
+                AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
             }
             else
             {
-                if (e.Passive == this.tankP1Agent)
+                if (e.Passive == tankP1Agent)
                 {
                     tank1EffectInstance?.Stop();
-                    AudioManager.CreateEffectInstance(tank1DestroyedEffect, e.Passive.Manipulator, this.Camera)?.Play();
+                    AudioManager.CreateEffectInstance(tank1DestroyedEffect, e.Passive.Manipulator, Camera)?.Play();
                 }
-                if (e.Passive == this.tankP2Agent)
+                if (e.Passive == tankP2Agent)
                 {
                     tank2EffectInstance?.Stop();
-                    AudioManager.CreateEffectInstance(tank2DestroyedEffect, e.Passive.Manipulator, this.Camera)?.Play();
+                    AudioManager.CreateEffectInstance(tank2DestroyedEffect, e.Passive.Manipulator, Camera)?.Play();
                 }
 
-                this.AddExplosionSystem(e.Passive);
-                this.AddExplosionSystem(e.Passive);
-                this.AddExplosionSystem(e.Passive);
-                this.AddExplosionSystem(e.Passive);
-                this.AddExplosionSystem(e.Passive);
-                this.AddExplosionSystem(e.Passive);
-                this.AddSmokePlumeSystem(e.Passive, true);
+                AddExplosionSystem(e.Passive);
+                AddExplosionSystem(e.Passive);
+                AddExplosionSystem(e.Passive);
+                AddExplosionSystem(e.Passive);
+                AddExplosionSystem(e.Passive);
+                AddExplosionSystem(e.Passive);
+                AddSmokePlumeSystem(e.Passive, true);
             }
         }
 
@@ -2178,7 +2180,7 @@ namespace Terrain.Rts
                 MaximumDistance = 100f,
             };
 
-            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pExplosion, emitter1);
+            pManager.AddParticleSystem(ParticleSystemTypes.CPU, pExplosion, emitter1);
         }
         private void AddExplosionSystem(AIAgent agent)
         {
@@ -2203,8 +2205,8 @@ namespace Terrain.Rts
                 MaximumDistance = 100f,
             };
 
-            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pExplosion, emitter1);
-            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pSmokeExplosion, emitter2);
+            pManager.AddParticleSystem(ParticleSystemTypes.CPU, pExplosion, emitter1);
+            pManager.AddParticleSystem(ParticleSystemTypes.CPU, pSmokeExplosion, emitter2);
         }
         private void AddSmokePlumeSystem(AIAgent agent, bool unique)
         {
@@ -2218,8 +2220,8 @@ namespace Terrain.Rts
                 plumeFireSystemName = "plumeFire." + agent.SceneObject.Name;
                 plumeSmokeSystemName = "plumeSmoke." + agent.SceneObject.Name;
 
-                plumeFire = this.pManager.GetParticleSystem("plumeFire");
-                plumeSmoke = this.pManager.GetParticleSystem("plumeSmoke");
+                plumeFire = pManager.GetParticleSystem("plumeFire");
+                plumeSmoke = pManager.GetParticleSystem("plumeSmoke");
             }
 
             float duration = Helper.RandomGenerator.NextFloat(6, 36);
@@ -2236,7 +2238,7 @@ namespace Terrain.Rts
                     MaximumDistance = 100f,
                 };
 
-                this.pManager.AddParticleSystem(plumeFireSystemName, ParticleSystemTypes.CPU, this.pFire, emitter1);
+                pManager.AddParticleSystem(plumeFireSystemName, ParticleSystemTypes.CPU, pFire, emitter1);
             }
             else
             {
@@ -2254,7 +2256,7 @@ namespace Terrain.Rts
                     MaximumDistance = 500f,
                 };
 
-                this.pManager.AddParticleSystem(plumeSmokeSystemName, ParticleSystemTypes.CPU, this.pPlume, emitter2);
+                pManager.AddParticleSystem(plumeSmokeSystemName, ParticleSystemTypes.CPU, pPlume, emitter2);
             }
             else
             {
@@ -2269,7 +2271,7 @@ namespace Terrain.Rts
             if (!unique)
             {
                 smokeSystemName = "smoke." + agent.SceneObject.Name;
-                smoke = this.pManager.GetParticleSystem(smokeSystemName);
+                smoke = pManager.GetParticleSystem(smokeSystemName);
             }
 
             float duration = Helper.RandomGenerator.NextFloat(5, 15);
@@ -2285,7 +2287,7 @@ namespace Terrain.Rts
                     MaximumDistance = 500f,
                 };
 
-                this.pManager.AddParticleSystem(smokeSystemName, ParticleSystemTypes.CPU, this.pPlume, emitter);
+                pManager.AddParticleSystem(smokeSystemName, ParticleSystemTypes.CPU, pPlume, emitter);
             }
             else
             {
@@ -2301,7 +2303,7 @@ namespace Terrain.Rts
                 MaximumDistance = 250f,
             };
 
-            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pDust, emitter);
+            pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDust, emitter);
         }
         private void AddProjectileTrailSystem(AIAgent agent, AIAgent target, float speed)
         {
@@ -2313,21 +2315,21 @@ namespace Terrain.Rts
                 MaximumDistance = 100f,
             };
 
-            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pProjectile, emitter);
+            pManager.AddParticleSystem(ParticleSystemTypes.CPU, pProjectile, emitter);
         }
 
         private void DEBUGPickingPosition(Vector3 position)
         {
-            if (this.FindAllGroundPosition<Triangle>(position.X, position.Z, out var results))
+            if (FindAllGroundPosition<Triangle>(position.X, position.Z, out var results))
             {
                 var positions = results.Select(r => r.Position).ToArray();
                 var triangles = results.Select(r => r.Item).ToArray();
 
-                this.terrainPointDrawer.SetPrimitives(Color.Magenta, Line3D.CreateCrossList(positions, 1f));
-                this.terrainPointDrawer.SetPrimitives(Color.DarkCyan, Line3D.CreateWiredTriangle(triangles));
+                terrainPointDrawer.SetPrimitives(Color.Magenta, Line3D.CreateCrossList(positions, 1f));
+                terrainPointDrawer.SetPrimitives(Color.DarkCyan, Line3D.CreateWiredTriangle(triangles));
                 if (positions.Length > 1)
                 {
-                    this.terrainPointDrawer.SetPrimitives(Color.Cyan, new Line3D(positions[0], positions[positions.Length - 1]));
+                    terrainPointDrawer.SetPrimitives(Color.Cyan, new Line3D(positions[0], positions[positions.Length - 1]));
                 }
             }
         }
@@ -2344,156 +2346,156 @@ namespace Terrain.Rts
                 path.Add(pos);
             }
 
-            this.curveLineDrawer.SetPrimitives(this.curvesColor, Line3D.CreatePath(path.ToArray()));
-            this.curveLineDrawer.SetPrimitives(this.pointsColor, Line3D.CreateCrossList(curve.Points, 0.5f));
-            this.curveLineDrawer.SetPrimitives(this.segmentsColor, Line3D.CreatePath(curve.Points));
+            curveLineDrawer.SetPrimitives(curvesColor, Line3D.CreatePath(path.ToArray()));
+            curveLineDrawer.SetPrimitives(pointsColor, Line3D.CreateCrossList(curve.Points, 0.5f));
+            curveLineDrawer.SetPrimitives(segmentsColor, Line3D.CreatePath(curve.Points));
         }
-        private void DEBUGDrawTankPath(Vector3? from, Vector3? direction, Vector3[] path, Color pathColor, Color arrowColor)
+        private void DEBUGDrawTankPath(Vector3? from, Vector3? direction, IEnumerable<Vector3> path, Color pathColor, Color arrowColor)
         {
-            this.terrainPointDrawer.Clear(pathColor);
-            this.terrainPointDrawer.Clear(arrowColor);
+            terrainPointDrawer.Clear(pathColor);
+            terrainPointDrawer.Clear(arrowColor);
 
             if (path?.Any() == true)
             {
-                int count = Math.Min(path.Length, MaxPickingTest);
+                int count = Math.Min(path.Count(), MaxPickingTest);
 
                 Line3D[] lines = new Line3D[count];
 
                 for (int i = 1; i < count; i++)
                 {
-                    lines[i] = new Line3D(path[i - 1], path[i]);
+                    lines[i] = new Line3D(path.ElementAt(i - 1), path.ElementAt(i));
                 }
 
-                this.terrainPointDrawer.SetPrimitives(pathColor, lines);
+                terrainPointDrawer.SetPrimitives(pathColor, lines);
             }
 
             if (from.HasValue && direction.HasValue)
             {
                 var arrow = Line3D.CreateArrow(from.Value, from.Value + direction.Value, 10f);
-                this.terrainPointDrawer.SetPrimitives(arrowColor, arrow);
+                terrainPointDrawer.SetPrimitives(arrowColor, arrow);
             }
         }
         private void DEBUGUpdateGraphDrawer()
         {
-            var agent = this.walkMode ? this.walkerAgentType : this.tankAgentType;
+            var agent = walkMode ? walkerAgentType : tankAgentType;
 
-            var nodes = this.GetNodes(agent).OfType<GraphNode>();
+            var nodes = GetNodes(agent).OfType<GraphNode>();
             if (nodes.Any())
             {
-                if (this.graphIndex <= -1)
+                if (graphIndex <= -1)
                 {
-                    this.graphIndex = -1;
+                    graphIndex = -1;
 
-                    this.terrainGraphDrawer.Clear();
+                    terrainGraphDrawer.Clear();
 
                     foreach (var node in nodes)
                     {
-                        this.terrainGraphDrawer.AddPrimitives(node.Color, node.Triangles);
+                        terrainGraphDrawer.AddPrimitives(node.Color, node.Triangles);
                     }
                 }
                 else
                 {
-                    if (this.graphIndex >= nodes.Count())
+                    if (graphIndex >= nodes.Count())
                     {
-                        this.graphIndex = nodes.Count() - 1;
+                        graphIndex = nodes.Count() - 1;
                     }
 
-                    if (this.graphIndex < nodes.Count())
+                    if (graphIndex < nodes.Count())
                     {
-                        this.terrainGraphDrawer.Clear();
+                        terrainGraphDrawer.Clear();
 
-                        var node = nodes.ToArray()[this.graphIndex];
+                        var node = nodes.ToArray()[graphIndex];
 
-                        this.terrainGraphDrawer.SetPrimitives(node.Color, node.Triangles);
+                        terrainGraphDrawer.SetPrimitives(node.Color, node.Triangles);
                     }
                 }
             }
             else
             {
-                this.graphIndex = -1;
+                graphIndex = -1;
             }
         }
         private void DEBUGDrawLightVolumes()
         {
-            this.lightsVolumeDrawer.Clear();
+            lightsVolumeDrawer.Clear();
 
-            foreach (var spot in this.Lights.SpotLights)
+            foreach (var spot in Lights.SpotLights)
             {
                 var lines = spot.GetVolume(10);
 
-                this.lightsVolumeDrawer.AddPrimitives(new Color4(spot.DiffuseColor.RGB(), 0.15f), lines);
+                lightsVolumeDrawer.AddPrimitives(new Color4(spot.DiffuseColor.RGB(), 0.15f), lines);
             }
 
-            foreach (var point in this.Lights.PointLights)
+            foreach (var point in Lights.PointLights)
             {
                 var lines = point.GetVolume(12, 5);
 
-                this.lightsVolumeDrawer.AddPrimitives(new Color4(point.DiffuseColor.RGB(), 0.15f), lines);
+                lightsVolumeDrawer.AddPrimitives(new Color4(point.DiffuseColor.RGB(), 0.15f), lines);
             }
 
-            this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = true;
+            lightsVolumeDrawer.Active = lightsVolumeDrawer.Visible = true;
         }
         private void DEBUGDrawLightMarks()
         {
-            this.lightsVolumeDrawer.Clear();
+            lightsVolumeDrawer.Clear();
 
-            foreach (var spot in this.Lights.SpotLights)
+            foreach (var spot in Lights.SpotLights)
             {
                 var lines = Line3D.CreateWiredSphere(spot.BoundingSphere, 10, 10);
 
-                this.lightsVolumeDrawer.AddPrimitives(new Color4(Color.Red.RGB(), 0.55f), lines);
+                lightsVolumeDrawer.AddPrimitives(new Color4(Color.Red.RGB(), 0.55f), lines);
             }
 
-            foreach (var point in this.Lights.PointLights)
+            foreach (var point in Lights.PointLights)
             {
                 var lines = Line3D.CreateWiredSphere(point.BoundingSphere, 10, 10);
 
-                this.lightsVolumeDrawer.AddPrimitives(new Color4(Color.Red.RGB(), 0.55f), lines);
+                lightsVolumeDrawer.AddPrimitives(new Color4(Color.Red.RGB(), 0.55f), lines);
             }
 
-            this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = true;
+            lightsVolumeDrawer.Active = lightsVolumeDrawer.Visible = true;
         }
         private void DEBUGDrawStaticVolumes()
         {
             List<Line3D> lines = new List<Line3D>();
-            lines.AddRange(Line3D.CreateWiredBox(this.heliport.GetBoundingBox()));
-            lines.AddRange(Line3D.CreateWiredBox(this.garage.GetBoundingBox()));
-            for (int i = 0; i < this.obelisk.InstanceCount; i++)
+            lines.AddRange(Line3D.CreateWiredBox(heliport.GetBoundingBox()));
+            lines.AddRange(Line3D.CreateWiredBox(garage.GetBoundingBox()));
+            for (int i = 0; i < obelisk.InstanceCount; i++)
             {
-                var instance = this.obelisk[i];
+                var instance = obelisk[i];
 
                 lines.AddRange(Line3D.CreateWiredBox(instance.GetBoundingBox()));
             }
-            for (int i = 0; i < this.rocks.InstanceCount; i++)
+            for (int i = 0; i < rocks.InstanceCount; i++)
             {
-                var instance = this.rocks[i];
+                var instance = rocks[i];
 
                 lines.AddRange(Line3D.CreateWiredBox(instance.GetBoundingBox()));
             }
-            for (int i = 0; i < this.tree1.InstanceCount; i++)
+            for (int i = 0; i < tree1.InstanceCount; i++)
             {
-                var instance = this.tree1[i];
+                var instance = tree1[i];
 
                 lines.AddRange(Line3D.CreateWiredTriangle(instance.GetVolume(false)));
             }
 
-            for (int i = 0; i < this.tree2.InstanceCount; i++)
+            for (int i = 0; i < tree2.InstanceCount; i++)
             {
-                var instance = this.tree2[i];
+                var instance = tree2[i];
 
                 lines.AddRange(Line3D.CreateWiredTriangle(instance.GetVolume(false)));
             }
 
-            this.staticObjLineDrawer.SetPrimitives(objColor, lines.ToArray());
+            staticObjLineDrawer.SetPrimitives(objColor, lines.ToArray());
         }
         private void DEBUGDrawMovingVolumes()
         {
-            var hsph = this.helicopter.GetBoundingSphere();
-            this.movingObjLineDrawer.SetPrimitives(new Color4(Color.White.ToColor3(), 0.55f), Line3D.CreateWiredSphere(new[] { hsph, }, 50, 20));
+            var hsph = helicopter.GetBoundingSphere();
+            movingObjLineDrawer.SetPrimitives(new Color4(Color.White.ToColor3(), 0.55f), Line3D.CreateWiredSphere(new[] { hsph, }, 50, 20));
 
-            var t1sph = this.tankP1.GetBoundingBox();
-            var t2sph = this.tankP2.GetBoundingBox();
-            this.movingObjLineDrawer.SetPrimitives(new Color4(Color.YellowGreen.ToColor3(), 0.55f), Line3D.CreateWiredBox(new[] { t1sph, t2sph, }));
+            var t1sph = tankP1.GetBoundingBox();
+            var t2sph = tankP2.GetBoundingBox();
+            movingObjLineDrawer.SetPrimitives(new Color4(Color.YellowGreen.ToColor3(), 0.55f), Line3D.CreateWiredBox(new[] { t1sph, t2sph, }));
         }
     }
 

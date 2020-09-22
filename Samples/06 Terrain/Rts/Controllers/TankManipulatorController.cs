@@ -16,19 +16,19 @@ namespace Terrain.Rts.Controllers
         /// <param name="manipulator">Manipulator</param>
         public override void UpdateManipulator(GameTime gameTime, Manipulator3D manipulator)
         {
-            if (this.HasPath)
+            if (HasPath)
             {
-                var target = this.path.GetNextControlPoint(this.path.Length);
+                var target = path.GetNextControlPoint(path.Length);
                 var position = manipulator.Position;
                 float dToTarget = (target - position).Length();
 
-                if (dToTarget > this.ArrivingThreshold)
+                if (dToTarget > ArrivingThreshold)
                 {
-                    this.MoveToTarget(gameTime, manipulator, dToTarget);
+                    MoveToTarget(gameTime, manipulator, dToTarget);
                 }
                 else
                 {
-                    this.Clear();
+                    Clear();
                 }
             }
         }
@@ -43,19 +43,19 @@ namespace Terrain.Rts.Controllers
             var position = manipulator.Position;
             var rotation = manipulator.Rotation;
 
-            float maxSpeed = this.MaximumSpeed * gameTime.ElapsedSeconds;
-            float maxForce = this.MaximumForce * gameTime.ElapsedSeconds;
+            float maxSpeed = MaximumSpeed * gameTime.ElapsedSeconds;
+            float maxForce = MaximumForce * gameTime.ElapsedSeconds;
 
-            var next = this.path.GetNextControlPoint(this.pathTime + maxSpeed);
+            var next = path.GetNextControlPoint(pathTime + maxSpeed);
 
             // A vector pointing from the location to the target
             var desired = (next - position);
             float dToNext = desired.Length();
             if (dToNext != 0)
             {
-                if (distanceToTarget < this.ArrivingRadius)
+                if (distanceToTarget < ArrivingRadius)
                 {
-                    var m = Map(distanceToTarget, 0, this.ArrivingRadius, 0, maxSpeed);
+                    var m = Map(distanceToTarget, 0, ArrivingRadius, 0, maxSpeed);
                     desired = Vector3.Normalize(desired) * m;
                 }
                 else
@@ -64,21 +64,21 @@ namespace Terrain.Rts.Controllers
                 }
 
                 // Steering = Desired minus Velocity
-                var steer = desired - this.Velocity;
+                var steer = desired - Velocity;
 
                 // Limit to maximum steering force
                 steer = steer.Limit(maxForce);
 
                 // Update velocity
-                var newVelocity = this.Velocity + steer;
+                var newVelocity = Velocity + steer;
 
                 // Limit speed
                 newVelocity = newVelocity.Limit(maxSpeed);
 
                 //Calculates 2 seconds in future
-                var futureTime = this.pathTime + 2;
-                var futurePosition = this.path.GetPosition(futureTime);
-                var futureNormal = this.path.GetNormal(futureTime);
+                var futureTime = pathTime + 2;
+                var futurePosition = path.GetPosition(futureTime);
+                var futureNormal = path.GetNormal(futureTime);
                 var futureTarget = futurePosition + (futurePosition - position);
 
                 //Calculates a delta using the future angle
@@ -90,7 +90,7 @@ namespace Terrain.Rts.Controllers
 
                 //Apply delta to velocity
                 newVelocity *= velDelta;
-                this.Velocity = newVelocity;
+                Velocity = newVelocity;
 
                 if (velDelta == 0 && futureAngle != 0)
                 {
@@ -100,9 +100,9 @@ namespace Terrain.Rts.Controllers
                 else
                 {
                     //Gets new time
-                    var newTime = this.pathTime + newVelocity.Length();
-                    var newPosition = this.path.GetPosition(newTime);
-                    var newNormal = this.path.GetNormal(newTime);
+                    var newTime = pathTime + newVelocity.Length();
+                    var newPosition = path.GetPosition(newTime);
+                    var newNormal = path.GetNormal(newTime);
                     var newTarget = newPosition + (newPosition - position);
 
                     //Rotate and move
@@ -110,7 +110,7 @@ namespace Terrain.Rts.Controllers
                     manipulator.SetPosition(newPosition);
 
                     //Updates new time in curve
-                    this.pathTime = newTime;
+                    pathTime = newTime;
                 }
             }
         }

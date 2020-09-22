@@ -1367,7 +1367,11 @@ namespace Engine
         /// <param name="e">Event args</param>
         private void GraphUpdating(object sender, EventArgs e)
         {
+            Logger.WriteDebug($"GraphUpdating - {sender}");
+
+            Logger.WriteDebug($"GraphUpdating - NavigationGraphUpdating Call");
             NavigationGraphUpdating();
+            Logger.WriteDebug($"GraphUpdating - NavigationGraphUpdating End");
         }
         /// <summary>
         /// Graph updated event
@@ -1376,7 +1380,11 @@ namespace Engine
         /// <param name="e">Event args</param>
         private void GraphUpdated(object sender, EventArgs e)
         {
+            Logger.WriteDebug($"GraphUpdated - {sender}");
+
+            Logger.WriteDebug($"GraphUpdating - NavigationGraphUpdated Call");
             NavigationGraphUpdated();
+            Logger.WriteDebug($"GraphUpdating - NavigationGraphUpdated End");
         }
         /// <summary>
         /// Fires when graph is updating
@@ -1447,10 +1455,9 @@ namespace Engine
         /// <param name="agent">Agent</param>
         /// <param name="from">Start point</param>
         /// <param name="to">End point</param>
-        /// <param name="useGround">Use ground info</param>
-        /// <param name="delta">Delta amount for path refinement</param>
+        /// <param name="useGround">Find nearest real ground position for "from" and "to" parameters, and all path results</param>
         /// <returns>Return path if exists</returns>
-        public virtual PathFindingPath FindPath(AgentType agent, Vector3 from, Vector3 to, bool useGround = false, float delta = 0f)
+        public virtual PathFindingPath FindPath(AgentType agent, Vector3 from, Vector3 to, bool useGround = false)
         {
             if (this.NavigationGraph?.Initialized != true)
             {
@@ -1459,11 +1466,11 @@ namespace Engine
 
             if (useGround)
             {
-                if (FindNearestGroundPosition(from, out PickingResult<Triangle> rFrom))
+                if (FindNearestGroundPosition<Triangle>(from, out var rFrom))
                 {
                     from = rFrom.Position;
                 }
-                if (FindNearestGroundPosition(to, out PickingResult<Triangle> rTo))
+                if (FindNearestGroundPosition<Triangle>(to, out var rTo))
                 {
                     to = rTo.Position;
                 }
@@ -1472,18 +1479,8 @@ namespace Engine
             var path = this.NavigationGraph.FindPath(agent, from, to);
             if (path.Count() > 1)
             {
-                List<Vector3> positions;
-                List<Vector3> normals;
-
-                if (delta == 0)
-                {
-                    positions = new List<Vector3>(path);
-                    normals = new List<Vector3>(Helper.CreateArray(path.Count(), Vector3.Up));
-                }
-                else
-                {
-                    ComputePath(path, delta, out positions, out normals);
-                }
+                List<Vector3> positions = new List<Vector3>(path);
+                List<Vector3> normals = new List<Vector3>(Helper.CreateArray(path.Count(), Vector3.Up));
 
                 if (useGround)
                 {
@@ -1501,10 +1498,9 @@ namespace Engine
         /// <param name="agent">Agent</param>
         /// <param name="from">Start point</param>
         /// <param name="to">End point</param>
-        /// <param name="useGround">Use ground info</param>
-        /// <param name="delta">Delta amount for path refinement</param>
+        /// <param name="useGround">Find nearest real ground position for "from" and "to" parameters, and all path results</param>
         /// <returns>Return path if exists</returns>
-        public virtual async Task<PathFindingPath> FindPathAsync(AgentType agent, Vector3 from, Vector3 to, bool useGround = false, float delta = 0f)
+        public virtual async Task<PathFindingPath> FindPathAsync(AgentType agent, Vector3 from, Vector3 to, bool useGround = false)
         {
             if (this.NavigationGraph?.Initialized != true)
             {
@@ -1526,18 +1522,8 @@ namespace Engine
             var path = await this.NavigationGraph.FindPathAsync(agent, from, to);
             if (path.Count() > 1)
             {
-                List<Vector3> positions;
-                List<Vector3> normals;
-
-                if (delta == 0)
-                {
-                    positions = new List<Vector3>(path);
-                    normals = new List<Vector3>(Helper.CreateArray(path.Count(), Vector3.Up));
-                }
-                else
-                {
-                    ComputePath(path, delta, out positions, out normals);
-                }
+                List<Vector3> positions = new List<Vector3>(path);
+                List<Vector3> normals = new List<Vector3>(Helper.CreateArray(path.Count(), Vector3.Up));
 
                 if (useGround)
                 {
@@ -1550,59 +1536,6 @@ namespace Engine
             return null;
         }
         /// <summary>
-        /// Compute path finding result
-        /// </summary>
-        /// <param name="path">Path</param>
-        /// <param name="delta">Control point path deltas</param>
-        /// <param name="positions">Resulting positions</param>
-        /// <param name="normals">Resulting normals</param>
-        private void ComputePath(IEnumerable<Vector3> path, float delta, out List<Vector3> positions, out List<Vector3> normals)
-        {
-            positions = new List<Vector3>();
-            normals = new List<Vector3>();
-
-            Vector3[] positionArray = path.ToArray();
-
-            positions.Add(positionArray[0]);
-            normals.Add(Vector3.Up);
-
-            var p0 = positionArray[0];
-            var p1 = positionArray[1];
-
-            int index = 0;
-            while (index < positionArray.Length - 1)
-            {
-                var s = p1 - p0;
-                var v = Vector3.Normalize(s) * delta;
-                var l = delta - s.Length();
-
-                if (l <= 0f)
-                {
-                    //Into de segment
-                    p0 += v;
-                }
-                else if (index < positionArray.Length - 2)
-                {
-                    //Next segment
-                    var p2 = positionArray[index + 2];
-                    p0 = p1 + ((p2 - p1) * l);
-                    p1 = p2;
-
-                    index++;
-                }
-                else
-                {
-                    //End
-                    p0 = positionArray[index + 1];
-
-                    index++;
-                }
-
-                positions.Add(p0);
-                normals.Add(Vector3.Up);
-            }
-        }
-        /// <summary>
         /// Updates the path positions and normals using current ground info
         /// </summary>
         /// <param name="positions">Positions</param>
@@ -1611,7 +1544,7 @@ namespace Engine
         {
             for (int i = 0; i < positions.Count; i++)
             {
-                if (FindNearestGroundPosition(positions[i], out PickingResult<Triangle> r))
+                if (FindNearestGroundPosition<Triangle>(positions[i], out var r))
                 {
                     positions[i] = r.Position;
                     normals[i] = r.Item.Normal;

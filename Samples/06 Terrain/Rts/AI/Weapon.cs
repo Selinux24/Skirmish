@@ -36,7 +36,7 @@ namespace Terrain.Rts.AI
         {
             get
             {
-                return this.lastAttackTime > this.Cadence;
+                return lastAttackTime > Cadence;
             }
         }
 
@@ -57,10 +57,10 @@ namespace Terrain.Rts.AI
         /// <param name="cadence">Cadence</param>
         public Weapon(string name, float damage, float range, float cadence)
         {
-            this.Name = name;
-            this.Damage = damage;
-            this.Range = range;
-            this.Cadence = cadence;
+            Name = name;
+            Damage = damage;
+            Range = range;
+            Cadence = cadence;
         }
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace Terrain.Rts.AI
         /// <param name="gameTime">Game time</param>
         public void Update(GameTime gameTime)
         {
-            this.lastAttackTime += gameTime.ElapsedSeconds;
+            lastAttackTime += gameTime.ElapsedSeconds;
         }
         /// <summary>
         /// Performs an attack
@@ -80,16 +80,16 @@ namespace Terrain.Rts.AI
         /// <returns></returns>
         public float Shoot(Brain brain, AIAgent from, AIAgent to)
         {
-            if (this.CanShoot && from.EnemyOnSight(to))
+            if (CanShoot && from.EnemyOnSight(to))
             {
                 var fromPosition = from.Manipulator.Position;
                 var toPosition = to.Manipulator.Position;
 
                 var distance = Vector3.Distance(toPosition, fromPosition);
-                if (distance <= this.Range)
+                if (distance <= Range)
                 {
-                    this.lastAttackTime = 0;
-                    var damage = Helper.RandomGenerator.NextFloat(0, this.Damage);
+                    lastAttackTime = 0;
+                    var damage = Helper.RandomGenerator.NextFloat(0, Damage);
                     if (Helper.RandomGenerator.NextFloat(0, 1) > 0.9f) { damage *= 2f; } //Critic
 
                     return damage;
@@ -104,7 +104,7 @@ namespace Terrain.Rts.AI
         /// <param name="delay"></param>
         public void Delay(float delay)
         {
-            this.lastAttackTime -= delay;
+            lastAttackTime -= delay;
         }
     }
 }

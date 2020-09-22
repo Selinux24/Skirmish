@@ -67,7 +67,7 @@ namespace Terrain.Rts.AI
         {
             get
             {
-                return this.SceneObject.Manipulator;
+                return SceneObject.Manipulator;
             }
         }
         /// <summary>
@@ -77,21 +77,21 @@ namespace Terrain.Rts.AI
         {
             get
             {
-                if (this.CurrentState == AIStates.Idle)
+                if (CurrentState == AIStates.Idle)
                 {
-                    return this.IdleBehavior.Target;
+                    return IdleBehavior.Target;
                 }
-                else if (this.CurrentState == AIStates.Patrolling)
+                else if (CurrentState == AIStates.Patrolling)
                 {
-                    return this.PatrolBehavior.Target;
+                    return PatrolBehavior.Target;
                 }
-                else if (this.CurrentState == AIStates.Attacking)
+                else if (CurrentState == AIStates.Attacking)
                 {
-                    return this.AttackBehavior.Target;
+                    return AttackBehavior.Target;
                 }
-                else if (this.CurrentState == AIStates.Retreating)
+                else if (CurrentState == AIStates.Retreating)
                 {
-                    return this.RetreatBehavior.Target;
+                    return RetreatBehavior.Target;
                 }
 
                 return null;
@@ -108,11 +108,11 @@ namespace Terrain.Rts.AI
         {
             get
             {
-                return this.SceneObject.Active;
+                return SceneObject.Active;
             }
             set
             {
-                this.SceneObject.Active = value;
+                SceneObject.Active = value;
             }
         }
         /// <summary>
@@ -122,11 +122,11 @@ namespace Terrain.Rts.AI
         {
             get
             {
-                return this.SceneObject.Visible;
+                return SceneObject.Visible;
             }
             set
             {
-                this.SceneObject.Visible = value;
+                SceneObject.Visible = value;
             }
         }
         /// <summary>
@@ -136,11 +136,11 @@ namespace Terrain.Rts.AI
         {
             get
             {
-                return this.Controller.MaximumSpeed;
+                return Controller.MaximumSpeed;
             }
             set
             {
-                this.Controller.MaximumSpeed = value;
+                Controller.MaximumSpeed = value;
             }
         }
 
@@ -187,19 +187,19 @@ namespace Terrain.Rts.AI
         /// <param name="stats"></param>
         protected AIAgent(Brain parent, AgentType agentType, Model sceneObject, AIStatsDescription stats)
         {
-            this.Parent = parent;
-            this.AgentType = agentType;
-            this.SceneObject = sceneObject;
-            this.Stats = new AIStats(stats);
-            this.Controller = new SteerManipulatorController();
+            Parent = parent;
+            AgentType = agentType;
+            SceneObject = sceneObject;
+            Stats = new AIStats(stats);
+            Controller = new SteerManipulatorController();
 
-            this.IdleBehavior = new IdleBehavior(this);
-            this.PatrolBehavior = new PatrolBehavior(this);
-            this.AttackBehavior = new AttackBehavior(this);
-            this.RetreatBehavior = new RetreatBehavior(this);
+            IdleBehavior = new IdleBehavior(this);
+            PatrolBehavior = new PatrolBehavior(this);
+            AttackBehavior = new AttackBehavior(this);
+            RetreatBehavior = new RetreatBehavior(this);
 
-            this.CurrentState = AIStates.None;
-            this.ChangeState(AIStates.Idle);
+            CurrentState = AIStates.None;
+            ChangeState(AIStates.Idle);
         }
 
         /// <summary>
@@ -208,40 +208,40 @@ namespace Terrain.Rts.AI
         /// <param name="context">Updating context</param>
         public void Update(GameTime gameTime)
         {
-            this.Stats.Update(gameTime);
+            Stats.Update(gameTime);
 
-            this.UpdateController(gameTime);
+            UpdateController(gameTime);
 
-            if (!this.ActiveAI)
+            if (!ActiveAI)
             {
                 return;
             }
 
-            if (this.CurrentState != AIStates.None)
+            if (CurrentState != AIStates.None)
             {
-                this.currentBehavior?.Task(gameTime);
+                currentBehavior?.Task(gameTime);
 
-                if (this.CurrentState == AIStates.Idle)
+                if (CurrentState == AIStates.Idle)
                 {
-                    this.UpdateIdle(gameTime);
+                    UpdateIdle(gameTime);
                 }
-                else if (this.CurrentState == AIStates.Patrolling)
+                else if (CurrentState == AIStates.Patrolling)
                 {
-                    this.UpdatePatrolling(gameTime);
+                    UpdatePatrolling(gameTime);
                 }
-                else if (this.CurrentState == AIStates.Attacking)
+                else if (CurrentState == AIStates.Attacking)
                 {
-                    this.UpdateAttacking(gameTime);
+                    UpdateAttacking(gameTime);
                 }
-                else if (this.CurrentState == AIStates.Retreating)
+                else if (CurrentState == AIStates.Retreating)
                 {
-                    this.UpdateRetreating(gameTime);
+                    UpdateRetreating(gameTime);
                 }
             }
-            else if (this.Stats.Life > 0)
+            else if (Stats.Life > 0)
             {
                 // If it's alive, set idle state
-                this.ChangeState(AIStates.Idle);
+                ChangeState(AIStates.Idle);
             }
         }
         /// <summary>
@@ -250,17 +250,17 @@ namespace Terrain.Rts.AI
         /// <param name="context">Updating context</param>
         private void UpdateIdle(GameTime gameTime)
         {
-            if (this.AttackBehavior.Test(gameTime))
+            if (AttackBehavior.Test(gameTime))
             {
-                this.ChangeState(AIStates.Attacking);
+                ChangeState(AIStates.Attacking);
             }
-            else if (this.RetreatBehavior.Test(gameTime))
+            else if (RetreatBehavior.Test(gameTime))
             {
-                this.ChangeState(AIStates.Retreating);
+                ChangeState(AIStates.Retreating);
             }
-            else if (this.PatrolBehavior.Test(gameTime))
+            else if (PatrolBehavior.Test(gameTime))
             {
-                this.ChangeState(AIStates.Patrolling);
+                ChangeState(AIStates.Patrolling);
             }
             else
             {
@@ -273,21 +273,21 @@ namespace Terrain.Rts.AI
         /// <param name="context">Updating context</param>
         private void UpdatePatrolling(GameTime gameTime)
         {
-            if (this.AttackBehavior.Test(gameTime))
+            if (AttackBehavior.Test(gameTime))
             {
-                this.ChangeState(AIStates.Attacking);
+                ChangeState(AIStates.Attacking);
             }
-            else if (this.RetreatBehavior.Test(gameTime))
+            else if (RetreatBehavior.Test(gameTime))
             {
-                this.ChangeState(AIStates.Retreating);
+                ChangeState(AIStates.Retreating);
             }
-            else if (this.PatrolBehavior.Test(gameTime))
+            else if (PatrolBehavior.Test(gameTime))
             {
                 //Continue patrolling
             }
             else
             {
-                this.ChangeState(AIStates.Idle);
+                ChangeState(AIStates.Idle);
             }
         }
         /// <summary>
@@ -296,21 +296,21 @@ namespace Terrain.Rts.AI
         /// <param name="context">Updating context</param>
         private void UpdateAttacking(GameTime gameTime)
         {
-            if (this.AttackBehavior.Test(gameTime))
+            if (AttackBehavior.Test(gameTime))
             {
                 //Continue attacking
             }
-            else if (this.RetreatBehavior.Test(gameTime))
+            else if (RetreatBehavior.Test(gameTime))
             {
-                this.ChangeState(AIStates.Retreating);
+                ChangeState(AIStates.Retreating);
             }
-            else if (this.PatrolBehavior.Test(gameTime))
+            else if (PatrolBehavior.Test(gameTime))
             {
-                this.ChangeState(AIStates.Patrolling);
+                ChangeState(AIStates.Patrolling);
             }
             else
             {
-                this.ChangeState(AIStates.Idle);
+                ChangeState(AIStates.Idle);
             }
         }
         /// <summary>
@@ -319,17 +319,17 @@ namespace Terrain.Rts.AI
         /// <param name="context">Updating context</param>
         private void UpdateRetreating(GameTime gameTime)
         {
-            if (this.RetreatBehavior.Test(gameTime))
+            if (RetreatBehavior.Test(gameTime))
             {
                 //Continue the retreat
             }
-            else if (this.PatrolBehavior.Test(gameTime))
+            else if (PatrolBehavior.Test(gameTime))
             {
-                this.ChangeState(AIStates.Patrolling);
+                ChangeState(AIStates.Patrolling);
             }
             else
             {
-                this.ChangeState(AIStates.Idle);
+                ChangeState(AIStates.Idle);
             }
         }
         /// <summary>
@@ -338,16 +338,16 @@ namespace Terrain.Rts.AI
         /// <param name="context">Updating context</param>
         private void UpdateController(GameTime gameTime)
         {
-            var lastPosition = this.Manipulator.Position;
+            var lastPosition = Manipulator.Position;
 
-            this.Controller.UpdateManipulator(gameTime, this.Manipulator);
+            Controller.UpdateManipulator(gameTime, Manipulator);
 
-            this.LastDistance += Vector3.Distance(lastPosition, this.Manipulator.Position);
-            if (this.LastDistance > 0.2f)
+            LastDistance += Vector3.Distance(lastPosition, Manipulator.Position);
+            if (LastDistance > 0.2f)
             {
-                this.FireMoving(this, null);
+                FireMoving(this, null);
 
-                this.LastDistance -= 0.2f;
+                LastDistance -= 0.2f;
             }
         }
         /// <summary>
@@ -356,29 +356,29 @@ namespace Terrain.Rts.AI
         /// <param name="state"></param>
         private void ChangeState(AIStates state)
         {
-            this.CurrentState = state;
+            CurrentState = state;
 
-            this.currentBehavior = null;
+            currentBehavior = null;
 
             if (state == AIStates.Idle)
             {
-                this.currentBehavior = this.IdleBehavior;
+                currentBehavior = IdleBehavior;
             }
             else if (state == AIStates.Patrolling)
             {
-                this.currentBehavior = this.PatrolBehavior;
+                currentBehavior = PatrolBehavior;
             }
             else if (state == AIStates.Attacking)
             {
-                this.currentBehavior = this.AttackBehavior;
+                currentBehavior = AttackBehavior;
             }
             else if (state == AIStates.Retreating)
             {
-                this.currentBehavior = this.RetreatBehavior;
+                currentBehavior = RetreatBehavior;
             }
             else if (state == AIStates.None)
             {
-                this.Controller.Clear();
+                Controller.Clear();
             }
         }
         /// <summary>
@@ -386,7 +386,7 @@ namespace Terrain.Rts.AI
         /// </summary>
         public void Clear()
         {
-            this.ChangeState(AIStates.None);
+            ChangeState(AIStates.None);
         }
 
         /// <summary>
@@ -395,13 +395,13 @@ namespace Terrain.Rts.AI
         /// <returns>Returns a list with the enemy agents on sight range</returns>
         public virtual AIAgent[] GetEnemiesOnSight()
         {
-            var targets = this.Parent.GetTargetsForAgent(this);
+            var targets = Parent.GetTargetsForAgent(this);
 
             return Array.FindAll(targets, target =>
             {
                 if (target.Stats.Life > 0)
                 {
-                    return this.EnemyOnSight(target);
+                    return EnemyOnSight(target);
                 }
 
                 return false;
@@ -414,14 +414,14 @@ namespace Terrain.Rts.AI
         /// <returns>Returns true if the target is on sight</returns>
         public virtual bool EnemyOnSight(AIAgent target)
         {
-            var p1 = this.Manipulator.Position;
+            var p1 = Manipulator.Position;
             var p2 = target.Manipulator.Position;
 
             var s = p2 - p1;
-            if (s.Length() < this.Stats.SightDistance)
+            if (s.Length() < Stats.SightDistance)
             {
-                float a = Helper.Angle(s, this.Manipulator.Forward);
-                if (a < this.Stats.SightAngle)
+                float a = Helper.Angle(s, Manipulator.Forward);
+                if (a < Stats.SightAngle)
                 {
                     return true;
                 }
@@ -436,13 +436,13 @@ namespace Terrain.Rts.AI
         /// <returns>Returns true if the target is on range</returns>
         public virtual bool EnemyOnAttackRange(AIAgent target)
         {
-            if (this.Stats.CurrentWeapon != null)
+            if (Stats.CurrentWeapon != null)
             {
-                var p1 = this.Manipulator.Position;
+                var p1 = Manipulator.Position;
                 var p2 = target.Manipulator.Position;
 
                 var s = p2 - p1;
-                if (s.Length() < this.Stats.CurrentWeapon.Range)
+                if (s.Length() < Stats.CurrentWeapon.Range)
                 {
                     return true;
                 }
@@ -458,8 +458,8 @@ namespace Terrain.Rts.AI
         public virtual bool IsHardEnemy(AIAgent target)
         {
             if (target?.Stats.CurrentWeapon != null &&
-                target?.Stats.CurrentWeapon.Damage > this.Stats.Life &&
-                this.Stats.Damage > 0.9f)
+                target?.Stats.CurrentWeapon.Damage > Stats.Life &&
+                Stats.Damage > 0.9f)
             {
                 return true;
             }
@@ -472,14 +472,14 @@ namespace Terrain.Rts.AI
         /// <param name="target">Target</param>
         public virtual void Attack(AIAgent target)
         {
-            if (this.Stats.CurrentWeapon != null)
+            if (Stats.CurrentWeapon != null)
             {
-                float d = this.Stats.CurrentWeapon.Shoot(this.Parent, this, target);
+                float d = Stats.CurrentWeapon.Shoot(Parent, this, target);
                 if (d > 0f)
                 {
                     target.GetDamage(this, d);
 
-                    this.FireAttacking(this, target);
+                    FireAttacking(this, target);
                 }
             }
         }
@@ -490,26 +490,26 @@ namespace Terrain.Rts.AI
         /// <param name="damage">Damage amount</param>
         public virtual void GetDamage(AIAgent attacker, float damage)
         {
-            if (this.EnemyOnAttackRange(attacker) && this.AttackBehavior.Target == null)
+            if (EnemyOnAttackRange(attacker) && AttackBehavior.Target == null)
             {
-                this.AttackBehavior.SetTarget(attacker);
-                this.ChangeState(AIStates.Attacking);
+                AttackBehavior.SetTarget(attacker);
+                ChangeState(AIStates.Attacking);
             }
 
-            this.Stats.Life -= Helper.RandomGenerator.NextFloat(0, damage);
+            Stats.Life -= Helper.RandomGenerator.NextFloat(0, damage);
 
-            if (this.Stats.PrimaryWeapon != null) this.Stats.PrimaryWeapon.Delay(damage * 0.1f);
-            if (this.Stats.SecondaryWeapon != null) this.Stats.SecondaryWeapon.Delay(damage * 0.1f);
+            if (Stats.PrimaryWeapon != null) Stats.PrimaryWeapon.Delay(damage * 0.1f);
+            if (Stats.SecondaryWeapon != null) Stats.SecondaryWeapon.Delay(damage * 0.1f);
 
-            this.FireDamaged(attacker, this);
+            FireDamaged(attacker, this);
 
-            if (this.Stats.Life <= 0)
+            if (Stats.Life <= 0)
             {
-                this.Stats.Life = 0;
+                Stats.Life = 0;
 
-                this.Clear();
+                Clear();
 
-                this.FireDestroyed(attacker, this);
+                FireDestroyed(attacker, this);
             }
         }
 
@@ -521,31 +521,33 @@ namespace Terrain.Rts.AI
         /// <param name="refine">Refine route</param>
         public virtual void SetRouteToPoint(Vector3 point, float speed, bool refine)
         {
-            if (this.AgentType != null && this.Parent.Scene != null)
+            if (AgentType != null && Parent.Scene != null)
             {
-                if (!this.lookingForRoute || this.lookingForRouteTicks > MaxLookingForRouteTicks)
+                if (!lookingForRoute || lookingForRouteTicks > MaxLookingForRouteTicks)
                 {
-                    this.lookingForRoute = true;
-                    this.lookingForRouteTicks = 0;
+                    lookingForRoute = true;
+                    lookingForRouteTicks = 0;
 
                     var refineDelta = refine ? speed * 0.1f : 0f;
 
                     Task.Run(async () =>
                     {
-                        var path = await this.Parent.Scene.FindPathAsync(this.AgentType, this.Manipulator.Position, point, true, refineDelta);
+                        var path = await Parent.Scene.FindPathAsync(AgentType, Manipulator.Position, point, true);
                         if (path != null)
                         {
-                            this.FollowPath(path, speed);
+                            path.RefinePath(refineDelta);
 
-                            this.lookingForRoute = false;
-                            this.lookingForRouteTicks = 0;
+                            FollowPath(path, speed);
+
+                            lookingForRoute = false;
+                            lookingForRouteTicks = 0;
                         }
                     });
                 }
 
-                if (this.lookingForRoute)
+                if (lookingForRoute)
                 {
-                    this.lookingForRouteTicks++;
+                    lookingForRouteTicks++;
                 }
             }
         }
@@ -556,16 +558,16 @@ namespace Terrain.Rts.AI
         /// <param name="speed">Speed</param>
         public virtual void FollowPath(PathFindingPath path, float speed)
         {
-            this.Controller.Follow(new NormalPath(path.ReturnPath, path.Normals));
-            this.Controller.MaximumSpeed = speed;
+            Controller.Follow(new NormalPath(path.Positions, path.Normals));
+            Controller.MaximumSpeed = speed;
         }
         /// <summary>
         /// Stops the movement controller actions
         /// </summary>
         public virtual void Stop()
         {
-            this.Controller.Clear();
-            this.Controller.MaximumSpeed = 0f;
+            Controller.Clear();
+            Controller.MaximumSpeed = 0f;
         }
 
         /// <summary>
@@ -575,7 +577,7 @@ namespace Terrain.Rts.AI
         /// <param name="passive">Pasive</param>
         protected virtual void FireMoving(AIAgent active, AIAgent passive)
         {
-            this.Moving?.Invoke(this, new BehaviorEventArgs(active, passive));
+            Moving?.Invoke(this, new BehaviorEventArgs(active, passive));
         }
         /// <summary>
         /// Fires the attacking action
@@ -584,7 +586,7 @@ namespace Terrain.Rts.AI
         /// <param name="passive">Passive</param>
         protected virtual void FireAttacking(AIAgent active, AIAgent passive)
         {
-            this.Attacking?.Invoke(this, new BehaviorEventArgs(active, passive));
+            Attacking?.Invoke(this, new BehaviorEventArgs(active, passive));
         }
         /// <summary>
         /// Fires the damage action
@@ -593,7 +595,7 @@ namespace Terrain.Rts.AI
         /// <param name="passive">Pasive</param>
         protected virtual void FireDamaged(AIAgent active, AIAgent passive)
         {
-            this.Damaged?.Invoke(this, new BehaviorEventArgs(active, passive));
+            Damaged?.Invoke(this, new BehaviorEventArgs(active, passive));
         }
         /// <summary>
         /// Fires the destroyed action
@@ -602,7 +604,7 @@ namespace Terrain.Rts.AI
         /// <param name="passive">Passive</param>
         protected virtual void FireDestroyed(AIAgent active, AIAgent passive)
         {
-            this.Destroyed?.Invoke(this, new BehaviorEventArgs(active, passive));
+            Destroyed?.Invoke(this, new BehaviorEventArgs(active, passive));
         }
 
         /// <summary>
@@ -611,7 +613,7 @@ namespace Terrain.Rts.AI
         /// <returns>Returns the text representation of the agent</returns>
         public override string ToString()
         {
-            return string.Format("{0} -> {1:000.00}", this.CurrentState, this.Stats.Life);
+            return $"{CurrentState} -> {Stats.Life:000.00}";
         }
     }
 }

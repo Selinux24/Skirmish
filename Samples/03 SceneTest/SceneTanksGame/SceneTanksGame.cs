@@ -1525,7 +1525,7 @@ You will lost all the game progress.",
                 currentWindVelocity = Helper.RandomGenerator.NextFloat(0f, maxWindVelocity);
                 windDirection = Helper.RandomGenerator.NextVector2(-Vector2.One, Vector2.One);
 
-                particleManager.ParticleSystems.ForEach(p =>
+                Parallel.ForEach(particleManager.ParticleSystems, p =>
                 {
                     var particleParams = p.GetParameters();
                     particleParams.Gravity = new Vector3(windDirection.X, 0, windDirection.Y) * currentWindVelocity;

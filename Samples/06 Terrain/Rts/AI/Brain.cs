@@ -24,7 +24,7 @@ namespace Terrain.Rts.AI
         /// <param name="scene">Scene</param>
         public Brain(Scene scene)
         {
-            this.Scene = scene;
+            Scene = scene;
         }
 
         /// <summary>
@@ -34,12 +34,12 @@ namespace Terrain.Rts.AI
         /// <param name="agent">Agent</param>
         public void AddAgent(int index, AIAgent agent)
         {
-            if (!this.groups.ContainsKey(index))
+            if (!groups.ContainsKey(index))
             {
-                this.groups.Add(index, new List<AIAgent>());
+                groups.Add(index, new List<AIAgent>());
             }
 
-            this.groups[index].Add(agent);
+            groups[index].Add(agent);
         }
         /// <summary>
         /// Gets available targets for agent
@@ -50,11 +50,11 @@ namespace Terrain.Rts.AI
         {
             List<AIAgent> targets = new List<AIAgent>();
 
-            foreach (var key in this.groups.Keys)
+            foreach (var key in groups.Keys)
             {
-                if (!this.groups[key].Contains(agent))
+                if (!groups[key].Contains(agent))
                 {
-                    targets.AddRange(this.groups[key]);
+                    targets.AddRange(groups[key]);
                 }
             }
 

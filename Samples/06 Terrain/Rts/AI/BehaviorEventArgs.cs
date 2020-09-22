@@ -23,8 +23,8 @@ namespace Terrain.Rts.AI
         /// <param name="passive">Passive agent</param>
         public BehaviorEventArgs(AIAgent active, AIAgent passive)
         {
-            this.Active = active;
-            this.Passive = passive;
+            Active = active;
+            Passive = passive;
         }
     }
 }

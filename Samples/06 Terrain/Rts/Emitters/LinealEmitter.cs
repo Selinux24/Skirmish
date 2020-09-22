@@ -24,11 +24,11 @@ namespace Terrain.Rts.Emitters
         {
             this.to = to;
             var vDir = (to - from);
-            this.direction = Vector3.Normalize(vDir);
+            direction = Vector3.Normalize(vDir);
             this.speed = speed;
 
-            this.Position = from;
-            this.Duration = (vDir.Length() / speed);
+            Position = from;
+            Duration = (vDir.Length() / speed);
         }
 
         /// <summary>
@@ -37,13 +37,13 @@ namespace Terrain.Rts.Emitters
         /// <param name="context">Updating context</param>
         public override void Update(UpdateContext context)
         {
-            float distance = Vector3.Distance(this.to, this.Position);
+            float distance = Vector3.Distance(to, Position);
 
             if (distance < previousDistance)
             {
-                this.Position += (direction * speed * context.GameTime.ElapsedSeconds);
+                Position += (direction * speed * context.GameTime.ElapsedSeconds);
 
-                this.previousDistance = distance;
+                previousDistance = distance;
             }
 
             base.Update(context);

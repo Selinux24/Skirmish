@@ -1015,17 +1015,14 @@ namespace Collada
         private bool CalcPath(AgentType agent, Vector3 from, Vector3 to)
         {
             var path = this.FindPath(agent, from, to);
-            if (path?.ReturnPath?.Count > 0)
+            if (path?.Count > 0)
             {
-                path.ReturnPath.Insert(0, from);
-                path.Normals.Insert(0, Vector3.Up);
+                path.InsertControlPoint(0, from, Vector3.Up);
+                path.AddControlPoint(to, Vector3.Up);
 
-                path.ReturnPath.Add(to);
-                path.Normals.Add(Vector3.Up);
+                this.ratDrawer.SetPrimitives(Color.Red, Line3D.CreateLineList(path.Positions));
 
-                this.ratDrawer.SetPrimitives(Color.Red, Line3D.CreateLineList(path.ReturnPath.ToArray()));
-
-                this.ratController.Follow(new NormalPath(path.ReturnPath.ToArray(), path.Normals.ToArray()));
+                this.ratController.Follow(new NormalPath(path.Positions, path.Normals));
                 this.ratController.MaximumSpeed = this.ratAgentType.Velocity;
                 this.rat.Visible = true;
                 this.rat.AnimationController.Start(0);

@@ -23,7 +23,7 @@ namespace Terrain.Rts.AI
         /// <param name="agent">Agent</param>
         protected Behavior(AIAgent agent)
         {
-            this.Agent = agent;
+            Agent = agent;
         }
 
         /// <summary>

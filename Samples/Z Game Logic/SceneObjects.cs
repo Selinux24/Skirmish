@@ -1178,7 +1178,7 @@ namespace GameLogic
             var path = this.FindPath(agentType, origin, destination);
             if (path != null)
             {
-                return new SegmentPath(origin, path.ReturnPath.ToArray());
+                return new SegmentPath(origin, path.Positions);
             }
 
             return null;

@@ -55,7 +55,7 @@ namespace Terrain.Rts.Controllers
             }
             prevSpeed = curSpeed;
 
-            float maxSpeed = this.MaximumSpeed * gameTime.ElapsedSeconds;
+            float maxSpeed = MaximumSpeed * gameTime.ElapsedSeconds;
 
             var lookPos = pos + dir;
             lookPos.Y = pos.Y - (curSpeed / (maxSpeed == 0 ? 1 : maxSpeed));

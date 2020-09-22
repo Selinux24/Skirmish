@@ -73,7 +73,7 @@ namespace Engine
         /// <param name="origin">Origin</param>
         /// <param name="path">Inner path</param>
         /// <param name="destination">Destination</param>
-        public SegmentPath(Vector3 origin, Vector3[] path, Vector3 destination)
+        public SegmentPath(Vector3 origin, IEnumerable<Vector3> path, Vector3 destination)
         {
             this.InitializePath(origin, path, destination);
         }
@@ -82,7 +82,7 @@ namespace Engine
         /// </summary>
         /// <param name="origin">Origin</param>
         /// <param name="path">Path</param>
-        public SegmentPath(Vector3 origin, Vector3[] path)
+        public SegmentPath(Vector3 origin, IEnumerable<Vector3> path)
         {
             this.InitializePath(origin, path, null);
         }
@@ -110,7 +110,7 @@ namespace Engine
         /// <param name="origin">Origin</param>
         /// <param name="path">Inner path</param>
         /// <param name="destination">Destination</param>
-        private void InitializePath(Vector3? origin, Vector3[] path, Vector3? destination)
+        private void InitializePath(Vector3? origin, IEnumerable<Vector3> path, Vector3? destination)
         {
             List<Vector3> lPath = new List<Vector3>();
 

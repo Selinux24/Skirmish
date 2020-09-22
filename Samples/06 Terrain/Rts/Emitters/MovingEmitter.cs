@@ -35,9 +35,9 @@ namespace Terrain.Rts.Emitters
         /// <param name="context">Updating context</param>
         public override void Update(UpdateContext context)
         {
-            Vector3 rDelta = Vector3.Transform(this.delta, this.manipulator.Rotation);
+            Vector3 rDelta = Vector3.Transform(delta, manipulator.Rotation);
 
-            this.Position = this.manipulator.Position + rDelta;
+            Position = manipulator.Position + rDelta;
 
             base.Update(context);
         }
