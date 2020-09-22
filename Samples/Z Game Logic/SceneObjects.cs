@@ -7,6 +7,7 @@ using Engine.UI;
 using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace GameLogic
@@ -44,13 +45,6 @@ namespace GameLogic
         private readonly Dictionary<Soldier, ModelInstance> soldierModels = new Dictionary<Soldier, ModelInstance>();
         private readonly Dictionary<Soldier, ManipulatorController> soldierControllers = new Dictionary<Soldier, ManipulatorController>();
         private readonly Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
-        private ModelInstance Current
-        {
-            get
-            {
-                return this.soldierModels[this.skirmishGame.CurrentSoldier];
-            }
-        }
 
         private PrimitiveListDrawer<Line3D> lineDrawer = null;
         private readonly Color4 bsphColor = new Color4(Color.LightYellow.ToColor3(), 0.25f);
@@ -568,8 +562,7 @@ namespace GameLogic
             else if (this.CurrentAction.Action == Actions.Assault)
             {
                 Soldier active = this.skirmishGame.CurrentSoldier;
-                Vector3 pos = this.Current.Manipulator.Position;
-                Soldier passive = this.PickSoldierNearestToPosition(cursorRay, pos, true);
+                Soldier passive = this.PickSoldierNearestToPosition(cursorRay, true);
                 if (passive != null)
                 {
                     this.Assault(active, passive);
@@ -1192,34 +1185,32 @@ namespace GameLogic
         }
         private Soldier PickSoldier(Ray cursorRay, bool enemyOnly)
         {
-            Vector3 position = cursorRay.Position;
-            return PickSoldierNearestToPosition(cursorRay, position, enemyOnly);
+            return PickSoldierNearestToPosition(cursorRay, enemyOnly);
         }
-        private Soldier PickSoldierNearestToPosition(Ray cursorRay, Vector3 position, bool enemyOnly)
+        private Soldier PickSoldierNearestToPosition(Ray cursorRay, bool enemyOnly)
         {
-            Soldier res = null;
-
             Team[] teams = enemyOnly ? this.skirmishGame.EnemyOf(this.skirmishGame.CurrentTeam) : this.skirmishGame.Teams;
+            if (!teams.Any())
+            {
+                return null;
+            }
 
+            //Select nearest picked soldier
+            float d = float.MaxValue;
+            Soldier res = null;
             foreach (Team team in teams)
             {
                 foreach (var soldierC in team.Soldiers)
                 {
-                    var picked = this.soldierModels[soldierC].PickAll(cursorRay, out PickingResult<Triangle>[] r);
-                    if (picked && r?.Length > 0)
+                    var picked = this.soldierModels[soldierC].PickNearest(cursorRay, out var r);
+                    if (!picked)
                     {
-                        if (r.Length > 1)
-                        {
-                            Array.Sort(r, (r1, r2) =>
-                            {
-                                var d1 = Vector3.DistanceSquared(r1.Position, position);
-                                var d2 = Vector3.DistanceSquared(r2.Position, position);
+                        continue;
+                    }
 
-                                return d1.CompareTo(d2);
-                            });
-                        }
-
-                        //Select nearest picked soldier
+                    if (r.Distance < d)
+                    {
+                        d = r.Distance;
                         res = soldierC;
                     }
                 }

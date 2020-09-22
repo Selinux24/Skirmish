@@ -198,7 +198,7 @@ namespace Engine
                 Vector3 lightPosition = light.GetPosition(maxZ);
                 Ray ray = new Ray(lightPosition, -light.Direction);
 
-                if (!this.Scene.PickNearest(ray, RayPickingParams.Coarse, out _))
+                if (!this.Scene.PickNearest<Triangle>(ray, RayPickingParams.Coarse, out _))
                 {
                     return true;
                 }

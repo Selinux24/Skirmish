@@ -20,6 +20,11 @@ namespace Engine
     public class Scene : IDisposable
     {
         /// <summary>
+        /// Ground usage enum for ground picking
+        /// </summary>
+        private const SceneObjectUsages GroundUsage = SceneObjectUsages.Ground | SceneObjectUsages.FullPathFinding | SceneObjectUsages.CoarsePathFinding;
+
+        /// <summary>
         /// Performs coarse ray picking over the specified collection
         /// </summary>
         /// <param name="ray">Ray</param>
@@ -62,12 +67,13 @@ namespace Engine
         /// <summary>
         /// Perfors coarse picking between the specified ray and the bounding volume of the object
         /// </summary>
+        /// <typeparam name="T">Primitive type</typeparam>
         /// <param name="ray">Ray</param>
         /// <param name="obj">Object</param>
         /// <param name="maxDistance">Maximum distance to test</param>
         /// <param name="distance">Gets the picking distance if intersection exists</param>
         /// <returns>Returns true if exists intersection between the ray and the bounding volume of the object, into the maximum distance</returns>
-        private static bool TestCoarse(ref Ray ray, IRayPickable<Triangle> obj, float maxDistance, out float distance)
+        private static bool TestCoarse<T>(ref Ray ray, IRayPickable<T> obj, float maxDistance, out float distance) where T : IRayIntersectable
         {
             distance = float.MaxValue;
 
@@ -99,28 +105,25 @@ namespace Engine
             return texHeight;
         }
         /// <summary>
-        /// Ground usage enum for ground picking
-        /// </summary>
-        private const SceneObjectUsages GroundUsage = SceneObjectUsages.Ground | SceneObjectUsages.FullPathFinding | SceneObjectUsages.CoarsePathFinding;
-        /// <summary>
         /// Gets wether the ray picks the object nearest to the specified best distance
         /// </summary>
+        /// <typeparam name="T">Primitive type</typeparam>
         /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="rayPickingParams">Ray picking parameters</param>
         /// <param name="obj">Object to test</param>
         /// <param name="bestDistance">Best distance</param>
         /// <param name="result">Resulting picking result</param>
         /// <returns>Returns true if the ray picks the object nearest to the specified best distance</returns>
-        private static bool PickNearestSingle(Ray ray, RayPickingParams rayPickingParams, IRayPickable<Triangle> obj, float bestDistance, out PickingResult<Triangle> result)
+        private static bool PickNearestSingle<T>(Ray ray, RayPickingParams rayPickingParams, IRayPickable<T> obj, float bestDistance, out PickingResult<T> result) where T : IRayIntersectable
         {
             bool pickedNearest = false;
 
-            result = new PickingResult<Triangle>()
+            result = new PickingResult<T>()
             {
                 Distance = float.MaxValue,
             };
 
-            var picked = obj.PickNearest(ray, rayPickingParams, out PickingResult<Triangle> r);
+            var picked = obj.PickNearest(ray, rayPickingParams, out var r);
             if (picked && r.Distance < bestDistance)
             {
                 result = r;
@@ -132,28 +135,29 @@ namespace Engine
         /// <summary>
         /// Gets wether the ray picks the object nearest to the specified best distance
         /// </summary>
+        /// <typeparam name="T">Primitive type</typeparam>
         /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="rayPickingParams">Ray picking parameters</param>
         /// <param name="obj">Object to test</param>
         /// <param name="bestDistance">Best distance</param>
         /// <param name="result">Resulting picking result</param>
         /// <returns>Returns true if the ray picks the object nearest to the specified best distance</returns>
-        private static bool PickNearestComposed(Ray ray, RayPickingParams rayPickingParams, IComposed obj, float bestDistance, out PickingResult<Triangle> result)
+        private static bool PickNearestComposed<T>(Ray ray, RayPickingParams rayPickingParams, IComposed obj, float bestDistance, out PickingResult<T> result) where T : IRayIntersectable
         {
             bool pickedNearest = false;
 
-            result = new PickingResult<Triangle>()
+            result = new PickingResult<T>()
             {
                 Distance = float.MaxValue,
             };
 
             float dist = bestDistance;
 
-            var pickComponents = obj.GetComponents<IRayPickable<Triangle>>();
+            var pickComponents = obj.GetComponents<IRayPickable<T>>();
 
             foreach (var pickable in pickComponents)
             {
-                var picked = pickable.PickNearest(ray, rayPickingParams, out PickingResult<Triangle> r);
+                var picked = pickable.PickNearest(ray, rayPickingParams, out var r);
                 if (picked && r.Distance < dist)
                 {
                     dist = r.Distance;
@@ -167,18 +171,20 @@ namespace Engine
         /// <summary>
         /// Gets the current object triangle collection
         /// </summary>
+        /// <typeparam name="T">Primitive type</typeparam>
+        /// <param name="obj">Scene object</param>
         /// <returns>Returns the triangle list</returns>
-        private static IEnumerable<Triangle> GetTrianglesForNavigationGraph(ISceneObject obj)
+        private static IEnumerable<T> GetTrianglesForNavigationGraph<T>(ISceneObject obj) where T : IRayIntersectable
         {
-            List<Triangle> tris = new List<Triangle>();
+            List<T> tris = new List<T>();
 
-            List<IRayPickable<Triangle>> volumes = new List<IRayPickable<Triangle>>();
+            List<IRayPickable<T>> volumes = new List<IRayPickable<T>>();
 
             if (obj is IComposed composed)
             {
-                volumes.AddRange(GetVolumesForNavigationGraph(composed));
+                volumes.AddRange(GetVolumesForNavigationGraph<T>(composed));
             }
-            else if (obj is IRayPickable<Triangle> pickable)
+            else if (obj is IRayPickable<T> pickable)
             {
                 if (obj is ITransformable3D transformable)
                 {
@@ -205,11 +211,12 @@ namespace Engine
         /// <summary>
         /// Get volumes from composed object
         /// </summary>
+        /// <typeparam name="T">Primitive type</typeparam>
         /// <param name="composed">Composed</param>
         /// <returns>Returns a list of volumes</returns>
-        private static IEnumerable<IRayPickable<Triangle>> GetVolumesForNavigationGraph(IComposed composed)
+        private static IEnumerable<IRayPickable<T>> GetVolumesForNavigationGraph<T>(IComposed composed) where T : IRayIntersectable
         {
-            List<IRayPickable<Triangle>> volumes = new List<IRayPickable<Triangle>>();
+            List<IRayPickable<T>> volumes = new List<IRayPickable<T>>();
 
             var trnChilds = composed.GetComponents<ITransformable3D>();
             if (trnChilds.Any())
@@ -220,7 +227,7 @@ namespace Engine
                 }
             }
 
-            var pickableChilds = composed.GetComponents<IRayPickable<Triangle>>();
+            var pickableChilds = composed.GetComponents<IRayPickable<T>>();
             if (pickableChilds.Any())
             {
                 volumes.AddRange(pickableChilds);
@@ -909,7 +916,7 @@ namespace Engine
         /// </summary>
         /// <param name="ray">Ray</param>
         /// <param name="maxDistance">Maximum distance for test</param>
-        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="rayPickingParams">Ray picking parameters</param>
         /// <param name="usage">Object usage mask</param>
         /// <param name="model">Gets the resulting ray pickable object</param>
         /// <returns>Returns true if a pickable object in the ray path was found</returns>
@@ -923,7 +930,7 @@ namespace Engine
 
             foreach (var obj in coarse)
             {
-                if (obj.Item1 is IRayPickable<Triangle> pickable && pickable.PickNearest(ray, rayPickingParams, out PickingResult<Triangle> r))
+                if (obj.Item1 is IRayPickable<Triangle> pickable && pickable.PickNearest(ray, rayPickingParams, out _))
                 {
                     model = obj.Item1;
 
@@ -936,25 +943,27 @@ namespace Engine
         /// <summary>
         /// Gets nearest picking position of giving ray
         /// </summary>
+        /// <typeparam name="T">Primitive type</typeparam>
         /// <param name="ray">Picking ray</param>
-        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="rayPickingParams">Ray picking parameters</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool PickNearest(Ray ray, RayPickingParams rayPickingParams, out PickingResult<Triangle> result)
+        public bool PickNearest<T>(Ray ray, RayPickingParams rayPickingParams, out PickingResult<T> result) where T : IRayIntersectable
         {
             return PickNearest(ray, rayPickingParams, SceneObjectUsages.None, out result);
         }
         /// <summary>
         /// Gets nearest picking position of giving ray
         /// </summary>
+        /// <typeparam name="T">Primitive type</typeparam>
         /// <param name="ray">Picking ray</param>
-        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="rayPickingParams">Ray picking parameters</param>
         /// <param name="usage">Component usage</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool PickNearest(Ray ray, RayPickingParams rayPickingParams, SceneObjectUsages usage, out PickingResult<Triangle> result)
+        public bool PickNearest<T>(Ray ray, RayPickingParams rayPickingParams, SceneObjectUsages usage, out PickingResult<T> result) where T : IRayIntersectable
         {
-            result = new PickingResult<Triangle>()
+            result = new PickingResult<T>()
             {
                 Distance = float.MaxValue,
             };
@@ -980,7 +989,7 @@ namespace Engine
 
                 if (obj.Item1 is IComposed composed)
                 {
-                    bool pickedComposed = PickNearestComposed(ray, rayPickingParams, composed, bestDistance, out var r);
+                    bool pickedComposed = PickNearestComposed<T>(ray, rayPickingParams, composed, bestDistance, out var r);
                     if (pickedComposed)
                     {
                         result = r;
@@ -989,7 +998,7 @@ namespace Engine
                         picked = true;
                     }
                 }
-                else if (obj.Item1 is IRayPickable<Triangle> pickable)
+                else if (obj.Item1 is IRayPickable<T> pickable)
                 {
                     bool pickedSingle = PickNearestSingle(ray, rayPickingParams, pickable, bestDistance, out var r);
                     if (pickedSingle)
@@ -1007,25 +1016,27 @@ namespace Engine
         /// <summary>
         /// Gets first picking position of giving ray
         /// </summary>
+        /// <typeparam name="T">Primitive type</typeparam>
         /// <param name="ray">Picking ray</param>
-        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="rayPickingParams">Ray picking parameters</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool PickFirst(Ray ray, RayPickingParams rayPickingParams, out PickingResult<Triangle> result)
+        public bool PickFirst<T>(Ray ray, RayPickingParams rayPickingParams, out PickingResult<T> result) where T : IRayIntersectable
         {
             return PickFirst(ray, rayPickingParams, SceneObjectUsages.None, out result);
         }
         /// <summary>
         /// Gets first picking position of giving ray
         /// </summary>
+        /// <typeparam name="T">Primitive type</typeparam>
         /// <param name="ray">Picking ray</param>
-        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="rayPickingParams">Ray picking parameters</param>
         /// <param name="usage">Component usage</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool PickFirst(Ray ray, RayPickingParams rayPickingParams, SceneObjectUsages usage, out PickingResult<Triangle> result)
+        public bool PickFirst<T>(Ray ray, RayPickingParams rayPickingParams, SceneObjectUsages usage, out PickingResult<T> result) where T : IRayIntersectable
         {
-            result = new PickingResult<Triangle>()
+            result = new PickingResult<T>()
             {
                 Distance = float.MaxValue,
             };
@@ -1043,10 +1054,10 @@ namespace Engine
             {
                 if (obj.Item1 is IComposed composed)
                 {
-                    var pickComponents = composed.GetComponents<IRayPickable<Triangle>>();
+                    var pickComponents = composed.GetComponents<IRayPickable<T>>();
                     foreach (var pickable in pickComponents)
                     {
-                        if (pickable.PickFirst(ray, rayPickingParams, out PickingResult<Triangle> r))
+                        if (pickable.PickFirst(ray, rayPickingParams, out var r))
                         {
                             result = r;
 
@@ -1055,8 +1066,8 @@ namespace Engine
                     }
                 }
                 else if (
-                    obj.Item1 is IRayPickable<Triangle> pickable &&
-                    pickable.PickFirst(ray, rayPickingParams, out PickingResult<Triangle> r))
+                    obj.Item1 is IRayPickable<T> pickable &&
+                    pickable.PickFirst(ray, rayPickingParams, out var r))
                 {
                     result = r;
 
@@ -1069,23 +1080,25 @@ namespace Engine
         /// <summary>
         /// Gets all picking position of giving ray
         /// </summary>
+        /// <typeparam name="T">Primitive type</typeparam>
         /// <param name="ray">Picking ray</param>
-        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="rayPickingParams">Ray picking parameters</param>
         /// <param name="results">Picking results</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool PickAll(Ray ray, RayPickingParams rayPickingParams, out PickingResult<Triangle>[] results)
+        public bool PickAll<T>(Ray ray, RayPickingParams rayPickingParams, out IEnumerable<PickingResult<T>> results) where T : IRayIntersectable
         {
             return PickAll(ray, rayPickingParams, SceneObjectUsages.None, out results);
         }
         /// <summary>
         /// Gets all picking position of giving ray
         /// </summary>
+        /// <typeparam name="T">Primitive type</typeparam>
         /// <param name="ray">Picking ray</param>
-        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="rayPickingParams">Ray picking parameters</param>
         /// <param name="usage">Component usage</param>
         /// <param name="results">Picking results</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool PickAll(Ray ray, RayPickingParams rayPickingParams, SceneObjectUsages usage, out PickingResult<Triangle>[] results)
+        public bool PickAll<T>(Ray ray, RayPickingParams rayPickingParams, SceneObjectUsages usage, out IEnumerable<PickingResult<T>> results) where T : IRayIntersectable
         {
             results = null;
 
@@ -1098,24 +1111,24 @@ namespace Engine
 
             var coarse = PickCoarse(ref ray, float.MaxValue, cmpList);
 
-            List<PickingResult<Triangle>> lResults = new List<PickingResult<Triangle>>();
+            List<PickingResult<T>> lResults = new List<PickingResult<T>>();
 
             foreach (var obj in coarse)
             {
                 if (obj.Item1 is IComposed composed)
                 {
-                    var pickComponents = composed.GetComponents<IRayPickable<Triangle>>();
+                    var pickComponents = composed.GetComponents<IRayPickable<T>>();
                     foreach (var pickable in pickComponents)
                     {
-                        if (pickable.PickAll(ray, rayPickingParams, out PickingResult<Triangle>[] r))
+                        if (pickable.PickAll(ray, rayPickingParams, out var r))
                         {
                             lResults.AddRange(r);
                         }
                     }
                 }
                 else if (
-                    obj.Item1 is IRayPickable<Triangle> pickable &&
-                    pickable.PickAll(ray, rayPickingParams, out PickingResult<Triangle>[] r))
+                    obj.Item1 is IRayPickable<T> pickable &&
+                    pickable.PickAll(ray, rayPickingParams, out var r))
                 {
                     lResults.AddRange(r);
                 }
@@ -1123,7 +1136,7 @@ namespace Engine
 
             results = lResults.ToArray();
 
-            return results.Length > 0;
+            return results.Any();
         }
 
         /// <summary>
@@ -1133,7 +1146,7 @@ namespace Engine
         /// <param name="z">Z coordinate</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool FindTopGroundPosition(float x, float z, out PickingResult<Triangle> result)
+        public bool FindTopGroundPosition<T>(float x, float z, out PickingResult<T> result) where T : IRayIntersectable
         {
             var ray = this.GetTopDownRay(x, z);
 
@@ -1146,7 +1159,7 @@ namespace Engine
         /// <param name="z">Z coordinate</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool FindFirstGroundPosition(float x, float z, out PickingResult<Triangle> result)
+        public bool FindFirstGroundPosition<T>(float x, float z, out PickingResult<T> result) where T : IRayIntersectable
         {
             var ray = this.GetTopDownRay(x, z);
 
@@ -1159,7 +1172,7 @@ namespace Engine
         /// <param name="z">Z coordinate</param>
         /// <param name="results">Picking results</param>
         /// <returns>Returns true if ground positions found</returns>
-        public bool FindAllGroundPosition(float x, float z, out PickingResult<Triangle>[] results)
+        public bool FindAllGroundPosition<T>(float x, float z, out IEnumerable<PickingResult<T>> results) where T : IRayIntersectable
         {
             var ray = this.GetTopDownRay(x, z);
 
@@ -1171,18 +1184,18 @@ namespace Engine
         /// <param name="from">Position from</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool FindNearestGroundPosition(Vector3 from, out PickingResult<Triangle> result)
+        public bool FindNearestGroundPosition<T>(Vector3 from, out PickingResult<T> result) where T : IRayIntersectable
         {
             var ray = this.GetTopDownRay(from.X, from.Z);
 
-            bool picked = this.PickAll(ray, RayPickingParams.Default, GroundUsage, out PickingResult<Triangle>[] pResults);
+            bool picked = this.PickAll<T>(ray, RayPickingParams.Default, GroundUsage, out var pResults);
             if (picked)
             {
                 int index = -1;
                 float dist = float.MaxValue;
-                for (int i = 0; i < pResults.Length; i++)
+                for (int i = 0; i < pResults.Count(); i++)
                 {
-                    float d = Vector3.DistanceSquared(from, pResults[i].Position);
+                    float d = Vector3.DistanceSquared(from, pResults.ElementAt(i).Position);
                     if (d <= dist)
                     {
                         dist = d;
@@ -1191,13 +1204,13 @@ namespace Engine
                     }
                 }
 
-                result = pResults[index];
+                result = pResults.ElementAt(index);
 
                 return true;
             }
             else
             {
-                result = new PickingResult<Triangle>()
+                result = new PickingResult<T>()
                 {
                     Distance = float.MaxValue,
                 };
@@ -1398,7 +1411,7 @@ namespace Engine
 
             foreach (var cmp in pfComponents)
             {
-                var currTris = GetTrianglesForNavigationGraph(cmp);
+                var currTris = GetTrianglesForNavigationGraph<Triangle>(cmp);
                 if (currTris.Any())
                 {
                     tris.AddRange(currTris);
@@ -1642,7 +1655,7 @@ namespace Engine
                 return false;
             }
 
-            bool isInGround = this.FindAllGroundPosition(newPosition.X, newPosition.Z, out PickingResult<Triangle>[] results);
+            bool isInGround = this.FindAllGroundPosition<Triangle>(newPosition.X, newPosition.Z, out var results);
             if (!isInGround)
             {
                 return false;
@@ -1660,11 +1673,11 @@ namespace Engine
                     .OrderBy(r => r.Distance).ToArray();
             }
 
-            for (int i = 0; i < results.Length; i++)
+            foreach (var result in results)
             {
-                if (this.IsWalkable(agent, results[i].Position, out Vector3? nearest))
+                if (this.IsWalkable(agent, result.Position, out Vector3? nearest))
                 {
-                    finalPosition = GetPositionWalkable(agent, prevPosition, newPosition, results[i].Position, adjustHeight);
+                    finalPosition = GetPositionWalkable(agent, prevPosition, newPosition, result.Position, adjustHeight);
 
                     return true;
                 }

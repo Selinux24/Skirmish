@@ -86,8 +86,6 @@ namespace Engine
         /// <returns>Returns true if picked position found</returns>
         public bool PickNearest(Ray ray, RayPickingParams rayPickingParams, out PickingResult<Triangle> result)
         {
-            bool res = false;
-
             result = new PickingResult<Triangle>()
             {
                 Distance = float.MaxValue,
@@ -95,35 +93,47 @@ namespace Engine
 
             bool facingOnly = rayPickingParams.HasFlag(RayPickingParams.FacingOnly);
 
-            if (this.groundPickingQuadtree != null)
+            if (groundPickingQuadtree != null)
             {
                 // Use quadtree
-                if (this.groundPickingQuadtree.PickNearest(ray, facingOnly, out PickingResult<Triangle> gResult))
+                if (!groundPickingQuadtree.PickNearest(ray, facingOnly, out var gResult))
                 {
-                    if (result.Distance > gResult.Distance)
-                    {
-                        result = gResult;
-                    }
-
-                    res = true;
+                    // Without contacts
+                    return false;
                 }
+
+                // Store result
+                result.Position = gResult.Position;
+                result.Item = gResult.Item;
+                result.Distance = gResult.Distance;
+
+                return true;
             }
             else if (collisionDetection == CollisionDetectionMode.BruteForce)
             {
                 // Brute force
                 var mesh = GetVolume(true);
-                var inItem = Intersection.IntersectNearest(ray, mesh, facingOnly, out var pos, out var tri, out var d);
-                if (inItem)
+                if (!mesh.Any())
                 {
-                    result.Position = pos;
-                    result.Item = tri;
-                    result.Distance = d;
-
-                    res = true;
+                    // Empty mesh
+                    return false;
                 }
+
+                if (!Intersection.IntersectNearest(ray, mesh, facingOnly, out var pos, out var tri, out var d))
+                {
+                    // There are no intersected primitives
+                    return false;
+                }
+
+                // Store result
+                result.Position = pos;
+                result.Item = tri;
+                result.Distance = d;
+
+                return true;
             }
 
-            return res;
+            return false;
         }
         /// <summary>
         /// Gets first picking position of giving ray
@@ -144,8 +154,6 @@ namespace Engine
         /// <returns>Returns true if picked position found</returns>
         public bool PickFirst(Ray ray, RayPickingParams rayPickingParams, out PickingResult<Triangle> result)
         {
-            bool res = false;
-
             result = new PickingResult<Triangle>()
             {
                 Distance = float.MaxValue,
@@ -153,35 +161,46 @@ namespace Engine
 
             bool facingOnly = rayPickingParams.HasFlag(RayPickingParams.FacingOnly);
 
-            if (this.groundPickingQuadtree != null)
+            if (groundPickingQuadtree != null)
             {
                 // Use quadtree
-                if (this.groundPickingQuadtree.PickFirst(ray, facingOnly, out PickingResult<Triangle> gResult))
+                if (!groundPickingQuadtree.PickFirst(ray, facingOnly, out var gResult))
                 {
-                    if (result.Distance > gResult.Distance)
-                    {
-                        result = gResult;
-                    }
-
-                    res = true;
+                    return false;
                 }
+
+                // Store result
+                result.Position = gResult.Position;
+                result.Item = gResult.Item;
+                result.Distance = gResult.Distance;
+
+                return true;
             }
             else if (collisionDetection == CollisionDetectionMode.BruteForce)
             {
                 // Brute force
                 var mesh = GetVolume(true);
-                var inItem = Intersection.IntersectFirst(ray, mesh, facingOnly, out var pos, out var tri, out var d);
-                if (inItem)
+                if (!mesh.Any())
                 {
-                    result.Position = pos;
-                    result.Item = tri;
-                    result.Distance = d;
-
-                    res = true;
+                    // Empty mesh
+                    return false;
                 }
+
+                if (!Intersection.IntersectFirst(ray, mesh, facingOnly, out var pos, out var tri, out var d))
+                {
+                    // There are no intersected primitives
+                    return false;
+                }
+
+                // Store result
+                result.Position = pos;
+                result.Item = tri;
+                result.Distance = d;
+
+                return true;
             }
 
-            return res;
+            return false;
         }
         /// <summary>
         /// Get all picking positions of giving ray
@@ -189,7 +208,7 @@ namespace Engine
         /// <param name="ray">Picking ray</param>
         /// <param name="results">Picking results</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool PickAll(Ray ray, out PickingResult<Triangle>[] results)
+        public bool PickAll(Ray ray, out IEnumerable<PickingResult<Triangle>> results)
         {
             return PickAll(ray, RayPickingParams.Default, out results);
         }
@@ -200,47 +219,59 @@ namespace Engine
         /// <param name="rayPickingParams">Ray picking params</param>
         /// <param name="results">Picking results</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool PickAll(Ray ray, RayPickingParams rayPickingParams, out PickingResult<Triangle>[] results)
+        public bool PickAll(Ray ray, RayPickingParams rayPickingParams, out IEnumerable<PickingResult<Triangle>> results)
         {
-            bool res = false;
-
-            results = null;
+            results = new PickingResult<Triangle>[] { };
 
             bool facingOnly = rayPickingParams.HasFlag(RayPickingParams.FacingOnly);
 
-            if (this.groundPickingQuadtree != null)
+            if (groundPickingQuadtree != null)
             {
                 // Use quadtree
-                if (this.groundPickingQuadtree.PickAll(ray, facingOnly, out PickingResult<Triangle>[] gResults))
+                if (!groundPickingQuadtree.PickAll(ray, facingOnly, out var gResults))
                 {
-                    results = gResults;
-
-                    res = true;
+                    // Without contacts
+                    return false;
                 }
+
+                results = gResults;
+
+                return true;
             }
             else if (collisionDetection == CollisionDetectionMode.BruteForce)
             {
                 // Brute force
                 var mesh = GetVolume(true);
-                var inItem = Intersection.IntersectAll(ray, mesh, facingOnly, out var pos, out var tris, out var ds);
-                if (inItem)
+                if (!mesh.Any())
                 {
-                    results = new PickingResult<Triangle>[pos.Length];
-                    for (int i = 0; i < pos.Length; i++)
-                    {
-                        results[i] = new PickingResult<Triangle>
-                        {
-                            Position = pos[i],
-                            Item = tris[i],
-                            Distance = ds[i],
-                        };
-                    }
-
-                    res = true;
+                    // Empty mesh
+                    return false;
                 }
+
+                if (!Intersection.IntersectAll(ray, mesh, facingOnly, out var pos, out var tris, out var ds))
+                {
+                    // There are no intersected primitives
+                    return false;
+                }
+
+                // Store results
+                List<PickingResult<Triangle>> picks = new List<PickingResult<Triangle>>(pos.Length);
+                for (int i = 0; i < pos.Length; i++)
+                {
+                    picks.Add(new PickingResult<Triangle>
+                    {
+                        Position = pos[i],
+                        Item = tris[i],
+                        Distance = ds[i],
+                    });
+                }
+
+                results = picks;
+
+                return true;
             }
 
-            return res;
+            return false;
         }
 
         /// <summary>

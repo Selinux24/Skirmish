@@ -46,7 +46,7 @@ namespace Engine
         /// <param name="ray">Picking ray</param>
         /// <param name="results">Picking results</param>
         /// <returns>Returns true if ground position found</returns>
-        bool PickAll(Ray ray, out PickingResult<T>[] results);
+        bool PickAll(Ray ray, out IEnumerable<PickingResult<T>> results);
         /// <summary>
         /// Gets all picking position of giving ray
         /// </summary>
@@ -54,7 +54,7 @@ namespace Engine
         /// <param name="rayPickingParams">Ray picking params</param>
         /// <param name="results">Picking results</param>
         /// <returns>Returns true if ground position found</returns>
-        bool PickAll(Ray ray, RayPickingParams rayPickingParams, out PickingResult<T>[] results);
+        bool PickAll(Ray ray, RayPickingParams rayPickingParams, out IEnumerable<PickingResult<T>> results);
 
         /// <summary>
         /// Gets bounding sphere
@@ -72,6 +72,6 @@ namespace Engine
         /// </summary>
         /// <param name="full">Gets full geometry</param>
         /// <returns>Returns the volume geometry of the instance</returns>
-        IEnumerable<Triangle> GetVolume(bool full);
+        IEnumerable<T> GetVolume(bool full);
     }
 }

@@ -397,7 +397,7 @@ namespace Deferred
         }
         private void StartTerrain()
         {
-            if (FindTopGroundPosition(20, -20, out var treePos))
+            if (FindTopGroundPosition<Triangle>(20, -20, out var treePos))
             {
                 tree.Manipulator.SetPosition(treePos.Position);
                 tree.Manipulator.SetScale(0.5f);
@@ -405,7 +405,7 @@ namespace Deferred
 
             for (int i = 0; i < trees.InstanceCount; i++)
             {
-                if (FindTopGroundPosition((i * 10) - 35, 17, out var pos))
+                if (FindTopGroundPosition<Triangle>((i * 10) - 35, 17, out var pos))
                 {
                     trees[i].Manipulator.SetScale(0.5f, true);
                     trees[i].Manipulator.SetPosition(pos.Position, true);
@@ -419,7 +419,7 @@ namespace Deferred
 
             for (int i = 0; i < tankAgents.Count; i++)
             {
-                if (FindTopGroundPosition((i * 10) - (tankAgents.Count * 10 / 2), 40, out var t1Pos))
+                if (FindTopGroundPosition<Triangle>((i * 10) - (tankAgents.Count * 10 / 2), 40, out var t1Pos))
                 {
                     tankAgents[i].Manipulator.SetPosition(t1Pos.Position);
                     tankAgents[i].Manipulator.SetNormal(t1Pos.Item.Normal);
@@ -428,7 +428,7 @@ namespace Deferred
                 }
             }
 
-            if (FindTopGroundPosition(20, -20, out var hPos))
+            if (FindTopGroundPosition<Triangle>(20, -20, out var hPos))
             {
                 var p = hPos.Position;
                 p.Y += 10f;
@@ -444,7 +444,7 @@ namespace Deferred
 
             for (int i = 0; i < helicopters.InstanceCount; i++)
             {
-                if (FindTopGroundPosition((i * 10) - 20, 20, out var r))
+                if (FindTopGroundPosition<Triangle>((i * 10) - 20, 20, out var r))
                 {
                     var p = r.Position;
                     p.Y += 10f;
@@ -548,7 +548,7 @@ namespace Deferred
                 var pRay = GetPickingRay();
                 var rayPParams = RayPickingParams.FacingOnly | RayPickingParams.Perfect;
 
-                if (PickNearest(pRay, rayPParams, out var r))
+                if (PickNearest<Triangle>(pRay, rayPParams, out var r))
                 {
                     var tri = Line3D.CreateWiredTriangle(r.Item);
                     volumesDrawer.SetPrimitives(Color.White, tri);
@@ -965,11 +965,11 @@ namespace Deferred
             Vector2 c3 = new Vector2(rect.Left, rect.Bottom);
             Vector2 ct = rect.Center;
 
-            FindFirstGroundPosition(c0.X, c0.Y, out var r0);
-            FindFirstGroundPosition(c1.X, c1.Y, out var r1);
-            FindFirstGroundPosition(c2.X, c2.Y, out var r2);
-            FindFirstGroundPosition(c3.X, c3.Y, out var r3);
-            FindFirstGroundPosition(ct.X, ct.Y, out var rt);
+            FindFirstGroundPosition<Triangle>(c0.X, c0.Y, out var r0);
+            FindFirstGroundPosition<Triangle>(c1.X, c1.Y, out var r1);
+            FindFirstGroundPosition<Triangle>(c2.X, c2.Y, out var r2);
+            FindFirstGroundPosition<Triangle>(c3.X, c3.Y, out var r3);
+            FindFirstGroundPosition<Triangle>(ct.X, ct.Y, out var rt);
 
             lines.AddRange(Line3D.CreateWiredSquare(new[] { r0.Position, r1.Position, r2.Position, r3.Position }));
 

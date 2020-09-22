@@ -1121,7 +1121,7 @@ namespace Heightmap
         }
         private async Task SetPlayerPosition()
         {
-            if (this.FindAllGroundPosition(-20, -40, out PickingResult<Triangle>[] res))
+            if (this.FindAllGroundPosition<Triangle>(-20, -40, out var res))
             {
                 this.soldier.Manipulator.SetPosition(res.Last().Position, true);
                 this.soldier.Manipulator.SetRotation(MathUtil.Pi, 0, 0, true);

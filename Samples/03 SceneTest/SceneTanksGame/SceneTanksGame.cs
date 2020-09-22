@@ -900,12 +900,12 @@ namespace SceneTest.SceneTanksGame
             Vector3 p2 = new Vector3(+100, 100, 0);
             Vector3 n2 = Vector3.Up;
 
-            if (this.FindTopGroundPosition(p1.X, p1.Z, out var r1))
+            if (this.FindTopGroundPosition<Triangle>(p1.X, p1.Z, out var r1))
             {
                 p1 = r1.Position - (Vector3.Up * 0.1f);
                 n1 = r1.Item.Normal;
             }
-            if (this.FindTopGroundPosition(p2.X, p2.Z, out var r2))
+            if (this.FindTopGroundPosition<Triangle>(p2.X, p2.Z, out var r2))
             {
                 p2 = r2.Position - (Vector3.Up * 0.1f);
                 n2 = r2.Item.Normal;
@@ -1225,7 +1225,7 @@ You will lost all the game progress.",
         }
         private void UpdateTanks()
         {
-            if (this.FindTopGroundPosition(Shooter.Manipulator.Position.X, Shooter.Manipulator.Position.Z, out var r))
+            if (this.FindTopGroundPosition<Triangle>(Shooter.Manipulator.Position.X, Shooter.Manipulator.Position.Z, out var r))
             {
                 Shooter.Manipulator.SetPosition(r.Position - (Vector3.Up * 0.1f));
                 Shooter.Manipulator.SetNormal(r.Item.Normal, 0.05f);

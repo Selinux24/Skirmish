@@ -220,7 +220,7 @@ namespace Engine
             {
                 var ray = scene.GetTopDownRay(pos);
 
-                bool found = scene.PickFirst(
+                bool found = scene.PickFirst<Triangle>(
                     ray,
                     RayPickingParams.FacingOnly | RayPickingParams.Geometry,
                     SceneObjectUsages.Ground,

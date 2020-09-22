@@ -595,7 +595,7 @@ namespace Engine
         /// <returns>Returns true if ground position found</returns>
         public bool PickNearest(Ray ray, out PickingResult<Triangle> result)
         {
-            return PickNearest(ray, RayPickingParams.Default, out result);
+            return RayPickingHelper.PickNearest(this, ray, out result);
         }
         /// <summary>
         /// Gets nearest picking position of giving ray
@@ -606,28 +606,7 @@ namespace Engine
         /// <returns>Returns true if ground position found</returns>
         public bool PickNearest(Ray ray, RayPickingParams rayPickingParams, out PickingResult<Triangle> result)
         {
-            result = new PickingResult<Triangle>()
-            {
-                Distance = float.MaxValue,
-            };
-
-            var bsph = GetBoundingSphere();
-            if (bsph.Intersects(ref ray))
-            {
-                bool facingOnly = rayPickingParams.HasFlag(RayPickingParams.FacingOnly);
-                var triangles = GetVolume(rayPickingParams.HasFlag(RayPickingParams.Geometry));
-
-                if (triangles.Any() && Intersection.IntersectNearest(ray, triangles, facingOnly, out Vector3 pos, out Triangle tri, out float d))
-                {
-                    result.Position = pos;
-                    result.Item = tri;
-                    result.Distance = d;
-
-                    return true;
-                }
-            }
-
-            return false;
+            return RayPickingHelper.PickNearest(this, ray, rayPickingParams, out result);
         }
         /// <summary>
         /// Gets first picking position of giving ray
@@ -637,7 +616,7 @@ namespace Engine
         /// <returns>Returns true if ground position found</returns>
         public bool PickFirst(Ray ray, out PickingResult<Triangle> result)
         {
-            return PickFirst(ray, RayPickingParams.Default, out result);
+            return RayPickingHelper.PickFirst(this, ray, out result);
         }
         /// <summary>
         /// Gets first picking position of giving ray
@@ -648,28 +627,7 @@ namespace Engine
         /// <returns>Returns true if ground position found</returns>
         public bool PickFirst(Ray ray, RayPickingParams rayPickingParams, out PickingResult<Triangle> result)
         {
-            result = new PickingResult<Triangle>()
-            {
-                Distance = float.MaxValue,
-            };
-
-            var bsph = GetBoundingSphere();
-            if (bsph.Intersects(ref ray))
-            {
-                bool facingOnly = rayPickingParams.HasFlag(RayPickingParams.FacingOnly);
-                var triangles = GetVolume(rayPickingParams.HasFlag(RayPickingParams.Geometry));
-
-                if (triangles.Any() && Intersection.IntersectFirst(ray, triangles, facingOnly, out Vector3 pos, out Triangle tri, out float d))
-                {
-                    result.Position = pos;
-                    result.Item = tri;
-                    result.Distance = d;
-
-                    return true;
-                }
-            }
-
-            return false;
+            return RayPickingHelper.PickFirst(this, ray, rayPickingParams, out result);
         }
         /// <summary>
         /// Get all picking positions of giving ray
@@ -677,9 +635,9 @@ namespace Engine
         /// <param name="ray">Picking ray</param>
         /// <param name="results">Picking results</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool PickAll(Ray ray, out PickingResult<Triangle>[] results)
+        public bool PickAll(Ray ray, out IEnumerable<PickingResult<Triangle>> results)
         {
-            return PickAll(ray, RayPickingParams.Default, out results);
+            return RayPickingHelper.PickAll(this, ray, out results);
         }
         /// <summary>
         /// Gets all picking position of giving ray
@@ -688,35 +646,9 @@ namespace Engine
         /// <param name="rayPickingParams">Ray picking params</param>
         /// <param name="results">Picking results</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool PickAll(Ray ray, RayPickingParams rayPickingParams, out PickingResult<Triangle>[] results)
+        public bool PickAll(Ray ray, RayPickingParams rayPickingParams, out IEnumerable<PickingResult<Triangle>> results)
         {
-            results = null;
-
-            var bsph = GetBoundingSphere();
-            if (bsph.Intersects(ref ray))
-            {
-                bool facingOnly = rayPickingParams.HasFlag(RayPickingParams.FacingOnly);
-                var triangles = GetVolume(rayPickingParams.HasFlag(RayPickingParams.Geometry));
-
-                if (triangles.Any() && Intersection.IntersectAll(ray, triangles, facingOnly, out Vector3[] pos, out Triangle[] tri, out float[] ds))
-                {
-                    results = new PickingResult<Triangle>[pos.Length];
-
-                    for (int i = 0; i < results.Length; i++)
-                    {
-                        results[i] = new PickingResult<Triangle>
-                        {
-                            Position = pos[i],
-                            Item = tri[i],
-                            Distance = ds[i]
-                        };
-                    }
-
-                    return true;
-                }
-            }
-
-            return false;
+            return RayPickingHelper.PickAll(this, ray, rayPickingParams, out results);
         }
 
         /// <summary>

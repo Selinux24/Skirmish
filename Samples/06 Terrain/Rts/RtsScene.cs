@@ -2318,7 +2318,7 @@ namespace Terrain.Rts
 
         private void DEBUGPickingPosition(Vector3 position)
         {
-            if (this.FindAllGroundPosition(position.X, position.Z, out PickingResult<Triangle>[] results))
+            if (this.FindAllGroundPosition<Triangle>(position.X, position.Z, out var results))
             {
                 var positions = results.Select(r => r.Position).ToArray();
                 var triangles = results.Select(r => r.Item).ToArray();
