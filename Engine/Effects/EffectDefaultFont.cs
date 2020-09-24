@@ -23,9 +23,9 @@ namespace Engine.Effects
         /// </summary>
         private readonly EngineEffectVariableMatrix worldViewProjectionVar = null;
         /// <summary>
-        /// Color effect variable
+        /// Alpha value effect variable
         /// </summary>
-        private readonly EngineEffectVariableVector colorVar = null;
+        private readonly EngineEffectVariableScalar alphaVar = null;
         /// <summary>
         /// Use color effect variable
         /// </summary>
@@ -69,17 +69,17 @@ namespace Engine.Effects
             }
         }
         /// <summary>
-        /// Color
+        /// Alpha value
         /// </summary>
-        protected Color4 Color
+        protected float Alpha
         {
             get
             {
-                return this.colorVar.GetVector<Color4>();
+                return this.alphaVar.GetFloat();
             }
             set
             {
-                this.colorVar.Set(value);
+                this.alphaVar.Set(value);
             }
         }
         /// <summary>
@@ -131,7 +131,7 @@ namespace Engine.Effects
 
             this.worldVar = this.Effect.GetVariableMatrix("gWorld");
             this.worldViewProjectionVar = this.Effect.GetVariableMatrix("gWorldViewProjection");
-            this.colorVar = this.Effect.GetVariableVector("gColor");
+            this.alphaVar = this.Effect.GetVariableScalar("gAlpha");
             this.useColorVar = this.Effect.GetVariableScalar("gUseColor");
             this.textureVar = this.Effect.GetVariableTexture("gTexture");
         }
@@ -148,14 +148,13 @@ namespace Engine.Effects
         public void UpdatePerFrame(
             Matrix world,
             Matrix viewProjection,
-            Color3 color,
             float alphaMult,
             bool useTextureColor,
             EngineShaderResourceView texture)
         {
             this.World = world;
             this.WorldViewProjection = world * viewProjection;
-            this.Color = new Color4(color, alphaMult);
+            this.Alpha = alphaMult;
             this.UseColor = useTextureColor;
             this.Texture = texture;
         }

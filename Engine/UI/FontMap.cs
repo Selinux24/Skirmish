@@ -12,6 +12,7 @@ namespace Engine.UI
     using Engine.Common;
     using Engine.Content;
     using SharpDX;
+    using System.Text.RegularExpressions;
 
     /// <summary>
     /// Font map
@@ -30,6 +31,10 @@ namespace Engine.UI
         /// Key codes
         /// </summary>
         public const uint KeyCodes = 512;
+        /// <summary>
+        /// Color pattern used for text parse
+        /// </summary>
+        public const string colorPattern = @"(?<cA>A|Alpha):(?<fA>\d+(?:(?:.|,)\d+)?) (?<cR>R|Red):(?<fR>\d+(?:(?:.|,)\d+)?) (?<cG>G|Green):(?<fG>\d+(?:(?:.|,)\d+)?) (?<cB>B|Blue):(?<fB>\d+(?:(?:.|,)\d+)?)(?:\|(?<sA>A|Alpha):(?<sfA>\d+(?:(?:.|,)\d+)?) (?<sR>R|Red):(?<sfR>\d+(?:(?:.|,)\d+)?) (?<sG>G|Green):(?<sfG>\d+(?:(?:.|,)\d+)?) (?<sB>B|Blue):(?<sfB>\d+(?:(?:.|,)\d+)?)|)";
 
         /// <summary>
         /// Default line separation in pixels
@@ -78,7 +83,7 @@ namespace Engine.UI
         /// <param name="horizontalAlign">Horizontal align</param>
         /// <param name="verticalAlign">Vertical align</param>
         /// <returns>Returns a new vertex list</returns>
-        private static IEnumerable<VertexPositionTexture> AlignVertices(IEnumerable<VertexPositionTexture> vertices, RectangleF rect, HorizontalTextAlign horizontalAlign, VerticalTextAlign verticalAlign)
+        private static IEnumerable<VertexFont> AlignVertices(IEnumerable<VertexFont> vertices, RectangleF rect, HorizontalTextAlign horizontalAlign, VerticalTextAlign verticalAlign)
         {
             if (horizontalAlign == HorizontalTextAlign.Left && verticalAlign == VerticalTextAlign.Top)
             {
@@ -93,7 +98,7 @@ namespace Engine.UI
             var textSize = MeasureText(vertices);
 
             //Relocate lines
-            List<VertexPositionTexture> res = new List<VertexPositionTexture>();
+            List<VertexFont> res = new List<VertexFont>();
             foreach (var l in lines)
             {
                 //Find this line width
@@ -128,11 +133,11 @@ namespace Engine.UI
         /// Separate the vertex list into a list o vertex list by text line
         /// </summary>
         /// <param name="verts">Vertex list</param>
-        private static IEnumerable<VertexPositionTexture[]> SeparateLines(VertexPositionTexture[] verts)
+        private static IEnumerable<VertexFont[]> SeparateLines(VertexFont[] verts)
         {
-            List<VertexPositionTexture[]> lines = new List<VertexPositionTexture[]>();
+            List<VertexFont[]> lines = new List<VertexFont[]>();
 
-            List<VertexPositionTexture> line = new List<VertexPositionTexture>();
+            List<VertexFont> line = new List<VertexFont>();
 
             for (int i = 0; i < verts.Length; i += 4)
             {
@@ -209,7 +214,7 @@ namespace Engine.UI
         /// </summary>
         /// <param name="vertices">Vertex list</param>
         /// <returns>Returns a vector with the width in the x component, and the height in the y component</returns>
-        private static Vector2 MeasureText(IEnumerable<VertexPositionTexture> vertices)
+        private static Vector2 MeasureText(IEnumerable<VertexFont> vertices)
         {
             float maxX = float.MinValue;
             float maxY = float.MinValue;
@@ -234,11 +239,15 @@ namespace Engine.UI
         /// </summary>
         /// <param name="text">Text to parse</param>
         /// <returns>Returns a list of words</returns>
-        private static string[] ParseSentence(string text)
+        private static void ParseSentence(string text, Color4 defaultForeColor, Color4 defaultShadowColor, out string[] words, out IEnumerable<Color4[]> colors, out IEnumerable<Color4[]> shadowColors)
         {
+            words = new string[] { };
+            colors = new List<Color4[]>();
+            shadowColors = new List<Color4[]>();
+
             if (string.IsNullOrWhiteSpace(text))
             {
-                return new string[] { };
+                return;
             }
 
             if (text.Length > MAXTEXTLENGTH)
@@ -247,25 +256,48 @@ namespace Engine.UI
             }
 
             List<string> sentenceParts = new List<string>();
+            List<Color4[]> colorParts = new List<Color4[]>();
+            List<Color4[]> shadowColorParts = new List<Color4[]>();
 
             //Find lines
             var lines = text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
-            foreach (var line in lines)
+            foreach (string line in lines)
             {
-                if (!string.IsNullOrEmpty(line))
+                if (string.IsNullOrEmpty(line))
                 {
-                    var words = line.Split(new[] { " " }, StringSplitOptions.None);
-                    foreach (var word in words)
-                    {
-                        sentenceParts.Add(word);
-                        sentenceParts.Add(" ");
-                    }
+                    continue;
+                }
+
+                Parse(line, defaultForeColor, defaultShadowColor, out string parsedLine, out var charColors, out var charShadowColors);
+
+                var parts = parsedLine.Split(new[] { " " }, StringSplitOptions.None);
+                foreach (var part in parts)
+                {
+                    var partColors = charColors.Take(part.Length + 1);
+                    charColors = charColors.Skip(part.Length + 1);
+
+                    var partShadowColors = charShadowColors.Take(part.Length + 1);
+                    charShadowColors = charShadowColors.Skip(part.Length + 1);
+
+                    sentenceParts.Add(part);
+                    colorParts.Add(partColors.ToArray());
+                    shadowColorParts.Add(partShadowColors.ToArray());
+
+                    sentenceParts.Add(" ");
+                    colorParts.Add(new Color4[] { Color.Transparent });
+                    shadowColorParts.Add(new Color4[] { Color.Transparent });
                 }
 
                 sentenceParts.Add(Environment.NewLine);
+                colorParts.Add(new Color4[] { Color.Transparent });
+                shadowColorParts.Add(new Color4[] { Color.Transparent });
             }
 
-            return sentenceParts.ToArray();
+            words = sentenceParts.ToArray();
+            colors = colorParts.ToArray();
+            shadowColors = shadowColorParts.ToArray();
+
+            return;
         }
         /// <summary>
         /// Parses the specified font family string
@@ -692,32 +724,37 @@ namespace Engine.UI
         /// <param name="size">Gets generated sentence total size</param>
         public void MapSentence(
             string text,
+            Color4 defaultForeColor,
+            Color4 defaultShadowColor,
+            bool shadows,
             RectangleF rect,
             HorizontalTextAlign horizontalAlign,
             VerticalTextAlign verticalAlign,
-            out VertexPositionTexture[] vertices,
+            out VertexFont[] vertices,
             out uint[] indices,
             out Vector2 size)
         {
             size = Vector2.Zero;
-            vertices = null;
-            indices = null;
+            vertices = new VertexFont[] { };
+            indices = new uint[] { };
 
-            var words = ParseSentence(text);
+            ParseSentence(text, defaultForeColor, defaultShadowColor, out var words, out var colors, out var shadowColors);
             if (!words.Any())
             {
                 return;
             }
 
-            List<VertexPositionTexture> vertList = new List<VertexPositionTexture>();
+            List<VertexFont> vertList = new List<VertexFont>();
             List<uint> indexList = new List<uint>();
 
             var spaceSize = MapSpace();
             Vector2 pos = Vector2.Zero;
             bool firstWord = true;
 
-            foreach (var word in words)
+            for (int i = 0; i < words.Length; i++)
             {
+                string word = words[i];
+
                 if (string.IsNullOrEmpty(word))
                 {
                     //Discard empty words
@@ -744,11 +781,14 @@ namespace Engine.UI
                 //Store previous cursor position
                 Vector2 prevPos = pos;
 
+                //Select the color list for the word
+                var charColors = shadows ? shadowColors.ElementAtOrDefault(i) : colors.ElementAtOrDefault(i);
+
                 //Map the word
-                MapWord(word, ref pos, out var wVerts, out var wIndices, out var wHeight);
+                MapWord(word, charColors, ref pos, out var wVerts, out var wIndices, out var wHeight);
 
                 //Store the indices adding last vertext index in the list
-                wIndices.ToList().ForEach((i) => { indexList.Add(i + (uint)vertList.Count); });
+                wIndices.ToList().ForEach((index) => { indexList.Add(index + (uint)vertList.Count); });
 
                 if (!firstWord && pos.X > rect.Width)
                 {
@@ -758,9 +798,9 @@ namespace Engine.UI
 
                     //Move the word to the next line
                     Vector3 diff = new Vector3(prevPos.X, wHeight, 0);
-                    for (int i = 0; i < wVerts.Length; i++)
+                    for (int index = 0; index < wVerts.Length; index++)
                     {
-                        wVerts[i].Position -= diff;
+                        wVerts[index].Position -= diff;
                     }
                 }
 
@@ -780,7 +820,7 @@ namespace Engine.UI
         private Vector2 MapSpace()
         {
             Vector2 tmpPos = Vector2.Zero;
-            MapWord(" ", ref tmpPos, out _, out _, out var tmpHeight);
+            MapWord(" ", new Color4[] { }, ref tmpPos, out _, out _, out var tmpHeight);
 
             return new Vector2(tmpPos.X, tmpHeight);
         }
@@ -788,49 +828,38 @@ namespace Engine.UI
         /// Maps a word
         /// </summary>
         /// <param name="word">Word to map</param>
+        /// <param name="color">Color</param>
         /// <param name="pos">Position</param>
         /// <param name="vertices">Gets generated vertices</param>
         /// <param name="indices">Gets generated indices</param>
         /// <param name="height">Gets generated word height</param>
         private void MapWord(
             string word,
+            IEnumerable<Color4> colors,
             ref Vector2 pos,
-            out VertexPositionTexture[] vertices,
+            out VertexFont[] vertices,
             out uint[] indices,
             out float height)
         {
-            List<VertexPositionTexture> vertList = new List<VertexPositionTexture>();
+            List<VertexFont> vertList = new List<VertexFont>();
             List<uint> indexList = new List<uint>();
 
             height = 0;
 
-            foreach (char c in word)
+            for (int i = 0; i < word.Length; i++)
             {
-                if (!this.map.ContainsKey(c))
+                char c = word[i];
+                Color4 color = colors.ElementAtOrDefault(i);
+
+                if (!map.ContainsKey(c))
                 {
                     //Discard unmapped characters
                     continue;
                 }
 
-                var chr = this.map[c];
+                var chr = map[c];
 
-                //Creates the texture UVMap
-                var uv = GeometryUtil.CreateUVMap(
-                    chr.Width, chr.Height,
-                    chr.X, chr.Y,
-                    TextureWidth, TextureHeight);
-
-                //Creates the sprite
-                var s = GeometryUtil.CreateSprite(
-                    pos,
-                    chr.Width, chr.Height, 0, 0,
-                    uv);
-
-                //Add indices to word index list
-                s.Indices.ToList().ForEach((i) => { indexList.Add(i + (uint)vertList.Count); });
-
-                //Store the vertices
-                vertList.AddRange(VertexPositionTexture.Generate(s.Vertices, s.Uvs));
+                MapChar(chr, pos, color, vertList, indexList);
 
                 //Move the cursor position to the next character
                 float d = (float)(chr.Width - Math.Sqrt(chr.Width));
@@ -842,6 +871,27 @@ namespace Engine.UI
 
             vertices = vertList.ToArray();
             indices = indexList.ToArray();
+        }
+
+        private void MapChar(FontMapChar chr, Vector2 pos, Color4 color, List<VertexFont> vertList, List<uint> indexList)
+        {
+            //Creates the texture UVMap
+            var uv = GeometryUtil.CreateUVMap(
+                chr.Width, chr.Height,
+                chr.X, chr.Y,
+                TextureWidth, TextureHeight);
+
+            //Creates the sprite
+            var s = GeometryUtil.CreateSprite(
+                pos,
+                chr.Width, chr.Height, 0, 0,
+                uv);
+
+            //Add indices to word index list
+            s.Indices.ToList().ForEach((i) => { indexList.Add(i + (uint)vertList.Count); });
+
+            //Store the vertices
+            vertList.AddRange(VertexFont.Generate(s.Vertices, s.Uvs, color));
         }
         /// <summary>
         /// Gets the font's white space size
@@ -881,6 +931,120 @@ namespace Engine.UI
         public char[] GetKeys()
         {
             return map.Keys.ToArray();
+        }
+
+
+
+        private static void Parse(string text, Color4 defaultForeColor, Color4 defaultShadowColor, out string parsedString, out IEnumerable<Color4> foreColors, out IEnumerable<Color4> shadowColors)
+        {
+            string rawString = text;
+            Color4 foreColor = defaultForeColor;
+            Color4 shadowColor = defaultShadowColor;
+
+            List<Color4> foreColorsByChar = new List<Color4>();
+            List<Color4> shadowColorsByChar = new List<Color4>();
+
+            RegexOptions options = RegexOptions.IgnoreCase;
+
+            Match match = Regex.Match(rawString, colorPattern, options);
+            while (match.Success)
+            {
+                int foreColorsLength = match.Index - foreColorsByChar.Count;
+                if (foreColorsLength > 0)
+                {
+                    foreColorsByChar.AddRange(Helper.CreateArray(foreColorsLength, foreColor));
+                }
+
+                int shadowColorsLength = match.Index - shadowColorsByChar.Count;
+                if (shadowColorsLength > 0)
+                {
+                    shadowColorsByChar.AddRange(Helper.CreateArray(shadowColorsLength, shadowColor));
+                }
+
+                ReadMatch(match, out var mForeColor, out var mShadowColor);
+
+                if (mForeColor.HasValue) foreColor = mForeColor.Value;
+                if (mShadowColor.HasValue) shadowColor = mShadowColor.Value;
+
+                rawString = rawString.Remove(match.Index, match.Length);
+
+                match = Regex.Match(rawString, colorPattern, options);
+            }
+
+            if (rawString.Length > foreColorsByChar.Count)
+            {
+                int length = rawString.Length - foreColorsByChar.Count;
+                foreColorsByChar.AddRange(Helper.CreateArray(length, foreColor));
+            }
+
+            if (rawString.Length > shadowColorsByChar.Count)
+            {
+                int length = rawString.Length - shadowColorsByChar.Count;
+                shadowColorsByChar.AddRange(Helper.CreateArray(length, shadowColor));
+            }
+
+            parsedString = rawString;
+            foreColors = foreColorsByChar;
+            shadowColors = shadowColorsByChar;
+        }
+
+        private static void ReadMatch(Match match, out Color4? foreColor, out Color4? shadowColor)
+        {
+            foreColor = null;
+            shadowColor = null;
+
+            foreach (Group gr in match.Groups)
+            {
+                if (gr.Name == "cA")
+                {
+                    string vA = match.Groups["fA"].Value;
+                    string vR = match.Groups["fR"].Value;
+                    string vG = match.Groups["fG"].Value;
+                    string vB = match.Groups["fB"].Value;
+
+                    if (gr.Value == "Alpha")
+                    {
+                        float a = float.Parse(vA);
+                        float r = float.Parse(vR);
+                        float g = float.Parse(vG);
+                        float b = float.Parse(vB);
+                        foreColor = new Color4(r, g, b, a);
+                    }
+                    else if (gr.Value == "A")
+                    {
+                        int a = int.Parse(vA);
+                        int r = int.Parse(vR);
+                        int g = int.Parse(vG);
+                        int b = int.Parse(vB);
+                        foreColor = new Color(r, g, b, a);
+                    }
+                }
+
+                if (gr.Name == "sA")
+                {
+                    string vA = match.Groups["sfA"].Value;
+                    string vR = match.Groups["sfR"].Value;
+                    string vG = match.Groups["sfG"].Value;
+                    string vB = match.Groups["sfB"].Value;
+
+                    if (gr.Value == "Alpha")
+                    {
+                        float a = float.Parse(vA);
+                        float r = float.Parse(vR);
+                        float g = float.Parse(vG);
+                        float b = float.Parse(vB);
+                        shadowColor = new Color4(r, g, b, a);
+                    }
+                    else if (gr.Value == "A")
+                    {
+                        int a = int.Parse(vA);
+                        int r = int.Parse(vR);
+                        int g = int.Parse(vG);
+                        int b = int.Parse(vB);
+                        shadowColor = new Color(r, g, b, a);
+                    }
+                }
+            }
         }
     }
 }

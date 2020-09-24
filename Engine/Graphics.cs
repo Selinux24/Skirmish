@@ -1202,6 +1202,8 @@ namespace Engine
                     return CreateVertexBuffer(name, data.OfType<VertexCpuParticle>(), dynamic);
                 case VertexTypes.GPUParticle:
                     return CreateVertexBuffer(name, data.OfType<VertexGpuParticle>(), dynamic);
+                case VertexTypes.Font:
+                    return CreateVertexBuffer(name, data.OfType<VertexFont>(), dynamic);
                 case VertexTypes.Terrain:
                     return CreateVertexBuffer(name, data.OfType<VertexTerrain>(), dynamic);
                 case VertexTypes.Position:

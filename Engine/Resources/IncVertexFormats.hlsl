@@ -26,6 +26,12 @@ struct VSVertexGPUParticle
 	uint type : TYPE;
 	float emissionTime : EMISSION_TIME;
 };
+struct VSVertexFont
+{
+    float3 positionLocal : POSITION;
+    float2 tex : TEXCOORD0;
+    float4 color : COLOR0;
+};
 struct VSVertexPosition
 {
 	float3 positionLocal : POSITION;
@@ -314,6 +320,13 @@ struct PSGPUParticle
 	float4 color : COLOR0;
 	float2 tex : TEXCOORD0;
 	uint primitiveID : SV_PRIMITIVEID;
+};
+struct PSVertexFont
+{
+    float4 positionHomogeneous : SV_POSITION;
+    float3 positionWorld : POSITION;
+    float2 tex : TEXCOORD0;
+    float4 color : COLOR0;
 };
 struct PSVertexPosition
 {

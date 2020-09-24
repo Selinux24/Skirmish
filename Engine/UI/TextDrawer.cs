@@ -1,4 +1,6 @@
 ﻿using SharpDX;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.UI
 {
@@ -25,7 +27,7 @@ namespace Engine.UI
         /// <summary>
         /// Vertices
         /// </summary>
-        private VertexPositionTexture[] vertices;
+        private VertexFont[] vertices;
         /// <summary>
         /// Indices
         /// </summary>
@@ -51,6 +53,14 @@ namespace Engine.UI
         /// Text
         /// </summary>
         private string text = null;
+        /// <summary>
+        /// Text fore color
+        /// </summary>
+        private Color4 textColor;
+        /// <summary>
+        /// Text shadow color
+        /// </summary>
+        private Color4 shadowColor;
 
         /// <summary>
         /// Parent control
@@ -108,13 +118,13 @@ namespace Engine.UI
         {
             get
             {
-                return this.text;
+                return text;
             }
             set
             {
-                if (!string.Equals(this.text, value))
+                if (!string.Equals(text, value))
                 {
-                    this.text = value;
+                    text = value;
 
                     updateInternals = true;
                 }
@@ -165,11 +175,41 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets text fore color
         /// </summary>
-        public Color4 TextColor { get; set; }
+        public Color4 TextColor
+        {
+            get
+            {
+                return textColor;
+            }
+            set
+            {
+                if (textColor != value)
+                {
+                    textColor = value;
+
+                    updateInternals = true;
+                }
+            }
+        }
         /// <summary>
         /// Gets or sets text shadow color
         /// </summary>
-        public Color4 ShadowColor { get; set; }
+        public Color4 ShadowColor
+        {
+            get
+            {
+                return shadowColor;
+            }
+            set
+            {
+                if (shadowColor != value)
+                {
+                    shadowColor = value;
+
+                    updateInternals = true;
+                }
+            }
+        }
         /// <summary>
         /// Alpha color component
         /// </summary>
@@ -189,7 +229,7 @@ namespace Engine.UI
         {
             get
             {
-                return this.vertexBuffer?.Ready == true && this.indexBuffer?.Ready == true;
+                return vertexBuffer?.Ready == true && indexBuffer?.Ready == true;
             }
         }
 
@@ -201,48 +241,48 @@ namespace Engine.UI
         public TextDrawer(Scene scene, TextDrawerDescription description)
             : base(scene, description)
         {
-            this.Manipulator = new Manipulator2D(this.Game);
-            this.ShadowManipulator = new Manipulator2D(this.Game);
+            Manipulator = new Manipulator2D(Game);
+            ShadowManipulator = new Manipulator2D(Game);
 
-            this.Font = string.Format("{0} {1}", description.FontFamily, description.FontSize);
+            Font = string.Format("{0} {1}", description.FontFamily, description.FontSize);
 
-            this.viewProjection = this.Game.Form.GetOrthoProjectionMatrix();
+            viewProjection = Game.Form.GetOrthoProjectionMatrix();
 
             if (!string.IsNullOrWhiteSpace(description.FontFileName) && !string.IsNullOrWhiteSpace(description.ContentPath))
             {
-                this.fontMap = FontMap.FromFile(this.Game, description.ContentPath, description.FontFileName, description.FontSize, description.Style);
+                fontMap = FontMap.FromFile(Game, description.ContentPath, description.FontFileName, description.FontSize, description.Style);
             }
             else if (description.FontMapping != null)
             {
-                this.fontMap = FontMap.FromMap(this.Game, description.ContentPath, description.FontMapping);
+                fontMap = FontMap.FromMap(Game, description.ContentPath, description.FontMapping);
             }
             else if (!string.IsNullOrWhiteSpace(description.FontFamily))
             {
-                this.fontMap = FontMap.FromFamily(this.Game, description.FontFamily, description.FontSize, description.Style);
+                fontMap = FontMap.FromFamily(Game, description.FontFamily, description.FontSize, description.Style);
             }
 
-            VertexPositionTexture[] verts = new VertexPositionTexture[FontMap.MAXTEXTLENGTH * 4];
+            VertexFont[] verts = new VertexFont[FontMap.MAXTEXTLENGTH * 4];
             uint[] idx = new uint[FontMap.MAXTEXTLENGTH * 6];
 
-            this.vertexBuffer = this.BufferManager.AddVertexData(description.Name, true, verts);
-            this.indexBuffer = this.BufferManager.AddIndexData(description.Name, true, idx);
+            vertexBuffer = BufferManager.AddVertexData(description.Name, true, verts);
+            indexBuffer = BufferManager.AddIndexData(description.Name, true, idx);
 
-            this.TextColor = description.TextColor;
-            this.UseTextureColor = description.UseTextureColor;
-            this.ShadowColor = description.ShadowColor;
-            this.ShadowDelta = description.ShadowDelta;
-            this.horizontalAlign = description.HorizontalAlign;
-            this.verticalAlign = description.VerticalAlign;
+            TextColor = description.TextColor;
+            UseTextureColor = description.UseTextureColor;
+            ShadowColor = description.ShadowColor;
+            ShadowDelta = description.ShadowDelta;
+            horizontalAlign = description.HorizontalAlign;
+            verticalAlign = description.VerticalAlign;
 
             if (description.LineAdjust)
             {
-                string sampleChar = $"{this.fontMap.GetSampleCharacter()}";
-                RectangleF rect = this.Game.Form.RenderRectangle;
+                string sampleChar = $"{fontMap.GetSampleCharacter()}";
+                RectangleF rect = Game.Form.RenderRectangle;
 
                 // Set base line threshold
-                var size = this.MeasureText(sampleChar, rect, HorizontalTextAlign.Left, VerticalTextAlign.Top);
+                var size = MeasureText(sampleChar, rect, HorizontalTextAlign.Left, VerticalTextAlign.Top);
 
-                this.baseLineThr = size.Y * 0.1666f; // --> 0.3333f * 0.5f
+                baseLineThr = size.Y * 0.1666f; // --> 0.3333f * 0.5f
             }
         }
         /// <summary>
@@ -259,8 +299,8 @@ namespace Engine.UI
             if (disposing)
             {
                 //Remove data from buffer manager
-                this.BufferManager?.RemoveVertexData(this.vertexBuffer);
-                this.BufferManager?.RemoveIndexData(this.indexBuffer);
+                BufferManager?.RemoveVertexData(vertexBuffer);
+                BufferManager?.RemoveIndexData(indexBuffer);
             }
         }
 
@@ -269,14 +309,14 @@ namespace Engine.UI
         {
             base.Update(context);
 
-            if (!this.Active)
+            if (!Active)
             {
                 return;
             }
 
             if (updateInternals)
             {
-                this.MapText();
+                MapText();
 
                 updateInternals = false;
             }
@@ -287,13 +327,13 @@ namespace Engine.UI
             Vector2 parentCenter;
             float parentScale;
 
-            if (this.parent != null)
+            if (parent != null)
             {
-                sca = Vector2.One * this.parent.AbsoluteScale;
-                pos = new Vector2(this.parent.AbsoluteLeft, this.parent.AbsoluteTop);
-                rot = this.parent.AbsoluteRotation;
-                parentCenter = this.parent.GrandpaRectangle.Center;
-                parentScale = this.parent.GrandpaScale;
+                sca = Vector2.One * parent.AbsoluteScale;
+                pos = new Vector2(parent.AbsoluteLeft, parent.AbsoluteTop);
+                rot = parent.AbsoluteRotation;
+                parentCenter = parent.GrandpaRectangle.Center;
+                parentScale = parent.GrandpaScale;
             }
             else
             {
@@ -305,22 +345,22 @@ namespace Engine.UI
             }
 
             // Adjust position
-            var rect = this.GetRenderArea();
+            var rect = GetRenderArea();
             pos.X = rect.X;
-            pos.Y = rect.Y + this.baseLineThr;
+            pos.Y = rect.Y + baseLineThr;
 
             // Calculate new transforms
-            this.Manipulator.SetScale(sca);
-            this.Manipulator.SetRotation(rot);
-            this.Manipulator.SetPosition(pos);
-            this.Manipulator.Update(parentCenter, parentScale);
+            Manipulator.SetScale(sca);
+            Manipulator.SetRotation(rot);
+            Manipulator.SetPosition(pos);
+            Manipulator.Update(parentCenter, parentScale);
 
-            if (this.ShadowColor != Color.Transparent)
+            if (ShadowColor != Color.Transparent)
             {
-                this.ShadowManipulator.SetScale(sca);
-                this.ShadowManipulator.SetRotation(rot);
-                this.ShadowManipulator.SetPosition(pos + this.ShadowDelta);
-                this.ShadowManipulator.Update(parentCenter, parentScale);
+                ShadowManipulator.SetScale(sca);
+                ShadowManipulator.SetRotation(rot);
+                ShadowManipulator.SetPosition(pos + ShadowDelta);
+                ShadowManipulator.Update(parentCenter, parentScale);
             }
         }
 
@@ -332,7 +372,7 @@ namespace Engine.UI
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(this.text))
+            if (string.IsNullOrWhiteSpace(text))
             {
                 return;
             }
@@ -347,29 +387,34 @@ namespace Engine.UI
                 return;
             }
 
-            bool draw = context.ValidateDraw(this.BlendMode, true);
+            bool draw = context.ValidateDraw(BlendMode, true);
             if (!draw)
             {
                 return;
             }
 
-            this.WriteBuffers();
+            WriteBuffers();
 
-            this.BufferManager.SetIndexBuffer(this.indexBuffer);
+            BufferManager.SetIndexBuffer(indexBuffer);
 
             var effect = DrawerPool.EffectDefaultFont;
             var technique = effect.FontDrawer;
 
-            this.BufferManager.SetInputAssembler(technique, this.vertexBuffer, Topology.TriangleList);
+            BufferManager.SetInputAssembler(technique, vertexBuffer, Topology.TriangleList);
 
-            if (this.ShadowColor != Color.Transparent)
+            if (ShadowColor != Color.Transparent)
             {
-                //Draw shadow
-                this.DrawText(effect, technique, this.ShadowManipulator.LocalTransform, this.ShadowColor, false);
+                //Draw with shadows
+                int offset = indexDrawCount / 2;
+                int count = indexDrawCount / 2;
+                DrawText(effect, technique, ShadowManipulator.LocalTransform, UseTextureColor, offset, count);
+                DrawText(effect, technique, Manipulator.LocalTransform, UseTextureColor, 0, count);
             }
-
-            //Draw text
-            this.DrawText(effect, technique, this.Manipulator.LocalTransform, this.TextColor, this.UseTextureColor);
+            else
+            {
+                //Draw fore color only
+                DrawText(effect, technique, Manipulator.LocalTransform, UseTextureColor, 0, indexDrawCount);
+            }
         }
         /// <summary>
         /// Draw text
@@ -377,25 +422,23 @@ namespace Engine.UI
         /// <param name="effect">Effect</param>
         /// <param name="technique">Technique</param>
         /// <param name="local">Local transform</param>
-        /// <param name="color">Text color</param>
         /// <param name="useTextureColor">Use the texture color</param>
-        private void DrawText(EffectDefaultFont effect, EngineEffectTechnique technique, Matrix local, Color4 color, bool useTextureColor)
+        private void DrawText(EffectDefaultFont effect, EngineEffectTechnique technique, Matrix local, bool useTextureColor, int index, int count)
         {
             effect.UpdatePerFrame(
                 local,
-                this.viewProjection,
-                color.RGB(),
-                color.Alpha * Alpha * AlphaMultplier,
+                viewProjection,
+                Alpha * AlphaMultplier,
                 useTextureColor,
-                this.fontMap.Texture);
+                fontMap.Texture);
 
-            var graphics = this.Game.Graphics;
+            var graphics = Game.Graphics;
 
             for (int p = 0; p < technique.PassCount; p++)
             {
                 graphics.EffectPassApply(technique, p, 0);
 
-                graphics.DrawIndexed(this.indexDrawCount, this.indexBuffer.BufferOffset, this.vertexBuffer.BufferOffset);
+                graphics.DrawIndexed(count, indexBuffer.BufferOffset + index, vertexBuffer.BufferOffset);
             }
         }
         /// <summary>
@@ -403,21 +446,21 @@ namespace Engine.UI
         /// </summary>
         private void WriteBuffers()
         {
-            if (!this.updateBuffers)
+            if (!updateBuffers)
             {
                 return;
             }
 
-            bool vertsWrited = this.BufferManager.WriteVertexBuffer(this.vertexBuffer, this.vertices);
-            bool idxWrited = this.BufferManager.WriteIndexBuffer(this.indexBuffer, this.indices);
+            bool vertsWrited = BufferManager.WriteVertexBuffer(vertexBuffer, vertices);
+            bool idxWrited = BufferManager.WriteIndexBuffer(indexBuffer, indices);
             if (!vertsWrited || !idxWrited)
             {
                 return;
             }
 
-            this.indexDrawCount = this.indices?.Length ?? 0;
+            indexDrawCount = indices?.Length ?? 0;
 
-            this.updateBuffers = false;
+            updateBuffers = false;
         }
 
         /// <summary>
@@ -425,7 +468,7 @@ namespace Engine.UI
         /// </summary>
         public void Resize()
         {
-            this.viewProjection = this.Game.Form.GetOrthoProjectionMatrix();
+            viewProjection = Game.Form.GetOrthoProjectionMatrix();
 
             updateInternals = true;
         }
@@ -435,19 +478,47 @@ namespace Engine.UI
         /// </summary>
         private void MapText()
         {
-            if (this.fontMap == null)
+            if (fontMap == null)
             {
                 return;
             }
 
-            this.fontMap.MapSentence(
-                this.text,
-                this.GetRenderArea(),
-                this.horizontalAlign,
-                this.verticalAlign,
-                out this.vertices, out this.indices, out _);
+            List<VertexFont> vList = new List<VertexFont>();
+            List<uint> iList = new List<uint>();
 
-            this.updateBuffers = true;
+            fontMap.MapSentence(
+                text,
+                TextColor,
+                ShadowColor,
+                false,
+                GetRenderArea(),
+                horizontalAlign,
+                verticalAlign,
+                out var verticesC, out var indicesC, out _);
+
+            iList.AddRange(indicesC);
+            vList.AddRange(verticesC);
+
+            if (ShadowColor != Color.Transparent)
+            {
+                fontMap.MapSentence(
+                    text,
+                    TextColor,
+                    ShadowColor,
+                    true,
+                    GetRenderArea(),
+                    horizontalAlign,
+                    verticalAlign,
+                    out var verticesSM, out var indicesSM, out _);
+
+                indicesSM.ToList().ForEach((i) => { iList.Add(i + (uint)vList.Count); });
+                vList.AddRange(verticesSM);
+            }
+
+            vertices = vList.ToArray();
+            indices = iList.ToArray();
+
+            updateBuffers = true;
         }
         /// <summary>
         /// Gets the text render area
@@ -455,7 +526,7 @@ namespace Engine.UI
         /// <returns>Returns the text render area</returns>
         private RectangleF GetRenderArea()
         {
-            return this.parent?.GetRenderArea() ?? this.Game.Form.RenderRectangle;
+            return parent?.GetRenderArea() ?? Game.Form.RenderRectangle;
         }
 
         /// <summary>
@@ -468,13 +539,16 @@ namespace Engine.UI
         /// <returns>Returns a size vector where X is the width, and Y is the height</returns>
         public Vector2 MeasureText(string text, RectangleF rect, HorizontalTextAlign horizontalAlign, VerticalTextAlign verticalAlign)
         {
-            if (this.fontMap == null)
+            if (fontMap == null)
             {
                 return Vector2.Zero;
             }
 
-            this.fontMap.MapSentence(
+            fontMap.MapSentence(
                 text,
+                Color.Transparent,
+                Color.Transparent,
+                false,
                 rect,
                 horizontalAlign,
                 verticalAlign,
@@ -487,16 +561,19 @@ namespace Engine.UI
         /// </summary>
         public float GetLineHeight()
         {
-            if (this.fontMap == null)
+            if (fontMap == null)
             {
                 return 0;
             }
 
-            string sampleChar = $"{this.fontMap.GetSampleCharacter()}";
-            RectangleF rect = this.Game.Form.RenderRectangle;
+            string sampleChar = $"{fontMap.GetSampleCharacter()}";
+            RectangleF rect = Game.Form.RenderRectangle;
 
-            this.fontMap.MapSentence(
+            fontMap.MapSentence(
                 sampleChar,
+                Color.Transparent,
+                Color.Transparent,
+                false,
                 rect,
                 HorizontalTextAlign.Left,
                 VerticalTextAlign.Top,

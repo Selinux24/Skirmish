@@ -1014,7 +1014,7 @@ namespace SceneTest.SceneTest
             }
 
             var pLines = new List<Line3D>();
-            var count = this.pManager.SystemsCount;
+            var count = this.pManager.Count;
             for (int i = 0; i < count; i++)
             {
                 pLines.AddRange(Line3D.CreateWiredBox(this.pManager.GetParticleSystem(i).Emitter.GetBoundingBox()));

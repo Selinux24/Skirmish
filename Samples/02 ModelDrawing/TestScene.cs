@@ -475,7 +475,7 @@ namespace ModelDrawing
         {
             lines.Clear();
 
-            var count = pManager.SystemsCount;
+            var count = pManager.Count;
             for (int i = 0; i < count; i++)
             {
                 lines.AddRange(Line3D.CreateWiredBox(pManager.GetParticleSystem(i).Emitter.GetBoundingBox()));

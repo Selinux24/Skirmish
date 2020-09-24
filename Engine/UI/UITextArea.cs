@@ -26,15 +26,15 @@ namespace Engine.UI
         {
             get
             {
-                return this.textDrawer?.Text;
+                return textDrawer?.Text;
             }
             set
             {
-                if (this.textDrawer != null && !string.Equals(value, this.textDrawer.Text))
+                if (textDrawer != null && !string.Equals(value, textDrawer.Text))
                 {
-                    this.textDrawer.Text = value;
+                    textDrawer.Text = value;
 
-                    this.GrowControl();
+                    GrowControl();
                 }
             }
         }
@@ -49,9 +49,9 @@ namespace Engine.UI
             }
             set
             {
-                if (this.textDrawer != null && this.textDrawer.TextColor != value)
+                if (textDrawer != null && textDrawer.TextColor != value)
                 {
-                    this.textDrawer.TextColor = value;
+                    textDrawer.TextColor = value;
                 }
             }
         }
@@ -66,9 +66,9 @@ namespace Engine.UI
             }
             set
             {
-                if (this.textDrawer != null && this.textDrawer.ShadowColor != value)
+                if (textDrawer != null && textDrawer.ShadowColor != value)
                 {
-                    this.textDrawer.ShadowColor = value;
+                    textDrawer.ShadowColor = value;
                 }
             }
         }
@@ -79,13 +79,13 @@ namespace Engine.UI
         {
             get
             {
-                return this.textDrawer?.HorizontalAlign ?? HorizontalTextAlign.Left;
+                return textDrawer?.HorizontalAlign ?? HorizontalTextAlign.Left;
             }
             set
             {
-                if (this.textDrawer != null && this.textDrawer.HorizontalAlign != value)
+                if (textDrawer != null && textDrawer.HorizontalAlign != value)
                 {
-                    this.textDrawer.HorizontalAlign = value;
+                    textDrawer.HorizontalAlign = value;
                 }
             }
         }
@@ -96,13 +96,13 @@ namespace Engine.UI
         {
             get
             {
-                return this.textDrawer?.VerticalAlign ?? VerticalTextAlign.Top;
+                return textDrawer?.VerticalAlign ?? VerticalTextAlign.Top;
             }
             set
             {
-                if (this.textDrawer != null && this.textDrawer.VerticalAlign != value)
+                if (textDrawer != null && textDrawer.VerticalAlign != value)
                 {
-                    this.textDrawer.VerticalAlign = value;
+                    textDrawer.VerticalAlign = value;
                 }
             }
         }
@@ -117,9 +117,9 @@ namespace Engine.UI
             {
                 base.Alpha = value;
 
-                if (this.textDrawer != null && this.textDrawer.Alpha != value)
+                if (textDrawer != null && textDrawer.Alpha != value)
                 {
-                    this.textDrawer.Alpha = value;
+                    textDrawer.Alpha = value;
                 }
             }
         }
@@ -140,23 +140,23 @@ namespace Engine.UI
         /// <param name="description">Description</param>
         public UITextArea(Scene scene, UITextAreaDescription description) : base(scene, description)
         {
-            this.Padding = description.Padding;
-            this.AdjustAreaWithText = description.AdjustAreaWithText;
+            Padding = description.Padding;
+            AdjustAreaWithText = description.AdjustAreaWithText;
 
             if (description.Font != null)
             {
                 description.Font.Name = description.Font.Name ?? $"{description.Name}.TextArea";
 
-                this.textDrawer = new TextDrawer(scene, description.Font)
+                textDrawer = new TextDrawer(scene, description.Font)
                 {
                     Parent = this,
                 };
 
-                this.Text = description.Text;
+                Text = description.Text;
 
-                this.lineHeight = this.textDrawer.GetLineHeight();
+                lineHeight = textDrawer.GetLineHeight();
 
-                this.GrowControl();
+                GrowControl();
             }
         }
         /// <inheritdoc/>
@@ -164,7 +164,7 @@ namespace Engine.UI
         {
             if (disposing)
             {
-                this.textDrawer?.Dispose();
+                textDrawer?.Dispose();
             }
 
             base.Dispose(disposing);
@@ -175,12 +175,12 @@ namespace Engine.UI
         {
             base.Update(context);
 
-            if (!this.Active)
+            if (!Active)
             {
                 return;
             }
 
-            this.textDrawer?.Update(context);
+            textDrawer?.Update(context);
         }
 
         /// <inheritdoc/>
@@ -188,12 +188,12 @@ namespace Engine.UI
         {
             base.Draw(context);
 
-            if (!this.Visible)
+            if (!Visible)
             {
                 return;
             }
 
-            this.textDrawer?.Draw(context);
+            textDrawer?.Draw(context);
         }
 
         /// <inheritdoc/>
@@ -201,7 +201,7 @@ namespace Engine.UI
         {
             base.Resize();
 
-            this.textDrawer?.Resize();
+            textDrawer?.Resize();
         }
 
         /// <inheritdoc/>
@@ -217,15 +217,15 @@ namespace Engine.UI
             {
                 left = Left;
                 top = Top;
-                width = this.Game.Form.RenderWidth - left;
-                height = this.Game.Form.RenderHeight - top;
+                width = Game.Form.RenderWidth - left;
+                height = Game.Form.RenderHeight - top;
             }
             else
             {
                 left = AbsoluteLeft;
                 top = AbsoluteTop;
-                width = AbsoluteWidth == 0 ? this.Game.Form.RenderWidth - AbsoluteLeft : AbsoluteWidth;
-                height = AbsoluteHeight == 0 ? this.Game.Form.RenderHeight - AbsoluteTop : AbsoluteHeight;
+                width = AbsoluteWidth == 0 ? Game.Form.RenderWidth - AbsoluteLeft : AbsoluteWidth;
+                height = AbsoluteHeight == 0 ? Game.Form.RenderHeight - AbsoluteTop : AbsoluteHeight;
             }
 
             return new RectangleF(
@@ -240,20 +240,20 @@ namespace Engine.UI
         /// </summary>
         private void GrowControl()
         {
-            var size = this.textDrawer.MeasureText(this.Text, this.GetRenderArea(), this.HorizontalAlign, this.VerticalAlign);
+            var size = textDrawer.MeasureText(Text, GetRenderArea(), HorizontalAlign, VerticalAlign);
 
             //Set initial sizes
-            if (this.Width == 0) this.Width = size.X;
-            if (this.Height == 0) this.Height = size.Y == 0 ? this.lineHeight : size.Y;
+            if (Width == 0) Width = size.X;
+            if (Height == 0) Height = size.Y == 0 ? lineHeight : size.Y;
 
-            if (!this.AdjustAreaWithText)
+            if (!AdjustAreaWithText)
             {
                 return;
             }
 
             //Grow area
-            this.Width = size.X;
-            this.Height = size.Y == 0 ? this.lineHeight : size.Y;
+            Width = size.X;
+            Height = size.Y == 0 ? lineHeight : size.Y;
         }
     }
 

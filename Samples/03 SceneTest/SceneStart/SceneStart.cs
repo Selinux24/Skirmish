@@ -255,15 +255,18 @@ namespace SceneTest.SceneStart
 
             backGround.Manipulator.SetScale(1.5f, 1.25f, 1.5f);
 
-            title.Text = "Scene Manager Test";
-            sceneMaterialsButton.Caption.Text = "Materials";
-            sceneWaterButton.Caption.Text = "Water";
-            sceneStencilPassButton.Caption.Text = "Stencil Pass";
-            sceneLightsButton.Caption.Text = "Lights";
-            sceneCascadedShadowsButton.Caption.Text = "Cascaded";
-            sceneTestButton.Caption.Text = "Test";
-            sceneTanksGameButton.Caption.Text = "Tanks Game";
-            exitButton.Caption.Text = "Exit";
+            var shadow = new Color4(0, 0, 0, 0.5f);
+            title.Text = $"{Color.Red}|{shadow}S{Color.Cyan}c{Color.Red}e{Color.Cyan}n{Color.Red}e {Color.Green}M{Color.Orange}a{Color.Green}n{Color.Orange}a{Color.Green}g{Color.Orange}e{Color.Green}r {Color.Yellow}T{Color.Blue}e{Color.Yellow}s{Color.Blue}t";
+
+            sceneMaterialsButton.Caption.Text = $"{Color.Red}M{Color.Gold}aterials";
+            sceneWaterButton.Caption.Text = $"{Color.Red}W{Color.Gold}ater";
+            sceneStencilPassButton.Caption.Text = $"{Color.Red}S{Color.Gold}tencil Pass";
+            sceneLightsButton.Caption.Text = $"{Color.Red}L{Color.Gold}ights";
+            sceneCascadedShadowsButton.Caption.Text = $"{Color.Red}C{Color.Gold}ascaded";
+            sceneTestButton.Caption.Text = $"{Color.Red}T{Color.Gold}est";
+            sceneTanksGameButton.Caption.Text = $"{Color.Gold}Tanks {Color.Red}G{Color.Gold}ame";
+
+            exitButton.Caption.Text = $"{Color.Red}E{Color.Gold}xit";
 
             UpdateLayout();
 

@@ -43,7 +43,7 @@ namespace Engine
         /// <summary>
         /// Number of active particle systems
         /// </summary>
-        public int SystemsCount
+        public int Count
         {
             get
             {
