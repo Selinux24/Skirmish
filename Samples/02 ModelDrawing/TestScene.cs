@@ -78,15 +78,15 @@ namespace ModelDrawing
         }
         private async Task InitializeUI()
         {
-            text = await this.AddComponentUITextArea(new UITextAreaDescription { Font = new TextDrawerDescription() { FontFamily = "Arial", FontSize = 20, TextColor = Color.Yellow, ShadowColor = Color.OrangeRed } }, layerHUD);
+            text = await this.AddComponentUITextArea(new UITextAreaDescription { Font = new TextDrawerDescription() { FontFamily = "Arial", FontSize = 20, ForeColor = Color.Yellow, ShadowColor = Color.OrangeRed } }, layerHUD);
 
-            statistics = await this.AddComponentUITextArea(new UITextAreaDescription { Font = new TextDrawerDescription() { FontFamily = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue } }, layerHUD);
+            statistics = await this.AddComponentUITextArea(new UITextAreaDescription { Font = new TextDrawerDescription() { FontFamily = "Arial", FontSize = 10, ForeColor = Color.LightBlue, ShadowColor = Color.DarkBlue } }, layerHUD);
 
-            text1 = await this.AddComponentUITextArea(new UITextAreaDescription { Font = new TextDrawerDescription() { FontFamily = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue } }, layerHUD);
+            text1 = await this.AddComponentUITextArea(new UITextAreaDescription { Font = new TextDrawerDescription() { FontFamily = "Arial", FontSize = 10, ForeColor = Color.LightBlue, ShadowColor = Color.DarkBlue } }, layerHUD);
 
-            text2 = await this.AddComponentUITextArea(new UITextAreaDescription { Font = new TextDrawerDescription() { FontFamily = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue } }, layerHUD);
+            text2 = await this.AddComponentUITextArea(new UITextAreaDescription { Font = new TextDrawerDescription() { FontFamily = "Arial", FontSize = 10, ForeColor = Color.LightBlue, ShadowColor = Color.DarkBlue } }, layerHUD);
 
-            log = await this.AddComponentUITextArea(new UITextAreaDescription { Font = new TextDrawerDescription() { FontFamily = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue } }, layerHUD);
+            log = await this.AddComponentUITextArea(new UITextAreaDescription { Font = new TextDrawerDescription() { FontFamily = "Arial", FontSize = 10, ForeColor = Color.LightBlue, ShadowColor = Color.DarkBlue } }, layerHUD);
             log.Visible = false;
 
             backPanel = await this.AddComponentSprite(SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), SceneObjectUsages.UI, layerHUD - 1);

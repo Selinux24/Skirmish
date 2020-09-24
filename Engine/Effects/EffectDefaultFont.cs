@@ -29,7 +29,7 @@ namespace Engine.Effects
         /// <summary>
         /// Use color effect variable
         /// </summary>
-        private readonly EngineEffectVariableScalar useColorVar = null;
+        private readonly EngineEffectVariableScalar useTextureColorVar = null;
         /// <summary>
         /// Texture effect variable
         /// </summary>
@@ -85,15 +85,15 @@ namespace Engine.Effects
         /// <summary>
         /// Use texture color
         /// </summary>
-        protected bool UseColor
+        protected bool UseTextureColor
         {
             get
             {
-                return this.useColorVar.GetBool();
+                return this.useTextureColorVar.GetBool();
             }
             set
             {
-                this.useColorVar.Set(value);
+                this.useTextureColorVar.Set(value);
             }
         }
         /// <summary>
@@ -132,7 +132,7 @@ namespace Engine.Effects
             this.worldVar = this.Effect.GetVariableMatrix("gWorld");
             this.worldViewProjectionVar = this.Effect.GetVariableMatrix("gWorldViewProjection");
             this.alphaVar = this.Effect.GetVariableScalar("gAlpha");
-            this.useColorVar = this.Effect.GetVariableScalar("gUseColor");
+            this.useTextureColorVar = this.Effect.GetVariableScalar("gUseColor");
             this.textureVar = this.Effect.GetVariableTexture("gTexture");
         }
 
@@ -141,7 +141,6 @@ namespace Engine.Effects
         /// </summary>
         /// <param name="world">World matrix</param>
         /// <param name="viewProjection">View * projection matrix</param>
-        /// <param name="color">Text color</param>
         /// <param name="alphaMult">Alpha multiplier</param>
         /// <param name="useTextureColor">Use the texture color instead of the specified color</param>
         /// <param name="texture">Font texture</param>
@@ -155,7 +154,7 @@ namespace Engine.Effects
             this.World = world;
             this.WorldViewProjection = world * viewProjection;
             this.Alpha = alphaMult;
-            this.UseColor = useTextureColor;
+            this.UseTextureColor = useTextureColor;
             this.Texture = texture;
         }
     }

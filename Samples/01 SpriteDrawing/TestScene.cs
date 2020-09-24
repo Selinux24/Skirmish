@@ -50,7 +50,7 @@ namespace SpriteDrawing
 
         private async Task LoadUserInterface()
         {
-            await this.LoadResourcesAsync(
+            await LoadResourcesAsync(
                 new Task[]
                 {
                     InitializeConsole(),
@@ -73,9 +73,9 @@ namespace SpriteDrawing
         private async Task InitializeConsole()
         {
             var desc = UITextAreaDescription.Default();
-            desc.Width = this.Game.Form.RenderWidth * 0.5f;
+            desc.Width = Game.Form.RenderWidth * 0.5f;
 
-            this.textDebug = await this.AddComponentUITextArea(desc, layerHUD);
+            textDebug = await this.AddComponentUITextArea(desc, layerHUD);
         }
         private async Task InitializeBackground()
         {
@@ -89,19 +89,19 @@ namespace SpriteDrawing
         {
             var desc = UIProgressBarDescription.DefaultFromFile("LeagueSpartan-Bold.otf", 10, true);
             desc.Name = "Progress Bar";
-            desc.Top = this.Game.Form.RenderHeight - 20;
+            desc.Top = Game.Form.RenderHeight - 20;
             desc.Left = 100;
-            desc.Width = this.Game.Form.RenderWidth - 200;
+            desc.Width = Game.Form.RenderWidth - 200;
             desc.Height = 15;
             desc.BaseColor = new Color(0, 0, 0, 0.5f);
             desc.ProgressColor = Color.Green;
 
-            this.progressBar = await this.AddComponentUIProgressBar(desc, layerHUD);
+            progressBar = await this.AddComponentUIProgressBar(desc, layerHUD);
         }
 
         private async Task LoadControls()
         {
-            await this.LoadResourcesAsync(
+            await LoadResourcesAsync(
                 new[]
                 {
                     InitializeSmiley(),
@@ -128,7 +128,7 @@ namespace SpriteDrawing
         {
             await Task.Delay(500);
 
-            float size = this.Game.Form.RenderWidth * 0.3333f;
+            float size = Game.Form.RenderWidth * 0.3333f;
 
             var desc = new SpriteDescription()
             {
@@ -136,14 +136,14 @@ namespace SpriteDrawing
                 Width = size,
                 Height = size,
             };
-            this.spriteSmiley = await this.AddComponentSprite(desc, SceneObjectUsages.None, layerObjects);
-            this.spriteSmiley.Visible = false;
+            spriteSmiley = await this.AddComponentSprite(desc, SceneObjectUsages.None, layerObjects);
+            spriteSmiley.Visible = false;
         }
         private async Task InitializeStaticPan()
         {
             await Task.Delay(1000);
 
-            float width = this.Game.Form.RenderWidth / 2.25f;
+            float width = Game.Form.RenderWidth / 2.25f;
             float height = width * 0.6666f;
 
             var desc = new UIPanelDescription()
@@ -154,12 +154,12 @@ namespace SpriteDrawing
                     Textures = new[] { "pan_bw.png" },
                     BaseColor = new Color(176, 77, 45),
                 },
-                Top = this.Game.Form.RenderHeight / 8f,
-                Left = this.Game.Form.RenderCenter.X,
+                Top = Game.Form.RenderHeight / 8f,
+                Left = Game.Form.RenderCenter.X,
                 Width = width,
                 Height = height,
             };
-            this.staticPan = await this.AddComponentUIPanel(desc, layerHUD);
+            staticPan = await this.AddComponentUIPanel(desc, layerHUD);
 
             var descText = new UITextAreaDescription()
             {
@@ -168,7 +168,7 @@ namespace SpriteDrawing
                     Name = "Text",
                     FontFileName = "LeagueSpartan-Bold.otf",
                     FontSize = 18,
-                    TextColor = Color.LightGoldenrodYellow,
+                    ForeColor = Color.LightGoldenrodYellow,
                     ShadowColor = new Color4(0, 0, 0, 0.2f),
                     ShadowDelta = new Vector2(8, 5),
                     LineAdjust = true,
@@ -181,16 +181,16 @@ namespace SpriteDrawing
                     Bottom = height * 0.1f,
                 }
             };
-            this.textArea = new UITextArea(this, descText);
+            textArea = new UITextArea(this, descText);
 
-            this.staticPan.AddChild(this.textArea);
-            this.staticPan.Visible = false;
+            staticPan.AddChild(textArea);
+            staticPan.Visible = false;
         }
         private async Task InitializeDynamicPan()
         {
             await Task.Delay(1500);
 
-            float width = this.Game.Form.RenderWidth / 1.5f;
+            float width = Game.Form.RenderWidth / 1.5f;
             float height = width * 0.6666f;
 
             var descPan = new UIPanelDescription
@@ -208,7 +208,7 @@ namespace SpriteDrawing
                     BaseColor = Color.Pink,
                 }
             };
-            this.dynamicPan = await this.AddComponentUIPanel(descPan, layerHUDDialogs);
+            dynamicPan = await this.AddComponentUIPanel(descPan, layerHUDDialogs);
 
             float w = 0.3333f;
 
@@ -222,7 +222,7 @@ namespace SpriteDrawing
                 UITextAreaDescription.Default(font, "X"));
             descButClose.Name = "CloseButton";
             descButClose.Top = 10;
-            descButClose.Left = this.dynamicPan.Width - 10 - 40;
+            descButClose.Left = dynamicPan.Width - 10 - 40;
             descButClose.Width = 40;
             descButClose.Height = 40;
 
@@ -244,9 +244,9 @@ namespace SpriteDrawing
 
             var textMapped = new UITextArea(this, descText);
 
-            this.dynamicPan.AddChild(textMapped);
-            this.dynamicPan.AddChild(butClose, false);
-            this.dynamicPan.Visible = false;
+            dynamicPan.AddChild(textMapped);
+            dynamicPan.AddChild(butClose, false);
+            dynamicPan.Visible = false;
         }
         private async Task InitializeButtonTest()
         {
@@ -303,56 +303,56 @@ namespace SpriteDrawing
         }
         private void UpdateDebugInfo()
         {
-            if (this.textDebug != null)
+            if (textDebug != null)
             {
                 var mousePos = Cursor.ScreenPosition;
                 var but = dynamicPan?.Children.OfType<UIButton>().FirstOrDefault();
 
                 textDebug.Text = $@"PanPressed: {dynamicPan?.IsPressed ?? false}; PanRect: {dynamicPan?.AbsoluteRectangle}; 
 ButPressed: {but?.IsPressed ?? false}; ButRect: {but?.AbsoluteRectangle}; 
-MousePos: {mousePos}; InputMousePos: {this.Game.Input.MousePosition}; 
-FormCenter: {this.Game.Form.RenderCenter} ScreenCenter: {this.Game.Form.ScreenCenter}
+MousePos: {mousePos}; InputMousePos: {Game.Input.MousePosition}; 
+FormCenter: {Game.Form.RenderCenter} ScreenCenter: {Game.Form.ScreenCenter}
 Progress: {(int)(progressValue * 100f)}%";
             }
         }
         private void UpdateInput()
         {
-            if (this.Game.Input.KeyJustReleased(Keys.Escape))
+            if (Game.Input.KeyJustReleased(Keys.Escape))
             {
-                this.Game.Exit();
+                Game.Exit();
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.Home))
+            if (Game.Input.KeyJustReleased(Keys.Home))
             {
-                this.spriteSmiley.CenterHorizontally = CenterTargets.Screen;
-                this.spriteSmiley.CenterVertically = CenterTargets.Screen;
+                spriteSmiley.CenterHorizontally = CenterTargets.Screen;
+                spriteSmiley.CenterVertically = CenterTargets.Screen;
             }
         }
         private void UpdateSprite(GameTime gameTime)
         {
-            if (this.Game.Input.KeyPressed(Keys.A))
+            if (Game.Input.KeyPressed(Keys.A))
             {
-                this.spriteSmiley.MoveLeft(gameTime, delta);
+                spriteSmiley.MoveLeft(gameTime, delta);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.D))
+            if (Game.Input.KeyPressed(Keys.D))
             {
-                this.spriteSmiley.MoveRight(gameTime, delta);
+                spriteSmiley.MoveRight(gameTime, delta);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.W))
+            if (Game.Input.KeyPressed(Keys.W))
             {
-                this.spriteSmiley.MoveUp(gameTime, delta);
+                spriteSmiley.MoveUp(gameTime, delta);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.S))
+            if (Game.Input.KeyPressed(Keys.S))
             {
-                this.spriteSmiley.MoveDown(gameTime, delta);
+                spriteSmiley.MoveDown(gameTime, delta);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.X))
+            if (Game.Input.KeyPressed(Keys.X))
             {
-                this.spriteSmiley.ClearTween();
+                spriteSmiley.ClearTween();
             }
         }
         private void UpdateLorem(GameTime gameTime)
@@ -446,7 +446,7 @@ Progress: {(int)(progressValue * 100f)}%";
                 Task.Run(async () =>
                 {
                     await Task.Delay(2000);
-                    this.Game.Exit();
+                    Game.Exit();
                 });
             }
         }

@@ -39,26 +39,36 @@ namespace Engine.UI
             }
         }
         /// <summary>
-        /// Gets or sets the text color
+        /// Gets the parsed text value
         /// </summary>
-        public Color4 TextColor
+        public string ParsedText
         {
             get
             {
-                return textDrawer?.TextColor ?? new Color4(0, 0, 0, 0);
+                return textDrawer?.ParsedText;
+            }
+        }
+        /// <summary>
+        /// Gets or sets the text color
+        /// </summary>
+        public Color4 ForeColor
+        {
+            get
+            {
+                return textDrawer?.ForeColor ?? new Color4(0, 0, 0, 0);
             }
             set
             {
-                if (textDrawer != null && textDrawer.TextColor != value)
+                if (textDrawer != null && textDrawer.ForeColor != value)
                 {
-                    textDrawer.TextColor = value;
+                    textDrawer.ForeColor = value;
                 }
             }
         }
         /// <summary>
         /// Gets or sets the shadow color
         /// </summary>
-        public Color4 TextShadowColor
+        public Color4 ShadowColor
         {
             get
             {
@@ -123,7 +133,6 @@ namespace Engine.UI
                 }
             }
         }
-
         /// <summary>
         /// Padding
         /// </summary>

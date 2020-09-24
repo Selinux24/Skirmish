@@ -47,7 +47,7 @@ namespace Engine.UI
                 FontFamily = DefaultFontFamily,
                 FontSize = size,
                 Style = FontMapStyles.Regular,
-                TextColor = textColor,
+                ForeColor = textColor,
             };
         }
 
@@ -113,7 +113,7 @@ namespace Engine.UI
                 FontFamily = fontFamilyName,
                 FontSize = size,
                 Style = style,
-                TextColor = textColor,
+                ForeColor = textColor,
                 ShadowColor = shadowColor,
             };
         }
@@ -207,7 +207,7 @@ namespace Engine.UI
                 FontFileName = fontFileName,
                 FontSize = size,
                 Style = style,
-                TextColor = textColor,
+                ForeColor = textColor,
                 ShadowColor = shadowColor,
                 LineAdjust = lineAdjust,
             };
@@ -252,7 +252,7 @@ namespace Engine.UI
                     ImageFile = imageFileName,
                     MapFile = mapFileName,
                 },
-                TextColor = textColor,
+                ForeColor = textColor,
                 ShadowColor = shadowColor,
             };
         }
@@ -285,11 +285,7 @@ namespace Engine.UI
         /// <summary>
         /// Text color
         /// </summary>
-        public Color4 TextColor { get; set; } = Color.White;
-        /// <summary>
-        /// Use the texture color instead of the specified Color
-        /// </summary>
-        public bool UseTextureColor { get; set; } = false;
+        public Color4 ForeColor { get; set; } = Color.White;
         /// <summary>
         /// Shadow color
         /// </summary>
@@ -298,6 +294,10 @@ namespace Engine.UI
         /// Shadow position delta
         /// </summary>
         public Vector2 ShadowDelta { get; set; } = new Vector2(1, 1);
+        /// <summary>
+        /// Use the texture color instead of the specified Color
+        /// </summary>
+        public bool UseTextureColor { get; set; } = false;
         /// <summary>
         /// Perform line adjust
         /// </summary>

@@ -70,10 +70,10 @@ namespace Collada
 
         private async Task LoadUserInteface()
         {
-            this.Game.VisibleMouse = false;
-            this.Game.LockMouse = false;
+            Game.VisibleMouse = false;
+            Game.LockMouse = false;
 
-            await this.LoadResourcesAsync(
+            await LoadResourcesAsync(
                 new[]
                 {
                     InitializeAudio(),
@@ -88,13 +88,13 @@ namespace Collada
 
                     SetBackground();
 
-                    this.Camera.Position = Vector3.BackwardLH * 8f;
-                    this.Camera.Interest = Vector3.Zero;
+                    Camera.Position = Vector3.BackwardLH * 8f;
+                    Camera.Interest = Vector3.Zero;
 
                     PlayAudio();
 
-                    this.AudioManager.MasterVolume = 1;
-                    this.AudioManager.Start();
+                    AudioManager.MasterVolume = 1;
+                    AudioManager.Start();
 
                     LoadGameAssets();
                 });
@@ -102,22 +102,22 @@ namespace Collada
         private async Task InitializeBackGround()
         {
             var backGroundDesc = ModelDescription.FromXml("Background", "Resources/SceneStart", "SkyPlane.xml");
-            this.backGround = await this.AddComponentModel(backGroundDesc, SceneObjectUsages.UI);
+            backGround = await this.AddComponentModel(backGroundDesc, SceneObjectUsages.UI);
         }
         private async Task InitializeAudio()
         {
             //Sounds
             for (int i = 0; i < musicList.Length; i++)
             {
-                this.AudioManager.LoadSound($"Music{i}", "Resources/Common", musicList[i]);
+                AudioManager.LoadSound($"Music{i}", "Resources/Common", musicList[i]);
             }
 
-            this.AudioManager.LoadSound("push", "Resources/Common", "push.wav");
+            AudioManager.LoadSound("push", "Resources/Common", "push.wav");
 
             //Effects
             for (int i = 0; i < musicList.Length; i++)
             {
-                this.AudioManager.AddEffectParams(
+                AudioManager.AddEffectParams(
                     $"Music{i}",
                     new GameAudioEffectParameters
                     {
@@ -128,7 +128,7 @@ namespace Collada
                     });
             }
 
-            this.AudioManager.AddEffectParams(
+            AudioManager.AddEffectParams(
                 "push",
                 new GameAudioEffectParameters
                 {
@@ -139,12 +139,12 @@ namespace Collada
         }
         private void SetBackground()
         {
-            this.backGround.Manipulator.SetScale(1.5f, 1.25f, 1.5f);
+            backGround.Manipulator.SetScale(1.5f, 1.25f, 1.5f);
         }
 
         private void LoadGameAssets()
         {
-            _ = this.LoadResourcesAsync(
+            _ = LoadResourcesAsync(
                 new[]
                 {
                     InitializeCursor(),
@@ -171,11 +171,11 @@ namespace Collada
             // Title text
             var titleDesc = UITextAreaDescription.FromFamily("Viner Hand ITC", 90, FontMapStyles.Bold);
             titleDesc.Name = "Title";
-            titleDesc.Font.TextColor = Color.IndianRed;
+            titleDesc.Font.ForeColor = Color.IndianRed;
             titleDesc.Font.ShadowColor = new Color4(Color.Brown.RGB(), 0.25f);
             titleDesc.Font.ShadowDelta = new Vector2(4, 4);
 
-            this.title = await this.AddComponentUITextArea(titleDesc, layerHUD);
+            title = await this.AddComponentUITextArea(titleDesc, layerHUD);
 
             // Font description
             var buttonFont = TextDrawerDescription.FromFile("common/HelveticaNeueHv.ttf", 16, Color.Gold);
@@ -190,10 +190,10 @@ namespace Collada
             buttonDesc.ColorReleased = new Color4(sceneButtonColor.RGB(), 0.8f);
             buttonDesc.ColorReleased = new Color4(sceneButtonColor.RGB() * 1.2f, 0.9f);
 
-            this.sceneDungeonWallButton = await this.AddComponentUIButton(buttonDesc, layerHUD);
-            this.sceneNavMeshTestButton = await this.AddComponentUIButton(buttonDesc, layerHUD);
-            this.sceneDungeonButton = await this.AddComponentUIButton(buttonDesc, layerHUD);
-            this.sceneModularDungeonButton = await this.AddComponentUIButton(buttonDesc, layerHUD);
+            sceneDungeonWallButton = await this.AddComponentUIButton(buttonDesc, layerHUD);
+            sceneNavMeshTestButton = await this.AddComponentUIButton(buttonDesc, layerHUD);
+            sceneDungeonButton = await this.AddComponentUIButton(buttonDesc, layerHUD);
+            sceneModularDungeonButton = await this.AddComponentUIButton(buttonDesc, layerHUD);
 
             // Exit button
             var exitButtonDesc = UIButtonDescription.DefaultTwoStateButton("common/buttons.png", new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f, UITextAreaDescription.Default(buttonFont));
@@ -203,113 +203,113 @@ namespace Collada
             exitButtonDesc.ColorReleased = new Color4(exitButtonColor.RGB(), 0.8f);
             exitButtonDesc.ColorReleased = new Color4(exitButtonColor.RGB() * 1.2f, 0.9f);
 
-            this.exitButton = await this.AddComponentUIButton(exitButtonDesc, layerHUD);
+            exitButton = await this.AddComponentUIButton(exitButtonDesc, layerHUD);
 
             // Description text
             var tooltipDesc = UITextAreaDescription.FromFile("common/HelveticaNeue Medium.ttf", 12);
             tooltipDesc.Name = "Tooltip";
-            tooltipDesc.Font.TextColor = Color.LightGray;
+            tooltipDesc.Font.ForeColor = Color.LightGray;
             tooltipDesc.Width = 250;
 
-            this.description = await this.AddComponentUITextArea(tooltipDesc, layerHUD);
+            description = await this.AddComponentUITextArea(tooltipDesc, layerHUD);
         }
         private void SetControlPositions()
         {
             long tweenTime = 1000;
             long tweenInc = 250;
 
-            this.title.Text = "Collada Loader Test";
-            this.title.CenterHorizontally = CenterTargets.Screen;
-            this.title.Top = this.Game.Form.RenderHeight * 0.25f;
-            this.title.Show(2000);
-            this.title.ScaleInScaleOut(1f, 1.05f, 10000);
+            title.Text = "Collada Loader Test";
+            title.CenterHorizontally = CenterTargets.Screen;
+            title.Top = Game.Form.RenderHeight * 0.25f;
+            title.Show(2000);
+            title.ScaleInScaleOut(1f, 1.05f, 10000);
 
-            this.sceneDungeonWallButton.Caption.Text = "Dungeon Wall";
-            this.sceneDungeonWallButton.TooltipText = "Shows a basic normal map scene demo.";
-            this.sceneDungeonWallButton.Left = ((this.Game.Form.RenderWidth / 6) * 1) - (this.sceneDungeonWallButton.Width / 2);
-            this.sceneDungeonWallButton.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneDungeonWallButton.Height / 2);
-            this.sceneDungeonWallButton.JustReleased += SceneButtonClick;
-            this.sceneDungeonWallButton.MouseOver += SceneButtonOver;
-            this.sceneDungeonWallButton.Show(tweenTime, tweenTime);
+            sceneDungeonWallButton.Caption.Text = "Dungeon Wall";
+            sceneDungeonWallButton.TooltipText = "Shows a basic normal map scene demo.";
+            sceneDungeonWallButton.Left = ((Game.Form.RenderWidth / 6) * 1) - (sceneDungeonWallButton.Width / 2);
+            sceneDungeonWallButton.Top = (Game.Form.RenderHeight / 4) * 3 - (sceneDungeonWallButton.Height / 2);
+            sceneDungeonWallButton.JustReleased += SceneButtonClick;
+            sceneDungeonWallButton.MouseOver += SceneButtonOver;
+            sceneDungeonWallButton.Show(tweenTime, tweenTime);
             tweenTime += tweenInc;
 
-            this.sceneNavMeshTestButton.Caption.Text = "Navmesh Test";
-            this.sceneNavMeshTestButton.TooltipText = "Shows a navigation mesh scene demo.";
-            this.sceneNavMeshTestButton.Left = ((this.Game.Form.RenderWidth / 6) * 2) - (this.sceneNavMeshTestButton.Width / 2);
-            this.sceneNavMeshTestButton.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneNavMeshTestButton.Height / 2);
-            this.sceneNavMeshTestButton.JustReleased += SceneButtonClick;
-            this.sceneNavMeshTestButton.MouseOver += SceneButtonOver;
-            this.sceneNavMeshTestButton.Show(tweenTime, tweenTime);
+            sceneNavMeshTestButton.Caption.Text = "Navmesh Test";
+            sceneNavMeshTestButton.TooltipText = "Shows a navigation mesh scene demo.";
+            sceneNavMeshTestButton.Left = ((Game.Form.RenderWidth / 6) * 2) - (sceneNavMeshTestButton.Width / 2);
+            sceneNavMeshTestButton.Top = (Game.Form.RenderHeight / 4) * 3 - (sceneNavMeshTestButton.Height / 2);
+            sceneNavMeshTestButton.JustReleased += SceneButtonClick;
+            sceneNavMeshTestButton.MouseOver += SceneButtonOver;
+            sceneNavMeshTestButton.Show(tweenTime, tweenTime);
             tweenTime += tweenInc;
 
-            this.sceneDungeonButton.Caption.Text = "Dungeon";
-            this.sceneDungeonButton.TooltipText = "Shows a basic dungeon from a unique mesh scene demo.";
-            this.sceneDungeonButton.Left = ((this.Game.Form.RenderWidth / 6) * 3) - (this.sceneDungeonButton.Width / 2);
-            this.sceneDungeonButton.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneDungeonButton.Height / 2);
-            this.sceneDungeonButton.JustReleased += SceneButtonClick;
-            this.sceneDungeonButton.MouseOver += SceneButtonOver;
-            this.sceneDungeonButton.Show(tweenTime, tweenTime);
+            sceneDungeonButton.Caption.Text = "Dungeon";
+            sceneDungeonButton.TooltipText = "Shows a basic dungeon from a unique mesh scene demo.";
+            sceneDungeonButton.Left = ((Game.Form.RenderWidth / 6) * 3) - (sceneDungeonButton.Width / 2);
+            sceneDungeonButton.Top = (Game.Form.RenderHeight / 4) * 3 - (sceneDungeonButton.Height / 2);
+            sceneDungeonButton.JustReleased += SceneButtonClick;
+            sceneDungeonButton.MouseOver += SceneButtonOver;
+            sceneDungeonButton.Show(tweenTime, tweenTime);
             tweenTime += tweenInc;
 
-            this.sceneModularDungeonButton.Caption.Text = "Modular Dungeon";
-            this.sceneModularDungeonButton.TooltipText = "Shows a modular dungeon scene demo.";
-            this.sceneModularDungeonButton.Left = ((this.Game.Form.RenderWidth / 6) * 4) - (this.sceneModularDungeonButton.Width / 2);
-            this.sceneModularDungeonButton.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneModularDungeonButton.Height / 2);
-            this.sceneModularDungeonButton.JustReleased += SceneButtonClick;
-            this.sceneModularDungeonButton.MouseOver += SceneButtonOver;
-            this.sceneModularDungeonButton.Show(tweenTime, tweenTime);
+            sceneModularDungeonButton.Caption.Text = "Modular Dungeon";
+            sceneModularDungeonButton.TooltipText = "Shows a modular dungeon scene demo.";
+            sceneModularDungeonButton.Left = ((Game.Form.RenderWidth / 6) * 4) - (sceneModularDungeonButton.Width / 2);
+            sceneModularDungeonButton.Top = (Game.Form.RenderHeight / 4) * 3 - (sceneModularDungeonButton.Height / 2);
+            sceneModularDungeonButton.JustReleased += SceneButtonClick;
+            sceneModularDungeonButton.MouseOver += SceneButtonOver;
+            sceneModularDungeonButton.Show(tweenTime, tweenTime);
             tweenTime += tweenInc;
 
-            this.exitButton.Caption.Text = "Exit";
-            this.exitButton.TooltipText = "Closes the application.";
-            this.exitButton.Left = (this.Game.Form.RenderWidth / 6) * 5 - (this.exitButton.Width / 2);
-            this.exitButton.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.exitButton.Height / 2);
-            this.exitButton.JustReleased += ExitButtonClick;
-            this.exitButton.MouseOver += SceneButtonOver;
-            this.exitButton.Show(tweenTime, tweenTime);
+            exitButton.Caption.Text = "Exit";
+            exitButton.TooltipText = "Closes the application.";
+            exitButton.Left = (Game.Form.RenderWidth / 6) * 5 - (exitButton.Width / 2);
+            exitButton.Top = (Game.Form.RenderHeight / 4) * 3 - (exitButton.Height / 2);
+            exitButton.JustReleased += ExitButtonClick;
+            exitButton.MouseOver += SceneButtonOver;
+            exitButton.Show(tweenTime, tweenTime);
 
-            this.sceneButtons = new[]
+            sceneButtons = new[]
             {
-                this.sceneDungeonWallButton,
-                this.sceneNavMeshTestButton,
-                this.sceneDungeonButton,
-                this.sceneModularDungeonButton,
-                this.exitButton,
+                sceneDungeonWallButton,
+                sceneNavMeshTestButton,
+                sceneDungeonButton,
+                sceneModularDungeonButton,
+                exitButton,
             };
         }
 
         private void UpdateAudioInput(GameTime gameTime)
         {
-            if (this.Game.Input.KeyJustReleased(Keys.L))
+            if (Game.Input.KeyJustReleased(Keys.L))
             {
-                this.AudioManager.UseMasteringLimiter = !this.AudioManager.UseMasteringLimiter;
+                AudioManager.UseMasteringLimiter = !AudioManager.UseMasteringLimiter;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.R))
+            if (Game.Input.KeyJustReleased(Keys.R))
             {
                 currentMusic.SetReverb(null);
             }
-            if (this.Game.Input.KeyJustReleased(Keys.H))
+            if (Game.Input.KeyJustReleased(Keys.H))
             {
                 currentMusic.SetReverb(ReverbPresets.Forest);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.Subtract))
+            if (Game.Input.KeyPressed(Keys.Subtract))
             {
-                this.AudioManager.MasterVolume -= gameTime.ElapsedSeconds / 10;
+                AudioManager.MasterVolume -= gameTime.ElapsedSeconds / 10;
             }
 
-            if (this.Game.Input.KeyPressed(Keys.Add))
+            if (Game.Input.KeyPressed(Keys.Add))
             {
-                this.AudioManager.MasterVolume += gameTime.ElapsedSeconds / 10;
+                AudioManager.MasterVolume += gameTime.ElapsedSeconds / 10;
             }
 
-            if (this.Game.Input.KeyPressed(Keys.ControlKey))
+            if (Game.Input.KeyPressed(Keys.ControlKey))
             {
                 UpdateAudioPan();
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.Z))
+            if (Game.Input.KeyJustReleased(Keys.Z))
             {
                 UpdateAudioPlayback();
             }
@@ -337,38 +337,38 @@ namespace Collada
                 return;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.Left))
+            if (Game.Input.KeyJustReleased(Keys.Left))
             {
                 currentMusic.Pan = -1;
             }
-            else if (this.Game.Input.KeyJustReleased(Keys.Right))
+            else if (Game.Input.KeyJustReleased(Keys.Right))
             {
                 currentMusic.Pan = 1;
             }
-            else if (this.Game.Input.KeyJustReleased(Keys.Down))
+            else if (Game.Input.KeyJustReleased(Keys.Down))
             {
                 currentMusic.Pan = 0;
             }
         }
         private void UpdateListenerInput(GameTime gameTime)
         {
-            bool shift = this.Game.Input.KeyPressed(Keys.Shift);
+            bool shift = Game.Input.KeyPressed(Keys.Shift);
 
             var agentPosition = shift ? emitterPosition : listenerPosition;
 
-            if (this.Game.Input.KeyPressed(Keys.W))
+            if (Game.Input.KeyPressed(Keys.W))
             {
                 agentPosition.MoveForward(gameTime);
             }
-            if (this.Game.Input.KeyPressed(Keys.S))
+            if (Game.Input.KeyPressed(Keys.S))
             {
                 agentPosition.MoveBackward(gameTime);
             }
-            if (this.Game.Input.KeyPressed(Keys.A))
+            if (Game.Input.KeyPressed(Keys.A))
             {
                 agentPosition.MoveRight(gameTime);
             }
-            if (this.Game.Input.KeyPressed(Keys.D))
+            if (Game.Input.KeyPressed(Keys.D))
             {
                 agentPosition.MoveLeft(gameTime);
             }
@@ -387,7 +387,7 @@ namespace Collada
 
         private void SceneButtonClick(object sender, EventArgs e)
         {
-            var effect = this.AudioManager.CreateEffectInstance("push");
+            var effect = AudioManager.CreateEffectInstance("push");
 
             HideAllButButton(sender as UIButton, (long)effect.Duration.TotalMilliseconds);
 
@@ -397,27 +397,27 @@ namespace Collada
 
                 await Task.Delay(effect.Duration);
 
-                if (sender == this.sceneDungeonWallButton)
+                if (sender == sceneDungeonWallButton)
                 {
-                    this.Game.SetScene<SceneDungeonWall>();
+                    Game.SetScene<SceneDungeonWall>();
                 }
-                else if (sender == this.sceneNavMeshTestButton)
+                else if (sender == sceneNavMeshTestButton)
                 {
-                    this.Game.SetScene<SceneNavmeshTest>();
+                    Game.SetScene<SceneNavmeshTest>();
                 }
-                else if (sender == this.sceneDungeonButton)
+                else if (sender == sceneDungeonButton)
                 {
-                    this.Game.SetScene<SceneDungeon>();
+                    Game.SetScene<SceneDungeon>();
                 }
-                else if (sender == this.sceneModularDungeonButton)
+                else if (sender == sceneModularDungeonButton)
                 {
-                    this.Game.SetScene<SceneModularDungeon>(SceneModes.DeferredLightning);
+                    Game.SetScene<SceneModularDungeon>(SceneModes.DeferredLightning);
                 }
             });
         }
         private void ExitButtonClick(object sender, EventArgs e)
         {
-            var effect = this.AudioManager.CreateEffectInstance("push");
+            var effect = AudioManager.CreateEffectInstance("push");
 
             HideAllButButton(sender as UIButton, (long)effect.Duration.TotalMilliseconds);
 
@@ -427,7 +427,7 @@ namespace Collada
 
                 await Task.Delay(effect.Duration);
 
-                this.Game.Exit();
+                Game.Exit();
             });
         }
         private void HideAllButButton(UIButton button, long milliseconds)
@@ -461,7 +461,7 @@ namespace Collada
             musicIndex %= musicList.Length;
 
             string musicName = $"Music{musicIndex}";
-            currentMusic = this.AudioManager.CreateEffectInstance(musicName, emitterPosition, listenerPosition);
+            currentMusic = AudioManager.CreateEffectInstance(musicName, emitterPosition, listenerPosition);
             if (currentMusic != null)
             {
                 currentMusic.LoopEnd += AudioManager_LoopEnd;

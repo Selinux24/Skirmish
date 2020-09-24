@@ -131,6 +131,10 @@ namespace Engine.UI
             }
         }
         /// <summary>
+        /// Parsed text
+        /// </summary>
+        public string ParsedText { get; protected set; }
+        /// <summary>
         /// Gets or sets the horizontal align
         /// </summary>
         public HorizontalTextAlign HorizontalAlign
@@ -175,7 +179,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets text fore color
         /// </summary>
-        public Color4 TextColor
+        public Color4 ForeColor
         {
             get
             {
@@ -267,7 +271,7 @@ namespace Engine.UI
             vertexBuffer = BufferManager.AddVertexData(description.Name, true, verts);
             indexBuffer = BufferManager.AddIndexData(description.Name, true, idx);
 
-            TextColor = description.TextColor;
+            ForeColor = description.ForeColor;
             UseTextureColor = description.UseTextureColor;
             ShadowColor = description.ShadowColor;
             ShadowDelta = description.ShadowDelta;
@@ -423,6 +427,8 @@ namespace Engine.UI
         /// <param name="technique">Technique</param>
         /// <param name="local">Local transform</param>
         /// <param name="useTextureColor">Use the texture color</param>
+        /// <param name="index">Primitive index</param>
+        /// <param name="count">Index count</param>
         private void DrawText(EffectDefaultFont effect, EngineEffectTechnique technique, Matrix local, bool useTextureColor, int index, int count)
         {
             effect.UpdatePerFrame(
@@ -486,33 +492,33 @@ namespace Engine.UI
             List<VertexFont> vList = new List<VertexFont>();
             List<uint> iList = new List<uint>();
 
-            fontMap.MapSentence(
+            ParsedText = FontMap.ParseSentence(
                 text,
-                TextColor,
-                ShadowColor,
-                false,
+                textColor,
+                shadowColor,
+                out var words, out var colors, out var shadowColors);
+
+            var colorW = fontMap.MapSentence(
+                words,
+                colors,
                 GetRenderArea(),
                 horizontalAlign,
-                verticalAlign,
-                out var verticesC, out var indicesC, out _);
+                verticalAlign);
 
-            iList.AddRange(indicesC);
-            vList.AddRange(verticesC);
+            iList.AddRange(colorW.Indices);
+            vList.AddRange(colorW.Vertices);
 
             if (ShadowColor != Color.Transparent)
             {
-                fontMap.MapSentence(
-                    text,
-                    TextColor,
-                    ShadowColor,
-                    true,
+                var colorS = fontMap.MapSentence(
+                    words,
+                    shadowColors,
                     GetRenderArea(),
                     horizontalAlign,
-                    verticalAlign,
-                    out var verticesSM, out var indicesSM, out _);
+                    verticalAlign);
 
-                indicesSM.ToList().ForEach((i) => { iList.Add(i + (uint)vList.Count); });
-                vList.AddRange(verticesSM);
+                colorS.Indices.ToList().ForEach((i) => { iList.Add(i + (uint)vList.Count); });
+                vList.AddRange(colorS.Vertices);
             }
 
             vertices = vList.ToArray();
@@ -544,17 +550,16 @@ namespace Engine.UI
                 return Vector2.Zero;
             }
 
-            fontMap.MapSentence(
-                text,
-                Color.Transparent,
-                Color.Transparent,
-                false,
+            FontMap.ParseSentence(text, ForeColor, ShadowColor, out var words, out _, out _);
+
+            var w = fontMap.MapSentence(
+                words,
+                null,
                 rect,
                 horizontalAlign,
-                verticalAlign,
-                out _, out _, out Vector2 size);
+                verticalAlign);
 
-            return size;
+            return w.Size;
         }
         /// <summary>
         /// Gets the single line height
@@ -569,17 +574,14 @@ namespace Engine.UI
             string sampleChar = $"{fontMap.GetSampleCharacter()}";
             RectangleF rect = Game.Form.RenderRectangle;
 
-            fontMap.MapSentence(
-                sampleChar,
-                Color.Transparent,
-                Color.Transparent,
-                false,
+            var w = fontMap.MapSentence(
+                new[] { sampleChar },
+                null,
                 rect,
                 HorizontalTextAlign.Left,
-                VerticalTextAlign.Top,
-                out _, out _, out Vector2 size);
+                VerticalTextAlign.Top);
 
-            return size.Y;
+            return w.Size.Y;
         }
     }
 }

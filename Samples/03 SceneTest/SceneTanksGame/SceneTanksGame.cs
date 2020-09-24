@@ -137,18 +137,18 @@ namespace SceneTest.SceneTanksGame
         {
             GameEnvironment.Background = Color.CornflowerBlue;
 
-            this.Game.VisibleMouse = false;
-            this.Game.LockMouse = false;
+            Game.VisibleMouse = false;
+            Game.LockMouse = false;
 
-            this.Camera.NearPlaneDistance = 0.1f;
-            this.Camera.FarPlaneDistance = 2000;
+            Camera.NearPlaneDistance = 0.1f;
+            Camera.FarPlaneDistance = 2000;
 
             return LoadLoadingUI();
         }
 
         private async Task LoadLoadingUI()
         {
-            await this.LoadResourcesAsync(
+            await LoadResourcesAsync(
                 InitializeLoadingUI(),
                 async (res) =>
                 {
@@ -167,7 +167,7 @@ namespace SceneTest.SceneTanksGame
                     loadingBar.ProgressValue = 0;
                     loadingBar.Visible = true;
 
-                    await this.LoadUI();
+                    await LoadUI();
                 });
         }
         private async Task InitializeLoadingUI()
@@ -176,11 +176,11 @@ namespace SceneTest.SceneTanksGame
             fadePanel.Visible = false;
 
             loadingText = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 40, true), layerLoadingUI + 1);
-            loadingText.TextColor = Color.Yellow;
-            loadingText.TextShadowColor = Color.Orange;
+            loadingText.ForeColor = Color.Yellow;
+            loadingText.ShadowColor = Color.Orange;
             loadingText.CenterHorizontally = CenterTargets.Screen;
-            loadingText.Top = this.Game.Form.RenderCenter.Y - 75f;
-            loadingText.Width = this.Game.Form.RenderWidth * 0.8f;
+            loadingText.Top = Game.Form.RenderCenter.Y - 75f;
+            loadingText.Width = Game.Form.RenderWidth * 0.8f;
             loadingText.HorizontalAlign = HorizontalTextAlign.Center;
             loadingText.VerticalAlign = VerticalTextAlign.Middle;
             loadingText.AdjustAreaWithText = false;
@@ -189,11 +189,11 @@ namespace SceneTest.SceneTanksGame
             loadingBar = await this.AddComponentUIProgressBar(UIProgressBarDescription.DefaultFromFile(fontFilename, 20, true), layerLoadingUI + 1);
             loadingBar.CenterHorizontally = CenterTargets.Screen;
             loadingBar.CenterVertically = CenterTargets.Screen;
-            loadingBar.Width = this.Game.Form.RenderWidth * 0.8f;
+            loadingBar.Width = Game.Form.RenderWidth * 0.8f;
             loadingBar.Height = 35;
             loadingBar.ProgressColor = Color.Yellow;
             loadingBar.BaseColor = Color.CornflowerBlue;
-            loadingBar.Caption.TextColor = Color.Black;
+            loadingBar.Caption.ForeColor = Color.Black;
             loadingBar.Caption.Text = "0%";
             loadingBar.Visible = false;
         }
@@ -204,7 +204,7 @@ namespace SceneTest.SceneTanksGame
             taskList.AddRange(InitializeUI());
             taskList.AddRange(InitializeModels());
 
-            await this.LoadResourcesAsync(
+            await LoadResourcesAsync(
                 taskList.ToArray(),
                 (res) =>
                 {
@@ -262,15 +262,15 @@ namespace SceneTest.SceneTanksGame
             gameMessage = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 120, false), layerLoadingUI + 1);
             gameMessage.CenterHorizontally = CenterTargets.Screen;
             gameMessage.CenterVertically = CenterTargets.Screen;
-            gameMessage.TextColor = Color.Yellow;
-            gameMessage.TextShadowColor = Color.Yellow * 0.5f;
+            gameMessage.ForeColor = Color.Yellow;
+            gameMessage.ShadowColor = Color.Yellow * 0.5f;
             gameMessage.Visible = false;
 
             gameKeyHelp = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 25, true), layerLoadingUI + 1);
-            gameKeyHelp.TextColor = Color.Yellow;
+            gameKeyHelp.ForeColor = Color.Yellow;
             gameKeyHelp.Text = "Press space to exit";
             gameKeyHelp.CenterHorizontally = CenterTargets.Screen;
-            gameKeyHelp.Top = this.Game.Form.RenderHeight - 60;
+            gameKeyHelp.Top = Game.Form.RenderHeight - 60;
             gameKeyHelp.Width = 500;
             gameKeyHelp.Height = 40;
             gameKeyHelp.HorizontalAlign = HorizontalTextAlign.Center;
@@ -280,7 +280,7 @@ namespace SceneTest.SceneTanksGame
         }
         private async Task InitializeUIModalDialog()
         {
-            float width = this.Game.Form.RenderWidth / 2f;
+            float width = Game.Form.RenderWidth / 2f;
             float height = width * 0.6666f;
 
             var descPan = new UIPanelDescription
@@ -351,8 +351,8 @@ namespace SceneTest.SceneTanksGame
             float playerWidth = 300;
 
             player1Name = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 20, true), layerUI);
-            player1Name.TextColor = player1Status.Color;
-            player1Name.TextShadowColor = player1Status.Color * 0.5f;
+            player1Name.ForeColor = player1Status.Color;
+            player1Name.ShadowColor = player1Status.Color * 0.5f;
             player1Name.AdjustAreaWithText = false;
             player1Name.HorizontalAlign = HorizontalTextAlign.Left;
             player1Name.Width = playerWidth;
@@ -361,8 +361,8 @@ namespace SceneTest.SceneTanksGame
             player1Name.Visible = false;
 
             player1Points = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 25, true), layerUI);
-            player1Points.TextColor = player1Status.Color;
-            player1Points.TextShadowColor = player1Status.Color * 0.5f;
+            player1Points.ForeColor = player1Status.Color;
+            player1Points.ShadowColor = player1Status.Color * 0.5f;
             player1Points.AdjustAreaWithText = false;
             player1Points.HorizontalAlign = HorizontalTextAlign.Center;
             player1Points.Width = playerWidth;
@@ -377,46 +377,46 @@ namespace SceneTest.SceneTanksGame
             player1Life.Left = 10;
             player1Life.ProgressColor = player1Status.Color;
             player1Life.BaseColor = Color.Black;
-            player1Life.Caption.TextColor = Color.White;
+            player1Life.Caption.ForeColor = Color.White;
             player1Life.Caption.Text = "0%";
             player1Life.Visible = false;
 
             player2Name = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 20, true), layerUI);
-            player2Name.TextColor = player2Status.Color;
-            player2Name.TextShadowColor = player2Status.Color * 0.5f;
+            player2Name.ForeColor = player2Status.Color;
+            player2Name.ShadowColor = player2Status.Color * 0.5f;
             player2Name.AdjustAreaWithText = false;
             player2Name.HorizontalAlign = HorizontalTextAlign.Right;
             player2Name.Width = playerWidth;
             player2Name.Top = 10;
-            player2Name.Left = this.Game.Form.RenderWidth - 10 - player2Name.Width;
+            player2Name.Left = Game.Form.RenderWidth - 10 - player2Name.Width;
             player2Name.Visible = false;
 
             player2Points = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 25, true), layerUI);
-            player2Points.TextColor = player2Status.Color;
-            player2Points.TextShadowColor = player2Status.Color * 0.5f;
+            player2Points.ForeColor = player2Status.Color;
+            player2Points.ShadowColor = player2Status.Color * 0.5f;
             player2Points.AdjustAreaWithText = false;
             player2Points.HorizontalAlign = HorizontalTextAlign.Center;
             player2Points.Width = playerWidth;
             player2Points.Top = 60;
-            player2Points.Left = this.Game.Form.RenderWidth - 10 - player2Points.Width;
+            player2Points.Left = Game.Form.RenderWidth - 10 - player2Points.Width;
             player2Points.Visible = false;
 
             player2Life = await this.AddComponentUIProgressBar(UIProgressBarDescription.DefaultFromFile(fontFilename, 10, true), layerUI);
             player2Life.Width = playerWidth;
             player2Life.Height = 30;
             player2Life.Top = 100;
-            player2Life.Left = this.Game.Form.RenderWidth - 10 - player2Life.Width;
+            player2Life.Left = Game.Form.RenderWidth - 10 - player2Life.Width;
             player2Life.ProgressColor = player2Status.Color;
             player2Life.BaseColor = Color.Black;
-            player2Life.Caption.TextColor = Color.White;
+            player2Life.Caption.ForeColor = Color.White;
             player2Life.Caption.Text = "0%";
             player2Life.Visible = false;
         }
         private async Task InitializeUITurn()
         {
             turnText = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 40, true), layerUI);
-            turnText.TextColor = Color.Yellow;
-            turnText.TextShadowColor = Color.Yellow * 0.5f;
+            turnText.ForeColor = Color.Yellow;
+            turnText.ShadowColor = Color.Yellow * 0.5f;
             turnText.HorizontalAlign = HorizontalTextAlign.Center;
             turnText.Width = 300;
             turnText.CenterHorizontally = CenterTargets.Screen;
@@ -437,13 +437,13 @@ namespace SceneTest.SceneTanksGame
             playerTurnMarker.Width = 112;
             playerTurnMarker.Height = 75;
             playerTurnMarker.Top = 35;
-            playerTurnMarker.Left = this.Game.Form.RenderCenter.X - 112 - 120;
+            playerTurnMarker.Left = Game.Form.RenderCenter.X - 112 - 120;
             playerTurnMarker.Visible = false;
             playerTurnMarker.TweenScaleBounce(1, 1.2f, 500, ScaleFuncs.CubicEaseInOut);
         }
         private async Task InitializeUIKeyPanel()
         {
-            float top = this.Game.Form.RenderHeight - 150;
+            float top = Game.Form.RenderHeight - 150;
 
             keyHelp = await this.AddComponentUIPanel(UIPanelDescription.Default(Color4.Black * 0.3333f), layerUI);
             keyHelp.Left = 0;
@@ -477,42 +477,42 @@ namespace SceneTest.SceneTanksGame
             KeyPitch.Visible = false;
 
             keyRotateLeftText = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 15, true), layerUI + 2);
-            keyRotateLeftText.TextColor = Color.Yellow;
+            keyRotateLeftText.ForeColor = Color.Yellow;
             keyRotateLeftText.Text = "A";
             keyRotateLeftText.Top = top + 20;
             keyRotateLeftText.Left = 10;
             keyRotateLeftText.Visible = false;
 
             keyRotateRightText = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 15, true), layerUI + 2);
-            keyRotateRightText.TextColor = Color.Yellow;
+            keyRotateRightText.ForeColor = Color.Yellow;
             keyRotateRightText.Text = "D";
             keyRotateRightText.Top = top + 20;
             keyRotateRightText.Left = keyRotate.Width - 30;
             keyRotateRightText.Visible = false;
 
             keyMoveForwardText = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 15, true), layerUI + 2);
-            keyMoveForwardText.TextColor = Color.Yellow;
+            keyMoveForwardText.ForeColor = Color.Yellow;
             keyMoveForwardText.Text = "W";
             keyMoveForwardText.Top = top + 20;
             keyMoveForwardText.Left = keyMove.AbsoluteCenter.X - 5;
             keyMoveForwardText.Visible = false;
 
             keyMoveBackwardText = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 15, true), layerUI + 2);
-            keyMoveBackwardText.TextColor = Color.Yellow;
+            keyMoveBackwardText.ForeColor = Color.Yellow;
             keyMoveBackwardText.Text = "S";
             keyMoveBackwardText.Top = top + keyMove.Height + 10;
             keyMoveBackwardText.Left = keyMove.AbsoluteCenter.X - 5;
             keyMoveBackwardText.Visible = false;
 
             keyPitchUpText = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 15, true), layerUI + 2);
-            keyPitchUpText.TextColor = Color.Yellow;
+            keyPitchUpText.ForeColor = Color.Yellow;
             keyPitchUpText.Text = "Q";
             keyPitchUpText.Top = top + 20;
             keyPitchUpText.Left = KeyPitch.AbsoluteCenter.X - 15;
             keyPitchUpText.Visible = false;
 
             keyPitchDownText = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 15, true), layerUI + 2);
-            keyPitchDownText.TextColor = Color.Yellow;
+            keyPitchDownText.ForeColor = Color.Yellow;
             keyPitchDownText.Text = "Z";
             keyPitchDownText.Top = top + KeyPitch.Height + 10;
             keyPitchDownText.Left = KeyPitch.AbsoluteCenter.X + 10;
@@ -522,17 +522,17 @@ namespace SceneTest.SceneTanksGame
         {
             pbFire = await this.AddComponentUIProgressBar(UIProgressBarDescription.Default(), layerUI);
             pbFire.CenterHorizontally = CenterTargets.Screen;
-            pbFire.Top = this.Game.Form.RenderHeight - 100;
+            pbFire.Top = Game.Form.RenderHeight - 100;
             pbFire.Width = 500;
             pbFire.Height = 40;
             pbFire.ProgressColor = Color.Yellow;
             pbFire.Visible = false;
 
             fireKeyText = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 25, true), layerUI + 2);
-            fireKeyText.TextColor = Color.Yellow;
+            fireKeyText.ForeColor = Color.Yellow;
             fireKeyText.Text = "Press space to fire!";
             fireKeyText.CenterHorizontally = CenterTargets.Screen;
-            fireKeyText.Top = this.Game.Form.RenderHeight - 60;
+            fireKeyText.Top = Game.Form.RenderHeight - 60;
             fireKeyText.Width = 500;
             fireKeyText.Height = 40;
             fireKeyText.HorizontalAlign = HorizontalTextAlign.Center;
@@ -545,30 +545,30 @@ namespace SceneTest.SceneTanksGame
             miniMapBackground = await this.AddComponentSprite(SpriteDescription.FromFile("SceneTanksGame/Compass.png"), SceneObjectUsages.UI, layerUI);
             miniMapBackground.Width = 200;
             miniMapBackground.Height = 200;
-            miniMapBackground.Left = this.Game.Form.RenderWidth - 200 - 10;
-            miniMapBackground.Top = this.Game.Form.RenderHeight - 200 - 10;
+            miniMapBackground.Left = Game.Form.RenderWidth - 200 - 10;
+            miniMapBackground.Top = Game.Form.RenderHeight - 200 - 10;
             miniMapBackground.Alpha = 0.5f;
             miniMapBackground.Visible = false;
 
             miniMapTank1 = await this.AddComponentSprite(SpriteDescription.FromFile("SceneTanksGame/Tank.png"), SceneObjectUsages.UI, layerUI + 1);
             miniMapTank1.Width = 273 * 0.1f;
             miniMapTank1.Height = 365 * 0.1f;
-            miniMapTank1.Left = this.Game.Form.RenderWidth - 150 - 10;
-            miniMapTank1.Top = this.Game.Form.RenderHeight - 150 - 10;
+            miniMapTank1.Left = Game.Form.RenderWidth - 150 - 10;
+            miniMapTank1.Top = Game.Form.RenderHeight - 150 - 10;
             miniMapTank1.BaseColor = Color.Blue;
             miniMapTank1.Visible = false;
 
             miniMapTank2 = await this.AddComponentSprite(SpriteDescription.FromFile("SceneTanksGame/Tank.png"), SceneObjectUsages.UI, layerUI + 1);
             miniMapTank2.Width = 273 * 0.1f;
             miniMapTank2.Height = 365 * 0.1f;
-            miniMapTank2.Left = this.Game.Form.RenderWidth - 85 - 10;
-            miniMapTank2.Top = this.Game.Form.RenderHeight - 85 - 10;
+            miniMapTank2.Left = Game.Form.RenderWidth - 85 - 10;
+            miniMapTank2.Top = Game.Form.RenderHeight - 85 - 10;
             miniMapTank2.BaseColor = Color.Red;
             miniMapTank2.Visible = false;
 
             windVelocity = await this.AddComponentUIProgressBar(UIProgressBarDescription.DefaultFromFile(fontFilename, 8), layerUI + 2);
             windVelocity.Caption.Text = "Wind velocity";
-            windVelocity.Caption.TextColor = Color.Yellow * 0.85f;
+            windVelocity.Caption.ForeColor = Color.Yellow * 0.85f;
             windVelocity.Width = 180;
             windVelocity.Height = 15;
             windVelocity.Left = miniMapBackground.AbsoluteCenter.X - 90;
@@ -677,7 +677,7 @@ namespace SceneTest.SceneTanksGame
 
             terrainTop = terrain.GetBoundingBox().Maximum.Y;
 
-            this.SetGround(terrain, true);
+            SetGround(terrain, true);
         }
         private async Task InitializeLandscape()
         {
@@ -900,12 +900,12 @@ namespace SceneTest.SceneTanksGame
             Vector3 p2 = new Vector3(+100, 100, 0);
             Vector3 n2 = Vector3.Up;
 
-            if (this.FindTopGroundPosition<Triangle>(p1.X, p1.Z, out var r1))
+            if (FindTopGroundPosition<Triangle>(p1.X, p1.Z, out var r1))
             {
                 p1 = r1.Position - (Vector3.Up * 0.1f);
                 n1 = r1.Item.Normal;
             }
-            if (this.FindTopGroundPosition<Triangle>(p2.X, p2.Z, out var r2))
+            if (FindTopGroundPosition<Triangle>(p2.X, p2.Z, out var r2))
             {
                 p2 = r2.Position - (Vector3.Up * 0.1f);
                 n2 = r2.Item.Normal;
@@ -1033,8 +1033,8 @@ namespace SceneTest.SceneTanksGame
         {
             if (freeCamera)
             {
-                if (this.Game.Input.KeyJustReleased(Keys.F) ||
-                    this.Game.Input.KeyJustReleased(Keys.Escape))
+                if (Game.Input.KeyJustReleased(Keys.F) ||
+                    Game.Input.KeyJustReleased(Keys.Escape))
                 {
                     ToggleFreeCamera();
 
@@ -1043,23 +1043,23 @@ namespace SceneTest.SceneTanksGame
             }
             else
             {
-                if (this.Game.Input.KeyJustReleased(Keys.F))
+                if (Game.Input.KeyJustReleased(Keys.F))
                 {
                     ToggleFreeCamera();
 
                     return;
                 }
 
-                if (this.Game.Input.KeyJustReleased(Keys.Escape))
+                if (Game.Input.KeyJustReleased(Keys.Escape))
                 {
-                    this.ShowDialog(
+                    ShowDialog(
                         @"Press Ok if you want to exit.
 
 You will lost all the game progress.",
                         CloseDialog,
                         () =>
                         {
-                            this.Game.SetScene<SceneStart.SceneStart>();
+                            Game.SetScene<SceneStart.SceneStart>();
                         });
                 }
             }
@@ -1070,35 +1070,35 @@ You will lost all the game progress.",
 
             if (freeCamera)
             {
-                this.Camera.MovementDelta *= 10f;
-                this.Game.LockMouse = true;
+                Camera.MovementDelta *= 10f;
+                Game.LockMouse = true;
             }
             else
             {
-                this.Camera.MovementDelta /= 10f;
-                this.Game.LockMouse = false;
+                Camera.MovementDelta /= 10f;
+                Game.LockMouse = false;
             }
         }
         private void UpdateInputPlayer(GameTime gameTime)
         {
-            if (this.Game.Input.KeyPressed(Keys.A))
+            if (Game.Input.KeyPressed(Keys.A))
             {
                 Shooter.Manipulator.Rotate(-gameTime.ElapsedSeconds, 0, 0);
 
                 PlayEffectMove(Shooter);
             }
-            if (this.Game.Input.KeyPressed(Keys.D))
+            if (Game.Input.KeyPressed(Keys.D))
             {
                 Shooter.Manipulator.Rotate(+gameTime.ElapsedSeconds, 0, 0);
 
                 PlayEffectMove(Shooter);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.Q))
+            if (Game.Input.KeyPressed(Keys.Q))
             {
                 Shooter["Barrel-mesh"].Manipulator.Rotate(0, gameTime.ElapsedSeconds, 0);
             }
-            if (this.Game.Input.KeyPressed(Keys.Z))
+            if (Game.Input.KeyPressed(Keys.Z))
             {
                 Shooter["Barrel-mesh"].Manipulator.Rotate(0, -gameTime.ElapsedSeconds, 0);
             }
@@ -1110,13 +1110,13 @@ You will lost all the game progress.",
 
             Vector3 prevPosition = Shooter.Manipulator.Position;
 
-            if (this.Game.Input.KeyPressed(Keys.W))
+            if (Game.Input.KeyPressed(Keys.W))
             {
                 Shooter.Manipulator.MoveForward(gameTime, 10);
 
                 PlayEffectMove(Shooter);
             }
-            if (this.Game.Input.KeyPressed(Keys.S))
+            if (Game.Input.KeyPressed(Keys.S))
             {
                 Shooter.Manipulator.MoveBackward(gameTime, 10);
 
@@ -1130,67 +1130,67 @@ You will lost all the game progress.",
         }
         private void UpdateInputShooting(GameTime gameTime)
         {
-            if (this.Game.Input.KeyPressed(Keys.Space))
+            if (Game.Input.KeyPressed(Keys.Space))
             {
                 pbFire.ProgressValue += gameTime.ElapsedSeconds * 0.5f;
                 pbFire.ProgressValue %= 1f;
                 pbFire.ProgressColor = pbFire.ProgressValue < 0.75f ? Color.Yellow : Color4.Lerp(Color.Yellow, Color.Red, (pbFire.ProgressValue - 0.75f) / 0.25f);
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.Space))
+            if (Game.Input.KeyJustReleased(Keys.Space))
             {
                 Shoot(pbFire.ProgressValue);
             }
         }
         private void UpdateInputEndGame()
         {
-            if (this.Game.Input.KeyJustReleased(Keys.Space))
+            if (Game.Input.KeyJustReleased(Keys.Space))
             {
-                this.Game.SetScene<SceneStart.SceneStart>();
+                Game.SetScene<SceneStart.SceneStart>();
             }
         }
         private void UpdateInputFree(GameTime gameTime)
         {
 #if DEBUG
-            if (this.Game.Input.RightMouseButtonPressed)
+            if (Game.Input.RightMouseButtonPressed)
             {
-                this.Camera.RotateMouse(
+                Camera.RotateMouse(
                     gameTime,
-                    this.Game.Input.MouseXDelta,
-                    this.Game.Input.MouseYDelta);
+                    Game.Input.MouseXDelta,
+                    Game.Input.MouseYDelta);
             }
 #else
-            this.Camera.RotateMouse(
+            Camera.RotateMouse(
                 gameTime,
-                this.Game.Input.MouseXDelta,
-                this.Game.Input.MouseYDelta);
+                Game.Input.MouseXDelta,
+                Game.Input.MouseYDelta);
 #endif
 
-            Vector3 prevPosition = this.Camera.Position;
+            Vector3 prevPosition = Camera.Position;
 
-            if (this.Game.Input.KeyPressed(Keys.A))
+            if (Game.Input.KeyPressed(Keys.A))
             {
-                this.Camera.MoveLeft(gameTime, this.Game.Input.ShiftPressed);
+                Camera.MoveLeft(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.D))
+            if (Game.Input.KeyPressed(Keys.D))
             {
-                this.Camera.MoveRight(gameTime, this.Game.Input.ShiftPressed);
+                Camera.MoveRight(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.W))
+            if (Game.Input.KeyPressed(Keys.W))
             {
-                this.Camera.MoveForward(gameTime, this.Game.Input.ShiftPressed);
+                Camera.MoveForward(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.S))
+            if (Game.Input.KeyPressed(Keys.S))
             {
-                this.Camera.MoveBackward(gameTime, this.Game.Input.ShiftPressed);
+                Camera.MoveBackward(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.terrain.Intersects(new IntersectionVolumeSphere(this.Camera.Position, this.Camera.CameraRadius), out var res))
+            if (terrain.Intersects(new IntersectionVolumeSphere(Camera.Position, Camera.CameraRadius), out var res))
             {
-                this.Camera.Position = prevPosition;
+                Camera.Position = prevPosition;
             }
         }
 
@@ -1200,12 +1200,12 @@ You will lost all the game progress.",
 
             if (currentPlayer == 0)
             {
-                playerTurnMarker.Left = this.Game.Form.RenderCenter.X - 112 - 120;
+                playerTurnMarker.Left = Game.Form.RenderCenter.X - 112 - 120;
                 playerTurnMarker.Rotation = 0;
             }
             else
             {
-                playerTurnMarker.Left = this.Game.Form.RenderCenter.X + 120;
+                playerTurnMarker.Left = Game.Form.RenderCenter.X + 120;
                 playerTurnMarker.Rotation = MathUtil.Pi;
             }
         }
@@ -1225,7 +1225,7 @@ You will lost all the game progress.",
         }
         private void UpdateTanks()
         {
-            if (this.FindTopGroundPosition<Triangle>(Shooter.Manipulator.Position.X, Shooter.Manipulator.Position.Z, out var r))
+            if (FindTopGroundPosition<Triangle>(Shooter.Manipulator.Position.X, Shooter.Manipulator.Position.Z, out var r))
             {
                 Shooter.Manipulator.SetPosition(r.Position - (Vector3.Up * 0.1f));
                 Shooter.Manipulator.SetNormal(r.Item.Normal, 0.05f);
@@ -1255,14 +1255,14 @@ You will lost all the game progress.",
 
             if (firstUpdate)
             {
-                this.Camera.Position = position;
+                Camera.Position = position;
             }
             else
             {
-                this.Camera.Goto(position, CameraTranslations.Quick);
+                Camera.Goto(position, CameraTranslations.Quick);
             }
 
-            this.Camera.Interest = interest;
+            Camera.Interest = interest;
         }
 
         private void PaintShot(bool visible)
@@ -1300,13 +1300,13 @@ You will lost all the game progress.",
             {
                 Vector3 markerPos = from + (shootDirection * dist);
                 Vector3 screenPos = Vector3.Project(markerPos,
-                    this.Game.Graphics.Viewport.X,
-                    this.Game.Graphics.Viewport.Y,
-                    this.Game.Graphics.Viewport.Width,
-                    this.Game.Graphics.Viewport.Height,
-                    this.Game.Graphics.Viewport.MinDepth,
-                    this.Game.Graphics.Viewport.MaxDepth,
-                    this.Camera.View * this.Camera.Projection);
+                    Game.Graphics.Viewport.X,
+                    Game.Graphics.Viewport.Y,
+                    Game.Graphics.Viewport.Width,
+                    Game.Graphics.Viewport.Height,
+                    Game.Graphics.Viewport.MinDepth,
+                    Game.Graphics.Viewport.MaxDepth,
+                    Camera.View * Camera.Projection);
                 float scale = (1f - screenPos.Z) * 1000f;
 
                 trajectoryMarkerPool[i].Left = screenPos.X - (trajectoryMarkerPool[i].Width * 0.5f);
@@ -1369,7 +1369,7 @@ You will lost all the game progress.",
             var shotDirection = Shooter["Barrel-mesh"].Manipulator.FinalTransform.Forward;
 
             shot = new ParabolicShot();
-            shot.Configure(this.Game.GameTime, shotDirection, shotForce * 200, windDirection, currentWindVelocity);
+            shot.Configure(Game.GameTime, shotDirection, shotForce * 200, windDirection, currentWindVelocity);
 
             shooting = true;
 
@@ -1427,7 +1427,7 @@ You will lost all the game progress.",
 
                 if (impactPosition.HasValue)
                 {
-                    this.AddExplosionSystem(impactPosition.Value);
+                    AddExplosionSystem(impactPosition.Value);
                     PlayEffectDamage(Target);
                     PlayEffectImpact(Target);
                 }
@@ -1439,23 +1439,23 @@ You will lost all the game progress.",
                         Vector3 min = Vector3.One * -5f;
                         Vector3 max = Vector3.One * +5f;
 
-                        this.AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
+                        AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
                         PlayEffectDestroyed(Target);
 
                         await Task.Delay(500);
 
-                        this.AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
+                        AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
 
                         await Task.Delay(500);
 
-                        this.AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
-                        this.AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
+                        AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
+                        AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
 
                         await Task.Delay(3000);
 
-                        this.AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
-                        this.AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
-                        this.AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
+                        AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
+                        AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
+                        AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
                         PlayEffectDestroyed(Target);
                     });
                 }
@@ -1464,7 +1464,7 @@ You will lost all the game progress.",
             {
                 if (impactPosition.HasValue)
                 {
-                    this.AddSmokePlumeSystem(impactPosition.Value);
+                    AddSmokePlumeSystem(impactPosition.Value);
                     PlayEffectDestroyed(impactPosition.Value);
                 }
             }
@@ -1495,8 +1495,8 @@ You will lost all the game progress.",
                 gameEnding = true;
 
                 gameMessage.Text = $"The winner is {shooter.Name}!";
-                gameMessage.TextColor = shooter.Color;
-                gameMessage.TextShadowColor = shooter.Color * 0.5f;
+                gameMessage.ForeColor = shooter.Color;
+                gameMessage.ShadowColor = shooter.Color * 0.5f;
                 gameMessage.Show(1000);
                 gameMessage.TweenScale(0, 1, 1000, ScaleFuncs.CubicEaseIn);
 
@@ -1559,8 +1559,8 @@ You will lost all the game progress.",
                 MaximumDistance = 1000f,
             };
 
-            this.particleManager.AddParticleSystem(ParticleSystemTypes.CPU, this.particleDescriptions["Explosion"], emitter1);
-            this.particleManager.AddParticleSystem(ParticleSystemTypes.CPU, this.particleDescriptions["SmokeExplosion"], emitter2);
+            particleManager.AddParticleSystem(ParticleSystemTypes.CPU, particleDescriptions["Explosion"], emitter1);
+            particleManager.AddParticleSystem(ParticleSystemTypes.CPU, particleDescriptions["SmokeExplosion"], emitter2);
         }
         private void AddSmokePlumeSystem(Vector3 position)
         {
@@ -1588,8 +1588,8 @@ You will lost all the game progress.",
                 MaximumDistance = 5000f,
             };
 
-            this.particleManager.AddParticleSystem(ParticleSystemTypes.CPU, this.particleDescriptions["Fire"], emitter1);
-            this.particleManager.AddParticleSystem(ParticleSystemTypes.CPU, this.particleDescriptions["Plume"], emitter2);
+            particleManager.AddParticleSystem(ParticleSystemTypes.CPU, particleDescriptions["Fire"], emitter1);
+            particleManager.AddParticleSystem(ParticleSystemTypes.CPU, particleDescriptions["Plume"], emitter2);
         }
 
         private async Task ShowMessage(string text, int delay)
@@ -1610,7 +1610,7 @@ You will lost all the game progress.",
         {
             if (tankMoveEffectInstance == null)
             {
-                tankMoveEffectInstance = AudioManager.CreateEffectInstance(tankMoveEffect, emitter, this.Camera);
+                tankMoveEffectInstance = AudioManager.CreateEffectInstance(tankMoveEffect, emitter, Camera);
                 tankMoveEffectInstance.Play();
 
                 Task.Run(async () =>
@@ -1624,27 +1624,27 @@ You will lost all the game progress.",
         }
         private void PlayEffectShooting(ITransformable3D emitter)
         {
-            AudioManager.CreateEffectInstance(tankShootingEffect, emitter, this.Camera)?.Play();
+            AudioManager.CreateEffectInstance(tankShootingEffect, emitter, Camera)?.Play();
         }
         private void PlayEffectImpact(ITransformable3D emitter)
         {
             int index = Helper.RandomGenerator.Next(0, impactEffects.Length);
             index %= impactEffects.Length - 1;
-            AudioManager.CreateEffectInstance(impactEffects[index], emitter, this.Camera)?.Play();
+            AudioManager.CreateEffectInstance(impactEffects[index], emitter, Camera)?.Play();
         }
         private void PlayEffectDamage(ITransformable3D emitter)
         {
             int index = Helper.RandomGenerator.Next(0, damageEffects.Length);
             index %= damageEffects.Length - 1;
-            AudioManager.CreateEffectInstance(damageEffects[index], emitter, this.Camera)?.Play();
+            AudioManager.CreateEffectInstance(damageEffects[index], emitter, Camera)?.Play();
         }
         private void PlayEffectDestroyed(ITransformable3D emitter)
         {
-            AudioManager.CreateEffectInstance(tankDestroyedEffect, emitter, this.Camera)?.Play();
+            AudioManager.CreateEffectInstance(tankDestroyedEffect, emitter, Camera)?.Play();
         }
         private void PlayEffectDestroyed(Vector3 emitter)
         {
-            AudioManager.CreateEffectInstance(tankDestroyedEffect, emitter, this.Camera)?.Play();
+            AudioManager.CreateEffectInstance(tankDestroyedEffect, emitter, Camera)?.Play();
         }
 
         private void ShowDialog(string message, Action onCloseCallback, Action onAcceptCallback)
