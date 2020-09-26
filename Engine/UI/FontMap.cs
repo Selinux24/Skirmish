@@ -338,49 +338,51 @@ namespace Engine.UI
             Color4 foreColor = defaultForeColor;
             Color4 shadowColor = defaultShadowColor;
 
+            RegexOptions options = RegexOptions.IgnoreCase;
+
+            Dictionary<int, Color4> foreColorValues = new Dictionary<int, Color4>();
+            Dictionary<int, Color4> shadowColorValues = new Dictionary<int, Color4>();
+            int deletedSize = 0;
+            parsedString = Regex.Replace(rawString, colorPattern, (m) =>
+            {
+                ReadMatch(m, out var mForeColor, out var mShadowColor);
+
+                if (mForeColor.HasValue)
+                {
+                    foreColorValues.Add(m.Index - deletedSize, mForeColor.Value);
+                }
+                if (mShadowColor.HasValue)
+                {
+                    shadowColorValues.Add(m.Index - deletedSize, mShadowColor.Value);
+                }
+
+                deletedSize += m.Length;
+
+                return string.Empty;
+            }, options);
+
             List<Color4> foreColorsByChar = new List<Color4>();
             List<Color4> shadowColorsByChar = new List<Color4>();
 
-            RegexOptions options = RegexOptions.IgnoreCase;
-
-            Match match = Regex.Match(rawString, colorPattern, options);
-            while (match.Success)
+            // Fill result
+            Color4 currentForeColor = defaultForeColor;
+            Color4 currentShadowColor = defaultShadowColor;
+            for (int i = 0; i < parsedString.Length; i++)
             {
-                int foreColorsLength = match.Index - foreColorsByChar.Count;
-                if (foreColorsLength > 0)
+                if (foreColorValues.ContainsKey(i))
                 {
-                    foreColorsByChar.AddRange(Helper.CreateArray(foreColorsLength, foreColor));
+                    currentForeColor = foreColorValues[i];
                 }
 
-                int shadowColorsLength = match.Index - shadowColorsByChar.Count;
-                if (shadowColorsLength > 0)
+                if (shadowColorValues.ContainsKey(i))
                 {
-                    shadowColorsByChar.AddRange(Helper.CreateArray(shadowColorsLength, shadowColor));
+                    currentShadowColor = shadowColorValues[i];
                 }
 
-                ReadMatch(match, out var mForeColor, out var mShadowColor);
-
-                if (mForeColor.HasValue) foreColor = mForeColor.Value;
-                if (mShadowColor.HasValue) shadowColor = mShadowColor.Value;
-
-                rawString = rawString.Remove(match.Index, match.Length);
-
-                match = Regex.Match(rawString, colorPattern, options);
+                foreColorsByChar.Add(currentForeColor);
+                shadowColorsByChar.Add(currentShadowColor);
             }
 
-            if (rawString.Length > foreColorsByChar.Count)
-            {
-                int length = rawString.Length - foreColorsByChar.Count;
-                foreColorsByChar.AddRange(Helper.CreateArray(length, foreColor));
-            }
-
-            if (rawString.Length > shadowColorsByChar.Count)
-            {
-                int length = rawString.Length - shadowColorsByChar.Count;
-                shadowColorsByChar.AddRange(Helper.CreateArray(length, shadowColor));
-            }
-
-            parsedString = rawString;
             foreColors = foreColorsByChar;
             shadowColors = shadowColorsByChar;
         }

@@ -498,7 +498,7 @@ namespace ModelDrawing
 
             if (log.Visible)
             {
-                string logText = Logger.ReadText(logLines);
+                string logText = Logger.ReadText(FormatLog, logLines);
                 log.Text = logText;
             }
 
@@ -512,6 +512,32 @@ namespace ModelDrawing
 
             text1.Text = $"P1 - {particle1}";
             text2.Text = $"P2 - {particle2}";
+        }
+        private string FormatLog(LogEntry logEntry)
+        {
+            Color4 defColor = log.ForeColor;
+
+            Color4 logColor;
+            switch (logEntry.LogLevel)
+            {
+                case LogLevel.Debug:
+                    logColor = Color.White;
+                    break;
+                case LogLevel.Information:
+                    logColor = Color.Blue;
+                    break;
+                case LogLevel.Warning:
+                    logColor = Color.Yellow;
+                    break;
+                case LogLevel.Error:
+                    logColor = Color.Red;
+                    break;
+                default:
+                    logColor = log.ForeColor;
+                    break;
+            }
+
+            return $"{logEntry.EventDate:HH:mm:ss.fff} {logColor}[{logEntry.LogLevel}]{defColor}> {logEntry.Text}{System.Environment.NewLine}";
         }
 
         public override void GameGraphicsResized()

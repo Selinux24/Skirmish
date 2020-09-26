@@ -137,6 +137,16 @@ namespace Engine
         /// <param name="reverse">Reverse entry order</param>
         public static string ReadText(int maxLines = 0, bool reverse = true)
         {
+            return ReadText(FormatLog, maxLines, reverse);
+        }
+        /// <summary>
+        /// Gets the last maxLines lines of the log
+        /// </summary>
+        /// <param name="fncFormat">Log line format function</param>
+        /// <param name="maxLines">Maximum number of lines</param>
+        /// <param name="reverse">Reverse entry order</param>
+        public static string ReadText(Func<LogEntry, string> fncFormat, int maxLines = 0, bool reverse = true)
+        {
             var logEntries = Read();
             if (!logEntries.Any())
             {
@@ -148,7 +158,7 @@ namespace Engine
                 logEntries = logEntries.Reverse();
             }
 
-            string logText = new string(logEntries.SelectMany(l => $"{l.EventDate:HH:mm:ss.fff} [{l.LogLevel}]> {l.Text}" + Environment.NewLine).ToArray());
+            string logText = new string(logEntries.SelectMany(fncFormat).ToArray());
             var lines = logText.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
 
             if (maxLines > 0 && lines.Length > maxLines)
@@ -157,6 +167,14 @@ namespace Engine
             }
 
             return string.Join(Environment.NewLine, lines);
+        }
+        /// <summary>
+        /// Default log line formatter
+        /// </summary>
+        /// <param name="logEntry">Log entry</param>
+        private static string FormatLog(LogEntry logEntry)
+        {
+            return $"{logEntry.EventDate:HH:mm:ss.fff} [{logEntry.LogLevel}]> {logEntry.Text}{Environment.NewLine}";
         }
 
         /// <summary>
@@ -177,6 +195,7 @@ namespace Engine
         public static void Dump(string fileName)
         {
             string dumpText = ReadText(0, false);
+
             File.WriteAllText(fileName, dumpText);
         }
     }
