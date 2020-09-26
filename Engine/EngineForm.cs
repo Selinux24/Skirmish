@@ -88,8 +88,10 @@ namespace Engine
             this.Icon = Resources.engine;
             this.Name = "EngineForm";
             this.Text = "Engine Form";
-
+            this.KeyPreview = true;
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.EngineFormKeyDown);
             this.ResumeLayout(false);
+
         }
         /// <summary>
         /// Invalidation override
@@ -164,6 +166,18 @@ namespace Engine
             screenSpace.Y *= -1f;
 
             return screenSpace;
+        }
+
+        /// <summary>
+        /// Invalidates control keys
+        /// </summary>
+        private void EngineFormKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyData == System.Windows.Forms.Keys.F10)
+            {
+                // Do what you want with the F10 key
+                e.SuppressKeyPress = true;
+            }
         }
     }
 }

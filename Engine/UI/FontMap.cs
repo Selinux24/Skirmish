@@ -334,32 +334,31 @@ namespace Engine.UI
         /// <param name="shadowColors">Returns a shadow color by character list</param>
         private static void ParseLine(string text, Color4 defaultForeColor, Color4 defaultShadowColor, out string parsedString, out IEnumerable<Color4> foreColors, out IEnumerable<Color4> shadowColors)
         {
-            string rawString = text;
-            Color4 foreColor = defaultForeColor;
-            Color4 shadowColor = defaultShadowColor;
-
-            RegexOptions options = RegexOptions.IgnoreCase;
-
             Dictionary<int, Color4> foreColorValues = new Dictionary<int, Color4>();
             Dictionary<int, Color4> shadowColorValues = new Dictionary<int, Color4>();
             int deletedSize = 0;
-            parsedString = Regex.Replace(rawString, colorPattern, (m) =>
-            {
-                ReadMatch(m, out var mForeColor, out var mShadowColor);
 
-                if (mForeColor.HasValue)
+            parsedString = Regex.Replace(
+                text,
+                colorPattern,
+                (m) =>
                 {
-                    foreColorValues.Add(m.Index - deletedSize, mForeColor.Value);
-                }
-                if (mShadowColor.HasValue)
-                {
-                    shadowColorValues.Add(m.Index - deletedSize, mShadowColor.Value);
-                }
+                    ReadMatch(m, out var mForeColor, out var mShadowColor);
 
-                deletedSize += m.Length;
+                    if (mForeColor.HasValue)
+                    {
+                        foreColorValues.Add(m.Index - deletedSize, mForeColor.Value);
+                    }
+                    if (mShadowColor.HasValue)
+                    {
+                        shadowColorValues.Add(m.Index - deletedSize, mShadowColor.Value);
+                    }
 
-                return string.Empty;
-            }, options);
+                    deletedSize += m.Length;
+
+                    return string.Empty;
+                },
+                RegexOptions.IgnoreCase);
 
             List<Color4> foreColorsByChar = new List<Color4>();
             List<Color4> shadowColorsByChar = new List<Color4>();

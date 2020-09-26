@@ -343,17 +343,18 @@ namespace Deferred
         {
             var lineDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
             {
-                DepthEnabled = false,
+                Name = "DEBUG++ Lines",
                 Count = 1000,
             };
-            lineDrawer = await this.AddComponentPrimitiveListDrawer(lineDrawerDesc, SceneObjectUsages.None, layerEffects);
+            lineDrawer = await this.AddComponentPrimitiveListDrawer(lineDrawerDesc, SceneObjectUsages.None, layerEffects + 1);
             lineDrawer.Visible = false;
 
             var terrainGraphDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
             {
+                Name = "DEBUG++ Terrain Graph",
                 Count = MaxGridDrawer,
             };
-            terrainGraphDrawer = await this.AddComponentPrimitiveListDrawer(terrainGraphDrawerDesc, SceneObjectUsages.None, layerEffects);
+            terrainGraphDrawer = await this.AddComponentPrimitiveListDrawer(terrainGraphDrawerDesc, SceneObjectUsages.None, layerEffects + 1);
             terrainGraphDrawer.Visible = false;
 
             var graphDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
@@ -362,13 +363,16 @@ namespace Deferred
                 DepthEnabled = true,
                 Count = 50000,
             };
-            graphDrawer = await this.AddComponentPrimitiveListDrawer(graphDrawerDesc);
+            graphDrawer = await this.AddComponentPrimitiveListDrawer(graphDrawerDesc, SceneObjectUsages.None, layerEffects + 1);
+            graphDrawer.Visible = false;
 
             var volumesDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
             {
+                Name = "DEBUG++ Volumes",
                 Count = 10000
             };
-            volumesDrawer = await this.AddComponentPrimitiveListDrawer(volumesDrawerDesc);
+            volumesDrawer = await this.AddComponentPrimitiveListDrawer(volumesDrawerDesc, SceneObjectUsages.None, layerEffects + 1);
+            volumesDrawer.Visible = false;
         }
 
         private void StartNodes()
@@ -485,20 +489,20 @@ namespace Deferred
 
             bool shift = Game.Input.KeyPressed(Keys.LShiftKey);
 
-            UpdateInputCamera(gameTime, shift);
-            UpdateInputMouse(shift);
-            UpdayeInputLights(shift);
+            UpdateInputCamera(gameTime);
+            UpdateInputMouse();
+            UpdayeInputLights();
             UpdateInputObjectsVisibility();
             UpdateInputHelicopterTexture();
-            UpdateInputGraph();
-            UpdateInputDebug(shift);
+            UpdateInputDebug();
+            UpdateInputDeferredMap();
 
             UpdateDebugProximityGridDrawer();
 
             UpdateLights(gameTime);
             UpdateTanks();
         }
-        private void UpdateInputCamera(GameTime gameTime, bool shift)
+        private void UpdateInputCamera(GameTime gameTime)
         {
 #if DEBUG
             if (Game.Input.RightMouseButtonPressed)
@@ -517,22 +521,22 @@ namespace Deferred
 
             if (Game.Input.KeyPressed(Keys.A))
             {
-                Camera.MoveLeft(gameTime, shift);
+                Camera.MoveLeft(gameTime, Game.Input.ShiftPressed);
             }
 
             if (Game.Input.KeyPressed(Keys.D))
             {
-                Camera.MoveRight(gameTime, shift);
+                Camera.MoveRight(gameTime, Game.Input.ShiftPressed);
             }
 
             if (Game.Input.KeyPressed(Keys.W))
             {
-                Camera.MoveForward(gameTime, shift);
+                Camera.MoveForward(gameTime, Game.Input.ShiftPressed);
             }
 
             if (Game.Input.KeyPressed(Keys.S))
             {
-                Camera.MoveBackward(gameTime, shift);
+                Camera.MoveBackward(gameTime, Game.Input.ShiftPressed);
             }
 
             if (Game.Input.KeyPressed(Keys.Space))
@@ -541,7 +545,7 @@ namespace Deferred
                 lineDrawer.Visible = true;
             }
         }
-        private void UpdateInputMouse(bool shift)
+        private void UpdateInputMouse()
         {
             if (Game.Input.LeftMouseButtonJustReleased)
             {
@@ -551,12 +555,14 @@ namespace Deferred
                 if (PickNearest<Triangle>(pRay, rayPParams, out var r))
                 {
                     var tri = Line3D.CreateWiredTriangle(r.Item);
-                    volumesDrawer.SetPrimitives(Color.White, tri);
-
                     var cross = Line3D.CreateCross(r.Position, 0.25f);
-                    volumesDrawer.SetPrimitives(Color.Red, cross);
 
-                    if (shift)
+                    volumesDrawer.SetPrimitives(Color.White, tri);
+                    volumesDrawer.SetPrimitives(Color.Red, cross);
+                    volumesDrawer.Visible = true;
+
+
+                    if (Game.Input.ShiftPressed)
                     {
                         graph.RequestMoveAgent(crowd, tankAgents[0].CrowdAgent, tankAgentType, r.Position);
                     }
@@ -567,7 +573,7 @@ namespace Deferred
                 }
             }
         }
-        private void UpdayeInputLights(bool shift)
+        private void UpdayeInputLights()
         {
             if (Game.Input.KeyJustReleased(Keys.F))
             {
@@ -585,12 +591,67 @@ namespace Deferred
             {
                 onlyModels = !onlyModels;
 
-                CreateLights(onlyModels, !shift);
+                CreateLights(onlyModels, !Game.Input.ShiftPressed);
             }
 
             if (Game.Input.KeyJustReleased(Keys.P))
             {
                 animateLights = !animateLights;
+            }
+        }
+        private void UpdateInputHelicopterTexture()
+        {
+            if (Game.Input.KeyJustReleased(Keys.Oemcomma))
+            {
+                textIntex--;
+            }
+
+            if (Game.Input.KeyJustReleased(Keys.OemPeriod))
+            {
+                textIntex++;
+            }
+
+            if (Game.Input.KeyJustReleased(Keys.T))
+            {
+                helicopter.TextureIndex++;
+
+                if (helicopter.TextureIndex >= helicopter.TextureCount)
+                {
+                    //Loop
+                    helicopter.TextureIndex = 0;
+                }
+            }
+        }
+        private void UpdateInputDeferredMap()
+        {
+            if (Game.Input.KeyJustReleased(Keys.F1))
+            {
+                UpdateDebugColorMap();
+            }
+
+            if (Game.Input.KeyJustReleased(Keys.F2))
+            {
+                UpdateDebugNormalMap();
+            }
+
+            if (Game.Input.KeyJustReleased(Keys.F3))
+            {
+                UpdateDebugDepthMap();
+            }
+
+            if (Game.Input.KeyJustReleased(Keys.F4))
+            {
+                UpdateDebugShadowMap(Game.Input.ShiftPressed);
+            }
+
+            if (Game.Input.KeyJustReleased(Keys.F5))
+            {
+                UpdateDebugLightMap();
+            }
+
+            if (Game.Input.KeyJustReleased(Keys.F6))
+            {
+                UpdateDebugBufferDrawer();
             }
         }
         private void UpdateInputObjectsVisibility()
@@ -626,66 +687,12 @@ namespace Deferred
                 helicopters.Active = helicopters.Visible = !helicopters.Visible;
             }
         }
-        private void UpdateInputHelicopterTexture()
+        private void UpdateInputDebug()
         {
-            if (Game.Input.KeyJustReleased(Keys.Oemcomma))
-            {
-                textIntex--;
-            }
-
-            if (Game.Input.KeyJustReleased(Keys.OemPeriod))
-            {
-                textIntex++;
-            }
-
-            if (Game.Input.KeyJustReleased(Keys.T))
-            {
-                helicopter.TextureIndex++;
-
-                if (helicopter.TextureIndex >= helicopter.TextureCount)
-                {
-                    //Loop
-                    helicopter.TextureIndex = 0;
-                }
-            }
-        }
-        private void UpdateInputGraph()
-        {
-            if (Game.Input.KeyJustReleased(Keys.F4))
-            {
-                terrainGraphDrawer.Visible = !terrainGraphDrawer.Visible;
-            }
-        }
-        private void UpdateInputDebug(bool shift)
-        {
-            if (Game.Input.KeyJustReleased(Keys.F1))
-            {
-                UpdateDebugColorMap();
-            }
-
-            if (Game.Input.KeyJustReleased(Keys.F2))
-            {
-                UpdateDebugNormalMap();
-            }
-
-            if (Game.Input.KeyJustReleased(Keys.F3))
-            {
-                UpdateDebugDepthMap();
-            }
-
-            if (Game.Input.KeyJustReleased(Keys.F5))
-            {
-                UpdateDebugShadowMap(shift);
-            }
-
-            if (Game.Input.KeyJustReleased(Keys.F6))
-            {
-                UpdateDebugLightMap();
-            }
-
             if (Game.Input.KeyJustReleased(Keys.F12))
             {
-                UpdateDebugBufferDrawer();
+                terrainGraphDrawer.Visible = !terrainGraphDrawer.Visible;
+                graphDrawer.Visible = !graphDrawer.Visible;
             }
         }
         private void UpdateTanks()
