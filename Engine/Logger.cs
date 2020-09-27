@@ -39,6 +39,14 @@ namespace Engine
         }
 
         /// <summary>
+        /// Writes a trace entry
+        /// </summary>
+        /// <param name="text">Entry text</param>
+        public static void WriteTrace(string text)
+        {
+            Write(LogLevel.Trace, text);
+        }
+        /// <summary>
         /// Writes a debug entry
         /// </summary>
         /// <param name="text">Entry text</param>
@@ -66,16 +74,26 @@ namespace Engine
         /// Writes a error entry
         /// </summary>
         /// <param name="text">Entry text</param>
-        public static void WriteError(string text)
+        /// <param name="ex">Exception (optional)</param>
+        public static void WriteError(string text, Exception ex = null)
         {
-            Write(LogLevel.Error, text);
+            Write(LogLevel.Error, text, ex);
+        }
+        /// <summary>
+        /// Writes a error entry
+        /// </summary>
+        /// <param name="ex">Exception</param>
+        public static void WriteError(Exception ex)
+        {
+            Write(LogLevel.Error, ex.Message, ex);
         }
         /// <summary>
         /// Writes a log entry
         /// </summary>
         /// <param name="logLevel">Log level</param>
         /// <param name="text">Entry text</param>
-        public static void Write(LogLevel logLevel, string text)
+        /// <param name="ex">Exception (optional)</param>
+        public static void Write(LogLevel logLevel, string text, Exception ex = null)
         {
             if (logLevel < LogLevel)
             {
@@ -83,7 +101,7 @@ namespace Engine
                 return;
             }
 
-            log.Enqueue(new LogEntry { EventDate = DateTime.Now, LogLevel = logLevel, Text = text });
+            log.Enqueue(new LogEntry { EventDate = DateTime.Now, LogLevel = logLevel, Text = text, Exception = ex });
 
             if (LogStackSize <= 0)
             {
@@ -137,7 +155,7 @@ namespace Engine
         /// <param name="reverse">Reverse entry order</param>
         public static string ReadText(int maxLines = 0, bool reverse = true)
         {
-            return ReadText(FormatLog, maxLines, reverse);
+            return ReadText(DefaultFormatter, maxLines, reverse);
         }
         /// <summary>
         /// Gets the last maxLines lines of the log
@@ -172,7 +190,7 @@ namespace Engine
         /// Default log line formatter
         /// </summary>
         /// <param name="logEntry">Log entry</param>
-        private static string FormatLog(LogEntry logEntry)
+        public static string DefaultFormatter(LogEntry logEntry)
         {
             return $"{logEntry.EventDate:HH:mm:ss.fff} [{logEntry.LogLevel}]> {logEntry.Text}{Environment.NewLine}";
         }

@@ -482,7 +482,7 @@ namespace Engine
                             else
                             {
                                 this.patchDictionary.Remove(res.Result.Id);
-                                Logger.WriteError($"Error creating patch {res.Result.Id}: {res.Exception}");
+                                Logger.WriteError($"Error creating patch {res.Result.Id}: {res.Exception.Message}", res.Exception);
                             }
                         }
                     });

@@ -148,7 +148,7 @@ namespace Engine.UI
     }
 
     /// <summary>
-    /// Sprite button extensions
+    /// UIButton extensions
     /// </summary>
     public static class SpriteButtonExtensions
     {

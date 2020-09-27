@@ -63,7 +63,7 @@ namespace Engine
         {
             get
             {
-                return this.positionCache?.Any() == true;
+                return positionCache?.Any() == true;
             }
         }
 
@@ -90,12 +90,12 @@ namespace Engine
         {
             get
             {
-                return this.levelOfDetail;
+                return levelOfDetail;
             }
             set
             {
-                this.levelOfDetail = this.GetLODNearest(value);
-                this.DrawingData = this.GetDrawingData(this.levelOfDetail);
+                levelOfDetail = GetLODNearest(value);
+                DrawingData = GetDrawingData(levelOfDetail);
             }
         }
         /// <summary>
@@ -111,7 +111,7 @@ namespace Engine
         {
             get
             {
-                return this.ModelParts.Find(p => p.Name == name);
+                return ModelParts.Find(p => p.Name == name);
             }
         }
         /// <summary>
@@ -121,7 +121,7 @@ namespace Engine
         {
             get
             {
-                return this.ModelParts.Count;
+                return ModelParts.Count;
             }
         }
 

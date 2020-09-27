@@ -222,7 +222,7 @@ namespace Engine
             }
             catch (Exception ex)
             {
-                Logger.WriteError($"Error creating new resources: {ex.Message}");
+                Logger.WriteError($"Error creating new resources: {ex.Message}", ex);
             }
             finally
             {

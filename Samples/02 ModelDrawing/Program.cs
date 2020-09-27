@@ -39,7 +39,7 @@ namespace ModelDrawing
             }
             catch (Exception ex)
             {
-                Logger.WriteError(ex.ToString());
+                Logger.WriteError(ex);
             }
             finally
             {

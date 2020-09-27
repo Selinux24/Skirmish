@@ -18,24 +18,24 @@ namespace SceneTest.SceneWater
         public override async Task Initialize()
         {
 #if DEBUG
-            this.Game.VisibleMouse = false;
-            this.Game.LockMouse = false;
+            Game.VisibleMouse = false;
+            Game.LockMouse = false;
 #else
-            this.Game.VisibleMouse = false;
-            this.Game.LockMouse = true;
+            Game.VisibleMouse = false;
+            Game.LockMouse = true;
 #endif
 
-            this.Camera.NearPlaneDistance = 0.1f;
-            this.Camera.FarPlaneDistance = 500;
-            this.Camera.Goto(80, 10, 100f);
-            this.Camera.LookTo(0, 0, 0);
+            Camera.NearPlaneDistance = 0.1f;
+            Camera.FarPlaneDistance = 500;
+            Camera.Goto(80, 10, 100f);
+            Camera.LookTo(0, 0, 0);
 
-            this.Lights.BaseFogColor = Color.White;
+            Lights.BaseFogColor = Color.White;
 
-            await this.LoadResourcesAsync(InitializeAssets());
+            await LoadResourcesAsync(InitializeAssets());
 
-            this.Environment.TimeOfDay.BeginAnimation(5, 00, 00, 10f);
-            //this.Environment.TimeOfDay.SetTimeOfDay(7, 00, 00)
+            Environment.TimeOfDay.BeginAnimation(5, 00, 00, 10f);
+            //Environment.TimeOfDay.SetTimeOfDay(7, 00, 00)
         }
         private async Task InitializeAssets()
         {
@@ -79,61 +79,58 @@ namespace SceneTest.SceneWater
 
         public override void Update(GameTime gameTime)
         {
-            if (this.Game.Input.KeyJustReleased(Keys.Escape))
+            if (Game.Input.KeyJustReleased(Keys.Escape))
             {
-                this.Game.SetScene<SceneStart.SceneStart>();
+                Game.SetScene<SceneStart.SceneStart>();
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F))
+            if (Game.Input.KeyJustReleased(Keys.F))
             {
-                this.ToggleFog();
+                ToggleFog();
             }
 
-            bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
-            bool rightBtn = this.Game.Input.RightMouseButtonPressed;
-
-            this.UpdateCamera(gameTime, shift, rightBtn);
+            UpdateCamera(gameTime);
 
             base.Update(gameTime);
         }
 
-        private void UpdateCamera(GameTime gameTime, bool shift, bool rightBtn)
+        private void UpdateCamera(GameTime gameTime)
         {
 #if DEBUG
-            if (rightBtn)
+            if (Game.Input.RightMouseButtonPressed)
 #endif
             {
-                this.Camera.RotateMouse(
+                Camera.RotateMouse(
                     gameTime,
-                    this.Game.Input.MouseXDelta,
-                    this.Game.Input.MouseYDelta);
+                    Game.Input.MouseXDelta,
+                    Game.Input.MouseYDelta);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.A))
+            if (Game.Input.KeyPressed(Keys.A))
             {
-                this.Camera.MoveLeft(gameTime, shift);
+                Camera.MoveLeft(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.D))
+            if (Game.Input.KeyPressed(Keys.D))
             {
-                this.Camera.MoveRight(gameTime, shift);
+                Camera.MoveRight(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.W))
+            if (Game.Input.KeyPressed(Keys.W))
             {
-                this.Camera.MoveForward(gameTime, shift);
+                Camera.MoveForward(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.S))
+            if (Game.Input.KeyPressed(Keys.S))
             {
-                this.Camera.MoveBackward(gameTime, shift);
+                Camera.MoveBackward(gameTime, Game.Input.ShiftPressed);
             }
         }
 
         private void ToggleFog()
         {
-            this.Lights.FogStart = this.Lights.FogStart == 0f ? fogStart : 0f;
-            this.Lights.FogRange = this.Lights.FogRange == 0f ? fogRange : 0f;
+            Lights.FogStart = Lights.FogStart == 0f ? fogStart : 0f;
+            Lights.FogRange = Lights.FogRange == 0f ? fogRange : 0f;
         }
     }
 }

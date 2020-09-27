@@ -331,7 +331,7 @@ namespace GameLogic
         }
         private async Task InitializeDebug()
         {
-            lineDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(new PrimitiveListDrawerDescription<Line3D>() { Count = 5000 });
+            lineDrawer = await this.AddComponentPrimitiveListDrawer(new PrimitiveListDrawerDescription<Line3D>() { Count = 5000 });
             lineDrawer.Visible = false;
         }
 
@@ -370,8 +370,6 @@ namespace GameLogic
                 return;
             }
 
-            bool shift = Game.Input.KeyPressed(Keys.LShiftKey) || Game.Input.KeyPressed(Keys.RShiftKey);
-
             Ray cursorRay = GetPickingRay();
             bool picked = PickNearest(cursorRay, RayPickingParams.Default, SceneObjectUsages.Ground, out PickingResult<Triangle> r);
 
@@ -379,7 +377,7 @@ namespace GameLogic
             UpdateDebug();
 
             //HUD
-            UpdateHUD(shift);
+            UpdateHUD();
 
             if (UICaptured)
             {
@@ -387,7 +385,7 @@ namespace GameLogic
             }
 
             //3D
-            Update3D(gameTime, shift, cursorRay, picked, r);
+            Update3D(gameTime, cursorRay, picked, r);
 
             //Actions
             UpdateActions(cursorRay, picked, r);
@@ -404,16 +402,16 @@ namespace GameLogic
                 lineDrawer.Visible = !lineDrawer.Visible;
             }
         }
-        private void UpdateHUD(bool shift)
+        private void UpdateHUD()
         {
             if (Game.Input.KeyJustReleased(keyHUDNextSoldier))
             {
-                NextSoldier(!shift);
+                NextSoldier(!Game.Input.ShiftPressed);
             }
 
             if (Game.Input.KeyJustReleased(keyHUDPrevSoldier))
             {
-                PrevSoldier(!shift);
+                PrevSoldier(!Game.Input.ShiftPressed);
             }
 
             if (Game.Input.KeyJustReleased(keyHUDNextAction))
@@ -440,7 +438,7 @@ namespace GameLogic
                 txtAction.Text = string.Format("{0}", CurrentAction);
             }
         }
-        private void Update3D(GameTime gameTime, bool shift, Ray cursorRay, bool picked, PickingResult<Triangle> r)
+        private void Update3D(GameTime gameTime, Ray cursorRay, bool picked, PickingResult<Triangle> r)
         {
             if (picked)
             {
@@ -459,22 +457,22 @@ namespace GameLogic
 
             if (Game.Input.KeyPressed(keyCAMMoveLeft))
             {
-                Camera.MoveLeft(gameTime, shift);
+                Camera.MoveLeft(gameTime, Game.Input.ShiftPressed);
             }
 
             if (Game.Input.KeyPressed(keyCAMMoveRight))
             {
-                Camera.MoveRight(gameTime, shift);
+                Camera.MoveRight(gameTime, Game.Input.ShiftPressed);
             }
 
             if (Game.Input.KeyPressed(keyCAMMoveForward))
             {
-                Camera.MoveForward(gameTime, shift);
+                Camera.MoveForward(gameTime, Game.Input.ShiftPressed);
             }
 
             if (Game.Input.KeyPressed(keyCAMMoveBackward))
             {
-                Camera.MoveBackward(gameTime, shift);
+                Camera.MoveBackward(gameTime, Game.Input.ShiftPressed);
             }
 
             if (Game.Input.RightMouseButtonJustReleased)
@@ -484,12 +482,12 @@ namespace GameLogic
 
             if (Game.Input.MouseWheelDelta > 0)
             {
-                Camera.ZoomIn(gameTime, shift);
+                Camera.ZoomIn(gameTime, Game.Input.ShiftPressed);
             }
 
             if (Game.Input.MouseWheelDelta < 0)
             {
-                Camera.ZoomOut(gameTime, shift);
+                Camera.ZoomOut(gameTime, Game.Input.ShiftPressed);
             }
 
             if (Game.Input.KeyJustReleased(keyCAMCenterSoldier))

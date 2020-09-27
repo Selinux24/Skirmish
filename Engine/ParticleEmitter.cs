@@ -157,7 +157,7 @@ namespace Engine
         {
             get
             {
-                return (this.InfiniteDuration || this.Duration > 0);
+                return (InfiniteDuration || Duration > 0);
             }
         }
         /// <summary>
@@ -197,14 +197,14 @@ namespace Engine
         /// </summary>
         public ParticleEmitter()
         {
-            this.Position = Vector3.Zero;
-            this.Velocity = Vector3.Up;
-            this.Scale = 1f;
-            this.EmissionRate = 1f;
-            this.Duration = 0f;
-            this.InfiniteDuration = false;
-            this.MaximumDistance = GameEnvironment.LODDistanceLow;
-            this.Distance = 0f;
+            Position = Vector3.Zero;
+            Velocity = Vector3.Up;
+            Scale = 1f;
+            EmissionRate = 1f;
+            Duration = 0f;
+            InfiniteDuration = false;
+            MaximumDistance = GameEnvironment.LODDistanceLow;
+            Distance = 0f;
         }
         /// <summary>
         /// Constructor
@@ -212,14 +212,14 @@ namespace Engine
         /// <param name="desc">Description</param>
         public ParticleEmitter(ParticleEmitterDescription desc)
         {
-            this.Position = desc.Position;
-            this.Velocity = desc.Velocity;
-            this.Scale = desc.Scale;
-            this.EmissionRate = desc.EmissionRate;
-            this.Duration = desc.Duration;
-            this.InfiniteDuration = desc.InfiniteDuration;
-            this.MaximumDistance = desc.MaximumDistance;
-            this.Distance = desc.Distance;
+            Position = desc.Position;
+            Velocity = desc.Velocity;
+            Scale = desc.Scale;
+            EmissionRate = desc.EmissionRate;
+            Duration = desc.Duration;
+            InfiniteDuration = desc.InfiniteDuration;
+            MaximumDistance = desc.MaximumDistance;
+            Distance = desc.Distance;
         }
 
         /// <summary>
@@ -228,18 +228,18 @@ namespace Engine
         /// <param name="context">Updating context</param>
         public virtual void Update(UpdateContext context)
         {
-            this.ElapsedTime = context.GameTime.ElapsedSeconds;
+            ElapsedTime = context.GameTime.ElapsedSeconds;
 
-            this.TotalTime += this.ElapsedTime;
+            TotalTime += ElapsedTime;
 
-            if (!this.InfiniteDuration)
+            if (!InfiniteDuration)
             {
-                this.Duration -= this.ElapsedTime;
+                Duration -= ElapsedTime;
             }
 
-            this.Distance = Vector3.Distance(this.Position, context.EyePosition);
+            Distance = Vector3.Distance(Position, context.EyePosition);
 
-            this.UpdateBoundingBox();
+            UpdateBoundingBox();
         }
         /// <summary>
         /// Updates the internal bounding box
@@ -249,8 +249,8 @@ namespace Engine
             var tmp = mergedBoundingBox;
 
             mergedBoundingBox = new BoundingBox(
-                this.boundingBox.Minimum + this.Position,
-                this.boundingBox.Maximum + this.Position);
+                boundingBox.Minimum + Position,
+                boundingBox.Maximum + Position);
 
             if (tmp != null)
             {
@@ -268,7 +268,7 @@ namespace Engine
         /// <returns>Returns the initial velocity vector with magnitude</returns>
         public Vector3 CalcInitialVelocity(ParticleSystemParams parameters, float hVelVariance, float vVelVariance, float hAngleVariance)
         {
-            Vector3 velocity = this.Velocity * parameters.EmitterVelocitySensitivity;
+            Vector3 velocity = Velocity * parameters.EmitterVelocitySensitivity;
 
             float horizontalVelocity = MathUtil.Lerp(
                 parameters.HorizontalVelocity.X,
@@ -295,7 +295,7 @@ namespace Engine
         /// <returns>Returns the maximum number of particles running at the same time</returns>
         public int GetMaximumConcurrentParticles(float maxParticleDuration)
         {
-            float maxActiveParticles = maxParticleDuration * (1f / this.EmissionRate);
+            float maxActiveParticles = maxParticleDuration * (1f / EmissionRate);
 
             return (int)(maxActiveParticles != (int)maxActiveParticles ? maxActiveParticles + 1 : maxActiveParticles);
         }
@@ -310,15 +310,15 @@ namespace Engine
         {
             distance = float.MaxValue;
 
-            var bbox = this.GetBoundingBox();
+            var bbox = GetBoundingBox();
 
             var inside = volume.Contains(bbox) != ContainmentType.Disjoint;
             if (inside)
             {
-                distance = Vector3.DistanceSquared(volume.Position, this.Position);
+                distance = Vector3.DistanceSquared(volume.Position, Position);
             }
 
-            return this.Culled = !inside;
+            return Culled = !inside;
         }
 
         /// <summary>
@@ -327,8 +327,8 @@ namespace Engine
         /// <param name="bbox">Bounding box</param>
         public void SetBoundingBox(BoundingBox bbox)
         {
-            this.boundingBox = bbox;
-            this.mergedBoundingBox = null;
+            boundingBox = bbox;
+            mergedBoundingBox = null;
         }
         /// <summary>
         /// Gets the internal bounding box updated with position
@@ -337,8 +337,8 @@ namespace Engine
         public virtual BoundingBox GetBoundingBox()
         {
             return mergedBoundingBox ?? new BoundingBox(
-                this.boundingBox.Minimum + this.Position,
-                this.boundingBox.Maximum + this.Position);
+                boundingBox.Minimum + Position,
+                boundingBox.Maximum + Position);
         }
         /// <summary>
         /// Updates the particle emitter bounds
@@ -350,7 +350,7 @@ namespace Engine
             bbox = BoundingBox.Merge(bbox, SampleBBox(this, systemParams, 0.66f));
             bbox = BoundingBox.Merge(bbox, SampleBBox(this, systemParams, 1f));
 
-            this.SetBoundingBox(bbox);
+            SetBoundingBox(bbox);
         }
     }
 }

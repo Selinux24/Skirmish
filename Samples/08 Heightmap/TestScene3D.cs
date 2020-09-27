@@ -1313,13 +1313,11 @@ namespace Heightmap
                     SceneModes.ForwardLigthning);
             }
 
-            bool shift = Game.Input.KeyPressed(Keys.LShiftKey);
-
             //Input driven
-            UpdateCamera(gameTime, shift);
+            UpdateCamera(gameTime);
             UpdatePlayer();
             UpdateInputDebugInfo(gameTime);
-            UpdateInputBuffers(shift);
+            UpdateInputBuffers();
 
             //Auto
             UpdateLights();
@@ -1367,16 +1365,16 @@ namespace Heightmap
                 }
             }
         }
-        private void UpdateCamera(GameTime gameTime, bool shift)
+        private void UpdateCamera(GameTime gameTime)
         {
             Vector3 position;
             if (playerFlying)
             {
-                position = UpdateFlyingCamera(gameTime, shift);
+                position = UpdateFlyingCamera(gameTime);
             }
             else
             {
-                position = UpdateWalkingCamera(gameTime, shift);
+                position = UpdateWalkingCamera(gameTime);
             }
 
             if (!udaptingGraph)
@@ -1392,7 +1390,7 @@ namespace Heightmap
                 });
             }
         }
-        private Vector3 UpdateFlyingCamera(GameTime gameTime, bool shift)
+        private Vector3 UpdateFlyingCamera(GameTime gameTime)
         {
 #if DEBUG
             if (Game.Input.RightMouseButtonPressed)
@@ -1411,27 +1409,27 @@ namespace Heightmap
 
             if (Game.Input.KeyPressed(Keys.A))
             {
-                Camera.MoveLeft(gameTime, !shift);
+                Camera.MoveLeft(gameTime, !Game.Input.ShiftPressed);
             }
 
             if (Game.Input.KeyPressed(Keys.D))
             {
-                Camera.MoveRight(gameTime, !shift);
+                Camera.MoveRight(gameTime, !Game.Input.ShiftPressed);
             }
 
             if (Game.Input.KeyPressed(Keys.W))
             {
-                Camera.MoveForward(gameTime, !shift);
+                Camera.MoveForward(gameTime, !Game.Input.ShiftPressed);
             }
 
             if (Game.Input.KeyPressed(Keys.S))
             {
-                Camera.MoveBackward(gameTime, !shift);
+                Camera.MoveBackward(gameTime, !Game.Input.ShiftPressed);
             }
 
             return Camera.Position;
         }
-        private Vector3 UpdateWalkingCamera(GameTime gameTime, bool shift)
+        private Vector3 UpdateWalkingCamera(GameTime gameTime)
         {
             var prevPosition = soldier.Manipulator.Position;
 #if DEBUG
@@ -1447,7 +1445,7 @@ namespace Heightmap
             soldier.Manipulator.Rotate(amount * gameTime.ElapsedSeconds, 0, 0);
 #endif
 
-            float delta = shift ? 24 : 12;
+            float delta = Game.Input.ShiftPressed ? 24 : 12;
 
             if (Game.Input.KeyPressed(Keys.A))
             {
@@ -1581,7 +1579,7 @@ namespace Heightmap
                 Environment.TimeOfDay.SetTimeOfDay(time % 1f);
             }
         }
-        private void UpdateInputBuffers(bool shift)
+        private void UpdateInputBuffers()
         {
             if (Game.Input.KeyJustReleased(Keys.F8))
             {
@@ -1591,7 +1589,7 @@ namespace Heightmap
                     bufferDrawer.Texture = shadowMap;
                     bufferDrawer.Channels = UITextureRendererChannels.Red;
 
-                    if (shift)
+                    if (Game.Input.ShiftPressed)
                     {
                         int tIndex = bufferDrawer.TextureIndex;
 

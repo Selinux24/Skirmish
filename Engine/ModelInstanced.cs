@@ -44,7 +44,7 @@ namespace Engine
         {
             get
             {
-                return this.instances[index];
+                return instances[index];
             }
         }
         /// <summary>
@@ -54,7 +54,7 @@ namespace Engine
         {
             get
             {
-                return this.Visible ? Array.FindAll(this.instances, i => i.Visible).Length : 0;
+                return Visible ? Array.FindAll(instances, i => i.Visible).Length : 0;
             }
         }
         /// <summary>
@@ -230,9 +230,7 @@ namespace Engine
         /// <returns>Returns the number of maximum instances to draw</returns>
         private int GetMaxCount()
         {
-            return MaximumCount >= 0 ?
-                Math.Min(MaximumCount, InstanceCount) :
-                this.InstanceCount;
+            return MaximumCount >= 0 ? Math.Min(MaximumCount, InstanceCount) : InstanceCount;
         }
         /// <inheritdoc/>
         public override void DrawShadows(DrawContextShadows context)
@@ -249,7 +247,7 @@ namespace Engine
 
             if (hasDataToWrite)
             {
-                Logger.WriteDebug($"{this.Name} - DrawShadows WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset}");
+                Logger.WriteTrace($"{Name} - DrawShadows WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset}");
                 BufferManager.WriteInstancingData(InstancingBuffer, instancingData);
             }
 
@@ -378,7 +376,7 @@ namespace Engine
 
             if (hasDataToWrite)
             {
-                Logger.WriteDebug($"{Name} - Draw WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset} {context.DrawerMode}");
+                Logger.WriteTrace($"{Name} - Draw WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset} {context.DrawerMode}");
                 BufferManager.WriteInstancingData(InstancingBuffer, instancingData);
             }
 

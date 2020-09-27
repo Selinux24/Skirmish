@@ -218,7 +218,7 @@ namespace Engine.UI
                     FitWithParent = true,
                 };
 
-                this.AddChild(background);
+                AddChild(background);
             }
 
             SetGridLayout(description.GridLayout);

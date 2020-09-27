@@ -99,21 +99,21 @@ namespace Animation
 
         public override async Task Initialize()
         {
-            await this.InitializeUI();
+            await InitializeUI();
 
             try
             {
-                await this.LoadResourcesAsync(
+                await LoadResourcesAsync(
                     new[]
                     {
-                        this.InitializeLadder(),
-                        this.InitializeLadder2(),
-                        this.InitializeSoldier(),
-                        this.InitializeRat(),
-                        this.InitializeDoors(),
-                        this.InitializeJails(),
-                        this.InitializeFloor(),
-                        this.InitializeDebug()
+                        InitializeLadder(),
+                        InitializeLadder2(),
+                        InitializeSoldier(),
+                        InitializeRat(),
+                        InitializeDoors(),
+                        InitializeJails(),
+                        InitializeFloor(),
+                        InitializeDebug()
                     },
                     (res) =>
                     {
@@ -137,24 +137,24 @@ namespace Animation
         private async Task InitializeUI()
         {
             var title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18, Color.White) }, layerHUD);
-            this.runtime = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11, Color.Yellow) }, layerHUD);
-            this.animText = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 15, Color.Orange) }, layerHUD);
-            this.messages = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 15, Color.Orange) }, layerHUD);
+            runtime = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11, Color.Yellow) }, layerHUD);
+            animText = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 15, Color.Orange) }, layerHUD);
+            messages = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 15, Color.Orange) }, layerHUD);
 
             title.Text = "Animation test";
-            this.runtime.Text = "";
-            this.animText.Text = "";
-            this.messages.Text = "";
+            runtime.Text = "";
+            animText.Text = "";
+            messages.Text = "";
 
             title.SetPosition(Vector2.Zero);
-            this.runtime.SetPosition(new Vector2(5, title.Top + title.Height + 3));
-            this.animText.SetPosition(new Vector2(5, this.runtime.Top + this.runtime.Height + 3));
-            this.messages.SetPosition(new Vector2(5, this.animText.Top + this.animText.Height + 3));
+            runtime.SetPosition(new Vector2(5, title.Top + title.Height + 3));
+            animText.SetPosition(new Vector2(5, runtime.Top + runtime.Height + 3));
+            messages.SetPosition(new Vector2(5, animText.Top + animText.Height + 3));
 
             var spDesc = new SpriteDescription()
             {
-                Width = this.Game.Form.RenderWidth,
-                Height = this.messages.Top + this.messages.Height + 3,
+                Width = Game.Form.RenderWidth,
+                Height = messages.Top + messages.Height + 3,
                 BaseColor = new Color4(0, 0, 0, 0.75f),
             };
 
@@ -239,7 +239,7 @@ namespace Animation
             ladder[0].AnimationController.AddPath(ladderPaths["pull"]);
             ladder[1].AnimationController.AddPath(ladderPaths["pull"]);
 
-            this.animObjects.Add(ladder);
+            animObjects.Add(ladder);
         }
         private async Task InitializeLadder2()
         {
@@ -303,8 +303,8 @@ namespace Animation
             ladder2[0].AnimationController.AddPath(ladder2Paths["push"]);
             ladder2[1].AnimationController.AddPath(ladder2Paths["push"]);
 
-            this.animObjects.Add(ladder);
-            this.animObjects.Add(ladder2);
+            animObjects.Add(ladder);
+            animObjects.Add(ladder2);
         }
         private async Task InitializeSoldier()
         {
@@ -349,15 +349,15 @@ namespace Animation
             AnimationPath p3 = new AnimationPath();
             p3.AddRepeat("stand", 5);
 
-            this.soldierPaths.Add("complex", new AnimationPlan(p0));
-            this.soldierPaths.Add("idle1", new AnimationPlan(p1));
-            this.soldierPaths.Add("idle2", new AnimationPlan(p2));
-            this.soldierPaths.Add("stand", new AnimationPlan(p3));
+            soldierPaths.Add("complex", new AnimationPlan(p0));
+            soldierPaths.Add("idle1", new AnimationPlan(p1));
+            soldierPaths.Add("idle2", new AnimationPlan(p2));
+            soldierPaths.Add("stand", new AnimationPlan(p3));
 
-            soldier[0].AnimationController.AddPath(this.soldierPaths["complex"]);
-            soldier[1].AnimationController.AddPath(this.soldierPaths["complex"]);
+            soldier[0].AnimationController.AddPath(soldierPaths["complex"]);
+            soldier[1].AnimationController.AddPath(soldierPaths["complex"]);
 
-            this.animObjects.Add(soldier);
+            animObjects.Add(soldier);
         }
         private async Task InitializeRat()
         {
@@ -381,12 +381,12 @@ namespace Animation
             AnimationPath p0 = new AnimationPath();
             p0.AddLoop("walk");
 
-            this.ratPaths.Add("walk", new AnimationPlan(p0));
+            ratPaths.Add("walk", new AnimationPlan(p0));
 
-            rat[0].AnimationController.AddPath(this.ratPaths["walk"]);
-            rat[1].AnimationController.AddPath(this.ratPaths["walk"]);
+            rat[0].AnimationController.AddPath(ratPaths["walk"]);
+            rat[1].AnimationController.AddPath(ratPaths["walk"]);
 
-            this.animObjects.Add(rat);
+            animObjects.Add(rat);
         }
         private async Task InitializeDoors()
         {
@@ -446,7 +446,7 @@ namespace Animation
 
             doors[0].AnimationController.AddPath(doorsPaths["rep"]);
 
-            this.animObjects.Add(doors);
+            animObjects.Add(doors);
         }
         private async Task InitializeJails()
         {
@@ -506,24 +506,24 @@ namespace Animation
 
             doors[0].AnimationController.AddPath(jailsPaths["rep"]);
 
-            this.animObjects.Add(doors);
+            animObjects.Add(doors);
         }
         private async Task InitializeDebug()
         {
-            this.itemTris = await this.AddComponentPrimitiveListDrawer<Triangle>(new PrimitiveListDrawerDescription<Triangle>() { Count = 5000, Color = itemTrisColor });
-            this.itemLines = await this.AddComponentPrimitiveListDrawer<Line3D>(new PrimitiveListDrawerDescription<Line3D>() { Count = 1000, Color = itemLinesColor });
+            itemTris = await this.AddComponentPrimitiveListDrawer(new PrimitiveListDrawerDescription<Triangle>() { Count = 5000, Color = itemTrisColor });
+            itemLines = await this.AddComponentPrimitiveListDrawer(new PrimitiveListDrawerDescription<Line3D>() { Count = 1000, Color = itemLinesColor });
         }
 
         private void InitializeEnvironment()
         {
             GameEnvironment.Background = Color.CornflowerBlue;
 
-            this.Lights.KeyLight.CastShadow = true;
-            this.Lights.KeyLight.Direction = Vector3.Normalize(new Vector3(-0.1f, -1, 1));
-            this.Lights.KeyLight.Enabled = true;
-            this.Lights.BackLight.Enabled = false;
-            this.Lights.FillLight.Enabled = false;
-            this.Lights.HemisphericLigth = new SceneLightHemispheric("Ambient", Color.Gray, Color.White, true);
+            Lights.KeyLight.CastShadow = true;
+            Lights.KeyLight.Direction = Vector3.Normalize(new Vector3(-0.1f, -1, 1));
+            Lights.KeyLight.Enabled = true;
+            Lights.BackLight.Enabled = false;
+            Lights.FillLight.Enabled = false;
+            Lights.HemisphericLigth = new SceneLightHemispheric("Ambient", Color.Gray, Color.White, true);
 
             BoundingBox bbox = new BoundingBox();
             animObjects.ForEach(item =>
@@ -535,17 +535,17 @@ namespace Animation
             });
             float playerHeight = bbox.Maximum.Y - bbox.Minimum.Y;
 
-            this.Camera.NearPlaneDistance = 0.1f;
-            this.Camera.FarPlaneDistance = 500;
-            this.Camera.Goto(0, playerHeight, -12f);
-            this.Camera.LookTo(0, playerHeight * 0.6f, 0);
+            Camera.NearPlaneDistance = 0.1f;
+            Camera.FarPlaneDistance = 500;
+            Camera.Goto(0, playerHeight, -12f);
+            Camera.LookTo(0, playerHeight * 0.6f, 0);
         }
 
         public override void Update(GameTime gameTime)
         {
-            if (this.Game.Input.KeyJustReleased(Keys.Escape))
+            if (Game.Input.KeyJustReleased(Keys.Escape))
             {
-                this.Game.Exit();
+                Game.Exit();
             }
 
             if (!gameReady)
@@ -553,20 +553,18 @@ namespace Animation
                 return;
             }
 
-            bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
-
-            this.UpdateInputCamera(gameTime, shift);
-            this.UpdateInputAnimation();
-            this.UpdateInputDebug();
+            UpdateInputCamera(gameTime);
+            UpdateInputAnimation();
+            UpdateInputDebug();
 
             base.Update(gameTime);
 
-            this.UpdateDebugData();
+            UpdateDebugData();
 
             var itemController = animObjects[itemIndex][0].AnimationController;
 
-            this.runtime.Text = this.Game.RuntimeText;
-            this.animText.Text = string.Format(
+            runtime.Text = Game.RuntimeText;
+            animText.Text = string.Format(
                 "Paths: {0:00}; Delta: {1:0.0}; Index: {2}; Clip: {3}; Time: {4:0.00}; Item Time: {5:0.00}",
                 itemController.PathCount,
                 itemController.TimeDelta,
@@ -575,58 +573,58 @@ namespace Animation
                 itemController.CurrentPathTime,
                 itemController.CurrentPathItemTime);
         }
-        private void UpdateInputCamera(GameTime gameTime, bool shift)
+        private void UpdateInputCamera(GameTime gameTime)
         {
 #if DEBUG
-            if (this.Game.Input.RightMouseButtonPressed)
+            if (Game.Input.RightMouseButtonPressed)
             {
-                this.Camera.RotateMouse(
+                Camera.RotateMouse(
                     gameTime,
-                    this.Game.Input.MouseXDelta,
-                    this.Game.Input.MouseYDelta);
+                    Game.Input.MouseXDelta,
+                    Game.Input.MouseYDelta);
             }
 #else
-            this.Camera.RotateMouse(
+            Camera.RotateMouse(
                 gameTime,
-                this.Game.Input.MouseXDelta,
-                this.Game.Input.MouseYDelta);
+                Game.Input.MouseXDelta,
+                Game.Input.MouseYDelta);
 #endif
 
-            if (this.Game.Input.KeyPressed(Keys.A))
+            if (Game.Input.KeyPressed(Keys.A))
             {
-                this.Camera.MoveLeft(gameTime, shift);
+                Camera.MoveLeft(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.D))
+            if (Game.Input.KeyPressed(Keys.D))
             {
-                this.Camera.MoveRight(gameTime, shift);
+                Camera.MoveRight(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.W))
+            if (Game.Input.KeyPressed(Keys.W))
             {
-                this.Camera.MoveForward(gameTime, shift);
+                Camera.MoveForward(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.S))
+            if (Game.Input.KeyPressed(Keys.S))
             {
-                this.Camera.MoveBackward(gameTime, shift);
+                Camera.MoveBackward(gameTime, Game.Input.ShiftPressed);
             }
         }
         private void UpdateInputAnimation()
         {
-            if (this.Game.Input.KeyJustReleased(Keys.Left))
+            if (Game.Input.KeyJustReleased(Keys.Left))
             {
                 animObjects.ForEach(DecreaseDelta());
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.Right))
+            if (Game.Input.KeyJustReleased(Keys.Right))
             {
                 animObjects.ForEach(IncreaseDelta());
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.Up))
+            if (Game.Input.KeyJustReleased(Keys.Up))
             {
-                if (this.Game.Input.KeyPressed(Keys.ShiftKey))
+                if (Game.Input.KeyPressed(Keys.ShiftKey))
                 {
                     animObjects.ForEach(StartAnimation());
                 }
@@ -636,46 +634,46 @@ namespace Animation
                 }
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.Down))
+            if (Game.Input.KeyJustReleased(Keys.Down))
             {
                 animObjects.ForEach(PauseAnimation());
             }
         }
         private void UpdateInputDebug()
         {
-            if (this.Game.Input.KeyJustReleased(Keys.R))
+            if (Game.Input.KeyJustReleased(Keys.R))
             {
-                this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
+                SetRenderMode(GetRenderMode() == SceneModes.ForwardLigthning ?
                     SceneModes.DeferredLightning :
                     SceneModes.ForwardLigthning);
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.C))
+            if (Game.Input.KeyJustReleased(Keys.C))
             {
-                this.Lights.DirectionalLights[0].CastShadow = !this.Lights.DirectionalLights[0].CastShadow;
+                Lights.DirectionalLights[0].CastShadow = !Lights.DirectionalLights[0].CastShadow;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F1))
+            if (Game.Input.KeyJustReleased(Keys.F1))
             {
-                this.showItemDEBUG = !this.showItemDEBUG;
+                showItemDEBUG = !showItemDEBUG;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F2))
+            if (Game.Input.KeyJustReleased(Keys.F2))
             {
-                this.itemIndex--;
+                itemIndex--;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F3))
+            if (Game.Input.KeyJustReleased(Keys.F3))
             {
-                this.itemIndex++;
+                itemIndex++;
             }
 
-            this.itemIndex %= animObjects.Count;
-            if (this.itemIndex < 0) this.itemIndex = animObjects.Count - 1;
+            itemIndex %= animObjects.Count;
+            if (itemIndex < 0) itemIndex = animObjects.Count - 1;
 
-            if (this.Game.Input.KeyJustReleased(Keys.F5))
+            if (Game.Input.KeyJustReleased(Keys.F5))
             {
-                this.showItem = !this.showItem;
+                showItem = !showItem;
             }
         }
         private void UpdateDebugData()
@@ -686,44 +684,44 @@ namespace Animation
             {
                 for (int i = 0; i < item.InstanceCount; i++)
                 {
-                    item[i].Visible = !this.showItemDEBUG || this.showItem || (item[i] != selectedItem);
+                    item[i].Visible = !showItemDEBUG || showItem || (item[i] != selectedItem);
                 }
             });
 
-            if (this.showItemDEBUG)
+            if (showItemDEBUG)
             {
                 var tris = selectedItem.GetTriangles(true);
                 var bbox = selectedItem.GetBoundingBox(true);
 
-                this.itemTris.SetPrimitives(itemTrisColor, tris);
-                this.itemLines.SetPrimitives(itemLinesColor, Line3D.CreateWiredBox(bbox));
+                itemTris.SetPrimitives(itemTrisColor, tris);
+                itemLines.SetPrimitives(itemLinesColor, Line3D.CreateWiredBox(bbox));
 
-                this.itemTris.Active = this.itemTris.Visible = true;
-                this.itemLines.Active = this.itemLines.Visible = true;
+                itemTris.Active = itemTris.Visible = true;
+                itemLines.Active = itemLines.Visible = true;
             }
             else
             {
-                if (this.itemTris != null)
+                if (itemTris != null)
                 {
-                    this.itemTris.Active = this.itemTris.Visible = false;
+                    itemTris.Active = itemTris.Visible = false;
                 }
 
-                if (this.itemLines != null)
+                if (itemLines != null)
                 {
-                    this.itemLines.Active = this.itemLines.Visible = false;
+                    itemLines.Active = itemLines.Visible = false;
                 }
             }
         }
 
         private void SoldierControllerPathEnding(object sender, EventArgs e)
         {
-            var keys = this.soldierPaths.Keys.ToArray();
+            var keys = soldierPaths.Keys.ToArray();
 
             int index = Math.Min(Helper.RandomGenerator.Next(1, 3), keys.Length - 1);
 
             var key = keys[index];
 
-            ((AnimationController)sender).SetPath(this.soldierPaths[key]);
+            ((AnimationController)sender).SetPath(soldierPaths[key]);
             ((AnimationController)sender).Start(0);
         }
     }

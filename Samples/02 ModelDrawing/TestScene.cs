@@ -17,8 +17,7 @@ namespace ModelDrawing
         private UITextArea statistics = null;
         private UITextArea text1 = null;
         private UITextArea text2 = null;
-        private UITextArea log = null;
-        private int logLines = 10;
+        private UIConsole console = null;
         private Sprite backPanel = null;
 
         private readonly Dictionary<string, ParticleSystemDescription> pDescriptions = new Dictionary<string, ParticleSystemDescription>();
@@ -86,10 +85,10 @@ namespace ModelDrawing
 
             text2 = await this.AddComponentUITextArea(new UITextAreaDescription { Font = new TextDrawerDescription() { FontFamily = "Arial", FontSize = 10, ForeColor = Color.LightBlue, ShadowColor = Color.DarkBlue } }, layerHUD);
 
-            log = await this.AddComponentUITextArea(new UITextAreaDescription { Font = new TextDrawerDescription() { FontFamily = "Arial", FontSize = 10, ForeColor = Color.LightBlue, ShadowColor = Color.DarkBlue } }, layerHUD);
-            log.Visible = false;
-
             backPanel = await this.AddComponentSprite(SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), SceneObjectUsages.UI, layerHUD - 1);
+
+            console = await this.AddComponentUIConsole(UIConsoleDescription.Default(Color.DarkSlateBlue), layerHUD + 1);
+            console.Visible = false;
         }
         private async Task InitializeFloor()
         {
@@ -167,9 +166,9 @@ namespace ModelDrawing
                 Game.Exit();
             }
 
-            if (Game.Input.KeyJustReleased(Keys.L))
+            if (Game.Input.KeyJustReleased(Keys.Oem5))
             {
-                ToggleLog();
+                console.Toggle();
             }
 
             if (!gameReady)
@@ -446,31 +445,6 @@ namespace ModelDrawing
             pSystem.SetParameters(parameters);
         }
 
-        private void ToggleLog()
-        {
-            if (!log.Visible)
-            {
-                log.Visible = true;
-                logLines = 10;
-            }
-            else if (logLines == 10)
-            {
-                logLines = 50;
-            }
-            else if (logLines == 50)
-            {
-                log.Visible = false;
-                logLines = 10;
-            }
-
-            log.Height = text2.Height * logLines + 5;
-
-            float top = log.Visible ? log.Top : text2.Top;
-            float hight = log.Visible ? log.Height : text2.Height;
-
-            backPanel.Height = top + hight + 3;
-        }
-
         private void DrawVolumes()
         {
             lines.Clear();
@@ -496,12 +470,6 @@ namespace ModelDrawing
             text.Text = "Particle System Drawing";
             statistics.Text = Game.RuntimeText;
 
-            if (log.Visible)
-            {
-                string logText = Logger.ReadText(FormatLog, logLines);
-                log.Text = logText;
-            }
-
             if (!gameReady)
             {
                 return;
@@ -513,32 +481,6 @@ namespace ModelDrawing
             text1.Text = $"P1 - {particle1}";
             text2.Text = $"P2 - {particle2}";
         }
-        private string FormatLog(LogEntry logEntry)
-        {
-            Color4 defColor = log.ForeColor;
-
-            Color4 logColor;
-            switch (logEntry.LogLevel)
-            {
-                case LogLevel.Debug:
-                    logColor = Color.White;
-                    break;
-                case LogLevel.Information:
-                    logColor = Color.Blue;
-                    break;
-                case LogLevel.Warning:
-                    logColor = Color.Yellow;
-                    break;
-                case LogLevel.Error:
-                    logColor = Color.Red;
-                    break;
-                default:
-                    logColor = log.ForeColor;
-                    break;
-            }
-
-            return $"{logEntry.EventDate:HH:mm:ss.fff} {logColor}[{logEntry.LogLevel}]{defColor}> {logEntry.Text}{System.Environment.NewLine}";
-        }
 
         public override void GameGraphicsResized()
         {
@@ -548,21 +490,16 @@ namespace ModelDrawing
         }
         private void UpdateLayout()
         {
-            text.SetPosition(Vector2.One);
-            statistics.SetPosition(Vector2.One);
-            text1.SetPosition(Vector2.One);
-            text2.SetPosition(Vector2.One);
-            log.SetPosition(Vector2.One);
+            text.SetPosition(Vector2.Zero);
+            statistics.SetPosition(0, text.Rectangle.Bottom + 5);
+            text1.SetPosition(0, statistics.Rectangle.Bottom + 5);
+            text2.SetPosition(0, text1.Rectangle.Bottom + 5);
 
-            statistics.Top = text.Top + text.Height + 5;
-            text1.Top = statistics.Top + statistics.Height + 5;
-            text2.Top = text1.Top + text1.Height + 5;
-
-            log.Top = text2.Top + text2.Height + 5;
-            log.Height = text2.Height * logLines + 5;
-
+            backPanel.SetPosition(Vector2.Zero);
+            backPanel.Height = text2.Top + text2.Height + 5;
             backPanel.Width = Game.Form.RenderWidth;
-            backPanel.Height = text2.Top + text2.Height + 3;
+
+            console.SetPosition(0, backPanel.Rectangle.Bottom);
         }
     }
 }

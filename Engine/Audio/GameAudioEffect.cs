@@ -258,7 +258,7 @@ namespace Engine.Audio
 
                 string fileName = audioFile?.FileName ?? "AlreadyDisposed.file";
 
-                Logger.WriteDebug($"{fileName} Dispose Begin");
+                Logger.WriteTrace($"{fileName} Dispose Begin");
 
                 if (sourceVoice?.IsDisposed != true)
                 {
@@ -275,7 +275,7 @@ namespace Engine.Audio
 
                 audioFile?.Dispose();
 
-                Logger.WriteDebug($"{fileName} Dispose End");
+                Logger.WriteTrace($"{fileName} Dispose End");
             }
         }
 
@@ -390,20 +390,11 @@ namespace Engine.Audio
         /// </summary>
         private void PlayAsync()
         {
-            try
-            {
-                AudioStart?.Invoke(this, new GameAudioEventArgs());
+            AudioStart?.Invoke(this, new GameAudioEventArgs());
 
-                DueToDispose = false;
+            DueToDispose = false;
 
-                PlaySound();
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteError(ex.Message);
-
-                throw;
-            }
+            PlaySound();
         }
         /// <summary>
         /// Plays de sound
@@ -422,7 +413,7 @@ namespace Engine.Audio
                 {
                     if (playEvent.WaitOne(WaitPrecision))
                     {
-                        Logger.WriteDebug("playEvent.WaitOne - Waiting for play");
+                        Logger.WriteTrace("playEvent.WaitOne - Waiting for play");
                         break;
                     }
                 }
@@ -531,7 +522,7 @@ namespace Engine.Audio
             {
                 clock.Restart();
 
-                Logger.WriteDebug("waitForPlayToOutput.Set (First time)");
+                Logger.WriteTrace("waitForPlayToOutput.Set (First time)");
                 waitForPlayToOutput.Set();
             }
 
@@ -558,7 +549,7 @@ namespace Engine.Audio
                 // While the player is not stopped, wait for the play event
                 if (playEvent.WaitOne(WaitPrecision))
                 {
-                    Logger.WriteDebug("playEvent.WaitOne - Waiting for play");
+                    Logger.WriteTrace("playEvent.WaitOne - Waiting for play");
                     break;
                 }
             }
@@ -572,7 +563,7 @@ namespace Engine.Audio
             {
                 bufferEndEvent.WaitOne(WaitPrecision);
             }
-            Logger.WriteDebug("bufferEndEvent.WaitOne - Load new buffer");
+            Logger.WriteTrace("bufferEndEvent.WaitOne - Load new buffer");
         }
 
         /// <summary>

@@ -433,6 +433,8 @@
     <Compile Include="Tween\TweenState.cs" />
     <Compile Include="UI\FontMapCache.cs" />
     <Compile Include="UI\HorizontalTextAlign.cs" />
+    <Compile Include="UI\UIConsole.cs" />
+    <Compile Include="UI\UIConsoleDescription.cs" />
     <Compile Include="UI\UICursorDescription.cs" />
     <Compile Include="UI\UICursor.cs" />
     <Compile Include="UI\UIPanel.cs" />

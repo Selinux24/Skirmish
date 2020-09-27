@@ -487,8 +487,6 @@ namespace Deferred
 
             tankAgents.ForEach(a => a.Update(new Engine.Common.UpdateContext() { GameTime = gameTime }));
 
-            bool shift = Game.Input.KeyPressed(Keys.LShiftKey);
-
             UpdateInputCamera(gameTime);
             UpdateInputMouse();
             UpdayeInputLights();
@@ -1200,7 +1198,7 @@ namespace Deferred
             }
             catch (Exception ex)
             {
-                Logger.WriteError(ex.Message);
+                Logger.WriteError(ex);
             }
         }
     }

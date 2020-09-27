@@ -44,13 +44,13 @@ namespace Collada
 
             GameEnvironment.Background = new Color4(0.09f, 0.09f, 0.09f, 1f);
 
-            this.Game.VisibleMouse = true;
-            this.Game.LockMouse = false;
+            Game.VisibleMouse = true;
+            Game.LockMouse = false;
 
-            this.Camera.MovementDelta = 25f;
+            Camera.MovementDelta = 25f;
 
-            await this.LoadResourcesAsync(
-                this.InitializeText(),
+            await LoadResourcesAsync(
+                InitializeText(),
                 (resUi) =>
                 {
                     if (!resUi.Completed)
@@ -58,14 +58,14 @@ namespace Collada
                         resUi.ThrowExceptions();
                     }
 
-                    this.InitializeLights();
-                    this.InitializeAgent();
+                    InitializeLights();
+                    InitializeAgent();
 
-                    _ = this.LoadResourcesAsync(
+                    _ = LoadResourcesAsync(
                         new[]
                         {
-                            this.InitializeNavmesh(),
-                            this.InitializeDebug()
+                            InitializeNavmesh(),
+                            InitializeDebug()
                         },
                         (res) =>
                         {
@@ -78,10 +78,10 @@ namespace Collada
                             var center = bbox.GetCenter();
                             float maxD = Math.Max(Math.Max(bbox.Width, bbox.Height), bbox.Depth);
 
-                            this.Camera.Interest = center;
-                            this.Camera.Position = center + new Vector3(1, 0.8f, -1) * maxD * 0.8f;
+                            Camera.Interest = center;
+                            Camera.Position = center + new Vector3(1, 0.8f, -1) * maxD * 0.8f;
 
-                            Task.WhenAll(this.UpdateNavigationGraph());
+                            Task.WhenAll(UpdateNavigationGraph());
 
                             gameReady = true;
                         });
@@ -93,12 +93,12 @@ namespace Collada
             title.Text = "Navigation Mesh Test Scene";
             title.SetPosition(Vector2.Zero);
 
-            this.debug = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12, Color.Green) }, layerHUD);
-            this.debug.Text = null;
-            this.debug.SetPosition(new Vector2(0, title.Top + title.Height + 3));
+            debug = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12, Color.Green) }, layerHUD);
+            debug.Text = null;
+            debug.SetPosition(new Vector2(0, title.Top + title.Height + 3));
 
-            this.help = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12, Color.Yellow) }, layerHUD);
-            this.help.Text = @"Camera: WASD+Mouse (Press right mouse in windowed mode to look). 
+            help = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12, Color.Yellow) }, layerHUD);
+            help.Text = @"Camera: WASD+Mouse (Press right mouse in windowed mode to look). 
 B: Change Build Mode (SHIFT reverse).
 P: Change Partition Type (SHIFT reverse).
 T: Toggle using Tile Cache.
@@ -107,13 +107,13 @@ F6: Loads the graph from a file.
 Left Mouse: Update current tile (SHIFT remove).
 Middle Mouse: Finds random point around circle (5 units).
 Space: Finds random over navmesh";
-            this.help.SetPosition(new Vector2(0, debug.Top + debug.Height + 3));
-            this.help.Visible = false;
+            help.SetPosition(new Vector2(0, debug.Top + debug.Height + 3));
+            help.Visible = false;
 
             var spDesc = new SpriteDescription()
             {
-                Width = this.Game.Form.RenderWidth,
-                Height = this.debug.Top + this.debug.Height + 3,
+                Width = Game.Form.RenderWidth,
+                Height = debug.Top + debug.Height + 3,
                 BaseColor = new Color4(0, 0, 0, 0.75f),
             };
 
@@ -121,13 +121,13 @@ Space: Finds random over navmesh";
         }
         private void InitializeLights()
         {
-            this.Lights.KeyLight.CastShadow = false;
-            this.Lights.BackLight.Enabled = false;
-            this.Lights.FillLight.Enabled = false;
+            Lights.KeyLight.CastShadow = false;
+            Lights.BackLight.Enabled = false;
+            Lights.FillLight.Enabled = false;
         }
         private void InitializeAgent()
         {
-            this.agent = new Player()
+            agent = new Player()
             {
                 Name = "Player",
                 Height = 0.2f,
@@ -138,12 +138,12 @@ Space: Finds random over navmesh";
                 VelocitySlow = 1f,
             };
 
-            this.Camera.NearPlaneDistance = 0.01f;
-            this.Camera.FarPlaneDistance *= 2;
+            Camera.NearPlaneDistance = 0.01f;
+            Camera.FarPlaneDistance *= 2;
         }
         private async Task InitializeNavmesh()
         {
-            this.inputGeometry = await this.AddComponentModel(
+            inputGeometry = await this.AddComponentModel(
                 new ModelDescription()
                 {
                     TextureIndex = 0,
@@ -157,14 +157,14 @@ Space: Finds random over navmesh";
                 },
                 SceneObjectUsages.Ground);
 
-            this.SetGround(inputGeometry, true);
+            SetGround(inputGeometry, true);
 
             //Rasterization
             nmsettings.CellSize = 0.20f;
             nmsettings.CellHeight = 0.15f;
 
             //Agents
-            nmsettings.Agents = new[] { this.agent };
+            nmsettings.Agents = new[] { agent };
 
             //Partitioning
             nmsettings.PartitionType = SamplePartitionTypes.Monotone;
@@ -178,7 +178,7 @@ Space: Finds random over navmesh";
 
             var nminput = new InputGeometry(GetTrianglesForNavigationGraph);
 
-            this.PathFinderDescription = new PathFinderDescription(nmsettings, nminput);
+            PathFinderDescription = new PathFinderDescription(nmsettings, nminput);
         }
         private async Task InitializeDebug()
         {
@@ -187,13 +187,13 @@ Space: Finds random over navmesh";
                 Name = "DEBUG++ Graph",
                 Count = 50000,
             };
-            this.graphDrawer = await this.AddComponentPrimitiveListDrawer<Triangle>(graphDrawerDesc);
+            graphDrawer = await this.AddComponentPrimitiveListDrawer(graphDrawerDesc);
 
             var volumesDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
             {
                 Count = 10000
             };
-            this.volumesDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(volumesDrawerDesc);
+            volumesDrawer = await this.AddComponentPrimitiveListDrawer(volumesDrawerDesc);
         }
 
         public override async Task UpdateNavigationGraph()
@@ -206,7 +206,7 @@ Space: Finds random over navmesh";
         }
         public override void NavigationGraphUpdated()
         {
-            this.DrawGraphNodes(this.agent);
+            DrawGraphNodes(agent);
         }
 
         public override void Update(GameTime gameTime)
@@ -218,63 +218,59 @@ Space: Finds random over navmesh";
                 return;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.Escape))
+            if (Game.Input.KeyJustReleased(Keys.Escape))
             {
-                this.Game.SetScene<SceneStart>();
+                Game.SetScene<SceneStart>();
             }
 
-            bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
-
-            if (this.Game.Input.KeyJustReleased(Keys.F1))
+            if (Game.Input.KeyJustReleased(Keys.F1))
             {
-                this.help.Visible = !this.help.Visible;
+                help.Visible = !help.Visible;
             }
 
-            this.UpdateCameraInput();
-            this.UpdateNavmeshInput();
-            this.UpdateGraphInput(shift);
-            this.UpdateFilesInput();
+            UpdateCameraInput();
+            UpdateNavmeshInput();
+            UpdateGraphInput();
+            UpdateFilesInput();
         }
         private void UpdateCameraInput()
         {
-            bool slow = this.Game.Input.KeyPressed(Keys.LShiftKey);
-
-            if (this.Game.Input.KeyPressed(Keys.A))
+            if (Game.Input.KeyPressed(Keys.A))
             {
-                this.Camera.MoveLeft(this.Game.GameTime, slow);
+                Camera.MoveLeft(Game.GameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.D))
+            if (Game.Input.KeyPressed(Keys.D))
             {
-                this.Camera.MoveRight(this.Game.GameTime, slow);
+                Camera.MoveRight(Game.GameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.W))
+            if (Game.Input.KeyPressed(Keys.W))
             {
-                this.Camera.MoveForward(this.Game.GameTime, slow);
+                Camera.MoveForward(Game.GameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.S))
+            if (Game.Input.KeyPressed(Keys.S))
             {
-                this.Camera.MoveBackward(this.Game.GameTime, slow);
+                Camera.MoveBackward(Game.GameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.RightMouseButtonPressed)
+            if (Game.Input.RightMouseButtonPressed)
             {
-                this.Camera.RotateMouse(
-                    this.Game.GameTime,
-                    this.Game.Input.MouseXDelta,
-                    this.Game.Input.MouseYDelta);
+                Camera.RotateMouse(
+                    Game.GameTime,
+                    Game.Input.MouseXDelta,
+                    Game.Input.MouseYDelta);
             }
         }
         private void UpdateNavmeshInput()
         {
-            if (this.Game.Input.MiddleMouseButtonJustReleased)
+            if (Game.Input.MiddleMouseButtonJustReleased)
             {
-                var pRay = this.GetPickingRay();
+                var pRay = GetPickingRay();
                 var rayPParams = RayPickingParams.FacingOnly | RayPickingParams.Perfect;
 
-                if (this.PickNearest(pRay, rayPParams, out PickingResult<Triangle> r))
+                if (PickNearest(pRay, rayPParams, out PickingResult<Triangle> r))
                 {
                     DrawPoint(r.Position, 0.25f, Color.Red);
                     DrawTriangle(r.Item, Color.White);
@@ -283,7 +279,7 @@ Space: Finds random over navmesh";
 
                     DrawCircle(r.Position, radius, Color.Orange);
 
-                    var pt = this.NavigationGraph.FindRandomPoint(agent, r.Position, radius);
+                    var pt = NavigationGraph.FindRandomPoint(agent, r.Position, radius);
                     if (pt.HasValue)
                     {
                         float dist = Vector3.Distance(r.Position, pt.Value);
@@ -293,38 +289,38 @@ Space: Finds random over navmesh";
                 }
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.Space))
+            if (Game.Input.KeyJustReleased(Keys.Space))
             {
-                var pt = this.NavigationGraph.FindRandomPoint(agent);
+                var pt = NavigationGraph.FindRandomPoint(agent);
                 if (pt.HasValue)
                 {
                     DrawPoint(pt.Value, 2.5f, Color.LightGreen);
                 }
             }
         }
-        private void UpdateGraphInput(bool shift)
+        private void UpdateGraphInput()
         {
             bool updateGraph = false;
 
-            if (this.Game.Input.LeftMouseButtonJustReleased)
+            if (Game.Input.LeftMouseButtonJustReleased)
             {
-                var pRay = this.GetPickingRay();
+                var pRay = GetPickingRay();
                 var rayPParams = RayPickingParams.FacingOnly | RayPickingParams.Perfect;
 
-                if (this.PickNearest(pRay, rayPParams, out PickingResult<Triangle> r))
+                if (PickNearest(pRay, rayPParams, out PickingResult<Triangle> r))
                 {
                     DrawPoint(r.Position, 0.25f, Color.Red);
                     DrawTriangle(r.Item, Color.White);
 
-                    ToggleTile(shift, r.Position);
+                    ToggleTile(r.Position);
                 }
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.B))
+            if (Game.Input.KeyJustReleased(Keys.B))
             {
                 var buildModes = Enum.GetNames(typeof(BuildModes)).Length;
 
-                if (!shift)
+                if (!Game.Input.ShiftPressed)
                 {
                     nmsettings.BuildMode = (BuildModes)Helper.Next((int)nmsettings.BuildMode, buildModes);
                 }
@@ -335,11 +331,11 @@ Space: Finds random over navmesh";
                 updateGraph = true;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.P))
+            if (Game.Input.KeyJustReleased(Keys.P))
             {
                 var sampleTypes = Enum.GetNames(typeof(SamplePartitionTypes)).Length;
 
-                if (!shift)
+                if (!Game.Input.ShiftPressed)
                 {
                     nmsettings.PartitionType = (SamplePartitionTypes)Helper.Next((int)nmsettings.PartitionType, sampleTypes);
                 }
@@ -350,7 +346,7 @@ Space: Finds random over navmesh";
                 updateGraph = true;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.T))
+            if (Game.Input.KeyJustReleased(Keys.T))
             {
                 nmsettings.UseTileCache = !nmsettings.UseTileCache;
 
@@ -359,14 +355,14 @@ Space: Finds random over navmesh";
 
             if (updateGraph)
             {
-                _ = this.UpdateNavigationGraph();
+                _ = UpdateNavigationGraph();
             }
 
-            this.debug.Text = string.Format("Build Mode: {0}; Partition Type: {1}; Build Time: {2:0.00000} seconds", nmsettings.BuildMode, nmsettings.PartitionType, lastElapsedSeconds);
+            debug.Text = string.Format("Build Mode: {0}; Partition Type: {1}; Build Time: {2:0.00000} seconds", nmsettings.BuildMode, nmsettings.PartitionType, lastElapsedSeconds);
         }
         private void UpdateFilesInput()
         {
-            if (this.Game.Input.KeyJustReleased(Keys.F5))
+            if (Game.Input.KeyJustReleased(Keys.F5))
             {
                 using (var dlg = new System.Windows.Forms.SaveFileDialog())
                 {
@@ -374,12 +370,12 @@ Space: Finds random over navmesh";
 
                     if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                     {
-                        Task.Run(() => this.PathFinderDescription.Save(dlg.FileName, this.NavigationGraph));
+                        Task.Run(() => PathFinderDescription.Save(dlg.FileName, NavigationGraph));
                     }
                 }
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F6))
+            if (Game.Input.KeyJustReleased(Keys.F6))
             {
                 using (var dlg = new System.Windows.Forms.OpenFileDialog())
                 {
@@ -387,8 +383,8 @@ Space: Finds random over navmesh";
 
                     if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                     {
-                        var graphTask = Task.Run(() => this.PathFinderDescription.Load(dlg.FileName));
-                        this.SetNavigationGraph(graphTask.Result);
+                        var graphTask = Task.Run(() => PathFinderDescription.Load(dlg.FileName));
+                        SetNavigationGraph(graphTask.Result);
                     }
                 }
             }
@@ -397,45 +393,45 @@ Space: Finds random over navmesh";
         private void DrawPoint(Vector3 position, float size, Color color)
         {
             var cross = Line3D.CreateCross(position, size);
-            this.volumesDrawer.SetPrimitives(color, cross);
+            volumesDrawer.SetPrimitives(color, cross);
         }
         private void DrawTriangle(Triangle triangle, Color color)
         {
             var tri = Line3D.CreateWiredTriangle(triangle);
-            this.volumesDrawer.SetPrimitives(color, tri);
+            volumesDrawer.SetPrimitives(color, tri);
         }
         private void DrawCircle(Vector3 position, float radius, Color color)
         {
             var circle = Line3D.CreateCircle(position, radius, 12);
-            this.volumesDrawer.SetPrimitives(color, circle);
+            volumesDrawer.SetPrimitives(color, circle);
         }
         private void DrawGraphNodes(AgentType agent)
         {
-            var nodes = this.GetNodes(agent).OfType<GraphNode>();
+            var nodes = GetNodes(agent).OfType<GraphNode>();
             if (nodes.Any())
             {
-                this.graphDrawer.Clear();
+                graphDrawer.Clear();
 
                 foreach (var node in nodes)
                 {
-                    this.graphDrawer.AddPrimitives(node.Color, node.Triangles);
+                    graphDrawer.AddPrimitives(node.Color, node.Triangles);
                 }
             }
         }
 
-        private void ToggleTile(bool shift, Vector3 tilePosition)
+        private void ToggleTile(Vector3 tilePosition)
         {
-            this.graphDrawer.Clear();
+            graphDrawer.Clear();
 
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            if (!shift)
+            if (!Game.Input.ShiftPressed)
             {
-                this.NavigationGraph.CreateAt(tilePosition);
+                NavigationGraph.CreateAt(tilePosition);
             }
             else
             {
-                this.NavigationGraph.RemoveAt(tilePosition);
+                NavigationGraph.RemoveAt(tilePosition);
             }
             sw.Stop();
             lastElapsedSeconds = sw.ElapsedMilliseconds / 1000.0f;

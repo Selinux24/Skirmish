@@ -19,5 +19,9 @@ namespace Engine
         /// Entry level
         /// </summary>
         public LogLevel LogLevel { get; set; }
+        /// <summary>
+        /// Exception
+        /// </summary>
+        public Exception Exception { get; set; }
     }
 }

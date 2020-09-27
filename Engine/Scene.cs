@@ -321,27 +321,27 @@ namespace Engine
         /// <param name="game">Game class</param>
         public Scene(Game game)
         {
-            this.Game = game;
+            Game = game;
 
-            this.Game.ResourcesLoading += FireResourcesLoading;
-            this.Game.ResourcesLoaded += FireResourcesLoaded;
-            this.Game.Graphics.Resized += FireGraphicsResized;
+            Game.ResourcesLoading += FireResourcesLoading;
+            Game.ResourcesLoaded += FireResourcesLoaded;
+            Game.Graphics.Resized += FireGraphicsResized;
 
-            this.AudioManager = new GameAudioManager();
+            AudioManager = new GameAudioManager();
 
-            this.Camera = Camera.CreateFree(
+            Camera = Camera.CreateFree(
                 new Vector3(0.0f, 0.0f, -10.0f),
                 Vector3.Zero);
 
-            this.Camera.SetLens(
-                this.Game.Form.RenderWidth,
-                this.Game.Form.RenderHeight);
+            Camera.SetLens(
+                Game.Form.RenderWidth,
+                Game.Form.RenderHeight);
 
-            this.Lights = SceneLights.CreateDefault(this);
+            Lights = SceneLights.CreateDefault(this);
 
-            this.PerformFrustumCulling = true;
+            PerformFrustumCulling = true;
 
-            this.UpdateGlobalResources = true;
+            UpdateGlobalResources = true;
         }
         /// <summary>
         /// Destructor
@@ -367,9 +367,9 @@ namespace Engine
         {
             if (disposing)
             {
-                this.Game.ResourcesLoading -= FireResourcesLoading;
-                this.Game.ResourcesLoaded -= FireResourcesLoaded;
-                this.Game.Graphics.Resized -= FireGraphicsResized;
+                Game.ResourcesLoading -= FireResourcesLoading;
+                Game.ResourcesLoaded -= FireResourcesLoaded;
+                Game.Graphics.Resized -= FireGraphicsResized;
 
                 Renderer?.Dispose();
                 Renderer = null;
@@ -412,37 +412,37 @@ namespace Engine
         {
             try
             {
-                if (this.UpdateGlobalResources)
+                if (UpdateGlobalResources)
                 {
-                    Logger.WriteDebug("Updating global resources.");
+                    Logger.WriteInformation("Updating global resources.");
 
-                    this.UpdateGlobals();
+                    UpdateGlobals();
 
-                    this.UpdateGlobalResources = false;
+                    UpdateGlobalResources = false;
                 }
 
-                this.Environment.Update(gameTime);
+                Environment.Update(gameTime);
 
                 // Lights
-                this.Lights?.Update();
+                Lights?.Update();
 
                 // Camera!
-                this.Camera?.Update(gameTime);
+                Camera?.Update(gameTime);
 
-                this.AudioManager?.Update(gameTime);
+                AudioManager?.Update(gameTime);
 
-                this.NavigationGraph?.Update(gameTime);
+                NavigationGraph?.Update(gameTime);
 
-                this.UICapturedControl = UIControl.EvaluateInput(this);
+                UICapturedControl = UIControl.EvaluateInput(this);
 
                 FloatTweenManager.Update(gameTime);
 
                 // Action!
-                this.Renderer?.Update(gameTime, this);
+                Renderer?.Update(gameTime, this);
             }
             catch (EngineException ex)
             {
-                Logger.WriteError($"Scene Updating error: {ex}");
+                Logger.WriteError($"Scene Updating error: {ex.Message}", ex);
 
                 throw;
             }
@@ -455,11 +455,11 @@ namespace Engine
         {
             try
             {
-                this.Renderer?.Draw(gameTime, this);
+                Renderer?.Draw(gameTime, this);
             }
             catch (EngineException ex)
             {
-                Logger.WriteError($"Scene Drawing error {this.Renderer?.GetType()}: {ex}");
+                Logger.WriteError($"Scene Drawing error {Renderer?.GetType()}: {ex.Message}", ex);
 
                 throw;
             }
@@ -471,7 +471,7 @@ namespace Engine
         /// <returns>Returns the render mode</returns>
         public SceneModes GetRenderMode()
         {
-            return this.sceneMode;
+            return sceneMode;
         }
         /// <summary>
         /// Change renderer mode
@@ -480,26 +480,26 @@ namespace Engine
         /// <returns>Returns true if the renderer changes correctly</returns>
         public bool SetRenderMode(SceneModes mode)
         {
-            var graphics = this.Game.Graphics;
+            var graphics = Game.Graphics;
 
             ISceneRenderer renderer;
 
             if (mode == SceneModes.ForwardLigthning && SceneRendererForward.Validate(graphics))
             {
-                renderer = new SceneRendererForward(this.Game);
+                renderer = new SceneRendererForward(Game);
             }
             else if (mode == SceneModes.DeferredLightning && SceneRendererDeferred.Validate(graphics))
             {
-                renderer = new SceneRendererDeferred(this.Game);
+                renderer = new SceneRendererDeferred(Game);
             }
             else
             {
                 return false;
             }
 
-            this.Renderer?.Dispose();
-            this.Renderer = renderer;
-            this.sceneMode = mode;
+            Renderer?.Dispose();
+            Renderer = renderer;
+            sceneMode = mode;
 
             Counters.ClearAll();
 
@@ -514,7 +514,7 @@ namespace Engine
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
         public async Task<bool> LoadResourcesAsync(Task task, Action<LoadResourcesResult> callback = null)
         {
-            return await this.Game.LoadResourcesAsync(this, task, callback);
+            return await Game.LoadResourcesAsync(this, task, callback);
         }
         /// <summary>
         /// Executes a list of resource load tasks
@@ -524,7 +524,7 @@ namespace Engine
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
         public async Task<bool> LoadResourcesAsync(IEnumerable<Task> tasks, Action<LoadResourcesResult> callback = null)
         {
-            return await this.Game.LoadResourcesAsync(this, tasks, callback);
+            return await Game.LoadResourcesAsync(this, tasks, callback);
         }
         /// <summary>
         /// Executes a resource load task
@@ -535,7 +535,7 @@ namespace Engine
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
         public async Task<bool> LoadResourcesAsync<T>(Task<T> task, Action<LoadResourcesResult<T>> callback = null)
         {
-            return await this.Game.LoadResourcesAsync(this, task, callback);
+            return await Game.LoadResourcesAsync(this, task, callback);
         }
         /// <summary>
         /// Executes a list of resource load tasks
@@ -546,7 +546,7 @@ namespace Engine
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
         public async Task<bool> LoadResourcesAsync<T>(IEnumerable<Task<T>> tasks, Action<LoadResourcesResult<T>> callback = null)
         {
-            return await this.Game.LoadResourcesAsync(this, tasks, callback);
+            return await Game.LoadResourcesAsync(this, tasks, callback);
         }
 
         /// <summary>
@@ -580,9 +580,9 @@ namespace Engine
         /// <param name="e">Event arguments</param>
         private void FireGraphicsResized(object sender, EventArgs e)
         {
-            this.Renderer?.Resize();
+            Renderer?.Resize();
 
-            var fittedComponents = this.GetComponents().OfType<IScreenFitted>();
+            var fittedComponents = GetComponents().OfType<IScreenFitted>();
             if (fittedComponents.Any())
             {
                 fittedComponents.ToList().ForEach(c => c.Resize());
@@ -633,8 +633,8 @@ namespace Engine
         {
             return Helper.UnprojectToScreen(
                 position,
-                this.Game.Graphics.Viewport,
-                this.Camera.View * this.Camera.Projection,
+                Game.Graphics.Viewport,
+                Camera.View * Camera.Projection,
                 out inside);
         }
 
@@ -648,7 +648,7 @@ namespace Engine
         /// <returns>Returns the added component</returns>
         public void AddComponent(ISceneObject component, SceneObjectUsages usage, int order)
         {
-            if (this.internalComponents.Contains(component))
+            if (internalComponents.Contains(component))
             {
                 return;
             }
@@ -660,9 +660,9 @@ namespace Engine
                 component.Order = order;
             }
 
-            Monitor.Enter(this.internalComponents);
-            this.internalComponents.Add(component);
-            this.internalComponents.Sort((p1, p2) =>
+            Monitor.Enter(internalComponents);
+            internalComponents.Add(component);
+            internalComponents.Sort((p1, p2) =>
             {
                 //First by order index
                 int i = p1.Order.CompareTo(p2.Order);
@@ -677,9 +677,9 @@ namespace Engine
 
                 return i;
             });
-            Monitor.Exit(this.internalComponents);
+            Monitor.Exit(internalComponents);
 
-            this.UpdateGlobalResources = true;
+            UpdateGlobalResources = true;
         }
         /// <summary>
         /// Removes and disposes the specified component
@@ -687,16 +687,16 @@ namespace Engine
         /// <param name="component">Component</param>
         public void RemoveComponent(ISceneObject component)
         {
-            if (!this.internalComponents.Contains(component))
+            if (!internalComponents.Contains(component))
             {
                 return;
             }
 
-            Monitor.Enter(this.internalComponents);
-            this.internalComponents.Remove(component);
-            Monitor.Exit(this.internalComponents);
+            Monitor.Enter(internalComponents);
+            internalComponents.Remove(component);
+            Monitor.Exit(internalComponents);
 
-            this.UpdateGlobalResources = true;
+            UpdateGlobalResources = true;
 
             component.Dispose();
         }
@@ -706,19 +706,19 @@ namespace Engine
         /// <param name="components">List of components</param>
         public void RemoveComponents(IEnumerable<ISceneObject> components)
         {
-            Monitor.Enter(this.internalComponents);
+            Monitor.Enter(internalComponents);
             foreach (var component in components)
             {
-                if (this.internalComponents.Contains(component))
+                if (internalComponents.Contains(component))
                 {
-                    this.internalComponents.Remove(component);
+                    internalComponents.Remove(component);
 
-                    this.UpdateGlobalResources = true;
+                    UpdateGlobalResources = true;
                 }
 
                 component.Dispose();
             }
-            Monitor.Exit(this.internalComponents);
+            Monitor.Exit(internalComponents);
         }
 
         /// <summary>
@@ -735,9 +735,9 @@ namespace Engine
         /// </summary>
         protected virtual void UpdateGlobals()
         {
-            this.UpdateMaterialPalette(out EngineShaderResourceView materialPalette, out uint materialPaletteWidth);
+            UpdateMaterialPalette(out EngineShaderResourceView materialPalette, out uint materialPaletteWidth);
 
-            this.UpdateAnimationPalette(out EngineShaderResourceView animationPalette, out uint animationPaletteWidth);
+            UpdateAnimationPalette(out EngineShaderResourceView animationPalette, out uint animationPaletteWidth);
 
             DrawerPool.UpdateSceneGlobals(materialPalette, materialPaletteWidth, animationPalette, animationPaletteWidth);
         }
@@ -792,7 +792,7 @@ namespace Engine
         {
             List<SkinningData> skData = new List<SkinningData>();
 
-            var skComponents = this.GetComponents().OfType<IUseSkinningData>();
+            var skComponents = GetComponents().OfType<IUseSkinningData>();
 
             foreach (var component in skComponents)
             {
@@ -835,7 +835,7 @@ namespace Engine
 
             int texWidth = GetTextureSize(values.Count);
 
-            animationPalette = this.Game.ResourceManager.CreateGlobalResource("AnimationPalette", values.ToArray(), texWidth);
+            animationPalette = Game.ResourceManager.CreateGlobalResource("AnimationPalette", values.ToArray(), texWidth);
             animationPaletteWidth = (uint)texWidth;
         }
 
@@ -845,12 +845,12 @@ namespace Engine
         /// <returns>Returns picking ray from current mouse position</returns>
         public Ray GetPickingRay()
         {
-            int mouseX = this.Game.Input.MouseX;
-            int mouseY = this.Game.Input.MouseY;
-            Matrix worldViewProjection = this.world * this.Camera.View * this.Camera.Projection;
-            float nDistance = this.Camera.NearPlaneDistance;
-            float fDistance = this.Camera.FarPlaneDistance;
-            ViewportF viewport = this.Game.Graphics.Viewport;
+            int mouseX = Game.Input.MouseX;
+            int mouseY = Game.Input.MouseY;
+            Matrix worldViewProjection = world * Camera.View * Camera.Projection;
+            float nDistance = Camera.NearPlaneDistance;
+            float fDistance = Camera.FarPlaneDistance;
+            ViewportF viewport = Game.Graphics.Viewport;
 
             Vector3 nVector = new Vector3(mouseX, mouseY, nDistance);
             Vector3 fVector = new Vector3(mouseX, mouseY, fDistance);
@@ -867,7 +867,7 @@ namespace Engine
         /// <returns>Returns vertical ray from scene's top and down vector with x and z coordinates</returns>
         public Ray GetTopDownRay(Point position)
         {
-            return this.GetTopDownRay(position.X, position.Y);
+            return GetTopDownRay(position.X, position.Y);
         }
         /// <summary>
         /// Gets vertical ray from scene's top and down vector with x and z coordinates
@@ -876,7 +876,7 @@ namespace Engine
         /// <returns>Returns vertical ray from scene's top and down vector with x and z coordinates</returns>
         public Ray GetTopDownRay(Vector2 position)
         {
-            return this.GetTopDownRay(position.X, position.Y);
+            return GetTopDownRay(position.X, position.Y);
         }
         /// <summary>
         /// Gets vertical ray from scene's top and down vector with x and z coordinates
@@ -885,7 +885,7 @@ namespace Engine
         /// <returns>Returns vertical ray from scene's top and down vector with x and z coordinates</returns>
         public Ray GetTopDownRay(Vector3 position)
         {
-            return this.GetTopDownRay(position.X, position.Z);
+            return GetTopDownRay(position.X, position.Z);
         }
         /// <summary>
         /// Gets vertical ray from scene's top and down vector with x and z coordinates
@@ -895,7 +895,7 @@ namespace Engine
         /// <returns>Returns vertical ray from scene's top and down vector with x and z coordinates</returns>
         public Ray GetTopDownRay(float x, float z)
         {
-            var bbox = this.GetGroundBoundingBox();
+            var bbox = GetGroundBoundingBox();
 
             if (!bbox.HasValue || bbox == new BoundingBox())
             {
@@ -924,7 +924,7 @@ namespace Engine
         {
             model = null;
 
-            var cmpList = this.GetComponents().Where(c => c.Usage.HasFlag(usage));
+            var cmpList = GetComponents().Where(c => c.Usage.HasFlag(usage));
 
             var coarse = PickCoarse(ref ray, maxDistance, cmpList);
 
@@ -968,7 +968,7 @@ namespace Engine
                 Distance = float.MaxValue,
             };
 
-            IEnumerable<ISceneObject> cmpList = this.GetComponents();
+            IEnumerable<ISceneObject> cmpList = GetComponents();
 
             if (usage != SceneObjectUsages.None)
             {
@@ -1041,7 +1041,7 @@ namespace Engine
                 Distance = float.MaxValue,
             };
 
-            IEnumerable<ISceneObject> cmpList = this.GetComponents();
+            IEnumerable<ISceneObject> cmpList = GetComponents();
 
             if (usage != SceneObjectUsages.None)
             {
@@ -1102,7 +1102,7 @@ namespace Engine
         {
             results = null;
 
-            IEnumerable<ISceneObject> cmpList = this.GetComponents();
+            IEnumerable<ISceneObject> cmpList = GetComponents();
 
             if (usage != SceneObjectUsages.None)
             {
@@ -1148,9 +1148,9 @@ namespace Engine
         /// <returns>Returns true if ground position found</returns>
         public bool FindTopGroundPosition<T>(float x, float z, out PickingResult<T> result) where T : IRayIntersectable
         {
-            var ray = this.GetTopDownRay(x, z);
+            var ray = GetTopDownRay(x, z);
 
-            return this.PickNearest(ray, RayPickingParams.Default, GroundUsage, out result);
+            return PickNearest(ray, RayPickingParams.Default, GroundUsage, out result);
         }
         /// <summary>
         /// Gets ground position giving x, z coordinates
@@ -1161,9 +1161,9 @@ namespace Engine
         /// <returns>Returns true if ground position found</returns>
         public bool FindFirstGroundPosition<T>(float x, float z, out PickingResult<T> result) where T : IRayIntersectable
         {
-            var ray = this.GetTopDownRay(x, z);
+            var ray = GetTopDownRay(x, z);
 
-            return this.PickFirst(ray, RayPickingParams.Default, GroundUsage, out result);
+            return PickFirst(ray, RayPickingParams.Default, GroundUsage, out result);
         }
         /// <summary>
         /// Gets all ground positions giving x, z coordinates
@@ -1174,9 +1174,9 @@ namespace Engine
         /// <returns>Returns true if ground positions found</returns>
         public bool FindAllGroundPosition<T>(float x, float z, out IEnumerable<PickingResult<T>> results) where T : IRayIntersectable
         {
-            var ray = this.GetTopDownRay(x, z);
+            var ray = GetTopDownRay(x, z);
 
-            return this.PickAll(ray, RayPickingParams.Default, GroundUsage, out results);
+            return PickAll(ray, RayPickingParams.Default, GroundUsage, out results);
         }
         /// <summary>
         /// Gets nearest ground position to "from" position
@@ -1186,9 +1186,9 @@ namespace Engine
         /// <returns>Returns true if ground position found</returns>
         public bool FindNearestGroundPosition<T>(Vector3 from, out PickingResult<T> result) where T : IRayIntersectable
         {
-            var ray = this.GetTopDownRay(from.X, from.Z);
+            var ray = GetTopDownRay(from.X, from.Z);
 
-            bool picked = this.PickAll<T>(ray, RayPickingParams.Default, GroundUsage, out var pResults);
+            bool picked = PickAll<T>(ray, RayPickingParams.Default, GroundUsage, out var pResults);
             if (picked)
             {
                 int index = -1;
@@ -1225,13 +1225,13 @@ namespace Engine
         /// <returns>Returns the whole ground bounding box.</returns>
         public BoundingBox? GetGroundBoundingBox()
         {
-            if (this.groundBoundingBox.HasValue && this.groundBoundingBox != new BoundingBox())
+            if (groundBoundingBox.HasValue && groundBoundingBox != new BoundingBox())
             {
-                return this.groundBoundingBox;
+                return groundBoundingBox;
             }
 
             //Try to get a bounding box from the current ground objects
-            var cmpList = this.GetComponents().Where(c => c.Usage.HasFlag(SceneObjectUsages.Ground));
+            var cmpList = GetComponents().Where(c => c.Usage.HasFlag(SceneObjectUsages.Ground));
 
             if (cmpList.Any())
             {
@@ -1253,10 +1253,10 @@ namespace Engine
                     }
                 }
 
-                this.groundBoundingBox = Helper.MergeBoundingBox(boxes);
+                groundBoundingBox = Helper.MergeBoundingBox(boxes);
             }
 
-            return this.groundBoundingBox;
+            return groundBoundingBox;
         }
         /// <summary>
         /// Gets the current navigation bounding box
@@ -1264,7 +1264,7 @@ namespace Engine
         /// <returns>Returns the current navigation bounding box.</returns>
         public BoundingBox? GetNavigationBoundingBox()
         {
-            return this.navigationBoundingBox;
+            return navigationBoundingBox;
         }
 
         /// <summary>
@@ -1273,7 +1273,7 @@ namespace Engine
         /// <returns>Returns the scene volume</returns>
         public IIntersectionVolume GetSceneVolume()
         {
-            var ground = this.GetComponents()
+            var ground = GetComponents()
                 .Where(c => c.Usage.HasFlag(SceneObjectUsages.Ground))
                 .OfType<Ground>()
                 .FirstOrDefault();
@@ -1293,7 +1293,7 @@ namespace Engine
         /// <param name="fullGeometryPathFinding">Sets whether use full triangle list or volumes for navigation graphs</param>
         public void SetGround(ISceneObject obj, bool fullGeometryPathFinding)
         {
-            this.groundBoundingBox = null;
+            groundBoundingBox = null;
 
             obj.Usage |= SceneObjectUsages.Ground;
             obj.Usage |= fullGeometryPathFinding ? SceneObjectUsages.FullPathFinding : SceneObjectUsages.CoarsePathFinding;
@@ -1317,18 +1317,18 @@ namespace Engine
         /// </summary>
         public virtual async Task UpdateNavigationGraph()
         {
-            if (this.PathFinderDescription == null)
+            if (PathFinderDescription == null)
             {
-                this.SetNavigationGraph(null);
+                SetNavigationGraph(null);
 
                 return;
             }
 
-            var graph = await this.PathFinderDescription.Build();
+            var graph = await PathFinderDescription.Build();
 
-            this.SetNavigationGraph(graph);
+            SetNavigationGraph(graph);
 
-            this.NavigationGraphUpdated();
+            NavigationGraphUpdated();
         }
         /// <summary>
         /// Sets a navigation graph
@@ -1336,26 +1336,26 @@ namespace Engine
         /// <param name="graph">Navigation graph</param>
         public virtual void SetNavigationGraph(IGraph graph)
         {
-            if (this.NavigationGraph != null)
+            if (NavigationGraph != null)
             {
-                this.NavigationGraph.Updating -= GraphUpdating;
-                this.NavigationGraph.Updated -= GraphUpdated;
+                NavigationGraph.Updating -= GraphUpdating;
+                NavigationGraph.Updated -= GraphUpdated;
 
-                this.NavigationGraph.Dispose();
-                this.NavigationGraph = null;
+                NavigationGraph.Dispose();
+                NavigationGraph = null;
 
-                this.navigationBoundingBox = new BoundingBox();
+                navigationBoundingBox = new BoundingBox();
             }
 
             if (graph != null)
             {
-                this.NavigationGraph = graph;
-                this.NavigationGraph.Updating += GraphUpdating;
-                this.NavigationGraph.Updated += GraphUpdated;
+                NavigationGraph = graph;
+                NavigationGraph.Updating += GraphUpdating;
+                NavigationGraph.Updated += GraphUpdated;
 
-                if (this.PathFinderDescription?.Input != null)
+                if (PathFinderDescription?.Input != null)
                 {
-                    this.navigationBoundingBox = this.PathFinderDescription.Input.BoundingBox;
+                    navigationBoundingBox = PathFinderDescription.Input.BoundingBox;
                 }
             }
         }
@@ -1367,11 +1367,11 @@ namespace Engine
         /// <param name="e">Event args</param>
         private void GraphUpdating(object sender, EventArgs e)
         {
-            Logger.WriteDebug($"GraphUpdating - {sender}");
+            Logger.WriteInformation($"GraphUpdating - {sender}");
 
-            Logger.WriteDebug($"GraphUpdating - NavigationGraphUpdating Call");
+            Logger.WriteInformation($"GraphUpdating - NavigationGraphUpdating Call");
             NavigationGraphUpdating();
-            Logger.WriteDebug($"GraphUpdating - NavigationGraphUpdating End");
+            Logger.WriteInformation($"GraphUpdating - NavigationGraphUpdating End");
         }
         /// <summary>
         /// Graph updated event
@@ -1380,11 +1380,11 @@ namespace Engine
         /// <param name="e">Event args</param>
         private void GraphUpdated(object sender, EventArgs e)
         {
-            Logger.WriteDebug($"GraphUpdated - {sender}");
+            Logger.WriteInformation($"GraphUpdated - {sender}");
 
-            Logger.WriteDebug($"GraphUpdating - NavigationGraphUpdated Call");
+            Logger.WriteInformation($"GraphUpdating - NavigationGraphUpdated Call");
             NavigationGraphUpdated();
-            Logger.WriteDebug($"GraphUpdating - NavigationGraphUpdated End");
+            Logger.WriteInformation($"GraphUpdating - NavigationGraphUpdated End");
         }
         /// <summary>
         /// Fires when graph is updating
@@ -1409,7 +1409,7 @@ namespace Engine
         {
             List<Triangle> tris = new List<Triangle>();
 
-            var pfComponents = this.GetComponents().Where(c =>
+            var pfComponents = GetComponents().Where(c =>
             {
                 return
                     !c.HasParent &&
@@ -1426,7 +1426,7 @@ namespace Engine
                 }
             }
 
-            var bounds = this.PathFinderDescription.Settings.Bounds;
+            var bounds = PathFinderDescription.Settings.Bounds;
             if (bounds.HasValue)
             {
                 tris = tris.FindAll(t =>
@@ -1447,7 +1447,7 @@ namespace Engine
         /// <returns>Returns the path finder grid nodes</returns>
         public virtual IEnumerable<IGraphNode> GetNodes(AgentType agent)
         {
-            return this.NavigationGraph?.GetNodes(agent) ?? new IGraphNode[] { };
+            return NavigationGraph?.GetNodes(agent) ?? new IGraphNode[] { };
         }
         /// <summary>
         /// Find path from point to point
@@ -1459,7 +1459,7 @@ namespace Engine
         /// <returns>Return path if exists</returns>
         public virtual PathFindingPath FindPath(AgentType agent, Vector3 from, Vector3 to, bool useGround = false)
         {
-            if (this.NavigationGraph?.Initialized != true)
+            if (NavigationGraph?.Initialized != true)
             {
                 return null;
             }
@@ -1476,7 +1476,7 @@ namespace Engine
                 }
             }
 
-            var path = this.NavigationGraph.FindPath(agent, from, to);
+            var path = NavigationGraph.FindPath(agent, from, to);
             if (path.Count() > 1)
             {
                 List<Vector3> positions = new List<Vector3>(path);
@@ -1502,7 +1502,7 @@ namespace Engine
         /// <returns>Return path if exists</returns>
         public virtual async Task<PathFindingPath> FindPathAsync(AgentType agent, Vector3 from, Vector3 to, bool useGround = false)
         {
-            if (this.NavigationGraph?.Initialized != true)
+            if (NavigationGraph?.Initialized != true)
             {
                 return null;
             }
@@ -1519,7 +1519,7 @@ namespace Engine
                 }
             }
 
-            var path = await this.NavigationGraph.FindPathAsync(agent, from, to);
+            var path = await NavigationGraph.FindPathAsync(agent, from, to);
             if (path.Count() > 1)
             {
                 List<Vector3> positions = new List<Vector3>(path);
@@ -1561,9 +1561,9 @@ namespace Engine
         /// <returns>Returns true if the specified position is walkable</returns>
         public virtual bool IsWalkable(AgentType agent, Vector3 position, out Vector3? nearest)
         {
-            if (this.NavigationGraph != null)
+            if (NavigationGraph != null)
             {
-                return this.NavigationGraph.IsWalkable(agent, position, out nearest);
+                return NavigationGraph.IsWalkable(agent, position, out nearest);
             }
 
             nearest = position;
@@ -1588,7 +1588,7 @@ namespace Engine
                 return false;
             }
 
-            bool isInGround = this.FindAllGroundPosition<Triangle>(newPosition.X, newPosition.Z, out var results);
+            bool isInGround = FindAllGroundPosition<Triangle>(newPosition.X, newPosition.Z, out var results);
             if (!isInGround)
             {
                 return false;
@@ -1608,7 +1608,7 @@ namespace Engine
 
             foreach (var result in results)
             {
-                if (this.IsWalkable(agent, result.Position, out Vector3? nearest))
+                if (IsWalkable(agent, result.Position, out Vector3? nearest))
                 {
                     finalPosition = GetPositionWalkable(agent, prevPosition, newPosition, result.Position, adjustHeight);
 
@@ -1665,7 +1665,7 @@ namespace Engine
         {
             //Find nearest ground position
             Vector3 finalPosition;
-            if (this.FindNearestGroundPosition(position, out PickingResult<Triangle> nearestResult))
+            if (FindNearestGroundPosition(position, out PickingResult<Triangle> nearestResult))
             {
                 //Use nearest ground position found
                 finalPosition = nearestResult.Position;
@@ -1699,7 +1699,7 @@ namespace Engine
         /// <returns>Returns the obstacle Id</returns>
         public virtual int AddObstacle(BoundingCylinder cylinder)
         {
-            return this.NavigationGraph?.AddObstacle(cylinder) ?? -1;
+            return NavigationGraph?.AddObstacle(cylinder) ?? -1;
         }
         /// <summary>
         /// Adds AABB obstacle
@@ -1708,7 +1708,7 @@ namespace Engine
         /// <returns>Returns the obstacle Id</returns>
         public virtual int AddObstacle(BoundingBox bbox)
         {
-            return this.NavigationGraph?.AddObstacle(bbox) ?? -1;
+            return NavigationGraph?.AddObstacle(bbox) ?? -1;
         }
         /// <summary>
         /// Adds OBB obstacle
@@ -1717,7 +1717,7 @@ namespace Engine
         /// <returns>Returns the obstacle Id</returns>
         public virtual int AddObstacle(OrientedBoundingBox obb)
         {
-            return this.NavigationGraph?.AddObstacle(obb) ?? -1;
+            return NavigationGraph?.AddObstacle(obb) ?? -1;
         }
         /// <summary>
         /// Removes obstable by id
@@ -1725,7 +1725,7 @@ namespace Engine
         /// <param name="obstacle">Obstacle id</param>
         public virtual void RemoveObstacle(int obstacle)
         {
-            this.NavigationGraph?.RemoveObstacle(obstacle);
+            NavigationGraph?.RemoveObstacle(obstacle);
         }
 
         /// <summary>
@@ -1734,9 +1734,9 @@ namespace Engine
         /// <param name="position">Position</param>
         public virtual async void UpdateGraph(Vector3 position)
         {
-            await this.PathFinderDescription?.Input.Refresh();
+            await PathFinderDescription?.Input.Refresh();
 
-            this.NavigationGraph?.UpdateAt(position);
+            NavigationGraph?.UpdateAt(position);
         }
         /// <summary>
         /// Updates the graph at positions in the specified list
@@ -1746,9 +1746,9 @@ namespace Engine
         {
             if (positions?.Any() == true)
             {
-                await this.PathFinderDescription?.Input.Refresh();
+                await PathFinderDescription?.Input.Refresh();
 
-                this.NavigationGraph?.UpdateAt(positions);
+                NavigationGraph?.UpdateAt(positions);
             }
         }
 
@@ -1760,7 +1760,7 @@ namespace Engine
         /// <returns>Returns a position over the ground</returns>
         public Vector3 GetRandomPoint(Random rnd, Vector3 offset)
         {
-            var bbox = this.GetGroundBoundingBox();
+            var bbox = GetGroundBoundingBox();
             if (!bbox.HasValue)
             {
                 Vector3 min = Vector3.One * float.MinValue;
@@ -1784,7 +1784,7 @@ namespace Engine
             {
                 Vector3 v = rnd.NextVector3(bbox.Minimum * 0.9f, bbox.Maximum * 0.9f);
 
-                if (this.FindTopGroundPosition(v.X, v.Z, out PickingResult<Triangle> r))
+                if (FindTopGroundPosition(v.X, v.Z, out PickingResult<Triangle> r))
                 {
                     return r.Position + offset;
                 }
@@ -1807,7 +1807,7 @@ namespace Engine
 
                 Vector3 v = bsph.Center + (dist * Vector3.Normalize(dir));
 
-                if (this.FindTopGroundPosition(v.X, v.Z, out PickingResult<Triangle> r))
+                if (FindTopGroundPosition(v.X, v.Z, out PickingResult<Triangle> r))
                 {
                     return r.Position + offset;
                 }

@@ -80,7 +80,7 @@ namespace Engine
         {
             get
             {
-                return this.Emitter.Active || this.TimeToEnd > 0;
+                return Emitter.Active || TimeToEnd > 0;
             }
         }
 
@@ -93,26 +93,26 @@ namespace Engine
         /// <param name="emitter">Particle emitter</param>
         public ParticleSystemCpu(Game game, string name, ParticleSystemDescription description, ParticleEmitter emitter)
         {
-            this.Game = game;
-            this.Name = name;
+            Game = game;
+            Name = name;
 
-            this.parameters = new ParticleSystemParams(description) * emitter.Scale;
+            parameters = new ParticleSystemParams(description) * emitter.Scale;
 
             var imgContent = ImageContent.Texture(description.ContentPath, description.TextureName);
-            this.Texture = game.ResourceManager.RequestResource(imgContent);
-            this.TextureCount = (uint)imgContent.Count;
+            Texture = game.ResourceManager.RequestResource(imgContent);
+            TextureCount = (uint)imgContent.Count;
 
-            this.Emitter = emitter;
-            this.Emitter.UpdateBounds(this.parameters);
-            this.MaxConcurrentParticles = this.Emitter.GetMaximumConcurrentParticles(description.MaxDuration);
+            Emitter = emitter;
+            Emitter.UpdateBounds(parameters);
+            MaxConcurrentParticles = Emitter.GetMaximumConcurrentParticles(description.MaxDuration);
 
-            this.particles = new VertexCpuParticle[this.MaxConcurrentParticles];
+            particles = new VertexCpuParticle[MaxConcurrentParticles];
 
-            this.buffer = new EngineBuffer<VertexCpuParticle>(game.Graphics, description.Name, this.particles, true);
+            buffer = new EngineBuffer<VertexCpuParticle>(game.Graphics, description.Name, particles, true);
             buffer.AddInputLayout(game.Graphics.CreateInputLayout(DrawerPool.EffectDefaultCPUParticles.RotationDraw.GetSignature(), VertexCpuParticle.Input(BufferSlot)));
             buffer.AddInputLayout(game.Graphics.CreateInputLayout(DrawerPool.EffectDefaultCPUParticles.NonRotationDraw.GetSignature(), VertexCpuParticle.Input(BufferSlot)));
 
-            this.TimeToEnd = this.Emitter.Duration + this.parameters.MaxDuration;
+            TimeToEnd = Emitter.Duration + parameters.MaxDuration;
         }
         /// <summary>
         /// Destructor
@@ -149,17 +149,17 @@ namespace Engine
         /// <param name="context">Context</param>
         public void Update(UpdateContext context)
         {
-            this.Emitter.Update(context);
+            Emitter.Update(context);
 
-            if (this.Emitter.Active && this.timeToNextParticle <= 0)
+            if (Emitter.Active && timeToNextParticle <= 0)
             {
-                this.AddParticle();
+                AddParticle();
 
-                this.timeToNextParticle = this.Emitter.EmissionRate;
+                timeToNextParticle = Emitter.EmissionRate;
             }
 
-            this.timeToNextParticle -= this.Emitter.ElapsedTime;
-            this.TimeToEnd -= this.Emitter.ElapsedTime;
+            timeToNextParticle -= Emitter.ElapsedTime;
+            TimeToEnd -= Emitter.ElapsedTime;
         }
         /// <summary>
         /// Draw particles
@@ -167,19 +167,19 @@ namespace Engine
         /// <param name="context">Context</param>
         public void Draw(DrawContext context)
         {
-            if (this.ActiveParticles <= 0)
+            if (ActiveParticles <= 0)
             {
                 return;
             }
 
-            bool isTransparent = this.parameters.BlendMode.HasFlag(BlendModes.Alpha) || this.parameters.BlendMode.HasFlag(BlendModes.Transparent);
+            bool isTransparent = parameters.BlendMode.HasFlag(BlendModes.Alpha) || parameters.BlendMode.HasFlag(BlendModes.Transparent);
             bool draw = context.ValidateDraw(BlendModes.Default, isTransparent);
             if (!draw)
             {
                 return;
             }
 
-            var rot = this.parameters.RotateSpeed != Vector2.Zero;
+            var rot = parameters.RotateSpeed != Vector2.Zero;
 
             var effect = DrawerPool.EffectDefaultCPUParticles;
             var technique = rot ? effect.RotationDraw : effect.NonRotationDraw;
@@ -188,44 +188,44 @@ namespace Engine
             if (!mode.HasFlag(DrawerModes.ShadowMap))
             {
                 Counters.InstancesPerFrame++;
-                Counters.PrimitivesPerFrame += this.ActiveParticles;
+                Counters.PrimitivesPerFrame += ActiveParticles;
             }
 
-            var graphics = this.Game.Graphics;
+            var graphics = Game.Graphics;
 
-            graphics.IASetVertexBuffers(BufferSlot, this.buffer.VertexBufferBinding);
-            graphics.IAInputLayout = rot ? this.buffer.InputLayouts[0] : this.buffer.InputLayouts[1];
+            graphics.IASetVertexBuffers(BufferSlot, buffer.VertexBufferBinding);
+            graphics.IAInputLayout = rot ? buffer.InputLayouts[0] : buffer.InputLayouts[1];
             graphics.IAPrimitiveTopology = PrimitiveTopology.PointList;
 
             graphics.SetDepthStencilRDZEnabled();
-            graphics.SetBlendState(this.parameters.BlendMode);
+            graphics.SetBlendState(parameters.BlendMode);
 
             var state = new EffectParticleState
             {
-                TotalTime = this.Emitter.TotalTime,
-                MaxDuration = this.parameters.MaxDuration,
-                MaxDurationRandomness = this.parameters.MaxDurationRandomness,
-                EndVelocity = this.parameters.EndVelocity,
-                Gravity = this.parameters.Gravity,
-                StartSize = this.parameters.StartSize,
-                EndSize = this.parameters.EndSize,
-                MinColor = this.parameters.MinColor,
-                MaxColor = this.parameters.MaxColor,
-                RotateSpeed = this.parameters.RotateSpeed,
+                TotalTime = Emitter.TotalTime,
+                MaxDuration = parameters.MaxDuration,
+                MaxDurationRandomness = parameters.MaxDurationRandomness,
+                EndVelocity = parameters.EndVelocity,
+                Gravity = parameters.Gravity,
+                StartSize = parameters.StartSize,
+                EndSize = parameters.EndSize,
+                MinColor = parameters.MinColor,
+                MaxColor = parameters.MaxColor,
+                RotateSpeed = parameters.RotateSpeed,
             };
 
             effect.UpdatePerFrame(
                 context.ViewProjection,
                 context.EyePosition,
                 state,
-                this.TextureCount,
-                this.Texture);
+                TextureCount,
+                Texture);
 
             for (int p = 0; p < technique.PassCount; p++)
             {
                 graphics.EffectPassApply(technique, p, 0);
 
-                graphics.Draw(this.ActiveParticles, 0);
+                graphics.Draw(ActiveParticles, 0);
             }
         }
 
@@ -245,7 +245,7 @@ namespace Engine
         {
             parameters = particleParameters;
 
-            this.Emitter?.UpdateBounds(particleParameters);
+            Emitter?.UpdateBounds(particleParameters);
         }
 
         /// <summary>
@@ -253,45 +253,41 @@ namespace Engine
         /// </summary>
         private void AddParticle()
         {
-            int nextFreeParticle = this.currentParticleIndex + 1;
+            int nextFreeParticle = currentParticleIndex + 1;
 
-            if (this.ActiveParticles < nextFreeParticle)
+            if (ActiveParticles < nextFreeParticle)
             {
-                this.ActiveParticles = nextFreeParticle;
+                ActiveParticles = nextFreeParticle;
             }
 
-            if (nextFreeParticle >= this.particles.Length)
+            if (nextFreeParticle >= particles.Length)
             {
                 nextFreeParticle = 0;
             }
 
-            Vector3 velocity = this.Emitter.CalcInitialVelocity(
-                this.parameters,
+            Vector3 velocity = Emitter.CalcInitialVelocity(
+                parameters,
                 Helper.RandomGenerator.NextFloat(0, 1),
                 Helper.RandomGenerator.NextFloat(0, 1),
                 Helper.RandomGenerator.NextFloat(0, 1));
 
             Vector4 randomValues = Helper.RandomGenerator.NextVector4(Vector4.Zero, Vector4.One);
 
-            this.particles[this.currentParticleIndex].Position = this.Emitter.Position;
-            this.particles[this.currentParticleIndex].Velocity = velocity;
-            this.particles[this.currentParticleIndex].RandomValues = randomValues;
-            this.particles[this.currentParticleIndex].MaxAge = this.Emitter.TotalTime;
+            particles[currentParticleIndex].Position = Emitter.Position;
+            particles[currentParticleIndex].Velocity = velocity;
+            particles[currentParticleIndex].RandomValues = randomValues;
+            particles[currentParticleIndex].MaxAge = Emitter.TotalTime;
 
-            Logger.WriteDebug($"{this.Name} - AddParticle WriteDiscardBuffer");
-            this.Game.Graphics.WriteDiscardBuffer(this.buffer.VertexBuffer, this.particles);
+            Logger.WriteTrace($"{Name} - AddParticle WriteDiscardBuffer");
+            Game.Graphics.WriteDiscardBuffer(buffer.VertexBuffer, particles);
 
-            this.currentParticleIndex = nextFreeParticle;
+            currentParticleIndex = nextFreeParticle;
         }
 
         /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("Count: {0}; Total: {1:0.00}/{2:0.00}; ToEnd: {3:0.00};",
-                this.ActiveParticles,
-                this.Emitter.TotalTime,
-                this.Emitter.Duration,
-                this.TimeToEnd);
+            return $"Count: {ActiveParticles}; Total: {Emitter.TotalTime:0.00}/{Emitter.Duration:0.00}; ToEnd: {TimeToEnd:0.00};";
         }
     }
 }

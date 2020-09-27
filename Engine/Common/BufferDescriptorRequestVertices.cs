@@ -70,7 +70,7 @@ namespace Engine.Common
             VertexTypes vType = this.Data.First().VertexType;
             bool instanced = this.InstancingDescriptor != null;
 
-            Logger.WriteDebug($"Add BufferDescriptor {(this.Dynamic ? "dynamic" : "static")} {vType} Instanced {instanced} [{this.Id}]");
+            Logger.WriteTrace($"Add BufferDescriptor {(this.Dynamic ? "dynamic" : "static")} {vType} Instanced {instanced} [{this.Id}]");
 
             int slot = bufferManager.FindVertexBufferDescription(vType, this.Dynamic);
             if (slot < 0)
@@ -102,7 +102,7 @@ namespace Engine.Common
             {
                 var descriptor = bufferManager.GetVertexBufferDescription(this.VertexDescriptor.BufferDescriptionIndex);
 
-                Logger.WriteDebug($"Remove BufferDescriptor {(descriptor.Dynamic ? "dynamic" : "static")} {descriptor.Type} [{this.VertexDescriptor.Id}]");
+                Logger.WriteTrace($"Remove BufferDescriptor {(descriptor.Dynamic ? "dynamic" : "static")} {descriptor.Type} [{this.VertexDescriptor.Id}]");
 
                 descriptor.RemoveDescriptor(this.VertexDescriptor);
                 descriptor.ReallocationNeeded = true;

@@ -7,20 +7,24 @@ namespace Engine
     public enum LogLevel
     {
         /// <summary>
+        /// Trace
+        /// </summary>
+        Trace = 0,
+        /// <summary>
         /// Debug
         /// </summary>
-        Debug = 0,
+        Debug = 1,
         /// <summary>
         /// Information
         /// </summary>
-        Information = 1,
+        Information = 2,
         /// <summary>
         /// Warning
         /// </summary>
-        Warning = 2,
+        Warning = 3,
         /// <summary>
         /// Error
         /// </summary>
-        Error = 3,
+        Error = 4,
     }
 }

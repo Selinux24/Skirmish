@@ -209,18 +209,18 @@ namespace Engine.Common
 
                 if (!Initilialized)
                 {
-                    Logger.WriteDebug($"Creating reserved buffer descriptors");
+                    Logger.WriteTrace($"Creating reserved buffer descriptors");
 
                     CreateReservedBuffers();
 
-                    Logger.WriteDebug($"Reserved buffer descriptors created");
+                    Logger.WriteTrace($"Reserved buffer descriptors created");
 
                     Initilialized = true;
                 }
 
                 if (HasPendingRequests)
                 {
-                    Logger.WriteDebug($"Processing descriptor requests");
+                    Logger.WriteTrace($"Processing descriptor requests");
 
                     //Copy request collection
                     var toAssign = this.requestedDescriptors
@@ -231,9 +231,9 @@ namespace Engine.Common
 
                     DoProcessRequest(progress, ref current, toAssign.Count(), toAssign);
 
-                    Logger.WriteDebug($"Descriptor requests processed");
+                    Logger.WriteTrace($"Descriptor requests processed");
 
-                    Logger.WriteDebug($"Reallocating buffers");
+                    Logger.WriteTrace($"Reallocating buffers");
 
                     var instancingList = this.instancingBufferDescriptors
                         .Where(v => v.Dirty)
@@ -259,12 +259,12 @@ namespace Engine.Common
 
                     ReallocateIndexData(progress, ref current, total, indexList);
 
-                    Logger.WriteDebug($"Buffers reallocated");
+                    Logger.WriteTrace($"Buffers reallocated");
                 }
             }
             catch (Exception ex)
             {
-                Logger.WriteError($"Error creating buffers: {ex.Message}");
+                Logger.WriteError($"Error creating buffers: {ex.Message}", ex);
             }
             finally
             {
@@ -299,7 +299,7 @@ namespace Engine.Common
                 descriptor.Allocated = true;
                 descriptor.ReallocationNeeded = false;
 
-                Logger.WriteDebug($"Created {name} and binding. Size {descriptor.Data.Count()}");
+                Logger.WriteTrace($"Created {name} and binding. Size {descriptor.Data.Count()}");
             }
         }
         /// <summary>
@@ -342,7 +342,7 @@ namespace Engine.Common
                     //Dispose old buffer
                     oldBuffer?.Dispose();
 
-                    Logger.WriteDebug($"Reallocated {name}. Size {descriptor.Instances}");
+                    Logger.WriteTrace($"Reallocated {name}. Size {descriptor.Instances}");
                 }
                 else
                 {
@@ -361,7 +361,7 @@ namespace Engine.Common
                     descriptor.BufferIndex = bufferIndex;
                     descriptor.BufferBindingIndex = bindingIndex;
 
-                    Logger.WriteDebug($"Created {name} and binding. Size {descriptor.Instances}");
+                    Logger.WriteTrace($"Created {name} and binding. Size {descriptor.Instances}");
                 }
 
                 //Updates the allocated buffer size
@@ -396,7 +396,7 @@ namespace Engine.Common
                     //Dispose old buffer
                     oldBuffer?.Dispose();
 
-                    Logger.WriteDebug($"Reallocated {name} and binding. Size {descriptor.Data.Count()}");
+                    Logger.WriteTrace($"Reallocated {name} and binding. Size {descriptor.Data.Count()}");
                 }
                 else
                 {
@@ -416,7 +416,7 @@ namespace Engine.Common
                     descriptor.BufferIndex = bufferIndex;
                     descriptor.BufferBindingIndex = bindingIndex;
 
-                    Logger.WriteDebug($"Created {name} and binding. Size {descriptor.Data.Count()}");
+                    Logger.WriteTrace($"Created {name} and binding. Size {descriptor.Data.Count()}");
                 }
 
                 descriptor.ClearInstancingInputs();
@@ -455,7 +455,7 @@ namespace Engine.Common
                     //Dispose buffer
                     oldBuffer?.Dispose();
 
-                    Logger.WriteDebug($"Reallocated {name}. Size {descriptor.Data.Count()}");
+                    Logger.WriteTrace($"Reallocated {name}. Size {descriptor.Data.Count()}");
                 }
                 else
                 {
@@ -469,7 +469,7 @@ namespace Engine.Common
 
                     descriptor.BufferIndex = bufferIndex;
 
-                    Logger.WriteDebug($"Created {name}. Size {descriptor.Data.Count()}");
+                    Logger.WriteTrace($"Created {name}. Size {descriptor.Data.Count()}");
                 }
 
                 //Updates the allocated buffer size

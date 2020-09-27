@@ -135,7 +135,7 @@ namespace Engine.Audio
                 return false;
             }
 
-            Logger.WriteDebug($"Sample: {currentSample++}");
+            Logger.WriteTrace($"Sample: {currentSample++}");
 
             var bufferPointer = sampleIterator.Current;
 

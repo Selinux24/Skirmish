@@ -5,7 +5,6 @@ using Engine.UI;
 using SharpDX;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace SceneTest.SceneMaterials
@@ -261,20 +260,17 @@ namespace SceneTest.SceneMaterials
                 return;
             }
 
-            bool shift = Game.Input.KeyPressed(Keys.LShiftKey);
-            bool rightBtn = Game.Input.RightMouseButtonPressed;
-
-            UpdateCamera(gameTime, shift, rightBtn);
+            UpdateCamera(gameTime);
 
             base.Update(gameTime);
 
             runtime.Text = Game.RuntimeText;
         }
 
-        private void UpdateCamera(GameTime gameTime, bool shift, bool rightBtn)
+        private void UpdateCamera(GameTime gameTime)
         {
 #if DEBUG
-            if (rightBtn)
+            if (Game.Input.RightMouseButtonPressed)
             {
                 Camera.RotateMouse(
                     gameTime,
@@ -290,22 +286,22 @@ namespace SceneTest.SceneMaterials
 
             if (Game.Input.KeyPressed(Keys.A))
             {
-                Camera.MoveLeft(gameTime, shift);
+                Camera.MoveLeft(gameTime, Game.Input.ShiftPressed);
             }
 
             if (Game.Input.KeyPressed(Keys.D))
             {
-                Camera.MoveRight(gameTime, shift);
+                Camera.MoveRight(gameTime, Game.Input.ShiftPressed);
             }
 
             if (Game.Input.KeyPressed(Keys.W))
             {
-                Camera.MoveForward(gameTime, shift);
+                Camera.MoveForward(gameTime, Game.Input.ShiftPressed);
             }
 
             if (Game.Input.KeyPressed(Keys.S))
             {
-                Camera.MoveBackward(gameTime, shift);
+                Camera.MoveBackward(gameTime, Game.Input.ShiftPressed);
             }
         }
     }

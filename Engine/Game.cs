@@ -73,7 +73,7 @@ namespace Engine
         {
             get
             {
-                return this.scenes.Count;
+                return scenes.Count;
             }
         }
         /// <summary>
@@ -83,7 +83,7 @@ namespace Engine
         {
             get
             {
-                return this.scenes.FindAll(s => s.Active).Count;
+                return scenes.FindAll(s => s.Active).Count;
             }
         }
         /// <summary>
@@ -93,9 +93,9 @@ namespace Engine
         {
             get
             {
-                if (this.Input != null)
+                if (Input != null)
                 {
-                    return this.Input.VisibleMouse;
+                    return Input.VisibleMouse;
                 }
                 else
                 {
@@ -104,9 +104,9 @@ namespace Engine
             }
             set
             {
-                if (this.Input != null)
+                if (Input != null)
                 {
-                    this.Input.VisibleMouse = value;
+                    Input.VisibleMouse = value;
                 }
             }
         }
@@ -117,9 +117,9 @@ namespace Engine
         {
             get
             {
-                if (this.Input != null)
+                if (Input != null)
                 {
-                    return this.Input.LockMouse;
+                    return Input.LockMouse;
                 }
                 else
                 {
@@ -128,9 +128,9 @@ namespace Engine
             }
             set
             {
-                if (this.Input != null)
+                if (Input != null)
                 {
-                    this.Input.LockMouse = value;
+                    Input.LockMouse = value;
                 }
             }
         }
@@ -196,17 +196,17 @@ namespace Engine
         /// <param name="multiSampling">Enable multi-sampling</param>
         public Game(string name, bool fullScreen = true, int screenWidth = 0, int screenHeight = 0, bool vsyncEnabled = true, int refreshRate = 0, int multiSampling = 0)
         {
-            this.Name = name;
+            Name = name;
 
-            this.GameTime = new GameTime();
+            GameTime = new GameTime();
 
-            this.Progress = new Progress<float>(ReportProgress);
+            Progress = new Progress<float>(ReportProgress);
 
-            this.BufferManager = new BufferManager(this);
+            BufferManager = new BufferManager(this);
 
-            this.ResourceManager = new GameResourceManager(this);
+            ResourceManager = new GameResourceManager(this);
 
-            this.CPUStats = new PerformanceCounter("Processor", "% Processor Time", "_Total");
+            CPUStats = new PerformanceCounter("Processor", "% Processor Time", "_Total");
 
             #region Form
 
@@ -218,23 +218,23 @@ namespace Engine
                 screenHeight = mode.DesktopCoordinates.Bottom - mode.DesktopCoordinates.Top;
             }
 
-            this.Form = new EngineForm(name, screenWidth, screenHeight, fullScreen);
+            Form = new EngineForm(name, screenWidth, screenHeight, fullScreen);
 
-            this.Form.UserResized += (sender, eventArgs) =>
+            Form.UserResized += (sender, eventArgs) =>
             {
-                if (this.Graphics != null)
+                if (Graphics != null)
                 {
-                    this.Graphics.PrepareDevice(this.Form.RenderWidth, this.Form.RenderHeight, true);
+                    Graphics.PrepareDevice(Form.RenderWidth, Form.RenderHeight, true);
                 }
             };
 
             #endregion
 
-            this.Input = new Input(this.Form);
+            Input = new Input(Form);
 
-            this.Graphics = new Graphics(this.Form, vsyncEnabled, refreshRate, multiSampling);
+            Graphics = new Graphics(Form, vsyncEnabled, refreshRate, multiSampling);
 
-            DrawerPool.Initialize(this.Graphics);
+            DrawerPool.Initialize(Graphics);
         }
         /// <summary>
         /// Destructor
@@ -261,17 +261,17 @@ namespace Engine
             if (disposing)
             {
                 //Remove scene reference
-                this.nextScene = null;
+                nextScene = null;
 
-                if (this.scenes != null)
+                if (scenes != null)
                 {
-                    for (int i = 0; i < this.scenes.Count; i++)
+                    for (int i = 0; i < scenes.Count; i++)
                     {
-                        this.scenes[i]?.Dispose();
+                        scenes[i]?.Dispose();
                     }
 
-                    this.scenes.Clear();
-                    this.scenes = null;
+                    scenes.Clear();
+                    scenes = null;
                 }
 
                 DrawerPool.DisposeResources();
@@ -300,7 +300,11 @@ namespace Engine
         /// </summary>
         public void Run()
         {
-            RenderLoop.Run(this.Form, this.Frame);
+            Logger.WriteInformation("**************************************************************************");
+            Logger.WriteInformation("** Game started                                                         **");
+            Logger.WriteInformation("**************************************************************************");
+
+            RenderLoop.Run(Form, Frame);
         }
 
         /// <summary>
@@ -312,16 +316,16 @@ namespace Engine
         {
             try
             {
-                Logger.WriteDebug("Game: Setting scene with the default constructor");
+                Logger.WriteInformation("Game: Setting scene with the default constructor");
 
                 T scene = (T)Activator.CreateInstance(typeof(T), new object[] { this });
                 scene.SetRenderMode(sceneMode);
                 scene.Order = 1;
-                this.nextScene = scene;
+                nextScene = scene;
             }
             catch (Exception ex)
             {
-                Logger.WriteError($"Game: Error setting scene: {ex.Message}");
+                Logger.WriteError($"Game: Error setting scene: {ex.Message}", ex);
             }
         }
         /// <summary>
@@ -331,21 +335,21 @@ namespace Engine
         private void ChangeScene(Scene sceneToLoad)
         {
             //Deactivate scenes
-            this.scenes.ForEach(s => s.Active = false);
+            scenes.ForEach(s => s.Active = false);
 
             //Copy collection for disposing
-            List<Scene> toDispose = new List<Scene>(this.scenes);
+            List<Scene> toDispose = new List<Scene>(scenes);
 
             //Clear scene collection
-            this.scenes.Clear();
+            scenes.Clear();
 
             toDispose.ForEach(s => s.Dispose());
             toDispose.Clear();
 
-            Task.WhenAll(this.StartScene(sceneToLoad));
+            Task.WhenAll(StartScene(sceneToLoad));
 
-            this.scenes.Add(sceneToLoad);
-            this.scenes.Sort(
+            scenes.Add(sceneToLoad);
+            scenes.Sort(
                 delegate (Scene p1, Scene p2)
                 {
                     return p2.Order.CompareTo(p1.Order);
@@ -357,26 +361,26 @@ namespace Engine
         /// <param name="scene">New scene</param>
         private async Task StartScene(Scene scene)
         {
-            Logger.WriteDebug("Game: Begin StartScene");
+            Logger.WriteInformation("Game: Begin StartScene");
 
             try
             {
                 scene.Active = false;
 
-                Logger.WriteDebug("Scene: Initialize start");
+                Logger.WriteInformation("Scene: Initialize start");
                 await scene.Initialize();
-                Logger.WriteDebug("Scene: Initialize end");
+                Logger.WriteInformation("Scene: Initialize end");
 
                 scene.Active = true;
             }
             catch (Exception ex)
             {
-                Logger.WriteError($"Scene: Initialize error: {ex}");
+                Logger.WriteError($"Scene: Initialize error: {ex.Message}", ex);
 
                 throw;
             }
 
-            Logger.WriteDebug("Game: End StartScene");
+            Logger.WriteInformation("Game: End StartScene");
         }
 
         /// <summary>
@@ -621,19 +625,19 @@ namespace Engine
             {
                 ResourcesLoading?.Invoke(this, new GameLoadResourcesEventArgs() { Scene = scene });
 
-                Logger.WriteDebug("BufferManager: Recreating buffers");
-                this.BufferManager.CreateBuffers(Progress);
-                Logger.WriteDebug("BufferManager: Buffers recreated");
+                Logger.WriteInformation("BufferManager: Recreating buffers");
+                BufferManager.CreateBuffers(Progress);
+                Logger.WriteInformation("BufferManager: Buffers recreated");
 
-                Logger.WriteDebug("ResourceManager: Creating new resources");
-                this.ResourceManager.CreateResources(Progress);
-                Logger.WriteDebug("ResourceManager: New resources created");
+                Logger.WriteInformation("ResourceManager: Creating new resources");
+                ResourceManager.CreateResources(Progress);
+                Logger.WriteInformation("ResourceManager: New resources created");
 
                 ResourcesLoaded?.Invoke(this, new GameLoadResourcesEventArgs() { Scene = scene });
             }
             catch (Exception ex)
             {
-                Logger.WriteError($"ResourceManager error: {ex}");
+                Logger.WriteError($"ResourceManager error: {ex.Message}", ex);
             }
         }
 
@@ -642,7 +646,7 @@ namespace Engine
         /// </summary>
         public void Exit()
         {
-            this.exiting = true;
+            exiting = true;
         }
 
         /// <summary>
@@ -650,17 +654,18 @@ namespace Engine
         /// </summary>
         private void Frame()
         {
-            if (this.exiting)
+            if (exiting)
             {
+                Logger.WriteInformation("Game exiting");
                 return;
             }
 
-            this.GameTime.Update();
+            GameTime.Update();
 
-            if (this.nextScene != null)
+            if (nextScene != null)
             {
-                this.ChangeScene(this.nextScene);
-                this.nextScene = null;
+                ChangeScene(nextScene);
+                nextScene = null;
 
                 return;
             }
@@ -687,15 +692,15 @@ namespace Engine
             gSW.Stop();
             GameStatus.Add("TOTAL", gSW);
 
-            if (this.ResourceManager.HasRequests)
+            if (ResourceManager.HasRequests)
             {
-                Logger.WriteDebug("ResourceManager: Creating new resources");
-                this.ResourceManager.CreateResources(null);
-                Logger.WriteDebug("ResourceManager: New resources created");
+                Logger.WriteInformation("ResourceManager: Creating new resources");
+                ResourceManager.CreateResources(null);
+                Logger.WriteInformation("ResourceManager: New resources created");
             }
 
             Counters.FrameCount++;
-            Counters.FrameTime += this.GameTime.ElapsedSeconds;
+            Counters.FrameTime += GameTime.ElapsedSeconds;
 
             if (Counters.FrameTime >= 1.0f)
             {
@@ -711,10 +716,14 @@ namespace Engine
 
             Counters.ClearFrame();
 
-            if (this.exiting)
+            if (exiting)
             {
                 //Exit form
-                this.Form.Close();
+                Form.Close();
+
+                Logger.WriteInformation("**************************************************************************");
+                Logger.WriteInformation("** Game closed                                                          **");
+                Logger.WriteInformation("**************************************************************************");
             }
         }
         /// <summary>
@@ -726,13 +735,13 @@ namespace Engine
             {
                 Stopwatch pSW = new Stopwatch();
                 pSW.Start();
-                this.Input.Update(this.GameTime);
+                Input.Update(GameTime);
                 pSW.Stop();
                 GameStatus.Add("Input", pSW);
             }
             catch (Exception ex)
             {
-                Logger.WriteError($"Frame: Input Update error: {ex}");
+                Logger.WriteError($"Frame: Input Update error: {ex.Message}", ex);
             }
         }
         /// <summary>
@@ -744,13 +753,13 @@ namespace Engine
             {
                 Stopwatch pSW = new Stopwatch();
                 pSW.Start();
-                this.Graphics.Begin();
+                Graphics.Begin();
                 pSW.Stop();
                 GameStatus.Add("Begin", pSW);
             }
             catch (Exception ex)
             {
-                Logger.WriteError($"Frame: Graphics Begin error: {ex}");
+                Logger.WriteError($"Frame: Graphics Begin error: {ex.Message}", ex);
 
                 throw;
             }
@@ -765,13 +774,13 @@ namespace Engine
             {
                 Stopwatch uSW = new Stopwatch();
                 uSW.Start();
-                scene.Update(this.GameTime);
+                scene.Update(GameTime);
                 uSW.Stop();
                 GameStatus.Add($"Scene {scene}.Update", uSW);
             }
             catch (Exception ex)
             {
-                Logger.WriteError($"Scene: Update error: {ex}");
+                Logger.WriteError($"Scene: Update error: {ex.Message}", ex);
             }
         }
         /// <summary>
@@ -780,7 +789,7 @@ namespace Engine
         /// <param name="scene">Scene</param>
         private void FrameSceneDraw(Scene scene)
         {
-            if (!this.BufferManager.SetVertexBuffers())
+            if (!BufferManager.SetVertexBuffers())
             {
                 return;
             }
@@ -789,13 +798,13 @@ namespace Engine
             {
                 Stopwatch dSW = new Stopwatch();
                 dSW.Start();
-                scene.Draw(this.GameTime);
+                scene.Draw(GameTime);
                 dSW.Stop();
                 GameStatus.Add($"Scene {scene}.Draw", dSW);
             }
             catch (Exception ex)
             {
-                Logger.WriteError($"Scene: Draw error: {ex}");
+                Logger.WriteError($"Scene: Draw error: {ex.Message}", ex);
             }
         }
         /// <summary>
@@ -807,13 +816,13 @@ namespace Engine
             {
                 Stopwatch pSW = new Stopwatch();
                 pSW.Start();
-                this.Graphics.End();
+                Graphics.End();
                 pSW.Stop();
                 GameStatus.Add("End", pSW);
             }
             catch (Exception ex)
             {
-                Logger.WriteError($"Frame: Graphics End error: {ex}");
+                Logger.WriteError($"Frame: Graphics End error: {ex.Message}", ex);
 
                 throw;
             }
@@ -825,28 +834,28 @@ namespace Engine
         {
             try
             {
-                this.RuntimeText = string.Format(
+                RuntimeText = string.Format(
                     "{0} - {1} - FPS: {2:000} Draw C/D: {3:00}:{4:00} Inst: {5:00} U: {6:00} S: {7}:{8}:{9} F. Time: {10:0.0000} (secs) T. Time: {11:0000} (secs) CPU: {12:0.00}%",
-                    this.Graphics.DeviceDescription,
-                    this.Name,
+                    Graphics.DeviceDescription,
+                    Name,
                     Counters.FrameCount,
                     Counters.DrawCallsPerFrame,
                     Counters.InstancesPerFrame,
                     Counters.MaxInstancesPerFrame,
                     Counters.UpdatesPerFrame,
                     Counters.RasterizerStateChanges, Counters.BlendStateChanges, Counters.DepthStencilStateChanges,
-                    this.GameTime.ElapsedSeconds,
-                    this.GameTime.TotalSeconds,
-                    this.CPUStats.NextValue());
+                    GameTime.ElapsedSeconds,
+                    GameTime.TotalSeconds,
+                    CPUStats.NextValue());
 #if DEBUG
-                this.Form.Text = this.RuntimeText;
+                Form.Text = RuntimeText;
 #endif
                 Counters.FrameCount = 0;
                 Counters.FrameTime = 0f;
             }
             catch (Exception ex)
             {
-                Logger.WriteError($"Frame: Refresh Counters error: {ex}");
+                Logger.WriteError($"Frame: Refresh Counters error: {ex.Message}", ex);
             }
         }
         /// <summary>
@@ -867,7 +876,7 @@ namespace Engine
             }
             catch (Exception ex)
             {
-                Logger.WriteError($"Frame: Collecto Game Status error: {ex}");
+                Logger.WriteError($"Frame: Collecto Game Status error: {ex.Message}", ex);
             }
         }
     }

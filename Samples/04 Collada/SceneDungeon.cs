@@ -30,11 +30,11 @@ namespace Collada
             await base.Initialize();
 
 #if DEBUG
-            this.Game.VisibleMouse = false;
-            this.Game.LockMouse = false;
+            Game.VisibleMouse = false;
+            Game.LockMouse = false;
 #else
-            this.Game.VisibleMouse = false;
-            this.Game.LockMouse = true;
+            Game.VisibleMouse = false;
+            Game.LockMouse = true;
 #endif
             InitializeUI();
 
@@ -48,9 +48,9 @@ namespace Collada
         {
             base.Update(gameTime);
 
-            if (this.Game.Input.KeyJustReleased(Keys.Escape))
+            if (Game.Input.KeyJustReleased(Keys.Escape))
             {
-                this.Game.SetScene<SceneStart>();
+                Game.SetScene<SceneStart>();
             }
 
             if (!userInterfaceInitialized)
@@ -58,19 +58,19 @@ namespace Collada
                 return;
             }
 
-            this.fps.Text = this.Game.RuntimeText;
+            fps.Text = Game.RuntimeText;
 
             if (!gameReady)
             {
                 return;
             }
 
-            this.UpdateCamera();
+            UpdateCamera();
         }
 
         private void InitializeUI()
         {
-            _ = this.LoadResourcesAsync(
+            _ = LoadResourcesAsync(
                 new[] { InitializeUIComponents() },
                 (res) =>
                 {
@@ -81,14 +81,14 @@ namespace Collada
 
                     userInterfaceInitialized = true;
 
-                    this.InitializeEnvironment();
+                    InitializeEnvironment();
 
-                    this.LoadGameAssets();
+                    LoadGameAssets();
                 });
         }
         private void LoadGameAssets()
         {
-            _ = this.LoadResourcesAsync(
+            _ = LoadResourcesAsync(
                 new[] { InitializeDungeon() },
                 (res) =>
                 {
@@ -97,9 +97,9 @@ namespace Collada
                         res.ThrowExceptions();
                     }
 
-                    this.Lights.AddRange(this.dungeon.Lights);
+                    Lights.AddRange(dungeon.Lights);
 
-                    this.agent = new Player()
+                    agent = new Player()
                     {
                         Name = "Player",
                         Height = 0.5f,
@@ -107,9 +107,9 @@ namespace Collada
                         MaxClimb = 0.225f,
                     };
 
-                    this.InitializeCamera();
+                    InitializeCamera();
 
-                    this.SetGround(this.dungeon, true);
+                    SetGround(dungeon, true);
 
                     var settings = new BuildSettings()
                     {
@@ -118,9 +118,9 @@ namespace Collada
 
                     var input = new InputGeometry(GetTrianglesForNavigationGraph);
 
-                    this.PathFinderDescription = new PathFinderDescription(settings, input);
+                    PathFinderDescription = new PathFinderDescription(settings, input);
 
-                    Task.WhenAll(this.UpdateNavigationGraph());
+                    Task.WhenAll(UpdateNavigationGraph());
                 });
         }
 
@@ -130,9 +130,9 @@ namespace Collada
             title.Text = "Collada Dungeon Scene";
             title.SetPosition(Vector2.Zero);
 
-            this.fps = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12, Color.Yellow) }, layerHUD);
-            this.fps.Text = null;
-            this.fps.SetPosition(new Vector2(0, 24));
+            fps = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12, Color.Yellow) }, layerHUD);
+            fps.Text = null;
+            fps.SetPosition(new Vector2(0, 24));
 
             var picks = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12, Color.Yellow) }, layerHUD);
             picks.Text = null;
@@ -140,7 +140,7 @@ namespace Collada
 
             var spDesc = new SpriteDescription()
             {
-                Width = this.Game.Form.RenderWidth,
+                Width = Game.Form.RenderWidth,
                 Height = picks.Top + picks.Height + 3,
                 BaseColor = new Color4(0, 0, 0, 0.75f),
             };
@@ -149,76 +149,74 @@ namespace Collada
         }
         private async Task InitializeDungeon()
         {
-            this.dungeon = await this.AddComponentScenery(GroundDescription.FromFile("Resources/SceneDungeon", "Dungeon.xml", 2));
+            dungeon = await this.AddComponentScenery(GroundDescription.FromFile("Resources/SceneDungeon", "Dungeon.xml", 2));
         }
 
         private void InitializeCamera()
         {
-            this.Camera.NearPlaneDistance = 0.1f;
-            this.Camera.FarPlaneDistance = 500;
-            this.Camera.MovementDelta = this.agent.Velocity;
-            this.Camera.SlowMovementDelta = this.agent.VelocitySlow;
-            this.Camera.Mode = CameraModes.Free;
-            this.Camera.Position = new Vector3(0, this.agent.Height, 0);
-            this.Camera.Interest = new Vector3(0, this.agent.Height, 1);
+            Camera.NearPlaneDistance = 0.1f;
+            Camera.FarPlaneDistance = 500;
+            Camera.MovementDelta = agent.Velocity;
+            Camera.SlowMovementDelta = agent.VelocitySlow;
+            Camera.Mode = CameraModes.Free;
+            Camera.Position = new Vector3(0, agent.Height, 0);
+            Camera.Interest = new Vector3(0, agent.Height, 1);
         }
         private void InitializeEnvironment()
         {
             GameEnvironment.Background = Color.Black;
 
-            this.Lights.KeyLight.Enabled = false;
-            this.Lights.BackLight.Enabled = false;
-            this.Lights.FillLight.Enabled = true;
+            Lights.KeyLight.Enabled = false;
+            Lights.BackLight.Enabled = false;
+            Lights.FillLight.Enabled = true;
         }
 
         private void UpdateCamera()
         {
-            bool slow = this.Game.Input.KeyPressed(Keys.LShiftKey);
+            var prevPos = Camera.Position;
 
-            var prevPos = this.Camera.Position;
-
-            if (this.Game.Input.KeyPressed(Keys.A))
+            if (Game.Input.KeyPressed(Keys.A))
             {
-                this.Camera.MoveLeft(this.Game.GameTime, slow);
+                Camera.MoveLeft(Game.GameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.D))
+            if (Game.Input.KeyPressed(Keys.D))
             {
-                this.Camera.MoveRight(this.Game.GameTime, slow);
+                Camera.MoveRight(Game.GameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.W))
+            if (Game.Input.KeyPressed(Keys.W))
             {
-                this.Camera.MoveForward(this.Game.GameTime, slow);
+                Camera.MoveForward(Game.GameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.S))
+            if (Game.Input.KeyPressed(Keys.S))
             {
-                this.Camera.MoveBackward(this.Game.GameTime, slow);
+                Camera.MoveBackward(Game.GameTime, Game.Input.ShiftPressed);
             }
 
 #if DEBUG
-            if (this.Game.Input.RightMouseButtonPressed)
+            if (Game.Input.RightMouseButtonPressed)
             {
-                this.Camera.RotateMouse(
-                    this.Game.GameTime,
-                    this.Game.Input.MouseXDelta,
-                    this.Game.Input.MouseYDelta);
+                Camera.RotateMouse(
+                    Game.GameTime,
+                    Game.Input.MouseXDelta,
+                    Game.Input.MouseYDelta);
             }
 #else
-            this.Camera.RotateMouse(
-                this.Game.GameTime,
-                this.Game.Input.MouseXDelta,
-                this.Game.Input.MouseYDelta);
+            Camera.RotateMouse(
+                Game.GameTime,
+                Game.Input.MouseXDelta,
+                Game.Input.MouseYDelta);
 #endif
 
-            if (this.Walk(this.agent, prevPos, this.Camera.Position, true, out Vector3 walkerPos))
+            if (Walk(agent, prevPos, Camera.Position, true, out Vector3 walkerPos))
             {
-                this.Camera.Goto(walkerPos);
+                Camera.Goto(walkerPos);
             }
             else
             {
-                this.Camera.Goto(prevPos);
+                Camera.Goto(prevPos);
             }
         }
     }

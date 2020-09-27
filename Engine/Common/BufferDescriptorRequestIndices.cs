@@ -63,7 +63,7 @@ namespace Engine.Common
 
             BufferManagerIndices descriptor;
 
-            Logger.WriteDebug($"Add BufferDescriptor {(this.Dynamic ? "dynamic" : "static")} {typeof(uint)} [{this.Id}]");
+            Logger.WriteTrace($"Add BufferDescriptor {(this.Dynamic ? "dynamic" : "static")} {typeof(uint)} [{this.Id}]");
 
             int slot = bufferManager.FindIndexBufferDescription(this.Dynamic);
             if (slot < 0)
@@ -89,7 +89,7 @@ namespace Engine.Common
             {
                 var descriptor = bufferManager.GetIndexBufferDescription(this.Descriptor.BufferDescriptionIndex);
 
-                Logger.WriteDebug($"Remove BufferDescriptor {(descriptor.Dynamic ? "dynamic" : "static")} {typeof(uint)} [{this.Descriptor.Id}]");
+                Logger.WriteTrace($"Remove BufferDescriptor {(descriptor.Dynamic ? "dynamic" : "static")} {typeof(uint)} [{this.Descriptor.Id}]");
 
                 descriptor.RemoveDescriptor(this.Descriptor);
                 descriptor.ReallocationNeeded = true;

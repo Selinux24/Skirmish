@@ -47,9 +47,9 @@ namespace Instancing
                         res.ThrowExceptions();
                     }
 
-                    this.Camera.Goto(new Vector3(-45, 17, -30));
-                    this.Camera.LookTo(Vector3.Zero);
-                    this.Camera.FarPlaneDistance = 250;
+                    Camera.Goto(new Vector3(-45, 17, -30));
+                    Camera.LookTo(Vector3.Zero);
+                    Camera.FarPlaneDistance = 250;
 
                     gameReady = true;
                 });
@@ -68,8 +68,8 @@ namespace Instancing
 
             var spDesc = new SpriteDescription()
             {
-                Width = this.Game.Form.RenderWidth,
-                Height = this.runtimeText.Top + this.runtimeText.Height + 3,
+                Width = Game.Form.RenderWidth,
+                Height = runtimeText.Top + runtimeText.Height + 3,
                 BaseColor = new Color4(0, 0, 0, 0.75f),
             };
 
@@ -197,8 +197,8 @@ namespace Instancing
                     ModelContentFilename = @"soldier_anim2.xml",
                 }
             };
-            this.troops = await this.AddComponentModelInstanced(tDesc, SceneObjectUsages.Agent, layerObjects);
-            this.troops.MaximumCount = -1;
+            troops = await this.AddComponentModelInstanced(tDesc, SceneObjectUsages.Agent, layerObjects);
+            troops.MaximumCount = -1;
 
             Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
 
@@ -221,17 +221,17 @@ namespace Instancing
 
             int x = 0;
             int y = 0;
-            for (int i = 0; i < this.troops.InstanceCount; i++)
+            for (int i = 0; i < troops.InstanceCount; i++)
             {
                 var iPos = new Vector3(x * l * 2, 0, y * l * 2) - delta + rnd.NextVector3(vMin, vMax);
 
-                this.troops[i].Manipulator.SetPosition(iPos, true);
-                this.troops[i].Manipulator.SetRotation(iPos.Z, 0, 0, true);
-                this.troops[i].TextureIndex = (uint)(i % 3);
+                troops[i].Manipulator.SetPosition(iPos, true);
+                troops[i].Manipulator.SetRotation(iPos.Z, 0, 0, true);
+                troops[i].TextureIndex = (uint)(i % 3);
 
-                this.troops[i].AnimationController.TimeDelta = 0.4f + (0.1f * (i % 2));
-                this.troops[i].AnimationController.AddPath(animations[anim[i % anim.Length]]);
-                this.troops[i].AnimationController.Start(rnd.NextFloat(0f, 8f));
+                troops[i].AnimationController.TimeDelta = 0.4f + (0.1f * (i % 2));
+                troops[i].AnimationController.AddPath(animations[anim[i % anim.Length]]);
+                troops[i].AnimationController.Start(rnd.NextFloat(0f, 8f));
 
                 x++;
                 if (x >= side)
@@ -287,14 +287,14 @@ namespace Instancing
 
         public override void Update(GameTime gameTime)
         {
-            if (this.Game.Input.KeyJustReleased(Keys.Escape))
+            if (Game.Input.KeyJustReleased(Keys.Escape))
             {
-                this.Game.Exit();
+                Game.Exit();
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.R))
+            if (Game.Input.KeyJustReleased(Keys.R))
             {
-                this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
+                SetRenderMode(GetRenderMode() == SceneModes.ForwardLigthning ?
                     SceneModes.DeferredLightning :
                     SceneModes.ForwardLigthning);
             }
@@ -304,58 +304,56 @@ namespace Instancing
                 return;
             }
 
-            bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
-
 #if DEBUG
-            if (this.Game.Input.RightMouseButtonPressed)
+            if (Game.Input.RightMouseButtonPressed)
             {
-                this.Camera.RotateMouse(
-                    this.Game.GameTime,
-                    this.Game.Input.MouseXDelta,
-                    this.Game.Input.MouseYDelta);
+                Camera.RotateMouse(
+                    Game.GameTime,
+                    Game.Input.MouseXDelta,
+                    Game.Input.MouseYDelta);
             }
 #else
-            this.Camera.RotateMouse(
-                this.Game.GameTime,
-                this.Game.Input.MouseXDelta,
-                this.Game.Input.MouseYDelta);
+            Camera.RotateMouse(
+                Game.GameTime,
+                Game.Input.MouseXDelta,
+                Game.Input.MouseYDelta);
 #endif
 
-            if (this.Game.Input.KeyPressed(Keys.A))
+            if (Game.Input.KeyPressed(Keys.A))
             {
-                this.Camera.MoveLeft(gameTime, shift);
+                Camera.MoveLeft(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.D))
+            if (Game.Input.KeyPressed(Keys.D))
             {
-                this.Camera.MoveRight(gameTime, shift);
+                Camera.MoveRight(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.W))
+            if (Game.Input.KeyPressed(Keys.W))
             {
-                this.Camera.MoveForward(gameTime, shift);
+                Camera.MoveForward(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.S))
+            if (Game.Input.KeyPressed(Keys.S))
             {
-                this.Camera.MoveBackward(gameTime, shift);
+                Camera.MoveBackward(gameTime, Game.Input.ShiftPressed);
             }
 
-            int increment = shift ? 10 : 1;
+            int increment = Game.Input.ShiftPressed ? 10 : 1;
 
-            if (this.Game.Input.KeyJustReleased(Keys.Left))
+            if (Game.Input.KeyJustReleased(Keys.Left))
             {
-                this.troops.MaximumCount = Math.Max(-1, this.troops.MaximumCount - increment);
+                troops.MaximumCount = Math.Max(-1, troops.MaximumCount - increment);
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.Right))
+            if (Game.Input.KeyJustReleased(Keys.Right))
             {
-                this.troops.MaximumCount = Math.Min(this.troops.InstanceCount, this.troops.MaximumCount + increment);
+                troops.MaximumCount = Math.Min(troops.InstanceCount, troops.MaximumCount + increment);
             }
 
             base.Update(gameTime);
 
-            this.runtimeText.Text = this.Game.RuntimeText;
+            runtimeText.Text = Game.RuntimeText;
         }
     }
 }

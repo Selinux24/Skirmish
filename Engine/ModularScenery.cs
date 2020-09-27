@@ -223,7 +223,7 @@ namespace Engine
                     }
                     catch (Exception ex)
                     {
-                        Logger.WriteError($"{nameof(ModularScenery)}. Error loading particle system {item.Name}: {ex}");
+                        Logger.WriteError($"{nameof(ModularScenery)}. Error loading particle system {item.Name}: {ex.Message}", ex);
                     }
                 }
             }
@@ -296,7 +296,7 @@ namespace Engine
             }
             catch (Exception ex)
             {
-                Logger.WriteError($"{nameof(ModularScenery)}. Error loading asset {modelName}: {ex}");
+                Logger.WriteError($"{nameof(ModularScenery)}. Error loading asset {modelName}: {ex.Message}", ex);
             }
 
             return model;
@@ -393,7 +393,7 @@ namespace Engine
             }
             catch (Exception ex)
             {
-                Logger.WriteError($"{nameof(ModularScenery)}. Error loading object {modelName}: {ex}");
+                Logger.WriteError($"{nameof(ModularScenery)}. Error loading object {modelName}: {ex.Message}", ex);
             }
 
             return model;

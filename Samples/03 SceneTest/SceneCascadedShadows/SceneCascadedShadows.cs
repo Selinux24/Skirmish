@@ -31,27 +31,27 @@ namespace SceneTest.SceneCascadedShadows
         public override async Task Initialize()
         {
 #if DEBUG
-            this.Game.VisibleMouse = false;
-            this.Game.LockMouse = false;
+            Game.VisibleMouse = false;
+            Game.LockMouse = false;
 #else
-            this.Game.VisibleMouse = false;
-            this.Game.LockMouse = true;
+            Game.VisibleMouse = false;
+            Game.LockMouse = true;
 #endif
 
-            this.Camera.NearPlaneDistance = 0.1f;
-            this.Camera.FarPlaneDistance = 5000;
-            this.Camera.Goto(-10, 8, 20f);
-            this.Camera.LookTo(0, 0, 0);
+            Camera.NearPlaneDistance = 0.1f;
+            Camera.FarPlaneDistance = 5000;
+            Camera.Goto(-10, 8, 20f);
+            Camera.LookTo(0, 0, 0);
 
-            await this.LoadResourcesAsync(
+            await LoadResourcesAsync(
                 new Task[]
                 {
-                    this.InitializeFloorAsphalt(),
-                    this.InitializeBuildingObelisk(),
-                    this.InitializeTree(),
-                    this.InitializeSkyEffects(),
-                    this.InitializeLights(),
-                    this.InitializeDebug()
+                    InitializeFloorAsphalt(),
+                    InitializeBuildingObelisk(),
+                    InitializeTree(),
+                    InitializeSkyEffects(),
+                    InitializeLights(),
+                    InitializeDebug()
                 },
                 (res) =>
                 {
@@ -60,10 +60,10 @@ namespace SceneTest.SceneCascadedShadows
                         res.ThrowExceptions();
                     }
 
-                    this.buildingObelisks[0].Manipulator.SetPosition(+5, 0, +5);
-                    this.buildingObelisks[1].Manipulator.SetPosition(+5, 0, -5);
-                    this.buildingObelisks[2].Manipulator.SetPosition(-5, 0, +5);
-                    this.buildingObelisks[3].Manipulator.SetPosition(-5, 0, -5);
+                    buildingObelisks[0].Manipulator.SetPosition(+5, 0, +5);
+                    buildingObelisks[1].Manipulator.SetPosition(+5, 0, -5);
+                    buildingObelisks[2].Manipulator.SetPosition(-5, 0, +5);
+                    buildingObelisks[3].Manipulator.SetPosition(-5, 0, -5);
                 });
         }
 
@@ -123,7 +123,7 @@ namespace SceneTest.SceneCascadedShadows
                 }
             };
 
-            this.buildingObelisks = await this.AddComponentModelInstanced(desc);
+            buildingObelisks = await this.AddComponentModelInstanced(desc);
         }
         private async Task InitializeTree()
         {
@@ -167,21 +167,21 @@ namespace SceneTest.SceneCascadedShadows
         {
             GameEnvironment.Background = Color.CornflowerBlue;
 
-            this.Lights.KeyLight.Enabled = true;
-            this.Lights.KeyLight.CastShadow = true;
-            this.Lights.KeyLight.Direction = Vector3.Normalize(new Vector3(-1, -1, -3));
+            Lights.KeyLight.Enabled = true;
+            Lights.KeyLight.CastShadow = true;
+            Lights.KeyLight.Direction = Vector3.Normalize(new Vector3(-1, -1, -3));
 
-            this.Lights.BackLight.Enabled = true;
-            this.Lights.FillLight.Enabled = true;
+            Lights.BackLight.Enabled = true;
+            Lights.FillLight.Enabled = true;
 
             await Task.CompletedTask;
         }
         private async Task InitializeDebug()
         {
-            int width = (int)(this.Game.Form.RenderWidth * 0.33f);
-            int height = (int)(this.Game.Form.RenderHeight * 0.33f);
-            int smLeft = this.Game.Form.RenderWidth - width;
-            int smTop = this.Game.Form.RenderHeight - height;
+            int width = (int)(Game.Form.RenderWidth * 0.33f);
+            int height = (int)(Game.Form.RenderHeight * 0.33f);
+            int smLeft = Game.Form.RenderWidth - width;
+            int smTop = Game.Form.RenderHeight - height;
 
             var desc = new UITextureRendererDescription()
             {
@@ -191,97 +191,94 @@ namespace SceneTest.SceneCascadedShadows
                 Height = height,
                 Channel = UITextureRendererChannels.NoAlpha,
             };
-            this.bufferDrawer = await this.AddComponentUITextureRenderer(desc, layerEffects);
-            this.bufferDrawer.Visible = false;
+            bufferDrawer = await this.AddComponentUITextureRenderer(desc, layerEffects);
+            bufferDrawer.Visible = false;
         }
 
         public override void Update(GameTime gameTime)
         {
-            if (this.Game.Input.KeyJustReleased(Keys.Escape))
+            if (Game.Input.KeyJustReleased(Keys.Escape))
             {
-                this.Game.SetScene<SceneStart.SceneStart>();
+                Game.SetScene<SceneStart.SceneStart>();
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.R))
+            if (Game.Input.KeyJustReleased(Keys.R))
             {
-                this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
+                SetRenderMode(GetRenderMode() == SceneModes.ForwardLigthning ?
                     SceneModes.DeferredLightning :
                     SceneModes.ForwardLigthning);
             }
 
-            bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
-            bool rightBtn = this.Game.Input.RightMouseButtonPressed;
-
             // Camera
-            this.UpdateCamera(gameTime, shift, rightBtn);
+            UpdateCamera(gameTime);
 
             // Debug
-            this.UpdateDebug();
+            UpdateDebug();
 
             base.Update(gameTime);
         }
 
-        private void UpdateCamera(GameTime gameTime, bool shift, bool rightBtn)
+        private void UpdateCamera(GameTime gameTime)
         {
 #if DEBUG
-            if (rightBtn)
+            if (Game.Input.RightMouseButtonPressed)
 #endif
             {
-                this.Camera.RotateMouse(
+                Camera.RotateMouse(
                     gameTime,
-                    this.Game.Input.MouseXDelta,
-                    this.Game.Input.MouseYDelta);
+                    Game.Input.MouseXDelta,
+                    Game.Input.MouseYDelta);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.A))
+            if (Game.Input.KeyPressed(Keys.A))
             {
-                this.Camera.MoveLeft(gameTime, shift);
+                Camera.MoveLeft(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.D))
+            if (Game.Input.KeyPressed(Keys.D))
             {
-                this.Camera.MoveRight(gameTime, shift);
+                Camera.MoveRight(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.W))
+            if (Game.Input.KeyPressed(Keys.W))
             {
-                this.Camera.MoveForward(gameTime, shift);
+                Camera.MoveForward(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.S))
+            if (Game.Input.KeyPressed(Keys.S))
             {
-                this.Camera.MoveBackward(gameTime, shift);
+                Camera.MoveBackward(gameTime, Game.Input.ShiftPressed);
             }
         }
 
         private void UpdateDebug()
         {
-            if (this.Game.Input.KeyJustReleased(Keys.F5))
+            if (Game.Input.KeyJustReleased(Keys.F5))
             {
-                var shadowMap = this.Renderer.GetResource(SceneRendererResults.ShadowMapDirectional);
+                var shadowMap = Renderer.GetResource(SceneRendererResults.ShadowMapDirectional);
                 if (shadowMap != null)
                 {
-                    this.bufferDrawer.Texture = shadowMap;
-                    this.bufferDrawer.TextureIndex = 0;
-                    this.bufferDrawer.Channels = UITextureRendererChannels.Red;
-                    this.bufferDrawer.Visible = true;
+                    bufferDrawer.Texture = shadowMap;
+                    bufferDrawer.TextureIndex = 0;
+                    bufferDrawer.Channels = UITextureRendererChannels.Red;
+                    bufferDrawer.Visible = true;
                 }
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.Add))
+            if (Game.Input.KeyJustReleased(Keys.Add))
             {
-                int tIndex = this.bufferDrawer.TextureIndex + 1;
+                int tIndex = bufferDrawer.TextureIndex + 1;
                 tIndex %= 3;
-                this.bufferDrawer.TextureIndex = tIndex;
+                bufferDrawer.TextureIndex = tIndex;
             }
-            else if (this.Game.Input.KeyJustReleased(Keys.Subtract))
+            else if (Game.Input.KeyJustReleased(Keys.Subtract))
             {
-                int tIndex = this.bufferDrawer.TextureIndex - 1;
+                int tIndex = bufferDrawer.TextureIndex - 1;
                 if (tIndex < 0)
                 {
                     tIndex = 2;
                 }
-                this.bufferDrawer.TextureIndex = tIndex;
+                bufferDrawer.TextureIndex = tIndex;
             }
         }
     }

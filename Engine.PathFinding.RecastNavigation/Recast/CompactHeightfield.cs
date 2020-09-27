@@ -1000,7 +1000,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             if (ntris > MAX_TRIS)
             {
                 tris.RemoveRange(MAX_TRIS, ntris - MAX_TRIS);
-                Logger.WriteDebug($"rcBuildPolyMeshDetail: Shrinking triangle count from {ntris} to max {MAX_TRIS}.");
+                Logger.WriteWarning($"rcBuildPolyMeshDetail: Shrinking triangle count from {ntris} to max {MAX_TRIS}.");
             }
 
             outVerts = verts.ToArray();

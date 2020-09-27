@@ -30,26 +30,26 @@ namespace SceneTest.SceneStencilPass
         public override async Task Initialize()
         {
 #if DEBUG
-            this.Game.VisibleMouse = false;
-            this.Game.LockMouse = false;
+            Game.VisibleMouse = false;
+            Game.LockMouse = false;
 #else
-            this.Game.VisibleMouse = false;
-            this.Game.LockMouse = true;
+            Game.VisibleMouse = false;
+            Game.LockMouse = true;
 #endif
 
-            this.Camera.NearPlaneDistance = 0.1f;
-            this.Camera.FarPlaneDistance = 500;
-            this.Camera.Goto(-10, 8, 20f);
-            this.Camera.LookTo(0, 0, 0);
+            Camera.NearPlaneDistance = 0.1f;
+            Camera.FarPlaneDistance = 500;
+            Camera.Goto(-10, 8, 20f);
+            Camera.LookTo(0, 0, 0);
 
-            await this.LoadResourcesAsync(
+            await LoadResourcesAsync(
                 new[]
                 {
-                    this.InitializeFloorAsphalt(),
-                    this.InitializeBuildingObelisk(),
-                    this.InitializeEmitter(),
-                    this.InitializeLights(),
-                    this.InitializeLightsDrawer()
+                    InitializeFloorAsphalt(),
+                    InitializeBuildingObelisk(),
+                    InitializeEmitter(),
+                    InitializeLights(),
+                    InitializeLightsDrawer()
                 });
         }
 
@@ -96,7 +96,7 @@ namespace SceneTest.SceneStencilPass
         }
         private async Task InitializeBuildingObelisk()
         {
-            this.buildingObelisk = await this.AddComponentModel(
+            buildingObelisk = await this.AddComponentModel(
                 new ModelDescription()
                 {
                     Name = "Obelisk",
@@ -108,7 +108,7 @@ namespace SceneTest.SceneStencilPass
                         ModelContentFilename = "Obelisk.xml",
                     }
                 });
-            this.buildingObelisk.Manipulator.SetPosition(0, 0, 0);
+            buildingObelisk.Manipulator.SetPosition(0, 0, 0);
         }
         private async Task InitializeEmitter()
         {
@@ -132,18 +132,18 @@ namespace SceneTest.SceneStencilPass
                 }
             };
 
-            this.lightEmitter1 = await this.AddComponentModel(desc);
-            this.lightEmitter2 = await this.AddComponentModel(desc);
+            lightEmitter1 = await this.AddComponentModel(desc);
+            lightEmitter2 = await this.AddComponentModel(desc);
         }
         private async Task InitializeLights()
         {
-            this.Lights.KeyLight.Enabled = false;
-            this.Lights.BackLight.Enabled = false;
-            this.Lights.FillLight.Enabled = true;
+            Lights.KeyLight.Enabled = false;
+            Lights.BackLight.Enabled = false;
+            Lights.FillLight.Enabled = true;
 
-            this.Lights.Add(new SceneLightPoint("Point1", false, Color.White, Color.White, true, SceneLightPointDescription.Create(Vector3.Zero, 5, 5)));
+            Lights.Add(new SceneLightPoint("Point1", false, Color.White, Color.White, true, SceneLightPointDescription.Create(Vector3.Zero, 5, 5)));
 
-            this.Lights.Add(new SceneLightSpot("Spot1", false, Color.White, Color.White, true, SceneLightSpotDescription.Create(Vector3.Zero, Vector3.Down, 20, 5, 5)));
+            Lights.Add(new SceneLightSpot("Spot1", false, Color.White, Color.White, true, SceneLightSpotDescription.Create(Vector3.Zero, Vector3.Down, 20, 5, 5)));
 
             await Task.CompletedTask;
         }
@@ -154,78 +154,75 @@ namespace SceneTest.SceneStencilPass
                 DepthEnabled = true,
                 Count = 5000
             };
-            this.lightsVolumeDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(desc);
+            lightsVolumeDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(desc);
         }
 
         public override void Update(GameTime gameTime)
         {
-            if (this.Game.Input.KeyJustReleased(Keys.Escape))
+            if (Game.Input.KeyJustReleased(Keys.Escape))
             {
-                this.Game.SetScene<SceneStart.SceneStart>();
+                Game.SetScene<SceneStart.SceneStart>();
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.R))
+            if (Game.Input.KeyJustReleased(Keys.R))
             {
-                this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
+                SetRenderMode(GetRenderMode() == SceneModes.ForwardLigthning ?
                     SceneModes.DeferredLightning :
                     SceneModes.ForwardLigthning);
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.L))
+            if (Game.Input.KeyJustReleased(Keys.L))
             {
-                this.animateLightColors = !this.animateLightColors;
+                animateLightColors = !animateLightColors;
             }
 
-            bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
-            bool rightBtn = this.Game.Input.RightMouseButtonPressed;
-
             // Camera
-            this.UpdateCamera(gameTime, shift, rightBtn);
+            UpdateCamera(gameTime);
 
             // Light
-            this.UpdateLight();
+            UpdateLight();
 
             // Debug
-            this.UpdateDebug();
+            UpdateDebug();
 
             base.Update(gameTime);
         }
 
-        private void UpdateCamera(GameTime gameTime, bool shift, bool rightBtn)
+        private void UpdateCamera(GameTime gameTime)
         {
 #if DEBUG
-            if (rightBtn)
+            if (Game.Input.RightMouseButtonPressed)
             {
-                this.Camera.RotateMouse(
+                Camera.RotateMouse(
                     gameTime,
-                    this.Game.Input.MouseXDelta,
-                    this.Game.Input.MouseYDelta);
+                    Game.Input.MouseXDelta,
+                    Game.Input.MouseYDelta);
             }
 #else
-            this.Camera.RotateMouse(
+            Camera.RotateMouse(
                 gameTime,
-                this.Game.Input.MouseXDelta,
-                this.Game.Input.MouseYDelta);
+                Game.Input.MouseXDelta,
+                Game.Input.MouseYDelta);
 #endif
 
-            if (this.Game.Input.KeyPressed(Keys.A))
+            if (Game.Input.KeyPressed(Keys.A))
             {
-                this.Camera.MoveLeft(gameTime, shift);
+                Camera.MoveLeft(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.D))
+            if (Game.Input.KeyPressed(Keys.D))
             {
-                this.Camera.MoveRight(gameTime, shift);
+                Camera.MoveRight(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.W))
+            if (Game.Input.KeyPressed(Keys.W))
             {
-                this.Camera.MoveForward(gameTime, shift);
+                Camera.MoveForward(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.S))
+            if (Game.Input.KeyPressed(Keys.S))
             {
-                this.Camera.MoveBackward(gameTime, shift);
+                Camera.MoveBackward(gameTime, Game.Input.ShiftPressed);
             }
         }
         private void UpdateLight()
@@ -236,86 +233,86 @@ namespace SceneTest.SceneStencilPass
             float hv = 1.0f;
             float av = 1f;
 
-            position.X = r * (float)Math.Cos(av * this.Game.GameTime.TotalSeconds);
-            position.Y = hv * (float)Math.Sin(av * this.Game.GameTime.TotalSeconds);
-            position.Z = r * (float)Math.Sin(av * this.Game.GameTime.TotalSeconds);
+            position.X = r * (float)Math.Cos(av * Game.GameTime.TotalSeconds);
+            position.Y = hv * (float)Math.Sin(av * Game.GameTime.TotalSeconds);
+            position.Z = r * (float)Math.Sin(av * Game.GameTime.TotalSeconds);
 
             var pos1 = position + new Vector3(0, h, 0);
             var col1 = animateLightColors ? new Color4(pos1.X, pos1.Y, pos1.Z, 1.0f) : Color.White;
 
-            this.lightEmitter1.Manipulator.SetPosition(pos1);
-            this.Lights.PointLights[0].Position = pos1;
-            this.Lights.PointLights[0].DiffuseColor = col1;
-            this.Lights.PointLights[0].SpecularColor = col1;
+            lightEmitter1.Manipulator.SetPosition(pos1);
+            Lights.PointLights[0].Position = pos1;
+            Lights.PointLights[0].DiffuseColor = col1;
+            Lights.PointLights[0].SpecularColor = col1;
 
             var pos2 = (position * -1) + new Vector3(0, h, 0);
             var col2 = animateLightColors ? new Color4(pos2.X, pos2.Y, pos2.Z, 1.0f) : Color.White;
 
-            this.lightEmitter2.Manipulator.SetPosition(pos2);
-            this.Lights.SpotLights[0].Position = pos2;
-            this.Lights.SpotLights[0].Direction = -Vector3.Normalize(new Vector3(pos2.X, 0, pos2.Z));
-            this.Lights.SpotLights[0].DiffuseColor = col2;
-            this.Lights.SpotLights[0].SpecularColor = col2;
+            lightEmitter2.Manipulator.SetPosition(pos2);
+            Lights.SpotLights[0].Position = pos2;
+            Lights.SpotLights[0].Direction = -Vector3.Normalize(new Vector3(pos2.X, 0, pos2.Z));
+            Lights.SpotLights[0].DiffuseColor = col2;
+            Lights.SpotLights[0].SpecularColor = col2;
         }
         private void UpdateDebug()
         {
-            if (this.Game.Input.KeyJustReleased(Keys.F1))
+            if (Game.Input.KeyJustReleased(Keys.F1))
             {
-                this.drawDrawVolumes = !this.drawDrawVolumes;
+                drawDrawVolumes = !drawDrawVolumes;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F2))
+            if (Game.Input.KeyJustReleased(Keys.F2))
             {
-                this.drawCullVolumes = !this.drawCullVolumes;
+                drawCullVolumes = !drawCullVolumes;
             }
 
-            this.UpdateLightVolumes();
+            UpdateLightVolumes();
         }
         private void UpdateLightVolumes()
         {
-            this.lightsVolumeDrawer.Clear();
+            lightsVolumeDrawer.Clear();
 
-            if (this.drawDrawVolumes)
+            if (drawDrawVolumes)
             {
-                foreach (var spot in this.Lights.SpotLights)
+                foreach (var spot in Lights.SpotLights)
                 {
                     var color = new Color4(spot.DiffuseColor.RGB(), 0.25f);
 
                     var lines = spot.GetVolume(30);
 
-                    this.lightsVolumeDrawer.AddPrimitives(color, lines);
+                    lightsVolumeDrawer.AddPrimitives(color, lines);
                 }
 
-                foreach (var point in this.Lights.PointLights)
+                foreach (var point in Lights.PointLights)
                 {
                     var color = new Color4(point.DiffuseColor.RGB(), 0.25f);
 
                     var lines = point.GetVolume(30, 30);
 
-                    this.lightsVolumeDrawer.AddPrimitives(color, lines);
+                    lightsVolumeDrawer.AddPrimitives(color, lines);
                 }
             }
 
-            if (this.drawCullVolumes)
+            if (drawCullVolumes)
             {
                 var color = new Color4(Color.Red.RGB(), 0.50f);
 
-                foreach (var spot in this.Lights.SpotLights)
+                foreach (var spot in Lights.SpotLights)
                 {
                     var lines = Line3D.CreateWiredSphere(spot.BoundingSphere, 24, 24);
 
-                    this.lightsVolumeDrawer.AddPrimitives(color, lines);
+                    lightsVolumeDrawer.AddPrimitives(color, lines);
                 }
 
-                foreach (var point in this.Lights.PointLights)
+                foreach (var point in Lights.PointLights)
                 {
                     var lines = Line3D.CreateWiredSphere(point.BoundingSphere, 24, 24);
 
-                    this.lightsVolumeDrawer.AddPrimitives(color, lines);
+                    lightsVolumeDrawer.AddPrimitives(color, lines);
                 }
             }
 
-            this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = (drawDrawVolumes || drawCullVolumes);
+            lightsVolumeDrawer.Active = lightsVolumeDrawer.Visible = (drawDrawVolumes || drawCullVolumes);
         }
     }
 }

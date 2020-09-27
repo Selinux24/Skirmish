@@ -141,6 +141,16 @@ namespace Engine.UI
         /// Gets or sets whether the area must grow or shrinks with the text value
         /// </summary>
         public bool AdjustAreaWithText { get; set; }
+        /// <summary>
+        /// Returns the font line height
+        /// </summary>
+        public float FontHeight
+        {
+            get
+            {
+                return textDrawer.GetLineHeight();
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -267,7 +277,7 @@ namespace Engine.UI
     }
 
     /// <summary>
-    /// Sprite button extensions
+    /// UITextArea extensions
     /// </summary>
     public static class UITextAreaExtensions
     {

@@ -42,7 +42,7 @@ namespace Engine.PathFinding
             }
             catch (Exception ex)
             {
-                Logger.WriteError($"Error creating the graph: {ex}");
+                Logger.WriteError($"Error creating the graph: {ex.Message}", ex);
                 throw;
             }
 

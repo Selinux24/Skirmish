@@ -474,7 +474,7 @@ namespace Terrain.PerlinNoise
                 }
                 catch (Exception ex)
                 {
-                    Logger.WriteError(ex.Message);
+                    Logger.WriteError(ex);
                 }
 
                 generatingMap = false;

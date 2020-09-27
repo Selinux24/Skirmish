@@ -52,7 +52,7 @@
         {
             BufferManagerInstances descriptor;
 
-            Logger.WriteDebug($"Add BufferDescriptor {(this.Dynamic ? "dynamic" : "static")} {typeof(IInstacingData)} [{this.Id}]");
+            Logger.WriteTrace($"Add BufferDescriptor {(this.Dynamic ? "dynamic" : "static")} {typeof(IInstacingData)} [{this.Id}]");
 
             var slot = bufferManager.FindInstancingBufferDescription(this.Dynamic);
             if (slot < 0)
@@ -78,7 +78,7 @@
             {
                 var descriptor = bufferManager.GetInstancingBufferDescription(this.Descriptor.BufferDescriptionIndex);
 
-                Logger.WriteDebug($"Remove BufferDescriptor {(descriptor.Dynamic ? "dynamic" : "static")} {typeof(VertexInstancingData)} [{this.Descriptor.Id}]");
+                Logger.WriteTrace($"Remove BufferDescriptor {(descriptor.Dynamic ? "dynamic" : "static")} {typeof(VertexInstancingData)} [{this.Descriptor.Id}]");
 
                 descriptor.RemoveDescriptor(this.Descriptor, this.Instances);
                 descriptor.ReallocationNeeded = true;

@@ -1332,7 +1332,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                     pen = (1.0f / dist) * (pen * 0.5f) * m_collisionResolveFactor;
                 }
 
-                ag.Disp = (ag.Disp + diff * pen);
+                ag.Disp += diff * pen;
 
                 w += 1.0f;
             }

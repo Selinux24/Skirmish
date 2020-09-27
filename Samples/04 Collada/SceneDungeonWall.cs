@@ -29,18 +29,18 @@ namespace Collada
             await base.Initialize();
 
 #if DEBUG
-            this.Game.VisibleMouse = false;
-            this.Game.LockMouse = false;
+            Game.VisibleMouse = false;
+            Game.LockMouse = false;
 #else
-            this.Game.VisibleMouse = false;
-            this.Game.LockMouse = true;
+            Game.VisibleMouse = false;
+            Game.LockMouse = true;
 #endif
-            _ = this.LoadResourcesAsync(
-                new[] 
+            _ = LoadResourcesAsync(
+                new[]
                 {
-                    this.InitializeText(),
-                    this.InitializeDungeon(),
-                    this.InitializeEmitter() 
+                    InitializeText(),
+                    InitializeDungeon(),
+                    InitializeEmitter()
                 },
                 (res) =>
                 {
@@ -49,18 +49,18 @@ namespace Collada
                         res.ThrowExceptions();
                     }
 
-                    this.InitializeCamera();
-                    this.InitializeEnvironment();
-                    this.gameReady = true;
+                    InitializeCamera();
+                    InitializeEnvironment();
+                    gameReady = true;
                 });
         }
         private void InitializeCamera()
         {
-            this.Camera.NearPlaneDistance = 0.5f;
-            this.Camera.FarPlaneDistance = 500;
-            this.Camera.Mode = CameraModes.Free;
-            this.Camera.Position = new Vector3(-5, 3, -5);
-            this.Camera.Interest = new Vector3(0, 0, 0);
+            Camera.NearPlaneDistance = 0.5f;
+            Camera.FarPlaneDistance = 500;
+            Camera.Mode = CameraModes.Free;
+            Camera.Position = new Vector3(-5, 3, -5);
+            Camera.Interest = new Vector3(0, 0, 0);
         }
         private void InitializeEnvironment()
         {
@@ -68,9 +68,9 @@ namespace Collada
 
             var desc = SceneLightPointDescription.Create(new Vector3(0, 1, -1), 10f, 10f);
 
-            this.pointLight = new SceneLightPoint("light", false, Color.White, Color.White, true, desc);
+            pointLight = new SceneLightPoint("light", false, Color.White, Color.White, true, desc);
 
-            this.Lights.Add(this.pointLight);
+            Lights.Add(pointLight);
         }
         private async Task InitializeText()
         {
@@ -78,9 +78,9 @@ namespace Collada
             title.Text = "Tiled Wall Test Scene";
             title.SetPosition(Vector2.Zero);
 
-            this.fps = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12, Color.Yellow) }, layerHUD);
-            this.fps.Text = null;
-            this.fps.SetPosition(new Vector2(0, 24));
+            fps = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12, Color.Yellow) }, layerHUD);
+            fps.Text = null;
+            fps.SetPosition(new Vector2(0, 24));
 
             var picks = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12, Color.Yellow) }, layerHUD);
             picks.Text = null;
@@ -88,7 +88,7 @@ namespace Collada
 
             var spDesc = new SpriteDescription()
             {
-                Width = this.Game.Form.RenderWidth,
+                Width = Game.Form.RenderWidth,
                 Height = picks.Top + picks.Height + 3,
                 BaseColor = new Color4(0, 0, 0, 0.75f),
             };
@@ -146,7 +146,7 @@ namespace Collada
                 }
             };
 
-            this.lightEmitter = await this.AddComponentModel(desc);
+            lightEmitter = await this.AddComponentModel(desc);
         }
 
         public override void Update(GameTime gameTime)
@@ -158,89 +158,87 @@ namespace Collada
                 return;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.Escape))
+            if (Game.Input.KeyJustReleased(Keys.Escape))
             {
-                this.Game.SetScene<SceneStart>();
+                Game.SetScene<SceneStart>();
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.R))
+            if (Game.Input.KeyJustReleased(Keys.R))
             {
-                this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
+                SetRenderMode(GetRenderMode() == SceneModes.ForwardLigthning ?
                     SceneModes.DeferredLightning :
                     SceneModes.ForwardLigthning);
             }
 
-            this.UpdateCamera();
+            UpdateCamera();
 
-            this.UpdateLight(gameTime);
+            UpdateLight(gameTime);
 
-            this.fps.Text = this.Game.RuntimeText;
+            fps.Text = Game.RuntimeText;
         }
         private void UpdateCamera()
         {
-            bool slow = this.Game.Input.KeyPressed(Keys.LShiftKey);
-
-            if (this.Game.Input.KeyPressed(Keys.A))
+            if (Game.Input.KeyPressed(Keys.A))
             {
-                this.Camera.MoveLeft(this.Game.GameTime, slow);
+                Camera.MoveLeft(Game.GameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.D))
+            if (Game.Input.KeyPressed(Keys.D))
             {
-                this.Camera.MoveRight(this.Game.GameTime, slow);
+                Camera.MoveRight(Game.GameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.W))
+            if (Game.Input.KeyPressed(Keys.W))
             {
-                this.Camera.MoveForward(this.Game.GameTime, slow);
+                Camera.MoveForward(Game.GameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.S))
+            if (Game.Input.KeyPressed(Keys.S))
             {
-                this.Camera.MoveBackward(this.Game.GameTime, slow);
+                Camera.MoveBackward(Game.GameTime, Game.Input.ShiftPressed);
             }
 
 #if DEBUG
-            if (this.Game.Input.RightMouseButtonPressed)
+            if (Game.Input.RightMouseButtonPressed)
             {
-                this.Camera.RotateMouse(
-                    this.Game.GameTime,
-                    this.Game.Input.MouseXDelta,
-                    this.Game.Input.MouseYDelta);
+                Camera.RotateMouse(
+                    Game.GameTime,
+                    Game.Input.MouseXDelta,
+                    Game.Input.MouseYDelta);
             }
 #else
-            this.Camera.RotateMouse(
-                this.Game.GameTime,
-                this.Game.Input.MouseXDelta,
-                this.Game.Input.MouseYDelta);
+            Camera.RotateMouse(
+                Game.GameTime,
+                Game.Input.MouseXDelta,
+                Game.Input.MouseYDelta);
 #endif
         }
         private void UpdateLight(GameTime gameTime)
         {
-            var pos = this.pointLight.Position;
+            var pos = pointLight.Position;
 
-            if (this.Game.Input.KeyPressed(Keys.Left))
+            if (Game.Input.KeyPressed(Keys.Left))
             {
                 pos.X -= gameTime.ElapsedSeconds * 5f;
             }
 
-            if (this.Game.Input.KeyPressed(Keys.Right))
+            if (Game.Input.KeyPressed(Keys.Right))
             {
                 pos.X += gameTime.ElapsedSeconds * 5f;
             }
 
-            if (this.Game.Input.KeyPressed(Keys.Up))
+            if (Game.Input.KeyPressed(Keys.Up))
             {
                 pos.Z += gameTime.ElapsedSeconds * 5f;
             }
 
-            if (this.Game.Input.KeyPressed(Keys.Down))
+            if (Game.Input.KeyPressed(Keys.Down))
             {
                 pos.Z -= gameTime.ElapsedSeconds * 5f;
             }
 
-            this.lightEmitter.Manipulator.SetPosition(pos);
-            this.pointLight.Position = pos;
+            lightEmitter.Manipulator.SetPosition(pos);
+            pointLight.Position = pos;
         }
     }
 }
