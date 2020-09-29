@@ -32,6 +32,10 @@ namespace Engine.UI
         /// </summary>
         private readonly Func<LogEntry, string> fncFormatLog;
         /// <summary>
+        /// Log filter function
+        /// </summary>
+        private readonly Func<LogEntry, bool> fncFilterLog;
+        /// <summary>
         /// Elapsed seconds since last update
         /// </summary>
         private float elapsedSinceLastUpdate = 0;
@@ -84,6 +88,7 @@ namespace Engine.UI
             logLinesBig = description.LogLinesBig;
             logLines = logLinesSmall;
             fncFormatLog = description.LogFormatterFunc ?? FormatLog;
+            fncFilterLog = description.LogFilterFunc ?? FilterLog;
             UpdateInterval = description.UpdateInterval;
         }
 
@@ -100,7 +105,7 @@ namespace Engine.UI
             elapsedSinceLastUpdate += context.GameTime.ElapsedSeconds;
             if (elapsedSinceLastUpdate > UpdateInterval.TotalSeconds)
             {
-                Text = Logger.ReadText(fncFormatLog, LogLines);
+                Text = Logger.ReadText(fncFilterLog, fncFormatLog, LogLines);
             }
             elapsedSinceLastUpdate %= (float)UpdateInterval.TotalSeconds;
         }
@@ -133,6 +138,14 @@ namespace Engine.UI
             }
 
             return $"{logEntry.EventDate:HH:mm:ss.fff} {logColor}[{logEntry.LogLevel}]{defColor}> {logEntry.Text}{System.Environment.NewLine}";
+        }
+        /// <summary>
+        /// Log filter
+        /// </summary>
+        /// <param name="logEntry">Log entry</param>
+        private bool FilterLog(LogEntry logEntry)
+        {
+            return logEntry != null;
         }
 
         /// <inheritdoc/>

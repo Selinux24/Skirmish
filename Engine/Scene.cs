@@ -414,7 +414,7 @@ namespace Engine
             {
                 if (UpdateGlobalResources)
                 {
-                    Logger.WriteInformation("Updating global resources.");
+                    Logger.WriteInformation(this, "Updating global resources.");
 
                     UpdateGlobals();
 
@@ -442,7 +442,7 @@ namespace Engine
             }
             catch (EngineException ex)
             {
-                Logger.WriteError($"Scene Updating error: {ex.Message}", ex);
+                Logger.WriteError(this, $"Scene Updating error: {ex.Message}", ex);
 
                 throw;
             }
@@ -459,7 +459,7 @@ namespace Engine
             }
             catch (EngineException ex)
             {
-                Logger.WriteError($"Scene Drawing error {Renderer?.GetType()}: {ex.Message}", ex);
+                Logger.WriteError(this, $"Scene Drawing error {Renderer?.GetType()}: {ex.Message}", ex);
 
                 throw;
             }
@@ -899,7 +899,7 @@ namespace Engine
 
             if (!bbox.HasValue || bbox == new BoundingBox())
             {
-                Logger.WriteWarning($"Scene Picking test: A ground must be defined into the scene in the first place.");
+                Logger.WriteWarning(this, $"Scene Picking test: A ground must be defined into the scene in the first place.");
             }
 
             float maxY = (bbox?.Maximum.Y + 1.0f) ?? float.MaxValue;
@@ -1367,11 +1367,11 @@ namespace Engine
         /// <param name="e">Event args</param>
         private void GraphUpdating(object sender, EventArgs e)
         {
-            Logger.WriteInformation($"GraphUpdating - {sender}");
+            Logger.WriteInformation(this, $"GraphUpdating - {sender}");
 
-            Logger.WriteInformation($"GraphUpdating - NavigationGraphUpdating Call");
+            Logger.WriteInformation(this, $"GraphUpdating - NavigationGraphUpdating Call");
             NavigationGraphUpdating();
-            Logger.WriteInformation($"GraphUpdating - NavigationGraphUpdating End");
+            Logger.WriteInformation(this, $"GraphUpdating - NavigationGraphUpdating End");
         }
         /// <summary>
         /// Graph updated event
@@ -1380,11 +1380,11 @@ namespace Engine
         /// <param name="e">Event args</param>
         private void GraphUpdated(object sender, EventArgs e)
         {
-            Logger.WriteInformation($"GraphUpdated - {sender}");
+            Logger.WriteInformation(this, $"GraphUpdated - {sender}");
 
-            Logger.WriteInformation($"GraphUpdating - NavigationGraphUpdated Call");
+            Logger.WriteInformation(this, $"GraphUpdating - NavigationGraphUpdated Call");
             NavigationGraphUpdated();
-            Logger.WriteInformation($"GraphUpdating - NavigationGraphUpdated End");
+            Logger.WriteInformation(this, $"GraphUpdating - NavigationGraphUpdated End");
         }
         /// <summary>
         /// Fires when graph is updating

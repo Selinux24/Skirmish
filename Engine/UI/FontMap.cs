@@ -464,7 +464,7 @@ namespace Engine.UI
             var fileNames = ContentManager.FindPaths(contentPath, fontFileName);
             if (!fileNames.Any())
             {
-                Logger.WriteWarning($"Font resource not found: {fontFileName}");
+                Logger.WriteWarning(nameof(FontMap), $"Font resource not found: {fontFileName}");
 
                 return null;
             }
@@ -555,7 +555,7 @@ namespace Engine.UI
             string[] fonts = ParseFontFamilies(fontFamily);
             if (!fonts.Any())
             {
-                Logger.WriteWarning("Font family not specified");
+                Logger.WriteWarning(nameof(FontMap), "Font family not specified");
 
                 return null;
             }
@@ -567,7 +567,7 @@ namespace Engine.UI
 
             if (font == null)
             {
-                Logger.WriteWarning($"Font familiy not found in the graphic context: {fontFamily}");
+                Logger.WriteWarning(nameof(FontMap), $"Font familiy not found in the graphic context: {fontFamily}");
 
                 return null;
             }
@@ -772,12 +772,12 @@ namespace Engine.UI
 
             if (!float.TryParse(xValue, NumberStyles.Float, CultureInfo.InvariantCulture, out float x))
             {
-                Logger.WriteWarning($"Bad coordinate descriptor for X value. Single spected: {xValue}");
+                Logger.WriteWarning(nameof(FontMap), $"Bad coordinate descriptor for X value. Single spected: {xValue}");
             }
 
             if (!float.TryParse(yValue, NumberStyles.Float, CultureInfo.InvariantCulture, out float y))
             {
-                Logger.WriteWarning($"Bad coordinate descriptor for Y value. Single spected: {yValue}");
+                Logger.WriteWarning(nameof(FontMap), $"Bad coordinate descriptor for Y value. Single spected: {yValue}");
             }
 
             return new Vector2(x, y);

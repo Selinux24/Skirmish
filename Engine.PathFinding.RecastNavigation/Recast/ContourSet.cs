@@ -238,7 +238,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         {
                             if (regions[cont.RegionId].Outline != null)
                             {
-                                Logger.WriteWarning($"Multiple outlines for region {cont.RegionId}");
+                                Logger.WriteWarning(nameof(ContourSet), $"Multiple outlines for region {cont.RegionId}");
                             }
                             regions[cont.RegionId].Outline = cont;
                         }
@@ -285,7 +285,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         {
                             // The region does not have an outline.
                             // This can happen if the contour becames selfoverlapping because of too aggressive simplification settings.
-                            Logger.WriteWarning($"Bad outline for region {i}, contour simplification is likely too aggressive.");
+                            Logger.WriteWarning(nameof(ContourSet), $"Bad outline for region {i}, contour simplification is likely too aggressive.");
                         }
                     }
                 }

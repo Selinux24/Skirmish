@@ -38,11 +38,11 @@ namespace Engine.PathFinding
 
             try
             {
-                result = await this.Input?.CreateGraph(this.Settings);
+                result = await Input?.CreateGraph(Settings);
             }
             catch (Exception ex)
             {
-                Logger.WriteError($"Error creating the graph: {ex.Message}", ex);
+                Logger.WriteError(this, $"Error creating the graph: {ex.Message}", ex);
                 throw;
             }
 

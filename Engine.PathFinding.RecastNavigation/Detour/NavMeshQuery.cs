@@ -236,7 +236,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                         if (midPointRes != Status.DT_SUCCESS)
                         {
-                            Logger.WriteWarning($"FindPath GetEdgeMidPoint result: {midPointRes}");
+                            Logger.WriteWarning(this, $"FindPath GetEdgeMidPoint result: {midPointRes}");
                             return midPointRes;
                         }
 
@@ -812,7 +812,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 var midPointRes = GetEdgeMidPoint(best, neighbour, out var pos);
                 if (midPointRes != Status.DT_SUCCESS)
                 {
-                    Logger.WriteWarning($"UpdateSlicedFindPath GetEdgeMidPoint result: {midPointRes}");
+                    Logger.WriteWarning(this, $"UpdateSlicedFindPath GetEdgeMidPoint result: {midPointRes}");
                     return;
                 }
 
@@ -2474,7 +2474,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 var midPointRes = GetEdgeMidPoint(best, neighbour, out var pos);
                 if (midPointRes != Status.DT_SUCCESS)
                 {
-                    Logger.WriteWarning($"FindPath GetEdgeMidPoint result: {midPointRes}");
+                    Logger.WriteWarning(this, $"FindPath GetEdgeMidPoint result: {midPointRes}");
                     status = midPointRes;
                     return status;
                 }

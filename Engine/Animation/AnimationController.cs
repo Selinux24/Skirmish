@@ -1,5 +1,7 @@
 ﻿using SharpDX;
 using System;
+using System.Linq;
+using System.Text;
 
 namespace Engine.Animation
 {
@@ -28,6 +30,10 @@ namespace Engine.Animation
         /// Last animation offset
         /// </summary>
         private uint lastOffset = 0;
+        /// <summary>
+        /// Offset initialization flag
+        /// </summary>
+        private bool offsetInitialized = false;
 
         /// <summary>
         /// Time delta to aply to controller time
@@ -42,20 +48,33 @@ namespace Engine.Animation
         /// </summary>
         public int CurrentIndex { get; private set; } = 0;
         /// <summary>
+        /// Current animation path
+        /// </summary>
+        public AnimationPath CurrentPath
+        {
+            get
+            {
+                return animationPaths.ElementAtOrDefault(CurrentIndex);
+            }
+        }
+        /// <summary>
+        /// Next animation path
+        /// </summary>
+        public AnimationPath NextPath
+        {
+            get
+            {
+                return animationPaths.ElementAtOrDefault(CurrentIndex + 1);
+            }
+        }
+        /// <summary>
         /// Current path time
         /// </summary>
         public float CurrentPathTime
         {
             get
             {
-                if (this.CurrentIndex >= 0 && this.CurrentIndex < this.animationPaths.Count)
-                {
-                    var path = this.animationPaths[this.CurrentIndex];
-
-                    return path.Time;
-                }
-
-                return 0;
+                return CurrentPath?.Time ?? 0;
             }
         }
         /// <summary>
@@ -65,14 +84,7 @@ namespace Engine.Animation
         {
             get
             {
-                if (this.CurrentIndex >= 0 && this.CurrentIndex < this.animationPaths.Count)
-                {
-                    var path = this.animationPaths[this.CurrentIndex];
-
-                    return path.ItemTime;
-                }
-
-                return 0;
+                return CurrentPath?.ItemTime ?? 0;
             }
         }
         /// <summary>
@@ -82,20 +94,13 @@ namespace Engine.Animation
         {
             get
             {
-                if (this.CurrentIndex >= 0 && this.CurrentIndex < this.animationPaths.Count)
-                {
-                    var path = this.animationPaths[this.CurrentIndex];
-
-                    var pathItem = path.GetCurrentItem();
-                    if (pathItem != null)
-                    {
-                        return pathItem.ClipName;
-                    }
-                }
-
-                return "None";
+                return CurrentPath?.CurrentItem?.ClipName ?? "None";
             }
         }
+        /// <summary>
+        /// Animation offset in the animation palette
+        /// </summary>
+        public uint AnimationOffset { get; protected set; }
         /// <summary>
         /// Gets the path count in the controller
         /// </summary>
@@ -103,7 +108,7 @@ namespace Engine.Animation
         {
             get
             {
-                return this.animationPaths.Count;
+                return animationPaths.Count;
             }
         }
 
@@ -111,6 +116,18 @@ namespace Engine.Animation
         /// On path ending event
         /// </summary>
         public event EventHandler PathEnding;
+        /// <summary>
+        /// On path changed event
+        /// </summary>
+        public event EventHandler PathChanged;
+        /// <summary>
+        /// On path updated event
+        /// </summary>
+        public event EventHandler PathUpdated;
+        /// <summary>
+        /// On animation offset changed
+        /// </summary>
+        public event EventHandler AnimationOffsetChanged;
 
         /// <summary>
         /// Constructor
@@ -126,7 +143,7 @@ namespace Engine.Animation
         /// <param name="paths">Animation path list</param>
         public void AddPath(AnimationPlan paths)
         {
-            this.AppendPaths(AppendFlagTypes.None, paths);
+            AppendPaths(AppendFlagTypes.None, paths);
         }
         /// <summary>
         /// Sets the specified past as current path list
@@ -134,7 +151,7 @@ namespace Engine.Animation
         /// <param name="paths">Animation path list</param>
         public void SetPath(AnimationPlan paths)
         {
-            this.AppendPaths(AppendFlagTypes.ClearCurrent, paths);
+            AppendPaths(AppendFlagTypes.ClearCurrent, paths);
         }
         /// <summary>
         /// Adds clips to the controller clips list and ends the current animation
@@ -142,7 +159,7 @@ namespace Engine.Animation
         /// <param name="paths">Animation path list</param>
         public void ContinuePath(AnimationPlan paths)
         {
-            this.AppendPaths(AppendFlagTypes.EndsCurrent, paths);
+            AppendPaths(AppendFlagTypes.EndsCurrent, paths);
         }
         /// <summary>
         /// Append animation paths to the controller
@@ -158,30 +175,30 @@ namespace Engine.Animation
                 clonedPaths[i] = paths[i].Clone();
             }
 
-            if (this.animationPaths.Count > 0)
+            if (animationPaths.Count > 0)
             {
                 AnimationPath last;
                 AnimationPath next;
 
                 if (flags == AppendFlagTypes.ClearCurrent)
                 {
-                    last = this.animationPaths[this.animationPaths.Count - 1];
+                    last = animationPaths[animationPaths.Count - 1];
                     next = clonedPaths[0];
 
                     //Clear all paths
-                    this.animationPaths.Clear();
+                    animationPaths.Clear();
                 }
-                else if (flags == AppendFlagTypes.EndsCurrent && this.CurrentIndex < this.animationPaths.Count)
+                else if (flags == AppendFlagTypes.EndsCurrent && CurrentIndex < animationPaths.Count)
                 {
-                    last = this.animationPaths[this.CurrentIndex];
+                    last = animationPaths[CurrentIndex];
                     next = clonedPaths[0];
 
                     //Remove all paths from current to end
-                    if (this.CurrentIndex + 1 < this.animationPaths.Count)
+                    if (CurrentIndex + 1 < animationPaths.Count)
                     {
-                        this.animationPaths.RemoveRange(
-                            this.CurrentIndex + 1,
-                            this.animationPaths.Count - (this.CurrentIndex + 1));
+                        animationPaths.RemoveRange(
+                            CurrentIndex + 1,
+                            animationPaths.Count - (CurrentIndex + 1));
                     }
 
                     //Mark current path for ending
@@ -189,7 +206,7 @@ namespace Engine.Animation
                 }
                 else
                 {
-                    last = this.animationPaths[this.animationPaths.Count - 1];
+                    last = animationPaths[animationPaths.Count - 1];
                     next = clonedPaths[0];
                 }
 
@@ -197,11 +214,11 @@ namespace Engine.Animation
                 last.ConnectTo(next);
             }
 
-            this.animationPaths.AddRange(clonedPaths);
+            animationPaths.AddRange(clonedPaths);
 
-            if (this.CurrentIndex < 0)
+            if (CurrentIndex < 0)
             {
-                this.CurrentIndex = 0;
+                CurrentIndex = 0;
             }
         }
 
@@ -212,25 +229,53 @@ namespace Engine.Animation
         /// <param name="skData">Skinning data</param>
         public void Update(float time, SkinningData skData)
         {
-            if (this.active && this.CurrentIndex >= 0 && this.CurrentIndex < this.animationPaths.Count)
+            if (!active)
             {
-                var path = this.animationPaths[this.CurrentIndex];
-                if (!path.Playing)
+                if (!offsetInitialized)
                 {
-                    if (this.CurrentIndex < this.animationPaths.Count - 1)
-                    {
-                        //Go to next path
-                        this.CurrentIndex++;
-                    }
-                    else
-                    {
-                        //No paths to do
-                        this.PathEnding?.Invoke(this, new EventArgs());
-                    }
+                    AnimationOffset = GetAnimationOffset(skData);
+                    offsetInitialized = true;
                 }
 
-                //Update current path
-                path.Update(time * this.TimeDelta, skData);
+                return;
+            }
+
+            if (CurrentPath == null)
+            {
+                return;
+            }
+
+            bool playing = CurrentPath.Playing;
+
+            if (playing && CurrentIndex < animationPaths.Count - 1)
+            {
+                //Go to next path
+                CurrentIndex++;
+                Logger.WriteTrace(this, $"Move to next animation path: {CurrentPath}");
+                PathChanged?.Invoke(this, new EventArgs());
+            }
+
+            //Update current path
+            CurrentPath.Update(time * TimeDelta, skData, out bool updated, out bool atEnd);
+            if (updated)
+            {
+                Logger.WriteTrace(this, $"Current animation path index changed: {CurrentPath}");
+                PathUpdated?.Invoke(this, new EventArgs());
+            }
+
+            uint newOffset = GetAnimationOffset(skData);
+            if (AnimationOffset != newOffset)
+            {
+                Logger.WriteTrace(this, $"Animation offset changed: {newOffset}");
+                AnimationOffset = newOffset;
+                AnimationOffsetChanged?.Invoke(this, new EventArgs());
+            }
+
+            if (atEnd && playing != CurrentPath.Playing && CurrentIndex == animationPaths.Count - 1)
+            {
+                //No paths to do
+                Logger.WriteTrace(this, "All animation paths done");
+                PathEnding?.Invoke(this, new EventArgs());
             }
         }
         /// <summary>
@@ -238,18 +283,14 @@ namespace Engine.Animation
         /// </summary>
         /// <param name="skData"></param>
         /// <returns>Returns the current animation offset in skinning animation data</returns>
-        public uint GetAnimationOffset(SkinningData skData)
+        protected uint GetAnimationOffset(SkinningData skData)
         {
-            if (GetClipAndTime(out string clipName, out float time))
+            if (GetClipAndTime(out float time, out string clipName))
             {
-                skData.GetAnimationOffset(
-                    time,
-                    clipName,
-                    out uint offset);
-
-                lastItemTime = time;
                 lastClipName = clipName;
-                lastOffset = offset;
+                lastItemTime = time;
+
+                skData.GetAnimationOffset(time, clipName, out lastOffset);
             }
 
             return lastOffset;
@@ -261,14 +302,14 @@ namespace Engine.Animation
         /// <returns>Returns the transformation matrix list at current time</returns>
         public Matrix[] GetCurrentPose(SkinningData skData)
         {
-            if (GetClipAndTime(out string clipName, out float time))
+            if (GetClipAndTime(out float time, out string clipName))
             {
                 return skData.GetPoseAtTime(time, clipName);
             }
-
-            return skData.GetPoseAtTime(
-                lastItemTime,
-                lastClipName);
+            else
+            {
+                return skData.GetPoseAtTime(lastItemTime, lastClipName);
+            }
         }
         /// <summary>
         /// Gets the current clip name and time
@@ -276,32 +317,28 @@ namespace Engine.Animation
         /// <param name="clipName">Clip name</param>
         /// <param name="time">Time</param>
         /// <returns>Returns true if the controller is currently playing a clip</returns>
-        private bool GetClipAndTime(out string clipName, out float time)
+        protected bool GetClipAndTime(out float time, out string clipName)
         {
-            clipName = null;
             time = 0;
+            clipName = null;
 
-            if (this.CurrentIndex >= 0 && this.CurrentIndex < this.animationPaths.Count)
+            //Get the path
+            if (CurrentPath?.Playing == true)
             {
-                //Get the path
-                var path = this.animationPaths[this.CurrentIndex];
-                if (path.Playing)
+                //Get the path item
+                var pathItem = CurrentPath.CurrentItem;
+                if (pathItem != null)
                 {
-                    //Get the path item
-                    var pathItem = path.GetCurrentItem();
-                    if (pathItem != null)
-                    {
-                        time = path.ItemTime;
-                        clipName = pathItem.ClipName;
+                    time = CurrentPath.ItemTime;
+                    clipName = pathItem.ClipName;
 
-                        this.Playing = true;
+                    Playing = true;
 
-                        return true;
-                    }
+                    return true;
                 }
             }
 
-            this.Playing = false;
+            Playing = false;
 
             return false;
         }
@@ -312,14 +349,11 @@ namespace Engine.Animation
         /// <param name="time">At time</param>
         public void Start(float time = 0)
         {
-            this.active = true;
+            active = true;
 
-            this.CurrentIndex = 0;
+            CurrentIndex = 0;
 
-            if (this.animationPaths.Count > 0)
-            {
-                this.animationPaths[this.CurrentIndex].SetTime(time);
-            }
+            CurrentPath?.SetTime(time);
         }
         /// <summary>
         /// Stop
@@ -327,26 +361,23 @@ namespace Engine.Animation
         /// <param name="time">At time</param>
         public void Stop(float time = 0)
         {
-            this.active = false;
+            active = false;
 
-            if (this.CurrentIndex >= 0 && this.CurrentIndex < this.animationPaths.Count)
-            {
-                this.animationPaths[this.CurrentIndex].SetTime(time);
-            }
+            CurrentPath?.SetTime(time);
         }
         /// <summary>
         /// Resume playback
         /// </summary>
         public void Resume()
         {
-            this.active = true;
+            active = true;
         }
         /// <summary>
         /// Pause playback
         /// </summary>
         public void Pause()
         {
-            this.active = false;
+            active = false;
         }
 
         /// <summary>
@@ -355,18 +386,12 @@ namespace Engine.Animation
         /// <returns>Returns the text representation of the instance</returns>
         public override string ToString()
         {
-            string res = "Inactive";
+            StringBuilder res = new StringBuilder("Inactive");
 
-            if (this.CurrentIndex >= 0 && this.CurrentIndex < this.animationPaths.Count)
-            {
-                res = string.Format("{0}", this.animationPaths[this.CurrentIndex].GetItemList().Join(", "));
-                if (this.CurrentIndex + 1 < this.animationPaths.Count)
-                {
-                    res += string.Format(" {0}", this.animationPaths[this.CurrentIndex + 1].GetItemList().Join(", "));
-                }
-            }
+            res.Append(CurrentPath?.ItemList?.ToArray().Join(", ") ?? string.Empty);
+            res.Append(NextPath?.ItemList?.ToArray().Join(", ") ?? string.Empty);
 
-            return res;
+            return res.ToString();
         }
 
         /// <summary>

@@ -16,7 +16,7 @@ namespace Engine.UI
             return new UIConsoleDescription()
             {
                 Background = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)),
-                Font = TextDrawerDescription.Default(),
+                Font = TextDrawerDescription.FromFamily("Lucida Console"),
                 LogLinesBig = 50,
                 LogLinesSmall = 10,
             };
@@ -25,12 +25,12 @@ namespace Engine.UI
         /// Gets the default console description
         /// </summary>
         /// <param name="backgroundColor">Background color</param>
-        public static UIConsoleDescription Default(Color backgroundColor)
+        public static UIConsoleDescription Default(Color4 backgroundColor)
         {
             return new UIConsoleDescription()
             {
                 Background = SpriteDescription.Default(backgroundColor),
-                Font = TextDrawerDescription.Default(),
+                Font = TextDrawerDescription.FromFamily("Lucida Console"),
                 LogLinesBig = 50,
                 LogLinesSmall = 10,
             };
@@ -44,7 +44,7 @@ namespace Engine.UI
             return new UIConsoleDescription()
             {
                 Background = SpriteDescription.FromFile(backgroundImage),
-                Font = TextDrawerDescription.Default(),
+                Font = TextDrawerDescription.FromFamily("Lucida Console"),
                 LogLinesBig = 50,
                 LogLinesSmall = 10,
             };
@@ -66,6 +66,10 @@ namespace Engine.UI
         /// Log formatter function
         /// </summary>
         public Func<LogEntry, string> LogFormatterFunc { get; set; }
+        /// <summary>
+        /// Log filter function
+        /// </summary>
+        public Func<LogEntry, bool> LogFilterFunc { get; set; }
         /// <summary>
         /// Console text update interval
         /// </summary>

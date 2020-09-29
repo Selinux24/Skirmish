@@ -84,7 +84,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 var t = tris[i];
                 if (t.X == -1 || t.Y == -1 || t.Z == -1)
                 {
-                    Logger.WriteWarning($"delaunayHull: Removing dangling face {i} [{t.X},{t.Y},{t.Z}].");
+                    Logger.WriteWarning(nameof(DelaunayHull), $"delaunayHull: Removing dangling face {i} [{t.X},{t.Y},{t.Z}].");
                     tris[i] = tris[tris.Length - 1];
                     Array.Resize(ref tris, tris.Length - 1);
                     i--;
@@ -151,7 +151,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             if (NEdges >= MaxEdges)
             {
-                Logger.WriteWarning($"addEdge: Too many edges ({NEdges}/{MaxEdges}).");
+                Logger.WriteWarning(this, $"addEdge: Too many edges ({NEdges}/{MaxEdges}).");
                 return;
             }
 

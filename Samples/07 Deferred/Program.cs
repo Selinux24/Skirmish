@@ -41,7 +41,7 @@ namespace Deferred
             }
             catch (Exception ex)
             {
-                Logger.WriteError(ex);
+                Logger.WriteError(nameof(Program), ex);
             }
             finally
             {

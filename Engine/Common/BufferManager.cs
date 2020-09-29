@@ -128,7 +128,7 @@ namespace Engine.Common
                     return false;
                 }
 
-                return this.requestedDescriptors.Count > 0;
+                return requestedDescriptors.Count > 0;
             }
         }
 
@@ -144,7 +144,7 @@ namespace Engine.Common
 
             for (int i = 0; i < reservedSlots; i++)
             {
-                this.vertexBufferDescriptors.Add(new BufferManagerVertices(VertexTypes.Unknown, true));
+                vertexBufferDescriptors.Add(new BufferManagerVertices(VertexTypes.Unknown, true));
             }
         }
         /// <summary>
@@ -209,21 +209,21 @@ namespace Engine.Common
 
                 if (!Initilialized)
                 {
-                    Logger.WriteTrace($"Creating reserved buffer descriptors");
+                    Logger.WriteTrace(this, $"Creating reserved buffer descriptors");
 
                     CreateReservedBuffers();
 
-                    Logger.WriteTrace($"Reserved buffer descriptors created");
+                    Logger.WriteTrace(this, $"Reserved buffer descriptors created");
 
                     Initilialized = true;
                 }
 
                 if (HasPendingRequests)
                 {
-                    Logger.WriteTrace($"Processing descriptor requests");
+                    Logger.WriteTrace(this, $"Processing descriptor requests");
 
                     //Copy request collection
-                    var toAssign = this.requestedDescriptors
+                    var toAssign = requestedDescriptors
                         .Where(r => r?.Processed == false)
                         .ToArray();
 
@@ -231,19 +231,19 @@ namespace Engine.Common
 
                     DoProcessRequest(progress, ref current, toAssign.Count(), toAssign);
 
-                    Logger.WriteTrace($"Descriptor requests processed");
+                    Logger.WriteTrace(this, $"Descriptor requests processed");
 
-                    Logger.WriteTrace($"Reallocating buffers");
+                    Logger.WriteTrace(this, $"Reallocating buffers");
 
-                    var instancingList = this.instancingBufferDescriptors
+                    var instancingList = instancingBufferDescriptors
                         .Where(v => v.Dirty)
                         .ToArray();
 
-                    var vertexList = this.vertexBufferDescriptors
+                    var vertexList = vertexBufferDescriptors
                         .Where(v => v.Dirty)
                         .ToArray();
 
-                    var indexList = this.indexBufferDescriptors
+                    var indexList = indexBufferDescriptors
                         .Where(v => v.Dirty)
                         .ToArray();
 
@@ -259,12 +259,12 @@ namespace Engine.Common
 
                     ReallocateIndexData(progress, ref current, total, indexList);
 
-                    Logger.WriteTrace($"Buffers reallocated");
+                    Logger.WriteTrace(this, $"Buffers reallocated");
                 }
             }
             catch (Exception ex)
             {
-                Logger.WriteError($"Error creating buffers: {ex.Message}", ex);
+                Logger.WriteError(this, $"Error creating buffers: {ex.Message}", ex);
             }
             finally
             {
@@ -280,7 +280,7 @@ namespace Engine.Common
         {
             for (int i = 0; i < reservedSlots; i++)
             {
-                var descriptor = this.vertexBufferDescriptors[i];
+                var descriptor = vertexBufferDescriptors[i];
 
                 int bufferIndex = vertexBuffers.Count;
                 int bindingIndex = vertexBufferBindings.Count;
@@ -299,7 +299,7 @@ namespace Engine.Common
                 descriptor.Allocated = true;
                 descriptor.ReallocationNeeded = false;
 
-                Logger.WriteTrace($"Created {name} and binding. Size {descriptor.Data.Count()}");
+                Logger.WriteTrace(this, $"Created {name} and binding. Size {descriptor.Data.Count()}");
             }
         }
         /// <summary>
@@ -314,9 +314,9 @@ namespace Engine.Common
                 progress?.Report(++current / total);
             }
 
-            Monitor.Enter(this.requestedDescriptors);
-            this.requestedDescriptors.RemoveAll(r => r.Processed);
-            Monitor.Exit(this.requestedDescriptors);
+            Monitor.Enter(requestedDescriptors);
+            requestedDescriptors.RemoveAll(r => r.Processed);
+            Monitor.Exit(requestedDescriptors);
         }
         /// <summary>
         /// Reallocates the instance data
@@ -328,7 +328,7 @@ namespace Engine.Common
                 if (descriptor.Allocated)
                 {
                     //Reserve current buffer
-                    var oldBuffer = this.vertexBuffers[descriptor.BufferIndex];
+                    var oldBuffer = vertexBuffers[descriptor.BufferIndex];
 
                     //Recreate the buffer and binding
                     string name = $"InstancingBuffer.{descriptor.BufferIndex}.{(descriptor.Dynamic ? "dynamic" : "static")}";
@@ -336,13 +336,13 @@ namespace Engine.Common
                     var buffer = CreateInstancingBuffer(game.Graphics, name, descriptor.Dynamic, data);
                     var binding = new VertexBufferBinding(buffer, data[0].GetStride(), 0);
 
-                    this.vertexBuffers[descriptor.BufferIndex] = buffer;
-                    this.vertexBufferBindings[descriptor.BufferBindingIndex] = binding;
+                    vertexBuffers[descriptor.BufferIndex] = buffer;
+                    vertexBufferBindings[descriptor.BufferBindingIndex] = binding;
 
                     //Dispose old buffer
                     oldBuffer?.Dispose();
 
-                    Logger.WriteTrace($"Reallocated {name}. Size {descriptor.Instances}");
+                    Logger.WriteTrace(this, $"Reallocated {name}. Size {descriptor.Instances}");
                 }
                 else
                 {
@@ -355,13 +355,13 @@ namespace Engine.Common
                     var buffer = CreateInstancingBuffer(game.Graphics, name, descriptor.Dynamic, data);
                     var binding = new VertexBufferBinding(buffer, data[0].GetStride(), 0);
 
-                    this.vertexBuffers.Add(buffer);
-                    this.vertexBufferBindings.Add(binding);
+                    vertexBuffers.Add(buffer);
+                    vertexBufferBindings.Add(binding);
 
                     descriptor.BufferIndex = bufferIndex;
                     descriptor.BufferBindingIndex = bindingIndex;
 
-                    Logger.WriteTrace($"Created {name} and binding. Size {descriptor.Instances}");
+                    Logger.WriteTrace(this, $"Created {name} and binding. Size {descriptor.Instances}");
                 }
 
                 //Updates the allocated buffer size
@@ -383,20 +383,20 @@ namespace Engine.Common
                 if (descriptor.Allocated)
                 {
                     //Reserve current buffer
-                    var oldBuffer = this.vertexBuffers[descriptor.BufferIndex];
+                    var oldBuffer = vertexBuffers[descriptor.BufferIndex];
 
                     //Recreate the buffer and binding
                     string name = $"VertexBuffer.{descriptor.BufferIndex}.{(descriptor.Dynamic ? "dynamic" : "static")}";
                     var buffer = CreateVertexBuffer(game.Graphics, name, descriptor.Dynamic, descriptor.Data);
                     var binding = new VertexBufferBinding(buffer, descriptor.GetStride(), 0);
 
-                    this.vertexBuffers[descriptor.BufferIndex] = buffer;
-                    this.vertexBufferBindings[descriptor.BufferBindingIndex] = binding;
+                    vertexBuffers[descriptor.BufferIndex] = buffer;
+                    vertexBufferBindings[descriptor.BufferBindingIndex] = binding;
 
                     //Dispose old buffer
                     oldBuffer?.Dispose();
 
-                    Logger.WriteTrace($"Reallocated {name} and binding. Size {descriptor.Data.Count()}");
+                    Logger.WriteTrace(this, $"Reallocated {name} and binding. Size {descriptor.Data.Count()}");
                 }
                 else
                 {
@@ -408,22 +408,22 @@ namespace Engine.Common
                     var buffer = CreateVertexBuffer(game.Graphics, name, descriptor.Dynamic, descriptor.Data);
                     var binding = new VertexBufferBinding(buffer, descriptor.GetStride(), 0);
 
-                    this.vertexBuffers.Add(buffer);
-                    this.vertexBufferBindings.Add(binding);
+                    vertexBuffers.Add(buffer);
+                    vertexBufferBindings.Add(binding);
 
                     descriptor.AddInputs(bufferIndex);
 
                     descriptor.BufferIndex = bufferIndex;
                     descriptor.BufferBindingIndex = bindingIndex;
 
-                    Logger.WriteTrace($"Created {name} and binding. Size {descriptor.Data.Count()}");
+                    Logger.WriteTrace(this, $"Created {name} and binding. Size {descriptor.Data.Count()}");
                 }
 
                 descriptor.ClearInstancingInputs();
 
                 if (descriptor.InstancingDescriptor != null)
                 {
-                    var bufferIndex = this.instancingBufferDescriptors[descriptor.InstancingDescriptor.BufferDescriptionIndex].BufferIndex;
+                    var bufferIndex = instancingBufferDescriptors[descriptor.InstancingDescriptor.BufferDescriptionIndex].BufferIndex;
                     descriptor.AddInstancingInputs(bufferIndex);
                 }
 
@@ -449,13 +449,13 @@ namespace Engine.Common
                     var buffer = CreateIndexBuffer(game.Graphics, name, descriptor.Dynamic, descriptor.Data);
 
                     //Reserve current buffer
-                    var oldBuffer = this.indexBuffers[descriptor.BufferIndex];
+                    var oldBuffer = indexBuffers[descriptor.BufferIndex];
                     //Replace buffer
-                    this.indexBuffers[descriptor.BufferIndex] = buffer;
+                    indexBuffers[descriptor.BufferIndex] = buffer;
                     //Dispose buffer
                     oldBuffer?.Dispose();
 
-                    Logger.WriteTrace($"Reallocated {name}. Size {descriptor.Data.Count()}");
+                    Logger.WriteTrace(this, $"Reallocated {name}. Size {descriptor.Data.Count()}");
                 }
                 else
                 {
@@ -465,11 +465,11 @@ namespace Engine.Common
                     string name = $"IndexBuffer.{bufferIndex}.{(descriptor.Dynamic ? "dynamic" : "static")}";
                     var buffer = CreateIndexBuffer(game.Graphics, name, descriptor.Dynamic, descriptor.Data);
 
-                    this.indexBuffers.Add(buffer);
+                    indexBuffers.Add(buffer);
 
                     descriptor.BufferIndex = bufferIndex;
 
-                    Logger.WriteTrace($"Created {name}. Size {descriptor.Data.Count()}");
+                    Logger.WriteTrace(this, $"Created {name}. Size {descriptor.Data.Count()}");
                 }
 
                 //Updates the allocated buffer size
@@ -491,7 +491,7 @@ namespace Engine.Common
         /// <param name="instancingBuffer">Instancing buffer descriptor</param>
         public BufferDescriptor AddVertexData<T>(string id, bool dynamic, IEnumerable<T> data, BufferDescriptor instancingBuffer = null) where T : struct, IVertexData
         {
-            return this.AddVertexData(
+            return AddVertexData(
                 id,
                 dynamic,
                 data.OfType<IVertexData>(),
@@ -710,16 +710,16 @@ namespace Engine.Common
         {
             if (!Initilialized)
             {
-                Logger.WriteWarning("Attempt to set vertex buffers to Input Assembler with no initialized manager");
+                Logger.WriteWarning(this, "Attempt to set vertex buffers to Input Assembler with no initialized manager");
                 return false;
             }
 
-            if (this.vertexBufferDescriptors.Any(d => d.Dirty))
+            if (vertexBufferDescriptors.Any(d => d.Dirty))
             {
                 return false;
             }
 
-            this.game.Graphics.IASetVertexBuffers(0, this.vertexBufferBindings.ToArray());
+            game.Graphics.IASetVertexBuffers(0, vertexBufferBindings.ToArray());
 
             return true;
         }
@@ -736,18 +736,18 @@ namespace Engine.Common
 
             if (!Initilialized)
             {
-                Logger.WriteWarning("Attempt to set index buffers to Input Assembler with no initialized manager");
+                Logger.WriteWarning(this, "Attempt to set index buffers to Input Assembler with no initialized manager");
                 return false;
             }
 
-            var indexBufferDescriptor = this.indexBufferDescriptors[descriptor.BufferDescriptionIndex];
+            var indexBufferDescriptor = indexBufferDescriptors[descriptor.BufferDescriptionIndex];
             if (indexBufferDescriptor.Dirty)
             {
-                Logger.WriteWarning($"Attempt to set index buffer in buffer description {descriptor.BufferDescriptionIndex} to Input Assembler with no allocated buffer");
+                Logger.WriteWarning(this, $"Attempt to set index buffer in buffer description {descriptor.BufferDescriptionIndex} to Input Assembler with no allocated buffer");
                 return false;
             }
 
-            this.game.Graphics.IASetIndexBuffer(this.indexBuffers[descriptor.BufferDescriptionIndex], Format.R32_UInt, 0);
+            game.Graphics.IASetIndexBuffer(indexBuffers[descriptor.BufferDescriptionIndex], Format.R32_UInt, 0);
             return true;
         }
         /// <summary>
@@ -765,14 +765,14 @@ namespace Engine.Common
 
             if (!Initilialized)
             {
-                Logger.WriteWarning("Attempt to set technique to Input Assembler with no initialized manager");
+                Logger.WriteWarning(this, "Attempt to set technique to Input Assembler with no initialized manager");
                 return false;
             }
 
-            var vertexBufferDescriptor = this.vertexBufferDescriptors[descriptor.BufferDescriptionIndex];
+            var vertexBufferDescriptor = vertexBufferDescriptors[descriptor.BufferDescriptionIndex];
             if (vertexBufferDescriptor.Dirty)
             {
-                Logger.WriteWarning($"Attempt to set technique in buffer description {descriptor.BufferDescriptionIndex} to Input Assembler with no allocated buffer");
+                Logger.WriteWarning(this, $"Attempt to set technique in buffer description {descriptor.BufferDescriptionIndex} to Input Assembler with no allocated buffer");
                 return false;
             }
 
@@ -781,13 +781,13 @@ namespace Engine.Common
             {
                 var signature = technique.GetSignature();
 
-                this.inputLayouts.Add(
+                inputLayouts.Add(
                     technique,
-                    this.game.Graphics.CreateInputLayout(signature, vertexBufferDescriptor.Input.ToArray()));
+                    game.Graphics.CreateInputLayout(signature, vertexBufferDescriptor.Input.ToArray()));
             }
 
-            this.game.Graphics.IAInputLayout = inputLayouts[technique];
-            this.game.Graphics.IAPrimitiveTopology = (PrimitiveTopology)topology;
+            game.Graphics.IAInputLayout = inputLayouts[technique];
+            game.Graphics.IAPrimitiveTopology = (PrimitiveTopology)topology;
             return true;
         }
 
@@ -807,22 +807,22 @@ namespace Engine.Common
 
             if (!Initilialized)
             {
-                Logger.WriteWarning($"Attempt to write vertex data in buffer description {descriptor.BufferDescriptionIndex} with no initialized manager");
+                Logger.WriteWarning(this, $"Attempt to write vertex data in buffer description {descriptor.BufferDescriptionIndex} with no initialized manager");
                 return false;
             }
 
-            var vertexBufferDescriptor = this.vertexBufferDescriptors[descriptor.BufferDescriptionIndex];
+            var vertexBufferDescriptor = vertexBufferDescriptors[descriptor.BufferDescriptionIndex];
             if (vertexBufferDescriptor.Dirty)
             {
-                Logger.WriteWarning($"Attempt to write vertex data in buffer description {descriptor.BufferDescriptionIndex} with no allocated buffer");
+                Logger.WriteWarning(this, $"Attempt to write vertex data in buffer description {descriptor.BufferDescriptionIndex} with no allocated buffer");
                 return false;
             }
 
             if (data?.Any() == true)
             {
-                var buffer = this.vertexBuffers[vertexBufferDescriptor.BufferIndex];
+                var buffer = vertexBuffers[vertexBufferDescriptor.BufferIndex];
 
-                this.game.Graphics.WriteNoOverwriteBuffer(buffer, descriptor.BufferOffset, data);
+                game.Graphics.WriteNoOverwriteBuffer(buffer, descriptor.BufferOffset, data);
             }
 
             return true;
@@ -842,23 +842,23 @@ namespace Engine.Common
 
             if (!Initilialized)
             {
-                Logger.WriteWarning("Attempt to write instancing data with no initialized manager");
+                Logger.WriteWarning(this, "Attempt to write instancing data with no initialized manager");
                 return false;
             }
 
-            var instancingBufferDescriptor = this.instancingBufferDescriptors[descriptor.BufferDescriptionIndex];
+            var instancingBufferDescriptor = instancingBufferDescriptors[descriptor.BufferDescriptionIndex];
             if (instancingBufferDescriptor.Dirty)
             {
-                Logger.WriteWarning($"Attempt to write instancing data in buffer description {descriptor.BufferDescriptionIndex} with no allocated buffer");
+                Logger.WriteWarning(this, $"Attempt to write instancing data in buffer description {descriptor.BufferDescriptionIndex} with no allocated buffer");
                 return false;
             }
 
             if (data?.Any() == true)
             {
-                var instancingBuffer = this.vertexBuffers[instancingBufferDescriptor.BufferIndex];
+                var instancingBuffer = vertexBuffers[instancingBufferDescriptor.BufferIndex];
                 if (instancingBuffer != null)
                 {
-                    this.game.Graphics.WriteDiscardBuffer(instancingBuffer, descriptor.BufferOffset, data);
+                    game.Graphics.WriteDiscardBuffer(instancingBuffer, descriptor.BufferOffset, data);
                 }
             }
 
@@ -878,22 +878,22 @@ namespace Engine.Common
 
             if (!Initilialized)
             {
-                Logger.WriteWarning($"Attempt to write index data in buffer description {descriptor.BufferDescriptionIndex} with no initialized manager");
+                Logger.WriteWarning(this, $"Attempt to write index data in buffer description {descriptor.BufferDescriptionIndex} with no initialized manager");
                 return false;
             }
 
-            var indexBufferDescriptor = this.indexBufferDescriptors[descriptor.BufferDescriptionIndex];
+            var indexBufferDescriptor = indexBufferDescriptors[descriptor.BufferDescriptionIndex];
             if (indexBufferDescriptor.Dirty)
             {
-                Logger.WriteWarning($"Attempt to write index data in buffer description {descriptor.BufferDescriptionIndex} with no allocated buffer");
+                Logger.WriteWarning(this, $"Attempt to write index data in buffer description {descriptor.BufferDescriptionIndex} with no allocated buffer");
                 return false;
             }
 
             if (data?.Any() == true)
             {
-                var buffer = this.indexBuffers[indexBufferDescriptor.BufferIndex];
+                var buffer = indexBuffers[indexBufferDescriptor.BufferIndex];
 
-                this.game.Graphics.WriteNoOverwriteBuffer(buffer, descriptor.BufferOffset, data);
+                game.Graphics.WriteNoOverwriteBuffer(buffer, descriptor.BufferOffset, data);
             }
 
             return true;

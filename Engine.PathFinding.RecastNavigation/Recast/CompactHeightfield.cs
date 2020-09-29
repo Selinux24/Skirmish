@@ -882,7 +882,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             if (tris.Count == 0)
             {
                 // Could not triangulate the poly, make sure there is some valid data there.
-                Logger.WriteWarning($"buildPolyDetail: Could not triangulate polygon ({verts.Count} verts).");
+                Logger.WriteWarning(this, $"buildPolyDetail: Could not triangulate polygon ({verts.Count} verts).");
 
                 outVerts = verts.ToArray();
                 outTris = tris.ToArray();
@@ -1000,7 +1000,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             if (ntris > MAX_TRIS)
             {
                 tris.RemoveRange(MAX_TRIS, ntris - MAX_TRIS);
-                Logger.WriteWarning($"rcBuildPolyMeshDetail: Shrinking triangle count from {ntris} to max {MAX_TRIS}.");
+                Logger.WriteWarning(this, $"rcBuildPolyMeshDetail: Shrinking triangle count from {ntris} to max {MAX_TRIS}.");
             }
 
             outVerts = verts.ToArray();
@@ -1098,7 +1098,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 if (array.Count < 1)
                 {
-                    Logger.WriteWarning("Walk towards polygon center failed to reach center");
+                    Logger.WriteWarning(this, "Walk towards polygon center failed to reach center");
                     break;
                 }
 

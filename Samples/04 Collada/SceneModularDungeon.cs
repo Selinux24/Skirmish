@@ -53,7 +53,6 @@ namespace Collada
 
         private PrimitiveListDrawer<Triangle> selectedItemDrawer = null;
         private ModularSceneryItem selectedItem = null;
-        private bool selectedItemPainted = false;
 
         private ModelInstanced human = null;
 
@@ -161,7 +160,7 @@ namespace Collada
                 }
                 catch (Exception ex)
                 {
-                    Logger.WriteError($"Bad graph file. Generating navigation mesh. {ex.Message}", ex);
+                    Logger.WriteError(this, $"Bad graph file. Generating navigation mesh. {ex.Message}", ex);
                 }
             }
 
@@ -173,7 +172,7 @@ namespace Collada
             }
             catch (Exception ex)
             {
-                Logger.WriteError($"Error saving graph file. {ex.Message}", ex);
+                Logger.WriteError(this, $"Error saving graph file. {ex.Message}", ex);
             }
         }
         public override void NavigationGraphUpdated()
@@ -960,22 +959,15 @@ namespace Collada
                 return;
             }
 
-            if (selectedItemPainted && !selectedItem.Item.HasChanged)
-            {
-                return;
-            }
-
             var tris = selectedItem.Item.GetTriangles();
             if (tris.Any())
             {
                 Color4 sItemColor = Color.LightYellow;
                 sItemColor.Alpha = 0.3333f;
 
-                Logger.WriteDebug($"Processing {tris.Count()} triangles in the selected item drawer");
+                Logger.WriteDebug(this, $"Processing {tris.Count()} triangles in the selected item drawer");
 
                 selectedItemDrawer.SetPrimitives(sItemColor, tris);
-
-                selectedItemPainted = true;
             }
         }
         private void UpdateRatController(GameTime gameTime)
@@ -1134,7 +1126,6 @@ namespace Collada
             }
 
             selectedItem = item;
-            selectedItemPainted = false;
 
             if (item == null)
             {
@@ -1334,7 +1325,7 @@ namespace Collada
                     }
                     catch (Exception ex)
                     {
-                        Logger.WriteError($"SaveGraphToFile: {ex.Message}", ex);
+                        Logger.WriteError(this, $"SaveGraphToFile: {ex.Message}", ex);
                     }
                     finally
                     {

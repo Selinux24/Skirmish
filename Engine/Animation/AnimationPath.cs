@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.Animation
 {
@@ -11,7 +12,7 @@ namespace Engine.Animation
         /// <summary>
         /// Animation path items list
         /// </summary>
-        private List<AnimationPathItem> items = new List<AnimationPathItem>();
+        private readonly List<AnimationPathItem> items = new List<AnimationPathItem>();
         /// <summary>
         /// Current item index
         /// </summary>
@@ -20,15 +21,15 @@ namespace Engine.Animation
         /// <summary>
         /// Gets if the animation path is running
         /// </summary>
-        public bool Playing { get; private set; }
+        public bool Playing { get; private set; } = true;
         /// <summary>
         /// Path time
         /// </summary>
-        public float Time { get; private set; }
+        public float Time { get; private set; } = 0f;
         /// <summary>
         /// Total item time
         /// </summary>
-        public float TotalItemTime { get; private set; }
+        public float TotalItemTime { get; private set; } = 0f;
         /// <summary>
         /// Item time
         /// </summary>
@@ -36,10 +37,10 @@ namespace Engine.Animation
         {
             get
             {
-                var item = this.GetCurrentItem();
-                if (item != null && item.Duration > 0f)
+                var item = CurrentItem;
+                if (item?.Duration > 0f)
                 {
-                    return this.TotalItemTime % item.Duration;
+                    return TotalItemTime % item.Duration;
                 }
 
                 return 0;
@@ -54,12 +55,34 @@ namespace Engine.Animation
             {
                 float d = 0;
 
-                for (int i = 0; i < this.items.Count; i++)
+                for (int i = 0; i < items.Count; i++)
                 {
-                    d += this.items[i].TotalDuration;
+                    d += items[i].TotalDuration;
                 }
 
                 return d;
+            }
+        }
+        /// <summary>
+        /// Gets the current path item
+        /// </summary>
+        /// <returns>Returns the current path item</returns>
+        public AnimationPathItem CurrentItem
+        {
+            get
+            {
+                return items.ElementAtOrDefault(currentIndex);
+            }
+        }
+        /// <summary>
+        /// Gets the clip names into a strings array
+        /// </summary>
+        /// <returns>Returns the clip names of the path</returns>
+        public IEnumerable<string> ItemList
+        {
+            get
+            {
+                return items.Select(i => i.ClipName).ToArray();
             }
         }
 
@@ -68,9 +91,15 @@ namespace Engine.Animation
         /// </summary>
         public AnimationPath()
         {
-            this.Time = 0f;
-            this.TotalItemTime = 0f;
-            this.Playing = true;
+
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="pathItems">Path items</param>
+        public AnimationPath(IEnumerable<AnimationPathItem> pathItems)
+        {
+            items.AddRange(pathItems);
         }
 
         /// <summary>
@@ -79,9 +108,9 @@ namespace Engine.Animation
         /// <param name="time">Time to set</param>
         public void SetTime(float time)
         {
-            this.Time = time;
-            this.TotalItemTime = time;
-            this.Playing = true;
+            Time = time;
+            TotalItemTime = time;
+            Playing = true;
         }
         /// <summary>
         /// Adds a new animation item to the animation path
@@ -90,7 +119,7 @@ namespace Engine.Animation
         /// <param name="timeDelta">Delta time to apply on this animation clip</param>
         public void Add(string clipName, float timeDelta = 1f)
         {
-            this.Add(clipName, false, 1, timeDelta);
+            Add(clipName, false, 1, timeDelta);
         }
         /// <summary>
         /// Adds a new animation item to the animation path, wich repeats N times
@@ -100,7 +129,7 @@ namespace Engine.Animation
         /// <param name="timeDelta">Delta time to apply on this animation clip</param>
         public void AddRepeat(string clipName, int repeats, float timeDelta = 1f)
         {
-            this.Add(clipName, false, repeats, timeDelta);
+            Add(clipName, false, repeats, timeDelta);
         }
         /// <summary>
         /// Adds a new animation item to the animation path, wich loops for ever!!!
@@ -109,7 +138,7 @@ namespace Engine.Animation
         /// <param name="timeDelta">Delta time to apply on this animation clip</param>
         public void AddLoop(string clipName, float timeDelta = 1f)
         {
-            this.Add(clipName, true, 1, timeDelta);
+            Add(clipName, true, 1, timeDelta);
         }
         /// <summary>
         /// Adds a new animation item to the animation path
@@ -121,10 +150,10 @@ namespace Engine.Animation
         private void Add(string clipName, bool loop, int repeats, float timeDelta)
         {
             AnimationPathItem prev = null;
-            if (this.items.Count > 0)
+            if (items.Count > 0)
             {
                 //Gets last item
-                prev = this.items[this.items.Count - 1];
+                prev = items[items.Count - 1];
             }
 
             if (prev != null)
@@ -145,7 +174,7 @@ namespace Engine.Animation
         /// <param name="animationPath">Animation path to connect with current path</param>
         public void ConnectTo(AnimationPath animationPath)
         {
-            var lastItem = this.items[this.items.Count - 1];
+            var lastItem = items[items.Count - 1];
             var nextItem = animationPath.items[0];
 
             if (lastItem.ClipName != nextItem.ClipName)
@@ -160,26 +189,26 @@ namespace Engine.Animation
         /// </summary>
         public void End()
         {
-            var index = this.currentIndex;
+            var index = currentIndex;
             if (index >= 0)
             {
-                if (this.items[index].IsTranstition) index++;
+                if (items[index].IsTranstition) index++;
 
-                var current = this.items[index];
+                var current = items[index];
 
                 //Remove items from current to end
-                if (this.items.Count > index + 1)
+                if (items.Count > index + 1)
                 {
-                    this.items.RemoveRange(index + 1, this.items.Count - (index + 1));
+                    items.RemoveRange(index + 1, items.Count - (index + 1));
                 }
 
                 //Calcs total time of all clips
                 float t = 0;
-                this.items.ForEach(i => t += i != current ? i.TotalDuration : 0f);
+                items.ForEach(i => t += i != current ? i.TotalDuration : 0f);
 
                 //Fix time and item time
-                this.Time = t + this.ItemTime;
-                this.TotalItemTime = this.ItemTime;
+                Time = t + ItemTime;
+                TotalItemTime = ItemTime;
 
                 //Set current item for ending
                 current.End();
@@ -191,25 +220,29 @@ namespace Engine.Animation
         /// </summary>
         /// <param name="delta">Delta time</param>
         /// <param name="skData">Skinning data</param>
-        public void Update(float delta, SkinningData skData)
+        /// <param name="updated">Returns true when the internal path index change</param>
+        /// <param name="atEnd">Returns true when the internal path ends</param>
+        public void Update(float delta, SkinningData skData, out bool updated, out bool atEnd)
         {
+            updated = false;
+            atEnd = false;
+
             int itemIndex = 0;
 
-            float nextTime = this.Time + delta;
+            float nextTime = Time + delta;
             float clipTime = nextTime;
 
             float time = 0;
-            bool atEnd = false;
 
             if (nextTime > 0)
             {
-                for (int i = 0; i < this.items.Count; i++)
+                for (int i = 0; i < items.Count; i++)
                 {
                     //Set current item index
                     itemIndex = i;
-                    bool isLast = (i == this.items.Count - 1);
+                    bool isLast = i == items.Count - 1;
 
-                    var current = this.items[i];
+                    var current = items[i];
 
                     //Update current item
                     current.UpdateSkinningData(skData);
@@ -229,11 +262,16 @@ namespace Engine.Animation
                 }
             }
 
-            this.Time = atEnd ? time : nextTime;
-            this.Playing = !atEnd;
-            this.TotalItemTime = Math.Max(0, clipTime);
+            Time = atEnd ? time : nextTime;
+            Playing = !atEnd;
+            TotalItemTime = Math.Max(0, clipTime);
 
-            this.currentIndex = itemIndex;
+            if (currentIndex != itemIndex)
+            {
+                currentIndex = itemIndex;
+
+                updated = true;
+            }
         }
         /// <summary>
         /// Updates the current item
@@ -270,7 +308,7 @@ namespace Engine.Animation
                 //Do loop, continue path
                 return true;
             }
-            else if (nextTime >= time && isLastItem /*i == this.items.Count - 1*/)
+            else if (nextTime >= time && isLastItem)
             {
                 //Item passed, it's the end item
                 atEnd = true;
@@ -278,32 +316,6 @@ namespace Engine.Animation
             }
 
             return null;
-        }
-        /// <summary>
-        /// Gets the current path item
-        /// </summary>
-        /// <returns>Returns the current path item</returns>
-        public AnimationPathItem GetCurrentItem()
-        {
-            if (this.currentIndex >= 0)
-            {
-                return this.items[this.currentIndex];
-            }
-
-            return null;
-        }
-        /// <summary>
-        /// Gets the clip names into a strings array
-        /// </summary>
-        /// <returns>Returns the clip names of the path</returns>
-        public string[] GetItemList()
-        {
-            string[] res = new string[this.items.Count];
-            for (int i = 0; i < this.items.Count; i++)
-            {
-                res[i] = this.items[i].ClipName;
-            }
-            return res;
         }
 
         /// <summary>
@@ -314,18 +326,17 @@ namespace Engine.Animation
         {
             List<AnimationPathItem> clonedItems = new List<AnimationPathItem>();
 
-            foreach (var item in this.items)
+            foreach (var item in items)
             {
                 clonedItems.Add(item.Clone());
             }
 
-            return new AnimationPath()
+            return new AnimationPath(clonedItems)
             {
-                items = clonedItems,
-                currentIndex = this.currentIndex,
-                TotalItemTime = this.TotalItemTime,
-                Playing = this.Playing,
-                Time = this.Time,
+                currentIndex = currentIndex,
+                TotalItemTime = TotalItemTime,
+                Playing = Playing,
+                Time = Time,
             };
         }
 
@@ -335,10 +346,7 @@ namespace Engine.Animation
         /// <returns>Returns the text representation of the instance</returns>
         public override string ToString()
         {
-            return string.Format("Items: {0}; Time: {1:00.00}; Item Time: {2:00.00}",
-                this.items.Count,
-                this.Time,
-                this.ItemTime);
+            return $"Items: {items.Count}; Time: {Time:00.00}; Item Time: {ItemTime:00.00}";
         }
     }
 }

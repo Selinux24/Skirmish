@@ -137,16 +137,11 @@ namespace Engine
                 }
 
                 uint animationOffset = 0;
-
                 if (drawingData?.SkinningData != null)
                 {
-                    if (current.AnimationController.Playing)
-                    {
-                        current.InvalidateCache();
-                    }
-
                     current.AnimationController.Update(context.GameTime.ElapsedSeconds, drawingData.SkinningData);
-                    animationOffset = current.AnimationController.GetAnimationOffset(drawingData.SkinningData);
+
+                    animationOffset = current.AnimationController.AnimationOffset;
                 }
 
                 instancingData[instanceIndex].Local = current.Manipulator.LocalTransform;
@@ -247,7 +242,7 @@ namespace Engine
 
             if (hasDataToWrite)
             {
-                Logger.WriteTrace($"{Name} - DrawShadows WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset}");
+                Logger.WriteTrace(this, $"{Name} - DrawShadows WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset}");
                 BufferManager.WriteInstancingData(InstancingBuffer, instancingData);
             }
 
@@ -376,7 +371,7 @@ namespace Engine
 
             if (hasDataToWrite)
             {
-                Logger.WriteTrace($"{Name} - Draw WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset} {context.DrawerMode}");
+                Logger.WriteTrace(this, $"{Name} - Draw WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset} {context.DrawerMode}");
                 BufferManager.WriteInstancingData(InstancingBuffer, instancingData);
             }
 

@@ -33,16 +33,16 @@
         /// <param name="request">Buffer request</param>
         public void Process(BufferManager bufferManager)
         {
-            if (this.Action == BufferDescriptorRequestActions.Add)
+            if (Action == BufferDescriptorRequestActions.Add)
             {
                 Add(bufferManager);
             }
-            else if (this.Action == BufferDescriptorRequestActions.Remove)
+            else if (Action == BufferDescriptorRequestActions.Remove)
             {
                 Remove(bufferManager);
             }
 
-            this.Processed = true;
+            Processed = true;
         }
         /// <summary>
         /// Assign the descriptor to the buffer manager
@@ -52,12 +52,12 @@
         {
             BufferManagerInstances descriptor;
 
-            Logger.WriteTrace($"Add BufferDescriptor {(this.Dynamic ? "dynamic" : "static")} {typeof(IInstacingData)} [{this.Id}]");
+            Logger.WriteTrace(this, $"Add BufferDescriptor {(Dynamic ? "dynamic" : "static")} {typeof(IInstacingData)} [{Id}]");
 
-            var slot = bufferManager.FindInstancingBufferDescription(this.Dynamic);
+            var slot = bufferManager.FindInstancingBufferDescription(Dynamic);
             if (slot < 0)
             {
-                descriptor = new BufferManagerInstances(this.Dynamic);
+                descriptor = new BufferManagerInstances(Dynamic);
                 slot = bufferManager.AddInstancingBufferDescription(descriptor);
             }
             else
@@ -66,7 +66,7 @@
                 descriptor.ReallocationNeeded = true;
             }
 
-            descriptor.AddDescriptor(this.Descriptor, this.Id, slot, this.Instances);
+            descriptor.AddDescriptor(Descriptor, Id, slot, Instances);
         }
         /// <summary>
         /// Remove the descriptor from de internal buffers of the buffer manager
@@ -74,13 +74,13 @@
         /// <param name="request">Buffer request</param>
         private void Remove(BufferManager bufferManager)
         {
-            if (this.Descriptor?.Ready == true)
+            if (Descriptor?.Ready == true)
             {
-                var descriptor = bufferManager.GetInstancingBufferDescription(this.Descriptor.BufferDescriptionIndex);
+                var descriptor = bufferManager.GetInstancingBufferDescription(Descriptor.BufferDescriptionIndex);
 
-                Logger.WriteTrace($"Remove BufferDescriptor {(descriptor.Dynamic ? "dynamic" : "static")} {typeof(VertexInstancingData)} [{this.Descriptor.Id}]");
+                Logger.WriteTrace(this, $"Remove BufferDescriptor {(descriptor.Dynamic ? "dynamic" : "static")} {typeof(VertexInstancingData)} [{Descriptor.Id}]");
 
-                descriptor.RemoveDescriptor(this.Descriptor, this.Instances);
+                descriptor.RemoveDescriptor(Descriptor, Instances);
                 descriptor.ReallocationNeeded = true;
             }
         }

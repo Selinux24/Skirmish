@@ -300,9 +300,9 @@ namespace Engine
         /// </summary>
         public void Run()
         {
-            Logger.WriteInformation("**************************************************************************");
-            Logger.WriteInformation("** Game started                                                         **");
-            Logger.WriteInformation("**************************************************************************");
+            Logger.WriteInformation(this, "**************************************************************************");
+            Logger.WriteInformation(this, "** Game started                                                         **");
+            Logger.WriteInformation(this, "**************************************************************************");
 
             RenderLoop.Run(Form, Frame);
         }
@@ -316,7 +316,7 @@ namespace Engine
         {
             try
             {
-                Logger.WriteInformation("Game: Setting scene with the default constructor");
+                Logger.WriteInformation(this, "Game: Setting scene with the default constructor");
 
                 T scene = (T)Activator.CreateInstance(typeof(T), new object[] { this });
                 scene.SetRenderMode(sceneMode);
@@ -325,7 +325,7 @@ namespace Engine
             }
             catch (Exception ex)
             {
-                Logger.WriteError($"Game: Error setting scene: {ex.Message}", ex);
+                Logger.WriteError(this, $"Game: Error setting scene: {ex.Message}", ex);
             }
         }
         /// <summary>
@@ -361,26 +361,26 @@ namespace Engine
         /// <param name="scene">New scene</param>
         private async Task StartScene(Scene scene)
         {
-            Logger.WriteInformation("Game: Begin StartScene");
+            Logger.WriteInformation(this, "Game: Begin StartScene");
 
             try
             {
                 scene.Active = false;
 
-                Logger.WriteInformation("Scene: Initialize start");
+                Logger.WriteInformation(this, "Scene: Initialize start");
                 await scene.Initialize();
-                Logger.WriteInformation("Scene: Initialize end");
+                Logger.WriteInformation(this, "Scene: Initialize end");
 
                 scene.Active = true;
             }
             catch (Exception ex)
             {
-                Logger.WriteError($"Scene: Initialize error: {ex.Message}", ex);
+                Logger.WriteError(this, $"Scene: Initialize error: {ex.Message}", ex);
 
                 throw;
             }
 
-            Logger.WriteInformation("Game: End StartScene");
+            Logger.WriteInformation(this, "Game: End StartScene");
         }
 
         /// <summary>
@@ -625,19 +625,19 @@ namespace Engine
             {
                 ResourcesLoading?.Invoke(this, new GameLoadResourcesEventArgs() { Scene = scene });
 
-                Logger.WriteInformation("BufferManager: Recreating buffers");
+                Logger.WriteInformation(this, "BufferManager: Recreating buffers");
                 BufferManager.CreateBuffers(Progress);
-                Logger.WriteInformation("BufferManager: Buffers recreated");
+                Logger.WriteInformation(this, "BufferManager: Buffers recreated");
 
-                Logger.WriteInformation("ResourceManager: Creating new resources");
+                Logger.WriteInformation(this, "ResourceManager: Creating new resources");
                 ResourceManager.CreateResources(Progress);
-                Logger.WriteInformation("ResourceManager: New resources created");
+                Logger.WriteInformation(this, "ResourceManager: New resources created");
 
                 ResourcesLoaded?.Invoke(this, new GameLoadResourcesEventArgs() { Scene = scene });
             }
             catch (Exception ex)
             {
-                Logger.WriteError($"ResourceManager error: {ex.Message}", ex);
+                Logger.WriteError(this, $"ResourceManager error: {ex.Message}", ex);
             }
         }
 
@@ -656,7 +656,7 @@ namespace Engine
         {
             if (exiting)
             {
-                Logger.WriteInformation("Game exiting");
+                Logger.WriteInformation(this, "Game exiting");
                 return;
             }
 
@@ -694,9 +694,9 @@ namespace Engine
 
             if (ResourceManager.HasRequests)
             {
-                Logger.WriteInformation("ResourceManager: Creating new resources");
+                Logger.WriteInformation(this, "ResourceManager: Creating new resources");
                 ResourceManager.CreateResources(null);
-                Logger.WriteInformation("ResourceManager: New resources created");
+                Logger.WriteInformation(this, "ResourceManager: New resources created");
             }
 
             Counters.FrameCount++;
@@ -721,9 +721,9 @@ namespace Engine
                 //Exit form
                 Form.Close();
 
-                Logger.WriteInformation("**************************************************************************");
-                Logger.WriteInformation("** Game closed                                                          **");
-                Logger.WriteInformation("**************************************************************************");
+                Logger.WriteInformation(this, "**************************************************************************");
+                Logger.WriteInformation(this, "** Game closed                                                          **");
+                Logger.WriteInformation(this, "**************************************************************************");
             }
         }
         /// <summary>
@@ -741,7 +741,7 @@ namespace Engine
             }
             catch (Exception ex)
             {
-                Logger.WriteError($"Frame: Input Update error: {ex.Message}", ex);
+                Logger.WriteError(this, $"Frame: Input Update error: {ex.Message}", ex);
             }
         }
         /// <summary>
@@ -759,7 +759,7 @@ namespace Engine
             }
             catch (Exception ex)
             {
-                Logger.WriteError($"Frame: Graphics Begin error: {ex.Message}", ex);
+                Logger.WriteError(this, $"Frame: Graphics Begin error: {ex.Message}", ex);
 
                 throw;
             }
@@ -780,7 +780,7 @@ namespace Engine
             }
             catch (Exception ex)
             {
-                Logger.WriteError($"Scene: Update error: {ex.Message}", ex);
+                Logger.WriteError(this, $"Scene: Update error: {ex.Message}", ex);
             }
         }
         /// <summary>
@@ -804,7 +804,7 @@ namespace Engine
             }
             catch (Exception ex)
             {
-                Logger.WriteError($"Scene: Draw error: {ex.Message}", ex);
+                Logger.WriteError(this, $"Scene: Draw error: {ex.Message}", ex);
             }
         }
         /// <summary>
@@ -822,7 +822,7 @@ namespace Engine
             }
             catch (Exception ex)
             {
-                Logger.WriteError($"Frame: Graphics End error: {ex.Message}", ex);
+                Logger.WriteError(this, $"Frame: Graphics End error: {ex.Message}", ex);
 
                 throw;
             }
@@ -855,7 +855,7 @@ namespace Engine
             }
             catch (Exception ex)
             {
-                Logger.WriteError($"Frame: Refresh Counters error: {ex.Message}", ex);
+                Logger.WriteError(this, $"Frame: Refresh Counters error: {ex.Message}", ex);
             }
         }
         /// <summary>
@@ -876,7 +876,7 @@ namespace Engine
             }
             catch (Exception ex)
             {
-                Logger.WriteError($"Frame: Collecto Game Status error: {ex.Message}", ex);
+                Logger.WriteError(this, $"Frame: Collecto Game Status error: {ex.Message}", ex);
             }
         }
     }

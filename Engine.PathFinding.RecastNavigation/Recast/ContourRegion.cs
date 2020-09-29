@@ -146,7 +146,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                 if (index == -1)
                 {
-                    Logger.WriteWarning($"Failed to find merge points for {Outline} and {hole}.");
+                    Logger.WriteWarning(this, $"Failed to find merge points for {Outline} and {hole}.");
                 }
                 else
                 {

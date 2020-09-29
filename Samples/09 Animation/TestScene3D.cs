@@ -15,9 +15,12 @@ namespace Animation
     {
         private const int layerHUD = 99;
 
+        private UITextArea title = null;
         private UITextArea runtime = null;
         private UITextArea animText = null;
         private UITextArea messages = null;
+        private Sprite backPanel = null;
+        private UIConsole console = null;
 
         private PrimitiveListDrawer<Triangle> itemTris = null;
         private PrimitiveListDrawer<Line3D> itemLines = null;
@@ -89,6 +92,7 @@ namespace Animation
         private readonly Dictionary<string, AnimationPlan> soldierPaths = new Dictionary<string, AnimationPlan>();
         private readonly Dictionary<string, AnimationPlan> ratPaths = new Dictionary<string, AnimationPlan>();
 
+        private bool uiReady = false;
         private bool gameReady = false;
 
         public TestScene3D(Game game)
@@ -100,6 +104,8 @@ namespace Animation
         public override async Task Initialize()
         {
             await InitializeUI();
+
+            UpdateLayout();
 
             try
             {
@@ -136,7 +142,7 @@ namespace Animation
 
         private async Task InitializeUI()
         {
-            var title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18, Color.White) }, layerHUD);
+            title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18, Color.White) }, layerHUD);
             runtime = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11, Color.Yellow) }, layerHUD);
             animText = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 15, Color.Orange) }, layerHUD);
             messages = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 15, Color.Orange) }, layerHUD);
@@ -146,19 +152,14 @@ namespace Animation
             animText.Text = "";
             messages.Text = "";
 
-            title.SetPosition(Vector2.Zero);
-            runtime.SetPosition(new Vector2(5, title.Top + title.Height + 3));
-            animText.SetPosition(new Vector2(5, runtime.Top + runtime.Height + 3));
-            messages.SetPosition(new Vector2(5, animText.Top + animText.Height + 3));
+            backPanel = await this.AddComponentSprite(SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), SceneObjectUsages.UI, layerHUD - 1);
 
-            var spDesc = new SpriteDescription()
-            {
-                Width = Game.Form.RenderWidth,
-                Height = messages.Top + messages.Height + 3,
-                BaseColor = new Color4(0, 0, 0, 0.75f),
-            };
+            var consoleDesc = UIConsoleDescription.Default(new Color4(0.35f, 0.35f, 0.35f, 1f));
+            consoleDesc.LogFilterFunc = (l) => l.LogLevel > LogLevel.Trace || (l.LogLevel == LogLevel.Trace && l.CallerTypeName == nameof(AnimationController));
+            console = await this.AddComponentUIConsole(consoleDesc, layerHUD + 1);
+            console.Visible = false;
 
-            await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            uiReady = true;
         }
         private async Task InitializeFloor()
         {
@@ -548,6 +549,16 @@ namespace Animation
                 Game.Exit();
             }
 
+            if (!uiReady)
+            {
+                return;
+            }
+
+            if (Game.Input.KeyJustReleased(Keys.Oem5))
+            {
+                console.Toggle();
+            }
+
             if (!gameReady)
             {
                 return;
@@ -690,8 +701,8 @@ namespace Animation
 
             if (showItemDEBUG)
             {
-                var tris = selectedItem.GetTriangles(true);
-                var bbox = selectedItem.GetBoundingBox(true);
+                var tris = selectedItem.GetTriangles();
+                var bbox = selectedItem.GetBoundingBox();
 
                 itemTris.SetPrimitives(itemTrisColor, tris);
                 itemLines.SetPrimitives(itemLinesColor, Line3D.CreateWiredBox(bbox));
@@ -715,14 +726,42 @@ namespace Animation
 
         private void SoldierControllerPathEnding(object sender, EventArgs e)
         {
-            var keys = soldierPaths.Keys.ToArray();
+            if (sender is AnimationController controller)
+            {
+                var keys = soldierPaths.Keys.ToArray();
 
-            int index = Math.Min(Helper.RandomGenerator.Next(1, 3), keys.Length - 1);
+                int index = Math.Min(Helper.RandomGenerator.Next(1, 3), keys.Length - 1);
 
-            var key = keys[index];
+                var key = keys[index];
 
-            ((AnimationController)sender).SetPath(soldierPaths[key]);
-            ((AnimationController)sender).Start(0);
+                controller.SetPath(soldierPaths[key]);
+                controller.Start(0);
+            }
+        }
+
+        public override void GameGraphicsResized()
+        {
+            base.GameGraphicsResized();
+
+            UpdateLayout();
+        }
+        private void UpdateLayout()
+        {
+            if (!uiReady)
+            {
+                return;
+            }
+
+            title.SetPosition(Vector2.Zero);
+            runtime.SetPosition(new Vector2(5, title.Rectangle.Bottom + 3));
+            animText.SetPosition(new Vector2(5, runtime.Rectangle.Bottom + 3));
+            messages.SetPosition(new Vector2(5, animText.Rectangle.Bottom + 3));
+
+            backPanel.Width = Game.Form.RenderWidth;
+            backPanel.Height = messages.Rectangle.Bottom + 3;
+
+            console.Top = backPanel.Rectangle.Bottom;
+            console.Width = Game.Form.RenderWidth;
         }
     }
 }

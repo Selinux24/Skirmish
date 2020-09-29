@@ -59,13 +59,15 @@ namespace Engine
         /// <summary>
         /// Gets bounding sphere
         /// </summary>
+        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
-        BoundingSphere GetBoundingSphere();
+        BoundingSphere GetBoundingSphere(bool refresh = false);
         /// <summary>
         /// Gets bounding box
         /// </summary>
+        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
-        BoundingBox GetBoundingBox();
+        BoundingBox GetBoundingBox(bool refresh = false);
 
         /// <summary>
         /// Gets the volume geometry of the instance

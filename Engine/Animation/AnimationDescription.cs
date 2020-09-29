@@ -22,6 +22,11 @@ namespace Engine.Animation
         [XmlArray("transitions")]
         [XmlArrayItem("transition", typeof(TransitionDescription))]
         public List<TransitionDescription> Transitions { get; set; } = new List<TransitionDescription>();
+        /// <summary>
+        /// Time step
+        /// </summary>
+        [XmlAttribute("timeStep")]
+        public float TimeStep { get; set; }
 
         /// <summary>
         /// Adds a clip to clip list
@@ -31,7 +36,7 @@ namespace Engine.Animation
         /// <param name="endTime">End time</param>
         public void AddClip(string clipName, int startTime, int endTime)
         {
-            this.Clips.Add(new AnimationClipDescription()
+            Clips.Add(new AnimationClipDescription()
             {
                 Name = clipName,
                 From = startTime,
@@ -47,7 +52,7 @@ namespace Engine.Animation
         /// <param name="startTo">Start time of the "to" clip</param>
         public void AddTransition(string clipFrom, string clipTo, float startFrom, float startTo)
         {
-            this.Transitions.Add(new TransitionDescription()
+            Transitions.Add(new TransitionDescription()
             {
                 ClipFrom = clipFrom,
                 ClipTo = clipTo,

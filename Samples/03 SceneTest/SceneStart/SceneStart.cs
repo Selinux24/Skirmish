@@ -411,7 +411,7 @@ namespace SceneTest.SceneStart
         }
         private void TabsPanelTabJustReleased(object sender, UITabPanelEventArgs e)
         {
-            Logger.WriteDebug($"Clicked button {e.TabButton.Caption.Text}");
+            Logger.WriteDebug(this, $"Clicked button {e.TabButton.Caption.Text}");
         }
         private void ExitButtonJustReleased(object sender, EventArgs e)
         {

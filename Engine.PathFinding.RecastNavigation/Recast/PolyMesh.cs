@@ -88,7 +88,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 if (ntris <= 0)
                 {
                     // Bad triangulation, should not happen.
-                    Logger.WriteWarning($"rcBuildPolyMesh: Bad triangulation Contour {i}.");
+                    Logger.WriteWarning(nameof(PolyMesh), $"rcBuildPolyMesh: Bad triangulation Contour {i}.");
                     ntris = -ntris;
                 }
 
@@ -762,7 +762,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int ntris = RecastUtils.Triangulate(tverts, ref thole, out Int3[] tris);
             if (ntris < 0)
             {
-                Logger.WriteWarning("removeVertex: triangulate() returned bad results.");
+                Logger.WriteWarning(this, "removeVertex: triangulate() returned bad results.");
                 ntris = -ntris;
             }
 
@@ -866,7 +866,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 NPolys++;
                 if (NPolys > maxTris)
                 {
-                    Logger.WriteWarning($"removeVertex: Too many polygons {NPolys} (max:{maxTris}).");
+                    Logger.WriteWarning(this, $"removeVertex: Too many polygons {NPolys} (max:{maxTris}).");
                     return false;
                 }
             }

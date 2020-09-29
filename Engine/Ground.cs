@@ -277,22 +277,20 @@ namespace Engine
         /// <summary>
         /// Gets bounding sphere
         /// </summary>
+        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
-        public virtual BoundingSphere GetBoundingSphere()
+        public virtual BoundingSphere GetBoundingSphere(bool refresh = false)
         {
-            return this.groundPickingQuadtree != null ?
-                BoundingSphere.FromBox(this.groundPickingQuadtree.BoundingBox) :
-                new BoundingSphere();
+            return groundPickingQuadtree != null ? BoundingSphere.FromBox(groundPickingQuadtree.BoundingBox) : new BoundingSphere();
         }
         /// <summary>
         /// Gets bounding box
         /// </summary>
+        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
-        public virtual BoundingBox GetBoundingBox()
+        public virtual BoundingBox GetBoundingBox(bool refresh = false)
         {
-            return this.groundPickingQuadtree != null ?
-                this.groundPickingQuadtree.BoundingBox :
-                new BoundingBox();
+            return groundPickingQuadtree != null ? groundPickingQuadtree.BoundingBox : new BoundingBox();
         }
 
         /// <summary>
@@ -302,7 +300,7 @@ namespace Engine
         /// <returns>Returns a bounding boxes array</returns>
         public IEnumerable<BoundingBox> GetBoundingBoxes(int level = 0)
         {
-            return this.groundPickingQuadtree.GetBoundingBoxes(level);
+            return groundPickingQuadtree.GetBoundingBoxes(level);
         }
 
         /// <summary>
@@ -314,7 +312,7 @@ namespace Engine
         {
             List<Triangle> res = new List<Triangle>();
 
-            var leafNodes = this.groundPickingQuadtree.GetLeafNodes();
+            var leafNodes = groundPickingQuadtree.GetLeafNodes();
 
             foreach (var node in leafNodes)
             {
@@ -424,15 +422,15 @@ namespace Engine
         {
             if (detectionMode == IntersectDetectionMode.Box)
             {
-                return (IntersectionVolumeAxisAlignedBox)this.GetBoundingBox();
+                return (IntersectionVolumeAxisAlignedBox)GetBoundingBox();
             }
             else if (detectionMode == IntersectDetectionMode.Sphere)
             {
-                return (IntersectionVolumeSphere)this.GetBoundingSphere();
+                return (IntersectionVolumeSphere)GetBoundingSphere();
             }
             else
             {
-                return (IntersectionVolumeMesh)this.GetVolume(true).ToArray();
+                return (IntersectionVolumeMesh)GetVolume(true).ToArray();
             }
         }
     }

@@ -43,16 +43,16 @@ namespace Engine.Common
         /// <param name="bufferManager">Buffer manager</param>
         public void Process(BufferManager bufferManager)
         {
-            if (this.Action == BufferDescriptorRequestActions.Add)
+            if (Action == BufferDescriptorRequestActions.Add)
             {
                 Add(bufferManager);
             }
-            else if (this.Action == BufferDescriptorRequestActions.Remove)
+            else if (Action == BufferDescriptorRequestActions.Remove)
             {
                 Remove(bufferManager);
             }
 
-            this.Processed = true;
+            Processed = true;
         }
         /// <summary>
         /// Adds the descriptor to the buffer manager
@@ -60,22 +60,22 @@ namespace Engine.Common
         /// <param name="bufferManager">Buffer manager</param>
         private void Add(BufferManager bufferManager)
         {
-            if (this.Data?.Any() != true)
+            if (Data?.Any() != true)
             {
                 return;
             }
 
             BufferManagerVertices descriptor;
 
-            VertexTypes vType = this.Data.First().VertexType;
-            bool instanced = this.InstancingDescriptor != null;
+            VertexTypes vType = Data.First().VertexType;
+            bool instanced = InstancingDescriptor != null;
 
-            Logger.WriteTrace($"Add BufferDescriptor {(this.Dynamic ? "dynamic" : "static")} {vType} Instanced {instanced} [{this.Id}]");
+            Logger.WriteTrace(this, $"Add BufferDescriptor {(Dynamic ? "dynamic" : "static")} {vType} Instanced {instanced} [{Id}]");
 
-            int slot = bufferManager.FindVertexBufferDescription(vType, this.Dynamic);
+            int slot = bufferManager.FindVertexBufferDescription(vType, Dynamic);
             if (slot < 0)
             {
-                descriptor = new BufferManagerVertices(vType, this.Dynamic);
+                descriptor = new BufferManagerVertices(vType, Dynamic);
                 slot = bufferManager.AddVertexBufferDescription(descriptor);
             }
             else
@@ -84,13 +84,13 @@ namespace Engine.Common
                 descriptor.ReallocationNeeded = true;
             }
 
-            if (this.InstancingDescriptor != null)
+            if (InstancingDescriptor != null)
             {
                 //Additive only
-                descriptor.InstancingDescriptor = this.InstancingDescriptor;
+                descriptor.InstancingDescriptor = InstancingDescriptor;
             }
 
-            descriptor.AddDescriptor(this.VertexDescriptor, this.Id, slot, this.Data);
+            descriptor.AddDescriptor(VertexDescriptor, Id, slot, Data);
         }
         /// <summary>
         /// Removes the descriptor from de internal buffers of the buffer manager
@@ -98,13 +98,13 @@ namespace Engine.Common
         /// <param name="bufferManager">Buffer manager</param>
         private void Remove(BufferManager bufferManager)
         {
-            if (this.VertexDescriptor?.Ready == true)
+            if (VertexDescriptor?.Ready == true)
             {
-                var descriptor = bufferManager.GetVertexBufferDescription(this.VertexDescriptor.BufferDescriptionIndex);
+                var descriptor = bufferManager.GetVertexBufferDescription(VertexDescriptor.BufferDescriptionIndex);
 
-                Logger.WriteTrace($"Remove BufferDescriptor {(descriptor.Dynamic ? "dynamic" : "static")} {descriptor.Type} [{this.VertexDescriptor.Id}]");
+                Logger.WriteTrace(this, $"Remove BufferDescriptor {(descriptor.Dynamic ? "dynamic" : "static")} {descriptor.Type} [{VertexDescriptor.Id}]");
 
-                descriptor.RemoveDescriptor(this.VertexDescriptor);
+                descriptor.RemoveDescriptor(VertexDescriptor);
                 descriptor.ReallocationNeeded = true;
             }
         }

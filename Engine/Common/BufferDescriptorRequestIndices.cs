@@ -39,16 +39,16 @@ namespace Engine.Common
         /// <param name="request">Buffer request</param>
         public void Process(BufferManager bufferManager)
         {
-            if (this.Action == BufferDescriptorRequestActions.Add)
+            if (Action == BufferDescriptorRequestActions.Add)
             {
                 Add(bufferManager);
             }
-            else if (this.Action == BufferDescriptorRequestActions.Remove)
+            else if (Action == BufferDescriptorRequestActions.Remove)
             {
                 Remove(bufferManager);
             }
 
-            this.Processed = true;
+            Processed = true;
         }
         /// <summary>
         /// Assign the descriptor to the buffer manager
@@ -56,19 +56,19 @@ namespace Engine.Common
         /// <param name="request">Buffer request</param>
         private void Add(BufferManager bufferManager)
         {
-            if (this.Data?.Any() != true)
+            if (Data?.Any() != true)
             {
                 return;
             }
 
             BufferManagerIndices descriptor;
 
-            Logger.WriteTrace($"Add BufferDescriptor {(this.Dynamic ? "dynamic" : "static")} {typeof(uint)} [{this.Id}]");
+            Logger.WriteTrace(this, $"Add BufferDescriptor {(Dynamic ? "dynamic" : "static")} {typeof(uint)} [{Id}]");
 
-            int slot = bufferManager.FindIndexBufferDescription(this.Dynamic);
+            int slot = bufferManager.FindIndexBufferDescription(Dynamic);
             if (slot < 0)
             {
-                descriptor = new BufferManagerIndices(this.Dynamic);
+                descriptor = new BufferManagerIndices(Dynamic);
                 slot = bufferManager.AddIndexBufferDescription(descriptor);
             }
             else
@@ -77,7 +77,7 @@ namespace Engine.Common
                 descriptor.ReallocationNeeded = true;
             }
 
-            descriptor.AddDescriptor(this.Descriptor, this.Id, slot, this.Data);
+            descriptor.AddDescriptor(Descriptor, Id, slot, Data);
         }
         /// <summary>
         /// Remove the descriptor from de internal buffers of the buffer manager
@@ -85,13 +85,13 @@ namespace Engine.Common
         /// <param name="request">Buffer request</param>
         private void Remove(BufferManager bufferManager)
         {
-            if (this.Descriptor?.Ready == true)
+            if (Descriptor?.Ready == true)
             {
-                var descriptor = bufferManager.GetIndexBufferDescription(this.Descriptor.BufferDescriptionIndex);
+                var descriptor = bufferManager.GetIndexBufferDescription(Descriptor.BufferDescriptionIndex);
 
-                Logger.WriteTrace($"Remove BufferDescriptor {(descriptor.Dynamic ? "dynamic" : "static")} {typeof(uint)} [{this.Descriptor.Id}]");
+                Logger.WriteTrace(this, $"Remove BufferDescriptor {(descriptor.Dynamic ? "dynamic" : "static")} {typeof(uint)} [{Descriptor.Id}]");
 
-                descriptor.RemoveDescriptor(this.Descriptor);
+                descriptor.RemoveDescriptor(Descriptor);
                 descriptor.ReallocationNeeded = true;
             }
         }

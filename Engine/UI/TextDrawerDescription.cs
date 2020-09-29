@@ -55,6 +55,15 @@ namespace Engine.UI
         /// Generates a new description
         /// </summary>
         /// <param name="fontFamilyName">Comma separated font family name list</param>
+        /// <returns>Returns the new generated description</returns>
+        public static TextDrawerDescription FromFamily(string fontFamilyName)
+        {
+            return FromFamily(fontFamilyName, DefaultSize, FontMapStyles.Regular, Color.White, Color.Transparent);
+        }
+        /// <summary>
+        /// Generates a new description
+        /// </summary>
+        /// <param name="fontFamilyName">Comma separated font family name list</param>
         /// <param name="size">Size</param>
         /// <returns>Returns the new generated description</returns>
         public static TextDrawerDescription FromFamily(string fontFamilyName, int size)
@@ -317,10 +326,10 @@ namespace Engine.UI
         public TextDrawerDescription()
             : base()
         {
-            this.CastShadow = false;
-            this.DeferredEnabled = false;
-            this.DepthEnabled = false;
-            this.BlendMode = BlendModes.Alpha;
+            CastShadow = false;
+            DeferredEnabled = false;
+            DepthEnabled = false;
+            BlendMode = BlendModes.Alpha;
         }
     }
 

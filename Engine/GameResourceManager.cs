@@ -58,13 +58,13 @@ namespace Engine
         {
             if (contentLoaders.ContainsKey(extension))
             {
-                Logger.WriteWarning($"Extension {extension} is currently registered.");
+                Logger.WriteWarning(nameof(GameResourceManager), $"Extension {extension} is currently registered.");
                 return false;
             }
 
             if (!contentLoaders.TryAdd(extension, loaderDelegate))
             {
-                Logger.WriteWarning($"Cannot get {extension} loader delegate from concurrent delegate.");
+                Logger.WriteWarning(nameof(GameResourceManager), $"Cannot get {extension} loader delegate from concurrent delegate.");
                 return false;
             }
 
@@ -81,7 +81,7 @@ namespace Engine
 
             if (!contentLoaders.ContainsKey(extension))
             {
-                Logger.WriteWarning($"Extension {extension} is not registered. A valid content loader must be added first.");
+                Logger.WriteWarning(nameof(GameResourceManager), $"Extension {extension} is not registered. A valid content loader must be added first.");
                 return null;
             }
 
@@ -91,7 +91,7 @@ namespace Engine
             }
             else
             {
-                Logger.WriteWarning($"Cannot get {extension} loader delegate from concurrent delegate.");
+                Logger.WriteWarning(nameof(GameResourceManager), $"Cannot get {extension} loader delegate from concurrent delegate.");
 
                 return null;
             }
@@ -208,7 +208,7 @@ namespace Engine
                 // Process requests
                 foreach (var resource in pendingRequests)
                 {
-                    resource.Value.Create(this.game);
+                    resource.Value.Create(game);
 
                     resources.Add(resource.Key, resource.Value.ResourceView);
 
@@ -222,7 +222,7 @@ namespace Engine
             }
             catch (Exception ex)
             {
-                Logger.WriteError($"Error creating new resources: {ex.Message}", ex);
+                Logger.WriteError(this, $"Error creating new resources: {ex.Message}", ex);
             }
             finally
             {
@@ -231,10 +231,17 @@ namespace Engine
                 callback?.Invoke();
             }
         }
+        /// <summary>
+        /// Gets the pending requests
+        /// </summary>
         private IEnumerable<KeyValuePair<string, IGameResourceRequest>> GetPendingRequests()
         {
             return requestedResources.ToArray();
         }
+        /// <summary>
+        /// Removes the specified requests keys
+        /// </summary>
+        /// <param name="requestKeys">Request keys list</param>
         private void RemoveRequests(IEnumerable<string> requestKeys)
         {
             foreach (string key in requestKeys)
@@ -260,8 +267,8 @@ namespace Engine
                 Dynamic = dynamic,
             };
 
-            resource.Create(this.game);
-            this.SetGlobalResource(name, resource.ResourceView);
+            resource.Create(game);
+            SetGlobalResource(name, resource.ResourceView);
             return resource.ResourceView;
         }
         /// <summary>
@@ -281,8 +288,8 @@ namespace Engine
                 Dynamic = dynamic,
             };
 
-            resource.Create(this.game);
-            this.SetGlobalResource(name, resource.ResourceView);
+            resource.Create(game);
+            SetGlobalResource(name, resource.ResourceView);
             return resource.ResourceView;
         }
         /// <summary>
@@ -302,8 +309,8 @@ namespace Engine
                 Dynamic = dynamic,
             };
 
-            resource.Create(this.game);
-            this.SetGlobalResource(name, resource.ResourceView);
+            resource.Create(game);
+            SetGlobalResource(name, resource.ResourceView);
             return resource.ResourceView;
         }
         /// <summary>
@@ -324,8 +331,8 @@ namespace Engine
                 Dynamic = dynamic,
             };
 
-            resource.Create(this.game);
-            this.SetGlobalResource(name, resource.ResourceView);
+            resource.Create(game);
+            SetGlobalResource(name, resource.ResourceView);
             return resource.ResourceView;
         }
         /// <summary>
@@ -349,8 +356,8 @@ namespace Engine
                 Dynamic = dynamic,
             };
 
-            resource.Create(this.game);
-            this.SetGlobalResource(name, resource.ResourceView);
+            resource.Create(game);
+            SetGlobalResource(name, resource.ResourceView);
             return resource.ResourceView;
         }
         /// <summary>
@@ -360,16 +367,16 @@ namespace Engine
         /// <param name="resource">Resource content</param>
         private void SetGlobalResource(string name, EngineShaderResourceView resource)
         {
-            if (this.globalResources.ContainsKey(name))
+            if (globalResources.ContainsKey(name))
             {
-                var cRes = this.globalResources[name];
+                var cRes = globalResources[name];
                 var srv = cRes.GetResource();
                 srv?.Dispose();
                 cRes.SetResource(resource.GetResource());
             }
             else
             {
-                this.globalResources.Add(name, resource);
+                globalResources.Add(name, resource);
             }
         }
 
@@ -382,7 +389,7 @@ namespace Engine
         /// <returns>Returns the engine shader resource view</returns>
         public EngineShaderResourceView RequestResource(ImageContent imageContent, bool mipAutogen = true, bool dynamic = false)
         {
-            var existingResource = this.TryGetResource(imageContent, out string resourceKey);
+            var existingResource = TryGetResource(imageContent, out string resourceKey);
             if (existingResource != null)
             {
                 return existingResource;
@@ -441,9 +448,9 @@ namespace Engine
         public EngineShaderResourceView RequestResource<T>(Guid identifier, IEnumerable<T> values, int size, bool dynamic = false) where T : struct
         {
             string resourceKey = identifier.ToByteArray().GetMd5Sum();
-            if (this.resources.ContainsKey(resourceKey))
+            if (resources.ContainsKey(resourceKey))
             {
-                return this.resources[resourceKey];
+                return resources[resourceKey];
             }
 
             if (requestedResources.ContainsKey(resourceKey))
@@ -478,9 +485,9 @@ namespace Engine
         public EngineShaderResourceView RequestResource(Guid identifier, int size, float min, float max, int seed = 0, bool dynamic = false)
         {
             string resourceKey = identifier.ToByteArray().GetMd5Sum();
-            if (this.resources.ContainsKey(resourceKey))
+            if (resources.ContainsKey(resourceKey))
             {
-                return this.resources[resourceKey];
+                return resources[resourceKey];
             }
 
             if (requestedResources.ContainsKey(resourceKey))
@@ -538,11 +545,11 @@ namespace Engine
 
             if (!string.IsNullOrWhiteSpace(imageContent.Path))
             {
-                return this.TryGet(imageContent.Path, out key);
+                return TryGet(imageContent.Path, out key);
             }
             else if (imageContent.Stream != null)
             {
-                return this.TryGet(imageContent.Stream, out key);
+                return TryGet(imageContent.Stream, out key);
             }
 
             return null;
@@ -559,11 +566,11 @@ namespace Engine
 
             if (imageContent.Paths.Any())
             {
-                return this.TryGet(imageContent.Paths, out key);
+                return TryGet(imageContent.Paths, out key);
             }
             else if (imageContent.Streams.Any())
             {
-                return this.TryGet(imageContent.Streams, out key);
+                return TryGet(imageContent.Streams, out key);
             }
 
             return null;
@@ -582,22 +589,22 @@ namespace Engine
             {
                 if (imageContent.Paths.Any())
                 {
-                    return this.TryGet(imageContent.Paths, out key);
+                    return TryGet(imageContent.Paths, out key);
                 }
                 else if (imageContent.Streams.Any())
                 {
-                    return this.TryGet(imageContent.Streams, out key);
+                    return TryGet(imageContent.Streams, out key);
                 }
             }
             else
             {
                 if (!string.IsNullOrWhiteSpace(imageContent.Path))
                 {
-                    return this.TryGet(imageContent.Path, out key);
+                    return TryGet(imageContent.Path, out key);
                 }
                 else if (imageContent.Stream != null)
                 {
-                    return this.TryGet(imageContent.Stream, out key);
+                    return TryGet(imageContent.Stream, out key);
                 }
             }
 
@@ -612,12 +619,12 @@ namespace Engine
         private EngineShaderResourceView TryGet(string path, out string key)
         {
             key = path;
-            if (!this.resources.ContainsKey(key))
+            if (!resources.ContainsKey(key))
             {
                 return null;
             }
 
-            return this.resources[key];
+            return resources[key];
         }
         /// <summary>
         /// Trys to get a resource by content
@@ -628,13 +635,13 @@ namespace Engine
         private EngineShaderResourceView TryGet(MemoryStream stream, out string key)
         {
             key = stream.GetMd5Sum();
-            if (!this.resources.ContainsKey(key))
+            if (!resources.ContainsKey(key))
             {
                 stream.Position = 0;
                 return null;
             }
 
-            return this.resources[key];
+            return resources[key];
         }
         /// <summary>
         /// Trys to get a resource by content
@@ -645,12 +652,12 @@ namespace Engine
         private EngineShaderResourceView TryGet(IEnumerable<string> paths, out string key)
         {
             key = paths.GetMd5Sum();
-            if (!this.resources.ContainsKey(key))
+            if (!resources.ContainsKey(key))
             {
                 return null;
             }
 
-            return this.resources[key];
+            return resources[key];
         }
         /// <summary>
         /// Trys to get a resource by content
@@ -661,12 +668,12 @@ namespace Engine
         private EngineShaderResourceView TryGet(IEnumerable<MemoryStream> streams, out string key)
         {
             key = streams.GetMd5Sum();
-            if (!this.resources.ContainsKey(key))
+            if (!resources.ContainsKey(key))
             {
                 return null;
             }
 
-            return this.resources[key];
+            return resources[key];
         }
     }
 }

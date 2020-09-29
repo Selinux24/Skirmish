@@ -12,6 +12,10 @@ namespace Engine
         /// </summary>
         public DateTime EventDate { get; set; }
         /// <summary>
+        /// Caller type name
+        /// </summary>
+        public string CallerTypeName { get; set; }
+        /// <summary>
         /// Text
         /// </summary>
         public string Text { get; set; }

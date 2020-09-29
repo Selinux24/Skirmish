@@ -75,8 +75,8 @@ namespace Engine
             /// <param name="drawingData">Drawing data</param>
             public SceneryPatch(Game game, DrawingData drawingData)
             {
-                this.Game = game;
-                this.DrawingData = drawingData;
+                Game = game;
+                DrawingData = drawingData;
             }
             /// <summary>
             /// Destructor
@@ -102,8 +102,8 @@ namespace Engine
             {
                 if (disposing)
                 {
-                    this.DrawingData?.Dispose();
-                    this.DrawingData = null;
+                    DrawingData?.Dispose();
+                    DrawingData = null;
                 }
             }
             /// <summary>
@@ -113,11 +113,11 @@ namespace Engine
             /// <param name="bufferManager">Buffer manager</param>
             public void DrawSceneryShadows(IShadowMapDrawer sceneryEffect, BufferManager bufferManager)
             {
-                var graphics = this.Game.Graphics;
+                var graphics = Game.Graphics;
 
-                foreach (string meshName in this.DrawingData.Meshes.Keys)
+                foreach (string meshName in DrawingData.Meshes.Keys)
                 {
-                    var meshDict = this.DrawingData.Meshes[meshName];
+                    var meshDict = DrawingData.Meshes[meshName];
 
                     foreach (string materialName in meshDict.Keys)
                     {
@@ -127,7 +127,7 @@ namespace Engine
                             continue;
                         }
 
-                        var material = this.DrawingData.Materials[materialName];
+                        var material = DrawingData.Materials[materialName];
 
                         var technique = sceneryEffect.GetTechnique(mesh.VertextType, false, material.Material.IsTransparent);
 
@@ -153,12 +153,12 @@ namespace Engine
             /// <param name="bufferManager">Buffer manager</param>
             public void DrawScenery(DrawContext context, IGeometryDrawer sceneryEffect, BufferManager bufferManager)
             {
-                var graphics = this.Game.Graphics;
+                var graphics = Game.Graphics;
                 int count = 0;
 
-                foreach (string meshName in this.DrawingData.Meshes.Keys)
+                foreach (string meshName in DrawingData.Meshes.Keys)
                 {
-                    var meshDict = this.DrawingData.Meshes[meshName];
+                    var meshDict = DrawingData.Meshes[meshName];
 
                     foreach (string materialName in meshDict.Keys)
                     {
@@ -168,7 +168,7 @@ namespace Engine
                             continue;
                         }
 
-                        var material = this.DrawingData.Materials[materialName];
+                        var material = DrawingData.Materials[materialName];
 
                         bool draw = context.ValidateDraw(BlendModes.Default, material.Material.IsTransparent);
                         if (!draw)
@@ -206,13 +206,13 @@ namespace Engine
             {
                 List<MeshMaterial> matList = new List<MeshMaterial>();
 
-                foreach (string meshName in this.DrawingData.Meshes.Keys)
+                foreach (string meshName in DrawingData.Meshes.Keys)
                 {
-                    var dictionary = this.DrawingData.Meshes[meshName];
+                    var dictionary = DrawingData.Meshes[meshName];
 
                     foreach (string material in dictionary.Keys)
                     {
-                        matList.Add(this.DrawingData.Materials[material]);
+                        matList.Add(DrawingData.Materials[material]);
                     }
                 }
 
@@ -256,7 +256,7 @@ namespace Engine
         {
             get
             {
-                var matList = this.patchDictionary.Values.SelectMany(v => v?.GetMaterials() ?? new MeshMaterial[] { }).ToArray();
+                var matList = patchDictionary.Values.SelectMany(v => v?.GetMaterials() ?? new MeshMaterial[] { }).ToArray();
 
                 return matList;
             }
@@ -268,7 +268,7 @@ namespace Engine
         {
             get
             {
-                return this.visibleNodes?.Length ?? 0;
+                return visibleNodes?.Length ?? 0;
             }
         }
         /// <summary>
@@ -294,9 +294,9 @@ namespace Engine
             var nodes = groundPickingQuadtree.GetLeafNodes();
             foreach (var node in nodes)
             {
-                var patch = SceneryPatch.CreatePatch(this.Game, description.Name, content, node);
+                var patch = SceneryPatch.CreatePatch(Game, description.Name, content, node);
 
-                this.patchDictionary.Add(node.Id, patch);
+                patchDictionary.Add(node.Id, patch);
             }
 
             // Retrieve lights from content
@@ -335,7 +335,7 @@ namespace Engine
                 return true;
             }
 
-            visibleNodes = this.groundPickingQuadtree.GetNodesInVolume(volume).ToArray();
+            visibleNodes = groundPickingQuadtree.GetNodesInVolume(volume).ToArray();
             if (!visibleNodes.Any())
             {
                 return true;
@@ -373,10 +373,10 @@ namespace Engine
 
             foreach (var node in visibleNodes)
             {
-                if (!this.patchDictionary.ContainsKey(node.Id))
+                if (!patchDictionary.ContainsKey(node.Id))
                 {
                     // Reserve position
-                    this.patchDictionary.Add(node.Id, null);
+                    patchDictionary.Add(node.Id, null);
 
                     // Add creation task
                     taskList.Add(LoadPatch(node));
@@ -405,9 +405,9 @@ namespace Engine
 
             foreach (var node in visibleNodes)
             {
-                if (this.patchDictionary.ContainsKey(node.Id))
+                if (patchDictionary.ContainsKey(node.Id))
                 {
-                    this.patchDictionary[node.Id]?.DrawSceneryShadows(sceneryEffect, this.BufferManager);
+                    patchDictionary[node.Id]?.DrawSceneryShadows(sceneryEffect, BufferManager);
                 }
             }
         }
@@ -429,9 +429,9 @@ namespace Engine
 
             foreach (var node in visibleNodes)
             {
-                if (this.patchDictionary.ContainsKey(node.Id))
+                if (patchDictionary.ContainsKey(node.Id))
                 {
-                    this.patchDictionary[node.Id]?.DrawScenery(context, sceneryEffect, this.BufferManager);
+                    patchDictionary[node.Id]?.DrawScenery(context, sceneryEffect, BufferManager);
                 }
             }
         }
@@ -468,7 +468,7 @@ namespace Engine
             // Fire and forget
             Task.Run(async () =>
             {
-                await this.Scene.LoadResourcesAsync(
+                await Scene.LoadResourcesAsync(
                     taskList,
                     (result) =>
                     {
@@ -477,12 +477,12 @@ namespace Engine
                             // Assign patch to dictionary
                             if (res.Completed)
                             {
-                                this.patchDictionary[res.Result.Id] = res.Result.Patch;
+                                patchDictionary[res.Result.Id] = res.Result.Patch;
                             }
                             else
                             {
-                                this.patchDictionary.Remove(res.Result.Id);
-                                Logger.WriteError($"Error creating patch {res.Result.Id}: {res.Exception.Message}", res.Exception);
+                                patchDictionary.Remove(res.Result.Id);
+                                Logger.WriteError(this, $"Error creating patch {res.Result.Id}: {res.Exception.Message}", res.Exception);
                             }
                         }
                     });
@@ -498,7 +498,7 @@ namespace Engine
             SceneryPatchTask res = new SceneryPatchTask
             {
                 Id = node.Id,
-                Patch = SceneryPatch.CreatePatch(this.Game, this.Description.Name, content, node),
+                Patch = SceneryPatch.CreatePatch(Game, Description.Name, content, node),
             };
 
             return await Task.FromResult(res);

@@ -147,14 +147,6 @@ namespace Engine
             }
         }
 
-        public bool HasChanged
-        {
-            get
-            {
-                return updateTriangles;
-            }
-        }
-
         /// <summary>
         /// Constructor
         /// </summary>
@@ -205,6 +197,11 @@ namespace Engine
 
             var drawData = model.GetDrawingData(LevelOfDetail.High);
             Lights = drawData?.Lights.Select(l => l.Clone()).ToArray() ?? new ISceneLight[] { };
+
+            AnimationController.AnimationOffsetChanged += (s, a) =>
+            {
+                InvalidateCache();
+            };
         }
 
         /// <summary>
@@ -278,6 +275,8 @@ namespace Engine
         /// </summary>
         public void InvalidateCache()
         {
+            Logger.WriteTrace(this, $"ModelInstance InvalidateCache");
+
             updatePoints = true;
             updateTriangles = true;
 
@@ -291,7 +290,9 @@ namespace Engine
         /// <returns>Returns null or position list</returns>
         public IEnumerable<Vector3> GetPoints(bool refresh = false)
         {
-            if (refresh || updatePoints)
+            bool update = refresh || updatePoints;
+
+            if (update)
             {
                 var drawingData = model.GetDrawingData(model.GetLODMinimum());
                 if (drawingData == null)
@@ -306,13 +307,13 @@ namespace Engine
                     cache = drawingData.GetPoints(
                         Manipulator.LocalTransform,
                         AnimationController.GetCurrentPose(drawingData.SkinningData),
-                        refresh);
+                        update);
                 }
                 else
                 {
                     cache = drawingData.GetPoints(
                         Manipulator.LocalTransform,
-                        refresh);
+                        update);
                 }
 
                 positionCache = cache.ToArray();
@@ -329,7 +330,9 @@ namespace Engine
         /// <returns>Returns null or triangle list</returns>
         public IEnumerable<Triangle> GetTriangles(bool refresh = false)
         {
-            if (refresh || updateTriangles)
+            bool update = refresh || updateTriangles;
+
+            if (update)
             {
                 var drawingData = model.GetDrawingData(model.GetLODMinimum());
                 if (drawingData == null)
@@ -344,13 +347,13 @@ namespace Engine
                     cache = drawingData.GetTriangles(
                         Manipulator.LocalTransform,
                         AnimationController.GetCurrentPose(drawingData.SkinningData),
-                        refresh);
+                        update);
                 }
                 else
                 {
                     cache = drawingData.GetTriangles(
                         Manipulator.LocalTransform,
-                        refresh);
+                        update);
                 }
 
                 triangleCache = cache.ToArray();
@@ -363,17 +366,9 @@ namespace Engine
         /// <summary>
         /// Gets bounding sphere
         /// </summary>
-        /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
-        public BoundingSphere GetBoundingSphere()
-        {
-            return GetBoundingSphere(false);
-        }
-        /// <summary>
-        /// Gets bounding sphere
-        /// </summary>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
-        public BoundingSphere GetBoundingSphere(bool refresh)
+        public BoundingSphere GetBoundingSphere(bool refresh = false)
         {
             if (refresh || boundingSphere == null)
             {
@@ -389,17 +384,9 @@ namespace Engine
         /// <summary>
         /// Gets bounding box
         /// </summary>
-        /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
-        public BoundingBox GetBoundingBox()
-        {
-            return GetBoundingBox(false);
-        }
-        /// <summary>
-        /// Gets bounding box
-        /// </summary>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
-        public BoundingBox GetBoundingBox(bool refresh)
+        public BoundingBox GetBoundingBox(bool refresh = false)
         {
             if (refresh || boundingBox == null)
             {

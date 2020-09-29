@@ -278,7 +278,7 @@ namespace Engine
             particles[currentParticleIndex].RandomValues = randomValues;
             particles[currentParticleIndex].MaxAge = Emitter.TotalTime;
 
-            Logger.WriteTrace($"{Name} - AddParticle WriteDiscardBuffer");
+            Logger.WriteTrace(this, $"{Name} - AddParticle WriteDiscardBuffer");
             Game.Graphics.WriteDiscardBuffer(buffer.VertexBuffer, particles);
 
             currentParticleIndex = nextFreeParticle;

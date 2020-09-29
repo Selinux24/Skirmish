@@ -109,7 +109,7 @@ namespace GameLogic.Rules
 
         private static IEnumerable<ActionSpecification> GetListForTeam(Team team)
         {
-            Logger.WriteDebug($"{team?.Name}");
+            Logger.WriteDebug(nameof(ActionsManager), $"{team?.Name}");
 
             return new ActionSpecification[] { };
         }

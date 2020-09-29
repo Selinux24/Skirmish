@@ -189,7 +189,7 @@ namespace Engine.Audio
             voiceInputChannels = audioFile.WaveFormat.Channels;
 
             // Create the source voice
-            sourceVoice = audioState.CreateSourceVoice(this.audioFile.WaveFormat, true);
+            sourceVoice = audioState.CreateSourceVoice(audioFile.WaveFormat, true);
             sourceVoice.BufferEnd += SourceVoiceBufferEnd;
 
             // LPF direct-path
@@ -258,7 +258,7 @@ namespace Engine.Audio
 
                 string fileName = audioFile?.FileName ?? "AlreadyDisposed.file";
 
-                Logger.WriteTrace($"{fileName} Dispose Begin");
+                Logger.WriteTrace(this, $"{fileName} Dispose Begin");
 
                 if (sourceVoice?.IsDisposed != true)
                 {
@@ -275,7 +275,7 @@ namespace Engine.Audio
 
                 audioFile?.Dispose();
 
-                Logger.WriteTrace($"{fileName} Dispose End");
+                Logger.WriteTrace(this, $"{fileName} Dispose End");
             }
         }
 
@@ -413,7 +413,7 @@ namespace Engine.Audio
                 {
                     if (playEvent.WaitOne(WaitPrecision))
                     {
-                        Logger.WriteTrace("playEvent.WaitOne - Waiting for play");
+                        Logger.WriteTrace(this, "playEvent.WaitOne - Waiting for play");
                         break;
                     }
                 }
@@ -522,7 +522,7 @@ namespace Engine.Audio
             {
                 clock.Restart();
 
-                Logger.WriteTrace("waitForPlayToOutput.Set (First time)");
+                Logger.WriteTrace(this, "waitForPlayToOutput.Set (First time)");
                 waitForPlayToOutput.Set();
             }
 
@@ -549,7 +549,7 @@ namespace Engine.Audio
                 // While the player is not stopped, wait for the play event
                 if (playEvent.WaitOne(WaitPrecision))
                 {
-                    Logger.WriteTrace("playEvent.WaitOne - Waiting for play");
+                    Logger.WriteTrace(this, "playEvent.WaitOne - Waiting for play");
                     break;
                 }
             }
@@ -563,7 +563,7 @@ namespace Engine.Audio
             {
                 bufferEndEvent.WaitOne(WaitPrecision);
             }
-            Logger.WriteTrace("bufferEndEvent.WaitOne - Load new buffer");
+            Logger.WriteTrace(this, "bufferEndEvent.WaitOne - Load new buffer");
         }
 
         /// <summary>
