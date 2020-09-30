@@ -59,6 +59,38 @@ namespace Engine.Animation
         public uint ResourceSize { get; set; } = 0;
 
         /// <summary>
+        /// Initializes the animation dictionary
+        /// </summary>
+        /// <param name="jointAnimations">Joint list</param>
+        /// <param name="animationDescription">Animation description</param>
+        private static Dictionary<string, JointAnimation[]> InitializeAnimationDictionary(JointAnimation[] jointAnimations, AnimationDescription animationDescription)
+        {
+            Dictionary<string, JointAnimation[]> dictAnimations = new Dictionary<string, JointAnimation[]>();
+
+            foreach (var clip in animationDescription.Clips)
+            {
+                JointAnimation[] ja = new JointAnimation[jointAnimations.Length];
+                for (int c = 0; c < ja.Length; c++)
+                {
+                    Keyframe[] kfs = new Keyframe[clip.To - clip.From + 1];
+                    Array.Copy(jointAnimations[c].Keyframes, clip.From, kfs, 0, kfs.Length);
+
+                    float dTime = kfs[0].Time;
+                    for (int k = 0; k < kfs.Length; k++)
+                    {
+                        kfs[k].Time -= dTime;
+                    }
+
+                    ja[c] = new JointAnimation(jointAnimations[c].Joint, kfs);
+                }
+
+                dictAnimations.Add(clip.Name, ja);
+            }
+
+            return dictAnimations;
+        }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="skeleton">Skeleton</param>
@@ -78,27 +110,7 @@ namespace Engine.Animation
             {
                 TimeStep = animationDescription.TimeStep > 0 ? animationDescription.TimeStep : FixedTimeStep;
 
-                Dictionary<string, JointAnimation[]> dictAnimations = new Dictionary<string, JointAnimation[]>();
-
-                foreach (var clip in animationDescription.Clips)
-                {
-                    JointAnimation[] ja = new JointAnimation[jointAnimations.Length];
-                    for (int c = 0; c < ja.Length; c++)
-                    {
-                        Keyframe[] kfs = new Keyframe[clip.To - clip.From + 1];
-                        Array.Copy(jointAnimations[c].Keyframes, clip.From, kfs, 0, kfs.Length);
-
-                        float dTime = kfs[0].Time;
-                        for (int k = 0; k < kfs.Length; k++)
-                        {
-                            kfs[k].Time -= dTime;
-                        }
-
-                        ja[c] = new JointAnimation(jointAnimations[c].Joint, kfs);
-                    }
-
-                    dictAnimations.Add(clip.Name, ja);
-                }
+                var dictAnimations = InitializeAnimationDictionary(jointAnimations, animationDescription);
 
                 foreach (var key in dictAnimations.Keys)
                 {

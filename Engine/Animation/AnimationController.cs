@@ -388,8 +388,8 @@ namespace Engine.Animation
         {
             StringBuilder res = new StringBuilder("Inactive");
 
-            res.Append(CurrentPath?.ItemList?.ToArray().Join(", ") ?? string.Empty);
-            res.Append(NextPath?.ItemList?.ToArray().Join(", ") ?? string.Empty);
+            res.Append(CurrentPath?.GetItemList() ?? string.Empty);
+            res.Append(NextPath?.GetItemList() ?? string.Empty);
 
             return res.ToString();
         }

@@ -74,17 +74,6 @@ namespace Engine.Animation
                 return items.ElementAtOrDefault(currentIndex);
             }
         }
-        /// <summary>
-        /// Gets the clip names into a strings array
-        /// </summary>
-        /// <returns>Returns the clip names of the path</returns>
-        public IEnumerable<string> ItemList
-        {
-            get
-            {
-                return items.Select(i => i.ClipName).ToArray();
-            }
-        }
 
         /// <summary>
         /// Constructor
@@ -318,6 +307,16 @@ namespace Engine.Animation
             return null;
         }
 
+        /// <summary>
+        /// Gets the clip names into a comma separated list
+        /// </summary>
+        /// <returns>Returns the clip names of the path</returns>
+        public string GetItemList()
+        {
+            string[] itemList = items.Select(i => i.ClipName).ToArray();
+
+            return itemList.Join(", ");
+        }
         /// <summary>
         /// Creates a copy of the current path
         /// </summary>

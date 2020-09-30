@@ -12,10 +12,6 @@ namespace Engine.UI
     public class UIConsole : UITextArea
     {
         /// <summary>
-        /// Back panel
-        /// </summary>
-        private readonly Sprite background = null;
-        /// <summary>
         /// Log lines
         /// </summary>
         private int logLines;
@@ -75,7 +71,7 @@ namespace Engine.UI
 
             if (description.Background != null)
             {
-                background = new Sprite(scene, description.Background)
+                var background = new Sprite(scene, description.Background)
                 {
                     Name = $"{description.Name}.Background",
                     FitWithParent = true,
