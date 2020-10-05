@@ -8,6 +8,19 @@ namespace Engine.UI
     public class UIPanelDescription : UIControlDescription
     {
         /// <summary>
+        /// Gets a new transparent panel description
+        /// </summary>
+        public static UIPanelDescription Transparent
+        {
+            get
+            {
+                return new UIPanelDescription()
+                {
+                    Background = SpriteDescription.Default(Color.Transparent),
+                };
+            }
+        }
+        /// <summary>
         /// Gets the default panel description
         /// </summary>
         /// <param name="color">Tint color</param>

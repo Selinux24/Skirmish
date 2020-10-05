@@ -64,6 +64,7 @@ namespace Engine.Content.FmtCollada
             string[] meshesByLOD = content.LODMeshes;
             var animation = content.Animation;
             bool useControllerTransform = content.UseControllerTransform;
+            bool bakeTransforms = content.BakeTransforms;
 
             var modelList = ContentManager.FindContent(contentFolder, fileName);
             if (modelList?.Any() == true)
@@ -84,7 +85,7 @@ namespace Engine.Content.FmtCollada
                     ProcessLibraryControllers(dae, modelContent);
 
                     //Scene Relations
-                    ProcessVisualScene(dae, transform, useControllerTransform, modelContent);
+                    ProcessVisualScene(dae, transform, useControllerTransform, bakeTransforms, modelContent);
 
                     //Animations
                     ProcessLibraryAnimations(dae, modelContent, animation);
@@ -1356,8 +1357,9 @@ namespace Engine.Content.FmtCollada
         /// <param name="dae">Dae object</param>
         /// <param name="transform">Parent transform</param>
         /// <param name="useControllerTransform">Use parent controller transform</param>
+        /// <param name="bakeTransforms">Bake transforms into sub-meshes</param>
         /// <param name="modelContent">Model content</param>
-        private static void ProcessVisualScene(Collada dae, Matrix transform, bool useControllerTransform, ModelContent modelContent)
+        private static void ProcessVisualScene(Collada dae, Matrix transform, bool useControllerTransform, bool bakeTransforms, ModelContent modelContent)
         {
             if (dae.Scene.InstanceVisualScene != null)
             {
@@ -1370,6 +1372,7 @@ namespace Engine.Content.FmtCollada
                         vScene.Nodes,
                         transform,
                         useControllerTransform,
+                        bakeTransforms,
                         modelContent);
                 }
             }
@@ -1380,8 +1383,9 @@ namespace Engine.Content.FmtCollada
         /// <param name="nodes">Node list</param>
         /// <param name="transform">Parent transform</param>
         /// <param name="useControllerTransform">Use parent controller transform</param>
+        /// <param name="bakeTransforms">Bake transforms into sub-meshes</param>
         /// <param name="modelContent">Model content</param>
-        private static void ProcessSceneNodes(IEnumerable<Node> nodes, Matrix transform, bool useControllerTransform, ModelContent modelContent)
+        private static void ProcessSceneNodes(IEnumerable<Node> nodes, Matrix transform, bool useControllerTransform, bool bakeTransforms, ModelContent modelContent)
         {
             foreach (var node in nodes.Where(n => !n.IsArmature && !n.HasController))
             {
@@ -1397,19 +1401,19 @@ namespace Engine.Content.FmtCollada
                 else if (node.HasGeometry)
                 {
                     //Geometry nodes
-                    ProcessSceneNodeGeometry(trn, node, modelContent);
+                    ProcessSceneNodeGeometry(trn, node, modelContent, bakeTransforms);
                 }
                 else
                 {
                     procChilds = false;
 
                     //Default node
-                    ProcessSceneNodeDefault(trn, node, modelContent);
+                    ProcessSceneNodeDefault(trn, node, modelContent, bakeTransforms);
                 }
 
                 if (procChilds && node.Nodes?.Length > 0)
                 {
-                    ProcessSceneNodes(node.Nodes, trn, true, modelContent);
+                    ProcessSceneNodes(node.Nodes, bakeTransforms ? trn : transform, true, bakeTransforms, modelContent);
                 }
             }
 
@@ -1445,7 +1449,8 @@ namespace Engine.Content.FmtCollada
         /// <param name="trn">Transform</param>
         /// <param name="node">Node</param>
         /// <param name="modelContent">Model content</param>
-        private static void ProcessSceneNodeGeometry(Matrix trn, Node node, ModelContent modelContent)
+        /// <param name="bakeTransforms">Bake transforms into sub-meshes</param>
+        private static void ProcessSceneNodeGeometry(Matrix trn, Node node, ModelContent modelContent, bool bakeTransforms)
         {
             if (!trn.IsIdentity && node.InstanceGeometry?.Length > 0)
             {
@@ -1455,7 +1460,14 @@ namespace Engine.Content.FmtCollada
 
                     foreach (var submesh in modelContent.Geometry[meshName].Values)
                     {
-                        submesh.Transform(trn);
+                        if (bakeTransforms)
+                        {
+                            submesh.ApplyTransform(trn);
+                        }
+                        else
+                        {
+                            submesh.Transform = trn;
+                        }
                     }
                 }
             }
@@ -1466,7 +1478,8 @@ namespace Engine.Content.FmtCollada
         /// <param name="trn">Transform</param>
         /// <param name="node">Node</param>
         /// <param name="modelContent">Model content</param>
-        private static void ProcessSceneNodeDefault(Matrix trn, Node node, ModelContent modelContent)
+        /// <param name="bakeTransforms">Bake transforms into sub-meshes</param>
+        private static void ProcessSceneNodeDefault(Matrix trn, Node node, ModelContent modelContent, bool bakeTransforms)
         {
             if (node.Nodes?.Any() != true)
             {
@@ -1485,7 +1498,14 @@ namespace Engine.Content.FmtCollada
 
                         foreach (var submesh in modelContent.Geometry[meshName].Values)
                         {
-                            submesh.Transform(childTrn);
+                            if (bakeTransforms)
+                            {
+                                submesh.ApplyTransform(childTrn);
+                            }
+                            else
+                            {
+                                submesh.Transform = childTrn;
+                            }
                         }
                     }
                 }

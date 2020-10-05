@@ -227,6 +227,7 @@ namespace Engine.Common
                     Mesh nMesh = new Mesh(
                         meshName,
                         geometry.Topology,
+                        geometry.Transform,
                         vertexList,
                         indices);
 
@@ -664,6 +665,20 @@ namespace Engine.Common
             }
 
             return triangles.ToArray();
+        }
+
+        /// <summary>
+        /// Gets the first mesh by mesh name
+        /// </summary>
+        /// <param name="name">Name</param>
+        public Mesh GetMeshByName(string name)
+        {
+            if (!Meshes.ContainsKey(name))
+            {
+                return null;
+            }
+
+            return Meshes[name].Values.FirstOrDefault();
         }
     }
 }

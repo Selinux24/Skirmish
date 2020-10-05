@@ -145,7 +145,9 @@ namespace Engine
 
                 for (int i = 0; i < description.TransformNames.Length; i++)
                 {
-                    ModelParts.Add(new ModelPart(description.TransformNames[i]));
+                    var thisName = description.TransformNames[i];
+                    var part = new ModelPart(thisName);
+                    ModelParts.Add(part);
                 }
 
                 for (int i = 0; i < description.TransformNames.Length; i++)
@@ -177,6 +179,20 @@ namespace Engine
             Lights = drawData?.Lights.Select(l => l.Clone()).ToArray() ?? new ISceneLight[] { };
 
             AnimationController.AnimationOffsetChanged += (s, a) => { InvalidateCache(); };
+
+            for (int i = 0; i < ModelParts.Count; i++)
+            {
+                var thisName = ModelParts[i].Name;
+
+                var mesh = drawData?.GetMeshByName(thisName);
+                if (mesh == null)
+                {
+                    continue;
+                }
+
+                var part = ModelParts.First(p => p.Name == thisName);
+                part.Manipulator.SetTransform(mesh.Transform);
+            }
         }
 
         /// <inheritdoc/>
@@ -438,15 +454,13 @@ namespace Engine
         /// <returns>Retusn the transform of the specified transform name</returns>
         public Matrix GetTransformByName(string name)
         {
-            var part = ModelParts.Find(p => p.Name == name);
+            var part = ModelParts.FirstOrDefault(p => p.Name == name);
             if (part != null)
             {
                 return part.Manipulator.FinalTransform;
             }
-            else
-            {
-                return Manipulator.FinalTransform;
-            }
+
+            return Manipulator.FinalTransform;
         }
 
         /// <summary>

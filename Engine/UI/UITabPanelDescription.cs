@@ -1,4 +1,6 @@
 ﻿using SharpDX;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.UI
 {
@@ -31,6 +33,20 @@ namespace Engine.UI
                 Tabs = tabs,
                 BaseColor = Color.Transparent,
             };
+        }
+        /// <summary>
+        /// Gets the default tab panel description
+        /// </summary>
+        /// <param name="tabCaptions">Tab captions</param>
+        /// <param name="backgroundColor">Back color</param>
+        /// <param name="baseColor">Control color</param>
+        /// <param name="selectedColor">Highlight color</param>
+        public static UITabPanelDescription Default(string[] tabCaptions, Color4 backgroundColor, Color4 baseColor, Color4 selectedColor)
+        {
+            var desc = Default(tabCaptions.Length, backgroundColor, baseColor, selectedColor);
+            desc.Captions = tabCaptions;
+
+            return desc;
         }
 
         /// <summary>

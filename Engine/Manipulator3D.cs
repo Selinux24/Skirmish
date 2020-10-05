@@ -45,7 +45,7 @@ namespace Engine
         {
             get
             {
-                return this.position;
+                return position;
             }
         }
         /// <summary>
@@ -55,7 +55,7 @@ namespace Engine
         {
             get
             {
-                return this.scaling;
+                return scaling;
             }
         }
         /// <summary>
@@ -65,7 +65,7 @@ namespace Engine
         {
             get
             {
-                return this.rotation;
+                return rotation;
             }
         }
         /// <summary>
@@ -75,7 +75,7 @@ namespace Engine
         {
             get
             {
-                return this.localTransform;
+                return localTransform;
             }
         }
         /// <summary>
@@ -85,12 +85,12 @@ namespace Engine
         {
             get
             {
-                if (this.Parent != null)
+                if (Parent != null)
                 {
-                    return this.localTransform * this.Parent.FinalTransform;
+                    return localTransform * Parent.FinalTransform;
                 }
 
-                return this.localTransform;
+                return localTransform;
             }
         }
         /// <summary>
@@ -127,7 +127,7 @@ namespace Engine
         /// </summary>
         public Manipulator3D()
         {
-            this.UpdateLocalTransform();
+            UpdateLocalTransform();
         }
         /// <summary>
         /// Constructor
@@ -135,7 +135,7 @@ namespace Engine
         /// <param name="parent">Parent manipulator</param>
         public Manipulator3D(Manipulator3D parent) : this()
         {
-            this.Parent = parent;
+            Parent = parent;
         }
         /// <summary>
         /// Update internal state
@@ -143,7 +143,7 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         public virtual void Update(GameTime gameTime)
         {
-            this.UpdateLocalTransform();
+            UpdateLocalTransform();
         }
         /// <summary>
         /// Update internal state
@@ -151,38 +151,38 @@ namespace Engine
         /// <param name="force">If true, local transforms were forced to update</param>
         public void UpdateInternals(bool force)
         {
-            if (force) this.transformUpdateNeeded = true;
+            if (force) transformUpdateNeeded = true;
 
-            this.UpdateLocalTransform();
+            UpdateLocalTransform();
         }
         /// <summary>
         /// Update internal state
         /// </summary>
         protected void UpdateLocalTransform()
         {
-            Vector3 prePos = this.localTransform.TranslationVector;
-            this.Velocity = this.position - prePos;
+            Vector3 prePos = localTransform.TranslationVector;
+            Velocity = position - prePos;
 
-            if (this.transformUpdateNeeded)
+            if (transformUpdateNeeded)
             {
-                Matrix sca = Matrix.Scaling(this.scaling);
-                Matrix rot = Matrix.RotationQuaternion(this.rotation);
-                Matrix tra = Matrix.Translation(this.position);
+                Matrix sca = Matrix.Scaling(scaling);
+                Matrix rot = Matrix.RotationQuaternion(rotation);
+                Matrix tra = Matrix.Translation(position);
 
-                this.localTransform = sca * rot * tra;
+                localTransform = sca * rot * tra;
 
-                this.Forward = rot.Forward;
-                this.Backward = rot.Backward;
-                this.Left = rot.Left;
-                this.Right = rot.Right;
-                this.Up = rot.Up;
-                this.Down = rot.Down;
+                Forward = rot.Forward;
+                Backward = rot.Backward;
+                Left = rot.Left;
+                Right = rot.Right;
+                Up = rot.Up;
+                Down = rot.Down;
 
-                this.transformUpdateNeeded = false;
+                transformUpdateNeeded = false;
 
-                if (this.Updated != null)
+                if (Updated != null)
                 {
-                    this.Updated.Invoke(this, new EventArgs());
+                    Updated.Invoke(this, new EventArgs());
                 }
 
                 Counters.UpdatesPerFrame++;
@@ -196,9 +196,9 @@ namespace Engine
         {
             if (newLocalTransform.Decompose(out scaling, out rotation, out position))
             {
-                this.transformUpdateNeeded = true;
+                transformUpdateNeeded = true;
 
-                this.UpdateLocalTransform();
+                UpdateLocalTransform();
             }
         }
 
@@ -210,9 +210,9 @@ namespace Engine
         {
             if (d != Vector3.Zero)
             {
-                this.position += d;
+                position += d;
 
-                this.transformUpdateNeeded = true;
+                transformUpdateNeeded = true;
             }
         }
         /// <summary>
@@ -225,9 +225,9 @@ namespace Engine
         {
             if (yaw != 0f || pitch != 0f || roll != 0f)
             {
-                this.rotation *= Quaternion.RotationYawPitchRoll(yaw, pitch, roll);
+                rotation *= Quaternion.RotationYawPitchRoll(yaw, pitch, roll);
 
-                this.transformUpdateNeeded = true;
+                transformUpdateNeeded = true;
             }
         }
 
@@ -237,7 +237,7 @@ namespace Engine
         /// <param name="d">Distance</param>
         public void MoveForward(GameTime gameTime, float d = 1f)
         {
-            this.Move(this.Forward * d * gameTime.ElapsedSeconds);
+            Move(Forward * d * gameTime.ElapsedSeconds);
         }
         /// <summary>
         /// Increments position component d distance along backward vector
@@ -245,7 +245,7 @@ namespace Engine
         /// <param name="d">Distance</param>
         public void MoveBackward(GameTime gameTime, float d = 1f)
         {
-            this.Move(this.Backward * d * gameTime.ElapsedSeconds);
+            Move(Backward * d * gameTime.ElapsedSeconds);
         }
         /// <summary>
         /// Increments position component d distance along left vector
@@ -253,7 +253,7 @@ namespace Engine
         /// <param name="d">Distance</param>
         public void MoveLeft(GameTime gameTime, float d = 1f)
         {
-            this.Move(this.Left * -d * gameTime.ElapsedSeconds);
+            Move(Left * -d * gameTime.ElapsedSeconds);
         }
         /// <summary>
         /// Increments position component d distance along right vector
@@ -261,7 +261,7 @@ namespace Engine
         /// <param name="d">Distance</param>
         public void MoveRight(GameTime gameTime, float d = 1f)
         {
-            this.Move(this.Right * -d * gameTime.ElapsedSeconds);
+            Move(Right * -d * gameTime.ElapsedSeconds);
         }
         /// <summary>
         /// Increments position component d distance along up vector
@@ -269,7 +269,7 @@ namespace Engine
         /// <param name="d">Distance</param>
         public void MoveUp(GameTime gameTime, float d = 1f)
         {
-            this.Move(this.Up * d * gameTime.ElapsedSeconds);
+            Move(Up * d * gameTime.ElapsedSeconds);
         }
         /// <summary>
         /// Increments position component d distance along down vector
@@ -277,7 +277,7 @@ namespace Engine
         /// <param name="d">Distance</param>
         public void MoveDown(GameTime gameTime, float d = 1f)
         {
-            this.Move(this.Down * d * gameTime.ElapsedSeconds);
+            Move(Down * d * gameTime.ElapsedSeconds);
         }
 
         /// <summary>
@@ -286,7 +286,7 @@ namespace Engine
         /// <param name="a">Amount (radians)</param>
         public void YawLeft(GameTime gameTime, float a = Helper.Radian)
         {
-            this.Rotate(-a * gameTime.ElapsedSeconds, 0, 0);
+            Rotate(-a * gameTime.ElapsedSeconds, 0, 0);
         }
         /// <summary>
         /// Increments rotation yaw (Y) to the right
@@ -294,7 +294,7 @@ namespace Engine
         /// <param name="a">Amount (radians)</param>
         public void YawRight(GameTime gameTime, float a = Helper.Radian)
         {
-            this.Rotate(a * gameTime.ElapsedSeconds, 0, 0);
+            Rotate(a * gameTime.ElapsedSeconds, 0, 0);
         }
         /// <summary>
         /// Increments rotation pitch (X) up
@@ -302,7 +302,7 @@ namespace Engine
         /// <param name="a">Amount (radians)</param>
         public void PitchUp(GameTime gameTime, float a = Helper.Radian)
         {
-            this.Rotate(0, a * gameTime.ElapsedSeconds, 0);
+            Rotate(0, a * gameTime.ElapsedSeconds, 0);
         }
         /// <summary>
         /// Increments rotation pitch (X) down
@@ -310,7 +310,7 @@ namespace Engine
         /// <param name="a">Amount (radians)</param>
         public void PitchDown(GameTime gameTime, float a = Helper.Radian)
         {
-            this.Rotate(0, -a * gameTime.ElapsedSeconds, 0);
+            Rotate(0, -a * gameTime.ElapsedSeconds, 0);
         }
         /// <summary>
         /// Increments rotation roll (Z) left
@@ -318,7 +318,7 @@ namespace Engine
         /// <param name="a">Amount (radians)</param>
         public void RollLeft(GameTime gameTime, float a = Helper.Radian)
         {
-            this.Rotate(0, 0, -a * gameTime.ElapsedSeconds);
+            Rotate(0, 0, -a * gameTime.ElapsedSeconds);
         }
         /// <summary>
         /// Increments rotation roll (Z) right
@@ -326,7 +326,7 @@ namespace Engine
         /// <param name="a">Amount (radians)</param>
         public void RollRight(GameTime gameTime, float a = Helper.Radian)
         {
-            this.Rotate(0, 0, a * gameTime.ElapsedSeconds);
+            Rotate(0, 0, a * gameTime.ElapsedSeconds);
         }
 
         /// <summary>
@@ -337,7 +337,7 @@ namespace Engine
         /// <param name="maxSize">Max scaling component</param>
         public void Scale(GameTime gameTime, float scale, Vector3? minSize = null, Vector3? maxSize = null)
         {
-            this.Scale(gameTime, new Vector3(scale), minSize, maxSize);
+            Scale(gameTime, new Vector3(scale), minSize, maxSize);
         }
         /// <summary>
         /// Clamped scale increment
@@ -349,7 +349,7 @@ namespace Engine
         /// <param name="maxSize">Max scaling component</param>
         public void Scale(GameTime gameTime, float scaleX, float scaleY, float scaleZ, Vector3? minSize = null, Vector3? maxSize = null)
         {
-            this.Scale(gameTime, new Vector3(scaleX, scaleY, scaleZ), minSize, maxSize);
+            Scale(gameTime, new Vector3(scaleX, scaleY, scaleZ), minSize, maxSize);
         }
         /// <summary>
         /// Clamped scale increment
@@ -359,7 +359,7 @@ namespace Engine
         /// <param name="maxSize">Max scaling component</param>
         public void Scale(GameTime gameTime, Vector3 scale, Vector3? minSize = null, Vector3? maxSize = null)
         {
-            Vector3 newScaling = this.scaling + (scale * gameTime.ElapsedSeconds);
+            Vector3 newScaling = scaling + (scale * gameTime.ElapsedSeconds);
 
             if (maxSize.HasValue && newScaling.LengthSquared() > maxSize.Value.LengthSquared())
             {
@@ -371,7 +371,7 @@ namespace Engine
                 newScaling = minSize.Value;
             }
 
-            this.SetScale(newScaling);
+            SetScale(newScaling);
         }
 
         /// <summary>
@@ -383,7 +383,7 @@ namespace Engine
         /// <param name="updateState">Update internal state</param>
         public void SetPosition(float x, float y, float z, bool updateState = false)
         {
-            this.SetPosition(new Vector3(x, y, z), updateState);
+            SetPosition(new Vector3(x, y, z), updateState);
         }
         /// <summary>
         /// Sets position
@@ -396,9 +396,9 @@ namespace Engine
             {
                 this.position = position;
 
-                this.transformUpdateNeeded = true;
+                transformUpdateNeeded = true;
 
-                if (updateState) this.UpdateLocalTransform();
+                if (updateState) UpdateLocalTransform();
             }
         }
         /// <summary>
@@ -410,7 +410,7 @@ namespace Engine
         /// <param name="updateState">Update internal state</param>
         public void SetRotation(float yaw, float pitch, float roll, bool updateState = false)
         {
-            this.SetRotation(Quaternion.RotationYawPitchRoll(yaw, pitch, roll), updateState);
+            SetRotation(Quaternion.RotationYawPitchRoll(yaw, pitch, roll), updateState);
         }
         /// <summary>
         /// Sets rotation
@@ -423,9 +423,9 @@ namespace Engine
             {
                 this.rotation = rotation;
 
-                this.transformUpdateNeeded = true;
+                transformUpdateNeeded = true;
 
-                if (updateState) this.UpdateLocalTransform();
+                if (updateState) UpdateLocalTransform();
             }
         }
         /// <summary>
@@ -435,7 +435,7 @@ namespace Engine
         /// <param name="updateState">Update internal state</param>
         public void SetScale(float scale, bool updateState = false)
         {
-            this.SetScale(new Vector3(scale), updateState);
+            SetScale(new Vector3(scale), updateState);
         }
         /// <summary>
         /// Sets scale
@@ -446,7 +446,7 @@ namespace Engine
         /// <param name="updateState">Update internal state</param>
         public void SetScale(float scaleX, float scaleY, float scaleZ, bool updateState = false)
         {
-            this.SetScale(new Vector3(scaleX, scaleY, scaleZ), updateState);
+            SetScale(new Vector3(scaleX, scaleY, scaleZ), updateState);
         }
         /// <summary>
         /// Sets scale
@@ -455,13 +455,13 @@ namespace Engine
         /// <param name="updateState">Update internal state</param>
         public void SetScale(Vector3 scale, bool updateState = false)
         {
-            if (this.scaling != scale)
+            if (scaling != scale)
             {
-                this.scaling = scale;
+                scaling = scale;
 
-                this.transformUpdateNeeded = true;
+                transformUpdateNeeded = true;
 
-                if (updateState) this.UpdateLocalTransform();
+                if (updateState) UpdateLocalTransform();
             }
         }
         /// <summary>
@@ -470,7 +470,7 @@ namespace Engine
         /// <param name="transform">Transform matrix</param>
         public void SetTransform(Matrix transform)
         {
-            this.SetLocalTransform(transform);
+            SetLocalTransform(transform);
         }
         /// <summary>
         /// Look at target
@@ -493,24 +493,24 @@ namespace Engine
         /// <param name="updateState">Update internal state</param>
         public void LookAt(Vector3 target, Vector3 up, Axis axis = Axis.Y, float interpolationAmount = 0, bool updateState = false)
         {
-            if (this.Parent != null)
+            if (Parent != null)
             {
                 //Set parameters to local space
-                var parentTransform = Matrix.Invert(this.Parent.FinalTransform);
+                var parentTransform = Matrix.Invert(Parent.FinalTransform);
 
                 target = Vector3.TransformCoordinate(target, parentTransform);
             }
 
-            if (!Vector3.NearEqual(this.position, target, new Vector3(MathUtil.ZeroTolerance)))
+            if (!Vector3.NearEqual(position, target, new Vector3(MathUtil.ZeroTolerance)))
             {
-                var newRotation = Helper.LookAt(this.position, target, up, axis);
+                var newRotation = Helper.LookAt(position, target, up, axis);
 
                 if (interpolationAmount > 0)
                 {
-                    newRotation = Quaternion.Lerp(this.rotation, newRotation, interpolationAmount);
+                    newRotation = Quaternion.Lerp(rotation, newRotation, interpolationAmount);
                 }
 
-                this.SetRotation(newRotation, updateState);
+                SetRotation(newRotation, updateState);
             }
         }
         /// <summary>
@@ -534,24 +534,24 @@ namespace Engine
         /// <param name="updateState">Update internal state</param>
         public void RotateTo(Vector3 target, Vector3 up, Axis axis = Axis.Y, float interpolationAmount = 0, bool updateState = false)
         {
-            if (this.Parent != null)
+            if (Parent != null)
             {
                 //Set parameters to local space
-                var parentTransform = Matrix.Invert(this.Parent.FinalTransform);
+                var parentTransform = Matrix.Invert(Parent.FinalTransform);
 
                 target = Vector3.TransformCoordinate(target, parentTransform);
             }
 
-            if (!Vector3.NearEqual(this.position, target, new Vector3(MathUtil.ZeroTolerance)))
+            if (!Vector3.NearEqual(position, target, new Vector3(MathUtil.ZeroTolerance)))
             {
-                var newRotation = Helper.LookAt(this.position, target, up, axis);
+                var newRotation = Helper.LookAt(position, target, up, axis);
 
                 if (interpolationAmount > 0)
                 {
-                    newRotation = Helper.RotateTowards(this.rotation, newRotation, interpolationAmount);
+                    newRotation = Helper.RotateTowards(rotation, newRotation, interpolationAmount);
                 }
 
-                this.SetRotation(newRotation, updateState);
+                SetRotation(newRotation, updateState);
             }
         }
         /// <summary>
@@ -564,24 +564,24 @@ namespace Engine
         {
             Quaternion newRotation;
 
-            float angle = Helper.Angle(this.Up, normal);
+            float angle = Helper.Angle(Up, normal);
             if (angle != 0)
             {
-                Vector3 axis = Vector3.Cross(this.Up, normal);
+                Vector3 axis = Vector3.Cross(Up, normal);
 
-                newRotation = Quaternion.RotationAxis(axis, angle) * this.rotation;
+                newRotation = Quaternion.RotationAxis(axis, angle) * rotation;
             }
             else
             {
-                newRotation = Quaternion.RotationAxis(Vector3.Left, 0f) * this.rotation;
+                newRotation = Quaternion.RotationAxis(Vector3.Left, 0f) * rotation;
             }
 
             if (interpolationAmount > 0)
             {
-                newRotation = Quaternion.Lerp(this.rotation, newRotation, interpolationAmount);
+                newRotation = Quaternion.Lerp(rotation, newRotation, interpolationAmount);
             }
 
-            this.SetRotation(newRotation, updateState);
+            SetRotation(newRotation, updateState);
         }
 
         /// <summary>
@@ -590,7 +590,7 @@ namespace Engine
         /// <returns>Returns manipulator text description</returns>
         public override string ToString()
         {
-            return string.Format("{0}", this.FinalTransform.GetDescription());
+            return $"{FinalTransform.GetDescription()}";
         }
     }
 }

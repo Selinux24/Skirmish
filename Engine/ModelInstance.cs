@@ -167,7 +167,9 @@ namespace Engine
 
                 for (int i = 0; i < description.TransformNames.Length; i++)
                 {
-                    ModelParts.Add(new ModelPart(description.TransformNames[i]));
+                    var thisName = description.TransformNames[i];
+                    var part = new ModelPart(thisName);
+                    ModelParts.Add(part);
                 }
 
                 for (int i = 0; i < description.TransformNames.Length; i++)
@@ -198,10 +200,21 @@ namespace Engine
             var drawData = model.GetDrawingData(LevelOfDetail.High);
             Lights = drawData?.Lights.Select(l => l.Clone()).ToArray() ?? new ISceneLight[] { };
 
-            AnimationController.AnimationOffsetChanged += (s, a) =>
+            AnimationController.AnimationOffsetChanged += (s, a) => { InvalidateCache(); };
+
+            for (int i = 0; i < ModelParts.Count; i++)
             {
-                InvalidateCache();
-            };
+                var thisName = ModelParts[i].Name;
+
+                var mesh = drawData?.GetMeshByName(thisName);
+                if (mesh == null)
+                {
+                    continue;
+                }
+
+                var part = ModelParts.First(p => p.Name == thisName);
+                part.Manipulator.SetTransform(mesh.Transform);
+            }
         }
 
         /// <summary>

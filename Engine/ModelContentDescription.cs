@@ -49,5 +49,10 @@ namespace Engine
         /// </summary>
         [XmlElement("use_controller_transform")]
         public bool UseControllerTransform { get; set; } = true;
+        /// <summary>
+        /// Bake transforms
+        /// </summary>
+        [XmlElement("bake_transforms")]
+        public bool BakeTransforms { get; set; } = true;
     }
 }

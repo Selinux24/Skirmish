@@ -31,7 +31,7 @@ namespace Engine.Animation
         {
             get
             {
-                return this.EndTime - this.StartTime;
+                return EndTime - StartTime;
             }
         }
 
@@ -40,15 +40,15 @@ namespace Engine.Animation
         /// </summary>
         public JointAnimation(string jointName, Keyframe[] keyframes)
         {
-            this.Joint = jointName;
-            this.Keyframes = keyframes;
-            this.StartTime = keyframes[0].Time;
-            this.EndTime = keyframes[keyframes.Length - 1].Time;
+            Joint = jointName;
+            Keyframes = keyframes;
+            StartTime = keyframes[0].Time;
+            EndTime = keyframes[keyframes.Length - 1].Time;
 
             //Pre-normalize rotations
-            for (int i = 0; i < this.Keyframes.Length; i++)
+            for (int i = 0; i < Keyframes.Length; i++)
             {
-                this.Keyframes[i].Rotation.Normalize();
+                Keyframes[i].Rotation.Normalize();
             }
         }
 
@@ -59,7 +59,7 @@ namespace Engine.Animation
         /// <returns>Return interpolated transformation</returns>
         public Matrix Interpolate(float time)
         {
-            this.Interpolate(time, out Vector3 translation, out Quaternion rotation, out Vector3 scale);
+            Interpolate(time, out Vector3 translation, out Quaternion rotation, out Vector3 scale);
 
             //Create the combined transformation matrix
             return
@@ -80,38 +80,38 @@ namespace Engine.Animation
             rotation = Quaternion.Identity;
             scale = Vector3.One;
 
-            if (this.Keyframes != null)
+            if (Keyframes != null)
             {
                 var deltaTime = 0.0f;
-                if (this.Duration > 0.0f)
+                if (Duration > 0.0f)
                 {
-                    deltaTime = time % this.Duration;
+                    deltaTime = time % Duration;
                 }
 
                 var currFrame = 0;
-                while (currFrame < this.Keyframes.Length - 1)
+                while (currFrame < Keyframes.Length - 1)
                 {
-                    if (deltaTime < this.Keyframes[currFrame + 1].Time)
+                    if (deltaTime < Keyframes[currFrame + 1].Time)
                     {
                         break;
                     }
                     currFrame++;
                 }
 
-                if (currFrame >= this.Keyframes.Length)
+                if (currFrame >= Keyframes.Length)
                 {
                     currFrame = 0;
                 }
 
-                var nextFrame = (currFrame + 1) % this.Keyframes.Length;
+                var nextFrame = (currFrame + 1) % Keyframes.Length;
 
-                var currKey = this.Keyframes[currFrame];
-                var nextKey = this.Keyframes[nextFrame];
+                var currKey = Keyframes[currFrame];
+                var nextKey = Keyframes[nextFrame];
 
                 var diffTime = nextKey.Time - currKey.Time;
                 if (diffTime < 0.0)
                 {
-                    diffTime += this.Duration;
+                    diffTime += Duration;
                 }
 
                 if (diffTime > 0.0)
@@ -138,7 +138,7 @@ namespace Engine.Animation
         /// <returns>Returns text representation</returns>
         public override string ToString()
         {
-            return string.Format("Start: {0:0.00000}; End: {1:0.00000}; Keyframes: {2}", this.StartTime, this.EndTime, this.Keyframes.Length);
+            return $"Start: {StartTime:0.00000}; End: {EndTime:0.00000}; Keyframes: {Keyframes.Length}";
         }
         /// <summary>
         /// Gets whether the current instance is equal to the other instance
@@ -148,10 +148,10 @@ namespace Engine.Animation
         public bool Equals(JointAnimation other)
         {
             return
-                this.Joint == other.Joint &&
-                Helper.ListIsEqual(this.Keyframes, other.Keyframes) &&
-                this.StartTime == other.StartTime &&
-                this.EndTime == other.EndTime;
+                Joint == other.Joint &&
+                Helper.ListIsEqual(Keyframes, other.Keyframes) &&
+                StartTime == other.StartTime &&
+                EndTime == other.EndTime;
         }
     }
 }

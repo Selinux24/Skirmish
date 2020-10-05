@@ -57,6 +57,10 @@ namespace Engine.Content
         /// Gets or sets whether the current submesh content is a volume mesh
         /// </summary>
         public bool IsVolume { get; set; }
+        /// <summary>
+        /// Transform
+        /// </summary>
+        public Matrix Transform { get; set; } = Matrix.Identity;
 
         /// <summary>
         /// Submesh grouping optimization
@@ -281,8 +285,10 @@ namespace Engine.Content
         /// Transforms the vertex data
         /// </summary>
         /// <param name="transform">Transform to apply</param>
-        public void Transform(Matrix transform)
+        public void ApplyTransform(Matrix transform)
         {
+            Transform = Matrix.Identity;
+
             for (int i = 0; i < this.Vertices.Length; i++)
             {
                 this.Vertices[i] = this.Vertices[i].Transform(transform);

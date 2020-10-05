@@ -61,6 +61,10 @@ namespace Engine.Common
         /// Topology
         /// </summary>
         public Topology Topology { get; private set; }
+        /// <summary>
+        /// Transform
+        /// </summary>
+        public Matrix Transform { get; set; }
 
         /// <summary>
         /// Vertex buffer descriptor
@@ -105,13 +109,15 @@ namespace Engine.Common
         /// </summary>
         /// <param name="name">Mesh name</param>
         /// <param name="topology">Topology</param>
+        /// <param name="transform">Transform</param>
         /// <param name="vertices">Vertices</param>
         /// <param name="indices">Indices</param>
-        public Mesh(string name, Topology topology, IEnumerable<IVertexData> vertices, IEnumerable<uint> indices)
+        public Mesh(string name, Topology topology, Matrix transform, IEnumerable<IVertexData> vertices, IEnumerable<uint> indices)
         {
             this.Id = GetNextId();
             this.Name = name;
             this.Topology = topology;
+            this.Transform = transform;
             this.Vertices = vertices ?? new IVertexData[] { };
             this.VertextType = vertices?.FirstOrDefault()?.VertexType ?? VertexTypes.Unknown;
             this.Indices = indices ?? new uint[] { };

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModelContentDescription>
+  <model_filename>Dn_Doors.dae</model_filename>
+  <armature_name>Dn_Jail_1_Armature</armature_name>
+  <animation_description>
+    <animations>
+      <animation skeleton="Dn_Jail_1_Armature" name="default" from="0" to="1" />
+      <animation skeleton="Dn_Jail_1_Armature" name="open" from="1" to="2" />
+      <animation skeleton="Dn_Jail_1_Armature" name="close" from="2" to="3" />
+    </animations>
+  </animation_description>
+</ModelContentDescription>

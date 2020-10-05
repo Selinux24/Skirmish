@@ -25,7 +25,7 @@ namespace Engine.Animation
         {
             get
             {
-                return this.jointNames.Count;
+                return jointNames.Count;
             }
         }
         /// <summary>
@@ -37,7 +37,7 @@ namespace Engine.Animation
         {
             get
             {
-                return this.FindJoint(this.Root, jointName);
+                return FindJoint(Root, jointName);
             }
         }
 
@@ -145,9 +145,9 @@ namespace Engine.Animation
         /// <param name="root">Root joint</param>
         public Skeleton(Joint root)
         {
-            this.Root = root;
+            Root = root;
 
-            FlattenSkeleton(root, this.jointNames);
+            FlattenSkeleton(root, jointNames);
         }
 
         /// <summary>
@@ -158,13 +158,13 @@ namespace Engine.Animation
         /// <param name="transforms">Returns the transforms list of the pose at specified time</param>
         public void GetPoseAtTime(float time, JointAnimation[] animations, ref Matrix[] transforms)
         {
-            BuildTransforms(this.Root, time, animations);
+            BuildTransforms(Root, time, animations);
 
-            UpdateTransforms(this.Root);
+            UpdateTransforms(Root);
 
-            for (int i = 0; i < this.jointNames.Count; i++)
+            for (int i = 0; i < jointNames.Count; i++)
             {
-                transforms[i] = this[this.jointNames[i]].Offset * this[this.jointNames[i]].GlobalTransform;
+                transforms[i] = this[jointNames[i]].Offset * this[jointNames[i]].GlobalTransform;
             }
         }
         /// <summary>
@@ -178,13 +178,13 @@ namespace Engine.Animation
         /// <param name="transforms">Returns the transforms list of the pose at specified time</param>
         public void GetPoseAtTime(float time1, JointAnimation[] animations1, float time2, JointAnimation[] animations2, float factor, ref Matrix[] transforms)
         {
-            BuildTransforms(this.Root, time1, animations1, time2, animations2, factor);
+            BuildTransforms(Root, time1, animations1, time2, animations2, factor);
 
-            UpdateTransforms(this.Root);
+            UpdateTransforms(Root);
 
-            for (int i = 0; i < this.jointNames.Count; i++)
+            for (int i = 0; i < jointNames.Count; i++)
             {
-                transforms[i] = this[this.jointNames[i]].Offset * this[this.jointNames[i]].GlobalTransform;
+                transforms[i] = this[jointNames[i]].Offset * this[jointNames[i]].GlobalTransform;
             }
         }
         /// <summary>
@@ -193,7 +193,7 @@ namespace Engine.Animation
         /// <returns>Returns the joint names list</returns>
         public string[] GetJointNames()
         {
-            return this.jointNames.ToArray();
+            return jointNames.ToArray();
         }
 
         /// <summary>
@@ -224,8 +224,8 @@ namespace Engine.Animation
         public bool Equals(Skeleton other)
         {
             return
-                Helper.ListIsEqual(this.jointNames, other.jointNames) &&
-                this.Root.Equals(other.Root);
+                Helper.ListIsEqual(jointNames, other.jointNames) &&
+                Root.Equals(other.Root);
         }
     }
 }
