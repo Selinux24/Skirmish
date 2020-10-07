@@ -1466,6 +1466,8 @@ namespace Engine
 
             if (useGround)
             {
+                Logger.WriteTrace(this, $"FindPath looking for nearest ground end-point positions {from} -> {to}.");
+              
                 if (FindNearestGroundPosition<Triangle>(from, out var rFrom))
                 {
                     from = rFrom.Position;
@@ -1474,9 +1476,14 @@ namespace Engine
                 {
                     to = rTo.Position;
                 }
+          
+                Logger.WriteTrace(this, $"FindPath Found nearest ground end-point positions {from} -> {to}.");
             }
 
             var path = NavigationGraph.FindPath(agent, from, to);
+        
+            Logger.WriteTrace(this, $"FindPath path result: {path.Count()} nodes.");
+            
             if (path.Count() > 1)
             {
                 List<Vector3> positions = new List<Vector3>(path);
@@ -1484,7 +1491,11 @@ namespace Engine
 
                 if (useGround)
                 {
+                    Logger.WriteTrace(this, "FindPath compute ground positions.");
+
                     ComputeGroundPositions(positions, normals);
+              
+                    Logger.WriteTrace(this, "FindPath ground positions computed.");
                 }
 
                 return new PathFindingPath(positions, normals);
@@ -1509,6 +1520,8 @@ namespace Engine
 
             if (useGround)
             {
+                Logger.WriteTrace(this, $"FindPathAsync looking for nearest ground end-point positions {from} -> {to}.");
+
                 if (FindNearestGroundPosition(from, out PickingResult<Triangle> rFrom))
                 {
                     from = rFrom.Position;
@@ -1517,9 +1530,14 @@ namespace Engine
                 {
                     to = rTo.Position;
                 }
+
+                Logger.WriteTrace(this, $"FindPathAsync Found nearest ground end-point positions {from} -> {to}.");
             }
 
             var path = await NavigationGraph.FindPathAsync(agent, from, to);
+
+            Logger.WriteTrace(this, $"FindPathAsync path result: {path.Count()} nodes.");
+
             if (path.Count() > 1)
             {
                 List<Vector3> positions = new List<Vector3>(path);
@@ -1527,7 +1545,11 @@ namespace Engine
 
                 if (useGround)
                 {
+                    Logger.WriteTrace(this, "FindPathAsync compute ground positions.");
+
                     ComputeGroundPositions(positions, normals);
+                
+                    Logger.WriteTrace(this, "FindPathAsync ground positions computed.");
                 }
 
                 return new PathFindingPath(positions, normals);

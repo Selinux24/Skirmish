@@ -141,6 +141,7 @@
     <Compile Include="Rts\AI\BehaviorEventArgs.cs" />
     <Compile Include="Rts\AI\BehaviorEventHandler.cs" />
     <Compile Include="Rts\AI\Behaviors\HelicopterAttackBehavior.cs" />
+    <Compile Include="Rts\AI\Behaviors\TankPatrolBehavior.cs" />
     <Compile Include="Rts\AI\Brain.cs" />
     <Compile Include="Rts\AI\Agents\HelicopterAIAgent.cs" />
     <Compile Include="Rts\AI\Agents\TankAIAgent.cs" />

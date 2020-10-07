@@ -27,9 +27,9 @@ namespace Terrain.Rts.AI.Agents
         public HelicopterAIAgent(Brain parent, AgentType agentType, Model sceneObject, HelicopterAIStatsDescription stats) :
             base(parent, agentType, sceneObject, stats)
         {
-            this.FlightHeight = stats.FlightHeight;
-            this.Controller = new HeliManipulatorController(sceneObject.Manipulator);
-            this.AttackBehavior = new HelicopterAttackBehavior(this);
+            FlightHeight = stats.FlightHeight;
+            Controller = new HeliManipulatorController();
+            AttackBehavior = new HelicopterAttackBehavior(this);
         }
 
         /// <summary>
@@ -42,13 +42,13 @@ namespace Terrain.Rts.AI.Agents
         {
             var p = point;
 
-            if (this.Stats.Life > 0)
+            if (Stats.Life > 0)
             {
-                p.Y = this.FlightHeight;
+                p.Y = FlightHeight;
             }
 
-            this.Controller.Follow(new SegmentPath(new[] { this.Manipulator.Position, p }));
-            this.Controller.MaximumSpeed = speed;
+            Controller.Follow(new SegmentPath(new[] { Manipulator.Position, p }));
+            Controller.MaximumSpeed = speed;
         }
 
         /// <summary>
@@ -60,14 +60,14 @@ namespace Terrain.Rts.AI.Agents
         {
             base.FireDamaged(active, passive);
 
-            var model = this.SceneObject;
+            var model = SceneObject;
             if (model != null)
             {
-                if (this.Stats.Damage > 0.9f)
+                if (Stats.Damage > 0.9f)
                 {
                     model.TextureIndex = 2;
                 }
-                else if (this.Stats.Damage > 0.2f)
+                else if (Stats.Damage > 0.2f)
                 {
                     model.TextureIndex = 1;
                 }
@@ -84,12 +84,12 @@ namespace Terrain.Rts.AI.Agents
         /// <param name="passive">Passive</param>
         protected override void FireDestroyed(AIAgent active, AIAgent passive)
         {
-            var model = this.SceneObject;
+            var model = SceneObject;
 
             //Find nearest ground position
-            if (this.Parent.Scene.FindNearestGroundPosition(this.Manipulator.Position, out PickingResult<Triangle> r))
+            if (Parent.Scene.FindNearestGroundPosition<Triangle>(Manipulator.Position, out var r))
             {
-                this.SetRouteToPoint(r.Position, 15f, false);
+                SetRouteToPoint(r.Position, 15f, false);
                 if (model != null)
                 {
                     model.AnimationController.Stop();
@@ -97,7 +97,7 @@ namespace Terrain.Rts.AI.Agents
             }
             else
             {
-                this.SceneObject.Visible = false;
+                SceneObject.Visible = false;
             }
 
             if (model != null)

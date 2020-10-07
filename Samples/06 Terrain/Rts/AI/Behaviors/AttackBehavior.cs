@@ -1,5 +1,6 @@
 ﻿using Engine;
 using SharpDX;
+using System.Linq;
 
 namespace Terrain.Rts.AI.Behaviors
 {
@@ -32,7 +33,7 @@ namespace Terrain.Rts.AI.Behaviors
         {
             get
             {
-                return this.attackPosition;
+                return attackPosition;
             }
         }
 
@@ -52,8 +53,8 @@ namespace Terrain.Rts.AI.Behaviors
         /// <param name="attakingDeltaDistance">Delta</param>
         public void InitAttackingBehavior(float attackVelocity, float attakingDeltaDistance)
         {
-            this.attackTarget = null;
-            this.attackPosition = null;
+            attackTarget = null;
+            attackPosition = null;
             this.attackVelocity = attackVelocity;
             this.attakingDeltaDistance = attakingDeltaDistance;
         }
@@ -65,48 +66,56 @@ namespace Terrain.Rts.AI.Behaviors
         /// <returns>Returns true if the behavior can be executed</returns>
         public override bool Test(GameTime gameTime)
         {
-            bool res = false;
-
-            if (this.attackTarget != null)
+            if (attackTarget != null)
             {
-                if (this.attackTarget.Stats.Life <= 0)
+                if (attackTarget.Stats.Life <= 0)
                 {
-                    this.attackTarget = null;
-                    this.attackPosition = null;
-                    return false;
+                    attackTarget = null;
+                    attackPosition = null;
                 }
-
-                var onSight = this.Agent.EnemyOnSight(this.attackTarget);
-                if (onSight)
+                else
                 {
-                    var onRange = this.Agent.EnemyOnAttackRange(this.attackTarget);
-                    if (onRange)
+                    var onSight = Agent.EnemyOnSight(attackTarget);
+                    if (onSight)
                     {
-                        return !this.Agent.IsHardEnemy(this.attackTarget);
-                    }
-                    else
-                    {
-                        return false;
+                        Logger.WriteDebug(this, $"Agent {Agent} target on sight.");
+
+                        var inRange = Agent.EnemyOnAttackRange(attackTarget);
+                        if (inRange)
+                        {
+                            bool hardEnemy = Agent.IsHardEnemy(attackTarget);
+
+                            Logger.WriteDebug(this, $"Agent {Agent} target in range. Hard enemy {hardEnemy}");
+
+                            return !hardEnemy;
+                        }
+                        else
+                        {
+                            Logger.WriteDebug(this, $"Agent {Agent} target not in range.");
+
+                            return false;
+                        }
                     }
                 }
             }
 
-            var targets = this.Agent.GetEnemiesOnSight();
+            Logger.WriteDebug(this, $"Agent {Agent} looking for valid targets.");
 
-            if (targets != null && targets.Length > 0)
+            var target = Agent.GetEnemiesOnSight().FirstOrDefault(e => e != attackTarget);
+            if (target != null)
             {
-                this.attackTarget = targets[0];
-                this.attackPosition = null;
-                res = !this.Agent.IsHardEnemy(this.attackTarget);
+                Logger.WriteDebug(this, $"Agent {Agent} selected target {target}.");
+
+                attackTarget = target;
+                attackPosition = null;
+                return !Agent.IsHardEnemy(target);
             }
             else
             {
-                this.attackTarget = null;
-                this.attackPosition = null;
+                attackTarget = null;
+                attackPosition = null;
                 return false;
             }
-
-            return res;
         }
         /// <summary>
         /// Executes the behavior task
@@ -114,40 +123,43 @@ namespace Terrain.Rts.AI.Behaviors
         /// <param name="gameTime">Game time</param>
         public override void Task(GameTime gameTime)
         {
-            if (this.attackTarget != null)
+            if (attackTarget != null)
             {
-                bool onSight = this.Agent.EnemyOnSight(this.attackTarget);
-                bool onRange = onSight && this.Agent.EnemyOnAttackRange(this.attackTarget);
+                bool onSight = Agent.EnemyOnSight(attackTarget);
+                bool onRange = onSight && Agent.EnemyOnAttackRange(attackTarget);
 
-                if (!this.attackPosition.HasValue)
+                if (!attackPosition.HasValue)
                 {
-                    this.attackPosition = this.attackTarget.Manipulator.Position;
+                    attackPosition = attackTarget.Manipulator.Position;
                 }
                 else
                 {
-                    float d = Vector3.Distance(this.attackTarget.Manipulator.Position, this.attackPosition.Value);
-                    if (d > this.attakingDeltaDistance || !onSight || !onRange)
+                    float d = Vector3.Distance(attackTarget.Manipulator.Position, attackPosition.Value);
+                    if (d > attakingDeltaDistance || !onSight || !onRange)
                     {
-                        this.attackPosition = this.attackTarget.Manipulator.Position;
+                        attackPosition = attackTarget.Manipulator.Position;
                     }
                 }
 
                 if (!onRange)
                 {
-                    float v = this.attackVelocity;
+                    float v = attackVelocity;
 
-                    float d = Vector3.Distance(this.attackTarget.Manipulator.Position, this.Agent.Manipulator.Position);
+                    float d = Vector3.Distance(attackTarget.Manipulator.Position, Agent.Manipulator.Position);
                     if (d < 10)
                     {
-                        v = this.attackTarget.Controller.Speed;
+                        v = attackTarget.Controller.Speed;
                     }
-                    this.Agent.SetRouteToPoint(this.attackPosition.Value, v, false);
+
+                    Logger.WriteDebug(this, $"Agent {Agent} not on range. Going to target position.");
+                    Agent.SetRouteToPoint(attackPosition.Value, v, false);
                 }
                 else
                 {
-                    this.Agent.Attack(this.attackTarget);
+                    Logger.WriteDebug(this, $"Agent {Agent} attacking target {attackTarget}.");
+                    Agent.Attack(attackTarget);
 
-                    this.Agent.Stop();
+                    Agent.Stop();
                 }
             }
         }
@@ -158,8 +170,8 @@ namespace Terrain.Rts.AI.Behaviors
         /// <param name="target">Attakcing target</param>
         public void SetTarget(AIAgent target)
         {
-            this.attackTarget = target;
-            this.attackPosition = target.Manipulator.Position;
+            attackTarget = target;
+            attackPosition = target.Manipulator.Position;
         }
     }
 }

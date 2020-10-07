@@ -41,7 +41,7 @@ namespace Engine
             /// <param name="content">Content</param>
             /// <param name="node">Quadtree node</param>
             /// <returns>Returns the new generated patch</returns>
-            public static SceneryPatch CreatePatch(Game game, string name, ModelContent content, PickingQuadTreeNode<Triangle> node)
+            public static async Task<SceneryPatch> CreatePatch(Game game, string name, ModelContent content, PickingQuadTreeNode<Triangle> node)
             {
                 var desc = new DrawingDataDescription()
                 {
@@ -54,7 +54,7 @@ namespace Engine
                     Constraint = node.BoundingBox,
                 };
 
-                var drawingData = DrawingData.Build(game, name, content, desc);
+                var drawingData = await DrawingData.Build(game, name, content, desc);
 
                 return new SceneryPatch(game, drawingData);
             }
@@ -294,7 +294,7 @@ namespace Engine
             var nodes = groundPickingQuadtree.GetLeafNodes();
             foreach (var node in nodes)
             {
-                var patch = SceneryPatch.CreatePatch(Game, description.Name, content, node);
+                var patch = SceneryPatch.CreatePatch(Game, description.Name, content, node).GetAwaiter().GetResult();
 
                 patchDictionary.Add(node.Id, patch);
             }
@@ -375,6 +375,8 @@ namespace Engine
             {
                 if (!patchDictionary.ContainsKey(node.Id))
                 {
+                    Logger.WriteTrace(this, $"Loading node {node.Id} patch.");
+
                     // Reserve position
                     patchDictionary.Add(node.Id, null);
 
@@ -407,7 +409,13 @@ namespace Engine
             {
                 if (patchDictionary.ContainsKey(node.Id))
                 {
+                    Logger.WriteTrace(this, $"Scenery DrawShadows {context.ShadowMap} {node.Id} patch.");
+
                     patchDictionary[node.Id]?.DrawSceneryShadows(sceneryEffect, BufferManager);
+                }
+                else
+                {
+                    Logger.WriteWarning(this, $"Scenery DrawShadows {context.ShadowMap} {node.Id} without assigned patch. No draw method called");
                 }
             }
         }
@@ -431,7 +439,13 @@ namespace Engine
             {
                 if (patchDictionary.ContainsKey(node.Id))
                 {
+                    Logger.WriteTrace(this, $"Scenery Draw {node.Id} patch.");
+                 
                     patchDictionary[node.Id]?.DrawScenery(context, sceneryEffect, BufferManager);
+                }
+                else
+                {
+                    Logger.WriteWarning(this, $"Scenery Draw {node.Id} without assigned patch. No draw method called");
                 }
             }
         }
@@ -468,6 +482,8 @@ namespace Engine
             // Fire and forget
             Task.Run(async () =>
             {
+                Logger.WriteTrace(this, $"LoadPatches Init: {taskList.Count()} tasks.");
+
                 await Scene.LoadResourcesAsync(
                     taskList,
                     (result) =>
@@ -486,6 +502,8 @@ namespace Engine
                             }
                         }
                     });
+
+                Logger.WriteTrace(this, "LoadPatches End.");
             });
         }
         /// <summary>
@@ -495,13 +513,15 @@ namespace Engine
         private async Task<SceneryPatchTask> LoadPatch(PickingQuadTreeNode<Triangle> node)
         {
             // Create patch
+            var patch = await SceneryPatch.CreatePatch(Game, Description.Name, content, node);
+
             SceneryPatchTask res = new SceneryPatchTask
             {
                 Id = node.Id,
-                Patch = SceneryPatch.CreatePatch(Game, Description.Name, content, node),
+                Patch = patch,
             };
 
-            return await Task.FromResult(res);
+            return res;
         }
     }
 

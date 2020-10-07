@@ -654,7 +654,7 @@ namespace Engine.Common
         /// <returns>Returns a vertex list</returns>
         public Vector3[] GetVertices()
         {
-            return new Vector3[] { this.Position.Value };
+            return new Vector3[] { Position.Value };
         }
         /// <summary>
         /// Gets text representation of instance
@@ -663,20 +663,20 @@ namespace Engine.Common
         {
             string text = null;
 
-            if (this.Weights != null && this.Weights.Length > 0) text += "Skinned; ";
+            if (Weights != null && Weights.Length > 0) text += "Skinned; ";
 
-            text += string.Format("FaceIndex: {0}; ", this.FaceIndex);
-            text += string.Format("VertexIndex: {0}; ", this.VertexIndex);
+            text += string.Format("FaceIndex: {0}; ", FaceIndex);
+            text += string.Format("VertexIndex: {0}; ", VertexIndex);
 
-            if (this.Position.HasValue) text += string.Format("Position: {0}; ", this.Position);
-            if (this.Normal.HasValue) text += string.Format("Normal: {0}; ", this.Normal);
-            if (this.Tangent.HasValue) text += string.Format("Tangent: {0}; ", this.Tangent);
-            if (this.BiNormal.HasValue) text += string.Format("BiNormal: {0}; ", this.BiNormal);
-            if (this.Texture.HasValue) text += string.Format("Texture: {0}; ", this.Texture);
-            if (this.Color.HasValue) text += string.Format("Color: {0}; ", this.Color);
-            if (this.Size.HasValue) text += string.Format("Size: {0}; ", this.Size);
-            if (this.Weights != null && this.Weights.Length > 0) text += string.Format("Weights: {0}; ", this.Weights.Length);
-            if (this.BoneIndices != null && this.BoneIndices.Length > 0) text += string.Format("BoneIndices: {0}; ", this.BoneIndices.Length);
+            if (Position.HasValue) text += string.Format("Position: {0}; ", Position);
+            if (Normal.HasValue) text += string.Format("Normal: {0}; ", Normal);
+            if (Tangent.HasValue) text += string.Format("Tangent: {0}; ", Tangent);
+            if (BiNormal.HasValue) text += string.Format("BiNormal: {0}; ", BiNormal);
+            if (Texture.HasValue) text += string.Format("Texture: {0}; ", Texture);
+            if (Color.HasValue) text += string.Format("Color: {0}; ", Color);
+            if (Size.HasValue) text += string.Format("Size: {0}; ", Size);
+            if (Weights != null && Weights.Length > 0) text += string.Format("Weights: {0}; ", Weights.Length);
+            if (BoneIndices != null && BoneIndices.Length > 0) text += string.Format("BoneIndices: {0}; ", BoneIndices.Length);
 
             return text;
         }

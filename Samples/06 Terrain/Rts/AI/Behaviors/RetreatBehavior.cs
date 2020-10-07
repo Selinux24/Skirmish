@@ -28,7 +28,7 @@ namespace Terrain.Rts.AI.Behaviors
         {
             get
             {
-                return this.retreatingPosition;
+                return retreatingPosition;
             }
         }
 
@@ -49,7 +49,7 @@ namespace Terrain.Rts.AI.Behaviors
         public void InitRetreatingBehavior(Vector3 rallyPoint, float retreatVelocity)
         {
             this.rallyPoint = rallyPoint;
-            this.retreatingPosition = null;
+            retreatingPosition = null;
             this.retreatVelocity = retreatVelocity;
         }
 
@@ -60,16 +60,16 @@ namespace Terrain.Rts.AI.Behaviors
         /// <returns>Returns true if the behavior can be executed</returns>
         public override bool Test(GameTime gameTime)
         {
-            if (this.Agent.Manipulator.Position == this.Agent.RetreatBehavior.rallyPoint)
+            if (Agent.Manipulator.Position == Agent.RetreatBehavior.rallyPoint)
             {
                 return false;
             }
             else
             {
-                var targets = this.Agent.GetEnemiesOnSight();
+                var targets = Agent.GetEnemiesOnSight();
                 for (int i = 0; i < targets.Length; i++)
                 {
-                    if (this.Agent.IsHardEnemy(targets[i]))
+                    if (Agent.IsHardEnemy(targets[i]))
                     {
                         return true;
                     }
@@ -86,15 +86,15 @@ namespace Terrain.Rts.AI.Behaviors
         {
             bool retreat = false;
 
-            if (!this.retreatingPosition.HasValue)
+            if (!retreatingPosition.HasValue)
             {
-                this.retreatingPosition = this.rallyPoint;
+                retreatingPosition = rallyPoint;
                 retreat = true;
             }
 
             if (retreat)
             {
-                this.Agent.SetRouteToPoint(this.retreatingPosition.Value, this.retreatVelocity, true);
+                Agent.SetRouteToPoint(retreatingPosition.Value, retreatVelocity, true);
             }
         }
     }

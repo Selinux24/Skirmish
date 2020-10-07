@@ -16,6 +16,14 @@ namespace Engine
         /// </summary>
         private static readonly ConcurrentQueue<LogEntry> log = new ConcurrentQueue<LogEntry>();
         /// <summary>
+        /// Custom filter function
+        /// </summary>
+        private static Func<LogEntry, bool> filterFnc;
+        /// <summary>
+        /// Custom format function
+        /// </summary>
+        private static Func<LogEntry, string> formatFnc;
+        /// <summary>
         /// Log level
         /// </summary>
         public static LogLevel LogLevel { get; set; }
@@ -288,12 +296,28 @@ namespace Engine
         }
 
         /// <summary>
+        /// Sets a custom log entry filter
+        /// </summary>
+        /// <param name="predicate">Filter predicate</param>
+        public static void SetCustomFilter(Func<LogEntry, bool> predicate)
+        {
+            filterFnc = predicate;
+        }
+        /// <summary>
+        /// Sets a custom log entry formatter
+        /// </summary>
+        /// <param name="formatter">Formatter function</param>
+        public static void SetDefaultFormatter(Func<LogEntry, string> formatter)
+        {
+            formatFnc = formatter;
+        }
+        /// <summary>
         /// Default log filter
         /// </summary>
         /// <param name="logEntry">Log entry</param>
         private static bool DefaultFilter(LogEntry logEntry)
         {
-            return true;
+            return filterFnc != null ? filterFnc(logEntry) : logEntry != null;
         }
         /// <summary>
         /// Default log line formatter
@@ -301,7 +325,21 @@ namespace Engine
         /// <param name="logEntry">Log entry</param>
         private static string DefaultFormatter(LogEntry logEntry)
         {
-            return $"{logEntry.EventDate:HH:mm:ss.fff} [{logEntry.LogLevel}]> {logEntry.Text}{Environment.NewLine}";
+            return formatFnc != null ? formatFnc(logEntry) : $"{logEntry.EventDate:HH:mm:ss.fff} [{logEntry.LogLevel}]> {logEntry.Text}{Environment.NewLine}";
+        }
+        /// <summary>
+        /// Sets the built-in log entry filter
+        /// </summary>
+        public static void SetDefaultFilter()
+        {
+            filterFnc = null;
+        }
+        /// <summary>
+        /// Sets the built-in log entry formatter
+        /// </summary>
+        public static void SetDefaultFormatter()
+        {
+            formatFnc = null;
         }
 
         /// <summary>

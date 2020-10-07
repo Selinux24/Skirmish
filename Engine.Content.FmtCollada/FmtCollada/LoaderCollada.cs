@@ -1361,24 +1361,33 @@ namespace Engine.Content.FmtCollada
         /// <param name="modelContent">Model content</param>
         private static void ProcessVisualScene(Collada dae, Matrix transform, bool useControllerTransform, bool bakeTransforms, ModelContent modelContent)
         {
-            if (dae.Scene.InstanceVisualScene != null)
+            if (dae.Scene.InstanceVisualScene == null)
             {
-                string sceneUrl = dae.Scene.InstanceVisualScene.Url;
-
-                var vScene = Array.Find(dae.LibraryVisualScenes, l => string.Equals("#" + l.Id, sceneUrl, StringComparison.OrdinalIgnoreCase));
-                if (vScene?.Nodes.Length > 0)
-                {
-                    ProcessSceneNodes(
-                        vScene.Nodes,
-                        transform,
-                        useControllerTransform,
-                        bakeTransforms,
-                        modelContent);
-                }
+                return;
             }
+
+            string sceneUrl = dae.Scene.InstanceVisualScene.Url;
+
+            var vScene = dae.LibraryVisualScenes.FirstOrDefault(l => string.Equals("#" + l.Id, sceneUrl, StringComparison.OrdinalIgnoreCase));
+            if (vScene?.Nodes.Any() != true)
+            {
+                return;
+            }
+
+            ProcessSceneNodes(
+                vScene.Nodes.Where(n => !n.IsArmature && !n.HasController),
+                transform,
+                useControllerTransform,
+                bakeTransforms,
+                modelContent);
+
+            ProcessSceneNodesArmature(
+                vScene.Nodes.Where(n => n.IsArmature),
+                vScene.Nodes.Where(n => n.HasController),
+                modelContent);
         }
         /// <summary>
-        /// Process a node list from a visual scene
+        /// Process a node from a visual scene node list
         /// </summary>
         /// <param name="nodes">Node list</param>
         /// <param name="transform">Parent transform</param>
@@ -1387,7 +1396,12 @@ namespace Engine.Content.FmtCollada
         /// <param name="modelContent">Model content</param>
         private static void ProcessSceneNodes(IEnumerable<Node> nodes, Matrix transform, bool useControllerTransform, bool bakeTransforms, ModelContent modelContent)
         {
-            foreach (var node in nodes.Where(n => !n.IsArmature && !n.HasController))
+            if (nodes?.Any() != true)
+            {
+                return;
+            }
+
+            foreach (var node in nodes)
             {
                 Matrix trn = useControllerTransform ? transform * node.ReadMatrix() : transform;
 
@@ -1396,19 +1410,19 @@ namespace Engine.Content.FmtCollada
                 if (node.IsLight)
                 {
                     //Lights
-                    ProcessSceneNodeLight(trn, node, modelContent);
+                    ProcessSceneNodesLight(trn, node.InstanceLight, modelContent);
                 }
                 else if (node.HasGeometry)
                 {
                     //Geometry nodes
-                    ProcessSceneNodeGeometry(trn, node, modelContent, bakeTransforms);
+                    ProcessSceneNodesGeometry(trn, node.InstanceGeometry, modelContent, bakeTransforms);
                 }
                 else
                 {
                     procChilds = false;
 
                     //Default node
-                    ProcessSceneNodeDefault(trn, node, modelContent, bakeTransforms);
+                    ProcessSceneNodesDefault(trn, node.Nodes, modelContent, bakeTransforms);
                 }
 
                 if (procChilds && node.Nodes?.Length > 0)
@@ -1416,58 +1430,62 @@ namespace Engine.Content.FmtCollada
                     ProcessSceneNodes(node.Nodes, bakeTransforms ? trn : transform, true, bakeTransforms, modelContent);
                 }
             }
-
-            if (nodes.Any(n => n.IsArmature || n.HasController))
-            {
-                ProcessSceneNodesArmature(nodes, modelContent);
-            }
         }
         /// <summary>
-        /// Process a light node
+        /// Process a light node list
         /// </summary>
         /// <param name="trn">Transform</param>
-        /// <param name="node">Node</param>
+        /// <param name="lights">Light nodes</param>
         /// <param name="modelContent">Model content</param>
-        private static void ProcessSceneNodeLight(Matrix trn, Node node, ModelContent modelContent)
+        private static void ProcessSceneNodesLight(Matrix trn, IEnumerable<InstanceWithExtra> lights, ModelContent modelContent)
         {
-            if (node.InstanceLight?.Length > 0)
+            if (lights?.Any() != true)
             {
-                foreach (var il in node.InstanceLight)
-                {
-                    string lightName = il.Url.Replace("#", "");
+                return;
+            }
 
-                    var light = modelContent.Lights[lightName];
+            foreach (var il in lights)
+            {
+                string lightName = il.Url.Replace("#", "");
 
-                    light.Name = lightName;
-                    light.Transform = trn;
-                }
+                var light = modelContent.Lights[lightName];
+
+                light.Name = lightName;
+                light.Transform = trn;
             }
         }
         /// <summary>
-        /// Process a geometry node
+        /// Process a geometry node list
         /// </summary>
         /// <param name="trn">Transform</param>
-        /// <param name="node">Node</param>
+        /// <param name="geometry">Geometry nodes</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="bakeTransforms">Bake transforms into sub-meshes</param>
-        private static void ProcessSceneNodeGeometry(Matrix trn, Node node, ModelContent modelContent, bool bakeTransforms)
+        private static void ProcessSceneNodesGeometry(Matrix trn, IEnumerable<InstanceGeometry> geometry, ModelContent modelContent, bool bakeTransforms)
         {
-            if (!trn.IsIdentity && node.InstanceGeometry?.Length > 0)
+            if (trn.IsIdentity)
             {
-                foreach (var ig in node.InstanceGeometry)
-                {
-                    string meshName = ig.Url.Replace("#", "");
+                return;
+            }
 
-                    foreach (var submesh in modelContent.Geometry[meshName].Values)
+            if (geometry?.Any() != true)
+            {
+                return;
+            }
+
+            foreach (var ig in geometry)
+            {
+                string meshName = ig.Url.Replace("#", "");
+
+                foreach (var submesh in modelContent.Geometry[meshName].Values)
+                {
+                    if (bakeTransforms)
                     {
-                        if (bakeTransforms)
-                        {
-                            submesh.ApplyTransform(trn);
-                        }
-                        else
-                        {
-                            submesh.Transform = trn;
-                        }
+                        submesh.ApplyTransform(trn);
+                    }
+                    else
+                    {
+                        submesh.Transform = trn;
                     }
                 }
             }
@@ -1476,36 +1494,42 @@ namespace Engine.Content.FmtCollada
         /// Process a default node
         /// </summary>
         /// <param name="trn">Transform</param>
-        /// <param name="node">Node</param>
+        /// <param name="nodes">Node list</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="bakeTransforms">Bake transforms into sub-meshes</param>
-        private static void ProcessSceneNodeDefault(Matrix trn, Node node, ModelContent modelContent, bool bakeTransforms)
+        private static void ProcessSceneNodesDefault(Matrix trn, IEnumerable<Node> nodes, ModelContent modelContent, bool bakeTransforms)
         {
-            if (node.Nodes?.Any() != true)
+            if (nodes?.Any() != true)
             {
                 return;
             }
 
-            foreach (var child in node.Nodes)
+            foreach (var child in nodes)
             {
-                Matrix childTrn = trn * child.ReadMatrix();
-
-                if (!childTrn.IsIdentity && child.InstanceGeometry?.Length > 0)
+                if (child.InstanceGeometry?.Any() != true)
                 {
-                    foreach (var ig in child.InstanceGeometry)
-                    {
-                        string meshName = ig.Url.Replace("#", "");
+                    continue;
+                }
 
-                        foreach (var submesh in modelContent.Geometry[meshName].Values)
+                Matrix childTrn = trn * child.ReadMatrix();
+                if (childTrn.IsIdentity)
+                {
+                    continue;
+                }
+
+                foreach (var ig in child.InstanceGeometry)
+                {
+                    string meshName = ig.Url.Replace("#", "");
+
+                    foreach (var submesh in modelContent.Geometry[meshName].Values)
+                    {
+                        if (bakeTransforms)
                         {
-                            if (bakeTransforms)
-                            {
-                                submesh.ApplyTransform(childTrn);
-                            }
-                            else
-                            {
-                                submesh.Transform = childTrn;
-                            }
+                            submesh.ApplyTransform(childTrn);
+                        }
+                        else
+                        {
+                            submesh.Transform = childTrn;
                         }
                     }
                 }
@@ -1514,76 +1538,59 @@ namespace Engine.Content.FmtCollada
         /// <summary>
         /// Process a node from a visual scene node list
         /// </summary>
-        /// <param name="nodes">Node list</param>
+        /// <param name="armatureNodes">Armature node list</param>
+        /// <param name="controllerNodes">Controller node list</param>
+        /// <param name="modelContent">Nodel content</param>
         /// <returns>Returns the resulting skinning content</returns>
-        private static void ProcessSceneNodesArmature(IEnumerable<Node> nodes, ModelContent modelContent)
+        private static void ProcessSceneNodesArmature(IEnumerable<Node> armatureNodes, IEnumerable<Node> controllerNodes, ModelContent modelContent)
         {
-            foreach (var node in nodes.Where(n => n.IsArmature))
+            if (armatureNodes?.Any() != true || controllerNodes?.Any() != true)
+            {
+                return;
+            }
+
+            foreach (var node in armatureNodes)
             {
                 //Armatures (Skeletons)
-                var skeleton = ProcessSceneNodeArmature(node);
-                if (skeleton != null)
+                var skeleton = CreateSkeleton(node.Id, node.Nodes);
+                if (skeleton == null)
                 {
-                    List<string> lControllers = new List<string>();
+                    continue;
+                }
 
-                    string skeletonName = $"#{skeleton.Root.Name}";
+                string skeletonName = $"#{skeleton.Root.Name}";
 
-                    //Armature controllers
-                    var controllerNodes = nodes.Where(n => n.HasController && string.Equals(n.SkeletonId, skeletonName, StringComparison.OrdinalIgnoreCase));
-                    foreach (var controller in controllerNodes)
+                //Armature controllers
+                var lControllers = controllerNodes
+                    .Where(n => n.HasController && string.Equals(n.SkeletonId, skeletonName, StringComparison.OrdinalIgnoreCase))
+                    .SelectMany(controller => controller.InstanceController.Select(c => c.Url.Replace("#", "")))
+                    .ToArray();
+
+                modelContent.SkinningInfo.Add(
+                    node.Id,
+                    new SkinningContent
                     {
-                        //Controllers
-                        var nControllers = ProcessSceneNodeController(controller);
-
-                        lControllers.AddRange(nControllers);
-                    }
-
-                    modelContent.SkinningInfo.Add(
-                        node.Id,
-                        new SkinningContent
-                        {
-                            Skeleton = skeleton,
-                            Controllers = lControllers.ToArray(),
-                        });
-                }
+                        Skeleton = skeleton,
+                        Controllers = lControllers,
+                    });
             }
         }
         /// <summary>
-        /// Process an armature node
+        /// Creates a skeleton from an armature node list
         /// </summary>
-        /// <param name="node">Node</param>
+        /// <param name="skeletonName">Skeleton name</param>
+        /// <param name="armatureNodes">Armature node list</param>
         /// <returns>Returns the resulting skeleton</returns>
-        private static Skeleton ProcessSceneNodeArmature(Node node)
+        private static Skeleton CreateSkeleton(string skeletonName, IEnumerable<Node> armatureNodes)
         {
-            if (node.Nodes?.Length > 0)
+            if (armatureNodes?.Any() != true)
             {
-                var root = ProcessJoints(node.Id, null, node.Nodes[0]);
-
-                return new Skeleton(root);
+                return null;
             }
 
-            return null;
-        }
-        /// <summary>
-        /// Process a controller node
-        /// </summary>
-        /// <param name="node">Node</param>
-        /// <returns>Returns a list of controller names</returns>
-        private static string[] ProcessSceneNodeController(Node node)
-        {
-            List<string> lControllers = new List<string>();
+            var root = ProcessJoints(skeletonName, null, armatureNodes.First());
 
-            if (node.InstanceController?.Length > 0)
-            {
-                foreach (var ic in node.InstanceController)
-                {
-                    string controllerName = ic.Url.Replace("#", "");
-
-                    lControllers.Add(controllerName);
-                }
-            }
-
-            return lControllers.ToArray();
+            return new Skeleton(root);
         }
 
         #endregion

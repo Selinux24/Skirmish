@@ -26,7 +26,7 @@ namespace Engine.Helpers
         /// <param name="elements">Number of elements</param>
         public void Add(string name, int usage, int binding, long size, int elements)
         {
-            base.Add(new ResourceStatusItem()
+            Add(new ResourceStatusItem()
             {
                 Name = name,
                 Usage = usage,
@@ -35,13 +35,13 @@ namespace Engine.Helpers
                 Elements = elements
             });
 
-            this.Size = 0;
-            this.Elements = 0;
+            Size = 0;
+            Elements = 0;
 
-            for (int i = 0; i < base.Count; i++)
+            for (int i = 0; i < Count; i++)
             {
-                this.Size += base[i].Size;
-                this.Elements += base[i].Elements;
+                Size += base[i]?.Size ?? 0;
+                Elements += base[i]?.Elements ?? 0;
             }
         }
         /// <summary>
@@ -50,7 +50,7 @@ namespace Engine.Helpers
         /// <returns>Returns the text representation of the instance</returns>
         public override string ToString()
         {
-            return string.Format("{0}; Size {1:0.0}KB; Elements {2}", base.Count, (float)this.Size / 1024.0f, this.Elements);
+            return $"{Count}; Size {Size / 1024.0f:0.0}KB; Elements {Elements}";
         }
     }
 }

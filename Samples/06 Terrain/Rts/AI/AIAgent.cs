@@ -528,10 +528,12 @@ namespace Terrain.Rts.AI
                     lookingForRoute = true;
                     lookingForRouteTicks = 0;
 
-                    var refineDelta = refine ? speed * 0.1f : 0f;
+                    var refineDelta = refine ? Math.Max(speed * 0.1f, 0.25f) : 0f;
 
                     Task.Run(async () =>
                     {
+                        Logger.WriteDebug(this, $"Agent {AgentType} FindPathAsync.");
+
                         var path = await Parent.Scene.FindPathAsync(AgentType, Manipulator.Position, point, true);
                         if (path != null)
                         {

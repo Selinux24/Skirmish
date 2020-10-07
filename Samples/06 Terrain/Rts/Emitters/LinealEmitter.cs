@@ -23,12 +23,12 @@ namespace Terrain.Rts.Emitters
         public LinealEmitter(Vector3 from, Vector3 to, float speed) : base()
         {
             this.to = to;
-            var vDir = (to - from);
+            var vDir = to - from;
             direction = Vector3.Normalize(vDir);
             this.speed = speed;
 
             Position = from;
-            Duration = (vDir.Length() / speed);
+            Duration = vDir.Length() / speed;
         }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace Terrain.Rts.Emitters
 
             if (distance < previousDistance)
             {
-                Position += (direction * speed * context.GameTime.ElapsedSeconds);
+                Position += direction * speed * context.GameTime.ElapsedSeconds;
 
                 previousDistance = distance;
             }

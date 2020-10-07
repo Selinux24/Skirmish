@@ -114,14 +114,14 @@ namespace Engine.Common
         /// <param name="indices">Indices</param>
         public Mesh(string name, Topology topology, Matrix transform, IEnumerable<IVertexData> vertices, IEnumerable<uint> indices)
         {
-            this.Id = GetNextId();
-            this.Name = name;
-            this.Topology = topology;
-            this.Transform = transform;
-            this.Vertices = vertices ?? new IVertexData[] { };
-            this.VertextType = vertices?.FirstOrDefault()?.VertexType ?? VertexTypes.Unknown;
-            this.Indices = indices ?? new uint[] { };
-            this.Indexed = indices?.Any() == true;
+            Id = GetNextId();
+            Name = name;
+            Topology = topology;
+            Transform = transform;
+            Vertices = vertices ?? new IVertexData[] { };
+            VertextType = vertices?.FirstOrDefault()?.VertexType ?? VertexTypes.Unknown;
+            Indices = indices ?? new uint[] { };
+            Indexed = indices?.Any() == true;
         }
         /// <summary>
         /// Destructor
@@ -154,23 +154,23 @@ namespace Engine.Common
         /// <param name="graphics">Graphics</param>
         public virtual void Draw(Graphics graphics)
         {
-            if (this.Indexed)
+            if (Indexed)
             {
-                if (this.IndexBuffer.Count > 0)
+                if (IndexBuffer.Count > 0)
                 {
                     graphics.DrawIndexed(
-                        this.IndexBuffer.Count,
-                        this.IndexBuffer.BufferOffset,
-                        this.VertexBuffer.BufferOffset);
+                        IndexBuffer.Count,
+                        IndexBuffer.BufferOffset,
+                        VertexBuffer.BufferOffset);
                 }
             }
             else
             {
-                if (this.VertexBuffer.Count > 0)
+                if (VertexBuffer.Count > 0)
                 {
                     graphics.Draw(
-                        this.VertexBuffer.Count,
-                        this.VertexBuffer.BufferOffset);
+                        VertexBuffer.Count,
+                        VertexBuffer.BufferOffset);
                 }
             }
         }
@@ -182,29 +182,28 @@ namespace Engine.Common
         /// <param name="count">Instance count</param>
         public virtual void Draw(Graphics graphics, int startInstanceLocation, int count)
         {
-            if (count > 0)
+            if (count <= 0)
             {
-                if (this.Indexed)
-                {
-                    if (this.IndexBuffer.Count > 0)
-                    {
-                        graphics.DrawIndexedInstanced(
-                            this.IndexBuffer.Count,
-                            count,
-                            this.IndexBuffer.BufferOffset,
-                            this.VertexBuffer.BufferOffset, startInstanceLocation);
-                    }
-                }
-                else
-                {
-                    if (this.VertexBuffer.Count > 0)
-                    {
-                        graphics.DrawInstanced(
-                            this.VertexBuffer.Count,
-                            count,
-                            this.VertexBuffer.BufferOffset, startInstanceLocation);
-                    }
-                }
+                return;
+            }
+
+            if (Indexed && IndexBuffer.Count > 0)
+            {
+                graphics.DrawIndexedInstanced(
+                    IndexBuffer.Count,
+                    count,
+                    IndexBuffer.BufferOffset,
+                    VertexBuffer.BufferOffset, startInstanceLocation);
+
+                return;
+            }
+
+            if (VertexBuffer.Count > 0)
+            {
+                graphics.DrawInstanced(
+                    VertexBuffer.Count,
+                    count,
+                    VertexBuffer.BufferOffset, startInstanceLocation);
             }
         }
 
@@ -215,22 +214,22 @@ namespace Engine.Common
         /// <returns>Returns null or position list</returns>
         public IEnumerable<Vector3> GetPoints(bool refresh = false)
         {
-            if (refresh || this.positionCache == null)
+            if (refresh || positionCache == null)
             {
                 var positionList = new List<Vector3>();
 
-                if (this.Vertices.FirstOrDefault().HasChannel(VertexDataChannels.Position))
+                if (Vertices.FirstOrDefault().HasChannel(VertexDataChannels.Position))
                 {
-                    this.Vertices.ToList().ForEach(v =>
+                    Vertices.ToList().ForEach(v =>
                     {
                         positionList.Add(v.GetChannelValue<Vector3>(VertexDataChannels.Position));
                     });
                 }
 
-                this.positionCache = positionList.ToArray();
+                positionCache = positionList.ToArray();
             }
 
-            return this.positionCache?.ToArray() ?? new Vector3[] { };
+            return positionCache?.ToArray() ?? new Vector3[] { };
         }
         /// <summary>
         /// Gets point list of mesh if the vertex type has position channel
@@ -240,24 +239,24 @@ namespace Engine.Common
         /// <returns>Returns null or position list</returns>
         public IEnumerable<Vector3> GetPoints(Matrix[] boneTransforms, bool refresh = false)
         {
-            if (refresh || this.positionCache == null)
+            if (refresh || positionCache == null)
             {
                 var positionList = new List<Vector3>();
 
-                if (this.Vertices.FirstOrDefault().HasChannel(VertexDataChannels.Position) &&
-                    this.Vertices.FirstOrDefault().HasChannel(VertexDataChannels.BoneIndices) &&
-                    this.Vertices.FirstOrDefault().HasChannel(VertexDataChannels.Weights))
+                if (Vertices.FirstOrDefault().HasChannel(VertexDataChannels.Position) &&
+                    Vertices.FirstOrDefault().HasChannel(VertexDataChannels.BoneIndices) &&
+                    Vertices.FirstOrDefault().HasChannel(VertexDataChannels.Weights))
                 {
-                    this.Vertices.ToList().ForEach(v =>
+                    Vertices.ToList().ForEach(v =>
                     {
                         positionList.Add(VertexData.ApplyWeight(v, boneTransforms));
                     });
                 }
 
-                this.positionCache = positionList.ToArray();
+                positionCache = positionList.ToArray();
             }
 
-            return this.positionCache?.ToArray() ?? new Vector3[] { };
+            return positionCache?.ToArray() ?? new Vector3[] { };
         }
         /// <summary>
         /// Gets triangle list of mesh if the vertex type has position channel
@@ -266,27 +265,27 @@ namespace Engine.Common
         /// <returns>Returns null or triangle list</returns>
         public IEnumerable<Triangle> GetTriangles(bool refresh = false)
         {
-            if (refresh || this.triangleCache == null)
+            if (refresh || triangleCache == null)
             {
-                var positions = this.GetPoints(refresh);
+                var positions = GetPoints(refresh);
                 if (positions.Any())
                 {
-                    if (this.Indices.Any())
+                    if (Indices.Any())
                     {
-                        this.triangleCache = Triangle.ComputeTriangleList(this.Topology, positions, this.Indices);
+                        triangleCache = Triangle.ComputeTriangleList(Topology, positions, Indices);
                     }
                     else
                     {
-                        this.triangleCache = Triangle.ComputeTriangleList(this.Topology, positions);
+                        triangleCache = Triangle.ComputeTriangleList(Topology, positions);
                     }
                 }
                 else
                 {
-                    this.triangleCache = new Triangle[] { };
+                    triangleCache = new Triangle[] { };
                 }
             }
 
-            return this.triangleCache?.ToArray() ?? new Triangle[] { };
+            return triangleCache?.ToArray() ?? new Triangle[] { };
         }
         /// <summary>
         /// Gets triangle list of mesh if the vertex type has position channel
@@ -296,27 +295,27 @@ namespace Engine.Common
         /// <returns>Returns null or triangle list</returns>
         public IEnumerable<Triangle> GetTriangles(Matrix[] boneTransforms, bool refresh = false)
         {
-            if (refresh || this.triangleCache == null)
+            if (refresh || triangleCache == null)
             {
-                var positions = this.GetPoints(boneTransforms, refresh);
+                var positions = GetPoints(boneTransforms, refresh);
                 if (positions.Any())
                 {
-                    if (this.Indices.Any())
+                    if (Indices.Any())
                     {
-                        this.triangleCache = Triangle.ComputeTriangleList(this.Topology, positions, this.Indices);
+                        triangleCache = Triangle.ComputeTriangleList(Topology, positions, Indices);
                     }
                     else
                     {
-                        this.triangleCache = Triangle.ComputeTriangleList(this.Topology, positions);
+                        triangleCache = Triangle.ComputeTriangleList(Topology, positions);
                     }
                 }
                 else
                 {
-                    this.triangleCache = new Triangle[] { };
+                    triangleCache = new Triangle[] { };
                 }
             }
 
-            return this.triangleCache?.ToArray() ?? new Triangle[] { };
+            return triangleCache?.ToArray() ?? new Triangle[] { };
         }
     }
 }

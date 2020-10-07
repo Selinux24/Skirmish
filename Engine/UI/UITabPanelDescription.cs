@@ -1,6 +1,4 @@
 ﻿using SharpDX;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.UI
 {

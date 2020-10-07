@@ -1,5 +1,6 @@
 ﻿using Engine;
 using SharpDX;
+using System.Linq;
 
 namespace Terrain.Rts.AI.Behaviors
 {
@@ -20,11 +21,25 @@ namespace Terrain.Rts.AI.Behaviors
         /// Time to wait in the check point
         /// </summary>
         private float checkPointTime;
+        /// <summary>
+        /// Check-point proximity threshold
+        /// </summary>
+        private readonly float checkPointThr = 10f;
 
         /// <summary>
         /// Last check point time
         /// </summary>
         protected float LastCheckPointTime { get; set; } = 0;
+        /// <summary>
+        /// Get the next check point
+        /// </summary>
+        protected Vector3? NextCheckPoint
+        {
+            get
+            {
+                return checkPoints.ElementAtOrDefault(currentCheckPoint);
+            }
+        }
 
         /// <summary>
         /// Gets the target position
@@ -33,9 +48,9 @@ namespace Terrain.Rts.AI.Behaviors
         {
             get
             {
-                if (this.currentCheckPoint >= 0)
+                if (currentCheckPoint >= 0)
                 {
-                    return this.checkPoints[this.currentCheckPoint];
+                    return checkPoints[currentCheckPoint];
                 }
 
                 return null;
@@ -64,10 +79,10 @@ namespace Terrain.Rts.AI.Behaviors
         public void InitPatrollingBehavior(Vector3[] checkPoints, float checkPointTime, float patrolVelocity)
         {
             this.checkPoints = checkPoints;
-            this.currentCheckPoint = -1;
+            currentCheckPoint = -1;
             this.checkPointTime = checkPointTime;
-            this.LastCheckPointTime = 0;
-            this.PatrollVelocity = patrolVelocity;
+            LastCheckPointTime = 0;
+            PatrollVelocity = patrolVelocity;
         }
 
         /// <summary>
@@ -77,7 +92,7 @@ namespace Terrain.Rts.AI.Behaviors
         /// <returns>Returns true if the behavior can be executed</returns>
         public override bool Test(GameTime gameTime)
         {
-            if (this.checkPoints?.Length > 0)
+            if (checkPoints?.Length > 0)
             {
                 return true;
             }
@@ -92,33 +107,33 @@ namespace Terrain.Rts.AI.Behaviors
         {
             bool navigate = false;
 
-            var currentPosition = this.Agent.Manipulator.Position;
-
-            if (this.currentCheckPoint < 0)
+            if (currentCheckPoint < 0)
             {
-                this.currentCheckPoint = 0;
+                currentCheckPoint = 0;
 
                 navigate = true;
             }
 
-            if (!this.Agent.Controller.HasPath)
+            if (!Agent.Controller.HasPath)
             {
                 navigate = true;
             }
 
-            float d = Vector3.Distance(currentPosition, this.checkPoints[this.currentCheckPoint]);
-            if (d < 10f)
+            float d = Vector3.Distance(Agent.Manipulator.Position, NextCheckPoint.Value);
+            if (d < checkPointThr)
             {
-                this.LastCheckPointTime += gameTime.ElapsedSeconds;
+                LastCheckPointTime += gameTime.ElapsedSeconds;
 
-                if (this.LastCheckPointTime > this.checkPointTime)
+                if (LastCheckPointTime > checkPointTime)
                 {
-                    this.LastCheckPointTime = 0;
+                    LastCheckPointTime = 0;
 
-                    this.currentCheckPoint++;
-                    if (this.currentCheckPoint > this.checkPoints.Length - 1)
+                    Logger.WriteDebug(this, $"Agent {Agent} going to next check-point.");
+
+                    currentCheckPoint++;
+                    if (currentCheckPoint > checkPoints.Length - 1)
                     {
-                        this.currentCheckPoint = 0;
+                        currentCheckPoint = 0;
                     }
 
                     navigate = true;
@@ -127,8 +142,24 @@ namespace Terrain.Rts.AI.Behaviors
 
             if (navigate)
             {
-                this.Agent.SetRouteToPoint(this.checkPoints[this.currentCheckPoint], this.PatrollVelocity, true);
+                Logger.WriteDebug(this, $"Agent {Agent} looking for path.");
+
+                Agent.SetRouteToPoint(checkPoints[currentCheckPoint], PatrollVelocity, true);
             }
+        }
+
+        /// <summary>
+        /// Gets whether the agent is waiting in a check-point or not
+        /// </summary>
+        public bool IsWaitingInCheckPoint()
+        {
+            float d = Vector3.Distance(Agent.Manipulator.Position, NextCheckPoint.Value);
+            if (d < checkPointThr)
+            {
+                return LastCheckPointTime <= checkPointTime;
+            }
+
+            return false;
         }
     }
 }

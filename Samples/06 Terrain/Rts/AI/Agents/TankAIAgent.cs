@@ -21,14 +21,15 @@ namespace Terrain.Rts.AI.Agents
         public TankAIAgent(Brain parent, AgentType agentType, Model sceneObject, AIStatsDescription stats) :
             base(parent, agentType, sceneObject, stats)
         {
-            this.Controller = new TankManipulatorController()
+            Controller = new TankManipulatorController()
             {
                 ArrivingRadius = 1f,
                 ArrivingThreshold = 1f,
                 MaximumForce = 0.25f,
             };
 
-            this.AttackBehavior = new TankAttackBehavior(this);
+            AttackBehavior = new TankAttackBehavior(this);
+            PatrolBehavior = new TankPatrolBehavior(this);
         }
 
         /// <summary>
@@ -40,14 +41,14 @@ namespace Terrain.Rts.AI.Agents
         {
             base.FireDamaged(active, passive);
 
-            var model = this.SceneObject;
+            var model = SceneObject;
             if (model != null)
             {
-                if (this.Stats.Damage > 0.9f)
+                if (Stats.Damage > 0.9f)
                 {
                     model.TextureIndex = 2;
                 }
-                else if (this.Stats.Damage > 0.2f)
+                else if (Stats.Damage > 0.2f)
                 {
                     model.TextureIndex = 1;
                 }
@@ -66,7 +67,7 @@ namespace Terrain.Rts.AI.Agents
         {
             base.FireDestroyed(active, passive);
 
-            var model = this.SceneObject;
+            var model = SceneObject;
             if (model != null)
             {
                 model.TextureIndex = 2;

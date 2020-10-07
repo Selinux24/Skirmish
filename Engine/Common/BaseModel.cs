@@ -101,7 +101,7 @@ namespace Engine.Common
 
                 if (description.Optimize) iGeo.Optimize();
 
-                var drawable = DrawingData.Build(Game, description.Name, iGeo, desc, InstancingBuffer);
+                var drawable = DrawingData.Build(Game, description.Name, iGeo, desc, InstancingBuffer).GetAwaiter().GetResult();
 
                 meshesByLOD.Add(LevelOfDetail.High, drawable);
             }
@@ -116,7 +116,7 @@ namespace Engine.Common
                         defaultLevelOfDetail = lod;
                     }
 
-                    var drawable = DrawingData.Build(this.Game, description.Name, content[lod], desc, InstancingBuffer);
+                    var drawable = DrawingData.Build(this.Game, description.Name, content[lod], desc, InstancingBuffer).GetAwaiter().GetResult();
 
                     meshesByLOD.Add(lod, drawable);
                 }

@@ -131,10 +131,17 @@ namespace Engine.PathFinding
         /// <param name="delta">Control point path deltas</param>
         public void RefinePath(float delta)
         {
+            if (delta <= 0)
+            {
+                return;
+            }
+
             if (positions.Count < 2)
             {
                 return;
             }
+
+            Logger.WriteTrace(this, $"PathFindingPath.RefinePath delta {delta}.");
 
             List<Vector3> lPositions = new List<Vector3>();
             List<Vector3> lNormals = new List<Vector3>();

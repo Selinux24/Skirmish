@@ -23,12 +23,12 @@ namespace Terrain.Rts.AI.Behaviors
         /// <param name="gameTime">Game time</param>
         public override void Task(GameTime gameTime)
         {
-            if (this.Target != null)
+            if (Target != null)
             {
-                var model = this.Agent.SceneObject;
+                var model = Agent.SceneObject;
                 if (model != null)
                 {
-                    model.Manipulator.RotateTo(this.Target.Value, Vector3.Up, Axis.Y, 0.01f);
+                    model.Manipulator.RotateTo(Target.Value, Vector3.Up, Axis.Y, 0.01f);
                 }
             }
 

@@ -111,7 +111,7 @@ namespace Engine
         {
             get
             {
-                return ModelParts.Find(p => p.Name == name);
+                return GetModelPartByName(name);
             }
         }
         /// <summary>
@@ -137,37 +137,7 @@ namespace Engine
 
             if (description.TransformDependences?.Any() == true)
             {
-                var parents = Array.FindAll(description.TransformDependences, i => i == -1);
-                if (parents == null || parents.Length != 1)
-                {
-                    throw new EngineException("Model with transform dependences must have one (and only one) parent mesh identified by -1");
-                }
-
-                for (int i = 0; i < description.TransformNames.Length; i++)
-                {
-                    var thisName = description.TransformNames[i];
-                    var part = new ModelPart(thisName);
-                    ModelParts.Add(part);
-                }
-
-                for (int i = 0; i < description.TransformNames.Length; i++)
-                {
-                    var thisName = description.TransformNames[i];
-                    var thisMan = this[thisName].Manipulator;
-                    thisMan.Updated += new EventHandler(ManipulatorUpdated);
-
-                    var parentIndex = description.TransformDependences[i];
-                    if (parentIndex >= 0)
-                    {
-                        var parentName = description.TransformNames[parentIndex];
-
-                        thisMan.Parent = this[parentName].Manipulator;
-                    }
-                    else
-                    {
-                        Manipulator = thisMan;
-                    }
-                }
+                AddModelParts(description.TransformNames, description.TransformDependences);
             }
             else
             {
@@ -176,10 +146,68 @@ namespace Engine
             }
 
             var drawData = GetDrawingData(LevelOfDetail.High);
-            Lights = drawData?.Lights.Select(l => l.Clone()).ToArray() ?? new ISceneLight[] { };
+            if (drawData != null)
+            {
+                SetModelPartsTransforms(drawData);
+
+                Lights = drawData.Lights.Select(l => l.Clone()).ToArray();
+            }
 
             AnimationController.AnimationOffsetChanged += (s, a) => { InvalidateCache(); };
+        }
+        /// <summary>
+        /// Add model parts
+        /// </summary>
+        /// <param name="names">Part names</param>
+        /// <param name="dependences">Part dependences</param>
+        private void AddModelParts(string[] names, int[] dependences)
+        {
+            int parents = dependences.Count(i => i == -1);
+            if (parents != 1)
+            {
+                throw new EngineException("Model with transform dependences must have one (and only one) parent mesh identified by -1");
+            }
 
+            if (dependences.Any(i => i < -1 || i > dependences.Count() - 1))
+            {
+                throw new EngineException("Bad transform dependences indices.");
+            }
+
+            for (int i = 0; i < names.Length; i++)
+            {
+                ModelParts.Add(new ModelPart(names[i]));
+            }
+
+            for (int i = 0; i < names.Length; i++)
+            {
+                var thisPart = GetModelPartByName(names[i]);
+                if (thisPart == null)
+                {
+                    continue;
+                }
+
+                var thisMan = thisPart.Manipulator;
+                thisMan.Updated += new EventHandler(ManipulatorUpdated);
+
+                var parentIndex = dependences[i];
+                if (parentIndex >= 0)
+                {
+                    var parentPart = GetModelPartByName(names[parentIndex]);
+
+                    thisMan.Parent = parentPart?.Manipulator;
+                }
+                else
+                {
+                    Manipulator = thisMan;
+                }
+            }
+        }
+        /// <summary>
+        /// Sets model part transforms from original meshes
+        /// </summary>
+        /// <param name="drawData">Drawing data</param>
+        private void SetModelPartsTransforms(DrawingData drawData)
+        {
             for (int i = 0; i < ModelParts.Count; i++)
             {
                 var thisName = ModelParts[i].Name;
@@ -462,13 +490,21 @@ namespace Engine
 
             return Manipulator.FinalTransform;
         }
+        /// <summary>
+        /// Gets the model part by name
+        /// </summary>
+        /// <param name="name">Name</param>
+        public ModelPart GetModelPartByName(string name)
+        {
+            return ModelParts.FirstOrDefault(p => p.Name == name);
+        }
 
         /// <summary>
         /// Invalidates the internal cache
         /// </summary>
         private void InvalidateCache()
         {
-            Logger.WriteTrace(this, $"Model InvalidateCache");
+            Logger.WriteTrace(this, $"Model Name: {Name}; LOD: {LevelOfDetail}; InvalidateCache");
 
             updatePoints = true;
             updateTriangles = true;
@@ -487,13 +523,15 @@ namespace Engine
 
             if (update)
             {
-                IEnumerable<Vector3> cache;
+                Logger.WriteTrace(this, $"Model Name: {Name}; LOD: {LevelOfDetail}; GetPoints Forced");
 
                 var drawingData = GetDrawingData(GetLODMinimum());
                 if (drawingData == null)
                 {
                     return new Vector3[] { };
                 }
+
+                IEnumerable<Vector3> cache;
 
                 if (drawingData.SkinningData != null)
                 {
@@ -513,6 +551,10 @@ namespace Engine
 
                 updatePoints = false;
             }
+            else
+            {
+                Logger.WriteTrace(this, $"Model Name: {Name}; LOD: {LevelOfDetail}; GetPoints Cached");
+            }
 
             return positionCache?.ToArray() ?? new Vector3[] { };
         }
@@ -527,13 +569,15 @@ namespace Engine
 
             if (update)
             {
-                IEnumerable<Triangle> cache;
+                Logger.WriteTrace(this, $"Model Name: {Name}; LOD: {LevelOfDetail}; GetTriangles Forced");
 
                 var drawingData = GetDrawingData(GetLODMinimum());
                 if (drawingData == null)
                 {
                     return new Triangle[] { };
                 }
+
+                IEnumerable<Triangle> cache;
 
                 if (drawingData.SkinningData != null)
                 {
@@ -552,6 +596,10 @@ namespace Engine
                 triangleCache = cache.ToArray();
 
                 updateTriangles = false;
+            }
+            else
+            {
+                Logger.WriteTrace(this, $"Model Name: {Name}; LOD: {LevelOfDetail}; GetTriangles Cached");
             }
 
             return triangleCache?.ToArray() ?? new Triangle[] { };
@@ -669,7 +717,7 @@ namespace Engine
                 return Triangle.Transform(DrawingData.VolumeMesh, Manipulator.LocalTransform);
             }
 
-            return GetTriangles(true);
+            return GetTriangles();
         }
 
         /// <summary>

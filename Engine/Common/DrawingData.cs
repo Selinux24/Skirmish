@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Engine.Common
 {
@@ -77,30 +78,35 @@ namespace Engine.Common
         /// <param name="description">Data description</param>
         /// <param name="instancingBuffer">Instancing buffer descriptor</param>
         /// <returns>Returns the generated drawing data objects</returns>
-        public static DrawingData Build(Game game, string name, ModelContent modelContent, DrawingDataDescription description, BufferDescriptor instancingBuffer = null)
+        public static async Task<DrawingData> Build(Game game, string name, ModelContent modelContent, DrawingDataDescription description, BufferDescriptor instancingBuffer = null)
         {
-            DrawingData res = new DrawingData(game, description);
+            DrawingData res = null;
 
-            //Animation
-            if (description.LoadAnimation)
+            await Task.Run(()=>
             {
-                InitializeSkinningData(res, modelContent);
-            }
+                res = new DrawingData(game, description);
 
-            //Images
-            InitializeTextures(res, game, modelContent, description.TextureCount);
+                //Animation
+                if (description.LoadAnimation)
+                {
+                    InitializeSkinningData(res, modelContent);
+                }
 
-            //Materials
-            InitializeMaterials(res, modelContent);
+                //Images
+                InitializeTextures(res, game, modelContent, description.TextureCount);
 
-            //Skins & Meshes
-            InitializeGeometry(res, modelContent, description);
+                //Materials
+                InitializeMaterials(res, modelContent);
 
-            //Update meshes into device
-            InitializeMeshes(res, game, name, description.DynamicBuffers, instancingBuffer);
+                //Skins & Meshes
+                InitializeGeometry(res, modelContent, description);
 
-            //Lights
-            InitializeLights(res, modelContent);
+                //Update meshes into device
+                InitializeMeshes(res, game, name, description.DynamicBuffers, instancingBuffer);
+
+                //Lights
+                InitializeLights(res, modelContent);
+            });
 
             return res;
         }

@@ -24,12 +24,13 @@ namespace Terrain.Rts.AI.Behaviors
         /// <remarks>Rotate turret towards target</remarks>
         public override void Task(GameTime gameTime)
         {
-            if (this.Target != null)
+            if (Target.HasValue)
             {
-                var model = this.Agent.SceneObject;
+                var model = Agent.SceneObject;
                 if (model?.ModelPartCount > 0)
                 {
-                    model["Turret-mesh"].Manipulator.RotateTo(this.Target.Value, Vector3.Up, Axis.Y, 0.01f);
+                    model["Turret-mesh"].Manipulator.RotateTo(Target.Value, Vector3.Up, Axis.Y, 0.01f);
+                    model["Barrel-mesh"].Manipulator.RotateTo(Target.Value, Vector3.Up, Axis.X, 0.01f);
                 }
             }
 

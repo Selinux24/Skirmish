@@ -128,7 +128,6 @@ namespace Terrain.Rts
         private string[] damageEffects;
 
         private bool started = false;
-        private readonly List<AIAgent> agents = new List<AIAgent>();
 
         private bool gameReady = false;
 
@@ -506,7 +505,7 @@ namespace Terrain.Rts
             helicopter.Manipulator.SetScale(0.15f);
             helicopter.Manipulator.UpdateInternals(true);
 
-            Lights.AddRange(helicopter.Lights);
+            PrepareLights(helicopter.Lights);
 
             sw.Stop();
             return new TaskResult()
@@ -560,8 +559,8 @@ namespace Terrain.Rts
                 MaxClimb = tankbbox.Height * 0.1f,
             };
 
-            Lights.AddRange(tankP1.Lights);
-            Lights.AddRange(tankP2.Lights);
+            PrepareLights(tankP1.Lights);
+            PrepareLights(tankP2.Lights);
 
             sw.Stop();
             return new TaskResult()
@@ -589,7 +588,7 @@ namespace Terrain.Rts
             heliport.Visible = false;
             AttachToGround(heliport, true);
 
-            Lights.AddRange(heliport.Lights);
+            PrepareLights(heliport.Lights);
 
             sw.Stop();
             return new TaskResult()
@@ -617,7 +616,7 @@ namespace Terrain.Rts
             garage.Visible = false;
             AttachToGround(garage, true);
 
-            Lights.AddRange(garage.Lights);
+            PrepareLights(garage.Lights);
 
             sw.Stop();
             return new TaskResult()
@@ -645,7 +644,7 @@ namespace Terrain.Rts
             building.Visible = false;
             AttachToGround(building, true);
 
-            Lights.AddRange(building.Lights);
+            PrepareLights(building.Lights);
 
             sw.Stop();
             return new TaskResult()
@@ -1224,6 +1223,7 @@ namespace Terrain.Rts
                     heliport.Manipulator.UpdateInternals(true);
                 }
                 heliport.Visible = true;
+                heliport.Lights.ToList().ForEach(l => l.Enabled = true);
             });
         }
         private async Task InitializePositionGarage()
@@ -1237,6 +1237,7 @@ namespace Terrain.Rts
                     garage.Manipulator.UpdateInternals(true);
                 }
                 garage.Visible = true;
+                garage.Lights.ToList().ForEach(l => l.Enabled = true);
             });
         }
         private async Task InitializePositionBuildings()
@@ -1250,6 +1251,7 @@ namespace Terrain.Rts
                     building.Manipulator.UpdateInternals(true);
                 }
                 building.Visible = true;
+                building.Lights.ToList().ForEach(l => l.Enabled = true);
             });
         }
         private async Task InitializePositionObelisk()
@@ -1273,6 +1275,17 @@ namespace Terrain.Rts
                 obelisk.Visible = true;
             });
         }
+        private void PrepareLights(IEnumerable<ISceneLight> lights)
+        {
+            if (!lights.Any())
+            {
+                return;
+            }
+
+            lights.OfType<ISceneLightPoint>().ToList().ForEach(l => l.CastShadow = false);
+            lights.ToList().ForEach(l => l.Enabled = false);
+            Lights.AddRange(lights);
+        }
 
         public override void NavigationGraphUpdated()
         {
@@ -1283,6 +1296,8 @@ namespace Terrain.Rts
                 await StartHelicopter();
                 await StartTanks();
                 await StartDebug();
+
+                BeginToggleGarageLights();
 
                 started = true;
             });
@@ -1331,9 +1346,6 @@ namespace Terrain.Rts
 
                 helicopterAgent = new HelicopterAIAgent(agentManager, null, helicopter, hStats);
 
-                // Adds agent to scene
-                agents.Add(helicopterAgent);
-
                 // Register events
                 helicopterAgent.Moving += Agent_Moving;
                 helicopterAgent.Attacking += Agent_Attacking;
@@ -1346,11 +1358,11 @@ namespace Terrain.Rts
                 // Define patrolling check points
                 Vector3[] hCheckPoints = new Vector3[]
                 {
-                new Vector3(+60, 20, +60),
-                new Vector3(+60, 20, -60),
-                new Vector3(-70, 20, +70),
-                new Vector3(-60, 20, -60),
-                new Vector3(+00, 25, +00),
+                    new Vector3(+60, 20, +60),
+                    new Vector3(+60, 20, -60),
+                    new Vector3(-70, 20, +70),
+                    new Vector3(-60, 20, -60),
+                    new Vector3(+00, 25, +00),
                 };
 
                 // Define behaviors
@@ -1361,6 +1373,7 @@ namespace Terrain.Rts
 
                 //Show
                 helicopter.Visible = true;
+                helicopter.Lights.ToList().ForEach(l => l.Enabled = true);
             });
         }
         private async Task StartTanks()
@@ -1402,9 +1415,6 @@ namespace Terrain.Rts
                 tankP1Agent.SceneObject.Name = "Tank1";
                 tankP2Agent.SceneObject.Name = "Tank2";
 
-                agents.Add(tankP1Agent);
-                agents.Add(tankP2Agent);
-
                 // Register events
                 tankP1Agent.Moving += Agent_Moving;
                 tankP1Agent.Attacking += Agent_Attacking;
@@ -1421,19 +1431,19 @@ namespace Terrain.Rts
                 // Define check-points
                 Vector3[] t1CheckPoints = new Vector3[]
                 {
-                new Vector3(+60, 0, -60),
-                new Vector3(-60, 0, -60),
-                new Vector3(+60, 0, +60),
-                new Vector3(-70, 0, +70),
+                    new Vector3(+60, 0, -60),
+                    new Vector3(-60, 0, -60),
+                    new Vector3(+60, 0, +60),
+                    new Vector3(-70, 0, +70),
                 };
 
                 Vector3[] t2CheckPoints = new Vector3[]
                 {
-                new Vector3(+60, 0, -60),
-                new Vector3(+60, 0, +60),
-                new Vector3(-70, 0, +70),
-                new Vector3(-60, 0, -60),
-                new Vector3(+00, 0, +00),
+                    new Vector3(+60, 0, -60),
+                    new Vector3(+60, 0, +60),
+                    new Vector3(-70, 0, +70),
+                    new Vector3(-60, 0, -60),
+                    new Vector3(+00, 0, +00),
                 };
 
                 //Adjust check-points
@@ -1467,6 +1477,8 @@ namespace Terrain.Rts
                 //Show
                 tankP1.Visible = true;
                 tankP2.Visible = true;
+                tankP1.Lights.ToList().ForEach(l => l.Enabled = true);
+                tankP2.Lights.ToList().ForEach(l => l.Enabled = true);
             });
         }
         private async Task StartDebug()
@@ -1504,6 +1516,24 @@ namespace Terrain.Rts
                 // Axis
                 curveLineDrawer.SetPrimitives(wAxisColor, Line3D.CreateAxis(Matrix.Identity, 20f));
                 curveLineDrawer.Visible = false;
+            });
+        }
+        private void BeginToggleGarageLights()
+        {
+            var light = garage.Lights.FirstOrDefault();
+            if (light == null)
+            {
+                return;
+            }
+
+            Task.Run(async () =>
+            {
+                while (true)
+                {
+                    await Task.Delay(Helper.RandomGenerator.Next(500, 3000));
+
+                    light.Enabled = !light.Enabled;
+                }
             });
         }
 
@@ -1544,7 +1574,7 @@ namespace Terrain.Rts
                 UpdateHelicopter();
                 UpdateDebug();
 
-                agents.ForEach(a => a.Update(gameTime));
+                agentManager.Update(gameTime);
             }
         }
         private void UpdateInputPlayer()
@@ -1847,8 +1877,7 @@ namespace Terrain.Rts
                 UpdateTankPath(pickingRay);
             }
 
-            bool shift = Game.Input.KeyPressed(Keys.ShiftKey);
-            if (shift)
+            if (Game.Input.ShiftPressed)
             {
                 if (Game.Input.KeyJustReleased(Keys.D1))
                 {
@@ -1863,17 +1892,8 @@ namespace Terrain.Rts
             SetStatsScreenPosition(tankP1Agent, 4, t1ProgressBar);
             SetStatsScreenPosition(tankP2Agent, 4, t2ProgressBar);
 
-            DEBUGDrawTankPath(
-                tankP1Agent.Manipulator.Position,
-                tankP1Agent.Manipulator.Forward * 10f,
-                tankP1Agent.Controller.SamplePath().ToArray(),
-                Color.Yellow, Color.GreenYellow);
-
-            DEBUGDrawTankPath(
-                tankP2Agent.Manipulator.Position,
-                tankP2Agent.Manipulator.Forward * 10f,
-                tankP2Agent.Controller.SamplePath().ToArray(),
-                Color.Firebrick, Color.Coral);
+            DEBUGDrawTankPath(tankP1Agent, Color.Yellow, Color.GreenYellow);
+            DEBUGDrawTankPath(tankP2Agent, Color.Firebrick, Color.Coral);
         }
         private void UpdateHelicopter()
         {
@@ -1952,11 +1972,7 @@ namespace Terrain.Rts
                 var result = FindPath(tankAgentType, t1Position, r.Position);
                 if (result != null)
                 {
-                    DEBUGDrawTankPath(
-                        null,
-                        null,
-                        result.Positions,
-                        Color.Red, Color.IndianRed);
+                    DEBUGDrawPath(result.Positions, Color.Red);
                 }
             }
         }
@@ -2012,9 +2028,9 @@ namespace Terrain.Rts
                 helicopterAgent);
             counters2.Text = txt2;
 
-            hProgressBar.ProgressValue = (1f - helicopterAgent?.Stats.Damage ?? 0);
-            t1ProgressBar.ProgressValue = (1f - tankP1Agent?.Stats.Damage ?? 0);
-            t2ProgressBar.ProgressValue = (1f - tankP2Agent?.Stats.Damage ?? 0);
+            hProgressBar.ProgressValue = 1f - helicopterAgent?.Stats.Damage ?? 0;
+            t1ProgressBar.ProgressValue = 1f - tankP1Agent?.Stats.Damage ?? 0;
+            t2ProgressBar.ProgressValue = 1f - tankP2Agent?.Stats.Damage ?? 0;
 
             #endregion
         }
@@ -2069,12 +2085,6 @@ namespace Terrain.Rts
 
         private void Agent_Moving(object sender, BehaviorEventArgs e)
         {
-            if (Helper.RandomGenerator.NextFloat(0, 1) > 0.8f)
-            {
-                AddDustSystem(e.Active, tankLeftCat);
-                AddDustSystem(e.Active, tankRightCat);
-            }
-
             //Start sounds
             if (e.Active == helicopterAgent && heliEffectInstance == null)
             {
@@ -2092,6 +2102,12 @@ namespace Terrain.Rts
             {
                 tank2EffectInstance = AudioManager.CreateEffectInstance(tank2Effect, tankP2, Camera);
                 tank2EffectInstance?.Play();
+            }
+
+            if (Helper.RandomGenerator.NextFloat(0, 1) > 0.8f && (e.Active == tankP1Agent || e.Active == tankP2Agent))
+            {
+                AddDustSystem(e.Active, tankLeftCat);
+                AddDustSystem(e.Active, tankRightCat);
             }
         }
         private void Agent_Attacking(object sender, BehaviorEventArgs e)
@@ -2320,6 +2336,11 @@ namespace Terrain.Rts
 
         private void DEBUGPickingPosition(Vector3 position)
         {
+            if (!terrainPointDrawer.Visible)
+            {
+                return;
+            }
+
             if (FindAllGroundPosition<Triangle>(position.X, position.Z, out var results))
             {
                 var positions = results.Select(r => r.Position).ToArray();
@@ -2335,6 +2356,11 @@ namespace Terrain.Rts
         }
         private void DEBUGDrawHelicopterPath(Curve3D curve)
         {
+            if (!curveLineDrawer.Visible)
+            {
+                return;
+            }
+
             List<Vector3> path = new List<Vector3>();
 
             float pass = curve.Length / 500f;
@@ -2350,10 +2376,14 @@ namespace Terrain.Rts
             curveLineDrawer.SetPrimitives(pointsColor, Line3D.CreateCrossList(curve.Points, 0.5f));
             curveLineDrawer.SetPrimitives(segmentsColor, Line3D.CreatePath(curve.Points));
         }
-        private void DEBUGDrawTankPath(Vector3? from, Vector3? direction, IEnumerable<Vector3> path, Color pathColor, Color arrowColor)
+        private void DEBUGDrawPath(IEnumerable<Vector3> path, Color pathColor)
         {
+            if (!terrainPointDrawer.Visible)
+            {
+                return;
+            }
+
             terrainPointDrawer.Clear(pathColor);
-            terrainPointDrawer.Clear(arrowColor);
 
             if (path?.Any() == true)
             {
@@ -2368,15 +2398,36 @@ namespace Terrain.Rts
 
                 terrainPointDrawer.SetPrimitives(pathColor, lines);
             }
-
-            if (from.HasValue && direction.HasValue)
+        }
+        private void DEBUGDrawArrow(Vector3 from, Vector3 direction, Color arrowColor)
+        {
+            terrainPointDrawer.Clear(arrowColor);
+            var arrow = Line3D.CreateArrow(from, from + direction, 10f);
+            terrainPointDrawer.SetPrimitives(arrowColor, arrow);
+        }
+        private void DEBUGDrawTankPath(TankAIAgent tank, Color pathColor, Color arrowColor)
+        {
+            if (!terrainPointDrawer.Visible)
             {
-                var arrow = Line3D.CreateArrow(from.Value, from.Value + direction.Value, 10f);
-                terrainPointDrawer.SetPrimitives(arrowColor, arrow);
+                return;
             }
+
+            var path = tank.Controller.SamplePath().ToArray();
+
+            DEBUGDrawPath(path, pathColor);
+
+            Vector3 from = tank.Manipulator.Position;
+            Vector3 direction = tank.Manipulator.Forward * 10f;
+
+            DEBUGDrawArrow(from, direction, arrowColor);
         }
         private void DEBUGUpdateGraphDrawer()
         {
+            if (!terrainGraphDrawer.Visible)
+            {
+                return;
+            }
+
             var agent = walkMode ? walkerAgentType : tankAgentType;
 
             var nodes = GetNodes(agent).OfType<GraphNode>();
@@ -2417,6 +2468,11 @@ namespace Terrain.Rts
         }
         private void DEBUGDrawLightVolumes()
         {
+            if (!lightsVolumeDrawer.Visible)
+            {
+                return;
+            }
+
             lightsVolumeDrawer.Clear();
 
             foreach (var spot in Lights.SpotLights)
@@ -2437,6 +2493,11 @@ namespace Terrain.Rts
         }
         private void DEBUGDrawLightMarks()
         {
+            if (!lightsVolumeDrawer.Visible)
+            {
+                return;
+            }
+
             lightsVolumeDrawer.Clear();
 
             foreach (var spot in Lights.SpotLights)
@@ -2457,6 +2518,11 @@ namespace Terrain.Rts
         }
         private void DEBUGDrawStaticVolumes()
         {
+            if (!staticObjLineDrawer.Visible)
+            {
+                return;
+            }
+
             List<Line3D> lines = new List<Line3D>();
             lines.AddRange(Line3D.CreateWiredBox(heliport.GetBoundingBox()));
             lines.AddRange(Line3D.CreateWiredBox(garage.GetBoundingBox()));
@@ -2490,6 +2556,11 @@ namespace Terrain.Rts
         }
         private void DEBUGDrawMovingVolumes()
         {
+            if (!movingObjLineDrawer.Visible)
+            {
+                return;
+            }
+
             var hsph = helicopter.GetBoundingSphere();
             movingObjLineDrawer.SetPrimitives(new Color4(Color.White.ToColor3(), 0.55f), Line3D.CreateWiredSphere(new[] { hsph, }, 50, 20));
 

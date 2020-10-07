@@ -239,10 +239,10 @@ namespace Engine
             {
                 return;
             }
-
+            
             if (hasDataToWrite)
             {
-                Logger.WriteTrace(this, $"{Name} - DrawShadows WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset}");
+                Logger.WriteTrace(this, $"{Name} - DrawShadows {context.ShadowMap} WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset}");
                 BufferManager.WriteInstancingData(InstancingBuffer, instancingData);
             }
 

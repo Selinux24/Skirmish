@@ -526,6 +526,7 @@ namespace SceneTest.SceneTanksGame
             pbFire.Width = 500;
             pbFire.Height = 40;
             pbFire.ProgressColor = Color.Yellow;
+            pbFire.BaseColor = new Color4(0, 0, 0, 0.5f);
             pbFire.Visible = false;
 
             fireKeyText = await this.AddComponentUITextArea(UITextAreaDescription.FromFile(fontFilename, 25, true), layerUI + 2);
@@ -574,6 +575,7 @@ namespace SceneTest.SceneTanksGame
             windVelocity.Left = miniMapBackground.AbsoluteCenter.X - 90;
             windVelocity.Top = miniMapBackground.AbsoluteCenter.Y - 130;
             windVelocity.ProgressColor = Color.DeepSkyBlue;
+            windVelocity.BaseColor = new Color4(0, 0, 0, 0.5f);
             windVelocity.Visible = false;
 
             windDirectionArrow = await this.AddComponentSprite(SpriteDescription.FromFile("SceneTanksGame/Wind.png"), SceneObjectUsages.UI, layerUI + 1);

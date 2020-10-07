@@ -20,8 +20,7 @@ namespace Terrain.Rts.Controllers
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="manipulator">Parent manipulator</param>
-        public HeliManipulatorController(Manipulator3D manipulator) : base()
+        public HeliManipulatorController() : base()
         {
 
         }

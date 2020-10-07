@@ -676,6 +676,10 @@ namespace Engine
                 return;
             }
 
+            Counters.FrameCount++;
+
+            Logger.WriteInformation(this, $"##### Frame {Counters.FrameCount} Start ####");
+
             Stopwatch gSW = new Stopwatch();
             gSW.Start();
 
@@ -692,6 +696,10 @@ namespace Engine
             gSW.Stop();
             GameStatus.Add("TOTAL", gSW);
 
+            long frameTime = gSW.ElapsedMilliseconds;
+            LogLevel level = frameTime > 500 ? LogLevel.Error : frameTime > 30 ? LogLevel.Warning : LogLevel.Information;
+            Logger.Write(level, this, $"##### Frame {Counters.FrameCount} End - {frameTime} milliseconds ####");
+
             if (ResourceManager.HasRequests)
             {
                 Logger.WriteInformation(this, "ResourceManager: Creating new resources");
@@ -699,7 +707,7 @@ namespace Engine
                 Logger.WriteInformation(this, "ResourceManager: New resources created");
             }
 
-            Counters.FrameCount++;
+            Counters.FramesPerSecond++;
             Counters.FrameTime += GameTime.ElapsedSeconds;
 
             if (Counters.FrameTime >= 1.0f)
@@ -835,10 +843,11 @@ namespace Engine
             try
             {
                 RuntimeText = string.Format(
-                    "{0} - {1} - FPS: {2:000} Draw C/D: {3:00}:{4:00} Inst: {5:00} U: {6:00} S: {7}:{8}:{9} F. Time: {10:0.0000} (secs) T. Time: {11:0000} (secs) CPU: {12:0.00}%",
+                    "{0} - {1} - Frame {2} FPS: {3:000} Draw C/D: {4:00}:{5:00} Inst: {6:00} U: {7:00} S: {8}:{9}:{10} F. Time: {11:0.0000} (secs) T. Time: {12:0000} (secs) CPU: {13:0.00}%",
                     Graphics.DeviceDescription,
                     Name,
                     Counters.FrameCount,
+                    Counters.FramesPerSecond,
                     Counters.DrawCallsPerFrame,
                     Counters.InstancesPerFrame,
                     Counters.MaxInstancesPerFrame,
@@ -850,7 +859,7 @@ namespace Engine
 #if DEBUG
                 Form.Text = RuntimeText;
 #endif
-                Counters.FrameCount = 0;
+                Counters.FramesPerSecond = 0;
                 Counters.FrameTime = 0f;
             }
             catch (Exception ex)

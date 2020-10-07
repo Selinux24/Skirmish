@@ -1612,7 +1612,7 @@ namespace Heightmap
             {
                 Color color = new Color(Color.Red.ToColor3(), 0.6f);
 
-                var tris = soldier.GetTriangles(true);
+                var tris = soldier.GetTriangles();
 
                 if (soldierTris == null)
                 {

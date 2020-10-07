@@ -1,5 +1,7 @@
 ﻿using Engine;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Terrain.Rts.AI
 {
@@ -59,6 +61,24 @@ namespace Terrain.Rts.AI
             }
 
             return targets.ToArray();
+        }
+
+        /// <summary>
+        /// Updates brain state
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        public void Update(GameTime gameTime)
+        {
+            var agents = groups.Values.SelectMany(a => a.ToList()).ToList();
+            if (!agents.Any())
+            {
+                return;
+            }
+
+            Parallel.ForEach(agents, a =>
+            {
+                a.Update(gameTime);
+            });
         }
     }
 }

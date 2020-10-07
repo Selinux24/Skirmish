@@ -49,10 +49,10 @@ namespace Engine
                 out EngineDepthStencilView[] dsv,
                 out EngineShaderResourceView srv);
 
-            this.DepthMap = dsv;
-            this.Texture = srv;
+            DepthMap = dsv;
+            Texture = srv;
 
-            this.MatrixSet = new ShadowMapCascadeSet(size, 1, cascades);
+            MatrixSet = new ShadowMapCascadeSet(size, 1, cascades);
         }
 
         /// <summary>
@@ -62,18 +62,18 @@ namespace Engine
         {
             if (light is ISceneLightDirectional lightDirectional)
             {
-                this.MatrixSet.Update(camera, lightDirectional.Direction);
+                MatrixSet.Update(camera, lightDirectional.Direction);
 
-                lightDirectional.ToShadowSpace = this.MatrixSet.GetWorldToShadowSpace();
-                lightDirectional.ToCascadeOffsetX = this.MatrixSet.GetToCascadeOffsetX();
-                lightDirectional.ToCascadeOffsetY = this.MatrixSet.GetToCascadeOffsetY();
-                lightDirectional.ToCascadeScale = this.MatrixSet.GetToCascadeScale();
+                lightDirectional.ToShadowSpace = MatrixSet.GetWorldToShadowSpace();
+                lightDirectional.ToCascadeOffsetX = MatrixSet.GetToCascadeOffsetX();
+                lightDirectional.ToCascadeOffsetY = MatrixSet.GetToCascadeOffsetY();
+                lightDirectional.ToCascadeScale = MatrixSet.GetToCascadeScale();
 
-                var vp = this.MatrixSet.GetWorldToCascadeProj();
+                var vp = MatrixSet.GetWorldToCascadeProj();
 
-                this.ToShadowMatrix = vp[0];
-                this.LightPosition = this.MatrixSet.GetLigthPosition();
-                this.FromLightViewProjectionArray = vp;
+                ToShadowMatrix = vp[0];
+                LightPosition = MatrixSet.GetLigthPosition();
+                FromLightViewProjectionArray = vp;
             }
         }
         /// <summary>
@@ -83,6 +83,12 @@ namespace Engine
         public override IShadowMapDrawer GetEffect()
         {
             return DrawerPool.EffectShadowCascade;
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"{nameof(ShadowMapCascade)} - LightPosition: {LightPosition} HighResolutionMap: {HighResolutionMap}";
         }
     }
 }
