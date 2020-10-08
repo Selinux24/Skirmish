@@ -68,6 +68,12 @@ namespace Engine
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
         BoundingBox GetBoundingBox(bool refresh = false);
+        /// <summary>
+        /// Gets oriented bounding box
+        /// </summary>
+        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
+        /// <returns>Returns oriented bounding box. Empty if the vertex type hasn't position channel</returns>
+        OrientedBoundingBox GetOrientedBoundingBox(bool refresh = false);
 
         /// <summary>
         /// Gets the volume geometry of the instance

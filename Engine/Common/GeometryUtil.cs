@@ -589,11 +589,41 @@ namespace Engine.Common
         /// <summary>
         /// Creates a box of VertexPosition VertexData
         /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateBox(BoundingBox bbox)
+        {
+            return CreateBox(bbox.Center, bbox.Width, bbox.Height, bbox.Depth);
+        }
+        /// <summary>
+        /// Creates a box of VertexPosition VertexData
+        /// </summary>
+        /// <param name="obb">Oriented bounding box</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateBox(OrientedBoundingBox obb)
+        {
+            return CreateBox(obb.Center, obb.Extents.X * 2, obb.Extents.Y * 2, obb.Extents.Z * 2);
+        }
+        /// <summary>
+        /// Creates a box of VertexPosition VertexData
+        /// </summary>
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
         /// <param name="depth">Depth</param>
         /// <returns>Returns a geometry descriptor</returns>
         public static GeometryDescriptor CreateBox(float width, float height, float depth)
+        {
+            return CreateBox(Vector3.Zero, width, height, depth);
+        }
+        /// <summary>
+        /// Creates a box of VertexPosition VertexData
+        /// </summary>
+        /// <param name="center">Box center</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <param name="depth">Depth</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateBox(Vector3 center, float width, float height, float depth)
         {
             Vector3[] vertices = new Vector3[24];
             uint[] indices = new uint[36];
@@ -661,6 +691,14 @@ namespace Engine.Common
             // Fill in the right face index data
             indices[30] = 20; indices[31] = 21; indices[32] = 22;
             indices[33] = 20; indices[34] = 22; indices[35] = 23;
+
+            if (center != Vector3.Zero)
+            {
+                for (int i = 0; i < vertices.Length; i++)
+                {
+                    vertices[i] += center;
+                }
+            }
 
             return new GeometryDescriptor()
             {
@@ -735,11 +773,34 @@ namespace Engine.Common
         /// <summary>
         /// Creates a sphere of VertexPositionNormalTextureTangent VertexData
         /// </summary>
+        /// <param name="sphere">Sphere</param>
+        /// <param name="sliceCount">Slice count</param>
+        /// <param name="stackCount">Stack count</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateSphere(BoundingSphere sphere, uint sliceCount, uint stackCount)
+        {
+            return CreateSphere(sphere.Center, sphere.Radius, sliceCount, stackCount);
+        }
+        /// <summary>
+        /// Creates a sphere of VertexPositionNormalTextureTangent VertexData
+        /// </summary>
         /// <param name="radius">Radius</param>
         /// <param name="sliceCount">Slice count</param>
         /// <param name="stackCount">Stack count</param>
         /// <returns>Returns a geometry descriptor</returns>
         public static GeometryDescriptor CreateSphere(float radius, uint sliceCount, uint stackCount)
+        {
+            return CreateSphere(Vector3.Zero, radius, sliceCount, stackCount);
+        }
+        /// <summary>
+        /// Creates a sphere of VertexPositionNormalTextureTangent VertexData
+        /// </summary>
+        /// <param name="center">Sphere center</param>
+        /// <param name="radius">Radius</param>
+        /// <param name="sliceCount">Slice count</param>
+        /// <param name="stackCount">Stack count</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateSphere(Vector3 center, float radius, uint sliceCount, uint stackCount)
         {
             List<Vector3> vertList = new List<Vector3>();
             List<Vector3> normList = new List<Vector3>();
@@ -753,7 +814,7 @@ namespace Engine.Common
             #region Positions
 
             //North pole
-            vertList.Add(new Vector3(0.0f, radius, 0.0f));
+            vertList.Add(new Vector3(0.0f, radius, 0.0f) + center);
             normList.Add(new Vector3(0.0f, 1.0f, 0.0f));
             tangList.Add(new Vector3(0.0f, 0.0f, 1.0f));
             binmList.Add(new Vector3(1.0f, 0.0f, 0.0f));
@@ -788,7 +849,7 @@ namespace Engine.Common
 
                     Vector2 texture = new Vector2(u, v);
 
-                    vertList.Add(position);
+                    vertList.Add(position + center);
                     normList.Add(normal);
                     tangList.Add(tangent);
                     binmList.Add(binormal);
@@ -797,7 +858,7 @@ namespace Engine.Common
             }
 
             //South pole
-            vertList.Add(new Vector3(0.0f, -radius, 0.0f));
+            vertList.Add(new Vector3(0.0f, -radius, 0.0f) + center);
             normList.Add(new Vector3(0.0f, -1.0f, 0.0f));
             tangList.Add(new Vector3(0.0f, 0.0f, -1.0f));
             binmList.Add(new Vector3(-1.0f, 0.0f, 0.0f));

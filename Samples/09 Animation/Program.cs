@@ -12,7 +12,7 @@ namespace Animation
             try
             {
 #if DEBUG
-                Logger.LogLevel = LogLevel.Trace;
+                Logger.LogLevel = LogLevel.Debug;
                 Logger.LogStackSize = 0;
 
                 int sWidth = (int)(System.Windows.Forms.SystemInformation.VirtualScreen.Width * .8f);

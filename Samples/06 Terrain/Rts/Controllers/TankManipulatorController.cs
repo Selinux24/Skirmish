@@ -106,8 +106,9 @@ namespace Terrain.Rts.Controllers
                     var newTarget = newPosition + (newPosition - position);
 
                     //Rotate and move
-                    manipulator.RotateTo(newTarget, newNormal, Axis.Y, 0.01f);
                     manipulator.SetPosition(newPosition);
+                    manipulator.RotateTo(newTarget, newNormal, Axis.Y, 0.01f);
+                    manipulator.SetNormal(newNormal);
 
                     //Updates new time in curve
                     pathTime = newTime;

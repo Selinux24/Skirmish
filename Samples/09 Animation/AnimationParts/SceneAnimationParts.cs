@@ -17,6 +17,15 @@ namespace Animation.AnimationParts
         private UIPanel backPanel = null;
         private UIConsole console = null;
 
+        private PrimitiveListDrawer<Triangle> itemTris = null;
+        private PrimitiveListDrawer<Line3D> itemLines = null;
+        private readonly Color sphTrisColor = new Color(Color.Red.ToColor3(), 0.25f);
+        private readonly Color sphLinesColor = new Color(Color.Red.ToColor3(), 1f);
+        private readonly Color boxTrisColor = new Color(Color.Green.ToColor3(), 0.25f);
+        private readonly Color boxLinesColor = new Color(Color.Green.ToColor3(), 1f);
+        private readonly Color obbTrisColor = new Color(Color.Blue.ToColor3(), 0.25f);
+        private readonly Color obbLinesColor = new Color(Color.Blue.ToColor3(), 1f);
+
         private Model tank;
 
         private bool uiReady = false;
@@ -40,6 +49,7 @@ namespace Animation.AnimationParts
                     {
                         InitializeTank(),
                         InitializeFloor(),
+                        InitializeDebug(),
                     },
                     (res) =>
                     {
@@ -143,6 +153,14 @@ namespace Animation.AnimationParts
 
             await this.AddComponentModel(desc);
         }
+        private async Task InitializeDebug()
+        {
+            itemTris = await this.AddComponentPrimitiveListDrawer(new PrimitiveListDrawerDescription<Triangle>() { Count = 5000 });
+            itemTris.Visible = false;
+
+            itemLines = await this.AddComponentPrimitiveListDrawer(new PrimitiveListDrawerDescription<Line3D>() { Count = 1000 });
+            itemLines.Visible = false;
+        }
 
         private void InitializeEnvironment()
         {
@@ -190,6 +208,8 @@ namespace Animation.AnimationParts
             UpdateInputCamera(gameTime);
             UpdateInputTank(gameTime);
             UpdateInputDebug();
+
+            UpdateDebugData();
 
             base.Update(gameTime);
         }
@@ -243,11 +263,11 @@ namespace Animation.AnimationParts
         }
         private void UpdateInputHull(GameTime gameTime)
         {
-            if (Game.Input.KeyPressed(Keys.J) && Game.Input.ShiftPressed)
+            if (Game.Input.KeyPressed(Keys.J))
             {
                 tank.Manipulator.Rotate(-gameTime.ElapsedSeconds, 0, 0);
             }
-            if (Game.Input.KeyPressed(Keys.L) && Game.Input.ShiftPressed)
+            if (Game.Input.KeyPressed(Keys.L))
             {
                 tank.Manipulator.Rotate(+gameTime.ElapsedSeconds, 0, 0);
             }
@@ -263,11 +283,11 @@ namespace Animation.AnimationParts
         }
         private void UpdateInputTurret(GameTime gameTime)
         {
-            if (Game.Input.KeyPressed(Keys.J) && !Game.Input.ShiftPressed)
+            if (Game.Input.KeyPressed(Keys.J))
             {
                 tank["Turret-mesh"].Manipulator.Rotate(-gameTime.ElapsedSeconds, 0, 0);
             }
-            if (Game.Input.KeyPressed(Keys.L) && !Game.Input.ShiftPressed)
+            if (Game.Input.KeyPressed(Keys.L))
             {
                 tank["Turret-mesh"].Manipulator.Rotate(+gameTime.ElapsedSeconds, 0, 0);
             }
@@ -294,6 +314,23 @@ namespace Animation.AnimationParts
             {
                 Lights.DirectionalLights[0].CastShadow = !Lights.DirectionalLights[0].CastShadow;
             }
+        }
+
+        private void UpdateDebugData()
+        {
+            var sph = tank.GetBoundingSphere();
+            var box = tank.GetBoundingBox();
+            var obb = tank.GetOrientedBoundingBox();
+
+            itemTris.SetPrimitives(sphTrisColor, Triangle.ComputeTriangleList(Topology.TriangleList, sph, 20, 20));
+            itemTris.SetPrimitives(boxTrisColor, Triangle.ComputeTriangleList(Topology.TriangleList, box));
+            itemTris.SetPrimitives(obbTrisColor, Triangle.ComputeTriangleList(Topology.TriangleList, obb));
+            itemTris.Active = itemTris.Visible = true;
+
+            itemLines.SetPrimitives(sphLinesColor, Line3D.CreateWiredSphere(sph, 20, 20));
+            itemLines.SetPrimitives(boxLinesColor, Line3D.CreateWiredBox(box));
+            itemLines.SetPrimitives(obbLinesColor, Line3D.CreateWiredBox(obb));
+            itemLines.Active = itemLines.Visible = true;
         }
 
         public override void GameGraphicsResized()

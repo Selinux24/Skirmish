@@ -315,7 +315,7 @@ namespace Engine.Common
             }
 
             Monitor.Enter(requestedDescriptors);
-            requestedDescriptors.RemoveAll(r => r.Processed);
+            requestedDescriptors.RemoveAll(r => r?.Processed != false);
             Monitor.Exit(requestedDescriptors);
         }
         /// <summary>

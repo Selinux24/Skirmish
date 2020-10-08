@@ -197,9 +197,11 @@
     <Compile Include="Common\BufferDescriptorRequestIndices.cs" />
     <Compile Include="Common\BufferDescriptorRequestInstancing.cs" />
     <Compile Include="Common\BufferDescriptorRequestVertices.cs" />
+    <Compile Include="Common\BoundsHelper.cs" />
     <Compile Include="Common\GeometryDescriptor.cs" />
     <Compile Include="Common\BufferManagerIndices.cs" />
     <Compile Include="Common\BufferManagerInstances.cs" />
+    <Compile Include="Common\GeometryHelper.cs" />
     <Compile Include="Common\IntersectionHelper.cs" />
     <Compile Include="Common\IntersectionTriangle.cs" />
     <Compile Include="Common\NormalDescriptor.cs" />

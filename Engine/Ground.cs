@@ -292,6 +292,15 @@ namespace Engine
         {
             return groundPickingQuadtree != null ? groundPickingQuadtree.BoundingBox : new BoundingBox();
         }
+        /// <summary>
+        /// Gets oriented bounding box
+        /// </summary>
+        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
+        /// <returns>Returns oriented bounding box. Empty if the vertex type hasn't position channel</returns>
+        public virtual OrientedBoundingBox GetOrientedBoundingBox(bool refresh = false)
+        {
+            return new OrientedBoundingBox(GetBoundingBox(refresh));
+        }
 
         /// <summary>
         /// Gets bounding boxes at specified level

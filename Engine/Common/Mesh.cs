@@ -222,7 +222,11 @@ namespace Engine.Common
                 {
                     Vertices.ToList().ForEach(v =>
                     {
-                        positionList.Add(v.GetChannelValue<Vector3>(VertexDataChannels.Position));
+                        Vector3 p = v.GetChannelValue<Vector3>(VertexDataChannels.Position);
+
+                        if (!Transform.IsIdentity) p = Vector3.TransformCoordinate(p, Transform);
+
+                        positionList.Add(p);
                     });
                 }
 
@@ -249,7 +253,11 @@ namespace Engine.Common
                 {
                     Vertices.ToList().ForEach(v =>
                     {
-                        positionList.Add(VertexData.ApplyWeight(v, boneTransforms));
+                        Vector3 p = VertexData.ApplyWeight(v, boneTransforms);
+
+                        if (!Transform.IsIdentity) p = Vector3.TransformCoordinate(p, Transform);
+
+                        positionList.Add(p);
                     });
                 }
 

@@ -314,6 +314,94 @@ namespace Engine
             return triangleList.ToArray();
         }
         /// <summary>
+        /// Generate a triangle list from sphere
+        /// </summary>
+        /// <param name="topology">Topology</param>
+        /// <param name="sph">Sphere</param>
+        /// <param name="sliceCount">Slices</param>
+        /// <param name="stackCount">Stacks</param>
+        /// <returns>Returns the triangle list</returns>
+        public static IEnumerable<Triangle> ComputeTriangleList(Topology topology, BoundingSphere sph, uint sliceCount, uint stackCount)
+        {
+            List<Vector3> vertList = new List<Vector3>();
+
+            sliceCount--;
+            stackCount++;
+
+            #region Positions
+
+            //North pole
+            vertList.Add(new Vector3(0.0f, sph.Radius, 0.0f) + sph.Center);
+
+            float phiStep = MathUtil.Pi / stackCount;
+            float thetaStep = 2.0f * MathUtil.Pi / sliceCount;
+
+            for (int st = 1; st <= stackCount - 1; ++st)
+            {
+                float phi = st * phiStep;
+
+                for (int sl = 0; sl <= sliceCount; ++sl)
+                {
+                    float theta = sl * thetaStep;
+
+                    float x = (float)Math.Sin(phi) * (float)Math.Cos(theta);
+                    float y = (float)Math.Cos(phi);
+                    float z = (float)Math.Sin(phi) * (float)Math.Sin(theta);
+
+                    Vector3 position = sph.Radius * new Vector3(x, y, z);
+
+                    vertList.Add(position + sph.Center);
+                }
+            }
+
+            //South pole
+            vertList.Add(new Vector3(0.0f, -sph.Radius, 0.0f) + sph.Center);
+
+            #endregion
+
+            List<uint> indexList = new List<uint>();
+
+            #region Indexes
+
+            for (uint index = 1; index <= sliceCount; ++index)
+            {
+                indexList.Add(0);
+                indexList.Add(index + 1);
+                indexList.Add(index);
+            }
+
+            uint baseIndex = 1;
+            uint ringVertexCount = sliceCount + 1;
+            for (uint st = 0; st < stackCount - 2; ++st)
+            {
+                for (uint sl = 0; sl < sliceCount; ++sl)
+                {
+                    indexList.Add(baseIndex + st * ringVertexCount + sl);
+                    indexList.Add(baseIndex + st * ringVertexCount + sl + 1);
+                    indexList.Add(baseIndex + (st + 1) * ringVertexCount + sl);
+
+                    indexList.Add(baseIndex + (st + 1) * ringVertexCount + sl);
+                    indexList.Add(baseIndex + st * ringVertexCount + sl + 1);
+                    indexList.Add(baseIndex + (st + 1) * ringVertexCount + sl + 1);
+                }
+            }
+
+            uint southPoleIndex = (uint)vertList.Count - 1;
+
+            baseIndex = southPoleIndex - ringVertexCount;
+
+            for (uint index = 0; index < sliceCount; ++index)
+            {
+                indexList.Add(southPoleIndex);
+                indexList.Add(baseIndex + index);
+                indexList.Add(baseIndex + index + 1);
+            }
+
+            #endregion
+
+            return ComputeTriangleList(topology, vertList, indexList);
+        }
+        /// <summary>
         /// Generate a triangle list from cylinder
         /// </summary>
         /// <param name="topology">Topology</param>
@@ -355,7 +443,6 @@ namespace Engine
 
             return triangleList.ToArray();
         }
-
         /// <summary>
         /// Generate a triangle list from polygon
         /// </summary>

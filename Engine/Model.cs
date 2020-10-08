@@ -16,37 +16,17 @@ namespace Engine
     public class Model : BaseModel, ITransformable3D, IRayPickable<Triangle>, IIntersectable, ICullable
     {
         /// <summary>
-        /// Update point cache flag
-        /// </summary>
-        private bool updatePoints = true;
-        /// <summary>
-        /// Update triangle cache flag
-        /// </summary>
-        private bool updateTriangles = true;
-        /// <summary>
-        /// Points cache
-        /// </summary>
-        private Vector3[] positionCache = null;
-        /// <summary>
-        /// Triangle list cache
-        /// </summary>
-        private Triangle[] triangleCache = null;
-        /// <summary>
-        /// Coarse bounding sphere
-        /// </summary>
-        private BoundingSphere? coarseBoundingSphere = null;
-        /// <summary>
-        /// Bounding sphere
-        /// </summary>
-        private BoundingSphere? boundingSphere = null;
-        /// <summary>
-        /// Bounding box
-        /// </summary>
-        private BoundingBox? boundingBox = null;
-        /// <summary>
         /// Level of detail
         /// </summary>
         private LevelOfDetail levelOfDetail = LevelOfDetail.None;
+        /// <summary>
+        /// Volume helper
+        /// </summary>
+        private readonly BoundsHelper boundsHelper = new BoundsHelper();
+        /// <summary>
+        /// Geometry helper
+        /// </summary>
+        private readonly GeometryHelper geometryHelper = new GeometryHelper();
 
         /// <summary>
         /// Current drawing data
@@ -56,16 +36,6 @@ namespace Engine
         /// Model parts collection
         /// </summary>
         protected List<ModelPart> ModelParts = new List<ModelPart>();
-        /// <summary>
-        /// Gets if model has volumes
-        /// </summary>
-        protected bool HasVolumes
-        {
-            get
-            {
-                return positionCache?.Any() == true;
-            }
-        }
 
         /// <summary>
         /// Model manipulator
@@ -142,7 +112,7 @@ namespace Engine
             else
             {
                 Manipulator = new Manipulator3D();
-                Manipulator.Updated += new EventHandler(ManipulatorUpdated);
+                Manipulator.Updated += ManipulatorUpdated;
             }
 
             var drawData = GetDrawingData(LevelOfDetail.High);
@@ -154,6 +124,8 @@ namespace Engine
             }
 
             AnimationController.AnimationOffsetChanged += (s, a) => { InvalidateCache(); };
+
+            boundsHelper.Initialize(GetPoints(true));
         }
         /// <summary>
         /// Add model parts
@@ -187,7 +159,7 @@ namespace Engine
                 }
 
                 var thisMan = thisPart.Manipulator;
-                thisMan.Updated += new EventHandler(ManipulatorUpdated);
+                thisMan.Updated += ManipulatorUpdated;
 
                 var parentIndex = dependences[i];
                 if (parentIndex >= 0)
@@ -226,6 +198,8 @@ namespace Engine
         /// <inheritdoc/>
         public override void Update(UpdateContext context)
         {
+            SetLOD(context.EyePosition);
+
             if (DrawingData?.SkinningData != null)
             {
                 if (AnimationController.Playing)
@@ -416,24 +390,13 @@ namespace Engine
             bool cull;
             distance = float.MaxValue;
 
-            if (HasVolumes)
+            if (SphericVolume)
             {
-                if (coarseBoundingSphere.HasValue)
-                {
-                    cull = volume.Contains(coarseBoundingSphere.Value) == ContainmentType.Disjoint;
-                }
-                else if (SphericVolume)
-                {
-                    cull = volume.Contains(GetBoundingSphere()) == ContainmentType.Disjoint;
-                }
-                else
-                {
-                    cull = volume.Contains(GetBoundingBox()) == ContainmentType.Disjoint;
-                }
+                cull = volume.Contains(GetBoundingSphere()) == ContainmentType.Disjoint;
             }
             else
             {
-                cull = false;
+                cull = volume.Contains(GetBoundingBox()) == ContainmentType.Disjoint;
             }
 
             if (!cull)
@@ -441,14 +404,20 @@ namespace Engine
                 var eyePosition = volume.Position;
 
                 distance = Vector3.DistanceSquared(Manipulator.Position, eyePosition);
-
-                LevelOfDetail = GameEnvironment.GetLOD(
-                    eyePosition,
-                    coarseBoundingSphere,
-                    Manipulator.LocalTransform);
             }
 
             return cull;
+        }
+        /// <summary>
+        /// Set level of detail values
+        /// </summary>
+        /// <param name="origin">Origin point</param>
+        public void SetLOD(Vector3 origin)
+        {
+            LevelOfDetail = GameEnvironment.GetLOD(
+                origin,
+                GetBoundingSphere(),
+                Manipulator.FinalTransform);
         }
 
         /// <summary>
@@ -457,11 +426,22 @@ namespace Engine
         /// <param name="manipulator">Manipulator</param>
         public void SetManipulator(Manipulator3D manipulator)
         {
-            Manipulator.Updated -= ManipulatorUpdated;
-            Manipulator = null;
+            if (manipulator == null)
+            {
+                Logger.WriteWarning(this, $"Model Name: {Name} - Sets a null manipulator. Discarded.");
+
+                return;
+            }
+
+            if (Manipulator != null)
+            {
+                Manipulator.Updated -= ManipulatorUpdated;
+            }
 
             Manipulator = manipulator;
             Manipulator.Updated += ManipulatorUpdated;
+
+            boundsHelper.Initialize(GetPoints(true));
         }
         /// <summary>
         /// Occurs when manipulator transform updated
@@ -471,8 +451,6 @@ namespace Engine
         private void ManipulatorUpdated(object sender, EventArgs e)
         {
             InvalidateCache();
-
-            coarseBoundingSphere = GetBoundingSphere();
         }
 
         /// <summary>
@@ -506,11 +484,8 @@ namespace Engine
         {
             Logger.WriteTrace(this, $"Model Name: {Name}; LOD: {LevelOfDetail}; InvalidateCache");
 
-            updatePoints = true;
-            updateTriangles = true;
-
-            boundingSphere = null;
-            boundingBox = null;
+            boundsHelper.Invalidate();
+            geometryHelper.Invalidate();
         }
         /// <summary>
         /// Gets point list of mesh if the vertex type has position channel
@@ -519,44 +494,11 @@ namespace Engine
         /// <returns>Returns null or position list</returns>
         public IEnumerable<Vector3> GetPoints(bool refresh = false)
         {
-            bool update = refresh || updatePoints;
-
-            if (update)
-            {
-                Logger.WriteTrace(this, $"Model Name: {Name}; LOD: {LevelOfDetail}; GetPoints Forced");
-
-                var drawingData = GetDrawingData(GetLODMinimum());
-                if (drawingData == null)
-                {
-                    return new Vector3[] { };
-                }
-
-                IEnumerable<Vector3> cache;
-
-                if (drawingData.SkinningData != null)
-                {
-                    cache = drawingData.GetPoints(
-                        Manipulator.LocalTransform,
-                        AnimationController.GetCurrentPose(drawingData.SkinningData),
-                        update);
-                }
-                else
-                {
-                    cache = drawingData.GetPoints(
-                        Manipulator.LocalTransform,
-                        update);
-                }
-
-                positionCache = cache.ToArray();
-
-                updatePoints = false;
-            }
-            else
-            {
-                Logger.WriteTrace(this, $"Model Name: {Name}; LOD: {LevelOfDetail}; GetPoints Cached");
-            }
-
-            return positionCache?.ToArray() ?? new Vector3[] { };
+            return geometryHelper.GetPoints(
+                GetDrawingData(GetLODMinimum()),
+                AnimationController,
+                Manipulator,
+                refresh);
         }
         /// <summary>
         /// Gets triangle list of mesh if the vertex type has position channel
@@ -565,44 +507,11 @@ namespace Engine
         /// <returns>Returns null or triangle list</returns>
         public IEnumerable<Triangle> GetTriangles(bool refresh = false)
         {
-            bool update = refresh || updateTriangles;
-
-            if (update)
-            {
-                Logger.WriteTrace(this, $"Model Name: {Name}; LOD: {LevelOfDetail}; GetTriangles Forced");
-
-                var drawingData = GetDrawingData(GetLODMinimum());
-                if (drawingData == null)
-                {
-                    return new Triangle[] { };
-                }
-
-                IEnumerable<Triangle> cache;
-
-                if (drawingData.SkinningData != null)
-                {
-                    cache = drawingData.GetTriangles(
-                        Manipulator.LocalTransform,
-                        AnimationController.GetCurrentPose(drawingData.SkinningData),
-                        update);
-                }
-                else
-                {
-                    cache = drawingData.GetTriangles(
-                        Manipulator.LocalTransform,
-                        update);
-                }
-
-                triangleCache = cache.ToArray();
-
-                updateTriangles = false;
-            }
-            else
-            {
-                Logger.WriteTrace(this, $"Model Name: {Name}; LOD: {LevelOfDetail}; GetTriangles Cached");
-            }
-
-            return triangleCache?.ToArray() ?? new Triangle[] { };
+            return geometryHelper.GetTriangles(
+                GetDrawingData(GetLODMinimum()),
+                AnimationController,
+                Manipulator,
+                refresh);
         }
         /// <summary>
         /// Gets bounding sphere
@@ -611,16 +520,7 @@ namespace Engine
         /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
         public BoundingSphere GetBoundingSphere(bool refresh = false)
         {
-            if (refresh || boundingSphere == null)
-            {
-                var points = GetPoints(refresh);
-                if (points.Any())
-                {
-                    boundingSphere = BoundingSphere.FromPoints(points.ToArray());
-                }
-            }
-
-            return boundingSphere ?? new BoundingSphere(Manipulator.Position, 0f);
+            return boundsHelper.GetBoundingSphere(Manipulator, refresh);
         }
         /// <summary>
         /// Gets bounding box
@@ -629,16 +529,16 @@ namespace Engine
         /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
         public BoundingBox GetBoundingBox(bool refresh = false)
         {
-            if (refresh || boundingBox == null)
-            {
-                var points = GetPoints(refresh);
-                if (points.Any())
-                {
-                    boundingBox = BoundingBox.FromPoints(points.ToArray());
-                }
-            }
-
-            return boundingBox ?? new BoundingBox(Manipulator.Position, Manipulator.Position);
+            return boundsHelper.GetBoundingBox(Manipulator, refresh);
+        }
+        /// <summary>
+        /// Gets oriented bounding box
+        /// </summary>
+        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
+        /// <returns>Returns oriented bounding box. Empty if the vertex type hasn't position channel</returns>
+        public OrientedBoundingBox GetOrientedBoundingBox(bool refresh = false)
+        {
+            return boundsHelper.GetOrientedBoundingBox(Manipulator, refresh);
         }
 
         /// <summary>

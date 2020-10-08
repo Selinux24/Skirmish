@@ -40,10 +40,10 @@ namespace Engine.Common
         /// <param name="transform">Transform matrix</param>
         public void Transform(Matrix transform)
         {
-            this.Vertices = this.Vertices?.Select(v => Vector3.TransformCoordinate(v, transform));
-            this.Normals = this.Normals?.Select(v => Vector3.TransformNormal(v, transform));
-            this.Tangents = this.Tangents?.Select(v => Vector3.TransformNormal(v, transform));
-            this.Binormals = this.Binormals?.Select(v => Vector3.TransformNormal(v, transform));
+            Vertices = Vertices?.Select(v => Vector3.TransformCoordinate(v, transform));
+            Normals = Normals?.Select(v => Vector3.TransformNormal(v, transform));
+            Tangents = Tangents?.Select(v => Vector3.TransformNormal(v, transform));
+            Binormals = Binormals?.Select(v => Vector3.TransformNormal(v, transform));
         }
     }
 }

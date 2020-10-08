@@ -90,12 +90,11 @@ namespace Engine
         {
             if (instances.Any())
             {
-                Array.ForEach(instances, i =>
+                Parallel.ForEach(instances, i =>
                 {
                     if (i.Active)
                     {
                         i.Update(context);
-                        i.SetLOD(context.EyePosition);
                     }
                 });
 
