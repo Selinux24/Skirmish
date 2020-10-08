@@ -2431,39 +2431,39 @@ namespace Terrain.Rts
             var agent = walkMode ? walkerAgentType : tankAgentType;
 
             var nodes = GetNodes(agent).OfType<GraphNode>();
-            if (nodes.Any())
+            if (!nodes.Any())
             {
-                if (graphIndex <= -1)
+                graphIndex = -1;
+
+                return;
+            }
+
+            if (graphIndex <= -1)
+            {
+                graphIndex = -1;
+
+                terrainGraphDrawer.Clear();
+
+                foreach (var node in nodes)
                 {
-                    graphIndex = -1;
-
-                    terrainGraphDrawer.Clear();
-
-                    foreach (var node in nodes)
-                    {
-                        terrainGraphDrawer.AddPrimitives(node.Color, node.Triangles);
-                    }
-                }
-                else
-                {
-                    if (graphIndex >= nodes.Count())
-                    {
-                        graphIndex = nodes.Count() - 1;
-                    }
-
-                    if (graphIndex < nodes.Count())
-                    {
-                        terrainGraphDrawer.Clear();
-
-                        var node = nodes.ToArray()[graphIndex];
-
-                        terrainGraphDrawer.SetPrimitives(node.Color, node.Triangles);
-                    }
+                    terrainGraphDrawer.AddPrimitives(node.Color, node.Triangles);
                 }
             }
             else
             {
-                graphIndex = -1;
+                if (graphIndex >= nodes.Count())
+                {
+                    graphIndex = nodes.Count() - 1;
+                }
+
+                if (graphIndex < nodes.Count())
+                {
+                    terrainGraphDrawer.Clear();
+
+                    var node = nodes.ToArray()[graphIndex];
+
+                    terrainGraphDrawer.SetPrimitives(node.Color, node.Triangles);
+                }
             }
         }
         private void DEBUGDrawLightVolumes()

@@ -696,9 +696,8 @@ namespace Engine
             gSW.Stop();
             GameStatus.Add("TOTAL", gSW);
 
-            long frameTime = gSW.ElapsedMilliseconds;
-            LogLevel level = frameTime > 500 ? LogLevel.Error : frameTime > 30 ? LogLevel.Warning : LogLevel.Information;
-            Logger.Write(level, this, $"##### Frame {Counters.FrameCount} End - {frameTime} milliseconds ####");
+            LogLevel level = EvaluateTime(gSW.ElapsedMilliseconds);
+            Logger.Write(level, this, $"##### Frame {Counters.FrameCount} End - {gSW.ElapsedMilliseconds} milliseconds ####");
 
             if (ResourceManager.HasRequests)
             {
@@ -887,6 +886,18 @@ namespace Engine
             {
                 Logger.WriteError(this, $"Frame: Collecto Game Status error: {ex.Message}", ex);
             }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="frameTime"></param>
+        /// <returns></returns>
+        private static LogLevel EvaluateTime(long frameTime)
+        {
+            if (frameTime > 500) return LogLevel.Error;
+            if (frameTime > 30) return LogLevel.Warning;
+            else return LogLevel.Information;
         }
     }
 

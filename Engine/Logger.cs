@@ -307,7 +307,7 @@ namespace Engine
         /// Sets a custom log entry formatter
         /// </summary>
         /// <param name="formatter">Formatter function</param>
-        public static void SetDefaultFormatter(Func<LogEntry, string> formatter)
+        public static void SetCustomFormatter(Func<LogEntry, string> formatter)
         {
             formatFnc = formatter;
         }

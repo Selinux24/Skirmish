@@ -1432,6 +1432,25 @@ namespace Engine.Content.FmtCollada
             }
         }
         /// <summary>
+        /// Process a default node
+        /// </summary>
+        /// <param name="trn">Transform</param>
+        /// <param name="nodes">Node list</param>
+        /// <param name="modelContent">Model content</param>
+        /// <param name="bakeTransforms">Bake transforms into sub-meshes</param>
+        private static void ProcessSceneNodesDefault(Matrix trn, IEnumerable<Node> nodes, ModelContent modelContent, bool bakeTransforms)
+        {
+            if (nodes?.Any() != true)
+            {
+                return;
+            }
+
+            foreach (var child in nodes)
+            {
+                ProcessSceneNodesGeometry(trn * child.ReadMatrix(), child.InstanceGeometry, modelContent, bakeTransforms);
+            }
+        }
+        /// <summary>
         /// Process a light node list
         /// </summary>
         /// <param name="trn">Transform</param>
@@ -1486,51 +1505,6 @@ namespace Engine.Content.FmtCollada
                     else
                     {
                         submesh.Transform = trn;
-                    }
-                }
-            }
-        }
-        /// <summary>
-        /// Process a default node
-        /// </summary>
-        /// <param name="trn">Transform</param>
-        /// <param name="nodes">Node list</param>
-        /// <param name="modelContent">Model content</param>
-        /// <param name="bakeTransforms">Bake transforms into sub-meshes</param>
-        private static void ProcessSceneNodesDefault(Matrix trn, IEnumerable<Node> nodes, ModelContent modelContent, bool bakeTransforms)
-        {
-            if (nodes?.Any() != true)
-            {
-                return;
-            }
-
-            foreach (var child in nodes)
-            {
-                if (child.InstanceGeometry?.Any() != true)
-                {
-                    continue;
-                }
-
-                Matrix childTrn = trn * child.ReadMatrix();
-                if (childTrn.IsIdentity)
-                {
-                    continue;
-                }
-
-                foreach (var ig in child.InstanceGeometry)
-                {
-                    string meshName = ig.Url.Replace("#", "");
-
-                    foreach (var submesh in modelContent.Geometry[meshName].Values)
-                    {
-                        if (bakeTransforms)
-                        {
-                            submesh.ApplyTransform(childTrn);
-                        }
-                        else
-                        {
-                            submesh.Transform = childTrn;
-                        }
                     }
                 }
             }
