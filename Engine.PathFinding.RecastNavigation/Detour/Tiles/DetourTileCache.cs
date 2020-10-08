@@ -414,7 +414,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 int ntris = RecastUtils.Triangulate(cont.Verts, ref indices, out Int3[] tris);
                 if (ntris <= 0)
                 {
-                    // TODO: issue warning!
+                    Logger.WriteWarning(nameof(DetourTileCache), $"Polygon contour triangulation error: Index {i} - {cont}");
+
                     ntris = -ntris;
                 }
 
@@ -1481,7 +1482,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             int ntris = RecastUtils.Triangulate(tverts, ref thole, out Int3[] tris);
             if (ntris < 0)
             {
-                // TODO: issue warning!
+                Logger.WriteWarning(nameof(DetourTileCache), "Hole triangulation error");
+
                 ntris = -ntris;
             }
 
