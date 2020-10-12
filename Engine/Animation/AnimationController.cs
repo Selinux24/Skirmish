@@ -26,10 +26,6 @@ namespace Engine.Animation
         /// Last clip name
         /// </summary>
         private string lastClipName = null;
-        /// <summary>
-        /// Last animation offset
-        /// </summary>
-        private uint lastOffset = 0;
 
         /// <summary>
         /// Time delta to aply to controller time
@@ -287,9 +283,9 @@ namespace Engine.Animation
                 lastClipName = clipName;
                 lastItemTime = time;
 
-                skData.GetAnimationOffset(time, clipName, out lastOffset);
+                skData.GetAnimationOffset(time, clipName, out uint newOffset);
 
-                offset = lastOffset;
+                offset = newOffset;
 
                 return true;
             }
