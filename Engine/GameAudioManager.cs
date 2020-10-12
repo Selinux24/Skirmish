@@ -46,10 +46,6 @@ namespace Engine
         /// Effect instances list
         /// </summary>
         private readonly List<EffectInstance> effectInstances = new List<EffectInstance>();
-        /// <summary>
-        /// Frame to update audio
-        /// </summary>
-        private int frameToUpdateAudio = 0;
 
         /// <summary>
         /// Gets or sets the master volume
@@ -160,13 +156,7 @@ namespace Engine
                 return;
             }
 
-            for (int i = frameToUpdateAudio; i < effectCount; i += 2)
-            {
-                toUpdate[i].Effect.Update(gameTime);
-            }
-
-            frameToUpdateAudio++;
-            frameToUpdateAudio %= 2;
+            Parallel.ForEach(toUpdate, e => e.Effect.Update(gameTime));
         }
 
         /// <summary>
@@ -278,6 +268,7 @@ namespace Engine
 
             instance?.Emitter.SetSource(emitter);
             instance?.Listener.SetSource(listener);
+            instance?.Update(new GameTime());
 
             return instance;
         }
@@ -294,6 +285,7 @@ namespace Engine
 
             instance?.Emitter.SetSource(emitter);
             instance?.Listener.SetSource(listener);
+            instance?.Update(new GameTime());
 
             return instance;
         }

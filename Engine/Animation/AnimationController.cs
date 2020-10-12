@@ -30,10 +30,6 @@ namespace Engine.Animation
         /// Last animation offset
         /// </summary>
         private uint lastOffset = 0;
-        /// <summary>
-        /// Offset initialization flag
-        /// </summary>
-        private bool offsetInitialized = false;
 
         /// <summary>
         /// Time delta to aply to controller time
@@ -231,10 +227,9 @@ namespace Engine.Animation
         {
             if (!active)
             {
-                if (!offsetInitialized)
+                if (GetAnimationOffset(skData, out uint offset))
                 {
-                    AnimationOffset = GetAnimationOffset(skData);
-                    offsetInitialized = true;
+                    AnimationOffset = offset;
                 }
 
                 return;
@@ -263,8 +258,7 @@ namespace Engine.Animation
                 PathUpdated?.Invoke(this, new EventArgs());
             }
 
-            uint newOffset = GetAnimationOffset(skData);
-            if (AnimationOffset != newOffset)
+            if (GetAnimationOffset(skData, out uint newOffset) && AnimationOffset != newOffset)
             {
                 Logger.WriteTrace(this, $"Animation offset changed: {newOffset}");
                 AnimationOffset = newOffset;
@@ -281,19 +275,26 @@ namespace Engine.Animation
         /// <summary>
         /// Gets the current animation offset from skinning animation data
         /// </summary>
-        /// <param name="skData"></param>
-        /// <returns>Returns the current animation offset in skinning animation data</returns>
-        protected uint GetAnimationOffset(SkinningData skData)
+        /// <param name="skData">Skinning data</param>
+        /// <param name="offset">Returns the current animation offset in skinning animation data</param>
+        /// <returns>Returns true if the offset was recovered</returns>
+        protected bool GetAnimationOffset(SkinningData skData, out uint offset)
         {
+            offset = 0;
+
             if (GetClipAndTime(out float time, out string clipName))
             {
                 lastClipName = clipName;
                 lastItemTime = time;
 
                 skData.GetAnimationOffset(time, clipName, out lastOffset);
+
+                offset = lastOffset;
+
+                return true;
             }
 
-            return lastOffset;
+            return false;
         }
         /// <summary>
         /// Gets the transformation matrix list at current time
