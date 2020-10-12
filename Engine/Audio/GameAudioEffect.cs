@@ -173,6 +173,10 @@ namespace Engine.Audio
         /// Event fired when a loop ends
         /// </summary>
         public event GameAudioHandler LoopEnd;
+        /// <summary>
+        /// Event fired when the play progressed
+        /// </summary>
+        public event GameAudioProgressHandler PlayProgress;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GameAudioEffect" /> class.
@@ -461,6 +465,9 @@ namespace Engine.Audio
                 }
 
                 isFirstTime = false;
+
+                // Fires the progress event
+                PlayProgress?.Invoke(this, new GameAudioProgressEventArgs(Duration, playPosition));
             }
         }
         /// <summary>

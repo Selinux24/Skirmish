@@ -256,7 +256,7 @@ namespace Heightmap
                     skydom.RayleighScattering *= 0.8f;
                     skydom.MieScattering *= 0.1f;
 
-                    Environment.TimeOfDay.BeginAnimation(8, 55, 00);
+                    GameEnvironment.TimeOfDay.BeginAnimation(8, 55, 00);
 
                     Lights.BaseFogColor = new Color((byte)95, (byte)147, (byte)233) * 0.5f;
                     ToggleFog();
@@ -1287,7 +1287,7 @@ namespace Heightmap
                 "{0}. Wind {1} {2:0.000} - Next {3:0.000}; {4} Light brightness: {5:0.00}; CamPos {6}; CamDir {7};",
                 Renderer,
                 windDirection, windStrength, windNextStrength,
-                Environment.TimeOfDay,
+                GameEnvironment.TimeOfDay,
                 Lights.KeyLight.Brightness,
                 Camera.Position, Camera.Direction);
 
@@ -1570,13 +1570,13 @@ namespace Heightmap
             if (Game.Input.KeyPressed(Keys.Left))
             {
                 time -= gameTime.ElapsedSeconds * 0.1f;
-                Environment.TimeOfDay.SetTimeOfDay(time % 1f);
+                GameEnvironment.TimeOfDay.SetTimeOfDay(time % 1f);
             }
 
             if (Game.Input.KeyPressed(Keys.Right))
             {
                 time += gameTime.ElapsedSeconds * 0.1f;
-                Environment.TimeOfDay.SetTimeOfDay(time % 1f);
+                GameEnvironment.TimeOfDay.SetTimeOfDay(time % 1f);
             }
         }
         private void UpdateInputBuffers()

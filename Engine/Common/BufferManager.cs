@@ -194,9 +194,10 @@ namespace Engine.Common
         /// <summary>
         /// Creates and populates vertex, instancing and index buffers
         /// </summary>
+        /// <param name="id">Load group id</param>
         /// <param name="progress">Progress helper</param>
         /// <param name="callback">Callback</param>
-        internal void CreateBuffers(IProgress<float> progress, Action callback = null)
+        internal void CreateBuffers(string id, IProgress<LoadResourceProgress> progress, Action callback = null)
         {
             if (allocating)
             {
@@ -229,7 +230,7 @@ namespace Engine.Common
 
                     float current = 0;
 
-                    DoProcessRequest(progress, ref current, toAssign.Count(), toAssign);
+                    DoProcessRequest(id, progress, ref current, toAssign.Count(), toAssign);
 
                     Logger.WriteTrace(this, $"Descriptor requests processed");
 
@@ -253,11 +254,11 @@ namespace Engine.Common
                         vertexList.Count() +
                         indexList.Count();
 
-                    ReallocateInstances(progress, ref current, total, instancingList);
+                    ReallocateInstances(id, progress, ref current, total, instancingList);
 
-                    ReallocateVertexData(progress, ref current, total, vertexList);
+                    ReallocateVertexData(id, progress, ref current, total, vertexList);
 
-                    ReallocateIndexData(progress, ref current, total, indexList);
+                    ReallocateIndexData(id, progress, ref current, total, indexList);
 
                     Logger.WriteTrace(this, $"Buffers reallocated");
                 }
@@ -305,13 +306,18 @@ namespace Engine.Common
         /// <summary>
         /// Do descriptor request processing
         /// </summary>
-        private void DoProcessRequest(IProgress<float> progress, ref float current, float total, IEnumerable<IBufferDescriptorRequest> toAssign)
+        /// <param name="id">Load group id</param>
+        /// <param name="progress">Progress helper</param>
+        /// <param name="current">Current progress value</param>
+        /// <param name="total">Total progress value</param>
+        /// <param name="toAssign">To assign buffer list</param>
+        private void DoProcessRequest(string id, IProgress<LoadResourceProgress> progress, ref float current, float total, IEnumerable<IBufferDescriptorRequest> toAssign)
         {
             foreach (var request in toAssign)
             {
                 request.Process(this);
 
-                progress?.Report(++current / total);
+                progress?.Report(new LoadResourceProgress { Id = id, Progress = ++current / total });
             }
 
             Monitor.Enter(requestedDescriptors);
@@ -321,7 +327,12 @@ namespace Engine.Common
         /// <summary>
         /// Reallocates the instance data
         /// </summary>
-        private void ReallocateInstances(IProgress<float> progress, ref float current, float total, IEnumerable<BufferManagerInstances> dirtyList)
+        /// <param name="id">Load group id</param>
+        /// <param name="progress">Progress helper</param>
+        /// <param name="current">Current progress value</param>
+        /// <param name="total">Total progress value</param>
+        /// <param name="dirtyList">Dirty buffer list</param>
+        private void ReallocateInstances(string id, IProgress<LoadResourceProgress> progress, ref float current, float total, IEnumerable<BufferManagerInstances> dirtyList)
         {
             foreach (var descriptor in dirtyList)
             {
@@ -369,14 +380,18 @@ namespace Engine.Common
                 descriptor.Allocated = true;
                 descriptor.ReallocationNeeded = false;
 
-                progress?.Report(++current / total);
+                progress?.Report(new LoadResourceProgress { Id = id, Progress = ++current / total });
             }
         }
         /// <summary>
         /// Reallocates the vertex data
         /// </summary>
-        /// <param name="reallocateInstances">Returns wether instance reallocation is necessary</param>
-        private void ReallocateVertexData(IProgress<float> progress, ref float current, float total, IEnumerable<BufferManagerVertices> dirtyList)
+        /// <param name="id">Load group id</param>
+        /// <param name="progress">Progress helper</param>
+        /// <param name="current">Current progress value</param>
+        /// <param name="total">Total progress value</param>
+        /// <param name="dirtyList">Dirty buffer list</param>
+        private void ReallocateVertexData(string id, IProgress<LoadResourceProgress> progress, ref float current, float total, IEnumerable<BufferManagerVertices> dirtyList)
         {
             foreach (var descriptor in dirtyList)
             {
@@ -432,13 +447,18 @@ namespace Engine.Common
                 descriptor.Allocated = true;
                 descriptor.ReallocationNeeded = false;
 
-                progress?.Report(++current / total);
+                progress?.Report(new LoadResourceProgress { Id = id, Progress = ++current / total });
             }
         }
         /// <summary>
         /// Reallocates the index data
         /// </summary>
-        private void ReallocateIndexData(IProgress<float> progress, ref float current, float total, IEnumerable<BufferManagerIndices> dirtyList)
+        /// <param name="id">Load group id</param>
+        /// <param name="progress">Progress helper</param>
+        /// <param name="current">Current progress value</param>
+        /// <param name="total">Total progress value</param>
+        /// <param name="dirtyList">Dirty buffer list</param>
+        private void ReallocateIndexData(string id, IProgress<LoadResourceProgress> progress, ref float current, float total, IEnumerable<BufferManagerIndices> dirtyList)
         {
             foreach (var descriptor in dirtyList)
             {
@@ -477,7 +497,7 @@ namespace Engine.Common
                 descriptor.Allocated = true;
                 descriptor.ReallocationNeeded = false;
 
-                progress?.Report(++current / total);
+                progress?.Report(new LoadResourceProgress { Id = id, Progress = ++current / total });
             }
         }
 

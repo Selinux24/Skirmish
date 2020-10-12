@@ -49,7 +49,7 @@ namespace Animation.AnimationParts
                     {
                         InitializeTank(),
                         InitializeFloor(),
-                        InitializeDebug(),
+                        InitializeDebug()
                     },
                     (res) =>
                     {

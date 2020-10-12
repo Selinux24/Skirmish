@@ -339,14 +339,14 @@ namespace Engine.UI
         {
             get
             {
-                return this.left;
+                return left;
             }
             set
             {
-                this.left = value;
-                this.centerHorizontally = CenterTargets.None;
+                left = value;
+                centerHorizontally = CenterTargets.None;
 
-                this.UpdateInternals = true;
+                UpdateInternals = true;
             }
         }
         /// <summary>
@@ -356,14 +356,14 @@ namespace Engine.UI
         {
             get
             {
-                return this.top;
+                return top;
             }
             set
             {
-                this.top = value;
-                this.centerVertically = CenterTargets.None;
+                top = value;
+                centerVertically = CenterTargets.None;
 
-                this.UpdateInternals = true;
+                UpdateInternals = true;
             }
         }
         /// <summary>
@@ -373,13 +373,13 @@ namespace Engine.UI
         {
             get
             {
-                return this.width;
+                return width;
             }
             set
             {
-                this.width = value;
+                width = value;
 
-                this.UpdateInternals = true;
+                UpdateInternals = true;
             }
         }
         /// <summary>
@@ -389,13 +389,13 @@ namespace Engine.UI
         {
             get
             {
-                return this.height;
+                return height;
             }
             set
             {
-                this.height = value;
+                height = value;
 
-                this.UpdateInternals = true;
+                UpdateInternals = true;
             }
         }
         /// <summary>
@@ -411,7 +411,7 @@ namespace Engine.UI
             {
                 scale = value;
 
-                this.UpdateInternals = true;
+                UpdateInternals = true;
             }
         }
         /// <summary>
@@ -427,7 +427,7 @@ namespace Engine.UI
             {
                 rotation = value % MathUtil.TwoPi;
 
-                this.UpdateInternals = true;
+                UpdateInternals = true;
             }
         }
         /// <summary>
@@ -438,10 +438,10 @@ namespace Engine.UI
             get
             {
                 return new RectangleF(
-                    this.Left,
-                    this.Top,
-                    this.Width,
-                    this.Height);
+                    Left,
+                    Top,
+                    Width,
+                    Height);
             }
         }
         /// <summary>
@@ -451,7 +451,7 @@ namespace Engine.UI
         {
             get
             {
-                return new Vector2(this.width, this.height) * 0.5f;
+                return new Vector2(width, height) * 0.5f;
             }
         }
 
@@ -463,7 +463,7 @@ namespace Engine.UI
         {
             get
             {
-                return (Parent?.AbsoluteLeft ?? 0) + this.Left;
+                return (Parent?.AbsoluteLeft ?? 0) + Left;
             }
         }
         /// <summary>
@@ -473,7 +473,7 @@ namespace Engine.UI
         {
             get
             {
-                return (Parent?.AbsoluteTop ?? 0) + this.Top;
+                return (Parent?.AbsoluteTop ?? 0) + Top;
             }
         }
         /// <summary>
@@ -483,13 +483,13 @@ namespace Engine.UI
         {
             get
             {
-                if (this.fitWithParent)
+                if (fitWithParent)
                 {
-                    return Parent?.AbsoluteWidth ?? this.Width;
+                    return Parent?.AbsoluteWidth ?? Width;
                 }
                 else
                 {
-                    return this.Width;
+                    return Width;
                 }
             }
         }
@@ -500,13 +500,13 @@ namespace Engine.UI
         {
             get
             {
-                if (this.fitWithParent)
+                if (fitWithParent)
                 {
-                    return Parent?.AbsoluteHeight ?? this.Height;
+                    return Parent?.AbsoluteHeight ?? Height;
                 }
                 else
                 {
-                    return this.Height;
+                    return Height;
                 }
             }
         }
@@ -517,7 +517,7 @@ namespace Engine.UI
         {
             get
             {
-                return (Parent?.AbsoluteScale ?? 1) * this.Scale;
+                return (Parent?.AbsoluteScale ?? 1) * Scale;
             }
         }
         /// <summary>
@@ -527,7 +527,7 @@ namespace Engine.UI
         {
             get
             {
-                return (Parent?.AbsoluteRotation ?? 0) + this.Rotation;
+                return (Parent?.AbsoluteRotation ?? 0) + Rotation;
             }
         }
         /// <summary>
@@ -538,10 +538,10 @@ namespace Engine.UI
             get
             {
                 return new RectangleF(
-                    this.AbsoluteLeft,
-                    this.AbsoluteTop,
-                    this.AbsoluteWidth,
-                    this.AbsoluteHeight);
+                    AbsoluteLeft,
+                    AbsoluteTop,
+                    AbsoluteWidth,
+                    AbsoluteHeight);
             }
         }
         /// <summary>
@@ -562,7 +562,7 @@ namespace Engine.UI
         {
             get
             {
-                return Parent?.GrandpaLeft ?? this.Left;
+                return Parent?.GrandpaLeft ?? Left;
             }
         }
         /// <summary>
@@ -572,7 +572,7 @@ namespace Engine.UI
         {
             get
             {
-                return Parent?.GrandpaTop ?? this.Top;
+                return Parent?.GrandpaTop ?? Top;
             }
         }
         /// <summary>
@@ -582,7 +582,7 @@ namespace Engine.UI
         {
             get
             {
-                return Parent?.GrandpaWidth ?? this.Width;
+                return Parent?.GrandpaWidth ?? Width;
             }
         }
         /// <summary>
@@ -592,7 +592,7 @@ namespace Engine.UI
         {
             get
             {
-                return Parent?.GrandpaHeight ?? this.Height;
+                return Parent?.GrandpaHeight ?? Height;
             }
         }
         /// <summary>
@@ -602,7 +602,7 @@ namespace Engine.UI
         {
             get
             {
-                return Parent?.GrandpaScale ?? this.Scale;
+                return Parent?.GrandpaScale ?? Scale;
             }
         }
         /// <summary>
@@ -612,7 +612,7 @@ namespace Engine.UI
         {
             get
             {
-                return Parent?.GrandpaRotation ?? this.Rotation;
+                return Parent?.GrandpaRotation ?? Rotation;
             }
         }
         /// <summary>
@@ -623,10 +623,10 @@ namespace Engine.UI
             get
             {
                 return new RectangleF(
-                    this.GrandpaLeft,
-                    this.GrandpaTop,
-                    this.GrandpaWidth,
-                    this.GrandpaHeight);
+                    GrandpaLeft,
+                    GrandpaTop,
+                    GrandpaWidth,
+                    GrandpaHeight);
             }
         }
         /// <summary>
@@ -647,13 +647,13 @@ namespace Engine.UI
         {
             get
             {
-                return this.fitWithParent;
+                return fitWithParent;
             }
             set
             {
-                this.fitWithParent = value;
+                fitWithParent = value;
 
-                this.UpdateInternals = true;
+                UpdateInternals = true;
             }
         }
         /// <summary>
@@ -664,13 +664,13 @@ namespace Engine.UI
         {
             get
             {
-                return this.centerVertically;
+                return centerVertically;
             }
             set
             {
-                this.centerVertically = value;
+                centerVertically = value;
 
-                this.UpdateInternals = true;
+                UpdateInternals = true;
             }
         }
         /// <summary>
@@ -681,13 +681,13 @@ namespace Engine.UI
         {
             get
             {
-                return this.centerHorizontally;
+                return centerHorizontally;
             }
             set
             {
-                this.centerHorizontally = value;
+                centerHorizontally = value;
 
-                this.UpdateInternals = true;
+                UpdateInternals = true;
             }
         }
 
@@ -763,35 +763,35 @@ namespace Engine.UI
         protected UIControl(Scene scene, UIControlDescription description)
             : base(scene, description)
         {
-            this.updateOrder = GetNextUpdateOrder();
+            updateOrder = GetNextUpdateOrder();
 
-            this.Manipulator = new Manipulator2D(this.Game);
+            Manipulator = new Manipulator2D(Game);
 
-            this.fitWithParent = description.FitParent;
+            fitWithParent = description.FitParent;
             if (fitWithParent)
             {
-                this.top = 0;
-                this.left = 0;
-                this.width = Parent?.width ?? this.Game.Form.RenderWidth;
-                this.height = Parent?.height ?? this.Game.Form.RenderHeight;
+                top = 0;
+                left = 0;
+                width = Parent?.width ?? Game.Form.RenderWidth;
+                height = Parent?.height ?? Game.Form.RenderHeight;
             }
             else
             {
-                this.top = description.Top;
-                this.left = description.Left;
-                this.width = description.Width;
-                this.height = description.Height;
+                top = description.Top;
+                left = description.Left;
+                width = description.Width;
+                height = description.Height;
             }
 
-            this.centerHorizontally = description.CenterHorizontally;
-            this.centerVertically = description.CenterVertically;
+            centerHorizontally = description.CenterHorizontally;
+            centerVertically = description.CenterVertically;
 
-            this.baseColor = description.BaseColor;
-            this.tintColor = description.TintColor;
+            baseColor = description.BaseColor;
+            tintColor = description.TintColor;
 
-            this.EventsEnabled = description.EventsEnabled;
+            EventsEnabled = description.EventsEnabled;
 
-            this.UpdateInternals = true;
+            UpdateInternals = true;
         }
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
@@ -813,11 +813,11 @@ namespace Engine.UI
                 return;
             }
 
-            if (this.UpdateInternals)
+            if (UpdateInternals)
             {
-                this.UpdateInternalState();
+                UpdateInternalState();
 
-                this.UpdateInternals = false;
+                UpdateInternals = false;
             }
 
             if (children.Any())
@@ -830,26 +830,26 @@ namespace Engine.UI
         /// </summary>
         protected virtual void UpdateInternalState()
         {
-            if (this.centerHorizontally != CenterTargets.None)
+            if (centerHorizontally != CenterTargets.None)
             {
-                var rect = this.GetCenteringArea(this.centerHorizontally);
-                this.left = rect.Center.X - (this.AbsoluteWidth * 0.5f);
+                var rect = GetCenteringArea(centerHorizontally);
+                left = rect.Center.X - (AbsoluteWidth * 0.5f);
             }
 
-            if (this.centerVertically != CenterTargets.None)
+            if (centerVertically != CenterTargets.None)
             {
-                var rect = this.GetCenteringArea(this.centerVertically);
-                this.top = rect.Center.Y - (this.AbsoluteHeight * 0.5f);
+                var rect = GetCenteringArea(centerVertically);
+                top = rect.Center.Y - (AbsoluteHeight * 0.5f);
             }
 
-            Vector2 sca = new Vector2(this.AbsoluteWidth, this.AbsoluteHeight) * AbsoluteScale;
-            float rot = this.AbsoluteRotation;
-            Vector2 pos = new Vector2(this.AbsoluteLeft, this.AbsoluteTop);
+            Vector2 sca = new Vector2(AbsoluteWidth, AbsoluteHeight) * AbsoluteScale;
+            float rot = AbsoluteRotation;
+            Vector2 pos = new Vector2(AbsoluteLeft, AbsoluteTop);
 
-            this.Manipulator.SetScale(sca);
-            this.Manipulator.SetRotation(rot);
-            this.Manipulator.SetPosition(pos);
-            this.Manipulator.Update(this.GrandpaRectangle.Center, this.GrandpaScale);
+            Manipulator.SetScale(sca);
+            Manipulator.SetRotation(rot);
+            Manipulator.SetPosition(pos);
+            Manipulator.Update(GrandpaRectangle.Center, GrandpaScale);
 
             if (children.Any())
             {
@@ -878,42 +878,42 @@ namespace Engine.UI
         /// </summary>
         protected void FireMouseOverEvent()
         {
-            this.MouseOver?.Invoke(this, new EventArgs());
+            MouseOver?.Invoke(this, new EventArgs());
         }
         /// <summary>
         /// Fires on mouse enter event
         /// </summary>
         protected void FireMouseEnterEvent()
         {
-            this.MouseEnter?.Invoke(this, new EventArgs());
+            MouseEnter?.Invoke(this, new EventArgs());
         }
         /// <summary>
         /// Fires on mouse leave event
         /// </summary>
         protected void FireMouseLeaveEvent()
         {
-            this.MouseLeave?.Invoke(this, new EventArgs());
+            MouseLeave?.Invoke(this, new EventArgs());
         }
         /// <summary>
         /// Fires on pressed event
         /// </summary>
         protected void FirePressedEvent()
         {
-            this.Pressed?.Invoke(this, new EventArgs());
+            Pressed?.Invoke(this, new EventArgs());
         }
         /// <summary>
         /// Fires on just pressed event
         /// </summary>
         protected void FireJustPressedEvent()
         {
-            this.JustPressed?.Invoke(this, new EventArgs());
+            JustPressed?.Invoke(this, new EventArgs());
         }
         /// <summary>
         /// Fires on just released event
         /// </summary>
         protected void FireJustReleasedEvent()
         {
-            this.JustReleased?.Invoke(this, new EventArgs());
+            JustReleased?.Invoke(this, new EventArgs());
         }
 
         /// <summary>
@@ -921,7 +921,7 @@ namespace Engine.UI
         /// </summary>
         public virtual void Resize()
         {
-            this.UpdateInternals = true;
+            UpdateInternals = true;
 
             children.ForEach(c => c.Resize());
         }
@@ -1054,7 +1054,7 @@ namespace Engine.UI
         /// <param name="distance">Distance</param>
         public void MoveLeft(GameTime gameTime, float distance = 1f)
         {
-            this.Left -= (int)(1f * distance * gameTime.ElapsedSeconds);
+            Left -= (int)(1f * distance * gameTime.ElapsedSeconds);
         }
         /// <summary>
         /// Increments position component d distance along right vector
@@ -1063,7 +1063,7 @@ namespace Engine.UI
         /// <param name="distance">Distance</param>
         public void MoveRight(GameTime gameTime, float distance = 1f)
         {
-            this.Left += (int)(1f * distance * gameTime.ElapsedSeconds);
+            Left += (int)(1f * distance * gameTime.ElapsedSeconds);
         }
         /// <summary>
         /// Increments position component d distance along up vector
@@ -1072,7 +1072,7 @@ namespace Engine.UI
         /// <param name="distance">Distance</param>
         public void MoveUp(GameTime gameTime, float distance = 1f)
         {
-            this.Top -= (int)(1f * distance * gameTime.ElapsedSeconds);
+            Top -= (int)(1f * distance * gameTime.ElapsedSeconds);
         }
         /// <summary>
         /// Increments position component d distance along down vector
@@ -1081,7 +1081,7 @@ namespace Engine.UI
         /// <param name="distance">Distance</param>
         public void MoveDown(GameTime gameTime, float distance = 1f)
         {
-            this.Top += (int)(1f * distance * gameTime.ElapsedSeconds);
+            Top += (int)(1f * distance * gameTime.ElapsedSeconds);
         }
 
         /// <summary>
@@ -1092,12 +1092,12 @@ namespace Engine.UI
         /// <remarks>Setting the position invalidates centering properties</remarks>
         public virtual void SetPosition(float x, float y)
         {
-            this.left = x;
-            this.top = y;
-            this.centerHorizontally = CenterTargets.None;
-            this.centerVertically = CenterTargets.None;
+            left = x;
+            top = y;
+            centerHorizontally = CenterTargets.None;
+            centerVertically = CenterTargets.None;
 
-            this.UpdateInternals = true;
+            UpdateInternals = true;
         }
         /// <summary>
         /// Sets the control left-top position
@@ -1106,7 +1106,7 @@ namespace Engine.UI
         /// <remarks>Setting the position invalidates centering properties</remarks>
         public virtual void SetPosition(Vector2 position)
         {
-            this.SetPosition(position.X, position.Y);
+            SetPosition(position.X, position.Y);
         }
         /// <summary>
         /// Sets the control rectangle area
@@ -1115,14 +1115,14 @@ namespace Engine.UI
         /// <remarks>Adjust the control left-top position and with and height properties</remarks>
         public virtual void SetRectangle(RectangleF rectangle)
         {
-            this.left = rectangle.X;
-            this.top = rectangle.Y;
-            this.width = rectangle.Width;
-            this.height = rectangle.Height;
-            this.centerHorizontally = CenterTargets.None;
-            this.centerVertically = CenterTargets.None;
+            left = rectangle.X;
+            top = rectangle.Y;
+            width = rectangle.Width;
+            height = rectangle.Height;
+            centerHorizontally = CenterTargets.None;
+            centerVertically = CenterTargets.None;
 
-            this.UpdateInternals = true;
+            UpdateInternals = true;
         }
 
         /// <summary>
@@ -1131,7 +1131,7 @@ namespace Engine.UI
         /// <returns>Returns the render area</returns>
         public virtual RectangleF GetRenderArea()
         {
-            return this.AbsoluteRectangle;
+            return AbsoluteRectangle;
         }
         /// <summary>
         /// Gets the area used for centering calculation
@@ -1140,12 +1140,12 @@ namespace Engine.UI
         /// <returns>Returns the centering area</returns>
         public virtual RectangleF GetCenteringArea(CenterTargets target)
         {
-            if (this.Parent != null && target == CenterTargets.Parent)
+            if (Parent != null && target == CenterTargets.Parent)
             {
-                return new RectangleF(0, 0, this.Parent.AbsoluteWidth, this.Parent.AbsoluteHeight);
+                return new RectangleF(0, 0, Parent.AbsoluteWidth, Parent.AbsoluteHeight);
             }
 
-            return this.Game.Form.RenderRectangle;
+            return Game.Form.RenderRectangle;
         }
     }
 }

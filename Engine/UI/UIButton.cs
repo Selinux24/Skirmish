@@ -74,9 +74,9 @@ namespace Engine.UI
                 spriteDesc.UVMap = description.TextureReleasedUVMap;
             }
 
-            this.buttonReleased = new Sprite(scene, spriteDesc);
+            buttonReleased = new Sprite(scene, spriteDesc);
 
-            this.AddChild(this.buttonReleased, true);
+            AddChild(buttonReleased, true);
 
             if (description.TwoStateButton)
             {
@@ -93,18 +93,18 @@ namespace Engine.UI
                     spriteDesc2.UVMap = description.TexturePressedUVMap;
                 }
 
-                this.buttonPressed = new Sprite(scene, spriteDesc2);
+                buttonPressed = new Sprite(scene, spriteDesc2);
 
-                this.AddChild(this.buttonPressed, true);
+                AddChild(buttonPressed, true);
             }
 
             if (description.Caption != null)
             {
                 description.Caption.EventsEnabled = false;
 
-                this.Caption = new UITextArea(scene, description.Caption);
+                Caption = new UITextArea(scene, description.Caption);
 
-                this.AddChild(this.Caption, true);
+                AddChild(Caption, true);
             }
         }
 
@@ -113,21 +113,21 @@ namespace Engine.UI
         {
             base.Update(context);
 
-            if (!this.Active)
+            if (!Active)
             {
                 return;
             }
 
             bool pressed = IsPressed || (State == UIButtonState.Pressed);
 
-            if (this.buttonPressed != null)
+            if (buttonPressed != null)
             {
-                this.buttonPressed.Visible = pressed;
-                this.buttonReleased.Visible = !pressed;
+                buttonPressed.Visible = pressed;
+                buttonReleased.Visible = !pressed;
             }
             else
             {
-                this.buttonReleased.Visible = true;
+                buttonReleased.Visible = true;
             }
         }
     }

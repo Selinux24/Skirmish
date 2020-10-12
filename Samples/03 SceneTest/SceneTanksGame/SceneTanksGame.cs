@@ -122,9 +122,9 @@ namespace SceneTest.SceneTanksGame
             InitializePlayers();
         }
 
-        public override void OnReportProgress(float value)
+        public override void OnReportProgress(LoadResourceProgress value)
         {
-            progressValue = Math.Max(progressValue, value);
+            progressValue = Math.Max(progressValue, value.Progress);
 
             if (loadingBar != null)
             {
@@ -205,7 +205,7 @@ namespace SceneTest.SceneTanksGame
             taskList.AddRange(InitializeModels());
 
             await LoadResourcesAsync(
-                taskList.ToArray(),
+                taskList,
                 (res) =>
                 {
                     if (!res.Completed)

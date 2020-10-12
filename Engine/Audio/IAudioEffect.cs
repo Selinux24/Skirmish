@@ -55,6 +55,11 @@ namespace Engine.Audio
         /// The instance is due to dispose
         /// </summary>
         bool DueToDispose { get; }
+        /// <summary>
+        /// Gets or sets the position in seconds.
+        /// </summary>
+        /// <value>The position.</value>
+        TimeSpan Position { get; set; }
 
         /// <summary>
         /// Event fired when the audio starts
@@ -68,6 +73,10 @@ namespace Engine.Audio
         /// Event fired when a loop ends
         /// </summary>
         event GameAudioHandler LoopEnd;
+        /// <summary>
+        /// Event fired when the play progressed
+        /// </summary>
+        event GameAudioProgressHandler PlayProgress;
 
         /// <summary>
         /// Plays the current instance. If it is already playing - the call is ignored.

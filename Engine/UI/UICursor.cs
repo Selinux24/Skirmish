@@ -31,9 +31,9 @@ namespace Engine.UI
         public UICursor(Scene scene, UICursorDescription description)
             : base(scene, description)
         {
-            this.Centered = description.Centered;
-            this.Delta = description.Delta;
-            this.EventsEnabled = false;
+            Centered = description.Centered;
+            Delta = description.Delta;
+            EventsEnabled = false;
         }
 
         /// <inheritdoc/>
@@ -47,26 +47,26 @@ namespace Engine.UI
             float left;
             float top;
 
-            if (this.Centered)
+            if (Centered)
             {
-                left = this.Game.Input.MouseX - (this.Width * 0.5f);
-                top = this.Game.Input.MouseY - (this.Height * 0.5f);
+                left = Game.Input.MouseX - (Width * 0.5f);
+                top = Game.Input.MouseY - (Height * 0.5f);
             }
             else
             {
-                left = this.Game.Input.MouseX;
-                top = this.Game.Input.MouseY;
+                left = Game.Input.MouseX;
+                top = Game.Input.MouseY;
             }
 
-            this.CursorPosition = new Vector2(left, top) + this.Delta;
+            CursorPosition = new Vector2(left, top) + Delta;
 
-            if (this.Game.Input.LockMouse)
+            if (Game.Input.LockMouse)
             {
-                this.SetPosition(this.Game.Form.RenderCenter);
+                SetPosition(Game.Form.RenderCenter);
             }
             else
             {
-                this.SetPosition(this.CursorPosition);
+                SetPosition(CursorPosition);
             }
 
             base.Update(context);

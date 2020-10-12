@@ -46,7 +46,7 @@ namespace Engine.UI
         {
             get
             {
-                return this.vertexBuffer?.Ready == true && this.indexBuffer?.Ready == true && this.indexBuffer.Count > 0;
+                return vertexBuffer?.Ready == true && indexBuffer?.Ready == true && indexBuffer.Count > 0;
             }
         }
 
@@ -58,17 +58,17 @@ namespace Engine.UI
         public Sprite(Scene scene, SpriteDescription description)
             : base(scene, description)
         {
-            this.Textured = description.Textures?.Any() == true;
-            this.TextureIndex = description.TextureIndex;
+            Textured = description.Textures?.Any() == true;
+            TextureIndex = description.TextureIndex;
 
-            this.InitializeBuffers(description.Name, this.Textured, description.UVMap);
+            InitializeBuffers(description.Name, Textured, description.UVMap);
 
-            if (this.Textured)
+            if (Textured)
             {
-                this.InitializeTexture(description.ContentPath, description.Textures);
+                InitializeTexture(description.ContentPath, description.Textures);
             }
 
-            this.viewProjection = this.Game.Form.GetOrthoProjectionMatrix();
+            viewProjection = Game.Form.GetOrthoProjectionMatrix();
         }
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
@@ -76,8 +76,8 @@ namespace Engine.UI
             if (disposing)
             {
                 //Remove data from buffer manager
-                this.BufferManager?.RemoveVertexData(this.vertexBuffer);
-                this.BufferManager?.RemoveIndexData(this.indexBuffer);
+                BufferManager?.RemoveVertexData(vertexBuffer);
+                BufferManager?.RemoveIndexData(indexBuffer);
             }
 
             base.Dispose(disposing);
@@ -103,17 +103,17 @@ namespace Engine.UI
                 }
 
                 var vertices = VertexPositionTexture.Generate(geom.Vertices, geom.Uvs);
-                this.vertexBuffer = this.BufferManager.AddVertexData(name, false, vertices);
+                vertexBuffer = BufferManager.AddVertexData(name, false, vertices);
             }
             else
             {
                 geom = GeometryUtil.CreateUnitSprite();
 
                 var vertices = VertexPositionColor.Generate(geom.Vertices, Color4.White);
-                this.vertexBuffer = this.BufferManager.AddVertexData(name, false, vertices);
+                vertexBuffer = BufferManager.AddVertexData(name, false, vertices);
             }
 
-            this.indexBuffer = this.BufferManager.AddIndexData(name, false, geom.Indices);
+            indexBuffer = BufferManager.AddIndexData(name, false, geom.Indices);
         }
         /// <summary>
         /// Initialize textures
@@ -123,7 +123,7 @@ namespace Engine.UI
         private void InitializeTexture(string contentPath, string[] textures)
         {
             var image = ImageContent.Array(contentPath, textures);
-            this.spriteTexture = this.Game.ResourceManager.RequestResource(image);
+            spriteTexture = Game.ResourceManager.RequestResource(image);
         }
 
         /// <inheritdoc/>
@@ -139,7 +139,7 @@ namespace Engine.UI
                 return;
             }
 
-            bool draw = context.ValidateDraw(this.BlendMode);
+            bool draw = context.ValidateDraw(BlendMode);
             if (!draw)
             {
                 return;
@@ -147,32 +147,32 @@ namespace Engine.UI
 
             var effect = DrawerPool.EffectDefaultSprite;
             var technique = effect.GetTechnique(
-                this.Textured ? VertexTypes.PositionTexture : VertexTypes.PositionColor,
+                Textured ? VertexTypes.PositionTexture : VertexTypes.PositionColor,
                 UITextureRendererChannels.All);
 
             Counters.InstancesPerFrame++;
-            Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
+            Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
 
-            this.BufferManager.SetIndexBuffer(this.indexBuffer);
-            this.BufferManager.SetInputAssembler(technique, this.vertexBuffer, Topology.TriangleList);
+            BufferManager.SetIndexBuffer(indexBuffer);
+            BufferManager.SetInputAssembler(technique, vertexBuffer, Topology.TriangleList);
 
-            effect.UpdatePerFrame(this.Manipulator.LocalTransform, this.viewProjection);
+            effect.UpdatePerFrame(Manipulator.LocalTransform, viewProjection);
 
             var color = Color4.AdjustSaturation(BaseColor * TintColor, 1f);
             color.Alpha *= Alpha;
 
-            effect.UpdatePerObject(color, this.spriteTexture, this.TextureIndex);
+            effect.UpdatePerObject(color, spriteTexture, TextureIndex);
 
-            var graphics = this.Game.Graphics;
+            var graphics = Game.Graphics;
 
             for (int p = 0; p < technique.PassCount; p++)
             {
                 graphics.EffectPassApply(technique, p, 0);
 
                 graphics.DrawIndexed(
-                    this.indexBuffer.Count,
-                    this.indexBuffer.BufferOffset,
-                    this.vertexBuffer.BufferOffset);
+                    indexBuffer.Count,
+                    indexBuffer.BufferOffset,
+                    vertexBuffer.BufferOffset);
             }
         }
 
@@ -181,7 +181,7 @@ namespace Engine.UI
         {
             base.Resize();
 
-            this.viewProjection = this.Game.Form.GetOrthoProjectionMatrix();
+            viewProjection = Game.Form.GetOrthoProjectionMatrix();
         }
     }
 

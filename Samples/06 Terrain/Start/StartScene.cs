@@ -36,12 +36,12 @@ namespace Terrain.Start
 
         public override async Task Initialize()
         {
-            this.Game.VisibleMouse = false;
-            this.Game.LockMouse = false;
+            Game.VisibleMouse = false;
+            Game.LockMouse = false;
 
             GameEnvironment.Background = Color.Black;
 
-            await this.LoadResourcesAsync(InitializeAssets(), PrepareAssets);
+            await LoadResourcesAsync(InitializeAssets(), PrepareAssets);
         }
         private async Task InitializeAssets()
         {
@@ -65,7 +65,7 @@ namespace Terrain.Start
             #region Background
 
             var backGroundDesc = ModelDescription.FromXml("Background", "Start", "SkyPlane.xml");
-            this.backGround = await this.AddComponentModel(backGroundDesc, SceneObjectUsages.UI);
+            backGround = await this.AddComponentModel(backGroundDesc, SceneObjectUsages.UI);
 
             #endregion
 
@@ -80,8 +80,8 @@ namespace Terrain.Start
 
             var titleDesc = UITextAreaDescription.Default(titleFont);
 
-            this.title = await this.AddComponentUITextArea(titleDesc, layerHUD);
-            this.title.AdjustAreaWithText = false;
+            title = await this.AddComponentUITextArea(titleDesc, layerHUD);
+            title.AdjustAreaWithText = false;
 
             #endregion
 
@@ -98,8 +98,8 @@ namespace Terrain.Start
             startButtonDesc.ColorReleased = new Color4(sceneButtonColor.RGB(), 0.8f);
             startButtonDesc.ColorPressed = new Color4(sceneButtonColor.RGB() * 1.2f, 0.9f);
 
-            this.scenePerlinNoiseButton = await this.AddComponentUIButton(startButtonDesc, layerHUD);
-            this.sceneRtsButton = await this.AddComponentUIButton(startButtonDesc, layerHUD);
+            scenePerlinNoiseButton = await this.AddComponentUIButton(startButtonDesc, layerHUD);
+            sceneRtsButton = await this.AddComponentUIButton(startButtonDesc, layerHUD);
 
             #endregion
 
@@ -112,7 +112,7 @@ namespace Terrain.Start
             exitButtonDesc.ColorReleased = new Color4(exitButtonColor.RGB(), 0.8f);
             exitButtonDesc.ColorPressed = new Color4(exitButtonColor.RGB() * 1.2f, 0.9f);
 
-            this.exitButton = await this.AddComponentUIButton(exitButtonDesc, layerHUD);
+            exitButton = await this.AddComponentUIButton(exitButtonDesc, layerHUD);
 
             #endregion
         }
@@ -123,17 +123,17 @@ namespace Terrain.Start
                 res.ThrowExceptions();
             }
 
-            this.backGround.Manipulator.SetScale(1.5f, 1.25f, 1.5f);
+            backGround.Manipulator.SetScale(1.5f, 1.25f, 1.5f);
 
-            this.title.Text = "Terrain Tests";
-            this.scenePerlinNoiseButton.Caption.Text = "Perlin Noise";
-            this.sceneRtsButton.Caption.Text = "Real Time Strategy Game";
-            this.exitButton.Caption.Text = "Exit";
+            title.Text = "Terrain Tests";
+            scenePerlinNoiseButton.Caption.Text = "Perlin Noise";
+            sceneRtsButton.Caption.Text = "Real Time Strategy Game";
+            exitButton.Caption.Text = "Exit";
 
             var sceneButtons = new[]
             {
-                this.scenePerlinNoiseButton,
-                this.sceneRtsButton,
+                scenePerlinNoiseButton,
+                sceneRtsButton,
             };
 
             int numButtons = sceneButtons.Length + 1;
@@ -141,47 +141,47 @@ namespace Terrain.Start
             int h = 4;
             int hv = h - 1;
 
-            var rect = this.Game.Form.RenderRectangle;
+            var rect = Game.Form.RenderRectangle;
             rect.Height /= 2;
-            this.title.SetRectangle(rect);
-            this.title.CenterHorizontally = CenterTargets.Screen;
-            this.title.CenterVertically = CenterTargets.Screen;
+            title.SetRectangle(rect);
+            title.CenterHorizontally = CenterTargets.Screen;
+            title.CenterVertically = CenterTargets.Screen;
 
             for (int i = 0; i < sceneButtons.Length; i++)
             {
-                sceneButtons[i].Left = ((this.Game.Form.RenderWidth / div) * (i + 1)) - (this.scenePerlinNoiseButton.Width / 2);
-                sceneButtons[i].Top = (this.Game.Form.RenderHeight / h) * hv - (this.scenePerlinNoiseButton.Height / 2);
+                sceneButtons[i].Left = ((Game.Form.RenderWidth / div) * (i + 1)) - (scenePerlinNoiseButton.Width / 2);
+                sceneButtons[i].Top = (Game.Form.RenderHeight / h) * hv - (scenePerlinNoiseButton.Height / 2);
                 sceneButtons[i].JustReleased += SceneButtonClick;
                 sceneButtons[i].MouseEnter += SceneButtonMouseEnter;
                 sceneButtons[i].MouseLeave += SceneButtonMouseLeave;
             }
 
-            this.exitButton.Left = (this.Game.Form.RenderWidth / div) * numButtons - (this.exitButton.Width / 2);
-            this.exitButton.Top = (this.Game.Form.RenderHeight / h) * hv - (this.exitButton.Height / 2);
-            this.exitButton.JustReleased += ExitButtonClick;
-            this.exitButton.MouseEnter += SceneButtonMouseEnter;
-            this.exitButton.MouseLeave += SceneButtonMouseLeave;
+            exitButton.Left = (Game.Form.RenderWidth / div) * numButtons - (exitButton.Width / 2);
+            exitButton.Top = (Game.Form.RenderHeight / h) * hv - (exitButton.Height / 2);
+            exitButton.JustReleased += ExitButtonClick;
+            exitButton.MouseEnter += SceneButtonMouseEnter;
+            exitButton.MouseLeave += SceneButtonMouseLeave;
 
-            this.sceneReady = true;
+            sceneReady = true;
         }
 
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
 
-            float xmouse = (((float)this.Game.Input.MouseX / (float)this.Game.Form.RenderWidth) - 0.5f) * 2f;
-            float ymouse = (((float)this.Game.Input.MouseY / (float)this.Game.Form.RenderHeight) - 0.5f) * 2f;
+            float xmouse = (((float)Game.Input.MouseX / (float)Game.Form.RenderWidth) - 0.5f) * 2f;
+            float ymouse = (((float)Game.Input.MouseY / (float)Game.Form.RenderHeight) - 0.5f) * 2f;
 
             float d = 0.25f;
             float vx = 0.5f;
             float vy = 0.25f;
 
             Vector3 position = Vector3.Zero;
-            position.X = +((xmouse * d) + (0.2f * (float)Math.Cos(vx * this.Game.GameTime.TotalSeconds)));
-            position.Y = -((ymouse * d) + (0.1f * (float)Math.Sin(vy * this.Game.GameTime.TotalSeconds)));
+            position.X = +((xmouse * d) + (0.2f * (float)Math.Cos(vx * Game.GameTime.TotalSeconds)));
+            position.Y = -((ymouse * d) + (0.1f * (float)Math.Sin(vy * Game.GameTime.TotalSeconds)));
 
-            this.Camera.Position = new Vector3(0, 0, -5f);
-            this.Camera.LookTo(position);
+            Camera.Position = new Vector3(0, 0, -5f);
+            Camera.LookTo(position);
         }
 
         private void SceneButtonClick(object sender, EventArgs e)
@@ -191,13 +191,13 @@ namespace Terrain.Start
                 return;
             }
 
-            if (sender == this.scenePerlinNoiseButton)
+            if (sender == scenePerlinNoiseButton)
             {
-                this.Game.SetScene<PerlinNoiseScene>();
+                Game.SetScene<PerlinNoiseScene>();
             }
-            else if (sender == this.sceneRtsButton)
+            else if (sender == sceneRtsButton)
             {
-                this.Game.SetScene<RtsScene>();
+                Game.SetScene<RtsScene>();
             }
         }
         private void SceneButtonMouseEnter(object sender, EventArgs e)
@@ -223,7 +223,7 @@ namespace Terrain.Start
                 return;
             }
 
-            this.Game.Exit();
+            Game.Exit();
         }
     }
 

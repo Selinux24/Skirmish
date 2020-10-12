@@ -440,7 +440,7 @@ namespace Engine
                 if (patchDictionary.ContainsKey(node.Id))
                 {
                     Logger.WriteTrace(this, $"Scenery Draw {node.Id} patch.");
-                 
+
                     patchDictionary[node.Id]?.DrawScenery(context, sceneryEffect, BufferManager);
                 }
                 else

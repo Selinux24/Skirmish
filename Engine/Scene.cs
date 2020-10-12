@@ -264,7 +264,7 @@ namespace Engine
         /// <summary>
         /// Game environment
         /// </summary>
-        public GameEnvironment Environment { get; private set; } = new GameEnvironment();
+        public GameEnvironment GameEnvironment { get; private set; } = new GameEnvironment();
         /// <summary>
         /// Scene renderer
         /// </summary>
@@ -421,7 +421,7 @@ namespace Engine
                     UpdateGlobalResources = false;
                 }
 
-                Environment.Update(gameTime);
+                GameEnvironment.Update(gameTime);
 
                 // Lights
                 Lights?.Update();
@@ -507,46 +507,67 @@ namespace Engine
         }
 
         /// <summary>
-        /// Executes a resource load task
+        /// Executes a list of resource load tasks
         /// </summary>
-        /// <param name="task">Resource load task</param>
+        /// <param name="task">Task</param>
         /// <param name="callback">Callback</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
         public async Task<bool> LoadResourcesAsync(Task task, Action<LoadResourcesResult> callback = null)
         {
-            return await Game.LoadResourcesAsync(this, task, callback);
+            return await Game.LoadResourcesAsync(this, LoadResourceGroup.FromTasks(task), callback);
         }
         /// <summary>
         /// Executes a list of resource load tasks
         /// </summary>
-        /// <param name="tasks">Resource load tasks</param>
+        /// <param name="tasks">Task list</param>
         /// <param name="callback">Callback</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
         public async Task<bool> LoadResourcesAsync(IEnumerable<Task> tasks, Action<LoadResourcesResult> callback = null)
         {
-            return await Game.LoadResourcesAsync(this, tasks, callback);
+            return await Game.LoadResourcesAsync(this, LoadResourceGroup.FromTasks(tasks), callback);
         }
         /// <summary>
-        /// Executes a resource load task
+        /// Executes a list of resource load tasks
         /// </summary>
-        /// <typeparam name="T">Result type</typeparam>
-        /// <param name="task">Resource load task</param>
+        /// <param name="taskGroup">Resource load tasks</param>
         /// <param name="callback">Callback</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        public async Task<bool> LoadResourcesAsync<T>(Task<T> task, Action<LoadResourcesResult<T>> callback = null)
+        public async Task<bool> LoadResourcesAsync(LoadResourceGroup taskGroup, Action<LoadResourcesResult> callback = null)
         {
-            return await Game.LoadResourcesAsync(this, task, callback);
+            return await Game.LoadResourcesAsync(this, taskGroup, callback);
         }
         /// <summary>
         /// Executes a list of resource load tasks
         /// </summary>
         /// <typeparam name="T">Result type</typeparam>
-        /// <param name="tasks">Resource load tasks</param>
+        /// <param name="task">Task</param>
+        /// <param name="callback">Callback</param>
+        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
+        public async Task<bool> LoadResourcesAsync<T>(Task<T> task, Action<LoadResourcesResult<T>> callback = null)
+        {
+            return await Game.LoadResourcesAsync(this, LoadResourceGroup<T>.FromTasks(task), callback);
+        }
+        /// <summary>
+        /// Executes a list of resource load tasks
+        /// </summary>
+        /// <typeparam name="T">Result type</typeparam>
+        /// <param name="tasks">Task list</param>
         /// <param name="callback">Callback</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
         public async Task<bool> LoadResourcesAsync<T>(IEnumerable<Task<T>> tasks, Action<LoadResourcesResult<T>> callback = null)
         {
-            return await Game.LoadResourcesAsync(this, tasks, callback);
+            return await Game.LoadResourcesAsync(this, LoadResourceGroup<T>.FromTasks(tasks), callback);
+        }
+        /// <summary>
+        /// Executes a list of resource load tasks
+        /// </summary>
+        /// <typeparam name="T">Result type</typeparam>
+        /// <param name="taskGroup">Resource load tasks</param>
+        /// <param name="callback">Callback</param>
+        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
+        public async Task<bool> LoadResourcesAsync<T>(LoadResourceGroup<T> taskGroup, Action<LoadResourcesResult<T>> callback = null)
+        {
+            return await Game.LoadResourcesAsync(this, taskGroup, callback);
         }
 
         /// <summary>
@@ -595,7 +616,7 @@ namespace Engine
         /// Progress reporting
         /// </summary>
         /// <param name="value">Progress value from 0.0f to 1.0f</param>
-        public virtual void OnReportProgress(float value)
+        public virtual void OnReportProgress(LoadResourceProgress value)
         {
 
         }
@@ -1467,7 +1488,7 @@ namespace Engine
             if (useGround)
             {
                 Logger.WriteTrace(this, $"FindPath looking for nearest ground end-point positions {from} -> {to}.");
-              
+
                 if (FindNearestGroundPosition<Triangle>(from, out var rFrom))
                 {
                     from = rFrom.Position;
@@ -1476,14 +1497,14 @@ namespace Engine
                 {
                     to = rTo.Position;
                 }
-          
+
                 Logger.WriteTrace(this, $"FindPath Found nearest ground end-point positions {from} -> {to}.");
             }
 
             var path = NavigationGraph.FindPath(agent, from, to);
-        
+
             Logger.WriteTrace(this, $"FindPath path result: {path.Count()} nodes.");
-            
+
             if (path.Count() > 1)
             {
                 List<Vector3> positions = new List<Vector3>(path);
@@ -1494,7 +1515,7 @@ namespace Engine
                     Logger.WriteTrace(this, "FindPath compute ground positions.");
 
                     ComputeGroundPositions(positions, normals);
-              
+
                     Logger.WriteTrace(this, "FindPath ground positions computed.");
                 }
 
@@ -1548,7 +1569,7 @@ namespace Engine
                     Logger.WriteTrace(this, "FindPathAsync compute ground positions.");
 
                     ComputeGroundPositions(positions, normals);
-                
+
                     Logger.WriteTrace(this, "FindPathAsync ground positions computed.");
                 }
 

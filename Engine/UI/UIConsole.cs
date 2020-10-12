@@ -133,7 +133,7 @@ namespace Engine.UI
                     break;
             }
 
-            return $"{logEntry.EventDate:HH:mm:ss.fff} {logColor}[{logEntry.LogLevel}]{defColor}> {logEntry.Text}{System.Environment.NewLine}";
+            return $"{logEntry.EventDate:HH:mm:ss.fff} {logColor}[{logEntry.LogLevel}]{defColor}> {logEntry.Text}{Environment.NewLine}";
         }
         /// <summary>
         /// Log filter

@@ -201,6 +201,14 @@ namespace Engine.UI
 
             textDrawer?.Update(context);
         }
+        
+        /// <inheritdoc/>
+        protected override void UpdateInternalState()
+        {
+            base.UpdateInternalState();
+
+            textDrawer?.UpdateInternals();
+        }
 
         /// <inheritdoc/>
         public override void Draw(DrawContext context)

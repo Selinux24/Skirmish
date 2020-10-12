@@ -288,6 +288,9 @@
     <Compile Include="ISceneLightSpot.cs" />
     <Compile Include="FrameStatsLight.cs" />
     <Compile Include="ISceneObject.cs" />
+    <Compile Include="LoadResourceGroup.cs" />
+    <Compile Include="LoadResourceProgress.cs" />
+    <Compile Include="LoadResourcesResult.cs" />
     <Compile Include="LogEntry.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="LogLevel.cs" />
@@ -417,6 +420,7 @@
     <Compile Include="SkyPlaneDescription.cs" />
     <Compile Include="SkyScatteringDescription.cs" />
     <Compile Include="SkyScatteringResolutions.cs" />
+    <Compile Include="TaskResult.cs" />
     <Compile Include="Tween\FloatTween.cs" />
     <Compile Include="Tween\ITweenCollection.cs" />
     <Compile Include="UI\CenterTargets.cs" />

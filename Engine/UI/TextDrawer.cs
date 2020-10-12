@@ -367,6 +367,13 @@ namespace Engine.UI
                 ShadowManipulator.Update(parentCenter, parentScale);
             }
         }
+        /// <summary>
+        /// Sets the update internals flag to true
+        /// </summary>
+        public void UpdateInternals()
+        {
+            updateInternals = true;
+        }
 
         /// <inheritdoc/>
         public override void Draw(DrawContext context)

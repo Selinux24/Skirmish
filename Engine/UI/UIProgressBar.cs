@@ -38,9 +38,9 @@ namespace Engine.UI
             {
                 base.Alpha = value;
 
-                if (this.Caption != null)
+                if (Caption != null)
                 {
-                    this.Caption.Alpha = value;
+                    Caption.Alpha = value;
                 }
             }
         }
@@ -51,11 +51,11 @@ namespace Engine.UI
         {
             get
             {
-                return this.spriteProgress.BaseColor;
+                return spriteProgress.BaseColor;
             }
             set
             {
-                this.spriteProgress.BaseColor = value;
+                spriteProgress.BaseColor = value;
             }
         }
         /// <summary>
@@ -65,11 +65,11 @@ namespace Engine.UI
         {
             get
             {
-                return this.spriteBase.BaseColor;
+                return spriteBase.BaseColor;
             }
             set
             {
-                this.spriteBase.BaseColor = value;
+                spriteBase.BaseColor = value;
             }
         }
 
@@ -82,9 +82,9 @@ namespace Engine.UI
         public UIProgressBar(Scene scene, UIProgressBarDescription description)
             : base(scene, description)
         {
-            this.ProgressValue = 0;
+            ProgressValue = 0;
 
-            this.spriteBase = new Sprite(
+            spriteBase = new Sprite(
                 scene,
                 new SpriteDescription()
                 {
@@ -95,9 +95,9 @@ namespace Engine.UI
                     EventsEnabled = false,
                 });
 
-            this.AddChild(spriteBase, false);
+            AddChild(spriteBase, false);
 
-            this.spriteProgress = new Sprite(
+            spriteProgress = new Sprite(
                 scene,
                 new SpriteDescription()
                 {
@@ -108,11 +108,11 @@ namespace Engine.UI
                     EventsEnabled = false,
                 });
 
-            this.AddChild(spriteProgress, false);
+            AddChild(spriteProgress, false);
 
             if (description.Font != null)
             {
-                this.Caption = new UITextArea(
+                Caption = new UITextArea(
                     scene,
                     new UITextAreaDescription
                     {
@@ -120,9 +120,9 @@ namespace Engine.UI
                         EventsEnabled = false,
                     });
 
-                this.AddChild(this.Caption, true);
+                AddChild(Caption, true);
 
-                this.Caption.Text = description.Text;
+                Caption.Text = description.Text;
             }
         }
 
@@ -138,15 +138,15 @@ namespace Engine.UI
 
             int width = (int)(ProgressValue * Width);
 
-            this.spriteProgress.Width = width;
-            this.spriteProgress.Height = Height;
-            this.spriteProgress.Left = 0;
-            this.spriteProgress.Top = 0;
+            spriteProgress.Width = width;
+            spriteProgress.Height = Height;
+            spriteProgress.Left = 0;
+            spriteProgress.Top = 0;
 
-            this.spriteBase.Width = Width - width;
-            this.spriteBase.Height = Height;
-            this.spriteBase.Left = width;
-            this.spriteBase.Top = 0;
+            spriteBase.Width = Width - width;
+            spriteBase.Height = Height;
+            spriteBase.Left = width;
+            spriteBase.Top = 0;
         }
     }
 

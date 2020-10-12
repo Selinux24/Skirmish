@@ -51,12 +51,7 @@ namespace SpriteDrawing
         private async Task LoadUserInterface()
         {
             await LoadResourcesAsync(
-                new Task[]
-                {
-                    InitializeConsole(),
-                    InitializeBackground(),
-                    InitializeProgressbar(),
-                },
+                new[] { InitializeConsole(), InitializeBackground(), InitializeProgressbar() },
                 async (res) =>
                 {
                     if (!res.Completed)
@@ -275,9 +270,9 @@ namespace SpriteDrawing
             butTest1.Visible = false;
         }
 
-        public override void OnReportProgress(float value)
+        public override void OnReportProgress(LoadResourceProgress value)
         {
-            progressValue = Math.Max(progressValue, value);
+            progressValue = Math.Max(progressValue, value.Progress);
 
             if (progressBar != null)
             {

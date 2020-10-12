@@ -15,6 +15,19 @@ namespace Engine.UI
             return new UIProgressBarDescription();
         }
         /// <summary>
+        /// Gets the default progress bar description
+        /// </summary>
+        /// <param name="baseColor">Base color</param>
+        /// <param name="progressColor">Progress color</param>
+        public static UIProgressBarDescription Default(Color4 baseColor, Color4 progressColor)
+        {
+            return new UIProgressBarDescription()
+            {
+                BaseColor = baseColor,
+                ProgressColor = progressColor,
+            };
+        }
+        /// <summary>
         /// Gets the default progress bar description from a font family name
         /// </summary>
         /// <param name="fontFamilyName">Font family name</param>
@@ -82,7 +95,7 @@ namespace Engine.UI
         /// <summary>
         /// Progress color
         /// </summary>
-        public Color ProgressColor { get; set; } = new Color(0f, 1f, 0f, 1f);
+        public Color4 ProgressColor { get; set; } = new Color4(0f, 1f, 0f, 1f);
 
         /// <summary>
         /// Text
@@ -99,7 +112,11 @@ namespace Engine.UI
         public UIProgressBarDescription()
             : base()
         {
+            var font = TextDrawerDescription.Default();
+            font.HorizontalAlign = HorizontalTextAlign.Center;
+            font.VerticalAlign = VerticalTextAlign.Middle;
 
+            Font = font;
         }
     }
 }

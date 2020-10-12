@@ -551,7 +551,7 @@ namespace Engine
         /// </summary>
         public void Update()
         {
-            var timeOfDay = scene.Environment.TimeOfDay;
+            var timeOfDay = scene.GameEnvironment.TimeOfDay;
 
             if (!timeOfDay.Updated)
             {

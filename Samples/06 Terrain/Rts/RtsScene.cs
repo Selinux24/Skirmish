@@ -182,7 +182,7 @@ namespace Terrain.Rts
             };
 
             await LoadResourcesAsync(
-                loadTasks.ToArray(),
+                loadTasks,
                 (res) =>
                 {
                     if (!res.Completed)

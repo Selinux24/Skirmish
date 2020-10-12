@@ -178,9 +178,10 @@ namespace Engine
         /// <summary>
         /// Creates the requested resources
         /// </summary>
+        /// <param name="id">Load group id</param>
         /// <param name="progress">Progress helper</param>
         /// <param name="callback">Callback</param>
-        public void CreateResources(IProgress<float> progress, Action callback = null)
+        public void CreateResources(string id, IProgress<LoadResourceProgress> progress, Action callback = null)
         {
             if (creatingResources)
             {
@@ -212,13 +213,13 @@ namespace Engine
 
                     resources.Add(resource.Key, resource.Value.ResourceView);
 
-                    progress?.Report(++current / total);
+                    progress?.Report(new LoadResourceProgress { Id = id, Progress = ++current / total });
                 }
 
                 // Remove requests
                 RemoveRequests(pendingRequests.Select(r => r.Key));
 
-                progress?.Report(1);
+                progress?.Report(new LoadResourceProgress { Id = id, Progress = 1f });
             }
             catch (Exception ex)
             {

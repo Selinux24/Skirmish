@@ -44,7 +44,7 @@ namespace SceneTest.SceneCascadedShadows
             Camera.LookTo(0, 0, 0);
 
             await LoadResourcesAsync(
-                new Task[]
+                new[]
                 {
                     InitializeFloorAsphalt(),
                     InitializeBuildingObelisk(),

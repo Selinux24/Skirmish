@@ -31,7 +31,7 @@ namespace Instancing
         {
             GameEnvironment.Background = Color.CornflowerBlue;
 
-            await this.LoadResourcesAsync(
+            await LoadResourcesAsync(
                 new[]
                 {
                     InitializeTexts(),

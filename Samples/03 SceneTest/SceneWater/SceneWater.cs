@@ -34,7 +34,7 @@ namespace SceneTest.SceneWater
 
             await LoadResourcesAsync(InitializeAssets());
 
-            Environment.TimeOfDay.BeginAnimation(5, 00, 00, 10f);
+            GameEnvironment.TimeOfDay.BeginAnimation(5, 00, 00, 10f);
             //Environment.TimeOfDay.SetTimeOfDay(7, 00, 00)
         }
         private async Task InitializeAssets()

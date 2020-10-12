@@ -54,12 +54,12 @@ namespace Engine.UI
         public UIMinimap(Scene scene, UIMinimapDescription description)
             : base(scene, description)
         {
-            this.Drawables = description.Drawables;
-            this.BackColor = description.BackColor;
+            Drawables = description.Drawables;
+            BackColor = description.BackColor;
 
-            this.minimapArea = description.MinimapArea;
+            minimapArea = description.MinimapArea;
 
-            this.minimapBox = new UITextureRenderer(scene, new UITextureRendererDescription()
+            minimapBox = new UITextureRenderer(scene, new UITextureRendererDescription()
             {
                 Top = description.Top,
                 Left = description.Left,
@@ -67,15 +67,15 @@ namespace Engine.UI
                 Height = description.Height,
             });
 
-            this.viewport = new Viewport(0, 0, description.Width, description.Height);
+            viewport = new Viewport(0, 0, description.Width, description.Height);
 
-            this.Game.Graphics.CreateRenderTargetTexture(
+            Game.Graphics.CreateRenderTargetTexture(
                 Format.R8G8B8A8_UNorm,
                 description.Width, description.Height, false,
-                out this.renderTarget,
-                out this.renderTexture);
+                out renderTarget,
+                out renderTexture);
 
-            this.InitializeContext();
+            InitializeContext();
         }
         /// <summary>
         /// Destructor
@@ -90,23 +90,14 @@ namespace Engine.UI
         {
             if (disposing)
             {
-                if (this.renderTarget != null)
-                {
-                    this.renderTarget.Dispose();
-                    this.renderTarget = null;
-                }
+                renderTarget?.Dispose();
+                renderTarget = null;
 
-                if (this.renderTexture != null)
-                {
-                    this.renderTexture.Dispose();
-                    this.renderTexture = null;
-                }
+                renderTexture?.Dispose();
+                renderTexture = null;
 
-                if (this.minimapBox != null)
-                {
-                    this.minimapBox.Dispose();
-                    this.minimapBox = null;
-                }
+                minimapBox?.Dispose();
+                minimapBox = null;
             }
         }
 
@@ -115,11 +106,11 @@ namespace Engine.UI
         /// </summary>
         private void InitializeContext()
         {
-            float x = this.minimapArea.Maximum.X - this.minimapArea.Minimum.X;
-            float y = this.minimapArea.Maximum.Y - this.minimapArea.Minimum.Y;
-            float z = this.minimapArea.Maximum.Z - this.minimapArea.Minimum.Z;
+            float x = minimapArea.Maximum.X - minimapArea.Minimum.X;
+            float y = minimapArea.Maximum.Y - minimapArea.Minimum.Y;
+            float z = minimapArea.Maximum.Z - minimapArea.Minimum.Z;
 
-            float aspect = this.minimapBox.Height / this.minimapBox.Width;
+            float aspect = minimapBox.Height / minimapBox.Width;
             float near = 0.1f;
 
             Vector3 eyePos = new Vector3(0, y + near, 0);
@@ -136,13 +127,13 @@ namespace Engine.UI
                 near,
                 y + near);
 
-            this.drawContext = new DrawContext()
+            drawContext = new DrawContext()
             {
                 DrawerMode = DrawerModes.Forward | DrawerModes.OpaqueOnly,
                 ViewProjection = view * proj,
                 EyePosition = eyePos,
                 EyeTarget = target,
-                Lights = SceneLights.CreateDefault(this.Scene),
+                Lights = SceneLights.CreateDefault(Scene),
             };
         }
 
@@ -151,7 +142,7 @@ namespace Engine.UI
         {
             base.Update(context);
 
-            this.minimapBox?.Update(context);
+            minimapBox?.Update(context);
         }
 
         /// <inheritdoc/>
@@ -162,32 +153,32 @@ namespace Engine.UI
                 return;
             }
 
-            if (this.Drawables?.Any() != true)
+            if (Drawables?.Any() != true)
             {
                 return;
             }
 
-            this.drawContext.GameTime = context.GameTime;
+            drawContext.GameTime = context.GameTime;
 
-            var graphics = this.Game.Graphics;
+            var graphics = Game.Graphics;
 
-            graphics.SetViewport(this.viewport);
+            graphics.SetViewport(viewport);
 
             graphics.SetRenderTargets(
-                this.renderTarget, true, this.BackColor,
+                renderTarget, true, BackColor,
                 null, false, false,
                 false);
 
-            foreach (var item in this.Drawables)
+            foreach (var item in Drawables)
             {
-                item.Draw(this.drawContext);
+                item.Draw(drawContext);
             }
 
             graphics.SetDefaultViewport();
             graphics.SetDefaultRenderTarget(false, false, false);
 
-            this.minimapBox.Texture = this.renderTexture;
-            this.minimapBox.Draw(context);
+            minimapBox.Texture = renderTexture;
+            minimapBox.Draw(context);
         }
 
         /// <summary>
@@ -195,13 +186,13 @@ namespace Engine.UI
         /// </summary>
         public virtual void Resize()
         {
-            this.minimapBox.Resize();
+            minimapBox.Resize();
         }
 
         /// <inheritdoc/>
         public override bool Cull(IIntersectionVolume volume, out float distance)
         {
-            this.drawContext.Lights.Cull(volume, this.drawContext.EyePosition);
+            drawContext.Lights.Cull(volume, drawContext.EyePosition);
 
             return base.Cull(volume, out distance);
         }

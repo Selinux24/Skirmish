@@ -141,7 +141,7 @@ namespace Engine
         /// <summary>
         /// Progress reporter
         /// </summary>
-        public readonly IProgress<float> Progress;
+        public readonly IProgress<LoadResourceProgress> Progress;
         /// <summary>
         /// Gets wheter a resource loading is running
         /// </summary>
@@ -200,7 +200,7 @@ namespace Engine
 
             GameTime = new GameTime();
 
-            Progress = new Progress<float>(ReportProgress);
+            Progress = new Progress<LoadResourceProgress>(ReportProgress);
 
             BufferManager = new BufferManager(this);
 
@@ -314,19 +314,34 @@ namespace Engine
         /// <remarks>Current scenes will be removed from internal scene collection</remarks>
         public void SetScene<T>(SceneModes sceneMode = SceneModes.ForwardLigthning) where T : Scene
         {
+            T scene = null;
             try
             {
                 Logger.WriteInformation(this, "Game: Setting scene with the default constructor");
 
-                T scene = (T)Activator.CreateInstance(typeof(T), new object[] { this });
-                scene.SetRenderMode(sceneMode);
-                scene.Order = 1;
-                nextScene = scene;
+                scene = (T)Activator.CreateInstance(typeof(T), new object[] { this });
             }
             catch (Exception ex)
             {
                 Logger.WriteError(this, $"Game: Error setting scene: {ex.Message}", ex);
             }
+
+            SetScene(scene, sceneMode);
+        }
+        /// <summary>
+        /// Sets the specified scene to next scene to load
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        public void SetScene(Scene scene, SceneModes sceneMode = SceneModes.ForwardLigthning)
+        {
+            if (scene == null)
+            {
+                return;
+            }
+
+            scene.SetRenderMode(sceneMode);
+            scene.Order = 1;
+            nextScene = scene;
         }
         /// <summary>
         /// Unloads the current scenes and loads the specified scene
@@ -387,27 +402,49 @@ namespace Engine
         /// Report progress callback
         /// </summary>
         /// <param name="value">Progress value from 0.0f to 1.0f</param>
-        public void ReportProgress(float value)
+        public void ReportProgress(LoadResourceProgress value)
         {
             var activeScene = scenes.FirstOrDefault(s => s.Active);
             activeScene?.OnReportProgress(value);
         }
 
         /// <summary>
-        /// Executes a resource load task
+        /// Executes a list of resource load tasks
         /// </summary>
         /// <typeparam name="T">Response type</typeparam>
         /// <param name="scene">Scene</param>
-        /// <param name="task">Resource load task</param>
+        /// <param name="taskGroup">Resource load tasks</param>
         /// <param name="callback">Callback</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal async Task<bool> LoadResourcesAsync<T>(Scene scene, Task<T> task, Action<LoadResourcesResult<T>> callback = null)
+        internal async Task<bool> LoadResourcesAsync<T>(Scene scene, LoadResourceGroup<T> taskGroup, Action<LoadResourcesResult<T>> callback = null)
         {
             bool res = false;
 
             while (!res)
             {
-                res = await InternalLoadResourcesAsync(scene, new[] { task }, callback);
+                res = await InternalLoadResourcesAsync(scene, taskGroup, callback);
+
+                if (res) break;
+
+                await Task.Delay(100);
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Executes a list of resource load tasks
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        /// <param name="taskGroup">Resource load tasks</param>
+        /// <param name="callback">Callback</param>
+        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
+        internal async Task<bool> LoadResourcesAsync(Scene scene, LoadResourceGroup taskGroup, Action<LoadResourcesResult> callback = null)
+        {
+            bool res = false;
+
+            while (!res)
+            {
+                res = await InternalLoadResourcesAsync(scene, taskGroup, callback);
 
                 if (res) break;
 
@@ -421,77 +458,10 @@ namespace Engine
         /// </summary>
         /// <typeparam name="T">Response type</typeparam>
         /// <param name="scene">Scene</param>
-        /// <param name="tasks">Resource load tasks</param>
+        /// <param name="taskGroup">Resource load tasks</param>
         /// <param name="callback">Callback</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal async Task<bool> LoadResourcesAsync<T>(Scene scene, IEnumerable<Task<T>> tasks, Action<LoadResourcesResult<T>> callback = null)
-        {
-            bool res = false;
-
-            while (!res)
-            {
-                res = await InternalLoadResourcesAsync(scene, tasks, callback);
-
-                if (res) break;
-
-                await Task.Delay(100);
-            }
-
-            return res;
-        }
-        /// <summary>
-        /// Executes a resource load task
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="task">Resource load task</param>
-        /// <param name="callback">Callback</param>
-        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal async Task<bool> LoadResourcesAsync(Scene scene, Task task, Action<LoadResourcesResult> callback = null)
-        {
-            bool res = false;
-
-            while (!res)
-            {
-                res = await InternalLoadResourcesAsync(scene, new[] { task }, callback);
-
-                if (res) break;
-
-                await Task.Delay(100);
-            }
-
-            return res;
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="tasks">Resource load tasks</param>
-        /// <param name="callback">Callback</param>
-        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal async Task<bool> LoadResourcesAsync(Scene scene, IEnumerable<Task> tasks, Action<LoadResourcesResult> callback = null)
-        {
-            bool res = false;
-
-            while (!res)
-            {
-                res = await InternalLoadResourcesAsync(scene, tasks, callback);
-
-                if (res) break;
-
-                await Task.Delay(100);
-            }
-
-            return res;
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <typeparam name="T">Response type</typeparam>
-        /// <param name="scene">Scene</param>
-        /// <param name="tasks">Resource load tasks</param>
-        /// <param name="callback">Callback</param>
-        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        private async Task<bool> InternalLoadResourcesAsync<T>(Scene scene, IEnumerable<Task<T>> tasks, Action<LoadResourcesResult<T>> callback = null)
+        private async Task<bool> InternalLoadResourcesAsync<T>(Scene scene, LoadResourceGroup<T> taskGroup, Action<LoadResourcesResult<T>> callback = null)
         {
             if (ResourceLoadRuning)
             {
@@ -504,7 +474,7 @@ namespace Engine
 
             try
             {
-                var taskList = tasks.ToList();
+                var taskList = taskGroup.Tasks.ToList();
 
                 int totalTasks = taskList.Count;
                 int currentTask = 0;
@@ -525,10 +495,10 @@ namespace Engine
 
                     loadResult.Add(res);
 
-                    Progress?.Report(++currentTask / (float)totalTasks);
+                    Progress?.Report(new LoadResourceProgress { Id = taskGroup.Id, Progress = ++currentTask / (float)totalTasks });
                 }
 
-                IntegrateResources(scene);
+                IntegrateResources(taskGroup.Id, scene);
             }
             finally
             {
@@ -555,10 +525,10 @@ namespace Engine
         /// Executes a list of resource load tasks
         /// </summary>
         /// <param name="scene">Scene</param>
-        /// <param name="tasks">Resource load tasks</param>
+        /// <param name="taskGroup">Resource load tasks</param>
         /// <param name="callback">Callback</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        private async Task<bool> InternalLoadResourcesAsync(Scene scene, IEnumerable<Task> tasks, Action<LoadResourcesResult> callback = null)
+        private async Task<bool> InternalLoadResourcesAsync(Scene scene, LoadResourceGroup taskGroup, Action<LoadResourcesResult> callback = null)
         {
             if (ResourceLoadRuning)
             {
@@ -571,7 +541,7 @@ namespace Engine
 
             try
             {
-                var taskList = tasks.ToList();
+                var taskList = taskGroup.Tasks.ToList();
 
                 int totalTasks = taskList.Count;
                 int currentTask = 0;
@@ -589,10 +559,10 @@ namespace Engine
 
                     loadResult.Add(res);
 
-                    Progress?.Report(++currentTask / (float)totalTasks);
+                    Progress?.Report(new LoadResourceProgress { Id = taskGroup.Id, Progress = ++currentTask / (float)totalTasks });
                 }
 
-                IntegrateResources(scene);
+                IntegrateResources(taskGroup.Id, scene);
             }
             finally
             {
@@ -619,18 +589,18 @@ namespace Engine
         /// Integrates the requested resources into the resource manager
         /// </summary>
         /// <param name="scene">Scene</param>
-        private void IntegrateResources(Scene scene)
+        private void IntegrateResources(string id, Scene scene)
         {
             try
             {
                 ResourcesLoading?.Invoke(this, new GameLoadResourcesEventArgs() { Scene = scene });
 
                 Logger.WriteInformation(this, "BufferManager: Recreating buffers");
-                BufferManager.CreateBuffers(Progress);
+                BufferManager.CreateBuffers(id, Progress);
                 Logger.WriteInformation(this, "BufferManager: Buffers recreated");
 
                 Logger.WriteInformation(this, "ResourceManager: Creating new resources");
-                ResourceManager.CreateResources(Progress);
+                ResourceManager.CreateResources(id, Progress);
                 Logger.WriteInformation(this, "ResourceManager: New resources created");
 
                 ResourcesLoaded?.Invoke(this, new GameLoadResourcesEventArgs() { Scene = scene });
@@ -702,7 +672,7 @@ namespace Engine
             if (ResourceManager.HasRequests)
             {
                 Logger.WriteInformation(this, "ResourceManager: Creating new resources");
-                ResourceManager.CreateResources(null);
+                ResourceManager.CreateResources($"ResourceManager.Frame{Counters.FrameCount}", null);
                 Logger.WriteInformation(this, "ResourceManager: New resources created");
             }
 
@@ -899,85 +869,5 @@ namespace Engine
             if (frameTime > 30) return LogLevel.Warning;
             else return LogLevel.Information;
         }
-    }
-
-    /// <summary>
-    /// Load resource result
-    /// </summary>
-    public class LoadResourcesResult
-    {
-        /// <summary>
-        /// Task result list
-        /// </summary>
-        public virtual IEnumerable<TaskResult> Results { get; set; }
-        /// <summary>
-        /// Gets whether all tasks completed correctly or not
-        /// </summary>
-        public virtual bool Completed
-        {
-            get
-            {
-                return Results?.Any(r => !r.Completed) != true;
-            }
-        }
-
-        /// <summary>
-        /// Throw exceptions, if any
-        /// </summary>
-        public virtual void ThrowExceptions()
-        {
-            var exList = Results?
-                .Where(r => r.Exception != null)
-                .Select(r => r.Exception)
-                .ToArray();
-
-            if (exList?.Any() != true)
-            {
-                return;
-            }
-
-            var aggregate = new AggregateException($"A load resource task list results in error.", exList);
-
-            throw aggregate.Flatten();
-        }
-    }
-
-    /// <summary>
-    /// Load resource result
-    /// </summary>
-    /// <typeparam name="T">Type of result</typeparam>
-    public class LoadResourcesResult<T> : LoadResourcesResult
-    {
-        /// <summary>
-        /// Task result list
-        /// </summary>
-        public new IEnumerable<TaskResult<T>> Results { get; set; }
-    }
-
-    /// <summary>
-    /// Task result
-    /// </summary>
-    public class TaskResult
-    {
-        /// <summary>
-        /// Gets whether the task completed correctly or not
-        /// </summary>
-        public bool Completed { get; set; }
-        /// <summary>
-        /// Exception result
-        /// </summary>
-        public Exception Exception { get; set; }
-    }
-
-    /// <summary>
-    /// Task result
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public class TaskResult<T> : TaskResult
-    {
-        /// <summary>
-        /// Result
-        /// </summary>
-        public T Result { get; set; }
     }
 }

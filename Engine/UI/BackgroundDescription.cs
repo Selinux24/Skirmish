@@ -12,7 +12,7 @@ namespace Engine.UI
         public BackgroundDescription()
             : base()
         {
-            this.FitParent = true;
+            FitParent = true;
         }
     }
 }

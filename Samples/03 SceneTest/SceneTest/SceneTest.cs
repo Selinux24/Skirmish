@@ -203,27 +203,29 @@ namespace SceneTest.SceneTest
                 InitializaDebug(),
             };
 
-            await LoadResourcesAsync(taskList, async (res) =>
-            {
-                if (!res.Completed)
+            await LoadResourcesAsync(
+                taskList,
+                async (res) =>
                 {
-                    res.ThrowExceptions();
-                }
+                    if (!res.Completed)
+                    {
+                        res.ThrowExceptions();
+                    }
 
-                PlantTrees();
+                    PlantTrees();
 
-                Environment.TimeOfDay.BeginAnimation(9, 00, 00, 0.1f);
+                    GameEnvironment.TimeOfDay.BeginAnimation(9, 00, 00, 0.1f);
 
-                Camera.Goto(-20 + xDelta, 10 + yDelta, -40f + zDelta);
-                Camera.LookTo(0 + xDelta, 0 + yDelta, 0 + zDelta);
+                    Camera.Goto(-20 + xDelta, 10 + yDelta, -40f + zDelta);
+                    Camera.LookTo(0 + xDelta, 0 + yDelta, 0 + zDelta);
 
-                blackPan.Hide(4000);
-                progressBar.Hide(2000);
+                    blackPan.Hide(4000);
+                    progressBar.Hide(2000);
 
-                await Task.Delay(1000);
+                    await Task.Delay(1000);
 
-                gameReady = true;
-            });
+                    gameReady = true;
+                });
         }
         private async Task InitializeSkyEffects()
         {
@@ -858,9 +860,9 @@ namespace SceneTest.SceneTest
             }
         }
 
-        public override void OnReportProgress(float value)
+        public override void OnReportProgress(LoadResourceProgress value)
         {
-            progressValue = Math.Max(progressValue, value);
+            progressValue = Math.Max(progressValue, value.Progress);
 
             if (progressBar != null)
             {

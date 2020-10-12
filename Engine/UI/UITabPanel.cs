@@ -211,12 +211,12 @@ namespace Engine.UI
 
             if (description.Background != null)
             {
-                this.Background = new Sprite(scene, description.Background)
+                Background = new Sprite(scene, description.Background)
                 {
                     Name = $"{description.Name}.Background",
                 };
 
-                this.AddChild(this.Background);
+                AddChild(Background);
             }
 
             if (description.Tabs > 0)
@@ -241,8 +241,8 @@ namespace Engine.UI
                     tabButtons.Add(button);
                     tabPanels.Add(panel);
 
-                    this.AddChild(button, false);
-                    this.AddChild(panel, false);
+                    AddChild(button, false);
+                    AddChild(panel, false);
                 }
 
                 SetSelectedTab(0);
@@ -336,8 +336,8 @@ namespace Engine.UI
             var oldButton = tabButtons[index];
             tabButtons[index] = button;
 
-            this.RemoveChild(oldButton, true);
-            this.AddChild(button, false);
+            RemoveChild(oldButton, true);
+            AddChild(button, false);
 
             updateLayout = true;
         }
@@ -353,8 +353,8 @@ namespace Engine.UI
             var oldPanel = tabPanels[index];
             tabPanels[index] = panel;
 
-            this.RemoveChild(oldPanel, true);
-            this.AddChild(panel, false);
+            RemoveChild(oldPanel, true);
+            AddChild(panel, false);
 
             updateLayout = true;
         }
@@ -409,7 +409,7 @@ namespace Engine.UI
         /// </summary>
         protected void FireTabPressedEvent(int index)
         {
-            this.TabPressed?.Invoke(
+            TabPressed?.Invoke(
                 this,
                 new UITabPanelEventArgs()
                 {
@@ -423,7 +423,7 @@ namespace Engine.UI
         /// </summary>
         protected void FireTabJustPressedEvent(int index)
         {
-            this.TabJustPressed?.Invoke(
+            TabJustPressed?.Invoke(
                 this,
                 new UITabPanelEventArgs()
                 {
@@ -437,7 +437,7 @@ namespace Engine.UI
         /// </summary>
         protected void FireTabJustReleasedEvent(int index)
         {
-            this.TabJustReleased?.Invoke(
+            TabJustReleased?.Invoke(
                 this,
                 new UITabPanelEventArgs()
                 {
