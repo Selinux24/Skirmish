@@ -77,13 +77,13 @@ namespace ModelDrawing
         }
         private async Task InitializeUI()
         {
-            text = await this.AddComponentUITextArea(new UITextAreaDescription { Font = new TextDrawerDescription() { FontFamily = "Arial", FontSize = 20, ForeColor = Color.Yellow, ShadowColor = Color.OrangeRed } }, layerHUD);
+            text = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 20), TextForeColor = Color.Yellow, TextShadowColor = Color.OrangeRed }, layerHUD);
 
-            statistics = await this.AddComponentUITextArea(new UITextAreaDescription { Font = new TextDrawerDescription() { FontFamily = "Arial", FontSize = 10, ForeColor = Color.LightBlue, ShadowColor = Color.DarkBlue } }, layerHUD);
+            statistics = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 10), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, layerHUD);
 
-            text1 = await this.AddComponentUITextArea(new UITextAreaDescription { Font = new TextDrawerDescription() { FontFamily = "Arial", FontSize = 10, ForeColor = Color.LightBlue, ShadowColor = Color.DarkBlue } }, layerHUD);
+            text1 = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 10), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, layerHUD);
 
-            text2 = await this.AddComponentUITextArea(new UITextAreaDescription { Font = new TextDrawerDescription() { FontFamily = "Arial", FontSize = 10, ForeColor = Color.LightBlue, ShadowColor = Color.DarkBlue } }, layerHUD);
+            text2 = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 10), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, layerHUD);
 
             backPanel = await this.AddComponentSprite(SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), SceneObjectUsages.UI, layerHUD - 1);
 

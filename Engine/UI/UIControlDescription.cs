@@ -28,21 +28,25 @@ namespace Engine.UI
         /// </summary>
         public float Height { get; set; } = 0;
         /// <summary>
+        /// Spacing
+        /// </summary>
+        public Spacing Spacing { get; set; } = UIConfiguration.Spacing;
+        /// <summary>
+        /// Padding
+        /// </summary>
+        public Padding Padding { get; set; } = UIConfiguration.Padding;
+        /// <summary>
         /// Fit screen
         /// </summary>
         public bool FitParent { get; set; } = false;
         /// <summary>
-        /// Vertically centered
+        /// Anchor
         /// </summary>
-        public CenterTargets CenterVertically { get; set; } = CenterTargets.None;
-        /// <summary>
-        /// Horizontally centered
-        /// </summary>
-        public CenterTargets CenterHorizontally { get; set; } = CenterTargets.None;
+        public Anchors Anchor { get; set; } = Anchors.None;
         /// <summary>
         /// Base color
         /// </summary>
-        public Color4 BaseColor { get; set; } = Color4.White;
+        public Color4 BaseColor { get; set; } = UIConfiguration.BaseColor;
         /// <summary>
         /// Tint color
         /// </summary>
@@ -57,10 +61,10 @@ namespace Engine.UI
         /// </summary>
         protected UIControlDescription() : base()
         {
-            this.CastShadow = false;
-            this.DeferredEnabled = false;
-            this.DepthEnabled = false;
-            this.BlendMode = BlendModes.Alpha;
+            CastShadow = false;
+            DeferredEnabled = false;
+            DepthEnabled = false;
+            BlendMode = BlendModes.Alpha;
         }
     }
 }

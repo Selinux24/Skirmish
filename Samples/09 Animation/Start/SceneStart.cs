@@ -69,15 +69,15 @@ namespace Animation.Start
         {
             var titleFont = TextDrawerDescription.FromFamily(titleFonts, 72);
             titleFont.Name = "Title";
-            titleFont.ForeColor = Color.Gold;
-            titleFont.ShadowColor = new Color4(Color.LightYellow.RGB(), 0.25f);
-            titleFont.ShadowDelta = new Vector2(4, 4);
-            titleFont.HorizontalAlign = HorizontalTextAlign.Center;
-            titleFont.VerticalAlign = VerticalTextAlign.Middle;
 
             title = await this.AddComponentUITextArea(UITextAreaDescription.Default(titleFont), layerHUD);
-            title.AdjustAreaWithText = false;
+            title.GrowControlWithText = false;
             title.Text = "Animation";
+            title.TextForeColor = Color.Gold;
+            title.TextShadowColor = new Color4(Color.LightYellow.RGB(), 0.25f);
+            title.TextShadowDelta = new Vector2(4, 4);
+            title.TextHorizontalAlign = HorizontalTextAlign.Center;
+            title.TextVerticalAlign = VerticalTextAlign.Middle;
         }
         private async Task InitializeMainPanel()
         {
@@ -87,15 +87,19 @@ namespace Animation.Start
             mainPanel.SetGridLayout(GridLayout.FixedRows(2));
 
             var buttonFont = TextDrawerDescription.FromFamily(buttonFonts, 36);
-            buttonFont.ForeColor = Color.Gold;
-            buttonFont.HorizontalAlign = HorizontalTextAlign.Center;
-            buttonFont.VerticalAlign = VerticalTextAlign.Middle;
-            var textDesc = UITextAreaDescription.Default(buttonFont);
             Color4 highlightColor = new Color4(0.3333f, 0.3333f, 0.3333f, 0f);
-            var buttonDesc = UIButtonDescription.DefaultTwoStateButton(Color.Red, Color.Red.ToColor4() + highlightColor, textDesc);
-            var exitDesc = UIButtonDescription.DefaultTwoStateButton(Color.Orange, Color.Orange.ToColor4() + highlightColor, textDesc);
+            var buttonDesc = UIButtonDescription.DefaultTwoStateButton(Color.Red, Color.Red.ToColor4() + highlightColor);
+            buttonDesc.Font = buttonFont;
+            buttonDesc.TextForeColor = Color.Gold;
+            buttonDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
+            buttonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
+            var exitDesc = UIButtonDescription.DefaultTwoStateButton(Color.Orange, Color.Orange.ToColor4() + highlightColor);
+            exitDesc.Font = buttonFont;
+            exitDesc.TextForeColor = Color.Gold;
+            exitDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
+            exitDesc.TextVerticalAlign = VerticalTextAlign.Middle;
 
-            var emptyDesc = SpriteDescription.FromFile("start/resources/empty.png");
+            var emptyDesc = SpriteDescription.Default("start/resources/empty.png");
 
             var panSimpleAnimation = AddButtonPanel(buttonDesc, "Simple Animation", (sender, args) => { Game.SetScene<SimpleAnimation.SceneSimpleAnimation>(); });
             var panAnimationParts = AddButtonPanel(buttonDesc, "Animation Parts", (sender, args) => { Game.SetScene<AnimationParts.SceneAnimationParts>(); });
@@ -190,7 +194,7 @@ namespace Animation.Start
         {
             mainPanel.Width = Game.Form.RenderWidth * 0.8f;
             mainPanel.Height = Game.Form.RenderHeight * 0.7f;
-            mainPanel.CenterHorizontally = CenterTargets.Screen;
+            mainPanel.Anchor = Anchors.HorizontalCenter;
             mainPanel.Top = Game.Form.RenderHeight * 0.25f;
 
             var rect = Game.Form.RenderRectangle;

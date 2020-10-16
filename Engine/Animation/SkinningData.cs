@@ -57,6 +57,10 @@ namespace Engine.Animation
         /// Resource size
         /// </summary>
         public uint ResourceSize { get; set; } = 0;
+        /// <summary>
+        /// On resources updated event
+        /// </summary>
+        public EventHandler OnResourcesUpdated;
 
         /// <summary>
         /// Initializes the animation dictionary
@@ -225,6 +229,21 @@ namespace Engine.Animation
                     offset += mat.Length * 4;
                 }
             }
+        }
+
+        /// <summary>
+        /// Updates the resource data
+        /// </summary>
+        /// <param name="index">Index</param>
+        /// <param name="offset">Offset</param>
+        /// <param name="size">Size</param>
+        public void UpdateResource(uint index, uint offset, uint size)
+        {
+            ResourceIndex = index;
+            ResourceOffset = offset;
+            ResourceSize = size;
+
+            OnResourcesUpdated?.Invoke(this, new EventArgs());
         }
 
         /// <summary>

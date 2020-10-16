@@ -67,7 +67,7 @@ namespace Engine.UI
         /// <param name="description">Description</param>
         public UIConsole(Scene scene, UIConsoleDescription description) : base(scene, description)
         {
-            AdjustAreaWithText = false;
+            GrowControlWithText = false;
 
             if (description.Background != null)
             {
@@ -111,7 +111,7 @@ namespace Engine.UI
         /// <param name="logEntry">Log entry</param>
         private string FormatLog(LogEntry logEntry)
         {
-            Color4 defColor = ForeColor;
+            Color4 defColor = TextForeColor;
 
             Color4 logColor;
             switch (logEntry.LogLevel)
@@ -129,7 +129,7 @@ namespace Engine.UI
                     logColor = Color.Red;
                     break;
                 default:
-                    logColor = ForeColor;
+                    logColor = TextForeColor;
                     break;
             }
 
@@ -172,7 +172,7 @@ namespace Engine.UI
                 LogLines = logLinesSmall;
             }
 
-            Height = FontHeight * LogLines;
+            Height = TextLineHeight * LogLines;
             Width = Game.Form.RenderWidth;
         }
     }

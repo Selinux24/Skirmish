@@ -319,24 +319,32 @@ namespace Deferred
         }
         private async Task InitializeUI()
         {
-            var dTitle = new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18, Color.White) };
-            var dLoad = new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12, Color.Yellow) };
-            var dHelp = new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12, Color.Yellow) };
-            var dStats = new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 10, Color.Red) };
+            var dTitle = new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White };
+            var dLoad = new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow };
+            var dHelp = new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow };
+            var dStats = new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 10), TextForeColor = Color.Red };
 
             title = await this.AddComponentUITextArea(dTitle, layerHUD);
+
             load = await this.AddComponentUITextArea(dLoad, layerHUD);
+
             help = await this.AddComponentUITextArea(dHelp, layerHUD);
+
             statistics = await this.AddComponentUITextArea(dStats, layerHUD);
 
+
             var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
+
             upperPanel = await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+
 
             var bufferDrawerDesc = new UITextureRendererDescription()
             {
                 Channel = UITextureRendererChannels.NoAlpha,
             };
+
             bufferDrawer = await this.AddComponentUITextureRenderer(bufferDrawerDesc, layerEffects);
+
             bufferDrawer.Visible = false;
         }
         private async Task InitializeDebug()

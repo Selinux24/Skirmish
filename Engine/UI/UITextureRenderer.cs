@@ -23,10 +23,6 @@ namespace Engine.UI
         /// View * projection for 2D projection
         /// </summary>
         private Matrix viewProjection;
-        /// <summary>
-        /// Drawing channels
-        /// </summary>
-        private UITextureRendererChannels channels = UITextureRendererChannels.None;
 
         /// <summary>
         /// Texture
@@ -35,24 +31,11 @@ namespace Engine.UI
         /// <summary>
         /// Texture index
         /// </summary>
-        public int TextureIndex { get; set; }
+        public int TextureIndex { get; set; } = 0;
         /// <summary>
         /// Drawing channels
         /// </summary>
-        public UITextureRendererChannels Channels
-        {
-            get
-            {
-                return channels;
-            }
-            set
-            {
-                if (channels != value)
-                {
-                    channels = value;
-                }
-            }
-        }
+        public UITextureRendererChannels Channels { get; set; } = UITextureRendererChannels.None;
         /// <summary>
         /// Gets whether the internal buffers were ready or not
         /// </summary>

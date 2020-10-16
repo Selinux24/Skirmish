@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 
 namespace Engine.UI
 {
@@ -14,13 +15,7 @@ namespace Engine.UI
         {
             get
             {
-                return new Padding
-                {
-                    Left = 0,
-                    Top = 0,
-                    Bottom = 0,
-                    Right = 0,
-                };
+                return new Padding(0);
             }
         }
 
@@ -40,6 +35,57 @@ namespace Engine.UI
         /// Padding right
         /// </summary>
         public float Right { get; set; }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="left">Left</param>
+        /// <param name="top">Top</param>
+        /// <param name="bottom">Bottom</param>
+        /// <param name="right">Right</param>
+        public Padding(float left, float top, float bottom, float right)
+        {
+            Left = left;
+            Top = top;
+            Bottom = bottom;
+            Right = right;
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="horizontal">Horizontal</param>
+        /// <param name="vertical">Vertical</param>
+        public Padding(float horizontal, float vertical)
+        {
+            Left = horizontal;
+            Top = vertical;
+            Bottom = vertical;
+            Right = horizontal;
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="padding">Padding value</param>
+        public Padding(float padding)
+        {
+            Left = padding;
+            Top = padding;
+            Bottom = padding;
+            Right = padding;
+        }
+
+        /// <summary>
+        /// Applies padding to rectangle
+        /// </summary>
+        /// <param name="rectangle">Rectangle</param>
+        public RectangleF Apply(RectangleF rectangle)
+        {
+            return new RectangleF(
+                rectangle.Left + Left,
+                rectangle.Top + Top,
+                rectangle.Width - (Left + Right),
+                rectangle.Height - (Top + Bottom));
+        }
 
         /// <inheritdoc/>
         public bool Equals(Padding other)
@@ -98,6 +144,60 @@ namespace Engine.UI
             };
         }
         public static implicit operator Padding(int[] value)
+        {
+            if (value?.Length == 1)
+            {
+                return new Padding
+                {
+                    Left = value[0],
+                    Top = value[0],
+                    Bottom = value[0],
+                    Right = value[0],
+                };
+            }
+
+            if (value?.Length == 2)
+            {
+                return new Padding
+                {
+                    Left = value[0],
+                    Top = value[1],
+                    Bottom = value[1],
+                    Right = value[0],
+                };
+            }
+
+            if (value?.Length == 4)
+            {
+                return new Padding
+                {
+                    Left = value[1],
+                    Top = value[2],
+                    Bottom = value[3],
+                    Right = value[4],
+                };
+            }
+
+            return new Padding
+            {
+                Left = float.NaN,
+                Top = float.NaN,
+                Bottom = float.NaN,
+                Right = float.NaN,
+            };
+        }
+
+        public static implicit operator Padding(float value)
+        {
+            return new Padding
+            {
+                Left = value,
+                Top = value,
+                Bottom = value,
+                Right = value,
+            };
+        }
+        public static implicit operator Padding(float[] value)
         {
             if (value?.Length == 1)
             {

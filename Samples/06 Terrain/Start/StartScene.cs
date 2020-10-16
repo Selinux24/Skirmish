@@ -71,32 +71,35 @@ namespace Terrain.Start
 
             #region Title text
 
-            var titleFont = TextDrawerDescription.FromFamily(titleFonts, 72, FontMapStyles.Bold, Color.Gold);
+            var titleFont = TextDrawerDescription.FromFamily(titleFonts, 72, FontMapStyles.Bold);
             titleFont.Name = "Title";
-            titleFont.ShadowColor = new Color4(Color.LightYellow.RGB(), 0.25f);
-            titleFont.ShadowDelta = new Vector2(4, 4);
-            titleFont.HorizontalAlign = HorizontalTextAlign.Center;
-            titleFont.VerticalAlign = VerticalTextAlign.Middle;
 
             var titleDesc = UITextAreaDescription.Default(titleFont);
+            titleDesc.TextForeColor = Color.Gold;
+            titleDesc.TextShadowColor = new Color4(Color.LightYellow.RGB(), 0.25f);
+            titleDesc.TextShadowDelta = new Vector2(4, 4);
+            titleDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
+            titleDesc.TextVerticalAlign = VerticalTextAlign.Middle;
 
             title = await this.AddComponentUITextArea(titleDesc, layerHUD);
-            title.AdjustAreaWithText = false;
+            title.GrowControlWithText = false;
 
             #endregion
 
             #region Scene buttons
 
-            var buttonsFont = TextDrawerDescription.FromFamily(buttonFonts, 20, FontMapStyles.Bold, Color.Gold);
-            buttonsFont.HorizontalAlign = HorizontalTextAlign.Center;
-            buttonsFont.VerticalAlign = VerticalTextAlign.Middle;
+            var buttonsFont = TextDrawerDescription.FromFamily(buttonFonts, 20, FontMapStyles.Bold);
 
-            var startButtonDesc = UIButtonDescription.DefaultTwoStateButton("Start/buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f, UITextAreaDescription.Default(buttonsFont));
+            var startButtonDesc = UIButtonDescription.DefaultTwoStateButton("Start/buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f);
             startButtonDesc.Name = "Scene buttons";
             startButtonDesc.Width = 275;
             startButtonDesc.Height = 65;
             startButtonDesc.ColorReleased = new Color4(sceneButtonColor.RGB(), 0.8f);
             startButtonDesc.ColorPressed = new Color4(sceneButtonColor.RGB() * 1.2f, 0.9f);
+            startButtonDesc.Font = buttonsFont;
+            startButtonDesc.TextForeColor = Color.Gold;
+            startButtonDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
+            startButtonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
 
             scenePerlinNoiseButton = await this.AddComponentUIButton(startButtonDesc, layerHUD);
             sceneRtsButton = await this.AddComponentUIButton(startButtonDesc, layerHUD);
@@ -105,12 +108,15 @@ namespace Terrain.Start
 
             #region Exit button
 
-            var exitButtonDesc = UIButtonDescription.DefaultTwoStateButton("Start/buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f, UITextAreaDescription.Default(buttonsFont));
+            var exitButtonDesc = UIButtonDescription.DefaultTwoStateButton("Start/buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f);
             exitButtonDesc.Name = "Exit button";
             exitButtonDesc.Width = 275;
             exitButtonDesc.Height = 65;
             exitButtonDesc.ColorReleased = new Color4(exitButtonColor.RGB(), 0.8f);
             exitButtonDesc.ColorPressed = new Color4(exitButtonColor.RGB() * 1.2f, 0.9f);
+            exitButtonDesc.Font = buttonsFont;
+            exitButtonDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
+            exitButtonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
 
             exitButton = await this.AddComponentUIButton(exitButtonDesc, layerHUD);
 
@@ -144,8 +150,7 @@ namespace Terrain.Start
             var rect = Game.Form.RenderRectangle;
             rect.Height /= 2;
             title.SetRectangle(rect);
-            title.CenterHorizontally = CenterTargets.Screen;
-            title.CenterVertically = CenterTargets.Screen;
+            title.Anchor = Anchors.Center;
 
             for (int i = 0; i < sceneButtons.Length; i++)
             {

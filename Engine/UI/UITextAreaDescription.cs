@@ -1,10 +1,11 @@
-﻿
+﻿using SharpDX;
+
 namespace Engine.UI
 {
     /// <summary>
-    /// Panel description
+    /// Text area description
     /// </summary>
-    public class UITextAreaDescription : UIControlDescription
+    public class UITextAreaDescription : UIControlDescription, IWithTextDescription
     {
         /// <summary>
         /// Gets the default text area description
@@ -14,7 +15,6 @@ namespace Engine.UI
         {
             return new UITextAreaDescription()
             {
-                Font = TextDrawerDescription.Default(),
                 Text = text,
             };
         }
@@ -31,14 +31,13 @@ namespace Engine.UI
                 Text = text,
             };
         }
-
         /// <summary>
         /// Gets the default text area description from a font family name
         /// </summary>
         /// <param name="fontFamilyName">Font family name</param>
         /// <param name="size">Font size</param>
         /// <param name="fontStyle">Font style</param>
-        public static UITextAreaDescription FromFamily(string fontFamilyName, int size, FontMapStyles fontStyle = FontMapStyles.Regular)
+        public static UITextAreaDescription DefaultFromFamily(string fontFamilyName, int size, FontMapStyles fontStyle = FontMapStyles.Regular)
         {
             return new UITextAreaDescription
             {
@@ -57,7 +56,7 @@ namespace Engine.UI
         /// <param name="size">Size</param>
         /// <param name="fontStyle">Font style</param>
         /// <param name="lineAdjust">Line adjust</param>
-        public static UITextAreaDescription FromFile(string fileName, int size, bool lineAdjust = false, FontMapStyles fontStyle = FontMapStyles.Regular)
+        public static UITextAreaDescription DefaultFromFile(string fileName, int size, bool lineAdjust = false, FontMapStyles fontStyle = FontMapStyles.Regular)
         {
             return new UITextAreaDescription()
             {
@@ -75,7 +74,7 @@ namespace Engine.UI
         /// </summary>
         /// <param name="fontImageFileName">Font image file name</param>
         /// <param name="fontMapFileName">Font map file name</param>
-        public static UITextAreaDescription FromMap(string fontImageFileName, string fontMapFileName)
+        public static UITextAreaDescription DefaultFromMap(string fontImageFileName, string fontMapFileName)
         {
             return new UITextAreaDescription
             {
@@ -92,22 +91,39 @@ namespace Engine.UI
         }
 
         /// <summary>
-        /// Padding
+        /// Gets or sets whether the control must grow or shrinks with the text value
         /// </summary>
-        public Padding Padding { get; set; }
+        public bool GrowControlWithText { get; set; } = true;
+
         /// <summary>
-        /// Gets or sets whether the area must grow or shrinks with the text value
+        /// Font description
         /// </summary>
-        public bool AdjustAreaWithText { get; set; } = true;
+        public TextDrawerDescription Font { get; set; } = UIConfiguration.Font;
 
         /// <summary>
         /// Text
         /// </summary>
         public string Text { get; set; }
         /// <summary>
-        /// Font description
+        /// Text fore color
         /// </summary>
-        public TextDrawerDescription Font { get; set; }
+        public Color4 TextForeColor { get; set; } = UIConfiguration.TextColor;
+        /// <summary>
+        /// Text shadow color
+        /// </summary>
+        public Color4 TextShadowColor { get; set; } = Color.Transparent;
+        /// <summary>
+        /// Shadow position delta
+        /// </summary>
+        public Vector2 TextShadowDelta { get; set; } = new Vector2(1, 1);
+        /// <summary>
+        /// Text horizontal alignement
+        /// </summary>
+        public HorizontalTextAlign TextHorizontalAlign { get; set; } = HorizontalTextAlign.Left;
+        /// <summary>
+        /// Text vertical alignement
+        /// </summary>
+        public VerticalTextAlign TextVerticalAlign { get; set; } = VerticalTextAlign.Top;
 
         /// <summary>
         /// Constructor

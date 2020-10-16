@@ -408,12 +408,12 @@ namespace Engine.Common
                 foreach (var mesh in dictionary.Values)
                 {
                     //Vertices
-                    mesh.VertexBuffer = game.BufferManager.AddVertexData($"{name}.{mesh.Name}", dynamicBuffers, mesh.Vertices.ToArray(), instancingBuffer);
+                    mesh.VertexBuffer = game.BufferManager.AddVertexData($"{name}.{mesh.Name}", dynamicBuffers, mesh.Vertices, instancingBuffer);
 
                     if (mesh.Indexed)
                     {
                         //Indices
-                        mesh.IndexBuffer = game.BufferManager.AddIndexData($"{name}.{mesh.Name}", dynamicBuffers, mesh.Indices.ToArray());
+                        mesh.IndexBuffer = game.BufferManager.AddIndexData($"{name}.{mesh.Name}", dynamicBuffers, mesh.Indices);
                     }
                 }
             }

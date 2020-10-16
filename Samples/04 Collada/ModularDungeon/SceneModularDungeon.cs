@@ -30,6 +30,7 @@ namespace Collada.ModularDungeon
 
         private Sprite dungeonMap = null;
         private UIProgressBar pbLevels = null;
+        private UIDialog dialog = null;
         private UIConsole console = null;
 
         private readonly Color ambientDown = new Color(127, 127, 127, 255);
@@ -270,16 +271,25 @@ namespace Collada.ModularDungeon
                 },
                 (res) =>
                 {
-                    if (!res.Completed)
+                    try
                     {
-                        res.ThrowExceptions();
+                        if (!res.Completed)
+                        {
+                            res.ThrowExceptions();
+                        }
+
+                        userInterfaceInitialized = true;
+
+                        UpdateLayout();
+
+                        LoadAssets();
                     }
+                    catch (Exception ex)
+                    {
+                        Logger.WriteError(this, ex);
 
-                    userInterfaceInitialized = true;
-
-                    UpdateLayout();
-
-                    LoadAssets();
+                        PrepareMessage(true, $"Error loading UI: {ex.Message}{Environment.NewLine}Press Esc to return to the start screen.");
+                    }
                 });
         }
         private async Task InitializeUI()
@@ -290,10 +300,26 @@ namespace Collada.ModularDungeon
             pbLevels = await this.AddComponentUIProgressBar(UIProgressBarDescription.Default(Color.Transparent, Color.Green), layerHUD);
             pbLevels.Visible = false;
 
-            messages = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 48, Color.Red, Color.DarkRed) }, layerHUD + 1);
+            messages = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 48), TextForeColor = Color.Red, TextShadowColor = Color.DarkRed }, layerHUD + 1);
             messages.Text = null;
             messages.SetPosition(new Vector2(0, 0));
             messages.Visible = false;
+
+            var dialogDesc = UIDialogDescription.Default(Game.Form.RenderWidth * 0.5f, Game.Form.RenderHeight * 0.5f);
+            dialogDesc.DialogButtons = UIDialogButtons.Accept;
+            dialog = await this.AddComponentUIDialog(dialogDesc, layerHUD + 1);
+            dialog.OnAcceptHandler += (s, e) =>
+            {
+                dialog.CloseDialog(async () =>
+                {
+                    dialog.Hide(100);
+
+                    await Task.Delay(1000);
+
+                    Game.SetScene<Start.SceneStart>();
+                });
+            };
+            dialog.Visible = false;
 
             var drawerDesc = new PrimitiveListDrawerDescription<Triangle>()
             {
@@ -314,7 +340,7 @@ namespace Collada.ModularDungeon
 
             string onePageResourcesFolder = Path.Combine(resourcesFolder, "onepagedungeons");
 
-            dungeonMap = await this.AddComponentSprite(SpriteDescription.FromFile(Path.Combine(onePageResourcesFolder, dungeonMapFile)), SceneObjectUsages.UI, layerHUD + 2);
+            dungeonMap = await this.AddComponentSprite(SpriteDescription.Default(Path.Combine(onePageResourcesFolder, dungeonMapFile)), SceneObjectUsages.UI, layerHUD + 2);
             dungeonMap.Visible = false;
         }
 
@@ -333,21 +359,35 @@ namespace Collada.ModularDungeon
                 LoadResourceGroup.FromTasks("LoadAssets", tasks),
                 (res) =>
                 {
-                    if (!res.Completed)
+                    try
                     {
-                        res.ThrowExceptions();
+                        if (!res.Completed)
+                        {
+                            res.ThrowExceptions();
+                        }
+
+                        gameAssetsInitialized = true;
+
+                        InitializeEnvironment();
+                        InitializeLights();
+
+                        StartCamera();
+
+                        AudioManager.Start();
+
+                        ChangeToLevel(null);
                     }
+                    catch (AggregateException ex)
+                    {
+                        Logger.WriteError(this, ex);
 
-                    gameAssetsInitialized = true;
+                        string[] exceptions = ex.Flatten().InnerExceptions
+                            .Select(e => e.Message)
+                            .ToArray();
 
-                    InitializeEnvironment();
-                    InitializeLights();
-
-                    StartCamera();
-
-                    AudioManager.Start();
-
-                    ChangeToLevel(null);
+                        string msg = $"Error loading Assets: {ex.Message}{Environment.NewLine}{Environment.NewLine}{string.Join(Environment.NewLine, exceptions)}";
+                        dialog.ShowDialog(msg, () => { dialog.Show(100); });
+                    }
                 });
         }
         private async Task InitializeDebug()
@@ -1194,8 +1234,7 @@ namespace Collada.ModularDungeon
             if (show)
             {
                 messages.Text = text;
-                messages.CenterHorizontally = CenterTargets.Screen;
-                messages.CenterVertically = CenterTargets.Screen;
+                messages.Anchor = Anchors.Center;
                 messages.Visible = true;
                 messages.ClearTween();
                 messages.Show(1000);
@@ -1275,8 +1314,7 @@ namespace Collada.ModularDungeon
                 }
 
                 messages.Text = string.Format("Press space to {0} the light...", enabled ? "turn off" : "turn on");
-                messages.CenterHorizontally = CenterTargets.Screen;
-                messages.CenterVertically = CenterTargets.Screen;
+                messages.Anchor = Anchors.Center;
             }
         }
 
@@ -1368,14 +1406,23 @@ namespace Collada.ModularDungeon
                 LoadResourceGroup.FromTasks($"Level.{name ?? "Default"}", ChangeToLevelAsync(name)),
                 (res) =>
                 {
-                    if (!res.Completed)
+                    try
                     {
-                        res.ThrowExceptions();
+                        if (!res.Completed)
+                        {
+                            res.ThrowExceptions();
+                        }
+
+                        levelInitialized = true;
+
+                        pbLevels.Visible = false;
                     }
+                    catch (Exception ex)
+                    {
+                        Logger.WriteError(this, ex);
 
-                    levelInitialized = true;
-
-                    pbLevels.Visible = false;
+                        PrepareMessage(true, $"Error loading level {name ?? "Default"}: {ex.Message}{Environment.NewLine}Press Esc to return to the start screen.");
+                    }
                 });
         }
         private async Task ChangeToLevelAsync(string name)

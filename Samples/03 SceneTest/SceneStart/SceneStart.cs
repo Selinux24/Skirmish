@@ -86,17 +86,18 @@ namespace SceneTest.SceneStart
         }
         private async Task InitializeTitle()
         {
-            var titleFont = TextDrawerDescription.FromFamily(titleFonts, 72, FontMapStyles.Bold, Color.Gold);
+            var titleFont = TextDrawerDescription.FromFamily(titleFonts, 72, FontMapStyles.Bold);
             titleFont.Name = "Title";
-            titleFont.ShadowColor = new Color4(Color.LightYellow.RGB(), 0.25f);
-            titleFont.ShadowDelta = new Vector2(4, 4);
-            titleFont.HorizontalAlign = HorizontalTextAlign.Center;
-            titleFont.VerticalAlign = VerticalTextAlign.Middle;
 
             var titleDesc = UITextAreaDescription.Default(titleFont);
+            titleDesc.TextForeColor = Color.Gold;
+            titleDesc.TextShadowColor = new Color4(Color.LightYellow.RGB(), 0.25f);
+            titleDesc.TextShadowDelta = new Vector2(4, 4);
+            titleDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
+            titleDesc.TextVerticalAlign = VerticalTextAlign.Middle;
 
             title = await this.AddComponentUITextArea(titleDesc, layerHUD);
-            title.AdjustAreaWithText = false;
+            title.GrowControlWithText = false;
         }
         private async Task InitializeButtonPanel()
         {
@@ -104,18 +105,18 @@ namespace SceneTest.SceneStart
             buttonPanel.SetGridLayout(GridLayout.FixedRows(1));
             buttonPanel.Spacing = 20;
 
-            var buttonsFont = TextDrawerDescription.FromFamily(buttonFonts, 20, FontMapStyles.Bold, Color.Gold);
-            buttonsFont.HorizontalAlign = HorizontalTextAlign.Center;
-            buttonsFont.VerticalAlign = VerticalTextAlign.Middle;
+            var buttonsFont = TextDrawerDescription.FromFamily(buttonFonts, 20, FontMapStyles.Bold);
 
-            var startButtonDesc = UIButtonDescription.DefaultTwoStateButton(
-                "common/buttons.png", new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f,
-                UITextAreaDescription.Default(buttonsFont));
+            var startButtonDesc = UIButtonDescription.DefaultTwoStateButton("common/buttons.png", new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f);
             startButtonDesc.Name = "Scene buttons";
             startButtonDesc.Width = 150;
             startButtonDesc.Height = 55;
             startButtonDesc.ColorReleased = new Color4(sceneButtonColor.RGB(), 0.8f);
             startButtonDesc.ColorPressed = new Color4(sceneButtonColor.RGB() * 1.2f, 0.9f);
+            startButtonDesc.Font = buttonsFont;
+            startButtonDesc.TextForeColor = Color.Gold;
+            startButtonDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
+            startButtonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
 
             sceneMaterialsButton = new UIButton(this, startButtonDesc);
             sceneWaterButton = new UIButton(this, startButtonDesc);
@@ -143,14 +144,15 @@ namespace SceneTest.SceneStart
                 sceneButtons[i].MouseLeave += SceneButtonMouseLeave;
             }
 
-            var exitButtonDesc = UIButtonDescription.DefaultTwoStateButton(
-                "common/buttons.png", new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f,
-                UITextAreaDescription.Default(buttonsFont));
+            var exitButtonDesc = UIButtonDescription.DefaultTwoStateButton("common/buttons.png", new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f);
             exitButtonDesc.Name = "Exit button";
             exitButtonDesc.Width = 150;
             exitButtonDesc.Height = 55;
             exitButtonDesc.ColorReleased = new Color4(exitButtonColor.RGB(), 0.8f);
             exitButtonDesc.ColorPressed = new Color4(exitButtonColor.RGB() * 1.2f, 0.9f);
+            exitButtonDesc.Font = buttonsFont;
+            exitButtonDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
+            exitButtonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
 
             exitButton = new UIButton(this, exitButtonDesc);
             exitButton.JustReleased += ExitButtonJustReleased;
@@ -176,7 +178,8 @@ namespace SceneTest.SceneStart
             Color4 baseColor = Color.CornflowerBlue;
             Color4 highLightColor = new Color4(baseColor.RGB() * 1.25f, 1f);
             var tabDesc = UITabPanelDescription.Default(3, Color.Transparent, baseColor, highLightColor);
-            tabDesc.Captions = new[] { "But 1", "But 2", "But 3" };
+            tabDesc.TabCaptions = new[] { "But 1", "But 2", "But 3" };
+            tabDesc.TabButtonsSpacing = new Spacing() { Horizontal = 5f };
 
             tabsPanel = await this.AddComponentUITabPanel(tabDesc, layerHUD + 1);
             tabsPanel.Visible = false;
@@ -188,7 +191,7 @@ namespace SceneTest.SceneStart
             var p = GridLayout.FixedRows(1);
             tabsPanel.TabPanels[0].SetGridLayout(p);
             tabsPanel.TabPanels[0].Spacing = 10;
-            tabsPanel.TabPanels[0].Padding = 15;
+            tabsPanel.TabPanels[0].Padding = 10;
             tabsPanel.TabPanels[0].BaseColor = new Color4(1, 1, 1, 0.25f);
             for (int i = 0; i < 5; i++)
             {
@@ -315,21 +318,20 @@ namespace SceneTest.SceneStart
         {
             tabsPanel.Width = Game.Form.RenderWidth * 0.9f;
             tabsPanel.Height = Game.Form.RenderHeight * 0.7f;
-            tabsPanel.CenterHorizontally = CenterTargets.Screen;
+            tabsPanel.Anchor = Anchors.HorizontalCenter;
             tabsPanel.Top = Game.Form.RenderHeight * 0.1f;
 
             var rect = Game.Form.RenderRectangle;
             rect.Height /= 2;
             title.SetRectangle(rect);
-            title.CenterHorizontally = CenterTargets.Screen;
-            title.CenterVertically = CenterTargets.Screen;
+            title.Anchor = Anchors.Center;
 
             int h = 8;
             int hv = h - 1;
 
             buttonPanel.Width = Game.Form.RenderWidth * 0.9f;
             buttonPanel.Height = 50;
-            buttonPanel.CenterHorizontally = CenterTargets.Screen;
+            buttonPanel.Anchor = Anchors.HorizontalCenter;
             buttonPanel.Top = Game.Form.RenderHeight / h * hv - (buttonPanel.Height / 2);
 
             optsButton.Width = 50;

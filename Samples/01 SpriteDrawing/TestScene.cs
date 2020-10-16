@@ -74,10 +74,7 @@ namespace SpriteDrawing
         }
         private async Task InitializeBackground()
         {
-            var desc = new BackgroundDescription()
-            {
-                Textures = new[] { "background.jpg" },
-            };
+            var desc = SpriteDescription.Background("background.jpg");
             await this.AddComponentSprite(desc, SceneObjectUsages.UI, layerBackground);
         }
         private async Task InitializeProgressbar()
@@ -125,12 +122,7 @@ namespace SpriteDrawing
 
             float size = Game.Form.RenderWidth * 0.3333f;
 
-            var desc = new SpriteDescription()
-            {
-                Textures = new[] { "smiley.png" },
-                Width = size,
-                Height = size,
-            };
+            var desc = SpriteDescription.Default("smiley.png", size, size);
             spriteSmiley = await this.AddComponentSprite(desc, SceneObjectUsages.None, layerObjects);
             spriteSmiley.Visible = false;
         }
@@ -143,16 +135,18 @@ namespace SpriteDrawing
 
             var desc = new UIPanelDescription()
             {
-                Name = "WoodPanel",
+                Name = "Static Panel",
+
+                Top = Game.Form.RenderHeight / 8f,
+                Left = Game.Form.RenderCenter.X,
+                Width = width,
+                Height = height,
+                
                 Background = new SpriteDescription
                 {
                     Textures = new[] { "pan_bw.png" },
                     BaseColor = new Color(176, 77, 45),
                 },
-                Top = Game.Form.RenderHeight / 8f,
-                Left = Game.Form.RenderCenter.X,
-                Width = width,
-                Height = height,
             };
             staticPan = await this.AddComponentUIPanel(desc, layerHUD);
 
@@ -163,9 +157,6 @@ namespace SpriteDrawing
                     Name = "Text",
                     FontFileName = "LeagueSpartan-Bold.otf",
                     FontSize = 18,
-                    ForeColor = Color.LightGoldenrodYellow,
-                    ShadowColor = new Color4(0, 0, 0, 0.2f),
-                    ShadowDelta = new Vector2(8, 5),
                     LineAdjust = true,
                 },
                 Padding = new Padding
@@ -174,7 +165,10 @@ namespace SpriteDrawing
                     Right = width * 0.1f,
                     Top = height * 0.1f,
                     Bottom = height * 0.1f,
-                }
+                },
+                TextForeColor = Color.LightGoldenrodYellow,
+                TextShadowColor = new Color4(0, 0, 0, 0.2f),
+                TextShadowDelta = new Vector2(8, 5),
             };
             textArea = new UITextArea(this, descText);
 
@@ -190,12 +184,11 @@ namespace SpriteDrawing
 
             var descPan = new UIPanelDescription
             {
-                Name = "Test Panel",
+                Name = "Dynamic Panel",
 
                 Width = width,
                 Height = height,
-                CenterVertically = CenterTargets.Screen,
-                CenterHorizontally = CenterTargets.Screen,
+                Anchor = Anchors.Center,
 
                 Background = new SpriteDescription()
                 {
@@ -207,24 +200,23 @@ namespace SpriteDrawing
 
             float w = 0.3333f;
 
-            var font = TextDrawerDescription.FromFile("LeagueSpartan-Bold.otf", 16);
-            font.LineAdjust = true;
-            font.HorizontalAlign = HorizontalTextAlign.Center;
-            font.VerticalAlign = VerticalTextAlign.Middle;
+            var font = TextDrawerDescription.FromFile("LeagueSpartan-Bold.otf", 16, true);
 
-            var descButClose = UIButtonDescription.DefaultTwoStateButton(
-                "buttons.png", new Vector4(0, 0, w, 1f), new Vector4(w * 2f, 0, w * 3f, 1f),
-                UITextAreaDescription.Default(font, "X"));
+            var descButClose = UIButtonDescription.DefaultTwoStateButton("buttons.png", new Vector4(0, 0, w, 1f), new Vector4(w * 2f, 0, w * 3f, 1f));
             descButClose.Name = "CloseButton";
             descButClose.Top = 10;
             descButClose.Left = dynamicPan.Width - 10 - 40;
             descButClose.Width = 40;
             descButClose.Height = 40;
+            descButClose.Font = font;
+            descButClose.TextHorizontalAlign = HorizontalTextAlign.Center;
+            descButClose.TextVerticalAlign = VerticalTextAlign.Middle;
+            descButClose.Text = "X";
 
             var butClose = new UIButton(this, descButClose);
             butClose.JustReleased += ButClose_Click;
 
-            var descText = UITextAreaDescription.FromMap("MaraFont.png", "MaraFont.txt");
+            var descText = UITextAreaDescription.DefaultFromMap("MaraFont.png", "MaraFont.txt");
             descText.Name = "MaraText";
             descText.Text = @"Letters by Mara";
             descText.Padding = new Padding
@@ -234,8 +226,8 @@ namespace SpriteDrawing
                 Top = height * 0.1f,
                 Bottom = height * 0.1f,
             };
-            descText.Font.HorizontalAlign = HorizontalTextAlign.Center;
-            descText.Font.VerticalAlign = VerticalTextAlign.Middle;
+            descText.TextHorizontalAlign = HorizontalTextAlign.Center;
+            descText.TextVerticalAlign = VerticalTextAlign.Middle;
 
             var textMapped = new UITextArea(this, descText);
 
@@ -245,17 +237,18 @@ namespace SpriteDrawing
         }
         private async Task InitializeButtonTest()
         {
-            var font = TextDrawerDescription.FromFile("LeagueSpartan-Bold.otf", 16);
-            font.LineAdjust = true;
-            font.HorizontalAlign = HorizontalTextAlign.Center;
-            font.VerticalAlign = VerticalTextAlign.Middle;
+            var font = TextDrawerDescription.FromFile("LeagueSpartan-Bold.otf", 16, true);
 
-            var descButClose = UIButtonDescription.DefaultTwoStateButton(Color.Blue, Color.Green, UITextAreaDescription.Default(font, "Press Me"));
-            descButClose.Name = "Test Button";
+            var descButClose = UIButtonDescription.DefaultTwoStateButton(Color.Blue, Color.Green);
+            descButClose.Name = "Button Test";
             descButClose.Top = 250;
             descButClose.Left = 150;
             descButClose.Width = 200;
             descButClose.Height = 55;
+            descButClose.Font = font;
+            descButClose.TextHorizontalAlign = HorizontalTextAlign.Center;
+            descButClose.TextVerticalAlign = VerticalTextAlign.Middle;
+            descButClose.Text = "Press Me";
 
             butTest2 = await this.AddComponentUIButton(descButClose, layerHUD);
             butTest2.JustReleased += ButTest2_Click;
@@ -319,8 +312,7 @@ Progress: {(int)(progressValue * 100f)}%";
 
             if (Game.Input.KeyJustReleased(Keys.Home))
             {
-                spriteSmiley.CenterHorizontally = CenterTargets.Screen;
-                spriteSmiley.CenterVertically = CenterTargets.Screen;
+                spriteSmiley.Anchor = Anchors.Center;
             }
         }
         private void UpdateSprite(GameTime gameTime)
@@ -399,8 +391,7 @@ Progress: {(int)(progressValue * 100f)}%";
             dynamicPan.HideRoll(1000);
 
             spriteSmiley.Visible = true;
-            spriteSmiley.CenterHorizontally = CenterTargets.Screen;
-            spriteSmiley.CenterVertically = CenterTargets.Screen;
+            spriteSmiley.Anchor = Anchors.Center;
             spriteSmiley.Show(1000);
             spriteSmiley.ScaleInScaleOut(0.85f, 1f, 250);
 

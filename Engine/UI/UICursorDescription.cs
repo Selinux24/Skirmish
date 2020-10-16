@@ -22,6 +22,7 @@ namespace Engine.UI
                 Width = width,
                 Height = height,
                 Centered = centered,
+                BaseColor = Color4.White,
             };
         }
         /// <summary>
@@ -39,6 +40,7 @@ namespace Engine.UI
                 Width = width,
                 Height = height,
                 Delta = delta,
+                BaseColor = Color4.White,
             };
         }
 
@@ -50,5 +52,13 @@ namespace Engine.UI
         /// Center cursor sprite
         /// </summary>
         public bool Centered { get; set; } = false;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public UICursorDescription() : base()
+        {
+
+        }
     }
 }

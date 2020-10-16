@@ -142,10 +142,10 @@ namespace Animation.SimpleAnimation
 
         private async Task InitializeUI()
         {
-            title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18, Color.White) }, layerHUD);
-            runtime = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11, Color.Yellow) }, layerHUD);
-            animText = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 15, Color.Orange) }, layerHUD);
-            messages = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 15, Color.Orange) }, layerHUD);
+            title = await this.AddComponentUITextArea(new UITextAreaDescription {Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White }, layerHUD);
+            runtime = await this.AddComponentUITextArea(new UITextAreaDescription {Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Yellow }, layerHUD);
+            animText = await this.AddComponentUITextArea(new UITextAreaDescription {Font = TextDrawerDescription.FromFamily("Tahoma", 15), TextForeColor = Color.Orange }, layerHUD);
+            messages = await this.AddComponentUITextArea(new UITextAreaDescription {Font = TextDrawerDescription.FromFamily("Tahoma", 15), TextForeColor = Color.Orange }, layerHUD);
 
             title.Text = "Animation test";
             runtime.Text = "";

@@ -71,8 +71,8 @@ namespace SceneTest.SceneMaterials
 
         private async Task InitializeTextBoxes()
         {
-            title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18, Color.White, Color.Orange) }, layerHUD);
-            runtime = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 10, Color.Yellow, Color.Orange) }, layerHUD);
+            title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White, TextShadowColor = Color.Orange }, layerHUD);
+            runtime = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 10), TextForeColor = Color.Yellow, TextShadowColor = Color.Orange }, layerHUD);
 
             title.Text = "Scene Test - Materials";
             runtime.Text = "";

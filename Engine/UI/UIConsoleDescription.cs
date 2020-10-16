@@ -15,8 +15,6 @@ namespace Engine.UI
         {
             return new UIConsoleDescription()
             {
-                Background = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)),
-                Font = TextDrawerDescription.FromFamily("Lucida Console"),
                 LogLinesBig = 50,
                 LogLinesSmall = 10,
             };
@@ -30,7 +28,6 @@ namespace Engine.UI
             return new UIConsoleDescription()
             {
                 Background = SpriteDescription.Default(backgroundColor),
-                Font = TextDrawerDescription.FromFamily("Lucida Console"),
                 LogLinesBig = 50,
                 LogLinesSmall = 10,
             };
@@ -43,8 +40,7 @@ namespace Engine.UI
         {
             return new UIConsoleDescription()
             {
-                Background = SpriteDescription.FromFile(backgroundImage),
-                Font = TextDrawerDescription.FromFamily("Lucida Console"),
+                Background = SpriteDescription.Default(backgroundImage),
                 LogLinesBig = 50,
                 LogLinesSmall = 10,
             };
@@ -53,7 +49,7 @@ namespace Engine.UI
         /// <summary>
         /// Background
         /// </summary>
-        public SpriteDescription Background { get; set; }
+        public SpriteDescription Background { get; set; } = SpriteDescription.Default(UIConfiguration.TextBackgroundColor);
         /// <summary>
         /// Log lines in small size
         /// </summary>
@@ -74,5 +70,13 @@ namespace Engine.UI
         /// Console text update interval
         /// </summary>
         public TimeSpan UpdateInterval { get; set; } = TimeSpan.FromMilliseconds(100);
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public UIConsoleDescription() : base()
+        {
+            Font = UIConfiguration.MonospacedFont;
+        }
     }
 }

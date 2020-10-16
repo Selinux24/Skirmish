@@ -128,15 +128,15 @@ namespace Collada.Dungeon
 
         private async Task InitializeUIComponents()
         {
-            var title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18, Color.White) }, layerHUD);
+            var title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White }, layerHUD);
             title.Text = "Collada Dungeon Scene";
             title.SetPosition(Vector2.Zero);
 
-            fps = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12, Color.Yellow) }, layerHUD);
+            fps = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow }, layerHUD);
             fps.Text = null;
             fps.SetPosition(new Vector2(0, 24));
 
-            var picks = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12, Color.Yellow) }, layerHUD);
+            var picks = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow }, layerHUD);
             picks.Text = null;
             picks.SetPosition(new Vector2(0, 48));
 

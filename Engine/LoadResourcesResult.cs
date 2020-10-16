@@ -29,12 +29,8 @@ namespace Engine
         /// </summary>
         public virtual void ThrowExceptions()
         {
-            var exList = Results?
-                .Where(r => r.Exception != null)
-                .Select(r => r.Exception)
-                .ToArray();
-
-            if (exList?.Any() != true)
+            var exList = GetExceptions();
+            if (!exList.Any())
             {
                 return;
             }
@@ -42,6 +38,19 @@ namespace Engine
             var aggregate = new AggregateException($"A load resource task list results in error.", exList);
 
             throw aggregate.Flatten();
+        }
+        /// <summary>
+        /// Gets a list of exception results, if any
+        /// </summary>
+        /// <returns>Returns a list of exceptions</returns>
+        public IEnumerable<Exception> GetExceptions()
+        {
+            var exList = Results?
+                .Where(r => r.Exception != null)
+                .Select(r => r.Exception)
+                .ToArray();
+
+            return exList ?? new Exception[] { };
         }
     }
 

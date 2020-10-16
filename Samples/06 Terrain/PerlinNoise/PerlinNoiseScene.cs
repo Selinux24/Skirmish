@@ -124,25 +124,27 @@ namespace Terrain.PerlinNoise
             Color4 pColor = Color.DeepSkyBlue;
 
             var font = TextDrawerDescription.FromFamily(fontFamily, 16);
+            var butDesc = UIButtonDescription.DefaultTwoStateButton(bColor1, bColor2);
+            butDesc.Font = font;
 
             backGround = await this.AddComponentUIPanel(UIPanelDescription.Screen(this, Color.SandyBrown));
-            btnExit = await this.AddComponentUIButton(UIButtonDescription.DefaultTwoStateButton(bColor1, bColor2, UITextAreaDescription.Default(font)));
+            btnExit = await this.AddComponentUIButton(butDesc);
 
-            txtScale = await this.AddComponentUITextArea(UITextAreaDescription.FromFamily(fontFamily, 16));
-            txtLacunarity = await this.AddComponentUITextArea(UITextAreaDescription.FromFamily(fontFamily, 16));
-            txtPersistance = await this.AddComponentUITextArea(UITextAreaDescription.FromFamily(fontFamily, 16));
-            txtOctaves = await this.AddComponentUITextArea(UITextAreaDescription.FromFamily(fontFamily, 16));
-            txtHelpOffset = await this.AddComponentUITextArea(UITextAreaDescription.FromFamily(fontFamily, 12));
-            txtOffset = await this.AddComponentUITextArea(UITextAreaDescription.FromFamily(fontFamily, 14));
-            txtHelpSeed = await this.AddComponentUITextArea(UITextAreaDescription.FromFamily(fontFamily, 12));
-            txtSeed = await this.AddComponentUITextArea(UITextAreaDescription.FromFamily(fontFamily, 14));
+            txtScale = await this.AddComponentUITextArea(UITextAreaDescription.DefaultFromFamily(fontFamily, 16));
+            txtLacunarity = await this.AddComponentUITextArea(UITextAreaDescription.DefaultFromFamily(fontFamily, 16));
+            txtPersistance = await this.AddComponentUITextArea(UITextAreaDescription.DefaultFromFamily(fontFamily, 16));
+            txtOctaves = await this.AddComponentUITextArea(UITextAreaDescription.DefaultFromFamily(fontFamily, 16));
+            txtHelpOffset = await this.AddComponentUITextArea(UITextAreaDescription.DefaultFromFamily(fontFamily, 12));
+            txtOffset = await this.AddComponentUITextArea(UITextAreaDescription.DefaultFromFamily(fontFamily, 14));
+            txtHelpSeed = await this.AddComponentUITextArea(UITextAreaDescription.DefaultFromFamily(fontFamily, 12));
+            txtSeed = await this.AddComponentUITextArea(UITextAreaDescription.DefaultFromFamily(fontFamily, 14));
 
             pbScale = await this.AddComponentUIProgressBar(UIProgressBarDescription.DefaultFromFamily(fontFamily, 12));
             pbLacunarity = await this.AddComponentUIProgressBar(UIProgressBarDescription.DefaultFromFamily(fontFamily, 12));
             pbPersistance = await this.AddComponentUIProgressBar(UIProgressBarDescription.DefaultFromFamily(fontFamily, 12));
             pbOctaves = await this.AddComponentUIProgressBar(UIProgressBarDescription.DefaultFromFamily(fontFamily, 12));
 
-            btnSave = await this.AddComponentUIButton(UIButtonDescription.DefaultTwoStateButton(bColor1, bColor2, UITextAreaDescription.Default(font)));
+            btnSave = await this.AddComponentUIButton(butDesc);
 
             btnExit.JustReleased += BtnExit_JustReleased;
 
@@ -308,8 +310,7 @@ namespace Terrain.PerlinNoise
 
             perlinRenderer.Width = size;
             perlinRenderer.Height = size;
-            perlinRenderer.CenterHorizontally = CenterTargets.Screen;
-            perlinRenderer.CenterVertically = CenterTargets.Screen;
+            perlinRenderer.Anchor = Anchors.Center;
         }
         public void ResizeUI()
         {
@@ -332,8 +333,8 @@ namespace Terrain.PerlinNoise
             btnExit.Width = 30;
             btnExit.Height = 30;
             btnExit.Caption.Text = "X";
-            btnExit.Caption.HorizontalAlign = HorizontalTextAlign.Center;
-            btnExit.Caption.VerticalAlign = VerticalTextAlign.Middle;
+            btnExit.Caption.TextHorizontalAlign = HorizontalTextAlign.Center;
+            btnExit.Caption.TextVerticalAlign = VerticalTextAlign.Middle;
 
             txtScale.SetPosition(marginLeft, marginTop + (separation * lineIndex++));
 
@@ -362,7 +363,7 @@ namespace Terrain.PerlinNoise
             lineIndex++;
 
             txtHelpOffset.SetPosition(marginLeft, marginTop + (separation * lineIndex++));
-            txtHelpOffset.AdjustAreaWithText = false;
+            txtHelpOffset.GrowControlWithText = false;
             txtHelpOffset.Width = width;
             txtHelpOffset.Height = 0;
             txtHelpOffset.Text = "Use W A S D keys to displace the Noise map";
@@ -372,7 +373,7 @@ namespace Terrain.PerlinNoise
             lineIndex++;
 
             txtHelpSeed.SetPosition(marginLeft, marginTop + (separation * lineIndex++));
-            txtHelpSeed.AdjustAreaWithText = false;
+            txtHelpSeed.GrowControlWithText = false;
             txtHelpSeed.Width = width;
             txtHelpSeed.Height = 0;
             txtHelpSeed.Text = "Use X key to change the seed";
@@ -382,8 +383,8 @@ namespace Terrain.PerlinNoise
             btnSave.Width = 200;
             btnSave.Height = 50;
             btnSave.SetPosition(Game.Form.RenderCenter.X + (perlinRendererSize / 2) - btnSave.Width, Game.Form.RenderCenter.Y + (perlinRendererSize / 2));
-            btnSave.Caption.HorizontalAlign = HorizontalTextAlign.Center;
-            btnSave.Caption.VerticalAlign = VerticalTextAlign.Middle;
+            btnSave.Caption.TextHorizontalAlign = HorizontalTextAlign.Center;
+            btnSave.Caption.TextVerticalAlign = VerticalTextAlign.Middle;
             btnSave.Caption.Text = "Save to File";
         }
 

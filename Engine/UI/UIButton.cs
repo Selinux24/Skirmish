@@ -98,14 +98,22 @@ namespace Engine.UI
                 AddChild(buttonPressed, true);
             }
 
-            if (description.Caption != null)
-            {
-                description.Caption.EventsEnabled = false;
+            Caption = new UITextArea(
+                scene,
+                new UITextAreaDescription
+                {
+                    Font = description.Font,
+                    Text = description.Text,
+                    TextForeColor = description.TextForeColor,
+                    TextShadowColor = description.TextShadowColor,
+                    TextShadowDelta = description.TextShadowDelta,
+                    TextHorizontalAlign = description.TextHorizontalAlign,
+                    TextVerticalAlign = description.TextVerticalAlign,
 
-                Caption = new UITextArea(scene, description.Caption);
+                    EventsEnabled = false,
+                });
 
-                AddChild(Caption, true);
-            }
+            AddChild(Caption, true);
         }
 
         /// <inheritdoc/>

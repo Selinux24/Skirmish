@@ -221,13 +221,17 @@ namespace Engine.UI
         /// </summary>
         private float height;
         /// <summary>
-        /// Draws the sprite vertically centered on the render area
+        /// Spacing
         /// </summary>
-        private CenterTargets centerVertically = CenterTargets.None;
+        private Spacing spacing;
         /// <summary>
-        /// Draws the sprite horizontally centered on the render area
+        /// Padding
         /// </summary>
-        private CenterTargets centerHorizontally = CenterTargets.None;
+        private Padding padding;
+        /// <summary>
+        /// Anchor
+        /// </summary>
+        private Anchors anchor;
         /// <summary>
         /// Scale value
         /// </summary>
@@ -335,7 +339,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets the left position in the render area
         /// </summary>
-        public virtual float Left
+        public float Left
         {
             get
             {
@@ -343,16 +347,18 @@ namespace Engine.UI
             }
             set
             {
-                left = value;
-                centerHorizontally = CenterTargets.None;
+                if (left != value)
+                {
+                    left = value;
 
-                UpdateInternals = true;
+                    UpdateInternals = true;
+                }
             }
         }
         /// <summary>
         /// Gets or sets the top position in the render area
         /// </summary>
-        public virtual float Top
+        public float Top
         {
             get
             {
@@ -360,16 +366,18 @@ namespace Engine.UI
             }
             set
             {
-                top = value;
-                centerVertically = CenterTargets.None;
+                if (top != value)
+                {
+                    top = value;
 
-                UpdateInternals = true;
+                    UpdateInternals = true;
+                }
             }
         }
         /// <summary>
         /// Gets or sets the width
         /// </summary>
-        public virtual float Width
+        public float Width
         {
             get
             {
@@ -377,15 +385,18 @@ namespace Engine.UI
             }
             set
             {
-                width = value;
+                if (width != value)
+                {
+                    width = value;
 
-                UpdateInternals = true;
+                    UpdateInternals = true;
+                }
             }
         }
         /// <summary>
         /// Gets or sets the height
         /// </summary>
-        public virtual float Height
+        public float Height
         {
             get
             {
@@ -393,15 +404,18 @@ namespace Engine.UI
             }
             set
             {
-                height = value;
+                if (height != value)
+                {
+                    height = value;
 
-                UpdateInternals = true;
+                    UpdateInternals = true;
+                }
             }
         }
         /// <summary>
         /// Gets or sets the scale
         /// </summary>
-        public virtual float Scale
+        public float Scale
         {
             get
             {
@@ -409,15 +423,18 @@ namespace Engine.UI
             }
             set
             {
-                scale = value;
+                if (scale != value)
+                {
+                    scale = value;
 
-                UpdateInternals = true;
+                    UpdateInternals = true;
+                }
             }
         }
         /// <summary>
         /// Gets or sets the rotation
         /// </summary>
-        public virtual float Rotation
+        public float Rotation
         {
             get
             {
@@ -425,15 +442,19 @@ namespace Engine.UI
             }
             set
             {
-                rotation = value % MathUtil.TwoPi;
+                float v = value % MathUtil.TwoPi;
+                if (rotation != v)
+                {
+                    rotation = v;
 
-                UpdateInternals = true;
+                    UpdateInternals = true;
+                }
             }
         }
         /// <summary>
         /// Gets the control's rectangle coordinates in the render area
         /// </summary>
-        public virtual RectangleF Rectangle
+        public RectangleF Rectangle
         {
             get
             {
@@ -447,7 +468,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets the control's local center coordinates
         /// </summary>
-        public virtual Vector2 Center
+        public Vector2 Center
         {
             get
             {
@@ -547,7 +568,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets the parent center coordinates in the render area
         /// </summary>
-        public virtual Vector2 AbsoluteCenter
+        public Vector2 AbsoluteCenter
         {
             get
             {
@@ -632,7 +653,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets the first's hierarchy item center coordinates in the render area
         /// </summary>
-        public virtual Vector2 GrandpaCenter
+        public Vector2 GrandpaCenter
         {
             get
             {
@@ -640,6 +661,44 @@ namespace Engine.UI
             }
         }
 
+        /// <summary>
+        /// Spacing
+        /// </summary>
+        public virtual Spacing Spacing
+        {
+            get
+            {
+                return spacing;
+            }
+            set
+            {
+                if (spacing != value)
+                {
+                    spacing = value;
+
+                    UpdateInternals = true;
+                }
+            }
+        }
+        /// <summary>
+        /// Padding
+        /// </summary>
+        public virtual Padding Padding
+        {
+            get
+            {
+                return padding;
+            }
+            set
+            {
+                if (padding != value)
+                {
+                    padding = value;
+
+                    UpdateInternals = true;
+                }
+            }
+        }
         /// <summary>
         /// Indicates whether the control has to maintain proportion with parent size
         /// </summary>
@@ -651,43 +710,31 @@ namespace Engine.UI
             }
             set
             {
-                fitWithParent = value;
+                if (fitWithParent != value)
+                {
+                    fitWithParent = value;
 
-                UpdateInternals = true;
+                    UpdateInternals = true;
+                }
             }
         }
         /// <summary>
-        /// Centers vertically the text
+        /// Anchor
         /// </summary>
-        /// <param name="target">Center target</param>
-        public virtual CenterTargets CenterVertically
+        public virtual Anchors Anchor
         {
             get
             {
-                return centerVertically;
+                return anchor;
             }
             set
             {
-                centerVertically = value;
+                if (anchor != value)
+                {
+                    anchor = value;
 
-                UpdateInternals = true;
-            }
-        }
-        /// <summary>
-        /// Centers horinzontally the text
-        /// </summary>
-        /// <param name="target">Center target</param>
-        public virtual CenterTargets CenterHorizontally
-        {
-            get
-            {
-                return centerHorizontally;
-            }
-            set
-            {
-                centerHorizontally = value;
-
-                UpdateInternals = true;
+                    UpdateInternals = true;
+                }
             }
         }
 
@@ -767,7 +814,11 @@ namespace Engine.UI
 
             Manipulator = new Manipulator2D(Game);
 
+            padding = description.Padding;
+            spacing = description.Spacing;
+            anchor = description.Anchor;
             fitWithParent = description.FitParent;
+
             if (fitWithParent)
             {
                 top = 0;
@@ -782,9 +833,6 @@ namespace Engine.UI
                 width = description.Width;
                 height = description.Height;
             }
-
-            centerHorizontally = description.CenterHorizontally;
-            centerVertically = description.CenterVertically;
 
             baseColor = description.BaseColor;
             tintColor = description.TintColor;
@@ -830,30 +878,44 @@ namespace Engine.UI
         /// </summary>
         protected virtual void UpdateInternalState()
         {
-            if (centerHorizontally != CenterTargets.None)
-            {
-                var rect = GetCenteringArea(centerHorizontally);
-                left = rect.Center.X - (AbsoluteWidth * 0.5f);
-            }
+            CalculatePosition(AbsoluteRectangle);
 
-            if (centerVertically != CenterTargets.None)
-            {
-                var rect = GetCenteringArea(centerVertically);
-                top = rect.Center.Y - (AbsoluteHeight * 0.5f);
-            }
-
-            Vector2 sca = new Vector2(AbsoluteWidth, AbsoluteHeight) * AbsoluteScale;
+            var absRectangle = AbsoluteRectangle;
+            Vector2 pos = new Vector2(absRectangle.Left, absRectangle.Top);
+            Vector2 sca = new Vector2(absRectangle.Width, absRectangle.Height) * AbsoluteScale;
             float rot = AbsoluteRotation;
-            Vector2 pos = new Vector2(AbsoluteLeft, AbsoluteTop);
 
             Manipulator.SetScale(sca);
             Manipulator.SetRotation(rot);
             Manipulator.SetPosition(pos);
-            Manipulator.Update(GrandpaRectangle.Center, GrandpaScale);
+            Manipulator.Update(GrandpaCenter, GrandpaScale);
 
             if (children.Any())
             {
                 children.ForEach(c => c.UpdateInternals = true);
+            }
+        }
+        /// <summary>
+        /// Calculates the control position
+        /// </summary>
+        /// <param name="controlBounds"></param>
+        private void CalculatePosition(RectangleF controlBounds)
+        {
+            if (anchor == Anchors.None)
+            {
+                return;
+            }
+
+            var areaBounds = Parent?.AbsoluteRectangle ?? Game.Form.RenderRectangle;
+
+            if (anchor.HasFlag(Anchors.HorizontalCenter))
+            {
+                left = areaBounds.Center.X - (controlBounds.Width * 0.5f);
+            }
+
+            if (anchor.HasFlag(Anchors.VerticalCenter))
+            {
+                top = areaBounds.Center.Y - (controlBounds.Height * 0.5f);
             }
         }
 
@@ -1094,8 +1156,7 @@ namespace Engine.UI
         {
             left = x;
             top = y;
-            centerHorizontally = CenterTargets.None;
-            centerVertically = CenterTargets.None;
+            anchor = Anchors.None;
 
             UpdateInternals = true;
         }
@@ -1119,8 +1180,7 @@ namespace Engine.UI
             top = rectangle.Y;
             width = rectangle.Width;
             height = rectangle.Height;
-            centerHorizontally = CenterTargets.None;
-            centerVertically = CenterTargets.None;
+            anchor = Anchors.None;
 
             UpdateInternals = true;
         }
@@ -1131,21 +1191,7 @@ namespace Engine.UI
         /// <returns>Returns the render area</returns>
         public virtual RectangleF GetRenderArea()
         {
-            return AbsoluteRectangle;
-        }
-        /// <summary>
-        /// Gets the area used for centering calculation
-        /// </summary>
-        /// <param name="target">Center target</param>
-        /// <returns>Returns the centering area</returns>
-        public virtual RectangleF GetCenteringArea(CenterTargets target)
-        {
-            if (Parent != null && target == CenterTargets.Parent)
-            {
-                return new RectangleF(0, 0, Parent.AbsoluteWidth, Parent.AbsoluteHeight);
-            }
-
-            return Game.Form.RenderRectangle;
+            return Padding.Apply(AbsoluteRectangle);
         }
     }
 }

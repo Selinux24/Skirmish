@@ -139,7 +139,6 @@ namespace Engine
                 if (drawingData?.SkinningData != null)
                 {
                     current.AnimationController.Update(context.GameTime.ElapsedSeconds, drawingData.SkinningData);
-
                     animationOffset = current.AnimationController.AnimationOffset;
                 }
 

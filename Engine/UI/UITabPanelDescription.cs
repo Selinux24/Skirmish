@@ -11,25 +11,39 @@ namespace Engine.UI
         /// Gets the default tab panel description
         /// </summary>
         /// <param name="tabs">Number of tabs</param>
+        public static UITabPanelDescription Default(int tabs)
+        {
+            return new UITabPanelDescription()
+            {
+                Tabs = tabs,
+            };
+        }
+        /// <summary>
+        /// Gets the default tab panel description
+        /// </summary>
+        /// <param name="tabCaptions">Tab captions</param>
+        public static UITabPanelDescription Default(string[] tabCaptions)
+        {
+            var desc = Default(tabCaptions.Length);
+            desc.TabCaptions = tabCaptions;
+
+            return desc;
+        }
+        /// <summary>
+        /// Gets the default tab panel description
+        /// </summary>
+        /// <param name="tabs">Number of tabs</param>
         /// <param name="backgroundColor">Back color</param>
         /// <param name="baseColor">Control color</param>
         /// <param name="selectedColor">Highlight color</param>
         public static UITabPanelDescription Default(int tabs, Color4 backgroundColor, Color4 baseColor, Color4 selectedColor)
         {
-            var backgroundDesc = SpriteDescription.Default(backgroundColor);
-            var buttonDesc = UIButtonDescription.DefaultTwoStateButton(baseColor, selectedColor);
-            var panelDesc = UIPanelDescription.Default(baseColor);
-
-            buttonDesc.Caption.Font.VerticalAlign = VerticalTextAlign.Middle;
-            buttonDesc.Caption.Font.HorizontalAlign = HorizontalTextAlign.Center;
-
             return new UITabPanelDescription()
             {
-                Background = backgroundDesc,
-                ButtonDescription = buttonDesc,
-                PanelDescription = panelDesc,
+                Background = SpriteDescription.Default(backgroundColor),
+                ButtonDescription = UIButtonDescription.DefaultTwoStateButton(baseColor, selectedColor),
+                PanelDescription = UIPanelDescription.Default(baseColor),
                 Tabs = tabs,
-                BaseColor = Color.Transparent,
             };
         }
         /// <summary>
@@ -42,23 +56,22 @@ namespace Engine.UI
         public static UITabPanelDescription Default(string[] tabCaptions, Color4 backgroundColor, Color4 baseColor, Color4 selectedColor)
         {
             var desc = Default(tabCaptions.Length, backgroundColor, baseColor, selectedColor);
-            desc.Captions = tabCaptions;
-
+            desc.TabCaptions = tabCaptions;
             return desc;
         }
 
         /// <summary>
         /// Background
         /// </summary>
-        public SpriteDescription Background { get; set; } = SpriteDescription.Default(Color.Black);
+        public SpriteDescription Background { get; set; } = SpriteDescription.Default();
         /// <summary>
         /// Button description
         /// </summary>
-        public UIButtonDescription ButtonDescription { get; set; } = UIButtonDescription.Default(Color.White);
+        public UIButtonDescription ButtonDescription { get; set; } = UIButtonDescription.DefaultTwoStateButton();
         /// <summary>
         /// Panel description
         /// </summary>
-        public UIPanelDescription PanelDescription { get; set; } = UIPanelDescription.Default(Color.White);
+        public UIPanelDescription PanelDescription { get; set; } = UIPanelDescription.Default();
         /// <summary>
         /// Number of tabs
         /// </summary>
@@ -66,19 +79,37 @@ namespace Engine.UI
         /// <summary>
         /// Tab button captions
         /// </summary>
-        public string[] Captions { get; set; } = new string[] { "Tab 1" };
+        public string[] TabCaptions { get; set; } = new string[] { "Tab 1" };
+
         /// <summary>
-        /// Margin value
+        /// Tab button text padding
         /// </summary>
-        public float Margin { get; set; } = 0f;
+        public Padding TabButtonPadding { get; set; } = UIConfiguration.Padding;
         /// <summary>
-        /// Spacing value
+        /// Tab panel internal padding
         /// </summary>
-        public float Spacing { get; set; } = 5f;
+        public Padding TabPanelPadding { get; set; } = UIConfiguration.Padding;
         /// <summary>
-        /// Button area size
+        /// Tab panel internal spacing
         /// </summary>
-        public float ButtonAreaSize { get; set; } = 40;
+        public Spacing TabPanelSpacing { get; set; } = UIConfiguration.Spacing;
+
+        /// <summary>
+        /// Tab buttons area size
+        /// </summary>
+        public float TabButtonsAreaSize { get; set; } = 40;
+        /// <summary>
+        /// Tab buttons area padding
+        /// </summary>
+        public Padding TabButtonsPadding { get; set; } = UIConfiguration.Padding;
+        /// <summary>
+        /// Tab buttons area spacing
+        /// </summary>
+        public Spacing TabButtonsSpacing { get; set; } = UIConfiguration.Spacing;
+        /// <summary>
+        /// Tab panels area padding
+        /// </summary>
+        public Padding TabPanelsPadding { get; set; } = UIConfiguration.Padding;
 
         /// <summary>
         /// Constructor

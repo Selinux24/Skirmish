@@ -30,17 +30,33 @@ namespace Engine.UI
         /// </summary>
         private int selectedTabIndex = 0;
         /// <summary>
-        /// Margin size
+        /// Tab button area size
         /// </summary>
-        private float margin;
+        private float tabButtonsAreaSize;
         /// <summary>
-        /// Spacing size
+        /// Tab button area padding
         /// </summary>
-        private float spacing;
+        private Padding tabButtonsPadding;
         /// <summary>
-        /// Button area size
+        /// Tab button area spacing
         /// </summary>
-        private float buttonAreaSize;
+        private Spacing tabButtonsSpacing;
+        /// <summary>
+        /// Padding size
+        /// </summary>
+        private Padding tabPanelsPadding;
+        /// <summary>
+        /// Tab button text padding
+        /// </summary>
+        private Padding tabButtonPadding;
+        /// <summary>
+        /// Tab panel internal padding
+        /// </summary>
+        private Padding tabPanelPadding;
+        /// <summary>
+        /// Tab panel internal spacing
+        /// </summary>
+        private Spacing tabPanelSpacing;
         /// <summary>
         /// Selected button color
         /// </summary>
@@ -53,7 +69,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets the number of tabs
         /// </summary>
-        public int Tabs
+        public int TabCount
         {
             get
             {
@@ -61,66 +77,144 @@ namespace Engine.UI
             }
         }
         /// <summary>
-        /// Gets or sets the margin value
+        /// Gets or sets the tab button area size
         /// </summary>
-        public float Margin
+        public float TabButtonsAreaSize
         {
             get
             {
-                return margin;
+                return tabButtonsAreaSize;
             }
             set
             {
-                if (margin == value)
+                if (tabButtonsAreaSize == value)
                 {
                     return;
                 }
 
-                margin = value;
+                tabButtonsAreaSize = value;
 
                 updateLayout = true;
             }
         }
         /// <summary>
-        /// Gets or sets the spacing value
+        /// Gets or sets the tab button area padding
         /// </summary>
-        public float Spacing
+        public Padding TabButtonsPadding
         {
             get
             {
-                return spacing;
+                return tabButtonsPadding;
             }
             set
             {
-                if (spacing == value)
+                if (tabButtonsPadding == value)
                 {
                     return;
                 }
 
-                spacing = value;
+                tabButtonsPadding = value;
 
                 updateLayout = true;
             }
         }
         /// <summary>
-        /// Gets or sets the button area size
+        /// Gets or sets the tab button area spacing
         /// </summary>
-        public float ButtonAreaSize
+        public Spacing TabButtonsSpacing
         {
             get
             {
-                return buttonAreaSize;
+                return tabButtonsSpacing;
             }
             set
             {
-                if (buttonAreaSize == value)
+                if (tabButtonsSpacing == value)
                 {
                     return;
                 }
 
-                buttonAreaSize = value;
+                tabButtonsSpacing = value;
 
                 updateLayout = true;
+            }
+        }
+        /// <summary>
+        /// Gets or sets the tab panel area padding
+        /// </summary>
+        public Padding TabPanelsPadding
+        {
+            get
+            {
+                return tabPanelsPadding;
+            }
+            set
+            {
+                if (tabPanelsPadding == value)
+                {
+                    return;
+                }
+
+                tabPanelsPadding = value;
+
+                updateLayout = true;
+            }
+        }
+        /// <summary>
+        /// Tab button text padding
+        /// </summary>
+        public Padding TabButtonPadding
+        {
+            get
+            {
+                return tabButtonPadding;
+            }
+            set
+            {
+                tabButtonPadding = value;
+
+                foreach (var but in tabButtons)
+                {
+                    but.Caption.Padding = tabButtonPadding;
+                }
+            }
+        }
+        /// <summary>
+        /// Tab panel internal padding
+        /// </summary>
+        public Padding TabPanelPadding
+        {
+            get
+            {
+                return tabPanelPadding;
+            }
+            set
+            {
+                tabPanelPadding = value;
+
+                foreach (var pan in tabPanels)
+                {
+                    pan.Padding = tabPanelPadding;
+                }
+            }
+        }
+        /// <summary>
+        /// Tab panel internal spacing
+        /// </summary>
+        public Spacing TabPanelSpacing
+        {
+            get
+            {
+                return tabPanelSpacing;
+            }
+            set
+            {
+                tabPanelSpacing = value;
+
+                foreach (var pan in tabPanels)
+                {
+                    pan.Spacing = tabPanelSpacing;
+                }
             }
         }
         /// <summary>
@@ -205,9 +299,14 @@ namespace Engine.UI
         /// <param name="description">Description</param>
         public UITabPanel(Scene scene, UITabPanelDescription description) : base(scene, description)
         {
-            margin = description.Margin;
-            spacing = description.Spacing;
-            buttonAreaSize = description.ButtonAreaSize;
+            tabButtonsAreaSize = description.TabButtonsAreaSize;
+            tabButtonsPadding = description.TabButtonsPadding;
+            tabButtonsSpacing = description.TabButtonsSpacing;
+            tabPanelsPadding = description.TabPanelsPadding;
+            
+            tabButtonPadding = description.TabButtonPadding;
+            tabPanelPadding = description.TabPanelPadding;
+            tabPanelSpacing = description.TabPanelSpacing;
 
             if (description.Background != null)
             {
@@ -230,15 +329,18 @@ namespace Engine.UI
                     panelDesc.Name = $"{description.Name}.Panel_{i}";
 
                     var button = new UIButton(scene, buttonDesc);
-                    var panel = new UIPanel(scene, panelDesc);
-
-                    button.Caption.Text = description.Captions?.ElementAtOrDefault(i) ?? $"Button_{i}";
-
+                    button.Caption.Text = description.TabCaptions?.ElementAtOrDefault(i) ?? $"Button_{i}";
+                    button.Caption.Padding = tabButtonPadding;
                     button.Pressed += Button_Pressed;
                     button.JustPressed += Button_JustPressed;
                     button.JustReleased += Button_JustReleased;
 
                     tabButtons.Add(button);
+
+                    var panel = new UIPanel(scene, panelDesc);
+                    panel.Padding = tabPanelPadding;
+                    panel.Spacing = tabPanelSpacing;
+
                     tabPanels.Add(panel);
 
                     AddChild(button, false);
@@ -267,26 +369,26 @@ namespace Engine.UI
         /// </summary>
         private void UpdateLayout()
         {
-            if (Tabs <= 0)
+            if (TabCount <= 0)
             {
                 return;
             }
 
-            int tabs = Tabs;
+            int tabs = TabCount;
             var bounds = AbsoluteRectangle;
-            float buttonWidth = (bounds.Width - (spacing * (tabs - 1)) - (margin * 2)) / tabs;
-            float buttonHeight = ButtonAreaSize - margin - spacing;
+            float buttonWidth = (bounds.Width - (tabButtonsSpacing.Horizontal * (tabs - 1)) - (tabButtonsPadding.Left + tabButtonsPadding.Right)) / tabs;
+            float buttonHeight = tabButtonsAreaSize - (tabButtonsPadding.Top + tabButtonsPadding.Bottom);
 
-            float panelWidth = bounds.Width - margin - margin;
-            float panelHeight = bounds.Height - ButtonAreaSize - margin;
+            float panelWidth = bounds.Width - tabPanelsPadding.Left - tabPanelsPadding.Right;
+            float panelHeight = bounds.Height - tabButtonsAreaSize - (tabPanelsPadding.Top + tabPanelsPadding.Bottom);
 
             for (int i = 0; i < tabs; i++)
             {
-                tabButtons[i].SetPosition((i * buttonWidth) + (i * spacing) + margin, margin);
+                tabButtons[i].SetPosition((i * buttonWidth) + (i * tabButtonsSpacing.Horizontal) + tabButtonsPadding.Left, tabButtonsPadding.Top);
                 tabButtons[i].Width = buttonWidth;
                 tabButtons[i].Height = buttonHeight;
 
-                tabPanels[i].SetPosition(margin, ButtonAreaSize);
+                tabPanels[i].SetPosition(tabPanelsPadding.Left, tabButtonsAreaSize + tabPanelsPadding.Top);
                 tabPanels[i].Width = panelWidth;
                 tabPanels[i].Height = panelHeight;
             }

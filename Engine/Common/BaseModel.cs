@@ -39,7 +39,7 @@ namespace Engine.Common
             {
                 List<MeshMaterial> matList = new List<MeshMaterial>();
 
-                var drawingData = this.GetDrawingData(LevelOfDetail.High);
+                var drawingData = GetDrawingData(LevelOfDetail.High);
                 if (drawingData != null)
                 {
                     foreach (var meshMaterial in drawingData.Materials.Keys)
@@ -62,7 +62,7 @@ namespace Engine.Common
         {
             get
             {
-                return this.GetDrawingData(LevelOfDetail.High)?.SkinningData;
+                return GetDrawingData(LevelOfDetail.High)?.SkinningData;
             }
         }
         /// <summary>
@@ -116,7 +116,7 @@ namespace Engine.Common
                         defaultLevelOfDetail = lod;
                     }
 
-                    var drawable = DrawingData.Build(this.Game, description.Name, content[lod], desc, InstancingBuffer).GetAwaiter().GetResult();
+                    var drawable = DrawingData.Build(Game, description.Name, content[lod], desc, InstancingBuffer).GetAwaiter().GetResult();
 
                     meshesByLOD.Add(lod, drawable);
                 }
@@ -144,7 +144,7 @@ namespace Engine.Common
 
                 if (InstancingBuffer != null)
                 {
-                    BufferManager.RemoveInstancingData(this.InstancingBuffer);
+                    BufferManager.RemoveInstancingData(InstancingBuffer);
                     InstancingBuffer = null;
                 }
             }

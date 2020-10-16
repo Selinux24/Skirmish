@@ -117,12 +117,16 @@ namespace Engine.UI
                     new UITextAreaDescription
                     {
                         Font = description.Font,
+                        Text = description.Text,
+                        TextForeColor = description.TextForeColor,
+                        TextShadowColor = description.TextShadowColor,
+                        TextShadowDelta = description.TextShadowDelta,
+                        TextHorizontalAlign = description.TextHorizontalAlign,
+                        TextVerticalAlign = description.TextVerticalAlign,
                         EventsEnabled = false,
                     });
 
                 AddChild(Caption, true);
-
-                Caption.Text = description.Text;
             }
         }
 

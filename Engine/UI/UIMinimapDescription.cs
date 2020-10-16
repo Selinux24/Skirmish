@@ -42,10 +42,10 @@ namespace Engine.UI
         public UIMinimapDescription()
             : base()
         {
-            this.CastShadow = false;
-            this.DeferredEnabled = false;
-            this.DepthEnabled = false;
-            this.BlendMode = BlendModes.Alpha;
+            CastShadow = false;
+            DeferredEnabled = false;
+            DepthEnabled = false;
+            BlendMode = BlendModes.Alpha;
         }
     }
 }

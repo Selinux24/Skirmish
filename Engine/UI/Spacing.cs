@@ -14,11 +14,7 @@ namespace Engine.UI
         {
             get
             {
-                return new Spacing
-                {
-                    Horizontal = 0,
-                    Vertical = 0,
-                };
+                return new Spacing(0);
             }
         }
 
@@ -30,6 +26,26 @@ namespace Engine.UI
         /// Vertical spacing
         /// </summary>
         public float Vertical { get; set; }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="horizontal">Horizontal</param>
+        /// <param name="vertical">Vertical</param>
+        public Spacing(float horizontal, float vertical)
+        {
+            Horizontal = horizontal;
+            Vertical = vertical;
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="padding">Padding value</param>
+        public Spacing(float padding)
+        {
+            Horizontal = padding;
+            Vertical = padding;
+        }
 
         /// <inheritdoc/>
         public bool Equals(Spacing other)
@@ -80,6 +96,41 @@ namespace Engine.UI
             };
         }
         public static implicit operator Spacing(int[] value)
+        {
+            if (value?.Length == 1)
+            {
+                return new Spacing
+                {
+                    Horizontal = value[0],
+                    Vertical = value[0],
+                };
+            }
+
+            if (value?.Length == 2)
+            {
+                return new Spacing
+                {
+                    Horizontal = value[0],
+                    Vertical = value[1],
+                };
+            }
+
+            return new Spacing
+            {
+                Horizontal = float.NaN,
+                Vertical = float.NaN,
+            };
+        }
+
+        public static implicit operator Spacing(float value)
+        {
+            return new Spacing
+            {
+                Horizontal = value,
+                Vertical = value,
+            };
+        }
+        public static implicit operator Spacing(float[] value)
         {
             if (value?.Length == 1)
             {

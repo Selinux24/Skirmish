@@ -836,9 +836,7 @@ namespace Engine
                 {
                     var skV = sk.Pack();
 
-                    sk.ResourceIndex = (uint)addedSks.Count;
-                    sk.ResourceOffset = (uint)values.Count;
-                    sk.ResourceSize = (uint)skV.Length;
+                    sk.UpdateResource((uint)addedSks.Count, (uint)values.Count, (uint)skV.Length);
 
                     values.AddRange(skV);
 
@@ -848,9 +846,7 @@ namespace Engine
                 {
                     var cMat = addedSks.Find(m => m.Equals(sk));
 
-                    sk.ResourceIndex = cMat.ResourceIndex;
-                    sk.ResourceOffset = cMat.ResourceOffset;
-                    sk.ResourceSize = cMat.ResourceSize;
+                    sk.UpdateResource(cMat.ResourceIndex, cMat.ResourceOffset, cMat.ResourceSize);
                 }
             }
 

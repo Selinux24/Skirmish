@@ -3,9 +3,9 @@
 namespace Engine.UI
 {
     /// <summary>
-    /// Sprite progress bar description
+    /// Progress bar description
     /// </summary>
-    public class UIProgressBarDescription : UIControlDescription
+    public class UIProgressBarDescription : UIControlDescription, IWithTextDescription
     {
         /// <summary>
         /// Gets the default progress bar description
@@ -41,8 +41,6 @@ namespace Engine.UI
                 {
                     FontFamily = fontFamilyName,
                     FontSize = size,
-                    HorizontalAlign = HorizontalTextAlign.Center,
-                    VerticalAlign = VerticalTextAlign.Middle,
                     Style = fontStyle,
                 },
             };
@@ -63,8 +61,6 @@ namespace Engine.UI
                     FontFileName = fileName,
                     FontSize = size,
                     LineAdjust = lineAdjust,
-                    HorizontalAlign = HorizontalTextAlign.Center,
-                    VerticalAlign = VerticalTextAlign.Middle,
                     Style = fontStyle,
                 },
             };
@@ -85,8 +81,6 @@ namespace Engine.UI
                         ImageFile = fontImageFileName,
                         MapFile = fontMapFileName,
                     },
-                    HorizontalAlign = HorizontalTextAlign.Center,
-                    VerticalAlign = VerticalTextAlign.Middle,
                     UseTextureColor = true,
                 },
             };
@@ -95,16 +89,37 @@ namespace Engine.UI
         /// <summary>
         /// Progress color
         /// </summary>
-        public Color4 ProgressColor { get; set; } = new Color4(0f, 1f, 0f, 1f);
+        public Color4 ProgressColor { get; set; } = UIConfiguration.HighlightColor;
+
+        /// <summary>
+        /// Font description
+        /// </summary>
+        public TextDrawerDescription Font { get; set; } = UIConfiguration.Font;
 
         /// <summary>
         /// Text
         /// </summary>
         public string Text { get; set; }
         /// <summary>
-        /// Font description
+        /// Text fore color
         /// </summary>
-        public TextDrawerDescription Font { get; set; }
+        public Color4 TextForeColor { get; set; } = UIConfiguration.TextColor;
+        /// <summary>
+        /// Text shadow color
+        /// </summary>
+        public Color4 TextShadowColor { get; set; } = Color.Transparent;
+        /// <summary>
+        /// Shadow position delta
+        /// </summary>
+        public Vector2 TextShadowDelta { get; set; } = new Vector2(1, 1);
+        /// <summary>
+        /// Text horizontal alignement
+        /// </summary>
+        public HorizontalTextAlign TextHorizontalAlign { get; set; } = HorizontalTextAlign.Center;
+        /// <summary>
+        /// Text vertical alignement
+        /// </summary>
+        public VerticalTextAlign TextVerticalAlign { get; set; } = VerticalTextAlign.Middle;
 
         /// <summary>
         /// Constructor
@@ -112,11 +127,7 @@ namespace Engine.UI
         public UIProgressBarDescription()
             : base()
         {
-            var font = TextDrawerDescription.Default();
-            font.HorizontalAlign = HorizontalTextAlign.Center;
-            font.VerticalAlign = VerticalTextAlign.Middle;
 
-            Font = font;
         }
     }
 }

@@ -118,17 +118,17 @@ namespace SceneTest.SceneTest
         }
         private async Task InitializeUI()
         {
-            var titleDesc = UITextAreaDescription.FromFamily("Tahoma", 18);
-            titleDesc.Font.ForeColor = Color.Yellow;
-            titleDesc.Font.ShadowColor = Color.Orange;
+            var titleDesc = UITextAreaDescription.DefaultFromFamily("Tahoma", 18);
+            titleDesc.TextForeColor = Color.Yellow;
+            titleDesc.TextShadowColor = Color.Orange;
 
             title = await this.AddComponentUITextArea(titleDesc, layerHUD);
             title.Text = "Scene Test - Textures";
             title.SetPosition(Vector2.Zero);
 
-            var runtimeDesc = UITextAreaDescription.FromFamily("Tahoma", 10);
-            runtimeDesc.Font.ForeColor = Color.Yellow;
-            runtimeDesc.Font.ShadowColor = Color.Orange;
+            var runtimeDesc = UITextAreaDescription.DefaultFromFamily("Tahoma", 10);
+            runtimeDesc.TextForeColor = Color.Yellow;
+            runtimeDesc.TextShadowColor = Color.Orange;
 
             runtime = await this.AddComponentUITextArea(runtimeDesc, layerHUD);
             runtime.Text = "";
@@ -141,14 +141,17 @@ namespace SceneTest.SceneTest
                 BaseColor = new Color4(0, 0, 0, 0.75f),
             }, SceneObjectUsages.UI, layerHUD - 1);
 
-            var buttonFont = TextDrawerDescription.FromFamily("Lucida Console", 12, Color.Yellow, Color.Orange);
-            buttonFont.HorizontalAlign = HorizontalTextAlign.Center;
-            buttonFont.VerticalAlign = VerticalTextAlign.Middle;
+            var buttonFont = TextDrawerDescription.FromFamily("Lucida Console", 12);
 
-            var buttonCaption = UITextAreaDescription.Default(buttonFont, "Close");
-            var buttonDesc = UIButtonDescription.DefaultTwoStateButton("SceneTest/UI/button_on.png", "SceneTest/UI/button_off.png", buttonCaption);
+            var buttonDesc = UIButtonDescription.DefaultTwoStateButton("SceneTest/UI/button_on.png", "SceneTest/UI/button_off.png");
             buttonDesc.Width = 100;
             buttonDesc.Height = 40;
+            buttonDesc.Font = buttonFont;
+            buttonDesc.Text = "Close";
+            buttonDesc.TextForeColor = Color.Yellow;
+            buttonDesc.TextShadowColor = Color.Orange;
+            buttonDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
+            buttonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
 
             butClose = await this.AddComponentUIButton(buttonDesc, layerHUD);
             butClose.JustReleased += (sender, eventArgs) => { Game.SetScene<SceneStart.SceneStart>(); };

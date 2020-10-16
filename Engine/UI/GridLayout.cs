@@ -135,16 +135,13 @@ namespace Engine.UI
         /// <summary>
         /// Updates the grid layout
         /// </summary>
-        /// <param name="panel">Panel</param>
         /// <param name="controls">Control list</param>
         /// <param name="parameters">Layout parameters</param>
-        public static void UpdateLayout(UIPanel panel, IEnumerable<UIControl> controls, GridLayout parameters)
+        /// <param name="bounds">Bounds</param>
+        /// <param name="padding">Padding</param>
+        /// <param name="spacing">Spacing</param>
+        public static void UpdateLayout(IEnumerable<UIControl> controls, GridLayout parameters, RectangleF bounds, Padding padding, Spacing spacing)
         {
-            if (panel == null)
-            {
-                return;
-            }
-
             if (controls?.Any() != true)
             {
                 return;
@@ -155,8 +152,6 @@ namespace Engine.UI
                 return;
             }
 
-            Spacing spacing = panel.Spacing;
-            Padding padding = panel.Padding;
             GridFitTypes fitType = parameters.FitType;
             int rows = parameters.Rows;
             int cols = parameters.Columns;
@@ -180,10 +175,8 @@ namespace Engine.UI
                 cols = (int)Math.Ceiling(controls.Count() / (float)rows);
             }
 
-            var rect = panel.GetRenderArea();
-
-            float cellWidth = (rect.Width / cols) - (spacing.Horizontal / cols * (cols - 1)) - (padding.Left / cols) - (padding.Right / cols);
-            float cellHeight = (rect.Height / rows) - (spacing.Vertical / rows * (rows - 1)) - (padding.Top / rows) - (padding.Bottom / rows);
+            float cellWidth = (bounds.Width / cols) - (spacing.Horizontal / cols * (cols - 1)) - (padding.Left / cols) - (padding.Right / cols);
+            float cellHeight = (bounds.Height / rows) - (spacing.Vertical / rows * (rows - 1)) - (padding.Top / rows) - (padding.Bottom / rows);
 
             cellSize.X = fitX ? cellWidth : cellSize.X;
             cellSize.Y = fitY ? cellHeight : cellSize.Y;
@@ -197,7 +190,7 @@ namespace Engine.UI
                 var yPos = cellSize.Y * rowCount + (spacing.Vertical * rowCount) + padding.Top;
 
                 var item = controls.ElementAt(i);
-                item.SetPosition(xPos, yPos);
+                item.SetPosition(xPos + bounds.X, yPos + bounds.Y);
                 item.Width = cellSize.X;
                 item.Height = cellSize.Y;
             }

@@ -15,9 +15,9 @@ namespace Engine.UI
         /// </summary>
         private readonly TextDrawer textDrawer = null;
         /// <summary>
-        /// Line height
+        /// Grow control with text value
         /// </summary>
-        private readonly float lineHeight = 0;
+        private bool growControlWithText = false;
 
         /// <summary>
         /// Gets or sets the control text
@@ -26,11 +26,11 @@ namespace Engine.UI
         {
             get
             {
-                return textDrawer?.Text;
+                return textDrawer.Text;
             }
             set
             {
-                if (textDrawer != null && !string.Equals(value, textDrawer.Text))
+                if (!string.Equals(value, textDrawer.Text))
                 {
                     textDrawer.Text = value;
 
@@ -45,74 +45,105 @@ namespace Engine.UI
         {
             get
             {
-                return textDrawer?.ParsedText;
+                return textDrawer.ParsedText;
             }
         }
         /// <summary>
         /// Gets or sets the text color
         /// </summary>
-        public Color4 ForeColor
+        public Color4 TextForeColor
         {
             get
             {
-                return textDrawer?.ForeColor ?? new Color4(0, 0, 0, 0);
+                return textDrawer.ForeColor;
             }
             set
             {
-                if (textDrawer != null && textDrawer.ForeColor != value)
-                {
-                    textDrawer.ForeColor = value;
-                }
+                textDrawer.ForeColor = value;
             }
         }
         /// <summary>
         /// Gets or sets the shadow color
         /// </summary>
-        public Color4 ShadowColor
+        public Color4 TextShadowColor
         {
             get
             {
-                return textDrawer?.ShadowColor ?? new Color4(0, 0, 0, 0);
+                return textDrawer.ShadowColor;
             }
             set
             {
-                if (textDrawer != null && textDrawer.ShadowColor != value)
-                {
-                    textDrawer.ShadowColor = value;
-                }
+                textDrawer.ShadowColor = value;
+            }
+        }
+        /// <summary>
+        /// Shadow position delta
+        /// </summary>
+        public Vector2 TextShadowDelta
+        {
+            get
+            {
+                return textDrawer.ShadowDelta;
+            }
+            set
+            {
+                textDrawer.ShadowDelta = value;
             }
         }
         /// <summary>
         /// Gets or sets the text horizontal align
         /// </summary>
-        public HorizontalTextAlign HorizontalAlign
+        public HorizontalTextAlign TextHorizontalAlign
         {
             get
             {
-                return textDrawer?.HorizontalAlign ?? HorizontalTextAlign.Left;
+                return textDrawer.HorizontalAlign;
             }
             set
             {
-                if (textDrawer != null && textDrawer.HorizontalAlign != value)
-                {
-                    textDrawer.HorizontalAlign = value;
-                }
+                textDrawer.HorizontalAlign = value;
             }
         }
         /// <summary>
         /// Gets or sets the text vertical align
         /// </summary>
-        public VerticalTextAlign VerticalAlign
+        public VerticalTextAlign TextVerticalAlign
         {
             get
             {
-                return textDrawer?.VerticalAlign ?? VerticalTextAlign.Top;
+                return textDrawer.VerticalAlign;
             }
             set
             {
-                if (textDrawer != null && textDrawer.VerticalAlign != value)
+                textDrawer.VerticalAlign = value;
+            }
+        }
+        /// <summary>
+        /// Returns the text line height
+        /// </summary>
+        public float TextLineHeight
+        {
+            get
+            {
+                return textDrawer.GetLineHeight();
+            }
+        }
+        /// <summary>
+        /// Gets or sets whether the area must grow or shrinks with the text value
+        /// </summary>
+        public bool GrowControlWithText
+        {
+            get
+            {
+                return growControlWithText;
+            }
+            set
+            {
+                if (growControlWithText != value)
                 {
-                    textDrawer.VerticalAlign = value;
+                    growControlWithText = value;
+
+                    UpdateInternals = true;
                 }
             }
         }
@@ -127,28 +158,7 @@ namespace Engine.UI
             {
                 base.Alpha = value;
 
-                if (textDrawer != null && textDrawer.Alpha != value)
-                {
-                    textDrawer.Alpha = value;
-                }
-            }
-        }
-        /// <summary>
-        /// Padding
-        /// </summary>
-        public Padding Padding { get; set; }
-        /// <summary>
-        /// Gets or sets whether the area must grow or shrinks with the text value
-        /// </summary>
-        public bool AdjustAreaWithText { get; set; }
-        /// <summary>
-        /// Returns the font line height
-        /// </summary>
-        public float FontHeight
-        {
-            get
-            {
-                return textDrawer.GetLineHeight();
+                textDrawer.Alpha = value;
             }
         }
 
@@ -159,31 +169,28 @@ namespace Engine.UI
         /// <param name="description">Description</param>
         public UITextArea(Scene scene, UITextAreaDescription description) : base(scene, description)
         {
-            Padding = description.Padding;
-            AdjustAreaWithText = description.AdjustAreaWithText;
+            growControlWithText = description.GrowControlWithText;
 
-            if (description.Font != null)
+            textDrawer = new TextDrawer(scene, this, description.Font)
             {
-                description.Font.Name = description.Font.Name ?? $"{description.Name}.TextArea";
+                Name = description.Font.Name ?? $"{description.Name}.TextArea",
 
-                textDrawer = new TextDrawer(scene, description.Font)
-                {
-                    Parent = this,
-                };
+                Text = description.Text,
+                ForeColor = description.TextForeColor,
+                ShadowColor = description.TextShadowColor,
+                ShadowDelta = description.TextShadowDelta,
+                HorizontalAlign = description.TextHorizontalAlign,
+                VerticalAlign = description.TextVerticalAlign,
+            };
 
-                Text = description.Text;
-
-                lineHeight = textDrawer.GetLineHeight();
-
-                GrowControl();
-            }
+            GrowControl();
         }
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                textDrawer?.Dispose();
+                textDrawer.Dispose();
             }
 
             base.Dispose(disposing);
@@ -199,15 +206,15 @@ namespace Engine.UI
                 return;
             }
 
-            textDrawer?.Update(context);
+            textDrawer.Update(context);
         }
-        
+
         /// <inheritdoc/>
         protected override void UpdateInternalState()
         {
             base.UpdateInternalState();
 
-            textDrawer?.UpdateInternals();
+            textDrawer.UpdateInternals();
         }
 
         /// <inheritdoc/>
@@ -220,7 +227,7 @@ namespace Engine.UI
                 return;
             }
 
-            textDrawer?.Draw(context);
+            textDrawer.Draw(context);
         }
 
         /// <inheritdoc/>
@@ -228,38 +235,20 @@ namespace Engine.UI
         {
             base.Resize();
 
-            textDrawer?.Resize();
+            textDrawer.Resize();
         }
 
         /// <inheritdoc/>
         /// <remarks>Applies margin configuration if any</remarks>
         public override RectangleF GetRenderArea()
         {
-            float left;
-            float top;
-            float width;
-            float height;
+            var absRect = AbsoluteRectangle;
 
-            if (AdjustAreaWithText && !HasParent)
-            {
-                left = Left;
-                top = Top;
-                width = Game.Form.RenderWidth - left;
-                height = Game.Form.RenderHeight - top;
-            }
-            else
-            {
-                left = AbsoluteLeft;
-                top = AbsoluteTop;
-                width = AbsoluteWidth == 0 ? Game.Form.RenderWidth - AbsoluteLeft : AbsoluteWidth;
-                height = AbsoluteHeight == 0 ? Game.Form.RenderHeight - AbsoluteTop : AbsoluteHeight;
-            }
+            //If adjust area with text is enabled, or the drawing area is zero, set area from current top-left position to screen right-bottom position
+            if ((GrowControlWithText && !HasParent) || absRect.Width == 0) absRect.Width = Game.Form.RenderWidth - absRect.Left;
+            if ((GrowControlWithText && !HasParent) || absRect.Height == 0) absRect.Height = Game.Form.RenderHeight - absRect.Top;
 
-            return new RectangleF(
-                left + Padding.Left,
-                top + Padding.Top,
-                width - (Padding.Left + Padding.Right),
-                height - (Padding.Top + Padding.Bottom));
+            return Padding.Apply(absRect);
         }
 
         /// <summary>
@@ -267,20 +256,12 @@ namespace Engine.UI
         /// </summary>
         private void GrowControl()
         {
-            var size = textDrawer.MeasureText(Text, GetRenderArea(), HorizontalAlign, VerticalAlign);
+            var size = textDrawer.MeasureText(Text, TextHorizontalAlign, TextVerticalAlign);
+            var minHeight = textDrawer.GetLineHeight();
 
-            //Set initial sizes
-            if (Width == 0) Width = size.X;
-            if (Height == 0) Height = size.Y == 0 ? lineHeight : size.Y;
-
-            if (!AdjustAreaWithText)
-            {
-                return;
-            }
-
-            //Grow area
-            Width = size.X;
-            Height = size.Y == 0 ? lineHeight : size.Y;
+            //Set sizes if grow control with text or sizes not setted
+            if (GrowControlWithText || Width == 0) Width = size.X;
+            if (GrowControlWithText || Height == 0) Height = size.Y == 0 ? minHeight : size.Y;
         }
     }
 

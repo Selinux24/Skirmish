@@ -65,7 +65,7 @@ namespace Engine.UI
         /// <summary>
         /// Parent control
         /// </summary>
-        private UIControl parent = null;
+        private readonly UIControl parent = null;
         /// <summary>
         /// Horizontal align
         /// </summary>
@@ -92,25 +92,6 @@ namespace Engine.UI
         /// Font name
         /// </summary>
         public readonly string Font = null;
-        /// <summary>
-        /// Parent control
-        /// </summary>
-        public UIControl Parent
-        {
-            get
-            {
-                return parent;
-            }
-            set
-            {
-                if (parent != value)
-                {
-                    parent = value;
-
-                    updateInternals = true;
-                }
-            }
-        }
         /// <summary>
         /// Gets or sets text to draw
         /// </summary>
@@ -241,10 +222,13 @@ namespace Engine.UI
         /// Constructor
         /// </summary>
         /// <param name="scene">Scene</param>
+        /// <param name="parent">Parent control</param>
         /// <param name="description">Text description</param>
-        public TextDrawer(Scene scene, TextDrawerDescription description)
+        public TextDrawer(Scene scene, UIControl parent, TextDrawerDescription description)
             : base(scene, description)
         {
+            this.parent = parent;
+
             Manipulator = new Manipulator2D(Game);
             ShadowManipulator = new Manipulator2D(Game);
 
@@ -271,22 +255,11 @@ namespace Engine.UI
             vertexBuffer = BufferManager.AddVertexData(description.Name, true, verts);
             indexBuffer = BufferManager.AddIndexData(description.Name, true, idx);
 
-            ForeColor = description.ForeColor;
             UseTextureColor = description.UseTextureColor;
-            ShadowColor = description.ShadowColor;
-            ShadowDelta = description.ShadowDelta;
-            horizontalAlign = description.HorizontalAlign;
-            verticalAlign = description.VerticalAlign;
 
             if (description.LineAdjust)
             {
-                string sampleChar = $"{fontMap.GetSampleCharacter()}";
-                RectangleF rect = Game.Form.RenderRectangle;
-
-                // Set base line threshold
-                var size = MeasureText(sampleChar, rect, HorizontalTextAlign.Left, VerticalTextAlign.Top);
-
-                baseLineThr = size.Y * 0.1666f; // --> 0.3333f * 0.5f
+                baseLineThr = GetLineHeight() * 0.1666f; // --> 0.3333f * 0.5f
             }
         }
         /// <summary>
@@ -325,33 +298,13 @@ namespace Engine.UI
                 updateInternals = false;
             }
 
-            Vector2 sca;
-            Vector2 pos;
-            float rot;
-            Vector2 parentCenter;
-            float parentScale;
+            var renderArea = GetRenderArea();
 
-            if (parent != null)
-            {
-                sca = Vector2.One * parent.AbsoluteScale;
-                pos = new Vector2(parent.AbsoluteLeft, parent.AbsoluteTop);
-                rot = parent.AbsoluteRotation;
-                parentCenter = parent.GrandpaRectangle.Center;
-                parentScale = parent.GrandpaScale;
-            }
-            else
-            {
-                sca = Vector2.One;
-                pos = Vector2.Zero;
-                rot = 0f;
-                parentCenter = Vector2.Zero;
-                parentScale = 1f;
-            }
-
-            // Adjust position
-            var rect = GetRenderArea();
-            pos.X = rect.X;
-            pos.Y = rect.Y + baseLineThr;
+            Vector2 sca = Vector2.One * (parent?.AbsoluteScale ?? 1f);
+            Vector2 pos = new Vector2(renderArea.X, renderArea.Y + baseLineThr);
+            float rot = parent?.AbsoluteRotation ?? 0f;
+            Vector2 parentCenter = parent?.GrandpaCenter ?? Vector2.Zero;
+            float parentScale = parent?.GrandpaScale ?? 1f;
 
             // Calculate new transforms
             Manipulator.SetScale(sca);
@@ -505,10 +458,12 @@ namespace Engine.UI
                 shadowColor,
                 out var words, out var colors, out var shadowColors);
 
+            var renderArea = GetRenderArea();
+
             var colorW = fontMap.MapSentence(
                 words,
                 colors,
-                GetRenderArea(),
+                renderArea,
                 horizontalAlign,
                 verticalAlign);
 
@@ -520,7 +475,7 @@ namespace Engine.UI
                 var colorS = fontMap.MapSentence(
                     words,
                     shadowColors,
-                    GetRenderArea(),
+                    renderArea,
                     horizontalAlign,
                     verticalAlign);
 
@@ -546,11 +501,10 @@ namespace Engine.UI
         /// Measures the specified text
         /// </summary>
         /// <param name="text">Text</param>
-        /// <param name="rect">Drawing rectangle</param>
         /// <param name="horizontalAlign">Horizontal align</param>
         /// <param name="verticalAlign">Vertical align</param>
         /// <returns>Returns a size vector where X is the width, and Y is the height</returns>
-        public Vector2 MeasureText(string text, RectangleF rect, HorizontalTextAlign horizontalAlign, VerticalTextAlign verticalAlign)
+        public Vector2 MeasureText(string text, HorizontalTextAlign horizontalAlign, VerticalTextAlign verticalAlign)
         {
             if (fontMap == null)
             {
@@ -562,7 +516,7 @@ namespace Engine.UI
             var w = fontMap.MapSentence(
                 words,
                 null,
-                rect,
+                GetRenderArea(),
                 horizontalAlign,
                 verticalAlign);
 
@@ -579,16 +533,21 @@ namespace Engine.UI
             }
 
             string sampleChar = $"{fontMap.GetSampleCharacter()}";
-            RectangleF rect = Game.Form.RenderRectangle;
 
             var w = fontMap.MapSentence(
                 new[] { sampleChar },
                 null,
-                rect,
+                Game.Form.RenderRectangle,
                 HorizontalTextAlign.Left,
                 VerticalTextAlign.Top);
 
             return w.Size.Y;
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return ParsedText;
         }
     }
 }

@@ -202,11 +202,6 @@ namespace Engine
 
             if (DrawingData?.SkinningData != null)
             {
-                if (AnimationController.Playing)
-                {
-                    InvalidateCache();
-                }
-
                 AnimationController.Update(context.GameTime.ElapsedSeconds, DrawingData.SkinningData);
                 AnimationOffset = AnimationController.AnimationOffset;
             }

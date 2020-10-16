@@ -423,9 +423,10 @@
     <Compile Include="TaskResult.cs" />
     <Compile Include="Tween\FloatTween.cs" />
     <Compile Include="Tween\ITweenCollection.cs" />
-    <Compile Include="UI\CenterTargets.cs" />
+    <Compile Include="UI\Anchors.cs" />
     <Compile Include="UI\GridFitTypes.cs" />
     <Compile Include="UI\GridLayout.cs" />
+    <Compile Include="UI\IWithTextDescription.cs" />
     <Compile Include="UI\Padding.cs" />
     <Compile Include="UI\Spacing.cs" />
     <Compile Include="UI\Tween\UIControlTweenCollection.cs" />
@@ -439,10 +440,13 @@
     <Compile Include="Tween\TweenState.cs" />
     <Compile Include="UI\FontMapCache.cs" />
     <Compile Include="UI\HorizontalTextAlign.cs" />
+    <Compile Include="UI\UIConfiguration.cs" />
     <Compile Include="UI\UIConsole.cs" />
     <Compile Include="UI\UIConsoleDescription.cs" />
     <Compile Include="UI\UICursorDescription.cs" />
     <Compile Include="UI\UICursor.cs" />
+    <Compile Include="UI\UIDialog.cs" />
+    <Compile Include="UI\UIDialogDescription.cs" />
     <Compile Include="UI\UIPanel.cs" />
     <Compile Include="UI\UIControl.cs" />
     <Compile Include="UI\UIControlDescription.cs" />
@@ -515,7 +519,6 @@
     <Compile Include="Common\GeometryUtil.cs" />
     <Compile Include="BoundingBoxInt.cs" />
     <Compile Include="SkydomDescription.cs" />
-    <Compile Include="UI\BackgroundDescription.cs" />
     <Compile Include="UI\UIButtonDescription.cs" />
     <Compile Include="UI\SpriteDescription.cs" />
     <Compile Include="UI\UITextureRendererChannels.cs" />

@@ -8,17 +8,11 @@ namespace Engine.UI
     public class UIPanelDescription : UIControlDescription
     {
         /// <summary>
-        /// Gets a new transparent panel description
+        /// Gets the default panel description
         /// </summary>
-        public static UIPanelDescription Transparent
+        public static UIPanelDescription Default()
         {
-            get
-            {
-                return new UIPanelDescription()
-                {
-                    Background = SpriteDescription.Default(Color.Transparent),
-                };
-            }
+            return new UIPanelDescription();
         }
         /// <summary>
         /// Gets the default panel description
@@ -39,7 +33,21 @@ namespace Engine.UI
         {
             return new UIPanelDescription()
             {
-                Background = SpriteDescription.FromFile(fileName),
+                Background = SpriteDescription.Default(fileName),
+            };
+        }
+        /// <summary>
+        /// Gets a screen panel description
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        public static UIPanelDescription Screen(Scene scene)
+        {
+            return new UIPanelDescription
+            {
+                Left = 0,
+                Top = 0,
+                Width = scene.Game.Form.RenderWidth,
+                Height = scene.Game.Form.RenderHeight,
             };
         }
         /// <summary>
@@ -67,7 +75,7 @@ namespace Engine.UI
         {
             return new UIPanelDescription
             {
-                Background = SpriteDescription.FromFile(fileName),
+                Background = SpriteDescription.Default(fileName),
                 Left = 0,
                 Top = 0,
                 Width = scene.Game.Form.RenderWidth,
@@ -78,15 +86,7 @@ namespace Engine.UI
         /// <summary>
         /// Background
         /// </summary>
-        public SpriteDescription Background { get; set; }
-        /// <summary>
-        /// Spacing
-        /// </summary>
-        public Spacing Spacing { get; set; }
-        /// <summary>
-        /// Padding
-        /// </summary>
-        public Padding Padding { get; set; }
+        public SpriteDescription Background { get; set; } = SpriteDescription.Default();
         /// <summary>
         /// Grid layout
         /// </summary>
