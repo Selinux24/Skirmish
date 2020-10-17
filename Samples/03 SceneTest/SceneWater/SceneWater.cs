@@ -39,23 +39,20 @@ namespace SceneTest.SceneWater
         }
         private async Task InitializeAssets()
         {
-            await this.AddComponentWater(new WaterDescription()
+            await this.AddComponentWater("Water", new WaterDescription()
             {
-                Name = "Water",
                 PlaneSize = 1000f,
                 HeightmapIterations = 8,
                 GeometryIterations = 4,
                 ColorIterations = 8,
             });
-            await this.AddComponentSkyScattering(new SkyScatteringDescription()
+            await this.AddComponentSkyScattering("Sky", new SkyScatteringDescription()
             {
-                Name = "Sky",
                 Resolution = SkyScatteringResolutions.High
             });
 
             var lfDesc = new LensFlareDescription()
             {
-                Name = "Flares",
                 ContentPath = @"Common/LensFlare",
                 GlowTexture = "lfGlow.png",
                 Flares = new[]
@@ -74,7 +71,7 @@ namespace SceneTest.SceneWater
                     new LensFlareDescription.Flare( 2.0f, 6.4f, new Color( 25,  50, 100), "lfFlare3.png"),
                 }
             };
-            await this.AddComponentLensFlare(lfDesc, SceneObjectUsages.None);
+            await this.AddComponentLensFlare("Flares", lfDesc, SceneObjectUsages.None);
         }
 
         public override void Update(GameTime gameTime)

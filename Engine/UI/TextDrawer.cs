@@ -221,18 +221,19 @@ namespace Engine.UI
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="parent">Parent control</param>
         /// <param name="description">Text description</param>
-        public TextDrawer(Scene scene, UIControl parent, TextDrawerDescription description)
-            : base(scene, description)
+        public TextDrawer(string name, Scene scene, UIControl parent, TextDrawerDescription description)
+            : base(name, scene, description)
         {
             this.parent = parent;
 
             Manipulator = new Manipulator2D(Game);
             ShadowManipulator = new Manipulator2D(Game);
 
-            Font = string.Format("{0} {1}", description.FontFamily, description.FontSize);
+            Font = $"{description.FontFamily} {description.FontSize}";
 
             viewProjection = Game.Form.GetOrthoProjectionMatrix();
 
@@ -252,8 +253,8 @@ namespace Engine.UI
             VertexFont[] verts = new VertexFont[FontMap.MAXTEXTLENGTH * 4];
             uint[] idx = new uint[FontMap.MAXTEXTLENGTH * 6];
 
-            vertexBuffer = BufferManager.AddVertexData(description.Name, true, verts);
-            indexBuffer = BufferManager.AddIndexData(description.Name, true, idx);
+            vertexBuffer = BufferManager.AddVertexData(name, true, verts);
+            indexBuffer = BufferManager.AddIndexData(name, true, idx);
 
             UseTextureColor = description.UseTextureColor;
 

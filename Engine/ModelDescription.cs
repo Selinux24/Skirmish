@@ -13,15 +13,13 @@ namespace Engine
         /// <summary>
         /// Creates a model description from the specified xml file
         /// </summary>
-        /// <param name="name">Name</param>
         /// <param name="contentFolder">Content folder</param>
         /// <param name="fileName">File name</param>
         /// <returns>Returns a new model description</returns>
-        public static ModelDescription FromXml(string name, string contentFolder, string fileName)
+        public static ModelDescription FromXml(string contentFolder, string fileName)
         {
             return new ModelDescription()
             {
-                Name = name,
                 Content = new ContentDescription()
                 {
                     ContentFolder = contentFolder,

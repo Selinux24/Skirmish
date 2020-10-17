@@ -60,7 +60,7 @@ namespace Engine.Animation
         /// <summary>
         /// On resources updated event
         /// </summary>
-        public EventHandler OnResourcesUpdated;
+        public event EventHandler OnResourcesUpdated;
 
         /// <summary>
         /// Initializes the animation dictionary

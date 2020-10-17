@@ -152,6 +152,7 @@ namespace GameLogic
         private async Task InitializeModels()
         {
             cursor3D = await this.AddComponentModel(
+                "Cursor3D",
                 new ModelDescription()
                 {
                     CastShadow = false,
@@ -166,6 +167,7 @@ namespace GameLogic
                 layerHUD);
 
             troops = await this.AddComponentModelInstanced(
+                "Troops",
                 new ModelInstancedDescription()
                 {
                     Instances = skirmishGame.AllSoldiers.Length,
@@ -179,6 +181,7 @@ namespace GameLogic
                 SceneObjectUsages.Agent);
 
             terrain = await this.AddComponentScenery(
+                "Terrain",
                 GroundDescription.FromFile("Resources3D", "terrain.xml"),
                 SceneObjectUsages.Ground);
 
@@ -193,6 +196,7 @@ namespace GameLogic
             var q = pTopLeft + ((pBottomRight - pTopLeft - new Vector2(minimapWidth, minimapHeight)) * 0.5f);
 
             await this.AddComponentUIMinimap(
+                "Minimap",
                 new UIMinimapDescription()
                 {
                     Top = (int)q.Y,
@@ -220,7 +224,7 @@ namespace GameLogic
         private async Task InitializeHUD()
         {
             SpriteDescription bkDesc = SpriteDescription.Background("Resources/HUD.png");
-            await this.AddComponentSprite(bkDesc, SceneObjectUsages.UI, layerHUD - 1);
+            await this.AddComponentSprite("HUD", bkDesc, SceneObjectUsages.UI, layerHUD - 1);
 
             var titleFont = new TextDrawerDescription
             {
@@ -243,24 +247,24 @@ namespace GameLogic
                 FontSize = fontSize,
             };
 
-            txtTitle = await this.AddComponentUITextArea(new UITextAreaDescription { Font = titleFont }, layerHUD);
+            txtTitle = await this.AddComponentUITextArea("txtTitle", new UITextAreaDescription { Font = titleFont }, layerHUD);
             txtTitle.TextForeColor = Color.White;
             txtTitle.TextShadowColor = Color.Gray;
 
-            txtGame = await this.AddComponentUITextArea(new UITextAreaDescription { Font = gameFont }, layerHUD);
+            txtGame = await this.AddComponentUITextArea("txtGame", new UITextAreaDescription { Font = gameFont }, layerHUD);
             txtGame.TextForeColor = Color.LightBlue;
             txtGame.TextShadowColor = Color.DarkBlue;
 
-            txtTeam = await this.AddComponentUITextArea(new UITextAreaDescription { Font = textFont }, layerHUD);
+            txtTeam = await this.AddComponentUITextArea("txtTeam", new UITextAreaDescription { Font = textFont }, layerHUD);
             txtTeam.TextForeColor = Color.Yellow;
 
-            txtSoldier = await this.AddComponentUITextArea(new UITextAreaDescription { Font = textFont }, layerHUD);
+            txtSoldier = await this.AddComponentUITextArea("txtSoldier", new UITextAreaDescription { Font = textFont }, layerHUD);
             txtSoldier.TextForeColor = Color.Yellow;
 
-            txtActionList = await this.AddComponentUITextArea(new UITextAreaDescription { Font = textFont }, layerHUD);
+            txtActionList = await this.AddComponentUITextArea("txtActionList", new UITextAreaDescription { Font = textFont }, layerHUD);
             txtActionList.TextForeColor = Color.Yellow;
 
-            txtAction = await this.AddComponentUITextArea(new UITextAreaDescription { Font = textFont }, layerHUD);
+            txtAction = await this.AddComponentUITextArea("txtAction", new UITextAreaDescription { Font = textFont }, layerHUD);
             txtAction.TextForeColor = Color.Yellow;
 
             var butCloseDesc = UIButtonDescription.DefaultTwoStateButton("button_on.png", "button_off.png");
@@ -272,9 +276,9 @@ namespace GameLogic
             butCloseDesc.TextVerticalAlign = VerticalTextAlign.Middle;
             butCloseDesc.Text = "Exit";
 
-            butClose = await this.AddComponentUIButton(butCloseDesc, layerHUD);
+            butClose = await this.AddComponentUIButton("butClose", butCloseDesc, layerHUD);
 
-            butNext = await this.AddComponentUIButton(new UIButtonDescription()
+            butNext = await this.AddComponentUIButton("butNext", new UIButtonDescription()
             {
                 TwoStateButton = true,
                 TextureReleased = "button_on.png",
@@ -286,7 +290,7 @@ namespace GameLogic
             }, layerHUD);
             butNext.Caption.TextForeColor = Color.Yellow;
 
-            butPrevSoldier = await this.AddComponentUIButton(new UIButtonDescription()
+            butPrevSoldier = await this.AddComponentUIButton("butPrevSoldier", new UIButtonDescription()
             {
                 TwoStateButton = true,
                 TextureReleased = "button_on.png",
@@ -298,7 +302,7 @@ namespace GameLogic
             }, layerHUD);
             butPrevSoldier.Caption.TextForeColor = Color.Yellow;
 
-            butNextSoldier = await this.AddComponentUIButton(new UIButtonDescription()
+            butNextSoldier = await this.AddComponentUIButton("butNextSoldier", new UIButtonDescription()
             {
                 TwoStateButton = true,
                 TextureReleased = "button_on.png",
@@ -310,7 +314,7 @@ namespace GameLogic
             }, layerHUD);
             butNextSoldier.Caption.TextForeColor = Color.Yellow;
 
-            butPrevAction = await this.AddComponentUIButton(new UIButtonDescription()
+            butPrevAction = await this.AddComponentUIButton("butPrevAction", new UIButtonDescription()
             {
                 TwoStateButton = true,
                 TextureReleased = "button_on.png",
@@ -322,7 +326,7 @@ namespace GameLogic
             }, layerHUD);
             butPrevAction.Caption.TextForeColor = Color.Yellow;
 
-            butNextAction = await this.AddComponentUIButton(new UIButtonDescription()
+            butNextAction = await this.AddComponentUIButton("butNextAction", new UIButtonDescription()
             {
                 TwoStateButton = true,
                 TextureReleased = "button_on.png",
@@ -345,7 +349,7 @@ namespace GameLogic
         }
         private async Task InitializeDebug()
         {
-            lineDrawer = await this.AddComponentPrimitiveListDrawer(new PrimitiveListDrawerDescription<Line3D>() { Count = 5000 });
+            lineDrawer = await this.AddComponentPrimitiveListDrawer("DebugLineDrawer", new PrimitiveListDrawerDescription<Line3D>() { Count = 5000 });
             lineDrawer.Visible = false;
         }
 

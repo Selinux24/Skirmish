@@ -57,8 +57,8 @@ namespace Instancing
 
         private async Task InitializeTexts()
         {
-            var title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White }, layerHUD);
-            runtimeText = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Yellow }, layerHUD);
+            var title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White }, layerHUD);
+            runtimeText = await this.AddComponentUITextArea("RuntimeText", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Yellow }, layerHUD);
 
             title.Text = "Instancing test";
             runtimeText.Text = "";
@@ -73,7 +73,7 @@ namespace Instancing
                 BaseColor = new Color4(0, 0, 0, 0.75f),
             };
 
-            await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            await this.AddComponentSprite("Backpanel", spDesc, SceneObjectUsages.UI, layerHUD - 1);
         }
         private async Task InitializeFloor()
         {
@@ -103,7 +103,6 @@ namespace Instancing
 
             var desc = new ModelInstancedDescription()
             {
-                Name = "Floor",
                 CastShadow = true,
                 DeferredEnabled = true,
                 DepthEnabled = true,
@@ -115,7 +114,7 @@ namespace Instancing
                 }
             };
 
-            var floor = await this.AddComponentModelInstanced(desc);
+            var floor = await this.AddComponentModelInstanced("Floor", desc);
 
             Vector3 delta = new Vector3(l * side, 0, l * side) - new Vector3(l, 0, l);
             int x = 0;
@@ -140,7 +139,6 @@ namespace Instancing
 
             var treeDesc = new ModelInstancedDescription()
             {
-                Name = "Trees",
                 CastShadow = true,
                 Instances = instances,
                 BlendMode = BlendModes.DefaultTransparent,
@@ -151,7 +149,7 @@ namespace Instancing
                     ModelContentFilename = @"tree.xml",
                 }
             };
-            var trees = await this.AddComponentModelInstanced(treeDesc, SceneObjectUsages.None, layerTerrain);
+            var trees = await this.AddComponentModelInstanced("Trees", treeDesc, SceneObjectUsages.None, layerTerrain);
 
             int side = instances / 4;
             float groundSide = 55f;
@@ -187,7 +185,6 @@ namespace Instancing
         {
             var tDesc = new ModelInstancedDescription()
             {
-                Name = "Troops",
                 Instances = 100,
                 CastShadow = true,
                 UseAnisotropicFiltering = true,
@@ -197,7 +194,7 @@ namespace Instancing
                     ModelContentFilename = @"soldier_anim2.xml",
                 }
             };
-            troops = await this.AddComponentModelInstanced(tDesc, SceneObjectUsages.Agent, layerObjects);
+            troops = await this.AddComponentModelInstanced("Troops", tDesc, SceneObjectUsages.Agent, layerObjects);
             troops.MaximumCount = -1;
 
             Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
@@ -244,9 +241,9 @@ namespace Instancing
         private async Task InitializeWall()
         {
             var wall = await this.AddComponentModelInstanced(
+                 "Wall",
                 new ModelInstancedDescription()
                 {
-                    Name = "wall",
                     Instances = 40,
                     CastShadow = true,
                     UseAnisotropicFiltering = true,

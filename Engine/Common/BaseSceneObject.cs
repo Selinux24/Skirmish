@@ -8,6 +8,10 @@ namespace Engine.Common
     public abstract class BaseSceneObject : IDisposable
     {
         /// <summary>
+        /// Object name
+        /// </summary>
+        public string Name { get; set; }
+        /// <summary>
         /// Game class
         /// </summary>
         public Scene Scene { get; private set; }
@@ -19,12 +23,14 @@ namespace Engine.Common
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        protected BaseSceneObject(Scene scene, SceneObjectDescription description)
+        protected BaseSceneObject(string name, Scene scene, SceneObjectDescription description)
         {
-            this.Scene = scene;
-            this.Description = description;
+            Name = name;
+            Scene = scene;
+            Description = description;
         }
         /// <summary>
         /// Destructor
@@ -47,5 +53,11 @@ namespace Engine.Common
         /// </summary>
         /// <param name="disposing">Free managed resources</param>
         protected abstract void Dispose(bool disposing);
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"{Name ?? base.ToString()}";
+        }
     }
 }

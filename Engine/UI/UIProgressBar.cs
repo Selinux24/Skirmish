@@ -76,19 +76,19 @@ namespace Engine.UI
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="game">Game</param>
-        /// <param name="bufferManager">Buffer manager</param>
+        /// <param name="name">Name</param>
+        /// <param name="scene">Scene</param>
         /// <param name="description">Button description</param>
-        public UIProgressBar(Scene scene, UIProgressBarDescription description)
-            : base(scene, description)
+        public UIProgressBar(string name, Scene scene, UIProgressBarDescription description)
+            : base(name, scene, description)
         {
             ProgressValue = 0;
 
             spriteBase = new Sprite(
+                $"{name}.Base",
                 scene,
                 new SpriteDescription()
                 {
-                    Name = $"{description.Name}.SpriteBase",
                     BaseColor = description.BaseColor,
                     Width = description.Width,
                     Height = description.Height,
@@ -98,10 +98,10 @@ namespace Engine.UI
             AddChild(spriteBase, false);
 
             spriteProgress = new Sprite(
+                $"{name}.Progress",
                 scene,
                 new SpriteDescription()
                 {
-                    Name = $"{description.Name}.SpriteProgress",
                     BaseColor = description.ProgressColor,
                     Width = description.Width,
                     Height = description.Height,
@@ -113,6 +113,7 @@ namespace Engine.UI
             if (description.Font != null)
             {
                 Caption = new UITextArea(
+                    $"{name}.Caption",
                     scene,
                     new UITextAreaDescription
                     {
@@ -163,16 +164,17 @@ namespace Engine.UI
         /// Adds a component to the scene
         /// </summary>
         /// <param name="scene">Scene</param>
+        /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<UIProgressBar> AddComponentUIProgressBar(this Scene scene, UIProgressBarDescription description, int order = 0)
+        public static async Task<UIProgressBar> AddComponentUIProgressBar(this Scene scene, string name, UIProgressBarDescription description, int order = 0)
         {
             UIProgressBar component = null;
 
             await Task.Run(() =>
             {
-                component = new UIProgressBar(scene, description);
+                component = new UIProgressBar(name, scene, description);
 
                 scene.AddComponent(component, SceneObjectUsages.UI, order);
             });

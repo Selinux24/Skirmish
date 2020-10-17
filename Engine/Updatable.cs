@@ -15,9 +15,10 @@
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        protected Updatable(Scene scene, SceneObjectDescription description) : base(scene, description)
+        protected Updatable(string name, Scene scene, SceneObjectDescription description) : base(name, scene, description)
         {
 
         }
@@ -26,9 +27,6 @@
         /// Update state
         /// </summary>
         /// <param name="context">Context</param>
-        public virtual void Update(UpdateContext context)
-        {
-            
-        }
+        public abstract void Update(UpdateContext context);
     }
 }

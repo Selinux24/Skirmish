@@ -1,9 +1,11 @@
 ﻿using SharpDX;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.UI
 {
     using Engine.Common;
+    using Engine.Content;
     using Engine.Effects;
 
     /// <summary>
@@ -35,7 +37,7 @@ namespace Engine.UI
         /// <summary>
         /// Drawing channels
         /// </summary>
-        public UITextureRendererChannels Channels { get; set; } = UITextureRendererChannels.None;
+        public UITextureRendererChannels Channels { get; set; }
         /// <summary>
         /// Gets whether the internal buffers were ready or not
         /// </summary>
@@ -50,19 +52,22 @@ namespace Engine.UI
         /// <summary>
         /// Contructor
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Sprite texture description</param>
-        public UITextureRenderer(Scene scene, UITextureRendererDescription description)
-            : base(scene, description)
+        public UITextureRenderer(string name, Scene scene, UITextureRendererDescription description)
+            : base(name, scene, description)
         {
             var sprite = GeometryUtil.CreateSprite(Vector2.Zero, 1, 1);
 
             var vertices = VertexPositionTexture.Generate(sprite.Vertices, sprite.Uvs);
             var indices = sprite.Indices;
 
-            vertexBuffer = BufferManager.AddVertexData(description.Name, false, vertices);
-            indexBuffer = BufferManager.AddIndexData(description.Name, false, indices);
+            vertexBuffer = BufferManager.AddVertexData(name, false, vertices);
+            indexBuffer = BufferManager.AddIndexData(name, false, indices);
 
+            Texture = InitializeTexture(description.ContentPath, description.Textures);
+            TextureIndex = description.TextureIndex;
             Channels = description.Channel;
 
             viewProjection = Game.Form.GetOrthoProjectionMatrix();
@@ -78,6 +83,22 @@ namespace Engine.UI
             }
 
             base.Dispose(disposing);
+        }
+
+        /// <summary>
+        /// Initialize textures
+        /// </summary>
+        /// <param name="contentPath">Content path</param>
+        /// <param name="textures">Texture names</param>
+        private EngineShaderResourceView InitializeTexture(string contentPath, string[] textures)
+        {
+            if (textures?.Any() != true)
+            {
+                return null;
+            }
+
+            var image = ImageContent.Array(contentPath, textures);
+            return Game.ResourceManager.RequestResource(image);
         }
 
         /// <inheritdoc/>
@@ -143,17 +164,18 @@ namespace Engine.UI
         /// <summary>
         /// Adds a component to the scene
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<UITextureRenderer> AddComponentUITextureRenderer(this Scene scene, UITextureRendererDescription description, int order = 0)
+        public static async Task<UITextureRenderer> AddComponentUITextureRenderer(this Scene scene, string name, UITextureRendererDescription description, int order = 0)
         {
             UITextureRenderer component = null;
 
             await Task.Run(() =>
             {
-                component = new UITextureRenderer(scene, description);
+                component = new UITextureRenderer(name, scene, description);
 
                 scene.AddComponent(component, SceneObjectUsages.UI, order);
             });

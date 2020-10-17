@@ -1,5 +1,4 @@
-﻿using Engine.Common;
-using SharpDX;
+﻿using SharpDX;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -22,17 +21,14 @@ namespace Engine.UI
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        public UIPanel(Scene scene, UIPanelDescription description) : base(scene, description)
+        public UIPanel(string name, Scene scene, UIPanelDescription description) : base(name, scene, description)
         {
             if (description.Background != null)
             {
-                background = new Sprite(scene, description.Background)
-                {
-                    Name = $"{description.Name}.Background",
-                    FitWithParent = true,
-                };
+                background = new Sprite($"{name}.Background", scene, description.Background);
 
                 AddChild(background);
             }
@@ -91,16 +87,17 @@ namespace Engine.UI
         /// Adds a component to the scene
         /// </summary>
         /// <param name="scene">Scene</param>
+        /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<UIPanel> AddComponentUIPanel(this Scene scene, UIPanelDescription description, int order = 0)
+        public static async Task<UIPanel> AddComponentUIPanel(this Scene scene, string name, UIPanelDescription description, int order = 0)
         {
             UIPanel component = null;
 
             await Task.Run(() =>
             {
-                component = new UIPanel(scene, description);
+                component = new UIPanel(name, scene, description);
 
                 scene.AddComponent(component, SceneObjectUsages.UI, order);
             });

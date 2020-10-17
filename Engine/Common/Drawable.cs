@@ -9,16 +9,12 @@ namespace Engine.Common
         /// <summary>
         /// Game class
         /// </summary>
-        protected Game Game { get { return this.Scene.Game; } }
+        protected Game Game { get { return Scene.Game; } }
         /// <summary>
         /// Buffer manager
         /// </summary>
-        protected BufferManager BufferManager { get { return this.Game.BufferManager; } }
+        protected BufferManager BufferManager { get { return Game.BufferManager; } }
 
-        /// <summary>
-        /// Name
-        /// </summary>
-        public virtual string Name { get; set; }
         /// <summary>
         /// Processing order
         /// </summary>
@@ -59,15 +55,21 @@ namespace Engine.Common
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        protected Drawable(Scene scene, SceneObjectDescription description) : base(scene, description)
+        protected Drawable(string name, Scene scene, SceneObjectDescription description) : base(name, scene, description)
         {
-            Name = description.Name;
             CastShadow = description.CastShadow;
             DeferredEnabled = description.DeferredEnabled;
             DepthEnabled = description.DepthEnabled;
             BlendMode = description.BlendMode;
+        }
+
+        /// <inheritdoc/>
+        public override void Update(UpdateContext context)
+        {
+
         }
 
         /// <summary>

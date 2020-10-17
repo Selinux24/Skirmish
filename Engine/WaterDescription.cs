@@ -10,15 +10,13 @@ namespace Engine
         /// <summary>
         /// Creates a default water description
         /// </summary>
-        /// <param name="name">Name</param>
         /// <param name="planeSize">Plane size</param>
         /// <param name="planeHeight">Plane height</param>
         /// <returns>Returns a water description</returns>
-        public static WaterDescription CreateDefault(string name, float planeSize, float planeHeight)
+        public static WaterDescription CreateDefault(float planeSize, float planeHeight)
         {
             return new WaterDescription()
             {
-                Name = name,
                 PlaneHeight = planeHeight,
                 PlaneSize = planeSize,
             };
@@ -26,15 +24,13 @@ namespace Engine
         /// <summary>
         /// Creates a calm water description
         /// </summary>
-        /// <param name="name">Name</param>
         /// <param name="planeSize">Plane size</param>
         /// <param name="planeHeight">Plane height</param>
         /// <returns>Returns a water description</returns>
-        public static WaterDescription CreateCalm(string name, float planeSize, float planeHeight)
+        public static WaterDescription CreateCalm(float planeSize, float planeHeight)
         {
             return new WaterDescription()
             {
-                Name = name,
                 PlaneHeight = planeHeight,
                 PlaneSize = planeSize,
                 WaveHeight = 0.2f,
@@ -46,15 +42,13 @@ namespace Engine
         /// <summary>
         /// Creates a ocean water description
         /// </summary>
-        /// <param name="name">Name</param>
         /// <param name="planeSize">Plane size</param>
         /// <param name="planeHeight">Plane height</param>
         /// <returns>Returns a water description</returns>
-        public static WaterDescription CreateOcean(string name, float planeSize, float planeHeight)
+        public static WaterDescription CreateOcean(float planeSize, float planeHeight)
         {
             return new WaterDescription()
             {
-                Name = name,
                 PlaneHeight = planeHeight,
                 PlaneSize = planeSize,
                 WaveHeight = 1.0f,
@@ -119,7 +113,7 @@ namespace Engine
         public WaterDescription()
             : base()
         {
-            this.BlendMode = BlendModes.Opaque;
+            BlendMode = BlendModes.Opaque;
         }
     }
 }

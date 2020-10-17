@@ -91,15 +91,15 @@ namespace Collada.NavmeshTest
         }
         private async Task InitializeText()
         {
-            var title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White }, layerHUD);
+            var title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White }, layerHUD);
             title.Text = "Navigation Mesh Test Scene";
             title.SetPosition(Vector2.Zero);
 
-            debug = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Green }, layerHUD);
+            debug = await this.AddComponentUITextArea("Debug", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Green }, layerHUD);
             debug.Text = null;
             debug.SetPosition(new Vector2(0, title.Top + title.Height + 3));
 
-            help = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow }, layerHUD);
+            help = await this.AddComponentUITextArea("Help", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow }, layerHUD);
             help.Text = @"Camera: WASD+Mouse (Press right mouse in windowed mode to look). 
 B: Change Build Mode (SHIFT reverse).
 P: Change Partition Type (SHIFT reverse).
@@ -119,7 +119,7 @@ Space: Finds random over navmesh";
                 BaseColor = new Color4(0, 0, 0, 0.75f),
             };
 
-            await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            await this.AddComponentSprite("Backpanel", spDesc, SceneObjectUsages.UI, layerHUD - 1);
         }
         private void InitializeLights()
         {
@@ -146,6 +146,7 @@ Space: Finds random over navmesh";
         private async Task InitializeNavmesh()
         {
             inputGeometry = await this.AddComponentModel(
+                "NavMesh",
                 new ModelDescription()
                 {
                     TextureIndex = 0,
@@ -182,16 +183,15 @@ Space: Finds random over navmesh";
         {
             var graphDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
             {
-                Name = "DEBUG++ Graph",
                 Count = 50000,
             };
-            graphDrawer = await this.AddComponentPrimitiveListDrawer(graphDrawerDesc);
+            graphDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Graph", graphDrawerDesc);
 
             var volumesDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
             {
                 Count = 10000
             };
-            volumesDrawer = await this.AddComponentPrimitiveListDrawer(volumesDrawerDesc);
+            volumesDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Volumes", volumesDrawerDesc);
         }
 
         public override async Task UpdateNavigationGraph()

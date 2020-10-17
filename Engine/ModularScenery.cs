@@ -99,10 +99,11 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Scenery description</param>
-        public ModularScenery(Scene scene, ModularSceneryDescription description)
-            : base(scene, description)
+        public ModularScenery(string name, Scene scene, ModularSceneryDescription description)
+            : base(name, scene, description)
         {
             if (description.AssetsConfiguration != null)
             {
@@ -204,10 +205,8 @@ namespace Engine
             if (Levels.ParticleSystems?.Any() == true)
             {
                 particleManager = await Scene.AddComponentParticleManager(
-                    new ParticleManagerDescription()
-                    {
-                        Name = $"{Description.Name ?? nameof(ModularScenery)}.Particle Manager",
-                    },
+                    $"{Name ?? nameof(ModularScenery)}.Particle Manager",
+                    ParticleManagerDescription.Default(),
                     SceneObjectUsages.None,
                     98);
 
@@ -274,15 +273,15 @@ namespace Engine
             var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
             var usage = hasVolumes ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding;
 
-            var modelName = $"{Description.Name ?? nameof(ModularScenery)}.{assetName}.{level.Name}";
+            var modelName = $"{Name ?? nameof(ModularScenery)}.{assetName}.{level.Name}";
             ModelInstanced model = null;
 
             try
             {
                 model = await Scene.AddComponentModelInstanced(
+                    modelName,
                     new ModelInstancedDescription()
                     {
-                        Name = modelName,
                         CastShadow = Description.CastShadow,
                         UseAnisotropicFiltering = Description.UseAnisotropic,
                         Instances = count,
@@ -355,15 +354,15 @@ namespace Engine
                 usage = hasVolumes ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding;
             }
 
-            var modelName = $"{Description.Name ?? nameof(ModularScenery)}.{assetName}.{level.Name}";
+            var modelName = $"{Name ?? nameof(ModularScenery)}.{assetName}.{level.Name}";
             ModelInstanced model = null;
 
             try
             {
                 model = await Scene.AddComponentModelInstanced(
+                    modelName,
                     new ModelInstancedDescription()
                     {
-                        Name = modelName,
                         CastShadow = Description.CastShadow,
                         UseAnisotropicFiltering = Description.UseAnisotropic,
                         Instances = count,
@@ -1623,17 +1622,18 @@ namespace Engine
         /// Adds a component to the scene
         /// </summary>
         /// <param name="scene">Scene</param>
+        /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="usage">Component usage</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<ModularScenery> AddComponentModularScenery(this Scene scene, ModularSceneryDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
+        public static async Task<ModularScenery> AddComponentModularScenery(this Scene scene, string name, ModularSceneryDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
         {
             ModularScenery component = null;
 
             await Task.Run(() =>
             {
-                component = new ModularScenery(scene, description);
+                component = new ModularScenery(name, scene, description);
 
                 scene.AddComponent(component, usage, order);
             });

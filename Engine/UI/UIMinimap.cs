@@ -49,23 +49,18 @@ namespace Engine.UI
         /// <summary>
         /// Contructor
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Minimap description</param>
-        public UIMinimap(Scene scene, UIMinimapDescription description)
-            : base(scene, description)
+        public UIMinimap(string name, Scene scene, UIMinimapDescription description)
+            : base(name, scene, description)
         {
             Drawables = description.Drawables;
             BackColor = description.BackColor;
 
             minimapArea = description.MinimapArea;
 
-            minimapBox = new UITextureRenderer(scene, new UITextureRendererDescription()
-            {
-                Top = description.Top,
-                Left = description.Left,
-                Width = description.Width,
-                Height = description.Height,
-            });
+            minimapBox = new UITextureRenderer($"{name}.TextureRenderer", scene, UITextureRendererDescription.Default(description.Left, description.Top, description.Width, description.Height));
 
             viewport = new Viewport(0, 0, description.Width, description.Height);
 
@@ -207,16 +202,17 @@ namespace Engine.UI
         /// Adds a component to the scene
         /// </summary>
         /// <param name="scene">Scene</param>
+        /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<UIMinimap> AddComponentUIMinimap(this Scene scene, UIMinimapDescription description, int order = 0)
+        public static async Task<UIMinimap> AddComponentUIMinimap(this Scene scene, string name, UIMinimapDescription description, int order = 0)
         {
             UIMinimap component = null;
 
             await Task.Run(() =>
             {
-                component = new UIMinimap(scene, description);
+                component = new UIMinimap(name, scene, description);
 
                 scene.AddComponent(component, SceneObjectUsages.UI, order);
             });

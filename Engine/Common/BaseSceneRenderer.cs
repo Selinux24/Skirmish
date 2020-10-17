@@ -282,7 +282,7 @@ namespace Engine.Common
                     swCUpdate.Stop();
 
                     var o = c as BaseSceneObject;
-                    string cName = o?.Description?.Name ?? c.ToString();
+                    string cName = o?.Name ?? c.ToString();
                     dict.Add($"Component Update {uIndex++} {cName}", swCUpdate.Elapsed.TotalMilliseconds);
                 });
             Updated = true;

@@ -38,17 +38,17 @@ namespace Engine
         {
             get
             {
-                if (this.vertexBuffer?.Ready != true)
+                if (vertexBuffer?.Ready != true)
                 {
                     return false;
                 }
 
-                if (this.indexBuffer?.Ready != true)
+                if (indexBuffer?.Ready != true)
                 {
                     return false;
                 }
 
-                if (this.indexBuffer.Count <= 0)
+                if (indexBuffer.Count <= 0)
                 {
                     return false;
                 }
@@ -60,12 +60,13 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        public Water(Scene scene, WaterDescription description)
-            : base(scene, description)
+        public Water(string name, Scene scene, WaterDescription description)
+            : base(name, scene, description)
         {
-            this.InitializeBuffers(description.Name, description.PlaneSize, description.PlaneHeight);
+            InitializeBuffers(name, description.PlaneSize, description.PlaneHeight);
         }
         /// <summary>
         /// Destructor
@@ -83,8 +84,8 @@ namespace Engine
             if (disposing)
             {
                 //Remove data from buffer manager
-                this.BufferManager?.RemoveVertexData(this.vertexBuffer);
-                this.BufferManager?.RemoveIndexData(this.indexBuffer);
+                BufferManager?.RemoveVertexData(vertexBuffer);
+                BufferManager?.RemoveIndexData(indexBuffer);
             }
         }
 
@@ -104,7 +105,7 @@ namespace Engine
                 return;
             }
 
-            bool draw = context.ValidateDraw(this.BlendMode);
+            bool draw = context.ValidateDraw(BlendMode);
             if (!draw)
             {
                 return;
@@ -114,10 +115,10 @@ namespace Engine
             var technique = DrawerPool.EffectDefaultWater.Water;
 
             Counters.InstancesPerFrame++;
-            Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
+            Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
 
-            this.BufferManager.SetIndexBuffer(this.indexBuffer);
-            this.BufferManager.SetInputAssembler(technique, this.vertexBuffer, Topology.TriangleList);
+            BufferManager.SetIndexBuffer(indexBuffer);
+            BufferManager.SetInputAssembler(technique, vertexBuffer, Topology.TriangleList);
 
             effect.UpdatePerFrame(
                 context.ViewProjection,
@@ -125,28 +126,28 @@ namespace Engine
                 context.Lights,
                 new EffectWaterState
                 {
-                    BaseColor = this.Description.BaseColor,
-                    WaterColor = this.Description.WaterColor,
-                    WaveHeight = this.Description.WaveHeight,
-                    WaveChoppy = this.Description.WaveChoppy,
-                    WaveSpeed = this.Description.WaveSpeed,
-                    WaveFrequency = this.Description.WaveFrequency,
+                    BaseColor = Description.BaseColor,
+                    WaterColor = Description.WaterColor,
+                    WaveHeight = Description.WaveHeight,
+                    WaveChoppy = Description.WaveChoppy,
+                    WaveSpeed = Description.WaveSpeed,
+                    WaveFrequency = Description.WaveFrequency,
                     TotalTime = context.GameTime.TotalSeconds,
-                    Steps = this.Description.HeightmapIterations,
-                    GeometryIterations = this.Description.GeometryIterations,
-                    ColorIterations = this.Description.ColorIterations,
+                    Steps = Description.HeightmapIterations,
+                    GeometryIterations = Description.GeometryIterations,
+                    ColorIterations = Description.ColorIterations,
                 });
 
-            var graphics = this.Game.Graphics;
+            var graphics = Game.Graphics;
 
             for (int p = 0; p < technique.PassCount; p++)
             {
                 graphics.EffectPassApply(technique, p, 0);
 
                 graphics.DrawIndexed(
-                    this.indexBuffer.Count,
-                    this.indexBuffer.BufferOffset,
-                    this.vertexBuffer.BufferOffset);
+                    indexBuffer.Count,
+                    indexBuffer.BufferOffset,
+                    vertexBuffer.BufferOffset);
             }
         }
         /// <summary>
@@ -162,8 +163,8 @@ namespace Engine
             var vertices = VertexPositionTexture.Generate(plane.Vertices, plane.Uvs);
             var indices = plane.Indices;
 
-            this.vertexBuffer = this.BufferManager.AddVertexData(name, false, vertices);
-            this.indexBuffer = this.BufferManager.AddIndexData(name, false, indices);
+            vertexBuffer = BufferManager.AddVertexData(name, false, vertices);
+            indexBuffer = BufferManager.AddIndexData(name, false, indices);
         }
     }
 
@@ -176,17 +177,18 @@ namespace Engine
         /// Adds a component to the scene
         /// </summary>
         /// <param name="scene">Scene</param>
+        /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="usage">Component usage</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<Water> AddComponentWater(this Scene scene, WaterDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
+        public static async Task<Water> AddComponentWater(this Scene scene, string name, WaterDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
         {
             Water component = null;
 
             await Task.Run(() =>
             {
-                component = new Water(scene, description);
+                component = new Water(name, scene, description);
 
                 scene.AddComponent(component, usage, order);
             });

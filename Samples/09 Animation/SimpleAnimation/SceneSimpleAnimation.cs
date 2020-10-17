@@ -142,21 +142,21 @@ namespace Animation.SimpleAnimation
 
         private async Task InitializeUI()
         {
-            title = await this.AddComponentUITextArea(new UITextAreaDescription {Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White }, layerHUD);
-            runtime = await this.AddComponentUITextArea(new UITextAreaDescription {Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Yellow }, layerHUD);
-            animText = await this.AddComponentUITextArea(new UITextAreaDescription {Font = TextDrawerDescription.FromFamily("Tahoma", 15), TextForeColor = Color.Orange }, layerHUD);
-            messages = await this.AddComponentUITextArea(new UITextAreaDescription {Font = TextDrawerDescription.FromFamily("Tahoma", 15), TextForeColor = Color.Orange }, layerHUD);
+            title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White }, layerHUD);
+            runtime = await this.AddComponentUITextArea("Runtime", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Yellow }, layerHUD);
+            animText = await this.AddComponentUITextArea("AnimText", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 15), TextForeColor = Color.Orange }, layerHUD);
+            messages = await this.AddComponentUITextArea("Messages", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 15), TextForeColor = Color.Orange }, layerHUD);
 
             title.Text = "Animation test";
             runtime.Text = "";
             animText.Text = "";
             messages.Text = "";
 
-            backPanel = await this.AddComponentSprite(SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), SceneObjectUsages.UI, layerHUD - 1);
+            backPanel = await this.AddComponentSprite("Backpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), SceneObjectUsages.UI, layerHUD - 1);
 
             var consoleDesc = UIConsoleDescription.Default(new Color4(0.35f, 0.35f, 0.35f, 1f));
             consoleDesc.LogFilterFunc = (l) => l.LogLevel > LogLevel.Trace || (l.LogLevel == LogLevel.Trace && l.CallerTypeName == nameof(AnimationController));
-            console = await this.AddComponentUIConsole(consoleDesc, layerHUD + 1);
+            console = await this.AddComponentUIConsole("Console", consoleDesc, layerHUD + 1);
             console.Visible = false;
 
             uiReady = true;
@@ -199,14 +199,14 @@ namespace Animation.SimpleAnimation
                 }
             };
 
-            await this.AddComponentModel(desc);
+            await this.AddComponentModel("Floor", desc);
         }
         private async Task InitializeLadder()
         {
             var ladder = await this.AddComponentModelInstanced(
+                "Ladder",
                 new ModelInstancedDescription()
                 {
-                    Name = "Ladder",
                     Instances = 2,
                     CastShadow = true,
                     UseAnisotropicFiltering = true,
@@ -245,9 +245,9 @@ namespace Animation.SimpleAnimation
         private async Task InitializeLadder2()
         {
             var ladder = await this.AddComponentModelInstanced(
+                "Ladder2",
                 new ModelInstancedDescription()
                 {
-                    Name = "Ladder2",
                     CastShadow = true,
                     Instances = 2,
                     UseAnisotropicFiltering = true,
@@ -259,9 +259,9 @@ namespace Animation.SimpleAnimation
                 });
 
             var ladder2 = await this.AddComponentModelInstanced(
+                "Ladder22",
                 new ModelInstancedDescription()
                 {
-                    Name = "Ladder22",
                     CastShadow = true,
                     Instances = 2,
                     UseAnisotropicFiltering = true,
@@ -310,9 +310,9 @@ namespace Animation.SimpleAnimation
         private async Task InitializeSoldier()
         {
             var soldier = await this.AddComponentModelInstanced(
+                "Soldier",
                 new ModelInstancedDescription()
                 {
-                    Name = "Soldier",
                     CastShadow = true,
                     Instances = 2,
                     UseAnisotropicFiltering = true,
@@ -363,9 +363,9 @@ namespace Animation.SimpleAnimation
         private async Task InitializeRat()
         {
             var rat = await this.AddComponentModelInstanced(
+                "Rat",
                 new ModelInstancedDescription()
                 {
-                    Name = "Rat",
                     CastShadow = true,
                     Instances = 2,
                     UseAnisotropicFiltering = true,
@@ -392,9 +392,9 @@ namespace Animation.SimpleAnimation
         private async Task InitializeDoors()
         {
             var doors = await this.AddComponentModelInstanced(
+                "Doors",
                 new ModelInstancedDescription()
                 {
-                    Name = "Doors",
                     CastShadow = true,
                     Instances = 1,
                     UseAnisotropicFiltering = true,
@@ -406,9 +406,9 @@ namespace Animation.SimpleAnimation
                 });
 
             var walls = await this.AddComponentModelInstanced(
+                "Walls",
                 new ModelInstancedDescription()
                 {
-                    Name = "Walls",
                     CastShadow = true,
                     Instances = 1,
                     UseAnisotropicFiltering = true,
@@ -452,9 +452,9 @@ namespace Animation.SimpleAnimation
         private async Task InitializeJails()
         {
             var walls = await this.AddComponentModelInstanced(
+                "Walls",
                 new ModelInstancedDescription()
                 {
-                    Name = "Walls",
                     CastShadow = true,
                     Instances = 1,
                     UseAnisotropicFiltering = true,
@@ -470,9 +470,9 @@ namespace Animation.SimpleAnimation
             walls[0].Manipulator.SetScale(2.5f);
 
             var doors = await this.AddComponentModelInstanced(
+                "Jails",
                 new ModelInstancedDescription()
                 {
-                    Name = "Jails",
                     CastShadow = true,
                     Instances = 1,
                     UseAnisotropicFiltering = true,
@@ -511,8 +511,8 @@ namespace Animation.SimpleAnimation
         }
         private async Task InitializeDebug()
         {
-            itemTris = await this.AddComponentPrimitiveListDrawer(new PrimitiveListDrawerDescription<Triangle>() { Count = 5000, Color = itemTrisColor });
-            itemLines = await this.AddComponentPrimitiveListDrawer(new PrimitiveListDrawerDescription<Line3D>() { Count = 1000, Color = itemLinesColor });
+            itemTris = await this.AddComponentPrimitiveListDrawer("DebugItemTris", new PrimitiveListDrawerDescription<Triangle>() { Count = 5000, Color = itemTrisColor });
+            itemLines = await this.AddComponentPrimitiveListDrawer("DebugItemLines", new PrimitiveListDrawerDescription<Line3D>() { Count = 1000, Color = itemLinesColor });
         }
 
         private void InitializeEnvironment()

@@ -47,7 +47,7 @@ namespace Engine
         {
             get
             {
-                if (this.vertexBuffer?.Ready != true)
+                if (vertexBuffer?.Ready != true)
                 {
                     return false;
                 }
@@ -59,10 +59,11 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        public PrimitiveListDrawer(Scene scene, PrimitiveListDrawerDescription<T> description)
-            : base(scene, description)
+        public PrimitiveListDrawer(string name, Scene scene, PrimitiveListDrawerDescription<T> description)
+            : base(name, scene, description)
         {
             var vertsPerItem = default(T).GetVertices();
             stride = vertsPerItem.Length;
@@ -87,17 +88,17 @@ namespace Engine
             {
                 count = description.Primitives.Length * stride;
 
-                this.dictionary.TryAdd(description.Color, new List<T>(description.Primitives));
-                this.dictionaryChanged = true;
+                dictionary.TryAdd(description.Color, new List<T>(description.Primitives));
+                dictionaryChanged = true;
             }
             else
             {
                 count = description.Count * stride;
 
-                this.dictionaryChanged = false;
+                dictionaryChanged = false;
             }
 
-            this.InitializeBuffers(description.Name, count);
+            InitializeBuffers(name, count);
         }
         /// <summary>
         /// Destructor
@@ -113,7 +114,7 @@ namespace Engine
             if (disposing)
             {
                 //Remove data from buffer manager
-                this.BufferManager?.RemoveVertexData(this.vertexBuffer);
+                BufferManager?.RemoveVertexData(vertexBuffer);
             }
         }
         /// <inheritdoc/>
@@ -129,37 +130,37 @@ namespace Engine
                 return;
             }
 
-            bool draw = context.ValidateDraw(this.BlendMode);
+            bool draw = context.ValidateDraw(BlendMode);
             if (!draw)
             {
                 return;
             }
 
-            this.WriteDataInBuffer();
+            WriteDataInBuffer();
 
-            if (this.drawCount <= 0)
+            if (drawCount <= 0)
             {
                 return;
             }
 
-            Counters.InstancesPerFrame += this.dictionary.Count;
-            Counters.PrimitivesPerFrame += this.drawCount / this.stride;
+            Counters.InstancesPerFrame += dictionary.Count;
+            Counters.PrimitivesPerFrame += drawCount / stride;
 
             var effect = DrawerPool.EffectDefaultBasic;
             var technique = effect.GetTechnique(VertexTypes.PositionColor, false);
 
-            this.BufferManager.SetInputAssembler(technique, this.vertexBuffer, this.topology);
+            BufferManager.SetInputAssembler(technique, vertexBuffer, topology);
 
             effect.UpdatePerFrameBasic(Matrix.Identity, context);
             effect.UpdatePerObject(0, null, 0, false);
 
-            var graphics = this.Game.Graphics;
+            var graphics = Game.Graphics;
 
             for (int p = 0; p < technique.PassCount; p++)
             {
                 graphics.EffectPassApply(technique, p, 0);
 
-                graphics.Draw(this.drawCount, this.vertexBuffer.BufferOffset);
+                graphics.Draw(drawCount, vertexBuffer.BufferOffset);
             }
         }
 
@@ -170,7 +171,7 @@ namespace Engine
         /// <param name="vertexCount">Vertex count</param>
         private void InitializeBuffers(string name, int vertexCount)
         {
-            this.vertexBuffer = this.BufferManager.AddVertexData(name, true, new VertexPositionColor[vertexCount]);
+            vertexBuffer = BufferManager.AddVertexData(name, true, new VertexPositionColor[vertexCount]);
         }
         /// <summary>
         /// Set primitive
@@ -179,7 +180,7 @@ namespace Engine
         /// <param name="primitive">Primitive</param>
         public void SetPrimitives(Color4 color, T primitive)
         {
-            this.SetPrimitives(color, new[] { primitive });
+            SetPrimitives(color, new[] { primitive });
         }
         /// <summary>
         /// Set primitives list
@@ -190,26 +191,26 @@ namespace Engine
         {
             if (primitives?.Count() > 0)
             {
-                if (!this.dictionary.ContainsKey(color))
+                if (!dictionary.ContainsKey(color))
                 {
-                    this.dictionary.TryAdd(color, new List<T>());
+                    dictionary.TryAdd(color, new List<T>());
                 }
                 else
                 {
-                    this.dictionary[color].Clear();
+                    dictionary[color].Clear();
                 }
 
-                this.dictionary[color].AddRange(primitives);
+                dictionary[color].AddRange(primitives);
 
-                this.dictionaryChanged = true;
+                dictionaryChanged = true;
             }
             else
             {
-                if (this.dictionary.ContainsKey(color))
+                if (dictionary.ContainsKey(color))
                 {
-                    this.dictionary.TryRemove(color, out _);
+                    dictionary.TryRemove(color, out _);
 
-                    this.dictionaryChanged = true;
+                    dictionaryChanged = true;
                 }
             }
         }
@@ -240,14 +241,14 @@ namespace Engine
         /// <param name="primitives">Primitives list</param>
         public void AddPrimitives(Color4 color, IEnumerable<T> primitives)
         {
-            if (!this.dictionary.ContainsKey(color))
+            if (!dictionary.ContainsKey(color))
             {
-                this.dictionary.TryAdd(color, new List<T>());
+                dictionary.TryAdd(color, new List<T>());
             }
 
-            this.dictionary[color].AddRange(primitives);
+            dictionary[color].AddRange(primitives);
 
-            this.dictionaryChanged = true;
+            dictionaryChanged = true;
         }
         /// <summary>
         /// Add primitives to list
@@ -266,28 +267,28 @@ namespace Engine
         /// <param name="color">Color</param>
         public void Clear(Color4 color)
         {
-            if (this.dictionary.ContainsKey(color))
+            if (dictionary.ContainsKey(color))
             {
-                this.dictionary.TryRemove(color, out _);
+                dictionary.TryRemove(color, out _);
             }
 
-            this.dictionaryChanged = true;
+            dictionaryChanged = true;
         }
         /// <summary>
         /// Remove all
         /// </summary>
         public void Clear()
         {
-            this.dictionary.Clear();
+            dictionary.Clear();
 
-            this.dictionaryChanged = true;
+            dictionaryChanged = true;
         }
         /// <summary>
         /// Writes dictionary data in buffer
         /// </summary>
         public void WriteDataInBuffer()
         {
-            if (!this.dictionaryChanged)
+            if (!dictionaryChanged)
             {
                 return;
             }
@@ -311,14 +312,14 @@ namespace Engine
                 }
             }
 
-            if (!this.BufferManager.WriteVertexBuffer(this.vertexBuffer, data))
+            if (!BufferManager.WriteVertexBuffer(vertexBuffer, data))
             {
                 return;
             }
 
-            this.drawCount = data.Count;
+            drawCount = data.Count;
 
-            this.dictionaryChanged = false;
+            dictionaryChanged = false;
         }
     }
 
@@ -332,17 +333,18 @@ namespace Engine
         /// </summary>
         /// <typeparam name="T">Primitive type</typeparam>
         /// <param name="scene">Scene</param>
+        /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="usage">Component usage</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<PrimitiveListDrawer<T>> AddComponentPrimitiveListDrawer<T>(this Scene scene, PrimitiveListDrawerDescription<T> description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0) where T : IVertexList
+        public static async Task<PrimitiveListDrawer<T>> AddComponentPrimitiveListDrawer<T>(this Scene scene, string name, PrimitiveListDrawerDescription<T> description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0) where T : IVertexList
         {
             PrimitiveListDrawer<T> component = null;
 
             await Task.Run(() =>
             {
-                component = new PrimitiveListDrawer<T>(scene, description);
+                component = new PrimitiveListDrawer<T>(name, scene, description);
 
                 scene.AddComponent(component, usage, order);
             });

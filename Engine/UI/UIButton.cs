@@ -53,17 +53,16 @@ namespace Engine.UI
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="game">Game</param>
-        /// <param name="bufferManager">Buffer manager</param>
+        /// <param name="name">Name</param>
+        /// <param name="scene">Scene</param>
         /// <param name="description">Button description</param>
-        public UIButton(Scene scene, UIButtonDescription description)
-            : base(scene, description)
+        public UIButton(string name, Scene scene, UIButtonDescription description)
+            : base(name, scene, description)
         {
             TwoStateButton = description.TwoStateButton;
 
             var spriteDesc = new SpriteDescription()
             {
-                Name = $"{description.Name}.ReleasedButton",
                 BaseColor = description.ColorReleased,
                 EventsEnabled = false,
             };
@@ -74,7 +73,7 @@ namespace Engine.UI
                 spriteDesc.UVMap = description.TextureReleasedUVMap;
             }
 
-            buttonReleased = new Sprite(scene, spriteDesc);
+            buttonReleased = new Sprite($"{name}.ReleasedButton", scene, spriteDesc);
 
             AddChild(buttonReleased, true);
 
@@ -82,7 +81,6 @@ namespace Engine.UI
             {
                 var spriteDesc2 = new SpriteDescription()
                 {
-                    Name = $"{description.Name}.PressedButton",
                     BaseColor = description.ColorPressed,
                     EventsEnabled = false,
                 };
@@ -93,12 +91,13 @@ namespace Engine.UI
                     spriteDesc2.UVMap = description.TexturePressedUVMap;
                 }
 
-                buttonPressed = new Sprite(scene, spriteDesc2);
+                buttonPressed = new Sprite($"{name}.PressedButton", scene, spriteDesc2);
 
                 AddChild(buttonPressed, true);
             }
 
             Caption = new UITextArea(
+                $"{name}.Caption",
                 scene,
                 new UITextAreaDescription
                 {
@@ -164,16 +163,17 @@ namespace Engine.UI
         /// Adds a component to the scene
         /// </summary>
         /// <param name="scene">Scene</param>
+        /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<UIButton> AddComponentUIButton(this Scene scene, UIButtonDescription description, int order = 0)
+        public static async Task<UIButton> AddComponentUIButton(this Scene scene, string name, UIButtonDescription description, int order = 0)
         {
             UIButton component = null;
 
             await Task.Run(() =>
             {
-                component = new UIButton(scene, description);
+                component = new UIButton(name, scene, description);
 
                 scene.AddComponent(component, SceneObjectUsages.UI, order);
             });

@@ -70,17 +70,16 @@ namespace SpriteDrawing
             var desc = UITextAreaDescription.Default();
             desc.Width = Game.Form.RenderWidth * 0.5f;
 
-            textDebug = await this.AddComponentUITextArea(desc, layerHUD);
+            textDebug = await this.AddComponentUITextArea("Console", desc, layerHUD);
         }
         private async Task InitializeBackground()
         {
             var desc = SpriteDescription.Background("background.jpg");
-            await this.AddComponentSprite(desc, SceneObjectUsages.UI, layerBackground);
+            await this.AddComponentSprite("Background", desc, SceneObjectUsages.UI, layerBackground);
         }
         private async Task InitializeProgressbar()
         {
             var desc = UIProgressBarDescription.DefaultFromFile("LeagueSpartan-Bold.otf", 10, true);
-            desc.Name = "Progress Bar";
             desc.Top = Game.Form.RenderHeight - 20;
             desc.Left = 100;
             desc.Width = Game.Form.RenderWidth - 200;
@@ -88,7 +87,7 @@ namespace SpriteDrawing
             desc.BaseColor = new Color(0, 0, 0, 0.5f);
             desc.ProgressColor = Color.Green;
 
-            progressBar = await this.AddComponentUIProgressBar(desc, layerHUD);
+            progressBar = await this.AddComponentUIProgressBar("ProgressBar", desc, layerHUD);
         }
 
         private async Task LoadControls()
@@ -123,7 +122,7 @@ namespace SpriteDrawing
             float size = Game.Form.RenderWidth * 0.3333f;
 
             var desc = SpriteDescription.Default("smiley.png", size, size);
-            spriteSmiley = await this.AddComponentSprite(desc, SceneObjectUsages.None, layerObjects);
+            spriteSmiley = await this.AddComponentSprite("SmileySprite", desc, SceneObjectUsages.None, layerObjects);
             spriteSmiley.Visible = false;
         }
         private async Task InitializeStaticPan()
@@ -135,26 +134,23 @@ namespace SpriteDrawing
 
             var desc = new UIPanelDescription()
             {
-                Name = "Static Panel",
-
                 Top = Game.Form.RenderHeight / 8f,
                 Left = Game.Form.RenderCenter.X,
                 Width = width,
                 Height = height,
-                
+
                 Background = new SpriteDescription
                 {
                     Textures = new[] { "pan_bw.png" },
                     BaseColor = new Color(176, 77, 45),
                 },
             };
-            staticPan = await this.AddComponentUIPanel(desc, layerHUD);
+            staticPan = await this.AddComponentUIPanel("StaticPanel", desc, layerHUD);
 
             var descText = new UITextAreaDescription()
             {
                 Font = new TextDrawerDescription()
                 {
-                    Name = "Text",
                     FontFileName = "LeagueSpartan-Bold.otf",
                     FontSize = 18,
                     LineAdjust = true,
@@ -170,7 +166,7 @@ namespace SpriteDrawing
                 TextShadowColor = new Color4(0, 0, 0, 0.2f),
                 TextShadowDelta = new Vector2(8, 5),
             };
-            textArea = new UITextArea(this, descText);
+            textArea = new UITextArea("StaticPanel.Text", this, descText);
 
             staticPan.AddChild(textArea);
             staticPan.Visible = false;
@@ -184,8 +180,6 @@ namespace SpriteDrawing
 
             var descPan = new UIPanelDescription
             {
-                Name = "Dynamic Panel",
-
                 Width = width,
                 Height = height,
                 Anchor = Anchors.Center,
@@ -196,14 +190,13 @@ namespace SpriteDrawing
                     BaseColor = Color.Pink,
                 }
             };
-            dynamicPan = await this.AddComponentUIPanel(descPan, layerHUDDialogs);
+            dynamicPan = await this.AddComponentUIPanel("DynamicPanel", descPan, layerHUDDialogs);
 
             float w = 0.3333f;
 
             var font = TextDrawerDescription.FromFile("LeagueSpartan-Bold.otf", 16, true);
 
             var descButClose = UIButtonDescription.DefaultTwoStateButton("buttons.png", new Vector4(0, 0, w, 1f), new Vector4(w * 2f, 0, w * 3f, 1f));
-            descButClose.Name = "CloseButton";
             descButClose.Top = 10;
             descButClose.Left = dynamicPan.Width - 10 - 40;
             descButClose.Width = 40;
@@ -213,11 +206,10 @@ namespace SpriteDrawing
             descButClose.TextVerticalAlign = VerticalTextAlign.Middle;
             descButClose.Text = "X";
 
-            var butClose = new UIButton(this, descButClose);
+            var butClose = new UIButton("DynamicPanel.CloseButton", this, descButClose);
             butClose.JustReleased += ButClose_Click;
 
             var descText = UITextAreaDescription.DefaultFromMap("MaraFont.png", "MaraFont.txt");
-            descText.Name = "MaraText";
             descText.Text = @"Letters by Mara";
             descText.Padding = new Padding
             {
@@ -229,7 +221,7 @@ namespace SpriteDrawing
             descText.TextHorizontalAlign = HorizontalTextAlign.Center;
             descText.TextVerticalAlign = VerticalTextAlign.Middle;
 
-            var textMapped = new UITextArea(this, descText);
+            var textMapped = new UITextArea("DynamicPanel.MaraText", this, descText);
 
             dynamicPan.AddChild(textMapped);
             dynamicPan.AddChild(butClose, false);
@@ -240,7 +232,6 @@ namespace SpriteDrawing
             var font = TextDrawerDescription.FromFile("LeagueSpartan-Bold.otf", 16, true);
 
             var descButClose = UIButtonDescription.DefaultTwoStateButton(Color.Blue, Color.Green);
-            descButClose.Name = "Button Test";
             descButClose.Top = 250;
             descButClose.Left = 150;
             descButClose.Width = 200;
@@ -250,13 +241,13 @@ namespace SpriteDrawing
             descButClose.TextVerticalAlign = VerticalTextAlign.Middle;
             descButClose.Text = "Press Me";
 
-            butTest2 = await this.AddComponentUIButton(descButClose, layerHUD);
+            butTest2 = await this.AddComponentUIButton("ButtonTest2", descButClose, layerHUD);
             butTest2.JustReleased += ButTest2_Click;
             butTest2.MouseEnter += ButTest_MouseEnter;
             butTest2.MouseLeave += ButTest_MouseLeave;
             butTest2.Visible = false;
 
-            butTest1 = await this.AddComponentUIButton(descButClose, layerHUD);
+            butTest1 = await this.AddComponentUIButton("ButtonTest1", descButClose, layerHUD);
             butTest1.JustReleased += ButTest1_Click;
             butTest1.MouseEnter += ButTest_MouseEnter;
             butTest1.MouseLeave += ButTest_MouseLeave;

@@ -100,8 +100,8 @@ namespace Collada.Start
         }
         private async Task InitializeBackGround()
         {
-            var backGroundDesc = ModelDescription.FromXml("Background", resourcesFolder, "SkyPlane.xml");
-            backGround = await this.AddComponentModel(backGroundDesc, SceneObjectUsages.UI);
+            var backGroundDesc = ModelDescription.FromXml(resourcesFolder, "SkyPlane.xml");
+            backGround = await this.AddComponentModel("Background", backGroundDesc, SceneObjectUsages.UI);
         }
         private async Task InitializeAudio()
         {
@@ -167,25 +167,23 @@ namespace Collada.Start
             Game.VisibleMouse = false;
             Game.LockMouse = false;
 
-            await this.AddComponentUICursor(UICursorDescription.Default(Path.Combine(resourcesFolder, "pointer.png"), 36, 36), layerCursor);
+            await this.AddComponentUICursor("Cursor", UICursorDescription.Default(Path.Combine(resourcesFolder, "pointer.png"), 36, 36), layerCursor);
         }
         private async Task InitializeControls()
         {
             // Title text
             var titleDesc = UITextAreaDescription.DefaultFromFamily(titleFontFamily, 90, FontMapStyles.Bold);
-            titleDesc.Name = "Title";
             titleDesc.TextForeColor = Color.IndianRed;
             titleDesc.TextShadowColor = new Color4(Color.Brown.RGB(), 0.25f);
             titleDesc.TextShadowDelta = new Vector2(4, 4);
 
-            title = await this.AddComponentUITextArea(titleDesc, layerHUD);
+            title = await this.AddComponentUITextArea("Title", titleDesc, layerHUD);
 
             // Font description
             var buttonFont = TextDrawerDescription.FromFile(Path.Combine(resourcesFolder, mediumControlsFont), 16);
 
             // Buttons
             var buttonDesc = UIButtonDescription.DefaultTwoStateButton(Path.Combine(resourcesFolder, "buttons.png"), new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f);
-            buttonDesc.Name = "Scene buttons";
             buttonDesc.Width = 200;
             buttonDesc.Height = 36;
             buttonDesc.ColorReleased = SceneButtonColorBase;
@@ -195,14 +193,13 @@ namespace Collada.Start
             buttonDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
             buttonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
 
-            sceneDungeonWallButton = await this.AddComponentUIButton(buttonDesc, layerHUD);
-            sceneNavMeshTestButton = await this.AddComponentUIButton(buttonDesc, layerHUD);
-            sceneDungeonButton = await this.AddComponentUIButton(buttonDesc, layerHUD);
-            sceneModularDungeonButton = await this.AddComponentUIButton(buttonDesc, layerHUD);
+            sceneDungeonWallButton = await this.AddComponentUIButton("ButtonDungeonWall", buttonDesc, layerHUD);
+            sceneNavMeshTestButton = await this.AddComponentUIButton("ButtonNavMeshTest", buttonDesc, layerHUD);
+            sceneDungeonButton = await this.AddComponentUIButton("ButtonDungeon", buttonDesc, layerHUD);
+            sceneModularDungeonButton = await this.AddComponentUIButton("ButtonModularDungeon", buttonDesc, layerHUD);
 
             // Exit button
             var exitButtonDesc = UIButtonDescription.DefaultTwoStateButton(Path.Combine(resourcesFolder, "buttons.png"), new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f);
-            exitButtonDesc.Name = "Exit button";
             exitButtonDesc.Width = 200;
             exitButtonDesc.Height = 36;
             exitButtonDesc.ColorReleased = ExitButtonColorBase;
@@ -212,15 +209,14 @@ namespace Collada.Start
             exitButtonDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
             exitButtonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
 
-            exitButton = await this.AddComponentUIButton(exitButtonDesc, layerHUD);
+            exitButton = await this.AddComponentUIButton("ButtonExit", exitButtonDesc, layerHUD);
 
             // Description text
             var tooltipDesc = UITextAreaDescription.DefaultFromFile(Path.Combine(resourcesFolder, largeControlsFont), 12);
-            tooltipDesc.Name = "Tooltip";
             tooltipDesc.TextForeColor = Color.LightGray;
             tooltipDesc.Width = 250;
 
-            description = await this.AddComponentUITextArea(tooltipDesc, layerHUD);
+            description = await this.AddComponentUITextArea("Tooltip", tooltipDesc, layerHUD);
         }
         private async Task InitializeModularDungeonTabs()
         {
@@ -244,7 +240,7 @@ namespace Collada.Start
             var mediumClickFont = TextDrawerDescription.FromFile(Path.Combine(resourcesFolder, mediumControlsFont), 12);
 
             var desc = UITabPanelDescription.Default(tabButtons.ToArray(), Color.Transparent, SceneButtonColorBase, SceneButtonColorHighlight);
-            
+
             desc.ButtonDescription.Font = mediumFont;
             desc.ButtonDescription.TextForeColor = Color.LightGoldenrodYellow;
             desc.ButtonDescription.TextHorizontalAlign = HorizontalTextAlign.Center;
@@ -258,7 +254,7 @@ namespace Collada.Start
             desc.TabPanelsPadding = new Padding() { Bottom = 5, Left = 5, Right = 5, Top = 0 };
             desc.TabPanelPadding = 100;
 
-            modularDungeonTabs = await this.AddComponentUITabPanel(desc, layerHUD + 1);
+            modularDungeonTabs = await this.AddComponentUITabPanel("ModularDungeonTabs", desc, layerHUD + 1);
             modularDungeonTabs.Visible = false;
 
             for (int i = 0; i < mapFiles.Length; i++)
@@ -272,7 +268,7 @@ namespace Collada.Start
                 buttonDesc.TextForeColor = Color.DarkGray;
                 buttonDesc.TextHorizontalAlign = HorizontalTextAlign.Right;
                 buttonDesc.TextVerticalAlign = VerticalTextAlign.Bottom;
-                var button = new UIButton(this, buttonDesc);
+                var button = new UIButton($"ModularDungeonTabs.Button_{i}", this, buttonDesc);
                 button.JustReleased += (s, o) =>
                 {
                     Game.SetScene(new ModularDungeon.SceneModularDungeon(Game, true, Path.GetFileName(mapFile), Path.GetFileName(mapTexture)), SceneModes.DeferredLightning);
@@ -282,13 +278,12 @@ namespace Collada.Start
             }
 
             var buttonBasicDesc = UIButtonDescription.Default("modulardungeon/resources/basicdungeon/basicdungeon.png");
-            buttonBasicDesc.Name = "Basic Dungeon";
             buttonBasicDesc.Font = largeFont;
             buttonBasicDesc.Text = "Basic Dungeon";
             buttonBasicDesc.TextForeColor = Color.Gold;
             buttonBasicDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
             buttonBasicDesc.TextVerticalAlign = VerticalTextAlign.Middle;
-            var buttonBasic = new UIButton(this, buttonBasicDesc);
+            var buttonBasic = new UIButton("ModularDungeonTabs.ButtonBasicDungeon", this, buttonBasicDesc);
             buttonBasic.JustReleased += (s, o) =>
             {
                 Game.SetScene(new ModularDungeon.SceneModularDungeon(Game, false, "basicdungeon", null), SceneModes.DeferredLightning);

@@ -98,12 +98,12 @@ namespace Engine
         {
             get
             {
-                return this.rayleighScattering;
+                return rayleighScattering;
             }
             set
             {
-                this.rayleighScattering = value;
-                this.RayleighScattering4PI = value * 4.0f * MathUtil.Pi;
+                rayleighScattering = value;
+                RayleighScattering4PI = value * 4.0f * MathUtil.Pi;
             }
         }
         /// <summary>
@@ -117,12 +117,12 @@ namespace Engine
         {
             get
             {
-                return this.mieScattering;
+                return mieScattering;
             }
             set
             {
-                this.mieScattering = value;
-                this.MieScattering4PI = value * 4.0f * MathUtil.Pi;
+                mieScattering = value;
+                MieScattering4PI = value * 4.0f * MathUtil.Pi;
             }
         }
         /// <summary>
@@ -140,12 +140,12 @@ namespace Engine
         {
             get
             {
-                return this.wavelength;
+                return wavelength;
             }
             set
             {
-                this.wavelength = value;
-                this.InvWaveLength4 = new Color4(
+                wavelength = value;
+                InvWaveLength4 = new Color4(
                     1f / (float)Math.Pow(value.Red, 4.0f),
                     1f / (float)Math.Pow(value.Green, 4.0f),
                     1f / (float)Math.Pow(value.Blue, 4.0f),
@@ -163,13 +163,13 @@ namespace Engine
         {
             get
             {
-                return this.sphereInnerRadius;
+                return sphereInnerRadius;
             }
             set
             {
-                this.sphereInnerRadius = value;
+                sphereInnerRadius = value;
 
-                this.CalcScale();
+                CalcScale();
             }
         }
         /// <summary>
@@ -179,13 +179,13 @@ namespace Engine
         {
             get
             {
-                return this.sphereOuterRadius;
+                return sphereOuterRadius;
             }
             set
             {
-                this.sphereOuterRadius = value;
+                sphereOuterRadius = value;
 
-                this.CalcScale();
+                CalcScale();
             }
         }
         /// <summary>
@@ -203,17 +203,17 @@ namespace Engine
         {
             get
             {
-                if (this.vertexBuffer?.Ready != true)
+                if (vertexBuffer?.Ready != true)
                 {
                     return false;
                 }
 
-                if (this.indexBuffer?.Ready != true)
+                if (indexBuffer?.Ready != true)
                 {
                     return false;
                 }
 
-                if (this.indexBuffer.Count <= 0)
+                if (indexBuffer.Count <= 0)
                 {
                     return false;
                 }
@@ -225,30 +225,31 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Sky scattering description class</param>
-        public SkyScattering(Scene scene, SkyScatteringDescription description)
-            : base(scene, description)
+        public SkyScattering(string name, Scene scene, SkyScatteringDescription description)
+            : base(name, scene, description)
         {
-            this.PlanetRadius = description.PlanetRadius;
-            this.PlanetAtmosphereRadius = description.PlanetAtmosphereRadius;
+            PlanetRadius = description.PlanetRadius;
+            PlanetAtmosphereRadius = description.PlanetAtmosphereRadius;
 
-            this.RayleighScattering = description.RayleighScattering;
-            this.RayleighScaleDepth = description.RayleighScaleDepth;
-            this.MieScattering = description.MieScattering;
-            this.MiePhaseAssymetry = description.MiePhaseAssymetry;
-            this.MieScaleDepth = description.MieScaleDepth;
+            RayleighScattering = description.RayleighScattering;
+            RayleighScaleDepth = description.RayleighScaleDepth;
+            MieScattering = description.MieScattering;
+            MiePhaseAssymetry = description.MiePhaseAssymetry;
+            MieScaleDepth = description.MieScaleDepth;
 
-            this.WaveLength = description.WaveLength;
-            this.Brightness = description.Brightness;
-            this.HDRExposure = description.HDRExposure;
-            this.Resolution = description.Resolution;
+            WaveLength = description.WaveLength;
+            Brightness = description.Brightness;
+            HDRExposure = description.HDRExposure;
+            Resolution = description.Resolution;
 
-            this.sphereInnerRadius = 1.0f;
-            this.sphereOuterRadius = this.sphereInnerRadius * 1.025f;
-            this.CalcScale();
+            sphereInnerRadius = 1.0f;
+            sphereOuterRadius = sphereInnerRadius * 1.025f;
+            CalcScale();
 
-            this.InitializeBuffers(description.Name);
+            InitializeBuffers(name);
         }
         /// <summary>
         /// Destructor
@@ -264,8 +265,8 @@ namespace Engine
             if (disposing)
             {
                 //Remove data from buffer manager
-                this.BufferManager?.RemoveVertexData(this.vertexBuffer);
-                this.BufferManager?.RemoveIndexData(this.indexBuffer);
+                BufferManager?.RemoveVertexData(vertexBuffer);
+                BufferManager?.RemoveIndexData(indexBuffer);
             }
         }
 
@@ -275,7 +276,7 @@ namespace Engine
             var keyLight = context.Lights.KeyLight;
             if (keyLight != null)
             {
-                context.Lights.BaseFogColor = this.GetFogColor(keyLight.Direction);
+                context.Lights.BaseFogColor = GetFogColor(keyLight.Direction);
             }
         }
         /// <inheritdoc/>
@@ -297,20 +298,20 @@ namespace Engine
                 return;
             }
 
-            bool draw = context.ValidateDraw(this.BlendMode);
+            bool draw = context.ValidateDraw(BlendMode);
             if (!draw)
             {
                 return;
             }
 
             Counters.InstancesPerFrame++;
-            Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
+            Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
 
             var effect = DrawerPool.EffectDefaultSkyScattering;
             var technique = GetScatteringTechnique(effect);
 
-            this.BufferManager.SetIndexBuffer(this.indexBuffer);
-            this.BufferManager.SetInputAssembler(technique, this.vertexBuffer, Topology.TriangleList);
+            BufferManager.SetIndexBuffer(indexBuffer);
+            BufferManager.SetInputAssembler(technique, vertexBuffer, Topology.TriangleList);
 
             effect.UpdatePerFrame(
                 Matrix.Translation(context.EyePosition),
@@ -318,29 +319,29 @@ namespace Engine
                 keyLight.Direction,
                 new EffectSkyScatterState
                 {
-                    PlanetRadius = this.PlanetRadius,
-                    PlanetAtmosphereRadius = this.PlanetAtmosphereRadius,
-                    SphereOuterRadius = this.SphereOuterRadius,
-                    SphereInnerRadius = this.SphereInnerRadius,
-                    SkyBrightness = this.Brightness,
-                    RayleighScattering = this.RayleighScattering,
-                    RayleighScattering4PI = this.RayleighScattering4PI,
-                    MieScattering = this.MieScattering,
-                    MieScattering4PI = this.MieScattering4PI,
-                    InvWaveLength4 = this.InvWaveLength4,
-                    Scale = this.ScatteringScale,
-                    RayleighScaleDepth = this.RayleighScaleDepth,
+                    PlanetRadius = PlanetRadius,
+                    PlanetAtmosphereRadius = PlanetAtmosphereRadius,
+                    SphereOuterRadius = SphereOuterRadius,
+                    SphereInnerRadius = SphereInnerRadius,
+                    SkyBrightness = Brightness,
+                    RayleighScattering = RayleighScattering,
+                    RayleighScattering4PI = RayleighScattering4PI,
+                    MieScattering = MieScattering,
+                    MieScattering4PI = MieScattering4PI,
+                    InvWaveLength4 = InvWaveLength4,
+                    Scale = ScatteringScale,
+                    RayleighScaleDepth = RayleighScaleDepth,
                     BackColor = context.Lights.FogColor,
-                    HdrExposure = this.HDRExposure,
+                    HdrExposure = HDRExposure,
                 });
 
-            var graphics = this.Game.Graphics;
+            var graphics = Game.Graphics;
 
             for (int p = 0; p < technique.PassCount; p++)
             {
                 graphics.EffectPassApply(technique, p, 0);
 
-                graphics.DrawIndexed(this.indexBuffer.Count, this.indexBuffer.BufferOffset, this.vertexBuffer.BufferOffset);
+                graphics.DrawIndexed(indexBuffer.Count, indexBuffer.BufferOffset, vertexBuffer.BufferOffset);
             }
         }
         /// <summary>
@@ -351,11 +352,11 @@ namespace Engine
         private EngineEffectTechnique GetScatteringTechnique(EffectDefaultSkyScattering effect)
         {
             EngineEffectTechnique technique;
-            if (this.Resolution == SkyScatteringResolutions.High)
+            if (Resolution == SkyScatteringResolutions.High)
             {
                 technique = effect.SkyScatteringHigh;
             }
-            else if (this.Resolution == SkyScatteringResolutions.Medium)
+            else if (Resolution == SkyScatteringResolutions.Medium)
             {
                 technique = effect.SkyScatteringMedium;
             }
@@ -378,15 +379,15 @@ namespace Engine
             var vertices = VertexPosition.Generate(sphere.Vertices);
             var indices = GeometryUtil.ChangeCoordinate(sphere.Indices);
 
-            this.vertexBuffer = this.BufferManager.AddVertexData(name, false, vertices);
-            this.indexBuffer = this.BufferManager.AddIndexData(name, false, indices);
+            vertexBuffer = BufferManager.AddVertexData(name, false, vertices);
+            indexBuffer = BufferManager.AddIndexData(name, false, indices);
         }
         /// <summary>
         /// Calc current scattering scale from sphere radius values
         /// </summary>
         private void CalcScale()
         {
-            this.ScatteringScale = 1.0f / (this.SphereOuterRadius - this.SphereInnerRadius);
+            ScatteringScale = 1.0f / (SphereOuterRadius - SphereInnerRadius);
         }
 
         /// <summary>
@@ -409,10 +410,10 @@ namespace Engine
             {
                 Helper.GetVectorFromAngles(yaw, pitch, out Vector3 scatterPos);
 
-                scatterPos *= this.PlanetRadius + this.PlanetAtmosphereRadius;
-                scatterPos.Y -= this.PlanetRadius;
+                scatterPos *= PlanetRadius + PlanetAtmosphereRadius;
+                scatterPos.Y -= PlanetRadius;
 
-                this.GetColor(scatterPos, lightDirection, out Color4 tmpColor);
+                GetColor(scatterPos, lightDirection, out Color4 tmpColor);
 
                 outColor += tmpColor;
 
@@ -448,22 +449,22 @@ namespace Engine
             float viewerHeight = 1f;
             Vector3 eyePosition = new Vector3(0, viewerHeight, 0);
 
-            float scale = 1.0f / (this.SphereOuterRadius - this.SphereInnerRadius);
-            float scaleOverScaleDepth = scale / this.RayleighScaleDepth;
-            float rayleighBrightness = this.RayleighScattering * this.Brightness * 0.25f;
-            float mieBrightness = this.MieScattering * this.Brightness * 0.25f;
+            float scale = 1.0f / (SphereOuterRadius - SphereInnerRadius);
+            float scaleOverScaleDepth = scale / RayleighScaleDepth;
+            float rayleighBrightness = RayleighScattering * Brightness * 0.25f;
+            float mieBrightness = MieScattering * Brightness * 0.25f;
 
-            Vector3 position = scatterPosition / this.PlanetRadius;
-            position.Y += this.SphereInnerRadius;
+            Vector3 position = scatterPosition / PlanetRadius;
+            position.Y += SphereInnerRadius;
 
             Vector3 eyeDirection = position - eyePosition;
             float sampleLength = eyeDirection.Length() * 0.5f;
-            float scaledLength = sampleLength * this.MieScaleDepth;
+            float scaledLength = sampleLength * MieScaleDepth;
             eyeDirection.Normalize();
             Vector3 sampleRay = eyeDirection * sampleLength;
             float startAngle = Vector3.Dot(eyeDirection, eyePosition);
 
-            float scaleDepth = (float)Math.Exp(scaleOverScaleDepth * (this.SphereInnerRadius - viewerHeight));
+            float scaleDepth = (float)Math.Exp(scaleOverScaleDepth * (SphereInnerRadius - viewerHeight));
             float startOffset = scaleDepth * VernierScale(startAngle);
 
             Vector3 samplePoint = eyePosition + sampleRay * 0.5f;
@@ -472,7 +473,7 @@ namespace Engine
 
             for (uint i = 0; i < 2; i++)
             {
-                float depth = (float)Math.Exp(scaleOverScaleDepth * (this.SphereInnerRadius - viewerHeight));
+                float depth = (float)Math.Exp(scaleOverScaleDepth * (SphereInnerRadius - viewerHeight));
 
                 float height = samplePoint.Length();
                 float lightAngle = Vector3.Dot(-lightDirection, samplePoint) / height;
@@ -481,16 +482,16 @@ namespace Engine
                 float scatter = (startOffset + depth * (VernierScale(lightAngle) - VernierScale(cameraAngle)));
 
                 Color3 attenuate = Color3.Black;
-                attenuate[0] = (float)Math.Exp(-scatter * (this.InvWaveLength4[0] * this.RayleighScattering4PI + this.MieScattering4PI));
-                attenuate[1] = (float)Math.Exp(-scatter * (this.InvWaveLength4[1] * this.RayleighScattering4PI + this.MieScattering4PI));
-                attenuate[2] = (float)Math.Exp(-scatter * (this.InvWaveLength4[2] * this.RayleighScattering4PI + this.MieScattering4PI));
+                attenuate[0] = (float)Math.Exp(-scatter * (InvWaveLength4[0] * RayleighScattering4PI + MieScattering4PI));
+                attenuate[1] = (float)Math.Exp(-scatter * (InvWaveLength4[1] * RayleighScattering4PI + MieScattering4PI));
+                attenuate[2] = (float)Math.Exp(-scatter * (InvWaveLength4[2] * RayleighScattering4PI + MieScattering4PI));
 
                 frontColor += attenuate * depth * scaledLength;
 
                 samplePoint += sampleRay;
             }
 
-            Color3 rayleighColor = frontColor * (this.InvWaveLength4.RGB() * rayleighBrightness);
+            Color3 rayleighColor = frontColor * (InvWaveLength4.RGB() * rayleighBrightness);
 
             Vector3 direction = Vector3.Normalize(eyePosition - position);
             float miePhase = GetMiePhase(Vector3.Dot(-lightDirection, direction));
@@ -499,9 +500,9 @@ namespace Engine
             Color3 color = rayleighColor + (miePhase * mieColor);
 
             Vector3 expColor = Vector3.Zero;
-            expColor.X = 1.0f - (float)Math.Exp(-this.HDRExposure * color.Red);
-            expColor.Y = 1.0f - (float)Math.Exp(-this.HDRExposure * color.Green);
-            expColor.Z = 1.0f - (float)Math.Exp(-this.HDRExposure * color.Blue);
+            expColor.X = 1.0f - (float)Math.Exp(-HDRExposure * color.Red);
+            expColor.Y = 1.0f - (float)Math.Exp(-HDRExposure * color.Green);
+            expColor.Z = 1.0f - (float)Math.Exp(-HDRExposure * color.Blue);
             expColor.Normalize();
 
             outColor = new Color4(expColor, 1f);
@@ -517,17 +518,18 @@ namespace Engine
         /// Adds a component to the scene
         /// </summary>
         /// <param name="scene">Scene</param>
+        /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="usage">Component usage</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<SkyScattering> AddComponentSkyScattering(this Scene scene, SkyScatteringDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
+        public static async Task<SkyScattering> AddComponentSkyScattering(this Scene scene, string name, SkyScatteringDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
         {
             SkyScattering component = null;
 
             await Task.Run(() =>
             {
-                component = new SkyScattering(scene, description);
+                component = new SkyScattering(name, scene, description);
 
                 scene.AddComponent(component, usage, order);
             });

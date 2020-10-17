@@ -165,16 +165,15 @@ namespace Engine.UI
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        public UITextArea(Scene scene, UITextAreaDescription description) : base(scene, description)
+        public UITextArea(string name, Scene scene, UITextAreaDescription description) : base(name, scene, description)
         {
             growControlWithText = description.GrowControlWithText;
 
-            textDrawer = new TextDrawer(scene, this, description.Font)
+            textDrawer = new TextDrawer($"{name}.TextDrawer", scene, this, description.Font)
             {
-                Name = description.Font.Name ?? $"{description.Name}.TextArea",
-
                 Text = description.Text,
                 ForeColor = description.TextForeColor,
                 ShadowColor = description.TextShadowColor,
@@ -274,16 +273,17 @@ namespace Engine.UI
         /// Adds a component to the scene
         /// </summary>
         /// <param name="scene">Scene</param>
+        /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<UITextArea> AddComponentUITextArea(this Scene scene, UITextAreaDescription description, int order = 0)
+        public static async Task<UITextArea> AddComponentUITextArea(this Scene scene, string name, UITextAreaDescription description, int order = 0)
         {
             UITextArea component = null;
 
             await Task.Run(() =>
             {
-                component = new UITextArea(scene, description);
+                component = new UITextArea(name, scene, description);
 
                 scene.AddComponent(component, SceneObjectUsages.UI, order);
             });

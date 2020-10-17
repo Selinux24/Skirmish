@@ -95,7 +95,6 @@ namespace SceneTest.SceneCascadedShadows
 
             var desc = new ModelDescription()
             {
-                Name = "Floor",
                 CastShadow = true,
                 DeferredEnabled = true,
                 DepthEnabled = true,
@@ -106,13 +105,12 @@ namespace SceneTest.SceneCascadedShadows
                 }
             };
 
-            await this.AddComponentModel(desc);
+            await this.AddComponentModel("Floor", desc);
         }
         private async Task InitializeBuildingObelisk()
         {
             var desc = new ModelInstancedDescription()
             {
-                Name = "Obelisk",
                 Instances = 4,
                 CastShadow = true,
                 UseAnisotropicFiltering = true,
@@ -123,13 +121,12 @@ namespace SceneTest.SceneCascadedShadows
                 }
             };
 
-            buildingObelisks = await this.AddComponentModelInstanced(desc);
+            buildingObelisks = await this.AddComponentModelInstanced("Obelisk", desc);
         }
         private async Task InitializeTree()
         {
             var desc = new ModelDescription()
             {
-                Name = "Tree",
                 CastShadow = true,
                 UseAnisotropicFiltering = true,
                 BlendMode = BlendModes.DefaultTransparent,
@@ -140,11 +137,11 @@ namespace SceneTest.SceneCascadedShadows
                 }
             };
 
-            await this.AddComponentModel(desc);
+            await this.AddComponentModel("Tree", desc);
         }
         private async Task InitializeSkyEffects()
         {
-            await this.AddComponentLensFlare(new LensFlareDescription()
+            await this.AddComponentLensFlare("Flare", new LensFlareDescription()
             {
                 ContentPath = @"Common/lensFlare",
                 GlowTexture = "lfGlow.png",
@@ -183,15 +180,7 @@ namespace SceneTest.SceneCascadedShadows
             int smLeft = Game.Form.RenderWidth - width;
             int smTop = Game.Form.RenderHeight - height;
 
-            var desc = new UITextureRendererDescription()
-            {
-                Left = smLeft,
-                Top = smTop,
-                Width = width,
-                Height = height,
-                Channel = UITextureRendererChannels.NoAlpha,
-            };
-            bufferDrawer = await this.AddComponentUITextureRenderer(desc, layerEffects);
+            bufferDrawer = await this.AddComponentUITextureRenderer("DebugTextureRenderer", UITextureRendererDescription.Default(smLeft, smTop, width, height), layerEffects);
             bufferDrawer.Visible = false;
         }
 

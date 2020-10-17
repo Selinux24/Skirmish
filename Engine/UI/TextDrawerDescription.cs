@@ -1,5 +1,4 @@
-﻿using SharpDX;
-
+﻿
 namespace Engine.UI
 {
     /// <summary>
@@ -64,7 +63,6 @@ namespace Engine.UI
         {
             return new TextDrawerDescription()
             {
-                Name = string.Format("TextBox {0} {1} {2}", fontFamilyName, size, style),
                 FontFamily = fontFamilyName,
                 FontSize = size,
                 Style = style,
@@ -104,7 +102,6 @@ namespace Engine.UI
         {
             return new TextDrawerDescription()
             {
-                Name = string.Format("TextBox {0} {1} {2}", fontFileName, size, style),
                 FontFileName = fontFileName,
                 FontSize = size,
                 Style = style,
@@ -122,7 +119,6 @@ namespace Engine.UI
         {
             return new TextDrawerDescription()
             {
-                Name = string.Format("TextBox {0}", imageFileName),
                 FontMapping = new FontMapping
                 {
                     ImageFile = imageFileName,

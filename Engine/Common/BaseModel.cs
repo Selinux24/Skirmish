@@ -73,10 +73,11 @@ namespace Engine.Common
         /// <summary>
         /// Base model
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Object description</param>
-        protected BaseModel(Scene scene, BaseModelDescription description)
-            : base(scene, description)
+        protected BaseModel(string name, Scene scene, BaseModelDescription description)
+            : base(name, scene, description)
         {
             var desc = new DrawingDataDescription()
             {
@@ -91,7 +92,7 @@ namespace Engine.Common
 
             if (desc.Instanced)
             {
-                InstancingBuffer = BufferManager.AddInstancingData($"{description.Name}.Instances", true, desc.Instances);
+                InstancingBuffer = BufferManager.AddInstancingData($"{Name}.Instances", true, desc.Instances);
             }
 
             var geo = description.ReadModelContent();
@@ -101,7 +102,7 @@ namespace Engine.Common
 
                 if (description.Optimize) iGeo.Optimize();
 
-                var drawable = DrawingData.Build(Game, description.Name, iGeo, desc, InstancingBuffer).GetAwaiter().GetResult();
+                var drawable = DrawingData.Build(Game, Name, iGeo, desc, InstancingBuffer).GetAwaiter().GetResult();
 
                 meshesByLOD.Add(LevelOfDetail.High, drawable);
             }
@@ -116,7 +117,7 @@ namespace Engine.Common
                         defaultLevelOfDetail = lod;
                     }
 
-                    var drawable = DrawingData.Build(Game, description.Name, content[lod], desc, InstancingBuffer).GetAwaiter().GetResult();
+                    var drawable = DrawingData.Build(Game, Name, content[lod], desc, InstancingBuffer).GetAwaiter().GetResult();
 
                     meshesByLOD.Add(lod, drawable);
                 }

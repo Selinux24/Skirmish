@@ -26,10 +26,11 @@ namespace Engine.UI
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Sprite description</param>
-        public UICursor(Scene scene, UICursorDescription description)
-            : base(scene, description)
+        public UICursor(string name, Scene scene, UICursorDescription description)
+            : base(name, scene, description)
         {
             Centered = description.Centered;
             Delta = description.Delta;
@@ -82,16 +83,17 @@ namespace Engine.UI
         /// Adds a component to the scene
         /// </summary>
         /// <param name="scene">Scene</param>
+        /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<UICursor> AddComponentUICursor(this Scene scene, UICursorDescription description, int order = 0)
+        public static async Task<UICursor> AddComponentUICursor(this Scene scene, string name, UICursorDescription description, int order = 0)
         {
             UICursor component = null;
 
             await Task.Run(() =>
             {
-                component = new UICursor(scene, description);
+                component = new UICursor(name, scene, description);
 
                 scene.AddComponent(component, SceneObjectUsages.UI, order);
             });

@@ -804,11 +804,11 @@ namespace Engine.UI
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="game">Game</param>
-        /// <param name="bufferManager">Buffer manager</param>
+        /// <param name="name">Name</param>
+        /// <param name="scene">Scene</param>
         /// <param name="description">Button description</param>
-        protected UIControl(Scene scene, UIControlDescription description)
-            : base(scene, description)
+        protected UIControl(string name, Scene scene, UIControlDescription description)
+            : base(name, scene, description)
         {
             updateOrder = GetNextUpdateOrder();
 
@@ -854,8 +854,6 @@ namespace Engine.UI
         /// <inheritdoc/>
         public override void Update(UpdateContext context)
         {
-            base.Update(context);
-
             if (!Active)
             {
                 return;

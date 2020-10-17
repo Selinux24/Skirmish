@@ -71,14 +71,14 @@ namespace Animation.AnimationParts
 
         private async Task InitializeUI()
         {
-            title = await this.AddComponentUITextArea(new UITextAreaDescription {Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White }, layerHUD);
+            title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White }, layerHUD);
 
             title.Text = "Model Parts Test";
 
-            backPanel = await this.AddComponentUIPanel(UIPanelDescription.Default(new Color4(0, 0, 0, 0.75f)), layerHUD - 1);
+            backPanel = await this.AddComponentUIPanel("Backpanel", UIPanelDescription.Default(new Color4(0, 0, 0, 0.75f)), layerHUD - 1);
 
             var consoleDesc = UIConsoleDescription.Default(new Color4(0.35f, 0.35f, 0.35f, 1f));
-            console = await this.AddComponentUIConsole(consoleDesc, layerHUD + 1);
+            console = await this.AddComponentUIConsole("Console", consoleDesc, layerHUD + 1);
             console.Visible = false;
 
             uiReady = true;
@@ -88,7 +88,6 @@ namespace Animation.AnimationParts
         {
             var tDesc = new ModelDescription()
             {
-                Name = "Tanks",
                 CastShadow = true,
                 Optimize = false,
                 Content = new ContentDescription()
@@ -110,7 +109,7 @@ namespace Animation.AnimationParts
                 },
             };
 
-            tank = await this.AddComponentModel(tDesc, SceneObjectUsages.Agent, layerModels);
+            tank = await this.AddComponentModel("Tanks", tDesc, SceneObjectUsages.Agent, layerModels);
             tank.Manipulator.SetScale(0.5f);
         }
         private async Task InitializeFloor()
@@ -151,14 +150,14 @@ namespace Animation.AnimationParts
                 }
             };
 
-            await this.AddComponentModel(desc);
+            await this.AddComponentModel("Floor", desc);
         }
         private async Task InitializeDebug()
         {
-            itemTris = await this.AddComponentPrimitiveListDrawer(new PrimitiveListDrawerDescription<Triangle>() { Count = 5000 });
+            itemTris = await this.AddComponentPrimitiveListDrawer("DebugItemTris", new PrimitiveListDrawerDescription<Triangle>() { Count = 5000 });
             itemTris.Visible = false;
 
-            itemLines = await this.AddComponentPrimitiveListDrawer(new PrimitiveListDrawerDescription<Line3D>() { Count = 1000 });
+            itemLines = await this.AddComponentPrimitiveListDrawer("DebugItemLines", new PrimitiveListDrawerDescription<Line3D>() { Count = 1000 });
             itemLines.Visible = false;
         }
 

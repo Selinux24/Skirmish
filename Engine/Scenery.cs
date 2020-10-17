@@ -279,10 +279,11 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Terrain description</param>
-        public Scenery(Scene scene, GroundDescription description)
-            : base(scene, description)
+        public Scenery(string name, Scene scene, GroundDescription description)
+            : base(name, scene, description)
         {
             // Generate model content
             content = description.ReadModelContent();
@@ -294,7 +295,7 @@ namespace Engine
             var nodes = groundPickingQuadtree.GetLeafNodes();
             foreach (var node in nodes)
             {
-                var patch = SceneryPatch.CreatePatch(Game, description.Name, content, node).GetAwaiter().GetResult();
+                var patch = SceneryPatch.CreatePatch(Game, name, content, node).GetAwaiter().GetResult();
 
                 patchDictionary.Add(node.Id, patch);
             }
@@ -513,7 +514,7 @@ namespace Engine
         private async Task<SceneryPatchTask> LoadPatch(PickingQuadTreeNode<Triangle> node)
         {
             // Create patch
-            var patch = await SceneryPatch.CreatePatch(Game, Description.Name, content, node);
+            var patch = await SceneryPatch.CreatePatch(Game, Name, content, node);
 
             SceneryPatchTask res = new SceneryPatchTask
             {
@@ -534,17 +535,18 @@ namespace Engine
         /// Adds a component to the scene
         /// </summary>
         /// <param name="scene">Scene</param>
+        /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="usage">Component usage</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<Scenery> AddComponentScenery(this Scene scene, GroundDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
+        public static async Task<Scenery> AddComponentScenery(this Scene scene, string name, GroundDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
         {
             Scenery component = null;
 
             await Task.Run(() =>
             {
-                component = new Scenery(scene, description);
+                component = new Scenery(name, scene, description);
 
                 scene.AddComponent(component, usage, order);
             });

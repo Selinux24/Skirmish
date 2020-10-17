@@ -65,10 +65,11 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        public ModelInstanced(Scene scene, ModelInstancedDescription description)
-            : base(scene, description)
+        public ModelInstanced(string name, Scene scene, ModelInstancedDescription description)
+            : base(name, scene, description)
         {
             if (description.Instances <= 0)
             {
@@ -237,7 +238,7 @@ namespace Engine
             {
                 return;
             }
-            
+
             if (hasDataToWrite)
             {
                 Logger.WriteTrace(this, $"{Name} - DrawShadows {context.ShadowMap} WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset}");
@@ -600,17 +601,18 @@ namespace Engine
         /// Adds a component to the scene
         /// </summary>
         /// <param name="scene">Scene</param>
+        /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="usage">Component usage</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<ModelInstanced> AddComponentModelInstanced(this Scene scene, ModelInstancedDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
+        public static async Task<ModelInstanced> AddComponentModelInstanced(this Scene scene, string name, ModelInstancedDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
         {
             ModelInstanced component = null;
 
             await Task.Run(() =>
             {
-                component = new ModelInstanced(scene, description);
+                component = new ModelInstanced(name, scene, description);
 
                 scene.AddComponent(component, usage, order);
             });

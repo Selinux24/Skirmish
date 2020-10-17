@@ -117,21 +117,20 @@ namespace Skybox
 
             var cursorDesc = new UICursorDescription()
             {
-                Name = "Cursor",
                 Textures = new[] { "target.png" },
                 BaseColor = Color.Purple,
                 Width = 16,
                 Height = 16,
             };
-            await this.AddComponentUICursor(cursorDesc, layerHUD + 1);
+            await this.AddComponentUICursor("Cursor", cursorDesc, layerHUD + 1);
 
             #endregion
 
             #region Text
 
-            var title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White }, layerHUD);
-            var help = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow }, layerHUD);
-            fps = await this.AddComponentUITextArea(new UITextAreaDescription {Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow }, layerHUD);
+            var title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White }, layerHUD);
+            var help = await this.AddComponentUITextArea("Help", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow }, layerHUD);
+            fps = await this.AddComponentUITextArea("FPS", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow }, layerHUD);
 
             title.Text = "Collada Scene with Skybox";
 #if DEBUG
@@ -147,21 +146,19 @@ namespace Skybox
 
             var spDesc = new SpriteDescription()
             {
-                Name = "UI Back pannel",
                 Width = Game.Form.RenderWidth,
                 Height = 120,
                 BaseColor = new Color4(0, 0, 0, 0.75f),
             };
 
-            await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            await this.AddComponentSprite("Backpanel", spDesc, SceneObjectUsages.UI, layerHUD - 1);
 
             #endregion
 
             #region Skydom
 
-            await this.AddComponentSkydom(new SkydomDescription()
+            await this.AddComponentSkydom("Skydom", new SkydomDescription()
             {
-                Name = "Skydom",
                 ContentPath = "Resources",
                 Radius = Camera.FarPlaneDistance,
                 Texture = "sunset.dds",
@@ -172,9 +169,9 @@ namespace Skybox
             #region Torchs
 
             torchs = await this.AddComponentModelInstanced(
+                "Torchs",
                 new ModelInstancedDescription()
                 {
-                    Name = "Torchs",
                     Instances = firePositions.Length,
                     CastShadow = true,
                     Content = new ContentDescription()
@@ -191,9 +188,9 @@ namespace Skybox
             #region Obelisks
 
             obelisks = await this.AddComponentModelInstanced(
+                "Obelisks",
                 new ModelInstancedDescription()
                 {
-                    Name = "Obelisks",
                     Instances = firePositions.Length,
                     CastShadow = true,
                     Content = new ContentDescription()
@@ -208,9 +205,9 @@ namespace Skybox
             #region Fountain
 
             fountain = await this.AddComponentModel(
+                "Fountain",
                 new ModelDescription()
                 {
-                    Name = "Fountain",
                     CastShadow = true,
                     Content = new ContentDescription()
                     {
@@ -225,21 +222,21 @@ namespace Skybox
 
             #region Terrain
 
-            ruins = await this.AddComponentScenery(GroundDescription.FromFile("Resources", "ruins.xml"));
+            ruins = await this.AddComponentScenery("Ruins", GroundDescription.FromFile("Resources", "ruins.xml"));
             SetGround(ruins, true);
 
             #endregion
 
             #region Water
 
-            var waterDesc = WaterDescription.CreateCalm("Ocean", 5000f, -1f);
-            await this.AddComponentWater(waterDesc, SceneObjectUsages.None);
+            var waterDesc = WaterDescription.CreateCalm(5000f, -1f);
+            await this.AddComponentWater("Ocean", waterDesc, SceneObjectUsages.None);
 
             #endregion
 
             #region Particle Systems
 
-            var pManager = await this.AddComponentParticleManager(new ParticleManagerDescription() { Name = "Particle Systems" });
+            var pManager = await this.AddComponentParticleManager("ParticleManager", ParticleManagerDescription.Default());
 
             #endregion
 
@@ -255,7 +252,6 @@ namespace Skybox
 
             var mFireDesc = new ModelDescription()
             {
-                Name = "Emitter",
                 CastShadow = false,
                 DeferredEnabled = true,
                 DepthEnabled = true,
@@ -265,7 +261,7 @@ namespace Skybox
                 }
             };
 
-            movingFire = await this.AddComponentModel(mFireDesc);
+            movingFire = await this.AddComponentModel("Emitter", mFireDesc);
 
             movingFireEmitter = new ParticleEmitter() { EmissionRate = 0.1f, InfiniteDuration = true };
 
@@ -340,10 +336,10 @@ namespace Skybox
 
             #region DEBUG drawers
 
-            volumesDrawer = await this.AddComponentPrimitiveListDrawer(new PrimitiveListDrawerDescription<Line3D>() { Count = 10000 });
+            volumesDrawer = await this.AddComponentPrimitiveListDrawer("DebugVolumesDrawer", new PrimitiveListDrawerDescription<Line3D>() { Count = 10000 });
             volumesDrawer.Visible = false;
 
-            graphDrawer = await this.AddComponentPrimitiveListDrawer(new PrimitiveListDrawerDescription<Triangle>() { Count = 10000 });
+            graphDrawer = await this.AddComponentPrimitiveListDrawer("DebugGraphDrawer", new PrimitiveListDrawerDescription<Triangle>() { Count = 10000 });
             graphDrawer.Visible = false;
 
             #endregion

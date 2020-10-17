@@ -49,7 +49,6 @@ namespace Animation.Start
         {
             var cursorDesc = new UICursorDescription()
             {
-                Name = "Cursor",
                 ContentPath = "Common",
                 Textures = new[] { "start/resources/pointer.png" },
                 Height = 48,
@@ -58,19 +57,18 @@ namespace Animation.Start
                 Delta = new Vector2(-14f, -7f),
                 BaseColor = Color.White,
             };
-            await this.AddComponentUICursor(cursorDesc, layerCursor);
+            await this.AddComponentUICursor("Cursor", cursorDesc, layerCursor);
         }
         private async Task InitializeBackground()
         {
-            var backGroundDesc = ModelDescription.FromXml("Background", "start/resources", "SkyPlane.xml");
-            backGround = await this.AddComponentModel(backGroundDesc, SceneObjectUsages.UI);
+            var backGroundDesc = ModelDescription.FromXml("start/resources", "SkyPlane.xml");
+            backGround = await this.AddComponentModel("Background", backGroundDesc, SceneObjectUsages.UI);
         }
         private async Task InitializeTitle()
         {
             var titleFont = TextDrawerDescription.FromFamily(titleFonts, 72);
-            titleFont.Name = "Title";
 
-            title = await this.AddComponentUITextArea(UITextAreaDescription.Default(titleFont), layerHUD);
+            title = await this.AddComponentUITextArea("Title", UITextAreaDescription.Default(titleFont), layerHUD);
             title.GrowControlWithText = false;
             title.Text = "Animation";
             title.TextForeColor = Color.Gold;
@@ -81,7 +79,7 @@ namespace Animation.Start
         }
         private async Task InitializeMainPanel()
         {
-            mainPanel = await this.AddComponentUIPanel(UIPanelDescription.Default(Color.Transparent), layerHUD);
+            mainPanel = await this.AddComponentUIPanel("MainPanel", UIPanelDescription.Default(Color.Transparent), layerHUD);
             mainPanel.Spacing = 10;
             mainPanel.Padding = 15;
             mainPanel.SetGridLayout(GridLayout.FixedRows(2));
@@ -106,19 +104,19 @@ namespace Animation.Start
             var panExit = AddButtonPanel(exitDesc, "Exit", (sender, args) => { Game.Exit(); });
 
             mainPanel.AddChild(panSimpleAnimation, false);
-            mainPanel.AddChild(new Sprite(this, emptyDesc), false);
-            mainPanel.AddChild(new Sprite(this, emptyDesc), false);
-            mainPanel.AddChild(new Sprite(this, emptyDesc), false);
-            mainPanel.AddChild(new Sprite(this, emptyDesc), false);
+            mainPanel.AddChild(new Sprite("Empty", this, emptyDesc), false);
+            mainPanel.AddChild(new Sprite("Empty", this, emptyDesc), false);
+            mainPanel.AddChild(new Sprite("Empty", this, emptyDesc), false);
+            mainPanel.AddChild(new Sprite("Empty", this, emptyDesc), false);
             mainPanel.AddChild(panAnimationParts, false);
-            mainPanel.AddChild(new Sprite(this, emptyDesc), false);
+            mainPanel.AddChild(new Sprite("Empty", this, emptyDesc), false);
             mainPanel.AddChild(panExit, false);
         }
         private UIPanel AddButtonPanel(UIButtonDescription desc, string text, EventHandler buttonJustReleased)
         {
-            var panel = new UIPanel(this, UIPanelDescription.Default(new Color4(1, 1, 1, 0.25f)));
+            var panel = new UIPanel($"MainPanel.Panel.{text}", this, UIPanelDescription.Default(new Color4(1, 1, 1, 0.25f)));
 
-            var button = new UIButton(this, desc);
+            var button = new UIButton($"MainPanel.Button.{text}", this, desc);
             button.Caption.Text = text;
             button.JustReleased += buttonJustReleased;
             panel.AddChild(button);

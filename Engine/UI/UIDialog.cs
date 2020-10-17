@@ -9,10 +9,6 @@ namespace Engine.UI
     public class UIDialog : UIControl
     {
         /// <summary>
-        /// Background panel
-        /// </summary>
-        private readonly UIPanel backPanel;
-        /// <summary>
         /// Close button
         /// </summary>
         private readonly UIButton butClose;
@@ -36,32 +32,33 @@ namespace Engine.UI
         /// <summary>
         /// Fires when the accept button was just released
         /// </summary>
-        public EventHandler OnAcceptHandler;
+        public event EventHandler OnAcceptHandler;
         /// <summary>
         /// Fires when the cancel button was just released
         /// </summary>
-        public EventHandler OnCancelHandler;
+        public event EventHandler OnCancelHandler;
         /// <summary>
         /// Fires when the close button was just released
         /// </summary>
-        public EventHandler OnCloseHandler;
+        public event EventHandler OnCloseHandler;
 
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        public UIDialog(Scene scene, UIDialogDescription description) : base(scene, description)
+        public UIDialog(string name, Scene scene, UIDialogDescription description) : base(name, scene, description)
         {
-            backPanel = new UIPanel(scene, description.Background);
+            var backPanel = new UIPanel($"{name}.BackPanel", scene, description.Background);
             AddChild(backPanel);
 
-            dialogText = new UITextArea(scene, description.TextArea);
+            dialogText = new UITextArea($"{name}.DialogText", scene, description.TextArea);
             backPanel.AddChild(dialogText);
 
             if (description.DialogButtons.HasFlag(UIDialogButtons.Accept))
             {
-                butAccept = new UIButton(scene, description.Buttons);
+                butAccept = new UIButton($"{name}.AcceptButton", scene, description.Buttons);
                 butAccept.Caption.Text = "Accept";
                 butAccept.JustReleased += DialogAcceptJustReleased;
                 backPanel.AddChild(butAccept, false);
@@ -71,18 +68,20 @@ namespace Engine.UI
 
             if (description.DialogButtons.HasFlag(UIDialogButtons.Cancel) || description.DialogButtons.HasFlag(UIDialogButtons.Close))
             {
-                butClose = new UIButton(scene, description.Buttons);
                 if (description.DialogButtons.HasFlag(UIDialogButtons.Cancel))
                 {
+                    butClose = new UIButton($"{name}.CancelButton", scene, description.Buttons);
                     butClose.Caption.Text = "Cancel";
                     butClose.JustReleased += DialogCancelJustReleased;
+                    backPanel.AddChild(butClose, false);
                 }
                 else
                 {
+                    butClose = new UIButton($"{name}.CloseButton", scene, description.Buttons);
                     butClose.Caption.Text = "Close";
                     butClose.JustReleased += DialogCloseJustReleased;
+                    backPanel.AddChild(butClose, false);
                 }
-                backPanel.AddChild(butClose, false);
 
                 buttonAreaHeight = butClose.Height + 10;
             }
@@ -170,16 +169,17 @@ namespace Engine.UI
         /// Adds a component to the scene
         /// </summary>
         /// <param name="scene">Scene</param>
+        /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<UIDialog> AddComponentUIDialog(this Scene scene, UIDialogDescription description, int order = 0)
+        public static async Task<UIDialog> AddComponentUIDialog(this Scene scene, string name, UIDialogDescription description, int order = 0)
         {
             UIDialog component = null;
 
             await Task.Run(() =>
             {
-                component = new UIDialog(scene, description);
+                component = new UIDialog(name, scene, description);
 
                 scene.AddComponent(component, SceneObjectUsages.UI, order);
             });

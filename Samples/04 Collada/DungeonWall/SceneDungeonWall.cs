@@ -76,15 +76,15 @@ namespace Collada.DungeonWall
         }
         private async Task InitializeText()
         {
-            var title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White }, layerHUD);
+            var title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White }, layerHUD);
             title.Text = "Tiled Wall Test Scene";
             title.SetPosition(Vector2.Zero);
 
-            fps = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow }, layerHUD);
+            fps = await this.AddComponentUITextArea("FPS", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow }, layerHUD);
             fps.Text = null;
             fps.SetPosition(new Vector2(0, 24));
 
-            var picks = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow }, layerHUD);
+            var picks = await this.AddComponentUITextArea("Picks", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow }, layerHUD);
             picks.Text = null;
             picks.SetPosition(new Vector2(0, 48));
 
@@ -95,14 +95,14 @@ namespace Collada.DungeonWall
                 BaseColor = new Color4(0, 0, 0, 0.75f),
             };
 
-            await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            await this.AddComponentSprite("BackPanel", spDesc, SceneObjectUsages.UI, layerHUD - 1);
         }
         private async Task InitializeDungeon()
         {
             var wall = await this.AddComponentModelInstanced(
+                "Wall",
                 new ModelInstancedDescription()
                 {
-                    Name = "wall",
                     Instances = 7,
                     CastShadow = true,
                     UseAnisotropicFiltering = true,
@@ -134,7 +134,6 @@ namespace Collada.DungeonWall
 
             var desc = new ModelDescription()
             {
-                Name = "Emitter",
                 CastShadow = false,
                 DeferredEnabled = true,
                 DepthEnabled = true,
@@ -144,7 +143,7 @@ namespace Collada.DungeonWall
                 }
             };
 
-            lightEmitter = await this.AddComponentModel(desc);
+            lightEmitter = await this.AddComponentModel("Emitter", desc);
         }
 
         public override void Update(GameTime gameTime)

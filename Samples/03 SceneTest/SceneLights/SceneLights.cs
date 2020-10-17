@@ -105,7 +105,6 @@ namespace SceneTest.SceneLights
 
             var desc = new ModelDescription()
             {
-                Name = "Floor",
                 CastShadow = true,
                 DeferredEnabled = true,
                 DepthEnabled = true,
@@ -116,13 +115,12 @@ namespace SceneTest.SceneLights
                 }
             };
 
-            await this.AddComponentModel(desc);
+            await this.AddComponentModel("Floor", desc);
         }
         private async Task InitializeBuildingObelisk()
         {
             var desc = new ModelInstancedDescription()
             {
-                Name = "Obelisk",
                 Instances = 4,
                 CastShadow = true,
                 UseAnisotropicFiltering = true,
@@ -133,13 +131,12 @@ namespace SceneTest.SceneLights
                 }
             };
 
-            buildingObelisks = await this.AddComponentModelInstanced(desc);
+            buildingObelisks = await this.AddComponentModelInstanced("Obelisk", desc);
         }
         private async Task InitializeTree()
         {
             var desc = new ModelDescription()
             {
-                Name = "Tree",
                 CastShadow = true,
                 UseAnisotropicFiltering = true,
                 BlendMode = BlendModes.DefaultTransparent,
@@ -150,7 +147,7 @@ namespace SceneTest.SceneLights
                 }
             };
 
-            await this.AddComponentModel(desc);
+            await this.AddComponentModel("Tree", desc);
         }
         private async Task InitializeEmitter()
         {
@@ -164,7 +161,6 @@ namespace SceneTest.SceneLights
 
             var desc = new ModelInstancedDescription()
             {
-                Name = "Emitter",
                 Instances = 4,
                 CastShadow = false,
                 DeferredEnabled = true,
@@ -175,7 +171,7 @@ namespace SceneTest.SceneLights
                 }
             };
 
-            lightEmitters = await this.AddComponentModelInstanced(desc);
+            lightEmitters = await this.AddComponentModelInstanced("Emitter", desc);
         }
         private async Task InitializeLanterns()
         {
@@ -200,7 +196,6 @@ namespace SceneTest.SceneLights
 
             var desc = new ModelInstancedDescription()
             {
-                Name = "Lanterns",
                 Instances = 3,
                 CastShadow = false,
                 DeferredEnabled = true,
@@ -211,7 +206,7 @@ namespace SceneTest.SceneLights
                 }
             };
 
-            lanterns = await this.AddComponentModelInstanced(desc);
+            lanterns = await this.AddComponentModelInstanced("Lanterns", desc);
         }
         private async Task InitializeLights()
         {
@@ -238,7 +233,7 @@ namespace SceneTest.SceneLights
                 DepthEnabled = true,
                 Count = 5000
             };
-            lightsVolumeDrawer = await this.AddComponentPrimitiveListDrawer(desc);
+            lightsVolumeDrawer = await this.AddComponentPrimitiveListDrawer("DebugLightsVolumeDrawer", desc);
         }
         private async Task InitializeBufferDrawer()
         {
@@ -247,16 +242,7 @@ namespace SceneTest.SceneLights
             int smLeft = Game.Form.RenderWidth - width;
             int smTop = Game.Form.RenderHeight - height;
 
-            var desc = new UITextureRendererDescription()
-            {
-                Left = smLeft,
-                Top = smTop,
-                Width = width,
-                Height = height,
-                Channel = UITextureRendererChannels.NoAlpha,
-            };
-            bufferDrawer = await this.AddComponentUITextureRenderer(desc, layerEffects);
-
+            bufferDrawer = await this.AddComponentUITextureRenderer("DebugBufferDrawer", UITextureRendererDescription.Default(smLeft, smTop, width, height), layerEffects);
             bufferDrawer.Visible = false;
         }
 

@@ -81,7 +81,6 @@ namespace SceneTest.SceneStencilPass
 
             var desc = new ModelDescription()
             {
-                Name = "Floor",
                 CastShadow = true,
                 DeferredEnabled = true,
                 DepthEnabled = true,
@@ -92,14 +91,14 @@ namespace SceneTest.SceneStencilPass
                 }
             };
 
-            await this.AddComponentModel(desc);
+            await this.AddComponentModel("Floor", desc);
         }
         private async Task InitializeBuildingObelisk()
         {
             buildingObelisk = await this.AddComponentModel(
+                "Obelisk",
                 new ModelDescription()
                 {
-                    Name = "Obelisk",
                     CastShadow = true,
                     UseAnisotropicFiltering = true,
                     Content = new ContentDescription()
@@ -122,7 +121,6 @@ namespace SceneTest.SceneStencilPass
 
             var desc = new ModelDescription()
             {
-                Name = "Emitter",
                 CastShadow = false,
                 DeferredEnabled = true,
                 DepthEnabled = true,
@@ -132,8 +130,8 @@ namespace SceneTest.SceneStencilPass
                 }
             };
 
-            lightEmitter1 = await this.AddComponentModel(desc);
-            lightEmitter2 = await this.AddComponentModel(desc);
+            lightEmitter1 = await this.AddComponentModel("Emitter1", desc);
+            lightEmitter2 = await this.AddComponentModel("Emitter2", desc);
         }
         private async Task InitializeLights()
         {
@@ -154,7 +152,7 @@ namespace SceneTest.SceneStencilPass
                 DepthEnabled = true,
                 Count = 5000
             };
-            lightsVolumeDrawer = await this.AddComponentPrimitiveListDrawer<Line3D>(desc);
+            lightsVolumeDrawer = await this.AddComponentPrimitiveListDrawer("DebugLightsDrawer", desc);
         }
 
         public override void Update(GameTime gameTime)

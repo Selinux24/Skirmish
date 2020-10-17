@@ -170,24 +170,22 @@ namespace Deferred
                 Width = 16,
                 Height = 16,
             };
-            await this.AddComponentUICursor(cursorDesc, layerHUD + 1);
+            await this.AddComponentUICursor("Cursor", cursorDesc, layerHUD + 1);
         }
         private async Task InitializeSkydom()
         {
             var desc = new SkydomDescription()
             {
-                Name = "Sky",
                 ContentPath = "Resources",
                 Radius = far,
                 Texture = "sunset.dds",
             };
-            await this.AddComponentSkydom(desc);
+            await this.AddComponentSkydom("Sky", desc);
         }
         private async Task InitializeHelicopters()
         {
             var desc1 = new ModelDescription()
             {
-                Name = "Helicopter",
                 CastShadow = true,
                 TextureIndex = 2,
                 Content = new ContentDescription()
@@ -196,12 +194,11 @@ namespace Deferred
                     ModelContentFilename = "m24.xml",
                 }
             };
-            helicopter = await this.AddComponentModel(desc1);
+            helicopter = await this.AddComponentModel("Helicopter", desc1);
             Lights.AddRange(helicopter.Lights);
 
             var desc2 = new ModelInstancedDescription()
             {
-                Name = "Bunch of Helicopters",
                 CastShadow = true,
                 Instances = 2,
                 Content = new ContentDescription()
@@ -210,7 +207,7 @@ namespace Deferred
                     ModelContentFilename = "m24.xml",
                 }
             };
-            helicopters = await this.AddComponentModelInstanced(desc2);
+            helicopters = await this.AddComponentModelInstanced("Bunch of Helicopters", desc2);
             for (int i = 0; i < helicopters.InstanceCount; i++)
             {
                 Lights.AddRange(helicopters[i].Lights);
@@ -222,7 +219,6 @@ namespace Deferred
         {
             var desc = new ModelInstancedDescription()
             {
-                Name = "Tanks",
                 CastShadow = true,
                 Content = new ContentDescription()
                 {
@@ -231,7 +227,7 @@ namespace Deferred
                 },
                 Instances = 5,
             };
-            var tanks = await this.AddComponentModelInstanced(desc);
+            var tanks = await this.AddComponentModelInstanced("Tanks", desc);
 
             tanks[0].Manipulator.SetScale(0.2f, true);
             var tankbbox = tanks[0].GetBoundingBox();
@@ -267,7 +263,7 @@ namespace Deferred
         }
         private async Task InitializeTerrain()
         {
-            terrain = await this.AddComponentScenery(GroundDescription.FromFile("Resources", "terrain.xml", 2));
+            terrain = await this.AddComponentScenery("Terrain", GroundDescription.FromFile("Resources", "terrain.xml", 2));
         }
         private async Task InitializeGardener()
         {
@@ -284,13 +280,12 @@ namespace Deferred
                     MaxSize = Vector2.One * 0.25f,
                 }
             };
-            await this.AddComponentGroundGardener(desc);
+            await this.AddComponentGroundGardener("Vegetation", desc);
         }
         private async Task InitializeTrees()
         {
             var desc1 = new ModelDescription()
             {
-                Name = "Lonely tree",
                 CastShadow = true,
                 DepthEnabled = true,
                 BlendMode = BlendModes.DefaultTransparent,
@@ -300,11 +295,10 @@ namespace Deferred
                     ModelContentFilename = "birch_a.xml",
                 }
             };
-            tree = await this.AddComponentModel(desc1);
+            tree = await this.AddComponentModel("Lonely tree", desc1);
 
             var desc2 = new ModelInstancedDescription()
             {
-                Name = "Bunch of trees",
                 CastShadow = true,
                 DepthEnabled = true,
                 BlendMode = BlendModes.DefaultTransparent,
@@ -315,7 +309,7 @@ namespace Deferred
                     ModelContentFilename = "birch_b.xml",
                 }
             };
-            trees = await this.AddComponentModelInstanced(desc2);
+            trees = await this.AddComponentModelInstanced("Bunch of trees", desc2);
         }
         private async Task InitializeUI()
         {
@@ -324,62 +318,45 @@ namespace Deferred
             var dHelp = new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow };
             var dStats = new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 10), TextForeColor = Color.Red };
 
-            title = await this.AddComponentUITextArea(dTitle, layerHUD);
+            title = await this.AddComponentUITextArea("Title", dTitle, layerHUD);
+            load = await this.AddComponentUITextArea("Load", dLoad, layerHUD);
+            help = await this.AddComponentUITextArea("Help", dHelp, layerHUD);
+            statistics = await this.AddComponentUITextArea("Statistics", dStats, layerHUD);
 
-            load = await this.AddComponentUITextArea(dLoad, layerHUD);
+            upperPanel = await this.AddComponentSprite("Upperpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), SceneObjectUsages.UI, layerHUD - 1);
 
-            help = await this.AddComponentUITextArea(dHelp, layerHUD);
-
-            statistics = await this.AddComponentUITextArea(dStats, layerHUD);
-
-
-            var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
-
-            upperPanel = await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);
-
-
-            var bufferDrawerDesc = new UITextureRendererDescription()
-            {
-                Channel = UITextureRendererChannels.NoAlpha,
-            };
-
-            bufferDrawer = await this.AddComponentUITextureRenderer(bufferDrawerDesc, layerEffects);
-
+            bufferDrawer = await this.AddComponentUITextureRenderer("DebugBuferDrawer", UITextureRendererDescription.Default(), layerEffects);
             bufferDrawer.Visible = false;
         }
         private async Task InitializeDebug()
         {
             var lineDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
             {
-                Name = "DEBUG++ Lines",
                 Count = 1000,
             };
-            lineDrawer = await this.AddComponentPrimitiveListDrawer(lineDrawerDesc, SceneObjectUsages.None, layerEffects + 1);
+            lineDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Lines", lineDrawerDesc, SceneObjectUsages.None, layerEffects + 1);
             lineDrawer.Visible = false;
 
             var terrainGraphDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
             {
-                Name = "DEBUG++ Terrain Graph",
                 Count = MaxGridDrawer,
             };
-            terrainGraphDrawer = await this.AddComponentPrimitiveListDrawer(terrainGraphDrawerDesc, SceneObjectUsages.None, layerEffects + 1);
+            terrainGraphDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Terrain Graph", terrainGraphDrawerDesc, SceneObjectUsages.None, layerEffects + 1);
             terrainGraphDrawer.Visible = false;
 
             var graphDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
             {
-                Name = "DEBUG++ Graph",
                 DepthEnabled = true,
                 Count = 50000,
             };
-            graphDrawer = await this.AddComponentPrimitiveListDrawer(graphDrawerDesc, SceneObjectUsages.None, layerEffects + 1);
+            graphDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Graph", graphDrawerDesc, SceneObjectUsages.None, layerEffects + 1);
             graphDrawer.Visible = false;
 
             var volumesDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
             {
-                Name = "DEBUG++ Volumes",
                 Count = 10000
             };
-            volumesDrawer = await this.AddComponentPrimitiveListDrawer(volumesDrawerDesc, SceneObjectUsages.None, layerEffects + 1);
+            volumesDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Volumes", volumesDrawerDesc, SceneObjectUsages.None, layerEffects + 1);
             volumesDrawer.Visible = false;
         }
 

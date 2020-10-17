@@ -128,15 +128,15 @@ namespace Collada.Dungeon
 
         private async Task InitializeUIComponents()
         {
-            var title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White }, layerHUD);
+            var title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White }, layerHUD);
             title.Text = "Collada Dungeon Scene";
             title.SetPosition(Vector2.Zero);
 
-            fps = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow }, layerHUD);
+            fps = await this.AddComponentUITextArea("FPS", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow }, layerHUD);
             fps.Text = null;
             fps.SetPosition(new Vector2(0, 24));
 
-            var picks = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow }, layerHUD);
+            var picks = await this.AddComponentUITextArea("Picks", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow }, layerHUD);
             picks.Text = null;
             picks.SetPosition(new Vector2(0, 48));
 
@@ -147,11 +147,11 @@ namespace Collada.Dungeon
                 BaseColor = new Color4(0, 0, 0, 0.75f),
             };
 
-            await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            await this.AddComponentSprite("Backpanel", spDesc, SceneObjectUsages.UI, layerHUD - 1);
         }
         private async Task InitializeDungeon()
         {
-            dungeon = await this.AddComponentScenery(GroundDescription.FromFile(resourcesFolder, "Dungeon.xml", 2));
+            dungeon = await this.AddComponentScenery("Dungeon", GroundDescription.FromFile(resourcesFolder, "Dungeon.xml", 2));
         }
 
         private void InitializeCamera()

@@ -49,7 +49,6 @@ namespace Terrain.Start
 
             var cursorDesc = new UICursorDescription()
             {
-                Name = "Cursor",
                 ContentPath = "Start",
                 Textures = new[] { "pointer.png" },
                 Height = 48,
@@ -58,21 +57,20 @@ namespace Terrain.Start
                 Delta = new Vector2(-14f, -7f),
                 BaseColor = Color.White,
             };
-            await this.AddComponentUICursor(cursorDesc, layerCursor);
+            await this.AddComponentUICursor("Cursor", cursorDesc, layerCursor);
 
             #endregion
 
             #region Background
 
-            var backGroundDesc = ModelDescription.FromXml("Background", "Start", "SkyPlane.xml");
-            backGround = await this.AddComponentModel(backGroundDesc, SceneObjectUsages.UI);
+            var backGroundDesc = ModelDescription.FromXml("Start", "SkyPlane.xml");
+            backGround = await this.AddComponentModel("Background", backGroundDesc, SceneObjectUsages.UI);
 
             #endregion
 
             #region Title text
 
             var titleFont = TextDrawerDescription.FromFamily(titleFonts, 72, FontMapStyles.Bold);
-            titleFont.Name = "Title";
 
             var titleDesc = UITextAreaDescription.Default(titleFont);
             titleDesc.TextForeColor = Color.Gold;
@@ -81,7 +79,7 @@ namespace Terrain.Start
             titleDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
             titleDesc.TextVerticalAlign = VerticalTextAlign.Middle;
 
-            title = await this.AddComponentUITextArea(titleDesc, layerHUD);
+            title = await this.AddComponentUITextArea("Title", titleDesc, layerHUD);
             title.GrowControlWithText = false;
 
             #endregion
@@ -91,7 +89,6 @@ namespace Terrain.Start
             var buttonsFont = TextDrawerDescription.FromFamily(buttonFonts, 20, FontMapStyles.Bold);
 
             var startButtonDesc = UIButtonDescription.DefaultTwoStateButton("Start/buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f);
-            startButtonDesc.Name = "Scene buttons";
             startButtonDesc.Width = 275;
             startButtonDesc.Height = 65;
             startButtonDesc.ColorReleased = new Color4(sceneButtonColor.RGB(), 0.8f);
@@ -101,15 +98,14 @@ namespace Terrain.Start
             startButtonDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
             startButtonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
 
-            scenePerlinNoiseButton = await this.AddComponentUIButton(startButtonDesc, layerHUD);
-            sceneRtsButton = await this.AddComponentUIButton(startButtonDesc, layerHUD);
+            scenePerlinNoiseButton = await this.AddComponentUIButton("ButtonPerlinNoise", startButtonDesc, layerHUD);
+            sceneRtsButton = await this.AddComponentUIButton("ButtonRts", startButtonDesc, layerHUD);
 
             #endregion
 
             #region Exit button
 
             var exitButtonDesc = UIButtonDescription.DefaultTwoStateButton("Start/buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f);
-            exitButtonDesc.Name = "Exit button";
             exitButtonDesc.Width = 275;
             exitButtonDesc.Height = 65;
             exitButtonDesc.ColorReleased = new Color4(exitButtonColor.RGB(), 0.8f);
@@ -118,7 +114,7 @@ namespace Terrain.Start
             exitButtonDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
             exitButtonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
 
-            exitButton = await this.AddComponentUIButton(exitButtonDesc, layerHUD);
+            exitButton = await this.AddComponentUIButton("ButtonExit", exitButtonDesc, layerHUD);
 
             #endregion
         }

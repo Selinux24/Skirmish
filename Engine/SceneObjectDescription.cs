@@ -7,10 +7,6 @@ namespace Engine
     public class SceneObjectDescription
     {
         /// <summary>
-        /// Name
-        /// </summary>
-        public string Name { get; set; } = null;
-        /// <summary>
         /// Gets or sets whether the object cast shadow
         /// </summary>
         public bool CastShadow { get; set; } = false;

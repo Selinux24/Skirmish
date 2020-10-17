@@ -77,17 +77,17 @@ namespace ModelDrawing
         }
         private async Task InitializeUI()
         {
-            text = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 20), TextForeColor = Color.Yellow, TextShadowColor = Color.OrangeRed }, layerHUD);
+            text = await this.AddComponentUITextArea("Text", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 20), TextForeColor = Color.Yellow, TextShadowColor = Color.OrangeRed }, layerHUD);
 
-            statistics = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 10), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, layerHUD);
+            statistics = await this.AddComponentUITextArea("Statistics", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 10), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, layerHUD);
 
-            text1 = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 10), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, layerHUD);
+            text1 = await this.AddComponentUITextArea("Text1", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 10), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, layerHUD);
 
-            text2 = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 10), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, layerHUD);
+            text2 = await this.AddComponentUITextArea("Text2", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 10), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, layerHUD);
 
-            backPanel = await this.AddComponentSprite(SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), SceneObjectUsages.UI, layerHUD - 1);
+            backPanel = await this.AddComponentSprite("Backpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), SceneObjectUsages.UI, layerHUD - 1);
 
-            console = await this.AddComponentUIConsole(UIConsoleDescription.Default(Color.DarkSlateBlue), layerHUD + 1);
+            console = await this.AddComponentUIConsole("Console", UIConsoleDescription.Default(Color.DarkSlateBlue), layerHUD + 1);
             console.Visible = false;
         }
         private async Task InitializeFloor()
@@ -121,7 +121,7 @@ namespace ModelDrawing
                 Content = ContentDescription.FromModelContent(content),
             };
 
-            await this.AddComponentModel(desc, SceneObjectUsages.Ground);
+            await this.AddComponentModel("Floor", desc, SceneObjectUsages.Ground);
         }
         private async Task InitializeModels()
         {
@@ -139,7 +139,7 @@ namespace ModelDrawing
             pDescriptions.Add("Explosion", pExplosion);
             pDescriptions.Add("SmokeExplosion", pSmokeExplosion);
 
-            pManager = await this.AddComponentParticleManager(new ParticleManagerDescription() { Name = "Particle Manager" });
+            pManager = await this.AddComponentParticleManager("ParticleManager", ParticleManagerDescription.Default());
         }
         private async Task InitializeParticleVolumeDrawer()
         {
@@ -148,7 +148,7 @@ namespace ModelDrawing
                 Count = 20000,
                 DepthEnabled = true,
             };
-            pManagerLineDrawer = await this.AddComponentPrimitiveListDrawer(desc, SceneObjectUsages.None, layerEffects);
+            pManagerLineDrawer = await this.AddComponentPrimitiveListDrawer("DebugParticleDrawer", desc, SceneObjectUsages.None, layerEffects);
             pManagerLineDrawer.Visible = true;
         }
 

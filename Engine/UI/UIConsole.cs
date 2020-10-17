@@ -63,19 +63,16 @@ namespace Engine.UI
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        public UIConsole(Scene scene, UIConsoleDescription description) : base(scene, description)
+        public UIConsole(string name, Scene scene, UIConsoleDescription description) : base(name, scene, description)
         {
             GrowControlWithText = false;
 
             if (description.Background != null)
             {
-                var background = new Sprite(scene, description.Background)
-                {
-                    Name = $"{description.Name}.Background",
-                    FitWithParent = true,
-                };
+                var background = new Sprite($"{name}.Background", scene, description.Background);
 
                 AddChild(background);
             }
@@ -186,16 +183,17 @@ namespace Engine.UI
         /// Adds a component to the scene
         /// </summary>
         /// <param name="scene">Scene</param>
+        /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<UIConsole> AddComponentUIConsole(this Scene scene, UIConsoleDescription description, int order = 0)
+        public static async Task<UIConsole> AddComponentUIConsole(this Scene scene, string name, UIConsoleDescription description, int order = 0)
         {
             UIConsole component = null;
 
             await Task.Run(() =>
             {
-                component = new UIConsole(scene, description);
+                component = new UIConsole(name, scene, description);
 
                 scene.AddComponent(component, SceneObjectUsages.UI, order);
             });

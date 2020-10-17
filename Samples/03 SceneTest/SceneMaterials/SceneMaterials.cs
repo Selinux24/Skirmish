@@ -71,8 +71,8 @@ namespace SceneTest.SceneMaterials
 
         private async Task InitializeTextBoxes()
         {
-            title = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White, TextShadowColor = Color.Orange }, layerHUD);
-            runtime = await this.AddComponentUITextArea(new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 10), TextForeColor = Color.Yellow, TextShadowColor = Color.Orange }, layerHUD);
+            title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White, TextShadowColor = Color.Orange }, layerHUD);
+            runtime = await this.AddComponentUITextArea("Runtime", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 10), TextForeColor = Color.Yellow, TextShadowColor = Color.Orange }, layerHUD);
 
             title.Text = "Scene Test - Materials";
             runtime.Text = "";
@@ -87,11 +87,11 @@ namespace SceneTest.SceneMaterials
                 BaseColor = new Color4(0, 0, 0, 0.75f),
             };
 
-            await this.AddComponentSprite(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            await this.AddComponentSprite("Backpanel", spDesc, SceneObjectUsages.UI, layerHUD - 1);
         }
         private async Task InitializeSkyEffects()
         {
-            await this.AddComponentLensFlare(new LensFlareDescription()
+            await this.AddComponentLensFlare("LensFlare", new LensFlareDescription()
             {
                 ContentPath = @"Common/lensFlare",
                 GlowTexture = "lfGlow.png",
@@ -157,7 +157,7 @@ namespace SceneTest.SceneMaterials
                 }
             };
 
-            await this.AddComponentModel(desc);
+            await this.AddComponentModel("Floor", desc);
         }
         private async Task<ModelInstanced> InitializeSphereInstanced(string name, int count, IEnumerable<MaterialContent> materials)
         {
@@ -168,7 +168,6 @@ namespace SceneTest.SceneMaterials
 
             var desc = new ModelInstancedDescription()
             {
-                Name = name,
                 CastShadow = true,
                 UseAnisotropicFiltering = true,
                 Instances = count,
@@ -178,7 +177,7 @@ namespace SceneTest.SceneMaterials
                 }
             };
 
-            var model = await this.AddComponentModelInstanced(desc);
+            var model = await this.AddComponentModelInstanced(name, desc);
 
             for (int i = 0; i < count; i++)
             {
