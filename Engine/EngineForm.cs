@@ -25,13 +25,23 @@ namespace Engine
         /// </summary>
         public int RenderHeight { get; private set; }
         /// <summary>
-        /// Relative center
+        /// Render rectangle
         /// </summary>
-        public Point RelativeCenter { get; private set; }
+        public RectangleF RenderRectangle
+        {
+            get
+            {
+                return new RectangleF(0, 0, RenderWidth, RenderHeight);
+            }
+        }
         /// <summary>
-        /// Absolute center
+        /// Rneder area center
         /// </summary>
-        public Point AbsoluteCenter { get; private set; }
+        public Point RenderCenter { get; private set; }
+        /// <summary>
+        /// Screen center
+        /// </summary>
+        public Point ScreenCenter { get; private set; }
         /// <summary>
         /// Gets or sets a value indicationg whether the current engine form is in fullscreen
         /// </summary>
@@ -78,8 +88,10 @@ namespace Engine
             this.Icon = Resources.engine;
             this.Name = "EngineForm";
             this.Text = "Engine Form";
-
+            this.KeyPreview = true;
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.EngineFormKeyDown);
             this.ResumeLayout(false);
+
         }
         /// <summary>
         /// Invalidation override
@@ -111,8 +123,61 @@ namespace Engine
                 this.RenderHeight = this.ClientSize.Height;
             }
 
-            this.RelativeCenter = new Point(this.RenderWidth / 2, this.RenderHeight / 2);
-            this.AbsoluteCenter = new Point(this.Location.X + this.RelativeCenter.X, this.Location.Y + this.RelativeCenter.Y);
+            this.RenderCenter = new Point(this.RenderWidth / 2, this.RenderHeight / 2);
+            this.ScreenCenter = new Point(this.Location.X + this.RenderCenter.X, this.Location.Y + this.RenderCenter.Y);
+        }
+
+        /// <summary>
+        /// Gets the render viewport
+        /// </summary>
+        /// <returns></returns>
+        public Viewport GetViewport()
+        {
+            return new Viewport(0, 0, RenderWidth, RenderHeight, 0, 1.0f);
+        }
+        /// <summary>
+        /// Gets the current ortho projection matrix
+        /// </summary>
+        /// <returns>Returns the current ortho projection matrix</returns>
+        public Matrix GetOrthoProjectionMatrix()
+        {
+            Matrix view = Matrix.LookAtLH(
+                Vector3.Zero,
+                Vector3.ForwardLH,
+                Vector3.Up);
+
+            Matrix projection = Matrix.OrthoLH(
+                RenderWidth,
+                RenderHeight,
+                0f, 100f);
+
+            return view * projection;
+        }
+        /// <summary>
+        /// Transform to screen space using the form view ortho projection matrix
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <returns>Returns the screen space position</returns>
+        /// <remarks>Screen space: Center = (0,0) Left = -X Up = +Y</remarks>
+        public Vector2 ToScreenSpace(Vector2 position)
+        {
+            var screenSpace = position - RenderRectangle.Center;
+
+            screenSpace.Y *= -1f;
+
+            return screenSpace;
+        }
+
+        /// <summary>
+        /// Invalidates control keys
+        /// </summary>
+        private void EngineFormKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyData == System.Windows.Forms.Keys.F10)
+            {
+                // Do what you want with the F10 key
+                e.SuppressKeyPress = true;
+            }
         }
     }
 }

@@ -3,13 +3,14 @@ using SharpDX.Windows;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading.Tasks;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Engine
 {
     using Engine.Common;
     using Engine.Effects;
+    using Engine.UI;
 
     /// <summary>
     /// Game class
@@ -33,6 +34,10 @@ namespace Engine
         /// Name
         /// </summary>
         public string Name { get; set; } = null;
+        /// <summary>
+        /// Buffer manager
+        /// </summary>
+        public BufferManager BufferManager { get; private set; }
         /// <summary>
         /// Resource manager
         /// </summary>
@@ -68,7 +73,7 @@ namespace Engine
         {
             get
             {
-                return this.scenes.Count;
+                return scenes.Count;
             }
         }
         /// <summary>
@@ -78,7 +83,7 @@ namespace Engine
         {
             get
             {
-                return this.scenes.FindAll(s => s.Active).Count;
+                return scenes.FindAll(s => s.Active).Count;
             }
         }
         /// <summary>
@@ -88,9 +93,9 @@ namespace Engine
         {
             get
             {
-                if (this.Input != null)
+                if (Input != null)
                 {
-                    return this.Input.VisibleMouse;
+                    return Input.VisibleMouse;
                 }
                 else
                 {
@@ -99,9 +104,9 @@ namespace Engine
             }
             set
             {
-                if (this.Input != null)
+                if (Input != null)
                 {
-                    this.Input.VisibleMouse = value;
+                    Input.VisibleMouse = value;
                 }
             }
         }
@@ -112,9 +117,9 @@ namespace Engine
         {
             get
             {
-                if (this.Input != null)
+                if (Input != null)
                 {
-                    return this.Input.LockMouse;
+                    return Input.LockMouse;
                 }
                 else
                 {
@@ -123,9 +128,9 @@ namespace Engine
             }
             set
             {
-                if (this.Input != null)
+                if (Input != null)
                 {
-                    this.Input.LockMouse = value;
+                    Input.LockMouse = value;
                 }
             }
         }
@@ -134,14 +139,30 @@ namespace Engine
         /// </summary>
         public bool CollectGameStatus { get; set; }
         /// <summary>
+        /// Progress reporter
+        /// </summary>
+        public readonly IProgress<LoadResourceProgress> Progress;
+        /// <summary>
+        /// Gets wheter a resource loading is running
+        /// </summary>
+        public bool ResourceLoadRuning { get; private set; } = false;
+        /// <summary>
         /// Game status
         /// </summary>
-        internal readonly GameStatus GameStatus = new GameStatus();
+        public readonly GameStatus GameStatus = new GameStatus();
 
         /// <summary>
         /// Game status collected event
         /// </summary>
         public event GameStatusCollectedHandler GameStatusCollected;
+        /// <summary>
+        /// Fires when a resource load starts
+        /// </summary>
+        public event GameLoadResourcesEventHandler ResourcesLoading;
+        /// <summary>
+        /// Fires when a resource load ends
+        /// </summary>
+        public event GameLoadResourcesEventHandler ResourcesLoaded;
 
         /// <summary>
         /// Gets desktop mode description
@@ -175,13 +196,17 @@ namespace Engine
         /// <param name="multiSampling">Enable multi-sampling</param>
         public Game(string name, bool fullScreen = true, int screenWidth = 0, int screenHeight = 0, bool vsyncEnabled = true, int refreshRate = 0, int multiSampling = 0)
         {
-            this.Name = name;
+            Name = name;
 
-            this.GameTime = new GameTime();
+            GameTime = new GameTime();
 
-            this.ResourceManager = new GameResourceManager(this);
+            Progress = new Progress<LoadResourceProgress>(ReportProgress);
 
-            this.CPUStats = new PerformanceCounter("Processor", "% Processor Time", "_Total");
+            BufferManager = new BufferManager(this);
+
+            ResourceManager = new GameResourceManager(this);
+
+            CPUStats = new PerformanceCounter("Processor", "% Processor Time", "_Total");
 
             #region Form
 
@@ -193,23 +218,23 @@ namespace Engine
                 screenHeight = mode.DesktopCoordinates.Bottom - mode.DesktopCoordinates.Top;
             }
 
-            this.Form = new EngineForm(name, screenWidth, screenHeight, fullScreen);
+            Form = new EngineForm(name, screenWidth, screenHeight, fullScreen);
 
-            this.Form.UserResized += (sender, eventArgs) =>
+            Form.UserResized += (sender, eventArgs) =>
             {
-                if (this.Graphics != null)
+                if (Graphics != null)
                 {
-                    this.Graphics.PrepareDevice(this.Form.RenderWidth, this.Form.RenderHeight, true);
+                    Graphics.PrepareDevice(Form.RenderWidth, Form.RenderHeight, true);
                 }
             };
 
             #endregion
 
-            this.Input = new Input(this.Form);
+            Input = new Input(Form);
 
-            this.Graphics = new Graphics(this.Form, vsyncEnabled, refreshRate, multiSampling);
+            Graphics = new Graphics(Form, vsyncEnabled, refreshRate, multiSampling);
 
-            DrawerPool.Initialize(this.Graphics);
+            DrawerPool.Initialize(Graphics);
         }
         /// <summary>
         /// Destructor
@@ -236,22 +261,22 @@ namespace Engine
             if (disposing)
             {
                 //Remove scene reference
-                this.nextScene = null;
+                nextScene = null;
 
-                if (this.scenes != null)
+                if (scenes != null)
                 {
-                    for (int i = 0; i < this.scenes.Count; i++)
+                    for (int i = 0; i < scenes.Count; i++)
                     {
-                        this.scenes[i]?.Dispose();
+                        scenes[i]?.Dispose();
                     }
 
-                    this.scenes.Clear();
-                    this.scenes = null;
+                    scenes.Clear();
+                    scenes = null;
                 }
 
                 DrawerPool.DisposeResources();
 
-                FontMap.ClearCache();
+                FontMapCache.Clear();
 
                 Input?.Dispose();
                 Input = null;
@@ -261,6 +286,9 @@ namespace Engine
 
                 ResourceManager?.Dispose();
                 ResourceManager = null;
+
+                BufferManager?.Dispose();
+                BufferManager = null;
 
                 Graphics?.Dispose();
                 Graphics = null;
@@ -272,69 +300,323 @@ namespace Engine
         /// </summary>
         public void Run()
         {
-            RenderLoop.Run(this.Form, this.Frame);
-        }
-        /// <summary>
-        /// Adds a new scene to collection
-        /// </summary>
-        /// <typeparam name="T">Type of scene</typeparam>
-        /// <param name="active">Sets the new scene as active</param>
-        /// <param name="order">The processing order of the scene</param>
-        public void AddScene<T>(bool active = true, int order = 1) where T : Scene
-        {
-            Scene scene = (T)Activator.CreateInstance(typeof(T), new[] { this });
-            scene.Active = active;
-            scene.Order = order;
+            Logger.WriteInformation(this, "**************************************************************************");
+            Logger.WriteInformation(this, "** Game started                                                         **");
+            Logger.WriteInformation(this, "**************************************************************************");
 
-            this.AddScene(scene);
+            RenderLoop.Run(Form, Frame);
         }
+
         /// <summary>
         /// Creates a new scene and sets it as the unique active scene
         /// </summary>
         /// <typeparam name="T">Type of scene</typeparam>
         /// <remarks>Current scenes will be removed from internal scene collection</remarks>
-        public void SetScene<T>() where T : Scene
+        public void SetScene<T>(SceneModes sceneMode = SceneModes.ForwardLigthning) where T : Scene
         {
-            this.nextScene = (T)Activator.CreateInstance(typeof(T), new[] { this });
+            T scene = null;
+            try
+            {
+                Logger.WriteInformation(this, "Game: Setting scene with the default constructor");
+
+                scene = (T)Activator.CreateInstance(typeof(T), new object[] { this });
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError(this, $"Game: Error setting scene: {ex.Message}", ex);
+            }
+
+            SetScene(scene, sceneMode);
+        }
+        /// <summary>
+        /// Sets the specified scene to next scene to load
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        public void SetScene(Scene scene, SceneModes sceneMode = SceneModes.ForwardLigthning)
+        {
+            if (scene == null)
+            {
+                return;
+            }
+
+            scene.SetRenderMode(sceneMode);
+            scene.Order = 1;
+            nextScene = scene;
+        }
+        /// <summary>
+        /// Unloads the current scenes and loads the specified scene
+        /// </summary>
+        /// <param name="sceneToLoad">Scene to load</param>
+        private void ChangeScene(Scene sceneToLoad)
+        {
+            //Deactivate scenes
+            scenes.ForEach(s => s.Active = false);
+
+            //Copy collection for disposing
+            List<Scene> toDispose = new List<Scene>(scenes);
+
+            //Clear scene collection
+            scenes.Clear();
+
+            toDispose.ForEach(s => s.Dispose());
+            toDispose.Clear();
+
+            Task.WhenAll(StartScene(sceneToLoad));
+
+            scenes.Add(sceneToLoad);
+            scenes.Sort(
+                delegate (Scene p1, Scene p2)
+                {
+                    return p2.Order.CompareTo(p1.Order);
+                });
         }
         /// <summary>
         /// Adds a scene to the internal scene collection
         /// </summary>
         /// <param name="scene">New scene</param>
-        private void AddScene(Scene scene)
+        private async Task StartScene(Scene scene)
         {
-            this.scenes.Add(scene);
-            this.scenes.Sort(
-                delegate (Scene p1, Scene p2)
-                {
-                    return p2.Order.CompareTo(p1.Order);
-                });
+            Logger.WriteInformation(this, "Game: Begin StartScene");
 
-            scene.Initialize();
+            try
+            {
+                scene.Active = false;
 
-            scene.Initialized();
+                Logger.WriteInformation(this, "Scene: Initialize start");
+                await scene.Initialize();
+                Logger.WriteInformation(this, "Scene: Initialize end");
 
-            scene.SetResources();
+                scene.Active = true;
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError(this, $"Scene: Initialize error: {ex.Message}", ex);
+
+                throw;
+            }
+
+            Logger.WriteInformation(this, "Game: End StartScene");
+        }
+
+        /// <summary>
+        /// Report progress callback
+        /// </summary>
+        /// <param name="value">Progress value from 0.0f to 1.0f</param>
+        public void ReportProgress(LoadResourceProgress value)
+        {
+            var activeScene = scenes.FirstOrDefault(s => s.Active);
+            activeScene?.OnReportProgress(value);
+        }
+
+        /// <summary>
+        /// Executes a list of resource load tasks
+        /// </summary>
+        /// <typeparam name="T">Response type</typeparam>
+        /// <param name="scene">Scene</param>
+        /// <param name="taskGroup">Resource load tasks</param>
+        /// <param name="callback">Callback</param>
+        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
+        internal async Task<bool> LoadResourcesAsync<T>(Scene scene, LoadResourceGroup<T> taskGroup, Action<LoadResourcesResult<T>> callback = null)
+        {
+            bool res = false;
+
+            while (!res)
+            {
+                res = await InternalLoadResourcesAsync(scene, taskGroup, callback);
+
+                if (res) break;
+
+                await Task.Delay(100);
+            }
+
+            return res;
         }
         /// <summary>
-        /// Remove scene from collection
+        /// Executes a list of resource load tasks
         /// </summary>
         /// <param name="scene">Scene</param>
-        public void RemoveScene(Scene scene)
+        /// <param name="taskGroup">Resource load tasks</param>
+        /// <param name="callback">Callback</param>
+        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
+        internal async Task<bool> LoadResourcesAsync(Scene scene, LoadResourceGroup taskGroup, Action<LoadResourcesResult> callback = null)
         {
-            if (this.scenes.Contains(scene))
-            {
-                this.scenes.Remove(scene);
+            bool res = false;
 
-                scene.Dispose();
+            while (!res)
+            {
+                res = await InternalLoadResourcesAsync(scene, taskGroup, callback);
+
+                if (res) break;
+
+                await Task.Delay(100);
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Executes a list of resource load tasks
+        /// </summary>
+        /// <typeparam name="T">Response type</typeparam>
+        /// <param name="scene">Scene</param>
+        /// <param name="taskGroup">Resource load tasks</param>
+        /// <param name="callback">Callback</param>
+        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
+        private async Task<bool> InternalLoadResourcesAsync<T>(Scene scene, LoadResourceGroup<T> taskGroup, Action<LoadResourcesResult<T>> callback = null)
+        {
+            if (ResourceLoadRuning)
+            {
+                return false;
+            }
+
+            ResourceLoadRuning = true;
+
+            List<TaskResult<T>> loadResult = new List<TaskResult<T>>();
+
+            try
+            {
+                var taskList = taskGroup.Tasks.ToList();
+
+                int totalTasks = taskList.Count;
+                int currentTask = 0;
+                while (taskList.Any())
+                {
+                    var t = await Task.WhenAny(taskList);
+
+                    taskList.Remove(t);
+
+                    bool completedOk = t.Status == TaskStatus.RanToCompletion;
+
+                    TaskResult<T> res = new TaskResult<T>
+                    {
+                        Completed = completedOk,
+                        Exception = t.Exception, // Store the excetion
+                        Result = completedOk ? (await t) : default, // Avoid throwing the exception now
+                    };
+
+                    loadResult.Add(res);
+
+                    Progress?.Report(new LoadResourceProgress { Id = taskGroup.Id, Progress = ++currentTask / (float)totalTasks });
+                }
+
+                IntegrateResources(taskGroup.Id, scene);
+            }
+            finally
+            {
+                ResourceLoadRuning = false;
+
+                var res = new LoadResourcesResult<T>
+                {
+                    Results = loadResult,
+                };
+
+                if (callback != null)
+                {
+                    callback.Invoke(res);
+                }
+                else
+                {
+                    res.ThrowExceptions();
+                }
+            }
+
+            return true;
+        }
+        /// <summary>
+        /// Executes a list of resource load tasks
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        /// <param name="taskGroup">Resource load tasks</param>
+        /// <param name="callback">Callback</param>
+        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
+        private async Task<bool> InternalLoadResourcesAsync(Scene scene, LoadResourceGroup taskGroup, Action<LoadResourcesResult> callback = null)
+        {
+            if (ResourceLoadRuning)
+            {
+                return false;
+            }
+
+            ResourceLoadRuning = true;
+
+            List<TaskResult> loadResult = new List<TaskResult>();
+
+            try
+            {
+                var taskList = taskGroup.Tasks.ToList();
+
+                int totalTasks = taskList.Count;
+                int currentTask = 0;
+                while (taskList.Any())
+                {
+                    var t = await Task.WhenAny(taskList);
+
+                    taskList.Remove(t);
+
+                    TaskResult res = new TaskResult
+                    {
+                        Completed = t.Status == TaskStatus.RanToCompletion,
+                        Exception = t.Exception, // Store the excetion
+                    };
+
+                    loadResult.Add(res);
+
+                    Progress?.Report(new LoadResourceProgress { Id = taskGroup.Id, Progress = ++currentTask / (float)totalTasks });
+                }
+
+                IntegrateResources(taskGroup.Id, scene);
+            }
+            finally
+            {
+                ResourceLoadRuning = false;
+
+                var res = new LoadResourcesResult
+                {
+                    Results = loadResult,
+                };
+
+                if (callback != null)
+                {
+                    callback.Invoke(res);
+                }
+                else
+                {
+                    res.ThrowExceptions();
+                }
+            }
+
+            return true;
+        }
+        /// <summary>
+        /// Integrates the requested resources into the resource manager
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        private void IntegrateResources(string id, Scene scene)
+        {
+            try
+            {
+                ResourcesLoading?.Invoke(this, new GameLoadResourcesEventArgs() { Scene = scene });
+
+                Logger.WriteInformation(this, "BufferManager: Recreating buffers");
+                BufferManager.CreateBuffers(id, Progress);
+                Logger.WriteInformation(this, "BufferManager: Buffers recreated");
+
+                Logger.WriteInformation(this, "ResourceManager: Creating new resources");
+                ResourceManager.CreateResources(id, Progress);
+                Logger.WriteInformation(this, "ResourceManager: New resources created");
+
+                ResourcesLoaded?.Invoke(this, new GameLoadResourcesEventArgs() { Scene = scene });
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError(this, $"ResourceManager error: {ex.Message}", ex);
             }
         }
+
         /// <summary>
         /// Close game
         /// </summary>
         public void Exit()
         {
-            this.exiting = true;
+            exiting = true;
         }
 
         /// <summary>
@@ -342,7 +624,31 @@ namespace Engine
         /// </summary>
         private void Frame()
         {
-            this.GameTime.Update();
+            if (exiting)
+            {
+                Logger.WriteInformation(this, "Game exiting");
+                return;
+            }
+
+            GameTime.Update();
+
+            if (nextScene != null)
+            {
+                ChangeScene(nextScene);
+                nextScene = null;
+
+                return;
+            }
+
+            var activeScene = scenes.FirstOrDefault(s => s.Active);
+            if (activeScene == null)
+            {
+                return;
+            }
+
+            Counters.FrameCount++;
+
+            Logger.WriteInformation(this, $"##### Frame {Counters.FrameCount} Start ####");
 
             Stopwatch gSW = new Stopwatch();
             gSW.Start();
@@ -351,20 +657,27 @@ namespace Engine
 
             FrameBegin();
 
-            foreach (var scene in scenes.Where(s => s.Active))
-            {
-                FrameSceneUpdate(scene);
+            FrameSceneUpdate(activeScene);
 
-                FrameSceneDraw(scene);
-            }
+            FrameSceneDraw(activeScene);
 
             FrameEnd();
 
             gSW.Stop();
             GameStatus.Add("TOTAL", gSW);
 
-            Counters.FrameCount++;
-            Counters.FrameTime += this.GameTime.ElapsedSeconds;
+            LogLevel level = EvaluateTime(gSW.ElapsedMilliseconds);
+            Logger.Write(level, this, $"##### Frame {Counters.FrameCount} End - {gSW.ElapsedMilliseconds} milliseconds ####");
+
+            if (ResourceManager.HasRequests)
+            {
+                Logger.WriteInformation(this, "ResourceManager: Creating new resources");
+                ResourceManager.CreateResources($"ResourceManager.Frame{Counters.FrameCount}", null);
+                Logger.WriteInformation(this, "ResourceManager: New resources created");
+            }
+
+            Counters.FramesPerSecond++;
+            Counters.FrameTime += GameTime.ElapsedSeconds;
 
             if (Counters.FrameTime >= 1.0f)
             {
@@ -380,15 +693,14 @@ namespace Engine
 
             Counters.ClearFrame();
 
-            if (this.exiting)
+            if (exiting)
             {
                 //Exit form
-                this.Form.Close();
-            }
-            else if (this.nextScene != null)
-            {
-                this.ChangeScene(this.nextScene);
-                this.nextScene = null;
+                Form.Close();
+
+                Logger.WriteInformation(this, "**************************************************************************");
+                Logger.WriteInformation(this, "** Game closed                                                          **");
+                Logger.WriteInformation(this, "**************************************************************************");
             }
         }
         /// <summary>
@@ -396,22 +708,38 @@ namespace Engine
         /// </summary>
         private void FrameInput()
         {
-            Stopwatch pSW = new Stopwatch();
-            pSW.Start();
-            this.Input.Update(this.GameTime);
-            pSW.Stop();
-            GameStatus.Add("Input", pSW);
+            try
+            {
+                Stopwatch pSW = new Stopwatch();
+                pSW.Start();
+                Input.Update(GameTime);
+                pSW.Stop();
+                GameStatus.Add("Input", pSW);
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError(this, $"Frame: Input Update error: {ex.Message}", ex);
+            }
         }
         /// <summary>
         /// Begin frame
         /// </summary>
         private void FrameBegin()
         {
-            Stopwatch pSW = new Stopwatch();
-            pSW.Start();
-            this.Graphics.Begin();
-            pSW.Stop();
-            GameStatus.Add("Begin", pSW);
+            try
+            {
+                Stopwatch pSW = new Stopwatch();
+                pSW.Start();
+                Graphics.Begin();
+                pSW.Stop();
+                GameStatus.Add("Begin", pSW);
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError(this, $"Frame: Graphics Begin error: {ex.Message}", ex);
+
+                throw;
+            }
         }
         /// <summary>
         /// Update scene state
@@ -419,11 +747,18 @@ namespace Engine
         /// <param name="scene">Scene</param>
         private void FrameSceneUpdate(Scene scene)
         {
-            Stopwatch uSW = new Stopwatch();
-            uSW.Start();
-            scene.Update(this.GameTime);
-            uSW.Stop();
-            GameStatus.Add($"Scene {scene}.Update", uSW);
+            try
+            {
+                Stopwatch uSW = new Stopwatch();
+                uSW.Start();
+                scene.Update(GameTime);
+                uSW.Stop();
+                GameStatus.Add($"Scene {scene}.Update", uSW);
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError(this, $"Scene: Update error: {ex.Message}", ex);
+            }
         }
         /// <summary>
         /// Draw scene
@@ -431,87 +766,108 @@ namespace Engine
         /// <param name="scene">Scene</param>
         private void FrameSceneDraw(Scene scene)
         {
-            Stopwatch dSW = new Stopwatch();
-            dSW.Start();
-            scene.Draw(this.GameTime);
-            dSW.Stop();
-            GameStatus.Add($"Scene {scene}.Draw", dSW);
+            if (!BufferManager.SetVertexBuffers())
+            {
+                return;
+            }
+
+            try
+            {
+                Stopwatch dSW = new Stopwatch();
+                dSW.Start();
+                scene.Draw(GameTime);
+                dSW.Stop();
+                GameStatus.Add($"Scene {scene}.Draw", dSW);
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError(this, $"Scene: Draw error: {ex.Message}", ex);
+            }
         }
         /// <summary>
         /// End frame
         /// </summary>
         private void FrameEnd()
         {
-            Stopwatch pSW = new Stopwatch();
-            pSW.Start();
-            this.Graphics.End();
-            pSW.Stop();
-            GameStatus.Add("End", pSW);
+            try
+            {
+                Stopwatch pSW = new Stopwatch();
+                pSW.Start();
+                Graphics.End();
+                pSW.Stop();
+                GameStatus.Add("End", pSW);
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError(this, $"Frame: Graphics End error: {ex.Message}", ex);
+
+                throw;
+            }
         }
         /// <summary>
         /// Refreshes frame counters
         /// </summary>
         private void FrameRefreshCounters()
         {
-            this.RuntimeText = string.Format(
-                "{0} - {1} - FPS: {2:000} Draw C/D: {3:00}:{4:00} Inst: {5:00} U: {6:00} S: {7}:{8}:{9} F. Time: {10:0.0000} (secs) T. Time: {11:0000} (secs) CPU: {12:0.00}%",
-                this.Graphics.DeviceDescription,
-                this.Name,
-                Counters.FrameCount,
-                Counters.DrawCallsPerFrame,
-                Counters.InstancesPerFrame,
-                Counters.MaxInstancesPerFrame,
-                Counters.UpdatesPerFrame,
-                Counters.RasterizerStateChanges, Counters.BlendStateChanges, Counters.DepthStencilStateChanges,
-                this.GameTime.ElapsedSeconds,
-                this.GameTime.TotalSeconds,
-                this.CPUStats.NextValue());
+            try
+            {
+                RuntimeText = string.Format(
+                    "{0} - {1} - Frame {2} FPS: {3:000} Draw C/D: {4:00}:{5:00} Inst: {6:00} U: {7:00} S: {8}:{9}:{10} F. Time: {11:0.0000} (secs) T. Time: {12:0000} (secs) CPU: {13:0.00}%",
+                    Graphics.DeviceDescription,
+                    Name,
+                    Counters.FrameCount,
+                    Counters.FramesPerSecond,
+                    Counters.DrawCallsPerFrame,
+                    Counters.InstancesPerFrame,
+                    Counters.MaxInstancesPerFrame,
+                    Counters.UpdatesPerFrame,
+                    Counters.RasterizerStateChanges, Counters.BlendStateChanges, Counters.DepthStencilStateChanges,
+                    GameTime.ElapsedSeconds,
+                    GameTime.TotalSeconds,
+                    CPUStats.NextValue());
 #if DEBUG
-            this.Form.Text = this.RuntimeText;
+                Form.Text = RuntimeText;
 #endif
-            Counters.FrameCount = 0;
-            Counters.FrameTime = 0f;
+                Counters.FramesPerSecond = 0;
+                Counters.FrameTime = 0f;
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError(this, $"Frame: Refresh Counters error: {ex.Message}", ex);
+            }
         }
         /// <summary>
         /// Collects frame status
         /// </summary>
         private void FrameCollectGameStatus()
         {
-            GameStatusCollectedEventArgs e = new GameStatusCollectedEventArgs()
+            try
             {
-                Trace = GameStatus.Copy(),
-            };
+                GameStatusCollectedEventArgs e = new GameStatusCollectedEventArgs()
+                {
+                    Trace = GameStatus.Copy(),
+                };
 
-            GameStatusCollected?.Invoke(this, e);
+                GameStatusCollected?.Invoke(this, e);
 
-            CollectGameStatus = false;
+                CollectGameStatus = false;
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError(this, $"Frame: Collecto Game Status error: {ex.Message}", ex);
+            }
         }
 
         /// <summary>
-        /// Unloads the current scenes and loads the specified scene
+        /// 
         /// </summary>
-        /// <param name="sceneToLoad">Scene to load</param>
-        private void ChangeScene(Scene sceneToLoad)
+        /// <param name="frameTime"></param>
+        /// <returns></returns>
+        private static LogLevel EvaluateTime(long frameTime)
         {
-            foreach (var s in this.scenes)
-            {
-                s.Active = false;
-            }
-
-            List<Scene> toDispose = new List<Scene>(this.scenes);
-            Task.Run(() =>
-            {
-                foreach (var s in toDispose)
-                {
-                    s.Dispose();
-                }
-
-                toDispose.Clear();
-            }).ConfigureAwait(false);
-
-            this.scenes.Clear();
-            this.AddScene(sceneToLoad);
-            sceneToLoad.Active = true;
+            if (frameTime > 500) return LogLevel.Error;
+            if (frameTime > 30) return LogLevel.Warning;
+            else return LogLevel.Information;
         }
     }
 }

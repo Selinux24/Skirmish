@@ -1,4 +1,7 @@
 ﻿using SharpDX;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Engine.Common
@@ -24,6 +27,54 @@ namespace Engine.Common
                 new InputElement("NORMAL", 0, SharpDX.DXGI.Format.R32G32B32_Float, 12, slot, InputClassification.PerVertexData, 0),
                 new InputElement("COLOR", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 24, slot, InputClassification.PerVertexData, 0),
             };
+        }
+        /// <summary>
+        /// Generates a vertex array from specified components
+        /// </summary>
+        /// <param name="vertices">Vertices</param>
+        /// <param name="normals">Normals</param>
+        /// <param name="color">Color for all vertices</param>
+        /// <returns>Returns the new generated vertex array</returns>
+        public static IEnumerable<VertexPositionNormalColor> Generate(IEnumerable<Vector3> vertices, IEnumerable<Vector3> normals, Color4 color)
+        {
+            if (vertices.Count() != normals.Count()) throw new ArgumentException("Vertices and normals must have the same length");
+
+            var vArray = vertices.ToArray();
+            var nArray = normals.ToArray();
+
+            VertexPositionNormalColor[] res = new VertexPositionNormalColor[vArray.Length];
+
+            for (int i = 0; i < vArray.Length; i++)
+            {
+                res[i] = new VertexPositionNormalColor() { Position = vArray[i], Normal = nArray[i], Color = color };
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Generates a vertex array from specified components
+        /// </summary>
+        /// <param name="vertices">Vertices</param>
+        /// <param name="normals">Normals</param>
+        /// <param name="colors">Colors</param>
+        /// <returns>Returns the new generated vertex array</returns>
+        public static IEnumerable<VertexPositionNormalColor> Generate(IEnumerable<Vector3> vertices, IEnumerable<Vector3> normals, IEnumerable<Color4> colors)
+        {
+            if (vertices.Count() != colors.Count()) throw new ArgumentException("Vertices and colors must have the same length");
+            if (vertices.Count() != normals.Count()) throw new ArgumentException("Vertices and normals must have the same length");
+
+            var vArray = vertices.ToArray();
+            var nArray = normals.ToArray();
+            var cArray = colors.ToArray();
+
+            VertexPositionNormalColor[] res = new VertexPositionNormalColor[vArray.Length];
+
+            for (int i = 0; i < vArray.Length; i++)
+            {
+                res[i] = new VertexPositionNormalColor() { Position = vArray[i], Normal = nArray[i], Color = cArray[i] };
+            }
+
+            return res;
         }
 
         /// <summary>

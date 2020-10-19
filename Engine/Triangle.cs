@@ -1,11 +1,12 @@
-﻿using Engine.Common;
-using SharpDX;
+﻿using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine
 {
+    using Engine.Common;
+
     /// <summary>
     /// Triangle
     /// </summary>
@@ -97,6 +98,22 @@ namespace Engine
                 return Helper.Angle(this.Normal, Vector3.Down);
             }
         }
+        /// <summary>
+        /// Returns the triangle vertex by index
+        /// </summary>
+        /// <param name="index">Index</param>
+        /// <returns>Returns a triangle vertex</returns>
+        public Vector3 this[int index]
+        {
+            get
+            {
+                if (index == 0) return Point1;
+                if (index == 1) return Point2;
+                if (index == 2) return Point3;
+
+                return Vector3.Zero;
+            }
+        }
 
         /// <summary>
         /// Generate a triangle list from vertices
@@ -145,7 +162,7 @@ namespace Engine
                 var tmpVerts = vertices.ToArray();
                 var tmpIndxs = indices.ToArray();
 
-                for (int i = 0; i < tmpVerts.Length; i += 3)
+                for (int i = 0; i < tmpIndxs.Length; i += 3)
                 {
                     Triangle tri = new Triangle(
                         tmpVerts[tmpIndxs[i + 0]],
@@ -265,18 +282,6 @@ namespace Engine
             {
                 Vector3[] v = obb.GetCorners();
 
-                float deltaY = obb.Extents.Y;
-                if (!MathUtil.NearEqual(obb.Transformation.ScaleVector.Y, 1f))
-                {
-                    // Adjust scaled height
-                    deltaY *= obb.Transformation.ScaleVector.Y;
-                }
-
-                for (int i = 0; i < v.Length; i++)
-                {
-                    v[i].Y += deltaY;
-                }
-
                 // Fill in the front face index data
                 triangleList.Add(new Triangle(v[0], v[1], v[2]));
                 triangleList.Add(new Triangle(v[0], v[2], v[3]));
@@ -307,6 +312,94 @@ namespace Engine
             }
 
             return triangleList.ToArray();
+        }
+        /// <summary>
+        /// Generate a triangle list from sphere
+        /// </summary>
+        /// <param name="topology">Topology</param>
+        /// <param name="sph">Sphere</param>
+        /// <param name="sliceCount">Slices</param>
+        /// <param name="stackCount">Stacks</param>
+        /// <returns>Returns the triangle list</returns>
+        public static IEnumerable<Triangle> ComputeTriangleList(Topology topology, BoundingSphere sph, uint sliceCount, uint stackCount)
+        {
+            List<Vector3> vertList = new List<Vector3>();
+
+            sliceCount--;
+            stackCount++;
+
+            #region Positions
+
+            //North pole
+            vertList.Add(new Vector3(0.0f, sph.Radius, 0.0f) + sph.Center);
+
+            float phiStep = MathUtil.Pi / stackCount;
+            float thetaStep = 2.0f * MathUtil.Pi / sliceCount;
+
+            for (int st = 1; st <= stackCount - 1; ++st)
+            {
+                float phi = st * phiStep;
+
+                for (int sl = 0; sl <= sliceCount; ++sl)
+                {
+                    float theta = sl * thetaStep;
+
+                    float x = (float)Math.Sin(phi) * (float)Math.Cos(theta);
+                    float y = (float)Math.Cos(phi);
+                    float z = (float)Math.Sin(phi) * (float)Math.Sin(theta);
+
+                    Vector3 position = sph.Radius * new Vector3(x, y, z);
+
+                    vertList.Add(position + sph.Center);
+                }
+            }
+
+            //South pole
+            vertList.Add(new Vector3(0.0f, -sph.Radius, 0.0f) + sph.Center);
+
+            #endregion
+
+            List<uint> indexList = new List<uint>();
+
+            #region Indexes
+
+            for (uint index = 1; index <= sliceCount; ++index)
+            {
+                indexList.Add(0);
+                indexList.Add(index + 1);
+                indexList.Add(index);
+            }
+
+            uint baseIndex = 1;
+            uint ringVertexCount = sliceCount + 1;
+            for (uint st = 0; st < stackCount - 2; ++st)
+            {
+                for (uint sl = 0; sl < sliceCount; ++sl)
+                {
+                    indexList.Add(baseIndex + st * ringVertexCount + sl);
+                    indexList.Add(baseIndex + st * ringVertexCount + sl + 1);
+                    indexList.Add(baseIndex + (st + 1) * ringVertexCount + sl);
+
+                    indexList.Add(baseIndex + (st + 1) * ringVertexCount + sl);
+                    indexList.Add(baseIndex + st * ringVertexCount + sl + 1);
+                    indexList.Add(baseIndex + (st + 1) * ringVertexCount + sl + 1);
+                }
+            }
+
+            uint southPoleIndex = (uint)vertList.Count - 1;
+
+            baseIndex = southPoleIndex - ringVertexCount;
+
+            for (uint index = 0; index < sliceCount; ++index)
+            {
+                indexList.Add(southPoleIndex);
+                indexList.Add(baseIndex + index);
+                indexList.Add(baseIndex + index + 1);
+            }
+
+            #endregion
+
+            return ComputeTriangleList(topology, vertList, indexList);
         }
         /// <summary>
         /// Generate a triangle list from cylinder
@@ -427,23 +520,6 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="p1x">Point 1 x coordinate</param>
-        /// <param name="p1y">Point 1 y coordinate</param>
-        /// <param name="p1z">Point 1 z coordinate</param>
-        /// <param name="p2x">Point 2 x coordinate</param>
-        /// <param name="p2y">Point 2 y coordinate</param>
-        /// <param name="p2z">Point 2 z coordinate</param>
-        /// <param name="p3x">Point 3 x coordinate</param>
-        /// <param name="p3y">Point 3 y coordinate</param>
-        /// <param name="p3z">Point 3 z coordinate</param>
-        public Triangle(float p1x, float p1y, float p1z, float p2x, float p2y, float p2z, float p3x, float p3y, float p3z)
-            : this(new Vector3(p1x, p1y, p1z), new Vector3(p2x, p2y, p2z), new Vector3(p3x, p3y, p3z))
-        {
-
-        }
-        /// <summary>
-        /// Constructor
-        /// </summary>
         /// <param name="point1">Point 1</param>
         /// <param name="point2">Point 2</param>
         /// <param name="point3">Point 3</param>
@@ -488,6 +564,14 @@ namespace Engine
                 }
             }
         }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="points">Point array</param>
+        public Triangle(Vector3[] points) : this(points[0], points[1], points[2])
+        {
+
+        }
 
         /// <summary>
         /// Text representation
@@ -504,7 +588,7 @@ namespace Engine
         /// <returns>Returns true if ray intersects with this triangle</returns>
         public bool Intersects(Ray ray)
         {
-            return this.Intersects(ray, false, out Vector3 position, out float distance);
+            return this.Intersects(ray, false, out _, out _);
         }
         /// <summary>
         /// Intersection test between ray and triangle
@@ -514,7 +598,7 @@ namespace Engine
         /// <returns>Returns true if ray intersects with this triangle</returns>
         public bool Intersects(Ray ray, out float distance)
         {
-            return this.Intersects(ray, false, out Vector3 position, out distance);
+            return this.Intersects(ray, false, out _, out distance);
         }
         /// <summary>
         /// Intersection test between ray and triangle
@@ -535,7 +619,7 @@ namespace Engine
         /// <returns>Returns true if ray intersects with this triangle</returns>
         public bool Intersects(Ray ray, bool facingOnly)
         {
-            return this.Intersects(ray, facingOnly, out Vector3 point, out float distance);
+            return this.Intersects(ray, facingOnly, out _, out _);
         }
         /// <summary>
         /// Intersection test between ray and triangle
@@ -546,7 +630,7 @@ namespace Engine
         /// <returns>Returns true if ray intersects with this triangle</returns>
         public bool Intersects(Ray ray, bool facingOnly, out float distance)
         {
-            return this.Intersects(ray, facingOnly, out Vector3 point, out distance);
+            return this.Intersects(ray, facingOnly, out _, out distance);
         }
         /// <summary>
         /// Intersection test between ray and triangle
@@ -590,6 +674,58 @@ namespace Engine
                 this.Point2,
                 this.Point3,
             };
+        }
+
+        /// <summary>
+        /// Gets the edge vector between points 2 and 1
+        /// </summary>
+        public Vector3 GetEdge1()
+        {
+            return Vector3.Subtract(Point2, Point1);
+        }
+        /// <summary>
+        /// Gets the edge vector between points 3 and 1
+        /// </summary>
+        public Vector3 GetEdge2()
+        {
+            return Vector3.Subtract(Point3, Point1);
+        }
+        /// <summary>
+        /// Gets the edge vector between points 2 and 3
+        /// </summary>
+        public Vector3 GetEdge3()
+        {
+            return Vector3.Subtract(Point2, Point3);
+        }
+        /// <summary>
+        /// Gets ray edgest by edge index (0 to 2)
+        /// </summary>
+        /// <param name="index">Edge index</param>
+        public Ray GetEdgeRay(int index)
+        {
+            if (index == 0)
+            {
+                var pos = Point1;
+                var dir = Vector3.Subtract(Point2, Point1);
+
+                return new Ray(pos, dir);
+            }
+            else if (index == 1)
+            {
+                var pos = Point1;
+                var dir = Vector3.Subtract(Point3, Point1);
+
+                return new Ray(pos, dir);
+            }
+            else if (index == 2)
+            {
+                var pos = Point3;
+                var dir = Vector3.Subtract(Point2, Point3);
+
+                return new Ray(pos, dir);
+            }
+
+            throw new ArgumentException($"Bad edge index", nameof(index));
         }
 
         /// <summary>

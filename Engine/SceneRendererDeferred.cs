@@ -29,7 +29,7 @@ namespace Engine
         /// <returns>Returns true if the renderer is valid</returns>
         public static bool Validate(Graphics graphics)
         {
-            return !graphics.MultiSampled;
+            return graphics != null && !graphics.MultiSampled;
         }
 
         /// <summary>
@@ -57,6 +57,14 @@ namespace Engine
         /// Blend state for transparent defered composer blending
         /// </summary>
         private EngineBlendState blendDeferredComposerTransparent = null;
+        /// <summary>
+        /// Blend state for alpha defered composer blending
+        /// </summary>
+        private EngineBlendState blendDeferredComposerAlpha = null;
+        /// <summary>
+        /// Blend state for additive defered composer blending
+        /// </summary>
+        private EngineBlendState blendDeferredComposerAdditive = null;
 
         /// <summary>
         /// View * OrthoProjection Matrix
@@ -113,6 +121,8 @@ namespace Engine
 
             this.blendDeferredComposer = EngineBlendState.DeferredComposer(game.Graphics, 3);
             this.blendDeferredComposerTransparent = EngineBlendState.DeferredComposerTransparent(game.Graphics, 3);
+            this.blendDeferredComposerAlpha = EngineBlendState.DeferredComposerAlpha(game.Graphics, 3);
+            this.blendDeferredComposerAdditive = EngineBlendState.DeferredComposerAdditive(game.Graphics, 3);
             this.blendDeferredLighting = EngineBlendState.DeferredLighting(game.Graphics);
         }
         /// <summary>
@@ -123,52 +133,34 @@ namespace Engine
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Dispose objects
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                if (geometryBuffer != null)
-                {
-                    geometryBuffer.Dispose();
-                    geometryBuffer = null;
-                }
-                if (lightBuffer != null)
-                {
-                    lightBuffer.Dispose();
-                    lightBuffer = null;
-                }
-                if (lightDrawer != null)
-                {
-                    lightDrawer.Dispose();
-                    lightDrawer = null;
-                }
+                geometryBuffer?.Dispose();
+                geometryBuffer = null;
+                lightBuffer?.Dispose();
+                lightBuffer = null;
+                lightDrawer?.Dispose();
+                lightDrawer = null;
 
-                if (blendDeferredLighting != null)
-                {
-                    blendDeferredLighting.Dispose();
-                    blendDeferredLighting = null;
-                }
-                if (blendDeferredComposer != null)
-                {
-                    blendDeferredComposer.Dispose();
-                    blendDeferredComposer = null;
-                }
-                if (blendDeferredComposerTransparent != null)
-                {
-                    blendDeferredComposerTransparent.Dispose();
-                    blendDeferredComposerTransparent = null;
-                }
+                blendDeferredComposer?.Dispose();
+                blendDeferredComposer = null;
+                blendDeferredComposerTransparent?.Dispose();
+                blendDeferredComposerTransparent = null;
+                blendDeferredComposerAlpha?.Dispose();
+                blendDeferredComposerAlpha = null;
+                blendDeferredComposerAdditive?.Dispose();
+                blendDeferredComposerAdditive = null;
+                blendDeferredLighting?.Dispose();
+                blendDeferredLighting = null;
             }
 
             base.Dispose(disposing);
         }
 
-        /// <summary>
-        /// Resizes buffers
-        /// </summary>
+        /// <inheritdoc/>
         public override void Resize()
         {
             this.UpdateRectangleAndView();
@@ -185,11 +177,7 @@ namespace Engine
 
             base.Resize();
         }
-        /// <summary>
-        /// Gets renderer resources
-        /// </summary>
-        /// <param name="result">Resource type</param>
-        /// <returns>Returns renderer specified resource, if renderer produces that resource.</returns>
+        /// <inheritdoc/>
         public override EngineShaderResourceView GetResource(SceneRendererResults result)
         {
             if (result == SceneRendererResults.LightMap) return this.LightMap[0];
@@ -205,11 +193,7 @@ namespace Engine
             return base.GetResource(result);
         }
 
-        /// <summary>
-        /// Draws scene components
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="scene">Scene</param>
+        /// <inheritdoc/>
         public override void Draw(GameTime gameTime, Scene scene)
         {
             if (this.Updated)
@@ -221,7 +205,7 @@ namespace Engine
                 Stopwatch swTotal = Stopwatch.StartNew();
 #endif
                 //Draw visible components
-                var visibleComponents = scene.GetComponents(c => c.Visible);
+                var visibleComponents = scene.GetComponents().Where(c => c.Visible);
                 if (visibleComponents.Any())
                 {
                     //Initialize context data from update context
@@ -293,12 +277,12 @@ namespace Engine
         /// </summary>
         /// <param name="scene">Scene</param>
         /// <param name="deferredEnabledComponents">Components</param>
-        private void DoDeferred(Scene scene, IEnumerable<SceneObject> deferredEnabledComponents)
+        private void DoDeferred(Scene scene, IEnumerable<ISceneObject> deferredEnabledComponents)
         {
 #if DEBUG
             Stopwatch swCull = Stopwatch.StartNew();
 #endif
-            var toCullDeferred = deferredEnabledComponents.Where(s => s.Is<ICullable>()).Select(s => s.Get<ICullable>());
+            var toCullDeferred = deferredEnabledComponents.OfType<ICullable>();
 
             bool draw = false;
             if (scene.PerformFrustumCulling)
@@ -370,12 +354,12 @@ namespace Engine
         /// </summary>
         /// <param name="scene">Scene</param>
         /// <param name="deferredDisabledComponents">Components</param>
-        private void DoForward(Scene scene, IEnumerable<SceneObject> deferredDisabledComponents)
+        private void DoForward(Scene scene, IEnumerable<ISceneObject> deferredDisabledComponents)
         {
 #if DEBUG
             Stopwatch swCull = Stopwatch.StartNew();
 #endif
-            var toCullNotDeferred = deferredDisabledComponents.Where(s => s.Is<ICullable>()).Select(s => s.Get<ICullable>());
+            var toCullNotDeferred = deferredDisabledComponents.OfType<ICullable>();
 
             bool draw = false;
             if (scene.PerformFrustumCulling)
@@ -432,9 +416,9 @@ namespace Engine
             this.Width = this.Game.Form.RenderWidth;
             this.Height = this.Game.Form.RenderHeight;
 
-            this.Viewport = new Viewport(0, 0, this.Width, this.Height, 0, 1.0f);
+            this.Viewport = this.Game.Form.GetViewport();
 
-            this.ViewProjection = Sprite.CreateViewOrthoProjection(this.Width, this.Height);
+            this.ViewProjection = this.Game.Form.GetOrthoProjectionMatrix();
 
             this.lightDrawer.Update(this.Game.Graphics, this.Width, this.Height);
         }
@@ -674,7 +658,7 @@ namespace Engine
         /// </summary>
         /// <param name="context">Context</param>
         /// <param name="components">Components</param>
-        private void DrawResultComponents(DrawContext context, int index, IEnumerable<SceneObject> components)
+        private void DrawResultComponents(DrawContext context, int index, IEnumerable<ISceneObject> components)
         {
             //Save current drawing mode
             var mode = context.DrawerMode;
@@ -690,7 +674,7 @@ namespace Engine
                 opaques.Sort((c1, c2) => this.SortOpaques(index, c1, c2));
 
                 //Draw items
-                opaques.ForEach((c) => DrawOpaque(context, c));
+                opaques.ForEach((c) => this.Draw(context, c));
             }
 
             //Then transparents
@@ -704,44 +688,40 @@ namespace Engine
                 transparents.Sort((c1, c2) => this.SortTransparents(index, c1, c2));
 
                 //Draw items
-                transparents.ForEach((c) => this.DrawTransparent(context, c));
+                transparents.ForEach((c) => this.Draw(context, c));
             }
 
             //Restore drawing mode
             context.DrawerMode = mode;
         }
 
-        /// <summary>
-        /// Sets blend state for opaques rendering
-        /// </summary>
-        /// <param name="context">Drawing context</param>
-        protected override void SetBlendStateOpaque(DrawContext context)
+        /// <inheritdoc/>
+        protected override void SetBlendState(DrawContext context, BlendModes blendMode)
         {
             if (context.DrawerMode.HasFlag(DrawerModes.Deferred))
             {
-                this.SetBlendDeferredComposer();
+                if (blendMode.HasFlag(BlendModes.Additive))
+                {
+                    this.SetBlendDeferredComposerAdditive();
+                }
+                else if (blendMode.HasFlag(BlendModes.Transparent))
+                {
+                    this.SetBlendDeferredComposerTransparent();
+                }
+                else if (blendMode.HasFlag(BlendModes.Alpha))
+                {
+                    this.SetBlendDeferredComposerAlpha();
+                }
+                else
+                {
+                    this.SetBlendDeferredComposer();
+                }
             }
             else
             {
-                this.Game.Graphics.SetBlendDefault();
+                base.SetBlendState(context, blendMode);
             }
         }
-        /// <summary>
-        /// Sets blend state for transparents rendering
-        /// </summary>
-        /// <param name="context">Drawing context</param>
-        protected override void SetBlendStateTransparent(DrawContext context)
-        {
-            if (context.DrawerMode.HasFlag(DrawerModes.Deferred))
-            {
-                this.SetBlendDeferredComposerTransparent();
-            }
-            else
-            {
-                this.Game.Graphics.SetBlendTransparent();
-            }
-        }
-
         /// <summary>
         /// Sets deferred composer blend state
         /// </summary>
@@ -755,6 +735,20 @@ namespace Engine
         private void SetBlendDeferredComposerTransparent()
         {
             this.Game.Graphics.SetBlendState(this.blendDeferredComposerTransparent);
+        }
+        /// <summary>
+        /// Sets alpha deferred composer blend state
+        /// </summary>
+        private void SetBlendDeferredComposerAlpha()
+        {
+            this.Game.Graphics.SetBlendState(this.blendDeferredComposerAlpha);
+        }
+        /// <summary>
+        /// Sets additive deferred composer blend state
+        /// </summary>
+        private void SetBlendDeferredComposerAdditive()
+        {
+            this.Game.Graphics.SetBlendState(this.blendDeferredComposerAdditive);
         }
         /// <summary>
         /// Sets deferred lighting blend state

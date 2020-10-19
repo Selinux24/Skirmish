@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -11,36 +14,51 @@ namespace Engine
     public class ParticleManager : Drawable
     {
         /// <summary>
-        /// Collection for particle system disposition
+        /// Concurrent particle list
         /// </summary>
-        private List<IParticleSystem> toDelete = new List<IParticleSystem>();
+        private readonly ConcurrentBag<IParticleSystem> particleSystems = new ConcurrentBag<IParticleSystem>();
 
         /// <summary>
         /// Particle systems list
         /// </summary>
-        public List<IParticleSystem> ParticleSystems { get; private set; } = new List<IParticleSystem>();
+        public IEnumerable<IParticleSystem> ParticleSystems
+        {
+            get
+            {
+                //Copy collection
+                var list = particleSystems.ToList();
+
+                //Sort active particles (draw far away particles first)
+                list.Sort((p1, p2) =>
+                {
+                    return p2.Emitter.Distance.CompareTo(p1.Emitter.Distance);
+                });
+                return list;
+            }
+        }
         /// <summary>
         /// Current particle count
         /// </summary>
         public int AllocatedParticleCount { get; private set; }
         /// <summary>
-        /// Maximum number of instances
+        /// Number of active particle systems
         /// </summary>
         public int Count
         {
             get
             {
-                return this.ParticleSystems.Count;
+                return particleSystems.Count;
             }
         }
 
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Particle manager description</param>
-        public ParticleManager(Scene scene, ParticleManagerDescription description)
-            : base(scene, description)
+        public ParticleManager(string name, Scene scene, ParticleManagerDescription description)
+            : base(name, scene, description)
         {
 
         }
@@ -59,28 +77,12 @@ namespace Engine
         {
             if (disposing)
             {
-                if (this.ParticleSystems != null)
+                while (!particleSystems.IsEmpty)
                 {
-                    for (int i = 0; i < this.ParticleSystems.Count; i++)
+                    if (particleSystems.TryTake(out var p))
                     {
-                        this.ParticleSystems[i]?.Dispose();
-                        this.ParticleSystems[i] = null;
+                        p?.Dispose();
                     }
-
-                    this.ParticleSystems.Clear();
-                    this.ParticleSystems = null;
-                }
-
-                if (this.toDelete != null)
-                {
-                    for (int i = 0; i < this.toDelete.Count; i++)
-                    {
-                        this.toDelete[i]?.Dispose();
-                        this.toDelete[i] = null;
-                    }
-
-                    this.toDelete.Clear();
-                    this.toDelete = null;
                 }
             }
         }
@@ -91,36 +93,59 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Update(UpdateContext context)
         {
-            if (this.ParticleSystems?.Count > 0)
+            //Copy collection
+            var particles = particleSystems.ToList();
+            if (!particles.Any())
             {
-                this.ParticleSystems.ForEach(p =>
+                return;
+            }
+
+            bool toDelete = false;
+            particles.ForEach(p =>
+            {
+                p.Update(context);
+
+                if (!p.Active)
                 {
-                    p.Update(context);
+                    toDelete = true;
+                }
+            });
 
-                    if (!p.Active)
-                    {
-                        toDelete.Add(p);
-                    }
-                });
+            if (!toDelete)
+            {
+                return;
+            }
 
-                if (toDelete.Count > 0)
+            List<IParticleSystem> toRestore = new List<IParticleSystem>();
+            while (!particleSystems.IsEmpty)
+            {
+                if (!particleSystems.TryTake(out var p))
                 {
-                    toDelete.ForEach(p =>
-                    {
-                        this.ParticleSystems.Remove(p);
-                        this.AllocatedParticleCount -= p.MaxConcurrentParticles;
-                        p.Dispose();
-                    });
-
-                    toDelete.Clear();
+                    break;
                 }
 
-                //Sort active particles (draw far away particles first)
-                this.ParticleSystems.Sort((p1, p2) =>
+                if (!p.Active)
                 {
-                    return p2.Emitter.Distance.CompareTo(p1.Emitter.Distance);
-                });
+                    //Dispose
+                    AllocatedParticleCount -= p.MaxConcurrentParticles;
+                    p.Dispose();
+                }
+                else
+                {
+                    //Restore into bag
+                    toRestore.Add(p);
+                }
             }
+
+            if (!toRestore.Any())
+            {
+                return;
+            }
+
+            toRestore.ForEach(p =>
+            {
+                particleSystems.Add(p);
+            });
         }
         /// <summary>
         /// Draws the active particle systems
@@ -128,7 +153,15 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            this.ParticleSystems.ForEach(p =>
+            if (!particleSystems.Any())
+            {
+                return;
+            }
+
+            // Copy collection
+            var particles = particleSystems.ToList();
+
+            particles.ForEach(p =>
             {
                 if (p.Emitter.IsDrawable)
                 {
@@ -142,13 +175,21 @@ namespace Engine
         /// <param name="volume">Culling volume</param>
         /// <param name="distance">If the at least one of the internal emitters is visible, returns the distance to the item</param>
         /// <returns>Returns true if all emitters were culled</returns>
-        public override bool Cull(ICullingVolume volume, out float distance)
+        public override bool Cull(IIntersectionVolume volume, out float distance)
         {
-            bool cull = true;
             distance = float.MaxValue;
+            bool cull = true;
+
+            if (!particleSystems.Any())
+            {
+                return cull;
+            }
 
             float minDistance = float.MaxValue;
-            this.ParticleSystems.ForEach(p =>
+
+            // Copy collection
+            var particles = particleSystems.ToList();
+            particles.ForEach(p =>
             {
                 var c = p.Emitter.Cull(volume, out float d);
                 if (!c)
@@ -175,7 +216,7 @@ namespace Engine
         /// <returns>Returns the new particle system</returns>
         public IParticleSystem AddParticleSystem(ParticleSystemTypes type, ParticleSystemDescription description, ParticleEmitter emitter)
         {
-            return this.AddParticleSystem(null, type, description, emitter);
+            return AddParticleSystem($"{Name}.{type}.{description.Name}", type, description, emitter);
         }
         /// <summary>
         /// Adds a new particle system to the collection
@@ -187,24 +228,24 @@ namespace Engine
         /// <returns>Returns the new particle system</returns>
         public IParticleSystem AddParticleSystem(string name, ParticleSystemTypes type, ParticleSystemDescription description, ParticleEmitter emitter)
         {
-            IParticleSystem pSystem = null;
+            IParticleSystem pSystem;
 
             if (type == ParticleSystemTypes.CPU)
             {
-                pSystem = new ParticleSystemCpu(this.Game, name, description, emitter);
+                pSystem = new ParticleSystemCpu(Game, name, description, emitter);
             }
             else if (type == ParticleSystemTypes.GPU)
             {
-                pSystem = new ParticleSystemGpu(this.Game, name, description, emitter);
+                pSystem = new ParticleSystemGpu(Game, name, description, emitter);
             }
             else
             {
                 throw new EngineException("Bad particle system type");
             }
 
-            this.AllocatedParticleCount += pSystem.MaxConcurrentParticles;
+            AllocatedParticleCount += pSystem.MaxConcurrentParticles;
 
-            this.ParticleSystems.Add(pSystem);
+            particleSystems.Add(pSystem);
 
             return pSystem;
         }
@@ -215,7 +256,7 @@ namespace Engine
         /// <returns>Returns the particle system at specified index</returns>
         public IParticleSystem GetParticleSystem(int index)
         {
-            return index < this.ParticleSystems.Count ? this.ParticleSystems[index] : null;
+            return particleSystems.ElementAtOrDefault(index);
         }
         /// <summary>
         /// Gets a particle systema by name
@@ -226,7 +267,7 @@ namespace Engine
         {
             if (!string.IsNullOrWhiteSpace(name))
             {
-                return this.ParticleSystems.Find(p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase));
+                return particleSystems.FirstOrDefault(p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase));
             }
             else
             {
@@ -238,7 +279,18 @@ namespace Engine
         /// </summary>
         public void Clear()
         {
-            this.toDelete.AddRange(this.ParticleSystems);
+            if (!particleSystems.Any())
+            {
+                return;
+            }
+
+            while (!particleSystems.IsEmpty)
+            {
+                if (particleSystems.TryTake(out var p))
+                {
+                    p?.Dispose();
+                }
+            }
         }
 
         /// <summary>
@@ -247,7 +299,36 @@ namespace Engine
         /// <returns>Returns the text representation of the particle manager</returns>
         public override string ToString()
         {
-            return string.Format("Particle systems: {0}; Allocated particles: {1}", ParticleSystems.Count, this.AllocatedParticleCount);
+            return $"Particle systems: {particleSystems.Count}; Allocated particles: {AllocatedParticleCount}";
+        }
+    }
+
+    /// <summary>
+    /// Particle manager extensions
+    /// </summary>
+    public static class ParticleManagerExtensions
+    {
+        /// <summary>
+        /// Adds a component to the scene
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        /// <param name="name">Name</param>
+        /// <param name="description">Description</param>
+        /// <param name="usage">Component usage</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns the created component</returns>
+        public static async Task<ParticleManager> AddComponentParticleManager(this Scene scene, string name, ParticleManagerDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
+        {
+            ParticleManager component = null;
+
+            await Task.Run(() =>
+            {
+                component = new ParticleManager(name, scene, description);
+
+                scene.AddComponent(component, usage, order);
+            });
+
+            return component;
         }
     }
 }

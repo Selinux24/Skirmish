@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.Content.FmtCollada;
 using SharpDX;
 using System;
 using System.IO;
@@ -15,7 +16,10 @@ namespace GameLogic
             try
             {
 #if DEBUG
-                using (game = new Game("Game Logic", false, 1600, 900, true, 0, 0))
+                int sWidth = (int)(System.Windows.Forms.SystemInformation.VirtualScreen.Width * .8f);
+                int sHeight = (int)(System.Windows.Forms.SystemInformation.VirtualScreen.Height * .8f);
+
+                using (game = new Game("Game Logic", false, sWidth, sHeight, true, 0, 0))
 #else
                 using (game = new Game("Game Logic", true, 0, 0, true, 0, 4))
 #endif
@@ -23,9 +27,11 @@ namespace GameLogic
                     game.VisibleMouse = true;
                     game.LockMouse = false;
 
+                    GameResourceManager.RegisterLoader<LoaderCollada>();
+
                     GameEnvironment.Background = Color.CornflowerBlue;
 
-                    game.AddScene<SceneObjects>();
+                    game.SetScene<SceneObjects>();
 
                     game.Run();
                 }

@@ -92,8 +92,7 @@ namespace Engine
                 MinEndSize = 0.5f,
                 MaxEndSize = 1f,
 
-                Transparent = true,
-                Additive = false
+                BlendMode = BlendModes.Alpha,
             };
 
             settings.Scale(scale);
@@ -138,8 +137,7 @@ namespace Engine
 
                 EmitterVelocitySensitivity = 1f,
 
-                Transparent = true,
-                Additive = true
+                BlendMode = BlendModes.Alpha | BlendModes.Additive,
             };
 
             settings.Scale(scale);
@@ -187,8 +185,7 @@ namespace Engine
 
                 EmitterVelocitySensitivity = 1f,
 
-                Transparent = true,
-                Additive = false
+                BlendMode = BlendModes.Alpha,
             };
 
             settings.Scale(scale);
@@ -234,8 +231,7 @@ namespace Engine
                 MinEndSize = 0.5f,
                 MaxEndSize = 1.0f,
 
-                Transparent = true,
-                Additive = false
+                BlendMode = BlendModes.Alpha,
             };
 
             settings.Scale(scale);
@@ -258,31 +254,30 @@ namespace Engine
                 ContentPath = contentPath,
                 TextureName = texture,
 
-                MaxDuration = 1.5f,
-                MaxDurationRandomness = 1,
+                MaxDuration = 1f,
+                MaxDurationRandomness = 1f,
 
-                MinHorizontalVelocity = 1.0f,
-                MaxHorizontalVelocity = 1.5f,
+                MinHorizontalVelocity = 0.5f,
+                MaxHorizontalVelocity = 1.0f,
 
                 MinVerticalVelocity = -1f,
                 MaxVerticalVelocity = 1f,
 
-                EndVelocity = 0,
+                EndVelocity = 1,
 
-                MinColor = Color.DarkGray,
-                MaxColor = Color.Gray,
+                MinColor = Color.White,
+                MaxColor = Color.White,
 
                 MinRotateSpeed = -1,
                 MaxRotateSpeed = 1,
 
-                MinStartSize = 0.25f,
-                MaxStartSize = 0.25f,
+                MinStartSize = 1.0f,
+                MaxStartSize = 2.0f,
 
-                MinEndSize = 5,
-                MaxEndSize = 10,
+                MinEndSize = 3f,
+                MaxEndSize = 5f,
 
-                Transparent = true,
-                Additive = true
+                BlendMode = BlendModes.Alpha | BlendModes.Additive,
             };
 
             settings.Scale(scale);
@@ -329,8 +324,7 @@ namespace Engine
                 MinEndSize = 10,
                 MaxEndSize = 20,
 
-                Transparent = true,
-                Additive = false
+                BlendMode = BlendModes.Alpha,
             };
 
             settings.Scale(scale);
@@ -530,15 +524,10 @@ namespace Engine
         public float MaxEndSize { get; set; }
 
         /// <summary>
-        /// Gets or sets wheter the particles were transparent
+        /// Gets or sets whether the blend mode
         /// </summary>
-        [XmlElement("transparent")]
-        public bool Transparent { get; set; }
-        /// <summary>
-        /// Gets or sets wheter the particles were additive
-        /// </summary>
-        [XmlElement("additive")]
-        public bool Additive { get; set; }
+        [XmlElement("blendMode")]
+        public BlendModes BlendMode { get; set; }
 
         /// <summary>
         /// Emitter velocity sensitivity
@@ -572,7 +561,7 @@ namespace Engine
             this.MaxStartSize = 1;
             this.MinEndSize = 1;
             this.MaxEndSize = 1;
-            this.Transparent = false;
+            this.BlendMode = BlendModes.Alpha;
             this.EmitterVelocitySensitivity = 0;
         }
 
@@ -620,7 +609,7 @@ namespace Engine
             this.MaxStartSize = other.MaxStartSize;
             this.MinEndSize = other.MinEndSize;
             this.MaxEndSize = other.MaxEndSize;
-            this.Transparent = other.Transparent;
+            this.BlendMode = other.BlendMode;
             this.EmitterVelocitySensitivity = other.EmitterVelocitySensitivity;
         }
     }

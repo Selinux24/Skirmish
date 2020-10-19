@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System.Collections.Generic;
 
 namespace Engine.PathFinding
 {
@@ -22,6 +23,6 @@ namespace Engine.PathFinding
         /// Gets the point list of this node perimeter
         /// </summary>
         /// <returns>Returns the point list of this node perimeter</returns>
-        Vector3[] GetPoints();
+        IEnumerable<Vector3> GetPoints();
     }
 }

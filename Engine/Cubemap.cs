@@ -1,6 +1,5 @@
 ﻿using SharpDX;
 using System;
-using System.Collections.Generic;
 
 namespace Engine
 {
@@ -34,82 +33,102 @@ namespace Engine
         /// Manipulator
         /// </summary>
         public Manipulator3D Manipulator { get; set; }
+        /// <summary>
+        /// Returns true if the buffers were ready
+        /// </summary>
+        public bool BuffersReady
+        {
+            get
+            {
+                if (vertexBuffer?.Ready != true)
+                {
+                    return false;
+                }
+
+                if (indexBuffer?.Ready != true)
+                {
+                    return false;
+                }
+
+                if (indexBuffer.Count <= 0)
+                {
+                    return false;
+                }
+
+                return true;
+            }
+        }
 
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        public Cubemap(Scene scene, CubemapDescription description)
-            : base(scene, description)
+        public Cubemap(string name, Scene scene, CubemapDescription description)
+            : base(name, scene, description)
         {
-            this.Manipulator = new Manipulator3D();
+            Manipulator = new Manipulator3D();
 
-            this.InitializeBuffers(description.Name, description.Geometry, description.ReverseFaces);
-            this.InitializeTexture(description.ContentPath, description.Texture);
+            InitializeBuffers(name, description.Geometry, description.ReverseFaces);
+            InitializeTexture(description.ContentPath, description.Texture);
         }
-        /// <summary>
-        /// Resource releasing
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
                 //Remove data from buffer manager
-                this.BufferManager?.RemoveVertexData(this.vertexBuffer);
-                this.BufferManager?.RemoveIndexData(this.indexBuffer);
+                BufferManager?.RemoveVertexData(vertexBuffer);
+                BufferManager?.RemoveIndexData(indexBuffer);
             }
         }
 
-        /// <summary>
-        /// Update
-        /// </summary>
-        /// <param name="context">Context</param>
+        /// <inheritdoc/>
         public override void Update(UpdateContext context)
         {
-            this.Manipulator.Update(context.GameTime);
+            Manipulator.Update(context.GameTime);
 
-            this.local = this.Manipulator.LocalTransform;
+            local = Manipulator.LocalTransform;
         }
-        /// <summary>
-        /// Draw
-        /// </summary>
-        /// <param name="context">Context</param>
+        /// <inheritdoc/>
         public override void Draw(DrawContext context)
         {
-            var mode = context.DrawerMode;
-            var draw =
-                (mode.HasFlag(DrawerModes.OpaqueOnly) && !this.Description.AlphaEnabled) ||
-                (mode.HasFlag(DrawerModes.TransparentOnly) && this.Description.AlphaEnabled);
-
-            if (draw && this.indexBuffer.Count > 0)
+            if (!Visible)
             {
-                var effect = DrawerPool.EffectDefaultCubemap;
-                var technique = DrawerPool.EffectDefaultCubemap.ForwardCubemap;
+                return;
+            }
 
-                if (!mode.HasFlag(DrawerModes.ShadowMap))
-                {
-                    Counters.InstancesPerFrame++;
-                    Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
-                }
+            if (!BuffersReady)
+            {
+                return;
+            }
 
-                this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
-                this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, Topology.TriangleList);
+            bool draw = context.ValidateDraw(BlendMode);
+            if (!draw)
+            {
+                return;
+            }
 
-                effect.UpdatePerFrame(this.local, context.ViewProjection);
-                effect.UpdatePerObject(this.cubeMapTexture);
+            var effect = DrawerPool.EffectDefaultCubemap;
+            var technique = DrawerPool.EffectDefaultCubemap.ForwardCubemap;
 
-                var graphics = this.Game.Graphics;
+            BufferManager.SetIndexBuffer(indexBuffer);
+            BufferManager.SetInputAssembler(technique, vertexBuffer, Topology.TriangleList);
 
-                for (int p = 0; p < technique.PassCount; p++)
-                {
-                    graphics.EffectPassApply(technique, p, 0);
+            effect.UpdatePerFrame(local, context.ViewProjection);
+            effect.UpdatePerObject(cubeMapTexture);
 
-                    graphics.DrawIndexed(
-                        this.indexBuffer.Count,
-                        this.indexBuffer.Offset,
-                        this.vertexBuffer.Offset);
-                }
+            var graphics = Game.Graphics;
+
+            for (int p = 0; p < technique.PassCount; p++)
+            {
+                graphics.EffectPassApply(technique, p, 0);
+
+                graphics.DrawIndexed(
+                    indexBuffer.Count,
+                    indexBuffer.BufferOffset,
+                    vertexBuffer.BufferOffset);
             }
         }
 
@@ -119,7 +138,7 @@ namespace Engine
         /// <param name="texture">Texture</param>
         public void SetTexture(EngineShaderResourceView texture)
         {
-            this.cubeMapTexture = texture;
+            cubeMapTexture = texture;
         }
 
         /// <summary>
@@ -130,22 +149,16 @@ namespace Engine
         /// <param name="reverse">Reverse faces</param>
         protected void InitializeBuffers(string name, CubemapDescription.CubeMapGeometry geometry, bool reverse)
         {
-            Vector3[] vData;
-            uint[] iData;
-            if (geometry == CubemapDescription.CubeMapGeometry.Box) GeometryUtil.CreateBox(1, 10, 10, out vData, out iData);
-            else if (geometry == CubemapDescription.CubeMapGeometry.Sphere) GeometryUtil.CreateSphere(1, 10, 10, out vData, out iData);
+            GeometryDescriptor geom;
+            if (geometry == CubemapDescription.CubeMapGeometry.Box) geom = GeometryUtil.CreateBox(1, 10, 10);
+            else if (geometry == CubemapDescription.CubeMapGeometry.Sphere) geom = GeometryUtil.CreateSphere(1, 10, 10);
             else throw new ArgumentException("Bad geometry enum type");
 
-            var vertices = new List<VertexPosition>();
-            foreach (var v in vData)
-            {
-                vertices.Add(new VertexPosition() { Position = v });
-            }
+            var vertices = VertexPosition.Generate(geom.Vertices);
+            var indices = reverse ? GeometryUtil.ChangeCoordinate(geom.Indices) : geom.Indices;
 
-            if (reverse) iData = GeometryUtil.ChangeCoordinate(iData);
-
-            this.vertexBuffer = this.BufferManager.Add(name, vertices.ToArray(), false, 0);
-            this.indexBuffer = this.BufferManager.Add(name, iData, false);
+            vertexBuffer = BufferManager.AddVertexData(name, false, vertices);
+            indexBuffer = BufferManager.AddIndexData(name, false, indices);
         }
         /// <summary>
         /// Initialize textures
@@ -155,7 +168,7 @@ namespace Engine
         protected void InitializeTexture(string contentPath, params string[] textures)
         {
             var image = ImageContent.Cubic(contentPath, textures[0]);
-            this.cubeMapTexture = this.Game.ResourceManager.CreateResource(image);
+            cubeMapTexture = Game.ResourceManager.RequestResource(image);
         }
     }
 }

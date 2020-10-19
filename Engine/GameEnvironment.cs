@@ -5,7 +5,7 @@ namespace Engine
     /// <summary>
     /// Global variables 
     /// </summary>
-    public static class GameEnvironment
+    public class GameEnvironment
     {
         /// <summary>
         /// Background color
@@ -39,9 +39,8 @@ namespace Engine
         /// <param name="origin">Origin</param>
         /// <param name="coarseBoundingSphere">Coarse bounding sphere</param>
         /// <param name="localTransform">Local transform</param>
-        /// <param name="averagingScale">Averaging scale</param>
         /// <returns>Returns the level of detail</returns>
-        public static LevelOfDetail GetLOD(Vector3 origin, BoundingSphere? coarseBoundingSphere, Matrix localTransform, float averagingScale)
+        public static LevelOfDetail GetLOD(Vector3 origin, BoundingSphere? coarseBoundingSphere, Matrix localTransform)
         {
             Vector3 position = localTransform.TranslationVector;
             float radius = 0f;
@@ -87,5 +86,19 @@ namespace Engine
         /// Maximum distance for Low level detailed shadows
         /// </summary>
         public static float ShadowDistanceLow { get; set; } = 50f;
+
+        /// <summary>
+        /// Time of day controller
+        /// </summary>
+        public TimeOfDay TimeOfDay { get; private set; } = new TimeOfDay();
+
+        /// <summary>
+        /// Updates the task list
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        public void Update(GameTime gameTime)
+        {
+            TimeOfDay.Update(gameTime);
+        }
     }
 }

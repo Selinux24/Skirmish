@@ -3,9 +3,12 @@ using Engine.Animation;
 using Engine.Common;
 using Engine.Content;
 using Engine.PathFinding.AStar;
+using Engine.UI;
 using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace GameLogic
 {
@@ -16,20 +19,22 @@ namespace GameLogic
     {
         private const int layerHUD = 99;
 
-        private TextDrawer txtTitle = null;
-        private TextDrawer txtGame = null;
-        private TextDrawer txtTeam = null;
-        private TextDrawer txtSoldier = null;
-        private TextDrawer txtActionList = null;
-        private TextDrawer txtAction = null;
+        private UITextArea txtTitle = null;
+        private UITextArea txtGame = null;
+        private UITextArea txtTeam = null;
+        private UITextArea txtSoldier = null;
+        private UITextArea txtActionList = null;
+        private UITextArea txtAction = null;
 
-        private readonly string fontName = "Lucida Sans";
-        private SpriteButton butClose = null;
-        private SpriteButton butNext = null;
-        private SpriteButton butPrevSoldier = null;
-        private SpriteButton butNextSoldier = null;
-        private SpriteButton butPrevAction = null;
-        private SpriteButton butNextAction = null;
+        private readonly string titleFontFileName = "ARMY RUST.TTF";
+        private readonly string fontFileName = "JOYSTIX.TTF";
+        private readonly int fontSize = 12;
+        private UIButton butClose = null;
+        private UIButton butNext = null;
+        private UIButton butPrevSoldier = null;
+        private UIButton butNextSoldier = null;
+        private UIButton butPrevAction = null;
+        private UIButton butNextAction = null;
 
         private Model cursor3D = null;
 
@@ -40,15 +45,8 @@ namespace GameLogic
         private readonly Dictionary<Soldier, ModelInstance> soldierModels = new Dictionary<Soldier, ModelInstance>();
         private readonly Dictionary<Soldier, ManipulatorController> soldierControllers = new Dictionary<Soldier, ManipulatorController>();
         private readonly Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
-        private ModelInstance Current
-        {
-            get
-            {
-                return this.soldierModels[this.skirmishGame.CurrentSoldier];
-            }
-        }
 
-        private SceneObject<PrimitiveListDrawer<Line3D>> lineDrawer = null;
+        private PrimitiveListDrawer<Line3D> lineDrawer = null;
         private readonly Color4 bsphColor = new Color4(Color.LightYellow.ToColor3(), 0.25f);
         private readonly Color4 frstColor = new Color4(Color.Yellow.ToColor3(), 1f);
         private readonly int bsphSlices = 50;
@@ -72,6 +70,8 @@ namespace GameLogic
                 return null;
             }
         }
+
+        private bool gameReady = false;
 
         #region Keys
 
@@ -98,21 +98,21 @@ namespace GameLogic
         #endregion
 
         public SceneObjects(Game game)
-            : base(game, SceneModes.ForwardLigthning)
+            : base(game)
         {
 
         }
 
-        public override void Initialize()
+        public override async Task Initialize()
         {
             GameEnvironment.Background = Color.Black;
 
-            this.Camera.FarPlaneDistance = 1000f;
-            this.Camera.Mode = CameraModes.FreeIsometric;
+            Camera.FarPlaneDistance = 1000f;
+            Camera.Mode = CameraModes.FreeIsometric;
 
-            this.NewGame();
+            NewGame();
 
-            this.spotLight = new SceneLightSpot(
+            spotLight = new SceneLightSpot(
                 "Current soldier",
                 false,
                 Color.White,
@@ -120,25 +120,39 @@ namespace GameLogic
                 true,
                 SceneLightSpotDescription.Create(Vector3.Zero, Vector3.Down, 15f, 15f, 100f));
 
-            this.Lights.Add(this.spotLight);
+            Lights.Add(spotLight);
 
-            this.InitializeModels();
+            await LoadResourcesAsync(
+                new[]
+                {
+                    InitializeModels(),
+                    InitializeHUD(),
+                    InitializeDebug()
+                },
+                (res) =>
+                {
+                    if (!res.Completed)
+                    {
+                        res.ThrowExceptions();
+                    }
 
-            this.InitializeHUD();
+                    UpdateLayout();
 
-            this.UpdateLayout();
+                    InitializeAnimations();
 
-            this.InitializeAnimations();
+                    InitializePositions();
 
-            this.InitializePositions();
+                    GoToSoldier(skirmishGame.CurrentSoldier);
 
-            this.InitializeDebug();
+                    Task.WhenAll(UpdateNavigationGraph());
 
-            this.GoToSoldier(this.skirmishGame.CurrentSoldier);
+                    gameReady = true;
+                });
         }
-        private void InitializeModels()
+        private async Task InitializeModels()
         {
-            this.cursor3D = this.AddComponent<Model>(
+            cursor3D = await this.AddComponentModel(
+                "Cursor3D",
                 new ModelDescription()
                 {
                     CastShadow = false,
@@ -150,12 +164,13 @@ namespace GameLogic
                     }
                 },
                 SceneObjectUsages.UI,
-                layerHUD).Instance;
+                layerHUD);
 
-            var troopsObj = this.AddComponent<ModelInstanced>(
+            troops = await this.AddComponentModelInstanced(
+                "Troops",
                 new ModelInstancedDescription()
                 {
-                    Instances = this.skirmishGame.AllSoldiers.Length,
+                    Instances = skirmishGame.AllSoldiers.Length,
                     CastShadow = true,
                     Content = new ContentDescription()
                     {
@@ -165,367 +180,373 @@ namespace GameLogic
                 },
                 SceneObjectUsages.Agent);
 
-            this.troops = troopsObj.Instance;
-
-            var terrainObj = this.AddComponent<Scenery>(
-                new GroundDescription()
-                {
-                    CastShadow = true,
-                    Content = new ContentDescription()
-                    {
-                        ContentFolder = "Resources3D",
-                        ModelContentFilename = "terrain.xml",
-                    }
-                },
+            terrain = await this.AddComponentScenery(
+                "Terrain",
+                GroundDescription.FromFile("Resources3D", "terrain.xml"),
                 SceneObjectUsages.Ground);
 
-            this.terrain = terrainObj.Instance;
-
-            int minimapHeight = (this.Game.Form.RenderHeight / 4) - 8;
+            int minimapHeight = (Game.Form.RenderHeight / 4) - 8;
             int minimapWidth = minimapHeight;
             var topLeft = new Vector2(593, 443);
             var bottomRight = new Vector2(789, 590);
             var tRes = new Vector2(800, 600);
-            var wRes = new Vector2(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
+            var wRes = new Vector2(Game.Form.RenderWidth, Game.Form.RenderHeight);
             var pTopLeft = wRes / tRes * topLeft;
             var pBottomRight = wRes / tRes * bottomRight;
             var q = pTopLeft + ((pBottomRight - pTopLeft - new Vector2(minimapWidth, minimapHeight)) * 0.5f);
 
-            this.AddComponent<Minimap>(
-                new MinimapDescription()
+            await this.AddComponentUIMinimap(
+                "Minimap",
+                new UIMinimapDescription()
                 {
                     Top = (int)q.Y,
                     Left = (int)q.X,
                     Width = minimapWidth,
                     Height = minimapHeight,
-                    Drawables = new SceneObject[]
+                    Drawables = new IDrawable[]
                     {
-                        terrainObj,
-                        troopsObj,
+                        troops,
                     },
-                    MinimapArea = terrainObj.Instance.GetBoundingBox(),
+                    BackColor = Color.LightSlateGray,
+                    MinimapArea = terrain.GetBoundingBox(),
                 },
-                SceneObjectUsages.UI,
                 layerHUD);
 
-            this.SetGround(terrainObj, true);
+            SetGround(terrain, true);
 
             GridInput input = new GridInput(GetTrianglesForNavigationGraph);
             GridGenerationSettings settings = new GridGenerationSettings()
             {
                 NodeSize = 5f,
             };
-            this.PathFinderDescription = new Engine.PathFinding.PathFinderDescription(settings, input);
+            PathFinderDescription = new Engine.PathFinding.PathFinderDescription(settings, input);
         }
-        private void InitializeHUD()
+        private async Task InitializeHUD()
         {
-            SpriteBackgroundDescription bkDesc = new SpriteBackgroundDescription()
+            SpriteDescription bkDesc = SpriteDescription.Background("Resources/HUD.png");
+            await this.AddComponentSprite("HUD", bkDesc, SceneObjectUsages.UI, layerHUD - 1);
+
+            var titleFont = new TextDrawerDescription
             {
-                ContentPath = "Resources",
-                Textures = new[] { "HUD.png" },
-                Color = new Color4(1f, 1f, 1f, 1f),
+                FontFileName = titleFontFileName,
+                FontSize = fontSize * 3,
             };
-            this.AddComponent<Sprite>(bkDesc, SceneObjectUsages.UI, layerHUD - 1);
+            var gameFont = new TextDrawerDescription()
+            {
+                FontFileName = fontFileName,
+                FontSize = (int)(fontSize * 1.25f),
+            };
+            var textFont = new TextDrawerDescription()
+            {
+                FontFileName = fontFileName,
+                FontSize = fontSize,
+            };
+            var buttonsFont = new TextDrawerDescription()
+            {
+                FontFileName = fontFileName,
+                FontSize = fontSize,
+            };
 
-            this.txtTitle = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 24, Color.White, Color.Gray), SceneObjectUsages.UI, layerHUD).Instance;
-            this.txtGame = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.LightBlue, Color.DarkBlue), SceneObjectUsages.UI, layerHUD).Instance;
-            this.txtTeam = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD).Instance;
-            this.txtSoldier = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD).Instance;
-            this.txtActionList = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD).Instance;
-            this.txtAction = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD).Instance;
+            txtTitle = await this.AddComponentUITextArea("txtTitle", new UITextAreaDescription { Font = titleFont }, layerHUD);
+            txtTitle.TextForeColor = Color.White;
+            txtTitle.TextShadowColor = Color.Gray;
 
-            this.butClose = this.AddComponent<SpriteButton>(new SpriteButtonDescription()
+            txtGame = await this.AddComponentUITextArea("txtGame", new UITextAreaDescription { Font = gameFont }, layerHUD);
+            txtGame.TextForeColor = Color.LightBlue;
+            txtGame.TextShadowColor = Color.DarkBlue;
+
+            txtTeam = await this.AddComponentUITextArea("txtTeam", new UITextAreaDescription { Font = textFont }, layerHUD);
+            txtTeam.TextForeColor = Color.Yellow;
+
+            txtSoldier = await this.AddComponentUITextArea("txtSoldier", new UITextAreaDescription { Font = textFont }, layerHUD);
+            txtSoldier.TextForeColor = Color.Yellow;
+
+            txtActionList = await this.AddComponentUITextArea("txtActionList", new UITextAreaDescription { Font = textFont }, layerHUD);
+            txtActionList.TextForeColor = Color.Yellow;
+
+            txtAction = await this.AddComponentUITextArea("txtAction", new UITextAreaDescription { Font = textFont }, layerHUD);
+            txtAction.TextForeColor = Color.Yellow;
+
+            var butCloseDesc = UIButtonDescription.DefaultTwoStateButton("button_on.png", "button_off.png");
+            butCloseDesc.Width = 60;
+            butCloseDesc.Height = 20;
+            butCloseDesc.Font = buttonsFont;
+            butCloseDesc.TextForeColor = Color.Yellow;
+            butCloseDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
+            butCloseDesc.TextVerticalAlign = VerticalTextAlign.Middle;
+            butCloseDesc.Text = "Exit";
+
+            butClose = await this.AddComponentUIButton("butClose", butCloseDesc, layerHUD);
+
+            butNext = await this.AddComponentUIButton("butNext", new UIButtonDescription()
             {
                 TwoStateButton = true,
                 TextureReleased = "button_on.png",
                 TexturePressed = "button_off.png",
-                Width = 60,
+                Width = 120,
                 Height = 20,
-                TextDescription = new TextDrawerDescription()
-                {
-                    Font = this.fontName,
-                    FontSize = 12,
-                    TextColor = Color.Yellow,
-                    ShadowColor = Color.Orange,
-                },
-                Text = "EXIT",
-            }, SceneObjectUsages.UI, layerHUD).Instance;
+                Font = buttonsFont,
+                Text = "Next Phase",
+            }, layerHUD);
+            butNext.Caption.TextForeColor = Color.Yellow;
 
-            this.butNext = this.AddComponent<SpriteButton>(new SpriteButtonDescription()
+            butPrevSoldier = await this.AddComponentUIButton("butPrevSoldier", new UIButtonDescription()
             {
                 TwoStateButton = true,
                 TextureReleased = "button_on.png",
                 TexturePressed = "button_off.png",
-                Width = 60,
+                Width = 150,
                 Height = 20,
-                TextDescription = new TextDrawerDescription()
-                {
-                    Font = this.fontName,
-                    FontSize = 10,
-                    TextColor = Color.Yellow,
-                },
-                Text = "Next",
-            }, SceneObjectUsages.UI, layerHUD).Instance;
-
-            this.butPrevSoldier = this.AddComponent<SpriteButton>(new SpriteButtonDescription()
-            {
-                TwoStateButton = true,
-                TextureReleased = "button_on.png",
-                TexturePressed = "button_off.png",
-                Width = 90,
-                Height = 20,
-                TextDescription = new TextDrawerDescription()
-                {
-                    Font = this.fontName,
-                    FontSize = 10,
-                    TextColor = Color.Yellow,
-                },
+                Font = buttonsFont,
                 Text = "Prev.Soldier",
-            }, SceneObjectUsages.UI, layerHUD).Instance;
+            }, layerHUD);
+            butPrevSoldier.Caption.TextForeColor = Color.Yellow;
 
-            this.butNextSoldier = this.AddComponent<SpriteButton>(new SpriteButtonDescription()
+            butNextSoldier = await this.AddComponentUIButton("butNextSoldier", new UIButtonDescription()
             {
                 TwoStateButton = true,
                 TextureReleased = "button_on.png",
                 TexturePressed = "button_off.png",
-                Width = 90,
+                Width = 150,
                 Height = 20,
-                TextDescription = new TextDrawerDescription()
-                {
-                    Font = this.fontName,
-                    FontSize = 10,
-                    TextColor = Color.Yellow,
-                },
+                Font = buttonsFont,
                 Text = "Next Soldier",
-            }, SceneObjectUsages.UI, layerHUD).Instance;
+            }, layerHUD);
+            butNextSoldier.Caption.TextForeColor = Color.Yellow;
 
-            this.butPrevAction = this.AddComponent<SpriteButton>(new SpriteButtonDescription()
+            butPrevAction = await this.AddComponentUIButton("butPrevAction", new UIButtonDescription()
             {
                 TwoStateButton = true,
                 TextureReleased = "button_on.png",
                 TexturePressed = "button_off.png",
-                Width = 90,
+                Width = 150,
                 Height = 20,
-                TextDescription = new TextDrawerDescription()
-                {
-                    Font = this.fontName,
-                    FontSize = 10,
-                    TextColor = Color.Yellow,
-                },
+                Font = buttonsFont,
                 Text = "Prev.Action",
-            }, SceneObjectUsages.UI, layerHUD).Instance;
+            }, layerHUD);
+            butPrevAction.Caption.TextForeColor = Color.Yellow;
 
-            this.butNextAction = this.AddComponent<SpriteButton>(new SpriteButtonDescription()
+            butNextAction = await this.AddComponentUIButton("butNextAction", new UIButtonDescription()
             {
                 TwoStateButton = true,
                 TextureReleased = "button_on.png",
                 TexturePressed = "button_off.png",
-                Width = 90,
+                Width = 150,
                 Height = 20,
-                TextDescription = new TextDrawerDescription()
-                {
-                    Font = this.fontName,
-                    FontSize = 10,
-                    TextColor = Color.Yellow,
-                },
+                Font = buttonsFont,
                 Text = "Next Action",
-            }, SceneObjectUsages.UI, layerHUD).Instance;
+            }, layerHUD);
+            butNextAction.Caption.TextForeColor = Color.Yellow;
 
-            this.butClose.Click += (sender, eventArgs) => { this.Game.Exit(); };
-            this.butNext.Click += (sender, eventArgs) => { this.NextPhase(); };
-            this.butPrevSoldier.Click += (sender, eventArgs) => { this.PrevSoldier(true); };
-            this.butNextSoldier.Click += (sender, eventArgs) => { this.NextSoldier(true); };
-            this.butPrevAction.Click += (sender, eventArgs) => { this.PrevAction(); };
-            this.butNextAction.Click += (sender, eventArgs) => { this.NextAction(); };
+            butClose.JustReleased += (sender, eventArgs) => { Game.Exit(); };
+            butNext.JustReleased += (sender, eventArgs) => { NextPhase(); };
+            butPrevSoldier.JustReleased += (sender, eventArgs) => { PrevSoldier(true); };
+            butNextSoldier.JustReleased += (sender, eventArgs) => { NextSoldier(true); };
+            butPrevAction.JustReleased += (sender, eventArgs) => { PrevAction(); };
+            butNextAction.JustReleased += (sender, eventArgs) => { NextAction(); };
 
-            this.txtTitle.Text = "Game Logic";
+            txtTitle.Text = "Game Logic";
         }
-        private void InitializeDebug()
+        private async Task InitializeDebug()
         {
-            this.lineDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(new PrimitiveListDrawerDescription<Line3D>() { Count = 5000 });
-            this.lineDrawer.Visible = false;
+            lineDrawer = await this.AddComponentPrimitiveListDrawer("DebugLineDrawer", new PrimitiveListDrawerDescription<Line3D>() { Count = 5000 });
+            lineDrawer.Visible = false;
+        }
+
+        public override void NavigationGraphUpdated()
+        {
+            gameReady = true;
         }
 
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
 
-            foreach (var soldierC in this.soldierControllers.Keys)
+            if (!gameReady)
             {
-                this.soldierControllers[soldierC].UpdateManipulator(gameTime, this.soldierModels[soldierC].Manipulator);
+                return;
             }
 
-            if (!this.CapturedControl)
+            foreach (var soldierC in soldierControllers.Keys)
             {
-                if (this.Game.Input.KeyJustReleased(this.keyExit))
-                {
-                    this.Game.Exit();
-                }
-
-                if (this.Game.Input.KeyJustReleased(this.keyChangeMode))
-                {
-                    this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
-                        SceneModes.DeferredLightning :
-                        SceneModes.ForwardLigthning);
-                }
-
-                bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey) || this.Game.Input.KeyPressed(Keys.RShiftKey);
-
-                Ray cursorRay = this.GetPickingRay();
-                bool picked = this.PickNearest(cursorRay, RayPickingParams.Default, SceneObjectUsages.Ground, out PickingResult<Triangle> r);
-
-                //DEBUG
-                this.UpdateDebug();
-
-                //HUD
-                this.UpdateHUD(shift);
-
-                //3D
-                this.Update3D(gameTime, shift, cursorRay, picked, r);
-
-                //Actions
-                this.UpdateActions(cursorRay, picked, r);
+                soldierControllers[soldierC].UpdateManipulator(gameTime, soldierModels[soldierC].Manipulator);
             }
+
+            if (Game.Input.KeyJustReleased(keyExit))
+            {
+                Game.Exit();
+
+                return;
+            }
+
+            if (Game.Input.KeyJustReleased(keyChangeMode))
+            {
+                SetRenderMode(GetRenderMode() == SceneModes.ForwardLigthning ?
+                    SceneModes.DeferredLightning :
+                    SceneModes.ForwardLigthning);
+
+                return;
+            }
+
+            Ray cursorRay = GetPickingRay();
+            bool picked = PickNearest(cursorRay, RayPickingParams.Default, SceneObjectUsages.Ground, out PickingResult<Triangle> r);
+
+            //DEBUG
+            UpdateDebug();
+
+            //HUD
+            UpdateHUD();
+
+            if (UICaptured)
+            {
+                return;
+            }
+
+            //3D
+            Update3D(gameTime, cursorRay, picked, r);
+
+            //Actions
+            UpdateActions(cursorRay, picked, r);
         }
         private void UpdateDebug()
         {
-            if (this.Game.Input.KeyJustReleased(this.keyDebugFrustum))
+            if (Game.Input.KeyJustReleased(keyDebugFrustum))
             {
-                this.SetFrustum();
+                SetFrustum();
             }
 
-            if (this.Game.Input.KeyJustReleased(this.keyDebugVolumes))
+            if (Game.Input.KeyJustReleased(keyDebugVolumes))
             {
-                this.lineDrawer.Visible = !this.lineDrawer.Visible;
+                lineDrawer.Visible = !lineDrawer.Visible;
             }
         }
-        private void UpdateHUD(bool shift)
+        private void UpdateHUD()
         {
-            if (this.Game.Input.KeyJustReleased(this.keyHUDNextSoldier))
+            if (Game.Input.KeyJustReleased(keyHUDNextSoldier))
             {
-                this.NextSoldier(!shift);
+                NextSoldier(!Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyJustReleased(this.keyHUDPrevSoldier))
+            if (Game.Input.KeyJustReleased(keyHUDPrevSoldier))
             {
-                this.PrevSoldier(!shift);
+                PrevSoldier(!Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyJustReleased(this.keyHUDNextAction))
+            if (Game.Input.KeyJustReleased(keyHUDNextAction))
             {
-                this.NextAction();
+                NextAction();
             }
 
-            if (this.Game.Input.KeyJustReleased(this.keyHUDPrevAction))
+            if (Game.Input.KeyJustReleased(keyHUDPrevAction))
             {
-                this.PrevAction();
+                PrevAction();
             }
 
-            if (this.Game.Input.KeyJustReleased(this.keyHUDNextPhase))
+            if (Game.Input.KeyJustReleased(keyHUDNextPhase))
             {
-                this.NextPhase();
+                NextPhase();
             }
 
-            if (!this.gameFinished)
+            if (!gameFinished)
             {
-                this.txtGame.Text = string.Format("{0}", this.skirmishGame);
-                this.txtTeam.Text = string.Format("{0}", this.skirmishGame.CurrentTeam);
-                this.txtSoldier.Text = string.Format("{0}", this.skirmishGame.CurrentSoldier);
-                this.txtActionList.Text = string.Format("{0}", this.currentActions.Join(" | "));
-                this.txtAction.Text = string.Format("{0}", this.CurrentAction);
+                txtGame.Text = string.Format("{0}", skirmishGame);
+                txtTeam.Text = string.Format("{0}", skirmishGame.CurrentTeam);
+                txtSoldier.Text = string.Format("{0}", skirmishGame.CurrentSoldier);
+                txtActionList.Text = string.Format("{0}", currentActions.Join(" ++ "));
+                txtAction.Text = string.Format("{0}", CurrentAction);
             }
         }
-        private void Update3D(GameTime gameTime, bool shift, Ray cursorRay, bool picked, PickingResult<Triangle> r)
+        private void Update3D(GameTime gameTime, Ray cursorRay, bool picked, PickingResult<Triangle> r)
         {
             if (picked)
             {
-                this.cursor3D.Manipulator.SetPosition(r.Position);
+                cursor3D.Manipulator.SetPosition(r.Position);
             }
 
-            if (this.Game.Input.KeyJustReleased(this.keyCAMNextIsometric))
+            if (Game.Input.KeyJustReleased(keyCAMNextIsometric))
             {
-                this.Camera.NextIsometricAxis();
+                Camera.NextIsometricAxis();
             }
 
-            if (this.Game.Input.KeyJustReleased(this.keyCAMPrevIsometric))
+            if (Game.Input.KeyJustReleased(keyCAMPrevIsometric))
             {
-                this.Camera.PreviousIsometricAxis();
+                Camera.PreviousIsometricAxis();
             }
 
-            if (this.Game.Input.KeyPressed(this.keyCAMMoveLeft))
+            if (Game.Input.KeyPressed(keyCAMMoveLeft))
             {
-                this.Camera.MoveLeft(gameTime, shift);
+                Camera.MoveLeft(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(this.keyCAMMoveRight))
+            if (Game.Input.KeyPressed(keyCAMMoveRight))
             {
-                this.Camera.MoveRight(gameTime, shift);
+                Camera.MoveRight(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(this.keyCAMMoveForward))
+            if (Game.Input.KeyPressed(keyCAMMoveForward))
             {
-                this.Camera.MoveForward(gameTime, shift);
+                Camera.MoveForward(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(this.keyCAMMoveBackward))
+            if (Game.Input.KeyPressed(keyCAMMoveBackward))
             {
-                this.Camera.MoveBackward(gameTime, shift);
+                Camera.MoveBackward(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.RightMouseButtonJustReleased)
+            if (Game.Input.RightMouseButtonJustReleased)
             {
-                this.DoGoto(cursorRay, picked, r.Position);
+                DoGoto(cursorRay, picked, r.Position);
             }
 
-            if (this.Game.Input.MouseWheelDelta > 0)
+            if (Game.Input.MouseWheelDelta > 0)
             {
-                this.Camera.ZoomIn(gameTime, shift);
+                Camera.ZoomIn(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.MouseWheelDelta < 0)
+            if (Game.Input.MouseWheelDelta < 0)
             {
-                this.Camera.ZoomOut(gameTime, shift);
+                Camera.ZoomOut(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyJustReleased(this.keyCAMCenterSoldier))
+            if (Game.Input.KeyJustReleased(keyCAMCenterSoldier))
             {
-                this.GoToSoldier(this.skirmishGame.CurrentSoldier);
+                GoToSoldier(skirmishGame.CurrentSoldier);
             }
 
-            this.spotLight.Position = this.soldierModels[this.skirmishGame.CurrentSoldier].Manipulator.Position + (Vector3.UnitY * 10f);
+            spotLight.Position = soldierModels[skirmishGame.CurrentSoldier].Manipulator.Position + (Vector3.UnitY * 10f);
         }
         private void DoGoto(Ray cursorRay, bool picked, Vector3 pickedPosition)
         {
-            Soldier pickedSoldier = this.PickSoldier(cursorRay, false);
+            Soldier pickedSoldier = PickSoldier(cursorRay, false);
             if (pickedSoldier != null)
             {
-                if (pickedSoldier.Team == this.skirmishGame.CurrentTeam)
+                if (pickedSoldier.Team == skirmishGame.CurrentTeam)
                 {
-                    this.skirmishGame.CurrentSoldier = pickedSoldier;
+                    skirmishGame.CurrentSoldier = pickedSoldier;
                 }
 
-                this.GoToSoldier(pickedSoldier);
+                GoToSoldier(pickedSoldier);
             }
             else if (picked)
             {
-                this.Camera.LookTo(pickedPosition, CameraTranslations.UseDelta);
+                Camera.LookTo(pickedPosition, CameraTranslations.UseDelta);
             }
         }
         private void UpdateActions(Ray cursorRay, bool picked, PickingResult<Triangle> r)
         {
-            if (this.CurrentAction != null)
+            if (CurrentAction != null)
             {
                 bool selectorDone = false;
                 Area area = null;
 
-                if (this.Game.Input.LeftMouseButtonJustReleased)
+                if (Game.Input.LeftMouseButtonJustReleased)
                 {
-                    if (this.CurrentAction.Selector == Selectors.Goto)
+                    if (CurrentAction.Selector == Selectors.Goto)
                     {
                         //TODO: Show goto selector
                         selectorDone = picked;
                     }
-                    else if (this.CurrentAction.Selector == Selectors.Area)
+                    else if (CurrentAction.Selector == Selectors.Area)
                     {
                         //TODO: Show area selector
                         area = new Area();
@@ -536,98 +557,91 @@ namespace GameLogic
 
                 if (selectorDone)
                 {
-                    this.UpdateSelected(cursorRay, r.Position, area);
+                    UpdateSelected(cursorRay, r.Position, area);
                 }
             }
         }
         private void UpdateSelected(Ray cursorRay, Vector3 position, Area area)
         {
-            if (this.CurrentAction.Action == Actions.Move)
+            if (CurrentAction.Action == Actions.Move)
             {
-                this.Move(this.skirmishGame.CurrentSoldier, position);
+                Move(skirmishGame.CurrentSoldier, position);
             }
-            else if (this.CurrentAction.Action == Actions.Run)
+            else if (CurrentAction.Action == Actions.Run)
             {
-                this.Run(this.skirmishGame.CurrentSoldier, position);
+                Run(skirmishGame.CurrentSoldier, position);
             }
-            else if (this.CurrentAction.Action == Actions.Crawl)
+            else if (CurrentAction.Action == Actions.Crawl)
             {
-                this.Crawl(this.skirmishGame.CurrentSoldier, position);
+                Crawl(skirmishGame.CurrentSoldier, position);
             }
-            else if (this.CurrentAction.Action == Actions.Assault)
+            else if (CurrentAction.Action == Actions.Assault)
             {
-                Soldier active = this.skirmishGame.CurrentSoldier;
-                Vector3 pos = this.Current.Manipulator.Position;
-                Soldier passive = this.PickSoldierNearestToPosition(cursorRay, pos, true);
+                Soldier active = skirmishGame.CurrentSoldier;
+                Soldier passive = PickSoldierNearestToPosition(cursorRay, true);
                 if (passive != null)
                 {
-                    this.Assault(active, passive);
+                    Assault(active, passive);
                 }
             }
-            else if (this.CurrentAction.Action == Actions.CoveringFire)
+            else if (CurrentAction.Action == Actions.CoveringFire)
             {
-                Soldier active = this.skirmishGame.CurrentSoldier;
+                Soldier active = skirmishGame.CurrentSoldier;
 
-                this.CoveringFire(active, active.CurrentShootingWeapon, area);
+                CoveringFire(active, active.CurrentShootingWeapon, area);
             }
-            else if (this.CurrentAction.Action == Actions.Reload)
+            else if (CurrentAction.Action == Actions.Reload)
             {
-                Soldier active = this.skirmishGame.CurrentSoldier;
+                Soldier active = skirmishGame.CurrentSoldier;
 
-                this.Reload(active, active.CurrentShootingWeapon);
+                Reload(active, active.CurrentShootingWeapon);
             }
-            else if (this.CurrentAction.Action == Actions.Repair)
+            else if (CurrentAction.Action == Actions.Repair)
             {
-                Soldier active = this.skirmishGame.CurrentSoldier;
+                Soldier active = skirmishGame.CurrentSoldier;
 
-                this.Repair(active, active.CurrentShootingWeapon);
+                Repair(active, active.CurrentShootingWeapon);
             }
-            else if (this.CurrentAction.Action == Actions.Inventory)
+            else if (CurrentAction.Action == Actions.Inventory)
             {
-                this.Inventory(this.skirmishGame.CurrentSoldier);
+                Inventory(skirmishGame.CurrentSoldier);
             }
-            else if (this.CurrentAction.Action == Actions.UseMovementItem)
+            else if (CurrentAction.Action == Actions.UseMovementItem)
             {
-                this.UseMovementItem(this.skirmishGame.CurrentSoldier);
+                UseMovementItem(skirmishGame.CurrentSoldier);
             }
-            else if (this.CurrentAction.Action == Actions.Communications)
+            else if (CurrentAction.Action == Actions.Communications)
             {
-                this.Communications(this.skirmishGame.CurrentSoldier);
+                Communications(skirmishGame.CurrentSoldier);
             }
         }
-        protected override void Resized(object sender, EventArgs e)
+        public override void GameGraphicsResized()
         {
-            this.UpdateLayout();
+            UpdateLayout();
         }
         private void UpdateLayout()
         {
-            this.txtTitle.Top = 0;
-            this.txtTitle.Left = 5;
-            this.txtGame.Top = this.txtTitle.Top + this.txtTitle.Height + 1;
-            this.txtGame.Left = 10;
-            this.txtTeam.Top = this.txtGame.Top + this.txtGame.Height + 1;
-            this.txtTeam.Left = this.txtGame.Left;
+            txtTitle.SetPosition(new Vector2(5, 0));
+            txtGame.SetPosition(new Vector2(10, txtTitle.Top + txtTitle.Height + 1));
+            txtTeam.SetPosition(new Vector2(txtGame.Left, txtGame.Top + txtGame.Height + 1));
 
-            this.butClose.Top = 1;
-            this.butClose.Left = this.Game.Form.RenderWidth - 60 - 1;
+            butClose.Top = 1;
+            butClose.Left = Game.Form.RenderWidth - 60 - 1;
 
-            this.butNext.Top = (int)((float)this.Game.Form.RenderHeight * 0.85f);
-            this.butNext.Left = 10;
-            this.butPrevSoldier.Top = this.butNext.Top;
-            this.butPrevSoldier.Left = this.butNext.Left + this.butNext.Width + 25;
-            this.butNextSoldier.Top = this.butNext.Top;
-            this.butNextSoldier.Left = this.butPrevSoldier.Left + this.butPrevSoldier.Width + 10;
-            this.butPrevAction.Top = this.butNext.Top;
-            this.butPrevAction.Left = this.butNextSoldier.Left + this.butNextSoldier.Width + 25;
-            this.butNextAction.Top = this.butNext.Top;
-            this.butNextAction.Left = this.butPrevAction.Left + this.butPrevAction.Width + 10;
+            butNext.Top = (int)(Game.Form.RenderHeight * 0.85f);
+            butNext.Left = 10;
+            butPrevSoldier.Top = butNext.Top;
+            butPrevSoldier.Left = butNext.Left + butNext.Width + 25;
+            butNextSoldier.Top = butNext.Top;
+            butNextSoldier.Left = butPrevSoldier.Left + butPrevSoldier.Width + 10;
+            butPrevAction.Top = butNext.Top;
+            butPrevAction.Left = butNextSoldier.Left + butNextSoldier.Width + 25;
+            butNextAction.Top = butNext.Top;
+            butNextAction.Left = butPrevAction.Left + butPrevAction.Width + 10;
 
-            this.txtSoldier.Top = this.butNext.Top + this.butNext.Height + 1;
-            this.txtSoldier.Left = 10;
-            this.txtActionList.Top = this.txtSoldier.Top + this.txtSoldier.Height + 1;
-            this.txtActionList.Left = this.txtSoldier.Left;
-            this.txtAction.Top = this.txtActionList.Top + this.txtActionList.Height + 1;
-            this.txtAction.Left = this.txtSoldier.Left;
+            txtSoldier.SetPosition(new Vector2(10, butNext.Top + butNext.Height + 1));
+            txtActionList.SetPosition(new Vector2(txtSoldier.Left, txtSoldier.Top + txtSoldier.Height + 1));
+            txtAction.SetPosition(new Vector2(txtSoldier.Left, txtActionList.Top + txtActionList.Height + 1));
         }
 
         private void InitializeAnimations()
@@ -641,37 +655,36 @@ namespace GameLogic
         {
             AnimationPath p = new AnimationPath();
             p.AddLoop(clipName);
-            this.animations.Add(animationName, new AnimationPlan(p));
+            animations.Add(animationName, new AnimationPlan(p));
         }
         private void InitializePositions()
         {
-            BoundingBox bbox = this.terrain.GetBoundingBox();
+            BoundingBox bbox = terrain.GetBoundingBox();
 
             float terrainHeight = bbox.Maximum.Z - bbox.Minimum.Z;
-            float gameWidth = terrainHeight / (this.skirmishGame.Teams.Length + 1);
-            float teamSeparation = terrainHeight / (this.skirmishGame.Teams.Length);
+            float teamSeparation = terrainHeight / (skirmishGame.Teams.Length);
 
-            float soldierSeparation = 10f;
+            float soldierSeparation = 12f;
             int instanceIndex = 0;
             uint teamIndex = 0;
-            foreach (Team team in this.skirmishGame.Teams)
+            foreach (Team team in skirmishGame.Teams)
             {
                 float teamWidth = team.Soldiers.Length * soldierSeparation;
 
                 int soldierIndex = 0;
                 foreach (var soldierC in team.Soldiers)
                 {
-                    var soldier = this.troops[instanceIndex++];
+                    var soldier = troops[instanceIndex++];
 
                     soldier.TextureIndex = teamIndex;
-                    soldier.AnimationController.AddPath(this.animations["stand"]);
+                    soldier.AnimationController.AddPath(animations["stand"]);
                     soldier.AnimationController.Start(soldierIndex);
                     soldier.AnimationController.TimeDelta = 0.20f;
 
                     float x = (soldierIndex * soldierSeparation) - (teamWidth * 0.5f);
-                    float z = (teamIndex * teamSeparation) - (gameWidth * 0.5f);
+                    float z = (teamIndex * teamSeparation) - (teamSeparation * 0.5f);
 
-                    if (this.FindTopGroundPosition(x, z, out PickingResult<Triangle> r))
+                    if (FindTopGroundPosition(x, z, out PickingResult<Triangle> r))
                     {
                         soldier.Manipulator.SetPosition(r.Position, true);
                     }
@@ -685,10 +698,10 @@ namespace GameLogic
                         soldier.Manipulator.SetRotation(MathUtil.DegreesToRadians(180), 0, 0, true);
                     }
 
-                    this.soldierModels.Add(soldierC, soldier);
+                    soldierModels.Add(soldierC, soldier);
                     var controller = new BasicManipulatorController();
                     controller.PathEnd += Controller_PathEnd;
-                    this.soldierControllers.Add(soldierC, controller);
+                    soldierControllers.Add(soldierC, controller);
 
                     soldierIndex++;
                 }
@@ -701,27 +714,27 @@ namespace GameLogic
         {
             var instance = sender as ManipulatorController;
 
-            foreach (var item in this.soldierControllers)
+            foreach (var item in soldierControllers)
             {
                 if (item.Value == instance)
                 {
-                    this.soldierModels[item.Key].AnimationController.ContinuePath(this.animations["stand"]);
+                    soldierModels[item.Key].AnimationController.ContinuePath(animations["stand"]);
                 }
             }
         }
 
         private void SetFrustum()
         {
-            this.lineDrawer.Instance.SetPrimitives(this.frstColor, Line3D.CreateWiredFrustum(this.Camera.Frustum));
+            lineDrawer.SetPrimitives(frstColor, Line3D.CreateWiredFrustum(Camera.Frustum));
         }
 
         protected void NewGame()
         {
-            this.skirmishGame = new Skirmish();
-            this.skirmishGame.AddTeam("Team1", "Reds", TeamRoles.Defense, 5, 1, 1);
-            this.skirmishGame.AddTeam("Team2", "Blues", TeamRoles.Assault, 5, 1, 1);
-            this.skirmishGame.Start();
-            this.currentActions = this.skirmishGame.GetActions();
+            skirmishGame = new Skirmish();
+            skirmishGame.AddTeam("Team1", "Reds", TeamRoles.Defense, 5, 1, 1);
+            skirmishGame.AddTeam("Team2", "Blues", TeamRoles.Assault, 5, 1, 1);
+            skirmishGame.Start();
+            currentActions = skirmishGame.GetActions();
         }
         protected void LoadGame()
         {
@@ -734,60 +747,60 @@ namespace GameLogic
 
         protected void NextSoldier(bool selectIdle)
         {
-            this.skirmishGame.NextSoldier(selectIdle);
+            skirmishGame.NextSoldier(selectIdle);
 
-            this.currentActions = this.skirmishGame.GetActions();
+            currentActions = skirmishGame.GetActions();
 
-            this.GoToSoldier(this.skirmishGame.CurrentSoldier);
+            GoToSoldier(skirmishGame.CurrentSoldier);
         }
         protected void PrevSoldier(bool selectIdle)
         {
-            this.skirmishGame.PrevSoldier(selectIdle);
+            skirmishGame.PrevSoldier(selectIdle);
 
-            this.currentActions = this.skirmishGame.GetActions();
+            currentActions = skirmishGame.GetActions();
 
-            this.GoToSoldier(this.skirmishGame.CurrentSoldier);
+            GoToSoldier(skirmishGame.CurrentSoldier);
         }
         protected void NextAction()
         {
-            if (this.currentActions != null && this.currentActions.Length > 0)
+            if (currentActions != null && currentActions.Length > 0)
             {
-                this.actionIndex++;
+                actionIndex++;
 
-                if (this.actionIndex > this.currentActions.Length - 1)
+                if (actionIndex > currentActions.Length - 1)
                 {
-                    this.actionIndex = 0;
+                    actionIndex = 0;
                 }
             }
         }
         protected void PrevAction()
         {
-            if (this.currentActions != null && this.currentActions.Length > 0)
+            if (currentActions != null && currentActions.Length > 0)
             {
-                this.actionIndex--;
+                actionIndex--;
 
-                if (this.actionIndex < 0)
+                if (actionIndex < 0)
                 {
-                    this.actionIndex = this.currentActions.Length - 1;
+                    actionIndex = currentActions.Length - 1;
                 }
             }
         }
         protected void RefreshActions()
         {
-            this.currentActions = this.skirmishGame.GetActions();
+            currentActions = skirmishGame.GetActions();
 
-            this.UpdateSoldierStates();
+            UpdateSoldierStates();
         }
         protected void NextPhase()
         {
-            this.skirmishGame.NextPhase();
+            skirmishGame.NextPhase();
 
             //Do automatic actions
-            foreach (var soldierC in this.skirmishGame.Soldiers)
+            foreach (var soldierC in skirmishGame.Soldiers)
             {
-                Melee melee = this.skirmishGame.GetMelee(soldierC);
+                Melee melee = skirmishGame.GetMelee(soldierC);
 
-                ActionSpecification[] actions = ActionsManager.GetActions(this.skirmishGame.CurrentPhase, soldierC.Team, soldierC, melee != null, ActionTypes.Automatic);
+                ActionSpecification[] actions = ActionsManager.GetActions(skirmishGame.CurrentPhase, soldierC.Team, soldierC, melee != null, ActionTypes.Automatic);
                 if (actions.Length > 0)
                 {
                     foreach (ActionSpecification ac in actions)
@@ -795,194 +808,196 @@ namespace GameLogic
                         //TODO: Need of standar method
                         if (ac.Action == Actions.FindCover)
                         {
-                            Vector3 point = this.GetRandomPoint();
+                            Vector3 point = GetRandomPoint();
 
-                            this.FindCover(soldierC, point);
+                            FindCover(soldierC, point);
                         }
                         else if (ac.Action == Actions.RunAway)
                         {
-                            Vector3 point = this.GetRandomPoint();
+                            Vector3 point = GetRandomPoint();
 
-                            this.RunAway(soldierC, point);
+                            RunAway(soldierC, point);
                         }
                         else if (ac.Action == Actions.TakeControl)
                         {
-                            this.TakeControl(soldierC);
+                            TakeControl(soldierC);
                         }
                     }
                 }
             }
 
-            this.skirmishGame.NextSoldier(true);
+            skirmishGame.NextSoldier(true);
 
-            this.UpdateSoldierStates();
+            UpdateSoldierStates();
 
-            this.currentActions = this.skirmishGame.GetActions();
-            this.actionIndex = 0;
+            currentActions = skirmishGame.GetActions();
+            actionIndex = 0;
 
-            this.GoToSoldier(this.skirmishGame.CurrentSoldier);
+            GoToSoldier(skirmishGame.CurrentSoldier);
 
-            Victory v = this.skirmishGame.IsFinished();
+            Victory v = skirmishGame.IsFinished();
             if (v != null)
             {
-                this.gameFinished = true;
+                gameFinished = true;
 
-                this.txtGame.Text = string.Format("{0}", v);
-                this.txtTeam.Text = "";
-                this.txtSoldier.Text = "";
-                this.txtActionList.Text = "";
-                this.txtAction.Text = "";
+                txtGame.Text = string.Format("{0}", v);
+                txtTeam.Text = "";
+                txtSoldier.Text = "";
+                txtActionList.Text = "";
+                txtAction.Text = "";
             }
         }
 
         protected void GoToSoldier(Soldier soldier)
         {
-            BoundingSphere bsph = this.soldierModels[soldier].GetBoundingSphere();
+            BoundingSphere bsph = soldierModels[soldier].GetBoundingSphere();
 
-            this.Camera.LookTo(bsph.Center, CameraTranslations.Quick);
-            this.lineDrawer.Instance.SetPrimitives(this.bsphColor, Line3D.CreateWiredSphere(bsph, this.bsphSlices, this.bsphStacks));
+            Camera.LookTo(bsph.Center, CameraTranslations.Quick);
+            lineDrawer.SetPrimitives(bsphColor, Line3D.CreateWiredSphere(bsph, bsphSlices, bsphStacks));
         }
         protected void UpdateSoldierStates()
         {
-            foreach (var soldierC in this.soldierModels.Keys)
+            foreach (var soldierC in soldierModels.Keys)
             {
                 if (soldierC.CurrentHealth == HealthStates.Disabled)
                 {
-                    this.soldierModels[soldierC].Active = false;
-                    this.soldierModels[soldierC].Visible = false;
+                    soldierModels[soldierC].Active = false;
+                    soldierModels[soldierC].Visible = false;
                 }
                 else
                 {
-                    this.soldierModels[soldierC].Active = true;
-                    this.soldierModels[soldierC].Visible = true;
+                    soldierModels[soldierC].Active = true;
+                    soldierModels[soldierC].Visible = true;
                 }
             }
         }
 
         protected void Move(Soldier active, Vector3 destination)
         {
-            if (ActionsManager.Move(this.skirmishGame, active, active.CurrentMovingCapacity))
+            if (ActionsManager.Move(active, active.CurrentMovingCapacity))
             {
-                var model = this.soldierModels[active];
-                var controller = this.soldierControllers[active];
+                var model = soldierModels[active];
+                var controller = soldierControllers[active];
 
                 //Run 3d actions
-                var path = this.SetPath(this.soldierAgent, model.Manipulator.Position, destination);
+                var path = SetPath(soldierAgent, model.Manipulator.Position, destination);
                 if (path != null)
                 {
                     //Set move animation clip
-                    model.AnimationController.SetPath(this.animations["walk"]);
+                    model.AnimationController.SetPath(animations["walk"]);
 
                     //Folow
                     controller.Follow(path);
-                    controller.MaximumSpeed = 3;
+                    controller.MaximumSpeed = 1.4f;
 
-                    this.GoToSoldier(active);
+                    GoToSoldier(active);
                 }
 
-                this.RefreshActions();
+                RefreshActions();
             }
         }
         protected void Crawl(Soldier active, Vector3 destination)
         {
-            if (ActionsManager.Crawl(this.skirmishGame, active, active.CurrentMovingCapacity))
+            if (ActionsManager.Crawl(active, active.CurrentMovingCapacity))
             {
                 //Run 3d actions
-                var path = this.SetPath(this.soldierAgent, this.soldierModels[active].Manipulator.Position, destination);
+                var path = SetPath(soldierAgent, soldierModels[active].Manipulator.Position, destination);
                 if (path != null)
                 {
                     //TODO: Set crawl animation clip
-                    this.soldierControllers[active].Follow(path);
+                    soldierControllers[active].Follow(path);
 
-                    this.GoToSoldier(active);
+                    GoToSoldier(active);
                 }
 
-                this.RefreshActions();
+                RefreshActions();
             }
         }
         protected void Run(Soldier active, Vector3 destination)
         {
-            if (ActionsManager.Run(this.skirmishGame, active, active.CurrentMovingCapacity))
+            if (ActionsManager.Run(active, active.CurrentMovingCapacity))
             {
-                var model = this.soldierModels[active];
-                var controller = this.soldierControllers[active];
+                var model = soldierModels[active];
+                var controller = soldierControllers[active];
 
                 //Run 3d actions
-                var path = this.SetPath(this.soldierAgent, model.Manipulator.Position, destination);
+                var path = SetPath(soldierAgent, model.Manipulator.Position, destination);
                 if (path != null)
                 {
                     //Set move animation clip
-                    model.AnimationController.SetPath(this.animations["run"]);
+                    model.AnimationController.SetPath(animations["run"]);
 
                     //Folow
                     controller.Follow(path);
-                    controller.MaximumSpeed = 8;
+                    controller.MaximumSpeed = 4.0f;
 
-                    this.GoToSoldier(active);
+                    GoToSoldier(active);
                 }
 
-                this.RefreshActions();
+                RefreshActions();
             }
         }
         protected void Assault(Soldier active, Soldier passive)
         {
-            if (ActionsManager.Assault(this.skirmishGame, active, passive, active.CurrentMovingCapacity))
+            skirmishGame.JoinMelee(active, passive);
+
+            if (ActionsManager.Assault(active, passive, active.CurrentMovingCapacity))
             {
                 //Run 3d actions
-                Manipulator3D passiveMan = this.soldierModels[passive].Manipulator;
-                Manipulator3D activeMan = this.soldierModels[active].Manipulator;
+                Manipulator3D passiveMan = soldierModels[passive].Manipulator;
+                Manipulator3D activeMan = soldierModels[active].Manipulator;
 
                 Vector3 dir = Vector3.Normalize(activeMan.Position - passiveMan.Position);
                 Vector3 destination = passiveMan.Position + (dir * 3f);
 
-                var path = this.SetPath(this.soldierAgent, activeMan.Position, destination);
+                var path = SetPath(soldierAgent, activeMan.Position, destination);
                 if (path != null)
                 {
                     //TODO: Set assault animation clip
-                    this.soldierControllers[active].Follow(path);
+                    soldierControllers[active].Follow(path);
 
-                    this.GoToSoldier(active);
+                    GoToSoldier(active);
                 }
 
-                this.RefreshActions();
+                RefreshActions();
             }
         }
         protected void CoveringFire(Soldier active, Weapon weapon, Area area)
         {
-            if (ActionsManager.CoveringFire(this.skirmishGame, active, weapon, area, active.CurrentMovingCapacity))
+            if (ActionsManager.CoveringFire(active, weapon, area, active.CurrentMovingCapacity))
             {
                 //Run 3d actions
                 //...
                 //TODO: Set covering fire animation clip
 
-                this.RefreshActions();
+                RefreshActions();
             }
         }
         protected void Reload(Soldier active, Weapon weapon)
         {
-            if (ActionsManager.Reload(this.skirmishGame, active, weapon, active.CurrentMovingCapacity))
+            if (ActionsManager.Reload(active, weapon, active.CurrentMovingCapacity))
             {
                 //Run 3d actions
                 //...
                 //TODO: Set reload animation clip
 
-                this.RefreshActions();
+                RefreshActions();
             }
         }
         protected void Repair(Soldier active, Weapon weapon)
         {
-            if (ActionsManager.Repair(this.skirmishGame, active, weapon, active.CurrentMovingCapacity))
+            if (ActionsManager.Repair(active, weapon, active.CurrentMovingCapacity))
             {
                 //Run 3d actions
                 //...
                 //TODO: Set repair animation clip
 
-                this.RefreshActions();
+                RefreshActions();
             }
         }
         protected void Inventory(Soldier active)
         {
-            if (ActionsManager.Inventory(this.skirmishGame, active, active.CurrentMovingCapacity))
+            if (ActionsManager.Inventory(active, active.CurrentMovingCapacity))
             {
                 //Run 3d actions
                 //...
@@ -990,73 +1005,73 @@ namespace GameLogic
 
                 //TODO: Show inventory screen
 
-                this.RefreshActions();
+                RefreshActions();
             }
         }
         protected void UseMovementItem(Soldier active)
         {
-            if (ActionsManager.UseMovementItem(this.skirmishGame, active, active.CurrentItem, active.CurrentMovingCapacity))
+            if (ActionsManager.UseMovementItem(active, active.CurrentItem, active.CurrentMovingCapacity))
             {
                 //Run 3d actions
                 //...
                 //TODO: Set use item animation clip
 
-                this.RefreshActions();
+                RefreshActions();
             }
         }
         protected void Communications(Soldier active)
         {
-            if (ActionsManager.Communications(this.skirmishGame, active))
+            if (ActionsManager.Communications(active))
             {
                 //Run 3d actions
                 //...
                 //TODO: Set use item animation clip
 
-                this.RefreshActions();
+                RefreshActions();
             }
         }
         protected void FindCover(Soldier active, Vector3 destination)
         {
-            if (ActionsManager.FindCover(this.skirmishGame, active))
+            if (ActionsManager.FindCover(active))
             {
                 //Run 3d actions
-                var path = this.SetPath(this.soldierAgent, this.soldierModels[active].Manipulator.Position, destination);
+                var path = SetPath(soldierAgent, soldierModels[active].Manipulator.Position, destination);
                 if (path != null)
                 {
                     //TODO: Set run animation clip
-                    this.soldierControllers[active].Follow(path);
+                    soldierControllers[active].Follow(path);
 
-                    this.GoToSoldier(active);
+                    GoToSoldier(active);
                 }
 
-                this.RefreshActions();
+                RefreshActions();
             }
         }
         protected void RunAway(Soldier active, Vector3 destination)
         {
-            if (ActionsManager.RunAway(this.skirmishGame, active))
+            if (ActionsManager.RunAway(active))
             {
                 //Run 3d actions
-                var path = this.SetPath(this.soldierAgent, this.soldierModels[active].Manipulator.Position, destination);
+                var path = SetPath(soldierAgent, soldierModels[active].Manipulator.Position, destination);
                 if (path != null)
                 {
                     //TODO: Set run animation clip
-                    this.soldierControllers[active].Follow(path);
+                    soldierControllers[active].Follow(path);
 
-                    this.GoToSoldier(active);
+                    GoToSoldier(active);
                 }
 
-                this.RefreshActions();
+                RefreshActions();
             }
         }
         protected void Shoot(Soldier active, Weapon weapon, Soldier passive)
         {
-            Manipulator3D passiveMan = this.soldierModels[passive].Manipulator;
-            Manipulator3D activeMan = this.soldierModels[active].Manipulator;
+            Manipulator3D passiveMan = soldierModels[passive].Manipulator;
+            Manipulator3D activeMan = soldierModels[active].Manipulator;
 
             float distance = Vector3.Distance(passiveMan.Position, activeMan.Position);
 
-            if (ActionsManager.Shoot(this.skirmishGame, active, weapon, distance, passive, active.CurrentActionPoints))
+            if (ActionsManager.Shoot(active, weapon, distance, passive, active.CurrentActionPoints))
             {
                 //Run 3d actions
 
@@ -1073,147 +1088,146 @@ namespace GameLogic
                     passive.AnimateHurt(weapon);
                 }
 
-                this.RefreshActions();
+                RefreshActions();
             }
         }
         protected void SupressingFire(Soldier active, Weapon weapon, Area area)
         {
-            if (ActionsManager.SupressingFire(this.skirmishGame, active, weapon, area, active.CurrentActionPoints))
+            if (ActionsManager.SupressingFire(active, weapon, area, active.CurrentActionPoints))
             {
                 //Run 3d actions
                 //...
                 //TODO: Set supressing fire animation clip
 
-                this.RefreshActions();
+                RefreshActions();
             }
         }
         protected void Support(Soldier active)
         {
-            if (ActionsManager.Support(this.skirmishGame, active))
+            if (ActionsManager.Support(active))
             {
                 //Run 3d actions
                 //...
                 //TODO: Set support animation clip
 
-                this.RefreshActions();
+                RefreshActions();
             }
         }
         protected void UseShootingItem(Soldier active)
         {
-            if (ActionsManager.UseShootingItem(this.skirmishGame, active, active.CurrentItem, active.CurrentActionPoints))
+            if (ActionsManager.UseShootingItem(active, active.CurrentItem, active.CurrentActionPoints))
             {
                 //Run 3d actions
                 //...
                 //TODO: Set use item animation clip
 
-                this.RefreshActions();
+                RefreshActions();
             }
         }
         protected void FirstAid(Soldier active, Soldier passive)
         {
-            if (ActionsManager.FirstAid(this.skirmishGame, active, passive, active.CurrentActionPoints))
+            if (ActionsManager.FirstAid(active, passive, active.CurrentActionPoints))
             {
                 //Run 3d actions
                 //...
                 //TODO: Set support animation clip
 
-                this.RefreshActions();
+                RefreshActions();
             }
         }
         protected void LeaveCombat(Soldier active, Vector3 destination)
         {
-            if (ActionsManager.Leave(this.skirmishGame, active))
+            if (ActionsManager.Leave(active))
             {
+                Melee melee = skirmishGame.GetMelee(active);
+                melee.RemoveFighter(active);
+
                 //Run 3d actions
-                var path = this.SetPath(this.soldierAgent, this.soldierModels[active].Manipulator.Position, destination);
+                var path = SetPath(soldierAgent, soldierModels[active].Manipulator.Position, destination);
                 if (path != null)
                 {
-                    //TODO: Set run animation clip
-                    this.soldierControllers[active].Follow(path);
+                    //Set run animation clip
+                    soldierControllers[active].Follow(path);
 
-                    this.GoToSoldier(active);
+                    GoToSoldier(active);
                 }
 
-                this.RefreshActions();
+                RefreshActions();
             }
         }
         protected void UseMeleeItem(Soldier active)
         {
-            if (ActionsManager.UseMeleeItem(this.skirmishGame, active, active.CurrentItem))
+            if (ActionsManager.UseMeleeItem(active, active.CurrentItem))
             {
                 //Run 3d actions
                 //...
                 //TODO: Set use item animation clip
 
-                this.RefreshActions();
+                RefreshActions();
             }
         }
         protected void TakeControl(Soldier active)
         {
-            if (ActionsManager.TakeControl(this.skirmishGame, active))
+            if (ActionsManager.TakeControl(active))
             {
                 //Run 3d actions
 
                 //TODO: Set take control animation clip
 
-                this.RefreshActions();
+                RefreshActions();
             }
         }
         protected void UseMoraleItem(Soldier active)
         {
-            if (ActionsManager.UseMoraleItem(this.skirmishGame, active, active.CurrentItem))
+            if (ActionsManager.UseMoraleItem(active, active.CurrentItem))
             {
                 //Run 3d actions
                 //...
                 //TODO: Set use item animation clip
 
-                this.RefreshActions();
+                RefreshActions();
             }
         }
 
         private IControllerPath SetPath(GridAgentType agentType, Vector3 origin, Vector3 destination)
         {
-            var path = this.FindPath(agentType, origin, destination);
+            var path = FindPath(agentType, origin, destination);
             if (path != null)
             {
-                return new SegmentPath(origin, path.ReturnPath.ToArray());
+                return new SegmentPath(origin, path.Positions);
             }
 
             return null;
         }
         private Soldier PickSoldier(Ray cursorRay, bool enemyOnly)
         {
-            Vector3 position = cursorRay.Position;
-            return PickSoldierNearestToPosition(cursorRay, position, enemyOnly);
+            return PickSoldierNearestToPosition(cursorRay, enemyOnly);
         }
-        private Soldier PickSoldierNearestToPosition(Ray cursorRay, Vector3 position, bool enemyOnly)
+        private Soldier PickSoldierNearestToPosition(Ray cursorRay, bool enemyOnly)
         {
-            Soldier res = null;
+            Team[] teams = enemyOnly ? skirmishGame.EnemyOf(skirmishGame.CurrentTeam) : skirmishGame.Teams;
+            if (!teams.Any())
+            {
+                return null;
+            }
+
+            //Select nearest picked soldier
             float d = float.MaxValue;
-
-            Team[] teams = enemyOnly ? this.skirmishGame.EnemyOf(this.skirmishGame.CurrentTeam) : this.skirmishGame.Teams;
-
+            Soldier res = null;
             foreach (Team team in teams)
             {
                 foreach (var soldierC in team.Soldiers)
                 {
-                    var picked = this.soldierModels[soldierC].PickAll(cursorRay, out PickingResult<Triangle>[] r);
-                    if (picked && r?.Length > 0)
+                    var picked = soldierModels[soldierC].PickNearest(cursorRay, out var r);
+                    if (!picked)
                     {
-                        if (r.Length > 1)
-                        {
-                            Array.Sort(r, (r1, r2) =>
-                            {
-                                var d1 = Vector3.DistanceSquared(r1.Position, position);
-                                var d2 = Vector3.DistanceSquared(r2.Position, position);
+                        continue;
+                    }
 
-                                return d1.CompareTo(d2);
-                            });
-                        }
-
-                        //Select nearest picked soldier
+                    if (r.Distance < d)
+                    {
+                        d = r.Distance;
                         res = soldierC;
-                        d = r[0].Distance;
                     }
                 }
             }

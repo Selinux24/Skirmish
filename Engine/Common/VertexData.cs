@@ -560,8 +560,8 @@ namespace Engine.Common
                 return position;
             }
 
-            byte[] boneIndices = vertex.HasChannel(VertexDataChannels.BoneIndices) ? vertex.GetChannelValue<byte[]>(VertexDataChannels.BoneIndices) : null;
-            float[] boneWeights = vertex.HasChannel(VertexDataChannels.Weights) ? vertex.GetChannelValue<float[]>(VertexDataChannels.Weights) : null;
+            byte[] boneIndices = vertex.HasChannel(VertexDataChannels.BoneIndices) ? vertex.GetChannelValue<byte[]>(VertexDataChannels.BoneIndices) : new byte[] { };
+            float[] boneWeights = vertex.HasChannel(VertexDataChannels.Weights) ? vertex.GetChannelValue<float[]>(VertexDataChannels.Weights) : new float[] { };
             Matrix[] transforms = boneTransforms.ToArray();
 
             Vector3 t = Vector3.Zero;
@@ -584,50 +584,66 @@ namespace Engine.Common
         }
 
         /// <summary>
+        /// Generates a vertex data array from a geometry descriptor
+        /// </summary>
+        /// <param name="descriptor">Geometry descriptor</param>
+        /// <returns>Returns a vertex array</returns>
+        public static IEnumerable<VertexData> FromDescriptor(GeometryDescriptor descriptor)
+        {
+            List<VertexData> res = new List<VertexData>();
+
+            var vertices = descriptor.Vertices?.ToArray() ?? new Vector3[] { };
+            var normals = descriptor.Normals?.ToArray() ?? new Vector3[] { };
+            var uvs = descriptor.Uvs?.ToArray() ?? new Vector2[] { };
+            var tangents = descriptor.Tangents?.ToArray() ?? new Vector3[] { };
+            var binormals = descriptor.Binormals?.ToArray() ?? new Vector3[] { };
+
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                res.Add(new VertexData()
+                {
+                    Position = vertices[i],
+                    Normal = normals.Any() ? normals[i] : (Vector3?)null,
+                    Texture = uvs.Any() ? uvs[i] : (Vector2?)null,
+                    Tangent = tangents.Any() ? tangents[i] : (Vector3?)null,
+                    BiNormal = binormals.Any() ? binormals[i] : (Vector3?)null,
+                });
+            }
+
+            return res.ToArray();
+        }
+
+        /// <summary>
         /// Transforms helper by given matrix
         /// </summary>
         /// <param name="transform">Transformation matrix</param>
         public VertexData Transform(Matrix transform)
         {
+            if (transform.IsIdentity)
+            {
+                return this;
+            }
+
             VertexData result = this;
 
-            if (!transform.IsIdentity)
+            if (result.Position.HasValue)
             {
-                if (result.Position.HasValue)
-                {
-                    Vector3 position = result.Position.Value;
+                result.Position = Vector3.TransformCoordinate(result.Position.Value, transform);
+            }
 
-                    Vector3.TransformCoordinate(ref position, ref transform, out Vector3 p);
+            if (result.Normal.HasValue)
+            {
+                result.Normal = Vector3.TransformNormal(result.Normal.Value, transform);
+            }
 
-                    result.Position = p;
-                }
+            if (result.Tangent.HasValue)
+            {
+                result.Tangent = Vector3.TransformNormal(result.Tangent.Value, transform);
+            }
 
-                if (result.Normal.HasValue)
-                {
-                    Vector3 normal = this.Normal.Value;
-
-                    Vector3.TransformNormal(ref normal, ref transform, out normal);
-
-                    result.Normal = normal;
-                }
-
-                if (result.Tangent.HasValue)
-                {
-                    Vector3 tangent = result.Tangent.Value;
-
-                    Vector3.TransformNormal(ref tangent, ref transform, out tangent);
-
-                    result.Tangent = tangent;
-                }
-
-                if (result.BiNormal.HasValue)
-                {
-                    Vector3 biNormal = result.BiNormal.Value;
-
-                    Vector3.TransformNormal(ref biNormal, ref transform, out biNormal);
-
-                    result.BiNormal = biNormal;
-                }
+            if (result.BiNormal.HasValue)
+            {
+                result.BiNormal = Vector3.TransformNormal(result.BiNormal.Value, transform);
             }
 
             return result;
@@ -638,7 +654,7 @@ namespace Engine.Common
         /// <returns>Returns a vertex list</returns>
         public Vector3[] GetVertices()
         {
-            return new Vector3[] { this.Position.Value };
+            return new Vector3[] { Position.Value };
         }
         /// <summary>
         /// Gets text representation of instance
@@ -647,20 +663,20 @@ namespace Engine.Common
         {
             string text = null;
 
-            if (this.Weights != null && this.Weights.Length > 0) text += "Skinned; ";
+            if (Weights != null && Weights.Length > 0) text += "Skinned; ";
 
-            text += string.Format("FaceIndex: {0}; ", this.FaceIndex);
-            text += string.Format("VertexIndex: {0}; ", this.VertexIndex);
+            text += string.Format("FaceIndex: {0}; ", FaceIndex);
+            text += string.Format("VertexIndex: {0}; ", VertexIndex);
 
-            if (this.Position.HasValue) text += string.Format("Position: {0}; ", this.Position);
-            if (this.Normal.HasValue) text += string.Format("Normal: {0}; ", this.Normal);
-            if (this.Tangent.HasValue) text += string.Format("Tangent: {0}; ", this.Tangent);
-            if (this.BiNormal.HasValue) text += string.Format("BiNormal: {0}; ", this.BiNormal);
-            if (this.Texture.HasValue) text += string.Format("Texture: {0}; ", this.Texture);
-            if (this.Color.HasValue) text += string.Format("Color: {0}; ", this.Color);
-            if (this.Size.HasValue) text += string.Format("Size: {0}; ", this.Size);
-            if (this.Weights != null && this.Weights.Length > 0) text += string.Format("Weights: {0}; ", this.Weights.Length);
-            if (this.BoneIndices != null && this.BoneIndices.Length > 0) text += string.Format("BoneIndices: {0}; ", this.BoneIndices.Length);
+            if (Position.HasValue) text += string.Format("Position: {0}; ", Position);
+            if (Normal.HasValue) text += string.Format("Normal: {0}; ", Normal);
+            if (Tangent.HasValue) text += string.Format("Tangent: {0}; ", Tangent);
+            if (BiNormal.HasValue) text += string.Format("BiNormal: {0}; ", BiNormal);
+            if (Texture.HasValue) text += string.Format("Texture: {0}; ", Texture);
+            if (Color.HasValue) text += string.Format("Color: {0}; ", Color);
+            if (Size.HasValue) text += string.Format("Size: {0}; ", Size);
+            if (Weights != null && Weights.Length > 0) text += string.Format("Weights: {0}; ", Weights.Length);
+            if (BoneIndices != null && BoneIndices.Length > 0) text += string.Format("BoneIndices: {0}; ", BoneIndices.Length);
 
             return text;
         }

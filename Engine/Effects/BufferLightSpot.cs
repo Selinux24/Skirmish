@@ -33,7 +33,7 @@ namespace Engine.Effects
         /// <param name="lights">Light list</param>
         /// <param name="lightCount">Returns the assigned light count</param>
         /// <returns>Returns a light buffer collection</returns>
-        public static BufferLightSpot[] Build(IEnumerable<SceneLightSpot> lights, out int lightCount)
+        public static BufferLightSpot[] Build(IEnumerable<ISceneLightSpot> lights, out int lightCount)
         {
             if (!lights.Any())
             {
@@ -104,7 +104,7 @@ namespace Engine.Effects
         /// Constructor
         /// </summary>
         /// <param name="light">Light</param>
-        public BufferLightSpot(SceneLightSpot light)
+        public BufferLightSpot(ISceneLightSpot light)
         {
             this.Position = light.Position;
             this.Direction = light.Direction;

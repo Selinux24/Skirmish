@@ -1,6 +1,8 @@
 ﻿using Engine;
 using Engine.Common;
 using Engine.PathFinding;
+using Engine.PathFinding.RecastNavigation.Detour.Crowds;
+using System.Collections.Generic;
 
 namespace Deferred
 {
@@ -12,7 +14,7 @@ namespace Deferred
         /// <summary>
         /// Model
         /// </summary>
-        private readonly SceneObject model;
+        private readonly ModelInstance model;
         /// <summary>
         /// Controller
         /// </summary>
@@ -22,7 +24,10 @@ namespace Deferred
         /// Agent type
         /// </summary>
         public AgentType AgentType { get; set; }
-
+        /// <summary>
+        /// Agent identifier
+        /// </summary>
+        public CrowdAgent CrowdAgent { get; set; }
         /// <summary>
         /// Gets or sets if the agent is active
         /// </summary>
@@ -68,7 +73,7 @@ namespace Deferred
         {
             get
             {
-                return this.model.Get<ITransformable3D>()?.Manipulator;
+                return this.model?.Manipulator;
             }
         }
         /// <summary>
@@ -88,18 +93,18 @@ namespace Deferred
         /// <summary>
         /// Gets the agent lights
         /// </summary>
-        public SceneLight[] Lights
+        public IEnumerable<ISceneLight> Lights
         {
             get
             {
-                return this.model.Get<Model>()?.Lights;
+                return this.model?.Lights ?? new ISceneLight[] { };
             }
         }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public GameAgent(AgentType agentType, SceneObject model, T controller)
+        public GameAgent(AgentType agentType, ModelInstance model, T controller)
         {
             this.model = model;
             this.controller = controller;

@@ -24,8 +24,8 @@ namespace Engine.Collections.Generic
         /// Constructor
         /// </summary>
         /// <param name="items">Partitioning items</param>
-        /// <param name="maxDepth">Maximum depth</param>
-        public PickingQuadTree(IEnumerable<T> items, int maxDepth)
+        /// <param name="description">Quadtree description</param>
+        public PickingQuadTree(IEnumerable<T> items, QuadtreeDescription description)
         {
             var bbox = GeometryUtil.CreateBoundingBox(items);
 
@@ -34,7 +34,7 @@ namespace Engine.Collections.Generic
             this.Root = PickingQuadTreeNode<T>.CreatePartitions(
                 this, null,
                 bbox, items,
-                maxDepth,
+                description.MaximumDepth,
                 0);
 
             this.Root.ConnectNodes();
@@ -164,7 +164,7 @@ namespace Engine.Collections.Generic
         /// </summary>
         /// <param name="volume">Volume</param>
         /// <returns>Returns the nodes contained into the volume</returns>
-        public IEnumerable<PickingQuadTreeNode<T>> GetNodesInVolume(ICullingVolume volume)
+        public IEnumerable<PickingQuadTreeNode<T>> GetNodesInVolume(IIntersectionVolume volume)
         {
             Stopwatch w = Stopwatch.StartNew();
             try

@@ -1,65 +1,33 @@
 ﻿using SharpDX;
+using System.Linq;
 
 namespace Engine
 {
+    using Engine.Content;
+
     /// <summary>
     /// Heightmap description
     /// </summary>
     public class HeightmapDescription
     {
         /// <summary>
-        /// Terrain textures
+        /// Creates a height map descripton from map data
         /// </summary>
-        public class TexturesDescription
+        /// <param name="heightmap">Height map</param>
+        /// <param name="cellsize">Cell size</param>
+        /// <param name="maximumHeight">Maximum height</param>
+        /// <param name="heightCurve">Height curve</param>
+        /// <param name="textures">Texture description</param>
+        public static HeightmapDescription FromMap(NoiseMap heightmap, float cellsize, float maximumHeight, Curve heightCurve, HeightmapTexturesDescription textures)
         {
-            /// <summary>
-            /// Content path
-            /// </summary>
-            public string ContentPath { get; set; } = "Textures";
-
-            /// <summary>
-            /// Normal maps
-            /// </summary>
-            public string[] NormalMaps { get; set; } = null;
-            /// <summary>
-            /// Specular maps
-            /// </summary>
-            public string[] SpecularMaps { get; set; } = null;
-
-            /// <summary>
-            /// Gets or sets if use alpha mapping or not
-            /// </summary>
-            public bool UseAlphaMapping { get; set; } = false;
-            /// <summary>
-            /// Alpha map
-            /// </summary>
-            public string AlphaMap { get; set; } = null;
-            /// <summary>
-            /// Color textures for alpha map
-            /// </summary>
-            public string[] ColorTextures { get; set; } = null;
-
-            /// <summary>
-            /// Gets or sets if use slope texturing or not
-            /// </summary>
-            public bool UseSlopes { get; set; } = false;
-            /// <summary>
-            /// Slope ranges
-            /// </summary>
-            public Vector2 SlopeRanges { get; set; } = Vector2.Zero;
-            /// <summary>
-            /// High resolution textures
-            /// </summary>
-            public string[] TexturesHR { get; set; } = null;
-            /// <summary>
-            /// Low resolution textures
-            /// </summary>
-            public string[] TexturesLR { get; set; } = null;
-
-            /// <summary>
-            /// Lerping proportion between alpha mapping and slope texturing
-            /// </summary>
-            public float Proportion { get; set; } = 0f;
+            return new HeightmapDescription
+            {
+                Heightmap = heightmap.Map,
+                CellSize = cellsize,
+                MaximumHeight = maximumHeight,
+                HeightCurve = heightCurve,
+                Textures = textures,
+            };
         }
 
         /// <summary>
@@ -67,9 +35,17 @@ namespace Engine
         /// </summary>
         public string ContentPath { get; set; } = "Resources";
         /// <summary>
+        /// Height map
+        /// </summary>
+        public float[,] Heightmap { get; set; } = null;
+        /// <summary>
         /// Height map file name
         /// </summary>
         public string HeightmapFileName { get; set; } = null;
+        /// <summary>
+        /// Color map
+        /// </summary>
+        public Color4[,] Colormap { get; set; } = null;
         /// <summary>
         /// Color map file name
         /// </summary>
@@ -83,16 +59,93 @@ namespace Engine
         /// </summary>
         public float MaximumHeight { get; set; } = 1;
         /// <summary>
-        /// Texture resolution
+        /// Height curve
         /// </summary>
-        public float TextureResolution { get; set; } = 10;
+        public Curve HeightCurve { get; set; }
         /// <summary>
         /// Textures
         /// </summary>
-        public TexturesDescription Textures { get; set; } = new TexturesDescription();
+        public HeightmapTexturesDescription Textures { get; set; } = new HeightmapTexturesDescription();
         /// <summary>
         /// Terrain material
         /// </summary>
         public MaterialDescription Material { get; set; } = new MaterialDescription();
+        /// <summary>
+        /// Use falloff map
+        /// </summary>
+        public bool UseFalloff { get; set; } = false;
+        /// <summary>
+        /// Falloff curve params
+        /// </summary>
+        /// <remarks>
+        /// From https://www.youtube.com/watch?v=COmtTyLCd6I
+        /// f(x) = (x pow a) / ((x pow a) + ((b - bx) pow a))
+        /// Where a = FalloffCurve.X and b = FalloffCurve.Y
+        /// </remarks>
+        public Vector2 FalloffCurve { get; set; } = new Vector2(2, 2.7f);
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public HeightmapDescription()
+        {
+            HeightCurve = new Curve();
+            HeightCurve.Keys.Add(new CurveKey(0f, 0f));
+            HeightCurve.Keys.Add(new CurveKey(1f, 1f));
+        }
+
+        /// <summary>
+        /// Generates a new model content from an height map description
+        /// </summary>
+        /// <returns>Returns a new model content</returns>
+        public ModelContent ReadModelContent()
+        {
+            HeightMap hm = HeightMap.FromDescription(this);
+            hm.BuildGeometry(
+                CellSize,
+                MaximumHeight,
+                HeightCurve,
+                Textures.Scale,
+                Textures.Displacement,
+                out var vertices, out var indices);
+
+            ModelContent modelContent = new ModelContent();
+
+            string materialName = "material";
+            string geoName = "geometry";
+
+            MaterialContent material = MaterialContent.Default;
+
+            SubMeshContent geo = new SubMeshContent(Topology.TriangleList, materialName, true, false);
+            geo.SetVertices(vertices);
+            geo.SetIndices(indices);
+
+            if (Textures?.TexturesLR?.Any() == true)
+            {
+                string diffuseTexureName = "diffuse";
+
+                material.DiffuseTexture = diffuseTexureName;
+
+                var diffuseImage = ImageContent.Array(Textures.ContentPath, Textures.TexturesLR);
+
+                modelContent.Images.Add(diffuseTexureName, diffuseImage);
+            }
+
+            if (Textures?.NormalMaps?.Any() == true)
+            {
+                string nmapTexureName = "normal";
+
+                material.NormalMapTexture = nmapTexureName;
+
+                var nmapImage = ImageContent.Array(Textures.ContentPath, Textures.NormalMaps);
+
+                modelContent.Images.Add(nmapTexureName, nmapImage);
+            }
+
+            modelContent.Materials.Add(materialName, material);
+            modelContent.Geometry.Add(geoName, materialName, geo);
+
+            return modelContent;
+        }
     }
 }

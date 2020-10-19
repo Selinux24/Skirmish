@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Engine.Common
 {
+    using SharpDX.Direct3D;
     using SharpDX.Direct3D11;
 
     /// <summary>
@@ -14,6 +16,13 @@ namespace Engine.Common
         /// </summary>
         private ShaderResourceView1 srv = null;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public EngineShaderResourceView()
+        {
+
+        }
         /// <summary>
         /// Constructor
         /// </summary>
@@ -38,6 +47,7 @@ namespace Engine.Common
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
         /// <summary>
         /// Dispose resources
         /// </summary>
@@ -58,6 +68,37 @@ namespace Engine.Common
         public ShaderResourceView1 GetResource()
         {
             return this.srv;
+        }
+        /// <summary>
+        /// Sets the internal shader resource view
+        /// </summary>
+        /// <param name="view">Resource view</param>
+        public void SetResource(ShaderResourceView1 view)
+        {
+            this.srv = view;
+        }
+
+        /// <summary>
+        /// Updates the texture data
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="game">Game instance</param>
+        /// <param name="data">New data</param>
+        public void Update<T>(Game game, IEnumerable<T> data) where T : struct
+        {
+            if (srv == null)
+            {
+                return;
+            }
+
+            if (srv.Description1.Dimension == ShaderResourceViewDimension.Texture1D)
+            {
+                game.Graphics.UpdateTexture1D(this, data);
+            }
+            else if (srv.Description1.Dimension == ShaderResourceViewDimension.Texture2D)
+            {
+                game.Graphics.UpdateTexture2D(this, data);
+            }
         }
     }
 }

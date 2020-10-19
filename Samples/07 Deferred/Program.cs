@@ -1,6 +1,6 @@
 ﻿using Engine;
+using Engine.Content.FmtCollada;
 using System;
-using System.IO;
 
 namespace Deferred
 {
@@ -12,27 +12,47 @@ namespace Deferred
             try
             {
 #if DEBUG
-                using (Game cl = new Game("7 Deferred", false, 1600, 900, true, 0, 0))
+                Logger.LogLevel = LogLevel.Debug;
+                Logger.LogStackSize = 0;
+
+                int sWidth = (int)(System.Windows.Forms.SystemInformation.VirtualScreen.Width * .8f);
+                int sHeight = (int)(System.Windows.Forms.SystemInformation.VirtualScreen.Height * .8f);
+
+                using (Game cl = new Game("7 Deferred", false, sWidth, sHeight, true, 0, 0))
 #else
+                Logger.LogLevel = LogLevel.Error;
+
                 using (Game cl = new Game("7 Deferred", true, 0, 0, true, 0, 4))
 #endif
                 {
-#if DEBUG
                     cl.VisibleMouse = false;
+#if DEBUG
                     cl.LockMouse = false;
 #else
-                    cl.VisibleMouse = false;
                     cl.LockMouse = true;
 #endif
 
-                    cl.AddScene<TestScene3D>();
+                    GameResourceManager.RegisterLoader<LoaderCollada>();
+
+                    cl.SetScene<TestScene3D>(SceneModes.DeferredLightning);
 
                     cl.Run();
                 }
             }
             catch (Exception ex)
             {
-                File.WriteAllText("dump.txt", ex.ToString());
+                Logger.WriteError(nameof(Program), ex);
+            }
+            finally
+            {
+#if DEBUG
+                Logger.Dump("dumpDEBUG.txt");
+#else
+                if (Logger.HasErrors())
+                {
+                    Logger.Dump($"dump{DateTime.Now:yyyyMMddHHmmss.fff}.txt");
+                }
+#endif
             }
         }
     }

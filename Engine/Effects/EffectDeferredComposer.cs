@@ -573,7 +573,7 @@ namespace Engine.Effects
         /// <param name="shadowMaps">Shadow map flags</param>
         /// <param name="shadowMap">Shadow map</param>
         public void UpdatePerLight(
-            SceneLightDirectional light,
+            ISceneLightDirectional light,
             IShadowMap shadowMap)
         {
             this.DirectionalLight = new BufferLightDirectional(light);
@@ -589,7 +589,7 @@ namespace Engine.Effects
         /// <param name="shadowMaps">Shadow map flags</param>
         /// <param name="shadowMap">Cubic shadow map</param>
         public void UpdatePerLight(
-            SceneLightPoint light,
+            ISceneLightPoint light,
             Matrix transform,
             Matrix viewProjection,
             IShadowMap shadowMap)
@@ -609,7 +609,7 @@ namespace Engine.Effects
         /// <param name="viewProjection">View * projection matrix</param>
         /// <param name="shadowMap">Shadow map</param>
         public void UpdatePerLight(
-            SceneLightSpot light,
+            ISceneLightSpot light,
             Matrix transform,
             Matrix viewProjection,
             IShadowMap shadowMap)

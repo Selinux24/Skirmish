@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Engine.Common
 {
@@ -13,6 +14,24 @@ namespace Engine.Common
     /// </summary>
     public class DrawingData : IDisposable
     {
+        /// <summary>
+        /// Volume mesh triangle list
+        /// </summary>
+        private readonly List<Triangle> volumeMesh = new List<Triangle>();
+        /// <summary>
+        /// Light list
+        /// </summary>
+        private readonly List<ISceneLight> lights = new List<ISceneLight>();
+
+        /// <summary>
+        /// Game instance
+        /// </summary>
+        protected readonly Game Game = null;
+        /// <summary>
+        /// Description
+        /// </summary>
+        protected readonly DrawingDataDescription Description;
+
         /// <summary>
         /// Materials dictionary
         /// </summary>
@@ -28,7 +47,13 @@ namespace Engine.Common
         /// <summary>
         /// Volume mesh
         /// </summary>
-        public Triangle[] VolumeMesh { get; set; } = null;
+        public IEnumerable<Triangle> VolumeMesh
+        {
+            get
+            {
+                return volumeMesh.ToArray();
+            }
+        }
         /// <summary>
         /// Datos de animación
         /// </summary>
@@ -36,45 +61,52 @@ namespace Engine.Common
         /// <summary>
         /// Lights collection
         /// </summary>
-        public SceneLight[] Lights { get; set; } = null;
-
-        /// <summary>
-        /// Buffer manager
-        /// </summary>
-        protected BufferManager BufferManager = null;
+        public IEnumerable<ISceneLight> Lights
+        {
+            get
+            {
+                return lights.ToArray();
+            }
+        }
 
         /// <summary>
         /// Model initialization
         /// </summary>
         /// <param name="game">Game</param>
-        /// <param name="bufferManager">Buffer manager</param>
+        /// <param name="name">Owner name</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="description">Data description</param>
+        /// <param name="instancingBuffer">Instancing buffer descriptor</param>
         /// <returns>Returns the generated drawing data objects</returns>
-        public static DrawingData Build(Game game, BufferManager bufferManager, ModelContent modelContent, DrawingDataDescription description)
+        public static async Task<DrawingData> Build(Game game, string name, ModelContent modelContent, DrawingDataDescription description, BufferDescriptor instancingBuffer = null)
         {
-            DrawingData res = new DrawingData(bufferManager);
+            DrawingData res = null;
 
-            //Animation
-            if (description.LoadAnimation)
+            await Task.Run(()=>
             {
-                InitializeSkinningData(ref res, modelContent);
-            }
+                res = new DrawingData(game, description);
 
-            //Images
-            InitializeTextures(ref res, game, modelContent, description.TextureCount);
+                //Animation
+                if (description.LoadAnimation)
+                {
+                    InitializeSkinningData(res, modelContent);
+                }
 
-            //Materials
-            InitializeMaterials(ref res, modelContent);
+                //Images
+                InitializeTextures(res, game, modelContent, description.TextureCount);
 
-            //Skins & Meshes
-            InitializeGeometry(ref res, modelContent, description);
+                //Materials
+                InitializeMaterials(res, modelContent);
 
-            //Update meshes into device
-            InitializeMeshes(ref res, bufferManager, description.Instanced ? description.Instances : 0);
+                //Skins & Meshes
+                InitializeGeometry(res, modelContent, description);
 
-            //Lights
-            InitializeLights(ref res, modelContent);
+                //Update meshes into device
+                InitializeMeshes(res, game, name, description.DynamicBuffers, instancingBuffer);
+
+                //Lights
+                InitializeLights(res, modelContent);
+            });
 
             return res;
         }
@@ -85,7 +117,7 @@ namespace Engine.Common
         /// <param name="game">Game</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="textureCount">Texture count</param>
-        private static void InitializeTextures(ref DrawingData drw, Game game, ModelContent modelContent, int textureCount)
+        private static void InitializeTextures(DrawingData drw, Game game, ModelContent modelContent, int textureCount)
         {
             if (modelContent.Images != null)
             {
@@ -93,7 +125,7 @@ namespace Engine.Common
                 {
                     var info = modelContent.Images[images];
 
-                    var view = game.ResourceManager.CreateResource(info);
+                    var view = game.ResourceManager.RequestResource(info);
                     if (view != null)
                     {
                         drw.Textures.Add(images, view);
@@ -109,7 +141,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="drw">Drawing data</param>
         /// <param name="modelContent">Model content</param>
-        private static void InitializeMaterials(ref DrawingData drw, ModelContent modelContent)
+        private static void InitializeMaterials(DrawingData drw, ModelContent modelContent)
         {
             foreach (string mat in modelContent.Materials?.Keys)
             {
@@ -135,77 +167,90 @@ namespace Engine.Common
         /// <param name="drw">Drawing data</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="description">Description</param>
-        private static void InitializeGeometry(ref DrawingData drw, ModelContent modelContent, DrawingDataDescription description)
+        private static void InitializeGeometry(DrawingData drw, ModelContent modelContent, DrawingDataDescription description)
         {
-            List<Triangle> volumeMesh = new List<Triangle>();
-
             foreach (string meshName in modelContent.Geometry.Keys)
             {
-                //Get skinning data
-                var isSkinned = ReadSkinningData(
-                    description, modelContent, meshName,
-                    out var bindShapeMatrix, out var weights, out var jointNames);
+                InitializeGeometryMesh(drw, modelContent, description, meshName);
+            }
+        }
+        /// <summary>
+        /// Initialize geometry mesh
+        /// </summary>
+        /// <param name="drw">Drawing data</param>
+        /// <param name="modelContent">Model content</param>
+        /// <param name="description">Description</param>
+        /// <param name="meshName">Mesh name</param>
+        private static void InitializeGeometryMesh(DrawingData drw, ModelContent modelContent, DrawingDataDescription description, string meshName)
+        {
+            //Get skinning data
+            var isSkinned = ReadSkinningData(
+                description, modelContent, meshName,
+                out var bindShapeMatrix, out var weights, out var jointNames);
 
-                //Process the mesh geometry material by material
-                var dictGeometry = modelContent.Geometry[meshName];
+            //Process the mesh geometry material by material
+            var dictGeometry = modelContent.Geometry[meshName];
 
-                foreach (string material in dictGeometry.Keys)
+            foreach (string material in dictGeometry.Keys)
+            {
+                var geometry = dictGeometry[material];
+
+                if (geometry.IsVolume)
                 {
-                    var geometry = dictGeometry[material];
-                    if (geometry.IsVolume)
+                    //If volume, store position only
+                    drw.volumeMesh.AddRange(geometry.GetTriangles());
+
+                    continue;
+                }
+
+                //Get vertex type
+                var vertexType = GetVertexType(geometry.VertexType, isSkinned, description.LoadNormalMaps, drw.Materials, material);
+
+                //Process the vertex data
+                geometry.ProcessVertexData(
+                    vertexType,
+                    description.Constraint,
+                    out var vertices, out var indices);
+
+                if (!bindShapeMatrix.IsIdentity)
+                {
+                    for (int i = 0; i < vertices.Length; i++)
                     {
-                        //If volume, store position only
-                        volumeMesh.AddRange(geometry.GetTriangles());
-                    }
-                    else
-                    {
-                        //Get vertex type
-                        var vertexType = GetVertexType(description, drw.Materials, geometry.VertexType, isSkinned, material);
-
-                        //Process the vertex data
-                        ProcessVertexData(
-                            description, geometry, vertexType,
-                            out var vertices, out var indices);
-
-                        for (int i = 0; i < vertices.Length; i++)
-                        {
-                            vertices[i] = vertices[i].Transform(bindShapeMatrix);
-                        }
-
-                        //Convert the vertex data to final mesh data
-                        var vertexList = VertexData.Convert(
-                            vertexType,
-                            vertices,
-                            weights,
-                            jointNames);
-
-                        if (vertexList.Any())
-                        {
-                            //Create and store the mesh into the drawing data
-                            Mesh nMesh = new Mesh(
-                                meshName,
-                                geometry.Topology,
-                                vertexList.ToArray(),
-                                indices);
-
-                            drw.Meshes.Add(meshName, geometry.Material, nMesh);
-                        }
+                        vertices[i] = vertices[i].Transform(bindShapeMatrix);
                     }
                 }
-            }
 
-            drw.VolumeMesh = volumeMesh.ToArray();
+                //Convert the vertex data to final mesh data
+                var vertexList = VertexData.Convert(
+                    vertexType,
+                    vertices,
+                    weights,
+                    jointNames);
+
+                if (vertexList.Any())
+                {
+                    //Create and store the mesh into the drawing data
+                    Mesh nMesh = new Mesh(
+                        meshName,
+                        geometry.Topology,
+                        geometry.Transform,
+                        vertexList,
+                        indices);
+
+                    drw.Meshes.Add(meshName, geometry.Material, nMesh);
+                }
+            }
         }
         /// <summary>
         /// Get vertex type from geometry
         /// </summary>
-        /// <param name="description">Description</param>
-        /// <param name="materials">Material dictionary</param>
         /// <param name="vertexType">Vertex type</param>
         /// <param name="isSkinned">Sets wether the current geometry has skinning data or not</param>
+        /// <param name="loadNormalMaps">Load normal maps flag</param>
+        /// <param name="materials">Material dictionary</param>
         /// <param name="material">Material name</param>
         /// <returns>Returns the vertex type</returns>
-        private static VertexTypes GetVertexType(DrawingDataDescription description, MaterialDictionary materials, VertexTypes vertexType, bool isSkinned, string material)
+        private static VertexTypes GetVertexType(VertexTypes vertexType, bool isSkinned, bool loadNormalMaps, MaterialDictionary materials, string material)
         {
             var res = vertexType;
             if (isSkinned)
@@ -214,7 +259,7 @@ namespace Engine.Common
                 res = VertexData.GetSkinnedEquivalent(res);
             }
 
-            if (!description.LoadNormalMaps)
+            if (!loadNormalMaps)
             {
                 return res;
             }
@@ -230,102 +275,6 @@ namespace Engine.Common
             }
 
             return res;
-        }
-        /// <summary>
-        /// Process the vertex data
-        /// </summary>
-        /// <param name="description">Decription</param>
-        /// <param name="geometry">Geometry</param>
-        /// <param name="vertexType">Vertext type</param>
-        /// <param name="vertices">Resulting vertices</param>
-        /// <param name="indices">Resulting indices</param>
-        private static void ProcessVertexData(DrawingDataDescription description, SubMeshContent geometry, VertexTypes vertexType, out VertexData[] vertices, out uint[] indices)
-        {
-            if (VertexData.IsTangent(vertexType))
-            {
-                geometry.ComputeTangents();
-            }
-
-            if (!description.Constraint.HasValue)
-            {
-                vertices = geometry.Vertices;
-                indices = geometry.Indices;
-
-                return;
-            }
-
-            if (geometry.Indices?.Length > 0)
-            {
-                ComputeConstraintIndices(
-                    description.Constraint.Value,
-                    geometry.Vertices, geometry.Indices,
-                    out vertices, out indices);
-            }
-            else
-            {
-                ComputeConstraintVertices(
-                    description.Constraint.Value,
-                    geometry.Vertices,
-                    out vertices);
-
-                indices = new uint[] { };
-            }
-        }
-        /// <summary>
-        /// Compute constraints into vertices
-        /// </summary>
-        /// <param name="constraint">Constraint</param>
-        /// <param name="vertices">Vertices</param>
-        /// <param name="res">Resulting vertices</param>
-        private static void ComputeConstraintVertices(BoundingBox constraint, VertexData[] vertices, out VertexData[] res)
-        {
-            List<VertexData> tmpVertices = new List<VertexData>();
-
-            for (int i = 0; i < vertices.Length; i += 3)
-            {
-                if (constraint.Contains(vertices[i + 0].Position.Value) != ContainmentType.Disjoint ||
-                    constraint.Contains(vertices[i + 1].Position.Value) != ContainmentType.Disjoint ||
-                    constraint.Contains(vertices[i + 2].Position.Value) != ContainmentType.Disjoint)
-                {
-                    tmpVertices.Add(vertices[i + 0]);
-                    tmpVertices.Add(vertices[i + 1]);
-                    tmpVertices.Add(vertices[i + 2]);
-                }
-            }
-
-            res = tmpVertices.ToArray();
-        }
-        /// <summary>
-        /// Compute constraints into vertices and indices
-        /// </summary>
-        /// <param name="constraint">Constraint</param>
-        /// <param name="vertices">Vertices</param>
-        /// <param name="indices">Indices</param>
-        /// <param name="resVertices">Resulting vertices</param>
-        /// <param name="resIndices">Resulting indices</param>
-        private static void ComputeConstraintIndices(BoundingBox constraint, VertexData[] vertices, uint[] indices, out VertexData[] resVertices, out uint[] resIndices)
-        {
-            List<VertexData> tmpVertices = new List<VertexData>();
-            List<uint> tmpIndices = new List<uint>();
-
-            uint index = 0;
-            for (int i = 0; i < indices.Length; i += 3)
-            {
-                if (constraint.Contains(vertices[indices[i + 0]].Position.Value) != ContainmentType.Disjoint ||
-                    constraint.Contains(vertices[indices[i + 1]].Position.Value) != ContainmentType.Disjoint ||
-                    constraint.Contains(vertices[indices[i + 2]].Position.Value) != ContainmentType.Disjoint)
-                {
-                    tmpVertices.Add(vertices[indices[i + 0]]);
-                    tmpVertices.Add(vertices[indices[i + 1]]);
-                    tmpVertices.Add(vertices[indices[i + 2]]);
-                    tmpIndices.Add(index++);
-                    tmpIndices.Add(index++);
-                    tmpIndices.Add(index++);
-                }
-            }
-
-            resVertices = tmpVertices.ToArray();
-            resIndices = tmpIndices.ToArray();
         }
         /// <summary>
         /// Reads skinning data
@@ -367,7 +316,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="drw">Drawing data</param>
         /// <param name="modelContent">Model content</param>
-        private static void InitializeSkinningData(ref DrawingData drw, ModelContent modelContent)
+        private static void InitializeSkinningData(DrawingData drw, ModelContent modelContent)
         {
             if (modelContent.SkinningInfo?.Count > 0)
             {
@@ -449,23 +398,22 @@ namespace Engine.Common
         /// </summary>
         /// <param name="drw">Drawing data</param>
         /// <param name="game">Game</param>
-        private static void InitializeMeshes(ref DrawingData drw, BufferManager bufferManager, int instances)
+        /// <param name="name">Owner name</param>
+        /// <param name="dynamicBuffers">Create dynamic buffers</param>
+        /// <param name="instancingBuffer">Instancing buffer descriptor</param>
+        private static void InitializeMeshes(DrawingData drw, Game game, string name, bool dynamicBuffers, BufferDescriptor instancingBuffer)
         {
             foreach (var dictionary in drw.Meshes.Values)
             {
                 foreach (var mesh in dictionary.Values)
                 {
                     //Vertices
-                    mesh.VertexBuffer = bufferManager.Add(mesh.Name, mesh.Vertices.ToArray(), false, instances);
+                    mesh.VertexBuffer = game.BufferManager.AddVertexData($"{name}.{mesh.Name}", dynamicBuffers, mesh.Vertices, instancingBuffer);
 
                     if (mesh.Indexed)
                     {
                         //Indices
-                        mesh.IndexBuffer = bufferManager.Add(mesh.Name, mesh.Indices.ToArray(), false);
-                    }
-                    else
-                    {
-                        mesh.IndexBuffer = new BufferDescriptor(-1, -1, 0);
+                        mesh.IndexBuffer = game.BufferManager.AddIndexData($"{name}.{mesh.Name}", dynamicBuffers, mesh.Indices);
                     }
                 }
             }
@@ -493,34 +441,32 @@ namespace Engine.Common
         /// </summary>
         /// <param name="drw">Drawing data</param>
         /// <param name="modelContent">Model content</param>
-        private static void InitializeLights(ref DrawingData drw, ModelContent modelContent)
+        private static void InitializeLights(DrawingData drw, ModelContent modelContent)
         {
-            List<SceneLight> lights = new List<SceneLight>();
-
             foreach (var key in modelContent.Lights.Keys)
             {
                 var l = modelContent.Lights[key];
 
                 if (l.LightType == LightContentTypes.Point)
                 {
-                    lights.Add(l.CreatePointLight());
+                    drw.lights.Add(l.CreatePointLight());
                 }
                 else if (l.LightType == LightContentTypes.Spot)
                 {
-                    lights.Add(l.CreateSpotLight());
+                    drw.lights.Add(l.CreateSpotLight());
                 }
             }
-
-            drw.Lights = lights.ToArray();
         }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="bufferManager">Buffer manager</param>
-        public DrawingData(BufferManager bufferManager)
+        /// <param name="game">Game</param>
+        /// <param name="description">Description</param>
+        public DrawingData(Game game, DrawingDataDescription description)
         {
-            this.BufferManager = bufferManager;
+            Game = game;
+            Description = description;
         }
         /// <summary>
         /// Destructor
@@ -546,29 +492,33 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                foreach (var item in this.Meshes?.Values)
+                foreach (var item in Meshes?.Values)
                 {
                     foreach (var mesh in item.Values)
                     {
                         //Remove data from buffer manager
-                        this.BufferManager?.RemoveVertexData(mesh.VertexBuffer);
-                        this.BufferManager?.RemoveIndexData(mesh.IndexBuffer);
+                        Game.BufferManager?.RemoveVertexData(mesh.VertexBuffer);
+
+                        if (mesh.IndexBuffer != null)
+                        {
+                            Game.BufferManager?.RemoveIndexData(mesh.IndexBuffer);
+                        }
 
                         //Dispose the mesh
                         mesh.Dispose();
                     }
                 }
-                this.Meshes?.Clear();
-                this.Meshes = null;
+                Meshes?.Clear();
+                Meshes = null;
 
-                this.Materials?.Clear();
-                this.Materials = null;
+                Materials?.Clear();
+                Materials = null;
 
                 //Don't dispose textures!
-                this.Textures?.Clear();
-                this.Textures = null;
+                Textures?.Clear();
+                Textures = null;
 
-                this.SkinningData = null;
+                SkinningData = null;
             }
         }
 
@@ -577,9 +527,9 @@ namespace Engine.Common
         /// </summary>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's point list</returns>
-        public Vector3[] GetPoints(bool refresh = false)
+        public IEnumerable<Vector3> GetPoints(bool refresh = false)
         {
-            return this.GetPoints(Matrix.Identity, refresh);
+            return GetPoints(Matrix.Identity, refresh);
         }
         /// <summary>
         /// Gets the drawing data's point list
@@ -587,19 +537,23 @@ namespace Engine.Common
         /// <param name="transform">Transform to apply</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's point list</returns>
-        public Vector3[] GetPoints(Matrix transform, bool refresh = false)
+        public IEnumerable<Vector3> GetPoints(Matrix transform, bool refresh = false)
         {
             List<Vector3> points = new List<Vector3>();
 
-            foreach (var dictionary in this.Meshes.Values)
+            var meshMaterialList = Meshes.Values.ToArray();
+
+            foreach (var dictionary in meshMaterialList)
             {
-                foreach (var mesh in dictionary.Values)
+                var meshList = dictionary.Values.ToArray();
+
+                foreach (var mesh in meshList)
                 {
                     var meshPoints = mesh.GetPoints(refresh);
-                    if (meshPoints != null && meshPoints.Length > 0)
+                    if (meshPoints.Any())
                     {
-                        var trnPoints = new Vector3[meshPoints.Length];
-                        Vector3.TransformCoordinate(meshPoints, ref transform, trnPoints);
+                        var trnPoints = meshPoints.ToArray();
+                        Vector3.TransformCoordinate(trnPoints, ref transform, trnPoints);
                         points.AddRange(trnPoints);
                     }
                 }
@@ -613,9 +567,9 @@ namespace Engine.Common
         /// <param name="boneTransforms">Bone transforms list</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's point list</returns>
-        public Vector3[] GetPoints(Matrix[] boneTransforms, bool refresh = false)
+        public IEnumerable<Vector3> GetPoints(Matrix[] boneTransforms, bool refresh = false)
         {
-            return this.GetPoints(Matrix.Identity, boneTransforms, refresh);
+            return GetPoints(Matrix.Identity, boneTransforms, refresh);
         }
         /// <summary>
         /// Gets the drawing data's point list
@@ -624,19 +578,23 @@ namespace Engine.Common
         /// <param name="boneTransforms">Bone transforms list</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's point list</returns>
-        public Vector3[] GetPoints(Matrix transform, Matrix[] boneTransforms, bool refresh = false)
+        public IEnumerable<Vector3> GetPoints(Matrix transform, Matrix[] boneTransforms, bool refresh = false)
         {
             List<Vector3> points = new List<Vector3>();
 
-            foreach (var dictionary in this.Meshes.Values)
+            var meshMaterialList = Meshes.Values.ToArray();
+
+            foreach (var dictionary in meshMaterialList)
             {
-                foreach (var mesh in dictionary.Values)
+                var meshList = dictionary.Values.ToArray();
+
+                foreach (var mesh in meshList)
                 {
                     var meshPoints = mesh.GetPoints(boneTransforms, refresh);
-                    if (meshPoints != null && meshPoints.Length > 0)
+                    if (meshPoints.Any())
                     {
-                        var trnPoints = new Vector3[meshPoints.Length];
-                        Vector3.TransformCoordinate(meshPoints, ref transform, trnPoints);
+                        var trnPoints = meshPoints.ToArray();
+                        Vector3.TransformCoordinate(trnPoints, ref transform, trnPoints);
                         points.AddRange(trnPoints);
                     }
                 }
@@ -649,9 +607,9 @@ namespace Engine.Common
         /// </summary>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's triangle list</returns>
-        public Triangle[] GetTriangles(bool refresh = false)
+        public IEnumerable<Triangle> GetTriangles(bool refresh = false)
         {
-            return this.GetTriangles(Matrix.Identity, refresh);
+            return GetTriangles(Matrix.Identity, refresh);
         }
         /// <summary>
         /// Gets the drawing data's triangle list
@@ -659,13 +617,17 @@ namespace Engine.Common
         /// <param name="transform">Transform to apply</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's triangle list</returns>
-        public Triangle[] GetTriangles(Matrix transform, bool refresh = false)
+        public IEnumerable<Triangle> GetTriangles(Matrix transform, bool refresh = false)
         {
             List<Triangle> triangles = new List<Triangle>();
 
-            foreach (var dictionary in this.Meshes.Values)
+            var meshMaterialList = Meshes.Values.ToArray();
+
+            foreach (var dictionary in meshMaterialList)
             {
-                foreach (var mesh in dictionary.Values)
+                var meshList = dictionary.Values.ToArray();
+
+                foreach (var mesh in meshList)
                 {
                     var meshTriangles = mesh.GetTriangles(refresh);
                     triangles.AddRange(Triangle.Transform(meshTriangles, transform));
@@ -680,9 +642,9 @@ namespace Engine.Common
         /// <param name="boneTransforms">Bone transforms list</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's triangle list</returns>
-        public Triangle[] GetTriangles(Matrix[] boneTransforms, bool refresh = false)
+        public IEnumerable<Triangle> GetTriangles(Matrix[] boneTransforms, bool refresh = false)
         {
-            return this.GetTriangles(Matrix.Identity, boneTransforms, refresh);
+            return GetTriangles(Matrix.Identity, boneTransforms, refresh);
         }
         /// <summary>
         /// Gets the drawing data's triangle list
@@ -691,13 +653,17 @@ namespace Engine.Common
         /// <param name="boneTransforms">Bone transforms list</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's triangle list</returns>
-        public Triangle[] GetTriangles(Matrix transform, Matrix[] boneTransforms, bool refresh = false)
+        public IEnumerable<Triangle> GetTriangles(Matrix transform, Matrix[] boneTransforms, bool refresh = false)
         {
             List<Triangle> triangles = new List<Triangle>();
 
-            foreach (var dictionary in this.Meshes.Values)
+            var meshMaterialList = Meshes.Values.ToArray();
+
+            foreach (var dictionary in meshMaterialList)
             {
-                foreach (var mesh in dictionary.Values)
+                var meshList = dictionary.Values.ToArray();
+
+                foreach (var mesh in meshList)
                 {
                     var meshTriangles = mesh.GetTriangles(boneTransforms, refresh);
                     triangles.AddRange(Triangle.Transform(meshTriangles, transform));
@@ -705,6 +671,20 @@ namespace Engine.Common
             }
 
             return triangles.ToArray();
+        }
+
+        /// <summary>
+        /// Gets the first mesh by mesh name
+        /// </summary>
+        /// <param name="name">Name</param>
+        public Mesh GetMeshByName(string name)
+        {
+            if (!Meshes.ContainsKey(name))
+            {
+                return null;
+            }
+
+            return Meshes[name].Values.FirstOrDefault();
         }
     }
 }

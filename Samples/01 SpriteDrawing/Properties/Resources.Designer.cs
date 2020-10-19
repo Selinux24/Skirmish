@@ -76,5 +76,16 @@ namespace SpriteDrawing.Properties {
                 return ResourceManager.GetString("Lorem", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Busca una cadena traducida similar a Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+        ///
+        ///In pretium vehicula turpis, ac volutpat augue venenatis viverra..
+        /// </summary>
+        internal static string TinyLorem {
+            get {
+                return ResourceManager.GetString("TinyLorem", resourceCulture);
+            }
+        }
     }
 }

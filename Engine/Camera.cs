@@ -3,10 +3,12 @@ using System;
 
 namespace Engine
 {
+    using Engine.Common;
+
     /// <summary>
     /// Camera 3D
     /// </summary>
-    public class Camera : IManipulator, IDisposable
+    public class Camera : IManipulator, IIntersectable, IDisposable
     {
         /// <summary>
         /// Creates an isometric camera
@@ -337,13 +339,11 @@ namespace Engine
         {
             get
             {
-                return this.Following != null ? this.Following.Position : this.position;
+                return this.Following?.Position ?? this.position;
             }
             set
             {
                 this.position = value;
-
-                if (this.Following != null) this.Following = null;
             }
         }
         /// <summary>
@@ -353,13 +353,11 @@ namespace Engine
         {
             get
             {
-                return this.Following != null ? this.Following.Interest : this.interest;
+                return this.Following?.Interest ?? this.interest;
             }
             set
             {
                 this.interest = value;
-
-                if (this.Following != null) this.Following = null;
             }
         }
         /// <summary>
@@ -488,6 +486,10 @@ namespace Engine
         /// Gets or sets whether the camera must invert the Y-delta mouse coordinate
         /// </summary>
         public bool InvertY { get; set; }
+        /// <summary>
+        /// Gets or sets the camera radius, for collision detection
+        /// </summary>
+        public float CameraRadius { get; set; } = 1f;
 
         /// <summary>
         /// Constructor
@@ -550,6 +552,8 @@ namespace Engine
         /// </summary>
         public void Update(GameTime gameTime)
         {
+            this.Velocity = Vector3.Zero;
+
             this.UpdateTranslations(gameTime);
 
             if (this.mode == CameraModes.Ortho)
@@ -1065,6 +1069,74 @@ namespace Engine
                 {
                     this.StopTranslations();
                 }
+            }
+        }
+
+        /// <summary>
+        /// Gets whether the sphere intersects with the current object
+        /// </summary>
+        /// <param name="sphere">Sphere</param>
+        /// <param name="result">Picking results</param>
+        /// <returns>Returns true if intersects</returns>
+        public bool Intersects(IntersectionVolumeSphere sphere, out PickingResult<Triangle> result)
+        {
+            result = new PickingResult<Triangle>()
+            {
+                Distance = float.MaxValue,
+            };
+
+            var bsph = new BoundingSphere(this.position, Math.Max(1f, this.CameraRadius));
+            if (bsph.Intersects(sphere))
+            {
+                float distance = Vector3.Distance(this.position, sphere.Position);
+
+                result.Distance = distance;
+                result.Position = Vector3.Normalize(this.position - sphere.Position) * distance * 0.5f;
+
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Gets whether the actual object have intersection with the intersectable or not
+        /// </summary>
+        /// <param name="detectionModeThis">Detection mode for this object</param>
+        /// <param name="other">Other intersectable</param>
+        /// <param name="detectionModeOther">Detection mode for the other object</param>
+        /// <returns>Returns true if have intersection</returns>
+        public bool Intersects(IntersectDetectionMode detectionModeThis, IIntersectable other, IntersectDetectionMode detectionModeOther)
+        {
+            return IntersectionHelper.Intersects(this, detectionModeThis, other, detectionModeOther);
+        }
+        /// <summary>
+        /// Gets whether the actual object have intersection with the volume or not
+        /// </summary>
+        /// <param name="detectionModeThis">Detection mode for this object</param>
+        /// <param name="volume">Volume</param>
+        /// <returns>Returns true if have intersection</returns>
+        public bool Intersects(IntersectDetectionMode detectionModeThis, IIntersectionVolume volume)
+        {
+            return IntersectionHelper.Intersects(this, detectionModeThis, volume);
+        }
+
+        /// <summary>
+        /// Gets the intersection volume based on the specified detection mode
+        /// </summary>
+        /// <param name="detectionMode">Detection mode</param>
+        /// <returns>Returns an intersection volume</returns>
+        public IIntersectionVolume GetIntersectionVolume(IntersectDetectionMode detectionMode)
+        {
+            if (detectionMode == IntersectDetectionMode.Sphere)
+            {
+                var bsph = new BoundingSphere(this.position, Math.Max(1f, this.CameraRadius));
+
+                return (IntersectionVolumeSphere)bsph;
+            }
+            else
+            {
+                return (IntersectionVolumeFrustum)this.Frustum;
             }
         }
     }

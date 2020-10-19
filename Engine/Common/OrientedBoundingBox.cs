@@ -17,16 +17,25 @@ namespace Engine.Common
         /// <returns>Returns the new oriented bounding box</returns>
         public static OrientedBoundingBox FromPoints(IEnumerable<Vector3> points, Matrix transform)
         {
-            var inv = Matrix.Invert(transform);
-
-            var vPoints = points.ToArray();
-            var originPoints = new Vector3[vPoints.Length];
-            Vector3.TransformCoordinate(vPoints, ref inv, originPoints);
-
-            return new OrientedBoundingBox(originPoints)
+            if (transform.IsIdentity)
             {
-                Transformation = transform
-            };
+                return new OrientedBoundingBox(points.ToArray());
+            }
+
+            //First, get item points
+            Vector3[] ptArray = points.ToArray();
+
+            //Next, remove any point transform and set points to origin
+            Matrix inv = Matrix.Invert(transform);
+            Vector3.TransformCoordinate(ptArray, ref inv, ptArray);
+
+            //Create the obb from origin points
+            var obb = new OrientedBoundingBox(ptArray);
+
+            //Apply the original transform to obb
+            obb.Transformation *= transform;
+
+            return obb;
         }
     }
 }

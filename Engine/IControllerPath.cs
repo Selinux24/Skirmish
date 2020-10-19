@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System.Collections.Generic;
 
 namespace Engine
 {
@@ -45,5 +46,11 @@ namespace Engine
         /// <param name="time">Time</param>
         /// <returns>Returns next path control point</returns>
         Vector3 GetNextControlPoint(float time);
+        /// <summary>
+        /// Samples current path in a vector array
+        /// </summary>
+        /// <param name="sampleTime">Time delta</param>
+        /// <returns>Returns a vector array</returns>
+        IEnumerable<Vector3> SamplePath(float sampleTime);
     }
 }

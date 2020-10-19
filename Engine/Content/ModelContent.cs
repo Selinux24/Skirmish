@@ -6,6 +6,7 @@ using System.Security.Permissions;
 
 namespace Engine.Content
 {
+    using Engine.Animation;
     using Engine.Common;
 
     /// <summary>
@@ -251,14 +252,22 @@ namespace Engine.Content
 
                 var matDict = this[meshName];
 
-                string matKey = string.IsNullOrEmpty(materialName) ? ModelContent.NoMaterial : materialName;
-
-                if (matDict.ContainsKey(matKey))
+                if (string.IsNullOrEmpty(materialName) || materialName == ModelContent.NoMaterial)
                 {
-                    throw new EngineException($"{matKey} already exists for {meshName}");
+                    if (!matDict.ContainsKey(ModelContent.NoMaterial))
+                    {
+                        matDict.Add(ModelContent.NoMaterial, meshContent);
+                    }
                 }
+                else
+                {
+                    if (matDict.ContainsKey(materialName))
+                    {
+                        throw new EngineException($"{materialName} already exists for {meshName}");
+                    }
 
-                matDict.Add(matKey, meshContent);
+                    matDict.Add(materialName, meshContent);
+                }
             }
             /// <summary>
             /// Gets all meshes with the specified material
@@ -340,7 +349,9 @@ namespace Engine.Content
                 return null;
             }
         }
-
+        /// <summary>
+        /// Skinning dictionary by armature name
+        /// </summary>
         [Serializable]
         public class SkinningDictionary : Dictionary<string, SkinningContent>
         {
@@ -363,6 +374,10 @@ namespace Engine.Content
 
             }
 
+            /// <summary>
+            /// Gets whether the specified joint has skinning data attached or not
+            /// </summary>
+            /// <param name="jointName">Joint name</param>
             public bool HasJointData(string jointName)
             {
                 foreach (var value in this.Values)
@@ -395,6 +410,7 @@ namespace Engine.Content
             {
 
             }
+
             /// <summary>
             /// Constructor de serialización
             /// </summary>
@@ -403,7 +419,7 @@ namespace Engine.Content
             protected AnimationDictionary(SerializationInfo info, StreamingContext context)
                 : base(info, context)
             {
-                Definition = info.GetValue<AnimationDescription>("Definition");
+                Definition = info.GetValue<AnimationDescription>(nameof(Definition));
             }
             /// <summary>
             /// Populates a SerializationInfo with the data needed to serialize the target object.
@@ -413,9 +429,9 @@ namespace Engine.Content
             [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
             public override void GetObjectData(SerializationInfo info, StreamingContext context)
             {
-                info.AddValue("Definition", Definition);
-
                 base.GetObjectData(info, context);
+
+                info.AddValue(nameof(Definition), Definition);
             }
 
             /// <summary>
@@ -476,8 +492,9 @@ namespace Engine.Content
         /// Skinning information
         /// </summary>
         public SkinningDictionary SkinningInfo { get; set; } = new SkinningDictionary();
+
         /// <summary>
-        /// Generate triangle list model content from scratch
+        /// Generates a triangle list model content from scratch
         /// </summary>
         /// <param name="vertices">Vertex list</param>
         /// <param name="indices">Index list</param>
@@ -485,7 +502,33 @@ namespace Engine.Content
         /// <returns>Returns new model content</returns>
         public static ModelContent GenerateTriangleList(IEnumerable<VertexData> vertices, IEnumerable<uint> indices, MaterialContent material = null)
         {
-            return Generate(Topology.TriangleList, vertices, indices, material);
+            var materials = new[] { material ?? MaterialContent.Default };
+
+            return Generate(Topology.TriangleList, vertices, indices, materials);
+        }
+        /// <summary>
+        /// Generates a triangle list model content from geometry descriptor
+        /// </summary>
+        /// <param name="geometry">Geometry descriptor</param>
+        /// <param name="material">Material</param>
+        /// <returns>Returns new model content</returns>
+        public static ModelContent GenerateTriangleList(GeometryDescriptor geometry, MaterialContent material = null)
+        {
+            var vertices = VertexData.FromDescriptor(geometry);
+            var materials = new[] { material ?? MaterialContent.Default };
+
+            return Generate(Topology.TriangleList, vertices, geometry.Indices, materials);
+        }
+        /// <summary>
+        /// Generates a triangle list model content from scratch
+        /// </summary>
+        /// <param name="vertices">Vertex list</param>
+        /// <param name="indices">Index list</param>
+        /// <param name="materials">Material list</param>
+        /// <returns>Returns new model content</returns>
+        public static ModelContent GenerateTriangleList(IEnumerable<VertexData> vertices, IEnumerable<uint> indices, IEnumerable<MaterialContent> materials)
+        {
+            return Generate(Topology.TriangleList, vertices, indices, materials);
         }
         /// <summary>
         /// Generate model content from scratch
@@ -493,74 +536,41 @@ namespace Engine.Content
         /// <param name="topology">Topology</param>
         /// <param name="vertices">Vertex list</param>
         /// <param name="indices">Index list</param>
-        /// <param name="material">Material</param>
+        /// <param name="materials">Material list</param>
         /// <returns>Returns new model content</returns>
-        private static ModelContent Generate(Topology topology, IEnumerable<VertexData> vertices, IEnumerable<uint> indices, MaterialContent material = null)
+        private static ModelContent Generate(Topology topology, IEnumerable<VertexData> vertices, IEnumerable<uint> indices, IEnumerable<MaterialContent> materials)
         {
             ModelContent modelContent = new ModelContent();
+            string materialName = NoMaterial;
+            bool textured = false;
 
-            if (material != null)
+            if (materials.Count() == 1)
             {
-                modelContent.Images.Import(ref material);
+                modelContent.AddMaterial(DefaultMaterial, materials.First());
 
-                modelContent.Materials.Add(ModelContent.DefaultMaterial, material);
+                materialName = DefaultMaterial;
+                textured = materials.First().DiffuseTexture != null;
             }
+            else if (materials.Count() > 1)
+            {
+                for (int i = 0; i < materials.Count(); i++)
+                {
+                    string name = i == 0 ? DefaultMaterial : $"{DefaultMaterial}_{i}";
 
-            var materialName = material != null ? ModelContent.DefaultMaterial : ModelContent.NoMaterial;
-            var textured = modelContent.Materials[materialName].DiffuseTexture != null;
+                    modelContent.AddMaterial(name, materials.ElementAt(i));
+                }
+
+                materialName = DefaultMaterial;
+                textured = materials.First().DiffuseTexture != null;
+            }
 
             SubMeshContent geo = new SubMeshContent(topology, materialName, textured, false);
 
             geo.SetVertices(vertices);
             geo.SetIndices(indices);
 
-            modelContent.Geometry.Add(ModelContent.StaticMesh, material != null ? ModelContent.DefaultMaterial : ModelContent.NoMaterial, geo);
+            modelContent.Geometry.Add(StaticMesh, materialName, geo);
             modelContent.Optimize();
-
-            return modelContent;
-        }
-        /// <summary>
-        /// Generates a new model content from an height map
-        /// </summary>
-        /// <param name="contentFolder">Content folder</param>
-        /// <param name="heightMap">Height map</param>
-        /// <param name="textures">Texture list</param>
-        /// <param name="cellSize">Cell size</param>
-        /// <param name="cellHeight">Cell height</param>
-        /// <returns>Returns a new model content</returns>
-        public static ModelContent FromHeightmap(string contentFolder, string heightMap, IEnumerable<string> textures, float cellSize, float cellHeight)
-        {
-            ModelContent modelContent = new ModelContent();
-
-            string texureName = "texture";
-            string materialName = "material";
-            string geoName = "geometry";
-
-            ImageContent heightMapImage = new ImageContent()
-            {
-                Streams = ContentManager.FindContent(contentFolder, heightMap),
-            };
-
-            ImageContent textureImage = new ImageContent()
-            {
-                Streams = ContentManager.FindContent(contentFolder, textures),
-            };
-
-            MaterialContent material = MaterialContent.Default;
-            material.DiffuseTexture = texureName;
-
-            HeightMap hm = HeightMap.FromStream(heightMapImage.Stream, null);
-
-            hm.BuildGeometry(cellSize, cellHeight, out var vertices, out var indices);
-
-            SubMeshContent geo = new SubMeshContent(Topology.TriangleList, materialName, true, false);
-
-            geo.SetVertices(vertices);
-            geo.SetIndices(indices);
-
-            modelContent.Images.Add(texureName, textureImage);
-            modelContent.Materials.Add(materialName, material);
-            modelContent.Geometry.Add(geoName, materialName, geo);
 
             return modelContent;
         }
@@ -972,12 +982,14 @@ namespace Engine.Content
                     .Any(j => g.Key.StartsWith($"{j}_pose_matrix", StringComparison.OrdinalIgnoreCase));
             });
 
-            if (animations.Any())
+            if (!animations.Any())
             {
-                foreach (var a in animations)
-                {
-                    res.Animations.Add(a.Key, a.Value);
-                }
+                return;
+            }
+
+            foreach (var a in animations)
+            {
+                res.Animations.Add(a.Key, a.Value);
             }
 
             var clips = this.Animations.Definition.Clips
@@ -1178,6 +1190,46 @@ namespace Engine.Content
             }
 
             return count;
+        }
+
+        /// <summary>
+        /// Gets the content lights
+        /// </summary>
+        public IEnumerable<SceneLight> GetLights()
+        {
+            List<SceneLight> lights = new List<SceneLight>();
+
+            foreach (var key in Lights.Keys)
+            {
+                var l = Lights[key];
+
+                if (l.LightType == LightContentTypes.Point)
+                {
+                    lights.Add(l.CreatePointLight());
+                }
+                else if (l.LightType == LightContentTypes.Spot)
+                {
+                    lights.Add(l.CreateSpotLight());
+                }
+            }
+
+            return lights.ToArray();
+        }
+
+        /// <summary>
+        /// Adds a material content to the model content
+        /// </summary>
+        /// <param name="name">Material name</param>
+        /// <param name="material">Material content</param>
+        public void AddMaterial(string name, MaterialContent material)
+        {
+            if (material == null)
+            {
+                return;
+            }
+
+            Images.Import(ref material);
+            Materials.Add(name, material);
         }
     }
 }

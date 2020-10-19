@@ -16,6 +16,10 @@ namespace Engine.Common
         /// </summary>
         Billboard,
         /// <summary>
+        /// Font
+        /// </summary>
+        Font,
+        /// <summary>
         /// CPU Particle
         /// </summary>
         CPUParticle,

@@ -7,6 +7,32 @@
     <RootNamespace>Collada</RootNamespace>
     <AssemblyName>Collada</AssemblyName>
     <Platforms>AnyCPU;x64;x86</Platforms>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>\\ZBOX\Compartido\Autoinstalables\SharpDX\Collada\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Unc</InstallFrom>
+    <UpdateEnabled>true</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>13</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <PublishWizardCompleted>true</PublishWizardCompleted>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+    <SonarQubeTestProject>
+    </SonarQubeTestProject>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -98,6 +124,18 @@
     <None Remove="Resources\SceneStart\backGround.jpg" />
     <None Remove="Resources\SceneStart\SkyPlane.dae" />
     <None Remove="Resources\SceneStart\SkyPlane.xml" />
+    <Reference Include="SharpDX, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\SharpDX.4.2.0\lib\net45\SharpDX.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX.Mathematics, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\SharpDX.Mathematics.4.2.0\lib\net45\SharpDX.Mathematics.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -106,23 +144,40 @@
     </Content>
     <Content Include="Resources\Common\Electro_1.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <Compile Include="ModularDungeon\ObstacleInfo.cs" />
+    <Compile Include="DungeonWall\SceneDungeonWall.cs" />
+    <Compile Include="ModularDungeon\SceneModularDungeon.cs" />
+    <Compile Include="NavMeshTest\SceneNavmeshTest.cs" />
+    <Compile Include="Player.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Dungeon\SceneDungeon.cs" />
+    <Compile Include="Start\SceneStart.cs" />
+    <Compile Include="UIControlExtensions.cs" />
+    <Content Include="ModularDungeon\Resources\BasicDungeon\BasicDungeon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Common\HipHoppy_1.wav">
+    <Content Include="ModularDungeon\Resources\OnePageDungeons\desert_catacombs_of_the_golden_witch.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Common\pointer.png">
+    <Content Include="ModularDungeon\Resources\OnePageDungeons\halls_of_pain.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Common\push.wav">
+    <Content Include="ModularDungeon\Resources\OnePageDungeons\infected_chambers_of_arhun-kyron.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\SceneDungeonWall\diffuse.dds">
+    <Content Include="ModularDungeon\Resources\OnePageDungeons\maze_of_the_purple_god.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\SceneDungeonWall\normal.bmp">
+    <Content Include="ModularDungeon\Resources\OnePageDungeons\ragerock_fortress.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Start\Resources\Electro_1.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\SceneDungeonWall\Wall.dae">
+    <Content Include="Start\Resources\HipHoppy_1.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
@@ -148,9 +203,10 @@
       <SubType>Designer</SubType>
     </Content>
     <Content Include="Resources\SceneModularDungeon\atlas1.jpg">
+    <Content Include="Start\Resources\pointer.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\SceneModularDungeon\Audio\Effects\door.wav">
+    <Content Include="Start\Resources\buttons.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\SceneModularDungeon\Audio\Effects\ladder.wav">
@@ -163,37 +219,48 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\SceneModularDungeon\Audio\Effects\mouse2.wav">
+    <Content Include="Start\Resources\push.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\SceneModularDungeon\Audio\Effects\Wind1_S.wav">
+    <Content Include="DungeonWall\Resources\diffuse.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\SceneModularDungeon\Audio\Effects\Wind2_S.wav">
+    <Content Include="DungeonWall\Resources\normal.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\SceneModularDungeon\Audio\Effects\Wind3_S.wav">
+    <Content Include="ModularDungeon\Resources\Audio\Effects\mouse2.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\Audio\Effects\mouse1.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\SceneModularDungeon\bark_d.dds">
+    <Content Include="ModularDungeon\Resources\Audio\Effects\door.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\SceneModularDungeon\bark_n.dds">
+    <Content Include="ModularDungeon\Resources\Audio\Effects\loop_torch.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\SceneModularDungeon\brick_d.png">
+    <Content Include="ModularDungeon\Resources\Audio\Effects\ladder.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\SceneModularDungeon\brick_n.png">
+    <Content Include="ModularDungeon\Resources\Audio\Effects\Wind1_S.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\SceneModularDungeon\bronze_d.jpg">
+    <Content Include="ModularDungeon\Resources\Audio\Effects\Wind2_S.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\SceneModularDungeon\bronze_n.jpg">
+    <Content Include="ModularDungeon\Resources\Audio\Effects\Wind3_S.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\SceneModularDungeon\candleLight.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\bench_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\bookshelf_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\crane_1_d.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\SceneModularDungeon\Characters\Human2\Human2.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -206,17 +273,54 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\SceneModularDungeon\Characters\Rat\Rat.xml">
+    <Content Include="ModularDungeon\Resources\BasicDungeon\crane_2_d.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\fire_d.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\Levels.xml">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\atlas1.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\bark_d.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\bark_n.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\brick_d.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\brick_n.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\bronze_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\bronze_n.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\candleLight.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\Characters\Human2\Human2.xml">
+      <SubType>Designer</SubType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="Resources\SceneModularDungeon\Characters\Rat\Rat_d.png">
+    <Content Include="ModularDungeon\Resources\Characters\Rat\Rat.xml">
+      <SubType>Designer</SubType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\SceneModularDungeon\crate_d.jpg">
+    <Content Include="ModularDungeon\Resources\Characters\Rat\Rat_d.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\SceneModularDungeon\crate_n.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\crate_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\SceneModularDungeon\fire.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -235,11 +339,34 @@
     </Content>
     <Content Include="Resources\SceneModularDungeon\jewels_d.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\crate_n.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\SceneModularDungeon\lava_d.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\furniture_atlas_1.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\SceneModularDungeon\lava_n.jpg">
+    <Content Include="ModularDungeon\Resources\BasicDungeon\green-algae.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\jewels_d.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\marble_d.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\metal_rust_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\oil_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\Pedestal_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\rag_d.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\fire.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\SceneModularDungeon\Levels.xml">
@@ -269,8 +396,47 @@
     </Content>
     <Content Include="Resources\SceneModularDungeon\stuff_map.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\lava_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\SceneModularDungeon\torch.jpg">
+    <Content Include="ModularDungeon\Resources\BasicDungeon\lava_n.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\rock_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\rock_n.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\AssetsMap.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\rug.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\Statue_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\stuff_map.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\treasure_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\wall_n.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\wall_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\floor_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\floor_n.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\Assets.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\SceneModularDungeon\treasure_d.jpg">
@@ -283,9 +449,66 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\SceneModularDungeon\wood_d.jpg">
+    <Content Include="ModularDungeon\Resources\BasicDungeon\torch.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="DungeonWall\Resources\Wall.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\wood_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\wrack1_d.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="NavMeshTest\Resources\dungeon.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="NavMeshTest\Resources\modular_dungeon.xml">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Dungeon\Resources\Dungeon.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Start\Resources\backGround.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Start\Resources\SkyPlane.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="04 Collada.ruleset" />
+    <Content Include="ModularDungeon\Resources\OnePageDungeons\desert_catacombs_of_the_golden_witch.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\OnePageDungeons\infected_chambers_of_arhun-kyron.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Content Include="Dungeon\Resources\Dungeon.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\SceneNavmeshTest\modular_dungeon.obj">
+    <Content Include="DungeonWall\Resources\Wall.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\SceneNavmeshTest\modular_dungeon.xml">
@@ -299,16 +522,68 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\SceneStart\SkyPlane.xml">
+    <Content Include="ModularDungeon\Resources\BasicDungeon\Assets.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="ModularDungeon\Resources\Characters\Rat\Rat.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\Characters\Human2\Human2.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Start\Resources\SkyPlane.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="NavMeshTest\Resources\modular_dungeon.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="NavMeshTest\Resources\dungeon.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\OnePageDungeons\ragerock_fortress.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\OnePageDungeons\maze_of_the_purple_god.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\OnePageDungeons\halls_of_pain.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Start\Resources\HelveticaNeue Medium.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Start\Resources\HelveticaNeueHv.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Resources\SceneModularDungeon\Audio\Music\" />
+    <Folder Include="ModularDungeon\Resources\Audio\Music\" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Engine\Engine.csproj" />
+    <ProjectReference Include="..\..\Engine.Content.FmtCollada\Engine.Content.FmtCollada.csproj">
+      <Project>{B5E51939-46DC-412D-A096-E1C892F95FB3}</Project>
+      <Name>Engine.Content.FmtCollada</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Engine.Content.FmtObj\Engine.Content.FmtObj.csproj">
+      <Project>{18852FDD-B099-4C91-A970-7B4A087B7554}</Project>
+      <Name>Engine.Content.FmtObj</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Engine.Content.OnePageDungeon\Engine.Content.OnePageDungeon.csproj">
+      <Project>{51447110-6f70-4c88-acf0-070daf4d3b18}</Project>
+      <Name>Engine.Content.OnePageDungeon</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Engine.PathFinding.RecastNavigation\Engine.PathFinding.RecastNavigation.csproj">
+      <Project>{0d7d6c77-588e-4371-a815-a58b87653991}</Project>
+      <Name>Engine.PathFinding.RecastNavigation</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Engine\Engine.csproj">
+      <Project>{a4bac380-82cb-4db8-953f-a291f0bef559}</Project>
+      <Name>Engine</Name>
+    </ProjectReference>
   </ItemGroup>
 
 </Project>

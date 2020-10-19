@@ -1,5 +1,7 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Engine.Common
@@ -31,18 +33,21 @@ namespace Engine.Common
         /// <param name="vertices">Vertices</param>
         /// <param name="uvs">Uv texture coordinates</param>
         /// <returns>Returns the new generated vertex array</returns>
-        public static VertexPositionTexture[] Generate(Vector3[] vertices, Vector2[] uvs)
+        public static IEnumerable<VertexPositionTexture> Generate(IEnumerable<Vector3> vertices, IEnumerable<Vector2> uvs)
         {
-            if (vertices.Length != uvs.Length) throw new ArgumentException("Vertices and uvs must have the same length");
+            if (vertices.Count() != uvs.Count()) throw new ArgumentException("Vertices and uvs must have the same length");
 
-            VertexPositionTexture[] res = new VertexPositionTexture[vertices.Length];
+            var vArray = vertices.ToArray();
+            var uvArray = uvs.ToArray();
 
-            for (int i = 0; i < vertices.Length; i++)
+            List<VertexPositionTexture> res = new List<VertexPositionTexture>();
+
+            for (int i = 0; i < vArray.Length; i++)
             {
-                res[i] = new VertexPositionTexture() { Position = vertices[i], Texture = uvs[i] };
+                res.Add(new VertexPositionTexture() { Position = vArray[i], Texture = uvArray[i] });
             }
 
-            return res;
+            return res.ToArray();
         }
 
         /// <summary>

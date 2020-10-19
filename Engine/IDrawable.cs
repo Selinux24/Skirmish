@@ -9,6 +9,11 @@ namespace Engine
     public interface IDrawable
     {
         /// <summary>
+        /// Visible
+        /// </summary>
+        bool Visible { get; set; }
+
+        /// <summary>
         /// Draw shadows
         /// </summary>
         /// <param name="context">Context</param>

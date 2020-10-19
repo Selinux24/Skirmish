@@ -26,7 +26,11 @@ namespace Engine
         /// <summary>
         /// Frame count
         /// </summary>
-        public static long FrameCount { get; set; } = 0;
+        public static int FrameCount { get; set; }
+        /// <summary>
+        /// Frame per second
+        /// </summary>
+        public static long FramesPerSecond { get; set; } = 0;
         /// <summary>
         /// Frame time
         /// </summary>
@@ -246,7 +250,7 @@ namespace Engine
         /// </summary>
         public static void ClearAll()
         {
-            FrameCount = 0;
+            FramesPerSecond = 0;
 
             DrawCallsPerFrame = 0;
 

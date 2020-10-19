@@ -40,7 +40,7 @@ namespace Engine
             {
                 var indexList = GeometryUtil.GenerateIndices(shapeId.LevelOfDetail, shapeId.Shape, trianglesPerNode);
 
-                return bufferManager.Add(string.Format("{0}.{1}", shapeId.LevelOfDetail, shapeId.Shape), indexList, false);
+                return bufferManager.AddIndexData(string.Format("{0}.{1}", shapeId.LevelOfDetail, shapeId.Shape), false, indexList);
             }
 
             /// <summary>
@@ -52,10 +52,6 @@ namespace Engine
             /// Game
             /// </summary>
             public Game Game = null;
-            /// <summary>
-            /// Buffer manager
-            /// </summary>
-            public BufferManager BufferManager = null;
             /// <summary>
             /// High resolution nodes
             /// </summary>
@@ -93,30 +89,29 @@ namespace Engine
             /// Constructor
             /// </summary>
             /// <param name="game">Game instance</param>
+            /// <param name="mapName">Map name</param>
             /// <param name="vertices">Vertices to map</param>
             /// <param name="trianglesPerNode">Triangles per terrain node</param>
-            /// <param name="bufferManager">Buffer manager</param>
-            public MapGrid(Game game, BufferManager bufferManager, IEnumerable<VertexData> vertices, int trianglesPerNode)
+            public MapGrid(Game game, string mapName, IEnumerable<VertexData> vertices, int trianglesPerNode)
             {
-                this.Game = game;
-                this.BufferManager = bufferManager;
+                Game = game;
 
                 //Populate collections
-                for (int i = 0; i < this.NodesHigh.Length; i++)
+                for (int i = 0; i < NodesHigh.Length; i++)
                 {
-                    this.NodesHigh[i] = new MapGridNode();
+                    NodesHigh[i] = new MapGridNode();
                 }
-                for (int i = 0; i < this.NodesMedium.Length; i++)
+                for (int i = 0; i < NodesMedium.Length; i++)
                 {
-                    this.NodesMedium[i] = new MapGridNode();
+                    NodesMedium[i] = new MapGridNode();
                 }
-                for (int i = 0; i < this.NodesLow.Length; i++)
+                for (int i = 0; i < NodesLow.Length; i++)
                 {
-                    this.NodesLow[i] = new MapGridNode();
+                    NodesLow[i] = new MapGridNode();
                 }
-                for (int i = 0; i < this.NodesMinimum.Length; i++)
+                for (int i = 0; i < NodesMinimum.Length; i++)
                 {
-                    this.NodesMinimum[i] = new MapGridNode();
+                    NodesMinimum[i] = new MapGridNode();
                 }
 
                 var lodList = new[]
@@ -148,19 +143,19 @@ namespace Engine
                     {
                         var id = new MapGridShapeId() { LevelOfDetail = lod, Shape = shape };
 
-                        this.dictIB.Add(id, CreateDescriptor(id, trianglesPerNode, bufferManager));
+                        dictIB.Add(id, CreateDescriptor(id, trianglesPerNode, game.BufferManager));
                     }
                 }
 
-                this.drawingQuadTree = new QuadTree<VertexData>(vertices, LODLevels);
+                drawingQuadTree = new QuadTree<VertexData>(vertices, LODLevels);
 
                 //Populate nodes dictionary
-                var nodes = this.drawingQuadTree.GetLeafNodes();
+                var nodes = drawingQuadTree.GetLeafNodes();
                 foreach (var node in nodes)
                 {
                     var data = VertexData.Convert(VertexTypes.Terrain, node.Items, null, null);
 
-                    this.dictVB.Add(node.Id, bufferManager.Add("", data.ToArray(), false, 1));
+                    dictVB.Add(node.Id, game.BufferManager.AddVertexData(mapName, false, data));
                 }
             }
             /// <summary>
@@ -187,38 +182,38 @@ namespace Engine
             {
                 if (disposing)
                 {
-                    if (this.BufferManager != null)
+                    if (Game.BufferManager != null)
                     {
                         //Remove data from buffer manager
-                        foreach (var vb in this.dictVB.Values)
+                        foreach (var vb in dictVB.Values)
                         {
-                            this.BufferManager.RemoveVertexData(vb);
+                            Game.BufferManager.RemoveVertexData(vb);
                         }
-                        foreach (var ib in this.dictIB.Values)
+                        foreach (var ib in dictIB.Values)
                         {
                             //Remove data from buffer manager
-                            this.BufferManager.RemoveIndexData(ib);
+                            Game.BufferManager.RemoveIndexData(ib);
                         }
                     }
 
-                    if (this.dictVB != null)
+                    if (dictVB != null)
                     {
-                        this.dictVB.Clear();
-                        this.dictVB = null;
+                        dictVB.Clear();
+                        dictVB = null;
                     }
 
-                    if (this.dictIB != null)
+                    if (dictIB != null)
                     {
-                        this.dictIB.Clear();
-                        this.dictIB = null;
+                        dictIB.Clear();
+                        dictIB = null;
                     }
 
-                    this.drawingQuadTree = null;
+                    drawingQuadTree = null;
 
-                    this.NodesHigh = null;
-                    this.NodesMedium = null;
-                    this.NodesLow = null;
-                    this.NodesMinimum = null;
+                    NodesHigh = null;
+                    NodesMedium = null;
+                    NodesLow = null;
+                    NodesMinimum = null;
                 }
             }
 
@@ -228,17 +223,17 @@ namespace Engine
             /// <param name="eyePosition">Eye position</param>
             public void Update(Vector3 eyePosition)
             {
-                if (!this.updatingNodes)
+                if (!updatingNodes)
                 {
                     var task = Task.Run(() =>
                     {
-                        this.updatingNodes = true;
-                        this.UpdateNodes(eyePosition);
+                        updatingNodes = true;
+                        UpdateNodes(eyePosition);
                     });
 
                     task.ContinueWith((t) =>
                     {
-                        this.updatingNodes = false;
+                        updatingNodes = false;
                     });
                 }
             }
@@ -248,105 +243,105 @@ namespace Engine
             /// <param name="eyePosition">Eye position</param>
             private void UpdateNodes(Vector3 eyePosition)
             {
-                var node = this.drawingQuadTree.FindNode(eyePosition);
+                var node = drawingQuadTree.FindNode(eyePosition);
 
-                if (node != null && this.lastNode != node)
+                if (node != null && lastNode != node)
                 {
-                    this.lastNode = node;
+                    lastNode = node;
 
-                    this.NodesHigh[0].Set(LevelOfDetail.High, IndexBufferShapes.SideTop, IndexBufferShapes.SideTop, node, this.dictVB, this.dictIB);
-                    this.NodesHigh[1].Set(LevelOfDetail.High, IndexBufferShapes.SideBottom, IndexBufferShapes.SideBottom, node, this.dictVB, this.dictIB);
-                    this.NodesHigh[2].Set(LevelOfDetail.High, IndexBufferShapes.SideLeft, IndexBufferShapes.SideLeft, node, this.dictVB, this.dictIB);
-                    this.NodesHigh[3].Set(LevelOfDetail.High, IndexBufferShapes.SideRight, IndexBufferShapes.SideRight, node, this.dictVB, this.dictIB);
-                    this.NodesHigh[4].Set(LevelOfDetail.High, IndexBufferShapes.CornerTopLeft, IndexBufferShapes.CornerTopLeft, node, this.dictVB, this.dictIB);
-                    this.NodesHigh[5].Set(LevelOfDetail.High, IndexBufferShapes.CornerTopRight, IndexBufferShapes.CornerTopRight, node, this.dictVB, this.dictIB);
-                    this.NodesHigh[6].Set(LevelOfDetail.High, IndexBufferShapes.CornerBottomLeft, IndexBufferShapes.CornerBottomLeft, node, this.dictVB, this.dictIB);
-                    this.NodesHigh[7].Set(LevelOfDetail.High, IndexBufferShapes.CornerBottomRight, IndexBufferShapes.CornerBottomRight, node, this.dictVB, this.dictIB);
-                    this.NodesHigh[8].Set(LevelOfDetail.High, IndexBufferShapes.Full, IndexBufferShapes.Full, node, this.dictVB, this.dictIB);
+                    NodesHigh[0].Set(LevelOfDetail.High, IndexBufferShapes.SideTop, IndexBufferShapes.SideTop, node, dictVB, dictIB);
+                    NodesHigh[1].Set(LevelOfDetail.High, IndexBufferShapes.SideBottom, IndexBufferShapes.SideBottom, node, dictVB, dictIB);
+                    NodesHigh[2].Set(LevelOfDetail.High, IndexBufferShapes.SideLeft, IndexBufferShapes.SideLeft, node, dictVB, dictIB);
+                    NodesHigh[3].Set(LevelOfDetail.High, IndexBufferShapes.SideRight, IndexBufferShapes.SideRight, node, dictVB, dictIB);
+                    NodesHigh[4].Set(LevelOfDetail.High, IndexBufferShapes.CornerTopLeft, IndexBufferShapes.CornerTopLeft, node, dictVB, dictIB);
+                    NodesHigh[5].Set(LevelOfDetail.High, IndexBufferShapes.CornerTopRight, IndexBufferShapes.CornerTopRight, node, dictVB, dictIB);
+                    NodesHigh[6].Set(LevelOfDetail.High, IndexBufferShapes.CornerBottomLeft, IndexBufferShapes.CornerBottomLeft, node, dictVB, dictIB);
+                    NodesHigh[7].Set(LevelOfDetail.High, IndexBufferShapes.CornerBottomRight, IndexBufferShapes.CornerBottomRight, node, dictVB, dictIB);
+                    NodesHigh[8].Set(LevelOfDetail.High, IndexBufferShapes.Full, IndexBufferShapes.Full, node, dictVB, dictIB);
 
-                    this.NodesMedium[0].Set(LevelOfDetail.Medium, IndexBufferShapes.SideTop, IndexBufferShapes.SideTop, this.NodesHigh[0].Node, this.dictVB, this.dictIB);
-                    this.NodesMedium[1].Set(LevelOfDetail.Medium, IndexBufferShapes.SideTop, IndexBufferShapes.SideLeft, this.NodesMedium[0].Node, this.dictVB, this.dictIB);
-                    this.NodesMedium[2].Set(LevelOfDetail.Medium, IndexBufferShapes.CornerTopLeft, IndexBufferShapes.SideLeft, this.NodesMedium[1].Node, this.dictVB, this.dictIB);
-                    this.NodesMedium[3].Set(LevelOfDetail.Medium, IndexBufferShapes.SideTop, IndexBufferShapes.SideRight, this.NodesMedium[0].Node, this.dictVB, this.dictIB);
-                    this.NodesMedium[4].Set(LevelOfDetail.Medium, IndexBufferShapes.CornerTopRight, IndexBufferShapes.SideRight, this.NodesMedium[3].Node, this.dictVB, this.dictIB);
+                    NodesMedium[0].Set(LevelOfDetail.Medium, IndexBufferShapes.SideTop, IndexBufferShapes.SideTop, NodesHigh[0].Node, dictVB, dictIB);
+                    NodesMedium[1].Set(LevelOfDetail.Medium, IndexBufferShapes.SideTop, IndexBufferShapes.SideLeft, NodesMedium[0].Node, dictVB, dictIB);
+                    NodesMedium[2].Set(LevelOfDetail.Medium, IndexBufferShapes.CornerTopLeft, IndexBufferShapes.SideLeft, NodesMedium[1].Node, dictVB, dictIB);
+                    NodesMedium[3].Set(LevelOfDetail.Medium, IndexBufferShapes.SideTop, IndexBufferShapes.SideRight, NodesMedium[0].Node, dictVB, dictIB);
+                    NodesMedium[4].Set(LevelOfDetail.Medium, IndexBufferShapes.CornerTopRight, IndexBufferShapes.SideRight, NodesMedium[3].Node, dictVB, dictIB);
 
-                    this.NodesMedium[5].Set(LevelOfDetail.Medium, IndexBufferShapes.SideBottom, IndexBufferShapes.SideBottom, this.NodesHigh[1].Node, this.dictVB, this.dictIB);
-                    this.NodesMedium[6].Set(LevelOfDetail.Medium, IndexBufferShapes.SideBottom, IndexBufferShapes.SideLeft, this.NodesMedium[5].Node, this.dictVB, this.dictIB);
-                    this.NodesMedium[7].Set(LevelOfDetail.Medium, IndexBufferShapes.CornerBottomLeft, IndexBufferShapes.SideLeft, this.NodesMedium[6].Node, this.dictVB, this.dictIB);
-                    this.NodesMedium[8].Set(LevelOfDetail.Medium, IndexBufferShapes.SideBottom, IndexBufferShapes.SideRight, this.NodesMedium[5].Node, this.dictVB, this.dictIB);
-                    this.NodesMedium[9].Set(LevelOfDetail.Medium, IndexBufferShapes.CornerBottomRight, IndexBufferShapes.SideRight, this.NodesMedium[8].Node, this.dictVB, this.dictIB);
+                    NodesMedium[5].Set(LevelOfDetail.Medium, IndexBufferShapes.SideBottom, IndexBufferShapes.SideBottom, NodesHigh[1].Node, dictVB, dictIB);
+                    NodesMedium[6].Set(LevelOfDetail.Medium, IndexBufferShapes.SideBottom, IndexBufferShapes.SideLeft, NodesMedium[5].Node, dictVB, dictIB);
+                    NodesMedium[7].Set(LevelOfDetail.Medium, IndexBufferShapes.CornerBottomLeft, IndexBufferShapes.SideLeft, NodesMedium[6].Node, dictVB, dictIB);
+                    NodesMedium[8].Set(LevelOfDetail.Medium, IndexBufferShapes.SideBottom, IndexBufferShapes.SideRight, NodesMedium[5].Node, dictVB, dictIB);
+                    NodesMedium[9].Set(LevelOfDetail.Medium, IndexBufferShapes.CornerBottomRight, IndexBufferShapes.SideRight, NodesMedium[8].Node, dictVB, dictIB);
 
-                    this.NodesMedium[10].Set(LevelOfDetail.Medium, IndexBufferShapes.SideLeft, IndexBufferShapes.SideLeft, this.NodesHigh[2].Node, this.dictVB, this.dictIB);
-                    this.NodesMedium[11].Set(LevelOfDetail.Medium, IndexBufferShapes.SideLeft, IndexBufferShapes.SideTop, this.NodesMedium[10].Node, this.dictVB, this.dictIB);
-                    this.NodesMedium[12].Set(LevelOfDetail.Medium, IndexBufferShapes.SideLeft, IndexBufferShapes.SideBottom, this.NodesMedium[10].Node, this.dictVB, this.dictIB);
+                    NodesMedium[10].Set(LevelOfDetail.Medium, IndexBufferShapes.SideLeft, IndexBufferShapes.SideLeft, NodesHigh[2].Node, dictVB, dictIB);
+                    NodesMedium[11].Set(LevelOfDetail.Medium, IndexBufferShapes.SideLeft, IndexBufferShapes.SideTop, NodesMedium[10].Node, dictVB, dictIB);
+                    NodesMedium[12].Set(LevelOfDetail.Medium, IndexBufferShapes.SideLeft, IndexBufferShapes.SideBottom, NodesMedium[10].Node, dictVB, dictIB);
 
-                    this.NodesMedium[13].Set(LevelOfDetail.Medium, IndexBufferShapes.SideRight, IndexBufferShapes.SideRight, this.NodesHigh[3].Node, this.dictVB, this.dictIB);
-                    this.NodesMedium[14].Set(LevelOfDetail.Medium, IndexBufferShapes.SideRight, IndexBufferShapes.SideTop, this.NodesMedium[13].Node, this.dictVB, this.dictIB);
-                    this.NodesMedium[15].Set(LevelOfDetail.Medium, IndexBufferShapes.SideRight, IndexBufferShapes.SideBottom, this.NodesMedium[13].Node, this.dictVB, this.dictIB);
+                    NodesMedium[13].Set(LevelOfDetail.Medium, IndexBufferShapes.SideRight, IndexBufferShapes.SideRight, NodesHigh[3].Node, dictVB, dictIB);
+                    NodesMedium[14].Set(LevelOfDetail.Medium, IndexBufferShapes.SideRight, IndexBufferShapes.SideTop, NodesMedium[13].Node, dictVB, dictIB);
+                    NodesMedium[15].Set(LevelOfDetail.Medium, IndexBufferShapes.SideRight, IndexBufferShapes.SideBottom, NodesMedium[13].Node, dictVB, dictIB);
 
-                    this.NodesLow[0].Set(LevelOfDetail.Low, IndexBufferShapes.SideTop, IndexBufferShapes.SideTop, this.NodesMedium[0].Node, this.dictVB, this.dictIB);
-                    this.NodesLow[1].Set(LevelOfDetail.Low, IndexBufferShapes.SideTop, IndexBufferShapes.SideLeft, this.NodesLow[0].Node, this.dictVB, this.dictIB);
-                    this.NodesLow[2].Set(LevelOfDetail.Low, IndexBufferShapes.SideTop, IndexBufferShapes.SideLeft, this.NodesLow[1].Node, this.dictVB, this.dictIB);
-                    this.NodesLow[3].Set(LevelOfDetail.Low, IndexBufferShapes.CornerTopLeft, IndexBufferShapes.SideLeft, this.NodesLow[2].Node, this.dictVB, this.dictIB);
-                    this.NodesLow[4].Set(LevelOfDetail.Low, IndexBufferShapes.SideTop, IndexBufferShapes.SideRight, this.NodesLow[0].Node, this.dictVB, this.dictIB);
-                    this.NodesLow[5].Set(LevelOfDetail.Low, IndexBufferShapes.SideTop, IndexBufferShapes.SideRight, this.NodesLow[4].Node, this.dictVB, this.dictIB);
-                    this.NodesLow[6].Set(LevelOfDetail.Low, IndexBufferShapes.CornerTopRight, IndexBufferShapes.SideRight, this.NodesLow[5].Node, this.dictVB, this.dictIB);
+                    NodesLow[0].Set(LevelOfDetail.Low, IndexBufferShapes.SideTop, IndexBufferShapes.SideTop, NodesMedium[0].Node, dictVB, dictIB);
+                    NodesLow[1].Set(LevelOfDetail.Low, IndexBufferShapes.SideTop, IndexBufferShapes.SideLeft, NodesLow[0].Node, dictVB, dictIB);
+                    NodesLow[2].Set(LevelOfDetail.Low, IndexBufferShapes.SideTop, IndexBufferShapes.SideLeft, NodesLow[1].Node, dictVB, dictIB);
+                    NodesLow[3].Set(LevelOfDetail.Low, IndexBufferShapes.CornerTopLeft, IndexBufferShapes.SideLeft, NodesLow[2].Node, dictVB, dictIB);
+                    NodesLow[4].Set(LevelOfDetail.Low, IndexBufferShapes.SideTop, IndexBufferShapes.SideRight, NodesLow[0].Node, dictVB, dictIB);
+                    NodesLow[5].Set(LevelOfDetail.Low, IndexBufferShapes.SideTop, IndexBufferShapes.SideRight, NodesLow[4].Node, dictVB, dictIB);
+                    NodesLow[6].Set(LevelOfDetail.Low, IndexBufferShapes.CornerTopRight, IndexBufferShapes.SideRight, NodesLow[5].Node, dictVB, dictIB);
 
-                    this.NodesLow[7].Set(LevelOfDetail.Low, IndexBufferShapes.SideBottom, IndexBufferShapes.SideBottom, this.NodesMedium[5].Node, this.dictVB, this.dictIB);
-                    this.NodesLow[8].Set(LevelOfDetail.Low, IndexBufferShapes.SideBottom, IndexBufferShapes.SideLeft, this.NodesLow[7].Node, this.dictVB, this.dictIB);
-                    this.NodesLow[9].Set(LevelOfDetail.Low, IndexBufferShapes.SideBottom, IndexBufferShapes.SideLeft, this.NodesLow[8].Node, this.dictVB, this.dictIB);
-                    this.NodesLow[10].Set(LevelOfDetail.Low, IndexBufferShapes.CornerBottomLeft, IndexBufferShapes.SideLeft, this.NodesLow[9].Node, this.dictVB, this.dictIB);
-                    this.NodesLow[11].Set(LevelOfDetail.Low, IndexBufferShapes.SideBottom, IndexBufferShapes.SideRight, this.NodesLow[7].Node, this.dictVB, this.dictIB);
-                    this.NodesLow[12].Set(LevelOfDetail.Low, IndexBufferShapes.SideBottom, IndexBufferShapes.SideRight, this.NodesLow[11].Node, this.dictVB, this.dictIB);
-                    this.NodesLow[13].Set(LevelOfDetail.Low, IndexBufferShapes.CornerBottomRight, IndexBufferShapes.SideRight, this.NodesLow[12].Node, this.dictVB, this.dictIB);
+                    NodesLow[7].Set(LevelOfDetail.Low, IndexBufferShapes.SideBottom, IndexBufferShapes.SideBottom, NodesMedium[5].Node, dictVB, dictIB);
+                    NodesLow[8].Set(LevelOfDetail.Low, IndexBufferShapes.SideBottom, IndexBufferShapes.SideLeft, NodesLow[7].Node, dictVB, dictIB);
+                    NodesLow[9].Set(LevelOfDetail.Low, IndexBufferShapes.SideBottom, IndexBufferShapes.SideLeft, NodesLow[8].Node, dictVB, dictIB);
+                    NodesLow[10].Set(LevelOfDetail.Low, IndexBufferShapes.CornerBottomLeft, IndexBufferShapes.SideLeft, NodesLow[9].Node, dictVB, dictIB);
+                    NodesLow[11].Set(LevelOfDetail.Low, IndexBufferShapes.SideBottom, IndexBufferShapes.SideRight, NodesLow[7].Node, dictVB, dictIB);
+                    NodesLow[12].Set(LevelOfDetail.Low, IndexBufferShapes.SideBottom, IndexBufferShapes.SideRight, NodesLow[11].Node, dictVB, dictIB);
+                    NodesLow[13].Set(LevelOfDetail.Low, IndexBufferShapes.CornerBottomRight, IndexBufferShapes.SideRight, NodesLow[12].Node, dictVB, dictIB);
 
-                    this.NodesLow[14].Set(LevelOfDetail.Low, IndexBufferShapes.SideLeft, IndexBufferShapes.SideLeft, this.NodesMedium[10].Node, this.dictVB, this.dictIB);
-                    this.NodesLow[15].Set(LevelOfDetail.Low, IndexBufferShapes.SideLeft, IndexBufferShapes.SideTop, this.NodesLow[14].Node, this.dictVB, this.dictIB);
-                    this.NodesLow[16].Set(LevelOfDetail.Low, IndexBufferShapes.SideLeft, IndexBufferShapes.SideTop, this.NodesLow[15].Node, this.dictVB, this.dictIB);
-                    this.NodesLow[17].Set(LevelOfDetail.Low, IndexBufferShapes.SideLeft, IndexBufferShapes.SideBottom, this.NodesLow[14].Node, this.dictVB, this.dictIB);
-                    this.NodesLow[18].Set(LevelOfDetail.Low, IndexBufferShapes.SideLeft, IndexBufferShapes.SideBottom, this.NodesLow[17].Node, this.dictVB, this.dictIB);
+                    NodesLow[14].Set(LevelOfDetail.Low, IndexBufferShapes.SideLeft, IndexBufferShapes.SideLeft, NodesMedium[10].Node, dictVB, dictIB);
+                    NodesLow[15].Set(LevelOfDetail.Low, IndexBufferShapes.SideLeft, IndexBufferShapes.SideTop, NodesLow[14].Node, dictVB, dictIB);
+                    NodesLow[16].Set(LevelOfDetail.Low, IndexBufferShapes.SideLeft, IndexBufferShapes.SideTop, NodesLow[15].Node, dictVB, dictIB);
+                    NodesLow[17].Set(LevelOfDetail.Low, IndexBufferShapes.SideLeft, IndexBufferShapes.SideBottom, NodesLow[14].Node, dictVB, dictIB);
+                    NodesLow[18].Set(LevelOfDetail.Low, IndexBufferShapes.SideLeft, IndexBufferShapes.SideBottom, NodesLow[17].Node, dictVB, dictIB);
 
-                    this.NodesLow[19].Set(LevelOfDetail.Low, IndexBufferShapes.SideRight, IndexBufferShapes.SideRight, this.NodesMedium[13].Node, this.dictVB, this.dictIB);
-                    this.NodesLow[20].Set(LevelOfDetail.Low, IndexBufferShapes.SideRight, IndexBufferShapes.SideTop, this.NodesLow[19].Node, this.dictVB, this.dictIB);
-                    this.NodesLow[21].Set(LevelOfDetail.Low, IndexBufferShapes.SideRight, IndexBufferShapes.SideTop, this.NodesLow[20].Node, this.dictVB, this.dictIB);
-                    this.NodesLow[22].Set(LevelOfDetail.Low, IndexBufferShapes.SideRight, IndexBufferShapes.SideBottom, this.NodesLow[19].Node, this.dictVB, this.dictIB);
-                    this.NodesLow[23].Set(LevelOfDetail.Low, IndexBufferShapes.SideRight, IndexBufferShapes.SideBottom, this.NodesLow[22].Node, this.dictVB, this.dictIB);
+                    NodesLow[19].Set(LevelOfDetail.Low, IndexBufferShapes.SideRight, IndexBufferShapes.SideRight, NodesMedium[13].Node, dictVB, dictIB);
+                    NodesLow[20].Set(LevelOfDetail.Low, IndexBufferShapes.SideRight, IndexBufferShapes.SideTop, NodesLow[19].Node, dictVB, dictIB);
+                    NodesLow[21].Set(LevelOfDetail.Low, IndexBufferShapes.SideRight, IndexBufferShapes.SideTop, NodesLow[20].Node, dictVB, dictIB);
+                    NodesLow[22].Set(LevelOfDetail.Low, IndexBufferShapes.SideRight, IndexBufferShapes.SideBottom, NodesLow[19].Node, dictVB, dictIB);
+                    NodesLow[23].Set(LevelOfDetail.Low, IndexBufferShapes.SideRight, IndexBufferShapes.SideBottom, NodesLow[22].Node, dictVB, dictIB);
 
-                    this.NodesMinimum[0].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideTop, IndexBufferShapes.SideTop, this.NodesLow[0].Node, this.dictVB, this.dictIB);
-                    this.NodesMinimum[1].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideTop, IndexBufferShapes.SideLeft, this.NodesMinimum[0].Node, this.dictVB, this.dictIB);
-                    this.NodesMinimum[2].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideTop, IndexBufferShapes.SideLeft, this.NodesMinimum[1].Node, this.dictVB, this.dictIB);
-                    this.NodesMinimum[3].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideTop, IndexBufferShapes.SideLeft, this.NodesMinimum[2].Node, this.dictVB, this.dictIB);
-                    this.NodesMinimum[4].Set(LevelOfDetail.Minimum, IndexBufferShapes.CornerTopLeft, IndexBufferShapes.SideLeft, this.NodesMinimum[3].Node, this.dictVB, this.dictIB);
-                    this.NodesMinimum[5].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideTop, IndexBufferShapes.SideRight, this.NodesMinimum[0].Node, this.dictVB, this.dictIB);
-                    this.NodesMinimum[6].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideTop, IndexBufferShapes.SideRight, this.NodesMinimum[5].Node, this.dictVB, this.dictIB);
-                    this.NodesMinimum[7].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideTop, IndexBufferShapes.SideRight, this.NodesMinimum[6].Node, this.dictVB, this.dictIB);
-                    this.NodesMinimum[8].Set(LevelOfDetail.Minimum, IndexBufferShapes.CornerTopRight, IndexBufferShapes.SideRight, this.NodesMinimum[7].Node, this.dictVB, this.dictIB);
+                    NodesMinimum[0].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideTop, IndexBufferShapes.SideTop, NodesLow[0].Node, dictVB, dictIB);
+                    NodesMinimum[1].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideTop, IndexBufferShapes.SideLeft, NodesMinimum[0].Node, dictVB, dictIB);
+                    NodesMinimum[2].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideTop, IndexBufferShapes.SideLeft, NodesMinimum[1].Node, dictVB, dictIB);
+                    NodesMinimum[3].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideTop, IndexBufferShapes.SideLeft, NodesMinimum[2].Node, dictVB, dictIB);
+                    NodesMinimum[4].Set(LevelOfDetail.Minimum, IndexBufferShapes.CornerTopLeft, IndexBufferShapes.SideLeft, NodesMinimum[3].Node, dictVB, dictIB);
+                    NodesMinimum[5].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideTop, IndexBufferShapes.SideRight, NodesMinimum[0].Node, dictVB, dictIB);
+                    NodesMinimum[6].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideTop, IndexBufferShapes.SideRight, NodesMinimum[5].Node, dictVB, dictIB);
+                    NodesMinimum[7].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideTop, IndexBufferShapes.SideRight, NodesMinimum[6].Node, dictVB, dictIB);
+                    NodesMinimum[8].Set(LevelOfDetail.Minimum, IndexBufferShapes.CornerTopRight, IndexBufferShapes.SideRight, NodesMinimum[7].Node, dictVB, dictIB);
 
-                    this.NodesMinimum[9].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideBottom, IndexBufferShapes.SideBottom, this.NodesLow[7].Node, this.dictVB, this.dictIB);
-                    this.NodesMinimum[10].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideBottom, IndexBufferShapes.SideLeft, this.NodesMinimum[9].Node, this.dictVB, this.dictIB);
-                    this.NodesMinimum[11].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideBottom, IndexBufferShapes.SideLeft, this.NodesMinimum[10].Node, this.dictVB, this.dictIB);
-                    this.NodesMinimum[12].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideBottom, IndexBufferShapes.SideLeft, this.NodesMinimum[11].Node, this.dictVB, this.dictIB);
-                    this.NodesMinimum[13].Set(LevelOfDetail.Minimum, IndexBufferShapes.CornerBottomLeft, IndexBufferShapes.SideLeft, this.NodesMinimum[12].Node, this.dictVB, this.dictIB);
-                    this.NodesMinimum[14].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideBottom, IndexBufferShapes.SideRight, this.NodesMinimum[9].Node, this.dictVB, this.dictIB);
-                    this.NodesMinimum[15].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideBottom, IndexBufferShapes.SideRight, this.NodesMinimum[14].Node, this.dictVB, this.dictIB);
-                    this.NodesMinimum[16].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideBottom, IndexBufferShapes.SideRight, this.NodesMinimum[15].Node, this.dictVB, this.dictIB);
-                    this.NodesMinimum[17].Set(LevelOfDetail.Minimum, IndexBufferShapes.CornerBottomRight, IndexBufferShapes.SideRight, this.NodesMinimum[16].Node, this.dictVB, this.dictIB);
+                    NodesMinimum[9].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideBottom, IndexBufferShapes.SideBottom, NodesLow[7].Node, dictVB, dictIB);
+                    NodesMinimum[10].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideBottom, IndexBufferShapes.SideLeft, NodesMinimum[9].Node, dictVB, dictIB);
+                    NodesMinimum[11].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideBottom, IndexBufferShapes.SideLeft, NodesMinimum[10].Node, dictVB, dictIB);
+                    NodesMinimum[12].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideBottom, IndexBufferShapes.SideLeft, NodesMinimum[11].Node, dictVB, dictIB);
+                    NodesMinimum[13].Set(LevelOfDetail.Minimum, IndexBufferShapes.CornerBottomLeft, IndexBufferShapes.SideLeft, NodesMinimum[12].Node, dictVB, dictIB);
+                    NodesMinimum[14].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideBottom, IndexBufferShapes.SideRight, NodesMinimum[9].Node, dictVB, dictIB);
+                    NodesMinimum[15].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideBottom, IndexBufferShapes.SideRight, NodesMinimum[14].Node, dictVB, dictIB);
+                    NodesMinimum[16].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideBottom, IndexBufferShapes.SideRight, NodesMinimum[15].Node, dictVB, dictIB);
+                    NodesMinimum[17].Set(LevelOfDetail.Minimum, IndexBufferShapes.CornerBottomRight, IndexBufferShapes.SideRight, NodesMinimum[16].Node, dictVB, dictIB);
 
-                    this.NodesMinimum[18].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideLeft, IndexBufferShapes.SideLeft, this.NodesLow[14].Node, this.dictVB, this.dictIB);
-                    this.NodesMinimum[19].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideLeft, IndexBufferShapes.SideTop, this.NodesMinimum[18].Node, this.dictVB, this.dictIB);
-                    this.NodesMinimum[20].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideLeft, IndexBufferShapes.SideTop, this.NodesMinimum[19].Node, this.dictVB, this.dictIB);
-                    this.NodesMinimum[21].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideLeft, IndexBufferShapes.SideTop, this.NodesMinimum[20].Node, this.dictVB, this.dictIB);
-                    this.NodesMinimum[22].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideLeft, IndexBufferShapes.SideBottom, this.NodesMinimum[18].Node, this.dictVB, this.dictIB);
-                    this.NodesMinimum[23].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideLeft, IndexBufferShapes.SideBottom, this.NodesMinimum[22].Node, this.dictVB, this.dictIB);
-                    this.NodesMinimum[24].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideLeft, IndexBufferShapes.SideBottom, this.NodesMinimum[23].Node, this.dictVB, this.dictIB);
+                    NodesMinimum[18].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideLeft, IndexBufferShapes.SideLeft, NodesLow[14].Node, dictVB, dictIB);
+                    NodesMinimum[19].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideLeft, IndexBufferShapes.SideTop, NodesMinimum[18].Node, dictVB, dictIB);
+                    NodesMinimum[20].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideLeft, IndexBufferShapes.SideTop, NodesMinimum[19].Node, dictVB, dictIB);
+                    NodesMinimum[21].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideLeft, IndexBufferShapes.SideTop, NodesMinimum[20].Node, dictVB, dictIB);
+                    NodesMinimum[22].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideLeft, IndexBufferShapes.SideBottom, NodesMinimum[18].Node, dictVB, dictIB);
+                    NodesMinimum[23].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideLeft, IndexBufferShapes.SideBottom, NodesMinimum[22].Node, dictVB, dictIB);
+                    NodesMinimum[24].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideLeft, IndexBufferShapes.SideBottom, NodesMinimum[23].Node, dictVB, dictIB);
 
-                    this.NodesMinimum[25].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideRight, IndexBufferShapes.SideRight, this.NodesLow[19].Node, this.dictVB, this.dictIB);
-                    this.NodesMinimum[26].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideRight, IndexBufferShapes.SideTop, this.NodesMinimum[25].Node, this.dictVB, this.dictIB);
-                    this.NodesMinimum[27].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideRight, IndexBufferShapes.SideTop, this.NodesMinimum[26].Node, this.dictVB, this.dictIB);
-                    this.NodesMinimum[28].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideRight, IndexBufferShapes.SideTop, this.NodesMinimum[27].Node, this.dictVB, this.dictIB);
-                    this.NodesMinimum[29].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideRight, IndexBufferShapes.SideBottom, this.NodesMinimum[25].Node, this.dictVB, this.dictIB);
-                    this.NodesMinimum[30].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideRight, IndexBufferShapes.SideBottom, this.NodesMinimum[29].Node, this.dictVB, this.dictIB);
-                    this.NodesMinimum[31].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideRight, IndexBufferShapes.SideBottom, this.NodesMinimum[30].Node, this.dictVB, this.dictIB);
+                    NodesMinimum[25].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideRight, IndexBufferShapes.SideRight, NodesLow[19].Node, dictVB, dictIB);
+                    NodesMinimum[26].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideRight, IndexBufferShapes.SideTop, NodesMinimum[25].Node, dictVB, dictIB);
+                    NodesMinimum[27].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideRight, IndexBufferShapes.SideTop, NodesMinimum[26].Node, dictVB, dictIB);
+                    NodesMinimum[28].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideRight, IndexBufferShapes.SideTop, NodesMinimum[27].Node, dictVB, dictIB);
+                    NodesMinimum[29].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideRight, IndexBufferShapes.SideBottom, NodesMinimum[25].Node, dictVB, dictIB);
+                    NodesMinimum[30].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideRight, IndexBufferShapes.SideBottom, NodesMinimum[29].Node, dictVB, dictIB);
+                    NodesMinimum[31].Set(LevelOfDetail.Minimum, IndexBufferShapes.SideRight, IndexBufferShapes.SideBottom, NodesMinimum[30].Node, dictVB, dictIB);
                 }
             }
             /// <summary>
@@ -357,15 +352,15 @@ namespace Engine
             /// <param name="terrainTechnique">Technique for drawing</param>
             public void DrawShadows(DrawContextShadows context, BufferManager bufferManager, EngineEffectTechnique terrainTechnique)
             {
-                var visibleNodesHigh = Array.FindAll(this.NodesHigh, n => n.Node != null && context.Frustum.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
-                var visibleNodesMedium = Array.FindAll(this.NodesMedium, n => n.Node != null && context.Frustum.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
-                var visibleNodesLow = Array.FindAll(this.NodesLow, n => n.Node != null && context.Frustum.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
-                var visibleNodesMinimum = Array.FindAll(this.NodesMinimum, n => n.Node != null && context.Frustum.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
+                var visibleNodesHigh = Array.FindAll(NodesHigh, n => n.Node != null && context.Frustum.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
+                var visibleNodesMedium = Array.FindAll(NodesMedium, n => n.Node != null && context.Frustum.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
+                var visibleNodesLow = Array.FindAll(NodesLow, n => n.Node != null && context.Frustum.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
+                var visibleNodesMinimum = Array.FindAll(NodesMinimum, n => n.Node != null && context.Frustum.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
 
-                this.DrawNodeList(DrawerModes.ShadowMap, bufferManager, terrainTechnique, visibleNodesHigh);
-                this.DrawNodeList(DrawerModes.ShadowMap, bufferManager, terrainTechnique, visibleNodesMedium);
-                this.DrawNodeList(DrawerModes.ShadowMap, bufferManager, terrainTechnique, visibleNodesLow);
-                this.DrawNodeList(DrawerModes.ShadowMap, bufferManager, terrainTechnique, visibleNodesMinimum);
+                DrawNodeList(DrawerModes.ShadowMap, bufferManager, terrainTechnique, visibleNodesHigh);
+                DrawNodeList(DrawerModes.ShadowMap, bufferManager, terrainTechnique, visibleNodesMedium);
+                DrawNodeList(DrawerModes.ShadowMap, bufferManager, terrainTechnique, visibleNodesLow);
+                DrawNodeList(DrawerModes.ShadowMap, bufferManager, terrainTechnique, visibleNodesMinimum);
             }
             /// <summary>
             /// Draw
@@ -375,16 +370,16 @@ namespace Engine
             /// <param name="terrainTechnique">Technique for drawing</param>
             public void Draw(DrawContext context, BufferManager bufferManager, EngineEffectTechnique terrainTechnique)
             {
-                var visibleNodesHigh = Array.FindAll(this.NodesHigh, n => n.Node != null && context.CameraVolume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
-                var visibleNodesMedium = Array.FindAll(this.NodesMedium, n => n.Node != null && context.CameraVolume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
-                var visibleNodesLow = Array.FindAll(this.NodesLow, n => n.Node != null && context.CameraVolume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
-                var visibleNodesMinimum = Array.FindAll(this.NodesMinimum, n => n.Node != null && context.CameraVolume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
+                var visibleNodesHigh = Array.FindAll(NodesHigh, n => n.Node != null && context.CameraVolume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
+                var visibleNodesMedium = Array.FindAll(NodesMedium, n => n.Node != null && context.CameraVolume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
+                var visibleNodesLow = Array.FindAll(NodesLow, n => n.Node != null && context.CameraVolume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
+                var visibleNodesMinimum = Array.FindAll(NodesMinimum, n => n.Node != null && context.CameraVolume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
 
                 var mode = context.DrawerMode;
-                this.DrawNodeList(mode, bufferManager, terrainTechnique, visibleNodesHigh);
-                this.DrawNodeList(mode, bufferManager, terrainTechnique, visibleNodesMedium);
-                this.DrawNodeList(mode, bufferManager, terrainTechnique, visibleNodesLow);
-                this.DrawNodeList(mode, bufferManager, terrainTechnique, visibleNodesMinimum);
+                DrawNodeList(mode, bufferManager, terrainTechnique, visibleNodesHigh);
+                DrawNodeList(mode, bufferManager, terrainTechnique, visibleNodesMedium);
+                DrawNodeList(mode, bufferManager, terrainTechnique, visibleNodesLow);
+                DrawNodeList(mode, bufferManager, terrainTechnique, visibleNodesMinimum);
             }
             /// <summary>
             /// Draws the visible node list
@@ -395,15 +390,15 @@ namespace Engine
             /// <param name="nodeList">Node list</param>
             private void DrawNodeList(DrawerModes mode, BufferManager bufferManager, EngineEffectTechnique terrainTechnique, MapGridNode[] nodeList)
             {
-                var graphics = this.Game.Graphics;
+                var graphics = Game.Graphics;
 
                 for (int i = 0; i < nodeList.Length; i++)
                 {
                     var gNode = nodeList[i];
                     if (gNode.IBDesc.Count > 0)
                     {
-                        bufferManager.SetInputAssembler(terrainTechnique, gNode.VBDesc.Slot, Topology.TriangleList);
-                        bufferManager.SetIndexBuffer(gNode.IBDesc.Slot);
+                        bufferManager.SetInputAssembler(terrainTechnique, gNode.VBDesc, Topology.TriangleList);
+                        bufferManager.SetIndexBuffer(gNode.IBDesc);
 
                         if (!mode.HasFlag(DrawerModes.ShadowMap))
                         {
@@ -417,8 +412,8 @@ namespace Engine
 
                             graphics.DrawIndexed(
                                 gNode.IBDesc.Count,
-                                gNode.IBDesc.Offset,
-                                gNode.VBDesc.Offset);
+                                gNode.IBDesc.BufferOffset,
+                                gNode.VBDesc.BufferOffset);
                         }
                     }
                 }
@@ -486,37 +481,37 @@ namespace Engine
                     }
                 }
 
-                if (this.Node != nNode)
+                if (Node != nNode)
                 {
                     //Set buffer (VX)
                     if (nNode != null)
                     {
-                        this.VBDesc = dictVB[nNode.Id];
+                        VBDesc = dictVB[nNode.Id];
                     }
-                    this.Node = nNode;
+                    Node = nNode;
                 }
 
                 bool assignIB = false;
 
-                if (this.LevelOfDetail != lod)
+                if (LevelOfDetail != lod)
                 {
                     //Set buffer (IX)
-                    this.LevelOfDetail = lod;
+                    LevelOfDetail = lod;
 
                     assignIB = true;
                 }
 
-                if (this.Shape != shape)
+                if (Shape != shape)
                 {
                     //Set buffer (IX)
-                    this.Shape = shape;
+                    Shape = shape;
 
                     assignIB = true;
                 }
 
                 if (assignIB)
                 {
-                    this.IBDesc = dictIB[new MapGridShapeId() { LevelOfDetail = lod, Shape = shape }];
+                    IBDesc = dictIB[new MapGridShapeId() { LevelOfDetail = lod, Shape = shape }];
                 }
             }
             /// <summary>
@@ -583,7 +578,7 @@ namespace Engine
             /// <returns>true if the current object is equal to the other parameter; otherwise, false</returns>
             public bool Equals(MapGridShapeId other)
             {
-                if (this.LevelOfDetail == other.LevelOfDetail && this.Shape == other.Shape)
+                if (LevelOfDetail == other.LevelOfDetail && Shape == other.Shape)
                 {
                     return true;
                 }
@@ -599,16 +594,17 @@ namespace Engine
             /// <returns>true if the current object is equal to the other parameter; otherwise, false</returns>
             public override bool Equals(object obj)
             {
-                if (obj == null) return false;
-
-                if (obj is MapGridShapeId)
-                {
-                    return this.Equals((MapGridShapeId)obj);
-                }
-                else
+                if (obj == null)
                 {
                     return false;
                 }
+
+                if (obj is MapGridShapeId shape)
+                {
+                    return Equals(shape);
+                }
+
+                return false;
             }
             /// <summary>
             /// Serves as the default hash function
@@ -616,7 +612,7 @@ namespace Engine
             /// <returns>A hash code for the current object</returns>
             public override int GetHashCode()
             {
-                return this.LevelOfDetail.GetHashCode() ^ this.Shape.GetHashCode();
+                return LevelOfDetail.GetHashCode() ^ Shape.GetHashCode();
             }
         }
 
@@ -625,19 +621,11 @@ namespace Engine
         /// <summary>
         /// Grid
         /// </summary>
-        private MapGrid Map = null;
+        private MapGrid mapGrid = null;
         /// <summary>
         /// Height map
         /// </summary>
         private HeightMap heightMap = null;
-        /// <summary>
-        /// Heightmap cell size
-        /// </summary>
-        private readonly float heightMapCellSize;
-        /// <summary>
-        /// Heightmap maximum height
-        /// </summary>
-        private readonly float heightMapHeight;
 
         /// <summary>
         /// Heightmap texture resolution
@@ -700,125 +688,75 @@ namespace Engine
         {
             get
             {
-                return new[] { this.terrainMaterial };
+                return new[] { terrainMaterial };
             }
         }
 
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Terrain description</param>
-        public Terrain(Scene scene, GroundDescription description)
-            : base(scene, description)
+        public Terrain(string name, Scene scene, GroundDescription description)
+            : base(name, scene, description)
         {
-            #region Read heightmap
+            useAnisotropic = description.UseAnisotropic;
 
-            string hmContentPath = description.Content.HeightmapDescription.ContentPath;
-
-            var heightMapImage = new ImageContent()
+            if (description.HeightmapDescription == null)
             {
-                Streams = ContentManager.FindContent(hmContentPath, description.Content.HeightmapDescription.HeightmapFileName),
-            };
-            var colorMapImage = new ImageContent()
-            {
-                Streams = ContentManager.FindContent(hmContentPath, description.Content.HeightmapDescription.ColormapFileName),
-            };
-
-            this.heightMap = HeightMap.FromStream(heightMapImage.Stream, colorMapImage.Stream);
-            this.heightMapCellSize = description.Content.HeightmapDescription.CellSize;
-            this.heightMapHeight = description.Content.HeightmapDescription.MaximumHeight;
-            this.textureResolution = description.Content.HeightmapDescription.TextureResolution;
-
-            #endregion
-
-            #region Read terrain data
-
-            string tContentPath = Path.Combine(description.Content.HeightmapDescription.ContentPath, description.Content.HeightmapDescription.Textures.ContentPath);
-
-            this.terrainMaterial = new MeshMaterial()
-            {
-                Material = description.Content.HeightmapDescription.Material != null ? description.Content.HeightmapDescription.Material.GetMaterial() : Material.Default
-            };
-
-            var normalMapTextures = new ImageContent()
-            {
-                Paths = ContentManager.FindPaths(tContentPath, description.Content.HeightmapDescription.Textures.NormalMaps),
-            };
-            this.terrainNormalMaps = this.Game.ResourceManager.CreateResource(normalMapTextures);
-
-            var specularMapTextures = new ImageContent()
-            {
-                Paths = ContentManager.FindPaths(tContentPath, description.Content.HeightmapDescription.Textures.SpecularMaps),
-            };
-            this.terrainSpecularMaps = this.Game.ResourceManager.CreateResource(specularMapTextures);
-
-            if (description.Content.HeightmapDescription.Textures.UseSlopes)
-            {
-                var texturesLR = new ImageContent()
-                {
-                    Paths = ContentManager.FindPaths(tContentPath, description.Content.HeightmapDescription.Textures.TexturesLR),
-                };
-                var texturesHR = new ImageContent()
-                {
-                    Paths = ContentManager.FindPaths(tContentPath, description.Content.HeightmapDescription.Textures.TexturesHR),
-                };
-
-                this.terrainTexturesLR = this.Game.ResourceManager.CreateResource(texturesLR);
-                this.terrainTexturesHR = this.Game.ResourceManager.CreateResource(texturesHR);
-                this.slopeRanges = description.Content.HeightmapDescription.Textures.SlopeRanges;
+                throw new EngineException($"Terrain initialization error. Heightmap description not found.");
             }
 
-            if (description.Content.HeightmapDescription.Textures.UseAlphaMapping)
-            {
-                var colors = new ImageContent()
-                {
-                    Paths = ContentManager.FindPaths(tContentPath, description.Content.HeightmapDescription.Textures.ColorTextures),
-                };
-                var aMap = new ImageContent()
-                {
-                    Paths = ContentManager.FindPaths(tContentPath, description.Content.HeightmapDescription.Textures.AlphaMap),
-                };
+            // Read heightmap
+            heightMap = HeightMap.FromDescription(description.HeightmapDescription);
+            float heightMapCellSize = description.HeightmapDescription.CellSize;
+            float heightMapHeight = description.HeightmapDescription.MaximumHeight;
+            Curve heightMapCurve = description.HeightmapDescription.HeightCurve;
+            float uvScale = 1;
+            Vector2 uvDisplacement = Vector2.Zero;
 
-                this.colorTextures = this.Game.ResourceManager.CreateResource(colors);
-                this.alphaMap = this.Game.ResourceManager.CreateResource(aMap);
+            if (description.HeightmapDescription.Textures != null)
+            {
+                // Read texture data
+                uvScale = description.HeightmapDescription.Textures.Scale;
+                uvDisplacement = description.HeightmapDescription.Textures.Displacement;
+                useAlphaMap = description.HeightmapDescription.Textures.UseAlphaMapping;
+                useSlopes = description.HeightmapDescription.Textures.UseSlopes;
+                proportion = description.HeightmapDescription.Textures.Proportion;
+                textureResolution = description.HeightmapDescription.Textures.Resolution;
+                slopeRanges = description.HeightmapDescription.Textures.SlopeRanges;
+
+                ReadHeightmapTextures(description.HeightmapDescription.ContentPath, description.HeightmapDescription.Textures);
             }
 
-            this.useAlphaMap = description.Content.HeightmapDescription.Textures.UseAlphaMapping;
-            this.useSlopes = description.Content.HeightmapDescription.Textures.UseSlopes;
-            this.proportion = description.Content.HeightmapDescription.Textures.Proportion;
-
-            #endregion
-
-            this.useAlphaMap = description.UseAnisotropic;
-            this.useAnisotropic = description.UseAnisotropic;
-
-            //Get vertices and indices from heightmap
-            this.BuildGeometry(out var vertices, out var indices);
-
-            var tmpVerts = vertices.ToArray();
-            var tmpIndex = indices.ToArray();
-
-            List<Triangle> tris = new List<Triangle>();
-
-            for (int i = 0; i < tmpIndex.Length; i += 3)
+            // Read material
+            terrainMaterial = new MeshMaterial()
             {
-                tris.Add(new Triangle(
-                    tmpVerts[tmpIndex[i + 0]].Position.Value,
-                    tmpVerts[tmpIndex[i + 2]].Position.Value,
-                    tmpVerts[tmpIndex[i + 1]].Position.Value));
-            }
+                Material = description.HeightmapDescription.Material?.GetMaterial() ?? Material.Default
+            };
 
-            //Initialize quadtree for ray picking
-            this.groundPickingQuadtree = new PickingQuadTree<Triangle>(tris, description.Quadtree.MaximumDepth);
+            // Get vertices and indices from heightmap
+            heightMap.BuildGeometry(
+                heightMapCellSize,
+                heightMapHeight,
+                heightMapCurve,
+                uvScale,
+                uvDisplacement,
+                out var vertices, out var indices);
 
-            if (this.Map == null)
-            {
-                //Initialize map
-                int trianglesPerNode = this.heightMap.CalcTrianglesPerNode(MapGrid.LODLevels);
+            // Compute triangles for ray - mesh picking
+            var tris = Triangle.ComputeTriangleList(
+                Topology.TriangleList,
+                vertices.Select(v => v.Position.Value).ToArray(),
+                indices.ToArray());
 
-                this.Map = new MapGrid(this.Game, this.BufferManager, vertices, trianglesPerNode);
-            }
+            // Initialize quadtree for ray picking
+            groundPickingQuadtree = description.ReadQuadTree(tris);
+
+            //Initialize map
+            int trianglesPerNode = heightMap.CalcTrianglesPerNode(MapGrid.LODLevels);
+            mapGrid = new MapGrid(Game, $"Terrain.{Name}", vertices, trianglesPerNode);
         }
         /// <summary>
         /// Destructor
@@ -828,15 +766,13 @@ namespace Engine
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Release of resources
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                Map?.Dispose();
-                Map = null;
+                mapGrid?.Dispose();
+                mapGrid = null;
 
                 heightMap?.Dispose();
                 heightMap = null;
@@ -856,41 +792,58 @@ namespace Engine
             }
         }
 
-        /// <summary>
-        /// Updates the state of the terrain components
-        /// </summary>
-        /// <param name="context">Update context</param>
+        /// <inheritdoc/>
         public override void Update(UpdateContext context)
         {
-            this.Map.Update(context.EyePosition);
+            if (!Active)
+            {
+                return;
+            }
+
+            mapGrid?.Update(context.EyePosition);
         }
-        /// <summary>
-        /// Draws the terrain components shadows
-        /// </summary>
-        /// <param name="context">Draw context</param>
+        /// <inheritdoc/>
         public override void DrawShadows(DrawContextShadows context)
         {
-            var terrainTechnique = this.SetTechniqueTerrainShadowMap(context);
+            if (!Visible)
+            {
+                return;
+            }
+
+            var terrainTechnique = SetTechniqueTerrainShadowMap(context);
             if (terrainTechnique != null)
             {
-                this.Map.DrawShadows(context, this.BufferManager, terrainTechnique);
+                mapGrid?.DrawShadows(context, BufferManager, terrainTechnique);
+            }
+        }
+        /// <inheritdoc/>
+        public override void Draw(DrawContext context)
+        {
+            if (!Visible)
+            {
+                return;
+            }
+
+            var terrainTechnique = SetTechniqueTerrain(context);
+            if (terrainTechnique != null)
+            {
+                mapGrid?.Draw(context, BufferManager, terrainTechnique);
             }
         }
         /// <summary>
-        /// Draws the terrain components
+        /// Sets thecnique for terrain drawing
         /// </summary>
-        /// <param name="context">Draw context</param>
-        public override void Draw(DrawContext context)
+        /// <param name="context">Drawing context</param>
+        /// <returns>Returns the selected technique</returns>
+        private EngineEffectTechnique SetTechniqueTerrain(DrawContext context)
         {
             var mode = context.DrawerMode;
 
             EngineEffectTechnique terrainTechnique = null;
-            if (mode.HasFlag(DrawerModes.Forward)) terrainTechnique = this.SetTechniqueTerrainDefault(context);
-            if (mode.HasFlag(DrawerModes.Deferred)) terrainTechnique = this.SetTechniqueTerrainDeferred(context);
-            if (terrainTechnique != null)
-            {
-                this.Map.Draw(context, this.BufferManager, terrainTechnique);
-            }
+            if (mode.HasFlag(DrawerModes.Forward)) terrainTechnique = SetTechniqueTerrainDefault(context);
+            if (mode.HasFlag(DrawerModes.Deferred)) terrainTechnique = SetTechniqueTerrainDeferred(context);
+
+            return terrainTechnique;
         }
         /// <summary>
         /// Sets thecnique for terrain drawing with forward renderer
@@ -902,30 +855,30 @@ namespace Engine
             var effect = DrawerPool.EffectDefaultTerrain;
 
             effect.UpdatePerFrame(
-                this.textureResolution,
+                textureResolution,
                 context);
 
             var state = new EffectTerrainState
             {
-                UseAnisotropic = this.useAnisotropic,
-                NormalMap = this.terrainNormalMaps,
-                SpecularMap = this.terrainSpecularMaps,
-                UseAlphaMap = this.useAlphaMap,
-                AlphaMap = this.alphaMap,
-                ColorTextures = this.colorTextures,
-                UseSlopes = this.useSlopes,
-                SlopeRanges = this.slopeRanges,
-                DiffuseMapLR = this.terrainTexturesLR,
-                DiffuseMapHR = this.terrainTexturesHR,
-                Proportion = this.proportion,
-                MaterialIndex = this.terrainMaterial.ResourceIndex,
+                UseAnisotropic = useAnisotropic,
+                NormalMap = terrainNormalMaps,
+                SpecularMap = terrainSpecularMaps,
+                UseAlphaMap = useAlphaMap,
+                AlphaMap = alphaMap,
+                ColorTextures = colorTextures,
+                UseSlopes = useSlopes,
+                SlopeRanges = slopeRanges,
+                DiffuseMapLR = terrainTexturesLR,
+                DiffuseMapHR = terrainTexturesHR,
+                Proportion = proportion,
+                MaterialIndex = terrainMaterial.ResourceIndex,
             };
 
             effect.UpdatePerObject(state);
 
-            if (this.useAlphaMap && this.useSlopes) { return effect.TerrainFullForward; }
-            if (this.useAlphaMap) { return effect.TerrainAlphaMapForward; }
-            if (this.useSlopes) { return effect.TerrainSlopesForward; }
+            if (useAlphaMap && useSlopes) { return effect.TerrainFullForward; }
+            if (useAlphaMap) { return effect.TerrainAlphaMapForward; }
+            if (useSlopes) { return effect.TerrainSlopesForward; }
 
             return null;
         }
@@ -940,29 +893,29 @@ namespace Engine
 
             effect.UpdatePerFrame(
                 context.ViewProjection,
-                this.textureResolution);
+                textureResolution);
 
             var state = new EffectTerrainState
             {
-                UseAnisotropic = this.useAnisotropic,
-                NormalMap = this.terrainNormalMaps,
-                SpecularMap = this.terrainSpecularMaps,
-                UseAlphaMap = this.useAlphaMap,
-                AlphaMap = this.alphaMap,
-                ColorTextures = this.colorTextures,
-                UseSlopes = this.useSlopes,
-                SlopeRanges = this.slopeRanges,
-                DiffuseMapLR = this.terrainTexturesLR,
-                DiffuseMapHR = this.terrainTexturesHR,
-                Proportion = this.proportion,
-                MaterialIndex = this.terrainMaterial.ResourceIndex,
+                UseAnisotropic = useAnisotropic,
+                NormalMap = terrainNormalMaps,
+                SpecularMap = terrainSpecularMaps,
+                UseAlphaMap = useAlphaMap,
+                AlphaMap = alphaMap,
+                ColorTextures = colorTextures,
+                UseSlopes = useSlopes,
+                SlopeRanges = slopeRanges,
+                DiffuseMapLR = terrainTexturesLR,
+                DiffuseMapHR = terrainTexturesHR,
+                Proportion = proportion,
+                MaterialIndex = terrainMaterial.ResourceIndex,
             };
 
             effect.UpdatePerObject(state);
 
-            if (this.useAlphaMap && this.useSlopes) { return effect.TerrainFullDeferred; }
-            if (this.useAlphaMap) { return effect.TerrainAlphaMapDeferred; }
-            if (this.useSlopes) { return effect.TerrainSlopesDeferred; }
+            if (useAlphaMap && useSlopes) { return effect.TerrainFullDeferred; }
+            if (useAlphaMap) { return effect.TerrainAlphaMapDeferred; }
+            if (useSlopes) { return effect.TerrainSlopesDeferred; }
 
             return null;
         }
@@ -981,16 +934,66 @@ namespace Engine
         }
 
         /// <summary>
-        /// Build geometry
+        /// Reads texture data
         /// </summary>
-        /// <param name="vertices">Geometry vertices</param>
-        /// <param name="indices">Geometry indices</param>
-        private void BuildGeometry(out IEnumerable<VertexData> vertices, out IEnumerable<uint> indices)
+        /// <param name="baseContentPath">Base content path</param>
+        /// <param name="description">Textures description</param>
+        private void ReadHeightmapTextures(string baseContentPath, HeightmapTexturesDescription description)
         {
-            this.heightMap.BuildGeometry(
-                this.heightMapCellSize,
-                this.heightMapHeight,
-                out vertices, out indices);
+            string tContentPath = Path.Combine(baseContentPath, description.ContentPath);
+
+            var normalMapTextures = ImageContent.Array(tContentPath, description.NormalMaps);
+            terrainNormalMaps = Game.ResourceManager.RequestResource(normalMapTextures);
+
+            var specularMapTextures = ImageContent.Array(tContentPath, description.SpecularMaps);
+            terrainSpecularMaps = Game.ResourceManager.RequestResource(specularMapTextures);
+
+            if (description.UseSlopes)
+            {
+                var texturesLR = ImageContent.Array(tContentPath, description.TexturesLR);
+                var texturesHR = ImageContent.Array(tContentPath, description.TexturesHR);
+
+                terrainTexturesLR = Game.ResourceManager.RequestResource(texturesLR);
+                terrainTexturesHR = Game.ResourceManager.RequestResource(texturesHR);
+            }
+
+            if (description.UseAlphaMapping)
+            {
+                var colors = ImageContent.Array(tContentPath, description.ColorTextures);
+                var aMap = ImageContent.Texture(tContentPath, description.AlphaMap);
+
+                colorTextures = Game.ResourceManager.RequestResource(colors);
+                alphaMap = Game.ResourceManager.RequestResource(aMap);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Terrain extensions
+    /// </summary>
+    public static class TerrainExtensions
+    {
+        /// <summary>
+        /// Adds a component to the scene
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        /// <param name="name">Name</param>
+        /// <param name="description">Description</param>
+        /// <param name="usage">Component usage</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns the created component</returns>
+        public static async Task<Terrain> AddComponentTerrain(this Scene scene, string name, GroundDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
+        {
+            Terrain component = null;
+
+            await Task.Run(() =>
+            {
+                component = new Terrain(name, scene, description);
+
+                scene.AddComponent(component, usage, order);
+            });
+
+            return component;
         }
     }
 }

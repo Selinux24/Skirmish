@@ -109,7 +109,7 @@ namespace Engine
         {
             get
             {
-                return this.Emitter.Active || this.TimeToEnd > 0;
+                return Emitter.Active || TimeToEnd > 0;
             }
         }
 
@@ -122,50 +122,47 @@ namespace Engine
         /// <param name="emitter">Emitter</param>
         public ParticleSystemGpu(Game game, string name, ParticleSystemDescription description, ParticleEmitter emitter)
         {
-            this.Game = game;
-            this.Name = name;
+            Game = game;
+            Name = name;
 
-            this.parameters = new ParticleSystemParams(description) * emitter.Scale;
+            parameters = new ParticleSystemParams(description) * emitter.Scale;
 
-            var imgContent = new ImageContent()
-            {
-                Streams = ContentManager.FindContent(description.ContentPath, description.TextureName),
-            };
-            this.Texture = game.ResourceManager.CreateResource(imgContent);
-            this.TextureCount = (uint)imgContent.Count;
+            var imgContent = ImageContent.Texture(description.ContentPath, description.TextureName);
+            Texture = game.ResourceManager.RequestResource(imgContent);
+            TextureCount = (uint)imgContent.Count;
 
-            this.Emitter = emitter;
-            this.Emitter.UpdateBounds(this.parameters);
-            this.MaxConcurrentParticles = this.Emitter.GetMaximumConcurrentParticles(description.MaxDuration);
+            Emitter = emitter;
+            Emitter.UpdateBounds(parameters);
+            MaxConcurrentParticles = Emitter.GetMaximumConcurrentParticles(description.MaxDuration);
 
-            this.TimeToEnd = this.Emitter.Duration + this.parameters.MaxDuration;
+            TimeToEnd = Emitter.Duration + parameters.MaxDuration;
 
             var data = Helper.CreateArray(1, new VertexGpuParticle()
             {
-                Position = this.Emitter.Position,
-                Velocity = this.Emitter.Velocity,
+                Position = Emitter.Position,
+                Velocity = Emitter.Velocity,
                 RandomValues = new Vector4(),
                 MaxAge = 0,
 
                 Type = 0,
-                EmissionTime = this.Emitter.Duration,
+                EmissionTime = Emitter.Duration,
             });
 
-            int size = this.GetBufferSize();
+            int size = GetBufferSize();
 
-            this.emittersBuffer = game.Graphics.CreateBuffer<VertexGpuParticle>(description.Name, data, ResourceUsage.Default, BindFlags.VertexBuffer, CpuAccessFlags.None);
-            this.drawingBuffer = game.Graphics.CreateBuffer<VertexGpuParticle>(description.Name, size, ResourceUsage.Default, BindFlags.VertexBuffer | BindFlags.StreamOutput, CpuAccessFlags.None);
-            this.streamOutBuffer = game.Graphics.CreateBuffer<VertexGpuParticle>(description.Name, size, ResourceUsage.Default, BindFlags.VertexBuffer | BindFlags.StreamOutput, CpuAccessFlags.None);
-            this.inputStride = default(VertexGpuParticle).GetStride();
+            emittersBuffer = game.Graphics.CreateBuffer<VertexGpuParticle>(description.Name, data, ResourceUsage.Default, BindFlags.VertexBuffer, CpuAccessFlags.None);
+            drawingBuffer = game.Graphics.CreateBuffer<VertexGpuParticle>(description.Name, size, ResourceUsage.Default, BindFlags.VertexBuffer | BindFlags.StreamOutput, CpuAccessFlags.None);
+            streamOutBuffer = game.Graphics.CreateBuffer<VertexGpuParticle>(description.Name, size, ResourceUsage.Default, BindFlags.VertexBuffer | BindFlags.StreamOutput, CpuAccessFlags.None);
+            inputStride = default(VertexGpuParticle).GetStride();
 
-            this.emitterBinding = new[] { new VertexBufferBinding(this.emittersBuffer, this.inputStride, 0) };
-            this.drawingBinding = new[] { new VertexBufferBinding(this.drawingBuffer, this.inputStride, 0) };
-            this.streamOutBinding = new[] { new StreamOutputBufferBinding(this.streamOutBuffer, 0) };
+            emitterBinding = new[] { new VertexBufferBinding(emittersBuffer, inputStride, 0) };
+            drawingBinding = new[] { new VertexBufferBinding(drawingBuffer, inputStride, 0) };
+            streamOutBinding = new[] { new StreamOutputBufferBinding(streamOutBuffer, 0) };
 
             var effect = DrawerPool.EffectDefaultGPUParticles;
-            this.streamOutInputLayout = game.Graphics.CreateInputLayout(effect.ParticleStreamOut.GetSignature(), VertexGpuParticle.Input(BufferSlot));
-            this.rotatingInputLayout = game.Graphics.CreateInputLayout(effect.RotationDraw.GetSignature(), VertexGpuParticle.Input(BufferSlot));
-            this.nonRotatingInputLayout = game.Graphics.CreateInputLayout(effect.NonRotationDraw.GetSignature(), VertexGpuParticle.Input(BufferSlot));
+            streamOutInputLayout = game.Graphics.CreateInputLayout(effect.ParticleStreamOut.GetSignature(), VertexGpuParticle.Input(BufferSlot));
+            rotatingInputLayout = game.Graphics.CreateInputLayout(effect.RotationDraw.GetSignature(), VertexGpuParticle.Input(BufferSlot));
+            nonRotatingInputLayout = game.Graphics.CreateInputLayout(effect.NonRotationDraw.GetSignature(), VertexGpuParticle.Input(BufferSlot));
         }
         /// <summary>
         /// Destructor
@@ -231,7 +228,7 @@ namespace Engine
         /// <remarks>The maximum size of the buffer is 5000</remarks>
         protected int GetBufferSize()
         {
-            int size = (int)(this.MaxConcurrentParticles * (this.Emitter.Duration == 0 ? 60 : this.Emitter.Duration));
+            int size = (int)(MaxConcurrentParticles * (Emitter.Duration == 0 ? 60 : Emitter.Duration));
 
             return Math.Min(size, 5000);
         }
@@ -242,9 +239,9 @@ namespace Engine
         /// <param name="context">Context</param>
         public void Update(UpdateContext context)
         {
-            this.Emitter.Update(context);
+            Emitter.Update(context);
 
-            this.TimeToEnd -= this.Emitter.ElapsedTime;
+            TimeToEnd -= Emitter.ElapsedTime;
         }
         /// <summary>
         /// Drawing
@@ -252,50 +249,51 @@ namespace Engine
         /// <param name="context">Context</param>
         public void Draw(DrawContext context)
         {
-            var drawerMode = context.DrawerMode;
-
-            if ((drawerMode.HasFlag(DrawerModes.OpaqueOnly) && !this.parameters.Transparent) ||
-                (drawerMode.HasFlag(DrawerModes.TransparentOnly) && this.parameters.Transparent))
+            bool isTransparent = parameters.BlendMode.HasFlag(BlendModes.Alpha) || parameters.BlendMode.HasFlag(BlendModes.Transparent);
+            bool draw = context.ValidateDraw(BlendModes.Default, isTransparent);
+            if (!draw)
             {
-                var effect = DrawerPool.EffectDefaultGPUParticles;
-
-                #region Per frame update
-
-                var state = new EffectParticleState
-                {
-                    TotalTime = this.Emitter.TotalTime,
-                    ElapsedTime = this.Emitter.ElapsedTime,
-                    EmissionRate = this.Emitter.EmissionRate,
-                    VelocitySensitivity = this.parameters.EmitterVelocitySensitivity,
-                    HorizontalVelocity = this.parameters.HorizontalVelocity,
-                    VerticalVelocity = this.parameters.VerticalVelocity,
-                    RandomValues = Helper.RandomGenerator.NextVector4(Vector4.Zero, Vector4.One),
-                    MaxDuration = this.parameters.MaxDuration,
-                    MaxDurationRandomness = this.parameters.MaxDurationRandomness,
-                    EndVelocity = this.parameters.EndVelocity,
-                    Gravity = this.parameters.Gravity,
-                    StartSize = this.parameters.StartSize,
-                    EndSize = this.parameters.EndSize,
-                    MinColor = this.parameters.MinColor,
-                    MaxColor = this.parameters.MaxColor,
-                    RotateSpeed = this.parameters.RotateSpeed,
-                };
-
-                effect.UpdatePerFrame(
-                    context.ViewProjection,
-                    context.EyePosition,
-                    state,
-                    this.TextureCount,
-                    this.Texture);
-
-                #endregion
-
-                this.StreamOut(effect);
-
-                this.ToggleBuffers();
-
-                this.Draw(effect, context.DrawerMode);
+                return;
             }
+
+            var effect = DrawerPool.EffectDefaultGPUParticles;
+
+            #region Per frame update
+
+            var state = new EffectParticleState
+            {
+                TotalTime = Emitter.TotalTime,
+                ElapsedTime = Emitter.ElapsedTime,
+                EmissionRate = Emitter.EmissionRate,
+                VelocitySensitivity = parameters.EmitterVelocitySensitivity,
+                HorizontalVelocity = parameters.HorizontalVelocity,
+                VerticalVelocity = parameters.VerticalVelocity,
+                RandomValues = Helper.RandomGenerator.NextVector4(Vector4.Zero, Vector4.One),
+                MaxDuration = parameters.MaxDuration,
+                MaxDurationRandomness = parameters.MaxDurationRandomness,
+                EndVelocity = parameters.EndVelocity,
+                Gravity = parameters.Gravity,
+                StartSize = parameters.StartSize,
+                EndSize = parameters.EndSize,
+                MinColor = parameters.MinColor,
+                MaxColor = parameters.MaxColor,
+                RotateSpeed = parameters.RotateSpeed,
+            };
+
+            effect.UpdatePerFrame(
+                context.ViewProjection,
+                context.EyePosition,
+                state,
+                TextureCount,
+                Texture);
+
+            #endregion
+
+            StreamOut(effect);
+
+            ToggleBuffers();
+
+            Draw(effect, context.DrawerMode);
         }
 
         /// <summary>
@@ -314,7 +312,7 @@ namespace Engine
         {
             parameters = particleParameters;
 
-            this.Emitter?.UpdateBounds(particleParameters);
+            Emitter?.UpdateBounds(particleParameters);
         }
 
         /// <summary>
@@ -323,14 +321,14 @@ namespace Engine
         /// <param name="effect">Effect for stream out</param>
         private void StreamOut(EffectDefaultGpuParticles effect)
         {
-            var graphics = this.Game.Graphics;
+            var graphics = Game.Graphics;
 
-            graphics.IAInputLayout = this.streamOutInputLayout;
-            graphics.IASetVertexBuffers(BufferSlot, this.firstRun ? this.emitterBinding : this.drawingBinding);
+            graphics.IAInputLayout = streamOutInputLayout;
+            graphics.IASetVertexBuffers(BufferSlot, firstRun ? emitterBinding : drawingBinding);
             graphics.IAPrimitiveTopology = PrimitiveTopology.PointList;
             graphics.SetDepthStencilNone();
 
-            graphics.SetStreamOutputTargets(this.streamOutBinding);
+            graphics.SetStreamOutputTargets(streamOutBinding);
 
             var techniqueForStreamOut = effect.ParticleStreamOut;
 
@@ -338,11 +336,11 @@ namespace Engine
             {
                 graphics.EffectPassApply(techniqueForStreamOut, p, 0);
 
-                if (this.firstRun)
+                if (firstRun)
                 {
                     graphics.Draw(1, 0);
 
-                    this.firstRun = false;
+                    firstRun = false;
                 }
                 else
                 {
@@ -357,12 +355,12 @@ namespace Engine
         /// </summary>
         private void ToggleBuffers()
         {
-            var temp = this.drawingBuffer;
-            this.drawingBuffer = this.streamOutBuffer;
-            this.streamOutBuffer = temp;
+            var temp = drawingBuffer;
+            drawingBuffer = streamOutBuffer;
+            streamOutBuffer = temp;
 
-            this.drawingBinding = new[] { new VertexBufferBinding(this.drawingBuffer, this.inputStride, 0) };
-            this.streamOutBinding = new[] { new StreamOutputBufferBinding(this.streamOutBuffer, 0) };
+            drawingBinding = new[] { new VertexBufferBinding(drawingBuffer, inputStride, 0) };
+            streamOutBinding = new[] { new StreamOutputBufferBinding(streamOutBuffer, 0) };
         }
         /// <summary>
         /// Drawing
@@ -371,7 +369,7 @@ namespace Engine
         /// <param name="drawerMode">Drawe mode</param>
         private void Draw(EffectDefaultGpuParticles effect, DrawerModes drawerMode)
         {
-            var rot = this.parameters.RotateSpeed != Vector2.Zero;
+            var rot = parameters.RotateSpeed != Vector2.Zero;
 
             var techniqueForDrawing = rot ? effect.RotationDraw : effect.NonRotationDraw;
 
@@ -380,26 +378,14 @@ namespace Engine
                 Counters.InstancesPerFrame++;
             }
 
-            var graphics = this.Game.Graphics;
+            var graphics = Game.Graphics;
 
-            graphics.IAInputLayout = rot ? this.rotatingInputLayout : this.nonRotatingInputLayout;
-            graphics.IASetVertexBuffers(BufferSlot, this.drawingBinding);
+            graphics.IAInputLayout = rot ? rotatingInputLayout : nonRotatingInputLayout;
+            graphics.IASetVertexBuffers(BufferSlot, drawingBinding);
             graphics.IAPrimitiveTopology = PrimitiveTopology.PointList;
 
             graphics.SetDepthStencilRDZEnabled();
-
-            if (this.parameters.Additive)
-            {
-                graphics.SetBlendAdditive();
-            }
-            else if (this.parameters.Transparent)
-            {
-                graphics.SetBlendDefaultAlpha();
-            }
-            else
-            {
-                graphics.SetBlendDefault();
-            }
+            graphics.SetBlendState(parameters.BlendMode);
 
             for (int p = 0; p < techniqueForDrawing.PassCount; p++)
             {
@@ -409,17 +395,10 @@ namespace Engine
             }
         }
 
-        /// <summary>
-        /// Gets the text representation of the particle system
-        /// </summary>
-        /// <returns>Returns the text representation of the particle system</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("Count: {0}; Total: {1:0.00}/{2:0.00}; ToEnd: {3:0.00};",
-                this.ActiveParticles,
-                this.Emitter.TotalTime,
-                this.Emitter.Duration,
-                this.TimeToEnd);
+            return $"Count: {ActiveParticles}; Total: {Emitter.TotalTime:0.00}/{Emitter.Duration:0.00}; ToEnd: {TimeToEnd:0.00};";
         }
     }
 }

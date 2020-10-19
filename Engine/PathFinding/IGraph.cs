@@ -1,5 +1,7 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Engine.PathFinding
 {
@@ -9,11 +11,15 @@ namespace Engine.PathFinding
     public interface IGraph : IDisposable
     {
         /// <summary>
+        /// Gets whether the graph is initialized
+        /// </summary>
+        bool Initialized { get; }
+        /// <summary>
         /// Gets the node collection of the graph for the specified agent type
         /// </summary>
         /// <param name="agent">Agent type</param>
         /// <returns>Returns the node collection for the agent type</returns>
-        IGraphNode[] GetNodes(AgentType agent);
+        IEnumerable<IGraphNode> GetNodes(AgentType agent);
         /// <summary>
         /// Find path from point to point for the specified agent type
         /// </summary>
@@ -21,7 +27,22 @@ namespace Engine.PathFinding
         /// <param name="from">Start point</param>
         /// <param name="to">End point</param>
         /// <returns>Return path if exists</returns>
-        Vector3[] FindPath(AgentType agent, Vector3 from, Vector3 to);
+        IEnumerable<Vector3> FindPath(AgentType agent, Vector3 from, Vector3 to);
+        /// <summary>
+        /// Find path from point to point for the specified agent type
+        /// </summary>
+        /// <param name="agent">Agent type</param>
+        /// <param name="from">Start point</param>
+        /// <param name="to">End point</param>
+        /// <returns>Return path if exists</returns>
+        Task<IEnumerable<Vector3>> FindPathAsync(AgentType agent, Vector3 from, Vector3 to);
+        /// <summary>
+        /// Gets wether the specified position is walkable for the specified agent type
+        /// </summary>
+        /// <param name="agent">Agent type</param>
+        /// <param name="position">Position</param>
+        /// <returns>Returns true if the specified position is walkable</returns>
+        bool IsWalkable(AgentType agent, Vector3 position);
         /// <summary>
         /// Gets wether the specified position is walkable for the specified agent type
         /// </summary>
@@ -32,10 +53,50 @@ namespace Engine.PathFinding
         bool IsWalkable(AgentType agent, Vector3 position, out Vector3? nearest);
 
         /// <summary>
+        /// Creates the graph at specified position
+        /// </summary>
+        /// <param name="position">Position</param>
+        void CreateAt(Vector3 position);
+        /// <summary>
+        /// Creates the graph at specified box
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        void CreateAt(BoundingBox bbox);
+        /// <summary>
+        /// Creates the graph at specified position list
+        /// </summary>
+        /// <param name="positions">Position list</param>
+        void CreateAt(IEnumerable<Vector3> positions);
+        /// <summary>
         /// Updates the graph at specified position
         /// </summary>
         /// <param name="position">Position</param>
         void UpdateAt(Vector3 position);
+        /// <summary>
+        /// Updates the graph at specified box
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        void UpdateAt(BoundingBox bbox);
+        /// <summary>
+        /// Updates the graph at specified position list
+        /// </summary>
+        /// <param name="positions">Position list</param>
+        void UpdateAt(IEnumerable<Vector3> positions);
+        /// <summary>
+        /// Removes the graph node at specified position
+        /// </summary>
+        /// <param name="position">Position</param>
+        void RemoveAt(Vector3 position);
+        /// <summary>
+        /// Removes the graph node at specified box
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        void RemoveAt(BoundingBox bbox);
+        /// <summary>
+        /// Removes the graph node at specified position list
+        /// </summary>
+        /// <param name="positions">Position list</param>
+        void RemoveAt(IEnumerable<Vector3> positions);
 
         /// <summary>
         /// Adds a cylinder obstacle
@@ -59,21 +120,23 @@ namespace Engine.PathFinding
         /// <summary>
         /// Removes an obstacle by obstacle id
         /// </summary>
-        /// <param name="obstacle">Obstacle id</param>
-        void RemoveObstacle(int obstacle);
+        /// <param name="obstacleId">Obstacle id</param>
+        void RemoveObstacle(int obstacleId);
 
         /// <summary>
-        /// Adds a new connection
+        /// Finds a random point over the graph
         /// </summary>
-        /// <param name="from">From point</param>
-        /// <param name="to">To point</param>
-        /// <returns>Returns the connection id</returns>
-        int AddConnection(Vector3 from, Vector3 to);
+        /// <param name="agent">Agent</param>
+        /// <returns>Returns a valid random position over the graph</returns>
+        Vector3? FindRandomPoint(AgentType agent);
         /// <summary>
-        /// Removes a connection by id
+        /// Finds a random point around a circle
         /// </summary>
-        /// <param name="id">Connection id</param>
-        void RemoveConnection(int id);
+        /// <param name="agent">Agent</param>
+        /// <param name="position">Position</param>
+        /// <param name="radius">Radius</param>
+        /// <returns>Returns a valid random position over the graph</returns>
+        Vector3? FindRandomPoint(AgentType agent, Vector3 position, float radius);
 
         /// <summary>
         /// Updates internal state

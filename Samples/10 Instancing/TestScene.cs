@@ -2,9 +2,11 @@
 using Engine.Animation;
 using Engine.Common;
 using Engine.Content;
+using Engine.UI;
 using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Instancing
 {
@@ -14,63 +16,66 @@ namespace Instancing
         private const int layerTerrain = 1;
         private const int layerHUD = 99;
 
-        private TextDrawer runtimeText = null;
+        private UITextArea runtimeText = null;
 
         private ModelInstanced troops = null;
 
-        public TestScene(Game game) : base(game, SceneModes.ForwardLigthning)
+        private bool gameReady = false;
+
+        public TestScene(Game game) : base(game)
         {
 
         }
 
-        public override void Initialize()
+        public override async Task Initialize()
         {
-            base.Initialize();
-
             GameEnvironment.Background = Color.CornflowerBlue;
 
-            //Texts
-            InitializeTexts();
+            await LoadResourcesAsync(
+                new[]
+                {
+                    InitializeTexts(),
+                    InitializeFloor(),
+                    InitializeTrees(),
+                    InitializeTroops(),
+                    InitializeWall()
+                },
+                (res) =>
+                {
+                    if (!res.Completed)
+                    {
+                        res.ThrowExceptions();
+                    }
 
-            //Floor
-            InitializeFloor();
+                    Camera.Goto(new Vector3(-45, 17, -30));
+                    Camera.LookTo(Vector3.Zero);
+                    Camera.FarPlaneDistance = 250;
 
-            //Trees
-            InitializeTrees();
-
-            //Troops
-            InitializeTroops();
-
-            //Wall
-            InitializeWall();
-
-            this.Camera.Goto(new Vector3(-45, 17, -30));
-            this.Camera.LookTo(Vector3.Zero);
-            this.Camera.FarPlaneDistance = 250;
+                    gameReady = true;
+                });
         }
 
-        private void InitializeTexts()
+        private async Task InitializeTexts()
         {
-            var title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD).Instance;
-            runtimeText = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD).Instance;
+            var title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White }, layerHUD);
+            runtimeText = await this.AddComponentUITextArea("RuntimeText", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Yellow }, layerHUD);
 
             title.Text = "Instancing test";
             runtimeText.Text = "";
 
-            title.Position = Vector2.Zero;
-            runtimeText.Position = new Vector2(5, title.Top + title.Height + 3);
+            title.SetPosition(Vector2.Zero);
+            runtimeText.SetPosition(new Vector2(5, title.Top + title.Height + 3));
 
             var spDesc = new SpriteDescription()
             {
-                AlphaEnabled = true,
-                Width = this.Game.Form.RenderWidth,
-                Height = this.runtimeText.Top + this.runtimeText.Height + 3,
-                Color = new Color4(0, 0, 0, 0.75f),
+                Width = Game.Form.RenderWidth,
+                Height = runtimeText.Top + runtimeText.Height + 3,
+                BaseColor = new Color4(0, 0, 0, 0.75f),
             };
 
-            this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            await this.AddComponentSprite("Backpanel", spDesc, SceneObjectUsages.UI, layerHUD - 1);
         }
-        private void InitializeFloor()
+        private async Task InitializeFloor()
         {
             float l = 12f;
             float h = 0f;
@@ -98,12 +103,9 @@ namespace Instancing
 
             var desc = new ModelInstancedDescription()
             {
-                Name = "Floor",
-                Static = true,
                 CastShadow = true,
                 DeferredEnabled = true,
                 DepthEnabled = true,
-                AlphaEnabled = false,
                 UseAnisotropicFiltering = true,
                 Instances = side * side,
                 Content = new ContentDescription()
@@ -112,16 +114,16 @@ namespace Instancing
                 }
             };
 
-            var floor = this.AddComponent<ModelInstanced>(desc);
+            var floor = await this.AddComponentModelInstanced("Floor", desc);
 
             Vector3 delta = new Vector3(l * side, 0, l * side) - new Vector3(l, 0, l);
             int x = 0;
             int y = 0;
-            for (int i = 0; i < floor.Count; i++)
+            for (int i = 0; i < floor.InstanceCount; i++)
             {
                 var iPos = new Vector3(x * l * 2, 0, y * l * 2) - delta;
 
-                floor.Instance[i].Manipulator.SetPosition(iPos, true);
+                floor[i].Manipulator.SetPosition(iPos, true);
 
                 x++;
                 if (x >= side)
@@ -131,17 +133,15 @@ namespace Instancing
                 }
             }
         }
-        private void InitializeTrees()
+        private async Task InitializeTrees()
         {
             int instances = 40;
 
             var treeDesc = new ModelInstancedDescription()
             {
-                Name = "Trees",
                 CastShadow = true,
-                Static = true,
                 Instances = instances,
-                AlphaEnabled = true,
+                BlendMode = BlendModes.DefaultTransparent,
                 UseAnisotropicFiltering = true,
                 Content = new ContentDescription()
                 {
@@ -149,12 +149,12 @@ namespace Instancing
                     ModelContentFilename = @"tree.xml",
                 }
             };
-            var trees = this.AddComponent<ModelInstanced>(treeDesc, SceneObjectUsages.None, layerTerrain);
+            var trees = await this.AddComponentModelInstanced("Trees", treeDesc, SceneObjectUsages.None, layerTerrain);
 
             int side = instances / 4;
             float groundSide = 55f;
 
-            for (int i = 0; i < trees.Count; i++)
+            for (int i = 0; i < trees.InstanceCount; i++)
             {
                 var iPos = Vector3.Zero;
 
@@ -175,17 +175,16 @@ namespace Instancing
                     iPos = new Vector3(-groundSide, 0, (i - ((side * 3) + (side * 0.5f))) * side);
                 }
 
-                trees.Instance[i].Manipulator.SetPosition(iPos, true);
-                trees.Instance[i].Manipulator.SetRotation(iPos.Z + iPos.X, 0, 0, true);
-                trees.Instance[i].Manipulator.SetScale(2 + (i % 3 * 0.2f), true);
-                trees.Instance[i].TextureIndex = (uint)(i % 2);
+                trees[i].Manipulator.SetPosition(iPos, true);
+                trees[i].Manipulator.SetRotation(iPos.Z + iPos.X, 0, 0, true);
+                trees[i].Manipulator.SetScale(2 + (i % 3 * 0.2f), true);
+                trees[i].TextureIndex = (uint)(i % 2);
             }
         }
-        private void InitializeTroops()
+        private async Task InitializeTroops()
         {
             var tDesc = new ModelInstancedDescription()
             {
-                Name = "Troops",
                 Instances = 100,
                 CastShadow = true,
                 UseAnisotropicFiltering = true,
@@ -195,22 +194,18 @@ namespace Instancing
                     ModelContentFilename = @"soldier_anim2.xml",
                 }
             };
-            this.troops = this.AddComponent<ModelInstanced>(tDesc, SceneObjectUsages.Agent, layerObjects).Instance;
-            this.troops.MaximumCount = -1;
+            troops = await this.AddComponentModelInstanced("Troops", tDesc, SceneObjectUsages.Agent, layerObjects);
+            troops.MaximumCount = -1;
 
             Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
 
-            {
-                var sp = new AnimationPath();
-                sp.AddLoop("idle1");
-                animations.Add("soldier_idle1", new AnimationPlan(sp));
-            }
+            var sp1 = new AnimationPath();
+            sp1.AddLoop("idle1");
+            animations.Add("soldier_idle1", new AnimationPlan(sp1));
 
-            {
-                var sp = new AnimationPath();
-                sp.AddLoop("idle2");
-                animations.Add("soldier_idle2", new AnimationPlan(sp));
-            }
+            var sp2 = new AnimationPath();
+            sp2.AddLoop("idle2");
+            animations.Add("soldier_idle2", new AnimationPlan(sp2));
 
             string[] anim = new[] { "soldier_idle1", "soldier_idle2" };
 
@@ -223,17 +218,17 @@ namespace Instancing
 
             int x = 0;
             int y = 0;
-            for (int i = 0; i < this.troops.Count; i++)
+            for (int i = 0; i < troops.InstanceCount; i++)
             {
                 var iPos = new Vector3(x * l * 2, 0, y * l * 2) - delta + rnd.NextVector3(vMin, vMax);
 
-                this.troops[i].Manipulator.SetPosition(iPos, true);
-                this.troops[i].Manipulator.SetRotation(iPos.Z, 0, 0, true);
-                this.troops[i].TextureIndex = (uint)(i % 3);
+                troops[i].Manipulator.SetPosition(iPos, true);
+                troops[i].Manipulator.SetRotation(iPos.Z, 0, 0, true);
+                troops[i].TextureIndex = (uint)(i % 3);
 
-                this.troops[i].AnimationController.TimeDelta = 0.4f + (0.1f * (i % 2));
-                this.troops[i].AnimationController.AddPath(animations[anim[i % anim.Length]]);
-                this.troops[i].AnimationController.Start(rnd.NextFloat(0f, 8f));
+                troops[i].AnimationController.TimeDelta = 0.4f + (0.1f * (i % 2));
+                troops[i].AnimationController.AddPath(animations[anim[i % anim.Length]]);
+                troops[i].AnimationController.Start(rnd.NextFloat(0f, 8f));
 
                 x++;
                 if (x >= side)
@@ -243,12 +238,12 @@ namespace Instancing
                 }
             }
         }
-        private void InitializeWall()
+        private async Task InitializeWall()
         {
-            var wall = this.AddComponent<ModelInstanced>(
+            var wall = await this.AddComponentModelInstanced(
+                 "Wall",
                 new ModelInstancedDescription()
                 {
-                    Name = "wall",
                     Instances = 40,
                     CastShadow = true,
                     UseAnisotropicFiltering = true,
@@ -257,11 +252,11 @@ namespace Instancing
                         ContentFolder = "Resources/Wall",
                         ModelContentFilename = "wall.xml",
                     }
-                }).Instance;
+                });
 
             BoundingBox bbox = wall[0].GetBoundingBox();
 
-            float x = bbox.GetX() * (10f / 11f);
+            float x = bbox.Width * (10f / 11f);
 
             for (int i = 0; i < 10; i++)
             {
@@ -289,65 +284,73 @@ namespace Instancing
 
         public override void Update(GameTime gameTime)
         {
-            if (this.Game.Input.KeyJustReleased(Keys.Escape))
+            if (Game.Input.KeyJustReleased(Keys.Escape))
             {
-                this.Game.Exit();
+                Game.Exit();
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.R))
+            if (Game.Input.KeyJustReleased(Keys.R))
             {
-                this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
+                SetRenderMode(GetRenderMode() == SceneModes.ForwardLigthning ?
                     SceneModes.DeferredLightning :
                     SceneModes.ForwardLigthning);
             }
 
-            bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
+            if (!gameReady)
+            {
+                return;
+            }
 
 #if DEBUG
-            if (this.Game.Input.RightMouseButtonPressed)
+            if (Game.Input.RightMouseButtonPressed)
+            {
+                Camera.RotateMouse(
+                    Game.GameTime,
+                    Game.Input.MouseXDelta,
+                    Game.Input.MouseYDelta);
+            }
+#else
+            Camera.RotateMouse(
+                Game.GameTime,
+                Game.Input.MouseXDelta,
+                Game.Input.MouseYDelta);
 #endif
+
+            if (Game.Input.KeyPressed(Keys.A))
             {
-                this.Camera.RotateMouse(
-                    this.Game.GameTime,
-                    this.Game.Input.MouseXDelta,
-                    this.Game.Input.MouseYDelta);
+                Camera.MoveLeft(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.A))
+            if (Game.Input.KeyPressed(Keys.D))
             {
-                this.Camera.MoveLeft(gameTime, shift);
+                Camera.MoveRight(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.D))
+            if (Game.Input.KeyPressed(Keys.W))
             {
-                this.Camera.MoveRight(gameTime, shift);
+                Camera.MoveForward(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.W))
+            if (Game.Input.KeyPressed(Keys.S))
             {
-                this.Camera.MoveForward(gameTime, shift);
+                Camera.MoveBackward(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.S))
+            int increment = Game.Input.ShiftPressed ? 10 : 1;
+
+            if (Game.Input.KeyJustReleased(Keys.Left))
             {
-                this.Camera.MoveBackward(gameTime, shift);
+                troops.MaximumCount = Math.Max(-1, troops.MaximumCount - increment);
             }
 
-            int increment = shift ? 10 : 1;
-
-            if (this.Game.Input.KeyJustReleased(Keys.Left))
+            if (Game.Input.KeyJustReleased(Keys.Right))
             {
-                this.troops.MaximumCount = Math.Max(-1, this.troops.MaximumCount - increment);
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.Right))
-            {
-                this.troops.MaximumCount = Math.Min(this.troops.Count, this.troops.MaximumCount + increment);
+                troops.MaximumCount = Math.Min(troops.InstanceCount, troops.MaximumCount + increment);
             }
 
             base.Update(gameTime);
 
-            this.runtimeText.Text = this.Game.RuntimeText;
+            runtimeText.Text = Game.RuntimeText;
         }
     }
 }

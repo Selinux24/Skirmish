@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.Common
 {
@@ -15,7 +16,7 @@ namespace Engine.Common
         /// <param name="bufferShape">Buffer shape</param>
         /// <param name="triangles">Triangle count</param>
         /// <returns>Returns the generated index list</returns>
-        public static uint[] GenerateIndices(IndexBufferShapes bufferShape, int triangles)
+        public static IEnumerable<uint> GenerateIndices(IndexBufferShapes bufferShape, int triangles)
         {
             return GenerateIndices(LevelOfDetail.High, bufferShape, triangles);
         }
@@ -26,7 +27,7 @@ namespace Engine.Common
         /// <param name="bufferShape">Buffer shape</param>
         /// <param name="triangles">Triangle count</param>
         /// <returns>Returns the generated index list</returns>
-        public static uint[] GenerateIndices(LevelOfDetail lod, IndexBufferShapes bufferShape, int triangles)
+        public static IEnumerable<uint> GenerateIndices(LevelOfDetail lod, IndexBufferShapes bufferShape, int triangles)
         {
             uint offset = (uint)lod;
             uint fullSide = (uint)Math.Sqrt(triangles / 2f);
@@ -108,7 +109,7 @@ namespace Engine.Common
         /// <param name="indexPRow">P index</param>
         /// <param name="indexCRow">C index</param>
         /// <returns>Returns the indexes list</returns>
-        private static uint[] ComputeTopSide(bool firstRow, bool topSide, uint offset, uint indexPRow, uint indexCRow)
+        private static IEnumerable<uint> ComputeTopSide(bool firstRow, bool topSide, uint offset, uint indexPRow, uint indexCRow)
         {
             if (firstRow && topSide)
             {
@@ -144,7 +145,7 @@ namespace Engine.Common
         /// <param name="indexCRow">C index</param>
         /// <param name="indexNRow">N index</param>
         /// <returns>Returns the indexes list</returns>
-        private static uint[] ComputeBottomSide(bool lastRow, bool bottomSide, uint offset, uint indexCRow, uint indexNRow)
+        private static IEnumerable<uint> ComputeBottomSide(bool lastRow, bool bottomSide, uint offset, uint indexCRow, uint indexNRow)
         {
             if (lastRow && bottomSide)
             {
@@ -181,7 +182,7 @@ namespace Engine.Common
         /// <param name="indexCRow">C index</param>
         /// <param name="indexNRow">N index</param>
         /// <returns>Returns the indexes list</returns>
-        private static uint[] ComputeLeftSide(bool firstColumn, bool leftSide, uint offset, uint indexPRow, uint indexCRow, uint indexNRow)
+        private static IEnumerable<uint> ComputeLeftSide(bool firstColumn, bool leftSide, uint offset, uint indexPRow, uint indexCRow, uint indexNRow)
         {
             if (firstColumn && leftSide)
             {
@@ -218,7 +219,7 @@ namespace Engine.Common
         /// <param name="indexCRow">C index</param>
         /// <param name="indexNRow">N index</param>
         /// <returns>Returns the indexes list</returns>
-        private static uint[] ComputeRightSide(bool lastColumn, bool rightSide, uint offset, uint indexPRow, uint indexCRow, uint indexNRow)
+        private static IEnumerable<uint> ComputeRightSide(bool lastColumn, bool rightSide, uint offset, uint indexPRow, uint indexCRow, uint indexNRow)
         {
             if (lastColumn && rightSide)
             {
@@ -251,15 +252,17 @@ namespace Engine.Common
         /// <typeparam name="T">Index type</typeparam>
         /// <param name="indices">Indices in a triangle list topology</param>
         /// <returns>Returns a new array</returns>
-        public static T[] ChangeCoordinate<T>(T[] indices)
+        public static IEnumerable<T> ChangeCoordinate<T>(IEnumerable<T> indices)
         {
-            T[] res = new T[indices.Length];
+            var idx = indices.ToArray();
 
-            for (int i = 0; i < indices.Length; i += 3)
+            T[] res = new T[idx.Length];
+
+            for (int i = 0; i < idx.Length; i += 3)
             {
-                res[i + 0] = indices[i + 0];
-                res[i + 1] = indices[i + 2];
-                res[i + 2] = indices[i + 1];
+                res[i + 0] = idx[i + 0];
+                res[i + 1] = idx[i + 2];
+                res[i + 2] = idx[i + 1];
             }
 
             return res;
@@ -290,34 +293,36 @@ namespace Engine.Common
         /// Creates a line list
         /// </summary>
         /// <param name="lines">Line list</param>
-        /// <param name="vertices">Result vertices</param>
-        public static void CreateLineList(Line3D[] lines, out Vector3[] vertices)
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateLineList(IEnumerable<Line3D> lines)
         {
             List<Vector3> data = new List<Vector3>();
 
-            for (int i = 0; i < lines.Length; i++)
+            foreach (var line in lines)
             {
-                data.Add(lines[i].Point1);
-                data.Add(lines[i].Point2);
+                data.Add(line.Point1);
+                data.Add(line.Point2);
             }
 
-            vertices = data.ToArray();
+            return new GeometryDescriptor()
+            {
+                Vertices = data.ToArray()
+            };
         }
         /// <summary>
         /// Creates a line list
         /// </summary>
         /// <param name="lines">Line list</param>
-        /// <param name="vertices">Result vertices</param>
-        /// <param name="indices">Result indices</param>
-        public static void CreateLineList(Line3D[] lines, out Vector3[] vertices, out uint[] indices)
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateIndexedLineList(IEnumerable<Line3D> lines)
         {
             List<Vector3> vData = new List<Vector3>();
             List<uint> iData = new List<uint>();
 
-            for (int i = 0; i < lines.Length; i++)
+            foreach (var line in lines)
             {
-                var p1 = lines[i].Point1;
-                var p2 = lines[i].Point2;
+                var p1 = line.Point1;
+                var p2 = line.Point2;
 
                 var i1 = vData.IndexOf(p1);
                 var i2 = vData.IndexOf(p2);
@@ -343,43 +348,48 @@ namespace Engine.Common
                 }
             }
 
-            vertices = vData.ToArray();
-            indices = iData.ToArray();
+            return new GeometryDescriptor()
+            {
+                Vertices = vData.ToArray(),
+                Indices = iData.ToArray(),
+            };
         }
         /// <summary>
         /// Creates a triangle list
         /// </summary>
         /// <param name="triangles">Triangle list</param>
-        /// <param name="vertices">Result vertices</param>
-        public static void CreateTriangleList(Triangle[] triangles, out Vector3[] vertices)
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateTriangleList(IEnumerable<Triangle> triangles)
         {
             List<Vector3> vData = new List<Vector3>();
 
-            for (int i = 0; i < triangles.Length; i++)
+            foreach (var triangle in triangles)
             {
-                vData.Add(triangles[i].Point1);
-                vData.Add(triangles[i].Point2);
-                vData.Add(triangles[i].Point3);
+                vData.Add(triangle.Point1);
+                vData.Add(triangle.Point2);
+                vData.Add(triangle.Point3);
             }
 
-            vertices = vData.ToArray();
+            return new GeometryDescriptor()
+            {
+                Vertices = vData.ToArray(),
+            };
         }
         /// <summary>
         /// Creates a triangle list
         /// </summary>
         /// <param name="triangles">Triangle list</param>
-        /// <param name="vertices">Result vertices</param>
-        /// <param name="indices">Result indices</param>
-        public static void CreateTriangleList(Triangle[] triangles, out Vector3[] vertices, out uint[] indices)
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateIndexedTriangleList(IEnumerable<Triangle> triangles)
         {
             List<Vector3> vData = new List<Vector3>();
             List<uint> iData = new List<uint>();
 
-            for (int i = 0; i < triangles.Length; i++)
+            foreach (var triangle in triangles)
             {
-                var p1 = triangles[i].Point1;
-                var p2 = triangles[i].Point2;
-                var p3 = triangles[i].Point3;
+                var p1 = triangle.Point1;
+                var p2 = triangle.Point2;
+                var p3 = triangle.Point3;
 
                 var i1 = vData.IndexOf(p1);
                 var i2 = vData.IndexOf(p2);
@@ -416,8 +426,41 @@ namespace Engine.Common
                 }
             }
 
-            vertices = vData.ToArray();
-            indices = iData.ToArray();
+            return new GeometryDescriptor()
+            {
+                Vertices = vData.ToArray(),
+                Indices = iData.ToArray(),
+            };
+        }
+        /// <summary>
+        /// Creates a unit sprite
+        /// </summary>
+        /// <returns>Returns a geometry descriptor</returns>
+        /// <remarks>Unit size with then center in X=0.5;Y=0.5</remarks>
+        public static GeometryDescriptor CreateUnitSprite()
+        {
+            return CreateSprite(Vector2.Zero, 1, 1, 0, 0);
+        }
+        /// <summary>
+        /// Creates a unit sprite
+        /// </summary>
+        /// <param name="uvMap">UV map</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        /// <remarks>Unit size with then center in X=0.5;Y=0.5</remarks>
+        public static GeometryDescriptor CreateUnitSprite(Vector4 uvMap)
+        {
+            return CreateSprite(Vector2.Zero, 1, 1, 0, 0, uvMap);
+        }
+        /// <summary>
+        /// Creates a sprite of VertexPositionTexture VertexData
+        /// </summary>
+        /// <param name="position">Sprite position</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateSprite(Vector2 position, float width, float height)
+        {
+            return CreateSprite(position, width, height, 0, 0, new Vector4(0, 0, 1, 1));
         }
         /// <summary>
         /// Creates a sprite of VertexPositionTexture VertexData
@@ -427,26 +470,10 @@ namespace Engine.Common
         /// <param name="height">Height</param>
         /// <param name="formWidth">Render form width</param>
         /// <param name="formHeight">Render form height</param>
-        /// <param name="vertices">Result vertices</param>
-        /// <param name="indices">Result indices</param>
-        public static void CreateSprite(Vector2 position, float width, float height, float formWidth, float formHeight, out Vector3[] vertices, out uint[] indices)
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateSprite(Vector2 position, float width, float height, float formWidth, float formHeight)
         {
-            CreateSprite(position, width, height, formWidth, formHeight, new Vector4(0, 0, 1, 1), out vertices, out Vector2[] uvs, out indices);
-        }
-        /// <summary>
-        /// Creates a sprite of VertexPositionTexture VertexData
-        /// </summary>
-        /// <param name="position">Sprite position</param>
-        /// <param name="width">Width</param>
-        /// <param name="height">Height</param>
-        /// <param name="formWidth">Render form width</param>
-        /// <param name="formHeight">Render form height</param>
-        /// <param name="vertices">Result vertices</param>
-        /// <param name="indices">Result indices</param>
-        /// <param name="uvs">Result texture uvs</param>
-        public static void CreateSprite(Vector2 position, float width, float height, float formWidth, float formHeight, out Vector3[] vertices, out Vector2[] uvs, out uint[] indices)
-        {
-            CreateSprite(position, width, height, formWidth, formHeight, new Vector4(0, 0, 1, 1), out vertices, out uvs, out indices);
+            return CreateSprite(position, width, height, formWidth, formHeight, new Vector4(0, 0, 1, 1));
         }
         /// <summary>
         /// Creates a sprite of VertexPositionTexture VertexData
@@ -457,13 +484,11 @@ namespace Engine.Common
         /// <param name="formWidth">Render form width</param>
         /// <param name="formHeight">Render form height</param>
         /// <param name="uvMap">UV map</param>
-        /// <param name="vertices">Result vertices</param>
-        /// <param name="indices">Result indices</param>
-        /// <param name="uvs">Result texture uvs</param>
-        public static void CreateSprite(Vector2 position, float width, float height, float formWidth, float formHeight, Vector4 uvMap, out Vector3[] vertices, out Vector2[] uvs, out uint[] indices)
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateSprite(Vector2 position, float width, float height, float formWidth, float formHeight, Vector4 uvMap)
         {
-            vertices = new Vector3[4];
-            uvs = new Vector2[4];
+            Vector3[] vertices = new Vector3[4];
+            Vector2[] uvs = new Vector2[4];
 
             float left = (formWidth * 0.5f * -1f) + position.X;
             float right = left + width;
@@ -488,7 +513,7 @@ namespace Engine.Common
             vertices[3] = new Vector3(right, top, 0.0f);
             uvs[3] = new Vector2(u1, v0);
 
-            indices = new uint[6];
+            uint[] indices = new uint[6];
 
             indices[0] = 0;
             indices[1] = 1;
@@ -497,52 +522,34 @@ namespace Engine.Common
             indices[3] = 0;
             indices[4] = 3;
             indices[5] = 1;
+
+            return new GeometryDescriptor()
+            {
+                Vertices = vertices,
+                Indices = indices,
+                Uvs = uvs,
+            };
         }
         /// <summary>
         /// Creates a screen of VertexPositionTexture VertexData
         /// </summary>
         /// <param name="form">Form</param>
-        /// <param name="vertices">Resulting positions</param>
-        /// <param name="indices">Resulting indices</param>
-        public static void CreateScreen(EngineForm form, out Vector3[] vertices, out uint[] indices)
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateScreen(EngineForm form)
         {
-            CreateScreen(form, out vertices, out Vector2[] uvs, out indices);
+            return CreateScreen(form.RenderWidth, form.RenderHeight);
         }
         /// <summary>
         /// Creates a screen of VertexPositionTexture VertexData
         /// </summary>
         /// <param name="renderWidth">Render area width</param>
         /// <param name="renderHeight">Render area height</param>
-        /// <param name="vertices">Resulting positions</param>
-        /// <param name="indices">Resulting indices</param>
-        public static void CreateScreen(int renderWidth, int renderHeight, out Vector3[] vertices, out uint[] indices)
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateScreen(int renderWidth, int renderHeight)
         {
-            CreateScreen(renderWidth, renderHeight, out vertices, out Vector2[] uvs, out indices);
-        }
-        /// <summary>
-        /// Creates a screen of VertexPositionTexture VertexData
-        /// </summary>
-        /// <param name="form">Form</param>
-        /// <param name="vertices">Resulting positions</param>
-        /// <param name="uvs">Resulting uv coordinates</param>
-        /// <param name="indices">Resulting indices</param>
-        public static void CreateScreen(EngineForm form, out Vector3[] vertices, out Vector2[] uvs, out uint[] indices)
-        {
-            CreateScreen(form.RenderWidth, form.RenderHeight, out vertices, out uvs, out indices);
-        }
-        /// <summary>
-        /// Creates a screen of VertexPositionTexture VertexData
-        /// </summary>
-        /// <param name="renderWidth">Render area width</param>
-        /// <param name="renderHeight">Render area height</param>
-        /// <param name="vertices">Resulting positions</param>
-        /// <param name="uvs">Resulting uv coordinates</param>
-        /// <param name="indices">Resulting indices</param>
-        public static void CreateScreen(int renderWidth, int renderHeight, out Vector3[] vertices, out Vector2[] uvs, out uint[] indices)
-        {
-            vertices = new Vector3[4];
-            uvs = new Vector2[4];
-            indices = new uint[6];
+            Vector3[] vertices = new Vector3[4];
+            Vector2[] uvs = new Vector2[4];
+            uint[] indices = new uint[6];
 
             float width = renderWidth;
             float height = renderHeight;
@@ -571,6 +578,31 @@ namespace Engine.Common
             indices[3] = 0;
             indices[4] = 3;
             indices[5] = 1;
+
+            return new GeometryDescriptor()
+            {
+                Vertices = vertices,
+                Indices = indices,
+                Uvs = uvs,
+            };
+        }
+        /// <summary>
+        /// Creates a box of VertexPosition VertexData
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateBox(BoundingBox bbox)
+        {
+            return CreateBox(bbox.Center, bbox.Width, bbox.Height, bbox.Depth);
+        }
+        /// <summary>
+        /// Creates a box of VertexPosition VertexData
+        /// </summary>
+        /// <param name="obb">Oriented bounding box</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateBox(OrientedBoundingBox obb)
+        {
+            return CreateBox(obb.Center, obb.Extents.X * 2, obb.Extents.Y * 2, obb.Extents.Z * 2);
         }
         /// <summary>
         /// Creates a box of VertexPosition VertexData
@@ -578,12 +610,23 @@ namespace Engine.Common
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
         /// <param name="depth">Depth</param>
-        /// <param name="v">Result vertices</param>
-        /// <param name="i">Result indices</param>
-        public static void CreateBox(float width, float height, float depth, out Vector3[] vertices, out uint[] indices)
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateBox(float width, float height, float depth)
         {
-            vertices = new Vector3[24];
-            indices = new uint[36];
+            return CreateBox(Vector3.Zero, width, height, depth);
+        }
+        /// <summary>
+        /// Creates a box of VertexPosition VertexData
+        /// </summary>
+        /// <param name="center">Box center</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <param name="depth">Depth</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateBox(Vector3 center, float width, float height, float depth)
+        {
+            Vector3[] vertices = new Vector3[24];
+            uint[] indices = new uint[36];
 
             float w2 = 0.5f * width;
             float h2 = 0.5f * height;
@@ -648,6 +691,20 @@ namespace Engine.Common
             // Fill in the right face index data
             indices[30] = 20; indices[31] = 21; indices[32] = 22;
             indices[33] = 20; indices[34] = 22; indices[35] = 23;
+
+            if (center != Vector3.Zero)
+            {
+                for (int i = 0; i < vertices.Length; i++)
+                {
+                    vertices[i] += center;
+                }
+            }
+
+            return new GeometryDescriptor()
+            {
+                Vertices = vertices,
+                Indices = indices,
+            };
         }
         /// <summary>
         /// Creates a cone of VertexPositionNormalTextureTangent VertexData
@@ -655,9 +712,8 @@ namespace Engine.Common
         /// <param name="radius">The base radius</param>
         /// <param name="sliceCount">The base slice count</param>
         /// <param name="height">Cone height</param>
-        /// <param name="vertices">Result vertices</param>
-        /// <param name="indices">Result indices</param>
-        public static void CreateCone(float radius, uint sliceCount, float height, out Vector3[] vertices, out uint[] indices)
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateCone(float radius, uint sliceCount, float height)
         {
             List<Vector3> vertList = new List<Vector3>();
             List<uint> indexList = new List<uint>();
@@ -708,20 +764,22 @@ namespace Engine.Common
                 indexList.Add(index == sliceCount - 1 ? 2 : index + 3);
             }
 
-            vertices = vertList.ToArray();
-            indices = indexList.ToArray();
+            return new GeometryDescriptor()
+            {
+                Vertices = vertList.ToArray(),
+                Indices = indexList.ToArray(),
+            };
         }
         /// <summary>
         /// Creates a sphere of VertexPositionNormalTextureTangent VertexData
         /// </summary>
-        /// <param name="radius">Radius</param>
+        /// <param name="sphere">Sphere</param>
         /// <param name="sliceCount">Slice count</param>
         /// <param name="stackCount">Stack count</param>
-        /// <param name="vertices">Result vertices</param>
-        /// <param name="indices">Result indices</param>
-        public static void CreateSphere(float radius, uint sliceCount, uint stackCount, out Vector3[] vertices, out uint[] indices)
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateSphere(BoundingSphere sphere, uint sliceCount, uint stackCount)
         {
-            CreateSphere(radius, sliceCount, stackCount, out vertices, out Vector3[] normals, out Vector2[] uvs, out Vector3[] tangents, out Vector3[] binormals, out indices);
+            return CreateSphere(sphere.Center, sphere.Radius, sliceCount, stackCount);
         }
         /// <summary>
         /// Creates a sphere of VertexPositionNormalTextureTangent VertexData
@@ -729,27 +787,20 @@ namespace Engine.Common
         /// <param name="radius">Radius</param>
         /// <param name="sliceCount">Slice count</param>
         /// <param name="stackCount">Stack count</param>
-        /// <param name="vertices">Result vertices</param>
-        /// <param name="normals">Result normals</param>
-        /// <param name="uvs">Result texture uvs</param>
-        /// <param name="indices">Result indices</param>
-        public static void CreateSphere(float radius, uint sliceCount, uint stackCount, out Vector3[] vertices, out Vector3[] normals, out Vector2[] uvs, out uint[] indices)
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateSphere(float radius, uint sliceCount, uint stackCount)
         {
-            CreateSphere(radius, sliceCount, stackCount, out vertices, out normals, out uvs, out Vector3[] tangents, out Vector3[] binormals, out indices);
+            return CreateSphere(Vector3.Zero, radius, sliceCount, stackCount);
         }
         /// <summary>
         /// Creates a sphere of VertexPositionNormalTextureTangent VertexData
         /// </summary>
+        /// <param name="center">Sphere center</param>
         /// <param name="radius">Radius</param>
         /// <param name="sliceCount">Slice count</param>
         /// <param name="stackCount">Stack count</param>
-        /// <param name="vertices">Result vertices</param>
-        /// <param name="normals">Result normals</param>
-        /// <param name="tangents">Result tangents</param>
-        /// <param name="binormals">Result binormals</param>
-        /// <param name="uvs">Result texture uvs</param>
-        /// <param name="indices">Result indices</param>
-        public static void CreateSphere(float radius, uint sliceCount, uint stackCount, out Vector3[] vertices, out Vector3[] normals, out Vector2[] uvs, out Vector3[] tangents, out Vector3[] binormals, out uint[] indices)
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateSphere(Vector3 center, float radius, uint sliceCount, uint stackCount)
         {
             List<Vector3> vertList = new List<Vector3>();
             List<Vector3> normList = new List<Vector3>();
@@ -763,7 +814,7 @@ namespace Engine.Common
             #region Positions
 
             //North pole
-            vertList.Add(new Vector3(0.0f, radius, 0.0f));
+            vertList.Add(new Vector3(0.0f, radius, 0.0f) + center);
             normList.Add(new Vector3(0.0f, 1.0f, 0.0f));
             tangList.Add(new Vector3(0.0f, 0.0f, 1.0f));
             binmList.Add(new Vector3(1.0f, 0.0f, 0.0f));
@@ -798,7 +849,7 @@ namespace Engine.Common
 
                     Vector2 texture = new Vector2(u, v);
 
-                    vertList.Add(position);
+                    vertList.Add(position + center);
                     normList.Add(normal);
                     tangList.Add(tangent);
                     binmList.Add(binormal);
@@ -807,7 +858,7 @@ namespace Engine.Common
             }
 
             //South pole
-            vertList.Add(new Vector3(0.0f, -radius, 0.0f));
+            vertList.Add(new Vector3(0.0f, -radius, 0.0f) + center);
             normList.Add(new Vector3(0.0f, -1.0f, 0.0f));
             tangList.Add(new Vector3(0.0f, 0.0f, -1.0f));
             binmList.Add(new Vector3(-1.0f, 0.0f, 0.0f));
@@ -855,25 +906,25 @@ namespace Engine.Common
 
             #endregion
 
-            vertices = vertList.ToArray();
-            normals = normList.ToArray();
-            tangents = tangList.ToArray();
-            binormals = binmList.ToArray();
-            uvs = uvList.ToArray();
-            indices = indexList.ToArray();
+            return new GeometryDescriptor()
+            {
+                Vertices = vertList.ToArray(),
+                Normals = normList.ToArray(),
+                Tangents = tangList.ToArray(),
+                Binormals = binmList.ToArray(),
+                Uvs = uvList.ToArray(),
+                Indices = indexList.ToArray(),
+            };
         }
         /// <summary>
         /// Creates a XZ plane of position normal texture data
         /// </summary>
         /// <param name="size">Plane size</param>
         /// <param name="height">Plane height</param>
-        /// <param name="vertices">Gets the plane vertices</param>
-        /// <param name="normals">Gets the plane normals</param>
-        /// <param name="uvs">Gets the plane uvs</param>
-        /// <param name="indices">Gets the plane indices</param>
-        public static void CreateXZPlane(float size, float height, out Vector3[] vertices, out Vector3[] normals, out Vector2[] uvs, out uint[] indices)
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateXZPlane(float size, float height)
         {
-            vertices = new Vector3[]
+            Vector3[] vertices = new Vector3[]
             {
                 new Vector3(-size*0.5f, +height, -size*0.5f),
                 new Vector3(-size*0.5f, +height, +size*0.5f),
@@ -881,7 +932,7 @@ namespace Engine.Common
                 new Vector3(+size*0.5f, +height, +size*0.5f),
             };
 
-            normals = new Vector3[]
+            Vector3[] normals = new Vector3[]
             {
                 Vector3.Up,
                 Vector3.Up,
@@ -889,7 +940,7 @@ namespace Engine.Common
                 Vector3.Up,
             };
 
-            uvs = new Vector2[]
+            Vector2[] uvs = new Vector2[]
             {
                 new Vector2(0.0f, 0.0f),
                 new Vector2(0.0f, size),
@@ -897,10 +948,18 @@ namespace Engine.Common
                 new Vector2(size, size),
             };
 
-            indices = new uint[]
+            uint[] indices = new uint[]
             {
                 0, 1, 2,
                 1, 3, 2,
+            };
+
+            return new GeometryDescriptor()
+            {
+                Vertices = vertices,
+                Normals = normals,
+                Uvs = uvs,
+                Indices = indices,
             };
         }
         /// <summary>
@@ -911,13 +970,11 @@ namespace Engine.Common
         /// <param name="planeWidth">Plane width</param>
         /// <param name="planeTop">Plane top</param>
         /// <param name="planeBottom">Plane bottom</param>
-        /// <param name="vertices">Result vertices</param>
-        /// <param name="uvs">Result texture uvs</param>
-        /// <param name="indices">Result indices</param>
-        public static void CreateCurvePlane(int size, int textureRepeat, float planeWidth, float planeTop, float planeBottom, out Vector3[] vertices, out Vector2[] uvs, out uint[] indices)
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateCurvePlane(int size, int textureRepeat, float planeWidth, float planeTop, float planeBottom)
         {
-            vertices = new Vector3[(size + 1) * (size + 1)];
-            uvs = new Vector2[(size + 1) * (size + 1)];
+            Vector3[] vertices = new Vector3[(size + 1) * (size + 1)];
+            Vector2[] uvs = new Vector2[(size + 1) * (size + 1)];
 
             // Determine the size of each quad on the sky plane.
             float quadSize = planeWidth / (float)size;
@@ -988,7 +1045,12 @@ namespace Engine.Common
                 }
             }
 
-            indices = indexList.ToArray();
+            return new GeometryDescriptor()
+            {
+                Vertices = vertices,
+                Uvs = uvs,
+                Indices = indexList.ToArray(),
+            };
         }
 
         /// <summary>
@@ -997,12 +1059,15 @@ namespace Engine.Common
         /// <param name="p1">Point 1</param>
         /// <param name="p2">point 2</param>
         /// <param name="p3">point 3</param>
-        /// <param name="normal">Resulting normal</param>
-        public static void ComputeNormal(Vector3 p1, Vector3 p2, Vector3 p3, out Vector3 normal)
+        /// <returns>Returns a normal descriptor</returns>
+        public static NormalDescriptor ComputeNormal(Vector3 p1, Vector3 p2, Vector3 p3)
         {
             var p = new Plane(p1, p2, p3);
 
-            normal = p.Normal;
+            return new NormalDescriptor()
+            {
+                Normal = p.Normal,
+            };
         }
         /// <summary>
         /// Calculate tangent, normal and binormals of triangle vertices
@@ -1013,10 +1078,8 @@ namespace Engine.Common
         /// <param name="uv1">Texture uv 1</param>
         /// <param name="uv2">Texture uv 2</param>
         /// <param name="uv3">Texture uv 3</param>
-        /// <param name="tangent">Tangen result</param>
-        /// <param name="binormal">Binormal result</param>
-        /// <param name="normal">Normal result</param>
-        public static void ComputeNormals(Vector3 p1, Vector3 p2, Vector3 p3, Vector2 uv1, Vector2 uv2, Vector2 uv3, out Vector3 tangent, out Vector3 binormal, out Vector3 normal)
+        /// <returns>Returns a normal descriptor</returns>
+        public static NormalDescriptor ComputeNormals(Vector3 p1, Vector3 p2, Vector3 p3, Vector2 uv1, Vector2 uv2, Vector2 uv3)
         {
             // Calculate the two vectors for the face.
             Vector3 vector1 = p2 - p1;
@@ -1030,19 +1093,32 @@ namespace Engine.Common
             var den = 1.0f / (tuVector[0] * tvVector[1] - tuVector[1] * tvVector[0]);
 
             // Calculate the cross products and multiply by the coefficient to get the tangent and binormal.
-            tangent.X = (tvVector[1] * vector1.X - tvVector[0] * vector2.X) * den;
-            tangent.Y = (tvVector[1] * vector1.Y - tvVector[0] * vector2.Y) * den;
-            tangent.Z = (tvVector[1] * vector1.Z - tvVector[0] * vector2.Z) * den;
+            Vector3 tangent = new Vector3
+            {
+                X = (tvVector[1] * vector1.X - tvVector[0] * vector2.X) * den,
+                Y = (tvVector[1] * vector1.Y - tvVector[0] * vector2.Y) * den,
+                Z = (tvVector[1] * vector1.Z - tvVector[0] * vector2.Z) * den
+            };
 
-            binormal.X = (tuVector[0] * vector2.X - tuVector[1] * vector1.X) * den;
-            binormal.Y = (tuVector[0] * vector2.Y - tuVector[1] * vector1.Y) * den;
-            binormal.Z = (tuVector[0] * vector2.Z - tuVector[1] * vector1.Z) * den;
+            Vector3 binormal = new Vector3
+            {
+                X = (tuVector[0] * vector2.X - tuVector[1] * vector1.X) * den,
+                Y = (tuVector[0] * vector2.Y - tuVector[1] * vector1.Y) * den,
+                Z = (tuVector[0] * vector2.Z - tuVector[1] * vector1.Z) * den
+            };
 
             tangent.Normalize();
             binormal.Normalize();
 
             // Calculate the cross product of the tangent and binormal which will give the normal vector.
-            normal = Vector3.Cross(tangent, binormal);
+            Vector3 normal = Vector3.Cross(tangent, binormal);
+
+            return new NormalDescriptor()
+            {
+                Normal = normal,
+                Tangent = tangent,
+                Binormal = binormal,
+            };
         }
 
         /// <summary>
@@ -1098,6 +1174,85 @@ namespace Engine.Common
             }
 
             return bsph;
+        }
+
+        /// <summary>
+        /// Computes constraints into vertices
+        /// </summary>
+        /// <param name="constraint">Constraint</param>
+        /// <param name="vertices">Vertices</param>
+        /// <param name="res">Resulting vertices</param>
+        public static void ConstraintVertices(BoundingBox constraint, VertexData[] vertices, out VertexData[] res)
+        {
+            List<VertexData> tmpVertices = new List<VertexData>();
+
+            for (int i = 0; i < vertices.Length; i += 3)
+            {
+                if (constraint.Contains(vertices[i + 0].Position.Value) != ContainmentType.Disjoint ||
+                    constraint.Contains(vertices[i + 1].Position.Value) != ContainmentType.Disjoint ||
+                    constraint.Contains(vertices[i + 2].Position.Value) != ContainmentType.Disjoint)
+                {
+                    tmpVertices.Add(vertices[i + 0]);
+                    tmpVertices.Add(vertices[i + 1]);
+                    tmpVertices.Add(vertices[i + 2]);
+                }
+            }
+
+            res = tmpVertices.ToArray();
+        }
+        /// <summary>
+        /// Computes constraints into vertices and indices
+        /// </summary>
+        /// <param name="constraint">Constraint</param>
+        /// <param name="vertices">Vertices</param>
+        /// <param name="indices">Indices</param>
+        /// <param name="resVertices">Resulting vertices</param>
+        /// <param name="resIndices">Resulting indices</param>
+        public static void ConstraintIndices(BoundingBox constraint, VertexData[] vertices, uint[] indices, out VertexData[] resVertices, out uint[] resIndices)
+        {
+            List<uint> tmpIndices = new List<uint>();
+
+            // Gets all triangle indices into the constraint
+            for (int i = 0; i < indices.Length; i += 3)
+            {
+                var i0 = indices[i + 0];
+                var i1 = indices[i + 1];
+                var i2 = indices[i + 2];
+
+                var v0 = vertices[i0];
+                var v1 = vertices[i1];
+                var v2 = vertices[i2];
+
+                if (constraint.Contains(v0.Position.Value) != ContainmentType.Disjoint ||
+                    constraint.Contains(v1.Position.Value) != ContainmentType.Disjoint ||
+                    constraint.Contains(v2.Position.Value) != ContainmentType.Disjoint)
+                {
+                    tmpIndices.Add(i0);
+                    tmpIndices.Add(i1);
+                    tmpIndices.Add(i2);
+                }
+            }
+
+            List<VertexData> tmpVertices = new List<VertexData>();
+            List<Tuple<uint, uint>> dict = new List<Tuple<uint, uint>>();
+
+            // Adds all the selected vertices for each unique index, and create a index traductor for the new vertext list
+            foreach (uint index in tmpIndices.Distinct())
+            {
+                tmpVertices.Add(vertices[index]);
+                dict.Add(new Tuple<uint, uint>(index, (uint)tmpVertices.Count - 1));
+            }
+
+            // Set the new index values
+            for (int i = 0; i < tmpIndices.Count; i++)
+            {
+                uint newIndex = dict.Find(d => d.Item1 == tmpIndices[i]).Item2;
+
+                tmpIndices[i] = newIndex;
+            }
+
+            resVertices = tmpVertices.ToArray();
+            resIndices = tmpIndices.ToArray();
         }
     }
 }

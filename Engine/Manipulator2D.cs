@@ -8,24 +8,26 @@ namespace Engine
     public class Manipulator2D
     {
         /// <summary>
-        /// Position component
+        /// Game instance
         /// </summary>
-        private Vector2 position = Vector2.Zero;
+        private readonly Game game;
+        /// <summary>
+        /// Update internals flag
+        /// </summary>
+        private bool updateInternals = true;
 
         /// <summary>
         /// Gets Position component
         /// </summary>
-        public Vector2 Position
-        {
-            get
-            {
-                return new Vector2(this.position.X, -this.position.Y);
-            }
-        }
+        public Vector2 Position { get; private set; } = Vector2.Zero;
         /// <summary>
         /// Gets Scale component
         /// </summary>
         public Vector2 Scale { get; private set; } = Vector2.One;
+        /// <summary>
+        /// Gets Rotation angle
+        /// </summary>
+        public float Rotation { get; private set; } = 0f;
         /// <summary>
         /// Gets final transform of controller
         /// </summary>
@@ -38,23 +40,50 @@ namespace Engine
         /// <summary>
         /// Contructor
         /// </summary>
-        public Manipulator2D()
+        /// <param name="game">Game</param>
+        public Manipulator2D(Game game)
         {
+            this.game = game;
+        }
 
+        /// <summary>
+        /// Updates the internal state
+        /// </summary>
+        public void Update()
+        {
+            Update(Vector2.Zero, 1f);
         }
         /// <summary>
-        /// Update internal state
+        /// Updates the internal state
         /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="relativeCenter">Relative window center</param>
-        /// <param name="width">Width</param>
-        /// <param name="height">Height</param>
-        public void Update(GameTime gameTime, Point relativeCenter, float width, float height)
+        /// <param name="parentPosition">Parent position</param>
+        /// <param name="parentScale">Parent scale</param>
+        public void Update(Vector2 parentPosition, float parentScale)
         {
-            this.LocalTransform =
-                Matrix.Scaling(this.Scale.X * width, this.Scale.Y * height, 1f) *
-                Matrix.Translation(-relativeCenter.X, +relativeCenter.Y, 0f) *
-                Matrix.Translation(this.position.X, this.position.Y, 0f);
+            if (!updateInternals)
+            {
+                return;
+            }
+
+            parentPosition = game.Form.ToScreenSpace(parentPosition);
+            var localPosition = game.Form.ToScreenSpace(Position);
+
+            var parentP = new Vector3(parentPosition.X, parentPosition.Y, 0);
+            var localP = new Vector3(localPosition.X, localPosition.Y, 0);
+
+            //Local scale (in origin)
+            var lsca = Matrix.Scaling(new Vector3(Scale.X, Scale.Y, 0));
+
+            //Local rotation relative to parent position
+            var lrot = Matrix.RotationZ(Rotation);
+            var ltrn = Matrix.Translation((localP - parentP) * parentScale);
+
+            //Translation to parent position
+            var ptrn = Matrix.Translation(parentP);
+
+            this.LocalTransform = lsca * ltrn * lrot * ptrn;
+
+            updateInternals = false;
 
             Counters.UpdatesPerFrame++;
         }
@@ -65,7 +94,9 @@ namespace Engine
         /// <param name="d">Distance</param>
         public void MoveLeft(GameTime gameTime, float d = 1f)
         {
-            this.position += Vector2.UnitX * -d * this.LinearVelocity * gameTime.ElapsedSeconds;
+            this.Position += Vector2.UnitX * -d * this.LinearVelocity * gameTime.ElapsedSeconds;
+
+            updateInternals = true;
         }
         /// <summary>
         /// Increments position component d distance along right vector
@@ -73,7 +104,9 @@ namespace Engine
         /// <param name="d">Distance</param>
         public void MoveRight(GameTime gameTime, float d = 1f)
         {
-            this.position += Vector2.UnitX * d * this.LinearVelocity * gameTime.ElapsedSeconds;
+            this.Position += Vector2.UnitX * d * this.LinearVelocity * gameTime.ElapsedSeconds;
+
+            updateInternals = true;
         }
         /// <summary>
         /// Increments position component d distance along up vector
@@ -81,7 +114,9 @@ namespace Engine
         /// <param name="d">Distance</param>
         public void MoveUp(GameTime gameTime, float d = 1f)
         {
-            this.position += Vector2.UnitY * d * this.LinearVelocity * gameTime.ElapsedSeconds;
+            this.Position += Vector2.UnitY * d * this.LinearVelocity * gameTime.ElapsedSeconds;
+
+            updateInternals = true;
         }
         /// <summary>
         /// Increments position component d distance along down vector
@@ -89,7 +124,9 @@ namespace Engine
         /// <param name="d">Distance</param>
         public void MoveDown(GameTime gameTime, float d = 1f)
         {
-            this.position += Vector2.UnitY * -d * this.LinearVelocity * gameTime.ElapsedSeconds;
+            this.Position += Vector2.UnitY * -d * this.LinearVelocity * gameTime.ElapsedSeconds;
+
+            updateInternals = true;
         }
 
         /// <summary>
@@ -99,7 +136,9 @@ namespace Engine
         /// <param name="y">Y component of position</param>
         public void SetPosition(float x, float y)
         {
-            this.position = new Vector2(x, -y);
+            this.Position = new Vector2(x, y);
+
+            updateInternals = true;
         }
         /// <summary>
         /// Sets position
@@ -107,7 +146,9 @@ namespace Engine
         /// <param name="position">Position component</param>
         public void SetPosition(Vector2 position)
         {
-            this.position = new Vector2(position.X, -position.Y);
+            this.Position = position;
+
+            updateInternals = true;
         }
         /// <summary>
         /// Sets scale
@@ -116,6 +157,8 @@ namespace Engine
         public void SetScale(float scale)
         {
             this.Scale = new Vector2(scale, scale);
+
+            updateInternals = true;
         }
         /// <summary>
         /// Sets scale
@@ -125,6 +168,8 @@ namespace Engine
         public void SetScale(float x, float y)
         {
             this.Scale = new Vector2(x, y);
+
+            updateInternals = true;
         }
         /// <summary>
         /// Sets scale
@@ -133,6 +178,18 @@ namespace Engine
         public void SetScale(Vector2 scale)
         {
             this.Scale = scale;
+
+            updateInternals = true;
+        }
+        /// <summary>
+        /// Stes rotation
+        /// </summary>
+        /// <param name="angle">Rotation angle in radians</param>
+        public void SetRotation(float angle)
+        {
+            this.Rotation = angle;
+
+            updateInternals = true;
         }
 
         /// <summary>

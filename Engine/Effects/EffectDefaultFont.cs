@@ -23,9 +23,13 @@ namespace Engine.Effects
         /// </summary>
         private readonly EngineEffectVariableMatrix worldViewProjectionVar = null;
         /// <summary>
-        /// Color effect variable
+        /// Alpha value effect variable
         /// </summary>
-        private readonly EngineEffectVariableVector colorVar = null;
+        private readonly EngineEffectVariableScalar alphaVar = null;
+        /// <summary>
+        /// Use color effect variable
+        /// </summary>
+        private readonly EngineEffectVariableScalar useTextureColorVar = null;
         /// <summary>
         /// Texture effect variable
         /// </summary>
@@ -65,17 +69,31 @@ namespace Engine.Effects
             }
         }
         /// <summary>
-        /// Color
+        /// Alpha value
         /// </summary>
-        protected Color4 Color
+        protected float Alpha
         {
             get
             {
-                return this.colorVar.GetVector<Color4>();
+                return this.alphaVar.GetFloat();
             }
             set
             {
-                this.colorVar.Set(value);
+                this.alphaVar.Set(value);
+            }
+        }
+        /// <summary>
+        /// Use texture color
+        /// </summary>
+        protected bool UseTextureColor
+        {
+            get
+            {
+                return this.useTextureColorVar.GetBool();
+            }
+            set
+            {
+                this.useTextureColorVar.Set(value);
             }
         }
         /// <summary>
@@ -113,7 +131,8 @@ namespace Engine.Effects
 
             this.worldVar = this.Effect.GetVariableMatrix("gWorld");
             this.worldViewProjectionVar = this.Effect.GetVariableMatrix("gWorldViewProjection");
-            this.colorVar = this.Effect.GetVariableVector("gColor");
+            this.alphaVar = this.Effect.GetVariableScalar("gAlpha");
+            this.useTextureColorVar = this.Effect.GetVariableScalar("gUseColor");
             this.textureVar = this.Effect.GetVariableTexture("gTexture");
         }
 
@@ -122,17 +141,20 @@ namespace Engine.Effects
         /// </summary>
         /// <param name="world">World matrix</param>
         /// <param name="viewProjection">View * projection matrix</param>
-        /// <param name="color">Color</param>
+        /// <param name="alphaMult">Alpha multiplier</param>
+        /// <param name="useTextureColor">Use the texture color instead of the specified color</param>
         /// <param name="texture">Font texture</param>
         public void UpdatePerFrame(
             Matrix world,
             Matrix viewProjection,
-            Color4 color,
+            float alphaMult,
+            bool useTextureColor,
             EngineShaderResourceView texture)
         {
             this.World = world;
             this.WorldViewProjection = world * viewProjection;
-            this.Color = color;
+            this.Alpha = alphaMult;
+            this.UseTextureColor = useTextureColor;
             this.Texture = texture;
         }
     }

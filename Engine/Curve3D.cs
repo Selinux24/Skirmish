@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
 
 namespace Engine
 {
@@ -291,6 +292,25 @@ namespace Engine
                 curr.TangentIn = dv * (curr.Position - prev.Position) / dt;
                 curr.TangentOut = dv * (next.Position - curr.Position) / dt;
             }
+        }
+        /// <summary>
+        /// Samples current path in a vector array
+        /// </summary>
+        /// <param name="sampleTime">Time delta</param>
+        /// <returns>Returns a vector array</returns>
+        public IEnumerable<Vector3> SamplePath(float sampleTime)
+        {
+            List<Vector3> returnPath = new List<Vector3>();
+
+            float time = 0;
+            while (time < this.Length)
+            {
+                returnPath.Add(this.GetPosition(time));
+
+                time += sampleTime;
+            }
+
+            return returnPath.ToArray();
         }
     }
 }

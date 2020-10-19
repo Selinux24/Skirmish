@@ -12,11 +12,8 @@ namespace Engine
         public SkydomDescription()
             : base()
         {
-            this.Static = true;
-            this.CastShadow = false;
-            this.DeferredEnabled = true;
             this.DepthEnabled = false;
-            this.AlphaEnabled = false;
+            this.BlendMode = BlendModes.Opaque;
 
             this.Geometry = CubeMapGeometry.Sphere;
             this.ReverseFaces = true;

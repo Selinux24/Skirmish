@@ -1,4 +1,6 @@
 ﻿using SharpDX;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Engine.Common
@@ -21,6 +23,25 @@ namespace Engine.Common
             {
                 new InputElement("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, slot, InputClassification.PerVertexData, 0),
             };
+        }
+        /// <summary>
+        /// Generates a vertex array from specified components
+        /// </summary>
+        /// <param name="vertices">Vertices</param>
+        /// <param name="uvs">Uv texture coordinates</param>
+        /// <returns>Returns the new generated vertex array</returns>
+        public static IEnumerable<VertexPosition> Generate(IEnumerable<Vector3> vertices)
+        {
+            var vArray = vertices.ToArray();
+
+            List<VertexPosition> res = new List<VertexPosition>();
+
+            for (int i = 0; i < vArray.Length; i++)
+            {
+                res.Add(new VertexPosition() { Position = vArray[i] });
+            }
+
+            return res.ToArray();
         }
 
         /// <summary>

@@ -113,7 +113,7 @@ namespace Engine
         /// <summary>
         /// Default alpha blend state
         /// </summary>
-        private EngineBlendState blendDefaultAlpha = null;
+        private EngineBlendState blendAlphaBlend = null;
         /// <summary>
         /// Blend state for transparent blending
         /// </summary>
@@ -202,7 +202,7 @@ namespace Engine
         {
             get
             {
-                return this.renderTargetView;
+                return renderTargetView;
             }
         }
         /// <summary>
@@ -212,7 +212,7 @@ namespace Engine
         {
             get
             {
-                return this.depthStencilView;
+                return depthStencilView;
             }
         }
         /// <summary>
@@ -222,7 +222,7 @@ namespace Engine
         {
             get
             {
-                return this.msCount > 1;
+                return msCount > 1;
             }
         }
         /// <summary>
@@ -232,7 +232,7 @@ namespace Engine
         {
             get
             {
-                return new SampleDescription(this.msCount, this.msQuality);
+                return new SampleDescription(msCount, msQuality);
             }
         }
         /// <summary>
@@ -242,16 +242,16 @@ namespace Engine
         {
             get
             {
-                return this.currentIAPrimitiveTopology;
+                return currentIAPrimitiveTopology;
             }
             set
             {
-                if (this.currentIAPrimitiveTopology != value)
+                if (currentIAPrimitiveTopology != value)
                 {
-                    this.deviceContext.InputAssembler.PrimitiveTopology = value;
+                    deviceContext.InputAssembler.PrimitiveTopology = value;
                     Counters.IAPrimitiveTopologySets++;
 
-                    this.currentIAPrimitiveTopology = value;
+                    currentIAPrimitiveTopology = value;
                 }
             }
         }
@@ -262,16 +262,16 @@ namespace Engine
         {
             get
             {
-                return this.currentIAInputLayout;
+                return currentIAInputLayout;
             }
             set
             {
-                if (this.currentIAInputLayout != value)
+                if (currentIAInputLayout != value)
                 {
-                    this.deviceContext.InputAssembler.InputLayout = value;
+                    deviceContext.InputAssembler.InputLayout = value;
                     Counters.IAInputLayoutSets++;
 
-                    this.currentIAInputLayout = value;
+                    currentIAInputLayout = value;
                 }
             }
         }
@@ -407,8 +407,8 @@ namespace Engine
         public Graphics(EngineForm form, bool vsyncEnabled = false, int refreshRate = 0, int multiSampling = 0)
         {
             FindModeDescription(
-                this.device,
-                this.BufferFormat,
+                device,
+                BufferFormat,
                 form.RenderWidth,
                 form.RenderHeight,
                 refreshRate,
@@ -426,7 +426,7 @@ namespace Engine
                 using (var tmpAdapter = factory.GetAdapter1(0))
                 using (var adapter = tmpAdapter.QueryInterface<Adapter4>())
                 {
-                    this.DeviceDescription = string.Format("{0}", adapter.Description2.Description);
+                    DeviceDescription = string.Format("{0}", adapter.Description2.Description);
 
                     DeviceCreationFlags creationFlags = DeviceCreationFlags.None;
 
@@ -435,13 +435,13 @@ namespace Engine
 #endif
                     using (var tmpDevice = new Device(adapter, creationFlags, FeatureLevel.Level_11_1, FeatureLevel.Level_11_0))
                     {
-                        this.device = tmpDevice.QueryInterface<Device3>();
+                        device = tmpDevice.QueryInterface<Device3>();
                     }
                 }
 
-                if (multiSampling != 0 && !CheckMultisample(this.device, this.BufferFormat, multiSampling, out this.msCount, out this.msQuality))
+                if (multiSampling != 0 && !CheckMultisample(device, BufferFormat, multiSampling, out msCount, out msQuality))
                 {
-                    throw new EngineException(string.Format("The specified multisampling value [{0}] is not supported for {1}", multiSampling, this.BufferFormat));
+                    throw new EngineException(string.Format("The specified multisampling value [{0}] is not supported for {1}", multiSampling, BufferFormat));
                 }
 
                 var desc = new SwapChainDescription1()
@@ -451,7 +451,7 @@ namespace Engine
                     Width = displayMode.Width,
                     Height = displayMode.Height,
                     Stereo = displayMode.Stereo,
-                    SampleDescription = this.CurrentSampleDescription,
+                    SampleDescription = CurrentSampleDescription,
                     AlphaMode = AlphaMode.Ignore,
                     Scaling = Scaling.Stretch,
                     Usage = Usage.RenderTargetOutput,
@@ -466,23 +466,23 @@ namespace Engine
                     Windowed = !form.IsFullscreen,
                 };
 
-                using (var tmpSwapChain = new SwapChain1(factory, this.device, form.Handle, ref desc, fsdesc))
+                using (var tmpSwapChain = new SwapChain1(factory, device, form.Handle, ref desc, fsdesc))
                 {
-                    this.swapChain = tmpSwapChain.QueryInterface<SwapChain4>();
+                    swapChain = tmpSwapChain.QueryInterface<SwapChain4>();
                 }
             }
 
-            this.deviceContext = this.device.ImmediateContext3;
+            deviceContext = device.ImmediateContext3;
 
-            this.PrepareDevice(displayMode.Width, displayMode.Height, false);
+            PrepareDevice(displayMode.Width, displayMode.Height, false);
 
 #if DEBUG
-            this.ConfigureDebugLayer();
+            ConfigureDebugLayer();
 #endif
 
             #region Alt + Enter
 
-            using (var factory = this.swapChain.GetParent<Factory5>())
+            using (var factory = swapChain.GetParent<Factory5>())
             {
                 factory.MakeWindowAssociation(form.Handle, WindowAssociationFlags.IgnoreAltEnter);
             }
@@ -491,7 +491,7 @@ namespace Engine
             {
                 if (eventArgs.Alt && (int)eventArgs.KeyCode == (int)Keys.Enter)
                 {
-                    this.swapChain.IsFullScreen = !this.swapChain.IsFullScreen;
+                    swapChain.IsFullScreen = !swapChain.IsFullScreen;
                 }
             };
 
@@ -521,26 +521,26 @@ namespace Engine
         {
             if (disposing)
             {
-                if (this.swapChain?.IsFullScreen == true)
+                if (swapChain?.IsFullScreen == true)
                 {
-                    this.swapChain.IsFullScreen = false;
+                    swapChain.IsFullScreen = false;
                 }
 
-                this.swapChain?.Dispose();
-                this.swapChain = null;
+                swapChain?.Dispose();
+                swapChain = null;
 
-                this.DisposeResources();
+                DisposeResources();
 
-                this.device?.Dispose();
-                this.device = null;
+                device?.Dispose();
+                device = null;
 
 #if DEBUG
-                this.deviceDebugInfoQueue?.Dispose();
-                this.deviceDebugInfoQueue = null;
+                deviceDebugInfoQueue?.Dispose();
+                deviceDebugInfoQueue = null;
 
-                this.deviceDebug?.ReportLiveDeviceObjects(ReportingLevel.Detail);
-                this.deviceDebug?.Dispose();
-                this.deviceDebug = null;
+                deviceDebug?.ReportLiveDeviceObjects(ReportingLevel.Detail);
+                deviceDebug?.Dispose();
+                deviceDebug = null;
 #endif
             }
         }
@@ -555,14 +555,14 @@ namespace Engine
         {
             if (resizing)
             {
-                this.DisposeResources();
+                DisposeResources();
 
-                this.swapChain.ResizeBuffers(2, width, height, this.BufferFormat, SwapChainFlags.None);
+                swapChain.ResizeBuffers(2, width, height, BufferFormat, SwapChainFlags.None);
             }
 
             #region Viewport
 
-            this.Viewport = new ViewportF()
+            Viewport = new ViewportF()
             {
                 X = 0,
                 Y = 0,
@@ -576,34 +576,34 @@ namespace Engine
 
             #region Render Target
 
-            using (var backBuffer = Resource.FromSwapChain<Resource>(this.swapChain, 0))
+            using (var backBuffer = Resource.FromSwapChain<Resource>(swapChain, 0))
             {
-                this.renderTargetView = new EngineRenderTargetView(new RenderTargetView1(this.device, backBuffer));
+                renderTargetView = new EngineRenderTargetView(new RenderTargetView1(device, backBuffer));
             }
 
             #endregion
 
             #region Depth Stencil Buffer and View
 
-            this.CreateDepthStencil(this.DepthFormat, width, height, true, out this.depthStencilView);
+            CreateDepthStencil(DepthFormat, width, height, true, out depthStencilView);
 
             #endregion
 
             #region Set Defaults
 
-            this.SetDefaultViewport();
-            this.SetDefaultRenderTarget();
+            SetDefaultViewport();
+            SetDefaultRenderTarget();
 
-            this.SetDepthStencilZEnabled();
-            this.SetRasterizerDefault();
-            this.SetBlendDefault();
+            SetDepthStencilZEnabled();
+            SetRasterizerDefault();
+            SetBlendDefault();
 
             #endregion
 
             if (resizing)
             {
                 //Launch the "resized" event
-                this.Resized?.Invoke(this, new EventArgs());
+                Resized?.Invoke(this, new EventArgs());
             }
         }
 
@@ -613,8 +613,8 @@ namespace Engine
         /// </summary>
         private void ConfigureDebugLayer()
         {
-            this.deviceDebug = this.device.QueryInterface<DeviceDebug>();
-            this.deviceDebugInfoQueue = this.deviceDebug.QueryInterface<InfoQueue>();
+            deviceDebug = device.QueryInterface<DeviceDebug>();
+            deviceDebugInfoQueue = deviceDebug.QueryInterface<InfoQueue>();
 
             var severityFilter = new InfoQueueFilter()
             {
@@ -647,8 +647,8 @@ namespace Engine
                 }
             };
 
-            this.deviceDebugInfoQueue.AddStorageFilterEntries(severityFilter);
-            this.deviceDebugInfoQueue.AddStorageFilterEntries(idFilter);
+            deviceDebugInfoQueue.AddStorageFilterEntries(severityFilter);
+            deviceDebugInfoQueue.AddStorageFilterEntries(idFilter);
         }
 #endif
 
@@ -657,14 +657,14 @@ namespace Engine
         /// </summary>
         public void Begin()
         {
-            this.deviceContext.ClearDepthStencilView(
-                this.depthStencilView.GetDepthStencil(),
+            deviceContext.ClearDepthStencilView(
+                depthStencilView.GetDepthStencil(),
                 DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil,
                 1.0f,
                 0);
 
-            this.deviceContext.ClearRenderTargetView(
-                this.renderTargetView.GetRenderTarget(),
+            deviceContext.ClearRenderTargetView(
+                renderTargetView.GetRenderTarget(),
                 GameEnvironment.Background);
         }
         /// <summary>
@@ -672,13 +672,13 @@ namespace Engine
         /// </summary>
         public void End()
         {
-            if (this.vsyncEnabled)
+            if (vsyncEnabled)
             {
-                this.swapChain.Present(1, PresentFlags.None);
+                swapChain.Present(1, PresentFlags.None);
             }
             else
             {
-                this.swapChain.Present(0, PresentFlags.None);
+                swapChain.Present(0, PresentFlags.None);
             }
         }
         /// <summary>
@@ -686,7 +686,7 @@ namespace Engine
         /// </summary>
         public void SetDefaultViewport()
         {
-            this.SetViewport(this.Viewport);
+            SetViewport(Viewport);
         }
         /// <summary>
         /// Sets default render target
@@ -696,9 +696,9 @@ namespace Engine
         /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
         public void SetDefaultRenderTarget(bool clearRT = true, bool clearDepth = true, bool clearStencil = true)
         {
-            this.SetRenderTargets(
-                this.renderTargetView, clearRT, GameEnvironment.Background,
-                this.depthStencilView, clearDepth, clearStencil,
+            SetRenderTargets(
+                renderTargetView, clearRT, GameEnvironment.Background,
+                depthStencilView, clearDepth, clearStencil,
                 false);
         }
         /// <summary>
@@ -707,7 +707,7 @@ namespace Engine
         /// <param name="viewport">Viewport</param>
         public void SetViewport(Viewport viewport)
         {
-            this.deviceContext.Rasterizer.SetViewport(viewport);
+            deviceContext.Rasterizer.SetViewport(viewport);
         }
         /// <summary>
         /// Sets viewport
@@ -715,7 +715,7 @@ namespace Engine
         /// <param name="viewport">Viewport</param>
         public void SetViewport(ViewportF viewport)
         {
-            this.deviceContext.Rasterizer.SetViewport(viewport);
+            deviceContext.Rasterizer.SetViewport(viewport);
         }
         /// <summary>
         /// Sets viewports
@@ -725,7 +725,7 @@ namespace Engine
         {
             var rawVpArray = viewports.Select(v => (SharpDX.Mathematics.Interop.RawViewportF)v).ToArray();
 
-            this.deviceContext.Rasterizer.SetViewports(rawVpArray);
+            deviceContext.Rasterizer.SetViewports(rawVpArray);
         }
         /// <summary>
         /// Sets viewports
@@ -735,7 +735,7 @@ namespace Engine
         {
             var rawVpArray = viewports.Select(v => (SharpDX.Mathematics.Interop.RawViewportF)v).ToArray();
 
-            this.deviceContext.Rasterizer.SetViewports(rawVpArray);
+            deviceContext.Rasterizer.SetViewports(rawVpArray);
         }
         /// <summary>
         /// Set render targets
@@ -752,20 +752,20 @@ namespace Engine
         {
             if (freeOMResources)
             {
-                this.ClearShaderResources();
+                ClearShaderResources();
             }
 
             var dsv = depthMap?.GetDepthStencil();
             var rtv = renderTargets?.GetRenderTargets();
             var rtvCount = renderTargets != null ? renderTargets.Count : 0;
 
-            this.deviceContext.OutputMerger.SetTargets(dsv, rtvCount, rtv);
+            deviceContext.OutputMerger.SetTargets(dsv, rtvCount, rtv);
 
             if (clearRT && rtv != null && rtvCount > 0)
             {
                 for (int i = 0; i < rtvCount; i++)
                 {
-                    this.deviceContext.ClearRenderTargetView(
+                    deviceContext.ClearRenderTargetView(
                         rtv[i],
                         clearRTColor);
                 }
@@ -777,7 +777,7 @@ namespace Engine
                 if (clearDepth) clearDSFlags |= DepthStencilClearFlags.Depth;
                 if (clearStencil) clearDSFlags |= DepthStencilClearFlags.Stencil;
 
-                this.deviceContext.ClearDepthStencilView(
+                deviceContext.ClearDepthStencilView(
                     dsv,
                     clearDSFlags,
                     1.0f, 0);
@@ -788,11 +788,11 @@ namespace Engine
         /// </summary>
         private void ClearShaderResources()
         {
-            this.deviceContext.VertexShader.SetShaderResources(0, nullSrv);
-            this.deviceContext.HullShader.SetShaderResources(0, nullSrv);
-            this.deviceContext.DomainShader.SetShaderResources(0, nullSrv);
-            this.deviceContext.GeometryShader.SetShaderResources(0, nullSrv);
-            this.deviceContext.PixelShader.SetShaderResources(0, nullSrv);
+            deviceContext.VertexShader.SetShaderResources(0, nullSrv);
+            deviceContext.HullShader.SetShaderResources(0, nullSrv);
+            deviceContext.DomainShader.SetShaderResources(0, nullSrv);
+            deviceContext.GeometryShader.SetShaderResources(0, nullSrv);
+            deviceContext.PixelShader.SetShaderResources(0, nullSrv);
         }
         /// <summary>
         /// Sets targets for stream output
@@ -800,7 +800,7 @@ namespace Engine
         /// <param name="streamOutBinding">Stream output binding</param>
         public void SetStreamOutputTargets(StreamOutputBufferBinding[] streamOutBinding)
         {
-            this.deviceContext.StreamOutput.SetTargets(streamOutBinding);
+            deviceContext.StreamOutput.SetTargets(streamOutBinding);
             Counters.SOTargetsSet++;
         }
         /// <summary>
@@ -817,7 +817,7 @@ namespace Engine
                 if (clearDepth) clearDSFlags |= DepthStencilClearFlags.Depth;
                 if (clearStencil) clearDSFlags |= DepthStencilClearFlags.Stencil;
 
-                this.deviceContext.ClearDepthStencilView(
+                deviceContext.ClearDepthStencilView(
                     depthMap.GetDepthStencil(),
                     clearDSFlags,
                     1.0f, 0);
@@ -828,180 +828,180 @@ namespace Engine
         /// </summary>
         public void SetDepthStencilZEnabled()
         {
-            if (this.depthStencilzBufferEnabled == null)
+            if (depthStencilzBufferEnabled == null)
             {
-                this.depthStencilzBufferEnabled = EngineDepthStencilState.ZBufferEnabled(this);
+                depthStencilzBufferEnabled = EngineDepthStencilState.ZBufferEnabled(this);
             }
 
-            this.SetDepthStencilState(this.depthStencilzBufferEnabled);
+            SetDepthStencilState(depthStencilzBufferEnabled);
         }
         /// <summary>
         /// Disables z-buffer for write
         /// </summary>
         public void SetDepthStencilZDisabled()
         {
-            if (this.depthStencilzBufferDisabled == null)
+            if (depthStencilzBufferDisabled == null)
             {
-                this.depthStencilzBufferDisabled = EngineDepthStencilState.ZBufferDisabled(this);
+                depthStencilzBufferDisabled = EngineDepthStencilState.ZBufferDisabled(this);
             }
 
-            this.SetDepthStencilState(this.depthStencilzBufferDisabled);
+            SetDepthStencilState(depthStencilzBufferDisabled);
         }
         /// <summary>
         /// Enables z-buffer for read
         /// </summary>
         public void SetDepthStencilRDZEnabled()
         {
-            if (this.depthStencilRDzBufferEnabled == null)
+            if (depthStencilRDzBufferEnabled == null)
             {
-                this.depthStencilRDzBufferEnabled = EngineDepthStencilState.RDzBufferEnabled(this);
+                depthStencilRDzBufferEnabled = EngineDepthStencilState.RDzBufferEnabled(this);
             }
 
-            this.SetDepthStencilState(this.depthStencilRDzBufferEnabled);
+            SetDepthStencilState(depthStencilRDzBufferEnabled);
         }
         /// <summary>
         /// Disables z-buffer for read
         /// </summary>
         public void SetDepthStencilRDZDisabled()
         {
-            if (this.depthStencilRDzBufferDisabled == null)
+            if (depthStencilRDzBufferDisabled == null)
             {
-                this.depthStencilRDzBufferDisabled = EngineDepthStencilState.RDzBufferDisabled(this);
+                depthStencilRDzBufferDisabled = EngineDepthStencilState.RDzBufferDisabled(this);
             }
 
-            this.SetDepthStencilState(this.depthStencilRDzBufferDisabled);
+            SetDepthStencilState(depthStencilRDzBufferDisabled);
         }
         /// <summary>
         /// Disables depth stencil
         /// </summary>
         public void SetDepthStencilNone()
         {
-            if (this.depthStencilNone == null)
+            if (depthStencilNone == null)
             {
-                this.depthStencilNone = EngineDepthStencilState.None(this);
+                depthStencilNone = EngineDepthStencilState.None(this);
             }
 
-            this.SetDepthStencilState(this.depthStencilNone);
+            SetDepthStencilState(depthStencilNone);
         }
         /// <summary>
         /// Sets the depth state for shadow mapping
         /// </summary>
         public void SetDepthStencilShadowMapping()
         {
-            if (this.depthStencilShadowMapping == null)
+            if (depthStencilShadowMapping == null)
             {
-                this.depthStencilShadowMapping = EngineDepthStencilState.ShadowMapping(this);
+                depthStencilShadowMapping = EngineDepthStencilState.ShadowMapping(this);
             }
 
-            this.SetDepthStencilState(this.depthStencilShadowMapping);
+            SetDepthStencilState(depthStencilShadowMapping);
         }
         /// <summary>
         /// Sets default blend state
         /// </summary>
         public void SetBlendDefault()
         {
-            if (this.blendDefault == null)
+            if (blendDefault == null)
             {
-                this.blendDefault = EngineBlendState.Default(this);
+                blendDefault = EngineBlendState.Default(this);
             }
 
-            this.SetBlendState(this.blendDefault);
+            SetBlendState(blendDefault);
         }
         /// <summary>
         /// Sets default alpha blend state
         /// </summary>
-        public void SetBlendDefaultAlpha()
+        public void SetBlendAlpha()
         {
-            if (this.blendDefaultAlpha == null)
+            if (blendAlphaBlend == null)
             {
-                this.blendDefaultAlpha = EngineBlendState.DefaultAlpha(this);
+                blendAlphaBlend = EngineBlendState.AlphaBlend(this);
             }
 
-            this.SetBlendState(this.blendDefaultAlpha);
+            SetBlendState(blendAlphaBlend);
         }
         /// <summary>
         /// Sets transparent blend state
         /// </summary>
         public void SetBlendTransparent()
         {
-            if (this.blendTransparent == null)
+            if (blendTransparent == null)
             {
-                this.blendTransparent = EngineBlendState.Transparent(this);
+                blendTransparent = EngineBlendState.Transparent(this);
             }
 
-            this.SetBlendState(this.blendTransparent);
+            SetBlendState(blendTransparent);
         }
         /// <summary>
         /// Sets additive blend state
         /// </summary>
         public void SetBlendAdditive()
         {
-            if (this.blendAdditive == null)
+            if (blendAdditive == null)
             {
-                this.blendAdditive = EngineBlendState.Additive(this);
+                blendAdditive = EngineBlendState.Additive(this);
             }
 
-            this.SetBlendState(this.blendAdditive);
+            SetBlendState(blendAdditive);
         }
         /// <summary>
         /// Sets default rasterizer
         /// </summary>
         public void SetRasterizerDefault()
         {
-            if (this.rasterizerDefault == null)
+            if (rasterizerDefault == null)
             {
-                this.rasterizerDefault = EngineRasterizerState.Default(this);
+                rasterizerDefault = EngineRasterizerState.Default(this);
             }
 
-            this.SetRasterizerState(this.rasterizerDefault);
+            SetRasterizerState(rasterizerDefault);
         }
         /// <summary>
         /// Sets wireframe rasterizer
         /// </summary>
         public void SetRasterizerWireframe()
         {
-            if (this.rasterizerWireframe == null)
+            if (rasterizerWireframe == null)
             {
-                this.rasterizerWireframe = EngineRasterizerState.Wireframe(this);
+                rasterizerWireframe = EngineRasterizerState.Wireframe(this);
             }
 
-            this.SetRasterizerState(this.rasterizerWireframe);
+            SetRasterizerState(rasterizerWireframe);
         }
         /// <summary>
         /// Sets no-cull rasterizer
         /// </summary>
         public void SetRasterizerCullNone()
         {
-            if (this.rasterizerNoCull == null)
+            if (rasterizerNoCull == null)
             {
-                this.rasterizerNoCull = EngineRasterizerState.NoCull(this);
+                rasterizerNoCull = EngineRasterizerState.NoCull(this);
             }
 
-            this.SetRasterizerState(this.rasterizerNoCull);
+            SetRasterizerState(rasterizerNoCull);
         }
         /// <summary>
         /// Sets cull counter-clockwise face rasterizer
         /// </summary>
         public void SetRasterizerCullFrontFace()
         {
-            if (this.rasterizerCullFrontFace == null)
+            if (rasterizerCullFrontFace == null)
             {
-                this.rasterizerCullFrontFace = EngineRasterizerState.CullFrontFace(this);
+                rasterizerCullFrontFace = EngineRasterizerState.CullFrontFace(this);
             }
 
-            this.SetRasterizerState(this.rasterizerCullFrontFace);
+            SetRasterizerState(rasterizerCullFrontFace);
         }
         /// <summary>
         /// Sets shadow mapping rasterizer state
         /// </summary>
         public void SetRasterizerShadowMapping()
         {
-            if (this.rasterizerShadowMapping == null)
+            if (rasterizerShadowMapping == null)
             {
-                this.rasterizerShadowMapping = EngineRasterizerState.ShadowMapping(this);
+                rasterizerShadowMapping = EngineRasterizerState.ShadowMapping(this);
             }
 
-            this.SetRasterizerState(this.rasterizerShadowMapping);
+            SetRasterizerState(rasterizerShadowMapping);
         }
         /// <summary>
         /// Bind an array of vertex buffers to the input-assembler stage.
@@ -1010,13 +1010,13 @@ namespace Engine
         /// <param name="vertexBufferBindings">A reference to an array of VertexBufferBinding</param>
         public void IASetVertexBuffers(int firstSlot, params VertexBufferBinding[] vertexBufferBindings)
         {
-            if (this.currentVertexBufferFirstSlot != firstSlot || this.currentVertexBufferBindings != vertexBufferBindings)
+            if (currentVertexBufferFirstSlot != firstSlot || currentVertexBufferBindings != vertexBufferBindings)
             {
-                this.deviceContext.InputAssembler.SetVertexBuffers(firstSlot, vertexBufferBindings);
+                deviceContext.InputAssembler.SetVertexBuffers(firstSlot, vertexBufferBindings);
                 Counters.IAVertexBuffersSets++;
 
-                this.currentVertexBufferFirstSlot = firstSlot;
-                this.currentVertexBufferBindings = vertexBufferBindings;
+                currentVertexBufferFirstSlot = firstSlot;
+                currentVertexBufferBindings = vertexBufferBindings;
             }
         }
         /// <summary>
@@ -1027,14 +1027,14 @@ namespace Engine
         /// <param name="offset">Offset (in bytes) from the start of the index buffer to the first index to use</param>
         public void IASetIndexBuffer(Buffer indexBufferRef, Format format, int offset)
         {
-            if (this.currentIndexBufferRef != indexBufferRef || this.currentIndexFormat != format || this.currentIndexOffset != offset)
+            if (currentIndexBufferRef != indexBufferRef || currentIndexFormat != format || currentIndexOffset != offset)
             {
-                this.deviceContext.InputAssembler.SetIndexBuffer(indexBufferRef, format, offset);
+                deviceContext.InputAssembler.SetIndexBuffer(indexBufferRef, format, offset);
                 Counters.IAIndexBufferSets++;
 
-                this.currentIndexBufferRef = indexBufferRef;
-                this.currentIndexFormat = format;
-                this.currentIndexOffset = offset;
+                currentIndexBufferRef = indexBufferRef;
+                currentIndexFormat = format;
+                currentIndexOffset = offset;
             }
         }
 
@@ -1043,43 +1043,43 @@ namespace Engine
         /// </summary>
         private void DisposeResources()
         {
-            this.renderTargetView?.Dispose();
-            this.renderTargetView = null;
-            this.depthStencilView?.Dispose();
-            this.depthStencilView = null;
+            renderTargetView?.Dispose();
+            renderTargetView = null;
+            depthStencilView?.Dispose();
+            depthStencilView = null;
 
-            this.depthStencilzBufferEnabled?.Dispose();
-            this.depthStencilzBufferEnabled = null;
-            this.depthStencilzBufferDisabled?.Dispose();
-            this.depthStencilzBufferDisabled = null;
-            this.depthStencilRDzBufferEnabled?.Dispose();
-            this.depthStencilRDzBufferEnabled = null;
-            this.depthStencilRDzBufferDisabled?.Dispose();
-            this.depthStencilRDzBufferDisabled = null;
-            this.depthStencilNone?.Dispose();
-            this.depthStencilNone = null;
-            this.depthStencilShadowMapping?.Dispose();
-            this.depthStencilShadowMapping = null;
+            depthStencilzBufferEnabled?.Dispose();
+            depthStencilzBufferEnabled = null;
+            depthStencilzBufferDisabled?.Dispose();
+            depthStencilzBufferDisabled = null;
+            depthStencilRDzBufferEnabled?.Dispose();
+            depthStencilRDzBufferEnabled = null;
+            depthStencilRDzBufferDisabled?.Dispose();
+            depthStencilRDzBufferDisabled = null;
+            depthStencilNone?.Dispose();
+            depthStencilNone = null;
+            depthStencilShadowMapping?.Dispose();
+            depthStencilShadowMapping = null;
 
-            this.rasterizerDefault?.Dispose();
-            this.rasterizerDefault = null;
-            this.rasterizerWireframe?.Dispose();
-            this.rasterizerWireframe = null;
-            this.rasterizerNoCull?.Dispose();
-            this.rasterizerNoCull = null;
-            this.rasterizerCullFrontFace?.Dispose();
-            this.rasterizerCullFrontFace = null;
-            this.rasterizerShadowMapping?.Dispose();
-            this.rasterizerShadowMapping = null;
+            rasterizerDefault?.Dispose();
+            rasterizerDefault = null;
+            rasterizerWireframe?.Dispose();
+            rasterizerWireframe = null;
+            rasterizerNoCull?.Dispose();
+            rasterizerNoCull = null;
+            rasterizerCullFrontFace?.Dispose();
+            rasterizerCullFrontFace = null;
+            rasterizerShadowMapping?.Dispose();
+            rasterizerShadowMapping = null;
 
-            this.blendDefault?.Dispose();
-            this.blendDefault = null;
-            this.blendDefaultAlpha?.Dispose();
-            this.blendDefaultAlpha = null;
-            this.blendTransparent?.Dispose();
-            this.blendTransparent = null;
-            this.blendAdditive?.Dispose();
-            this.blendAdditive = null;
+            blendDefault?.Dispose();
+            blendDefault = null;
+            blendAlphaBlend?.Dispose();
+            blendAlphaBlend = null;
+            blendTransparent?.Dispose();
+            blendTransparent = null;
+            blendAdditive?.Dispose();
+            blendAdditive = null;
         }
 
         /// <summary>
@@ -1088,29 +1088,52 @@ namespace Engine
         /// <param name="state">Depth stencil state</param>
         internal void SetDepthStencilState(EngineDepthStencilState state)
         {
-            if (this.currentDepthStencilState != state)
+            if (currentDepthStencilState != state)
             {
-                this.device.ImmediateContext.OutputMerger.SetDepthStencilState(state.GetDepthStencilState(), state.StencilRef);
-                this.device.ImmediateContext.OutputMerger.DepthStencilReference = state.StencilRef;
+                device.ImmediateContext.OutputMerger.SetDepthStencilState(state.GetDepthStencilState(), state.StencilRef);
+                device.ImmediateContext.OutputMerger.DepthStencilReference = state.StencilRef;
 
-                this.currentDepthStencilState = state;
+                currentDepthStencilState = state;
 
                 Counters.DepthStencilStateChanges++;
             }
         }
         /// <summary>
-        /// Stes blend state
+        /// Sets blend state
         /// </summary>
         /// <param name="state">Blend state</param>
         internal void SetBlendState(EngineBlendState state)
         {
-            if (this.currentBlendState != state)
+            if (currentBlendState != state)
             {
-                this.device.ImmediateContext.OutputMerger.SetBlendState(state.GetBlendState(), state.BlendFactor, state.SampleMask);
+                device.ImmediateContext.OutputMerger.SetBlendState(state.GetBlendState(), state.BlendFactor, state.SampleMask);
 
-                this.currentBlendState = state;
+                currentBlendState = state;
 
                 Counters.BlendStateChanges++;
+            }
+        }
+        /// <summary>
+        /// Sets blend state
+        /// </summary>
+        /// <param name="blendMode">Blend mode</param>
+        internal void SetBlendState(BlendModes blendMode)
+        {
+            if (blendMode.HasFlag(BlendModes.Additive))
+            {
+                SetBlendAdditive();
+            }
+            else if (blendMode.HasFlag(BlendModes.Transparent))
+            {
+                SetBlendTransparent();
+            }
+            else if (blendMode.HasFlag(BlendModes.Alpha))
+            {
+                SetBlendAlpha();
+            }
+            else
+            {
+                SetBlendDefault();
             }
         }
         /// <summary>
@@ -1119,11 +1142,11 @@ namespace Engine
         /// <param name="state">Rasterizer state</param>
         internal void SetRasterizerState(EngineRasterizerState state)
         {
-            if (this.currentRasterizerState != state)
+            if (currentRasterizerState != state)
             {
-                this.device.ImmediateContext.Rasterizer.State = state.GetRasterizerState();
+                device.ImmediateContext.Rasterizer.State = state.GetRasterizerState();
 
-                this.currentRasterizerState = state;
+                currentRasterizerState = state;
 
                 Counters.RasterizerStateChanges++;
             }
@@ -1138,7 +1161,7 @@ namespace Engine
         /// <returns>Returns a new blend state</returns>
         internal EngineBlendState CreateBlendState(BlendStateDescription1 description, Color4? blendFactor, int sampleMask)
         {
-            return new EngineBlendState(new BlendState1(this.device, description), blendFactor, sampleMask);
+            return new EngineBlendState(new BlendState1(device, description), blendFactor, sampleMask);
         }
         /// <summary>
         /// Creates a new rasterizer state
@@ -1147,7 +1170,7 @@ namespace Engine
         /// <returns>Returns a new rasterizer state</returns>
         internal EngineRasterizerState CreateRasterizerState(RasterizerStateDescription2 description)
         {
-            return new EngineRasterizerState(new RasterizerState2(this.device, description));
+            return new EngineRasterizerState(new RasterizerState2(device, description));
         }
         /// <summary>
         /// Creates a new depth stencil state
@@ -1157,44 +1180,59 @@ namespace Engine
         /// <returns>Returns a new depth stencil state</returns>
         internal EngineDepthStencilState CreateDepthStencilState(DepthStencilStateDescription description, int stencilRef)
         {
-            return new EngineDepthStencilState(new DepthStencilState(this.device, description), stencilRef);
+            return new EngineDepthStencilState(new DepthStencilState(device, description), stencilRef);
         }
 
         /// <summary>
-        /// Creates an index buffer
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="name">Buffer name</param>
-        /// <param name="data">Data to write in the buffer</param>
-        /// <returns>Returns created buffer initialized with the specified data</returns>
-        /// <param name="dynamic">Dynamic or Inmutable buffers</param>
-        internal Buffer CreateIndexBuffer<T>(string name, IEnumerable<T> data, bool dynamic)
-            where T : struct
-        {
-            return CreateBuffer<T>(
-                name,
-                data,
-                dynamic ? ResourceUsage.Dynamic : ResourceUsage.Immutable,
-                BindFlags.IndexBuffer,
-                dynamic ? CpuAccessFlags.Write : CpuAccessFlags.None);
-        }
-        /// <summary>
         /// Creates a vertex buffer
         /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
         /// <param name="name">Buffer name</param>
-        /// <param name="data">Data to write in the buffer</param>
+        /// <param name="data">Vertex data collection</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
-        internal Buffer CreateVertexBuffer<T>(string name, IEnumerable<IVertexData> data, bool dynamic)
-            where T : struct
+        internal Buffer CreateVertexBuffer(string name, IEnumerable<IVertexData> data, bool dynamic)
         {
-            return CreateBuffer<T>(
-                name,
-                data.OfType<T>(),
-                dynamic ? ResourceUsage.Dynamic : ResourceUsage.Immutable,
-                BindFlags.VertexBuffer,
-                dynamic ? CpuAccessFlags.Write : CpuAccessFlags.None);
+            var vertexType = data.First().VertexType;
+
+            switch (vertexType)
+            {
+                case VertexTypes.Billboard:
+                    return CreateVertexBuffer(name, data.OfType<VertexBillboard>(), dynamic);
+                case VertexTypes.CPUParticle:
+                    return CreateVertexBuffer(name, data.OfType<VertexCpuParticle>(), dynamic);
+                case VertexTypes.GPUParticle:
+                    return CreateVertexBuffer(name, data.OfType<VertexGpuParticle>(), dynamic);
+                case VertexTypes.Font:
+                    return CreateVertexBuffer(name, data.OfType<VertexFont>(), dynamic);
+                case VertexTypes.Terrain:
+                    return CreateVertexBuffer(name, data.OfType<VertexTerrain>(), dynamic);
+                case VertexTypes.Position:
+                    return CreateVertexBuffer(name, data.OfType<VertexPosition>(), dynamic);
+                case VertexTypes.PositionColor:
+                    return CreateVertexBuffer(name, data.OfType<VertexPositionColor>(), dynamic);
+                case VertexTypes.PositionTexture:
+                    return CreateVertexBuffer(name, data.OfType<VertexPositionTexture>(), dynamic);
+                case VertexTypes.PositionNormalColor:
+                    return CreateVertexBuffer(name, data.OfType<VertexPositionNormalColor>(), dynamic);
+                case VertexTypes.PositionNormalTexture:
+                    return CreateVertexBuffer(name, data.OfType<VertexPositionNormalTexture>(), dynamic);
+                case VertexTypes.PositionNormalTextureTangent:
+                    return CreateVertexBuffer(name, data.OfType<VertexPositionNormalTextureTangent>(), dynamic);
+                case VertexTypes.PositionSkinned:
+                    return CreateVertexBuffer(name, data.OfType<VertexSkinnedPosition>(), dynamic);
+                case VertexTypes.PositionColorSkinned:
+                    return CreateVertexBuffer(name, data.OfType<VertexSkinnedPositionColor>(), dynamic);
+                case VertexTypes.PositionTextureSkinned:
+                    return CreateVertexBuffer(name, data.OfType<VertexSkinnedPositionTexture>(), dynamic);
+                case VertexTypes.PositionNormalColorSkinned:
+                    return CreateVertexBuffer(name, data.OfType<VertexSkinnedPositionNormalColor>(), dynamic);
+                case VertexTypes.PositionNormalTextureSkinned:
+                    return CreateVertexBuffer(name, data.OfType<VertexSkinnedPositionNormalTexture>(), dynamic);
+                case VertexTypes.PositionNormalTextureTangentSkinned:
+                    return CreateVertexBuffer(name, data.OfType<VertexSkinnedPositionNormalTextureTangent>(), dynamic);
+                default:
+                    throw new EngineException(string.Format("Unknown vertex type: {0}", vertexType));
+            }
         }
         /// <summary>
         /// Creates a vertex buffer
@@ -1207,11 +1245,29 @@ namespace Engine
         internal Buffer CreateVertexBuffer<T>(string name, IEnumerable<T> data, bool dynamic)
             where T : struct
         {
-            return CreateBuffer<T>(
+            return CreateBuffer(
                 name,
                 data,
                 dynamic ? ResourceUsage.Dynamic : ResourceUsage.Immutable,
                 BindFlags.VertexBuffer,
+                dynamic ? CpuAccessFlags.Write : CpuAccessFlags.None);
+        }
+        /// <summary>
+        /// Creates an index buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="name">Buffer name</param>
+        /// <param name="data">Data to write in the buffer</param>
+        /// <returns>Returns created buffer initialized with the specified data</returns>
+        /// <param name="dynamic">Dynamic or Inmutable buffers</param>
+        internal Buffer CreateIndexBuffer<T>(string name, IEnumerable<T> data, bool dynamic)
+            where T : struct
+        {
+            return CreateBuffer(
+                name,
+                data,
+                dynamic ? ResourceUsage.Dynamic : ResourceUsage.Immutable,
+                BindFlags.IndexBuffer,
                 dynamic ? CpuAccessFlags.Write : CpuAccessFlags.None);
         }
         /// <summary>
@@ -1242,7 +1298,7 @@ namespace Engine
                 StructureByteStride = 0,
             };
 
-            return new Buffer(this.device, description);
+            return new Buffer(device, description);
         }
         /// <summary>
         /// Creates a buffer for the specified data type
@@ -1277,9 +1333,10 @@ namespace Engine
                     StructureByteStride = 0,
                 };
 
-                return new Buffer(this.device, dstr, description);
+                return new Buffer(device, dstr, description);
             }
         }
+
         /// <summary>
         /// Creates a new Input Layout for a Shader
         /// </summary>
@@ -1288,7 +1345,7 @@ namespace Engine
         /// <returns>Returns a new Input Layout</returns>
         internal InputLayout CreateInputLayout(ShaderBytecode shaderBytecode, InputElement[] elements)
         {
-            return new InputLayout(this.device, shaderBytecode, elements);
+            return new InputLayout(device, shaderBytecode, elements);
         }
 
         /// <summary>
@@ -1296,14 +1353,15 @@ namespace Engine
         /// </summary>
         /// <param name="description">Texture description</param>
         /// <param name="tryMipAutogen">Try to generate texture mips</param>
+        /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the new shader resource view</returns>
-        private ShaderResourceView1 CreateResource(TextureData description, bool tryMipAutogen)
+        internal ShaderResourceView1 CreateResource(TextureData description, bool tryMipAutogen, bool dynamic)
         {
             bool mipAutogen = false;
 
             if (tryMipAutogen && description.MipMaps == 1)
             {
-                var fmtSupport = this.device.CheckFormatSupport(description.Format);
+                var fmtSupport = device.CheckFormatSupport(description.Format);
                 mipAutogen = fmtSupport.HasFlag(FormatSupport.MipAutogen);
             }
 
@@ -1314,7 +1372,7 @@ namespace Engine
                 Texture2D1 texture;
                 if (description.IsCubeMap)
                 {
-                    texture = this.CreateTexture2DCube(description.Width, description.Height, description.Format, 1, mipAutogen);
+                    texture = CreateTexture2DCube(description.Width, description.Height, description.Format, 1, mipAutogen, dynamic);
                     desc = new ShaderResourceViewDescription1()
                     {
                         Format = texture.Description.Format,
@@ -1327,7 +1385,7 @@ namespace Engine
                 }
                 else
                 {
-                    texture = this.CreateTexture2D(description.Width, description.Height, description.Format, 1, mipAutogen);
+                    texture = CreateTexture2D(description.Width, description.Height, description.Format, 1, mipAutogen, dynamic);
                     desc = new ShaderResourceViewDescription1()
                     {
                         Format = texture.Description.Format,
@@ -1341,11 +1399,11 @@ namespace Engine
 
                 using (texture)
                 {
-                    var result = new ShaderResourceView1(this.device, texture, desc);
+                    var result = new ShaderResourceView1(device, texture, desc);
 
-                    this.deviceContext.UpdateSubresource(description.GetDataBox(0, 0), texture, 0);
+                    deviceContext.UpdateSubresource(description.GetDataBox(0, 0), texture, 0);
 
-                    this.deviceContext.GenerateMips(result);
+                    deviceContext.GenerateMips(result);
 
                     return result;
                 }
@@ -1364,7 +1422,7 @@ namespace Engine
 
                 if (description.IsCubeMap)
                 {
-                    texture = this.CreateTexture2DCube(width, height, format, mipMaps, 1, data);
+                    texture = CreateTexture2DCube(width, height, format, mipMaps, 1, data, dynamic);
                     desc = new ShaderResourceViewDescription1()
                     {
                         Format = format,
@@ -1377,7 +1435,7 @@ namespace Engine
                 }
                 else
                 {
-                    texture = this.CreateTexture2D(width, height, format, mipMaps, arraySize, data);
+                    texture = CreateTexture2D(width, height, format, mipMaps, arraySize, data, dynamic);
                     desc = new ShaderResourceViewDescription1()
                     {
                         Format = format,
@@ -1391,7 +1449,7 @@ namespace Engine
 
                 using (texture)
                 {
-                    return new ShaderResourceView1(this.device, texture, desc);
+                    return new ShaderResourceView1(device, texture, desc);
                 }
             }
         }
@@ -1400,8 +1458,9 @@ namespace Engine
         /// </summary>
         /// <param name="descriptions">Texture description list</param>
         /// <param name="tryMipAutogen">Try to generate texture mips</param>
+        /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the new shader resource view</returns>
-        private ShaderResourceView1 CreateResource(IEnumerable<TextureData> descriptions, bool tryMipAutogen)
+        internal ShaderResourceView1 CreateResource(IEnumerable<TextureData> descriptions, bool tryMipAutogen, bool dynamic)
         {
             var description = descriptions.First();
             int count = descriptions.Count();
@@ -1410,7 +1469,7 @@ namespace Engine
 
             if (tryMipAutogen && description.MipMaps == 1)
             {
-                var fmtSupport = this.device.CheckFormatSupport(description.Format);
+                var fmtSupport = device.CheckFormatSupport(description.Format);
                 mipAutogen = fmtSupport.HasFlag(FormatSupport.MipAutogen);
             }
 
@@ -1421,7 +1480,7 @@ namespace Engine
 
                 if (description.IsCubeMap)
                 {
-                    textureArray = this.CreateTexture2DCube(description.Width, description.Height, description.Format, count, mipAutogen);
+                    textureArray = CreateTexture2DCube(description.Width, description.Height, description.Format, count, mipAutogen, dynamic);
                     desc = new ShaderResourceViewDescription1()
                     {
                         Format = description.Format,
@@ -1435,7 +1494,7 @@ namespace Engine
                 }
                 else
                 {
-                    textureArray = this.CreateTexture2D(description.Width, description.Height, description.Format, count, mipAutogen);
+                    textureArray = CreateTexture2D(description.Width, description.Height, description.Format, count, mipAutogen, dynamic);
                     desc = new ShaderResourceViewDescription1()
                     {
                         Format = description.Format,
@@ -1450,17 +1509,17 @@ namespace Engine
 
                 using (textureArray)
                 {
-                    var result = new ShaderResourceView1(this.device, textureArray, desc);
+                    var result = new ShaderResourceView1(device, textureArray, desc);
 
                     int i = 0;
                     foreach (var currentDesc in descriptions)
                     {
                         var index = textureArray.CalculateSubResourceIndex(0, i++, out int mipSize);
 
-                        this.deviceContext.UpdateSubresource(currentDesc.GetDataBox(0, 0), textureArray, index);
+                        deviceContext.UpdateSubresource(currentDesc.GetDataBox(0, 0), textureArray, index);
                     }
 
-                    this.deviceContext.GenerateMips(result);
+                    deviceContext.GenerateMips(result);
 
                     return result;
                 }
@@ -1484,7 +1543,7 @@ namespace Engine
 
                 if (description.IsCubeMap)
                 {
-                    textureArray = this.CreateTexture2DCube(width, height, format, mipMaps, arraySize, data.ToArray());
+                    textureArray = CreateTexture2DCube(width, height, format, mipMaps, arraySize, data.ToArray(), dynamic);
                     desc = new ShaderResourceViewDescription1()
                     {
                         Format = format,
@@ -1498,7 +1557,7 @@ namespace Engine
                 }
                 else
                 {
-                    textureArray = this.CreateTexture2D(width, height, format, mipMaps, arraySize, data.ToArray());
+                    textureArray = CreateTexture2D(width, height, format, mipMaps, arraySize, data.ToArray(), dynamic);
                     desc = new ShaderResourceViewDescription1()
                     {
                         Format = format,
@@ -1513,8 +1572,108 @@ namespace Engine
 
                 using (textureArray)
                 {
-                    return new ShaderResourceView1(this.device, textureArray, desc);
+                    return new ShaderResourceView1(device, textureArray, desc);
                 }
+            }
+        }
+        /// <summary>
+        /// Creates a texture filled with specified values
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="size">Texture size</param>
+        /// <param name="values">Texture values</param>
+        /// <param name="dynamic">Dynamic or Inmutable</param>
+        /// <returns>Returns created texture</returns>
+        internal ShaderResourceView1 CreateTexture1D<T>(int size, IEnumerable<T> values, bool dynamic) where T : struct
+        {
+            try
+            {
+                Counters.Textures++;
+
+                using (var str = DataStream.Create(values.ToArray(), false, false))
+                {
+                    using (var randTex = new Texture1D(
+                        device,
+                        new Texture1DDescription()
+                        {
+                            Format = Format.R32G32B32A32_Float,
+                            Width = size,
+                            ArraySize = 1,
+                            MipLevels = 1,
+                            Usage = dynamic ? ResourceUsage.Dynamic : ResourceUsage.Immutable,
+                            BindFlags = BindFlags.ShaderResource,
+                            CpuAccessFlags = dynamic ? CpuAccessFlags.Write : CpuAccessFlags.None,
+                            OptionFlags = ResourceOptionFlags.None,
+                        },
+                        str))
+                    {
+                        return new ShaderResourceView1(device, randTex);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new EngineException("CreateTexture1D from value array Error. See inner exception for details", ex);
+            }
+        }
+        /// <summary>
+        /// Creates a texture filled with specified values
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="size">Texture size</param>
+        /// <param name="values">Texture values</param>
+        /// <param name="dynamic">Dynamic or Inmutable</param>
+        /// <returns>Returns created texture</returns>
+        internal ShaderResourceView1 CreateTexture2D<T>(int size, IEnumerable<T> values, bool dynamic) where T : struct
+        {
+            return CreateTexture2D(size, size, values, dynamic);
+        }
+        /// <summary>
+        /// Creates a texture filled with specified values
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <param name="values">Texture values</param>
+        /// <param name="dynamic">Dynamic or Inmutable</param>
+        /// <returns>Returns created texture</returns>
+        internal ShaderResourceView1 CreateTexture2D<T>(int width, int height, IEnumerable<T> values, bool dynamic) where T : struct
+        {
+            try
+            {
+                Counters.Textures++;
+
+                T[] tmp = new T[width * height];
+                Array.Copy(values.ToArray(), tmp, values.Count());
+
+                using (var str = DataStream.Create(tmp, false, false))
+                {
+                    var dBox = new DataBox(str.DataPointer, width * FormatHelper.SizeOfInBytes(Format.R32G32B32A32_Float), 0);
+
+                    using (var texture = new Texture2D1(
+                        device,
+                        new Texture2DDescription1()
+                        {
+                            Format = Format.R32G32B32A32_Float,
+                            Width = width,
+                            Height = height,
+                            ArraySize = 1,
+                            MipLevels = 1,
+                            SampleDescription = new SampleDescription(1, 0),
+                            Usage = dynamic ? ResourceUsage.Dynamic : ResourceUsage.Immutable,
+                            BindFlags = BindFlags.ShaderResource,
+                            CpuAccessFlags = dynamic ? CpuAccessFlags.Write : CpuAccessFlags.None,
+                            OptionFlags = ResourceOptionFlags.None,
+                        },
+                        new[] { dBox }))
+                    {
+                        return new ShaderResourceView1(device, texture);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new EngineException("CreateTexture2D from value array Error. See inner exception for details", ex);
             }
         }
         /// <summary>
@@ -1525,8 +1684,9 @@ namespace Engine
         /// <param name="format">Format</param>
         /// <param name="arraySize">Size</param>
         /// <param name="generateMips">Generate mips for the texture</param>
+        /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the Texture2D</returns>
-        private Texture2D1 CreateTexture2D(int width, int height, Format format, int arraySize, bool generateMips)
+        private Texture2D1 CreateTexture2D(int width, int height, Format format, int arraySize, bool generateMips, bool dynamic)
         {
             var description = new Texture2DDescription1()
             {
@@ -1534,8 +1694,8 @@ namespace Engine
                 Height = height,
                 ArraySize = arraySize,
                 BindFlags = (generateMips) ? BindFlags.ShaderResource | BindFlags.RenderTarget : BindFlags.ShaderResource,
-                Usage = ResourceUsage.Default,
-                CpuAccessFlags = CpuAccessFlags.None,
+                Usage = dynamic ? ResourceUsage.Dynamic : ResourceUsage.Default,
+                CpuAccessFlags = dynamic ? CpuAccessFlags.Write : CpuAccessFlags.None,
                 Format = format,
                 MipLevels = (generateMips) ? 0 : 1,
                 OptionFlags = (generateMips) ? ResourceOptionFlags.GenerateMipMaps : ResourceOptionFlags.None,
@@ -1543,7 +1703,7 @@ namespace Engine
                 TextureLayout = TextureLayout.Undefined,
             };
 
-            return new Texture2D1(this.device, description);
+            return new Texture2D1(device, description);
         }
         /// <summary>
         /// Creates a Texture2D
@@ -1554,8 +1714,9 @@ namespace Engine
         /// <param name="mipMaps">Mipmap count</param>
         /// <param name="arraySize">Array size</param>
         /// <param name="data">Initial data</param>
+        /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the Texture2D</returns>
-        private Texture2D1 CreateTexture2D(int width, int height, Format format, int mipMaps, int arraySize, DataBox[] data)
+        private Texture2D1 CreateTexture2D(int width, int height, Format format, int mipMaps, int arraySize, DataBox[] data, bool dynamic)
         {
             var description = new Texture2DDescription1()
             {
@@ -1563,8 +1724,8 @@ namespace Engine
                 Height = height,
                 ArraySize = arraySize,
                 BindFlags = BindFlags.ShaderResource,
-                Usage = ResourceUsage.Default,
-                CpuAccessFlags = CpuAccessFlags.None,
+                Usage = dynamic ? ResourceUsage.Dynamic : ResourceUsage.Default,
+                CpuAccessFlags = dynamic ? CpuAccessFlags.Write : CpuAccessFlags.None,
                 Format = format,
                 MipLevels = mipMaps,
                 OptionFlags = ResourceOptionFlags.None,
@@ -1572,7 +1733,7 @@ namespace Engine
                 TextureLayout = TextureLayout.Undefined,
             };
 
-            return new Texture2D1(this.device, description, data);
+            return new Texture2D1(device, description, data);
         }
         /// <summary>
         /// Creates a Texture2DCube
@@ -1582,8 +1743,9 @@ namespace Engine
         /// <param name="format">Format</param>
         /// <param name="arraySize">Array size</param>
         /// <param name="generateMips">Generate mips for the texture</param>
+        /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the Texture2DCube</returns>
-        private Texture2D1 CreateTexture2DCube(int width, int height, Format format, int arraySize, bool generateMips)
+        private Texture2D1 CreateTexture2DCube(int width, int height, Format format, int arraySize, bool generateMips, bool dynamic)
         {
             var description = new Texture2DDescription1()
             {
@@ -1591,8 +1753,8 @@ namespace Engine
                 Height = height,
                 ArraySize = arraySize * 6,
                 BindFlags = (generateMips) ? BindFlags.ShaderResource | BindFlags.RenderTarget : BindFlags.ShaderResource,
-                Usage = ResourceUsage.Default,
-                CpuAccessFlags = CpuAccessFlags.None,
+                Usage = dynamic ? ResourceUsage.Dynamic : ResourceUsage.Default,
+                CpuAccessFlags = dynamic ? CpuAccessFlags.Write : CpuAccessFlags.None,
                 Format = format,
                 MipLevels = (generateMips) ? 0 : 1,
                 OptionFlags = (generateMips) ? ResourceOptionFlags.TextureCube | ResourceOptionFlags.GenerateMipMaps : ResourceOptionFlags.TextureCube,
@@ -1600,7 +1762,7 @@ namespace Engine
                 TextureLayout = TextureLayout.Undefined,
             };
 
-            return new Texture2D1(this.device, description);
+            return new Texture2D1(device, description);
         }
         /// <summary>
         /// Creates a Texture2DCube
@@ -1611,8 +1773,9 @@ namespace Engine
         /// <param name="mipMaps">Mipmap count</param>
         /// <param name="arraySize">Array size</param>
         /// <param name="data">Initial data</param>
+        /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the Texture2DCube</returns>
-        private Texture2D1 CreateTexture2DCube(int width, int height, Format format, int mipMaps, int arraySize, DataBox[] data)
+        private Texture2D1 CreateTexture2DCube(int width, int height, Format format, int mipMaps, int arraySize, DataBox[] data, bool dynamic)
         {
             var description = new Texture2DDescription1()
             {
@@ -1620,8 +1783,8 @@ namespace Engine
                 Height = height,
                 ArraySize = arraySize * 6,
                 BindFlags = BindFlags.ShaderResource,
-                Usage = ResourceUsage.Default,
-                CpuAccessFlags = CpuAccessFlags.None,
+                Usage = dynamic ? ResourceUsage.Dynamic : ResourceUsage.Default,
+                CpuAccessFlags = dynamic ? CpuAccessFlags.Write : CpuAccessFlags.None,
                 Format = format,
                 MipLevels = mipMaps,
                 OptionFlags = ResourceOptionFlags.TextureCube,
@@ -1629,46 +1792,25 @@ namespace Engine
                 TextureLayout = TextureLayout.Undefined,
             };
 
-            return new Texture2D1(this.device, description, data);
+            return new Texture2D1(device, description, data);
         }
 
-        /// <summary>
-        /// Loads a texture from memory in the graphics device
-        /// </summary>
-        /// <param name="buffer">Data buffer</param>
-        /// <param name="mipAutogen">Try to generate texture mips</param>
-        /// <returns>Returns the resource view</returns>
-        internal EngineShaderResourceView LoadTexture(byte[] buffer, bool mipAutogen)
-        {
-            try
-            {
-                Counters.Textures++;
-
-                using (var resource = Helper.Attempt(TextureData.ReadTexture, buffer, 5))
-                {
-                    return new EngineShaderResourceView(CreateResource(resource, mipAutogen));
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new EngineException("LoadTexture from byte array Error. See inner exception for details", ex);
-            }
-        }
         /// <summary>
         /// Loads a texture from file in the graphics device
         /// </summary>
         /// <param name="filename">Path to file</param>
         /// <param name="mipAutogen">Try to generate texture mips</param>
+        /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the resource view</returns>
-        internal EngineShaderResourceView LoadTexture(string filename, bool mipAutogen)
+        internal ShaderResourceView1 LoadTexture(string filename, bool mipAutogen, bool dynamic)
         {
             try
             {
                 Counters.Textures++;
 
-                using (var resource = Helper.Attempt(TextureData.ReadTexture, filename, 5))
+                using (var resource = TextureData.ReadTexture(filename))
                 {
-                    return new EngineShaderResourceView(CreateResource(resource, mipAutogen));
+                    return CreateResource(resource, mipAutogen, dynamic);
                 }
             }
             catch (Exception ex)
@@ -1681,16 +1823,17 @@ namespace Engine
         /// </summary>
         /// <param name="stream">Stream</param>
         /// <param name="mipAutogen">Try to generate texture mips</param>
+        /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the resource view</returns>
-        internal EngineShaderResourceView LoadTexture(MemoryStream stream, bool mipAutogen)
+        internal ShaderResourceView1 LoadTexture(MemoryStream stream, bool mipAutogen, bool dynamic)
         {
             try
             {
                 Counters.Textures++;
 
-                using (var resource = Helper.Attempt(TextureData.ReadTexture, stream, 5))
+                using (var resource = TextureData.ReadTexture(stream))
                 {
-                    return new EngineShaderResourceView(CreateResource(resource, mipAutogen));
+                    return CreateResource(resource, mipAutogen, dynamic);
                 }
             }
             catch (Exception ex)
@@ -1703,14 +1846,15 @@ namespace Engine
         /// </summary>
         /// <param name="filenames">Path file collection</param>
         /// <param name="mipAutogen">Try to generate texture mips</param>
+        /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the resource view</returns>
-        internal EngineShaderResourceView LoadTextureArray(IEnumerable<string> filenames, bool mipAutogen)
+        internal ShaderResourceView1 LoadTextureArray(IEnumerable<string> filenames, bool mipAutogen, bool dynamic)
         {
             try
             {
-                var textureList = Helper.Attempt(TextureData.ReadTexture, filenames, 5);
+                var textureList = TextureData.ReadTexture(filenames);
 
-                return LoadTextureArray(textureList, mipAutogen);
+                return LoadTextureArray(textureList, mipAutogen, dynamic);
             }
             catch (Exception ex)
             {
@@ -1722,14 +1866,15 @@ namespace Engine
         /// </summary>
         /// <param name="streams">Stream collection</param>
         /// <param name="mipAutogen">Try to generate texture mips</param>
+        /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the resource view</returns>
-        internal EngineShaderResourceView LoadTextureArray(IEnumerable<MemoryStream> streams, bool mipAutogen)
+        internal ShaderResourceView1 LoadTextureArray(IEnumerable<MemoryStream> streams, bool mipAutogen, bool dynamic)
         {
             try
             {
-                var textureList = Helper.Attempt(TextureData.ReadTexture, streams, 5);
+                var textureList = TextureData.ReadTexture(streams);
 
-                return LoadTextureArray(textureList, mipAutogen);
+                return LoadTextureArray(textureList, mipAutogen, dynamic);
             }
             catch (Exception ex)
             {
@@ -1741,103 +1886,20 @@ namespace Engine
         /// </summary>
         /// <param name="textureList">Texture array</param>
         /// <param name="mipAutogen">Try to generate texture mips</param>
+        /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the resource view</returns>
-        private EngineShaderResourceView LoadTextureArray(IEnumerable<TextureData> textureList, bool mipAutogen)
+        internal ShaderResourceView1 LoadTextureArray(IEnumerable<TextureData> textureList, bool mipAutogen, bool dynamic)
         {
             Counters.Textures++;
 
-            var resource = this.CreateResource(textureList, mipAutogen);
+            var resource = CreateResource(textureList, mipAutogen, dynamic);
 
             foreach (var item in textureList)
             {
                 item?.Dispose();
             }
 
-            return new EngineShaderResourceView(resource);
-        }
-
-        /// <summary>
-        /// Creates a texture filled with specified values
-        /// </summary>
-        /// <param name="size">Texture size</param>
-        /// <param name="values">Color values</param>
-        /// <returns>Returns created texture</returns>
-        internal EngineShaderResourceView CreateTexture1D(int size, IEnumerable<Vector4> values)
-        {
-            try
-            {
-                Counters.Textures++;
-
-                using (var str = DataStream.Create(values.ToArray(), false, false))
-                {
-                    using (var randTex = new Texture1D(
-                        this.device,
-                        new Texture1DDescription()
-                        {
-                            Format = Format.R32G32B32A32_Float,
-                            Width = size,
-                            ArraySize = 1,
-                            MipLevels = 1,
-                            Usage = ResourceUsage.Immutable,
-                            BindFlags = BindFlags.ShaderResource,
-                            CpuAccessFlags = CpuAccessFlags.None,
-                            OptionFlags = ResourceOptionFlags.None,
-                        },
-                        str))
-                    {
-                        return new EngineShaderResourceView(new ShaderResourceView1(this.device, randTex));
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new EngineException("CreateTexture1D from value array Error. See inner exception for details", ex);
-            }
-        }
-        /// <summary>
-        /// Creates a texture filled with specified values
-        /// </summary>
-        /// <param name="size">Texture size</param>
-        /// <param name="values">Color values</param>
-        /// <returns>Returns created texture</returns>
-        internal EngineShaderResourceView CreateTexture2D(int size, IEnumerable<Vector4> values)
-        {
-            try
-            {
-                Counters.Textures++;
-
-                var tmp = new Vector4[size * size];
-                Array.Copy(values.ToArray(), tmp, values.Count());
-
-                using (var str = DataStream.Create(tmp, false, false))
-                {
-                    var dBox = new DataBox(str.DataPointer, size * FormatHelper.SizeOfInBytes(Format.R32G32B32A32_Float), 0);
-
-                    using (var texture = new Texture2D1(
-                        this.device,
-                        new Texture2DDescription1()
-                        {
-                            Format = Format.R32G32B32A32_Float,
-                            Width = size,
-                            Height = size,
-                            ArraySize = 1,
-                            MipLevels = 1,
-                            SampleDescription = new SampleDescription(1, 0),
-                            Usage = ResourceUsage.Immutable,
-                            BindFlags = BindFlags.ShaderResource,
-                            CpuAccessFlags = CpuAccessFlags.None,
-                            OptionFlags = ResourceOptionFlags.None,
-                        },
-                        new[] { dBox }))
-                    {
-                        return new EngineShaderResourceView(new ShaderResourceView1(this.device, texture));
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new EngineException("CreateTexture2D from value array Error. See inner exception for details", ex);
-            }
+            return resource;
         }
         /// <summary>
         /// Creates a random 1D texture
@@ -1846,8 +1908,9 @@ namespace Engine
         /// <param name="min">Minimum value</param>
         /// <param name="max">Maximum value</param>
         /// <param name="seed">Random seed</param>
+        /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns created texture</returns>
-        internal EngineShaderResourceView CreateRandomTexture(int size, float min, float max, int seed = 0)
+        internal ShaderResourceView1 CreateRandomTexture(int size, float min, float max, int seed = 0, bool dynamic = true)
         {
             try
             {
@@ -1861,13 +1924,63 @@ namespace Engine
                     randomValues.Add(rnd.NextVector4(new Vector4(min), new Vector4(max)));
                 }
 
-                return this.CreateTexture1D(size, randomValues.ToArray());
+                return CreateTexture1D(size, randomValues, dynamic);
             }
             catch (Exception ex)
             {
                 throw new EngineException("CreateRandomTexture Error. See inner exception for details", ex);
             }
         }
+
+        /// <summary>
+        /// Updates a texture
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="texture">Texture to update</param>
+        /// <param name="data">Data to write</param>
+        internal void UpdateTexture1D<T>(EngineShaderResourceView texture, IEnumerable<T> data) where T : struct
+        {
+            if (data?.Any() == true)
+            {
+                using (var resource = texture.GetResource().Resource.QueryInterface<Texture1D>())
+                {
+                    deviceContext.MapSubresource(resource, 0, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
+                    using (stream)
+                    {
+                        stream.Position = 0;
+                        stream.WriteRange(data.ToArray());
+                    }
+                    deviceContext.UnmapSubresource(resource, 0);
+                }
+
+                Counters.BufferWrites++;
+            }
+        }
+        /// <summary>
+        /// Updates a texture
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="texture">Texture to update</param>
+        /// <param name="data">Data to write</param>
+        internal void UpdateTexture2D<T>(EngineShaderResourceView texture, IEnumerable<T> data) where T : struct
+        {
+            if (data?.Any() == true)
+            {
+                using (var resource = texture.GetResource().Resource.QueryInterface<Texture2D1>())
+                {
+                    deviceContext.MapSubresource(resource, 0, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
+                    using (stream)
+                    {
+                        stream.Position = 0;
+                        stream.WriteRange(data.ToArray());
+                    }
+                    deviceContext.UnmapSubresource(resource, 0);
+                }
+
+                Counters.BufferWrites++;
+            }
+        }
+
         /// <summary>
         /// Create depth stencil view
         /// </summary>
@@ -1882,12 +1995,12 @@ namespace Engine
             SampleDescription sampleDescription = new SampleDescription(1, 0);
             if (useSamples)
             {
-                multiSampled = this.MultiSampled;
-                sampleDescription = this.CurrentSampleDescription;
+                multiSampled = MultiSampled;
+                sampleDescription = CurrentSampleDescription;
             }
 
             using (var texture = new Texture2D1(
-                this.device,
+                device,
                 new Texture2DDescription1()
                 {
                     Width = width,
@@ -1916,11 +2029,11 @@ namespace Engine
                     },
                 };
 
-                dsv = new EngineDepthStencilView(new DepthStencilView(this.device, texture, description));
+                dsv = new EngineDepthStencilView(new DepthStencilView(device, texture, description));
             }
         }
         /// <summary>
-        /// Creates a new render tarjet and his texture
+        /// Creates a new render target and his texture
         /// </summary>
         /// <param name="format">Format</param>
         /// <param name="width">Width</param>
@@ -1938,8 +2051,8 @@ namespace Engine
                 SampleDescription sampleDescription = new SampleDescription(1, 0);
                 if (useSamples)
                 {
-                    multiSampled = this.MultiSampled;
-                    sampleDescription = this.CurrentSampleDescription;
+                    multiSampled = MultiSampled;
+                    sampleDescription = CurrentSampleDescription;
                 }
 
                 CreateRenderTargetTexture(format, width, height, multiSampled, sampleDescription, out var rtv1, out var srv1);
@@ -1972,8 +2085,8 @@ namespace Engine
                 SampleDescription sampleDescription = new SampleDescription(1, 0);
                 if (useSamples)
                 {
-                    multiSampled = this.MultiSampled;
-                    sampleDescription = this.CurrentSampleDescription;
+                    multiSampled = MultiSampled;
+                    sampleDescription = CurrentSampleDescription;
                 }
 
                 rtv = new EngineRenderTargetView();
@@ -2005,7 +2118,7 @@ namespace Engine
         private void CreateRenderTargetTexture(Format format, int width, int height, bool multiSampled, SampleDescription sampleDescription, out RenderTargetView1 rtv, out ShaderResourceView1 srv)
         {
             using (var texture = new Texture2D1(
-                this.device,
+                device,
                 new Texture2DDescription1()
                 {
                     Width = width,
@@ -2046,8 +2159,8 @@ namespace Engine
                     srvDesc.Texture2D = new ShaderResourceViewDescription1.Texture2DResource1() { MipLevels = 1 };
                 }
 
-                rtv = new RenderTargetView1(this.device, texture, rtvDesc);
-                srv = new ShaderResourceView1(this.device, texture, srvDesc);
+                rtv = new RenderTargetView1(device, texture, rtvDesc);
+                srv = new ShaderResourceView1(device, texture, srvDesc);
             }
         }
         /// <summary>
@@ -2060,7 +2173,7 @@ namespace Engine
         internal void CreateShadowMapTextures(int width, int height, out EngineDepthStencilView dsv, out EngineShaderResourceView srv)
         {
             var depthMap = new Texture2D1(
-                this.device,
+                device,
                 new Texture2DDescription1()
                 {
                     Width = width,
@@ -2087,7 +2200,7 @@ namespace Engine
                         MipSlice = 0,
                     },
                 };
-                dsv = new EngineDepthStencilView(new DepthStencilView(this.device, depthMap, dsDescription));
+                dsv = new EngineDepthStencilView(new DepthStencilView(device, depthMap, dsDescription));
 
                 var rvDescription = new ShaderResourceViewDescription1
                 {
@@ -2099,7 +2212,7 @@ namespace Engine
                         MostDetailedMip = 0
                     },
                 };
-                srv = new EngineShaderResourceView(new ShaderResourceView1(this.device, depthMap, rvDescription));
+                srv = new EngineShaderResourceView(new ShaderResourceView1(device, depthMap, rvDescription));
             }
         }
         /// <summary>
@@ -2113,7 +2226,7 @@ namespace Engine
         internal void CreateShadowMapTextures(int width, int height, int mapCount, out EngineDepthStencilView dsv, out EngineShaderResourceView srv)
         {
             var depthMap = new Texture2D1(
-                this.device,
+                device,
                 new Texture2DDescription1()
                 {
                     Width = width,
@@ -2142,7 +2255,7 @@ namespace Engine
                         MipSlice = 0,
                     },
                 };
-                dsv = new EngineDepthStencilView(new DepthStencilView(this.device, depthMap, dsDescription));
+                dsv = new EngineDepthStencilView(new DepthStencilView(device, depthMap, dsDescription));
 
                 var rvDescription = new ShaderResourceViewDescription1
                 {
@@ -2154,7 +2267,7 @@ namespace Engine
                         MostDetailedMip = 0
                     },
                 };
-                srv = new EngineShaderResourceView(new ShaderResourceView1(this.device, depthMap, rvDescription));
+                srv = new EngineShaderResourceView(new ShaderResourceView1(device, depthMap, rvDescription));
             }
         }
         /// <summary>
@@ -2169,7 +2282,7 @@ namespace Engine
         internal void CreateShadowMapTextureArrays(int width, int height, int mapCount, int arraySize, out EngineDepthStencilView[] dsv, out EngineShaderResourceView srv)
         {
             var depthMap = new Texture2D1(
-                this.device,
+                device,
                 new Texture2DDescription1()
                 {
                     Width = width,
@@ -2201,7 +2314,7 @@ namespace Engine
                             MipSlice = 0,
                         },
                     };
-                    dsv[i] = new EngineDepthStencilView(new DepthStencilView(this.device, depthMap, dsDescription));
+                    dsv[i] = new EngineDepthStencilView(new DepthStencilView(device, depthMap, dsDescription));
                 }
 
                 var rvDescription = new ShaderResourceViewDescription1
@@ -2217,7 +2330,7 @@ namespace Engine
                         PlaneSlice = 0,
                     },
                 };
-                srv = new EngineShaderResourceView(new ShaderResourceView1(this.device, depthMap, rvDescription));
+                srv = new EngineShaderResourceView(new ShaderResourceView1(device, depthMap, rvDescription));
             }
         }
         /// <summary>
@@ -2230,7 +2343,7 @@ namespace Engine
         internal void CreateCubicShadowMapTextures(int width, int height, out EngineDepthStencilView dsv, out EngineShaderResourceView srv)
         {
             var depthMap = new Texture2D1(
-                this.device,
+                device,
                 new Texture2DDescription1()
                 {
                     Width = width,
@@ -2260,7 +2373,7 @@ namespace Engine
                         MipSlice = 0,
                     },
                 };
-                dsv = new EngineDepthStencilView(new DepthStencilView(this.device, depthMap, dsDescription));
+                dsv = new EngineDepthStencilView(new DepthStencilView(device, depthMap, dsDescription));
 
                 var rvDescription = new ShaderResourceViewDescription1
                 {
@@ -2272,7 +2385,7 @@ namespace Engine
                         MostDetailedMip = 0,
                     },
                 };
-                srv = new EngineShaderResourceView(new ShaderResourceView1(this.device, depthMap, rvDescription));
+                srv = new EngineShaderResourceView(new ShaderResourceView1(device, depthMap, rvDescription));
             }
         }
         /// <summary>
@@ -2286,7 +2399,7 @@ namespace Engine
         internal void CreateCubicShadowMapTextureArrays(int width, int height, int arraySize, out EngineDepthStencilView[] dsv, out EngineShaderResourceView srv)
         {
             var depthMap = new Texture2D1(
-                this.device,
+                device,
                 new Texture2DDescription1()
                 {
                     Width = width,
@@ -2319,7 +2432,7 @@ namespace Engine
                             MipSlice = 0,
                         },
                     };
-                    dsv[i] = new EngineDepthStencilView(new DepthStencilView(this.device, depthMap, dsDescription));
+                    dsv[i] = new EngineDepthStencilView(new DepthStencilView(device, depthMap, dsDescription));
                 }
 
                 var rvDescription = new ShaderResourceViewDescription1
@@ -2334,7 +2447,7 @@ namespace Engine
                         First2DArrayFace = 0,
                     },
                 };
-                srv = new EngineShaderResourceView(new ShaderResourceView1(this.device, depthMap, rvDescription));
+                srv = new EngineShaderResourceView(new ShaderResourceView1(device, depthMap, rvDescription));
             }
         }
 
@@ -2395,12 +2508,19 @@ namespace Engine
             InputElement[] input,
             string profile)
         {
-            return LoadVertexShader(
+            var res = LoadVertexShader(
                 byteCode,
                 entryPoint,
                 input,
                 profile,
                 out string compilationErrors);
+
+            if (!string.IsNullOrEmpty(compilationErrors))
+            {
+                Logger.WriteError(this, $"EngineVertexShader: {compilationErrors}");
+            }
+
+            return res;
         }
         /// <summary>
         /// Loads vertex shader from byte code
@@ -2435,12 +2555,12 @@ namespace Engine
                 }
 
                 InputLayout layout = new InputLayout(
-                    this.device,
+                    device,
                     ShaderSignature.GetInputSignature(cmpResult.Bytecode),
                     input);
 
                 VertexShader vertexShader = new VertexShader(
-                    this.device,
+                    device,
                     cmpResult.Bytecode);
 
                 return new EngineVertexShader(vertexShader, layout);
@@ -2458,11 +2578,18 @@ namespace Engine
             string entryPoint,
             string profile)
         {
-            return LoadPixelShader(
+            var res = LoadPixelShader(
                 File.ReadAllBytes(filename),
                 entryPoint,
                 profile,
                 out string compilationErrors);
+
+            if (!string.IsNullOrEmpty(compilationErrors))
+            {
+                Logger.WriteError(this, $"EnginePixelShader: {compilationErrors}");
+            }
+
+            return res;
         }
         /// <summary>
         /// Loads a pixel shader from file
@@ -2497,11 +2624,18 @@ namespace Engine
             string entryPoint,
             string profile)
         {
-            return LoadPixelShader(
+            var res = LoadPixelShader(
                 byteCode,
                 entryPoint,
                 profile,
                 out string compilationErrors);
+
+            if (!string.IsNullOrEmpty(compilationErrors))
+            {
+                Logger.WriteError(this, $"EnginePixelShader: {compilationErrors}");
+            }
+
+            return res;
         }
         /// <summary>
         /// Loads a pixel shader from byte code
@@ -2534,7 +2668,7 @@ namespace Engine
                     compilationErrors = cmpResult.Message;
                 }
 
-                return new EnginePixelShader(new PixelShader(this.device, cmpResult.Bytecode));
+                return new EnginePixelShader(new PixelShader(device, cmpResult.Bytecode));
             }
         }
 
@@ -2557,7 +2691,7 @@ namespace Engine
                 includeManager))
             {
                 var effect = new Effect(
-                    this.device,
+                    device,
                     cmpResult.Bytecode.Data,
                     EffectFlags.None);
 
@@ -2578,7 +2712,7 @@ namespace Engine
                 using (var effectCode = ShaderBytecode.FromStream(ms))
                 {
                     var effect = new Effect(
-                        this.device,
+                        device,
                         effectCode.Data,
                         EffectFlags.None);
 
@@ -2594,7 +2728,7 @@ namespace Engine
         /// <param name="flags"></param>
         internal void EffectPassApply(EngineEffectTechnique technique, int index, int flags)
         {
-            technique.GetPass(index).Apply(this.deviceContext, flags);
+            technique.GetPass(index).Apply(deviceContext, flags);
         }
 
         /// <summary>
@@ -2604,7 +2738,7 @@ namespace Engine
         /// <returns>Returns the new sampler state</returns>
         internal EngineSamplerState CreateSamplerState(SamplerStateDescription description)
         {
-            return new EngineSamplerState(new SamplerState(this.device, description));
+            return new EngineSamplerState(new SamplerState(device, description));
         }
 
         /// <summary>
@@ -2630,17 +2764,17 @@ namespace Engine
         internal void WriteDiscardBuffer<T>(Buffer buffer, long offset, IEnumerable<T> data)
             where T : struct
         {
-            Counters.BufferWrites++;
-
             if (data?.Any() == true)
             {
-                this.deviceContext.MapSubresource(buffer, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
+                deviceContext.MapSubresource(buffer, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
                 using (stream)
                 {
                     stream.Position = Marshal.SizeOf(default(T)) * offset;
                     stream.WriteRange(data.ToArray());
                 }
-                this.deviceContext.UnmapSubresource(buffer, 0);
+                deviceContext.UnmapSubresource(buffer, 0);
+
+                Counters.BufferWrites++;
             }
         }
         /// <summary>
@@ -2666,17 +2800,17 @@ namespace Engine
         internal void WriteNoOverwriteBuffer<T>(Buffer buffer, long offset, IEnumerable<T> data)
             where T : struct
         {
-            Counters.BufferWrites++;
-
             if (data?.Any() == true)
             {
-                this.deviceContext.MapSubresource(buffer, MapMode.WriteNoOverwrite, MapFlags.None, out DataStream stream);
+                deviceContext.MapSubresource(buffer, MapMode.WriteNoOverwrite, MapFlags.None, out DataStream stream);
                 using (stream)
                 {
                     stream.Position = Marshal.SizeOf(default(T)) * offset;
                     stream.WriteRange(data.ToArray());
                 }
-                this.deviceContext.UnmapSubresource(buffer, 0);
+                deviceContext.UnmapSubresource(buffer, 0);
+
+                Counters.BufferWrites++;
             }
         }
 
@@ -2709,7 +2843,7 @@ namespace Engine
 
             T[] data = new T[length];
 
-            this.deviceContext.MapSubresource(buffer, MapMode.Read, MapFlags.None, out DataStream stream);
+            deviceContext.MapSubresource(buffer, MapMode.Read, MapFlags.None, out DataStream stream);
             using (stream)
             {
                 stream.Position = Marshal.SizeOf(default(T)) * offset;
@@ -2719,7 +2853,7 @@ namespace Engine
                     data[i] = stream.Read<T>();
                 }
             }
-            this.deviceContext.UnmapSubresource(buffer, 0);
+            deviceContext.UnmapSubresource(buffer, 0);
 
             return data;
         }
@@ -2731,7 +2865,7 @@ namespace Engine
         /// <param name="startVertexLocation">Start vertex location</param>
         internal void Draw(int vertexCount, int startVertexLocation)
         {
-            this.deviceContext.Draw(vertexCount, startVertexLocation);
+            deviceContext.Draw(vertexCount, startVertexLocation);
 
             Counters.DrawCallsPerFrame++;
         }
@@ -2743,7 +2877,7 @@ namespace Engine
         /// <param name="baseVertexLocation">Base vertex location</param>
         internal void DrawIndexed(int indexCount, int startIndexLocation, int baseVertexLocation)
         {
-            this.deviceContext.DrawIndexed(indexCount, startIndexLocation, baseVertexLocation);
+            deviceContext.DrawIndexed(indexCount, startIndexLocation, baseVertexLocation);
 
             Counters.DrawCallsPerFrame++;
         }
@@ -2756,7 +2890,7 @@ namespace Engine
         /// <param name="startInstanceLocation">Start instance count</param>
         internal void DrawInstanced(int vertexCountPerInstance, int instanceCount, int startVertexLocation, int startInstanceLocation)
         {
-            this.deviceContext.DrawInstanced(vertexCountPerInstance, instanceCount, startVertexLocation, startInstanceLocation);
+            deviceContext.DrawInstanced(vertexCountPerInstance, instanceCount, startVertexLocation, startInstanceLocation);
 
             Counters.DrawCallsPerFrame++;
         }
@@ -2770,7 +2904,7 @@ namespace Engine
         /// <param name="startInstanceLocation">Start instance location</param>
         internal void DrawIndexedInstanced(int indexCountPerInstance, int instanceCount, int startIndexLocation, int baseVertexLocation, int startInstanceLocation)
         {
-            this.deviceContext.DrawIndexedInstanced(indexCountPerInstance, instanceCount, startIndexLocation, baseVertexLocation, startInstanceLocation);
+            deviceContext.DrawIndexedInstanced(indexCountPerInstance, instanceCount, startIndexLocation, baseVertexLocation, startInstanceLocation);
 
             Counters.DrawCallsPerFrame++;
         }
@@ -2779,7 +2913,7 @@ namespace Engine
         /// </summary>
         internal void DrawAuto()
         {
-            this.deviceContext.DrawAuto();
+            deviceContext.DrawAuto();
 
             Counters.DrawCallsPerFrame++;
         }

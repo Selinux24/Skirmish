@@ -138,11 +138,9 @@ namespace Engine
         public GroundGardenerDescription()
             : base()
         {
-            this.Static = false;
             this.CastShadow = true;
             this.DeferredEnabled = false;
-            this.DepthEnabled = true;
-            this.AlphaEnabled = true;
+            this.BlendMode = BlendModes.Transparent;
         }
     }
 }

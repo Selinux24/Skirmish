@@ -57,8 +57,8 @@ namespace Engine
                 width, height, arraySize,
                 out EngineDepthStencilView[] dsv, out EngineShaderResourceView srv);
 
-            this.DepthMap = dsv;
-            this.Texture = srv;
+            DepthMap = dsv;
+            Texture = srv;
         }
 
         /// <summary>
@@ -70,9 +70,9 @@ namespace Engine
             {
                 var vp = GetFromPointLightViewProjection(lightPoint);
 
-                this.ToShadowMatrix = vp[0];
-                this.LightPosition = lightPoint.Position;
-                this.FromLightViewProjectionArray = vp;
+                ToShadowMatrix = vp[0];
+                LightPosition = lightPoint.Position;
+                FromLightViewProjectionArray = vp;
             }
         }
         /// <summary>
@@ -82,6 +82,12 @@ namespace Engine
         public override IShadowMapDrawer GetEffect()
         {
             return DrawerPool.EffectShadowPoint;
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"{nameof(ShadowMapPoint)} - LightPosition: {LightPosition} HighResolutionMap: {HighResolutionMap}";
         }
     }
 }

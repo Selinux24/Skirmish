@@ -36,7 +36,7 @@ namespace Engine
                     this.Velocity = next - position;
 
                     manipulator.SetPosition(next, true);
-                    manipulator.LookAt(next + this.Velocity, false, 0, true);
+                    manipulator.LookAt(next + this.Velocity, Axis.None, 0, true);
                 }
                 else
                 {

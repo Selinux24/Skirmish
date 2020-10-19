@@ -22,7 +22,7 @@ namespace Engine
         /// <returns>Returns true if the renderer is valid</returns>
         public static bool Validate(Graphics graphics)
         {
-            return true;
+            return graphics != null;
         }
 
         /// <summary>
@@ -50,7 +50,7 @@ namespace Engine
                 Stopwatch swTotal = Stopwatch.StartNew();
 #endif
                 //Draw visible components
-                var visibleComponents = scene.GetComponents(c => c.Visible);
+                var visibleComponents = scene.GetComponents().Where(c => c.Visible);
                 if (visibleComponents.Any())
                 {
                     //Initialize context data from update context
@@ -86,7 +86,7 @@ namespace Engine
         /// </summary>
         /// <param name="scene">Scene</param>
         /// <param name="components">Components</param>
-        private void DoRender(Scene scene, IEnumerable<SceneObject> components)
+        private void DoRender(Scene scene, IEnumerable<ISceneObject> components)
         {
             #region Preparation
 #if DEBUG
@@ -110,7 +110,7 @@ namespace Engine
 #if DEBUG
                 Stopwatch swCull = Stopwatch.StartNew();
 #endif
-                var toCullVisible = components.Where(s => s.Is<ICullable>()).Select(s => s.Get<ICullable>());
+                var toCullVisible = components.OfType<ICullable>();
 
                 bool draw = false;
                 if (scene.PerformFrustumCulling)
@@ -165,7 +165,7 @@ namespace Engine
         /// <param name="context">Context</param>
         /// <param name="index">Cull results index</param>
         /// <param name="components">Components</param>
-        private void DrawResultComponents(DrawContext context, int index, IEnumerable<SceneObject> components)
+        private void DrawResultComponents(DrawContext context, int index, IEnumerable<ISceneObject> components)
         {
             //Save current drawer mode
             var mode = context.DrawerMode;
@@ -197,7 +197,7 @@ namespace Engine
                 {
                     Stopwatch stopwatch2 = new Stopwatch();
                     stopwatch2.Start();
-                    this.DrawOpaque(context, c);
+                    this.Draw(context, c);
                     stopwatch2.Stop();
                     dict.Add($"Opaque Draw {oDIndex++} {c.Name}", stopwatch2.Elapsed.TotalMilliseconds);
                 });
@@ -229,7 +229,7 @@ namespace Engine
                 {
                     Stopwatch stopwatch2 = new Stopwatch();
                     stopwatch2.Start();
-                    this.DrawTransparent(context, c);
+                    this.Draw(context, c);
                     stopwatch2.Stop();
                     dict.Add($"Transparent Draw {oTIndex++} {c.Name}", stopwatch2.Elapsed.TotalMilliseconds);
                 });

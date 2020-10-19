@@ -1,11 +1,15 @@
 ﻿using Engine;
+using Engine.Audio;
 using Engine.Common;
 using Engine.Content;
 using Engine.PathFinding.RecastNavigation;
+using Engine.UI;
 using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Skybox
 {
@@ -14,6 +18,12 @@ namespace Skybox
         private const int layerHUD = 99;
         private const float alpha = 0.25f;
 
+        private readonly Color4 ruinsVolumeColor = new Color4(Color.Green.RGB(), alpha);
+        private readonly Color4 torchVolumeColor = new Color4(Color.GreenYellow.RGB(), alpha);
+        private readonly Color4 obeliskVolumeColor = new Color4(Color.DarkGreen.RGB(), alpha);
+        private readonly Color4 fountainVolumeColor = new Color4(Color.DarkSeaGreen.RGB(), alpha);
+        private readonly int bsphSlices = 20;
+        private readonly int bsphStacks = 10;
         private readonly Vector2[] firePositions = new[]
         {
             new Vector2(+5, +5),
@@ -21,100 +31,136 @@ namespace Skybox
             new Vector2(+5, -5),
             new Vector2(-5, -5),
         };
-        private readonly Color4 ruinsVolumeColor = new Color4(Color.Green.RGB(), alpha);
-        private readonly Color4 torchVolumeColor = new Color4(Color.GreenYellow.RGB(), alpha);
-        private readonly int bsphSlices = 20;
-        private readonly int bsphStacks = 10;
+        private readonly Vector3[] obeliskPositions = new[]
+        {
+            new Vector3(+100, -0.2f, +100),
+            new Vector3(-100, -10, +100),
+            new Vector3(+100, -1, -100),
+            new Vector3(-100, -1, -100),
+        };
+        private readonly Quaternion[] obeliskRotations = new[]
+        {
+            Quaternion.RotationYawPitchRoll(-MathUtil.PiOverTwo * 0.75f, MathUtil.PiOverTwo*1.03f, 0.45f),
+            Quaternion.RotationYawPitchRoll(0, -0.15f, 0),
+            Quaternion.Identity,
+            Quaternion.Identity,
+        };
 
         private readonly Agent walker = new Agent()
         {
             Name = "Walker",
             Height = 1.2f,
             Radius = 0.4f,
-            MaxClimb = 0.5f,
-            MaxSlope = 50,
+            MaxClimb = 1.2f,
+            MaxSlope = 45,
         };
 
-        private SceneObject<Cursor> cursor;
+        private UITextArea fps = null;
 
-        private SceneObject<TextDrawer> fps = null;
+        private Scenery ruins = null;
+        private PrimitiveListDrawer<Line3D> volumesDrawer = null;
+        private PrimitiveListDrawer<Triangle> graphDrawer = null;
 
-        private SceneObject<Scenery> ruins = null;
-        private SceneObject<PrimitiveListDrawer<Line3D>> volumesDrawer = null;
-        private SceneObject<PrimitiveListDrawer<Triangle>> graphDrawer = null;
+        private ModelInstanced torchs = null;
+        private ModelInstanced obelisks = null;
+        private Model fountain = null;
 
-        private SceneObject<ModelInstanced> torchs = null;
-
-        private SceneObject<Model> movingFire = null;
+        private Model movingFire = null;
         private ParticleEmitter movingFireEmitter = null;
         private SceneLightPoint movingFireLight = null;
 
+        private readonly ParticleSystemDescription pBigFire = ParticleSystemDescription.InitializeFire("resources", "fire.png", 0.5f);
+        private readonly ParticleSystemDescription pFire = ParticleSystemDescription.InitializeFire("resources", "fire.png", 0.1f);
+        private readonly ParticleSystemDescription pPlume = ParticleSystemDescription.InitializeSmokePlume("resources", "smoke.png", 0.1f);
+
         private int directionalLightCount = 0;
 
+        private IAudioEffect fireAudioEffect;
+
+        private bool gameReady = false;
+
         public TestScene3D(Game game)
-            : base(game, SceneModes.ForwardLigthning)
+            : base(game)
         {
 
         }
 
-        public override void Initialize()
+        public override async Task Initialize()
         {
-            base.Initialize();
+            InitializeCamera();
 
-            this.InitializeCamera();
+            await LoadResourcesAsync(
+                InitializeAssets(),
+                (res) =>
+                {
+                    if (!res.Completed)
+                    {
+                        res.ThrowExceptions();
+                    }
 
+                    InitializeNavigationMesh();
+
+                    Task.WhenAll(UpdateNavigationGraph());
+
+                    InitializeSound();
+
+                    fireAudioEffect = AudioManager.CreateEffectInstance("Sphere", movingFire, Camera);
+                    fireAudioEffect.Play();
+
+                    AudioManager.MasterVolume = 1f;
+                    AudioManager.Start();
+                });
+        }
+        private async Task InitializeAssets()
+        {
             #region Cursor
 
-            var cursorDesc = new CursorDescription()
+            var cursorDesc = new UICursorDescription()
             {
-                Name = "Cursor",
                 Textures = new[] { "target.png" },
-                Color = Color.Purple,
+                BaseColor = Color.Purple,
                 Width = 16,
                 Height = 16,
             };
-            this.cursor = this.AddComponent<Cursor>(cursorDesc, SceneObjectUsages.UI, layerHUD + 1);
+            await this.AddComponentUICursor("Cursor", cursorDesc, layerHUD + 1);
 
             #endregion
 
             #region Text
 
-            var title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
-            var help = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            this.fps = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            var title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White }, layerHUD);
+            var help = await this.AddComponentUITextArea("Help", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow }, layerHUD);
+            fps = await this.AddComponentUITextArea("FPS", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow }, layerHUD);
 
-            title.Instance.Text = "Collada Scene with Skybox";
+            title.Text = "Collada Scene with Skybox";
 #if DEBUG
-            help.Instance.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Right Mouse: Drag view | Left Mouse: Pick";
+            help.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Right Mouse: Drag view | Left Mouse: Pick";
 #else
-            help.Instance.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Move Mouse: View | Left Mouse: Pick";
+            help.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Move Mouse: View | Left Mouse: Pick";
 #endif
-            this.fps.Instance.Text = null;
+            fps.Text = "";
 
-            title.Instance.Position = Vector2.Zero;
-            help.Instance.Position = new Vector2(0, 24);
-            this.fps.Instance.Position = new Vector2(0, 40);
+            title.SetPosition(Vector2.Zero);
+            help.SetPosition(new Vector2(0, 24));
+            fps.SetPosition(new Vector2(0, 40));
 
             var spDesc = new SpriteDescription()
             {
-                Name = "UI Back pannel",
-                AlphaEnabled = true,
-                Width = this.Game.Form.RenderWidth,
-                Height = this.fps.Instance.Top + this.fps.Instance.Height + 3,
-                Color = new Color4(0, 0, 0, 0.75f),
+                Width = Game.Form.RenderWidth,
+                Height = 120,
+                BaseColor = new Color4(0, 0, 0, 0.75f),
             };
 
-            this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            await this.AddComponentSprite("Backpanel", spDesc, SceneObjectUsages.UI, layerHUD - 1);
 
             #endregion
 
             #region Skydom
 
-            this.AddComponent<Skydom>(new SkydomDescription()
+            await this.AddComponentSkydom("Skydom", new SkydomDescription()
             {
-                Name = "Skydom",
                 ContentPath = "Resources",
-                Radius = this.Camera.FarPlaneDistance,
+                Radius = Camera.FarPlaneDistance,
                 Texture = "sunset.dds",
             });
 
@@ -122,11 +168,11 @@ namespace Skybox
 
             #region Torchs
 
-            this.torchs = this.AddComponent<ModelInstanced>(
+            torchs = await this.AddComponentModelInstanced(
+                "Torchs",
                 new ModelInstancedDescription()
                 {
-                    Name = "Torchs",
-                    Instances = this.firePositions.Length,
+                    Instances = firePositions.Length,
                     CastShadow = true,
                     Content = new ContentDescription()
                     {
@@ -135,41 +181,62 @@ namespace Skybox
                     }
                 });
 
+            AttachToGround(torchs, true);
+
+            #endregion
+
+            #region Obelisks
+
+            obelisks = await this.AddComponentModelInstanced(
+                "Obelisks",
+                new ModelInstancedDescription()
+                {
+                    Instances = firePositions.Length,
+                    CastShadow = true,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "Resources/obelisk",
+                        ModelContentFilename = "obelisk.xml",
+                    },
+                });
+
+            #endregion
+
+            #region Fountain
+
+            fountain = await this.AddComponentModel(
+                "Fountain",
+                new ModelDescription()
+                {
+                    CastShadow = true,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "Resources/Fountain",
+                        ModelContentFilename = "Fountain.xml",
+                    },
+                });
+
+            AttachToGround(fountain, true);
+
             #endregion
 
             #region Terrain
 
-            GroundDescription desc = new GroundDescription()
-            {
-                Name = "Terrain",
-                CastShadow = true,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = "Resources",
-                    ModelContentFilename = "ruins.xml",
-                }
-            };
-            this.ruins = this.AddComponent<Scenery>(desc);
+            ruins = await this.AddComponentScenery("Ruins", GroundDescription.FromFile("Resources", "ruins.xml"));
+            SetGround(ruins, true);
 
             #endregion
 
             #region Water
 
-            var waterDesc = WaterDescription.CreateCalm("Ocean", 5000f, -1f);
-            this.AddComponent<Water>(waterDesc, SceneObjectUsages.None);
+            var waterDesc = WaterDescription.CreateCalm(5000f, -1f);
+            await this.AddComponentWater("Ocean", waterDesc, SceneObjectUsages.None);
 
             #endregion
 
-            this.SetGround(this.ruins, true);
-            this.AttachToGround(this.torchs, true);
-
             #region Particle Systems
 
-            var pManager = this.AddComponent<ParticleManager>(new ParticleManagerDescription() { Name = "Particle Systems" });
-
-            var pBigFire = ParticleSystemDescription.InitializeFire("resources", "fire.png", 0.5f);
-            var pFire = ParticleSystemDescription.InitializeFire("resources", "fire.png", 0.1f);
-            var pPlume = ParticleSystemDescription.InitializeSmokePlume("resources", "smoke.png", 0.1f);
+            var pManager = await this.AddComponentParticleManager("ParticleManager", ParticleManagerDescription.Default());
 
             #endregion
 
@@ -178,67 +245,42 @@ namespace Skybox
             MaterialContent mat = MaterialContent.Default;
             mat.EmissionColor = Color.Yellow;
 
-            GeometryUtil.CreateSphere(
-                0.05f, 32, 32,
-                out Vector3[] v, out Vector3[] n, out Vector2[] uv, out uint[] ix);
-
-            VertexData[] vertices = new VertexData[v.Length];
-            for (int i = 0; i < v.Length; i++)
-            {
-                vertices[i] = new VertexData()
-                {
-                    Position = v[i],
-                    Normal = n[i],
-                    Texture = uv[i],
-                };
-            }
-
-            var content = ModelContent.GenerateTriangleList(vertices, ix, mat);
+            var sphere = GeometryUtil.CreateSphere(0.05f, 32, 32);
+            var vertices = VertexData.FromDescriptor(sphere);
+            var indices = sphere.Indices;
+            var content = ModelContent.GenerateTriangleList(vertices, indices, mat);
 
             var mFireDesc = new ModelDescription()
             {
-                Name = "Emitter",
-                Static = false,
                 CastShadow = false,
                 DeferredEnabled = true,
                 DepthEnabled = true,
-                AlphaEnabled = false,
                 Content = new ContentDescription()
                 {
                     ModelContent = content,
                 }
             };
 
-            this.movingFire = this.AddComponent<Model>(mFireDesc);
+            movingFire = await this.AddComponentModel("Emitter", mFireDesc);
 
-            this.movingFireEmitter = new ParticleEmitter() { EmissionRate = 0.1f, InfiniteDuration = true };
+            movingFireEmitter = new ParticleEmitter() { EmissionRate = 0.1f, InfiniteDuration = true };
 
-            pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, pBigFire, this.movingFireEmitter);
-
-            #endregion
-
-            #region DEBUG drawers
-
-            this.volumesDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(new PrimitiveListDrawerDescription<Line3D>() { AlphaEnabled = true, Count = 10000 });
-            this.volumesDrawer.Visible = false;
-
-            this.graphDrawer = this.AddComponent<PrimitiveListDrawer<Triangle>>(new PrimitiveListDrawerDescription<Triangle>() { AlphaEnabled = true, Count = 10000 });
-            this.graphDrawer.Visible = false;
+            pManager.AddParticleSystem(ParticleSystemTypes.CPU, pBigFire, movingFireEmitter);
 
             #endregion
 
             #region Positioning and lights
 
-            this.Lights.DirectionalLights[0].Enabled = true;
-            this.Lights.DirectionalLights[0].CastShadow = true;
+            Lights.DirectionalLights[0].Enabled = true;
+            Lights.DirectionalLights[0].CastShadow = true;
 
-            this.Lights.DirectionalLights[1].Enabled = true;
+            Lights.DirectionalLights[1].Enabled = true;
 
-            this.Lights.DirectionalLights[2].Enabled = false;
+            Lights.DirectionalLights[2].Enabled = false;
 
-            this.directionalLightCount = this.Lights.DirectionalLights.Length;
+            directionalLightCount = Lights.DirectionalLights.Length;
 
-            this.movingFireLight = new SceneLightPoint(
+            movingFireLight = new SceneLightPoint(
                 "Moving fire light",
                 false,
                 Color.Orange,
@@ -246,26 +288,24 @@ namespace Skybox
                 true,
                 SceneLightPointDescription.Create(Vector3.Zero, 15f, 20f));
 
-            this.Lights.Add(this.movingFireLight);
+            Lights.Add(movingFireLight);
 
-            Vector3[] firePositions3D = new Vector3[this.firePositions.Length];
-            SceneLightPoint[] torchLights = new SceneLightPoint[this.firePositions.Length];
-            for (int i = 0; i < this.firePositions.Length; i++)
+            Vector3[] firePositions3D = new Vector3[firePositions.Length];
+            SceneLightPoint[] torchLights = new SceneLightPoint[firePositions.Length];
+            for (int i = 0; i < firePositions.Length; i++)
             {
                 Color color = Color.Yellow;
                 if (i == 1) color = Color.Red;
                 if (i == 2) color = Color.Green;
                 if (i == 3) color = Color.LightBlue;
 
-                this.FindTopGroundPosition(
-                    this.firePositions[i].X, this.firePositions[i].Y,
-                    out PickingResult<Triangle> result);
+                FindTopGroundPosition(firePositions[i].X, firePositions[i].Y, out PickingResult<Triangle> result);
                 firePositions3D[i] = result.Position;
 
-                this.torchs.Instance[i].Manipulator.SetScale(0.20f, true);
-                this.torchs.Instance[i].Manipulator.SetPosition(firePositions3D[i], true);
+                torchs[i].Manipulator.SetScale(0.20f, true);
+                torchs[i].Manipulator.SetPosition(firePositions3D[i], true);
 
-                BoundingBox bbox = this.torchs.Instance[i].GetBoundingBox();
+                BoundingBox bbox = torchs[i].GetBoundingBox();
 
                 firePositions3D[i].Y += (bbox.Maximum.Y - bbox.Minimum.Y) * 0.95f;
 
@@ -277,16 +317,44 @@ namespace Skybox
                     true,
                     SceneLightPointDescription.Create(firePositions3D[i], 4f, 20f));
 
-                this.Lights.Add(torchLights[i]);
+                Lights.Add(torchLights[i]);
 
-                pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, pFire, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.1f });
-                pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, pPlume, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.5f });
+                pManager.AddParticleSystem(ParticleSystemTypes.CPU, pFire, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.1f });
+                pManager.AddParticleSystem(ParticleSystemTypes.CPU, pPlume, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.5f });
             }
+
+            for (int i = 0; i < obeliskPositions.Length; i++)
+            {
+                obelisks[i].Manipulator.SetPosition(obeliskPositions[i]);
+                obelisks[i].Manipulator.SetRotation(obeliskRotations[i]);
+                obelisks[i].Manipulator.SetScale(10f);
+            }
+
+            fountain.Manipulator.SetScale(2.3f);
 
             #endregion
 
-            #region Navigation Mesh
+            #region DEBUG drawers
 
+            volumesDrawer = await this.AddComponentPrimitiveListDrawer("DebugVolumesDrawer", new PrimitiveListDrawerDescription<Line3D>() { Count = 10000 });
+            volumesDrawer.Visible = false;
+
+            graphDrawer = await this.AddComponentPrimitiveListDrawer("DebugGraphDrawer", new PrimitiveListDrawerDescription<Triangle>() { Count = 10000 });
+            graphDrawer.Visible = false;
+
+            #endregion
+        }
+        private void InitializeCamera()
+        {
+            Camera.NearPlaneDistance = 0.1f;
+            Camera.FarPlaneDistance = 5000.0f;
+            Camera.Goto(new Vector3(-6, walker.Height, 5));
+            Camera.LookTo(Vector3.UnitY + Vector3.UnitZ);
+            Camera.MovementDelta = 4f;
+            Camera.SlowMovementDelta = 2f;
+        }
+        private void InitializeNavigationMesh()
+        {
             var nvInput = new InputGeometry(GetTrianglesForNavigationGraph);
 
             var nvSettings = BuildSettings.Default;
@@ -294,40 +362,53 @@ namespace Skybox
             nvSettings.CellSize = 0.05f;
             nvSettings.CellHeight = 0.2f;
             nvSettings.PartitionType = SamplePartitionTypes.Monotone;
-            nvSettings.Agents[0] = this.walker;
+            nvSettings.Agents[0] = walker;
 
-            this.PathFinderDescription = new Engine.PathFinding.PathFinderDescription(nvSettings, nvInput);
-
-            #endregion
+            PathFinderDescription = new Engine.PathFinding.PathFinderDescription(nvSettings, nvInput);
         }
-        private void InitializeCamera()
+        private void InitializeSound()
         {
-            this.Camera.NearPlaneDistance = 0.1f;
-            this.Camera.FarPlaneDistance = 5000.0f;
-            this.Camera.Goto(new Vector3(-6, this.walker.Height, 5));
-            this.Camera.LookTo(Vector3.UnitY + Vector3.UnitZ);
-            this.Camera.MovementDelta = 4f;
-            this.Camera.SlowMovementDelta = 2f;
+            AudioManager.LoadSound("target_balls_single_loop", "Resources/Audio/Effects", "target_balls_single_loop.wav");
+
+            AudioManager.AddEffectParams(
+                "Sphere",
+                new GameAudioEffectParameters
+                {
+                    SoundName = "target_balls_single_loop",
+                    IsLooped = true,
+                    UseAudio3D = true,
+                    ReverbPreset = ReverbPresets.StoneRoom,
+                    Volume = 0.25f,
+                    EmitterRadius = 6,
+                    ListenerCone = GameAudioConeDescription.DefaultListenerCone,
+                });
+        }
+
+        public override void NavigationGraphUpdated()
+        {
+            gameReady = true;
         }
 
         public override void Update(GameTime gameTime)
         {
-            Vector3 previousPosition = this.Camera.Position;
-            bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
+            if (!gameReady)
+            {
+                return;
+            }
 
-            this.UpdateInput(shift);
+            Vector3 previousPosition = Camera.Position;
+
+            UpdateInput();
 
             #region Walk
 
+            if (Walk(walker, previousPosition, Camera.Position, true, out Vector3 walkerPosition))
             {
-                if (this.Walk(this.walker, previousPosition, this.Camera.Position, out Vector3 walkerPosition))
-                {
-                    this.Camera.Goto(walkerPosition);
-                }
-                else
-                {
-                    this.Camera.Goto(previousPosition);
-                }
+                Camera.Goto(walkerPosition);
+            }
+            else
+            {
+                Camera.Goto(previousPosition);
             }
 
             #endregion
@@ -340,194 +421,208 @@ namespace Skybox
             float v = 0.8f;
 
             Vector3 position = Vector3.Zero;
-            position.X = r * d * (float)Math.Cos(v * this.Game.GameTime.TotalSeconds);
-            position.Y = h + (0.25f * (1f + (float)Math.Sin(this.Game.GameTime.TotalSeconds)));
-            position.Z = r * d * (float)Math.Sin(v * this.Game.GameTime.TotalSeconds);
+            position.X = r * d * (float)Math.Cos(v * Game.GameTime.TotalSeconds);
+            position.Y = h + (0.25f * (1f + (float)Math.Sin(Game.GameTime.TotalSeconds)));
+            position.Z = r * d * (float)Math.Sin(v * Game.GameTime.TotalSeconds);
 
-            this.movingFire.Transform.SetPosition(position);
-            this.movingFireEmitter.Position = position;
-            this.movingFireLight.Position = position;
+            movingFire.Manipulator.SetPosition(position);
+            movingFireEmitter.Position = position;
+            movingFireLight.Position = position;
 
-            this.DEBUGUpdateMovingVolumesDrawer();
+            DEBUGUpdateMovingVolumesDrawer();
 
             #endregion
 
             base.Update(gameTime);
         }
-
-        private void UpdateInput(bool shift)
+        private void UpdateInput()
         {
-            if (this.Game.Input.KeyJustReleased(Keys.Escape))
+            if (Game.Input.KeyJustReleased(Keys.Escape))
             {
-                this.Game.Exit();
+                Game.Exit();
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.R))
+            if (Game.Input.KeyJustReleased(Keys.R))
             {
-                this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
+                SetRenderMode(GetRenderMode() == SceneModes.ForwardLigthning ?
                     SceneModes.DeferredLightning :
                     SceneModes.ForwardLigthning);
             }
 
-            this.UpdateInputDebug();
+            UpdateInputDebug();
 
-            this.UpdateInputCamera(shift);
+            UpdateInputCamera();
 
-            this.UpdateInputLights();
+            UpdateInputLights();
 
-#if DEBUG
-            this.fps.Instance.Text = string.Format(
-                "Mouse (X:{0}; Y:{1}, Wheel: {2}) Absolute (X:{3}; Y:{4}) Cursor ({5})",
-                this.Game.Input.MouseXDelta,
-                this.Game.Input.MouseYDelta,
-                this.Game.Input.MouseWheelDelta,
-                this.Game.Input.MouseX,
-                this.Game.Input.MouseY,
-                this.cursor.Instance.CursorPosition);
-#else
-            this.fps.Instance.Text = this.Game.RuntimeText;
-#endif
+            var m = fireAudioEffect.GetOutputMatrix();
+            var ep = movingFire.Manipulator.Position.GetDescription();
+            var ev = movingFire.Manipulator.Velocity.GetDescription();
+            var lp = Camera.Position.GetDescription();
+            var lv = Camera.Velocity.GetDescription();
+            var d = Vector3.Distance(movingFire.Manipulator.Position, Camera.Position);
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"Mouse (X:{Game.Input.MouseXDelta}; Y:{Game.Input.MouseYDelta}, Wheel: {Game.Input.MouseWheelDelta}) Absolute (X:{Game.Input.MouseX}; Y:{Game.Input.MouseY})");
+            sb.AppendLine($"L {m[0]:0.000} R {m[1]:0.000} Distance {d}");
+            sb.AppendLine($"Emitter  pos: {ep} Emitter  vel: {ev}");
+            sb.AppendLine($"Listener pos: {lp} Listener vel: {lv}");
+            fps.Text = sb.ToString();
         }
-        private void UpdateInputCamera(bool shift)
+        private void UpdateInputCamera()
         {
-            if (this.Game.Input.LeftMouseButtonPressed)
+            if (Game.Input.LeftMouseButtonPressed)
             {
-                var pRay = this.GetPickingRay();
+                var pRay = GetPickingRay();
 
-                if (this.ruins.Instance.PickNearest(pRay, out PickingResult<Triangle> r))
+                if (ruins.PickNearest(pRay, out PickingResult<Triangle> r))
                 {
                     var tri = Line3D.CreateWiredTriangle(r.Item);
 
-                    this.volumesDrawer.Instance.SetPrimitives(Color.White, tri);
+                    volumesDrawer.SetPrimitives(Color.White, tri);
                 }
             }
 
 #if DEBUG
-            if (this.Game.Input.RightMouseButtonPressed)
+            if (Game.Input.RightMouseButtonPressed)
+            {
+                Camera.RotateMouse(
+                    Game.GameTime,
+                    Game.Input.MouseXDelta,
+                    Game.Input.MouseYDelta);
+            }
+#else
+            Camera.RotateMouse(
+                Game.GameTime,
+                Game.Input.MouseXDelta,
+                Game.Input.MouseYDelta);
 #endif
+
+            if (Game.Input.KeyPressed(Keys.A))
             {
-                this.Camera.RotateMouse(
-                    this.Game.GameTime,
-                    this.Game.Input.MouseXDelta,
-                    this.Game.Input.MouseYDelta);
+                Camera.MoveLeft(Game.GameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.A))
+            if (Game.Input.KeyPressed(Keys.D))
             {
-                this.Camera.MoveLeft(this.Game.GameTime, shift);
+                Camera.MoveRight(Game.GameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.D))
+            if (Game.Input.KeyPressed(Keys.W))
             {
-                this.Camera.MoveRight(this.Game.GameTime, shift);
+                Camera.MoveForward(Game.GameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.W))
+            if (Game.Input.KeyPressed(Keys.S))
             {
-                this.Camera.MoveForward(this.Game.GameTime, shift);
-            }
-
-            if (this.Game.Input.KeyPressed(Keys.S))
-            {
-                this.Camera.MoveBackward(this.Game.GameTime, shift);
+                Camera.MoveBackward(Game.GameTime, Game.Input.ShiftPressed);
             }
         }
         private void UpdateInputLights()
         {
-            if (this.Game.Input.KeyJustReleased(Keys.Add))
+            if (Game.Input.KeyJustReleased(Keys.Add))
             {
-                this.directionalLightCount++;
-                if (this.directionalLightCount > 3)
+                directionalLightCount++;
+                if (directionalLightCount > 3)
                 {
-                    this.directionalLightCount = 0;
+                    directionalLightCount = 0;
                 }
 
-                this.UpdateInputEnabledLights();
+                UpdateInputEnabledLights();
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.Subtract))
+            if (Game.Input.KeyJustReleased(Keys.Subtract))
             {
-                this.directionalLightCount--;
-                if (this.directionalLightCount < 0)
+                directionalLightCount--;
+                if (directionalLightCount < 0)
                 {
-                    this.directionalLightCount = 3;
+                    directionalLightCount = 3;
                 }
 
-                this.UpdateInputEnabledLights();
+                UpdateInputEnabledLights();
             }
         }
         private void UpdateInputEnabledLights()
         {
-            this.Lights.DirectionalLights[0].Enabled = this.directionalLightCount > 0;
-            this.Lights.DirectionalLights[1].Enabled = this.directionalLightCount > 1;
-            this.Lights.DirectionalLights[2].Enabled = this.directionalLightCount > 2;
+            Lights.DirectionalLights[0].Enabled = directionalLightCount > 0;
+            Lights.DirectionalLights[1].Enabled = directionalLightCount > 1;
+            Lights.DirectionalLights[2].Enabled = directionalLightCount > 2;
         }
         private void UpdateInputDebug()
         {
-            if (this.Game.Input.KeyJustReleased(Keys.Home))
+            if (Game.Input.KeyJustReleased(Keys.Home))
             {
-                this.InitializeCamera();
+                InitializeCamera();
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F1))
+            if (Game.Input.KeyJustReleased(Keys.F1))
             {
-                this.volumesDrawer.Visible = !this.volumesDrawer.Visible;
+                volumesDrawer.Visible = !volumesDrawer.Visible;
 
-                if (this.volumesDrawer.Visible)
+                if (volumesDrawer.Visible)
                 {
-                    this.DEBUGUpdateVolumesDrawer();
+                    DEBUGUpdateVolumesDrawer();
                 }
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F2))
+            if (Game.Input.KeyJustReleased(Keys.F2))
             {
-                this.graphDrawer.Visible = !this.graphDrawer.Visible;
+                graphDrawer.Visible = !graphDrawer.Visible;
 
-                if (this.graphDrawer.Visible)
+                if (graphDrawer.Visible)
                 {
-                    this.DEBUGUpdateGraphDrawer();
+                    DEBUGUpdateGraphDrawer();
                 }
             }
         }
 
         private void DEBUGUpdateVolumesDrawer()
         {
-            this.volumesDrawer.Instance.SetPrimitives(this.ruinsVolumeColor, Line3D.CreateWiredBox(this.ruins.Instance.GetBoundingBox()));
+            volumesDrawer.SetPrimitives(ruinsVolumeColor, Line3D.CreateWiredBox(ruins.GetBoundingBox()));
 
             List<Line3D> volumesTorchs = new List<Line3D>();
-            for (int i = 0; i < this.torchs.Count; i++)
+            for (int i = 0; i < torchs.InstanceCount; i++)
             {
-                volumesTorchs.AddRange(Line3D.CreateWiredBox(this.torchs.Instance[i].GetBoundingBox()));
+                volumesTorchs.AddRange(Line3D.CreateWiredBox(torchs[i].GetBoundingBox()));
             }
-            this.volumesDrawer.Instance.SetPrimitives(this.torchVolumeColor, volumesTorchs.ToArray());
+            volumesDrawer.SetPrimitives(torchVolumeColor, volumesTorchs);
 
-            for (int i = 1; i < this.Lights.PointLights.Length; i++)
+            List<Line3D> volumesObelisks = new List<Line3D>();
+            for (int i = 0; i < obelisks.InstanceCount; i++)
             {
-                var light = this.Lights.PointLights[i];
+                volumesObelisks.AddRange(Line3D.CreateWiredBox(obelisks[i].GetBoundingBox()));
+            }
+            volumesDrawer.SetPrimitives(obeliskVolumeColor, volumesObelisks);
 
-                this.volumesDrawer.Instance.SetPrimitives(
+            var volumeFountain = Line3D.CreateWiredBox(fountain.GetBoundingBox());
+            volumesDrawer.SetPrimitives(fountainVolumeColor, volumeFountain);
+
+            for (int i = 1; i < Lights.PointLights.Length; i++)
+            {
+                var light = Lights.PointLights[i];
+
+                volumesDrawer.SetPrimitives(
                     new Color4(light.DiffuseColor.RGB(), alpha),
-                    Line3D.CreateWiredSphere(light.BoundingSphere, this.bsphSlices, this.bsphStacks));
+                    Line3D.CreateWiredSphere(light.BoundingSphere, bsphSlices, bsphStacks));
             }
         }
         private void DEBUGUpdateMovingVolumesDrawer()
         {
-            var light = this.Lights.PointLights[0];
+            var light = Lights.PointLights[0];
 
-            this.volumesDrawer.Instance.SetPrimitives(
+            volumesDrawer.SetPrimitives(
                 new Color4(light.DiffuseColor.RGB(), alpha),
-                Line3D.CreateWiredSphere(light.BoundingSphere, this.bsphSlices, this.bsphStacks));
+                Line3D.CreateWiredSphere(light.BoundingSphere, bsphSlices, bsphStacks));
         }
         private void DEBUGUpdateGraphDrawer()
         {
-            var nodes = this.GetNodes(this.walker).OfType<GraphNode>();
+            var nodes = GetNodes(walker).OfType<GraphNode>();
             if (nodes.Any())
             {
-                this.graphDrawer.Instance.Clear();
+                graphDrawer.Clear();
 
                 foreach (var node in nodes)
                 {
-                    this.graphDrawer.Instance.AddPrimitives(node.Color, node.Triangles);
+                    graphDrawer.AddPrimitives(node.Color, node.Triangles);
                 }
             }
         }

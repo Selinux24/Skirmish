@@ -1,4 +1,6 @@
 ﻿using Engine;
+using Engine.Content.FmtCollada;
+using Engine.Content.FmtObj;
 using System;
 using System.IO;
 
@@ -12,7 +14,10 @@ namespace Skybox
             try
             {
 #if DEBUG
-                using (Game cl = new Game("5 Skybox", false, 1600, 900, true, 0, 0))
+                int sWidth = (int)(System.Windows.Forms.SystemInformation.VirtualScreen.Width * .8f);
+                int sHeight = (int)(System.Windows.Forms.SystemInformation.VirtualScreen.Height * .8f);
+
+                using (Game cl = new Game("5 Skybox", false, sWidth, sHeight, true, 0, 0))
 #else
                 using (Game cl = new Game("5 Skybox", true, 0, 0, true, 0, 4))
 #endif
@@ -25,7 +30,10 @@ namespace Skybox
                     cl.LockMouse = true;
 #endif
 
-                    cl.AddScene<TestScene3D>();
+                    GameResourceManager.RegisterLoader<LoaderCollada>();
+                    GameResourceManager.RegisterLoader<LoaderObj>();
+
+                    cl.SetScene<TestScene3D>();
 
                     cl.Run();
                 }

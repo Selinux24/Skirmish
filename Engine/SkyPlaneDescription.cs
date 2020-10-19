@@ -79,11 +79,8 @@ namespace Engine
         public SkyPlaneDescription()
             : base()
         {
-            this.Static = true;
-            this.CastShadow = false;
-            this.DeferredEnabled = true;
             this.DepthEnabled = false;
-            this.AlphaEnabled = false;
+            this.BlendMode = BlendModes.Opaque | BlendModes.Additive;
 
             this.MaxBrightness = 0.75f;
             this.MinBrightness = 0.15f;

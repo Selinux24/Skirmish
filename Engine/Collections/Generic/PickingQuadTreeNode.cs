@@ -1,7 +1,7 @@
 ﻿using SharpDX;
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.Collections.Generic
 {
@@ -57,7 +57,7 @@ namespace Engine.Collections.Generic
                     {
                         var tbox = BoundingBox.FromPoints(t.GetVertices());
 
-                        return Intersection.BoxContainsBox(ref bbox, ref tbox) != ContainmentType.Disjoint;
+                        return Intersection.BoxContainsBox(bbox, tbox) != ContainmentType.Disjoint;
                     })
                     .ToList(); //Break the reference
 
@@ -430,7 +430,7 @@ namespace Engine.Collections.Generic
         /// <returns>Returns true if picked position found</returns>
         public bool PickNearest(Ray ray, bool facingOnly, out Vector3 position, out T item)
         {
-            return this.PickNearest(ray, facingOnly, out position, out item, out float distance);
+            return this.PickNearest(ray, facingOnly, out position, out item, out _);
         }
         /// <summary>
         /// Pick nearest position
@@ -444,7 +444,7 @@ namespace Engine.Collections.Generic
         public bool PickNearest(Ray ray, bool facingOnly, out Vector3 position, out T item, out float distance)
         {
             position = Vector3.Zero;
-            item = default(T);
+            item = default;
             distance = float.MaxValue;
 
             if (this.Children == null)
@@ -484,24 +484,28 @@ namespace Engine.Collections.Generic
         private bool PickNearestItem(Ray ray, bool facingOnly, out Vector3 position, out T item, out float distance)
         {
             position = Vector3.Zero;
-            item = default(T);
+            item = default;
             distance = float.MaxValue;
 
-            if (this.Items.Any())
+            if (!this.Items.Any())
             {
-                var inBox = Intersection.RayIntersectsBox(ray, this.BoundingBox, out float d);
-                if (inBox)
-                {
-                    var inItem = Intersection.IntersectNearest(ray, this.Items, facingOnly, out Vector3 pos, out T tri, out d);
-                    if (inItem)
-                    {
-                        position = pos;
-                        item = tri;
-                        distance = d;
+                return false;
+            }
 
-                        return true;
-                    }
-                }
+            var inBox = Intersection.RayIntersectsBox(ray, this.BoundingBox, out _);
+            if (!inBox)
+            {
+                return false;
+            }
+
+            var inItem = Intersection.IntersectNearest(ray, this.Items, facingOnly, out Vector3 pos, out T tri, out float d);
+            if (inItem)
+            {
+                position = pos;
+                item = tri;
+                distance = d;
+
+                return true;
             }
 
             return false;
@@ -518,51 +522,38 @@ namespace Engine.Collections.Generic
         private bool PickNearestNode(Ray ray, bool facingOnly, out Vector3 position, out T item, out float distance)
         {
             position = Vector3.Zero;
-            item = default(T);
+            item = default;
             distance = float.MaxValue;
 
-            SortedDictionary<float, PickingQuadTreeNode<T>> boxHitsByDistance = new SortedDictionary<float, PickingQuadTreeNode<T>>();
-
-            #region Find children contacts by distance to hit in bounding box
-
-            foreach (var node in this.Children)
-            {
-                if (Intersection.RayIntersectsBox(ray, node.BoundingBox, out float d))
-                {
-                    while (boxHitsByDistance.ContainsKey(d))
-                    {
-                        // avoid duplicate keys
-                        d += 0.0001f;
-                    }
-
-                    boxHitsByDistance.Add(d, node);
-                }
-            }
-
-            #endregion
-
-            if (boxHitsByDistance.Count > 0)
+            var boxHitsByDistance = FindContacts(ray);
+            if (boxHitsByDistance.Any())
             {
                 bool intersect = false;
 
                 #region Find closest item node by node, from closest to farthest
 
                 Vector3 bestHit = Vector3.Zero;
-                T bestTri = default(T);
+                T bestTri = default;
                 float bestD = float.MaxValue;
 
                 foreach (var node in boxHitsByDistance.Values)
                 {
                     // check that the intersection is closer than the nearest intersection found thus far
-                    var inNode = node.PickNearest(ray, facingOnly, out Vector3 thisHit, out T thisTri, out float thisD);
-                    if (inNode && thisD < bestD)
+                    var inItem = node.PickNearest(ray, facingOnly, out Vector3 thisHit, out T thisTri, out float thisD);
+                    if (!inItem)
+                    {
+                        continue;
+                    }
+
+                    if (thisD < bestD)
                     {
                         // if we have found a closer intersection store the new closest intersection
                         bestHit = thisHit;
                         bestTri = thisTri;
                         bestD = thisD;
-                        intersect = true;
                     }
+
+                    intersect = true;
                 }
 
                 if (intersect)
@@ -578,6 +569,31 @@ namespace Engine.Collections.Generic
             }
 
             return false;
+        }
+        /// <summary>
+        /// Finds children contacts by distance to hit in bounding box
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <returns>Returns a sorted by distance node list</returns>
+        private SortedDictionary<float, PickingQuadTreeNode<T>> FindContacts(Ray ray)
+        {
+            SortedDictionary<float, PickingQuadTreeNode<T>> boxHitsByDistance = new SortedDictionary<float, PickingQuadTreeNode<T>>();
+
+            foreach (var node in this.Children)
+            {
+                if (Intersection.RayIntersectsBox(ray, node.BoundingBox, out float d))
+                {
+                    while (boxHitsByDistance.ContainsKey(d))
+                    {
+                        // avoid duplicate keys
+                        d += 0.0001f;
+                    }
+
+                    boxHitsByDistance.Add(d, node);
+                }
+            }
+
+            return boxHitsByDistance;
         }
 
         /// <summary>
@@ -602,7 +618,7 @@ namespace Engine.Collections.Generic
         /// <returns>Returns true if picked position found</returns>
         public bool PickFirst(Ray ray, bool facingOnly, out Vector3 position, out T item)
         {
-            return this.PickFirst(ray, facingOnly, out position, out item, out float distance);
+            return this.PickFirst(ray, facingOnly, out position, out item, out _);
         }
         /// <summary>
         /// Pick first position
@@ -616,7 +632,7 @@ namespace Engine.Collections.Generic
         public bool PickFirst(Ray ray, bool facingOnly, out Vector3 position, out T item, out float distance)
         {
             position = Vector3.Zero;
-            item = default(T);
+            item = default;
             distance = float.MaxValue;
 
             if (this.Children == null)
@@ -656,24 +672,28 @@ namespace Engine.Collections.Generic
         private bool PickFirstItem(Ray ray, bool facingOnly, out Vector3 position, out T item, out float distance)
         {
             position = Vector3.Zero;
-            item = default(T);
+            item = default;
             distance = float.MaxValue;
 
-            if (this.Items.Any())
+            if (!this.Items.Any())
             {
-                var inBox = Intersection.RayIntersectsBox(ray, this.BoundingBox, out float d);
-                if (inBox)
-                {
-                    var inItem = Intersection.IntersectFirst(ray, this.Items, facingOnly, out Vector3 pos, out T tri, out d);
-                    if (inItem)
-                    {
-                        position = pos;
-                        item = tri;
-                        distance = d;
+                return false;
+            }
 
-                        return true;
-                    }
-                }
+            var inBox = Intersection.RayIntersectsBox(ray, this.BoundingBox, out _);
+            if (!inBox)
+            {
+                return false;
+            }
+
+            var inItem = Intersection.IntersectFirst(ray, this.Items, facingOnly, out Vector3 pos, out T tri, out float d);
+            if (inItem)
+            {
+                position = pos;
+                item = tri;
+                distance = d;
+
+                return true;
             }
 
             return false;
@@ -690,24 +710,28 @@ namespace Engine.Collections.Generic
         private bool PickFirstNode(Ray ray, bool facingOnly, out Vector3 position, out T item, out float distance)
         {
             position = Vector3.Zero;
-            item = default(T);
+            item = default;
             distance = float.MaxValue;
 
             foreach (var node in this.Children)
             {
-                var inBox = Intersection.RayIntersectsBox(ray, node.BoundingBox, out float d);
-                if (inBox)
+                var inBox = Intersection.RayIntersectsBox(ray, node.BoundingBox, out _);
+                if (!inBox)
                 {
-                    var inItem = node.PickFirst(ray, facingOnly, out Vector3 thisHit, out T thisTri, out float thisD);
-                    if (inItem)
-                    {
-                        position = thisHit;
-                        item = thisTri;
-                        distance = thisD;
-
-                        return true;
-                    }
+                    continue;
                 }
+
+                var inItem = node.PickFirst(ray, facingOnly, out Vector3 thisHit, out T thisTri, out float thisD);
+                if (!inItem)
+                {
+                    continue;
+                }
+
+                position = thisHit;
+                item = thisTri;
+                distance = thisD;
+
+                return true;
             }
 
             return false;
@@ -735,7 +759,7 @@ namespace Engine.Collections.Generic
         /// <returns>Returns true if picked position found</returns>
         public bool PickAll(Ray ray, bool facingOnly, out Vector3[] positions, out T[] items)
         {
-            return this.PickAll(ray, facingOnly, out positions, out items, out float[] distances);
+            return this.PickAll(ray, facingOnly, out positions, out items, out _);
         }
         /// <summary>
         /// Pick all position
@@ -792,21 +816,25 @@ namespace Engine.Collections.Generic
             items = null;
             distances = null;
 
-            if (this.Items.Any())
+            if (!this.Items.Any())
             {
-                var inBox = Intersection.RayIntersectsBox(ray, this.BoundingBox, out float d);
-                if (inBox)
-                {
-                    var inItem = Intersection.IntersectAll(ray, this.Items, facingOnly, out Vector3[] pos, out T[] tri, out float[] ds);
-                    if (inItem)
-                    {
-                        positions = pos;
-                        items = tri;
-                        distances = ds;
+                return false;
+            }
 
-                        return true;
-                    }
-                }
+            var inBox = Intersection.RayIntersectsBox(ray, this.BoundingBox, out _);
+            if (!inBox)
+            {
+                return false;
+            }
+
+            var inItem = Intersection.IntersectAll(ray, this.Items, facingOnly, out Vector3[] pos, out T[] tri, out float[] ds);
+            if (inItem)
+            {
+                positions = pos;
+                items = tri;
+                distances = ds;
+
+                return true;
             }
 
             return false;
@@ -835,24 +863,28 @@ namespace Engine.Collections.Generic
             foreach (var node in this.Children)
             {
                 var inBox = Intersection.RayIntersectsBox(ray, node.BoundingBox, out float d);
-                if (inBox)
+                if (!inBox)
                 {
-                    var inItem = node.PickAll(ray, facingOnly, out Vector3[] thisHits, out T[] thisTris, out float[] thisDs);
-                    if (inItem)
-                    {
-                        for (int i = 0; i < thisHits.Length; i++)
-                        {
-                            if (!hits.Contains(thisHits[i]))
-                            {
-                                hits.Add(thisHits[i]);
-                                tris.Add(thisTris[i]);
-                                dists.Add(thisDs[i]);
-                            }
-                        }
+                    continue;
+                }
 
-                        intersect = true;
+                var inItem = node.PickAll(ray, facingOnly, out Vector3[] thisHits, out T[] thisTris, out float[] thisDs);
+                if (!inItem)
+                {
+                    continue;
+                }
+
+                for (int i = 0; i < thisHits.Length; i++)
+                {
+                    if (!hits.Contains(thisHits[i]))
+                    {
+                        hits.Add(thisHits[i]);
+                        tris.Add(thisTris[i]);
+                        dists.Add(thisDs[i]);
                     }
                 }
+
+                intersect = true;
             }
 
             positions = hits.ToArray();
@@ -926,7 +958,7 @@ namespace Engine.Collections.Generic
         /// </summary>
         /// <param name="volume">Volume</param>
         /// <returns>Returns the leaf nodes contained into the volume</returns>
-        public IEnumerable<PickingQuadTreeNode<T>> GetNodesInVolume(ICullingVolume volume)
+        public IEnumerable<PickingQuadTreeNode<T>> GetNodesInVolume(IIntersectionVolume volume)
         {
             List<PickingQuadTreeNode<T>> nodes = new List<PickingQuadTreeNode<T>>();
 

@@ -46,7 +46,7 @@ namespace Engine
         /// <param name="ray">Picking ray</param>
         /// <param name="results">Picking results</param>
         /// <returns>Returns true if ground position found</returns>
-        bool PickAll(Ray ray, out PickingResult<T>[] results);
+        bool PickAll(Ray ray, out IEnumerable<PickingResult<T>> results);
         /// <summary>
         /// Gets all picking position of giving ray
         /// </summary>
@@ -54,24 +54,32 @@ namespace Engine
         /// <param name="rayPickingParams">Ray picking params</param>
         /// <param name="results">Picking results</param>
         /// <returns>Returns true if ground position found</returns>
-        bool PickAll(Ray ray, RayPickingParams rayPickingParams, out PickingResult<T>[] results);
+        bool PickAll(Ray ray, RayPickingParams rayPickingParams, out IEnumerable<PickingResult<T>> results);
 
         /// <summary>
         /// Gets bounding sphere
         /// </summary>
+        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
-        BoundingSphere GetBoundingSphere();
+        BoundingSphere GetBoundingSphere(bool refresh = false);
         /// <summary>
         /// Gets bounding box
         /// </summary>
+        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
-        BoundingBox GetBoundingBox();
+        BoundingBox GetBoundingBox(bool refresh = false);
+        /// <summary>
+        /// Gets oriented bounding box
+        /// </summary>
+        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
+        /// <returns>Returns oriented bounding box. Empty if the vertex type hasn't position channel</returns>
+        OrientedBoundingBox GetOrientedBoundingBox(bool refresh = false);
 
         /// <summary>
         /// Gets the volume geometry of the instance
         /// </summary>
         /// <param name="full">Gets full geometry</param>
         /// <returns>Returns the volume geometry of the instance</returns>
-        IEnumerable<Triangle> GetVolume(bool full);
+        IEnumerable<T> GetVolume(bool full);
     }
 }

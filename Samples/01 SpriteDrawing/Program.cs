@@ -1,6 +1,5 @@
 ﻿using Engine;
 using System;
-using System.IO;
 
 namespace SpriteDrawing
 {
@@ -9,23 +8,20 @@ namespace SpriteDrawing
         [STAThread]
         static void Main()
         {
-            try
-            {
 #if DEBUG
-                using (Game cl = new Game("1 SpriteDrawing", false, 1600, 900, true, 0, 0))
-#else
-                using (Game cl = new Game("1 SpriteDrawing", true, 0, 0, true, 0, 4))
-#endif
-                {
-                    cl.AddScene<TestScene>();
+            int sWidth = (int)(System.Windows.Forms.SystemInformation.VirtualScreen.Width * .8f);
+            int sHeight = (int)(System.Windows.Forms.SystemInformation.VirtualScreen.Height * .8f);
 
-                    cl.Run();
-                }
-            }
-            catch (Exception ex)
+            using (Game cl = new Game("1 SpriteDrawing", false, sWidth, sHeight, true, 0, 0))
+#else
+            using (Game cl = new Game("1 SpriteDrawing", true, 0, 0, true, 0, 4))
+#endif
             {
-                File.WriteAllText("dump.txt", ex.ToString());
+                cl.SetScene<TestScene>();
+
+                cl.Run();
             }
+
         }
     }
 }

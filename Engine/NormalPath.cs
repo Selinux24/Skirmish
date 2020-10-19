@@ -1,4 +1,6 @@
 ﻿using SharpDX;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine
 {
@@ -66,16 +68,18 @@ namespace Engine
         /// </summary>
         /// <param name="checkPoints">Check-points</param>
         /// <param name="normals">Normals</param>
-        public NormalPath(Vector3[] checkPoints, Vector3[] normals)
+        public NormalPath(IEnumerable<Vector3> checkPoints, IEnumerable<Vector3> normals)
         {
+            var points = checkPoints.ToArray();
+
             float length = 0;
-            for (int i = 1; i < checkPoints.Length; i++)
+            for (int i = 1; i < points.Length; i++)
             {
-                length += Vector3.Distance(checkPoints[i], checkPoints[i - 1]);
+                length += Vector3.Distance(points[i], points[i - 1]);
             }
 
-            this.checkPoints = checkPoints;
-            this.normals = normals;
+            this.checkPoints = points;
+            this.normals = normals.ToArray();
             this.Length = length;
         }
 
@@ -186,6 +190,25 @@ namespace Engine
             {
                 return Vector3.Zero;
             }
+        }
+        /// <summary>
+        /// Samples current path in a vector array
+        /// </summary>
+        /// <param name="sampleTime">Time delta</param>
+        /// <returns>Returns a vector array</returns>
+        public IEnumerable<Vector3> SamplePath(float sampleTime)
+        {
+            List<Vector3> returnPath = new List<Vector3>();
+
+            float time = 0;
+            while (time < this.Length)
+            {
+                returnPath.Add(this.GetPosition(time));
+
+                time += sampleTime;
+            }
+
+            return returnPath.ToArray();
         }
     }
 }

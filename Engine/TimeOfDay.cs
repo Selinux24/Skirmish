@@ -251,7 +251,7 @@ namespace Engine
         /// Sets time of day
         /// </summary>
         /// <param name="time">Time (0 to 1)</param>
-        /// <param name="update">Sets wheter update internal state or not</param>
+        /// <param name="update">Sets whether update internal state or not</param>
         public void SetTimeOfDay(float time, bool update = false)
         {
             this.TimeOfDayValue = Math.Abs(time) % 1.0f;
@@ -265,17 +265,62 @@ namespace Engine
         /// Sets time of day
         /// </summary>
         /// <param name="time">Time</param>
-        /// <param name="update">Sets wheter update internal state or not</param>
+        /// <param name="update">Sets whether update internal state or not</param>
         public void SetTimeOfDay(TimeSpan time, bool update = false)
         {
             this.SetTimeOfDay((float)time.TotalDays % 1.0f, update);
+        }
+        /// <summary>
+        /// Sets time of day
+        /// </summary>
+        /// <param name="ticks">Ticks</param>
+        /// <param name="update">Sets whether update internal state or not</param>
+        public void SetTimeOfDay(long ticks, bool update = false)
+        {
+            SetTimeOfDay(new TimeSpan(ticks), update);
+        }
+        /// <summary>
+        /// Sets time of day
+        /// </summary>
+        /// <param name="hours">Hours</param>
+        /// <param name="minutes">Minutes</param>
+        /// <param name="seconds">Seconds</param>
+        /// <param name="update">Sets whether update internal state or not</param>
+        public void SetTimeOfDay(int hours, int minutes, int seconds, bool update = false)
+        {
+            SetTimeOfDay(new TimeSpan(hours, minutes, seconds), update);
+        }
+        /// <summary>
+        /// Sets time of day
+        /// </summary>
+        /// <param name="days">Days</param>
+        /// <param name="hours">Hours</param>
+        /// <param name="minutes">Minutes</param>
+        /// <param name="seconds">Seconds</param>
+        /// <param name="update">Sets whether update internal state or not</param>
+        public void SetTimeOfDay(int days, int hours, int minutes, int seconds, bool update = false)
+        {
+            SetTimeOfDay(new TimeSpan(days, hours, minutes, seconds), update);
+        }
+        /// <summary>
+        /// Sets time of day
+        /// </summary>
+        /// <param name="days">Days</param>
+        /// <param name="hours">Hours</param>
+        /// <param name="minutes">Minutes</param>
+        /// <param name="seconds">Seconds</param>
+        /// <param name="milliseconds">Milliseconds</param>
+        /// <param name="update">Sets whether update internal state or not</param>
+        public void SetTimeOfDay(int days, int hours, int minutes, int seconds, int milliseconds, bool update = false)
+        {
+            SetTimeOfDay(new TimeSpan(days, hours, minutes, seconds, milliseconds), update);
         }
         /// <summary>
         /// Begins animation cycle
         /// </summary>
         /// <param name="startTime">Start time</param>
         /// <param name="speed">Animation speed</param>
-        public void BeginAnimation(float startTime, float speed)
+        public void BeginAnimation(float startTime, float speed = 1f)
         {
             this.AnimateSpeed = speed * 0.001f;
             this.Animate = true;
@@ -287,12 +332,57 @@ namespace Engine
         /// </summary>
         /// <param name="startTime">Start time</param>
         /// <param name="speed">Animation speed</param>
-        public void BeginAnimation(TimeSpan startTime, float speed)
+        public void BeginAnimation(TimeSpan startTime, float speed = 1f)
         {
             this.AnimateSpeed = speed * 0.001f;
             this.Animate = true;
 
             this.SetTimeOfDay(startTime, true);
+        }
+        /// <summary>
+        /// Begins animation cycle
+        /// </summary>
+        /// <param name="ticks">Ticks</param>
+        /// <param name="speed">Animation speed</param>
+        public void BeginAnimation(long ticks, float speed = 1f)
+        {
+            BeginAnimation(new TimeSpan(ticks), speed);
+        }
+        /// <summary>
+        /// Begins animation cycle
+        /// </summary>
+        /// <param name="hours">Hours</param>
+        /// <param name="minutes">Minutes</param>
+        /// <param name="seconds">Seconds</param>
+        /// <param name="speed">Animation speed</param>
+        public void BeginAnimation(int hours, int minutes, int seconds, float speed = 1f)
+        {
+            BeginAnimation(new TimeSpan(hours, minutes, seconds), speed);
+        }
+        /// <summary>
+        /// Begins animation cycle
+        /// </summary>
+        /// <param name="days">Days</param>
+        /// <param name="hours">Hours</param>
+        /// <param name="minutes">Minutes</param>
+        /// <param name="seconds">Seconds</param>
+        /// <param name="speed">Animation speed</param>
+        public void BeginAnimation(int days, int hours, int minutes, int seconds, float speed = 1f)
+        {
+            BeginAnimation(new TimeSpan(days, hours, minutes, seconds), speed);
+        }
+        /// <summary>
+        /// Begins animation cycle
+        /// </summary>
+        /// <param name="days">Days</param>
+        /// <param name="hours">Hours</param>
+        /// <param name="minutes">Minutes</param>
+        /// <param name="seconds">Seconds</param>
+        /// <param name="milliseconds">Milliseconds</param>
+        /// <param name="speed">Animation speed</param>
+        public void BeginAnimation(int days, int hours, int minutes, int seconds, int milliseconds, float speed = 1f)
+        {
+            BeginAnimation(new TimeSpan(days, hours, minutes, seconds, milliseconds), speed);
         }
 
         /// <summary>

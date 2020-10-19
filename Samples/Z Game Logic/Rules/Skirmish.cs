@@ -212,9 +212,8 @@ namespace GameLogic.Rules
                 else
                 {
                     this.currentSoldier = Array.IndexOf(this.Soldiers, selectables[0]);
+                    this.PrevSoldierIndex();
                 }
-
-                this.PrevSoldierIndex();
             }
 
             return this.CurrentSoldier;
@@ -355,7 +354,7 @@ namespace GameLogic.Rules
         public override string ToString()
         {
             return string.Format(
-                "Battle -> {0} teams. Turn {1} | Phase {2}. Melees {3}",
+                "Battle -> {0} teams. Turn {1} ++ Phase {2}. Melees {3}",
                 this.teams.Count,
                 this.currentTurn,
                 this.CurrentPhase,

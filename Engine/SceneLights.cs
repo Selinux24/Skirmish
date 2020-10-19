@@ -15,8 +15,9 @@ namespace Engine
         /// <summary>
         /// Create default set of lights
         /// </summary>
+        /// <param name="scene">Scene</param>
         /// <returns>Returns default set of ligths</returns>
-        public static SceneLights CreateDefault()
+        public static SceneLights CreateDefault(Scene scene)
         {
             var lights = new[]
             {
@@ -25,7 +26,7 @@ namespace Engine
                 SceneLightDirectional.BackLight,
             };
 
-            var defLights = new SceneLights();
+            var defLights = new SceneLights(scene);
 
             defLights.AddRange(lights);
 
@@ -35,84 +36,88 @@ namespace Engine
         #endregion
 
         /// <summary>
+        /// Scene
+        /// </summary>
+        private readonly Scene scene = null;
+        /// <summary>
         /// Directional lights
         /// </summary>
-        private readonly List<SceneLightDirectional> directionalLights = new List<SceneLightDirectional>();
+        private readonly List<ISceneLightDirectional> directionalLights = new List<ISceneLightDirectional>();
         /// <summary>
         /// Point lights
         /// </summary>
-        private readonly List<SceneLightPoint> pointLights = new List<SceneLightPoint>();
+        private readonly List<ISceneLightPoint> pointLights = new List<ISceneLightPoint>();
         /// <summary>
         /// Spot lights
         /// </summary>
-        private readonly List<SceneLightSpot> spotLights = new List<SceneLightSpot>();
+        private readonly List<ISceneLightSpot> spotLights = new List<ISceneLightSpot>();
         /// <summary>
         /// Visible lights
         /// </summary>
-        private readonly List<SceneLight> visibleLights = new List<SceneLight>();
+        private readonly List<ISceneLight> visibleLights = new List<ISceneLight>();
 
         /// <summary>
         /// Gets or sets the hemispheric ambient light
         /// </summary>
-        public SceneLightHemispheric HemisphericLigth { get; set; }
+        public ISceneLightHemispheric HemisphericLigth { get; set; }
         /// <summary>
         /// Gets or sets directional lights
         /// </summary>
-        public SceneLightDirectional[] DirectionalLights
+        public ISceneLightDirectional[] DirectionalLights
         {
             get
             {
-                return this.directionalLights.ToArray();
+                return directionalLights.ToArray();
             }
         }
         /// <summary>
         /// Gets or sets point lights
         /// </summary>
-        public SceneLightPoint[] PointLights
+        public ISceneLightPoint[] PointLights
         {
             get
             {
-                return this.pointLights.ToArray();
+                return pointLights.ToArray();
             }
         }
         /// <summary>
         /// Gets or sets spot lights
         /// </summary>
-        public SceneLightSpot[] SpotLights
+        public ISceneLightSpot[] SpotLights
         {
             get
             {
-                return this.spotLights.ToArray();
+                return spotLights.ToArray();
             }
         }
         /// <summary>
         /// Key light
         /// </summary>
-        public SceneLightDirectional KeyLight
+        public ISceneLightDirectional KeyLight
         {
             get
             {
-                return this.DirectionalLights.Length > 0 ? this.DirectionalLights[0] : null;
+                return DirectionalLights.Length > 0 ? DirectionalLights[0] : null;
             }
         }
         /// <summary>
         /// Fill light
         /// </summary>
-        public SceneLightDirectional FillLight
+        public ISceneLightDirectional FillLight
         {
             get
             {
-                return this.DirectionalLights.Length > 1 ? this.DirectionalLights[1] : null;
+                return DirectionalLights.Length > 1 ? DirectionalLights[1] : null;
             }
         }
         /// <summary>
         /// Back light
         /// </summary>
-        public SceneLightDirectional BackLight
+        public ISceneLightDirectional BackLight
         {
             get
             {
-                return this.DirectionalLights.Length > 2 ? this.DirectionalLights[2] : null;
+                return DirectionalLights.Length > 2 ? DirectionalLights[2] : null;
             }
         }
         /// <summary>
@@ -147,19 +152,24 @@ namespace Engine
         /// - Spot lights
         /// Returns the first occurrence using that order
         /// </remarks>
-        public SceneLight this[string name]
+        public ISceneLight this[string name]
         {
             get
             {
-                SceneLight light = null;
+                ISceneLight light = null;
 
-                light = this.directionalLights.Find(l => string.Equals(l.Name, name, StringComparison.OrdinalIgnoreCase));
+                if (string.Equals(HemisphericLigth?.Name, name, StringComparison.OrdinalIgnoreCase))
+                {
+                    return HemisphericLigth;
+                }
+
+                light = directionalLights.Find(l => string.Equals(l.Name, name, StringComparison.OrdinalIgnoreCase));
                 if (light != null) return light;
 
-                light = this.pointLights.Find(l => string.Equals(l.Name, name, StringComparison.OrdinalIgnoreCase));
+                light = pointLights.Find(l => string.Equals(l.Name, name, StringComparison.OrdinalIgnoreCase));
                 if (light != null) return light;
 
-                light = this.spotLights.Find(l => string.Equals(l.Name, name, StringComparison.OrdinalIgnoreCase));
+                light = spotLights.Find(l => string.Equals(l.Name, name, StringComparison.OrdinalIgnoreCase));
                 if (light != null) return light;
 
                 return null;
@@ -185,17 +195,20 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        public SceneLights()
+        /// <param name="scene">Scene</param>
+        public SceneLights(Scene scene)
         {
-            this.FogStart = 0f;
-            this.FogRange = 0;
-            this.FarLightsDistance = 1000000f;
+            this.scene = scene;
 
-            this.SunColor = Color.White;
+            FogStart = 0f;
+            FogRange = 0;
+            FarLightsDistance = 1000000f;
 
-            this.UseSunColorPalette = true;
-            this.SunColorPalette = new List<Tuple<float, Color4>>();
-            this.SunColorPalette.AddRange(new[]
+            SunColor = Color.White;
+
+            UseSunColorPalette = true;
+            SunColorPalette = new List<Tuple<float, Color4>>();
+            SunColorPalette.AddRange(new[]
             {
                 new Tuple<float, Color4>(MathUtil.Pi * -1.00f, Color.Black),
                 new Tuple<float, Color4>(MathUtil.Pi * 0.02f, Color.Orange),
@@ -210,246 +223,268 @@ namespace Engine
         /// Sets the hemispheric ambient light
         /// </summary>
         /// <param name="hemiLight">Hemispheric light</param>
-        public void SetAmbient(SceneLightHemispheric hemiLight)
+        public void SetAmbient(ISceneLightHemispheric hemiLight)
         {
-            this.HemisphericLigth = hemiLight;
+            HemisphericLigth = hemiLight;
         }
         /// <summary>
         /// Adds the specified new light to colection
         /// </summary>
         /// <param name="light">Directional light</param>
-        public void Add(SceneLightDirectional light)
+        public void Add(ISceneLightDirectional light)
         {
-            this.directionalLights.Add(light);
+            directionalLights.Add(light);
         }
         /// <summary>
         /// Adds the specified new light to colection
         /// </summary>
         /// <param name="light">Point light</param>
-        public void Add(SceneLightPoint light)
+        public void Add(ISceneLightPoint light)
         {
-            this.pointLights.Add(light);
+            pointLights.Add(light);
         }
         /// <summary>
         /// Adds the specified new light to colection
         /// </summary>
         /// <param name="light">Spot light</param>
-        public void Add(SceneLightSpot light)
+        public void Add(ISceneLightSpot light)
         {
-            this.spotLights.Add(light);
+            spotLights.Add(light);
+        }
+        /// <summary>
+        /// Adds the specified new light to colection
+        /// </summary>
+        /// <param name="light">Light</param>
+        public void Add(ISceneLight light)
+        {
+            if (light is ISceneLightHemispheric hemLight) HemisphericLigth = hemLight;
+            else if (light is ISceneLightDirectional dirLight) directionalLights.Add(dirLight);
+            else if (light is ISceneLightPoint pointLight) pointLights.Add(pointLight);
+            else if (light is ISceneLightSpot spotLight) spotLights.Add(spotLight);
         }
         /// <summary>
         /// Adds the specified light list to colection
         /// </summary>
         /// <param name="sceneLights">Lights</param>
-        public void AddRange(IEnumerable<SceneLight> sceneLights)
+        public void AddRange(IEnumerable<ISceneLight> sceneLights)
         {
-            if (sceneLights != null)
+            if (sceneLights?.Any() != true)
             {
-                foreach (var light in sceneLights)
-                {
-                    if (light is SceneLightDirectional dirLight) this.directionalLights.Add(dirLight);
-                    else if (light is SceneLightPoint pointLight) this.pointLights.Add(pointLight);
-                    else if (light is SceneLightSpot spotLight) this.spotLights.Add(spotLight);
-                }
+                return;
+            }
+
+            foreach (var light in sceneLights)
+            {
+                Add(light);
             }
         }
         /// <summary>
         /// Removes the specified light
         /// </summary>
         /// <param name="light">Directional light</param>
-        public void Remove(SceneLightDirectional light)
+        public void Remove(ISceneLightDirectional light)
         {
-            if (this.directionalLights.Contains(light))
+            if (directionalLights.Contains(light))
             {
-                this.directionalLights.Remove(light);
+                directionalLights.Remove(light);
             }
         }
         /// <summary>
         /// Removes the specified light
         /// </summary>
         /// <param name="light">Point light</param>
-        public void Remove(SceneLightPoint light)
+        public void Remove(ISceneLightPoint light)
         {
-            if (this.pointLights.Contains(light))
+            if (pointLights.Contains(light))
             {
-                this.pointLights.Remove(light);
+                pointLights.Remove(light);
             }
         }
         /// <summary>
         /// Removes the specified light
         /// </summary>
         /// <param name="light">Spot light</param>
-        public void Remove(SceneLightSpot light)
+        public void Remove(ISceneLightSpot light)
         {
-            if (this.spotLights.Contains(light))
+            if (spotLights.Contains(light))
             {
-                this.spotLights.Remove(light);
+                spotLights.Remove(light);
             }
+        }
+        /// <summary>
+        /// Removes the specified light
+        /// </summary>
+        /// <param name="light">Light</param>
+        public void Remove(ISceneLight light)
+        {
+            if (light == HemisphericLigth) HemisphericLigth = null;
+            else if (light is ISceneLightDirectional dirLight) Remove(dirLight);
+            else if (light is ISceneLightPoint pointLight) Remove(pointLight);
+            else if (light is ISceneLightSpot spotLight) Remove(spotLight);
         }
         /// <summary>
         /// Clear all lights
         /// </summary>
         public void Clear()
         {
-            this.ClearDirectionalLights();
-            this.ClearPointLights();
-            this.ClearSpotLights();
+            HemisphericLigth = null;
+            ClearDirectionalLights();
+            ClearPointLights();
+            ClearSpotLights();
         }
         /// <summary>
         /// Clear all directional lights
         /// </summary>
         public void ClearDirectionalLights()
         {
-            this.directionalLights.Clear();
+            directionalLights.Clear();
         }
         /// <summary>
         /// Clear all point lights
         /// </summary>
         public void ClearPointLights()
         {
-            this.pointLights.Clear();
+            pointLights.Clear();
         }
         /// <summary>
         /// Clear all spot lights
         /// </summary>
         public void ClearSpotLights()
         {
-            this.spotLights.Clear();
+            spotLights.Clear();
         }
         /// <summary>
         /// Cull test
         /// </summary>
         /// <param name="volume">Volume</param>
         /// <param name="viewerPosition">Viewer position</param>
-        public void Cull(ICullingVolume volume, Vector3 viewerPosition)
+        public void Cull(IIntersectionVolume volume, Vector3 viewerPosition)
         {
-            this.visibleLights.Clear();
+            visibleLights.Clear();
 
-            this.CullDirectionalLights();
-            this.CullPointLights(volume, viewerPosition);
-            this.CullSpotLights(volume, viewerPosition);
+            visibleLights.AddRange(CullDirectionalLights());
+            visibleLights.AddRange(CullPointLights(volume, viewerPosition));
+            visibleLights.AddRange(CullSpotLights(volume, viewerPosition));
         }
         /// <summary>
         /// Cull test for directional lighs
         /// </summary>
         /// <param name="volume">Volume</param>
         /// <param name="viewerPosition">Viewer position</param>
-        private void CullDirectionalLights()
+        private IEnumerable<ISceneLight> CullDirectionalLights()
         {
-            var dLights = this.directionalLights.FindAll(l => l.Enabled);
-            if (dLights.Count > 0)
-            {
-                this.visibleLights.AddRange(dLights);
-            }
+            return directionalLights.Where(l => l.Enabled).ToArray();
         }
         /// <summary>
         /// Cull test for point lights
         /// </summary>
         /// <param name="volume">Volume</param>
         /// <param name="viewerPosition">Viewer position</param>
-        private void CullPointLights(ICullingVolume volume, Vector3 viewerPosition)
+        private IEnumerable<ISceneLight> CullPointLights(IIntersectionVolume volume, Vector3 viewerPosition)
         {
-            var pLights = this.pointLights.FindAll(l =>
-            {
-                if (l.Enabled && volume.Contains(l.BoundingSphere) != ContainmentType.Disjoint)
+            var pLights = pointLights
+                .Where(l =>
                 {
-                    float d = Vector3.Distance(viewerPosition, l.Position);
+                    if (l.Enabled && volume.Contains(l.BoundingSphere) != ContainmentType.Disjoint)
+                    {
+                        float d = Vector3.DistanceSquared(viewerPosition, l.Position);
 
-                    return (l.Radius / d) >= (1f / GameEnvironment.LODDistanceLow);
-                }
+                        return (l.Radius / d) >= (1f / GameEnvironment.LODDistanceLow);
+                    }
 
-                return false;
-            });
-            if (pLights.Count > 0)
+                    return false;
+                })
+                .ToList();
+
+            if (pLights.Any())
             {
                 pLights.Sort((l1, l2) =>
                 {
-                    float d1 = Vector3.Distance(viewerPosition, l1.Position);
-                    float d2 = Vector3.Distance(viewerPosition, l2.Position);
+                    float d1 = Vector3.DistanceSquared(viewerPosition, l1.Position);
+                    float d2 = Vector3.DistanceSquared(viewerPosition, l2.Position);
 
-                    float f1 = l1.Radius / d1 == 0 ? 1 : d1;
-                    float f2 = l2.Radius / d2 == 0 ? 1 : d2;
+                    float f1 = l1.Radius / (d1 == 0 ? 1 : d1);
+                    float f2 = l2.Radius / (d2 == 0 ? 1 : d2);
 
                     return f1.CompareTo(f2);
                 });
-
-                this.visibleLights.AddRange(pLights);
             }
+
+            return pLights;
         }
         /// <summary>
         /// Cull test for spot lights
         /// </summary>
         /// <param name="volume">Volume</param>
         /// <param name="viewerPosition">Viewer position</param>
-        private void CullSpotLights(ICullingVolume volume, Vector3 viewerPosition)
+        private IEnumerable<ISceneLight> CullSpotLights(IIntersectionVolume volume, Vector3 viewerPosition)
         {
-            var sLights = this.spotLights.FindAll(l =>
-            {
-                if (l.Enabled && volume.Contains(l.BoundingSphere) != ContainmentType.Disjoint)
+            var sLights = spotLights
+                .Where(l =>
                 {
-                    float d = Vector3.Distance(viewerPosition, l.Position);
+                    if (l.Enabled && volume.Contains(l.BoundingSphere) != ContainmentType.Disjoint)
+                    {
+                        float d = Vector3.DistanceSquared(viewerPosition, l.Position);
 
-                    return (l.Radius / d) >= (1f / GameEnvironment.LODDistanceLow);
-                }
+                        return (l.Radius / d) >= (1f / GameEnvironment.LODDistanceLow);
+                    }
 
-                return false;
-            });
-            if (sLights.Count > 0)
+                    return false;
+                })
+                .ToList();
+
+            if (sLights.Any())
             {
                 sLights.Sort((l1, l2) =>
                 {
-                    float d1 = Vector3.Distance(viewerPosition, l1.Position);
-                    float d2 = Vector3.Distance(viewerPosition, l2.Position);
+                    float d1 = Vector3.DistanceSquared(viewerPosition, l1.Position);
+                    float d2 = Vector3.DistanceSquared(viewerPosition, l2.Position);
 
-                    float f1 = l1.Radius / d1 == 0 ? 1 : d1;
-                    float f2 = l2.Radius / d2 == 0 ? 1 : d2;
+                    float f1 = l1.Radius / (d1 == 0 ? 1 : d1);
+                    float f2 = l2.Radius / (d2 == 0 ? 1 : d2);
 
                     return f1.CompareTo(f2);
                 });
-
-                this.visibleLights.AddRange(sLights);
             }
+
+            return sLights;
         }
         /// <summary>
         /// Gets the visible hemispheric light
         /// </summary>
         /// <returns>Returns the visible hemispheric light</returns>
-        public SceneLightHemispheric GetVisibleHemisphericLight()
+        public ISceneLightHemispheric GetVisibleHemisphericLight()
         {
-            return this.HemisphericLigth != null && this.HemisphericLigth.Enabled ? this.HemisphericLigth : null;
+            return HemisphericLigth != null && HemisphericLigth.Enabled ? HemisphericLigth : null;
         }
         /// <summary>
         /// Gets the visible directional lights
         /// </summary>
         /// <returns>Returns the visible directional lights array</returns>
-        public IEnumerable<SceneLightDirectional> GetVisibleDirectionalLights()
+        public IEnumerable<ISceneLightDirectional> GetVisibleDirectionalLights()
         {
-            return this.visibleLights
-                .FindAll(l => l is SceneLightDirectional)
-                .Cast<SceneLightDirectional>()
+            return visibleLights
+                .OfType<SceneLightDirectional>()
                 .ToArray();
         }
         /// <summary>
         /// Gets the visible point lights
         /// </summary>
         /// <returns>Returns the visible point lights array</returns>
-        public IEnumerable<SceneLightPoint> GetVisiblePointLights()
+        public IEnumerable<ISceneLightPoint> GetVisiblePointLights()
         {
-            return this.visibleLights
-                .FindAll(l => l is SceneLightPoint)
-                .Cast<SceneLightPoint>()
+            return visibleLights
+                .OfType<SceneLightPoint>()
                 .ToArray();
         }
         /// <summary>
         /// Gets the visible spot lights
         /// </summary>
         /// <returns>Returns the visible spot lights array</returns>
-        public IEnumerable<SceneLightSpot> GetVisibleSpotLights()
+        public IEnumerable<ISceneLightSpot> GetVisibleSpotLights()
         {
-            return this.visibleLights
-                .FindAll(l => l is SceneLightSpot)
-                .Cast<SceneLightSpot>()
+            return visibleLights
+                .OfType<SceneLightSpot>()
                 .ToArray();
         }
 
@@ -459,9 +494,9 @@ namespace Engine
         /// <returns>Returns a light collection</returns>
         public IEnumerable<ISceneLightDirectional> GetDirectionalShadowCastingLights()
         {
-            return this.visibleLights
-                .Where(l => l.CastShadow && l is SceneLightDirectional)
-                .Select(l => (SceneLightDirectional)l)
+            return visibleLights
+                .OfType<SceneLightDirectional>()
+                .Where(l => l.CastShadow)
                 .ToArray();
         }
         /// <summary>
@@ -473,17 +508,17 @@ namespace Engine
         {
             float lDistanceSquared = GameEnvironment.LODDistanceMedium * GameEnvironment.LODDistanceMedium;
 
-            return this.visibleLights
+            return visibleLights
+                .OfType<ISceneLightPoint>()
                 .Where(l =>
                 {
-                    if (l.CastShadow && l is ISceneLightPoint lPoint)
+                    if (l.CastShadow)
                     {
-                        return Vector3.DistanceSquared(lPoint.Position, eyePosition) < lDistanceSquared;
+                        return Vector3.DistanceSquared(l.Position, eyePosition) < lDistanceSquared;
                     }
 
                     return false;
                 })
-                .Cast<ISceneLightPoint>()
                 .OrderBy(lPoint => Vector3.DistanceSquared(lPoint.Position, eyePosition))
                 .ToArray();
         }
@@ -496,17 +531,17 @@ namespace Engine
         {
             float lDistanceSquared = GameEnvironment.LODDistanceMedium * GameEnvironment.LODDistanceMedium;
 
-            return this.visibleLights
+            return visibleLights
+                .OfType<ISceneLightSpot>()
                 .Where(l =>
                 {
-                    if (l.CastShadow && l is ISceneLightSpot lSpot)
+                    if (l.CastShadow)
                     {
-                        return Vector3.DistanceSquared(lSpot.Position, eyePosition) < lDistanceSquared;
+                        return Vector3.DistanceSquared(l.Position, eyePosition) < lDistanceSquared;
                     }
 
                     return false;
                 })
-                .Cast<ISceneLightSpot>()
                 .OrderBy(lSpot => Vector3.DistanceSquared(lSpot.Position, eyePosition))
                 .ToArray();
         }
@@ -514,56 +549,59 @@ namespace Engine
         /// <summary>
         /// Update directional lights with time of day controller
         /// </summary>
-        /// <param name="timeOfDay">Time of day</param>
-        public void UpdateLights(TimeOfDay timeOfDay)
+        public void Update()
         {
-            if (timeOfDay.Updated)
+            var timeOfDay = scene.GameEnvironment.TimeOfDay;
+
+            if (!timeOfDay.Updated)
             {
-                float b = Math.Max(0, -(float)Math.Cos(timeOfDay.Elevation) + 0.15f) * 1.5f;
-                this.Intensity = Math.Min(b, 1f);
-
-                Vector3 keyDir = timeOfDay.LightDirection;
-                Vector3 backDir = -Vector3.Reflect(keyDir, Vector3.Up);
-
-                float tan = (float)Math.Tan(timeOfDay.Elevation);
-                Vector3 fillDir = tan >= 0f ? Vector3.Cross(keyDir, backDir) : Vector3.Cross(backDir, keyDir);
-
-                if (this.UseSunColorPalette)
-                {
-                    this.SunColor = this.GetSunColor(timeOfDay);
-                }
-
-                var keyLight = this.KeyLight;
-                if (keyLight != null)
-                {
-                    keyLight.Brightness = keyLight.BaseBrightness * b;
-
-                    keyLight.Direction = keyDir;
-
-                    if (this.UseSunColorPalette)
-                    {
-                        keyLight.SpecularColor = this.SunColor * b;
-                    }
-                }
-
-                var fillLight = this.FillLight;
-                if (fillLight != null)
-                {
-                    fillLight.Brightness = fillLight.BaseBrightness * b;
-
-                    fillLight.Direction = fillDir;
-                }
-
-                var backLight = this.BackLight;
-                if (backLight != null)
-                {
-                    backLight.Brightness = backLight.BaseBrightness * b;
-
-                    backLight.Direction = backDir;
-                }
-
-                this.FogColor = this.BaseFogColor * this.Intensity;
+                return;
             }
+
+            float b = Math.Max(0, -(float)Math.Cos(timeOfDay.Elevation) + 0.15f) * 1.5f;
+            Intensity = Math.Min(b, 1f);
+
+            Vector3 keyDir = timeOfDay.LightDirection;
+            Vector3 backDir = -Vector3.Reflect(keyDir, Vector3.Up);
+
+            float tan = (float)Math.Tan(timeOfDay.Elevation);
+            Vector3 fillDir = tan >= 0f ? Vector3.Cross(keyDir, backDir) : Vector3.Cross(backDir, keyDir);
+
+            if (UseSunColorPalette)
+            {
+                SunColor = GetSunColor(timeOfDay);
+            }
+
+            var keyLight = KeyLight;
+            if (keyLight != null)
+            {
+                keyLight.Brightness = keyLight.BaseBrightness * b;
+
+                keyLight.Direction = keyDir;
+
+                if (UseSunColorPalette)
+                {
+                    keyLight.SpecularColor = SunColor * b;
+                }
+            }
+
+            var fillLight = FillLight;
+            if (fillLight != null)
+            {
+                fillLight.Brightness = fillLight.BaseBrightness * b;
+
+                fillLight.Direction = fillDir;
+            }
+
+            var backLight = BackLight;
+            if (backLight != null)
+            {
+                backLight.Brightness = backLight.BaseBrightness * b;
+
+                backLight.Direction = backDir;
+            }
+
+            FogColor = BaseFogColor * Intensity;
         }
         /// <summary>
         /// Gets the sun color based on time of day
@@ -574,25 +612,47 @@ namespace Engine
         {
             float angle = MathUtil.Clamp(timeOfDay.MeridianAngle - MathUtil.PiOverTwo, 0, MathUtil.Pi);
 
-            for (int i = 0; i < this.SunColorPalette.Count; i++)
+            for (int i = 0; i < SunColorPalette.Count; i++)
             {
-                if (this.SunColorPalette[i].Item1 > angle)
+                if (SunColorPalette[i].Item1 > angle)
                 {
                     if (i > 0)
                     {
-                        var from = this.SunColorPalette[i - 1];
-                        var to = this.SunColorPalette[i];
+                        var from = SunColorPalette[i - 1];
+                        var to = SunColorPalette[i];
                         float amount = (angle - from.Item1) / (to.Item1 - from.Item1);
                         return Color4.Lerp(from.Item2, to.Item2, amount);
                     }
                     else
                     {
-                        return this.SunColorPalette[i].Item2;
+                        return SunColorPalette[i].Item2;
                     }
                 }
             }
 
             return Color4.White;
+        }
+
+        /// <summary>
+        /// Enables the fog
+        /// </summary>
+        /// <param name="start">Starting distance</param>
+        /// <param name="end">End distance</param>
+        /// <param name="color">Fog color</param>
+        public void EnableFog(float start, float end, Color color)
+        {
+            FogStart = start;
+            FogRange = end - start;
+            BaseFogColor = FogColor = color;
+        }
+        /// <summary>
+        /// Disables de fog
+        /// </summary>
+        public void DisableFog()
+        {
+            FogStart = 0;
+            FogRange = 0;
+            BaseFogColor = FogColor = Color.Black;
         }
     }
 }

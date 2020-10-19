@@ -108,12 +108,7 @@ namespace Engine.Common
         {
             get
             {
-                if (this.ShadowMapperDirectional != null)
-                {
-                    return this.ShadowMapperDirectional.Texture;
-                }
-
-                return null;
+                return ShadowMapperDirectional?.Texture;
             }
         }
         /// <summary>
@@ -123,12 +118,7 @@ namespace Engine.Common
         {
             get
             {
-                if (this.ShadowMapperPoint != null)
-                {
-                    return this.ShadowMapperPoint.Texture;
-                }
-
-                return null;
+                return ShadowMapperPoint?.Texture;
             }
         }
         /// <summary>
@@ -138,12 +128,7 @@ namespace Engine.Common
         {
             get
             {
-                if (this.ShadowMapperSpot != null)
-                {
-                    return this.ShadowMapperSpot.Texture;
-                }
-
-                return null;
+                return ShadowMapperSpot?.Texture;
             }
         }
         /// <summary>
@@ -157,10 +142,10 @@ namespace Engine.Common
         /// <param name="game">Game</param>
         protected BaseSceneRenderer(Game game)
         {
-            this.Game = game;
+            Game = game;
 
             // Directional shadow mapper
-            this.ShadowMapperDirectional = new ShadowMapCascade(game,
+            ShadowMapperDirectional = new ShadowMapCascade(game,
                 DirectionalShadowMapSize,
                 MaxDirectionalCascadeShadowMaps, MaxDirectionalShadowMaps,
                 CascadeShadowMapsDistances)
@@ -169,7 +154,7 @@ namespace Engine.Common
             };
 
             // Point shadow mapper
-            this.ShadowMapperPoint = new ShadowMapPoint(game,
+            ShadowMapperPoint = new ShadowMapPoint(game,
                 CubicShadowMapSize, CubicShadowMapSize,
                 MaxCubicShadows)
             {
@@ -177,27 +162,27 @@ namespace Engine.Common
             };
 
             // Spot shadow mapper
-            this.ShadowMapperSpot = new ShadowMapSpot(game,
+            ShadowMapperSpot = new ShadowMapSpot(game,
                 SpotShadowMapSize, SpotShadowMapSize,
                 MaxSpotShadows)
             {
                 HighResolutionMap = true
             };
 
-            this.cullManager = new SceneCullManager();
+            cullManager = new SceneCullManager();
 
-            this.UpdateContext = new UpdateContext()
+            UpdateContext = new UpdateContext()
             {
                 Name = "Primary",
             };
 
-            this.DrawContext = new DrawContext()
+            DrawContext = new DrawContext()
             {
                 Name = "Primary",
                 DrawerMode = DrawerModes.Forward,
             };
 
-            this.DrawShadowsContext = new DrawContextShadows()
+            DrawShadowsContext = new DrawContextShadows()
             {
                 Name = "Shadow mapping",
             };
@@ -226,23 +211,14 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                if (this.ShadowMapperDirectional != null)
-                {
-                    this.ShadowMapperDirectional.Dispose();
-                    this.ShadowMapperDirectional = null;
-                }
+                ShadowMapperDirectional?.Dispose();
+                ShadowMapperDirectional = null;
 
-                if (this.ShadowMapperPoint != null)
-                {
-                    this.ShadowMapperPoint.Dispose();
-                    this.ShadowMapperPoint = null;
-                }
+                ShadowMapperPoint?.Dispose();
+                ShadowMapperPoint = null;
 
-                if (this.ShadowMapperSpot != null)
-                {
-                    this.ShadowMapperSpot.Dispose();
-                    this.ShadowMapperSpot = null;
-                }
+                ShadowMapperSpot?.Dispose();
+                ShadowMapperSpot = null;
             }
         }
 
@@ -260,9 +236,9 @@ namespace Engine.Common
         /// <returns>Returns renderer specified resource, if renderer produces that resource.</returns>
         public virtual EngineShaderResourceView GetResource(SceneRendererResults result)
         {
-            if (result == SceneRendererResults.ShadowMapDirectional) return this.ShadowMapDirectional;
-            if (result == SceneRendererResults.ShadowMapPoint) return this.ShadowMapPoint;
-            if (result == SceneRendererResults.ShadowMapSpot) return this.ShadowMapSpot;
+            if (result == SceneRendererResults.ShadowMapDirectional) return ShadowMapDirectional;
+            if (result == SceneRendererResults.ShadowMapPoint) return ShadowMapPoint;
+            if (result == SceneRendererResults.ShadowMapSpot) return ShadowMapSpot;
             return null;
         }
         /// <summary>
@@ -277,37 +253,39 @@ namespace Engine.Common
 
             Matrix viewProj = scene.Camera.View * scene.Camera.Projection;
 
-            this.UpdateContext.GameTime = gameTime;
-            this.UpdateContext.View = scene.Camera.View;
-            this.UpdateContext.Projection = scene.Camera.Projection;
-            this.UpdateContext.NearPlaneDistance = scene.Camera.NearPlaneDistance;
-            this.UpdateContext.FarPlaneDistance = scene.Camera.FarPlaneDistance;
-            this.UpdateContext.ViewProjection = viewProj;
-            this.UpdateContext.EyePosition = scene.Camera.Position;
-            this.UpdateContext.EyeDirection = scene.Camera.Direction;
-            this.UpdateContext.Lights = scene.Lights;
-            this.UpdateContext.CameraVolume = new CullingVolumeCamera(viewProj);
+            UpdateContext.GameTime = gameTime;
+            UpdateContext.View = scene.Camera.View;
+            UpdateContext.Projection = scene.Camera.Projection;
+            UpdateContext.NearPlaneDistance = scene.Camera.NearPlaneDistance;
+            UpdateContext.FarPlaneDistance = scene.Camera.FarPlaneDistance;
+            UpdateContext.ViewProjection = viewProj;
+            UpdateContext.EyePosition = scene.Camera.Position;
+            UpdateContext.EyeDirection = scene.Camera.Direction;
+            UpdateContext.Lights = scene.Lights;
+            UpdateContext.CameraVolume = new IntersectionVolumeFrustum(viewProj);
 
             //Cull lights
             Stopwatch swLights = Stopwatch.StartNew();
-            scene.Lights.Cull(this.UpdateContext.CameraVolume, this.UpdateContext.EyePosition);
+            scene.Lights.Cull(UpdateContext.CameraVolume, UpdateContext.EyePosition);
             swLights.Stop();
 
             //Update active components
             Stopwatch swUpdate = Stopwatch.StartNew();
             int uIndex = 0;
-            scene.GetComponents<IUpdatable>(c => c.Active)
+            scene.GetComponents()
+                .Where(c => c.Active)
+                .OfType<IUpdatable>()
                 .ToList().ForEach(c =>
                 {
                     Stopwatch swCUpdate = Stopwatch.StartNew();
-                    c.Update(this.UpdateContext);
+                    c.Update(UpdateContext);
                     swCUpdate.Stop();
 
                     var o = c as BaseSceneObject;
-                    string cName = o?.Description?.Name ?? c.ToString();
+                    string cName = o?.Name ?? c.ToString();
                     dict.Add($"Component Update {uIndex++} {cName}", swCUpdate.Elapsed.TotalMilliseconds);
                 });
-            this.Updated = true;
+            Updated = true;
             swUpdate.Stop();
             dict.Add($"Components Update", swUpdate.Elapsed.TotalMilliseconds);
 
@@ -316,9 +294,9 @@ namespace Engine.Common
 
             Counters.SetStatistics("Scene.Update", string.Format("Update = {0:000000}", swTotal.ElapsedTicks));
 
-            if (this.Game.CollectGameStatus)
+            if (Game.CollectGameStatus)
             {
-                this.Game.GameStatus.Add(dict);
+                Game.GameStatus.Add(dict);
             }
         }
         /// <summary>
@@ -334,16 +312,17 @@ namespace Engine.Common
         /// <param name="index">Cull index</param>
         /// <param name="components">Component list</param>
         /// <returns>Returns the opaque components</returns>
-        protected virtual List<SceneObject> GetOpaques(int index, IEnumerable<SceneObject> components)
+        protected virtual List<ISceneObject> GetOpaques(int index, IEnumerable<ISceneObject> components)
         {
             var opaques = components.Where(c =>
             {
-                if (!c.Is<Drawable>()) return false;
+                if (!(c is Drawable)) return false;
 
-                var cull = c.Get<ICullable>();
-                if (cull != null)
+                if (!c.BlendMode.HasFlag(BlendModes.Opaque)) return false;
+
+                if (c is ICullable cull)
                 {
-                    return !this.cullManager.GetCullValue(index, cull).Culled;
+                    return !cullManager.GetCullValue(index, cull).Culled;
                 }
 
                 return true;
@@ -358,7 +337,7 @@ namespace Engine.Common
         /// <param name="c1">First component</param>
         /// <param name="c2">Second component</param>
         /// <returns>Returns sorting order (nearest first)</returns>
-        protected virtual int SortOpaques(int index, SceneObject c1, SceneObject c2)
+        protected virtual int SortOpaques(int index, ISceneObject c1, ISceneObject c2)
         {
             int res = c1.Order.CompareTo(c2.Order);
 
@@ -369,13 +348,25 @@ namespace Engine.Common
 
             if (res == 0)
             {
-                var cull1 = c1.Get<ICullable>();
-                var cull2 = c2.Get<ICullable>();
+                float d1 = float.MaxValue;
+                if (c1 is ICullable cull1)
+                {
+                    d1 = cullManager.GetCullValue(index, cull1).Distance;
+                }
 
-                var d1 = cull1 != null ? this.cullManager.GetCullValue(index, cull1).Distance : float.MaxValue;
-                var d2 = cull2 != null ? this.cullManager.GetCullValue(index, cull2).Distance : float.MaxValue;
+                float d2 = float.MaxValue;
+                if (c2 is ICullable cull2)
+                {
+                    d2 = cullManager.GetCullValue(index, cull2).Distance;
+                }
 
+                // Nearest first
                 res = -d1.CompareTo(d2);
+            }
+
+            if (res == 0)
+            {
+                res = c1.BlendMode.CompareTo(c2.BlendMode);
             }
 
             return res;
@@ -386,18 +377,17 @@ namespace Engine.Common
         /// <param name="index">Cull index</param>
         /// <param name="components">Component list</param>
         /// <returns>Returns the transparent components</returns>
-        protected virtual List<SceneObject> GetTransparents(int index, IEnumerable<SceneObject> components)
+        protected virtual List<ISceneObject> GetTransparents(int index, IEnumerable<ISceneObject> components)
         {
             var transparents = components.Where(c =>
             {
-                if (!c.AlphaEnabled) return false;
+                if (!(c is Drawable)) return false;
 
-                if (!c.Is<Drawable>()) return false;
+                if (!c.BlendMode.HasFlag(BlendModes.Alpha) && !c.BlendMode.HasFlag(BlendModes.Transparent)) return false;
 
-                var cull = c.Get<ICullable>();
-                if (cull != null)
+                if (c is ICullable cull)
                 {
-                    return !this.cullManager.GetCullValue(index, cull).Culled;
+                    return !cullManager.GetCullValue(index, cull).Culled;
                 }
 
                 return true;
@@ -412,95 +402,93 @@ namespace Engine.Common
         /// <param name="c1">First component</param>
         /// <param name="c2">Second component</param>
         /// <returns>Returns sorting order (far first)</returns>
-        protected virtual int SortTransparents(int index, SceneObject c1, SceneObject c2)
+        protected virtual int SortTransparents(int index, ISceneObject c1, ISceneObject c2)
         {
-            int res = c1.DepthEnabled.CompareTo(c2.DepthEnabled);
+            int res = c1.Order.CompareTo(c2.Order);
+
             if (res == 0)
             {
-                var cull1 = c1.Get<ICullable>();
-                var cull2 = c2.Get<ICullable>();
-
-                var d1 = cull1 != null ? this.cullManager.GetCullValue(index, cull1).Distance : float.MaxValue;
-                var d2 = cull2 != null ? this.cullManager.GetCullValue(index, cull2).Distance : float.MaxValue;
-
-                res = -d1.CompareTo(d2);
+                res = c1.DepthEnabled.CompareTo(c2.DepthEnabled);
             }
 
             if (res == 0)
             {
-                res = -c1.Order.CompareTo(c2.Order);
+                float d1 = float.MaxValue;
+                if (c1 is ICullable cull1)
+                {
+                    d1 = cullManager.GetCullValue(index, cull1).Distance;
+                }
+
+                float d2 = float.MaxValue;
+                if (c2 is ICullable cull2)
+                {
+                    d2 = cullManager.GetCullValue(index, cull2).Distance;
+                }
+
+                // Far objects first
+                res = d1.CompareTo(d2);
             }
 
-            return -res;
+            if (res == 0)
+            {
+                res = c1.BlendMode.CompareTo(c2.BlendMode);
+            }
+
+            return res;
         }
 
         /// <summary>
-        /// Draws an opaque object
+        /// Draws an object
         /// </summary>
         /// <param name="context">Drawing context</param>
         /// <param name="c">Component</param>
-        protected virtual void DrawOpaque(DrawContext context, SceneObject c)
+        protected virtual void Draw(DrawContext context, ISceneObject c)
         {
-            var graphics = this.Game.Graphics;
-
-            Counters.MaxInstancesPerFrame += c.Count;
-
-            graphics.SetRasterizerDefault();
-
-            this.SetBlendStateOpaque(context);
-
-            if (c.DepthEnabled)
+            if (c is IDrawable drawable)
             {
-                graphics.SetDepthStencilZEnabled();
+                Counters.MaxInstancesPerFrame += c.InstanceCount;
+
+                SetRasterizer(context);
+
+                SetBlendState(context, c.BlendMode);
+
+                SetDepthStencil(context, c.DepthEnabled);
+
+                drawable.Draw(context);
+            }
+        }
+        /// <summary>
+        /// Sets the rasterizer state
+        /// </summary>
+        /// <param name="context">Drawing context</param>
+        protected virtual void SetRasterizer(DrawContext context)
+        {
+            Game.Graphics.SetRasterizerDefault();
+        }
+        /// <summary>
+        /// Sets the blend state
+        /// </summary>
+        /// <param name="context">Drawing context</param>
+        /// <param name="blendMode">Blend mode</param>
+        protected virtual void SetBlendState(DrawContext context, BlendModes blendMode)
+        {
+            Game.Graphics.SetBlendState(blendMode);
+        }
+        /// <summary>
+        /// Sets the depth-stencil buffer state
+        /// </summary>
+        /// <param name="context">Drawing context</param>
+        /// <param name="enable">Enables the z-buffer</param>
+        protected virtual void SetDepthStencil(DrawContext context, bool enable)
+        {
+            if (enable)
+            {
+                Game.Graphics.SetDepthStencilZEnabled();
             }
             else
             {
-                graphics.SetDepthStencilZDisabled();
+                Game.Graphics.SetDepthStencilZDisabled();
             }
-
-            c.Get<IDrawable>().Draw(context);
-        }
-        /// <summary>
-        /// Draws an transparent object
-        /// </summary>
-        /// <param name="context">Drawing context</param>
-        /// <param name="c">Component</param>
-        protected virtual void DrawTransparent(DrawContext context, SceneObject c)
-        {
-            var graphics = this.Game.Graphics;
-
-            Counters.MaxInstancesPerFrame += c.Count;
-
-            graphics.SetRasterizerDefault();
-
-            this.SetBlendStateTransparent(context);
-
-            if (c.DepthEnabled)
-            {
-                graphics.SetDepthStencilZEnabled();
-            }
-            else
-            {
-                graphics.SetDepthStencilZDisabled();
-            }
-
-            c.Get<IDrawable>().Draw(context);
-        }
-        /// <summary>
-        /// Sets the opaque blend state
-        /// </summary>
-        /// <param name="context">Drawing context</param>
-        protected virtual void SetBlendStateOpaque(DrawContext context)
-        {
-            this.Game.Graphics.SetBlendDefault();
-        }
-        /// <summary>
-        /// Sets the transparent blend state
-        /// </summary>
-        /// <param name="context">Drawing context</param>
-        protected virtual void SetBlendStateTransparent(DrawContext context)
-        {
-            this.Game.Graphics.SetBlendTransparent();
         }
 
         /// <summary>
@@ -545,7 +533,7 @@ namespace Engine.Common
 
             //Objects that cast shadows
             stopwatch.Restart();
-            var shadowObjs = scene.GetComponents(c => c.Visible && c.CastShadow);
+            var shadowObjs = scene.GetComponents().Where(c => c.Visible && c.CastShadow);
             stopwatch.Stop();
             dict.Add($"DoDirectionalShadowMapping Getting components", stopwatch.Elapsed.TotalMilliseconds);
 
@@ -555,16 +543,16 @@ namespace Engine.Common
             }
 
             //Objects that cast shadows and suitable for culling test
-            var toCullShadowObjs = shadowObjs.Where(s => s.Is<ICullable>()).Select(s => s.Get<ICullable>());
+            var toCullShadowObjs = shadowObjs.OfType<ICullable>();
             if (toCullShadowObjs.Any())
             {
                 //All objects suitable for culling
-                bool allCullingObjects = shadowObjs.Count == toCullShadowObjs.Count();
-                var camVolume = this.DrawContext.CameraVolume;
+                bool allCullingObjects = shadowObjs.Count() == toCullShadowObjs.Count();
+                var camVolume = DrawContext.CameraVolume;
 
                 stopwatch.Restart();
-                var shadowSph = new CullingVolumeSphere(camVolume.Position, camVolume.Radius);
-                var doShadows = this.cullManager.Cull(shadowSph, cullIndex, toCullShadowObjs);
+                var shadowSph = new IntersectionVolumeSphere(camVolume.Position, camVolume.Radius);
+                var doShadows = cullManager.Cull(shadowSph, cullIndex, toCullShadowObjs);
                 stopwatch.Stop();
                 dict.Add($"DoDirectionalShadowMapping - Cull {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
 
@@ -575,7 +563,7 @@ namespace Engine.Common
                 }
             }
 
-            var graphics = this.Game.Graphics;
+            var graphics = Game.Graphics;
             int assigned = 0;
 
             int l = 0;
@@ -590,12 +578,12 @@ namespace Engine.Common
 
                 //Draw shadows
                 stopwatch.Restart();
-                var shadowMapper = this.DrawShadowsContext.ShadowMap = this.ShadowMapperDirectional;
+                var shadowMapper = DrawShadowsContext.ShadowMap = ShadowMapperDirectional;
                 shadowMapper.UpdateFromLightViewProjection(scene.Camera, light);
                 shadowMapper.Bind(graphics, assigned * MaxDirectionalCascadeShadowMaps);
-                this.DrawShadowsContext.EyePosition = shadowMapper.LightPosition;
-                this.DrawShadowsContext.ViewProjection = shadowMapper.ToShadowMatrix;
-                this.DrawShadowComponents(this.DrawShadowsContext, cullIndex, shadowObjs);
+                DrawShadowsContext.EyePosition = shadowMapper.LightPosition;
+                DrawShadowsContext.ViewProjection = shadowMapper.ToShadowMatrix;
+                DrawShadowComponents(DrawShadowsContext, cullIndex, shadowObjs);
                 stopwatch.Stop();
                 dict.Add($"DoDirectionalShadowMapping {l} - Draw {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
 
@@ -613,9 +601,9 @@ namespace Engine.Common
             gStopwatch.Stop();
             dict.Add($"DoDirectionalShadowMapping TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
 
-            if (this.Game.CollectGameStatus)
+            if (Game.CollectGameStatus)
             {
-                this.Game.GameStatus.Add(dict);
+                Game.GameStatus.Add(dict);
             }
         }
         /// <summary>
@@ -644,7 +632,7 @@ namespace Engine.Common
 
             //Draw components if drop shadow (opaque)
             stopwatch.Restart();
-            var shadowObjs = scene.GetComponents(c => c.Visible && c.CastShadow);
+            var shadowObjs = scene.GetComponents().Where(c => c.Visible && c.CastShadow);
             stopwatch.Stop();
             dict.Add($"DoPointShadowMapping Getting components", stopwatch.Elapsed.TotalMilliseconds);
 
@@ -653,14 +641,12 @@ namespace Engine.Common
                 return;
             }
 
-            var toCullShadowObjs = shadowObjs
-                .Where(s => s.Is<ICullable>())
-                .Select(s => s.Get<ICullable>());
+            var toCullShadowObjs = shadowObjs.OfType<ICullable>();
 
             //All objects suitable for culling
-            bool allCullingObjects = shadowObjs.Count == toCullShadowObjs.Count();
+            bool allCullingObjects = shadowObjs.Count() == toCullShadowObjs.Count();
 
-            var graphics = this.Game.Graphics;
+            var graphics = Game.Graphics;
             int assigned = 0;
 
             int l = 0;
@@ -673,10 +659,13 @@ namespace Engine.Common
                     continue;
                 }
 
+                cullIndex++;
+                l++;
+
                 //Cull test
                 stopwatch.Restart();
-                var sph = new CullingVolumeSphere(light.Position, light.Radius);
-                var doShadows = this.cullManager.Cull(sph, cullIndex, toCullShadowObjs);
+                var sph = new IntersectionVolumeSphere(light.Position, light.Radius);
+                var doShadows = cullManager.Cull(sph, cullIndex, toCullShadowObjs);
                 stopwatch.Stop();
                 dict.Add($"DoPointShadowMapping {l} - Cull {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
 
@@ -688,12 +677,12 @@ namespace Engine.Common
 
                 //Draw shadows
                 stopwatch.Restart();
-                var shadowMapper = this.DrawShadowsContext.ShadowMap = this.ShadowMapperPoint;
+                var shadowMapper = DrawShadowsContext.ShadowMap = ShadowMapperPoint;
                 shadowMapper.UpdateFromLightViewProjection(scene.Camera, light);
                 shadowMapper.Bind(graphics, assigned);
-                this.DrawShadowsContext.EyePosition = shadowMapper.LightPosition;
-                this.DrawShadowsContext.ViewProjection = shadowMapper.ToShadowMatrix;
-                this.DrawShadowComponents(this.DrawShadowsContext, cullIndex, shadowObjs);
+                DrawShadowsContext.EyePosition = shadowMapper.LightPosition;
+                DrawShadowsContext.ViewProjection = shadowMapper.ToShadowMatrix;
+                DrawShadowComponents(DrawShadowsContext, cullIndex, shadowObjs);
                 stopwatch.Stop();
                 dict.Add($"DoPointShadowMapping {l} - Draw {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
 
@@ -701,18 +690,14 @@ namespace Engine.Common
                 light.ShadowMapIndex = assigned;
 
                 assigned++;
-
-                cullIndex++;
-
-                l++;
             }
 
             gStopwatch.Stop();
             dict.Add($"DoPointShadowMapping TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
 
-            if (this.Game.CollectGameStatus)
+            if (Game.CollectGameStatus)
             {
-                this.Game.GameStatus.Add(dict);
+                Game.GameStatus.Add(dict);
             }
         }
         /// <summary>
@@ -742,7 +727,7 @@ namespace Engine.Common
 
             //Draw components if drop shadow (opaque)
             stopwatch.Restart();
-            var shadowObjs = scene.GetComponents(c => c.Visible && c.CastShadow);
+            var shadowObjs = scene.GetComponents().Where(c => c.Visible && c.CastShadow);
             stopwatch.Stop();
             dict.Add($"DoSpotShadowMapping Getting components", stopwatch.Elapsed.TotalMilliseconds);
 
@@ -751,14 +736,12 @@ namespace Engine.Common
                 return;
             }
 
-            var toCullShadowObjs = shadowObjs
-                .Where(s => s.Is<ICullable>())
-                .Select(s => s.Get<ICullable>());
+            var toCullShadowObjs = shadowObjs.OfType<ICullable>();
 
             //All objects suitable for culling
-            bool allCullingObjects = shadowObjs.Count == toCullShadowObjs.Count();
+            bool allCullingObjects = shadowObjs.Count() == toCullShadowObjs.Count();
 
-            var graphics = this.Game.Graphics;
+            var graphics = Game.Graphics;
             int assigned = 0;
 
             int l = 0;
@@ -773,8 +756,8 @@ namespace Engine.Common
 
                 //Cull test
                 stopwatch.Restart();
-                var sph = new CullingVolumeSphere(light.Position, light.Radius);
-                var doShadows = this.cullManager.Cull(sph, cullIndex, toCullShadowObjs);
+                var sph = new IntersectionVolumeSphere(light.Position, light.Radius);
+                var doShadows = cullManager.Cull(sph, cullIndex, toCullShadowObjs);
                 stopwatch.Stop();
                 dict.Add($"DoSpotShadowMapping {l} - Cull {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
 
@@ -786,12 +769,12 @@ namespace Engine.Common
 
                 //Draw shadows
                 stopwatch.Restart();
-                var shadowMapper = this.DrawShadowsContext.ShadowMap = this.ShadowMapperSpot;
+                var shadowMapper = DrawShadowsContext.ShadowMap = ShadowMapperSpot;
                 shadowMapper.UpdateFromLightViewProjection(scene.Camera, light);
                 shadowMapper.Bind(graphics, assigned);
-                this.DrawShadowsContext.EyePosition = shadowMapper.LightPosition;
-                this.DrawShadowsContext.ViewProjection = shadowMapper.ToShadowMatrix;
-                this.DrawShadowComponents(this.DrawShadowsContext, cullIndex, shadowObjs);
+                DrawShadowsContext.EyePosition = shadowMapper.LightPosition;
+                DrawShadowsContext.ViewProjection = shadowMapper.ToShadowMatrix;
+                DrawShadowComponents(DrawShadowsContext, cullIndex, shadowObjs);
                 stopwatch.Stop();
                 dict.Add($"DoSpotShadowMapping {l} - Draw {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
 
@@ -810,9 +793,9 @@ namespace Engine.Common
             gStopwatch.Stop();
             dict.Add($"DoSpotShadowMapping TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
 
-            if (this.Game.CollectGameStatus)
+            if (Game.CollectGameStatus)
             {
-                this.Game.GameStatus.Add(dict);
+                Game.GameStatus.Add(dict);
             }
         }
 
@@ -822,9 +805,9 @@ namespace Engine.Common
         /// <param name="context">Context</param>
         /// <param name="index">Culling index</param>
         /// <param name="components">Components to draw</param>
-        protected void DrawShadowComponents(DrawContextShadows context, int index, IEnumerable<SceneObject> components)
+        protected void DrawShadowComponents(DrawContextShadows context, int index, IEnumerable<ISceneObject> components)
         {
-            var graphics = this.Game.Graphics;
+            var graphics = Game.Graphics;
 
             var objects = components.Where(c => IsVisible(c, index)).ToList();
             if (objects.Any())
@@ -840,14 +823,13 @@ namespace Engine.Common
         /// <param name="c">Scene object</param>
         /// <param name="cullIndex">Cull index</param>
         /// <returns>Returns true if the object is not culled</returns>
-        private bool IsVisible(SceneObject c, int cullIndex)
+        private bool IsVisible(ISceneObject c, int cullIndex)
         {
-            if (!c.Is<Drawable>()) return false;
+            if (!(c is Drawable)) return false;
 
-            var cull = c.Get<ICullable>();
-            if (cull != null)
+            if (c is ICullable cull)
             {
-                return !this.cullManager.GetCullValue(cullIndex, cull).Culled;
+                return !cullManager.GetCullValue(cullIndex, cull).Culled;
             }
 
             return true;
@@ -859,16 +841,22 @@ namespace Engine.Common
         /// <param name="c2">Scene object two</param>
         /// <param name="cullIndex">Cull index</param>
         /// <returns></returns>
-        private int Sort(SceneObject c1, SceneObject c2, int cullIndex)
+        private int Sort(ISceneObject c1, ISceneObject c2, int cullIndex)
         {
             int res = c1.DepthEnabled.CompareTo(c2.DepthEnabled);
             if (res == 0)
             {
-                var cull1 = c1.Get<ICullable>();
-                var cull2 = c2.Get<ICullable>();
+                float d1 = float.MaxValue;
+                if (c1 is ICullable cull1)
+                {
+                    d1 = cullManager.GetCullValue(cullIndex, cull1).Distance;
+                }
 
-                var d1 = cull1 != null ? this.cullManager.GetCullValue(cullIndex, cull1).Distance : float.MaxValue;
-                var d2 = cull2 != null ? this.cullManager.GetCullValue(cullIndex, cull2).Distance : float.MaxValue;
+                float d2 = float.MaxValue;
+                if (c2 is ICullable cull2)
+                {
+                    d2 = cullManager.GetCullValue(cullIndex, cull2).Distance;
+                }
 
                 res = -d1.CompareTo(d2);
             }
@@ -886,21 +874,24 @@ namespace Engine.Common
         /// <param name="graphics">Graphics</param>
         /// <param name="context">Context</param>
         /// <param name="c">Scene object</param>
-        private void DrawShadows(Graphics graphics, DrawContextShadows context, SceneObject c)
+        private void DrawShadows(Graphics graphics, DrawContextShadows context, ISceneObject c)
         {
-            graphics.SetRasterizerShadowMapping();
-            graphics.SetDepthStencilShadowMapping();
-
-            if (c.AlphaEnabled)
+            if (c is IDrawable drawable)
             {
-                graphics.SetBlendTransparent();
-            }
-            else
-            {
-                graphics.SetBlendDefault();
-            }
+                graphics.SetRasterizerShadowMapping();
+                graphics.SetDepthStencilShadowMapping();
 
-            c.Get<IDrawable>().DrawShadows(context);
+                if (c.BlendMode.HasFlag(BlendModes.Alpha) || c.BlendMode.HasFlag(BlendModes.Transparent))
+                {
+                    graphics.SetBlendAlpha();
+                }
+                else
+                {
+                    graphics.SetBlendDefault();
+                }
+
+                drawable.DrawShadows(context);
+            }
         }
     }
 }

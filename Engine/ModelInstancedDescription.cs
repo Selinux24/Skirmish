@@ -1,4 +1,5 @@
-﻿
+﻿using SharpDX;
+
 namespace Engine
 {
     using Engine.Common;
@@ -8,6 +9,19 @@ namespace Engine
     /// </summary>
     public class ModelInstancedDescription : BaseModelDescription
     {
+        /// <summary>
+        /// Transforms
+        /// </summary>
+        public Matrix[] Transforms { get; set; }
+        /// <summary>
+        /// Transform names
+        /// </summary>
+        public string[] TransformNames { get; set; }
+        /// <summary>
+        /// Transform dependences
+        /// </summary>
+        public int[] TransformDependences { get; set; }
+
         /// <summary>
         /// Constructor
         /// </summary>

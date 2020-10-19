@@ -27,7 +27,7 @@ namespace Engine.Common
         {
             get
             {
-                if (!string.IsNullOrEmpty(material) && base.ContainsKey(material))
+                if (!string.IsNullOrEmpty(material) && ContainsKey(material))
                 {
                     return base[material];
                 }

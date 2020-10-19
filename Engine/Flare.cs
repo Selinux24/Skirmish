@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Engine.UI;
+using SharpDX;
 using System;
 
 namespace Engine
@@ -13,9 +14,9 @@ namespace Engine
         /// </summary>
         public Sprite FlareSprite { get; set; }
         /// <summary>
-        /// Relative Position
+        /// Distance from light source along light ray
         /// </summary>
-        public float Position { get; set; }
+        public float Distance { get; set; }
         /// <summary>
         /// Relative Scale
         /// </summary>

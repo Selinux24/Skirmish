@@ -128,4 +128,9 @@ Nam tempus ex at ligula ultricies, vel gravida odio volutpat.
 
 Mauris egestas molestie mi, sed malesuada nisl porttitor et. Nunc nunc nunc, porttitor a lacus id, hendrerit convallis neque. Aliquam lacinia, elit eget gravida condimentum, sapien erat porta urna, at fermentum neque odio vel augue. Integer semper varius mauris, sit amet rutrum purus posuere eu. Integer luctus interdum iaculis. Nullam laoreet tortor enim, a vestibulum tortor consectetur id. Fusce eu aliquet elit, molestie mollis enim.</value>
   </data>
+  <data name="TinyLorem" xml:space="preserve">
+    <value>Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+
+In pretium vehicula turpis, ac volutpat augue venenatis viverra.</value>
+  </data>
 </root>

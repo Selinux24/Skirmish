@@ -26,6 +26,12 @@ struct VSVertexGPUParticle
 	uint type : TYPE;
 	float emissionTime : EMISSION_TIME;
 };
+struct VSVertexFont
+{
+    float3 positionLocal : POSITION;
+    float2 tex : TEXCOORD0;
+    float4 color : COLOR0;
+};
 struct VSVertexPosition
 {
 	float3 positionLocal : POSITION;
@@ -125,6 +131,7 @@ struct VSVertexPositionI
 	float3 positionLocal : POSITION;
 	row_major float4x4 localTransform : LOCALTRANSFORM;
 	uint textureIndex : TEXTUREINDEX;
+    uint materialIndex : MATERIALINDEX;
 	uint animationOffset : ANIMATIONOFFSET;
 	uint instanceId : SV_INSTANCEID;
 };
@@ -134,6 +141,7 @@ struct VSVertexPositionColorI
 	float4 color : COLOR0;
 	row_major float4x4 localTransform : LOCALTRANSFORM;
 	uint textureIndex : TEXTUREINDEX;
+    uint materialIndex : MATERIALINDEX;
 	uint animationOffset : ANIMATIONOFFSET;
 	uint instanceId : SV_INSTANCEID;
 };
@@ -144,6 +152,7 @@ struct VSVertexPositionNormalColorI
 	float4 color : COLOR0;
 	row_major float4x4 localTransform : LOCALTRANSFORM;
 	uint textureIndex : TEXTUREINDEX;
+    uint materialIndex : MATERIALINDEX;
 	uint animationOffset : ANIMATIONOFFSET;
 	uint instanceId : SV_INSTANCEID;
 };
@@ -153,6 +162,7 @@ struct VSVertexPositionTextureI
 	float2 tex : TEXCOORD0;
 	row_major float4x4 localTransform : LOCALTRANSFORM;
 	uint textureIndex : TEXTUREINDEX;
+    uint materialIndex : MATERIALINDEX;
 	uint animationOffset : ANIMATIONOFFSET;
 	uint instanceId : SV_INSTANCEID;
 };
@@ -163,6 +173,7 @@ struct VSVertexPositionNormalTextureI
 	float2 tex : TEXCOORD0;
 	row_major float4x4 localTransform : LOCALTRANSFORM;
 	uint textureIndex : TEXTUREINDEX;
+    uint materialIndex : MATERIALINDEX;
 	uint animationOffset : ANIMATIONOFFSET;
 	uint instanceId : SV_INSTANCEID;
 };
@@ -174,6 +185,7 @@ struct VSVertexPositionNormalTextureTangentI
 	float2 tex : TEXCOORD0;
 	row_major float4x4 localTransform : LOCALTRANSFORM;
 	uint textureIndex : TEXTUREINDEX;
+    uint materialIndex : MATERIALINDEX;
 	uint animationOffset : ANIMATIONOFFSET;
 	uint instanceId : SV_INSTANCEID;
 };
@@ -188,6 +200,7 @@ struct VSVertexPositionSkinnedI
 	uint4 boneIndices : BONEINDICES;
 	row_major float4x4 localTransform : LOCALTRANSFORM;
 	uint textureIndex : TEXTUREINDEX;
+    uint materialIndex : MATERIALINDEX;
 	uint animationOffset : ANIMATIONOFFSET;
 	uint instanceId : SV_INSTANCEID;
 };
@@ -199,6 +212,7 @@ struct VSVertexPositionColorSkinnedI
 	uint4 boneIndices : BONEINDICES;
 	row_major float4x4 localTransform : LOCALTRANSFORM;
 	uint textureIndex : TEXTUREINDEX;
+    uint materialIndex : MATERIALINDEX;
 	uint animationOffset : ANIMATIONOFFSET;
 	uint instanceId : SV_INSTANCEID;
 };
@@ -211,6 +225,7 @@ struct VSVertexPositionNormalColorSkinnedI
 	uint4 boneIndices : BONEINDICES;
 	row_major float4x4 localTransform : LOCALTRANSFORM;
 	uint textureIndex : TEXTUREINDEX;
+    uint materialIndex : MATERIALINDEX;
 	uint animationOffset : ANIMATIONOFFSET;
 	uint instanceId : SV_INSTANCEID;
 };
@@ -222,6 +237,7 @@ struct VSVertexPositionTextureSkinnedI
 	uint4 boneIndices : BONEINDICES;
 	row_major float4x4 localTransform : LOCALTRANSFORM;
 	uint textureIndex : TEXTUREINDEX;
+    uint materialIndex : MATERIALINDEX;
 	uint animationOffset : ANIMATIONOFFSET;
 	uint instanceId : SV_INSTANCEID;
 };
@@ -234,6 +250,7 @@ struct VSVertexPositionNormalTextureSkinnedI
 	uint4 boneIndices : BONEINDICES;
 	row_major float4x4 localTransform : LOCALTRANSFORM;
 	uint textureIndex : TEXTUREINDEX;
+    uint materialIndex : MATERIALINDEX;
 	uint animationOffset : ANIMATIONOFFSET;
 	uint instanceId : SV_INSTANCEID;
 };
@@ -247,6 +264,7 @@ struct VSVertexPositionNormalTextureTangentSkinnedI
 	uint4 boneIndices : BONEINDICES;
 	row_major float4x4 localTransform : LOCALTRANSFORM;
 	uint textureIndex : TEXTUREINDEX;
+    uint materialIndex : MATERIALINDEX;
 	uint animationOffset : ANIMATIONOFFSET;
 	uint instanceId : SV_INSTANCEID;
 };
@@ -303,6 +321,13 @@ struct PSGPUParticle
 	float2 tex : TEXCOORD0;
 	uint primitiveID : SV_PRIMITIVEID;
 };
+struct PSVertexFont
+{
+    float4 positionHomogeneous : SV_POSITION;
+    float3 positionWorld : POSITION;
+    float2 tex : TEXCOORD0;
+    float4 color : COLOR0;
+};
 struct PSVertexPosition
 {
 	float4 positionHomogeneous : SV_POSITION;
@@ -313,6 +338,7 @@ struct PSVertexPositionColor
 	float4 positionHomogeneous : SV_POSITION;
 	float3 positionWorld : POSITION;
 	float4 color : COLOR0;
+    uint materialIndex : MATERIALINDEX;
 };
 struct PSVertexPositionNormalColor
 {
@@ -320,6 +346,7 @@ struct PSVertexPositionNormalColor
 	float3 positionWorld : POSITION;
 	float3 normalWorld : NORMAL;
 	float4 color : COLOR0;
+    uint materialIndex : MATERIALINDEX;
 };
 struct PSVertexPositionTexture
 {
@@ -327,6 +354,7 @@ struct PSVertexPositionTexture
 	float3 positionWorld : POSITION;
 	float2 tex : TEXCOORD0;
 	uint textureIndex : TEXTUREINDEX;
+    uint materialIndex : MATERIALINDEX;
 };
 struct PSVertexPositionNormalTexture
 {
@@ -335,6 +363,7 @@ struct PSVertexPositionNormalTexture
 	float3 normalWorld : NORMAL;
 	float2 tex : TEXCOORD0;
 	uint textureIndex : TEXTUREINDEX;
+    uint materialIndex : MATERIALINDEX;
 };
 struct PSVertexPositionNormalTextureTangent
 {
@@ -344,6 +373,7 @@ struct PSVertexPositionNormalTextureTangent
 	float3 tangentWorld : TANGENT;
 	float2 tex : TEXCOORD0;
     uint textureIndex : TEXTUREINDEX;
+    uint materialIndex : MATERIALINDEX;
 };
 struct PSVertexTerrain
 {

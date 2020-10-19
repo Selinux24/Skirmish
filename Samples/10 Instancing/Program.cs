@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.Content.FmtCollada;
 using System;
 using System.IO;
 
@@ -12,20 +13,24 @@ namespace Instancing
             try
             {
 #if DEBUG
-                using (Game cl = new Game("10 Instancing", false, 1600, 900, true, 0, 0))
+                int sWidth = (int)(System.Windows.Forms.SystemInformation.VirtualScreen.Width * .8f);
+                int sHeight = (int)(System.Windows.Forms.SystemInformation.VirtualScreen.Height * .8f);
+
+                using (Game cl = new Game("10 Instancing", false, sWidth, sHeight, true, 0, 0))
 #else
                 using (Game cl = new Game("10 Instancing", true, 0, 0, true, 0, 4))
 #endif
                 {
-#if DEBUG
                     cl.VisibleMouse = false;
+#if DEBUG
                     cl.LockMouse = false;
 #else
-                    cl.VisibleMouse = false;
                     cl.LockMouse = true;
 #endif
 
-                    cl.AddScene<TestScene>();
+                    GameResourceManager.RegisterLoader<LoaderCollada>();
+
+                    cl.SetScene<TestScene>();
 
                     cl.Run();
                 }

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 namespace Engine.Common
@@ -16,11 +15,16 @@ namespace Engine.Common
         /// <summary>
         /// Meshes by level of detail dictionary
         /// </summary>
-        private LevelOfDetailDictionary meshesByLOD = new LevelOfDetailDictionary();
+        private readonly LevelOfDetailDictionary meshesByLOD = new LevelOfDetailDictionary();
         /// <summary>
         /// Default level of detail
         /// </summary>
         private readonly LevelOfDetail defaultLevelOfDetail = LevelOfDetail.Minimum;
+
+        /// <summary>
+        /// Instancing buffer
+        /// </summary>
+        protected BufferDescriptor InstancingBuffer { get; private set; } = null;
 
         /// <summary>
         /// Gets the texture count for texture index
@@ -35,7 +39,7 @@ namespace Engine.Common
             {
                 List<MeshMaterial> matList = new List<MeshMaterial>();
 
-                var drawingData = this.GetDrawingData(LevelOfDetail.High);
+                var drawingData = GetDrawingData(LevelOfDetail.High);
                 if (drawingData != null)
                 {
                     foreach (var meshMaterial in drawingData.Materials.Keys)
@@ -58,7 +62,7 @@ namespace Engine.Common
         {
             get
             {
-                return this.GetDrawingData(LevelOfDetail.High)?.SkinningData;
+                return GetDrawingData(LevelOfDetail.High)?.SkinningData;
             }
         }
         /// <summary>
@@ -69,10 +73,11 @@ namespace Engine.Common
         /// <summary>
         /// Base model
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Object description</param>
-        protected BaseModel(Scene scene, BaseModelDescription description)
-            : base(scene, description)
+        protected BaseModel(string name, Scene scene, BaseModelDescription description)
+            : base(name, scene, description)
         {
             var desc = new DrawingDataDescription()
             {
@@ -80,60 +85,45 @@ namespace Engine.Common
                 Instances = description.Instances,
                 LoadAnimation = description.LoadAnimation,
                 LoadNormalMaps = description.LoadNormalMaps,
-                TextureCount = this.TextureCount,
                 DynamicBuffers = description.Dynamic,
+
+                TextureCount = TextureCount,
             };
 
-            IEnumerable<ModelContent> geo;
-            if (!string.IsNullOrEmpty(description.Content.ModelContentFilename))
+            if (desc.Instanced)
             {
-                string contentFile = Path.Combine(description.Content.ContentFolder, description.Content.ModelContentFilename);
-                var contentDesc = Helper.DeserializeFromFile<ModelContentDescription>(contentFile);
-                var loader = contentDesc.GetLoader();
-                geo = loader.Load(description.Content.ContentFolder, contentDesc);
-            }
-            else if (description.Content.ModelContentDescription != null)
-            {
-                var loader = description.Content.ModelContentDescription.GetLoader();
-                geo = loader.Load(description.Content.ContentFolder, description.Content.ModelContentDescription);
-            }
-            else if (description.Content.ModelContent != null)
-            {
-                geo = new[] { description.Content.ModelContent };
-            }
-            else
-            {
-                throw new EngineException("No geometry found in description.");
+                InstancingBuffer = BufferManager.AddInstancingData($"{Name}.Instances", true, desc.Instances);
             }
 
+            var geo = description.ReadModelContent();
             if (geo.Count() == 1)
             {
                 var iGeo = geo.First();
 
                 if (description.Optimize) iGeo.Optimize();
 
-                var drawable = DrawingData.Build(this.Game, this.BufferManager, iGeo, desc);
+                var drawable = DrawingData.Build(Game, Name, iGeo, desc, InstancingBuffer).GetAwaiter().GetResult();
 
-                this.meshesByLOD.Add(LevelOfDetail.High, drawable);
+                meshesByLOD.Add(LevelOfDetail.High, drawable);
             }
             else
             {
-                var content = new LevelOfDetailModelContent(geo, description.Optimize);
+                var content = LevelOfDetailModelContent.Build(geo, description.Optimize);
 
                 foreach (var lod in content.Keys)
                 {
-                    if (this.defaultLevelOfDetail == LevelOfDetail.None)
+                    if (defaultLevelOfDetail == LevelOfDetail.None)
                     {
-                        this.defaultLevelOfDetail = lod;
+                        defaultLevelOfDetail = lod;
                     }
 
-                    var drawable = DrawingData.Build(this.Game, this.BufferManager, content[lod], desc);
+                    var drawable = DrawingData.Build(Game, Name, content[lod], desc, InstancingBuffer).GetAwaiter().GetResult();
 
-                    this.meshesByLOD.Add(lod, drawable);
+                    meshesByLOD.Add(lod, drawable);
                 }
             }
 
-            this.UseAnisotropicFiltering = description.UseAnisotropicFiltering;
+            UseAnisotropicFiltering = description.UseAnisotropicFiltering;
         }
         /// <summary>
         /// Destructor
@@ -150,11 +140,14 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                foreach (var mesh in this.meshesByLOD)
+                meshesByLOD.Values.ToList().ForEach(m => m?.Dispose());
+                meshesByLOD.Clear();
+
+                if (InstancingBuffer != null)
                 {
-                    mesh.Value?.Dispose();
+                    BufferManager.RemoveInstancingData(InstancingBuffer);
+                    InstancingBuffer = null;
                 }
-                this.meshesByLOD = null;
             }
         }
 
@@ -163,22 +156,22 @@ namespace Engine.Common
         /// </summary>
         /// <param name="lod">Level of detail</param>
         /// <returns>Returns the nearest level of detail for the specified level of detail</returns>
-        internal LevelOfDetail GetLODNearest(LevelOfDetail lod)
+        public LevelOfDetail GetLODNearest(LevelOfDetail lod)
         {
-            if (this.meshesByLOD == null)
+            if (meshesByLOD == null)
             {
                 return LevelOfDetail.None;
             }
 
-            if (this.meshesByLOD.Keys.Count == 0)
+            if (meshesByLOD.Keys.Count == 0)
             {
-                return this.defaultLevelOfDetail;
+                return defaultLevelOfDetail;
             }
             else
             {
-                if (this.meshesByLOD.Keys.Count == 1)
+                if (meshesByLOD.Keys.Count == 1)
                 {
-                    return this.meshesByLOD.Keys.First();
+                    return meshesByLOD.Keys.First();
                 }
                 else
                 {
@@ -186,13 +179,13 @@ namespace Engine.Common
 
                     for (int l = i; l > 0; l /= 2)
                     {
-                        if (this.meshesByLOD.ContainsKey((LevelOfDetail)l))
+                        if (meshesByLOD.ContainsKey((LevelOfDetail)l))
                         {
                             return (LevelOfDetail)l;
                         }
                     }
 
-                    return this.defaultLevelOfDetail;
+                    return defaultLevelOfDetail;
                 }
             }
         }
@@ -200,16 +193,16 @@ namespace Engine.Common
         /// Gets the minimum level of detail
         /// </summary>
         /// <returns>Returns the minimum level of detail</returns>
-        internal LevelOfDetail GetLODMinimum()
+        public LevelOfDetail GetLODMinimum()
         {
-            if (this.meshesByLOD == null)
+            if (meshesByLOD == null)
             {
                 return LevelOfDetail.None;
             }
 
             int l = int.MaxValue;
 
-            foreach (var lod in this.meshesByLOD.Keys)
+            foreach (var lod in meshesByLOD.Keys)
             {
                 if ((int)lod < l)
                 {
@@ -223,16 +216,16 @@ namespace Engine.Common
         /// Gets the maximum level of detail
         /// </summary>
         /// <returns>Returns the maximum level of detail</returns>
-        internal LevelOfDetail GetLODMaximum()
+        public LevelOfDetail GetLODMaximum()
         {
-            if (this.meshesByLOD == null)
+            if (meshesByLOD == null)
             {
                 return LevelOfDetail.None;
             }
 
             int l = int.MinValue;
 
-            foreach (var lod in this.meshesByLOD.Keys)
+            foreach (var lod in meshesByLOD.Keys)
             {
                 if ((int)lod > l)
                 {
@@ -247,16 +240,16 @@ namespace Engine.Common
         /// </summary>
         /// <param name="lod">Level of detail</param>
         /// <returns>Returns the drawing data object</returns>
-        internal DrawingData GetDrawingData(LevelOfDetail lod)
+        public DrawingData GetDrawingData(LevelOfDetail lod)
         {
-            if (this.meshesByLOD == null)
+            if (meshesByLOD == null)
             {
                 return null;
             }
 
-            if (this.meshesByLOD.ContainsKey(lod))
+            if (meshesByLOD.ContainsKey(lod))
             {
-                return this.meshesByLOD[lod];
+                return meshesByLOD[lod];
             }
 
             return null;
@@ -266,18 +259,18 @@ namespace Engine.Common
         /// </summary>
         /// <param name="lod">First level of detail</param>
         /// <returns>Returns the first available level of detail drawing data</returns>
-        internal DrawingData GetFirstDrawingData(LevelOfDetail lod)
+        public DrawingData GetFirstDrawingData(LevelOfDetail lod)
         {
-            if (this.meshesByLOD == null)
+            if (meshesByLOD == null)
             {
                 return null;
             }
 
             while (lod > LevelOfDetail.None)
             {
-                if (this.meshesByLOD.ContainsKey(lod))
+                if (meshesByLOD.ContainsKey(lod))
                 {
-                    return this.meshesByLOD[lod];
+                    return meshesByLOD[lod];
                 }
 
                 lod = (LevelOfDetail)((int)lod / 2);

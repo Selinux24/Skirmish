@@ -71,11 +71,6 @@ namespace Engine
         }
 
         /// <summary>
-        /// Shadow map index
-        /// </summary>
-        public int ShadowMapIndex { get; set; }
-
-        /// <summary>
         /// Constructor
         /// </summary>
         protected SceneLightPoint()
@@ -118,28 +113,10 @@ namespace Engine
         }
 
         /// <summary>
-        /// Clears all light shadow parameters
-        /// </summary>
-        public void ClearShadowParameters()
-        {
-            this.ShadowMapIndex = -1;
-        }
-
-        /// <summary>
-        /// Gets the light volume
-        /// </summary>
-        /// <param name="sliceCount">Sphere slice count (vertical subdivisions - meridians)</param>
-        /// <param name="stackCount">Sphere stack count (horizontal subdivisions - parallels)</param>
-        /// <returns>Returns a line list representing the light volume</returns>
-        public IEnumerable<Line3D> GetVolume(int sliceCount, int stackCount)
-        {
-            return Line3D.CreateWiredSphere(this.BoundingSphere, sliceCount, stackCount);
-        }
-        /// <summary>
         /// Clones current light
         /// </summary>
         /// <returns>Returns a new instante with same data</returns>
-        public override SceneLight Clone()
+        public override ISceneLight Clone()
         {
             return new SceneLightPoint()
             {
@@ -160,6 +137,16 @@ namespace Engine
 
                 ParentTransform = this.ParentTransform,
             };
+        }
+        /// <summary>
+        /// Gets the light volume
+        /// </summary>
+        /// <param name="sliceCount">Sphere slice count (vertical subdivisions - meridians)</param>
+        /// <param name="stackCount">Sphere stack count (horizontal subdivisions - parallels)</param>
+        /// <returns>Returns a line list representing the light volume</returns>
+        public IEnumerable<Line3D> GetVolume(int sliceCount, int stackCount)
+        {
+            return Line3D.CreateWiredSphere(this.BoundingSphere, sliceCount, stackCount);
         }
     }
 }

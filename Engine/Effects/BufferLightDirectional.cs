@@ -33,7 +33,7 @@ namespace Engine.Effects
         /// <param name="lights">Light list</param>
         /// <param name="lightCount">Returns the assigned light count</param>
         /// <returns>Returns a light buffer collection</returns>
-        public static BufferLightDirectional[] Build(IEnumerable<SceneLightDirectional> lights, out int lightCount)
+        public static BufferLightDirectional[] Build(IEnumerable<ISceneLightDirectional> lights, out int lightCount)
         {
             if (!lights.Any())
             {
@@ -88,7 +88,7 @@ namespace Engine.Effects
         /// Constructor
         /// </summary>
         /// <param name="light">Light</param>
-        public BufferLightDirectional(SceneLightDirectional light)
+        public BufferLightDirectional(ISceneLightDirectional light)
         {
             this.DirToLight = -light.Direction;
             this.CastShadow = light.CastShadow ? 1 : 0;
