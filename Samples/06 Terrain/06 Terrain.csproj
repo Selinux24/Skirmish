@@ -378,7 +378,6 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <None Include="06 Terrain.ruleset" />
-    <None Include="app.config" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

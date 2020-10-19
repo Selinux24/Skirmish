@@ -588,7 +588,6 @@
     <None Include="Blender\Characters\MySoldier\MySoldierAnim.blend" />
     <None Include="Blender\Furniture\Lamps\Lamp.blend" />
     <None Include="Blender\Vehicles\M24\diffuse_m24_alpha.dds" />
-    <None Include="App.config" />
     <None Include="Blender\Environment\Trees\Birch\birch_b.blend" />
     <None Include="Blender\Vehicles\LandRaider\landraider.blend" />
     <None Include="Blender\Vehicles\CapitalShip\capital ship.blend" />

@@ -191,7 +191,6 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <None Include="07 Deferred.ruleset" />
-    <None Include="app.config" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

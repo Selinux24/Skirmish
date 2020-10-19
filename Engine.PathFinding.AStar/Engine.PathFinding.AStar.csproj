@@ -153,7 +153,6 @@
       <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="app.config" />
     <None Include="Engine.PathFinding.AStar.ruleset" />
     <None Include="Engine.PathFinding.AStar.snk" />
     <None Include="packages.config" />

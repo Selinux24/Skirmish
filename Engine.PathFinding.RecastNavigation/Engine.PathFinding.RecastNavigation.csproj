@@ -288,7 +288,6 @@
       <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="app.config" />
     <None Include="Engine.PathFinding.RecastNavigation.ruleset" />
     <None Include="Engine.PathFinding.RecastNavigation.snk" />
     <None Include="packages.config" />

@@ -404,7 +404,6 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <None Include="04 Collada.ruleset" />
-    <None Include="app.config" />
     <Content Include="ModularDungeon\Resources\OnePageDungeons\desert_catacombs_of_the_golden_witch.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
