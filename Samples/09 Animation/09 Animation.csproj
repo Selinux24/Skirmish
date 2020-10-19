@@ -7,16 +7,6 @@
     <RootNamespace>Animation</RootNamespace>
     <AssemblyName>Animation</AssemblyName>
     <Platforms>AnyCPU;x64;x86</Platforms>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
-    <FileAlignment>512</FileAlignment>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
-    <SonarQubeTestProject>
-    </SonarQubeTestProject>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -44,52 +34,60 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\Doors\atlas1.jpg" />
-    <None Remove="Resources\Doors\bronze_n.jpg" />
-    <None Remove="Resources\Doors\Dn_Doors.dae" />
-    <None Remove="Resources\Doors\Dn_Doors.xml" />
-    <None Remove="Resources\Doors\Dn_Jails.xml" />
-    <None Remove="Resources\Doors\metal_rust_d.jpg" />
-    <None Remove="Resources\Doors\wall_d.jpg" />
-    <None Remove="Resources\Doors\wall_n.jpg" />
-    <None Remove="Resources\d_road_asphalt_stripes_diffuse.dds" />
-    <None Remove="Resources\d_road_asphalt_stripes_normal.dds" />
-    <None Remove="Resources\d_road_asphalt_stripes_specular.dds" />
-    <None Remove="Resources\Ladder\bronze_n.jpg" />
-    <None Remove="Resources\Ladder\Dn_Anim_Ladder.dae" />
-    <None Remove="Resources\Ladder\Dn_Anim_Ladder.xml" />
-    <None Remove="Resources\Ladder\Dn_Anim_Ladder_2.dae" />
-    <None Remove="Resources\Ladder\Dn_Anim_Ladder_2.xml" />
-    <None Remove="Resources\Ladder\Dn_Anim_Ladder_22.xml" />
-    <None Remove="Resources\Ladder\metal_rust_d.jpg" />
-    <None Remove="Resources\Rat\Rat.dae" />
-    <None Remove="Resources\Rat\Rat.xml" />
-    <None Remove="Resources\Rat\Rat_d.png" />
-    <None Remove="Resources\Soldier\soldier0.jpg" />
-    <None Remove="Resources\Soldier\Soldier1.jpg" />
-    <None Remove="Resources\Soldier\soldier_anim2.dae" />
-    <None Remove="Resources\Soldier\soldier_anim2.xml" />
-    <Reference Include="SharpDX, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\SharpDX.4.2.0\lib\net45\SharpDX.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpDX.Mathematics, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\SharpDX.Mathematics.4.2.0\lib\net45\SharpDX.Mathematics.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
+    <Compile Remove="Resources\**" />
+    <EmbeddedResource Remove="Resources\**" />
+    <None Remove="Resources\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Resources\Doors\atlas1.jpg">
-    <Compile Include="AnimationParts\SceneAnimationParts.cs" />
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SimpleAnimation\SceneSimpleAnimation.cs" />
-    <Compile Include="Start\SceneStart.cs" />
+    <None Remove="AnimationParts\Resources\d_road_asphalt_stripes_diffuse.dds" />
+    <None Remove="AnimationParts\Resources\d_road_asphalt_stripes_normal.dds" />
+    <None Remove="AnimationParts\Resources\d_road_asphalt_stripes_specular.dds" />
+    <None Remove="AnimationParts\Resources\Leopard\Leopard.bmp" />
+    <None Remove="AnimationParts\Resources\Leopard\Leopard.dae" />
+    <None Remove="AnimationParts\Resources\Leopard\Leopard.xml" />
+    <None Remove="SimpleAnimation\Resources\Doors\atlas1.jpg" />
+    <None Remove="SimpleAnimation\Resources\Doors\brick_d.png" />
+    <None Remove="SimpleAnimation\Resources\Doors\brick_n.png" />
+    <None Remove="SimpleAnimation\Resources\Doors\bronze_n.jpg" />
+    <None Remove="SimpleAnimation\Resources\Doors\Dn_Doors.dae" />
+    <None Remove="SimpleAnimation\Resources\Doors\Dn_Doors.xml" />
+    <None Remove="SimpleAnimation\Resources\Doors\Dn_Jails.xml" />
+    <None Remove="SimpleAnimation\Resources\Doors\metal_rust_d.jpg" />
+    <None Remove="SimpleAnimation\Resources\Doors\Wall1.dae" />
+    <None Remove="SimpleAnimation\Resources\Doors\Wall1.xml" />
+    <None Remove="SimpleAnimation\Resources\Doors\Wall2.dae" />
+    <None Remove="SimpleAnimation\Resources\Doors\Wall2.xml" />
+    <None Remove="SimpleAnimation\Resources\Doors\wall_d.jpg" />
+    <None Remove="SimpleAnimation\Resources\Doors\wall_n.jpg" />
+    <None Remove="SimpleAnimation\Resources\d_road_asphalt_stripes_diffuse.dds" />
+    <None Remove="SimpleAnimation\Resources\d_road_asphalt_stripes_normal.dds" />
+    <None Remove="SimpleAnimation\Resources\d_road_asphalt_stripes_specular.dds" />
+    <None Remove="SimpleAnimation\Resources\Ladder\bronze_n.jpg" />
+    <None Remove="SimpleAnimation\Resources\Ladder\Dn_Anim_Ladder.dae" />
+    <None Remove="SimpleAnimation\Resources\Ladder\Dn_Anim_Ladder.xml" />
+    <None Remove="SimpleAnimation\Resources\Ladder\Dn_Anim_Ladder_2.dae" />
+    <None Remove="SimpleAnimation\Resources\Ladder\Dn_Anim_Ladder_2.xml" />
+    <None Remove="SimpleAnimation\Resources\Ladder\Dn_Anim_Ladder_22.xml" />
+    <None Remove="SimpleAnimation\Resources\Ladder\metal_rust_d.jpg" />
+    <None Remove="SimpleAnimation\Resources\Rat\Rat.dae" />
+    <None Remove="SimpleAnimation\Resources\Rat\Rat.xml" />
+    <None Remove="SimpleAnimation\Resources\Rat\Rat_d.png" />
+    <None Remove="SimpleAnimation\Resources\Soldier\soldier0.jpg" />
+    <None Remove="SimpleAnimation\Resources\Soldier\Soldier1.jpg" />
+    <None Remove="SimpleAnimation\Resources\Soldier\soldier_anim2.dae" />
+    <None Remove="SimpleAnimation\Resources\Soldier\soldier_anim2.xml" />
+    <None Remove="Start\Resources\anttisinstrumentals+keepshiningoninstrumental.mp3" />
+    <None Remove="Start\Resources\backGround.png" />
+    <None Remove="Start\Resources\buttons.png" />
+    <None Remove="Start\Resources\Empty.png" />
+    <None Remove="Start\Resources\pointer.png" />
+    <None Remove="Start\Resources\SkyPlane.dae" />
+    <None Remove="Start\Resources\SkyPlane.xml" />
+    <None Remove="Start\Resources\ui_options.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="AnimationParts\Resources\d_road_asphalt_stripes_diffuse.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -99,17 +97,15 @@
     <Content Include="AnimationParts\Resources\d_road_asphalt_stripes_specular.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="AnimationParts\Resources\Leopard\Leopard.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="AnimationParts\Resources\Leopard\Leopard.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Doors\Dn_Doors.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Doors\Dn_Doors.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="AnimationParts\Resources\Leopard\Leopard.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="AnimationParts\Resources\Leopard\Leopard.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="SimpleAnimation\Resources\Doors\atlas1.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -122,22 +118,28 @@
     <Content Include="SimpleAnimation\Resources\Doors\bronze_n.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SimpleAnimation\Resources\Doors\Wall1.xml">
-      <SubType>Designer</SubType>
+    <Content Include="SimpleAnimation\Resources\Doors\Dn_Doors.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SimpleAnimation\Resources\Doors\Dn_Doors.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SimpleAnimation\Resources\Doors\Dn_Jails.xml">
-      <SubType>Designer</SubType>
-    </Content>
-    <Content Include="Resources\Doors\Dn_Jails.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
-    </Content>
-    <Content Include="SimpleAnimation\Resources\Doors\Dn_Doors.xml">
-      <SubType>Designer</SubType>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SimpleAnimation\Resources\Doors\metal_rust_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SimpleAnimation\Resources\Doors\Wall1.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SimpleAnimation\Resources\Doors\Wall1.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SimpleAnimation\Resources\Doors\Wall2.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SimpleAnimation\Resources\Doors\Wall2.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SimpleAnimation\Resources\Doors\wall_d.jpg">
@@ -155,63 +157,43 @@
     <Content Include="SimpleAnimation\Resources\d_road_asphalt_stripes_specular.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Ladder\Dn_Anim_Ladder.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Ladder\Dn_Anim_Ladder.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
-    </Content>
-    <Content Include="Resources\Ladder\Dn_Anim_Ladder_2.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     <Content Include="SimpleAnimation\Resources\Ladder\bronze_n.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SimpleAnimation\Resources\Ladder\Dn_Anim_Ladder.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SimpleAnimation\Resources\Ladder\Dn_Anim_Ladder.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
     </Content>
-    <Content Include="SimpleAnimation\Resources\Ladder\Dn_Anim_Ladder_22.xml">
+    <Content Include="SimpleAnimation\Resources\Ladder\Dn_Anim_Ladder_2.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SimpleAnimation\Resources\Ladder\Dn_Anim_Ladder_2.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Ladder\Dn_Anim_Ladder_22.xml">
+    <Content Include="SimpleAnimation\Resources\Ladder\Dn_Anim_Ladder_22.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Ladder\metal_rust_d.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Rat\Rat.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     <Content Include="SimpleAnimation\Resources\Ladder\metal_rust_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SimpleAnimation\Resources\Rat\Rat.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SimpleAnimation\Resources\Rat\Rat.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SimpleAnimation\Resources\Rat\Rat_d.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SimpleAnimation\Resources\Rat\Rat.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
-    </Content>
-    <Content Include="Resources\Rat\Rat_d.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Soldier\soldier0.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Soldier\Soldier1.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Soldier\soldier_anim2.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Soldier\soldier_anim2.xml">
     <Content Include="SimpleAnimation\Resources\Soldier\soldier0.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SimpleAnimation\Resources\Soldier\Soldier1.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SimpleAnimation\Resources\Soldier\soldier_anim2.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SimpleAnimation\Resources\Soldier\soldier_anim2.xml">
@@ -224,98 +206,28 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Start\Resources\buttons.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Start\Resources\Empty.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Start\Resources\pointer.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Start\Resources\SkyPlane.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Start\Resources\SkyPlane.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Start\Resources\ui_options.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-    </Compile>
-    <None Include="09 Animation.ruleset" />
-    <Content Include="AnimationParts\Resources\Leopard\Leopard.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <None Include="packages.config" />
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
-    <Content Include="SimpleAnimation\Resources\Soldier\soldier_anim2.dae">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <SubType>
-      </SubType>
-    </Content>
-    <Content Include="SimpleAnimation\Resources\Rat\Rat.dae">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <SubType>
-      </SubType>
-    </Content>
-    <Content Include="SimpleAnimation\Resources\Ladder\Dn_Anim_Ladder_2.dae">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SimpleAnimation\Resources\Ladder\Dn_Anim_Ladder.dae">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SimpleAnimation\Resources\Doors\Dn_Doors.dae">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SimpleAnimation\Resources\Doors\Wall1.dae">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SimpleAnimation\Resources\Doors\Wall2.dae">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SimpleAnimation\Resources\Doors\Wall2.xml">
-      <SubType>Designer</SubType>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Start\Resources\SkyPlane.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Engine.Content.FmtCollada\Engine.Content.FmtCollada.csproj" />
     <ProjectReference Include="..\..\Engine\Engine.csproj" />
   </ItemGroup>
 
-    <ProjectReference Include="..\..\Engine.Content.FmtCollada\Engine.Content.FmtCollada.csproj">
-      <Project>{B5E51939-46DC-412D-A096-E1C892F95FB3}</Project>
-      <Name>Engine.Content.FmtCollada</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Engine\Engine.csproj">
-      <Project>{a4bac380-82cb-4db8-953f-a291f0bef559}</Project>
-      <Name>Engine</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>

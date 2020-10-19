@@ -1,282 +1,41 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>Engine.Collada</AssemblyName>
-    <RootNamespace>Engine.Collada</RootNamespace>
-    <ApplicationIcon>engine.ico</ApplicationIcon>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AssemblyName>Engine.Content.FmtCollada</AssemblyName>
+    <RootNamespace>Engine.Content.FmtCollada</RootNamespace>
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>Engine.Collada.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>Engine.Content.FmtCollada.snk</AssemblyOriginatorKeyFile>
     <Platforms>AnyCPU;x64;x86</Platforms>
-    <PackageIcon>engine.ico</PackageIcon>
     <PackageIconUrl />
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <CodeAnalysisRuleSet>Engine.Collada.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>Engine.Content.FmtCollada.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
-    <CodeAnalysisRuleSet>Engine.Collada.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>Engine.Content.FmtCollada.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <CodeAnalysisRuleSet>Engine.Collada.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>Engine.Content.FmtCollada.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <CodeAnalysisRuleSet>Engine.Collada.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>Engine.Content.FmtCollada.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-    <CodeAnalysisRuleSet>Engine.Collada.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>Engine.Content.FmtCollada.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <CodeAnalysisRuleSet>Engine.Collada.ruleset</CodeAnalysisRuleSet>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{B5E51939-46DC-412D-A096-E1C892F95FB3}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Engine.Content.FmtCollada</RootNamespace>
-    <AssemblyName>Engine.Content.FmtCollada</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
-    <SonarQubeTestProject>False</SonarQubeTestProject>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <UseVSHostingProcess>true</UseVSHostingProcess>
-    <CodeAnalysisRuleSet>Engine.Content.FmtCollada.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <UseVSHostingProcess>true</UseVSHostingProcess>
-    <CodeAnalysisRuleSet>Engine.Content.FmtCollada.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>Engine.Content.FmtCollada.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x86\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <UseVSHostingProcess>true</UseVSHostingProcess>
-    <CodeAnalysisRuleSet>Engine.Content.FmtCollada.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <OutputPath>bin\x86\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>Engine.Content.FmtCollada.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x64\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <UseVSHostingProcess>true</UseVSHostingProcess>
-    <CodeAnalysisRuleSet>Engine.Content.FmtCollada.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>bin\x64\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
     <CodeAnalysisRuleSet>Engine.Content.FmtCollada.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="engine.ico">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
-    <Reference Include="SharpDX, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpDX.4.2.0\lib\net45\SharpDX.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpDX.Mathematics, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpDX.Mathematics.4.2.0\lib\net45\SharpDX.Mathematics.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Accessor.cs" />
-    <Compile Include="AmbientDirectional.cs" />
-    <Compile Include="Animation.cs" />
-    <Compile Include="AnimationClip.cs" />
-    <Compile Include="Annotate.cs" />
-    <Compile Include="Asset.cs" />
-    <Compile Include="BindMaterial.cs" />
-    <Compile Include="Camera.cs" />
-    <Compile Include="Channel.cs" />
-    <Compile Include="Collada.cs" />
-    <Compile Include="Contributor.cs" />
-    <Compile Include="Controller.cs" />
-    <Compile Include="ConvexMesh.cs" />
-    <Compile Include="Effect.cs" />
-    <Compile Include="EvaluateScene.cs" />
-    <Compile Include="Extra.cs" />
-    <Compile Include="FmtCollada\LoaderCollada.cs" />
-    <Compile Include="ForceField.cs" />
-    <Compile Include="FX\BlinnPhong.cs" />
-    <Compile Include="FX\Code.cs" />
-    <Compile Include="FX\Constant.cs" />
-    <Compile Include="FX\EnumChannels.cs" />
-    <Compile Include="FX\EnumOption.cs" />
-    <Compile Include="FX\EnumPrecision.cs" />
-    <Compile Include="FX\EnumRange.cs" />
-    <Compile Include="FX\EnumSamplerFilter.cs" />
-    <Compile Include="FX\EnumSamplerWrap.cs" />
-    <Compile Include="FX\EnumSurfaceFaces.cs" />
-    <Compile Include="FX\EnumSurfaceTypes.cs" />
-    <Compile Include="FX\Include.cs" />
-    <Compile Include="FX\Lambert.cs" />
-    <Compile Include="FX\NewParam.cs" />
-    <Compile Include="FX\Pass.cs" />
-    <Compile Include="FX\ProfileCG.cs" />
-    <Compile Include="FX\ProfileCommon.cs" />
-    <Compile Include="FX\ProfileGles.cs" />
-    <Compile Include="FX\ProfileGlsl.cs" />
-    <Compile Include="FX\Sampler2D.cs" />
-    <Compile Include="FX\Surface.cs" />
-    <Compile Include="FX\SurfaceFormatHint.cs" />
-    <Compile Include="FX\SurfaceInitCube.cs" />
-    <Compile Include="FX\SurfaceInitFrom.cs" />
-    <Compile Include="FX\SurfaceInitPlanar.cs" />
-    <Compile Include="FX\SurfaceInitVolume.cs" />
-    <Compile Include="FX\TechniqueCommon.cs" />
-    <Compile Include="FX\TechniqueFX.cs" />
-    <Compile Include="Geometry.cs" />
-    <Compile Include="Image.cs" />
-    <Compile Include="Imager.cs" />
-    <Compile Include="Input.cs" />
-    <Compile Include="InputLocal.cs" />
-    <Compile Include="InstanceController.cs" />
-    <Compile Include="InstanceEffect.cs" />
-    <Compile Include="InstanceGeometry.cs" />
-    <Compile Include="InstanceMaterial.cs" />
-    <Compile Include="InstanceWithExtra.cs" />
-    <Compile Include="Joints.cs" />
-    <Compile Include="Light.cs" />
-    <Compile Include="LightTechniqueCommon.cs" />
-    <Compile Include="Lines.cs" />
-    <Compile Include="LineStrips.cs" />
-    <Compile Include="Material.cs" />
-    <Compile Include="Mesh.cs" />
-    <Compile Include="MeshElements.cs" />
-    <Compile Include="Morph.cs" />
-    <Compile Include="Node.cs" />
-    <Compile Include="Optics.cs" />
-    <Compile Include="OpticsTechniqueCommon.cs" />
-    <Compile Include="Orthographic.cs" />
-    <Compile Include="Param.cs" />
-    <Compile Include="Perspective.cs" />
-    <Compile Include="Ph.cs" />
-    <Compile Include="PhysicMaterial.cs" />
-    <Compile Include="PhysicsModel.cs" />
-    <Compile Include="PhysicsScene.cs" />
-    <Compile Include="Point.cs" />
-    <Compile Include="Polygons.cs" />
-    <Compile Include="PolyList.cs" />
-    <Compile Include="Render.cs" />
-    <Compile Include="Sampler.cs" />
-    <Compile Include="Scene.cs" />
-    <Compile Include="SetParam.cs" />
-    <Compile Include="Skin.cs" />
-    <Compile Include="Source.cs" />
-    <Compile Include="SourceTechniqueCommon.cs" />
-    <Compile Include="Spline.cs" />
-    <Compile Include="Spot.cs" />
-    <Compile Include="Targets.cs" />
-    <Compile Include="Technique.cs" />
-    <Compile Include="TechniqueHint.cs" />
-    <Compile Include="Triangles.cs" />
-    <Compile Include="TriFans.cs" />
-    <Compile Include="TriStrips.cs" />
-    <Compile Include="Types\BasicBool.cs" />
-    <Compile Include="Types\BasicBool2.cs" />
-    <Compile Include="Types\BasicBool3.cs" />
-    <Compile Include="Types\BasicBool4.cs" />
-    <Compile Include="Types\BasicBoolArray.cs" />
-    <Compile Include="Types\BasicColor.cs" />
-    <Compile Include="Types\BasicFloat.cs" />
-    <Compile Include="Types\BasicFloat2.cs" />
-    <Compile Include="Types\BasicFloat2X2.cs" />
-    <Compile Include="Types\BasicFloat3.cs" />
-    <Compile Include="Types\BasicFloat3X3.cs" />
-    <Compile Include="Types\BasicFloat4.cs" />
-    <Compile Include="Types\BasicFloat4X4.cs" />
-    <Compile Include="Types\BasicFloatArray.cs" />
-    <Compile Include="Types\BasicIdRef.cs" />
-    <Compile Include="Types\BasicInt.cs" />
-    <Compile Include="Types\BasicInt2.cs" />
-    <Compile Include="Types\BasicInt3.cs" />
-    <Compile Include="Types\BasicInt4.cs" />
-    <Compile Include="Types\BasicIntArray.cs" />
-    <Compile Include="Types\BasicParam.cs" />
-    <Compile Include="Types\BasicTexture.cs" />
-    <Compile Include="Types\BasicTransparent.cs" />
-    <Compile Include="Types\EnumAxis.cs" />
-    <Compile Include="Types\EnumMorphMethods.cs" />
-    <Compile Include="Types\EnumNodeType.cs" />
-    <Compile Include="Types\EnumOpaque.cs" />
-    <Compile Include="Types\EnumSemantics.cs" />
-    <Compile Include="Types\EnumVersions.cs" />
-    <Compile Include="Types\NamedArray.cs" />
-    <Compile Include="Types\NamedBoolArray.cs" />
-    <Compile Include="Types\NamedFloatArray.cs" />
-    <Compile Include="Types\NamedIdRefArray.cs" />
-    <Compile Include="Types\NamedIntArray.cs" />
-    <Compile Include="Types\NamedNameArray.cs" />
-    <Compile Include="Types\NamedNode.cs" />
-    <Compile Include="Types\VarColorOrTexture.cs" />
-    <Compile Include="Types\VarFloatOrParam.cs" />
-    <Compile Include="Unit.cs" />
-    <Compile Include="VertexWeights.cs" />
-    <Compile Include="Vertices.cs" />
-    <Compile Include="VisualScene.cs" />
-    <Compile Include="ContentColladaException.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Engine.Content.FmtCollada.ruleset" />
-    <None Include="Engine.Content.FmtCollada.snk" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Engine\Engine.csproj">
-      <Project>{a4bac380-82cb-4db8-953f-a291f0bef559}</Project>
-      <Name>Engine</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\Engine\Engine.csproj" />
   </ItemGroup>
 
 </Project>
