@@ -154,14 +154,12 @@ namespace Collada.ModularDungeon
             {
                 try
                 {
-                    var graph = await PathFinderDescription.Load(fileName);
+                    string hash = await PathFinderDescription.GetHash();
+
+                    var graph = await PathFinderDescription.Load(fileName, hash);
                     if (graph != null)
                     {
-                        NavigationGraphUpdating();
-
                         SetNavigationGraph(graph);
-
-                        NavigationGraphUpdated();
 
                         return;
                     }
@@ -174,14 +172,19 @@ namespace Collada.ModularDungeon
 
             await base.UpdateNavigationGraph();
 
-            try
+            _ = Task.Run(async () =>
             {
-                await PathFinderDescription.Save(fileName, NavigationGraph);
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteError(this, $"Error saving graph file. {ex.Message}", ex);
-            }
+                 try
+                 {
+                     Logger.WriteDebug(this, $"Saving graph file. {fileName}");
+
+                     await PathFinderDescription.Save(fileName, NavigationGraph);
+                 }
+                 catch (Exception ex)
+                 {
+                     Logger.WriteError(this, $"Error saving graph file. {ex.Message}", ex);
+                 }
+             });
         }
         public override void NavigationGraphUpdated()
         {

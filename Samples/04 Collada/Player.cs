@@ -26,8 +26,8 @@ namespace Collada
             if (obj is Player other)
             {
                 return
-                    other.Velocity == this.Velocity &&
-                    other.VelocitySlow == this.VelocitySlow;
+                    other.Velocity == Velocity &&
+                    other.VelocitySlow == VelocitySlow;
             }
 
             return false;

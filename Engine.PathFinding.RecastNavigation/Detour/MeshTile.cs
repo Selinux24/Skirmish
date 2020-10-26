@@ -199,7 +199,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         public IEnumerable<OffMeshConnection> GetOffMeshConnections()
         {
-            return OffMeshCons.Take(Header.OffMeshConCount).ToArray();
+            return OffMeshCons.Take(Header.OffMeshConCount).Where(o => o != null).ToArray();
         }
         /// <summary>
         /// Gets the off-mesh connection by off-mesh connection index
@@ -398,7 +398,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             if (data.NavDVerts.Count > 0) DetailVerts = data.NavDVerts.ToArray();
             if (data.NavDTris.Count > 0) DetailTris = data.NavDTris.ToArray();
             if (data.NavBvtree.Count > 0) BvTree = data.NavBvtree.ToArray();
-            if (data.OffMeshCons.Count > 0) OffMeshCons = data.OffMeshCons.ToArray();
+            if (data.OffMeshCons.Count > 0)
+            {
+                OffMeshCons = data.OffMeshCons.ToArray();
+            }
         }
 
         /// <summary>

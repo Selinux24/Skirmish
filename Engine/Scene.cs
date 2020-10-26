@@ -1353,6 +1353,8 @@ namespace Engine
         /// <param name="graph">Navigation graph</param>
         public virtual void SetNavigationGraph(IGraph graph)
         {
+            NavigationGraphUpdating();
+
             if (NavigationGraph != null)
             {
                 NavigationGraph.Updating -= GraphUpdating;
@@ -1375,6 +1377,8 @@ namespace Engine
                     navigationBoundingBox = PathFinderDescription.Input.BoundingBox;
                 }
             }
+
+            NavigationGraphUpdated();
         }
 
         /// <summary>

@@ -52,6 +52,7 @@ namespace Collada.Start
         private int musicLoops = 0;
         private bool musicFadingOff = false;
         private readonly int musicFadingMs = 10000;
+        private readonly float musicVolume = 0.1f;
 
         private readonly Manipulator3D emitterPosition = new Manipulator3D();
         private readonly Manipulator3D listenerPosition = new Manipulator3D();
@@ -92,7 +93,7 @@ namespace Collada.Start
 
                     PlayAudio();
 
-                    AudioManager.MasterVolume = 1;
+                    AudioManager.MasterVolume = 1f;
                     AudioManager.Start();
 
                     LoadGameAssets();
@@ -600,8 +601,9 @@ namespace Collada.Start
             {
                 currentMusic.LoopEnd += AudioManager_LoopEnd;
                 currentMusic.PlayProgress += AudioManager_PlayProgress;
+                currentMusic.Volume = 0;
                 currentMusic.Play();
-                currentMusic.TweenVolumeUp(musicFadingMs, ScaleFuncs.Linear);
+                currentMusic.TweenVolume(0, musicVolume, musicFadingMs, ScaleFuncs.Linear);
                 musicFadingOff = false;
             }
         }
@@ -629,7 +631,7 @@ namespace Collada.Start
 
                 if (e.TimeToEnd <= TimeSpan.FromMilliseconds(musicFadingMs))
                 {
-                    effect.TweenVolumeDown(musicFadingMs, ScaleFuncs.Linear);
+                    effect.TweenVolume(effect.Volume, 0, musicFadingMs, ScaleFuncs.Linear);
                     musicFadingOff = true;
                 }
             }

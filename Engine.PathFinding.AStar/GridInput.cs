@@ -20,11 +20,7 @@ namespace Engine.PathFinding.AStar
 
         }
 
-        /// <summary>
-        /// Creates a new graph
-        /// </summary>
-        /// <param name="settings">Settings</param>
-        /// <returns>Returns the new graph</returns>
+        /// <inheritdoc/>
         public override async Task<IGraph> CreateGraph(PathFinderSettings settings)
         {
             IGraph grid = null;
@@ -254,27 +250,23 @@ namespace Engine.PathFinding.AStar
             }
         }
 
-        /// <summary>
-        /// Refresh
-        /// </summary>
+        /// <inheritdoc/>
         public override Task Refresh()
         {
             throw new NotImplementedException();
         }
 
-        /// <summary>
-        /// Loads the graph from a file
-        /// </summary>
-        /// <param name="fileName">File name</param>
-        public override Task<IGraph> Load(string fileName)
+        /// <inheritdoc/>
+        public override Task<string> GetHash(PathFinderSettings settings)
         {
             throw new NotImplementedException();
         }
-        /// <summary>
-        /// Saves the graph to a file
-        /// </summary>
-        /// <param name="fileName">File name</param>
-        /// <param name="graph">Graph instance</param>
+        /// <inheritdoc/>
+        public override Task<IGraph> Load(string fileName, string hash = null)
+        {
+            throw new NotImplementedException();
+        }
+        /// <inheritdoc/>
         public override Task Save(string fileName, IGraph graph)
         {
             throw new NotImplementedException();

@@ -221,11 +221,19 @@ namespace Engine.PathFinding
         public abstract Task Refresh();
 
         /// <summary>
+        /// Gets the input hash
+        /// </summary>
+        /// <param name="settings">Path finder settings</param>
+        /// <returns>Returns the input hash</returns>
+        public abstract Task<string> GetHash(PathFinderSettings settings);
+        /// <summary>
         /// Loads the graph from a file
         /// </summary>
         /// <param name="fileName">File name</param>
+        /// <param name="hash">Source hash</param>
         /// <returns>Returns the loaded graph</returns>
-        public abstract Task<IGraph> Load(string fileName);
+        /// <remarks>If hash specified, the input proceed to compare file hash and specified hash. If they are different, the returns null.</remarks>
+        public abstract Task<IGraph> Load(string fileName, string hash = null);
         /// <summary>
         /// Saves the graph to a file
         /// </summary>

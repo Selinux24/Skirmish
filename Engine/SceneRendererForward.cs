@@ -41,11 +41,11 @@ namespace Engine
         /// <param name="scene">Scene</param>
         public override void Draw(GameTime gameTime, Scene scene)
         {
-            if (this.Updated)
+            if (Updated)
             {
-                this.Updated = false;
+                Updated = false;
 #if DEBUG
-                this.frameStats.Clear();
+                frameStats.Clear();
 
                 Stopwatch swTotal = Stopwatch.StartNew();
 #endif
@@ -54,18 +54,18 @@ namespace Engine
                 if (visibleComponents.Any())
                 {
                     //Initialize context data from update context
-                    this.DrawContext.GameTime = gameTime;
-                    this.DrawContext.DrawerMode = DrawerModes.Forward;
-                    this.DrawContext.ViewProjection = this.UpdateContext.ViewProjection;
-                    this.DrawContext.CameraVolume = this.UpdateContext.CameraVolume;
-                    this.DrawContext.EyePosition = this.UpdateContext.EyePosition;
-                    this.DrawContext.EyeTarget = this.UpdateContext.EyeDirection;
+                    DrawContext.GameTime = gameTime;
+                    DrawContext.DrawerMode = DrawerModes.Forward;
+                    DrawContext.ViewProjection = UpdateContext.ViewProjection;
+                    DrawContext.CameraVolume = UpdateContext.CameraVolume;
+                    DrawContext.EyePosition = UpdateContext.EyePosition;
+                    DrawContext.EyeTarget = UpdateContext.EyeDirection;
 
                     //Initialize context data from scene
-                    this.DrawContext.Lights = scene.Lights;
-                    this.DrawContext.ShadowMapDirectional = this.ShadowMapperDirectional;
-                    this.DrawContext.ShadowMapPoint = this.ShadowMapperPoint;
-                    this.DrawContext.ShadowMapSpot = this.ShadowMapperSpot;
+                    DrawContext.Lights = scene.Lights;
+                    DrawContext.ShadowMapDirectional = ShadowMapperDirectional;
+                    DrawContext.ShadowMapPoint = ShadowMapperPoint;
+                    DrawContext.ShadowMapSpot = ShadowMapperSpot;
 
                     //Shadow mapping
                     DoShadowMapping(gameTime, scene);
@@ -76,7 +76,7 @@ namespace Engine
 #if DEBUG
                 swTotal.Stop();
 
-                this.frameStats.UpdateCounters(swTotal.ElapsedTicks);
+                frameStats.UpdateCounters(swTotal.ElapsedTicks);
 #endif
             }
         }
@@ -93,13 +93,13 @@ namespace Engine
             Stopwatch swPreparation = Stopwatch.StartNew();
 #endif
             //Set default render target and depth buffer, and clear it
-            var graphics = this.Game.Graphics;
+            var graphics = Game.Graphics;
             graphics.SetDefaultViewport();
             graphics.SetDefaultRenderTarget();
 #if DEBUG
             swPreparation.Stop();
 
-            this.frameStats.ForwardStart = swPreparation.ElapsedTicks;
+            frameStats.ForwardStart = swPreparation.ElapsedTicks;
 #endif
             #endregion
 
@@ -116,7 +116,7 @@ namespace Engine
                 if (scene.PerformFrustumCulling)
                 {
                     //Frustum culling
-                    draw = this.cullManager.Cull(this.DrawContext.CameraVolume, CullIndexDrawIndex, toCullVisible);
+                    draw = cullManager.Cull(DrawContext.CameraVolume, CullIndexDrawIndex, toCullVisible);
                 }
                 else
                 {
@@ -129,14 +129,14 @@ namespace Engine
                     if (groundVolume != null)
                     {
                         //Ground culling
-                        draw = this.cullManager.Cull(groundVolume, CullIndexDrawIndex, toCullVisible);
+                        draw = cullManager.Cull(groundVolume, CullIndexDrawIndex, toCullVisible);
                     }
                 }
 
 #if DEBUG
                 swCull.Stop();
 
-                this.frameStats.ForwardCull = swCull.ElapsedTicks;
+                frameStats.ForwardCull = swCull.ElapsedTicks;
 #endif
                 #endregion
 
@@ -148,11 +148,11 @@ namespace Engine
                     Stopwatch swDraw = Stopwatch.StartNew();
 #endif
                     //Draw solid
-                    this.DrawResultComponents(this.DrawContext, CullIndexDrawIndex, components);
+                    DrawResultComponents(DrawContext, CullIndexDrawIndex, components);
 #if DEBUG
                     swDraw.Stop();
 
-                    this.frameStats.ForwardDraw = swDraw.ElapsedTicks;
+                    frameStats.ForwardDraw = swDraw.ElapsedTicks;
 #endif
                 }
 
@@ -175,7 +175,7 @@ namespace Engine
 
             //First opaques
             stopwatch.Start();
-            var opaques = this.GetOpaques(index, components);
+            var opaques = GetOpaques(index, components);
             stopwatch.Stop();
             dict.Add("Opaques Selection", stopwatch.Elapsed.TotalMilliseconds);
 
@@ -197,7 +197,7 @@ namespace Engine
                 {
                     Stopwatch stopwatch2 = new Stopwatch();
                     stopwatch2.Start();
-                    this.Draw(context, c);
+                    Draw(context, c);
                     stopwatch2.Stop();
                     dict.Add($"Opaque Draw {oDIndex++} {c.Name}", stopwatch2.Elapsed.TotalMilliseconds);
                 });
@@ -207,7 +207,7 @@ namespace Engine
 
             //Then transparents
             stopwatch.Restart();
-            var transparents = this.GetTransparents(index, components);
+            var transparents = GetTransparents(index, components);
             stopwatch.Stop();
             dict.Add("Transparents Selection", stopwatch.Elapsed.TotalMilliseconds);
 
@@ -229,7 +229,7 @@ namespace Engine
                 {
                     Stopwatch stopwatch2 = new Stopwatch();
                     stopwatch2.Start();
-                    this.Draw(context, c);
+                    Draw(context, c);
                     stopwatch2.Stop();
                     dict.Add($"Transparent Draw {oTIndex++} {c.Name}", stopwatch2.Elapsed.TotalMilliseconds);
                 });
@@ -240,9 +240,9 @@ namespace Engine
             //Reset drawer mode
             context.DrawerMode = mode;
 
-            if (this.Game.CollectGameStatus)
+            if (Game.CollectGameStatus)
             {
-                this.Game.GameStatus.Add(dict);
+                Game.GameStatus.Add(dict);
             }
         }
     }
