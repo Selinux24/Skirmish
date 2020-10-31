@@ -20,6 +20,10 @@ namespace Engine
         /// </summary>
         public bool CastShadow { get; set; }
         /// <summary>
+        /// Gets or sets whether the light is marked for shadow cast the next call
+        /// </summary>
+        public bool CastShadowsMarked { get; set; } = false;
+        /// <summary>
         /// Diffuse color
         /// </summary>
         public Color4 DiffuseColor { get; set; }
@@ -44,6 +48,39 @@ namespace Engine
         public int ShadowMapIndex { get; set; } = 0;
 
         /// <summary>
+        /// Evaluates whether a light must be processed as a shadow casting light or not
+        /// </summary>
+        /// <param name="eyePosition">Eye position</param>
+        /// <param name="castShadow">Cast shadows</param>
+        /// <param name="position">Light position</param>
+        /// <param name="radius">Light radius</param>
+        /// <returns>Returns true if the light cast shadow</returns>
+        public static bool EvaluateLight(Vector3 eyePosition, bool castShadow, Vector3 position, float radius)
+        {
+            if (!castShadow)
+            {
+                // Discard no shadow casting lights
+                return false;
+            }
+
+            float dist = Vector3.Distance(position, eyePosition);
+            if (dist >= GameEnvironment.LODDistanceMedium)
+            {
+                // Discard too far lights
+                return false;
+            }
+
+            float thr = radius / (dist <= 0 ? 1 : dist);
+            if (thr < GameEnvironment.ShadowRadiusDistanceThreshold)
+            {
+                // Discard too small lights based on radius and distance
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         protected SceneLight()
@@ -60,11 +97,11 @@ namespace Engine
         /// <param name="enabled">Lights is enabled</param>
         protected SceneLight(string name, bool castShadow, Color4 diffuse, Color4 specular, bool enabled)
         {
-            this.Name = name;
-            this.Enabled = enabled;
-            this.CastShadow = castShadow;
-            this.DiffuseColor = diffuse;
-            this.SpecularColor = specular;
+            Name = name;
+            Enabled = enabled;
+            CastShadow = castShadow;
+            DiffuseColor = diffuse;
+            SpecularColor = specular;
         }
 
         /// <summary>
@@ -72,8 +109,16 @@ namespace Engine
         /// </summary>
         public virtual void ClearShadowParameters()
         {
-            this.ShadowMapIndex = -1;
+            ShadowMapIndex = -1;
         }
+        /// <summary>
+        /// Test the light shadow casting based on the viewer position
+        /// </summary>
+        /// <param name="eyePosition">Viewer eye position</param>
+        /// <returns>Returns true if the light can cast shadows</returns>
+        /// <remarks>This method updates the light internal cast shadow flag</remarks>
+        public abstract bool MarkForShadowCasting(Vector3 eyePosition);
+
         /// <summary>
         /// Clones current light
         /// </summary>
@@ -86,13 +131,13 @@ namespace Engine
         /// <returns>Returns the text representation of the light</returns>
         public override string ToString()
         {
-            if (!string.IsNullOrEmpty(this.Name))
+            if (!string.IsNullOrEmpty(Name))
             {
-                return string.Format("{0}; Enabled: {1}", this.Name, this.Enabled);
+                return $"{Name}; Enabled: {Enabled}";
             }
             else
             {
-                return string.Format("{0}; Enabled {1}", this.GetType(), this.Enabled);
+                return $"{GetType()}; Enabled: {Enabled}";
             }
         }
     }

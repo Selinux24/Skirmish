@@ -21,6 +21,10 @@ namespace Engine
         /// </summary>
         bool CastShadow { get; set; }
         /// <summary>
+        /// The light is marked for shadow cast the next call
+        /// </summary>
+        bool CastShadowsMarked { get; set; }
+        /// <summary>
         /// Diffuse color
         /// </summary>
         Color4 DiffuseColor { get; set; }
@@ -48,6 +52,12 @@ namespace Engine
         /// Clears all light shadow parameters
         /// </summary>
         void ClearShadowParameters();
+        /// <summary>
+        /// Test the light shadow casting based on the viewer position
+        /// </summary>
+        /// <param name="eyePosition">Viewer eye position</param>
+        /// <returns>Returns true if the light can cast shadows</returns>
+        bool MarkForShadowCasting(Vector3 eyePosition);
         /// <summary>
         /// Clones the light
         /// </summary>

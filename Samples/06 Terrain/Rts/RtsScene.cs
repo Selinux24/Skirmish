@@ -1267,6 +1267,11 @@ namespace Terrain.Rts
         {
             gameReady = true;
 
+            if (started)
+            {
+                return;
+            }
+
             Task.Run(async () =>
             {
                 await StartHelicopter();

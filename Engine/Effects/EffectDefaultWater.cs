@@ -323,7 +323,7 @@ namespace Engine.Effects
                 this.DirLights = BufferLightDirectional.Build(lights.GetVisibleDirectionalLights(), out int dirLength);
                 this.LightCount = dirLength;
 
-                this.Ambient = lights.Intensity;
+                this.Ambient = lights.Albedo;
 
                 this.FogStart = lights.FogStart;
                 this.FogRange = lights.FogRange;

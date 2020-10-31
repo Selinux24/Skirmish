@@ -22,6 +22,7 @@ cbuffer cbPerFrame : register(b1)
 	float4 gFogColor;
 	float gFogStart;
 	float gFogRange;
+    float gAlbedo;
 	float gStartRadius;
 	float gEndRadius;
 	float3 gWindDirection;
@@ -29,7 +30,6 @@ cbuffer cbPerFrame : register(b1)
 	float3 gDelta;
 	float gTotalTime;
 	float3 gEyePositionWorld;
-	float PAD12;
     uint gMaterialIndex;
     uint gTextureCount;
     uint gNormalMapCount;
@@ -269,6 +269,7 @@ float4 PSFoliage(PSVertexBillboard input) : SV_Target
     lInput.dirLightsCount = gLightCount.x;
     lInput.pointLightsCount = gLightCount.y;
     lInput.spotLightsCount = gLightCount.z;
+    lInput.albedo = gAlbedo;
 
 	lInput.shadowMapDir = gShadowMapDir;
     lInput.shadowMapPoint = gShadowMapPoint;

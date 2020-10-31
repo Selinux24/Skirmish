@@ -210,6 +210,9 @@ namespace Engine
                     SceneObjectUsages.None,
                     98);
 
+                float total = Levels.ParticleSystems.Count();
+                int current = 0;
+
                 foreach (var item in Levels.ParticleSystems)
                 {
                     try
@@ -224,6 +227,8 @@ namespace Engine
                     {
                         Logger.WriteError($"{nameof(ModularScenery)}. Error loading particle system {item.Name}: {ex.Message}", ex);
                     }
+
+                    progress?.Report(new LoadResourceProgress { Progress = ++current / total });
                 }
             }
         }

@@ -106,20 +106,20 @@ namespace Engine.Effects
         /// <param name="light">Light</param>
         public BufferLightPoint(ISceneLightPoint light)
         {
-            this.Position = light.Position;
-            this.DiffuseColor = light.DiffuseColor;
-            this.SpecularColor = light.SpecularColor;
-            this.Intensity = light.Intensity;
-            this.Radius = light.Radius;
-            this.CastShadow = light.CastShadow ? 1 : 0;
-            this.MapIndex = light.ShadowMapIndex;
+            Position = light.Position;
+            DiffuseColor = light.DiffuseColor;
+            SpecularColor = light.SpecularColor;
+            Intensity = light.Intensity;
+            Radius = light.Radius;
+            CastShadow = light.CastShadowsMarked ? 1 : 0;
+            MapIndex = light.ShadowMapIndex;
 
-            var perspectiveMatrix = Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1, 0.1f, this.Radius + 0.1f);
-            this.PerspectiveValues = new Vector2(perspectiveMatrix[2, 2], perspectiveMatrix[3, 2]);
+            var perspectiveMatrix = Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1, 0.1f, Radius + 0.1f);
+            PerspectiveValues = new Vector2(perspectiveMatrix[2, 2], perspectiveMatrix[3, 2]);
 
-            this.Pad1 = 1000;
-            this.Pad2 = 2000;
-            this.Pad3 = 3000;
+            Pad1 = 1000;
+            Pad2 = 2000;
+            Pad3 = 3000;
         }
 
         /// <summary>

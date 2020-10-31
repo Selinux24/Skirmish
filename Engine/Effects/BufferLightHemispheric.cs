@@ -58,8 +58,8 @@ namespace Engine.Effects
         /// <param name="light">Light</param>
         public BufferLightHemispheric(ISceneLightHemispheric light)
         {
-            this.AmbientDown = light.AmbientDown;
-            this.AmbientUp = light.AmbientUp;
+            AmbientDown = light.AmbientDown;
+            AmbientUp = light.AmbientUp;
         }
 
         /// <summary>

@@ -90,13 +90,13 @@ namespace Engine.Effects
         /// <param name="light">Light</param>
         public BufferLightDirectional(ISceneLightDirectional light)
         {
-            this.DirToLight = -light.Direction;
-            this.CastShadow = light.CastShadow ? 1 : 0;
-            this.LightColor = light.DiffuseColor * light.Brightness;
-            this.ToCascadeOffsetX = light.ToCascadeOffsetX;
-            this.ToCascadeOffsetY = light.ToCascadeOffsetY;
-            this.ToCascadeScale = light.ToCascadeScale;
-            this.ToShadowSpace = Matrix.Transpose(light.ToShadowSpace);
+            DirToLight = -light.Direction;
+            CastShadow = light.CastShadowsMarked ? 1 : 0;
+            LightColor = light.DiffuseColor * light.Brightness;
+            ToCascadeOffsetX = light.ToCascadeOffsetX;
+            ToCascadeOffsetY = light.ToCascadeOffsetY;
+            ToCascadeScale = light.ToCascadeScale;
+            ToShadowSpace = Matrix.Transpose(light.ToShadowSpace);
         }
 
         /// <summary>

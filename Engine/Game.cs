@@ -626,7 +626,13 @@ namespace Engine
         {
             if (exiting)
             {
-                Logger.WriteInformation(this, "Game exiting");
+                Logger.WriteInformation(this, "**************************************************************************");
+                Logger.WriteInformation(this, "** Game closed                                                          **");
+                Logger.WriteInformation(this, "**************************************************************************");
+
+                //Exit form
+                Form.Close();
+
                 return;
             }
 
@@ -692,16 +698,6 @@ namespace Engine
             GameStatus.Clear();
 
             Counters.ClearFrame();
-
-            if (exiting)
-            {
-                //Exit form
-                Form.Close();
-
-                Logger.WriteInformation(this, "**************************************************************************");
-                Logger.WriteInformation(this, "** Game closed                                                          **");
-                Logger.WriteInformation(this, "**************************************************************************");
-            }
         }
         /// <summary>
         /// Update input

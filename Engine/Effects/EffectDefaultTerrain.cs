@@ -146,6 +146,10 @@ namespace Engine.Effects
         /// Spot light shadows map effect variable
         /// </summary>
         private readonly EngineEffectVariableTexture shadowMapSpotVar = null;
+        /// <summary>
+        /// Albedo effect variable
+        /// </summary>
+        private readonly EngineEffectVariableScalar albedoVar = null;
 
         /// <summary>
         /// Current diffuse map (Low resolution)
@@ -212,11 +216,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.hemiLightVar.GetValue<BufferLightHemispheric>();
+                return hemiLightVar.GetValue<BufferLightHemispheric>();
             }
             set
             {
-                this.hemiLightVar.SetValue(value);
+                hemiLightVar.SetValue(value);
             }
         }
         /// <summary>
@@ -226,11 +230,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.dirLightsVar.GetValue<BufferLightDirectional>(BufferLightDirectional.MAX);
+                return dirLightsVar.GetValue<BufferLightDirectional>(BufferLightDirectional.MAX);
             }
             set
             {
-                this.dirLightsVar.SetValue(value, BufferLightDirectional.MAX);
+                dirLightsVar.SetValue(value, BufferLightDirectional.MAX);
             }
         }
         /// <summary>
@@ -240,11 +244,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.pointLightsVar.GetValue<BufferLightPoint>(BufferLightPoint.MAX);
+                return pointLightsVar.GetValue<BufferLightPoint>(BufferLightPoint.MAX);
             }
             set
             {
-                this.pointLightsVar.SetValue(value, BufferLightPoint.MAX);
+                pointLightsVar.SetValue(value, BufferLightPoint.MAX);
             }
         }
         /// <summary>
@@ -254,11 +258,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.spotLightsVar.GetValue<BufferLightSpot>(BufferLightSpot.MAX);
+                return spotLightsVar.GetValue<BufferLightSpot>(BufferLightSpot.MAX);
             }
             set
             {
-                this.spotLightsVar.SetValue(value, BufferLightSpot.MAX);
+                spotLightsVar.SetValue(value, BufferLightSpot.MAX);
             }
         }
         /// <summary>
@@ -268,7 +272,7 @@ namespace Engine.Effects
         {
             get
             {
-                var v = this.lightCountVar.GetVector<Int3>();
+                var v = lightCountVar.GetVector<Int3>();
 
                 return new int[] { v.X, v.Y, v.Z };
             }
@@ -276,7 +280,7 @@ namespace Engine.Effects
             {
                 var v = new Int3(value[0], value[1], value[2]);
 
-                this.lightCountVar.Set(v);
+                lightCountVar.Set(v);
             }
         }
         /// <summary>
@@ -286,11 +290,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.eyePositionWorldVar.GetVector<Vector3>();
+                return eyePositionWorldVar.GetVector<Vector3>();
             }
             set
             {
-                this.eyePositionWorldVar.Set(value);
+                eyePositionWorldVar.Set(value);
             }
         }
         /// <summary>
@@ -300,11 +304,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.fogStartVar.GetFloat();
+                return fogStartVar.GetFloat();
             }
             set
             {
-                this.fogStartVar.Set(value);
+                fogStartVar.Set(value);
             }
         }
         /// <summary>
@@ -314,11 +318,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.fogRangeVar.GetFloat();
+                return fogRangeVar.GetFloat();
             }
             set
             {
-                this.fogRangeVar.Set(value);
+                fogRangeVar.Set(value);
             }
         }
         /// <summary>
@@ -328,11 +332,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.fogColorVar.GetVector<Color4>();
+                return fogColorVar.GetVector<Color4>();
             }
             set
             {
-                this.fogColorVar.Set(value);
+                fogColorVar.Set(value);
             }
         }
         /// <summary>
@@ -342,11 +346,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.worldVar.GetMatrix();
+                return worldVar.GetMatrix();
             }
             set
             {
-                this.worldVar.SetMatrix(value);
+                worldVar.SetMatrix(value);
             }
         }
         /// <summary>
@@ -356,11 +360,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.worldViewProjectionVar.GetMatrix();
+                return worldViewProjectionVar.GetMatrix();
             }
             set
             {
-                this.worldViewProjectionVar.SetMatrix(value);
+                worldViewProjectionVar.SetMatrix(value);
             }
         }
         /// <summary>
@@ -370,11 +374,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.textureResolutionVar.GetFloat();
+                return textureResolutionVar.GetFloat();
             }
             set
             {
-                this.textureResolutionVar.Set(value);
+                textureResolutionVar.Set(value);
             }
         }
         /// <summary>
@@ -384,11 +388,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.useColorDiffuseVar.GetBool();
+                return useColorDiffuseVar.GetBool();
             }
             set
             {
-                this.useColorDiffuseVar.Set(value);
+                useColorDiffuseVar.Set(value);
             }
         }
         /// <summary>
@@ -398,11 +402,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.useColorSpecularVar.GetBool();
+                return useColorSpecularVar.GetBool();
             }
             set
             {
-                this.useColorSpecularVar.Set(value);
+                useColorSpecularVar.Set(value);
             }
         }
         /// <summary>
@@ -412,11 +416,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.materialIndexVar.GetUInt();
+                return materialIndexVar.GetUInt();
             }
             set
             {
-                this.materialIndexVar.Set(value);
+                materialIndexVar.Set(value);
             }
         }
         /// <summary>
@@ -426,15 +430,15 @@ namespace Engine.Effects
         {
             get
             {
-                return this.diffuseMapLRVar.GetResource();
+                return diffuseMapLRVar.GetResource();
             }
             set
             {
-                if (this.currentDiffuseMapLR != value)
+                if (currentDiffuseMapLR != value)
                 {
-                    this.diffuseMapLRVar.SetResource(value);
+                    diffuseMapLRVar.SetResource(value);
 
-                    this.currentDiffuseMapLR = value;
+                    currentDiffuseMapLR = value;
 
                     Counters.TextureUpdates++;
                 }
@@ -447,15 +451,15 @@ namespace Engine.Effects
         {
             get
             {
-                return this.diffuseMapHRVar.GetResource();
+                return diffuseMapHRVar.GetResource();
             }
             set
             {
-                if (this.currentDiffuseMapHR != value)
+                if (currentDiffuseMapHR != value)
                 {
-                    this.diffuseMapHRVar.SetResource(value);
+                    diffuseMapHRVar.SetResource(value);
 
-                    this.currentDiffuseMapHR = value;
+                    currentDiffuseMapHR = value;
 
                     Counters.TextureUpdates++;
                 }
@@ -468,15 +472,15 @@ namespace Engine.Effects
         {
             get
             {
-                return this.normalMapVar.GetResource();
+                return normalMapVar.GetResource();
             }
             set
             {
-                if (this.currentNormalMap != value)
+                if (currentNormalMap != value)
                 {
-                    this.normalMapVar.SetResource(value);
+                    normalMapVar.SetResource(value);
 
-                    this.currentNormalMap = value;
+                    currentNormalMap = value;
 
                     Counters.TextureUpdates++;
                 }
@@ -489,15 +493,15 @@ namespace Engine.Effects
         {
             get
             {
-                return this.specularMapVar.GetResource();
+                return specularMapVar.GetResource();
             }
             set
             {
-                if (this.currentSpecularMap != value)
+                if (currentSpecularMap != value)
                 {
-                    this.specularMapVar.SetResource(value);
+                    specularMapVar.SetResource(value);
 
-                    this.currentSpecularMap = value;
+                    currentSpecularMap = value;
 
                     Counters.TextureUpdates++;
                 }
@@ -510,15 +514,15 @@ namespace Engine.Effects
         {
             get
             {
-                return this.colorTexturesVar.GetResource();
+                return colorTexturesVar.GetResource();
             }
             set
             {
-                if (this.currentColorTextures != value)
+                if (currentColorTextures != value)
                 {
-                    this.colorTexturesVar.SetResource(value);
+                    colorTexturesVar.SetResource(value);
 
-                    this.currentColorTextures = value;
+                    currentColorTextures = value;
 
                     Counters.TextureUpdates++;
                 }
@@ -531,15 +535,15 @@ namespace Engine.Effects
         {
             get
             {
-                return this.alphaMapVar.GetResource();
+                return alphaMapVar.GetResource();
             }
             set
             {
-                if (this.currentAlphaMap != value)
+                if (currentAlphaMap != value)
                 {
-                    this.alphaMapVar.SetResource(value);
+                    alphaMapVar.SetResource(value);
 
-                    this.currentAlphaMap = value;
+                    currentAlphaMap = value;
 
                     Counters.TextureUpdates++;
                 }
@@ -552,11 +556,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.parametersVar.GetVector<Vector4>();
+                return parametersVar.GetVector<Vector4>();
             }
             set
             {
-                this.parametersVar.Set(value);
+                parametersVar.Set(value);
             }
         }
         /// <summary>
@@ -566,11 +570,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.materialPaletteWidthVar.GetUInt();
+                return materialPaletteWidthVar.GetUInt();
             }
             set
             {
-                this.materialPaletteWidthVar.Set(value);
+                materialPaletteWidthVar.Set(value);
             }
         }
         /// <summary>
@@ -580,15 +584,15 @@ namespace Engine.Effects
         {
             get
             {
-                return this.materialPaletteVar.GetResource();
+                return materialPaletteVar.GetResource();
             }
             set
             {
-                if (this.currentMaterialPalette != value)
+                if (currentMaterialPalette != value)
                 {
-                    this.materialPaletteVar.SetResource(value);
+                    materialPaletteVar.SetResource(value);
 
-                    this.currentMaterialPalette = value;
+                    currentMaterialPalette = value;
 
                     Counters.TextureUpdates++;
                 }
@@ -601,11 +605,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.lodVar.GetVector<Vector3>();
+                return lodVar.GetVector<Vector3>();
             }
             set
             {
-                this.lodVar.Set(value);
+                lodVar.Set(value);
             }
         }
         /// <summary>
@@ -615,21 +619,21 @@ namespace Engine.Effects
         {
             get
             {
-                return this.anisotropic == true;
+                return anisotropic == true;
             }
             set
             {
-                if (this.anisotropic != value)
+                if (anisotropic != value)
                 {
-                    this.anisotropic = value;
+                    anisotropic = value;
 
-                    var sampler = this.anisotropic == true ?
-                        this.samplerAnisotropic.GetSamplerState() :
-                        this.samplerLinear.GetSamplerState();
+                    var sampler = anisotropic == true ?
+                        samplerAnisotropic.GetSamplerState() :
+                        samplerLinear.GetSamplerState();
 
-                    this.samplerDiffuseVar.SetValue(0, sampler);
-                    this.samplerNormalVar.SetValue(0, sampler);
-                    this.samplerSpecularVar.SetValue(0, sampler);
+                    samplerDiffuseVar.SetValue(0, sampler);
+                    samplerNormalVar.SetValue(0, sampler);
+                    samplerSpecularVar.SetValue(0, sampler);
                 }
             }
         }
@@ -640,15 +644,15 @@ namespace Engine.Effects
         {
             get
             {
-                return this.shadowMapDirectionalVar.GetResource();
+                return shadowMapDirectionalVar.GetResource();
             }
             set
             {
-                if (this.currentShadowMapDirectional != value)
+                if (currentShadowMapDirectional != value)
                 {
-                    this.shadowMapDirectionalVar.SetResource(value);
+                    shadowMapDirectionalVar.SetResource(value);
 
-                    this.currentShadowMapDirectional = value;
+                    currentShadowMapDirectional = value;
 
                     Counters.TextureUpdates++;
                 }
@@ -661,15 +665,15 @@ namespace Engine.Effects
         {
             get
             {
-                return this.shadowMapPointVar.GetResource();
+                return shadowMapPointVar.GetResource();
             }
             set
             {
-                if (this.currentShadowMapPoint != value)
+                if (currentShadowMapPoint != value)
                 {
-                    this.shadowMapPointVar.SetResource(value);
+                    shadowMapPointVar.SetResource(value);
 
-                    this.currentShadowMapPoint = value;
+                    currentShadowMapPoint = value;
 
                     Counters.TextureUpdates++;
                 }
@@ -682,18 +686,32 @@ namespace Engine.Effects
         {
             get
             {
-                return this.shadowMapSpotVar.GetResource();
+                return shadowMapSpotVar.GetResource();
             }
             set
             {
-                if (this.currentShadowMapSpot != value)
+                if (currentShadowMapSpot != value)
                 {
-                    this.shadowMapSpotVar.SetResource(value);
+                    shadowMapSpotVar.SetResource(value);
 
-                    this.currentShadowMapSpot = value;
+                    currentShadowMapSpot = value;
 
                     Counters.TextureUpdates++;
                 }
+            }
+        }
+        /// <summary>
+        /// Albedo
+        /// </summary>
+        protected float Albedo
+        {
+            get
+            {
+                return albedoVar.GetFloat();
+            }
+            set
+            {
+                albedoVar.Set(value);
             }
         }
 
@@ -706,54 +724,55 @@ namespace Engine.Effects
         public EffectDefaultTerrain(Graphics graphics, byte[] effect, bool compile)
             : base(graphics, effect, compile)
         {
-            this.TerrainAlphaMapForward = this.Effect.GetTechniqueByName("TerrainAlphaMapForward");
-            this.TerrainSlopesForward = this.Effect.GetTechniqueByName("TerrainSlopesForward");
-            this.TerrainFullForward = this.Effect.GetTechniqueByName("TerrainFullForward");
+            TerrainAlphaMapForward = Effect.GetTechniqueByName("TerrainAlphaMapForward");
+            TerrainSlopesForward = Effect.GetTechniqueByName("TerrainSlopesForward");
+            TerrainFullForward = Effect.GetTechniqueByName("TerrainFullForward");
 
             //Globals
-            this.materialPaletteWidthVar = this.Effect.GetVariableScalar("gMaterialPaletteWidth");
-            this.materialPaletteVar = this.Effect.GetVariableTexture("gMaterialPalette");
-            this.lodVar = this.Effect.GetVariableVector("gLOD");
+            materialPaletteWidthVar = Effect.GetVariableScalar("gMaterialPaletteWidth");
+            materialPaletteVar = Effect.GetVariableTexture("gMaterialPalette");
+            lodVar = Effect.GetVariableVector("gLOD");
 
             //Per frame
-            this.worldVar = this.Effect.GetVariableMatrix("gVSWorld");
-            this.worldViewProjectionVar = this.Effect.GetVariableMatrix("gVSWorldViewProjection");
-            this.textureResolutionVar = this.Effect.GetVariableScalar("gVSTextureResolution");
+            worldVar = Effect.GetVariableMatrix("gVSWorld");
+            worldViewProjectionVar = Effect.GetVariableMatrix("gVSWorldViewProjection");
+            textureResolutionVar = Effect.GetVariableScalar("gVSTextureResolution");
 
-            this.eyePositionWorldVar = this.Effect.GetVariableVector("gPSEyePositionWorld");
-            this.lightCountVar = this.Effect.GetVariableVector("gPSLightCount");
-            this.fogColorVar = this.Effect.GetVariableVector("gPSFogColor");
-            this.fogStartVar = this.Effect.GetVariableScalar("gPSFogStart");
-            this.fogRangeVar = this.Effect.GetVariableScalar("gPSFogRange");
-            this.hemiLightVar = this.Effect.GetVariable("gPSHemiLight");
-            this.dirLightsVar = this.Effect.GetVariable("gPSDirLights");
-            this.pointLightsVar = this.Effect.GetVariable("gPSPointLights");
-            this.spotLightsVar = this.Effect.GetVariable("gPSSpotLights");
-            this.shadowMapDirectionalVar = this.Effect.GetVariableTexture("gPSShadowMapDir");
-            this.shadowMapPointVar = this.Effect.GetVariableTexture("gPSShadowMapPoint");
-            this.shadowMapSpotVar = this.Effect.GetVariableTexture("gPSShadowMapSpot");
+            eyePositionWorldVar = Effect.GetVariableVector("gPSEyePositionWorld");
+            lightCountVar = Effect.GetVariableVector("gPSLightCount");
+            fogColorVar = Effect.GetVariableVector("gPSFogColor");
+            fogStartVar = Effect.GetVariableScalar("gPSFogStart");
+            fogRangeVar = Effect.GetVariableScalar("gPSFogRange");
+            hemiLightVar = Effect.GetVariable("gPSHemiLight");
+            dirLightsVar = Effect.GetVariable("gPSDirLights");
+            pointLightsVar = Effect.GetVariable("gPSPointLights");
+            spotLightsVar = Effect.GetVariable("gPSSpotLights");
+            shadowMapDirectionalVar = Effect.GetVariableTexture("gPSShadowMapDir");
+            shadowMapPointVar = Effect.GetVariableTexture("gPSShadowMapPoint");
+            shadowMapSpotVar = Effect.GetVariableTexture("gPSShadowMapSpot");
+            albedoVar = Effect.GetVariableScalar("gPSAlbedo");
 
             //Per object
-            this.parametersVar = this.Effect.GetVariableVector("gPSParams");
-            this.useColorDiffuseVar = this.Effect.GetVariableScalar("gPSUseColorDiffuse");
-            this.useColorSpecularVar = this.Effect.GetVariableScalar("gPSUseColorSpecular");
-            this.materialIndexVar = this.Effect.GetVariableScalar("gPSMaterialIndex");
-            this.normalMapVar = this.Effect.GetVariableTexture("gPSNormalMapArray");
-            this.specularMapVar = this.Effect.GetVariableTexture("gPSSpecularMapArray");
-            this.colorTexturesVar = this.Effect.GetVariableTexture("gPSColorTextureArray");
-            this.alphaMapVar = this.Effect.GetVariableTexture("gPSAlphaTexture");
-            this.diffuseMapLRVar = this.Effect.GetVariableTexture("gPSDiffuseMapLRArray");
-            this.diffuseMapHRVar = this.Effect.GetVariableTexture("gPSDiffuseMapHRArray");
+            parametersVar = Effect.GetVariableVector("gPSParams");
+            useColorDiffuseVar = Effect.GetVariableScalar("gPSUseColorDiffuse");
+            useColorSpecularVar = Effect.GetVariableScalar("gPSUseColorSpecular");
+            materialIndexVar = Effect.GetVariableScalar("gPSMaterialIndex");
+            normalMapVar = Effect.GetVariableTexture("gPSNormalMapArray");
+            specularMapVar = Effect.GetVariableTexture("gPSSpecularMapArray");
+            colorTexturesVar = Effect.GetVariableTexture("gPSColorTextureArray");
+            alphaMapVar = Effect.GetVariableTexture("gPSAlphaTexture");
+            diffuseMapLRVar = Effect.GetVariableTexture("gPSDiffuseMapLRArray");
+            diffuseMapHRVar = Effect.GetVariableTexture("gPSDiffuseMapHRArray");
 
             //Samplers
-            this.samplerDiffuseVar = this.Effect.GetVariableSampler("SamplerDiffuse");
-            this.samplerSpecularVar = this.Effect.GetVariableSampler("SamplerSpecular");
-            this.samplerNormalVar = this.Effect.GetVariableSampler("SamplerNormal");
+            samplerDiffuseVar = Effect.GetVariableSampler("SamplerDiffuse");
+            samplerSpecularVar = Effect.GetVariableSampler("SamplerSpecular");
+            samplerNormalVar = Effect.GetVariableSampler("SamplerNormal");
 
             //Initialize states
-            this.samplerPoint = EngineSamplerState.Point(graphics);
-            this.samplerLinear = EngineSamplerState.Linear(graphics);
-            this.samplerAnisotropic = EngineSamplerState.Anisotropic(graphics, 8);
+            samplerPoint = EngineSamplerState.Point(graphics);
+            samplerLinear = EngineSamplerState.Linear(graphics);
+            samplerAnisotropic = EngineSamplerState.Anisotropic(graphics, 8);
         }
         /// <summary>
         /// Destructor
@@ -770,21 +789,14 @@ namespace Engine.Effects
         {
             if (disposing)
             {
-                if (this.samplerPoint != null)
-                {
-                    this.samplerPoint.Dispose();
-                    this.samplerPoint = null;
-                }
-                if (this.samplerLinear != null)
-                {
-                    this.samplerLinear.Dispose();
-                    this.samplerLinear = null;
-                }
-                if (this.samplerAnisotropic != null)
-                {
-                    this.samplerAnisotropic.Dispose();
-                    this.samplerAnisotropic = null;
-                }
+                samplerPoint?.Dispose();
+                samplerPoint = null;
+
+                samplerLinear?.Dispose();
+                samplerLinear = null;
+
+                samplerAnisotropic?.Dispose();
+                samplerAnisotropic = null;
             }
 
             base.Dispose(disposing);
@@ -805,10 +817,10 @@ namespace Engine.Effects
             float lod2,
             float lod3)
         {
-            this.MaterialPalette = materialPalette;
-            this.MaterialPaletteWidth = materialPaletteWidth;
+            MaterialPalette = materialPalette;
+            MaterialPaletteWidth = materialPaletteWidth;
 
-            this.LOD = new Vector3(lod1, lod2, lod3);
+            LOD = new Vector3(lod1, lod2, lod3);
         }
         /// <summary>
         /// Update per frame data
@@ -819,46 +831,48 @@ namespace Engine.Effects
             float textureResolution,
             DrawContext context)
         {
-            this.World = Matrix.Identity;
-            this.WorldViewProjection = context.ViewProjection;
-            this.TextureResolution = textureResolution;
+            World = Matrix.Identity;
+            WorldViewProjection = context.ViewProjection;
+            TextureResolution = textureResolution;
 
             var lights = context.Lights;
             if (lights != null)
             {
-                this.EyePositionWorld = context.EyePosition;
+                EyePositionWorld = context.EyePosition;
 
-                this.HemiLight = BufferLightHemispheric.Build(lights.GetVisibleHemisphericLight());
-                this.DirLights = BufferLightDirectional.Build(lights.GetVisibleDirectionalLights(), out int dirLength);
-                this.PointLights = BufferLightPoint.Build(lights.GetVisiblePointLights(), out int pointLength);
-                this.SpotLights = BufferLightSpot.Build(lights.GetVisibleSpotLights(), out int spotLength);
-                this.LightCount = new[] { dirLength, pointLength, spotLength };
+                HemiLight = BufferLightHemispheric.Build(lights.GetVisibleHemisphericLight());
+                DirLights = BufferLightDirectional.Build(lights.GetVisibleDirectionalLights(), out int dirLength);
+                PointLights = BufferLightPoint.Build(lights.GetVisiblePointLights(), out int pointLength);
+                SpotLights = BufferLightSpot.Build(lights.GetVisibleSpotLights(), out int spotLength);
+                LightCount = new[] { dirLength, pointLength, spotLength };
+                Albedo = lights.Albedo;
 
-                this.FogStart = lights.FogStart;
-                this.FogRange = lights.FogRange;
-                this.FogColor = lights.FogColor;
+                FogStart = lights.FogStart;
+                FogRange = lights.FogRange;
+                FogColor = lights.FogColor;
 
-                this.ShadowMapDirectional = context.ShadowMapDirectional?.Texture;
-                this.ShadowMapPoint = context.ShadowMapPoint?.Texture;
-                this.ShadowMapSpot = context.ShadowMapSpot?.Texture;
+                ShadowMapDirectional = context.ShadowMapDirectional?.Texture;
+                ShadowMapPoint = context.ShadowMapPoint?.Texture;
+                ShadowMapSpot = context.ShadowMapSpot?.Texture;
             }
             else
             {
-                this.EyePositionWorld = Vector3.Zero;
+                EyePositionWorld = Vector3.Zero;
 
-                this.HemiLight = BufferLightHemispheric.Default;
-                this.DirLights = BufferLightDirectional.Default;
-                this.PointLights = BufferLightPoint.Default;
-                this.SpotLights = BufferLightSpot.Default;
-                this.LightCount = new[] { 0, 0, 0 };
+                HemiLight = BufferLightHemispheric.Default;
+                DirLights = BufferLightDirectional.Default;
+                PointLights = BufferLightPoint.Default;
+                SpotLights = BufferLightSpot.Default;
+                LightCount = new[] { 0, 0, 0 };
+                Albedo = 1;
 
-                this.FogStart = 0;
-                this.FogRange = 0;
-                this.FogColor = Color.Transparent;
+                FogStart = 0;
+                FogRange = 0;
+                FogColor = Color.Transparent;
 
-                this.ShadowMapDirectional = null;
-                this.ShadowMapPoint = null;
-                this.ShadowMapSpot = null;
+                ShadowMapDirectional = null;
+                ShadowMapPoint = null;
+                ShadowMapSpot = null;
             }
         }
         /// <summary>
@@ -868,22 +882,22 @@ namespace Engine.Effects
         public void UpdatePerObject(
             EffectTerrainState state)
         {
-            this.Anisotropic = state.UseAnisotropic;
+            Anisotropic = state.UseAnisotropic;
 
-            this.NormalMap = state.NormalMap;
-            this.SpecularMap = state.SpecularMap;
-            this.UseColorSpecular = state.SpecularMap != null;
+            NormalMap = state.NormalMap;
+            SpecularMap = state.SpecularMap;
+            UseColorSpecular = state.SpecularMap != null;
 
-            this.AlphaMap = state.AlphaMap;
-            this.ColorTextures = state.ColorTextures;
-            this.UseColorDiffuse = this.ColorTextures != null;
+            AlphaMap = state.AlphaMap;
+            ColorTextures = state.ColorTextures;
+            UseColorDiffuse = ColorTextures != null;
 
-            this.DiffuseMapLR = state.DiffuseMapLR;
-            this.DiffuseMapHR = state.DiffuseMapHR;
+            DiffuseMapLR = state.DiffuseMapLR;
+            DiffuseMapHR = state.DiffuseMapHR;
 
-            this.Parameters = new Vector4(0, state.Proportion, state.SlopeRanges.X, state.SlopeRanges.Y);
+            Parameters = new Vector4(0, state.Proportion, state.SlopeRanges.X, state.SlopeRanges.Y);
 
-            this.MaterialIndex = state.MaterialIndex;
+            MaterialIndex = state.MaterialIndex;
         }
     }
 }

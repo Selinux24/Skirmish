@@ -106,22 +106,22 @@ namespace Engine.Effects
         /// <param name="light">Light</param>
         public BufferLightSpot(ISceneLightSpot light)
         {
-            this.Position = light.Position;
-            this.Direction = light.Direction;
-            this.DiffuseColor = light.DiffuseColor;
-            this.SpecularColor = light.SpecularColor;
-            this.Intensity = light.Intensity;
-            this.Intensity = light.Intensity;
-            this.Angle = light.AngleRadians;
-            this.Radius = light.Radius;
-            this.CastShadow = light.CastShadow ? 1 : 0;
-            this.MapIndex = light.ShadowMapIndex;
-            this.MapCount = light.ShadowMapCount;
+            Position = light.Position;
+            Direction = light.Direction;
+            DiffuseColor = light.DiffuseColor;
+            SpecularColor = light.SpecularColor;
+            Intensity = light.Intensity;
+            Intensity = light.Intensity;
+            Angle = light.AngleRadians;
+            Radius = light.Radius;
+            CastShadow = light.CastShadowsMarked ? 1 : 0;
+            MapIndex = light.ShadowMapIndex;
+            MapCount = light.ShadowMapCount;
 
-            this.FromLightVP = Matrix.Identity;
+            FromLightVP = Matrix.Identity;
             if (light.FromLightVP?.Length > 0)
             {
-                this.FromLightVP = Matrix.Transpose(light.FromLightVP[0]);
+                FromLightVP = Matrix.Transpose(light.FromLightVP[0]);
             }
         }
 

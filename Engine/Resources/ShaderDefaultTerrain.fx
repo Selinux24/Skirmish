@@ -29,7 +29,8 @@ cbuffer cbPSPerFrame : register(b3)
 	float4 gPSFogColor;
 	float gPSFogStart;
 	float gPSFogRange;
-	float2 PAD32;
+    float gPSAlbedo;
+	float PAD32;
 	float3 gPSEyePositionWorld;
 	float PAD33;
 };
@@ -90,6 +91,7 @@ float4 PSTerrainAlphaMap(PSVertexTerrain input) : SV_TARGET
 	lInput.dirLightsCount = gPSLightCount.x;
 	lInput.pointLightsCount = gPSLightCount.y;
 	lInput.spotLightsCount = gPSLightCount.z;
+    lInput.albedo = gPSAlbedo;
 
 	lInput.shadowMapDir = gPSShadowMapDir;
     lInput.shadowMapPoint = gPSShadowMapPoint;
@@ -128,6 +130,7 @@ float4 PSTerrainSlopes(PSVertexTerrain input) : SV_TARGET
 	lInput.dirLightsCount = gPSLightCount.x;
 	lInput.pointLightsCount = gPSLightCount.y;
 	lInput.spotLightsCount = gPSLightCount.z;
+    lInput.albedo = gPSAlbedo;
 
 	lInput.shadowMapDir = gPSShadowMapDir;
     lInput.shadowMapPoint = gPSShadowMapPoint;
@@ -166,6 +169,7 @@ float4 PSTerrainFull(PSVertexTerrain input) : SV_TARGET
 	lInput.dirLightsCount = gPSLightCount.x;
 	lInput.pointLightsCount = gPSLightCount.y;
 	lInput.spotLightsCount = gPSLightCount.z;
+    lInput.albedo = gPSAlbedo;
 
 	lInput.shadowMapDir = gPSShadowMapDir;
     lInput.shadowMapPoint = gPSShadowMapPoint;

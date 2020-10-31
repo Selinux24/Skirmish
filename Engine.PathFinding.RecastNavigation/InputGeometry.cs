@@ -90,7 +90,7 @@ namespace Engine.PathFinding.RecastNavigation
             return GraphFile.GetHash(settings, tris);
         }
         /// <inheritdoc/>
-        public override async Task<IGraph> Load(string fileName, string hash)
+        public override async Task<IGraph> Load(string fileName, string hash = null)
         {
             // Load file
             var file = await GraphFile.Load(fileName);

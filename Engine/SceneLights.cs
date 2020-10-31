@@ -137,9 +137,9 @@ namespace Engine
         /// </summary>
         public Color4 FogColor { get; protected set; }
         /// <summary>
-        /// Intensity
+        /// Albedo
         /// </summary>
-        public float Intensity { get; protected set; }
+        public float Albedo { get; protected set; } = 1f;
         /// <summary>
         /// Gets light by name
         /// </summary>
@@ -406,7 +406,7 @@ namespace Engine
                     float f1 = l1.Radius / (d1 == 0 ? 1 : d1);
                     float f2 = l2.Radius / (d2 == 0 ? 1 : d2);
 
-                    return f1.CompareTo(f2);
+                    return -f1.CompareTo(f2);
                 });
             }
 
@@ -443,7 +443,7 @@ namespace Engine
                     float f1 = l1.Radius / (d1 == 0 ? 1 : d1);
                     float f2 = l2.Radius / (d2 == 0 ? 1 : d2);
 
-                    return f1.CompareTo(f2);
+                    return -f1.CompareTo(f2);
                 });
             }
 
@@ -491,12 +491,13 @@ namespace Engine
         /// <summary>
         /// Gets a collection of directional lights that cast shadow
         /// </summary>
+        /// <param name="eyePosition">Eye position</param>
         /// <returns>Returns a light collection</returns>
-        public IEnumerable<ISceneLightDirectional> GetDirectionalShadowCastingLights()
+        public IEnumerable<ISceneLightDirectional> GetDirectionalShadowCastingLights(Vector3 eyePosition)
         {
             return visibleLights
-                .OfType<SceneLightDirectional>()
-                .Where(l => l.CastShadow)
+                .OfType<ISceneLightDirectional>()
+                .Where(l => l.MarkForShadowCasting(eyePosition))
                 .ToArray();
         }
         /// <summary>
@@ -506,20 +507,10 @@ namespace Engine
         /// <returns>Returns a light collection</returns>
         public IEnumerable<ISceneLightPoint> GetPointShadowCastingLights(Vector3 eyePosition)
         {
-            float lDistanceSquared = GameEnvironment.LODDistanceMedium * GameEnvironment.LODDistanceMedium;
-
             return visibleLights
                 .OfType<ISceneLightPoint>()
-                .Where(l =>
-                {
-                    if (l.CastShadow)
-                    {
-                        return Vector3.DistanceSquared(l.Position, eyePosition) < lDistanceSquared;
-                    }
-
-                    return false;
-                })
-                .OrderBy(lPoint => Vector3.DistanceSquared(lPoint.Position, eyePosition))
+                .Where(l => l.MarkForShadowCasting(eyePosition))
+                .OrderBy(l => Vector3.DistanceSquared(l.Position, eyePosition))
                 .ToArray();
         }
         /// <summary>
@@ -529,20 +520,10 @@ namespace Engine
         /// <returns>Returns a light collection</returns>
         public IEnumerable<ISceneLightSpot> GetSpotShadowCastingLights(Vector3 eyePosition)
         {
-            float lDistanceSquared = GameEnvironment.LODDistanceMedium * GameEnvironment.LODDistanceMedium;
-
             return visibleLights
                 .OfType<ISceneLightSpot>()
-                .Where(l =>
-                {
-                    if (l.CastShadow)
-                    {
-                        return Vector3.DistanceSquared(l.Position, eyePosition) < lDistanceSquared;
-                    }
-
-                    return false;
-                })
-                .OrderBy(lSpot => Vector3.DistanceSquared(lSpot.Position, eyePosition))
+                .Where(l => l.MarkForShadowCasting(eyePosition))
+                .OrderBy(l => Vector3.DistanceSquared(l.Position, eyePosition))
                 .ToArray();
         }
 
@@ -559,7 +540,7 @@ namespace Engine
             }
 
             float b = Math.Max(0, -(float)Math.Cos(timeOfDay.Elevation) + 0.15f) * 1.5f;
-            Intensity = Math.Min(b, 1f);
+            Albedo = Math.Min(b, 1f);
 
             Vector3 keyDir = timeOfDay.LightDirection;
             Vector3 backDir = -Vector3.Reflect(keyDir, Vector3.Up);
@@ -601,7 +582,7 @@ namespace Engine
                 backLight.Direction = backDir;
             }
 
-            FogColor = BaseFogColor * Intensity;
+            FogColor = BaseFogColor * Albedo;
         }
         /// <summary>
         /// Gets the sun color based on time of day

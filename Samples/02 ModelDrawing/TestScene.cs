@@ -110,7 +110,6 @@ namespace ModelDrawing
             };
 
             var material = MaterialContent.Default;
-            material.AmbientColor = Color.White * 0.4f;
             material.DiffuseTexture = "resources/floor.png";
 
             var content = ModelContent.GenerateTriangleList(vertices, indices, material);
