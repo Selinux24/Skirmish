@@ -44,12 +44,12 @@ namespace Engine.Common
         /// <param name="mesh">Mesh object</param>
         public void Add(string meshName, string materialName, Mesh mesh)
         {
-            if (!this.ContainsKey(meshName))
+            if (!ContainsKey(meshName))
             {
-                this.Add(meshName, new MeshMaterialsDictionary());
+                Add(meshName, new MeshMaterialsDictionary());
             }
 
-            this[meshName].Add(string.IsNullOrEmpty(materialName) ? ModelContent.NoMaterial : materialName, mesh);
+            this[meshName].Add(string.IsNullOrEmpty(materialName) ? ContentData.NoMaterial : materialName, mesh);
         }
     }
 }

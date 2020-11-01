@@ -134,18 +134,13 @@ namespace SceneTest.SceneMaterials
             MaterialContent mat = MaterialContent.Default;
             mat.DiffuseTexture = "SceneMaterials/floor.png";
 
-            var content = ModelContent.GenerateTriangleList(vertices, indices, mat);
-
             var desc = new ModelDescription()
             {
                 CastShadow = true,
                 DeferredEnabled = true,
                 DepthEnabled = true,
                 UseAnisotropicFiltering = true,
-                Content = new ContentDescription()
-                {
-                    ModelContent = content,
-                }
+                Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
             await this.AddComponentModel("Floor", desc);
@@ -155,17 +150,13 @@ namespace SceneTest.SceneMaterials
             var sphere = GeometryUtil.CreateSphere(radius, stacks, stacks);
             var vertices = VertexData.FromDescriptor(sphere);
             var indices = sphere.Indices;
-            var content = ModelContent.GenerateTriangleList(vertices, indices, materials);
 
             var desc = new ModelInstancedDescription()
             {
                 CastShadow = true,
                 UseAnisotropicFiltering = true,
                 Instances = count,
-                Content = new ContentDescription()
-                {
-                    ModelContent = content,
-                }
+                Content = ContentDescription.FromContentData(vertices, indices, materials),
             };
 
             var model = await this.AddComponentModelInstanced(name, desc);

@@ -91,7 +91,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             foreach (var t in triangles)
             {
-                var bbox = BoundingBox.FromPoints(t.GetVertices());
+                var bbox = BoundingBox.FromPoints(t.GetVertices().ToArray());
 
                 items.Add(new BoundsItem
                 {
@@ -247,7 +247,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the triangles in the specified node</returns>
         public IEnumerable<Triangle> GetTriangles(int index)
         {
-            return GetTriangles(this.nodes[index]);
+            return GetTriangles(nodes[index]);
         }
         /// <summary>
         /// Gets the triangles in the specified node

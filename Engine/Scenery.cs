@@ -41,7 +41,7 @@ namespace Engine
             /// <param name="content">Content</param>
             /// <param name="node">Quadtree node</param>
             /// <returns>Returns the new generated patch</returns>
-            public static async Task<SceneryPatch> CreatePatch(Game game, string name, ModelContent content, PickingQuadTreeNode<Triangle> node)
+            public static async Task<SceneryPatch> CreatePatch(Game game, string name, ContentData content, PickingQuadTreeNode<Triangle> node)
             {
                 var desc = new DrawingDataDescription()
                 {
@@ -239,7 +239,7 @@ namespace Engine
         /// <summary>
         /// Model content
         /// </summary>
-        private readonly ModelContent content;
+        private readonly ContentData content;
         /// <summary>
         /// Scenery patch list
         /// </summary>

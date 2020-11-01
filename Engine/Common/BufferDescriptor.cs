@@ -33,18 +33,7 @@ namespace Engine.Common
             }
         }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public BufferDescriptor()
-        {
-
-        }
-
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
             return $"Id: {Id ?? "Empty"}; Ready: {Ready} BufferDescriptionIndex: {BufferDescriptionIndex}; BufferOffset: {BufferOffset}; Count: {Count}; Next: {BufferOffset + Count};";

@@ -212,7 +212,6 @@ namespace SceneTest.SceneTanksGame
                         res.ThrowExceptions();
                     }
 
-                    PrepareUI();
                     PrepareModels();
                     UpdateCamera(true);
 
@@ -597,10 +596,6 @@ namespace SceneTest.SceneTanksGame
                 trajectoryMarkerPool[i] = trajectoryMarker;
             }
         }
-        private void PrepareUI()
-        {
-
-        }
 
         private Task[] InitializeModels()
         {
@@ -620,11 +615,7 @@ namespace SceneTest.SceneTanksGame
             {
                 CastShadow = true,
                 Optimize = false,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = "SceneTanksGame/Leopard",
-                    ModelContentFilename = "Leopard.xml",
-                },
+                Content = ContentDescription.FromFile("SceneTanksGame/Leopard", "Leopard.xml"),
                 Instances = 2,
                 TransformNames = new[] { "Barrel-mesh", "Turret-mesh", "Hull-mesh" },
                 TransformDependences = new[] { 1, 2, -1 },
@@ -666,7 +657,7 @@ namespace SceneTest.SceneTanksGame
                 Scale = 0.2f,
             };
             GroundDescription groundDesc = GroundDescription.FromHeightmap(noiseMap, cellSize, terrainHeight, heightCurve, textures, 2);
-            groundDesc.HeightmapDescription.UseFalloff = true;
+            groundDesc.Heightmap.UseFalloff = true;
 
             terrain = await this.AddComponentScenery("Terrain", groundDesc, SceneObjectUsages.Ground, layerModels);
             terrain.Visible = false;
@@ -699,7 +690,10 @@ namespace SceneTest.SceneTanksGame
             var material = MaterialContent.Default;
             material.DiffuseTexture = "SceneTanksGame/Landscape.png";
 
-            var content = ModelDescription.FromData(vertices, indices, material);
+            var content = new ModelDescription
+            {
+                Content = ContentDescription.FromContentData(vertices, indices, material),
+            };
 
             landScape = await this.AddComponentModel("Landscape", content, SceneObjectUsages.UI, layerModels);
             landScape.Visible = false;
@@ -710,7 +704,10 @@ namespace SceneTest.SceneTanksGame
             var material = MaterialContent.Default;
             material.DiffuseColor = Color.Black;
 
-            var content = ModelDescription.FromData(sphereDesc, material);
+            var content = new ModelDescription
+            {
+                Content = ContentDescription.FromContentData(sphereDesc, material),
+            };
             content.DepthEnabled = false;
 
             projectile = await this.AddComponentModel("Projectile", content, SceneObjectUsages.None, layerModels + 100);
@@ -1033,8 +1030,6 @@ namespace SceneTest.SceneTanksGame
                     Game.Input.KeyJustReleased(Keys.Escape))
                 {
                     ToggleFreeCamera();
-
-                    return;
                 }
             }
             else
@@ -1411,7 +1406,6 @@ You will lost all the game progress.",
 
             Vector3 outPosition = Vector3.Up * (terrainTop + 1);
             projectile.Manipulator.SetPosition(outPosition, true);
-            var sph = projectile.GetBoundingSphere(true);
             projectile.Visible = false;
 
             if (impact)

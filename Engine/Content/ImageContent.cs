@@ -16,17 +16,17 @@ namespace Engine.Content
         {
             get
             {
-                return this.Streams.FirstOrDefault();
+                return Streams.FirstOrDefault();
             }
             set
             {
                 if (value == null)
                 {
-                    this.Streams = new MemoryStream[] { };
+                    Streams = new MemoryStream[] { };
                 }
                 else
                 {
-                    this.Streams = new[] { value };
+                    Streams = new[] { value };
                 }
             }
         }
@@ -41,17 +41,17 @@ namespace Engine.Content
         {
             get
             {
-                return this.Paths.FirstOrDefault();
+                return Paths.FirstOrDefault();
             }
             set
             {
                 if (value == null)
                 {
-                    this.Paths = new string[] { };
+                    Paths = new string[] { };
                 }
                 else
                 {
-                    this.Paths = new[] { value };
+                    Paths = new[] { value };
                 }
             }
         }
@@ -66,7 +66,7 @@ namespace Engine.Content
         {
             get
             {
-                return (this.Paths.Count() > 1) || (this.Streams.Count() > 1);
+                return (Paths.Count() > 1) || (Streams.Count() > 1);
             }
         }
         /// <summary>
@@ -80,7 +80,7 @@ namespace Engine.Content
         {
             get
             {
-                return this.Paths.Count() + this.Streams.Count();
+                return Paths.Count() + Streams.Count();
             }
         }
 
@@ -168,27 +168,24 @@ namespace Engine.Content
             };
         }
 
-        /// <summary>
-        /// Gets text representation of instance
-        /// </summary>
-        /// <returns>Returns text representation of instance</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
-            if (!string.IsNullOrWhiteSpace(this.Path))
+            if (!string.IsNullOrWhiteSpace(Path))
             {
-                return string.Format("Path: {0}; ", this.Path);
+                return $"Path: {Path};";
             }
-            if (this.Paths.Any())
+            if (Paths.Any())
             {
-                return string.Format("Path array: {0}; ", this.Paths.Count());
+                return $"Path array: {Paths.Count()} elements;";
             }
-            else if (this.Stream != null)
+            else if (Stream != null)
             {
-                return string.Format("Stream: {0} bytes; ", this.Stream.Length);
+                return $"Stream: {Stream.Length} bytes;";
             }
-            else if (this.Streams.Any())
+            else if (Streams.Any())
             {
-                return string.Format("Stream array: {0}; ", this.Streams.Count());
+                return $"Stream array: {Streams.Count()} elements;";
             }
             else
             {

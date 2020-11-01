@@ -202,13 +202,15 @@
     <Compile Include="Common\BufferManagerIndices.cs" />
     <Compile Include="Common\BufferManagerInstances.cs" />
     <Compile Include="Common\GeometryHelper.cs" />
+    <Compile Include="Common\IInstacingData.cs" />
     <Compile Include="Common\IntersectionHelper.cs" />
     <Compile Include="Common\IntersectionTriangle.cs" />
     <Compile Include="Common\NormalDescriptor.cs" />
-    <Compile Include="Common\OrientedBoundingBox.cs" />
+    <Compile Include="Common\OrientedBoundingBoxExtensions.cs" />
     <Compile Include="Common\BufferManagerVertices.cs" />
     <Compile Include="Common\RayPickingHelper.cs" />
     <Compile Include="Common\VertexFont.cs" />
+    <Compile Include="Content\SubMeshContent.cs" />
     <Compile Include="GameAudioManager.cs" />
     <Compile Include="Audio\GameAudio.cs" />
     <Compile Include="Audio\GameAudioEventArgs.cs" />
@@ -507,7 +509,7 @@
     <Compile Include="Helpers\ResourceStatusItem.cs" />
     <Compile Include="LensFlareDescription.cs" />
     <Compile Include="UI\UIMinimapDescription.cs" />
-    <Compile Include="ModelContentDescription.cs" />
+    <Compile Include="Content\ContentDataDescription.cs" />
     <Compile Include="ModelDescription.cs" />
     <Compile Include="ModelInstance.cs" />
     <Compile Include="ModelInstancedDescription.cs" />
@@ -572,10 +574,9 @@
     <Compile Include="Content\ContentManager.cs" />
     <Compile Include="Content\ControllerContent.cs" />
     <Compile Include="Content\MaterialContent.cs" />
-    <Compile Include="Content\SubMeshContent.cs" />
     <Compile Include="Content\ImageContent.cs" />
     <Compile Include="Content\MeshContent.cs" />
-    <Compile Include="Content\ModelContent.cs" />
+    <Compile Include="Content\ContentData.cs" />
     <Compile Include="Content\SkinningContent.cs" />
     <Compile Include="Common\VertexData.cs" />
     <Compile Include="Common\Weight.cs" />

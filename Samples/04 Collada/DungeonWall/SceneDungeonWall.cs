@@ -130,17 +130,13 @@ namespace Collada.DungeonWall
             var sphere = GeometryUtil.CreateSphere(0.05f, 16, 5);
             var vertices = VertexData.FromDescriptor(sphere);
             var indices = sphere.Indices;
-            var content = ModelContent.GenerateTriangleList(vertices, indices, mat);
 
             var desc = new ModelDescription()
             {
                 CastShadow = false,
                 DeferredEnabled = true,
                 DepthEnabled = true,
-                Content = new ContentDescription()
-                {
-                    ModelContent = content,
-                }
+                Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
             lightEmitter = await this.AddComponentModel("Emitter", desc);

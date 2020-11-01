@@ -99,8 +99,6 @@ namespace Instancing
             mat.DiffuseTexture = "resources/ground/gravel_01_diffuse.jpg";
             mat.NormalMapTexture = "resources/ground/gravel_01_normal.jpg";
 
-            var content = ModelContent.GenerateTriangleList(vertices, indices, mat);
-
             var desc = new ModelInstancedDescription()
             {
                 CastShadow = true,
@@ -108,10 +106,7 @@ namespace Instancing
                 DepthEnabled = true,
                 UseAnisotropicFiltering = true,
                 Instances = side * side,
-                Content = new ContentDescription()
-                {
-                    ModelContent = content,
-                }
+                Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
             var floor = await this.AddComponentModelInstanced("Floor", desc);
@@ -143,11 +138,7 @@ namespace Instancing
                 Instances = instances,
                 BlendMode = BlendModes.DefaultTransparent,
                 UseAnisotropicFiltering = true,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = @"Resources/Trees",
-                    ModelContentFilename = @"tree.xml",
-                }
+                Content = ContentDescription.FromFile(@"Resources/Trees",@"tree.xml"),
             };
             var trees = await this.AddComponentModelInstanced("Trees", treeDesc, SceneObjectUsages.None, layerTerrain);
 
@@ -188,11 +179,7 @@ namespace Instancing
                 Instances = 100,
                 CastShadow = true,
                 UseAnisotropicFiltering = true,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = @"Resources/Soldier",
-                    ModelContentFilename = @"soldier_anim2.xml",
-                }
+                Content = ContentDescription.FromFile(@"Resources/Soldier",@"soldier_anim2.xml"),
             };
             troops = await this.AddComponentModelInstanced("Troops", tDesc, SceneObjectUsages.Agent, layerObjects);
             troops.MaximumCount = -1;
@@ -247,11 +234,7 @@ namespace Instancing
                     Instances = 40,
                     CastShadow = true,
                     UseAnisotropicFiltering = true,
-                    Content = new ContentDescription()
-                    {
-                        ContentFolder = "Resources/Wall",
-                        ModelContentFilename = "wall.xml",
-                    }
+                    Content = ContentDescription.FromFile("Resources/Wall","wall.xml"),
                 });
 
             BoundingBox bbox = wall[0].GetBoundingBox();

@@ -899,7 +899,7 @@ namespace Engine.Common
         {
             Vector3 boxExtents = box.GetExtents();
 
-            BoundingBox triBounds = BoundingBox.FromPoints(triangle.GetVertices());
+            BoundingBox triBounds = BoundingBox.FromPoints(triangle.GetVertices().ToArray());
             Vector3 triExtents = triBounds.GetExtents();
             Vector3 triCenter = triBounds.GetCenter();
 

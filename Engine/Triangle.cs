@@ -47,7 +47,7 @@ namespace Engine
         {
             get
             {
-                return this.Plane.Normal;
+                return Plane.Normal;
             }
         }
         /// <summary>
@@ -57,7 +57,7 @@ namespace Engine
         {
             get
             {
-                return Vector3.Min(this.Point1, Vector3.Min(this.Point2, this.Point3));
+                return Vector3.Min(Point1, Vector3.Min(Point2, Point3));
             }
         }
         /// <summary>
@@ -67,7 +67,7 @@ namespace Engine
         {
             get
             {
-                return Vector3.Max(this.Point1, Vector3.Max(this.Point2, this.Point3));
+                return Vector3.Max(Point1, Vector3.Max(Point2, Point3));
             }
         }
         /// <summary>
@@ -78,9 +78,9 @@ namespace Engine
         {
             get
             {
-                float a = (this.Point1 - this.Point2).Length();
-                float b = (this.Point1 - this.Point3).Length();
-                float c = (this.Point2 - this.Point3).Length();
+                float a = (Point1 - Point2).Length();
+                float b = (Point1 - Point3).Length();
+                float c = (Point2 - Point3).Length();
 
                 float p = (a + b + c) * 0.5f;
                 float z = p * (p - a) * (p - b) * (p - c);
@@ -95,7 +95,7 @@ namespace Engine
         {
             get
             {
-                return Helper.Angle(this.Normal, Vector3.Down);
+                return Helper.Angle(Normal, Vector3.Down);
             }
         }
         /// <summary>
@@ -525,13 +525,13 @@ namespace Engine
         /// <param name="point3">Point 3</param>
         public Triangle(Vector3 point1, Vector3 point2, Vector3 point3)
         {
-            this.Point1 = point1;
-            this.Point2 = point2;
-            this.Point3 = point3;
-            this.Center = Vector3.Multiply(point1 + point2 + point3, 1.0f / 3.0f);
-            this.Plane = new Plane(this.Point1, this.Point2, this.Point3);
+            Point1 = point1;
+            Point2 = point2;
+            Point3 = point3;
+            Center = Vector3.Multiply(point1 + point2 + point3, 1.0f / 3.0f);
+            Plane = new Plane(Point1, Point2, Point3);
 
-            Vector3 n = this.Plane.Normal;
+            Vector3 n = Plane.Normal;
             float absX = Math.Abs(n.X);
             float absY = Math.Abs(n.Y);
             float absZ = Math.Abs(n.Z);
@@ -541,26 +541,26 @@ namespace Engine
             {
                 if (a.X > a.Z)
                 {
-                    this.I1 = 1;
-                    this.I2 = 2;
+                    I1 = 1;
+                    I2 = 2;
                 }
                 else
                 {
-                    this.I1 = 0;
-                    this.I2 = 1;
+                    I1 = 0;
+                    I2 = 1;
                 }
             }
             else
             {
                 if (a.Y > a.Z)
                 {
-                    this.I1 = 0;
-                    this.I2 = 2;
+                    I1 = 0;
+                    I2 = 2;
                 }
                 else
                 {
-                    this.I1 = 0;
-                    this.I2 = 1;
+                    I1 = 0;
+                    I2 = 1;
                 }
             }
         }
@@ -573,12 +573,10 @@ namespace Engine
 
         }
 
-        /// <summary>
-        /// Text representation
-        /// </summary>
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("Vertex 1 {0}; Vertex 2 {1}; Vertex 3 {2};", this.Point1, this.Point2, this.Point3);
+            return string.Format("Vertex 1 {0}; Vertex 2 {1}; Vertex 3 {2};", Point1, Point2, Point3);
         }
 
         /// <summary>
@@ -588,7 +586,7 @@ namespace Engine
         /// <returns>Returns true if ray intersects with this triangle</returns>
         public bool Intersects(Ray ray)
         {
-            return this.Intersects(ray, false, out _, out _);
+            return Intersects(ray, false, out _, out _);
         }
         /// <summary>
         /// Intersection test between ray and triangle
@@ -598,7 +596,7 @@ namespace Engine
         /// <returns>Returns true if ray intersects with this triangle</returns>
         public bool Intersects(Ray ray, out float distance)
         {
-            return this.Intersects(ray, false, out _, out distance);
+            return Intersects(ray, false, out _, out distance);
         }
         /// <summary>
         /// Intersection test between ray and triangle
@@ -609,7 +607,7 @@ namespace Engine
         /// <returns>Returns true if ray intersects with this triangle</returns>
         public bool Intersects(Ray ray, out Vector3 point, out float distance)
         {
-            return this.Intersects(ray, false, out point, out distance);
+            return Intersects(ray, false, out point, out distance);
         }
         /// <summary>
         /// Intersection test between ray and triangle
@@ -619,7 +617,7 @@ namespace Engine
         /// <returns>Returns true if ray intersects with this triangle</returns>
         public bool Intersects(Ray ray, bool facingOnly)
         {
-            return this.Intersects(ray, facingOnly, out _, out _);
+            return Intersects(ray, facingOnly, out _, out _);
         }
         /// <summary>
         /// Intersection test between ray and triangle
@@ -630,7 +628,7 @@ namespace Engine
         /// <returns>Returns true if ray intersects with this triangle</returns>
         public bool Intersects(Ray ray, bool facingOnly, out float distance)
         {
-            return this.Intersects(ray, facingOnly, out _, out distance);
+            return Intersects(ray, facingOnly, out _, out distance);
         }
         /// <summary>
         /// Intersection test between ray and triangle
@@ -648,7 +646,7 @@ namespace Engine
             bool cull = false;
             if (facingOnly)
             {
-                cull = Vector3.Dot(ray.Direction, this.Normal) >= 0f;
+                cull = Vector3.Dot(ray.Direction, Normal) >= 0f;
             }
 
             if (!cull)
@@ -666,14 +664,30 @@ namespace Engine
         /// Retrieves the three vertices of the triangle.
         /// </summary>
         /// <returns>An array of points representing the three vertices of the triangle.</returns>
-        public Vector3[] GetVertices()
+        public IEnumerable<Vector3> GetVertices()
         {
             return new[]
             {
-                this.Point1,
-                this.Point2,
-                this.Point3,
+                Point1,
+                Point2,
+                Point3,
             };
+        }
+        /// <summary>
+        /// Gets the vertex list stride
+        /// </summary>
+        /// <returns>Returns the list stride</returns>
+        public int GetStride()
+        {
+            return 3;
+        }
+        /// <summary>
+        /// Gets the vertex list topology
+        /// </summary>
+        /// <returns>Returns the list topology</returns>
+        public Topology GetTopology()
+        {
+            return Topology.TriangleList;
         }
 
         /// <summary>

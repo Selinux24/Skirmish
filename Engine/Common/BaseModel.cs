@@ -6,6 +6,7 @@ namespace Engine.Common
     using Engine.Animation;
     using Engine.Content;
     using Engine.Effects;
+    using System;
 
     /// <summary>
     /// Model basic implementation
@@ -79,6 +80,11 @@ namespace Engine.Common
         protected BaseModel(string name, Scene scene, BaseModelDescription description)
             : base(name, scene, description)
         {
+            if (description.Content == null)
+            {
+                throw new ArgumentException($"{nameof(description)} must have a {nameof(description.Content)} instance specified.", nameof(description));
+            }
+
             var desc = new DrawingDataDescription()
             {
                 Instanced = description.Instanced,
@@ -95,7 +101,7 @@ namespace Engine.Common
                 InstancingBuffer = BufferManager.AddInstancingData($"{Name}.Instances", true, desc.Instances);
             }
 
-            var geo = description.ReadModelContent();
+            var geo = description.Content.ReadModelContent();
             if (geo.Count() == 1)
             {
                 var iGeo = geo.First();
@@ -133,9 +139,7 @@ namespace Engine.Common
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Dispose model buffers
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             if (disposing)

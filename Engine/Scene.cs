@@ -1452,7 +1452,7 @@ namespace Engine
             {
                 tris = tris.FindAll(t =>
                 {
-                    var tbbox = BoundingBox.FromPoints(t.GetVertices());
+                    var tbbox = BoundingBox.FromPoints(t.GetVertices().ToArray());
 
                     return bounds.Value.Contains(ref tbbox) != ContainmentType.Disjoint;
                 });

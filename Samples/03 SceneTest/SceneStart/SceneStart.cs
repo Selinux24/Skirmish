@@ -1,6 +1,7 @@
 ﻿using Engine;
 using Engine.Audio;
 using Engine.Audio.Tween;
+using Engine.Content;
 using Engine.Tween;
 using Engine.UI;
 using Engine.UI.Tween;
@@ -80,7 +81,10 @@ namespace SceneTest.SceneStart
         }
         private async Task InitializeBackground()
         {
-            var backGroundDesc = ModelDescription.FromXml("SceneStart", "SkyPlane.xml");
+            var backGroundDesc = new ModelDescription()
+            {
+                Content = ContentDescription.FromFile("SceneStart", "SkyPlane.xml"),
+            };
             backGround = await this.AddComponentModel("Background", backGroundDesc, SceneObjectUsages.UI);
         }
         private async Task InitializeTitle()

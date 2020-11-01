@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.Content;
 using Engine.Tween;
 using Engine.UI;
 using Engine.UI.Tween;
@@ -63,7 +64,10 @@ namespace Terrain.Start
 
             #region Background
 
-            var backGroundDesc = ModelDescription.FromXml("Start", "SkyPlane.xml");
+            var backGroundDesc = new ModelDescription()
+            {
+                Content = ContentDescription.FromFile("Start", "SkyPlane.xml"),
+            };
             backGround = await this.AddComponentModel("Background", backGroundDesc, SceneObjectUsages.UI);
 
             #endregion

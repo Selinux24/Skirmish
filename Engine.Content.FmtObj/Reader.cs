@@ -371,7 +371,7 @@ namespace Engine.Content.FmtObj
                 vertexList = ComputeNormals(vertexList, mIndices);
             }
 
-            SubMeshContent content = new SubMeshContent(Topology.TriangleList, material ?? ModelContent.NoMaterial, uvs.Any(), false);
+            SubMeshContent content = new SubMeshContent(Topology.TriangleList, material ?? ContentData.NoMaterial, uvs.Any(), false);
 
             content.SetVertices(vertexList);
             content.SetIndices(mIndices);

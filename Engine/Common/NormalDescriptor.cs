@@ -26,9 +26,9 @@ namespace Engine.Common
         /// <param name="transform">Transform matrix</param>
         public void Transform(Matrix transform)
         {
-            this.Normal = Vector3.TransformNormal(this.Normal, transform);
-            this.Tangent = Vector3.TransformNormal(this.Tangent, transform);
-            this.Binormal = Vector3.TransformNormal(this.Binormal, transform);
+            Normal = Vector3.TransformNormal(Normal, transform);
+            Tangent = Vector3.TransformNormal(Tangent, transform);
+            Binormal = Vector3.TransformNormal(Binormal, transform);
         }
     }
 }

@@ -174,11 +174,7 @@ namespace Skybox
                 {
                     Instances = firePositions.Length,
                     CastShadow = true,
-                    Content = new ContentDescription()
-                    {
-                        ContentFolder = "Resources",
-                        ModelContentFilename = "torch.xml",
-                    }
+                    Content = ContentDescription.FromFile("Resources", "torch.xml"),
                 });
 
             AttachToGround(torchs, true);
@@ -193,11 +189,7 @@ namespace Skybox
                 {
                     Instances = firePositions.Length,
                     CastShadow = true,
-                    Content = new ContentDescription()
-                    {
-                        ContentFolder = "Resources/obelisk",
-                        ModelContentFilename = "obelisk.xml",
-                    },
+                    Content = ContentDescription.FromFile("Resources/obelisk", "obelisk.xml"),
                 });
 
             #endregion
@@ -209,11 +201,7 @@ namespace Skybox
                 new ModelDescription()
                 {
                     CastShadow = true,
-                    Content = new ContentDescription()
-                    {
-                        ContentFolder = "Resources/Fountain",
-                        ModelContentFilename = "Fountain.xml",
-                    },
+                    Content = ContentDescription.FromFile("Resources/Fountain", "Fountain.xml"),
                 });
 
             AttachToGround(fountain, true);
@@ -248,17 +236,13 @@ namespace Skybox
             var sphere = GeometryUtil.CreateSphere(0.05f, 32, 32);
             var vertices = VertexData.FromDescriptor(sphere);
             var indices = sphere.Indices;
-            var content = ModelContent.GenerateTriangleList(vertices, indices, mat);
 
             var mFireDesc = new ModelDescription()
             {
                 CastShadow = false,
                 DeferredEnabled = true,
                 DepthEnabled = true,
-                Content = new ContentDescription()
-                {
-                    ModelContent = content,
-                }
+                Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
             movingFire = await this.AddComponentModel("Emitter", mFireDesc);

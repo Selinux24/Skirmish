@@ -49,7 +49,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="contentFolder">Content folder</param>
         /// <param name="content">Conten description</param>
         /// <returns>Returns the loaded contents</returns>
-        public IEnumerable<ModelContent> Load(string contentFolder, ModelContentDescription content)
+        public IEnumerable<ContentData> Load(string contentFolder, ContentDataDescription content)
         {
             Matrix transform = Matrix.Identity;
 
@@ -69,13 +69,13 @@ namespace Engine.Content.FmtCollada
             var modelList = ContentManager.FindContent(contentFolder, fileName);
             if (modelList?.Any() == true)
             {
-                List<ModelContent> res = new List<ModelContent>();
+                List<ContentData> res = new List<ContentData>();
 
                 foreach (var model in modelList)
                 {
                     var dae = Collada.Load(model);
 
-                    ModelContent modelContent = new ModelContent();
+                    ContentData modelContent = new ContentData();
 
                     //Scene Objects
                     ProcessLibraryLights(dae, modelContent);
@@ -112,7 +112,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="armatureName">Armature name</param>
         /// <param name="meshesByLOD">Level of detail meshes</param>
         /// <returns>Returns the filtered model content parts</returns>
-        private static IEnumerable<ModelContent> FilterGeometry(ModelContent modelContent, string armatureName, IEnumerable<string> meshesByLOD)
+        private static IEnumerable<ContentData> FilterGeometry(ContentData modelContent, string armatureName, IEnumerable<string> meshesByLOD)
         {
             bool filterByArmature = !string.IsNullOrWhiteSpace(armatureName);
             bool filterByMeshes = meshesByLOD?.Any() == true;
@@ -123,7 +123,7 @@ namespace Engine.Content.FmtCollada
                 return new[] { modelContent };
             }
 
-            List<ModelContent> res = new List<ModelContent>();
+            List<ContentData> res = new List<ContentData>();
 
             //Filter by armature name
             if (filterByArmature &&
@@ -162,7 +162,7 @@ namespace Engine.Content.FmtCollada
         /// </summary>
         /// <param name="dae">Dae object</param>
         /// <param name="modelContent">Model content</param>
-        private static void ProcessLibraryLights(Collada dae, ModelContent modelContent)
+        private static void ProcessLibraryLights(Collada dae, ContentData modelContent)
         {
             if (dae.LibraryLights?.Length > 0)
             {
@@ -218,7 +218,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="dae">Dae object</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="contentFolder">Content folder</param>
-        private static void ProcessLibraryImages(Collada dae, ModelContent modelContent, string contentFolder)
+        private static void ProcessLibraryImages(Collada dae, ContentData modelContent, string contentFolder)
         {
             if (dae.LibraryImages?.Length > 0)
             {
@@ -244,7 +244,7 @@ namespace Engine.Content.FmtCollada
         /// </summary>
         /// <param name="dae">Dae object</param>
         /// <param name="modelContent">Model content</param>
-        private static void ProcessLibraryMaterial(Collada dae, ModelContent modelContent)
+        private static void ProcessLibraryMaterial(Collada dae, ContentData modelContent)
         {
             if (dae.LibraryMaterials?.Length > 0 && dae.LibraryEffects?.Length > 0)
             {
@@ -284,7 +284,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="dae">Dae object</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="volumes">Volume mesh names</param>
-        private static void ProcessLibraryGeometries(Collada dae, ModelContent modelContent, IEnumerable<string> volumes)
+        private static void ProcessLibraryGeometries(Collada dae, ContentData modelContent, IEnumerable<string> volumes)
         {
             if (dae.LibraryGeometries?.Length > 0)
             {
@@ -317,7 +317,7 @@ namespace Engine.Content.FmtCollada
         /// </summary>
         /// <param name="dae">Dae object</param>
         /// <param name="modelContent">Model content</param>
-        private static void ProcessLibraryControllers(Collada dae, ModelContent modelContent)
+        private static void ProcessLibraryControllers(Collada dae, ContentData modelContent)
         {
             if (dae.LibraryControllers?.Length > 0)
             {
@@ -337,7 +337,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="dae">Dae object</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="animation">Animation description</param>
-        private static void ProcessLibraryAnimations(Collada dae, ModelContent modelContent, AnimationDescription animation)
+        private static void ProcessLibraryAnimations(Collada dae, ContentData modelContent, AnimationDescription animation)
         {
             if (dae.LibraryAnimations?.Length > 0)
             {
@@ -989,7 +989,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="modelContent">Model content</param>
         /// <param name="animationLibrary">Animation library</param>
         /// <returns>Retuns animation content list</returns>
-        private static AnimationContent[] ProcessAnimation(ModelContent modelContent, Animation animationLibrary)
+        private static AnimationContent[] ProcessAnimation(ContentData modelContent, Animation animationLibrary)
         {
             List<AnimationContent> res = new List<AnimationContent>();
 
@@ -1359,7 +1359,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="useControllerTransform">Use parent controller transform</param>
         /// <param name="bakeTransforms">Bake transforms into sub-meshes</param>
         /// <param name="modelContent">Model content</param>
-        private static void ProcessVisualScene(Collada dae, Matrix transform, bool useControllerTransform, bool bakeTransforms, ModelContent modelContent)
+        private static void ProcessVisualScene(Collada dae, Matrix transform, bool useControllerTransform, bool bakeTransforms, ContentData modelContent)
         {
             if (dae.Scene.InstanceVisualScene == null)
             {
@@ -1394,7 +1394,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="useControllerTransform">Use parent controller transform</param>
         /// <param name="bakeTransforms">Bake transforms into sub-meshes</param>
         /// <param name="modelContent">Model content</param>
-        private static void ProcessSceneNodes(IEnumerable<Node> nodes, Matrix transform, bool useControllerTransform, bool bakeTransforms, ModelContent modelContent)
+        private static void ProcessSceneNodes(IEnumerable<Node> nodes, Matrix transform, bool useControllerTransform, bool bakeTransforms, ContentData modelContent)
         {
             if (nodes?.Any() != true)
             {
@@ -1438,7 +1438,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="nodes">Node list</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="bakeTransforms">Bake transforms into sub-meshes</param>
-        private static void ProcessSceneNodesDefault(Matrix trn, IEnumerable<Node> nodes, ModelContent modelContent, bool bakeTransforms)
+        private static void ProcessSceneNodesDefault(Matrix trn, IEnumerable<Node> nodes, ContentData modelContent, bool bakeTransforms)
         {
             if (nodes?.Any() != true)
             {
@@ -1456,7 +1456,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="trn">Transform</param>
         /// <param name="lights">Light nodes</param>
         /// <param name="modelContent">Model content</param>
-        private static void ProcessSceneNodesLight(Matrix trn, IEnumerable<InstanceWithExtra> lights, ModelContent modelContent)
+        private static void ProcessSceneNodesLight(Matrix trn, IEnumerable<InstanceWithExtra> lights, ContentData modelContent)
         {
             if (lights?.Any() != true)
             {
@@ -1480,7 +1480,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="geometry">Geometry nodes</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="bakeTransforms">Bake transforms into sub-meshes</param>
-        private static void ProcessSceneNodesGeometry(Matrix trn, IEnumerable<InstanceGeometry> geometry, ModelContent modelContent, bool bakeTransforms)
+        private static void ProcessSceneNodesGeometry(Matrix trn, IEnumerable<InstanceGeometry> geometry, ContentData modelContent, bool bakeTransforms)
         {
             if (trn.IsIdentity)
             {
@@ -1516,7 +1516,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="controllerNodes">Controller node list</param>
         /// <param name="modelContent">Nodel content</param>
         /// <returns>Returns the resulting skinning content</returns>
-        private static void ProcessSceneNodesArmature(IEnumerable<Node> armatureNodes, IEnumerable<Node> controllerNodes, ModelContent modelContent)
+        private static void ProcessSceneNodesArmature(IEnumerable<Node> armatureNodes, IEnumerable<Node> controllerNodes, ContentData modelContent)
         {
             if (armatureNodes?.Any() != true || controllerNodes?.Any() != true)
             {

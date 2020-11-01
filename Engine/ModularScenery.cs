@@ -111,7 +111,7 @@ namespace Engine
             }
             else if (!string.IsNullOrWhiteSpace(description.AssetsConfigurationFile))
             {
-                AssetConfiguration = SerializationHelper.DeserializeXmlFromFile<ModularSceneryAssetConfiguration>(Path.Combine(description.ContentDescription.ContentFolder ?? "", description.AssetsConfigurationFile));
+                AssetConfiguration = SerializationHelper.DeserializeXmlFromFile<ModularSceneryAssetConfiguration>(Path.Combine(description.Content.ContentFolder ?? "", description.AssetsConfigurationFile));
             }
 
             if (description.Levels != null)
@@ -120,7 +120,7 @@ namespace Engine
             }
             else if (!string.IsNullOrWhiteSpace(description.LevelsFile))
             {
-                Levels = SerializationHelper.DeserializeXmlFromFile<ModularSceneryLevels>(Path.Combine(description.ContentDescription.ContentFolder ?? "", description.LevelsFile));
+                Levels = SerializationHelper.DeserializeXmlFromFile<ModularSceneryLevels>(Path.Combine(description.Content.ContentFolder ?? "", description.LevelsFile));
             }
         }
         /// <summary>
@@ -163,7 +163,7 @@ namespace Engine
         /// Loads the model content
         /// </summary>
         /// <returns>Returns the model content</returns>
-        private ModelContent LoadModelContent()
+        private ContentData LoadModelContent()
         {
             return Description.ReadModelContent();
         }
@@ -187,7 +187,7 @@ namespace Engine
 
             CurrentLevel = level;
 
-            ModelContent content = LoadModelContent();
+            ContentData content = LoadModelContent();
 
             await InitializeParticles(progress);
             await InitializeAssets(level, content, progress);
@@ -217,7 +217,7 @@ namespace Engine
                 {
                     try
                     {
-                        item.ContentPath = item.ContentPath ?? Description.ContentDescription.ContentFolder;
+                        item.ContentPath = item.ContentPath ?? Description.Content.ContentFolder;
 
                         var pDesc = ParticleSystemDescription.Initialize(item);
 
@@ -236,7 +236,7 @@ namespace Engine
         /// Initialize all assets into asset dictionary 
         /// </summary>
         /// <param name="content">Assets model content</param>
-        private async Task InitializeAssets(ModularSceneryLevel level, ModelContent content, IProgress<LoadResourceProgress> progress = null)
+        private async Task InitializeAssets(ModularSceneryLevel level, ContentData content, IProgress<LoadResourceProgress> progress = null)
         {
             // Get instance count for all single geometries from Map
             var instances = level.GetMapInstanceCounters(AssetConfiguration.Assets);
@@ -277,7 +277,7 @@ namespace Engine
         /// <param name="count">Instance count</param>
         /// <param name="level">Level</param>
         /// <param name="modelContent">Model content</param>
-        private async Task<ModelInstanced> InitializeAsset(string assetName, int count, ModularSceneryLevel level, ModelContent modelContent)
+        private async Task<ModelInstanced> InitializeAsset(string assetName, int count, ModularSceneryLevel level, ContentData modelContent)
         {
             var masks = Levels.GetMasksForAsset(assetName);
             var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
@@ -297,7 +297,7 @@ namespace Engine
                         Instances = count,
                         LoadAnimation = false,
                         BlendMode = Description.BlendMode,
-                        Content = ContentDescription.FromModelContent(modelContent),
+                        Content = ContentDescription.FromContentData(modelContent),
                     },
                     usage);
 
@@ -314,7 +314,7 @@ namespace Engine
         /// Initialize all objects into asset dictionary 
         /// </summary>
         /// <param name="content">Assets model content</param>
-        private async Task InitializeObjects(ModularSceneryLevel level, ModelContent content, IProgress<LoadResourceProgress> progress = null)
+        private async Task InitializeObjects(ModularSceneryLevel level, ContentData content, IProgress<LoadResourceProgress> progress = null)
         {
             // Set auto-identifiers
             level.PopulateObjectIds();
@@ -359,7 +359,7 @@ namespace Engine
         /// <param name="pathFinding">Path finding enabled flag</param>
         /// <param name="level">Level</param>
         /// <param name="modelContent">Model content</param>
-        private async Task<ModelInstanced> InitializeObject(string assetName, int count, bool pathFinding, ModularSceneryLevel level, ModelContent modelContent)
+        private async Task<ModelInstanced> InitializeObject(string assetName, int count, bool pathFinding, ModularSceneryLevel level, ContentData modelContent)
         {
             var masks = Levels.GetMasksForAsset(assetName);
             var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
@@ -382,7 +382,7 @@ namespace Engine
                         UseAnisotropicFiltering = Description.UseAnisotropic,
                         Instances = count,
                         BlendMode = Description.BlendMode,
-                        Content = ContentDescription.FromModelContent(modelContent),
+                        Content = ContentDescription.FromContentData(modelContent),
                     },
                     usage);
 

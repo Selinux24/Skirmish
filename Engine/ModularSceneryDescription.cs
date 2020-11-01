@@ -13,7 +13,7 @@ namespace Engine
         /// <param name="contentFolder">Content folder</param>
         /// <remarks>
         /// The folder must contains the following files:
-        /// - assets.xml for asset collection in the ModelContentDescription format
+        /// - assets.xml for asset collection in the ContentDataDescription format
         /// - assetsmap.xml for asset groups definition, like rooms or corridors, in the ModularSceneryAssetConfiguration format
         /// - levels.xml for level description in the ModularSceneryLevels format
         /// </remarks>
@@ -23,7 +23,7 @@ namespace Engine
             {
                 UseAnisotropic = true,
                 CastShadow = true,
-                ContentDescription = ContentDescription.FromFile(contentFolder, "assets.xml"),
+                Content = ContentDescription.FromFile(contentFolder, "assets.xml"),
                 AssetsConfigurationFile = "assetsmap.xml",
                 LevelsFile = "levels.xml",
             };

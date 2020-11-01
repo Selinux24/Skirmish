@@ -28,6 +28,16 @@ namespace Engine.Common
         /// <param name="description">Description</param>
         protected BaseSceneObject(string name, Scene scene, SceneObjectDescription description)
         {
+            if (scene == null)
+            {
+                throw new ArgumentNullException(nameof(scene));
+            }
+
+            if (description == null)
+            {
+                throw new ArgumentNullException(nameof(description));
+            }
+
             Name = name;
             Scene = scene;
             Description = description;

@@ -91,18 +91,13 @@ namespace SceneTest.SceneCascadedShadows
             mat.NormalMapTexture = "SceneLights/floors/asphalt/d_road_asphalt_stripes_normal.dds";
             mat.SpecularTexture = "SceneLights/floors/asphalt/d_road_asphalt_stripes_specular.dds";
 
-            var content = ModelContent.GenerateTriangleList(vertices, indices, mat);
-
             var desc = new ModelDescription()
             {
                 CastShadow = true,
                 DeferredEnabled = true,
                 DepthEnabled = true,
                 UseAnisotropicFiltering = true,
-                Content = new ContentDescription()
-                {
-                    ModelContent = content
-                }
+                Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
             await this.AddComponentModel("Floor", desc);
@@ -114,11 +109,7 @@ namespace SceneTest.SceneCascadedShadows
                 Instances = 4,
                 CastShadow = true,
                 UseAnisotropicFiltering = true,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = "SceneLights/buildings/obelisk",
-                    ModelContentFilename = "Obelisk.xml",
-                }
+                Content = ContentDescription.FromFile("SceneLights/buildings/obelisk", "Obelisk.xml"),
             };
 
             buildingObelisks = await this.AddComponentModelInstanced("Obelisk", desc);
@@ -130,11 +121,7 @@ namespace SceneTest.SceneCascadedShadows
                 CastShadow = true,
                 UseAnisotropicFiltering = true,
                 BlendMode = BlendModes.DefaultTransparent,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = "SceneLights/trees",
-                    ModelContentFilename = "Tree.xml",
-                }
+                Content = ContentDescription.FromFile("SceneLights/trees", "Tree.xml"),
             };
 
             await this.AddComponentModel("Tree", desc);

@@ -112,12 +112,10 @@ namespace ModelDrawing
             var material = MaterialContent.Default;
             material.DiffuseTexture = "resources/floor.png";
 
-            var content = ModelContent.GenerateTriangleList(vertices, indices, material);
-
             var desc = new ModelDescription()
             {
                 UseAnisotropicFiltering = true,
-                Content = ContentDescription.FromModelContent(content),
+                Content = ContentDescription.FromContentData(vertices, indices, material),
             };
 
             await this.AddComponentModel("Floor", desc, SceneObjectUsages.Ground);

@@ -302,7 +302,7 @@ namespace Engine.Content
         /// <param name="vertexType">Vertext type</param>
         /// <param name="vertices">Resulting vertices</param>
         /// <param name="indices">Resulting indices</param>
-        public void ProcessVertexData(VertexTypes vertexType, BoundingBox? constraint, out VertexData[] vertices, out uint[] indices)
+        public void ProcessVertexData(VertexTypes vertexType, BoundingBox? constraint, out IEnumerable<VertexData> vertices, out IEnumerable<uint> indices)
         {
             if (VertexData.IsTangent(vertexType))
             {

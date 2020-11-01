@@ -50,7 +50,7 @@ namespace Engine.Content.FmtObj
         /// <param name="contentFolder">Content folder</param>
         /// <param name="content">Content description</param>
         /// <returns>Returns a list of model contents</returns>
-        public IEnumerable<ModelContent> Load(string contentFolder, ModelContentDescription content)
+        public IEnumerable<ContentData> Load(string contentFolder, ContentDataDescription content)
         {
             Matrix transform = Matrix.Identity;
 
@@ -62,7 +62,7 @@ namespace Engine.Content.FmtObj
             var meshList = Load(contentFolder, content.ModelFileName, transform, out var materials);
             if (meshList.Any())
             {
-                ModelContent m = new ModelContent();
+                ContentData m = new ContentData();
 
                 foreach (var mat in materials)
                 {
@@ -84,13 +84,13 @@ namespace Engine.Content.FmtObj
                 for (int i = 0; i < meshList.Count(); i++)
                 {
                     var mesh = meshList.ElementAt(i);
-                    m.Geometry.Add($"Mesh{i + 1}", mesh.Material ?? ModelContent.NoMaterial, mesh);
+                    m.Geometry.Add($"Mesh{i + 1}", mesh.Material ?? ContentData.NoMaterial, mesh);
                 }
 
                 return new[] { m };
             }
 
-            return new ModelContent[] { };
+            return new ContentData[] { };
         }
         /// <summary>
         /// Loads a model content list from resources
@@ -145,7 +145,7 @@ namespace Engine.Content.FmtObj
         /// </summary>
         /// <param name="models"></param>
         /// <param name="fileName"></param>
-        public void Save(IEnumerable<ModelContent> models, string fileName)
+        public void Save(IEnumerable<ContentData> models, string fileName)
         {
             // Write the file
             using (StreamWriter wr = new StreamWriter(fileName, false, Encoding.Default))
@@ -209,7 +209,7 @@ namespace Engine.Content.FmtObj
             return matContent;
         }
 
-        public static void TryAddTexture(this ModelContent m, string contentFolder, string texture)
+        public static void TryAddTexture(this ContentData m, string contentFolder, string texture)
         {
             if (texture != null && !m.Images.ContainsKey(texture))
             {

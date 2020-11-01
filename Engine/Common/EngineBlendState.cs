@@ -316,8 +316,8 @@ namespace Engine.Common
         internal EngineBlendState(BlendState1 blendState, Color4? blendFactor, int sampleMask)
         {
             this.blendState = blendState;
-            this.BlendFactor = blendFactor;
-            this.SampleMask = sampleMask;
+            BlendFactor = blendFactor;
+            SampleMask = sampleMask;
         }
         /// <summary>
         /// Destructor
@@ -343,8 +343,8 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                this.blendState?.Dispose();
-                this.blendState = null;
+                blendState?.Dispose();
+                blendState = null;
             }
         }
 
@@ -354,7 +354,7 @@ namespace Engine.Common
         /// <returns>Returns the internal blend state</returns>
         internal BlendState1 GetBlendState()
         {
-            return this.blendState;
+            return blendState;
         }
     }
 }

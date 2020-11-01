@@ -24,6 +24,6 @@ namespace Engine.Content
         /// <param name="contentFolder">Content folder</param>
         /// <param name="content">Content description</param>
         /// <returns>Returns a list of model contents</returns>
-        IEnumerable<ModelContent> Load(string contentFolder, ModelContentDescription content);
+        IEnumerable<ContentData> Load(string contentFolder, ContentDataDescription content);
     }
 }

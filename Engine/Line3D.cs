@@ -25,7 +25,7 @@ namespace Engine
         {
             get
             {
-                return Vector3.Distance(this.Point1, this.Point2);
+                return Vector3.Distance(Point1, Point2);
             }
         }
 
@@ -564,8 +564,8 @@ namespace Engine
         /// <param name="z2">Z coordinate of end point</param>
         public Line3D(float x1, float y1, float z1, float x2, float y2, float z2)
         {
-            this.Point1 = new Vector3(x1, y1, z1);
-            this.Point2 = new Vector3(x2, y2, z2);
+            Point1 = new Vector3(x1, y1, z1);
+            Point2 = new Vector3(x2, y2, z2);
         }
         /// <summary>
         /// Constructor
@@ -574,8 +574,8 @@ namespace Engine
         /// <param name="p2">End point</param>
         public Line3D(Vector3 p1, Vector3 p2)
         {
-            this.Point1 = p1;
-            this.Point2 = p2;
+            Point1 = p1;
+            Point2 = p2;
         }
         /// <summary>
         /// Constructor
@@ -583,29 +583,43 @@ namespace Engine
         /// <param name="ray">Ray</param>
         public Line3D(Ray ray)
         {
-            this.Point1 = ray.Position;
-            this.Point2 = ray.Position + ray.Direction;
+            Point1 = ray.Position;
+            Point2 = ray.Position + ray.Direction;
         }
 
         /// <summary>
         /// Gets vertex position list
         /// </summary>
         /// <returns>Returns the vertex position list</returns>
-        public Vector3[] GetVertices()
+        public IEnumerable<Vector3> GetVertices()
         {
             return new[]
             {
-                this.Point1,
-                this.Point2,
+                Point1,
+                Point2,
             };
         }
-
         /// <summary>
-        /// Text representation
+        /// Gets the vertex list stride
         /// </summary>
+        /// <returns>Returns the list stride</returns>
+        public int GetStride()
+        {
+            return 2;
+        }
+        /// <summary>
+        /// Gets the vertex list topology
+        /// </summary>
+        /// <returns>Returns the list topology</returns>
+        public Topology GetTopology()
+        {
+            return Topology.LineList;
+        }
+
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return $"P1({this.Point1}) -> P2({this.Point2});";
+            return $"P1({Point1}) -> P2({Point2});";
         }
     }
 }

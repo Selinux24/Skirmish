@@ -55,7 +55,7 @@ namespace Engine.Collections.Generic
                 var nodeItems = items
                     .Where(t =>
                     {
-                        var tbox = BoundingBox.FromPoints(t.GetVertices());
+                        var tbox = BoundingBox.FromPoints(t.GetVertices().ToArray());
 
                         return Intersection.BoxContainsBox(bbox, tbox) != ContainmentType.Disjoint;
                     })
@@ -218,7 +218,7 @@ namespace Engine.Collections.Generic
         {
             get
             {
-                return (this.BoundingBox.Maximum + this.BoundingBox.Minimum) * 0.5f;
+                return (BoundingBox.Maximum + BoundingBox.Minimum) * 0.5f;
             }
         }
         /// <summary>
@@ -237,29 +237,29 @@ namespace Engine.Collections.Generic
         /// <param name="parent">Parent node</param>
         public PickingQuadTreeNode(PickingQuadTree<T> quadTree, PickingQuadTreeNode<T> parent) : base()
         {
-            this.QuadTree = quadTree;
-            this.Parent = parent;
+            QuadTree = quadTree;
+            Parent = parent;
         }
         /// <summary>
         /// Connect nodes in the grid
         /// </summary>
         public void ConnectNodes()
         {
-            this.TopNeighbor = this.FindNeighborNodeAtTop();
-            this.BottomNeighbor = this.FindNeighborNodeAtBottom();
-            this.LeftNeighbor = this.FindNeighborNodeAtLeft();
-            this.RightNeighbor = this.FindNeighborNodeAtRight();
+            TopNeighbor = FindNeighborNodeAtTop();
+            BottomNeighbor = FindNeighborNodeAtBottom();
+            LeftNeighbor = FindNeighborNodeAtLeft();
+            RightNeighbor = FindNeighborNodeAtRight();
 
-            this.TopLeftNeighbor = this.TopNeighbor?.FindNeighborNodeAtLeft();
-            this.TopRightNeighbor = this.TopNeighbor?.FindNeighborNodeAtRight();
-            this.BottomLeftNeighbor = this.BottomNeighbor?.FindNeighborNodeAtLeft();
-            this.BottomRightNeighbor = this.BottomNeighbor?.FindNeighborNodeAtRight();
+            TopLeftNeighbor = TopNeighbor?.FindNeighborNodeAtLeft();
+            TopRightNeighbor = TopNeighbor?.FindNeighborNodeAtRight();
+            BottomLeftNeighbor = BottomNeighbor?.FindNeighborNodeAtLeft();
+            BottomRightNeighbor = BottomNeighbor?.FindNeighborNodeAtRight();
 
-            if (this.Children != null && this.Children.Length > 0)
+            if (Children != null && Children.Length > 0)
             {
-                for (int i = 0; i < this.Children.Length; i++)
+                for (int i = 0; i < Children.Length; i++)
                 {
-                    this.Children[i].ConnectNodes();
+                    Children[i].ConnectNodes();
                 }
             }
         }
@@ -269,31 +269,31 @@ namespace Engine.Collections.Generic
         /// <returns>Returns the neighbor node at top position if exists.</returns>
         private PickingQuadTreeNode<T> FindNeighborNodeAtTop()
         {
-            if (this.Parent != null)
+            if (Parent != null)
             {
-                if (this == this.Parent.TopLeftChild)
+                if (this == Parent.TopLeftChild)
                 {
-                    var node = this.Parent.FindNeighborNodeAtTop();
+                    var node = Parent.FindNeighborNodeAtTop();
                     if (node != null)
                     {
                         return node.BottomLeftChild;
                     }
                 }
-                else if (this == this.Parent.TopRightChild)
+                else if (this == Parent.TopRightChild)
                 {
-                    var node = this.Parent.FindNeighborNodeAtTop();
+                    var node = Parent.FindNeighborNodeAtTop();
                     if (node != null)
                     {
                         return node.BottomRightChild;
                     }
                 }
-                else if (this == this.Parent.BottomLeftChild)
+                else if (this == Parent.BottomLeftChild)
                 {
-                    return this.Parent.TopLeftChild;
+                    return Parent.TopLeftChild;
                 }
-                else if (this == this.Parent.BottomRightChild)
+                else if (this == Parent.BottomRightChild)
                 {
-                    return this.Parent.TopRightChild;
+                    return Parent.TopRightChild;
                 }
             }
 
@@ -305,27 +305,27 @@ namespace Engine.Collections.Generic
         /// <returns>Returns the neighbor node at bottom position if exists.</returns>
         private PickingQuadTreeNode<T> FindNeighborNodeAtBottom()
         {
-            if (this.Parent != null)
+            if (Parent != null)
             {
-                if (this == this.Parent.TopLeftChild)
+                if (this == Parent.TopLeftChild)
                 {
-                    return this.Parent.BottomLeftChild;
+                    return Parent.BottomLeftChild;
                 }
-                else if (this == this.Parent.TopRightChild)
+                else if (this == Parent.TopRightChild)
                 {
-                    return this.Parent.BottomRightChild;
+                    return Parent.BottomRightChild;
                 }
-                else if (this == this.Parent.BottomLeftChild)
+                else if (this == Parent.BottomLeftChild)
                 {
-                    var node = this.Parent.FindNeighborNodeAtBottom();
+                    var node = Parent.FindNeighborNodeAtBottom();
                     if (node != null)
                     {
                         return node.TopLeftChild;
                     }
                 }
-                else if (this == this.Parent.BottomRightChild)
+                else if (this == Parent.BottomRightChild)
                 {
-                    var node = this.Parent.FindNeighborNodeAtBottom();
+                    var node = Parent.FindNeighborNodeAtBottom();
                     if (node != null)
                     {
                         return node.TopRightChild;
@@ -341,27 +341,27 @@ namespace Engine.Collections.Generic
         /// <returns>Returns the neighbor node at top position if exists.</returns>
         private PickingQuadTreeNode<T> FindNeighborNodeAtRight()
         {
-            if (this.Parent != null)
+            if (Parent != null)
             {
-                if (this == this.Parent.TopLeftChild)
+                if (this == Parent.TopLeftChild)
                 {
-                    return this.Parent.TopRightChild;
+                    return Parent.TopRightChild;
                 }
-                else if (this == this.Parent.TopRightChild)
+                else if (this == Parent.TopRightChild)
                 {
-                    var node = this.Parent.FindNeighborNodeAtRight();
+                    var node = Parent.FindNeighborNodeAtRight();
                     if (node != null)
                     {
                         return node.TopLeftChild;
                     }
                 }
-                else if (this == this.Parent.BottomLeftChild)
+                else if (this == Parent.BottomLeftChild)
                 {
-                    return this.Parent.BottomRightChild;
+                    return Parent.BottomRightChild;
                 }
-                else if (this == this.Parent.BottomRightChild)
+                else if (this == Parent.BottomRightChild)
                 {
-                    var node = this.Parent.FindNeighborNodeAtRight();
+                    var node = Parent.FindNeighborNodeAtRight();
                     if (node != null)
                     {
                         return node.BottomLeftChild;
@@ -377,31 +377,31 @@ namespace Engine.Collections.Generic
         /// <returns>Returns the neighbor node at left position if exists.</returns>
         private PickingQuadTreeNode<T> FindNeighborNodeAtLeft()
         {
-            if (this.Parent != null)
+            if (Parent != null)
             {
-                if (this == this.Parent.TopLeftChild)
+                if (this == Parent.TopLeftChild)
                 {
-                    var node = this.Parent.FindNeighborNodeAtLeft();
+                    var node = Parent.FindNeighborNodeAtLeft();
                     if (node != null)
                     {
                         return node.TopRightChild;
                     }
                 }
-                else if (this == this.Parent.TopRightChild)
+                else if (this == Parent.TopRightChild)
                 {
-                    return this.Parent.TopLeftChild;
+                    return Parent.TopLeftChild;
                 }
-                else if (this == this.Parent.BottomLeftChild)
+                else if (this == Parent.BottomLeftChild)
                 {
-                    var node = this.Parent.FindNeighborNodeAtLeft();
+                    var node = Parent.FindNeighborNodeAtLeft();
                     if (node != null)
                     {
                         return node.BottomRightChild;
                     }
                 }
-                else if (this == this.Parent.BottomRightChild)
+                else if (this == Parent.BottomRightChild)
                 {
-                    return this.Parent.BottomLeftChild;
+                    return Parent.BottomLeftChild;
                 }
             }
 
@@ -418,7 +418,7 @@ namespace Engine.Collections.Generic
         /// <remarks>By default, result is constrained to front faces only</remarks>
         public bool PickNearest(Ray ray, out Vector3 position, out T item)
         {
-            return this.PickNearest(ray, true, out position, out item);
+            return PickNearest(ray, true, out position, out item);
         }
         /// <summary>
         /// Pick nearest position
@@ -430,7 +430,7 @@ namespace Engine.Collections.Generic
         /// <returns>Returns true if picked position found</returns>
         public bool PickNearest(Ray ray, bool facingOnly, out Vector3 position, out T item)
         {
-            return this.PickNearest(ray, facingOnly, out position, out item, out _);
+            return PickNearest(ray, facingOnly, out position, out item, out _);
         }
         /// <summary>
         /// Pick nearest position
@@ -447,9 +447,9 @@ namespace Engine.Collections.Generic
             item = default;
             distance = float.MaxValue;
 
-            if (this.Children == null)
+            if (Children == null)
             {
-                if (this.PickNearestItem(ray, facingOnly, out var iPosition, out var iItem, out var iDistance))
+                if (PickNearestItem(ray, facingOnly, out var iPosition, out var iItem, out var iDistance))
                 {
                     position = iPosition;
                     item = iItem;
@@ -460,7 +460,7 @@ namespace Engine.Collections.Generic
             }
             else
             {
-                if (this.PickNearestNode(ray, facingOnly, out var nPosition, out var nItem, out var nDistance))
+                if (PickNearestNode(ray, facingOnly, out var nPosition, out var nItem, out var nDistance))
                 {
                     position = nPosition;
                     item = nItem;
@@ -487,18 +487,18 @@ namespace Engine.Collections.Generic
             item = default;
             distance = float.MaxValue;
 
-            if (!this.Items.Any())
+            if (!Items.Any())
             {
                 return false;
             }
 
-            var inBox = Intersection.RayIntersectsBox(ray, this.BoundingBox, out _);
+            var inBox = Intersection.RayIntersectsBox(ray, BoundingBox, out _);
             if (!inBox)
             {
                 return false;
             }
 
-            var inItem = Intersection.IntersectNearest(ray, this.Items, facingOnly, out Vector3 pos, out T tri, out float d);
+            var inItem = Intersection.IntersectNearest(ray, Items, facingOnly, out Vector3 pos, out T tri, out float d);
             if (inItem)
             {
                 position = pos;
@@ -579,7 +579,7 @@ namespace Engine.Collections.Generic
         {
             SortedDictionary<float, PickingQuadTreeNode<T>> boxHitsByDistance = new SortedDictionary<float, PickingQuadTreeNode<T>>();
 
-            foreach (var node in this.Children)
+            foreach (var node in Children)
             {
                 if (Intersection.RayIntersectsBox(ray, node.BoundingBox, out float d))
                 {
@@ -606,7 +606,7 @@ namespace Engine.Collections.Generic
         /// <remarks>By default, result is constrained to front faces only</remarks>
         public bool PickFirst(Ray ray, out Vector3 position, out T item)
         {
-            return this.PickFirst(ray, true, out position, out item);
+            return PickFirst(ray, true, out position, out item);
         }
         /// <summary>
         /// Pick first position
@@ -618,7 +618,7 @@ namespace Engine.Collections.Generic
         /// <returns>Returns true if picked position found</returns>
         public bool PickFirst(Ray ray, bool facingOnly, out Vector3 position, out T item)
         {
-            return this.PickFirst(ray, facingOnly, out position, out item, out _);
+            return PickFirst(ray, facingOnly, out position, out item, out _);
         }
         /// <summary>
         /// Pick first position
@@ -635,9 +635,9 @@ namespace Engine.Collections.Generic
             item = default;
             distance = float.MaxValue;
 
-            if (this.Children == null)
+            if (Children == null)
             {
-                if (this.PickFirstItem(ray, facingOnly, out var iPosition, out var iItem, out var iDistance))
+                if (PickFirstItem(ray, facingOnly, out var iPosition, out var iItem, out var iDistance))
                 {
                     position = iPosition;
                     item = iItem;
@@ -648,7 +648,7 @@ namespace Engine.Collections.Generic
             }
             else
             {
-                if (this.PickFirstNode(ray, facingOnly, out var nPosition, out var nItem, out var nDistance))
+                if (PickFirstNode(ray, facingOnly, out var nPosition, out var nItem, out var nDistance))
                 {
                     position = nPosition;
                     item = nItem;
@@ -675,18 +675,18 @@ namespace Engine.Collections.Generic
             item = default;
             distance = float.MaxValue;
 
-            if (!this.Items.Any())
+            if (!Items.Any())
             {
                 return false;
             }
 
-            var inBox = Intersection.RayIntersectsBox(ray, this.BoundingBox, out _);
+            var inBox = Intersection.RayIntersectsBox(ray, BoundingBox, out _);
             if (!inBox)
             {
                 return false;
             }
 
-            var inItem = Intersection.IntersectFirst(ray, this.Items, facingOnly, out Vector3 pos, out T tri, out float d);
+            var inItem = Intersection.IntersectFirst(ray, Items, facingOnly, out Vector3 pos, out T tri, out float d);
             if (inItem)
             {
                 position = pos;
@@ -713,7 +713,7 @@ namespace Engine.Collections.Generic
             item = default;
             distance = float.MaxValue;
 
-            foreach (var node in this.Children)
+            foreach (var node in Children)
             {
                 var inBox = Intersection.RayIntersectsBox(ray, node.BoundingBox, out _);
                 if (!inBox)
@@ -747,7 +747,7 @@ namespace Engine.Collections.Generic
         /// <remarks>By default, result is constrained to front faces only</remarks>
         public bool PickAll(Ray ray, out Vector3[] positions, out T[] items)
         {
-            return this.PickAll(ray, true, out positions, out items);
+            return PickAll(ray, true, out positions, out items);
         }
         /// <summary>
         /// Pick all position
@@ -759,7 +759,7 @@ namespace Engine.Collections.Generic
         /// <returns>Returns true if picked position found</returns>
         public bool PickAll(Ray ray, bool facingOnly, out Vector3[] positions, out T[] items)
         {
-            return this.PickAll(ray, facingOnly, out positions, out items, out _);
+            return PickAll(ray, facingOnly, out positions, out items, out _);
         }
         /// <summary>
         /// Pick all position
@@ -776,9 +776,9 @@ namespace Engine.Collections.Generic
             items = null;
             distances = null;
 
-            if (this.Children == null)
+            if (Children == null)
             {
-                if (this.PickAllItem(ray, facingOnly, out var iPositions, out var iItems, out var iDistances))
+                if (PickAllItem(ray, facingOnly, out var iPositions, out var iItems, out var iDistances))
                 {
                     positions = iPositions;
                     items = iItems;
@@ -789,7 +789,7 @@ namespace Engine.Collections.Generic
             }
             else
             {
-                if (this.PickAllNode(ray, facingOnly, out var nPositions, out var nItems, out var nDistances))
+                if (PickAllNode(ray, facingOnly, out var nPositions, out var nItems, out var nDistances))
                 {
                     positions = nPositions;
                     items = nItems;
@@ -816,18 +816,18 @@ namespace Engine.Collections.Generic
             items = null;
             distances = null;
 
-            if (!this.Items.Any())
+            if (!Items.Any())
             {
                 return false;
             }
 
-            var inBox = Intersection.RayIntersectsBox(ray, this.BoundingBox, out _);
+            var inBox = Intersection.RayIntersectsBox(ray, BoundingBox, out _);
             if (!inBox)
             {
                 return false;
             }
 
-            var inItem = Intersection.IntersectAll(ray, this.Items, facingOnly, out Vector3[] pos, out T[] tri, out float[] ds);
+            var inItem = Intersection.IntersectAll(ray, Items, facingOnly, out Vector3[] pos, out T[] tri, out float[] ds);
             if (inItem)
             {
                 positions = pos;
@@ -860,7 +860,7 @@ namespace Engine.Collections.Generic
             List<T> tris = new List<T>();
             List<float> dists = new List<float>();
 
-            foreach (var node in this.Children)
+            foreach (var node in Children)
             {
                 var inBox = Intersection.RayIntersectsBox(ray, node.BoundingBox, out float d);
                 if (!inBox)
@@ -903,19 +903,19 @@ namespace Engine.Collections.Generic
         {
             List<BoundingBox> bboxes = new List<BoundingBox>();
 
-            if (this.Children != null)
+            if (Children != null)
             {
-                bool haltByDepth = maxDepth > 0 && this.Level == maxDepth;
+                bool haltByDepth = maxDepth > 0 && Level == maxDepth;
                 if (haltByDepth)
                 {
-                    Array.ForEach(this.Children, (c) =>
+                    Array.ForEach(Children, (c) =>
                     {
                         bboxes.Add(c.BoundingBox);
                     });
                 }
                 else
                 {
-                    Array.ForEach(this.Children, (c) =>
+                    Array.ForEach(Children, (c) =>
                     {
                         bboxes.AddRange(c.GetBoundingBoxes(maxDepth));
                     });
@@ -923,7 +923,7 @@ namespace Engine.Collections.Generic
             }
             else
             {
-                bboxes.Add(this.BoundingBox);
+                bboxes.Add(BoundingBox);
             }
 
             return bboxes.ToArray();
@@ -936,18 +936,18 @@ namespace Engine.Collections.Generic
         {
             int level = 0;
 
-            if (this.Children != null)
+            if (Children != null)
             {
-                for (int i = 0; i < this.Children.Length; i++)
+                for (int i = 0; i < Children.Length; i++)
                 {
-                    int cLevel = this.Children[i].GetMaxLevel();
+                    int cLevel = Children[i].GetMaxLevel();
 
                     if (cLevel > level) level = cLevel;
                 }
             }
             else
             {
-                level = this.Level;
+                level = Level;
             }
 
             return level;
@@ -962,18 +962,18 @@ namespace Engine.Collections.Generic
         {
             List<PickingQuadTreeNode<T>> nodes = new List<PickingQuadTreeNode<T>>();
 
-            if (this.Children == null)
+            if (Children == null)
             {
-                if (volume.Contains(this.BoundingBox) != ContainmentType.Disjoint)
+                if (volume.Contains(BoundingBox) != ContainmentType.Disjoint)
                 {
                     nodes.Add(this);
                 }
             }
             else
             {
-                for (int i = 0; i < this.Children.Length; i++)
+                for (int i = 0; i < Children.Length; i++)
                 {
-                    var childNodes = this.Children[i].GetNodesInVolume(volume);
+                    var childNodes = Children[i].GetNodesInVolume(volume);
                     if (childNodes.Any())
                     {
                         nodes.AddRange(childNodes);
@@ -991,15 +991,15 @@ namespace Engine.Collections.Generic
         {
             List<PickingQuadTreeNode<T>> nodes = new List<PickingQuadTreeNode<T>>();
 
-            if (this.Children == null)
+            if (Children == null)
             {
                 nodes.Add(this);
             }
             else
             {
-                for (int i = 0; i < this.Children.Length; i++)
+                for (int i = 0; i < Children.Length; i++)
                 {
-                    var childNodes = this.Children[i].GetLeafNodes();
+                    var childNodes = Children[i].GetLeafNodes();
                     if (childNodes.Any())
                     {
                         nodes.AddRange(childNodes);
@@ -1016,18 +1016,18 @@ namespace Engine.Collections.Generic
         /// <returns>Returns the leaf node wich contains the specified position</returns>
         public PickingQuadTreeNode<T> GetNode(Vector3 position)
         {
-            if (this.Children == null)
+            if (Children == null)
             {
-                if (this.BoundingBox.Contains(position) != ContainmentType.Disjoint)
+                if (BoundingBox.Contains(position) != ContainmentType.Disjoint)
                 {
                     return this;
                 }
             }
             else
             {
-                for (int i = 0; i < this.Children.Length; i++)
+                for (int i = 0; i < Children.Length; i++)
                 {
-                    var childNode = this.Children[i].GetNode(position);
+                    var childNode = Children[i].GetNode(position);
                     if (childNode != null)
                     {
                         return childNode;
@@ -1038,21 +1038,18 @@ namespace Engine.Collections.Generic
             return null;
         }
 
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
-            if (this.Children == null)
+            if (Children == null)
             {
                 //Leaf node
-                return string.Format("PickingQuadTreeNode {0}; Depth {1}; Items {2}", this.Id, this.Level, this.Items.Count());
+                return string.Format("PickingQuadTreeNode {0}; Depth {1}; Items {2}", Id, Level, Items.Count());
             }
             else
             {
                 //Node
-                return string.Format("PickingQuadTreeNode {0}; Depth {1}; Childs {2}", this.Id, this.Level, this.Children.Length);
+                return string.Format("PickingQuadTreeNode {0}; Depth {1}; Childs {2}", Id, Level, Children.Length);
             }
         }
     }

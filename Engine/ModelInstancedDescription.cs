@@ -28,7 +28,7 @@ namespace Engine
         public ModelInstancedDescription()
             : base()
         {
-            this.Instanced = true;
+            Instanced = true;
         }
     }
 }

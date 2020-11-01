@@ -78,7 +78,7 @@ namespace Engine.Common
         /// <param name="description">Data description</param>
         /// <param name="instancingBuffer">Instancing buffer descriptor</param>
         /// <returns>Returns the generated drawing data objects</returns>
-        public static async Task<DrawingData> Build(Game game, string name, ModelContent modelContent, DrawingDataDescription description, BufferDescriptor instancingBuffer = null)
+        public static async Task<DrawingData> Build(Game game, string name, ContentData modelContent, DrawingDataDescription description, BufferDescriptor instancingBuffer = null)
         {
             DrawingData res = null;
 
@@ -117,7 +117,7 @@ namespace Engine.Common
         /// <param name="game">Game</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="textureCount">Texture count</param>
-        private static void InitializeTextures(DrawingData drw, Game game, ModelContent modelContent, int textureCount)
+        private static void InitializeTextures(DrawingData drw, Game game, ContentData modelContent, int textureCount)
         {
             if (modelContent.Images != null)
             {
@@ -141,7 +141,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="drw">Drawing data</param>
         /// <param name="modelContent">Model content</param>
-        private static void InitializeMaterials(DrawingData drw, ModelContent modelContent)
+        private static void InitializeMaterials(DrawingData drw, ContentData modelContent)
         {
             foreach (string mat in modelContent.Materials?.Keys)
             {
@@ -167,7 +167,7 @@ namespace Engine.Common
         /// <param name="drw">Drawing data</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="description">Description</param>
-        private static void InitializeGeometry(DrawingData drw, ModelContent modelContent, DrawingDataDescription description)
+        private static void InitializeGeometry(DrawingData drw, ContentData modelContent, DrawingDataDescription description)
         {
             foreach (string meshName in modelContent.Geometry.Keys)
             {
@@ -181,7 +181,7 @@ namespace Engine.Common
         /// <param name="modelContent">Model content</param>
         /// <param name="description">Description</param>
         /// <param name="meshName">Mesh name</param>
-        private static void InitializeGeometryMesh(DrawingData drw, ModelContent modelContent, DrawingDataDescription description, string meshName)
+        private static void InitializeGeometryMesh(DrawingData drw, ContentData modelContent, DrawingDataDescription description, string meshName)
         {
             //Get skinning data
             var isSkinned = ReadSkinningData(
@@ -214,10 +214,7 @@ namespace Engine.Common
 
                 if (!bindShapeMatrix.IsIdentity)
                 {
-                    for (int i = 0; i < vertices.Length; i++)
-                    {
-                        vertices[i] = vertices[i].Transform(bindShapeMatrix);
-                    }
+                    vertices = VertexData.Transform(vertices, bindShapeMatrix);
                 }
 
                 //Convert the vertex data to final mesh data
@@ -286,7 +283,7 @@ namespace Engine.Common
         /// <param name="weights">Resulting weights</param>
         /// <param name="jointNames">Resulting joints</param>
         /// <returns>Returns true if the model has skinnging data</returns>
-        private static bool ReadSkinningData(DrawingDataDescription description, ModelContent modelContent, string meshName, out Matrix bindShapeMatrix, out Weight[] weights, out string[] jointNames)
+        private static bool ReadSkinningData(DrawingDataDescription description, ContentData modelContent, string meshName, out Matrix bindShapeMatrix, out Weight[] weights, out string[] jointNames)
         {
             bindShapeMatrix = Matrix.Identity;
             weights = null;
@@ -316,7 +313,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="drw">Drawing data</param>
         /// <param name="modelContent">Model content</param>
-        private static void InitializeSkinningData(DrawingData drw, ModelContent modelContent)
+        private static void InitializeSkinningData(DrawingData drw, ContentData modelContent)
         {
             if (modelContent.SkinningInfo?.Count > 0)
             {
@@ -344,7 +341,7 @@ namespace Engine.Common
         /// <param name="modelContent">Model content</param>
         /// <param name="joint">Joint to initialize</param>
         /// <param name="animations">Animation list to feed</param>
-        private static JointAnimation[] InitializeJoints(ModelContent modelContent, Joint joint, string[] skinController)
+        private static JointAnimation[] InitializeJoints(ContentData modelContent, Joint joint, string[] skinController)
         {
             List<JointAnimation> animations = new List<JointAnimation>();
 
@@ -441,7 +438,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="drw">Drawing data</param>
         /// <param name="modelContent">Model content</param>
-        private static void InitializeLights(DrawingData drw, ModelContent modelContent)
+        private static void InitializeLights(DrawingData drw, ContentData modelContent)
         {
             foreach (var key in modelContent.Lights.Keys)
             {

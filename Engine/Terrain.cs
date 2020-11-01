@@ -703,37 +703,37 @@ namespace Engine
         {
             useAnisotropic = description.UseAnisotropic;
 
-            if (description.HeightmapDescription == null)
+            if (description.Heightmap == null)
             {
                 throw new EngineException($"Terrain initialization error. Heightmap description not found.");
             }
 
             // Read heightmap
-            heightMap = HeightMap.FromDescription(description.HeightmapDescription);
-            float heightMapCellSize = description.HeightmapDescription.CellSize;
-            float heightMapHeight = description.HeightmapDescription.MaximumHeight;
-            Curve heightMapCurve = description.HeightmapDescription.HeightCurve;
+            heightMap = HeightMap.FromDescription(description.Heightmap);
+            float heightMapCellSize = description.Heightmap.CellSize;
+            float heightMapHeight = description.Heightmap.MaximumHeight;
+            Curve heightMapCurve = description.Heightmap.HeightCurve;
             float uvScale = 1;
             Vector2 uvDisplacement = Vector2.Zero;
 
-            if (description.HeightmapDescription.Textures != null)
+            if (description.Heightmap.Textures != null)
             {
                 // Read texture data
-                uvScale = description.HeightmapDescription.Textures.Scale;
-                uvDisplacement = description.HeightmapDescription.Textures.Displacement;
-                useAlphaMap = description.HeightmapDescription.Textures.UseAlphaMapping;
-                useSlopes = description.HeightmapDescription.Textures.UseSlopes;
-                proportion = description.HeightmapDescription.Textures.Proportion;
-                textureResolution = description.HeightmapDescription.Textures.Resolution;
-                slopeRanges = description.HeightmapDescription.Textures.SlopeRanges;
+                uvScale = description.Heightmap.Textures.Scale;
+                uvDisplacement = description.Heightmap.Textures.Displacement;
+                useAlphaMap = description.Heightmap.Textures.UseAlphaMapping;
+                useSlopes = description.Heightmap.Textures.UseSlopes;
+                proportion = description.Heightmap.Textures.Proportion;
+                textureResolution = description.Heightmap.Textures.Resolution;
+                slopeRanges = description.Heightmap.Textures.SlopeRanges;
 
-                ReadHeightmapTextures(description.HeightmapDescription.ContentPath, description.HeightmapDescription.Textures);
+                ReadHeightmapTextures(description.Heightmap.ContentPath, description.Heightmap.Textures);
             }
 
             // Read material
             terrainMaterial = new MeshMaterial()
             {
-                Material = description.HeightmapDescription.Material?.GetMaterial() ?? Material.Default
+                Material = description.Heightmap.Material?.GetMaterial() ?? Material.Default
             };
 
             // Get vertices and indices from heightmap

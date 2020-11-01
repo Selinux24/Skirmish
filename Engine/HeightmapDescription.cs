@@ -98,7 +98,7 @@ namespace Engine
         /// Generates a new model content from an height map description
         /// </summary>
         /// <returns>Returns a new model content</returns>
-        public ModelContent ReadModelContent()
+        public ContentData ReadModelContent()
         {
             HeightMap hm = HeightMap.FromDescription(this);
             hm.BuildGeometry(
@@ -109,7 +109,7 @@ namespace Engine
                 Textures.Displacement,
                 out var vertices, out var indices);
 
-            ModelContent modelContent = new ModelContent();
+            ContentData modelContent = new ContentData();
 
             string materialName = "material";
             string geoName = "geometry";

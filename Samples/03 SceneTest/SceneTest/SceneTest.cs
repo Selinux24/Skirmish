@@ -274,11 +274,7 @@ namespace SceneTest.SceneTest
                     SphericVolume = false,
                     UseAnisotropicFiltering = true,
                     BlendMode = BlendModes.DefaultTransparent,
-                    Content = new ContentDescription()
-                    {
-                        ContentFolder = "SceneTest/Trees",
-                        ModelContentFilename = "Tree.xml",
-                    }
+                    Content = ContentDescription.FromFile("SceneTest/Trees", "Tree.xml"),
                 });
 
             var desc = new ModelInstancedDescription()
@@ -288,11 +284,7 @@ namespace SceneTest.SceneTest
                 UseAnisotropicFiltering = true,
                 BlendMode = BlendModes.DefaultTransparent,
                 Instances = 50,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = "SceneTest/Trees",
-                    ModelContentFilename = "Tree.xml",
-                }
+                Content = ContentDescription.FromFile("SceneTest/Trees", "Tree.xml"),
             };
 
             treesI = await this.AddComponentModelInstanced("TreeI", desc);
@@ -321,8 +313,6 @@ namespace SceneTest.SceneTest
             mat.NormalMapTexture = "SceneTest/floors/asphalt/d_road_asphalt_stripes_normal.dds";
             mat.SpecularTexture = "SceneTest/floors/asphalt/d_road_asphalt_stripes_specular.dds";
 
-            var content = ModelContent.GenerateTriangleList(vertices, indices, mat);
-
             var desc = new ModelDescription()
             {
                 CastShadow = true,
@@ -331,10 +321,7 @@ namespace SceneTest.SceneTest
                 BlendMode = BlendModes.Opaque,
                 SphericVolume = false,
                 UseAnisotropicFiltering = true,
-                Content = new ContentDescription()
-                {
-                    ModelContent = content,
-                }
+                Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
             var descI = new ModelInstancedDescription()
@@ -346,10 +333,7 @@ namespace SceneTest.SceneTest
                 SphericVolume = false,
                 UseAnisotropicFiltering = true,
                 Instances = 8,
-                Content = new ContentDescription()
-                {
-                    ModelContent = content,
-                }
+                Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
             var floorAsphalt = await this.AddComponentModel("Floor", desc);
@@ -376,11 +360,7 @@ namespace SceneTest.SceneTest
                     CastShadow = true,
                     SphericVolume = false,
                     UseAnisotropicFiltering = true,
-                    Content = new ContentDescription()
-                    {
-                        ContentFolder = "SceneTest/buildings/obelisk",
-                        ModelContentFilename = "Obelisk.xml",
-                    }
+                    Content = ContentDescription.FromFile("SceneTest/buildings/obelisk", "Obelisk.xml"),
                 });
 
             buildingObeliskI = await this.AddComponentModelInstanced(
@@ -391,11 +371,7 @@ namespace SceneTest.SceneTest
                     SphericVolume = false,
                     UseAnisotropicFiltering = true,
                     Instances = 4,
-                    Content = new ContentDescription()
-                    {
-                        ContentFolder = "SceneTest/buildings/obelisk",
-                        ModelContentFilename = "Obelisk.xml",
-                    }
+                    Content = ContentDescription.FromFile("SceneTest/buildings/obelisk", "Obelisk.xml"),
                 });
 
             buildingObelisk.Manipulator.SetPosition(0 + xDelta, baseHeight + yDelta, 0 + zDelta);
@@ -425,11 +401,7 @@ namespace SceneTest.SceneTest
                 {
                     TextureIndex = 1,
                     CastShadow = true,
-                    Content = new ContentDescription()
-                    {
-                        ContentFolder = "SceneTest/character/soldier",
-                        ModelContentFilename = "soldier_anim2.xml",
-                    }
+                    Content = ContentDescription.FromFile("SceneTest/character/soldier", "soldier_anim2.xml"),
                 });
 
             characterSoldierI = await this.AddComponentModelInstanced(
@@ -438,11 +410,7 @@ namespace SceneTest.SceneTest
                 {
                     CastShadow = true,
                     Instances = 4,
-                    Content = new ContentDescription()
-                    {
-                        ContentFolder = "SceneTest/character/soldier",
-                        ModelContentFilename = "soldier_anim2.xml",
-                    }
+                    Content = ContentDescription.FromFile("SceneTest/character/soldier", "soldier_anim2.xml"),
                 });
 
             float s = spaceSize / 2f;
@@ -484,11 +452,7 @@ namespace SceneTest.SceneTest
                 {
                     CastShadow = true,
                     SphericVolume = false,
-                    Content = new ContentDescription()
-                    {
-                        ContentFolder = "SceneTest/vehicles/Challenger",
-                        ModelContentFilename = "Challenger.xml",
-                    }
+                    Content = ContentDescription.FromFile("SceneTest/vehicles/Challenger", "Challenger.xml"),
                 });
 
             vehicleI = await this.AddComponentModelInstanced(
@@ -498,11 +462,7 @@ namespace SceneTest.SceneTest
                     CastShadow = true,
                     SphericVolume = false,
                     Instances = 4,
-                    Content = new ContentDescription()
-                    {
-                        ContentFolder = "SceneTest/vehicles/leopard",
-                        ModelContentFilename = "Leopard.xml",
-                    }
+                    Content = ContentDescription.FromFile("SceneTest/vehicles/leopard", "Leopard.xml"),
                 });
 
             float s = -spaceSize / 2f;
@@ -539,11 +499,7 @@ namespace SceneTest.SceneTest
                 {
                     CastShadow = true,
                     SphericVolume = false,
-                    Content = new ContentDescription()
-                    {
-                        ContentFolder = "SceneTest/lamps",
-                        ModelContentFilename = "lamp.xml",
-                    }
+                    Content = ContentDescription.FromFile("SceneTest/lamps", "lamp.xml"),
                 });
 
             lampI = await this.AddComponentModelInstanced(
@@ -553,11 +509,7 @@ namespace SceneTest.SceneTest
                     CastShadow = true,
                     SphericVolume = false,
                     Instances = 4,
-                    Content = new ContentDescription()
-                    {
-                        ContentFolder = "SceneTest/lamps",
-                        ModelContentFilename = "lamp.xml",
-                    }
+                    Content = ContentDescription.FromFile("SceneTest/lamps", "lamp.xml"),
                 });
 
             float dist = 0.23f;
@@ -595,11 +547,7 @@ namespace SceneTest.SceneTest
                 {
                     CastShadow = true,
                     SphericVolume = false,
-                    Content = new ContentDescription()
-                    {
-                        ContentFolder = "SceneTest/lamps",
-                        ModelContentFilename = "streetlamp.xml",
-                    }
+                    Content = ContentDescription.FromFile("SceneTest/lamps", "streetlamp.xml"),
                 });
 
             streetlampI = await this.AddComponentModelInstanced(
@@ -609,11 +557,7 @@ namespace SceneTest.SceneTest
                     CastShadow = true,
                     SphericVolume = false,
                     Instances = 9,
-                    Content = new ContentDescription()
-                    {
-                        ContentFolder = "SceneTest/lamps",
-                        ModelContentFilename = "streetlamp.xml",
-                    }
+                    Content = ContentDescription.FromFile("SceneTest/lamps", "streetlamp.xml"),
                 });
 
             streetlamp.Manipulator.SetPosition(-spaceSize + xDelta, baseHeight + yDelta, -spaceSize * -2f + zDelta);
@@ -666,11 +610,7 @@ namespace SceneTest.SceneTest
                 {
                     CastShadow = true,
                     SphericVolume = false,
-                    Content = new ContentDescription()
-                    {
-                        ContentFolder = "SceneTest/container",
-                        ModelContentFilename = "Container.xml",
-                    }
+                    Content = ContentDescription.FromFile("SceneTest/container", "Container.xml"),
                 });
 
             containerI = await this.AddComponentModelInstanced(
@@ -680,11 +620,7 @@ namespace SceneTest.SceneTest
                     CastShadow = true,
                     SphericVolume = false,
                     Instances = instances,
-                    Content = new ContentDescription()
-                    {
-                        ContentFolder = "SceneTest/container",
-                        ModelContentFilename = "Container.xml",
-                    }
+                    Content = ContentDescription.FromFile("SceneTest/container", "Container.xml"),
                 });
 
             float s = -spaceSize / 2f;
@@ -827,13 +763,13 @@ namespace SceneTest.SceneTest
 
         private void PlantTrees()
         {
-            Vector3 yDelta = Vector3.Down;
+            Vector3 delta = Vector3.Down;
 
             Ray topDownRay = new Ray(new Vector3(350, 1000, 350), Vector3.Down);
 
             scenery.PickFirst(topDownRay, out var treePos);
 
-            tree.Manipulator.SetPosition(treePos.Position + yDelta);
+            tree.Manipulator.SetPosition(treePos.Position + delta);
             tree.Manipulator.SetScale(2);
 
             foreach (var t in treesI.GetInstances())
@@ -847,7 +783,7 @@ namespace SceneTest.SceneTest
                 topDownRay = new Ray(new Vector3(px, 1000, pz), Vector3.Down);
                 scenery.PickFirst(topDownRay, out var treeIPos);
 
-                t.Manipulator.SetPosition(treeIPos.Position + yDelta);
+                t.Manipulator.SetPosition(treeIPos.Position + delta);
                 t.Manipulator.SetRotation(r, y, y);
                 t.Manipulator.SetScale(s);
             }

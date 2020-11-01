@@ -21,9 +21,9 @@ namespace Engine
         /// <summary>
         /// Sets the path to follow
         /// </summary>
-        /// <param name="path">Path to follow</param>
+        /// <param name="newPath">Path to follow</param>
         /// <param name="time">Path initial time</param>
-        void Follow(IControllerPath path, float time = 0f);
+        void Follow(IControllerPath newPath, float time = 0f);
         /// <summary>
         /// Clears current path
         /// </summary>

@@ -33,11 +33,11 @@ namespace Engine.Common
         /// <param name="dynamic">Dynamic flag</param>
         public EngineBuffer(Graphics graphics, string name, IEnumerable<T> data, bool dynamic)
         {
-            this.VertexBuffer = graphics.CreateVertexBuffer(name, data, dynamic);
+            VertexBuffer = graphics.CreateVertexBuffer(name, data, dynamic);
 
-            this.VertexBufferBinding = new[]
+            VertexBufferBinding = new[]
             {
-                new VertexBufferBinding(this.VertexBuffer, default(T).GetStride(), 0),
+                new VertexBufferBinding(VertexBuffer, default(T).GetStride(), 0),
             };
         }
         /// <summary>
@@ -89,7 +89,7 @@ namespace Engine.Common
         /// <param name="input">Input layout</param>
         public void AddInputLayout(InputLayout input)
         {
-            this.InputLayouts.Add(input);
+            InputLayouts.Add(input);
         }
     }
 }

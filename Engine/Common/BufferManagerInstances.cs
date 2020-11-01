@@ -41,7 +41,7 @@ namespace Engine.Common
         {
             get
             {
-                return this.Instances;
+                return Instances;
             }
         }
         /// <summary>
@@ -69,7 +69,7 @@ namespace Engine.Common
         /// </summary>
         public BufferManagerInstances(bool dynamic)
         {
-            this.Dynamic = dynamic;
+            Dynamic = dynamic;
         }
 
         /// <summary>
@@ -91,10 +91,10 @@ namespace Engine.Common
         public void AddDescriptor(BufferDescriptor descriptor, string id, int bufferDescriptionIndex, int instances)
         {
             //Store current data index as descriptor offset
-            int offset = this.Instances;
+            int offset = Instances;
 
             //Increment the instance count
-            this.Instances += instances;
+            Instances += instances;
 
             //Add the new descriptor to main descriptor list
             descriptor.Id = id;
@@ -102,9 +102,9 @@ namespace Engine.Common
             descriptor.BufferOffset = offset;
             descriptor.Count = instances;
 
-            Monitor.Enter(this.instancingDescriptors);
-            this.instancingDescriptors.Add(descriptor);
-            Monitor.Exit(this.instancingDescriptors);
+            Monitor.Enter(instancingDescriptors);
+            instancingDescriptors.Add(descriptor);
+            Monitor.Exit(instancingDescriptors);
         }
         /// <summary>
         /// Removes a buffer descriptor from the internal list
@@ -113,30 +113,27 @@ namespace Engine.Common
         /// <param name="instances">Number of instances</param>
         public void RemoveDescriptor(BufferDescriptor descriptor, int instances)
         {
-            Monitor.Enter(this.instancingDescriptors);
+            Monitor.Enter(instancingDescriptors);
             //Remove descriptor
-            this.instancingDescriptors.Remove(descriptor);
+            instancingDescriptors.Remove(descriptor);
 
-            if (this.instancingDescriptors.Any())
+            if (instancingDescriptors.Any())
             {
                 //Reallocate descriptor offsets
-                this.instancingDescriptors[0].BufferOffset = 0;
-                for (int i = 1; i < this.instancingDescriptors.Count; i++)
+                instancingDescriptors[0].BufferOffset = 0;
+                for (int i = 1; i < instancingDescriptors.Count; i++)
                 {
-                    var prev = this.instancingDescriptors[i - 1];
+                    var prev = instancingDescriptors[i - 1];
 
-                    this.instancingDescriptors[i].BufferOffset = prev.BufferOffset + prev.Count;
+                    instancingDescriptors[i].BufferOffset = prev.BufferOffset + prev.Count;
                 }
             }
-            Monitor.Exit(this.instancingDescriptors);
+            Monitor.Exit(instancingDescriptors);
 
-            this.Instances -= instances;
+            Instances -= instances;
         }
 
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns a description of the instance</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
             return $"[{typeof(VertexInstancingData)}][{Dynamic}] Instances: {Instances} AllocatedSize: {AllocatedSize} ToAllocateSize: {ToAllocateSize} Dirty: {Dirty}";

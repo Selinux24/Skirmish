@@ -12,7 +12,7 @@ namespace Engine.Content
     /// <summary>
     /// Model content
     /// </summary>
-    public class ModelContent
+    public class ContentData
     {
         /// <summary>
         /// Static mesh name
@@ -67,7 +67,7 @@ namespace Engine.Content
             {
                 get
                 {
-                    return string.Format("_image_{0}_", this.Count + 1);
+                    return string.Format("_image_{0}_", Count + 1);
                 }
             }
 
@@ -99,45 +99,45 @@ namespace Engine.Content
             {
                 if (!string.IsNullOrEmpty(material.AmbientTexture))
                 {
-                    string imageName = this.NextImageName;
+                    string imageName = NextImageName;
 
-                    this.Add(imageName, ImageContent.Texture("", material.AmbientTexture));
+                    Add(imageName, ImageContent.Texture("", material.AmbientTexture));
 
                     material.AmbientTexture = imageName;
                 }
 
                 if (!string.IsNullOrEmpty(material.DiffuseTexture))
                 {
-                    string imageName = this.NextImageName;
+                    string imageName = NextImageName;
 
-                    this.Add(imageName, ImageContent.Texture("", material.DiffuseTexture));
+                    Add(imageName, ImageContent.Texture("", material.DiffuseTexture));
 
                     material.DiffuseTexture = imageName;
                 }
 
                 if (!string.IsNullOrEmpty(material.EmissionTexture))
                 {
-                    string imageName = this.NextImageName;
+                    string imageName = NextImageName;
 
-                    this.Add(imageName, ImageContent.Texture("", material.EmissionTexture));
+                    Add(imageName, ImageContent.Texture("", material.EmissionTexture));
 
                     material.EmissionTexture = imageName;
                 }
 
                 if (!string.IsNullOrEmpty(material.NormalMapTexture))
                 {
-                    string imageName = this.NextImageName;
+                    string imageName = NextImageName;
 
-                    this.Add(imageName, ImageContent.Texture("", material.NormalMapTexture));
+                    Add(imageName, ImageContent.Texture("", material.NormalMapTexture));
 
                     material.NormalMapTexture = imageName;
                 }
 
                 if (!string.IsNullOrEmpty(material.SpecularTexture))
                 {
-                    string imageName = this.NextImageName;
+                    string imageName = NextImageName;
 
-                    this.Add(imageName, ImageContent.Texture("", material.SpecularTexture));
+                    Add(imageName, ImageContent.Texture("", material.SpecularTexture));
 
                     material.SpecularTexture = imageName;
                 }
@@ -158,7 +158,7 @@ namespace Engine.Content
                 {
                     List<string> images = new List<string>();
 
-                    foreach (var item in this.Values)
+                    foreach (var item in Values)
                     {
                         var itemImages = item.GetImages();
                         foreach (var image in itemImages)
@@ -206,7 +206,7 @@ namespace Engine.Content
                 {
                     List<string> materials = new List<string>();
 
-                    foreach (var meshDict in this.Values)
+                    foreach (var meshDict in Values)
                     {
                         foreach (var subMesh in meshDict.Values)
                         {
@@ -245,18 +245,18 @@ namespace Engine.Content
             /// <param name="meshContent">Submesh</param>
             public void Add(string meshName, string materialName, SubMeshContent meshContent)
             {
-                if (!this.ContainsKey(meshName))
+                if (!ContainsKey(meshName))
                 {
-                    this.Add(meshName, new Dictionary<string, SubMeshContent>());
+                    Add(meshName, new Dictionary<string, SubMeshContent>());
                 }
 
                 var matDict = this[meshName];
 
-                if (string.IsNullOrEmpty(materialName) || materialName == ModelContent.NoMaterial)
+                if (string.IsNullOrEmpty(materialName) || materialName == ContentData.NoMaterial)
                 {
-                    if (!matDict.ContainsKey(ModelContent.NoMaterial))
+                    if (!matDict.ContainsKey(ContentData.NoMaterial))
                     {
-                        matDict.Add(ModelContent.NoMaterial, meshContent);
+                        matDict.Add(ContentData.NoMaterial, meshContent);
                     }
                 }
                 else
@@ -279,7 +279,7 @@ namespace Engine.Content
             {
                 List<SubMeshContent> res = new List<SubMeshContent>();
 
-                foreach (string mesh in this.Keys)
+                foreach (string mesh in Keys)
                 {
                     SubMeshContent meshContent = this[mesh][material];
                     if (meshContent != null)
@@ -306,7 +306,7 @@ namespace Engine.Content
                 {
                     List<string> skins = new List<string>();
 
-                    foreach (var item in this.Values)
+                    foreach (var item in Values)
                     {
                         if (!skins.Contains(item.Skin)) skins.Add(item.Skin);
                     }
@@ -341,7 +341,7 @@ namespace Engine.Content
             /// <returns>Returns the controller attached to the mesh</returns>
             public ControllerContent GetControllerForMesh(string meshName)
             {
-                foreach (ControllerContent controller in this.Values)
+                foreach (ControllerContent controller in Values)
                 {
                     if (controller.Skin == meshName) return controller;
                 }
@@ -380,7 +380,7 @@ namespace Engine.Content
             /// <param name="jointName">Joint name</param>
             public bool HasJointData(string jointName)
             {
-                foreach (var value in this.Values)
+                foreach (var value in Values)
                 {
                     if (value.Skeleton.GetJointNames().Any(j => j == jointName))
                     {
@@ -500,24 +500,11 @@ namespace Engine.Content
         /// <param name="indices">Index list</param>
         /// <param name="material">Material</param>
         /// <returns>Returns new model content</returns>
-        public static ModelContent GenerateTriangleList(IEnumerable<VertexData> vertices, IEnumerable<uint> indices, MaterialContent material = null)
+        public static ContentData GenerateTriangleList(IEnumerable<VertexData> vertices, IEnumerable<uint> indices, MaterialContent? material = null)
         {
             var materials = new[] { material ?? MaterialContent.Default };
 
             return Generate(Topology.TriangleList, vertices, indices, materials);
-        }
-        /// <summary>
-        /// Generates a triangle list model content from geometry descriptor
-        /// </summary>
-        /// <param name="geometry">Geometry descriptor</param>
-        /// <param name="material">Material</param>
-        /// <returns>Returns new model content</returns>
-        public static ModelContent GenerateTriangleList(GeometryDescriptor geometry, MaterialContent material = null)
-        {
-            var vertices = VertexData.FromDescriptor(geometry);
-            var materials = new[] { material ?? MaterialContent.Default };
-
-            return Generate(Topology.TriangleList, vertices, geometry.Indices, materials);
         }
         /// <summary>
         /// Generates a triangle list model content from scratch
@@ -526,9 +513,34 @@ namespace Engine.Content
         /// <param name="indices">Index list</param>
         /// <param name="materials">Material list</param>
         /// <returns>Returns new model content</returns>
-        public static ModelContent GenerateTriangleList(IEnumerable<VertexData> vertices, IEnumerable<uint> indices, IEnumerable<MaterialContent> materials)
+        public static ContentData GenerateTriangleList(IEnumerable<VertexData> vertices, IEnumerable<uint> indices, IEnumerable<MaterialContent> materials)
         {
             return Generate(Topology.TriangleList, vertices, indices, materials);
+        }
+        /// <summary>
+        /// Generates a triangle list model content from geometry descriptor
+        /// </summary>
+        /// <param name="geometry">Geometry descriptor</param>
+        /// <param name="material">Material</param>
+        /// <returns>Returns new model content</returns>
+        public static ContentData GenerateTriangleList(GeometryDescriptor geometry, MaterialContent? material = null)
+        {
+            var vertices = VertexData.FromDescriptor(geometry);
+            var materials = new[] { material ?? MaterialContent.Default };
+
+            return Generate(Topology.TriangleList, vertices, geometry.Indices, materials);
+        }
+        /// <summary>
+        /// Generates a triangle list model content from geometry descriptor
+        /// </summary>
+        /// <param name="geometry">Geometry descriptor</param>
+        /// <param name="materials">Material list</param>
+        /// <returns>Returns new model content</returns>
+        public static ContentData GenerateTriangleList(GeometryDescriptor geometry, IEnumerable<MaterialContent> materials)
+        {
+            var vertices = VertexData.FromDescriptor(geometry);
+
+            return Generate(Topology.TriangleList, vertices, geometry.Indices, materials);
         }
         /// <summary>
         /// Generate model content from scratch
@@ -538,9 +550,9 @@ namespace Engine.Content
         /// <param name="indices">Index list</param>
         /// <param name="materials">Material list</param>
         /// <returns>Returns new model content</returns>
-        private static ModelContent Generate(Topology topology, IEnumerable<VertexData> vertices, IEnumerable<uint> indices, IEnumerable<MaterialContent> materials)
+        private static ContentData Generate(Topology topology, IEnumerable<VertexData> vertices, IEnumerable<uint> indices, IEnumerable<MaterialContent> materials)
         {
-            ModelContent modelContent = new ModelContent();
+            ContentData modelContent = new ContentData();
             string materialName = NoMaterial;
             bool textured = false;
 
@@ -578,10 +590,10 @@ namespace Engine.Content
         /// <summary>
         /// Constructor
         /// </summary>
-        public ModelContent()
+        public ContentData()
         {
             //Adding default material for non material geometry, like volumes
-            this.Materials.Add(NoMaterial, MaterialContent.Default);
+            Materials.Add(NoMaterial, MaterialContent.Default);
         }
 
         /// <summary>
@@ -591,27 +603,27 @@ namespace Engine.Content
         {
             GeometryDictionary newDict = new GeometryDictionary();
 
-            if (this.Materials.Count > 0)
+            if (Materials.Count > 0)
             {
-                if (this.Controllers.Skins.Length > 0)
+                if (Controllers.Skins.Length > 0)
                 {
                     //Skinned
-                    foreach (string skin in this.Controllers.Skins)
+                    foreach (string skin in Controllers.Skins)
                     {
-                        foreach (string material in this.Materials.Keys)
+                        foreach (string material in Materials.Keys)
                         {
-                            this.OptimizeSkinnedMesh(newDict, skin, material);
+                            OptimizeSkinnedMesh(newDict, skin, material);
                         }
                     }
                 }
 
-                foreach (string material in this.Materials.Keys)
+                foreach (string material in Materials.Keys)
                 {
-                    this.OptimizeStaticMesh(newDict, material);
+                    OptimizeStaticMesh(newDict, material);
                 }
             }
 
-            this.Geometry = newDict;
+            Geometry = newDict;
         }
         /// <summary>
         /// Optimizes the skinned mesh
@@ -624,7 +636,7 @@ namespace Engine.Content
             var skinnedM = ComputeSubmeshContent(newDict, skin, skin, material);
             if (skinnedM != null)
             {
-                this.OptimizeSubmeshContent(newDict, skin, material, new[] { skinnedM });
+                OptimizeSubmeshContent(newDict, skin, material, new[] { skinnedM });
             }
         }
         /// <summary>
@@ -636,9 +648,9 @@ namespace Engine.Content
         {
             List<SubMeshContent> staticM = new List<SubMeshContent>();
 
-            foreach (string mesh in this.Geometry.Keys)
+            foreach (string mesh in Geometry.Keys)
             {
-                if (!Array.Exists(this.Controllers.Skins, s => s == mesh))
+                if (!Array.Exists(Controllers.Skins, s => s == mesh))
                 {
                     var submesh = ComputeSubmeshContent(newDict, mesh, StaticMesh, material);
                     if (submesh != null)
@@ -650,7 +662,7 @@ namespace Engine.Content
 
             if (staticM.Count > 0)
             {
-                this.OptimizeSubmeshContent(newDict, StaticMesh, material, staticM);
+                OptimizeSubmeshContent(newDict, StaticMesh, material, staticM);
             }
         }
         /// <summary>
@@ -663,12 +675,12 @@ namespace Engine.Content
         /// <returns>Returns a submesh content if source mesh isn't a volume</returns>
         private SubMeshContent ComputeSubmeshContent(GeometryDictionary newDict, string sourceMesh, string targetMesh, string material)
         {
-            if (!this.Geometry.ContainsKey(sourceMesh))
+            if (!Geometry.ContainsKey(sourceMesh))
             {
                 return null;
             }
 
-            var dict = this.Geometry[sourceMesh];
+            var dict = Geometry[sourceMesh];
 
             if (dict.ContainsKey(material))
             {
@@ -714,11 +726,11 @@ namespace Engine.Content
         /// Gets triangle list
         /// </summary>
         /// <returns>Returns triangle list</returns>
-        public Triangle[] GetTriangles()
+        public IEnumerable<Triangle> GetTriangles()
         {
             List<Triangle> triangles = new List<Triangle>();
 
-            foreach (var meshDict in this.Geometry.Values)
+            foreach (var meshDict in Geometry.Values)
             {
                 foreach (var mesh in meshDict.Values)
                 {
@@ -726,23 +738,23 @@ namespace Engine.Content
                 }
             }
 
-            return triangles.ToArray();
+            return triangles;
         }
         /// <summary>
         /// Creates a new content filtering with the specified geometry name
         /// </summary>
         /// <param name="geometryName">Geometry name</param>
         /// <returns>Returns a new content instance with the referenced geometry, materials, images, ...</returns>
-        public ModelContent Filter(string geometryName)
+        public ContentData Filter(string geometryName)
         {
-            var geo = this.Geometry.Where(g => string.Equals(g.Key, geometryName + "-mesh", StringComparison.OrdinalIgnoreCase));
+            var geo = Geometry.Where(g => string.Equals(g.Key, geometryName + "-mesh", StringComparison.OrdinalIgnoreCase));
 
             if (geo.Any())
             {
-                var res = new ModelContent
+                var res = new ContentData
                 {
-                    Images = this.Images,
-                    Materials = this.Materials,
+                    Images = Images,
+                    Materials = Materials,
                 };
 
                 foreach (var g in geo)
@@ -760,18 +772,18 @@ namespace Engine.Content
         /// </summary>
         /// <param name="geometryNames">Geometry names</param>
         /// <returns>Returns a new content instance with the referenced geometry, materials, images, ...</returns>
-        public ModelContent Filter(IEnumerable<string> geometryNames)
+        public ContentData Filter(IEnumerable<string> geometryNames)
         {
             if (geometryNames != null && geometryNames.Any())
             {
-                var geo = this.Geometry.Where(g => geometryNames.Any(i => string.Equals(g.Key, i + "-mesh", StringComparison.OrdinalIgnoreCase)));
+                var geo = Geometry.Where(g => geometryNames.Any(i => string.Equals(g.Key, i + "-mesh", StringComparison.OrdinalIgnoreCase)));
 
                 if (geo.Any())
                 {
-                    var res = new ModelContent
+                    var res = new ContentData
                     {
-                        Images = this.Images,
-                        Materials = this.Materials,
+                        Images = Images,
+                        Materials = Materials,
                     };
 
                     foreach (var g in geo)
@@ -790,7 +802,7 @@ namespace Engine.Content
         /// </summary>
         /// <param name="mask">Name mask</param>
         /// <returns>Returns a new content instance with the referenced geometry, materials, images, ...</returns>
-        public ModelContent FilterMask(string mask)
+        public ContentData FilterMask(string mask)
         {
             return FilterMask(new[] { mask });
         }
@@ -799,9 +811,9 @@ namespace Engine.Content
         /// </summary>
         /// <param name="masks">Name mask list</param>
         /// <returns>Returns a new content instance with the referenced geometry, materials, images, ...</returns>
-        public ModelContent FilterMask(IEnumerable<string> masks)
+        public ContentData FilterMask(IEnumerable<string> masks)
         {
-            ModelContent res = null;
+            ContentData res = null;
 
             if (masks?.Any() == true)
             {
@@ -829,7 +841,7 @@ namespace Engine.Content
         /// <param name="armatureName">Armature name</param>
         /// <param name="modelContent">Model content</param>
         /// <returns>Returns true if the new model content was created</returns>
-        public bool FilterByArmature(string armatureName, out ModelContent modelContent)
+        public bool FilterByArmature(string armatureName, out ContentData modelContent)
         {
             modelContent = null;
 
@@ -838,14 +850,14 @@ namespace Engine.Content
                 return false;
             }
 
-            if (!this.SkinningInfo.ContainsKey(armatureName))
+            if (!SkinningInfo.ContainsKey(armatureName))
             {
                 return false;
             }
 
-            modelContent = new ModelContent();
+            modelContent = new ContentData();
 
-            var controllers = this.SkinningInfo[armatureName].Controllers;
+            var controllers = SkinningInfo[armatureName].Controllers;
 
             foreach (var controller in controllers)
             {
@@ -864,14 +876,14 @@ namespace Engine.Content
         /// </summary>
         /// <param name="mask">Mask</param>
         /// <param name="res">Model content</param>
-        private void FilterMaskByMesh(string mask, ref ModelContent res)
+        private void FilterMaskByMesh(string mask, ref ContentData res)
         {
             if (string.IsNullOrWhiteSpace(mask))
             {
                 return;
             }
 
-            var geo = this.Geometry.Where(g =>
+            var geo = Geometry.Where(g =>
                 g.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase) &&
                 g.Key.EndsWith("-mesh", StringComparison.OrdinalIgnoreCase));
 
@@ -879,7 +891,7 @@ namespace Engine.Content
             {
                 if (res == null)
                 {
-                    res = new ModelContent();
+                    res = new ContentData();
                 }
 
                 foreach (var g in geo)
@@ -895,14 +907,14 @@ namespace Engine.Content
         /// </summary>
         /// <param name="mask">Mask</param>
         /// <param name="res">Model content</param>
-        private bool FilterMaskByController(string mask, ref ModelContent res)
+        private bool FilterMaskByController(string mask, ref ContentData res)
         {
             if (string.IsNullOrWhiteSpace(mask))
             {
                 return false;
             }
 
-            var controllers = this.Controllers.Where(g =>
+            var controllers = Controllers.Where(g =>
                 g.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase) &&
                 g.Key.EndsWith("-skin", StringComparison.OrdinalIgnoreCase));
 
@@ -910,7 +922,7 @@ namespace Engine.Content
             {
                 if (res == null)
                 {
-                    res = new ModelContent();
+                    res = new ContentData();
                 }
 
                 foreach (var c in controllers)
@@ -932,7 +944,7 @@ namespace Engine.Content
         /// </summary>
         /// <param name="controllerName">Controller name</param>
         /// <param name="res">Result content</param>
-        private void TryAddController(string controllerName, ref ModelContent res)
+        private void TryAddController(string controllerName, ref ContentData res)
         {
             if (string.IsNullOrWhiteSpace(controllerName))
             {
@@ -944,7 +956,7 @@ namespace Engine.Content
                 return;
             }
 
-            var c = this.Controllers[controllerName];
+            var c = Controllers[controllerName];
 
             res.Controllers.Add(controllerName, c);
 
@@ -959,7 +971,7 @@ namespace Engine.Content
         /// </summary>
         /// <param name="controllerName">Controller name</param>
         /// <param name="res">Result content</param>
-        private void TryAddSkin(string armatureName, ref ModelContent res)
+        private void TryAddSkin(string armatureName, ref ContentData res)
         {
             if (string.IsNullOrWhiteSpace(armatureName))
             {
@@ -971,12 +983,12 @@ namespace Engine.Content
                 return;
             }
 
-            var s = this.SkinningInfo[armatureName];
+            var s = SkinningInfo[armatureName];
 
             res.SkinningInfo.Add(armatureName, s);
 
             //Add animations
-            var animations = this.Animations.Where(g =>
+            var animations = Animations.Where(g =>
             {
                 return s.Skeleton.GetJointNames()
                     .Any(j => g.Key.StartsWith($"{j}_pose_matrix", StringComparison.OrdinalIgnoreCase));
@@ -992,7 +1004,7 @@ namespace Engine.Content
                 res.Animations.Add(a.Key, a.Value);
             }
 
-            var clips = this.Animations.Definition.Clips
+            var clips = Animations.Definition.Clips
                 .Where(c => string.Equals(armatureName, c.Skeleton, StringComparison.OrdinalIgnoreCase));
 
             if (clips.Any())
@@ -1010,7 +1022,7 @@ namespace Engine.Content
         /// </summary>
         /// <param name="controllerName">Controller name</param>
         /// <param name="res">Result content</param>
-        private void TryAddGeometry(string meshName, ref ModelContent res)
+        private void TryAddGeometry(string meshName, ref ContentData res)
         {
             if (string.IsNullOrWhiteSpace(meshName))
             {
@@ -1022,7 +1034,7 @@ namespace Engine.Content
                 return;
             }
 
-            var g = this.Geometry[meshName];
+            var g = Geometry[meshName];
 
             res.Geometry.Add(meshName, g);
 
@@ -1037,7 +1049,7 @@ namespace Engine.Content
         /// </summary>
         /// <param name="controllerName">Controller name</param>
         /// <param name="res">Result content</param>
-        private void TryAddMaterial(string materialName, ref ModelContent res)
+        private void TryAddMaterial(string materialName, ref ContentData res)
         {
             if (string.IsNullOrWhiteSpace(materialName))
             {
@@ -1049,7 +1061,7 @@ namespace Engine.Content
                 return;
             }
 
-            var mat = this.Materials[materialName];
+            var mat = Materials[materialName];
 
             res.Materials.Add(materialName, mat);
 
@@ -1066,7 +1078,7 @@ namespace Engine.Content
         /// </summary>
         /// <param name="controllerName">Controller name</param>
         /// <param name="res">Result content</param>
-        private void TryAddImage(string textureName, ref ModelContent res)
+        private void TryAddImage(string textureName, ref ContentData res)
         {
             if (string.IsNullOrWhiteSpace(textureName))
             {
@@ -1078,21 +1090,21 @@ namespace Engine.Content
                 return;
             }
 
-            res.Images.Add(textureName, this.Images[textureName]);
+            res.Images.Add(textureName, Images[textureName]);
         }
         /// <summary>
         /// Try to add the lights to the result content
         /// </summary>
         /// <param name="controllerName">Controller name</param>
         /// <param name="res">Result content</param>
-        private void TryAddLights(string mask, ref ModelContent res)
+        private void TryAddLights(string mask, ref ContentData res)
         {
             if (string.IsNullOrWhiteSpace(mask))
             {
                 return;
             }
 
-            var lights = this.Lights.Where(l =>
+            var lights = Lights.Where(l =>
                 l.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase) &&
                 l.Key.EndsWith("-light", StringComparison.OrdinalIgnoreCase));
 
@@ -1119,9 +1131,9 @@ namespace Engine.Content
         {
             int count = 0;
 
-            if (this.Geometry.Count > 0)
+            if (Geometry.Count > 0)
             {
-                foreach (var g in this.Geometry)
+                foreach (var g in Geometry)
                 {
                     foreach (var s in g.Value.Values)
                     {
@@ -1173,7 +1185,7 @@ namespace Engine.Content
         {
             int count = 0;
 
-            var geo = this.Geometry.Where(g =>
+            var geo = Geometry.Where(g =>
                 g.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase) &&
                 g.Key.EndsWith("-mesh", StringComparison.OrdinalIgnoreCase));
 
@@ -1223,11 +1235,6 @@ namespace Engine.Content
         /// <param name="material">Material content</param>
         public void AddMaterial(string name, MaterialContent material)
         {
-            if (material == null)
-            {
-                return;
-            }
-
             Images.Import(ref material);
             Materials.Add(name, material);
         }

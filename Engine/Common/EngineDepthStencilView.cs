@@ -46,8 +46,8 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                this.dsv?.Dispose();
-                this.dsv = null;
+                dsv?.Dispose();
+                dsv = null;
             }
         }
 
@@ -55,9 +55,9 @@ namespace Engine.Common
         /// Gets the depth stencil
         /// </summary>
         /// <returns></returns>
-        public DepthStencilView GetDepthStencil()
+        internal DepthStencilView GetDepthStencil()
         {
-            return this.dsv;
+            return dsv;
         }
     }
 }

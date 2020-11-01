@@ -92,11 +92,14 @@ namespace Engine
         private static IFormatter CreateBinaryFormatter()
         {
             var ss = new SurrogateSelector();
+            ss.AddSurrogate(typeof(Vector2), new StreamingContext(StreamingContextStates.All), new Vector2SerializationSurrogate());
             ss.AddSurrogate(typeof(Vector3), new StreamingContext(StreamingContextStates.All), new Vector3SerializationSurrogate());
             ss.AddSurrogate(typeof(Vector4), new StreamingContext(StreamingContextStates.All), new Vector4SerializationSurrogate());
             ss.AddSurrogate(typeof(BoundingBox), new StreamingContext(StreamingContextStates.All), new BoundingBoxSerializationSurrogate());
             ss.AddSurrogate(typeof(Int3), new StreamingContext(StreamingContextStates.All), new Int3SerializationSurrogate());
             ss.AddSurrogate(typeof(Int4), new StreamingContext(StreamingContextStates.All), new Int4SerializationSurrogate());
+            ss.AddSurrogate(typeof(Color3), new StreamingContext(StreamingContextStates.All), new Color3SerializationSurrogate());
+            ss.AddSurrogate(typeof(Color4), new StreamingContext(StreamingContextStates.All), new Color4SerializationSurrogate());
 
             IFormatter formatter = new BinaryFormatter
             {
@@ -248,6 +251,25 @@ namespace Engine
     }
 
     /// <summary>
+    /// Vector2 serialization surrogate
+    /// </summary>
+    sealed class Vector2SerializationSurrogate : ISerializationSurrogate
+    {
+        public void GetObjectData(object obj, SerializationInfo info, StreamingContext context)
+        {
+            var v = (Vector2)obj;
+            info.AddValue("X", v.X);
+            info.AddValue("Y", v.Y);
+        }
+        public object SetObjectData(object obj, SerializationInfo info, StreamingContext context, ISurrogateSelector selector)
+        {
+            var v = (Vector2)obj;
+            v.X = info.GetSingle("X");
+            v.Y = info.GetSingle("Y");
+            return v;
+        }
+    }
+    /// <summary>
     /// Vector3 serialization surrogate
     /// </summary>
     sealed class Vector3SerializationSurrogate : ISerializationSurrogate
@@ -352,6 +374,50 @@ namespace Engine
             b.Minimum = info.GetValue<Vector3>("Minimum");
             b.Maximum = info.GetValue<Vector3>("Maximum");
             return b;
+        }
+    }
+    /// <summary>
+    /// Color3 serialization surrogate
+    /// </summary>
+    sealed class Color3SerializationSurrogate : ISerializationSurrogate
+    {
+        public void GetObjectData(object obj, SerializationInfo info, StreamingContext context)
+        {
+            var v = (Color3)obj;
+            info.AddValue("R", v.Red);
+            info.AddValue("G", v.Green);
+            info.AddValue("B", v.Blue);
+        }
+        public object SetObjectData(object obj, SerializationInfo info, StreamingContext context, ISurrogateSelector selector)
+        {
+            var v = (Color3)obj;
+            v.Red = info.GetSingle("R");
+            v.Green = info.GetSingle("G");
+            v.Blue = info.GetSingle("B");
+            return v;
+        }
+    }
+    /// <summary>
+    /// Color4 serialization surrogate
+    /// </summary>
+    sealed class Color4SerializationSurrogate : ISerializationSurrogate
+    {
+        public void GetObjectData(object obj, SerializationInfo info, StreamingContext context)
+        {
+            var v = (Color4)obj;
+            info.AddValue("R", v.Red);
+            info.AddValue("G", v.Green);
+            info.AddValue("B", v.Blue);
+            info.AddValue("A", v.Alpha);
+        }
+        public object SetObjectData(object obj, SerializationInfo info, StreamingContext context, ISurrogateSelector selector)
+        {
+            var v = (Color4)obj;
+            v.Red = info.GetSingle("R");
+            v.Green = info.GetSingle("G");
+            v.Blue = info.GetSingle("B");
+            v.Alpha = info.GetSingle("A");
+            return v;
         }
     }
 }

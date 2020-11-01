@@ -584,6 +584,71 @@ namespace Engine.Common
         }
 
         /// <summary>
+        /// Transforms the specified vertex list by the given transform matrix
+        /// </summary>
+        /// <param name="vertices">Vertex list</param>
+        /// <param name="transform">Transform matrix</param>
+        /// <returns>Returns the transformed vertex list</returns>
+        public static IEnumerable<VertexData> Transform(IEnumerable<VertexData> vertices, Matrix transform)
+        {
+            if (vertices?.Any() != true)
+            {
+                return new VertexData[] { };
+            }
+
+            if (transform.IsIdentity)
+            {
+                return new List<VertexData>(vertices);
+            }
+
+            List<VertexData> result = new List<VertexData>();
+
+            foreach (var v in vertices)
+            {
+                result.Add(Transform(v, transform));
+            }
+
+            return result;
+        }
+        /// <summary>
+        /// Transforms the specified vertex by the given transform matrix
+        /// </summary>
+        /// <param name="vertex">Vertex</param>
+        /// <param name="transform">Transform matrix</param>
+        /// <returns>Returns the transformed vertex</returns>
+        public static VertexData Transform(VertexData vertex, Matrix transform)
+        {
+            if (transform.IsIdentity)
+            {
+                return vertex;
+            }
+
+            VertexData result = vertex;
+
+            if (result.Position.HasValue)
+            {
+                result.Position = Vector3.TransformCoordinate(result.Position.Value, transform);
+            }
+
+            if (result.Normal.HasValue)
+            {
+                result.Normal = Vector3.TransformNormal(result.Normal.Value, transform);
+            }
+
+            if (result.Tangent.HasValue)
+            {
+                result.Tangent = Vector3.TransformNormal(result.Tangent.Value, transform);
+            }
+
+            if (result.BiNormal.HasValue)
+            {
+                result.BiNormal = Vector3.TransformNormal(result.BiNormal.Value, transform);
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// Generates a vertex data array from a geometry descriptor
         /// </summary>
         /// <param name="descriptor">Geometry descriptor</param>
@@ -614,51 +679,40 @@ namespace Engine.Common
         }
 
         /// <summary>
-        /// Transforms helper by given matrix
+        /// Transforms this vertex by the given matrix
         /// </summary>
         /// <param name="transform">Transformation matrix</param>
+        /// <returns>Returns the transformed vertex</returns>
         public VertexData Transform(Matrix transform)
         {
-            if (transform.IsIdentity)
-            {
-                return this;
-            }
-
-            VertexData result = this;
-
-            if (result.Position.HasValue)
-            {
-                result.Position = Vector3.TransformCoordinate(result.Position.Value, transform);
-            }
-
-            if (result.Normal.HasValue)
-            {
-                result.Normal = Vector3.TransformNormal(result.Normal.Value, transform);
-            }
-
-            if (result.Tangent.HasValue)
-            {
-                result.Tangent = Vector3.TransformNormal(result.Tangent.Value, transform);
-            }
-
-            if (result.BiNormal.HasValue)
-            {
-                result.BiNormal = Vector3.TransformNormal(result.BiNormal.Value, transform);
-            }
-
-            return result;
+            return Transform(this, transform);
+        }
+        /// <summary>
+        /// Gets the vertex list stride
+        /// </summary>
+        /// <returns>Returns the list stride</returns>
+        public int GetStride()
+        {
+            return 1;
         }
         /// <summary>
         /// Gets the vertex list
         /// </summary>
         /// <returns>Returns a vertex list</returns>
-        public Vector3[] GetVertices()
+        public IEnumerable<Vector3> GetVertices()
         {
             return new Vector3[] { Position.Value };
         }
         /// <summary>
-        /// Gets text representation of instance
+        /// Gets the vertex list topology
         /// </summary>
+        /// <returns>Returns the list topology</returns>
+        public Topology GetTopology()
+        {
+            return Topology.PointList;
+        }
+
+        /// <inheritdoc/>
         public override string ToString()
         {
             string text = null;

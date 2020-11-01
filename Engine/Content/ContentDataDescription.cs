@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Xml.Serialization;
 
-namespace Engine
+namespace Engine.Content
 {
     using Engine.Animation;
 
@@ -9,7 +9,7 @@ namespace Engine
     /// Model content description
     /// </summary>
     [Serializable]
-    public class ModelContentDescription
+    public class ContentDataDescription
     {
         /// <summary>
         /// Model file name

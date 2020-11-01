@@ -1,6 +1,7 @@
 ﻿using Engine;
 using Engine.Audio;
 using Engine.Audio.Tween;
+using Engine.Content;
 using Engine.Tween;
 using Engine.UI;
 using Engine.UI.Tween;
@@ -101,7 +102,10 @@ namespace Collada.Start
         }
         private async Task InitializeBackGround()
         {
-            var backGroundDesc = ModelDescription.FromXml(resourcesFolder, "SkyPlane.xml");
+            var backGroundDesc = new ModelDescription()
+            {
+                Content = ContentDescription.FromFile(resourcesFolder, "SkyPlane.xml"),
+            };
             backGround = await this.AddComponentModel("Background", backGroundDesc, SceneObjectUsages.UI);
         }
         private async Task InitializeAudio()

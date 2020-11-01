@@ -7,7 +7,7 @@ namespace Engine.Content
     /// <summary>
     /// Material content
     /// </summary>
-    public class MaterialContent
+    public struct MaterialContent
     {
         /// <summary>
         /// Default material content
@@ -117,7 +117,7 @@ namespace Engine.Content
         /// Gets the material content image names
         /// </summary>
         /// <returns>Returns a collection of distinct image names used in the material</returns>
-        public string[] GetImages()
+        public IEnumerable<string> GetImages()
         {
             List<string> images = new List<string>();
 
@@ -131,13 +131,10 @@ namespace Engine.Content
             return images.Distinct().ToArray();
         }
 
-        /// <summary>
-        /// Gets text representation of instance
-        /// </summary>
-        /// <returns>Returns text representation of instance</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("Algorithm: {0}; ", this.Algorithm);
+            return $"Algorithm: {Algorithm};";
         }
     }
 }

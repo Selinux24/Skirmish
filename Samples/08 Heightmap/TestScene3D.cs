@@ -269,11 +269,7 @@ namespace Heightmap
             {
                 CastShadow = true,
                 Instances = 250,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = @"Resources/Rocks",
-                    ModelContentFilename = @"boulder.xml",
-                }
+                Content = ContentDescription.FromFile(@"Resources/Rocks", @"boulder.xml"),
             };
             rocks = await this.AddComponentModelInstanced("Rocks", rDesc, SceneObjectUsages.None, layerObjects);
             rocks.Visible = false;
@@ -291,11 +287,7 @@ namespace Heightmap
                 CastShadow = true,
                 Instances = 200,
                 BlendMode = BlendModes.DefaultTransparent,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = @"Resources/Trees",
-                    ModelContentFilename = @"tree.xml",
-                }
+                Content = ContentDescription.FromFile(@"Resources/Trees", @"tree.xml"),
             };
             trees = await this.AddComponentModelInstanced("Trees", treeDesc, SceneObjectUsages.None, layerTerrain);
             trees.Visible = false;
@@ -313,11 +305,7 @@ namespace Heightmap
                 CastShadow = true,
                 Instances = 200,
                 BlendMode = BlendModes.DefaultTransparent,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = @"Resources/Trees2",
-                    ModelContentFilename = @"tree.xml",
-                }
+                Content = ContentDescription.FromFile(@"Resources/Trees2", @"tree.xml"),
             };
             trees2 = await this.AddComponentModelInstanced("Trees2", tree2Desc, SceneObjectUsages.None, layerTerrain);
             trees2.Visible = false;
@@ -335,11 +323,7 @@ namespace Heightmap
             {
                 TextureIndex = 0,
                 CastShadow = true,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = @"Resources/Soldier",
-                    ModelContentFilename = @"soldier_anim2.xml",
-                }
+                Content = ContentDescription.FromFile(@"Resources/Soldier", @"soldier_anim2.xml"),
             };
             soldier = await this.AddComponentModel("Soldier", sDesc, SceneObjectUsages.Agent, layerObjects);
             soldier.Visible = false;
@@ -356,11 +340,7 @@ namespace Heightmap
             {
                 Instances = 4,
                 CastShadow = true,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = @"Resources/Soldier",
-                    ModelContentFilename = @"soldier_anim2.xml",
-                }
+                Content = ContentDescription.FromFile(@"Resources/Soldier", @"soldier_anim2.xml"),
             };
             troops = await this.AddComponentModelInstanced("Troops", tDesc, SceneObjectUsages.Agent, layerObjects);
             troops.Visible = false;
@@ -377,11 +357,7 @@ namespace Heightmap
             {
                 CastShadow = true,
                 Instances = 3,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = @"Resources/m24",
-                    ModelContentFilename = @"m24.xml",
-                },
+                Content = ContentDescription.FromFile(@"Resources/m24", @"m24.xml"),
             };
             helicopterI = await this.AddComponentModelInstanced("M24", mDesc, SceneObjectUsages.None, layerObjects);
             helicopterI.Visible = false;
@@ -399,11 +375,7 @@ namespace Heightmap
             {
                 CastShadow = true,
                 Instances = 5,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = @"Resources/Bradley",
-                    ModelContentFilename = @"Bradley.xml",
-                }
+                Content = ContentDescription.FromFile(@"Resources/Bradley", @"Bradley.xml"),
             };
             bradleyI = await this.AddComponentModelInstanced("Bradley", mDesc, SceneObjectUsages.None, layerObjects);
             bradleyI.Visible = false;
@@ -421,11 +393,7 @@ namespace Heightmap
             {
                 CastShadow = true,
                 Instances = 5,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = @"Resources/buildings",
-                    ModelContentFilename = @"Affgan1.xml",
-                }
+                Content = ContentDescription.FromFile(@"Resources/buildings", @"Affgan1.xml"),
             };
             buildings = await this.AddComponentModelInstanced("Affgan buildings", mDesc, SceneObjectUsages.None, layerObjects);
             buildings.Visible = false;
@@ -442,11 +410,7 @@ namespace Heightmap
             var mDesc = new ModelDescription()
             {
                 CastShadow = true,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = @"Resources/Watch Tower",
-                    ModelContentFilename = @"Watch Tower.xml",
-                }
+                Content = ContentDescription.FromFile(@"Resources/Watch Tower", @"Watch Tower.xml"),
             };
             watchTower = await this.AddComponentModel("Watch Tower", mDesc, SceneObjectUsages.None, layerObjects);
             watchTower.Visible = false;
@@ -465,11 +429,7 @@ namespace Heightmap
                 CastShadow = true,
                 SphericVolume = false,
                 Instances = 5,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = @"Resources/container",
-                    ModelContentFilename = "Container.xml",
-                }
+                Content = ContentDescription.FromFile(@"Resources/container", "Container.xml"),
             };
             containers = await this.AddComponentModelInstanced("Container", desc);
             containers.Visible = false;
@@ -487,11 +447,7 @@ namespace Heightmap
             {
                 Instances = 50,
                 CastShadow = false,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = @"Resources/Scenery/Objects",
-                    ModelContentFilename = @"torch.xml",
-                }
+                Content = ContentDescription.FromFile(@"Resources/Scenery/Objects", @"torch.xml"),
             };
             torchs = await this.AddComponentModelInstanced("Torchs", tcDesc, SceneObjectUsages.None, layerObjects);
             torchs.Visible = false;

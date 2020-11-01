@@ -70,10 +70,8 @@ namespace Engine.Common
                 SpecularColor == other.SpecularColor &&
                 Shininess == other.Shininess;
         }
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+
+        /// <inheritdoc/>
         public override string ToString()
         {
             return $"EmissiveColor: {EmissiveColor}; AmbientColor: {AmbientColor}; DiffuseColor: {DiffuseColor}; SpecularColor: {SpecularColor}; Shininess: {Shininess};";

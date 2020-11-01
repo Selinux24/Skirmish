@@ -77,18 +77,13 @@ namespace SceneTest.SceneStencilPass
             mat.NormalMapTexture = "SceneStencilPass/floors/asphalt/d_road_asphalt_stripes_normal.dds";
             mat.SpecularTexture = "SceneStencilPass/floors/asphalt/d_road_asphalt_stripes_specular.dds";
 
-            var content = ModelContent.GenerateTriangleList(vertices, indices, mat);
-
             var desc = new ModelDescription()
             {
                 CastShadow = true,
                 DeferredEnabled = true,
                 DepthEnabled = true,
                 UseAnisotropicFiltering = true,
-                Content = new ContentDescription()
-                {
-                    ModelContent = content
-                }
+                Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
             await this.AddComponentModel("Floor", desc);
@@ -101,11 +96,7 @@ namespace SceneTest.SceneStencilPass
                 {
                     CastShadow = true,
                     UseAnisotropicFiltering = true,
-                    Content = new ContentDescription()
-                    {
-                        ContentFolder = "SceneStencilPass/buildings/obelisk",
-                        ModelContentFilename = "Obelisk.xml",
-                    }
+                    Content = ContentDescription.FromFile("SceneStencilPass/buildings/obelisk", "Obelisk.xml"),
                 });
             buildingObelisk.Manipulator.SetPosition(0, 0, 0);
         }
@@ -117,17 +108,13 @@ namespace SceneTest.SceneStencilPass
             var sphere = GeometryUtil.CreateSphere(0.1f, 16, 5);
             var vertices = VertexData.FromDescriptor(sphere);
             var indices = sphere.Indices;
-            var content = ModelContent.GenerateTriangleList(vertices, indices, mat);
 
             var desc = new ModelDescription()
             {
                 CastShadow = false,
                 DeferredEnabled = true,
                 DepthEnabled = true,
-                Content = new ContentDescription()
-                {
-                    ModelContent = content,
-                }
+                Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
             lightEmitter1 = await this.AddComponentModel("Emitter1", desc);

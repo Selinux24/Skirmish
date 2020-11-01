@@ -41,7 +41,7 @@ namespace Engine.Common
         {
             get
             {
-                return this.data?.Count ?? 0;
+                return data?.Count ?? 0;
             }
         }
         /// <summary>
@@ -69,7 +69,7 @@ namespace Engine.Common
         /// </summary>
         public BufferManagerIndices(bool dynamic)
         {
-            this.Dynamic = dynamic;
+            Dynamic = dynamic;
         }
 
         /// <summary>
@@ -82,12 +82,12 @@ namespace Engine.Common
         /// <returns>Returns the new registerd descriptor</returns>
         public void AddDescriptor(BufferDescriptor descriptor, string id, int bufferDescriptionIndex, IEnumerable<uint> indices)
         {
-            Monitor.Enter(this.data);
+            Monitor.Enter(data);
             //Store current data index as descriptor offset
-            int offset = this.data.Count;
+            int offset = data.Count;
             //Add items to data list
-            this.data.AddRange(indices);
-            Monitor.Exit(this.data);
+            data.AddRange(indices);
+            Monitor.Exit(data);
 
             //Create and add the new descriptor to main descriptor list
             descriptor.Id = id;
@@ -95,9 +95,9 @@ namespace Engine.Common
             descriptor.BufferOffset = offset;
             descriptor.Count = indices.Count();
 
-            Monitor.Enter(this.descriptors);
-            this.descriptors.Add(descriptor);
-            Monitor.Exit(this.descriptors);
+            Monitor.Enter(descriptors);
+            descriptors.Add(descriptor);
+            Monitor.Exit(descriptors);
         }
         /// <summary>
         /// Removes a buffer descriptor from the internal list
@@ -106,7 +106,7 @@ namespace Engine.Common
         public void RemoveDescriptor(BufferDescriptor descriptor)
         {
             //Find descriptor
-            var index = this.descriptors.IndexOf(descriptor);
+            var index = descriptors.IndexOf(descriptor);
             if (index < 0)
             {
                 return;
@@ -114,34 +114,31 @@ namespace Engine.Common
 
             if (descriptor.Count > 0)
             {
-                Monitor.Enter(this.data);
+                Monitor.Enter(data);
                 //If descriptor has items, remove from buffer descriptors
-                this.data.RemoveRange(descriptor.BufferOffset, descriptor.Count);
-                Monitor.Exit(this.data);
+                data.RemoveRange(descriptor.BufferOffset, descriptor.Count);
+                Monitor.Exit(data);
             }
 
-            Monitor.Enter(this.descriptors);
+            Monitor.Enter(descriptors);
             //Remove from descriptors list
-            this.descriptors.RemoveAt(index);
+            descriptors.RemoveAt(index);
 
-            if (this.descriptors.Any())
+            if (descriptors.Any())
             {
                 //Reallocate descriptor offsets
-                this.descriptors[0].BufferOffset = 0;
-                for (int i = 1; i < this.descriptors.Count; i++)
+                descriptors[0].BufferOffset = 0;
+                for (int i = 1; i < descriptors.Count; i++)
                 {
-                    var prev = this.descriptors[i - 1];
+                    var prev = descriptors[i - 1];
 
-                    this.descriptors[i].BufferOffset = prev.BufferOffset + prev.Count;
+                    descriptors[i].BufferOffset = prev.BufferOffset + prev.Count;
                 }
             }
-            Monitor.Exit(this.descriptors);
+            Monitor.Exit(descriptors);
         }
 
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns a description of the instance</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
             return $"[{Dynamic}] AllocatedSize: {AllocatedSize} ToAllocateSize: {ToAllocateSize} Dirty: {Dirty}";

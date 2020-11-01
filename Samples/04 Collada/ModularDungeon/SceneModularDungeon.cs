@@ -538,7 +538,7 @@ namespace Collada.ModularDungeon
                 UseAnisotropic = true,
                 CastShadow = true,
                 BlendMode = BlendModes.DefaultTransparent,
-                ContentDescription = ContentDescription.FromFile(resourcesFolder, "basicdungeon/assets.xml"),
+                Content = ContentDescription.FromFile(resourcesFolder, "basicdungeon/assets.xml"),
                 AssetsConfiguration = Engine.Content.OnePageDungeon.DungeonCreator.CreateAssets(dn, config),
                 Levels = Engine.Content.OnePageDungeon.DungeonCreator.CreateLevels(dn, config),
             };

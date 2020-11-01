@@ -24,8 +24,8 @@ namespace Engine
         {
             return new GroundDescription()
             {
-                QuadtreeDescription = QuadtreeDescription.Default(quadtreeDepth),
-                HeightmapDescription = HeightmapDescription.FromMap(heightmap, cellSize, maximumHeight, heightCurve, textures),
+                Quadtree = QuadtreeDescription.Default(quadtreeDepth),
+                Heightmap = HeightmapDescription.FromMap(heightmap, cellSize, maximumHeight, heightCurve, textures),
             };
         }
         /// <summary>
@@ -37,8 +37,8 @@ namespace Engine
         {
             return new GroundDescription()
             {
-                QuadtreeDescription = QuadtreeDescription.Default(quadtreeDepth),
-                HeightmapDescription = description,
+                Quadtree = QuadtreeDescription.Default(quadtreeDepth),
+                Heightmap = description,
             };
         }
         /// <summary>
@@ -51,23 +51,23 @@ namespace Engine
         {
             return new GroundDescription()
             {
-                QuadtreeDescription = QuadtreeDescription.Default(quadtreeDepth),
-                ContentDescription = ContentDescription.FromFile(contentFolder, fileName),
+                Quadtree = QuadtreeDescription.Default(quadtreeDepth),
+                Content = ContentDescription.FromFile(contentFolder, fileName),
             };
         }
 
         /// <summary>
         /// Heightmap description
         /// </summary>
-        public HeightmapDescription HeightmapDescription { get; set; }
+        public HeightmapDescription Heightmap { get; set; }
         /// <summary>
         /// Content
         /// </summary>
-        public ContentDescription ContentDescription { get; set; }
+        public ContentDescription Content { get; set; }
         /// <summary>
         /// Quadtree
         /// </summary>
-        public QuadtreeDescription QuadtreeDescription { get; set; }
+        public QuadtreeDescription Quadtree { get; set; }
         /// <summary>
         /// Use anisotropic filtering
         /// </summary>
@@ -89,16 +89,16 @@ namespace Engine
         /// <summary>
         /// Reads a model content from description
         /// </summary>
-        public ModelContent ReadModelContent()
+        public ContentData ReadModelContent()
         {
             // Read model content
-            if (HeightmapDescription != null)
+            if (Heightmap != null)
             {
-                return HeightmapDescription.ReadModelContent();
+                return Heightmap.ReadModelContent();
             }
-            else if (ContentDescription != null)
+            else if (Content != null)
             {
-                return ContentDescription.ReadModelContent().FirstOrDefault();
+                return Content.ReadModelContent().FirstOrDefault();
             }
             else
             {
@@ -112,9 +112,9 @@ namespace Engine
         /// <param name="items">Quadtree items</param>
         public PickingQuadTree<T> ReadQuadTree<T>(IEnumerable<T> items) where T : IVertexList, IRayIntersectable
         {
-            if (QuadtreeDescription != null)
+            if (Quadtree != null)
             {
-                return new PickingQuadTree<T>(items, QuadtreeDescription);
+                return new PickingQuadTree<T>(items, Quadtree);
             }
 
             return null;

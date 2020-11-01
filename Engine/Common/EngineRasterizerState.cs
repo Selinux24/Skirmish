@@ -222,8 +222,8 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                this.rasterizerState?.Dispose();
-                this.rasterizerState = null;
+                rasterizerState?.Dispose();
+                rasterizerState = null;
             }
         }
 
@@ -233,7 +233,7 @@ namespace Engine.Common
         /// <returns>Returns the internal rasterizer state</returns>
         internal RasterizerState2 GetRasterizerState()
         {
-            return this.rasterizerState;
+            return rasterizerState;
         }
     }
 }

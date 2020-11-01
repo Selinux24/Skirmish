@@ -23,15 +23,15 @@ namespace Engine.Content
         {
             get
             {
-                return Matrix.Transformation(Vector3.Zero, Quaternion.Identity, this.Scale, Vector3.Zero, this.Rotation, this.Position);
+                return Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Scale, Vector3.Zero, Rotation, Position);
             }
             set
             {
                 value.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 translation);
 
-                this.Position = translation;
-                this.Rotation = rotation;
-                this.Scale = scale;
+                Position = translation;
+                Rotation = rotation;
+                Scale = scale;
             }
         }
         /// <summary>
@@ -77,20 +77,20 @@ namespace Engine.Content
         /// <returns>Returns the new generate spot light</returns>
         public SceneLightSpot CreateSpotLight()
         {
-            Vector3 direction = Vector3.TransformNormal(Vector3.Up, Matrix.RotationQuaternion(this.Rotation));
-            float radius = this.GetRadius(this.QuadraticAttenuation, 0.5f);
-            float intensity = this.ConstantAttenuation * radius;
+            Vector3 direction = Vector3.TransformNormal(Vector3.Up, Matrix.RotationQuaternion(Rotation));
+            float radius = GetRadius(QuadraticAttenuation, 0.5f);
+            float intensity = ConstantAttenuation * radius;
 
             var desc = new SceneLightSpotDescription
             {
-                Position = this.Position,
+                Position = Position,
                 Direction = direction,
-                Angle = this.FallOffAngle,
+                Angle = FallOffAngle,
                 Radius = radius,
                 Intensity = intensity,
             };
 
-            return new SceneLightSpot(this.Name, true, this.Color, this.Color, true, desc);
+            return new SceneLightSpot(Name, true, Color, Color, true, desc);
         }
         /// <summary>
         /// Creates a new point light from content
@@ -98,17 +98,17 @@ namespace Engine.Content
         /// <returns>Returns the new generate point light</returns>
         public SceneLightPoint CreatePointLight()
         {
-            float radius = this.GetRadius(this.QuadraticAttenuation, 0.5f);
-            float intensity = this.ConstantAttenuation * radius;
+            float radius = GetRadius(QuadraticAttenuation, 0.5f);
+            float intensity = ConstantAttenuation * radius;
 
             var desc = new SceneLightPointDescription
             {
-                Transform = this.Transform,
+                Transform = Transform,
                 Radius = radius,
                 Intensity = intensity,
             };
 
-            return new SceneLightPoint(this.Name, true, this.Color, this.Color, true, desc);
+            return new SceneLightPoint(Name, true, Color, Color, true, desc);
         }
 
         /// <summary>
