@@ -139,7 +139,7 @@ namespace Engine
         /// <summary>
         /// Albedo
         /// </summary>
-        public float Albedo { get; protected set; } = 1f;
+        public float Albedo { get; protected set; } = 0.5f;
         /// <summary>
         /// Gets light by name
         /// </summary>
@@ -540,7 +540,7 @@ namespace Engine
             }
 
             float b = Math.Max(0, -(float)Math.Cos(timeOfDay.Elevation) + 0.15f) * 1.5f;
-            Albedo = Math.Min(b, 1f);
+            Albedo = Math.Min(b, 0.5f);
 
             Vector3 keyDir = timeOfDay.LightDirection;
             Vector3 backDir = -Vector3.Reflect(keyDir, Vector3.Up);

@@ -3,6 +3,7 @@ using System.Linq;
 
 namespace Engine
 {
+    using Engine.Common;
     using Engine.Content;
 
     /// <summary>
@@ -83,6 +84,10 @@ namespace Engine
         /// Where a = FalloffCurve.X and b = FalloffCurve.Y
         /// </remarks>
         public Vector2 FalloffCurve { get; set; } = new Vector2(2, 2.7f);
+        /// <summary>
+        /// Transform matrix
+        /// </summary>
+        public Matrix Transform { get; set; } = Matrix.Identity;
 
         /// <summary>
         /// Constructor
@@ -108,6 +113,11 @@ namespace Engine
                 Textures.Scale,
                 Textures.Displacement,
                 out var vertices, out var indices);
+
+            if (!Transform.IsIdentity)
+            {
+                vertices = VertexData.Transform(vertices, Transform);
+            }
 
             ContentData modelContent = new ContentData();
 

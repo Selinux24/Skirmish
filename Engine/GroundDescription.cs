@@ -83,7 +83,7 @@ namespace Engine
         public GroundDescription()
             : base()
         {
-            this.CastShadow = true;
+            CastShadow = true;
         }
 
         /// <summary>

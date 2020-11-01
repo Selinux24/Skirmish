@@ -21,16 +21,9 @@ namespace Engine
         private BufferDescriptor indexBuffer = null;
 
         /// <summary>
-        /// Water description
+        /// Water state
         /// </summary>
-        protected new WaterDescription Description
-        {
-            get
-            {
-                return (WaterDescription)base.Description;
-            }
-        }
-
+        public WaterState WaterState { get; private set; }
         /// <summary>
         /// Returns true if the buffers were ready
         /// </summary>
@@ -66,6 +59,20 @@ namespace Engine
         public Water(string name, Scene scene, WaterDescription description)
             : base(name, scene, description)
         {
+            WaterState = new WaterState
+            {
+                BaseColor = description.BaseColor,
+                WaterColor = description.WaterColor.RGB(),
+                WaterTransparency = description.WaterColor.Alpha,
+                WaveHeight = description.WaveHeight,
+                WaveChoppy = description.WaveChoppy,
+                WaveSpeed = description.WaveSpeed,
+                WaveFrequency = description.WaveFrequency,
+                Steps = description.HeightmapIterations,
+                GeometryIterations = description.GeometryIterations,
+                ColorIterations = description.ColorIterations,
+            };
+
             InitializeBuffers(name, description.PlaneSize, description.PlaneHeight);
         }
         /// <summary>
@@ -122,20 +129,20 @@ namespace Engine
 
             effect.UpdatePerFrame(
                 context.ViewProjection,
-                context.EyePosition + new Vector3(0, -Description.PlaneHeight, 0),
+                context.EyePosition,
                 context.Lights,
                 new EffectWaterState
                 {
-                    BaseColor = Description.BaseColor,
-                    WaterColor = Description.WaterColor,
-                    WaveHeight = Description.WaveHeight,
-                    WaveChoppy = Description.WaveChoppy,
-                    WaveSpeed = Description.WaveSpeed,
-                    WaveFrequency = Description.WaveFrequency,
+                    BaseColor = WaterState.BaseColor,
+                    WaterColor = new Color4(WaterState.WaterColor, WaterState.WaterTransparency),
+                    WaveHeight = WaterState.WaveHeight,
+                    WaveChoppy = WaterState.WaveChoppy,
+                    WaveSpeed = WaterState.WaveSpeed,
+                    WaveFrequency = WaterState.WaveFrequency,
+                    Steps = WaterState.Steps,
+                    GeometryIterations = WaterState.GeometryIterations,
+                    ColorIterations = WaterState.ColorIterations,
                     TotalTime = context.GameTime.TotalSeconds,
-                    Steps = Description.HeightmapIterations,
-                    GeometryIterations = Description.GeometryIterations,
-                    ColorIterations = Description.ColorIterations,
                 });
 
             var graphics = Game.Graphics;
@@ -166,6 +173,53 @@ namespace Engine
             vertexBuffer = BufferManager.AddVertexData(name, false, vertices);
             indexBuffer = BufferManager.AddIndexData(name, false, indices);
         }
+    }
+
+    /// <summary>
+    /// Water state
+    /// </summary>
+    public class WaterState
+    {
+        /// <summary>
+        /// Base color
+        /// </summary>
+        public Color3 BaseColor { get; set; }
+        /// <summary>
+        /// Water color
+        /// </summary>
+        public Color3 WaterColor { get; set; }
+        /// <summary>
+        /// Water color alpha component
+        /// </summary>
+        public float WaterTransparency { get; set; }
+        /// <summary>
+        /// Wave heigth
+        /// </summary>
+        public float WaveHeight { get; set; }
+        /// <summary>
+        /// Wave choppy
+        /// </summary>
+        public float WaveChoppy { get; set; }
+        /// <summary>
+        /// Wave speed
+        /// </summary>
+        public float WaveSpeed { get; set; }
+        /// <summary>
+        /// Wave frequency
+        /// </summary>
+        public float WaveFrequency { get; set; }
+        /// <summary>
+        /// Shader steps
+        /// </summary>
+        public int Steps { get; set; }
+        /// <summary>
+        /// Geometry iterations
+        /// </summary>
+        public int GeometryIterations { get; set; }
+        /// <summary>
+        /// Color iterations
+        /// </summary>
+        public int ColorIterations { get; set; }
     }
 
     /// <summary>

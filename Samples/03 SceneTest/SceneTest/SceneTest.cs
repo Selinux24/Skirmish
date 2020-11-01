@@ -14,6 +14,7 @@ namespace SceneTest.SceneTest
 {
     public class SceneTest : Scene
     {
+        private const int layerObjs = 50;
         private const int layerHUD = 99;
 
         private readonly float baseHeight = 0.1f;
@@ -22,6 +23,13 @@ namespace SceneTest.SceneTest
         private readonly float xDelta = 500f;
         private readonly float yDelta = 7f;
         private readonly float zDelta = 0f;
+
+        private readonly Color4 ambientUp = Color4.White;
+        private readonly Color4 ambientDown = new Color4(1f, 0.671f, 0.328f, 1f);
+
+        private readonly Color3 waterBaseColor = new Color3(0.067f, 0.065f, 0.003f);
+        private readonly Color4 waterColor = new Color4(0.003f, 0.267f, 0.096f, 0.95f);
+        private readonly float waterHeight = -50f;
 
         private UICursor cursor = null;
         private UIButton butClose = null;
@@ -98,6 +106,8 @@ namespace SceneTest.SceneTest
             Camera.FarPlaneDistance = 2000;
             Camera.SlowMovementDelta = 100f;
             Camera.MovementDelta = 500f;
+
+            Lights.HemisphericLigth = new SceneLightHemispheric("hemi_light", ambientDown, ambientUp, true);
 
             await LoadResourcesAsync(
                 InitializeUI(),
@@ -200,7 +210,7 @@ namespace SceneTest.SceneTest
                 InitializeContainers(),
                 InitializeTestCube(),
                 InitializeParticles(),
-                InitializaDebug(),
+                InitializeDebug(),
             };
 
             await LoadResourcesAsync(
@@ -262,7 +272,16 @@ namespace SceneTest.SceneTest
         }
         private async Task InitializeScenery()
         {
-            scenery = await this.AddComponentScenery("Scenery", GroundDescription.FromFile("SceneTest/scenery", "Clif.xml"));
+            var sDesc = GroundDescription.FromFile("SceneTest/scenery", "Clif.xml");
+
+            scenery = await this.AddComponentScenery("Scenery", sDesc, SceneObjectUsages.Ground, layerObjs);
+            var bbox = scenery.GetBoundingBox();
+
+            var waterDesc = WaterDescription.CreateCalm(Math.Max(bbox.Width, bbox.Depth), waterHeight);
+            waterDesc.BaseColor = waterBaseColor;
+            waterDesc.WaterColor = waterColor;
+
+            await this.AddComponentWater("Water", waterDesc, SceneObjectUsages.None, layerObjs + 1);
         }
         private async Task InitializeTrees()
         {
@@ -755,7 +774,7 @@ namespace SceneTest.SceneTest
             };
             await this.AddComponentPrimitiveListDrawer("Marker Cubes", desc);
         }
-        private async Task InitializaDebug()
+        private async Task InitializeDebug()
         {
             var desc = new PrimitiveListDrawerDescription<Line3D>() { DepthEnabled = true, Count = 20000 };
             lightsVolumeDrawer = await this.AddComponentPrimitiveListDrawer("DebugLightsVolumeDrawer", desc);
@@ -830,6 +849,17 @@ namespace SceneTest.SceneTest
             UpdateSkyEffects();
             UpdateParticles();
             UpdateDebug();
+
+            if (Camera.Position.Y < waterHeight)
+            {
+                Lights.HemisphericLigth.AmbientUp = Color4.White * 0.25f;
+                Lights.HemisphericLigth.AmbientDown = waterColor;
+            }
+            else
+            {
+                Lights.HemisphericLigth.AmbientUp = ambientUp;
+                Lights.HemisphericLigth.AmbientDown = ambientDown;
+            }
         }
         private void UpdateInputCamera(GameTime gameTime, bool shift)
         {

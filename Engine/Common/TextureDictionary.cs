@@ -21,9 +21,9 @@ namespace Engine.Common
             {
                 if (!string.IsNullOrEmpty(image))
                 {
-                    if (!base.ContainsKey(image))
+                    if (!ContainsKey(image))
                     {
-                        throw new KeyNotFoundException(string.Format("Texture resource not found: {0}", image));
+                        throw new KeyNotFoundException($"Texture resource not found: {image}");
                     }
 
                     return base[image];

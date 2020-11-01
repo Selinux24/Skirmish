@@ -6,8 +6,14 @@ namespace SceneTest.SceneWater
 {
     public class SceneWater : Scene
     {
+        private const int layerObjs = 50;
+
         private const float fogStart = 150f;
         private const float fogRange = 200f;
+
+        private readonly int mapSize = 256;
+        private readonly float terrainSize = 1000f;
+        private readonly float terrainHeight = 20;
 
         public SceneWater(Game game)
             : base(game)
@@ -32,25 +38,18 @@ namespace SceneTest.SceneWater
 
             Lights.BaseFogColor = Color.White;
 
-            await LoadResourcesAsync(InitializeAssets());
+            await LoadResourcesAsync(new[] {
+                InitializeLensFlare(),
+                InitializeSky(),
+                InitializeWater(),
+                InitializeSeaBottom(),
+            });
 
             GameEnvironment.TimeOfDay.BeginAnimation(5, 00, 00, 10f);
             //Environment.TimeOfDay.SetTimeOfDay(7, 00, 00)
         }
-        private async Task InitializeAssets()
+        private async Task InitializeLensFlare()
         {
-            await this.AddComponentWater("Water", new WaterDescription()
-            {
-                PlaneSize = 1000f,
-                HeightmapIterations = 8,
-                GeometryIterations = 4,
-                ColorIterations = 8,
-            });
-            await this.AddComponentSkyScattering("Sky", new SkyScatteringDescription()
-            {
-                Resolution = SkyScatteringResolutions.High
-            });
-
             var lfDesc = new LensFlareDescription()
             {
                 ContentPath = @"Common/LensFlare",
@@ -72,6 +71,55 @@ namespace SceneTest.SceneWater
                 }
             };
             await this.AddComponentLensFlare("Flares", lfDesc, SceneObjectUsages.None);
+        }
+        private async Task InitializeSky()
+        {
+            await this.AddComponentSkyScattering("Sky", new SkyScatteringDescription()
+            {
+                Resolution = SkyScatteringResolutions.High
+            });
+        }
+        private async Task InitializeWater()
+        {
+            var wDesc = WaterDescription.CreateOcean(terrainSize, 0f);
+
+            await this.AddComponentWater("Water", wDesc, SceneObjectUsages.None, layerObjs + 1);
+        }
+        private async Task InitializeSeaBottom()
+        {
+            // Generates a random terrain using perlin noise
+            NoiseMapDescriptor nmDesc = new NoiseMapDescriptor
+            {
+                MapWidth = mapSize,
+                MapHeight = mapSize,
+                Scale = 0.5f,
+                Lacunarity = 2f,
+                Persistance = 0.5f,
+                Octaves = 4,
+                Offset = Vector2.One,
+                Seed = 150,
+            };
+            var noiseMap = NoiseMap.CreateNoiseMap(nmDesc);
+
+            Curve heightCurve = new Curve();
+            heightCurve.Keys.Add(0, 0);
+            heightCurve.Keys.Add(0.4f, 0f);
+            heightCurve.Keys.Add(1f, 1f);
+
+            float cellSize = terrainSize / mapSize;
+
+            var textures = new HeightmapTexturesDescription
+            {
+                ContentPath = "SceneWater",
+                TexturesLR = new[] { "Diffuse.jpg" },
+                NormalMaps = new[] { "Normal.jpg" },
+                Scale = 0.0333f,
+            };
+            GroundDescription groundDesc = GroundDescription.FromHeightmap(noiseMap, cellSize, terrainHeight, heightCurve, textures, 2);
+            groundDesc.Heightmap.UseFalloff = true;
+            groundDesc.Heightmap.Transform = Matrix.Translation(0, -terrainHeight * 0.99f, 0);
+
+            await this.AddComponentScenery("Sea Bottom", groundDesc, SceneObjectUsages.None, layerObjs);
         }
 
         public override void Update(GameTime gameTime)

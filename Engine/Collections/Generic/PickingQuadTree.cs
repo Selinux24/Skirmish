@@ -12,6 +12,11 @@ namespace Engine.Collections.Generic
     public class PickingQuadTree<T> where T : IVertexList, IRayIntersectable
     {
         /// <summary>
+        /// Node id
+        /// </summary>
+        private int nodeId = 0;
+
+        /// <summary>
         /// Root node
         /// </summary>
         public PickingQuadTreeNode<T> Root { get; private set; }
@@ -213,6 +218,15 @@ namespace Engine.Collections.Generic
             }
 
             return node;
+        }
+
+        /// <summary>
+        /// Gets the node id
+        /// </summary>
+        /// <returns>Returns the next node id</returns>
+        public int GetNextNodeId()
+        {
+            return nodeId++;
         }
 
         /// <summary>

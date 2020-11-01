@@ -16,6 +16,7 @@ namespace Skybox
     public class TestScene3D : Scene
     {
         private const int layerHUD = 99;
+        private const int layerObjs = 50;
         private const float alpha = 0.25f;
 
         private readonly Color4 ruinsVolumeColor = new Color4(Color.Green.RGB(), alpha);
@@ -49,7 +50,7 @@ namespace Skybox
         private readonly Agent walker = new Agent()
         {
             Name = "Walker",
-            Height = 1.2f,
+            Height = 1.7f,
             Radius = 0.4f,
             MaxClimb = 1.2f,
             MaxSlope = 45,
@@ -61,6 +62,10 @@ namespace Skybox
         private PrimitiveListDrawer<Line3D> volumesDrawer = null;
         private PrimitiveListDrawer<Triangle> graphDrawer = null;
 
+        private readonly int mapSize = 256;
+        private readonly float terrainSize = 512;
+        private readonly float terrainHeight = 20;
+
         private ModelInstanced torchs = null;
         private ModelInstanced obelisks = null;
         private Model fountain = null;
@@ -69,6 +74,7 @@ namespace Skybox
         private ParticleEmitter movingFireEmitter = null;
         private SceneLightPoint movingFireLight = null;
 
+        private ParticleManager pManager = null;
         private readonly ParticleSystemDescription pBigFire = ParticleSystemDescription.InitializeFire("resources", "fire.png", 0.5f);
         private readonly ParticleSystemDescription pFire = ParticleSystemDescription.InitializeFire("resources", "fire.png", 0.1f);
         private readonly ParticleSystemDescription pPlume = ParticleSystemDescription.InitializeSmokePlume("resources", "smoke.png", 0.1f);
@@ -90,8 +96,21 @@ namespace Skybox
             InitializeCamera();
 
             await LoadResourcesAsync(
-                InitializeAssets(),
-                (res) =>
+                new[]
+                {
+                    InitializeUI(),
+                    InitializeSkydom(),
+                    InitializeLakeBottom(),
+                    InitializeTorchs(),
+                    InitializeObelisks(),
+                    InitializeFountain(),
+                    InitializeRuins(),
+                    InitializeWater(),
+                    InitializeParticles(),
+                    InitializeEmitter(),
+                    InitializeDebug(),
+                },
+                async (res) =>
                 {
                     if (!res.Completed)
                     {
@@ -100,7 +119,9 @@ namespace Skybox
 
                     InitializeNavigationMesh();
 
-                    Task.WhenAll(UpdateNavigationGraph());
+                    await UpdateNavigationGraph();
+
+                    PrepareScene();
 
                     InitializeSound();
 
@@ -110,223 +131,6 @@ namespace Skybox
                     AudioManager.MasterVolume = 1f;
                     AudioManager.Start();
                 });
-        }
-        private async Task InitializeAssets()
-        {
-            #region Cursor
-
-            var cursorDesc = new UICursorDescription()
-            {
-                Textures = new[] { "target.png" },
-                BaseColor = Color.Purple,
-                Width = 16,
-                Height = 16,
-            };
-            await this.AddComponentUICursor("Cursor", cursorDesc, layerHUD + 1);
-
-            #endregion
-
-            #region Text
-
-            var title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White }, layerHUD);
-            var help = await this.AddComponentUITextArea("Help", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow }, layerHUD);
-            fps = await this.AddComponentUITextArea("FPS", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow }, layerHUD);
-
-            title.Text = "Collada Scene with Skybox";
-#if DEBUG
-            help.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Right Mouse: Drag view | Left Mouse: Pick";
-#else
-            help.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Move Mouse: View | Left Mouse: Pick";
-#endif
-            fps.Text = "";
-
-            title.SetPosition(Vector2.Zero);
-            help.SetPosition(new Vector2(0, 24));
-            fps.SetPosition(new Vector2(0, 40));
-
-            var spDesc = new SpriteDescription()
-            {
-                Width = Game.Form.RenderWidth,
-                Height = 120,
-                BaseColor = new Color4(0, 0, 0, 0.75f),
-            };
-
-            await this.AddComponentSprite("Backpanel", spDesc, SceneObjectUsages.UI, layerHUD - 1);
-
-            #endregion
-
-            #region Skydom
-
-            await this.AddComponentSkydom("Skydom", new SkydomDescription()
-            {
-                ContentPath = "Resources",
-                Radius = Camera.FarPlaneDistance,
-                Texture = "sunset.dds",
-            });
-
-            #endregion
-
-            #region Torchs
-
-            torchs = await this.AddComponentModelInstanced(
-                "Torchs",
-                new ModelInstancedDescription()
-                {
-                    Instances = firePositions.Length,
-                    CastShadow = true,
-                    Content = ContentDescription.FromFile("Resources", "torch.xml"),
-                });
-
-            AttachToGround(torchs, true);
-
-            #endregion
-
-            #region Obelisks
-
-            obelisks = await this.AddComponentModelInstanced(
-                "Obelisks",
-                new ModelInstancedDescription()
-                {
-                    Instances = firePositions.Length,
-                    CastShadow = true,
-                    Content = ContentDescription.FromFile("Resources/obelisk", "obelisk.xml"),
-                });
-
-            #endregion
-
-            #region Fountain
-
-            fountain = await this.AddComponentModel(
-                "Fountain",
-                new ModelDescription()
-                {
-                    CastShadow = true,
-                    Content = ContentDescription.FromFile("Resources/Fountain", "Fountain.xml"),
-                });
-
-            AttachToGround(fountain, true);
-
-            #endregion
-
-            #region Terrain
-
-            ruins = await this.AddComponentScenery("Ruins", GroundDescription.FromFile("Resources", "ruins.xml"));
-            SetGround(ruins, true);
-
-            #endregion
-
-            #region Water
-
-            var waterDesc = WaterDescription.CreateCalm(5000f, -1f);
-            await this.AddComponentWater("Ocean", waterDesc, SceneObjectUsages.None);
-
-            #endregion
-
-            #region Particle Systems
-
-            var pManager = await this.AddComponentParticleManager("ParticleManager", ParticleManagerDescription.Default());
-
-            #endregion
-
-            #region Moving fire
-
-            MaterialContent mat = MaterialContent.Default;
-            mat.EmissionColor = Color.Yellow;
-
-            var sphere = GeometryUtil.CreateSphere(0.05f, 32, 32);
-            var vertices = VertexData.FromDescriptor(sphere);
-            var indices = sphere.Indices;
-
-            var mFireDesc = new ModelDescription()
-            {
-                CastShadow = false,
-                DeferredEnabled = true,
-                DepthEnabled = true,
-                Content = ContentDescription.FromContentData(vertices, indices, mat),
-            };
-
-            movingFire = await this.AddComponentModel("Emitter", mFireDesc);
-
-            movingFireEmitter = new ParticleEmitter() { EmissionRate = 0.1f, InfiniteDuration = true };
-
-            pManager.AddParticleSystem(ParticleSystemTypes.CPU, pBigFire, movingFireEmitter);
-
-            #endregion
-
-            #region Positioning and lights
-
-            Lights.DirectionalLights[0].Enabled = true;
-            Lights.DirectionalLights[0].CastShadow = true;
-
-            Lights.DirectionalLights[1].Enabled = true;
-
-            Lights.DirectionalLights[2].Enabled = false;
-
-            directionalLightCount = Lights.DirectionalLights.Length;
-
-            movingFireLight = new SceneLightPoint(
-                "Moving fire light",
-                false,
-                Color.Orange,
-                Color.Orange,
-                true,
-                SceneLightPointDescription.Create(Vector3.Zero, 15f, 20f));
-
-            Lights.Add(movingFireLight);
-
-            Vector3[] firePositions3D = new Vector3[firePositions.Length];
-            SceneLightPoint[] torchLights = new SceneLightPoint[firePositions.Length];
-            for (int i = 0; i < firePositions.Length; i++)
-            {
-                Color color = Color.Yellow;
-                if (i == 1) color = Color.Red;
-                if (i == 2) color = Color.Green;
-                if (i == 3) color = Color.LightBlue;
-
-                FindTopGroundPosition(firePositions[i].X, firePositions[i].Y, out PickingResult<Triangle> result);
-                firePositions3D[i] = result.Position;
-
-                torchs[i].Manipulator.SetScale(0.20f, true);
-                torchs[i].Manipulator.SetPosition(firePositions3D[i], true);
-
-                BoundingBox bbox = torchs[i].GetBoundingBox();
-
-                firePositions3D[i].Y += (bbox.Maximum.Y - bbox.Minimum.Y) * 0.95f;
-
-                torchLights[i] = new SceneLightPoint(
-                    string.Format("Torch {0}", i),
-                    false,
-                    color,
-                    color,
-                    true,
-                    SceneLightPointDescription.Create(firePositions3D[i], 4f, 20f));
-
-                Lights.Add(torchLights[i]);
-
-                pManager.AddParticleSystem(ParticleSystemTypes.CPU, pFire, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.1f });
-                pManager.AddParticleSystem(ParticleSystemTypes.CPU, pPlume, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.5f });
-            }
-
-            for (int i = 0; i < obeliskPositions.Length; i++)
-            {
-                obelisks[i].Manipulator.SetPosition(obeliskPositions[i]);
-                obelisks[i].Manipulator.SetRotation(obeliskRotations[i]);
-                obelisks[i].Manipulator.SetScale(10f);
-            }
-
-            fountain.Manipulator.SetScale(2.3f);
-
-            #endregion
-
-            #region DEBUG drawers
-
-            volumesDrawer = await this.AddComponentPrimitiveListDrawer("DebugVolumesDrawer", new PrimitiveListDrawerDescription<Line3D>() { Count = 10000 });
-            volumesDrawer.Visible = false;
-
-            graphDrawer = await this.AddComponentPrimitiveListDrawer("DebugGraphDrawer", new PrimitiveListDrawerDescription<Triangle>() { Count = 10000 });
-            graphDrawer.Visible = false;
-
-            #endregion
         }
         private void InitializeCamera()
         {
@@ -371,6 +175,259 @@ namespace Skybox
         public override void NavigationGraphUpdated()
         {
             gameReady = true;
+        }
+
+        private async Task InitializeUI()
+        {
+            #region Cursor
+
+            var cursorDesc = new UICursorDescription()
+            {
+                Textures = new[] { "target.png" },
+                BaseColor = Color.Purple,
+                Width = 16,
+                Height = 16,
+            };
+            await this.AddComponentUICursor("Cursor", cursorDesc, layerHUD + 1);
+
+            #endregion
+
+            #region Text
+
+            var title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White }, layerHUD);
+            var help = await this.AddComponentUITextArea("Help", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow }, layerHUD);
+            fps = await this.AddComponentUITextArea("FPS", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow }, layerHUD);
+
+            title.Text = "Collada Scene with Skybox";
+#if DEBUG
+            help.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Right Mouse: Drag view | Left Mouse: Pick";
+#else
+            help.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Move Mouse: View | Left Mouse: Pick";
+#endif
+            fps.Text = "";
+
+            title.SetPosition(Vector2.Zero);
+            help.SetPosition(new Vector2(0, 24));
+            fps.SetPosition(new Vector2(0, 40));
+
+            var spDesc = new SpriteDescription()
+            {
+                Width = Game.Form.RenderWidth,
+                Height = 120,
+                BaseColor = new Color4(0, 0, 0, 0.75f),
+            };
+
+            await this.AddComponentSprite("Backpanel", spDesc, SceneObjectUsages.UI, layerHUD - 1);
+
+            #endregion
+        }
+        private async Task InitializeSkydom()
+        {
+            var skydomDesc = new SkydomDescription()
+            {
+                ContentPath = "Resources",
+                Radius = Camera.FarPlaneDistance,
+                Texture = "sunset.dds",
+            };
+
+            await this.AddComponentSkydom("Skydom", skydomDesc);
+        }
+        private async Task InitializeLakeBottom()
+        {
+            // Generates a random terrain using perlin noise
+            NoiseMapDescriptor nmDesc = new NoiseMapDescriptor
+            {
+                MapWidth = mapSize,
+                MapHeight = mapSize,
+                Scale = 0.5f,
+                Lacunarity = 2f,
+                Persistance = 0.5f,
+                Octaves = 4,
+                Offset = Vector2.One,
+                Seed = 5,
+            };
+            var noiseMap = NoiseMap.CreateNoiseMap(nmDesc);
+
+            Curve heightCurve = new Curve();
+            heightCurve.Keys.Add(0, 0);
+            heightCurve.Keys.Add(0.4f, 0f);
+            heightCurve.Keys.Add(1f, 1f);
+
+            float cellSize = terrainSize / mapSize;
+
+            var textures = new HeightmapTexturesDescription
+            {
+                ContentPath = "resources/lakebottom",
+                TexturesLR = new[] { "Diffuse.jpg" },
+                NormalMaps = new[] { "Normal.jpg" },
+                Scale = 0.0333f,
+            };
+            GroundDescription groundDesc = GroundDescription.FromHeightmap(noiseMap, cellSize, terrainHeight, heightCurve, textures, 2);
+            groundDesc.Heightmap.UseFalloff = true;
+            groundDesc.Heightmap.Transform = Matrix.Translation(0, -terrainHeight * 0.33f, 0);
+
+            await this.AddComponentScenery("Lage Bottom", groundDesc, SceneObjectUsages.None, layerObjs);
+        }
+        private async Task InitializeTorchs()
+        {
+            var torchDesc = new ModelInstancedDescription()
+            {
+                Instances = firePositions.Length,
+                CastShadow = true,
+                Content = ContentDescription.FromFile("Resources", "torch.xml"),
+            };
+
+            torchs = await this.AddComponentModelInstanced("Torchs", torchDesc, SceneObjectUsages.None, layerObjs);
+
+            AttachToGround(torchs, true);
+        }
+        private async Task InitializeObelisks()
+        {
+            var obeliskDesc = new ModelInstancedDescription()
+            {
+                Instances = firePositions.Length,
+                CastShadow = true,
+                Content = ContentDescription.FromFile("Resources/obelisk", "obelisk.xml"),
+            };
+
+            obelisks = await this.AddComponentModelInstanced("Obelisks", obeliskDesc, SceneObjectUsages.Ground, layerObjs);
+        }
+        private async Task InitializeFountain()
+        {
+            var fountainDesc = new ModelDescription()
+            {
+                CastShadow = true,
+                Content = ContentDescription.FromFile("Resources/Fountain", "Fountain.xml"),
+            };
+
+            fountain = await this.AddComponentModel("Fountain", fountainDesc, SceneObjectUsages.Ground, layerObjs);
+
+            AttachToGround(fountain, true);
+        }
+        private async Task InitializeRuins()
+        {
+            var ruinsDesc = GroundDescription.FromFile("Resources", "ruins.xml");
+
+            ruins = await this.AddComponentScenery("Ruins", ruinsDesc, SceneObjectUsages.Ground, layerObjs);
+
+            SetGround(ruins, true);
+        }
+        private async Task InitializeWater()
+        {
+            var waterDesc = WaterDescription.CreateCalm(5000f, -2f);
+            waterDesc.BaseColor = new Color3(0.067f, 0.065f, 0.003f);
+            waterDesc.WaterColor = new Color4(0.003f, 0.267f, 0.096f, 0.98f);
+
+            await this.AddComponentWater("Water", waterDesc, SceneObjectUsages.None, layerObjs + 1);
+        }
+        private async Task InitializeEmitter()
+        {
+            MaterialContent mat = MaterialContent.Default;
+            mat.EmissionColor = Color.Yellow;
+
+            var sphere = GeometryUtil.CreateSphere(0.05f, 32, 32);
+
+            var mFireDesc = new ModelDescription()
+            {
+                CastShadow = false,
+                DeferredEnabled = true,
+                DepthEnabled = true,
+                Content = ContentDescription.FromContentData(sphere, mat),
+            };
+
+            movingFire = await this.AddComponentModel("Emitter", mFireDesc);
+        }
+        private async Task InitializeParticles()
+        {
+            var pManagerDesc = ParticleManagerDescription.Default();
+
+            pManager = await this.AddComponentParticleManager("ParticleManager", pManagerDesc);
+
+            movingFireEmitter = new ParticleEmitter() { EmissionRate = 0.1f, InfiniteDuration = true };
+
+            pManager.AddParticleSystem(ParticleSystemTypes.CPU, pBigFire, movingFireEmitter);
+        }
+        private async Task InitializeDebug()
+        {
+            volumesDrawer = await this.AddComponentPrimitiveListDrawer("DebugVolumesDrawer", new PrimitiveListDrawerDescription<Line3D>() { Count = 10000 });
+            volumesDrawer.Visible = false;
+
+            graphDrawer = await this.AddComponentPrimitiveListDrawer("DebugGraphDrawer", new PrimitiveListDrawerDescription<Triangle>() { Count = 10000 });
+            graphDrawer.Visible = false;
+        }
+
+        private void PrepareScene()
+        {
+            Lights.DirectionalLights[0].Enabled = true;
+            Lights.DirectionalLights[0].CastShadow = true;
+
+            Lights.DirectionalLights[1].Enabled = true;
+
+            Lights.DirectionalLights[2].Enabled = false;
+
+            directionalLightCount = Lights.DirectionalLights.Length;
+
+            movingFireLight = new SceneLightPoint(
+                "Moving fire light",
+                false,
+                Color.Orange,
+                Color.Orange,
+                true,
+                SceneLightPointDescription.Create(Vector3.Zero, 15f, 20f));
+
+            Lights.Add(movingFireLight);
+
+            Vector3[] firePositions3D = new Vector3[firePositions.Length];
+            SceneLightPoint[] torchLights = new SceneLightPoint[firePositions.Length];
+            Parallel.For(0, firePositions.Length, (i, loopState) =>
+            {
+                if (loopState.IsExceptional)
+                {
+                    return;
+                }
+
+                Color color = Color.Yellow;
+                if (i == 1) color = Color.Red;
+                if (i == 2) color = Color.Green;
+                if (i == 3) color = Color.LightBlue;
+
+                FindTopGroundPosition(firePositions[i].X, firePositions[i].Y, out PickingResult<Triangle> result);
+                firePositions3D[i] = result.Position;
+
+                torchs[i].Manipulator.SetScale(0.20f, true);
+                torchs[i].Manipulator.SetPosition(firePositions3D[i], true);
+
+                BoundingBox bbox = torchs[i].GetBoundingBox();
+
+                firePositions3D[i].Y += (bbox.Maximum.Y - bbox.Minimum.Y) * 0.95f;
+
+                torchLights[i] = new SceneLightPoint(
+                    string.Format("Torch {0}", i),
+                    false,
+                    color,
+                    color,
+                    true,
+                    SceneLightPointDescription.Create(firePositions3D[i], 4f, 20f));
+
+                Lights.Add(torchLights[i]);
+
+                pManager.AddParticleSystem(ParticleSystemTypes.CPU, pFire, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.1f });
+                pManager.AddParticleSystem(ParticleSystemTypes.CPU, pPlume, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.5f });
+            });
+
+            Parallel.For(0, obeliskPositions.Length, (i, loopState) =>
+            {
+                if (loopState.IsExceptional)
+                {
+                    return;
+                }
+
+                obelisks[i].Manipulator.SetPosition(obeliskPositions[i]);
+                obelisks[i].Manipulator.SetRotation(obeliskRotations[i]);
+                obelisks[i].Manipulator.SetScale(10f);
+            });
+
+            fountain.Manipulator.SetScale(2.3f);
         }
 
         public override void Update(GameTime gameTime)

@@ -23,9 +23,9 @@ namespace Engine.Effects
         /// </summary>
         private readonly EngineEffectVariableScalar lightCountVar = null;
         /// <summary>
-        /// Ambient effect variable
+        /// Albedo effect variable
         /// </summary>
-        private readonly EngineEffectVariableScalar ambientVar = null;
+        private readonly EngineEffectVariableScalar albedoVar = null;
         /// <summary>
         /// World matrix effect variable
         /// </summary>
@@ -46,6 +46,10 @@ namespace Engine.Effects
         /// Water color effect variable
         /// </summary>
         private readonly EngineEffectVariableVector waterColorVar = null;
+        /// <summary>
+        /// Water color alpha effect variable
+        /// </summary>
+        private readonly EngineEffectVariableScalar waterAlphaVar = null;
         /// <summary>
         /// Wave parameters effect variable
         /// </summary>
@@ -78,11 +82,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.dirLightsVar.GetValue<BufferLightDirectional>(BufferLightDirectional.MAX);
+                return dirLightsVar.GetValue<BufferLightDirectional>(BufferLightDirectional.MAX);
             }
             set
             {
-                this.dirLightsVar.SetValue(value, BufferLightDirectional.MAX);
+                dirLightsVar.SetValue(value, BufferLightDirectional.MAX);
             }
         }
         /// <summary>
@@ -92,25 +96,25 @@ namespace Engine.Effects
         {
             get
             {
-                return (int)this.lightCountVar.GetUInt();
+                return (int)lightCountVar.GetUInt();
             }
             set
             {
-                this.lightCountVar.Set(value);
+                lightCountVar.Set(value);
             }
         }
         /// <summary>
-        /// Ambient
+        /// Albedo
         /// </summary>
-        protected float Ambient
+        protected float Albedo
         {
             get
             {
-                return this.ambientVar.GetFloat();
+                return albedoVar.GetFloat();
             }
             set
             {
-                this.ambientVar.Set(value);
+                albedoVar.Set(value);
             }
         }
         /// <summary>
@@ -120,11 +124,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.worldVar.GetMatrix();
+                return worldVar.GetMatrix();
             }
             set
             {
-                this.worldVar.SetMatrix(value);
+                worldVar.SetMatrix(value);
             }
         }
         /// <summary>
@@ -134,11 +138,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.worldViewProjectionVar.GetMatrix();
+                return worldViewProjectionVar.GetMatrix();
             }
             set
             {
-                this.worldViewProjectionVar.SetMatrix(value);
+                worldViewProjectionVar.SetMatrix(value);
             }
         }
         /// <summary>
@@ -148,11 +152,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.eyePositionWorldVar.GetVector<Vector3>();
+                return eyePositionWorldVar.GetVector<Vector3>();
             }
             set
             {
-                this.eyePositionWorldVar.Set(value);
+                eyePositionWorldVar.Set(value);
             }
         }
         /// <summary>
@@ -162,11 +166,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.baseColorVar.GetVector<Color3>();
+                return baseColorVar.GetVector<Color3>();
             }
             set
             {
-                this.baseColorVar.Set(value);
+                baseColorVar.Set(value);
             }
         }
         /// <summary>
@@ -176,11 +180,25 @@ namespace Engine.Effects
         {
             get
             {
-                return this.waterColorVar.GetVector<Color3>();
+                return waterColorVar.GetVector<Color3>();
             }
             set
             {
-                this.waterColorVar.Set(value);
+                waterColorVar.Set(value);
+            }
+        }
+        /// <summary>
+        /// Water alpha color component
+        /// </summary>
+        protected float WaterAlpha
+        {
+            get
+            {
+                return waterAlphaVar.GetFloat();
+            }
+            set
+            {
+                waterAlphaVar.Set(value);
             }
         }
         /// <summary>
@@ -190,11 +208,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.waveParamsVar.GetVector<Vector4>();
+                return waveParamsVar.GetVector<Vector4>();
             }
             set
             {
-                this.waveParamsVar.Set(value);
+                waveParamsVar.Set(value);
             }
         }
         /// <summary>
@@ -204,11 +222,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.totalTimeVar.GetFloat();
+                return totalTimeVar.GetFloat();
             }
             set
             {
-                this.totalTimeVar.Set(value);
+                totalTimeVar.Set(value);
             }
         }
         /// <summary>
@@ -218,11 +236,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.iterParamsVar.GetVector<Int3>();
+                return iterParamsVar.GetVector<Int3>();
             }
             set
             {
-                this.iterParamsVar.Set(value);
+                iterParamsVar.Set(value);
             }
         }
         /// <summary>
@@ -232,11 +250,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.fogStartVar.GetFloat();
+                return fogStartVar.GetFloat();
             }
             set
             {
-                this.fogStartVar.Set(value);
+                fogStartVar.Set(value);
             }
         }
         /// <summary>
@@ -246,11 +264,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.fogRangeVar.GetFloat();
+                return fogRangeVar.GetFloat();
             }
             set
             {
-                this.fogRangeVar.Set(value);
+                fogRangeVar.Set(value);
             }
         }
         /// <summary>
@@ -260,11 +278,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.fogColorVar.GetVector<Color3>();
+                return fogColorVar.GetVector<Color3>();
             }
             set
             {
-                this.fogColorVar.Set(value);
+                fogColorVar.Set(value);
             }
         }
 
@@ -277,23 +295,24 @@ namespace Engine.Effects
         public EffectDefaultWater(Graphics graphics, byte[] effect, bool compile)
             : base(graphics, effect, compile)
         {
-            this.Water = this.Effect.GetTechniqueByName("Water");
+            Water = Effect.GetTechniqueByName("Water");
 
-            this.worldVar = this.Effect.GetVariableMatrix("gVSWorld");
-            this.worldViewProjectionVar = this.Effect.GetVariableMatrix("gVSWorldViewProjection");
+            worldVar = Effect.GetVariableMatrix("gVSWorld");
+            worldViewProjectionVar = Effect.GetVariableMatrix("gVSWorldViewProjection");
 
-            this.eyePositionWorldVar = this.Effect.GetVariableVector("gPSEyePositionWorld");
-            this.baseColorVar = this.Effect.GetVariableVector("gPSBaseColor");
-            this.waterColorVar = this.Effect.GetVariableVector("gPSWaterColor");
-            this.waveParamsVar = this.Effect.GetVariableVector("gPSWaveParams");
-            this.ambientVar = this.Effect.GetVariableScalar("gPSAmbient");
-            this.fogRangeVar = this.Effect.GetVariableScalar("gPSFogRange");
-            this.fogStartVar = this.Effect.GetVariableScalar("gPSFogStart");
-            this.fogColorVar = this.Effect.GetVariableVector("gPSFogColor");
-            this.totalTimeVar = this.Effect.GetVariableScalar("gPSTotalTime");
-            this.iterParamsVar = this.Effect.GetVariableVector("gPSIters");
-            this.lightCountVar = this.Effect.GetVariableScalar("gPSLightCount");
-            this.dirLightsVar = this.Effect.GetVariable("gPSDirLights");
+            eyePositionWorldVar = Effect.GetVariableVector("gPSEyePositionWorld");
+            baseColorVar = Effect.GetVariableVector("gPSBaseColor");
+            waterColorVar = Effect.GetVariableVector("gPSWaterColor");
+            waterAlphaVar = Effect.GetVariableScalar("gPSWaterAlpha");
+            waveParamsVar = Effect.GetVariableVector("gPSWaveParams");
+            albedoVar = Effect.GetVariableScalar("gPSAlbedo");
+            fogRangeVar = Effect.GetVariableScalar("gPSFogRange");
+            fogStartVar = Effect.GetVariableScalar("gPSFogStart");
+            fogColorVar = Effect.GetVariableVector("gPSFogColor");
+            totalTimeVar = Effect.GetVariableScalar("gPSTotalTime");
+            iterParamsVar = Effect.GetVariableVector("gPSIters");
+            lightCountVar = Effect.GetVariableScalar("gPSLightCount");
+            dirLightsVar = Effect.GetVariable("gPSDirLights");
         }
 
         /// <summary>
@@ -309,36 +328,37 @@ namespace Engine.Effects
             SceneLights lights,
             EffectWaterState state)
         {
-            this.World = Matrix.Identity;
-            this.WorldViewProjection = viewProjection;
-            this.EyePositionWorld = eyePosition;
-            this.BaseColor = state.BaseColor.RGB();
-            this.WaterColor = state.WaterColor.RGB();
-            this.WaveParams = new Vector4(state.WaveHeight, state.WaveChoppy, state.WaveSpeed, state.WaveFrequency);
-            this.TotalTime = state.TotalTime;
-            this.IterParams = new Int3(state.Steps, state.GeometryIterations, state.ColorIterations);
+            World = Matrix.Identity;
+            WorldViewProjection = viewProjection;
+            EyePositionWorld = eyePosition;
+            BaseColor = state.BaseColor;
+            WaterColor = state.WaterColor.RGB();
+            WaterAlpha = state.WaterColor.Alpha;
+            WaveParams = new Vector4(state.WaveHeight, state.WaveChoppy, state.WaveSpeed, state.WaveFrequency);
+            TotalTime = state.TotalTime;
+            IterParams = new Int3(state.Steps, state.GeometryIterations, state.ColorIterations);
 
             if (lights != null)
             {
-                this.DirLights = BufferLightDirectional.Build(lights.GetVisibleDirectionalLights(), out int dirLength);
-                this.LightCount = dirLength;
+                DirLights = BufferLightDirectional.Build(lights.GetVisibleDirectionalLights(), out int dirLength);
+                LightCount = dirLength;
 
-                this.Ambient = lights.Albedo;
+                Albedo = lights.Albedo;
 
-                this.FogStart = lights.FogStart;
-                this.FogRange = lights.FogRange;
-                this.FogColor = lights.FogColor.RGB();
+                FogStart = lights.FogStart;
+                FogRange = lights.FogRange;
+                FogColor = lights.FogColor.RGB();
             }
             else
             {
-                this.DirLights = BufferLightDirectional.Default;
-                this.LightCount = 0;
+                DirLights = BufferLightDirectional.Default;
+                LightCount = 0;
 
-                this.Ambient = 1;
+                Albedo = 1;
 
-                this.FogStart = 0;
-                this.FogRange = 0;
-                this.FogColor = Color.Transparent.RGB();
+                FogStart = 0;
+                FogRange = 0;
+                FogColor = Color.Transparent.RGB();
             }
         }
     }

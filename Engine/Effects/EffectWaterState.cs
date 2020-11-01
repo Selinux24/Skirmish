@@ -10,11 +10,11 @@ namespace Engine.Effects
         /// <summary>
         /// Base color
         /// </summary>
-        public Color BaseColor { get; set; }
+        public Color3 BaseColor { get; set; }
         /// <summary>
-        /// Water color
+        /// Water color (with alpha component)
         /// </summary>
-        public Color WaterColor { get; set; }
+        public Color4 WaterColor { get; set; }
         /// <summary>
         /// Wave heigth
         /// </summary>

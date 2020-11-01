@@ -13,11 +13,6 @@ namespace Engine.Collections.Generic
     public abstract class PickingQuadTreeNode
     {
         /// <summary>
-        /// Static node count
-        /// </summary>
-        protected static int NodeCount { get; set; } = 0;
-
-        /// <summary>
         /// Constructor
         /// </summary>
         protected PickingQuadTreeNode()
@@ -47,8 +42,6 @@ namespace Engine.Collections.Generic
             int maxDepth,
             int treeDepth)
         {
-            if (parent == null) NodeCount = 0;
-
             if (treeDepth <= maxDepth)
             {
                 //Find triangles into the bounding box
@@ -75,7 +68,7 @@ namespace Engine.Collections.Generic
                     if (haltByDepth)
                     {
                         // Maximum tree depth reached. Stop the process
-                        node.Id = NodeCount++;
+                        node.Id = quadTree.GetNextNodeId();
                         node.Items = nodeItems;
                     }
                     else
