@@ -90,11 +90,7 @@ namespace Animation.AnimationParts
             {
                 CastShadow = true,
                 Optimize = false,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = "AnimationParts/Resources/Leopard",
-                    ModelContentFilename = "Leopard.xml",
-                },
+                Content = ContentDescription.FromFile("AnimationParts/Resources/Leopard", "Leopard.xml"),
                 TransformNames = new[]
                 {
                     "Hull-mesh",
@@ -136,18 +132,13 @@ namespace Animation.AnimationParts
             mat.NormalMapTexture = "AnimationParts/Resources/d_road_asphalt_stripes_normal.dds";
             mat.SpecularTexture = "AnimationParts/Resources/d_road_asphalt_stripes_specular.dds";
 
-            var content = ModelContent.GenerateTriangleList(vertices, indices, mat);
-
             var desc = new ModelDescription()
             {
                 CastShadow = true,
                 DeferredEnabled = true,
                 DepthEnabled = true,
                 UseAnisotropicFiltering = true,
-                Content = new ContentDescription()
-                {
-                    ModelContent = content,
-                }
+                Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
             await this.AddComponentModel("Floor", desc);

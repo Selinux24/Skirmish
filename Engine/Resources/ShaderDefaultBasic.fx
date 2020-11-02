@@ -41,7 +41,8 @@ cbuffer cbPSPerFrame : register(b3)
 	float4 gPSFogColor;
 	float gPSFogStart;
 	float gPSFogRange;
-	float2 PAD32;
+    float gPSAlbedo;
+	float PAD32;
 	float3 gPSEyePositionWorld;
 	float PAD33;
 };
@@ -270,6 +271,7 @@ float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 	lInput.dirLightsCount = gPSLightCount.x;
 	lInput.pointLightsCount = gPSLightCount.y;
 	lInput.spotLightsCount = gPSLightCount.z;
+    lInput.albedo = gPSAlbedo;
 
 	lInput.shadowMapDir = gPSShadowMapDir;
     lInput.shadowMapPoint = gPSShadowMapPoint;
@@ -533,6 +535,7 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 	lInput.dirLightsCount = gPSLightCount.x;
 	lInput.pointLightsCount = gPSLightCount.y;
 	lInput.spotLightsCount = gPSLightCount.z;
+    lInput.albedo = gPSAlbedo;
 
 	lInput.shadowMapDir = gPSShadowMapDir;
     lInput.shadowMapPoint = gPSShadowMapPoint;
@@ -684,6 +687,7 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
 	lInput.dirLightsCount = gPSLightCount.x;
 	lInput.pointLightsCount = gPSLightCount.y;
 	lInput.spotLightsCount = gPSLightCount.z;
+    lInput.albedo = gPSAlbedo;
 
 	lInput.shadowMapDir = gPSShadowMapDir;
     lInput.shadowMapPoint = gPSShadowMapPoint;

@@ -50,15 +50,15 @@ namespace Engine.Effects
         /// <param name="material">Material</param>
         public BufferMaterials(Material material)
         {
-            this.Emissive = material.EmissiveColor;
-            this.Ambient = material.AmbientColor;
-            this.Diffuse = material.DiffuseColor;
-            this.Specular = material.SpecularColor;
-            this.Shininess = material.Shininess;
+            Emissive = material.EmissiveColor;
+            Ambient = material.AmbientColor;
+            Diffuse = material.DiffuseColor;
+            Specular = material.SpecularColor;
+            Shininess = material.Shininess;
 
-            this.Pad1 = 1000;
-            this.Pad2 = 2000;
-            this.Pad3 = 3000;
+            Pad1 = 1000;
+            Pad2 = 2000;
+            Pad3 = 3000;
         }
 
         /// <summary>

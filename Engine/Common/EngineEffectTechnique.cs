@@ -21,7 +21,7 @@ namespace Engine.Common
         {
             get
             {
-                return this.techinque.Description.PassCount;
+                return techinque.Description.PassCount;
             }
         }
 
@@ -41,7 +41,7 @@ namespace Engine.Common
         /// <returns>Returns the effect pass</returns>
         internal EffectPass GetPass(int index)
         {
-            return this.techinque.GetPassByIndex(index);
+            return techinque.GetPassByIndex(index);
         }
         /// <summary>
         /// Gets the shader byte code
@@ -50,7 +50,7 @@ namespace Engine.Common
         /// <returns>Returns the shader byte code</returns>
         internal ShaderBytecode GetSignature(int pass = 0)
         {
-            return this.techinque.GetPassByIndex(pass).Description.Signature;
+            return techinque.GetPassByIndex(pass).Description.Signature;
         }
     }
 }

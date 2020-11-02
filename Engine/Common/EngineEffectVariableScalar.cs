@@ -28,7 +28,7 @@ namespace Engine.Common
         /// <returns>Returns the value from the variable</returns>
         public float GetFloat()
         {
-            return this.variable.GetFloat();
+            return variable.GetFloat();
         }
         /// <summary>
         /// Gets a int value from the variable
@@ -36,7 +36,7 @@ namespace Engine.Common
         /// <returns>Returns the value from the variable</returns>
         public int GetInt()
         {
-            return this.variable.GetInt();
+            return variable.GetInt();
         }
         /// <summary>
         /// Gets a uint value from the variable
@@ -44,7 +44,7 @@ namespace Engine.Common
         /// <returns>Returns the value from the variable</returns>
         public uint GetUInt()
         {
-            return (uint)this.variable.GetFloat();
+            return (uint)variable.GetFloat();
         }
         /// <summary>
         /// Gets a bool value from the variable
@@ -52,7 +52,7 @@ namespace Engine.Common
         /// <returns>Returns the value from the variable</returns>
         public bool GetBool()
         {
-            return this.variable.GetBool();
+            return variable.GetBool();
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace Engine.Common
         /// <param name="value">Value</param>
         public void Set(float value)
         {
-            this.variable.Set(value);
+            variable.Set(value);
         }
         /// <summary>
         /// Sets a int value to the variable
@@ -69,7 +69,7 @@ namespace Engine.Common
         /// <param name="value">Value</param>
         public void Set(int value)
         {
-            this.variable.Set(value);
+            variable.Set(value);
         }
         /// <summary>
         /// Sets a uint value to the variable
@@ -77,7 +77,7 @@ namespace Engine.Common
         /// <param name="value">Value</param>
         public void Set(uint value)
         {
-            this.variable.Set(value);
+            variable.Set(value);
         }
         /// <summary>
         /// Sets a bool value to the variable
@@ -85,7 +85,7 @@ namespace Engine.Common
         /// <param name="value">Value</param>
         public void Set(bool value)
         {
-            this.variable.Set(value);
+            variable.Set(value);
         }
     }
 }

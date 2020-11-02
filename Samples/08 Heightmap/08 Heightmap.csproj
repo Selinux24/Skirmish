@@ -7,6 +7,7 @@
     <RootNamespace>Heightmap</RootNamespace>
     <AssemblyName>Heightmap</AssemblyName>
     <Platforms>AnyCPU;x64;x86</Platforms>
+    <SonarQubeTestProject>False</SonarQubeTestProject>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -34,94 +35,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\Bradley\Bradley.dae" />
-    <None Remove="Resources\Bradley\Bradley.jpg" />
-    <None Remove="Resources\Bradley\Bradley.xml" />
-    <None Remove="Resources\Buildings\Affgan1.dae" />
-    <None Remove="Resources\Container\container.dae" />
-    <None Remove="Resources\Container\container.xml" />
-    <None Remove="Resources\Container\ikube azul-1.png" />
-    <None Remove="Resources\Container\ikube azul-2.png" />
-    <None Remove="Resources\Container\ikube azul-3.png" />
-    <None Remove="Resources\Container\ikube azul-4.png" />
-    <None Remove="Resources\Container\ikube azul-5.png" />
-    <None Remove="Resources\M24\m24.dae" />
-    <None Remove="Resources\M24\m24.dds" />
-    <None Remove="Resources\M24\m24.xml" />
-    <None Remove="Resources\Particles\dust.png" />
-    <None Remove="Resources\Particles\fire.png" />
-    <None Remove="Resources\Particles\smoke.png" />
-    <None Remove="Resources\Rocks\boulder.xml" />
-    <None Remove="Resources\Rocks\boulder_1.dae" />
-    <None Remove="Resources\Rocks\boulder_2.dae" />
-    <None Remove="Resources\Rocks\boulder_3.dae" />
-    <None Remove="Resources\Rocks\boulder_granite_grey_01_diffuse.dds" />
-    <None Remove="Resources\Rocks\boulder_granite_grey_01_normal.dds" />
-    <None Remove="Resources\Rocks\boulder_granite_grey_01_specular.dds" />
-    <None Remove="Resources\Scenery\Flare\lfFlare1.png" />
-    <None Remove="Resources\Scenery\Flare\lfFlare2.png" />
-    <None Remove="Resources\Scenery\Flare\lfFlare3.png" />
-    <None Remove="Resources\Scenery\Flare\lfGlow.png" />
-    <None Remove="Resources\Scenery\Foliage\Billboard\flower0.dds" />
-    <None Remove="Resources\Scenery\Foliage\Billboard\flower1.dds" />
-    <None Remove="Resources\Scenery\Foliage\Billboard\flower2.dds" />
-    <None Remove="Resources\Scenery\Foliage\Billboard\grass0.png" />
-    <None Remove="Resources\Scenery\Foliage\Billboard\grass1.png" />
-    <None Remove="Resources\Scenery\Foliage\Billboard\grass2.png" />
-    <None Remove="Resources\Scenery\Foliage\Billboard\grass_d0.dds" />
-    <None Remove="Resources\Scenery\Foliage\Billboard\grass_d1.dds" />
-    <None Remove="Resources\Scenery\Foliage\Billboard\grass_d2.dds" />
-    <None Remove="Resources\Scenery\Foliage\Billboard\grass_n0.dds" />
-    <None Remove="Resources\Scenery\Foliage\Billboard\grass_n1.dds" />
-    <None Remove="Resources\Scenery\Foliage\Billboard\grass_n2.dds" />
-    <None Remove="Resources\Scenery\Foliage\Billboard\grass_v0.dds" />
-    <None Remove="Resources\Scenery\Foliage\Billboard\grass_v1.dds" />
-    <None Remove="Resources\Scenery\Foliage\Billboard\grass_v2.dds" />
-    <None Remove="Resources\Scenery\Foliage\Billboard\map.png" />
-    <None Remove="Resources\Scenery\Foliage\Billboard\map_flowers.png" />
-    <None Remove="Resources\Scenery\Heightmap\desert0cm.bmp" />
-    <None Remove="Resources\Scenery\Heightmap\desert0hm.bmp" />
-    <None Remove="Resources\Scenery\Heightmap\Textures\alpha001.dds" />
-    <None Remove="Resources\Scenery\Heightmap\Textures\dirt001.dds" />
-    <None Remove="Resources\Scenery\Heightmap\Textures\dirt002.dds" />
-    <None Remove="Resources\Scenery\Heightmap\Textures\dirt004.dds" />
-    <None Remove="Resources\Scenery\Heightmap\Textures\dirt0hr.dds" />
-    <None Remove="Resources\Scenery\Heightmap\Textures\dirt0lr.dds" />
-    <None Remove="Resources\Scenery\Heightmap\Textures\dirt1lr.dds" />
-    <None Remove="Resources\Scenery\Heightmap\Textures\dirt2lr.dds" />
-    <None Remove="Resources\Scenery\Heightmap\Textures\normal001.dds" />
-    <None Remove="Resources\Scenery\Heightmap\Textures\normal002.dds" />
-    <None Remove="Resources\Scenery\Heightmap\Textures\specular001.dds" />
-    <None Remove="Resources\Scenery\Heightmap\Textures\specular002.dds" />
-    <None Remove="Resources\Scenery\Heightmap\Textures\stone001.dds" />
-    <None Remove="Resources\Scenery\Heightmap\UVtest 256.bmp" />
-    <None Remove="Resources\Scenery\Objects\torch.dae" />
-    <None Remove="Resources\Scenery\Objects\torch.xml" />
-    <None Remove="Resources\Sky\cloud001.dds" />
-    <None Remove="Resources\Sky\perturb001.dds" />
-    <None Remove="Resources\Soldier\soldier0.jpg" />
-    <None Remove="Resources\Soldier\Soldier1.jpg" />
-    <None Remove="Resources\Soldier\soldier_anim2.dae" />
-    <None Remove="Resources\Soldier\soldier_anim2.xml" />
-    <None Remove="Resources\target.png" />
-    <None Remove="Resources\Trees2\Bark_d.png" />
-    <None Remove="Resources\Trees2\Leafs_d.png" />
-    <None Remove="Resources\Trees2\Tree.xml" />
-    <None Remove="Resources\Trees2\tree_1.dae" />
-    <None Remove="Resources\Trees2\tree_2.dae" />
-    <None Remove="Resources\Trees2\tree_3.dae" />
-    <None Remove="Resources\Trees\Bark_d.png" />
-    <None Remove="Resources\Trees\Leafs_d.png" />
-    <None Remove="Resources\Trees\tree.xml" />
-    <None Remove="Resources\Trees\tree_1.dae" />
-    <None Remove="Resources\Trees\tree_2.dae" />
-    <None Remove="Resources\Trees\tree_3.dae" />
-    <None Remove="Resources\Watch Tower\Watch Tower.dae" />
-    <None Remove="Resources\Watch Tower\Watch Tower.xml" />
-    <None Remove="Resources\Watch Tower\Wood.jpg" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <AdditionalFiles Include="..\..\.sonarlint\selinux24_skirmish_dev\CSharp\SonarLint.xml" Link="SonarLint.xml" />
     <Content Include="Resources\Bradley\Bradley.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

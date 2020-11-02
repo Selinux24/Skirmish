@@ -261,7 +261,7 @@ namespace Engine.Common
         internal EngineDepthStencilState(DepthStencilState state, int stencilRef)
         {
             this.state = state;
-            this.StencilRef = stencilRef;
+            StencilRef = stencilRef;
         }
         /// <summary>
         /// Destructor
@@ -287,8 +287,8 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                this.state?.Dispose();
-                this.state = null;
+                state?.Dispose();
+                state = null;
             }
         }
 
@@ -298,7 +298,7 @@ namespace Engine.Common
         /// <returns>Returns the internal depth stencil state</returns>
         internal DepthStencilState GetDepthStencilState()
         {
-            return this.state;
+            return state;
         }
     }
 }

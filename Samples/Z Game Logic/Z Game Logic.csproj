@@ -7,6 +7,7 @@
     <RootNamespace>GameLogic</RootNamespace>
     <AssemblyName>GameLogic</AssemblyName>
     <Platforms>AnyCPU;x64;x86</Platforms>
+    <SonarQubeTestProject>False</SonarQubeTestProject>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -34,24 +35,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources3D\cursor.dae" />
-    <None Remove="Resources3D\cursor.xml" />
-    <None Remove="Resources3D\soldier0.jpg" />
-    <None Remove="Resources3D\Soldier1.jpg" />
-    <None Remove="Resources3D\soldier_anim2.dae" />
-    <None Remove="Resources3D\soldier_anim2.xml" />
-    <None Remove="Resources3D\terrain.dae" />
-    <None Remove="Resources3D\terrain.png" />
-    <None Remove="Resources3D\terrain.xml" />
-    <None Remove="Resources3D\terrain_nmap.png" />
-    <None Remove="Resources\ARMY RUST.ttf" />
-    <None Remove="Resources\button_off.png" />
-    <None Remove="Resources\button_on.png" />
-    <None Remove="Resources\HUD.png" />
-    <None Remove="Resources\JOYSTIX.TTF" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <AdditionalFiles Include="..\..\.sonarlint\selinux24_skirmish_dev\CSharp\SonarLint.xml" Link="SonarLint.xml" />
     <Content Include="Resources3D\cursor.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

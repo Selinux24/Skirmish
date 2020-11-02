@@ -77,12 +77,7 @@ namespace Engine
         {
             get
             {
-                if (this.geometryBuffer != null)
-                {
-                    return this.geometryBuffer.Textures;
-                }
-
-                return new EngineShaderResourceView[] { };
+                return geometryBuffer?.Textures ?? new EngineShaderResourceView[] { };
             }
         }
         /// <summary>
@@ -92,12 +87,7 @@ namespace Engine
         {
             get
             {
-                if (this.lightBuffer != null)
-                {
-                    return this.lightBuffer.Textures;
-                }
-
-                return new EngineShaderResourceView[] { };
+                return lightBuffer?.Textures ?? new EngineShaderResourceView[] { };
             }
         }
 
@@ -112,18 +102,18 @@ namespace Engine
         /// <param name="game">Game</param>
         public SceneRendererDeferred(Game game) : base(game)
         {
-            this.lightDrawer = new SceneRendererDeferredLights(game.Graphics);
+            lightDrawer = new SceneRendererDeferredLights(game.Graphics);
 
-            this.UpdateRectangleAndView();
+            UpdateRectangleAndView();
 
-            this.geometryBuffer = new RenderTarget(game, Format.R32G32B32A32_Float, false, 3);
-            this.lightBuffer = new RenderTarget(game, Format.R32G32B32A32_Float, false, 1);
+            geometryBuffer = new RenderTarget(game, Format.R32G32B32A32_Float, false, 3);
+            lightBuffer = new RenderTarget(game, Format.R32G32B32A32_Float, false, 1);
 
-            this.blendDeferredComposer = EngineBlendState.DeferredComposer(game.Graphics, 3);
-            this.blendDeferredComposerTransparent = EngineBlendState.DeferredComposerTransparent(game.Graphics, 3);
-            this.blendDeferredComposerAlpha = EngineBlendState.DeferredComposerAlpha(game.Graphics, 3);
-            this.blendDeferredComposerAdditive = EngineBlendState.DeferredComposerAdditive(game.Graphics, 3);
-            this.blendDeferredLighting = EngineBlendState.DeferredLighting(game.Graphics);
+            blendDeferredComposer = EngineBlendState.DeferredComposer(game.Graphics, 3);
+            blendDeferredComposerTransparent = EngineBlendState.DeferredComposerTransparent(game.Graphics, 3);
+            blendDeferredComposerAlpha = EngineBlendState.DeferredComposerAlpha(game.Graphics, 3);
+            blendDeferredComposerAdditive = EngineBlendState.DeferredComposerAdditive(game.Graphics, 3);
+            blendDeferredLighting = EngineBlendState.DeferredLighting(game.Graphics);
         }
         /// <summary>
         /// Destructor
@@ -163,28 +153,22 @@ namespace Engine
         /// <inheritdoc/>
         public override void Resize()
         {
-            this.UpdateRectangleAndView();
+            UpdateRectangleAndView();
 
-            if (this.geometryBuffer != null)
-            {
-                this.geometryBuffer.Resize();
-            }
+            geometryBuffer?.Resize();
 
-            if (this.lightBuffer != null)
-            {
-                this.lightBuffer.Resize();
-            }
+            lightBuffer?.Resize();
 
             base.Resize();
         }
         /// <inheritdoc/>
         public override EngineShaderResourceView GetResource(SceneRendererResults result)
         {
-            if (result == SceneRendererResults.LightMap) return this.LightMap[0];
+            if (result == SceneRendererResults.LightMap) return LightMap[0];
 
-            var colorMap = this.GeometryMap?.Length > 0 ? this.GeometryMap[0] : null;
-            var normalMap = this.GeometryMap?.Length > 1 ? this.GeometryMap[1] : null;
-            var depthMap = this.GeometryMap?.Length > 2 ? this.GeometryMap[2] : null;
+            var colorMap = GeometryMap?.Length > 0 ? GeometryMap[0] : null;
+            var normalMap = GeometryMap?.Length > 1 ? GeometryMap[1] : null;
+            var depthMap = GeometryMap?.Length > 2 ? GeometryMap[2] : null;
 
             if (result == SceneRendererResults.ColorMap) return colorMap;
             if (result == SceneRendererResults.NormalMap) return normalMap;
@@ -196,11 +180,11 @@ namespace Engine
         /// <inheritdoc/>
         public override void Draw(GameTime gameTime, Scene scene)
         {
-            if (this.Updated)
+            if (Updated)
             {
-                this.Updated = false;
+                Updated = false;
 #if DEBUG
-                this.frameStats.Clear();
+                frameStats.Clear();
 
                 Stopwatch swTotal = Stopwatch.StartNew();
 #endif
@@ -209,20 +193,20 @@ namespace Engine
                 if (visibleComponents.Any())
                 {
                     //Initialize context data from update context
-                    this.DrawContext.GameTime = gameTime;
-                    this.DrawContext.DrawerMode = DrawerModes.Deferred;
-                    this.DrawContext.ViewProjection = this.UpdateContext.ViewProjection;
-                    this.DrawContext.CameraVolume = this.UpdateContext.CameraVolume;
-                    this.DrawContext.EyePosition = this.UpdateContext.EyePosition;
-                    this.DrawContext.EyeTarget = this.UpdateContext.EyeDirection;
+                    DrawContext.GameTime = gameTime;
+                    DrawContext.DrawerMode = DrawerModes.Deferred;
+                    DrawContext.ViewProjection = UpdateContext.ViewProjection;
+                    DrawContext.CameraVolume = UpdateContext.CameraVolume;
+                    DrawContext.EyePosition = UpdateContext.EyePosition;
+                    DrawContext.EyeTarget = UpdateContext.EyeDirection;
 
                     //Initialize context data from scene
-                    this.DrawContext.Lights = scene.Lights;
+                    DrawContext.Lights = scene.Lights;
                     //Initialize context data from shadow mapping
 
-                    this.DrawContext.ShadowMapDirectional = this.ShadowMapperDirectional;
-                    this.DrawContext.ShadowMapPoint = this.ShadowMapperPoint;
-                    this.DrawContext.ShadowMapSpot = this.ShadowMapperSpot;
+                    DrawContext.ShadowMapDirectional = ShadowMapperDirectional;
+                    DrawContext.ShadowMapPoint = ShadowMapperPoint;
+                    DrawContext.ShadowMapSpot = ShadowMapperSpot;
 
                     //Shadow mapping
                     DoShadowMapping(gameTime, scene);
@@ -240,15 +224,15 @@ namespace Engine
 #if DEBUG
                     Stopwatch swComponsition = Stopwatch.StartNew();
 #endif
-                    this.BindResult();
+                    BindResult();
 
                     //Draw scene result on screen using g-buffer and light buffer
-                    this.DrawResult(this.DrawContext);
+                    DrawResult(DrawContext);
 
 #if DEBUG
                     swComponsition.Stop();
 
-                    this.frameStats.DeferredCompose = swComponsition.ElapsedTicks;
+                    frameStats.DeferredCompose = swComponsition.ElapsedTicks;
 #endif
                     #endregion
 
@@ -268,7 +252,7 @@ namespace Engine
 #if DEBUG
                 swTotal.Stop();
 
-                this.frameStats.UpdateCounters(swTotal.ElapsedTicks);
+                frameStats.UpdateCounters(swTotal.ElapsedTicks);
 #endif
             }
         }
@@ -288,7 +272,7 @@ namespace Engine
             if (scene.PerformFrustumCulling)
             {
                 //Frustum culling
-                draw = this.cullManager.Cull(this.DrawContext.CameraVolume, CullIndexDrawIndex, toCullDeferred);
+                draw = cullManager.Cull(DrawContext.CameraVolume, CullIndexDrawIndex, toCullDeferred);
             }
             else
             {
@@ -301,13 +285,13 @@ namespace Engine
                 if (groundVolume != null)
                 {
                     //Ground culling
-                    draw = this.cullManager.Cull(groundVolume, CullIndexDrawIndex, toCullDeferred);
+                    draw = cullManager.Cull(groundVolume, CullIndexDrawIndex, toCullDeferred);
                 }
             }
 #if DEBUG
             swCull.Stop();
 
-            this.frameStats.DeferredCull = swCull.ElapsedTicks;
+            frameStats.DeferredCull = swCull.ElapsedTicks;
 #endif
 
             if (draw)
@@ -317,35 +301,35 @@ namespace Engine
 
                 Stopwatch swGeometryBufferInit = Stopwatch.StartNew();
 #endif
-                this.BindGBuffer();
+                BindGBuffer();
 #if DEBUG
                 swGeometryBufferInit.Stop();
 
                 Stopwatch swGeometryBufferDraw = Stopwatch.StartNew();
 #endif
                 //Draw scene on g-buffer render targets
-                this.DrawResultComponents(this.DrawContext, CullIndexDrawIndex, deferredEnabledComponents);
+                DrawResultComponents(DrawContext, CullIndexDrawIndex, deferredEnabledComponents);
 #if DEBUG
                 swGeometryBufferDraw.Stop();
 
                 swGeometryBuffer.Stop();
 
-                this.frameStats.DeferredGbuffer = swGeometryBuffer.ElapsedTicks;
-                this.frameStats.DeferredGbufferInit = swGeometryBufferInit.ElapsedTicks;
-                this.frameStats.DeferredGbufferDraw = swGeometryBufferDraw.ElapsedTicks;
+                frameStats.DeferredGbuffer = swGeometryBuffer.ElapsedTicks;
+                frameStats.DeferredGbufferInit = swGeometryBufferInit.ElapsedTicks;
+                frameStats.DeferredGbufferDraw = swGeometryBufferDraw.ElapsedTicks;
 #endif
 
 #if DEBUG
                 Stopwatch swLightBuffer = Stopwatch.StartNew();
 #endif
-                this.BindLights();
+                BindLights();
 
                 //Draw scene lights on light buffer using g-buffer output
-                this.DrawLights(this.DrawContext);
+                DrawLights(DrawContext);
 #if DEBUG
                 swLightBuffer.Stop();
 
-                this.frameStats.DeferredLbuffer = swLightBuffer.ElapsedTicks;
+                frameStats.DeferredLbuffer = swLightBuffer.ElapsedTicks;
 #endif
             }
         }
@@ -365,7 +349,7 @@ namespace Engine
             if (scene.PerformFrustumCulling)
             {
                 //Frustum culling
-                draw = this.cullManager.Cull(this.DrawContext.CameraVolume, CullIndexDrawIndex, toCullNotDeferred);
+                draw = cullManager.Cull(DrawContext.CameraVolume, CullIndexDrawIndex, toCullNotDeferred);
             }
             else
             {
@@ -378,13 +362,13 @@ namespace Engine
                 if (groundVolume != null)
                 {
                     //Ground culling
-                    draw = this.cullManager.Cull(groundVolume, CullIndexDrawIndex, toCullNotDeferred);
+                    draw = cullManager.Cull(groundVolume, CullIndexDrawIndex, toCullNotDeferred);
                 }
             }
 #if DEBUG
             swCull.Stop();
 
-            this.frameStats.DisabledDeferredCull = swCull.ElapsedTicks;
+            frameStats.DisabledDeferredCull = swCull.ElapsedTicks;
 #endif
 
             if (draw)
@@ -393,17 +377,17 @@ namespace Engine
                 Stopwatch swDraw = Stopwatch.StartNew();
 #endif
                 //Set forward mode
-                this.DrawContext.DrawerMode = DrawerModes.Forward;
+                DrawContext.DrawerMode = DrawerModes.Forward;
 
                 //Draw scene
-                this.DrawResultComponents(this.DrawContext, CullIndexDrawIndex, deferredDisabledComponents);
+                DrawResultComponents(DrawContext, CullIndexDrawIndex, deferredDisabledComponents);
 
                 //Set deferred mode
-                this.DrawContext.DrawerMode = DrawerModes.Deferred;
+                DrawContext.DrawerMode = DrawerModes.Deferred;
 #if DEBUG
                 swDraw.Stop();
 
-                this.frameStats.DisabledDeferredDraw = swDraw.ElapsedTicks;
+                frameStats.DisabledDeferredDraw = swDraw.ElapsedTicks;
 #endif
             }
         }
@@ -413,28 +397,28 @@ namespace Engine
         /// </summary>
         private void UpdateRectangleAndView()
         {
-            this.Width = this.Game.Form.RenderWidth;
-            this.Height = this.Game.Form.RenderHeight;
+            Width = Game.Form.RenderWidth;
+            Height = Game.Form.RenderHeight;
 
-            this.Viewport = this.Game.Form.GetViewport();
+            Viewport = Game.Form.GetViewport();
 
-            this.ViewProjection = this.Game.Form.GetOrthoProjectionMatrix();
+            ViewProjection = Game.Form.GetOrthoProjectionMatrix();
 
-            this.lightDrawer.Update(this.Game.Graphics, this.Width, this.Height);
+            lightDrawer.Update(Game.Graphics, Width, Height);
         }
         /// <summary>
         /// Binds graphics for g-buffer pass
         /// </summary>
         private void BindGBuffer()
         {
-            var graphics = this.Game.Graphics;
+            var graphics = Game.Graphics;
 
             //Set local viewport
-            graphics.SetViewport(this.Viewport);
+            graphics.SetViewport(Viewport);
 
             //Set g-buffer render targets
             graphics.SetRenderTargets(
-                this.geometryBuffer.Targets, true, Color.Black,
+                geometryBuffer.Targets, true, Color.Black,
                 graphics.DefaultDepthStencil, true, true,
                 true);
         }
@@ -443,14 +427,14 @@ namespace Engine
         /// </summary>
         private void BindLights()
         {
-            var graphics = this.Game.Graphics;
+            var graphics = Game.Graphics;
 
             //Set local viewport
-            graphics.SetViewport(this.Viewport);
+            graphics.SetViewport(Viewport);
 
             //Set light buffer to draw lights
             graphics.SetRenderTargets(
-                this.lightBuffer.Targets, true, Color.Black,
+                lightBuffer.Targets, true, Color.Black,
                 graphics.DefaultDepthStencil, false, false,
                 false);
         }
@@ -459,7 +443,7 @@ namespace Engine
         /// </summary>
         private void BindResult()
         {
-            var graphics = this.Game.Graphics;
+            var graphics = Game.Graphics;
 
             //Restore backbuffer as render target and clear it
             graphics.SetDefaultViewport();
@@ -473,11 +457,11 @@ namespace Engine
         private void DrawLights(DrawContext context)
         {
 #if DEBUG
-            this.lightStats.Clear();
+            lightStats.Clear();
 
             Stopwatch swTotal = Stopwatch.StartNew();
 #endif
-            var graphics = this.Game.Graphics;
+            var graphics = Game.Graphics;
 
             Counters.MaxInstancesPerFrame += context.Lights.DirectionalLights.Length;
             Counters.MaxInstancesPerFrame += context.Lights.PointLights.Length;
@@ -494,16 +478,16 @@ namespace Engine
             var pointLights = context.Lights.GetVisiblePointLights();
 
             effect.UpdatePerFrame(
-                this.ViewProjection,
+                ViewProjection,
                 context.EyePosition,
-                this.GeometryMap[0],
-                this.GeometryMap[1],
-                this.GeometryMap[2]);
+                GeometryMap[0],
+                GeometryMap[1],
+                GeometryMap[2]);
 
             graphics.SetDepthStencilRDZDisabled();
-            this.SetBlendDeferredLighting();
+            SetBlendDeferredLighting();
 
-            this.lightDrawer.BindGeometry(graphics);
+            lightDrawer.BindGeometry(graphics);
 #if DEBUG
             swPrepare.Stop();
 #endif
@@ -515,7 +499,7 @@ namespace Engine
 #endif
             if (directionalLights.Any())
             {
-                this.lightDrawer.BindGobalLight(graphics);
+                lightDrawer.BindGobalLight(graphics);
 
                 foreach (var light in directionalLights)
                 {
@@ -523,7 +507,7 @@ namespace Engine
                         light,
                         context.ShadowMapDirectional);
 
-                    this.lightDrawer.DrawDirectional(graphics, effect);
+                    lightDrawer.DrawDirectional(graphics, effect);
                 }
             }
 #if DEBUG
@@ -537,7 +521,7 @@ namespace Engine
 #endif
             if (pointLights.Any())
             {
-                this.lightDrawer.BindPoint(graphics);
+                lightDrawer.BindPoint(graphics);
 
                 foreach (var light in pointLights)
                 {
@@ -548,7 +532,7 @@ namespace Engine
                         context.ViewProjection,
                         context.ShadowMapPoint);
 
-                    this.lightDrawer.DrawPoint(graphics, effect);
+                    lightDrawer.DrawPoint(graphics, effect);
                 }
             }
 #if DEBUG
@@ -562,7 +546,7 @@ namespace Engine
 #endif
             if (spotLights.Any())
             {
-                this.lightDrawer.BindSpot(graphics);
+                lightDrawer.BindSpot(graphics);
 
                 foreach (var light in spotLights)
                 {
@@ -573,7 +557,7 @@ namespace Engine
                         context.ViewProjection,
                         context.ShadowMapSpot);
 
-                    this.lightDrawer.DrawSpot(graphics, effect);
+                    lightDrawer.DrawSpot(graphics, effect);
                 }
             }
 #if DEBUG
@@ -584,15 +568,15 @@ namespace Engine
             swTotal.Stop();
 #endif
 #if DEBUG
-            this.lightStats.Prepare = swPrepare.ElapsedTicks;
-            this.lightStats.Directional = swDirectional.ElapsedTicks;
-            this.lightStats.Point = swPoint.ElapsedTicks;
-            this.lightStats.Spot = swSpot.ElapsedTicks;
-            this.lightStats.DirectionalLights = directionalLights?.Count() ?? 0;
-            this.lightStats.PointLights = pointLights?.Count() ?? 0;
-            this.lightStats.SpotLights = spotLights?.Count() ?? 0;
+            lightStats.Prepare = swPrepare.ElapsedTicks;
+            lightStats.Directional = swDirectional.ElapsedTicks;
+            lightStats.Point = swPoint.ElapsedTicks;
+            lightStats.Spot = swSpot.ElapsedTicks;
+            lightStats.DirectionalLights = directionalLights?.Count() ?? 0;
+            lightStats.PointLights = pointLights?.Count() ?? 0;
+            lightStats.SpotLights = spotLights?.Count() ?? 0;
 
-            this.lightStats.UpdateCounters(swTotal.ElapsedTicks);
+            lightStats.UpdateCounters(swTotal.ElapsedTicks);
 #endif
         }
         /// <summary>
@@ -601,7 +585,7 @@ namespace Engine
         /// <param name="context">Drawing context</param>
         private void DrawResult(DrawContext context)
         {
-            var graphics = this.Game.Graphics;
+            var graphics = Game.Graphics;
 
 #if DEBUG
             long init = 0;
@@ -609,7 +593,7 @@ namespace Engine
 
             Stopwatch swTotal = Stopwatch.StartNew();
 #endif
-            if (this.GeometryMap != null && this.LightMap != null)
+            if (GeometryMap != null && LightMap != null)
             {
 #if DEBUG
                 Stopwatch swInit = Stopwatch.StartNew();
@@ -617,12 +601,12 @@ namespace Engine
                 var effect = DrawerPool.EffectDeferredComposer;
 
                 effect.UpdateComposer(
-                    this.ViewProjection,
-                    this.GeometryMap[2],
-                    this.LightMap[0],
+                    ViewProjection,
+                    GeometryMap[2],
+                    LightMap[0],
                     context);
 
-                this.lightDrawer.BindResult(graphics);
+                lightDrawer.BindResult(graphics);
 
                 graphics.SetDepthStencilNone();
                 graphics.SetRasterizerDefault();
@@ -635,7 +619,7 @@ namespace Engine
 #if DEBUG
                 Stopwatch swDraw = Stopwatch.StartNew();
 #endif
-                this.lightDrawer.DrawResult(graphics, effect);
+                lightDrawer.DrawResult(graphics, effect);
 #if DEBUG
                 swDraw.Stop();
 
@@ -664,31 +648,31 @@ namespace Engine
             var mode = context.DrawerMode;
 
             //First opaques
-            var opaques = this.GetOpaques(index, components);
+            var opaques = GetOpaques(index, components);
             if (opaques.Any())
             {
                 //Set opaques draw mode
                 context.DrawerMode = mode | DrawerModes.OpaqueOnly;
 
                 //Sort items (nearest first)
-                opaques.Sort((c1, c2) => this.SortOpaques(index, c1, c2));
+                opaques.Sort((c1, c2) => SortOpaques(index, c1, c2));
 
                 //Draw items
-                opaques.ForEach((c) => this.Draw(context, c));
+                opaques.ForEach((c) => Draw(context, c));
             }
 
             //Then transparents
-            var transparents = this.GetTransparents(index, components);
+            var transparents = GetTransparents(index, components);
             if (transparents.Any())
             {
                 //Set transparents draw mode
                 context.DrawerMode = mode | DrawerModes.TransparentOnly;
 
                 //Sort items (far first)
-                transparents.Sort((c1, c2) => this.SortTransparents(index, c1, c2));
+                transparents.Sort((c1, c2) => SortTransparents(index, c1, c2));
 
                 //Draw items
-                transparents.ForEach((c) => this.Draw(context, c));
+                transparents.ForEach((c) => Draw(context, c));
             }
 
             //Restore drawing mode
@@ -702,19 +686,15 @@ namespace Engine
             {
                 if (blendMode.HasFlag(BlendModes.Additive))
                 {
-                    this.SetBlendDeferredComposerAdditive();
+                    SetBlendDeferredComposerAdditive();
                 }
-                else if (blendMode.HasFlag(BlendModes.Transparent))
+                else if (blendMode.HasFlag(BlendModes.Transparent) || blendMode.HasFlag(BlendModes.Alpha))
                 {
-                    this.SetBlendDeferredComposerTransparent();
-                }
-                else if (blendMode.HasFlag(BlendModes.Alpha))
-                {
-                    this.SetBlendDeferredComposerAlpha();
+                    SetBlendDeferredComposerTransparent();
                 }
                 else
                 {
-                    this.SetBlendDeferredComposer();
+                    SetBlendDeferredComposer();
                 }
             }
             else
@@ -727,35 +707,28 @@ namespace Engine
         /// </summary>
         private void SetBlendDeferredComposer()
         {
-            this.Game.Graphics.SetBlendState(this.blendDeferredComposer);
+            Game.Graphics.SetBlendState(blendDeferredComposer);
         }
         /// <summary>
         /// Sets transparent deferred composer blend state
         /// </summary>
         private void SetBlendDeferredComposerTransparent()
         {
-            this.Game.Graphics.SetBlendState(this.blendDeferredComposerTransparent);
-        }
-        /// <summary>
-        /// Sets alpha deferred composer blend state
-        /// </summary>
-        private void SetBlendDeferredComposerAlpha()
-        {
-            this.Game.Graphics.SetBlendState(this.blendDeferredComposerAlpha);
+            Game.Graphics.SetBlendState(blendDeferredComposerTransparent);
         }
         /// <summary>
         /// Sets additive deferred composer blend state
         /// </summary>
         private void SetBlendDeferredComposerAdditive()
         {
-            this.Game.Graphics.SetBlendState(this.blendDeferredComposerAdditive);
+            Game.Graphics.SetBlendState(blendDeferredComposerAdditive);
         }
         /// <summary>
         /// Sets deferred lighting blend state
         /// </summary>
         private void SetBlendDeferredLighting()
         {
-            this.Game.Graphics.SetBlendState(this.blendDeferredLighting);
+            Game.Graphics.SetBlendState(blendDeferredLighting);
         }
     }
 }

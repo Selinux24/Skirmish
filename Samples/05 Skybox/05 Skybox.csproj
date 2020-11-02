@@ -7,6 +7,7 @@
     <AssemblyName>Skybox</AssemblyName>
     <RootNamespace>Skybox</RootNamespace>
     <Platforms>AnyCPU;x64;x86</Platforms>
+    <SonarQubeTestProject>False</SonarQubeTestProject>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -34,32 +35,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\Audio\Effects\target_balls_single_loop.wav" />
-    <None Remove="Resources\fire.png" />
-    <None Remove="Resources\flare0.dds" />
-    <None Remove="Resources\flare1.png" />
-    <None Remove="Resources\flare2.png" />
-    <None Remove="Resources\flare3.png" />
-    <None Remove="Resources\Fountain\1_9be8dc.mtl" />
-    <None Remove="Resources\Fountain\1_9be8dc.obj" />
-    <None Remove="Resources\Fountain\Fountain.xml" />
-    <None Remove="Resources\Fountain\tLbZ9Jo.png" />
-    <None Remove="Resources\Obelisk\obelisk.mtl" />
-    <None Remove="Resources\Obelisk\obelisk.obj" />
-    <None Remove="Resources\Obelisk\obelisk.xml" />
-    <None Remove="Resources\Obelisk\obelisk_d.jpg" />
-    <None Remove="Resources\Obelisk\obelisk_n.jpg" />
-    <None Remove="Resources\raindrop.dds" />
-    <None Remove="Resources\ruins.dae" />
-    <None Remove="Resources\ruins.xml" />
-    <None Remove="Resources\smoke.png" />
-    <None Remove="Resources\sunset.dds" />
-    <None Remove="Resources\target.png" />
-    <None Remove="Resources\torch.dae" />
-    <None Remove="Resources\torch.xml" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <AdditionalFiles Include="..\..\.sonarlint\selinux24_skirmish_dev\CSharp\SonarLint.xml" Link="SonarLint.xml" />
     <Content Include="Resources\Audio\Effects\target_balls_single_loop.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -86,6 +62,15 @@
     </Content>
     <Content Include="Resources\Fountain\Fountain.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\LakeBottom\Diffuse.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\LakeBottom\Normal.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\torch.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Fountain\tLbZ9Jo.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

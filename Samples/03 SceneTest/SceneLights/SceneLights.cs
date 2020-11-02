@@ -101,18 +101,13 @@ namespace SceneTest.SceneLights
             mat.NormalMapTexture = "SceneLights/floors/asphalt/d_road_asphalt_stripes_normal.dds";
             mat.SpecularTexture = "SceneLights/floors/asphalt/d_road_asphalt_stripes_specular.dds";
 
-            var content = ModelContent.GenerateTriangleList(vertices, indices, mat);
-
             var desc = new ModelDescription()
             {
                 CastShadow = true,
                 DeferredEnabled = true,
                 DepthEnabled = true,
                 UseAnisotropicFiltering = true,
-                Content = new ContentDescription()
-                {
-                    ModelContent = content
-                }
+                Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
             await this.AddComponentModel("Floor", desc);
@@ -124,11 +119,7 @@ namespace SceneTest.SceneLights
                 Instances = 4,
                 CastShadow = true,
                 UseAnisotropicFiltering = true,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = "SceneLights/buildings/obelisk",
-                    ModelContentFilename = "Obelisk.xml",
-                }
+                Content = ContentDescription.FromFile("SceneLights/buildings/obelisk", "Obelisk.xml"),
             };
 
             buildingObelisks = await this.AddComponentModelInstanced("Obelisk", desc);
@@ -140,11 +131,7 @@ namespace SceneTest.SceneLights
                 CastShadow = true,
                 UseAnisotropicFiltering = true,
                 BlendMode = BlendModes.DefaultTransparent,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = "SceneLights/trees",
-                    ModelContentFilename = "Tree.xml",
-                }
+                Content = ContentDescription.FromFile("SceneLights/trees", "Tree.xml"),
             };
 
             await this.AddComponentModel("Tree", desc);
@@ -157,7 +144,6 @@ namespace SceneTest.SceneLights
             var s = GeometryUtil.CreateSphere(0.1f, 16, 5);
             var vertices = VertexData.FromDescriptor(s);
             var indices = s.Indices;
-            var content = ModelContent.GenerateTriangleList(vertices, indices, mat);
 
             var desc = new ModelInstancedDescription()
             {
@@ -165,10 +151,7 @@ namespace SceneTest.SceneLights
                 CastShadow = false,
                 DeferredEnabled = true,
                 DepthEnabled = true,
-                Content = new ContentDescription()
-                {
-                    ModelContent = content,
-                }
+                Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
             lightEmitters = await this.AddComponentModelInstanced("Emitter", desc);
@@ -192,18 +175,13 @@ namespace SceneTest.SceneLights
 
             var indices = cone.Indices;
 
-            var content = ModelContent.GenerateTriangleList(vertices, indices, mat);
-
             var desc = new ModelInstancedDescription()
             {
                 Instances = 3,
                 CastShadow = false,
                 DeferredEnabled = true,
                 DepthEnabled = true,
-                Content = new ContentDescription()
-                {
-                    ModelContent = content,
-                }
+                Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
             lanterns = await this.AddComponentModelInstanced("Lanterns", desc);

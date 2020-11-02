@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ModelContentDescription>
+<ContentDataDescription>
   <model_filename>human2.dae</model_filename>
   <animation_description>
     <animations>
       <animation name="stand" from="1" to="5" />
     </animations>
   </animation_description>
-</ModelContentDescription>
+</ContentDataDescription>

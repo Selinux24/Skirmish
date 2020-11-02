@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 namespace Engine.PathFinding.RecastNavigation
 {
     using Engine.PathFinding.RecastNavigation.Detour;
+    using System.Linq;
 
     /// <summary>
     /// Graph file
@@ -14,12 +15,47 @@ namespace Engine.PathFinding.RecastNavigation
     public struct GraphFile
     {
         /// <summary>
+        /// Calculates a hash string from a list of triangles
+        /// </summary>
+        /// <param name="settings">Settings</param>
+        /// <param name="triangles">Triangle list</param>
+        /// <returns>Returns the hash string</returns>
+        public static string GetHash(PathFinderSettings settings, IEnumerable<Triangle> triangles)
+        {
+            List<byte> buffer = new List<byte>();
+
+            var tris = triangles.ToList();
+            tris.Sort((t1, t2) =>
+            {
+                return t1.GetHashCode().CompareTo(t2.GetHashCode());
+            });
+
+            var serTris = tris
+                .Select(t => new[]
+                {
+                    t.Point1.X, t.Point1.Y, t.Point1.Z,
+                    t.Point2.X, t.Point2.Y, t.Point2.Z,
+                    t.Point3.X, t.Point3.Y, t.Point3.Z,
+                })
+                .ToArray();
+
+            buffer.AddRange(serTris.SerializeBinary());
+            buffer.AddRange(settings.SerializeBinary());
+
+            return buffer.ToArray().GetMd5Sum();
+        }
+
+        /// <summary>
         /// Creates a graph file from a graph
         /// </summary>
         /// <param name="graph">Graph</param>
         /// <returns>Returns the graph file</returns>
         public static async Task<GraphFile> FromGraph(Graph graph)
         {
+            //Calculate hash
+            var tris = await graph.Input.GetTriangles();
+            string hash = GetHash(graph.Settings, tris);
+
             var meshFileDict = new Dictionary<Agent, NavMeshFile>();
 
             foreach (var agentQ in graph.AgentQueries)
@@ -31,22 +67,20 @@ namespace Engine.PathFinding.RecastNavigation
                 meshFileDict.Add(agentQ.Agent, rcFile);
             }
 
-            var tris = await graph.Input.GetTriangles();
-            var sourceHash = InputGeometry.GetHash(tris);
-
             return new GraphFile()
             {
                 Settings = graph.Settings,
                 Dictionary = meshFileDict,
-                Hash = sourceHash,
+                Hash = hash,
             };
         }
         /// <summary>
         /// Creates a graph from a graph file
         /// </summary>
         /// <param name="file">Graph file</param>
+        /// <param name="inputGeometry">Input geometry</param>
         /// <returns>Returns the graph</returns>
-        public static async Task<Graph> FromGraphFile(GraphFile file)
+        public static async Task<Graph> FromGraphFile(GraphFile file, InputGeometry inputGeometry)
         {
             var agentQueries = new List<GraphAgentQuery>();
 
@@ -70,29 +104,22 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 Settings = file.Settings,
                 AgentQueries = agentQueries,
+                Input = inputGeometry,
                 Initialized = true,
             };
         }
         /// <summary>
-        /// Loads the graph from a file
+        /// Loads the graph file from a file name
         /// </summary>
         /// <param name="fileName">File name</param>
-        /// <param name="hash">Source hash</param>
-        /// <returns>Returns the graph</returns>
-        public static async Task<Graph> Load(string fileName, string hash)
+        /// <returns>Returns the graph file</returns>
+        public static async Task<GraphFile> Load(string fileName)
         {
             byte[] buffer = File.ReadAllBytes(fileName);
 
             try
             {
-                var file = buffer.Decompress<GraphFile>();
-
-                if (file.Hash == hash)
-                {
-                    return await FromGraphFile(file);
-                }
-
-                return null;
+                return await Task.FromResult(buffer.Decompress<GraphFile>());
             }
             catch (Exception ex)
             {

@@ -22,8 +22,8 @@ namespace Engine
         protected SceneLightHemispheric()
             : base()
         {
-            this.AmbientDown = Color.White;
-            this.AmbientUp = Color.White;
+            AmbientDown = Color.White;
+            AmbientUp = Color.White;
         }
         /// <summary>
         /// Constructor
@@ -49,26 +49,30 @@ namespace Engine
         public SceneLightHemispheric(string name, Color4 ambientDown, float brightnessDown, Color4 ambientUp, float brightnessUp, bool enabled)
             : base(name, false, Color.Transparent, Color.Transparent, enabled)
         {
-            this.AmbientDown = new Color4(ambientDown.RGB() * brightnessDown, 1);
-            this.AmbientUp = new Color4(ambientUp.RGB() * brightnessUp, 1);
+            AmbientDown = new Color4(ambientDown.RGB() * brightnessDown, 1);
+            AmbientUp = new Color4(ambientUp.RGB() * brightnessUp, 1);
         }
 
-        /// <summary>
-        /// Clones current light
-        /// </summary>
-        /// <returns>Returns a new instante with same data</returns>
+        /// <inheritdoc/>
+        public override bool MarkForShadowCasting(Vector3 eyePosition)
+        {
+            CastShadowsMarked = false;
+
+            return CastShadowsMarked;
+        }
+        /// <inheritdoc/>
         public override ISceneLight Clone()
         {
             return new SceneLightHemispheric()
             {
-                Name = this.Name,
-                Enabled = this.Enabled,
-                CastShadow = this.CastShadow,
-                AmbientDown = this.AmbientDown,
-                AmbientUp = this.AmbientUp,
-                DiffuseColor = this.DiffuseColor,
-                SpecularColor = this.SpecularColor,
-                State = this.State,
+                Name = Name,
+                Enabled = Enabled,
+                CastShadow = CastShadow,
+                AmbientDown = AmbientDown,
+                AmbientUp = AmbientUp,
+                DiffuseColor = DiffuseColor,
+                SpecularColor = SpecularColor,
+                State = State,
             };
         }
     }

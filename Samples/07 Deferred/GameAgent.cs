@@ -131,11 +131,11 @@ namespace Deferred
         /// <summary>
         /// Follow the specified path
         /// </summary>
-        /// <param name="path">Path to follow</param>
+        /// <param name="newPath">Path to follow</param>
         /// <param name="time">Path time</param>
-        public void Follow(IControllerPath path, float time = 0)
+        public void Follow(IControllerPath newPath, float time = 0)
         {
-            this.controller.Follow(path, time);
+            this.controller.Follow(newPath, time);
         }
         /// <summary>
         /// Clears the path

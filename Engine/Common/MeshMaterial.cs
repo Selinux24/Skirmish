@@ -72,11 +72,11 @@ namespace Engine.Common
         {
             Vector4[] res = new Vector4[4];
 
-            res[0] = this.Material.EmissiveColor;
-            res[1] = this.Material.AmbientColor;
-            res[2] = this.Material.DiffuseColor;
-            res[3] = this.Material.SpecularColor;
-            res[3].W = this.Material.Shininess;
+            res[0] = Material.EmissiveColor;
+            res[1] = Material.AmbientColor;
+            res[2] = Material.DiffuseColor;
+            res[3] = Material.SpecularColor;
+            res[3].W = Material.Shininess;
 
             return res;
         }
@@ -89,28 +89,19 @@ namespace Engine.Common
         public bool Equals(MeshMaterial other)
         {
             return
-                this.Material.Equals(other.Material) &&
-                this.EmissionTexture == other.EmissionTexture &&
-                this.AmbientTexture == other.AmbientTexture &&
-                this.DiffuseTexture == other.DiffuseTexture &&
-                this.SpecularTexture == other.SpecularTexture &&
-                this.ReflectiveTexture == other.ReflectiveTexture &&
-                this.NormalMap == other.NormalMap;
+                Material.Equals(other.Material) &&
+                EmissionTexture == other.EmissionTexture &&
+                AmbientTexture == other.AmbientTexture &&
+                DiffuseTexture == other.DiffuseTexture &&
+                SpecularTexture == other.SpecularTexture &&
+                ReflectiveTexture == other.ReflectiveTexture &&
+                NormalMap == other.NormalMap;
         }
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("{0} EmissionTexture: {1}; AmbientTexture: {2}; DiffuseTexture: {3}; SpecularTexture: {4}; ReflectiveTexture: {5}; NormalMapTexture: {6};",
-                this.Material,
-                this.EmissionTexture != null,
-                this.AmbientTexture != null,
-                this.DiffuseTexture != null,
-                this.SpecularTexture != null,
-                this.ReflectiveTexture != null,
-                this.NormalMap != null);
+            return $"{Material} EmissionTexture: {EmissionTexture != null}; AmbientTexture: {AmbientTexture != null}; DiffuseTexture: {DiffuseTexture != null}; SpecularTexture: {SpecularTexture != null}; ReflectiveTexture: {ReflectiveTexture != null}; NormalMapTexture: {NormalMap != null};";
         }
     }
 }

@@ -28,7 +28,7 @@ namespace Engine.Common
         /// <returns>Returns a value of the specified type from the sampler variable</returns>
         public SamplerState GetValue()
         {
-            return this.variable.GetSampler();
+            return variable.GetSampler();
         }
         /// <summary>
         /// Gets a value of the specified type from the sampler variable
@@ -37,7 +37,7 @@ namespace Engine.Common
         /// <returns>Returns a value of the specified type from the sampler variable</returns>
         public SamplerState GetValue(int index)
         {
-            return this.variable.GetSampler(index);
+            return variable.GetSampler(index);
         }
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace Engine.Common
         /// <param name="samplerRef">Sampler reference</param>
         public void SetValue(int index, SamplerState samplerRef)
         {
-            this.variable.SetSampler(index, samplerRef);
+            variable.SetSampler(index, samplerRef);
         }
     }
 }

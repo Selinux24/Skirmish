@@ -3,6 +3,8 @@ using System.IO;
 
 namespace Engine.Content
 {
+    using Engine.Common;
+
     /// <summary>
     /// Content description
     /// </summary>
@@ -13,34 +15,87 @@ namespace Engine.Content
         /// </summary>
         /// <param name="contentFolder">Content folder</param>
         /// <param name="fileName">File name</param>
+        /// <returns>Returns a new content description</returns>
         public static ContentDescription FromFile(string contentFolder, string fileName)
         {
             return new ContentDescription
             {
                 ContentFolder = contentFolder,
-                ModelContentFilename = fileName,
+                ContentFilename = fileName,
             };
         }
         /// <summary>
-        /// Creates a content description from a generated model content
+        /// Creates a content description from a generated content data
         /// </summary>
-        /// <param name="content">Model content</param>
-        public static ContentDescription FromModelContent(ModelContent content)
+        /// <param name="contentData">Content data</param>
+        /// <remarks>Returns a new content description</remarks>
+        public static ContentDescription FromContentData(ContentData contentData)
         {
             return new ContentDescription
             {
-                ModelContent = content,
+                ContentData = contentData,
             };
         }
         /// <summary>
-        /// Creates a content description from a model content description
+        /// Creates a model descriptor from scratch
         /// </summary>
-        /// <param name="description">Model content description</param>
-        public static ContentDescription FromModelContentDescription(ModelContentDescription description)
+        /// <param name="vertices">Vertex data</param>
+        /// <param name="indices">Index data</param>
+        /// <param name="material">Material</param>
+        /// <returns>Returns a new content description</returns>
+        public static ContentDescription FromContentData(IEnumerable<VertexData> vertices, IEnumerable<uint> indices, MaterialContent? material = null)
         {
+            var contentData = ContentData.GenerateTriangleList(vertices, indices, material);
+
             return new ContentDescription
             {
-                ModelContentDescription = description,
+                ContentData = contentData,
+            };
+        }
+        /// <summary>
+        /// Creates a model descriptor from scratch
+        /// </summary>
+        /// <param name="vertices">Vertex data</param>
+        /// <param name="indices">Index data</param>
+        /// <param name="materials">Materials</param>
+        /// <returns>Returns a new content description</returns>
+        public static ContentDescription FromContentData(IEnumerable<VertexData> vertices, IEnumerable<uint> indices, IEnumerable<MaterialContent> materials)
+        {
+            var contentData = ContentData.GenerateTriangleList(vertices, indices, materials);
+
+            return new ContentDescription
+            {
+                ContentData = contentData,
+            };
+        }
+        /// <summary>
+        /// Creates a model descriptor from scratch
+        /// </summary>
+        /// <param name="geometry">Geometry descriptor</param>
+        /// <param name="material">Material</param>
+        /// <returns>Returns a new content description</returns>
+        public static ContentDescription FromContentData(GeometryDescriptor geometry, MaterialContent? material = null)
+        {
+            var contentData = ContentData.GenerateTriangleList(geometry, material);
+
+            return new ContentDescription
+            {
+                ContentData = contentData,
+            };
+        }
+        /// <summary>
+        /// Creates a model descriptor from scratch
+        /// </summary>
+        /// <param name="geometry">Geometry descriptor</param>
+        /// <param name="materials">Material list</param>
+        /// <returns>Returns a new content description</returns>
+        public static ContentDescription FromContentData(GeometryDescriptor geometry, IEnumerable<MaterialContent> materials)
+        {
+            var contentData = ContentData.GenerateTriangleList(geometry, materials);
+
+            return new ContentDescription
+            {
+                ContentData = contentData,
             };
         }
 
@@ -49,42 +104,32 @@ namespace Engine.Content
         /// </summary>
         public string ContentFolder { get; set; }
         /// <summary>
-        /// Model content file name
+        /// Content file name
         /// </summary>
-        public string ModelContentFilename { get; set; }
+        public string ContentFilename { get; set; }
         /// <summary>
-        /// Model content
+        /// Content data
         /// </summary>
-        public ModelContent ModelContent { get; set; }
-        /// <summary>
-        /// Model content description
-        /// </summary>
-        public ModelContentDescription ModelContentDescription { get; set; }
+        public ContentData ContentData { get; set; }
 
         /// <summary>
         /// Reads the model content file
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<ModelContent> ReadModelContent()
+        public IEnumerable<ContentData> ReadModelContent()
         {
-            if (!string.IsNullOrEmpty(ModelContentFilename))
+            if (!string.IsNullOrEmpty(ContentFilename))
             {
-                string fileName = Path.GetFileName(ModelContentFilename);
-                string directory = Path.Combine(ContentFolder ?? "", Path.GetDirectoryName(ModelContentFilename));
+                string fileName = Path.GetFileName(ContentFilename);
+                string directory = Path.Combine(ContentFolder ?? "", Path.GetDirectoryName(ContentFilename));
 
-                var contentDesc = SerializationHelper.DeserializeXmlFromFile<ModelContentDescription>(Path.Combine(directory, fileName));
+                var contentDesc = SerializationHelper.DeserializeXmlFromFile<ContentDataDescription>(Path.Combine(directory, fileName));
                 var loader = GameResourceManager.GetLoaderForFile(contentDesc.ModelFileName);
                 return loader.Load(directory, contentDesc);
             }
-            else if (ModelContentDescription != null)
+            else if (ContentData != null)
             {
-                var contentDesc = ModelContentDescription;
-                var loader = GameResourceManager.GetLoaderForFile(contentDesc.ModelFileName);
-                return loader.Load(ContentFolder, contentDesc);
-            }
-            else if (ModelContent != null)
-            {
-                return new[] { ModelContent };
+                return new[] { ContentData };
             }
             else
             {

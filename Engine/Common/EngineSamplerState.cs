@@ -89,8 +89,8 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                this.samplerState?.Dispose();
-                this.samplerState = null;
+                samplerState?.Dispose();
+                samplerState = null;
             }
         }
 
@@ -100,7 +100,7 @@ namespace Engine.Common
         /// <returns>Returns the internal sampler state</returns>
         internal SamplerState GetSamplerState()
         {
-            return this.samplerState;
+            return samplerState;
         }
     }
 }

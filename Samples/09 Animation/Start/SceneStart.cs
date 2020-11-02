@@ -1,6 +1,7 @@
 ﻿using Engine;
 using Engine.Audio;
 using Engine.Audio.Tween;
+using Engine.Content;
 using Engine.Tween;
 using Engine.UI;
 using SharpDX;
@@ -61,7 +62,10 @@ namespace Animation.Start
         }
         private async Task InitializeBackground()
         {
-            var backGroundDesc = ModelDescription.FromXml("start/resources", "SkyPlane.xml");
+            var backGroundDesc = new ModelDescription()
+            {
+                Content = ContentDescription.FromFile("start/resources", "SkyPlane.xml"),
+            };
             backGround = await this.AddComponentModel("Background", backGroundDesc, SceneObjectUsages.UI);
         }
         private async Task InitializeTitle()

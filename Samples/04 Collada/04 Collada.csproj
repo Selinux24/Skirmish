@@ -7,6 +7,7 @@
     <RootNamespace>Collada</RootNamespace>
     <AssemblyName>Collada</AssemblyName>
     <Platforms>AnyCPU;x64;x86</Platforms>
+    <SonarQubeTestProject>False</SonarQubeTestProject>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -34,103 +35,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Resources\**" />
-    <EmbeddedResource Remove="Resources\**" />
-    <None Remove="Resources\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="DungeonWall\Resources\diffuse.dds" />
-    <None Remove="DungeonWall\Resources\normal.bmp" />
-    <None Remove="DungeonWall\Resources\Wall.dae" />
-    <None Remove="DungeonWall\Resources\Wall.xml" />
-    <None Remove="Dungeon\Resources\Dungeon.dae" />
-    <None Remove="Dungeon\Resources\Dungeon.xml" />
-    <None Remove="ModularDungeon\Resources\Audio\Effects\door.wav" />
-    <None Remove="ModularDungeon\Resources\Audio\Effects\ladder.wav" />
-    <None Remove="ModularDungeon\Resources\Audio\Effects\loop_torch.wav" />
-    <None Remove="ModularDungeon\Resources\Audio\Effects\mouse1.wav" />
-    <None Remove="ModularDungeon\Resources\Audio\Effects\mouse2.wav" />
-    <None Remove="ModularDungeon\Resources\Audio\Effects\Wind1_S.wav" />
-    <None Remove="ModularDungeon\Resources\Audio\Effects\Wind2_S.wav" />
-    <None Remove="ModularDungeon\Resources\Audio\Effects\Wind3_S.wav" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\Assets.dae" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\Assets.xml" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\AssetsMap.xml" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\atlas1.jpg" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\bark_d.dds" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\bark_n.dds" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\BasicDungeon.png" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\bench_d.jpg" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\bookshelf_d.jpg" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\brick_d.png" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\brick_n.png" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\bronze_d.jpg" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\bronze_n.jpg" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\candleLight.png" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\crane_1_d.png" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\crane_2_d.png" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\crate_d.jpg" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\crate_n.png" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\fire.png" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\fire_d.png" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\floor_d.jpg" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\floor_n.jpg" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\furniture_atlas_1.png" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\green-algae.png" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\jewels_d.png" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\lava_d.jpg" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\lava_n.jpg" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\Levels.xml" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\marble_d.png" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\metal_rust_d.jpg" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\oil_d.jpg" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\Pedestal_d.jpg" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\rag_d.png" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\rock_d.jpg" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\rock_n.jpg" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\rug.jpg" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\Statue_d.jpg" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\stuff_map.png" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\torch.jpg" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\treasure_d.jpg" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\wall_d.jpg" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\wall_n.jpg" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\wood_d.jpg" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\wrack1_d.png" />
-    <None Remove="ModularDungeon\Resources\Characters\Human2\Human2.dae" />
-    <None Remove="ModularDungeon\Resources\Characters\Human2\Human2.xml" />
-    <None Remove="ModularDungeon\Resources\Characters\Rat\Rat.dae" />
-    <None Remove="ModularDungeon\Resources\Characters\Rat\Rat.xml" />
-    <None Remove="ModularDungeon\Resources\Characters\Rat\Rat_d.png" />
-    <None Remove="ModularDungeon\Resources\OnePageDungeons\desert_catacombs_of_the_golden_witch.json" />
-    <None Remove="ModularDungeon\Resources\OnePageDungeons\desert_catacombs_of_the_golden_witch.png" />
-    <None Remove="ModularDungeon\Resources\OnePageDungeons\halls_of_pain.json" />
-    <None Remove="ModularDungeon\Resources\OnePageDungeons\halls_of_pain.png" />
-    <None Remove="ModularDungeon\Resources\OnePageDungeons\infected_chambers_of_arhun-kyron.json" />
-    <None Remove="ModularDungeon\Resources\OnePageDungeons\infected_chambers_of_arhun-kyron.png" />
-    <None Remove="ModularDungeon\Resources\OnePageDungeons\maze_of_the_purple_god.json" />
-    <None Remove="ModularDungeon\Resources\OnePageDungeons\maze_of_the_purple_god.png" />
-    <None Remove="ModularDungeon\Resources\OnePageDungeons\ragerock_fortress.json" />
-    <None Remove="ModularDungeon\Resources\OnePageDungeons\ragerock_fortress.png" />
-    <None Remove="NavMeshTest\Resources\dungeon.obj" />
-    <None Remove="NavMeshTest\Resources\dungeon.xml" />
-    <None Remove="NavMeshTest\Resources\modular_dungeon.obj" />
-    <None Remove="NavMeshTest\Resources\modular_dungeon.xml" />
-    <None Remove="Start\Resources\backGround.jpg" />
-    <None Remove="Start\Resources\buttons.png" />
-    <None Remove="Start\Resources\Electro_1.wav" />
-    <None Remove="Start\Resources\HelveticaNeue Medium.ttf" />
-    <None Remove="Start\Resources\HelveticaNeueHv.ttf" />
-    <None Remove="Start\Resources\HipHoppy_1.wav" />
-    <None Remove="Start\Resources\pointer.png" />
-    <None Remove="Start\Resources\push.wav" />
-    <None Remove="Start\Resources\SkyPlane.dae" />
-    <None Remove="Start\Resources\SkyPlane.xml" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <AdditionalFiles Include="..\..\.sonarlint\selinux24_skirmish_dev\CSharp\SonarLint.xml" Link="SonarLint.xml" />
     <Content Include="DungeonWall\Resources\diffuse.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\BasicDungeon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="DungeonWall\Resources\normal.bmp">

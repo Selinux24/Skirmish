@@ -59,7 +59,7 @@ namespace Engine.Common
         {
             get
             {
-                return this.data?.Count ?? 0;
+                return data?.Count ?? 0;
             }
         }
         /// <summary>
@@ -91,8 +91,8 @@ namespace Engine.Common
         /// </summary>
         public BufferManagerVertices(VertexTypes type, bool dynamic)
         {
-            this.Type = type;
-            this.Dynamic = dynamic;
+            Type = type;
+            Dynamic = dynamic;
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace Engine.Common
         /// <returns>Returns the buffer format stride in bytes</returns>
         public int GetStride()
         {
-            return this.data.FirstOrDefault()?.GetStride() ?? 0;
+            return data.FirstOrDefault()?.GetStride() ?? 0;
         }
         /// <summary>
         /// Adds the input element to the internal input list, of the specified slot
@@ -110,21 +110,21 @@ namespace Engine.Common
         public void AddInputs(int slot)
         {
             //Get the input element list from the vertex data
-            var inputs = this.data.First().GetInput(slot);
+            var inputs = data.First().GetInput(slot);
 
             //Adds the input list
-            this.input.AddRange(inputs);
+            input.AddRange(inputs);
 
             //Updates the allocated size
-            this.AllocatedSize = this.data.Count;
+            AllocatedSize = data.Count;
         }
         /// <summary>
         /// Clears the internal input list
         /// </summary>
         public void ClearInputs()
         {
-            this.input.Clear();
-            this.AllocatedSize = 0;
+            input.Clear();
+            AllocatedSize = 0;
         }
         /// <summary>
         /// Adds the specified instancing input elements to the internal list
@@ -133,14 +133,14 @@ namespace Engine.Common
         public void AddInstancingInputs(int instancingSlot)
         {
             var instancingInputs = VertexInstancingData.Input(instancingSlot);
-            this.input.AddRange(instancingInputs);
+            input.AddRange(instancingInputs);
         }
         /// <summary>
         /// Crears the instancing inputs from the input elements
         /// </summary>
         public void ClearInstancingInputs()
         {
-            this.input.RemoveAll(i => i.Classification == InputClassification.PerInstanceData);
+            input.RemoveAll(i => i.Classification == InputClassification.PerInstanceData);
         }
 
         /// <summary>
@@ -152,12 +152,12 @@ namespace Engine.Common
         /// <param name="vertices">Vertex list</param>
         public void AddDescriptor(BufferDescriptor descriptor, string id, int bufferDescriptionIndex, IEnumerable<IVertexData> vertices)
         {
-            Monitor.Enter(this.data);
+            Monitor.Enter(data);
             //Store current data index as descriptor offset
-            int offset = this.data.Count;
+            int offset = data.Count;
             //Add items to data list
-            this.data.AddRange(vertices);
-            Monitor.Exit(this.data);
+            data.AddRange(vertices);
+            Monitor.Exit(data);
 
             //Add the new descriptor to main descriptor list
             descriptor.Id = id;
@@ -165,9 +165,9 @@ namespace Engine.Common
             descriptor.BufferOffset = offset;
             descriptor.Count = vertices.Count();
 
-            Monitor.Enter(this.vertexDescriptors);
-            this.vertexDescriptors.Add(descriptor);
-            Monitor.Exit(this.vertexDescriptors);
+            Monitor.Enter(vertexDescriptors);
+            vertexDescriptors.Add(descriptor);
+            Monitor.Exit(vertexDescriptors);
         }
         /// <summary>
         /// Removes a buffer descriptor from the internal list
@@ -178,36 +178,33 @@ namespace Engine.Common
             if (descriptor.Count > 0)
             {
                 //If descriptor has items, remove from buffer descriptors
-                Monitor.Enter(this.data);
-                this.data.RemoveRange(descriptor.BufferOffset, descriptor.Count);
-                Monitor.Exit(this.data);
+                Monitor.Enter(data);
+                data.RemoveRange(descriptor.BufferOffset, descriptor.Count);
+                Monitor.Exit(data);
             }
 
-            Monitor.Enter(this.vertexDescriptors);
+            Monitor.Enter(vertexDescriptors);
             //Remove descriptor
-            this.vertexDescriptors.Remove(descriptor);
+            vertexDescriptors.Remove(descriptor);
 
-            if (this.vertexDescriptors.Any())
+            if (vertexDescriptors.Any())
             {
                 //Reallocate descriptor offsets
-                this.vertexDescriptors[0].BufferOffset = 0;
-                for (int i = 1; i < this.vertexDescriptors.Count; i++)
+                vertexDescriptors[0].BufferOffset = 0;
+                for (int i = 1; i < vertexDescriptors.Count; i++)
                 {
-                    var prev = this.vertexDescriptors[i - 1];
+                    var prev = vertexDescriptors[i - 1];
 
-                    this.vertexDescriptors[i].BufferOffset = prev.BufferOffset + prev.Count;
+                    vertexDescriptors[i].BufferOffset = prev.BufferOffset + prev.Count;
                 }
             }
-            Monitor.Exit(this.vertexDescriptors);
+            Monitor.Exit(vertexDescriptors);
         }
 
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns a description of the instance</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return $"[{Type}][{Dynamic}] Instances: {this.InstancingDescriptor?.Count ?? 0} AllocatedSize: {AllocatedSize} ToAllocateSize: {ToAllocateSize} Dirty: {Dirty}";
+            return $"[{Type}][{Dynamic}] Instances: {InstancingDescriptor?.Count ?? 0} AllocatedSize: {AllocatedSize} ToAllocateSize: {ToAllocateSize} Dirty: {Dirty}";
         }
     }
 }

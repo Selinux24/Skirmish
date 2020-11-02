@@ -131,19 +131,8 @@ namespace SceneTest.SceneMaterials
                 1, 3, 2,
             };
 
-            MaterialContent mat = new MaterialContent()
-            {
-                EmissionColor = new Color4(0f, 0f, 0f, 0f),
-                AmbientColor = new Color4(0.02f, 0.02f, 0.02f, 1f),
-
-                DiffuseColor = new Color4(0.8f, 0.8f, 0.8f, 1f),
-                DiffuseTexture = "SceneMaterials/floor.png",
-
-                SpecularColor = new Color4(0.5f, 0.5f, 0.5f, 1f),
-                Shininess = 1024,
-            };
-
-            var content = ModelContent.GenerateTriangleList(vertices, indices, mat);
+            MaterialContent mat = MaterialContent.Default;
+            mat.DiffuseTexture = "SceneMaterials/floor.png";
 
             var desc = new ModelDescription()
             {
@@ -151,10 +140,7 @@ namespace SceneTest.SceneMaterials
                 DeferredEnabled = true,
                 DepthEnabled = true,
                 UseAnisotropicFiltering = true,
-                Content = new ContentDescription()
-                {
-                    ModelContent = content,
-                }
+                Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
             await this.AddComponentModel("Floor", desc);
@@ -164,17 +150,13 @@ namespace SceneTest.SceneMaterials
             var sphere = GeometryUtil.CreateSphere(radius, stacks, stacks);
             var vertices = VertexData.FromDescriptor(sphere);
             var indices = sphere.Indices;
-            var content = ModelContent.GenerateTriangleList(vertices, indices, materials);
 
             var desc = new ModelInstancedDescription()
             {
                 CastShadow = true,
                 UseAnisotropicFiltering = true,
                 Instances = count,
-                Content = new ContentDescription()
-                {
-                    ModelContent = content,
-                }
+                Content = ContentDescription.FromContentData(vertices, indices, materials),
             };
 
             var model = await this.AddComponentModelInstanced(name, desc);
@@ -190,7 +172,9 @@ namespace SceneTest.SceneMaterials
         {
             int n = 32;
             int colorCount = 256;
-            int totalSpheres = (int)Math.Pow(colorCount / n, 3);
+            int e = colorCount / n;
+            int totalSpheres = (int)Math.Pow(e, 3);
+            float distance = 3f;
 
             List<MaterialContent> materials = new List<MaterialContent>();
             for (int r = 0; r < colorCount; r += n)
@@ -216,7 +200,7 @@ namespace SceneTest.SceneMaterials
                 {
                     for (int b = 0; b < colorCount; b += n)
                     {
-                        float f = 1f / n * 4f;
+                        float f = 1f / n * distance;
 
                         var instance = modelInstanced[instanceIndex++];
                         instance.Manipulator.SetPosition(new Vector3(r * f, (g * f) + 1f, b * f) + position);
@@ -226,18 +210,14 @@ namespace SceneTest.SceneMaterials
         }
         private MaterialContent GenerateMaterial(Color4 diffuse, Color4 specular, float shininess, bool nmap)
         {
-            return new MaterialContent()
-            {
-                EmissionColor = new Color4(0f, 0f, 0f, 0f),
-                AmbientColor = new Color4(0.02f, 0.02f, 0.02f, 1f),
+            MaterialContent mat = MaterialContent.Default;
+            mat.DiffuseColor = diffuse;
+            mat.DiffuseTexture = "SceneMaterials/white.png";
+            mat.NormalMapTexture = nmap ? "SceneMaterials/nmap1.jpg" : "SceneMaterials/nmap2.png";
+            mat.SpecularColor = specular;
+            mat.Shininess = shininess;
 
-                DiffuseColor = diffuse,
-                DiffuseTexture = "SceneMaterials/white.png",
-                NormalMapTexture = nmap ? "SceneMaterials/nmap1.jpg" : "SceneMaterials/nmap2.png",
-
-                SpecularColor = specular,
-                Shininess = shininess,
-            };
+            return mat;
         }
 
         public override void Update(GameTime gameTime)

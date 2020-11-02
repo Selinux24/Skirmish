@@ -1,4 +1,5 @@
-﻿
+﻿using System.Linq;
+
 namespace Engine.Content
 {
     using Engine.Animation;
@@ -17,15 +18,12 @@ namespace Engine.Content
         /// </summary>
         public Keyframe[] Keyframes { get; set; }
 
-        /// <summary>
-        /// Gets text representation of instance
-        /// </summary>
-        /// <returns>Returns text representation of instance</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
-            if (this.Keyframes != null && this.Keyframes.Length > 0)
+            if (Keyframes?.Any() == true)
             {
-                return string.Format("Start: {0}; End: {1};", this.Keyframes[0], this.Keyframes[this.Keyframes.Length - 1]);
+                return $"Start: {Keyframes.First()}; End: {Keyframes.Last()};";
             }
             else
             {

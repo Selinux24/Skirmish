@@ -46,8 +46,8 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                this.shader?.Dispose();
-                this.shader = null;
+                shader?.Dispose();
+                shader = null;
             }
         }
     }

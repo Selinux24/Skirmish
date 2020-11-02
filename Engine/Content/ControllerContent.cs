@@ -21,38 +21,25 @@ namespace Engine.Content
         /// <summary>
         /// Bind shape matrix
         /// </summary>
-        public Matrix BindShapeMatrix { get; set; }
+        public Matrix BindShapeMatrix { get; set; } = Matrix.Identity;
         /// <summary>
         /// Inverse bind matrix list by joint name
         /// </summary>
-        public Dictionary<string, Matrix> InverseBindMatrix { get; set; }
+        public Dictionary<string, Matrix> InverseBindMatrix { get; set; } = new Dictionary<string, Matrix>();
         /// <summary>
         /// Weight information by joint name
         /// </summary>
-        public Weight[] Weights { get; set; }
+        public Weight[] Weights { get; set; } = new Weight[] { };
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public ControllerContent()
-        {
-            this.BindShapeMatrix = Matrix.Identity;
-            this.InverseBindMatrix = new Dictionary<string, Matrix>();
-            this.Weights = new Weight[] { };
-        }
-
-        /// <summary>
-        /// Gets text representation of instance
-        /// </summary>
-        /// <returns>Returns text representation of instance</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
             string text = null;
 
-            if (this.Skin != null) text += string.Format("Skin: {0}; ", this.Skin);
-            if (this.InverseBindMatrix != null) text += string.Format("InverseBindMatrix: {0}; ", this.InverseBindMatrix.Count);
-            if (this.Weights != null) text += string.Format("Weights: {0}; ", this.Weights.Length);
-            text += string.Format("BindShapeMatrix: {0}; ", this.BindShapeMatrix);
+            if (Skin != null) text += $"Skin: {Skin}; ";
+            if (InverseBindMatrix != null) text += $"InverseBindMatrix: {InverseBindMatrix.Count}; ";
+            if (Weights != null) text += $"Weights: {Weights.Length}; ";
+            text += $"BindShapeMatrix: {BindShapeMatrix};";
 
             return text;
         }

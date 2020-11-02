@@ -18,9 +18,10 @@
         /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        protected Updatable(string name, Scene scene, SceneObjectDescription description) : base(name, scene, description)
+        protected Updatable(string name, Scene scene, SceneObjectDescription description) : 
+            base(name, scene, description)
         {
-
+            
         }
 
         /// <summary>

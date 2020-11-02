@@ -38,11 +38,11 @@ namespace Engine
         {
             return new Material()
             {
-                EmissiveColor = this.EmissionColor,
-                AmbientColor = this.AmbientColor,
-                DiffuseColor = this.DiffuseColor,
-                SpecularColor = this.SpecularColor,
-                Shininess = this.Shininess,
+                EmissiveColor = EmissionColor,
+                AmbientColor = AmbientColor,
+                DiffuseColor = DiffuseColor,
+                SpecularColor = SpecularColor,
+                Shininess = Shininess,
             };
         }
 
@@ -51,14 +51,13 @@ namespace Engine
         /// </summary>
         public MaterialDescription()
         {
-            var m = Common.Material.Default;
+            var m = Material.Default;
 
-            this.EmissionColor = m.EmissiveColor;
-            this.AmbientColor = m.AmbientColor;
-            this.DiffuseColor = m.DiffuseColor;
-            this.SpecularColor = m.SpecularColor;
-            this.Shininess = m.Shininess;
+            EmissionColor = m.EmissiveColor;
+            AmbientColor = m.AmbientColor;
+            DiffuseColor = m.DiffuseColor;
+            SpecularColor = m.SpecularColor;
+            Shininess = m.Shininess;
         }
     }
-
 }

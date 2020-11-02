@@ -3,6 +3,7 @@ using System.Linq;
 
 namespace Engine
 {
+    using Engine.Common;
     using Engine.Content;
 
     /// <summary>
@@ -83,6 +84,10 @@ namespace Engine
         /// Where a = FalloffCurve.X and b = FalloffCurve.Y
         /// </remarks>
         public Vector2 FalloffCurve { get; set; } = new Vector2(2, 2.7f);
+        /// <summary>
+        /// Transform matrix
+        /// </summary>
+        public Matrix Transform { get; set; } = Matrix.Identity;
 
         /// <summary>
         /// Constructor
@@ -98,7 +103,7 @@ namespace Engine
         /// Generates a new model content from an height map description
         /// </summary>
         /// <returns>Returns a new model content</returns>
-        public ModelContent ReadModelContent()
+        public ContentData ReadModelContent()
         {
             HeightMap hm = HeightMap.FromDescription(this);
             hm.BuildGeometry(
@@ -109,7 +114,12 @@ namespace Engine
                 Textures.Displacement,
                 out var vertices, out var indices);
 
-            ModelContent modelContent = new ModelContent();
+            if (!Transform.IsIdentity)
+            {
+                vertices = VertexData.Transform(vertices, Transform);
+            }
+
+            ContentData modelContent = new ContentData();
 
             string materialName = "material";
             string geoName = "geometry";

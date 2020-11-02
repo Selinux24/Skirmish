@@ -89,7 +89,7 @@ namespace Engine
             {
                 base.ParentTransform = value;
 
-                this.UpdateLocalTransform();
+                UpdateLocalTransform();
             }
         }
         /// <summary>
@@ -119,7 +119,7 @@ namespace Engine
         protected SceneLightDirectional()
             : base()
         {
-            this.UpdateLocalTransform();
+            UpdateLocalTransform();
         }
         /// <summary>
         /// Constructor
@@ -134,10 +134,10 @@ namespace Engine
         public SceneLightDirectional(string name, bool castShadow, Color4 diffuse, Color4 specular, bool enabled, Vector3 direction, float brigthness)
             : base(name, castShadow, diffuse, specular, enabled)
         {
-            this.initialDirection = direction;
-            this.BaseBrightness = this.Brightness = brigthness;
+            initialDirection = direction;
+            BaseBrightness = Brightness = brigthness;
 
-            this.UpdateLocalTransform();
+            UpdateLocalTransform();
         }
 
         /// <summary>
@@ -145,43 +145,45 @@ namespace Engine
         /// </summary>
         private void UpdateLocalTransform()
         {
-            this.Direction = Vector3.TransformNormal(this.initialDirection, base.ParentTransform);
+            Direction = Vector3.TransformNormal(initialDirection, ParentTransform);
         }
 
-        /// <summary>
-        /// Clears all light shadow parameters
-        /// </summary>
+        /// <inheritdoc/>
         public override void ClearShadowParameters()
         {
             base.ClearShadowParameters();
 
-            this.ShadowMapCount = 0;
-            this.ToShadowSpace = Matrix.Identity;
-            this.ToCascadeOffsetX = Vector4.Zero;
-            this.ToCascadeOffsetY = Vector4.Zero;
-            this.ToCascadeScale = Vector4.Zero;
+            ShadowMapCount = 0;
+            ToShadowSpace = Matrix.Identity;
+            ToCascadeOffsetX = Vector4.Zero;
+            ToCascadeOffsetY = Vector4.Zero;
+            ToCascadeScale = Vector4.Zero;
         }
-        /// <summary>
-        /// Clones current light
-        /// </summary>
-        /// <returns>Returns a new instante with same data</returns>
+        /// <inheritdoc/>
+        public override bool MarkForShadowCasting(Vector3 eyePosition)
+        {
+            CastShadowsMarked = CastShadow;
+
+            return CastShadowsMarked;
+        }
+        /// <inheritdoc/>
         public override ISceneLight Clone()
         {
             return new SceneLightDirectional()
             {
-                Name = this.Name,
-                Enabled = this.Enabled,
-                CastShadow = this.CastShadow,
-                DiffuseColor = this.DiffuseColor,
-                SpecularColor = this.SpecularColor,
-                State = this.State,
+                Name = Name,
+                Enabled = Enabled,
+                CastShadow = CastShadow,
+                DiffuseColor = DiffuseColor,
+                SpecularColor = SpecularColor,
+                State = State,
 
-                Direction = this.Direction,
-                Brightness = this.Brightness,
+                Direction = Direction,
+                Brightness = Brightness,
 
-                initialDirection = this.initialDirection,
+                initialDirection = initialDirection,
 
-                ParentTransform = this.ParentTransform,
+                ParentTransform = ParentTransform,
             };
         }
 
@@ -192,7 +194,7 @@ namespace Engine
         /// <returns>Returns light position at specified distance</returns>
         public Vector3 GetPosition(float distance)
         {
-            return distance * -2f * this.Direction;
+            return distance * -2f * Direction;
         }
     }
 }

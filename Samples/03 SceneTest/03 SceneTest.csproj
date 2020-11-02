@@ -7,169 +7,35 @@
     <AssemblyName>SceneTest</AssemblyName>
     <RootNamespace>SceneTest</RootNamespace>
     <Platforms>AnyCPU;x64;x86</Platforms>
+    <SonarQubeTestProject>False</SonarQubeTestProject>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <CodeAnalysisRuleSet />
+    <CodeAnalysisRuleSet>03 SceneTest.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
-    <CodeAnalysisRuleSet />
+    <CodeAnalysisRuleSet>03 SceneTest.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <CodeAnalysisRuleSet />
+    <CodeAnalysisRuleSet>03 SceneTest.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <CodeAnalysisRuleSet />
+    <CodeAnalysisRuleSet>03 SceneTest.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-    <CodeAnalysisRuleSet />
+    <CodeAnalysisRuleSet>03 SceneTest.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <CodeAnalysisRuleSet />
+    <CodeAnalysisRuleSet>03 SceneTest.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Common\buttons.png" />
-    <None Remove="Common\LensFlare\lfFlare1.png" />
-    <None Remove="Common\LensFlare\lfFlare2.png" />
-    <None Remove="Common\LensFlare\lfFlare3.png" />
-    <None Remove="Common\LensFlare\lfFlare4.png" />
-    <None Remove="Common\LensFlare\lfGlow.png" />
-    <None Remove="Common\pointer.png" />
-    <None Remove="SceneLights\Buildings\Obelisk\diffus.dds" />
-    <None Remove="SceneLights\Buildings\Obelisk\normal.dds" />
-    <None Remove="SceneLights\Buildings\Obelisk\obelisk.dae" />
-    <None Remove="SceneLights\Buildings\Obelisk\obelisk.xml" />
-    <None Remove="SceneLights\Buildings\Obelisk\specular.dds" />
-    <None Remove="SceneLights\Floors\Asphalt\d_road_asphalt_stripes_diffuse.dds" />
-    <None Remove="SceneLights\Floors\Asphalt\d_road_asphalt_stripes_normal.dds" />
-    <None Remove="SceneLights\Floors\Asphalt\d_road_asphalt_stripes_specular.dds" />
-    <None Remove="SceneLights\Trees\bark_albedo.png" />
-    <None Remove="SceneLights\Trees\bark_normal.png" />
-    <None Remove="SceneLights\Trees\bark_specular.png" />
-    <None Remove="SceneLights\Trees\bushes_albedo.png" />
-    <None Remove="SceneLights\Trees\bushes_normal.png" />
-    <None Remove="SceneLights\Trees\bushes_specular.png" />
-    <None Remove="SceneLights\Trees\tree.dae" />
-    <None Remove="SceneLights\Trees\tree.xml" />
-    <None Remove="SceneMaterials\floor.png" />
-    <None Remove="SceneMaterials\nmap1.jpg" />
-    <None Remove="SceneMaterials\nmap2.png" />
-    <None Remove="SceneMaterials\white.png" />
-    <None Remove="SceneStart\anttisinstrumentals+icemanandangelinstrumental.mp3" />
-    <None Remove="SceneStart\backGround.jpg" />
-    <None Remove="SceneStart\SkyPlane.dae" />
-    <None Remove="SceneStart\SkyPlane.xml" />
-    <None Remove="SceneStart\TanksGame.png" />
-    <None Remove="SceneStart\ui_options.png" />
-    <None Remove="SceneStencilPass\Buildings\Obelisk\diffus.dds" />
-    <None Remove="SceneStencilPass\Buildings\Obelisk\normal.dds" />
-    <None Remove="SceneStencilPass\Buildings\Obelisk\obelisk.dae" />
-    <None Remove="SceneStencilPass\Buildings\Obelisk\obelisk.xml" />
-    <None Remove="SceneStencilPass\Buildings\Obelisk\specular.dds" />
-    <None Remove="SceneStencilPass\Floors\Asphalt\d_road_asphalt_stripes_diffuse.dds" />
-    <None Remove="SceneStencilPass\Floors\Asphalt\d_road_asphalt_stripes_normal.dds" />
-    <None Remove="SceneStencilPass\Floors\Asphalt\d_road_asphalt_stripes_specular.dds" />
-    <None Remove="SceneTanksGame\Arrow.png" />
-    <None Remove="SceneTanksGame\Audio\cannon-shooting.wav" />
-    <None Remove="SceneTanksGame\Audio\explosion_vehicle_small_close_01.wav" />
-    <None Remove="SceneTanksGame\Audio\explosion_vehicle_small_distant_01.wav" />
-    <None Remove="SceneTanksGame\Audio\metal_grate_large_01.wav" />
-    <None Remove="SceneTanksGame\Audio\metal_grate_large_02.wav" />
-    <None Remove="SceneTanksGame\Audio\metal_grate_large_03.wav" />
-    <None Remove="SceneTanksGame\Audio\metal_grate_large_04.wav" />
-    <None Remove="SceneTanksGame\Audio\metal_pipe_large_01.wav" />
-    <None Remove="SceneTanksGame\Audio\metal_pipe_large_02.wav" />
-    <None Remove="SceneTanksGame\Audio\metal_pipe_large_03.wav" />
-    <None Remove="SceneTanksGame\Audio\metal_pipe_large_04.wav" />
-    <None Remove="SceneTanksGame\Audio\tank_engine.wav" />
-    <None Remove="SceneTanksGame\Compass.png" />
-    <None Remove="SceneTanksGame\Crater.png" />
-    <None Remove="SceneTanksGame\Dot.png" />
-    <None Remove="SceneTanksGame\Dot_w.png" />
-    <None Remove="SceneTanksGame\GameIcon.png" />
-    <None Remove="SceneTanksGame\Landscape.png" />
-    <None Remove="SceneTanksGame\LeagueSpartan-Bold.otf" />
-    <None Remove="SceneTanksGame\Leopard\Leopard.dae" />
-    <None Remove="SceneTanksGame\Leopard\Leopard.xml" />
-    <None Remove="SceneTanksGame\Leopard\Leopard_0.bmp" />
-    <None Remove="SceneTanksGame\Leopard\Leopard_1.bmp" />
-    <None Remove="SceneTanksGame\Leopard\Leopard_2.bmp" />
-    <None Remove="SceneTanksGame\Move.png" />
-    <None Remove="SceneTanksGame\Particles\explosion.png" />
-    <None Remove="SceneTanksGame\Particles\fire.dds" />
-    <None Remove="SceneTanksGame\Particles\fire.png" />
-    <None Remove="SceneTanksGame\Particles\floor.png" />
-    <None Remove="SceneTanksGame\Particles\smoke.png" />
-    <None Remove="SceneTanksGame\Pitch.png" />
-    <None Remove="SceneTanksGame\Tank.png" />
-    <None Remove="SceneTanksGame\Terrain\Diffuse.jpg" />
-    <None Remove="SceneTanksGame\Terrain\Normal.jpg" />
-    <None Remove="SceneTanksGame\Terrain\terrain.dae" />
-    <None Remove="SceneTanksGame\Terrain\terrain.png" />
-    <None Remove="SceneTanksGame\Terrain\terrain.xml" />
-    <None Remove="SceneTanksGame\Terrain\terrain_nmap.png" />
-    <None Remove="SceneTanksGame\Turn.png" />
-    <None Remove="SceneTanksGame\Wind.png" />
-    <None Remove="SceneTest\Buildings\Obelisk\diffus.dds" />
-    <None Remove="SceneTest\Buildings\Obelisk\normal.dds" />
-    <None Remove="SceneTest\Buildings\Obelisk\obelisk.dae" />
-    <None Remove="SceneTest\Buildings\Obelisk\obelisk.xml" />
-    <None Remove="SceneTest\Buildings\Obelisk\specular.dds" />
-    <None Remove="SceneTest\Character\Soldier\soldier0.jpg" />
-    <None Remove="SceneTest\Character\Soldier\Soldier1.jpg" />
-    <None Remove="SceneTest\Character\Soldier\soldier_anim2.dae" />
-    <None Remove="SceneTest\Character\Soldier\soldier_anim2.xml" />
-    <None Remove="SceneTest\Container\container.dae" />
-    <None Remove="SceneTest\Container\container.xml" />
-    <None Remove="SceneTest\Container\ikube azul-1.png" />
-    <None Remove="SceneTest\Container\ikube azul-2.png" />
-    <None Remove="SceneTest\Container\ikube azul-3.png" />
-    <None Remove="SceneTest\Container\ikube azul-4.png" />
-    <None Remove="SceneTest\Container\ikube azul-5.png" />
-    <None Remove="SceneTest\Floors\Asphalt\d_road_asphalt_stripes_diffuse.dds" />
-    <None Remove="SceneTest\Floors\Asphalt\d_road_asphalt_stripes_normal.dds" />
-    <None Remove="SceneTest\Floors\Asphalt\d_road_asphalt_stripes_specular.dds" />
-    <None Remove="SceneTest\Lamps\concrete.jpg" />
-    <None Remove="SceneTest\Lamps\Lamp.dae" />
-    <None Remove="SceneTest\Lamps\Lamp.png" />
-    <None Remove="SceneTest\Lamps\Lamp.xml" />
-    <None Remove="SceneTest\Lamps\metallic.jpg" />
-    <None Remove="SceneTest\Lamps\StreetLamp.dae" />
-    <None Remove="SceneTest\Lamps\StreetLamp.xml" />
-    <None Remove="SceneTest\Particles\explosion.png" />
-    <None Remove="SceneTest\Particles\fire.dds" />
-    <None Remove="SceneTest\Particles\fire.png" />
-    <None Remove="SceneTest\Particles\floor.png" />
-    <None Remove="SceneTest\Particles\smoke.png" />
-    <None Remove="SceneTest\Scenery\clif.dae" />
-    <None Remove="SceneTest\Scenery\clif.xml" />
-    <None Remove="SceneTest\Scenery\Diffuse.jpg" />
-    <None Remove="SceneTest\Scenery\Normal.jpg" />
-    <None Remove="SceneTest\Sky\cloud001.dds" />
-    <None Remove="SceneTest\Sky\perturb001.dds" />
-    <None Remove="SceneTest\Trees\Bark_d.png" />
-    <None Remove="SceneTest\Trees\Leafs_d.png" />
-    <None Remove="SceneTest\Trees\Tree.xml" />
-    <None Remove="SceneTest\Trees\tree_1.dae" />
-    <None Remove="SceneTest\Trees\tree_2.dae" />
-    <None Remove="SceneTest\Trees\tree_3.dae" />
-    <None Remove="SceneTest\UI\button_off.png" />
-    <None Remove="SceneTest\UI\button_on.png" />
-    <None Remove="SceneTest\Vehicles\Challenger\Challenger.bmp" />
-    <None Remove="SceneTest\Vehicles\Challenger\challenger.dae" />
-    <None Remove="SceneTest\Vehicles\Challenger\challenger.xml" />
-    <None Remove="SceneTest\Vehicles\Leopard\Leopard.bmp" />
-    <None Remove="SceneTest\Vehicles\Leopard\Leopard.dae" />
-    <None Remove="SceneTest\Vehicles\Leopard\Leopard.xml" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <AdditionalFiles Include="..\..\.sonarlint\selinux24_skirmish_dev\CSharp\SonarLint.xml" Link="SonarLint.xml" />
     <Content Include="Common\buttons.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -400,18 +266,6 @@
     <Content Include="SceneTanksGame\Terrain\Normal.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneTanksGame\Terrain\terrain.dae">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Terrain\terrain.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Terrain\terrain.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Terrain\terrain_nmap.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="SceneTanksGame\Turn.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -570,6 +424,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneTest\Vehicles\Leopard\Leopard.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneWater\Diffuse.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneWater\Normal.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

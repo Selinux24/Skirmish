@@ -7,6 +7,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <AssemblyName>ModelDrawing</AssemblyName>
     <Platforms>AnyCPU;x64;x86</Platforms>
+    <SonarQubeTestProject>False</SonarQubeTestProject>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -34,14 +35,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\explosion.png" />
-    <None Remove="Resources\fire.dds" />
-    <None Remove="Resources\fire.png" />
-    <None Remove="Resources\floor.png" />
-    <None Remove="Resources\smoke.png" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <AdditionalFiles Include="..\..\.sonarlint\selinux24_skirmish_dev\CSharp\SonarLint.xml" Link="SonarLint.xml" />
     <Content Include="Resources\explosion.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

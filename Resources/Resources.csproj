@@ -6,6 +6,7 @@
     <RootNamespace>Resources</RootNamespace>
     <Platforms>AnyCPU;x64;x86</Platforms>
     <SonarQubeExclude>True</SonarQubeExclude>
+    <SonarQubeTestProject>False</SonarQubeTestProject>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

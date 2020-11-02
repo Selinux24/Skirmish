@@ -40,7 +40,7 @@ namespace Engine
         {
             get
             {
-                return new BoundingSphere(this.Position, this.Radius);
+                return new BoundingSphere(Position, Radius);
             }
         }
         /// <summary>
@@ -56,7 +56,7 @@ namespace Engine
             {
                 base.ParentTransform = value;
 
-                this.UpdateLocalTransform();
+                UpdateLocalTransform();
             }
         }
         /// <summary>
@@ -66,7 +66,7 @@ namespace Engine
         {
             get
             {
-                return Matrix.Scaling(this.Radius) * Matrix.Translation(this.Position);
+                return Matrix.Scaling(Radius) * Matrix.Translation(Position);
             }
         }
 
@@ -92,11 +92,11 @@ namespace Engine
             SceneLightPointDescription description)
             : base(name, castShadow, diffuse, specular, enabled)
         {
-            this.initialTransform = description.Transform;
-            this.initialRadius = description.Radius;
-            this.initialIntensity = description.Intensity;
+            initialTransform = description.Transform;
+            initialRadius = description.Radius;
+            initialIntensity = description.Intensity;
 
-            this.UpdateLocalTransform();
+            UpdateLocalTransform();
         }
 
         /// <summary>
@@ -104,38 +104,42 @@ namespace Engine
         /// </summary>
         private void UpdateLocalTransform()
         {
-            var trn = this.initialTransform * base.ParentTransform;
+            var trn = initialTransform * ParentTransform;
 
-            trn.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 translation);
-            this.Radius = initialRadius * scale.X;
-            this.Intensity = initialIntensity * scale.X;
-            this.Position = translation;
+            trn.Decompose(out Vector3 scale, out _, out Vector3 translation);
+            Radius = initialRadius * scale.X;
+            Intensity = initialIntensity * scale.X;
+            Position = translation;
         }
 
-        /// <summary>
-        /// Clones current light
-        /// </summary>
-        /// <returns>Returns a new instante with same data</returns>
+        /// <inheritdoc/>
+        public override bool MarkForShadowCasting(Vector3 eyePosition)
+        {
+            CastShadowsMarked = EvaluateLight(eyePosition, CastShadow, Position, Radius);
+
+            return CastShadowsMarked;
+        }
+        /// <inheritdoc/>
         public override ISceneLight Clone()
         {
             return new SceneLightPoint()
             {
-                Name = this.Name,
-                Enabled = this.Enabled,
-                CastShadow = this.CastShadow,
-                DiffuseColor = this.DiffuseColor,
-                SpecularColor = this.SpecularColor,
-                State = this.State,
+                Name = Name,
+                Enabled = Enabled,
+                CastShadow = CastShadow,
+                DiffuseColor = DiffuseColor,
+                SpecularColor = SpecularColor,
+                State = State,
 
-                Position = this.Position,
-                Radius = this.Radius,
-                Intensity = this.Intensity,
+                Position = Position,
+                Radius = Radius,
+                Intensity = Intensity,
 
-                initialTransform = this.initialTransform,
-                initialRadius = this.initialRadius,
-                initialIntensity = this.initialIntensity,
+                initialTransform = initialTransform,
+                initialRadius = initialRadius,
+                initialIntensity = initialIntensity,
 
-                ParentTransform = this.ParentTransform,
+                ParentTransform = ParentTransform,
             };
         }
         /// <summary>
@@ -146,7 +150,7 @@ namespace Engine
         /// <returns>Returns a line list representing the light volume</returns>
         public IEnumerable<Line3D> GetVolume(int sliceCount, int stackCount)
         {
-            return Line3D.CreateWiredSphere(this.BoundingSphere, sliceCount, stackCount);
+            return Line3D.CreateWiredSphere(BoundingSphere, sliceCount, stackCount);
         }
     }
 }

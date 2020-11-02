@@ -65,23 +65,9 @@ namespace Engine
         public PrimitiveListDrawer(string name, Scene scene, PrimitiveListDrawerDescription<T> description)
             : base(name, scene, description)
         {
-            var vertsPerItem = default(T).GetVertices();
-            stride = vertsPerItem.Length;
-            switch (stride)
-            {
-                case 1:
-                    topology = Topology.PointList;
-                    break;
-                case 2:
-                    topology = Topology.LineList;
-                    break;
-                case 3:
-                    topology = Topology.TriangleList;
-                    break;
-                default:
-                    topology = Topology.PointList;
-                    break;
-            }
+            T tmp = default;
+            stride = tmp.GetStride();
+            topology = tmp.GetTopology();
 
             int count;
             if (description.Primitives?.Length > 0)
@@ -305,9 +291,13 @@ namespace Engine
                 for (int i = 0; i < primitives.Count; i++)
                 {
                     var vList = primitives[i].GetVertices();
-                    for (int v = 0; v < vList.Length; v++)
+                    for (int v = 0; v < vList.Count(); v++)
                     {
-                        data.Add(new VertexPositionColor() { Position = vList[v], Color = color });
+                        data.Add(new VertexPositionColor()
+                        {
+                            Position = vList.ElementAt(v),
+                            Color = color
+                        });
                     }
                 }
             }

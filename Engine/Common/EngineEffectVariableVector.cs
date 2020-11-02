@@ -29,7 +29,7 @@ namespace Engine.Common
         /// <returns>Returns a value of the specified type</returns>
         public T GetVector<T>() where T : struct
         {
-            return this.variable.GetVector<T>();
+            return variable.GetVector<T>();
         }
         /// <summary>
         /// Sets a value of the specified type to the variable
@@ -38,7 +38,7 @@ namespace Engine.Common
         /// <param name="value">Value</param>
         public void Set<T>(T value) where T : struct
         {
-            this.variable.Set<T>(value);
+            variable.Set<T>(value);
         }
     }
 }

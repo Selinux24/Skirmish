@@ -14,16 +14,6 @@ namespace Engine
     public abstract class Ground : Drawable, IRayPickable<Triangle>, IIntersectable
     {
         /// <summary>
-        /// Ground description
-        /// </summary>
-        protected new GroundDescription Description
-        {
-            get
-            {
-                return base.Description as GroundDescription;
-            }
-        }
-        /// <summary>
         /// Quadtree for base ground picking
         /// </summary>
         protected PickingQuadTree<Triangle> groundPickingQuadtree = null;

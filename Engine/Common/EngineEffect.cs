@@ -46,8 +46,8 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                this.effect?.Dispose();
-                this.effect = null;
+                effect?.Dispose();
+                effect = null;
             }
         }
 
@@ -56,9 +56,9 @@ namespace Engine.Common
         /// </summary>
         public void Optimize()
         {
-            if (!this.effect.IsOptimized)
+            if (!effect.IsOptimized)
             {
-                this.effect.Optimize();
+                effect.Optimize();
             }
         }
 
@@ -69,7 +69,7 @@ namespace Engine.Common
         /// <returns>Returns the technique</returns>
         public EngineEffectTechnique GetTechniqueByName(string name)
         {
-            return new EngineEffectTechnique(this.effect.GetTechniqueByName(name));
+            return new EngineEffectTechnique(effect.GetTechniqueByName(name));
         }
         /// <summary>
         /// Get variable by name
@@ -78,7 +78,7 @@ namespace Engine.Common
         /// <returns>Returns the variable</returns>
         public EngineEffectVariable GetVariable(string name)
         {
-            return new EngineEffectVariable(this.effect.GetVariableByName(name));
+            return new EngineEffectVariable(effect.GetVariableByName(name));
         }
         /// <summary>
         /// Get variable by name
@@ -87,7 +87,7 @@ namespace Engine.Common
         /// <returns>Returns the variable</returns>
         public EngineEffectVariableTexture GetVariableTexture(string name)
         {
-            return new EngineEffectVariableTexture(this.effect.GetVariableByName(name).AsShaderResource());
+            return new EngineEffectVariableTexture(effect.GetVariableByName(name).AsShaderResource());
         }
         /// <summary>
         /// Get variable by name
@@ -96,7 +96,7 @@ namespace Engine.Common
         /// <returns>Returns the variable</returns>
         public EngineEffectVariableScalar GetVariableScalar(string name)
         {
-            return new EngineEffectVariableScalar(this.effect.GetVariableByName(name).AsScalar());
+            return new EngineEffectVariableScalar(effect.GetVariableByName(name).AsScalar());
         }
         /// <summary>
         /// Get variable by name
@@ -105,7 +105,7 @@ namespace Engine.Common
         /// <returns>Returns the variable</returns>
         public EngineEffectVariableVector GetVariableVector(string name)
         {
-            return new EngineEffectVariableVector(this.effect.GetVariableByName(name).AsVector());
+            return new EngineEffectVariableVector(effect.GetVariableByName(name).AsVector());
         }
         /// <summary>
         /// Get variable by name
@@ -114,7 +114,7 @@ namespace Engine.Common
         /// <returns>Returns the variable</returns>
         public EngineEffectVariableMatrix GetVariableMatrix(string name)
         {
-            return new EngineEffectVariableMatrix(this.effect.GetVariableByName(name).AsMatrix());
+            return new EngineEffectVariableMatrix(effect.GetVariableByName(name).AsMatrix());
         }
         /// <summary>
         /// Get variable by name
@@ -123,7 +123,7 @@ namespace Engine.Common
         /// <returns>Returns the variable</returns>
         public EngineEffectVariableSampler GetVariableSampler(string name)
         {
-            return new EngineEffectVariableSampler(this.effect.GetVariableByName(name).AsSampler());
+            return new EngineEffectVariableSampler(effect.GetVariableByName(name).AsSampler());
         }
     }
 }

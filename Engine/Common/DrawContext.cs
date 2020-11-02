@@ -10,11 +10,11 @@ namespace Engine.Common
         /// <summary>
         /// Context name
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         /// <summary>
         /// Drawer mode
         /// </summary>
-        public DrawerModes DrawerMode { get; set; }
+        public DrawerModes DrawerMode { get; set; } = DrawerModes.Forward;
 
         /// <summary>
         /// Game time
@@ -53,15 +53,6 @@ namespace Engine.Common
         /// Spot light shadow map
         /// </summary>
         public IShadowMap ShadowMapSpot { get; set; }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public DrawContext()
-        {
-            this.Name = string.Empty;
-            this.DrawerMode = DrawerModes.Forward;
-        }
 
         /// <summary>
         /// Validates the drawing stage

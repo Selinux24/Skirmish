@@ -52,17 +52,11 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                if (this.shader != null)
-                {
-                    this.shader.Dispose();
-                    this.shader = null;
-                }
+                shader?.Dispose();
+                shader = null;
 
-                if (this.layout != null)
-                {
-                    this.layout.Dispose();
-                    this.layout = null;
-                }
+                layout?.Dispose();
+                layout = null;
             }
         }
     }

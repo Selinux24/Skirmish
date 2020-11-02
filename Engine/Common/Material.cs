@@ -48,12 +48,12 @@ namespace Engine.Common
         /// <param name="effect">Effect content</param>
         public Material(MaterialContent effect)
         {
-            this.EmissiveColor = effect.EmissionColor;
-            this.AmbientColor = effect.AmbientColor;
-            this.DiffuseColor = effect.DiffuseColor;
-            this.SpecularColor = effect.SpecularColor;
-            this.Shininess = effect.Shininess;
-            this.IsTransparent = effect.IsTransparent;
+            EmissiveColor = effect.EmissionColor;
+            AmbientColor = effect.AmbientColor;
+            DiffuseColor = effect.DiffuseColor;
+            SpecularColor = effect.SpecularColor;
+            Shininess = effect.Shininess;
+            IsTransparent = effect.IsTransparent;
         }
 
         /// <summary>
@@ -64,24 +64,17 @@ namespace Engine.Common
         public bool Equals(Material other)
         {
             return
-                this.EmissiveColor == other.EmissiveColor &&
-                this.AmbientColor == other.AmbientColor &&
-                this.DiffuseColor == other.DiffuseColor &&
-                this.SpecularColor == other.SpecularColor &&
-                this.Shininess == other.Shininess;
+                EmissiveColor == other.EmissiveColor &&
+                AmbientColor == other.AmbientColor &&
+                DiffuseColor == other.DiffuseColor &&
+                SpecularColor == other.SpecularColor &&
+                Shininess == other.Shininess;
         }
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("EmissiveColor: {0}; AmbientColor: {1}; DiffuseColor: {2}; SpecularColor: {3}; Shininess: {4};",
-                this.EmissiveColor,
-                this.AmbientColor,
-                this.DiffuseColor,
-                this.SpecularColor,
-                this.Shininess);
+            return $"EmissiveColor: {EmissiveColor}; AmbientColor: {AmbientColor}; DiffuseColor: {DiffuseColor}; SpecularColor: {SpecularColor}; Shininess: {Shininess};";
         }
     };
 }

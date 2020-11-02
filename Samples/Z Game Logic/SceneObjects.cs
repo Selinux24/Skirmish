@@ -157,11 +157,7 @@ namespace GameLogic
                 {
                     CastShadow = false,
                     DepthEnabled = false,
-                    Content = new ContentDescription()
-                    {
-                        ContentFolder = "Resources3D",
-                        ModelContentFilename = "cursor.xml",
-                    }
+                    Content = ContentDescription.FromFile("Resources3D", "cursor.xml"),
                 },
                 SceneObjectUsages.UI,
                 layerHUD);
@@ -172,11 +168,7 @@ namespace GameLogic
                 {
                     Instances = skirmishGame.AllSoldiers.Length,
                     CastShadow = true,
-                    Content = new ContentDescription()
-                    {
-                        ContentFolder = "Resources3D",
-                        ModelContentFilename = "soldier_anim2.xml",
-                    }
+                    Content = ContentDescription.FromFile("Resources3D", "soldier_anim2.xml"),
                 },
                 SceneObjectUsages.Agent);
 

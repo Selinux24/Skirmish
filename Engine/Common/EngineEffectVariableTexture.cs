@@ -28,7 +28,7 @@ namespace Engine.Common
         /// <param name="resource">Resource</param>
         public void SetResource(EngineShaderResourceView resource)
         {
-            this.variable.SetResource(resource?.GetResource());
+            variable.SetResource(resource?.GetResource());
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace Engine.Common
         /// <returns>Returns the resource from the shader</returns>
         public EngineShaderResourceView GetResource()
         {
-            var srv = this.variable.GetResource()?.QueryInterface<ShaderResourceView1>();
+            var srv = variable.GetResource()?.QueryInterface<ShaderResourceView1>();
             if (srv != null)
             {
                 return new EngineShaderResourceView(srv);

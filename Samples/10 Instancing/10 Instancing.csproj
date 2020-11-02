@@ -7,6 +7,7 @@
     <RootNamespace>Instancing</RootNamespace>
     <AssemblyName>Instancing</AssemblyName>
     <Platforms>AnyCPU;x64;x86</Platforms>
+    <SonarQubeTestProject>False</SonarQubeTestProject>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -34,26 +35,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\Ground\gravel_01_diffuse.jpg" />
-    <None Remove="Resources\Ground\gravel_01_normal.jpg" />
-    <None Remove="Resources\Soldier\soldier0.jpg" />
-    <None Remove="Resources\Soldier\Soldier1.jpg" />
-    <None Remove="Resources\Soldier\Soldier2.jpg" />
-    <None Remove="Resources\Soldier\soldier_anim2.dae" />
-    <None Remove="Resources\Soldier\soldier_anim2.xml" />
-    <None Remove="Resources\Trees\Bark_d.png" />
-    <None Remove="Resources\Trees\Leafs_d.png" />
-    <None Remove="Resources\Trees\tree.xml" />
-    <None Remove="Resources\Trees\tree_1.dae" />
-    <None Remove="Resources\Trees\tree_2.dae" />
-    <None Remove="Resources\Trees\tree_3.dae" />
-    <None Remove="Resources\Wall\diffuse.dds" />
-    <None Remove="Resources\Wall\normal.bmp" />
-    <None Remove="Resources\Wall\Wall.dae" />
-    <None Remove="Resources\Wall\Wall.xml" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <AdditionalFiles Include="..\..\.sonarlint\selinux24_skirmish_dev\CSharp\SonarLint.xml" Link="SonarLint.xml" />
     <Content Include="Resources\Ground\gravel_01_diffuse.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

@@ -7,6 +7,7 @@
     <RootNamespace>Deferred</RootNamespace>
     <AssemblyName>Deferred</AssemblyName>
     <Platforms>AnyCPU;x64;x86</Platforms>
+    <SonarQubeTestProject>False</SonarQubeTestProject>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -34,33 +35,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\flare2.png" />
-    <None Remove="Resources\Leopard.bmp" />
-    <None Remove="Resources\Leopard.dae" />
-    <None Remove="Resources\Leopard.xml" />
-    <None Remove="Resources\m24.dae" />
-    <None Remove="Resources\m24.dds" />
-    <None Remove="Resources\m24.xml" />
-    <None Remove="Resources\sunset.dds" />
-    <None Remove="Resources\target.png" />
-    <None Remove="Resources\terrain.dae" />
-    <None Remove="Resources\terrain.png" />
-    <None Remove="Resources\terrain.xml" />
-    <None Remove="Resources\terrain_nmap.png" />
-    <None Remove="Resources\Trees\birch_01_bark_diffuse.dds" />
-    <None Remove="Resources\Trees\birch_01_bark_normal.dds" />
-    <None Remove="Resources\Trees\birch_01_leaves_diffuse.dds" />
-    <None Remove="Resources\Trees\birch_01_leaves_normal.dds" />
-    <None Remove="Resources\Trees\birch_a.dae" />
-    <None Remove="Resources\Trees\birch_a.xml" />
-    <None Remove="Resources\Trees\birch_b.dae" />
-    <None Remove="Resources\Trees\birch_b.xml" />
-    <None Remove="Resources\Vegetation\grass.png" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <AdditionalFiles Include="..\..\.sonarlint\selinux24_skirmish_dev\CSharp\SonarLint.xml" Link="SonarLint.xml" />
     <Content Include="Resources\flare2.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\m24.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Leopard.bmp">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

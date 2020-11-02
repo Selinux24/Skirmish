@@ -61,11 +61,11 @@ namespace Engine
         /// <summary>
         /// Base color
         /// </summary>
-        public Color BaseColor { get; set; } = new Color(0.1f, 0.19f, 0.22f, 1.0f);
+        public Color3 BaseColor { get; set; } = new Color3(0.1f, 0.19f, 0.22f);
         /// <summary>
         /// Water color
         /// </summary>
-        public Color WaterColor { get; set; } = new Color(0.8f, 0.9f, 0.6f, 1.0f);
+        public Color4 WaterColor { get; set; } = new Color4(0.8f, 0.9f, 0.6f, 0.75f);
         /// <summary>
         /// Wave height
         /// </summary>
@@ -110,10 +110,10 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        public WaterDescription()
-            : base()
+        public WaterDescription() : base()
         {
-            BlendMode = BlendModes.Opaque;
+            DeferredEnabled = false;
+            SphericVolume = false;
         }
     }
 }

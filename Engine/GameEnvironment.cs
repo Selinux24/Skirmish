@@ -32,6 +32,10 @@ namespace Engine
         /// Maximum distance for minimum level of detail models
         /// </summary>
         public static float LODDistanceMinimum { get; set; } = 1000f;
+        /// <summary>
+        /// The engine will discard all lights where: Distance / light radius < threshold
+        /// </summary>
+        public static float ShadowRadiusDistanceThreshold { get; set; } = 0.25f;
 
         /// <summary>
         /// Gets the level of detail

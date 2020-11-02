@@ -265,11 +265,7 @@ namespace Terrain.Rts
                 DeferredEnabled = false,
                 CastShadow = false,
                 DepthEnabled = false,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = "Rts/resources/cursor",
-                    ModelContentFilename = "cursor.xml",
-                }
+                Content = ContentDescription.FromFile("Rts/resources/cursor", "cursor.xml"),
             };
             cursor3D = await this.AddComponentModel("Cursor3D", c3DDesc, SceneObjectUsages.UI, layerHud);
 
@@ -481,11 +477,7 @@ namespace Terrain.Rts
             {
                 CastShadow = true,
                 TextureIndex = 0,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = "Rts/resources/Helicopter",
-                    ModelContentFilename = "M24.xml",
-                }
+                Content = ContentDescription.FromFile("Rts/resources/Helicopter", "M24.xml"),
             };
             helicopter = await this.AddComponentModel("Helicopter", hDesc, SceneObjectUsages.Agent, layerObjects);
             helicopter.Visible = false;
@@ -510,11 +502,7 @@ namespace Terrain.Rts
             {
                 CastShadow = true,
                 Optimize = false,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = "Rts/resources/Leopard",
-                    ModelContentFilename = "Leopard.xml",
-                },
+                Content = ContentDescription.FromFile("Rts/resources/Leopard", "Leopard.xml"),
                 TransformNames = new[] { "Barrel-mesh", "Turret-mesh", "Hull-mesh" },
                 TransformDependences = new[] { 1, 2, -1 },
             };
@@ -563,11 +551,7 @@ namespace Terrain.Rts
             var hpDesc = new ModelDescription()
             {
                 CastShadow = true,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = "Rts/resources/Heliport",
-                    ModelContentFilename = "Heliport.xml",
-                }
+                Content = ContentDescription.FromFile("Rts/resources/Heliport", "Heliport.xml"),
             };
             heliport = await this.AddComponentModel("Heliport", hpDesc, SceneObjectUsages.None, layerObjects);
             heliport.Visible = false;
@@ -590,11 +574,7 @@ namespace Terrain.Rts
             var gDesc = new ModelDescription()
             {
                 CastShadow = true,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = "Rts/resources/Garage",
-                    ModelContentFilename = "Garage.xml",
-                }
+                Content = ContentDescription.FromFile("Rts/resources/Garage", "Garage.xml"),
             };
             garage = await this.AddComponentModel("Garage", gDesc, SceneObjectUsages.None, layerObjects);
             garage.Visible = false;
@@ -617,11 +597,7 @@ namespace Terrain.Rts
             var gDesc = new ModelDescription()
             {
                 CastShadow = true,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = "Rts/resources/Buildings",
-                    ModelContentFilename = "Building_1.xml",
-                }
+                Content = ContentDescription.FromFile("Rts/resources/Buildings", "Building_1.xml"),
             };
             building = await this.AddComponentModel("Buildings", gDesc, SceneObjectUsages.None, layerObjects);
             building.Visible = false;
@@ -645,11 +621,7 @@ namespace Terrain.Rts
             {
                 CastShadow = true,
                 Instances = 4,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = "Rts/resources/Obelisk",
-                    ModelContentFilename = "Obelisk.xml",
-                }
+                Content = ContentDescription.FromFile("Rts/resources/Obelisk", "Obelisk.xml"),
             };
             obelisk = await this.AddComponentModelInstanced("Obelisk", oDesc, SceneObjectUsages.None, layerObjects);
             obelisk.Visible = false;
@@ -671,11 +643,7 @@ namespace Terrain.Rts
             {
                 CastShadow = true,
                 Instances = 250,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = "Rts/resources/Rocks",
-                    ModelContentFilename = "boulder.xml",
-                }
+                Content = ContentDescription.FromFile("Rts/resources/Rocks", "boulder.xml"),
             };
             rocks = await this.AddComponentModelInstanced("Rocks", rDesc, SceneObjectUsages.None, layerObjects);
             rocks.Visible = false;
@@ -698,22 +666,14 @@ namespace Terrain.Rts
                 CastShadow = true,
                 BlendMode = BlendModes.DefaultTransparent,
                 Instances = 100,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = "Rts/resources/Trees",
-                    ModelContentFilename = "birch_a.xml",
-                }
+                Content = ContentDescription.FromFile("Rts/resources/Trees", "birch_a.xml"),
             };
             var t2Desc = new ModelInstancedDescription()
             {
                 CastShadow = true,
                 BlendMode = BlendModes.DefaultTransparent,
                 Instances = 100,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = "Rts/resources/Trees",
-                    ModelContentFilename = "birch_b.xml",
-                }
+                Content = ContentDescription.FromFile("Rts/resources/Trees", "birch_b.xml"),
             };
             tree1 = await this.AddComponentModelInstanced("birch_a", t1Desc, SceneObjectUsages.None, layerTerrain);
             tree2 = await this.AddComponentModelInstanced("birch_b", t2Desc, SceneObjectUsages.None, layerTerrain);
@@ -1266,6 +1226,11 @@ namespace Terrain.Rts
         public override void NavigationGraphUpdated()
         {
             gameReady = true;
+
+            if (started)
+            {
+                return;
+            }
 
             Task.Run(async () =>
             {

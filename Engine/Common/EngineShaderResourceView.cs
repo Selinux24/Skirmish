@@ -56,8 +56,8 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                this.srv?.Dispose();
-                this.srv = null;
+                srv?.Dispose();
+                srv = null;
             }
         }
 
@@ -65,17 +65,17 @@ namespace Engine.Common
         /// Get the internal shader resource view
         /// </summary>
         /// <returns>Returns the internal shader resource view</returns>
-        public ShaderResourceView1 GetResource()
+        internal ShaderResourceView1 GetResource()
         {
-            return this.srv;
+            return srv;
         }
         /// <summary>
         /// Sets the internal shader resource view
         /// </summary>
         /// <param name="view">Resource view</param>
-        public void SetResource(ShaderResourceView1 view)
+        internal void SetResource(ShaderResourceView1 view)
         {
-            this.srv = view;
+            srv = view;
         }
 
         /// <summary>

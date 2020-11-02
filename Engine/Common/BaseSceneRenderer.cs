@@ -522,7 +522,7 @@ namespace Engine.Common
             //And there were lights
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            var shadowCastingLights = scene.Lights.GetDirectionalShadowCastingLights();
+            var shadowCastingLights = scene.Lights.GetDirectionalShadowCastingLights(scene.Camera.Position);
             stopwatch.Stop();
             dict.Add($"DoDirectionalShadowMapping Getting lights", stopwatch.Elapsed.TotalMilliseconds);
 

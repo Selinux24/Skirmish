@@ -8,6 +8,7 @@
     <RootNamespace>SpriteDrawing</RootNamespace>
     <StartupObject>SpriteDrawing.Program</StartupObject>
     <Platforms>AnyCPU;x64;x86</Platforms>
+    <SonarQubeTestProject>False</SonarQubeTestProject>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -35,22 +36,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\background.jpg" />
-    <None Remove="Resources\buttons.png" />
-    <None Remove="Resources\CaviarDreams.ttf" />
-    <None Remove="Resources\Chunk Five Print.otf" />
-    <None Remove="Resources\FFF_Tusj.ttf" />
-    <None Remove="Resources\LeagueSpartan-Bold.otf" />
-    <None Remove="Resources\MaraFont.png" />
-    <None Remove="Resources\MaraFont.txt" />
-    <None Remove="Resources\pan.jpg" />
-    <None Remove="Resources\pan_bw.png" />
-    <None Remove="Resources\seafloor.dds" />
-    <None Remove="Resources\SEASRN__.ttf" />
-    <None Remove="Resources\smiley.png" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <AdditionalFiles Include="..\..\.sonarlint\selinux24_skirmish_dev\CSharp\SonarLint.xml" Link="SonarLint.xml" />
     <Content Include="Resources\background.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

@@ -33,8 +33,8 @@ namespace Collada.ModularDungeon
         private UIDialog dialog = null;
         private UIConsole console = null;
 
-        private readonly Color ambientDown = new Color(127, 127, 127, 255);
-        private readonly Color ambientUp = new Color(137, 116, 104, 255);
+        private readonly Color ambientUp = new Color(255, 224, 255, 255);
+        private readonly Color ambientDown = new Color(0, 31, 0, 255);
 
         private Player playerAgentType = null;
         private readonly Color agentTorchLight = new Color(255, 249, 224, 255);
@@ -154,14 +154,12 @@ namespace Collada.ModularDungeon
             {
                 try
                 {
-                    var graph = await PathFinderDescription.Load(fileName);
+                    string hash = await PathFinderDescription.GetHash();
+
+                    var graph = await PathFinderDescription.Load(fileName, hash);
                     if (graph != null)
                     {
-                        NavigationGraphUpdating();
-
                         SetNavigationGraph(graph);
-
-                        NavigationGraphUpdated();
 
                         return;
                     }
@@ -174,14 +172,19 @@ namespace Collada.ModularDungeon
 
             await base.UpdateNavigationGraph();
 
-            try
+            _ = Task.Run(async () =>
             {
-                await PathFinderDescription.Save(fileName, NavigationGraph);
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteError(this, $"Error saving graph file. {ex.Message}", ex);
-            }
+                 try
+                 {
+                     Logger.WriteDebug(this, $"Saving graph file. {fileName}");
+
+                     await PathFinderDescription.Save(fileName, NavigationGraph);
+                 }
+                 catch (Exception ex)
+                 {
+                     Logger.WriteError(this, $"Error saving graph file. {ex.Message}", ex);
+                 }
+             });
         }
         public override void NavigationGraphUpdated()
         {
@@ -535,7 +538,7 @@ namespace Collada.ModularDungeon
                 UseAnisotropic = true,
                 CastShadow = true,
                 BlendMode = BlendModes.DefaultTransparent,
-                ContentDescription = ContentDescription.FromFile(resourcesFolder, "basicdungeon/assets.xml"),
+                Content = ContentDescription.FromFile(resourcesFolder, "basicdungeon/assets.xml"),
                 AssetsConfiguration = Engine.Content.OnePageDungeon.DungeonCreator.CreateAssets(dn, config),
                 Levels = Engine.Content.OnePageDungeon.DungeonCreator.CreateLevels(dn, config),
             };

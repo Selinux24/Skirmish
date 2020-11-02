@@ -8,7 +8,7 @@ namespace Engine.Content
     /// Model content dictionary by level of detail
     /// </summary>
     [Serializable]
-    public class LevelOfDetailModelContent : Dictionary<LevelOfDetail, ModelContent>
+    public class LevelOfDetailModelContent : Dictionary<LevelOfDetail, ContentData>
     {
         /// <summary>
         /// Builds a content dictionary by level of detail
@@ -16,7 +16,7 @@ namespace Engine.Content
         /// <param name="geo">Model content list</param>
         /// <param name="optimize">Sets whether the content must be optimized or not</param>
         /// <returns>Returns the content dictionary by level of detail</returns>
-        public static LevelOfDetailModelContent Build(IEnumerable<ModelContent> geo, bool optimize)
+        public static LevelOfDetailModelContent Build(IEnumerable<ContentData> geo, bool optimize)
         {
             LevelOfDetailModelContent res = new LevelOfDetailModelContent();
 

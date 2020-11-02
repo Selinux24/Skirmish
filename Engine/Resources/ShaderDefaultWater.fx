@@ -10,14 +10,16 @@ cbuffer cbVSPerFrame : register(b1)
 cbuffer cbPSPerFrame : register(b3)
 {
     float3 gPSEyePositionWorld;
-    float3 gPSBaseColor;
+    float gPSTotalTime;
     float3 gPSWaterColor;
+    float gPSWaterAlpha;
+    float3 gPSBaseColor;
+    float gPSAlbedo;
     float4 gPSWaveParams;
-    float gPSAmbient;
+    float3 gPSFogColor;
     float gPSFogRange;
     float gPSFogStart;
-    float3 gPSFogColor;
-    float gPSTotalTime;
+    float3 pPSPadding1;
     uint3 gPSIters;
     uint gPSLightCount;
     DirectionalLight gPSDirLights[MAX_LIGHTS_DIRECTIONAL];
@@ -71,7 +73,6 @@ float3 HeightMapTracing(float3 eyePos, float3 eyeDir, float time)
 {
     float3 p = 0;
 
-    float tm = 0.0;
     float tx = 1000.0;
     float hx = Map(eyePos + eyeDir * tx, time, gPSIters.y);
     if (hx > 0.0)
@@ -79,6 +80,7 @@ float3 HeightMapTracing(float3 eyePos, float3 eyeDir, float time)
         return tx;
     }
 
+    float tm = 0.0;
     float hm = Map(eyePos + eyeDir * tm, time, gPSIters.y);
     float tmid = 0.0;
     for (uint i = 0; i < gPSIters.x; i++)
@@ -112,6 +114,7 @@ void GetLightColor(DirectionalLight light, float3 normal, float3 eyeDir, out flo
 float3 GetSkyColor(float3 eyeDir)
 {
     eyeDir.y = max(eyeDir.y, 0.0);
+    
     return float3(pow(1.0 - eyeDir.y, 2.0), 1.0 - eyeDir.y, 0.6 + (1.0 - eyeDir.y) * 0.4);
 }
 float3 GetSeaColor(float3 position, float3 normal, float3 eyeDir, float ambient, float3 diffuse, float3 specular, float epsilon)
@@ -150,6 +153,8 @@ float4 PSWater(PSVertexPosition input) : SV_TARGET
     // Get the current time    
     float time = (1.0f + gPSTotalTime * gPSWaveParams.z);
     
+    // Move position to origin level for tracing
+    eyePos.y -= input.positionWorld.y;
     // Get the geometry (position and normal)
     float3 hmPosition = HeightMapTracing(eyePos, -eyeDir, time);
     float3 toPosition = hmPosition - eyePos;
@@ -184,9 +189,9 @@ float4 PSWater(PSVertexPosition input) : SV_TARGET
         }
 
         // Do sea color
-        float3 color = GetSeaColor(hmPosition, hmNormal, eyeDir, gPSAmbient, saturate(lDiffuse), lSpecular, epsilon);
+        float3 color = GetSeaColor(hmPosition, hmNormal, eyeDir, gPSAlbedo, saturate(lDiffuse), lSpecular, epsilon);
 
-        return float4(lerp(color, gPSFogColor, fog), 1.0f);
+        return float4(lerp(color, gPSFogColor, fog), gPSWaterAlpha);
     }
 }
 

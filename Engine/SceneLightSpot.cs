@@ -41,11 +41,11 @@ namespace Engine
         {
             get
             {
-                return MathUtil.DegreesToRadians(this.Angle);
+                return MathUtil.DegreesToRadians(Angle);
             }
             set
             {
-                this.Angle = MathUtil.RadiansToDegrees(value);
+                Angle = MathUtil.RadiansToDegrees(value);
             }
         }
         /// <summary>
@@ -63,8 +63,8 @@ namespace Engine
         {
             get
             {
-                float radius = this.Radius * 0.5f;
-                Vector3 center = (this.Position + (Vector3.Normalize(this.Direction) * radius));
+                float radius = Radius * 0.5f;
+                Vector3 center = (Position + (Vector3.Normalize(Direction) * radius));
 
                 return new BoundingSphere(center, radius);
             }
@@ -82,7 +82,7 @@ namespace Engine
             {
                 base.ParentTransform = value;
 
-                this.UpdateLocalTransform();
+                UpdateLocalTransform();
             }
         }
         /// <summary>
@@ -92,8 +92,8 @@ namespace Engine
         {
             get
             {
-                float radius = this.Radius * 0.5f;
-                Vector3 center = (this.Position + (Vector3.Normalize(this.Direction) * radius));
+                float radius = Radius * 0.5f;
+                Vector3 center = (Position + (Vector3.Normalize(Direction) * radius));
 
                 return Matrix.Scaling(radius) * Matrix.Translation(center);
             }
@@ -142,15 +142,15 @@ namespace Engine
             SceneLightSpotDescription description)
             : base(name, castShadow, diffuse, specular, enabled)
         {
-            this.Position = description.Position;
-            this.Direction = description.Direction;
-            this.Angle = description.Angle;
-            this.Radius = description.Radius;
-            this.Intensity = description.Intensity;
+            Position = description.Position;
+            Direction = description.Direction;
+            Angle = description.Angle;
+            Radius = description.Radius;
+            Intensity = description.Intensity;
 
-            this.initialTransform = CreateFromPositionDirection(this.Position, this.Direction);
-            this.initialRadius = description.Radius;
-            this.initialIntensity = description.Intensity;
+            initialTransform = CreateFromPositionDirection(Position, Direction);
+            initialRadius = description.Radius;
+            initialIntensity = description.Intensity;
         }
 
         /// <summary>
@@ -158,53 +158,56 @@ namespace Engine
         /// </summary>
         private void UpdateLocalTransform()
         {
-            var trn = this.initialTransform * base.ParentTransform;
+            var trn = initialTransform * ParentTransform;
 
             trn.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 translation);
-            this.Radius = this.initialRadius * scale.X;
-            this.Intensity = this.initialIntensity * scale.X;
-            this.Direction = Matrix.RotationQuaternion(rotation).Backward;
-            this.Position = translation;
+            Radius = initialRadius * scale.X;
+            Intensity = initialIntensity * scale.X;
+            Direction = Matrix.RotationQuaternion(rotation).Backward;
+            Position = translation;
         }
 
-        /// <summary>
-        /// Clears all light shadow parameters
-        /// </summary>
+        /// <inheritdoc/>
         public override void ClearShadowParameters()
         {
             base.ClearShadowParameters();
 
-            this.ShadowMapCount = 0;
-            this.FromLightVP = new Matrix[1];
+            ShadowMapCount = 0;
+            FromLightVP = new Matrix[1];
         }
-        /// <summary>
-        /// Clones current light
-        /// </summary>
-        /// <returns>Returns a new instante with same data</returns>
+        /// <inheritdoc/>
+        public override bool MarkForShadowCasting(Vector3 eyePosition)
+        {
+            CastShadowsMarked = EvaluateLight(eyePosition, CastShadow, Position, Radius);
+
+            return CastShadowsMarked;
+        }
+        /// <inheritdoc/>
         public override ISceneLight Clone()
         {
             return new SceneLightSpot()
             {
-                Name = this.Name,
-                Enabled = this.Enabled,
-                CastShadow = this.CastShadow,
-                DiffuseColor = this.DiffuseColor,
-                SpecularColor = this.SpecularColor,
-                State = this.State,
+                Name = Name,
+                Enabled = Enabled,
+                CastShadow = CastShadow,
+                DiffuseColor = DiffuseColor,
+                SpecularColor = SpecularColor,
+                State = State,
 
-                Position = this.Position,
-                Radius = this.Radius,
-                Angle = this.Angle,
-                Direction = this.Direction,
-                Intensity = this.Intensity,
+                Position = Position,
+                Radius = Radius,
+                Angle = Angle,
+                Direction = Direction,
+                Intensity = Intensity,
 
-                initialTransform = this.initialTransform,
-                initialRadius = this.initialRadius,
-                initialIntensity = this.initialIntensity,
+                initialTransform = initialTransform,
+                initialRadius = initialRadius,
+                initialIntensity = initialIntensity,
 
-                ParentTransform = this.ParentTransform,
+                ParentTransform = ParentTransform,
             };
         }
+
         /// <summary>
         /// Gets the light volume
         /// </summary>
@@ -212,14 +215,14 @@ namespace Engine
         /// <returns>Returns a line list representing the light volume</returns>
         public IEnumerable<Line3D> GetVolume(int sliceCount)
         {
-            var coneLines = Line3D.CreateWiredConeAngle(this.AngleRadians, this.Radius, sliceCount);
+            var coneLines = Line3D.CreateWiredConeAngle(AngleRadians, Radius, sliceCount);
 
             //The wired cone has his basin on the XZ plane. Light points along the Z axis, we have to rotate 90 degrees around the X axis
             Matrix rot = Matrix.RotationX(MathUtil.PiOverTwo);
 
             //Then move and rotate the cone to light position and direction
-            float f = Math.Abs(Vector3.Dot(this.Direction, Vector3.Up));
-            Matrix trn = Helper.CreateWorld(this.Position, this.Direction, f == 1 ? Vector3.ForwardLH : Vector3.Up);
+            float f = Math.Abs(Vector3.Dot(Direction, Vector3.Up));
+            Matrix trn = Helper.CreateWorld(Position, Direction, f == 1 ? Vector3.ForwardLH : Vector3.Up);
 
             return Line3D.Transform(coneLines, rot * trn);
         }

@@ -69,12 +69,4 @@ namespace Engine.Common
             return Marshal.SizeOf(typeof(VertexInstancingData));
         }
     };
-
-    /// <summary>
-    /// Instancing data interface
-    /// </summary>
-    public interface IInstacingData : IBufferData
-    {
-
-    }
 }

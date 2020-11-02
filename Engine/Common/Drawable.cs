@@ -1,4 +1,6 @@
 ﻿
+using System;
+
 namespace Engine.Common
 {
     /// <summary>
@@ -58,7 +60,8 @@ namespace Engine.Common
         /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        protected Drawable(string name, Scene scene, SceneObjectDescription description) : base(name, scene, description)
+        protected Drawable(string name, Scene scene, SceneObjectDescription description) :
+            base(name, scene, description)
         {
             CastShadow = description.CastShadow;
             DeferredEnabled = description.DeferredEnabled;

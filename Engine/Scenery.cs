@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,13 +20,6 @@ namespace Engine
         #region Helper Classes
 
         /// <summary>
-        /// Scenery patches dictionary
-        /// </summary>
-        class SceneryPatchDictionary : Dictionary<int, SceneryPatch>
-        {
-
-        }
-        /// <summary>
         /// Terrain patch
         /// </summary>
         /// <remarks>
@@ -41,7 +35,7 @@ namespace Engine
             /// <param name="content">Content</param>
             /// <param name="node">Quadtree node</param>
             /// <returns>Returns the new generated patch</returns>
-            public static async Task<SceneryPatch> CreatePatch(Game game, string name, ModelContent content, PickingQuadTreeNode<Triangle> node)
+            public static async Task<SceneryPatch> CreatePatch(Game game, string name, ContentData content, PickingQuadTreeNode<Triangle> node)
             {
                 var desc = new DrawingDataDescription()
                 {
@@ -239,11 +233,11 @@ namespace Engine
         /// <summary>
         /// Model content
         /// </summary>
-        private readonly ModelContent content;
+        private readonly ContentData content;
         /// <summary>
         /// Scenery patch list
         /// </summary>
-        private SceneryPatchDictionary patchDictionary = new SceneryPatchDictionary();
+        private ConcurrentDictionary<int, SceneryPatch> patchDictionary = new ConcurrentDictionary<int, SceneryPatch>();
         /// <summary>
         /// Visible Nodes
         /// </summary>
@@ -291,15 +285,6 @@ namespace Engine
             // Generate quadtree
             groundPickingQuadtree = description.ReadQuadTree(content.GetTriangles());
 
-            // Generate initial patches
-            var nodes = groundPickingQuadtree.GetLeafNodes();
-            foreach (var node in nodes)
-            {
-                var patch = SceneryPatch.CreatePatch(Game, name, content, node).GetAwaiter().GetResult();
-
-                patchDictionary.Add(node.Id, patch);
-            }
-
             // Retrieve lights from content
             Lights = content.GetLights().ToArray();
         }
@@ -324,6 +309,25 @@ namespace Engine
                 patchDictionary?.Clear();
                 patchDictionary = null;
             }
+        }
+
+        /// <summary>
+        /// Initializes internal patch collection
+        /// </summary>
+        /// <returns></returns>
+        internal async Task IntializePatches()
+        {
+            // Generate initial patches
+            var nodes = groundPickingQuadtree.GetLeafNodes();
+
+            var tasks = nodes.Select(async node =>
+            {
+                var patch = await SceneryPatch.CreatePatch(Game, Name, content, node);
+
+                patchDictionary.AddOrUpdate(node.Id, patch, (key, oldValue) => patch);
+            });
+
+            await Task.WhenAll(tasks);
         }
 
         /// <inheritdoc/>
@@ -374,16 +378,18 @@ namespace Engine
 
             foreach (var node in visibleNodes)
             {
-                if (!patchDictionary.ContainsKey(node.Id))
+                if (patchDictionary.ContainsKey(node.Id))
                 {
-                    Logger.WriteTrace(this, $"Loading node {node.Id} patch.");
-
-                    // Reserve position
-                    patchDictionary.Add(node.Id, null);
-
-                    // Add creation task
-                    taskList.Add(LoadPatch(node));
+                    continue;
                 }
+
+                Logger.WriteTrace(this, $"Loading node {node.Id} patch.");
+
+                // Reserve position
+                patchDictionary.TryAdd(node.Id, null);
+
+                // Add creation task
+                taskList.Add(LoadPatch(node));
             }
 
             // Launch creation tasks
@@ -498,7 +504,11 @@ namespace Engine
                             }
                             else
                             {
-                                patchDictionary.Remove(res.Result.Id);
+                                while (!patchDictionary.TryRemove(res.Result.Id, out _))
+                                {
+                                    //None
+                                }
+
                                 Logger.WriteError(this, $"Error creating patch {res.Result.Id}: {res.Exception.Message}", res.Exception);
                             }
                         }
@@ -550,6 +560,8 @@ namespace Engine
 
                 scene.AddComponent(component, usage, order);
             });
+
+            await component.IntializePatches();
 
             return component;
         }

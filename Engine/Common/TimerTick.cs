@@ -4,7 +4,7 @@ using System.Diagnostics;
 namespace Engine.Common
 {
     /// <summary>
-    /// This provides timing information similar to <see cref="System.Diagnostics.Stopwatch"/> but an update occurring only on a <see cref="Tick"/> method.
+    /// This provides timing information similar to <see cref="Stopwatch"/> but an update occurring only on a <see cref="Tick"/> method.
     /// </summary>
     public class TimerTick
     {

@@ -216,22 +216,26 @@ inline float CalcSpotCone(float3 lightDirection, float spotAngle, float3 L)
     return smoothstep(minCos, maxCos, cosAngle);
 }
 
-inline float4 ForwardLightEquation(Material k, float3 lAmbient, float4 lDiffuse, float4 pDiffuse, float4 lSpecular, float4 pSpecular)
+inline float4 ForwardLightEquation(Material k, float3 lAmbient, float lAlbedo, float4 lDiffuse, float4 pDiffuse, float4 lSpecular, float4 pSpecular)
 {
+    float4 color = pDiffuse * float4(lAmbient * lAlbedo, 1);
+    
 	float4 emissive = k.Emissive;
-    float4 ambient = k.Ambient * float4(lAmbient, 1);
+    float4 ambient = k.Ambient;
 
 	float4 diffuse = k.Diffuse * lDiffuse;
     float4 specular = k.Specular * lSpecular * pSpecular;
 
-	return (emissive + ambient + diffuse + specular) * pDiffuse;
+    return (emissive + ambient + diffuse + specular) * color;
 }
-inline float4 DeferredLightEquation(Material k, float3 lAmbient, float4 light, float4 pDiffuse)
+inline float4 DeferredLightEquation(Material k, float3 lAmbient, float lAlbedo, float4 light, float4 pDiffuse)
 {
+    float4 color = pDiffuse * float4(lAmbient * lAlbedo, 1);
+    
 	float4 emissive = k.Emissive;
-    float4 ambient = k.Ambient * float4(lAmbient, 1);
+    float4 ambient = k.Ambient;
 
-	return (emissive + ambient + light) * pDiffuse;
+    return (emissive + ambient + light) * color;
 }
 
 struct ComputeLightsOutput
@@ -506,6 +510,7 @@ struct ComputeLightsInput
 	DirectionalLight dirLights[MAX_LIGHTS_DIRECTIONAL];
     PointLight pointLights[MAX_LIGHTS_POINT];
     SpotLight spotLights[MAX_LIGHTS_SPOT];
+    float albedo;
 	uint dirLightsCount;
     uint pointLightsCount;
     uint spotLightsCount;
@@ -603,7 +608,7 @@ inline float4 ComputeLightsLOD1(ComputeLightsInput input)
         lSpecular += (cSpecular * cShadowFactor * attenuation);
     }
 
-	return ForwardLightEquation(input.k, lAmbient, lDiffuse, input.pColorDiffuse, lSpecular, input.pColorSpecular);
+    return ForwardLightEquation(input.k, lAmbient, input.albedo, lDiffuse, input.pColorDiffuse, lSpecular, input.pColorSpecular);
 }
 inline float4 ComputeLightsLOD2(ComputeLightsInput input)
 {
@@ -676,7 +681,7 @@ inline float4 ComputeLightsLOD2(ComputeLightsInput input)
         lDiffuse += (cDiffuse * cShadowFactor * attenuation);
     }
 
-	return ForwardLightEquation(input.k, lAmbient, lDiffuse, input.pColorDiffuse, 0, 0);
+    return ForwardLightEquation(input.k, lAmbient, input.albedo, lDiffuse, input.pColorDiffuse, 0, 0);
 }
 inline float4 ComputeLightsLOD3(ComputeLightsInput input)
 {
@@ -708,7 +713,7 @@ inline float4 ComputeLightsLOD3(ComputeLightsInput input)
         lDiffuse += (cDiffuse * cShadowFactor);
     }
 
-	return ForwardLightEquation(input.k, lAmbient, lDiffuse, input.pColorDiffuse, 0, 0);
+    return ForwardLightEquation(input.k, lAmbient, input.albedo, lDiffuse, input.pColorDiffuse, 0, 0);
 }
 inline float4 ComputeLights(ComputeLightsInput input)
 {

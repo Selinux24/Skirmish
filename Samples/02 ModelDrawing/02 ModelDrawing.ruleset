@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<RuleSet Name="SonarQube - Skirmish Sonar way" ToolsVersion="16.0">
+<RuleSet Name="SonarQube - Skirmish-dev Sonar way" ToolsVersion="16.0">
   <Include Path="..\..\.sonarlint\selinux24_skirmish_devcsharp.ruleset" Action="Default" />
-  <Include Path="..\.sonarlint\selinux24_skirmishcsharp.ruleset" Action="Default" />
+  <Include Path="02 modeldrawing.ruleset" Action="Default" />
 </RuleSet>

@@ -22,7 +22,7 @@ namespace Engine.Common
         {
             get
             {
-                return this.rtv.Count;
+                return rtv.Count;
             }
         }
 
@@ -89,17 +89,17 @@ namespace Engine.Common
         /// Gets the render target
         /// </summary>
         /// <returns>Returns the internal render target</returns>
-        public RenderTargetView1 GetRenderTarget()
+        internal RenderTargetView1 GetRenderTarget()
         {
-            return this.rtv[0];
+            return rtv[0];
         }
         /// <summary>
         /// Gets the render targets
         /// </summary>
         /// <returns>Returns the internal render target list</returns>
-        public RenderTargetView1[] GetRenderTargets()
+        internal RenderTargetView1[] GetRenderTargets()
         {
-            return this.rtv.ToArray();
+            return rtv.ToArray();
         }
     }
 }

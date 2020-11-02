@@ -111,7 +111,7 @@ namespace Engine
             }
             else if (!string.IsNullOrWhiteSpace(description.AssetsConfigurationFile))
             {
-                AssetConfiguration = SerializationHelper.DeserializeXmlFromFile<ModularSceneryAssetConfiguration>(Path.Combine(description.ContentDescription.ContentFolder ?? "", description.AssetsConfigurationFile));
+                AssetConfiguration = SerializationHelper.DeserializeXmlFromFile<ModularSceneryAssetConfiguration>(Path.Combine(description.Content.ContentFolder ?? "", description.AssetsConfigurationFile));
             }
 
             if (description.Levels != null)
@@ -120,7 +120,7 @@ namespace Engine
             }
             else if (!string.IsNullOrWhiteSpace(description.LevelsFile))
             {
-                Levels = SerializationHelper.DeserializeXmlFromFile<ModularSceneryLevels>(Path.Combine(description.ContentDescription.ContentFolder ?? "", description.LevelsFile));
+                Levels = SerializationHelper.DeserializeXmlFromFile<ModularSceneryLevels>(Path.Combine(description.Content.ContentFolder ?? "", description.LevelsFile));
             }
         }
         /// <summary>
@@ -136,7 +136,7 @@ namespace Engine
         /// Loads the level by name
         /// </summary>
         /// <param name="levelName">Level name</param>
-        public async Task LoadLevel(string levelName)
+        public async Task LoadLevel(string levelName, IProgress<LoadResourceProgress> progress = null)
         {
             if (string.Equals(CurrentLevel?.Name, levelName, StringComparison.OrdinalIgnoreCase))
             {
@@ -149,21 +149,21 @@ namespace Engine
             if (level != null)
             {
                 //Load the level
-                await LoadLevel(level);
+                await LoadLevel(level, progress);
             }
         }
         /// <summary>
         /// Loads the first level
         /// </summary>
-        public async Task LoadFirstLevel()
+        public async Task LoadFirstLevel(IProgress<LoadResourceProgress> progress = null)
         {
-            await LoadLevel(Levels.Levels.FirstOrDefault());
+            await LoadLevel(Levels.Levels.FirstOrDefault(), progress);
         }
         /// <summary>
         /// Loads the model content
         /// </summary>
         /// <returns>Returns the model content</returns>
-        private ModelContent LoadModelContent()
+        private ContentData LoadModelContent()
         {
             return Description.ReadModelContent();
         }
@@ -171,7 +171,7 @@ namespace Engine
         /// Loads a level
         /// </summary>
         /// <param name="level">Level definition</param>
-        private async Task LoadLevel(ModularSceneryLevel level)
+        private async Task LoadLevel(ModularSceneryLevel level, IProgress<LoadResourceProgress> progress = null)
         {
             //Removes previous level components from scene
             Scene.RemoveComponents(assets.Select(a => a.Value));
@@ -187,20 +187,20 @@ namespace Engine
 
             CurrentLevel = level;
 
-            ModelContent content = LoadModelContent();
+            ContentData content = LoadModelContent();
 
-            await InitializeParticles();
-            await InitializeAssets(level, content);
-            await InitializeObjects(level, content);
+            await InitializeParticles(progress);
+            await InitializeAssets(level, content, progress);
+            await InitializeObjects(level, content, progress);
 
-            ParseAssetsMap(level);
+            ParseAssetsMap(level, progress);
 
-            InitializeEntities(level);
+            InitializeEntities(level, progress);
         }
         /// <summary>
         /// Initialize the particle system and the particle descriptions
         /// </summary>
-        private async Task InitializeParticles()
+        private async Task InitializeParticles(IProgress<LoadResourceProgress> progress = null)
         {
             if (Levels.ParticleSystems?.Any() == true)
             {
@@ -210,11 +210,14 @@ namespace Engine
                     SceneObjectUsages.None,
                     98);
 
+                float total = Levels.ParticleSystems.Count();
+                int current = 0;
+
                 foreach (var item in Levels.ParticleSystems)
                 {
                     try
                     {
-                        item.ContentPath = item.ContentPath ?? Description.ContentDescription.ContentFolder;
+                        item.ContentPath = item.ContentPath ?? Description.Content.ContentFolder;
 
                         var pDesc = ParticleSystemDescription.Initialize(item);
 
@@ -224,6 +227,8 @@ namespace Engine
                     {
                         Logger.WriteError($"{nameof(ModularScenery)}. Error loading particle system {item.Name}: {ex.Message}", ex);
                     }
+
+                    progress?.Report(new LoadResourceProgress { Progress = ++current / total });
                 }
             }
         }
@@ -231,10 +236,13 @@ namespace Engine
         /// Initialize all assets into asset dictionary 
         /// </summary>
         /// <param name="content">Assets model content</param>
-        private async Task InitializeAssets(ModularSceneryLevel level, ModelContent content)
+        private async Task InitializeAssets(ModularSceneryLevel level, ContentData content, IProgress<LoadResourceProgress> progress = null)
         {
             // Get instance count for all single geometries from Map
             var instances = level.GetMapInstanceCounters(AssetConfiguration.Assets);
+
+            float total = instances.Keys.Count;
+            int current = 0;
 
             // Load all single geometries into single instanced model components
             foreach (var assetName in instances.Keys)
@@ -258,6 +266,8 @@ namespace Engine
                 }
 
                 assets.Add(assetName, model);
+
+                progress?.Report(new LoadResourceProgress { Progress = ++current / total });
             }
         }
         /// <summary>
@@ -267,7 +277,7 @@ namespace Engine
         /// <param name="count">Instance count</param>
         /// <param name="level">Level</param>
         /// <param name="modelContent">Model content</param>
-        private async Task<ModelInstanced> InitializeAsset(string assetName, int count, ModularSceneryLevel level, ModelContent modelContent)
+        private async Task<ModelInstanced> InitializeAsset(string assetName, int count, ModularSceneryLevel level, ContentData modelContent)
         {
             var masks = Levels.GetMasksForAsset(assetName);
             var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
@@ -287,7 +297,7 @@ namespace Engine
                         Instances = count,
                         LoadAnimation = false,
                         BlendMode = Description.BlendMode,
-                        Content = ContentDescription.FromModelContent(modelContent),
+                        Content = ContentDescription.FromContentData(modelContent),
                     },
                     usage);
 
@@ -304,13 +314,16 @@ namespace Engine
         /// Initialize all objects into asset dictionary 
         /// </summary>
         /// <param name="content">Assets model content</param>
-        private async Task InitializeObjects(ModularSceneryLevel level, ModelContent content)
+        private async Task InitializeObjects(ModularSceneryLevel level, ContentData content, IProgress<LoadResourceProgress> progress = null)
         {
             // Set auto-identifiers
             level.PopulateObjectIds();
 
             // Get instance count for all single geometries from Map
             var instances = level.GetObjectsInstanceCounters();
+
+            float total = instances.Keys.Count;
+            int current = 0;
 
             // Load all single geometries into single instanced model components
             foreach (var assetName in instances.Keys)
@@ -334,6 +347,8 @@ namespace Engine
                 }
 
                 objects.Add(assetName, model);
+
+                progress?.Report(new LoadResourceProgress { Progress = ++current / total });
             }
         }
         /// <summary>
@@ -344,7 +359,7 @@ namespace Engine
         /// <param name="pathFinding">Path finding enabled flag</param>
         /// <param name="level">Level</param>
         /// <param name="modelContent">Model content</param>
-        private async Task<ModelInstanced> InitializeObject(string assetName, int count, bool pathFinding, ModularSceneryLevel level, ModelContent modelContent)
+        private async Task<ModelInstanced> InitializeObject(string assetName, int count, bool pathFinding, ModularSceneryLevel level, ContentData modelContent)
         {
             var masks = Levels.GetMasksForAsset(assetName);
             var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
@@ -367,7 +382,7 @@ namespace Engine
                         UseAnisotropicFiltering = Description.UseAnisotropic,
                         Instances = count,
                         BlendMode = Description.BlendMode,
-                        Content = ContentDescription.FromModelContent(modelContent),
+                        Content = ContentDescription.FromContentData(modelContent),
                     },
                     usage);
 
@@ -536,8 +551,11 @@ namespace Engine
         /// <summary>
         /// Initialize scenery entities proxy list
         /// </summary>
-        private void InitializeEntities(ModularSceneryLevel level)
+        private void InitializeEntities(ModularSceneryLevel level, IProgress<LoadResourceProgress> progress = null)
         {
+            float total = level.Objects.Count();
+            int current = 0;
+
             foreach (var obj in level.Objects)
             {
                 ModelInstance instance;
@@ -566,17 +584,22 @@ namespace Engine
 
                     entities.Add(new ModularSceneryItem(obj, instance, emitters, defaultState));
                 }
+
+                progress?.Report(new LoadResourceProgress { Progress = ++current / total });
             }
         }
 
         /// <summary>
         /// Parse the assets map to set the assets transforms
         /// </summary>
-        private void ParseAssetsMap(ModularSceneryLevel level)
+        private void ParseAssetsMap(ModularSceneryLevel level, IProgress<LoadResourceProgress> progress = null)
         {
             assetMap = new AssetMap();
 
             var transforms = new Dictionary<string, List<Matrix>>();
+
+            float total = level.Map.Length + transforms.Keys.Count;
+            int current = 0;
 
             // Paser map for instance positioning
             foreach (var item in level.Map)
@@ -588,11 +611,15 @@ namespace Engine
                 }
 
                 ParseAssetReference(item, assetIndex, transforms);
+
+                progress?.Report(new LoadResourceProgress { Progress = ++current / total });
             }
 
             foreach (var assetName in transforms.Keys)
             {
                 assets[assetName].SetTransforms(transforms[assetName]);
+
+                progress?.Report(new LoadResourceProgress { Progress = ++current / total });
             }
 
             assetMap.Build(AssetConfiguration, assets);
@@ -814,10 +841,33 @@ namespace Engine
 
             foreach (var asset in assets.Values)
             {
+                if (!asset.Usage.HasFlag(SceneObjectUsages.FullPathFinding) && !asset.Usage.HasFlag(SceneObjectUsages.CoarsePathFinding))
+                {
+                    continue;
+                }
+
+                var assetfull = full && asset.Usage.HasFlag(SceneObjectUsages.FullPathFinding);
+
                 var instances = asset.GetInstances().Where(i => i.Visible);
                 foreach (var instance in instances)
                 {
-                    triangles.AddRange(instance.GetVolume(full));
+                    triangles.AddRange(instance.GetVolume(assetfull));
+                }
+            }
+
+            foreach (var obj in objects.Values)
+            {
+                if (!obj.Usage.HasFlag(SceneObjectUsages.FullPathFinding) && !obj.Usage.HasFlag(SceneObjectUsages.CoarsePathFinding))
+                {
+                    continue;
+                }
+
+                var objfull = full && obj.Usage.HasFlag(SceneObjectUsages.FullPathFinding);
+
+                var instances = obj.GetInstances().Where(i => i.Visible);
+                foreach (var instance in instances)
+                {
+                    triangles.AddRange(instance.GetVolume(objfull));
                 }
             }
 

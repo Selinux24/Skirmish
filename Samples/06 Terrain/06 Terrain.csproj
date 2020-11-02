@@ -7,6 +7,7 @@
     <AssemblyName>Terrain</AssemblyName>
     <RootNamespace>Terrain</RootNamespace>
     <Platforms>AnyCPU;x64;x86</Platforms>
+    <SonarQubeTestProject>False</SonarQubeTestProject>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -34,100 +35,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Resources\**" />
-    <EmbeddedResource Remove="Resources\**" />
-    <None Remove="Resources\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="Rts\Resources\Audio\Effects\explosion_helicopter_close_01.wav" />
-    <None Remove="Rts\Resources\Audio\Effects\explosion_helicopter_distant_01.wav" />
-    <None Remove="Rts\Resources\Audio\Effects\explosion_vehicle_small_close_01.wav" />
-    <None Remove="Rts\Resources\Audio\Effects\explosion_vehicle_small_distant_01.wav" />
-    <None Remove="Rts\Resources\Audio\Effects\fire_vehicle_close_loop.wav" />
-    <None Remove="Rts\Resources\Audio\Effects\fire_vehicle_distant_loop.wav" />
-    <None Remove="Rts\Resources\Audio\Effects\heli.wav" />
-    <None Remove="Rts\Resources\Audio\Effects\machinegun-shooting.wav" />
-    <None Remove="Rts\Resources\Audio\Effects\metal_grate_large_01.wav" />
-    <None Remove="Rts\Resources\Audio\Effects\metal_grate_large_02.wav" />
-    <None Remove="Rts\Resources\Audio\Effects\metal_grate_large_03.wav" />
-    <None Remove="Rts\Resources\Audio\Effects\metal_grate_large_04.wav" />
-    <None Remove="Rts\Resources\Audio\Effects\metal_pipe_large_01.wav" />
-    <None Remove="Rts\Resources\Audio\Effects\metal_pipe_large_02.wav" />
-    <None Remove="Rts\Resources\Audio\Effects\metal_pipe_large_03.wav" />
-    <None Remove="Rts\Resources\Audio\Effects\metal_pipe_large_04.wav" />
-    <None Remove="Rts\Resources\Audio\Effects\tank_engine.wav" />
-    <None Remove="Rts\Resources\Audio\Effects\wind_birds_forest_01.wav" />
-    <None Remove="Rts\Resources\Buildings\Building_1.dae" />
-    <None Remove="Rts\Resources\Buildings\Building_1.xml" />
-    <None Remove="Rts\Resources\Clouds\cloud001.dds" />
-    <None Remove="Rts\Resources\Clouds\perturb001.dds" />
-    <None Remove="Rts\Resources\Cursor\cursor.dae" />
-    <None Remove="Rts\Resources\Cursor\cursor.xml" />
-    <None Remove="Rts\Resources\Cursor\target.png" />
-    <None Remove="Rts\Resources\Flare\lfFlare1.png" />
-    <None Remove="Rts\Resources\Flare\lfFlare2.png" />
-    <None Remove="Rts\Resources\Flare\lfFlare3.png" />
-    <None Remove="Rts\Resources\Flare\lfGlow.png" />
-    <None Remove="Rts\Resources\Garage\concrete.jpg" />
-    <None Remove="Rts\Resources\Garage\garage.dae" />
-    <None Remove="Rts\Resources\Garage\garage.xml" />
-    <None Remove="Rts\Resources\Helicopter\m24 - 1.dds" />
-    <None Remove="Rts\Resources\Helicopter\m24 - 2.dds" />
-    <None Remove="Rts\Resources\Helicopter\m24 - 3.dds" />
-    <None Remove="Rts\Resources\Helicopter\m24.dae" />
-    <None Remove="Rts\Resources\Helicopter\m24.xml" />
-    <None Remove="Rts\Resources\Heliport\concrete.jpg" />
-    <None Remove="Rts\Resources\Heliport\heliport.dae" />
-    <None Remove="Rts\Resources\Heliport\heliport.png" />
-    <None Remove="Rts\Resources\Heliport\heliport.xml" />
-    <None Remove="Rts\Resources\Leopard\Leopard.dae" />
-    <None Remove="Rts\Resources\Leopard\Leopard.xml" />
-    <None Remove="Rts\Resources\Leopard\Leopard_0.bmp" />
-    <None Remove="Rts\Resources\Leopard\Leopard_1.bmp" />
-    <None Remove="Rts\Resources\Leopard\Leopard_2.bmp" />
-    <None Remove="Rts\Resources\Obelisk\diffus.dds" />
-    <None Remove="Rts\Resources\Obelisk\normal.dds" />
-    <None Remove="Rts\Resources\Obelisk\obelisk.dae" />
-    <None Remove="Rts\Resources\Obelisk\obelisk.xml" />
-    <None Remove="Rts\Resources\Obelisk\specular.dds" />
-    <None Remove="Rts\Resources\Particles\explosion.png" />
-    <None Remove="Rts\Resources\Particles\fire.dds" />
-    <None Remove="Rts\Resources\Particles\fire.png" />
-    <None Remove="Rts\Resources\Particles\floor.png" />
-    <None Remove="Rts\Resources\Particles\smoke.png" />
-    <None Remove="Rts\Resources\Rocks\boulder.xml" />
-    <None Remove="Rts\Resources\Rocks\boulder_1.dae" />
-    <None Remove="Rts\Resources\Rocks\boulder_2.dae" />
-    <None Remove="Rts\Resources\Rocks\boulder_3.dae" />
-    <None Remove="Rts\Resources\Rocks\boulder_granite_grey_01_diffuse.dds" />
-    <None Remove="Rts\Resources\Rocks\boulder_granite_grey_01_normal.dds" />
-    <None Remove="Rts\Resources\Rocks\boulder_granite_grey_01_specular.dds" />
-    <None Remove="Rts\Resources\Skydom\sunset.dds" />
-    <None Remove="Rts\Resources\Terrain\Foliage\Billboard\grass_v0.dds" />
-    <None Remove="Rts\Resources\Terrain\Foliage\Billboard\grass_v1.dds" />
-    <None Remove="Rts\Resources\Terrain\Foliage\Billboard\grass_v2.dds" />
-    <None Remove="Rts\Resources\Terrain\terrain.png" />
-    <None Remove="Rts\Resources\Terrain\terrain_nmap.png" />
-    <None Remove="Rts\Resources\Terrain\two_levels.dae" />
-    <None Remove="Rts\Resources\Terrain\two_levels.xml" />
-    <None Remove="Rts\Resources\Trees\birch_01_bark_diffuse.dds" />
-    <None Remove="Rts\Resources\Trees\birch_01_bark_normal.dds" />
-    <None Remove="Rts\Resources\Trees\birch_01_leaves_diffuse.dds" />
-    <None Remove="Rts\Resources\Trees\birch_01_leaves_normal.dds" />
-    <None Remove="Rts\Resources\Trees\birch_a.dae" />
-    <None Remove="Rts\Resources\Trees\birch_a.xml" />
-    <None Remove="Rts\Resources\Trees\birch_b.dae" />
-    <None Remove="Rts\Resources\Trees\birch_b.xml" />
-    <None Remove="Rts\Resources\uvtest.png" />
-    <None Remove="Start\backGround.jpg" />
-    <None Remove="Start\buttons.png" />
-    <None Remove="Start\pointer.png" />
-    <None Remove="Start\SkyPlane.dae" />
-    <None Remove="Start\SkyPlane.xml" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <AdditionalFiles Include="..\..\.sonarlint\selinux24_skirmish_dev\CSharp\SonarLint.xml" Link="SonarLint.xml" />
     <Content Include="Rts\Resources\Audio\Effects\explosion_helicopter_close_01.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

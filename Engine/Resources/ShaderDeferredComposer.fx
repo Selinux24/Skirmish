@@ -31,7 +31,7 @@ cbuffer cbCombineLights : register(b5)
 	float4 gFogColor;
 	float gFogStart;
 	float gFogRange;
-	float PAD51;
+	float gAlbedo;
 	float PAD52;
 }
 
@@ -212,7 +212,7 @@ float4 PSCombineLights(PSLightInput input) : SV_TARGET
 
 		Material k = GetMaterialData(gMaterialPalette, materialIndex, gMaterialPaletteWidth);
 
-		color = DeferredLightEquation(k, lAmbient, light, color);
+        color = DeferredLightEquation(k, lAmbient, gAlbedo, light, color);
 
 		if (gFogRange > 0)
 		{

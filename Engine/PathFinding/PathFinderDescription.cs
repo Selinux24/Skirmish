@@ -50,22 +50,31 @@ namespace Engine.PathFinding
         }
 
         /// <summary>
+        /// Gets the path finder hash
+        /// </summary>
+        /// <returns>Returns the path finder hash</returns>
+        public async Task<string> GetHash()
+        {
+            return await Input.GetHash(Settings);
+        }
+        /// <summary>
         /// Loads the graph from a file
         /// </summary>
         /// <param name="fileName">File name</param>
+        /// <param name="hash">Source hash</param>
         /// <returns>Returns the loaded graph</returns>
-        public async Task<IGraph> Load(string filename)
+        public async Task<IGraph> Load(string fileName, string hash = null)
         {
-            return await Input.Load(filename);
+            return await Input.Load(fileName, hash);
         }
         /// <summary>
         /// Saves the graph to a file
         /// </summary>
         /// <param name="fileName">File name</param>
         /// <param name="graph">Graph instance</param>
-        public async Task Save(string filename, IGraph graph)
+        public async Task Save(string fileName, IGraph graph)
         {
-            await Input.Save(filename, graph);
+            await Input.Save(fileName, graph);
         }
     }
 }

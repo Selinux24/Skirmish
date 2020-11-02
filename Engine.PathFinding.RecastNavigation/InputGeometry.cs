@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.PathFinding.RecastNavigation
@@ -12,33 +11,6 @@ namespace Engine.PathFinding.RecastNavigation
     /// </summary>
     public class InputGeometry : PathFinderInput
     {
-        /// <summary>
-        /// Calculates a hash string from a list of triangles
-        /// </summary>
-        /// <param name="triangles">Triangle list</param>
-        /// <returns>Returns the hash string</returns>
-        public static string GetHash(IEnumerable<Triangle> triangles)
-        {
-            var tris = triangles.ToList();
-            tris.Sort((t1, t2) =>
-            {
-                return $"{t1}".CompareTo($"{t2}");
-            });
-
-            var serTris = tris
-                .Select(t => new[]
-                {
-                    t.Point1.X, t.Point1.Y, t.Point1.Z,
-                    t.Point2.X, t.Point2.Y, t.Point2.Z,
-                    t.Point3.X, t.Point3.Y, t.Point3.Z,
-                })
-                .ToArray();
-
-            byte[] buffer = serTris.SerializeBinary();
-
-            return buffer.GetMd5Sum();
-        }
-
         /// <summary>
         /// Chunky mesh
         /// </summary>
@@ -53,14 +25,10 @@ namespace Engine.PathFinding.RecastNavigation
 
         }
 
-        /// <summary>
-        /// Creates a new graph from current geometry input
-        /// </summary>
-        /// <param name="settings">Settings</param>
-        /// <returns>Returns the new graph</returns>
+        /// <inheritdoc/>
         public override async Task<IGraph> CreateGraph(PathFinderSettings settings)
         {
-            var triangles = await this.GetTriangles();
+            var triangles = await GetTriangles();
 
             return Create(settings, triangles);
         }
@@ -73,7 +41,7 @@ namespace Engine.PathFinding.RecastNavigation
         private Graph Create(PathFinderSettings settings, IEnumerable<Triangle> triangles)
         {
             // Prepare input data
-            this.ChunkyMesh = ChunkyTriMesh.Build(triangles);
+            ChunkyMesh = ChunkyTriMesh.Build(triangles);
 
             // Create graph
             var graph = new Graph()
@@ -99,14 +67,12 @@ namespace Engine.PathFinding.RecastNavigation
 
             return graph;
         }
-        /// <summary>
-        /// Refresh
-        /// </summary>
+        /// <inheritdoc/>
         public override async Task Refresh()
         {
             ChunkyTriMesh mesh = null;
 
-            var triangles = await this.GetTriangles();
+            var triangles = await GetTriangles();
 
             await Task.Run(() =>
             {
@@ -114,38 +80,36 @@ namespace Engine.PathFinding.RecastNavigation
                 mesh = ChunkyTriMesh.Build(triangles);
             });
 
-            this.ChunkyMesh = mesh;
+            ChunkyMesh = mesh;
         }
 
-        /// <summary>
-        /// Loads the graph from a file
-        /// </summary>
-        /// <param name="fileName">File name</param>
-        public override async Task<IGraph> Load(string fileName)
+        /// <inheritdoc/>
+        public override async Task<string> GetHash(PathFinderSettings settings)
         {
-            var triangles = await this.GetTriangles();
-            var sourceHash = GetHash(triangles);
-
+            var tris = await GetTriangles();
+            return GraphFile.GetHash(settings, tris);
+        }
+        /// <inheritdoc/>
+        public override async Task<IGraph> Load(string fileName, string hash = null)
+        {
             // Load file
-            Graph graph = await GraphFile.Load(fileName, sourceHash);
-            if (graph == null)
+            var file = await GraphFile.Load(fileName);
+
+            // Test hash
+            if (!string.IsNullOrEmpty(hash) && file.Hash != hash)
             {
                 return null;
             }
 
-            // Set input data
-            graph.Input = this;
+            // Create graph
+            Graph graph = await GraphFile.FromGraphFile(file, this);
 
             // Initialize the input data
-            this.ChunkyMesh = ChunkyTriMesh.Build(triangles);
+            ChunkyMesh = ChunkyTriMesh.Build(await GetTriangles());
 
             return graph;
         }
-        /// <summary>
-        /// Saves the graph to a file
-        /// </summary>
-        /// <param name="fileName">File name</param>
-        /// <param name="graph">Instance to save</param>
+        /// <inheritdoc/>
         public override async Task Save(string fileName, IGraph graph)
         {
             if (graph is Graph nmGraph)

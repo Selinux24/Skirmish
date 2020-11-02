@@ -19,19 +19,10 @@ namespace Engine.Common
         /// </summary>
         public float WeightValue { get; set; }
 
-        /// <summary>
-        /// Gets text representation of this weight
-        /// </summary>
-        /// <returns>Returns text representation of this weight</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
-            string text = null;
-
-            text += string.Format("VertexIndex: {0}; ", this.VertexIndex);
-            text += string.Format("Joint: {0}; ", this.Joint);
-            text += string.Format("Weight: {0}; ", this.WeightValue);
-
-            return text;
+            return $"VertexIndex: {VertexIndex}; Joint: {Joint}; Weight: {WeightValue};";
         }
     }
 }

@@ -26,8 +26,8 @@ namespace Engine
         public PrimitiveListDrawerDescription()
             : base()
         {
-            this.DeferredEnabled = false;
-            this.DepthEnabled = false;
+            DeferredEnabled = false;
+            DepthEnabled = false;
         }
     }
 }

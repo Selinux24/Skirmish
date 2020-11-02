@@ -17,18 +17,7 @@ namespace Engine.Content
         /// </summary>
         public Skeleton Skeleton { get; set; }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public SkinningContent()
-        {
-
-        }
-
-        /// <summary>
-        /// Gets text representation of instance
-        /// </summary>
-        /// <returns>Returns text representation of instance</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
             if (this.Controllers?.Length == 1)
