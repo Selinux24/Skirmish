@@ -172,6 +172,9 @@
     <Compile Include="Dungeon\SceneDungeon.cs" />
     <Compile Include="Start\SceneStart.cs" />
     <Compile Include="UIControlExtensions.cs" />
+    <AdditionalFiles Include="..\..\.sonarlint\selinux24_skirmish_dev\CSharp\SonarLint.xml">
+      <Link>SonarLint.xml</Link>
+    </AdditionalFiles>
     <Content Include="ModularDungeon\Resources\BasicDungeon\BasicDungeon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

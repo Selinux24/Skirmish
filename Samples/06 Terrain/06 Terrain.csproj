@@ -157,6 +157,9 @@
     <Compile Include="Start\StartScene.cs" />
     <Compile Include="Rts\RtsScene.cs" />
     <Compile Include="Rts\AI\Weapon.cs" />
+    <AdditionalFiles Include="..\..\.sonarlint\selinux24_skirmish_dev\CSharp\SonarLint.xml">
+      <Link>SonarLint.xml</Link>
+    </AdditionalFiles>
     <Content Include="Rts\Resources\Audio\Effects\explosion_helicopter_close_01.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
