@@ -42,8 +42,8 @@ namespace SceneTest.SceneMaterials
 
             Camera.NearPlaneDistance = 0.1f;
             Camera.FarPlaneDistance = 500;
-            Camera.Goto(-20, 10, -40f);
-            Camera.LookTo(0, 0, 0);
+            Camera.Goto(-20, 25, -40f);
+            Camera.LookTo(0, 10, 0);
 
             Lights.DirectionalLights[0].CastShadow = false;
 
@@ -216,6 +216,11 @@ namespace SceneTest.SceneMaterials
             mat.NormalMapTexture = nmap ? "SceneMaterials/nmap1.jpg" : "SceneMaterials/nmap2.png";
             mat.SpecularColor = specular;
             mat.Shininess = shininess;
+
+            mat.Algorithm = SpecularAlgorithms.CookTorrance;
+            mat.RoughnessMode = SpecularCookTorranceModes.Beckmann;
+            mat.Reflectivity = 0.1f;
+            mat.IndexOfRefraction = 0.8f;
 
             return mat;
         }

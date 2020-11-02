@@ -71,9 +71,9 @@ namespace Engine.Common
             SpecularColor = effect.SpecularColor;
             Shininess = effect.Shininess;
             IsTransparent = effect.IsTransparent;
-            RoughnessMode = SpecularCookTorranceModes.Beckmann;
-            RoughnessValue = 1;
-            ReflectionAtNormIncidence = 1;
+            RoughnessMode = effect.RoughnessMode;
+            RoughnessValue = effect.Reflectivity;
+            ReflectionAtNormIncidence = effect.IndexOfRefraction;
         }
 
         /// <summary>

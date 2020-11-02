@@ -116,6 +116,10 @@ namespace Engine.Content
                 return Transparent != Color.Transparent;
             }
         }
+        /// <summary>
+        /// Cook-Torrance Roughness mode
+        /// </summary>
+        public SpecularCookTorranceModes RoughnessMode { get; set; }
 
         /// <summary>
         /// Gets the material content image names

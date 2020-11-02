@@ -197,6 +197,39 @@ inline float3 SpecularPassBlinnPhong(float3 normal, float3 viewer, float3 light,
 }
 inline float3 SpecularPassCookTorrance(float3 normal, float3 viewer, float3 light, float3 lightSpecularColor, Material k)
 {
+    float NdotL = max(0, dot(normal, light));
+    float Rs = 0.0;
+    if (NdotL > 0)
+    {
+        float3 H = normalize(light + viewer);
+        float NdotH = max(0, dot(normal, H));
+        float NdotV = max(0, dot(normal, viewer));
+        float VdotH = max(0, dot(light, H));
+
+		// Fresnel reflectance
+        float F = pow(1.0 - VdotH, 5.0);
+        F *= (1.0 - k.ReflectionAtNormIncidence);
+        F += k.ReflectionAtNormIncidence;
+
+		// Microfacet distribution by Beckmann
+        float m_squared = k.RoughnessValue * k.RoughnessValue;
+        float r1 = 1.0 / (4.0 * m_squared * pow(NdotH, 4.0));
+        float r2 = (NdotH * NdotH - 1.0) / (m_squared * NdotH * NdotH);
+        float D = r1 * exp(r2);
+
+		// Geometric shadowing
+        float two_NdotH = 2.0 * NdotH;
+        float g1 = (two_NdotH * NdotV) / VdotH;
+        float g2 = (two_NdotH * NdotL) / VdotH;
+        float G = min(1.0, min(g1, g2));
+
+        Rs = (F * D * G) / (PI * NdotL * NdotV);
+    }
+    
+    return k.Diffuse.rgb * float3(1,1,1) * NdotL + float3(1,1,1) * k.Specular.rgb * NdotL * (0.2 + Rs * (1.0 - 0.2));
+}
+inline float3 SpecularPassCookTorrance2(float3 normal, float3 viewer, float3 light, float3 lightSpecularColor, Material k)
+{
 	// Compute any aliases and intermediary values	
     float3 half_vector = normalize(light + viewer);
     float NdotL = saturate(dot(normal, light));
@@ -253,7 +286,7 @@ inline float3 SpecularPassCookTorrance(float3 normal, float3 viewer, float3 ligh
     float3 Rs = Rs_numerator / Rs_denominator;
 
 	// Put all the parts together to generate the final colour
-    float3 final = max(0.0f, NdotL) * (lightSpecularColor.rgb * Rs);
+    float3 final = max(0.0f, NdotL) * (lightSpecularColor.rgb * Rs + k.Diffuse.rgb);
 
 	// Return the result
     return final;

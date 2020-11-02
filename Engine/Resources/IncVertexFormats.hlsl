@@ -1,5 +1,4 @@
 static const float4x4 IDENTITY = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
-static const float PI = 6.28319f;
 
 /*
 BASIC VS INPUTS
