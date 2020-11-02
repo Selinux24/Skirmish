@@ -100,7 +100,7 @@ float4 PSForwardBillboard(PSVertexBillboard input) : SV_Target
 
     ComputeLightsInput lInput;
 
-	lInput.k = material;
+    lInput.material = material;
 	lInput.pPosition = input.positionWorld;
 	lInput.pNormal = normalWorld;
 	lInput.pColorDiffuse = textureColor;

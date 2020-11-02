@@ -1117,8 +1117,6 @@ namespace Engine.Content.FmtCollada
         {
             TechniqueCommon technique = profile.Technique;
 
-            string algorithmName = null;
-
             VarColorOrTexture emission = null;
             VarColorOrTexture ambient = null;
             VarColorOrTexture diffuse = null;
@@ -1133,8 +1131,6 @@ namespace Engine.Content.FmtCollada
             if (technique.Blinn != null || technique.Phong != null)
             {
                 BlinnPhong algorithm = technique.Blinn ?? technique.Phong;
-
-                algorithmName = "BlinnPhong";
 
                 emission = algorithm.Emission;
                 ambient = algorithm.Ambient;
@@ -1151,8 +1147,6 @@ namespace Engine.Content.FmtCollada
             {
                 Constant algorithm = technique.Constant;
 
-                algorithmName = "Constant";
-
                 emission = algorithm.Emission;
                 reflective = algorithm.Reflective;
                 reflectivity = algorithm.Reflectivity;
@@ -1163,8 +1157,6 @@ namespace Engine.Content.FmtCollada
             else if (technique.Lambert != null)
             {
                 Lambert algorithm = technique.Lambert;
-
-                algorithmName = "Lambert";
 
                 emission = algorithm.Emission;
                 ambient = algorithm.Ambient;
@@ -1208,7 +1200,7 @@ namespace Engine.Content.FmtCollada
 
             return new MaterialContent()
             {
-                Algorithm = algorithmName,
+                Algorithm = SpecularAlgorithms.BlinnPhong,
 
                 EmissionTexture = emissionTexture,
                 EmissionColor = emissionColor,

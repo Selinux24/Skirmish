@@ -483,11 +483,11 @@ namespace Engine.Common
         {
             if (enable)
             {
-                Game.Graphics.SetDepthStencilZEnabled();
+                Game.Graphics.SetDepthStencilWRZEnabled();
             }
             else
             {
-                Game.Graphics.SetDepthStencilZDisabled();
+                Game.Graphics.SetDepthStencilWRZDisabled();
             }
         }
 

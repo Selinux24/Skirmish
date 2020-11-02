@@ -209,6 +209,8 @@
     <Compile Include="Common\OrientedBoundingBoxExtensions.cs" />
     <Compile Include="Common\BufferManagerVertices.cs" />
     <Compile Include="Common\RayPickingHelper.cs" />
+    <Compile Include="Common\SpecularAlgorithms.cs" />
+    <Compile Include="Common\SpecularCookTorranceModes.cs" />
     <Compile Include="Common\VertexFont.cs" />
     <Compile Include="Content\SubMeshContent.cs" />
     <Compile Include="GameAudioManager.cs" />

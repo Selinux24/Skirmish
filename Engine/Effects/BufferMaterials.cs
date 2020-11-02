@@ -1,5 +1,5 @@
-﻿using System.Runtime.InteropServices;
-using SharpDX;
+﻿using SharpDX;
+using System.Runtime.InteropServices;
 
 namespace Engine.Effects
 {
@@ -12,9 +12,21 @@ namespace Engine.Effects
     public struct BufferMaterials : IBufferData
     {
         /// <summary>
-        /// Emissive color
+        /// Algorihtm
         /// </summary>
-        public Color4 Emissive;
+        public uint Algorihtm;
+        /// <summary>
+        /// Padding
+        /// </summary>
+        public uint Pad1;
+        /// <summary>
+        /// Padding
+        /// </summary>
+        public uint Pad2;
+        /// <summary>
+        /// Padding
+        /// </summary>
+        public uint Pad3;
         /// <summary>
         /// Ambient color
         /// </summary>
@@ -24,6 +36,10 @@ namespace Engine.Effects
         /// </summary>
         public Color4 Diffuse;
         /// <summary>
+        /// Emissive color
+        /// </summary>
+        public Color4 Emissive;
+        /// <summary>
         /// Specular color
         /// </summary>
         public Color4 Specular;
@@ -32,17 +48,17 @@ namespace Engine.Effects
         /// </summary>
         public float Shininess;
         /// <summary>
-        /// Padding
+        /// Cook-Torrance Roughness mode
         /// </summary>
-        public float Pad1;
+        public uint RoughnessMode;
         /// <summary>
-        /// Padding
+        /// Cook-Torrance Roughness value
         /// </summary>
-        public float Pad2;
+        public float RoughnessValue;
         /// <summary>
-        /// Padding
+        /// Cook-Torrance Reflection at norm incidence
         /// </summary>
-        public float Pad3;
+        public float ReflectionAtNormIncidence;
 
         /// <summary>
         /// Constructor
@@ -50,15 +66,18 @@ namespace Engine.Effects
         /// <param name="material">Material</param>
         public BufferMaterials(Material material)
         {
+            Algorihtm = (uint)material.Algorithm;
+            Pad1 = 1000;
+            Pad2 = 2000;
+            Pad3 = 3000;
             Emissive = material.EmissiveColor;
             Ambient = material.AmbientColor;
             Diffuse = material.DiffuseColor;
             Specular = material.SpecularColor;
             Shininess = material.Shininess;
-
-            Pad1 = 1000;
-            Pad2 = 2000;
-            Pad3 = 3000;
+            RoughnessMode = (uint)material.RoughnessMode;
+            RoughnessValue = material.RoughnessValue;
+            ReflectionAtNormIncidence = material.ReflectionAtNormIncidence;
         }
 
         /// <summary>

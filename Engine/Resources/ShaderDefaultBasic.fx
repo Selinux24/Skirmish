@@ -255,7 +255,7 @@ float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 
 	ComputeLightsInput lInput;
 
-	lInput.k = material;
+	lInput.material = material;
 	lInput.pPosition = input.positionWorld;
 	lInput.pNormal = input.normalWorld;
 	lInput.pColorDiffuse = input.color;
@@ -519,7 +519,7 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 
 	ComputeLightsInput lInput;
 
-	lInput.k = material;
+    lInput.material = material;
 	lInput.pPosition = input.positionWorld;
 	lInput.pNormal = input.normalWorld;
 	lInput.pColorDiffuse = diffuseMap;
@@ -671,7 +671,7 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
 
 	ComputeLightsInput lInput;
 
-	lInput.k = material;
+    lInput.material = material;
 	lInput.pPosition = input.positionWorld;
 	lInput.pNormal = normalWorld;
 	lInput.pColorDiffuse = diffuseMap;

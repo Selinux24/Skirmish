@@ -75,7 +75,7 @@ float4 PSTerrainAlphaMap(PSVertexTerrain input) : SV_TARGET
 
 	ComputeLightsInput lInput;
 
-	lInput.k = material;
+    lInput.material = material;
 	lInput.pPosition = input.positionWorld;
 	lInput.pNormal = normal;
 	lInput.pColorDiffuse = color;
@@ -114,7 +114,7 @@ float4 PSTerrainSlopes(PSVertexTerrain input) : SV_TARGET
 
 	ComputeLightsInput lInput;
 
-	lInput.k = material;
+    lInput.material = material;
 	lInput.pPosition = input.positionWorld;
 	lInput.pNormal = normal;
 	lInput.pColorDiffuse = color;
@@ -153,7 +153,7 @@ float4 PSTerrainFull(PSVertexTerrain input) : SV_TARGET
 
 	ComputeLightsInput lInput;
 
-	lInput.k = material;
+    lInput.material = material;
 	lInput.pPosition = input.positionWorld;
 	lInput.pNormal = normal;
 	lInput.pColorDiffuse = color;

@@ -108,8 +108,11 @@ void GetLightColor(DirectionalLight light, float3 normal, float3 eyeDir, out flo
 {
     float3 lightDir = normalize(-light.DirToLight);
 
-    diffusePass = DiffusePass(light.LightColor, -lightDir, normal).rgb;
-    specularPass = SpecularBlinnPhongPass(0, waterShinniness, lightDir, normal, eyeDir).rgb;
+    Material mat = (Material) 0;
+    mat.Shininess = waterShinniness;
+    
+    diffusePass = DiffusePass(normal, -lightDir, light.Diffuse).rgb;
+    specularPass = SpecularPassBlinnPhong(normal, eyeDir, lightDir, 0, mat).rgb;
 }
 float3 GetSkyColor(float3 eyeDir)
 {

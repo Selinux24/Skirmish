@@ -24,7 +24,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="graphics">Graphics</param>
         /// <returns>Returns the Z-buffer enabled for write depth-stencil state</returns>
-        public static EngineDepthStencilState ZBufferEnabled(Graphics graphics)
+        public static EngineDepthStencilState WRzBufferEnabled(Graphics graphics)
         {
             var desc = new DepthStencilStateDescription()
             {
@@ -60,7 +60,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="graphics">Graphics</param>
         /// <returns>Returns the Z-buffer disabled for write depth-stencil state</returns>
-        public static EngineDepthStencilState ZBufferDisabled(Graphics graphics)
+        public static EngineDepthStencilState WRzBufferDisabled(Graphics graphics)
         {
             var desc = new DepthStencilStateDescription()
             {

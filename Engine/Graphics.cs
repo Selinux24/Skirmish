@@ -84,11 +84,11 @@ namespace Engine
         /// <summary>
         /// Depth stencil state with z-buffer enabled for write
         /// </summary>
-        private EngineDepthStencilState depthStencilzBufferEnabled = null;
+        private EngineDepthStencilState depthStencilWRzBufferEnabled = null;
         /// <summary>
         /// Depth stencil state with z-buffer disabled for write
         /// </summary>
-        private EngineDepthStencilState depthStencilzBufferDisabled = null;
+        private EngineDepthStencilState depthStencilWRzBufferDisabled = null;
         /// <summary>
         /// Depth stencil state with z-buffer enabled for read
         /// </summary>
@@ -594,7 +594,7 @@ namespace Engine
             SetDefaultViewport();
             SetDefaultRenderTarget();
 
-            SetDepthStencilZEnabled();
+            SetDepthStencilWRZEnabled();
             SetRasterizerDefault();
             SetBlendDefault();
 
@@ -826,26 +826,26 @@ namespace Engine
         /// <summary>
         /// Enables z-buffer for write
         /// </summary>
-        public void SetDepthStencilZEnabled()
+        public void SetDepthStencilWRZEnabled()
         {
-            if (depthStencilzBufferEnabled == null)
+            if (depthStencilWRzBufferEnabled == null)
             {
-                depthStencilzBufferEnabled = EngineDepthStencilState.ZBufferEnabled(this);
+                depthStencilWRzBufferEnabled = EngineDepthStencilState.WRzBufferEnabled(this);
             }
 
-            SetDepthStencilState(depthStencilzBufferEnabled);
+            SetDepthStencilState(depthStencilWRzBufferEnabled);
         }
         /// <summary>
         /// Disables z-buffer for write
         /// </summary>
-        public void SetDepthStencilZDisabled()
+        public void SetDepthStencilWRZDisabled()
         {
-            if (depthStencilzBufferDisabled == null)
+            if (depthStencilWRzBufferDisabled == null)
             {
-                depthStencilzBufferDisabled = EngineDepthStencilState.ZBufferDisabled(this);
+                depthStencilWRzBufferDisabled = EngineDepthStencilState.WRzBufferDisabled(this);
             }
 
-            SetDepthStencilState(depthStencilzBufferDisabled);
+            SetDepthStencilState(depthStencilWRzBufferDisabled);
         }
         /// <summary>
         /// Enables z-buffer for read
@@ -1048,10 +1048,10 @@ namespace Engine
             depthStencilView?.Dispose();
             depthStencilView = null;
 
-            depthStencilzBufferEnabled?.Dispose();
-            depthStencilzBufferEnabled = null;
-            depthStencilzBufferDisabled?.Dispose();
-            depthStencilzBufferDisabled = null;
+            depthStencilWRzBufferEnabled?.Dispose();
+            depthStencilWRzBufferEnabled = null;
+            depthStencilWRzBufferDisabled?.Dispose();
+            depthStencilWRzBufferDisabled = null;
             depthStencilRDzBufferEnabled?.Dispose();
             depthStencilRDzBufferEnabled = null;
             depthStencilRDzBufferDisabled?.Dispose();

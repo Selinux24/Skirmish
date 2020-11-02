@@ -70,13 +70,14 @@ namespace Engine.Common
         /// <returns>Returns the packed material</returns>
         internal Vector4[] Pack()
         {
-            Vector4[] res = new Vector4[4];
+            Vector4[] res = new Vector4[5];
 
             res[0] = Material.EmissiveColor;
             res[1] = Material.AmbientColor;
             res[2] = Material.DiffuseColor;
             res[3] = Material.SpecularColor;
             res[3].W = Material.Shininess;
+            res[4] = new Vector4((uint)Material.Algorithm, (uint)Material.RoughnessMode, Material.RoughnessValue, Material.ReflectionAtNormIncidence);
 
             return res;
         }

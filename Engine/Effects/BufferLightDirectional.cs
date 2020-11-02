@@ -56,6 +56,14 @@ namespace Engine.Effects
         }
 
         /// <summary>
+        /// Diffuse color
+        /// </summary>
+        public Color4 DiffuseColor;
+        /// <summary>
+        /// Specular color
+        /// </summary>
+        public Color4 SpecularColor;
+        /// <summary>
         /// Light direction vector
         /// </summary>
         public Vector3 DirToLight;
@@ -63,10 +71,6 @@ namespace Engine.Effects
         /// The light casts shadow
         /// </summary>
         public float CastShadow;
-        /// <summary>
-        /// Diffuse color
-        /// </summary>
-        public Color4 LightColor;
         /// <summary>
         /// X cascade offsets
         /// </summary>
@@ -90,9 +94,10 @@ namespace Engine.Effects
         /// <param name="light">Light</param>
         public BufferLightDirectional(ISceneLightDirectional light)
         {
+            DiffuseColor = light.DiffuseColor;
+            SpecularColor = light.SpecularColor;
             DirToLight = -light.Direction;
             CastShadow = light.CastShadowsMarked ? 1 : 0;
-            LightColor = light.DiffuseColor * light.Brightness;
             ToCascadeOffsetX = light.ToCascadeOffsetX;
             ToCascadeOffsetY = light.ToCascadeOffsetY;
             ToCascadeScale = light.ToCascadeScale;

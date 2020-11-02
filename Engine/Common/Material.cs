@@ -18,6 +18,10 @@ namespace Engine.Common
         public static readonly Material Default = new Material(MaterialContent.Default);
 
         /// <summary>
+        /// Algorithm
+        /// </summary>
+        public SpecularAlgorithms Algorithm;
+        /// <summary>
         /// Emissive color
         /// </summary>
         public Color4 EmissiveColor;
@@ -41,6 +45,18 @@ namespace Engine.Common
         /// Transparent
         /// </summary>
         public bool IsTransparent;
+        /// <summary>
+        /// Cook-Torrance Roughness mode
+        /// </summary>
+        public SpecularCookTorranceModes RoughnessMode;
+        /// <summary>
+        /// Cook-Torrance Roughness value
+        /// </summary>
+        public float RoughnessValue;
+        /// <summary>
+        /// Cook-Torrance Reflection at norm incidence
+        /// </summary>
+        public float ReflectionAtNormIncidence;
 
         /// <summary>
         /// Constructor
@@ -48,12 +64,16 @@ namespace Engine.Common
         /// <param name="effect">Effect content</param>
         public Material(MaterialContent effect)
         {
+            Algorithm = effect.Algorithm;
             EmissiveColor = effect.EmissionColor;
             AmbientColor = effect.AmbientColor;
             DiffuseColor = effect.DiffuseColor;
             SpecularColor = effect.SpecularColor;
             Shininess = effect.Shininess;
             IsTransparent = effect.IsTransparent;
+            RoughnessMode = SpecularCookTorranceModes.Beckmann;
+            RoughnessValue = 1;
+            ReflectionAtNormIncidence = 1;
         }
 
         /// <summary>
@@ -64,17 +84,22 @@ namespace Engine.Common
         public bool Equals(Material other)
         {
             return
+                Algorithm == other.Algorithm &&
                 EmissiveColor == other.EmissiveColor &&
                 AmbientColor == other.AmbientColor &&
                 DiffuseColor == other.DiffuseColor &&
                 SpecularColor == other.SpecularColor &&
-                Shininess == other.Shininess;
+                Shininess == other.Shininess &&
+                IsTransparent == other.IsTransparent &&
+                RoughnessMode == other.RoughnessMode &&
+                RoughnessValue == other.RoughnessValue &&
+                ReflectionAtNormIncidence == other.ReflectionAtNormIncidence;
         }
 
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"EmissiveColor: {EmissiveColor}; AmbientColor: {AmbientColor}; DiffuseColor: {DiffuseColor}; SpecularColor: {SpecularColor}; Shininess: {Shininess};";
+            return $"{Algorithm} EmissiveColor: {EmissiveColor}; AmbientColor: {AmbientColor}; DiffuseColor: {DiffuseColor}; SpecularColor: {SpecularColor}; Shininess: {Shininess};";
         }
     };
 }

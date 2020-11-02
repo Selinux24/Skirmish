@@ -4,6 +4,8 @@ using System.Linq;
 
 namespace Engine.Content
 {
+    using Engine.Common;
+
     /// <summary>
     /// Material content
     /// </summary>
@@ -18,6 +20,8 @@ namespace Engine.Content
             {
                 return new MaterialContent()
                 {
+                    Algorithm = SpecularAlgorithms.BlinnPhong,
+
                     AmbientColor = new Color4(0.02f, 0.02f, 0.02f, 1f),
                     DiffuseColor = new Color4(0.8f, 0.8f, 0.8f, 1.0f),
                     SpecularColor = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
@@ -36,7 +40,7 @@ namespace Engine.Content
         /// <summary>
         /// Algorithm name
         /// </summary>
-        public string Algorithm { get; set; }
+        public SpecularAlgorithms Algorithm { get; set; }
 
         /// <summary>
         /// Emission texture name
