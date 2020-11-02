@@ -332,9 +332,11 @@ namespace Engine.UI
 
                     tabButtons.Add(button);
 
-                    var panel = new UIPanel($"{name}.Panel_{i}", scene, panelDesc);
-                    panel.Padding = tabPanelPadding;
-                    panel.Spacing = tabPanelSpacing;
+                    var panel = new UIPanel($"{name}.Panel_{i}", scene, panelDesc)
+                    {
+                        Padding = tabPanelPadding,
+                        Spacing = tabPanelSpacing
+                    };
 
                     tabPanels.Add(panel);
 

@@ -7,8 +7,8 @@ namespace Engine.Collada
     public class OpticsTechniqueCommon
     {
         [XmlElement("orthographic", typeof(Orthographic))]
-        public Orthographic orthographic { get; set; }
+        public Orthographic Orthographic { get; set; }
         [XmlElement("perspective", typeof(Perspective))]
-        public Perspective perspective { get; set; }
+        public Perspective Perspective { get; set; }
     }
 }

@@ -171,9 +171,9 @@ namespace Engine
         /// <returns>true if the specified System.Object is equal to this instance; otherwise, false</returns>
         public override bool Equals(object obj)
         {
-            if (obj is BoundingCylinder)
+            if (obj is BoundingCylinder cylinder)
             {
-                return this == (BoundingCylinder)obj;
+                return this == cylinder;
             }
 
             return false;

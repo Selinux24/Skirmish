@@ -24,58 +24,58 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             }
         }
 
-        public int m_nsamples { get; set; }
-        public int m_maxSamples { get; set; }
-        public Vector3[] m_vel { get; set; }
-        public float[] m_ssize { get; set; }
-        public float[] m_pen { get; set; }
-        public float[] m_vpen { get; set; }
-        public float[] m_vcpen { get; set; }
-        public float[] m_spen { get; set; }
-        public float[] m_tpen { get; set; }
+        public int Nsamples { get; set; }
+        public int MaxSamples { get; set; }
+        public Vector3[] Vel { get; set; }
+        public float[] Ssize { get; set; }
+        public float[] Pen { get; set; }
+        public float[] Vpen { get; set; }
+        public float[] Vcpen { get; set; }
+        public float[] Spen { get; set; }
+        public float[] Tpen { get; set; }
 
         public bool Init(int maxSamples)
         {
 
-            m_maxSamples = maxSamples;
+            MaxSamples = maxSamples;
 
-            m_vel = new Vector3[m_maxSamples];
-            m_pen = new float[m_maxSamples];
-            m_ssize = new float[m_maxSamples];
-            m_vpen = new float[m_maxSamples];
-            m_vcpen = new float[m_maxSamples];
-            m_spen = new float[m_maxSamples];
-            m_tpen = new float[m_maxSamples];
+            Vel = new Vector3[MaxSamples];
+            Pen = new float[MaxSamples];
+            Ssize = new float[MaxSamples];
+            Vpen = new float[MaxSamples];
+            Vcpen = new float[MaxSamples];
+            Spen = new float[MaxSamples];
+            Tpen = new float[MaxSamples];
 
             return true;
         }
         public void Reset()
         {
-            m_nsamples = 0;
+            Nsamples = 0;
         }
         public void AddSample(Vector3 vel, float ssize, float pen, float vpen, float vcpen, float spen, float tpen)
         {
-            if (m_nsamples >= m_maxSamples)
+            if (Nsamples >= MaxSamples)
             {
                 return;
             }
 
-            m_vel[m_nsamples] = vel;
-            m_ssize[m_nsamples] = ssize;
-            m_pen[m_nsamples] = pen;
-            m_vpen[m_nsamples] = vpen;
-            m_vcpen[m_nsamples] = vcpen;
-            m_spen[m_nsamples] = spen;
-            m_tpen[m_nsamples] = tpen;
-            m_nsamples++;
+            Vel[Nsamples] = vel;
+            Ssize[Nsamples] = ssize;
+            Pen[Nsamples] = pen;
+            Vpen[Nsamples] = vpen;
+            Vcpen[Nsamples] = vcpen;
+            Spen[Nsamples] = spen;
+            Tpen[Nsamples] = tpen;
+            Nsamples++;
         }
         public void NormalizeSamples()
         {
-            NormalizeArray(m_pen, m_nsamples);
-            NormalizeArray(m_vpen, m_nsamples);
-            NormalizeArray(m_vcpen, m_nsamples);
-            NormalizeArray(m_spen, m_nsamples);
-            NormalizeArray(m_tpen, m_nsamples);
+            NormalizeArray(Pen, Nsamples);
+            NormalizeArray(Vpen, Nsamples);
+            NormalizeArray(Vcpen, Nsamples);
+            NormalizeArray(Spen, Nsamples);
+            NormalizeArray(Tpen, Nsamples);
         }
     }
 }

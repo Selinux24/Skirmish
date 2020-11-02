@@ -198,13 +198,18 @@ namespace SceneTest.SceneCascadedShadows
         {
 #if DEBUG
             if (Game.Input.RightMouseButtonPressed)
-#endif
             {
                 Camera.RotateMouse(
                     gameTime,
                     Game.Input.MouseXDelta,
                     Game.Input.MouseYDelta);
             }
+#else
+            Camera.RotateMouse(
+                gameTime,
+                Game.Input.MouseXDelta,
+                Game.Input.MouseYDelta);
+#endif
 
             if (Game.Input.KeyPressed(Keys.A))
             {

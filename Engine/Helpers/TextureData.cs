@@ -8,7 +8,6 @@ using System.IO;
 namespace Engine.Helpers
 {
     using Engine.Helpers.DDS;
-    using SharpDX.Direct3D11;
 
     /// <summary>
     /// Texture data
@@ -226,14 +225,14 @@ namespace Engine.Helpers
         /// <param name="bitmap">Bitmap</param>
         private TextureData(int width, int height, byte[] buffer)
         {
-            this.Width = width;
-            this.Height = height;
-            this.Depth = 1;
-            this.Format = Format.R8G8B8A8_UNorm;
-            this.ArraySize = 1;
-            this.IsCubeMap = false;
-            this.MipMaps = 1;
-            this.data = buffer;
+            Width = width;
+            Height = height;
+            Depth = 1;
+            Format = Format.R8G8B8A8_UNorm;
+            ArraySize = 1;
+            IsCubeMap = false;
+            MipMaps = 1;
+            data = buffer;
         }
         /// <summary>
         /// Constructor
@@ -246,21 +245,21 @@ namespace Engine.Helpers
         {
             bool validFile = DdsHeader.ValidateTexture(
                 header, header10,
-                out int depth, out Format format, out ResourceDimension resDim, out int arraySize, out bool isCubeMap);
+                out int depth, out Format format, out _, out int arraySize, out bool isCubeMap);
             if (validFile)
             {
-                this.Width = header.Width;
-                this.Height = header.Height;
-                this.Depth = depth;
-                this.Format = format;
-                this.ArraySize = arraySize;
-                this.IsCubeMap = isCubeMap;
-                this.MipMaps = header.MipMapCount == 0 ? 1 : header.MipMapCount;
+                Width = header.Width;
+                Height = header.Height;
+                Depth = depth;
+                Format = format;
+                ArraySize = arraySize;
+                IsCubeMap = isCubeMap;
+                MipMaps = header.MipMapCount == 0 ? 1 : header.MipMapCount;
 
                 var bytes = new byte[bitData.Length - offset];
                 Array.Copy(bitData, offset, bytes, 0, bytes.Length);
 
-                this.data = bytes;
+                data = bytes;
             }
             else
             {
@@ -290,7 +289,7 @@ namespace Engine.Helpers
         {
             if (disposing)
             {
-                this.data = null;
+                data = null;
             }
         }
 
@@ -302,7 +301,7 @@ namespace Engine.Helpers
         /// <returns>Returns a databox</returns>
         public DataBox GetDataBox(int slice, int mip)
         {
-            this.GetDataOffset(slice, mip, out int offset, out int size, out int stride);
+            GetDataOffset(slice, mip, out int offset, out int size, out int stride);
 
             var bytes = new byte[size];
             Array.Copy(data, offset, bytes, 0, bytes.Length);
@@ -318,11 +317,11 @@ namespace Engine.Helpers
         /// <returns>Returns a databox array</returns>
         public DataBox[] GetDataBoxes(int slice)
         {
-            var res = new DataBox[this.MipMaps];
+            var res = new DataBox[MipMaps];
 
-            for (int i = 0; i < this.MipMaps; i++)
+            for (int i = 0; i < MipMaps; i++)
             {
-                res[i] = this.GetDataBox(slice, i);
+                res[i] = GetDataBox(slice, i);
             }
 
             return res;
@@ -333,14 +332,14 @@ namespace Engine.Helpers
         /// <returns>Returns a databox array</returns>
         public DataBox[] GetDataBoxes()
         {
-            var res = new DataBox[this.ArraySize * this.MipMaps];
+            var res = new DataBox[ArraySize * MipMaps];
 
             int index = 0;
-            for (int j = 0; j < this.ArraySize; j++)
+            for (int j = 0; j < ArraySize; j++)
             {
-                for (int i = 0; i < this.MipMaps; i++)
+                for (int i = 0; i < MipMaps; i++)
                 {
-                    res[index++] = this.GetDataBox(j, i);
+                    res[index++] = GetDataBox(j, i);
                 }
             }
 
@@ -364,22 +363,22 @@ namespace Engine.Helpers
             size = 0;
             stride = 0;
 
-            for (int j = 0; j < this.ArraySize; j++)
+            for (int j = 0; j < ArraySize; j++)
             {
                 int index = 0;
-                int width = this.Width;
-                int height = this.Height;
-                int depth = this.Depth;
+                int width = Width;
+                int height = Height;
+                int depth = Depth;
 
-                for (int i = 0; i < this.MipMaps; i++)
+                for (int i = 0; i < MipMaps; i++)
                 {
                     DdsPixelFormat.GetSurfaceInfo(
                         width,
                         height,
-                        this.Format,
+                        Format,
                         out int numBytes,
                         out int rowBytes,
-                        out int numRows);
+                        out _);
 
                     if (slice == j && index == mip)
                     {
@@ -391,7 +390,7 @@ namespace Engine.Helpers
 
                     offset += numBytes * depth;
 
-                    if (offset > this.data.Length)
+                    if (offset > data.Length)
                     {
                         throw new EngineException("File too short");
                     }

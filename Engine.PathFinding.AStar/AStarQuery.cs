@@ -17,7 +17,7 @@ namespace Engine.PathFinding.AStar
         /// <summary>
         /// Cached paths
         /// </summary>
-        private static List<PathCache> Cache = new List<PathCache>();
+        private static readonly List<PathCache> Cache = new List<PathCache>();
 
         /// <summary>
         /// Gets the path from start to end

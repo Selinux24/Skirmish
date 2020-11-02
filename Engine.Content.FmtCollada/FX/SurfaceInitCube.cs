@@ -20,6 +20,6 @@ namespace Engine.Collada.FX
     public class SurfaceInitCubePrimary : BasicIdRef
     {
         [XmlElement("order", typeof(EnumSurfaceFaces))]
-        public EnumSurfaceFaces[] order { get; set; }
+        public EnumSurfaceFaces[] Order { get; set; }
     }
 }

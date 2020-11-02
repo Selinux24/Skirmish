@@ -474,7 +474,7 @@ namespace Terrain.Rts.AI
         {
             if (Stats.CurrentWeapon != null)
             {
-                float d = Stats.CurrentWeapon.Shoot(Parent, this, target);
+                float d = Stats.CurrentWeapon.Shoot(this, target);
                 if (d > 0f)
                 {
                     target.GetDamage(this, d);
