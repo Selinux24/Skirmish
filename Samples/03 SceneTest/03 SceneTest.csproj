@@ -219,6 +219,12 @@
     <Content Include="SceneLights\Trees\tree.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="SceneMaterials\corrugated_n.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneMaterials\corrugated_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="SceneMaterials\floor.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

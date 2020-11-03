@@ -2,9 +2,11 @@
 #define SPECULAR_ALGORITHM_BLINNPHONG 	1
 #define SPECULAR_ALGORITHM_COOKTORRANCE	2
 
-#define ROUGHNESS_LOOK_UP 		0
-#define ROUGHNESS_BECKMANN 		1
-#define ROUGHNESS_GAUSSIAN 		2
+#define ROUGHNESS_LOOK_UP 	0
+#define ROUGHNESS_BECKMANN 	1
+#define ROUGHNESS_GAUSSIAN 	2
+
+#define MATERIAL_STRIDE 5
 
 struct Material
 {
@@ -24,7 +26,7 @@ Texture2D CookTorranceTexRoughness;
 
 inline Material GetMaterialData(Texture2D materialsTexture, uint materialIndex, uint paletteWidth)
 {
-    uint baseIndex = 5 * materialIndex;
+    uint baseIndex = MATERIAL_STRIDE * materialIndex;
 
     float4 mat1 = materialsTexture.Load(uint3(baseIndex % paletteWidth, baseIndex / paletteWidth, 0));
     baseIndex++;

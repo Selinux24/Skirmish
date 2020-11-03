@@ -20,6 +20,9 @@ namespace SceneTest.SceneMaterials
         private UITextArea title = null;
         private UITextArea runtime = null;
 
+        private Model lightEmitter = null;
+        private SceneLightPoint movingLight = null;
+
         private bool gameReady = false;
 
         public SceneMaterials(Game game)
@@ -55,6 +58,7 @@ namespace SceneTest.SceneMaterials
                     InitializeTextBoxes(),
                     InitializeSkyEffects(),
                     InitializeFloor(),
+                    InitializeEmitter(),
                     InitializeColorGroup("Spheres soft", 1, 0.1f, new Vector3(-10, 0, -10), false),
                     InitializeColorGroup("Spheres rought", 128, 1f, new Vector3(-10.5f, 0, -10), true)
                 },
@@ -64,6 +68,8 @@ namespace SceneTest.SceneMaterials
                     {
                         res.ThrowExceptions();
                     }
+
+                    PrepareScene();
 
                     gameReady = true;
                 });
@@ -115,14 +121,15 @@ namespace SceneTest.SceneMaterials
         private async Task InitializeFloor()
         {
             float l = spaceSize;
+            float t = spaceSize / 5f;
             float h = 0f;
 
             VertexData[] vertices = new VertexData[]
             {
                 new VertexData{ Position = new Vector3(-l, -h, -l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 0.0f) },
-                new VertexData{ Position = new Vector3(-l, -h, +l), Normal = Vector3.Up, Texture = new Vector2(0.0f, l) },
-                new VertexData{ Position = new Vector3(+l, -h, -l), Normal = Vector3.Up, Texture = new Vector2(l, 0.0f) },
-                new VertexData{ Position = new Vector3(+l, -h, +l), Normal = Vector3.Up, Texture = new Vector2(l, l) },
+                new VertexData{ Position = new Vector3(-l, -h, +l), Normal = Vector3.Up, Texture = new Vector2(0.0f, t) },
+                new VertexData{ Position = new Vector3(+l, -h, -l), Normal = Vector3.Up, Texture = new Vector2(t, 0.0f) },
+                new VertexData{ Position = new Vector3(+l, -h, +l), Normal = Vector3.Up, Texture = new Vector2(t, t) },
             };
 
             uint[] indices = new uint[]
@@ -132,7 +139,12 @@ namespace SceneTest.SceneMaterials
             };
 
             MaterialContent mat = MaterialContent.Default;
-            mat.DiffuseTexture = "SceneMaterials/floor.png";
+            mat.Algorithm = SpecularAlgorithms.CookTorrance;
+            mat.IndexOfRefraction = 0.9f;
+            mat.Reflectivity = 0.2f;
+            mat.Shininess = 0.1f;
+            mat.DiffuseTexture = "SceneMaterials/corrugated_d.jpg";
+            mat.NormalMapTexture = "SceneMaterials/corrugated_n.jpg";
 
             var desc = new ModelDescription()
             {
@@ -144,6 +156,23 @@ namespace SceneTest.SceneMaterials
             };
 
             await this.AddComponentModel("Floor", desc);
+        }
+        private async Task InitializeEmitter()
+        {
+            MaterialContent mat = MaterialContent.Default;
+            mat.EmissionColor = Color.White;
+
+            var sphere = GeometryUtil.CreateSphere(0.25f, 32, 32);
+
+            var desc = new ModelDescription()
+            {
+                CastShadow = false,
+                DeferredEnabled = true,
+                DepthEnabled = true,
+                Content = ContentDescription.FromContentData(sphere, mat),
+            };
+
+            lightEmitter = await this.AddComponentModel("Emitter", desc);
         }
         private async Task<ModelInstanced> InitializeSphereInstanced(string name, int count, IEnumerable<MaterialContent> materials)
         {
@@ -218,11 +247,24 @@ namespace SceneTest.SceneMaterials
             mat.Shininess = shininess;
 
             mat.Algorithm = SpecularAlgorithms.CookTorrance;
-            mat.RoughnessMode = SpecularCookTorranceModes.Beckmann;
-            mat.Reflectivity = 0.1f;
-            mat.IndexOfRefraction = 0.8f;
+            mat.IndexOfRefraction = 0.8f; //F0
+            mat.Reflectivity = 0.1f; //roughness
+            mat.Shininess = 0.2f; //K
 
             return mat;
+        }
+
+        private void PrepareScene()
+        {
+            movingLight = new SceneLightPoint(
+                "Moving fire light",
+                false,
+                Color.Yellow * 1.25f,
+                Color.White,
+                true,
+                SceneLightPointDescription.Create(Vector3.Zero, 15f, 20f));
+
+            Lights.Add(movingLight);
         }
 
         public override void Update(GameTime gameTime)
@@ -245,6 +287,7 @@ namespace SceneTest.SceneMaterials
             }
 
             UpdateCamera(gameTime);
+            UpdateLight(gameTime);
 
             base.Update(gameTime);
 
@@ -287,6 +330,21 @@ namespace SceneTest.SceneMaterials
             {
                 Camera.MoveBackward(gameTime, Game.Input.ShiftPressed);
             }
+        }
+        private void UpdateLight(GameTime gameTime)
+        {
+            float r = 35f;
+            float d = 0.5f;
+            float v = 0.8f;
+            float totalSeconds = gameTime.TotalSeconds;
+
+            Vector3 position = Vector3.Zero;
+            position.X = r * d * (float)Math.Cos(v * totalSeconds);
+            position.Y = 5f + (2f * (1f + (float)Math.Sin(totalSeconds)));
+            position.Z = r * d * (float)Math.Sin(v * totalSeconds);
+
+            lightEmitter.Manipulator.SetPosition(position);
+            movingLight.Position = position;
         }
     }
 }

@@ -1,13 +1,15 @@
 #include "IncHelpers.hlsl"
 #include "IncMaterials.hlsl"
 
-static const int MAX_LIGHTS_DIRECTIONAL = 3;
-static const int MAX_LIGHTS_DIRECTIONAL_CASCADES = 3;
-static const int MAX_LIGHTS_POINT = 16;
-static const int MAX_LIGHTS_SPOT = 16;
+#define MAX_LIGHTS_DIRECTIONAL          3
+#define MAX_LIGHTS_DIRECTIONAL_CASCADES 3
+#define MAX_LIGHTS_POINT                16
+#define MAX_LIGHTS_SPOT                 16
 
-static const uint SHADOW_SAMPLES_HD = 16;
-static const uint SHADOW_SAMPLES_LD = 4;
+#define SHADOW_SAMPLES_HD   16
+#define SHADOW_SAMPLES_LD   4
+
+#define MaxSampleCount      16
 
 struct HemisphericLight
 {
@@ -59,8 +61,6 @@ struct SpotLight
     uint MapCount;
     float4x4 FromLightVP;
 };
-
-static const uint MaxSampleCount = 16;
 
 static float2 poissonDisk[MaxSampleCount] =
 {
@@ -195,7 +195,7 @@ inline float3 SpecularPassBlinnPhong(float3 normal, float3 viewer, float3 light,
     
     return pow(max(0, dot(R, -light)), k.Shininess) * lightSpecularColor;
 }
-inline float3 SpecularPassCookTorrance(float3 normal, float3 viewer, float3 light, float3 lightSpecularColor, Material k)
+inline float3 SpecularPassCookTorrance(float3 normal, float3 viewer, float3 light, float3 lightColor, float3 lightSpecularColor, Material k)
 {
     float NdotL = max(0, dot(normal, light));
     float Rs = 0.0;
@@ -226,7 +226,7 @@ inline float3 SpecularPassCookTorrance(float3 normal, float3 viewer, float3 ligh
         Rs = (F * D * G) / (PI * NdotL * NdotV);
     }
     
-    return k.Diffuse.rgb * float3(1,1,1) * NdotL + float3(1,1,1) * k.Specular.rgb * NdotL * (0.2 + Rs * (1.0 - 0.2));
+    return k.Diffuse.rgb * lightColor * NdotL + lightColor * k.Specular.rgb * NdotL * (k.Shininess + Rs * (1.0 - k.Shininess));
 }
 inline float3 SpecularPassCookTorrance2(float3 normal, float3 viewer, float3 light, float3 lightSpecularColor, Material k)
 {
@@ -291,7 +291,7 @@ inline float3 SpecularPassCookTorrance2(float3 normal, float3 viewer, float3 lig
 	// Return the result
     return final;
 }
-inline float3 SpecularPass(float3 normal, float3 viewer, float3 light, float3 lightSpecularColor, Material k)
+inline float3 SpecularPass(float3 normal, float3 viewer, float3 light, float3 lightColor, float3 lightSpecularColor, Material k)
 {
     if (k.Algorithm == SPECULAR_ALGORITHM_PHONG)
     {
@@ -303,7 +303,7 @@ inline float3 SpecularPass(float3 normal, float3 viewer, float3 light, float3 li
     }
     if (k.Algorithm == SPECULAR_ALGORITHM_COOKTORRANCE)
     {
-        return SpecularPassCookTorrance(normal, viewer, light, lightSpecularColor, k);
+        return SpecularPassCookTorrance(normal, viewer, light, lightColor, lightSpecularColor, k);
     }
     
     return 0;
@@ -405,7 +405,7 @@ inline ComputeLightsOutput ComputeDirectionalLightLOD1(ComputeDirectionalLightsI
     ComputeLightsOutput output;
 
     output.diffuse = DiffusePass(input.pNormal, L, input.dirLight.Diffuse) * cShadowFactor;
-    output.specular = SpecularPass(input.pNormal, V, L, input.dirLight.Specular, input.material) * cShadowFactor;
+    output.specular = SpecularPass(input.pNormal, V, L, input.dirLight.Diffuse, input.dirLight.Specular, input.material) * cShadowFactor;
 
     return output;
 }
@@ -506,7 +506,7 @@ inline ComputeLightsOutput ComputeSpotLightLOD1(ComputeSpotLightsInput input, fl
     ComputeLightsOutput output;
 
     output.diffuse = DiffusePass(input.pNormal, L, input.spotLight.Diffuse) * attenuation * cShadowFactor;
-    output.specular = SpecularPass(input.pNormal, V, L, input.spotLight.Specular, input.material) * dist * attenuation * cShadowFactor;
+    output.specular = SpecularPass(input.pNormal, V, L, input.spotLight.Diffuse, input.spotLight.Specular, input.material) * dist * attenuation * cShadowFactor;
 
     return output;
 }
@@ -584,7 +584,7 @@ inline ComputeLightsOutput ComputePointLightLOD1(ComputePointLightsInput input, 
     ComputeLightsOutput output;
 
     output.diffuse = DiffusePass(input.pNormal, L, input.pointLight.Diffuse) * attenuation * cShadowFactor;
-    output.specular = SpecularPass(input.pNormal, V, L, input.pointLight.Specular, input.material) * dist * attenuation * cShadowFactor;
+    output.specular = SpecularPass(input.pNormal, V, L, input.pointLight.Diffuse, input.pointLight.Specular, input.material) * dist * attenuation * cShadowFactor;
 
     return output;
 }
@@ -685,7 +685,7 @@ inline float4 ComputeLightsLOD1(ComputeLightsInput input)
         }
 
         float3 cDiffuse = DiffusePass(input.pNormal, L, input.dirLights[i].Diffuse);
-        float3 cSpecular = SpecularPass(input.pNormal, V, L, input.dirLights[i].Specular, input.material);
+        float3 cSpecular = SpecularPass(input.pNormal, V, L, input.dirLights[i].Diffuse, input.dirLights[i].Specular, input.material);
 
         lDiffuse += (cDiffuse * cShadowFactor);
         lSpecular += (cSpecular * cShadowFactor);
@@ -708,7 +708,7 @@ inline float4 ComputeLightsLOD1(ComputeLightsInput input)
         attenuation *= CalcSpotCone(input.spotLights[i].Direction, input.spotLights[i].Angle, L);
 
         float3 cDiffuse = DiffusePass(input.pNormal, L, input.spotLights[i].Diffuse);
-        float3 cSpecular = SpecularPass(input.pNormal, V, L, input.spotLights[i].Specular, input.material);
+        float3 cSpecular = SpecularPass(input.pNormal, V, L, input.spotLights[i].Diffuse, input.spotLights[i].Specular, input.material);
         
         lDiffuse += (cDiffuse * cShadowFactor * attenuation);
         lSpecular += (cSpecular * cShadowFactor * attenuation);
@@ -730,7 +730,7 @@ inline float4 ComputeLightsLOD1(ComputeLightsInput input)
         float attenuation = CalcSphericAttenuation(input.pointLights[i].Intensity, input.pointLights[i].Radius, D);
 
         float3 cDiffuse = DiffusePass(input.pNormal, L, input.pointLights[i].Diffuse);
-        float3 cSpecular = SpecularPass(input.pNormal, V, L, input.pointLights[i].Specular, input.material);
+        float3 cSpecular = SpecularPass(input.pNormal, V, L, input.pointLights[i].Diffuse, input.pointLights[i].Specular, input.material);
 
         lDiffuse += (cDiffuse * cShadowFactor * attenuation);
         lSpecular += (cSpecular * cShadowFactor * attenuation);
