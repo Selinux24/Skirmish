@@ -26,7 +26,10 @@ namespace Engine
                 SceneLightDirectional.BackLight,
             };
 
-            var defLights = new SceneLights(scene);
+            var defLights = new SceneLights(scene)
+            {
+                HemisphericLigth = new SceneLightHemispheric("Default")
+            };
 
             defLights.AddRange(lights);
 
@@ -139,7 +142,7 @@ namespace Engine
         /// <summary>
         /// Albedo
         /// </summary>
-        public float Albedo { get; protected set; } = 0.5f;
+        public float Albedo { get; set; } = 0.5f;
         /// <summary>
         /// Gets light by name
         /// </summary>

@@ -43,7 +43,7 @@ namespace Engine.Content
         /// <param name="indices">Index data</param>
         /// <param name="material">Material</param>
         /// <returns>Returns a new content description</returns>
-        public static ContentDescription FromContentData(IEnumerable<VertexData> vertices, IEnumerable<uint> indices, MaterialContent? material = null)
+        public static ContentDescription FromContentData(IEnumerable<VertexData> vertices, IEnumerable<uint> indices, IMaterialContent material = null)
         {
             var contentData = ContentData.GenerateTriangleList(vertices, indices, material);
 
@@ -59,7 +59,7 @@ namespace Engine.Content
         /// <param name="indices">Index data</param>
         /// <param name="materials">Materials</param>
         /// <returns>Returns a new content description</returns>
-        public static ContentDescription FromContentData(IEnumerable<VertexData> vertices, IEnumerable<uint> indices, IEnumerable<MaterialContent> materials)
+        public static ContentDescription FromContentData(IEnumerable<VertexData> vertices, IEnumerable<uint> indices, IEnumerable<IMaterialContent> materials)
         {
             var contentData = ContentData.GenerateTriangleList(vertices, indices, materials);
 
@@ -74,7 +74,7 @@ namespace Engine.Content
         /// <param name="geometry">Geometry descriptor</param>
         /// <param name="material">Material</param>
         /// <returns>Returns a new content description</returns>
-        public static ContentDescription FromContentData(GeometryDescriptor geometry, MaterialContent? material = null)
+        public static ContentDescription FromContentData(GeometryDescriptor geometry, IMaterialContent material = null)
         {
             var contentData = ContentData.GenerateTriangleList(geometry, material);
 
@@ -89,7 +89,7 @@ namespace Engine.Content
         /// <param name="geometry">Geometry descriptor</param>
         /// <param name="materials">Material list</param>
         /// <returns>Returns a new content description</returns>
-        public static ContentDescription FromContentData(GeometryDescriptor geometry, IEnumerable<MaterialContent> materials)
+        public static ContentDescription FromContentData(GeometryDescriptor geometry, IEnumerable<IMaterialContent> materials)
         {
             var contentData = ContentData.GenerateTriangleList(geometry, materials);
 

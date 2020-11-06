@@ -322,8 +322,8 @@ namespace Skybox
         }
         private async Task InitializeEmitter()
         {
-            MaterialContent mat = MaterialContent.Default;
-            mat.EmissionColor = Color.Yellow;
+            var mat = MaterialCookTorranceContent.Default;
+            mat.EmissiveColor = Color.Yellow.RGB();
 
             var sphere = GeometryUtil.CreateSphere(0.05f, 32, 32);
 

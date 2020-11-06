@@ -95,7 +95,7 @@ namespace Instancing
                     1, 3, 2,
             };
 
-            MaterialContent mat = MaterialContent.Default;
+            var mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = "resources/ground/gravel_01_diffuse.jpg";
             mat.NormalMapTexture = "resources/ground/gravel_01_normal.jpg";
 

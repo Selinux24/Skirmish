@@ -21,17 +21,17 @@ namespace Engine.Effects
         {
             get
             {
-                return this.WorldViewProjectionVariable.GetMatrixArray(MaxCascades);
+                return WorldViewProjectionVariable.GetMatrixArray(MaxCascades);
             }
             set
             {
                 if (value == null)
                 {
-                    this.WorldViewProjectionVariable.SetMatrix(new Matrix[MaxCascades]);
+                    WorldViewProjectionVariable.SetMatrix(new Matrix[MaxCascades]);
                 }
                 else
                 {
-                    this.WorldViewProjectionVariable.SetMatrix(value);
+                    WorldViewProjectionVariable.SetMatrix(value);
                 }
             }
         }
@@ -57,8 +57,8 @@ namespace Engine.Effects
             EngineShaderResourceView animationPalette,
             uint animationPaletteWidth)
         {
-            this.AnimationPalette = animationPalette;
-            this.AnimationPaletteWidth = animationPaletteWidth;
+            AnimationPalette = animationPalette;
+            AnimationPaletteWidth = animationPaletteWidth;
         }
         /// <summary>
         /// Update per frame data
@@ -84,11 +84,11 @@ namespace Engine.Effects
                     m[i] = world * viewProjection[i];
                 }
 
-                this.WorldViewProjectionArray = m;
+                WorldViewProjectionArray = m;
             }
             else
             {
-                this.WorldViewProjectionArray = null;
+                WorldViewProjectionArray = null;
             }
         }
         /// <summary>
@@ -99,12 +99,12 @@ namespace Engine.Effects
         /// <param name="textureIndex">Texture index</param>
         public override void UpdatePerObject(
             uint animationOffset,
-            MeshMaterial material,
+            IMeshMaterial material,
             uint textureIndex)
         {
-            this.AnimationOffset = animationOffset;
-            this.DiffuseMap = material?.DiffuseTexture;
-            this.TextureIndex = textureIndex;
+            AnimationOffset = animationOffset;
+            DiffuseMap = material?.DiffuseTexture;
+            TextureIndex = textureIndex;
         }
     }
 }

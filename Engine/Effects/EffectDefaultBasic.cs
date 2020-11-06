@@ -1038,7 +1038,7 @@ namespace Engine.Effects
         /// <param name="useAnisotropic">Use anisotropic filtering</param>
         public void UpdatePerObject(
             uint animationOffset,
-            MeshMaterial material,
+            IMeshMaterial material,
             uint textureIndex,
             bool useAnisotropic)
         {

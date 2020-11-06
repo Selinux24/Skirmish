@@ -508,12 +508,6 @@ namespace Heightmap
                     Proportion = 0.25f,
                     Resolution = 100f,
                 },
-                Material = new MaterialDescription
-                {
-                    Shininess = 10f,
-                    DiffuseColor = new Color4(1f, 1f, 1f, 1f),
-                    SpecularColor = new Color4(0.1f, 0.1f, 0.1f, 1f),
-                },
             };
             var gDesc = GroundDescription.FromHeightmapDescription(hDesc, 5);
             terrain = await this.AddComponentTerrain("Terrain", gDesc, SceneObjectUsages.None, layerTerrain);
@@ -680,10 +674,6 @@ namespace Heightmap
                 VegetationMap = "map.png",
                 PlantingArea = gardenerArea,
                 CastShadow = false,
-                Material = new MaterialDescription()
-                {
-                    DiffuseColor = Color.Gray,
-                },
                 ChannelRed = new GroundGardenerDescription.Channel()
                 {
                     VegetationTextures = new[] { "grass_v.dds" },

@@ -24,8 +24,8 @@ namespace SceneTest.SceneTest
         private readonly float yDelta = 7f;
         private readonly float zDelta = 0f;
 
-        private readonly Color4 ambientUp = Color4.White;
-        private readonly Color4 ambientDown = new Color4(1f, 0.671f, 0.328f, 1f);
+        private readonly Color3 ambientUp = Color3.White;
+        private readonly Color3 ambientDown = new Color3(1f, 0.671f, 0.328f);
 
         private readonly Color3 waterBaseColor = new Color3(0.067f, 0.065f, 0.003f);
         private readonly Color4 waterColor = new Color4(0.003f, 0.267f, 0.096f, 0.95f);
@@ -327,7 +327,7 @@ namespace SceneTest.SceneTest
                 1, 3, 2,
             };
 
-            MaterialContent mat = MaterialContent.Default;
+            MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = "SceneTest/floors/asphalt/d_road_asphalt_stripes_diffuse.dds";
             mat.NormalMapTexture = "SceneTest/floors/asphalt/d_road_asphalt_stripes_normal.dds";
             mat.SpecularTexture = "SceneTest/floors/asphalt/d_road_asphalt_stripes_specular.dds";
@@ -852,8 +852,8 @@ namespace SceneTest.SceneTest
 
             if (Camera.Position.Y < waterHeight)
             {
-                Lights.HemisphericLigth.AmbientUp = Color4.White * 0.25f;
-                Lights.HemisphericLigth.AmbientDown = waterColor;
+                Lights.HemisphericLigth.AmbientUp = Color3.White * 0.25f;
+                Lights.HemisphericLigth.AmbientDown = waterColor.RGB();
             }
             else
             {

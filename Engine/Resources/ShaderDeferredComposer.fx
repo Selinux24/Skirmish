@@ -103,7 +103,7 @@ float4 PSDirectionalLight(PSLightInput input) : SV_TARGET
 
         ComputeLightsOutput loutput = ComputeDirectionalLight(linput);
 
-        return (k.Diffuse * float4(loutput.diffuse, 1)) + (k.Specular * float4(loutput.specular, 1));
+        return (k.Diffuse * float4(loutput.diffuse, 1)) + float4(k.Specular * loutput.specular, 1);
     }
     else
     {
@@ -141,7 +141,7 @@ float4 PSPointLight(PSLightInput input) : SV_TARGET
 
         ComputeLightsOutput loutput = ComputePointLight(linput);
 
-        return (k.Diffuse * float4(loutput.diffuse, 1)) + (k.Specular * float4(loutput.specular, 1));
+        return (k.Diffuse * float4(loutput.diffuse, 1)) + float4(k.Specular * loutput.specular, 1);
     }
     else
     {
@@ -162,7 +162,7 @@ float4 PSSpotLight(PSLightInput input) : SV_TARGET
     float doLighting = tg2.w;
     float3 position = tg3.xyz;
     float materialIndex = tg3.w;
-
+    
     if (doLighting == 0)
     {
         Material k = GetMaterialData(gMaterialPalette, materialIndex, gMaterialPaletteWidth);
@@ -179,7 +179,7 @@ float4 PSSpotLight(PSLightInput input) : SV_TARGET
 
         ComputeLightsOutput loutput = ComputeSpotLight(linput);
 
-        return (k.Diffuse * float4(loutput.diffuse, 1)) + (k.Specular * float4(loutput.specular, 1));
+        return (k.Diffuse * float4(loutput.diffuse, 1)) + float4(k.Specular * loutput.specular, 1);
     }
     else
     {

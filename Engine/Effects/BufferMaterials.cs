@@ -3,8 +3,6 @@ using System.Runtime.InteropServices;
 
 namespace Engine.Effects
 {
-    using Engine.Common;
-
     /// <summary>
     /// Material buffer
     /// </summary>
@@ -12,72 +10,67 @@ namespace Engine.Effects
     public struct BufferMaterials : IBufferData
     {
         /// <summary>
-        /// Algorihtm
+        /// Algorithm
         /// </summary>
-        public uint Algorihtm;
+        public uint Algorithm;
         /// <summary>
         /// Padding
         /// </summary>
-        public uint Pad1;
+        public uint Block11;
         /// <summary>
         /// Padding
         /// </summary>
-        public uint Pad2;
+        public uint Block12;
         /// <summary>
         /// Padding
         /// </summary>
-        public uint Pad3;
+        public uint Block13;
         /// <summary>
-        /// Ambient color
+        /// Material block 2
         /// </summary>
-        public Color4 Ambient;
+        public Vector4 Block2;
         /// <summary>
-        /// Diffuse color
+        /// Material block 3
+        /// </summary>
+        public Vector4 Block3;
+        /// <summary>
+        /// Material block 4
+        /// </summary>
+        public Vector4 Block4;
+        /// <summary>
+        /// Material block 5 - Diffuse color
         /// </summary>
         public Color4 Diffuse;
         /// <summary>
-        /// Emissive color
+        /// Material block 6 - Emissive color
         /// </summary>
         public Color4 Emissive;
         /// <summary>
-        /// Specular color
+        /// Material block 7 - Ambient color
+        /// </summary>
+        public Color4 Ambient;
+        /// <summary>
+        /// Material block 8 - Specular color
         /// </summary>
         public Color4 Specular;
-        /// <summary>
-        /// Shininess
-        /// </summary>
-        public float Shininess;
-        /// <summary>
-        /// Cook-Torrance Roughness mode
-        /// </summary>
-        public uint RoughnessMode;
-        /// <summary>
-        /// Cook-Torrance Roughness value
-        /// </summary>
-        public float RoughnessValue;
-        /// <summary>
-        /// Cook-Torrance Reflection at norm incidence
-        /// </summary>
-        public float ReflectionAtNormIncidence;
 
         /// <summary>
-        /// Constructor
+        /// Packs current instance into a Vector4 array
         /// </summary>
-        /// <param name="material">Material</param>
-        public BufferMaterials(Material material)
+        /// <returns>Returns the packed material</returns>
+        public Vector4[] Pack()
         {
-            Algorihtm = (uint)material.Algorithm;
-            Pad1 = 1000;
-            Pad2 = 2000;
-            Pad3 = 3000;
-            Emissive = material.EmissiveColor;
-            Ambient = material.AmbientColor;
-            Diffuse = material.DiffuseColor;
-            Specular = material.SpecularColor;
-            Shininess = material.Shininess;
-            RoughnessMode = (uint)material.RoughnessMode;
-            RoughnessValue = material.RoughnessValue;
-            ReflectionAtNormIncidence = material.ReflectionAtNormIncidence;
+            return new[]
+            {
+                new Vector4(Algorithm, Block11, Block12, Block13),
+                Block2,
+                Block3,
+                Block4,
+                Diffuse,
+                Emissive,
+                Ambient,
+                Specular,
+            };
         }
 
         /// <summary>

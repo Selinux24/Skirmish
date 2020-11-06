@@ -147,16 +147,7 @@ namespace Engine.Common
             {
                 var effectInfo = modelContent.Materials[mat];
 
-                MeshMaterial meshMaterial = new MeshMaterial()
-                {
-                    Material = new Material(effectInfo),
-                    EmissionTexture = drw.Textures[effectInfo.EmissionTexture],
-                    AmbientTexture = drw.Textures[effectInfo.AmbientTexture],
-                    DiffuseTexture = drw.Textures[effectInfo.DiffuseTexture],
-                    SpecularTexture = drw.Textures[effectInfo.SpecularTexture],
-                    ReflectiveTexture = drw.Textures[effectInfo.ReflectiveTexture],
-                    NormalMap = drw.Textures[effectInfo.NormalMapTexture],
-                };
+                var meshMaterial = effectInfo.CreateMeshMaterial(drw.Textures);
 
                 drw.Materials.Add(mat, meshMaterial);
             }

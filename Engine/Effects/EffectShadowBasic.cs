@@ -30,8 +30,8 @@ namespace Engine.Effects
             EngineShaderResourceView animationPalette,
             uint animationPaletteWidth)
         {
-            this.AnimationPalette = animationPalette;
-            this.AnimationPaletteWidth = animationPaletteWidth;
+            AnimationPalette = animationPalette;
+            AnimationPaletteWidth = animationPaletteWidth;
         }
         /// <summary>
         /// Update per frame data
@@ -42,7 +42,7 @@ namespace Engine.Effects
             Matrix world,
             DrawContextShadows context)
         {
-            this.WorldViewProjection = world * context.ShadowMap.FromLightViewProjectionArray[0];
+            WorldViewProjection = world * context.ShadowMap.FromLightViewProjectionArray[0];
         }
         /// <summary>
         /// Update per model object data
@@ -52,12 +52,12 @@ namespace Engine.Effects
         /// <param name="textureIndex">Texture index</param>
         public override void UpdatePerObject(
             uint animationOffset,
-            MeshMaterial material,
+            IMeshMaterial material,
             uint textureIndex)
         {
-            this.AnimationOffset = animationOffset;
-            this.DiffuseMap = material?.DiffuseTexture;
-            this.TextureIndex = textureIndex;
+            AnimationOffset = animationOffset;
+            DiffuseMap = material?.DiffuseTexture;
+            TextureIndex = textureIndex;
         }
     }
 }

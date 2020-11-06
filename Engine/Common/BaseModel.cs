@@ -34,11 +34,11 @@ namespace Engine.Common
         /// <summary>
         /// Gets the material list used by the current drawing data
         /// </summary>
-        public IEnumerable<MeshMaterial> Materials
+        public IEnumerable<IMeshMaterial> Materials
         {
             get
             {
-                List<MeshMaterial> matList = new List<MeshMaterial>();
+                List<IMeshMaterial> matList = new List<IMeshMaterial>();
 
                 var drawingData = GetDrawingData(LevelOfDetail.High);
                 if (drawingData != null)

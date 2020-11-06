@@ -250,7 +250,7 @@ namespace Engine.Content.FmtCollada
             {
                 foreach (var material in dae.LibraryMaterials)
                 {
-                    var info = MaterialContent.Default;
+                    var info = MaterialBlinnPhongContent.Default;
 
                     //Find effect
                     var effect = Array.Find(dae.LibraryEffects, e => e.Id == material.InstanceEffect.Url.Replace("#", ""));
@@ -1113,112 +1113,79 @@ namespace Engine.Content.FmtCollada
         /// </summary>
         /// <param name="profile">Profile</param>
         /// <returns>Returns material content</returns>
-        private static MaterialContent ProcessTechniqueFX(ProfileCommon profile)
+        private static MaterialBlinnPhongContent ProcessTechniqueFX(ProfileCommon profile)
         {
-            TechniqueCommon technique = profile.Technique;
+            var technique = profile.Technique;
 
-            VarColorOrTexture emission = null;
-            VarColorOrTexture ambient = null;
             VarColorOrTexture diffuse = null;
+            VarColorOrTexture emissive = null;
+            VarColorOrTexture ambient = null;
             VarColorOrTexture specular = null;
             VarFloatOrParam shininess = null;
-            VarColorOrTexture reflective = null;
-            VarFloatOrParam reflectivity = null;
             BasicTransparent transparent = null;
-            VarFloatOrParam transparency = null;
-            VarFloatOrParam indexOfRefraction = null;
 
             if (technique.Blinn != null || technique.Phong != null)
             {
-                BlinnPhong algorithm = technique.Blinn ?? technique.Phong;
+                var algorithm = technique.Blinn ?? technique.Phong;
 
-                emission = algorithm.Emission;
-                ambient = algorithm.Ambient;
                 diffuse = algorithm.Diffuse;
+                emissive = algorithm.Emission;
+                ambient = algorithm.Ambient;
                 specular = algorithm.Specular;
                 shininess = algorithm.Shininess;
-                reflective = algorithm.Reflective;
-                reflectivity = algorithm.Reflectivity;
                 transparent = algorithm.Transparent;
-                transparency = algorithm.Transparency;
-                indexOfRefraction = algorithm.IndexOfRefraction;
             }
             else if (technique.Constant != null)
             {
-                Constant algorithm = technique.Constant;
+                var algorithm = technique.Constant;
 
-                emission = algorithm.Emission;
-                reflective = algorithm.Reflective;
-                reflectivity = algorithm.Reflectivity;
+                emissive = algorithm.Emission;
                 transparent = algorithm.Transparent;
-                transparency = algorithm.Transparency;
-                indexOfRefraction = algorithm.IndexOfRefraction;
             }
             else if (technique.Lambert != null)
             {
-                Lambert algorithm = technique.Lambert;
+                var algorithm = technique.Lambert;
 
-                emission = algorithm.Emission;
-                ambient = algorithm.Ambient;
                 diffuse = algorithm.Diffuse;
+                emissive = algorithm.Emission;
+                ambient = algorithm.Ambient;
                 specular = algorithm.Specular;
                 shininess = algorithm.Shininess;
-                reflective = algorithm.Reflective;
-                reflectivity = algorithm.Reflectivity;
                 transparent = algorithm.Transparent;
-                transparency = algorithm.Transparency;
-                indexOfRefraction = algorithm.IndexOfRefraction;
             }
 
-            string emissionTexture = GetTexture(profile, emission);
-            Color4 emissionColor = GetColor(emission, new Color4(0.0f, 0.0f, 0.0f, 1.0f));
+            string diffuseTexture = GetTexture(profile, diffuse);
+            Color4 diffuseColor = GetColor(diffuse, MaterialConstants.DiffuseColor);
+
+            string emissiveTexture = GetTexture(profile, emissive);
+            Color3 emissiveColor = GetColor(emissive, MaterialConstants.EmissiveColor);
 
             string ambientTexture = GetTexture(profile, ambient);
-            Color4 ambientColor = GetColor(ambient, new Color4(0.0f, 0.0f, 0.0f, 1.0f));
-
-            string diffuseTexture = GetTexture(profile, diffuse);
-            Color4 diffuseColor = GetColor(diffuse, new Color4(0.8f, 0.8f, 0.8f, 1.0f));
-
-            string reflectiveTexture = GetTexture(profile, reflective);
-            Color4 reflectiveColor = GetColor(reflective, new Color4(0.0f, 0.0f, 0.0f, 0.0f));
+            Color3 ambientColor = GetColor(ambient, MaterialConstants.AmbientColor);
 
             string specularTexture = GetTexture(profile, specular);
-            Color4 specularColor = GetColor(specular, new Color4(0.5f, 0.5f, 0.5f, 1.0f));
+            Color3 specularColor = GetColor(specular, MaterialConstants.SpecularColor);
 
-            float indexOfRefractionValue = indexOfRefraction?.Float.Value ?? 1.0f;
+            float shininessValue = shininess?.Float?.Value ?? MaterialConstants.Shininess;
 
-            float reflectivityValue = reflectivity?.Float.Value ?? 0.0f;
-
-            float shininessValue = shininess?.Float.Value ?? 50.0f;
-
-            float transparencyValue = transparency?.Float.Value ?? 0.0f;
-
-            Color4 transparentColor = transparent?.Opaque == EnumOpaque.AlphaOne ? new Color4(0.0f, 0.0f, 0.0f, 1.0f) : new Color4(0.0f, 0.0f, 0.0f, 0.0f);
+            bool isTransparent = transparent?.Opaque != null;
 
             //Look for bump mappings
             string normalMapTexture = FindBumpMap(profile, technique);
 
-            return new MaterialContent()
+            return new MaterialBlinnPhongContent()
             {
-                Algorithm = SpecularAlgorithms.BlinnPhong,
-
-                EmissionTexture = emissionTexture,
-                EmissionColor = emissionColor,
-                AmbientTexture = ambientTexture,
-                AmbientColor = ambientColor,
                 DiffuseTexture = diffuseTexture,
                 DiffuseColor = diffuseColor,
+                EmissiveTexture = emissiveTexture,
+                EmissiveColor = emissiveColor,
+                AmbientTexture = ambientTexture,
+                AmbientColor = ambientColor,
                 SpecularTexture = specularTexture,
                 SpecularColor = specularColor,
-                ReflectiveTexture = reflectiveTexture,
-                ReflectiveColor = reflectiveColor,
-
                 Shininess = shininessValue,
-                Reflectivity = reflectivityValue,
-                Transparency = transparencyValue,
-                IndexOfRefraction = indexOfRefractionValue,
 
-                Transparent = transparentColor,
+                IsTransparent = isTransparent,
 
                 NormalMapTexture = normalMapTexture,
             };
@@ -1242,6 +1209,21 @@ namespace Engine.Content.FmtCollada
             }
 
             return null;
+        }
+        /// <summary>
+        /// Gets the color value
+        /// </summary>
+        /// <param name="colorOrTexture">Color or texture value</param>
+        /// <param name="defaultColor">Default color value</param>
+        /// <returns>Returns the color value</returns>
+        private static Color3 GetColor(VarColorOrTexture colorOrTexture, Color3 defaultColor)
+        {
+            if (colorOrTexture == null)
+            {
+                return defaultColor;
+            }
+
+            return colorOrTexture.Color?.ToColor3() ?? defaultColor;
         }
         /// <summary>
         /// Gets the color value
@@ -1613,6 +1595,26 @@ namespace Engine.Content.FmtCollada
             else
             {
                 throw new EngineException("Value cannot be parsed to Vector4.");
+            }
+        }
+        /// <summary>
+        /// Reads a Color3 from BasicColor
+        /// </summary>
+        /// <param name="color">BasicColor color</param>
+        /// <returns>Returns the parsed Color3 from BasicColor</returns>
+        public static Color3 ToColor3(this BasicColor color)
+        {
+            if (color.Values != null && color.Values.Length == 3)
+            {
+                return new Color3(color.Values[0], color.Values[1], color.Values[2]);
+            }
+            else if (color.Values != null && color.Values.Length == 4)
+            {
+                return new Color3(color.Values[0], color.Values[1], color.Values[2]);
+            }
+            else
+            {
+                throw new EngineException("Value cannot be parsed to Color2.");
             }
         }
         /// <summary>

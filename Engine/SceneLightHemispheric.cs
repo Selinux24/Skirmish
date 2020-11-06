@@ -7,14 +7,17 @@ namespace Engine
     /// </summary>
     public class SceneLightHemispheric : SceneLight, ISceneLightHemispheric
     {
+        private static readonly Color3 ambientDown = new Color3(0.8f, 0.8f, 0.8f);
+        private static readonly Color3 ambientUp = new Color3(0.2f, 0.2f, 0.2f);
+
         /// <summary>
         /// Ambient down color
         /// </summary>
-        public Color4 AmbientDown { get; set; }
+        public Color3 AmbientDown { get; set; } = ambientDown;
         /// <summary>
         /// Ambient up color
         /// </summary>
-        public Color4 AmbientUp { get; set; }
+        public Color3 AmbientUp { get; set; } = ambientUp;
 
         /// <summary>
         /// Constructor
@@ -22,8 +25,15 @@ namespace Engine
         protected SceneLightHemispheric()
             : base()
         {
-            AmbientDown = Color.White;
-            AmbientUp = Color.White;
+
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public SceneLightHemispheric(string name)
+            : this(name, ambientDown, ambientUp, true)
+        {
+
         }
         /// <summary>
         /// Constructor
@@ -32,7 +42,7 @@ namespace Engine
         /// <param name="ambientDown">Ambient down color contribution</param>
         /// <param name="ambientUp">Ambient up color contribution</param>
         /// <param name="enabled">Lights is enabled</param>
-        public SceneLightHemispheric(string name, Color4 ambientDown, Color4 ambientUp, bool enabled)
+        public SceneLightHemispheric(string name, Color3 ambientDown, Color3 ambientUp, bool enabled)
             : this(name, ambientDown, 1f, ambientUp, 1f, enabled)
         {
 
@@ -46,11 +56,11 @@ namespace Engine
         /// <param name="ambientUp">Ambient up color contribution</param>
         /// <param name="brightnessUp">Brightness up</param>
         /// <param name="enabled">Lights is enabled</param>
-        public SceneLightHemispheric(string name, Color4 ambientDown, float brightnessDown, Color4 ambientUp, float brightnessUp, bool enabled)
+        public SceneLightHemispheric(string name, Color3 ambientDown, float brightnessDown, Color3 ambientUp, float brightnessUp, bool enabled)
             : base(name, false, Color.Transparent, Color.Transparent, enabled)
         {
-            AmbientDown = new Color4(ambientDown.RGB() * brightnessDown, 1);
-            AmbientUp = new Color4(ambientUp.RGB() * brightnessUp, 1);
+            AmbientDown = ambientDown * brightnessDown;
+            AmbientUp = ambientUp * brightnessUp;
         }
 
         /// <inheritdoc/>

@@ -10,6 +10,6 @@ namespace Engine.Common
         /// <summary>
         /// Gets the instance materials list
         /// </summary>
-        IEnumerable<MeshMaterial> Materials { get; }
+        IEnumerable<IMeshMaterial> Materials { get; }
     }
 }

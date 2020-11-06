@@ -8,22 +8,19 @@ namespace Engine.Common
     /// Material by name dictionary
     /// </summary>
     [Serializable]
-    public class MaterialDictionary : Dictionary<string, MeshMaterial>
+    public class MaterialDictionary : Dictionary<string, IMeshMaterial>
     {
         /// <summary>
         /// Default material
         /// </summary>
-        private static readonly MeshMaterial Default = new MeshMaterial()
-        {
-            Material = Material.Default,
-        };
+        private static readonly IMeshMaterial Default = MeshMaterial.DefaultBlinnPhong;
 
         /// <summary>
         /// Gets material description by name
         /// </summary>
         /// <param name="material">Material name</param>
         /// <returns>Return material description by name if exists</returns>
-        public new MeshMaterial this[string material]
+        public new IMeshMaterial this[string material]
         {
             get
             {

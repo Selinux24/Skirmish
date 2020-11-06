@@ -72,7 +72,7 @@ namespace SceneTest.SceneStencilPass
                 1, 3, 2,
             };
 
-            MaterialContent mat = MaterialContent.Default;
+            MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = "SceneStencilPass/floors/asphalt/d_road_asphalt_stripes_diffuse.dds";
             mat.NormalMapTexture = "SceneStencilPass/floors/asphalt/d_road_asphalt_stripes_normal.dds";
             mat.SpecularTexture = "SceneStencilPass/floors/asphalt/d_road_asphalt_stripes_specular.dds";
@@ -102,8 +102,8 @@ namespace SceneTest.SceneStencilPass
         }
         private async Task InitializeEmitter()
         {
-            MaterialContent mat = MaterialContent.Default;
-            mat.EmissionColor = Color.White;
+            MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
+            mat.EmissiveColor = Color.White.RGB();
 
             var sphere = GeometryUtil.CreateSphere(0.1f, 16, 5);
             var vertices = VertexData.FromDescriptor(sphere);

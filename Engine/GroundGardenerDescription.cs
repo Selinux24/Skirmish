@@ -82,9 +82,9 @@ namespace Engine
             {
                 float vRadius = 0;
 
-                for (int i = 0; i < this.Channels.Length; i++)
+                for (int i = 0; i < Channels.Length; i++)
                 {
-                    vRadius = Math.Max(vRadius, this.Channels[i].EndRadius);
+                    vRadius = Math.Max(vRadius, Channels[i].EndRadius);
                 }
 
                 return vRadius;
@@ -94,10 +94,6 @@ namespace Engine
         /// Quadtree maximum node size
         /// </summary>
         public float NodeSize { get; set; } = 128f;
-        /// <summary>
-        /// Material
-        /// </summary>
-        public MaterialDescription Material { get; set; } = new MaterialDescription();
         /// <summary>
         /// Red vegetation channel from map
         /// </summary>
@@ -119,9 +115,9 @@ namespace Engine
             {
                 List<Channel> channels = new List<Channel>
                 {
-                    this.ChannelRed,
-                    this.ChannelGreen,
-                    this.ChannelBlue
+                    ChannelRed,
+                    ChannelGreen,
+                    ChannelBlue
                 };
 
                 return channels.ToArray();
@@ -138,9 +134,9 @@ namespace Engine
         public GroundGardenerDescription()
             : base()
         {
-            this.CastShadow = true;
-            this.DeferredEnabled = false;
-            this.BlendMode = BlendModes.Transparent;
+            CastShadow = true;
+            DeferredEnabled = false;
+            BlendMode = BlendModes.Transparent;
         }
     }
 }

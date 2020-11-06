@@ -166,9 +166,9 @@ namespace Engine.Content.FmtObj
 
     static class ContentExtensions
     {
-        public static MaterialContent CreateContent(this Material mat)
+        public static MaterialBlinnPhongContent CreateContent(this Material mat)
         {
-            var matContent = MaterialContent.Default;
+            var matContent = MaterialBlinnPhongContent.Default;
 
             if (mat.MapNs != null)
             {
@@ -187,7 +187,7 @@ namespace Engine.Content.FmtObj
             }
             else
             {
-                matContent.DiffuseColor = new Color4(mat.Kd, 1);
+                matContent.DiffuseColor = new Color4(mat.Kd, 1f);
             }
 
             if (mat.MapKs != null)
@@ -196,13 +196,13 @@ namespace Engine.Content.FmtObj
             }
             else
             {
-                matContent.SpecularColor = new Color4(mat.Ks, 1);
+                matContent.SpecularColor = mat.Ks;
             }
 
-            matContent.EmissionColor = new Color4(mat.Ke, 1);
-            matContent.IndexOfRefraction = mat.Ni;
+            matContent.EmissiveColor = mat.Ke;
+            matContent.Shininess = mat.Ni;
 
-            matContent.Transparency = mat.D != 0 ? 1f / mat.D : 0;
+            matContent.IsTransparent = mat.D != 0;
 
             matContent.NormalMapTexture = mat.MapBump;
 

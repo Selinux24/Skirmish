@@ -36,6 +36,6 @@ namespace Engine.Effects
         /// <param name="animationOffset">Animation index</param>
         /// <param name="material">Material</param>
         /// <param name="textureIndex">Texture index</param>
-        void UpdatePerObject(uint animationOffset, MeshMaterial material, uint textureIndex);
+        void UpdatePerObject(uint animationOffset, IMeshMaterial material, uint textureIndex);
     }
 }

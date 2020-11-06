@@ -127,7 +127,7 @@ namespace Animation.AnimationParts
                     1, 3, 2,
             };
 
-            MaterialContent mat = MaterialContent.Default;
+            var mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = "AnimationParts/Resources/d_road_asphalt_stripes_diffuse.dds";
             mat.NormalMapTexture = "AnimationParts/Resources/d_road_asphalt_stripes_normal.dds";
             mat.SpecularTexture = "AnimationParts/Resources/d_road_asphalt_stripes_specular.dds";
@@ -161,7 +161,7 @@ namespace Animation.AnimationParts
             Lights.KeyLight.Enabled = true;
             Lights.BackLight.Enabled = false;
             Lights.FillLight.Enabled = false;
-            Lights.HemisphericLigth = new SceneLightHemispheric("Ambient", Color.Gray, Color.White, true);
+            Lights.HemisphericLigth = new SceneLightHemispheric("Ambient", Color.Gray.RGB(), Color.White.RGB(), true);
 
             BoundingBox bbox = tank.GetBoundingBox();
             float playerHeight = bbox.Maximum.Y - bbox.Minimum.Y;

@@ -124,8 +124,8 @@ namespace Collada.DungeonWall
         }
         private async Task InitializeEmitter()
         {
-            MaterialContent mat = MaterialContent.Default;
-            mat.EmissionColor = Color.White;
+            var mat = MaterialPhongContent.Default;
+            mat.EmissiveColor = Color.White.RGB();
 
             var sphere = GeometryUtil.CreateSphere(0.05f, 16, 5);
             var vertices = VertexData.FromDescriptor(sphere);

@@ -95,7 +95,7 @@ namespace Engine.Content
             /// </summary>
             /// <param name="material">Material content</param>
             /// <remarks>Replaces texture path with assigned name</remarks>
-            public void Import(ref MaterialContent material)
+            public void Import(ref IMaterialContent material)
             {
                 if (!string.IsNullOrEmpty(material.AmbientTexture))
                 {
@@ -115,13 +115,13 @@ namespace Engine.Content
                     material.DiffuseTexture = imageName;
                 }
 
-                if (!string.IsNullOrEmpty(material.EmissionTexture))
+                if (!string.IsNullOrEmpty(material.EmissiveTexture))
                 {
                     string imageName = NextImageName;
 
-                    Add(imageName, ImageContent.Texture("", material.EmissionTexture));
+                    Add(imageName, ImageContent.Texture("", material.EmissiveTexture));
 
-                    material.EmissionTexture = imageName;
+                    material.EmissiveTexture = imageName;
                 }
 
                 if (!string.IsNullOrEmpty(material.NormalMapTexture))
@@ -147,30 +147,8 @@ namespace Engine.Content
         /// Materials dictionary by material name
         /// </summary>
         [Serializable]
-        public class MaterialDictionary : Dictionary<string, MaterialContent>
+        public class MaterialDictionary : Dictionary<string, IMaterialContent>
         {
-            /// <summary>
-            /// Images name list
-            /// </summary>
-            public string[] Images
-            {
-                get
-                {
-                    List<string> images = new List<string>();
-
-                    foreach (var item in Values)
-                    {
-                        var itemImages = item.GetImages();
-                        foreach (var image in itemImages)
-                        {
-                            if (!images.Contains(image)) images.Add(image);
-                        }
-                    }
-
-                    return images.ToArray();
-                }
-            }
-
             /// <summary>
             /// Constructor
             /// </summary>
@@ -500,9 +478,9 @@ namespace Engine.Content
         /// <param name="indices">Index list</param>
         /// <param name="material">Material</param>
         /// <returns>Returns new model content</returns>
-        public static ContentData GenerateTriangleList(IEnumerable<VertexData> vertices, IEnumerable<uint> indices, MaterialContent? material = null)
+        public static ContentData GenerateTriangleList(IEnumerable<VertexData> vertices, IEnumerable<uint> indices, IMaterialContent material = null)
         {
-            var materials = new[] { material ?? MaterialContent.Default };
+            var materials = new[] { material ?? MaterialBlinnPhongContent.Default };
 
             return Generate(Topology.TriangleList, vertices, indices, materials);
         }
@@ -513,7 +491,7 @@ namespace Engine.Content
         /// <param name="indices">Index list</param>
         /// <param name="materials">Material list</param>
         /// <returns>Returns new model content</returns>
-        public static ContentData GenerateTriangleList(IEnumerable<VertexData> vertices, IEnumerable<uint> indices, IEnumerable<MaterialContent> materials)
+        public static ContentData GenerateTriangleList(IEnumerable<VertexData> vertices, IEnumerable<uint> indices, IEnumerable<IMaterialContent> materials)
         {
             return Generate(Topology.TriangleList, vertices, indices, materials);
         }
@@ -523,10 +501,10 @@ namespace Engine.Content
         /// <param name="geometry">Geometry descriptor</param>
         /// <param name="material">Material</param>
         /// <returns>Returns new model content</returns>
-        public static ContentData GenerateTriangleList(GeometryDescriptor geometry, MaterialContent? material = null)
+        public static ContentData GenerateTriangleList(GeometryDescriptor geometry, IMaterialContent material = null)
         {
             var vertices = VertexData.FromDescriptor(geometry);
-            var materials = new[] { material ?? MaterialContent.Default };
+            var materials = new[] { material ?? MaterialBlinnPhongContent.Default };
 
             return Generate(Topology.TriangleList, vertices, geometry.Indices, materials);
         }
@@ -536,7 +514,7 @@ namespace Engine.Content
         /// <param name="geometry">Geometry descriptor</param>
         /// <param name="materials">Material list</param>
         /// <returns>Returns new model content</returns>
-        public static ContentData GenerateTriangleList(GeometryDescriptor geometry, IEnumerable<MaterialContent> materials)
+        public static ContentData GenerateTriangleList(GeometryDescriptor geometry, IEnumerable<IMaterialContent> materials)
         {
             var vertices = VertexData.FromDescriptor(geometry);
 
@@ -550,7 +528,7 @@ namespace Engine.Content
         /// <param name="indices">Index list</param>
         /// <param name="materials">Material list</param>
         /// <returns>Returns new model content</returns>
-        private static ContentData Generate(Topology topology, IEnumerable<VertexData> vertices, IEnumerable<uint> indices, IEnumerable<MaterialContent> materials)
+        private static ContentData Generate(Topology topology, IEnumerable<VertexData> vertices, IEnumerable<uint> indices, IEnumerable<IMaterialContent> materials)
         {
             ContentData modelContent = new ContentData();
             string materialName = NoMaterial;
@@ -593,7 +571,7 @@ namespace Engine.Content
         public ContentData()
         {
             //Adding default material for non material geometry, like volumes
-            Materials.Add(NoMaterial, MaterialContent.Default);
+            Materials.Add(NoMaterial, MaterialBlinnPhongContent.Default);
         }
 
         /// <summary>
@@ -1068,9 +1046,8 @@ namespace Engine.Content
             //Add textures
             TryAddImage(mat.AmbientTexture, ref res);
             TryAddImage(mat.DiffuseTexture, ref res);
-            TryAddImage(mat.EmissionTexture, ref res);
+            TryAddImage(mat.EmissiveTexture, ref res);
             TryAddImage(mat.NormalMapTexture, ref res);
-            TryAddImage(mat.ReflectiveTexture, ref res);
             TryAddImage(mat.SpecularTexture, ref res);
         }
         /// <summary>
@@ -1233,7 +1210,7 @@ namespace Engine.Content
         /// </summary>
         /// <param name="name">Material name</param>
         /// <param name="material">Material content</param>
-        public void AddMaterial(string name, MaterialContent material)
+        public void AddMaterial(string name, IMaterialContent material)
         {
             Images.Import(ref material);
             Materials.Add(name, material);

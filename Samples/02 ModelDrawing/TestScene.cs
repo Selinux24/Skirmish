@@ -109,7 +109,7 @@ namespace ModelDrawing
                 1, 3, 2,
             };
 
-            var material = MaterialContent.Default;
+            var material = MaterialBlinnPhongContent.Default;
             material.DiffuseTexture = "resources/floor.png";
 
             var desc = new ModelDescription()

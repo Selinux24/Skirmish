@@ -1225,23 +1225,21 @@ namespace Terrain.Rts
 
         public override void NavigationGraphUpdated()
         {
-            gameReady = true;
-
-            if (started)
+            if (!started)
             {
-                return;
-            }
-
-            Task.Run(async () =>
-            {
-                await StartHelicopter();
-                await StartTanks();
-                await StartDebug();
-
-                BeginToggleGarageLights();
-
                 started = true;
-            });
+
+                Task.Run(async () =>
+                {
+                    await StartHelicopter();
+                    await StartTanks();
+                    await StartDebug();
+
+                    BeginToggleGarageLights();
+
+                    gameReady = true;
+                });
+            }
         }
         private async Task StartHelicopter()
         {
