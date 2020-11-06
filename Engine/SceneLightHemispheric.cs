@@ -7,8 +7,8 @@ namespace Engine
     /// </summary>
     public class SceneLightHemispheric : SceneLight, ISceneLightHemispheric
     {
-        private static readonly Color3 ambientDown = new Color3(0.8f, 0.8f, 0.8f);
-        private static readonly Color3 ambientUp = new Color3(0.2f, 0.2f, 0.2f);
+        private static readonly Color3 ambientDown = new Color3(0.0f, 0.0f, 0.0f);
+        private static readonly Color3 ambientUp = new Color3(0.1f, 0.1f, 0.1f);
 
         /// <summary>
         /// Ambient down color

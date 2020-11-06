@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Engine.Common
 {
@@ -1201,6 +1202,22 @@ namespace Engine.Common
             res = tmpVertices;
         }
         /// <summary>
+        /// Computes constraints into vertices
+        /// </summary>
+        /// <param name="constraint">Constraint</param>
+        /// <param name="vertices">Vertices</param>
+        /// <returns>Resulting vertices</returns>
+        public static async Task<IEnumerable<VertexData>> ConstraintVerticesAsync(BoundingBox constraint, IEnumerable<VertexData> vertices)
+        {
+            return await Task.Factory.StartNew(() =>
+            {
+                ConstraintVertices(constraint, vertices, out var tres);
+
+                return tres;
+            },
+            TaskCreationOptions.LongRunning);
+        }
+        /// <summary>
         /// Computes constraints into vertices and indices
         /// </summary>
         /// <param name="constraint">Constraint</param>
@@ -1253,6 +1270,23 @@ namespace Engine.Common
 
             resVertices = tmpVertices;
             resIndices = tmpIndices;
+        }
+        /// <summary>
+        /// Computes constraints into vertices and indices
+        /// </summary>
+        /// <param name="constraint">Constraint</param>
+        /// <param name="vertices">Vertices</param>
+        /// <param name="indices">Indices</param>
+        /// <returns>Resulting vertices and indices</returns>
+        public static async Task<(IEnumerable<VertexData> Vertices, IEnumerable<uint> Indices)> ConstraintIndicesAsync(BoundingBox constraint, IEnumerable<VertexData> vertices, IEnumerable<uint> indices)
+        {
+            return await Task.Factory.StartNew(() =>
+            {
+                ConstraintIndices(constraint, vertices, indices, out var tvertices, out var tindices);
+
+                return (tvertices, tindices);
+            },
+            TaskCreationOptions.LongRunning);
         }
     }
 }

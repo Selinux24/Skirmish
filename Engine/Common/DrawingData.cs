@@ -80,35 +80,30 @@ namespace Engine.Common
         /// <returns>Returns the generated drawing data objects</returns>
         public static async Task<DrawingData> Build(Game game, string name, ContentData modelContent, DrawingDataDescription description, BufferDescriptor instancingBuffer = null)
         {
-            DrawingData res = null;
+            DrawingData res = new DrawingData(game, description);
 
-            await Task.Run(()=>
+            //Animation
+            if (description.LoadAnimation)
             {
-                res = new DrawingData(game, description);
+                InitializeSkinningData(res, modelContent);
+            }
 
-                //Animation
-                if (description.LoadAnimation)
-                {
-                    InitializeSkinningData(res, modelContent);
-                }
+            //Images
+            InitializeTextures(res, game, modelContent, description.TextureCount);
 
-                //Images
-                InitializeTextures(res, game, modelContent, description.TextureCount);
+            //Materials
+            InitializeMaterials(res, modelContent);
 
-                //Materials
-                InitializeMaterials(res, modelContent);
+            //Skins & Meshes
+            await InitializeGeometry(res, modelContent, description);
 
-                //Skins & Meshes
-                InitializeGeometry(res, modelContent, description);
+            //Update meshes into device
+            InitializeMeshes(res, game, name, description.DynamicBuffers, instancingBuffer);
 
-                //Update meshes into device
-                InitializeMeshes(res, game, name, description.DynamicBuffers, instancingBuffer);
+            //Lights
+            InitializeLights(res, modelContent);
 
-                //Lights
-                InitializeLights(res, modelContent);
-            });
-
-            return res;
+            return await Task.FromResult(res);
         }
         /// <summary>
         /// Initialize textures
@@ -119,20 +114,22 @@ namespace Engine.Common
         /// <param name="textureCount">Texture count</param>
         private static void InitializeTextures(DrawingData drw, Game game, ContentData modelContent, int textureCount)
         {
-            if (modelContent.Images != null)
+            if (modelContent.Images == null)
             {
-                foreach (string images in modelContent.Images.Keys)
+                return;
+            }
+
+            foreach (string images in modelContent.Images.Keys)
+            {
+                var info = modelContent.Images[images];
+
+                var view = game.ResourceManager.RequestResource(info);
+                if (view != null)
                 {
-                    var info = modelContent.Images[images];
+                    drw.Textures.Add(images, view);
 
-                    var view = game.ResourceManager.RequestResource(info);
-                    if (view != null)
-                    {
-                        drw.Textures.Add(images, view);
-
-                        //Set the maximum texture index in the model
-                        if (info.Count > textureCount) textureCount = info.Count;
-                    }
+                    //Set the maximum texture index in the model
+                    if (info.Count > textureCount) textureCount = info.Count;
                 }
             }
         }
@@ -158,11 +155,11 @@ namespace Engine.Common
         /// <param name="drw">Drawing data</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="description">Description</param>
-        private static void InitializeGeometry(DrawingData drw, ContentData modelContent, DrawingDataDescription description)
+        private static async Task InitializeGeometry(DrawingData drw, ContentData modelContent, DrawingDataDescription description)
         {
             foreach (string meshName in modelContent.Geometry.Keys)
             {
-                InitializeGeometryMesh(drw, modelContent, description, meshName);
+                await InitializeGeometryMesh(drw, modelContent, description, meshName);
             }
         }
         /// <summary>
@@ -172,7 +169,7 @@ namespace Engine.Common
         /// <param name="modelContent">Model content</param>
         /// <param name="description">Description</param>
         /// <param name="meshName">Mesh name</param>
-        private static void InitializeGeometryMesh(DrawingData drw, ContentData modelContent, DrawingDataDescription description, string meshName)
+        private static async Task InitializeGeometryMesh(DrawingData drw, ContentData modelContent, DrawingDataDescription description, string meshName)
         {
             //Get skinning data
             var isSkinned = ReadSkinningData(
@@ -198,10 +195,9 @@ namespace Engine.Common
                 var vertexType = GetVertexType(geometry.VertexType, isSkinned, description.LoadNormalMaps, drw.Materials, material);
 
                 //Process the vertex data
-                geometry.ProcessVertexData(
-                    vertexType,
-                    description.Constraint,
-                    out var vertices, out var indices);
+                var vertexData = await geometry.ProcessVertexData(vertexType, description.Constraint);
+                var vertices = vertexData.vertices;
+                var indices = vertexData.indices;
 
                 if (!bindShapeMatrix.IsIdentity)
                 {
@@ -306,24 +302,26 @@ namespace Engine.Common
         /// <param name="modelContent">Model content</param>
         private static void InitializeSkinningData(DrawingData drw, ContentData modelContent)
         {
-            if (modelContent.SkinningInfo?.Count > 0)
+            if (modelContent.SkinningInfo?.Any() != true)
             {
-                //Use the definition to read animation data into a clip dictionary
-                foreach (var sInfo in modelContent.SkinningInfo.Values)
+                return;
+            }
+
+            //Use the definition to read animation data into a clip dictionary
+            foreach (var sInfo in modelContent.SkinningInfo.Values)
+            {
+                if (drw.SkinningData != null)
                 {
-                    if (drw.SkinningData != null)
-                    {
-                        continue;
-                    }
-
-                    drw.SkinningData = new SkinningData(sInfo.Skeleton);
-
-                    var animations = InitializeJoints(modelContent, sInfo.Skeleton.Root, sInfo.Controllers);
-
-                    drw.SkinningData.Initialize(
-                        animations,
-                        modelContent.Animations.Definition);
+                    continue;
                 }
+
+                drw.SkinningData = new SkinningData(sInfo.Skeleton);
+
+                var animations = InitializeJoints(modelContent, sInfo.Skeleton.Root, sInfo.Controllers);
+
+                drw.SkinningData.Initialize(
+                    animations,
+                    modelContent.Animations.Definition);
             }
         }
         /// <summary>

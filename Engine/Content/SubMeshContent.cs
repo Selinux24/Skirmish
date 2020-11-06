@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Engine.Content
 {
@@ -247,7 +248,7 @@ namespace Engine.Content
         /// Gets triangle list
         /// </summary>
         /// <returns>Returns the triangle list</returns>
-        public Triangle[] GetTriangles()
+        public IEnumerable<Triangle> GetTriangles()
         {
             if (Topology == Topology.TriangleList)
             {
@@ -298,11 +299,9 @@ namespace Engine.Content
         /// <summary>
         /// Process the vertex data
         /// </summary>
-        /// <param name="description">Decription</param>
         /// <param name="vertexType">Vertext type</param>
-        /// <param name="vertices">Resulting vertices</param>
-        /// <param name="indices">Resulting indices</param>
-        public void ProcessVertexData(VertexTypes vertexType, BoundingBox? constraint, out IEnumerable<VertexData> vertices, out IEnumerable<uint> indices)
+        /// <param name="constraint">Constraint</param>
+        public async Task<(IEnumerable<VertexData> vertices, IEnumerable<uint> indices)> ProcessVertexData(VertexTypes vertexType, BoundingBox? constraint)
         {
             if (VertexData.IsTangent(vertexType))
             {
@@ -311,34 +310,23 @@ namespace Engine.Content
 
             if (!constraint.HasValue)
             {
-                vertices = Vertices;
-                indices = Indices;
-
-                return;
+                return (Vertices, Indices);
             }
 
             if (Indices?.Length > 0)
             {
-                GeometryUtil.ConstraintIndices(
-                    constraint.Value,
-                    Vertices, Indices,
-                    out vertices, out indices);
+                return await GeometryUtil.ConstraintIndicesAsync(constraint.Value, Vertices, Indices);
             }
             else
             {
-                GeometryUtil.ConstraintVertices(
-                    constraint.Value,
-                    Vertices,
-                    out vertices);
+                var vertices = await GeometryUtil.ConstraintVerticesAsync(constraint.Value, Vertices);
+                var indices = new uint[] { };
 
-                indices = new uint[] { };
+                return (vertices, indices);
             }
         }
 
-        /// <summary>
-        /// Gets text representation of instance
-        /// </summary>
-        /// <returns>Returns text representation of instance</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
             return $"VertexType: {VertexType}; Vertices: {Vertices?.Length ?? 0}; Indices: {Indices?.Length ?? 0}; Material: {Material}";

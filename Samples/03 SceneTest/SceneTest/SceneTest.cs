@@ -24,8 +24,8 @@ namespace SceneTest.SceneTest
         private readonly float yDelta = 7f;
         private readonly float zDelta = 0f;
 
-        private readonly Color3 ambientUp = Color3.White;
-        private readonly Color3 ambientDown = new Color3(1f, 0.671f, 0.328f);
+        private readonly Color3 ambientUp = Color3.Black;
+        private readonly Color3 ambientDown = new Color3(1f, 0.671f, 0.328f) * 0.2f;
 
         private readonly Color3 waterBaseColor = new Color3(0.067f, 0.065f, 0.003f);
         private readonly Color4 waterColor = new Color4(0.003f, 0.267f, 0.096f, 0.95f);
@@ -66,6 +66,7 @@ namespace SceneTest.SceneTest
         private Model tree = null;
         private ModelInstanced treesI = null;
 
+        private SkyScattering skydom = null;
         private SkyPlane skyPlane = null;
 
         private readonly Dictionary<string, ParticleSystemDescription> pDescriptions = new Dictionary<string, ParticleSystemDescription>();
@@ -260,7 +261,7 @@ namespace SceneTest.SceneTest
                 }
             });
 
-            await this.AddComponentSkyScattering("Sky", new SkyScatteringDescription());
+            skydom = await this.AddComponentSkyScattering("Sky", new SkyScatteringDescription());
 
             skyPlane = await this.AddComponentSkyPlane("Clouds", new SkyPlaneDescription()
             {
@@ -852,13 +853,23 @@ namespace SceneTest.SceneTest
 
             if (Camera.Position.Y < waterHeight)
             {
-                Lights.HemisphericLigth.AmbientUp = Color3.White * 0.25f;
-                Lights.HemisphericLigth.AmbientDown = waterColor.RGB();
+                Lights.HemisphericLigth.AmbientUp = Color3.Black;
+                Lights.HemisphericLigth.AmbientDown = waterColor.RGB() * 1.5f;
+
+                float depth = waterHeight - Camera.Position.Y;
+                Lights.EnableFog(1, Math.Max((1 - (depth / 300f)) * 500f, 25f), waterColor * 0.25f);
+                GameEnvironment.Background = waterColor * 0.26f;
+                skydom.Visible = false;
+                skyPlane.Visible = false;
             }
             else
             {
                 Lights.HemisphericLigth.AmbientUp = ambientUp;
                 Lights.HemisphericLigth.AmbientDown = ambientDown;
+
+                Lights.DisableFog();
+                skydom.Visible = true;
+                skyPlane.Visible = true;
             }
         }
         private void UpdateInputCamera(GameTime gameTime, bool shift)

@@ -211,7 +211,7 @@ float4 PSCombineLights(PSLightInput input) : SV_TARGET
 
         Material k = GetMaterialData(gMaterialPalette, materialIndex, gMaterialPaletteWidth);
 
-        color = DeferredLightEquation(k, lAmbient, gAlbedo, light, color);
+        color = DeferredLightEquation(k, color, gAlbedo, lAmbient, light);
 
         if (gFogRange > 0)
         {

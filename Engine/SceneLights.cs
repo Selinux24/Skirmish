@@ -142,7 +142,7 @@ namespace Engine
         /// <summary>
         /// Albedo
         /// </summary>
-        public float Albedo { get; set; } = 0.5f;
+        public float Albedo { get; set; } = 1f;
         /// <summary>
         /// Gets light by name
         /// </summary>
@@ -623,7 +623,7 @@ namespace Engine
         /// <param name="start">Starting distance</param>
         /// <param name="end">End distance</param>
         /// <param name="color">Fog color</param>
-        public void EnableFog(float start, float end, Color color)
+        public void EnableFog(float start, float end, Color4 color)
         {
             FogStart = start;
             FogRange = end - start;
