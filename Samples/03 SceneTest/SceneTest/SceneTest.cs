@@ -327,7 +327,7 @@ namespace SceneTest.SceneTest
                 1, 3, 2,
             };
 
-            MaterialContent mat = MaterialContent.Default;
+            MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = "SceneTest/floors/asphalt/d_road_asphalt_stripes_diffuse.dds";
             mat.NormalMapTexture = "SceneTest/floors/asphalt/d_road_asphalt_stripes_normal.dds";
             mat.SpecularTexture = "SceneTest/floors/asphalt/d_road_asphalt_stripes_specular.dds";

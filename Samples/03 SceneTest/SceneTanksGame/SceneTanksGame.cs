@@ -687,7 +687,7 @@ namespace SceneTest.SceneTanksGame
                 1, 3, 2,
             };
 
-            var material = MaterialContent.Default;
+            var material = MaterialBlinnPhongContent.Default;
             material.DiffuseTexture = "SceneTanksGame/Landscape.png";
 
             var content = new ModelDescription
@@ -701,7 +701,7 @@ namespace SceneTest.SceneTanksGame
         private async Task InitializeModelProjectile()
         {
             var sphereDesc = GeometryUtil.CreateSphere(1, 5, 5);
-            var material = MaterialContent.Default;
+            var material = MaterialBlinnPhongContent.Default;
             material.DiffuseColor = Color.Black;
 
             var content = new ModelDescription

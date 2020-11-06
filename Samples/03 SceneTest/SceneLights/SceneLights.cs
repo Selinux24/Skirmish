@@ -96,7 +96,7 @@ namespace SceneTest.SceneLights
                 1, 3, 2,
             };
 
-            MaterialContent mat = MaterialContent.Default;
+            MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = "SceneLights/floors/asphalt/d_road_asphalt_stripes_diffuse.dds";
             mat.NormalMapTexture = "SceneLights/floors/asphalt/d_road_asphalt_stripes_normal.dds";
             mat.SpecularTexture = "SceneLights/floors/asphalt/d_road_asphalt_stripes_specular.dds";
@@ -138,8 +138,8 @@ namespace SceneTest.SceneLights
         }
         private async Task InitializeEmitter()
         {
-            MaterialContent mat = MaterialContent.Default;
-            mat.EmissionColor = Color.White;
+            MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
+            mat.EmissiveColor = Color.White.RGB();
 
             var s = GeometryUtil.CreateSphere(0.1f, 16, 5);
             var vertices = VertexData.FromDescriptor(s);
@@ -158,7 +158,7 @@ namespace SceneTest.SceneLights
         }
         private async Task InitializeLanterns()
         {
-            MaterialContent mat = MaterialContent.Default;
+            MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
 
             var cone = GeometryUtil.CreateCone(0.25f, 16, 0.5f);
 

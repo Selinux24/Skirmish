@@ -127,7 +127,7 @@ namespace Animation.AnimationParts
                     1, 3, 2,
             };
 
-            MaterialContent mat = MaterialContent.Default;
+            var mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = "AnimationParts/Resources/d_road_asphalt_stripes_diffuse.dds";
             mat.NormalMapTexture = "AnimationParts/Resources/d_road_asphalt_stripes_normal.dds";
             mat.SpecularTexture = "AnimationParts/Resources/d_road_asphalt_stripes_specular.dds";

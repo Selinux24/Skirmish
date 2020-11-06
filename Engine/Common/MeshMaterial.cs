@@ -1,23 +1,48 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 
 namespace Engine.Common
 {
     /// <summary>
     /// Mesh material
     /// </summary>
-    public sealed class MeshMaterial : IEquatable<MeshMaterial>
+    public sealed class MeshMaterial : IMeshMaterial, IEquatable<MeshMaterial>
     {
         /// <summary>
-        /// Default material
+        /// Default phong
         /// </summary>
-        public static MeshMaterial Default
+        public static MeshMaterial DefaultPhong
         {
             get
             {
-                return new MeshMaterial()
+                return new MeshMaterial
                 {
-                    Material = Material.Default
+                    Material = MaterialPhong.Default,
+                };
+            }
+        }
+        /// <summary>
+        /// Default blinn-phong
+        /// </summary>
+        public static MeshMaterial DefaultBlinnPhong
+        {
+            get
+            {
+                return new MeshMaterial
+                {
+                    Material = MaterialBlinnPhong.Default,
+                };
+            }
+        }
+        /// <summary>
+        /// Default cook-torrance
+        /// </summary>
+        public static MeshMaterial DefaultCookTorrance
+        {
+            get
+            {
+                return new MeshMaterial
+                {
+                    Material = MaterialCookTorrance.Default,
                 };
             }
         }
@@ -25,7 +50,7 @@ namespace Engine.Common
         /// <summary>
         /// Material description
         /// </summary>
-        public Material Material { get; set; }
+        public IMaterial Material { get; set; }
         /// <summary>
         /// Emission texture
         /// </summary>
@@ -42,10 +67,6 @@ namespace Engine.Common
         /// Specular texture
         /// </summary>
         public EngineShaderResourceView SpecularTexture { get; set; }
-        /// <summary>
-        /// Reflective texture
-        /// </summary>
-        public EngineShaderResourceView ReflectiveTexture { get; set; }
         /// <summary>
         /// Normal map
         /// </summary>
@@ -64,45 +85,21 @@ namespace Engine.Common
         /// </summary>
         public uint ResourceSize { get; set; } = 0;
 
-        /// <summary>
-        /// Packs current instance into a Vector4 array
-        /// </summary>
-        /// <returns>Returns the packed material</returns>
-        internal Vector4[] Pack()
-        {
-            Vector4[] res = new Vector4[5];
-
-            res[0] = Material.EmissiveColor;
-            res[1] = Material.AmbientColor;
-            res[2] = Material.DiffuseColor;
-            res[3] = Material.SpecularColor;
-            res[3].W = Material.Shininess;
-            res[4] = new Vector4((uint)Material.Algorithm, (uint)Material.RoughnessMode, Material.RoughnessValue, Material.ReflectionAtNormIncidence);
-
-            return res;
-        }
-
-        /// <summary>
-        /// Gets whether the current instance is equal to the other instance
-        /// </summary>
-        /// <param name="other">The other instance</param>
-        /// <returns>Returns true if both instances are equal</returns>
+        /// <inheritdoc/>
         public bool Equals(MeshMaterial other)
         {
             return
-                Material.Equals(other.Material) &&
+                Material?.Equals(other.Material) == true &&
                 EmissionTexture == other.EmissionTexture &&
                 AmbientTexture == other.AmbientTexture &&
                 DiffuseTexture == other.DiffuseTexture &&
                 SpecularTexture == other.SpecularTexture &&
-                ReflectiveTexture == other.ReflectiveTexture &&
                 NormalMap == other.NormalMap;
         }
-
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"{Material} EmissionTexture: {EmissionTexture != null}; AmbientTexture: {AmbientTexture != null}; DiffuseTexture: {DiffuseTexture != null}; SpecularTexture: {SpecularTexture != null}; ReflectiveTexture: {ReflectiveTexture != null}; NormalMapTexture: {NormalMap != null};";
+            return $"{Material} EmissionTexture: {EmissionTexture != null}; AmbientTexture: {AmbientTexture != null}; DiffuseTexture: {DiffuseTexture != null}; SpecularTexture: {SpecularTexture != null}; NormalMapTexture: {NormalMap != null};";
         }
     }
 }

@@ -634,7 +634,7 @@ namespace Engine
         /// <summary>
         /// Terrain material
         /// </summary>
-        private readonly MeshMaterial terrainMaterial;
+        private readonly IMeshMaterial terrainMaterial;
 
         /// <summary>
         /// Gets or sets whether use alpha mapping or not
@@ -684,7 +684,7 @@ namespace Engine
         /// <summary>
         /// Gets the used material list
         /// </summary>
-        public virtual IEnumerable<MeshMaterial> Materials
+        public virtual IEnumerable<IMeshMaterial> Materials
         {
             get
             {
@@ -731,10 +731,7 @@ namespace Engine
             }
 
             // Read material
-            terrainMaterial = new MeshMaterial()
-            {
-                Material = description.Heightmap.Material?.GetMaterial() ?? Material.Default
-            };
+            terrainMaterial = MeshMaterial.DefaultBlinnPhong;
 
             // Get vertices and indices from heightmap
             heightMap.BuildGeometry(

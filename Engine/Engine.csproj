@@ -205,13 +205,18 @@
     <Compile Include="Common\IInstacingData.cs" />
     <Compile Include="Common\IntersectionHelper.cs" />
     <Compile Include="Common\IntersectionTriangle.cs" />
+    <Compile Include="MaterialBlinnPhong.cs" />
+    <Compile Include="MaterialCookTorrance.cs" />
+    <Compile Include="MaterialPhong.cs" />
     <Compile Include="Common\NormalDescriptor.cs" />
     <Compile Include="Common\OrientedBoundingBoxExtensions.cs" />
     <Compile Include="Common\BufferManagerVertices.cs" />
     <Compile Include="Common\RayPickingHelper.cs" />
-    <Compile Include="Common\SpecularAlgorithms.cs" />
-    <Compile Include="Common\SpecularCookTorranceModes.cs" />
+    <Compile Include="SpecularAlgorithms.cs" />
     <Compile Include="Common\VertexFont.cs" />
+    <Compile Include="Content\MaterialBlinnPhongContent.cs" />
+    <Compile Include="Content\MaterialConstants.cs" />
+    <Compile Include="Content\MaterialCookTorranceContent.cs" />
     <Compile Include="Content\SubMeshContent.cs" />
     <Compile Include="GameAudioManager.cs" />
     <Compile Include="Audio\GameAudio.cs" />
@@ -285,6 +290,9 @@
     <Compile Include="IGameResourceRequest.cs" />
     <Compile Include="IIntersectable.cs" />
     <Compile Include="IManipulator.cs" />
+    <Compile Include="IMaterial.cs" />
+    <Compile Include="IMaterialContent.cs" />
+    <Compile Include="IMeshMaterial.cs" />
     <Compile Include="IntersectDetectionMode.cs" />
     <Compile Include="IntersectionVolumeMesh.cs" />
     <Compile Include="ISceneLight.cs" />
@@ -366,7 +374,6 @@
     <Compile Include="IUpdatable.cs" />
     <Compile Include="IVertexList.cs" />
     <Compile Include="BasicManipulatorController.cs" />
-    <Compile Include="MaterialDescription.cs" />
     <Compile Include="ModelPart.cs" />
     <Compile Include="ModularSceneryLevel.cs" />
     <Compile Include="ModularSceneryLevels.cs" />
@@ -575,7 +582,7 @@
     <Compile Include="Content\AnimationContent.cs" />
     <Compile Include="Content\ContentManager.cs" />
     <Compile Include="Content\ControllerContent.cs" />
-    <Compile Include="Content\MaterialContent.cs" />
+    <Compile Include="Content\MaterialPhongContent.cs" />
     <Compile Include="Content\ImageContent.cs" />
     <Compile Include="Content\MeshContent.cs" />
     <Compile Include="Content\ContentData.cs" />
@@ -606,7 +613,6 @@
     <Compile Include="EngineForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Common\Material.cs" />
     <Compile Include="ModelInstanced.cs" />
     <Compile Include="SceneLightDirectional.cs" />
     <Compile Include="SceneLightPoint.cs" />

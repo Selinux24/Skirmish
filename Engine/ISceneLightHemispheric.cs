@@ -10,10 +10,10 @@ namespace Engine
         /// <summary>
         /// Ambient down color
         /// </summary>
-        Color4 AmbientDown { get; set; }
+        Color3 AmbientDown { get; set; }
         /// <summary>
         /// Ambient up color
         /// </summary>
-        Color4 AmbientUp { get; set; }
+        Color3 AmbientUp { get; set; }
     }
 }

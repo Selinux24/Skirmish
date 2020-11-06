@@ -769,9 +769,9 @@ namespace Engine
         /// <param name="materialPaletteWidth">Material palette width</param>
         private void UpdateMaterialPalette(out EngineShaderResourceView materialPalette, out uint materialPaletteWidth)
         {
-            List<MeshMaterial> mats = new List<MeshMaterial>
+            List<IMeshMaterial> mats = new List<IMeshMaterial>
             {
-                MeshMaterial.Default
+                MeshMaterial.DefaultBlinnPhong,
             };
 
             var matComponents = GetComponents().OfType<IUseMaterials>();
@@ -790,7 +790,7 @@ namespace Engine
             for (int i = 0; i < mats.Count; i++)
             {
                 var mat = mats[i];
-                var matV = mat.Pack();
+                var matV = mat.Material.Convert().Pack();
 
                 mat.ResourceIndex = (uint)i;
                 mat.ResourceOffset = (uint)values.Count;

@@ -138,11 +138,10 @@ namespace SceneTest.SceneMaterials
                 1, 3, 2,
             };
 
-            MaterialContent mat = MaterialContent.Default;
-            mat.Algorithm = SpecularAlgorithms.CookTorrance;
-            mat.IndexOfRefraction = 0.9f;
-            mat.Reflectivity = 0.2f;
-            mat.Shininess = 0.1f;
+            MaterialCookTorranceContent mat = MaterialCookTorranceContent.Default;
+            mat.F0 = 0.9f;
+            mat.Roughness = 0.2f;
+            mat.K = 0.1f;
             mat.DiffuseTexture = "SceneMaterials/corrugated_d.jpg";
             mat.NormalMapTexture = "SceneMaterials/corrugated_n.jpg";
 
@@ -159,8 +158,8 @@ namespace SceneTest.SceneMaterials
         }
         private async Task InitializeEmitter()
         {
-            MaterialContent mat = MaterialContent.Default;
-            mat.EmissionColor = Color.White;
+            MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
+            mat.EmissiveColor = Color3.White;
 
             var sphere = GeometryUtil.CreateSphere(0.25f, 32, 32);
 
@@ -174,7 +173,7 @@ namespace SceneTest.SceneMaterials
 
             lightEmitter = await this.AddComponentModel("Emitter", desc);
         }
-        private async Task<ModelInstanced> InitializeSphereInstanced(string name, int count, IEnumerable<MaterialContent> materials)
+        private async Task<ModelInstanced> InitializeSphereInstanced(string name, int count, IEnumerable<IMaterialContent> materials)
         {
             var sphere = GeometryUtil.CreateSphere(radius, stacks, stacks);
             var vertices = VertexData.FromDescriptor(sphere);
@@ -205,15 +204,15 @@ namespace SceneTest.SceneMaterials
             int totalSpheres = (int)Math.Pow(e, 3);
             float distance = 3f;
 
-            List<MaterialContent> materials = new List<MaterialContent>();
+            List<IMaterialContent> materials = new List<IMaterialContent>();
             for (int r = 0; r < colorCount; r += n)
             {
                 for (int g = 0; g < colorCount; g += n)
                 {
                     for (int b = 0; b < colorCount; b += n)
                     {
-                        var diffuse = new Color4(r / (float)colorCount, g / (float)colorCount, b / (float)colorCount, 1);
-                        var specular = new Color4(r / (float)colorCount * specularFactor, g / (float)colorCount * specularFactor, b / (float)colorCount * specularFactor, 1f);
+                        var diffuse = new Color3(r / (float)colorCount, g / (float)colorCount, b / (float)colorCount);
+                        var specular = new Color3(r / (float)colorCount * specularFactor, g / (float)colorCount * specularFactor, b / (float)colorCount * specularFactor);
 
                         materials.Add(GenerateMaterial(diffuse, specular, shininess, nmap));
                     }
@@ -237,19 +236,16 @@ namespace SceneTest.SceneMaterials
                 }
             }
         }
-        private MaterialContent GenerateMaterial(Color4 diffuse, Color4 specular, float shininess, bool nmap)
+        private IMaterialContent GenerateMaterial(Color3 diffuse, Color3 specular, float shininess, bool nmap)
         {
-            MaterialContent mat = MaterialContent.Default;
-            mat.DiffuseColor = diffuse;
+            MaterialCookTorranceContent mat = MaterialCookTorranceContent.Default;
+            mat.DiffuseColor = new Color4(diffuse, 1f);
             mat.DiffuseTexture = "SceneMaterials/white.png";
             mat.NormalMapTexture = nmap ? "SceneMaterials/nmap1.jpg" : "SceneMaterials/nmap2.png";
             mat.SpecularColor = specular;
-            mat.Shininess = shininess;
-
-            mat.Algorithm = SpecularAlgorithms.CookTorrance;
-            mat.IndexOfRefraction = 0.8f; //F0
-            mat.Reflectivity = 0.1f; //roughness
-            mat.Shininess = 0.2f; //K
+            mat.F0 = 0.8f;
+            mat.Roughness = 0.1f;
+            mat.K = 0.2f;
 
             return mat;
         }

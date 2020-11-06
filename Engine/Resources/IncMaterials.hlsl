@@ -2,24 +2,21 @@
 #define SPECULAR_ALGORITHM_BLINNPHONG 	1
 #define SPECULAR_ALGORITHM_COOKTORRANCE	2
 
-#define ROUGHNESS_LOOK_UP 	0
-#define ROUGHNESS_BECKMANN 	1
-#define ROUGHNESS_GAUSSIAN 	2
-
-#define MATERIAL_STRIDE 5
+#define MATERIAL_STRIDE 8
 
 struct Material
 {
-    float4 Ambient;
-    float4 Diffuse;
-    float4 Emissive;
-    float4 Specular;
-    float Shininess;
-    
     uint Algorithm;
-    uint RoughnessMode;
-    float RoughnessValue;
-    float ReflectionAtNormIncidence;
+
+    float4 Diffuse;
+    float3 Emissive;
+    float3 Ambient;
+    float3 Specular;
+    
+    float Shininess;
+    float F0;
+    float Roughness;
+    float K;
 };
 
 Texture2D CookTorranceTexRoughness;
@@ -37,18 +34,29 @@ inline Material GetMaterialData(Texture2D materialsTexture, uint materialIndex, 
     float4 mat4 = materialsTexture.Load(uint3(baseIndex % paletteWidth, baseIndex / paletteWidth, 0));
     baseIndex++;
     float4 mat5 = materialsTexture.Load(uint3(baseIndex % paletteWidth, baseIndex / paletteWidth, 0));
+    baseIndex++;
+    float4 mat6 = materialsTexture.Load(uint3(baseIndex % paletteWidth, baseIndex / paletteWidth, 0));
+    baseIndex++;
+    float4 mat7 = materialsTexture.Load(uint3(baseIndex % paletteWidth, baseIndex / paletteWidth, 0));
+    baseIndex++;
+    float4 mat8 = materialsTexture.Load(uint3(baseIndex % paletteWidth, baseIndex / paletteWidth, 0));
 
     Material mat;
 
-    mat.Emissive = mat1;
-    mat.Ambient = mat2;
-    mat.Diffuse = mat3;
-    mat.Specular = float4(mat4.xyz, 1.0f);
-    mat.Shininess = mat4.w;
-    mat.Algorithm = uint(mat5.x);
-    mat.RoughnessMode = uint(mat5.y);
-    mat.RoughnessValue = mat5.z;
-    mat.ReflectionAtNormIncidence = mat5.w;
+    mat.Algorithm = uint(mat1.r);
+
+    mat.F0 = mat2.r;
+    mat.Roughness = mat2.g;
+    mat.K = mat2.b;
+
+    mat.Diffuse = mat5;
+    
+    mat.Emissive = mat6.rgb;
+
+    mat.Ambient = mat7.rgb;
+
+    mat.Specular = mat8.rgb;
+    mat.Shininess = mat8.a;
 
     return mat;
 }

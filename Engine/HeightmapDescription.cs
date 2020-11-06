@@ -68,10 +68,6 @@ namespace Engine
         /// </summary>
         public HeightmapTexturesDescription Textures { get; set; } = new HeightmapTexturesDescription();
         /// <summary>
-        /// Terrain material
-        /// </summary>
-        public MaterialDescription Material { get; set; } = new MaterialDescription();
-        /// <summary>
         /// Use falloff map
         /// </summary>
         public bool UseFalloff { get; set; } = false;
@@ -124,7 +120,7 @@ namespace Engine
             string materialName = "material";
             string geoName = "geometry";
 
-            MaterialContent material = MaterialContent.Default;
+            MaterialBlinnPhongContent material = MaterialBlinnPhongContent.Default;
 
             SubMeshContent geo = new SubMeshContent(Topology.TriangleList, materialName, true, false);
             geo.SetVertices(vertices);

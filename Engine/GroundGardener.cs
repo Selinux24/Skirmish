@@ -572,7 +572,7 @@ namespace Engine
         /// <summary>
         /// Material
         /// </summary>
-        private readonly MeshMaterial material;
+        private readonly IMeshMaterial material;
         /// <summary>
         /// Foliage visible sphere
         /// </summary>
@@ -604,7 +604,7 @@ namespace Engine
         /// <summary>
         /// Material
         /// </summary>
-        public IEnumerable<MeshMaterial> Materials
+        public IEnumerable<IMeshMaterial> Materials
         {
             get
             {
@@ -644,10 +644,7 @@ namespace Engine
             foliageSphere = new BoundingSphere(Vector3.Zero, description.VisibleRadius);
 
             //Material
-            material = new MeshMaterial()
-            {
-                Material = description.Material != null ? description.Material.GetMaterial() : Material.Default
-            };
+            material = MeshMaterial.DefaultPhong;
 
             //Read foliage textures
             string contentPath = description.ContentPath;

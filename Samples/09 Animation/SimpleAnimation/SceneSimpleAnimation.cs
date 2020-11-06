@@ -180,7 +180,7 @@ namespace Animation.SimpleAnimation
                     1, 3, 2,
             };
 
-            MaterialContent mat = MaterialContent.Default;
+            var mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = "SimpleAnimation/resources/d_road_asphalt_stripes_diffuse.dds";
             mat.NormalMapTexture = "SimpleAnimation/resources/d_road_asphalt_stripes_normal.dds";
             mat.SpecularTexture = "SimpleAnimation/resources/d_road_asphalt_stripes_specular.dds";

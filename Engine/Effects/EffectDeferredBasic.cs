@@ -176,11 +176,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.worldVar.GetMatrix();
+                return worldVar.GetMatrix();
             }
             set
             {
-                this.worldVar.SetMatrix(value);
+                worldVar.SetMatrix(value);
             }
         }
         /// <summary>
@@ -190,11 +190,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.worldViewProjectionVar.GetMatrix();
+                return worldViewProjectionVar.GetMatrix();
             }
             set
             {
-                this.worldViewProjectionVar.SetMatrix(value);
+                worldViewProjectionVar.SetMatrix(value);
             }
         }
         /// <summary>
@@ -204,11 +204,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.animationOffsetVar.GetUInt();
+                return animationOffsetVar.GetUInt();
             }
             set
             {
-                this.animationOffsetVar.Set(value);
+                animationOffsetVar.Set(value);
             }
         }
         /// <summary>
@@ -218,11 +218,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.materialIndexVar.GetUInt();
+                return materialIndexVar.GetUInt();
             }
             set
             {
-                this.materialIndexVar.Set(value);
+                materialIndexVar.Set(value);
             }
         }
         /// <summary>
@@ -232,11 +232,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.textureIndexVar.GetUInt();
+                return textureIndexVar.GetUInt();
             }
             set
             {
-                this.textureIndexVar.Set(value);
+                textureIndexVar.Set(value);
             }
         }
         /// <summary>
@@ -246,15 +246,15 @@ namespace Engine.Effects
         {
             get
             {
-                return this.diffuseMapVar.GetResource();
+                return diffuseMapVar.GetResource();
             }
             set
             {
-                if (this.currentDiffuseMap != value)
+                if (currentDiffuseMap != value)
                 {
-                    this.diffuseMapVar.SetResource(value);
+                    diffuseMapVar.SetResource(value);
 
-                    this.currentDiffuseMap = value;
+                    currentDiffuseMap = value;
 
                     Counters.TextureUpdates++;
                 }
@@ -267,15 +267,15 @@ namespace Engine.Effects
         {
             get
             {
-                return this.normalMapVar.GetResource();
+                return normalMapVar.GetResource();
             }
             set
             {
-                if (this.currentNormalMap != value)
+                if (currentNormalMap != value)
                 {
-                    this.normalMapVar.SetResource(value);
+                    normalMapVar.SetResource(value);
 
-                    this.currentNormalMap = value;
+                    currentNormalMap = value;
 
                     Counters.TextureUpdates++;
                 }
@@ -288,15 +288,15 @@ namespace Engine.Effects
         {
             get
             {
-                return this.specularMapVar.GetResource();
+                return specularMapVar.GetResource();
             }
             set
             {
-                if (this.currentSpecularMap != value)
+                if (currentSpecularMap != value)
                 {
-                    this.specularMapVar.SetResource(value);
+                    specularMapVar.SetResource(value);
 
-                    this.currentSpecularMap = value;
+                    currentSpecularMap = value;
 
                     Counters.TextureUpdates++;
                 }
@@ -309,11 +309,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.animationPaletteWidthVar.GetUInt();
+                return animationPaletteWidthVar.GetUInt();
             }
             set
             {
-                this.animationPaletteWidthVar.Set(value);
+                animationPaletteWidthVar.Set(value);
             }
         }
         /// <summary>
@@ -323,15 +323,15 @@ namespace Engine.Effects
         {
             get
             {
-                return this.animationPaletteVar.GetResource();
+                return animationPaletteVar.GetResource();
             }
             set
             {
-                if (this.currentAnimationPalette != value)
+                if (currentAnimationPalette != value)
                 {
-                    this.animationPaletteVar.SetResource(value);
+                    animationPaletteVar.SetResource(value);
 
-                    this.currentAnimationPalette = value;
+                    currentAnimationPalette = value;
 
                     Counters.TextureUpdates++;
                 }
@@ -344,20 +344,20 @@ namespace Engine.Effects
         {
             get
             {
-                return this.anisotropic == true;
+                return anisotropic == true;
             }
             set
             {
-                if (this.anisotropic != value)
+                if (anisotropic != value)
                 {
-                    this.anisotropic = value;
+                    anisotropic = value;
 
-                    var sampler = this.anisotropic == true ?
-                        this.samplerAnisotropic.GetSamplerState() :
-                        this.samplerLinear.GetSamplerState();
+                    var sampler = anisotropic == true ?
+                        samplerAnisotropic.GetSamplerState() :
+                        samplerLinear.GetSamplerState();
 
-                    this.samplerDiffuseVar.SetValue(0, sampler);
-                    this.samplerNormalVar.SetValue(0, sampler);
+                    samplerDiffuseVar.SetValue(0, sampler);
+                    samplerNormalVar.SetValue(0, sampler);
                 }
             }
         }
@@ -371,45 +371,45 @@ namespace Engine.Effects
         public EffectDeferredBasic(Graphics graphics, byte[] effect, bool compile)
             : base(graphics, effect, compile)
         {
-            this.PositionColor = this.Effect.GetTechniqueByName("PositionColor");
-            this.PositionColorSkinned = this.Effect.GetTechniqueByName("PositionColorSkinned");
-            this.PositionNormalColor = this.Effect.GetTechniqueByName("PositionNormalColor");
-            this.PositionNormalColorSkinned = this.Effect.GetTechniqueByName("PositionNormalColorSkinned");
-            this.PositionTexture = this.Effect.GetTechniqueByName("PositionTexture");
-            this.PositionTextureSkinned = this.Effect.GetTechniqueByName("PositionTextureSkinned");
-            this.PositionNormalTexture = this.Effect.GetTechniqueByName("PositionNormalTexture");
-            this.PositionNormalTextureSkinned = this.Effect.GetTechniqueByName("PositionNormalTextureSkinned");
-            this.PositionNormalTextureTangent = this.Effect.GetTechniqueByName("PositionNormalTextureTangent");
-            this.PositionNormalTextureTangentSkinned = this.Effect.GetTechniqueByName("PositionNormalTextureTangentSkinned");
-            this.InstancingPositionColor = this.Effect.GetTechniqueByName("PositionColorI");
-            this.InstancingPositionColorSkinned = this.Effect.GetTechniqueByName("PositionColorSkinnedI");
-            this.InstancingPositionNormalColor = this.Effect.GetTechniqueByName("PositionNormalColorI");
-            this.InstancingPositionNormalColorSkinned = this.Effect.GetTechniqueByName("PositionNormalColorSkinnedI");
-            this.InstancingPositionTexture = this.Effect.GetTechniqueByName("PositionTextureI");
-            this.InstancingPositionTextureSkinned = this.Effect.GetTechniqueByName("PositionTextureSkinnedI");
-            this.InstancingPositionNormalTexture = this.Effect.GetTechniqueByName("PositionNormalTextureI");
-            this.InstancingPositionNormalTextureSkinned = this.Effect.GetTechniqueByName("PositionNormalTextureSkinnedI");
-            this.InstancingPositionNormalTextureTangent = this.Effect.GetTechniqueByName("PositionNormalTextureTangentI");
-            this.InstancingPositionNormalTextureTangentSkinned = this.Effect.GetTechniqueByName("PositionNormalTextureTangentSkinnedI");
+            PositionColor = Effect.GetTechniqueByName("PositionColor");
+            PositionColorSkinned = Effect.GetTechniqueByName("PositionColorSkinned");
+            PositionNormalColor = Effect.GetTechniqueByName("PositionNormalColor");
+            PositionNormalColorSkinned = Effect.GetTechniqueByName("PositionNormalColorSkinned");
+            PositionTexture = Effect.GetTechniqueByName("PositionTexture");
+            PositionTextureSkinned = Effect.GetTechniqueByName("PositionTextureSkinned");
+            PositionNormalTexture = Effect.GetTechniqueByName("PositionNormalTexture");
+            PositionNormalTextureSkinned = Effect.GetTechniqueByName("PositionNormalTextureSkinned");
+            PositionNormalTextureTangent = Effect.GetTechniqueByName("PositionNormalTextureTangent");
+            PositionNormalTextureTangentSkinned = Effect.GetTechniqueByName("PositionNormalTextureTangentSkinned");
+            InstancingPositionColor = Effect.GetTechniqueByName("PositionColorI");
+            InstancingPositionColorSkinned = Effect.GetTechniqueByName("PositionColorSkinnedI");
+            InstancingPositionNormalColor = Effect.GetTechniqueByName("PositionNormalColorI");
+            InstancingPositionNormalColorSkinned = Effect.GetTechniqueByName("PositionNormalColorSkinnedI");
+            InstancingPositionTexture = Effect.GetTechniqueByName("PositionTextureI");
+            InstancingPositionTextureSkinned = Effect.GetTechniqueByName("PositionTextureSkinnedI");
+            InstancingPositionNormalTexture = Effect.GetTechniqueByName("PositionNormalTextureI");
+            InstancingPositionNormalTextureSkinned = Effect.GetTechniqueByName("PositionNormalTextureSkinnedI");
+            InstancingPositionNormalTextureTangent = Effect.GetTechniqueByName("PositionNormalTextureTangentI");
+            InstancingPositionNormalTextureTangentSkinned = Effect.GetTechniqueByName("PositionNormalTextureTangentSkinnedI");
 
-            this.worldVar = this.Effect.GetVariableMatrix("gWorld");
-            this.worldViewProjectionVar = this.Effect.GetVariableMatrix("gWorldViewProjection");
-            this.animationOffsetVar = this.Effect.GetVariableScalar("gAnimationOffset");
-            this.materialIndexVar = this.Effect.GetVariableScalar("gMaterialIndex");
-            this.textureIndexVar = this.Effect.GetVariableScalar("gTextureIndex");
-            this.diffuseMapVar = this.Effect.GetVariableTexture("gDiffuseMapArray");
-            this.normalMapVar = this.Effect.GetVariableTexture("gNormalMapArray");
-            this.specularMapVar = this.Effect.GetVariableTexture("gSpecularMapArray");
-            this.animationPaletteWidthVar = this.Effect.GetVariableScalar("gAnimationPaletteWidth");
-            this.animationPaletteVar = this.Effect.GetVariableTexture("gAnimationPalette");
+            worldVar = Effect.GetVariableMatrix("gWorld");
+            worldViewProjectionVar = Effect.GetVariableMatrix("gWorldViewProjection");
+            animationOffsetVar = Effect.GetVariableScalar("gAnimationOffset");
+            materialIndexVar = Effect.GetVariableScalar("gMaterialIndex");
+            textureIndexVar = Effect.GetVariableScalar("gTextureIndex");
+            diffuseMapVar = Effect.GetVariableTexture("gDiffuseMapArray");
+            normalMapVar = Effect.GetVariableTexture("gNormalMapArray");
+            specularMapVar = Effect.GetVariableTexture("gSpecularMapArray");
+            animationPaletteWidthVar = Effect.GetVariableScalar("gAnimationPaletteWidth");
+            animationPaletteVar = Effect.GetVariableTexture("gAnimationPalette");
 
             //Samplers
-            this.samplerDiffuseVar = this.Effect.GetVariableSampler("SamplerDiffuse");
-            this.samplerNormalVar = this.Effect.GetVariableSampler("SamplerNormal");
+            samplerDiffuseVar = Effect.GetVariableSampler("SamplerDiffuse");
+            samplerNormalVar = Effect.GetVariableSampler("SamplerNormal");
 
             //Initialize states
-            this.samplerLinear = EngineSamplerState.Linear(graphics);
-            this.samplerAnisotropic = EngineSamplerState.Anisotropic(graphics, 4);
+            samplerLinear = EngineSamplerState.Linear(graphics);
+            samplerAnisotropic = EngineSamplerState.Anisotropic(graphics, 4);
         }
         /// <summary>
         /// Destructor
@@ -426,16 +426,11 @@ namespace Engine.Effects
         {
             if (disposing)
             {
-                if (this.samplerLinear != null)
-                {
-                    this.samplerLinear.Dispose();
-                    this.samplerLinear = null;
-                }
-                if (this.samplerAnisotropic != null)
-                {
-                    this.samplerAnisotropic.Dispose();
-                    this.samplerAnisotropic = null;
-                }
+                samplerLinear?.Dispose();
+                samplerLinear = null;
+
+                samplerAnisotropic?.Dispose();
+                samplerAnisotropic = null;
             }
 
             base.Dispose(disposing);
@@ -456,25 +451,25 @@ namespace Engine.Effects
                 switch (vertexType)
                 {
                     case VertexTypes.PositionColor:
-                        return this.PositionColor;
+                        return PositionColor;
                     case VertexTypes.PositionTexture:
-                        return this.PositionTexture;
+                        return PositionTexture;
                     case VertexTypes.PositionNormalColor:
-                        return this.PositionNormalColor;
+                        return PositionNormalColor;
                     case VertexTypes.PositionNormalTexture:
-                        return this.PositionNormalTexture;
+                        return PositionNormalTexture;
                     case VertexTypes.PositionNormalTextureTangent:
-                        return this.PositionNormalTextureTangent;
+                        return PositionNormalTextureTangent;
                     case VertexTypes.PositionColorSkinned:
-                        return this.PositionColorSkinned;
+                        return PositionColorSkinned;
                     case VertexTypes.PositionTextureSkinned:
-                        return this.PositionTextureSkinned;
+                        return PositionTextureSkinned;
                     case VertexTypes.PositionNormalColorSkinned:
-                        return this.PositionNormalColorSkinned;
+                        return PositionNormalColorSkinned;
                     case VertexTypes.PositionNormalTextureSkinned:
-                        return this.PositionNormalTextureSkinned;
+                        return PositionNormalTextureSkinned;
                     case VertexTypes.PositionNormalTextureTangentSkinned:
-                        return this.PositionNormalTextureTangentSkinned;
+                        return PositionNormalTextureTangentSkinned;
                     default:
                         throw new EngineException(string.Format("Bad vertex type for effect: {0}", vertexType));
                 }
@@ -484,25 +479,25 @@ namespace Engine.Effects
                 switch (vertexType)
                 {
                     case VertexTypes.PositionColor:
-                        return this.InstancingPositionColor;
+                        return InstancingPositionColor;
                     case VertexTypes.PositionTexture:
-                        return this.InstancingPositionTexture;
+                        return InstancingPositionTexture;
                     case VertexTypes.PositionNormalColor:
-                        return this.InstancingPositionNormalColor;
+                        return InstancingPositionNormalColor;
                     case VertexTypes.PositionNormalTexture:
-                        return this.InstancingPositionNormalTexture;
+                        return InstancingPositionNormalTexture;
                     case VertexTypes.PositionNormalTextureTangent:
-                        return this.InstancingPositionNormalTextureTangent;
+                        return InstancingPositionNormalTextureTangent;
                     case VertexTypes.PositionColorSkinned:
-                        return this.InstancingPositionColorSkinned;
+                        return InstancingPositionColorSkinned;
                     case VertexTypes.PositionTextureSkinned:
-                        return this.InstancingPositionTextureSkinned;
+                        return InstancingPositionTextureSkinned;
                     case VertexTypes.PositionNormalColorSkinned:
-                        return this.InstancingPositionNormalColorSkinned;
+                        return InstancingPositionNormalColorSkinned;
                     case VertexTypes.PositionNormalTextureSkinned:
-                        return this.InstancingPositionNormalTextureSkinned;
+                        return InstancingPositionNormalTextureSkinned;
                     case VertexTypes.PositionNormalTextureTangentSkinned:
-                        return this.InstancingPositionNormalTextureTangentSkinned;
+                        return InstancingPositionNormalTextureTangentSkinned;
                     default:
                         throw new EngineException(string.Format("Bad instanced vertex type for effect: {0}", vertexType));
                 }
@@ -518,8 +513,8 @@ namespace Engine.Effects
             EngineShaderResourceView animationPalette,
             uint animationPaletteWidth)
         {
-            this.AnimationPalette = animationPalette;
-            this.AnimationPaletteWidth = animationPaletteWidth;
+            AnimationPalette = animationPalette;
+            AnimationPaletteWidth = animationPaletteWidth;
         }
         /// <summary>
         /// Update per frame data
@@ -530,8 +525,8 @@ namespace Engine.Effects
             Matrix world,
             DrawContext context)
         {
-            this.World = world;
-            this.WorldViewProjection = world * context.ViewProjection;
+            World = world;
+            WorldViewProjection = world * context.ViewProjection;
         }
         /// <summary>
         /// Update per frame full data
@@ -542,7 +537,7 @@ namespace Engine.Effects
             Matrix world,
             DrawContext context)
         {
-            this.UpdatePerFrameBasic(world, context);
+            UpdatePerFrameBasic(world, context);
         }
         /// <summary>
         /// Update per model object data
@@ -553,29 +548,29 @@ namespace Engine.Effects
         /// <param name="useAnisotropic">Use anisotropic filtering</param>
         public void UpdatePerObject(
             uint animationOffset,
-            MeshMaterial material,
+            IMeshMaterial material,
             uint textureIndex,
             bool useAnisotropic)
         {
             if (material != null)
             {
-                this.DiffuseMap = material.DiffuseTexture;
-                this.NormalMap = material.NormalMap;
-                this.SpecularMap = material.SpecularTexture;
-                this.MaterialIndex = material.ResourceIndex;
+                DiffuseMap = material.DiffuseTexture;
+                NormalMap = material.NormalMap;
+                SpecularMap = material.SpecularTexture;
+                MaterialIndex = material.ResourceIndex;
             }
             else
             {
-                this.DiffuseMap = null;
-                this.NormalMap = null;
-                this.SpecularMap = null;
-                this.MaterialIndex = 0;
+                DiffuseMap = null;
+                NormalMap = null;
+                SpecularMap = null;
+                MaterialIndex = 0;
             }
 
-            this.TextureIndex = textureIndex;
-            this.Anisotropic = useAnisotropic;
+            TextureIndex = textureIndex;
+            Anisotropic = useAnisotropic;
 
-            this.AnimationOffset = animationOffset;
+            AnimationOffset = animationOffset;
         }
     }
 }

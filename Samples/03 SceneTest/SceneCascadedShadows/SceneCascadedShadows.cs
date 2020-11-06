@@ -86,7 +86,7 @@ namespace SceneTest.SceneCascadedShadows
                 1, 3, 2,
             };
 
-            MaterialContent mat = MaterialContent.Default;
+            MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = "SceneLights/floors/asphalt/d_road_asphalt_stripes_diffuse.dds";
             mat.NormalMapTexture = "SceneLights/floors/asphalt/d_road_asphalt_stripes_normal.dds";
             mat.SpecularTexture = "SceneLights/floors/asphalt/d_road_asphalt_stripes_specular.dds";

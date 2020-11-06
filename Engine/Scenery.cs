@@ -196,9 +196,9 @@ namespace Engine
             /// Gets all the used materials
             /// </summary>
             /// <returns>Returns the used materials array</returns>
-            public IEnumerable<MeshMaterial> GetMaterials()
+            public IEnumerable<IMeshMaterial> GetMaterials()
             {
-                List<MeshMaterial> matList = new List<MeshMaterial>();
+                List<IMeshMaterial> matList = new List<IMeshMaterial>();
 
                 foreach (string meshName in DrawingData.Meshes.Keys)
                 {
@@ -246,11 +246,11 @@ namespace Engine
         /// <summary>
         /// Gets the used material list
         /// </summary>
-        public virtual IEnumerable<MeshMaterial> Materials
+        public virtual IEnumerable<IMeshMaterial> Materials
         {
             get
             {
-                var matList = patchDictionary.Values.SelectMany(v => v?.GetMaterials() ?? new MeshMaterial[] { }).ToArray();
+                var matList = patchDictionary.Values.SelectMany(v => v?.GetMaterials() ?? new IMeshMaterial[] { }).ToArray();
 
                 return matList;
             }
@@ -324,7 +324,10 @@ namespace Engine
             {
                 var patch = await SceneryPatch.CreatePatch(Game, Name, content, node);
 
-                patchDictionary.AddOrUpdate(node.Id, patch, (key, oldValue) => patch);
+                while (!patchDictionary.TryAdd(node.Id, patch))
+                {
+                    //None
+                }
             });
 
             await Task.WhenAll(tasks);
@@ -552,16 +555,11 @@ namespace Engine
         /// <returns>Returns the created component</returns>
         public static async Task<Scenery> AddComponentScenery(this Scene scene, string name, GroundDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
         {
-            Scenery component = null;
-
-            await Task.Run(() =>
-            {
-                component = new Scenery(name, scene, description);
-
-                scene.AddComponent(component, usage, order);
-            });
+            Scenery component = new Scenery(name, scene, description);
 
             await component.IntializePatches();
+
+            scene.AddComponent(component, usage, order);
 
             return component;
         }

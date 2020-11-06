@@ -151,7 +151,7 @@ float4 PSPositionColor(PSVertexPositionColor input) : SV_TARGET
 {
     Material material = GetMaterialData(gMaterialPalette, gPSMaterialIndex + input.materialIndex, gMaterialPaletteWidth);
 
-	float4 matColor = input.color * material.Diffuse;
+    float4 matColor = input.color * material.Diffuse;
 
 	if (gPSFogRange > 0)
 	{
@@ -505,16 +505,16 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 {
     Material material = GetMaterialData(gMaterialPalette, gPSMaterialIndex + input.materialIndex, gMaterialPaletteWidth);
 
-	float4 diffuseMap = 1;
+	float4 diffuseColor = 1;
 	if (gPSUseColorDiffuse == true)
 	{
-        diffuseMap = gPSDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
+        diffuseColor = gPSDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
     }
 
-	float4 specularMap = 1;
+	float4 specularColor = 1;
 	if (gPSUseColorSpecular == true)
 	{
-        specularMap = gPSSpecularMapArray.Sample(SamplerSpecular, float3(input.tex, input.textureIndex));
+        specularColor = gPSSpecularMapArray.Sample(SamplerSpecular, float3(input.tex, input.textureIndex));
     }
 
 	ComputeLightsInput lInput;
@@ -522,8 +522,8 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
     lInput.material = material;
 	lInput.pPosition = input.positionWorld;
 	lInput.pNormal = input.normalWorld;
-	lInput.pColorDiffuse = diffuseMap;
-	lInput.pColorSpecular = specularMap;
+    lInput.pColorDiffuse = diffuseColor;
+    lInput.pColorSpecular = specularColor;
 
 	lInput.ePosition = gPSEyePositionWorld;
 	lInput.lod = gLOD;
@@ -654,16 +654,16 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
 {
     Material material = GetMaterialData(gMaterialPalette, gPSMaterialIndex + input.materialIndex, gMaterialPaletteWidth);
 
-	float4 diffuseMap = 1;
+	float4 diffuseColor = 1;
 	if (gPSUseColorDiffuse == true)
 	{
-        diffuseMap = gPSDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
+        diffuseColor = gPSDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
     }
 
-	float4 specularMap = 1;
+    float4 specularColor = 1;
 	if (gPSUseColorSpecular == true)
 	{
-        specularMap = gPSSpecularMapArray.Sample(SamplerSpecular, float3(input.tex, input.textureIndex));
+        specularColor = gPSSpecularMapArray.Sample(SamplerSpecular, float3(input.tex, input.textureIndex));
     }
 
     float3 normalMap = gPSNormalMapArray.Sample(SamplerNormal, float3(input.tex, input.textureIndex)).rgb;
@@ -674,8 +674,8 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
     lInput.material = material;
 	lInput.pPosition = input.positionWorld;
 	lInput.pNormal = normalWorld;
-	lInput.pColorDiffuse = diffuseMap;
-	lInput.pColorSpecular = specularMap;
+    lInput.pColorDiffuse = diffuseColor;
+    lInput.pColorSpecular = specularColor;
 
 	lInput.ePosition = gPSEyePositionWorld;
 	lInput.lod = gLOD;

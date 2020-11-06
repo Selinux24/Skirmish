@@ -174,17 +174,17 @@ namespace Collada.ModularDungeon
 
             _ = Task.Run(async () =>
             {
-                 try
-                 {
-                     Logger.WriteDebug(this, $"Saving graph file. {fileName}");
+                try
+                {
+                    Logger.WriteDebug(this, $"Saving graph file. {fileName}");
 
-                     await PathFinderDescription.Save(fileName, NavigationGraph);
-                 }
-                 catch (Exception ex)
-                 {
-                     Logger.WriteError(this, $"Error saving graph file. {ex.Message}", ex);
-                 }
-             });
+                    await PathFinderDescription.Save(fileName, NavigationGraph);
+                }
+                catch (Exception ex)
+                {
+                    Logger.WriteError(this, $"Error saving graph file. {ex.Message}", ex);
+                }
+            });
         }
         public override void NavigationGraphUpdated()
         {
@@ -748,7 +748,9 @@ namespace Collada.ModularDungeon
         }
         private void InitializeLights()
         {
-            Lights.HemisphericLigth = new SceneLightHemispheric("hemi_light", ambientDown, ambientUp, true);
+            Lights.Albedo = 1f;
+
+            Lights.HemisphericLigth = new SceneLightHemispheric("hemi_light", ambientDown.RGB(), ambientUp.RGB(), true);
             Lights.KeyLight.Enabled = false;
             Lights.BackLight.Enabled = false;
             Lights.FillLight.Enabled = false;

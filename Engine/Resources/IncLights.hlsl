@@ -208,11 +208,11 @@ inline float3 SpecularPassCookTorrance(float3 normal, float3 viewer, float3 ligh
 
 		// Fresnel reflectance
         float F = pow(1.0 - VdotH, 5.0);
-        F *= (1.0 - k.ReflectionAtNormIncidence);
-        F += k.ReflectionAtNormIncidence;
+        F *= (1.0 - k.F0);
+        F += k.F0;
 
 		// Microfacet distribution by Beckmann
-        float m_squared = k.RoughnessValue * k.RoughnessValue;
+        float m_squared = k.Roughness * k.Roughness;
         float r1 = 1.0 / (4.0 * m_squared * pow(NdotH, 4.0));
         float r2 = (NdotH * NdotH - 1.0) / (m_squared * NdotH * NdotH);
         float D = r1 * exp(r2);
@@ -226,70 +226,7 @@ inline float3 SpecularPassCookTorrance(float3 normal, float3 viewer, float3 ligh
         Rs = (F * D * G) / (PI * NdotL * NdotV);
     }
     
-    return k.Diffuse.rgb * lightColor * NdotL + lightColor * k.Specular.rgb * NdotL * (k.Shininess + Rs * (1.0 - k.Shininess));
-}
-inline float3 SpecularPassCookTorrance2(float3 normal, float3 viewer, float3 light, float3 lightSpecularColor, Material k)
-{
-	// Compute any aliases and intermediary values	
-    float3 half_vector = normalize(light + viewer);
-    float NdotL = saturate(dot(normal, light));
-    float NdotH = saturate(dot(normal, half_vector));
-    float NdotV = saturate(dot(normal, viewer));
-    float VdotH = saturate(dot(viewer, half_vector));
-    float r_sq = k.RoughnessValue * k.RoughnessValue;
-
-	// Evaluate the geometric term
-    float geo_numerator = 2.0f * NdotH;
-    float geo_denominator = VdotH;
-    float geo_b = (geo_numerator * NdotV) / geo_denominator;
-    float geo_c = (geo_numerator * NdotL) / geo_denominator;
-    float geo = min(1.0f, min(geo_b, geo_c));
-
-	// Now evaluate the roughness term
-    float roughness = 0;
-    if (ROUGHNESS_LOOK_UP == k.RoughnessMode)
-    {
-		// texture coordinate is:
-        float2 tc = { NdotH, k.RoughnessValue };
-        
-		// Remap the NdotH value to be 0.0-1.0 instead of -1.0..+1.0
-        tc.x += 1.0f;
-        tc.x /= 2.0f;
-
-		// look up the coefficient from the texture:
-        roughness = CookTorranceTexRoughness.SampleLevel(SamplerLinear, tc, 0).x;
-    }
-
-    if (ROUGHNESS_BECKMANN == k.RoughnessMode)
-    {
-        float roughness_a = 1.0f / (4.0f * r_sq * pow(NdotH, 4));
-        float roughness_b = NdotH * NdotH - 1.0f;
-        float roughness_c = r_sq * NdotH * NdotH;
-        roughness = roughness_a * exp(roughness_b / roughness_c);
-    }
-
-    if (ROUGHNESS_GAUSSIAN == k.RoughnessMode)
-    {
-		// This variable could be exposed as a variable	for the application to control:
-        float c = 1.0f;
-        float alpha = acos(dot(normal, half_vector));
-        roughness = c * exp(-(alpha / r_sq));
-    }
-
-	// Next evaluate the Fresnel value
-    float fresnel = pow(1.0f - VdotH, 5.0f) * (1.0f - k.ReflectionAtNormIncidence);
-    fresnel += k.ReflectionAtNormIncidence;
-
-	// Put all the terms together to compute the specular term in the equation
-    float3 Rs_numerator = (fresnel * geo * roughness);
-    float Rs_denominator = NdotV * NdotL;
-    float3 Rs = Rs_numerator / Rs_denominator;
-
-	// Put all the parts together to generate the final colour
-    float3 final = max(0.0f, NdotL) * (lightSpecularColor.rgb * Rs + k.Diffuse.rgb);
-
-	// Return the result
-    return final;
+    return k.Diffuse.rgb * lightColor * NdotL + lightColor * k.Specular.rgb * NdotL * (k.K + Rs * (1.0 - k.K));
 }
 inline float3 SpecularPass(float3 normal, float3 viewer, float3 light, float3 lightColor, float3 lightSpecularColor, Material k)
 {
@@ -345,10 +282,10 @@ inline float4 ForwardLightEquation(Material k, float3 lAmbient, float lAlbedo, f
 {
     float4 color = pDiffuse * float4(lAmbient * lAlbedo, 1);
     
-    float4 emissive = k.Emissive;
-    float4 ambient = k.Ambient;
+    float4 emissive = float4(k.Emissive, 1);
+    float4 ambient = float4(k.Ambient, 1);
     float4 diffuse = k.Diffuse * float4(lDiffuse, 1) * pDiffuse;
-    float4 specular = k.Specular * float4(lSpecular, 1) * pSpecular;
+    float4 specular = float4(k.Specular, 1) * float4(lSpecular, 1) * pSpecular;
 
     float4 final = (emissive + ambient + diffuse + specular) * color;
     
@@ -358,10 +295,10 @@ inline float4 DeferredLightEquation(Material k, float3 lAmbient, float lAlbedo, 
 {
     float4 color = pDiffuse * float4(lAmbient * lAlbedo, 1);
     
-    float4 emissive = k.Emissive;
-    float4 ambient = k.Ambient;
+    float4 emissive = float4(k.Emissive, 1);
+    float4 ambient = float4(k.Ambient, 1);
     float4 diffuseSpecular = float4(lDiffuseSpecular, 1) * pDiffuse;
-
+    
     float4 final = (emissive + ambient + diffuseSpecular) * color;
     
     return saturate(final);
