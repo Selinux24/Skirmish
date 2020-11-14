@@ -34,3 +34,4 @@ del *.cod
 "%DXSDK_DIR%bin\x64\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderLightEmissive.fxo ShaderLightEmissive.fx
 "%DXSDK_DIR%bin\x64\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderLightPoint.fxo ShaderLightPoint.fx
 "%DXSDK_DIR%bin\x64\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderLightSpot.fxo ShaderLightSpot.fx
+pause
