@@ -748,8 +748,6 @@ namespace Collada.ModularDungeon
         }
         private void InitializeLights()
         {
-            Lights.Albedo = 1f;
-
             Lights.HemisphericLigth = new SceneLightHemispheric("hemi_light", ambientDown.RGB(), ambientUp.RGB(), true);
             Lights.KeyLight.Enabled = false;
             Lights.BackLight.Enabled = false;

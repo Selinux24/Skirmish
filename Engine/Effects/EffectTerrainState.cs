@@ -18,10 +18,6 @@ namespace Engine.Effects
         /// </summary>
         public EngineShaderResourceView NormalMap { get; set; }
         /// <summary>
-        /// Specular map
-        /// </summary>
-        public EngineShaderResourceView SpecularMap { get; set; }
-        /// <summary>
         /// Use alpha mapping
         /// </summary>
         public bool UseAlphaMap { get; set; }

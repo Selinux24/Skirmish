@@ -29,8 +29,7 @@ cbuffer cbPSPerFrame : register(b3)
 	float4 gPSFogColor;
 	float gPSFogStart;
 	float gPSFogRange;
-    float gPSAlbedo;
-	float PAD32;
+	float2 PAD32;
 	float3 gPSEyePositionWorld;
 	float PAD33;
 };
@@ -42,9 +41,8 @@ cbuffer cbPSPerObject : register(b4)
 {
 	float4 gPSParams;
 	bool gPSUseColorDiffuse;
-	bool gPSUseColorSpecular;
 	uint gPSMaterialIndex;
-	uint PAD_44;
+	uint2 PAD_41;
 };
 
 /**********************************************************************************************************
@@ -67,9 +65,8 @@ PSVertexTerrain VSTerrain(VSVertexTerrain input)
 
 float4 PSTerrainAlphaMap(PSVertexTerrain input) : SV_TARGET
 {
-	float4 specular;
 	float3 normal;
-	float4 color = AlphaMap(input, specular, normal);
+	float4 color = AlphaMap(input, normal);
 
 	Material material = GetMaterialData(gMaterialPalette, gPSMaterialIndex, gMaterialPaletteWidth);
 
@@ -79,7 +76,6 @@ float4 PSTerrainAlphaMap(PSVertexTerrain input) : SV_TARGET
 	lInput.pPosition = input.positionWorld;
 	lInput.pNormal = normal;
 	lInput.pColorDiffuse = color;
-	lInput.pColorSpecular = 1;
 
 	lInput.ePosition = gPSEyePositionWorld;
 	lInput.lod = gLOD;
@@ -91,7 +87,6 @@ float4 PSTerrainAlphaMap(PSVertexTerrain input) : SV_TARGET
 	lInput.dirLightsCount = gPSLightCount.x;
 	lInput.pointLightsCount = gPSLightCount.y;
 	lInput.spotLightsCount = gPSLightCount.z;
-    lInput.albedo = gPSAlbedo;
 
 	lInput.shadowMapDir = gPSShadowMapDir;
     lInput.shadowMapPoint = gPSShadowMapPoint;
@@ -106,9 +101,8 @@ float4 PSTerrainAlphaMap(PSVertexTerrain input) : SV_TARGET
 
 float4 PSTerrainSlopes(PSVertexTerrain input) : SV_TARGET
 {
-	float4 specular;
 	float3 normal;
-	float4 color = Slopes(input, gPSParams.z, gPSParams.w, specular, normal);
+	float4 color = Slopes(input, gPSParams.z, gPSParams.w, normal);
 
 	Material material = GetMaterialData(gMaterialPalette, gPSMaterialIndex, gMaterialPaletteWidth);
 
@@ -118,7 +112,6 @@ float4 PSTerrainSlopes(PSVertexTerrain input) : SV_TARGET
 	lInput.pPosition = input.positionWorld;
 	lInput.pNormal = normal;
 	lInput.pColorDiffuse = color;
-	lInput.pColorSpecular = 1;
 
 	lInput.ePosition = gPSEyePositionWorld;
 	lInput.lod = gLOD;
@@ -130,7 +123,6 @@ float4 PSTerrainSlopes(PSVertexTerrain input) : SV_TARGET
 	lInput.dirLightsCount = gPSLightCount.x;
 	lInput.pointLightsCount = gPSLightCount.y;
 	lInput.spotLightsCount = gPSLightCount.z;
-    lInput.albedo = gPSAlbedo;
 
 	lInput.shadowMapDir = gPSShadowMapDir;
     lInput.shadowMapPoint = gPSShadowMapPoint;
@@ -145,9 +137,8 @@ float4 PSTerrainSlopes(PSVertexTerrain input) : SV_TARGET
 
 float4 PSTerrainFull(PSVertexTerrain input) : SV_TARGET
 {
-	float4 specular;
 	float3 normal;
-	float4 color = Full(input, gPSParams.y, gPSParams.z, gPSParams.w, specular, normal);
+	float4 color = Full(input, gPSParams.y, gPSParams.z, gPSParams.w, normal);
 
 	Material material = GetMaterialData(gMaterialPalette, gPSMaterialIndex, gMaterialPaletteWidth);
 
@@ -157,7 +148,6 @@ float4 PSTerrainFull(PSVertexTerrain input) : SV_TARGET
 	lInput.pPosition = input.positionWorld;
 	lInput.pNormal = normal;
 	lInput.pColorDiffuse = color;
-	lInput.pColorSpecular = 1;
 
 	lInput.ePosition = gPSEyePositionWorld;
 	lInput.lod = gLOD;
@@ -169,7 +159,6 @@ float4 PSTerrainFull(PSVertexTerrain input) : SV_TARGET
 	lInput.dirLightsCount = gPSLightCount.x;
 	lInput.pointLightsCount = gPSLightCount.y;
 	lInput.spotLightsCount = gPSLightCount.z;
-    lInput.albedo = gPSAlbedo;
 
 	lInput.shadowMapDir = gPSShadowMapDir;
     lInput.shadowMapPoint = gPSShadowMapPoint;

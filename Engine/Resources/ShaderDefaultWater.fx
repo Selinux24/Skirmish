@@ -11,15 +11,13 @@ cbuffer cbPSPerFrame : register(b3)
 {
     float3 gPSEyePositionWorld;
     float gPSTotalTime;
-    float3 gPSWaterColor;
-    float gPSWaterAlpha;
-    float3 gPSBaseColor;
-    float gPSAlbedo;
     float4 gPSWaveParams;
     float3 gPSFogColor;
     float gPSFogRange;
     float gPSFogStart;
-    float3 pPSPadding1;
+    float3 gPSWaterColor;
+    float3 gPSBaseColor;
+    float gPSWaterAlpha;
     uint3 gPSIters;
     uint gPSLightCount;
     DirectionalLight gPSDirLights[MAX_LIGHTS_DIRECTIONAL];
@@ -120,8 +118,10 @@ float3 GetSkyColor(float3 eyeDir)
     
     return float3(pow(1.0 - eyeDir.y, 2.0), 1.0 - eyeDir.y, 0.6 + (1.0 - eyeDir.y) * 0.4);
 }
-float3 GetSeaColor(float3 position, float3 normal, float3 eyeDir, float ambient, float3 diffuse, float3 specular, float epsilon)
+float3 GetSeaColor(float3 position, float3 normal, float3 eyeDir, float3 diffuse, float3 specular, float epsilon)
 {
+    float ambient = 0.3333;
+    
     float3 refracted = (gPSBaseColor + pow(diffuse * 0.4 + float3(0.6, 0.6, 0.6), 80.0) * gPSWaterColor * 0.12) * clamp(ambient * 1.5f, 0.1, 1);
     float3 reflected = GetSkyColor(reflect(eyeDir, normal)) * clamp(ambient * 2, 0.1, 1);
 
@@ -134,6 +134,12 @@ float3 GetSeaColor(float3 position, float3 normal, float3 eyeDir, float ambient,
     color += specular * specularPassNRM;
 
     return color;
+}
+float GetSeaAlpha(float distToEye, float alpha)
+{
+    float trDistance = (1 - alpha) * 500;
+    
+    return min(((distToEye / trDistance) * (1 - alpha)) + alpha, 1);
 }
 
 PSVertexPosition VSWater(VSVertexPosition input)
@@ -192,9 +198,10 @@ float4 PSWater(PSVertexPosition input) : SV_TARGET
         }
 
         // Do sea color
-        float3 color = GetSeaColor(hmPosition, hmNormal, eyeDir, gPSAlbedo, saturate(lDiffuse), lSpecular, epsilon);
-
-        return float4(lerp(color, gPSFogColor, fog), gPSWaterAlpha);
+        float3 color = GetSeaColor(hmPosition, hmNormal, eyeDir, saturate(lDiffuse), lSpecular, epsilon);
+        float alpha = GetSeaAlpha(distToEye, gPSWaterAlpha);
+        
+        return float4(lerp(color, gPSFogColor, fog), alpha);
     }
 }
 

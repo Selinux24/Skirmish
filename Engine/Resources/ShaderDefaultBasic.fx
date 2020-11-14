@@ -41,8 +41,7 @@ cbuffer cbPSPerFrame : register(b3)
 	float4 gPSFogColor;
 	float gPSFogStart;
 	float gPSFogRange;
-    float gPSAlbedo;
-	float PAD32;
+	float2 PAD32;
 	float3 gPSEyePositionWorld;
 	float PAD33;
 };
@@ -53,13 +52,12 @@ TextureCubeArray<float> gPSShadowMapPoint : register(t4);
 cbuffer cbPSPerObject : register(b4)
 {
 	bool gPSUseColorDiffuse;
-	bool gPSUseColorSpecular;
 	bool PAD41;
 	bool PAD42;
+    bool PAD43;
 };
 Texture2DArray gPSDiffuseMapArray : register(t5);
 Texture2DArray gPSNormalMapArray : register(t6);
-Texture2DArray gPSSpecularMapArray : register(t7);
 
 cbuffer cbPSPerInstance : register(b5)
 {
@@ -259,7 +257,6 @@ float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 	lInput.pPosition = input.positionWorld;
 	lInput.pNormal = input.normalWorld;
 	lInput.pColorDiffuse = input.color;
-	lInput.pColorSpecular = 1;
 
 	lInput.ePosition = gPSEyePositionWorld;
 	lInput.lod = gLOD;
@@ -271,7 +268,6 @@ float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 	lInput.dirLightsCount = gPSLightCount.x;
 	lInput.pointLightsCount = gPSLightCount.y;
 	lInput.spotLightsCount = gPSLightCount.z;
-    lInput.albedo = gPSAlbedo;
 
 	lInput.shadowMapDir = gPSShadowMapDir;
     lInput.shadowMapPoint = gPSShadowMapPoint;
@@ -511,19 +507,12 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
         diffuseColor = gPSDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
     }
 
-	float4 specularColor = 1;
-	if (gPSUseColorSpecular == true)
-	{
-        specularColor = gPSSpecularMapArray.Sample(SamplerSpecular, float3(input.tex, input.textureIndex));
-    }
-
 	ComputeLightsInput lInput;
 
     lInput.material = material;
 	lInput.pPosition = input.positionWorld;
 	lInput.pNormal = input.normalWorld;
     lInput.pColorDiffuse = diffuseColor;
-    lInput.pColorSpecular = specularColor;
 
 	lInput.ePosition = gPSEyePositionWorld;
 	lInput.lod = gLOD;
@@ -535,7 +524,6 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 	lInput.dirLightsCount = gPSLightCount.x;
 	lInput.pointLightsCount = gPSLightCount.y;
 	lInput.spotLightsCount = gPSLightCount.z;
-    lInput.albedo = gPSAlbedo;
 
 	lInput.shadowMapDir = gPSShadowMapDir;
     lInput.shadowMapPoint = gPSShadowMapPoint;
@@ -660,12 +648,6 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
         diffuseColor = gPSDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
     }
 
-    float4 specularColor = 1;
-	if (gPSUseColorSpecular == true)
-	{
-        specularColor = gPSSpecularMapArray.Sample(SamplerSpecular, float3(input.tex, input.textureIndex));
-    }
-
     float3 normalMap = gPSNormalMapArray.Sample(SamplerNormal, float3(input.tex, input.textureIndex)).rgb;
     float3 normalWorld = NormalSampleToWorldSpace(normalMap, input.normalWorld, input.tangentWorld);
 
@@ -675,7 +657,6 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
 	lInput.pPosition = input.positionWorld;
 	lInput.pNormal = normalWorld;
     lInput.pColorDiffuse = diffuseColor;
-    lInput.pColorSpecular = specularColor;
 
 	lInput.ePosition = gPSEyePositionWorld;
 	lInput.lod = gLOD;
@@ -687,7 +668,6 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
 	lInput.dirLightsCount = gPSLightCount.x;
 	lInput.pointLightsCount = gPSLightCount.y;
 	lInput.spotLightsCount = gPSLightCount.z;
-    lInput.albedo = gPSAlbedo;
 
 	lInput.shadowMapDir = gPSShadowMapDir;
     lInput.shadowMapPoint = gPSShadowMapPoint;

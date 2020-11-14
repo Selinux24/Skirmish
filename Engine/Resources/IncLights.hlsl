@@ -180,6 +180,26 @@ inline float4 ComputeFog(float4 litColor, float distToEye, float fogStart, float
     return float4(lerp(litColor.rgb, fogColor.rgb, fogLerp), litColor.a);
 }
 
+inline float DistributionBeckmann(float roughness, float NdotH)
+{
+    float a2 = roughness * roughness;
+    float NdotH2 = NdotH * NdotH;
+    float r1 = 1.0 / (4.0 * a2 * pow(NdotH, 4.0));
+    float r2 = (NdotH2 - 1.0) / (a2 * NdotH2);
+    return r1 * exp(r2);
+}
+inline float GeometryFunction(float NdotL, float NdotH, float NdotV, float VdotH)
+{
+    float two_NdotH = 2.0 * NdotH;
+    float g1 = (two_NdotH * NdotV) / VdotH;
+    float g2 = (two_NdotH * NdotL) / VdotH;
+    return min(1.0, min(g1, g2));
+}
+inline float FresnelSchlick(float VdotH, float F0)
+{
+    return F0 + (1.0 - F0) * pow(1.0 - VdotH, 5.0);
+}
+
 inline float3 DiffusePass(float3 normal, float3 light, float3 lightDiffuseColor)
 {
     return max(0, dot(light, normal)) * lightDiffuseColor;
@@ -208,24 +228,16 @@ inline float3 SpecularPassCookTorrance(float3 normal, float3 viewer, float3 ligh
         float NdotV = max(0, dot(normal, viewer));
         float VdotH = max(0, dot(light, H));
 
-		// Fresnel reflectance
-        float F = pow(1.0 - VdotH, 5.0);
-        F *= (1.0 - k.F0);
-        F += k.F0;
-
 		// Microfacet distribution by Beckmann
-        float m_squared = k.Roughness * k.Roughness;
-        float r1 = 1.0 / (4.0 * m_squared * pow(NdotH, 4.0));
-        float r2 = (NdotH * NdotH - 1.0) / (m_squared * NdotH * NdotH);
-        float D = r1 * exp(r2);
+        float D = DistributionBeckmann(k.Roughness, NdotH);
 
 		// Geometric shadowing
-        float two_NdotH = 2.0 * NdotH;
-        float g1 = (two_NdotH * NdotV) / VdotH;
-        float g2 = (two_NdotH * NdotL) / VdotH;
-        float G = min(1.0, min(g1, g2));
+        float G = GeometryFunction(NdotL, NdotH, NdotV, VdotH);
 
-        Rs = (F * D * G) / (PI * NdotL * NdotV);
+		// Fresnel reflectance
+        float F = FresnelSchlick(VdotH, k.F0);
+
+        Rs = (D * G * F) / (PI * NdotL * NdotV);
     }
     
     return k.Diffuse.rgb * lightColor * NdotL + lightColor * k.Specular.rgb * NdotL * (k.K + Rs * (1.0 - k.K));
@@ -280,26 +292,21 @@ inline float CalcSpotCone(float3 lightDirection, float spotAngle, float3 L)
     return smoothstep(minCos, maxCos, cosAngle);
 }
 
-inline float4 ForwardLightEquation(Material k, float4 pDiffuse, float4 pSpecular, float lAlbedo, float3 lAmbient, float3 lDiffuse, float3 lSpecular)
+inline float3 ForwardLightEquation(Material k, float3 lAmbient, float3 lDiffuse, float3 lSpecular)
 {
-    float3 ambient = (k.Ambient + lAmbient) * lAlbedo;
-    float3 diffuse = k.Diffuse.rgb * lDiffuse;
-    float3 specular = k.Specular * lSpecular * pSpecular.rgb;
+    float3 ambient = k.Ambient * lAmbient;
+    float3 diffuseSpecular = (k.Diffuse.rgb * lDiffuse) + (k.Specular * lSpecular);
     float3 emissive = k.Emissive;
 
-    float3 final = ambient + diffuse + specular + emissive;
-    
-    return saturate(float4(final, 1) * pDiffuse);
+    return ambient + diffuseSpecular + emissive;
 }
-inline float4 DeferredLightEquation(Material k, float4 pDiffuse, float lAlbedo, float3 lAmbient, float3 lDiffuseSpecular)
+inline float3 DeferredLightEquation(Material k, float3 lAmbient, float3 lDiffuseSpecular)
 {
-    float3 ambient = (k.Ambient + lAmbient) * lAlbedo;
+    float3 ambient = k.Ambient * lAmbient;
     float3 diffuseSpecular = lDiffuseSpecular;
     float3 emissive = k.Emissive;
     
-    float3 final = ambient + diffuseSpecular + emissive;
-    
-    return saturate(float4(final, 1) * pDiffuse);
+    return ambient + diffuseSpecular + emissive;
 }
 
 struct ComputeLightsOutput
@@ -421,7 +428,7 @@ struct ComputeSpotLightsInput
     Texture2DArray<float> shadowMap;
 };
 
-inline ComputeLightsOutput ComputeSpotLightLOD1(ComputeSpotLightsInput input, float dist)
+inline ComputeLightsOutput ComputeSpotLightLOD1(ComputeSpotLightsInput input)
 {
     float3 L = input.spotLight.Position - input.pPosition;
     float D = length(L);
@@ -441,7 +448,7 @@ inline ComputeLightsOutput ComputeSpotLightLOD1(ComputeSpotLightsInput input, fl
     ComputeLightsOutput output;
 
     output.diffuse = DiffusePass(input.pNormal, L, input.spotLight.Diffuse) * attenuation * cShadowFactor;
-    output.specular = SpecularPass(input.pNormal, V, L, input.spotLight.Diffuse, input.spotLight.Specular, input.material) * dist * attenuation * cShadowFactor;
+    output.specular = SpecularPass(input.pNormal, V, L, input.spotLight.Diffuse, input.spotLight.Specular, input.material) * attenuation * cShadowFactor;
 
     return output;
 }
@@ -474,7 +481,7 @@ inline ComputeLightsOutput ComputeSpotLight(ComputeSpotLightsInput input)
 
     if (distToEye < input.lod.x)
     {
-        return ComputeSpotLightLOD1(input, 1.0f - (max(1.0f, distToEye / input.lod.x)));
+        return ComputeSpotLightLOD1(input);
     }
     else if (distToEye < input.lod.z)
     {
@@ -500,7 +507,7 @@ struct ComputePointLightsInput
     TextureCubeArray<float> shadowMapPoint;
 };
 
-inline ComputeLightsOutput ComputePointLightLOD1(ComputePointLightsInput input, float dist)
+inline ComputeLightsOutput ComputePointLightLOD1(ComputePointLightsInput input)
 {
     float3 L = input.pointLight.Position - input.pPosition;
     float D = length(L);
@@ -519,7 +526,7 @@ inline ComputeLightsOutput ComputePointLightLOD1(ComputePointLightsInput input, 
     ComputeLightsOutput output;
 
     output.diffuse = DiffusePass(input.pNormal, L, input.pointLight.Diffuse) * attenuation * cShadowFactor;
-    output.specular = SpecularPass(input.pNormal, V, L, input.pointLight.Diffuse, input.pointLight.Specular, input.material) * dist * attenuation * cShadowFactor;
+    output.specular = SpecularPass(input.pNormal, V, L, input.pointLight.Diffuse, input.pointLight.Specular, input.material) * attenuation * cShadowFactor;
 
     return output;
 }
@@ -551,7 +558,7 @@ inline ComputeLightsOutput ComputePointLight(ComputePointLightsInput input)
 
     if (distToEye < input.lod.x)
     {
-        return ComputePointLightLOD1(input, 1.0f - (max(1.0f, distToEye / input.lod.x)));
+        return ComputePointLightLOD1(input);
     }
     else if (distToEye < input.lod.z)
     {
@@ -576,7 +583,6 @@ struct ComputeLightsInput
     uint dirLightsCount;
     uint pointLightsCount;
     uint spotLightsCount;
-    float albedo;
     float3 lod;
     float fogStart;
     float fogRange;
@@ -584,7 +590,6 @@ struct ComputeLightsInput
     float3 pPosition;
     float3 pNormal;
     float4 pColorDiffuse;
-    float4 pColorSpecular;
     float3 ePosition;
     Texture2DArray<float> shadowMapDir;
     Texture2DArray<float> shadowMapSpot;
@@ -671,7 +676,9 @@ inline float4 ComputeLightsLOD1(ComputeLightsInput input)
         lSpecular += (cSpecular * cShadowFactor * attenuation);
     }
 
-    return ForwardLightEquation(input.material, input.pColorDiffuse, input.pColorSpecular, input.albedo, lAmbient, lDiffuse, lSpecular);
+    float3 light = ForwardLightEquation(input.material, lAmbient, lDiffuse, lSpecular);
+        
+    return saturate(float4(light, 1) * input.pColorDiffuse);
 }
 inline float4 ComputeLightsLOD2(ComputeLightsInput input)
 {
@@ -744,7 +751,9 @@ inline float4 ComputeLightsLOD2(ComputeLightsInput input)
         lDiffuse += (cDiffuse * cShadowFactor * attenuation);
     }
 
-    return ForwardLightEquation(input.material, input.pColorDiffuse, 0, input.albedo, lAmbient, lDiffuse, 0);
+    float3 light = ForwardLightEquation(input.material, lAmbient, lDiffuse, 0);
+        
+    return saturate(float4(light, 1) * input.pColorDiffuse);
 }
 inline float4 ComputeLightsLOD3(ComputeLightsInput input)
 {
@@ -776,7 +785,9 @@ inline float4 ComputeLightsLOD3(ComputeLightsInput input)
         lDiffuse += (cDiffuse * cShadowFactor);
     }
 
-    return ForwardLightEquation(input.material, input.pColorDiffuse, 0, input.albedo, lAmbient, lDiffuse, 0);
+    float3 light = ForwardLightEquation(input.material, lAmbient, lDiffuse, 0);
+        
+    return saturate(float4(light, 1) * input.pColorDiffuse);
 }
 inline float4 ComputeLights(ComputeLightsInput input)
 {
@@ -801,5 +812,5 @@ inline float4 ComputeLights(ComputeLightsInput input)
         color = ComputeFog(color, distToEye, input.fogStart, input.fogRange, input.fogColor);
     }
     
-    return saturate(color);
+    return color;
 }

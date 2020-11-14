@@ -494,7 +494,6 @@ namespace Heightmap
                 {
                     ContentPath = "Textures",
                     NormalMaps = new[] { "normal001.dds", "normal002.dds" },
-                    SpecularMaps = new[] { "specular001.dds", "specular002.dds" },
 
                     UseAlphaMapping = true,
                     AlphaMap = "alpha001.dds",

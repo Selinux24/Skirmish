@@ -114,10 +114,6 @@ namespace Engine.Effects
         /// Spot lights shadows map effect variable
         /// </summary>
         private readonly EngineEffectVariableTexture shadowMapSpotVar = null;
-        /// <summary>
-        /// Albedo effect variable
-        /// </summary>
-        private readonly EngineEffectVariableScalar albedoVar = null;
 
         /// <summary>
         /// Current texture array
@@ -551,20 +547,6 @@ namespace Engine.Effects
                 }
             }
         }
-        /// <summary>
-        /// Albedo
-        /// </summary>
-        protected float Albedo
-        {
-            get
-            {
-                return albedoVar.GetFloat();
-            }
-            set
-            {
-                albedoVar.Set(value);
-            }
-        }
 
         /// <summary>
         /// Constructor
@@ -589,7 +571,6 @@ namespace Engine.Effects
             fogStartVar = Effect.GetVariableScalar("gFogStart");
             fogRangeVar = Effect.GetVariableScalar("gFogRange");
             fogColorVar = Effect.GetVariableVector("gFogColor");
-            albedoVar = Effect.GetVariableScalar("gAlbedo");
             startRadiusVar = Effect.GetVariableScalar("gStartRadius");
             endRadiusVar = Effect.GetVariableScalar("gEndRadius");
             textureCountVar = Effect.GetVariableScalar("gTextureCount");
@@ -655,7 +636,6 @@ namespace Engine.Effects
                 PointLights = BufferLightPoint.Build(lights.GetVisiblePointLights(), out int pointLength);
                 SpotLights = BufferLightSpot.Build(lights.GetVisibleSpotLights(), out int spotLength);
                 LightCount = new[] { dirLength, pointLength, spotLength };
-                Albedo = lights.Albedo;
 
                 FogStart = lights.FogStart;
                 FogRange = lights.FogRange;
@@ -672,7 +652,6 @@ namespace Engine.Effects
                 PointLights = BufferLightPoint.Default;
                 SpotLights = BufferLightSpot.Default;
                 LightCount = new[] { 0, 0, 0 };
-                Albedo = 1;
 
                 FogStart = 0;
                 FogRange = 0;

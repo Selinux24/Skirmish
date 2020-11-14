@@ -47,10 +47,6 @@ namespace Engine.Effects
         /// </summary>
         private readonly EngineEffectVariableTexture normalMapVar = null;
         /// <summary>
-        /// Specular map effect variable
-        /// </summary>
-        private readonly EngineEffectVariableTexture specularMapVar = null;
-        /// <summary>
         /// Color texture array effect variable
         /// </summary>
         private readonly EngineEffectVariableTexture colorTexturesVar = null;
@@ -92,10 +88,6 @@ namespace Engine.Effects
         /// </summary>
         private EngineShaderResourceView currentNormalMap = null;
         /// <summary>
-        /// Current specular map
-        /// </summary>
-        private EngineShaderResourceView currentSpecularMap = null;
-        /// <summary>
         /// Current color texture array
         /// </summary>
         private EngineShaderResourceView currentColorTextures = null;
@@ -128,11 +120,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.worldVar.GetMatrix();
+                return worldVar.GetMatrix();
             }
             set
             {
-                this.worldVar.SetMatrix(value);
+                worldVar.SetMatrix(value);
             }
         }
         /// <summary>
@@ -142,11 +134,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.worldViewProjectionVar.GetMatrix();
+                return worldViewProjectionVar.GetMatrix();
             }
             set
             {
-                this.worldViewProjectionVar.SetMatrix(value);
+                worldViewProjectionVar.SetMatrix(value);
             }
         }
         /// <summary>
@@ -156,11 +148,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.textureResolutionVar.GetFloat();
+                return textureResolutionVar.GetFloat();
             }
             set
             {
-                this.textureResolutionVar.Set(value);
+                textureResolutionVar.Set(value);
             }
         }
         /// <summary>
@@ -170,15 +162,15 @@ namespace Engine.Effects
         {
             get
             {
-                return this.diffuseMapLRVar.GetResource();
+                return diffuseMapLRVar.GetResource();
             }
             set
             {
-                if (this.currentDiffuseMapLR != value)
+                if (currentDiffuseMapLR != value)
                 {
-                    this.diffuseMapLRVar.SetResource(value);
+                    diffuseMapLRVar.SetResource(value);
 
-                    this.currentDiffuseMapLR = value;
+                    currentDiffuseMapLR = value;
 
                     Counters.TextureUpdates++;
                 }
@@ -191,15 +183,15 @@ namespace Engine.Effects
         {
             get
             {
-                return this.diffuseMapHRVar.GetResource();
+                return diffuseMapHRVar.GetResource();
             }
             set
             {
-                if (this.currentDiffuseMapHR != value)
+                if (currentDiffuseMapHR != value)
                 {
-                    this.diffuseMapHRVar.SetResource(value);
+                    diffuseMapHRVar.SetResource(value);
 
-                    this.currentDiffuseMapHR = value;
+                    currentDiffuseMapHR = value;
 
                     Counters.TextureUpdates++;
                 }
@@ -212,36 +204,15 @@ namespace Engine.Effects
         {
             get
             {
-                return this.normalMapVar.GetResource();
+                return normalMapVar.GetResource();
             }
             set
             {
-                if (this.currentNormalMap != value)
+                if (currentNormalMap != value)
                 {
-                    this.normalMapVar.SetResource(value);
+                    normalMapVar.SetResource(value);
 
-                    this.currentNormalMap = value;
-
-                    Counters.TextureUpdates++;
-                }
-            }
-        }
-        /// <summary>
-        /// Scpecular map
-        /// </summary>
-        protected EngineShaderResourceView SpecularMap
-        {
-            get
-            {
-                return this.specularMapVar.GetResource();
-            }
-            set
-            {
-                if (this.currentSpecularMap != value)
-                {
-                    this.specularMapVar.SetResource(value);
-
-                    this.currentSpecularMap = value;
+                    currentNormalMap = value;
 
                     Counters.TextureUpdates++;
                 }
@@ -254,15 +225,15 @@ namespace Engine.Effects
         {
             get
             {
-                return this.colorTexturesVar.GetResource();
+                return colorTexturesVar.GetResource();
             }
             set
             {
-                if (this.currentColorTextures != value)
+                if (currentColorTextures != value)
                 {
-                    this.colorTexturesVar.SetResource(value);
+                    colorTexturesVar.SetResource(value);
 
-                    this.currentColorTextures = value;
+                    currentColorTextures = value;
 
                     Counters.TextureUpdates++;
                 }
@@ -275,15 +246,15 @@ namespace Engine.Effects
         {
             get
             {
-                return this.alphaMapVar.GetResource();
+                return alphaMapVar.GetResource();
             }
             set
             {
-                if (this.currentAlphaMap != value)
+                if (currentAlphaMap != value)
                 {
-                    this.alphaMapVar.SetResource(value);
+                    alphaMapVar.SetResource(value);
 
-                    this.currentAlphaMap = value;
+                    currentAlphaMap = value;
 
                     Counters.TextureUpdates++;
                 }
@@ -296,11 +267,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.parametersVar.GetVector<Vector4>();
+                return parametersVar.GetVector<Vector4>();
             }
             set
             {
-                this.parametersVar.Set(value);
+                parametersVar.Set(value);
             }
         }
         /// <summary>
@@ -310,11 +281,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.materialIndexVar.GetUInt();
+                return materialIndexVar.GetUInt();
             }
             set
             {
-                this.materialIndexVar.Set(value);
+                materialIndexVar.Set(value);
             }
         }
         /// <summary>
@@ -324,21 +295,21 @@ namespace Engine.Effects
         {
             get
             {
-                return this.anisotropic == true;
+                return anisotropic == true;
             }
             set
             {
-                if (this.anisotropic != value)
+                if (anisotropic != value)
                 {
-                    this.anisotropic = value;
+                    anisotropic = value;
 
-                    var sampler = this.anisotropic == true ?
-                        this.samplerAnisotropic.GetSamplerState() :
-                        this.samplerLinear.GetSamplerState();
+                    var sampler = anisotropic == true ?
+                        samplerAnisotropic.GetSamplerState() :
+                        samplerLinear.GetSamplerState();
 
-                    this.samplerDiffuseVar.SetValue(0, sampler);
-                    this.samplerNormalVar.SetValue(0, sampler);
-                    this.samplerSpecularVar.SetValue(0, sampler);
+                    samplerDiffuseVar.SetValue(0, sampler);
+                    samplerNormalVar.SetValue(0, sampler);
+                    samplerSpecularVar.SetValue(0, sampler);
                 }
             }
         }
@@ -352,32 +323,31 @@ namespace Engine.Effects
         public EffectDeferredTerrain(Graphics graphics, byte[] effect, bool compile)
             : base(graphics, effect, compile)
         {
-            this.TerrainAlphaMapDeferred = this.Effect.GetTechniqueByName("TerrainAlphaMapDeferred");
-            this.TerrainSlopesDeferred = this.Effect.GetTechniqueByName("TerrainSlopesDeferred");
-            this.TerrainFullDeferred = this.Effect.GetTechniqueByName("TerrainFullDeferred");
+            TerrainAlphaMapDeferred = Effect.GetTechniqueByName("TerrainAlphaMapDeferred");
+            TerrainSlopesDeferred = Effect.GetTechniqueByName("TerrainSlopesDeferred");
+            TerrainFullDeferred = Effect.GetTechniqueByName("TerrainFullDeferred");
 
-            this.worldVar = this.Effect.GetVariableMatrix("gVSWorld");
-            this.worldViewProjectionVar = this.Effect.GetVariableMatrix("gVSWorldViewProjection");
-            this.textureResolutionVar = this.Effect.GetVariableScalar("gVSTextureResolution");
+            worldVar = Effect.GetVariableMatrix("gVSWorld");
+            worldViewProjectionVar = Effect.GetVariableMatrix("gVSWorldViewProjection");
+            textureResolutionVar = Effect.GetVariableScalar("gVSTextureResolution");
 
-            this.diffuseMapLRVar = this.Effect.GetVariableTexture("gPSDiffuseMapLRArray");
-            this.diffuseMapHRVar = this.Effect.GetVariableTexture("gPSDiffuseMapHRArray");
-            this.normalMapVar = this.Effect.GetVariableTexture("gPSNormalMapArray");
-            this.specularMapVar = this.Effect.GetVariableTexture("gPSSpecularMapArray");
-            this.colorTexturesVar = this.Effect.GetVariableTexture("gPSColorTextureArray");
-            this.alphaMapVar = this.Effect.GetVariableTexture("gPSAlphaTexture");
-            this.parametersVar = this.Effect.GetVariableVector("gPSParams");
-            this.materialIndexVar = this.Effect.GetVariableScalar("gPSMaterialIndex");
+            diffuseMapLRVar = Effect.GetVariableTexture("gPSDiffuseMapLRArray");
+            diffuseMapHRVar = Effect.GetVariableTexture("gPSDiffuseMapHRArray");
+            normalMapVar = Effect.GetVariableTexture("gPSNormalMapArray");
+            colorTexturesVar = Effect.GetVariableTexture("gPSColorTextureArray");
+            alphaMapVar = Effect.GetVariableTexture("gPSAlphaTexture");
+            parametersVar = Effect.GetVariableVector("gPSParams");
+            materialIndexVar = Effect.GetVariableScalar("gPSMaterialIndex");
 
             //Samplers
-            this.samplerDiffuseVar = this.Effect.GetVariableSampler("SamplerDiffuse");
-            this.samplerSpecularVar = this.Effect.GetVariableSampler("SamplerSpecular");
-            this.samplerNormalVar = this.Effect.GetVariableSampler("SamplerNormal");
+            samplerDiffuseVar = Effect.GetVariableSampler("SamplerDiffuse");
+            samplerSpecularVar = Effect.GetVariableSampler("SamplerSpecular");
+            samplerNormalVar = Effect.GetVariableSampler("SamplerNormal");
 
             //Initialize states
-            this.samplerPoint = EngineSamplerState.Point(graphics);
-            this.samplerLinear = EngineSamplerState.Linear(graphics);
-            this.samplerAnisotropic = EngineSamplerState.Anisotropic(graphics, 8);
+            samplerPoint = EngineSamplerState.Point(graphics);
+            samplerLinear = EngineSamplerState.Linear(graphics);
+            samplerAnisotropic = EngineSamplerState.Anisotropic(graphics, 8);
         }
         /// <summary>
         /// Destructor
@@ -394,21 +364,12 @@ namespace Engine.Effects
         {
             if (disposing)
             {
-                if (this.samplerPoint != null)
-                {
-                    this.samplerPoint.Dispose();
-                    this.samplerPoint = null;
-                }
-                if (this.samplerLinear != null)
-                {
-                    this.samplerLinear.Dispose();
-                    this.samplerLinear = null;
-                }
-                if (this.samplerAnisotropic != null)
-                {
-                    this.samplerAnisotropic.Dispose();
-                    this.samplerAnisotropic = null;
-                }
+                samplerPoint?.Dispose();
+                samplerPoint = null;
+                samplerLinear?.Dispose();
+                samplerLinear = null;
+                samplerAnisotropic?.Dispose();
+                samplerAnisotropic = null;
             }
 
             base.Dispose(disposing);
@@ -423,9 +384,9 @@ namespace Engine.Effects
             Matrix viewProjection,
             float textureResolution)
         {
-            this.World = Matrix.Identity;
-            this.WorldViewProjection = viewProjection;
-            this.TextureResolution = textureResolution;
+            World = Matrix.Identity;
+            WorldViewProjection = viewProjection;
+            TextureResolution = textureResolution;
         }
         /// <summary>
         /// Update per model object data
@@ -445,19 +406,18 @@ namespace Engine.Effects
         public void UpdatePerObject(
             EffectTerrainState state)
         {
-            this.MaterialIndex = state.MaterialIndex;
+            MaterialIndex = state.MaterialIndex;
 
-            this.Anisotropic = state.UseAnisotropic;
-            this.NormalMap = state.NormalMap;
-            this.SpecularMap = state.SpecularMap;
+            Anisotropic = state.UseAnisotropic;
+            NormalMap = state.NormalMap;
 
-            this.AlphaMap = state.AlphaMap;
-            this.ColorTextures = state.ColorTextures;
+            AlphaMap = state.AlphaMap;
+            ColorTextures = state.ColorTextures;
 
-            this.DiffuseMapLR = state.DiffuseMapLR;
-            this.DiffuseMapHR = state.DiffuseMapHR;
+            DiffuseMapLR = state.DiffuseMapLR;
+            DiffuseMapHR = state.DiffuseMapHR;
 
-            this.Parameters = new Vector4(0, state.Proportion, state.SlopeRanges.X, state.SlopeRanges.Y);
+            Parameters = new Vector4(0, state.Proportion, state.SlopeRanges.X, state.SlopeRanges.Y);
         }
     }
 }

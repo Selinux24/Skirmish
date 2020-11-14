@@ -15,6 +15,7 @@ namespace SceneTest.SceneTest
     public class SceneTest : Scene
     {
         private const int layerObjs = 50;
+        private const int layerEffects = 60;
         private const int layerHUD = 99;
 
         private readonly float baseHeight = 0.1f;
@@ -736,7 +737,7 @@ namespace SceneTest.SceneTest
             pDescriptions.Add("Explosion", pExplosion);
             pDescriptions.Add("SmokeExplosion", pSmokeExplosion);
 
-            pManager = await this.AddComponentParticleManager("ParticleManager", ParticleManagerDescription.Default());
+            pManager = await this.AddComponentParticleManager("ParticleManager", ParticleManagerDescription.Default(), SceneObjectUsages.None, layerEffects);
 
             float d = 500;
             var positions = new Vector3[]

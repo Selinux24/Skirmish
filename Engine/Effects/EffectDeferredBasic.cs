@@ -119,10 +119,6 @@ namespace Engine.Effects
         /// </summary>
         private readonly EngineEffectVariableTexture normalMapVar = null;
         /// <summary>
-        /// Specular map effect variable
-        /// </summary>
-        private readonly EngineEffectVariableTexture specularMapVar = null;
-        /// <summary>
         /// Animation palette width effect variable
         /// </summary>
         private readonly EngineEffectVariableScalar animationPaletteWidthVar = null;
@@ -147,10 +143,6 @@ namespace Engine.Effects
         /// Current normal map
         /// </summary>
         private EngineShaderResourceView currentNormalMap = null;
-        /// <summary>
-        /// Current specular map
-        /// </summary>
-        private EngineShaderResourceView currentSpecularMap = null;
         /// <summary>
         /// Current animation palette
         /// </summary>
@@ -282,27 +274,6 @@ namespace Engine.Effects
             }
         }
         /// <summary>
-        /// Specular map
-        /// </summary>
-        protected EngineShaderResourceView SpecularMap
-        {
-            get
-            {
-                return specularMapVar.GetResource();
-            }
-            set
-            {
-                if (currentSpecularMap != value)
-                {
-                    specularMapVar.SetResource(value);
-
-                    currentSpecularMap = value;
-
-                    Counters.TextureUpdates++;
-                }
-            }
-        }
-        /// <summary>
         /// Animation palette width
         /// </summary>
         protected uint AnimationPaletteWidth
@@ -399,7 +370,6 @@ namespace Engine.Effects
             textureIndexVar = Effect.GetVariableScalar("gTextureIndex");
             diffuseMapVar = Effect.GetVariableTexture("gDiffuseMapArray");
             normalMapVar = Effect.GetVariableTexture("gNormalMapArray");
-            specularMapVar = Effect.GetVariableTexture("gSpecularMapArray");
             animationPaletteWidthVar = Effect.GetVariableScalar("gAnimationPaletteWidth");
             animationPaletteVar = Effect.GetVariableTexture("gAnimationPalette");
 
@@ -556,14 +526,12 @@ namespace Engine.Effects
             {
                 DiffuseMap = material.DiffuseTexture;
                 NormalMap = material.NormalMap;
-                SpecularMap = material.SpecularTexture;
                 MaterialIndex = material.ResourceIndex;
             }
             else
             {
                 DiffuseMap = null;
                 NormalMap = null;
-                SpecularMap = null;
                 MaterialIndex = 0;
             }
 

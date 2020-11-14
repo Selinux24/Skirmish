@@ -25,10 +25,6 @@ namespace Engine
         /// </summary>
         EngineShaderResourceView DiffuseTexture { get; set; }
         /// <summary>
-        /// Specular texture
-        /// </summary>
-        EngineShaderResourceView SpecularTexture { get; set; }
-        /// <summary>
         /// Normal map
         /// </summary>
         EngineShaderResourceView NormalMap { get; set; }
