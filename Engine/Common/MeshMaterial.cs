@@ -64,10 +64,6 @@ namespace Engine.Common
         /// </summary>
         public EngineShaderResourceView DiffuseTexture { get; set; }
         /// <summary>
-        /// Specular texture
-        /// </summary>
-        public EngineShaderResourceView SpecularTexture { get; set; }
-        /// <summary>
         /// Normal map
         /// </summary>
         public EngineShaderResourceView NormalMap { get; set; }
@@ -93,13 +89,12 @@ namespace Engine.Common
                 EmissionTexture == other.EmissionTexture &&
                 AmbientTexture == other.AmbientTexture &&
                 DiffuseTexture == other.DiffuseTexture &&
-                SpecularTexture == other.SpecularTexture &&
                 NormalMap == other.NormalMap;
         }
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"{Material} EmissionTexture: {EmissionTexture != null}; AmbientTexture: {AmbientTexture != null}; DiffuseTexture: {DiffuseTexture != null}; SpecularTexture: {SpecularTexture != null}; NormalMapTexture: {NormalMap != null};";
+            return $"{Material} EmissionTexture: {EmissionTexture != null}; AmbientTexture: {AmbientTexture != null}; DiffuseTexture: {DiffuseTexture != null}; NormalMapTexture: {NormalMap != null};";
         }
     }
 }

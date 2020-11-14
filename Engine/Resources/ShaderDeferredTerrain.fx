@@ -37,9 +37,8 @@ GBufferPSOutput PSTerrainAlphaMap(PSVertexTerrain input)
 {
 	GBufferPSOutput output = (GBufferPSOutput) 0;
 
-	float4 specular;
 	float3 normal;
-	float4 color = AlphaMap(input, specular, normal);
+	float4 color = AlphaMap(input, normal);
 
 	output.color = color;
 	output.normal = float4(normal, 0);
@@ -51,9 +50,8 @@ GBufferPSOutput PSTerrainSlopes(PSVertexTerrain input)
 {
 	GBufferPSOutput output = (GBufferPSOutput) 0;
 
-	float4 specular;
 	float3 normal;
-	float4 color = Slopes(input, gPSParams.z, gPSParams.w, specular, normal);
+	float4 color = Slopes(input, gPSParams.z, gPSParams.w, normal);
 
 	output.color = color;
 	output.normal = float4(normal, 0);
@@ -65,9 +63,8 @@ GBufferPSOutput PSTerrainFull(PSVertexTerrain input)
 {
 	GBufferPSOutput output = (GBufferPSOutput) 0;
 
-	float4 specular;
 	float3 normal;
-	float4 color = Full(input, gPSParams.y, gPSParams.z, gPSParams.w, specular, normal);
+	float4 color = Full(input, gPSParams.y, gPSParams.z, gPSParams.w, normal);
 
 	output.color = color;
 	output.normal = float4(normal, 0);

@@ -90,7 +90,6 @@ namespace Engine.Content
                 EmissionTexture = textures[EmissiveTexture],
                 AmbientTexture = textures[AmbientTexture],
                 DiffuseTexture = textures[DiffuseTexture],
-                SpecularTexture = textures[SpecularTexture],
                 NormalMap = textures[NormalMapTexture],
             };
         }

@@ -661,10 +661,6 @@ namespace Engine
         /// </summary>
         private EngineShaderResourceView terrainNormalMaps = null;
         /// <summary>
-        /// Terrain specular maps
-        /// </summary>
-        private EngineShaderResourceView terrainSpecularMaps = null;
-        /// <summary>
         /// Color textures for alpha map
         /// </summary>
         private EngineShaderResourceView colorTextures = null;
@@ -780,8 +776,6 @@ namespace Engine
                 terrainTexturesHR = null;
                 terrainNormalMaps?.Dispose();
                 terrainNormalMaps = null;
-                terrainSpecularMaps?.Dispose();
-                terrainSpecularMaps = null;
                 colorTextures?.Dispose();
                 colorTextures = null;
                 alphaMap?.Dispose();
@@ -859,7 +853,6 @@ namespace Engine
             {
                 UseAnisotropic = useAnisotropic,
                 NormalMap = terrainNormalMaps,
-                SpecularMap = terrainSpecularMaps,
                 UseAlphaMap = useAlphaMap,
                 AlphaMap = alphaMap,
                 ColorTextures = colorTextures,
@@ -896,7 +889,6 @@ namespace Engine
             {
                 UseAnisotropic = useAnisotropic,
                 NormalMap = terrainNormalMaps,
-                SpecularMap = terrainSpecularMaps,
                 UseAlphaMap = useAlphaMap,
                 AlphaMap = alphaMap,
                 ColorTextures = colorTextures,
@@ -941,9 +933,6 @@ namespace Engine
 
             var normalMapTextures = ImageContent.Array(tContentPath, description.NormalMaps);
             terrainNormalMaps = Game.ResourceManager.RequestResource(normalMapTextures);
-
-            var specularMapTextures = ImageContent.Array(tContentPath, description.SpecularMaps);
-            terrainSpecularMaps = Game.ResourceManager.RequestResource(specularMapTextures);
 
             if (description.UseSlopes)
             {

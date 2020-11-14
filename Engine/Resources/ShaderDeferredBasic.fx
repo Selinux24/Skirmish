@@ -24,7 +24,6 @@ Texture2D gAnimationPalette : register(t0);
 
 Texture2DArray gDiffuseMapArray : register(t1);
 Texture2DArray gNormalMapArray : register(t2);
-Texture2DArray gSpecularMapArray : register(t3);
 
 SamplerState SamplerDiffuse : register(s0);
 SamplerState SamplerNormal : register(s1);

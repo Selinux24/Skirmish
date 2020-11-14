@@ -140,10 +140,6 @@ namespace Engine
         /// </summary>
         public Color4 FogColor { get; protected set; }
         /// <summary>
-        /// Albedo
-        /// </summary>
-        public float Albedo { get; set; } = 1f;
-        /// <summary>
         /// Gets light by name
         /// </summary>
         /// <param name="name">Light name</param>
@@ -543,7 +539,6 @@ namespace Engine
             }
 
             float b = Math.Max(0, -(float)Math.Cos(timeOfDay.Elevation) + 0.15f) * 1.5f;
-            Albedo = Math.Min(b, 0.5f);
 
             Vector3 keyDir = timeOfDay.LightDirection;
             Vector3 backDir = -Vector3.Reflect(keyDir, Vector3.Up);
@@ -585,7 +580,7 @@ namespace Engine
                 backLight.Direction = backDir;
             }
 
-            FogColor = BaseFogColor * Albedo;
+            FogColor = BaseFogColor * b;
         }
         /// <summary>
         /// Gets the sun color based on time of day

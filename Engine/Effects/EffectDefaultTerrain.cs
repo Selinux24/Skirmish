@@ -75,10 +75,6 @@ namespace Engine.Effects
         /// </summary>
         private readonly EngineEffectVariableScalar useColorDiffuseVar = null;
         /// <summary>
-        /// Use specular map color variable
-        /// </summary>
-        private readonly EngineEffectVariableScalar useColorSpecularVar = null;
-        /// <summary>
         /// Material index effect variable
         /// </summary>
         private readonly EngineEffectVariableScalar materialIndexVar = null;
@@ -94,10 +90,6 @@ namespace Engine.Effects
         /// Normal map effect variable
         /// </summary>
         private readonly EngineEffectVariableTexture normalMapVar = null;
-        /// <summary>
-        /// Specular map effect variable
-        /// </summary>
-        private readonly EngineEffectVariableTexture specularMapVar = null;
         /// <summary>
         /// Color texture array effect variable
         /// </summary>
@@ -146,10 +138,6 @@ namespace Engine.Effects
         /// Spot light shadows map effect variable
         /// </summary>
         private readonly EngineEffectVariableTexture shadowMapSpotVar = null;
-        /// <summary>
-        /// Albedo effect variable
-        /// </summary>
-        private readonly EngineEffectVariableScalar albedoVar = null;
 
         /// <summary>
         /// Current diffuse map (Low resolution)
@@ -163,10 +151,6 @@ namespace Engine.Effects
         /// Current normal map
         /// </summary>
         private EngineShaderResourceView currentNormalMap = null;
-        /// <summary>
-        /// Current specular map
-        /// </summary>
-        private EngineShaderResourceView currentSpecularMap = null;
         /// <summary>
         /// Current color texure array
         /// </summary>
@@ -396,20 +380,6 @@ namespace Engine.Effects
             }
         }
         /// <summary>
-        /// Use specular map color
-        /// </summary>
-        protected bool UseColorSpecular
-        {
-            get
-            {
-                return useColorSpecularVar.GetBool();
-            }
-            set
-            {
-                useColorSpecularVar.Set(value);
-            }
-        }
-        /// <summary>
         /// Material index
         /// </summary>
         protected uint MaterialIndex
@@ -481,27 +451,6 @@ namespace Engine.Effects
                     normalMapVar.SetResource(value);
 
                     currentNormalMap = value;
-
-                    Counters.TextureUpdates++;
-                }
-            }
-        }
-        /// <summary>
-        /// Scpecular map
-        /// </summary>
-        protected EngineShaderResourceView SpecularMap
-        {
-            get
-            {
-                return specularMapVar.GetResource();
-            }
-            set
-            {
-                if (currentSpecularMap != value)
-                {
-                    specularMapVar.SetResource(value);
-
-                    currentSpecularMap = value;
 
                     Counters.TextureUpdates++;
                 }
@@ -700,20 +649,6 @@ namespace Engine.Effects
                 }
             }
         }
-        /// <summary>
-        /// Albedo
-        /// </summary>
-        protected float Albedo
-        {
-            get
-            {
-                return albedoVar.GetFloat();
-            }
-            set
-            {
-                albedoVar.Set(value);
-            }
-        }
 
         /// <summary>
         /// Constructor
@@ -750,15 +685,12 @@ namespace Engine.Effects
             shadowMapDirectionalVar = Effect.GetVariableTexture("gPSShadowMapDir");
             shadowMapPointVar = Effect.GetVariableTexture("gPSShadowMapPoint");
             shadowMapSpotVar = Effect.GetVariableTexture("gPSShadowMapSpot");
-            albedoVar = Effect.GetVariableScalar("gPSAlbedo");
 
             //Per object
             parametersVar = Effect.GetVariableVector("gPSParams");
             useColorDiffuseVar = Effect.GetVariableScalar("gPSUseColorDiffuse");
-            useColorSpecularVar = Effect.GetVariableScalar("gPSUseColorSpecular");
             materialIndexVar = Effect.GetVariableScalar("gPSMaterialIndex");
             normalMapVar = Effect.GetVariableTexture("gPSNormalMapArray");
-            specularMapVar = Effect.GetVariableTexture("gPSSpecularMapArray");
             colorTexturesVar = Effect.GetVariableTexture("gPSColorTextureArray");
             alphaMapVar = Effect.GetVariableTexture("gPSAlphaTexture");
             diffuseMapLRVar = Effect.GetVariableTexture("gPSDiffuseMapLRArray");
@@ -845,7 +777,6 @@ namespace Engine.Effects
                 PointLights = BufferLightPoint.Build(lights.GetVisiblePointLights(), out int pointLength);
                 SpotLights = BufferLightSpot.Build(lights.GetVisibleSpotLights(), out int spotLength);
                 LightCount = new[] { dirLength, pointLength, spotLength };
-                Albedo = lights.Albedo;
 
                 FogStart = lights.FogStart;
                 FogRange = lights.FogRange;
@@ -864,7 +795,6 @@ namespace Engine.Effects
                 PointLights = BufferLightPoint.Default;
                 SpotLights = BufferLightSpot.Default;
                 LightCount = new[] { 0, 0, 0 };
-                Albedo = 1;
 
                 FogStart = 0;
                 FogRange = 0;
@@ -885,8 +815,6 @@ namespace Engine.Effects
             Anisotropic = state.UseAnisotropic;
 
             NormalMap = state.NormalMap;
-            SpecularMap = state.SpecularMap;
-            UseColorSpecular = state.SpecularMap != null;
 
             AlphaMap = state.AlphaMap;
             ColorTextures = state.ColorTextures;

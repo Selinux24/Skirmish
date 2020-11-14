@@ -3,16 +3,15 @@
 
 Texture2D gPSAlphaTexture : register(t1);
 Texture2DArray gPSNormalMapArray : register(t5);
-Texture2DArray gPSSpecularMapArray : register(t6);
-Texture2DArray gPSColorTextureArray : register(t7);
-Texture2DArray gPSDiffuseMapLRArray : register(t8);
-Texture2DArray gPSDiffuseMapHRArray : register(t9);
+Texture2DArray gPSColorTextureArray : register(t6);
+Texture2DArray gPSDiffuseMapLRArray : register(t7);
+Texture2DArray gPSDiffuseMapHRArray : register(t8);
 
 SamplerState SamplerDiffuse : register(s0);
 SamplerState SamplerNormal : register(s1);
 SamplerState SamplerSpecular : register(s2);
 
-inline float4 AlphaMap(PSVertexTerrain input, out float4 specular, out float3 normal)
+inline float4 AlphaMap(PSVertexTerrain input, out float3 normal)
 {
     float4 alphaMap = gPSAlphaTexture.Sample(SamplerDiffuse, input.tex1);
 
@@ -20,10 +19,6 @@ inline float4 AlphaMap(PSVertexTerrain input, out float4 specular, out float3 no
     float3 normalMapSample2 = gPSNormalMapArray.Sample(SamplerNormal, float3(input.tex0, 1)).rgb;
     float3 normalMapSample = lerp(normalMapSample1, normalMapSample2, alphaMap.b);
     normal = NormalSampleToWorldSpace(normalMapSample, input.normalWorld, input.tangentWorld);
-
-    float4 specular1 = gPSSpecularMapArray.Sample(SamplerSpecular, float3(input.tex0, 0));
-    float4 specular2 = gPSSpecularMapArray.Sample(SamplerSpecular, float3(input.tex0, 1));
-    specular = lerp(specular1, specular2, alphaMap.b);
 
     float4 textureColor1 = gPSColorTextureArray.Sample(SamplerDiffuse, float3(input.tex0, 0));
     float4 textureColor2 = gPSColorTextureArray.Sample(SamplerDiffuse, float3(input.tex0, 1));
@@ -37,7 +32,7 @@ inline float4 AlphaMap(PSVertexTerrain input, out float4 specular, out float3 no
     return saturate(color * input.color);
 }
 
-inline float4 Slopes(PSVertexTerrain input, float slope1, float slope2, out float4 specular, out float3 normal)
+inline float4 Slopes(PSVertexTerrain input, float slope1, float slope2, out float3 normal)
 {
     float4 alphaMap = gPSAlphaTexture.Sample(SamplerDiffuse, input.tex1);
 
@@ -45,10 +40,6 @@ inline float4 Slopes(PSVertexTerrain input, float slope1, float slope2, out floa
     float3 normalMapSample2 = gPSNormalMapArray.Sample(SamplerNormal, float3(input.tex0, 1)).rgb;
     float3 normalMapSample = lerp(normalMapSample1, normalMapSample2, alphaMap.b);
     normal = NormalSampleToWorldSpace(normalMapSample, input.normalWorld, input.tangentWorld);
-
-    float4 specular1 = gPSSpecularMapArray.Sample(SamplerSpecular, float3(input.tex0, 0));
-    float4 specular2 = gPSSpecularMapArray.Sample(SamplerSpecular, float3(input.tex0, 1));
-    specular = lerp(specular1, specular2, alphaMap.b);
 
 	float4 color = 0;
 
@@ -82,7 +73,7 @@ inline float4 Slopes(PSVertexTerrain input, float slope1, float slope2, out floa
 	return saturate(color * input.color);
 }
 
-inline float4 Full(PSVertexTerrain input, float prop, float slope1, float slope2, out float4 specular, out float3 normal)
+inline float4 Full(PSVertexTerrain input, float prop, float slope1, float slope2, out float3 normal)
 {
     float4 alphaMap = gPSAlphaTexture.Sample(SamplerDiffuse, input.tex1);
 
@@ -90,10 +81,6 @@ inline float4 Full(PSVertexTerrain input, float prop, float slope1, float slope2
     float3 normalMapSample2 = gPSNormalMapArray.Sample(SamplerNormal, float3(input.tex0, 1)).rgb;
     float3 normalMapSample = lerp(normalMapSample1, normalMapSample2, alphaMap.b);
     normal = NormalSampleToWorldSpace(normalMapSample, input.normalWorld, input.tangentWorld);
-
-    float4 specular1 = gPSSpecularMapArray.Sample(SamplerSpecular, float3(input.tex0, 0));
-    float4 specular2 = gPSSpecularMapArray.Sample(SamplerSpecular, float3(input.tex0, 1));
-    specular = lerp(specular1, specular2, alphaMap.b);
 
 	// BY ALPHA MAP
     float4 textureColor1 = gPSColorTextureArray.Sample(SamplerDiffuse, float3(input.tex0, 0));

@@ -31,8 +31,7 @@ cbuffer cbCombineLights : register(b5)
     float4 gFogColor;
     float gFogStart;
     float gFogRange;
-    float gAlbedo;
-    float PAD52;
+    float2 PAD51;
 }
 
 Texture2D gTG1Map : register(t0);
@@ -102,8 +101,9 @@ float4 PSDirectionalLight(PSLightInput input) : SV_TARGET
         linput.shadowMap = gShadowMapDir;
 
         ComputeLightsOutput loutput = ComputeDirectionalLight(linput);
-
-        return (k.Diffuse * float4(loutput.diffuse, 1)) + float4(k.Specular * loutput.specular, 1);
+        float3 diffuseSpecular = (k.Diffuse.rgb * loutput.diffuse) + (k.Specular * loutput.specular);
+        
+        return float4(diffuseSpecular, 1);
     }
     else
     {
@@ -140,8 +140,9 @@ float4 PSPointLight(PSLightInput input) : SV_TARGET
         linput.shadowMapPoint = gShadowMapPoint;
 
         ComputeLightsOutput loutput = ComputePointLight(linput);
-
-        return (k.Diffuse * float4(loutput.diffuse, 1)) + float4(k.Specular * loutput.specular, 1);
+        float3 diffuseSpecular = (k.Diffuse.rgb * loutput.diffuse) + (k.Specular * loutput.specular);
+        
+        return float4(diffuseSpecular, 1);
     }
     else
     {
@@ -178,8 +179,9 @@ float4 PSSpotLight(PSLightInput input) : SV_TARGET
         linput.shadowMap = gShadowMapSpot;
 
         ComputeLightsOutput loutput = ComputeSpotLight(linput);
-
-        return (k.Diffuse * float4(loutput.diffuse, 1)) + float4(k.Specular * loutput.specular, 1);
+        float3 diffuseSpecular = (k.Diffuse.rgb * loutput.diffuse) + (k.Specular * loutput.specular);
+        
+        return float4(diffuseSpecular, 1);
     }
     else
     {
@@ -201,17 +203,18 @@ float4 PSCombineLights(PSLightInput input) : SV_TARGET
     float doLighting = tg2.w;
     if (doLighting == 0)
     {
-        float4 color = tg1;
+        float4 albedo = tg1;
         float3 normal = tg2.xyz;
         float3 position = tg3.xyz;
         float materialIndex = tg3.w;
-        float3 light = lmap.rgb;
+        float3 diffuseSpecular = lmap.rgb;
 
         float3 lAmbient = CalcAmbient(gHemiLight.AmbientDown, gHemiLight.AmbientRange, normal);
 
         Material k = GetMaterialData(gMaterialPalette, materialIndex, gMaterialPaletteWidth);
 
-        color = DeferredLightEquation(k, color, gAlbedo, lAmbient, light);
+        float3 light = DeferredLightEquation(k, lAmbient, diffuseSpecular);
+        float4 color = float4(light, 1) * albedo;
 
         if (gFogRange > 0)
         {

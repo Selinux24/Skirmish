@@ -23,10 +23,6 @@ namespace Engine.Effects
         /// </summary>
         private readonly EngineEffectVariableScalar lightCountVar = null;
         /// <summary>
-        /// Albedo effect variable
-        /// </summary>
-        private readonly EngineEffectVariableScalar albedoVar = null;
-        /// <summary>
         /// World matrix effect variable
         /// </summary>
         private readonly EngineEffectVariableMatrix worldVar = null;
@@ -101,20 +97,6 @@ namespace Engine.Effects
             set
             {
                 lightCountVar.Set(value);
-            }
-        }
-        /// <summary>
-        /// Albedo
-        /// </summary>
-        protected float Albedo
-        {
-            get
-            {
-                return albedoVar.GetFloat();
-            }
-            set
-            {
-                albedoVar.Set(value);
             }
         }
         /// <summary>
@@ -305,7 +287,6 @@ namespace Engine.Effects
             waterColorVar = Effect.GetVariableVector("gPSWaterColor");
             waterAlphaVar = Effect.GetVariableScalar("gPSWaterAlpha");
             waveParamsVar = Effect.GetVariableVector("gPSWaveParams");
-            albedoVar = Effect.GetVariableScalar("gPSAlbedo");
             fogRangeVar = Effect.GetVariableScalar("gPSFogRange");
             fogStartVar = Effect.GetVariableScalar("gPSFogStart");
             fogColorVar = Effect.GetVariableVector("gPSFogColor");
@@ -343,8 +324,6 @@ namespace Engine.Effects
                 DirLights = BufferLightDirectional.Build(lights.GetVisibleDirectionalLights(), out int dirLength);
                 LightCount = dirLength;
 
-                Albedo = lights.Albedo;
-
                 FogStart = lights.FogStart;
                 FogRange = lights.FogRange;
                 FogColor = lights.FogColor.RGB();
@@ -353,8 +332,6 @@ namespace Engine.Effects
             {
                 DirLights = BufferLightDirectional.Default;
                 LightCount = 0;
-
-                Albedo = 1;
 
                 FogStart = 0;
                 FogRange = 0;
