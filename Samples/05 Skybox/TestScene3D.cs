@@ -370,8 +370,8 @@ namespace Skybox
             movingFireLight = new SceneLightPoint(
                 "Moving fire light",
                 false,
-                Color.Orange,
-                Color.Orange,
+                Color.Orange.RGB(),
+                Color.Orange.RGB(),
                 true,
                 SceneLightPointDescription.Create(Vector3.Zero, 15f, 20f));
 
@@ -386,10 +386,10 @@ namespace Skybox
                     return;
                 }
 
-                Color color = Color.Yellow;
-                if (i == 1) color = Color.Red;
-                if (i == 2) color = Color.Green;
-                if (i == 3) color = Color.LightBlue;
+                Color3 color = Color.Yellow.RGB();
+                if (i == 1) color = Color.Red.RGB();
+                if (i == 2) color = Color.Green.RGB();
+                if (i == 3) color = Color.LightBlue.RGB();
 
                 FindTopGroundPosition(firePositions[i].X, firePositions[i].Y, out PickingResult<Triangle> result);
                 firePositions3D[i] = result.Position;
@@ -642,7 +642,7 @@ namespace Skybox
                 var light = Lights.PointLights[i];
 
                 volumesDrawer.SetPrimitives(
-                    new Color4(light.DiffuseColor.RGB(), alpha),
+                    new Color4(light.DiffuseColor, alpha),
                     Line3D.CreateWiredSphere(light.BoundingSphere, bsphSlices, bsphStacks));
             }
         }
@@ -651,7 +651,7 @@ namespace Skybox
             var light = Lights.PointLights[0];
 
             volumesDrawer.SetPrimitives(
-                new Color4(light.DiffuseColor.RGB(), alpha),
+                new Color4(light.DiffuseColor, alpha),
                 Line3D.CreateWiredSphere(light.BoundingSphere, bsphSlices, bsphStacks));
         }
         private void DEBUGUpdateGraphDrawer()

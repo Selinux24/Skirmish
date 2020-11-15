@@ -126,9 +126,9 @@ namespace SceneTest.SceneStencilPass
             Lights.BackLight.Enabled = false;
             Lights.FillLight.Enabled = true;
 
-            Lights.Add(new SceneLightPoint("Point1", false, Color.White, Color.White, true, SceneLightPointDescription.Create(Vector3.Zero, 5, 5)));
+            Lights.Add(new SceneLightPoint("Point1", false, Color3.White, Color3.White, true, SceneLightPointDescription.Create(Vector3.Zero, 5, 5)));
 
-            Lights.Add(new SceneLightSpot("Spot1", false, Color.White, Color.White, true, SceneLightSpotDescription.Create(Vector3.Zero, Vector3.Down, 20, 5, 5)));
+            Lights.Add(new SceneLightSpot("Spot1", false, Color3.White, Color3.White, true, SceneLightSpotDescription.Create(Vector3.Zero, Vector3.Down, 20, 5, 5)));
 
             await Task.CompletedTask;
         }
@@ -223,7 +223,7 @@ namespace SceneTest.SceneStencilPass
             position.Z = r * (float)Math.Sin(av * Game.GameTime.TotalSeconds);
 
             var pos1 = position + new Vector3(0, h, 0);
-            var col1 = animateLightColors ? new Color4(pos1.X, pos1.Y, pos1.Z, 1.0f) : Color.White;
+            var col1 = animateLightColors ? new Color3(pos1.X, pos1.Y, pos1.Z) : Color3.White;
 
             lightEmitter1.Manipulator.SetPosition(pos1);
             Lights.PointLights[0].Position = pos1;
@@ -231,7 +231,7 @@ namespace SceneTest.SceneStencilPass
             Lights.PointLights[0].SpecularColor = col1;
 
             var pos2 = (position * -1) + new Vector3(0, h, 0);
-            var col2 = animateLightColors ? new Color4(pos2.X, pos2.Y, pos2.Z, 1.0f) : Color.White;
+            var col2 = animateLightColors ? new Color3(pos2.X, pos2.Y, pos2.Z) : Color3.White;
 
             lightEmitter2.Manipulator.SetPosition(pos2);
             Lights.SpotLights[0].Position = pos2;
@@ -261,7 +261,7 @@ namespace SceneTest.SceneStencilPass
             {
                 foreach (var spot in Lights.SpotLights)
                 {
-                    var color = new Color4(spot.DiffuseColor.RGB(), 0.25f);
+                    var color = new Color4(spot.DiffuseColor, 0.25f);
 
                     var lines = spot.GetVolume(30);
 
@@ -270,7 +270,7 @@ namespace SceneTest.SceneStencilPass
 
                 foreach (var point in Lights.PointLights)
                 {
-                    var color = new Color4(point.DiffuseColor.RGB(), 0.25f);
+                    var color = new Color4(point.DiffuseColor, 0.25f);
 
                     var lines = point.GetVolume(30, 30);
 

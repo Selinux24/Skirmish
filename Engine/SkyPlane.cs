@@ -60,7 +60,7 @@ namespace Engine
         /// <summary>
         /// Clouds color
         /// </summary>
-        private Color4 color;
+        private Color3 color;
 
         /// <summary>
         /// First layer translation
@@ -114,7 +114,7 @@ namespace Engine
         /// <summary>
         /// Gets or sets the clouds base color
         /// </summary>
-        public Color4 CloudsBaseColor { get; set; }
+        public Color3 CloudsBaseColor { get; set; }
         /// <summary>
         /// Returns true if the buffers were ready
         /// </summary>

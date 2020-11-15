@@ -94,8 +94,8 @@ namespace Engine.Effects
         /// <param name="light">Light</param>
         public BufferLightDirectional(ISceneLightDirectional light)
         {
-            DiffuseColor = light.DiffuseColor;
-            SpecularColor = light.SpecularColor;
+            DiffuseColor = new Color4(light.DiffuseColor, 0f);
+            SpecularColor = new Color4(light.SpecularColor, 0f);
             DirToLight = -light.Direction;
             CastShadow = light.CastShadowsMarked ? 1 : 0;
             ToCascadeOffsetX = light.ToCascadeOffsetX;

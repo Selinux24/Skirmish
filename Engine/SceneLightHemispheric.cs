@@ -57,7 +57,7 @@ namespace Engine
         /// <param name="brightnessUp">Brightness up</param>
         /// <param name="enabled">Lights is enabled</param>
         public SceneLightHemispheric(string name, Color3 ambientDown, float brightnessDown, Color3 ambientUp, float brightnessUp, bool enabled)
-            : base(name, false, Color.Transparent, Color.Transparent, enabled)
+            : base(name, false, Color3.Black, Color3.Black, enabled)
         {
             AmbientDown = ambientDown * brightnessDown;
             AmbientUp = ambientUp * brightnessUp;

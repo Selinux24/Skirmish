@@ -651,7 +651,7 @@ namespace Heightmap
                     }
 
                     var lanternDesc = SceneLightSpotDescription.Create(Camera.Position, Camera.Direction, 25f, 100, 10000);
-                    lantern = new SceneLightSpot("lantern", true, Color.White, Color.White, false, lanternDesc);
+                    lantern = new SceneLightSpot("lantern", true, Color3.White, Color3.White, false, lanternDesc);
                     Lights.Add(lantern);
 
                     SetDebugInfo();
@@ -954,16 +954,16 @@ namespace Heightmap
                 spotLight1 = new SceneLightSpot(
                     "Red Spot",
                     true,
-                    Color.Red,
-                    Color.Red,
+                    Color.Red.RGB(),
+                    Color.Red.RGB(),
                     true,
                     SceneLightSpotDescription.Create(position, Vector3.Normalize(Vector3.One * -1f), 25, 25, 100));
 
                 spotLight2 = new SceneLightSpot(
                     "Blue Spot",
                     true,
-                    Color.Blue,
-                    Color.Blue,
+                    Color.Blue.RGB(),
+                    Color.Blue.RGB(),
                     true,
                     SceneLightSpotDescription.Create(position, Vector3.Normalize(Vector3.One * -1f), 25, 25, 100));
 
@@ -974,11 +974,10 @@ namespace Heightmap
             SceneLightPoint[] torchLights = new SceneLightPoint[torchs.InstanceCount - 1];
             for (int i = 1; i < torchs.InstanceCount; i++)
             {
-                Color color = new Color(
+                Color3 color = new Color3(
                     posRnd.NextFloat(0, 1),
                     posRnd.NextFloat(0, 1),
-                    posRnd.NextFloat(0, 1),
-                    1);
+                    posRnd.NextFloat(0, 1));
 
                 Vector3 position = new Vector3(
                     posRnd.NextFloat(bbox.Minimum.X, bbox.Maximum.X),
@@ -1677,14 +1676,14 @@ namespace Heightmap
             {
                 var lines = spot.GetVolume(10);
 
-                lightsVolumeDrawer.AddPrimitives(new Color4(spot.DiffuseColor.RGB(), 0.15f), lines);
+                lightsVolumeDrawer.AddPrimitives(new Color4(spot.DiffuseColor, 0.15f), lines);
             }
 
             foreach (var point in Lights.PointLights)
             {
                 var lines = point.GetVolume(12, 5);
 
-                lightsVolumeDrawer.AddPrimitives(new Color4(point.DiffuseColor.RGB(), 0.15f), lines);
+                lightsVolumeDrawer.AddPrimitives(new Color4(point.DiffuseColor, 0.15f), lines);
             }
 
             lightsVolumeDrawer.Active = lightsVolumeDrawer.Visible = true;

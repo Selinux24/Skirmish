@@ -195,12 +195,12 @@ namespace SceneTest.SceneLights
             Lights.FillLight.CastShadow = false;
 
             var pointDesc = SceneLightPointDescription.Create(Vector3.Zero, 25, 25);
-            Lights.Add(new SceneLightPoint("Point1", true, Color.White, Color.White, true, pointDesc));
+            Lights.Add(new SceneLightPoint("Point1", true, Color3.White, Color3.White, true, pointDesc));
 
             var spotDesc = SceneLightSpotDescription.Create(Vector3.Zero, Vector3.Down, 50, 25, 25);
-            Lights.Add(new SceneLightSpot("Spot1", true, Color.White, Color.White, true, spotDesc));
-            Lights.Add(new SceneLightSpot("Spot2", true, Color.White, Color.White, true, spotDesc));
-            Lights.Add(new SceneLightSpot("Spot3", true, Color.White, Color.White, true, spotDesc));
+            Lights.Add(new SceneLightSpot("Spot1", true, Color3.White, Color3.White, true, spotDesc));
+            Lights.Add(new SceneLightSpot("Spot2", true, Color3.White, Color3.White, true, spotDesc));
+            Lights.Add(new SceneLightSpot("Spot3", true, Color3.White, Color3.White, true, spotDesc));
 
             await Task.CompletedTask;
         }
@@ -385,7 +385,7 @@ namespace SceneTest.SceneLights
             {
                 foreach (var spot in Lights.SpotLights)
                 {
-                    var color = new Color4(spot.DiffuseColor.RGB(), 0.25f);
+                    var color = new Color4(spot.DiffuseColor, 0.25f);
 
                     var lines = spot.GetVolume(30);
 
@@ -394,7 +394,7 @@ namespace SceneTest.SceneLights
 
                 foreach (var point in Lights.PointLights)
                 {
-                    var color = new Color4(point.DiffuseColor.RGB(), 0.25f);
+                    var color = new Color4(point.DiffuseColor, 0.25f);
 
                     var lines = point.GetVolume(30, 30);
 

@@ -18,10 +18,10 @@ namespace Engine.Content
             {
                 return new MaterialCookTorranceContent()
                 {
-                    DiffuseColor = MaterialConstants.DiffuseColor,
-                    EmissiveColor = MaterialConstants.EmissiveColor,
                     AmbientColor = MaterialConstants.AmbientColor,
+                    DiffuseColor = MaterialConstants.DiffuseColor,
                     SpecularColor = MaterialConstants.SpecularColor,
+                    EmissiveColor = MaterialConstants.EmissiveColor,
                     Metallic = MaterialConstants.Metallic,
                     Roughness = MaterialConstants.Roughness,
                     IsTransparent = false,

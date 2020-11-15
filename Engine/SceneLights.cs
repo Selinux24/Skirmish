@@ -185,11 +185,11 @@ namespace Engine
         /// <summary>
         /// Sun color palette
         /// </summary>
-        public List<Tuple<float, Color4>> SunColorPalette { get; set; }
+        public List<Tuple<float, Color3>> SunColorPalette { get; set; }
         /// <summary>
         /// Sun color
         /// </summary>
-        public Color4 SunColor { get; set; }
+        public Color3 SunColor { get; set; }
 
         /// <summary>
         /// Constructor
@@ -203,18 +203,18 @@ namespace Engine
             FogRange = 0;
             FarLightsDistance = 1000000f;
 
-            SunColor = Color.White;
+            SunColor = Color3.White;
 
             UseSunColorPalette = true;
-            SunColorPalette = new List<Tuple<float, Color4>>();
+            SunColorPalette = new List<Tuple<float, Color3>>();
             SunColorPalette.AddRange(new[]
             {
-                new Tuple<float, Color4>(MathUtil.Pi * -1.00f, Color.Black),
-                new Tuple<float, Color4>(MathUtil.Pi * 0.02f, Color.Orange),
-                new Tuple<float, Color4>(MathUtil.Pi * 0.20f, Color.White),
-                new Tuple<float, Color4>(MathUtil.Pi * 0.70f, Color.White),
-                new Tuple<float, Color4>(MathUtil.Pi * 0.98f, Color.Orange),
-                new Tuple<float, Color4>(MathUtil.Pi * 2.00f, Color.Black),
+                new Tuple<float, Color3>(MathUtil.Pi * -1.00f, Color.Black.RGB()),
+                new Tuple<float, Color3>(MathUtil.Pi * 0.02f, Color.Orange.RGB()),
+                new Tuple<float, Color3>(MathUtil.Pi * 0.20f, Color.White.RGB()),
+                new Tuple<float, Color3>(MathUtil.Pi * 0.70f, Color.White.RGB()),
+                new Tuple<float, Color3>(MathUtil.Pi * 0.98f, Color.Orange.RGB()),
+                new Tuple<float, Color3>(MathUtil.Pi * 2.00f, Color.Black.RGB()),
             });
         }
 
@@ -587,7 +587,7 @@ namespace Engine
         /// </summary>
         /// <param name="timeOfDay">Time of day class</param>
         /// <returns>Returns the color base on time of day meridian angle</returns>
-        private Color4 GetSunColor(TimeOfDay timeOfDay)
+        private Color3 GetSunColor(TimeOfDay timeOfDay)
         {
             float angle = MathUtil.Clamp(timeOfDay.MeridianAngle - MathUtil.PiOverTwo, 0, MathUtil.Pi);
 
@@ -600,7 +600,7 @@ namespace Engine
                         var from = SunColorPalette[i - 1];
                         var to = SunColorPalette[i];
                         float amount = (angle - from.Item1) / (to.Item1 - from.Item1);
-                        return Color4.Lerp(from.Item2, to.Item2, amount);
+                        return Color3.Lerp(from.Item2, to.Item2, amount);
                     }
                     else
                     {
@@ -609,7 +609,7 @@ namespace Engine
                 }
             }
 
-            return Color4.White;
+            return Color3.White;
         }
 
         /// <summary>

@@ -73,12 +73,12 @@ float4 PSTerrainAlphaMap(PSVertexTerrain input) : SV_TARGET
 	ComputeLightsInput lInput;
 
     lInput.material = material;
-	lInput.pPosition = input.positionWorld;
-	lInput.pNormal = normal;
-	lInput.pColorDiffuse = color;
+	lInput.objectPosition = input.positionWorld;
+	lInput.objectNormal = normal;
+    lInput.objectDiffuseColor = color;
 
-	lInput.ePosition = gPSEyePositionWorld;
-	lInput.lod = gLOD;
+	lInput.eyePosition = gPSEyePositionWorld;
+	lInput.levelOfDetailRanges = gLOD;
 
 	lInput.hemiLight = gPSHemiLight;
 	lInput.dirLights = gPSDirLights;
@@ -109,12 +109,12 @@ float4 PSTerrainSlopes(PSVertexTerrain input) : SV_TARGET
 	ComputeLightsInput lInput;
 
     lInput.material = material;
-	lInput.pPosition = input.positionWorld;
-	lInput.pNormal = normal;
-	lInput.pColorDiffuse = color;
+	lInput.objectPosition = input.positionWorld;
+	lInput.objectNormal = normal;
+    lInput.objectDiffuseColor = color;
 
-	lInput.ePosition = gPSEyePositionWorld;
-	lInput.lod = gLOD;
+	lInput.eyePosition = gPSEyePositionWorld;
+	lInput.levelOfDetailRanges = gLOD;
 
 	lInput.hemiLight = gPSHemiLight;
 	lInput.dirLights = gPSDirLights;
@@ -145,12 +145,12 @@ float4 PSTerrainFull(PSVertexTerrain input) : SV_TARGET
 	ComputeLightsInput lInput;
 
     lInput.material = material;
-	lInput.pPosition = input.positionWorld;
-	lInput.pNormal = normal;
-	lInput.pColorDiffuse = color;
+	lInput.objectPosition = input.positionWorld;
+	lInput.objectNormal = normal;
+    lInput.objectDiffuseColor = color;
 
-	lInput.ePosition = gPSEyePositionWorld;
-	lInput.lod = gLOD;
+	lInput.eyePosition = gPSEyePositionWorld;
+	lInput.levelOfDetailRanges = gLOD;
 
 	lInput.hemiLight = gPSHemiLight;
 	lInput.dirLights = gPSDirLights;

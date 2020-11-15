@@ -108,8 +108,8 @@ namespace Engine.Effects
         {
             Position = light.Position;
             Direction = light.Direction;
-            DiffuseColor = light.DiffuseColor;
-            SpecularColor = light.SpecularColor;
+            DiffuseColor = new Color4(light.DiffuseColor, 0f);
+            SpecularColor = new Color4(light.SpecularColor, 0f);
             Intensity = light.Intensity;
             Intensity = light.Intensity;
             Angle = light.AngleRadians;

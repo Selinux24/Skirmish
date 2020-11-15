@@ -37,7 +37,7 @@ namespace Collada.ModularDungeon
         private readonly Color ambientDown = new Color(0, 31, 0, 255);
 
         private Player playerAgentType = null;
-        private readonly Color agentTorchLight = new Color(255, 249, 224, 255);
+        private readonly Color3 agentTorchLight = new Color(255, 249, 224).RGB();
         private readonly Vector3 cameraInitialPosition = new Vector3(1000, 1000, 1000);
         private readonly Vector3 cameraInitialInterest = new Vector3(1001, 1000, 1000);
 

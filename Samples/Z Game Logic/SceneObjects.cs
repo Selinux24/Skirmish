@@ -115,8 +115,8 @@ namespace GameLogic
             spotLight = new SceneLightSpot(
                 "Current soldier",
                 false,
-                Color.White,
-                Color.White,
+                Color3.White,
+                Color3.White,
                 true,
                 SceneLightSpotDescription.Create(Vector3.Zero, Vector3.Down, 15f, 15f, 100f));
 

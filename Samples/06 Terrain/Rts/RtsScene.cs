@@ -2418,14 +2418,14 @@ namespace Terrain.Rts
             {
                 var lines = spot.GetVolume(10);
 
-                lightsVolumeDrawer.AddPrimitives(new Color4(spot.DiffuseColor.RGB(), 0.15f), lines);
+                lightsVolumeDrawer.AddPrimitives(new Color4(spot.DiffuseColor, 0.15f), lines);
             }
 
             foreach (var point in Lights.PointLights)
             {
                 var lines = point.GetVolume(12, 5);
 
-                lightsVolumeDrawer.AddPrimitives(new Color4(point.DiffuseColor.RGB(), 0.15f), lines);
+                lightsVolumeDrawer.AddPrimitives(new Color4(point.DiffuseColor, 0.15f), lines);
             }
 
             lightsVolumeDrawer.Active = lightsVolumeDrawer.Visible = true;

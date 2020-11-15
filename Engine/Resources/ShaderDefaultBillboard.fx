@@ -86,8 +86,8 @@ float4 PSForwardBillboard(PSVertexBillboard input) : SV_Target
 {
     float3 uvw = float3(input.tex, input.primitiveID % gTextureCount);
 
-    float4 textureColor = gTextureArray.Sample(SamplerLinear, uvw);
-    clip(textureColor.a - 0.01f);
+    float4 diffuseColor = gTextureArray.Sample(SamplerLinear, uvw);
+    clip(diffuseColor.a - 0.01f);
 
     float3 normalWorld = input.normalWorld;
     if (gNormalMapCount > 0)
@@ -101,12 +101,12 @@ float4 PSForwardBillboard(PSVertexBillboard input) : SV_Target
     ComputeLightsInput lInput;
 
     lInput.material = material;
-	lInput.pPosition = input.positionWorld;
-	lInput.pNormal = normalWorld;
-	lInput.pColorDiffuse = textureColor;
+	lInput.objectPosition = input.positionWorld;
+	lInput.objectNormal = normalWorld;
+    lInput.objectDiffuseColor = diffuseColor;
 
-	lInput.ePosition = gEyePositionWorld;
-	lInput.lod = gLOD;
+	lInput.eyePosition = gEyePositionWorld;
+	lInput.levelOfDetailRanges = gLOD;
 
 	lInput.hemiLight = gPSHemiLight;
 	lInput.dirLights = gDirLights;

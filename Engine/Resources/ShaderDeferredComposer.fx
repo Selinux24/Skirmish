@@ -209,7 +209,7 @@ float4 PSCombineLights(PSLightInput input) : SV_TARGET
         float materialIndex = tg3.w;
         float3 diffuseSpecular = lmap.rgb;
 
-        float3 lAmbient = CalcAmbient(gHemiLight.AmbientDown, gHemiLight.AmbientRange, normal);
+        float3 lAmbient = CalcAmbientHemispheric(gHemiLight.AmbientDown, gHemiLight.AmbientRange, normal);
 
         Material k = GetMaterialData(gMaterialPalette, materialIndex, gMaterialPaletteWidth);
 

@@ -236,11 +236,11 @@ float4 PSFoliage(PSVertexBillboard input) : SV_Target
 {
     float3 uvw = float3(input.tex, input.primitiveID % gTextureCount);
 
-    float4 textureColor = gTextureArray.Sample(SamplerLinear, uvw);
+    float4 diffuseColor = gTextureArray.Sample(SamplerLinear, uvw);
 
     float distToEye = length(gEyePositionWorld - input.positionWorld);
     float falloff = saturate(distToEye / gEndRadius);
-    clip(textureColor.a - max(0.01f, falloff));
+    clip(diffuseColor.a - max(0.01f, falloff));
 
     float3 normalWorld = input.normalWorld;
     if (gNormalMapCount > 0)
@@ -254,12 +254,12 @@ float4 PSFoliage(PSVertexBillboard input) : SV_Target
     ComputeLightsInput lInput;
 
     lInput.material = material;
-	lInput.pPosition = input.positionWorld;
-	lInput.pNormal = normalWorld;
-	lInput.pColorDiffuse = textureColor;
+	lInput.objectPosition = input.positionWorld;
+	lInput.objectNormal = normalWorld;
+    lInput.objectDiffuseColor = diffuseColor;
 
-	lInput.ePosition = gEyePositionWorld;
-	lInput.lod = gLOD;
+	lInput.eyePosition = gEyePositionWorld;
+	lInput.levelOfDetailRanges = gLOD;
 
 	lInput.hemiLight = gPSHemiLight;
 	lInput.dirLights = gDirLights;

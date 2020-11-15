@@ -27,11 +27,11 @@ namespace Engine
         /// <summary>
         /// Diffuse color
         /// </summary>
-        Color4 DiffuseColor { get; set; }
+        Color3 DiffuseColor { get; set; }
         /// <summary>
         /// Specular color
         /// </summary>
-        Color4 SpecularColor { get; set; }
+        Color3 SpecularColor { get; set; }
         /// <summary>
         /// Shadow map index
         /// </summary>

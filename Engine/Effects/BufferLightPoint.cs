@@ -107,8 +107,8 @@ namespace Engine.Effects
         public BufferLightPoint(ISceneLightPoint light)
         {
             Position = light.Position;
-            DiffuseColor = light.DiffuseColor;
-            SpecularColor = light.SpecularColor;
+            DiffuseColor = new Color4(light.DiffuseColor, 0f);
+            SpecularColor = new Color4(light.SpecularColor, 0f);
             Intensity = light.Intensity;
             Radius = light.Radius;
             CastShadow = light.CastShadowsMarked ? 1 : 0;

@@ -14,11 +14,13 @@ namespace Engine
         {
             get
             {
+                var lightColor = new Color3(1, 0.9607844f, 0.8078432f);
+
                 return new SceneLightDirectional(
                     "Key light",
                     true,
-                    new Color4(1, 0.9607844f, 0.8078432f, 1f),
-                    new Color4(1, 0.9607844f, 0.8078432f, 1f) * 0.5f,
+                    lightColor,
+                    lightColor,
                     true,
                     new Vector3(-0.5265408f, -0.5735765f, -0.6275069f),
                     1f);
@@ -31,11 +33,13 @@ namespace Engine
         {
             get
             {
+                var lightColor = new Color3(0.9647059f, 0.7607844f, 0.4078432f);
+
                 return new SceneLightDirectional(
                     "Fill light",
                     false,
-                    new Color4(0.9647059f, 0.7607844f, 0.4078432f, 1f),
-                    new Color4(0, 0, 0, 0),
+                    lightColor,
+                    Color3.Black,
                     true,
                     new Vector3(0.7198464f, 0.3420201f, 0.6040227f),
                     1f);
@@ -48,11 +52,13 @@ namespace Engine
         {
             get
             {
+                var lightColor = new Color3(0.3231373f, 0.3607844f, 0.3937255f);
+
                 return new SceneLightDirectional(
                     "Back light",
                     false,
-                    new Color4(0.3231373f, 0.3607844f, 0.3937255f, 1f),
-                    new Color4(0.3231373f, 0.3607844f, 0.3937255f, 1f) * 0.25f,
+                    lightColor,
+                    lightColor * 0.05f,
                     true,
                     new Vector3(0.4545195f, -0.7660444f, 0.4545195f),
                     1f);
@@ -131,7 +137,7 @@ namespace Engine
         /// <param name="enabled">Lights is enabled</param>
         /// <param name="direction">Direction</param>
         /// <param name="brigthness">Brightness</param>
-        public SceneLightDirectional(string name, bool castShadow, Color4 diffuse, Color4 specular, bool enabled, Vector3 direction, float brigthness)
+        public SceneLightDirectional(string name, bool castShadow, Color3 diffuse, Color3 specular, bool enabled, Vector3 direction, float brigthness)
             : base(name, castShadow, diffuse, specular, enabled)
         {
             initialDirection = direction;

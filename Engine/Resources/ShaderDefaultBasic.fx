@@ -254,12 +254,12 @@ float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 	ComputeLightsInput lInput;
 
 	lInput.material = material;
-	lInput.pPosition = input.positionWorld;
-	lInput.pNormal = input.normalWorld;
-	lInput.pColorDiffuse = input.color;
+    lInput.objectPosition = input.positionWorld;
+    lInput.objectNormal = input.normalWorld;
+    lInput.objectDiffuseColor = input.color;
 
-	lInput.ePosition = gPSEyePositionWorld;
-	lInput.lod = gLOD;
+	lInput.eyePosition = gPSEyePositionWorld;
+	lInput.levelOfDetailRanges = gLOD;
 
 	lInput.hemiLight = gPSHemiLight;
 	lInput.dirLights = gPSDirLights;
@@ -510,12 +510,12 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 	ComputeLightsInput lInput;
 
     lInput.material = material;
-	lInput.pPosition = input.positionWorld;
-	lInput.pNormal = input.normalWorld;
-    lInput.pColorDiffuse = diffuseColor;
+	lInput.objectPosition = input.positionWorld;
+	lInput.objectNormal = input.normalWorld;
+    lInput.objectDiffuseColor = diffuseColor;
 
-	lInput.ePosition = gPSEyePositionWorld;
-	lInput.lod = gLOD;
+	lInput.eyePosition = gPSEyePositionWorld;
+	lInput.levelOfDetailRanges = gLOD;
 
 	lInput.hemiLight = gPSHemiLight;
 	lInput.dirLights = gPSDirLights;
@@ -654,13 +654,13 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
 	ComputeLightsInput lInput;
 
     lInput.material = material;
-	lInput.pPosition = input.positionWorld;
-	lInput.pNormal = normalWorld;
-    lInput.pColorDiffuse = diffuseColor;
+	lInput.objectPosition = input.positionWorld;
+	lInput.objectNormal = normalWorld;
+    lInput.objectDiffuseColor = diffuseColor;
 
-	lInput.ePosition = gPSEyePositionWorld;
-	lInput.lod = gLOD;
-
+	lInput.eyePosition = gPSEyePositionWorld;
+	lInput.levelOfDetailRanges = gLOD;
+	
 	lInput.hemiLight = gPSHemiLight;
 	lInput.dirLights = gPSDirLights;
 	lInput.pointLights = gPSPointLights;

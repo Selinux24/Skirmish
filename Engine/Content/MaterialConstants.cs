@@ -8,21 +8,21 @@ namespace Engine.Content
     public static class MaterialConstants
     {
         /// <summary>
+        /// Ambient color
+        /// </summary>
+        public static Color3 AmbientColor { get; } = new Color3(0.2f, 0.2f, 0.1f);
+        /// <summary>
         /// Diffuse color
         /// </summary>
         public static Color4 DiffuseColor { get; } = new Color4(0.8f, 0.8f, 0.8f, 1.0f);
         /// <summary>
-        /// Emissive color
-        /// </summary>
-        public static Color3 EmissiveColor { get; } = new Color3(0.0f, 0.0f, 0.0f);
-        /// <summary>
-        /// Ambient color
-        /// </summary>
-        public static Color3 AmbientColor { get; } = new Color3(0.1f, 0.1f, 0.1f);
-        /// <summary>
         /// Specular color
         /// </summary>
         public static Color3 SpecularColor { get; } = new Color3(0.25f, 0.25f, 0.25f);
+        /// <summary>
+        /// Emissive color
+        /// </summary>
+        public static Color3 EmissiveColor { get; } = new Color3(0.0f, 0.0f, 0.0f);
 
         #region Phong / Blinn-Phong specs
 

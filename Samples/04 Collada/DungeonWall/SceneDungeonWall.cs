@@ -70,7 +70,7 @@ namespace Collada.DungeonWall
 
             var desc = SceneLightPointDescription.Create(new Vector3(0, 1, -1), 10f, 10f);
 
-            pointLight = new SceneLightPoint("light", false, Color.White, Color.White, true, desc);
+            pointLight = new SceneLightPoint("light", false, Color3.White, Color3.White, true, desc);
 
             Lights.Add(pointLight);
         }

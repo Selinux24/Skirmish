@@ -26,11 +26,11 @@ namespace Engine
         /// <summary>
         /// Diffuse color
         /// </summary>
-        public Color4 DiffuseColor { get; set; }
+        public Color3 DiffuseColor { get; set; }
         /// <summary>
         /// Specular color
         /// </summary>
-        public Color4 SpecularColor { get; set; }
+        public Color3 SpecularColor { get; set; }
         /// <summary>
         /// Free use variable
         /// </summary>
@@ -95,7 +95,7 @@ namespace Engine
         /// <param name="diffuse">Diffuse color contribution</param>
         /// <param name="specular">Specular color contribution</param>
         /// <param name="enabled">Lights is enabled</param>
-        protected SceneLight(string name, bool castShadow, Color4 diffuse, Color4 specular, bool enabled)
+        protected SceneLight(string name, bool castShadow, Color3 diffuse, Color3 specular, bool enabled)
         {
             Name = name;
             Enabled = enabled;

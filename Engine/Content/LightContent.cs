@@ -49,7 +49,7 @@ namespace Engine.Content
         /// <summary>
         /// Light color
         /// </summary>
-        public Color4 Color { get; set; }
+        public Color3 Color { get; set; }
         /// <summary>
         /// Constant attenuation
         /// </summary>

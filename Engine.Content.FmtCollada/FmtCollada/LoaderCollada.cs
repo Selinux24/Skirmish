@@ -176,7 +176,7 @@ namespace Engine.Content.FmtCollada
                         info = new LightContent()
                         {
                             LightType = LightContentTypes.Directional,
-                            Color = dirTechnique.Directional.Color.ToColor4(),
+                            Color = dirTechnique.Directional.Color.ToColor3(),
                         };
                     }
 
@@ -186,7 +186,7 @@ namespace Engine.Content.FmtCollada
                         info = new LightContent()
                         {
                             LightType = LightContentTypes.Point,
-                            Color = pointTechnique.Point.Color.ToColor4(),
+                            Color = pointTechnique.Point.Color.ToColor3(),
                             ConstantAttenuation = pointTechnique.Point.ConstantAttenuation.Value,
                             LinearAttenuation = pointTechnique.Point.LinearAttenuation.Value,
                             QuadraticAttenuation = pointTechnique.Point.QuadraticAttenuation.Value,
@@ -199,7 +199,7 @@ namespace Engine.Content.FmtCollada
                         info = new LightContent()
                         {
                             LightType = LightContentTypes.Spot,
-                            Color = spotTechnique.Spot.Color.ToColor4(),
+                            Color = spotTechnique.Spot.Color.ToColor3(),
                             ConstantAttenuation = spotTechnique.Spot.ConstantAttenuation.Value,
                             LinearAttenuation = spotTechnique.Spot.LinearAttenuation.Value,
                             QuadraticAttenuation = spotTechnique.Spot.QuadraticAttenuation.Value,

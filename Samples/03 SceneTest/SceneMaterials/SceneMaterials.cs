@@ -301,8 +301,8 @@ namespace SceneTest.SceneMaterials
             movingLight = new SceneLightPoint(
                 "Moving fire light",
                 false,
-                Color.Yellow * 1.25f,
-                Color.White,
+                Color.Yellow.RGB() * 1.25f,
+                Color3.White,
                 true,
                 SceneLightPointDescription.Create(Vector3.Zero, 15f, 20f));
 

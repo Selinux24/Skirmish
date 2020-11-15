@@ -138,7 +138,7 @@ namespace Engine
         /// <param name="enabled">Light is enabled</param>
         /// <param name="description">Light description</param>
         public SceneLightSpot(
-            string name, bool castShadow, Color4 diffuse, Color4 specular, bool enabled,
+            string name, bool castShadow, Color3 diffuse, Color3 specular, bool enabled,
             SceneLightSpotDescription description)
             : base(name, castShadow, diffuse, specular, enabled)
         {

@@ -1070,7 +1070,7 @@ namespace Deferred
                         lightPosition.Y += 1f;
                     }
 
-                    var color = new Color4(Helper.RandomGenerator.NextFloat(0, 1), Helper.RandomGenerator.NextFloat(0, 1), Helper.RandomGenerator.NextFloat(0, 1), 1.0f);
+                    var color = new Color3(Helper.RandomGenerator.NextFloat(0, 1), Helper.RandomGenerator.NextFloat(0, 1), Helper.RandomGenerator.NextFloat(0, 1));
 
                     var pointLight = new SceneLightPoint(
                         string.Format("Point {0}", Lights.PointLights.Length),
@@ -1097,8 +1097,8 @@ namespace Deferred
                 spotLight = new SceneLightSpot(
                     "Spot the dog",
                     castShadows,
-                    Color.Yellow,
-                    Color.Yellow,
+                    Color.Yellow.RGB(),
+                    Color.Yellow.RGB(),
                     true,
                     SceneLightSpotDescription.Create(lightPosition, Vector3.Down, 25, 25, 25f));
 

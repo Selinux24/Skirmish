@@ -148,7 +148,7 @@ namespace Engine
                     float glowScale = scale;
                     var glowSpritePos = lightProjectedPosition;
 
-                    glowSprite.BaseColor = new Color4(keyLight.DiffuseColor.RGB(), 0.25f);
+                    glowSprite.BaseColor = new Color4(keyLight.DiffuseColor, 0.25f);
                     glowSprite.Scale = glowScale;
                     glowSprite.SetPosition(glowSpritePos - glowSprite.Center);
                     glowSprite.Update(context);
