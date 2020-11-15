@@ -24,9 +24,8 @@ namespace Engine
                     EmissiveColor = MaterialConstants.EmissiveColor,
                     AmbientColor = MaterialConstants.AmbientColor,
                     SpecularColor = MaterialConstants.SpecularColor,
-                    F0 = MaterialConstants.F0,
+                    Metallic = MaterialConstants.Metallic,
                     Roughness = MaterialConstants.Roughness,
-                    K = MaterialConstants.K,
                     IsTransparent = false,
                 };
             }
@@ -49,17 +48,13 @@ namespace Engine
         /// </summary>
         public Color3 SpecularColor { get; set; }
         /// <summary>
-        /// F0
+        /// Metallic
         /// </summary>
-        public float F0 { get; set; }
+        public float Metallic { get; set; }
         /// <summary>
         /// Roughness
         /// </summary>
         public float Roughness { get; set; }
-        /// <summary>
-        /// K
-        /// </summary>
-        public float K { get; set; }
         /// <summary>
         /// Use transparency
         /// </summary>
@@ -74,7 +69,7 @@ namespace Engine
                 Block11 = 0,
                 Block12 = 0,
                 Block13 = 0,
-                Block2 = new Vector4(F0, Roughness, K, 0f),
+                Block2 = new Vector4(Metallic, Roughness, 0f, 0f),
                 Block3 = Vector4.Zero,
                 Block4 = Vector4.Zero,
                 Diffuse = DiffuseColor,
@@ -92,14 +87,13 @@ namespace Engine
                 DiffuseColor == other.DiffuseColor &&
                 SpecularColor == other.SpecularColor &&
                 IsTransparent == other.IsTransparent &&
-                F0 == other.F0 &&
-                Roughness == other.Roughness &&
-                K == other.K;
+                Metallic == other.Metallic &&
+                Roughness == other.Roughness;
         }
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"Cook-Torrance. EmissiveColor: {EmissiveColor}; AmbientColor: {AmbientColor}; DiffuseColor: {DiffuseColor}; SpecularColor: {SpecularColor}; F0: {F0}; Roughness: {Roughness}; K: {K};";
+            return $"Cook-Torrance. EmissiveColor: {EmissiveColor}; AmbientColor: {AmbientColor}; DiffuseColor: {DiffuseColor}; SpecularColor: {SpecularColor}; Metallic: {Metallic}; Roughness: {Roughness};";
         }
     };
 }

@@ -22,9 +22,8 @@ namespace Engine.Content
                     EmissiveColor = MaterialConstants.EmissiveColor,
                     AmbientColor = MaterialConstants.AmbientColor,
                     SpecularColor = MaterialConstants.SpecularColor,
-                    F0 = MaterialConstants.F0,
+                    Metallic = MaterialConstants.Metallic,
                     Roughness = MaterialConstants.Roughness,
-                    K = MaterialConstants.K,
                     IsTransparent = false,
                 };
             }
@@ -71,17 +70,13 @@ namespace Engine.Content
         /// </summary>
         public bool IsTransparent { get; set; }
         /// <summary>
-        /// F0
+        /// Metallic
         /// </summary>
-        public float F0 { get; set; }
+        public float Metallic { get; set; }
         /// <summary>
         /// Roughness
         /// </summary>
         public float Roughness { get; set; }
-        /// <summary>
-        /// K
-        /// </summary>
-        public float K { get; set; }
 
         /// <inheritdoc/>
         public IMeshMaterial CreateMeshMaterial(TextureDictionary textures)
@@ -94,9 +89,8 @@ namespace Engine.Content
                     EmissiveColor = EmissiveColor,
                     AmbientColor = AmbientColor,
                     SpecularColor = SpecularColor,
-                    F0 = F0,
+                    Metallic = Metallic,
                     Roughness = Roughness,
-                    K = K,
                     IsTransparent = IsTransparent,
                 },
                 EmissionTexture = textures[EmissiveTexture],

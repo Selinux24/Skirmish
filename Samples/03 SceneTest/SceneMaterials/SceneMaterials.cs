@@ -143,9 +143,8 @@ namespace SceneTest.SceneMaterials
             };
 
             MaterialCookTorranceContent mat = MaterialCookTorranceContent.Default;
-            mat.F0 = 0.9f;
+            mat.Metallic = 0.9f;
             mat.Roughness = 0.2f;
-            mat.K = 0.1f;
             mat.DiffuseTexture = "SceneMaterials/corrugated_d.jpg";
             mat.NormalMapTexture = "SceneMaterials/corrugated_n.jpg";
 
@@ -187,8 +186,8 @@ namespace SceneTest.SceneMaterials
 
             SpecularAlgorithms algorithm = (SpecularAlgorithms)currentAlgorithm;
 
-            var materials1 = GenerateMaterials(n, colorCount, 0.1f, algorithm, false, 1, 0.8f, 0.1f, 0.2f);
-            var materials2 = GenerateMaterials(n, colorCount, 0.1f, algorithm, true, 1, 0.8f, 0.1f, 0.2f);
+            var materials1 = GenerateMaterials(n, colorCount, 0.1f, algorithm, true, 32, 1f, 0.05f);
+            var materials2 = GenerateMaterials(n, colorCount, 0.1f, algorithm, false, 32, 1f, 0.05f);
 
             spheres1 = await InitializeSphereInstanced(name, totalSpheres, materials1);
             spheres2 = await InitializeSphereInstanced(name, totalSpheres, materials2);
@@ -199,7 +198,7 @@ namespace SceneTest.SceneMaterials
             SetSpheresPosition(colorCount, n, spheres1, position1, distance);
             SetSpheresPosition(colorCount, n, spheres2, position2, distance);
         }
-        private IEnumerable<IMaterialContent> GenerateMaterials(int n, int colorCount, float specularFactor, SpecularAlgorithms algorithm, bool nmap, float shininess, float f0, float roughness, float k)
+        private IEnumerable<IMaterialContent> GenerateMaterials(int n, int colorCount, float specularFactor, SpecularAlgorithms algorithm, bool nmap, float shininess, float metallic, float roughness)
         {
             List<IMaterialContent> materials = new List<IMaterialContent>();
 
@@ -213,14 +212,14 @@ namespace SceneTest.SceneMaterials
                         var specular = diffuse + new Color3(specularFactor);
                         specular = Color3.AdjustSaturation(specular, 1f);
 
-                        materials.Add(GenerateMaterial(diffuse, specular, algorithm, nmap, shininess, f0, roughness, k));
+                        materials.Add(GenerateMaterial(diffuse, specular, algorithm, nmap, shininess, metallic, roughness));
                     }
                 }
             }
 
             return materials;
         }
-        private IMaterialContent GenerateMaterial(Color3 diffuse, Color3 specular, SpecularAlgorithms algorithm, bool nmap, float shininess, float f0, float roughness, float k)
+        private IMaterialContent GenerateMaterial(Color3 diffuse, Color3 specular, SpecularAlgorithms algorithm, bool nmap, float shininess, float metallic, float roughness)
         {
             if (algorithm == SpecularAlgorithms.Phong)
             {
@@ -249,9 +248,8 @@ namespace SceneTest.SceneMaterials
                 mat.DiffuseTexture = "SceneMaterials/white.png";
                 mat.NormalMapTexture = nmap ? "SceneMaterials/nmap1.jpg" : "SceneMaterials/nmap2.png";
                 mat.SpecularColor = specular;
-                mat.F0 = f0;
+                mat.Metallic = metallic;
                 mat.Roughness = roughness;
-                mat.K = k;
                 return mat;
             }
 

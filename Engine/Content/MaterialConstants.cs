@@ -29,24 +29,20 @@ namespace Engine.Content
         /// <summary>
         /// Shininess factor
         /// </summary>
-        public static float Shininess { get; set; } = 50f;
+        public static float Shininess { get; set; } = 32f;
 
         #endregion
 
         #region Cook-Torrance specs
 
         /// <summary>
-        /// F0
+        /// Metallic
         /// </summary>
-        public static float F0 { get; set; } = 0.8f;
+        public static float Metallic { get; set; } = 0.0f;
         /// <summary>
         /// Roughness
         /// </summary>
-        public static float Roughness { get; set; } = 0.1f;
-        /// <summary>
-        /// K
-        /// </summary>
-        public static float K { get; set; } = 0.2f;
+        public static float Roughness { get; set; } = 0.0f;
 
         #endregion
     }

@@ -14,9 +14,8 @@ struct Material
     float3 Specular;
     
     float Shininess;
-    float F0;
+    float Metallic;
     float Roughness;
-    float K;
 };
 
 Texture2D CookTorranceTexRoughness;
@@ -45,9 +44,8 @@ inline Material GetMaterialData(Texture2D materialsTexture, uint materialIndex, 
 
     mat.Algorithm = uint(mat1.r);
 
-    mat.F0 = mat2.r;
-    mat.Roughness = mat2.g;
-    mat.K = mat2.b;
+    mat.Metallic = clamp(mat2.r, 0.0, 1.0);
+    mat.Roughness = clamp(mat2.g, 0.01, 1.0);
 
     mat.Diffuse = mat5;
     

@@ -195,7 +195,7 @@ inline float GeometryFunction(float NdotL, float NdotH, float NdotV, float VdotH
     float g2 = (two_NdotH * NdotL) / VdotH;
     return min(1.0, min(g1, g2));
 }
-inline float FresnelSchlick(float VdotH, float F0)
+inline float3 FresnelSchlick(float VdotH, float3 F0)
 {
     return F0 + (1.0 - F0) * pow(1.0 - VdotH, 5.0);
 }
@@ -220,14 +220,14 @@ inline float3 SpecularPassBlinnPhong(float3 normal, float3 viewer, float3 light,
 inline float3 SpecularPassCookTorrance(float3 normal, float3 viewer, float3 light, float3 lightColor, float3 lightSpecularColor, Material k)
 {
     float NdotL = max(0, dot(normal, light));
-    float Rs = 0.0;
     if (NdotL > 0)
     {
         float3 H = normalize(light + viewer);
         float NdotH = max(0, dot(normal, H));
         float NdotV = max(0, dot(normal, viewer));
         float VdotH = max(0, dot(light, H));
-
+        float3 F0 = lerp(float3(0.04, 0.04, 0.04), k.Diffuse.rgb, k.Metallic);
+        
 		// Microfacet distribution by Beckmann
         float D = DistributionBeckmann(k.Roughness, NdotH);
 
@@ -235,12 +235,19 @@ inline float3 SpecularPassCookTorrance(float3 normal, float3 viewer, float3 ligh
         float G = GeometryFunction(NdotL, NdotH, NdotV, VdotH);
 
 		// Fresnel reflectance
-        float F = FresnelSchlick(VdotH, k.F0);
+        float3 F = FresnelSchlick(VdotH, F0);
+        
+        // Energy conservation
+        float3 kS = F;
+        float3 kD = float3(1.0, 1.0, 1.0) - kS;
+        kD *= 1.0 - k.Metallic;
 
-        Rs = (D * G * F) / (PI * NdotL * NdotV);
+        float3 specular = D * G * F / max(4.0 * NdotV * NdotL, 0.001);
+      
+        return (kD * k.Diffuse.rgb / PI + specular) * NdotL;
     }
     
-    return k.Diffuse.rgb * lightColor * NdotL + lightColor * k.Specular.rgb * NdotL * (k.K + Rs * (1.0 - k.K));
+    return 0;
 }
 inline float3 SpecularPass(float3 normal, float3 viewer, float3 light, float3 lightColor, float3 lightSpecularColor, Material k)
 {
