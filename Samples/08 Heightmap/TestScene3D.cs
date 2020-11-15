@@ -22,13 +22,6 @@ namespace Heightmap
         private const float fogStart = 500f;
         private const float fogRange = 500f;
 
-        private const int layerObjects = 0;
-        private const int layerTerrain = 1;
-        private const int layerFoliage = 2;
-        private const int layerEffects = 3;
-        private const int layerHUD = 50;
-        private const int layerCursor = 100;
-
         private float time = 0.23f;
 
         private bool playerFlying = true;
@@ -42,6 +35,8 @@ namespace Heightmap
         private float windDuration = 0;
 
         private UIPanel fadePanel;
+        private Sprite panel;
+        private UITextArea title = null;
         private UITextArea stats = null;
         private UITextArea help = null;
         private UITextArea help2 = null;
@@ -133,6 +128,8 @@ namespace Heightmap
                         res.ThrowExceptions();
                     }
 
+                    UpdateLayout();
+
                     uiReady = true;
 
                     fadePanel.BaseColor = Color.Black;
@@ -156,53 +153,37 @@ namespace Heightmap
                 Height = 20,
             };
 
-            await this.AddComponentUICursor("Cursor", cursorDesc, layerCursor);
+            await this.AddComponentUICursor("Cursor", cursorDesc);
 
             #endregion
 
             #region Fade panel
 
-            fadePanel = await this.AddComponentUIPanel("FadePanel", UIPanelDescription.Screen(this, Color4.Black * 0.3333f), layerHUD + 1);
+            fadePanel = await this.AddComponentUIPanel("FadePanel", UIPanelDescription.Screen(this, Color4.Black * 0.3333f), LayerUIEffects);
             fadePanel.Visible = false;
 
             #endregion
 
             #region Texts
 
-            var title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White }, layerHUD);
-            stats = await this.AddComponentUITextArea("Stats", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Yellow }, layerHUD);
-            help = await this.AddComponentUITextArea("Help", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Yellow }, layerHUD);
-            help2 = await this.AddComponentUITextArea("Help2", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Orange }, layerHUD);
+            title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White });
+            stats = await this.AddComponentUITextArea("Stats", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Yellow });
+            help = await this.AddComponentUITextArea("Help", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Yellow });
+            help2 = await this.AddComponentUITextArea("Help2", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Orange });
 
             title.Text = "Heightmap Terrain test";
             stats.Text = "";
             help.Text = "";
             help2.Text = "";
 
-            title.SetPosition(Vector2.Zero);
-            stats.SetPosition(new Vector2(5, title.Top + title.Height + 3));
-            help.SetPosition(new Vector2(5, stats.Top + stats.Height + 3));
-            help2.SetPosition(new Vector2(5, help.Top + help.Height + 3));
-
-            var spDesc = new SpriteDescription()
-            {
-                Width = Game.Form.RenderWidth,
-                Height = help2.Top + help2.Height + 3,
-                BaseColor = new Color4(0, 0, 0, 0.75f),
-            };
-
-            await this.AddComponentSprite("Background", spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
+            panel = await this.AddComponentSprite("Background", spDesc, SceneObjectUsages.UI, LayerUI - 1);
 
             #endregion
 
             #region Debug
 
-            int width = (int)(Game.Form.RenderWidth * 0.33f);
-            int height = (int)(Game.Form.RenderHeight * 0.33f);
-            int smLeft = Game.Form.RenderWidth - width;
-            int smTop = Game.Form.RenderHeight - height;
-
-            bufferDrawer = await this.AddComponentUITextureRenderer("DebugBufferDrawer", UITextureRendererDescription.Default(smLeft, smTop, width, height), layerEffects);
+            bufferDrawer = await this.AddComponentUITextureRenderer("DebugBufferDrawer", UITextureRendererDescription.Default());
             bufferDrawer.Visible = false;
 
             #endregion
@@ -271,7 +252,7 @@ namespace Heightmap
                 Instances = 250,
                 Content = ContentDescription.FromFile(@"Resources/Rocks", @"boulder.xml"),
             };
-            rocks = await this.AddComponentModelInstanced("Rocks", rDesc, SceneObjectUsages.None, layerObjects);
+            rocks = await this.AddComponentModelInstanced("Rocks", rDesc);
             rocks.Visible = false;
             AttachToGround(rocks, false);
             sw.Stop();
@@ -289,7 +270,7 @@ namespace Heightmap
                 BlendMode = BlendModes.DefaultTransparent,
                 Content = ContentDescription.FromFile(@"Resources/Trees", @"tree.xml"),
             };
-            trees = await this.AddComponentModelInstanced("Trees", treeDesc, SceneObjectUsages.None, layerTerrain);
+            trees = await this.AddComponentModelInstanced("Trees", treeDesc);
             trees.Visible = false;
             AttachToGround(trees, false);
             sw.Stop();
@@ -307,7 +288,7 @@ namespace Heightmap
                 BlendMode = BlendModes.DefaultTransparent,
                 Content = ContentDescription.FromFile(@"Resources/Trees2", @"tree.xml"),
             };
-            trees2 = await this.AddComponentModelInstanced("Trees2", tree2Desc, SceneObjectUsages.None, layerTerrain);
+            trees2 = await this.AddComponentModelInstanced("Trees2", tree2Desc);
             trees2.Visible = false;
             AttachToGround(trees2, false);
             sw.Stop();
@@ -325,7 +306,7 @@ namespace Heightmap
                 CastShadow = true,
                 Content = ContentDescription.FromFile(@"Resources/Soldier", @"soldier_anim2.xml"),
             };
-            soldier = await this.AddComponentModel("Soldier", sDesc, SceneObjectUsages.Agent, layerObjects);
+            soldier = await this.AddComponentModel("Soldier", sDesc, SceneObjectUsages.Agent);
             soldier.Visible = false;
             sw.Stop();
 
@@ -342,7 +323,7 @@ namespace Heightmap
                 CastShadow = true,
                 Content = ContentDescription.FromFile(@"Resources/Soldier", @"soldier_anim2.xml"),
             };
-            troops = await this.AddComponentModelInstanced("Troops", tDesc, SceneObjectUsages.Agent, layerObjects);
+            troops = await this.AddComponentModelInstanced("Troops", tDesc, SceneObjectUsages.Agent);
             troops.Visible = false;
             sw.Stop();
 
@@ -359,7 +340,7 @@ namespace Heightmap
                 Instances = 3,
                 Content = ContentDescription.FromFile(@"Resources/m24", @"m24.xml"),
             };
-            helicopterI = await this.AddComponentModelInstanced("M24", mDesc, SceneObjectUsages.None, layerObjects);
+            helicopterI = await this.AddComponentModelInstanced("M24", mDesc);
             helicopterI.Visible = false;
             AttachToGround(helicopterI, true);
             sw.Stop();
@@ -377,7 +358,7 @@ namespace Heightmap
                 Instances = 5,
                 Content = ContentDescription.FromFile(@"Resources/Bradley", @"Bradley.xml"),
             };
-            bradleyI = await this.AddComponentModelInstanced("Bradley", mDesc, SceneObjectUsages.None, layerObjects);
+            bradleyI = await this.AddComponentModelInstanced("Bradley", mDesc);
             bradleyI.Visible = false;
             AttachToGround(bradleyI, true);
             sw.Stop();
@@ -395,7 +376,7 @@ namespace Heightmap
                 Instances = 5,
                 Content = ContentDescription.FromFile(@"Resources/buildings", @"Affgan1.xml"),
             };
-            buildings = await this.AddComponentModelInstanced("Affgan buildings", mDesc, SceneObjectUsages.None, layerObjects);
+            buildings = await this.AddComponentModelInstanced("Affgan buildings", mDesc);
             buildings.Visible = false;
             AttachToGround(buildings, true);
             sw.Stop();
@@ -412,7 +393,7 @@ namespace Heightmap
                 CastShadow = true,
                 Content = ContentDescription.FromFile(@"Resources/Watch Tower", @"Watch Tower.xml"),
             };
-            watchTower = await this.AddComponentModel("Watch Tower", mDesc, SceneObjectUsages.None, layerObjects);
+            watchTower = await this.AddComponentModel("Watch Tower", mDesc);
             watchTower.Visible = false;
             AttachToGround(watchTower, true);
             sw.Stop();
@@ -449,7 +430,7 @@ namespace Heightmap
                 CastShadow = false,
                 Content = ContentDescription.FromFile(@"Resources/Scenery/Objects", @"torch.xml"),
             };
-            torchs = await this.AddComponentModelInstanced("Torchs", tcDesc, SceneObjectUsages.None, layerObjects);
+            torchs = await this.AddComponentModelInstanced("Torchs", tcDesc);
             torchs.Visible = false;
             AttachToGround(torchs, false);
             sw.Stop();
@@ -461,7 +442,7 @@ namespace Heightmap
             Stopwatch sw = Stopwatch.StartNew();
 
             sw.Restart();
-            pManager = await this.AddComponentParticleManager("ParticleManager", ParticleManagerDescription.Default(), SceneObjectUsages.None, layerEffects);
+            pManager = await this.AddComponentParticleManager("ParticleManager", ParticleManagerDescription.Default());
 
             pFire = ParticleSystemDescription.InitializeFire("resources/particles", "fire.png", 0.5f);
             pPlume = ParticleSystemDescription.InitializeSmokePlume("resources/particles", "smoke.png", 0.5f);
@@ -509,7 +490,7 @@ namespace Heightmap
                 },
             };
             var gDesc = GroundDescription.FromHeightmapDescription(hDesc, 5);
-            terrain = await this.AddComponentTerrain("Terrain", gDesc, SceneObjectUsages.None, layerTerrain);
+            terrain = await this.AddComponentTerrain("Terrain", gDesc);
             SetGround(terrain, true);
             sw.Stop();
 
@@ -540,7 +521,7 @@ namespace Heightmap
                     new LensFlareDescription.Flare( 2.0f, 1.4f, new Color( 25,  50, 100), "lfFlare3.png"),
                 }
             };
-            await this.AddComponentLensFlare("Flares", lfDesc, SceneObjectUsages.None, layerEffects);
+            await this.AddComponentLensFlare("Flares", lfDesc);
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -597,7 +578,7 @@ namespace Heightmap
                     Count = 1000,
                 },
                 SceneObjectUsages.None,
-                layerEffects);
+                LayerEffects);
             bboxesTriDrawer.Visible = false;
 
             linesDrawer = await this.AddComponentPrimitiveListDrawer(
@@ -608,7 +589,7 @@ namespace Heightmap
                     Count = 1000,
                 },
                 SceneObjectUsages.None,
-                layerEffects);
+                LayerEffects);
             linesDrawer.Visible = false;
 
             lightsVolumeDrawer = await this.AddComponentPrimitiveListDrawer(
@@ -712,7 +693,7 @@ namespace Heightmap
                     Count = 1,
                 },
             };
-            gardener = await this.AddComponentGroundGardener("Grass", vDesc, SceneObjectUsages.None, layerFoliage);
+            gardener = await this.AddComponentGroundGardener("Grass", vDesc);
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -762,7 +743,7 @@ namespace Heightmap
                     WindEffect = 1f,
                 },
             };
-            gardener2 = await this.AddComponentGroundGardener("Flowers", vDesc2, SceneObjectUsages.None, layerFoliage);
+            gardener2 = await this.AddComponentGroundGardener("Flowers", vDesc2);
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -1748,6 +1729,30 @@ namespace Heightmap
 
                 updatingNodes = false;
             });
+        }
+
+        public override void GameGraphicsResized()
+        {
+            base.GameGraphicsResized();
+
+            UpdateLayout();
+        }
+        private void UpdateLayout()
+        {
+            fadePanel.Width = Game.Form.RenderWidth;
+            fadePanel.Height = Game.Form.RenderHeight;
+
+            title.SetPosition(Vector2.Zero);
+            stats.SetPosition(new Vector2(5, title.Top + title.Height + 3));
+            help.SetPosition(new Vector2(5, stats.Top + stats.Height + 3));
+            help2.SetPosition(new Vector2(5, help.Top + help.Height + 3));
+            panel.Width = Game.Form.RenderWidth;
+            panel.Height = help2.Top + help2.Height + 3;
+
+            bufferDrawer.Width = (int)(Game.Form.RenderWidth * 0.33f);
+            bufferDrawer.Height = (int)(Game.Form.RenderHeight * 0.33f);
+            bufferDrawer.Left = Game.Form.RenderWidth - bufferDrawer.Width;
+            bufferDrawer.Top = Game.Form.RenderHeight - bufferDrawer.Height;
         }
     }
 }

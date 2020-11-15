@@ -62,11 +62,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.worldViewProjectionVar.GetMatrix();
+                return worldViewProjectionVar.GetMatrix();
             }
             set
             {
-                this.worldViewProjectionVar.SetMatrix(value);
+                worldViewProjectionVar.SetMatrix(value);
             }
         }
         /// <summary>
@@ -76,11 +76,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.sphereRadiiVar.GetVector<Vector4>();
+                return sphereRadiiVar.GetVector<Vector4>();
             }
             set
             {
-                this.sphereRadiiVar.Set(value);
+                sphereRadiiVar.Set(value);
             }
         }
         /// <summary>
@@ -90,11 +90,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.scatteringCoefficientsVar.GetVector<Vector4>();
+                return scatteringCoefficientsVar.GetVector<Vector4>();
             }
             set
             {
-                this.scatteringCoefficientsVar.Set(value);
+                scatteringCoefficientsVar.Set(value);
             }
         }
         /// <summary>
@@ -104,11 +104,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.inverseWaveLengthVar.GetVector<Vector4>();
+                return inverseWaveLengthVar.GetVector<Vector4>();
             }
             set
             {
-                this.inverseWaveLengthVar.Set(value);
+                inverseWaveLengthVar.Set(value);
             }
         }
         /// <summary>
@@ -118,11 +118,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.miscVar.GetVector<Vector4>();
+                return miscVar.GetVector<Vector4>();
             }
             set
             {
-                this.miscVar.Set(value);
+                miscVar.Set(value);
             }
         }
         /// <summary>
@@ -132,11 +132,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.backColorVar.GetVector<Color4>();
+                return backColorVar.GetVector<Color4>();
             }
             set
             {
-                this.backColorVar.Set(value);
+                backColorVar.Set(value);
             }
         }
         /// <summary>
@@ -146,11 +146,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.lightDirectionWorldVar.GetVector<Vector3>();
+                return lightDirectionWorldVar.GetVector<Vector3>();
             }
             set
             {
-                this.lightDirectionWorldVar.Set(value);
+                lightDirectionWorldVar.Set(value);
             }
         }
         /// <summary>
@@ -160,11 +160,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.hdrExposureVar.GetFloat();
+                return hdrExposureVar.GetFloat();
             }
             set
             {
-                this.hdrExposureVar.Set(value);
+                hdrExposureVar.Set(value);
             }
         }
 
@@ -177,18 +177,18 @@ namespace Engine.Effects
         public EffectDefaultSkyScattering(Graphics graphics, byte[] effect, bool compile)
             : base(graphics, effect, compile)
         {
-            this.SkyScatteringLow = this.Effect.GetTechniqueByName("SkyScatteringLow");
-            this.SkyScatteringMedium = this.Effect.GetTechniqueByName("SkyScatteringMedium");
-            this.SkyScatteringHigh = this.Effect.GetTechniqueByName("SkyScatteringHigh");
+            SkyScatteringLow = Effect.GetTechniqueByName("SkyScatteringLow");
+            SkyScatteringMedium = Effect.GetTechniqueByName("SkyScatteringMedium");
+            SkyScatteringHigh = Effect.GetTechniqueByName("SkyScatteringHigh");
 
-            this.worldViewProjectionVar = this.Effect.GetVariableMatrix("gWorldViewProjection");
-            this.sphereRadiiVar = this.Effect.GetVariableVector("gSphereRadii");
-            this.scatteringCoefficientsVar = this.Effect.GetVariableVector("gScatteringCoeffs");
-            this.inverseWaveLengthVar = this.Effect.GetVariableVector("gInvWaveLength");
-            this.miscVar = this.Effect.GetVariableVector("gMisc");
-            this.backColorVar = this.Effect.GetVariableVector("gBackColor");
-            this.lightDirectionWorldVar = this.Effect.GetVariableVector("gLightDirection");
-            this.hdrExposureVar = this.Effect.GetVariableScalar("gHDRExposure");
+            worldViewProjectionVar = Effect.GetVariableMatrix("gWorldViewProjection");
+            sphereRadiiVar = Effect.GetVariableVector("gSphereRadii");
+            scatteringCoefficientsVar = Effect.GetVariableVector("gScatteringCoeffs");
+            inverseWaveLengthVar = Effect.GetVariableVector("gInvWaveLength");
+            miscVar = Effect.GetVariableVector("gMisc");
+            backColorVar = Effect.GetVariableVector("gBackColor");
+            lightDirectionWorldVar = Effect.GetVariableVector("gLightDirection");
+            hdrExposureVar = Effect.GetVariableScalar("gHDRExposure");
         }
 
         /// <summary>
@@ -204,24 +204,24 @@ namespace Engine.Effects
             Vector3 lightDirection,
             EffectSkyScatterState state)
         {
-            this.WorldViewProjection = world * viewProjection;
+            WorldViewProjection = world * viewProjection;
 
-            this.SphereRadii = new Vector4(
+            SphereRadii = new Vector4(
                 state.SphereOuterRadius, state.SphereOuterRadius * state.SphereOuterRadius,
                 state.SphereInnerRadius, state.SphereInnerRadius * state.SphereInnerRadius);
 
-            this.ScatteringCoefficients = new Vector4(
+            ScatteringCoefficients = new Vector4(
                 state.RayleighScattering * state.SkyBrightness, state.RayleighScattering4PI,
                 state.MieScattering * state.SkyBrightness, state.MieScattering4PI);
 
-            this.InverseWaveLength = state.InvWaveLength4;
+            InverseWaveLength = new Vector4(state.InvWaveLength4, 1f);
 
-            this.Misc = new Vector4(state.PlanetRadius, state.PlanetAtmosphereRadius, state.Scale, state.Scale / state.RayleighScaleDepth);
+            Misc = new Vector4(state.PlanetRadius, state.PlanetAtmosphereRadius, state.Scale, state.Scale / state.RayleighScaleDepth);
 
-            this.BackColor = state.BackColor;
+            BackColor = state.BackColor;
 
-            this.LightDirectionWorld = -lightDirection;
-            this.HDRExposure = state.HdrExposure;
+            LightDirectionWorld = -lightDirection;
+            HDRExposure = state.HdrExposure;
         }
     }
 }

@@ -15,8 +15,6 @@ namespace Skybox
 {
     public class TestScene3D : Scene
     {
-        private const int layerHUD = 99;
-        private const int layerObjs = 50;
         private const float alpha = 0.25f;
 
         private readonly Color4 ruinsVolumeColor = new Color4(Color.Green.RGB(), alpha);
@@ -56,6 +54,9 @@ namespace Skybox
             MaxSlope = 45,
         };
 
+        private Sprite panel = null;
+        private UITextArea title = null;
+        private UITextArea help = null;
         private UITextArea fps = null;
 
         private Scenery ruins = null;
@@ -116,6 +117,8 @@ namespace Skybox
                     {
                         res.ThrowExceptions();
                     }
+
+                    UpdateLayout();
 
                     InitializeNavigationMesh();
 
@@ -188,15 +191,15 @@ namespace Skybox
                 Width = 16,
                 Height = 16,
             };
-            await this.AddComponentUICursor("Cursor", cursorDesc, layerHUD + 1);
+            await this.AddComponentUICursor("Cursor", cursorDesc);
 
             #endregion
 
             #region Text
 
-            var title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White }, layerHUD);
-            var help = await this.AddComponentUITextArea("Help", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow }, layerHUD);
-            fps = await this.AddComponentUITextArea("FPS", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow }, layerHUD);
+            title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White });
+            help = await this.AddComponentUITextArea("Help", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow });
+            fps = await this.AddComponentUITextArea("FPS", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow });
 
             title.Text = "Collada Scene with Skybox";
 #if DEBUG
@@ -206,18 +209,8 @@ namespace Skybox
 #endif
             fps.Text = "";
 
-            title.SetPosition(Vector2.Zero);
-            help.SetPosition(new Vector2(0, 24));
-            fps.SetPosition(new Vector2(0, 40));
-
-            var spDesc = new SpriteDescription()
-            {
-                Width = Game.Form.RenderWidth,
-                Height = 120,
-                BaseColor = new Color4(0, 0, 0, 0.75f),
-            };
-
-            await this.AddComponentSprite("Backpanel", spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
+            panel = await this.AddComponentSprite("Backpanel", spDesc, SceneObjectUsages.UI, LayerUI - 1);
 
             #endregion
         }
@@ -266,7 +259,7 @@ namespace Skybox
             groundDesc.Heightmap.UseFalloff = true;
             groundDesc.Heightmap.Transform = Matrix.Translation(0, -terrainHeight * 0.33f, 0);
 
-            await this.AddComponentScenery("Lage Bottom", groundDesc, SceneObjectUsages.None, layerObjs);
+            await this.AddComponentScenery("Lage Bottom", groundDesc);
         }
         private async Task InitializeTorchs()
         {
@@ -277,7 +270,7 @@ namespace Skybox
                 Content = ContentDescription.FromFile("Resources", "torch.xml"),
             };
 
-            torchs = await this.AddComponentModelInstanced("Torchs", torchDesc, SceneObjectUsages.None, layerObjs);
+            torchs = await this.AddComponentModelInstanced("Torchs", torchDesc);
 
             AttachToGround(torchs, true);
         }
@@ -290,7 +283,7 @@ namespace Skybox
                 Content = ContentDescription.FromFile("Resources/obelisk", "obelisk.xml"),
             };
 
-            obelisks = await this.AddComponentModelInstanced("Obelisks", obeliskDesc, SceneObjectUsages.Ground, layerObjs);
+            obelisks = await this.AddComponentModelInstanced("Obelisks", obeliskDesc, SceneObjectUsages.Ground);
         }
         private async Task InitializeFountain()
         {
@@ -300,7 +293,7 @@ namespace Skybox
                 Content = ContentDescription.FromFile("Resources/Fountain", "Fountain.xml"),
             };
 
-            fountain = await this.AddComponentModel("Fountain", fountainDesc, SceneObjectUsages.Ground, layerObjs);
+            fountain = await this.AddComponentModel("Fountain", fountainDesc, SceneObjectUsages.Ground);
 
             AttachToGround(fountain, true);
         }
@@ -308,7 +301,7 @@ namespace Skybox
         {
             var ruinsDesc = GroundDescription.FromFile("Resources", "ruins.xml");
 
-            ruins = await this.AddComponentScenery("Ruins", ruinsDesc, SceneObjectUsages.Ground, layerObjs);
+            ruins = await this.AddComponentScenery("Ruins", ruinsDesc, SceneObjectUsages.Ground);
 
             SetGround(ruins, true);
         }
@@ -318,7 +311,7 @@ namespace Skybox
             waterDesc.BaseColor = new Color3(0.067f, 0.065f, 0.003f);
             waterDesc.WaterColor = new Color4(0.003f, 0.267f, 0.096f, 0.98f);
 
-            await this.AddComponentWater("Water", waterDesc, SceneObjectUsages.None, layerObjs + 1);
+            await this.AddComponentWater("Water", waterDesc);
         }
         private async Task InitializeEmitter()
         {
@@ -666,6 +659,20 @@ namespace Skybox
                     graphDrawer.AddPrimitives(node.Color, node.Triangles);
                 }
             }
+        }
+
+        public override void GameGraphicsResized()
+        {
+            base.GameGraphicsResized();
+            UpdateLayout();
+        }
+        private void UpdateLayout()
+        {
+            title.SetPosition(Vector2.Zero);
+            help.SetPosition(new Vector2(0, 24));
+            fps.SetPosition(new Vector2(0, 40));
+            panel.Width = Game.Form.RenderWidth;
+            panel.Height = 120;
         }
     }
 }

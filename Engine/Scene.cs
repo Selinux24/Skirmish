@@ -25,6 +25,31 @@ namespace Engine
         private const SceneObjectUsages GroundUsage = SceneObjectUsages.Ground | SceneObjectUsages.FullPathFinding | SceneObjectUsages.CoarsePathFinding;
 
         /// <summary>
+        /// Sky layer
+        /// </summary>
+        public const int LayerSky = 1;
+        /// <summary>
+        /// Default layer
+        /// </summary>
+        public const int LayerDefault = 50;
+        /// <summary>
+        /// 3D effects layer, like particles or water
+        /// </summary>
+        public const int LayerEffects = 75;
+        /// <summary>
+        /// User interface layer
+        /// </summary>
+        public const int LayerUI = 100;
+        /// <summary>
+        /// User interface effects layer
+        /// </summary>
+        public const int LayerUIEffects = 150;
+        /// <summary>
+        /// User interface cursor
+        /// </summary>
+        public const int LayerCursor = int.MaxValue;
+
+        /// <summary>
         /// Performs coarse ray picking over the specified collection
         /// </summary>
         /// <param name="ray">Ray</param>
@@ -665,9 +690,9 @@ namespace Engine
         /// <typeparam name="T">Component type</typeparam>
         /// <param name="component">Component</param>
         /// <param name="usage">Usage</param>
-        /// <param name="order">Processing order</param>
+        /// <param name="layer">Processing layer</param>
         /// <returns>Returns the added component</returns>
-        public void AddComponent(ISceneObject component, SceneObjectUsages usage, int order)
+        public void AddComponent(ISceneObject component, SceneObjectUsages usage = SceneObjectUsages.None, int layer = LayerDefault)
         {
             if (internalComponents.Contains(component))
             {
@@ -676,9 +701,9 @@ namespace Engine
 
             component.Usage |= usage;
 
-            if (order != 0)
+            if (layer != 0)
             {
-                component.Order = order;
+                component.Layer = layer;
             }
 
             Monitor.Enter(internalComponents);
@@ -686,7 +711,7 @@ namespace Engine
             internalComponents.Sort((p1, p2) =>
             {
                 //First by order index
-                int i = p1.Order.CompareTo(p2.Order);
+                int i = p1.Layer.CompareTo(p2.Layer);
                 if (i != 0) return i;
 
                 //Then opaques

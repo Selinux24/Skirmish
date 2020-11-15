@@ -13,8 +13,6 @@ namespace Animation.SimpleAnimation
 {
     public class SceneSimpleAnimation : Scene
     {
-        private const int layerHUD = 99;
-
         private UITextArea title = null;
         private UITextArea runtime = null;
         private UITextArea animText = null;
@@ -142,21 +140,21 @@ namespace Animation.SimpleAnimation
 
         private async Task InitializeUI()
         {
-            title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White }, layerHUD);
-            runtime = await this.AddComponentUITextArea("Runtime", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Yellow }, layerHUD);
-            animText = await this.AddComponentUITextArea("AnimText", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 15), TextForeColor = Color.Orange }, layerHUD);
-            messages = await this.AddComponentUITextArea("Messages", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 15), TextForeColor = Color.Orange }, layerHUD);
+            title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White });
+            runtime = await this.AddComponentUITextArea("Runtime", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Yellow });
+            animText = await this.AddComponentUITextArea("AnimText", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 15), TextForeColor = Color.Orange });
+            messages = await this.AddComponentUITextArea("Messages", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 15), TextForeColor = Color.Orange });
 
             title.Text = "Animation test";
             runtime.Text = "";
             animText.Text = "";
             messages.Text = "";
 
-            backPanel = await this.AddComponentSprite("Backpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), SceneObjectUsages.UI, layerHUD - 1);
+            backPanel = await this.AddComponentSprite("Backpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), SceneObjectUsages.UI, LayerUI - 1);
 
             var consoleDesc = UIConsoleDescription.Default(new Color4(0.35f, 0.35f, 0.35f, 1f));
             consoleDesc.LogFilterFunc = (l) => l.LogLevel > LogLevel.Trace || (l.LogLevel == LogLevel.Trace && l.CallerTypeName == nameof(AnimationController));
-            console = await this.AddComponentUIConsole("Console", consoleDesc, layerHUD + 1);
+            console = await this.AddComponentUIConsole("Console", consoleDesc, LayerUI + 1);
             console.Visible = false;
 
             uiReady = true;
@@ -205,7 +203,7 @@ namespace Animation.SimpleAnimation
                     Instances = 2,
                     CastShadow = true,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Ladder","Dn_Anim_Ladder.xml"),
+                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Ladder", "Dn_Anim_Ladder.xml"),
                 });
 
             ladder[0].Manipulator.SetPosition(-4f, 1, 0, true);

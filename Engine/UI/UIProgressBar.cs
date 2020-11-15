@@ -166,9 +166,9 @@ namespace Engine.UI
         /// <param name="scene">Scene</param>
         /// <param name="name">Name</param>
         /// <param name="description">Description</param>
-        /// <param name="order">Processing order</param>
+        /// <param name="layer">Processing layer</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<UIProgressBar> AddComponentUIProgressBar(this Scene scene, string name, UIProgressBarDescription description, int order = 0)
+        public static async Task<UIProgressBar> AddComponentUIProgressBar(this Scene scene, string name, UIProgressBarDescription description, int layer = Scene.LayerUI)
         {
             UIProgressBar component = null;
 
@@ -176,7 +176,7 @@ namespace Engine.UI
             {
                 component = new UIProgressBar(name, scene, description);
 
-                scene.AddComponent(component, SceneObjectUsages.UI, order);
+                scene.AddComponent(component, SceneObjectUsages.UI, layer);
             });
 
             return component;

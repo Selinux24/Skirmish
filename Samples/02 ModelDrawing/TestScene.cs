@@ -10,9 +10,6 @@ namespace ModelDrawing
 {
     public class TestScene : Scene
     {
-        private const int layerHUD = 99;
-        private const int layerEffects = 2;
-
         private UITextArea text = null;
         private UITextArea statistics = null;
         private UITextArea text1 = null;
@@ -77,17 +74,17 @@ namespace ModelDrawing
         }
         private async Task InitializeUI()
         {
-            text = await this.AddComponentUITextArea("Text", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 20), TextForeColor = Color.Yellow, TextShadowColor = Color.OrangeRed }, layerHUD);
+            text = await this.AddComponentUITextArea("Text", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 20), TextForeColor = Color.Yellow, TextShadowColor = Color.OrangeRed }, LayerUI);
 
-            statistics = await this.AddComponentUITextArea("Statistics", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 10), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, layerHUD);
+            statistics = await this.AddComponentUITextArea("Statistics", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 10), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, LayerUI);
 
-            text1 = await this.AddComponentUITextArea("Text1", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 10), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, layerHUD);
+            text1 = await this.AddComponentUITextArea("Text1", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 10), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, LayerUI);
 
-            text2 = await this.AddComponentUITextArea("Text2", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 10), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, layerHUD);
+            text2 = await this.AddComponentUITextArea("Text2", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 10), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, LayerUI);
 
-            backPanel = await this.AddComponentSprite("Backpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), SceneObjectUsages.UI, layerHUD - 1);
+            backPanel = await this.AddComponentSprite("Backpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), SceneObjectUsages.UI, LayerUI - 1);
 
-            console = await this.AddComponentUIConsole("Console", UIConsoleDescription.Default(Color.DarkSlateBlue), layerHUD + 1);
+            console = await this.AddComponentUIConsole("Console", UIConsoleDescription.Default(Color.DarkSlateBlue), LayerUI + 1);
             console.Visible = false;
         }
         private async Task InitializeFloor()
@@ -145,7 +142,7 @@ namespace ModelDrawing
                 Count = 20000,
                 DepthEnabled = true,
             };
-            pManagerLineDrawer = await this.AddComponentPrimitiveListDrawer("DebugParticleDrawer", desc, SceneObjectUsages.None, layerEffects);
+            pManagerLineDrawer = await this.AddComponentPrimitiveListDrawer("DebugParticleDrawer", desc, SceneObjectUsages.None, LayerEffects);
             pManagerLineDrawer.Visible = true;
         }
 

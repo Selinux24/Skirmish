@@ -18,10 +18,7 @@ namespace SceneTest.SceneTanksGame
     /// </summary>
     class SceneTanksGame : Scene
     {
-        const int layerLoadingUI = 100;
-        const int layerUI = 50;
-        const int layerModels = 10;
-
+        const int layerUIModal = LayerUI + 3;
         const string fontFilename = "SceneTanksGame/LeagueSpartan-Bold.otf";
 
         private bool gameReady = false;
@@ -157,6 +154,8 @@ namespace SceneTest.SceneTanksGame
                         res.ThrowExceptions();
                     }
 
+                    UpdateLayoutLoadingUI();
+
                     fadePanel.BaseColor = Color.Black;
                     fadePanel.Visible = true;
 
@@ -172,24 +171,18 @@ namespace SceneTest.SceneTanksGame
         }
         private async Task InitializeLoadingUI()
         {
-            fadePanel = await this.AddComponentUIPanel("FadePanel", UIPanelDescription.Screen(this, Color4.Black * 0.3333f), layerLoadingUI);
+            fadePanel = await this.AddComponentUIPanel("FadePanel", UIPanelDescription.Screen(this, Color4.Black * 0.3333f), LayerUIEffects);
             fadePanel.Visible = false;
 
-            loadingText = await this.AddComponentUITextArea("LoadingText", UITextAreaDescription.DefaultFromFile(fontFilename, 40, true), layerLoadingUI + 1);
+            loadingText = await this.AddComponentUITextArea("LoadingText", UITextAreaDescription.DefaultFromFile(fontFilename, 40, true), LayerUIEffects + 1);
             loadingText.TextForeColor = Color.Yellow;
             loadingText.TextShadowColor = Color.Orange;
-            loadingText.Anchor = Anchors.HorizontalCenter;
-            loadingText.Top = Game.Form.RenderCenter.Y - 75f;
-            loadingText.Width = Game.Form.RenderWidth * 0.8f;
             loadingText.TextHorizontalAlign = HorizontalTextAlign.Center;
             loadingText.TextVerticalAlign = VerticalTextAlign.Middle;
             loadingText.GrowControlWithText = false;
             loadingText.Visible = false;
 
-            loadingBar = await this.AddComponentUIProgressBar("LoadingBar", UIProgressBarDescription.DefaultFromFile(fontFilename, 20, true), layerLoadingUI + 1);
-            loadingBar.Anchor = Anchors.Center;
-            loadingBar.Width = Game.Form.RenderWidth * 0.8f;
-            loadingBar.Height = 35;
+            loadingBar = await this.AddComponentUIProgressBar("LoadingBar", UIProgressBarDescription.DefaultFromFile(fontFilename, 20, true), LayerUIEffects + 1);
             loadingBar.ProgressColor = Color.Yellow;
             loadingBar.BaseColor = Color.CornflowerBlue;
             loadingBar.Caption.TextForeColor = Color.Black;
@@ -211,6 +204,8 @@ namespace SceneTest.SceneTanksGame
                     {
                         res.ThrowExceptions();
                     }
+
+                    UpdateLayout();
 
                     PrepareModels();
                     UpdateCamera(true);
@@ -257,19 +252,14 @@ namespace SceneTest.SceneTanksGame
         }
         private async Task InitializeUIGameMessages()
         {
-            gameMessage = await this.AddComponentUITextArea("GameMessage", UITextAreaDescription.DefaultFromFile(fontFilename, 120, false), layerLoadingUI + 1);
-            gameMessage.Anchor = Anchors.Center;
+            gameMessage = await this.AddComponentUITextArea("GameMessage", UITextAreaDescription.DefaultFromFile(fontFilename, 120, false), LayerUIEffects + 1);
             gameMessage.TextForeColor = Color.Yellow;
             gameMessage.TextShadowColor = Color.Yellow * 0.5f;
             gameMessage.Visible = false;
 
-            gameKeyHelp = await this.AddComponentUITextArea("GameKeyHelp", UITextAreaDescription.DefaultFromFile(fontFilename, 25, true), layerLoadingUI + 1);
+            gameKeyHelp = await this.AddComponentUITextArea("GameKeyHelp", UITextAreaDescription.DefaultFromFile(fontFilename, 25, true), LayerUIEffects + 1);
             gameKeyHelp.TextForeColor = Color.Yellow;
             gameKeyHelp.Text = "Press space to exit";
-            gameKeyHelp.Anchor = Anchors.HorizontalCenter;
-            gameKeyHelp.Top = Game.Form.RenderHeight - 60;
-            gameKeyHelp.Width = 500;
-            gameKeyHelp.Height = 40;
             gameKeyHelp.TextHorizontalAlign = HorizontalTextAlign.Center;
             gameKeyHelp.TextVerticalAlign = VerticalTextAlign.Middle;
             gameKeyHelp.GrowControlWithText = false;
@@ -277,21 +267,8 @@ namespace SceneTest.SceneTanksGame
         }
         private async Task InitializeUIModalDialog()
         {
-            float width = Game.Form.RenderWidth / 2f;
-            float height = width * 0.6666f;
-
-            var descPan = new UIPanelDescription
-            {
-                Width = width,
-                Height = height,
-                Anchor = Anchors.Center,
-
-                Background = new SpriteDescription()
-                {
-                    BaseColor = Color.DarkGreen,
-                }
-            };
-            dialog = await this.AddComponentUIPanel("Modal Dialog", descPan, layerLoadingUI + 2);
+            var descPan = UIPanelDescription.Default(Color.DarkGreen);
+            dialog = await this.AddComponentUIPanel("Modal Dialog", descPan, layerUIModal);
 
             var font = TextDrawerDescription.FromFile(fontFilename, 20, true);
 
@@ -300,36 +277,13 @@ namespace SceneTest.SceneTanksGame
             descButton.TextHorizontalAlign = HorizontalTextAlign.Center;
             descButton.TextVerticalAlign = VerticalTextAlign.Middle;
 
-            float butWidth = 150;
-            float butHeight = 55;
-            float butMargin = 15;
-
-            dialogAccept = new UIButton("DialogAccept", this, descButton)
-            {
-                Width = butWidth,
-                Height = butHeight,
-                Top = dialog.Height - butMargin - butHeight,
-                Left = (dialog.Width * 0.5f) - (butWidth * 0.5f) - (butWidth * 0.6666f)
-            };
+            dialogAccept = new UIButton("DialogAccept", this, descButton);
             dialogAccept.Caption.Text = "Ok";
 
-            dialogCancel = new UIButton("DialogCancel", this, descButton)
-            {
-                Width = butWidth,
-                Height = butHeight,
-                Top = dialog.Height - butMargin - butHeight,
-                Left = (dialog.Width * 0.5f) - (butWidth * 0.5f) + (butWidth * 0.6666f)
-            };
+            dialogCancel = new UIButton("DialogCancel", this, descButton);
             dialogCancel.Caption.Text = "Cancel";
 
             var descText = UITextAreaDescription.DefaultFromFile(fontFilename, 28);
-            descText.Padding = new Padding
-            {
-                Left = width * 0.1f,
-                Right = width * 0.1f,
-                Top = height * 0.1f,
-                Bottom = butHeight + (butMargin * 2f),
-            };
             descText.TextHorizontalAlign = HorizontalTextAlign.Center;
             descText.TextVerticalAlign = VerticalTextAlign.Middle;
 
@@ -342,64 +296,42 @@ namespace SceneTest.SceneTanksGame
         }
         private async Task InitializeUIPlayers()
         {
-            float playerWidth = 300;
-
-            player1Name = await this.AddComponentUITextArea("Player1Name", UITextAreaDescription.DefaultFromFile(fontFilename, 20, true), layerUI);
+            player1Name = await this.AddComponentUITextArea("Player1Name", UITextAreaDescription.DefaultFromFile(fontFilename, 20, true));
             player1Name.TextForeColor = player1Status.Color;
             player1Name.TextShadowColor = player1Status.Color * 0.5f;
             player1Name.GrowControlWithText = false;
             player1Name.TextHorizontalAlign = HorizontalTextAlign.Left;
-            player1Name.Width = playerWidth;
-            player1Name.Top = 10;
-            player1Name.Left = 10;
             player1Name.Visible = false;
 
-            player1Points = await this.AddComponentUITextArea("Player1Points", UITextAreaDescription.DefaultFromFile(fontFilename, 25, true), layerUI);
+            player1Points = await this.AddComponentUITextArea("Player1Points", UITextAreaDescription.DefaultFromFile(fontFilename, 25, true));
             player1Points.TextForeColor = player1Status.Color;
             player1Points.TextShadowColor = player1Status.Color * 0.5f;
             player1Points.GrowControlWithText = false;
             player1Points.TextHorizontalAlign = HorizontalTextAlign.Center;
-            player1Points.Width = playerWidth;
-            player1Points.Top = 60;
-            player1Points.Left = 10;
             player1Points.Visible = false;
 
-            player1Life = await this.AddComponentUIProgressBar("Player1Life", UIProgressBarDescription.DefaultFromFile(fontFilename, 10, true), layerUI);
-            player1Life.Width = playerWidth;
-            player1Life.Height = 30;
-            player1Life.Top = 100;
-            player1Life.Left = 10;
+            player1Life = await this.AddComponentUIProgressBar("Player1Life", UIProgressBarDescription.DefaultFromFile(fontFilename, 10, true));
             player1Life.ProgressColor = player1Status.Color;
             player1Life.BaseColor = Color.Black;
             player1Life.Caption.TextForeColor = Color.White;
             player1Life.Caption.Text = "0%";
             player1Life.Visible = false;
 
-            player2Name = await this.AddComponentUITextArea("Player2Name", UITextAreaDescription.DefaultFromFile(fontFilename, 20, true), layerUI);
+            player2Name = await this.AddComponentUITextArea("Player2Name", UITextAreaDescription.DefaultFromFile(fontFilename, 20, true));
             player2Name.TextForeColor = player2Status.Color;
             player2Name.TextShadowColor = player2Status.Color * 0.5f;
             player2Name.GrowControlWithText = false;
             player2Name.TextHorizontalAlign = HorizontalTextAlign.Right;
-            player2Name.Width = playerWidth;
-            player2Name.Top = 10;
-            player2Name.Left = Game.Form.RenderWidth - 10 - player2Name.Width;
             player2Name.Visible = false;
 
-            player2Points = await this.AddComponentUITextArea("Player2Points", UITextAreaDescription.DefaultFromFile(fontFilename, 25, true), layerUI);
+            player2Points = await this.AddComponentUITextArea("Player2Points", UITextAreaDescription.DefaultFromFile(fontFilename, 25, true));
             player2Points.TextForeColor = player2Status.Color;
             player2Points.TextShadowColor = player2Status.Color * 0.5f;
             player2Points.GrowControlWithText = false;
             player2Points.TextHorizontalAlign = HorizontalTextAlign.Center;
-            player2Points.Width = playerWidth;
-            player2Points.Top = 60;
-            player2Points.Left = Game.Form.RenderWidth - 10 - player2Points.Width;
             player2Points.Visible = false;
 
-            player2Life = await this.AddComponentUIProgressBar("Player2Life", UIProgressBarDescription.DefaultFromFile(fontFilename, 10, true), layerUI);
-            player2Life.Width = playerWidth;
-            player2Life.Height = 30;
-            player2Life.Top = 100;
-            player2Life.Left = Game.Form.RenderWidth - 10 - player2Life.Width;
+            player2Life = await this.AddComponentUIProgressBar("Player2Life", UIProgressBarDescription.DefaultFromFile(fontFilename, 10, true));
             player2Life.ProgressColor = player2Status.Color;
             player2Life.BaseColor = Color.Black;
             player2Life.Caption.TextForeColor = Color.White;
@@ -408,128 +340,85 @@ namespace SceneTest.SceneTanksGame
         }
         private async Task InitializeUITurn()
         {
-            turnText = await this.AddComponentUITextArea("TurnText", UITextAreaDescription.DefaultFromFile(fontFilename, 40, true), layerUI);
+            turnText = await this.AddComponentUITextArea("TurnText", UITextAreaDescription.DefaultFromFile(fontFilename, 40, true));
             turnText.TextForeColor = Color.Yellow;
             turnText.TextShadowColor = Color.Yellow * 0.5f;
             turnText.TextHorizontalAlign = HorizontalTextAlign.Center;
-            turnText.Width = 300;
-            turnText.Anchor = Anchors.HorizontalCenter;
             turnText.GrowControlWithText = false;
             turnText.Visible = false;
 
-            gameIcon = await this.AddComponentSprite("GameIcon", SpriteDescription.Default("SceneTanksGame/GameIcon.png"), SceneObjectUsages.UI, layerUI);
+            gameIcon = await this.AddComponentSprite("GameIcon", SpriteDescription.Default("SceneTanksGame/GameIcon.png"), SceneObjectUsages.UI);
             gameIcon.BaseColor = Color.Yellow;
-            gameIcon.Width = 92;
-            gameIcon.Height = 82;
-            gameIcon.Top = 55;
-            gameIcon.Anchor = Anchors.HorizontalCenter;
             gameIcon.Visible = false;
             gameIcon.TweenRotateBounce(-0.1f, 0.1f, 500, ScaleFuncs.CubicEaseInOut);
 
-            playerTurnMarker = await this.AddComponentSprite("PlayerTurnMarker", SpriteDescription.Default("SceneTanksGame/Arrow.png"), SceneObjectUsages.UI, layerUI);
+            playerTurnMarker = await this.AddComponentSprite("PlayerTurnMarker", SpriteDescription.Default("SceneTanksGame/Arrow.png"), SceneObjectUsages.UI);
             playerTurnMarker.BaseColor = Color.Turquoise;
-            playerTurnMarker.Width = 112;
-            playerTurnMarker.Height = 75;
-            playerTurnMarker.Top = 35;
-            playerTurnMarker.Left = Game.Form.RenderCenter.X - 112 - 120;
             playerTurnMarker.Visible = false;
             playerTurnMarker.TweenScaleBounce(1, 1.2f, 500, ScaleFuncs.CubicEaseInOut);
         }
         private async Task InitializeUIKeyPanel()
         {
-            float top = Game.Form.RenderHeight - 150;
+            int layerPanel = LayerUI;
+            int layerSprites = layerPanel + 1;
+            int layerKeys = layerSprites + 1;
 
-            keyHelp = await this.AddComponentUIPanel("KeyHelp", UIPanelDescription.Default(Color4.Black * 0.3333f), layerUI);
-            keyHelp.Left = 0;
-            keyHelp.Top = top;
-            keyHelp.Height = 150;
-            keyHelp.Width = 250;
+            keyHelp = await this.AddComponentUIPanel("KeyHelp", UIPanelDescription.Default(Color4.Black * 0.3333f), layerPanel);
             keyHelp.Visible = false;
 
-            keyRotate = await this.AddComponentSprite("KeyRotate", SpriteDescription.Default("SceneTanksGame/Turn.png"), SceneObjectUsages.UI, layerUI + 1);
-            keyRotate.Left = 0;
-            keyRotate.Top = top + 25;
-            keyRotate.Width = 372 * 0.25f;
-            keyRotate.Height = 365 * 0.25f;
+            keyRotate = await this.AddComponentSprite("KeyRotate", SpriteDescription.Default("SceneTanksGame/Turn.png"), SceneObjectUsages.UI, layerSprites);
             keyRotate.BaseColor = Color.Turquoise;
             keyRotate.Visible = false;
 
-            keyMove = await this.AddComponentSprite("KeyMove", SpriteDescription.Default("SceneTanksGame/Move.png"), SceneObjectUsages.UI, layerUI + 1);
-            keyMove.Left = keyRotate.Width;
-            keyMove.Top = top + 25;
-            keyMove.Width = 232 * 0.25f;
-            keyMove.Height = 365 * 0.25f;
+            keyMove = await this.AddComponentSprite("KeyMove", SpriteDescription.Default("SceneTanksGame/Move.png"), SceneObjectUsages.UI, layerSprites);
             keyMove.BaseColor = Color.Turquoise;
             keyMove.Visible = false;
 
-            KeyPitch = await this.AddComponentSprite("KeyPitch", SpriteDescription.Default("SceneTanksGame/Pitch.png"), SceneObjectUsages.UI, layerUI + 1);
-            KeyPitch.Left = keyRotate.Width + keyMove.Width;
-            KeyPitch.Top = top + 25;
-            KeyPitch.Width = 322 * 0.25f;
-            KeyPitch.Height = 365 * 0.25f;
+            KeyPitch = await this.AddComponentSprite("KeyPitch", SpriteDescription.Default("SceneTanksGame/Pitch.png"), SceneObjectUsages.UI, layerSprites);
             KeyPitch.BaseColor = Color.Turquoise;
             KeyPitch.Visible = false;
 
-            keyRotateLeftText = await this.AddComponentUITextArea("KeyRotateLeftText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, true), layerUI + 2);
+            keyRotateLeftText = await this.AddComponentUITextArea("KeyRotateLeftText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, true), layerKeys);
             keyRotateLeftText.TextForeColor = Color.Yellow;
             keyRotateLeftText.Text = "A";
-            keyRotateLeftText.Top = top + 20;
-            keyRotateLeftText.Left = 10;
             keyRotateLeftText.Visible = false;
 
-            keyRotateRightText = await this.AddComponentUITextArea("KeyRotateRightText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, true), layerUI + 2);
+            keyRotateRightText = await this.AddComponentUITextArea("KeyRotateRightText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, true), layerKeys);
             keyRotateRightText.TextForeColor = Color.Yellow;
             keyRotateRightText.Text = "D";
-            keyRotateRightText.Top = top + 20;
-            keyRotateRightText.Left = keyRotate.Width - 30;
             keyRotateRightText.Visible = false;
 
-            keyMoveForwardText = await this.AddComponentUITextArea("KeyMoveForwardText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, true), layerUI + 2);
+            keyMoveForwardText = await this.AddComponentUITextArea("KeyMoveForwardText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, true), layerKeys);
             keyMoveForwardText.TextForeColor = Color.Yellow;
             keyMoveForwardText.Text = "W";
-            keyMoveForwardText.Top = top + 20;
-            keyMoveForwardText.Left = keyMove.AbsoluteCenter.X - 5;
             keyMoveForwardText.Visible = false;
 
-            keyMoveBackwardText = await this.AddComponentUITextArea("KeyMoveBackwardText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, true), layerUI + 2);
+            keyMoveBackwardText = await this.AddComponentUITextArea("KeyMoveBackwardText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, true), layerKeys);
             keyMoveBackwardText.TextForeColor = Color.Yellow;
             keyMoveBackwardText.Text = "S";
-            keyMoveBackwardText.Top = top + keyMove.Height + 10;
-            keyMoveBackwardText.Left = keyMove.AbsoluteCenter.X - 5;
             keyMoveBackwardText.Visible = false;
 
-            keyPitchUpText = await this.AddComponentUITextArea("KeyPitchUpText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, true), layerUI + 2);
+            keyPitchUpText = await this.AddComponentUITextArea("KeyPitchUpText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, true), layerKeys);
             keyPitchUpText.TextForeColor = Color.Yellow;
             keyPitchUpText.Text = "Q";
-            keyPitchUpText.Top = top + 20;
-            keyPitchUpText.Left = KeyPitch.AbsoluteCenter.X - 15;
             keyPitchUpText.Visible = false;
 
-            keyPitchDownText = await this.AddComponentUITextArea("KeyPitchDownText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, true), layerUI + 2);
+            keyPitchDownText = await this.AddComponentUITextArea("KeyPitchDownText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, true), layerKeys);
             keyPitchDownText.TextForeColor = Color.Yellow;
             keyPitchDownText.Text = "Z";
-            keyPitchDownText.Top = top + KeyPitch.Height + 10;
-            keyPitchDownText.Left = KeyPitch.AbsoluteCenter.X + 10;
             keyPitchDownText.Visible = false;
         }
         private async Task InitializeUIFire()
         {
-            pbFire = await this.AddComponentUIProgressBar("PbFire", UIProgressBarDescription.Default(), layerUI);
+            pbFire = await this.AddComponentUIProgressBar("PbFire", UIProgressBarDescription.Default());
             pbFire.Anchor = Anchors.HorizontalCenter;
-            pbFire.Top = Game.Form.RenderHeight - 100;
-            pbFire.Width = 500;
-            pbFire.Height = 40;
             pbFire.ProgressColor = Color.Yellow;
             pbFire.BaseColor = new Color4(0, 0, 0, 0.5f);
             pbFire.Visible = false;
 
-            fireKeyText = await this.AddComponentUITextArea("FireKeyText", UITextAreaDescription.DefaultFromFile(fontFilename, 25, true), layerUI + 2);
+            fireKeyText = await this.AddComponentUITextArea("FireKeyText", UITextAreaDescription.DefaultFromFile(fontFilename, 25, true));
             fireKeyText.TextForeColor = Color.Yellow;
             fireKeyText.Text = "Press space to fire!";
-            fireKeyText.Anchor = Anchors.HorizontalCenter;
-            fireKeyText.Top = Game.Form.RenderHeight - 60;
-            fireKeyText.Width = 500;
-            fireKeyText.Height = 40;
             fireKeyText.TextHorizontalAlign = HorizontalTextAlign.Center;
             fireKeyText.TextVerticalAlign = VerticalTextAlign.Middle;
             fireKeyText.GrowControlWithText = false;
@@ -537,46 +426,30 @@ namespace SceneTest.SceneTanksGame
         }
         private async Task InitializeUIMinimap()
         {
-            miniMapBackground = await this.AddComponentSprite("MiniMapBackground", SpriteDescription.Default("SceneTanksGame/Compass.png"), SceneObjectUsages.UI, layerUI);
-            miniMapBackground.Width = 200;
-            miniMapBackground.Height = 200;
-            miniMapBackground.Left = Game.Form.RenderWidth - 200 - 10;
-            miniMapBackground.Top = Game.Form.RenderHeight - 200 - 10;
+            int layerPanel = LayerUI;
+            int layerIcons = layerPanel + 1;
+            int layerMarkers = layerIcons + 1;
+
+            miniMapBackground = await this.AddComponentSprite("MiniMapBackground", SpriteDescription.Default("SceneTanksGame/Compass.png"), SceneObjectUsages.UI, layerPanel);
             miniMapBackground.Alpha = 0.5f;
             miniMapBackground.Visible = false;
 
-            miniMapTank1 = await this.AddComponentSprite("MiniMapTank1", SpriteDescription.Default("SceneTanksGame/Tank.png"), SceneObjectUsages.UI, layerUI + 1);
-            miniMapTank1.Width = 273 * 0.1f;
-            miniMapTank1.Height = 365 * 0.1f;
-            miniMapTank1.Left = Game.Form.RenderWidth - 150 - 10;
-            miniMapTank1.Top = Game.Form.RenderHeight - 150 - 10;
+            miniMapTank1 = await this.AddComponentSprite("MiniMapTank1", SpriteDescription.Default("SceneTanksGame/Tank.png"), SceneObjectUsages.UI, layerIcons);
             miniMapTank1.BaseColor = Color.Blue;
             miniMapTank1.Visible = false;
 
-            miniMapTank2 = await this.AddComponentSprite("MiniMapTank2", SpriteDescription.Default("SceneTanksGame/Tank.png"), SceneObjectUsages.UI, layerUI + 1);
-            miniMapTank2.Width = 273 * 0.1f;
-            miniMapTank2.Height = 365 * 0.1f;
-            miniMapTank2.Left = Game.Form.RenderWidth - 85 - 10;
-            miniMapTank2.Top = Game.Form.RenderHeight - 85 - 10;
+            miniMapTank2 = await this.AddComponentSprite("MiniMapTank2", SpriteDescription.Default("SceneTanksGame/Tank.png"), SceneObjectUsages.UI, layerIcons);
             miniMapTank2.BaseColor = Color.Red;
             miniMapTank2.Visible = false;
 
-            windVelocity = await this.AddComponentUIProgressBar("WindVelocity", UIProgressBarDescription.DefaultFromFile(fontFilename, 8), layerUI + 2);
+            windVelocity = await this.AddComponentUIProgressBar("WindVelocity", UIProgressBarDescription.DefaultFromFile(fontFilename, 8), layerMarkers);
             windVelocity.Caption.Text = "Wind velocity";
             windVelocity.Caption.TextForeColor = Color.Yellow * 0.85f;
-            windVelocity.Width = 180;
-            windVelocity.Height = 15;
-            windVelocity.Left = miniMapBackground.AbsoluteCenter.X - 90;
-            windVelocity.Top = miniMapBackground.AbsoluteCenter.Y - 130;
             windVelocity.ProgressColor = Color.DeepSkyBlue;
             windVelocity.BaseColor = new Color4(0, 0, 0, 0.5f);
             windVelocity.Visible = false;
 
-            windDirectionArrow = await this.AddComponentSprite("WindDirectionArrow", SpriteDescription.Default("SceneTanksGame/Wind.png"), SceneObjectUsages.UI, layerUI + 1);
-            windDirectionArrow.Width = 100;
-            windDirectionArrow.Height = 100;
-            windDirectionArrow.Left = miniMapBackground.AbsoluteCenter.X - 50;
-            windDirectionArrow.Top = miniMapBackground.AbsoluteCenter.Y - 50;
+            windDirectionArrow = await this.AddComponentSprite("WindDirectionArrow", SpriteDescription.Default("SceneTanksGame/Wind.png"), SceneObjectUsages.UI, layerMarkers);
             windDirectionArrow.BaseColor = Color.Green;
             windDirectionArrow.Visible = false;
         }
@@ -585,7 +458,7 @@ namespace SceneTest.SceneTanksGame
             trajectoryMarkerPool = new Sprite[5];
             for (int i = 0; i < trajectoryMarkerPool.Length; i++)
             {
-                var trajectoryMarker = await this.AddComponentSprite($"TrajectoryMarker_{i}", SpriteDescription.Default("SceneTanksGame/Dot_w.png"), SceneObjectUsages.UI, layerUI + 1);
+                var trajectoryMarker = await this.AddComponentSprite($"TrajectoryMarker_{i}", SpriteDescription.Default("SceneTanksGame/Dot_w.png"), SceneObjectUsages.UI);
                 trajectoryMarker.Width = 50;
                 trajectoryMarker.Height = 50;
                 trajectoryMarker.BaseColor = Color.Transparent;
@@ -595,6 +468,159 @@ namespace SceneTest.SceneTanksGame
 
                 trajectoryMarkerPool[i] = trajectoryMarker;
             }
+        }
+
+        public override void GameGraphicsResized()
+        {
+            base.GameGraphicsResized();
+
+            UpdateLayout();
+        }
+        private void UpdateLayout()
+        {
+            UpdateLayoutLoadingUI();
+
+            gameMessage.Anchor = Anchors.Center;
+            gameMessage.Width = Game.Form.RenderWidth;
+            gameMessage.Height = Game.Form.RenderHeight;
+
+            gameKeyHelp.Anchor = Anchors.HorizontalCenter;
+            gameKeyHelp.Top = Game.Form.RenderHeight - 60;
+            gameKeyHelp.Width = 500;
+            gameKeyHelp.Height = 40;
+
+            float width = Game.Form.RenderWidth / 2f;
+            float height = width * 0.6666f;
+            dialog.Width = width;
+            dialog.Height = height;
+            dialog.Anchor = Anchors.Center;
+
+            float butWidth = 150;
+            float butHeight = 55;
+            float butMargin = 15;
+
+            dialogAccept.Width = butWidth;
+            dialogAccept.Height = butHeight;
+            dialogAccept.Top = dialog.Height - butMargin - butHeight;
+            dialogAccept.Left = (dialog.Width * 0.5f) - (butWidth * 0.5f) - (butWidth * 0.6666f);
+
+            dialogCancel.Width = butWidth;
+            dialogCancel.Height = butHeight;
+            dialogCancel.Top = dialog.Height - butMargin - butHeight;
+            dialogCancel.Left = (dialog.Width * 0.5f) - (butWidth * 0.5f) + (butWidth * 0.6666f);
+
+            dialogText.Padding = new Padding
+            {
+                Left = width * 0.1f,
+                Right = width * 0.1f,
+                Top = height * 0.1f,
+                Bottom = butHeight + (butMargin * 2f),
+            };
+
+            float playerWidth = 300;
+            player1Name.Width = playerWidth;
+            player1Name.Top = 10;
+            player1Name.Left = 10;
+            player1Points.Width = playerWidth;
+            player1Points.Top = 60;
+            player1Points.Left = 10;
+            player1Life.Width = playerWidth;
+            player1Life.Height = 30;
+            player1Life.Top = 100;
+            player1Life.Left = 10;
+            player2Name.Width = playerWidth;
+            player2Name.Top = 10;
+            player2Name.Left = Game.Form.RenderWidth - 10 - player2Name.Width;
+            player2Points.Width = playerWidth;
+            player2Points.Top = 60;
+            player2Points.Left = Game.Form.RenderWidth - 10 - player2Points.Width;
+            player2Life.Width = playerWidth;
+            player2Life.Height = 30;
+            player2Life.Top = 100;
+            player2Life.Left = Game.Form.RenderWidth - 10 - player2Life.Width;
+
+            turnText.Width = 300;
+            turnText.Anchor = Anchors.HorizontalCenter;
+            gameIcon.Width = 92;
+            gameIcon.Height = 82;
+            gameIcon.Top = 55;
+            gameIcon.Anchor = Anchors.HorizontalCenter;
+            playerTurnMarker.Width = 112;
+            playerTurnMarker.Height = 75;
+            playerTurnMarker.Top = 35;
+            playerTurnMarker.Left = Game.Form.RenderCenter.X - 112 - 120;
+
+            float top = Game.Form.RenderHeight - 150;
+            keyHelp.Left = 0;
+            keyHelp.Top = top;
+            keyHelp.Height = 150;
+            keyHelp.Width = 250;
+            keyRotate.Left = 0;
+            keyRotate.Top = top + 25;
+            keyRotate.Width = 372 * 0.25f;
+            keyRotate.Height = 365 * 0.25f;
+            keyMove.Left = keyRotate.Width;
+            keyMove.Top = top + 25;
+            keyMove.Width = 232 * 0.25f;
+            keyMove.Height = 365 * 0.25f;
+            KeyPitch.Left = keyRotate.Width + keyMove.Width;
+            KeyPitch.Top = top + 25;
+            KeyPitch.Width = 322 * 0.25f;
+            KeyPitch.Height = 365 * 0.25f;
+            keyRotateLeftText.Top = top + 20;
+            keyRotateLeftText.Left = 10;
+            keyRotateRightText.Top = top + 20;
+            keyRotateRightText.Left = keyRotate.Width - 30;
+            keyMoveForwardText.Top = top + 20;
+            keyMoveForwardText.Left = keyMove.AbsoluteCenter.X - 5;
+            keyMoveBackwardText.Top = top + keyMove.Height + 10;
+            keyMoveBackwardText.Left = keyMove.AbsoluteCenter.X - 5;
+            keyPitchUpText.Top = top + 20;
+            keyPitchUpText.Left = KeyPitch.AbsoluteCenter.X - 15;
+            keyPitchDownText.Top = top + KeyPitch.Height + 10;
+            keyPitchDownText.Left = KeyPitch.AbsoluteCenter.X + 10;
+
+            pbFire.Top = Game.Form.RenderHeight - 100;
+            pbFire.Width = 500;
+            pbFire.Height = 40;
+            fireKeyText.Anchor = Anchors.HorizontalCenter;
+            fireKeyText.Top = Game.Form.RenderHeight - 60;
+            fireKeyText.Width = 500;
+            fireKeyText.Height = 40;
+
+            miniMapBackground.Width = 200;
+            miniMapBackground.Height = 200;
+            miniMapBackground.Left = Game.Form.RenderWidth - 200 - 10;
+            miniMapBackground.Top = Game.Form.RenderHeight - 200 - 10;
+            miniMapTank1.Width = 273 * 0.1f;
+            miniMapTank1.Height = 365 * 0.1f;
+            miniMapTank1.Left = Game.Form.RenderWidth - 150 - 10;
+            miniMapTank1.Top = Game.Form.RenderHeight - 150 - 10;
+            miniMapTank2.Width = 273 * 0.1f;
+            miniMapTank2.Height = 365 * 0.1f;
+            miniMapTank2.Left = Game.Form.RenderWidth - 85 - 10;
+            miniMapTank2.Top = Game.Form.RenderHeight - 85 - 10;
+            windVelocity.Width = 180;
+            windVelocity.Height = 15;
+            windVelocity.Left = miniMapBackground.AbsoluteCenter.X - 90;
+            windVelocity.Top = miniMapBackground.AbsoluteCenter.Y - 130;
+            windDirectionArrow.Width = 100;
+            windDirectionArrow.Height = 100;
+            windDirectionArrow.Left = miniMapBackground.AbsoluteCenter.X - 50;
+            windDirectionArrow.Top = miniMapBackground.AbsoluteCenter.Y - 50;
+        }
+        private void UpdateLayoutLoadingUI()
+        {
+            fadePanel.Width = Game.Form.RenderWidth;
+            fadePanel.Height = Game.Form.RenderHeight;
+
+            loadingText.Anchor = Anchors.HorizontalCenter;
+            loadingText.Top = Game.Form.RenderCenter.Y - 75f;
+            loadingText.Width = Game.Form.RenderWidth * 0.8f;
+
+            loadingBar.Anchor = Anchors.Center;
+            loadingBar.Width = Game.Form.RenderWidth * 0.8f;
+            loadingBar.Height = 35;
         }
 
         private Task[] InitializeModels()
@@ -621,7 +647,7 @@ namespace SceneTest.SceneTanksGame
                 TransformDependences = new[] { 1, 2, -1 },
             };
 
-            tanks = await this.AddComponentModelInstanced("Tanks", tDesc, SceneObjectUsages.Agent, layerModels);
+            tanks = await this.AddComponentModelInstanced("Tanks", tDesc, SceneObjectUsages.Agent);
             tanks.Visible = false;
 
             tankHeight = tanks[0].GetBoundingBox().Height * 0.5f;
@@ -659,7 +685,7 @@ namespace SceneTest.SceneTanksGame
             GroundDescription groundDesc = GroundDescription.FromHeightmap(noiseMap, cellSize, terrainHeight, heightCurve, textures, 2);
             groundDesc.Heightmap.UseFalloff = true;
 
-            terrain = await this.AddComponentScenery("Terrain", groundDesc, SceneObjectUsages.Ground, layerModels);
+            terrain = await this.AddComponentScenery("Terrain", groundDesc);
             terrain.Visible = false;
 
             terrainTop = terrain.GetBoundingBox().Maximum.Y;
@@ -695,7 +721,7 @@ namespace SceneTest.SceneTanksGame
                 Content = ContentDescription.FromContentData(vertices, indices, material),
             };
 
-            landScape = await this.AddComponentModel("Landscape", content, SceneObjectUsages.UI, layerModels);
+            landScape = await this.AddComponentModel("Landscape", content, SceneObjectUsages.UI, LayerDefault);
             landScape.Visible = false;
         }
         private async Task InitializeModelProjectile()
@@ -710,7 +736,7 @@ namespace SceneTest.SceneTanksGame
             };
             content.DepthEnabled = false;
 
-            projectile = await this.AddComponentModel("Projectile", content, SceneObjectUsages.None, layerModels + 100);
+            projectile = await this.AddComponentModel("Projectile", content, SceneObjectUsages.None, LayerDefault + 1);
             projectile.Visible = false;
         }
         private async Task InitializeParticleManager()

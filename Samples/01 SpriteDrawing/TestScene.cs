@@ -11,10 +11,9 @@ namespace SpriteDrawing
 {
     public class TestScene : Scene
     {
-        private const int layerBackground = 1;
-        private const int layerObjects = 50;
-        private const int layerHUD = 99;
-        private const int layerHUDDialogs = 200;
+        private const int layerUIBackground = LayerUI - 1;
+        private const int layerUIObjects = LayerUI + 1;
+        private const int layerUIDialogs = LayerUI + 2;
         private const float delta = 250f;
 
         private bool gameReady = false;
@@ -70,12 +69,12 @@ namespace SpriteDrawing
             var desc = UITextAreaDescription.Default();
             desc.Width = Game.Form.RenderWidth * 0.5f;
 
-            textDebug = await this.AddComponentUITextArea("Console", desc, layerHUD);
+            textDebug = await this.AddComponentUITextArea("Console", desc, LayerUI);
         }
         private async Task InitializeBackground()
         {
             var desc = SpriteDescription.Background("background.jpg");
-            await this.AddComponentSprite("Background", desc, SceneObjectUsages.UI, layerBackground);
+            await this.AddComponentSprite("Background", desc, SceneObjectUsages.UI, layerUIBackground);
         }
         private async Task InitializeProgressbar()
         {
@@ -87,7 +86,7 @@ namespace SpriteDrawing
             desc.BaseColor = new Color(0, 0, 0, 0.5f);
             desc.ProgressColor = Color.Green;
 
-            progressBar = await this.AddComponentUIProgressBar("ProgressBar", desc, layerHUD);
+            progressBar = await this.AddComponentUIProgressBar("ProgressBar", desc, LayerUI);
         }
 
         private async Task LoadControls()
@@ -122,7 +121,7 @@ namespace SpriteDrawing
             float size = Game.Form.RenderWidth * 0.3333f;
 
             var desc = SpriteDescription.Default("smiley.png", size, size);
-            spriteSmiley = await this.AddComponentSprite("SmileySprite", desc, SceneObjectUsages.None, layerObjects);
+            spriteSmiley = await this.AddComponentSprite("SmileySprite", desc, SceneObjectUsages.None, layerUIObjects);
             spriteSmiley.Visible = false;
         }
         private async Task InitializeStaticPan()
@@ -145,7 +144,7 @@ namespace SpriteDrawing
                     BaseColor = new Color(176, 77, 45),
                 },
             };
-            staticPan = await this.AddComponentUIPanel("StaticPanel", desc, layerHUD);
+            staticPan = await this.AddComponentUIPanel("StaticPanel", desc, LayerUI);
 
             var descText = new UITextAreaDescription()
             {
@@ -190,7 +189,7 @@ namespace SpriteDrawing
                     BaseColor = Color.Pink,
                 }
             };
-            dynamicPan = await this.AddComponentUIPanel("DynamicPanel", descPan, layerHUDDialogs);
+            dynamicPan = await this.AddComponentUIPanel("DynamicPanel", descPan, layerUIDialogs);
 
             float w = 0.3333f;
 
@@ -241,13 +240,13 @@ namespace SpriteDrawing
             descButClose.TextVerticalAlign = VerticalTextAlign.Middle;
             descButClose.Text = "Press Me";
 
-            butTest2 = await this.AddComponentUIButton("ButtonTest2", descButClose, layerHUD);
+            butTest2 = await this.AddComponentUIButton("ButtonTest2", descButClose, LayerUI);
             butTest2.JustReleased += ButTest2_Click;
             butTest2.MouseEnter += ButTest_MouseEnter;
             butTest2.MouseLeave += ButTest_MouseLeave;
             butTest2.Visible = false;
 
-            butTest1 = await this.AddComponentUIButton("ButtonTest1", descButClose, layerHUD);
+            butTest1 = await this.AddComponentUIButton("ButtonTest1", descButClose, LayerUI);
             butTest1.JustReleased += ButTest1_Click;
             butTest1.MouseEnter += ButTest_MouseEnter;
             butTest1.MouseLeave += ButTest_MouseLeave;

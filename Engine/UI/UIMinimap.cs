@@ -204,9 +204,9 @@ namespace Engine.UI
         /// <param name="scene">Scene</param>
         /// <param name="name">Name</param>
         /// <param name="description">Description</param>
-        /// <param name="order">Processing order</param>
+        /// <param name="layer">Processing layer</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<UIMinimap> AddComponentUIMinimap(this Scene scene, string name, UIMinimapDescription description, int order = 0)
+        public static async Task<UIMinimap> AddComponentUIMinimap(this Scene scene, string name, UIMinimapDescription description, int layer = Scene.LayerUI)
         {
             UIMinimap component = null;
 
@@ -214,7 +214,7 @@ namespace Engine.UI
             {
                 component = new UIMinimap(name, scene, description);
 
-                scene.AddComponent(component, SceneObjectUsages.UI, order);
+                scene.AddComponent(component, SceneObjectUsages.UI, layer);
             });
 
             return component;

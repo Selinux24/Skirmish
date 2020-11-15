@@ -23,8 +23,6 @@ namespace Deferred
         private const float far = 1000f;
         private const float fogStart = 0.01f;
         private const float fogRange = 0.10f;
-        private const int layerEffects = 2;
-        private const int layerHUD = 99;
 
         private UITextArea title = null;
         private UITextArea load = null;
@@ -170,7 +168,7 @@ namespace Deferred
                 Width = 16,
                 Height = 16,
             };
-            await this.AddComponentUICursor("Cursor", cursorDesc, layerHUD + 1);
+            await this.AddComponentUICursor("Cursor", cursorDesc);
         }
         private async Task InitializeSkydom()
         {
@@ -298,14 +296,14 @@ namespace Deferred
             var dHelp = new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow };
             var dStats = new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 10), TextForeColor = Color.Red };
 
-            title = await this.AddComponentUITextArea("Title", dTitle, layerHUD);
-            load = await this.AddComponentUITextArea("Load", dLoad, layerHUD);
-            help = await this.AddComponentUITextArea("Help", dHelp, layerHUD);
-            statistics = await this.AddComponentUITextArea("Statistics", dStats, layerHUD);
+            title = await this.AddComponentUITextArea("Title", dTitle);
+            load = await this.AddComponentUITextArea("Load", dLoad);
+            help = await this.AddComponentUITextArea("Help", dHelp);
+            statistics = await this.AddComponentUITextArea("Statistics", dStats);
 
-            upperPanel = await this.AddComponentSprite("Upperpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), SceneObjectUsages.UI, layerHUD - 1);
+            upperPanel = await this.AddComponentSprite("Upperpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), SceneObjectUsages.UI, LayerUI - 1);
 
-            bufferDrawer = await this.AddComponentUITextureRenderer("DebugBuferDrawer", UITextureRendererDescription.Default(), layerEffects);
+            bufferDrawer = await this.AddComponentUITextureRenderer("DebugBuferDrawer", UITextureRendererDescription.Default());
             bufferDrawer.Visible = false;
         }
         private async Task InitializeDebug()
@@ -314,14 +312,14 @@ namespace Deferred
             {
                 Count = 1000,
             };
-            lineDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Lines", lineDrawerDesc, SceneObjectUsages.None, layerEffects + 1);
+            lineDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Lines", lineDrawerDesc, SceneObjectUsages.None, LayerEffects);
             lineDrawer.Visible = false;
 
             var terrainGraphDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
             {
                 Count = MaxGridDrawer,
             };
-            terrainGraphDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Terrain Graph", terrainGraphDrawerDesc, SceneObjectUsages.None, layerEffects + 1);
+            terrainGraphDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Terrain Graph", terrainGraphDrawerDesc, SceneObjectUsages.None, LayerEffects);
             terrainGraphDrawer.Visible = false;
 
             var graphDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
@@ -329,14 +327,14 @@ namespace Deferred
                 DepthEnabled = true,
                 Count = 50000,
             };
-            graphDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Graph", graphDrawerDesc, SceneObjectUsages.None, layerEffects + 1);
+            graphDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Graph", graphDrawerDesc, SceneObjectUsages.None, LayerEffects);
             graphDrawer.Visible = false;
 
             var volumesDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
             {
                 Count = 10000
             };
-            volumesDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Volumes", volumesDrawerDesc, SceneObjectUsages.None, layerEffects + 1);
+            volumesDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Volumes", volumesDrawerDesc, SceneObjectUsages.None, LayerEffects);
             volumesDrawer.Visible = false;
         }
 

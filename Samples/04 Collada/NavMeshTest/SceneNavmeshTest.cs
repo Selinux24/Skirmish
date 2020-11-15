@@ -16,12 +16,12 @@ namespace Collada.NavmeshTest
     /// </summary>
     class SceneNavmeshTest : Scene
     {
-        private const int layerHUD = 99;
-
         private readonly string resourcesFolder = "navmeshtest/resources";
 
         private Player agent = null;
 
+        private Sprite panel = null;
+        private UITextArea title = null;
         private UITextArea debug = null;
         private UITextArea help = null;
 
@@ -60,6 +60,7 @@ namespace Collada.NavmeshTest
                         resUi.ThrowExceptions();
                     }
 
+                    UpdateLayout();
                     InitializeLights();
                     InitializeAgent();
 
@@ -91,15 +92,13 @@ namespace Collada.NavmeshTest
         }
         private async Task InitializeText()
         {
-            var title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White }, layerHUD);
+            title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White });
             title.Text = "Navigation Mesh Test Scene";
-            title.SetPosition(Vector2.Zero);
 
-            debug = await this.AddComponentUITextArea("Debug", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Green }, layerHUD);
+            debug = await this.AddComponentUITextArea("Debug", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Green });
             debug.Text = null;
-            debug.SetPosition(new Vector2(0, title.Top + title.Height + 3));
 
-            help = await this.AddComponentUITextArea("Help", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow }, layerHUD);
+            help = await this.AddComponentUITextArea("Help", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow });
             help.Text = @"Camera: WASD+Mouse (Press right mouse in windowed mode to look). 
 B: Change Build Mode (SHIFT reverse).
 P: Change Partition Type (SHIFT reverse).
@@ -109,17 +108,10 @@ F6: Loads the graph from a file.
 Left Mouse: Update current tile (SHIFT remove).
 Middle Mouse: Finds random point around circle (5 units).
 Space: Finds random over navmesh";
-            help.SetPosition(new Vector2(0, debug.Top + debug.Height + 3));
             help.Visible = false;
 
-            var spDesc = new SpriteDescription()
-            {
-                Width = Game.Form.RenderWidth,
-                Height = debug.Top + debug.Height + 3,
-                BaseColor = new Color4(0, 0, 0, 0.75f),
-            };
-
-            await this.AddComponentSprite("Backpanel", spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
+            panel = await this.AddComponentSprite("Backpanel", spDesc, SceneObjectUsages.UI, LayerUI - 1);
         }
         private void InitializeLights()
         {
@@ -433,6 +425,20 @@ Space: Finds random over navmesh";
             }
             sw.Stop();
             lastElapsedSeconds = sw.ElapsedMilliseconds / 1000.0f;
+        }
+
+        public override void GameGraphicsResized()
+        {
+            base.GameGraphicsResized();
+            UpdateLayout();
+        }
+        private void UpdateLayout()
+        {
+            title.SetPosition(Vector2.Zero);
+            debug.SetPosition(new Vector2(0, title.Top + title.Height + 3));
+            help.SetPosition(new Vector2(0, debug.Top + debug.Height + 3));
+            panel.Width = Game.Form.RenderWidth;
+            panel.Height = debug.Top + debug.Height + 3;
         }
     }
 }

@@ -326,9 +326,9 @@ namespace Engine
         /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="usage">Component usage</param>
-        /// <param name="order">Processing order</param>
+        /// <param name="layer">Processing layer</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<PrimitiveListDrawer<T>> AddComponentPrimitiveListDrawer<T>(this Scene scene, string name, PrimitiveListDrawerDescription<T> description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0) where T : IVertexList
+        public static async Task<PrimitiveListDrawer<T>> AddComponentPrimitiveListDrawer<T>(this Scene scene, string name, PrimitiveListDrawerDescription<T> description, SceneObjectUsages usage = SceneObjectUsages.None, int layer = Scene.LayerDefault) where T : IVertexList
         {
             PrimitiveListDrawer<T> component = null;
 
@@ -336,7 +336,7 @@ namespace Engine
             {
                 component = new PrimitiveListDrawer<T>(name, scene, description);
 
-                scene.AddComponent(component, usage, order);
+                scene.AddComponent(component, usage, layer);
             });
 
             return component;

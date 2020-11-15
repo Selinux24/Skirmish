@@ -12,9 +12,6 @@ namespace Animation.Start
 {
     class SceneStart : Scene
     {
-        private const int layerHUD = 50;
-        private const int layerCursor = 100;
-
         private Model backGround = null;
         private UITextArea title = null;
         private UIPanel mainPanel = null;
@@ -58,7 +55,7 @@ namespace Animation.Start
                 Delta = new Vector2(-14f, -7f),
                 BaseColor = Color.White,
             };
-            await this.AddComponentUICursor("Cursor", cursorDesc, layerCursor);
+            await this.AddComponentUICursor("Cursor", cursorDesc);
         }
         private async Task InitializeBackground()
         {
@@ -72,7 +69,7 @@ namespace Animation.Start
         {
             var titleFont = TextDrawerDescription.FromFamily(titleFonts, 72);
 
-            title = await this.AddComponentUITextArea("Title", UITextAreaDescription.Default(titleFont), layerHUD);
+            title = await this.AddComponentUITextArea("Title", UITextAreaDescription.Default(titleFont));
             title.GrowControlWithText = false;
             title.Text = "Animation";
             title.TextForeColor = Color.Gold;
@@ -83,7 +80,7 @@ namespace Animation.Start
         }
         private async Task InitializeMainPanel()
         {
-            mainPanel = await this.AddComponentUIPanel("MainPanel", UIPanelDescription.Default(Color.Transparent), layerHUD);
+            mainPanel = await this.AddComponentUIPanel("MainPanel", UIPanelDescription.Default(Color.Transparent));
             mainPanel.Spacing = 10;
             mainPanel.Padding = 15;
             mainPanel.SetGridLayout(GridLayout.FixedRows(2));
@@ -191,7 +188,6 @@ namespace Animation.Start
 
             UpdateLayout();
         }
-
         private void UpdateLayout()
         {
             mainPanel.Width = Game.Form.RenderWidth * 0.8f;

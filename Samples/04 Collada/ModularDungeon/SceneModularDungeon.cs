@@ -19,8 +19,6 @@ namespace Collada.ModularDungeon
 {
     public class SceneModularDungeon : Scene
     {
-        private const int layerHUD = 99;
-
         private const float maxDistance = 35;
 
         private readonly string resourcesFolder = "modulardungeon/resources";
@@ -297,20 +295,20 @@ namespace Collada.ModularDungeon
         }
         private async Task InitializeUI()
         {
-            console = await this.AddComponentUIConsole("Console", UIConsoleDescription.Default(), layerHUD + 1);
+            console = await this.AddComponentUIConsole("Console", UIConsoleDescription.Default(), LayerUI + 1);
             console.Visible = false;
 
-            pbLevels = await this.AddComponentUIProgressBar("PbLevels", UIProgressBarDescription.Default(Color.Transparent, Color.Green), layerHUD);
+            pbLevels = await this.AddComponentUIProgressBar("PbLevels", UIProgressBarDescription.Default(Color.Transparent, Color.Green));
             pbLevels.Visible = false;
 
-            messages = await this.AddComponentUITextArea("Messages", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 48), TextForeColor = Color.Red, TextShadowColor = Color.DarkRed }, layerHUD + 1);
+            messages = await this.AddComponentUITextArea("Messages", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 48), TextForeColor = Color.Red, TextShadowColor = Color.DarkRed }, LayerUI + 1);
             messages.Text = null;
             messages.SetPosition(new Vector2(0, 0));
             messages.Visible = false;
 
             var dialogDesc = UIDialogDescription.Default(Game.Form.RenderWidth * 0.5f, Game.Form.RenderHeight * 0.5f);
             dialogDesc.DialogButtons = UIDialogButtons.Accept;
-            dialog = await this.AddComponentUIDialog("Dialog", dialogDesc, layerHUD + 1);
+            dialog = await this.AddComponentUIDialog("Dialog", dialogDesc, LayerUI + 1);
             dialog.OnAcceptHandler += (s, e) =>
             {
                 dialog.CloseDialog(async () =>
@@ -330,7 +328,7 @@ namespace Collada.ModularDungeon
                 Count = 50000,
                 BlendMode = BlendModes.Opaque | BlendModes.Additive,
             };
-            selectedItemDrawer = await this.AddComponentPrimitiveListDrawer("SelectedItemsDrawer", drawerDesc, SceneObjectUsages.UI, layerHUD);
+            selectedItemDrawer = await this.AddComponentPrimitiveListDrawer("SelectedItemsDrawer", drawerDesc, SceneObjectUsages.UI, LayerUI);
             selectedItemDrawer.Visible = false;
         }
         private async Task InitializeMapTexture()
@@ -342,7 +340,7 @@ namespace Collada.ModularDungeon
 
             string onePageResourcesFolder = Path.Combine(resourcesFolder, "onepagedungeons");
 
-            dungeonMap = await this.AddComponentSprite("DungeonMap", SpriteDescription.Default(Path.Combine(onePageResourcesFolder, dungeonMapFile)), SceneObjectUsages.UI, layerHUD + 2);
+            dungeonMap = await this.AddComponentSprite("DungeonMap", SpriteDescription.Default(Path.Combine(onePageResourcesFolder, dungeonMapFile)), SceneObjectUsages.UI, LayerUI + 2);
             dungeonMap.Visible = false;
         }
 

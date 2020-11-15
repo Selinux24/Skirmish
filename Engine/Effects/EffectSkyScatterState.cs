@@ -46,7 +46,7 @@ namespace Engine.Effects
         /// <summary>
         /// Inverse light wave length
         /// </summary>
-        public Color4 InvWaveLength4 { get; set; }
+        public Color3 InvWaveLength4 { get; set; }
         /// <summary>
         /// Scale
         /// </summary>

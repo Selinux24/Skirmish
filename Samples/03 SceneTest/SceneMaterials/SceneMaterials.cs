@@ -11,12 +11,11 @@ namespace SceneTest.SceneMaterials
 {
     public class SceneMaterials : Scene
     {
-        private const int layerHUD = 99;
-
         private readonly float spaceSize = 40;
         private readonly float radius = 1;
         private readonly uint stacks = 40;
 
+        private Sprite backpanel = null;
         private UITextArea title = null;
         private UITextArea runtime = null;
 
@@ -73,6 +72,7 @@ namespace SceneTest.SceneMaterials
                         res.ThrowExceptions();
                     }
 
+                    UpdateLayout();
                     PrepareScene();
 
                     gameReady = true;
@@ -81,23 +81,17 @@ namespace SceneTest.SceneMaterials
 
         private async Task InitializeTextBoxes()
         {
-            title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White, TextShadowColor = Color.Orange }, layerHUD);
-            runtime = await this.AddComponentUITextArea("Runtime", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 10), TextForeColor = Color.Yellow, TextShadowColor = Color.Orange }, layerHUD);
+            var spDesc = new SpriteDescription()
+            {
+                BaseColor = new Color4(0, 0, 0, 0.75f),
+            };
+            backpanel = await this.AddComponentSprite("Backpanel", spDesc, SceneObjectUsages.UI, LayerUI - 1);
+
+            title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White, TextShadowColor = Color.Orange });
+            runtime = await this.AddComponentUITextArea("Runtime", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 10), TextForeColor = Color.Yellow, TextShadowColor = Color.Orange });
 
             title.Text = "Scene Test - Materials";
             runtime.Text = "";
-
-            title.SetPosition(Vector2.Zero);
-            runtime.SetPosition(new Vector2(5, title.Top + title.Height + 3));
-
-            var spDesc = new SpriteDescription()
-            {
-                Width = Game.Form.RenderWidth,
-                Height = runtime.Top + runtime.Height + 3,
-                BaseColor = new Color4(0, 0, 0, 0.75f),
-            };
-
-            await this.AddComponentSprite("Backpanel", spDesc, SceneObjectUsages.UI, layerHUD - 1);
         }
         private async Task InitializeSkyEffects()
         {
@@ -407,6 +401,21 @@ namespace SceneTest.SceneMaterials
                     await LoadResourcesAsync(InitializeColorGroups($"Spheres {(SpecularAlgorithms)currentAlgorithm}"));
                 });
             }
+        }
+
+        public override void GameGraphicsResized()
+        {
+            base.GameGraphicsResized();
+
+            UpdateLayout();
+        }
+        private void UpdateLayout()
+        {
+            title.SetPosition(Vector2.Zero);
+            runtime.SetPosition(new Vector2(5, title.Top + title.Height + 3));
+
+            backpanel.Width = Game.Form.RenderWidth;
+            backpanel.Height = runtime.Top + runtime.Height + 3;
         }
     }
 }

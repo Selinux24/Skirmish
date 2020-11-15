@@ -339,7 +339,7 @@ namespace Engine.Common
         /// <returns>Returns sorting order (nearest first)</returns>
         protected virtual int SortOpaques(int index, ISceneObject c1, ISceneObject c2)
         {
-            int res = c1.Order.CompareTo(c2.Order);
+            int res = c1.Layer.CompareTo(c2.Layer);
 
             if (res == 0)
             {
@@ -404,7 +404,7 @@ namespace Engine.Common
         /// <returns>Returns sorting order (far first)</returns>
         protected virtual int SortTransparents(int index, ISceneObject c1, ISceneObject c2)
         {
-            int res = c1.Order.CompareTo(c2.Order);
+            int res = c1.Layer.CompareTo(c2.Layer);
 
             if (res == 0)
             {
@@ -863,7 +863,7 @@ namespace Engine.Common
 
             if (res == 0)
             {
-                res = c1.Order.CompareTo(c2.Order);
+                res = c1.Layer.CompareTo(c2.Layer);
             }
 
             return res;

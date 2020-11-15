@@ -6,8 +6,6 @@ namespace SceneTest.SceneWater
 {
     public class SceneWater : Scene
     {
-        private const int layerObjs = 50;
-
         private const float fogStart = 150f;
         private const float fogRange = 200f;
 
@@ -83,7 +81,7 @@ namespace SceneTest.SceneWater
         {
             var wDesc = WaterDescription.CreateOcean(terrainSize, 0f);
 
-            await this.AddComponentWater("Water", wDesc, SceneObjectUsages.None, layerObjs + 1);
+            await this.AddComponentWater("Water", wDesc);
         }
         private async Task InitializeSeaBottom()
         {
@@ -119,7 +117,7 @@ namespace SceneTest.SceneWater
             groundDesc.Heightmap.UseFalloff = true;
             groundDesc.Heightmap.Transform = Matrix.Translation(0, -terrainHeight * 0.99f, 0);
 
-            await this.AddComponentScenery("Sea Bottom", groundDesc, SceneObjectUsages.None, layerObjs);
+            await this.AddComponentScenery("Sea Bottom", groundDesc);
         }
 
         public override void Update(GameTime gameTime)

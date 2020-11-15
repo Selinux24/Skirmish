@@ -12,7 +12,6 @@ namespace SceneTest.SceneCascadedShadows
     /// </summary>
     public class SceneCascadedShadows : Scene
     {
-        private const int layerEffects = 2;
         private const float spaceSize = 80;
 
         private ModelInstanced buildingObelisks = null;
@@ -167,7 +166,7 @@ namespace SceneTest.SceneCascadedShadows
             int smLeft = Game.Form.RenderWidth - width;
             int smTop = Game.Form.RenderHeight - height;
 
-            bufferDrawer = await this.AddComponentUITextureRenderer("DebugTextureRenderer", UITextureRendererDescription.Default(smLeft, smTop, width, height), layerEffects);
+            bufferDrawer = await this.AddComponentUITextureRenderer("DebugTextureRenderer", UITextureRendererDescription.Default(smLeft, smTop, width, height), LayerEffects);
             bufferDrawer.Visible = false;
         }
 

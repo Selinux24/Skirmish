@@ -10,9 +10,6 @@ namespace Animation.AnimationParts
 {
     class SceneAnimationParts : Scene
     {
-        private const int layerHUD = 99;
-        private const int layerModels = 10;
-
         private UITextArea title = null;
         private UIPanel backPanel = null;
         private UIConsole console = null;
@@ -71,14 +68,14 @@ namespace Animation.AnimationParts
 
         private async Task InitializeUI()
         {
-            title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White }, layerHUD);
+            title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White });
 
             title.Text = "Model Parts Test";
 
-            backPanel = await this.AddComponentUIPanel("Backpanel", UIPanelDescription.Default(new Color4(0, 0, 0, 0.75f)), layerHUD - 1);
+            backPanel = await this.AddComponentUIPanel("Backpanel", UIPanelDescription.Default(new Color4(0, 0, 0, 0.75f)), LayerUI - 1);
 
             var consoleDesc = UIConsoleDescription.Default(new Color4(0.35f, 0.35f, 0.35f, 1f));
-            console = await this.AddComponentUIConsole("Console", consoleDesc, layerHUD + 1);
+            console = await this.AddComponentUIConsole("Console", consoleDesc, LayerUI + 1);
             console.Visible = false;
 
             uiReady = true;
@@ -105,7 +102,7 @@ namespace Animation.AnimationParts
                 },
             };
 
-            tank = await this.AddComponentModel("Tanks", tDesc, SceneObjectUsages.Agent, layerModels);
+            tank = await this.AddComponentModel("Tanks", tDesc, SceneObjectUsages.Agent);
             tank.Manipulator.SetScale(0.5f);
         }
         private async Task InitializeFloor()

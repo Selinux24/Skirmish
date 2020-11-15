@@ -604,9 +604,9 @@ namespace Engine
         /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="usage">Component usage</param>
-        /// <param name="order">Processing order</param>
+        /// <param name="layer">Processing layer</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<ModelInstanced> AddComponentModelInstanced(this Scene scene, string name, ModelInstancedDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
+        public static async Task<ModelInstanced> AddComponentModelInstanced(this Scene scene, string name, ModelInstancedDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int layer = Scene.LayerDefault)
         {
             ModelInstanced component = null;
 
@@ -614,7 +614,7 @@ namespace Engine
             {
                 component = new ModelInstanced(name, scene, description);
 
-                scene.AddComponent(component, usage, order);
+                scene.AddComponent(component, usage, layer);
             });
 
             return component;

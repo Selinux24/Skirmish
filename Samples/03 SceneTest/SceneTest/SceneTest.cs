@@ -14,10 +14,6 @@ namespace SceneTest.SceneTest
 {
     public class SceneTest : Scene
     {
-        private const int layerObjs = 50;
-        private const int layerEffects = 60;
-        private const int layerHUD = 99;
-
         private readonly float baseHeight = 0.1f;
         private readonly float spaceSize = 40;
 
@@ -134,7 +130,7 @@ namespace SceneTest.SceneTest
             titleDesc.TextForeColor = Color.Yellow;
             titleDesc.TextShadowColor = Color.Orange;
 
-            title = await this.AddComponentUITextArea("Title", titleDesc, layerHUD);
+            title = await this.AddComponentUITextArea("Title", titleDesc, LayerUI);
             title.Text = "Scene Test - Textures";
             title.SetPosition(Vector2.Zero);
 
@@ -142,7 +138,7 @@ namespace SceneTest.SceneTest
             runtimeDesc.TextForeColor = Color.Yellow;
             runtimeDesc.TextShadowColor = Color.Orange;
 
-            runtime = await this.AddComponentUITextArea("Runtime", runtimeDesc, layerHUD);
+            runtime = await this.AddComponentUITextArea("Runtime", runtimeDesc, LayerUI);
             runtime.Text = "";
             runtime.SetPosition(new Vector2(5, title.Top + title.Height + 3));
 
@@ -151,7 +147,7 @@ namespace SceneTest.SceneTest
                 Width = Game.Form.RenderWidth,
                 Height = runtime.Top + runtime.Height + 3,
                 BaseColor = new Color4(0, 0, 0, 0.75f),
-            }, SceneObjectUsages.UI, layerHUD - 1);
+            }, SceneObjectUsages.UI, LayerUI - 1);
 
             var buttonFont = TextDrawerDescription.FromFamily("Lucida Console", 12);
 
@@ -165,7 +161,7 @@ namespace SceneTest.SceneTest
             buttonDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
             buttonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
 
-            butClose = await this.AddComponentUIButton("ButClose", buttonDesc, layerHUD);
+            butClose = await this.AddComponentUIButton("ButClose", buttonDesc, LayerUI);
             butClose.JustReleased += (sender, eventArgs) => { Game.SetScene<SceneStart.SceneStart>(); };
             butClose.Visible = false;
 
@@ -179,7 +175,7 @@ namespace SceneTest.SceneTest
                 Top = 0,
                 Width = Game.Form.RenderWidth,
                 Height = Game.Form.RenderHeight,
-            }, layerHUD + 1);
+            }, LayerUI + 1);
 
             var pbDesc = UIProgressBarDescription.DefaultFromFamily("Consolas", 18);
             pbDesc.Top = Game.Form.RenderHeight - 60;
@@ -189,10 +185,10 @@ namespace SceneTest.SceneTest
             pbDesc.BaseColor = new Color(0, 0, 0, 0.5f);
             pbDesc.ProgressColor = Color.Green;
 
-            progressBar = await this.AddComponentUIProgressBar("ProgressBar", pbDesc, layerHUD + 2);
+            progressBar = await this.AddComponentUIProgressBar("ProgressBar", pbDesc, LayerUI + 2);
 
             var cursorDesc = UICursorDescription.Default("Common/pointer.png", 48, 48, new Vector2(-14, -6));
-            cursor = await this.AddComponentUICursor("Cursor", cursorDesc, layerHUD * 2);
+            cursor = await this.AddComponentUICursor("Cursor", cursorDesc, LayerUI * 2);
             cursor.Visible = false;
         }
 
@@ -262,43 +258,44 @@ namespace SceneTest.SceneTest
                 }
             });
 
-            skydom = await this.AddComponentSkyScattering("Sky", new SkyScatteringDescription());
+            skydom = await this.AddComponentSkyScattering("Sky", SkyScatteringDescription.Default(), SceneObjectUsages.None, 1);
 
-            skyPlane = await this.AddComponentSkyPlane("Clouds", new SkyPlaneDescription()
+            var cloudsDesc = new SkyPlaneDescription()
             {
                 ContentPath = "SceneTest/sky",
                 Texture1Name = "perturb001.dds",
                 Texture2Name = "cloud001.dds",
                 SkyMode = SkyPlaneModes.Perturbed,
-            });
+            };
+
+            skyPlane = await this.AddComponentSkyPlane("Clouds", cloudsDesc, SceneObjectUsages.None, LayerSky);
         }
         private async Task InitializeScenery()
         {
             var sDesc = GroundDescription.FromFile("SceneTest/scenery", "Clif.xml");
 
-            scenery = await this.AddComponentScenery("Scenery", sDesc, SceneObjectUsages.Ground, layerObjs);
+            scenery = await this.AddComponentScenery("Scenery", sDesc, SceneObjectUsages.Ground, LayerDefault);
             var bbox = scenery.GetBoundingBox();
 
             var waterDesc = WaterDescription.CreateCalm(Math.Max(bbox.Width, bbox.Depth), waterHeight);
             waterDesc.BaseColor = waterBaseColor;
             waterDesc.WaterColor = waterColor;
 
-            await this.AddComponentWater("Water", waterDesc, SceneObjectUsages.None, layerObjs + 1);
+            await this.AddComponentWater("Water", waterDesc, SceneObjectUsages.None, LayerDefault + 1);
         }
         private async Task InitializeTrees()
         {
-            tree = await this.AddComponentModel(
-                "Tree",
-                new ModelDescription()
-                {
-                    CastShadow = true,
-                    SphericVolume = false,
-                    UseAnisotropicFiltering = true,
-                    BlendMode = BlendModes.DefaultTransparent,
-                    Content = ContentDescription.FromFile("SceneTest/Trees", "Tree.xml"),
-                });
+            var desc = new ModelDescription()
+            {
+                CastShadow = true,
+                SphericVolume = false,
+                UseAnisotropicFiltering = true,
+                BlendMode = BlendModes.DefaultTransparent,
+                Content = ContentDescription.FromFile("SceneTest/Trees", "Tree.xml"),
+            };
+            tree = await this.AddComponentModel("Tree", desc, SceneObjectUsages.None, LayerDefault);
 
-            var desc = new ModelInstancedDescription()
+            var descI = new ModelInstancedDescription()
             {
                 CastShadow = true,
                 SphericVolume = false,
@@ -307,8 +304,7 @@ namespace SceneTest.SceneTest
                 Instances = 50,
                 Content = ContentDescription.FromFile("SceneTest/Trees", "Tree.xml"),
             };
-
-            treesI = await this.AddComponentModelInstanced("TreeI", desc);
+            treesI = await this.AddComponentModelInstanced("TreeI", descI, SceneObjectUsages.None, LayerDefault);
         }
         private async Task InitializeFloorAsphalt()
         {
@@ -357,10 +353,10 @@ namespace SceneTest.SceneTest
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
-            var floorAsphalt = await this.AddComponentModel("Floor", desc);
+            var floorAsphalt = await this.AddComponentModel("Floor", desc, SceneObjectUsages.Ground, LayerDefault);
             floorAsphalt.Manipulator.SetPosition(xDelta, yDelta, zDelta);
 
-            floorAsphaltI = await this.AddComponentModelInstanced("FloorI", descI);
+            floorAsphaltI = await this.AddComponentModelInstanced("FloorI", descI, SceneObjectUsages.Ground, LayerDefault);
 
             floorAsphaltI[0].Manipulator.SetPosition((-l * 2) + xDelta, yDelta, 0 + zDelta);
             floorAsphaltI[1].Manipulator.SetPosition((+l * 2) + xDelta, yDelta, 0 + zDelta);
@@ -382,7 +378,7 @@ namespace SceneTest.SceneTest
                     SphericVolume = false,
                     UseAnisotropicFiltering = true,
                     Content = ContentDescription.FromFile("SceneTest/buildings/obelisk", "Obelisk.xml"),
-                });
+                }, SceneObjectUsages.None, LayerDefault);
 
             buildingObeliskI = await this.AddComponentModelInstanced(
                 "ObeliskI",
@@ -393,7 +389,7 @@ namespace SceneTest.SceneTest
                     UseAnisotropicFiltering = true,
                     Instances = 4,
                     Content = ContentDescription.FromFile("SceneTest/buildings/obelisk", "Obelisk.xml"),
-                });
+                }, SceneObjectUsages.None, LayerDefault);
 
             buildingObelisk.Manipulator.SetPosition(0 + xDelta, baseHeight + yDelta, 0 + zDelta);
             buildingObelisk.Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
@@ -423,7 +419,7 @@ namespace SceneTest.SceneTest
                     TextureIndex = 1,
                     CastShadow = true,
                     Content = ContentDescription.FromFile("SceneTest/character/soldier", "soldier_anim2.xml"),
-                });
+                }, SceneObjectUsages.Agent, LayerDefault);
 
             characterSoldierI = await this.AddComponentModelInstanced(
                 "SoldierI",
@@ -432,7 +428,7 @@ namespace SceneTest.SceneTest
                     CastShadow = true,
                     Instances = 4,
                     Content = ContentDescription.FromFile("SceneTest/character/soldier", "soldier_anim2.xml"),
-                });
+                }, SceneObjectUsages.Agent, LayerDefault);
 
             float s = spaceSize / 2f;
 
@@ -474,7 +470,7 @@ namespace SceneTest.SceneTest
                     CastShadow = true,
                     SphericVolume = false,
                     Content = ContentDescription.FromFile("SceneTest/vehicles/Challenger", "Challenger.xml"),
-                });
+                }, SceneObjectUsages.Agent, LayerDefault);
 
             vehicleI = await this.AddComponentModelInstanced(
                 "LeopardI",
@@ -484,7 +480,7 @@ namespace SceneTest.SceneTest
                     SphericVolume = false,
                     Instances = 4,
                     Content = ContentDescription.FromFile("SceneTest/vehicles/leopard", "Leopard.xml"),
-                });
+                }, SceneObjectUsages.Agent, LayerDefault);
 
             float s = -spaceSize / 2f;
 
@@ -521,7 +517,7 @@ namespace SceneTest.SceneTest
                     CastShadow = true,
                     SphericVolume = false,
                     Content = ContentDescription.FromFile("SceneTest/lamps", "lamp.xml"),
-                });
+                }, SceneObjectUsages.None, LayerDefault);
 
             lampI = await this.AddComponentModelInstanced(
                 "LampI",
@@ -531,7 +527,7 @@ namespace SceneTest.SceneTest
                     SphericVolume = false,
                     Instances = 4,
                     Content = ContentDescription.FromFile("SceneTest/lamps", "lamp.xml"),
-                });
+                }, SceneObjectUsages.None, LayerDefault);
 
             float dist = 0.23f;
             float pitch = MathUtil.DegreesToRadians(165) * -1;
@@ -569,7 +565,7 @@ namespace SceneTest.SceneTest
                     CastShadow = true,
                     SphericVolume = false,
                     Content = ContentDescription.FromFile("SceneTest/lamps", "streetlamp.xml"),
-                });
+                }, SceneObjectUsages.None, LayerDefault);
 
             streetlampI = await this.AddComponentModelInstanced(
                 "Street LampI",
@@ -579,7 +575,7 @@ namespace SceneTest.SceneTest
                     SphericVolume = false,
                     Instances = 9,
                     Content = ContentDescription.FromFile("SceneTest/lamps", "streetlamp.xml"),
-                });
+                }, SceneObjectUsages.None, LayerDefault);
 
             streetlamp.Manipulator.SetPosition(-spaceSize + xDelta, baseHeight + yDelta, -spaceSize * -2f + zDelta);
 
@@ -632,7 +628,7 @@ namespace SceneTest.SceneTest
                     CastShadow = true,
                     SphericVolume = false,
                     Content = ContentDescription.FromFile("SceneTest/container", "Container.xml"),
-                });
+                }, SceneObjectUsages.Ground, LayerDefault);
 
             containerI = await this.AddComponentModelInstanced(
                 "ContainerI",
@@ -642,7 +638,7 @@ namespace SceneTest.SceneTest
                     SphericVolume = false,
                     Instances = instances,
                     Content = ContentDescription.FromFile("SceneTest/container", "Container.xml"),
-                });
+                }, SceneObjectUsages.Ground, LayerDefault);
 
             float s = -spaceSize / 2f;
             float areaSize = spaceSize * 3;
@@ -719,7 +715,7 @@ namespace SceneTest.SceneTest
                 DepthEnabled = true,
             };
 
-            await this.AddComponentPrimitiveListDrawer("Test Cube", desc);
+            await this.AddComponentPrimitiveListDrawer("Test Cube", desc, SceneObjectUsages.UI, LayerDefault);
         }
         private async Task InitializeParticles()
         {
@@ -737,7 +733,7 @@ namespace SceneTest.SceneTest
             pDescriptions.Add("Explosion", pExplosion);
             pDescriptions.Add("SmokeExplosion", pSmokeExplosion);
 
-            pManager = await this.AddComponentParticleManager("ParticleManager", ParticleManagerDescription.Default(), SceneObjectUsages.None, layerEffects);
+            pManager = await this.AddComponentParticleManager("ParticleManager", ParticleManagerDescription.Default(), SceneObjectUsages.None, LayerEffects);
 
             float d = 500;
             var positions = new Vector3[]
@@ -779,7 +775,7 @@ namespace SceneTest.SceneTest
         private async Task InitializeDebug()
         {
             var desc = new PrimitiveListDrawerDescription<Line3D>() { DepthEnabled = true, Count = 20000 };
-            lightsVolumeDrawer = await this.AddComponentPrimitiveListDrawer("DebugLightsVolumeDrawer", desc);
+            lightsVolumeDrawer = await this.AddComponentPrimitiveListDrawer("DebugLightsVolumeDrawer", desc, SceneObjectUsages.UI, LayerDefault);
         }
 
         private void PlantTrees()

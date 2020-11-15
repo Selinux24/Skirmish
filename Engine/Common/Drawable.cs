@@ -1,6 +1,4 @@
 ﻿
-using System;
-
 namespace Engine.Common
 {
     /// <summary>
@@ -17,10 +15,6 @@ namespace Engine.Common
         /// </summary>
         protected BufferManager BufferManager { get { return Game.BufferManager; } }
 
-        /// <summary>
-        /// Processing order
-        /// </summary>
-        public virtual int Order { get; set; } = 0;
         /// <summary>
         /// Visible
         /// </summary>
@@ -45,6 +39,10 @@ namespace Engine.Common
         /// Object usage
         /// </summary>
         public virtual SceneObjectUsages Usage { get; set; } = SceneObjectUsages.None;
+        /// <summary>
+        /// Processing layer
+        /// </summary>
+        public virtual int Layer { get; set; } = 0;
         /// <summary>
         /// Gets or sets if the current object has a parent
         /// </summary>

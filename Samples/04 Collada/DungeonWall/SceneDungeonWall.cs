@@ -9,11 +9,12 @@ namespace Collada.DungeonWall
 {
     public class SceneDungeonWall : Scene
     {
-        private const int layerHUD = 99;
-
         private readonly string resourcesFolder = "dungeonwall/resources";
 
+        private Sprite panel = null;
+        private UITextArea title = null;
         private UITextArea fps = null;
+        private UITextArea picks = null;
 
         private Model lightEmitter = null;
         private SceneLightPoint pointLight = null;
@@ -50,7 +51,7 @@ namespace Collada.DungeonWall
                     {
                         res.ThrowExceptions();
                     }
-
+                    UpdateLayout();
                     InitializeCamera();
                     InitializeEnvironment();
                     gameReady = true;
@@ -76,26 +77,17 @@ namespace Collada.DungeonWall
         }
         private async Task InitializeText()
         {
-            var title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White }, layerHUD);
+            title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White });
             title.Text = "Tiled Wall Test Scene";
-            title.SetPosition(Vector2.Zero);
 
-            fps = await this.AddComponentUITextArea("FPS", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow }, layerHUD);
+            fps = await this.AddComponentUITextArea("FPS", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow });
             fps.Text = null;
-            fps.SetPosition(new Vector2(0, 24));
 
-            var picks = await this.AddComponentUITextArea("Picks", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow }, layerHUD);
+            picks = await this.AddComponentUITextArea("Picks", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow });
             picks.Text = null;
-            picks.SetPosition(new Vector2(0, 48));
 
-            var spDesc = new SpriteDescription()
-            {
-                Width = Game.Form.RenderWidth,
-                Height = picks.Top + picks.Height + 3,
-                BaseColor = new Color4(0, 0, 0, 0.75f),
-            };
-
-            await this.AddComponentSprite("BackPanel", spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
+            panel = await this.AddComponentSprite("BackPanel", spDesc, SceneObjectUsages.UI, LayerUI - 1);
         }
         private async Task InitializeDungeon()
         {
@@ -232,6 +224,21 @@ namespace Collada.DungeonWall
 
             lightEmitter.Manipulator.SetPosition(pos);
             pointLight.Position = pos;
+        }
+
+        public override void GameGraphicsResized()
+        {
+            base.GameGraphicsResized();
+
+            UpdateLayout();
+        }
+        private void UpdateLayout()
+        {
+            title.SetPosition(Vector2.Zero);
+            fps.SetPosition(new Vector2(0, 24));
+            picks.SetPosition(new Vector2(0, 48));
+            panel.Width = Game.Form.RenderWidth;
+            panel.Height = picks.Top + picks.Height + 3;
         }
     }
 }

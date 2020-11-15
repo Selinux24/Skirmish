@@ -12,10 +12,6 @@ namespace Engine
         /// </summary>
         string Name { get; set; }
         /// <summary>
-        /// Processing order
-        /// </summary>
-        int Order { get; set; }
-        /// <summary>
         /// Visible
         /// </summary>
         bool Visible { get; set; }
@@ -43,6 +39,10 @@ namespace Engine
         /// Object usage
         /// </summary>
         SceneObjectUsages Usage { get; set; }
+        /// <summary>
+        /// Processing layer
+        /// </summary>
+        int Layer { get; set; }
         /// <summary>
         /// Maximum instance count
         /// </summary>

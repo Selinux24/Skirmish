@@ -26,12 +26,6 @@ namespace Terrain.Rts
         private const int MaxPickingTest = 10000;
         private const int MaxGridDrawer = 10000;
 
-        private readonly int layerHud = 99;
-        private readonly int layerGameHud = 50;
-        private readonly int layerObjects = 0;
-        private readonly int layerTerrain = 1;
-        private readonly int layerEffects = 2;
-
         private bool walkMode = false;
         private readonly float walkerVelocity = 8f;
         private ISceneObject followTarget;
@@ -44,6 +38,8 @@ namespace Terrain.Rts
         private EngineShaderResourceView debugTex = null;
         private int graphIndex = -1;
 
+        private Sprite panel = null;
+        private UITextArea title = null;
         private UITextArea stats = null;
         private UITextArea counters1 = null;
         private UITextArea counters2 = null;
@@ -159,7 +155,15 @@ namespace Terrain.Rts
             Camera.NearPlaneDistance = 0.1f;
             Camera.FarPlaneDistance = 5000f;
 
-            await LoadResourcesAsync(InitializeUI());
+            await LoadResourcesAsync(InitializeUI(), (res) =>
+            {
+                if (!res.Completed)
+                {
+                    res.ThrowExceptions();
+                }
+
+                UpdateLayout();
+            });
 
             List<Task> loadTasks = new List<Task>()
             {
@@ -212,29 +216,18 @@ namespace Terrain.Rts
             Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
 
-            var title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White }, layerHud);
-            stats = await this.AddComponentUITextArea("Stats", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow }, layerHud);
-            counters1 = await this.AddComponentUITextArea("Counters1", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 10), TextForeColor = Color.GreenYellow }, layerHud);
-            counters2 = await this.AddComponentUITextArea("Counters2", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 10), TextForeColor = Color.GreenYellow }, layerHud);
+            title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White });
+            stats = await this.AddComponentUITextArea("Stats", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow });
+            counters1 = await this.AddComponentUITextArea("Counters1", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 10), TextForeColor = Color.GreenYellow });
+            counters2 = await this.AddComponentUITextArea("Counters2", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 10), TextForeColor = Color.GreenYellow });
 
             title.Text = "Terrain collision and trajectories test";
             stats.Text = "";
             counters1.Text = "";
             counters2.Text = "";
 
-            title.SetPosition(Vector2.Zero);
-            stats.SetPosition(new Vector2(0, 46));
-            counters1.SetPosition(new Vector2(0, 68));
-            counters2.SetPosition(new Vector2(0, 90));
-
-            var spDesc = new SpriteDescription()
-            {
-                Width = Game.Form.RenderWidth,
-                Height = counters2.Top + counters2.Height + 3,
-                BaseColor = new Color4(0, 0, 0, 0.75f),
-            };
-
-            await this.AddComponentSprite("Back Pannel", spDesc, SceneObjectUsages.UI, layerHud - 1);
+            var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
+            panel = await this.AddComponentSprite("Back Pannel", spDesc, SceneObjectUsages.UI, LayerUI - 1);
 
             var spbDesc = new UIProgressBarDescription()
             {
@@ -244,9 +237,9 @@ namespace Terrain.Rts
                 ProgressColor = Color.Green,
             };
 
-            hProgressBar = await this.AddComponentUIProgressBar("HelicopterProgressBar", spbDesc, layerGameHud);
-            t1ProgressBar = await this.AddComponentUIProgressBar("Tank1ProgressBar", spbDesc, layerGameHud);
-            t2ProgressBar = await this.AddComponentUIProgressBar("Tank2ProgressBar", spbDesc, layerGameHud);
+            hProgressBar = await this.AddComponentUIProgressBar("HelicopterProgressBar", spbDesc, LayerEffects);
+            t1ProgressBar = await this.AddComponentUIProgressBar("Tank1ProgressBar", spbDesc, LayerEffects);
+            t2ProgressBar = await this.AddComponentUIProgressBar("Tank2ProgressBar", spbDesc, LayerEffects);
 
             hProgressBar.Top = 120;
             t1ProgressBar.Top = 120;
@@ -267,7 +260,7 @@ namespace Terrain.Rts
                 DepthEnabled = false,
                 Content = ContentDescription.FromFile("Rts/resources/cursor", "cursor.xml"),
             };
-            cursor3D = await this.AddComponentModel("Cursor3D", c3DDesc, SceneObjectUsages.UI, layerHud);
+            cursor3D = await this.AddComponentModel("Cursor3D", c3DDesc, SceneObjectUsages.UI, LayerEffects);
 
             var c2DDesc = new UICursorDescription()
             {
@@ -277,7 +270,7 @@ namespace Terrain.Rts
                 Width = 16,
                 Height = 16,
             };
-            cursor2D = await this.AddComponentUICursor("Cursor2D", c2DDesc, layerHud + 1);
+            cursor2D = await this.AddComponentUICursor("Cursor2D", c2DDesc);
             cursor2D.BaseColor = Color.Red;
             cursor2D.Visible = false;
 
@@ -324,7 +317,7 @@ namespace Terrain.Rts
                     Count = 5000,
                 },
                 SceneObjectUsages.None,
-                layerEffects);
+                LayerEffects);
             lightsVolumeDrawer.Visible = false;
 
             #region DEBUG Shadow Map
@@ -334,7 +327,7 @@ namespace Terrain.Rts
             int smLeft = Game.Form.RenderWidth - width;
             int smTop = Game.Form.RenderHeight - height;
 
-            shadowMapDrawer = await this.AddComponentUITextureRenderer("++DEBUG++ Shadow Map", UITextureRendererDescription.Default(smLeft, smTop, width, height), layerHud);
+            shadowMapDrawer = await this.AddComponentUITextureRenderer("++DEBUG++ Shadow Map", UITextureRendererDescription.Default(smLeft, smTop, width, height));
             shadowMapDrawer.Channels = UITextureRendererChannels.Red;
             shadowMapDrawer.Visible = false;
             shadowMapDrawer.DeferredEnabled = false;
@@ -352,7 +345,7 @@ namespace Terrain.Rts
                     Count = MaxGridDrawer
                 },
                 SceneObjectUsages.None,
-                layerEffects);
+                LayerEffects);
             terrainGraphDrawer.Visible = false;
 
             #endregion
@@ -366,7 +359,7 @@ namespace Terrain.Rts
                     Count = MaxPickingTest
                 },
                 SceneObjectUsages.None,
-                layerEffects);
+                LayerEffects);
             terrainPointDrawer.Visible = false;
 
             #endregion
@@ -380,7 +373,7 @@ namespace Terrain.Rts
                     Count = 20000
                 },
                 SceneObjectUsages.None,
-                layerEffects);
+                LayerEffects);
             curveLineDrawer.Visible = false;
 
             #endregion
@@ -394,7 +387,7 @@ namespace Terrain.Rts
                     Count = 1000
                 },
                 SceneObjectUsages.None,
-                layerEffects);
+                LayerEffects);
             movingObjLineDrawer.Visible = false;
 
             #endregion
@@ -408,7 +401,7 @@ namespace Terrain.Rts
                     Count = 20000
                 },
                 SceneObjectUsages.None,
-                layerEffects);
+                LayerEffects);
             staticObjLineDrawer.Visible = false;
 
             #endregion
@@ -422,7 +415,7 @@ namespace Terrain.Rts
                     Count = 10000
                 },
                 SceneObjectUsages.None,
-                layerEffects);
+                LayerEffects);
             terrainLineDrawer.Visible = false;
 
             #endregion
@@ -459,7 +452,7 @@ namespace Terrain.Rts
                     new LensFlareDescription.Flare( 2.0f, 1.4f, new Color( 25,  50, 100), "lfFlare3.png"),
                 }
             };
-            await this.AddComponentLensFlare("Flares", lfDesc, SceneObjectUsages.None, layerEffects);
+            await this.AddComponentLensFlare("Flares", lfDesc);
 
             sw.Stop();
             return new TaskResult()
@@ -479,7 +472,7 @@ namespace Terrain.Rts
                 TextureIndex = 0,
                 Content = ContentDescription.FromFile("Rts/resources/Helicopter", "M24.xml"),
             };
-            helicopter = await this.AddComponentModel("Helicopter", hDesc, SceneObjectUsages.Agent, layerObjects);
+            helicopter = await this.AddComponentModel("Helicopter", hDesc, SceneObjectUsages.Agent);
             helicopter.Visible = false;
             helicopter.Manipulator.SetScale(0.15f);
             helicopter.Manipulator.UpdateInternals(true);
@@ -506,8 +499,8 @@ namespace Terrain.Rts
                 TransformNames = new[] { "Barrel-mesh", "Turret-mesh", "Hull-mesh" },
                 TransformDependences = new[] { 1, 2, -1 },
             };
-            tankP1 = await this.AddComponentModel("Tank1", tDesc, SceneObjectUsages.Agent, layerObjects);
-            tankP2 = await this.AddComponentModel("Tank2", tDesc, SceneObjectUsages.Agent, layerObjects);
+            tankP1 = await this.AddComponentModel("Tank1", tDesc, SceneObjectUsages.Agent);
+            tankP2 = await this.AddComponentModel("Tank2", tDesc, SceneObjectUsages.Agent);
 
             tankP1.Visible = false;
             tankP2.Visible = false;
@@ -553,7 +546,7 @@ namespace Terrain.Rts
                 CastShadow = true,
                 Content = ContentDescription.FromFile("Rts/resources/Heliport", "Heliport.xml"),
             };
-            heliport = await this.AddComponentModel("Heliport", hpDesc, SceneObjectUsages.None, layerObjects);
+            heliport = await this.AddComponentModel("Heliport", hpDesc);
             heliport.Visible = false;
             AttachToGround(heliport, true);
 
@@ -576,7 +569,7 @@ namespace Terrain.Rts
                 CastShadow = true,
                 Content = ContentDescription.FromFile("Rts/resources/Garage", "Garage.xml"),
             };
-            garage = await this.AddComponentModel("Garage", gDesc, SceneObjectUsages.None, layerObjects);
+            garage = await this.AddComponentModel("Garage", gDesc);
             garage.Visible = false;
             AttachToGround(garage, true);
 
@@ -599,7 +592,7 @@ namespace Terrain.Rts
                 CastShadow = true,
                 Content = ContentDescription.FromFile("Rts/resources/Buildings", "Building_1.xml"),
             };
-            building = await this.AddComponentModel("Buildings", gDesc, SceneObjectUsages.None, layerObjects);
+            building = await this.AddComponentModel("Buildings", gDesc);
             building.Visible = false;
             AttachToGround(building, true);
 
@@ -623,7 +616,7 @@ namespace Terrain.Rts
                 Instances = 4,
                 Content = ContentDescription.FromFile("Rts/resources/Obelisk", "Obelisk.xml"),
             };
-            obelisk = await this.AddComponentModelInstanced("Obelisk", oDesc, SceneObjectUsages.None, layerObjects);
+            obelisk = await this.AddComponentModelInstanced("Obelisk", oDesc);
             obelisk.Visible = false;
             AttachToGround(obelisk, true);
 
@@ -645,7 +638,7 @@ namespace Terrain.Rts
                 Instances = 250,
                 Content = ContentDescription.FromFile("Rts/resources/Rocks", "boulder.xml"),
             };
-            rocks = await this.AddComponentModelInstanced("Rocks", rDesc, SceneObjectUsages.None, layerObjects);
+            rocks = await this.AddComponentModelInstanced("Rocks", rDesc);
             rocks.Visible = false;
             AttachToGround(rocks, false);
 
@@ -675,8 +668,8 @@ namespace Terrain.Rts
                 Instances = 100,
                 Content = ContentDescription.FromFile("Rts/resources/Trees", "birch_b.xml"),
             };
-            tree1 = await this.AddComponentModelInstanced("birch_a", t1Desc, SceneObjectUsages.None, layerTerrain);
-            tree2 = await this.AddComponentModelInstanced("birch_b", t2Desc, SceneObjectUsages.None, layerTerrain);
+            tree1 = await this.AddComponentModelInstanced("birch_a", t1Desc);
+            tree2 = await this.AddComponentModelInstanced("birch_b", t2Desc);
             tree1.Visible = false;
             tree2.Visible = false;
 
@@ -740,7 +733,7 @@ namespace Terrain.Rts
             sw.Restart();
 
             var terrainDescription = GroundDescription.FromFile("Rts/resources/Terrain", "two_levels.xml", 1);
-            terrain = await this.AddComponentScenery("Terrain", terrainDescription, SceneObjectUsages.Ground, layerTerrain);
+            terrain = await this.AddComponentScenery("Terrain", terrainDescription);
             SetGround(terrain, true);
 
             sw.Stop();
@@ -772,7 +765,7 @@ namespace Terrain.Rts
                     Count = 4,
                 }
             };
-            gardener = await this.AddComponentGroundGardener("Grass", grDesc, SceneObjectUsages.None, layerTerrain);
+            gardener = await this.AddComponentGroundGardener("Grass", grDesc);
 
             sw.Stop();
             return new TaskResult()
@@ -793,7 +786,7 @@ namespace Terrain.Rts
             pExplosion = ParticleSystemDescription.InitializeExplosion("Rts/resources/particles", "fire.png");
             pSmokeExplosion = ParticleSystemDescription.InitializeExplosion("Rts/resources/particles", "smoke.png");
 
-            pManager = await this.AddComponentParticleManager("ParticleManager", ParticleManagerDescription.Default(), SceneObjectUsages.None, layerEffects);
+            pManager = await this.AddComponentParticleManager("ParticleManager", ParticleManagerDescription.Default());
 
             sw.Stop();
             return new TaskResult()
@@ -1221,6 +1214,21 @@ namespace Terrain.Rts
             lights.OfType<ISceneLightPoint>().ToList().ForEach(l => l.CastShadow = false);
             lights.ToList().ForEach(l => l.Enabled = false);
             Lights.AddRange(lights);
+        }
+
+        public override void GameGraphicsResized()
+        {
+            base.GameGraphicsResized();
+            UpdateLayout();
+        }
+        private void UpdateLayout()
+        {
+            title.SetPosition(Vector2.Zero);
+            stats.SetPosition(new Vector2(0, 46));
+            counters1.SetPosition(new Vector2(0, 68));
+            counters2.SetPosition(new Vector2(0, 90));
+            panel.Width = Game.Form.RenderWidth;
+            panel.Height = counters2.Top + counters2.Height + 3;
         }
 
         public override void NavigationGraphUpdated()

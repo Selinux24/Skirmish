@@ -14,7 +14,6 @@ namespace SceneTest.SceneLights
     /// </summary>
     public class SceneLights : Scene
     {
-        private const int layerEffects = 2;
         private const float spaceSize = 20;
 
         private ModelInstanced buildingObelisks = null;
@@ -220,7 +219,7 @@ namespace SceneTest.SceneLights
             int smLeft = Game.Form.RenderWidth - width;
             int smTop = Game.Form.RenderHeight - height;
 
-            bufferDrawer = await this.AddComponentUITextureRenderer("DebugBufferDrawer", UITextureRendererDescription.Default(smLeft, smTop, width, height), layerEffects);
+            bufferDrawer = await this.AddComponentUITextureRenderer("DebugBufferDrawer", UITextureRendererDescription.Default(smLeft, smTop, width, height), LayerEffects);
             bufferDrawer.Visible = false;
         }
 

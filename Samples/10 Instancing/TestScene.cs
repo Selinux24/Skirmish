@@ -12,10 +12,8 @@ namespace Instancing
 {
     class TestScene : Scene
     {
-        private const int layerObjects = 0;
-        private const int layerTerrain = 1;
-        private const int layerHUD = 99;
-
+        private Sprite panel = null;
+        private UITextArea title = null;
         private UITextArea runtimeText = null;
 
         private ModelInstanced troops = null;
@@ -57,23 +55,14 @@ namespace Instancing
 
         private async Task InitializeTexts()
         {
-            var title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White }, layerHUD);
-            runtimeText = await this.AddComponentUITextArea("RuntimeText", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Yellow }, layerHUD);
+            title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White });
+            runtimeText = await this.AddComponentUITextArea("RuntimeText", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Yellow });
 
             title.Text = "Instancing test";
             runtimeText.Text = "";
 
-            title.SetPosition(Vector2.Zero);
-            runtimeText.SetPosition(new Vector2(5, title.Top + title.Height + 3));
-
-            var spDesc = new SpriteDescription()
-            {
-                Width = Game.Form.RenderWidth,
-                Height = runtimeText.Top + runtimeText.Height + 3,
-                BaseColor = new Color4(0, 0, 0, 0.75f),
-            };
-
-            await this.AddComponentSprite("Backpanel", spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
+            panel = await this.AddComponentSprite("Backpanel", spDesc, SceneObjectUsages.UI, LayerUI - 1);
         }
         private async Task InitializeFloor()
         {
@@ -138,9 +127,9 @@ namespace Instancing
                 Instances = instances,
                 BlendMode = BlendModes.DefaultTransparent,
                 UseAnisotropicFiltering = true,
-                Content = ContentDescription.FromFile(@"Resources/Trees",@"tree.xml"),
+                Content = ContentDescription.FromFile(@"Resources/Trees", @"tree.xml"),
             };
-            var trees = await this.AddComponentModelInstanced("Trees", treeDesc, SceneObjectUsages.None, layerTerrain);
+            var trees = await this.AddComponentModelInstanced("Trees", treeDesc);
 
             int side = instances / 4;
             float groundSide = 55f;
@@ -179,9 +168,9 @@ namespace Instancing
                 Instances = 100,
                 CastShadow = true,
                 UseAnisotropicFiltering = true,
-                Content = ContentDescription.FromFile(@"Resources/Soldier",@"soldier_anim2.xml"),
+                Content = ContentDescription.FromFile(@"Resources/Soldier", @"soldier_anim2.xml"),
             };
-            troops = await this.AddComponentModelInstanced("Troops", tDesc, SceneObjectUsages.Agent, layerObjects);
+            troops = await this.AddComponentModelInstanced("Troops", tDesc, SceneObjectUsages.Agent);
             troops.MaximumCount = -1;
 
             Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
@@ -234,7 +223,7 @@ namespace Instancing
                     Instances = 40,
                     CastShadow = true,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("Resources/Wall","wall.xml"),
+                    Content = ContentDescription.FromFile("Resources/Wall", "wall.xml"),
                 });
 
             BoundingBox bbox = wall[0].GetBoundingBox();
@@ -334,6 +323,22 @@ namespace Instancing
             base.Update(gameTime);
 
             runtimeText.Text = Game.RuntimeText;
+        }
+
+        public override void GameGraphicsResized()
+        {
+            base.GameGraphicsResized();
+
+            UpdateLayout();
+        }
+        private void UpdateLayout()
+        {
+            title.SetPosition(Vector2.Zero);
+            runtimeText.SetPosition(new Vector2(5, title.Top + title.Height + 3));
+            panel.Width = Game.Form.RenderWidth;
+            panel.Height = runtimeText.Top + runtimeText.Height + 3;
+
+
         }
     }
 }

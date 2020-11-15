@@ -56,7 +56,7 @@ namespace Engine
         /// <summary>
         /// Wave length
         /// </summary>
-        private Color4 wavelength;
+        private Color3 wavelength;
         /// <summary>
         /// Sphere inner radius
         /// </summary>
@@ -77,7 +77,7 @@ namespace Engine
         /// <summary>
         /// Inverse wave length * 4
         /// </summary>
-        public Color4 InvWaveLength4 { get; private set; }
+        public Color3 InvWaveLength4 { get; private set; }
         /// <summary>
         /// Scattering Scale
         /// </summary>
@@ -136,7 +136,7 @@ namespace Engine
         /// <summary>
         /// Light wave length
         /// </summary>
-        public Color4 WaveLength
+        public Color3 WaveLength
         {
             get
             {
@@ -145,11 +145,10 @@ namespace Engine
             set
             {
                 wavelength = value;
-                InvWaveLength4 = new Color4(
+                InvWaveLength4 = new Color3(
                     1f / (float)Math.Pow(value.Red, 4.0f),
                     1f / (float)Math.Pow(value.Green, 4.0f),
-                    1f / (float)Math.Pow(value.Blue, 4.0f),
-                    1.0f);
+                    1f / (float)Math.Pow(value.Blue, 4.0f));
             }
         }
         /// <summary>
@@ -491,7 +490,7 @@ namespace Engine
                 samplePoint += sampleRay;
             }
 
-            Color3 rayleighColor = frontColor * (InvWaveLength4.RGB() * rayleighBrightness);
+            Color3 rayleighColor = frontColor * (InvWaveLength4 * rayleighBrightness);
 
             Vector3 direction = Vector3.Normalize(eyePosition - position);
             float miePhase = GetMiePhase(Vector3.Dot(-lightDirection, direction));
@@ -521,9 +520,9 @@ namespace Engine
         /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="usage">Component usage</param>
-        /// <param name="order">Processing order</param>
+        /// <param name="layer">Processing layer</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<SkyScattering> AddComponentSkyScattering(this Scene scene, string name, SkyScatteringDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
+        public static async Task<SkyScattering> AddComponentSkyScattering(this Scene scene, string name, SkyScatteringDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int layer = Scene.LayerSky)
         {
             SkyScattering component = null;
 
@@ -531,7 +530,7 @@ namespace Engine
             {
                 component = new SkyScattering(name, scene, description);
 
-                scene.AddComponent(component, usage, order);
+                scene.AddComponent(component, usage, layer);
             });
 
             return component;

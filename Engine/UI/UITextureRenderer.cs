@@ -167,9 +167,9 @@ namespace Engine.UI
         /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        /// <param name="order">Processing order</param>
+        /// <param name="layer">Processing layer</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<UITextureRenderer> AddComponentUITextureRenderer(this Scene scene, string name, UITextureRendererDescription description, int order = 0)
+        public static async Task<UITextureRenderer> AddComponentUITextureRenderer(this Scene scene, string name, UITextureRendererDescription description, int layer = Scene.LayerUI)
         {
             UITextureRenderer component = null;
 
@@ -177,7 +177,7 @@ namespace Engine.UI
             {
                 component = new UITextureRenderer(name, scene, description);
 
-                scene.AddComponent(component, SceneObjectUsages.UI, order);
+                scene.AddComponent(component, SceneObjectUsages.UI, layer);
             });
 
             return component;

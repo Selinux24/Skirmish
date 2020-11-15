@@ -89,9 +89,9 @@ namespace Engine.UI
         /// <param name="scene">Scene</param>
         /// <param name="name">Name</param>
         /// <param name="description">Description</param>
-        /// <param name="order">Processing order</param>
+        /// <param name="layer">Processing layer</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<UIPanel> AddComponentUIPanel(this Scene scene, string name, UIPanelDescription description, int order = 0)
+        public static async Task<UIPanel> AddComponentUIPanel(this Scene scene, string name, UIPanelDescription description, int layer = Scene.LayerUI)
         {
             UIPanel component = null;
 
@@ -99,7 +99,7 @@ namespace Engine.UI
             {
                 component = new UIPanel(name, scene, description);
 
-                scene.AddComponent(component, SceneObjectUsages.UI, order);
+                scene.AddComponent(component, SceneObjectUsages.UI, layer);
             });
 
             return component;

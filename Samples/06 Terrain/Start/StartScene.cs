@@ -85,6 +85,7 @@ namespace Terrain.Start
 
             title = await this.AddComponentUITextArea("Title", titleDesc, layerHUD);
             title.GrowControlWithText = false;
+            title.Text = "Terrain Tests";
 
             #endregion
 
@@ -103,7 +104,16 @@ namespace Terrain.Start
             startButtonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
 
             scenePerlinNoiseButton = await this.AddComponentUIButton("ButtonPerlinNoise", startButtonDesc, layerHUD);
+            scenePerlinNoiseButton.JustReleased += SceneButtonClick;
+            scenePerlinNoiseButton.MouseEnter += SceneButtonMouseEnter;
+            scenePerlinNoiseButton.MouseLeave += SceneButtonMouseLeave;
+            scenePerlinNoiseButton.Caption.Text = "Perlin Noise";
+           
             sceneRtsButton = await this.AddComponentUIButton("ButtonRts", startButtonDesc, layerHUD);
+            sceneRtsButton.JustReleased += SceneButtonClick;
+            sceneRtsButton.MouseEnter += SceneButtonMouseEnter;
+            sceneRtsButton.MouseLeave += SceneButtonMouseLeave;
+            sceneRtsButton.Caption.Text = "Real Time Strategy Game";
 
             #endregion
 
@@ -119,6 +129,10 @@ namespace Terrain.Start
             exitButtonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
 
             exitButton = await this.AddComponentUIButton("ButtonExit", exitButtonDesc, layerHUD);
+            exitButton.JustReleased += ExitButtonClick;
+            exitButton.MouseEnter += SceneButtonMouseEnter;
+            exitButton.MouseLeave += SceneButtonMouseLeave;
+            exitButton.Caption.Text = "Exit";
 
             #endregion
         }
@@ -129,13 +143,20 @@ namespace Terrain.Start
                 res.ThrowExceptions();
             }
 
+            UpdateLayout();
+
             backGround.Manipulator.SetScale(1.5f, 1.25f, 1.5f);
 
-            title.Text = "Terrain Tests";
-            scenePerlinNoiseButton.Caption.Text = "Perlin Noise";
-            sceneRtsButton.Caption.Text = "Real Time Strategy Game";
-            exitButton.Caption.Text = "Exit";
+            sceneReady = true;
+        }
 
+        public override void GameGraphicsResized()
+        {
+            base.GameGraphicsResized();
+            UpdateLayout();
+        }
+        private void UpdateLayout()
+        {
             var sceneButtons = new[]
             {
                 scenePerlinNoiseButton,
@@ -156,18 +177,10 @@ namespace Terrain.Start
             {
                 sceneButtons[i].Left = ((Game.Form.RenderWidth / div) * (i + 1)) - (scenePerlinNoiseButton.Width / 2);
                 sceneButtons[i].Top = (Game.Form.RenderHeight / h) * hv - (scenePerlinNoiseButton.Height / 2);
-                sceneButtons[i].JustReleased += SceneButtonClick;
-                sceneButtons[i].MouseEnter += SceneButtonMouseEnter;
-                sceneButtons[i].MouseLeave += SceneButtonMouseLeave;
             }
 
             exitButton.Left = (Game.Form.RenderWidth / div) * numButtons - (exitButton.Width / 2);
             exitButton.Top = (Game.Form.RenderHeight / h) * hv - (exitButton.Height / 2);
-            exitButton.JustReleased += ExitButtonClick;
-            exitButton.MouseEnter += SceneButtonMouseEnter;
-            exitButton.MouseLeave += SceneButtonMouseLeave;
-
-            sceneReady = true;
         }
 
         public override void Update(GameTime gameTime)

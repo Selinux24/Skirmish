@@ -41,44 +41,46 @@ namespace Engine
         /// <param name="scene">Scene</param>
         public override void Draw(GameTime gameTime, Scene scene)
         {
-            if (Updated)
+            if (!Updated)
             {
-                Updated = false;
-#if DEBUG
-                frameStats.Clear();
-
-                Stopwatch swTotal = Stopwatch.StartNew();
-#endif
-                //Draw visible components
-                var visibleComponents = scene.GetComponents().Where(c => c.Visible);
-                if (visibleComponents.Any())
-                {
-                    //Initialize context data from update context
-                    DrawContext.GameTime = gameTime;
-                    DrawContext.DrawerMode = DrawerModes.Forward;
-                    DrawContext.ViewProjection = UpdateContext.ViewProjection;
-                    DrawContext.CameraVolume = UpdateContext.CameraVolume;
-                    DrawContext.EyePosition = UpdateContext.EyePosition;
-                    DrawContext.EyeTarget = UpdateContext.EyeDirection;
-
-                    //Initialize context data from scene
-                    DrawContext.Lights = scene.Lights;
-                    DrawContext.ShadowMapDirectional = ShadowMapperDirectional;
-                    DrawContext.ShadowMapPoint = ShadowMapperPoint;
-                    DrawContext.ShadowMapSpot = ShadowMapperSpot;
-
-                    //Shadow mapping
-                    DoShadowMapping(gameTime, scene);
-
-                    //Rendering
-                    DoRender(scene, visibleComponents);
-                }
-#if DEBUG
-                swTotal.Stop();
-
-                frameStats.UpdateCounters(swTotal.ElapsedTicks);
-#endif
+                return;
             }
+
+            Updated = false;
+#if DEBUG
+            frameStats.Clear();
+
+            Stopwatch swTotal = Stopwatch.StartNew();
+#endif
+            //Draw visible components
+            var visibleComponents = scene.GetComponents().Where(c => c.Visible);
+            if (visibleComponents.Any())
+            {
+                //Initialize context data from update context
+                DrawContext.GameTime = gameTime;
+                DrawContext.DrawerMode = DrawerModes.Forward;
+                DrawContext.ViewProjection = UpdateContext.ViewProjection;
+                DrawContext.CameraVolume = UpdateContext.CameraVolume;
+                DrawContext.EyePosition = UpdateContext.EyePosition;
+                DrawContext.EyeTarget = UpdateContext.EyeDirection;
+
+                //Initialize context data from scene
+                DrawContext.Lights = scene.Lights;
+                DrawContext.ShadowMapDirectional = ShadowMapperDirectional;
+                DrawContext.ShadowMapPoint = ShadowMapperPoint;
+                DrawContext.ShadowMapSpot = ShadowMapperSpot;
+
+                //Shadow mapping
+                DoShadowMapping(gameTime, scene);
+
+                //Rendering
+                DoRender(scene, visibleComponents);
+            }
+#if DEBUG
+            swTotal.Stop();
+
+            frameStats.UpdateCounters(swTotal.ElapsedTicks);
+#endif
         }
 
         /// <summary>

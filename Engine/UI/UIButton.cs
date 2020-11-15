@@ -165,9 +165,9 @@ namespace Engine.UI
         /// <param name="scene">Scene</param>
         /// <param name="name">Name</param>
         /// <param name="description">Description</param>
-        /// <param name="order">Processing order</param>
+        /// <param name="layer">Processing layer</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<UIButton> AddComponentUIButton(this Scene scene, string name, UIButtonDescription description, int order = 0)
+        public static async Task<UIButton> AddComponentUIButton(this Scene scene, string name, UIButtonDescription description, int layer = Scene.LayerUI)
         {
             UIButton component = null;
 
@@ -175,7 +175,7 @@ namespace Engine.UI
             {
                 component = new UIButton(name, scene, description);
 
-                scene.AddComponent(component, SceneObjectUsages.UI, order);
+                scene.AddComponent(component, SceneObjectUsages.UI, layer);
             });
 
             return component;

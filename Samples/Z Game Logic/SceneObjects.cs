@@ -17,8 +17,6 @@ namespace GameLogic
 
     public class SceneObjects : Scene
     {
-        private const int layerHUD = 99;
-
         private UITextArea txtTitle = null;
         private UITextArea txtGame = null;
         private UITextArea txtTeam = null;
@@ -160,7 +158,7 @@ namespace GameLogic
                     Content = ContentDescription.FromFile("Resources3D", "cursor.xml"),
                 },
                 SceneObjectUsages.UI,
-                layerHUD);
+                LayerEffects);
 
             troops = await this.AddComponentModelInstanced(
                 "Troops",
@@ -201,8 +199,7 @@ namespace GameLogic
                     },
                     BackColor = Color.LightSlateGray,
                     MinimapArea = terrain.GetBoundingBox(),
-                },
-                layerHUD);
+                });
 
             SetGround(terrain, true);
 
@@ -216,7 +213,7 @@ namespace GameLogic
         private async Task InitializeHUD()
         {
             SpriteDescription bkDesc = SpriteDescription.Background("Resources/HUD.png");
-            await this.AddComponentSprite("HUD", bkDesc, SceneObjectUsages.UI, layerHUD - 1);
+            await this.AddComponentSprite("HUD", bkDesc, SceneObjectUsages.UI, LayerUI - 1);
 
             var titleFont = new TextDrawerDescription
             {
@@ -239,24 +236,24 @@ namespace GameLogic
                 FontSize = fontSize,
             };
 
-            txtTitle = await this.AddComponentUITextArea("txtTitle", new UITextAreaDescription { Font = titleFont }, layerHUD);
+            txtTitle = await this.AddComponentUITextArea("txtTitle", new UITextAreaDescription { Font = titleFont });
             txtTitle.TextForeColor = Color.White;
             txtTitle.TextShadowColor = Color.Gray;
 
-            txtGame = await this.AddComponentUITextArea("txtGame", new UITextAreaDescription { Font = gameFont }, layerHUD);
+            txtGame = await this.AddComponentUITextArea("txtGame", new UITextAreaDescription { Font = gameFont });
             txtGame.TextForeColor = Color.LightBlue;
             txtGame.TextShadowColor = Color.DarkBlue;
 
-            txtTeam = await this.AddComponentUITextArea("txtTeam", new UITextAreaDescription { Font = textFont }, layerHUD);
+            txtTeam = await this.AddComponentUITextArea("txtTeam", new UITextAreaDescription { Font = textFont });
             txtTeam.TextForeColor = Color.Yellow;
 
-            txtSoldier = await this.AddComponentUITextArea("txtSoldier", new UITextAreaDescription { Font = textFont }, layerHUD);
+            txtSoldier = await this.AddComponentUITextArea("txtSoldier", new UITextAreaDescription { Font = textFont });
             txtSoldier.TextForeColor = Color.Yellow;
 
-            txtActionList = await this.AddComponentUITextArea("txtActionList", new UITextAreaDescription { Font = textFont }, layerHUD);
+            txtActionList = await this.AddComponentUITextArea("txtActionList", new UITextAreaDescription { Font = textFont });
             txtActionList.TextForeColor = Color.Yellow;
 
-            txtAction = await this.AddComponentUITextArea("txtAction", new UITextAreaDescription { Font = textFont }, layerHUD);
+            txtAction = await this.AddComponentUITextArea("txtAction", new UITextAreaDescription { Font = textFont });
             txtAction.TextForeColor = Color.Yellow;
 
             var butCloseDesc = UIButtonDescription.DefaultTwoStateButton("button_on.png", "button_off.png");
@@ -268,7 +265,7 @@ namespace GameLogic
             butCloseDesc.TextVerticalAlign = VerticalTextAlign.Middle;
             butCloseDesc.Text = "Exit";
 
-            butClose = await this.AddComponentUIButton("butClose", butCloseDesc, layerHUD);
+            butClose = await this.AddComponentUIButton("butClose", butCloseDesc);
 
             butNext = await this.AddComponentUIButton("butNext", new UIButtonDescription()
             {
@@ -279,7 +276,7 @@ namespace GameLogic
                 Height = 20,
                 Font = buttonsFont,
                 Text = "Next Phase",
-            }, layerHUD);
+            });
             butNext.Caption.TextForeColor = Color.Yellow;
 
             butPrevSoldier = await this.AddComponentUIButton("butPrevSoldier", new UIButtonDescription()
@@ -291,7 +288,7 @@ namespace GameLogic
                 Height = 20,
                 Font = buttonsFont,
                 Text = "Prev.Soldier",
-            }, layerHUD);
+            });
             butPrevSoldier.Caption.TextForeColor = Color.Yellow;
 
             butNextSoldier = await this.AddComponentUIButton("butNextSoldier", new UIButtonDescription()
@@ -303,7 +300,7 @@ namespace GameLogic
                 Height = 20,
                 Font = buttonsFont,
                 Text = "Next Soldier",
-            }, layerHUD);
+            });
             butNextSoldier.Caption.TextForeColor = Color.Yellow;
 
             butPrevAction = await this.AddComponentUIButton("butPrevAction", new UIButtonDescription()
@@ -315,7 +312,7 @@ namespace GameLogic
                 Height = 20,
                 Font = buttonsFont,
                 Text = "Prev.Action",
-            }, layerHUD);
+            });
             butPrevAction.Caption.TextForeColor = Color.Yellow;
 
             butNextAction = await this.AddComponentUIButton("butNextAction", new UIButtonDescription()
@@ -327,7 +324,7 @@ namespace GameLogic
                 Height = 20,
                 Font = buttonsFont,
                 Text = "Next Action",
-            }, layerHUD);
+            });
             butNextAction.Caption.TextForeColor = Color.Yellow;
 
             butClose.JustReleased += (sender, eventArgs) => { Game.Exit(); };

@@ -551,15 +551,15 @@ namespace Engine
         /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="usage">Component usage</param>
-        /// <param name="order">Processing order</param>
+        /// <param name="layer">Processing layer</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<Scenery> AddComponentScenery(this Scene scene, string name, GroundDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
+        public static async Task<Scenery> AddComponentScenery(this Scene scene, string name, GroundDescription description, SceneObjectUsages usage = SceneObjectUsages.Ground, int layer = Scene.LayerDefault)
         {
             Scenery component = new Scenery(name, scene, description);
 
             await component.IntializePatches();
 
-            scene.AddComponent(component, usage, order);
+            scene.AddComponent(component, usage, layer);
 
             return component;
         }

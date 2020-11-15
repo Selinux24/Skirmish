@@ -14,9 +14,6 @@ namespace SceneTest.SceneStart
 {
     class SceneStart : Scene
     {
-        private const int layerHUD = 50;
-        private const int layerCursor = 100;
-
         private Model backGround = null;
         private UITextArea title = null;
         private UIButton[] sceneButtons = null;
@@ -77,7 +74,7 @@ namespace SceneTest.SceneStart
                 Delta = new Vector2(-14f, -7f),
                 BaseColor = Color.White,
             };
-            await this.AddComponentUICursor("Cursor", cursorDesc, layerCursor);
+            await this.AddComponentUICursor("Cursor", cursorDesc);
         }
         private async Task InitializeBackground()
         {
@@ -98,12 +95,12 @@ namespace SceneTest.SceneStart
             titleDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
             titleDesc.TextVerticalAlign = VerticalTextAlign.Middle;
 
-            title = await this.AddComponentUITextArea("Title", titleDesc, layerHUD);
+            title = await this.AddComponentUITextArea("Title", titleDesc);
             title.GrowControlWithText = false;
         }
         private async Task InitializeButtonPanel()
         {
-            buttonPanel = await this.AddComponentUIPanel("ButtonPanel", UIPanelDescription.Default(Color.Transparent), layerHUD);
+            buttonPanel = await this.AddComponentUIPanel("ButtonPanel", UIPanelDescription.Default(Color.Transparent));
             buttonPanel.SetGridLayout(GridLayout.FixedRows(1));
             buttonPanel.Spacing = 20;
 
@@ -181,7 +178,7 @@ namespace SceneTest.SceneStart
             tabDesc.TabCaptions = new[] { "But 1", "But 2", "But 3" };
             tabDesc.TabButtonsSpacing = new Spacing() { Horizontal = 5f };
 
-            tabsPanel = await this.AddComponentUITabPanel("TabPanel", tabDesc, layerHUD + 1);
+            tabsPanel = await this.AddComponentUITabPanel("TabPanel", tabDesc, LayerUI + 1);
             tabsPanel.Visible = false;
             tabsPanel.TabJustReleased += TabsPanelTabJustReleased;
 
@@ -313,7 +310,6 @@ namespace SceneTest.SceneStart
 
             UpdateLayout();
         }
-
         private void UpdateLayout()
         {
             tabsPanel.Width = Game.Form.RenderWidth * 0.9f;
