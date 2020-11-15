@@ -21,8 +21,12 @@ namespace SceneTest.SceneMaterials
 
         private ModelInstanced spheres1 = null;
         private ModelInstanced spheres2 = null;
-        private Model lightEmitter = null;
-        private SceneLightPoint movingLight = null;
+        private ModelInstanced spheres3 = null;
+        private ModelInstanced spheres4 = null;
+        private Model lightEmitter1 = null;
+        private Model lightEmitter2 = null;
+        private SceneLightPoint movingLight1 = null;
+        private SceneLightPoint movingLight2 = null;
 
         private uint currentAlgorithm = (uint)SpecularAlgorithms.Phong;
         private readonly uint algorithmCount = 3;
@@ -49,7 +53,7 @@ namespace SceneTest.SceneMaterials
 
             Camera.NearPlaneDistance = 0.1f;
             Camera.FarPlaneDistance = 500;
-            Camera.Goto(-20, 25, -40f);
+            Camera.Goto(20, 25, 40f);
             Camera.LookTo(0, 10, 0);
 
             Lights.KeyLight.CastShadow = false;
@@ -62,8 +66,10 @@ namespace SceneTest.SceneMaterials
                     InitializeTextBoxes(),
                     InitializeSkyEffects(),
                     InitializeFloor(),
-                    InitializeEmitter(),
+                    InitializeEmitters(),
                     InitializeColorGroups($"Spheres {(SpecularAlgorithms)currentAlgorithm}"),
+                    InitializeBuiltInList(),
+                    InitializeMetallicList(),
                 },
                 (res) =>
                 {
@@ -138,7 +144,7 @@ namespace SceneTest.SceneMaterials
 
             MaterialCookTorranceContent mat = MaterialCookTorranceContent.Default;
             mat.Metallic = 0.9f;
-            mat.Roughness = 0.2f;
+            mat.Roughness = 0.1f;
             mat.DiffuseTexture = "SceneMaterials/corrugated_d.jpg";
             mat.NormalMapTexture = "SceneMaterials/corrugated_n.jpg";
 
@@ -153,7 +159,7 @@ namespace SceneTest.SceneMaterials
 
             await this.AddComponentModel("Floor", desc);
         }
-        private async Task InitializeEmitter()
+        private async Task InitializeEmitters()
         {
             MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
             mat.EmissiveColor = Color3.White;
@@ -168,7 +174,8 @@ namespace SceneTest.SceneMaterials
                 Content = ContentDescription.FromContentData(sphere, mat),
             };
 
-            lightEmitter = await this.AddComponentModel("Emitter", desc);
+            lightEmitter1 = await this.AddComponentModel("Emitter1", desc);
+            lightEmitter2 = await this.AddComponentModel("Emitter2", desc);
         }
         private async Task InitializeColorGroups(string name)
         {
@@ -178,10 +185,15 @@ namespace SceneTest.SceneMaterials
             int totalSpheres = (int)Math.Pow(e, 3);
             float distance = 3f;
 
-            SpecularAlgorithms algorithm = (SpecularAlgorithms)currentAlgorithm;
-
-            var materials1 = GenerateMaterials(n, colorCount, 0.1f, algorithm, true, 32, 1f, 0.05f);
-            var materials2 = GenerateMaterials(n, colorCount, 0.1f, algorithm, false, 32, 1f, 0.05f);
+            var mapParams = new MaterialParams
+            {
+                Algorithm = (SpecularAlgorithms)currentAlgorithm,
+                Shininess = 32,
+                Metallic = 1f,
+                Roughness = 0.05f
+            };
+            var materials1 = GenerateMaterials(n, colorCount, 0.1f, mapParams, true);
+            var materials2 = GenerateMaterials(n, colorCount, 0.1f, mapParams, false);
 
             spheres1 = await InitializeSphereInstanced(name, totalSpheres, materials1);
             spheres2 = await InitializeSphereInstanced(name, totalSpheres, materials2);
@@ -192,7 +204,97 @@ namespace SceneTest.SceneMaterials
             SetSpheresPosition(colorCount, n, spheres1, position1, distance);
             SetSpheresPosition(colorCount, n, spheres2, position2, distance);
         }
-        private IEnumerable<IMaterialContent> GenerateMaterials(int n, int colorCount, float specularFactor, SpecularAlgorithms algorithm, bool nmap, float shininess, float metallic, float roughness)
+        private async Task InitializeBuiltInList()
+        {
+            List<IMaterialContent> materials = new List<IMaterialContent>()
+            {
+                BuiltInMaterials.Emerald,
+                BuiltInMaterials.Jade,
+                BuiltInMaterials.Obsidian,
+                BuiltInMaterials.Pearl,
+                BuiltInMaterials.Ruby,
+                BuiltInMaterials.Turquoise,
+                BuiltInMaterials.Brass,
+                BuiltInMaterials.Bronze,
+                BuiltInMaterials.Chrome,
+                BuiltInMaterials.Copper,
+                BuiltInMaterials.Gold,
+                BuiltInMaterials.Silver,
+                BuiltInMaterials.BlackPlastic,
+                BuiltInMaterials.CyanPlastic,
+                BuiltInMaterials.GreenPlastic,
+                BuiltInMaterials.RedPlastic,
+                BuiltInMaterials.WhitePlastic,
+                BuiltInMaterials.YellowPlastic,
+                BuiltInMaterials.BlackRubber,
+                BuiltInMaterials.CyanRubber,
+                BuiltInMaterials.GreenRubber,
+                BuiltInMaterials.RedRubber,
+                BuiltInMaterials.WhiteRubber,
+                BuiltInMaterials.YellowRubber,
+            };
+
+            spheres3 = await InitializeSphereInstanced("Built-in Blinn-Phong", materials.Count, materials);
+
+            float sep = 2f;
+            float x = sep * spheres3.InstanceCount * 0.5f;
+            int index = 0;
+            foreach (var item in spheres3.GetInstances())
+            {
+                item.Manipulator.SetPosition(x - (sep * index++), 5, 20);
+            }
+        }
+        private async Task InitializeMetallicList()
+        {
+            int itemsPerRow = 10;
+
+            List<IMaterialContent> materials = new List<IMaterialContent>();
+
+            float roughness = 0.1f;
+            for (int i = 0; i < itemsPerRow; i++)
+            {
+                var mat = MaterialCookTorranceContent.Default;
+                mat.DiffuseColor = Color.Gold;
+                mat.SpecularColor = (Color.Gold * 1.25f).RGB();
+                mat.Metallic = 0.9f;
+                mat.Roughness = roughness * (i + 1);
+                mat.DiffuseTexture = "SceneMaterials/white.png";
+                mat.NormalMapTexture = "SceneMaterials/nmap2.png";
+
+                materials.Add(mat);
+            }
+
+            float metalness = 0.1f;
+            for (int i = 0; i < itemsPerRow; i++)
+            {
+                var mat = MaterialCookTorranceContent.Default;
+                mat.DiffuseColor = Color.Gold;
+                mat.SpecularColor = (Color.Gold * 1.25f).RGB();
+                mat.Metallic = metalness * (i + 1);
+                mat.Roughness = 0.1f;
+                mat.DiffuseTexture = "SceneMaterials/white.png";
+                mat.NormalMapTexture = "SceneMaterials/nmap2.png";
+
+                materials.Add(mat);
+            }
+
+            spheres4 = await InitializeSphereInstanced("Metallic set Cook-Torrance", materials.Count, materials);
+
+            float sep = 2f;
+            float x = sep * itemsPerRow * 0.5f;
+            float y = 8f;
+            int index = 0;
+            foreach (var item in spheres4.GetInstances())
+            {
+                item.Manipulator.SetPosition(x - (sep * index++), y, 20);
+                if (index >= itemsPerRow)
+                {
+                    index = 0;
+                    y += 2.2f;
+                }
+            }
+        }
+        private IEnumerable<IMaterialContent> GenerateMaterials(int n, int colorCount, float specularFactor, MaterialParams matParams, bool nmap)
         {
             List<IMaterialContent> materials = new List<IMaterialContent>();
 
@@ -206,44 +308,44 @@ namespace SceneTest.SceneMaterials
                         var specular = diffuse + new Color3(specularFactor);
                         specular = Color3.AdjustSaturation(specular, 1f);
 
-                        materials.Add(GenerateMaterial(diffuse, specular, algorithm, nmap, shininess, metallic, roughness));
+                        materials.Add(GenerateMaterial(diffuse, specular, matParams, nmap));
                     }
                 }
             }
 
             return materials;
         }
-        private IMaterialContent GenerateMaterial(Color3 diffuse, Color3 specular, SpecularAlgorithms algorithm, bool nmap, float shininess, float metallic, float roughness)
+        private IMaterialContent GenerateMaterial(Color3 diffuse, Color3 specular, MaterialParams matParams, bool nmap)
         {
-            if (algorithm == SpecularAlgorithms.Phong)
+            if (matParams.Algorithm == SpecularAlgorithms.Phong)
             {
                 MaterialPhongContent mat = MaterialPhongContent.Default;
                 mat.DiffuseColor = new Color4(diffuse, 1f);
                 mat.DiffuseTexture = "SceneMaterials/white.png";
                 mat.NormalMapTexture = nmap ? "SceneMaterials/nmap1.jpg" : "SceneMaterials/nmap2.png";
                 mat.SpecularColor = specular;
-                mat.Shininess = shininess;
+                mat.Shininess = matParams.Shininess;
                 return mat;
             }
-            else if (algorithm == SpecularAlgorithms.BlinnPhong)
+            else if (matParams.Algorithm == SpecularAlgorithms.BlinnPhong)
             {
                 MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
                 mat.DiffuseColor = new Color4(diffuse, 1f);
                 mat.DiffuseTexture = "SceneMaterials/white.png";
                 mat.NormalMapTexture = nmap ? "SceneMaterials/nmap1.jpg" : "SceneMaterials/nmap2.png";
                 mat.SpecularColor = specular;
-                mat.Shininess = shininess;
+                mat.Shininess = matParams.Shininess;
                 return mat;
             }
-            else if (algorithm == SpecularAlgorithms.CookTorrance)
+            else if (matParams.Algorithm == SpecularAlgorithms.CookTorrance)
             {
                 MaterialCookTorranceContent mat = MaterialCookTorranceContent.Default;
                 mat.DiffuseColor = new Color4(diffuse, 1f);
                 mat.DiffuseTexture = "SceneMaterials/white.png";
                 mat.NormalMapTexture = nmap ? "SceneMaterials/nmap1.jpg" : "SceneMaterials/nmap2.png";
                 mat.SpecularColor = specular;
-                mat.Metallic = metallic;
-                mat.Roughness = roughness;
+                mat.Metallic = matParams.Metallic;
+                mat.Roughness = matParams.Roughness;
                 return mat;
             }
 
@@ -292,15 +394,25 @@ namespace SceneTest.SceneMaterials
 
         private void PrepareScene()
         {
-            movingLight = new SceneLightPoint(
-                "Moving fire light",
+            movingLight1 = new SceneLightPoint(
+                "Emitter 1 light",
                 false,
                 Color.Yellow.RGB() * 1.25f,
                 Color3.White,
                 true,
                 SceneLightPointDescription.Create(Vector3.Zero, 15f, 20f));
 
-            Lights.Add(movingLight);
+            Lights.Add(movingLight1);
+
+            movingLight2 = new SceneLightPoint(
+                "Emitter 2 light",
+                false,
+                Color3.White,
+                Color3.White,
+                true,
+                SceneLightPointDescription.Create(Vector3.Zero, 10f, 5f));
+
+            Lights.Add(movingLight2);
         }
 
         public override void Update(GameTime gameTime)
@@ -370,18 +482,29 @@ namespace SceneTest.SceneMaterials
         }
         private void UpdateLight(GameTime gameTime)
         {
-            float r = 35f;
-            float d = 0.5f;
-            float v = 0.8f;
             float totalSeconds = gameTime.TotalSeconds;
 
-            Vector3 position = Vector3.Zero;
-            position.X = r * d * (float)Math.Cos(v * totalSeconds);
-            position.Y = 5f + (2f * (1f + (float)Math.Sin(totalSeconds)));
-            position.Z = r * d * (float)Math.Sin(v * totalSeconds);
+            float r1 = 35f;
+            float d1 = 0.5f;
+            float v1 = 0.8f;
+            Vector3 position1 = Vector3.Zero;
+            position1.X = r1 * d1 * (float)Math.Cos(v1 * totalSeconds);
+            position1.Y = 5f + (2f * (1f + (float)Math.Sin(totalSeconds)));
+            position1.Z = r1 * d1 * (float)Math.Sin(v1 * totalSeconds);
 
-            lightEmitter.Manipulator.SetPosition(position);
-            movingLight.Position = position;
+            lightEmitter1.Manipulator.SetPosition(position1);
+            movingLight1.Position = position1;
+
+            float r2 = 25f;
+            float d2 = 0.5f;
+            float v2 = 0.6f;
+            Vector3 position2 = Vector3.Zero;
+            position2.X = r2 * d2 * (float)Math.Cos(v2 * totalSeconds);
+            position2.Y = 8f;
+            position2.Z = 24;
+
+            lightEmitter2.Manipulator.SetPosition(position2);
+            movingLight2.Position = position2;
         }
         private void UpdateInput()
         {
@@ -398,7 +521,10 @@ namespace SceneTest.SceneMaterials
                     currentAlgorithm++;
                     currentAlgorithm %= algorithmCount;
 
-                    await LoadResourcesAsync(InitializeColorGroups($"Spheres {(SpecularAlgorithms)currentAlgorithm}"));
+                    await LoadResourcesAsync(new Task[]
+                    {
+                        InitializeColorGroups($"Spheres {(SpecularAlgorithms)currentAlgorithm}"),
+                    });
                 });
             }
         }
@@ -417,5 +543,13 @@ namespace SceneTest.SceneMaterials
             backpanel.Width = Game.Form.RenderWidth;
             backpanel.Height = runtime.Top + runtime.Height + 3;
         }
+    }
+
+    struct MaterialParams
+    {
+        public SpecularAlgorithms Algorithm;
+        public float Shininess;
+        public float Metallic;
+        public float Roughness;
     }
 }

@@ -96,7 +96,12 @@ namespace Engine.Content
         /// <inheritdoc/>
         public override string ToString()
         {
-            return "Blinn-Phong;";
+            var emissive = EmissiveTexture ?? $"{EmissiveColor}";
+            var ambient = AmbientTexture ?? $"{AmbientColor}";
+            var diffuse = DiffuseTexture ?? $"{DiffuseColor}";
+            var specular = SpecularTexture ?? $"{SpecularColor}";
+
+            return $"Blinn-Phong. Emissive: {emissive}; Ambient: {ambient}; Diffuse: {diffuse}; Specular: {specular}; Shininess: {Shininess};";
         }
     }
 }

@@ -102,7 +102,12 @@ namespace Engine.Content
         /// <inheritdoc/>
         public override string ToString()
         {
-            return "Cook-Torrance;";
+            var emissive = EmissiveTexture ?? $"{EmissiveColor}";
+            var ambient = AmbientTexture ?? $"{AmbientColor}";
+            var diffuse = DiffuseTexture ?? $"{DiffuseColor}";
+            var specular = SpecularTexture ?? $"{SpecularColor}";
+
+            return $"Cook-Torrance. Emissive: {emissive}; Ambient: {ambient}; Diffuse: {diffuse}; Specular: {specular}; Metallic: {Metallic}; Roughness: {Roughness};";
         }
     }
 }
