@@ -660,46 +660,61 @@ namespace SceneTest.SceneTest
 
             Random prnd = new Random(1000);
 
+            GridParams gridParams = new GridParams
+            {
+                RowSize = rowSize,
+                AreaSize = areaSize,
+                Sx = sx,
+                Sy = sy,
+                Sz = sz,
+                XCount = xCount,
+                ZCount = zCount,
+                XRowCount = xRowCount,
+                ZRowCount = zRowCount,
+                BasementRows = basementRows,
+            };
+
             for (int i = 0; i < containerI.InstanceCount; i++)
             {
                 uint textureIndex = (uint)prnd.Next(0, 6);
                 textureIndex %= 5;
 
-                float height = (i / rowSize * sy) + baseHeight + yDelta - (sy * basementRows);
+                var (position, angle) = GetP(prnd, i, gridParams);
 
-                if ((i % rowSize) < zRowCount)
-                {
-                    float rx = (i % zRowCount < zCount ? -areaSize - (sx / 2f) : areaSize + (sx / 2f)) + prnd.NextFloat(-1f, 1f);
-                    float dz = i % zRowCount < zCount ? -(sz / 2f) : (sz / 2f);
+                containerI[i].Manipulator.SetPosition(position);
+                containerI[i].Manipulator.SetRotation(angle, 0, 0);
+                containerI[i].Manipulator.SetScale(scale);
+                containerI[i].TextureIndex = textureIndex;
+            }
+        }
+        private (Vector3 position, float angle) GetP(Random prnd, int i, GridParams gridParams)
+        {
+            float height = (i / gridParams.RowSize * gridParams.Sy) + baseHeight + yDelta - (gridParams.Sy * gridParams.BasementRows);
 
-                    float x = rx + xDelta;
-                    float y = height;
-                    float z = (i % zCount * sz) - areaSize + zDelta + dz;
-                    float angle = MathUtil.Pi * prnd.Next(0, 2);
+            if ((i % gridParams.RowSize) < gridParams.ZRowCount)
+            {
+                float rx = (i % gridParams.ZRowCount < gridParams.ZCount ? -gridParams.AreaSize - (gridParams.Sx / 2f) : gridParams.AreaSize + (gridParams.Sx / 2f)) + prnd.NextFloat(-1f, 1f);
+                float dz = i % gridParams.ZRowCount < gridParams.ZCount ? -(gridParams.Sz / 2f) : (gridParams.Sz / 2f);
 
-                    containerI[i].TextureIndex = textureIndex;
+                float x = rx + xDelta;
+                float y = height;
+                float z = (i % gridParams.ZCount * gridParams.Sz) - gridParams.AreaSize + zDelta + dz;
+                float angle = MathUtil.Pi * prnd.Next(0, 2);
 
-                    containerI[i].Manipulator.SetPosition(x, y, z);
-                    containerI[i].Manipulator.SetRotation(angle, 0, 0);
-                    containerI[i].Manipulator.SetScale(scale);
-                }
-                else
-                {
-                    int ci = i - zRowCount;
-                    float rz = (ci % xRowCount < xCount ? -areaSize - (sz / 2f) : areaSize + (sz / 2f)) + prnd.NextFloat(-1f, 1f);
-                    float dx = ci % xRowCount < xCount ? (sx / 2f) : -(sx / 2f);
+                return (new Vector3(x, y, z), angle);
+            }
+            else
+            {
+                int ci = i - gridParams.ZRowCount;
+                float rz = (ci % gridParams.XRowCount < gridParams.XCount ? -gridParams.AreaSize - (gridParams.Sz / 2f) : gridParams.AreaSize + (gridParams.Sz / 2f)) + prnd.NextFloat(-1f, 1f);
+                float dx = ci % gridParams.XRowCount < gridParams.XCount ? (gridParams.Sx / 2f) : -(gridParams.Sx / 2f);
 
-                    float x = (ci % xCount * sx) - areaSize + xDelta + dx;
-                    float y = height;
-                    float z = rz + zDelta;
-                    float angle = MathUtil.Pi * prnd.Next(0, 2);
+                float x = (ci % gridParams.XCount * gridParams.Sx) - gridParams.AreaSize + xDelta + dx;
+                float y = height;
+                float z = rz + zDelta;
+                float angle = MathUtil.Pi * prnd.Next(0, 2);
 
-                    containerI[i].TextureIndex = textureIndex;
-
-                    containerI[i].Manipulator.SetPosition(x, y, z);
-                    containerI[i].Manipulator.SetRotation(angle, 0, 0);
-                    containerI[i].Manipulator.SetScale(scale);
-                }
+                return (new Vector3(x, y, z), angle);
             }
         }
         private async Task InitializeTestCube()
@@ -1060,5 +1075,19 @@ namespace SceneTest.SceneTest
                 File.WriteAllLines(file, lines);
             }
         }
+    }
+
+    struct GridParams
+    {
+        public int RowSize;
+        public float AreaSize;
+        public float Sx;
+        public float Sy;
+        public float Sz;
+        public int XCount;
+        public int ZCount;
+        public int XRowCount;
+        public int ZRowCount;
+        public int BasementRows;
     }
 }

@@ -38,11 +38,11 @@ namespace Engine.Content
         /// <summary>
         /// Metallic
         /// </summary>
-        public static float Metallic { get; set; } = 0.0f;
+        public static float Metallic { get; set; } = 0.9f;
         /// <summary>
         /// Roughness
         /// </summary>
-        public static float Roughness { get; set; } = 0.0f;
+        public static float Roughness { get; set; } = 0.2f;
 
         #endregion
     }

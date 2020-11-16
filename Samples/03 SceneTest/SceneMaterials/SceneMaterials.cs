@@ -5,6 +5,7 @@ using Engine.UI;
 using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace SceneTest.SceneMaterials
@@ -206,7 +207,7 @@ namespace SceneTest.SceneMaterials
         }
         private async Task InitializeBuiltInList()
         {
-            List<IMaterialContent> materials = new List<IMaterialContent>()
+            List<BuiltInMaterial> materials = new List<BuiltInMaterial>()
             {
                 BuiltInMaterials.Emerald,
                 BuiltInMaterials.Jade,
@@ -234,7 +235,10 @@ namespace SceneTest.SceneMaterials
                 BuiltInMaterials.YellowRubber,
             };
 
-            spheres3 = await InitializeSphereInstanced("Built-in Blinn-Phong", materials.Count, materials);
+            //Cook-torrance
+            var ctMaterials = materials.Select(m => (MaterialCookTorranceContent)m).OfType<IMaterialContent>();
+
+            spheres3 = await InitializeSphereInstanced("Built-in materials test", materials.Count, ctMaterials);
 
             float sep = 2f;
             float x = sep * spheres3.InstanceCount * 0.5f;
@@ -278,7 +282,7 @@ namespace SceneTest.SceneMaterials
                 materials.Add(mat);
             }
 
-            spheres4 = await InitializeSphereInstanced("Metallic set Cook-Torrance", materials.Count, materials);
+            spheres4 = await InitializeSphereInstanced("Cook-Torrance Metallics", materials.Count, materials);
 
             float sep = 2f;
             float x = sep * itemsPerRow * 0.5f;

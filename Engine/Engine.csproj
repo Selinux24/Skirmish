@@ -205,6 +205,7 @@
     <Compile Include="Common\IInstacingData.cs" />
     <Compile Include="Common\IntersectionHelper.cs" />
     <Compile Include="Common\IntersectionTriangle.cs" />
+    <Compile Include="Content\BuiltInMaterial.cs" />
     <Compile Include="Content\BuiltInMaterials.cs" />
     <Compile Include="MaterialBlinnPhong.cs" />
     <Compile Include="MaterialCookTorrance.cs" />
