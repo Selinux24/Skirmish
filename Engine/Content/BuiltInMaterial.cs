@@ -10,19 +10,19 @@ namespace Engine.Content
         /// <summary>
         /// Ambient color
         /// </summary>
-        public Color3 AmbientColor;
+        public Color3 AmbientColor { get; set; }
         /// <summary>
         /// Diffuse color
         /// </summary>
-        public Color4 DiffuseColor;
+        public Color4 DiffuseColor { get; set; }
         /// <summary>
         /// Specular color
         /// </summary>
-        public Color3 SpecularColor;
+        public Color3 SpecularColor { get; set; }
         /// <summary>
         /// Shininess factor
         /// </summary>
-        public float Shininess;
+        public float Shininess { get; set; }
 
         /// <summary>
         /// Phong material operator

@@ -44,9 +44,13 @@ namespace Engine.Common
         /// </summary>
         public virtual int Layer { get; set; } = 0;
         /// <summary>
-        /// Gets or sets if the current object has a parent
+        /// Gets whether the current object has owner or not
         /// </summary>
-        public virtual bool HasParent { get; set; } = false;
+        public virtual bool HasOwner { get { return Owner != null; } }
+        /// <summary>
+        /// Gets or sets the current object's owner
+        /// </summary>
+        public virtual ISceneObject Owner { get; set; } = null;
         /// <summary>
         /// Maximum instance count
         /// </summary>

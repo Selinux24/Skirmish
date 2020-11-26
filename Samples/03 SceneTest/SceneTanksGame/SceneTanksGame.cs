@@ -1352,7 +1352,7 @@ You will lost all the game progress.",
             Vector2 tank2 = tanks[1].Manipulator.Position.XZ() - terrainRect.TopLeft;
 
             // Get the mini map rectangle
-            RectangleF miniMapRect = miniMapBackground.GrandpaRectangle;
+            RectangleF miniMapRect = miniMapBackground.GetRenderArea(false);
 
             // Get the marker sprite bounds
             Vector2 markerBounds1 = new Vector2(miniMapTank1.Width, miniMapTank1.Height);

@@ -193,7 +193,7 @@ namespace SceneTest.SceneStart
             for (int i = 0; i < 5; i++)
             {
                 var panDesc = UIPanelDescription.Default(new Color4(Helper.RandomGenerator.NextVector3(Vector3.Zero, Vector3.One), 1f));
-                var pan = new UIPanel("TabPanel.Level1", this, panDesc);
+                var pan = new UIPanel($"TabPanel.Level1_{i}", this, panDesc);
                 tabsPanel.TabPanels[0].AddChild(pan, false);
             }
 
@@ -205,7 +205,7 @@ namespace SceneTest.SceneStart
             for (int i = 0; i < 2; i++)
             {
                 var panDesc = UIPanelDescription.Default(new Color4(Helper.RandomGenerator.NextVector3(Vector3.Zero, Vector3.One), 1f));
-                var pan = new UIPanel("TabPanel.Level2", this, panDesc);
+                var pan = new UIPanel($"TabPanel.Level2_{i}", this, panDesc);
                 lastPan.AddChild(pan, false);
             }
 
@@ -217,7 +217,7 @@ namespace SceneTest.SceneStart
             for (int i = 0; i < 4; i++)
             {
                 var panDesc = UIPanelDescription.Default(new Color4(Helper.RandomGenerator.NextVector3(Vector3.Zero, Vector3.One), 1f));
-                var pan = new UIPanel("TabPanel.Level3", this, panDesc);
+                var pan = new UIPanel($"TabPanel.Level3_{i}", this, panDesc);
                 lastPan2.AddChild(pan, false);
             }
 
@@ -396,6 +396,7 @@ namespace SceneTest.SceneStart
         {
             if (sender is UIControl ctrl)
             {
+                ctrl.PivotAnchor = PivotAnchors.Center;
                 ctrl.ScaleInScaleOut(1.0f, 1.10f, 250);
             }
         }

@@ -150,7 +150,7 @@ namespace Engine
 
                     glowSprite.BaseColor = new Color4(keyLight.DiffuseColor, 0.25f);
                     glowSprite.Scale = glowScale;
-                    glowSprite.SetPosition(glowSpritePos - glowSprite.Center);
+                    glowSprite.SetPosition(glowSpritePos - glowSprite.LocalCenter);
                     glowSprite.Update(context);
 
                     //Update flares
@@ -167,7 +167,7 @@ namespace Engine
                             // Set the flare alpha based on the angle with view and light directions.
                             flare.FlareSprite.BaseColor = new Color4(flare.Color.RGB(), 0.5f * transparency);
                             flare.FlareSprite.Scale = flareScale;
-                            flare.FlareSprite.SetPosition(flareSpritePos - flare.FlareSprite.Center);
+                            flare.FlareSprite.SetPosition(flareSpritePos - flare.FlareSprite.LocalCenter);
                             flare.FlareSprite.Update(context);
                         }
                     }

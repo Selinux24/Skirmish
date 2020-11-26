@@ -58,7 +58,7 @@ namespace Engine.UI
         public UITextureRenderer(string name, Scene scene, UITextureRendererDescription description)
             : base(name, scene, description)
         {
-            var sprite = GeometryUtil.CreateSprite(Vector2.Zero, 1, 1);
+            var sprite = GeometryUtil.CreateUnitSprite();
 
             var vertices = VertexPositionTexture.Generate(sprite.Vertices, sprite.Uvs);
             var indices = sprite.Indices;

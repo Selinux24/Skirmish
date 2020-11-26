@@ -157,7 +157,7 @@ namespace Engine.UI
             BufferManager.SetIndexBuffer(indexBuffer);
             BufferManager.SetInputAssembler(technique, vertexBuffer, Topology.TriangleList);
 
-            effect.UpdatePerFrame(Manipulator.LocalTransform, viewProjection);
+            effect.UpdatePerFrame(GetTransform(), viewProjection);
 
             var color = Color4.AdjustSaturation(BaseColor * TintColor, 1f);
             color.Alpha *= Alpha;

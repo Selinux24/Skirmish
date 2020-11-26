@@ -504,7 +504,7 @@ namespace Engine
         {
             if (triangles?.Any() != true)
             {
-                return triangles;
+                return Enumerable.Empty<Triangle>();
             }
 
             List<Triangle> res = new List<Triangle>(triangles.Count());
@@ -515,6 +515,52 @@ namespace Engine
             }
 
             return res.ToArray();
+        }
+        /// <summary>
+        /// Reverses the normal of all the triangles of the list
+        /// </summary>
+        /// <param name="vertices">Point list</param>
+        /// <returns>Returns a new point list</returns>
+        public static IEnumerable<Vector3> Reverse(IEnumerable<Vector3> vertices)
+        {
+            if (vertices.Count() % 3 != 0)
+            {
+                throw new ArgumentException("The point list must be divisible by three.", nameof(vertices));
+            }
+
+            List<Vector3> result = new List<Vector3>();
+
+            for (int i = 0; i < vertices.Count(); i += 3)
+            {
+                result.Add(vertices.ElementAt(i + 0));
+                result.Add(vertices.ElementAt(i + 2));
+                result.Add(vertices.ElementAt(i + 1));
+            }
+
+            return result;
+        }
+        /// <summary>
+        /// Reverses the normal of all the triangles of the list
+        /// </summary>
+        /// <param name="indices">Index list</param>
+        /// <returns>Returns a new index list</returns>
+        public static IEnumerable<uint> Reverse(IEnumerable<uint> indices)
+        {
+            if (indices.Count() % 3 != 0)
+            {
+                throw new ArgumentException("The index list must be divisible by three.", nameof(indices));
+            }
+
+            List<uint> result = new List<uint>();
+
+            for (int i = 0; i < indices.Count(); i += 3)
+            {
+                result.Add(indices.ElementAt(i + 0));
+                result.Add(indices.ElementAt(i + 2));
+                result.Add(indices.ElementAt(i + 1));
+            }
+
+            return result;
         }
 
         /// <summary>

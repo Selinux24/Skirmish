@@ -397,7 +397,7 @@ namespace Terrain.PerlinNoise
                     return;
                 }
 
-                var rect = pb.GetRenderArea();
+                var rect = pb.GetRenderArea(true);
                 var mouse = Game.Input.MouseX - rect.Left;
 
                 if (pb == pbOctaves)

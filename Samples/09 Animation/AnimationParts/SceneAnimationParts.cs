@@ -336,9 +336,9 @@ namespace Animation.AnimationParts
             title.SetPosition(Vector2.Zero);
 
             backPanel.Width = Game.Form.RenderWidth;
-            backPanel.Height = title.Rectangle.Bottom + 3;
+            backPanel.Height = title.AbsoluteRectangle.Bottom + 3;
 
-            console.Top = backPanel.Rectangle.Bottom;
+            console.Top = backPanel.AbsoluteRectangle.Bottom;
             console.Width = Game.Form.RenderWidth;
         }
     }

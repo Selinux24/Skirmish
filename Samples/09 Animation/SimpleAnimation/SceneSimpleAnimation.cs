@@ -710,14 +710,14 @@ namespace Animation.SimpleAnimation
             }
 
             title.SetPosition(Vector2.Zero);
-            runtime.SetPosition(new Vector2(5, title.Rectangle.Bottom + 3));
-            animText.SetPosition(new Vector2(5, runtime.Rectangle.Bottom + 3));
-            messages.SetPosition(new Vector2(5, animText.Rectangle.Bottom + 3));
+            runtime.SetPosition(new Vector2(5, title.AbsoluteRectangle.Bottom + 3));
+            animText.SetPosition(new Vector2(5, runtime.AbsoluteRectangle.Bottom + 3));
+            messages.SetPosition(new Vector2(5, animText.AbsoluteRectangle.Bottom + 3));
 
             backPanel.Width = Game.Form.RenderWidth;
-            backPanel.Height = messages.Rectangle.Bottom + 3;
+            backPanel.Height = messages.AbsoluteRectangle.Bottom + 3;
 
-            console.Top = backPanel.Rectangle.Bottom;
+            console.Top = backPanel.AbsoluteRectangle.Bottom;
             console.Width = Game.Form.RenderWidth;
         }
     }

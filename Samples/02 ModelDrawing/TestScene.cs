@@ -485,15 +485,15 @@ namespace ModelDrawing
         private void UpdateLayout()
         {
             text.SetPosition(Vector2.Zero);
-            statistics.SetPosition(0, text.Rectangle.Bottom + 5);
-            text1.SetPosition(0, statistics.Rectangle.Bottom + 5);
-            text2.SetPosition(0, text1.Rectangle.Bottom + 5);
+            statistics.SetPosition(0, text.AbsoluteRectangle.Bottom + 5);
+            text1.SetPosition(0, statistics.AbsoluteRectangle.Bottom + 5);
+            text2.SetPosition(0, text1.AbsoluteRectangle.Bottom + 5);
 
             backPanel.SetPosition(Vector2.Zero);
             backPanel.Height = text2.Top + text2.Height + 5;
             backPanel.Width = Game.Form.RenderWidth;
 
-            console.SetPosition(0, backPanel.Rectangle.Bottom);
+            console.SetPosition(0, backPanel.AbsoluteRectangle.Bottom);
         }
     }
 }

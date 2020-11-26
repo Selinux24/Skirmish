@@ -3,6 +3,8 @@ using System;
 
 namespace Engine
 {
+    using Engine.UI;
+
     /// <summary>
     /// Control interface
     /// </summary>
@@ -47,42 +49,99 @@ namespace Engine
         bool IsJustReleased { get; }
 
         /// <summary>
-        /// Gets or sets text left position in the render area
-        /// </summary>
-        float Left { get; set; }
-        /// <summary>
-        /// Gets or sets text top position in the render area
-        /// </summary>
-        float Top { get; set; }
-        /// <summary>
-        /// Gets or sets the width
-        /// </summary>
-        float Width { get; set; }
-        /// <summary>
         /// Gets or sets the height
         /// </summary>
         float Height { get; set; }
         /// <summary>
-        /// Gets or sets the scale
+        /// Gets or sets the width
+        /// </summary>
+        float Width { get; set; }
+
+        /// <summary>
+        /// Gets or sets the local scale
         /// </summary>
         float Scale { get; set; }
         /// <summary>
-        /// Gets or sets the rotation
+        /// Gets or sets the absolute scale
+        /// </summary>
+        float AbsoluteScale { get; }
+        /// <summary>
+        /// Gets or sets the local rotation
         /// </summary>
         float Rotation { get; set; }
         /// <summary>
-        /// Gets the control's rectangle coordinates in the render area
+        /// Gets or sets the absolute rotation
         /// </summary>
-        RectangleF Rectangle { get; }
+        float AbsoluteRotation { get; }
+        /// <summary>
+        /// Gets or sets the rotation and scale pivot anchor
+        /// </summary>
+        PivotAnchors PivotAnchor { get; set; }
+
+        /// <summary>
+        /// Gets or sets the (local) left coordinate value from parent or the screen origin
+        /// </summary>
+        float Left { get; set; }
+        /// <summary>
+        /// Gets the (absolute) left coordinate value the screen origin
+        /// </summary>
+        float AbsoluteLeft { get; }
+        /// <summary>
+        /// Gets or sets the (local) top coordinate value from parent or the screen origin
+        /// </summary>
+        float Top { get; set; }
+        /// <summary>
+        /// Gets the (absolute) top coordinate value from the screen origin
+        /// </summary>
+        float AbsoluteTop { get; }
+
+        /// <summary>
+        /// Gets the control's rectangle local coordinates
+        /// </summary>
+        RectangleF LocalRectangle { get; }
+        /// <summary>
+        /// Gets the control's rectangle absolute coordinates from screen origin
+        /// </summary>
+        RectangleF AbsoluteRectangle { get; }
+        /// <summary>
+        /// Gets the control's rectangle coordinates relative to inmediate parent control position
+        /// </summary>
+        RectangleF RelativeToParentRectangle { get; }
+        /// <summary>
+        /// Gets the control's rectangle coordinates relative to root control position
+        /// </summary>
+        RectangleF RelativeToRootRectangle { get; }
+
         /// <summary>
         /// Gets the control's local center coordinates
         /// </summary>
-        Vector2 Center { get; }
+        Vector2 LocalCenter { get; }
+        /// <summary>
+        /// Gets the control's absolute center coordinates
+        /// </summary>
+        Vector2 AbsoluteCenter { get; }
 
+        /// <summary>
+        /// Spacing
+        /// </summary>
+        Spacing Spacing { get; set; }
+        /// <summary>
+        /// Padding
+        /// </summary>
+        Padding Padding { get; set; }
         /// <summary>
         /// Indicates whether the control has to maintain proportion with parent size
         /// </summary>
         bool FitWithParent { get; set; }
+        /// <summary>
+        /// Anchor
+        /// </summary>
+        Anchors Anchor { get; set; }
+
+        /// <summary>
+        /// Gets or sets the base color
+        /// </summary>
+        Color4 BaseColor { get; set; }
         /// <summary>
         /// Gets or sets the tint color
         /// </summary>
@@ -143,9 +202,10 @@ namespace Engine
         void SetRectangle(RectangleF rectangle);
 
         /// <summary>
-        /// Gets the text render area
+        /// Gets the render area in absolute coordinates from screen origin
         /// </summary>
+        /// <param name="applyPadding">Apply the padding to the resulting reactangle, if any.</param>
         /// <returns>Returns the text render area</returns>
-        RectangleF GetRenderArea();
+        RectangleF GetRenderArea(bool applyPadding);
     }
 }

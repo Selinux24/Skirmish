@@ -304,21 +304,21 @@ namespace Engine.UI
             Vector2 sca = Vector2.One * (parent?.AbsoluteScale ?? 1f);
             Vector2 pos = new Vector2(renderArea.X, renderArea.Y + baseLineThr);
             float rot = parent?.AbsoluteRotation ?? 0f;
-            Vector2 parentCenter = parent?.GrandpaCenter ?? Vector2.Zero;
-            float parentScale = parent?.GrandpaScale ?? 1f;
+
+            Vector2? parentPos = parent?.GetTransformationPivot();
 
             // Calculate new transforms
             Manipulator.SetScale(sca);
             Manipulator.SetRotation(rot);
             Manipulator.SetPosition(pos);
-            Manipulator.Update(parentCenter, parentScale);
+            Manipulator.Update2D(parentPos);
 
             if (ShadowColor != Color.Transparent)
             {
                 ShadowManipulator.SetScale(sca);
                 ShadowManipulator.SetRotation(rot);
                 ShadowManipulator.SetPosition(pos + ShadowDelta);
-                ShadowManipulator.Update(parentCenter, parentScale);
+                ShadowManipulator.Update2D(parentPos);
             }
         }
         /// <summary>
@@ -490,12 +490,12 @@ namespace Engine.UI
             updateBuffers = true;
         }
         /// <summary>
-        /// Gets the text render area
+        /// Gets the render area in absolute coordinates from screen origin
         /// </summary>
-        /// <returns>Returns the text render area</returns>
+        /// <returns>Returns the render area</returns>
         private RectangleF GetRenderArea()
         {
-            return parent?.GetRenderArea() ?? Game.Form.RenderRectangle;
+            return parent?.GetRenderArea(true) ?? Game.Form.RenderRectangle;
         }
 
         /// <summary>
@@ -514,10 +514,12 @@ namespace Engine.UI
 
             FontMap.ParseSentence(text, ForeColor, ShadowColor, out var words, out _, out _);
 
+            var renderArea = GetRenderArea();
+
             var w = fontMap.MapSentence(
                 words,
                 null,
-                GetRenderArea(),
+                renderArea,
                 horizontalAlign,
                 verticalAlign);
 

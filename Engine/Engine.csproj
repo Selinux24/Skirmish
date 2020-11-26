@@ -441,6 +441,7 @@
     <Compile Include="UI\GridLayout.cs" />
     <Compile Include="UI\IWithTextDescription.cs" />
     <Compile Include="UI\Padding.cs" />
+    <Compile Include="UI\PivotAnchors.cs" />
     <Compile Include="UI\Spacing.cs" />
     <Compile Include="UI\Tween\UIControlTweenCollection.cs" />
     <Compile Include="UI\Tween\UIControlTweenExtensions.cs" />

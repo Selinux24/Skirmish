@@ -75,7 +75,7 @@ namespace Engine.UI
 
             buttonReleased = new Sprite($"{name}.ReleasedButton", scene, spriteDesc);
 
-            AddChild(buttonReleased, true);
+            AddChild(buttonReleased);
 
             if (description.TwoStateButton)
             {
@@ -93,7 +93,7 @@ namespace Engine.UI
 
                 buttonPressed = new Sprite($"{name}.PressedButton", scene, spriteDesc2);
 
-                AddChild(buttonPressed, true);
+                AddChild(buttonPressed);
             }
 
             Caption = new UITextArea(
@@ -112,7 +112,7 @@ namespace Engine.UI
                     EventsEnabled = false,
                 });
 
-            AddChild(Caption, true);
+            AddChild(Caption);
         }
 
         /// <inheritdoc/>

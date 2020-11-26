@@ -1,5 +1,4 @@
-﻿using SharpDX;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.UI
@@ -42,7 +41,7 @@ namespace Engine.UI
             var childs = Children.Where(c => c != background).ToArray();
             if (childs.Any())
             {
-                GridLayout.UpdateLayout(childs, gridLayout, new RectangleF(0, 0, AbsoluteWidth, AbsoluteHeight), Padding, Spacing);
+                GridLayout.UpdateLayout(childs, gridLayout, AbsoluteRectangle.Size, Padding, Spacing);
             }
 
             base.UpdateInternalState();

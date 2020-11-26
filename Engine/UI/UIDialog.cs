@@ -110,14 +110,14 @@ namespace Engine.UI
 
             if (butAccept != null)
             {
-                butAccept.Top = dialogText.Rectangle.Bottom + 5;
+                butAccept.Top = dialogText.AbsoluteRectangle.Bottom + 5;
                 butAccept.Left = buttonsSpace;
-                buttonsSpace += butAccept.Rectangle.Right + 5;
+                buttonsSpace += butAccept.AbsoluteRectangle.Right + 5;
             }
 
             if (butClose != null)
             {
-                butClose.Top = dialogText.Rectangle.Bottom + 5;
+                butClose.Top = dialogText.AbsoluteRectangle.Bottom + 5;
                 butClose.Left = buttonsSpace;
             }
         }

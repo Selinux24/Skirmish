@@ -48,8 +48,12 @@ namespace Engine
         /// </summary>
         int InstanceCount { get; }
         /// <summary>
-        /// Gets or sets if the current object has a parent
+        /// Gets whether the current object has owner or not
         /// </summary>
-        bool HasParent { get; }
+        bool HasOwner { get; }
+        /// <summary>
+        /// Gets or sets the current object's owner
+        /// </summary>
+        ISceneObject Owner { get; set; }
     }
 }

@@ -168,7 +168,8 @@ namespace Engine.UI
         /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        public UITextArea(string name, Scene scene, UITextAreaDescription description) : base(name, scene, description)
+        public UITextArea(string name, Scene scene, UITextAreaDescription description) :
+            base(name, scene, description)
         {
             growControlWithText = description.GrowControlWithText;
 
@@ -215,6 +216,20 @@ namespace Engine.UI
 
             textDrawer.UpdateInternals();
         }
+        /// <inheritdoc/>
+        public override Vector2? GetTransformationPivot()
+        {
+            //The internal text drawer is always attached to the text area parent
+
+            if (Parent?.IsRoot == true)
+            {
+                //If the text area parent is the root, use the text area itself as pivot control
+                return base.GetTransformationPivot();
+            }
+
+            //Otherwise, use the parent as pivot, if any
+            return Parent?.GetTransformationPivot() ?? base.GetTransformationPivot();
+        }
 
         /// <inheritdoc/>
         public override void Draw(DrawContext context)
@@ -238,16 +253,15 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        /// <remarks>Applies margin configuration if any</remarks>
-        public override RectangleF GetRenderArea()
+        public override RectangleF GetRenderArea(bool applyPadding)
         {
-            var absRect = AbsoluteRectangle;
+            var absRect = base.GetRenderArea(false);
 
             //If adjust area with text is enabled, or the drawing area is zero, set area from current top-left position to screen right-bottom position
             if ((GrowControlWithText && !HasParent) || absRect.Width == 0) absRect.Width = Game.Form.RenderWidth - absRect.Left;
             if ((GrowControlWithText && !HasParent) || absRect.Height == 0) absRect.Height = Game.Form.RenderHeight - absRect.Top;
 
-            return Padding.Apply(absRect);
+            return applyPadding ? Padding.Apply(absRect) : absRect;
         }
 
         /// <summary>

@@ -301,7 +301,7 @@ namespace Engine
                     },
                     usage);
 
-                model.HasParent = true;
+                model.Owner = this;
             }
             catch (Exception ex)
             {
@@ -386,7 +386,7 @@ namespace Engine
                     },
                     usage);
 
-                model.HasParent = true;
+                model.Owner = this;
 
                 //Get the object list to process
                 var objList = level.Objects

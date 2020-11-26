@@ -1458,7 +1458,7 @@ namespace Engine
             var pfComponents = GetComponents().Where(c =>
             {
                 return
-                    !c.HasParent &&
+                    !c.HasOwner &&
                     c.Visible &&
                     (c.Usage.HasFlag(SceneObjectUsages.FullPathFinding) || c.Usage.HasFlag(SceneObjectUsages.CoarsePathFinding));
             });

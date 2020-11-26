@@ -241,6 +241,10 @@ namespace Engine.UI
         /// </summary>
         private float rotation = 0f;
         /// <summary>
+        /// Rotation and scale pivot anchor
+        /// </summary>
+        private PivotAnchors pivotAnchor = PivotAnchors.Default;
+        /// <summary>
         /// Base color
         /// </summary>
         private Color4 baseColor;
@@ -275,6 +279,24 @@ namespace Engine.UI
         /// </summary>
         /// <remarks>When a control has a parent, all the position, size, scale and rotation parameters, are relative to it.</remarks>
         public UIControl Parent { get; protected set; }
+        /// <summary>
+        /// Root control
+        /// </summary>
+        public UIControl Root
+        {
+            get
+            {
+                return Parent?.Root ?? Parent;
+            }
+        }
+        /// <summary>
+        /// Gets whether the control has a parent or not
+        /// </summary>
+        public bool HasParent { get { return Parent != null; } }
+        /// <summary>
+        /// Gets whether the control is the root control
+        /// </summary>
+        public bool IsRoot { get { return Root == null; } }
         /// <summary>
         /// Children collection
         /// </summary>
@@ -337,44 +359,6 @@ namespace Engine.UI
         public virtual bool IsJustReleased { get; protected set; }
 
         /// <summary>
-        /// Gets or sets the left position in the render area
-        /// </summary>
-        public float Left
-        {
-            get
-            {
-                return left;
-            }
-            set
-            {
-                if (left != value)
-                {
-                    left = value;
-
-                    UpdateInternals = true;
-                }
-            }
-        }
-        /// <summary>
-        /// Gets or sets the top position in the render area
-        /// </summary>
-        public float Top
-        {
-            get
-            {
-                return top;
-            }
-            set
-            {
-                if (top != value)
-                {
-                    top = value;
-
-                    UpdateInternals = true;
-                }
-            }
-        }
-        /// <summary>
         /// Gets or sets the width
         /// </summary>
         public float Width
@@ -412,8 +396,9 @@ namespace Engine.UI
                 }
             }
         }
+
         /// <summary>
-        /// Gets or sets the scale
+        /// Gets or sets the local scale
         /// </summary>
         public float Scale
         {
@@ -432,7 +417,17 @@ namespace Engine.UI
             }
         }
         /// <summary>
-        /// Gets or sets the rotation
+        /// Gets or sets the absolute scale
+        /// </summary>
+        public float AbsoluteScale
+        {
+            get
+            {
+                return (Parent?.AbsoluteScale ?? 1) * Scale;
+            }
+        }
+        /// <summary>
+        /// Gets or sets the local rotation
         /// </summary>
         public float Rotation
         {
@@ -452,97 +447,7 @@ namespace Engine.UI
             }
         }
         /// <summary>
-        /// Gets the control's rectangle coordinates in the render area
-        /// </summary>
-        public RectangleF Rectangle
-        {
-            get
-            {
-                return new RectangleF(
-                    Left,
-                    Top,
-                    Width,
-                    Height);
-            }
-        }
-        /// <summary>
-        /// Gets the control's local center coordinates
-        /// </summary>
-        public Vector2 Center
-        {
-            get
-            {
-                return new Vector2(width, height) * 0.5f;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the left position in the render area, taking account the parent control configuration
-        /// </summary>
-        /// <remarks>Uses the parent position plus the actual relative position</remarks>
-        public float AbsoluteLeft
-        {
-            get
-            {
-                return (Parent?.AbsoluteLeft ?? 0) + Left;
-            }
-        }
-        /// <summary>
-        /// Gets or sets the top position in the render area, taking account the parent control configuration
-        /// </summary>
-        public float AbsoluteTop
-        {
-            get
-            {
-                return (Parent?.AbsoluteTop ?? 0) + Top;
-            }
-        }
-        /// <summary>
-        /// Gets or sets the width, taking account the parent control configuration
-        /// </summary>
-        public float AbsoluteWidth
-        {
-            get
-            {
-                if (fitWithParent)
-                {
-                    return Parent?.AbsoluteWidth ?? Width;
-                }
-                else
-                {
-                    return Width;
-                }
-            }
-        }
-        /// <summary>
-        /// Gets or sets the height, taking account the parent control configuration
-        /// </summary>
-        public float AbsoluteHeight
-        {
-            get
-            {
-                if (fitWithParent)
-                {
-                    return Parent?.AbsoluteHeight ?? Height;
-                }
-                else
-                {
-                    return Height;
-                }
-            }
-        }
-        /// <summary>
-        /// Gets or sets the scale, taking account the parent control configuration
-        /// </summary>
-        public float AbsoluteScale
-        {
-            get
-            {
-                return (Parent?.AbsoluteScale ?? 1) * Scale;
-            }
-        }
-        /// <summary>
-        /// Gets or sets the rotation, taking account the parent control configuration
+        /// Gets or sets the absolute rotation
         /// </summary>
         public float AbsoluteRotation
         {
@@ -552,112 +457,156 @@ namespace Engine.UI
             }
         }
         /// <summary>
-        /// Gets or sets the parent rectangle
+        /// Gets or sets the rotation and scale pivot anchor
+        /// </summary>
+        public PivotAnchors PivotAnchor
+        {
+            get
+            {
+                return pivotAnchor;
+            }
+            set
+            {
+                if (pivotAnchor != value)
+                {
+                    pivotAnchor = value;
+
+                    UpdateInternals = true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the (local) left coordinate value from parent or the screen origin
+        /// </summary>
+        public float Left
+        {
+            get
+            {
+                return left;
+            }
+            set
+            {
+                if (left != value)
+                {
+                    left = value;
+
+                    UpdateInternals = true;
+                }
+            }
+        }
+        /// <summary>
+        /// Gets the (absolute) left coordinate value the screen origin
+        /// </summary>
+        public float AbsoluteLeft
+        {
+            get
+            {
+                return (Parent?.AbsoluteLeft ?? 0) + Left;
+            }
+        }
+        /// <summary>
+        /// Gets or sets the (local) top coordinate value from parent or the screen origin
+        /// </summary>
+        public float Top
+        {
+            get
+            {
+                return top;
+            }
+            set
+            {
+                if (top != value)
+                {
+                    top = value;
+
+                    UpdateInternals = true;
+                }
+            }
+        }
+        /// <summary>
+        /// Gets the (absolute) top coordinate value from the screen origin
+        /// </summary>
+        public float AbsoluteTop
+        {
+            get
+            {
+                return (Parent?.AbsoluteTop ?? 0) + Top;
+            }
+        }
+
+        /// <summary>
+        /// Gets the control's rectangle local coordinates
+        /// </summary>
+        public RectangleF LocalRectangle
+        {
+            get
+            {
+                return new RectangleF(0, 0, Width, Height);
+            }
+        }
+        /// <summary>
+        /// Gets the control's rectangle absolute coordinates from screen origin
         /// </summary>
         public RectangleF AbsoluteRectangle
         {
             get
             {
-                return new RectangleF(
-                    AbsoluteLeft,
-                    AbsoluteTop,
-                    AbsoluteWidth,
-                    AbsoluteHeight);
+                return new RectangleF(AbsoluteLeft, AbsoluteTop, Width, Height);
             }
         }
         /// <summary>
-        /// Gets the parent center coordinates in the render area
+        /// Gets the control's rectangle coordinates relative to inmediate parent control position
+        /// </summary>
+        public RectangleF RelativeToParentRectangle
+        {
+            get
+            {
+                return new RectangleF(Left, Top, Width, Height);
+            }
+        }
+        /// <summary>
+        /// Gets the control's rectangle coordinates relative to root control position
+        /// </summary>
+        public RectangleF RelativeToRootRectangle
+        {
+            get
+            {
+                var rect = AbsoluteRectangle;
+
+                if (Root != null)
+                {
+                    return new RectangleF
+                    {
+                        Left = rect.Left - Root.Left,
+                        Top = rect.Top - Root.Top,
+                        Width = Width,
+                        Height = Height,
+                    };
+                }
+
+                return rect;
+            }
+        }
+
+        /// <summary>
+        /// Gets the control's local center coordinates
+        /// </summary>
+        public Vector2 LocalCenter
+        {
+            get
+            {
+                return new Vector2(Width * 0.5f, Height * 0.5f);
+            }
+        }
+        /// <summary>
+        /// Gets the control's absolute center coordinates
         /// </summary>
         public Vector2 AbsoluteCenter
         {
             get
             {
                 return AbsoluteRectangle.Center;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the first's hierarchy item left position in the render area
-        /// </summary>
-        public float GrandpaLeft
-        {
-            get
-            {
-                return Parent?.GrandpaLeft ?? Left;
-            }
-        }
-        /// <summary>
-        /// Gets or sets the first's hierarchy item top position in the render area
-        /// </summary>
-        public float GrandpaTop
-        {
-            get
-            {
-                return Parent?.GrandpaTop ?? Top;
-            }
-        }
-        /// <summary>
-        /// Gets or sets the first's hierarchy item width
-        /// </summary>
-        public float GrandpaWidth
-        {
-            get
-            {
-                return Parent?.GrandpaWidth ?? Width;
-            }
-        }
-        /// <summary>
-        /// Gets or sets the first's hierarchy item height
-        /// </summary>
-        public float GrandpaHeight
-        {
-            get
-            {
-                return Parent?.GrandpaHeight ?? Height;
-            }
-        }
-        /// <summary>
-        /// Gets or sets the first's hierarchy item scale
-        /// </summary>
-        public float GrandpaScale
-        {
-            get
-            {
-                return Parent?.GrandpaScale ?? Scale;
-            }
-        }
-        /// <summary>
-        /// Gets or sets the first's hierarchy item rotation
-        /// </summary>
-        public float GrandpaRotation
-        {
-            get
-            {
-                return Parent?.GrandpaRotation ?? Rotation;
-            }
-        }
-        /// <summary>
-        /// Gets or sets the first's hierarchy item rectangle
-        /// </summary>
-        public RectangleF GrandpaRectangle
-        {
-            get
-            {
-                return new RectangleF(
-                    GrandpaLeft,
-                    GrandpaTop,
-                    GrandpaWidth,
-                    GrandpaHeight);
-            }
-        }
-        /// <summary>
-        /// Gets the first's hierarchy item center coordinates in the render area
-        /// </summary>
-        public Vector2 GrandpaCenter
-        {
-            get
-            {
-                return GrandpaRectangle.Center;
             }
         }
 
@@ -876,17 +825,25 @@ namespace Engine.UI
         /// </summary>
         protected virtual void UpdateInternalState()
         {
-            CalculatePosition(AbsoluteRectangle);
+            if (!fitWithParent || Parent == null)
+            {
+                UpdateAnchorPositions();
 
-            var absRectangle = AbsoluteRectangle;
-            Vector2 pos = new Vector2(absRectangle.Left, absRectangle.Top);
-            Vector2 sca = new Vector2(absRectangle.Width, absRectangle.Height) * AbsoluteScale;
-            float rot = AbsoluteRotation;
+                var rect = GetRenderArea(true);
+                Vector2 size = new Vector2(rect.Width, rect.Height);
+                Vector2 pos = new Vector2(rect.Left, rect.Top);
+                Vector2 sca = Vector2.One * AbsoluteScale;
+                float rot = AbsoluteRotation;
 
-            Manipulator.SetScale(sca);
-            Manipulator.SetRotation(rot);
-            Manipulator.SetPosition(pos);
-            Manipulator.Update(GrandpaCenter, GrandpaScale);
+                Manipulator.SetSize(size);
+                Manipulator.SetScale(sca);
+                Manipulator.SetRotation(rot);
+                Manipulator.SetPosition(pos);
+
+                Vector2? parentPos = GetTransformationPivot();
+
+                Manipulator.Update2D(parentPos);
+            }
 
             if (children.Any())
             {
@@ -894,27 +851,85 @@ namespace Engine.UI
             }
         }
         /// <summary>
-        /// Calculates the control position
+        /// Updates the control position, based on the specified anchor value
         /// </summary>
-        /// <param name="controlBounds"></param>
-        private void CalculatePosition(RectangleF controlBounds)
+        protected virtual void UpdateAnchorPositions()
         {
             if (anchor == Anchors.None)
             {
                 return;
             }
 
-            var areaBounds = Parent?.AbsoluteRectangle ?? Game.Form.RenderRectangle;
-
-            if (anchor.HasFlag(Anchors.HorizontalCenter))
-            {
-                left = areaBounds.Center.X - (controlBounds.Width * 0.5f);
-            }
+            var areaRect = Root?.AbsoluteRectangle ?? Game.Form.RenderRectangle;
 
             if (anchor.HasFlag(Anchors.VerticalCenter))
             {
-                top = areaBounds.Center.Y - (controlBounds.Height * 0.5f);
+                top = areaRect.Center.Y - (Height * 0.5f);
             }
+
+            if (anchor.HasFlag(Anchors.Top))
+            {
+                top = areaRect.Top;
+            }
+
+            if (anchor.HasFlag(Anchors.Bottom))
+            {
+                top = areaRect.Bottom - Height;
+            }
+
+            if (anchor.HasFlag(Anchors.HorizontalCenter))
+            {
+                left = areaRect.Center.X - (Width * 0.5f);
+            }
+
+            if (anchor.HasFlag(Anchors.Left))
+            {
+                left = areaRect.Left;
+            }
+
+            if (anchor.HasFlag(Anchors.Right))
+            {
+                left = areaRect.Right - Width;
+            }
+        }
+        /// <summary>
+        /// Gets the rotation and scaling absolute pivot point
+        /// </summary>
+        /// <returns>Returns the control pivot point</returns>
+        public virtual Vector2? GetTransformationPivot()
+        {
+            if (IsRoot)
+            {
+                return null;
+            }
+
+            RectangleF rect = AbsoluteRectangle;
+            if (PivotAnchor.HasFlag(PivotAnchors.Root)) rect = Root.AbsoluteRectangle;
+            if (PivotAnchor.HasFlag(PivotAnchors.Parent)) rect = Parent.AbsoluteRectangle;
+
+            Vector2 result;
+
+            switch (PivotAnchor)
+            {
+                case PivotAnchors.TopLeft:
+                    result = rect.TopLeft;
+                    break;
+                case PivotAnchors.TopRight:
+                    result = rect.TopRight;
+                    break;
+                case PivotAnchors.BottomLeft:
+                    result = rect.BottomLeft;
+                    break;
+                case PivotAnchors.BottomRight:
+                    result = rect.BottomRight;
+                    break;
+                case PivotAnchors.Center:
+                default:
+                    result = rect.Center;
+                    break;
+            }
+
+            return result;
         }
 
         /// <inheritdoc/>
@@ -931,6 +946,16 @@ namespace Engine.UI
             {
                 children.ForEach(c => c.Draw(context));
             }
+        }
+
+        /// <summary>
+        /// Gets the current control's transform matrix
+        /// </summary>
+        /// <returns>Returns the transform matrix</returns>
+        /// <remarks>If the control is parent-fitted, returns the parent's transform</remarks>
+        public Matrix GetTransform()
+        {
+            return fitWithParent && HasParent ? Parent.GetTransform() : Manipulator.LocalTransform;
         }
 
         /// <summary>
@@ -1004,8 +1029,8 @@ namespace Engine.UI
             }
 
             ctrl.Parent = this;
-            ctrl.HasParent = true;
             ctrl.FitWithParent = fitToParent;
+            ctrl.PivotAnchor = PivotAnchors.Default;
 
             if (!children.Contains(ctrl))
             {
@@ -1044,7 +1069,6 @@ namespace Engine.UI
             if (children.Contains(ctrl))
             {
                 ctrl.Parent = null;
-                ctrl.HasParent = false;
                 ctrl.FitWithParent = false;
 
                 children.Remove(ctrl);
@@ -1088,7 +1112,6 @@ namespace Engine.UI
             }
 
             ctrl.Parent = this;
-            ctrl.HasParent = true;
             ctrl.FitWithParent = fitToParent;
 
             if (!children.Contains(ctrl))
@@ -1174,8 +1197,8 @@ namespace Engine.UI
         /// <remarks>Adjust the control left-top position and with and height properties</remarks>
         public virtual void SetRectangle(RectangleF rectangle)
         {
-            left = rectangle.X;
-            top = rectangle.Y;
+            left = rectangle.Left;
+            top = rectangle.Top;
             width = rectangle.Width;
             height = rectangle.Height;
             anchor = Anchors.None;
@@ -1184,12 +1207,24 @@ namespace Engine.UI
         }
 
         /// <summary>
-        /// Gets the render area
+        /// Gets the render area in absolute coordinates from screen origin
         /// </summary>
+        /// <param name="applyPadding">Apply the padding to the resulting reactangle, if any.</param>
         /// <returns>Returns the render area</returns>
-        public virtual RectangleF GetRenderArea()
+        public virtual RectangleF GetRenderArea(bool applyPadding)
         {
-            return Padding.Apply(AbsoluteRectangle);
+            RectangleF renderArea;
+
+            if (fitWithParent && Parent != null)
+            {
+                renderArea = Parent.AbsoluteRectangle;
+            }
+            else
+            {
+                renderArea = AbsoluteRectangle;
+            }
+
+            return applyPadding ? Padding.Apply(renderArea) : renderArea;
         }
     }
 }
