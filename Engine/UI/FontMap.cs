@@ -85,12 +85,6 @@ namespace Engine.UI
         /// <returns>Returns a new vertex list</returns>
         private static IEnumerable<VertexFont> AlignVertices(IEnumerable<VertexFont> vertices, RectangleF rect, HorizontalTextAlign horizontalAlign, VerticalTextAlign verticalAlign)
         {
-            if (horizontalAlign == HorizontalTextAlign.Left && verticalAlign == VerticalTextAlign.Top)
-            {
-                //Return a copy of the original enumerable
-                return vertices.ToArray();
-            }
-
             //Separate lines
             var lines = SeparateLines(vertices.ToArray());
 
@@ -172,15 +166,15 @@ namespace Engine.UI
             float diffX;
             if (horizontalAlign == HorizontalTextAlign.Center)
             {
-                diffX = (maxWidth - lineWidth) * 0.5f;
+                diffX = -lineWidth * 0.5f;
             }
             else if (horizontalAlign == HorizontalTextAlign.Right)
             {
-                diffX = maxWidth - lineWidth;
+                diffX = (maxWidth * 0.5f) - lineWidth;
             }
             else
             {
-                diffX = 0;
+                diffX = -maxWidth * 0.5f;
             }
 
             return diffX;
@@ -196,15 +190,15 @@ namespace Engine.UI
             float diffY;
             if (verticalAlign == VerticalTextAlign.Middle)
             {
-                diffY = (maxHeight - columnHeight) * 0.5f;
+                diffY = -columnHeight * 0.5f;
             }
             else if (verticalAlign == VerticalTextAlign.Bottom)
             {
-                diffY = maxHeight - columnHeight;
+                diffY = (maxHeight * 0.5f) - columnHeight;
             }
             else
             {
-                diffY = 0;
+                diffY = -maxHeight * 0.5f;
             }
 
             return diffY;

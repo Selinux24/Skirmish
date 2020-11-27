@@ -302,8 +302,9 @@ namespace Engine.UI
             var renderArea = GetRenderArea();
 
             Vector2 sca = Vector2.One * (parent?.AbsoluteScale ?? 1f);
-            Vector2 pos = new Vector2(renderArea.X, renderArea.Y + baseLineThr);
             float rot = parent?.AbsoluteRotation ?? 0f;
+            Vector2 pos = renderArea.Center;
+            pos.Y += baseLineThr;
 
             Vector2? parentPos = parent?.GetTransformationPivot();
 

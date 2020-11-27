@@ -220,6 +220,7 @@ namespace Collada.Start
             var tooltipDesc = UITextAreaDescription.DefaultFromFile(Path.Combine(resourcesFolder, largeControlsFont), 12);
             tooltipDesc.TextForeColor = Color.LightGray;
             tooltipDesc.Width = 250;
+            tooltipDesc.EventsEnabled = false;
 
             description = await this.AddComponentUITextArea("Tooltip", tooltipDesc, layerHUD);
         }
@@ -257,7 +258,7 @@ namespace Collada.Start
             desc.TabButtonPadding = 5;
 
             desc.TabPanelsPadding = new Padding() { Bottom = 5, Left = 5, Right = 5, Top = 0 };
-            desc.TabPanelPadding = 100;
+            desc.TabPanelPadding = 2;
 
             modularDungeonTabs = await this.AddComponentUITabPanel("ModularDungeonTabs", desc, layerHUD + 1);
             modularDungeonTabs.Visible = false;

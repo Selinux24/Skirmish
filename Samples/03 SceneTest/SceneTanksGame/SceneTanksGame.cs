@@ -255,6 +255,9 @@ namespace SceneTest.SceneTanksGame
             gameMessage = await this.AddComponentUITextArea("GameMessage", UITextAreaDescription.DefaultFromFile(fontFilename, 120, false), LayerUIEffects + 1);
             gameMessage.TextForeColor = Color.Yellow;
             gameMessage.TextShadowColor = Color.Yellow * 0.5f;
+            gameMessage.TextHorizontalAlign = HorizontalTextAlign.Center;
+            gameMessage.TextVerticalAlign = VerticalTextAlign.Middle;
+            gameMessage.GrowControlWithText = false;
             gameMessage.Visible = false;
 
             gameKeyHelp = await this.AddComponentUITextArea("GameKeyHelp", UITextAreaDescription.DefaultFromFile(fontFilename, 25, true), LayerUIEffects + 1);

@@ -170,20 +170,32 @@ namespace Engine.UI
         /// <param name="ctrl">Control</param>
         private static void InitControlState(Point mousePosition, UIControl ctrl)
         {
-            ctrl.IsMouseOver = ctrl.Contains(mousePosition);
-            if (!ctrl.IsMouseOver)
+            if (!ctrl.Active || !ctrl.Visible)
             {
-                if (ctrl.prevIsMouseOver)
+                ctrl.prevIsMouseOver = false;
+                ctrl.IsMouseOver = false;
+
+                ctrl.IsPressed = false;
+                ctrl.IsJustPressed = false;
+                ctrl.IsJustReleased = false;
+            }
+            else
+            {
+                ctrl.IsMouseOver = ctrl.Contains(mousePosition);
+                if (!ctrl.IsMouseOver)
                 {
-                    ctrl.FireMouseLeaveEvent();
+                    if (ctrl.prevIsMouseOver)
+                    {
+                        ctrl.FireMouseLeaveEvent();
+                    }
+
+                    ctrl.prevIsMouseOver = false;
                 }
 
-                ctrl.prevIsMouseOver = false;
+                ctrl.IsPressed = false;
+                ctrl.IsJustPressed = false;
+                ctrl.IsJustReleased = false;
             }
-
-            ctrl.IsPressed = false;
-            ctrl.IsJustPressed = false;
-            ctrl.IsJustReleased = false;
 
             if (!ctrl.Children.Any())
             {
@@ -923,7 +935,6 @@ namespace Engine.UI
                 case PivotAnchors.BottomRight:
                     result = rect.BottomRight;
                     break;
-                case PivotAnchors.Center:
                 default:
                     result = rect.Center;
                     break;
@@ -1127,7 +1138,9 @@ namespace Engine.UI
         /// <returns>Returns true if the point is contained into the control rectangle</returns>
         public bool Contains(Point point)
         {
-            return AbsoluteRectangle.Scale(AbsoluteScale).Contains(point.X, point.Y);
+            var rect = GetRenderArea(false);
+
+            return rect.Scale(AbsoluteScale).Contains(point.X, point.Y);
         }
 
         /// <summary>
@@ -1217,7 +1230,7 @@ namespace Engine.UI
 
             if (fitWithParent && Parent != null)
             {
-                renderArea = Parent.AbsoluteRectangle;
+                renderArea = Parent.GetRenderArea(true);
             }
             else
             {
