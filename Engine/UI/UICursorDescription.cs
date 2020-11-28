@@ -58,7 +58,7 @@ namespace Engine.UI
         /// </summary>
         public UICursorDescription() : base()
         {
-
+            EventsEnabled = false;
         }
     }
 }

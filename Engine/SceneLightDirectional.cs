@@ -166,7 +166,7 @@ namespace Engine
             ToCascadeScale = Vector4.Zero;
         }
         /// <inheritdoc/>
-        public override bool MarkForShadowCasting(Vector3 eyePosition)
+        public override bool MarkForShadowCasting(GameEnvironment environment, Vector3 eyePosition)
         {
             CastShadowsMarked = CastShadow;
 

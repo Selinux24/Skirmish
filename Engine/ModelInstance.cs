@@ -465,7 +465,7 @@ namespace Engine
         /// <param name="origin">Origin point</param>
         public void SetLOD(Vector3 origin)
         {
-            LevelOfDetail = GameEnvironment.GetLOD(
+            LevelOfDetail = model.Scene.GameEnvironment.GetLOD(
                 origin,
                 GetBoundingSphere(),
                 Manipulator.FinalTransform);

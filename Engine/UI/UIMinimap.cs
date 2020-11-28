@@ -187,7 +187,7 @@ namespace Engine.UI
         /// <inheritdoc/>
         public override bool Cull(IIntersectionVolume volume, out float distance)
         {
-            drawContext.Lights.Cull(volume, drawContext.EyePosition);
+            drawContext.Lights.Cull(volume, drawContext.EyePosition, Scene.GameEnvironment.LODDistanceLow);
 
             return base.Cull(volume, out distance);
         }

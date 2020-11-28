@@ -99,21 +99,21 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="game">Game</param>
-        public SceneRendererDeferred(Game game) : base(game)
+        /// <param name="scene">Scene</param>
+        public SceneRendererDeferred(Scene scene) : base(scene)
         {
-            lightDrawer = new SceneRendererDeferredLights(game.Graphics);
+            lightDrawer = new SceneRendererDeferredLights(scene.Game.Graphics);
 
             UpdateRectangleAndView();
 
-            geometryBuffer = new RenderTarget(game, Format.R32G32B32A32_Float, false, 3);
-            lightBuffer = new RenderTarget(game, Format.R32G32B32A32_Float, false, 1);
+            geometryBuffer = new RenderTarget(scene.Game, Format.R32G32B32A32_Float, false, 3);
+            lightBuffer = new RenderTarget(scene.Game, Format.R32G32B32A32_Float, false, 1);
 
-            blendDeferredComposer = EngineBlendState.DeferredComposer(game.Graphics, 3);
-            blendDeferredComposerTransparent = EngineBlendState.DeferredComposerTransparent(game.Graphics, 3);
-            blendDeferredComposerAlpha = EngineBlendState.DeferredComposerAlpha(game.Graphics, 3);
-            blendDeferredComposerAdditive = EngineBlendState.DeferredComposerAdditive(game.Graphics, 3);
-            blendDeferredLighting = EngineBlendState.DeferredLighting(game.Graphics);
+            blendDeferredComposer = EngineBlendState.DeferredComposer(scene.Game.Graphics, 3);
+            blendDeferredComposerTransparent = EngineBlendState.DeferredComposerTransparent(scene.Game.Graphics, 3);
+            blendDeferredComposerAlpha = EngineBlendState.DeferredComposerAlpha(scene.Game.Graphics, 3);
+            blendDeferredComposerAdditive = EngineBlendState.DeferredComposerAdditive(scene.Game.Graphics, 3);
+            blendDeferredLighting = EngineBlendState.DeferredLighting(scene.Game.Graphics);
         }
         /// <summary>
         /// Destructor
@@ -397,21 +397,21 @@ namespace Engine
         /// </summary>
         private void UpdateRectangleAndView()
         {
-            Width = Game.Form.RenderWidth;
-            Height = Game.Form.RenderHeight;
+            Width = Scene.Game.Form.RenderWidth;
+            Height = Scene.Game.Form.RenderHeight;
 
-            Viewport = Game.Form.GetViewport();
+            Viewport = Scene.Game.Form.GetViewport();
 
-            ViewProjection = Game.Form.GetOrthoProjectionMatrix();
+            ViewProjection = Scene.Game.Form.GetOrthoProjectionMatrix();
 
-            lightDrawer.Update(Game.Graphics, Width, Height);
+            lightDrawer.Update(Scene.Game.Graphics, Width, Height);
         }
         /// <summary>
         /// Binds graphics for g-buffer pass
         /// </summary>
         private void BindGBuffer()
         {
-            var graphics = Game.Graphics;
+            var graphics = Scene.Game.Graphics;
 
             //Set local viewport
             graphics.SetViewport(Viewport);
@@ -427,7 +427,7 @@ namespace Engine
         /// </summary>
         private void BindLights()
         {
-            var graphics = Game.Graphics;
+            var graphics = Scene.Game.Graphics;
 
             //Set local viewport
             graphics.SetViewport(Viewport);
@@ -443,7 +443,7 @@ namespace Engine
         /// </summary>
         private void BindResult()
         {
-            var graphics = Game.Graphics;
+            var graphics = Scene.Game.Graphics;
 
             //Restore backbuffer as render target and clear it
             graphics.SetDefaultViewport();
@@ -461,7 +461,7 @@ namespace Engine
 
             Stopwatch swTotal = Stopwatch.StartNew();
 #endif
-            var graphics = Game.Graphics;
+            var graphics = Scene.Game.Graphics;
 
             Counters.MaxInstancesPerFrame += context.Lights.DirectionalLights.Length;
             Counters.MaxInstancesPerFrame += context.Lights.PointLights.Length;
@@ -585,7 +585,7 @@ namespace Engine
         /// <param name="context">Drawing context</param>
         private void DrawResult(DrawContext context)
         {
-            var graphics = Game.Graphics;
+            var graphics = Scene.Game.Graphics;
 
 #if DEBUG
             long init = 0;
@@ -707,28 +707,28 @@ namespace Engine
         /// </summary>
         private void SetBlendDeferredComposer()
         {
-            Game.Graphics.SetBlendState(blendDeferredComposer);
+            Scene.Game.Graphics.SetBlendState(blendDeferredComposer);
         }
         /// <summary>
         /// Sets transparent deferred composer blend state
         /// </summary>
         private void SetBlendDeferredComposerTransparent()
         {
-            Game.Graphics.SetBlendState(blendDeferredComposerTransparent);
+            Scene.Game.Graphics.SetBlendState(blendDeferredComposerTransparent);
         }
         /// <summary>
         /// Sets additive deferred composer blend state
         /// </summary>
         private void SetBlendDeferredComposerAdditive()
         {
-            Game.Graphics.SetBlendState(blendDeferredComposerAdditive);
+            Scene.Game.Graphics.SetBlendState(blendDeferredComposerAdditive);
         }
         /// <summary>
         /// Sets deferred lighting blend state
         /// </summary>
         private void SetBlendDeferredLighting()
         {
-            Game.Graphics.SetBlendState(blendDeferredLighting);
+            Scene.Game.Graphics.SetBlendState(blendDeferredLighting);
         }
     }
 }

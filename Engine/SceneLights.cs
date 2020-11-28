@@ -357,13 +357,14 @@ namespace Engine
         /// </summary>
         /// <param name="volume">Volume</param>
         /// <param name="viewerPosition">Viewer position</param>
-        public void Cull(IIntersectionVolume volume, Vector3 viewerPosition)
+        /// <param name="distance">Light maximum distance</param>
+        public void Cull(IIntersectionVolume volume, Vector3 viewerPosition, float distance)
         {
             visibleLights.Clear();
 
             visibleLights.AddRange(CullDirectionalLights());
-            visibleLights.AddRange(CullPointLights(volume, viewerPosition));
-            visibleLights.AddRange(CullSpotLights(volume, viewerPosition));
+            visibleLights.AddRange(CullPointLights(volume, viewerPosition, distance));
+            visibleLights.AddRange(CullSpotLights(volume, viewerPosition, distance));
         }
         /// <summary>
         /// Cull test for directional lighs
@@ -379,7 +380,8 @@ namespace Engine
         /// </summary>
         /// <param name="volume">Volume</param>
         /// <param name="viewerPosition">Viewer position</param>
-        private IEnumerable<ISceneLight> CullPointLights(IIntersectionVolume volume, Vector3 viewerPosition)
+        /// <param name="distance">Light maximum distance</param>
+        private IEnumerable<ISceneLight> CullPointLights(IIntersectionVolume volume, Vector3 viewerPosition, float distance)
         {
             var pLights = pointLights
                 .Where(l =>
@@ -388,7 +390,7 @@ namespace Engine
                     {
                         float d = Vector3.DistanceSquared(viewerPosition, l.Position);
 
-                        return (l.Radius / d) >= (1f / GameEnvironment.LODDistanceLow);
+                        return (l.Radius / d) >= (1f / distance);
                     }
 
                     return false;
@@ -416,7 +418,8 @@ namespace Engine
         /// </summary>
         /// <param name="volume">Volume</param>
         /// <param name="viewerPosition">Viewer position</param>
-        private IEnumerable<ISceneLight> CullSpotLights(IIntersectionVolume volume, Vector3 viewerPosition)
+        /// <param name="distance">Light maximum distance</param>
+        private IEnumerable<ISceneLight> CullSpotLights(IIntersectionVolume volume, Vector3 viewerPosition, float distance)
         {
             var sLights = spotLights
                 .Where(l =>
@@ -425,7 +428,7 @@ namespace Engine
                     {
                         float d = Vector3.DistanceSquared(viewerPosition, l.Position);
 
-                        return (l.Radius / d) >= (1f / GameEnvironment.LODDistanceLow);
+                        return (l.Radius / d) >= (1f / distance);
                     }
 
                     return false;
@@ -490,38 +493,41 @@ namespace Engine
         /// <summary>
         /// Gets a collection of directional lights that cast shadow
         /// </summary>
+        /// <param name="environment">Game environment</param>
         /// <param name="eyePosition">Eye position</param>
         /// <returns>Returns a light collection</returns>
-        public IEnumerable<ISceneLightDirectional> GetDirectionalShadowCastingLights(Vector3 eyePosition)
+        public IEnumerable<ISceneLightDirectional> GetDirectionalShadowCastingLights(GameEnvironment environment, Vector3 eyePosition)
         {
             return visibleLights
                 .OfType<ISceneLightDirectional>()
-                .Where(l => l.MarkForShadowCasting(eyePosition))
+                .Where(l => l.MarkForShadowCasting(environment, eyePosition))
                 .ToArray();
         }
         /// <summary>
         /// Gets a collection of point lights that cast shadow
         /// </summary>
+        /// <param name="environment">Game environment</param>
         /// <param name="eyePosition">Eye position</param>
         /// <returns>Returns a light collection</returns>
-        public IEnumerable<ISceneLightPoint> GetPointShadowCastingLights(Vector3 eyePosition)
+        public IEnumerable<ISceneLightPoint> GetPointShadowCastingLights(GameEnvironment environment, Vector3 eyePosition)
         {
             return visibleLights
                 .OfType<ISceneLightPoint>()
-                .Where(l => l.MarkForShadowCasting(eyePosition))
+                .Where(l => l.MarkForShadowCasting(environment, eyePosition))
                 .OrderBy(l => Vector3.DistanceSquared(l.Position, eyePosition))
                 .ToArray();
         }
         /// <summary>
         /// Gets a collection of spot lights that cast shadow
         /// </summary>
+        /// <param name="environment">Game environment</param>
         /// <param name="eyePosition">Eye position</param>
         /// <returns>Returns a light collection</returns>
-        public IEnumerable<ISceneLightSpot> GetSpotShadowCastingLights(Vector3 eyePosition)
+        public IEnumerable<ISceneLightSpot> GetSpotShadowCastingLights(GameEnvironment environment, Vector3 eyePosition)
         {
             return visibleLights
                 .OfType<ISceneLightSpot>()
-                .Where(l => l.MarkForShadowCasting(eyePosition))
+                .Where(l => l.MarkForShadowCasting(environment, eyePosition))
                 .OrderBy(l => Vector3.DistanceSquared(l.Position, eyePosition))
                 .ToArray();
         }

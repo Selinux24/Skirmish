@@ -336,7 +336,12 @@ namespace Skybox
 
             pManager = await this.AddComponentParticleManager("ParticleManager", pManagerDesc);
 
-            movingFireEmitter = new ParticleEmitter() { EmissionRate = 0.1f, InfiniteDuration = true };
+            movingFireEmitter = new ParticleEmitter()
+            {
+                EmissionRate = 0.1f,
+                InfiniteDuration = true,
+                MaximumDistance = GameEnvironment.LODDistanceLow,
+            };
 
             pManager.AddParticleSystem(ParticleSystemTypes.CPU, pBigFire, movingFireEmitter);
         }
@@ -404,8 +409,8 @@ namespace Skybox
 
                 Lights.Add(torchLights[i]);
 
-                pManager.AddParticleSystem(ParticleSystemTypes.CPU, pFire, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.1f });
-                pManager.AddParticleSystem(ParticleSystemTypes.CPU, pPlume, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.5f });
+                pManager.AddParticleSystem(ParticleSystemTypes.CPU, pFire, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.1f, MaximumDistance = GameEnvironment.LODDistanceLow });
+                pManager.AddParticleSystem(ParticleSystemTypes.CPU, pPlume, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.5f, MaximumDistance = GameEnvironment.LODDistanceLow });
             });
 
             Parallel.For(0, obeliskPositions.Length, (i, loopState) =>

@@ -47,5 +47,10 @@ namespace Engine
         /// </summary>
         /// <returns>Returns an effect</returns>
         IShadowMapDrawer GetEffect();
+
+        /// <summary>
+        /// Update shadow map globals
+        /// </summary>
+        void UpdateGlobals();
     }
 }

@@ -28,8 +28,8 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="game">Game</param>
-        public SceneRendererForward(Game game) : base(game)
+        /// <param name="scene">Scene</param>
+        public SceneRendererForward(Scene scene) : base(scene)
         {
 
         }
@@ -95,7 +95,7 @@ namespace Engine
             Stopwatch swPreparation = Stopwatch.StartNew();
 #endif
             //Set default render target and depth buffer, and clear it
-            var graphics = Game.Graphics;
+            var graphics = Scene.Game.Graphics;
             graphics.SetDefaultViewport();
             graphics.SetDefaultRenderTarget();
 #if DEBUG
@@ -242,9 +242,9 @@ namespace Engine
             //Reset drawer mode
             context.DrawerMode = mode;
 
-            if (Game.CollectGameStatus)
+            if (Scene.Game.CollectGameStatus)
             {
-                Game.GameStatus.Add(dict);
+                Scene.Game.GameStatus.Add(dict);
             }
         }
     }

@@ -113,9 +113,9 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override bool MarkForShadowCasting(Vector3 eyePosition)
+        public override bool MarkForShadowCasting(GameEnvironment environment, Vector3 eyePosition)
         {
-            CastShadowsMarked = EvaluateLight(eyePosition, CastShadow, Position, Radius);
+            CastShadowsMarked = EvaluateLight(environment, eyePosition, CastShadow, Position, Radius);
 
             return CastShadowsMarked;
         }

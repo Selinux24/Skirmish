@@ -21,6 +21,12 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         /// <param name="scene">Scene</param>
         void Draw(GameTime gameTime, Scene scene);
+
+        /// <summary>
+        /// Updates the scene renderer globals
+        /// </summary>
+        void UpdateGlobals();
+
         /// <summary>
         /// Gets renderer resources
         /// </summary>

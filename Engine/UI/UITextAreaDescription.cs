@@ -131,7 +131,7 @@ namespace Engine.UI
         public UITextAreaDescription()
             : base()
         {
-
+            EventsEnabled = false;
         }
     }
 }

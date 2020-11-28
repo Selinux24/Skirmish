@@ -108,14 +108,14 @@ namespace Engine
         /// </summary>
         public ParticleEmitterDescription()
         {
-            this.Position = Vector3.Zero;
-            this.Velocity = Vector3.Up;
-            this.Scale = 1f;
-            this.EmissionRate = 1f;
-            this.Duration = 0f;
-            this.InfiniteDuration = false;
-            this.MaximumDistance = GameEnvironment.LODDistanceLow;
-            this.Distance = 0f;
+            Position = Vector3.Zero;
+            Velocity = Vector3.Up;
+            Scale = 1f;
+            EmissionRate = 1f;
+            Duration = 0f;
+            InfiniteDuration = false;
+            MaximumDistance = 100f;
+            Distance = 0f;
         }
     }
 }

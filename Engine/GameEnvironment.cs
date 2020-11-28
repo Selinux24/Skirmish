@@ -19,23 +19,234 @@ namespace Engine
         /// <summary>
         /// Maximum distance for high level of detail models
         /// </summary>
-        public static float LODDistanceHigh { get; set; } = 100f;
+        private float lodDistanceHigh = 100f;
         /// <summary>
         /// Maximum distance for medium level of detail models
         /// </summary>
-        public static float LODDistanceMedium { get; set; } = 200f;
+        private float lodDistanceMedium = 200f;
         /// <summary>
         /// Maximum distance for low level of detail models
         /// </summary>
-        public static float LODDistanceLow { get; set; } = 500f;
+        private float lodDistanceLow = 500f;
         /// <summary>
         /// Maximum distance for minimum level of detail models
         /// </summary>
-        public static float LODDistanceMinimum { get; set; } = 1000f;
+        private float lodDistanceMinimum = 1000f;
+
         /// <summary>
         /// The engine will discard all lights where: Distance / light radius < threshold
         /// </summary>
-        public static float ShadowRadiusDistanceThreshold { get; set; } = 0.25f;
+        private float shadowRadiusDistanceThreshold = 0.25f;
+
+        /// <summary>
+        /// Maximum distance for High level detailed shadows
+        /// </summary>
+        private float shadowDistanceHigh = 10f;
+        /// <summary>
+        /// Maximum distance for Medium level detailed shadows
+        /// </summary>
+        private float shadowDistanceMedium = 25f;
+        /// <summary>
+        /// Maximum distance for Low level detailed shadows
+        /// </summary>
+        private float shadowDistanceLow = 50f;
+
+        /// <summary>
+        /// Maximum distance for high level of detail models
+        /// </summary>
+        public float LODDistanceHigh
+        {
+            get
+            {
+                return lodDistanceHigh;
+            }
+            set
+            {
+                if (lodDistanceHigh != value)
+                {
+                    lodDistanceHigh = value;
+
+                    Modified = true;
+                }
+            }
+        }
+        /// <summary>
+        /// Maximum distance for medium level of detail models
+        /// </summary>
+        public float LODDistanceMedium
+        {
+            get
+            {
+                return lodDistanceMedium;
+            }
+            set
+            {
+                if (lodDistanceMedium != value)
+                {
+                    lodDistanceMedium = value;
+
+                    Modified = true;
+                }
+            }
+        }
+        /// <summary>
+        /// Maximum distance for low level of detail models
+        /// </summary>
+        public float LODDistanceLow
+        {
+            get
+            {
+                return lodDistanceLow;
+            }
+            set
+            {
+                if (lodDistanceLow != value)
+                {
+                    lodDistanceLow = value;
+
+                    Modified = true;
+                }
+            }
+        }
+        /// <summary>
+        /// Maximum distance for minimum level of detail models
+        /// </summary>
+        public float LODDistanceMinimum
+        {
+            get
+            {
+                return lodDistanceMinimum;
+            }
+            set
+            {
+                if (lodDistanceMinimum != value)
+                {
+                    lodDistanceMinimum = value;
+
+                    Modified = true;
+                }
+            }
+        }
+        /// <summary>
+        /// The engine will discard all lights where: Distance / light radius < threshold
+        /// </summary>
+        public float ShadowRadiusDistanceThreshold
+        {
+            get
+            {
+                return shadowRadiusDistanceThreshold;
+            }
+            set
+            {
+                if (shadowRadiusDistanceThreshold != value)
+                {
+                    shadowRadiusDistanceThreshold = value;
+
+                    Modified = true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Maximum distance for High level detailed shadows
+        /// </summary>
+        public float ShadowDistanceHigh
+        {
+            get
+            {
+                return shadowDistanceHigh;
+            }
+            set
+            {
+                if (shadowDistanceHigh != value)
+                {
+                    shadowDistanceHigh = value;
+
+                    Modified = true;
+                }
+            }
+        }
+        /// <summary>
+        /// Maximum distance for Medium level detailed shadows
+        /// </summary>
+        public float ShadowDistanceMedium
+        {
+            get
+            {
+                return shadowDistanceMedium;
+            }
+            set
+            {
+                if (shadowDistanceMedium != value)
+                {
+                    shadowDistanceMedium = value;
+
+                    Modified = true;
+                }
+            }
+        }
+        /// <summary>
+        /// Maximum distance for Low level detailed shadows
+        /// </summary>
+        public float ShadowDistanceLow
+        {
+            get
+            {
+                return shadowDistanceLow;
+            }
+            set
+            {
+                if (shadowDistanceLow != value)
+                {
+                    shadowDistanceLow = value;
+
+                    Modified = true;
+                }
+            }
+        }
+        /// <summary>
+        /// Shadow map sampling distances
+        /// </summary>
+        public float[] CascadeShadowMapsDistances
+        {
+            get
+            {
+                return new[]
+                {
+                    shadowDistanceHigh,
+                    shadowDistanceMedium,
+                    shadowDistanceLow,
+                };
+            }
+        }
+
+        /// <summary>
+        /// Time of day controller
+        /// </summary>
+        public TimeOfDay TimeOfDay { get; private set; } = new TimeOfDay();
+
+        /// <summary>
+        /// Environment modified flag
+        /// </summary>
+        public bool Modified { get; private set; } = false;
+
+        /// <summary>
+        /// Updates the task list
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        public bool Update(GameTime gameTime)
+        {
+            TimeOfDay.Update(gameTime);
+
+            if (Modified)
+            {
+                Modified = false;
+
+                return true;
+            }
+
+            return false;
+        }
 
         /// <summary>
         /// Gets the level of detail
@@ -44,7 +255,7 @@ namespace Engine
         /// <param name="coarseBoundingSphere">Coarse bounding sphere</param>
         /// <param name="localTransform">Local transform</param>
         /// <returns>Returns the level of detail</returns>
-        public static LevelOfDetail GetLOD(Vector3 origin, BoundingSphere? coarseBoundingSphere, Matrix localTransform)
+        public LevelOfDetail GetLOD(Vector3 origin, BoundingSphere? coarseBoundingSphere, Matrix localTransform)
         {
             Vector3 position = localTransform.TranslationVector;
             float radius = 0f;
@@ -76,33 +287,6 @@ namespace Engine
             {
                 return LevelOfDetail.None;
             }
-        }
-
-        /// <summary>
-        /// Maximum distance for High level detailed shadows
-        /// </summary>
-        public static float ShadowDistanceHigh { get; set; } = 10f;
-        /// <summary>
-        /// Maximum distance for Medium level detailed shadows
-        /// </summary>
-        public static float ShadowDistanceMedium { get; set; } = 25f;
-        /// <summary>
-        /// Maximum distance for Low level detailed shadows
-        /// </summary>
-        public static float ShadowDistanceLow { get; set; } = 50f;
-
-        /// <summary>
-        /// Time of day controller
-        /// </summary>
-        public TimeOfDay TimeOfDay { get; private set; } = new TimeOfDay();
-
-        /// <summary>
-        /// Updates the task list
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        public void Update(GameTime gameTime)
-        {
-            TimeOfDay.Update(gameTime);
         }
     }
 }

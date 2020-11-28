@@ -12,9 +12,9 @@ namespace Engine
     public abstract class ShadowMap : IShadowMap
     {
         /// <summary>
-        /// Game instance
+        /// Scene
         /// </summary>
-        protected Game Game { get; private set; }
+        protected Scene Scene { get; private set; }
         /// <summary>
         /// Viewport
         /// </summary>
@@ -48,15 +48,17 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="game">Game</param>
+        /// <param name="scene">Scene</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
         /// <param name="arraySize">Array size</param>
-        protected ShadowMap(Game game, int width, int height, int arraySize)
+        protected ShadowMap(Scene scene, int width, int height, int arraySize)
         {
-            this.Game = game;
+            Scene = scene;
 
-            this.Viewports = Helper.CreateArray(arraySize, new Viewport(0, 0, width, height, 0, 1.0f));
+            Viewports = Helper.CreateArray(arraySize, new Viewport(0, 0, width, height, 0, 1.0f));
 
-            this.FromLightViewProjectionArray = Helper.CreateArray(arraySize, Matrix.Identity);
+            FromLightViewProjectionArray = Helper.CreateArray(arraySize, Matrix.Identity);
         }
         /// <summary>
         /// Destructor
@@ -82,15 +84,15 @@ namespace Engine
         {
             if (disposing)
             {
-                for (int i = 0; i < this.DepthMap?.Length; i++)
+                for (int i = 0; i < DepthMap?.Length; i++)
                 {
-                    this.DepthMap[i]?.Dispose();
-                    this.DepthMap[i] = null;
+                    DepthMap[i]?.Dispose();
+                    DepthMap[i] = null;
                 }
-                this.DepthMap = null;
+                DepthMap = null;
 
-                this.Texture?.Dispose();
-                this.Texture = null;
+                Texture?.Dispose();
+                Texture = null;
             }
         }
 
@@ -105,6 +107,11 @@ namespace Engine
         public abstract IShadowMapDrawer GetEffect();
 
         /// <summary>
+        /// Update shadow map globals
+        /// </summary>
+        public abstract void UpdateGlobals();
+
+        /// <summary>
         /// Binds the shadow map data to graphics
         /// </summary>
         /// <param name="graphics">Graphics</param>
@@ -112,12 +119,12 @@ namespace Engine
         public void Bind(Graphics graphics, int index)
         {
             //Set shadow mapper viewport
-            graphics.SetViewports(this.Viewports);
+            graphics.SetViewports(Viewports);
 
             //Set shadow map depth map without render target
             graphics.SetRenderTargets(
                 null, false, Color.Transparent,
-                this.DepthMap[index], true, false,
+                DepthMap[index], true, false,
                 true);
         }
     }

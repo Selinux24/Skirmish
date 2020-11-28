@@ -283,6 +283,32 @@ namespace Engine
         private BoundingBox? navigationBoundingBox;
 
         /// <summary>
+        /// Update materials palette flag
+        /// </summary>
+        private bool updateMaterialsPalette;
+        /// <summary>
+        /// Material palette resource
+        /// </summary>
+        private EngineShaderResourceView materialPalette;
+        /// <summary>
+        /// Material palette width
+        /// </summary>
+        private uint materialPaletteWidth;
+
+        /// <summary>
+        /// Update animation palette flag
+        /// </summary>
+        private bool updateAnimationsPalette;
+        /// <summary>
+        /// Animation palette resource
+        /// </summary>
+        private EngineShaderResourceView animationPalette;
+        /// <summary>
+        /// Animation palette width
+        /// </summary>
+        private uint animationPaletteWidth;
+
+        /// <summary>
         /// Game class
         /// </summary>
         public Game Game { get; private set; }
@@ -294,10 +320,6 @@ namespace Engine
         /// Scene renderer
         /// </summary>
         protected ISceneRenderer Renderer = null;
-        /// <summary>
-        /// Flag to update the scene global resources
-        /// </summary>
-        protected bool UpdateGlobalResources { get; set; }
         /// <summary>
         /// Path finder
         /// </summary>
@@ -366,7 +388,8 @@ namespace Engine
 
             PerformFrustumCulling = true;
 
-            UpdateGlobalResources = true;
+            updateMaterialsPalette = true;
+            updateAnimationsPalette = true;
         }
         /// <summary>
         /// Destructor
@@ -437,16 +460,9 @@ namespace Engine
         {
             try
             {
-                if (UpdateGlobalResources)
-                {
-                    Logger.WriteInformation(this, "Updating global resources.");
+                bool updateEnvironment = GameEnvironment.Update(gameTime);
 
-                    UpdateGlobals();
-
-                    UpdateGlobalResources = false;
-                }
-
-                GameEnvironment.Update(gameTime);
+                UpdateGlobals(updateEnvironment);
 
                 // Lights
                 Lights?.Update();
@@ -511,11 +527,11 @@ namespace Engine
 
             if (mode == SceneModes.ForwardLigthning && SceneRendererForward.Validate(graphics))
             {
-                renderer = new SceneRendererForward(Game);
+                renderer = new SceneRendererForward(this);
             }
             else if (mode == SceneModes.DeferredLightning && SceneRendererDeferred.Validate(graphics))
             {
-                renderer = new SceneRendererDeferred(Game);
+                renderer = new SceneRendererDeferred(this);
             }
             else
             {
@@ -725,7 +741,8 @@ namespace Engine
             });
             Monitor.Exit(internalComponents);
 
-            UpdateGlobalResources = true;
+            updateMaterialsPalette = true;
+            updateAnimationsPalette = true;
         }
         /// <summary>
         /// Removes and disposes the specified component
@@ -742,7 +759,8 @@ namespace Engine
             internalComponents.Remove(component);
             Monitor.Exit(internalComponents);
 
-            UpdateGlobalResources = true;
+            updateMaterialsPalette = true;
+            updateAnimationsPalette = true;
 
             component.Dispose();
         }
@@ -759,7 +777,8 @@ namespace Engine
                 {
                     internalComponents.Remove(component);
 
-                    UpdateGlobalResources = true;
+                    updateMaterialsPalette = true;
+                    updateAnimationsPalette = true;
                 }
 
                 component.Dispose();
@@ -779,13 +798,40 @@ namespace Engine
         /// <summary>
         /// Update global resources
         /// </summary>
-        protected virtual void UpdateGlobals()
+        protected virtual void UpdateGlobals(bool updateEnvironment)
         {
-            UpdateMaterialPalette(out EngineShaderResourceView materialPalette, out uint materialPaletteWidth);
+            bool updateGlobals = updateEnvironment;
 
-            UpdateAnimationPalette(out EngineShaderResourceView animationPalette, out uint animationPaletteWidth);
+            if (updateMaterialsPalette)
+            {
+                Logger.WriteInformation(this, "Updating Material palette.");
 
-            DrawerPool.UpdateSceneGlobals(materialPalette, materialPaletteWidth, animationPalette, animationPaletteWidth);
+                UpdateMaterialPalette(out materialPalette, out materialPaletteWidth);
+
+                updateGlobals = true;
+
+                updateMaterialsPalette = false;
+            }
+
+            if (updateAnimationsPalette)
+            {
+                Logger.WriteInformation(this, "Updating Animation palette.");
+
+                UpdateAnimationPalette(out animationPalette, out animationPaletteWidth);
+
+                updateGlobals = true;
+
+                updateAnimationsPalette = false;
+            }
+
+            if (updateGlobals)
+            {
+                Logger.WriteInformation(this, "Updating Scene Globals.");
+
+                Renderer?.UpdateGlobals();
+
+                DrawerPool.UpdateSceneGlobals(GameEnvironment, materialPalette, materialPaletteWidth, animationPalette, animationPaletteWidth);
+            }
         }
         /// <summary>
         /// Updates the global material palette

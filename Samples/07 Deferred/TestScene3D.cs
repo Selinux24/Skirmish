@@ -969,7 +969,7 @@ namespace Deferred
                 Lights.DirectionalLights.Length,
                 Lights.PointLights.Length,
                 Lights.SpotLights.Length,
-                Lights.GetDirectionalShadowCastingLights(Camera.Position).Count());
+                Lights.GetDirectionalShadowCastingLights(GameEnvironment, Camera.Position).Count());
 
             if (Counters.Statistics.Length == 0)
             {

@@ -26,6 +26,12 @@ namespace Engine.UI
         }
 
         /// <summary>
+        /// Pressed state flag
+        /// </summary>
+        /// <remarks>It's true when the control has been pressed by a mouse button, and the mouse button remains pressed.</remarks>
+        protected MouseButtons PressedState = MouseButtons.None;
+
+        /// <summary>
         /// Mouse over event
         /// </summary>
         public event EventHandler MouseOver;
@@ -59,31 +65,69 @@ namespace Engine.UI
         {
             var input = scene.Game.Input;
 
+            //Gets all UIControl order by processing order
             var sortedControls = scene.GetComponents()
                 .OfType<UIControl>()
                 .OrderBy(c => c.updateOrder)
                 .ToList();
 
+            //Initialize state of selected controls
             sortedControls.ForEach(c => InitControlState(input.MousePosition, c));
 
-            var mouseOverCtrls = sortedControls.Where(c => IsEvaluable(c)).ToList();
+            //Gets all controls with the mouse pointer into its bounds
+            var evaluableCtrls = sortedControls.Where(c => IsEvaluable(c));
+
+            //Evaluates all not mouse-over controls state
+            EvaluateControls(scene, evaluableCtrls.Where(c => !c.IsMouseOver));
+
+            //Evaluates all mouse-over controls state
+            var mouseOverCtrls = evaluableCtrls.Where(c => c.IsMouseOver).ToList();
             if (!mouseOverCtrls.Any())
             {
                 return null;
             }
 
+            //Select the top-most parent control
             var topMostParent = mouseOverCtrls.Last();
 
+            //Evaluates all controls with the mouse pointer into its bounds
             bool mouseCaptured = EvaluateInputControl(scene, topMostParent, mouseOverCtrls);
             if (mouseCaptured)
             {
-                mouseOverCtrls.ForEach(c => c.prevIsMouseOver = false);
-                topMostParent.prevIsMouseOver = true;
+                //Clears all mouse-over flag, except the top-most parent
+                mouseOverCtrls.ForEach(c =>
+                {
+                    if (c == topMostParent)
+                    {
+                        return;
+                    }
+
+                    ClearPrevMouseOver(c);
+                });
 
                 return topMostParent;
             }
 
             return null;
+        }
+        /// <summary>
+        /// Evaluate controls
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        /// <param name="ctrls">Control list</param>
+        private static void EvaluateControls(Scene scene, IEnumerable<UIControl> ctrls)
+        {
+            var input = scene.Game.Input;
+
+            foreach (var ctrl in ctrls)
+            {
+                if (ctrl.PressedState.HasFlag(MouseButtons.Left) && !input.LeftMouseButtonPressed)
+                {
+                    ctrl.IsJustReleased = true;
+                    ctrl.PressedState = MouseButtons.None;
+                    ctrl.FireJustReleasedEvent();
+                }
+            }
         }
         /// <summary>
         /// Evaluates input over the specified scene control
@@ -112,6 +156,7 @@ namespace Engine.UI
                 if (input.LeftMouseButtonPressed)
                 {
                     topChildren.IsPressed = true;
+                    topChildren.PressedState |= MouseButtons.Left;
                     topChildren.FirePressedEvent();
 
                     mouseCaptured = true;
@@ -120,6 +165,7 @@ namespace Engine.UI
                 if (input.LeftMouseButtonJustPressed)
                 {
                     topChildren.IsJustPressed = true;
+                    topChildren.PressedState |= MouseButtons.Left;
                     topChildren.FireJustPressedEvent();
 
                     mouseCaptured = true;
@@ -128,12 +174,13 @@ namespace Engine.UI
                 if (input.LeftMouseButtonJustReleased)
                 {
                     topChildren.IsJustReleased = true;
+                    topChildren.PressedState &= ~MouseButtons.Left;
                     topChildren.FireJustReleasedEvent();
 
                     mouseCaptured = true;
                 }
 
-                mouseOverCtrls = topChildren.Children.Where(c => IsEvaluable(c)).ToList();
+                mouseOverCtrls = topChildren.Children.Where(c => IsEvaluable(c) && c.IsMouseOver).ToList();
                 topChildren = mouseOverCtrls.LastOrDefault();
             }
 
@@ -161,7 +208,7 @@ namespace Engine.UI
                 return false;
             }
 
-            return ctrl.Active && ctrl.Visible && ctrl.EventsEnabled && ctrl.IsMouseOver;
+            return ctrl.Active && ctrl.Visible && ctrl.EventsEnabled;
         }
         /// <summary>
         /// Initializes the UI state
@@ -1140,7 +1187,9 @@ namespace Engine.UI
         {
             var rect = GetRenderArea(false);
 
-            return rect.Scale(AbsoluteScale).Contains(point.X, point.Y);
+            var contains = rect.Scale(AbsoluteScale).Contains(point.X, point.Y);
+
+            return contains;
         }
 
         /// <summary>

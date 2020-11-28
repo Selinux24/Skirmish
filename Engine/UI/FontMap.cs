@@ -34,7 +34,7 @@ namespace Engine.UI
         /// <summary>
         /// Color pattern used for text parse
         /// </summary>
-        public const string colorPattern = @"(?<cA>A|Alpha):(?<fA>\d+(?:(?:.|,)\d+)?) (?<cR>R|Red):(?<fR>\d+(?:(?:.|,)\d+)?) (?<cG>G|Green):(?<fG>\d+(?:(?:.|,)\d+)?) (?<cB>B|Blue):(?<fB>\d+(?:(?:.|,)\d+)?)(?:\|(?<sA>A|Alpha):(?<sfA>\d+(?:(?:.|,)\d+)?) (?<sR>R|Red):(?<sfR>\d+(?:(?:.|,)\d+)?) (?<sG>G|Green):(?<sfG>\d+(?:(?:.|,)\d+)?) (?<sB>B|Blue):(?<sfB>\d+(?:(?:.|,)\d+)?)|)";
+        public const string colorPattern = @"(?<cA>A|Alpha):(?<fA>\d+(?:(?:\.|\,)\d+)?) (?<cR>R|Red):(?<fR>\d+(?:(?:\.|\,)\d+)?) (?<cG>G|Green):(?<fG>\d+(?:(?:\.|\,)\d+)?) (?<cB>B|Blue):(?<fB>\d+(?:(?:\.|\,)\d+)?)(?:\|(?<sA>A|Alpha):(?<sfA>\d+(?:(?:\.|\,)\d+)?) (?<sR>R|Red):(?<sfR>\d+(?:(?:\.|\,)\d+)?) (?<sG>G|Green):(?<sfG>\d+(?:(?:\.|\,)\d+)?) (?<sB>B|Blue):(?<sfB>\d+(?:(?:\.|\,)\d+)?)|)";
 
         /// <summary>
         /// Default line separation in pixels

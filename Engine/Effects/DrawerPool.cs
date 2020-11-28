@@ -220,32 +220,34 @@ namespace Engine.Effects
         /// <summary>
         /// Update scene globals
         /// </summary>
+        /// <param name="environment">Game environment</param>
         /// <param name="materialPalette">Material palette</param>
         /// <param name="materialPaletteWidth">Material palette width</param>
         public static void UpdateSceneGlobals(
+            GameEnvironment environment,
             EngineShaderResourceView materialPalette, uint materialPaletteWidth,
             EngineShaderResourceView animationPalette, uint animationPaletteWidth)
         {
             EffectDefaultBillboard.UpdateGlobals(
                 materialPalette, materialPaletteWidth,
-                GameEnvironment.LODDistanceHigh, GameEnvironment.LODDistanceMedium, GameEnvironment.LODDistanceLow);
+                environment.LODDistanceHigh, environment.LODDistanceMedium, environment.LODDistanceLow);
 
             EffectDefaultFoliage.UpdateGlobals(
                 materialPalette, materialPaletteWidth,
-                GameEnvironment.LODDistanceHigh, GameEnvironment.LODDistanceMedium, GameEnvironment.LODDistanceLow);
+                environment.LODDistanceHigh, environment.LODDistanceMedium, environment.LODDistanceLow);
 
             EffectDefaultBasic.UpdateGlobals(
                 materialPalette, materialPaletteWidth,
                 animationPalette, animationPaletteWidth,
-                GameEnvironment.LODDistanceHigh, GameEnvironment.LODDistanceMedium, GameEnvironment.LODDistanceLow);
+                environment.LODDistanceHigh, environment.LODDistanceMedium, environment.LODDistanceLow);
             EffectDefaultTerrain.UpdateGlobals(
                 materialPalette, materialPaletteWidth,
-                GameEnvironment.LODDistanceHigh, GameEnvironment.LODDistanceMedium, GameEnvironment.LODDistanceLow);
+                environment.LODDistanceHigh, environment.LODDistanceMedium, environment.LODDistanceLow);
 
             EffectDeferredBasic.UpdateGlobals(animationPalette, animationPaletteWidth);
             EffectDeferredComposer.UpdateGlobals(
                 materialPalette, materialPaletteWidth,
-                GameEnvironment.LODDistanceHigh, GameEnvironment.LODDistanceMedium, GameEnvironment.LODDistanceLow);
+                environment.LODDistanceHigh, environment.LODDistanceMedium, environment.LODDistanceLow);
 
             EffectShadowCascade.UpdateGlobals(animationPalette, animationPaletteWidth);
 

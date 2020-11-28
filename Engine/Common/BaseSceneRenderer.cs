@@ -23,15 +23,6 @@ namespace Engine.Common
         /// Maximum number of cascade shadow maps per directional light
         /// </summary>
         protected const int MaxDirectionalCascadeShadowMaps = 3;
-        /// <summary>
-        /// Shadow map sampling distances
-        /// </summary>
-        public static float[] CascadeShadowMapsDistances { get; set; } = new[]
-        {
-            GameEnvironment.ShadowDistanceHigh,
-            GameEnvironment.ShadowDistanceMedium,
-            GameEnvironment.ShadowDistanceLow,
-        };
 
         /// <summary>
         /// Cubic shadow map size
@@ -74,9 +65,9 @@ namespace Engine.Common
         protected IShadowMap ShadowMapperSpot { get; private set; }
 
         /// <summary>
-        /// Game
+        /// Scene
         /// </summary>
-        protected Game Game;
+        protected Scene Scene;
         /// <summary>
         /// Renderer width
         /// </summary>
@@ -139,22 +130,24 @@ namespace Engine.Common
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="game">Game</param>
-        protected BaseSceneRenderer(Game game)
+        /// <param name="scene">Scene</param>
+        protected BaseSceneRenderer(Scene scene)
         {
-            Game = game;
+            Scene = scene;
 
             // Directional shadow mapper
-            ShadowMapperDirectional = new ShadowMapCascade(game,
+            ShadowMapperDirectional = new ShadowMapCascade(
+                scene,
                 DirectionalShadowMapSize,
                 MaxDirectionalCascadeShadowMaps, MaxDirectionalShadowMaps,
-                CascadeShadowMapsDistances)
+                scene.GameEnvironment.CascadeShadowMapsDistances)
             {
                 HighResolutionMap = true
             };
 
             // Point shadow mapper
-            ShadowMapperPoint = new ShadowMapPoint(game,
+            ShadowMapperPoint = new ShadowMapPoint(
+                scene,
                 CubicShadowMapSize, CubicShadowMapSize,
                 MaxCubicShadows)
             {
@@ -162,7 +155,8 @@ namespace Engine.Common
             };
 
             // Spot shadow mapper
-            ShadowMapperSpot = new ShadowMapSpot(game,
+            ShadowMapperSpot = new ShadowMapSpot(
+                scene,
                 SpotShadowMapSize, SpotShadowMapSize,
                 MaxSpotShadows)
             {
@@ -266,7 +260,7 @@ namespace Engine.Common
 
             //Cull lights
             Stopwatch swLights = Stopwatch.StartNew();
-            scene.Lights.Cull(UpdateContext.CameraVolume, UpdateContext.EyePosition);
+            scene.Lights.Cull(UpdateContext.CameraVolume, UpdateContext.EyePosition, scene.GameEnvironment.LODDistanceLow);
             swLights.Stop();
 
             //Update active components
@@ -294,9 +288,9 @@ namespace Engine.Common
 
             Counters.SetStatistics("Scene.Update", string.Format("Update = {0:000000}", swTotal.ElapsedTicks));
 
-            if (Game.CollectGameStatus)
+            if (Scene.Game.CollectGameStatus)
             {
-                Game.GameStatus.Add(dict);
+                Scene.Game.GameStatus.Add(dict);
             }
         }
         /// <summary>
@@ -305,6 +299,16 @@ namespace Engine.Common
         /// <param name="gameTime">Game time</param>
         /// <param name="scene">Scene</param>
         public abstract void Draw(GameTime gameTime, Scene scene);
+
+        /// <summary>
+        /// Update renderer globals
+        /// </summary>
+        public virtual void UpdateGlobals()
+        {
+            ShadowMapperDirectional.UpdateGlobals();
+            ShadowMapperPoint.UpdateGlobals();
+            ShadowMapperSpot.UpdateGlobals();
+        }
 
         /// <summary>
         /// Gets opaque components
@@ -463,7 +467,7 @@ namespace Engine.Common
         /// <param name="context">Drawing context</param>
         protected virtual void SetRasterizer(DrawContext context)
         {
-            Game.Graphics.SetRasterizerDefault();
+            Scene.Game.Graphics.SetRasterizerDefault();
         }
         /// <summary>
         /// Sets the blend state
@@ -472,7 +476,7 @@ namespace Engine.Common
         /// <param name="blendMode">Blend mode</param>
         protected virtual void SetBlendState(DrawContext context, BlendModes blendMode)
         {
-            Game.Graphics.SetBlendState(blendMode);
+            Scene.Game.Graphics.SetBlendState(blendMode);
         }
         /// <summary>
         /// Sets the depth-stencil buffer state
@@ -483,11 +487,11 @@ namespace Engine.Common
         {
             if (enable)
             {
-                Game.Graphics.SetDepthStencilWRZEnabled();
+                Scene.Game.Graphics.SetDepthStencilWRZEnabled();
             }
             else
             {
-                Game.Graphics.SetDepthStencilWRZDisabled();
+                Scene.Game.Graphics.SetDepthStencilWRZDisabled();
             }
         }
 
@@ -522,7 +526,7 @@ namespace Engine.Common
             //And there were lights
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            var shadowCastingLights = scene.Lights.GetDirectionalShadowCastingLights(scene.Camera.Position);
+            var shadowCastingLights = scene.Lights.GetDirectionalShadowCastingLights(scene.GameEnvironment, scene.Camera.Position);
             stopwatch.Stop();
             dict.Add($"DoDirectionalShadowMapping Getting lights", stopwatch.Elapsed.TotalMilliseconds);
 
@@ -563,7 +567,7 @@ namespace Engine.Common
                 }
             }
 
-            var graphics = Game.Graphics;
+            var graphics = Scene.Game.Graphics;
             int assigned = 0;
 
             int l = 0;
@@ -601,9 +605,9 @@ namespace Engine.Common
             gStopwatch.Stop();
             dict.Add($"DoDirectionalShadowMapping TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
 
-            if (Game.CollectGameStatus)
+            if (Scene.Game.CollectGameStatus)
             {
-                Game.GameStatus.Add(dict);
+                Scene.Game.GameStatus.Add(dict);
             }
         }
         /// <summary>
@@ -621,7 +625,7 @@ namespace Engine.Common
 
             //And there were lights
             Stopwatch stopwatch = new Stopwatch();
-            var shadowCastingLights = scene.Lights.GetPointShadowCastingLights(scene.Camera.Position);
+            var shadowCastingLights = scene.Lights.GetPointShadowCastingLights(scene.GameEnvironment, scene.Camera.Position);
             stopwatch.Stop();
             dict.Add($"DoPointShadowMapping Getting lights", stopwatch.Elapsed.TotalMilliseconds);
 
@@ -646,7 +650,7 @@ namespace Engine.Common
             //All objects suitable for culling
             bool allCullingObjects = shadowObjs.Count() == toCullShadowObjs.Count();
 
-            var graphics = Game.Graphics;
+            var graphics = Scene.Game.Graphics;
             int assigned = 0;
 
             int l = 0;
@@ -695,9 +699,9 @@ namespace Engine.Common
             gStopwatch.Stop();
             dict.Add($"DoPointShadowMapping TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
 
-            if (Game.CollectGameStatus)
+            if (Scene.Game.CollectGameStatus)
             {
-                Game.GameStatus.Add(dict);
+                Scene.Game.GameStatus.Add(dict);
             }
         }
         /// <summary>
@@ -716,7 +720,7 @@ namespace Engine.Common
             //And there were lights
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            var shadowCastingLights = scene.Lights.GetSpotShadowCastingLights(scene.Camera.Position);
+            var shadowCastingLights = scene.Lights.GetSpotShadowCastingLights(scene.GameEnvironment, scene.Camera.Position);
             stopwatch.Stop();
             dict.Add($"DoSpotShadowMapping Getting lights", stopwatch.Elapsed.TotalMilliseconds);
 
@@ -741,7 +745,7 @@ namespace Engine.Common
             //All objects suitable for culling
             bool allCullingObjects = shadowObjs.Count() == toCullShadowObjs.Count();
 
-            var graphics = Game.Graphics;
+            var graphics = Scene.Game.Graphics;
             int assigned = 0;
 
             int l = 0;
@@ -793,9 +797,9 @@ namespace Engine.Common
             gStopwatch.Stop();
             dict.Add($"DoSpotShadowMapping TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
 
-            if (Game.CollectGameStatus)
+            if (Scene.Game.CollectGameStatus)
             {
-                Game.GameStatus.Add(dict);
+                Scene.Game.GameStatus.Add(dict);
             }
         }
 
@@ -807,7 +811,7 @@ namespace Engine.Common
         /// <param name="components">Components to draw</param>
         protected void DrawShadowComponents(DrawContextShadows context, int index, IEnumerable<ISceneObject> components)
         {
-            var graphics = Game.Graphics;
+            var graphics = Scene.Game.Graphics;
 
             var objects = components.Where(c => IsVisible(c, index)).ToList();
             if (objects.Any())

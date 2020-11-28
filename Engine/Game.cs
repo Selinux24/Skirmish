@@ -184,6 +184,17 @@ namespace Engine
                 }
             }
         }
+        /// <summary>
+        /// Gets the log level base on frame time
+        /// </summary>
+        /// <param name="frameTime">Frame time</param>
+        /// <returns>Returns the log level</returns>
+        private static LogLevel EvaluateTime(long frameTime)
+        {
+            if (frameTime > 500) return LogLevel.Warning;
+            if (frameTime > 30) return LogLevel.Information;
+            else return LogLevel.Debug;
+        }
 
         /// <summary>
         /// Constructor
@@ -852,18 +863,6 @@ namespace Engine
             {
                 Logger.WriteError(this, $"Frame: Collecto Game Status error: {ex.Message}", ex);
             }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="frameTime"></param>
-        /// <returns></returns>
-        private static LogLevel EvaluateTime(long frameTime)
-        {
-            if (frameTime > 500) return LogLevel.Error;
-            if (frameTime > 30) return LogLevel.Warning;
-            else return LogLevel.Information;
         }
     }
 }

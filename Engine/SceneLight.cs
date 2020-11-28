@@ -50,12 +50,13 @@ namespace Engine
         /// <summary>
         /// Evaluates whether a light must be processed as a shadow casting light or not
         /// </summary>
+        /// <param name="environment">Game environment</param>
         /// <param name="eyePosition">Eye position</param>
         /// <param name="castShadow">Cast shadows</param>
         /// <param name="position">Light position</param>
         /// <param name="radius">Light radius</param>
         /// <returns>Returns true if the light cast shadow</returns>
-        public static bool EvaluateLight(Vector3 eyePosition, bool castShadow, Vector3 position, float radius)
+        public static bool EvaluateLight(GameEnvironment environment, Vector3 eyePosition, bool castShadow, Vector3 position, float radius)
         {
             if (!castShadow)
             {
@@ -64,14 +65,14 @@ namespace Engine
             }
 
             float dist = Vector3.Distance(position, eyePosition);
-            if (dist >= GameEnvironment.LODDistanceMedium)
+            if (dist >= environment.LODDistanceMedium)
             {
                 // Discard too far lights
                 return false;
             }
 
             float thr = radius / (dist <= 0 ? 1 : dist);
-            if (thr < GameEnvironment.ShadowRadiusDistanceThreshold)
+            if (thr < environment.ShadowRadiusDistanceThreshold)
             {
                 // Discard too small lights based on radius and distance
                 return false;
@@ -114,10 +115,11 @@ namespace Engine
         /// <summary>
         /// Test the light shadow casting based on the viewer position
         /// </summary>
+        /// <param name="environment">Game environment</param>
         /// <param name="eyePosition">Viewer eye position</param>
         /// <returns>Returns true if the light can cast shadows</returns>
         /// <remarks>This method updates the light internal cast shadow flag</remarks>
-        public abstract bool MarkForShadowCasting(Vector3 eyePosition);
+        public abstract bool MarkForShadowCasting(GameEnvironment environment, Vector3 eyePosition);
 
         /// <summary>
         /// Clones current light

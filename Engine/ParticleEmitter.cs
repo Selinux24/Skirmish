@@ -203,7 +203,7 @@ namespace Engine
             EmissionRate = 1f;
             Duration = 0f;
             InfiniteDuration = false;
-            MaximumDistance = GameEnvironment.LODDistanceLow;
+            MaximumDistance = 100f;
             Distance = 0f;
         }
         /// <summary>

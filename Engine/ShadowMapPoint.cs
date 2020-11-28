@@ -47,13 +47,13 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="game">Game instance</param>
+        /// <param name="scene">Scene</param>
         /// <param name="width">With</param>
         /// <param name="height">Height</param>
         /// <param name="arraySize">Array size</param>
-        public ShadowMapPoint(Game game, int width, int height, int arraySize) : base(game, width, height, 6)
+        public ShadowMapPoint(Scene scene, int width, int height, int arraySize) : base(scene, width, height, 6)
         {
-            game.Graphics.CreateCubicShadowMapTextureArrays(
+            scene.Game.Graphics.CreateCubicShadowMapTextureArrays(
                 width, height, arraySize,
                 out EngineDepthStencilView[] dsv, out EngineShaderResourceView srv);
 
@@ -61,9 +61,7 @@ namespace Engine
             Texture = srv;
         }
 
-        /// <summary>
-        /// Updates the from light view projection
-        /// </summary>
+        /// <inheritdoc/>
         public override void UpdateFromLightViewProjection(Camera camera, ISceneLight light)
         {
             if (light is ISceneLightPoint lightPoint)
@@ -75,13 +73,16 @@ namespace Engine
                 FromLightViewProjectionArray = vp;
             }
         }
-        /// <summary>
-        /// Gets the effect to draw this shadow map
-        /// </summary>
-        /// <returns>Returns an effect</returns>
+        /// <inheritdoc/>
         public override IShadowMapDrawer GetEffect()
         {
             return DrawerPool.EffectShadowPoint;
+        }
+
+        /// <inheritdoc/>
+        public override void UpdateGlobals()
+        {
+
         }
 
         /// <inheritdoc/>
