@@ -60,7 +60,7 @@ namespace Engine.UI
             {
                 butAccept = new UIButton($"{name}.AcceptButton", scene, description.Buttons);
                 butAccept.Caption.Text = "Accept";
-                butAccept.JustReleased += DialogAcceptJustReleased;
+                butAccept.MouseJustReleased += DialogAcceptJustReleased;
                 backPanel.AddChild(butAccept, false);
 
                 buttonAreaHeight = butAccept.Height + 10;
@@ -72,14 +72,14 @@ namespace Engine.UI
                 {
                     butClose = new UIButton($"{name}.CancelButton", scene, description.Buttons);
                     butClose.Caption.Text = "Cancel";
-                    butClose.JustReleased += DialogCancelJustReleased;
+                    butClose.MouseJustReleased += DialogCancelJustReleased;
                     backPanel.AddChild(butClose, false);
                 }
                 else
                 {
                     butClose = new UIButton($"{name}.CloseButton", scene, description.Buttons);
                     butClose.Caption.Text = "Close";
-                    butClose.JustReleased += DialogCloseJustReleased;
+                    butClose.MouseJustReleased += DialogCloseJustReleased;
                     backPanel.AddChild(butClose, false);
                 }
 
@@ -122,15 +122,15 @@ namespace Engine.UI
             }
         }
 
-        private void DialogAcceptJustReleased(object sender, EventArgs e)
+        private void DialogAcceptJustReleased(UIControl sender, MouseEventArgs e)
         {
             OnAcceptHandler?.Invoke(this, e);
         }
-        private void DialogCancelJustReleased(object sender, EventArgs e)
+        private void DialogCancelJustReleased(UIControl sender, MouseEventArgs e)
         {
             OnCancelHandler?.Invoke(this, e);
         }
-        private void DialogCloseJustReleased(object sender, EventArgs e)
+        private void DialogCloseJustReleased(UIControl sender, MouseEventArgs e)
         {
             OnCloseHandler?.Invoke(this, e);
         }

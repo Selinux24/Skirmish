@@ -104,13 +104,13 @@ namespace Terrain.Start
             startButtonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
 
             scenePerlinNoiseButton = await this.AddComponentUIButton("ButtonPerlinNoise", startButtonDesc, layerHUD);
-            scenePerlinNoiseButton.JustReleased += SceneButtonClick;
+            scenePerlinNoiseButton.MouseJustReleased += SceneButtonClick;
             scenePerlinNoiseButton.MouseEnter += SceneButtonMouseEnter;
             scenePerlinNoiseButton.MouseLeave += SceneButtonMouseLeave;
             scenePerlinNoiseButton.Caption.Text = "Perlin Noise";
-           
+
             sceneRtsButton = await this.AddComponentUIButton("ButtonRts", startButtonDesc, layerHUD);
-            sceneRtsButton.JustReleased += SceneButtonClick;
+            sceneRtsButton.MouseJustReleased += SceneButtonClick;
             sceneRtsButton.MouseEnter += SceneButtonMouseEnter;
             sceneRtsButton.MouseLeave += SceneButtonMouseLeave;
             sceneRtsButton.Caption.Text = "Real Time Strategy Game";
@@ -129,7 +129,7 @@ namespace Terrain.Start
             exitButtonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
 
             exitButton = await this.AddComponentUIButton("ButtonExit", exitButtonDesc, layerHUD);
-            exitButton.JustReleased += ExitButtonClick;
+            exitButton.MouseJustReleased += ExitButtonClick;
             exitButton.MouseEnter += SceneButtonMouseEnter;
             exitButton.MouseLeave += SceneButtonMouseLeave;
             exitButton.Caption.Text = "Exit";
@@ -202,9 +202,14 @@ namespace Terrain.Start
             Camera.LookTo(position);
         }
 
-        private void SceneButtonClick(object sender, EventArgs e)
+        private void SceneButtonClick(UIControl sender, MouseEventArgs e)
         {
             if (!sceneReady)
+            {
+                return;
+            }
+
+            if (!e.Buttons.HasFlag(MouseButtons.Left))
             {
                 return;
             }
@@ -218,25 +223,24 @@ namespace Terrain.Start
                 Game.SetScene<RtsScene>();
             }
         }
-        private void SceneButtonMouseEnter(object sender, EventArgs e)
+        private void SceneButtonMouseEnter(UIControl sender, MouseEventArgs e)
         {
-            if (sender is UIControl ctrl)
-            {
-                ctrl.ScaleInScaleOut(1.0f, 1.10f, 250);
-            }
+            sender.ScaleInScaleOut(1.0f, 1.10f, 250);
         }
-        private void SceneButtonMouseLeave(object sender, EventArgs e)
+        private void SceneButtonMouseLeave(UIControl sender, MouseEventArgs e)
         {
-            if (sender is UIControl ctrl)
-            {
-                ctrl.ClearTween();
-                ctrl.TweenScale(ctrl.Scale, 1.0f, 500, ScaleFuncs.Linear);
-            }
+            sender.ClearTween();
+            sender.TweenScale(sender.Scale, 1.0f, 500, ScaleFuncs.Linear);
         }
 
-        private void ExitButtonClick(object sender, EventArgs e)
+        private void ExitButtonClick(UIControl sender, MouseEventArgs e)
         {
             if (!sceneReady)
+            {
+                return;
+            }
+
+            if (!e.Buttons.HasFlag(MouseButtons.Left))
             {
                 return;
             }

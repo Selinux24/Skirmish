@@ -275,9 +275,12 @@ namespace Collada.Start
                 buttonDesc.TextHorizontalAlign = HorizontalTextAlign.Right;
                 buttonDesc.TextVerticalAlign = VerticalTextAlign.Bottom;
                 var button = new UIButton($"ModularDungeonTabs.Button_{i}", this, buttonDesc);
-                button.JustReleased += (s, o) =>
+                button.MouseJustReleased += (s, o) =>
                 {
-                    Game.SetScene(new ModularDungeon.SceneModularDungeon(Game, true, Path.GetFileName(mapFile), Path.GetFileName(mapTexture)), SceneModes.DeferredLightning);
+                    if (o.Buttons.HasFlag(MouseButtons.Left))
+                    {
+                        Game.SetScene(new ModularDungeon.SceneModularDungeon(Game, true, Path.GetFileName(mapFile), Path.GetFileName(mapTexture)), SceneModes.DeferredLightning);
+                    }
                 };
 
                 modularDungeonTabs.TabPanels[i].AddChild(button);
@@ -290,17 +293,23 @@ namespace Collada.Start
             buttonBasicDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
             buttonBasicDesc.TextVerticalAlign = VerticalTextAlign.Middle;
             var buttonBasic = new UIButton("ModularDungeonTabs.ButtonBasicDungeon", this, buttonBasicDesc);
-            buttonBasic.JustReleased += (s, o) =>
+            buttonBasic.MouseJustReleased += (s, o) =>
             {
-                Game.SetScene(new ModularDungeon.SceneModularDungeon(Game, false, "basicdungeon", null), SceneModes.DeferredLightning);
+                if (o.Buttons.HasFlag(MouseButtons.Left))
+                {
+                    Game.SetScene(new ModularDungeon.SceneModularDungeon(Game, false, "basicdungeon", null), SceneModes.DeferredLightning);
+                }
             };
             modularDungeonTabs.TabPanels.ElementAt(basicIndex).AddChild(buttonBasic);
 
             var backButton = modularDungeonTabs.TabButtons.ElementAt(backIndex);
-            backButton.JustReleased += (s, o) =>
+            backButton.MouseJustReleased += (s, o) =>
             {
-                modularDungeonTabs.Hide(100);
-                ShowAllButButton(100);
+                if (o.Buttons.HasFlag(MouseButtons.Left))
+                {
+                    modularDungeonTabs.Hide(100);
+                    ShowAllButButton(100);
+                }
             };
         }
         private void SetControlPositions()
@@ -314,35 +323,35 @@ namespace Collada.Start
 
             sceneDungeonWallButton.Caption.Text = "Dungeon Wall";
             sceneDungeonWallButton.TooltipText = "Shows a basic normal map scene demo.";
-            sceneDungeonWallButton.JustReleased += SceneButtonClick;
+            sceneDungeonWallButton.MouseJustReleased += SceneButtonClick;
             sceneDungeonWallButton.MouseOver += SceneButtonOver;
             sceneDungeonWallButton.Show(tweenTime, tweenTime);
             tweenTime += tweenInc;
 
             sceneNavMeshTestButton.Caption.Text = "Navmesh Test";
             sceneNavMeshTestButton.TooltipText = "Shows a navigation mesh scene demo.";
-            sceneNavMeshTestButton.JustReleased += SceneButtonClick;
+            sceneNavMeshTestButton.MouseJustReleased += SceneButtonClick;
             sceneNavMeshTestButton.MouseOver += SceneButtonOver;
             sceneNavMeshTestButton.Show(tweenTime, tweenTime);
             tweenTime += tweenInc;
 
             sceneDungeonButton.Caption.Text = "Dungeon";
             sceneDungeonButton.TooltipText = "Shows a basic dungeon from a unique mesh scene demo.";
-            sceneDungeonButton.JustReleased += SceneButtonClick;
+            sceneDungeonButton.MouseJustReleased += SceneButtonClick;
             sceneDungeonButton.MouseOver += SceneButtonOver;
             sceneDungeonButton.Show(tweenTime, tweenTime);
             tweenTime += tweenInc;
 
             sceneModularDungeonButton.Caption.Text = "Modular Dungeon";
             sceneModularDungeonButton.TooltipText = "Shows a modular dungeon scene demo.";
-            sceneModularDungeonButton.JustReleased += SceneButtonClick;
+            sceneModularDungeonButton.MouseJustReleased += SceneButtonClick;
             sceneModularDungeonButton.MouseOver += SceneButtonOver;
             sceneModularDungeonButton.Show(tweenTime, tweenTime);
             tweenTime += tweenInc;
 
             exitButton.Caption.Text = "Exit";
             exitButton.TooltipText = "Closes the application.";
-            exitButton.JustReleased += ExitButtonClick;
+            exitButton.MouseJustReleased += ExitButtonClick;
             exitButton.MouseOver += SceneButtonOver;
             exitButton.Show(tweenTime, tweenTime);
 
@@ -510,8 +519,13 @@ namespace Collada.Start
             PlayAudio();
         }
 
-        private void SceneButtonClick(object sender, EventArgs e)
+        private void SceneButtonClick(UIControl sender, MouseEventArgs e)
         {
+            if (!e.Buttons.HasFlag(MouseButtons.Left))
+            {
+                return;
+            }
+
             if (sender is UIButton button)
             {
                 var effect = AudioManager.CreateEffectInstance("push");
@@ -547,8 +561,13 @@ namespace Collada.Start
                 });
             }
         }
-        private void ExitButtonClick(object sender, EventArgs e)
+        private void ExitButtonClick(UIControl sender, MouseEventArgs e)
         {
+            if (!e.Buttons.HasFlag(MouseButtons.Left))
+            {
+                return;
+            }
+
             var effect = AudioManager.CreateEffectInstance("push");
 
             HideAllButButton(sender as UIButton, (long)effect.Duration.TotalMilliseconds);
@@ -584,7 +603,7 @@ namespace Collada.Start
             }
         }
 
-        private void SceneButtonOver(object sender, EventArgs e)
+        private void SceneButtonOver(UIControl sender, MouseEventArgs e)
         {
             if (sender is UIButton button)
             {

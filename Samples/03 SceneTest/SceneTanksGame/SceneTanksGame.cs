@@ -18,7 +18,7 @@ namespace SceneTest.SceneTanksGame
     /// </summary>
     class SceneTanksGame : Scene
     {
-        const int layerUIModal = LayerUI + 3;
+        const int layerUIModal = LayerUIEffects + 3;
         const string fontFilename = "SceneTanksGame/LeagueSpartan-Bold.otf";
 
         private bool gameReady = false;
@@ -36,8 +36,8 @@ namespace SceneTest.SceneTanksGame
         private UIButton dialogAccept;
         private UITextArea dialogText;
         private bool dialogActive = false;
-        private EventHandler lastOnCloseHandler;
-        private EventHandler lastOnAcceptHandler;
+        private MouseEventHandler lastOnCloseHandler;
+        private MouseEventHandler lastOnAcceptHandler;
 
         private UITextArea player1Name;
         private UITextArea player1Points;
@@ -296,6 +296,7 @@ namespace SceneTest.SceneTanksGame
             dialog.AddChild(dialogCancel, false);
             dialog.AddChild(dialogAccept, false);
             dialog.Visible = false;
+            dialog.EventsEnabled = true;
         }
         private async Task InitializeUIPlayers()
         {
@@ -1172,7 +1173,7 @@ You will lost all the game progress.",
         private void UpdateInputFree(GameTime gameTime)
         {
 #if DEBUG
-            if (Game.Input.RightMouseButtonPressed)
+            if (Game.Input.MouseButtonPressed(MouseButtons.Right))
             {
                 Camera.RotateMouse(
                     gameTime,
@@ -1672,7 +1673,7 @@ You will lost all the game progress.",
 
             if (lastOnCloseHandler != null)
             {
-                dialogCancel.JustReleased -= lastOnCloseHandler;
+                dialogCancel.MouseJustReleased -= lastOnCloseHandler;
             }
             if (onCloseCallback != null)
             {
@@ -1681,12 +1682,12 @@ You will lost all the game progress.",
                     onCloseCallback.Invoke();
                 };
 
-                dialogCancel.JustReleased += lastOnCloseHandler;
+                dialogCancel.MouseJustReleased += lastOnCloseHandler;
             }
 
             if (lastOnAcceptHandler != null)
             {
-                dialogAccept.JustReleased -= lastOnAcceptHandler;
+                dialogAccept.MouseJustReleased -= lastOnAcceptHandler;
             }
             if (onAcceptCallback != null)
             {
@@ -1695,7 +1696,7 @@ You will lost all the game progress.",
                     onAcceptCallback.Invoke();
                 };
 
-                dialogAccept.JustReleased += lastOnAcceptHandler;
+                dialogAccept.MouseJustReleased += lastOnAcceptHandler;
             }
 
             dialogText.Text = message;

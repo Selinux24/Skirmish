@@ -509,7 +509,7 @@ namespace Skybox
         }
         private void UpdateInputCamera()
         {
-            if (Game.Input.LeftMouseButtonPressed)
+            if (Game.Input.MouseButtonPressed(MouseButtons.Left))
             {
                 var pRay = GetPickingRay();
 
@@ -522,7 +522,7 @@ namespace Skybox
             }
 
 #if DEBUG
-            if (Game.Input.RightMouseButtonPressed)
+            if (Game.Input.MouseButtonPressed(MouseButtons.Right))
             {
                 Camera.RotateMouse(
                     Game.GameTime,

@@ -127,7 +127,7 @@ namespace Engine.UI
         public UIProgressBarDescription()
             : base()
         {
-
+            EventsEnabled = false;
         }
     }
 }

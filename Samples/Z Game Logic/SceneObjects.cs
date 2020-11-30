@@ -327,12 +327,12 @@ namespace GameLogic
             });
             butNextAction.Caption.TextForeColor = Color.Yellow;
 
-            butClose.JustReleased += (sender, eventArgs) => { Game.Exit(); };
-            butNext.JustReleased += (sender, eventArgs) => { NextPhase(); };
-            butPrevSoldier.JustReleased += (sender, eventArgs) => { PrevSoldier(true); };
-            butNextSoldier.JustReleased += (sender, eventArgs) => { NextSoldier(true); };
-            butPrevAction.JustReleased += (sender, eventArgs) => { PrevAction(); };
-            butNextAction.JustReleased += (sender, eventArgs) => { NextAction(); };
+            butClose.MouseJustReleased += (sender, eventArgs) => { if (eventArgs.Buttons.HasFlag(MouseButtons.Left)) Game.Exit(); };
+            butNext.MouseJustReleased += (sender, eventArgs) => { if (eventArgs.Buttons.HasFlag(MouseButtons.Left)) NextPhase(); };
+            butPrevSoldier.MouseJustReleased += (sender, eventArgs) => { if (eventArgs.Buttons.HasFlag(MouseButtons.Left)) PrevSoldier(true); };
+            butNextSoldier.MouseJustReleased += (sender, eventArgs) => { if (eventArgs.Buttons.HasFlag(MouseButtons.Left)) NextSoldier(true); };
+            butPrevAction.MouseJustReleased += (sender, eventArgs) => { if (eventArgs.Buttons.HasFlag(MouseButtons.Left)) PrevAction(); };
+            butNextAction.MouseJustReleased += (sender, eventArgs) => { if (eventArgs.Buttons.HasFlag(MouseButtons.Left)) NextAction(); };
 
             txtTitle.Text = "Game Logic";
         }
@@ -482,7 +482,7 @@ namespace GameLogic
                 Camera.MoveBackward(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (Game.Input.RightMouseButtonJustReleased)
+            if (Game.Input.MouseButtonJustReleased(MouseButtons.Right))
             {
                 DoGoto(cursorRay, picked, r.Position);
             }
@@ -528,7 +528,7 @@ namespace GameLogic
                 bool selectorDone = false;
                 Area area = null;
 
-                if (Game.Input.LeftMouseButtonJustReleased)
+                if (Game.Input.MouseButtonJustReleased(MouseButtons.Left))
                 {
                     if (CurrentAction.Selector == Selectors.Goto)
                     {

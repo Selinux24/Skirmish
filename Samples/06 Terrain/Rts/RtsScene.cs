@@ -1572,7 +1572,7 @@ namespace Terrain.Rts
         private void UpdateInputWalker(GameTime gameTime)
         {
 #if DEBUG
-            if (Game.Input.RightMouseButtonPressed)
+            if (Game.Input.MouseButtonPressed(MouseButtons.Right))
             {
                 Camera.RotateMouse(
                     gameTime,
@@ -1620,7 +1620,7 @@ namespace Terrain.Rts
         private void UpdateInputFree(GameTime gameTime, Ray pickingRay)
         {
 #if DEBUG
-            if (Game.Input.RightMouseButtonPressed)
+            if (Game.Input.MouseButtonPressed(MouseButtons.Right))
             {
                 Camera.RotateMouse(
                     gameTime,
@@ -1714,7 +1714,7 @@ namespace Terrain.Rts
                 walkMode = !walkMode;
             }
 
-            if (Game.Input.LeftMouseButtonPressed)
+            if (Game.Input.MouseButtonPressed(MouseButtons.Left))
             {
                 var visible = terrainGraphDrawer.Visible;
                 if (visible)
@@ -1812,13 +1812,13 @@ namespace Terrain.Rts
         }
         private void UpdateTanks(Ray pickingRay)
         {
-            if (Game.Input.LeftMouseButtonPressed)
+            if (Game.Input.MouseButtonPressed(MouseButtons.Left))
             {
                 //Draw path before set it to the agent
                 DrawTankPath(pickingRay);
             }
 
-            if (Game.Input.LeftMouseButtonJustReleased && !Game.Input.RightMouseButtonPressed)
+            if (Game.Input.MouseButtonJustReleased(MouseButtons.Left) && !Game.Input.MouseButtonPressed(MouseButtons.Right))
             {
                 //Calc path and set it to the agent
                 UpdateTankPath(pickingRay);

@@ -1291,7 +1291,7 @@ namespace Heightmap
         private Vector3 UpdateFlyingCamera(GameTime gameTime)
         {
 #if DEBUG
-            if (Game.Input.RightMouseButtonPressed)
+            if (Game.Input.MouseButtonPressed(MouseButtons.Right))
             {
                 Camera.RotateMouse(
                     gameTime,
@@ -1331,7 +1331,7 @@ namespace Heightmap
         {
             var prevPosition = soldier.Manipulator.Position;
 #if DEBUG
-            if (Game.Input.RightMouseButtonPressed)
+            if (Game.Input.MouseButtonPressed(MouseButtons.Right))
             {
                 float amount = Game.Input.MouseXDelta;
 

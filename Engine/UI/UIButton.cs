@@ -125,7 +125,7 @@ namespace Engine.UI
                 return;
             }
 
-            bool pressed = IsPressed || (State == UIButtonState.Pressed);
+            bool pressed = PressedState.HasFlag(MouseButtons.Left) || (State == UIButtonState.Pressed);
 
             if (buttonPressed != null)
             {

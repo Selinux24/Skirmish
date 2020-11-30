@@ -103,6 +103,7 @@ namespace SceneTest.SceneStart
             buttonPanel = await this.AddComponentUIPanel("ButtonPanel", UIPanelDescription.Default(Color.Transparent));
             buttonPanel.SetGridLayout(GridLayout.FixedRows(1));
             buttonPanel.Spacing = 20;
+            buttonPanel.EventsEnabled = true;
 
             var buttonsFont = TextDrawerDescription.FromFamily(buttonFonts, 20, FontMapStyles.Bold);
 
@@ -137,7 +138,7 @@ namespace SceneTest.SceneStart
 
             for (int i = 0; i < sceneButtons.Length; i++)
             {
-                sceneButtons[i].JustReleased += SceneButtonJustReleased;
+                sceneButtons[i].MouseJustReleased += SceneButtonJustReleased;
                 sceneButtons[i].MouseEnter += SceneButtonMouseEnter;
                 sceneButtons[i].MouseLeave += SceneButtonMouseLeave;
             }
@@ -152,7 +153,7 @@ namespace SceneTest.SceneStart
             exitButtonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
 
             exitButton = new UIButton("ButtonExit", this, exitButtonDesc);
-            exitButton.JustReleased += ExitButtonJustReleased;
+            exitButton.MouseJustReleased += ExitButtonJustReleased;
             exitButton.MouseEnter += SceneButtonMouseEnter;
             exitButton.MouseLeave += SceneButtonMouseLeave;
 
@@ -162,7 +163,7 @@ namespace SceneTest.SceneStart
         private async Task InitializeOptionsButton()
         {
             optsButton = await this.AddComponentUIButton("ButtonOptions", UIButtonDescription.Default("SceneStart/ui_options.png"));
-            optsButton.JustReleased += OptsButtonJustReleased;
+            optsButton.MouseJustReleased += OptsButtonJustReleased;
 
             var optsBackground = new Sprite("ButtonOptions.Background", this, SpriteDescription.Default(Color.White))
             {
@@ -356,9 +357,14 @@ namespace SceneTest.SceneStart
             tabsPanel.Hide(100);
         }
 
-        private void SceneButtonJustReleased(object sender, EventArgs e)
+        private void SceneButtonJustReleased(UIControl sender, MouseEventArgs e)
         {
             if (!sceneReady)
+            {
+                return;
+            }
+
+            if (!e.Buttons.HasFlag(MouseButtons.Left))
             {
                 return;
             }
@@ -392,37 +398,41 @@ namespace SceneTest.SceneStart
                 Game.SetScene<SceneTanksGame.SceneTanksGame>();
             }
         }
-        private void SceneButtonMouseEnter(object sender, EventArgs e)
+        private void SceneButtonMouseEnter(UIControl sender, MouseEventArgs e)
         {
-            if (sender is UIControl ctrl)
-            {
-                ctrl.PivotAnchor = PivotAnchors.Center;
-                ctrl.ScaleInScaleOut(1.0f, 1.10f, 250);
-            }
+            sender.PivotAnchor = PivotAnchors.Center;
+            sender.ScaleInScaleOut(1.0f, 1.10f, 250);
         }
-        private void SceneButtonMouseLeave(object sender, EventArgs e)
+        private void SceneButtonMouseLeave(UIControl sender, MouseEventArgs e)
         {
-            if (sender is UIControl ctrl)
-            {
-                ctrl.ClearTween();
-                ctrl.TweenScale(ctrl.Scale, 1.0f, 500, ScaleFuncs.Linear);
-            }
+            sender.ClearTween();
+            sender.TweenScale(sender.Scale, 1.0f, 500, ScaleFuncs.Linear);
         }
         private void TabsPanelTabJustReleased(object sender, UITabPanelEventArgs e)
         {
             Logger.WriteDebug(this, $"Clicked button {e.TabButton.Caption.Text}");
         }
-        private void ExitButtonJustReleased(object sender, EventArgs e)
+        private void ExitButtonJustReleased(UIControl sender, MouseEventArgs e)
         {
             if (!sceneReady)
             {
                 return;
             }
 
+            if (!e.Buttons.HasFlag(MouseButtons.Left))
+            {
+                return;
+            }
+
             Game.Exit();
         }
-        private void OptsButtonJustReleased(object sender, EventArgs e)
+        private void OptsButtonJustReleased(UIControl sender, MouseEventArgs e)
         {
+            if (!e.Buttons.HasFlag(MouseButtons.Left))
+            {
+                return;
+            }
+
             OpenPanel();
         }
     }

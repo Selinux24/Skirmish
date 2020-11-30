@@ -466,7 +466,7 @@ namespace Deferred
         private void UpdateInputCamera(GameTime gameTime)
         {
 #if DEBUG
-            if (Game.Input.RightMouseButtonPressed)
+            if (Game.Input.MouseButtonPressed(MouseButtons.Right))
             {
                 Camera.RotateMouse(
                     gameTime,
@@ -508,7 +508,7 @@ namespace Deferred
         }
         private void UpdateInputMouse()
         {
-            if (Game.Input.LeftMouseButtonJustReleased)
+            if (Game.Input.MouseButtonJustReleased(MouseButtons.Left))
             {
                 var pRay = GetPickingRay();
                 var rayPParams = RayPickingParams.FacingOnly | RayPickingParams.Perfect;

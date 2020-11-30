@@ -100,8 +100,24 @@ namespace Animation.Start
 
             var emptyDesc = SpriteDescription.Default("start/resources/empty.png");
 
-            var panSimpleAnimation = AddButtonPanel(buttonDesc, "Simple Animation", (sender, args) => { Game.SetScene<SimpleAnimation.SceneSimpleAnimation>(); });
-            var panAnimationParts = AddButtonPanel(buttonDesc, "Animation Parts", (sender, args) => { Game.SetScene<AnimationParts.SceneAnimationParts>(); });
+            var panSimpleAnimation = AddButtonPanel(buttonDesc, "Simple Animation", (sender, args) =>
+            {
+                if (!args.Buttons.HasFlag(MouseButtons.Left))
+                {
+                    return;
+                }
+
+                Game.SetScene<SimpleAnimation.SceneSimpleAnimation>();
+            });
+            var panAnimationParts = AddButtonPanel(buttonDesc, "Animation Parts", (sender, args) =>
+            {
+                if (!args.Buttons.HasFlag(MouseButtons.Left))
+                {
+                    return;
+                }
+
+                Game.SetScene<AnimationParts.SceneAnimationParts>();
+            });
             var panExit = AddButtonPanel(exitDesc, "Exit", (sender, args) => { Game.Exit(); });
 
             mainPanel.AddChild(panSimpleAnimation, false);
@@ -113,13 +129,13 @@ namespace Animation.Start
             mainPanel.AddChild(new Sprite("Empty", this, emptyDesc), false);
             mainPanel.AddChild(panExit, false);
         }
-        private UIPanel AddButtonPanel(UIButtonDescription desc, string text, EventHandler buttonJustReleased)
+        private UIPanel AddButtonPanel(UIButtonDescription desc, string text, MouseEventHandler buttonJustReleased)
         {
             var panel = new UIPanel($"MainPanel.Panel.{text}", this, UIPanelDescription.Default(new Color4(1, 1, 1, 0.25f)));
 
             var button = new UIButton($"MainPanel.Button.{text}", this, desc);
             button.Caption.Text = text;
-            button.JustReleased += buttonJustReleased;
+            button.MouseJustReleased += buttonJustReleased;
             panel.AddChild(button);
 
             return panel;

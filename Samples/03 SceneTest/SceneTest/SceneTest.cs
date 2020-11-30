@@ -162,7 +162,13 @@ namespace SceneTest.SceneTest
             buttonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
 
             butClose = await this.AddComponentUIButton("ButClose", buttonDesc, LayerUI);
-            butClose.JustReleased += (sender, eventArgs) => { Game.SetScene<SceneStart.SceneStart>(); };
+            butClose.MouseJustReleased += (sender, eventArgs) =>
+            {
+                if (eventArgs.Buttons.HasFlag(MouseButtons.Left))
+                {
+                    Game.SetScene<SceneStart.SceneStart>();
+                }
+            };
             butClose.Visible = false;
 
             blackPan = await this.AddComponentUIPanel("BlackPanel", new UIPanelDescription

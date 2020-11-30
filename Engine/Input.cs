@@ -43,13 +43,9 @@ namespace Engine
         /// </summary>
         private int mouseWheel;
         /// <summary>
-        /// Mouse buttons of last update
+        /// Last mouse buttons state
         /// </summary>
         private MouseButtons lastMouseButtons = MouseButtons.None;
-        /// <summary>
-        /// Current mouse buttons
-        /// </summary>
-        private MouseButtons currentMouseButtons = MouseButtons.None;
         /// <summary>
         /// Keys of last update
         /// </summary>
@@ -88,65 +84,17 @@ namespace Engine
         /// </summary>
         public Point MousePosition { get; private set; }
         /// <summary>
-        /// Gets if left mouse button is just released
+        /// Current pressed mouse buttons
         /// </summary>
-        public bool LeftMouseButtonJustReleased { get; private set; }
+        public MouseButtons PressedMouseButtons { get; private set; } = MouseButtons.None;
         /// <summary>
-        /// Gets if left mouse button is just pressed
+        /// Current just pressed mouse buttons
         /// </summary>
-        public bool LeftMouseButtonJustPressed { get; private set; }
+        public MouseButtons JustPressedMouseButtons { get; private set; } = MouseButtons.None;
         /// <summary>
-        /// Gets if left mouse button is pressed now
+        /// Current just released mouse buttons
         /// </summary>
-        public bool LeftMouseButtonPressed { get; private set; }
-        /// <summary>
-        /// Gets if right mouse button is just released
-        /// </summary>
-        public bool RightMouseButtonJustReleased { get; private set; }
-        /// <summary>
-        /// Gets if right mouse button is just pressed
-        /// </summary>
-        public bool RightMouseButtonJustPressed { get; private set; }
-        /// <summary>
-        /// Gets if right mouse button is pressed now
-        /// </summary>
-        public bool RightMouseButtonPressed { get; private set; }
-        /// <summary>
-        /// Gets if middle mouse button is just released
-        /// </summary>
-        public bool MiddleMouseButtonJustReleased { get; private set; }
-        /// <summary>
-        /// Gets if middle mouse button is just pressed
-        /// </summary>
-        public bool MiddleMouseButtonJustPressed { get; private set; }
-        /// <summary>
-        /// Gets if middle mouse button is pressed now
-        /// </summary>
-        public bool MiddleMouseButtonPressed { get; private set; }
-        /// <summary>
-        /// Gets if X1 mouse button is just released
-        /// </summary>
-        public bool X1MouseButtonJustReleased { get; private set; }
-        /// <summary>
-        /// Gets if X1 mouse button is just pressed
-        /// </summary>
-        public bool X1MouseButtonJustPressed { get; private set; }
-        /// <summary>
-        /// Gets if X1 mouse button is pressed now
-        /// </summary>
-        public bool X1MouseButtonPressed { get; private set; }
-        /// <summary>
-        /// Gets if X2 mouse button is just released
-        /// </summary>
-        public bool X2MouseButtonJustReleased { get; private set; }
-        /// <summary>
-        /// Gets if X2 mouse button is just pressed
-        /// </summary>
-        public bool X2MouseButtonJustPressed { get; private set; }
-        /// <summary>
-        /// Gets if X2 mouse button is pressed now
-        /// </summary>
-        public bool X2MouseButtonPressed { get; private set; }
+        public MouseButtons JustReleasedMouseButtons { get; private set; } = MouseButtons.None;
         /// <summary>
         /// Gets if left or right shift key were pressed now
         /// </summary>
@@ -321,41 +269,11 @@ namespace Engine
         /// </summary>
         private void UpdateMouseButtonsState()
         {
-            lastMouseButtons = currentMouseButtons;
-            currentMouseButtons = MouseButtonsState;
+            JustPressedMouseButtons = MouseButtonsState & ~lastMouseButtons;
+            JustReleasedMouseButtons = lastMouseButtons & ~MouseButtonsState;
 
-            bool prev;
-            bool curr;
-
-            prev = lastMouseButtons.HasFlag(MouseButtons.Left);
-            curr = currentMouseButtons.HasFlag(MouseButtons.Left);
-            LeftMouseButtonPressed = curr;
-            LeftMouseButtonJustPressed = curr && !prev;
-            LeftMouseButtonJustReleased = !curr && prev;
-
-            prev = lastMouseButtons.HasFlag(MouseButtons.Right);
-            curr = currentMouseButtons.HasFlag(MouseButtons.Right);
-            RightMouseButtonPressed = curr;
-            RightMouseButtonJustPressed = curr && !prev;
-            RightMouseButtonJustReleased = !curr && prev;
-
-            prev = lastMouseButtons.HasFlag(MouseButtons.Middle);
-            curr = currentMouseButtons.HasFlag(MouseButtons.Middle);
-            MiddleMouseButtonPressed = curr;
-            MiddleMouseButtonJustPressed = curr && !prev;
-            MiddleMouseButtonJustReleased = !curr && prev;
-
-            prev = lastMouseButtons.HasFlag(MouseButtons.XButton1);
-            curr = currentMouseButtons.HasFlag(MouseButtons.XButton1);
-            X1MouseButtonPressed = curr;
-            X1MouseButtonJustPressed = curr && !prev;
-            X1MouseButtonJustReleased = !curr && prev;
-
-            prev = lastMouseButtons.HasFlag(MouseButtons.XButton2);
-            curr = currentMouseButtons.HasFlag(MouseButtons.XButton2);
-            X2MouseButtonPressed = curr;
-            X2MouseButtonJustPressed = curr && !prev;
-            X2MouseButtonJustReleased = !curr && prev;
+            lastMouseButtons = PressedMouseButtons;
+            PressedMouseButtons = MouseButtonsState;
 
             MouseWheelDelta = mouseWheel;
             mouseWheel = 0;
@@ -387,6 +305,33 @@ namespace Engine
         public bool KeyPressed(Keys key)
         {
             return currentKeyboardKeys.Contains(key);
+        }
+        /// <summary>
+        /// Gets if the specified mouse button is just released
+        /// </summary>
+        /// <param name="button">Mouse button</param>
+        /// <returns>Returns true if the specified mouse button is just released</returns>
+        public bool MouseButtonJustReleased(MouseButtons button)
+        {
+            return JustReleasedMouseButtons.HasFlag(button);
+        }
+        /// <summary>
+        /// Gets if the specified mouse button is just pressed
+        /// </summary>
+        /// <param name="button">Mouse button</param>
+        /// <returns>Returns true if the specified mouse button is just pressed</returns>
+        public bool MouseButtonJustPressed(MouseButtons button)
+        {
+            return JustPressedMouseButtons.HasFlag(button);
+        }
+        /// <summary>
+        /// Gets if the specified mouse button is pressed
+        /// </summary>
+        /// <param name="button">Mouse button</param>
+        /// <returns>Returns true if the specified mouse button is pressed</returns>
+        public bool MouseButtonPressed(MouseButtons button)
+        {
+            return PressedMouseButtons.HasFlag(button);
         }
         /// <summary>
         /// Sets mouse position
@@ -426,28 +371,10 @@ namespace Engine
 
             #region Mouse buttons
 
-            LeftMouseButtonPressed = false;
-            LeftMouseButtonJustPressed = false;
-            LeftMouseButtonJustReleased = false;
-
-            RightMouseButtonPressed = false;
-            RightMouseButtonJustPressed = false;
-            RightMouseButtonJustReleased = false;
-
-            MiddleMouseButtonPressed = false;
-            MiddleMouseButtonJustPressed = false;
-            MiddleMouseButtonJustReleased = false;
-
-            X1MouseButtonPressed = false;
-            X1MouseButtonJustPressed = false;
-            X1MouseButtonJustReleased = false;
-
-            X2MouseButtonPressed = false;
-            X2MouseButtonJustPressed = false;
-            X2MouseButtonJustReleased = false;
-
             lastMouseButtons = MouseButtons.None;
-            currentMouseButtons = MouseButtons.None;
+            PressedMouseButtons = MouseButtons.None;
+            JustPressedMouseButtons = MouseButtons.None;
+            JustReleasedMouseButtons = MouseButtons.None;
 
             #endregion
 

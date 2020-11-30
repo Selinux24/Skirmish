@@ -326,9 +326,9 @@ namespace Engine.UI
                     var button = new UIButton($"{name}.Button_{i}", scene, buttonDesc);
                     button.Caption.Text = description.TabCaptions?.ElementAtOrDefault(i) ?? $"Button_{i}";
                     button.Caption.Padding = tabButtonPadding;
-                    button.Pressed += Button_Pressed;
-                    button.JustPressed += Button_JustPressed;
-                    button.JustReleased += Button_JustReleased;
+                    button.MousePressed += Button_Pressed;
+                    button.MouseJustPressed += Button_JustPressed;
+                    button.MouseJustReleased += Button_JustReleased;
 
                     tabButtons.Add(button);
 
@@ -461,7 +461,7 @@ namespace Engine.UI
         /// <summary>
         /// Button pressed event
         /// </summary>
-        private void Button_Pressed(object sender, EventArgs e)
+        private void Button_Pressed(UIControl sender, MouseEventArgs e)
         {
             if (sender is UIButton button)
             {
@@ -475,7 +475,7 @@ namespace Engine.UI
         /// <summary>
         /// Button just pressed event
         /// </summary>
-        private void Button_JustPressed(object sender, EventArgs e)
+        private void Button_JustPressed(UIControl sender, MouseEventArgs e)
         {
             if (sender is UIButton button)
             {
@@ -489,7 +489,7 @@ namespace Engine.UI
         /// <summary>
         /// Button just released event
         /// </summary>
-        private void Button_JustReleased(object sender, EventArgs e)
+        private void Button_JustReleased(UIControl sender, MouseEventArgs e)
         {
             if (sender is UIButton button)
             {

@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System;
 
 namespace Engine
 {
@@ -13,19 +12,27 @@ namespace Engine
         /// <summary>
         /// Mouse over event
         /// </summary>
-        event EventHandler MouseOver;
+        event MouseEventHandler MouseOver;
+        /// <summary>
+        /// Mouse enter event
+        /// </summary>
+        event MouseEventHandler MouseEnter;
+        /// <summary>
+        /// Mouse leave event
+        /// </summary>
+        event MouseEventHandler MouseLeave;
         /// <summary>
         /// Mouse pressed
         /// </summary>
-        event EventHandler Pressed;
+        event MouseEventHandler MousePressed;
         /// <summary>
         /// Mouse just pressed
         /// </summary>
-        event EventHandler JustPressed;
+        event MouseEventHandler MouseJustPressed;
         /// <summary>
         /// Mouse just released
         /// </summary>
-        event EventHandler JustReleased;
+        event MouseEventHandler MouseJustReleased;
 
         /// <summary>
         /// Gets or sets whether the control is enabled for event processing

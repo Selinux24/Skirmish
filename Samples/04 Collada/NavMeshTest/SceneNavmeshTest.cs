@@ -245,7 +245,7 @@ Space: Finds random over navmesh";
                 Camera.MoveBackward(Game.GameTime, Game.Input.ShiftPressed);
             }
 
-            if (Game.Input.RightMouseButtonPressed)
+            if (Game.Input.MouseButtonPressed(MouseButtons.Right))
             {
                 Camera.RotateMouse(
                     Game.GameTime,
@@ -255,7 +255,7 @@ Space: Finds random over navmesh";
         }
         private void UpdateNavmeshInput()
         {
-            if (Game.Input.MiddleMouseButtonJustReleased)
+            if (Game.Input.MouseButtonJustReleased(MouseButtons.Middle))
             {
                 var pRay = GetPickingRay();
                 var rayPParams = RayPickingParams.FacingOnly | RayPickingParams.Perfect;
@@ -292,7 +292,7 @@ Space: Finds random over navmesh";
         {
             bool updateGraph = false;
 
-            if (Game.Input.LeftMouseButtonJustReleased)
+            if (Game.Input.MouseButtonJustReleased(MouseButtons.Left))
             {
                 var pRay = GetPickingRay();
                 var rayPParams = RayPickingParams.FacingOnly | RayPickingParams.Perfect;

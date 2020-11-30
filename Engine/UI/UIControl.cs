@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -34,27 +33,27 @@ namespace Engine.UI
         /// <summary>
         /// Mouse over event
         /// </summary>
-        public event EventHandler MouseOver;
+        public event MouseEventHandler MouseOver;
         /// <summary>
         /// Mouse enter event
         /// </summary>
-        public event EventHandler MouseEnter;
+        public event MouseEventHandler MouseEnter;
         /// <summary>
         /// Mouse leave event
         /// </summary>
-        public event EventHandler MouseLeave;
+        public event MouseEventHandler MouseLeave;
         /// <summary>
         /// Mouse pressed
         /// </summary>
-        public event EventHandler Pressed;
+        public event MouseEventHandler MousePressed;
         /// <summary>
         /// Mouse just pressed
         /// </summary>
-        public event EventHandler JustPressed;
+        public event MouseEventHandler MouseJustPressed;
         /// <summary>
         /// Mouse just released
         /// </summary>
-        public event EventHandler JustReleased;
+        public event MouseEventHandler MouseJustReleased;
 
         /// <summary>
         /// Evaluates input over the specified scene
@@ -66,21 +65,24 @@ namespace Engine.UI
             var input = scene.Game.Input;
 
             //Gets all UIControl order by processing order
-            var sortedControls = scene.GetComponents()
+            var evaluableCtrls = scene.GetComponents()
                 .OfType<UIControl>()
+                .Where(c => IsEvaluable(c))
                 .OrderBy(c => c.updateOrder)
                 .ToList();
 
+            if (!evaluableCtrls.Any())
+            {
+                return null;
+            }
+
             //Initialize state of selected controls
-            sortedControls.ForEach(c => InitControlState(input.MousePosition, c));
+            evaluableCtrls.ForEach(c => InitControlState(input, c));
+
+            //Evaluates all controls with the mouse pointer outside its bounds
+            EvaluateOutsideControls(input, evaluableCtrls.Where(c => !c.IsMouseOver));
 
             //Gets all controls with the mouse pointer into its bounds
-            var evaluableCtrls = sortedControls.Where(c => IsEvaluable(c));
-
-            //Evaluates all not mouse-over controls state
-            EvaluateControls(scene, evaluableCtrls.Where(c => !c.IsMouseOver));
-
-            //Evaluates all mouse-over controls state
             var mouseOverCtrls = evaluableCtrls.Where(c => c.IsMouseOver).ToList();
             if (!mouseOverCtrls.Any())
             {
@@ -91,7 +93,7 @@ namespace Engine.UI
             var topMostParent = mouseOverCtrls.Last();
 
             //Evaluates all controls with the mouse pointer into its bounds
-            bool mouseCaptured = EvaluateInputControl(scene, topMostParent, mouseOverCtrls);
+            bool mouseCaptured = EvaluateInsideControls(input, topMostParent, mouseOverCtrls);
             if (mouseCaptured)
             {
                 //Clears all mouse-over flag, except the top-most parent
@@ -111,77 +113,133 @@ namespace Engine.UI
             return null;
         }
         /// <summary>
+        /// Initializes the UI state
+        /// </summary>
+        /// <param name="input">Input</param>
+        /// <param name="ctrl">Control</param>
+        private static void InitControlState(Input input, UIControl ctrl)
+        {
+            if (ctrl.Active && ctrl.Visible)
+            {
+                ctrl.IsMouseOver = ctrl.Contains(input.MousePosition);
+                if (!ctrl.IsMouseOver && ctrl.prevIsMouseOver)
+                {
+                    ctrl.FireMouseLeaveEvent(input.MousePosition, input.MouseButtonsState);
+                    ctrl.prevIsMouseOver = false;
+                }
+            }
+            else
+            {
+                ctrl.IsMouseOver = false;
+                ctrl.prevIsMouseOver = false;
+            }
+
+            ctrl.IsPressed = false;
+            ctrl.IsJustPressed = false;
+            ctrl.IsJustReleased = false;
+
+            if (!ctrl.Children.Any())
+            {
+                return;
+            }
+
+            foreach (var child in ctrl.Children)
+            {
+                InitControlState(input, child);
+            }
+        }
+        /// <summary>
         /// Evaluate controls
         /// </summary>
-        /// <param name="scene">Scene</param>
+        /// <param name="input">Input</param>
         /// <param name="ctrls">Control list</param>
-        private static void EvaluateControls(Scene scene, IEnumerable<UIControl> ctrls)
+        private static void EvaluateOutsideControls(Input input, IEnumerable<UIControl> ctrls)
         {
-            var input = scene.Game.Input;
+            if (!ctrls.Any())
+            {
+                return;
+            }
 
             foreach (var ctrl in ctrls)
             {
-                if (ctrl.PressedState.HasFlag(MouseButtons.Left) && !input.LeftMouseButtonPressed)
+                var justReleasedButtons = ctrl.PressedState & ~input.MouseButtonsState;
+
+                //Evaluate the just released event
+                if (justReleasedButtons != MouseButtons.None)
                 {
+                    //Update the control pressed state
+                    ctrl.PressedState = input.MouseButtonsState;
+
                     ctrl.IsJustReleased = true;
-                    ctrl.PressedState = MouseButtons.None;
-                    ctrl.FireJustReleasedEvent();
+                    ctrl.FireJustReleasedEvent(input.MousePosition, justReleasedButtons);
                 }
+
+                EvaluateOutsideControls(input, ctrl.Children.Where(c => IsEvaluable(c)));
             }
         }
         /// <summary>
         /// Evaluates input over the specified scene control
         /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="ctrl">Controls</param>
-        /// <param name="mouseOverCtrls">Mouse over controls</param>
-        /// <returns>Returns true if any control fires a mouse click event</returns>
-        private static bool EvaluateInputControl(Scene scene, UIControl ctrl, List<UIControl> mouseOverCtrls)
+        /// <param name="input">Input</param>
+        /// <param name="ctrl">Top most control</param>
+        /// <param name="ctrls">Mouse over controls</param>
+        /// <returns>Returns true if any control fires a mouse event</returns>
+        private static bool EvaluateInsideControls(Input input, UIControl ctrl, List<UIControl> ctrls)
         {
-            var input = scene.Game.Input;
-
             bool mouseCaptured = false;
-            UIControl topChildren = ctrl;
+            var topChildren = ctrl;
             while (topChildren != null)
             {
-                topChildren.FireMouseOverEvent();
+                var justPressedButtons = input.MouseButtonsState & ~topChildren.PressedState;
+                var justReleasedButtons = topChildren.PressedState & ~input.MouseButtonsState;
+
+                //Update the control pressed state
+                topChildren.PressedState = input.MouseButtonsState;
+
+                //Mouse is over
+                topChildren.FireMouseOverEvent(input.MousePosition, input.MouseButtonsState);
+
                 if (!topChildren.prevIsMouseOver)
                 {
-                    topChildren.FireMouseEnterEvent();
+                    //First time over
+                    topChildren.FireMouseEnterEvent(input.MousePosition, input.MouseButtonsState);
                 }
 
-                mouseOverCtrls.ForEach(c => c.prevIsMouseOver = false);
+                //Only the top most control is considered the mouse-over control
                 topChildren.prevIsMouseOver = true;
 
-                if (input.LeftMouseButtonPressed)
+                //Evaluate the pressed state
+                if (input.MouseButtonsState != MouseButtons.None)
                 {
+                    //If any mouse button is pressed, launch the event
                     topChildren.IsPressed = true;
-                    topChildren.PressedState |= MouseButtons.Left;
-                    topChildren.FirePressedEvent();
+                    topChildren.FirePressedEvent(input.MousePosition, input.MouseButtonsState);
 
                     mouseCaptured = true;
                 }
 
-                if (input.LeftMouseButtonJustPressed)
+                //Evaluate the just pressed event
+                if (justPressedButtons != MouseButtons.None)
                 {
                     topChildren.IsJustPressed = true;
-                    topChildren.PressedState |= MouseButtons.Left;
-                    topChildren.FireJustPressedEvent();
+                    topChildren.FireJustPressedEvent(input.MousePosition, justPressedButtons);
 
                     mouseCaptured = true;
                 }
 
-                if (input.LeftMouseButtonJustReleased)
+                //Evaluate the just released event
+                if (justReleasedButtons != MouseButtons.None)
                 {
                     topChildren.IsJustReleased = true;
-                    topChildren.PressedState &= ~MouseButtons.Left;
-                    topChildren.FireJustReleasedEvent();
+                    topChildren.FireJustReleasedEvent(input.MousePosition, justReleasedButtons);
 
                     mouseCaptured = true;
                 }
 
-                mouseOverCtrls = topChildren.Children.Where(c => IsEvaluable(c) && c.IsMouseOver).ToList();
-                topChildren = mouseOverCtrls.LastOrDefault();
+                //Get the evaluable top most children list
+                ctrls = topChildren.Children.Where(c => IsEvaluable(c) && c.IsMouseOver).ToList();
+                //Set the new top most children
+                topChildren = ctrls.LastOrDefault();
             }
 
             return mouseCaptured;
@@ -209,50 +267,6 @@ namespace Engine.UI
             }
 
             return ctrl.Active && ctrl.Visible && ctrl.EventsEnabled;
-        }
-        /// <summary>
-        /// Initializes the UI state
-        /// </summary>
-        /// <param name="mousePosition">Mouse position</param>
-        /// <param name="ctrl">Control</param>
-        private static void InitControlState(Point mousePosition, UIControl ctrl)
-        {
-            if (!ctrl.Active || !ctrl.Visible)
-            {
-                ctrl.prevIsMouseOver = false;
-                ctrl.IsMouseOver = false;
-
-                ctrl.IsPressed = false;
-                ctrl.IsJustPressed = false;
-                ctrl.IsJustReleased = false;
-            }
-            else
-            {
-                ctrl.IsMouseOver = ctrl.Contains(mousePosition);
-                if (!ctrl.IsMouseOver)
-                {
-                    if (ctrl.prevIsMouseOver)
-                    {
-                        ctrl.FireMouseLeaveEvent();
-                    }
-
-                    ctrl.prevIsMouseOver = false;
-                }
-
-                ctrl.IsPressed = false;
-                ctrl.IsJustPressed = false;
-                ctrl.IsJustReleased = false;
-            }
-
-            if (!ctrl.Children.Any())
-            {
-                return;
-            }
-
-            foreach (var child in ctrl.Children)
-            {
-                InitControlState(mousePosition, child);
-            }
         }
 
         /// <summary>
@@ -1019,44 +1033,68 @@ namespace Engine.UI
         /// <summary>
         /// Fires on mouse over event
         /// </summary>
-        protected void FireMouseOverEvent()
+        protected void FireMouseOverEvent(Point pointerPosition, MouseButtons buttons)
         {
-            MouseOver?.Invoke(this, new EventArgs());
+            MouseOver?.Invoke(this, new MouseEventArgs
+            {
+                PointerPosition = pointerPosition,
+                Buttons = buttons,
+            });
         }
         /// <summary>
         /// Fires on mouse enter event
         /// </summary>
-        protected void FireMouseEnterEvent()
+        protected void FireMouseEnterEvent(Point pointerPosition, MouseButtons buttons)
         {
-            MouseEnter?.Invoke(this, new EventArgs());
+            MouseEnter?.Invoke(this, new MouseEventArgs
+            {
+                PointerPosition = pointerPosition,
+                Buttons = buttons,
+            });
         }
         /// <summary>
         /// Fires on mouse leave event
         /// </summary>
-        protected void FireMouseLeaveEvent()
+        protected void FireMouseLeaveEvent(Point pointerPosition, MouseButtons buttons)
         {
-            MouseLeave?.Invoke(this, new EventArgs());
+            MouseLeave?.Invoke(this, new MouseEventArgs
+            {
+                PointerPosition = pointerPosition,
+                Buttons = buttons,
+            });
         }
         /// <summary>
         /// Fires on pressed event
         /// </summary>
-        protected void FirePressedEvent()
+        protected void FirePressedEvent(Point pointerPosition, MouseButtons buttons)
         {
-            Pressed?.Invoke(this, new EventArgs());
+            MousePressed?.Invoke(this, new MouseEventArgs
+            {
+                PointerPosition = pointerPosition,
+                Buttons = buttons,
+            });
         }
         /// <summary>
         /// Fires on just pressed event
         /// </summary>
-        protected void FireJustPressedEvent()
+        protected void FireJustPressedEvent(Point pointerPosition, MouseButtons buttons)
         {
-            JustPressed?.Invoke(this, new EventArgs());
+            MouseJustPressed?.Invoke(this, new MouseEventArgs
+            {
+                PointerPosition = pointerPosition,
+                Buttons = buttons,
+            });
         }
         /// <summary>
         /// Fires on just released event
         /// </summary>
-        protected void FireJustReleasedEvent()
+        protected void FireJustReleasedEvent(Point pointerPosition, MouseButtons buttons)
         {
-            JustReleased?.Invoke(this, new EventArgs());
+            MouseJustReleased?.Invoke(this, new MouseEventArgs
+            {
+                PointerPosition = pointerPosition,
+                Buttons = buttons,
+            });
         }
 
         /// <summary>

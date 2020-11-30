@@ -187,7 +187,9 @@ namespace SpriteDrawing
                 {
                     Textures = new[] { "pan_bw.png" },
                     BaseColor = Color.Pink,
-                }
+                },
+
+                EventsEnabled = true,
             };
             dynamicPan = await this.AddComponentUIPanel("DynamicPanel", descPan, layerUIDialogs);
 
@@ -206,7 +208,7 @@ namespace SpriteDrawing
             descButClose.Text = "X";
 
             var butClose = new UIButton("DynamicPanel.CloseButton", this, descButClose);
-            butClose.JustReleased += ButClose_Click;
+            butClose.MouseJustReleased += ButClose_Click;
 
             var descText = UITextAreaDescription.DefaultFromMap("MaraFont.png", "MaraFont.txt");
             descText.Text = @"Letters by Mara";
@@ -238,16 +240,15 @@ namespace SpriteDrawing
             descButClose.Font = font;
             descButClose.TextHorizontalAlign = HorizontalTextAlign.Center;
             descButClose.TextVerticalAlign = VerticalTextAlign.Middle;
-            descButClose.Text = "Press Me";
 
             butTest2 = await this.AddComponentUIButton("ButtonTest2", descButClose, LayerUI);
-            butTest2.JustReleased += ButTest2_Click;
+            butTest2.MouseJustReleased += ButTest2_Click;
             butTest2.MouseEnter += ButTest_MouseEnter;
             butTest2.MouseLeave += ButTest_MouseLeave;
             butTest2.Visible = false;
 
             butTest1 = await this.AddComponentUIButton("ButtonTest1", descButClose, LayerUI);
-            butTest1.JustReleased += ButTest1_Click;
+            butTest1.MouseJustReleased += ButTest1_Click;
             butTest1.MouseEnter += ButTest_MouseEnter;
             butTest1.MouseLeave += ButTest_MouseLeave;
             butTest1.Visible = false;
@@ -376,8 +377,13 @@ Progress: {(int)(progressValue * 100f)}%";
             }
         }
 
-        private void ButClose_Click(object sender, EventArgs e)
+        private void ButClose_Click(UIControl sender, MouseEventArgs e)
         {
+            if (!e.Buttons.HasFlag(MouseButtons.Left))
+            {
+                return;
+            }
+
             dynamicPan.HideRoll(1000);
 
             spriteSmiley.Visible = true;
@@ -385,36 +391,37 @@ Progress: {(int)(progressValue * 100f)}%";
             spriteSmiley.Show(1000);
             spriteSmiley.ScaleInScaleOut(0.85f, 1f, 250);
 
+            butTest2.Caption.Text = $"Press Me with the{Environment.NewLine}{Color.Black}Right Button";
             butTest2.Visible = true;
             butTest2.Show(250);
             butTest2.TweenBaseColorBounce(Color.Yellow, Color.Red, 2000, ScaleFuncs.Linear);
 
-            butTest1.Caption.Text = "The other";
+            butTest1.Caption.Text = $"Press Me with the{Environment.NewLine}{Color.Black}Middle Button";
             butTest1.Visible = true;
             butTest1.Show(250);
             butTest1.TweenBaseColorBounce(Color.Yellow, Color.Red, 2000, ScaleFuncs.Linear);
         }
 
-        private void ButTest1_Click(object sender, EventArgs e)
+        private void ButTest1_Click(UIControl sender, MouseEventArgs e)
         {
-            if (sender is UIButton button)
+            if (sender is UIButton button && e.Buttons.HasFlag(MouseButtons.Middle))
             {
                 button.ClearTween();
-                button.JustReleased -= ButTest1_Click;
+                button.MouseJustReleased -= ButTest1_Click;
                 button.MouseLeave -= ButTest_MouseLeave;
                 button.MouseEnter -= ButTest_MouseEnter;
                 button.Hide(500);
             }
         }
-        private void ButTest2_Click(object sender, EventArgs e)
+        private void ButTest2_Click(UIControl sender, MouseEventArgs e)
         {
-            if (sender is UIButton button)
+            if (sender is UIButton button && e.Buttons.HasFlag(MouseButtons.Right))
             {
                 spriteSmiley.ClearTween();
                 spriteSmiley.Hide(500);
 
                 button.ClearTween();
-                button.JustReleased -= ButTest2_Click;
+                button.MouseJustReleased -= ButTest2_Click;
                 button.MouseLeave -= ButTest_MouseLeave;
                 button.MouseEnter -= ButTest_MouseEnter;
                 button.Hide(500);
@@ -426,7 +433,7 @@ Progress: {(int)(progressValue * 100f)}%";
                 });
             }
         }
-        private void ButTest_MouseLeave(object sender, EventArgs e)
+        private void ButTest_MouseLeave(UIControl sender, MouseEventArgs e)
         {
             if (sender is UIButton button)
             {
@@ -435,7 +442,7 @@ Progress: {(int)(progressValue * 100f)}%";
                 button.TweenBaseColorBounce(Color.Yellow, Color.Red, 2000, ScaleFuncs.Linear);
             }
         }
-        private void ButTest_MouseEnter(object sender, EventArgs e)
+        private void ButTest_MouseEnter(UIControl sender, MouseEventArgs e)
         {
             if (sender is UIButton button)
             {

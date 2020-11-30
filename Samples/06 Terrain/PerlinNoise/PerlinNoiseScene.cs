@@ -146,41 +146,41 @@ namespace Terrain.PerlinNoise
 
             btnSave = await this.AddComponentUIButton("btnSave", butDesc);
 
-            btnExit.JustReleased += BtnExit_JustReleased;
+            btnExit.MouseJustReleased += BtnExit_JustReleased;
 
             txtScale.Text = "Scale";
 
             pbScale.ProgressColor = pColor;
             pbScale.ProgressValue = Scale;
-            pbScale.JustPressed += PbJustPressed;
-            pbScale.Pressed += PbPressed;
-            pbScale.JustReleased += PbJustReleased;
+            pbScale.MouseJustPressed += PbJustPressed;
+            pbScale.MousePressed += PbPressed;
+            pbScale.MouseJustReleased += PbJustReleased;
 
             txtLacunarity.Text = "Lacunarity";
 
             pbLacunarity.ProgressColor = pColor;
             pbLacunarity.ProgressValue = Lacunarity;
-            pbLacunarity.JustPressed += PbJustPressed;
-            pbLacunarity.Pressed += PbPressed;
-            pbLacunarity.JustReleased += PbJustReleased;
+            pbLacunarity.MouseJustPressed += PbJustPressed;
+            pbLacunarity.MousePressed += PbPressed;
+            pbLacunarity.MouseJustReleased += PbJustReleased;
 
             txtPersistance.Text = "Persistance";
 
             pbPersistance.ProgressColor = pColor;
             pbPersistance.ProgressValue = Persistance;
-            pbPersistance.JustPressed += PbJustPressed;
-            pbPersistance.Pressed += PbPressed;
-            pbPersistance.JustReleased += PbJustReleased;
+            pbPersistance.MouseJustPressed += PbJustPressed;
+            pbPersistance.MousePressed += PbPressed;
+            pbPersistance.MouseJustReleased += PbJustReleased;
 
             txtOctaves.Text = "Octaves";
 
             pbOctaves.ProgressColor = pColor;
             pbOctaves.ProgressValue = Octaves;
-            pbOctaves.JustPressed += PbJustPressed;
-            pbOctaves.Pressed += PbPressed;
-            pbOctaves.JustReleased += PbJustReleased;
+            pbOctaves.MouseJustPressed += PbJustPressed;
+            pbOctaves.MousePressed += PbPressed;
+            pbOctaves.MouseJustReleased += PbJustReleased;
 
-            btnSave.JustReleased += BtnSave_JustReleased;
+            btnSave.MouseJustReleased += BtnSave_JustReleased;
         }
         public async Task InitializeTextureRenderer()
         {
@@ -388,9 +388,9 @@ namespace Terrain.PerlinNoise
             btnSave.Caption.Text = "Save to File";
         }
 
-        private void PbPressed(object sender, EventArgs e)
+        private void PbPressed(UIControl sender, MouseEventArgs e)
         {
-            if (sender is UIProgressBar pb)
+            if (sender is UIProgressBar pb && e.Buttons.HasFlag(MouseButtons.Left))
             {
                 if (capturedCtrl != pb)
                 {
@@ -410,38 +410,44 @@ namespace Terrain.PerlinNoise
                 }
             }
         }
-        private void PbJustPressed(object sender, EventArgs e)
+        private void PbJustPressed(UIControl sender, MouseEventArgs e)
         {
-            if (sender is UIControl control)
+            if (e.Buttons.HasFlag(MouseButtons.Left))
             {
-                capturedCtrl = control;
+                capturedCtrl = sender;
             }
         }
-        private void PbJustReleased(object sender, EventArgs e)
+        private void PbJustReleased(UIControl sender, MouseEventArgs e)
         {
             capturedCtrl = null;
         }
-        private void BtnSave_JustReleased(object sender, EventArgs e)
+        private void BtnSave_JustReleased(UIControl sender, MouseEventArgs e)
         {
             if (noiseMap == null)
             {
                 return;
             }
 
-            using (var dlg = new SaveFileDialog())
+            if (e.Buttons.HasFlag(MouseButtons.Left))
             {
-                dlg.DefaultExt = ".png";
-                dlg.FileName = "Noisemap.png";
-
-                if (dlg.ShowDialog() == DialogResult.OK)
+                using (var dlg = new SaveFileDialog())
                 {
-                    noiseMap.SaveMapToFile(dlg.FileName);
+                    dlg.DefaultExt = ".png";
+                    dlg.FileName = "Noisemap.png";
+
+                    if (dlg.ShowDialog() == DialogResult.OK)
+                    {
+                        noiseMap.SaveMapToFile(dlg.FileName);
+                    }
                 }
             }
         }
-        private void BtnExit_JustReleased(object sender, EventArgs e)
+        private void BtnExit_JustReleased(UIControl sender, MouseEventArgs e)
         {
-            Game.SetScene<StartScene>();
+            if (e.Buttons.HasFlag(MouseButtons.Left))
+            {
+                Game.SetScene<StartScene>();
+            }
         }
 
         private void GenerateMap()

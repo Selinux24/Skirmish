@@ -440,6 +440,8 @@
     <Compile Include="UI\GridFitTypes.cs" />
     <Compile Include="UI\GridLayout.cs" />
     <Compile Include="UI\IWithTextDescription.cs" />
+    <Compile Include="UI\MouseEventArgs.cs" />
+    <Compile Include="UI\MouseEventHandler.cs" />
     <Compile Include="UI\Padding.cs" />
     <Compile Include="UI\PivotAnchors.cs" />
     <Compile Include="UI\Spacing.cs" />

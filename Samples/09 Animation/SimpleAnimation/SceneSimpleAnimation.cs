@@ -544,7 +544,7 @@ namespace Animation.SimpleAnimation
         private void UpdateInputCamera(GameTime gameTime)
         {
 #if DEBUG
-            if (Game.Input.RightMouseButtonPressed)
+            if (Game.Input.MouseButtonPressed(MouseButtons.Right))
             {
                 Camera.RotateMouse(
                     gameTime,

@@ -3,7 +3,6 @@ using Engine.Common;
 using Engine.Content;
 using Engine.UI;
 using SharpDX;
-using System;
 using System.Threading.Tasks;
 
 namespace SceneTest.SceneCascadedShadows
@@ -105,13 +104,13 @@ namespace SceneTest.SceneCascadedShadows
 
             spSelect1 = await this.AddComponentSprite("First selector", SpriteDescription.Default(new Color(0xF6, 0xD5, 0x5C, 0xFF)), SceneObjectUsages.UI, LayerUI + 1);
             spSelect1.EventsEnabled = true;
-            spSelect1.JustPressed += PbJustPressed;
-            spSelect1.JustReleased += PbJustReleased;
+            spSelect1.MouseJustPressed += PbJustPressed;
+            spSelect1.MouseJustReleased += PbJustReleased;
 
             spSelect2 = await this.AddComponentSprite("Second selector", SpriteDescription.Default(new Color(0xF6, 0xD5, 0x5C, 0xFF)), SceneObjectUsages.UI, LayerUI + 1);
             spSelect2.EventsEnabled = true;
-            spSelect2.JustPressed += PbJustPressed;
-            spSelect2.JustReleased += PbJustReleased;
+            spSelect2.MouseJustPressed += PbJustPressed;
+            spSelect2.MouseJustReleased += PbJustReleased;
         }
         private async Task InitializeUIDrawers()
         {
@@ -266,7 +265,7 @@ namespace SceneTest.SceneCascadedShadows
         private void UpdateCamera(GameTime gameTime)
         {
 #if DEBUG
-            if (Game.Input.RightMouseButtonPressed)
+            if (Game.Input.MouseButtonPressed(MouseButtons.Right))
             {
                 Camera.RotateMouse(
                     gameTime,
@@ -438,27 +437,34 @@ namespace SceneTest.SceneCascadedShadows
             caption3.TextHorizontalAlign = HorizontalTextAlign.Center;
         }
 
-        private void PbJustPressed(object sender, EventArgs e)
+        private void PbJustPressed(UIControl sender, MouseEventArgs e)
         {
-            if (sender is UIControl control)
+            if (!e.Buttons.HasFlag(MouseButtons.Left))
             {
-                currentSelector = control;
+                return;
+            }
 
-                if (control == spSelect1)
-                {
-                    min = spLevel1.Left;
-                    max = spLevel2.Left + spLevel2.Width;
-                }
+            currentSelector = sender;
 
-                if (control == spSelect2)
-                {
-                    min = spLevel2.Left;
-                    max = spLevel3.Left + spLevel3.Width;
-                }
+            if (sender == spSelect1)
+            {
+                min = spLevel1.Left;
+                max = spLevel2.Left + spLevel2.Width;
+            }
+
+            if (sender == spSelect2)
+            {
+                min = spLevel2.Left;
+                max = spLevel3.Left + spLevel3.Width;
             }
         }
-        private void PbJustReleased(object sender, EventArgs e)
+        private void PbJustReleased(UIControl sender, MouseEventArgs e)
         {
+            if (!e.Buttons.HasFlag(MouseButtons.Left))
+            {
+                return;
+            }
+
             currentSelector = null;
             min = 0;
             max = 0;

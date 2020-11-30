@@ -103,7 +103,7 @@ namespace Engine.UI
         public SpriteDescription()
             : base()
         {
-
+            EventsEnabled = false;
         }
     }
 }
