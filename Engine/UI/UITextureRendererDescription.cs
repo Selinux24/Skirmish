@@ -133,7 +133,7 @@ namespace Engine.UI
         public UITextureRendererDescription()
             : base()
         {
-
+            EventsEnabled = false;
         }
     }
 }

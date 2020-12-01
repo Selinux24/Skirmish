@@ -1673,7 +1673,7 @@ You will lost all the game progress.",
 
             if (lastOnCloseHandler != null)
             {
-                dialogCancel.MouseJustReleased -= lastOnCloseHandler;
+                dialogCancel.MouseClick -= lastOnCloseHandler;
             }
             if (onCloseCallback != null)
             {
@@ -1682,12 +1682,12 @@ You will lost all the game progress.",
                     onCloseCallback.Invoke();
                 };
 
-                dialogCancel.MouseJustReleased += lastOnCloseHandler;
+                dialogCancel.MouseClick += lastOnCloseHandler;
             }
 
             if (lastOnAcceptHandler != null)
             {
-                dialogAccept.MouseJustReleased -= lastOnAcceptHandler;
+                dialogAccept.MouseClick -= lastOnAcceptHandler;
             }
             if (onAcceptCallback != null)
             {
@@ -1696,7 +1696,7 @@ You will lost all the game progress.",
                     onAcceptCallback.Invoke();
                 };
 
-                dialogAccept.MouseJustReleased += lastOnAcceptHandler;
+                dialogAccept.MouseClick += lastOnAcceptHandler;
             }
 
             dialogText.Text = message;

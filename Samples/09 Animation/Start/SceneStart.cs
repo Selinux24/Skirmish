@@ -135,7 +135,7 @@ namespace Animation.Start
 
             var button = new UIButton($"MainPanel.Button.{text}", this, desc);
             button.Caption.Text = text;
-            button.MouseJustReleased += buttonJustReleased;
+            button.MouseClick += buttonJustReleased;
             panel.AddChild(button);
 
             return panel;

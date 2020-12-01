@@ -291,6 +291,10 @@ namespace Engine.UI
         /// Mouse just released
         /// </summary>
         public event UITabPanelEventHandler TabJustReleased;
+        /// <summary>
+        /// Mouse click
+        /// </summary>
+        public event UITabPanelEventHandler TabClick;
 
         /// <summary>
         /// Constructor
@@ -329,6 +333,7 @@ namespace Engine.UI
                     button.MousePressed += Button_Pressed;
                     button.MouseJustPressed += Button_JustPressed;
                     button.MouseJustReleased += Button_JustReleased;
+                    button.MouseClick += Button_Click;
 
                     tabButtons.Add(button);
 
@@ -496,9 +501,23 @@ namespace Engine.UI
                 int index = tabButtons.IndexOf(button);
                 if (index >= 0)
                 {
+                    FireTabJustReleasedEvent(index);
+                }
+            }
+        }
+        /// <summary>
+        /// Button click event
+        /// </summary>
+        private void Button_Click(UIControl sender, MouseEventArgs e)
+        {
+            if (sender is UIButton button)
+            {
+                int index = tabButtons.IndexOf(button);
+                if (index >= 0)
+                {
                     SetSelectedTab(index);
 
-                    FireTabJustReleasedEvent(index);
+                    FireTabClickEvent(index);
                 }
             }
         }
@@ -537,6 +556,20 @@ namespace Engine.UI
         protected void FireTabJustReleasedEvent(int index)
         {
             TabJustReleased?.Invoke(
+                this,
+                new UITabPanelEventArgs()
+                {
+                    TabIndex = index,
+                    TabButton = tabButtons.ElementAtOrDefault(index),
+                    TabPanel = tabPanels.ElementAtOrDefault(index),
+                });
+        }
+        /// <summary>
+        /// Fires on click event
+        /// </summary>
+        protected void FireTabClickEvent(int index)
+        {
+            TabClick?.Invoke(
                 this,
                 new UITabPanelEventArgs()
                 {

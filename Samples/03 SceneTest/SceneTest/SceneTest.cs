@@ -162,7 +162,7 @@ namespace SceneTest.SceneTest
             buttonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
 
             butClose = await this.AddComponentUIButton("ButClose", buttonDesc, LayerUI);
-            butClose.MouseJustReleased += (sender, eventArgs) =>
+            butClose.MouseClick += (sender, eventArgs) =>
             {
                 if (eventArgs.Buttons.HasFlag(MouseButtons.Left))
                 {

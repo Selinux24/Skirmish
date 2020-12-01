@@ -146,12 +146,13 @@ namespace Terrain.PerlinNoise
 
             btnSave = await this.AddComponentUIButton("btnSave", butDesc);
 
-            btnExit.MouseJustReleased += BtnExit_JustReleased;
+            btnExit.MouseClick += BtnExitClick;
 
             txtScale.Text = "Scale";
 
             pbScale.ProgressColor = pColor;
             pbScale.ProgressValue = Scale;
+            pbScale.EventsEnabled = true;
             pbScale.MouseJustPressed += PbJustPressed;
             pbScale.MousePressed += PbPressed;
             pbScale.MouseJustReleased += PbJustReleased;
@@ -160,6 +161,7 @@ namespace Terrain.PerlinNoise
 
             pbLacunarity.ProgressColor = pColor;
             pbLacunarity.ProgressValue = Lacunarity;
+            pbLacunarity.EventsEnabled = true;
             pbLacunarity.MouseJustPressed += PbJustPressed;
             pbLacunarity.MousePressed += PbPressed;
             pbLacunarity.MouseJustReleased += PbJustReleased;
@@ -168,6 +170,7 @@ namespace Terrain.PerlinNoise
 
             pbPersistance.ProgressColor = pColor;
             pbPersistance.ProgressValue = Persistance;
+            pbPersistance.EventsEnabled = true;
             pbPersistance.MouseJustPressed += PbJustPressed;
             pbPersistance.MousePressed += PbPressed;
             pbPersistance.MouseJustReleased += PbJustReleased;
@@ -176,11 +179,12 @@ namespace Terrain.PerlinNoise
 
             pbOctaves.ProgressColor = pColor;
             pbOctaves.ProgressValue = Octaves;
+            pbOctaves.EventsEnabled = true;
             pbOctaves.MouseJustPressed += PbJustPressed;
             pbOctaves.MousePressed += PbPressed;
             pbOctaves.MouseJustReleased += PbJustReleased;
 
-            btnSave.MouseJustReleased += BtnSave_JustReleased;
+            btnSave.MouseClick += BtnSaveClick;
         }
         public async Task InitializeTextureRenderer()
         {
@@ -412,6 +416,11 @@ namespace Terrain.PerlinNoise
         }
         private void PbJustPressed(UIControl sender, MouseEventArgs e)
         {
+            if (capturedCtrl != null)
+            {
+                return;
+            }
+
             if (e.Buttons.HasFlag(MouseButtons.Left))
             {
                 capturedCtrl = sender;
@@ -421,7 +430,7 @@ namespace Terrain.PerlinNoise
         {
             capturedCtrl = null;
         }
-        private void BtnSave_JustReleased(UIControl sender, MouseEventArgs e)
+        private void BtnSaveClick(UIControl sender, MouseEventArgs e)
         {
             if (noiseMap == null)
             {
@@ -442,7 +451,7 @@ namespace Terrain.PerlinNoise
                 }
             }
         }
-        private void BtnExit_JustReleased(UIControl sender, MouseEventArgs e)
+        private void BtnExitClick(UIControl sender, MouseEventArgs e)
         {
             if (e.Buttons.HasFlag(MouseButtons.Left))
             {

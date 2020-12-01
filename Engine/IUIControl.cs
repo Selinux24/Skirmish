@@ -33,6 +33,10 @@ namespace Engine
         /// Mouse just released
         /// </summary>
         event MouseEventHandler MouseJustReleased;
+        /// <summary>
+        /// Mouse click
+        /// </summary>
+        event MouseEventHandler MouseClick;
 
         /// <summary>
         /// Gets or sets whether the control is enabled for event processing
@@ -43,17 +47,9 @@ namespace Engine
         /// </summary>
         bool IsMouseOver { get; }
         /// <summary>
-        /// Gets whether the control is pressed or not
+        /// Pressed buttons state flags
         /// </summary>
-        bool IsPressed { get; }
-        /// <summary>
-        /// Gets whether the control is just pressed or not
-        /// </summary>
-        bool IsJustPressed { get; }
-        /// <summary>
-        /// Gets whether the control is just released or not
-        /// </summary>
-        bool IsJustReleased { get; }
+        MouseButtons PressedState { get; }
 
         /// <summary>
         /// Gets or sets the height

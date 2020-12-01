@@ -327,12 +327,12 @@ namespace GameLogic
             });
             butNextAction.Caption.TextForeColor = Color.Yellow;
 
-            butClose.MouseJustReleased += (sender, eventArgs) => { if (eventArgs.Buttons.HasFlag(MouseButtons.Left)) Game.Exit(); };
-            butNext.MouseJustReleased += (sender, eventArgs) => { if (eventArgs.Buttons.HasFlag(MouseButtons.Left)) NextPhase(); };
-            butPrevSoldier.MouseJustReleased += (sender, eventArgs) => { if (eventArgs.Buttons.HasFlag(MouseButtons.Left)) PrevSoldier(true); };
-            butNextSoldier.MouseJustReleased += (sender, eventArgs) => { if (eventArgs.Buttons.HasFlag(MouseButtons.Left)) NextSoldier(true); };
-            butPrevAction.MouseJustReleased += (sender, eventArgs) => { if (eventArgs.Buttons.HasFlag(MouseButtons.Left)) PrevAction(); };
-            butNextAction.MouseJustReleased += (sender, eventArgs) => { if (eventArgs.Buttons.HasFlag(MouseButtons.Left)) NextAction(); };
+            butClose.MouseClick += (sender, eventArgs) => { if (eventArgs.Buttons.HasFlag(MouseButtons.Left)) Game.Exit(); };
+            butNext.MouseClick += (sender, eventArgs) => { if (eventArgs.Buttons.HasFlag(MouseButtons.Left)) NextPhase(); };
+            butPrevSoldier.MouseClick += (sender, eventArgs) => { if (eventArgs.Buttons.HasFlag(MouseButtons.Left)) PrevSoldier(true); };
+            butNextSoldier.MouseClick += (sender, eventArgs) => { if (eventArgs.Buttons.HasFlag(MouseButtons.Left)) NextSoldier(true); };
+            butPrevAction.MouseClick += (sender, eventArgs) => { if (eventArgs.Buttons.HasFlag(MouseButtons.Left)) PrevAction(); };
+            butNextAction.MouseClick += (sender, eventArgs) => { if (eventArgs.Buttons.HasFlag(MouseButtons.Left)) NextAction(); };
 
             txtTitle.Text = "Game Logic";
         }

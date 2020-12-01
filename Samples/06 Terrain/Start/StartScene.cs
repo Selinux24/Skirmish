@@ -104,13 +104,13 @@ namespace Terrain.Start
             startButtonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
 
             scenePerlinNoiseButton = await this.AddComponentUIButton("ButtonPerlinNoise", startButtonDesc, layerHUD);
-            scenePerlinNoiseButton.MouseJustReleased += SceneButtonClick;
+            scenePerlinNoiseButton.MouseClick += SceneButtonClick;
             scenePerlinNoiseButton.MouseEnter += SceneButtonMouseEnter;
             scenePerlinNoiseButton.MouseLeave += SceneButtonMouseLeave;
             scenePerlinNoiseButton.Caption.Text = "Perlin Noise";
 
             sceneRtsButton = await this.AddComponentUIButton("ButtonRts", startButtonDesc, layerHUD);
-            sceneRtsButton.MouseJustReleased += SceneButtonClick;
+            sceneRtsButton.MouseClick += SceneButtonClick;
             sceneRtsButton.MouseEnter += SceneButtonMouseEnter;
             sceneRtsButton.MouseLeave += SceneButtonMouseLeave;
             sceneRtsButton.Caption.Text = "Real Time Strategy Game";
@@ -129,7 +129,7 @@ namespace Terrain.Start
             exitButtonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
 
             exitButton = await this.AddComponentUIButton("ButtonExit", exitButtonDesc, layerHUD);
-            exitButton.MouseJustReleased += ExitButtonClick;
+            exitButton.MouseClick += ExitButtonClick;
             exitButton.MouseEnter += SceneButtonMouseEnter;
             exitButton.MouseLeave += SceneButtonMouseLeave;
             exitButton.Caption.Text = "Exit";

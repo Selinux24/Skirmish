@@ -193,11 +193,16 @@ namespace SpriteDrawing
             };
             dynamicPan = await this.AddComponentUIPanel("DynamicPanel", descPan, layerUIDialogs);
 
-            float w = 0.3333f;
+            float w0 = 0.0f;
+            float w1 = 0.324634656f;
+            float w2 = 0.655532359f;
+            float w3 = 0.98434238f;
+            Vector4 releasedRect = new Vector4(w0, 0, w1, 1f);
+            Vector4 pressedRect = new Vector4(w2, 0, w3, 1f);
 
             var font = TextDrawerDescription.FromFile("LeagueSpartan-Bold.otf", 16, true);
 
-            var descButClose = UIButtonDescription.DefaultTwoStateButton("buttons.png", new Vector4(0, 0, w, 1f), new Vector4(w * 2f, 0, w * 3f, 1f));
+            var descButClose = UIButtonDescription.DefaultTwoStateButton("buttons.png", releasedRect, pressedRect);
             descButClose.Top = 10;
             descButClose.Left = dynamicPan.Width - 10 - 40;
             descButClose.Width = 40;
@@ -208,7 +213,7 @@ namespace SpriteDrawing
             descButClose.Text = "X";
 
             var butClose = new UIButton("DynamicPanel.CloseButton", this, descButClose);
-            butClose.MouseJustReleased += ButClose_Click;
+            butClose.MouseClick += ButClose_Click;
 
             var descText = UITextAreaDescription.DefaultFromMap("MaraFont.png", "MaraFont.txt");
             descText.Text = @"Letters by Mara";
@@ -242,13 +247,13 @@ namespace SpriteDrawing
             descButClose.TextVerticalAlign = VerticalTextAlign.Middle;
 
             butTest2 = await this.AddComponentUIButton("ButtonTest2", descButClose, LayerUI);
-            butTest2.MouseJustReleased += ButTest2_Click;
+            butTest2.MouseClick += ButTest2_Click;
             butTest2.MouseEnter += ButTest_MouseEnter;
             butTest2.MouseLeave += ButTest_MouseLeave;
             butTest2.Visible = false;
 
             butTest1 = await this.AddComponentUIButton("ButtonTest1", descButClose, LayerUI);
-            butTest1.MouseJustReleased += ButTest1_Click;
+            butTest1.MouseClick += ButTest1_Click;
             butTest1.MouseEnter += ButTest_MouseEnter;
             butTest1.MouseLeave += ButTest_MouseLeave;
             butTest1.Visible = false;
@@ -287,8 +292,8 @@ namespace SpriteDrawing
                 var mousePos = Cursor.ScreenPosition;
                 var but = dynamicPan?.Children.OfType<UIButton>().FirstOrDefault();
 
-                textDebug.Text = $@"PanPressed: {dynamicPan?.IsPressed ?? false}; PanRect: {dynamicPan?.AbsoluteRectangle}; 
-ButPressed: {but?.IsPressed ?? false}; ButRect: {but?.AbsoluteRectangle}; 
+                textDebug.Text = $@"PanPressed: {dynamicPan?.PressedState ?? MouseButtons.None}; PanRect: {dynamicPan?.AbsoluteRectangle}; 
+ButPressed: {but?.PressedState ?? MouseButtons.None}; ButRect: {but?.AbsoluteRectangle}; 
 MousePos: {mousePos}; InputMousePos: {Game.Input.MousePosition}; 
 FormCenter: {Game.Form.RenderCenter} ScreenCenter: {Game.Form.ScreenCenter}
 Progress: {(int)(progressValue * 100f)}%";
@@ -407,7 +412,7 @@ Progress: {(int)(progressValue * 100f)}%";
             if (sender is UIButton button && e.Buttons.HasFlag(MouseButtons.Middle))
             {
                 button.ClearTween();
-                button.MouseJustReleased -= ButTest1_Click;
+                button.MouseClick -= ButTest1_Click;
                 button.MouseLeave -= ButTest_MouseLeave;
                 button.MouseEnter -= ButTest_MouseEnter;
                 button.Hide(500);
@@ -421,7 +426,7 @@ Progress: {(int)(progressValue * 100f)}%";
                 spriteSmiley.Hide(500);
 
                 button.ClearTween();
-                button.MouseJustReleased -= ButTest2_Click;
+                button.MouseClick -= ButTest2_Click;
                 button.MouseLeave -= ButTest_MouseLeave;
                 button.MouseEnter -= ButTest_MouseEnter;
                 button.Hide(500);

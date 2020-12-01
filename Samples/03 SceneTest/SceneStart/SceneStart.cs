@@ -138,7 +138,7 @@ namespace SceneTest.SceneStart
 
             for (int i = 0; i < sceneButtons.Length; i++)
             {
-                sceneButtons[i].MouseJustReleased += SceneButtonJustReleased;
+                sceneButtons[i].MouseClick += SceneButtonClick;
                 sceneButtons[i].MouseEnter += SceneButtonMouseEnter;
                 sceneButtons[i].MouseLeave += SceneButtonMouseLeave;
             }
@@ -153,7 +153,7 @@ namespace SceneTest.SceneStart
             exitButtonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
 
             exitButton = new UIButton("ButtonExit", this, exitButtonDesc);
-            exitButton.MouseJustReleased += ExitButtonJustReleased;
+            exitButton.MouseClick += ExitButtonClick;
             exitButton.MouseEnter += SceneButtonMouseEnter;
             exitButton.MouseLeave += SceneButtonMouseLeave;
 
@@ -163,7 +163,7 @@ namespace SceneTest.SceneStart
         private async Task InitializeOptionsButton()
         {
             optsButton = await this.AddComponentUIButton("ButtonOptions", UIButtonDescription.Default("SceneStart/ui_options.png"));
-            optsButton.MouseJustReleased += OptsButtonJustReleased;
+            optsButton.MouseClick += OptsButtonClick;
 
             var optsBackground = new Sprite("ButtonOptions.Background", this, SpriteDescription.Default(Color.White))
             {
@@ -181,7 +181,7 @@ namespace SceneTest.SceneStart
 
             tabsPanel = await this.AddComponentUITabPanel("TabPanel", tabDesc, LayerUI + 1);
             tabsPanel.Visible = false;
-            tabsPanel.TabJustReleased += TabsPanelTabJustReleased;
+            tabsPanel.TabClick += TabsPanelTabClick;
 
             var pan1Desc = UIPanelDescription.Default(@"SceneStart/TanksGame.png");
             tabsPanel.SetTabPanel(1, pan1Desc);
@@ -357,7 +357,7 @@ namespace SceneTest.SceneStart
             tabsPanel.Hide(100);
         }
 
-        private void SceneButtonJustReleased(UIControl sender, MouseEventArgs e)
+        private void SceneButtonClick(UIControl sender, MouseEventArgs e)
         {
             if (!sceneReady)
             {
@@ -408,11 +408,11 @@ namespace SceneTest.SceneStart
             sender.ClearTween();
             sender.TweenScale(sender.Scale, 1.0f, 500, ScaleFuncs.Linear);
         }
-        private void TabsPanelTabJustReleased(object sender, UITabPanelEventArgs e)
+        private void TabsPanelTabClick(object sender, UITabPanelEventArgs e)
         {
             Logger.WriteDebug(this, $"Clicked button {e.TabButton.Caption.Text}");
         }
-        private void ExitButtonJustReleased(UIControl sender, MouseEventArgs e)
+        private void ExitButtonClick(UIControl sender, MouseEventArgs e)
         {
             if (!sceneReady)
             {
@@ -426,7 +426,7 @@ namespace SceneTest.SceneStart
 
             Game.Exit();
         }
-        private void OptsButtonJustReleased(UIControl sender, MouseEventArgs e)
+        private void OptsButtonClick(UIControl sender, MouseEventArgs e)
         {
             if (!e.Buttons.HasFlag(MouseButtons.Left))
             {

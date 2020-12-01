@@ -275,7 +275,7 @@ namespace Collada.Start
                 buttonDesc.TextHorizontalAlign = HorizontalTextAlign.Right;
                 buttonDesc.TextVerticalAlign = VerticalTextAlign.Bottom;
                 var button = new UIButton($"ModularDungeonTabs.Button_{i}", this, buttonDesc);
-                button.MouseJustReleased += (s, o) =>
+                button.MouseClick += (s, o) =>
                 {
                     if (o.Buttons.HasFlag(MouseButtons.Left))
                     {
@@ -293,7 +293,7 @@ namespace Collada.Start
             buttonBasicDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
             buttonBasicDesc.TextVerticalAlign = VerticalTextAlign.Middle;
             var buttonBasic = new UIButton("ModularDungeonTabs.ButtonBasicDungeon", this, buttonBasicDesc);
-            buttonBasic.MouseJustReleased += (s, o) =>
+            buttonBasic.MouseClick += (s, o) =>
             {
                 if (o.Buttons.HasFlag(MouseButtons.Left))
                 {
@@ -303,7 +303,7 @@ namespace Collada.Start
             modularDungeonTabs.TabPanels.ElementAt(basicIndex).AddChild(buttonBasic);
 
             var backButton = modularDungeonTabs.TabButtons.ElementAt(backIndex);
-            backButton.MouseJustReleased += (s, o) =>
+            backButton.MouseClick += (s, o) =>
             {
                 if (o.Buttons.HasFlag(MouseButtons.Left))
                 {
@@ -323,35 +323,35 @@ namespace Collada.Start
 
             sceneDungeonWallButton.Caption.Text = "Dungeon Wall";
             sceneDungeonWallButton.TooltipText = "Shows a basic normal map scene demo.";
-            sceneDungeonWallButton.MouseJustReleased += SceneButtonClick;
+            sceneDungeonWallButton.MouseClick += SceneButtonClick;
             sceneDungeonWallButton.MouseOver += SceneButtonOver;
             sceneDungeonWallButton.Show(tweenTime, tweenTime);
             tweenTime += tweenInc;
 
             sceneNavMeshTestButton.Caption.Text = "Navmesh Test";
             sceneNavMeshTestButton.TooltipText = "Shows a navigation mesh scene demo.";
-            sceneNavMeshTestButton.MouseJustReleased += SceneButtonClick;
+            sceneNavMeshTestButton.MouseClick += SceneButtonClick;
             sceneNavMeshTestButton.MouseOver += SceneButtonOver;
             sceneNavMeshTestButton.Show(tweenTime, tweenTime);
             tweenTime += tweenInc;
 
             sceneDungeonButton.Caption.Text = "Dungeon";
             sceneDungeonButton.TooltipText = "Shows a basic dungeon from a unique mesh scene demo.";
-            sceneDungeonButton.MouseJustReleased += SceneButtonClick;
+            sceneDungeonButton.MouseClick += SceneButtonClick;
             sceneDungeonButton.MouseOver += SceneButtonOver;
             sceneDungeonButton.Show(tweenTime, tweenTime);
             tweenTime += tweenInc;
 
             sceneModularDungeonButton.Caption.Text = "Modular Dungeon";
             sceneModularDungeonButton.TooltipText = "Shows a modular dungeon scene demo.";
-            sceneModularDungeonButton.MouseJustReleased += SceneButtonClick;
+            sceneModularDungeonButton.MouseClick += SceneButtonClick;
             sceneModularDungeonButton.MouseOver += SceneButtonOver;
             sceneModularDungeonButton.Show(tweenTime, tweenTime);
             tweenTime += tweenInc;
 
             exitButton.Caption.Text = "Exit";
             exitButton.TooltipText = "Closes the application.";
-            exitButton.MouseJustReleased += ExitButtonClick;
+            exitButton.MouseClick += ExitButtonClick;
             exitButton.MouseOver += SceneButtonOver;
             exitButton.Show(tweenTime, tweenTime);
 

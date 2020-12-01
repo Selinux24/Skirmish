@@ -60,7 +60,7 @@ namespace Engine.UI
             {
                 butAccept = new UIButton($"{name}.AcceptButton", scene, description.Buttons);
                 butAccept.Caption.Text = "Accept";
-                butAccept.MouseJustReleased += DialogAcceptJustReleased;
+                butAccept.MouseClick += DialogAcceptClick;
                 backPanel.AddChild(butAccept, false);
 
                 buttonAreaHeight = butAccept.Height + 10;
@@ -72,14 +72,14 @@ namespace Engine.UI
                 {
                     butClose = new UIButton($"{name}.CancelButton", scene, description.Buttons);
                     butClose.Caption.Text = "Cancel";
-                    butClose.MouseJustReleased += DialogCancelJustReleased;
+                    butClose.MouseClick += DialogCancelClick;
                     backPanel.AddChild(butClose, false);
                 }
                 else
                 {
                     butClose = new UIButton($"{name}.CloseButton", scene, description.Buttons);
                     butClose.Caption.Text = "Close";
-                    butClose.MouseJustReleased += DialogCloseJustReleased;
+                    butClose.MouseClick += DialogCloseClick;
                     backPanel.AddChild(butClose, false);
                 }
 
@@ -122,15 +122,15 @@ namespace Engine.UI
             }
         }
 
-        private void DialogAcceptJustReleased(UIControl sender, MouseEventArgs e)
+        private void DialogAcceptClick(UIControl sender, MouseEventArgs e)
         {
             OnAcceptHandler?.Invoke(this, e);
         }
-        private void DialogCancelJustReleased(UIControl sender, MouseEventArgs e)
+        private void DialogCancelClick(UIControl sender, MouseEventArgs e)
         {
             OnCancelHandler?.Invoke(this, e);
         }
-        private void DialogCloseJustReleased(UIControl sender, MouseEventArgs e)
+        private void DialogCloseClick(UIControl sender, MouseEventArgs e)
         {
             OnCloseHandler?.Invoke(this, e);
         }
