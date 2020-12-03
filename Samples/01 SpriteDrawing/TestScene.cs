@@ -213,7 +213,7 @@ namespace SpriteDrawing
             descButClose.Text = "X";
 
             var butClose = new UIButton("DynamicPanel.CloseButton", this, descButClose);
-            butClose.MouseClick += ButClose_Click;
+            butClose.MouseDoubleClick += ButDoubleClose_Click;
 
             var descText = UITextAreaDescription.DefaultFromMap("MaraFont.png", "MaraFont.txt");
             descText.Text = @"Letters by Mara";
@@ -382,7 +382,7 @@ Progress: {(int)(progressValue * 100f)}%";
             }
         }
 
-        private void ButClose_Click(UIControl sender, MouseEventArgs e)
+        private void ButDoubleClose_Click(UIControl sender, MouseEventArgs e)
         {
             if (!e.Buttons.HasFlag(MouseButtons.Left))
             {

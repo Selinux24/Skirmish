@@ -37,6 +37,10 @@ namespace Engine
         /// Mouse click
         /// </summary>
         event MouseEventHandler MouseClick;
+        /// <summary>
+        /// Mouse double click
+        /// </summary>
+        event MouseEventHandler MouseDoubleClick;
 
         /// <summary>
         /// Gets or sets whether the control is enabled for event processing

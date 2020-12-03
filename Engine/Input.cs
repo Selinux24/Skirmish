@@ -16,6 +16,10 @@ namespace Engine
         /// Frame time
         /// </summary>
         public const float InputTime = 1f / 60f;
+        /// <summary>
+        /// Double click interval
+        /// </summary>
+        public const float DoubleClickTime = 500;
 
         /// <summary>
         /// Engine render form

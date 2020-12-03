@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -52,12 +53,16 @@ namespace Engine.UI
         /// Mouse click
         /// </summary>
         public event MouseEventHandler MouseClick;
+        /// <summary>
+        /// Mouse double click
+        /// </summary>
+        public event MouseEventHandler MouseDoubleClick;
 
         /// <summary>
         /// Evaluates input over the specified scene
         /// </summary>
         /// <param name="scene">Scene</param>
-        /// <param name="capturedControl">Returns the control wich captures the mouse event</param>
+        /// <returns>Returns the control wich captures the mouse event</returns>
         public static UIControl EvaluateInput(Scene scene)
         {
             var input = scene.Game.Input;
@@ -181,49 +186,58 @@ namespace Engine.UI
                 {
                     capturedControl = topControl;
 
-                    var justPressedButtons = input.MouseButtonsState & ~topControl.PressedState;
-                    var justReleasedButtons = topControl.PressedState & ~input.MouseButtonsState;
-
-                    //Update the control pressed state
-                    topControl.PressedState = input.MouseButtonsState;
-
-                    //Mouse is over
-                    topControl.FireMouseOverEvent(input.MousePosition, input.MouseButtonsState);
-
-                    //Evaluate mouse enter
-                    if (!topControl.prevIsMouseOver)
-                    {
-                        topControl.FireMouseEnterEvent(input.MousePosition, input.MouseButtonsState);
-                    }
-
-                    //Only the top most control is considered the mouse-over control
-                    topControl.prevIsMouseOver = true;
-
-                    //Evaluate the pressed state
-                    if (input.MouseButtonsState != MouseButtons.None)
-                    {
-                        topControl.FirePressedEvent(input.MousePosition, input.MouseButtonsState);
-                    }
-
-                    //Evaluate the just pressed event
-                    if (justPressedButtons != MouseButtons.None)
-                    {
-                        topControl.FireJustPressedEvent(input.MousePosition, justPressedButtons);
-                    }
-
-                    //Evaluate the just released event
-                    if (justReleasedButtons != MouseButtons.None)
-                    {
-                        topControl.FireJustReleasedEvent(input.MousePosition, justReleasedButtons);
-                        topControl.FireClickEvent(input.MousePosition, justReleasedButtons);
-                    }
+                    EvaluateEventsEnabledControl(input, topControl);
                 }
 
-                //Get the evaluable top most control
+                //Get the new evaluable top most control in the children list
                 topControl = topControl.Children.LastOrDefault(c => IsEvaluable(c) && c.IsMouseOver);
             }
 
             return capturedControl;
+        }
+        /// <summary>
+        /// Evaluate events enabled control
+        /// </summary>
+        /// <param name="input">Input</param>
+        /// <param name="ctrl">Control</param>
+        private static void EvaluateEventsEnabledControl(Input input, UIControl ctrl)
+        {
+            var justPressedButtons = input.MouseButtonsState & ~ctrl.PressedState;
+            var justReleasedButtons = ctrl.PressedState & ~input.MouseButtonsState;
+
+            //Update the control pressed state
+            ctrl.PressedState = input.MouseButtonsState;
+
+            //Mouse is over
+            ctrl.FireMouseOverEvent(input.MousePosition, input.MouseButtonsState);
+
+            //Evaluate mouse enter
+            if (!ctrl.prevIsMouseOver)
+            {
+                ctrl.FireMouseEnterEvent(input.MousePosition, input.MouseButtonsState);
+            }
+
+            //Only the top most control is considered the mouse-over control
+            ctrl.prevIsMouseOver = true;
+
+            //Evaluate the pressed state
+            if (input.MouseButtonsState != MouseButtons.None)
+            {
+                ctrl.FirePressedEvent(input.MousePosition, input.MouseButtonsState);
+            }
+
+            //Evaluate the just pressed event
+            if (justPressedButtons != MouseButtons.None)
+            {
+                ctrl.FireJustPressedEvent(input.MousePosition, justPressedButtons);
+            }
+
+            //Evaluate the just released event
+            if (justReleasedButtons != MouseButtons.None)
+            {
+                ctrl.FireJustReleasedEvent(input.MousePosition, justReleasedButtons);
+                ctrl.FireClickEvent(input.MousePosition, justReleasedButtons);
+            }
         }
 
         /// <summary>
@@ -294,6 +308,14 @@ namespace Engine.UI
         /// Indicates whether the mouse was previously pressed or not
         /// </summary>
         private bool prevIsMouseOver = false;
+        /// <summary>
+        /// Last clicked event time
+        /// </summary>
+        private TimeSpan lastClickedTime = TimeSpan.Zero;
+        /// <summary>
+        /// Last clicked buttons
+        /// </summary>
+        private MouseButtons lastClickedButtons = MouseButtons.None;
 
         /// <summary>
         /// Manipulator
@@ -370,11 +392,11 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets whether the control is enabled for event processing
         /// </summary>
-        public virtual bool EventsEnabled { get; set; } = true;
+        public bool EventsEnabled { get; set; } = true;
         /// <summary>
         /// Gets whether the mouse is over the button rectangle or not
         /// </summary>
-        public virtual bool IsMouseOver { get; protected set; }
+        public bool IsMouseOver { get; private set; }
         /// <summary>
         /// Pressed buttons state flags
         /// </summary>
@@ -383,7 +405,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets the width
         /// </summary>
-        public float Width
+        public virtual float Width
         {
             get
             {
@@ -402,7 +424,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets the height
         /// </summary>
-        public float Height
+        public virtual float Height
         {
             get
             {
@@ -422,7 +444,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets the local scale
         /// </summary>
-        public float Scale
+        public virtual float Scale
         {
             get
             {
@@ -441,7 +463,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets the absolute scale
         /// </summary>
-        public float AbsoluteScale
+        public virtual float AbsoluteScale
         {
             get
             {
@@ -451,7 +473,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets the local rotation
         /// </summary>
-        public float Rotation
+        public virtual float Rotation
         {
             get
             {
@@ -471,7 +493,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets the absolute rotation
         /// </summary>
-        public float AbsoluteRotation
+        public virtual float AbsoluteRotation
         {
             get
             {
@@ -481,7 +503,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets the rotation and scale pivot anchor
         /// </summary>
-        public PivotAnchors PivotAnchor
+        public virtual PivotAnchors PivotAnchor
         {
             get
             {
@@ -501,7 +523,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets the (local) left coordinate value from parent or the screen origin
         /// </summary>
-        public float Left
+        public virtual float Left
         {
             get
             {
@@ -520,7 +542,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets the (absolute) left coordinate value the screen origin
         /// </summary>
-        public float AbsoluteLeft
+        public virtual float AbsoluteLeft
         {
             get
             {
@@ -530,7 +552,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets the (local) top coordinate value from parent or the screen origin
         /// </summary>
-        public float Top
+        public virtual float Top
         {
             get
             {
@@ -549,7 +571,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets the (absolute) top coordinate value from the screen origin
         /// </summary>
-        public float AbsoluteTop
+        public virtual float AbsoluteTop
         {
             get
             {
@@ -560,7 +582,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets the control's rectangle local coordinates
         /// </summary>
-        public RectangleF LocalRectangle
+        public virtual RectangleF LocalRectangle
         {
             get
             {
@@ -570,7 +592,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets the control's rectangle absolute coordinates from screen origin
         /// </summary>
-        public RectangleF AbsoluteRectangle
+        public virtual RectangleF AbsoluteRectangle
         {
             get
             {
@@ -580,7 +602,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets the control's rectangle coordinates relative to inmediate parent control position
         /// </summary>
-        public RectangleF RelativeToParentRectangle
+        public virtual RectangleF RelativeToParentRectangle
         {
             get
             {
@@ -590,7 +612,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets the control's rectangle coordinates relative to root control position
         /// </summary>
-        public RectangleF RelativeToRootRectangle
+        public virtual RectangleF RelativeToRootRectangle
         {
             get
             {
@@ -614,7 +636,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets the control's local center coordinates
         /// </summary>
-        public Vector2 LocalCenter
+        public virtual Vector2 LocalCenter
         {
             get
             {
@@ -624,7 +646,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets the control's absolute center coordinates
         /// </summary>
-        public Vector2 AbsoluteCenter
+        public virtual Vector2 AbsoluteCenter
         {
             get
             {
@@ -974,7 +996,7 @@ namespace Engine.UI
         /// </summary>
         /// <returns>Returns the transform matrix</returns>
         /// <remarks>If the control is parent-fitted, returns the parent's transform</remarks>
-        public Matrix GetTransform()
+        public virtual Matrix GetTransform()
         {
             return fitWithParent && HasParent ? Parent.GetTransform() : Manipulator.LocalTransform;
         }
@@ -982,7 +1004,9 @@ namespace Engine.UI
         /// <summary>
         /// Fires on mouse over event
         /// </summary>
-        protected void FireMouseOverEvent(Point pointerPosition, MouseButtons buttons)
+        /// <param name="pointerPosition">Pointer position</param>
+        /// <param name="buttons">Pressed buttons</param>
+        protected virtual void FireMouseOverEvent(Point pointerPosition, MouseButtons buttons)
         {
             MouseOver?.Invoke(this, new MouseEventArgs
             {
@@ -993,7 +1017,9 @@ namespace Engine.UI
         /// <summary>
         /// Fires on mouse enter event
         /// </summary>
-        protected void FireMouseEnterEvent(Point pointerPosition, MouseButtons buttons)
+        /// <param name="pointerPosition">Pointer position</param>
+        /// <param name="buttons">Pressed buttons</param>
+        protected virtual void FireMouseEnterEvent(Point pointerPosition, MouseButtons buttons)
         {
             MouseEnter?.Invoke(this, new MouseEventArgs
             {
@@ -1004,7 +1030,9 @@ namespace Engine.UI
         /// <summary>
         /// Fires on mouse leave event
         /// </summary>
-        protected void FireMouseLeaveEvent(Point pointerPosition, MouseButtons buttons)
+        /// <param name="pointerPosition">Pointer position</param>
+        /// <param name="buttons">Pressed buttons</param>
+        protected virtual void FireMouseLeaveEvent(Point pointerPosition, MouseButtons buttons)
         {
             MouseLeave?.Invoke(this, new MouseEventArgs
             {
@@ -1015,7 +1043,9 @@ namespace Engine.UI
         /// <summary>
         /// Fires on pressed event
         /// </summary>
-        protected void FirePressedEvent(Point pointerPosition, MouseButtons buttons)
+        /// <param name="pointerPosition">Pointer position</param>
+        /// <param name="buttons">Pressed buttons</param>
+        protected virtual void FirePressedEvent(Point pointerPosition, MouseButtons buttons)
         {
             MousePressed?.Invoke(this, new MouseEventArgs
             {
@@ -1026,34 +1056,70 @@ namespace Engine.UI
         /// <summary>
         /// Fires on just pressed event
         /// </summary>
-        protected void FireJustPressedEvent(Point pointerPosition, MouseButtons buttons)
+        /// <param name="pointerPosition">Pointer position</param>
+        /// <param name="justPressedButtons">Just pressed buttons</param>
+        protected virtual void FireJustPressedEvent(Point pointerPosition, MouseButtons justPressedButtons)
         {
             MouseJustPressed?.Invoke(this, new MouseEventArgs
             {
                 PointerPosition = pointerPosition,
-                Buttons = buttons,
+                Buttons = justPressedButtons,
             });
         }
         /// <summary>
         /// Fires on just released event
         /// </summary>
-        protected void FireJustReleasedEvent(Point pointerPosition, MouseButtons buttons)
+        /// <param name="pointerPosition">Pointer position</param>
+        /// <param name="justReleasedButtons">Just released buttons</param>
+        protected virtual void FireJustReleasedEvent(Point pointerPosition, MouseButtons justReleasedButtons)
         {
             MouseJustReleased?.Invoke(this, new MouseEventArgs
             {
                 PointerPosition = pointerPosition,
-                Buttons = buttons,
+                Buttons = justReleasedButtons,
             });
         }
         /// <summary>
         /// Fires on click event
         /// </summary>
-        protected void FireClickEvent(Point pointerPosition, MouseButtons buttons)
+        /// <param name="pointerPosition">Pointer position</param>
+        /// <param name="clickedButtons">Clicked buttons</param>
+        protected virtual void FireClickEvent(Point pointerPosition, MouseButtons clickedButtons)
         {
             MouseClick?.Invoke(this, new MouseEventArgs
             {
                 PointerPosition = pointerPosition,
-                Buttons = buttons,
+                Buttons = clickedButtons,
+            });
+
+            if ((Game.GameTime.TotalTime - lastClickedTime).TotalMilliseconds <= Input.DoubleClickTime)
+            {
+                var doubleClickedButtons = lastClickedButtons & clickedButtons;
+                if (doubleClickedButtons != MouseButtons.None)
+                {
+                    FireDoubleClickEvent(pointerPosition, doubleClickedButtons);
+
+                    lastClickedTime = TimeSpan.Zero;
+                    lastClickedButtons = MouseButtons.None;
+
+                    return;
+                }
+            }
+
+            lastClickedTime = Game.GameTime.TotalTime;
+            lastClickedButtons = clickedButtons;
+        }
+        /// <summary>
+        /// Fires on double click event
+        /// </summary>
+        /// <param name="pointerPosition">Pointer position</param>
+        /// <param name="doubleClickedButtons">Double clicked buttons</param>
+        protected virtual void FireDoubleClickEvent(Point pointerPosition, MouseButtons doubleClickedButtons)
+        {
+            MouseDoubleClick?.Invoke(this, new MouseEventArgs
+            {
+                PointerPosition = pointerPosition,
+                Buttons = doubleClickedButtons,
             });
         }
 
@@ -1064,7 +1130,10 @@ namespace Engine.UI
         {
             UpdateInternals = true;
 
-            children.ForEach(c => c.Resize());
+            if (children.Any())
+            {
+                children.ForEach(c => c.Resize());
+            }
         }
 
         /// <summary>
@@ -1181,7 +1250,7 @@ namespace Engine.UI
         /// </summary>
         /// <param name="point">Point to test</param>
         /// <returns>Returns true if the point is contained into the control rectangle</returns>
-        public bool Contains(Point point)
+        public virtual bool Contains(Point point)
         {
             var rect = GetRenderArea(false);
 
@@ -1195,7 +1264,7 @@ namespace Engine.UI
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="distance">Distance</param>
-        public void MoveLeft(GameTime gameTime, float distance = 1f)
+        public virtual void MoveLeft(GameTime gameTime, float distance = 1f)
         {
             Left -= (int)(1f * distance * gameTime.ElapsedSeconds);
         }
@@ -1204,7 +1273,7 @@ namespace Engine.UI
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="distance">Distance</param>
-        public void MoveRight(GameTime gameTime, float distance = 1f)
+        public virtual void MoveRight(GameTime gameTime, float distance = 1f)
         {
             Left += (int)(1f * distance * gameTime.ElapsedSeconds);
         }
@@ -1213,7 +1282,7 @@ namespace Engine.UI
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="distance">Distance</param>
-        public void MoveUp(GameTime gameTime, float distance = 1f)
+        public virtual void MoveUp(GameTime gameTime, float distance = 1f)
         {
             Top -= (int)(1f * distance * gameTime.ElapsedSeconds);
         }
@@ -1222,7 +1291,7 @@ namespace Engine.UI
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="distance">Distance</param>
-        public void MoveDown(GameTime gameTime, float distance = 1f)
+        public virtual void MoveDown(GameTime gameTime, float distance = 1f)
         {
             Top += (int)(1f * distance * gameTime.ElapsedSeconds);
         }
