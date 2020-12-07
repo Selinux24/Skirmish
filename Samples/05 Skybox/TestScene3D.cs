@@ -216,12 +216,9 @@ namespace Skybox
         }
         private async Task InitializeSkydom()
         {
-            var skydomDesc = new SkydomDescription()
-            {
-                ContentPath = "Resources",
-                Radius = Camera.FarPlaneDistance,
-                Texture = "sunset.dds",
-            };
+            string fileName = "Resources/Daylight Box UV.png";
+            int faceSize = 512;
+            var skydomDesc = SkydomDescription.FromCrossTexture(fileName, faceSize, Camera.FarPlaneDistance);
 
             await this.AddComponentSkydom("Skydom", skydomDesc);
         }

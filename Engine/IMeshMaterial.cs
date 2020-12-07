@@ -32,14 +32,22 @@ namespace Engine
         /// <summary>
         /// Resource index
         /// </summary>
-        uint ResourceIndex { get; set; }
+        uint ResourceIndex { get; }
         /// <summary>
         /// Resource offset
         /// </summary>
-        uint ResourceOffset { get; set; }
+        uint ResourceOffset { get; }
         /// <summary>
         /// Resource size
         /// </summary>
-        uint ResourceSize { get; set; }
+        uint ResourceSize { get; }
+
+        /// <summary>
+        /// Updates the data
+        /// </summary>
+        /// <param name="index">Index</param>
+        /// <param name="offset">Offset</param>
+        /// <param name="size">Size</param>
+        void UpdateResource(uint index, uint offset, uint size);
     }
 }

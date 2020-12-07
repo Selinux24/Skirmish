@@ -688,12 +688,9 @@ namespace Terrain.Rts
             Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
 
-            await this.AddComponentSkydom("Skydom", new SkydomDescription()
-            {
-                ContentPath = "Rts/resources/Skydom",
-                Texture = "sunset.dds",
-                Radius = Camera.FarPlaneDistance,
-            });
+            string fileName = @"Rts/resources/Skydom/sunset.dds";
+
+            await this.AddComponentSkydom("Skydom", SkydomDescription.Default(fileName, Camera.FarPlaneDistance));
 
             sw.Stop();
             return new TaskResult()

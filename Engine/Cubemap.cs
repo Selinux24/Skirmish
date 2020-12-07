@@ -71,7 +71,7 @@ namespace Engine
             Manipulator = new Manipulator3D();
 
             InitializeBuffers(name, description.Geometry, description.ReverseFaces);
-            InitializeTexture(description.ContentPath, description.Texture);
+            InitializeTexture(description.Texture, description.Faces);
         }
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
@@ -163,11 +163,11 @@ namespace Engine
         /// <summary>
         /// Initialize textures
         /// </summary>
-        /// <param name="contentPath">Content path</param>
-        /// <param name="textures">Texture names</param>
-        protected void InitializeTexture(string contentPath, params string[] textures)
+        /// <param name="texture">Texture file name</param>
+        /// <param name="faces">Texture faces</param>
+        protected void InitializeTexture(string texture, Rectangle[] faces = null)
         {
-            var image = ImageContent.Cubic(contentPath, textures[0]);
+            var image = ImageContent.Cubic(texture, faces);
             cubeMapTexture = Game.ResourceManager.RequestResource(image);
         }
     }

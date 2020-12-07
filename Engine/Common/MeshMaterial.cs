@@ -81,6 +81,19 @@ namespace Engine.Common
         /// </summary>
         public uint ResourceSize { get; set; } = 0;
 
+        /// <summary>
+        /// Updates the data
+        /// </summary>
+        /// <param name="index">Index</param>
+        /// <param name="offset">Offset</param>
+        /// <param name="size">Size</param>
+        public void UpdateResource(uint index, uint offset, uint size)
+        {
+            ResourceIndex = index;
+            ResourceOffset = offset;
+            ResourceSize = size;
+        }
+
         /// <inheritdoc/>
         public bool Equals(MeshMaterial other)
         {

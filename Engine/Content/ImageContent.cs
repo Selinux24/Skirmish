@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using SharpDX;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -83,32 +84,57 @@ namespace Engine.Content
                 return Paths.Count() + Streams.Count();
             }
         }
+        /// <summary>
+        /// Crop rectangle
+        /// </summary>
+        public Rectangle CropRectangle { get; set; } = Rectangle.Empty;
+        /// <summary>
+        /// Texture faces
+        /// </summary>
+        public Rectangle[] Faces { get; set; } = new Rectangle[] { };
 
+        /// <summary>
+        /// Creates a unique texture image
+        /// </summary>
+        /// <param name="texture">Path to texture</param>
+        /// <param name="rectangle">Crop rectangle</param>
+        /// <returns>Returns content</returns>
+        public static ImageContent Texture(string texture, Rectangle? rectangle = null)
+        {
+            string directoryName = System.IO.Path.GetDirectoryName(texture);
+            string filenName = System.IO.Path.GetFileName(texture);
+
+            return Texture(directoryName, filenName, rectangle);
+        }
         /// <summary>
         /// Creates a unique texture image
         /// </summary>
         /// <param name="contentFolder">Content folder</param>
         /// <param name="texture">Path to texture</param>
+        /// <param name="rectangle">Crop rectangle</param>
         /// <returns>Returns content</returns>
-        public static ImageContent Texture(string contentFolder, string texture)
+        public static ImageContent Texture(string contentFolder, string texture, Rectangle? rectangle = null)
         {
             var p = ContentManager.FindPaths(contentFolder, texture);
 
             return new ImageContent()
             {
                 Paths = p,
+                CropRectangle = rectangle ?? Rectangle.Empty,
             };
         }
         /// <summary>
         /// Creates a unique texture image
         /// </summary>
         /// <param name="texture">Texture stream</param>
+        /// <param name="rectangle">Crop rectangle</param>
         /// <returns>Returns content</returns>
-        public static ImageContent Texture(MemoryStream texture)
+        public static ImageContent Texture(MemoryStream texture, Rectangle? rectangle = null)
         {
             return new ImageContent()
             {
                 Stream = texture,
+                CropRectangle = rectangle ?? Rectangle.Empty,
             };
         }
         /// <summary>
@@ -116,35 +142,53 @@ namespace Engine.Content
         /// </summary>
         /// <param name="contentFolder">Content folder</param>
         /// <param name="textures">Paths to textures</param>
+        /// <param name="rectangle">Crop rectangle</param>
         /// <returns>Returns content</returns>
-        public static ImageContent Array(string contentFolder, IEnumerable<string> textures)
+        public static ImageContent Array(string contentFolder, IEnumerable<string> textures, Rectangle? rectangle = null)
         {
             var p = ContentManager.FindPaths(contentFolder, textures);
 
             return new ImageContent()
             {
                 Paths = p,
+                CropRectangle = rectangle ?? Rectangle.Empty,
             };
         }
         /// <summary>
         /// Creates a texture array image
         /// </summary>
         /// <param name="textures">Texture streams</param>
+        /// <param name="rectangle">Crop rectangle</param>
         /// <returns>Returns content</returns>
-        public static ImageContent Array(IEnumerable<MemoryStream> textures)
+        public static ImageContent Array(IEnumerable<MemoryStream> textures, Rectangle? rectangle = null)
         {
             return new ImageContent()
             {
                 Streams = textures,
+                CropRectangle = rectangle ?? Rectangle.Empty,
             };
+        }
+        /// <summary>
+        /// Creates a cubic texture image
+        /// </summary>
+        /// <param name="texture">Path to texture</param>
+        /// <param name="faces">Texture faces</param>
+        /// <returns>Returns content</returns>
+        public static ImageContent Cubic(string texture, Rectangle[] faces = null)
+        {
+            string directoryName = System.IO.Path.GetDirectoryName(texture);
+            string filenName = System.IO.Path.GetFileName(texture);
+
+            return Cubic(directoryName, filenName, faces);
         }
         /// <summary>
         /// Creates a cubic texture image
         /// </summary>
         /// <param name="contentFolder">Content folder</param>
         /// <param name="texture">Path to texture</param>
+        /// <param name="faces">Texture faces</param>
         /// <returns>Returns content</returns>
-        public static ImageContent Cubic(string contentFolder, string texture)
+        public static ImageContent Cubic(string contentFolder, string texture, Rectangle[] faces = null)
         {
             var p = ContentManager.FindPaths(contentFolder, texture);
 
@@ -152,19 +196,22 @@ namespace Engine.Content
             {
                 Paths = p,
                 IsCubic = true,
+                Faces = faces,
             };
         }
         /// <summary>
         /// Creates a cubic texture image
         /// </summary>
         /// <param name="texture">Texture stream</param>
+        /// <param name="faces">Texture faces</param>
         /// <returns>Returns content</returns>
-        public static ImageContent Cubic(MemoryStream texture)
+        public static ImageContent Cubic(MemoryStream texture, Rectangle[] faces = null)
         {
             return new ImageContent()
             {
                 Stream = texture,
                 IsCubic = true,
+                Faces = faces,
             };
         }
 

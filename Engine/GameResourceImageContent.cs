@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 namespace Engine
 {
@@ -50,7 +51,7 @@ namespace Engine
         {
             if (imageContent.Stream != null)
             {
-                return game.Graphics.LoadTexture(imageContent.Stream, mipAutogen, dynamic);
+                return game.Graphics.LoadTexture(imageContent.Stream, imageContent.CropRectangle, mipAutogen, dynamic);
             }
             else
             {
@@ -80,11 +81,11 @@ namespace Engine
         {
             if (!string.IsNullOrWhiteSpace(imageContent.Path))
             {
-                return game.Graphics.LoadTexture(imageContent.Path, mipAutogen, dynamic);
+                return game.Graphics.LoadTexture(imageContent.Path, imageContent.CropRectangle, mipAutogen, dynamic);
             }
             else if (imageContent.Stream != null)
             {
-                return game.Graphics.LoadTexture(imageContent.Stream, mipAutogen, dynamic);
+                return game.Graphics.LoadTexture(imageContent.Stream, imageContent.CropRectangle, mipAutogen, dynamic);
             }
 
             return null;
@@ -101,11 +102,11 @@ namespace Engine
         {
             if (imageContent.Paths.Any())
             {
-                return game.Graphics.LoadTextureArray(imageContent.Paths, mipAutogen, dynamic);
+                return game.Graphics.LoadTextureArray(imageContent.Paths, imageContent.CropRectangle, mipAutogen, dynamic);
             }
             else if (imageContent.Streams.Any())
             {
-                return game.Graphics.LoadTextureArray(imageContent.Streams, mipAutogen, dynamic);
+                return game.Graphics.LoadTextureArray(imageContent.Streams, imageContent.CropRectangle, mipAutogen, dynamic);
             }
 
             return null;
@@ -122,24 +123,17 @@ namespace Engine
         {
             if (imageContent.IsArray)
             {
-                if (imageContent.Paths.Any())
-                {
-                    return game.Graphics.LoadTextureArray(imageContent.Paths, mipAutogen, dynamic);
-                }
-                else if (imageContent.Streams.Any())
-                {
-                    return game.Graphics.LoadTextureArray(imageContent.Streams, mipAutogen, dynamic);
-                }
+                throw new NotImplementedException();
             }
             else
             {
                 if (!string.IsNullOrWhiteSpace(imageContent.Path))
                 {
-                    return game.Graphics.LoadTexture(imageContent.Path, mipAutogen, dynamic);
+                    return game.Graphics.LoadTextureCubic(imageContent.Path, imageContent.Faces, mipAutogen, dynamic);
                 }
                 else if (imageContent.Stream != null)
                 {
-                    return game.Graphics.LoadTexture(imageContent.Stream, mipAutogen, dynamic);
+                    return game.Graphics.LoadTextureCubic(imageContent.Stream, imageContent.Faces, mipAutogen, dynamic);
                 }
             }
 

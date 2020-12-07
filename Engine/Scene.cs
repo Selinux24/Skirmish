@@ -863,9 +863,7 @@ namespace Engine
                 var mat = mats[i];
                 var matV = mat.Material.Convert().Pack();
 
-                mat.ResourceIndex = (uint)i;
-                mat.ResourceOffset = (uint)values.Count;
-                mat.ResourceSize = (uint)matV.Length;
+                mat.UpdateResource((uint)i, (uint)values.Count, (uint)matV.Length);
 
                 values.AddRange(matV);
             }

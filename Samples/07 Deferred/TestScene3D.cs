@@ -172,12 +172,8 @@ namespace Deferred
         }
         private async Task InitializeSkydom()
         {
-            var desc = new SkydomDescription()
-            {
-                ContentPath = "Resources",
-                Radius = far,
-                Texture = "sunset.dds",
-            };
+            var desc = SkydomDescription.Default(@"Resources/sunset.dds", far);
+
             await this.AddComponentSkydom("Sky", desc);
         }
         private async Task InitializeHelicopters()
