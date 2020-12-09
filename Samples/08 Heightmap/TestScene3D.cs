@@ -1235,14 +1235,11 @@ namespace Heightmap
                 }
                 else
                 {
-                    var eyePos = new Vector3(0, agent.Height, 0);
-                    var eyeView = -Vector3.ForwardLH * 4f;
-                    var interest = eyePos + eyeView;
+                    var eyePos = new Vector3(0, agent.Height * 0.8f, 0);
+                    var offset = (eyePos * 1.25f) - (Vector3.Right * 1.25f) - (Vector3.BackwardLH * 10f);
+                    var view = soldier.Manipulator.Forward;
 
-                    var offset = (eyePos * 1.1f) - (Vector3.Right * 1.5f) - (Vector3.BackwardLH * 4f);
-                    var view = Vector3.Normalize(interest - offset);
-
-                    Camera.Following = new CameraFollower(soldier.Manipulator, offset, view);
+                    Camera.Following = new CameraFollower(soldier.Manipulator, offset, view, 10f);
                 }
             }
 

@@ -35,11 +35,11 @@ namespace Deferred
         {
             get
             {
-                return this.model.Active;
+                return model.Active;
             }
             set
             {
-                this.model.Active = value;
+                model.Active = value;
             }
         }
         /// <summary>
@@ -49,11 +49,11 @@ namespace Deferred
         {
             get
             {
-                return this.model.Visible;
+                return model.Visible;
             }
             set
             {
-                this.model.Visible = value;
+                model.Visible = value;
             }
         }
         /// <summary>
@@ -63,7 +63,7 @@ namespace Deferred
         {
             get
             {
-                return this.controller.HasPath;
+                return controller.HasPath;
             }
         }
         /// <summary>
@@ -73,7 +73,7 @@ namespace Deferred
         {
             get
             {
-                return this.model?.Manipulator;
+                return model?.Manipulator;
             }
         }
         /// <summary>
@@ -83,11 +83,11 @@ namespace Deferred
         {
             get
             {
-                return this.controller.MaximumSpeed;
+                return controller.MaximumSpeed;
             }
             set
             {
-                this.controller.MaximumSpeed = value;
+                controller.MaximumSpeed = value;
             }
         }
         /// <summary>
@@ -97,7 +97,7 @@ namespace Deferred
         {
             get
             {
-                return this.model?.Lights ?? new ISceneLight[] { };
+                return model?.Lights ?? new ISceneLight[] { };
             }
         }
 
@@ -115,9 +115,25 @@ namespace Deferred
         /// Updates internal state
         /// </summary>
         /// <param name="context">Upating context</param>
+        public void EarlyUpdate(UpdateContext context)
+        {
+
+        }
+        /// <summary>
+        /// Updates internal state
+        /// </summary>
+        /// <param name="context">Upating context</param>
         public void Update(UpdateContext context)
         {
-            this.controller?.UpdateManipulator(context.GameTime, this.Manipulator);
+            controller?.UpdateManipulator(context.GameTime, Manipulator);
+        }
+        /// <summary>
+        /// Updates internal state
+        /// </summary>
+        /// <param name="context">Upating context</param>
+        public void LateUpdate(UpdateContext context)
+        {
+
         }
         /// <summary>
         /// Updates the specified manipulator
@@ -126,7 +142,7 @@ namespace Deferred
         /// <param name="manipulator">Manipulator</param>
         public void UpdateManipulator(GameTime gameTime, Manipulator3D manipulator)
         {
-            this.controller.UpdateManipulator(gameTime, manipulator);
+            controller.UpdateManipulator(gameTime, manipulator);
         }
         /// <summary>
         /// Follow the specified path
@@ -135,14 +151,14 @@ namespace Deferred
         /// <param name="time">Path time</param>
         public void Follow(IControllerPath newPath, float time = 0)
         {
-            this.controller.Follow(newPath, time);
+            controller.Follow(newPath, time);
         }
         /// <summary>
         /// Clears the path
         /// </summary>
         public void Clear()
         {
-            this.controller.Clear();
+            controller.Clear();
         }
     }
 }

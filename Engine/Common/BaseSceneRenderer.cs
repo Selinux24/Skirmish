@@ -235,6 +235,7 @@ namespace Engine.Common
             if (result == SceneRendererResults.ShadowMapSpot) return ShadowMapSpot;
             return null;
         }
+      
         /// <summary>
         /// Updates scene components
         /// </summary>
@@ -242,11 +243,9 @@ namespace Engine.Common
         /// <param name="scene">Scene</param>
         public virtual void Update(GameTime gameTime, Scene scene)
         {
-            Dictionary<string, double> dict = new Dictionary<string, double>();
             Stopwatch swTotal = Stopwatch.StartNew();
 
             Matrix viewProj = scene.Camera.View * scene.Camera.Projection;
-
             UpdateContext.GameTime = gameTime;
             UpdateContext.View = scene.Camera.View;
             UpdateContext.Projection = scene.Camera.Projection;
@@ -262,37 +261,61 @@ namespace Engine.Common
             Stopwatch swLights = Stopwatch.StartNew();
             scene.Lights.Cull(UpdateContext.CameraVolume, UpdateContext.EyePosition, scene.GameEnvironment.LODDistanceLow);
             swLights.Stop();
+            Logger.WriteTrace(this, $"Cull lights in {swLights.ElapsedTicks:0.000000}");
 
             //Update active components
             Stopwatch swUpdate = Stopwatch.StartNew();
-            int uIndex = 0;
-            scene.GetComponents()
-                .Where(c => c.Active)
-                .OfType<IUpdatable>()
-                .ToList().ForEach(c =>
-                {
-                    Stopwatch swCUpdate = Stopwatch.StartNew();
-                    c.Update(UpdateContext);
-                    swCUpdate.Stop();
-
-                    var o = c as BaseSceneObject;
-                    string cName = o?.Name ?? c.ToString();
-                    dict.Add($"Component Update {uIndex++} {cName}", swCUpdate.Elapsed.TotalMilliseconds);
-                });
+            var updatables = scene.GetComponents().Where(c => c.Active).OfType<IUpdatable>().ToList();
+            if (updatables.Any())
+            {
+                updatables.ForEach(EarlyUpdateCall);
+                updatables.ForEach(UpdateCall);
+                updatables.ForEach(LateUpdateCall);
+            }
             Updated = true;
             swUpdate.Stop();
-            dict.Add($"Components Update", swUpdate.Elapsed.TotalMilliseconds);
+            Logger.WriteTrace(this, $"Update active components in {swUpdate.ElapsedTicks:0.000000}");
 
             swTotal.Stop();
-            dict.Add($"Scene Update", swTotal.Elapsed.TotalMilliseconds);
-
-            Counters.SetStatistics("Scene.Update", string.Format("Update = {0:000000}", swTotal.ElapsedTicks));
-
-            if (Scene.Game.CollectGameStatus)
-            {
-                Scene.Game.GameStatus.Add(dict);
-            }
+            Logger.WriteTrace(this, $"Scene.Update in {swTotal.ElapsedTicks:0.000000}");
         }
+        /// <summary>
+        /// Early update loop call
+        /// </summary>
+        /// <param name="c">Component</param>
+        private void EarlyUpdateCall(IUpdatable c)
+        {
+            Stopwatch swCUpdate = Stopwatch.StartNew();
+            c.EarlyUpdate(UpdateContext);
+            swCUpdate.Stop();
+
+            Logger.WriteTrace(this, $"Early update component {c} in {swCUpdate.ElapsedTicks:0.000000}");
+        }
+        /// <summary>
+        /// Update loop call
+        /// </summary>
+        /// <param name="c">Component</param>
+        private void UpdateCall(IUpdatable c)
+        {
+            Stopwatch swCUpdate = Stopwatch.StartNew();
+            c.Update(UpdateContext);
+            swCUpdate.Stop();
+
+            Logger.WriteTrace(this, $"Update component {c} in {swCUpdate.ElapsedTicks:0.000000}");
+        }
+        /// <summary>
+        /// Late update loop call
+        /// </summary>
+        /// <param name="c">Component</param>
+        private void LateUpdateCall(IUpdatable c)
+        {
+            Stopwatch swCUpdate = Stopwatch.StartNew();
+            c.LateUpdate(UpdateContext);
+            swCUpdate.Stop();
+
+            Logger.WriteTrace(this, $"Late update component {c} in {swCUpdate.ElapsedTicks:0.000000}");
+        }
+        
         /// <summary>
         /// Draws scene components
         /// </summary>

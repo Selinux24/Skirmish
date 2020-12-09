@@ -7,6 +7,10 @@ namespace Engine
     public class SceneObjectDescription
     {
         /// <summary>
+        /// The object starts active
+        /// </summary>
+        public bool StartsActive { get; set; } = true;
+        /// <summary>
         /// Gets or sets whether the object cast shadow
         /// </summary>
         public bool CastShadow { get; set; } = false;
