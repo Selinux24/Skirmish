@@ -80,6 +80,8 @@ namespace Skybox
         private readonly ParticleSystemDescription pFire = ParticleSystemDescription.InitializeFire("resources", "fire.png", 0.1f);
         private readonly ParticleSystemDescription pPlume = ParticleSystemDescription.InitializeSmokePlume("resources", "smoke.png", 0.1f);
 
+        private DecalDrawer decalEmitter = null;
+
         private int directionalLightCount = 0;
 
         private IAudioEffect fireAudioEffect;
@@ -109,6 +111,7 @@ namespace Skybox
                     InitializeWater(),
                     InitializeParticles(),
                     InitializeEmitter(),
+                    InitializeDecalEmitter(),
                     InitializeDebug(),
                 },
                 async (res) =>
@@ -190,6 +193,7 @@ namespace Skybox
                 BaseColor = Color.Purple,
                 Width = 16,
                 Height = 16,
+                Delta = new Vector2(-8, -8),
             };
             await this.AddComponentUICursor("Cursor", cursorDesc);
 
@@ -341,6 +345,18 @@ namespace Skybox
             };
 
             pManager.AddParticleSystem(ParticleSystemTypes.CPU, pBigFire, movingFireEmitter);
+        }
+        private async Task InitializeDecalEmitter()
+        {
+            DecalDrawerDescription desc = new DecalDrawerDescription
+            {
+                BlendMode = BlendModes.Default,
+                TextureName = "resources/bullets/bullet-hole.png",
+                MaxDecalCount = 1000,
+                RotateDecals = true,
+            };
+
+            decalEmitter = await this.AddComponentDecalDrawer("Bullets", desc);
         }
         private async Task InitializeDebug()
         {
@@ -513,8 +529,24 @@ namespace Skybox
                 if (ruins.PickNearest(pRay, out PickingResult<Triangle> r))
                 {
                     var tri = Line3D.CreateWiredTriangle(r.Item);
+                    var cross = Line3D.CreateCross(r.Position, 0.1f);
 
                     volumesDrawer.SetPrimitives(Color.White, tri);
+                    volumesDrawer.SetPrimitives(Color.YellowGreen, cross);
+                }
+            }
+
+            if (Game.Input.MouseButtonJustReleased(MouseButtons.Left))
+            {
+                var pRay = GetPickingRay();
+
+                if (ruins.PickNearest(pRay, out PickingResult<Triangle> r))
+                {
+                    decalEmitter.AddDecal(
+                        r.Position,
+                        r.Item.Normal,
+                        Vector2.One * 0.1f,
+                        60);
                 }
             }
 

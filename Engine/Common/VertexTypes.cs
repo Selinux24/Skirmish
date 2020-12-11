@@ -31,6 +31,10 @@ namespace Engine.Common
         /// Terrain
         /// </summary>
         Terrain,
+        /// <summary>
+        /// Decal
+        /// </summary>
+        Decal,
 
         /// <summary>
         /// Position

@@ -72,8 +72,6 @@ namespace Engine.Common
         public bool HasChannel(VertexDataChannels channel)
         {
             if (channel == VertexDataChannels.Position) return true;
-            if (channel == VertexDataChannels.Color) return true;
-            else if (channel == VertexDataChannels.Size) return true;
             else return false;
         }
         /// <summary>

@@ -205,8 +205,10 @@
     <Compile Include="Common\IInstacingData.cs" />
     <Compile Include="Common\IntersectionHelper.cs" />
     <Compile Include="Common\IntersectionTriangle.cs" />
+    <Compile Include="Common\VertexDecal.cs" />
     <Compile Include="Content\BuiltInMaterial.cs" />
     <Compile Include="Content\BuiltInMaterials.cs" />
+    <Compile Include="Effects\EffectDefaultDecals.cs" />
     <Compile Include="MaterialBlinnPhong.cs" />
     <Compile Include="MaterialCookTorrance.cs" />
     <Compile Include="MaterialPhong.cs" />
@@ -214,6 +216,13 @@
     <Compile Include="Common\OrientedBoundingBoxExtensions.cs" />
     <Compile Include="Common\BufferManagerVertices.cs" />
     <Compile Include="Common\RayPickingHelper.cs" />
+    <Compile Include="DecalDrawer.cs" />
+    <Compile Include="DecalDrawerDescription.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="SpecularAlgorithms.cs" />
     <Compile Include="Common\VertexFont.cs" />
     <Compile Include="Content\MaterialBlinnPhongContent.cs" />
@@ -410,11 +419,6 @@
     <Compile Include="PathFinding\PathFinderInput.cs" />
     <Compile Include="PathFinding\PathFinderDescription.cs" />
     <Compile Include="PickingResult.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="SceneCullManager.cs" />
     <Compile Include="SceneLightHemispheric.cs" />
     <Compile Include="SceneObjectDescription.cs" />
@@ -718,6 +722,7 @@
     <None Include="Resources\ShaderDefaultSkyScattering.fxo" />
     <None Include="Resources\ShaderDefaultSprite.fxo" />
     <None Include="Resources\ShaderDefaultTerrain.fxo" />
+    <None Include="Resources\shadershadowterrain1.fxo" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\IncLights.hlsl" />
@@ -735,6 +740,7 @@
     <None Include="Resources\ShaderLightSpot.fx" />
     <None Include="Resources\ShaderLightCapsule.fx" />
     <None Include="Resources\ShaderLightEmissive.fx" />
+    <None Include="Resources\ShaderDefaultDecal.fx" />
     <Content Include="Resources\ShaderShadowCascade.fx" />
     <Content Include="Resources\IncCommon.hlsl" />
     <Content Include="sharpdx_direct3d11_1_effects_x64.dll">

@@ -173,6 +173,26 @@ namespace Engine.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
+        internal static byte[] ShaderDefaultDecalsFx {
+            get {
+                object obj = ResourceManager.GetObject("ShaderDefaultDecalsFx", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] ShaderDefaultDecalsFxo {
+            get {
+                object obj = ResourceManager.GetObject("ShaderDefaultDecalsFxo", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
         internal static byte[] ShaderDefaultFoliageFx {
             get {
                 object obj = ResourceManager.GetObject("ShaderDefaultFoliageFx", resourceCulture);

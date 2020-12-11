@@ -8,6 +8,14 @@ struct VSVertexBillboard
 	float3 positionWorld : POSITION;
 	float2 sizeWorld : SIZE;
 };
+struct VSVertexDecal
+{
+    float3 positionWorld : POSITION;
+    float3 normalWorld : NORMAL;
+    float2 sizeWorld : SIZE;
+    float startTime : START_TIME;
+    float maxAge : MAX_AGE;
+};
 struct VSVertexCPUParticle
 {
 	float3 positionWorld : POSITION;
@@ -276,6 +284,14 @@ struct GSVertexBillboard
 	float3 centerWorld : POSITION;
 	float2 sizeWorld : SIZE;
 };
+struct GSDecal
+{
+    float3 centerWorld : POSITION;
+    float3 normalWorld : NORMAL;
+    float4 rotationWorld : ROTATION;
+    float2 sizeWorld : SIZE;
+    float alpha : ALPHA;
+};
 struct GSCPUParticle
 {
 	float3 centerWorld : POSITION;
@@ -302,6 +318,15 @@ struct PSVertexBillboard
 	float3 tangentWorld : TANGENT;
     float2 tex : TEXCOORD0;
 	uint primitiveID : SV_PRIMITIVEID;
+};
+struct PSDecal
+{
+    float4 positionHomogeneous : SV_POSITION;
+    float3 positionWorld : POSITION;
+    float4 rotationWorld : ROTATION;
+    float alpha : ALPHA;
+    float2 tex : TEXCOORD0;
+    uint primitiveID : SV_PRIMITIVEID;
 };
 struct PSCPUParticle
 {

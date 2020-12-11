@@ -117,7 +117,7 @@ namespace Deferred
         /// <param name="context">Upating context</param>
         public void EarlyUpdate(UpdateContext context)
         {
-
+            //Not applicable
         }
         /// <summary>
         /// Updates internal state
@@ -133,7 +133,7 @@ namespace Deferred
         /// <param name="context">Upating context</param>
         public void LateUpdate(UpdateContext context)
         {
-
+            //Not applicable
         }
         /// <summary>
         /// Updates the specified manipulator

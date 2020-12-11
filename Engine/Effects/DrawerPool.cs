@@ -63,6 +63,10 @@ namespace Engine.Effects
         /// Water drawing effect
         /// </summary>
         public static EffectDefaultWater EffectDefaultWater { get; private set; }
+        /// <summary>
+        /// Decals drawing effect
+        /// </summary>
+        public static EffectDefaultDecals EffectDefaultDecals { get; private set; }
 
         /// <summary>
         /// Deferred lightning effect
@@ -127,6 +131,7 @@ namespace Engine.Effects
             EffectDefaultCPUParticles = CreateEffect<EffectDefaultCpuParticles>(graphics, Resources.ShaderDefaultCPUParticlesFxo, Resources.ShaderDefaultCPUParticlesFx);
             EffectDefaultGPUParticles = CreateEffect<EffectDefaultGpuParticles>(graphics, Resources.ShaderDefaultGPUParticlesFxo, Resources.ShaderDefaultGPUParticlesFx);
             EffectDefaultWater = CreateEffect<EffectDefaultWater>(graphics, Resources.ShaderDefaultWaterFxo, Resources.ShaderDefaultWaterFx);
+            EffectDefaultDecals = CreateEffect<EffectDefaultDecals>(graphics, Resources.ShaderDefaultDecalsFxo, Resources.ShaderDefaultDecalsFx);
 
             EffectDeferredComposer = CreateEffect<EffectDeferredComposer>(graphics, Resources.ShaderDeferredComposerFxo, Resources.ShaderDeferredComposerFx);
             EffectDeferredBasic = CreateEffect<EffectDeferredBasic>(graphics, Resources.ShaderDeferredBasicFxo, Resources.ShaderDeferredBasicFxo);
@@ -173,6 +178,8 @@ namespace Engine.Effects
             EffectDefaultGPUParticles = null;
             EffectDefaultWater?.Dispose();
             EffectDefaultWater = null;
+            EffectDefaultDecals?.Dispose();
+            EffectDefaultDecals = null;
 
             EffectDeferredComposer?.Dispose();
             EffectDeferredComposer = null;

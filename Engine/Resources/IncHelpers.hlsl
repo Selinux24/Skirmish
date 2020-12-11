@@ -1,5 +1,6 @@
-#define PI 3.14159265
-#define FLOAT_MAX 3.402823466e+38F
+#define PI          3.14159265
+#define TWO_PI      6.28318530
+#define FLOAT_MAX   3.402823466e+38F
 
 SamplerState SamplerPoint
 {

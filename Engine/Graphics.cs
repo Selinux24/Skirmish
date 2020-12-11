@@ -1198,6 +1198,8 @@ namespace Engine
             {
                 case VertexTypes.Billboard:
                     return CreateVertexBuffer(name, data.OfType<VertexBillboard>(), dynamic);
+                case VertexTypes.Decal:
+                    return CreateVertexBuffer(name, data.OfType<VertexDecal>(), dynamic);
                 case VertexTypes.CPUParticle:
                     return CreateVertexBuffer(name, data.OfType<VertexCpuParticle>(), dynamic);
                 case VertexTypes.GPUParticle:
