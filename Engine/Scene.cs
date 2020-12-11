@@ -479,7 +479,7 @@ namespace Engine
                 FloatTweenManager.Update(gameTime);
 
                 // Action!
-                Renderer?.Update(gameTime, this);
+                Renderer?.Update(gameTime);
             }
             catch (EngineException ex)
             {
@@ -496,7 +496,7 @@ namespace Engine
         {
             try
             {
-                Renderer?.Draw(gameTime, this);
+                Renderer?.Draw(gameTime);
             }
             catch (EngineException ex)
             {

@@ -13,14 +13,23 @@ namespace Engine
         /// Updates scene components
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        /// <param name="scene">Scene</param>
-        void Update(GameTime gameTime, Scene scene);
+        void Update(GameTime gameTime);
         /// <summary>
         /// Draws scene components
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        /// <param name="scene">Scene</param>
-        void Draw(GameTime gameTime, Scene scene);
+        void Draw(GameTime gameTime);
+
+        /// <summary>
+        /// Sets the post-processing effect
+        /// </summary>
+        /// <param name="effect">Effect</param>
+        /// <param name="parameters">Parameters</param>
+        void SetPostProcessingEffect(PostProcessingEffects effect, IDrawerPostProcessParams parameters);
+        /// <summary>
+        /// Crears the post-processing effect
+        /// </summary>
+        void CrearPostProcessingEffects();
 
         /// <summary>
         /// Updates the scene renderer globals

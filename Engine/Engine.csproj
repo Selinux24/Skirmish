@@ -208,6 +208,11 @@
     <Compile Include="Common\VertexDecal.cs" />
     <Compile Include="Content\BuiltInMaterial.cs" />
     <Compile Include="Content\BuiltInMaterials.cs" />
+    <Compile Include="Effects\IDrawerPostProcess.cs" />
+    <Compile Include="IDrawerPostProcessParams.cs" />
+    <Compile Include="PostProcessBloomParams.cs" />
+    <Compile Include="PostProcessBlurParams.cs" />
+    <Compile Include="PostProcessingDrawer.cs" />
     <Compile Include="Effects\EffectDefaultDecals.cs" />
     <Compile Include="MaterialBlinnPhong.cs" />
     <Compile Include="MaterialCookTorrance.cs" />
@@ -218,6 +223,8 @@
     <Compile Include="Common\RayPickingHelper.cs" />
     <Compile Include="DecalDrawer.cs" />
     <Compile Include="DecalDrawerDescription.cs" />
+    <Compile Include="PostProcessingEffects.cs" />
+    <Compile Include="PostProcessVignetteParams.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -347,7 +354,7 @@
     <Compile Include="Effects\EffectDefaultFoliage.cs" />
     <Compile Include="Effects\EffectDefaultClouds.cs" />
     <Compile Include="Effects\EffectDefaultWater.cs" />
-    <Compile Include="Effects\EffectPostBlur.cs" />
+    <Compile Include="Effects\EffectPostProcess.cs" />
     <Compile Include="Effects\EffectShadowCascade.cs" />
     <Compile Include="Effects\EffectShadowPoint.cs" />
     <Compile Include="Effects\EffectShadowFoliage.cs" />
@@ -684,8 +691,8 @@
     <None Include="Resources\ShaderLightEmissive.fxo" />
     <None Include="Resources\ShaderLightPoint.fxo" />
     <None Include="Resources\ShaderLightSpot.fxo" />
-    <None Include="Resources\ShaderPostBlur.fx" />
-    <None Include="Resources\ShaderPostBlur.fxo" />
+    <None Include="Resources\ShaderPostProcess.fx" />
+    <None Include="Resources\ShaderPostProcess.fxo" />
     <AdditionalFiles Include="..\.sonarlint\selinux24_skirmish_dev\CSharp\SonarLint.xml">
       <Link>SonarLint.xml</Link>
     </AdditionalFiles>

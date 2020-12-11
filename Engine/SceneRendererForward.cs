@@ -38,8 +38,7 @@ namespace Engine
         /// Draws scene components
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        /// <param name="scene">Scene</param>
-        public override void Draw(GameTime gameTime, Scene scene)
+        public override void Draw(GameTime gameTime)
         {
             if (!Updated)
             {
@@ -53,7 +52,7 @@ namespace Engine
             Stopwatch swTotal = Stopwatch.StartNew();
 #endif
             //Draw visible components
-            var visibleComponents = scene.GetComponents().Where(c => c.Visible);
+            var visibleComponents = Scene.GetComponents().Where(c => c.Visible);
             if (visibleComponents.Any())
             {
                 //Initialize context data from update context
@@ -65,22 +64,24 @@ namespace Engine
                 DrawContext.EyeTarget = UpdateContext.EyeDirection;
 
                 //Initialize context data from scene
-                DrawContext.Lights = scene.Lights;
+                DrawContext.Lights = Scene.Lights;
                 DrawContext.ShadowMapDirectional = ShadowMapperDirectional;
                 DrawContext.ShadowMapPoint = ShadowMapperPoint;
                 DrawContext.ShadowMapSpot = ShadowMapperSpot;
 
                 //Shadow mapping
-                DoShadowMapping(gameTime, scene);
+                DoShadowMapping(gameTime);
 
                 //Rendering
-                DoRender(scene, visibleComponents);
+                DoRender(Scene, visibleComponents);
             }
 #if DEBUG
             swTotal.Stop();
 
             frameStats.UpdateCounters(swTotal.ElapsedTicks);
 #endif
+            //Post-processing
+            DoPostProcessing(gameTime);
         }
 
         /// <summary>
@@ -95,9 +96,7 @@ namespace Engine
             Stopwatch swPreparation = Stopwatch.StartNew();
 #endif
             //Set default render target and depth buffer, and clear it
-            var graphics = Scene.Game.Graphics;
-            graphics.SetDefaultViewport();
-            graphics.SetDefaultRenderTarget();
+            BindResult();
 #if DEBUG
             swPreparation.Stop();
 

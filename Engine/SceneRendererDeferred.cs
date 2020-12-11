@@ -178,90 +178,94 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override void Draw(GameTime gameTime, Scene scene)
+        public override void Draw(GameTime gameTime)
         {
-            if (Updated)
+            if (!Updated)
             {
-                Updated = false;
-#if DEBUG
-                frameStats.Clear();
-
-                Stopwatch swTotal = Stopwatch.StartNew();
-#endif
-                //Draw visible components
-                var visibleComponents = scene.GetComponents().Where(c => c.Visible);
-                if (visibleComponents.Any())
-                {
-                    //Initialize context data from update context
-                    DrawContext.GameTime = gameTime;
-                    DrawContext.DrawerMode = DrawerModes.Deferred;
-                    DrawContext.ViewProjection = UpdateContext.ViewProjection;
-                    DrawContext.CameraVolume = UpdateContext.CameraVolume;
-                    DrawContext.EyePosition = UpdateContext.EyePosition;
-                    DrawContext.EyeTarget = UpdateContext.EyeDirection;
-
-                    //Initialize context data from scene
-                    DrawContext.Lights = scene.Lights;
-                    //Initialize context data from shadow mapping
-
-                    DrawContext.ShadowMapDirectional = ShadowMapperDirectional;
-                    DrawContext.ShadowMapPoint = ShadowMapperPoint;
-                    DrawContext.ShadowMapSpot = ShadowMapperSpot;
-
-                    //Shadow mapping
-                    DoShadowMapping(gameTime, scene);
-
-                    #region Deferred rendering
-
-                    //Render to G-Buffer only opaque objects
-                    var deferredEnabledComponents = visibleComponents.Where(c => c.DeferredEnabled);
-                    if (deferredEnabledComponents.Any())
-                    {
-                        DoDeferred(scene, deferredEnabledComponents);
-                    }
-
-                    #region Final composition
-#if DEBUG
-                    Stopwatch swComponsition = Stopwatch.StartNew();
-#endif
-                    BindResult();
-
-                    //Draw scene result on screen using g-buffer and light buffer
-                    DrawResult(DrawContext);
-
-#if DEBUG
-                    swComponsition.Stop();
-
-                    frameStats.DeferredCompose = swComponsition.ElapsedTicks;
-#endif
-                    #endregion
-
-                    #endregion
-
-                    #region Forward rendering
-
-                    //Render to screen deferred disabled components
-                    var deferredDisabledComponents = visibleComponents.Where(c => !c.DeferredEnabled);
-                    if (deferredDisabledComponents.Any())
-                    {
-                        DoForward(scene, deferredDisabledComponents);
-                    }
-
-                    #endregion
-                }
-#if DEBUG
-                swTotal.Stop();
-
-                frameStats.UpdateCounters(swTotal.ElapsedTicks);
-#endif
+                return;
             }
+
+            Updated = false;
+#if DEBUG
+            frameStats.Clear();
+
+            Stopwatch swTotal = Stopwatch.StartNew();
+#endif
+            //Draw visible components
+            var visibleComponents = Scene.GetComponents().Where(c => c.Visible);
+            if (visibleComponents.Any())
+            {
+                //Initialize context data from update context
+                DrawContext.GameTime = gameTime;
+                DrawContext.DrawerMode = DrawerModes.Deferred;
+                DrawContext.ViewProjection = UpdateContext.ViewProjection;
+                DrawContext.CameraVolume = UpdateContext.CameraVolume;
+                DrawContext.EyePosition = UpdateContext.EyePosition;
+                DrawContext.EyeTarget = UpdateContext.EyeDirection;
+
+                //Initialize context data from scene
+                DrawContext.Lights = Scene.Lights;
+
+                //Initialize context data from shadow mapping
+                DrawContext.ShadowMapDirectional = ShadowMapperDirectional;
+                DrawContext.ShadowMapPoint = ShadowMapperPoint;
+                DrawContext.ShadowMapSpot = ShadowMapperSpot;
+
+                //Shadow mapping
+                DoShadowMapping(gameTime);
+
+                #region Deferred rendering
+
+                //Render to G-Buffer only opaque objects
+                var deferredEnabledComponents = visibleComponents.Where(c => c.DeferredEnabled);
+                if (deferredEnabledComponents.Any())
+                {
+                    DoDeferred(deferredEnabledComponents);
+                }
+
+                #region Final composition
+#if DEBUG
+                Stopwatch swComponsition = Stopwatch.StartNew();
+#endif
+                BindResult();
+
+                //Draw scene result on screen using g-buffer and light buffer
+                DrawResult(DrawContext);
+
+#if DEBUG
+                swComponsition.Stop();
+
+                frameStats.DeferredCompose = swComponsition.ElapsedTicks;
+#endif
+                #endregion
+
+                #endregion
+
+                #region Forward rendering
+
+                //Render to screen deferred disabled components
+                var deferredDisabledComponents = visibleComponents.Where(c => !c.DeferredEnabled);
+                if (deferredDisabledComponents.Any())
+                {
+                    DoForward(deferredDisabledComponents);
+                }
+
+                #endregion
+            }
+#if DEBUG
+            swTotal.Stop();
+
+            frameStats.UpdateCounters(swTotal.ElapsedTicks);
+#endif
+
+            //Post-processing
+            DoPostProcessing(gameTime);
         }
         /// <summary>
         /// Do deferred rendering
         /// </summary>
-        /// <param name="scene">Scene</param>
         /// <param name="deferredEnabledComponents">Components</param>
-        private void DoDeferred(Scene scene, IEnumerable<ISceneObject> deferredEnabledComponents)
+        private void DoDeferred(IEnumerable<ISceneObject> deferredEnabledComponents)
         {
 #if DEBUG
             Stopwatch swCull = Stopwatch.StartNew();
@@ -269,7 +273,7 @@ namespace Engine
             var toCullDeferred = deferredEnabledComponents.OfType<ICullable>();
 
             bool draw = false;
-            if (scene.PerformFrustumCulling)
+            if (Scene.PerformFrustumCulling)
             {
                 //Frustum culling
                 draw = cullManager.Cull(DrawContext.CameraVolume, CullIndexDrawIndex, toCullDeferred);
@@ -281,7 +285,7 @@ namespace Engine
 
             if (draw)
             {
-                var groundVolume = scene.GetSceneVolume();
+                var groundVolume = Scene.GetSceneVolume();
                 if (groundVolume != null)
                 {
                     //Ground culling
@@ -336,9 +340,8 @@ namespace Engine
         /// <summary>
         /// Do forward rendering (UI, transparents, etc.)
         /// </summary>
-        /// <param name="scene">Scene</param>
         /// <param name="deferredDisabledComponents">Components</param>
-        private void DoForward(Scene scene, IEnumerable<ISceneObject> deferredDisabledComponents)
+        private void DoForward(IEnumerable<ISceneObject> deferredDisabledComponents)
         {
 #if DEBUG
             Stopwatch swCull = Stopwatch.StartNew();
@@ -346,7 +349,7 @@ namespace Engine
             var toCullNotDeferred = deferredDisabledComponents.OfType<ICullable>();
 
             bool draw = false;
-            if (scene.PerformFrustumCulling)
+            if (Scene.PerformFrustumCulling)
             {
                 //Frustum culling
                 draw = cullManager.Cull(DrawContext.CameraVolume, CullIndexDrawIndex, toCullNotDeferred);
@@ -358,7 +361,7 @@ namespace Engine
 
             if (draw)
             {
-                var groundVolume = scene.GetSceneVolume();
+                var groundVolume = Scene.GetSceneVolume();
                 if (groundVolume != null)
                 {
                     //Ground culling
@@ -437,17 +440,6 @@ namespace Engine
                 lightBuffer.Targets, true, Color.Black,
                 graphics.DefaultDepthStencil, false, false,
                 false);
-        }
-        /// <summary>
-        /// Binds graphics for results pass
-        /// </summary>
-        private void BindResult()
-        {
-            var graphics = Scene.Game.Graphics;
-
-            //Restore backbuffer as render target and clear it
-            graphics.SetDefaultViewport();
-            graphics.SetDefaultRenderTarget(true, false, true);
         }
 
         /// <summary>

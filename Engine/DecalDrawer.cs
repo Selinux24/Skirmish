@@ -87,10 +87,7 @@ namespace Engine
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -100,19 +97,7 @@ namespace Engine
             }
         }
 
-        /// <summary>
-        /// Update internal state
-        /// </summary>
-        /// <param name="context">Context</param>
-        public override void Update(UpdateContext context)
-        {
-
-        }
-
-        /// <summary>
-        /// Draw
-        /// </summary>
-        /// <param name="context">Context</param>
+        /// <inheritdoc/>
         public override void Draw(DrawContext context)
         {
             if (!Visible)

@@ -413,9 +413,9 @@ namespace Engine.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        internal static byte[] ShaderPostBlurFx {
+        internal static byte[] ShaderPostProcessFx {
             get {
-                object obj = ResourceManager.GetObject("ShaderPostBlurFx", resourceCulture);
+                object obj = ResourceManager.GetObject("ShaderPostProcessFx", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -423,9 +423,9 @@ namespace Engine.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        internal static byte[] ShaderPostBlurFxo {
+        internal static byte[] ShaderPostProcessFxo {
             get {
-                object obj = ResourceManager.GetObject("ShaderPostBlurFxo", resourceCulture);
+                object obj = ResourceManager.GetObject("ShaderPostProcessFxo", resourceCulture);
                 return ((byte[])(obj));
             }
         }

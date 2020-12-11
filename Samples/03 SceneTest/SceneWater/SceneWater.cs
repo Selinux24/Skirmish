@@ -43,6 +43,8 @@ namespace SceneTest.SceneWater
                 InitializeSeaBottom(),
             });
 
+            Renderer.SetPostProcessingEffect(PostProcessingEffects.Bloom, PostProcessBloomParams.Low);
+
             GameEnvironment.TimeOfDay.BeginAnimation(5, 00, 00, 10f);
             //Environment.TimeOfDay.SetTimeOfDay(7, 00, 00)
         }

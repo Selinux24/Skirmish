@@ -107,9 +107,9 @@ namespace Engine.Effects
         public static EffectShadowCascade EffectShadowCascade { get; private set; }
 
         /// <summary>
-        /// Blur effect
+        /// Post-processing effect
         /// </summary>
-        public static EffectPostBlur EffectPostBlur { get; private set; }
+        public static EffectPostProcess EffectPostProcess { get; private set; }
 
         /// <summary>
         /// Initializes pool
@@ -144,7 +144,7 @@ namespace Engine.Effects
             EffectShadowPoint = CreateEffect<EffectShadowPoint>(graphics, Resources.ShaderShadowPointFxo, Resources.ShaderShadowPointFx);
             EffectShadowCascade = CreateEffect<EffectShadowCascade>(graphics, Resources.ShaderShadowCascadeFxo, Resources.ShaderShadowCascadeFx);
 
-            EffectPostBlur = CreateEffect<EffectPostBlur>(graphics, Resources.ShaderPostBlurFxo, Resources.ShaderPostBlurFx);
+            EffectPostProcess = CreateEffect<EffectPostProcess>(graphics, Resources.ShaderPostProcessFxo, Resources.ShaderPostProcessFx);
         }
         /// <summary>
         /// Dispose of used resources
@@ -201,8 +201,8 @@ namespace Engine.Effects
             EffectShadowCascade?.Dispose();
             EffectShadowCascade = null;
 
-            EffectPostBlur?.Dispose();
-            EffectPostBlur = null;
+            EffectPostProcess?.Dispose();
+            EffectPostProcess = null;
         }
 
         /// <summary>

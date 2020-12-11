@@ -376,6 +376,8 @@ namespace Collada.ModularDungeon
                         AudioManager.Start();
 
                         ChangeToLevel(null);
+
+                        Renderer.SetPostProcessingEffect(PostProcessingEffects.Vignette, PostProcessVignetteParams.Thin);
                     }
                     catch (AggregateException ex)
                     {
