@@ -8,10 +8,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 11
       - name: SonarQube Scan
         uses: SonarSource/sonarcloud-github-action@v1.4
         with:
-           projectBaseDir: "/path/to/my-custom-project"
-           projectKey: "my-custom-project"
-           projectName: "my-custom-project-name"
-           projectVersion: "v0.0.1"
+           projectBaseDir: .
+           projectKey: "Selinux24_Skirmish_dev"
+           orgnization: "selinux24-github"
