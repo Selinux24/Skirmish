@@ -145,6 +145,8 @@ namespace Engine
             if (effectTechnique == null)
             {
                 currentInputLayout = null;
+
+                return;
             }
 
             if (!layouts.ContainsKey(effectTechnique))
