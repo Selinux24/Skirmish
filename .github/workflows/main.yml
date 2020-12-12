@@ -1,0 +1,17 @@
+name: SonarQube
+on:
+  push:
+    branches: [ dev ]
+jobs:
+  sonarQubeTrigger:
+    name: "SonarQube Trigger"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: SonarQube Scan
+        uses: SonarSource/sonarcloud-github-action@v1.4
+        with:
+           projectBaseDir: "/path/to/my-custom-project"
+           projectKey: "my-custom-project"
+           projectName: "my-custom-project-name"
+           projectVersion: "v0.0.1"
