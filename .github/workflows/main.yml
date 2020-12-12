@@ -13,7 +13,3 @@ jobs:
           java-version: 11
       - name: SonarQube Scan
         uses: SonarSource/sonarcloud-github-action@v1.4
-        with:
-           projectBaseDir: .
-           projectKey: "Selinux24_Skirmish_dev"
-           orgnization: "selinux24-github"
