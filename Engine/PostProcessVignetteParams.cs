@@ -4,7 +4,7 @@ namespace Engine
     /// <summary>
     /// Post-process Vignette parameters
     /// </summary>
-    public struct PostProcessVignetteParams : IDrawerPostProcessParams
+    public class PostProcessVignetteParams : IDrawerPostProcessParams
     {
         /// <summary>
         /// Default Vignette parameters

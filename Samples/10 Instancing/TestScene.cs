@@ -15,8 +15,15 @@ namespace Instancing
         private Sprite panel = null;
         private UITextArea title = null;
         private UITextArea runtimeText = null;
+        private UITextArea info = null;
+
+        private Sprite helpPanel = null;
+        private UITextArea help = null;
 
         private ModelInstanced troops = null;
+
+        private readonly int instanceBlock = 10;
+        private readonly PostProcessToneMappingParams toneParams = new PostProcessToneMappingParams();
 
         private bool gameReady = false;
 
@@ -45,9 +52,13 @@ namespace Instancing
                         res.ThrowExceptions();
                     }
 
+                    UpdateLayout();
+
                     Camera.Goto(new Vector3(-45, 17, -30));
                     Camera.LookTo(Vector3.Zero);
                     Camera.FarPlaneDistance = 250;
+
+                    Renderer.SetPostProcessingEffect(PostProcessingEffects.ToneMapping, toneParams);
 
                     gameReady = true;
                 });
@@ -57,12 +68,23 @@ namespace Instancing
         {
             title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White });
             runtimeText = await this.AddComponentUITextArea("RuntimeText", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Yellow });
+            info = await this.AddComponentUITextArea("Information", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Yellow });
 
             title.Text = "Instancing test";
             runtimeText.Text = "";
+            info.Text = "Press F1 for Help.";
 
-            var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
-            panel = await this.AddComponentSprite("Backpanel", spDesc, SceneObjectUsages.UI, LayerUI - 1);
+            var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.66f));
+            panel = await this.AddComponentSprite("Panel", spDesc, SceneObjectUsages.UI, LayerUI - 1);
+
+            help = await this.AddComponentUITextArea("Help", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Yellow });
+            help.Visible = false;
+            helpPanel = await this.AddComponentSprite("Help panel", spDesc, SceneObjectUsages.UI, LayerUI - 1);
+            helpPanel.Visible = false;
+
+            help.Text = $"Camera: W-A-S-D.{Environment.NewLine}" +
+                $"Change instance count using Left and Right arrows (Shift moves by {instanceBlock} to {instanceBlock}).{Environment.NewLine}" +
+                $"Change tone mapping using Tab (Shift reverse).";
         }
         private async Task InitializeFloor()
         {
@@ -266,6 +288,8 @@ namespace Instancing
                 SetRenderMode(GetRenderMode() == SceneModes.ForwardLigthning ?
                     SceneModes.DeferredLightning :
                     SceneModes.ForwardLigthning);
+
+                Renderer.SetPostProcessingEffect(PostProcessingEffects.ToneMapping, toneParams);
             }
 
             if (!gameReady)
@@ -273,6 +297,26 @@ namespace Instancing
                 return;
             }
 
+            UpdateCamera(gameTime);
+
+            UpdateInstances();
+
+            UpdateToneMapping();
+
+            if (Game.Input.KeyJustReleased(Keys.F1))
+            {
+                bool helpVisible = !helpPanel.Visible;
+
+                help.Visible = helpVisible;
+                helpPanel.Visible = helpVisible;
+            }
+
+            base.Update(gameTime);
+
+            runtimeText.Text = $"{Game.RuntimeText}. Instances: {troops.MaximumCount}; Tone: {toneParams.Tone}.";
+        }
+        private void UpdateCamera(GameTime gameTime)
+        {
 #if DEBUG
             if (Game.Input.MouseButtonPressed(MouseButtons.Right))
             {
@@ -307,8 +351,10 @@ namespace Instancing
             {
                 Camera.MoveBackward(gameTime, Game.Input.ShiftPressed);
             }
-
-            int increment = Game.Input.ShiftPressed ? 10 : 1;
+        }
+        private void UpdateInstances()
+        {
+            int increment = Game.Input.ShiftPressed ? instanceBlock : 1;
 
             if (Game.Input.KeyJustReleased(Keys.Left))
             {
@@ -319,10 +365,17 @@ namespace Instancing
             {
                 troops.MaximumCount = Math.Min(troops.InstanceCount, troops.MaximumCount + increment);
             }
+        }
+        private void UpdateToneMapping()
+        {
+            if (Game.Input.KeyJustReleased(Keys.Tab))
+            {
+                int inc = (int)toneParams.Tone + (Game.Input.ShiftPressed ? -1 : 1);
+                uint tone = (uint)inc;
+                tone %= 8;
 
-            base.Update(gameTime);
-
-            runtimeText.Text = Game.RuntimeText;
+                toneParams.Tone = (ToneMappingTones)tone;
+            }
         }
 
         public override void GameGraphicsResized()
@@ -335,10 +388,15 @@ namespace Instancing
         {
             title.SetPosition(Vector2.Zero);
             runtimeText.SetPosition(new Vector2(5, title.Top + title.Height + 3));
+            info.SetPosition(new Vector2(5, runtimeText.Top + runtimeText.Height + 3));
+
             panel.Width = Game.Form.RenderWidth;
-            panel.Height = runtimeText.Top + runtimeText.Height + 3;
+            panel.Height = info.Top + info.Height + 3;
 
-
+            help.SetPosition(5, Game.Form.RenderHeight - help.Height - 10);
+            helpPanel.SetPosition(0, Game.Form.RenderHeight - help.Height - 15);
+            helpPanel.Width = Game.Form.RenderWidth;
+            helpPanel.Height = help.Height + 15;
         }
     }
 }

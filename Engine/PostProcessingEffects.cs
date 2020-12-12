@@ -30,5 +30,9 @@ namespace Engine
         /// Bloom
         /// </summary>
         Bloom,
+        /// <summary>
+        /// Tone mapping
+        /// </summary>
+        ToneMapping,
     }
 }

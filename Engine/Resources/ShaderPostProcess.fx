@@ -1,5 +1,6 @@
 #include "IncLights.hlsl"
 #include "IncVertexFormats.hlsl"
+#include "IncPostProcessing.hlsl"
 
 cbuffer cbPerFrame : register(b0)
 {
@@ -22,26 +23,16 @@ cbuffer cbPerFrame : register(b0)
     float gBloomIntensity;
     float gBloomBlurSize;
     float2 gPad4;
+    
+    //Tone mapping
+    uint gToneMappingTone;
+    uint3 gPad5;
 };
 
 struct PSVertexEmpty
 {
     float4 hpos : SV_Position;
     float2 uv : TEXCOORD0;
-};
-struct PSVertexBlur
-{
-    float4 hpos : SV_Position;
-
-    float2 uv0 : TEXCOORD0;
-    float2 uv1 : TEXCOORD1;
-    float2 uv2 : TEXCOORD2;
-    float2 uv3 : TEXCOORD3;
-
-    float2 uv4 : TEXCOORD4;
-    float2 uv5 : TEXCOORD5;
-    float2 uv6 : TEXCOORD6;
-    float2 uv7 : TEXCOORD7;
 };
 
 Texture2D gDiffuseMap : register(t0);
@@ -159,6 +150,29 @@ float4 PSBloom(PSVertexEmpty input) : SV_TARGET
     
     return output;
 }
+float4 PSToneMapping(PSVertexEmpty input) : SV_TARGET
+{
+    uint toneMap = gToneMappingTone;
+    
+    float3 color = gDiffuseMap.Sample(SamplerLinear, input.uv).rgb;
+    
+    if (toneMap == 1)
+        color = LinearToneMapping(color);
+    if (toneMap == 2)
+        color = SimpleReinhardToneMapping(color);
+    if (toneMap == 3)
+        color = LumaBasedReinhardToneMapping(color);
+    if (toneMap == 4)
+        color = WhitePreservingLumaBasedReinhardToneMapping(color);
+    if (toneMap == 5)
+        color = RomBinDaHouseToneMapping(color);
+    if (toneMap == 6)
+        color = FilmicToneMapping(color);
+    if (toneMap == 7)
+        color = Uncharted2ToneMapping(color);
+        
+    return float4(color, 1.);
+}
 
 technique11 Empty
 {
@@ -212,5 +226,14 @@ technique11 Bloom
         SetVertexShader(CompileShader(vs_5_0, VSEmpty()));
         SetGeometryShader(NULL);
         SetPixelShader(CompileShader(ps_5_0, PSBloom()));
+    }
+}
+technique11 ToneMapping
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSEmpty()));
+        SetGeometryShader(NULL);
+        SetPixelShader(CompileShader(ps_5_0, PSToneMapping()));
     }
 }

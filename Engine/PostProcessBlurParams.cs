@@ -4,7 +4,7 @@ namespace Engine
     /// <summary>
     /// Post-process Blur parameters
     /// </summary>
-    public struct PostProcessBlurParams : IDrawerPostProcessParams
+    public class PostProcessBlurParams : IDrawerPostProcessParams
     {
         /// <summary>
         /// Default blur parameters

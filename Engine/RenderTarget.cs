@@ -45,12 +45,12 @@ namespace Engine
         /// <param name="count">Buffer count</param>
         public RenderTarget(Game game, Format format, bool useSamples, int count)
         {
-            this.Game = game;
-            this.RenderTargetFormat = format;
-            this.UseSamples = useSamples;
-            this.BufferCount = count;
+            Game = game;
+            RenderTargetFormat = format;
+            UseSamples = useSamples;
+            BufferCount = count;
 
-            this.CreateTargets();
+            CreateTargets();
         }
         /// <summary>
         /// Destructor
@@ -76,7 +76,7 @@ namespace Engine
         {
             if (disposing)
             {
-                this.DisposeTargets();
+                DisposeTargets();
             }
         }
 
@@ -85,8 +85,8 @@ namespace Engine
         /// </summary>
         public void Resize()
         {
-            this.DisposeTargets();
-            this.CreateTargets();
+            DisposeTargets();
+            CreateTargets();
         }
 
         /// <summary>
@@ -94,39 +94,32 @@ namespace Engine
         /// </summary>
         private void CreateTargets()
         {
-            int width = this.Game.Form.RenderWidth;
-            int height = this.Game.Form.RenderHeight;
+            int width = Game.Form.RenderWidth;
+            int height = Game.Form.RenderHeight;
 
-            this.Game.Graphics.CreateRenderTargetTexture(
-                this.RenderTargetFormat,
-                width, height, this.BufferCount, this.UseSamples,
+            Game.Graphics.CreateRenderTargetTexture(
+                RenderTargetFormat,
+                width, height, BufferCount, UseSamples,
                 out EngineRenderTargetView targets,
                 out EngineShaderResourceView[] textures);
 
-            this.Targets = targets;
-            this.Textures = textures;
+            Targets = targets;
+            Textures = textures;
         }
         /// <summary>
         /// Disposes all targets and depth buffer
         /// </summary>
         private void DisposeTargets()
         {
-            if (this.Targets != null)
-            {
-                this.Targets.Dispose();
-                this.Targets = null;
-            }
+            Targets?.Dispose();
+            Targets = null;
 
-            if (this.Textures != null)
+            for (int i = 0; i < Textures?.Length; i++)
             {
-                for (int i = 0; i < this.Textures.Length; i++)
-                {
-                    this.Textures[i]?.Dispose();
-                    this.Textures[i] = null;
-                }
-
-                this.Textures = null;
+                Textures[i]?.Dispose();
+                Textures[i] = null;
             }
+            Textures = null;
         }
     }
 }

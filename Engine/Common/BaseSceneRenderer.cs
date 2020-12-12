@@ -272,6 +272,7 @@ namespace Engine.Common
         public virtual void Resize()
         {
             postProcessingBuffer1?.Resize();
+            postProcessingBuffer2?.Resize();
             processingDrawer?.Resize();
         }
         /// <summary>

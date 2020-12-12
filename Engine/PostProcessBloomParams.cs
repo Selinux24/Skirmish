@@ -4,7 +4,7 @@ namespace Engine
     /// <summary>
     /// Post-process Bloom parameters
     /// </summary>
-    public struct PostProcessBloomParams : IDrawerPostProcessParams
+    public class PostProcessBloomParams : IDrawerPostProcessParams
     {
         /// <summary>
         /// Default Bloom parameters

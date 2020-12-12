@@ -33,6 +33,10 @@ namespace Engine.Effects
         /// Bloom drawing technique
         /// </summary>
         public readonly EngineEffectTechnique Bloom = null;
+        /// <summary>
+        /// Tone mapping technique
+        /// </summary>
+        public readonly EngineEffectTechnique ToneMapping = null;
 
         /// <summary>
         /// World view projection effect variable
@@ -46,6 +50,7 @@ namespace Engine.Effects
         /// Diffuse map effect variable
         /// </summary>
         private readonly EngineEffectVariableTexture diffuseMapVar = null;
+
         /// <summary>
         /// Blur direcctions effect variable
         /// </summary>
@@ -76,6 +81,11 @@ namespace Engine.Effects
         /// Bloom blur size ring effect variable
         /// </summary>
         private readonly EngineEffectVariableScalar bloomBlurSizeVar = null;
+
+        /// <summary>
+        /// Tone mapping tone
+        /// </summary>
+        private readonly EngineEffectVariableScalar toneMappingToneVar = null;
 
         /// <summary>
         /// Blur direction
@@ -179,6 +189,21 @@ namespace Engine.Effects
         }
 
         /// <summary>
+        /// Tone mapping tone
+        /// </summary>
+        protected uint ToneMappingTone
+        {
+            get
+            {
+                return toneMappingToneVar.GetUInt();
+            }
+            set
+            {
+                toneMappingToneVar.Set(value);
+            }
+        }
+
+        /// <summary>
         /// Current diffuse map
         /// </summary>
         private EngineShaderResourceView currentDiffuseMap = null;
@@ -248,6 +273,7 @@ namespace Engine.Effects
             Blur = Effect.GetTechniqueByName("Blur");
             Vignette = Effect.GetTechniqueByName("Vignette");
             Bloom = Effect.GetTechniqueByName("Bloom");
+            ToneMapping = Effect.GetTechniqueByName("ToneMapping");
 
             worldViewProjectionVar = Effect.GetVariableMatrix("gWorldViewProjection");
             textureSizeVar = Effect.GetVariableVector("gTextureSize");
@@ -262,6 +288,8 @@ namespace Engine.Effects
 
             bloomIntensityVar = Effect.GetVariableScalar("gBloomIntensity");
             bloomBlurSizeVar = Effect.GetVariableScalar("gBloomBlurSize");
+
+            toneMappingToneVar = Effect.GetVariableScalar("gToneMappingTone");
         }
 
         /// <summary>
@@ -287,6 +315,9 @@ namespace Engine.Effects
                     break;
                 case PostProcessingEffects.Bloom:
                     technique = DrawerPool.EffectPostProcess.Bloom;
+                    break;
+                case PostProcessingEffects.ToneMapping:
+                    technique = DrawerPool.EffectPostProcess.ToneMapping;
                     break;
                 default:
                     technique = DrawerPool.EffectPostProcess.Empty;
@@ -338,6 +369,10 @@ namespace Engine.Effects
             {
                 BloomIntensity = bloom.Intensity;
                 BloomBlurSize = bloom.BlurSize;
+            }
+            else if (parameters is PostProcessToneMappingParams toneMapping)
+            {
+                ToneMappingTone = (uint)toneMapping.Tone;
             }
         }
     }

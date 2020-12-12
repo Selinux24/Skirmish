@@ -210,6 +210,7 @@
     <Compile Include="Content\BuiltInMaterials.cs" />
     <Compile Include="Effects\IDrawerPostProcess.cs" />
     <Compile Include="IDrawerPostProcessParams.cs" />
+    <Compile Include="PostProcessToneMappingParams.cs" />
     <Compile Include="PostProcessBloomParams.cs" />
     <Compile Include="PostProcessBlurParams.cs" />
     <Compile Include="PostProcessingDrawer.cs" />
@@ -696,6 +697,7 @@
     <AdditionalFiles Include="..\.sonarlint\selinux24_skirmish_dev\CSharp\SonarLint.xml">
       <Link>SonarLint.xml</Link>
     </AdditionalFiles>
+    <Content Include="Resources\IncPostProcessing.hlsl" />
     <Content Include="Resources\IncScattering.hlsl" />
     <None Include="Resources\ShaderShadowBillboard.fx" />
     <None Include="Resources\ShaderShadowBillboard.fxo" />
