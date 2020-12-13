@@ -72,16 +72,26 @@ namespace Engine
                 //Shadow mapping
                 DoShadowMapping(gameTime);
 
-                //Rendering
-                DoRender(Scene, visibleComponents);
+                //Binds the result target
+                BindResult();
+
+                //Render components
+                DoRender(Scene, visibleComponents.Where(c => !c.Usage.HasFlag(SceneObjectUsages.UI)));
+
+                //Post-processing
+                DoPostProcessing(gameTime);
+
+                //Render UI
+                DoRender(Scene, visibleComponents.Where(c => c.Usage.HasFlag(SceneObjectUsages.UI)));
+
+                //Write result
+                WriteResult();
             }
 #if DEBUG
             swTotal.Stop();
 
             frameStats.UpdateCounters(swTotal.ElapsedTicks);
 #endif
-            //Post-processing
-            DoPostProcessing(gameTime);
         }
 
         /// <summary>
@@ -91,19 +101,6 @@ namespace Engine
         /// <param name="components">Components</param>
         private void DoRender(Scene scene, IEnumerable<ISceneObject> components)
         {
-            #region Preparation
-#if DEBUG
-            Stopwatch swPreparation = Stopwatch.StartNew();
-#endif
-            //Set default render target and depth buffer, and clear it
-            BindResult();
-#if DEBUG
-            swPreparation.Stop();
-
-            frameStats.ForwardStart = swPreparation.ElapsedTicks;
-#endif
-            #endregion
-
             //Forward rendering
             if (components.Any())
             {

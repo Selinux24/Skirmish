@@ -94,11 +94,23 @@ namespace Engine
         /// <summary>
         /// Current just pressed mouse buttons
         /// </summary>
-        public MouseButtons JustPressedMouseButtons { get; private set; } = MouseButtons.None;
+        public MouseButtons JustPressedMouseButtons
+        {
+            get
+            {
+                return MouseButtonsState & ~lastMouseButtons;
+            }
+        }
         /// <summary>
         /// Current just released mouse buttons
         /// </summary>
-        public MouseButtons JustReleasedMouseButtons { get; private set; } = MouseButtons.None;
+        public MouseButtons JustReleasedMouseButtons
+        {
+            get
+            {
+                return lastMouseButtons & ~MouseButtonsState;
+            }
+        }
         /// <summary>
         /// Gets if left or right shift key were pressed now
         /// </summary>
@@ -273,9 +285,6 @@ namespace Engine
         /// </summary>
         private void UpdateMouseButtonsState()
         {
-            JustPressedMouseButtons = MouseButtonsState & ~lastMouseButtons;
-            JustReleasedMouseButtons = lastMouseButtons & ~MouseButtonsState;
-
             lastMouseButtons = PressedMouseButtons;
             PressedMouseButtons = MouseButtonsState;
 
@@ -377,8 +386,6 @@ namespace Engine
 
             lastMouseButtons = MouseButtons.None;
             PressedMouseButtons = MouseButtons.None;
-            JustPressedMouseButtons = MouseButtons.None;
-            JustReleasedMouseButtons = MouseButtons.None;
 
             #endregion
 

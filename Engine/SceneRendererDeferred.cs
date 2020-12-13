@@ -217,7 +217,7 @@ namespace Engine
                 #region Deferred rendering
 
                 //Render to G-Buffer only opaque objects
-                var deferredEnabledComponents = visibleComponents.Where(c => c.DeferredEnabled);
+                var deferredEnabledComponents = visibleComponents.Where(c => c.DeferredEnabled && !c.Usage.HasFlag(SceneObjectUsages.UI));
                 if (deferredEnabledComponents.Any())
                 {
                     DoDeferred(deferredEnabledComponents);
@@ -244,22 +244,36 @@ namespace Engine
                 #region Forward rendering
 
                 //Render to screen deferred disabled components
-                var deferredDisabledComponents = visibleComponents.Where(c => !c.DeferredEnabled);
+                var deferredDisabledComponents = visibleComponents.Where(c => !c.DeferredEnabled && !c.Usage.HasFlag(SceneObjectUsages.UI));
                 if (deferredDisabledComponents.Any())
                 {
                     DoForward(deferredDisabledComponents);
                 }
 
                 #endregion
+
+                //Post-processing
+                DoPostProcessing(gameTime);
+
+                #region UI rendering (Forward)
+
+                //Render to screen deferred disabled components
+                var uiComponents = visibleComponents.Where(c => c.Usage.HasFlag(SceneObjectUsages.UI));
+                if (uiComponents.Any())
+                {
+                    DoForward(uiComponents);
+                }
+
+                #endregion
+
+                //Writes result
+                WriteResult();
             }
 #if DEBUG
             swTotal.Stop();
 
             frameStats.UpdateCounters(swTotal.ElapsedTicks);
 #endif
-
-            //Post-processing
-            DoPostProcessing(gameTime);
         }
         /// <summary>
         /// Do deferred rendering

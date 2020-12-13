@@ -51,6 +51,10 @@ namespace Engine
         /// Rotate decals
         /// </summary>
         public bool RotateDecals { get; private set; }
+        /// <summary>
+        /// Tint color
+        /// </summary>
+        public Color4 TintColor { get; set; } = Color4.White;
 
         /// <summary>
         /// Constructor
@@ -139,6 +143,7 @@ namespace Engine
             effect.UpdatePerFrame(
                 context.ViewProjection,
                 context.GameTime.TotalSeconds,
+                TintColor,
                 TextureCount,
                 Texture);
 

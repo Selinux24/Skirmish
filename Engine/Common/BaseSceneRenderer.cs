@@ -983,6 +983,58 @@ namespace Engine.Common
             }
         }
         /// <summary>
+        /// Writes result to target
+        /// </summary>
+        protected virtual void WriteResult()
+        {
+            if (!PostProcessingEnabled)
+            {
+                return;
+            }
+
+            if (!postProcessingEffects.Any())
+            {
+                return;
+            }
+
+            var graphics = Scene.Game.Graphics;
+
+            graphics.SetRasterizerDefault();
+            graphics.SetBlendState(BlendModes.Default);
+            graphics.SetDepthStencilWRZDisabled();
+
+            var effect = DrawerPool.EffectPostProcess;
+
+            var forms = Scene.Game.Form;
+            var viewProj = forms.GetOrthoProjectionMatrix();
+            var screenRect = forms.RenderRectangle;
+
+            //Sets as effect source the last used buffer
+            effect.UpdatePerFrame(
+                viewProj,
+                new Vector2(screenRect.Width, screenRect.Height),
+                postProcessingBuffer1.Textures?.FirstOrDefault());
+
+            //Set the default render target
+            BindDefault();
+
+            //Draw the result
+            processingDrawer.SetDrawer(DrawerPool.EffectPostProcess.Empty);
+            processingDrawer.Bind();
+            processingDrawer.Draw();
+        }
+        /// <summary>
+        /// Binds the default render target
+        /// </summary>
+        private void BindDefault()
+        {
+            var graphics = Scene.Game.Graphics;
+
+            //Restore backbuffer as render target and clear it
+            graphics.SetDefaultViewport();
+            graphics.SetDefaultRenderTarget(true, false, true);
+        }
+        /// <summary>
         /// Binds graphics for post-processing pass
         /// </summary>
         private void BindPostProcessing()
@@ -1010,17 +1062,6 @@ namespace Engine.Common
             postProcessingBuffer2 = tmp;
         }
         /// <summary>
-        /// Binds the default render target
-        /// </summary>
-        private void BindDefault()
-        {
-            var graphics = Scene.Game.Graphics;
-
-            //Restore backbuffer as render target and clear it
-            graphics.SetDefaultViewport();
-            graphics.SetDefaultRenderTarget(true, false, true);
-        }
-        /// <summary>
         /// Does the post-processing draw
         /// </summary>
         /// <param name="gameTime">Game time</param>
@@ -1036,13 +1077,17 @@ namespace Engine.Common
                 return;
             }
 
-            Scene.Game.Graphics.SetRasterizerDefault();
-            Scene.Game.Graphics.SetBlendState(BlendModes.Default);
-            Scene.Game.Graphics.SetDepthStencilWRZDisabled();
+            var graphics = Scene.Game.Graphics;
+
+            graphics.SetRasterizerDefault();
+            graphics.SetBlendState(BlendModes.Default);
+            graphics.SetDepthStencilWRZDisabled();
 
             var effect = DrawerPool.EffectPostProcess;
-            var viewProj = Scene.Game.Form.GetOrthoProjectionMatrix();
-            var screenRect = Scene.Game.Form.RenderRectangle;
+
+            var forms = Scene.Game.Form;
+            var viewProj = forms.GetOrthoProjectionMatrix();
+            var screenRect = forms.RenderRectangle;
 
             foreach (var postEffect in postProcessingEffects)
             {
@@ -1064,20 +1109,6 @@ namespace Engine.Common
                 processingDrawer.Bind();
                 processingDrawer.Draw();
             }
-
-            //Sets as effect source the last used buffer
-            effect.UpdatePerFrame(
-                viewProj,
-                new Vector2(screenRect.Width, screenRect.Height),
-                postProcessingBuffer1.Textures?.FirstOrDefault());
-
-            //Set the default render target
-            BindDefault();
-
-            //Draw the result
-            processingDrawer.SetDrawer(DrawerPool.EffectPostProcess.Empty);
-            processingDrawer.Bind();
-            processingDrawer.Draw();
         }
 
         /// <summary>

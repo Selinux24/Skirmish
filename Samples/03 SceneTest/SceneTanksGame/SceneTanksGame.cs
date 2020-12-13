@@ -110,6 +110,8 @@ namespace SceneTest.SceneTanksGame
         private string[] impactEffects;
         private string[] damageEffects;
 
+        private DecalDrawer decalDrawer;
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -636,6 +638,7 @@ namespace SceneTest.SceneTanksGame
                 InitializeLandscape(),
                 InitializeModelProjectile(),
                 InitializeParticleManager(),
+                InitializeDecalDrawer(),
                 InitializeAudio(),
             };
         }
@@ -725,7 +728,7 @@ namespace SceneTest.SceneTanksGame
                 Content = ContentDescription.FromContentData(vertices, indices, material),
             };
 
-            landScape = await this.AddComponentModel("Landscape", content, SceneObjectUsages.UI, LayerDefault);
+            landScape = await this.AddComponentModel("Landscape", content, SceneObjectUsages.None, LayerDefault);
             landScape.Visible = false;
         }
         private async Task InitializeModelProjectile()
@@ -760,6 +763,13 @@ namespace SceneTest.SceneTanksGame
             particleDescriptions.Add("Projectile", pProjectile);
             particleDescriptions.Add("Explosion", pExplosion);
             particleDescriptions.Add("SmokeExplosion", pSmokeExplosion);
+        }
+        private async Task InitializeDecalDrawer()
+        {
+            var desc = DecalDrawerDescription.DefaultRotate(@"SceneTanksGame/Crater.png", 100);
+
+            decalDrawer = await this.AddComponentDecalDrawer("Craters", desc);
+            decalDrawer.TintColor = new Color(223, 194, 179);
         }
         private async Task InitializeAudio()
         {
@@ -1162,6 +1172,11 @@ You will lost all the game progress.",
             {
                 Shoot(pbFire.ProgressValue);
             }
+
+            if (Game.Input.MouseButtonJustReleased(MouseButtons.Left))
+            {
+                PlayEffectImpact(Target);
+            }
         }
         private void UpdateInputEndGame()
         {
@@ -1409,7 +1424,7 @@ You will lost all the game progress.",
             // Test collision with target
             if (Target.Intersects(projVolume, out var targetImpact))
             {
-                ResolveShot(true, targetImpact.Position);
+                ResolveShot(true, targetImpact.Position, targetImpact.Item.Normal);
 
                 return;
             }
@@ -1418,7 +1433,7 @@ You will lost all the game progress.",
             var terrainBox = terrain.GetBoundingBox();
             if (projVolume.Center.Y + projVolume.Radius < terrainBox.Minimum.Y)
             {
-                ResolveShot(false, null);
+                ResolveShot(false, null, null);
 
                 return;
             }
@@ -1426,10 +1441,10 @@ You will lost all the game progress.",
             // Test full collision with terrain mesh
             if (terrain.Intersects(projVolume, out var terrainImpact))
             {
-                ResolveShot(false, terrainImpact.Position);
+                ResolveShot(false, terrainImpact.Position, terrainImpact.Item.Normal);
             }
         }
-        private void ResolveShot(bool impact, Vector3? impactPosition)
+        private void ResolveShot(bool impact, Vector3? impactPosition, Vector3? impactNormal)
         {
             shot = null;
             shooting = false;
@@ -1440,6 +1455,7 @@ You will lost all the game progress.",
 
             if (impact)
             {
+                //Target damaged
                 int res = Helper.RandomGenerator.Next(10, 50);
 
                 ShooterStatus.Points += res * 100;
@@ -1447,6 +1463,7 @@ You will lost all the game progress.",
 
                 if (impactPosition.HasValue)
                 {
+                    //Add damage effects to tank
                     AddExplosionSystem(impactPosition.Value);
                     PlayEffectDamage(Target);
                     PlayEffectImpact(Target);
@@ -1454,6 +1471,8 @@ You will lost all the game progress.",
 
                 if (TargetStatus.CurrentLife == 0)
                 {
+                    //Tank destroyed
+
                     Task.Run(async () =>
                     {
                         Vector3 min = Vector3.One * -5f;
@@ -1482,9 +1501,11 @@ You will lost all the game progress.",
             }
             else
             {
+                //Ground impact
                 if (impactPosition.HasValue)
                 {
                     AddSmokePlumeSystem(impactPosition.Value);
+                    AddCrater(impactPosition.Value, impactNormal.Value);
                     PlayEffectDestroyed(impactPosition.Value);
                 }
             }
@@ -1611,6 +1632,10 @@ You will lost all the game progress.",
             particleManager.AddParticleSystem(ParticleSystemTypes.CPU, particleDescriptions["Fire"], emitter1);
             particleManager.AddParticleSystem(ParticleSystemTypes.CPU, particleDescriptions["Plume"], emitter2);
         }
+        private void AddCrater(Vector3 position, Vector3 normal)
+        {
+            decalDrawer.AddDecal(position + (normal * 0.2f), normal, Vector2.One * 20f, float.PositiveInfinity);
+        }
 
         private async Task ShowMessage(string text, int delay)
         {
@@ -1703,12 +1728,19 @@ You will lost all the game progress.",
 
             dialog.Show(500);
             fadePanel.TweenAlpha(0, 0.5f, 500, ScaleFuncs.Linear);
+
+            Renderer.SetPostProcessingEffect(PostProcessingEffects.Grayscale, null);
+            Renderer.SetPostProcessingEffect(PostProcessingEffects.Blur, PostProcessBlurParams.Strong);
+
             Game.VisibleMouse = true;
         }
         private void CloseDialog()
         {
             dialog.Hide(500);
             fadePanel.TweenAlpha(0.5f, 0f, 500, ScaleFuncs.Linear);
+
+            Renderer.CrearPostProcessingEffects();
+
             Game.VisibleMouse = false;
 
             Task.Run(async () =>
@@ -1717,207 +1749,6 @@ You will lost all the game progress.",
 
                 dialogActive = false;
             });
-        }
-    }
-
-    /// <summary>
-    /// Paralbolic shot helper
-    /// </summary>
-    public class ParabolicShot
-    {
-        /// <summary>
-        /// Gravity acceleration
-        /// </summary>
-        private readonly float g = 50f;
-
-        /// <summary>
-        /// Initial shot time
-        /// </summary>
-        private TimeSpan initialTime;
-        /// <summary>
-        /// Initial velocity
-        /// </summary>
-        public Vector3 initialVelocity;
-        /// <summary>
-        /// Horizontal velocity component
-        /// </summary>
-        public Vector2 horizontalVelocity;
-        /// <summary>
-        /// Vertical velocity component
-        /// </summary>
-        public float verticalVelocity;
-        /// <summary>
-        /// Wind force (direction plus magnitude)
-        /// </summary>
-        public Vector3 wind;
-
-        /// <summary>
-        /// Configures the parabolic shot
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="shotDirection">Shot direction</param>
-        /// <param name="shotForce">Shot force</param>
-        /// <param name="windDirection">Wind direction</param>
-        /// <param name="windForce">Wind force</param>
-        public void Configure(GameTime gameTime, Vector3 shotDirection, float shotForce, Vector2 windDirection, float windForce)
-        {
-            initialTime = TimeSpan.FromMilliseconds(gameTime.TotalMilliseconds);
-            initialVelocity = shotDirection * shotForce;
-            horizontalVelocity = initialVelocity.XZ();
-            verticalVelocity = initialVelocity.Y;
-            wind = new Vector3(windDirection.X, 0, windDirection.Y) * windForce;
-        }
-
-        /// <summary>
-        /// Gets the horizontal shot distance at the specified time
-        /// </summary>
-        /// <param name="time">Time</param>
-        public Vector2 GetHorizontalDistance(float time)
-        {
-            return horizontalVelocity * time;
-        }
-        /// <summary>
-        /// Gets the vertical shot distance at the specified time
-        /// </summary>
-        /// <param name="time">Time</param>
-        /// <param name="shooterPosition">Shooter position</param>
-        /// <param name="targetPosition">Target position</param>
-        /// <remarks>Shooter and target positions were used for height difference calculation</remarks>
-        public float GetVerticalDistance(float time, Vector3 shooterPosition, Vector3 targetPosition)
-        {
-            float h = shooterPosition.Y - targetPosition.Y;
-
-            return h + (verticalVelocity * time) - (g * time * time / 2f);
-        }
-
-        /// <summary>
-        /// Gets the horizontal velocity
-        /// </summary>
-        public Vector2 GetHorizontalVelocity()
-        {
-            return horizontalVelocity;
-        }
-        /// <summary>
-        /// Gets the vertical velocity at the specified time
-        /// </summary>
-        /// <param name="time">Time</param>
-        public float GetVerticalVelocity(float time)
-        {
-            return verticalVelocity - g * time;
-        }
-
-        /// <summary>
-        /// Gets the horizontal acceleration
-        /// </summary>
-        public float GetHorizontalAcceleration()
-        {
-            return 0f;
-        }
-        /// <summary>
-        /// Gets the vertical acceleration
-        /// </summary>
-        public float GetVerticalAcceleration()
-        {
-            return -g;
-        }
-
-        /// <summary>
-        /// Gets the total time of flight of the projectile, from shooter to target
-        /// </summary>
-        /// <param name="shooterPosition">Shooter position</param>
-        /// <param name="targetPosition">Target position</param>
-        /// <returns>Returns the total time of flight of the projectile</returns>
-        public float GetTimeOfFlight(Vector3 shooterPosition, Vector3 targetPosition)
-        {
-            float h = shooterPosition.Y - targetPosition.Y;
-            if (h == 0)
-            {
-                return 2f * verticalVelocity / g;
-            }
-            else
-            {
-                return (verticalVelocity + (float)Math.Sqrt((verticalVelocity * verticalVelocity) + 2f * g * h)) / g;
-            }
-        }
-
-        /// <summary>
-        /// Gets the trajectory curve of the shot
-        /// </summary>
-        /// <param name="shooterPosition">Shooter position</param>
-        /// <param name="targetPosition">Target position</param>
-        /// <returns>Returns the trajectory curve of the shot</returns>
-        public Curve3D ComputeCurve(Vector3 shooterPosition, Vector3 targetPosition)
-        {
-            Curve3D curve = new Curve3D();
-
-            float flightTime = GetTimeOfFlight(shooterPosition, targetPosition);
-            float sampleTime = 0.1f;
-            for (float time = 0; time < flightTime; time += sampleTime)
-            {
-                Vector2 horizontalDist = GetHorizontalDistance(time);
-                float verticalDist = GetVerticalDistance(time, shooterPosition, targetPosition);
-
-                Vector3 position = new Vector3(horizontalDist.X, verticalDist, horizontalDist.Y) + (wind * time);
-                curve.AddPosition(time, position);
-            }
-
-            return curve;
-        }
-
-        /// <summary>
-        /// Integrates the shot in time
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="shooter">Shooter position</param>
-        /// <param name="target">Target position</param>
-        /// <returns>Returns the current parabolic shot position (relative to shooter position)</returns>
-        public Vector3 Integrate(GameTime gameTime, Vector3 shooter, Vector3 target)
-        {
-            float time = (float)(gameTime.TotalSeconds - initialTime.TotalSeconds);
-
-            Vector2 horizontalDist = GetHorizontalDistance(time);
-            float verticalDist = GetVerticalDistance(time, shooter, target);
-
-            return new Vector3(horizontalDist.X, verticalDist, horizontalDist.Y) + (wind * time);
-        }
-    }
-
-    public class PlayerStatus
-    {
-        public string Name { get; set; }
-        public int Points { get; set; }
-        public int MaxLife { get; set; }
-        public int CurrentLife { get; set; }
-        public int MaxMove { get; set; }
-        public float CurrentMove { get; set; }
-        public Color Color { get; set; }
-        public float Health
-        {
-            get
-            {
-                return (float)CurrentLife / MaxLife;
-            }
-        }
-        public uint TextureIndex
-        {
-            get
-            {
-                if (Health > 0.6666f)
-                {
-                    return 0;
-                }
-                else if (Health > 0)
-                {
-                    return 1;
-                }
-
-                return 2;
-            }
-        }
-
-        public void NewTurn()
-        {
-            CurrentMove = MaxMove;
         }
     }
 }

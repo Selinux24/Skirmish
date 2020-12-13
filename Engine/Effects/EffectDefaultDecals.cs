@@ -27,6 +27,10 @@ namespace Engine.Effects
         /// </summary>
         private readonly EngineEffectVariableMatrix worldViewProjectionVar = null;
         /// <summary>
+        /// Tint color effect variable
+        /// </summary>
+        private readonly EngineEffectVariableVector tintColorVar = null;
+        /// <summary>
         /// Textures effect variable
         /// </summary>
         private readonly EngineEffectVariableTexture textureArrayVar = null;
@@ -94,6 +98,20 @@ namespace Engine.Effects
             }
         }
         /// <summary>
+        /// Tint color
+        /// </summary>
+        protected Color4 TintColor
+        {
+            get
+            {
+                return tintColorVar.GetVector<Color4>();
+            }
+            set
+            {
+                tintColorVar.Set(value);
+            }
+        }
+        /// <summary>
         /// Texture count
         /// </summary>
         protected uint TextureCount
@@ -136,6 +154,7 @@ namespace Engine.Effects
 
             worldVar = Effect.GetVariableMatrix("gWorld");
             worldViewProjectionVar = Effect.GetVariableMatrix("gWorldViewProjection");
+            tintColorVar = Effect.GetVariableVector("gTintColor");
             textureArrayVar = Effect.GetVariableTexture("gTextureArray");
             textureCountVar = Effect.GetVariableScalar("gTextureCount");
             totalTimeVar = Effect.GetVariableScalar("gTotalTime");
@@ -146,19 +165,22 @@ namespace Engine.Effects
         /// </summary>
         /// <param name="viewProjection">View * projection matrix</param>
         /// <param name="totalTime">Total time</param>
+        /// <param name="tintColor">Tint color</param>
         /// <param name="textureCount">Texture count</param>
         /// <param name="textures">Texture</param>
         public void UpdatePerFrame(
             Matrix viewProjection,
             float totalTime,
+            Color4 tintColor,
             uint textureCount,
             EngineShaderResourceView textures)
         {
             World = Matrix.Identity;
             WorldViewProjection = viewProjection;
-            TotalTime = totalTime;
+            TintColor = tintColor;
             TextureCount = textureCount;
             TextureArray = textures;
+            TotalTime = totalTime;
         }
     }
 }

@@ -5,6 +5,7 @@ cbuffer cbPerFrame : register(b0)
 {
     float4x4 gWorld;
     float4x4 gWorldViewProjection;
+    float4 gTintColor;
     uint gTextureCount;
     float gTotalTime;
 };
@@ -112,6 +113,7 @@ float4 PSDecals(PSDecal input) : SV_Target
 {
     float3 uvw = float3(input.tex, input.primitiveID % gTextureCount);
     float4 color = gTextureArray.Sample(SamplerPointParticle, uvw);
+    color *= gTintColor;
     color.a *= input.alpha;
 	
     return color;
@@ -128,6 +130,7 @@ float4 PSDecalsRotated(PSDecal input) : SV_Target
     
     float3 uvw = float3(tex, input.primitiveID % gTextureCount);
     float4 color = gTextureArray.Sample(SamplerPointParticle, uvw);
+    color *= gTintColor;
     color.a *= input.alpha;
 	
     return color;
