@@ -1000,8 +1000,8 @@ namespace Engine.Common
             var graphics = Scene.Game.Graphics;
 
             graphics.SetRasterizerDefault();
-            graphics.SetBlendState(BlendModes.Default);
-            graphics.SetDepthStencilWRZDisabled();
+            graphics.SetBlendDefault();
+            graphics.SetDepthStencilNone();
 
             var effect = DrawerPool.EffectPostProcess;
 
@@ -1080,8 +1080,8 @@ namespace Engine.Common
             var graphics = Scene.Game.Graphics;
 
             graphics.SetRasterizerDefault();
-            graphics.SetBlendState(BlendModes.Default);
-            graphics.SetDepthStencilWRZDisabled();
+            graphics.SetBlendDefault();
+            graphics.SetDepthStencilNone();
 
             var effect = DrawerPool.EffectPostProcess;
 
@@ -1129,9 +1129,9 @@ namespace Engine.Common
             PostProcessingEnabled = true;
         }
         /// <summary>
-        /// Crears the post-processing effect
+        /// Clears the post-processing effect
         /// </summary>
-        public void CrearPostProcessingEffects()
+        public void ClearPostProcessingEffects()
         {
             postProcessingEffects.Clear();
             PostProcessingEnabled = false;

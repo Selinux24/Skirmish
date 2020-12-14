@@ -1739,7 +1739,7 @@ You will lost all the game progress.",
             dialog.Hide(500);
             fadePanel.TweenAlpha(0.5f, 0f, 500, ScaleFuncs.Linear);
 
-            Renderer.CrearPostProcessingEffects();
+            Renderer.ClearPostProcessingEffects();
 
             Game.VisibleMouse = false;
 

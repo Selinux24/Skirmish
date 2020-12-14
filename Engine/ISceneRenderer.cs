@@ -27,9 +27,9 @@ namespace Engine
         /// <param name="parameters">Parameters</param>
         void SetPostProcessingEffect(PostProcessingEffects effect, IDrawerPostProcessParams parameters);
         /// <summary>
-        /// Crears the post-processing effect
+        /// Clears the post-processing effect
         /// </summary>
-        void CrearPostProcessingEffects();
+        void ClearPostProcessingEffects();
 
         /// <summary>
         /// Updates the scene renderer globals

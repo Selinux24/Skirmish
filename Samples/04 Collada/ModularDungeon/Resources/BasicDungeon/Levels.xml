@@ -321,13 +321,13 @@
         <item asset_name="Dn_Torch" type="Light" cast_shadows="false">
           <position>-0.9 6 -19</position>
           <scale>0.75</scale>
-          <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.001"></particleLight>
+          <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.1"></particleLight>
         </item>
         <item asset_name="Dn_Torch" type="Light" cast_shadows="false">
           <position>0.9 6 -19</position>
           <rotation>rot180</rotation>
           <scale>0.75</scale>
-          <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.001"></particleLight>
+          <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.1"></particleLight>
         </item>
 
         <item asset_name="Dn_Torch" type="Light" cast_shadows="false">
@@ -588,11 +588,11 @@
 
         <item asset_name="Dn_Temple_Fire_1" type="Light" path_finding="true">
           <position>53 0 -4</position>
-          <particleLight name="torchFire" scale="1" infiniteDuration="true" emissionRate="0.001"></particleLight>
+          <particleLight name="torchFire" scale="1" infiniteDuration="true" emissionRate="0.1"></particleLight>
         </item>
         <item asset_name="Dn_Temple_Fire_1" type="Light" path_finding="true">
           <position>53 0 -38</position>
-          <particleLight name="torchFire" scale="1" infiniteDuration="true" emissionRate="0.001"></particleLight>
+          <particleLight name="torchFire" scale="1" infiniteDuration="true" emissionRate="0.1"></particleLight>
         </item>
 
         <item asset_name="Dn_Floor_Gap_1" path_finding="true">

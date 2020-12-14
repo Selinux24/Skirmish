@@ -87,6 +87,10 @@ namespace Collada.ModularDungeon
         private string ratSoundTalk = null;
         private IAudioEffect ratSoundInstance = null;
 
+        private readonly PostProcessToneMappingParams toneMapParams = PostProcessToneMappingParams.SimpleReinhard;
+        private readonly PostProcessBloomParams bloomParams = PostProcessBloomParams.Low;
+        private readonly PostProcessVignetteParams vignetteParams = PostProcessVignetteParams.Thin;
+
         private bool userInterfaceInitialized = false;
         private bool gameAssetsInitialized = false;
         private bool levelInitialized = false;
@@ -216,6 +220,8 @@ namespace Collada.ModularDungeon
                 SetRenderMode(GetRenderMode() == SceneModes.ForwardLigthning ?
                     SceneModes.DeferredLightning :
                     SceneModes.ForwardLigthning);
+
+                InitializePostProcessing();
             }
 
             if (!userInterfaceInitialized)
@@ -247,12 +253,13 @@ namespace Collada.ModularDungeon
             UpdateEntities();
             UpdateWind();
 
-            UpdateDebugInput();
+            UpdateDebugInput(gameTime);
             UpdateGraphInput();
             UpdateRatInput();
             UpdatePlayerInput();
             UpdateEntitiesInput();
 
+            UpdatePlayerState(gameTime);
             UpdateSelection();
         }
         public override void GameGraphicsResized()
@@ -376,8 +383,6 @@ namespace Collada.ModularDungeon
                         AudioManager.Start();
 
                         ChangeToLevel(null);
-
-                        Renderer.SetPostProcessingEffect(PostProcessingEffects.Vignette, PostProcessVignetteParams.Thin);
                     }
                     catch (AggregateException ex)
                     {
@@ -762,6 +767,13 @@ namespace Collada.ModularDungeon
             torch = new SceneLightPoint("player_torch", true, agentTorchLight, agentTorchLight, true, desc);
             Lights.Add(torch);
         }
+        private void InitializePostProcessing()
+        {
+            Renderer.ClearPostProcessingEffects();
+            Renderer.SetPostProcessingEffect(PostProcessingEffects.ToneMapping, toneMapParams);
+            Renderer.SetPostProcessingEffect(PostProcessingEffects.Vignette, vignetteParams);
+            Renderer.SetPostProcessingEffect(PostProcessingEffects.Bloom, bloomParams);
+        }
 
         private void StartCamera()
         {
@@ -896,7 +908,7 @@ namespace Collada.ModularDungeon
                 torch.Enabled = !torch.Enabled;
             }
         }
-        private void UpdateDebugInput()
+        private void UpdateDebugInput(GameTime gameTime)
         {
             if (Game.Input.KeyJustReleased(Keys.F1))
             {
@@ -929,6 +941,16 @@ namespace Collada.ModularDungeon
             if (Game.Input.KeyJustReleased(Keys.Oem5))
             {
                 console.Toggle();
+            }
+
+            if (Game.Input.KeyPressed(Keys.Left))
+            {
+                bloomParams.Intensity = MathUtil.Clamp(bloomParams.Intensity - gameTime.ElapsedSeconds, 0, 100);
+            }
+
+            if (Game.Input.KeyPressed(Keys.Right))
+            {
+                bloomParams.Intensity = MathUtil.Clamp(bloomParams.Intensity + gameTime.ElapsedSeconds, 0, 100);
             }
         }
         private void UpdateGraphInput()
@@ -996,6 +1018,10 @@ namespace Collada.ModularDungeon
             }
         }
 
+        private void UpdatePlayerState(GameTime gameTime)
+        {
+            vignetteParams.Inner = 0.66f + ((float)Math.Sin(gameTime.TotalSeconds * 2f) * 0.1f);
+        }
         private void UpdateSelection()
         {
             if (selectedItem == null)
@@ -1463,6 +1489,8 @@ namespace Collada.ModularDungeon
             Lights.Add(torch);
 
             AudioManager.Start();
+
+            InitializePostProcessing();
 
             gameReady = true;
         }
