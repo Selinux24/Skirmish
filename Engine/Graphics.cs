@@ -1917,6 +1917,48 @@ namespace Engine
             }
         }
         /// <summary>
+        /// Loads a texture array from a file in the graphics device
+        /// </summary>
+        /// <param name="filename">Path file</param>
+        /// <param name="rectangles">Crop rectangle list</param>
+        /// <param name="mipAutogen">Try to generate texture mips</param>
+        /// <param name="dynamic">Dynamic or Inmutable</param>
+        /// <returns>Returns the resource view</returns>
+        internal ShaderResourceView1 LoadTextureArray(string filename, IEnumerable<Rectangle> rectangles, bool mipAutogen, bool dynamic)
+        {
+            try
+            {
+                var textureList = TextureData.ReadTextureArray(filename, rectangles);
+
+                return CreateResource(textureList, mipAutogen, dynamic);
+            }
+            catch (Exception ex)
+            {
+                throw new EngineException("LoadTexture from file array Error. See inner exception for details", ex);
+            }
+        }
+        /// <summary>
+        /// Loads a texture array from a file in the graphics device
+        /// </summary>
+        /// <param name="stream">Stream</param>
+        /// <param name="rectangles">Crop rectangle list</param>
+        /// <param name="mipAutogen">Try to generate texture mips</param>
+        /// <param name="dynamic">Dynamic or Inmutable</param>
+        /// <returns>Returns the resource view</returns>
+        internal ShaderResourceView1 LoadTextureArray(MemoryStream stream, IEnumerable<Rectangle> rectangles, bool mipAutogen, bool dynamic)
+        {
+            try
+            {
+                var textureList = TextureData.ReadTextureArray(stream, rectangles);
+
+                return CreateResource(textureList, mipAutogen, dynamic);
+            }
+            catch (Exception ex)
+            {
+                throw new EngineException("LoadTexture from stream array Error. See inner exception for details", ex);
+            }
+        }
+        /// <summary>
         /// Loads a texture array from a file collection in the graphics device
         /// </summary>
         /// <param name="filenames">Path file collection</param>
@@ -1966,13 +2008,13 @@ namespace Engine
         /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the resource view</returns>
-        internal ShaderResourceView1 LoadTextureCubic(string filename, Rectangle[] faces, bool mipAutogen, bool dynamic)
+        internal ShaderResourceView1 LoadTextureCubic(string filename, IEnumerable<Rectangle> faces, bool mipAutogen, bool dynamic)
         {
             try
             {
                 Counters.Textures++;
 
-                if (faces?.Length == 6)
+                if (faces?.Count() == 6)
                 {
                     var resources = TextureData.ReadTextureCubic(filename, faces);
 
@@ -1998,13 +2040,13 @@ namespace Engine
         /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the resource view</returns>
-        internal ShaderResourceView1 LoadTextureCubic(MemoryStream stream, Rectangle[] faces, bool mipAutogen, bool dynamic)
+        internal ShaderResourceView1 LoadTextureCubic(MemoryStream stream, IEnumerable<Rectangle> faces, bool mipAutogen, bool dynamic)
         {
             try
             {
                 Counters.Textures++;
 
-                if (faces?.Length == 6)
+                if (faces?.Count() == 6)
                 {
                     var resources = TextureData.ReadTextureCubic(stream, faces);
 
