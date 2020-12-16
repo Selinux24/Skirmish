@@ -20,19 +20,25 @@ namespace Engine
             /// Sphere
             /// </summary>
             Sphere,
+            /// <summary>
+            /// Hemispheric
+            /// </summary>
+            Hemispheric,
         }
 
         /// <summary>
         /// Gets the default cube map description
         /// </summary>
         /// <param name="texture">Texture file name</param>
-        /// <param name="radius">Cube radius</param>
-        public static CubemapDescription Default(string texture, float radius)
+        /// <param name="radius">Radius</param>
+        public static CubemapDescription Box(string texture, float radius)
         {
             return new CubemapDescription
             {
-                Texture = texture,
+                CubicTexture = texture,
+                Geometry = CubeMapGeometry.Box,
                 Radius = radius,
+                IsCubic = true,
             };
         }
         /// <summary>
@@ -40,14 +46,74 @@ namespace Engine
         /// </summary>
         /// <param name="texture">Texture file name</param>
         /// <param name="faceSize">Cross texture face size</param>
-        /// <param name="radius">Cube radius</param>
-        public static CubemapDescription FromCrossTexture(string texture, int faceSize, float radius)
+        /// <param name="radius">Radius</param>
+        public static CubemapDescription Box(string texture, int faceSize, float radius)
         {
             return new CubemapDescription
             {
-                Texture = texture,
+                CubicTexture = texture,
+                Geometry = CubeMapGeometry.Box,
                 Faces = ComputeCubemapFaces(faceSize),
                 Radius = radius,
+                IsCubic = true,
+            };
+        }
+        /// <summary>
+        /// Gets the default cube map description
+        /// </summary>
+        /// <param name="texture">Texture file name</param>
+        /// <param name="radius">Radius</param>
+        public static CubemapDescription Sphere(string texture, float radius)
+        {
+            return new CubemapDescription
+            {
+                CubicTexture = texture,
+                Geometry = CubeMapGeometry.Sphere,
+                Radius = radius,
+                IsCubic = true,
+            };
+        }
+        /// <summary>
+        /// Gets the default cube map description
+        /// </summary>
+        /// <param name="texture">Texture file name</param>
+        /// <param name="faceSize">Cross texture face size</param>
+        /// <param name="radius">Radius</param>
+        public static CubemapDescription Sphere(string texture, int faceSize, float radius)
+        {
+            return new CubemapDescription
+            {
+                CubicTexture = texture,
+                Geometry = CubeMapGeometry.Sphere,
+                Faces = ComputeCubemapFaces(faceSize),
+                Radius = radius,
+                IsCubic = true,
+            };
+        }
+        /// <summary>
+        /// Gets the default skydom description
+        /// </summary>
+        /// <param name="texture">Texture file name</param>
+        /// <param name="radius">Radius</param>
+        /// <returns></returns>
+        public static CubemapDescription Hemispheric(string texture, float radius)
+        {
+            return Hemispheric(new[] { texture }, radius);
+        }
+        /// <summary>
+        /// Gets the default skydom description
+        /// </summary>
+        /// <param name="textures">Texture file names</param>
+        /// <param name="radius">Radius</param>
+        /// <returns></returns>
+        public static CubemapDescription Hemispheric(string[] textures, float radius)
+        {
+            return new CubemapDescription
+            {
+                PlainTextures = textures,
+                Geometry = CubeMapGeometry.Hemispheric,
+                Radius = radius,
+                IsCubic = false,
             };
         }
         /// <summary>
@@ -68,9 +134,13 @@ namespace Engine
         }
 
         /// <summary>
+        /// Cubic texture
+        /// </summary>
+        public bool IsCubic { get; set; } = true;
+        /// <summary>
         /// Texture
         /// </summary>
-        public string Texture { get; set; }
+        public string CubicTexture { get; set; }
         /// <summary>
         /// Cube faces
         /// </summary>
@@ -84,10 +154,12 @@ namespace Engine
         /// Index 5: Back face
         /// </remarks>
         public Rectangle[] Faces { get; set; } = new Rectangle[] { };
+
         /// <summary>
-        /// Radius
+        /// Plain texture list
         /// </summary>
-        public float Radius { get; set; }
+        public string[] PlainTextures { get; set; }
+
         /// <summary>
         /// Cubemap geometry
         /// </summary>
@@ -96,6 +168,11 @@ namespace Engine
         /// Reverse geometry faces
         /// </summary>
         public bool ReverseFaces { get; set; } = false;
+
+        /// <summary>
+        /// Radius
+        /// </summary>
+        public float Radius { get; set; }
 
         /// <summary>
         /// Constructor

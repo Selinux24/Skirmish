@@ -208,6 +208,7 @@
     <Compile Include="Common\VertexDecal.cs" />
     <Compile Include="Content\BuiltInMaterial.cs" />
     <Compile Include="Content\BuiltInMaterials.cs" />
+    <Compile Include="Effects\EffectDefaultTexture.cs" />
     <Compile Include="Effects\IDrawerPostProcess.cs" />
     <Compile Include="IDrawerPostProcessParams.cs" />
     <Compile Include="PostProcessToneMappingParams.cs" />
@@ -685,7 +686,9 @@
     <None Include="Engine.snk" />
     <None Include="packages.config" />
     <None Include="Resources\ShaderDefaultClouds.fxo" />
+    <None Include="Resources\ShaderDefaultDecal.fxo" />
     <None Include="Resources\ShaderDefaultFoliage.fxo" />
+    <None Include="Resources\ShaderDefaultTexture.fxo" />
     <None Include="Resources\ShaderDefaultWater.fxo" />
     <None Include="Resources\ShaderLightCapsule.fxo" />
     <None Include="Resources\ShaderLightDirectional.fxo" />
@@ -750,6 +753,7 @@
     <None Include="Resources\ShaderLightCapsule.fx" />
     <None Include="Resources\ShaderLightEmissive.fx" />
     <None Include="Resources\ShaderDefaultDecal.fx" />
+    <None Include="Resources\ShaderDefaultTexture.fx" />
     <Content Include="Resources\ShaderShadowCascade.fx" />
     <Content Include="Resources\IncCommon.hlsl" />
     <Content Include="sharpdx_direct3d11_1_effects_x64.dll">

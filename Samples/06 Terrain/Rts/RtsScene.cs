@@ -690,7 +690,7 @@ namespace Terrain.Rts
 
             string fileName = @"Rts/resources/Skydom/sunset.dds";
 
-            await this.AddComponentSkydom("Skydom", SkydomDescription.Default(fileName, Camera.FarPlaneDistance));
+            await this.AddComponentSkydom("Skydom", SkydomDescription.Sphere(fileName, Camera.FarPlaneDistance));
 
             sw.Stop();
             return new TaskResult()

@@ -20,6 +20,9 @@ namespace Instancing
         private Sprite helpPanel = null;
         private UITextArea help = null;
 
+        private Skydom skydom = null;
+        private uint skyboxesCount = 0;
+
         private ModelInstanced troops = null;
 
         private readonly int instanceBlock = 10;
@@ -40,6 +43,7 @@ namespace Instancing
                 new[]
                 {
                     InitializeTexts(),
+                    InitializeSky(),
                     InitializeFloor(),
                     InitializeTrees(),
                     InitializeTroops(),
@@ -82,9 +86,35 @@ namespace Instancing
             helpPanel = await this.AddComponentSprite("Help panel", spDesc, SceneObjectUsages.UI, LayerUI - 1);
             helpPanel.Visible = false;
 
-            help.Text = $"Camera: W-A-S-D.{Environment.NewLine}" +
-                $"Change instance count using Left and Right arrows (Shift moves by {instanceBlock} to {instanceBlock}).{Environment.NewLine}" +
-                $"Change tone mapping using Tab (Shift reverse).";
+            Color d = Color.Gray;
+            Color h = Color.White;
+            help.Text = $"{d}Camera: {h}W{d}-{h}A{d}-{h}S{d}-{h}D{d}.{Environment.NewLine}" +
+                $"{d}Change tone mapping using {h}Tab{d} ({h}Shift{d} reverse).{Environment.NewLine}" +
+                $"{d}Change instance count using {h}Left{d} and {h}Right{d} arrows ({h}Shift{d} moves by {instanceBlock} to {instanceBlock}).{Environment.NewLine}" +
+                $"{d}Change sky box using {h}Top{d} and {h}Down{d} arrows";
+        }
+        private async Task InitializeSky()
+        {
+            string[] paths = new[]
+            {
+                @"resources/skyboxes/Sky_horiz_1_4096.jpg",
+                @"resources/skyboxes/Sky_horiz_3_4096.jpg",
+                @"resources/skyboxes/Sky_horiz_4_4096.jpg",
+                @"resources/skyboxes/Sky_horiz_5_4096.jpg",
+                @"resources/skyboxes/Sky_horiz_7_4096.jpg",
+                @"resources/skyboxes/Sky_horiz_9_4096.jpg",
+                @"resources/skyboxes/Sky_horiz_10_4096.jpg",
+                @"resources/skyboxes/Sky_horiz_14_4096.jpg",
+                @"resources/skyboxes/Sky_horiz_15_4096.jpg",
+                @"resources/skyboxes/Sky_horiz_18_4096.jpg",
+                @"resources/skyboxes/Sky_horiz_22_4096.jpg",
+            };
+
+            skyboxesCount = (uint)paths.Length;
+
+            var desc = SkydomDescription.Hemispheric(paths, Camera.FarPlaneDistance);
+
+            skydom = await this.AddComponentSkydom("Sky", desc);
         }
         private async Task InitializeFloor()
         {
@@ -303,6 +333,8 @@ namespace Instancing
 
             UpdateToneMapping();
 
+            UpdateSkybox();
+
             if (Game.Input.KeyJustReleased(Keys.F1))
             {
                 bool helpVisible = !helpPanel.Visible;
@@ -376,6 +408,20 @@ namespace Instancing
 
                 toneParams.Tone = (ToneMappingTones)tone;
             }
+        }
+        private void UpdateSkybox()
+        {
+            if (Game.Input.KeyJustReleased(Keys.Up))
+            {
+                skydom.TextureIndex++;
+            }
+
+            if (Game.Input.KeyJustReleased(Keys.Down))
+            {
+                skydom.TextureIndex--;
+            }
+
+            skydom.TextureIndex %= skyboxesCount;
         }
 
         public override void GameGraphicsResized()

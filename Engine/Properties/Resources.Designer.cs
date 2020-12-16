@@ -313,6 +313,26 @@ namespace Engine.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
+        internal static byte[] ShaderDefaultTextureFx {
+            get {
+                object obj = ResourceManager.GetObject("ShaderDefaultTextureFx", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] ShaderDefaultTextureFxo {
+            get {
+                object obj = ResourceManager.GetObject("ShaderDefaultTextureFxo", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
         internal static byte[] ShaderDefaultWaterFx {
             get {
                 object obj = ResourceManager.GetObject("ShaderDefaultWaterFx", resourceCulture);

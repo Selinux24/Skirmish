@@ -101,10 +101,7 @@ namespace Engine.Content
         /// <returns>Returns content</returns>
         public static ImageContent Texture(string texture, Rectangle? rectangle = null)
         {
-            string directoryName = System.IO.Path.GetDirectoryName(texture);
-            string filenName = System.IO.Path.GetFileName(texture);
-
-            return Texture(directoryName, filenName, rectangle);
+            return Texture(string.Empty, texture, rectangle);
         }
         /// <summary>
         /// Creates a unique texture image
@@ -136,6 +133,16 @@ namespace Engine.Content
                 Stream = texture,
                 CropRectangle = rectangle ?? Rectangle.Empty,
             };
+        }
+        /// <summary>
+        /// Creates a texture array image
+        /// </summary>
+        /// <param name="textures">Paths to textures</param>
+        /// <param name="rectangle">Crop rectangle</param>
+        /// <returns>Returns content</returns>
+        public static ImageContent Array(IEnumerable<string> textures, Rectangle? rectangle = null)
+        {
+            return Array(string.Empty, textures, rectangle);
         }
         /// <summary>
         /// Creates a texture array image
@@ -176,10 +183,7 @@ namespace Engine.Content
         /// <returns>Returns content</returns>
         public static ImageContent Cubic(string texture, Rectangle[] faces = null)
         {
-            string directoryName = System.IO.Path.GetDirectoryName(texture);
-            string filenName = System.IO.Path.GetFileName(texture);
-
-            return Cubic(directoryName, filenName, faces);
+            return Cubic(string.Empty, texture, faces);
         }
         /// <summary>
         /// Creates a cubic texture image

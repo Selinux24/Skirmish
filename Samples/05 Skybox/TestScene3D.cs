@@ -222,7 +222,7 @@ namespace Skybox
         {
             string fileName = "Resources/Daylight Box UV.png";
             int faceSize = 512;
-            var skydomDesc = SkydomDescription.FromCrossTexture(fileName, faceSize, Camera.FarPlaneDistance);
+            var skydomDesc = SkydomDescription.Sphere(fileName, faceSize, Camera.FarPlaneDistance);
 
             await this.AddComponentSkydom("Skydom", skydomDesc);
         }

@@ -28,6 +28,10 @@ namespace Engine.Effects
         /// </summary>
         public static EffectDefaultCubemap EffectDefaultCubemap { get; private set; }
         /// <summary>
+        /// Simple texture effect
+        /// </summary>
+        public static EffectDefaultTexture EffectDefaultTexture { get; private set; }
+        /// <summary>
         /// Billboards effect
         /// </summary>
         public static EffectDefaultBillboard EffectDefaultBillboard { get; private set; }
@@ -122,6 +126,7 @@ namespace Engine.Effects
             EffectDefaultSprite = CreateEffect<EffectDefaultSprite>(graphics, Resources.ShaderDefaultSpriteFxo, Resources.ShaderDefaultSpriteFxo);
             EffectDefaultFont = CreateEffect<EffectDefaultFont>(graphics, Resources.ShaderDefaultFontFxo, Resources.ShaderDefaultFontFxo);
             EffectDefaultCubemap = CreateEffect<EffectDefaultCubemap>(graphics, Resources.ShaderDefaultCubemapFxo, Resources.ShaderDefaultCubemapFx);
+            EffectDefaultTexture = CreateEffect<EffectDefaultTexture>(graphics, Resources.ShaderDefaultTextureFxo, Resources.ShaderDefaultTextureFx);
             EffectDefaultBillboard = CreateEffect<EffectDefaultBillboard>(graphics, Resources.ShaderDefaultBillboardFxo, Resources.ShaderDefaultBillboardFx);
             EffectDefaultFoliage = CreateEffect<EffectDefaultFoliage>(graphics, Resources.ShaderDefaultFoliageFxo, Resources.ShaderDefaultFoliageFx);
             EffectDefaultClouds = CreateEffect<EffectDefaultClouds>(graphics, Resources.ShaderDefaultCloudsFxo, Resources.ShaderDefaultCloudsFx);
@@ -160,6 +165,8 @@ namespace Engine.Effects
             EffectDefaultFont = null;
             EffectDefaultCubemap?.Dispose();
             EffectDefaultCubemap = null;
+            EffectDefaultTexture?.Dispose();
+            EffectDefaultTexture = null;
             EffectDefaultBillboard?.Dispose();
             EffectDefaultBillboard = null;
             EffectDefaultFoliage?.Dispose();

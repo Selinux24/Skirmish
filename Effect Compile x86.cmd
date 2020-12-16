@@ -4,6 +4,7 @@ del *.cod
 "%DXSDK_DIR%bin\x86\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderNull.fxo ShaderNull.fx
 
 "%DXSDK_DIR%bin\x86\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderDefaultBasic.fxo ShaderDefaultBasic.fx
+"%DXSDK_DIR%bin\x86\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderDefaultTexture.fxo ShaderDefaultTexture.fx
 "%DXSDK_DIR%bin\x86\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderDefaultBillboard.fxo ShaderDefaultBillboard.fx
 "%DXSDK_DIR%bin\x86\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderDefaultClouds.fxo ShaderDefaultClouds.fx
 "%DXSDK_DIR%bin\x86\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderDefaultCPUParticles.fxo ShaderDefaultCPUParticles.fx

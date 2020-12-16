@@ -453,7 +453,7 @@ namespace Engine.Common
             return CreateSprite(new Vector2(-0.5f, 0.5f), 1, 1, 0, 0, uvMap);
         }
         /// <summary>
-        /// Creates a sprite of VertexPositionTexture VertexData
+        /// Creates a sprite
         /// </summary>
         /// <param name="position">Sprite position</param>
         /// <param name="width">Width</param>
@@ -464,7 +464,7 @@ namespace Engine.Common
             return CreateSprite(position, width, height, 0, 0, new Vector4(0, 0, 1, 1));
         }
         /// <summary>
-        /// Creates a sprite of VertexPositionTexture VertexData
+        /// Creates a sprite
         /// </summary>
         /// <param name="position">Sprite position</param>
         /// <param name="width">Width</param>
@@ -477,7 +477,7 @@ namespace Engine.Common
             return CreateSprite(position, width, height, formWidth, formHeight, new Vector4(0, 0, 1, 1));
         }
         /// <summary>
-        /// Creates a sprite of VertexPositionTexture VertexData
+        /// Creates a sprite
         /// </summary>
         /// <param name="position">Sprite position</param>
         /// <param name="width">Width</param>
@@ -532,7 +532,7 @@ namespace Engine.Common
             };
         }
         /// <summary>
-        /// Creates a screen of VertexPositionTexture VertexData
+        /// Creates a screen
         /// </summary>
         /// <param name="form">Form</param>
         /// <returns>Returns a geometry descriptor</returns>
@@ -541,7 +541,7 @@ namespace Engine.Common
             return CreateScreen(form.RenderWidth, form.RenderHeight);
         }
         /// <summary>
-        /// Creates a screen of VertexPositionTexture VertexData
+        /// Creates a screen
         /// </summary>
         /// <param name="renderWidth">Render area width</param>
         /// <param name="renderHeight">Render area height</param>
@@ -588,7 +588,7 @@ namespace Engine.Common
             };
         }
         /// <summary>
-        /// Creates a box of VertexPosition VertexData
+        /// Creates a box
         /// </summary>
         /// <param name="bbox">Bounding box</param>
         /// <returns>Returns a geometry descriptor</returns>
@@ -597,7 +597,7 @@ namespace Engine.Common
             return CreateBox(bbox.Center, bbox.Width, bbox.Height, bbox.Depth);
         }
         /// <summary>
-        /// Creates a box of VertexPosition VertexData
+        /// Creates a box
         /// </summary>
         /// <param name="obb">Oriented bounding box</param>
         /// <returns>Returns a geometry descriptor</returns>
@@ -606,7 +606,7 @@ namespace Engine.Common
             return CreateBox(obb.Center, obb.Extents.X * 2, obb.Extents.Y * 2, obb.Extents.Z * 2);
         }
         /// <summary>
-        /// Creates a box of VertexPosition VertexData
+        /// Creates a box
         /// </summary>
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
@@ -617,7 +617,7 @@ namespace Engine.Common
             return CreateBox(Vector3.Zero, width, height, depth);
         }
         /// <summary>
-        /// Creates a box of VertexPosition VertexData
+        /// Creates a box
         /// </summary>
         /// <param name="center">Box center</param>
         /// <param name="width">Width</param>
@@ -708,7 +708,7 @@ namespace Engine.Common
             };
         }
         /// <summary>
-        /// Creates a cone of VertexPositionNormalTextureTangent VertexData
+        /// Creates a cone
         /// </summary>
         /// <param name="radius">The base radius</param>
         /// <param name="sliceCount">The base slice count</param>
@@ -772,7 +772,7 @@ namespace Engine.Common
             };
         }
         /// <summary>
-        /// Creates a sphere of VertexPositionNormalTextureTangent VertexData
+        /// Creates a sphere
         /// </summary>
         /// <param name="sphere">Sphere</param>
         /// <param name="sliceCount">Slice count</param>
@@ -783,7 +783,7 @@ namespace Engine.Common
             return CreateSphere(sphere.Center, sphere.Radius, sliceCount, stackCount);
         }
         /// <summary>
-        /// Creates a sphere of VertexPositionNormalTextureTangent VertexData
+        /// Creates a sphere
         /// </summary>
         /// <param name="radius">Radius</param>
         /// <param name="sliceCount">Slice count</param>
@@ -794,7 +794,7 @@ namespace Engine.Common
             return CreateSphere(Vector3.Zero, radius, sliceCount, stackCount);
         }
         /// <summary>
-        /// Creates a sphere of VertexPositionNormalTextureTangent VertexData
+        /// Creates a sphere
         /// </summary>
         /// <param name="center">Sphere center</param>
         /// <param name="radius">Radius</param>
@@ -918,7 +918,125 @@ namespace Engine.Common
             };
         }
         /// <summary>
-        /// Creates a XZ plane of position normal texture data
+        /// Creates a hemispheric
+        /// </summary>
+        /// <param name="radius">Radius</param>
+        /// <param name="sliceCount">Slices (vertical)</param>
+        /// <param name="stackCount">Stacks (horizontal)</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateHemispheric(float radius, uint sliceCount, uint stackCount)
+        {
+            return CreateHemispheric(Vector3.Zero, radius, sliceCount, stackCount);
+        }
+        /// <summary>
+        /// Creates a hemispheric
+        /// </summary>
+        /// <param name="center">Center</param>
+        /// <param name="radius">Radius</param>
+        /// <param name="sliceCount">Slices (vertical)</param>
+        /// <param name="stackCount">Stacks (horizontal)</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateHemispheric(Vector3 center, float radius, uint sliceCount, uint stackCount)
+        {
+            List<Vector3> vertList = new List<Vector3>();
+            List<Vector3> normList = new List<Vector3>();
+            List<Vector3> tangList = new List<Vector3>();
+            List<Vector3> binmList = new List<Vector3>();
+            List<Vector2> uvList = new List<Vector2>();
+
+            sliceCount--;
+            stackCount++;
+
+            #region Positions
+
+            float phiStep = MathUtil.PiOverTwo / stackCount;
+            float thetaStep = MathUtil.TwoPi / sliceCount;
+            float halfStep = thetaStep / MathUtil.TwoPi / 2f;
+
+            for (int st = 0; st <= stackCount; st++)
+            {
+                float phi = st * phiStep;
+
+                for (int sl = 0; sl <= sliceCount; sl++)
+                {
+                    float theta = sl * thetaStep;
+
+                    float sinPhi = (float)Math.Sin(phi);
+                    float cosPhi = (float)Math.Cos(phi);
+                    float sinTheta = (float)Math.Sin(theta);
+                    float cosTheta = (float)Math.Cos(theta);
+
+                    float x = sinPhi * cosTheta;
+                    float y = cosPhi;
+                    float z = sinPhi * sinTheta;
+
+                    float tX = -sinPhi * sinTheta;
+                    float tY = 0.0f;
+                    float tZ = +sinPhi * cosTheta;
+
+                    Vector3 position = radius * new Vector3(x, y, z);
+                    Vector3 normal = new Vector3(x, y, z);
+                    Vector3 tangent = Vector3.Normalize(new Vector3(tX, tY, tZ));
+                    Vector3 binormal = Vector3.Cross(normal, tangent);
+
+                    float u = theta / MathUtil.TwoPi;
+                    float v = phi / MathUtil.PiOverTwo;
+
+                    if (st == 0)
+                    {
+                        u -= halfStep;
+                    }
+
+                    Vector2 texture = new Vector2(u, v);
+
+                    vertList.Add(position + center);
+                    normList.Add(normal);
+                    tangList.Add(tangent);
+                    binmList.Add(binormal);
+                    uvList.Add(texture);
+                }
+            }
+
+            #endregion
+
+            List<uint> indexList = new List<uint>();
+
+            #region Indexes
+
+            uint ringVertexCount = sliceCount + 1;
+            for (uint st = 0; st < stackCount; st++)
+            {
+                for (uint sl = 0; sl < sliceCount; sl++)
+                {
+                    indexList.Add((st + 1) * ringVertexCount + sl + 0);
+                    indexList.Add((st + 0) * ringVertexCount + sl + 1);
+                    indexList.Add((st + 1) * ringVertexCount + sl + 1);
+
+                    if (st == 0)
+                    {
+                        continue;
+                    }
+
+                    indexList.Add((st + 0) * ringVertexCount + sl + 0);
+                    indexList.Add((st + 0) * ringVertexCount + sl + 1);
+                    indexList.Add((st + 1) * ringVertexCount + sl + 0);
+                }
+            }
+
+            #endregion
+
+            return new GeometryDescriptor()
+            {
+                Vertices = vertList.ToArray(),
+                Normals = normList.ToArray(),
+                Tangents = tangList.ToArray(),
+                Binormals = binmList.ToArray(),
+                Uvs = uvList.ToArray(),
+                Indices = indexList.ToArray(),
+            };
+        }
+        /// <summary>
+        /// Creates a XZ plane
         /// </summary>
         /// <param name="size">Plane size</param>
         /// <param name="height">Plane height</param>

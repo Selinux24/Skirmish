@@ -101,7 +101,7 @@ namespace Engine.Content
                 {
                     string imageName = NextImageName;
 
-                    Add(imageName, ImageContent.Texture("", material.AmbientTexture));
+                    Add(imageName, ImageContent.Texture(material.AmbientTexture));
 
                     material.AmbientTexture = imageName;
                 }
@@ -110,7 +110,7 @@ namespace Engine.Content
                 {
                     string imageName = NextImageName;
 
-                    Add(imageName, ImageContent.Texture("", material.DiffuseTexture));
+                    Add(imageName, ImageContent.Texture(material.DiffuseTexture));
 
                     material.DiffuseTexture = imageName;
                 }
@@ -119,7 +119,7 @@ namespace Engine.Content
                 {
                     string imageName = NextImageName;
 
-                    Add(imageName, ImageContent.Texture("", material.EmissiveTexture));
+                    Add(imageName, ImageContent.Texture(material.EmissiveTexture));
 
                     material.EmissiveTexture = imageName;
                 }
@@ -128,7 +128,7 @@ namespace Engine.Content
                 {
                     string imageName = NextImageName;
 
-                    Add(imageName, ImageContent.Texture("", material.NormalMapTexture));
+                    Add(imageName, ImageContent.Texture(material.NormalMapTexture));
 
                     material.NormalMapTexture = imageName;
                 }
@@ -137,7 +137,7 @@ namespace Engine.Content
                 {
                     string imageName = NextImageName;
 
-                    Add(imageName, ImageContent.Texture("", material.SpecularTexture));
+                    Add(imageName, ImageContent.Texture(material.SpecularTexture));
 
                     material.SpecularTexture = imageName;
                 }

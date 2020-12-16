@@ -172,7 +172,7 @@ namespace Deferred
         }
         private async Task InitializeSkydom()
         {
-            var desc = SkydomDescription.Default(@"Resources/sunset.dds", far);
+            var desc = SkydomDescription.Sphere(@"Resources/sunset.dds", far);
 
             await this.AddComponentSkydom("Sky", desc);
         }
