@@ -101,7 +101,10 @@ namespace Engine.Content
         /// <returns>Returns content</returns>
         public static ImageContent Texture(string texture, Rectangle? rectangle = null)
         {
-            return Texture(string.Empty, texture, rectangle);
+            string directory = System.IO.Path.GetDirectoryName(texture);
+            string fileName = System.IO.Path.GetFileName(texture);
+
+            return Texture(directory, fileName, rectangle);
         }
         /// <summary>
         /// Creates a unique texture image
@@ -183,7 +186,10 @@ namespace Engine.Content
         /// <returns>Returns content</returns>
         public static ImageContent Cubic(string texture, Rectangle[] faces = null)
         {
-            return Cubic(string.Empty, texture, faces);
+            string directory = System.IO.Path.GetDirectoryName(texture);
+            string fileName = System.IO.Path.GetFileName(texture);
+
+            return Cubic(directory, fileName, faces);
         }
         /// <summary>
         /// Creates a cubic texture image

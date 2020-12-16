@@ -31,7 +31,7 @@ namespace Engine
         /// <summary>
         /// Texture cubic
         /// </summary>
-        private readonly bool textureCubic = true;
+        private readonly bool textureCubic;
 
         /// <summary>
         /// Manipulator

@@ -1,5 +1,7 @@
 ﻿using SharpDX;
 using SharpDX.Direct3D;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine
@@ -30,6 +32,14 @@ namespace Engine
         /// Current decal index to update data
         /// </summary>
         private int currentDecalIndex = 0;
+        /// <summary>
+        /// Decal volume
+        /// </summary>
+        private BoundingSphere boundingVolume = new BoundingSphere();
+        /// <summary>
+        /// Current decal count
+        /// </summary>
+        private int currentDecals;
 
         /// <summary>
         /// Decal texture
@@ -39,10 +49,6 @@ namespace Engine
         /// Texture count
         /// </summary>
         public uint TextureCount { get; private set; }
-        /// <summary>
-        /// Active decal count
-        /// </summary>
-        public int ActiveDecals { get; private set; }
         /// <summary>
         /// Gets the maximum number of concurrent decals
         /// </summary>
@@ -55,6 +61,10 @@ namespace Engine
         /// Tint color
         /// </summary>
         public Color4 TintColor { get; set; } = Color4.White;
+        /// <summary>
+        /// Gets the active decal count
+        /// </summary>
+        public int ActiveDecals { get; private set; } = 0;
 
         /// <summary>
         /// Constructor
@@ -102,6 +112,25 @@ namespace Engine
         }
 
         /// <inheritdoc/>
+        public override void Update(UpdateContext context)
+        {
+            base.Update(context);
+
+            var activeDecals = GetActiveDecals();
+
+            ActiveDecals = activeDecals.Count();
+
+            if (ActiveDecals <= 0)
+            {
+                boundingVolume = new BoundingSphere();
+
+                return;
+            }
+
+            boundingVolume = BoundingSphere.FromPoints(activeDecals.ToArray());
+        }
+
+        /// <inheritdoc/>
         public override void Draw(DrawContext context)
         {
             if (!Visible)
@@ -109,7 +138,7 @@ namespace Engine
                 return;
             }
 
-            if (ActiveDecals <= 0)
+            if (currentDecals <= 0)
             {
                 return;
             }
@@ -128,7 +157,7 @@ namespace Engine
             if (!mode.HasFlag(DrawerModes.ShadowMap))
             {
                 Counters.InstancesPerFrame++;
-                Counters.PrimitivesPerFrame += ActiveDecals;
+                Counters.PrimitivesPerFrame += currentDecals;
             }
 
             var graphics = Scene.Game.Graphics;
@@ -151,8 +180,27 @@ namespace Engine
             {
                 graphics.EffectPassApply(technique, p, 0);
 
-                graphics.Draw(ActiveDecals, 0);
+                graphics.Draw(currentDecals, 0);
             }
+        }
+
+        /// <inheritdoc/>
+        public override bool Cull(IIntersectionVolume volume, out float distance)
+        {
+            distance = float.MaxValue;
+
+            if (ActiveDecals <= 0)
+            {
+                return true;
+            }
+
+            var inside = volume.Contains(boundingVolume) != ContainmentType.Disjoint;
+            if (inside)
+            {
+                distance = Vector3.DistanceSquared(volume.Position, boundingVolume.Center);
+            }
+
+            return !inside;
         }
 
         /// <summary>
@@ -166,9 +214,9 @@ namespace Engine
         {
             int nextFreeDecal = currentDecalIndex + 1;
 
-            if (ActiveDecals < nextFreeDecal)
+            if (currentDecals < nextFreeDecal)
             {
-                ActiveDecals = nextFreeDecal;
+                currentDecals = nextFreeDecal;
             }
 
             if (nextFreeDecal >= decals.Length)
@@ -187,11 +235,22 @@ namespace Engine
 
             currentDecalIndex = nextFreeDecal;
         }
+        /// <summary>
+        /// Gets the active decal list
+        /// </summary>
+        /// <returns>Returns a position list</returns>
+        private IEnumerable<Vector3> GetActiveDecals()
+        {
+            return decals
+                .Where(d => d.StartTime + d.MaxAge > Game.GameTime.TotalSeconds)
+                .Select(d => d.Position)
+                .ToArray();
+        }
 
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"Count: {ActiveDecals}";
+            return $"{nameof(DecalDrawer)}. ActiveDecals: {ActiveDecals}";
         }
     }
 
