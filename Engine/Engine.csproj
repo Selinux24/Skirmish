@@ -211,6 +211,7 @@
     <Compile Include="Effects\EffectDefaultTexture.cs" />
     <Compile Include="Effects\IDrawerPostProcess.cs" />
     <Compile Include="IDrawerPostProcessParams.cs" />
+    <Compile Include="PostProcessBlurVignetteParams.cs" />
     <Compile Include="PostProcessToneMappingParams.cs" />
     <Compile Include="PostProcessBloomParams.cs" />
     <Compile Include="PostProcessBlurParams.cs" />

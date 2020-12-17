@@ -89,7 +89,7 @@ namespace Collada.ModularDungeon
 
         private readonly PostProcessToneMappingParams toneMapParams = PostProcessToneMappingParams.SimpleReinhard;
         private readonly PostProcessBloomParams bloomParams = PostProcessBloomParams.Low;
-        private readonly PostProcessVignetteParams vignetteParams = PostProcessVignetteParams.Thin;
+        private readonly PostProcessBlurVignetteParams vignetteParams = PostProcessBlurVignetteParams.Default;
 
         private bool userInterfaceInitialized = false;
         private bool gameAssetsInitialized = false;
@@ -771,7 +771,7 @@ namespace Collada.ModularDungeon
         {
             Renderer.ClearPostProcessingEffects();
             Renderer.SetPostProcessingEffect(PostProcessingEffects.ToneMapping, toneMapParams);
-            Renderer.SetPostProcessingEffect(PostProcessingEffects.Vignette, vignetteParams);
+            Renderer.SetPostProcessingEffect(PostProcessingEffects.BlurVignette, vignetteParams);
             Renderer.SetPostProcessingEffect(PostProcessingEffects.Bloom, bloomParams);
         }
 

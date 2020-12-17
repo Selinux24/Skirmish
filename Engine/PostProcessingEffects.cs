@@ -19,13 +19,17 @@ namespace Engine
         /// </summary>
         Sepia,
         /// <summary>
+        /// Vignette
+        /// </summary>
+        Vignette,
+        /// <summary>
         /// Blur
         /// </summary>
         Blur,
         /// <summary>
-        /// Vignette
+        /// Blur + Vignette
         /// </summary>
-        Vignette,
+        BlurVignette,
         /// <summary>
         /// Bloom
         /// </summary>

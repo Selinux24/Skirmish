@@ -68,3 +68,13 @@ float3 Uncharted2ToneMapping(float3 color)
     color = pow(color, inverseGamma);
     return color;
 }
+
+float GetVignette(float vOutter, float vInner, float2 uv)
+{
+    // Center of Screen
+    float2 center = float2(0.5, 0.5);
+    // Distance  between center and the current Uv. Multiplyed by 1.414213 to fit in the range of 0.0 to 1.0 
+    float dist = distance(center, uv) * 1.414213;
+	// Generate the Vignette with Clamp which go from outer Viggnet ring to inner vignette ring with smooth steps
+    return clamp((vOutter - dist) / (vOutter - vInner), 0.0, 1.0);
+}

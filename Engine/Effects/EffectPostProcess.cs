@@ -22,13 +22,17 @@ namespace Engine.Effects
         /// </summary>
         public readonly EngineEffectTechnique Sepia = null;
         /// <summary>
+        /// Vignette drawing technique
+        /// </summary>
+        public readonly EngineEffectTechnique Vignette = null;
+        /// <summary>
         /// Blur drawing technique
         /// </summary>
         public readonly EngineEffectTechnique Blur = null;
         /// <summary>
-        /// Vignette drawing technique
+        /// Blur + vignette drawing technique
         /// </summary>
-        public readonly EngineEffectTechnique Vignette = null;
+        public readonly EngineEffectTechnique BlurVignette = null;
         /// <summary>
         /// Bloom drawing technique
         /// </summary>
@@ -270,8 +274,9 @@ namespace Engine.Effects
             Empty = Effect.GetTechniqueByName("Empty");
             Grayscale = Effect.GetTechniqueByName("Grayscale");
             Sepia = Effect.GetTechniqueByName("Sepia");
-            Blur = Effect.GetTechniqueByName("Blur");
             Vignette = Effect.GetTechniqueByName("Vignette");
+            Blur = Effect.GetTechniqueByName("Blur");
+            BlurVignette = Effect.GetTechniqueByName("BlurVignette");
             Bloom = Effect.GetTechniqueByName("Bloom");
             ToneMapping = Effect.GetTechniqueByName("ToneMapping");
 
@@ -307,11 +312,14 @@ namespace Engine.Effects
                 case PostProcessingEffects.Sepia:
                     technique = DrawerPool.EffectPostProcess.Sepia;
                     break;
+                case PostProcessingEffects.Vignette:
+                    technique = DrawerPool.EffectPostProcess.Vignette;
+                    break;
                 case PostProcessingEffects.Blur:
                     technique = DrawerPool.EffectPostProcess.Blur;
                     break;
-                case PostProcessingEffects.Vignette:
-                    technique = DrawerPool.EffectPostProcess.Vignette;
+                case PostProcessingEffects.BlurVignette:
+                    technique = DrawerPool.EffectPostProcess.BlurVignette;
                     break;
                 case PostProcessingEffects.Bloom:
                     technique = DrawerPool.EffectPostProcess.Bloom;
@@ -354,16 +362,24 @@ namespace Engine.Effects
                 return;
             }
 
-            if (parameters is PostProcessBlurParams blur)
+            if (parameters is PostProcessVignetteParams vignette)
+            {
+                VignetteOuter = vignette.Outer;
+                VignetteInner = vignette.Inner;
+            }
+            else if (parameters is PostProcessBlurParams blur)
             {
                 BlurDirections = blur.Directions;
                 BlurQuality = blur.Quality;
                 BlurSize = blur.Size;
             }
-            else if (parameters is PostProcessVignetteParams vignette)
+            else if (parameters is PostProcessBlurVignetteParams blurVignette)
             {
-                VignetteOuter = vignette.Outer;
-                VignetteInner = vignette.Inner;
+                BlurDirections = blurVignette.Directions;
+                BlurQuality = blurVignette.Quality;
+                BlurSize = blurVignette.Size;
+                VignetteOuter = blurVignette.Outer;
+                VignetteInner = blurVignette.Inner;
             }
             else if (parameters is PostProcessBloomParams bloom)
             {

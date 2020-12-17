@@ -71,6 +71,19 @@ float4 PSSepia(PSVertexEmpty input) : SV_TARGET
     
     return float4(color, 1);
 }
+float4 PSVignette(PSVertexEmpty input) : SV_TARGET
+{
+    float vOutter = gVignetteOuter;
+    float vInner = gVignetteInner;
+    
+    float4 output = gDiffuseMap.Sample(SamplerLinear, input.uv);
+    output.a = 1;
+    
+	// Multiply the Vignette with the texture color
+    output *= GetVignette(vOutter, vInner, input.uv);
+    
+    return output;
+}
 float4 PSBlur(PSVertexEmpty input) : SV_TARGET
 {
     float Directions = gBlurDirections;
@@ -97,24 +110,36 @@ float4 PSBlur(PSVertexEmpty input) : SV_TARGET
     
     return output;
 }
-float4 PSVignette(PSVertexEmpty input) : SV_TARGET
+float4 PSBlurVigentte(PSVertexEmpty input) : SV_TARGET
 {
+    float Directions = gBlurDirections;
+    float Quality = gBlurQuality;
+    float Size = gBlurSize;
     float vOutter = gVignetteOuter;
     float vInner = gVignetteInner;
+
+    float2 Radius = Size / gTextureSize;
     
-    float4 output = gDiffuseMap.Sample(SamplerLinear, input.uv);
-    output.a = 1;
+    float4 frag = gDiffuseMap.Sample(SamplerLinear, input.uv);
     
-    // Center of Screen
-    float2 center = float2(0.5, 0.5);
-    // Distance  between center and the current Uv. Multiplyed by 1.414213 to fit in the range of 0.0 to 1.0 
-    float dist = distance(center, input.uv) * 1.414213;
-	// Generate the Vignette with Clamp which go from outer Viggnet ring to inner vignette ring with smooth steps
-    float vig = clamp((vOutter - dist) / (vOutter - vInner), 0.0, 1.0);
-	// Multiply the Vignette with the texture color
-    output *= vig;
+    float4 output = frag;
     
-    return output;
+    // Gaussian blur calculations
+    for (float d = 0.0; d < TWO_PI; d += TWO_PI / Directions)
+    {
+        for (float i = 1.0 / Quality; i <= 1.0; i += 1.0 / Quality)
+        {
+            float2 uv = input.uv + float2(cos(d), sin(d)) * Radius * i;
+            output += gDiffuseMap.Sample(SamplerLinear, uv);
+        }
+    }
+    
+    // Output to screen
+    output /= Quality * Directions - 15.0;
+
+    float vig = GetVignette(vOutter, vInner, input.uv);
+    
+    return float4(lerp(output.rgb, frag.rgb, vig), 1);
 }
 float4 PSBloom(PSVertexEmpty input) : SV_TARGET
 {
@@ -201,6 +226,15 @@ technique11 Sepia
         SetPixelShader(CompileShader(ps_5_0, PSSepia()));
     }
 }
+technique11 Vignette
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSEmpty()));
+        SetGeometryShader(NULL);
+        SetPixelShader(CompileShader(ps_5_0, PSVignette()));
+    }
+}
 technique11 Blur
 {
     pass P0
@@ -210,13 +244,13 @@ technique11 Blur
         SetPixelShader(CompileShader(ps_5_0, PSBlur()));
     }
 }
-technique11 Vignette
+technique11 BlurVignette
 {
     pass P0
     {
         SetVertexShader(CompileShader(vs_5_0, VSEmpty()));
         SetGeometryShader(NULL);
-        SetPixelShader(CompileShader(ps_5_0, PSVignette()));
+        SetPixelShader(CompileShader(ps_5_0, PSBlurVigentte()));
     }
 }
 technique11 Bloom
