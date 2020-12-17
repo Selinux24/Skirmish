@@ -1,6 +1,8 @@
+#include "IncLights.hlsl"
+
 #define GAMMA_INVERSE 1.0/2.2
 
-float3 inverseGamma = float3(GAMMA_INVERSE, GAMMA_INVERSE, GAMMA_INVERSE);
+float3 inverseGamma = GAMMA_INVERSE.rrr;
 
 float3 LinearToneMapping(float3 color)
 {
@@ -77,4 +79,56 @@ float GetVignette(float vOutter, float vInner, float2 uv)
     float dist = distance(center, uv) * 1.414213;
 	// Generate the Vignette with Clamp which go from outer Viggnet ring to inner vignette ring with smooth steps
     return clamp((vOutter - dist) / (vOutter - vInner), 0.0, 1.0);
+}
+
+float3 CalcBlur(float2 uv, Texture2D gDiffuseMap, float blurSize)
+{
+    float4 sum = 0;
+    
+    sum += gDiffuseMap.Sample(SamplerLinear, float2(uv.x - 4.0 * blurSize, uv.y)) * 0.05;
+    sum += gDiffuseMap.Sample(SamplerLinear, float2(uv.x - 3.0 * blurSize, uv.y)) * 0.09;
+    sum += gDiffuseMap.Sample(SamplerLinear, float2(uv.x - 2.0 * blurSize, uv.y)) * 0.12;
+    sum += gDiffuseMap.Sample(SamplerLinear, float2(uv.x - blurSize, uv.y)) * 0.15;
+    sum += gDiffuseMap.Sample(SamplerLinear, float2(uv.x, uv.y)) * 0.16;
+    sum += gDiffuseMap.Sample(SamplerLinear, float2(uv.x + blurSize, uv.y)) * 0.15;
+    sum += gDiffuseMap.Sample(SamplerLinear, float2(uv.x + 2.0 * blurSize, uv.y)) * 0.12;
+    sum += gDiffuseMap.Sample(SamplerLinear, float2(uv.x + 3.0 * blurSize, uv.y)) * 0.09;
+    sum += gDiffuseMap.Sample(SamplerLinear, float2(uv.x + 4.0 * blurSize, uv.y)) * 0.05;
+    
+    sum += gDiffuseMap.Sample(SamplerLinear, float2(uv.x, uv.y - 4.0 * blurSize)) * 0.05;
+    sum += gDiffuseMap.Sample(SamplerLinear, float2(uv.x, uv.y - 3.0 * blurSize)) * 0.09;
+    sum += gDiffuseMap.Sample(SamplerLinear, float2(uv.x, uv.y - 2.0 * blurSize)) * 0.12;
+    sum += gDiffuseMap.Sample(SamplerLinear, float2(uv.x, uv.y - blurSize)) * 0.15;
+    sum += gDiffuseMap.Sample(SamplerLinear, float2(uv.x, uv.y)) * 0.16;
+    sum += gDiffuseMap.Sample(SamplerLinear, float2(uv.x, uv.y + blurSize)) * 0.15;
+    sum += gDiffuseMap.Sample(SamplerLinear, float2(uv.x, uv.y + 2.0 * blurSize)) * 0.12;
+    sum += gDiffuseMap.Sample(SamplerLinear, float2(uv.x, uv.y + 3.0 * blurSize)) * 0.09;
+    sum += gDiffuseMap.Sample(SamplerLinear, float2(uv.x, uv.y + 4.0 * blurSize)) * 0.05;
+    
+    return sum.rgb;
+}
+
+float3 CalcGaussianBlur(float2 uv, Texture2D gDiffuseMap, float3 color, float Directions, float Quality, float2 Radius)
+{
+    float3 output = color;
+    
+    // Gaussian blur calculations
+    for (float d = 0.0; d < TWO_PI; d += TWO_PI / Directions)
+    {
+        for (float i = 1.0 / Quality; i <= 1.0; i += 1.0 / Quality)
+        {
+            float2 suv = uv + float2(cos(d), sin(d)) * Radius * i;
+            output += gDiffuseMap.Sample(SamplerLinear, suv).rgb;
+        }
+    }
+    
+    // Output to screen
+    output /= Quality * Directions - 15.0;
+    
+    return output;
+}
+
+float CalcGrain(float2 uv, float iTime)
+{
+    return frac(sin(dot(uv, float2(17.0, 180.))) * 2500. + iTime);
 }

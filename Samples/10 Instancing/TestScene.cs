@@ -2,6 +2,9 @@
 using Engine.Animation;
 using Engine.Common;
 using Engine.Content;
+using Engine.PostProcessing;
+using Engine.PostProcessing.Tween;
+using Engine.Tween;
 using Engine.UI;
 using SharpDX;
 using System;
@@ -27,6 +30,8 @@ namespace Instancing
 
         private readonly int instanceBlock = 10;
         private readonly PostProcessToneMappingParams toneParams = new PostProcessToneMappingParams();
+        private readonly PostProcessBloomParams bloomParams = PostProcessBloomParams.Default;
+        private readonly PostProcessBlurParams blurParams = PostProcessBlurParams.Strong;
 
         private bool gameReady = false;
 
@@ -62,7 +67,10 @@ namespace Instancing
                     Camera.LookTo(Vector3.Zero);
                     Camera.FarPlaneDistance = 250;
 
-                    Renderer.SetPostProcessingEffect(PostProcessingEffects.ToneMapping, toneParams);
+                    SetPostProcessingEffects();
+
+                    blurParams.TweenIntensity(1, 0, 60000, ScaleFuncs.CubicEaseOut);
+                    bloomParams.TweenIntensity(0, 1, 120000, ScaleFuncs.CubicEaseOut);
 
                     gameReady = true;
                 });
@@ -319,7 +327,7 @@ namespace Instancing
                     SceneModes.DeferredLightning :
                     SceneModes.ForwardLigthning);
 
-                Renderer.SetPostProcessingEffect(PostProcessingEffects.ToneMapping, toneParams);
+                SetPostProcessingEffects();
             }
 
             if (!gameReady)
@@ -443,6 +451,13 @@ namespace Instancing
             helpPanel.SetPosition(0, Game.Form.RenderHeight - help.Height - 15);
             helpPanel.Width = Game.Form.RenderWidth;
             helpPanel.Height = help.Height + 15;
+        }
+
+        private void SetPostProcessingEffects()
+        {
+            Renderer.SetPostProcessingEffect(PostProcessingEffects.Bloom, bloomParams);
+            Renderer.SetPostProcessingEffect(PostProcessingEffects.Blur, blurParams);
+            Renderer.SetPostProcessingEffect(PostProcessingEffects.ToneMapping, toneParams);
         }
     }
 }

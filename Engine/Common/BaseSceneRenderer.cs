@@ -7,6 +7,7 @@ using System.Linq;
 namespace Engine.Common
 {
     using Engine.Effects;
+    using Engine.PostProcessing;
 
     /// <summary>
     /// Base scene renderer
@@ -985,7 +986,8 @@ namespace Engine.Common
         /// <summary>
         /// Writes result to target
         /// </summary>
-        protected virtual void WriteResult()
+        /// <param name="context">Draw context</param>
+        protected virtual void WriteResult(DrawContext context)
         {
             if (!PostProcessingEnabled)
             {
@@ -1013,6 +1015,7 @@ namespace Engine.Common
             effect.UpdatePerFrame(
                 viewProj,
                 new Vector2(screenRect.Width, screenRect.Height),
+                context.GameTime.TotalSeconds,
                 postProcessingBuffer1.Textures?.FirstOrDefault());
 
             //Set the default render target
@@ -1095,6 +1098,7 @@ namespace Engine.Common
                 effect.UpdatePerFrame(
                     viewProj,
                     new Vector2(screenRect.Width, screenRect.Height),
+                    gameTime.TotalSeconds,
                     postProcessingBuffer1.Textures?.FirstOrDefault());
 
                 //Toggles post-processing buffers

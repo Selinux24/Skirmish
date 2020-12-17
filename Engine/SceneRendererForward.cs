@@ -85,7 +85,7 @@ namespace Engine
                 DoRender(Scene, visibleComponents.Where(c => c.Usage.HasFlag(SceneObjectUsages.UI)));
 
                 //Write result
-                WriteResult();
+                WriteResult(DrawContext);
             }
 #if DEBUG
             swTotal.Stop();

@@ -1,5 +1,6 @@
-﻿
-namespace Engine
+﻿using System;
+
+namespace Engine.PostProcessing
 {
     /// <summary>
     /// Post-process tone mapping parameters
@@ -99,9 +100,51 @@ namespace Engine
         }
 
         /// <summary>
+        /// Gets whether the effect is active or not
+        /// </summary>
+        public bool Active { get; set; } = true;
+        /// <summary>
+        /// Gets the effect intensity
+        /// </summary>
+        /// <remarks>From 1 = full to 0 = none</remarks>
+        public float EffectIntensity { get; set; } = 1f;
+        /// <summary>
         /// Intensity
         /// </summary>
         public ToneMappingTones Tone { get; set; } = ToneMappingTones.None;
+
+        /// <summary>
+        /// Sets the propery value by name
+        /// </summary>
+        /// <typeparam name="T">Value type</typeparam>
+        /// <param name="name">Property name</param>
+        /// <param name="value">Value</param>
+        public void SetProperty<T>(string name, T value)
+        {
+            if (string.Equals(name, nameof(Tone), StringComparison.OrdinalIgnoreCase))
+            {
+                Tone = (ToneMappingTones)(object)value;
+
+                return;
+            }
+
+            throw new ArgumentException($"Property {name} not found.", nameof(name));
+        }
+        /// <summary>
+        /// Gets the property value by name
+        /// </summary>
+        /// <typeparam name="T">Value type</typeparam>
+        /// <param name="name">Property name</param>
+        /// <returns>Gets the property value</returns>
+        public T GetProperty<T>(string name)
+        {
+            if (string.Equals(name, nameof(Tone), StringComparison.OrdinalIgnoreCase))
+            {
+                return (T)(object)Tone;
+            }
+
+            throw new ArgumentException($"Property {name} not found.", nameof(name));
+        }
     }
 
     /// <summary>

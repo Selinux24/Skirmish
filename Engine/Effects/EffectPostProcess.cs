@@ -3,6 +3,7 @@
 namespace Engine.Effects
 {
     using Engine.Common;
+    using Engine.PostProcessing;
 
     /// <summary>
     /// Post-process effect drawer
@@ -38,6 +39,10 @@ namespace Engine.Effects
         /// </summary>
         public readonly EngineEffectTechnique Bloom = null;
         /// <summary>
+        /// Grain drawing technique
+        /// </summary>
+        public readonly EngineEffectTechnique Grain = null;
+        /// <summary>
         /// Tone mapping technique
         /// </summary>
         public readonly EngineEffectTechnique ToneMapping = null;
@@ -54,6 +59,14 @@ namespace Engine.Effects
         /// Diffuse map effect variable
         /// </summary>
         private readonly EngineEffectVariableTexture diffuseMapVar = null;
+        /// <summary>
+        /// Effect intensity effect variable
+        /// </summary>
+        private readonly EngineEffectVariableScalar effectIntensityVar = null;
+        /// <summary>
+        /// Time effect variable
+        /// </summary>
+        private readonly EngineEffectVariableScalar timeVar = null;
 
         /// <summary>
         /// Blur direcctions effect variable
@@ -67,7 +80,6 @@ namespace Engine.Effects
         /// Blur size effect variable
         /// </summary>
         private readonly EngineEffectVariableScalar blurSizeVar = null;
-
         /// <summary>
         /// Vignette outer ring effect variable
         /// </summary>
@@ -76,20 +88,43 @@ namespace Engine.Effects
         /// Vignette inner ring effect variable
         /// </summary>
         private readonly EngineEffectVariableScalar vignetteInnerVar = null;
-
         /// <summary>
         /// Bloom intensity ring effect variable
         /// </summary>
         private readonly EngineEffectVariableScalar bloomIntensityVar = null;
         /// <summary>
-        /// Bloom blur size ring effect variable
-        /// </summary>
-        private readonly EngineEffectVariableScalar bloomBlurSizeVar = null;
-
-        /// <summary>
         /// Tone mapping tone
         /// </summary>
         private readonly EngineEffectVariableScalar toneMappingToneVar = null;
+
+        /// <summary>
+        /// Time
+        /// </summary>
+        protected float Time
+        {
+            get
+            {
+                return timeVar.GetFloat();
+            }
+            set
+            {
+                timeVar.Set(value);
+            }
+        }
+        /// <summary>
+        /// Effect intensity
+        /// </summary>
+        protected float EffectIntensity
+        {
+            get
+            {
+                return effectIntensityVar.GetFloat();
+            }
+            set
+            {
+                effectIntensityVar.Set(value);
+            }
+        }
 
         /// <summary>
         /// Blur direction
@@ -133,7 +168,6 @@ namespace Engine.Effects
                 blurSizeVar.Set(value);
             }
         }
-
         /// <summary>
         /// Vignette outer ring
         /// </summary>
@@ -162,7 +196,6 @@ namespace Engine.Effects
                 vignetteInnerVar.Set(value);
             }
         }
-
         /// <summary>
         /// Bloom intensity
         /// </summary>
@@ -177,21 +210,6 @@ namespace Engine.Effects
                 bloomIntensityVar.Set(value);
             }
         }
-        /// <summary>
-        /// Bloom blur size
-        /// </summary>
-        protected float BloomBlurSize
-        {
-            get
-            {
-                return bloomBlurSizeVar.GetFloat();
-            }
-            set
-            {
-                bloomBlurSizeVar.Set(value);
-            }
-        }
-
         /// <summary>
         /// Tone mapping tone
         /// </summary>
@@ -278,11 +296,14 @@ namespace Engine.Effects
             Blur = Effect.GetTechniqueByName("Blur");
             BlurVignette = Effect.GetTechniqueByName("BlurVignette");
             Bloom = Effect.GetTechniqueByName("Bloom");
+            Grain = Effect.GetTechniqueByName("Grain");
             ToneMapping = Effect.GetTechniqueByName("ToneMapping");
 
             worldViewProjectionVar = Effect.GetVariableMatrix("gWorldViewProjection");
             textureSizeVar = Effect.GetVariableVector("gTextureSize");
             diffuseMapVar = Effect.GetVariableTexture("gDiffuseMap");
+            effectIntensityVar = Effect.GetVariableScalar("gEffectIntensity");
+            timeVar = Effect.GetVariableScalar("gTime");
 
             blurDirectionsVar = Effect.GetVariableScalar("gBlurDirections");
             blurQualityVar = Effect.GetVariableScalar("gBlurQuality");
@@ -292,7 +313,6 @@ namespace Engine.Effects
             vignetteInnerVar = Effect.GetVariableScalar("gVignetteInner");
 
             bloomIntensityVar = Effect.GetVariableScalar("gBloomIntensity");
-            bloomBlurSizeVar = Effect.GetVariableScalar("gBloomBlurSize");
 
             toneMappingToneVar = Effect.GetVariableScalar("gToneMappingTone");
         }
@@ -324,6 +344,9 @@ namespace Engine.Effects
                 case PostProcessingEffects.Bloom:
                     technique = DrawerPool.EffectPostProcess.Bloom;
                     break;
+                case PostProcessingEffects.Grain:
+                    technique = DrawerPool.EffectPostProcess.Grain;
+                    break;
                 case PostProcessingEffects.ToneMapping:
                     technique = DrawerPool.EffectPostProcess.ToneMapping;
                     break;
@@ -340,15 +363,18 @@ namespace Engine.Effects
         /// </summary>
         /// <param name="viewProjection">View * projection matrix</param>
         /// <param name="viewportSize">Viewport size</param>
+        /// <param name="time">Time</param>
         /// <param name="texture">Texture</param>
         public void UpdatePerFrame(
             Matrix viewProjection,
             Vector2 viewportSize,
+            float time,
             EngineShaderResourceView texture)
         {
             WorldViewProjection = viewProjection;
             TextureSize = viewportSize;
             DiffuseMap = texture;
+            Time = time;
         }
         /// <summary>
         /// Update effect parameters
@@ -361,6 +387,8 @@ namespace Engine.Effects
             {
                 return;
             }
+
+            EffectIntensity = parameters.EffectIntensity;
 
             if (parameters is PostProcessVignetteParams vignette)
             {
@@ -384,7 +412,9 @@ namespace Engine.Effects
             else if (parameters is PostProcessBloomParams bloom)
             {
                 BloomIntensity = bloom.Intensity;
-                BloomBlurSize = bloom.BlurSize;
+                BlurDirections = bloom.Directions;
+                BlurQuality = bloom.Quality;
+                BlurSize = bloom.Size;
             }
             else if (parameters is PostProcessToneMappingParams toneMapping)
             {

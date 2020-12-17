@@ -1,32 +1,20 @@
-#include "IncLights.hlsl"
 #include "IncVertexFormats.hlsl"
 #include "IncPostProcessing.hlsl"
 
 cbuffer cbPerFrame : register(b0)
 {
     float4x4 gWorldViewProjection;
+    float gTime;
     float2 gTextureSize;
-    float2 gPad1;
+    float gEffectIntensity;
     
-    //Blur parameters
     float gBlurDirections;
     float gBlurQuality;
     float gBlurSize;
-    float gPad2;
-    
-    //Blur vignette
     float gVignetteOuter;
     float gVignetteInner;
-    float2 gPad3;
-
-    //Blur bloom
     float gBloomIntensity;
-    float gBloomBlurSize;
-    float2 gPad4;
-    
-    //Tone mapping
     uint gToneMappingTone;
-    uint3 gPad5;
 };
 
 struct PSVertexEmpty
@@ -49,154 +37,154 @@ PSVertexEmpty VSEmpty(VSVertexPositionTexture input)
 
 float4 PSEmpty(PSVertexEmpty input) : SV_TARGET
 {
-    float4 output = gDiffuseMap.Sample(SamplerLinear, input.uv);
-    output.a = 1;
-    return output;
+    float3 output = gDiffuseMap.Sample(SamplerLinear, input.uv).rgb;
+    
+    return float4(output, 1.);
 }
 float4 PSGrayscale(PSVertexEmpty input) : SV_TARGET
 {
     float3 color = gDiffuseMap.Sample(SamplerLinear, input.uv).rgb;
-    float3 greyScale = float3(.5, .5, .5);
-    float d = dot(color, greyScale);
-    return float4(d, d, d, 1);
+    if (gEffectIntensity == 0)
+    {
+        return float4(color, 1.);
+    }
+    
+    float greyScale = .5;
+    float3 output = dot(color, greyScale.rrr).rrr;
+    
+    return float4(lerp(color, output, gEffectIntensity), 1.);
 }
 float4 PSSepia(PSVertexEmpty input) : SV_TARGET
 {
     float3 color = gDiffuseMap.Sample(SamplerLinear, input.uv).rgb;
+    if (gEffectIntensity == 0)
+    {
+        return float4(color, 1.);
+    }
+    
     float3 sepia = float3(1.2, 1.0, 0.8);
     float grey = dot(color, float3(0.299, 0.587, 0.114));
-    float3 sepiaColour = float3(grey, grey, grey) * sepia;
+    float3 output = grey.rrr * sepia;
+    output = lerp(color, output, 0.75);
     
-    color = lerp(color, sepiaColour, 0.75);
-    
-    return float4(color, 1);
+    return float4(lerp(color, output, gEffectIntensity), 1.);
 }
 float4 PSVignette(PSVertexEmpty input) : SV_TARGET
 {
     float vOutter = gVignetteOuter;
     float vInner = gVignetteInner;
     
-    float4 output = gDiffuseMap.Sample(SamplerLinear, input.uv);
-    output.a = 1;
+    float3 color = gDiffuseMap.Sample(SamplerLinear, input.uv).rgb;
+    if (gEffectIntensity == 0)
+    {
+        return float4(color, 1.);
+    }
     
 	// Multiply the Vignette with the texture color
-    output *= GetVignette(vOutter, vInner, input.uv);
+    float3 output = color * GetVignette(vOutter, vInner, input.uv);
     
-    return output;
+    return float4(lerp(color, output, gEffectIntensity), 1.);
 }
 float4 PSBlur(PSVertexEmpty input) : SV_TARGET
 {
-    float Directions = gBlurDirections;
-    float Quality = gBlurQuality;
-    float Size = gBlurSize;
+    float directions = gBlurDirections;
+    float quality = gBlurQuality;
+    float2 radius = gBlurSize / gTextureSize;
     
-    float2 Radius = Size / gTextureSize;
-    
-    float4 output = gDiffuseMap.Sample(SamplerLinear, input.uv);
-    
-    // Gaussian blur calculations
-    for (float d = 0.0; d < TWO_PI; d += TWO_PI / Directions)
+    float3 color = gDiffuseMap.Sample(SamplerLinear, input.uv).rgb;
+    if (gEffectIntensity == 0)
     {
-        for (float i = 1.0 / Quality; i <= 1.0; i += 1.0 / Quality)
-        {
-            float2 uv = input.uv + float2(cos(d), sin(d)) * Radius * i;
-            output += gDiffuseMap.Sample(SamplerLinear, uv);
-        }
+        return float4(color, 1.);
     }
     
-    // Output to screen
-    output /= Quality * Directions - 15.0;
-    output.a = 1;
+    float3 output = CalcGaussianBlur(input.uv, gDiffuseMap, color, directions, quality, radius);
     
-    return output;
+    return float4(lerp(color, output, gEffectIntensity), 1.);
 }
-float4 PSBlurVigentte(PSVertexEmpty input) : SV_TARGET
+float4 PSBlurVignette(PSVertexEmpty input) : SV_TARGET
 {
-    float Directions = gBlurDirections;
-    float Quality = gBlurQuality;
-    float Size = gBlurSize;
+    float directions = gBlurDirections;
+    float quality = gBlurQuality;
+    float2 radius = gBlurSize / gTextureSize;
     float vOutter = gVignetteOuter;
     float vInner = gVignetteInner;
-
-    float2 Radius = Size / gTextureSize;
     
-    float4 frag = gDiffuseMap.Sample(SamplerLinear, input.uv);
-    
-    float4 output = frag;
-    
-    // Gaussian blur calculations
-    for (float d = 0.0; d < TWO_PI; d += TWO_PI / Directions)
+    float3 color = gDiffuseMap.Sample(SamplerLinear, input.uv).rgb;
+    if (gEffectIntensity == 0)
     {
-        for (float i = 1.0 / Quality; i <= 1.0; i += 1.0 / Quality)
-        {
-            float2 uv = input.uv + float2(cos(d), sin(d)) * Radius * i;
-            output += gDiffuseMap.Sample(SamplerLinear, uv);
-        }
+        return float4(color, 1.);
     }
     
-    // Output to screen
-    output /= Quality * Directions - 15.0;
+    float3 output = CalcGaussianBlur(input.uv, gDiffuseMap, color, directions, quality, radius);
 
     float vig = GetVignette(vOutter, vInner, input.uv);
     
-    return float4(lerp(output.rgb, frag.rgb, vig), 1);
+    output = lerp(output, color, vig);
+    
+    return float4(lerp(color, output, gEffectIntensity), 1.);
 }
 float4 PSBloom(PSVertexEmpty input) : SV_TARGET
 {
     float intensity = gBloomIntensity;
-    float blurSize = gBloomBlurSize;
+    float directions = gBlurDirections;
+    float quality = gBlurQuality;
+    float2 radius = gBlurSize / gTextureSize;
+
+    float3 color = gDiffuseMap.Sample(SamplerLinear, input.uv).rgb;
+    if (gEffectIntensity == 0)
+    {
+        return float4(color, 1.);
+    }
     
-    float4 sum = float4(0, 0, 0, 0);
-    
-    // Blur
-    sum += gDiffuseMap.Sample(SamplerLinear, float2(input.uv.x - 4.0 * blurSize, input.uv.y)) * 0.05;
-    sum += gDiffuseMap.Sample(SamplerLinear, float2(input.uv.x - 3.0 * blurSize, input.uv.y)) * 0.09;
-    sum += gDiffuseMap.Sample(SamplerLinear, float2(input.uv.x - 2.0 * blurSize, input.uv.y)) * 0.12;
-    sum += gDiffuseMap.Sample(SamplerLinear, float2(input.uv.x - blurSize, input.uv.y)) * 0.15;
-    sum += gDiffuseMap.Sample(SamplerLinear, float2(input.uv.x, input.uv.y)) * 0.16;
-    sum += gDiffuseMap.Sample(SamplerLinear, float2(input.uv.x + blurSize, input.uv.y)) * 0.15;
-    sum += gDiffuseMap.Sample(SamplerLinear, float2(input.uv.x + 2.0 * blurSize, input.uv.y)) * 0.12;
-    sum += gDiffuseMap.Sample(SamplerLinear, float2(input.uv.x + 3.0 * blurSize, input.uv.y)) * 0.09;
-    sum += gDiffuseMap.Sample(SamplerLinear, float2(input.uv.x + 4.0 * blurSize, input.uv.y)) * 0.05;
-    
-    sum += gDiffuseMap.Sample(SamplerLinear, float2(input.uv.x, input.uv.y - 4.0 * blurSize)) * 0.05;
-    sum += gDiffuseMap.Sample(SamplerLinear, float2(input.uv.x, input.uv.y - 3.0 * blurSize)) * 0.09;
-    sum += gDiffuseMap.Sample(SamplerLinear, float2(input.uv.x, input.uv.y - 2.0 * blurSize)) * 0.12;
-    sum += gDiffuseMap.Sample(SamplerLinear, float2(input.uv.x, input.uv.y - blurSize)) * 0.15;
-    sum += gDiffuseMap.Sample(SamplerLinear, float2(input.uv.x, input.uv.y)) * 0.16;
-    sum += gDiffuseMap.Sample(SamplerLinear, float2(input.uv.x, input.uv.y + blurSize)) * 0.15;
-    sum += gDiffuseMap.Sample(SamplerLinear, float2(input.uv.x, input.uv.y + 2.0 * blurSize)) * 0.12;
-    sum += gDiffuseMap.Sample(SamplerLinear, float2(input.uv.x, input.uv.y + 3.0 * blurSize)) * 0.09;
-    sum += gDiffuseMap.Sample(SamplerLinear, float2(input.uv.x, input.uv.y + 4.0 * blurSize)) * 0.05;
+    float3 blur = CalcGaussianBlur(input.uv, gDiffuseMap, color, directions, quality, radius);
     
     //Bloom intensity
-    float4 output = sum * intensity + gDiffuseMap.Sample(SamplerLinear, input.uv);
-    output.a = 1;
+    float3 output = blur * intensity + color;
     
-    return output;
+    return float4(lerp(color, output, gEffectIntensity), 1.);
+}
+float4 PSGrain(PSVertexEmpty input) : SV_TARGET
+{
+    float3 color = gDiffuseMap.Sample(SamplerLinear, input.uv).rgb;
+    if (gEffectIntensity == 0)
+    {
+        return float4(color, 1.);
+    }
+    
+    float3 grain = CalcGrain(input.uv, gTime);
+    
+    float3 output = lerp(color, grain, .1);
+    
+    return float4(lerp(color, output, gEffectIntensity), 1.);
 }
 float4 PSToneMapping(PSVertexEmpty input) : SV_TARGET
 {
     uint toneMap = gToneMappingTone;
     
     float3 color = gDiffuseMap.Sample(SamplerLinear, input.uv).rgb;
+    if (gEffectIntensity == 0)
+    {
+        return float4(color, 1.);
+    }
+    
+    float3 output = color;
     
     if (toneMap == 1)
-        color = LinearToneMapping(color);
+        output = LinearToneMapping(color);
     if (toneMap == 2)
-        color = SimpleReinhardToneMapping(color);
+        output = SimpleReinhardToneMapping(color);
     if (toneMap == 3)
-        color = LumaBasedReinhardToneMapping(color);
+        output = LumaBasedReinhardToneMapping(color);
     if (toneMap == 4)
-        color = WhitePreservingLumaBasedReinhardToneMapping(color);
+        output = WhitePreservingLumaBasedReinhardToneMapping(color);
     if (toneMap == 5)
-        color = RomBinDaHouseToneMapping(color);
+        output = RomBinDaHouseToneMapping(color);
     if (toneMap == 6)
-        color = FilmicToneMapping(color);
+        output = FilmicToneMapping(color);
     if (toneMap == 7)
-        color = Uncharted2ToneMapping(color);
+        output = Uncharted2ToneMapping(color);
         
-    return float4(color, 1.);
+    return float4(lerp(color, output, gEffectIntensity), 1.);
 }
 
 technique11 Empty
@@ -250,7 +238,7 @@ technique11 BlurVignette
     {
         SetVertexShader(CompileShader(vs_5_0, VSEmpty()));
         SetGeometryShader(NULL);
-        SetPixelShader(CompileShader(ps_5_0, PSBlurVigentte()));
+        SetPixelShader(CompileShader(ps_5_0, PSBlurVignette()));
     }
 }
 technique11 Bloom
@@ -260,6 +248,15 @@ technique11 Bloom
         SetVertexShader(CompileShader(vs_5_0, VSEmpty()));
         SetGeometryShader(NULL);
         SetPixelShader(CompileShader(ps_5_0, PSBloom()));
+    }
+}
+technique11 Grain
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSEmpty()));
+        SetGeometryShader(NULL);
+        SetPixelShader(CompileShader(ps_5_0, PSGrain()));
     }
 }
 technique11 ToneMapping

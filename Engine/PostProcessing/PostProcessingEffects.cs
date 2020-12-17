@@ -1,5 +1,5 @@
 ﻿
-namespace Engine
+namespace Engine.PostProcessing
 {
     /// <summary>
     /// Post processing effects
@@ -34,6 +34,10 @@ namespace Engine
         /// Bloom
         /// </summary>
         Bloom,
+        /// <summary>
+        /// Grain
+        /// </summary>
+        Grain,
         /// <summary>
         /// Tone mapping
         /// </summary>

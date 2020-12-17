@@ -2,6 +2,7 @@
 using Engine.Audio;
 using Engine.Common;
 using Engine.Content;
+using Engine.PostProcessing;
 using Engine.Tween;
 using Engine.UI;
 using Engine.UI.Tween;

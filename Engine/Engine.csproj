@@ -210,11 +210,11 @@
     <Compile Include="Content\BuiltInMaterials.cs" />
     <Compile Include="Effects\EffectDefaultTexture.cs" />
     <Compile Include="Effects\IDrawerPostProcess.cs" />
-    <Compile Include="IDrawerPostProcessParams.cs" />
-    <Compile Include="PostProcessBlurVignetteParams.cs" />
-    <Compile Include="PostProcessToneMappingParams.cs" />
-    <Compile Include="PostProcessBloomParams.cs" />
-    <Compile Include="PostProcessBlurParams.cs" />
+    <Compile Include="PostProcessing\IDrawerPostProcessParams.cs" />
+    <Compile Include="PostProcessing\PostProcessBlurVignetteParams.cs" />
+    <Compile Include="PostProcessing\PostProcessToneMappingParams.cs" />
+    <Compile Include="PostProcessing\PostProcessBloomParams.cs" />
+    <Compile Include="PostProcessing\PostProcessBlurParams.cs" />
     <Compile Include="PostProcessingDrawer.cs" />
     <Compile Include="Effects\EffectDefaultDecals.cs" />
     <Compile Include="MaterialBlinnPhong.cs" />
@@ -226,8 +226,10 @@
     <Compile Include="Common\RayPickingHelper.cs" />
     <Compile Include="DecalDrawer.cs" />
     <Compile Include="DecalDrawerDescription.cs" />
-    <Compile Include="PostProcessingEffects.cs" />
-    <Compile Include="PostProcessVignetteParams.cs" />
+    <Compile Include="PostProcessing\PostProcessingEffects.cs" />
+    <Compile Include="PostProcessing\PostProcessVignetteParams.cs" />
+    <Compile Include="PostProcessing\Tween\DrawerPostProcessParamsTweenCollection.cs" />
+    <Compile Include="PostProcessing\Tween\DrawerPostProcessParamsTweenExtensions.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

@@ -6,6 +6,7 @@ using Engine.Content;
 using Engine.Content.FmtObj;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
+using Engine.PostProcessing;
 using Engine.UI;
 using Engine.UI.Tween;
 using SharpDX;

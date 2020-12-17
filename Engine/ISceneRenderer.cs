@@ -3,6 +3,7 @@
 namespace Engine
 {
     using Engine.Common;
+    using Engine.PostProcessing;
 
     /// <summary>
     /// Scene renderer interface

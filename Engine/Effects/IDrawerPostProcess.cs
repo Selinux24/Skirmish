@@ -3,6 +3,7 @@
 namespace Engine.Effects
 {
     using Engine.Common;
+    using Engine.PostProcessing;
 
     /// <summary>
     /// Post-processing drawer interface
@@ -20,8 +21,9 @@ namespace Engine.Effects
         /// </summary>
         /// <param name="viewProjection">View * projection matrix</param>
         /// <param name="viewportSize">Viewport size</param>
+        /// <param name="time">Time</param>
         /// <param name="texture">Texture</param>
-        void UpdatePerFrame(Matrix viewProjection, Vector2 viewportSize, EngineShaderResourceView texture);
+        void UpdatePerFrame(Matrix viewProjection, Vector2 viewportSize, float time, EngineShaderResourceView texture);
         /// <summary>
         /// Update effect parameters
         /// </summary>

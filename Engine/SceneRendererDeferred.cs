@@ -267,7 +267,7 @@ namespace Engine
                 #endregion
 
                 //Writes result
-                WriteResult();
+                WriteResult(DrawContext);
             }
 #if DEBUG
             swTotal.Stop();
