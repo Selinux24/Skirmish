@@ -29,7 +29,7 @@ namespace Instancing
         private ModelInstanced troops = null;
 
         private readonly int instanceBlock = 10;
-        private readonly PostProcessToneMappingParams toneParams = new PostProcessToneMappingParams();
+        private readonly PostProcessToneMappingParams toneParams = new PostProcessToneMappingParams { Tone = ToneMappingTones.LumaBasedReinhard };
         private readonly PostProcessBloomParams bloomParams = PostProcessBloomParams.Default;
         private readonly PostProcessBlurParams blurParams = PostProcessBlurParams.Strong;
 
@@ -63,7 +63,7 @@ namespace Instancing
 
                     UpdateLayout();
 
-                    Camera.Goto(new Vector3(-45, 17, -30));
+                    Camera.Goto(new Vector3(-48, 8, -30));
                     Camera.LookTo(Vector3.Zero);
                     Camera.FarPlaneDistance = 250;
 
@@ -384,12 +384,16 @@ namespace Instancing
 
             if (Game.Input.KeyPressed(Keys.W))
             {
-                Camera.MoveForward(gameTime, Game.Input.ShiftPressed);
+                Vector3 fwd = new Vector3(Camera.Forward.X, 0, Camera.Forward.Z);
+                fwd.Normalize();
+                Camera.Move(gameTime, fwd, Game.Input.ShiftPressed);
             }
 
             if (Game.Input.KeyPressed(Keys.S))
             {
-                Camera.MoveBackward(gameTime, Game.Input.ShiftPressed);
+                Vector3 bwd = new Vector3(Camera.Backward.X, 0, Camera.Backward.Z);
+                bwd.Normalize();
+                Camera.Move(gameTime, bwd, Game.Input.ShiftPressed);
             }
         }
         private void UpdateInstances()

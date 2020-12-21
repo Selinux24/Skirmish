@@ -41,11 +41,11 @@ namespace Engine
         /// <summary>
         /// Maximum distance for High level detailed shadows
         /// </summary>
-        private float shadowDistanceHigh = 10f;
+        private float shadowDistanceHigh = 2f;
         /// <summary>
         /// Maximum distance for Medium level detailed shadows
         /// </summary>
-        private float shadowDistanceMedium = 25f;
+        private float shadowDistanceMedium = 10f;
         /// <summary>
         /// Maximum distance for Low level detailed shadows
         /// </summary>

@@ -193,7 +193,7 @@ namespace SceneTest.SceneTest
 
             progressBar = await this.AddComponentUIProgressBar("ProgressBar", pbDesc, LayerUI + 2);
 
-            var cursorDesc = UICursorDescription.Default("Common/pointer.png", 48, 48, new Vector2(-14, -6));
+            var cursorDesc = UICursorDescription.Default("Common/pointer.png", 48, 48, false, new Vector2(-14, -6));
             cursor = await this.AddComponentUICursor("Cursor", cursorDesc, LayerUI * 2);
             cursor.Visible = false;
         }

@@ -145,14 +145,7 @@ namespace Heightmap
 
             #region Cursor
 
-            var cursorDesc = new UICursorDescription()
-            {
-                Textures = new[] { "target.png" },
-                BaseColor = Color.Red,
-                Width = 20,
-                Height = 20,
-            };
-
+            var cursorDesc = UICursorDescription.Default("target.png", 20, 20, true, Color.Red);
             await this.AddComponentUICursor("Cursor", cursorDesc);
 
             #endregion

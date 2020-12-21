@@ -775,7 +775,7 @@ namespace SceneTest.SceneTanksGame
         private async Task InitializeAudio()
         {
             float nearRadius = 1000;
-            ReverbPresets preset = ReverbPresets.Mountains;
+            ReverbPresets preset = ReverbPresets.Default;
 
             tankMoveEffect = "TankMove";
             tankDestroyedEffect = "TankDestroyed";

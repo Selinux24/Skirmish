@@ -64,16 +64,7 @@ namespace SceneTest.SceneStart
         }
         private async Task InitializeCursor()
         {
-            var cursorDesc = new UICursorDescription()
-            {
-                ContentPath = "Common",
-                Textures = new[] { "pointer.png" },
-                Height = 48,
-                Width = 48,
-                Centered = false,
-                Delta = new Vector2(-14f, -7f),
-                BaseColor = Color.White,
-            };
+            var cursorDesc = UICursorDescription.Default("Common/pointer.png", 48, 48, false, new Vector2(-14f, -7f));
             await this.AddComponentUICursor("Cursor", cursorDesc);
         }
         private async Task InitializeBackground()

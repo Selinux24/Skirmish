@@ -48,16 +48,7 @@ namespace Terrain.Start
         {
             #region Cursor
 
-            var cursorDesc = new UICursorDescription()
-            {
-                ContentPath = "Start",
-                Textures = new[] { "pointer.png" },
-                Height = 48,
-                Width = 48,
-                Centered = false,
-                Delta = new Vector2(-14f, -7f),
-                BaseColor = Color.White,
-            };
+            var cursorDesc = UICursorDescription.Default("Start/pointer.png", 48, 48, false, new Vector2(-14f, -7f));
             await this.AddComponentUICursor("Cursor", cursorDesc, layerCursor);
 
             #endregion

@@ -14,7 +14,8 @@ namespace Engine
         {
             get
             {
-                var lightColor = new Color3(1, 0.9607844f, 0.8078432f);
+                float brightness = 0.8f;
+                var lightColor = new Color3(1, 0.9607844f, 0.8078432f) * brightness;
 
                 return new SceneLightDirectional(
                     "Key light",
@@ -23,7 +24,7 @@ namespace Engine
                     lightColor,
                     true,
                     new Vector3(-0.5265408f, -0.5735765f, -0.6275069f),
-                    1f);
+                    brightness);
             }
         }
         /// <summary>
@@ -33,7 +34,8 @@ namespace Engine
         {
             get
             {
-                var lightColor = new Color3(0.9647059f, 0.7607844f, 0.4078432f);
+                float brightness = 0.5f;
+                var lightColor = new Color3(0.9647059f, 0.7607844f, 0.4078432f) * brightness;
 
                 return new SceneLightDirectional(
                     "Fill light",
@@ -42,7 +44,7 @@ namespace Engine
                     Color3.Black,
                     true,
                     new Vector3(0.7198464f, 0.3420201f, 0.6040227f),
-                    1f);
+                    brightness);
             }
         }
         /// <summary>
@@ -52,7 +54,8 @@ namespace Engine
         {
             get
             {
-                var lightColor = new Color3(0.3231373f, 0.3607844f, 0.3937255f);
+                float brightness = 0.1f;
+                var lightColor = new Color3(0.3231373f, 0.3607844f, 0.3937255f) * brightness;
 
                 return new SceneLightDirectional(
                     "Back light",
@@ -61,7 +64,7 @@ namespace Engine
                     lightColor * 0.05f,
                     true,
                     new Vector3(0.4545195f, -0.7660444f, 0.4545195f),
-                    1f);
+                    brightness);
             }
         }
 

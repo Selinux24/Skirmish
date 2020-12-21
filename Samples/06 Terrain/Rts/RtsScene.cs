@@ -262,14 +262,7 @@ namespace Terrain.Rts
             };
             cursor3D = await this.AddComponentModel("Cursor3D", c3DDesc, SceneObjectUsages.UI, LayerEffects);
 
-            var c2DDesc = new UICursorDescription()
-            {
-                ContentPath = "Rts/resources/Cursor",
-                Textures = new[] { "target.png" },
-                BaseColor = Color.Red,
-                Width = 16,
-                Height = 16,
-            };
+            var c2DDesc = UICursorDescription.Default("Rts/resources/Cursor/target.png", 16, 16, true, Color.Red);
             cursor2D = await this.AddComponentUICursor("Cursor2D", c2DDesc);
             cursor2D.BaseColor = Color.Red;
             cursor2D.Visible = false;

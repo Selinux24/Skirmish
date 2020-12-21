@@ -45,29 +45,19 @@ namespace Engine.UI
                 return;
             }
 
-            float left;
-            float top;
+            float left = Game.Input.MouseX;
+            float top = Game.Input.MouseY;
+            Vector2 centerDelta = Centered ? new Vector2(-Width * 0.5f, -Height * 0.5f) : Vector2.Zero;
 
-            if (Centered)
-            {
-                left = Game.Input.MouseX - (Width * 0.5f);
-                top = Game.Input.MouseY - (Height * 0.5f);
-            }
-            else
-            {
-                left = Game.Input.MouseX;
-                top = Game.Input.MouseY;
-            }
-
-            CursorPosition = new Vector2(left, top) + Delta;
+            CursorPosition = new Vector2(left, top);
 
             if (Game.Input.LockMouse)
             {
-                SetPosition(Game.Form.RenderCenter);
+                SetPosition(Game.Form.RenderCenter + centerDelta + Delta);
             }
             else
             {
-                SetPosition(CursorPosition);
+                SetPosition(CursorPosition + centerDelta + Delta);
             }
 
             base.Update(context);

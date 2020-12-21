@@ -187,14 +187,8 @@ namespace Skybox
         {
             #region Cursor
 
-            var cursorDesc = new UICursorDescription()
-            {
-                Textures = new[] { "target.png" },
-                BaseColor = Color.Purple,
-                Width = 16,
-                Height = 16,
-                Delta = new Vector2(-8, -8),
-            };
+            var cursorDesc = UICursorDescription.Default("target.png", 16, 16, true, Color.Purple);
+
             await this.AddComponentUICursor("Cursor", cursorDesc);
 
             #endregion
@@ -423,7 +417,7 @@ namespace Skybox
                 Lights.Add(torchLights[i]);
 
                 pManager.AddParticleSystem(ParticleSystemTypes.CPU, pFire, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.1f, MaximumDistance = GameEnvironment.LODDistanceLow });
-                pManager.AddParticleSystem(ParticleSystemTypes.CPU, pPlume, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.5f, MaximumDistance = GameEnvironment.LODDistanceLow });
+                pManager.AddParticleSystem(ParticleSystemTypes.CPU, pPlume, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.2f, MaximumDistance = GameEnvironment.LODDistanceLow });
             });
 
             Parallel.For(0, obeliskPositions.Length, (i, loopState) =>

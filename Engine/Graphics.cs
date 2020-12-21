@@ -672,13 +672,19 @@ namespace Engine
         /// </summary>
         public void End()
         {
+            Result res;
             if (vsyncEnabled)
             {
-                swapChain.Present(1, PresentFlags.None);
+                res = swapChain.Present(1, PresentFlags.None);
             }
             else
             {
-                swapChain.Present(0, PresentFlags.None);
+                res = swapChain.Present(0, PresentFlags.None);
+            }
+
+            if (!res.Success)
+            {
+                Logger.WriteError(this, $"Error presenting Graphics: Code {res.Code}");
             }
         }
         /// <summary>
@@ -740,7 +746,20 @@ namespace Engine
         /// <summary>
         /// Set render targets
         /// </summary>
-        /// <param name="renderTarget">Render target</param>
+        /// <param name="renderTargets">Render targets</param>
+        /// <param name="clearRT">Indicates whether the target must be cleared</param>
+        /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
+        /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
+        public void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, bool clearDepth, bool clearStencil)
+        {
+            SetRenderTargets(
+                renderTargets, clearRT, GameEnvironment.Background,
+                DefaultDepthStencil, clearDepth, clearStencil,
+                false);
+        }
+        /// <summary>
+        /// Set render targets
+        /// </summary>
         /// <param name="renderTargets">Render targets</param>
         /// <param name="clearRT">Indicates whether the target must be cleared</param>
         /// <param name="clearRTColor">Target clear color</param>

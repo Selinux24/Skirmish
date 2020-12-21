@@ -162,12 +162,7 @@ namespace Deferred
         }
         private async Task InitializeCursor()
         {
-            var cursorDesc = new UICursorDescription()
-            {
-                Textures = new[] { "target.png" },
-                Width = 16,
-                Height = 16,
-            };
+            var cursorDesc = UICursorDescription.Default("target.png", 15, 15, true);
             await this.AddComponentUICursor("Cursor", cursorDesc);
         }
         private async Task InitializeSkydom()

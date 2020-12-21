@@ -1,4 +1,5 @@
-﻿using SharpDX.Direct3D;
+﻿using SharpDX;
+using SharpDX.Direct3D;
 using SharpDX.DXGI;
 using System;
 using System.Collections.Generic;
@@ -7,6 +8,8 @@ using System.Linq;
 namespace Engine
 {
     using Engine.Common;
+    using Engine.Effects;
+    using Engine.PostProcessing;
     using SharpDX.Direct3D11;
 
     /// <summary>
@@ -23,6 +26,10 @@ namespace Engine
         /// Graphics class
         /// </summary>
         private readonly Graphics graphics;
+        /// <summary>
+        /// Post processing drawer
+        /// </summary>
+        private readonly IDrawerPostProcess drawer;
         /// <summary>
         /// Window vertex buffer
         /// </summary>
@@ -42,7 +49,7 @@ namespace Engine
         /// <summary>
         /// Current drawer
         /// </summary>
-        private EngineEffectTechnique currentDrawer;
+        private EngineEffectTechnique currentTechnique;
         /// <summary>
         /// Current input layout
         /// </summary>
@@ -55,9 +62,10 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        public PostProcessingDrawer(Graphics graphics)
+        public PostProcessingDrawer(Graphics graphics, IDrawerPostProcess drawer)
         {
             this.graphics = graphics;
+            this.drawer = drawer;
 
             InitializeBuffers();
         }
@@ -130,17 +138,19 @@ namespace Engine
         }
 
         /// <summary>
-        /// Sets the drawer to the post processing helper class
+        /// Sets the effect to the post processing helper class
         /// </summary>
-        /// <param name="effectTechnique">Technique</param>
-        public void SetDrawer(EngineEffectTechnique effectTechnique)
+        /// <param name="effect">Effect</param>
+        public void SetEffect(PostProcessingEffects effect)
         {
-            if (currentDrawer == effectTechnique)
+            var effectTechnique = drawer.GetTechnique(effect);
+
+            if (currentTechnique == effectTechnique)
             {
                 return;
             }
 
-            currentDrawer = effectTechnique;
+            currentTechnique = effectTechnique;
 
             if (effectTechnique == null)
             {
@@ -163,18 +173,32 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Updates the internal buffers according to the new render dimension
+        /// Updates the effect parameters
         /// </summary>
-        public void Resize()
+        /// <param name="scene">Scene</param>
+        /// <param name="totalSeconds">Total seconds</param>
+        /// <param name="texture">Source texture</param>
+        /// <param name="parameters">Parameters</param>
+        public void UpdateEffectParameters(Scene scene, float totalSeconds, EngineShaderResourceView texture, IDrawerPostProcessParams parameters)
         {
-            InitializeBuffers();
+            var forms = scene.Game.Form;
+            var viewProj = forms.GetOrthoProjectionMatrix();
+            var screenRect = forms.RenderRectangle;
+
+            drawer.UpdatePerFrame(
+                viewProj,
+                new Vector2(screenRect.Width, screenRect.Height),
+                totalSeconds,
+                texture);
+
+            drawer.UpdatePerEffect(parameters);
         }
         /// <summary>
         /// Binds the result box input layout to the input assembler
         /// </summary>
         public void Bind()
         {
-            if (currentDrawer == null)
+            if (currentTechnique == null)
             {
                 return;
             }
@@ -190,17 +214,24 @@ namespace Engine
         /// </summary>
         public void Draw()
         {
-            if (currentDrawer == null)
+            if (currentTechnique == null)
             {
                 return;
             }
 
-            for (int p = 0; p < currentDrawer.PassCount; p++)
+            for (int p = 0; p < currentTechnique.PassCount; p++)
             {
-                graphics.EffectPassApply(currentDrawer, p, 0);
+                graphics.EffectPassApply(currentTechnique, p, 0);
 
                 graphics.DrawIndexed(indexCount, 0, 0);
             }
+        }
+        /// <summary>
+        /// Updates the internal buffers according to the new render dimension
+        /// </summary>
+        public void Resize()
+        {
+            InitializeBuffers();
         }
 
         /// <inheritdoc/>

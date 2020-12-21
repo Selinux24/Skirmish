@@ -907,7 +907,7 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         /// <param name="vector">Movement vector</param>
         /// <param name="slow">Slow movement</param>
-        private void Move(GameTime gameTime, Vector3 vector, bool slow)
+        public void Move(GameTime gameTime, Vector3 vector, bool slow)
         {
             StopTranslations();
 

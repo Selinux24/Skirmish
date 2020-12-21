@@ -18,7 +18,7 @@ namespace Instancing
 
                 using (Game cl = new Game("10 Instancing", false, sWidth, sHeight, true, 0, 0))
 #else
-                using (Game cl = new Game("10 Instancing", true, 0, 0, true, 0, 4))
+                using (Game cl = new Game("10 Instancing", true, 0, 0, true, 0, 0))
 #endif
                 {
                     cl.VisibleMouse = false;

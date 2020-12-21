@@ -17,12 +17,12 @@ namespace Engine.Common
         /// <summary>
         /// Post-processing effect descriptor
         /// </summary>
-        class PostProcessingEffect
+        struct PostProcessingEffect
         {
             /// <summary>
-            /// Technique
+            /// Effect
             /// </summary>
-            public EngineEffectTechnique Technique { get; set; }
+            public PostProcessingEffects Effect { get; set; }
             /// <summary>
             /// Parameters
             /// </summary>
@@ -32,11 +32,11 @@ namespace Engine.Common
         /// <summary>
         /// Post-processing render target 1
         /// </summary>
-        private RenderTarget postProcessingBuffer1 = null;
+        private RenderTarget postProcessingTarget1 = null;
         /// <summary>
         /// Post-processing render target 2
         /// </summary>
-        private RenderTarget postProcessingBuffer2 = null;
+        private RenderTarget postProcessingTarget2 = null;
         /// <summary>
         /// Post-processing drawer
         /// </summary>
@@ -221,9 +221,9 @@ namespace Engine.Common
                 Name = "Shadow mapping",
             };
 
-            postProcessingBuffer1 = new RenderTarget(scene.Game, SharpDX.DXGI.Format.R32G32B32A32_Float, false, 1);
-            postProcessingBuffer2 = new RenderTarget(scene.Game, SharpDX.DXGI.Format.R32G32B32A32_Float, false, 1);
-            processingDrawer = new PostProcessingDrawer(scene.Game.Graphics);
+            postProcessingTarget1 = new RenderTarget(scene.Game, SharpDX.DXGI.Format.R32G32B32A32_Float, false, 1);
+            postProcessingTarget2 = new RenderTarget(scene.Game, SharpDX.DXGI.Format.R32G32B32A32_Float, false, 1);
+            processingDrawer = new PostProcessingDrawer(scene.Game.Graphics, DrawerPool.EffectPostProcess);
         }
         /// <summary>
         /// Destructor
@@ -258,10 +258,10 @@ namespace Engine.Common
                 ShadowMapperSpot?.Dispose();
                 ShadowMapperSpot = null;
 
-                postProcessingBuffer1?.Dispose();
-                postProcessingBuffer1 = null;
-                postProcessingBuffer2?.Dispose();
-                postProcessingBuffer2 = null;
+                postProcessingTarget1?.Dispose();
+                postProcessingTarget1 = null;
+                postProcessingTarget2?.Dispose();
+                postProcessingTarget2 = null;
                 processingDrawer?.Dispose();
                 processingDrawer = null;
             }
@@ -272,8 +272,8 @@ namespace Engine.Common
         /// </summary>
         public virtual void Resize()
         {
-            postProcessingBuffer1?.Resize();
-            postProcessingBuffer2?.Resize();
+            postProcessingTarget1?.Resize();
+            postProcessingTarget2?.Resize();
             processingDrawer?.Resize();
         }
         /// <summary>
@@ -1005,24 +1005,15 @@ namespace Engine.Common
             graphics.SetBlendDefault();
             graphics.SetDepthStencilNone();
 
-            var effect = DrawerPool.EffectPostProcess;
-
-            var forms = Scene.Game.Form;
-            var viewProj = forms.GetOrthoProjectionMatrix();
-            var screenRect = forms.RenderRectangle;
-
-            //Sets as effect source the last used buffer
-            effect.UpdatePerFrame(
-                viewProj,
-                new Vector2(screenRect.Width, screenRect.Height),
-                context.GameTime.TotalSeconds,
-                postProcessingBuffer1.Textures?.FirstOrDefault());
+            //Gets the source texture
+            var texture = postProcessingTarget1.Textures?.FirstOrDefault();
 
             //Set the default render target
             BindDefault();
 
             //Draw the result
-            processingDrawer.SetDrawer(DrawerPool.EffectPostProcess.Empty);
+            processingDrawer.SetEffect(PostProcessingEffects.None);
+            processingDrawer.UpdateEffectParameters(Scene, context.GameTime.TotalSeconds, texture, null);
             processingDrawer.Bind();
             processingDrawer.Draw();
         }
@@ -1034,8 +1025,8 @@ namespace Engine.Common
             var graphics = Scene.Game.Graphics;
 
             //Restore backbuffer as render target and clear it
+            graphics.SetDefaultRenderTarget(true, true, true);
             graphics.SetDefaultViewport();
-            graphics.SetDefaultRenderTarget(true, false, true);
         }
         /// <summary>
         /// Binds graphics for post-processing pass
@@ -1044,25 +1035,21 @@ namespace Engine.Common
         {
             var graphics = Scene.Game.Graphics;
 
-            var viewport = Scene.Game.Form.GetViewport();
+            //Set light buffer to draw lights
+            graphics.SetRenderTargets(postProcessingTarget1.Targets, true, true, true);
 
             //Set local viewport
+            var viewport = Scene.Game.Form.GetViewport();
             graphics.SetViewport(viewport);
-
-            //Set light buffer to draw lights
-            graphics.SetRenderTargets(
-                postProcessingBuffer1.Targets, true, GameEnvironment.Background,
-                graphics.DefaultDepthStencil, false, false,
-                false);
         }
         /// <summary>
-        /// Toggles post-processing buffers
+        /// Toggles post-processing render targets
         /// </summary>
-        private void TogglePostProcessingBuffers()
+        private void TogglePostProcessingTargets()
         {
-            var tmp = postProcessingBuffer1;
-            postProcessingBuffer1 = postProcessingBuffer2;
-            postProcessingBuffer2 = tmp;
+            var tmp = postProcessingTarget1;
+            postProcessingTarget1 = postProcessingTarget2;
+            postProcessingTarget2 = tmp;
         }
         /// <summary>
         /// Does the post-processing draw
@@ -1086,30 +1073,19 @@ namespace Engine.Common
             graphics.SetBlendDefault();
             graphics.SetDepthStencilNone();
 
-            var effect = DrawerPool.EffectPostProcess;
-
-            var forms = Scene.Game.Form;
-            var viewProj = forms.GetOrthoProjectionMatrix();
-            var screenRect = forms.RenderRectangle;
-
             foreach (var postEffect in postProcessingEffects)
             {
-                //Sets as effect source the first buffer
-                effect.UpdatePerFrame(
-                    viewProj,
-                    new Vector2(screenRect.Width, screenRect.Height),
-                    gameTime.TotalSeconds,
-                    postProcessingBuffer1.Textures?.FirstOrDefault());
+                //Gets the source texture
+                var texture = postProcessingTarget1.Textures?.FirstOrDefault();
 
                 //Toggles post-processing buffers
-                TogglePostProcessingBuffers();
+                TogglePostProcessingTargets();
 
-                //Use the second buffer as render target
+                //Use the next buffer as render target
                 BindPostProcessing();
 
-                effect.UpdatePerEffect(postEffect.Parameters);
-
-                processingDrawer.SetDrawer(postEffect.Technique);
+                processingDrawer.SetEffect(postEffect.Effect);
+                processingDrawer.UpdateEffectParameters(Scene, gameTime.TotalSeconds, texture, postEffect.Parameters);
                 processingDrawer.Bind();
                 processingDrawer.Draw();
             }
@@ -1122,11 +1098,9 @@ namespace Engine.Common
         /// <param name="parameters">Parameters</param>
         public void SetPostProcessingEffect(PostProcessingEffects effect, IDrawerPostProcessParams parameters)
         {
-            var technique = DrawerPool.EffectPostProcess.GetTechnique(effect);
-
             postProcessingEffects.Add(new PostProcessingEffect
             {
-                Technique = technique,
+                Effect = effect,
                 Parameters = parameters,
             });
 

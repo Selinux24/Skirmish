@@ -333,6 +333,65 @@ namespace Engine
         }
 
         /// <summary>
+        /// Reads vector3 to string
+        /// </summary>
+        /// <param name="value">Vector3 value</param>
+        private static string ReadVector3(Vector3 value)
+        {
+            return $"{value.X} {value.Y} {value.Z}";
+        }
+        /// <summary>
+        /// Writes vector3 from string
+        /// </summary>
+        /// <param name="value">String value</param>
+        /// <param name="defaultValue">Default value</param>
+        private static Vector3 WriteVector3(string value, Vector3 defaultValue)
+        {
+            var floats = value?.SplitFloats();
+            if (floats?.Length == 3)
+            {
+                return new Vector3(floats);
+            }
+            else if (floats?.Length == 1)
+            {
+                return new Vector3(floats[0]);
+            }
+            else
+            {
+                return defaultValue;
+            }
+        }
+        /// <summary>
+        /// Reads color to string
+        /// </summary>
+        /// <param name="value">Color value</param>
+        private static string ReadColor(Color value)
+        {
+            return $"{value.R} {value.G} {value.B} {value.A}";
+        }
+        /// <summary>
+        /// Writes color from string
+        /// </summary>
+        /// <param name="value">String value</param>
+        /// <param name="defaultValue">Default value</param>
+        private static Color WriteColor(string value, Color defaultValue)
+        {
+            var floats = value?.SplitFloats();
+            if (floats?.Length == 4)
+            {
+                return new Color(floats);
+            }
+            else if (floats?.Length == 1)
+            {
+                return new Color(floats[0]);
+            }
+            else
+            {
+                return defaultValue;
+            }
+        }
+
+        /// <summary>
         /// Particle type
         /// </summary>
         [XmlAttribute("type")]
@@ -399,23 +458,11 @@ namespace Engine
         {
             get
             {
-                return string.Format("{0} {1} {2}", Gravity.X, Gravity.Y, Gravity.Z);
+                return ReadVector3(Gravity);
             }
             set
             {
-                var floats = value?.SplitFloats();
-                if (floats?.Length == 3)
-                {
-                    Gravity = new Vector3(floats);
-                }
-                else if (floats?.Length == 1)
-                {
-                    Gravity = new Vector3(floats[0]);
-                }
-                else
-                {
-                    Gravity = DefaultGravity;
-                }
+                Gravity = WriteVector3(value, DefaultGravity);
             }
         }
 
@@ -438,23 +485,11 @@ namespace Engine
         {
             get
             {
-                return string.Format("{0} {1} {2} {3}", MinColor.R, MinColor.G, MinColor.B, MinColor.A);
+                return ReadColor(MinColor);
             }
             set
             {
-                var floats = value?.SplitFloats();
-                if (floats?.Length == 4)
-                {
-                    MinColor = new Color(floats);
-                }
-                else if (floats?.Length == 1)
-                {
-                    MinColor = new Color(floats[0]);
-                }
-                else
-                {
-                    MinColor = DefaultMinColor;
-                }
+                MinColor = WriteColor(value, DefaultMinColor);
             }
         }
         /// <summary>
@@ -470,23 +505,11 @@ namespace Engine
         {
             get
             {
-                return string.Format("{0} {1} {2} {3}", MaxColor.R, MaxColor.G, MaxColor.B, MaxColor.A);
+                return ReadColor(MaxColor);
             }
             set
             {
-                var floats = value?.SplitFloats();
-                if (floats?.Length == 4)
-                {
-                    MaxColor = new Color(floats);
-                }
-                else if (floats?.Length == 1)
-                {
-                    MaxColor = new Color(floats[0]);
-                }
-                else
-                {
-                    MaxColor = DefaultMaxColor;
-                }
+                MaxColor = WriteColor(value, DefaultMaxColor);
             }
         }
 
@@ -540,29 +563,29 @@ namespace Engine
         /// </summary>
         public ParticleSystemDescription()
         {
-            this.ParticleType = ParticleTypes.None;
-            this.Name = null;
-            this.ContentPath = null;
-            this.TextureName = null;
+            ParticleType = ParticleTypes.None;
+            Name = null;
+            ContentPath = null;
+            TextureName = null;
 
-            this.MaxDuration = 0;
-            this.MaxDurationRandomness = 1;
-            this.MaxHorizontalVelocity = 0;
-            this.MinHorizontalVelocity = 0;
-            this.MaxVerticalVelocity = 0;
-            this.MinVerticalVelocity = 0;
-            this.Gravity = DefaultGravity;
-            this.EndVelocity = 1;
-            this.MinColor = DefaultMinColor;
-            this.MaxColor = DefaultMaxColor;
-            this.MinRotateSpeed = 0;
-            this.MaxRotateSpeed = 0;
-            this.MinStartSize = 1;
-            this.MaxStartSize = 1;
-            this.MinEndSize = 1;
-            this.MaxEndSize = 1;
-            this.BlendMode = BlendModes.Alpha;
-            this.EmitterVelocitySensitivity = 0;
+            MaxDuration = 0;
+            MaxDurationRandomness = 1;
+            MaxHorizontalVelocity = 0;
+            MinHorizontalVelocity = 0;
+            MaxVerticalVelocity = 0;
+            MinVerticalVelocity = 0;
+            Gravity = DefaultGravity;
+            EndVelocity = 1;
+            MinColor = DefaultMinColor;
+            MaxColor = DefaultMaxColor;
+            MinRotateSpeed = 0;
+            MaxRotateSpeed = 0;
+            MinStartSize = 1;
+            MaxStartSize = 1;
+            MinEndSize = 1;
+            MaxEndSize = 1;
+            BlendMode = BlendModes.Alpha;
+            EmitterVelocitySensitivity = 0;
         }
 
         /// <summary>
@@ -573,18 +596,18 @@ namespace Engine
         {
             if (scale != 1f)
             {
-                this.MaxHorizontalVelocity *= scale;
-                this.MinHorizontalVelocity *= scale;
-                this.MaxVerticalVelocity *= scale;
-                this.MinVerticalVelocity *= scale;
+                MaxHorizontalVelocity *= scale;
+                MinHorizontalVelocity *= scale;
+                MaxVerticalVelocity *= scale;
+                MinVerticalVelocity *= scale;
 
-                this.Gravity *= scale;
-                this.EndVelocity *= scale;
+                Gravity *= scale;
+                EndVelocity *= scale;
 
-                this.MinStartSize *= scale;
-                this.MaxStartSize *= scale;
-                this.MinEndSize *= scale;
-                this.MaxEndSize *= scale;
+                MinStartSize *= scale;
+                MaxStartSize *= scale;
+                MinEndSize *= scale;
+                MaxEndSize *= scale;
             }
         }
         /// <summary>
@@ -593,24 +616,24 @@ namespace Engine
         /// <param name="other">The other particle description</param>
         public void Update(ParticleSystemDescription other)
         {
-            this.MaxDuration = other.MaxDuration;
-            this.MaxDurationRandomness = other.MaxDurationRandomness;
-            this.MaxHorizontalVelocity = other.MaxHorizontalVelocity;
-            this.MinHorizontalVelocity = other.MinHorizontalVelocity;
-            this.MaxVerticalVelocity = other.MaxVerticalVelocity;
-            this.MinVerticalVelocity = other.MinVerticalVelocity;
-            this.Gravity = other.Gravity;
-            this.EndVelocity = other.EndVelocity;
-            this.MinColor = other.MinColor;
-            this.MaxColor = other.MaxColor;
-            this.MinRotateSpeed = other.MinRotateSpeed;
-            this.MaxRotateSpeed = other.MaxRotateSpeed;
-            this.MinStartSize = other.MinStartSize;
-            this.MaxStartSize = other.MaxStartSize;
-            this.MinEndSize = other.MinEndSize;
-            this.MaxEndSize = other.MaxEndSize;
-            this.BlendMode = other.BlendMode;
-            this.EmitterVelocitySensitivity = other.EmitterVelocitySensitivity;
+            MaxDuration = other.MaxDuration;
+            MaxDurationRandomness = other.MaxDurationRandomness;
+            MaxHorizontalVelocity = other.MaxHorizontalVelocity;
+            MinHorizontalVelocity = other.MinHorizontalVelocity;
+            MaxVerticalVelocity = other.MaxVerticalVelocity;
+            MinVerticalVelocity = other.MinVerticalVelocity;
+            Gravity = other.Gravity;
+            EndVelocity = other.EndVelocity;
+            MinColor = other.MinColor;
+            MaxColor = other.MaxColor;
+            MinRotateSpeed = other.MinRotateSpeed;
+            MaxRotateSpeed = other.MaxRotateSpeed;
+            MinStartSize = other.MinStartSize;
+            MaxStartSize = other.MaxStartSize;
+            MinEndSize = other.MinEndSize;
+            MaxEndSize = other.MaxEndSize;
+            BlendMode = other.BlendMode;
+            EmitterVelocitySensitivity = other.EmitterVelocitySensitivity;
         }
     }
 }
