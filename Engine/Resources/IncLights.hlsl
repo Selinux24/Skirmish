@@ -113,21 +113,19 @@ inline float CalcSpotShadowFactor(float3 pPosition, int mapIndex, float4x4 fromL
 
     return max(minShadowFactor, (sShadow / float(samples)));
 }
-inline float CalcPointShadowFactor(float3 pPosition, PointLight pointLight, TextureCubeArray<float> shadowMapPoint)
+inline float CalcPointShadowFactor(float3 lightToPixel, int mapIndex, float2 perspectiveValues, TextureCubeArray<float> shadowMapPoint)
 {
-    float3 toPixel = pPosition - pointLight.Position;
-	
 	// Calc PCF depth
-    float3 toPixelAbs = abs(toPixel);
+    float3 toPixelAbs = abs(lightToPixel);
     float z = max(toPixelAbs.x, max(toPixelAbs.y, toPixelAbs.z));
-    float depth = (pointLight.PerspectiveValues.x * z + pointLight.PerspectiveValues.y) / z;
+    float depth = (perspectiveValues.x * z + perspectiveValues.y) / z;
 
-    return max(minShadowFactor, shadowMapPoint.SampleCmpLevelZero(PCFSampler, float4(toPixel, pointLight.MapIndex), depth));
+    return max(minShadowFactor, shadowMapPoint.SampleCmpLevelZero(PCFSampler, float4(lightToPixel, mapIndex), depth));
 }
-inline float CalcCascadedShadowFactor(float3 position, float4x4 toShadowSpace, float4 toCascadeOffsetX, float4 toCascadeOffsetY, float4 toCascadeScale, Texture2DArray<float> CascadeShadowMapTexture)
+inline float CalcCascadedShadowFactor(float3 pPosition, float4x4 toShadowSpace, float4 toCascadeOffsetX, float4 toCascadeOffsetY, float4 toCascadeScale, Texture2DArray<float> CascadeShadowMapTexture)
 {
 	// Transform the world position to shadow space
-    float4 posShadowSpace = mul(float4(position, 1.0), toShadowSpace);
+    float4 posShadowSpace = mul(float4(pPosition, 1.0), toShadowSpace);
 
 	// Transform the shadow space position into each cascade position
     float4 posCascadeSpaceX = (toCascadeOffsetX + posShadowSpace.xxxx) * toCascadeScale;
@@ -523,16 +521,16 @@ struct ComputePointLightsInput
 
 inline ComputeLightsOutput ComputePointLightLOD1(ComputePointLightsInput input)
 {
-    float3 L = input.pointLight.Position - input.pPosition;
-    float D = length(L);
-    L /= D;
+    float3 P = input.pointLight.Position - input.pPosition;
+    float D = length(P);
+    float3 L = P / D;
     float3 V = normalize(input.ePosition - input.pPosition);
 
     float cShadowFactor = 1;
     [flatten]
     if (input.pointLight.CastShadow == 1 && input.pointLight.MapIndex >= 0)
     {
-        cShadowFactor = CalcPointShadowFactor(input.pPosition, input.pointLight, input.shadowMapPoint);
+        cShadowFactor = CalcPointShadowFactor(P, input.pointLight.MapIndex, input.pointLight.PerspectiveValues, input.shadowMapPoint);
     }
 
     float attenuation = CalcSphericAttenuation(input.pointLight.Intensity, input.pointLight.Radius, D);
@@ -546,15 +544,15 @@ inline ComputeLightsOutput ComputePointLightLOD1(ComputePointLightsInput input)
 }
 inline ComputeLightsOutput ComputePointLightLOD2(ComputePointLightsInput input)
 {
-    float3 L = input.pointLight.Position - input.pPosition;
-    float D = length(L);
-    L /= D;
+    float3 P = input.pointLight.Position - input.pPosition;
+    float D = length(P);
+    float3 L = P / D;
 
     float cShadowFactor = 1;
     [flatten]
     if (input.pointLight.CastShadow == 1 && input.pointLight.MapIndex >= 0)
     {
-        cShadowFactor = CalcPointShadowFactor(input.pPosition, input.pointLight, input.shadowMapPoint);
+        cShadowFactor = CalcPointShadowFactor(P, input.pointLight.MapIndex, input.pointLight.PerspectiveValues, input.shadowMapPoint);
     }
 
     float attenuation = CalcSphericAttenuation(input.pointLight.Intensity, input.pointLight.Radius, D);
@@ -678,7 +676,7 @@ inline float4 ComputeLightsLOD1(ComputeLightsInput input)
         [flatten]
         if (input.pointLights[i].CastShadow == 1 && input.pointLights[i].MapIndex >= 0)
         {
-            cShadowFactor = CalcPointShadowFactor(input.objectPosition, input.pointLights[i], input.shadowMapPoint);
+            cShadowFactor = CalcPointShadowFactor(P, input.pointLights[i].MapIndex, input.pointLights[i].PerspectiveValues, input.shadowMapPoint);
         }
 
         float attenuation = CalcSphericAttenuation(input.pointLights[i].Intensity, input.pointLights[i].Radius, D);
@@ -691,7 +689,7 @@ inline float4 ComputeLightsLOD1(ComputeLightsInput input)
     }
 
     float3 light = ForwardLightEquation(input.material, lAmbient, lDiffuse, lSpecular);
-        
+
     return saturate(float4(light, 1) * input.objectDiffuseColor);
 }
 inline float4 ComputeLightsLOD2(ComputeLightsInput input)
@@ -755,7 +753,7 @@ inline float4 ComputeLightsLOD2(ComputeLightsInput input)
         [flatten]
         if (input.pointLights[i].CastShadow == 1 && input.pointLights[i].MapIndex >= 0)
         {
-            cShadowFactor = CalcPointShadowFactor(input.objectPosition, input.pointLights[i], input.shadowMapPoint);
+            cShadowFactor = CalcPointShadowFactor(P, input.pointLights[i].MapIndex, input.pointLights[i].PerspectiveValues, input.shadowMapPoint);
         }
 
         float attenuation = CalcSphericAttenuation(input.pointLights[i].Intensity, input.pointLights[i].Radius, D);

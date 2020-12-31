@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿#if DEBUG
 using System.Diagnostics;
+#endif
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine
@@ -34,10 +36,7 @@ namespace Engine
 
         }
 
-        /// <summary>
-        /// Draws scene components
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
+        /// <inheritdoc/>
         public override void Draw(GameTime gameTime)
         {
             if (!Updated)
@@ -73,7 +72,7 @@ namespace Engine
                 DoShadowMapping(gameTime);
 
                 //Binds the result target
-                BindResult();
+                BindResult(true, true, true);
 
                 //Render components
                 DoRender(Scene, visibleComponents.Where(c => !c.Usage.HasFlag(SceneObjectUsages.UI)));
@@ -167,15 +166,19 @@ namespace Engine
         {
             //Save current drawer mode
             var mode = context.DrawerMode;
-
+#if DEBUG
             Dictionary<string, double> dict = new Dictionary<string, double>();
             Stopwatch stopwatch = new Stopwatch();
-
+#endif
             //First opaques
+#if DEBUG
             stopwatch.Start();
+#endif
             var opaques = GetOpaques(index, components);
+#if DEBUG
             stopwatch.Stop();
             dict.Add("Opaques Selection", stopwatch.Elapsed.TotalMilliseconds);
+#endif
 
             if (opaques.Any())
             {
@@ -183,31 +186,47 @@ namespace Engine
                 context.DrawerMode = mode | DrawerModes.OpaqueOnly;
 
                 //Sort items nearest first
+#if DEBUG
                 stopwatch.Restart();
+#endif
                 opaques.Sort((c1, c2) => SortOpaques(index, c1, c2));
+#if DEBUG
                 stopwatch.Stop();
                 dict.Add("Opaques Sort", stopwatch.Elapsed.TotalMilliseconds);
+#endif
 
                 //Draw items
+#if DEBUG
                 stopwatch.Restart();
                 int oDIndex = 0;
+#endif
                 opaques.ForEach((c) =>
                 {
+#if DEBUG
                     Stopwatch stopwatch2 = new Stopwatch();
                     stopwatch2.Start();
+#endif
                     Draw(context, c);
+#if DEBUG
                     stopwatch2.Stop();
                     dict.Add($"Opaque Draw {oDIndex++} {c.Name}", stopwatch2.Elapsed.TotalMilliseconds);
+#endif
                 });
+#if DEBUG
                 stopwatch.Stop();
                 dict.Add("Opaques Draw", stopwatch.Elapsed.TotalMilliseconds);
+#endif
             }
 
             //Then transparents
+#if DEBUG
             stopwatch.Restart();
+#endif
             var transparents = GetTransparents(index, components);
+#if DEBUG
             stopwatch.Stop();
             dict.Add("Transparents Selection", stopwatch.Elapsed.TotalMilliseconds);
+#endif
 
             if (transparents.Any())
             {
@@ -215,33 +234,47 @@ namespace Engine
                 context.DrawerMode = mode | DrawerModes.TransparentOnly;
 
                 //Sort items far first
+#if DEBUG
                 stopwatch.Restart();
+#endif
                 transparents.Sort((c1, c2) => SortTransparents(index, c1, c2));
+#if DEBUG
                 stopwatch.Stop();
                 dict.Add("Transparents Sort", stopwatch.Elapsed.TotalMilliseconds);
+#endif
 
                 //Draw items
+#if DEBUG
                 stopwatch.Restart();
                 int oTIndex = 0;
+#endif
                 transparents.ForEach((c) =>
                 {
+#if DEBUG
                     Stopwatch stopwatch2 = new Stopwatch();
                     stopwatch2.Start();
+#endif
                     Draw(context, c);
+#if DEBUG
                     stopwatch2.Stop();
                     dict.Add($"Transparent Draw {oTIndex++} {c.Name}", stopwatch2.Elapsed.TotalMilliseconds);
+#endif
                 });
+#if DEBUG
                 stopwatch.Stop();
                 dict.Add("Transparents Draw", stopwatch.Elapsed.TotalMilliseconds);
+#endif
             }
 
             //Reset drawer mode
             context.DrawerMode = mode;
 
+#if DEBUG
             if (Scene.Game.CollectGameStatus)
             {
                 Scene.Game.GameStatus.Add(dict);
             }
+#endif
         }
     }
 }

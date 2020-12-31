@@ -737,7 +737,6 @@
     <None Include="Resources\ShaderDefaultSkyScattering.fxo" />
     <None Include="Resources\ShaderDefaultSprite.fxo" />
     <None Include="Resources\ShaderDefaultTerrain.fxo" />
-    <None Include="Resources\shadershadowterrain1.fxo" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\IncLights.hlsl" />

@@ -1,7 +1,9 @@
-﻿using SharpDX;
+﻿#if DEBUG
+using System.Diagnostics;
+#endif
+using SharpDX;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
 namespace Engine.Common
@@ -295,8 +297,6 @@ namespace Engine.Common
         /// <param name="gameTime">Game time</param>
         public virtual void Update(GameTime gameTime)
         {
-            Stopwatch swTotal = Stopwatch.StartNew();
-
             Matrix viewProj = Scene.Camera.View * Scene.Camera.Projection;
             UpdateContext.GameTime = gameTime;
             UpdateContext.View = Scene.Camera.View;
@@ -310,13 +310,9 @@ namespace Engine.Common
             UpdateContext.CameraVolume = new IntersectionVolumeFrustum(viewProj);
 
             //Cull lights
-            Stopwatch swLights = Stopwatch.StartNew();
             Scene.Lights.Cull(UpdateContext.CameraVolume, UpdateContext.EyePosition, Scene.GameEnvironment.LODDistanceLow);
-            swLights.Stop();
-            Logger.WriteTrace(this, $"Cull lights in {swLights.ElapsedTicks:0.000000}");
 
             //Update active components
-            Stopwatch swUpdate = Stopwatch.StartNew();
             var updatables = Scene.GetComponents().Where(c => c.Active).OfType<IUpdatable>().ToList();
             if (updatables.Any())
             {
@@ -325,11 +321,6 @@ namespace Engine.Common
                 updatables.ForEach(LateUpdateCall);
             }
             Updated = true;
-            swUpdate.Stop();
-            Logger.WriteTrace(this, $"Update active components in {swUpdate.ElapsedTicks:0.000000}");
-
-            swTotal.Stop();
-            Logger.WriteTrace(this, $"Scene.Update in {swTotal.ElapsedTicks:0.000000}");
         }
         /// <summary>
         /// Early update loop call
@@ -337,11 +328,7 @@ namespace Engine.Common
         /// <param name="c">Component</param>
         private void EarlyUpdateCall(IUpdatable c)
         {
-            Stopwatch swCUpdate = Stopwatch.StartNew();
             c.EarlyUpdate(UpdateContext);
-            swCUpdate.Stop();
-
-            Logger.WriteTrace(this, $"Early update component {c} in {swCUpdate.ElapsedTicks:0.000000}");
         }
         /// <summary>
         /// Update loop call
@@ -349,11 +336,7 @@ namespace Engine.Common
         /// <param name="c">Component</param>
         private void UpdateCall(IUpdatable c)
         {
-            Stopwatch swCUpdate = Stopwatch.StartNew();
             c.Update(UpdateContext);
-            swCUpdate.Stop();
-
-            Logger.WriteTrace(this, $"Update component {c} in {swCUpdate.ElapsedTicks:0.000000}");
         }
         /// <summary>
         /// Late update loop call
@@ -361,11 +344,7 @@ namespace Engine.Common
         /// <param name="c">Component</param>
         private void LateUpdateCall(IUpdatable c)
         {
-            Stopwatch swCUpdate = Stopwatch.StartNew();
             c.LateUpdate(UpdateContext);
-            swCUpdate.Stop();
-
-            Logger.WriteTrace(this, $"Late update component {c} in {swCUpdate.ElapsedTicks:0.000000}");
         }
 
         /// <summary>
@@ -593,15 +572,21 @@ namespace Engine.Common
         {
             Dictionary<string, double> dict = new Dictionary<string, double>();
 
+#if DEBUG
             Stopwatch gStopwatch = new Stopwatch();
             gStopwatch.Start();
+#endif
 
             //And there were lights
+#if DEBUG
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
+#endif
             var shadowCastingLights = Scene.Lights.GetDirectionalShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position);
+#if DEBUG
             stopwatch.Stop();
             dict.Add($"DoDirectionalShadowMapping Getting lights", stopwatch.Elapsed.TotalMilliseconds);
+#endif
 
             if (!shadowCastingLights.Any())
             {
@@ -609,10 +594,14 @@ namespace Engine.Common
             }
 
             //Objects that cast shadows
+#if DEBUG
             stopwatch.Restart();
+#endif
             var shadowObjs = Scene.GetComponents().Where(c => c.Visible && c.CastShadow);
+#if DEBUG
             stopwatch.Stop();
             dict.Add($"DoDirectionalShadowMapping Getting components", stopwatch.Elapsed.TotalMilliseconds);
+#endif
 
             if (!shadowObjs.Any())
             {
@@ -627,11 +616,15 @@ namespace Engine.Common
                 bool allCullingObjects = shadowObjs.Count() == toCullShadowObjs.Count();
                 var camVolume = DrawContext.CameraVolume;
 
+#if DEBUG
                 stopwatch.Restart();
+#endif
                 var shadowSph = new IntersectionVolumeSphere(camVolume.Position, camVolume.Radius);
                 var doShadows = cullManager.Cull(shadowSph, cullIndex, toCullShadowObjs);
+#if DEBUG
                 stopwatch.Stop();
                 dict.Add($"DoDirectionalShadowMapping - Cull {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
+#endif
 
                 if (allCullingObjects && !doShadows)
                 {
@@ -654,15 +647,19 @@ namespace Engine.Common
                 }
 
                 //Draw shadows
+#if DEBUG
                 stopwatch.Restart();
+#endif
                 var shadowMapper = DrawShadowsContext.ShadowMap = ShadowMapperDirectional;
                 shadowMapper.UpdateFromLightViewProjection(Scene.Camera, light);
                 shadowMapper.Bind(graphics, assigned * MaxDirectionalCascadeShadowMaps);
                 DrawShadowsContext.EyePosition = shadowMapper.LightPosition;
                 DrawShadowsContext.ViewProjection = shadowMapper.ToShadowMatrix;
                 DrawShadowComponents(DrawShadowsContext, cullIndex, shadowObjs);
+#if DEBUG
                 stopwatch.Stop();
                 dict.Add($"DoDirectionalShadowMapping {l} - Draw {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
+#endif
 
                 //Assign light parameters
                 light.ShadowMapIndex = assigned;
@@ -675,6 +672,7 @@ namespace Engine.Common
                 l++;
             }
 
+#if DEBUG
             gStopwatch.Stop();
             dict.Add($"DoDirectionalShadowMapping TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
 
@@ -682,6 +680,7 @@ namespace Engine.Common
             {
                 Scene.Game.GameStatus.Add(dict);
             }
+#endif
         }
         /// <summary>
         /// Draw point light shadow maps
@@ -692,14 +691,20 @@ namespace Engine.Common
         {
             Dictionary<string, double> dict = new Dictionary<string, double>();
 
+#if DEBUG
             Stopwatch gStopwatch = new Stopwatch();
             gStopwatch.Start();
+#endif
 
             //And there were lights
+#if DEBUG
             Stopwatch stopwatch = new Stopwatch();
+#endif
             var shadowCastingLights = Scene.Lights.GetPointShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position);
+#if DEBUG
             stopwatch.Stop();
             dict.Add($"DoPointShadowMapping Getting lights", stopwatch.Elapsed.TotalMilliseconds);
+#endif
 
             if (!shadowCastingLights.Any())
             {
@@ -707,10 +712,14 @@ namespace Engine.Common
             }
 
             //Draw components if drop shadow (opaque)
+#if DEBUG
             stopwatch.Restart();
+#endif
             var shadowObjs = Scene.GetComponents().Where(c => c.Visible && c.CastShadow);
+#if DEBUG
             stopwatch.Stop();
             dict.Add($"DoPointShadowMapping Getting components", stopwatch.Elapsed.TotalMilliseconds);
+#endif
 
             if (!shadowObjs.Any())
             {
@@ -739,11 +748,15 @@ namespace Engine.Common
                 l++;
 
                 //Cull test
+#if DEBUG
                 stopwatch.Restart();
+#endif
                 var sph = new IntersectionVolumeSphere(light.Position, light.Radius);
                 var doShadows = cullManager.Cull(sph, cullIndex, toCullShadowObjs);
+#if DEBUG
                 stopwatch.Stop();
                 dict.Add($"DoPointShadowMapping {l} - Cull {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
+#endif
 
                 if (allCullingObjects && !doShadows)
                 {
@@ -752,15 +765,19 @@ namespace Engine.Common
                 }
 
                 //Draw shadows
+#if DEBUG
                 stopwatch.Restart();
+#endif
                 var shadowMapper = DrawShadowsContext.ShadowMap = ShadowMapperPoint;
                 shadowMapper.UpdateFromLightViewProjection(Scene.Camera, light);
                 shadowMapper.Bind(graphics, assigned);
                 DrawShadowsContext.EyePosition = shadowMapper.LightPosition;
                 DrawShadowsContext.ViewProjection = shadowMapper.ToShadowMatrix;
                 DrawShadowComponents(DrawShadowsContext, cullIndex, shadowObjs);
+#if DEBUG
                 stopwatch.Stop();
                 dict.Add($"DoPointShadowMapping {l} - Draw {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
+#endif
 
                 //Assign light parameters
                 light.ShadowMapIndex = assigned;
@@ -768,6 +785,7 @@ namespace Engine.Common
                 assigned++;
             }
 
+#if DEBUG
             gStopwatch.Stop();
             dict.Add($"DoPointShadowMapping TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
 
@@ -775,6 +793,7 @@ namespace Engine.Common
             {
                 Scene.Game.GameStatus.Add(dict);
             }
+#endif
         }
         /// <summary>
         /// Draw spot light shadow maps
@@ -785,15 +804,21 @@ namespace Engine.Common
         {
             Dictionary<string, double> dict = new Dictionary<string, double>();
 
+#if DEBUG
             Stopwatch gStopwatch = new Stopwatch();
             gStopwatch.Start();
+#endif
 
             //And there were lights
+#if DEBUG
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
+#endif
             var shadowCastingLights = Scene.Lights.GetSpotShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position);
+#if DEBUG
             stopwatch.Stop();
             dict.Add($"DoSpotShadowMapping Getting lights", stopwatch.Elapsed.TotalMilliseconds);
+#endif
 
             if (!shadowCastingLights.Any())
             {
@@ -801,10 +826,14 @@ namespace Engine.Common
             }
 
             //Draw components if drop shadow (opaque)
+#if DEBUG
             stopwatch.Restart();
+#endif
             var shadowObjs = Scene.GetComponents().Where(c => c.Visible && c.CastShadow);
+#if DEBUG
             stopwatch.Stop();
             dict.Add($"DoSpotShadowMapping Getting components", stopwatch.Elapsed.TotalMilliseconds);
+#endif
 
             if (!shadowObjs.Any())
             {
@@ -830,11 +859,15 @@ namespace Engine.Common
                 }
 
                 //Cull test
+#if DEBUG
                 stopwatch.Restart();
+#endif
                 var sph = new IntersectionVolumeSphere(light.Position, light.Radius);
                 var doShadows = cullManager.Cull(sph, cullIndex, toCullShadowObjs);
+#if DEBUG
                 stopwatch.Stop();
                 dict.Add($"DoSpotShadowMapping {l} - Cull {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
+#endif
 
                 if (allCullingObjects && !doShadows)
                 {
@@ -843,15 +876,19 @@ namespace Engine.Common
                 }
 
                 //Draw shadows
+#if DEBUG
                 stopwatch.Restart();
+#endif
                 var shadowMapper = DrawShadowsContext.ShadowMap = ShadowMapperSpot;
                 shadowMapper.UpdateFromLightViewProjection(Scene.Camera, light);
                 shadowMapper.Bind(graphics, assigned);
                 DrawShadowsContext.EyePosition = shadowMapper.LightPosition;
                 DrawShadowsContext.ViewProjection = shadowMapper.ToShadowMatrix;
                 DrawShadowComponents(DrawShadowsContext, cullIndex, shadowObjs);
+#if DEBUG
                 stopwatch.Stop();
                 dict.Add($"DoSpotShadowMapping {l} - Draw {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
+#endif
 
                 //Assign light parameters
                 light.FromLightVP = shadowMapper.FromLightViewProjectionArray;
@@ -865,6 +902,7 @@ namespace Engine.Common
                 l++;
             }
 
+#if DEBUG
             gStopwatch.Stop();
             dict.Add($"DoSpotShadowMapping TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
 
@@ -872,6 +910,7 @@ namespace Engine.Common
             {
                 Scene.Game.GameStatus.Add(dict);
             }
+#endif
         }
 
         /// <summary>
@@ -972,15 +1011,18 @@ namespace Engine.Common
         /// <summary>
         /// Binds graphics for results pass
         /// </summary>
-        protected virtual void BindResult()
+        /// <param name="clearRT">Indicates whether the render target must be cleared</param>
+        /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
+        /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
+        protected virtual void BindResult(bool clearRT, bool clearDepth, bool clearStencil)
         {
             if (PostProcessingEnabled)
             {
-                BindPostProcessing();
+                BindPostProcessing(clearRT, clearDepth, clearStencil);
             }
             else
             {
-                BindDefault();
+                BindDefault(clearRT, clearDepth, clearStencil);
             }
         }
         /// <summary>
@@ -1009,7 +1051,7 @@ namespace Engine.Common
             var texture = postProcessingTarget1.Textures?.FirstOrDefault();
 
             //Set the default render target
-            BindDefault();
+            BindDefault(true, true, true);
 
             //Draw the result
             processingDrawer.SetEffect(PostProcessingEffects.None);
@@ -1020,23 +1062,29 @@ namespace Engine.Common
         /// <summary>
         /// Binds the default render target
         /// </summary>
-        private void BindDefault()
+        /// <param name="clearRT">Indicates whether the render target must be cleared</param>
+        /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
+        /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
+        private void BindDefault(bool clearRT, bool clearDepth, bool clearStencil)
         {
             var graphics = Scene.Game.Graphics;
 
             //Restore backbuffer as render target and clear it
-            graphics.SetDefaultRenderTarget(true, true, true);
+            graphics.SetDefaultRenderTarget(clearRT, clearDepth, clearStencil);
             graphics.SetDefaultViewport();
         }
         /// <summary>
         /// Binds graphics for post-processing pass
         /// </summary>
-        private void BindPostProcessing()
+        /// <param name="clearRT">Indicates whether the render target must be cleared</param>
+        /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
+        /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
+        private void BindPostProcessing(bool clearRT, bool clearDepth, bool clearStencil)
         {
             var graphics = Scene.Game.Graphics;
 
             //Set light buffer to draw lights
-            graphics.SetRenderTargets(postProcessingTarget1.Targets, true, true, true);
+            graphics.SetRenderTargets(postProcessingTarget1.Targets, clearRT, clearDepth, clearStencil);
 
             //Set local viewport
             var viewport = Scene.Game.Form.GetViewport();
@@ -1082,7 +1130,7 @@ namespace Engine.Common
                 TogglePostProcessingTargets();
 
                 //Use the next buffer as render target
-                BindPostProcessing();
+                BindPostProcessing(true, true, true);
 
                 processingDrawer.SetEffect(postEffect.Effect);
                 processingDrawer.UpdateEffectParameters(Scene, gameTime.TotalSeconds, texture, postEffect.Parameters);

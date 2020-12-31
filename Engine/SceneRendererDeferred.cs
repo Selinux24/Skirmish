@@ -227,7 +227,7 @@ namespace Engine
 #if DEBUG
                 Stopwatch swComponsition = Stopwatch.StartNew();
 #endif
-                BindResult();
+                BindResult(true, false, false);
 
                 //Draw scene result on screen using g-buffer and light buffer
                 DrawResult(DrawContext);

@@ -2,6 +2,7 @@
 using Engine.Audio;
 using Engine.Audio.Tween;
 using Engine.Content;
+using Engine.PostProcessing;
 using Engine.Tween;
 using Engine.UI;
 using Engine.UI.Tween;
@@ -50,6 +51,8 @@ namespace SceneTest.SceneStart
 
             GameEnvironment.Background = Color.Black;
 
+            Renderer?.SetPostProcessingEffect(PostProcessingEffects.ToneMapping, PostProcessToneMappingParams.RomBinDaHouse);
+
             var assetTasks = new[] {
                 InitializeCursor(),
                 InitializeBackground(),
@@ -73,7 +76,7 @@ namespace SceneTest.SceneStart
             {
                 Content = ContentDescription.FromFile("SceneStart", "SkyPlane.xml"),
             };
-            backGround = await this.AddComponentModel("Background", backGroundDesc, SceneObjectUsages.UI);
+            backGround = await this.AddComponentModel("Background", backGroundDesc, SceneObjectUsages.None);
         }
         private async Task InitializeTitle()
         {

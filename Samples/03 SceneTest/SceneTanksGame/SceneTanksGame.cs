@@ -143,6 +143,8 @@ namespace SceneTest.SceneTanksGame
             Camera.NearPlaneDistance = 0.1f;
             Camera.FarPlaneDistance = 2000;
 
+            GameEnvironment.ShadowDistanceLow *= 2f;
+
             return LoadLoadingUI();
         }
 
