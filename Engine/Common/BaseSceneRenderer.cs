@@ -570,15 +570,12 @@ namespace Engine.Common
         /// <param name="cullIndex">Cull index</param>
         protected virtual void DoDirectionalShadowMapping(GameTime gameTime, ref int cullIndex)
         {
+#if DEBUG
             Dictionary<string, double> dict = new Dictionary<string, double>();
 
-#if DEBUG
             Stopwatch gStopwatch = new Stopwatch();
             gStopwatch.Start();
-#endif
 
-            //And there were lights
-#if DEBUG
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
 #endif
@@ -689,15 +686,12 @@ namespace Engine.Common
         /// <param name="cullIndex">Cull index</param>
         protected virtual void DoPointShadowMapping(GameTime gameTime, ref int cullIndex)
         {
+#if DEBUG
             Dictionary<string, double> dict = new Dictionary<string, double>();
 
-#if DEBUG
             Stopwatch gStopwatch = new Stopwatch();
             gStopwatch.Start();
-#endif
 
-            //And there were lights
-#if DEBUG
             Stopwatch stopwatch = new Stopwatch();
 #endif
             var shadowCastingLights = Scene.Lights.GetPointShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position);
@@ -802,15 +796,12 @@ namespace Engine.Common
         /// <param name="cullIndex">Cull index</param>
         protected virtual void DoSpotShadowMapping(GameTime gameTime, ref int cullIndex)
         {
+#if DEBUG
             Dictionary<string, double> dict = new Dictionary<string, double>();
 
-#if DEBUG
             Stopwatch gStopwatch = new Stopwatch();
             gStopwatch.Start();
-#endif
 
-            //And there were lights
-#if DEBUG
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
 #endif
