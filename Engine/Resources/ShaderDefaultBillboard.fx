@@ -89,7 +89,7 @@ float4 PSForwardBillboard(PSVertexBillboard input) : SV_Target
     float4 diffuseColor = gTextureArray.Sample(SamplerLinear, uvw);
     clip(diffuseColor.a - 0.01f);
 
-    float3 normalWorld = input.normalWorld;
+    float3 normalWorld = normalize(input.normalWorld);
     if (gNormalMapCount > 0)
     {
         float3 normalMap = gNormalMapArray.Sample(SamplerLinear, uvw).rgb;

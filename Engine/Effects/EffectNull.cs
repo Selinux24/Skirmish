@@ -26,11 +26,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.worldViewProjectionVar.GetMatrix();
+                return worldViewProjectionVar.GetMatrix();
             }
             set
             {
-                this.worldViewProjectionVar.SetMatrix(value);
+                worldViewProjectionVar.SetMatrix(value);
             }
         }
 
@@ -43,9 +43,9 @@ namespace Engine.Effects
         public EffectNull(Graphics graphics, byte[] effect, bool compile)
             : base(graphics, effect, compile)
         {
-            this.Null = this.Effect.GetTechniqueByName("Null");
+            Null = Effect.GetTechniqueByName("Null");
 
-            this.worldViewProjectionVar = this.Effect.GetVariableMatrix("gWorldViewProjection");
+            worldViewProjectionVar = Effect.GetVariableMatrix("gWorldViewProjection");
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace Engine.Effects
             Matrix world,
             Matrix viewProjection)
         {
-            this.WorldViewProjection = world * viewProjection;
+            WorldViewProjection = world * viewProjection;
         }
     }
 }

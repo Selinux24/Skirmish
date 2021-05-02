@@ -107,6 +107,10 @@ namespace Engine
         private EngineDepthStencilState depthStencilShadowMapping = null;
 
         /// <summary>
+        /// Disabled blend state
+        /// </summary>
+        private EngineBlendState blendDisabled = null;
+        /// <summary>
         /// Default blend state
         /// </summary>
         private EngineBlendState blendDefault = null;
@@ -592,7 +596,7 @@ namespace Engine
             #region Set Defaults
 
             SetDefaultViewport();
-            SetDefaultRenderTarget();
+            SetDefaultRenderTarget(true, true, true);
 
             SetDepthStencilWRZEnabled();
             SetRasterizerDefault();
@@ -687,6 +691,7 @@ namespace Engine
                 Logger.WriteError(this, $"Error presenting Graphics: Code {res.Code}");
             }
         }
+      
         /// <summary>
         /// Sets the default viewport
         /// </summary>
@@ -700,13 +705,28 @@ namespace Engine
         /// <param name="clearRT">Indicates whether the render target must be cleared</param>
         /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
         /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
-        public void SetDefaultRenderTarget(bool clearRT = true, bool clearDepth = true, bool clearStencil = true)
+        public void SetDefaultRenderTarget(bool clearRT, bool clearDepth, bool clearStencil)
         {
             SetRenderTargets(
                 renderTargetView, clearRT, GameEnvironment.Background,
                 depthStencilView, clearDepth, clearStencil,
                 false);
         }
+        /// <summary>
+        /// Sets default render target
+        /// </summary>
+        /// <param name="clearRT">Indicates whether the render target must be cleared</param>
+        /// <param name="clearRTColor">Render target clear color</param>
+        /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
+        /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
+        public void SetDefaultRenderTarget(bool clearRT, Color4 clearRTColor, bool clearDepth, bool clearStencil)
+        {
+            SetRenderTargets(
+                renderTargetView, clearRT, clearRTColor,
+                depthStencilView, clearDepth, clearStencil,
+                false);
+        }
+        
         /// <summary>
         /// Sets viewport
         /// </summary>
@@ -743,6 +763,7 @@ namespace Engine
 
             deviceContext.Rasterizer.SetViewports(rawVpArray);
         }
+        
         /// <summary>
         /// Set render targets
         /// </summary>
@@ -754,6 +775,21 @@ namespace Engine
         {
             SetRenderTargets(
                 renderTargets, clearRT, GameEnvironment.Background,
+                DefaultDepthStencil, clearDepth, clearStencil,
+                false);
+        }
+        /// <summary>
+        /// Set render targets
+        /// </summary>
+        /// <param name="renderTargets">Render targets</param>
+        /// <param name="clearRT">Indicates whether the target must be cleared</param>
+        /// <param name="clearRTColor">Render target clear color</param>
+        /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
+        /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
+        public void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, Color4 clearRTColor, bool clearDepth, bool clearStencil)
+        {
+            SetRenderTargets(
+                renderTargets, clearRT, clearRTColor,
                 DefaultDepthStencil, clearDepth, clearStencil,
                 false);
         }
@@ -802,6 +838,7 @@ namespace Engine
                     1.0f, 0);
             }
         }
+        
         /// <summary>
         /// Clear shader resources
         /// </summary>
@@ -842,6 +879,7 @@ namespace Engine
                     1.0f, 0);
             }
         }
+   
         /// <summary>
         /// Enables z-buffer for write
         /// </summary>
@@ -914,6 +952,19 @@ namespace Engine
 
             SetDepthStencilState(depthStencilShadowMapping);
         }
+
+        /// <summary>
+        /// Sets disabled blend state
+        /// </summary>
+        public void SetBlendDisabled()
+        {
+            if (blendDisabled == null)
+            {
+                blendDisabled = EngineBlendState.Disabled(this);
+            }
+
+            SetBlendState(blendDisabled);
+        }
         /// <summary>
         /// Sets default blend state
         /// </summary>
@@ -962,6 +1013,7 @@ namespace Engine
 
             SetBlendState(blendAdditive);
         }
+   
         /// <summary>
         /// Sets default rasterizer
         /// </summary>
@@ -1022,6 +1074,7 @@ namespace Engine
 
             SetRasterizerState(rasterizerShadowMapping);
         }
+    
         /// <summary>
         /// Bind an array of vertex buffers to the input-assembler stage.
         /// </summary>
@@ -1091,6 +1144,8 @@ namespace Engine
             rasterizerShadowMapping?.Dispose();
             rasterizerShadowMapping = null;
 
+            blendDisabled?.Dispose();
+            blendDisabled = null;
             blendDefault?.Dispose();
             blendDefault = null;
             blendAlphaBlend?.Dispose();

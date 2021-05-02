@@ -200,7 +200,7 @@ GBufferPSOutput PSPositionNormalColor(PSVertexPositionNormalColor input)
 	GBufferPSOutput output = (GBufferPSOutput) 0;
 
 	output.color = input.color;
-	output.normal = float4(input.normalWorld, 0);
+    output.normal = float4(normalize(input.normalWorld), 0);
     output.depth = float4(input.positionWorld, gMaterialIndex + input.materialIndex);
 
 	return output;
@@ -386,7 +386,7 @@ GBufferPSOutput PSPositionNormalTexture(PSVertexPositionNormalTexture input)
 	GBufferPSOutput output = (GBufferPSOutput) 0;
 
     output.color = gDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
-	output.normal = float4(input.normalWorld, 0);
+    output.normal = float4(normalize(input.normalWorld), 0);
     output.depth = float4(input.positionWorld, gMaterialIndex + input.materialIndex);
 
 	return output;

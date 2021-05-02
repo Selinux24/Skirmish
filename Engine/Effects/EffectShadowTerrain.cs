@@ -26,11 +26,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.worldViewProjectionVar.GetMatrix();
+                return worldViewProjectionVar.GetMatrix();
             }
             set
             {
-                this.worldViewProjectionVar.SetMatrix(value);
+                worldViewProjectionVar.SetMatrix(value);
             }
         }
 
@@ -43,9 +43,9 @@ namespace Engine.Effects
         public EffectShadowTerrain(Graphics graphics, byte[] effect, bool compile)
             : base(graphics, effect, compile)
         {
-            this.TerrainShadowMap = this.Effect.GetTechniqueByName("TerrainShadowMap");
+            TerrainShadowMap = Effect.GetTechniqueByName("TerrainShadowMap");
 
-            this.worldViewProjectionVar = this.Effect.GetVariableMatrix("gWorldViewProjection");
+            worldViewProjectionVar = Effect.GetVariableMatrix("gWorldViewProjection");
         }
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace Engine.Effects
         /// <param name="viewProjection">View * projection</param>
         public void UpdatePerFrame(Matrix viewProjection)
         {
-            this.WorldViewProjection = viewProjection;
+            WorldViewProjection = viewProjection;
         }
     }
 }

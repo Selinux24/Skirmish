@@ -13,7 +13,7 @@
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
+    <RestorePackages>false</RestorePackages>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <NuGetPackageImportStamp>
@@ -103,7 +103,7 @@
     <ErrorReport>prompt</ErrorReport>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
     <Prefer32Bit>false</Prefer32Bit>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
     <CodeAnalysisRuleSet>Engine.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup>
@@ -235,6 +235,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="RenderPass.cs" />
     <Compile Include="SpecularAlgorithms.cs" />
     <Compile Include="Common\VertexFont.cs" />
     <Compile Include="Content\MaterialBlinnPhongContent.cs" />
@@ -500,12 +501,8 @@
     <Compile Include="Camera.cs" />
     <Compile Include="CameraModes.cs" />
     <Compile Include="CameraTranslations.cs" />
-    <Compile Include="Collections\QuadTree.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Collections\QuadTreeNode.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="Collections\QuadTree.cs" />
+    <Compile Include="Collections\QuadTreeNode.cs" />
     <Compile Include="Common\DrawingData.cs" />
     <Compile Include="Common\DrawingDataDescription.cs" />
     <Compile Include="UI\FontMap.cs" />
@@ -698,66 +695,69 @@
     <None Include="Resources\ShaderLightEmissive.fxo" />
     <None Include="Resources\ShaderLightPoint.fxo" />
     <None Include="Resources\ShaderLightSpot.fxo" />
-    <None Include="Resources\ShaderPostProcess.fx" />
     <None Include="Resources\ShaderPostProcess.fxo" />
-    <AdditionalFiles Include="..\.sonarlint\selinux24_skirmish_dev\CSharp\SonarLint.xml">
-      <Link>SonarLint.xml</Link>
-    </AdditionalFiles>
-    <Content Include="Resources\IncPostProcessing.hlsl" />
-    <Content Include="Resources\IncScattering.hlsl" />
-    <None Include="Resources\ShaderShadowBillboard.fx" />
     <None Include="Resources\ShaderShadowBillboard.fxo" />
     <None Include="Resources\ShaderShadowCascade.fxo" />
     <None Include="Resources\ShaderShadowFoliage.fxo" />
     <None Include="Resources\ShaderShadowPoints.fxo" />
     <None Include="Resources\ShaderShadowTerrain.fxo" />
     <None Include="Resources\ShaderDeferredTerrain.fxo" />
-    <None Include="Resources\ShaderShadowTerrain.fx" />
-    <None Include="Resources\ShaderDeferredTerrain.fx" />
-    <None Include="Resources\ShaderDefaultSkyScattering.fx" />
-    <None Include="Resources\ShaderDefaultCPUParticles.fx" />
     <None Include="Resources\ShaderDefaultBasic.fxo" />
     <None Include="Resources\ShaderDefaultCPUParticles.fxo" />
     <None Include="Resources\ShaderDeferredComposer.fxo" />
-    <None Include="Resources\ShaderDeferredBasic.fx" />
     <None Include="Resources\ShaderDefaultBillboard.fxo" />
     <None Include="Resources\ShaderDefaultCubemap.fxo" />
     <None Include="Resources\ShaderDefaultFont.fxo" />
     <None Include="Resources\ShaderDeferredBasic.fxo" />
     <None Include="Resources\ShaderNull.fxo" />
     <None Include="Resources\ShaderDefaultGPUParticles.fxo" />
-    <None Include="Resources\ShaderShadowBasic.fx" />
-    <Content Include="Resources\IncVertexFormats.hlsl" />
-    <None Include="Resources\ShaderDefaultBasic.fx" />
-    <None Include="Resources\ShaderDefaultBillboard.fx" />
-    <None Include="Resources\ShaderDefaultFont.fx" />
-    <None Include="Resources\ShaderDefaultCubemap.fx" />
-    <None Include="Resources\ShaderDefaultGPUParticles.fx" />
     <None Include="Resources\ShaderShadowBasic.fxo" />
     <None Include="Resources\ShaderDefaultSkyScattering.fxo" />
     <None Include="Resources\ShaderDefaultSprite.fxo" />
     <None Include="Resources\ShaderDefaultTerrain.fxo" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\IncLights.hlsl" />
+    <EffectShader Include="Resources\IncVertexFormats.hlsl" />
+    <EffectShader Include="Resources\IncLights.hlsl" />
+    <EffectShader Include="Resources\IncPostProcessing.hlsl" />
+    <EffectShader Include="Resources\IncScattering.hlsl" />
+    <EffectShader Include="Resources\IncHelpers.hlsl" />
+    <EffectShader Include="Resources\IncMaterials.hlsl" />
+    <EffectShader Include="Resources\IncCommon.hlsl" />
+    <EffectShader Include="Resources\IncTerrain.hlsl" />
+    <EffectShader Include="Resources\ShaderPostProcess.fx" />
+    <EffectShader Include="Resources\ShaderShadowBillboard.fx" />
+    <EffectShader Include="Resources\ShaderShadowTerrain.fx" />
+    <EffectShader Include="Resources\ShaderDeferredTerrain.fx" />
+    <EffectShader Include="Resources\ShaderDefaultSkyScattering.fx" />
+    <EffectShader Include="Resources\ShaderDefaultCPUParticles.fx" />
+    <EffectShader Include="Resources\ShaderDeferredBasic.fx" />
+    <EffectShader Include="Resources\ShaderShadowBasic.fx" />
+    <EffectShader Include="Resources\ShaderDefaultBasic.fx" />
+    <EffectShader Include="Resources\ShaderDefaultBillboard.fx" />
+    <EffectShader Include="Resources\ShaderDefaultFont.fx" />
+    <EffectShader Include="Resources\ShaderDefaultCubemap.fx" />
+    <EffectShader Include="Resources\ShaderDefaultGPUParticles.fx" />
+    <EffectShader Include="Resources\ShaderDefaultFoliage.fx" />
+    <EffectShader Include="Resources\ShaderShadowFoliage.fx" />
+    <EffectShader Include="Resources\ShaderDefaultWater.fx" />
+    <EffectShader Include="Resources\ShaderShadowPoints.fx" />
+    <EffectShader Include="Resources\ShaderLightDirectional.fx" />
+    <EffectShader Include="Resources\ShaderLightPoint.fx" />
+    <EffectShader Include="Resources\ShaderLightSpot.fx" />
+    <EffectShader Include="Resources\ShaderLightCapsule.fx" />
+    <EffectShader Include="Resources\ShaderLightEmissive.fx" />
+    <EffectShader Include="Resources\ShaderDefaultDecal.fx" />
+    <EffectShader Include="Resources\ShaderDefaultTexture.fx" />
+    <EffectShader Include="Resources\ShaderShadowCascade.fx" />
+    <EffectShader Include="Resources\ShaderDeferredComposer.fx" />
+    <EffectShader Include="Resources\ShaderNull.fx" />
+    <EffectShader Include="Resources\ShaderDefaultSprite.fx" />
+    <EffectShader Include="Resources\ShaderDefaultTerrain.fx" />
+    <EffectShader Include="Resources\ShaderDefaultClouds.fx" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="engine.ico" />
-    <Content Include="Resources\IncHelpers.hlsl" />
-    <None Include="Resources\ShaderDefaultFoliage.fx" />
-    <None Include="Resources\ShaderShadowFoliage.fx" />
-    <None Include="Resources\ShaderDefaultWater.fx" />
-    <Content Include="Resources\IncMaterials.hlsl" />
-    <None Include="Resources\ShaderShadowPoints.fx" />
-    <None Include="Resources\ShaderLightDirectional.fx" />
-    <None Include="Resources\ShaderLightPoint.fx" />
-    <None Include="Resources\ShaderLightSpot.fx" />
-    <None Include="Resources\ShaderLightCapsule.fx" />
-    <None Include="Resources\ShaderLightEmissive.fx" />
-    <None Include="Resources\ShaderDefaultDecal.fx" />
-    <None Include="Resources\ShaderDefaultTexture.fx" />
-    <Content Include="Resources\ShaderShadowCascade.fx" />
-    <Content Include="Resources\IncCommon.hlsl" />
     <Content Include="sharpdx_direct3d11_1_effects_x64.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -770,15 +770,19 @@
     <Content Include="sharpdx_direct3d11_effects_x86.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <None Include="Resources\ShaderDeferredComposer.fx" />
-    <None Include="Resources\ShaderNull.fx" />
-    <None Include="Resources\ShaderDefaultSprite.fx" />
-    <None Include="Resources\ShaderDefaultTerrain.fx" />
-    <None Include="Resources\ShaderDefaultClouds.fx" />
-    <Content Include="Resources\IncTerrain.hlsl" />
+    <AdditionalFiles Include="..\.sonarlint\selinux24_skirmish_dev\CSharp\SonarLint.xml">
+      <Link>SonarLint.xml</Link>
+    </AdditionalFiles>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\packages\Microsoft.HLSL.CSharpVB.1.0.2\build\Microsoft.HLSL.CSharpVB.targets" Condition="Exists('..\packages\Microsoft.HLSL.CSharpVB.1.0.2\build\Microsoft.HLSL.CSharpVB.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>Este proyecto hace referencia a los paquetes NuGet que faltan en este equipo. Use la restauración de paquetes NuGet para descargarlos. Para obtener más información, consulte http://go.microsoft.com/fwlink/?LinkID=322105. El archivo que falta es {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Microsoft.HLSL.CSharpVB.1.0.2\build\Microsoft.HLSL.CSharpVB.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.HLSL.CSharpVB.1.0.2\build\Microsoft.HLSL.CSharpVB.targets'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

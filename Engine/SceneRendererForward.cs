@@ -3,6 +3,7 @@ using System.Diagnostics;
 #endif
 using System.Collections.Generic;
 using System.Linq;
+using SharpDX;
 
 namespace Engine
 {
@@ -45,47 +46,68 @@ namespace Engine
             }
 
             Updated = false;
+
+            //Draw visible components
+            var visibleComponents = Scene.GetComponents().Where(c => c.Visible);
+            if (!visibleComponents.Any())
+            {
+                return;
+            }
+
 #if DEBUG
             frameStats.Clear();
 
             Stopwatch swTotal = Stopwatch.StartNew();
 #endif
-            //Draw visible components
-            var visibleComponents = Scene.GetComponents().Where(c => c.Visible);
-            if (visibleComponents.Any())
+
+            //Initialize context data from update context
+            DrawContext.GameTime = gameTime;
+            DrawContext.DrawerMode = DrawerModes.Forward;
+            DrawContext.ViewProjection = UpdateContext.ViewProjection;
+            DrawContext.CameraVolume = UpdateContext.CameraVolume;
+            DrawContext.EyePosition = UpdateContext.EyePosition;
+            DrawContext.EyeTarget = UpdateContext.EyeDirection;
+
+            //Initialize context data from scene
+            DrawContext.Lights = Scene.Lights;
+            DrawContext.ShadowMapDirectional = ShadowMapperDirectional;
+            DrawContext.ShadowMapPoint = ShadowMapperPoint;
+            DrawContext.ShadowMapSpot = ShadowMapperSpot;
+
+            //Shadow mapping
+            DoShadowMapping(gameTime);
+
+            List<Targets> targets = new List<Targets>(2);
+
+            var objectComponents = visibleComponents.Where(c => !c.Usage.HasFlag(SceneObjectUsages.UI));
+            if (objectComponents.Any())
             {
-                //Initialize context data from update context
-                DrawContext.GameTime = gameTime;
-                DrawContext.DrawerMode = DrawerModes.Forward;
-                DrawContext.ViewProjection = UpdateContext.ViewProjection;
-                DrawContext.CameraVolume = UpdateContext.CameraVolume;
-                DrawContext.EyePosition = UpdateContext.EyePosition;
-                DrawContext.EyeTarget = UpdateContext.EyeDirection;
-
-                //Initialize context data from scene
-                DrawContext.Lights = Scene.Lights;
-                DrawContext.ShadowMapDirectional = ShadowMapperDirectional;
-                DrawContext.ShadowMapPoint = ShadowMapperPoint;
-                DrawContext.ShadowMapSpot = ShadowMapperSpot;
-
-                //Shadow mapping
-                DoShadowMapping(gameTime);
-
                 //Binds the result target
-                BindResult(true, true, true);
-
-                //Render components
-                DoRender(Scene, visibleComponents.Where(c => !c.Usage.HasFlag(SceneObjectUsages.UI)));
-
+                SetTarget(Targets.Objects, true, GameEnvironment.Background, true, true);
+                //Render objects
+                DoRender(Scene, objectComponents);
                 //Post-processing
-                DoPostProcessing(gameTime);
+                DoPostProcessing(Targets.Objects, RenderPass.Objects, gameTime);
 
-                //Render UI
-                DoRender(Scene, visibleComponents.Where(c => c.Usage.HasFlag(SceneObjectUsages.UI)));
-
-                //Write result
-                WriteResult(DrawContext);
+                targets.Add(Targets.Objects);
             }
+
+            var uiComponents = visibleComponents.Where(c => c.Usage.HasFlag(SceneObjectUsages.UI));
+            if (uiComponents.Any())
+            {
+                //Binds the UI target
+                SetTarget(Targets.UI, true, Color.Transparent, true, true);
+                //Render UI
+                DoRender(Scene, uiComponents);
+                //UI post-processing
+                DoPostProcessing(Targets.UI, RenderPass.UI, gameTime);
+
+                targets.Add(Targets.UI);
+            }
+
+            //Combine to screen
+            CombineTargets(targets, Targets.Screen);
+
 #if DEBUG
             swTotal.Stop();
 
@@ -100,61 +122,65 @@ namespace Engine
         /// <param name="components">Components</param>
         private void DoRender(Scene scene, IEnumerable<ISceneObject> components)
         {
-            //Forward rendering
-            if (components.Any())
+            if (!components.Any())
             {
-                #region Cull
-#if DEBUG
-                Stopwatch swCull = Stopwatch.StartNew();
-#endif
-                var toCullVisible = components.OfType<ICullable>();
-
-                bool draw = false;
-                if (scene.PerformFrustumCulling)
-                {
-                    //Frustum culling
-                    draw = cullManager.Cull(DrawContext.CameraVolume, CullIndexDrawIndex, toCullVisible);
-                }
-                else
-                {
-                    draw = true;
-                }
-
-                if (draw)
-                {
-                    var groundVolume = scene.GetSceneVolume();
-                    if (groundVolume != null)
-                    {
-                        //Ground culling
-                        draw = cullManager.Cull(groundVolume, CullIndexDrawIndex, toCullVisible);
-                    }
-                }
-
-#if DEBUG
-                swCull.Stop();
-
-                frameStats.ForwardCull = swCull.ElapsedTicks;
-#endif
-                #endregion
-
-                #region Draw
-
-                if (draw)
-                {
-#if DEBUG
-                    Stopwatch swDraw = Stopwatch.StartNew();
-#endif
-                    //Draw solid
-                    DrawResultComponents(DrawContext, CullIndexDrawIndex, components);
-#if DEBUG
-                    swDraw.Stop();
-
-                    frameStats.ForwardDraw = swDraw.ElapsedTicks;
-#endif
-                }
-
-                #endregion
+                return;
             }
+
+            bool draw = false;
+
+            #region Cull
+#if DEBUG
+            Stopwatch swCull = Stopwatch.StartNew();
+#endif
+            var toCullVisible = components.OfType<ICullable>();
+
+            if (scene.PerformFrustumCulling)
+            {
+                //Frustum culling
+                draw = cullManager.Cull(DrawContext.CameraVolume, CullIndexDrawIndex, toCullVisible);
+            }
+            else
+            {
+                draw = true;
+            }
+
+            if (draw)
+            {
+                var groundVolume = scene.GetSceneVolume();
+                if (groundVolume != null)
+                {
+                    //Ground culling
+                    draw = cullManager.Cull(groundVolume, CullIndexDrawIndex, toCullVisible);
+                }
+            }
+
+#if DEBUG
+            swCull.Stop();
+
+            frameStats.ForwardCull = swCull.ElapsedTicks;
+#endif
+            #endregion
+
+            if (!draw)
+            {
+                return;
+            }
+
+            #region Draw
+
+#if DEBUG
+            Stopwatch swDraw = Stopwatch.StartNew();
+#endif
+            //Draw solid
+            DrawResultComponents(DrawContext, CullIndexDrawIndex, components);
+#if DEBUG
+            swDraw.Stop();
+
+            frameStats.ForwardDraw = swDraw.ElapsedTicks;
+#endif
+
+            #endregion
         }
         /// <summary>
         /// Draw components

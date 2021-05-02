@@ -83,11 +83,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.worldViewProjectionVar.GetMatrix();
+                return worldViewProjectionVar.GetMatrix();
             }
             set
             {
-                this.worldViewProjectionVar.SetMatrix(value);
+                worldViewProjectionVar.SetMatrix(value);
             }
         }
         /// <summary>
@@ -97,11 +97,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.eyePositionWorldVar.GetVector<Vector3>();
+                return eyePositionWorldVar.GetVector<Vector3>();
             }
             set
             {
-                this.eyePositionWorldVar.Set(value);
+                eyePositionWorldVar.Set(value);
             }
         }
         /// <summary>
@@ -111,11 +111,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.startRadiusVar.GetFloat();
+                return startRadiusVar.GetFloat();
             }
             set
             {
-                this.startRadiusVar.Set(value);
+                startRadiusVar.Set(value);
             }
         }
         /// <summary>
@@ -125,11 +125,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.endRadiusVar.GetFloat();
+                return endRadiusVar.GetFloat();
             }
             set
             {
-                this.endRadiusVar.Set(value);
+                endRadiusVar.Set(value);
             }
         }
         /// <summary>
@@ -139,11 +139,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.windDirectionVar.GetVector<Vector3>();
+                return windDirectionVar.GetVector<Vector3>();
             }
             set
             {
-                this.windDirectionVar.Set(value);
+                windDirectionVar.Set(value);
             }
         }
         /// <summary>
@@ -153,11 +153,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.windStrengthVar.GetFloat();
+                return windStrengthVar.GetFloat();
             }
             set
             {
-                this.windStrengthVar.Set(value);
+                windStrengthVar.Set(value);
             }
         }
         /// <summary>
@@ -167,11 +167,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.totalTimeVar.GetFloat();
+                return totalTimeVar.GetFloat();
             }
             set
             {
-                this.totalTimeVar.Set(value);
+                totalTimeVar.Set(value);
             }
         }
         /// <summary>
@@ -181,11 +181,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.deltaVar.GetVector<Vector3>();
+                return deltaVar.GetVector<Vector3>();
             }
             set
             {
-                this.deltaVar.Set(value);
+                deltaVar.Set(value);
             }
         }
         /// <summary>
@@ -195,11 +195,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.textureCountVar.GetUInt();
+                return textureCountVar.GetUInt();
             }
             set
             {
-                this.textureCountVar.Set(value);
+                textureCountVar.Set(value);
             }
         }
         /// <summary>
@@ -209,15 +209,15 @@ namespace Engine.Effects
         {
             get
             {
-                return this.texturesVar.GetResource();
+                return texturesVar.GetResource();
             }
             set
             {
-                if (this.currentTextures != value)
+                if (currentTextures != value)
                 {
-                    this.texturesVar.SetResource(value);
+                    texturesVar.SetResource(value);
 
-                    this.currentTextures = value;
+                    currentTextures = value;
 
                     Counters.TextureUpdates++;
                 }
@@ -230,15 +230,15 @@ namespace Engine.Effects
         {
             get
             {
-                return this.textureRandomVar.GetResource();
+                return textureRandomVar.GetResource();
             }
             set
             {
-                if (this.currentTextureRandom != value)
+                if (currentTextureRandom != value)
                 {
-                    this.textureRandomVar.SetResource(value);
+                    textureRandomVar.SetResource(value);
 
-                    this.currentTextureRandom = value;
+                    currentTextureRandom = value;
 
                     Counters.TextureUpdates++;
                 }
@@ -254,22 +254,22 @@ namespace Engine.Effects
         public EffectShadowFoliage(Graphics graphics, byte[] effect, bool compile)
             : base(graphics, effect, compile)
         {
-            this.ShadowMapFoliage4 = this.Effect.GetTechniqueByName("ShadowMapFoliage4");
-            this.ShadowMapFoliage8 = this.Effect.GetTechniqueByName("ShadowMapFoliage8");
-            this.ShadowMapFoliage16 = this.Effect.GetTechniqueByName("ShadowMapFoliage16");
+            ShadowMapFoliage4 = Effect.GetTechniqueByName("ShadowMapFoliage4");
+            ShadowMapFoliage8 = Effect.GetTechniqueByName("ShadowMapFoliage8");
+            ShadowMapFoliage16 = Effect.GetTechniqueByName("ShadowMapFoliage16");
 
-            this.worldViewProjectionVar = this.Effect.GetVariableMatrix("gWorldViewProjection");
-            this.eyePositionWorldVar = this.Effect.GetVariableVector("gEyePositionWorld");
-            this.startRadiusVar = this.Effect.GetVariableScalar("gStartRadius");
-            this.endRadiusVar = this.Effect.GetVariableScalar("gEndRadius");
-            this.textureCountVar = this.Effect.GetVariableScalar("gTextureCount");
-            this.texturesVar = this.Effect.GetVariableTexture("gTextureArray");
+            worldViewProjectionVar = Effect.GetVariableMatrix("gWorldViewProjection");
+            eyePositionWorldVar = Effect.GetVariableVector("gEyePositionWorld");
+            startRadiusVar = Effect.GetVariableScalar("gStartRadius");
+            endRadiusVar = Effect.GetVariableScalar("gEndRadius");
+            textureCountVar = Effect.GetVariableScalar("gTextureCount");
+            texturesVar = Effect.GetVariableTexture("gTextureArray");
 
-            this.windDirectionVar = this.Effect.GetVariableVector("gWindDirection");
-            this.windStrengthVar = this.Effect.GetVariableScalar("gWindStrength");
-            this.totalTimeVar = this.Effect.GetVariableScalar("gTotalTime");
-            this.deltaVar = this.Effect.GetVariableVector("gDelta");
-            this.textureRandomVar = this.Effect.GetVariableTexture("gTextureRandom");
+            windDirectionVar = Effect.GetVariableVector("gWindDirection");
+            windStrengthVar = Effect.GetVariableScalar("gWindStrength");
+            totalTimeVar = Effect.GetVariableScalar("gTotalTime");
+            deltaVar = Effect.GetVariableVector("gDelta");
+            textureRandomVar = Effect.GetVariableTexture("gTextureRandom");
         }
 
         /// <summary>
@@ -291,14 +291,14 @@ namespace Engine.Effects
             Vector3 delta,
             EngineShaderResourceView randomTexture)
         {
-            this.WorldViewProjection = viewProjection;
-            this.EyePositionWorld = eyePositionWorld;
+            WorldViewProjection = viewProjection;
+            EyePositionWorld = eyePositionWorld;
 
-            this.WindDirection = windDirection;
-            this.WindStrength = windStrength;
-            this.TotalTime = totalTime;
-            this.Delta = delta;
-            this.TextureRandom = randomTexture;
+            WindDirection = windDirection;
+            WindStrength = windStrength;
+            TotalTime = totalTime;
+            Delta = delta;
+            TextureRandom = randomTexture;
         }
         /// <summary>
         /// Update per model object data
@@ -313,10 +313,10 @@ namespace Engine.Effects
             uint textureCount,
             EngineShaderResourceView texture)
         {
-            this.StartRadius = startRadius;
-            this.EndRadius = endRadius;
-            this.TextureCount = textureCount;
-            this.Textures = texture;
+            StartRadius = startRadius;
+            EndRadius = endRadius;
+            TextureCount = textureCount;
+            Textures = texture;
         }
     }
 }

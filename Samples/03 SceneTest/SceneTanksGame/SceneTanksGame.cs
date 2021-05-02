@@ -1732,8 +1732,8 @@ You will lost all the game progress.",
             dialog.Show(500);
             fadePanel.TweenAlpha(0, 0.5f, 500, ScaleFuncs.Linear);
 
-            Renderer.SetPostProcessingEffect(PostProcessingEffects.Grayscale, null);
-            Renderer.SetPostProcessingEffect(PostProcessingEffects.Blur, PostProcessBlurParams.Strong);
+            Renderer.SetPostProcessingEffect(RenderPass.Objects, PostProcessingEffects.Grayscale, null);
+            Renderer.SetPostProcessingEffect(RenderPass.Objects, PostProcessingEffects.Blur, PostProcessBlurParams.Strong);
 
             Game.VisibleMouse = true;
         }

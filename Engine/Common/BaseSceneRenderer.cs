@@ -22,6 +22,10 @@ namespace Engine.Common
         struct PostProcessingEffect
         {
             /// <summary>
+            /// Render pass
+            /// </summary>
+            public RenderPass RenderPass { get; set; }
+            /// <summary>
             /// Effect
             /// </summary>
             public PostProcessingEffects Effect { get; set; }
@@ -30,6 +34,18 @@ namespace Engine.Common
             /// </summary>
             public IDrawerPostProcessParams Parameters { get; set; }
         }
+
+        protected enum Targets
+        {
+            Screen,
+            Objects,
+            UI,
+            PostProcessing,
+        }
+
+        private RenderTarget sceneObjectsTarget = null;
+
+        private RenderTarget sceneUITarget = null;
 
         /// <summary>
         /// Post-processing render target 1
@@ -223,6 +239,9 @@ namespace Engine.Common
                 Name = "Shadow mapping",
             };
 
+            sceneObjectsTarget = new RenderTarget(scene.Game, SharpDX.DXGI.Format.R32G32B32A32_Float, false, 1);
+            sceneUITarget = new RenderTarget(scene.Game, SharpDX.DXGI.Format.R32G32B32A32_Float, false, 1);
+
             postProcessingTarget1 = new RenderTarget(scene.Game, SharpDX.DXGI.Format.R32G32B32A32_Float, false, 1);
             postProcessingTarget2 = new RenderTarget(scene.Game, SharpDX.DXGI.Format.R32G32B32A32_Float, false, 1);
             processingDrawer = new PostProcessingDrawer(scene.Game.Graphics, DrawerPool.EffectPostProcess);
@@ -260,10 +279,15 @@ namespace Engine.Common
                 ShadowMapperSpot?.Dispose();
                 ShadowMapperSpot = null;
 
+                sceneObjectsTarget?.Dispose();
+                sceneObjectsTarget = null;
+                sceneUITarget?.Dispose();
+                sceneUITarget = null;
                 postProcessingTarget1?.Dispose();
                 postProcessingTarget1 = null;
                 postProcessingTarget2?.Dispose();
                 postProcessingTarget2 = null;
+
                 processingDrawer?.Dispose();
                 processingDrawer = null;
             }
@@ -1002,80 +1026,87 @@ namespace Engine.Common
         /// <summary>
         /// Binds graphics for results pass
         /// </summary>
+        /// <param name="target">Target type</param>
         /// <param name="clearRT">Indicates whether the render target must be cleared</param>
+        /// <param name="clearRTColor">Target clear color</param>
         /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
         /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
-        protected virtual void BindResult(bool clearRT, bool clearDepth, bool clearStencil)
+        protected virtual void SetTarget(Targets target, bool clearRT, Color4 clearRTColor, bool clearDepth, bool clearStencil)
         {
-            if (PostProcessingEnabled)
+            switch (target)
             {
-                BindPostProcessing(clearRT, clearDepth, clearStencil);
+                case Targets.Screen:
+                    BindDefaultTarget(clearRT, clearRTColor, clearDepth, clearStencil);
+                    break;
+                case Targets.Objects:
+                    BindObjectsTarget(clearRT, clearRTColor, clearDepth, clearStencil);
+                    break;
+                case Targets.UI:
+                    BindUITarget(clearRT, clearRTColor, clearDepth, clearStencil);
+                    break;
+                case Targets.PostProcessing:
+                    BindPostProcessingTarget(clearRT, clearRTColor, clearDepth, clearStencil);
+                    break;
+                default:
+                    BindDefaultTarget(clearRT, clearRTColor, clearDepth, clearStencil);
+                    break;
             }
-            else
-            {
-                BindDefault(clearRT, clearDepth, clearStencil);
-            }
-        }
-        /// <summary>
-        /// Writes result to target
-        /// </summary>
-        /// <param name="context">Draw context</param>
-        protected virtual void WriteResult(DrawContext context)
-        {
-            if (!PostProcessingEnabled)
-            {
-                return;
-            }
-
-            if (!postProcessingEffects.Any())
-            {
-                return;
-            }
-
-            var graphics = Scene.Game.Graphics;
-
-            graphics.SetRasterizerDefault();
-            graphics.SetBlendDefault();
-            graphics.SetDepthStencilNone();
-
-            //Gets the source texture
-            var texture = postProcessingTarget1.Textures?.FirstOrDefault();
-
-            //Set the default render target
-            BindDefault(true, true, true);
-
-            //Draw the result
-            processingDrawer.SetEffect(PostProcessingEffects.None);
-            processingDrawer.UpdateEffectParameters(Scene, context.GameTime.TotalSeconds, texture, null);
-            processingDrawer.Bind();
-            processingDrawer.Draw();
         }
         /// <summary>
         /// Binds the default render target
         /// </summary>
         /// <param name="clearRT">Indicates whether the render target must be cleared</param>
+        /// <param name="clearRTColor">Target clear color</param>
         /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
         /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
-        private void BindDefault(bool clearRT, bool clearDepth, bool clearStencil)
+        private void BindDefaultTarget(bool clearRT, Color4 clearRTColor, bool clearDepth, bool clearStencil)
         {
             var graphics = Scene.Game.Graphics;
 
             //Restore backbuffer as render target and clear it
-            graphics.SetDefaultRenderTarget(clearRT, clearDepth, clearStencil);
+            graphics.SetDefaultRenderTarget(clearRT, clearRTColor, clearDepth, clearStencil);
+            graphics.SetDefaultViewport();
+        }
+        /// <summary>
+        /// Binds the objects render target
+        /// </summary>
+        /// <param name="clearRT">Indicates whether the render target must be cleared</param>
+        /// <param name="clearRTColor">Target clear color</param>
+        /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
+        /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
+        private void BindObjectsTarget(bool clearRT, Color4 clearRTColor, bool clearDepth, bool clearStencil)
+        {
+            var graphics = Scene.Game.Graphics;
+
+            graphics.SetRenderTargets(sceneObjectsTarget.Targets, clearRT, clearRTColor, clearDepth, clearStencil);
+            graphics.SetDefaultViewport();
+        }
+        /// <summary>
+        /// Binds the UI render target
+        /// </summary>
+        /// <param name="clearRT">Indicates whether the render target must be cleared</param>
+        /// <param name="clearRTColor">Target clear color</param>
+        /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
+        /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
+        private void BindUITarget(bool clearRT, Color4 clearRTColor, bool clearDepth, bool clearStencil)
+        {
+            var graphics = Scene.Game.Graphics;
+
+            graphics.SetRenderTargets(sceneUITarget.Targets, clearRT, clearRTColor, clearDepth, clearStencil);
             graphics.SetDefaultViewport();
         }
         /// <summary>
         /// Binds graphics for post-processing pass
         /// </summary>
         /// <param name="clearRT">Indicates whether the render target must be cleared</param>
+        /// <param name="clearRTColor">Target clear color</param>
         /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
         /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
-        private void BindPostProcessing(bool clearRT, bool clearDepth, bool clearStencil)
+        private void BindPostProcessingTarget(bool clearRT, Color4 clearRTColor, bool clearDepth, bool clearStencil)
         {
             var graphics = Scene.Game.Graphics;
 
-            //Set light buffer to draw lights
-            graphics.SetRenderTargets(postProcessingTarget1.Targets, clearRT, clearDepth, clearStencil);
+            graphics.SetRenderTargets(postProcessingTarget1.Targets, clearRT, clearRTColor, clearDepth, clearStencil);
 
             //Set local viewport
             var viewport = Scene.Game.Form.GetViewport();
@@ -1093,52 +1124,122 @@ namespace Engine.Common
         /// <summary>
         /// Does the post-processing draw
         /// </summary>
+        /// <param name="target">Target to set restul</param>
+        /// <param name="renderPass">Render pass</param>
         /// <param name="gameTime">Game time</param>
-        protected virtual void DoPostProcessing(GameTime gameTime)
+        protected virtual bool DoPostProcessing(Targets target, RenderPass renderPass, GameTime gameTime)
         {
             if (!PostProcessingEnabled)
             {
-                return;
+                return false;
             }
 
-            if (!postProcessingEffects.Any())
+            var effects = postProcessingEffects.Where(e => e.RenderPass == renderPass);
+            if (!effects.Any())
             {
-                return;
+                return false;
             }
+
+            //Gets the las used target texture
+            var texture = GetTargetTextures(target)?.FirstOrDefault();
 
             var graphics = Scene.Game.Graphics;
 
             graphics.SetRasterizerDefault();
-            graphics.SetBlendDefault();
             graphics.SetDepthStencilNone();
+            graphics.SetBlendDefault();
 
-            foreach (var postEffect in postProcessingEffects)
+            foreach (var postEffect in effects)
             {
-                //Gets the source texture
-                var texture = postProcessingTarget1.Textures?.FirstOrDefault();
-
                 //Toggles post-processing buffers
                 TogglePostProcessingTargets();
 
                 //Use the next buffer as render target
-                BindPostProcessing(true, true, true);
+                BindPostProcessingTarget(true, Color.Transparent, true, true);
 
-                processingDrawer.SetEffect(postEffect.Effect);
-                processingDrawer.UpdateEffectParameters(Scene, gameTime.TotalSeconds, texture, postEffect.Parameters);
+                processingDrawer.UpdateEffectParameters(Scene, gameTime.TotalSeconds, texture, postEffect.Effect, postEffect.Parameters);
                 processingDrawer.Bind();
                 processingDrawer.Draw();
+
+                //Gets the source texture
+                texture = postProcessingTarget1.Textures?.FirstOrDefault();
             }
+
+            //Set the result render target
+            SetTarget(target, true, Color.Transparent, true, true);
+
+            //Draw the result
+            processingDrawer.UpdateEffectEmpty(Scene, texture);
+            processingDrawer.Bind();
+            processingDrawer.Draw();
+
+            return true;
+        }
+        /// <summary>
+        /// Gets the target textures
+        /// </summary>
+        /// <param name="target">Target type</param>
+        /// <returns>Returns the target texture list</returns>
+        protected virtual IEnumerable<EngineShaderResourceView> GetTargetTextures(Targets target)
+        {
+            switch (target)
+            {
+                case Targets.Screen:
+                    return null;
+                case Targets.Objects:
+                    return sceneObjectsTarget?.Textures;
+                case Targets.UI:
+                    return sceneUITarget?.Textures;
+                case Targets.PostProcessing:
+                    return postProcessingTarget1?.Textures;
+                default:
+                    return null;
+            }
+        }
+        /// <summary>
+        /// Combine the specified targets into the result target
+        /// </summary>
+        /// <param name="sourceTargets">Target list</param>
+        /// <param name="resultTarget">Result target</param>
+        protected virtual void CombineTargets(IEnumerable<Targets> sourceTargets, Targets resultTarget)
+        {
+            SetTarget(resultTarget, true, Color.Transparent, true, true);
+
+            var graphics = Scene.Game.Graphics;
+
+            graphics.SetDepthStencilNone();
+            graphics.SetRasterizerDefault();
+            graphics.SetBlendDisabled();
+
+            var texture1 = GetTargetTextures(Targets.Objects)?.FirstOrDefault();
+            var texture2 = GetTargetTextures(Targets.UI)?.FirstOrDefault();
+
+            processingDrawer.UpdateEffectCombine(Scene, texture1, texture2);
+            processingDrawer.Bind();
+            processingDrawer.Draw();
+
+            //foreach (var sourceTarget in sourceTargets)
+            //{
+            //    var texture = GetTargetTextures(sourceTarget)?.FirstOrDefault();
+
+            //    //Draw the result
+            //    processingDrawer.UpdateEffectEmpty(Scene, texture);
+            //    processingDrawer.Bind();
+            //    processingDrawer.Draw();
+            //}
         }
 
         /// <summary>
         /// Sets the post-processing effect
         /// </summary>
+        /// <param name="renderPass">Render pass</param>
         /// <param name="effect">Effect</param>
         /// <param name="parameters">Parameters</param>
-        public void SetPostProcessingEffect(PostProcessingEffects effect, IDrawerPostProcessParams parameters)
+        public void SetPostProcessingEffect(RenderPass renderPass, PostProcessingEffects effect, IDrawerPostProcessParams parameters)
         {
             postProcessingEffects.Add(new PostProcessingEffect
             {
+                RenderPass = renderPass,
                 Effect = effect,
                 Parameters = parameters,
             });

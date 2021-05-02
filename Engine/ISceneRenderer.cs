@@ -24,9 +24,10 @@ namespace Engine
         /// <summary>
         /// Sets the post-processing effect
         /// </summary>
+        /// <param name="renderPass">Render pass</param>
         /// <param name="effect">Effect</param>
         /// <param name="parameters">Parameters</param>
-        void SetPostProcessingEffect(PostProcessingEffects effect, IDrawerPostProcessParams parameters);
+        void SetPostProcessingEffect(RenderPass renderPass, PostProcessingEffects effect, IDrawerPostProcessParams parameters);
         /// <summary>
         /// Clears the post-processing effect
         /// </summary>

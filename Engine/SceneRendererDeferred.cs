@@ -214,60 +214,71 @@ namespace Engine
                 //Shadow mapping
                 DoShadowMapping(gameTime);
 
-                #region Deferred rendering
+                List<Targets> targets = new List<Targets>(2);
 
-                //Render to G-Buffer only opaque objects
                 var deferredEnabledComponents = visibleComponents.Where(c => c.DeferredEnabled && !c.Usage.HasFlag(SceneObjectUsages.UI));
-                if (deferredEnabledComponents.Any())
-                {
-                    DoDeferred(deferredEnabledComponents);
-                }
-
-                #region Final composition
-#if DEBUG
-                Stopwatch swComponsition = Stopwatch.StartNew();
-#endif
-                BindResult(true, false, false);
-
-                //Draw scene result on screen using g-buffer and light buffer
-                DrawResult(DrawContext);
-
-#if DEBUG
-                swComponsition.Stop();
-
-                frameStats.DeferredCompose = swComponsition.ElapsedTicks;
-#endif
-                #endregion
-
-                #endregion
-
-                #region Forward rendering
-
-                //Render to screen deferred disabled components
+                bool anyDeferred = deferredEnabledComponents.Any();
                 var deferredDisabledComponents = visibleComponents.Where(c => !c.DeferredEnabled && !c.Usage.HasFlag(SceneObjectUsages.UI));
-                if (deferredDisabledComponents.Any())
+                bool anyForward = deferredDisabledComponents.Any();
+
+                if (anyForward || anyDeferred)
                 {
-                    DoForward(deferredDisabledComponents);
+                    if (anyDeferred)
+                    {
+                        //Render to G-Buffer deferred enabled components
+                        DoDeferred(deferredEnabledComponents);
+
+                        //Binds the result target
+                        SetTarget(Targets.Objects, true, Color.Transparent, false, false);
+
+                        #region Final composition
+#if DEBUG
+                        Stopwatch swComponsition = Stopwatch.StartNew();
+#endif
+                        //Draw scene result on screen using g-buffer and light buffer
+                        DrawResult(DrawContext);
+
+#if DEBUG
+                        swComponsition.Stop();
+
+                        frameStats.DeferredCompose = swComponsition.ElapsedTicks;
+#endif
+                        #endregion
+                    }
+                    else
+                    {
+                        //Binds the result target
+                        SetTarget(Targets.Objects, true, Color.Transparent, true, true);
+                    }
+
+                    if (anyForward)
+                    {
+                        //Render to screen deferred disabled components
+                        DoForward(deferredDisabledComponents);
+                    }
+
+                    //Post-processing
+                    DoPostProcessing(Targets.Objects, RenderPass.Objects, gameTime);
+
+                    targets.Add(Targets.Objects);
                 }
-
-                #endregion
-
-                //Post-processing
-                DoPostProcessing(gameTime);
-
-                #region UI rendering (Forward)
 
                 //Render to screen deferred disabled components
                 var uiComponents = visibleComponents.Where(c => c.Usage.HasFlag(SceneObjectUsages.UI));
                 if (uiComponents.Any())
                 {
+                    //Binds the result target
+                    SetTarget(Targets.UI, true, Color.Transparent, false, false);
+                    //UI render
                     DoForward(uiComponents);
+                    //UI post-processing
+                    DoPostProcessing(Targets.UI, RenderPass.UI, gameTime);
+              
+                    targets.Add(Targets.UI);
                 }
 
-                #endregion
-
-                //Writes result
-                WriteResult(DrawContext);
+                //Combine to screen
+                CombineTargets(targets, Targets.Screen);
             }
 #if DEBUG
             swTotal.Stop();

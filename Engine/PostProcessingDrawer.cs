@@ -141,7 +141,7 @@ namespace Engine
         /// Sets the effect to the post processing helper class
         /// </summary>
         /// <param name="effect">Effect</param>
-        public void SetEffect(PostProcessingEffects effect)
+        private void SetEffect(PostProcessingEffects effect)
         {
             var effectTechnique = drawer.GetTechnique(effect);
 
@@ -176,11 +176,46 @@ namespace Engine
         /// Updates the effect parameters
         /// </summary>
         /// <param name="scene">Scene</param>
+        /// <param name="texture">Source texture</param>
+        public void UpdateEffectEmpty(Scene scene, EngineShaderResourceView texture)
+        {
+            SetEffect(PostProcessingEffects.None);
+
+            var viewProj = scene.Game.Form.GetOrthoProjectionMatrix();
+
+            drawer.UpdatePerFrameEmpty(
+                viewProj,
+                texture);
+        }
+        /// <summary>
+        /// Updates the effect parameters
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        /// <param name="texture1">Texture 1</param>
+        /// <param name="texture2">Texture 2</param>
+        public void UpdateEffectCombine(Scene scene, EngineShaderResourceView texture1, EngineShaderResourceView texture2)
+        {
+            SetEffect(PostProcessingEffects.Combine);
+
+            var viewProj = scene.Game.Form.GetOrthoProjectionMatrix();
+
+            drawer.UpdatePerFrameCombine(
+                viewProj,
+                texture1,
+                texture2);
+        }
+        /// <summary>
+        /// Updates the effect parameters
+        /// </summary>
+        /// <param name="scene">Scene</param>
         /// <param name="totalSeconds">Total seconds</param>
         /// <param name="texture">Source texture</param>
+        /// <param name="effect">Effect</param>
         /// <param name="parameters">Parameters</param>
-        public void UpdateEffectParameters(Scene scene, float totalSeconds, EngineShaderResourceView texture, IDrawerPostProcessParams parameters)
+        public void UpdateEffectParameters(Scene scene, float totalSeconds, EngineShaderResourceView texture, PostProcessingEffects effect, IDrawerPostProcessParams parameters)
         {
+            SetEffect(effect);
+
             var forms = scene.Game.Form;
             var viewProj = forms.GetOrthoProjectionMatrix();
             var screenRect = forms.RenderRectangle;

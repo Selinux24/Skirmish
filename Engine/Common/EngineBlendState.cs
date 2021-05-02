@@ -25,6 +25,32 @@ namespace Engine.Common
         public int SampleMask { get; set; }
 
         /// <summary>
+        /// Creates a disabled blend state
+        /// </summary>
+        /// <param name="graphics">Graphics</param>
+        /// <returns>Returns the default disabled blend state</returns>
+        public static EngineBlendState Disabled(Graphics graphics)
+        {
+            BlendStateDescription1 desc = new BlendStateDescription1
+            {
+                AlphaToCoverageEnable = false,
+                IndependentBlendEnable = false
+            };
+
+            desc.RenderTarget[0].IsBlendEnabled = true;
+            desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+
+            desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
+            desc.RenderTarget[0].SourceBlend = BlendOption.One;
+            desc.RenderTarget[0].DestinationBlend = BlendOption.Zero;
+
+            desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
+            desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
+            desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
+
+            return graphics.CreateBlendState(desc, Color.Transparent, -1);
+        }
+        /// <summary>
         /// Creates a default blend state
         /// </summary>
         /// <param name="graphics">Graphics</param>

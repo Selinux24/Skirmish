@@ -103,7 +103,7 @@
     <ErrorReport>prompt</ErrorReport>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
     <Prefer32Bit>false</Prefer32Bit>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
     <CodeAnalysisRuleSet>Engine.PathFinding.AStar.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup>

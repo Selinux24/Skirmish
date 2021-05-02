@@ -27,15 +27,15 @@ namespace Engine.Effects
         /// <param name="compile">Compile effect</param>
         protected Drawer(Graphics graphics, byte[] effect, bool compile)
         {
-            this.Graphics = graphics;
+            Graphics = graphics;
 
             if (compile)
             {
-                this.Effect = graphics.CompileEffect(effect, HelperShaders.FXProfile);
+                Effect = graphics.CompileEffect(effect, HelperShaders.FXProfile);
             }
             else
             {
-                this.Effect = graphics.LoadEffect(effect);
+                Effect = graphics.LoadEffect(effect);
             }
         }
         /// <summary>
@@ -62,8 +62,8 @@ namespace Engine.Effects
         {
             if (disposing)
             {
-                this.Effect?.Dispose();
-                this.Effect = null;
+                Effect?.Dispose();
+                Effect = null;
             }
         }
 
@@ -72,7 +72,7 @@ namespace Engine.Effects
         /// </summary>
         public void Optimize()
         {
-            this.Effect.Optimize();
+            Effect?.Optimize();
         }
     }
 }

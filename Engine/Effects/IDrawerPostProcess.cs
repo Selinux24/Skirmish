@@ -20,6 +20,19 @@ namespace Engine.Effects
         /// Update per frame data
         /// </summary>
         /// <param name="viewProjection">View * projection matrix</param>
+        /// <param name="texture">Texture</param>
+        void UpdatePerFrameEmpty(Matrix viewProjection, EngineShaderResourceView texture);
+        /// <summary>
+        /// Update per frame data
+        /// </summary>
+        /// <param name="viewProjection">View * projection matrix</param>
+        /// <param name="texture1">Texture 1</param>
+        /// <param name="texture2">Texture 2</param>
+        void UpdatePerFrameCombine(Matrix viewProjection, EngineShaderResourceView texture1, EngineShaderResourceView texture2);
+        /// <summary>
+        /// Update per frame data
+        /// </summary>
+        /// <param name="viewProjection">View * projection matrix</param>
         /// <param name="viewportSize">Viewport size</param>
         /// <param name="time">Time</param>
         /// <param name="texture">Texture</param>

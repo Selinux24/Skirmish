@@ -11,6 +11,10 @@ namespace Engine.PostProcessing
         /// </summary>
         None,
         /// <summary>
+        /// Combines two textures
+        /// </summary>
+        Combine,
+        /// <summary>
         /// Gray scale
         /// </summary>
         Grayscale,

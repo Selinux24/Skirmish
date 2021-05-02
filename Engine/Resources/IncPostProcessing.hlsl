@@ -16,7 +16,7 @@ float3 SimpleReinhardToneMapping(float3 color)
 {
     float exposure = 1.5;
     color *= exposure / (1. + color / exposure);
-    color = pow(color, inverseGamma);
+    color = pow(saturate(color), inverseGamma);
     return color;
 }
 
@@ -25,7 +25,7 @@ float3 LumaBasedReinhardToneMapping(float3 color)
     float luma = dot(color, float3(0.2126, 0.7152, 0.0722));
     float toneMappedLuma = luma / (1. + luma);
     color *= toneMappedLuma / luma;
-    color = pow(color, inverseGamma);
+    color = pow(saturate(color), inverseGamma);
     return color;
 }
 
@@ -35,14 +35,14 @@ float3 WhitePreservingLumaBasedReinhardToneMapping(float3 color)
     float luma = dot(color, float3(0.2126, 0.7152, 0.0722));
     float toneMappedLuma = luma * (1. + luma / (white * white)) / (1. + luma);
     color *= toneMappedLuma / luma;
-    color = pow(color, inverseGamma);
+    color = pow(saturate(color), inverseGamma);
     return color;
 }
 
 float3 RomBinDaHouseToneMapping(float3 color)
 {
     color = exp(-1.0 / (2.72 * color + 0.15));
-    color = pow(color, inverseGamma);
+    color = pow(saturate(color), inverseGamma);
     return color;
 }
 
@@ -67,7 +67,7 @@ float3 Uncharted2ToneMapping(float3 color)
     color = ((color * (A * color + C * B) + D * E) / (color * (A * color + B) + D * F)) - E / F;
     float white = ((W * (A * W + C * B) + D * E) / (W * (A * W + B) + D * F)) - E / F;
     color /= white;
-    color = pow(color, inverseGamma);
+    color = pow(saturate(color), inverseGamma);
     return color;
 }
 

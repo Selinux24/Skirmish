@@ -15,6 +15,10 @@ namespace Engine.Effects
         /// </summary>
         public readonly EngineEffectTechnique Empty = null;
         /// <summary>
+        /// Combine drawing technique
+        /// </summary>
+        public readonly EngineEffectTechnique Combine = null;
+        /// <summary>
         /// Gray scale drawing technique
         /// </summary>
         public readonly EngineEffectTechnique Grayscale = null;
@@ -67,6 +71,14 @@ namespace Engine.Effects
         /// Time effect variable
         /// </summary>
         private readonly EngineEffectVariableScalar timeVar = null;
+        /// <summary>
+        /// Texture 1 effect variable
+        /// </summary>
+        private readonly EngineEffectVariableTexture texture1Var = null;
+        /// <summary>
+        /// Texture 2 effect variable
+        /// </summary>
+        private readonly EngineEffectVariableTexture texture2Var = null;
 
         /// <summary>
         /// Blur direcctions effect variable
@@ -229,6 +241,14 @@ namespace Engine.Effects
         /// Current diffuse map
         /// </summary>
         private EngineShaderResourceView currentDiffuseMap = null;
+        /// <summary>
+        /// Current texture 1
+        /// </summary>
+        private EngineShaderResourceView currentTexture1 = null;
+        /// <summary>
+        /// Current texture 2
+        /// </summary>
+        private EngineShaderResourceView currentTexture2 = null;
 
         /// <summary>
         /// World view projection matrix
@@ -279,6 +299,48 @@ namespace Engine.Effects
                 }
             }
         }
+        /// <summary>
+        /// Texture 1
+        /// </summary>
+        protected EngineShaderResourceView Texture1
+        {
+            get
+            {
+                return texture1Var.GetResource();
+            }
+            set
+            {
+                if (currentTexture1 != value)
+                {
+                    texture1Var.SetResource(value);
+
+                    currentTexture1 = value;
+
+                    Counters.TextureUpdates++;
+                }
+            }
+        }
+        /// <summary>
+        /// Texture 2
+        /// </summary>
+        protected EngineShaderResourceView Texture2
+        {
+            get
+            {
+                return texture2Var.GetResource();
+            }
+            set
+            {
+                if (currentTexture2 != value)
+                {
+                    texture2Var.SetResource(value);
+
+                    currentTexture2 = value;
+
+                    Counters.TextureUpdates++;
+                }
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -290,6 +352,7 @@ namespace Engine.Effects
             : base(graphics, effect, compile)
         {
             Empty = Effect.GetTechniqueByName("Empty");
+            Combine = Effect.GetTechniqueByName("Combine");
             Grayscale = Effect.GetTechniqueByName("Grayscale");
             Sepia = Effect.GetTechniqueByName("Sepia");
             Vignette = Effect.GetTechniqueByName("Vignette");
@@ -304,6 +367,8 @@ namespace Engine.Effects
             diffuseMapVar = Effect.GetVariableTexture("gDiffuseMap");
             effectIntensityVar = Effect.GetVariableScalar("gEffectIntensity");
             timeVar = Effect.GetVariableScalar("gTime");
+            texture1Var = Effect.GetVariableTexture("gTexture1");
+            texture2Var = Effect.GetVariableTexture("gTexture2");
 
             blurDirectionsVar = Effect.GetVariableScalar("gBlurDirections");
             blurQualityVar = Effect.GetVariableScalar("gBlurQuality");
@@ -326,6 +391,9 @@ namespace Engine.Effects
             EngineEffectTechnique technique;
             switch (effect)
             {
+                case PostProcessingEffects.Combine:
+                    technique = DrawerPool.EffectPostProcess.Combine;
+                    break;
                 case PostProcessingEffects.Grayscale:
                     technique = DrawerPool.EffectPostProcess.Grayscale;
                     break;
@@ -358,6 +426,33 @@ namespace Engine.Effects
             return technique;
         }
 
+        /// <summary>
+        /// Update per frame data
+        /// </summary>
+        /// <param name="viewProjection">View * projection matrix</param>
+        /// <param name="texture">Texture</param>
+        public void UpdatePerFrameEmpty(
+            Matrix viewProjection,
+            EngineShaderResourceView texture)
+        {
+            WorldViewProjection = viewProjection;
+            DiffuseMap = texture;
+        }
+        /// <summary>
+        /// Update per frame data
+        /// </summary>
+        /// <param name="viewProjection">View * projection matrix</param>
+        /// <param name="texture1">Texture 1</param>
+        /// <param name="texture2">Texture 2</param>
+        public void UpdatePerFrameCombine(
+            Matrix viewProjection,
+            EngineShaderResourceView texture1,
+            EngineShaderResourceView texture2)
+        {
+            WorldViewProjection = viewProjection;
+            Texture1 = texture1;
+            Texture2 = texture2;
+        }
         /// <summary>
         /// Update per frame data
         /// </summary>

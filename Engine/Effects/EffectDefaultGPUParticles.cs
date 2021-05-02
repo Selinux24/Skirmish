@@ -121,11 +121,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.worldVar.GetMatrix();
+                return worldVar.GetMatrix();
             }
             set
             {
-                this.worldVar.SetMatrix(value);
+                worldVar.SetMatrix(value);
             }
         }
         /// <summary>
@@ -135,11 +135,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.worldViewProjectionVar.GetMatrix();
+                return worldViewProjectionVar.GetMatrix();
             }
             set
             {
-                this.worldViewProjectionVar.SetMatrix(value);
+                worldViewProjectionVar.SetMatrix(value);
             }
         }
         /// <summary>
@@ -149,11 +149,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.eyePositionWorldVar.GetVector<Vector3>();
+                return eyePositionWorldVar.GetVector<Vector3>();
             }
             set
             {
-                this.eyePositionWorldVar.Set(value);
+                eyePositionWorldVar.Set(value);
             }
         }
         /// <summary>
@@ -163,11 +163,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.totalTimeVar.GetFloat();
+                return totalTimeVar.GetFloat();
             }
             set
             {
-                this.totalTimeVar.Set(value);
+                totalTimeVar.Set(value);
             }
         }
         /// <summary>
@@ -177,11 +177,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.elapsedTimeVar.GetFloat();
+                return elapsedTimeVar.GetFloat();
             }
             set
             {
-                this.elapsedTimeVar.Set(value);
+                elapsedTimeVar.Set(value);
             }
         }
         /// <summary>
@@ -191,11 +191,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.textureCountVar.GetUInt();
+                return textureCountVar.GetUInt();
             }
             set
             {
-                this.textureCountVar.Set(value);
+                textureCountVar.Set(value);
             }
         }
         /// <summary>
@@ -205,15 +205,15 @@ namespace Engine.Effects
         {
             get
             {
-                return this.textureArrayVar.GetResource();
+                return textureArrayVar.GetResource();
             }
             set
             {
-                if (this.currentTextureArray != value)
+                if (currentTextureArray != value)
                 {
-                    this.textureArrayVar.SetResource(value);
+                    textureArrayVar.SetResource(value);
 
-                    this.currentTextureArray = value;
+                    currentTextureArray = value;
 
                     Counters.TextureUpdates++;
                 }
@@ -227,11 +227,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.emissionRateVar.GetFloat();
+                return emissionRateVar.GetFloat();
             }
             set
             {
-                this.emissionRateVar.Set(value);
+                emissionRateVar.Set(value);
             }
         }
         /// <summary>
@@ -241,11 +241,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.velocitySensitivityVar.GetFloat();
+                return velocitySensitivityVar.GetFloat();
             }
             set
             {
-                this.velocitySensitivityVar.Set(value);
+                velocitySensitivityVar.Set(value);
             }
         }
         /// <summary>
@@ -255,11 +255,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.horizontalVelocityVar.GetVector<Vector2>();
+                return horizontalVelocityVar.GetVector<Vector2>();
             }
             set
             {
-                this.horizontalVelocityVar.Set(value);
+                horizontalVelocityVar.Set(value);
             }
         }
         /// <summary>
@@ -269,11 +269,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.verticalVelocityVar.GetVector<Vector2>();
+                return verticalVelocityVar.GetVector<Vector2>();
             }
             set
             {
-                this.verticalVelocityVar.Set(value);
+                verticalVelocityVar.Set(value);
             }
         }
         /// <summary>
@@ -283,11 +283,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.randomValuesVar.GetVector<Vector4>();
+                return randomValuesVar.GetVector<Vector4>();
             }
             set
             {
-                this.randomValuesVar.Set(value);
+                randomValuesVar.Set(value);
             }
         }
 
@@ -298,11 +298,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.maxDurationVar.GetFloat();
+                return maxDurationVar.GetFloat();
             }
             set
             {
-                this.maxDurationVar.Set(value);
+                maxDurationVar.Set(value);
             }
         }
         /// <summary>
@@ -312,11 +312,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.maxDurationRandomnessVar.GetFloat();
+                return maxDurationRandomnessVar.GetFloat();
             }
             set
             {
-                this.maxDurationRandomnessVar.Set(value);
+                maxDurationRandomnessVar.Set(value);
             }
         }
         /// <summary>
@@ -326,11 +326,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.endVelocityVar.GetFloat();
+                return endVelocityVar.GetFloat();
             }
             set
             {
-                this.endVelocityVar.Set(value);
+                endVelocityVar.Set(value);
             }
         }
         /// <summary>
@@ -340,11 +340,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.gravityVar.GetVector<Vector3>();
+                return gravityVar.GetVector<Vector3>();
             }
             set
             {
-                this.gravityVar.Set(value);
+                gravityVar.Set(value);
             }
         }
         /// <summary>
@@ -354,11 +354,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.startSizeVar.GetVector<Vector2>();
+                return startSizeVar.GetVector<Vector2>();
             }
             set
             {
-                this.startSizeVar.Set(value);
+                startSizeVar.Set(value);
             }
         }
         /// <summary>
@@ -368,11 +368,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.endSizeVar.GetVector<Vector2>();
+                return endSizeVar.GetVector<Vector2>();
             }
             set
             {
-                this.endSizeVar.Set(value);
+                endSizeVar.Set(value);
             }
         }
         /// <summary>
@@ -382,11 +382,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.minColorVar.GetVector<Color4>();
+                return minColorVar.GetVector<Color4>();
             }
             set
             {
-                this.minColorVar.Set(value);
+                minColorVar.Set(value);
             }
         }
         /// <summary>
@@ -396,11 +396,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.maxColorVar.GetVector<Color4>();
+                return maxColorVar.GetVector<Color4>();
             }
             set
             {
-                this.maxColorVar.Set(value);
+                maxColorVar.Set(value);
             }
         }
         /// <summary>
@@ -410,11 +410,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.rotateSpeedVar.GetVector<Vector2>();
+                return rotateSpeedVar.GetVector<Vector2>();
             }
             set
             {
-                this.rotateSpeedVar.Set(value);
+                rotateSpeedVar.Set(value);
             }
         }
 
@@ -427,33 +427,33 @@ namespace Engine.Effects
         public EffectDefaultGpuParticles(Graphics graphics, byte[] effect, bool compile)
             : base(graphics, effect, compile)
         {
-            this.ParticleStreamOut = this.Effect.GetTechniqueByName("ParticleStreamOut");
-            this.NonRotationDraw = this.Effect.GetTechniqueByName("NonRotationParticle");
-            this.RotationDraw = this.Effect.GetTechniqueByName("RotationParticle");
+            ParticleStreamOut = Effect.GetTechniqueByName("ParticleStreamOut");
+            NonRotationDraw = Effect.GetTechniqueByName("NonRotationParticle");
+            RotationDraw = Effect.GetTechniqueByName("RotationParticle");
 
-            this.worldVar = this.Effect.GetVariableMatrix("gWorld");
-            this.worldViewProjectionVar = this.Effect.GetVariableMatrix("gWorldViewProjection");
-            this.eyePositionWorldVar = this.Effect.GetVariableVector("gEyePositionWorld");
-            this.totalTimeVar = this.Effect.GetVariableScalar("gTotalTime");
-            this.elapsedTimeVar = this.Effect.GetVariableScalar("gElapsedTime");
-            this.textureCountVar = this.Effect.GetVariableScalar("gTextureCount");
-            this.textureArrayVar = this.Effect.GetVariableTexture("gTextureArray");
+            worldVar = Effect.GetVariableMatrix("gWorld");
+            worldViewProjectionVar = Effect.GetVariableMatrix("gWorldViewProjection");
+            eyePositionWorldVar = Effect.GetVariableVector("gEyePositionWorld");
+            totalTimeVar = Effect.GetVariableScalar("gTotalTime");
+            elapsedTimeVar = Effect.GetVariableScalar("gElapsedTime");
+            textureCountVar = Effect.GetVariableScalar("gTextureCount");
+            textureArrayVar = Effect.GetVariableTexture("gTextureArray");
 
-            this.emissionRateVar = this.Effect.GetVariableScalar("gEmissionRate");
-            this.velocitySensitivityVar = this.Effect.GetVariableScalar("gVelocitySensitivity");
-            this.horizontalVelocityVar = this.Effect.GetVariableVector("gHorizontalVelocity");
-            this.verticalVelocityVar = this.Effect.GetVariableVector("gVerticalVelocity");
-            this.randomValuesVar = this.Effect.GetVariableVector("gRandomValues");
+            emissionRateVar = Effect.GetVariableScalar("gEmissionRate");
+            velocitySensitivityVar = Effect.GetVariableScalar("gVelocitySensitivity");
+            horizontalVelocityVar = Effect.GetVariableVector("gHorizontalVelocity");
+            verticalVelocityVar = Effect.GetVariableVector("gVerticalVelocity");
+            randomValuesVar = Effect.GetVariableVector("gRandomValues");
 
-            this.maxDurationVar = this.Effect.GetVariableScalar("gMaxDuration");
-            this.maxDurationRandomnessVar = this.Effect.GetVariableScalar("gMaxDurationRandomness");
-            this.endVelocityVar = this.Effect.GetVariableScalar("gEndVelocity");
-            this.gravityVar = this.Effect.GetVariableVector("gGravity");
-            this.startSizeVar = this.Effect.GetVariableVector("gStartSize");
-            this.endSizeVar = this.Effect.GetVariableVector("gEndSize");
-            this.minColorVar = this.Effect.GetVariableVector("gMinColor");
-            this.maxColorVar = this.Effect.GetVariableVector("gMaxColor");
-            this.rotateSpeedVar = this.Effect.GetVariableVector("gRotateSpeed");
+            maxDurationVar = Effect.GetVariableScalar("gMaxDuration");
+            maxDurationRandomnessVar = Effect.GetVariableScalar("gMaxDurationRandomness");
+            endVelocityVar = Effect.GetVariableScalar("gEndVelocity");
+            gravityVar = Effect.GetVariableVector("gGravity");
+            startSizeVar = Effect.GetVariableVector("gStartSize");
+            endSizeVar = Effect.GetVariableVector("gEndSize");
+            minColorVar = Effect.GetVariableVector("gMinColor");
+            maxColorVar = Effect.GetVariableVector("gMaxColor");
+            rotateSpeedVar = Effect.GetVariableVector("gRotateSpeed");
         }
 
         /// <summary>
@@ -471,29 +471,29 @@ namespace Engine.Effects
             uint textureCount,
             EngineShaderResourceView textures)
         {
-            this.World = Matrix.Identity;
-            this.WorldViewProjection = viewProjection;
-            this.EyePositionWorld = eyePositionWorld;
-            this.TotalTime = state.TotalTime;
-            this.ElapsedTime = state.ElapsedTime;
+            World = Matrix.Identity;
+            WorldViewProjection = viewProjection;
+            EyePositionWorld = eyePositionWorld;
+            TotalTime = state.TotalTime;
+            ElapsedTime = state.ElapsedTime;
 
-            this.EmissionRate = state.EmissionRate;
-            this.VelocitySensitivity = state.VelocitySensitivity;
-            this.HorizontalVelocity = state.HorizontalVelocity;
-            this.VerticalVelocity = state.VerticalVelocity;
-            this.RandomValues = state.RandomValues;
+            EmissionRate = state.EmissionRate;
+            VelocitySensitivity = state.VelocitySensitivity;
+            HorizontalVelocity = state.HorizontalVelocity;
+            VerticalVelocity = state.VerticalVelocity;
+            RandomValues = state.RandomValues;
 
-            this.MaxDuration = state.MaxDuration;
-            this.MaxDurationRandomness = state.MaxDurationRandomness;
-            this.EndVelocity = state.EndVelocity;
-            this.Gravity = state.Gravity;
-            this.StartSize = state.StartSize;
-            this.EndSize = state.EndSize;
-            this.MinColor = state.MinColor;
-            this.MaxColor = state.MaxColor;
-            this.RotateSpeed = state.RotateSpeed;
-            this.TextureCount = textureCount;
-            this.TextureArray = textures;
+            MaxDuration = state.MaxDuration;
+            MaxDurationRandomness = state.MaxDurationRandomness;
+            EndVelocity = state.EndVelocity;
+            Gravity = state.Gravity;
+            StartSize = state.StartSize;
+            EndSize = state.EndSize;
+            MinColor = state.MinColor;
+            MaxColor = state.MaxColor;
+            RotateSpeed = state.RotateSpeed;
+            TextureCount = textureCount;
+            TextureArray = textures;
         }
     }
 }

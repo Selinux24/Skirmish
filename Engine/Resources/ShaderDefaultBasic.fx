@@ -255,7 +255,7 @@ float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 
 	lInput.material = material;
     lInput.objectPosition = input.positionWorld;
-    lInput.objectNormal = input.normalWorld;
+    lInput.objectNormal = normalize(input.normalWorld);
     lInput.objectDiffuseColor = input.color;
 
 	lInput.eyePosition = gPSEyePositionWorld;
@@ -511,7 +511,7 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 
     lInput.material = material;
 	lInput.objectPosition = input.positionWorld;
-	lInput.objectNormal = input.normalWorld;
+    lInput.objectNormal = normalize(input.normalWorld);
     lInput.objectDiffuseColor = diffuseColor;
 
 	lInput.eyePosition = gPSEyePositionWorld;

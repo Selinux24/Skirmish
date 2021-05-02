@@ -47,11 +47,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.worldVar.GetMatrix();
+                return worldVar.GetMatrix();
             }
             set
             {
-                this.worldVar.SetMatrix(value);
+                worldVar.SetMatrix(value);
             }
         }
         /// <summary>
@@ -61,11 +61,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.worldViewProjectionVar.GetMatrix();
+                return worldViewProjectionVar.GetMatrix();
             }
             set
             {
-                this.worldViewProjectionVar.SetMatrix(value);
+                worldViewProjectionVar.SetMatrix(value);
             }
         }
         /// <summary>
@@ -75,11 +75,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.alphaVar.GetFloat();
+                return alphaVar.GetFloat();
             }
             set
             {
-                this.alphaVar.Set(value);
+                alphaVar.Set(value);
             }
         }
         /// <summary>
@@ -89,11 +89,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.useTextureColorVar.GetBool();
+                return useTextureColorVar.GetBool();
             }
             set
             {
-                this.useTextureColorVar.Set(value);
+                useTextureColorVar.Set(value);
             }
         }
         /// <summary>
@@ -103,15 +103,15 @@ namespace Engine.Effects
         {
             get
             {
-                return this.textureVar.GetResource();
+                return textureVar.GetResource();
             }
             set
             {
-                if (this.currentTexture != value)
+                if (currentTexture != value)
                 {
-                    this.textureVar.SetResource(value);
+                    textureVar.SetResource(value);
 
-                    this.currentTexture = value;
+                    currentTexture = value;
 
                     Counters.TextureUpdates++;
                 }
@@ -127,13 +127,13 @@ namespace Engine.Effects
         public EffectDefaultFont(Graphics graphics, byte[] effect, bool compile)
             : base(graphics, effect, compile)
         {
-            this.FontDrawer = this.Effect.GetTechniqueByName("FontDrawer");
+            FontDrawer = Effect.GetTechniqueByName("FontDrawer");
 
-            this.worldVar = this.Effect.GetVariableMatrix("gWorld");
-            this.worldViewProjectionVar = this.Effect.GetVariableMatrix("gWorldViewProjection");
-            this.alphaVar = this.Effect.GetVariableScalar("gAlpha");
-            this.useTextureColorVar = this.Effect.GetVariableScalar("gUseColor");
-            this.textureVar = this.Effect.GetVariableTexture("gTexture");
+            worldVar = Effect.GetVariableMatrix("gWorld");
+            worldViewProjectionVar = Effect.GetVariableMatrix("gWorldViewProjection");
+            alphaVar = Effect.GetVariableScalar("gAlpha");
+            useTextureColorVar = Effect.GetVariableScalar("gUseColor");
+            textureVar = Effect.GetVariableTexture("gTexture");
         }
 
         /// <summary>
@@ -151,11 +151,11 @@ namespace Engine.Effects
             bool useTextureColor,
             EngineShaderResourceView texture)
         {
-            this.World = world;
-            this.WorldViewProjection = world * viewProjection;
-            this.Alpha = alphaMult;
-            this.UseTextureColor = useTextureColor;
-            this.Texture = texture;
+            World = world;
+            WorldViewProjection = world * viewProjection;
+            Alpha = alphaMult;
+            UseTextureColor = useTextureColor;
+            Texture = texture;
         }
     }
 }

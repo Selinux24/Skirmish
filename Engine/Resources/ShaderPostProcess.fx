@@ -24,6 +24,8 @@ struct PSVertexEmpty
 };
 
 Texture2D gDiffuseMap : register(t0);
+Texture2D gTexture1 : register(t1);
+Texture2D gTexture2 : register(t2);
 
 PSVertexEmpty VSEmpty(VSVertexPositionTexture input)
 {
@@ -37,9 +39,16 @@ PSVertexEmpty VSEmpty(VSVertexPositionTexture input)
 
 float4 PSEmpty(PSVertexEmpty input) : SV_TARGET
 {
-    float3 output = gDiffuseMap.Sample(SamplerLinear, input.uv).rgb;
+    return gDiffuseMap.Sample(SamplerLinear, input.uv);
+}
+float4 PSCombine(PSVertexEmpty input) : SV_TARGET
+{
+    float4 output1 = gTexture1.Sample(SamplerLinear, input.uv);
+    float4 output2 = gTexture2.Sample(SamplerLinear, input.uv);
     
-    return float4(output, 1.);
+    //float3 mix = output2.a == 0. ? output1.rgb : (output1.rgb * (1 - output2.a)) + (output2.rgb * output2.a);
+    
+    return (output1 + output2);
 }
 float4 PSGrayscale(PSVertexEmpty input) : SV_TARGET
 {
@@ -91,15 +100,15 @@ float4 PSBlur(PSVertexEmpty input) : SV_TARGET
     float quality = gBlurQuality;
     float2 radius = gBlurSize / gTextureSize;
     
-    float3 color = gDiffuseMap.Sample(SamplerLinear, input.uv).rgb;
+    float4 color = gDiffuseMap.Sample(SamplerLinear, input.uv);
     if (gEffectIntensity == 0)
     {
-        return float4(color, 1.);
+        return color;
     }
     
-    float3 output = CalcGaussianBlur(input.uv, gDiffuseMap, color, directions, quality, radius);
+    float3 output = CalcGaussianBlur(input.uv, gDiffuseMap, color.rgb, directions, quality, radius);
     
-    return float4(lerp(color, output, gEffectIntensity), 1.);
+    return float4(lerp(color.rgb, output, gEffectIntensity), color.a);
 }
 float4 PSBlurVignette(PSVertexEmpty input) : SV_TARGET
 {
@@ -161,30 +170,30 @@ float4 PSToneMapping(PSVertexEmpty input) : SV_TARGET
 {
     uint toneMap = gToneMappingTone;
     
-    float3 color = gDiffuseMap.Sample(SamplerLinear, input.uv).rgb;
+    float4 color = gDiffuseMap.Sample(SamplerLinear, input.uv);
     if (gEffectIntensity == 0)
     {
-        return float4(color, 1.);
+        return color;
     }
     
-    float3 output = color;
+    float3 output = color.rgb;
     
     if (toneMap == 1)
-        output = LinearToneMapping(color);
+        output = LinearToneMapping(color.rgb);
     if (toneMap == 2)
-        output = SimpleReinhardToneMapping(color);
+        output = SimpleReinhardToneMapping(color.rgb);
     if (toneMap == 3)
-        output = LumaBasedReinhardToneMapping(color);
+        output = LumaBasedReinhardToneMapping(color.rgb);
     if (toneMap == 4)
-        output = WhitePreservingLumaBasedReinhardToneMapping(color);
+        output = WhitePreservingLumaBasedReinhardToneMapping(color.rgb);
     if (toneMap == 5)
-        output = RomBinDaHouseToneMapping(color);
+        output = RomBinDaHouseToneMapping(color.rgb);
     if (toneMap == 6)
-        output = FilmicToneMapping(color);
+        output = FilmicToneMapping(color.rgb);
     if (toneMap == 7)
-        output = Uncharted2ToneMapping(color);
+        output = Uncharted2ToneMapping(color.rgb);
         
-    return float4(lerp(color, output, gEffectIntensity), 1.);
+    return float4(lerp(color.rgb, output, gEffectIntensity), color.a);
 }
 
 technique11 Empty
@@ -194,6 +203,15 @@ technique11 Empty
         SetVertexShader(CompileShader(vs_5_0, VSEmpty()));
         SetGeometryShader(NULL);
         SetPixelShader(CompileShader(ps_5_0, PSEmpty()));
+    }
+}
+technique11 Combine
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSEmpty()));
+        SetGeometryShader(NULL);
+        SetPixelShader(CompileShader(ps_5_0, PSCombine()));
     }
 }
 technique11 Grayscale

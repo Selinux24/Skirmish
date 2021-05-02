@@ -51,7 +51,8 @@ namespace SceneTest.SceneStart
 
             GameEnvironment.Background = Color.Black;
 
-            Renderer?.SetPostProcessingEffect(PostProcessingEffects.ToneMapping, PostProcessToneMappingParams.RomBinDaHouse);
+            //Renderer?.SetPostProcessingEffect(RenderPass.Objects, PostProcessingEffects.ToneMapping, new PostProcessToneMappingParams());
+            //Renderer?.SetPostProcessingEffect(RenderPass.UI, PostProcessingEffects.Blur, PostProcessBlurParams.Strong);
 
             var assetTasks = new[] {
                 InitializeCursor(),

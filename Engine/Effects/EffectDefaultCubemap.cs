@@ -35,11 +35,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.worldViewProjectionVar.GetMatrix();
+                return worldViewProjectionVar.GetMatrix();
             }
             set
             {
-                this.worldViewProjectionVar.SetMatrix(value);
+                worldViewProjectionVar.SetMatrix(value);
             }
         }
         /// <summary>
@@ -49,15 +49,15 @@ namespace Engine.Effects
         {
             get
             {
-                return this.cubeTextureVar.GetResource();
+                return cubeTextureVar.GetResource();
             }
             set
             {
-                if (this.currentCubeTexture != value)
+                if (currentCubeTexture != value)
                 {
-                    this.cubeTextureVar.SetResource(value);
+                    cubeTextureVar.SetResource(value);
 
-                    this.currentCubeTexture = value;
+                    currentCubeTexture = value;
 
                     Counters.TextureUpdates++;
                 }
@@ -73,10 +73,10 @@ namespace Engine.Effects
         public EffectDefaultCubemap(Graphics graphics, byte[] effect, bool compile)
             : base(graphics, effect, compile)
         {
-            this.ForwardCubemap = this.Effect.GetTechniqueByName("ForwardCubemap");
+            ForwardCubemap = Effect.GetTechniqueByName("ForwardCubemap");
 
-            this.worldViewProjectionVar = this.Effect.GetVariableMatrix("gWorldViewProjection");
-            this.cubeTextureVar = this.Effect.GetVariableTexture("gCubemap");
+            worldViewProjectionVar = Effect.GetVariableMatrix("gWorldViewProjection");
+            cubeTextureVar = Effect.GetVariableTexture("gCubemap");
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace Engine.Effects
             Matrix world,
             Matrix viewProjection)
         {
-            this.WorldViewProjection = world * viewProjection;
+            WorldViewProjection = world * viewProjection;
         }
         /// <summary>
         /// Update per model object data
@@ -97,7 +97,7 @@ namespace Engine.Effects
         public void UpdatePerObject(
             EngineShaderResourceView cubeTexture)
         {
-            this.CubeTexture = cubeTexture;
+            CubeTexture = cubeTexture;
         }
     }
 }

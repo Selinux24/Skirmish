@@ -206,3 +206,6 @@ Thumbs.db
 #SonarLint
 /.sonarlint
 .sonarlint/
+
+#Engine
+dumpDEBUG.txt
