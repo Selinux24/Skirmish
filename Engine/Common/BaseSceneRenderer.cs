@@ -530,9 +530,15 @@ namespace Engine.Common
             {
                 Counters.MaxInstancesPerFrame += c.InstanceCount;
 
+                BlendModes blend = c.BlendMode;
+                if (c.Usage.HasFlag(SceneObjectUsages.UI))
+                {
+                    blend |= BlendModes.PostProcess;
+                }
+
                 SetRasterizer(context);
 
-                SetBlendState(context, c.BlendMode);
+                SetBlendState(context, blend);
 
                 SetDepthStencil(context, c.DepthEnabled);
 

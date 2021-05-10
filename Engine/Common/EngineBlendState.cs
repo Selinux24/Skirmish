@@ -103,6 +103,32 @@ namespace Engine.Common
             return graphics.CreateBlendState(desc, Color.Transparent, -1);
         }
         /// <summary>
+        /// Creates an alpha enabled conservative blend state
+        /// </summary>
+        /// <param name="graphics">Graphics</param>
+        /// <returns>Creates the alpha enabled blend state</returns>
+        public static EngineBlendState AlphaConservativeBlend(Graphics graphics)
+        {
+            BlendStateDescription1 desc = new BlendStateDescription1
+            {
+                AlphaToCoverageEnable = false,
+                IndependentBlendEnable = false
+            };
+
+            desc.RenderTarget[0].IsBlendEnabled = true;
+            desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+
+            desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
+            desc.RenderTarget[0].SourceBlend = BlendOption.SourceAlpha;
+            desc.RenderTarget[0].DestinationBlend = BlendOption.InverseSourceAlpha;
+
+            desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
+            desc.RenderTarget[0].SourceAlphaBlend = BlendOption.SourceAlpha;
+            desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.InverseSourceAlpha;
+
+            return graphics.CreateBlendState(desc, Color.Transparent, -1);
+        }
+        /// <summary>
         /// Creates a transparent enabled blend state
         /// </summary>
         /// <param name="graphics">Graphics</param>
@@ -126,6 +152,33 @@ namespace Engine.Common
             desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
             desc.RenderTarget[0].SourceAlphaBlend = BlendOption.Zero;
             desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
+
+            return graphics.CreateBlendState(desc, Color.Transparent, -1);
+        }
+        /// <summary>
+        /// Creates a transparent enabled conservative blend state
+        /// </summary>
+        /// <param name="graphics">Graphics</param>
+        /// <remarks>It's equal to AlphaBlend, but with AlphaToCoverageEnable enabled</remarks>
+        /// <returns>Creates the transparent enabled blend state</returns>
+        public static EngineBlendState TransparentConservative(Graphics graphics)
+        {
+            BlendStateDescription1 desc = new BlendStateDescription1
+            {
+                AlphaToCoverageEnable = true,
+                IndependentBlendEnable = false
+            };
+
+            desc.RenderTarget[0].IsBlendEnabled = true;
+            desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+
+            desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
+            desc.RenderTarget[0].SourceBlend = BlendOption.SourceAlpha;
+            desc.RenderTarget[0].DestinationBlend = BlendOption.InverseSourceAlpha;
+
+            desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
+            desc.RenderTarget[0].SourceAlphaBlend = BlendOption.SourceAlpha;
+            desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.InverseSourceAlpha;
 
             return graphics.CreateBlendState(desc, Color.Transparent, -1);
         }

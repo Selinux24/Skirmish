@@ -119,9 +119,17 @@ namespace Engine
         /// </summary>
         private EngineBlendState blendAlphaBlend = null;
         /// <summary>
+        /// Default alpha blend conservative state
+        /// </summary>
+        private EngineBlendState blendAlphaConservativeBlend = null;
+        /// <summary>
         /// Blend state for transparent blending
         /// </summary>
         private EngineBlendState blendTransparent = null;
+        /// <summary>
+        /// Blend state for transparent conservative blending
+        /// </summary>
+        private EngineBlendState blendTransparentConservative = null;
         /// <summary>
         /// Additive blend state
         /// </summary>
@@ -691,7 +699,7 @@ namespace Engine
                 Logger.WriteError(this, $"Error presenting Graphics: Code {res.Code}");
             }
         }
-      
+
         /// <summary>
         /// Sets the default viewport
         /// </summary>
@@ -726,7 +734,7 @@ namespace Engine
                 depthStencilView, clearDepth, clearStencil,
                 false);
         }
-        
+
         /// <summary>
         /// Sets viewport
         /// </summary>
@@ -763,7 +771,7 @@ namespace Engine
 
             deviceContext.Rasterizer.SetViewports(rawVpArray);
         }
-        
+
         /// <summary>
         /// Set render targets
         /// </summary>
@@ -838,7 +846,7 @@ namespace Engine
                     1.0f, 0);
             }
         }
-        
+
         /// <summary>
         /// Clear shader resources
         /// </summary>
@@ -879,7 +887,7 @@ namespace Engine
                     1.0f, 0);
             }
         }
-   
+
         /// <summary>
         /// Enables z-buffer for write
         /// </summary>
@@ -980,26 +988,50 @@ namespace Engine
         /// <summary>
         /// Sets default alpha blend state
         /// </summary>
-        public void SetBlendAlpha()
+        public void SetBlendAlpha(bool alphaConservative = false)
         {
-            if (blendAlphaBlend == null)
+            if (alphaConservative)
             {
-                blendAlphaBlend = EngineBlendState.AlphaBlend(this);
-            }
+                if (blendAlphaConservativeBlend == null)
+                {
+                    blendAlphaConservativeBlend = EngineBlendState.AlphaConservativeBlend(this);
+                }
 
-            SetBlendState(blendAlphaBlend);
+                SetBlendState(blendAlphaConservativeBlend);
+            }
+            else
+            {
+                if (blendAlphaBlend == null)
+                {
+                    blendAlphaBlend = EngineBlendState.AlphaBlend(this);
+                }
+
+                SetBlendState(blendAlphaBlend);
+            }
         }
         /// <summary>
         /// Sets transparent blend state
         /// </summary>
-        public void SetBlendTransparent()
+        public void SetBlendTransparent(bool alphaConservative = false)
         {
-            if (blendTransparent == null)
+            if (alphaConservative)
             {
-                blendTransparent = EngineBlendState.Transparent(this);
-            }
+                if (blendTransparentConservative == null)
+                {
+                    blendTransparentConservative = EngineBlendState.TransparentConservative(this);
+                }
 
-            SetBlendState(blendTransparent);
+                SetBlendState(blendTransparentConservative);
+            }
+            else
+            {
+                if (blendTransparent == null)
+                {
+                    blendTransparent = EngineBlendState.Transparent(this);
+                }
+
+                SetBlendState(blendTransparent);
+            }
         }
         /// <summary>
         /// Sets additive blend state
@@ -1013,7 +1045,7 @@ namespace Engine
 
             SetBlendState(blendAdditive);
         }
-   
+
         /// <summary>
         /// Sets default rasterizer
         /// </summary>
@@ -1074,7 +1106,7 @@ namespace Engine
 
             SetRasterizerState(rasterizerShadowMapping);
         }
-    
+
         /// <summary>
         /// Bind an array of vertex buffers to the input-assembler stage.
         /// </summary>
@@ -1150,8 +1182,12 @@ namespace Engine
             blendDefault = null;
             blendAlphaBlend?.Dispose();
             blendAlphaBlend = null;
+            blendAlphaConservativeBlend?.Dispose();
+            blendAlphaConservativeBlend = null;
             blendTransparent?.Dispose();
             blendTransparent = null;
+            blendTransparentConservative?.Dispose();
+            blendTransparentConservative = null;
             blendAdditive?.Dispose();
             blendAdditive = null;
         }
@@ -1199,11 +1235,11 @@ namespace Engine
             }
             else if (blendMode.HasFlag(BlendModes.Transparent))
             {
-                SetBlendTransparent();
+                SetBlendTransparent(blendMode.HasFlag(BlendModes.PostProcess));
             }
             else if (blendMode.HasFlag(BlendModes.Alpha))
             {
-                SetBlendAlpha();
+                SetBlendAlpha(blendMode.HasFlag(BlendModes.PostProcess));
             }
             else
             {
