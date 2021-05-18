@@ -77,8 +77,6 @@ namespace Engine
             //Shadow mapping
             DoShadowMapping(gameTime);
 
-            List<Targets> targets = new List<Targets>(2);
-
             var objectComponents = visibleComponents.Where(c => !c.Usage.HasFlag(SceneObjectUsages.UI));
             if (objectComponents.Any())
             {
@@ -88,8 +86,6 @@ namespace Engine
                 DoRender(Scene, objectComponents);
                 //Post-processing
                 DoPostProcessing(Targets.Objects, RenderPass.Objects, gameTime);
-
-                targets.Add(Targets.Objects);
             }
 
             var uiComponents = visibleComponents.Where(c => c.Usage.HasFlag(SceneObjectUsages.UI));
@@ -101,12 +97,16 @@ namespace Engine
                 DoRender(Scene, uiComponents);
                 //UI post-processing
                 DoPostProcessing(Targets.UI, RenderPass.UI, gameTime);
-
-                targets.Add(Targets.UI);
             }
 
-            //Combine to screen
-            CombineTargets(targets, Targets.Screen);
+            //Combine to result
+            CombineTargets(Targets.Objects, Targets.UI, Targets.Result);
+
+            //Final post-processing
+            DoPostProcessing(Targets.Result, RenderPass.Final, gameTime);
+
+            //Draw to screen
+            DrawToScreen(Targets.Result);
 
 #if DEBUG
             swTotal.Stop();

@@ -14,5 +14,9 @@ namespace Engine
         /// UI pass
         /// </summary>
         UI,
+        /// <summary>
+        /// Final composition
+        /// </summary>
+        Final,
     }
 }

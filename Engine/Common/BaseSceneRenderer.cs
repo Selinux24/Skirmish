@@ -35,18 +35,47 @@ namespace Engine.Common
             public IDrawerPostProcessParams Parameters { get; set; }
         }
 
+        /// <summary>
+        /// Render targets
+        /// </summary>
         protected enum Targets
         {
-            Screen,
+            /// <summary>
+            /// Objects target
+            /// </summary>
+            /// <remarks>
+            /// All scene objects and their post-processing effects are drawn to this target
+            /// </remarks>
             Objects,
+            /// <summary>
+            /// UI target
+            /// </summary>
+            /// <remarks>
+            /// All user interface components and their post-processing effects are drawn to this target
+            /// </remarks>
             UI,
-            PostProcessing,
+            /// <summary>
+            /// Results target
+            /// </summary>
+            Result,
+            /// <summary>
+            /// Screen
+            /// </summary>
+            Screen,
         }
 
+        /// <summary>
+        /// Scene objects target
+        /// </summary>
         private RenderTarget sceneObjectsTarget = null;
-
+        /// <summary>
+        /// Scene UI target
+        /// </summary>
         private RenderTarget sceneUITarget = null;
-
+        /// <summary>
+        /// Scene results target
+        /// </summary>
+        private RenderTarget sceneResultsTarget = null;
         /// <summary>
         /// Post-processing render target 1
         /// </summary>
@@ -239,11 +268,14 @@ namespace Engine.Common
                 Name = "Shadow mapping",
             };
 
-            sceneObjectsTarget = new RenderTarget(scene.Game, SharpDX.DXGI.Format.R32G32B32A32_Float, false, 1);
-            sceneUITarget = new RenderTarget(scene.Game, SharpDX.DXGI.Format.R32G32B32A32_Float, false, 1);
+            var targetFormat = SharpDX.DXGI.Format.R32G32B32A32_Float;
 
-            postProcessingTarget1 = new RenderTarget(scene.Game, SharpDX.DXGI.Format.R32G32B32A32_Float, false, 1);
-            postProcessingTarget2 = new RenderTarget(scene.Game, SharpDX.DXGI.Format.R32G32B32A32_Float, false, 1);
+            sceneObjectsTarget = new RenderTarget(scene.Game, targetFormat, false, 1);
+            sceneUITarget = new RenderTarget(scene.Game, targetFormat, false, 1);
+            sceneResultsTarget = new RenderTarget(scene.Game, targetFormat, false, 1);
+
+            postProcessingTarget1 = new RenderTarget(scene.Game, targetFormat, false, 1);
+            postProcessingTarget2 = new RenderTarget(scene.Game, targetFormat, false, 1);
             processingDrawer = new PostProcessingDrawer(scene.Game.Graphics, DrawerPool.EffectPostProcess);
         }
         /// <summary>
@@ -283,6 +315,8 @@ namespace Engine.Common
                 sceneObjectsTarget = null;
                 sceneUITarget?.Dispose();
                 sceneUITarget = null;
+                sceneResultsTarget?.Dispose();
+                sceneResultsTarget = null;
                 postProcessingTarget1?.Dispose();
                 postProcessingTarget1 = null;
                 postProcessingTarget2?.Dispose();
@@ -1050,8 +1084,8 @@ namespace Engine.Common
                 case Targets.UI:
                     BindUITarget(clearRT, clearRTColor, clearDepth, clearStencil);
                     break;
-                case Targets.PostProcessing:
-                    BindPostProcessingTarget(clearRT, clearRTColor, clearDepth, clearStencil);
+                case Targets.Result:
+                    BindResultsTarget(clearRT, clearRTColor, clearDepth, clearStencil);
                     break;
                 default:
                     BindDefaultTarget(clearRT, clearRTColor, clearDepth, clearStencil);
@@ -1102,6 +1136,20 @@ namespace Engine.Common
             graphics.SetDefaultViewport();
         }
         /// <summary>
+        /// Binds the results render target
+        /// </summary>
+        /// <param name="clearRT">Indicates whether the render target must be cleared</param>
+        /// <param name="clearRTColor">Target clear color</param>
+        /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
+        /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
+        private void BindResultsTarget(bool clearRT, Color4 clearRTColor, bool clearDepth, bool clearStencil)
+        {
+            var graphics = Scene.Game.Graphics;
+
+            graphics.SetRenderTargets(sceneResultsTarget.Targets, clearRT, clearRTColor, clearDepth, clearStencil);
+            graphics.SetDefaultViewport();
+        }
+        /// <summary>
         /// Binds graphics for post-processing pass
         /// </summary>
         /// <param name="clearRT">Indicates whether the render target must be cleared</param>
@@ -1146,7 +1194,7 @@ namespace Engine.Common
                 return false;
             }
 
-            //Gets the las used target texture
+            //Gets the last used target texture
             var texture = GetTargetTextures(target)?.FirstOrDefault();
 
             var graphics = Scene.Game.Graphics;
@@ -1196,8 +1244,8 @@ namespace Engine.Common
                     return sceneObjectsTarget?.Textures;
                 case Targets.UI:
                     return sceneUITarget?.Textures;
-                case Targets.PostProcessing:
-                    return postProcessingTarget1?.Textures;
+                case Targets.Result:
+                    return sceneResultsTarget?.Textures;
                 default:
                     return null;
             }
@@ -1205,9 +1253,10 @@ namespace Engine.Common
         /// <summary>
         /// Combine the specified targets into the result target
         /// </summary>
-        /// <param name="sourceTargets">Target list</param>
+        /// <param name="target1">Target 1</param>
+        /// <param name="target2">Target 2</param>
         /// <param name="resultTarget">Result target</param>
-        protected virtual void CombineTargets(IEnumerable<Targets> sourceTargets, Targets resultTarget)
+        protected virtual void CombineTargets(Targets target1, Targets target2, Targets resultTarget)
         {
             SetTarget(resultTarget, true, Color.Transparent, true, true);
 
@@ -1217,22 +1266,32 @@ namespace Engine.Common
             graphics.SetRasterizerDefault();
             graphics.SetBlendDisabled();
 
-            var texture1 = GetTargetTextures(Targets.Objects)?.FirstOrDefault();
-            var texture2 = GetTargetTextures(Targets.UI)?.FirstOrDefault();
+            var texture1 = GetTargetTextures(target1)?.FirstOrDefault();
+            var texture2 = GetTargetTextures(target2)?.FirstOrDefault();
 
             processingDrawer.UpdateEffectCombine(Scene, texture1, texture2);
             processingDrawer.Bind();
             processingDrawer.Draw();
+        }
+        /// <summary>
+        /// Draws the specified target to screen
+        /// </summary>
+        /// <param name="target">Target</param>
+        protected virtual void DrawToScreen(Targets target)
+        {
+            SetTarget(Targets.Screen, true, Color.Transparent, true, true);
 
-            //foreach (var sourceTarget in sourceTargets)
-            //{
-            //    var texture = GetTargetTextures(sourceTarget)?.FirstOrDefault();
+            var graphics = Scene.Game.Graphics;
 
-            //    //Draw the result
-            //    processingDrawer.UpdateEffectEmpty(Scene, texture);
-            //    processingDrawer.Bind();
-            //    processingDrawer.Draw();
-            //}
+            graphics.SetDepthStencilNone();
+            graphics.SetRasterizerDefault();
+            graphics.SetBlendDisabled();
+
+            var texture = GetTargetTextures(target)?.FirstOrDefault();
+
+            processingDrawer.UpdateEffectEmpty(Scene, texture);
+            processingDrawer.Bind();
+            processingDrawer.Draw();
         }
 
         /// <summary>

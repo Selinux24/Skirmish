@@ -51,8 +51,8 @@ namespace SceneTest.SceneStart
 
             GameEnvironment.Background = Color.Black;
 
-            //Renderer?.SetPostProcessingEffect(RenderPass.Objects, PostProcessingEffects.ToneMapping, new PostProcessToneMappingParams());
-            //Renderer?.SetPostProcessingEffect(RenderPass.UI, PostProcessingEffects.Blur, PostProcessBlurParams.Strong);
+            Renderer?.SetPostProcessingEffect(RenderPass.Objects, PostProcessingEffects.Blur, PostProcessBlurParams.Strong);
+            Renderer?.SetPostProcessingEffect(RenderPass.Final, PostProcessingEffects.ToneMapping, PostProcessToneMappingParams.Filmic);
 
             var assetTasks = new[] {
                 InitializeCursor(),
