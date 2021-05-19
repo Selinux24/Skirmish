@@ -962,18 +962,6 @@ namespace Engine
         }
 
         /// <summary>
-        /// Sets disabled blend state
-        /// </summary>
-        public void SetBlendDisabled()
-        {
-            if (blendDisabled == null)
-            {
-                blendDisabled = EngineBlendState.Disabled(this);
-            }
-
-            SetBlendState(blendDisabled);
-        }
-        /// <summary>
         /// Sets default blend state
         /// </summary>
         public void SetBlendDefault()

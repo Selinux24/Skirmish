@@ -1239,7 +1239,7 @@ namespace Engine.Common
             switch (target)
             {
                 case Targets.Screen:
-                    return null;
+                    return Enumerable.Empty<EngineShaderResourceView>();
                 case Targets.Objects:
                     return sceneObjectsTarget?.Textures;
                 case Targets.UI:
@@ -1247,7 +1247,7 @@ namespace Engine.Common
                 case Targets.Result:
                     return sceneResultsTarget?.Textures;
                 default:
-                    return null;
+                    return Enumerable.Empty<EngineShaderResourceView>();
             }
         }
         /// <summary>
@@ -1264,7 +1264,7 @@ namespace Engine.Common
 
             graphics.SetDepthStencilNone();
             graphics.SetRasterizerDefault();
-            graphics.SetBlendDisabled();
+            graphics.SetBlendDefault();
 
             var texture1 = GetTargetTextures(target1)?.FirstOrDefault();
             var texture2 = GetTargetTextures(target2)?.FirstOrDefault();
@@ -1285,7 +1285,7 @@ namespace Engine.Common
 
             graphics.SetDepthStencilNone();
             graphics.SetRasterizerDefault();
-            graphics.SetBlendDisabled();
+            graphics.SetBlendDefault();
 
             var texture = GetTargetTextures(target)?.FirstOrDefault();
 
