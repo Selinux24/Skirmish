@@ -186,100 +186,105 @@ namespace Engine
             }
 
             Updated = false;
+
+            //Select visible components
+            var visibleComponents = Scene.GetComponents().Where(c => c.Visible);
+            if (!visibleComponents.Any())
+            {
+                return;
+            }
+
 #if DEBUG
             frameStats.Clear();
 
             Stopwatch swTotal = Stopwatch.StartNew();
 #endif
-            //Draw visible components
-            var visibleComponents = Scene.GetComponents().Where(c => c.Visible);
-            if (visibleComponents.Any())
+
+            //Initialize context data from update context
+            DrawContext.GameTime = gameTime;
+            DrawContext.DrawerMode = DrawerModes.Deferred;
+            DrawContext.ViewProjection = UpdateContext.ViewProjection;
+            DrawContext.CameraVolume = UpdateContext.CameraVolume;
+            DrawContext.EyePosition = UpdateContext.EyePosition;
+            DrawContext.EyeTarget = UpdateContext.EyeDirection;
+
+            //Initialize context data from scene
+            DrawContext.Lights = Scene.Lights;
+
+            //Initialize context data from shadow mapping
+            DrawContext.ShadowMapDirectional = ShadowMapperDirectional;
+            DrawContext.ShadowMapPoint = ShadowMapperPoint;
+            DrawContext.ShadowMapSpot = ShadowMapperSpot;
+
+            //Shadow mapping
+            DoShadowMapping(gameTime);
+
+            var deferredEnabledComponents = visibleComponents.Where(c => c.DeferredEnabled && !c.Usage.HasFlag(SceneObjectUsages.UI));
+            bool anyDeferred = deferredEnabledComponents.Any();
+            var deferredDisabledComponents = visibleComponents.Where(c => !c.DeferredEnabled && !c.Usage.HasFlag(SceneObjectUsages.UI));
+            bool anyForward = deferredDisabledComponents.Any();
+
+            if (anyForward || anyDeferred)
             {
-                //Initialize context data from update context
-                DrawContext.GameTime = gameTime;
-                DrawContext.DrawerMode = DrawerModes.Deferred;
-                DrawContext.ViewProjection = UpdateContext.ViewProjection;
-                DrawContext.CameraVolume = UpdateContext.CameraVolume;
-                DrawContext.EyePosition = UpdateContext.EyePosition;
-                DrawContext.EyeTarget = UpdateContext.EyeDirection;
-
-                //Initialize context data from scene
-                DrawContext.Lights = Scene.Lights;
-
-                //Initialize context data from shadow mapping
-                DrawContext.ShadowMapDirectional = ShadowMapperDirectional;
-                DrawContext.ShadowMapPoint = ShadowMapperPoint;
-                DrawContext.ShadowMapSpot = ShadowMapperSpot;
-
-                //Shadow mapping
-                DoShadowMapping(gameTime);
-
-                var deferredEnabledComponents = visibleComponents.Where(c => c.DeferredEnabled && !c.Usage.HasFlag(SceneObjectUsages.UI));
-                bool anyDeferred = deferredEnabledComponents.Any();
-                var deferredDisabledComponents = visibleComponents.Where(c => !c.DeferredEnabled && !c.Usage.HasFlag(SceneObjectUsages.UI));
-                bool anyForward = deferredDisabledComponents.Any();
-
-                if (anyForward || anyDeferred)
+                if (anyDeferred)
                 {
-                    if (anyDeferred)
-                    {
-                        //Render to G-Buffer deferred enabled components
-                        DoDeferred(deferredEnabledComponents);
+                    //Render to G-Buffer deferred enabled components
+                    DoDeferred(deferredEnabledComponents);
 
-                        //Binds the result target
-                        SetTarget(Targets.Objects, true, Color.Transparent, false, false);
+                    //Binds the result target
+                    SetTarget(Targets.Objects, true, Color.Transparent, false, false);
 
-                        #region Final composition
+                    #region Final composition
 #if DEBUG
-                        Stopwatch swComponsition = Stopwatch.StartNew();
+                    Stopwatch swComponsition = Stopwatch.StartNew();
 #endif
-                        //Draw scene result on screen using g-buffer and light buffer
-                        DrawResult(DrawContext);
+                    //Draw scene result on screen using g-buffer and light buffer
+                    DrawResult(DrawContext);
 
 #if DEBUG
-                        swComponsition.Stop();
+                    swComponsition.Stop();
 
-                        frameStats.DeferredCompose = swComponsition.ElapsedTicks;
+                    frameStats.DeferredCompose = swComponsition.ElapsedTicks;
 #endif
-                        #endregion
-                    }
-                    else
-                    {
-                        //Binds the result target
-                        SetTarget(Targets.Objects, true, Color.Transparent, true, true);
-                    }
-
-                    if (anyForward)
-                    {
-                        //Render to screen deferred disabled components
-                        DoForward(deferredDisabledComponents);
-                    }
-
-                    //Post-processing
-                    DoPostProcessing(Targets.Objects, RenderPass.Objects, gameTime);
+                    #endregion
                 }
-
-                //Render to screen deferred disabled components
-                var uiComponents = visibleComponents.Where(c => c.Usage.HasFlag(SceneObjectUsages.UI));
-                if (uiComponents.Any())
+                else
                 {
                     //Binds the result target
-                    SetTarget(Targets.UI, true, Color.Transparent, false, false);
-                    //UI render
-                    DoForward(uiComponents);
-                    //UI post-processing
-                    DoPostProcessing(Targets.UI, RenderPass.UI, gameTime);
+                    SetTarget(Targets.Objects, true, Color.Transparent, true, true);
                 }
 
-                //Combine to screen
-                CombineTargets(Targets.Objects, Targets.UI, Targets.Result);
+                if (anyForward)
+                {
+                    //Render to screen deferred disabled components
+                    DoForward(deferredDisabledComponents);
+                }
 
-                //Final post-processing
-                DoPostProcessing(Targets.Result, RenderPass.Final, gameTime);
-
-                //Draw to screen
-                DrawToScreen(Targets.Result);
+                //Post-processing
+                DoPostProcessing(Targets.Objects, RenderPass.Objects, gameTime);
             }
+
+            //Render to screen deferred disabled components
+            var uiComponents = visibleComponents.Where(c => c.Usage.HasFlag(SceneObjectUsages.UI));
+            if (uiComponents.Any())
+            {
+                //Binds the result target
+                SetTarget(Targets.UI, true, Color.Transparent, false, false);
+                //UI render
+                DoForward(uiComponents);
+                //UI post-processing
+                DoPostProcessing(Targets.UI, RenderPass.UI, gameTime);
+            }
+
+            //Combine to screen
+            CombineTargets(Targets.Objects, Targets.UI, Targets.Result);
+
+            //Final post-processing
+            DoPostProcessing(Targets.Result, RenderPass.Final, gameTime);
+
+            //Draw to screen
+            DrawToScreen(Targets.Result);
+
 #if DEBUG
             swTotal.Stop();
 

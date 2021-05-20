@@ -146,6 +146,7 @@
     <Compile Include="SceneLights\SceneLights.cs" />
     <Compile Include="SceneMaterials\SceneMaterials.cs" />
     <Compile Include="SceneStart\SceneStart.cs" />
+    <Compile Include="SceneTanksGame\IShot.cs" />
     <Compile Include="SceneTanksGame\ParabolicShot.cs" />
     <Compile Include="SceneTanksGame\PlayerStatus.cs" />
     <Compile Include="SceneTanksGame\SceneTanksGame.cs" />

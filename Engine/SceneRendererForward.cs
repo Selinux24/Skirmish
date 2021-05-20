@@ -47,7 +47,7 @@ namespace Engine
 
             Updated = false;
 
-            //Draw visible components
+            //Select visible components
             var visibleComponents = Scene.GetComponents().Where(c => c.Visible);
             if (!visibleComponents.Any())
             {

@@ -7,7 +7,7 @@ namespace SceneTest.SceneTanksGame
     /// <summary>
     /// Paralbolic shot helper
     /// </summary>
-    public class ParabolicShot
+    public class ParabolicShot : IShot
     {
         /// <summary>
         /// Gravity acceleration
@@ -21,19 +21,19 @@ namespace SceneTest.SceneTanksGame
         /// <summary>
         /// Initial velocity
         /// </summary>
-        public Vector3 initialVelocity;
+        private Vector3 initialVelocity;
         /// <summary>
         /// Horizontal velocity component
         /// </summary>
-        public Vector2 horizontalVelocity;
+        private Vector2 horizontalVelocity;
         /// <summary>
         /// Vertical velocity component
         /// </summary>
-        public float verticalVelocity;
+        private float verticalVelocity;
         /// <summary>
         /// Wind force (direction plus magnitude)
         /// </summary>
-        public Vector3 wind;
+        private Vector3 wind;
 
         /// <summary>
         /// Configures the parabolic shot
