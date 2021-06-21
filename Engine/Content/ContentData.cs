@@ -1215,5 +1215,46 @@ namespace Engine.Content
             Images.Import(ref material);
             Materials.Add(name, material);
         }
+        /// <summary>
+        /// Adds animation content to the model content
+        /// </summary>
+        /// <param name="animationLib">Animation library name</param>
+        /// <param name="animationContent">Animation content</param>
+        public void AddAnimationContent(string animationLib, IEnumerable<AnimationContent> animationContent)
+        {
+            if (animationContent?.Any() != true)
+            {
+                return;
+            }
+
+            if (SkinningInfo != null)
+            {
+                //Filter content by existing joints
+                Animations[animationLib] = animationContent.Where(a => SkinningInfo.HasJointData(a.Joint)).ToArray();
+            }
+            else
+            {
+                Animations[animationLib] = animationContent.ToArray();
+            }
+        }
+        /// <summary>
+        /// Adds animation content to the model content
+        /// </summary>
+        /// <param name="animationContent">Animation content</param>
+        public void AddAnimationContent(AnimationLibContentData animationContent)
+        {
+            if (animationContent?.Animations.Any() != true)
+            {
+                return;
+            }
+
+            foreach (var animationLib in animationContent.Animations)
+            {
+                foreach (var animation in animationLib)
+                {
+                    AddAnimationContent(animation.Key, animation.Value);
+                }
+            }
+        }
     }
 }

@@ -169,6 +169,7 @@
     <Compile Include="Animation\AnimationClipDescription.cs" />
     <Compile Include="Animation\AnimationPlan.cs" />
     <Compile Include="Animation\Armature.cs" />
+    <Compile Include="Animation\KeyframeInterpolations.cs" />
     <Compile Include="Animation\Skeleton.cs" />
     <Compile Include="Animation\Transition.cs" />
     <Compile Include="Audio\AudioSpeakers.cs" />
@@ -206,8 +207,11 @@
     <Compile Include="Common\IntersectionHelper.cs" />
     <Compile Include="Common\IntersectionTriangle.cs" />
     <Compile Include="Common\VertexDecal.cs" />
+    <Compile Include="Content\AnimationLibContentData.cs" />
+    <Compile Include="Content\AnimationLibContentDataDescription.cs" />
     <Compile Include="Content\BuiltInMaterial.cs" />
     <Compile Include="Content\BuiltInMaterials.cs" />
+    <Compile Include="Content\IAnimationLoader.cs" />
     <Compile Include="Effects\EffectDefaultTexture.cs" />
     <Compile Include="Effects\IDrawerPostProcess.cs" />
     <Compile Include="PostProcessing\IDrawerPostProcessParams.cs" />

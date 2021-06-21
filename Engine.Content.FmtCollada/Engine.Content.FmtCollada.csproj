@@ -109,7 +109,9 @@
     <Compile Include="Effect.cs" />
     <Compile Include="EvaluateScene.cs" />
     <Compile Include="Extra.cs" />
+    <Compile Include="FmtCollada\LoaderAnimations.cs" />
     <Compile Include="FmtCollada\LoaderCollada.cs" />
+    <Compile Include="FmtCollada\LoaderColladaExtensions.cs" />
     <Compile Include="ForceField.cs" />
     <Compile Include="FX\BlinnPhong.cs" />
     <Compile Include="FX\Code.cs" />

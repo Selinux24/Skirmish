@@ -45,7 +45,7 @@ namespace Animation.Start
         }
         private async Task InitializeCursor()
         {
-            var cursorDesc = UICursorDescription.Default("Common/start/resources/pointer.png", 48, 48, false, new Vector2(-14f, -7f));
+            var cursorDesc = UICursorDescription.Default("start/resources/pointer.png", 48, 48, false, new Vector2(-14f, -7f));
             await this.AddComponentUICursor("Cursor", cursorDesc);
         }
         private async Task InitializeBackground()

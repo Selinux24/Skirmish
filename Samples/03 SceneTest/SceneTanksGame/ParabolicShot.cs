@@ -19,10 +19,6 @@ namespace SceneTest.SceneTanksGame
         /// </summary>
         private TimeSpan initialTime;
         /// <summary>
-        /// Initial velocity
-        /// </summary>
-        private Vector3 initialVelocity;
-        /// <summary>
         /// Horizontal velocity component
         /// </summary>
         private Vector2 horizontalVelocity;
@@ -46,7 +42,7 @@ namespace SceneTest.SceneTanksGame
         public void Configure(GameTime gameTime, Vector3 shotDirection, float shotForce, Vector2 windDirection, float windForce)
         {
             initialTime = TimeSpan.FromMilliseconds(gameTime.TotalMilliseconds);
-            initialVelocity = shotDirection * shotForce;
+            var initialVelocity = shotDirection * shotForce;
             horizontalVelocity = initialVelocity.XZ();
             verticalVelocity = initialVelocity.Y;
             wind = new Vector3(windDirection.X, 0, windDirection.Y) * windForce;

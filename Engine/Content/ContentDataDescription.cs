@@ -54,5 +54,10 @@ namespace Engine.Content
         /// </summary>
         [XmlElement("bake_transforms")]
         public bool BakeTransforms { get; set; } = true;
+        /// <summary>
+        /// Read animations
+        /// </summary>
+        [XmlElement("read_animations")]
+        public bool ReadAnimations { get; set; } = true;
     }
 }
