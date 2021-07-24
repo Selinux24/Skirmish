@@ -20,15 +20,15 @@ namespace Engine.UI
         /// <summary>
         /// Tab space count
         /// </summary>
-        public int TabSpaces { get; set; } = 4;
+        public int TabSpaces { get; set; }
         /// <summary>
         /// Maximum text size
         /// </summary>
-        public int Size { get; set; } = 0;
+        public int Size { get; set; }
         /// <summary>
         /// Enables multi line text
         /// </summary>
-        public bool MultiLine { get; set; } = false;
+        public bool MultiLine { get; set; }
 
         /// <summary>
         /// Constructor

@@ -108,7 +108,7 @@ namespace Engine.UI
         /// <summary>
         /// Enables multi line text
         /// </summary>
-        public bool MultiLine { get; set; } = true;
+        public bool MultiLine { get; set; } = false;
 
         /// <summary>
         /// Constructor
