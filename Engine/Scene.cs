@@ -353,14 +353,6 @@ namespace Engine
         /// Gets or sets if scene has to perform frustum culling with objects
         /// </summary>
         public bool PerformFrustumCulling { get; set; }
-        /// <summary>
-        /// Gets whether a UIControl captured the mouse's click events or not
-        /// </summary>
-        public bool UICaptured { get { return UICapturedControl != null; } }
-        /// <summary>
-        /// Gets or sets the UIControl wich captured the mouse's click events
-        /// </summary>
-        public UIControl UICapturedControl { get; protected set; }
 
         /// <summary>
         /// Constructor
@@ -474,7 +466,7 @@ namespace Engine
 
                 NavigationGraph?.Update(gameTime);
 
-                UICapturedControl = UIControl.EvaluateInput(this);
+                UIControl.EvaluateInput(this);
 
                 FloatTweenManager.Update(gameTime);
 

@@ -479,6 +479,7 @@
     <Compile Include="UI\HorizontalTextAlign.cs" />
     <Compile Include="UI\UIConfiguration.cs" />
     <Compile Include="UI\UIConsole.cs" />
+    <Compile Include="UI\UITextBoxDescription.cs" />
     <Compile Include="UI\UIConsoleDescription.cs" />
     <Compile Include="UI\UICursorDescription.cs" />
     <Compile Include="UI\UICursor.cs" />
@@ -490,6 +491,7 @@
     <Compile Include="UI\UIPanelDescription.cs" />
     <Compile Include="UI\UITabPanel.cs" />
     <Compile Include="UI\UITabPanelDescription.cs" />
+    <Compile Include="UI\UITextBox.cs" />
     <Compile Include="UI\UITextArea.cs" />
     <Compile Include="UI\UITextAreaDescription.cs" />
     <Compile Include="UI\VerticalTextAlign.cs" />

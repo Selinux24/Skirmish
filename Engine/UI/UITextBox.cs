@@ -1,0 +1,251 @@
+﻿using System;
+using System.Threading.Tasks;
+
+namespace Engine.UI
+{
+    using Engine.Common;
+
+    /// <summary>
+    /// Text box
+    /// </summary>
+    public class UITextBox : UITextArea
+    {
+
+        private bool hasFocus = false;
+
+        /// <summary>
+        /// Cursor character
+        /// </summary>
+        public char Cursor { get; set; }
+        /// <summary>
+        /// Tab space count
+        /// </summary>
+        public int TabSpaces { get; set; } = 4;
+        /// <summary>
+        /// Maximum text size
+        /// </summary>
+        public int Size { get; set; } = 0;
+        /// <summary>
+        /// Enables multi line text
+        /// </summary>
+        public bool MultiLine { get; set; } = false;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="scene">Scene</param>
+        /// <param name="description">Description</param>
+        public UITextBox(string name, Scene scene, UITextBoxDescription description) : base(name, scene, description)
+        {
+            GrowControlWithText = false;
+
+            if (description.Background != null)
+            {
+                var background = new Sprite($"{name}.Background", scene, description.Background);
+
+                AddChild(background);
+            }
+
+            EventsEnabled = true;
+
+            Cursor = description.Cursor;
+            TabSpaces = description.TabSpaces;
+            Size = description.Size;
+            MultiLine = description.MultiLine;
+        }
+
+        /// <inheritdoc/>
+        public override void Update(UpdateContext context)
+        {
+            base.Update(context);
+
+            if (!hasFocus)
+            {
+                if (Text?.EndsWith(Cursor.ToString()) == true)
+                {
+                    Text = Text.Remove(Text.Length - 1);
+                }
+
+                return;
+            }
+
+            if (Text?.EndsWith(Cursor.ToString()) == false)
+            {
+                Text += Cursor.ToString();
+            }
+
+            if (Game.Input.KeyJustReleased(Keys.Escape))
+            {
+                ClearFocus();
+
+                return;
+            }
+
+            if (Game.Input.KeyJustReleased(Keys.Back))
+            {
+                DoBack();
+
+                return;
+            }
+
+            if (!EvaluateSize())
+            {
+                return;
+            }
+
+            if (Game.Input.KeyJustReleased(Keys.Enter))
+            {
+                DoEnter();
+
+                return;
+            }
+
+            if (Game.Input.KeyJustReleased(Keys.Tab))
+            {
+                DoTab();
+
+                return;
+            }
+
+            SetText(Helpers.NativeMethods.GetStrokes());
+        }
+        /// <summary>
+        /// Evaluates the size limit
+        /// </summary>
+        /// <returns>Returns true until the size limit is reached</returns>
+        private bool EvaluateSize()
+        {
+            if (Size <= 0)
+            {
+                //No size limit
+                return true;
+            }
+
+            int textSize = (Text?.Length ?? 0) - 1;
+
+            return textSize < Size;
+        }
+
+        /// <summary>
+        /// Sets the control text
+        /// </summary>
+        /// <param name="currText">Current text</param>
+        /// <param name="newText">Text to add</param>
+        /// <returns>Returns the updated text</returns>
+        private void SetText(string newText)
+        {
+            string currText = Text;
+
+            if (string.IsNullOrEmpty(currText))
+            {
+                Text = newText;
+
+                return;
+            }
+
+            Text = currText.Insert(currText.Length - 1, newText);
+        }
+        /// <summary>
+        /// Does the back operation. Removes the last character
+        /// </summary>
+        /// <param name="currText">Current text</param>
+        /// <param name="cursor">Cursor text</param>
+        /// <returns>Returns the updated text</returns>
+        private void DoBack()
+        {
+            string currText = Text;
+            string cursor = Cursor.ToString();
+
+            if (string.IsNullOrEmpty(currText))
+            {
+                //No text
+                return;
+            }
+
+            if (currText == cursor)
+            {
+                //Cursor only
+                return;
+            }
+
+            if (currText.EndsWith(Environment.NewLine + cursor))
+            {
+                //Removes the new line string
+                Text = currText.Remove(currText.Length - 3, 2);
+
+                return;
+            }
+
+            //Removes the last character
+            Text = currText.Remove(currText.Length - 2, 1);
+        }
+        /// <summary>
+        /// Does the enter operation. Adds a new line
+        /// </summary>
+        /// <param name="currText">Current text</param>
+        /// <returns>Returns the updated text</returns>
+        private void DoEnter()
+        {
+            if (!MultiLine)
+            {
+                return;
+            }
+
+            SetText(Environment.NewLine);
+        }
+        /// <summary>
+        /// Does the tab operation. Adds a number of white spaces
+        /// </summary>
+        /// <param name="currText">Current text</param>
+        /// <param name="tabSpaces">Tab spaces</param>
+        /// <returns>Returns the updated text</returns>
+        private void DoTab()
+        {
+            SetText(string.Empty.PadRight(Math.Max(1, TabSpaces)));
+        }
+
+        /// <inheritdoc/>
+        protected override void FireSetFocusEvent()
+        {
+            base.FireSetFocusEvent();
+
+            hasFocus = true;
+        }
+        /// <inheritdoc/>
+        protected override void FireLostFocusEvent()
+        {
+            base.FireLostFocusEvent();
+
+            hasFocus = false;
+        }
+    }
+
+    /// <summary>
+    /// UITextArea extensions
+    /// </summary>
+    public static class UITextBoxExtensions
+    {
+        /// <summary>
+        /// Adds a component to the scene
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        /// <param name="name">Name</param>
+        /// <param name="description">Description</param>
+        /// <param name="layer">Processing layer</param>
+        /// <returns>Returns the created component</returns>
+        public static async Task<UITextBox> AddComponentUITextBox(this Scene scene, string name, UITextBoxDescription description, int layer = Scene.LayerUI)
+        {
+            UITextBox component = null;
+
+            await Task.Run(() =>
+            {
+                component = new UITextBox(name, scene, description);
+
+                scene.AddComponent(component, SceneObjectUsages.UI, layer);
+            });
+
+            return component;
+        }
+    }
+}

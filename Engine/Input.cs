@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace Engine
@@ -409,24 +410,23 @@ namespace Engine
         /// <returns>Return pressed keys collection</returns>
         private Keys[] GetPressedKeys()
         {
-            List<Keys> pressedKeys = new List<Keys>();
-
-            byte[] array = new byte[256];
-            if (NativeMethods.GetKeyboardState(array))
-            {
-                for (int i = 0; i < array.Length; i++)
-                {
-                    if ((array[i] & 0x80) != 0)
-                    {
-                        //Pressed
-                        Keys key = (Keys)i;
-
-                        pressedKeys.Add(key);
-                    }
-                }
-            }
-
-            return pressedKeys.ToArray();
+            return NativeMethods.GetPressedKeys();
+        }
+        /// <summary>
+        /// Gets the just pressed key list
+        /// </summary>
+        /// <returns>Returns an array of just pressed keys</returns>
+        public Keys[] GetJustPressedKeys()
+        {
+            return currentKeyboardKeys.ToArray();
+        }
+        /// <summary>
+        /// Gets the just released key list
+        /// </summary>
+        /// <returns>Returns an array of just released keys</returns>
+        public Keys[] GetJustReleasedKeys()
+        {
+            return lastKeyboardKeys.Where(lk => !currentKeyboardKeys.Contains(lk)).ToArray();
         }
 
         /// <summary>

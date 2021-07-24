@@ -26,6 +26,15 @@ namespace Engine.UI
         }
 
         /// <summary>
+        /// Gets or sets the top most control in the UI hierarchy
+        /// </summary>
+        public static UIControl TopMostControl { get; private set; }
+        /// <summary>
+        /// Gets or sets the focused control the UI
+        /// </summary>
+        public static UIControl FocusedControl { get; private set; }
+
+        /// <summary>
         /// Mouse over event
         /// </summary>
         public event MouseEventHandler MouseOver;
@@ -57,13 +66,20 @@ namespace Engine.UI
         /// Mouse double click
         /// </summary>
         public event MouseEventHandler MouseDoubleClick;
+        /// <summary>
+        /// Set focus event
+        /// </summary>
+        public event EventHandler SetFocus;
+        /// <summary>
+        /// Lost focus event
+        /// </summary>
+        public event EventHandler LostFocus;
 
         /// <summary>
         /// Evaluates input over the specified scene
         /// </summary>
         /// <param name="scene">Scene</param>
-        /// <returns>Returns the control wich captures the mouse event</returns>
-        public static UIControl EvaluateInput(Scene scene)
+        public static void EvaluateInput(Scene scene)
         {
             var input = scene.Game.Input;
 
@@ -76,7 +92,9 @@ namespace Engine.UI
 
             if (!evaluableCtrls.Any())
             {
-                return null;
+                TopMostControl = null;
+
+                return;
             }
 
             //Initialize state of selected controls
@@ -86,23 +104,29 @@ namespace Engine.UI
             var mouseOverCtrls = evaluableCtrls.Where(c => c.IsMouseOver);
             if (!mouseOverCtrls.Any())
             {
-                return null;
+                TopMostControl = null;
+
+                return;
             }
 
             //Reverse the order for processing. Top-most first
             mouseOverCtrls = mouseOverCtrls.Reverse();
 
+            UIControl focusedControl = null;
             foreach (var topMostControl in mouseOverCtrls)
             {
                 //Evaluates all controls with the mouse pointer into its bounds
-                var topControl = EvaluateTopMostControl(input, topMostControl);
+                EvaluateTopMostControl(input, topMostControl, out var topControl, out focusedControl);
                 if (topControl != null)
                 {
-                    return topControl;
+                    TopMostControl = topControl;
+
+                    break;
                 }
             }
 
-            return null;
+            //Evaluate focused control
+            EvaluateFocus(input, focusedControl);
         }
         /// <summary>
         /// Gets whether the specified UI control is event-evaluable or not
@@ -174,34 +198,42 @@ namespace Engine.UI
         /// </summary>
         /// <param name="input">Input</param>
         /// <param name="ctrl">Top most control</param>
-        /// <returns>Returns the last control events enabled control</returns>
-        private static UIControl EvaluateTopMostControl(Input input, UIControl ctrl)
+        /// <param name="topMostControl">Returns the last events enabled control in the control hierarchy</param>
+        /// <param name="focusedControl">Returns the last clicked control with any mouse button</param>
+        /// <remarks>Iterates over the control's children collection</remarks>
+        private static void EvaluateTopMostControl(Input input, UIControl ctrl, out UIControl topMostControl, out UIControl focusedControl)
         {
-            UIControl capturedControl = null;
+            topMostControl = null;
+            focusedControl = null;
 
             var topControl = ctrl;
             while (topControl != null)
             {
                 if (topControl.EventsEnabled)
                 {
-                    capturedControl = topControl;
+                    topMostControl = topControl;
 
-                    EvaluateEventsEnabledControl(input, topControl);
+                    EvaluateEventsEnabledControl(input, topControl, out var focusControl);
+                    if (focusControl != null)
+                    {
+                        focusedControl = focusControl;
+                    }
                 }
 
                 //Get the new evaluable top most control in the children list
                 topControl = topControl.Children.LastOrDefault(c => IsEvaluable(c) && c.IsMouseOver);
             }
-
-            return capturedControl;
         }
         /// <summary>
         /// Evaluate events enabled control
         /// </summary>
         /// <param name="input">Input</param>
         /// <param name="ctrl">Control</param>
-        private static void EvaluateEventsEnabledControl(Input input, UIControl ctrl)
+        /// <param name="focusedControl">Returns the focused control (last clicked control with any mouse button)</param>
+        private static void EvaluateEventsEnabledControl(Input input, UIControl ctrl, out UIControl focusedControl)
         {
+            focusedControl = null;
+
             var justPressedButtons = input.MouseButtonsState & ~ctrl.PressedState;
             var justReleasedButtons = ctrl.PressedState & ~input.MouseButtonsState;
 
@@ -236,8 +268,50 @@ namespace Engine.UI
             if (justReleasedButtons != MouseButtons.None)
             {
                 ctrl.FireJustReleasedEvent(input.MousePosition, justReleasedButtons);
-                ctrl.FireClickEvent(input.MousePosition, justReleasedButtons);
+                ctrl.FireMouseClickEvent(input.MousePosition, justReleasedButtons);
+
+                //Focus changed
+                focusedControl = ctrl;
             }
+        }
+        /// <summary>
+        /// Evaluates the current focus
+        /// </summary>
+        /// <param name="input">Input</param>
+        /// <param name="focusedControl">Current focused control</param>
+        /// <remarks>Fires set and lost focus events</remarks>
+        private static void EvaluateFocus(Input input, UIControl focusedControl)
+        {
+            if (FocusedControl != null)
+            {
+                bool mouseClicked = input.MouseButtonsState != MouseButtons.None;
+                bool overFocused = FocusedControl.Contains(input.MousePosition);
+                if (mouseClicked && !overFocused)
+                {
+                    //Clicked outside the current focused control
+
+                    //Lost focus
+                    FocusedControl.FireLostFocusEvent();
+                    FocusedControl = null;
+                }
+            }
+
+            if (focusedControl != null && FocusedControl != focusedControl)
+            {
+                //Clicked on control
+
+                //Set focus
+                focusedControl.FireSetFocusEvent();
+                FocusedControl = focusedControl;
+            }
+        }
+        /// <summary>
+        /// Clears the current control focus
+        /// </summary>
+        public static void ClearFocus()
+        {
+            FocusedControl?.FireLostFocusEvent();
+            FocusedControl = null;
         }
 
         /// <summary>
@@ -1084,7 +1158,7 @@ namespace Engine.UI
         /// </summary>
         /// <param name="pointerPosition">Pointer position</param>
         /// <param name="clickedButtons">Clicked buttons</param>
-        protected virtual void FireClickEvent(Point pointerPosition, MouseButtons clickedButtons)
+        protected virtual void FireMouseClickEvent(Point pointerPosition, MouseButtons clickedButtons)
         {
             MouseClick?.Invoke(this, new MouseEventArgs
             {
@@ -1097,7 +1171,7 @@ namespace Engine.UI
                 var doubleClickedButtons = lastClickedButtons & clickedButtons;
                 if (doubleClickedButtons != MouseButtons.None)
                 {
-                    FireDoubleClickEvent(pointerPosition, doubleClickedButtons);
+                    FireMouseDoubleClickEvent(pointerPosition, doubleClickedButtons);
 
                     lastClickedTime = TimeSpan.Zero;
                     lastClickedButtons = MouseButtons.None;
@@ -1114,13 +1188,27 @@ namespace Engine.UI
         /// </summary>
         /// <param name="pointerPosition">Pointer position</param>
         /// <param name="doubleClickedButtons">Double clicked buttons</param>
-        protected virtual void FireDoubleClickEvent(Point pointerPosition, MouseButtons doubleClickedButtons)
+        protected virtual void FireMouseDoubleClickEvent(Point pointerPosition, MouseButtons doubleClickedButtons)
         {
             MouseDoubleClick?.Invoke(this, new MouseEventArgs
             {
                 PointerPosition = pointerPosition,
                 Buttons = doubleClickedButtons,
             });
+        }
+        /// <summary>
+        /// Fires on set focus event
+        /// </summary>
+        protected virtual void FireSetFocusEvent()
+        {
+            SetFocus?.Invoke(this, new EventArgs() { });
+        }
+        /// <summary>
+        /// Fires on lost focus event
+        /// </summary>
+        protected virtual void FireLostFocusEvent()
+        {
+            LostFocus?.Invoke(this, new EventArgs() { });
         }
 
         /// <summary>
