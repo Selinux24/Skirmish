@@ -96,9 +96,6 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestScene.cs" />
-    <AdditionalFiles Include="..\..\.sonarlint\selinux24_skirmish_dev\CSharp\SonarLint.xml">
-      <Link>SonarLint.xml</Link>
-    </AdditionalFiles>
     <Content Include="Resources\Ground\gravel_01_diffuse.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

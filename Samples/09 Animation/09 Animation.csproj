@@ -132,9 +132,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SimpleAnimation\SceneSimpleAnimation.cs" />
     <Compile Include="Start\SceneStart.cs" />
-    <AdditionalFiles Include="..\..\.sonarlint\selinux24_skirmish_dev\CSharp\SonarLint.xml">
-      <Link>SonarLint.xml</Link>
-    </AdditionalFiles>
     <Content Include="AnimationParts\Resources\d_road_asphalt_stripes_diffuse.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

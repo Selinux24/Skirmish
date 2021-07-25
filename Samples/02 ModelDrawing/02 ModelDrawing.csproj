@@ -154,9 +154,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <AdditionalFiles Include="..\..\.sonarlint\selinux24_skirmish_dev\CSharp\SonarLint.xml">
-      <Link>SonarLint.xml</Link>
-    </AdditionalFiles>
     <Content Include="Resources\explosion.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
