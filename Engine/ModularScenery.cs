@@ -111,7 +111,7 @@ namespace Engine
             }
             else if (!string.IsNullOrWhiteSpace(description.AssetsConfigurationFile))
             {
-                AssetConfiguration = SerializationHelper.DeserializeXmlFromFile<ModularSceneryAssetConfiguration>(Path.Combine(description.Content.ContentFolder ?? "", description.AssetsConfigurationFile));
+                AssetConfiguration = SerializationHelper.DeserializeFromFile<ModularSceneryAssetConfiguration>(Path.Combine(description.Content.ContentFolder ?? "", description.AssetsConfigurationFile));
             }
 
             if (description.Levels != null)
@@ -120,7 +120,7 @@ namespace Engine
             }
             else if (!string.IsNullOrWhiteSpace(description.LevelsFile))
             {
-                Levels = SerializationHelper.DeserializeXmlFromFile<ModularSceneryLevels>(Path.Combine(description.Content.ContentFolder ?? "", description.LevelsFile));
+                Levels = SerializationHelper.DeserializeFromFile<ModularSceneryLevels>(Path.Combine(description.Content.ContentFolder ?? "", description.LevelsFile));
             }
         }
         /// <summary>

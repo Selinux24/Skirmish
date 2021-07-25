@@ -24,6 +24,6 @@ namespace Engine.Content
         /// <param name="contentFolder">Content folder</param>
         /// <param name="content">Conten description</param>
         /// <returns>Returns the loaded contents</returns>
-        AnimationLibContentData Load(string contentFolder, AnimationLibContentDataDescription content);
+        AnimationLibContentData Load(string contentFolder, AnimationLibContentDataFile content);
     }
 }

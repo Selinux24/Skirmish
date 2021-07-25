@@ -8,20 +8,20 @@ namespace Engine.Animation
     /// Animation description class
     /// </summary>
     [Serializable]
-    public class AnimationDescription
+    public class AnimationFile
     {
         /// <summary>
         /// Clips
         /// </summary>
         [XmlArray("animations")]
-        [XmlArrayItem("animation", typeof(AnimationClipDescription))]
-        public List<AnimationClipDescription> Clips { get; set; } = new List<AnimationClipDescription>();
+        [XmlArrayItem("animation", typeof(AnimationClipFile))]
+        public List<AnimationClipFile> Clips { get; set; } = new List<AnimationClipFile>();
         /// <summary>
         /// Transitions
         /// </summary>
         [XmlArray("transitions")]
-        [XmlArrayItem("transition", typeof(TransitionDescription))]
-        public List<TransitionDescription> Transitions { get; set; } = new List<TransitionDescription>();
+        [XmlArrayItem("transition", typeof(TransitionFile))]
+        public List<TransitionFile> Transitions { get; set; } = new List<TransitionFile>();
         /// <summary>
         /// Time step
         /// </summary>
@@ -36,7 +36,7 @@ namespace Engine.Animation
         /// <param name="endTime">End time</param>
         public void AddClip(string clipName, int startTime, int endTime)
         {
-            Clips.Add(new AnimationClipDescription()
+            Clips.Add(new AnimationClipFile()
             {
                 Name = clipName,
                 From = startTime,
@@ -52,7 +52,7 @@ namespace Engine.Animation
         /// <param name="startTo">Start time of the "to" clip</param>
         public void AddTransition(string clipFrom, string clipTo, float startFrom, float startTo)
         {
-            Transitions.Add(new TransitionDescription()
+            Transitions.Add(new TransitionFile()
             {
                 ClipFrom = clipFrom,
                 ClipTo = clipTo,

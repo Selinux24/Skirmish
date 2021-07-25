@@ -187,7 +187,7 @@ namespace Instancing
                 Instances = instances,
                 BlendMode = BlendModes.DefaultTransparent,
                 UseAnisotropicFiltering = true,
-                Content = ContentDescription.FromFile(@"Resources/Trees", @"tree.xml"),
+                Content = ContentDescription.FromFile(@"Resources/Trees", @"tree.json"),
             };
             var trees = await this.AddComponentModelInstanced("Trees", treeDesc);
 
@@ -228,7 +228,7 @@ namespace Instancing
                 Instances = 100,
                 CastShadow = true,
                 UseAnisotropicFiltering = true,
-                Content = ContentDescription.FromFile(@"Resources/Soldier", @"soldier_anim2.xml"),
+                Content = ContentDescription.FromFile(@"Resources/Soldier", @"soldier_anim2.json"),
             };
             troops = await this.AddComponentModelInstanced("Troops", tDesc, SceneObjectUsages.Agent);
             troops.MaximumCount = -1;
@@ -283,7 +283,7 @@ namespace Instancing
                     Instances = 40,
                     CastShadow = true,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("Resources/Wall", "wall.xml"),
+                    Content = ContentDescription.FromFile("Resources/Wall", "wall.json"),
                 });
 
             BoundingBox bbox = wall[0].GetBoundingBox();

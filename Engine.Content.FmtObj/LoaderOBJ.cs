@@ -50,7 +50,7 @@ namespace Engine.Content.FmtObj
         /// <param name="contentFolder">Content folder</param>
         /// <param name="content">Content description</param>
         /// <returns>Returns a list of model contents</returns>
-        public IEnumerable<ContentData> Load(string contentFolder, ContentDataDescription content)
+        public IEnumerable<ContentData> Load(string contentFolder, ContentDataFile content)
         {
             Matrix transform = Matrix.Identity;
 

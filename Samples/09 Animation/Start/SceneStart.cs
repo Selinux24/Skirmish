@@ -52,7 +52,7 @@ namespace Animation.Start
         {
             var backGroundDesc = new ModelDescription()
             {
-                Content = ContentDescription.FromFile("start/resources", "SkyPlane.xml"),
+                Content = ContentDescription.FromFile("start/resources", "SkyPlane.json"),
             };
             backGround = await this.AddComponentModel("Background", backGroundDesc, SceneObjectUsages.UI);
         }

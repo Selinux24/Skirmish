@@ -7,7 +7,7 @@ namespace Engine.Content
     /// Animation content data description
     /// </summary>
     [Serializable]
-    public class AnimationLibContentDataDescription
+    public class AnimationLibContentDataFile
     {
         /// <summary>
         /// Animation file name
@@ -18,7 +18,7 @@ namespace Engine.Content
         /// <summary>
         /// Constructor
         /// </summary>
-        public AnimationLibContentDataDescription()
+        public AnimationLibContentDataFile()
         {
 
         }

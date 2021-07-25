@@ -1,0 +1,26 @@
+{
+  "modelFilename": "Dn_Doors.dae",
+  "armatureName": "Dn_Jail_1_Armature",
+  "animation": {
+    "clips": [
+      {
+        "name": "default",
+        "skeleton": "Dn_Jail_1_Armature",
+        "from": 0,
+        "to": 1
+      },
+      {
+        "name": "open",
+        "skeleton": "Dn_Jail_1_Armature",
+        "from": 1,
+        "to": 2
+      },
+      {
+        "name": "close",
+        "skeleton": "Dn_Jail_1_Armature",
+        "from": 2,
+        "to": 3
+      }
+    ]
+  }
+}

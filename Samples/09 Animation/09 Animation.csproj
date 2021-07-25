@@ -141,9 +141,9 @@
     <Content Include="AnimationParts\Resources\d_road_asphalt_stripes_specular.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="AnimationParts\Resources\Leopard\Leopard.xml">
+    <None Include="AnimationParts\Resources\Leopard\Leopard.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    </None>
     <Content Include="AnimationParts\Resources\Leopard\Leopard.bmp">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -159,21 +159,25 @@
     <Content Include="SimpleAnimation\Resources\Doors\bronze_n.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SimpleAnimation\Resources\Doors\Wall1.xml">
+    <None Include="SimpleAnimation\Resources\Doors\Dn_Doors.json">
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SimpleAnimation\Resources\Doors\Dn_Jails.xml">
+    </None>
+    <None Include="SimpleAnimation\Resources\Doors\Dn_Jails.json">
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SimpleAnimation\Resources\Doors\Dn_Doors.xml">
+    </None>
+    <None Include="SimpleAnimation\Resources\Doors\Wall1.json">
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    </None>
     <Content Include="SimpleAnimation\Resources\Doors\metal_rust_d.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Include="SimpleAnimation\Resources\Doors\Wall2.json">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <Content Include="SimpleAnimation\Resources\Doors\wall_d.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -192,33 +196,30 @@
     <Content Include="SimpleAnimation\Resources\Ladder\bronze_n.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SimpleAnimation\Resources\Ladder\Dn_Anim_Ladder.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <None Include="SimpleAnimation\Resources\Ladder\Dn_Anim_Ladder.json">
       <SubType>Designer</SubType>
-    </Content>
-    <Content Include="SimpleAnimation\Resources\Ladder\Dn_Anim_Ladder_22.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SimpleAnimation\Resources\Ladder\Dn_Anim_Ladder_2.xml">
+    </None>
+    <None Include="SimpleAnimation\Resources\Ladder\Dn_Anim_Ladder_2.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    </None>
+    <None Include="SimpleAnimation\Resources\Ladder\Dn_Anim_Ladder_22.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <Content Include="SimpleAnimation\Resources\Ladder\metal_rust_d.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Include="SimpleAnimation\Resources\Rat\Rat.json">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <Content Include="SimpleAnimation\Resources\Rat\Rat_d.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SimpleAnimation\Resources\Rat\Rat.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
     </Content>
     <Content Include="SimpleAnimation\Resources\Soldier\soldier0.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SimpleAnimation\Resources\Soldier\Soldier1.jpg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SimpleAnimation\Resources\Soldier\soldier_anim2.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Start\Resources\anttisinstrumentals+keepshiningoninstrumental.mp3">
@@ -236,9 +237,12 @@
     <Content Include="Start\Resources\pointer.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Start\Resources\SkyPlane.xml">
+    <None Include="SimpleAnimation\Resources\Soldier\soldier_anim2.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    </None>
+    <None Include="Start\Resources\SkyPlane.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <Content Include="Start\Resources\ui_options.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -289,10 +293,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SimpleAnimation\Resources\Doors\Wall2.dae">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SimpleAnimation\Resources\Doors\Wall2.xml">
-      <SubType>Designer</SubType>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Start\Resources\SkyPlane.dae">

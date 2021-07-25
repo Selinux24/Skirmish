@@ -13,7 +13,7 @@ namespace Engine
         /// <param name="contentFolder">Content folder</param>
         /// <remarks>
         /// The folder must contains the following files:
-        /// - assets.xml for asset collection in the ContentDataDescription format
+        /// - assets.xml for asset collection in the ContentDataFile format
         /// - assetsmap.xml for asset groups definition, like rooms or corridors, in the ModularSceneryAssetConfiguration format
         /// - levels.xml for level description in the ModularSceneryLevels format
         /// </remarks>

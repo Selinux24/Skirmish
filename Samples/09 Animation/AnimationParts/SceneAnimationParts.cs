@@ -87,7 +87,7 @@ namespace Animation.AnimationParts
             {
                 CastShadow = true,
                 Optimize = false,
-                Content = ContentDescription.FromFile("AnimationParts/Resources/Leopard", "Leopard.xml"),
+                Content = ContentDescription.FromFile("AnimationParts/Resources/Leopard", "Leopard.json"),
                 TransformNames = new[]
                 {
                     "Hull-mesh",

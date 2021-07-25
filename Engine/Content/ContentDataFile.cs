@@ -9,7 +9,7 @@ namespace Engine.Content
     /// Model content description
     /// </summary>
     [Serializable]
-    public class ContentDataDescription
+    public class ContentDataFile
     {
         /// <summary>
         /// Model file name
@@ -33,7 +33,7 @@ namespace Engine.Content
         /// Animation description
         /// </summary>
         [XmlElement("animation_description")]
-        public AnimationDescription Animation { get; set; } = null;
+        public AnimationFile Animation { get; set; } = null;
         /// <summary>
         /// Model scale
         /// </summary>

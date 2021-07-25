@@ -1,0 +1,26 @@
+{
+  "modelFilename": "Dn_Anim_Ladder_2.dae",
+  "armatureName": "Armature",
+  "animation": {
+    "clips": [
+      {
+        "name": "default",
+        "skeleton": "Armature",
+        "from": 0,
+        "to": 1
+      },
+      {
+        "name": "pull",
+        "skeleton": "Armature",
+        "from": 1,
+        "to": 2
+      },
+      {
+        "name": "push",
+        "skeleton": "Armature",
+        "from": 2,
+        "to": 3
+      }
+    ]
+  }
+}

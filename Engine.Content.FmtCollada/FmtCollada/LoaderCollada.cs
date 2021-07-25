@@ -49,7 +49,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="contentFolder">Content folder</param>
         /// <param name="content">Conten description</param>
         /// <returns>Returns the loaded contents</returns>
-        public IEnumerable<ContentData> Load(string contentFolder, ContentDataDescription content)
+        public IEnumerable<ContentData> Load(string contentFolder, ContentDataFile content)
         {
             Matrix transform = Matrix.Identity;
 
@@ -341,7 +341,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="dae">Dae object</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="animation">Animation description</param>
-        private static void ProcessLibraryAnimations(Collada dae, ContentData modelContent, AnimationDescription animation)
+        private static void ProcessLibraryAnimations(Collada dae, ContentData modelContent, AnimationFile animation)
         {
             if (dae.LibraryAnimations?.Length > 0)
             {

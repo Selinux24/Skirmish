@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ContentDataDescription>
+<ContentDataFile>
   <model_filename>boulder.dae</model_filename>
   <volumes>
     <volume>Volume</volume>
   </volumes>
-</ContentDataDescription>
+</ContentDataFile>

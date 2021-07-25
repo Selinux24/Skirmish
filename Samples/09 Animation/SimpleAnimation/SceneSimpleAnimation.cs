@@ -203,7 +203,7 @@ namespace Animation.SimpleAnimation
                     Instances = 2,
                     CastShadow = true,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Ladder", "Dn_Anim_Ladder.xml"),
+                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Ladder", "Dn_Anim_Ladder.json"),
                 });
 
             ladder[0].Manipulator.SetPosition(-4f, 1, 0, true);
@@ -240,7 +240,7 @@ namespace Animation.SimpleAnimation
                     CastShadow = true,
                     Instances = 2,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Ladder", "Dn_Anim_Ladder_2.xml"),
+                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Ladder", "Dn_Anim_Ladder_2.json"),
                 });
 
             var ladder2 = await this.AddComponentModelInstanced(
@@ -250,7 +250,7 @@ namespace Animation.SimpleAnimation
                     CastShadow = true,
                     Instances = 2,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Ladder", "Dn_Anim_Ladder_22.xml"),
+                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Ladder", "Dn_Anim_Ladder_22.json"),
                 });
 
             ladder[0].Manipulator.SetPosition(-3f, 1, 0, true);
@@ -297,7 +297,7 @@ namespace Animation.SimpleAnimation
                     CastShadow = true,
                     Instances = 2,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Soldier", "soldier_anim2.xml"),
+                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Soldier", "soldier_anim2.json"),
                 });
 
             soldier[0].Manipulator.SetPosition(0, 0, 0, true);
@@ -346,7 +346,7 @@ namespace Animation.SimpleAnimation
                     CastShadow = true,
                     Instances = 2,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Rat", "rat.xml"),
+                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Rat", "rat.json"),
                 });
 
             rat[0].Manipulator.SetPosition(2, 0, 0, true);
@@ -371,7 +371,7 @@ namespace Animation.SimpleAnimation
                     CastShadow = true,
                     Instances = 1,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Doors", "Dn_Doors.xml"),
+                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Doors", "Dn_Doors.json"),
                 });
 
             var walls = await this.AddComponentModelInstanced(
@@ -381,7 +381,7 @@ namespace Animation.SimpleAnimation
                     CastShadow = true,
                     Instances = 1,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Doors", "Wall1.xml"),
+                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Doors", "Wall1.json"),
                 });
 
             doors[0].Manipulator.SetPosition(-10, 0, 8, true);
@@ -423,7 +423,7 @@ namespace Animation.SimpleAnimation
                     CastShadow = true,
                     Instances = 1,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Doors", "Wall2.xml"),
+                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Doors", "Wall2.json"),
                 });
 
             walls[0].Manipulator.SetPosition(10, 0, 8, true);
@@ -437,7 +437,7 @@ namespace Animation.SimpleAnimation
                     CastShadow = true,
                     Instances = 1,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Doors", "Dn_Jails.xml"),
+                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Doors", "Dn_Jails.json"),
                 });
 
             doors[0].Manipulator.SetPosition(10, 0, 8, true);

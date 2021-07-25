@@ -7,7 +7,7 @@ namespace Engine.Animation
     /// Animation clip description
     /// </summary>
     [Serializable]
-    public class AnimationClipDescription
+    public class AnimationClipFile
     {
         /// <summary>
         /// Clip name

@@ -67,7 +67,7 @@ namespace Engine.Animation
         /// </summary>
         /// <param name="jointAnimations">Joint list</param>
         /// <param name="animationDescription">Animation description</param>
-        private static Dictionary<string, JointAnimation[]> InitializeAnimationDictionary(JointAnimation[] jointAnimations, AnimationDescription animationDescription)
+        private static Dictionary<string, JointAnimation[]> InitializeAnimationDictionary(JointAnimation[] jointAnimations, AnimationFile animationDescription)
         {
             Dictionary<string, JointAnimation[]> dictAnimations = new Dictionary<string, JointAnimation[]>();
 
@@ -108,7 +108,7 @@ namespace Engine.Animation
         /// </summary>
         /// <param name="jointAnimations">Joint animation list</param>
         /// <param name="animationDescription">Animation description</param>
-        public void Initialize(JointAnimation[] jointAnimations, AnimationDescription animationDescription)
+        public void Initialize(JointAnimation[] jointAnimations, AnimationFile animationDescription)
         {
             if (animationDescription != null)
             {

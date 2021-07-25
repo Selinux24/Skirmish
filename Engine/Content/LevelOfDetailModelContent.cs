@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.Serialization;
+﻿using System.Collections.Generic;
 
 namespace Engine.Content
 {
     /// <summary>
     /// Model content dictionary by level of detail
     /// </summary>
-    [Serializable]
     public class LevelOfDetailModelContent : Dictionary<LevelOfDetail, ContentData>
     {
         /// <summary>
@@ -38,16 +35,6 @@ namespace Engine.Content
         /// </summary>
         public LevelOfDetailModelContent()
             : base()
-        {
-
-        }
-        /// <summary>
-        /// Serialization constructor
-        /// </summary>
-        /// <param name="info">Serialization info</param>
-        /// <param name="context">Streaming context</param>
-        protected LevelOfDetailModelContent(SerializationInfo info, StreamingContext context)
-            : base(info, context)
         {
 
         }

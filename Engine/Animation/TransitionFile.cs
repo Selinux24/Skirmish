@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Xml.Serialization;
 
-namespace Engine
+namespace Engine.Animation
 {
     /// <summary>
     /// Transition description
     /// </summary>
     [Serializable]
-    public class TransitionDescription
+    public class TransitionFile
     {
         /// <summary>
         /// Clip from name

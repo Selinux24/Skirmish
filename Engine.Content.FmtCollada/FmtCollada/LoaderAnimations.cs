@@ -46,7 +46,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="contentFolder">Content folder</param>
         /// <param name="content">Conten description</param>
         /// <returns>Returns the loaded contents</returns>
-        public AnimationLibContentData Load(string contentFolder, AnimationLibContentDataDescription content)
+        public AnimationLibContentData Load(string contentFolder, AnimationLibContentDataFile content)
         {
             string fileName = content.AnimationFileName;
 

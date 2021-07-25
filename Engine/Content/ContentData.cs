@@ -378,7 +378,7 @@ namespace Engine.Content
             /// <summary>
             /// Animation definition
             /// </summary>
-            public AnimationDescription Definition { get; set; }
+            public AnimationFile Definition { get; set; }
 
             /// <summary>
             /// Constructor
@@ -397,7 +397,7 @@ namespace Engine.Content
             protected AnimationDictionary(SerializationInfo info, StreamingContext context)
                 : base(info, context)
             {
-                Definition = info.GetValue<AnimationDescription>(nameof(Definition));
+                Definition = info.GetValue<AnimationFile>(nameof(Definition));
             }
             /// <summary>
             /// Populates a SerializationInfo with the data needed to serialize the target object.
@@ -989,7 +989,7 @@ namespace Engine.Content
             {
                 if (res.Animations.Definition == null)
                 {
-                    res.Animations.Definition = new AnimationDescription();
+                    res.Animations.Definition = new AnimationFile();
                 }
 
                 res.Animations.Definition.Clips.AddRange(clips);
