@@ -114,7 +114,7 @@ namespace Engine.Common
             }
             else
             {
-                var content = LevelOfDetailModelContent.Build(geo, description.Optimize);
+                var content = ContentData.BuildLOD(geo, description.Optimize);
 
                 foreach (var lod in content.Keys)
                 {

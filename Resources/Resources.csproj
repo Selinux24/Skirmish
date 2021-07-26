@@ -276,6 +276,18 @@
     <Content Include="Collada\Buildings\Watch Tower\Wood.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Include="Collada\Characters\Human2\Human2.json">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <Content Include="Collada\Characters\Human2\Human2.xml">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Characters\Rat\Rat.xml">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Collada\Characters\Rat\Rat_d.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -830,6 +842,16 @@
     <Content Include="Collada\Scenery\TwoLevels\two_levels.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Include="Collada\Characters\Rat\Rat.json">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Collada\Characters\Soldier\soldier_anim2.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Collada\UI\Background\SkyPlane.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Resources.ruleset" />
   </ItemGroup>
   <ItemGroup>

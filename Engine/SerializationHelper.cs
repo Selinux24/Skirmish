@@ -104,7 +104,6 @@ namespace Engine
                 case ".json":
                     SerializeJsonToFile(obj, fileName);
                     break;
-                case ".bin":
                 default:
                     SerializeBinaryToFile(obj, fileName);
                     break;
@@ -130,7 +129,6 @@ namespace Engine
                 case ".json":
                     result = DeserializeJsonFromFile<T>(fileName);
                     break;
-                case ".bin":
                 default:
                     result = DeserializeBinaryFromFile<T>(fileName);
                     break;

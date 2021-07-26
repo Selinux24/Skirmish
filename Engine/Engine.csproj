@@ -523,7 +523,6 @@
     <Compile Include="Common\TextureDictionary.cs" />
     <Compile Include="Common\VertexDataChannels.cs" />
     <Compile Include="Content\LightContentTypes.cs" />
-    <Compile Include="Content\LevelOfDetailModelContent.cs" />
     <Compile Include="CubemapDescription.cs" />
     <Compile Include="CameraFollower.cs" />
     <Compile Include="GameResourceManager.cs" />
