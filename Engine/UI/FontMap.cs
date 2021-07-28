@@ -230,6 +230,10 @@ namespace Engine.UI
         }
 
         /// <summary>
+        /// Color validator
+        /// </summary>
+        private static Regex colorRegex = new Regex(colorPattern, RegexOptions.IgnoreCase | RegexOptions.Compiled, TimeSpan.FromMilliseconds(200));
+        /// <summary>
         /// Parses a sentence
         /// </summary>
         /// <param name="text">Text to parse</param>
@@ -332,9 +336,8 @@ namespace Engine.UI
             Dictionary<int, Color4> shadowColorValues = new Dictionary<int, Color4>();
             int deletedSize = 0;
 
-            parsedString = Regex.Replace(
+            parsedString = colorRegex.Replace(
                 text,
-                colorPattern,
                 (m) =>
                 {
                     ReadMatch(m, out var mForeColor, out var mShadowColor);
@@ -351,8 +354,7 @@ namespace Engine.UI
                     deletedSize += m.Length;
 
                     return string.Empty;
-                },
-                RegexOptions.IgnoreCase);
+                });
 
             List<Color4> foreColorsByChar = new List<Color4>();
             List<Color4> shadowColorsByChar = new List<Color4>();
