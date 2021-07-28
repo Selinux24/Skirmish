@@ -3,6 +3,9 @@ using System;
 
 namespace Engine
 {
+    /// <summary>
+    /// 3D rotation
+    /// </summary>
     public struct RotationQ : IEquatable<RotationQ>
     {
         /// <summary>
@@ -13,19 +16,19 @@ namespace Engine
         /// <summary>
         /// The X component of the rotation.
         /// </summary>
-        public float X;
+        public float X { get; set; }
         /// <summary>
         /// The Y component of the rotation.
         /// </summary>
-        public float Y;
+        public float Y { get; set; }
         /// <summary>
         /// The Z component of the rotation.
         /// </summary>
-        public float Z;
+        public float Z { get; set; }
         /// <summary>
         /// The W component of the rotation.
         /// </summary>
-        public float W;
+        public float W { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RotationQ"/> struct.
@@ -113,7 +116,7 @@ namespace Engine
         /// <inheritdoc/>
         public bool Equals(RotationQ other)
         {
-            return Equals(other);
+            return Equals(ref other);
         }
         /// <inheritdoc/>
         public override bool Equals(object obj)

@@ -3,20 +3,23 @@ using System;
 
 namespace Engine
 {
+    /// <summary>
+    /// 3D direction
+    /// </summary>
     public struct Direction3 : IEquatable<Direction3>
     {
         /// <summary>
         /// The X component of the direction.
         /// </summary>
-        public float X;
+        public float X { get; set; }
         /// <summary>
         /// The Y component of the direction.
         /// </summary>
-        public float Y;
+        public float Y { get; set; }
         /// <summary>
         /// The Z component of the direction.
         /// </summary>
-        public float Z;
+        public float Z { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Direction3"/> struct.
@@ -96,7 +99,7 @@ namespace Engine
         /// <inheritdoc/>
         public bool Equals(Direction3 other)
         {
-            return Equals(other);
+            return Equals(ref other);
         }
         /// <inheritdoc/>
         public override bool Equals(object obj)

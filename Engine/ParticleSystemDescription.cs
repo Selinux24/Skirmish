@@ -335,35 +335,6 @@ namespace Engine
         }
 
         /// <summary>
-        /// Reads vector3 to string
-        /// </summary>
-        /// <param name="value">Vector3 value</param>
-        private static string ReadVector3(Vector3 value)
-        {
-            return $"{value.X} {value.Y} {value.Z}";
-        }
-        /// <summary>
-        /// Writes vector3 from string
-        /// </summary>
-        /// <param name="value">String value</param>
-        /// <param name="defaultValue">Default value</param>
-        private static Vector3 WriteVector3(string value, Vector3 defaultValue)
-        {
-            var floats = value?.SplitFloats();
-            if (floats?.Length == 3)
-            {
-                return new Vector3(floats);
-            }
-            else if (floats?.Length == 1)
-            {
-                return new Vector3(floats[0]);
-            }
-            else
-            {
-                return defaultValue;
-            }
-        }
-        /// <summary>
         /// Reads color to string
         /// </summary>
         /// <param name="value">Color value</param>

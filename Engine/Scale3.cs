@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace Engine
 {
+    /// <summary>
+    /// 3D scale
+    /// </summary>
     public struct Scale3 : IEquatable<Scale3>
     {
         /// <summary>
@@ -21,15 +24,15 @@ namespace Engine
         /// <summary>
         /// The X component of the scale.
         /// </summary>
-        public float X;
+        public float X { get; set; }
         /// <summary>
         /// The Y component of the scale.
         /// </summary>
-        public float Y;
+        public float Y { get; set; }
         /// <summary>
         /// The Z component of the scale.
         /// </summary>
-        public float Z;
+        public float Z { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Scale3"/> struct.
@@ -117,7 +120,7 @@ namespace Engine
         /// <inheritdoc/>
         public bool Equals(Scale3 other)
         {
-            return Equals(other);
+            return Equals(ref other);
         }
         /// <inheritdoc/>
         public override bool Equals(object obj)

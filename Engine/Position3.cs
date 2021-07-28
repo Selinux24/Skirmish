@@ -3,22 +3,28 @@ using System;
 
 namespace Engine
 {
+    /// <summary>
+    /// 3D position
+    /// </summary>
     public struct Position3 : IEquatable<Position3>
     {
         /// <summary>
+        /// Position zero
+        /// </summary>
+        public static readonly Position3 Zero = new Position3();
+
+        /// <summary>
         /// The X component of the position.
         /// </summary>
-        public float X;
+        public float X { get; set; }
         /// <summary>
         /// The Y component of the position.
         /// </summary>
-        public float Y;
+        public float Y { get; set; }
         /// <summary>
         /// The Z component of the position.
         /// </summary>
-        public float Z;
-
-        public static readonly Position3 Zero = new Position3();
+        public float Z { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Position3"/> struct.
@@ -102,7 +108,7 @@ namespace Engine
         /// <inheritdoc/>
         public bool Equals(Position3 other)
         {
-            return Equals(other);
+            return Equals(ref other);
         }
         /// <inheritdoc/>
         public override bool Equals(object obj)
