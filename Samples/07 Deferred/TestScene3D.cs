@@ -177,7 +177,7 @@ namespace Deferred
             {
                 CastShadow = true,
                 TextureIndex = 2,
-                Content = ContentDescription.FromFile("Resources", "m24.xml"),
+                Content = ContentDescription.FromFile("Resources", "m24.json"),
             };
             helicopter = await this.AddComponentModel("Helicopter", desc1);
             Lights.AddRange(helicopter.Lights);
@@ -186,7 +186,7 @@ namespace Deferred
             {
                 CastShadow = true,
                 Instances = 2,
-                Content = ContentDescription.FromFile("Resources", "m24.xml"),
+                Content = ContentDescription.FromFile("Resources", "m24.json"),
             };
             helicopters = await this.AddComponentModelInstanced("Bunch of Helicopters", desc2);
             for (int i = 0; i < helicopters.InstanceCount; i++)
@@ -201,7 +201,7 @@ namespace Deferred
             var desc = new ModelInstancedDescription()
             {
                 CastShadow = true,
-                Content = ContentDescription.FromFile("Resources", "leopard.xml"),
+                Content = ContentDescription.FromFile("Resources", "leopard.json"),
                 Instances = 5,
             };
             var tanks = await this.AddComponentModelInstanced("Tanks", desc);
@@ -240,7 +240,7 @@ namespace Deferred
         }
         private async Task InitializeTerrain()
         {
-            terrain = await this.AddComponentScenery("Terrain", GroundDescription.FromFile("Resources", "terrain.xml", 2));
+            terrain = await this.AddComponentScenery("Terrain", GroundDescription.FromFile("Resources", "terrain.json", 2));
         }
         private async Task InitializeGardener()
         {
@@ -266,7 +266,7 @@ namespace Deferred
                 CastShadow = true,
                 DepthEnabled = true,
                 BlendMode = BlendModes.DefaultTransparent,
-                Content = ContentDescription.FromFile("resources/trees", "birch_a.xml"),
+                Content = ContentDescription.FromFile("resources/trees", "birch_a.json"),
             };
             tree = await this.AddComponentModel("Lonely tree", desc1);
 
@@ -276,7 +276,7 @@ namespace Deferred
                 DepthEnabled = true,
                 BlendMode = BlendModes.DefaultTransparent,
                 Instances = 10,
-                Content = ContentDescription.FromFile("resources/trees", "birch_b.xml"),
+                Content = ContentDescription.FromFile("resources/trees", "birch_b.json"),
             };
             trees = await this.AddComponentModelInstanced("Bunch of trees", desc2);
         }

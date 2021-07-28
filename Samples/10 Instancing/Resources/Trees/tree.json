@@ -1,6 +1,6 @@
 {
   "modelFilename": "tree.dae",
-  "volumes": [
+  "volumeMeshes": [
     "Volume"
   ]
 }

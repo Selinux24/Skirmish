@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using SharpDX;
+using System;
 using System.IO;
 using System.IO.Compression;
 using System.Runtime.Serialization;
@@ -216,6 +217,17 @@ namespace Engine
         }
 
         /// <summary>
+        /// Creates a new xml serializer
+        /// </summary>
+        /// <param name="objectType">Object type</param>
+        /// <param name="nameSpace">Default namespace</param>
+        /// <returns>Returns a new xml serializer</returns>
+        private static XmlSerializer CreateXmlFormatter(Type objectType, string nameSpace = null)
+        {
+            return new XmlSerializer(objectType, nameSpace);
+
+        }
+        /// <summary>
         /// Serialize into bytes
         /// </summary>
         /// <typeparam name="T">Object type</typeparam>
@@ -229,7 +241,7 @@ namespace Engine
             MemoryStream mso = new MemoryStream();
             using (StreamWriter wr = new StreamWriter(mso, Encoding.Default))
             {
-                XmlSerializer sr = new XmlSerializer(typeof(T), nameSpace);
+                XmlSerializer sr = CreateXmlFormatter(typeof(T), nameSpace);
 
                 sr.Serialize(wr, obj);
 
@@ -251,7 +263,7 @@ namespace Engine
         {
             using (StreamWriter wr = new StreamWriter(fileName, false, Encoding.Default))
             {
-                XmlSerializer sr = new XmlSerializer(typeof(T), nameSpace);
+                XmlSerializer sr = CreateXmlFormatter(typeof(T), nameSpace);
 
                 sr.Serialize(wr, obj);
             }
@@ -268,7 +280,7 @@ namespace Engine
             using (MemoryStream mso = new MemoryStream(data))
             using (StreamReader rd = new StreamReader(mso, Encoding.Default))
             {
-                XmlSerializer sr = new XmlSerializer(typeof(T), nameSpace);
+                XmlSerializer sr = CreateXmlFormatter(typeof(T), nameSpace);
 
                 return (T)sr.Deserialize(rd);
             }
@@ -284,12 +296,25 @@ namespace Engine
         {
             using (StreamReader rd = new StreamReader(fileName, Encoding.Default))
             {
-                XmlSerializer sr = new XmlSerializer(typeof(T), nameSpace);
+                XmlSerializer sr = CreateXmlFormatter(typeof(T), nameSpace);
 
                 return (T)sr.Deserialize(rd);
             }
         }
 
+        /// <summary>
+        /// Creates a new Json serializer
+        /// </summary>
+        /// <returns>Returns a Json serializer</returns>
+        private static JsonSerializer CreateJsonFormatter()
+        {
+            return new JsonSerializer()
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+                Formatting = Formatting.Indented,
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            };
+        }
         /// <summary>
         /// Serialize into bytes
         /// </summary>
@@ -303,12 +328,7 @@ namespace Engine
             MemoryStream mso = new MemoryStream();
             using (StreamWriter wr = new StreamWriter(mso, Encoding.Default))
             {
-                JsonSerializer sr = new JsonSerializer()
-                {
-                    NullValueHandling = NullValueHandling.Ignore,
-                    Formatting = Formatting.Indented,
-                    ContractResolver = new CamelCasePropertyNamesContractResolver()
-                };
+                JsonSerializer sr = CreateJsonFormatter();
 
                 sr.Serialize(wr, obj, typeof(T));
 
@@ -329,12 +349,7 @@ namespace Engine
         {
             using (StreamWriter wr = new StreamWriter(fileName, false, Encoding.Default))
             {
-                JsonSerializer sr = new JsonSerializer()
-                {
-                    NullValueHandling = NullValueHandling.Ignore,
-                    Formatting = Formatting.Indented,
-                    ContractResolver = new CamelCasePropertyNamesContractResolver()
-                };
+                JsonSerializer sr = CreateJsonFormatter();
 
                 sr.Serialize(wr, obj, typeof(T));
             }
@@ -350,7 +365,7 @@ namespace Engine
             using (MemoryStream mso = new MemoryStream(data))
             using (StreamReader rd = new StreamReader(mso, Encoding.Default))
             {
-                JsonSerializer sr = new JsonSerializer();
+                JsonSerializer sr = CreateJsonFormatter();
 
                 return (T)sr.Deserialize(rd, typeof(T));
             }
@@ -365,7 +380,7 @@ namespace Engine
         {
             using (StreamReader rd = new StreamReader(fileName, Encoding.Default))
             {
-                JsonSerializer sr = new JsonSerializer();
+                JsonSerializer sr = CreateJsonFormatter();
 
                 return (T)sr.Deserialize(rd, typeof(T));
             }

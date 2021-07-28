@@ -183,7 +183,7 @@
     <Content Include="SceneLights\Buildings\Obelisk\normal.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneLights\Buildings\Obelisk\obelisk.xml">
+    <Content Include="SceneLights\Buildings\Obelisk\obelisk.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneLights\Buildings\Obelisk\specular.dds">
@@ -216,7 +216,7 @@
     <Content Include="SceneLights\Trees\bushes_specular.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneLights\Trees\tree.xml">
+    <Content Include="SceneLights\Trees\tree.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneMaterials\corrugated_n.jpg">
@@ -240,9 +240,6 @@
     <Content Include="SceneStart\anttisinstrumentals+icemanandangelinstrumental.mp3">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneStart\SkyPlane.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="SceneStart\backGround.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -256,9 +253,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneStencilPass\Buildings\Obelisk\normal.dds">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneStencilPass\Buildings\Obelisk\obelisk.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneStencilPass\Buildings\Obelisk\specular.dds">
@@ -330,7 +324,7 @@
     <Content Include="SceneTanksGame\Landscape.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneTanksGame\Leopard\Leopard.xml">
+    <Content Include="SceneTanksGame\Leopard\Leopard.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneTanksGame\Leopard\Leopard_0.bmp">
@@ -378,9 +372,6 @@
     <Content Include="SceneTanksGame\Wind.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneTest\Buildings\Obelisk\obelisk.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="SceneTest\Buildings\Obelisk\specular.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -390,7 +381,7 @@
     <Content Include="SceneTest\Character\Soldier\Soldier1.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneTest\Character\Soldier\soldier_anim2.xml">
+    <Content Include="SceneTest\Container\container.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneTest\Container\ikube azul-1.png">
@@ -414,16 +405,16 @@
     <Content Include="SceneTest\Lamps\concrete.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="SceneTest\Lamps\StreetLamp.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Lamps\Lamp.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="SceneTest\Lamps\Lamp.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneTest\Lamps\metallic.jpg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTest\Lamps\StreetLamp.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTest\Lamps\Lamp.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneTest\Particles\explosion.png">
@@ -441,10 +432,10 @@
     <Content Include="SceneTest\Particles\smoke.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneTest\Scenery\Diffuse.jpg">
+    <Content Include="SceneTest\Scenery\clif.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneTest\Scenery\clif.xml">
+    <Content Include="SceneTest\Scenery\Diffuse.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneTest\Scenery\Normal.jpg">
@@ -462,7 +453,7 @@
     <Content Include="SceneTest\Trees\Leafs_d.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneTest\Trees\Tree.xml">
+    <Content Include="SceneTest\Trees\Tree.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneTest\UI\button_off.png">
@@ -471,16 +462,13 @@
     <Content Include="SceneTest\UI\button_on.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="SceneTest\Vehicles\Challenger\challenger.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="SceneTest\Vehicles\Challenger\Challenger.bmp">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneTest\Vehicles\Challenger\challenger.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="SceneTest\Vehicles\Leopard\Leopard.bmp">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTest\Vehicles\Leopard\Leopard.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneWater\Diffuse.jpg">
@@ -569,6 +557,21 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneTanksGame\Leopard\Leopard.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStart\SkyPlane.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStencilPass\Buildings\Obelisk\obelisk.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Buildings\Obelisk\obelisk.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Character\Soldier\soldier_anim2.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Vehicles\Leopard\Leopard.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

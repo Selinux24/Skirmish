@@ -258,7 +258,7 @@ namespace Terrain.Rts
                 DeferredEnabled = false,
                 CastShadow = false,
                 DepthEnabled = false,
-                Content = ContentDescription.FromFile("Rts/resources/cursor", "cursor.xml"),
+                Content = ContentDescription.FromFile("Rts/resources/cursor", "cursor.json"),
             };
             cursor3D = await this.AddComponentModel("Cursor3D", c3DDesc, SceneObjectUsages.UI, LayerEffects);
 
@@ -463,7 +463,7 @@ namespace Terrain.Rts
             {
                 CastShadow = true,
                 TextureIndex = 0,
-                Content = ContentDescription.FromFile("Rts/resources/Helicopter", "M24.xml"),
+                Content = ContentDescription.FromFile("Rts/resources/Helicopter", "M24.json"),
             };
             helicopter = await this.AddComponentModel("Helicopter", hDesc, SceneObjectUsages.Agent);
             helicopter.Visible = false;
@@ -488,7 +488,7 @@ namespace Terrain.Rts
             {
                 CastShadow = true,
                 Optimize = false,
-                Content = ContentDescription.FromFile("Rts/resources/Leopard", "Leopard.xml"),
+                Content = ContentDescription.FromFile("Rts/resources/Leopard", "Leopard.json"),
                 TransformNames = new[] { "Barrel-mesh", "Turret-mesh", "Hull-mesh" },
                 TransformDependences = new[] { 1, 2, -1 },
             };
@@ -537,7 +537,7 @@ namespace Terrain.Rts
             var hpDesc = new ModelDescription()
             {
                 CastShadow = true,
-                Content = ContentDescription.FromFile("Rts/resources/Heliport", "Heliport.xml"),
+                Content = ContentDescription.FromFile("Rts/resources/Heliport", "Heliport.json"),
             };
             heliport = await this.AddComponentModel("Heliport", hpDesc);
             heliport.Visible = false;
@@ -560,7 +560,7 @@ namespace Terrain.Rts
             var gDesc = new ModelDescription()
             {
                 CastShadow = true,
-                Content = ContentDescription.FromFile("Rts/resources/Garage", "Garage.xml"),
+                Content = ContentDescription.FromFile("Rts/resources/Garage", "Garage.json"),
             };
             garage = await this.AddComponentModel("Garage", gDesc);
             garage.Visible = false;
@@ -583,7 +583,7 @@ namespace Terrain.Rts
             var gDesc = new ModelDescription()
             {
                 CastShadow = true,
-                Content = ContentDescription.FromFile("Rts/resources/Buildings", "Building_1.xml"),
+                Content = ContentDescription.FromFile("Rts/resources/Buildings", "Building_1.json"),
             };
             building = await this.AddComponentModel("Buildings", gDesc);
             building.Visible = false;
@@ -607,7 +607,7 @@ namespace Terrain.Rts
             {
                 CastShadow = true,
                 Instances = 4,
-                Content = ContentDescription.FromFile("Rts/resources/Obelisk", "Obelisk.xml"),
+                Content = ContentDescription.FromFile("Rts/resources/Obelisk", "Obelisk.json"),
             };
             obelisk = await this.AddComponentModelInstanced("Obelisk", oDesc);
             obelisk.Visible = false;
@@ -629,7 +629,7 @@ namespace Terrain.Rts
             {
                 CastShadow = true,
                 Instances = 250,
-                Content = ContentDescription.FromFile("Rts/resources/Rocks", "boulder.xml"),
+                Content = ContentDescription.FromFile("Rts/resources/Rocks", "boulder.json"),
             };
             rocks = await this.AddComponentModelInstanced("Rocks", rDesc);
             rocks.Visible = false;
@@ -652,14 +652,14 @@ namespace Terrain.Rts
                 CastShadow = true,
                 BlendMode = BlendModes.DefaultTransparent,
                 Instances = 100,
-                Content = ContentDescription.FromFile("Rts/resources/Trees", "birch_a.xml"),
+                Content = ContentDescription.FromFile("Rts/resources/Trees", "birch_a.json"),
             };
             var t2Desc = new ModelInstancedDescription()
             {
                 CastShadow = true,
                 BlendMode = BlendModes.DefaultTransparent,
                 Instances = 100,
-                Content = ContentDescription.FromFile("Rts/resources/Trees", "birch_b.xml"),
+                Content = ContentDescription.FromFile("Rts/resources/Trees", "birch_b.json"),
             };
             tree1 = await this.AddComponentModelInstanced("birch_a", t1Desc);
             tree2 = await this.AddComponentModelInstanced("birch_b", t2Desc);
@@ -722,7 +722,7 @@ namespace Terrain.Rts
             Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
 
-            var terrainDescription = GroundDescription.FromFile("Rts/resources/Terrain", "two_levels.xml", 1);
+            var terrainDescription = GroundDescription.FromFile("Rts/resources/Terrain", "two_levels.json", 1);
             terrain = await this.AddComponentScenery("Terrain", terrainDescription);
             SetGround(terrain, true);
 

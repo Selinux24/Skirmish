@@ -187,7 +187,7 @@
     <Content Include="Resources\fire.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Fountain\Fountain.xml">
+    <Content Include="Resources\Fountain\Fountain.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Fountain\tLbZ9Jo.png">
@@ -199,10 +199,10 @@
     <Content Include="Resources\Obelisk\obelisk_n.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Obelisk\obelisk.xml">
+    <Content Include="Resources\Obelisk\obelisk.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\ruins.xml">
+    <Content Include="Resources\ruins.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\LakeBottom\Diffuse.jpg">
@@ -211,7 +211,7 @@
     <Content Include="Resources\LakeBottom\Normal.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\torch.xml">
+    <Content Include="Resources\torch.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\flare1.png">

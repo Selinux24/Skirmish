@@ -96,7 +96,7 @@ namespace SceneTest.SceneStencilPass
                 {
                     CastShadow = true,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("SceneStencilPass/buildings/obelisk", "Obelisk.xml"),
+                    Content = ContentDescription.FromFile("SceneStencilPass/buildings/obelisk", "Obelisk.json"),
                 });
             buildingObelisk.Manipulator.SetPosition(0, 0, 0);
         }

@@ -144,7 +144,7 @@ Space: Finds random over navmesh";
                     TextureIndex = 0,
                     CastShadow = true,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile(resourcesFolder, "modular_dungeon.xml"),
+                    Content = ContentDescription.FromFile(resourcesFolder, "modular_dungeon.json"),
                 },
                 SceneObjectUsages.Ground);
 

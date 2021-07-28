@@ -118,7 +118,7 @@ namespace SceneTest.SceneLights
                 Instances = 4,
                 CastShadow = true,
                 UseAnisotropicFiltering = true,
-                Content = ContentDescription.FromFile("SceneLights/buildings/obelisk", "Obelisk.xml"),
+                Content = ContentDescription.FromFile("SceneLights/buildings/obelisk", "Obelisk.json"),
             };
 
             buildingObelisks = await this.AddComponentModelInstanced("Obelisk", desc);
@@ -130,7 +130,7 @@ namespace SceneTest.SceneLights
                 CastShadow = true,
                 UseAnisotropicFiltering = true,
                 BlendMode = BlendModes.DefaultTransparent,
-                Content = ContentDescription.FromFile("SceneLights/trees", "Tree.xml"),
+                Content = ContentDescription.FromFile("SceneLights/trees", "Tree.json"),
             };
 
             await this.AddComponentModel("Tree", desc);

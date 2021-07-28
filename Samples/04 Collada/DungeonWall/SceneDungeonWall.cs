@@ -98,7 +98,7 @@ namespace Collada.DungeonWall
                     Instances = 7,
                     CastShadow = true,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile(resourcesFolder, "wall.xml"),
+                    Content = ContentDescription.FromFile(resourcesFolder, "wall.json"),
                 });
 
             BoundingBox bbox = wall[0].GetBoundingBox();

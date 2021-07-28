@@ -581,7 +581,7 @@ namespace Collada.ModularDungeon
                     TextureIndex = 0,
                     CastShadow = true,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile(Path.Combine(resourcesFolder, "characters/rat"), "rat.xml"),
+                    Content = ContentDescription.FromFile(Path.Combine(resourcesFolder, "characters/rat"), "rat.json"),
                 });
 
             ratAgentType = new Player()
@@ -618,7 +618,7 @@ namespace Collada.ModularDungeon
                     CastShadow = true,
                     Instances = 2,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile(Path.Combine(resourcesFolder, "characters/human2"), "Human2.xml"),
+                    Content = ContentDescription.FromFile(Path.Combine(resourcesFolder, "characters/human2"), "Human2.json"),
                 });
 
             human.Visible = false;

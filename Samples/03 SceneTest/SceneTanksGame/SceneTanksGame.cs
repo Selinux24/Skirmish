@@ -651,7 +651,7 @@ namespace SceneTest.SceneTanksGame
             {
                 CastShadow = true,
                 Optimize = false,
-                Content = ContentDescription.FromFile("SceneTanksGame/Leopard", "Leopard.xml"),
+                Content = ContentDescription.FromFile("SceneTanksGame/Leopard", "Leopard.json"),
                 Instances = 2,
                 TransformNames = new[] { "Barrel-mesh", "Turret-mesh", "Hull-mesh" },
                 TransformDependences = new[] { 1, 2, -1 },

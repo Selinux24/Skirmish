@@ -262,7 +262,7 @@ namespace Skybox
             {
                 Instances = firePositions.Length,
                 CastShadow = true,
-                Content = ContentDescription.FromFile("Resources", "torch.xml"),
+                Content = ContentDescription.FromFile("Resources", "torch.json"),
             };
 
             torchs = await this.AddComponentModelInstanced("Torchs", torchDesc);
@@ -275,7 +275,7 @@ namespace Skybox
             {
                 Instances = firePositions.Length,
                 CastShadow = true,
-                Content = ContentDescription.FromFile("Resources/obelisk", "obelisk.xml"),
+                Content = ContentDescription.FromFile("Resources/obelisk", "obelisk.json"),
             };
 
             obelisks = await this.AddComponentModelInstanced("Obelisks", obeliskDesc, SceneObjectUsages.Ground);
@@ -285,7 +285,7 @@ namespace Skybox
             var fountainDesc = new ModelDescription()
             {
                 CastShadow = true,
-                Content = ContentDescription.FromFile("Resources/Fountain", "Fountain.xml"),
+                Content = ContentDescription.FromFile("Resources/Fountain", "Fountain.json"),
             };
 
             fountain = await this.AddComponentModel("Fountain", fountainDesc, SceneObjectUsages.Ground);
@@ -294,7 +294,7 @@ namespace Skybox
         }
         private async Task InitializeRuins()
         {
-            var ruinsDesc = GroundDescription.FromFile("Resources", "ruins.xml");
+            var ruinsDesc = GroundDescription.FromFile("Resources", "ruins.json");
 
             ruins = await this.AddComponentScenery("Ruins", ruinsDesc, SceneObjectUsages.Ground);
 

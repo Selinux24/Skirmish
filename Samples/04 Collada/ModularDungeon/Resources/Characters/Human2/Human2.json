@@ -1,0 +1,12 @@
+{
+  "modelFilename": "human2.dae",
+  "animation": {
+    "clips": [
+      {
+        "name": "stand",
+        "from": 1,
+        "to": 5
+      }
+    ]
+  }
+}

@@ -243,7 +243,7 @@ namespace Heightmap
             {
                 CastShadow = true,
                 Instances = 250,
-                Content = ContentDescription.FromFile(@"Resources/Rocks", @"boulder.xml"),
+                Content = ContentDescription.FromFile(@"Resources/Rocks", @"boulder.json"),
             };
             rocks = await this.AddComponentModelInstanced("Rocks", rDesc);
             rocks.Visible = false;
@@ -261,7 +261,7 @@ namespace Heightmap
                 CastShadow = true,
                 Instances = 200,
                 BlendMode = BlendModes.DefaultTransparent,
-                Content = ContentDescription.FromFile(@"Resources/Trees", @"tree.xml"),
+                Content = ContentDescription.FromFile(@"Resources/Trees", @"tree.json"),
             };
             trees = await this.AddComponentModelInstanced("Trees", treeDesc);
             trees.Visible = false;
@@ -279,7 +279,7 @@ namespace Heightmap
                 CastShadow = true,
                 Instances = 200,
                 BlendMode = BlendModes.DefaultTransparent,
-                Content = ContentDescription.FromFile(@"Resources/Trees2", @"tree.xml"),
+                Content = ContentDescription.FromFile(@"Resources/Trees2", @"tree.json"),
             };
             trees2 = await this.AddComponentModelInstanced("Trees2", tree2Desc);
             trees2.Visible = false;
@@ -297,7 +297,7 @@ namespace Heightmap
             {
                 TextureIndex = 0,
                 CastShadow = true,
-                Content = ContentDescription.FromFile(@"Resources/Soldier", @"soldier_anim2.xml"),
+                Content = ContentDescription.FromFile(@"Resources/Soldier", @"soldier_anim2.json"),
             };
             soldier = await this.AddComponentModel("Soldier", sDesc, SceneObjectUsages.Agent);
             soldier.Visible = false;
@@ -314,7 +314,7 @@ namespace Heightmap
             {
                 Instances = 4,
                 CastShadow = true,
-                Content = ContentDescription.FromFile(@"Resources/Soldier", @"soldier_anim2.xml"),
+                Content = ContentDescription.FromFile(@"Resources/Soldier", @"soldier_anim2.json"),
             };
             troops = await this.AddComponentModelInstanced("Troops", tDesc, SceneObjectUsages.Agent);
             troops.Visible = false;
@@ -331,7 +331,7 @@ namespace Heightmap
             {
                 CastShadow = true,
                 Instances = 3,
-                Content = ContentDescription.FromFile(@"Resources/m24", @"m24.xml"),
+                Content = ContentDescription.FromFile(@"Resources/m24", @"m24.json"),
             };
             helicopterI = await this.AddComponentModelInstanced("M24", mDesc);
             helicopterI.Visible = false;
@@ -349,7 +349,7 @@ namespace Heightmap
             {
                 CastShadow = true,
                 Instances = 5,
-                Content = ContentDescription.FromFile(@"Resources/Bradley", @"Bradley.xml"),
+                Content = ContentDescription.FromFile(@"Resources/Bradley", @"Bradley.json"),
             };
             bradleyI = await this.AddComponentModelInstanced("Bradley", mDesc);
             bradleyI.Visible = false;
@@ -367,7 +367,7 @@ namespace Heightmap
             {
                 CastShadow = true,
                 Instances = 5,
-                Content = ContentDescription.FromFile(@"Resources/buildings", @"Affgan1.xml"),
+                Content = ContentDescription.FromFile(@"Resources/buildings", @"Affgan1.json"),
             };
             buildings = await this.AddComponentModelInstanced("Affgan buildings", mDesc);
             buildings.Visible = false;
@@ -384,7 +384,7 @@ namespace Heightmap
             var mDesc = new ModelDescription()
             {
                 CastShadow = true,
-                Content = ContentDescription.FromFile(@"Resources/Watch Tower", @"Watch Tower.xml"),
+                Content = ContentDescription.FromFile(@"Resources/Watch Tower", @"Watch Tower.json"),
             };
             watchTower = await this.AddComponentModel("Watch Tower", mDesc);
             watchTower.Visible = false;
@@ -403,7 +403,7 @@ namespace Heightmap
                 CastShadow = true,
                 SphericVolume = false,
                 Instances = 5,
-                Content = ContentDescription.FromFile(@"Resources/container", "Container.xml"),
+                Content = ContentDescription.FromFile(@"Resources/container", "Container.json"),
             };
             containers = await this.AddComponentModelInstanced("Container", desc);
             containers.Visible = false;
@@ -421,7 +421,7 @@ namespace Heightmap
             {
                 Instances = 50,
                 CastShadow = false,
-                Content = ContentDescription.FromFile(@"Resources/Scenery/Objects", @"torch.xml"),
+                Content = ContentDescription.FromFile(@"Resources/Scenery/Objects", @"torch.json"),
             };
             torchs = await this.AddComponentModelInstanced("Torchs", tcDesc);
             torchs.Visible = false;
@@ -758,12 +758,12 @@ namespace Heightmap
                 animations.Add("soldier_idle", new AnimationPlan(sp1));
 
                 var m24_1 = new AnimationPath();
-                m24_1.AddLoop("fly");
+                m24_1.AddLoop("roll");
                 animations.Add("m24_idle", new AnimationPlan(m24_1));
 
                 var m24_2 = new AnimationPath();
-                m24_2.AddLoop("fly", 5);
-                animations.Add("m24_fly", new AnimationPlan(m24_2));
+                m24_2.AddLoop("roll", 5);
+                animations.Add("m24_roll", new AnimationPlan(m24_2));
             });
         }
         private async Task SetPositionOverTerrain()
@@ -1002,7 +1002,7 @@ namespace Heightmap
                     helicopterI[i].Manipulator.SetNormal(r.Item.Normal);
 
                     helicopterI[i].AnimationController.TimeDelta = 0.5f * (i + 1);
-                    helicopterI[i].AnimationController.AddPath(animations["m24_fly"]);
+                    helicopterI[i].AnimationController.AddPath(animations["m24_roll"]);
                     helicopterI[i].AnimationController.Start();
                 }
             }

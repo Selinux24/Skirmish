@@ -1,0 +1,12 @@
+{
+  "modelFilename": "rat.dae",
+  "animation": {
+    "clips": [
+      {
+        "name": "walk",
+        "from": 0,
+        "to": 4
+      }
+    ]
+  }
+}

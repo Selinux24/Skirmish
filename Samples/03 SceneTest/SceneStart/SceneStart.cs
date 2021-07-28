@@ -75,7 +75,7 @@ namespace SceneTest.SceneStart
         {
             var backGroundDesc = new ModelDescription()
             {
-                Content = ContentDescription.FromFile("SceneStart", "SkyPlane.xml"),
+                Content = ContentDescription.FromFile("SceneStart", "SkyPlane.json"),
             };
             backGround = await this.AddComponentModel("Background", backGroundDesc, SceneObjectUsages.None);
         }

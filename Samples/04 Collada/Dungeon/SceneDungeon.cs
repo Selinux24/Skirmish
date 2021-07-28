@@ -151,7 +151,7 @@ namespace Collada.Dungeon
         }
         private async Task InitializeDungeon()
         {
-            dungeon = await this.AddComponentScenery("Dungeon", GroundDescription.FromFile(resourcesFolder, "Dungeon.xml", 2));
+            dungeon = await this.AddComponentScenery("Dungeon", GroundDescription.FromFile(resourcesFolder, "Dungeon.json", 2));
         }
 
         private void InitializeCamera()

@@ -155,7 +155,7 @@ namespace GameLogic
                 {
                     CastShadow = false,
                     DepthEnabled = false,
-                    Content = ContentDescription.FromFile("Resources3D", "cursor.xml"),
+                    Content = ContentDescription.FromFile("Resources3D", "cursor.json"),
                 },
                 SceneObjectUsages.UI,
                 LayerEffects);
@@ -166,13 +166,13 @@ namespace GameLogic
                 {
                     Instances = skirmishGame.AllSoldiers.Length,
                     CastShadow = true,
-                    Content = ContentDescription.FromFile("Resources3D", "soldier_anim2.xml"),
+                    Content = ContentDescription.FromFile("Resources3D", "soldier_anim2.json"),
                 },
                 SceneObjectUsages.Agent);
 
             terrain = await this.AddComponentScenery(
                 "Terrain",
-                GroundDescription.FromFile("Resources3D", "terrain.xml"),
+                GroundDescription.FromFile("Resources3D", "terrain.json"),
                 SceneObjectUsages.Ground);
 
             int minimapHeight = (Game.Form.RenderHeight / 4) - 8;

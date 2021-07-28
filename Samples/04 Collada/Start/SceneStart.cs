@@ -104,7 +104,7 @@ namespace Collada.Start
         {
             var backGroundDesc = new ModelDescription()
             {
-                Content = ContentDescription.FromFile(resourcesFolder, "SkyPlane.xml"),
+                Content = ContentDescription.FromFile(resourcesFolder, "SkyPlane.json"),
             };
             backGround = await this.AddComponentModel("Background", backGroundDesc, SceneObjectUsages.UI);
         }

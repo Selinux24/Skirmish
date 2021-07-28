@@ -210,7 +210,7 @@
     <Content Include="Rts\Resources\Audio\Effects\wind_birds_forest_01.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Rts\Resources\Buildings\Building_1.xml">
+    <Content Include="Rts\Resources\Buildings\Building_1.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Rts\Resources\Clouds\cloud001.dds">
@@ -219,7 +219,7 @@
     <Content Include="Rts\Resources\Clouds\perturb001.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Rts\Resources\Cursor\cursor.xml">
+    <Content Include="Rts\Resources\Cursor\cursor.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Rts\Resources\Flare\lfFlare1.png">
@@ -237,7 +237,7 @@
     <Content Include="Rts\Resources\Garage\concrete.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Rts\Resources\Garage\garage.xml">
+    <Content Include="Rts\Resources\Garage\garage.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Rts\Resources\Helicopter\m24 - 1.dds">
@@ -249,19 +249,16 @@
     <Content Include="Rts\Resources\Helicopter\m24 - 3.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Rts\Resources\Helicopter\m24.xml">
+    <Content Include="Rts\Resources\Helicopter\m24.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Rts\Resources\Heliport\concrete.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Rts\Resources\Heliport\heliport.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Rts\Resources\Heliport\heliport.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Rts\Resources\Heliport\heliport.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Rts\Resources\Leopard\Leopard.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Rts\Resources\Cursor\target.png">
@@ -274,9 +271,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Rts\Resources\Leopard\Leopard_2.bmp">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Rts\Resources\Obelisk\obelisk.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Rts\Resources\Obelisk\diffus.dds">
@@ -303,6 +297,9 @@
     <Content Include="Rts\Resources\Particles\smoke.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Rts\Resources\Rocks\boulder.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Rts\Resources\Rocks\boulder_granite_grey_01_diffuse.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -324,7 +321,7 @@
     <Content Include="Rts\Resources\Terrain\Foliage\Billboard\grass_v2.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Rts\Resources\Terrain\two_levels.xml">
+    <Content Include="Rts\Resources\Terrain\two_levels.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Rts\Resources\Terrain\terrain.png">
@@ -345,10 +342,10 @@
     <Content Include="Rts\Resources\Trees\birch_01_leaves_normal.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Rts\Resources\Trees\birch_a.xml">
+    <Content Include="Rts\Resources\Trees\birch_b.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Rts\Resources\Trees\birch_b.xml">
+    <Content Include="Rts\Resources\Trees\birch_a.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Rts\Resources\uvtest.png">
@@ -432,6 +429,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Start\SkyPlane.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Rts\Resources\Leopard\Leopard.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Rts\Resources\Obelisk\obelisk.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
