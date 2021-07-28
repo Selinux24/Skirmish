@@ -23,9 +23,9 @@ namespace Engine
             {
                 UseAnisotropic = true,
                 CastShadow = true,
-                Content = ContentDescription.FromFile(contentFolder, "assets.xml"),
-                AssetsConfigurationFile = "assetsmap.xml",
-                LevelsFile = "levels.xml",
+                Content = ContentDescription.FromFile(contentFolder, "assets.json"),
+                AssetsConfigurationFile = "assetsmap.json",
+                LevelsFile = "levels.json",
             };
         }
 

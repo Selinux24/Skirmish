@@ -1,4 +1,6 @@
-﻿using SharpDX;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using SharpDX;
 using System;
 using System.Xml.Serialization;
 
@@ -14,62 +16,50 @@ namespace Engine
         /// Connection type
         /// </summary>
         [XmlAttribute("type")]
+        [JsonConverter(typeof(StringEnumConverter))]
         public ModularSceneryAssetDescriptionConnectionTypes Type { get; set; } = ModularSceneryAssetDescriptionConnectionTypes.None;
+
         /// <summary>
         /// Position
         /// </summary>
         [XmlIgnore]
-        public Vector3 Position { get; set; } = new Vector3(0, 0, 0);
-        /// <summary>
-        /// Direction
-        /// </summary>
-        [XmlIgnore]
-        public Vector3 Direction { get; set; } = new Vector3(0, 0, 0);
-
+        public Position3 Position { get; set; } = new Position3(0, 0, 0);
         /// <summary>
         /// Position vector
         /// </summary>
         [XmlElement("position")]
+        [JsonIgnore]
         public string PositionText
         {
             get
             {
-                return string.Format("{0} {1} {2}", Position.X, Position.Y, Position.Z);
+                return Position;
             }
             set
             {
-                var floats = value?.SplitFloats();
-                if (floats?.Length == 3)
-                {
-                    Position = new Vector3(floats);
-                }
-                else
-                {
-                    Position = ModularSceneryExtents.ReadReservedWordsForPosition(value);
-                }
+                Position = value;
             }
         }
+
+        /// <summary>
+        /// Direction
+        /// </summary>
+        [XmlIgnore]
+        public Direction3 Direction { get; set; } = new Direction3(0, 0, 0);
         /// <summary>
         /// Direction vector
         /// </summary>
         [XmlElement("direction")]
+        [JsonIgnore]
         public string DirectionText
         {
             get
             {
-                return string.Format("{0} {1} {2}", Direction.X, Direction.Y, Direction.Z);
+                return Direction;
             }
             set
             {
-                var floats = value?.SplitFloats();
-                if (floats?.Length == 3)
-                {
-                    Direction = new Vector3(floats);
-                }
-                else
-                {
-                    Direction = ModularSceneryExtents.ReadReservedWordsForDirection(value);
-                }
+                Direction = value;
             }
         }
     }

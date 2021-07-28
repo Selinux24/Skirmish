@@ -16,7 +16,7 @@ namespace Engine.Common
         /// <summary>
         /// Meshes by level of detail dictionary
         /// </summary>
-        private readonly LevelOfDetailDictionary meshesByLOD = new LevelOfDetailDictionary();
+        private readonly Dictionary<LevelOfDetail, DrawingData> meshesByLOD = new Dictionary<LevelOfDetail, DrawingData>();
         /// <summary>
         /// Default level of detail
         /// </summary>

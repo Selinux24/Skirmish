@@ -310,7 +310,7 @@ namespace Engine.Content.FmtCollada
                                 subMesh.SetTextured(mat.DiffuseTexture != null);
                             }
 
-                            modelContent.Geometry.Add(geometry.Id, subMesh.Material, subMesh);
+                            modelContent.ImportMaterial(geometry.Id, subMesh.Material, subMesh);
                         }
                     }
                 }
@@ -354,7 +354,7 @@ namespace Engine.Content.FmtCollada
                     modelContent.AddAnimationContent(animationLib.Id, info);
                 }
 
-                modelContent.Animations.Definition = animation;
+                modelContent.AnimationDefinition = animation;
             }
         }
 

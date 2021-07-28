@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System.Collections.Generic;
 
 namespace Engine.Content
 {
@@ -79,7 +80,7 @@ namespace Engine.Content
         public float Roughness { get; set; }
 
         /// <inheritdoc/>
-        public IMeshMaterial CreateMeshMaterial(TextureDictionary textures)
+        public IMeshMaterial CreateMeshMaterial(Dictionary<string, EngineShaderResourceView> textures)
         {
             return new MeshMaterial
             {
@@ -93,10 +94,10 @@ namespace Engine.Content
                     Roughness = Roughness,
                     IsTransparent = IsTransparent,
                 },
-                EmissionTexture = textures[EmissiveTexture],
-                AmbientTexture = textures[AmbientTexture],
-                DiffuseTexture = textures[DiffuseTexture],
-                NormalMap = textures[NormalMapTexture],
+                EmissionTexture = string.IsNullOrEmpty(EmissiveTexture) ? null : textures[EmissiveTexture],
+                AmbientTexture = string.IsNullOrEmpty(AmbientTexture) ? null : textures[AmbientTexture],
+                DiffuseTexture = string.IsNullOrEmpty(DiffuseTexture) ? null : textures[DiffuseTexture],
+                NormalMap = string.IsNullOrEmpty(NormalMapTexture) ? null : textures[NormalMapTexture],
             };
         }
         /// <inheritdoc/>

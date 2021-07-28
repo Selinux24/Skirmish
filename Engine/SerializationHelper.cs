@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using SharpDX;
 using System.IO;
 using System.IO.Compression;
@@ -302,7 +303,12 @@ namespace Engine
             MemoryStream mso = new MemoryStream();
             using (StreamWriter wr = new StreamWriter(mso, Encoding.Default))
             {
-                JsonSerializer sr = new JsonSerializer();
+                JsonSerializer sr = new JsonSerializer()
+                {
+                    NullValueHandling = NullValueHandling.Ignore,
+                    Formatting = Formatting.Indented,
+                    ContractResolver = new CamelCasePropertyNamesContractResolver()
+                };
 
                 sr.Serialize(wr, obj, typeof(T));
 
@@ -323,7 +329,12 @@ namespace Engine
         {
             using (StreamWriter wr = new StreamWriter(fileName, false, Encoding.Default))
             {
-                JsonSerializer sr = new JsonSerializer();
+                JsonSerializer sr = new JsonSerializer()
+                {
+                    NullValueHandling = NullValueHandling.Ignore,
+                    Formatting = Formatting.Indented,
+                    ContractResolver = new CamelCasePropertyNamesContractResolver()
+                };
 
                 sr.Serialize(wr, obj, typeof(T));
             }

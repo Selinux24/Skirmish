@@ -1,4 +1,6 @@
-﻿using SharpDX;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using SharpDX;
 using System;
 using System.Xml.Serialization;
 
@@ -24,98 +26,69 @@ namespace Engine
         /// Type
         /// </summary>
         [XmlAttribute("type")]
+        [JsonConverter(typeof(StringEnumConverter))]
         public ModularSceneryAssetTypes Type { get; set; } = ModularSceneryAssetTypes.None;
-        /// <summary>
-        /// Position
-        /// </summary>
-        [XmlIgnore]
-        public Vector3 Position { get; set; } = new Vector3(0, 0, 0);
-        /// <summary>
-        /// Rotation
-        /// </summary>
-        [XmlIgnore]
-        public Quaternion Rotation { get; set; } = new Quaternion(0, 0, 0, 1);
-        /// <summary>
-        /// Scale
-        /// </summary>
-        [XmlIgnore]
-        public Vector3 Scale { get; set; } = new Vector3(1, 1, 1);
 
         /// <summary>
         /// Position vector
         /// </summary>
+        [XmlIgnore]
+        public Position3 Position { get; set; } = new Position3(0, 0, 0);
         [XmlElement("position")]
+        [JsonIgnore]
         public string PositionText
         {
             get
             {
-                return string.Format("{0} {1} {2}", Position.X, Position.Y, Position.Z);
+                return Position;
             }
             set
             {
-                var floats = value?.SplitFloats();
-                if (floats?.Length == 3)
-                {
-                    Position = new Vector3(floats);
-                }
-                else
-                {
-                    Position = ModularSceneryExtents.ReadReservedWordsForPosition(value);
-                }
+                Position = value;
             }
         }
+
+        /// <summary>
+        /// Rotation
+        /// </summary>
+        [XmlIgnore]
+        public RotationQ Rotation { get; set; } = new RotationQ(0, 0, 0, 1);
         /// <summary>
         /// Rotation quaternion
         /// </summary>
         [XmlElement("rotation")]
+        [JsonIgnore]
         public string RotationText
         {
             get
             {
-                return string.Format("{0} {1} {2} {3}", Rotation.X, Rotation.Y, Rotation.Z, Rotation.W);
+                return Rotation;
             }
             set
             {
-                var floats = value?.SplitFloats();
-                if (floats?.Length == 4)
-                {
-                    Rotation = new Quaternion(floats);
-                }
-                else if (floats?.Length == 3)
-                {
-                    Rotation = Quaternion.RotationYawPitchRoll(floats[0], floats[1], floats[2]);
-                }
-                else
-                {
-                    Rotation = ModularSceneryExtents.ReadReservedWordsForRotation(value);
-                }
+                Rotation = value;
             }
         }
+
+        /// <summary>
+        /// Scale
+        /// </summary>
+        [XmlIgnore]
+        public Scale3 Scale { get; set; } = new Scale3(1, 1, 1);
         /// <summary>
         /// Scale vector
         /// </summary>
         [XmlElement("scale")]
+        [JsonIgnore]
         public string ScaleText
         {
             get
             {
-                return string.Format("{0} {1} {2}", Scale.X, Scale.Y, Scale.Z);
+                return Scale;
             }
             set
             {
-                var floats = value?.SplitFloats();
-                if (floats?.Length == 3)
-                {
-                    Scale = new Vector3(floats);
-                }
-                else if (floats?.Length == 1)
-                {
-                    Scale = new Vector3(floats[0]);
-                }
-                else
-                {
-                    Scale = ModularSceneryExtents.ReadReservedWordsForScale(value);
-                }
+                Scale = value;
             }
         }
 
@@ -125,7 +98,7 @@ namespace Engine
         /// <returns>Returns a matrix with the reference transform</returns>
         public Matrix GetTransform()
         {
-            return ModularSceneryExtents.Transformation(this.Position, this.Rotation, this.Scale);
+            return ModularSceneryExtents.Transformation(Position, Rotation, Scale);
         }
 
         /// <summary>

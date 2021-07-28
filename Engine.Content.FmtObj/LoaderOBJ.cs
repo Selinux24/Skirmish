@@ -84,7 +84,7 @@ namespace Engine.Content.FmtObj
                 for (int i = 0; i < meshList.Count(); i++)
                 {
                     var mesh = meshList.ElementAt(i);
-                    m.Geometry.Add($"Mesh{i + 1}", mesh.Material ?? ContentData.NoMaterial, mesh);
+                    m.ImportMaterial($"Mesh{i + 1}", mesh.Material ?? ContentData.NoMaterial, mesh);
                 }
 
                 return new[] { m };

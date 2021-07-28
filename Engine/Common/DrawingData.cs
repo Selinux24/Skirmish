@@ -35,15 +35,15 @@ namespace Engine.Common
         /// <summary>
         /// Materials dictionary
         /// </summary>
-        public MaterialDictionary Materials { get; set; } = new MaterialDictionary();
+        public Dictionary<string, IMeshMaterial> Materials { get; private set; } = new Dictionary<string, IMeshMaterial>();
         /// <summary>
         /// Texture dictionary
         /// </summary>
-        public TextureDictionary Textures { get; set; } = new TextureDictionary();
+        public Dictionary<string, EngineShaderResourceView> Textures { get; private set; } = new Dictionary<string, EngineShaderResourceView>();
         /// <summary>
         /// Meshes
         /// </summary>
-        public MeshDictionary Meshes { get; set; } = new MeshDictionary();
+        public Dictionary<string, Dictionary<string, Mesh>> Meshes { get; private set; } = new Dictionary<string, Dictionary<string, Mesh>>();
         /// <summary>
         /// Volume mesh
         /// </summary>
@@ -221,7 +221,14 @@ namespace Engine.Common
                         vertexList,
                         indices);
 
-                    drw.Meshes.Add(meshName, geometry.Material, nMesh);
+                    if (!drw.Meshes.ContainsKey(meshName))
+                    {
+                        drw.Meshes.Add(meshName, new Dictionary<string, Mesh>());
+                    }
+
+                    string materialName = string.IsNullOrEmpty(geometry.Material) ? ContentData.NoMaterial : geometry.Material;
+
+                    drw.Meshes[meshName].Add(materialName, nMesh);
                 }
             }
         }
@@ -234,7 +241,7 @@ namespace Engine.Common
         /// <param name="materials">Material dictionary</param>
         /// <param name="material">Material name</param>
         /// <returns>Returns the vertex type</returns>
-        private static VertexTypes GetVertexType(VertexTypes vertexType, bool isSkinned, bool loadNormalMaps, MaterialDictionary materials, string material)
+        private static VertexTypes GetVertexType(VertexTypes vertexType, bool isSkinned, bool loadNormalMaps, Dictionary<string, IMeshMaterial> materials, string material)
         {
             var res = vertexType;
             if (isSkinned)
@@ -278,7 +285,7 @@ namespace Engine.Common
 
             if (description.LoadAnimation && modelContent.Controllers != null && modelContent.SkinningInfo != null)
             {
-                var cInfo = modelContent.Controllers.GetControllerForMesh(meshName);
+                var cInfo = modelContent.GetControllerForMesh(meshName);
                 if (cInfo != null)
                 {
                     //Apply shape matrix if controller exists but we are not loading animation info
@@ -321,7 +328,7 @@ namespace Engine.Common
 
                 drw.SkinningData.Initialize(
                     animations,
-                    modelContent.Animations.Definition);
+                    modelContent.AnimationDefinition);
             }
         }
         /// <summary>

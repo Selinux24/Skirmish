@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Newtonsoft.Json;
+using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,16 +35,51 @@ namespace Engine
         /// </summary>
         [XmlAttribute("name")]
         public string Name { get; set; } = null;
+
         /// <summary>
         /// Position
         /// </summary>
         [XmlIgnore]
-        public Vector3 StartPosition { get; set; } = Vector3.Zero;
+        public Position3 StartPosition { get; set; } = Position3.Zero;
+        /// <summary>
+        /// Position vector
+        /// </summary>
+        [XmlElement("start")]
+        [JsonIgnore]
+        public string StartPositionText
+        {
+            get
+            {
+                return StartPosition;
+            }
+            set
+            {
+                StartPosition = value;
+            }
+        }
+
         /// <summary>
         /// Looking vector
         /// </summary>
         [XmlIgnore]
-        public Vector3 LookingVector { get; set; } = Vector3.ForwardLH;
+        public Direction3 LookingVector { get; set; } = Vector3.ForwardLH;
+        /// <summary>
+        /// Looking vector
+        /// </summary>
+        [XmlElement("look")]
+        [JsonIgnore]
+        public string LookingVectorText
+        {
+            get
+            {
+                return LookingVector;
+            }
+            set
+            {
+                LookingVector = value;
+            }
+        }
+
         /// <summary>
         /// Assets map
         /// </summary>
@@ -56,53 +92,6 @@ namespace Engine
         [XmlArray("objects")]
         [XmlArrayItem("item", typeof(ModularSceneryObjectReference))]
         public ModularSceneryObjectReference[] Objects { get; set; } = new ModularSceneryObjectReference[] { };
-
-        /// <summary>
-        /// Position vector
-        /// </summary>
-        [XmlElement("start")]
-        public string StartPositionText
-        {
-            get
-            {
-                return string.Format("{0} {1} {2}", StartPosition.X, StartPosition.Y, StartPosition.Z);
-            }
-            set
-            {
-                var floats = value?.SplitFloats();
-                if (floats?.Length == 3)
-                {
-                    StartPosition = new Vector3(floats);
-                }
-                else
-                {
-                    StartPosition = ModularSceneryExtents.ReadReservedWordsForPosition(value);
-                }
-            }
-        }
-        /// <summary>
-        /// Looking vector
-        /// </summary>
-        [XmlElement("look")]
-        public string LookingVectorText
-        {
-            get
-            {
-                return string.Format("{0} {1} {2}", LookingVector.X, LookingVector.Y, LookingVector.Z);
-            }
-            set
-            {
-                var floats = value?.SplitFloats();
-                if (floats?.Length == 3)
-                {
-                    LookingVector = new Vector3(floats);
-                }
-                else
-                {
-                    LookingVector = ModularSceneryExtents.ReadReservedWordsForDirection(value);
-                }
-            }
-        }
 
         /// <summary>
         /// Populate objects empty ids
@@ -187,7 +176,7 @@ namespace Engine
                 .Where(a => this.Map.Any(m =>
                     string.Equals(m.Id, mapId, StringComparison.OrdinalIgnoreCase) &&
                     string.Equals(m.AssetName, a.Name, StringComparison.OrdinalIgnoreCase)))
-                .Select(a => a.Assets.FirstOrDefault(d => string.Equals(d.Id, id, StringComparison.OrdinalIgnoreCase)))
+                .Select(a => a.References.FirstOrDefault(d => string.Equals(d.Id, id, StringComparison.OrdinalIgnoreCase)))
                 .FirstOrDefault();
 
             return res;
@@ -214,7 +203,7 @@ namespace Engine
                     continue;
                 }
 
-                foreach (var a in asset.Assets)
+                foreach (var a in asset.References)
                 {
                     if (string.Equals(a.AssetName, assetName, StringComparison.OrdinalIgnoreCase))
                     {

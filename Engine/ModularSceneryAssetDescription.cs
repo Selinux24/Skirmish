@@ -22,7 +22,7 @@ namespace Engine
         /// </summary>
         [XmlArray("references")]
         [XmlArrayItem("asset", typeof(ModularSceneryAssetReference))]
-        public ModularSceneryAssetReference[] Assets { get; set; } = null;
+        public ModularSceneryAssetReference[] References { get; set; } = null;
         /// <summary>
         /// Connections list
         /// </summary>
@@ -38,11 +38,11 @@ namespace Engine
         {
             Dictionary<string, int> res = new Dictionary<string, int>();
 
-            var assets = this.Assets.Select(a => a.AssetName).Distinct();
+            var assets = this.References.Select(a => a.AssetName).Distinct();
 
             foreach (var assetName in assets)
             {
-                var count = this.Assets.Count(a => string.Equals(a.AssetName, assetName, StringComparison.OrdinalIgnoreCase));
+                var count = this.References.Count(a => string.Equals(a.AssetName, assetName, StringComparison.OrdinalIgnoreCase));
                 if (count > 0)
                 {
                     res.Add(assetName, count);
@@ -59,11 +59,11 @@ namespace Engine
         {
             Dictionary<string, Matrix[]> res = new Dictionary<string, Matrix[]>();
 
-            var assets = this.Assets.Select(a => a.AssetName).Distinct();
+            var assets = this.References.Select(a => a.AssetName).Distinct();
 
             foreach (var assetName in assets)
             {
-                var transforms = this.Assets
+                var transforms = this.References
                     .Where(a => string.Equals(a.AssetName, assetName, StringComparison.OrdinalIgnoreCase))
                     .Select(a => a.GetTransform()).ToArray();
 

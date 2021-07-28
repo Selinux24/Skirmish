@@ -660,7 +660,7 @@ namespace Engine
                 }
 
                 //Get basic asset type
-                var basicAssetType = Array.Find(asset.Assets, a => a.AssetName == basicAsset).Type;
+                var basicAssetType = Array.Find(asset.References, a => a.AssetName == basicAsset).Type;
 
                 Array.ForEach(assetTransforms[basicAsset], t =>
                 {

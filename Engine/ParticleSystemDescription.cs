@@ -1,4 +1,6 @@
-﻿using SharpDX;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using SharpDX;
 using System;
 using System.Xml.Serialization;
 
@@ -395,6 +397,7 @@ namespace Engine
         /// Particle type
         /// </summary>
         [XmlAttribute("type")]
+        [JsonConverter(typeof(StringEnumConverter))]
         public ParticleTypes ParticleType { get; set; }
         /// <summary>
         /// Name
@@ -449,20 +452,21 @@ namespace Engine
         /// Gravity
         /// </summary>
         [XmlIgnore]
-        public Vector3 Gravity { get; set; }
+        public Direction3 Gravity { get; set; }
         /// <summary>
         /// Gravity vector
         /// </summary>
         [XmlElement("gravity")]
+        [JsonIgnore]
         public string GravityText
         {
             get
             {
-                return ReadVector3(Gravity);
+                return Gravity;
             }
             set
             {
-                Gravity = WriteVector3(value, DefaultGravity);
+                Gravity = value;
             }
         }
 
@@ -481,6 +485,7 @@ namespace Engine
         /// Minimum color variation
         /// </summary>
         [XmlElement("minColor")]
+        [JsonIgnore]
         public string MinColorText
         {
             get
@@ -501,6 +506,7 @@ namespace Engine
         /// Maximum color variation
         /// </summary>
         [XmlElement("maxColor")]
+        [JsonIgnore]
         public string MaxColorText
         {
             get
@@ -550,6 +556,7 @@ namespace Engine
         /// Gets or sets whether the blend mode
         /// </summary>
         [XmlElement("blendMode")]
+        [JsonConverter(typeof(StringEnumConverter))]
         public BlendModes BlendMode { get; set; }
 
         /// <summary>
@@ -601,7 +608,7 @@ namespace Engine
                 MaxVerticalVelocity *= scale;
                 MinVerticalVelocity *= scale;
 
-                Gravity *= scale;
+                Gravity = (Vector3)Gravity * scale;
                 EndVelocity *= scale;
 
                 MinStartSize *= scale;

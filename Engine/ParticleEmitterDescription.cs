@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Newtonsoft.Json;
+using SharpDX;
 using System;
 using System.Xml.Serialization;
 
@@ -20,58 +21,46 @@ namespace Engine
         /// Position
         /// </summary>
         [XmlIgnore]
-        public Vector3 Position { get; set; }
+        public Position3 Position { get; set; }
         /// <summary>
         /// Position vector
         /// </summary>
         [XmlElement("position")]
+        [JsonIgnore]
         public string PositionText
         {
             get
             {
-                return string.Format("{0} {1} {2}", Position.X, Position.Y, Position.Z);
+                return Position;
             }
             set
             {
-                var floats = value?.SplitFloats();
-                if (floats?.Length == 3)
-                {
-                    Position = new Vector3(floats);
-                }
-                else
-                {
-                    Position = new Vector3(0, 0, 0);
-                }
+                Position = value;
             }
         }
+
         /// <summary>
         /// Velocity
         /// </summary>
         [XmlIgnore]
-        public Vector3 Velocity { get; set; }
+        public Direction3 Velocity { get; set; }
         /// <summary>
         /// Velocity vector
         /// </summary>
         [XmlElement("velocity")]
+        [JsonIgnore]
         public string VelocityText
         {
             get
             {
-                return string.Format("{0} {1} {2}", Velocity.X, Velocity.Y, Velocity.Z);
+                return Velocity;
             }
             set
             {
-                var floats = value?.SplitFloats();
-                if (floats?.Length == 3)
-                {
-                    Velocity = new Vector3(floats);
-                }
-                else
-                {
-                    Velocity = new Vector3(0, 1, 0);
-                }
+                Velocity = value;
             }
         }
+
         /// <summary>
         /// Particle scale
         /// </summary>

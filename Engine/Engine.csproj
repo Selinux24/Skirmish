@@ -215,8 +215,10 @@
     <Compile Include="Content\BuiltInMaterial.cs" />
     <Compile Include="Content\BuiltInMaterials.cs" />
     <Compile Include="Content\IAnimationLoader.cs" />
+    <Compile Include="Direction3.cs" />
     <Compile Include="Effects\EffectDefaultTexture.cs" />
     <Compile Include="Effects\IDrawerPostProcess.cs" />
+    <Compile Include="Position3.cs" />
     <Compile Include="PostProcessing\IDrawerPostProcessParams.cs" />
     <Compile Include="PostProcessing\PostProcessBlurVignetteParams.cs" />
     <Compile Include="PostProcessing\PostProcessToneMappingParams.cs" />
@@ -243,6 +245,8 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="RenderPass.cs" />
+    <Compile Include="RotationQ.cs" />
+    <Compile Include="Scale3.cs" />
     <Compile Include="SpecularAlgorithms.cs" />
     <Compile Include="Common\VertexFont.cs" />
     <Compile Include="Content\MaterialBlinnPhongContent.cs" />
@@ -516,11 +520,6 @@
     <Compile Include="Common\DrawingDataDescription.cs" />
     <Compile Include="UI\FontMap.cs" />
     <Compile Include="UI\FontMapChar.cs" />
-    <Compile Include="Common\LevelOfDetailDictionary.cs" />
-    <Compile Include="Common\MaterialDictionary.cs" />
-    <Compile Include="Common\MeshDictionary.cs" />
-    <Compile Include="Common\MeshMaterialsDictionary.cs" />
-    <Compile Include="Common\TextureDictionary.cs" />
     <Compile Include="Common\VertexDataChannels.cs" />
     <Compile Include="Content\LightContentTypes.cs" />
     <Compile Include="CubemapDescription.cs" />

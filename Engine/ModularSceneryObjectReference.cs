@@ -1,4 +1,6 @@
-﻿using SharpDX;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using SharpDX;
 using System;
 using System.Xml.Serialization;
 
@@ -39,6 +41,7 @@ namespace Engine
         /// Item type
         /// </summary>
         [XmlAttribute("type")]
+        [JsonConverter(typeof(StringEnumConverter))]
         public ModularSceneryObjectTypes Type { get; set; } = ModularSceneryObjectTypes.Default;
         /// <summary>
         /// Include object in path finding
@@ -69,21 +72,70 @@ namespace Engine
         /// <remarks>Only for exit doors</remarks>
         [XmlAttribute("next_level")]
         public string NextLevel { get; set; }
+
         /// <summary>
-        /// Position
+        /// Position vector
         /// </summary>
         [XmlIgnore]
-        public Vector3 Position { get; set; } = new Vector3(0, 0, 0);
+        public Position3 Position { get; set; } = new Position3(0, 0, 0);
+        [XmlElement("position")]
+        [JsonIgnore]
+        public string PositionText
+        {
+            get
+            {
+                return Position;
+            }
+            set
+            {
+                Position = value;
+            }
+        }
+
         /// <summary>
         /// Rotation
         /// </summary>
         [XmlIgnore]
-        public Quaternion Rotation { get; set; } = new Quaternion(0, 0, 0, 1);
+        public RotationQ Rotation { get; set; } = new RotationQ(0, 0, 0, 1);
+        /// <summary>
+        /// Rotation quaternion
+        /// </summary>
+        [XmlElement("rotation")]
+        [JsonIgnore]
+        public string RotationText
+        {
+            get
+            {
+                return Rotation;
+            }
+            set
+            {
+                Rotation = value;
+            }
+        }
+
         /// <summary>
         /// Scale
         /// </summary>
         [XmlIgnore]
-        public Vector3 Scale { get; set; } = new Vector3(1, 1, 1);
+        public Scale3 Scale { get; set; } = new Scale3(1, 1, 1);
+        /// <summary>
+        /// Scale vector
+        /// </summary>
+        [XmlElement("scale")]
+        [JsonIgnore]
+        public string ScaleText
+        {
+            get
+            {
+                return Scale;
+            }
+            set
+            {
+                Scale = value;
+            }
+        }
+
         /// <summary>
         /// Load model lights into scene
         /// </summary>
@@ -99,84 +151,6 @@ namespace Engine
         /// </summary>
         [XmlElement("particleLight", Type = typeof(ParticleEmitterDescription))]
         public ParticleEmitterDescription ParticleLight { get; set; }
-
-        /// <summary>
-        /// Position vector
-        /// </summary>
-        [XmlElement("position")]
-        public string PositionText
-        {
-            get
-            {
-                return string.Format("{0} {1} {2}", Position.X, Position.Y, Position.Z);
-            }
-            set
-            {
-                var floats = value?.SplitFloats();
-                if (floats?.Length == 3)
-                {
-                    Position = new Vector3(floats);
-                }
-                else
-                {
-                    Position = ModularSceneryExtents.ReadReservedWordsForPosition(value);
-                }
-            }
-        }
-        /// <summary>
-        /// Rotation quaternion
-        /// </summary>
-        [XmlElement("rotation")]
-        public string RotationText
-        {
-            get
-            {
-                return string.Format("{0} {1} {2} {3}", Rotation.X, Rotation.Y, Rotation.Z, Rotation.W);
-            }
-            set
-            {
-                var floats = value?.SplitFloats();
-                if (floats?.Length == 4)
-                {
-                    Rotation = new Quaternion(floats);
-                }
-                else if (floats?.Length == 3)
-                {
-                    Rotation = Quaternion.RotationYawPitchRoll(floats[0], floats[1], floats[2]);
-                }
-                else
-                {
-                    Rotation = ModularSceneryExtents.ReadReservedWordsForRotation(value);
-                }
-            }
-        }
-        /// <summary>
-        /// Scale vector
-        /// </summary>
-        [XmlElement("scale")]
-        public string ScaleText
-        {
-            get
-            {
-                return string.Format("{0} {1} {2}", Scale.X, Scale.Y, Scale.Z);
-            }
-            set
-            {
-                var floats = value?.SplitFloats();
-                if (floats?.Length == 3)
-                {
-                    Scale = new Vector3(floats);
-                }
-                else if (floats?.Length == 1)
-                {
-                    Scale = new Vector3(floats[0]);
-                }
-                else
-                {
-                    Scale = ModularSceneryExtents.ReadReservedWordsForScale(value);
-                }
-            }
-        }
 
         /// <summary>
         /// Gets the asset transform

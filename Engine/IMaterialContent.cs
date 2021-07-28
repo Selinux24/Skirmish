@@ -1,4 +1,5 @@
-﻿
+﻿using System.Collections.Generic;
+
 namespace Engine
 {
     using Engine.Common;
@@ -34,6 +35,6 @@ namespace Engine
         /// </summary>
         /// <param name="textures">Texture dictionary</param>
         /// <returns>Returns a new mesh material</returns>
-        IMeshMaterial CreateMeshMaterial(TextureDictionary textures);
+        IMeshMaterial CreateMeshMaterial(Dictionary<string, EngineShaderResourceView> textures);
     }
 }

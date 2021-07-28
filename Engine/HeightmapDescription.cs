@@ -149,7 +149,7 @@ namespace Engine
             }
 
             modelContent.Materials.Add(materialName, material);
-            modelContent.Geometry.Add(geoName, materialName, geo);
+            modelContent.ImportMaterial(geoName, materialName, geo);
 
             return modelContent;
         }

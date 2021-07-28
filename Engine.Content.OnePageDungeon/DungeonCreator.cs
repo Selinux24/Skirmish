@@ -130,7 +130,7 @@ namespace Engine.Content.OnePageDungeon
                     Name = $"{rectIndex++}",
                 };
 
-                room.Assets = roomAssets.ToArray();
+                room.References = roomAssets.ToArray();
                 room.Connections = CreateConnections(rect, dungeon, configuration).ToArray();
 
                 assetList.Add(room);

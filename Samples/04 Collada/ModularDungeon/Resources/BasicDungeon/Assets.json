@@ -1,0 +1,67 @@
+{
+  "modelFileName": "Assets.dae",
+  "animation": {
+    "clips": [
+      {
+        "name": "default",
+        "from": 0,
+        "to": 1,
+        "skeleton": "Dn_Anim_Ladder_Armature"
+      },
+      {
+        "name": "pull",
+        "from": 1,
+        "to": 2,
+        "skeleton": "Dn_Anim_Ladder_Armature"
+      },
+      {
+        "name": "push",
+        "from": 2,
+        "to": 3,
+        "skeleton": "Dn_Anim_Ladder_Armature"
+      },
+      {
+        "name": "default",
+        "from": 0,
+        "to": 1,
+        "skeleton": "Dn_WoodenDoor_1_Armature"
+      },
+      {
+        "name": "open",
+        "from": 1,
+        "to": 2,
+        "skeleton": "Dn_WoodenDoor_1_Armature"
+      },
+      {
+        "name": "close",
+        "from": 2,
+        "to": 3,
+        "skeleton": "Dn_WoodenDoor_1_Armature"
+      },
+      {
+        "name": "default",
+        "from": 0,
+        "to": 1,
+        "skeleton": "Dn_Jail_1_Armature"
+      },
+      {
+        "name": "open",
+        "from": 1,
+        "to": 2,
+        "skeleton": "Dn_Jail_1_Armature"
+      },
+      {
+        "name": "close",
+        "from": 2,
+        "to": 3,
+        "skeleton": "Dn_Jail_1_Armature"
+      }
+    ],
+    "transitions": [],
+    "timeStep": 0.0
+  },
+  "scale": 1.0,
+  "useControllerTransform": false,
+  "bakeTransforms": true,
+  "readAnimations": true
+}
