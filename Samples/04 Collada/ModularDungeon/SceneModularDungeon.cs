@@ -464,53 +464,53 @@ namespace Collada.ModularDungeon
         {
             var dn = Engine.Content.OnePageDungeon.DungeonFile.Load(fileName);
 
-            ModularSceneryObjectStateTransition toOpen = new ModularSceneryObjectStateTransition
+            ObjectStateTransition toOpen = new ObjectStateTransition
             {
                 State = "open",
             };
-            ModularSceneryObjectStateTransition toClose = new ModularSceneryObjectStateTransition
+            ObjectStateTransition toClose = new ObjectStateTransition
             {
                 State = "close",
             };
 
-            ModularSceneryObjectState openState = new ModularSceneryObjectState
+            ObjectState openState = new ObjectState
             {
                 Name = "open",
                 Transitions = new[] { toClose },
             };
-            ModularSceneryObjectState closeState = new ModularSceneryObjectState
+            ObjectState closeState = new ObjectState
             {
                 Name = "close",
                 Transitions = new[] { toOpen },
             };
 
-            ModularSceneryObjectAction openAction = new ModularSceneryObjectAction
+            ObjectAction openAction = new ObjectAction
             {
                 Name = "open",
                 StateFrom = "close",
                 StateTo = "open",
                 AnimationPlan = "open",
-                Items = new[] { new ModularSceneryObjectActionItem { Action = "open" } },
+                Items = new[] { new ObjectActionItem { Action = "open" } },
             };
 
-            ModularSceneryObjectAction closeAction = new ModularSceneryObjectAction
+            ObjectAction closeAction = new ObjectAction
             {
                 Name = "close",
                 StateFrom = "open",
                 StateTo = "close",
                 AnimationPlan = "close",
-                Items = new[] { new ModularSceneryObjectActionItem { Action = "close" } },
+                Items = new[] { new ObjectActionItem { Action = "close" } },
             };
 
-            ModularSceneryObjectAnimationPlan openPlan = new ModularSceneryObjectAnimationPlan
+            ObjectAnimationPlan openPlan = new ObjectAnimationPlan
             {
                 Name = "open",
-                Paths = new[] { new ModularSceneryObjectAnimationPath { Name = "open" } }
+                Paths = new[] { new ObjectAnimationPath { Name = "open" } }
             };
-            ModularSceneryObjectAnimationPlan closePlan = new ModularSceneryObjectAnimationPlan
+            ObjectAnimationPlan closePlan = new ObjectAnimationPlan
             {
                 Name = "close",
-                Paths = new[] { new ModularSceneryObjectAnimationPath { Name = "close" } }
+                Paths = new[] { new ObjectAnimationPath { Name = "close" } }
             };
 
             Dictionary<Engine.Content.OnePageDungeon.DoorTypes, string[]> doors = new Dictionary<Engine.Content.OnePageDungeon.DoorTypes, string[]>
@@ -1502,7 +1502,7 @@ namespace Collada.ModularDungeon
         {
             PathFinderDescription.Input.ClearConnections();
 
-            if (scenery.CurrentLevel?.Name == "Lvl1")
+            if (scenery.CurrentLevel.Name == "Lvl1")
             {
                 PathFinderDescription.Input.AddConnection(
                     new Vector3(-8.98233700f, 4.76837158e-07f, 0.0375497341f),
@@ -1545,7 +1545,7 @@ namespace Collada.ModularDungeon
             AnimationPath p0 = new AnimationPath();
             p0.AddLoop("stand");
 
-            if (scenery.CurrentLevel?.Name != "Lvl1")
+            if (scenery.CurrentLevel.Name != "Lvl1")
             {
                 human.Visible = false;
             }

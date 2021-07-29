@@ -8,14 +8,17 @@ namespace Engine.Modular.Persistence
     /// <summary>
     /// Asset reference
     /// </summary>
-    public class ModularSceneryAssetReference
+    /// <remarks>
+    /// Defines how to use an imported asset from a model file, into the parent asset.
+    /// </remarks>
+    public class AssetReference
     {
         /// <summary>
-        /// Asset name
+        /// Asset name in the model
         /// </summary>
         public string AssetName { get; set; }
         /// <summary>
-        /// Id
+        /// Internal id
         /// </summary>
         public string Id { get; set; }
         /// <summary>
@@ -26,18 +29,18 @@ namespace Engine.Modular.Persistence
         /// <summary>
         /// Position vector
         /// </summary>
-        public Position3 Position { get; set; } = new Position3(0, 0, 0);
+        public Position3 Position { get; set; } = Position3.Zero;
         /// <summary>
         /// Rotation
         /// </summary>
-        public RotationQ Rotation { get; set; } = new RotationQ(0, 0, 0, 1);
+        public RotationQ Rotation { get; set; } = RotationQ.Identity;
         /// <summary>
         /// Rotation quaternion
         /// </summary>
         /// <summary>
         /// Scale
         /// </summary>
-        public Scale3 Scale { get; set; } = new Scale3(1, 1, 1);
+        public Scale3 Scale { get; set; } = Scale3.One;
 
         /// <inheritdoc/>
         public override string ToString()

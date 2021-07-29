@@ -22,9 +22,9 @@ namespace Engine.Content.OnePageDungeon
         public IEnumerable<string> Columns { get; set; } = new string[] { };
 
         public IDictionary<DoorTypes, string[]> Doors { get; set; } = new Dictionary<DoorTypes, string[]> { };
-        public IEnumerable<ModularSceneryObjectAnimationPlan> DoorAnimationPlans { get; set; }
-        public IEnumerable<ModularSceneryObjectAction> DoorActions { get; set; }
-        public IEnumerable<ModularSceneryObjectState> DoorStates { get; set; }
+        public IEnumerable<ObjectAnimationPlan> DoorAnimationPlans { get; set; }
+        public IEnumerable<ObjectAction> DoorActions { get; set; }
+        public IEnumerable<ObjectState> DoorStates { get; set; }
 
         public int RandomSeed
         {

@@ -1,10 +1,10 @@
 ﻿
-namespace Engine.Modular
+namespace Engine.Modular.Persistence
 {
     /// <summary>
     /// Scenery object state transition descriptor
     /// </summary>
-    public class ModularSceneryObjectStateTransition
+    public class ObjectStateTransition
     {
         /// <summary>
         /// State name

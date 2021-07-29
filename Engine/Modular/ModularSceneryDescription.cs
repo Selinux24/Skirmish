@@ -38,7 +38,7 @@ namespace Engine.Modular
         /// <summary>
         /// Assets configuration
         /// </summary>
-        public Configuration AssetsConfiguration { get; set; } = null;
+        public AssetMap AssetsConfiguration { get; set; } = null;
         /// <summary>
         /// Levels file
         /// </summary>
@@ -46,6 +46,6 @@ namespace Engine.Modular
         /// <summary>
         /// Levels
         /// </summary>
-        public ModularSceneryLevels Levels { get; set; } = null;
+        public LevelMap Levels { get; set; } = null;
     }
 }

@@ -1,11 +1,11 @@
 ﻿
-namespace Engine.Modular
+namespace Engine.Modular.Persistence
 {
     /// <summary>
     /// Object action item
     /// </summary>
     /// <remarks>Designates the action by name to activate in the referenced object by id</remarks>
-    public class ModularSceneryObjectActionItem
+    public class ObjectActionItem
     {
         /// <summary>
         /// Object Id

@@ -222,6 +222,21 @@ namespace Engine
             MaximumDistance = desc.MaximumDistance;
             Distance = desc.Distance;
         }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="desc">Description</param>
+        public ParticleEmitter(ParticleEmitterFile desc)
+        {
+            Position = desc.Position;
+            Velocity = desc.Velocity;
+            Scale = desc.Scale;
+            EmissionRate = desc.EmissionRate;
+            Duration = desc.Duration;
+            InfiniteDuration = desc.InfiniteDuration;
+            MaximumDistance = desc.MaximumDistance;
+            Distance = desc.Distance;
+        }
 
         /// <summary>
         /// Updates internal state

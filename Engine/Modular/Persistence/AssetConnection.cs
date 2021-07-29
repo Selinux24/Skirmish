@@ -8,7 +8,10 @@ namespace Engine.Modular.Persistence
     /// <summary>
     /// Connection between assets
     /// </summary>
-    public class ModularSceneryAssetConnection
+    /// <remarks>
+    /// Identifies the connection points between assets
+    /// </remarks>
+    public class AssetConnection
     {
         /// <summary>
         /// Connection type
@@ -18,10 +21,10 @@ namespace Engine.Modular.Persistence
         /// <summary>
         /// Position
         /// </summary>
-        public Position3 Position { get; set; } = new Position3(0, 0, 0);
+        public Position3 Position { get; set; } = Position3.Zero;
         /// <summary>
         /// Direction
         /// </summary>
-        public Direction3 Direction { get; set; } = new Direction3(0, 0, 0);
+        public Direction3 Direction { get; set; } = Direction3.ForwardLH;
     }
 }

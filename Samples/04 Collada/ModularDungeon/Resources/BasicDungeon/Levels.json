@@ -860,8 +860,8 @@
       ],
       "objects": [
         {
-          "assetMapId": "entrance",
-          "assetId": "door",
+          "levelAssetId": "entrance",
+          "mapAssetId": "door",
           "id": "start",
           "type": "Entrance",
           "pathFinding": false,
@@ -885,8 +885,8 @@
           "castShadows": true
         },
         {
-          "assetMapId": "exit",
-          "assetId": "door",
+          "levelAssetId": "exit",
+          "mapAssetId": "door",
           "id": "end",
           "type": "Exit",
           "pathFinding": false,
@@ -911,7 +911,7 @@
           "castShadows": true
         },
         {
-          "assetId": "ladder",
+          "mapAssetId": "ladder",
           "id": "door_trigger_1",
           "name": "lever",
           "assetName": "Dn_Anim_Ladder",
@@ -1009,7 +1009,7 @@
           "castShadows": true
         },
         {
-          "assetId": "ladder",
+          "mapAssetId": "ladder",
           "id": "door_trigger_2",
           "name": "lever",
           "assetName": "Dn_Anim_Ladder",
@@ -4208,8 +4208,8 @@
       ],
       "objects": [
         {
-          "assetMapId": "entrance",
-          "assetId": "door",
+          "levelAssetId": "entrance",
+          "mapAssetId": "door",
           "id": "start",
           "type": "Entrance",
           "pathFinding": false,
@@ -4233,8 +4233,8 @@
           "castShadows": true
         },
         {
-          "assetMapId": "exit",
-          "assetId": "door",
+          "levelAssetId": "exit",
+          "mapAssetId": "door",
           "id": "end",
           "type": "Exit",
           "pathFinding": false,

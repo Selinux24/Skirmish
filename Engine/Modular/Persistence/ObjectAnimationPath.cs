@@ -1,10 +1,10 @@
 ﻿
-namespace Engine.Modular
+namespace Engine.Modular.Persistence
 {
     /// <summary>
     /// Modular scenery animation path
     /// </summary>
-    public class ModularSceneryObjectAnimationPath
+    public class ObjectAnimationPath
     {
         /// <summary>
         /// Path name

@@ -28,11 +28,12 @@ namespace Engine
         /// Creates a new particle description from another one
         /// </summary>
         /// <param name="particleDesc">The other particle description</param>
+        /// <param name="contentPath">Content path</param>
         /// <param name="scale">Scale</param>
         /// <returns>Returns the new generated particle system description</returns>
-        internal static ParticleSystemDescription Initialize(ParticleSystemDescription particleDesc, float scale = 1f)
+        internal static ParticleSystemDescription Initialize(ParticleSystemFile particleDesc, string contentPath, float scale = 1f)
         {
-            return Initialize(particleDesc.ParticleType, particleDesc.ContentPath, particleDesc.TextureName, scale);
+            return Initialize(particleDesc.ParticleType, contentPath, particleDesc.TextureName, scale);
         }
         /// <summary>
         /// Initializes particle system by type
