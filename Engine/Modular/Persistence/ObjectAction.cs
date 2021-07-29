@@ -1,10 +1,12 @@
-﻿
-namespace Engine.Modular
+﻿using System.Collections.Generic;
+using System.Linq;
+
+namespace Engine.Modular.Persistence
 {
     /// <summary>
     /// Modular scenery object action
     /// </summary>
-    public class ModularSceneryObjectAction
+    public class ObjectAction
     {
         /// <summary>
         /// Action name
@@ -25,6 +27,6 @@ namespace Engine.Modular
         /// <summary>
         /// Triggered item list
         /// </summary>
-        public ModularSceneryObjectActionItem[] Items { get; set; } = null;
+        public IEnumerable<ObjectActionItem> Items { get; set; } = Enumerable.Empty<ObjectActionItem>();
     }
 }

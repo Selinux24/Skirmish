@@ -265,6 +265,7 @@
         },
         {
           "assetName": "Dn_WoodenDoor_1",
+          "id": "door",
           "type": "Wall",
           "position": {
             "x": -3.0,

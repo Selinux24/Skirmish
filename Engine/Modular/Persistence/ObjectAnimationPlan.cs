@@ -1,10 +1,12 @@
-﻿
+﻿using System.Collections.Generic;
+using System.Linq;
+
 namespace Engine.Modular.Persistence
 {
     /// <summary>
     /// Modular scenery animation plan
     /// </summary>
-    public class ModularSceneryObjectAnimationPlan
+    public class ObjectAnimationPlan
     {
         /// <summary>
         /// Plan name
@@ -17,6 +19,6 @@ namespace Engine.Modular.Persistence
         /// <summary>
         /// Plan's animation paths
         /// </summary>
-        public ModularSceneryObjectAnimationPath[] Paths { get; set; } = null;
+        public IEnumerable<ObjectAnimationPath> Paths { get; set; } = Enumerable.Empty<ObjectAnimationPath>();
     }
 }

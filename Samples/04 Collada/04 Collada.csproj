@@ -171,9 +171,9 @@
     <Compile Include="Dungeon\SceneDungeon.cs" />
     <Compile Include="Start\SceneStart.cs" />
     <Compile Include="UIControlExtensions.cs" />
-    <None Include="ModularDungeon\Resources\BasicDungeon\Assets.json">
+    <Content Include="ModularDungeon\Resources\BasicDungeon\Assets.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    </Content>
     <Content Include="Dungeon\Resources\Dungeon.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -183,10 +183,10 @@
     <Content Include="ModularDungeon\Resources\BasicDungeon\BasicDungeon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <None Include="ModularDungeon\Resources\BasicDungeon\Levels.json">
+    <Content Include="ModularDungeon\Resources\BasicDungeon\Levels.json">
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    </Content>
     <Content Include="ModularDungeon\Resources\OnePageDungeons\desert_catacombs_of_the_golden_witch.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

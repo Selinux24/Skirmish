@@ -136,23 +136,23 @@ namespace Engine.Content.Persistence
         /// </summary>
         /// <param name="value">String value</param>
         /// <returns>Returns parsed Color</returns>
-        public static ColorRGBA ReadReservedWordsForColor(string value)
+        public static ColorRgba ReadReservedWordsForColor(string value)
         {
             if (string.Equals(value, "Transparent", StringComparison.OrdinalIgnoreCase))
             {
-                return ColorRGBA.Transparent;
+                return ColorRgba.Transparent;
             }
             else if (string.Equals(value, "White", StringComparison.OrdinalIgnoreCase))
             {
-                return ColorRGBA.White;
+                return ColorRgba.White;
             }
             else if (string.Equals(value, "Black", StringComparison.OrdinalIgnoreCase))
             {
-                return ColorRGBA.Black;
+                return ColorRgba.Black;
             }
             else
             {
-                return ColorRGBA.Black;
+                return ColorRgba.Black;
             }
         }
     }

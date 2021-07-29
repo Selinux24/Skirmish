@@ -11,7 +11,7 @@ namespace Engine.Modular
         /// <summary>
         /// Object
         /// </summary>
-        public ModularSceneryObjectReference Object { get; private set; }
+        public ObjectReference Object { get; private set; }
         /// <summary>
         /// Item
         /// </summary>
@@ -32,7 +32,7 @@ namespace Engine.Modular
         /// <param name="item">Scene object</param>
         /// <param name="emitters">Particle emitters list</param>
         /// <param name="state">Initial state</param>
-        public ModularSceneryItem(ModularSceneryObjectReference obj, ModelInstance item, ParticleEmitter[] emitters, string state)
+        public ModularSceneryItem(ObjectReference obj, ModelInstance item, ParticleEmitter[] emitters, string state)
         {
             this.Object = obj;
             this.Item = item;

@@ -18,6 +18,15 @@ namespace Engine.Modular
     public class ModularScenery : Ground
     {
         /// <summary>
+        /// Objects auto identifier counter
+        /// </summary>
+        private static int ObjectsAutoId = 1;
+        /// <summary>
+        /// Objects base string for identification build
+        /// </summary>
+        private static readonly string ObjectsAutoString = "__objauto__";
+
+        /// <summary>
         /// Asset models dictionary
         /// </summary>
         private readonly Dictionary<string, ModelInstanced> assets = new Dictionary<string, ModelInstanced>();
@@ -36,7 +45,7 @@ namespace Engine.Modular
         /// <summary>
         /// Asset map
         /// </summary>
-        private AssetMap assetMap = null;
+        private AssetMapIntersections assetMapIntersections = null;
         /// <summary>
         /// Scenery entities
         /// </summary>
@@ -57,16 +66,16 @@ namespace Engine.Modular
         /// <summary>
         /// Gets the assets description
         /// </summary>
-        protected Configuration AssetConfiguration { get; set; }
+        protected AssetMap AssetMap { get; set; }
         /// <summary>
         /// Gets the level list
         /// </summary>
-        protected ModularSceneryLevels Levels { get; set; }
+        protected LevelMap Levels { get; set; }
 
         /// <summary>
         /// First level
         /// </summary>
-        public ModularSceneryLevel FirstLevel
+        public Level FirstLevel
         {
             get
             {
@@ -76,7 +85,7 @@ namespace Engine.Modular
         /// <summary>
         /// Current level
         /// </summary>
-        public ModularSceneryLevel CurrentLevel { get; set; }
+        public Level CurrentLevel { get; set; }
         /// <summary>
         /// Gets the description
         /// </summary>
@@ -98,6 +107,240 @@ namespace Engine.Modular
         public event ModularSceneryTriggerEndHandler TriggerEnd;
 
         /// <summary>
+        /// Populate objects empty ids
+        /// </summary>
+        /// <param name="level">Level definition</param>
+        private static void PopulateObjectIds(Level level)
+        {
+            if (level.Objects?.Any() != true)
+            {
+                return;
+            }
+
+            foreach (var obj in level.Objects)
+            {
+                if (!string.IsNullOrEmpty(obj.Id))
+                {
+                    continue;
+                }
+
+                obj.Id = $"{ObjectsAutoString}_{GetNextObjectId()}";
+            }
+        }
+        /// <summary>
+        /// Gets the next Id
+        /// </summary>
+        /// <returns>Returns the next Id</returns>
+        private static int GetNextObjectId()
+        {
+            return ++ObjectsAutoId;
+        }
+        /// <summary>
+        /// Gets the instance counter dictionary
+        /// </summary>
+        /// <param name="assets">Asset list</param>
+        /// <returns>Returns a dictionary with the instance count by unique asset name</returns>
+        private static Dictionary<string, ModularSceneryAssetInstanceInfo> GetMapInstanceCounters(Level level, IEnumerable<Asset> assets)
+        {
+            Dictionary<string, ModularSceneryAssetInstanceInfo> res = new Dictionary<string, ModularSceneryAssetInstanceInfo>();
+
+            foreach (var item in level.Map)
+            {
+                var asset = assets
+                    .FirstOrDefault(a => string.Equals(a.Name, item.AssetName, StringComparison.OrdinalIgnoreCase));
+
+                if (asset != null)
+                {
+                    var assetInstances = GetInstanceCounters(asset);
+                    foreach (var key in assetInstances.Keys)
+                    {
+                        if (!res.ContainsKey(key))
+                        {
+                            res.Add(key, new ModularSceneryAssetInstanceInfo { Count = 0 });
+                        }
+
+                        res[key].Count += assetInstances[key];
+                    }
+                }
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Gets the instance count dictionary
+        /// </summary>
+        /// <param name="asset">Asset</param>
+        /// <returns>Returns a dictionary that contains the instance count by asset name</returns>
+        private static Dictionary<string, int> GetInstanceCounters(Asset asset)
+        {
+            Dictionary<string, int> res = new Dictionary<string, int>();
+
+            var assetNames = asset.References.Select(a => a.AssetName).Distinct();
+
+            foreach (var assetName in assetNames)
+            {
+                var count = asset.References.Count(a => string.Equals(a.AssetName, assetName, StringComparison.OrdinalIgnoreCase));
+                if (count > 0)
+                {
+                    res.Add(assetName, count);
+                }
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Gets the instance transforms dictionary
+        /// </summary>
+        /// <param name="asset">Asset</param>
+        /// <returns>Returns a dictionary that contains the instance transform list by asset name</returns>
+        private static Dictionary<string, Matrix[]> GetInstanceTransforms(Asset asset)
+        {
+            Dictionary<string, Matrix[]> res = new Dictionary<string, Matrix[]>();
+
+            var assetNames = asset.References.Select(a => a.AssetName).Distinct();
+
+            foreach (var assetName in assetNames)
+            {
+                var transforms = asset.References
+                    .Where(a => string.Equals(a.AssetName, assetName, StringComparison.OrdinalIgnoreCase))
+                    .Select(a => GeometryUtil.Transformation(a.Position, a.Rotation, a.Scale)).ToArray();
+
+                res.Add(assetName, transforms);
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Gets the instance counter dictionary
+        /// </summary>
+        /// <returns>Returns a dictionary with the instance count by unique asset name</returns>
+        private static Dictionary<string, ModularSceneryObjectInstanceInfo> GetObjectsInstanceCounters(Level level)
+        {
+            Dictionary<string, ModularSceneryObjectInstanceInfo> res = new Dictionary<string, ModularSceneryObjectInstanceInfo>();
+
+            foreach (var item in level.Objects)
+            {
+                if (string.IsNullOrEmpty(item.AssetName))
+                {
+                    continue;
+                }
+
+                if (!res.ContainsKey(item.AssetName))
+                {
+                    res.Add(item.AssetName, new ModularSceneryObjectInstanceInfo { Count = 0, PathFinding = item.PathFinding });
+                }
+
+                res[item.AssetName].Count += 1;
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Finds the asset reference by asset map id and asset id
+        /// </summary>
+        /// <param name="level">Level definition</param>
+        /// <param name="assets">Asset list</param>
+        /// <param name="levelAssetId">Asset reference id in the level asset reference list</param>
+        /// <param name="mapAssetId">Asset id in the asset map reference list</param>
+        /// <returns>Returns the asset reference</returns>
+        private static AssetReference FindAssetReference(Level level, IEnumerable<Asset> assets, string levelAssetId, string mapAssetId)
+        {
+            var res = assets
+                //Search any asset wich contains a reference with the specified level, by asset name or by the level asset map id
+                .Where(a => level.Map.Any(r =>
+                    string.Equals(r.AssetName, a.Name, StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(r.Id, levelAssetId, StringComparison.OrdinalIgnoreCase)));
+            var res2 = res
+                //Then, get the first reference wich matching reference Id with the level asset id
+                .Select(a => a.References.FirstOrDefault(r => string.Equals(r.Id, mapAssetId, StringComparison.OrdinalIgnoreCase)));
+            var res3 = res2
+                .FirstOrDefault();
+
+            return res3;
+        }
+        /// <summary>
+        /// Gets the first index of the asset in the current configuration
+        /// </summary>
+        /// <param name="level">Level definition</param>
+        /// <param name="assets">Asset list</param>
+        /// <param name="assetName">Asset name</param>
+        /// <param name="levelAssetId">Asset reference id in the level asset reference list</param>
+        /// <param name="mapAssetId">Asset id in the asset map reference list</param>
+        /// <returns>Returns the first index</returns>
+        private static int GetMapInstanceIndex(Level level, IEnumerable<Asset> assets, string assetName, string levelAssetId, string mapAssetId)
+        {
+            int index = 0;
+
+            foreach (var item in level.Map)
+            {
+                var asset = assets
+                    .FirstOrDefault(a => string.Equals(a.Name, item.AssetName, StringComparison.OrdinalIgnoreCase));
+
+                if (asset == null)
+                {
+                    continue;
+                }
+
+                foreach (var a in asset.References)
+                {
+                    if (string.Equals(a.AssetName, assetName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (string.Equals(item.Id, levelAssetId, StringComparison.OrdinalIgnoreCase) &&
+                            string.Equals(a.Id, mapAssetId, StringComparison.OrdinalIgnoreCase))
+                        {
+                            return index;
+                        }
+
+                        index++;
+                    }
+                }
+            }
+
+            return -1;
+        }
+        /// <summary>
+        /// Gets the first index of the object in the current configuration
+        /// </summary>
+        /// <param name="level">Level definition</param>
+        /// <param name="assetName">Asset name</param>
+        /// <param name="objectId">Object id</param>
+        /// <returns>Returns the first index</returns>
+        private static int GetObjectInstanceIndex(Level level, string assetName, string objectId)
+        {
+            int index = 0;
+
+            foreach (var item in level.Objects)
+            {
+                if (string.IsNullOrEmpty(item.AssetName))
+                {
+                    continue;
+                }
+
+                if (string.Equals(item.AssetName, assetName, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (string.Equals(item.Id, objectId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return index;
+                    }
+
+                    index++;
+                }
+            }
+
+            return -1;
+        }
+        /// <summary>
+        /// Gets a list of masks to find volume meshes for the specified asset name
+        /// </summary>
+        /// <param name="levels">Level list</param>
+        /// <param name="assetName">Asset name</param>
+        /// <returns>Returns a list of masks to find volume meshes for the specified asset name</returns>
+        private static IEnumerable<string> GetMasksForAsset(LevelMap levels, string assetName)
+        {
+            return levels.Volumes.Select(v => assetName + v).ToArray();
+        }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="name">Name</param>
@@ -108,11 +351,11 @@ namespace Engine.Modular
         {
             if (description.AssetsConfiguration != null)
             {
-                AssetConfiguration = description.AssetsConfiguration;
+                AssetMap = description.AssetsConfiguration;
             }
             else if (!string.IsNullOrWhiteSpace(description.AssetsConfigurationFile))
             {
-                AssetConfiguration = SerializationHelper.DeserializeFromFile<Configuration>(Path.Combine(description.Content.ContentFolder ?? "", description.AssetsConfigurationFile));
+                AssetMap = SerializationHelper.DeserializeFromFile<AssetMap>(Path.Combine(description.Content.ContentFolder ?? "", description.AssetsConfigurationFile));
             }
 
             if (description.Levels != null)
@@ -121,7 +364,7 @@ namespace Engine.Modular
             }
             else if (!string.IsNullOrWhiteSpace(description.LevelsFile))
             {
-                Levels = SerializationHelper.DeserializeFromFile<ModularSceneryLevels>(Path.Combine(description.Content.ContentFolder ?? "", description.LevelsFile));
+                Levels = SerializationHelper.DeserializeFromFile<LevelMap>(Path.Combine(description.Content.ContentFolder ?? "", description.LevelsFile));
             }
         }
         /// <summary>
@@ -137,42 +380,37 @@ namespace Engine.Modular
         /// Loads the level by name
         /// </summary>
         /// <param name="levelName">Level name</param>
+        /// <param name="progress">Resource loading progress updater</param>
         public async Task LoadLevel(string levelName, IProgress<LoadResourceProgress> progress = null)
         {
-            if (string.Equals(CurrentLevel?.Name, levelName, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(CurrentLevel.Name, levelName, StringComparison.OrdinalIgnoreCase))
             {
                 return;
             }
 
             //Find the level
-            var level = Levels.Levels
-                .FirstOrDefault(l => string.Equals(l.Name, levelName, StringComparison.OrdinalIgnoreCase));
-            if (level != null)
+            var levels = Levels.Levels
+                .Where(l => string.Equals(l.Name, levelName, StringComparison.OrdinalIgnoreCase));
+            if (levels.Any())
             {
                 //Load the level
-                await LoadLevel(level, progress);
+                await LoadLevel(levels.First(), progress);
             }
         }
         /// <summary>
         /// Loads the first level
         /// </summary>
+        /// <param name="progress">Resource loading progress updater</param>
         public async Task LoadFirstLevel(IProgress<LoadResourceProgress> progress = null)
         {
             await LoadLevel(Levels.Levels.FirstOrDefault(), progress);
         }
         /// <summary>
-        /// Loads the model content
-        /// </summary>
-        /// <returns>Returns the model content</returns>
-        private ContentData LoadModelContent()
-        {
-            return Description.ReadModelContent();
-        }
-        /// <summary>
         /// Loads a level
         /// </summary>
         /// <param name="level">Level definition</param>
-        private async Task LoadLevel(ModularSceneryLevel level, IProgress<LoadResourceProgress> progress = null)
+        /// <param name="progress">Resource loading progress updater</param>
+        private async Task LoadLevel(Level level, IProgress<LoadResourceProgress> progress = null)
         {
             //Removes previous level components from scene
             Scene.RemoveComponents(assets.Select(a => a.Value));
@@ -182,13 +420,13 @@ namespace Engine.Modular
             assets.Clear();
             objects.Clear();
             entities.Clear();
-            assetMap = null;
+            assetMapIntersections = null;
             particleManager?.Clear();
             particleDescriptors.Clear();
 
             CurrentLevel = level;
 
-            ContentData content = LoadModelContent();
+            var content = Description.ReadModelContent();
 
             await InitializeParticles(progress);
             await InitializeAssets(level, content, progress);
@@ -218,9 +456,9 @@ namespace Engine.Modular
                 {
                     try
                     {
-                        item.ContentPath = item.ContentPath ?? Description.Content.ContentFolder;
+                        string contentPath = item.ContentPath ?? Description.Content.ContentFolder;
 
-                        var pDesc = ParticleSystemDescription.Initialize(item);
+                        var pDesc = ParticleSystemDescription.Initialize(item, contentPath);
 
                         particleDescriptors.Add(item.Name, pDesc);
                     }
@@ -236,11 +474,13 @@ namespace Engine.Modular
         /// <summary>
         /// Initialize all assets into asset dictionary 
         /// </summary>
+        /// <param name="level">Level definition</param>
         /// <param name="content">Assets model content</param>
-        private async Task InitializeAssets(ModularSceneryLevel level, ContentData content, IProgress<LoadResourceProgress> progress = null)
+        /// <param name="progress">Resource loading progress updater</param>
+        private async Task InitializeAssets(Level level, ContentData content, IProgress<LoadResourceProgress> progress = null)
         {
             // Get instance count for all single geometries from Map
-            var instances = level.GetMapInstanceCounters(AssetConfiguration.Assets);
+            var instances = GetMapInstanceCounters(level, AssetMap.Assets);
 
             float total = instances.Keys.Count;
             int current = 0;
@@ -278,9 +518,9 @@ namespace Engine.Modular
         /// <param name="count">Instance count</param>
         /// <param name="level">Level</param>
         /// <param name="modelContent">Model content</param>
-        private async Task<ModelInstanced> InitializeAsset(string assetName, int count, ModularSceneryLevel level, ContentData modelContent)
+        private async Task<ModelInstanced> InitializeAsset(string assetName, int count, Level level, ContentData modelContent)
         {
-            var masks = Levels.GetMasksForAsset(assetName);
+            var masks = GetMasksForAsset(Levels, assetName);
             var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
             var usage = hasVolumes ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding;
 
@@ -314,14 +554,16 @@ namespace Engine.Modular
         /// <summary>
         /// Initialize all objects into asset dictionary 
         /// </summary>
+        /// <param name="level">Level definition</param>
         /// <param name="content">Assets model content</param>
-        private async Task InitializeObjects(ModularSceneryLevel level, ContentData content, IProgress<LoadResourceProgress> progress = null)
+        /// <param name="progress">Resource loading progress updater</param>
+        private async Task InitializeObjects(Level level, ContentData content, IProgress<LoadResourceProgress> progress = null)
         {
             // Set auto-identifiers
-            level.PopulateObjectIds();
+            PopulateObjectIds(level);
 
             // Get instance count for all single geometries from Map
-            var instances = level.GetObjectsInstanceCounters();
+            var instances = GetObjectsInstanceCounters(level);
 
             float total = instances.Keys.Count;
             int current = 0;
@@ -360,9 +602,9 @@ namespace Engine.Modular
         /// <param name="pathFinding">Path finding enabled flag</param>
         /// <param name="level">Level</param>
         /// <param name="modelContent">Model content</param>
-        private async Task<ModelInstanced> InitializeObject(string assetName, int count, bool pathFinding, ModularSceneryLevel level, ContentData modelContent)
+        private async Task<ModelInstanced> InitializeObject(string assetName, int count, bool pathFinding, Level level, ContentData modelContent)
         {
-            var masks = Levels.GetMasksForAsset(assetName);
+            var masks = GetMasksForAsset(Levels, assetName);
             var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
             SceneObjectUsages usage = SceneObjectUsages.None;
             if (pathFinding)
@@ -418,7 +660,7 @@ namespace Engine.Modular
         /// </summary>
         /// <param name="obj">Object</param>
         /// <param name="instance">Model instance</param>
-        private void InitializeObjectLights(ModularSceneryObjectReference obj, ModelInstance instance)
+        private void InitializeObjectLights(ObjectReference obj, ModelInstance instance)
         {
             if (!obj.LoadLights)
             {
@@ -477,28 +719,27 @@ namespace Engine.Modular
         /// </summary>
         /// <param name="obj">Object</param>
         /// <param name="instance">Model instance</param>
-        private void InitializeObjectAnimations(ModularSceneryObjectReference obj, ModelInstance instance)
+        private void InitializeObjectAnimations(ObjectReference obj, ModelInstance instance)
         {
             Dictionary<string, AnimationPlan> animationDict = new Dictionary<string, AnimationPlan>();
 
             //Plans
-            for (int i = 0; i < obj.AnimationPlans?.Length; i++)
+            if (obj.AnimationPlans?.Any() == true)
             {
-                var dPlan = obj.AnimationPlans[i];
-
-                AnimationPlan plan = new AnimationPlan();
-
-                for (int a = 0; a < dPlan.Paths?.Length; a++)
+                foreach (var dPlan in obj.AnimationPlans)
                 {
-                    var dPath = dPlan.Paths[a];
+                    AnimationPlan plan = new AnimationPlan();
 
-                    AnimationPath path = new AnimationPath();
-                    path.Add(dPath.Name);
+                    foreach (var dPath in dPlan.Paths)
+                    {
+                        AnimationPath path = new AnimationPath();
+                        path.Add(dPath.Name);
 
-                    plan.Add(path);
+                        plan.Add(path);
+                    }
+
+                    animationDict.Add(dPlan.Name, plan);
                 }
-
-                animationDict.Add(dPlan.Name, plan);
             }
 
             if (animationDict.Count > 0)
@@ -517,30 +758,31 @@ namespace Engine.Modular
             List<ModularSceneryTrigger> instanceTriggers = new List<ModularSceneryTrigger>();
 
             //Actions
-            for (int a = 0; a < obj.Actions?.Length; a++)
+            if (obj.Actions?.Any() == true)
             {
-                var action = obj.Actions[a];
-
-                ModularSceneryTrigger trigger = new ModularSceneryTrigger()
+                foreach (var action in obj.Actions)
                 {
-                    Name = action.Name,
-                    StateFrom = action.StateFrom,
-                    StateTo = action.StateTo,
-                    AnimationPlan = action.AnimationPlan,
-                };
-
-                for (int i = 0; i < action.Items?.Length; i++)
-                {
-                    ModularSceneryAction act = new ModularSceneryAction()
+                    ModularSceneryTrigger trigger = new ModularSceneryTrigger()
                     {
-                        ItemId = action.Items[i].Id,
-                        ItemAction = action.Items[i].Action,
+                        Name = action.Name,
+                        StateFrom = action.StateFrom,
+                        StateTo = action.StateTo,
+                        AnimationPlan = action.AnimationPlan,
                     };
 
-                    trigger.Actions.Add(act);
-                }
+                    foreach (var item in action.Items)
+                    {
+                        ModularSceneryAction act = new ModularSceneryAction()
+                        {
+                            ItemId = item.Id,
+                            ItemAction = item.Action,
+                        };
 
-                instanceTriggers.Add(trigger);
+                        trigger.Actions.Add(act);
+                    }
+
+                    instanceTriggers.Add(trigger);
+                }
             }
 
             if (instanceTriggers.Count > 0)
@@ -548,11 +790,12 @@ namespace Engine.Modular
                 triggers.Add(instance, instanceTriggers);
             }
         }
-
         /// <summary>
         /// Initialize scenery entities proxy list
         /// </summary>
-        private void InitializeEntities(ModularSceneryLevel level, IProgress<LoadResourceProgress> progress = null)
+        /// <param name="level">Level definition</param>
+        /// <param name="progress">Resource loading progress updater</param>
+        private void InitializeEntities(Level level, IProgress<LoadResourceProgress> progress = null)
         {
             float total = level.Objects.Count();
             int current = 0;
@@ -564,7 +807,7 @@ namespace Engine.Modular
                 if (string.IsNullOrEmpty(obj.AssetName))
                 {
                     // Adding object with referenced geometry
-                    instance = FindAssetInstance(obj.AssetMapId, obj.AssetId);
+                    instance = FindAssetModelInstance(obj.LevelAssetId, obj.MapAssetId);
                 }
                 else
                 {
@@ -589,23 +832,24 @@ namespace Engine.Modular
                 progress?.Report(new LoadResourceProgress { Progress = ++current / total });
             }
         }
-
         /// <summary>
         /// Parse the assets map to set the assets transforms
         /// </summary>
-        private void ParseAssetsMap(ModularSceneryLevel level, IProgress<LoadResourceProgress> progress = null)
+        /// <param name="level">Level definition</param>
+        /// <param name="progress">Resource loading progress updater</param>
+        private void ParseAssetsMap(Level level, IProgress<LoadResourceProgress> progress = null)
         {
-            assetMap = new AssetMap();
+            assetMapIntersections = new AssetMapIntersections();
 
             var transforms = new Dictionary<string, List<Matrix>>();
 
-            float total = level.Map.Length + transforms.Keys.Count;
+            float total = level.Map.Count() + transforms.Keys.Count;
             int current = 0;
 
             // Paser map for instance positioning
             foreach (var item in level.Map)
             {
-                var assetIndex = Array.FindIndex(AssetConfiguration.Assets, a => a.Name == item.AssetName);
+                var assetIndex = Array.FindIndex(AssetMap.Assets.ToArray(), a => a.Name == item.AssetName);
                 if (assetIndex < 0)
                 {
                     throw new EngineException($"Modular Scenery asset not found: {item.AssetName}");
@@ -623,7 +867,7 @@ namespace Engine.Modular
                 progress?.Report(new LoadResourceProgress { Progress = ++current / total });
             }
 
-            assetMap.Build(AssetConfiguration, assets);
+            assetMapIntersections.Build(AssetMap, assets);
         }
         /// <summary>
         /// Parses the specified asset reference
@@ -631,7 +875,7 @@ namespace Engine.Modular
         /// <param name="item">Reference</param>
         /// <param name="assetIndex">Asset index</param>
         /// <param name="transforms">Transforms dictionary</param>
-        private void ParseAssetReference(ModularSceneryAssetReference item, int assetIndex, Dictionary<string, List<Matrix>> transforms)
+        private void ParseAssetReference(AssetReference item, int assetIndex, Dictionary<string, List<Matrix>> transforms)
         {
             var complexAssetTransform = GeometryUtil.Transformation(item.Position, item.Rotation, item.Scale);
             var complexAssetRotation = item.Rotation;
@@ -643,10 +887,10 @@ namespace Engine.Modular
                 Transform = complexAssetTransform,
                 Assets = new Dictionary<string, List<int>>(),
             };
-            assetMap.Add(aMap);
+            assetMapIntersections.Add(aMap);
 
-            var asset = AssetConfiguration.Assets[assetIndex];
-            var assetTransforms = asset.GetInstanceTransforms();
+            var asset = AssetMap.Assets.ElementAt(assetIndex);
+            var assetTransforms = GetInstanceTransforms(asset);
 
             foreach (var basicAsset in assetTransforms.Keys)
             {
@@ -661,13 +905,13 @@ namespace Engine.Modular
                 }
 
                 //Get basic asset type
-                var basicAssetType = Array.Find(asset.References, a => a.AssetName == basicAsset).Type;
+                var basicAssetType = asset.References.First(a => a.AssetName == basicAsset).Type;
 
                 Array.ForEach(assetTransforms[basicAsset], t =>
                 {
                     var basicTrn = t;
 
-                    if (AssetConfiguration.MaintainTextureDirection)
+                    if (AssetMap.MaintainTextureDirection)
                     {
                         var maintain =
                             basicAssetType == ModularSceneryAssetTypes.Floor ||
@@ -684,21 +928,20 @@ namespace Engine.Modular
                 });
             }
         }
-
         /// <summary>
         /// Finds the model instance for the specified asset map id and asset id
         /// </summary>
-        /// <param name="mapId">Asset map id</param>
-        /// <param name="id">Asset id</param>
+        /// <param name="levelAssetId">Asset id in the level asset reference list</param>
+        /// <param name="mapAssetId">Asset id in the asset map reference list</param>
         /// <returns>Returns the model instance</returns>
-        private ModelInstance FindAssetInstance(string mapId, string id)
+        private ModelInstance FindAssetModelInstance(string levelAssetId, string mapAssetId)
         {
             // Find the assetName by object asset_id
-            var res = CurrentLevel.FindAssetInstance(AssetConfiguration.Assets, mapId, id);
+            var res = FindAssetReference(CurrentLevel, AssetMap.Assets, levelAssetId, mapAssetId);
             if (res != null)
             {
                 // Look for all geometry references
-                int index = CurrentLevel.GetMapInstanceIndex(AssetConfiguration.Assets, res.AssetName, mapId, id);
+                int index = GetMapInstanceIndex(CurrentLevel, AssetMap.Assets, res.AssetName, levelAssetId, mapAssetId);
                 if (index >= 0)
                 {
                     return assets[res.AssetName][index];
@@ -715,7 +958,7 @@ namespace Engine.Modular
         /// <returns>Returns the model instance</returns>
         private ModelInstance FindObjectInstance(string assetName, string id)
         {
-            var index = CurrentLevel.GetObjectInstanceIndex(assetName, id);
+            var index = GetObjectInstanceIndex(CurrentLevel, assetName, id);
             if (index >= 0)
             {
                 return objects[assetName][index];
@@ -730,7 +973,7 @@ namespace Engine.Modular
         /// <param name="context">Context</param>
         public override void Update(UpdateContext context)
         {
-            assetMap?.Update(context.CameraVolume);
+            assetMapIntersections?.Update(context.CameraVolume);
 
             if (activeCallbacks?.Any() == true)
             {
@@ -881,7 +1124,7 @@ namespace Engine.Modular
         /// <returns>Returns a dictionary of complex asset volumes by asset name</returns>
         public Dictionary<string, List<BoundingBox>> GetMapVolumes()
         {
-            return assetMap.GetMapVolumes();
+            return assetMapIntersections.GetMapVolumes();
         }
         /// <summary>
         /// Gets all individual map asset volumes
@@ -1263,13 +1506,13 @@ namespace Engine.Modular
         /// <returns>Return the culling volume</returns>
         public override IIntersectionVolume GetCullingVolume()
         {
-            return assetMap;
+            return assetMapIntersections;
         }
 
         /// <summary>
-        /// Asset map
+        /// Asset map intersection helpers
         /// </summary>
-        class AssetMap : IIntersectionVolume
+        class AssetMapIntersections : IIntersectionVolume
         {
             /// <summary>
             /// Asset map
@@ -1369,7 +1612,7 @@ namespace Engine.Modular
             /// </summary>
             /// <param name="assetConfiguration">Configuration</param>
             /// <param name="assets">Asset list</param>
-            public void Build(Configuration assetConfiguration, Dictionary<string, ModelInstanced> assets)
+            public void Build(Persistence.AssetMap assetConfiguration, Dictionary<string, ModelInstanced> assets)
             {
                 //Fill per complex asset bounding boxes
                 Fill(assets);
@@ -1430,13 +1673,13 @@ namespace Engine.Modular
             /// <param name="target">Target item</param>
             /// <param name="s">Source index</param>
             /// <param name="t">Target index</param>
-            private void FindPortals(Configuration assetConfiguration, AssetMapItem source, AssetMapItem target, int s, int t)
+            private void FindPortals(Persistence.AssetMap assetConfiguration, AssetMapItem source, AssetMapItem target, int s, int t)
             {
-                var sourceConf = Array.Find(assetConfiguration.Assets, (a => a.Name == source.Name));
-                if (sourceConf.Connections?.Length > 0)
+                var sourceConf = assetConfiguration.Assets.FirstOrDefault(a => a.Name == source.Name);
+                if (sourceConf?.Connections?.Any() == true)
                 {
-                    var targetConf = Array.Find(assetConfiguration.Assets, (a => a.Name == target.Name));
-                    if (targetConf.Connections?.Length > 0)
+                    var targetConf = assetConfiguration.Assets.FirstOrDefault(a => a.Name == target.Name);
+                    if (targetConf?.Connections?.Any() == true)
                     {
                         //Transform connection positions and directions
                         var sourcePositions = sourceConf.Connections.Select(i => ReadConnection(i, source.Transform));
@@ -1462,7 +1705,7 @@ namespace Engine.Modular
             /// <param name="connection">Connection</param>
             /// <param name="transform">Transform to apply</param>
             /// <returns>Returns the connector information</returns>
-            private ConnectorInfo ReadConnection(ModularSceneryAssetConnection connection, Matrix transform)
+            private ConnectorInfo ReadConnection(AssetConnection connection, Matrix transform)
             {
                 return new ConnectorInfo
                 {
@@ -1613,10 +1856,7 @@ namespace Engine.Modular
             /// </summary>
             public List<int> Connections = new List<int>();
 
-            /// <summary>
-            /// Gets the instance text representation
-            /// </summary>
-            /// <returns>Returns the instance text representation</returns>
+            /// <inheritdoc/>
             public override string ToString()
             {
                 return $"{Name}; Index: {Index}; Connections: {Connections.Count};";
@@ -1661,6 +1901,30 @@ namespace Engine.Modular
                 Trigger = trigger;
                 Item = item;
             }
+        }
+        /// <summary>
+        /// Asset instance info
+        /// </summary>
+        class ModularSceneryAssetInstanceInfo
+        {
+            /// <summary>
+            /// Instance count
+            /// </summary>
+            public int Count { get; set; }
+        }
+        /// <summary>
+        /// Object instance info
+        /// </summary>
+        class ModularSceneryObjectInstanceInfo
+        {
+            /// <summary>
+            /// Instance count
+            /// </summary>
+            public int Count { get; set; }
+            /// <summary>
+            /// Use of path finding
+            /// </summary>
+            public bool PathFinding { get; set; }
         }
     }
 

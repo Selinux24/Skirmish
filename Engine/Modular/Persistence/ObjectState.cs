@@ -1,10 +1,12 @@
-﻿
-namespace Engine.Modular
+﻿using System.Collections.Generic;
+using System.Linq;
+
+namespace Engine.Modular.Persistence
 {
     /// <summary>
     /// Scenery object state descriptor
     /// </summary>
-    public class ModularSceneryObjectState
+    public class ObjectState
     {
         /// <summary>
         /// State name
@@ -13,6 +15,6 @@ namespace Engine.Modular
         /// <summary>
         /// Transitions list
         /// </summary>
-        public ModularSceneryObjectStateTransition[] Transitions { get; set; } = null;
+        public IEnumerable<ObjectStateTransition> Transitions { get; set; } = Enumerable.Empty<ObjectStateTransition>();
     }
 }

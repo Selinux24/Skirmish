@@ -1,11 +1,10 @@
-﻿using SharpDX;
-
-namespace Engine
+﻿
+namespace Engine.Content.Persistence
 {
     /// <summary>
     /// Particle emitter description
     /// </summary>
-    public class ParticleEmitterDescription
+    public class ParticleEmitterFile
     {
         /// <summary>
         /// Particle name
@@ -14,15 +13,15 @@ namespace Engine
         /// <summary>
         /// Position
         /// </summary>
-        public Vector3 Position { get; set; }
+        public Position3 Position { get; set; } = Position3.Zero;
         /// <summary>
         /// Velocity
         /// </summary>
-        public Vector3 Velocity { get; set; }
+        public Direction3 Velocity { get; set; } = Direction3.Up;
         /// <summary>
         /// Particle scale
         /// </summary>
-        public float Scale { get; set; }
+        public float Scale { get; set; } = 1;
         /// <summary>
         /// Emission rate
         /// </summary>
@@ -43,20 +42,5 @@ namespace Engine
         /// Distance from camera
         /// </summary>
         public float Distance { get; set; }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public ParticleEmitterDescription()
-        {
-            Position = Vector3.Zero;
-            Velocity = Vector3.Up;
-            Scale = 1f;
-            EmissionRate = 1f;
-            Duration = 0f;
-            InfiniteDuration = false;
-            MaximumDistance = 100f;
-            Distance = 0f;
-        }
     }
 }

@@ -1,5 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.Modular.Persistence
 {
@@ -8,16 +10,22 @@ namespace Engine.Modular.Persistence
     /// <summary>
     /// Object reference
     /// </summary>
-    public class ModularSceneryObjectReference
+    public class ObjectReference
     {
         /// <summary>
         /// Asset map id
         /// </summary>
-        public string AssetMapId { get; set; }
+        /// <remarks>
+        /// References an id in the asset reference list of the LEVEL
+        /// </remarks>
+        public string LevelAssetId { get; set; }
         /// <summary>
-        /// Asset id
+        /// Internal asset id
         /// </summary>
-        public string AssetId { get; set; }
+        /// <remarks>
+        /// References an id in the asset reference list of the ASSET MAP
+        /// </remarks>
+        public string MapAssetId { get; set; }
         /// <summary>
         /// Item id
         /// </summary>
@@ -27,7 +35,7 @@ namespace Engine.Modular.Persistence
         /// </summary>
         public string Name { get; set; }
         /// <summary>
-        /// Asset name
+        /// Asset name in the asset map
         /// </summary>
         public string AssetName { get; set; }
         /// <summary>
@@ -38,54 +46,53 @@ namespace Engine.Modular.Persistence
         /// <summary>
         /// Include object in path finding
         /// </summary>
-        public bool PathFinding { get; set; } = false;
+        public bool PathFinding { get; set; }
         /// <summary>
         /// Animation plan list
         /// </summary>
-        public ModularSceneryObjectAnimationPlan[] AnimationPlans { get; set; } = null;
+        public IEnumerable<ObjectAnimationPlan> AnimationPlans { get; set; } = Enumerable.Empty<ObjectAnimationPlan>();
         /// <summary>
         /// Action list
         /// </summary>
-        public ModularSceneryObjectAction[] Actions { get; set; } = null;
+        public IEnumerable<ObjectAction> Actions { get; set; } = Enumerable.Empty<ObjectAction>();
         /// <summary>
         /// States list
         /// </summary>
-        public ModularSceneryObjectState[] States { get; set; } = null;
+        public IEnumerable<ObjectState> States { get; set; } = Enumerable.Empty<ObjectState>();
         /// <summary>
         /// Next level
         /// </summary>
         /// <remarks>Only for exit doors</remarks>
         public string NextLevel { get; set; }
-
         /// <summary>
         /// Position vector
         /// </summary>
-        public Position3 Position { get; set; } = new Position3(0, 0, 0);
+        public Position3 Position { get; set; } = Position3.Zero;
         /// <summary>
         /// Rotation
         /// </summary>
-        public RotationQ Rotation { get; set; } = new RotationQ(0, 0, 0, 1);
+        public RotationQ Rotation { get; set; } = RotationQ.Identity;
         /// <summary>
         /// Scale
         /// </summary>
-        public Scale3 Scale { get; set; } = new Scale3(1, 1, 1);
+        public Scale3 Scale { get; set; } = Scale3.One;
         /// <summary>
         /// Load model lights into scene
         /// </summary>
-        public bool LoadLights { get; set; } = true;
+        public bool LoadLights { get; set; }
         /// <summary>
         /// Lights cast shadows
         /// </summary>
-        public bool CastShadows { get; set; } = true;
+        public bool CastShadows { get; set; }
         /// <summary>
         /// Particle
         /// </summary>
-        public ParticleEmitterDescription ParticleLight { get; set; }
+        public ParticleEmitterFile ParticleLight { get; set; }
 
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"Type: {Type}; Id: {Id}; AssetName: {AssetName}; AssetMapId: {AssetMapId}; AssetId: {AssetId};";
+            return $"Type: {Type}; Id: {Id}; AssetName: {AssetName}; AssetMapId: {LevelAssetId}; AssetId: {MapAssetId};";
         }
     }
 }
