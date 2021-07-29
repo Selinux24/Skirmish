@@ -217,6 +217,7 @@
     <Compile Include="Content\IAnimationLoader.cs" />
     <Compile Include="Content\Persistence\Direction3.cs" />
     <Compile Include="Content\Persistence\ColorRgba.cs" />
+    <Compile Include="Content\Persistence\ColorRGBA.cs" />
     <Compile Include="Content\Persistence\ParticleEmitterFile.cs" />
     <Compile Include="Content\Persistence\ParticleSystemFile.cs" />
     <Compile Include="Effects\EffectDefaultTexture.cs" />
