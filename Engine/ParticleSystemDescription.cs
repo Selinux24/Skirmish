@@ -1,15 +1,14 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using SharpDX;
-using System;
-using System.Xml.Serialization;
 
 namespace Engine
 {
+    using Engine.Content.Persistence;
+
     /// <summary>
     /// Particle system description
     /// </summary>
-    [Serializable]
     public class ParticleSystemDescription
     {
         /// <summary>
@@ -335,205 +334,105 @@ namespace Engine
         }
 
         /// <summary>
-        /// Reads color to string
-        /// </summary>
-        /// <param name="value">Color value</param>
-        private static string ReadColor(Color value)
-        {
-            return $"{value.R} {value.G} {value.B} {value.A}";
-        }
-        /// <summary>
-        /// Writes color from string
-        /// </summary>
-        /// <param name="value">String value</param>
-        /// <param name="defaultValue">Default value</param>
-        private static Color WriteColor(string value, Color defaultValue)
-        {
-            var floats = value?.SplitFloats();
-            if (floats?.Length == 4)
-            {
-                return new Color(floats);
-            }
-            else if (floats?.Length == 1)
-            {
-                return new Color(floats[0]);
-            }
-            else
-            {
-                return defaultValue;
-            }
-        }
-
-        /// <summary>
         /// Particle type
         /// </summary>
-        [XmlAttribute("type")]
         [JsonConverter(typeof(StringEnumConverter))]
         public ParticleTypes ParticleType { get; set; }
         /// <summary>
         /// Name
         /// </summary>
-        [XmlAttribute("name")]
         public string Name { get; set; }
         /// <summary>
         /// Content path
         /// </summary>
-        [XmlAttribute("contentPath")]
         public string ContentPath { get; set; }
         /// <summary>
         /// Texture name
         /// </summary>
-        [XmlAttribute("textureName")]
         public string TextureName { get; set; }
 
         /// <summary>
         /// Maximum particle duration
         /// </summary>
-        [XmlElement("maxDuration")]
         public float MaxDuration { get; set; }
         /// <summary>
         /// Duration randomness
         /// </summary>
-        [XmlElement("maxDurationRandomness")]
         public float MaxDurationRandomness { get; set; }
 
         /// <summary>
         /// Maximum horizontal velocity
         /// </summary>
-        [XmlElement("maxHorizontalVelocity")]
         public float MaxHorizontalVelocity { get; set; }
         /// <summary>
         /// Minimum horizontal velocity
         /// </summary>
-        [XmlElement("minHorizontalVelocity")]
         public float MinHorizontalVelocity { get; set; }
 
         /// <summary>
         /// Maximum vertical velocity
         /// </summary>
-        [XmlElement("maxVerticalVelocity")]
         public float MaxVerticalVelocity { get; set; }
         /// <summary>
         /// Minimum vertical velocity
         /// </summary>
-        [XmlElement("minVerticalVelocity")]
         public float MinVerticalVelocity { get; set; }
 
         /// <summary>
         /// Gravity
         /// </summary>
-        [XmlIgnore]
         public Direction3 Gravity { get; set; }
-        /// <summary>
-        /// Gravity vector
-        /// </summary>
-        [XmlElement("gravity")]
-        [JsonIgnore]
-        public string GravityText
-        {
-            get
-            {
-                return Gravity;
-            }
-            set
-            {
-                Gravity = value;
-            }
-        }
 
         /// <summary>
         /// Velocity at end
         /// </summary>
-        [XmlElement("endVelocity")]
         public float EndVelocity { get; set; }
 
         /// <summary>
         /// Minimum color variation
         /// </summary>
-        [XmlIgnore]
-        public Color MinColor { get; set; }
-        /// <summary>
-        /// Minimum color variation
-        /// </summary>
-        [XmlElement("minColor")]
-        [JsonIgnore]
-        public string MinColorText
-        {
-            get
-            {
-                return ReadColor(MinColor);
-            }
-            set
-            {
-                MinColor = WriteColor(value, DefaultMinColor);
-            }
-        }
+        public ColorRGBA MinColor { get; set; }
         /// <summary>
         /// Maximum color variation
         /// </summary>
-        [XmlIgnore]
-        public Color MaxColor { get; set; }
-        /// <summary>
-        /// Maximum color variation
-        /// </summary>
-        [XmlElement("maxColor")]
-        [JsonIgnore]
-        public string MaxColorText
-        {
-            get
-            {
-                return ReadColor(MaxColor);
-            }
-            set
-            {
-                MaxColor = WriteColor(value, DefaultMaxColor);
-            }
-        }
+        public ColorRGBA MaxColor { get; set; }
 
         /// <summary>
         /// Minimum rotation speed
         /// </summary>
-        [XmlElement("minRotateSpeed")]
         public float MinRotateSpeed { get; set; }
         /// <summary>
         /// Maximum rotation speed
         /// </summary>
-        [XmlElement("maxRotateSpeed")]
         public float MaxRotateSpeed { get; set; }
 
         /// <summary>
         /// Minimum starting size
         /// </summary>
-        [XmlElement("minStartSize")]
         public float MinStartSize { get; set; }
         /// <summary>
         /// Maximum starting size
         /// </summary>
-        [XmlElement("maxStartSize")]
         public float MaxStartSize { get; set; }
 
         /// <summary>
         /// Minimum ending size
         /// </summary>
-        [XmlElement("minEndSize")]
         public float MinEndSize { get; set; }
         /// <summary>
         /// Maximum ending size
         /// </summary>
-        [XmlElement("maxEndSize")]
         public float MaxEndSize { get; set; }
 
         /// <summary>
         /// Gets or sets whether the blend mode
         /// </summary>
-        [XmlElement("blendMode")]
         [JsonConverter(typeof(StringEnumConverter))]
         public BlendModes BlendMode { get; set; }
 
         /// <summary>
         /// Emitter velocity sensitivity
         /// </summary>
-        [XmlElement("emitterVelocitySensitivity")]
         public float EmitterVelocitySensitivity { get; set; }
 
         /// <summary>

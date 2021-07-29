@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 namespace Engine.Content
 {
+    using Engine.Content.Persistence;
+
     /// <summary>
     /// Animation content loader interface
     /// </summary>

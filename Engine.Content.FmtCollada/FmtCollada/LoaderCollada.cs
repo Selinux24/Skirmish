@@ -11,6 +11,7 @@ namespace Engine.Content.FmtCollada
     using Engine.Collada.FX;
     using Engine.Collada.Types;
     using Engine.Common;
+    using Engine.Content.Persistence;
 
     /// <summary>
     /// Loader for collada

@@ -4,6 +4,8 @@ using Engine.Audio;
 using Engine.Common;
 using Engine.Content;
 using Engine.Content.FmtObj;
+using Engine.Modular;
+using Engine.Modular.Persistence;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
 using Engine.PostProcessing;

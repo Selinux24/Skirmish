@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace Engine.Content.OnePageDungeon
 {
+    using Engine.Modular;
+    using Engine.Modular.Persistence;
+
     public class DungeonAssetConfiguration
     {
         private Random randomGenerator = Helper.RandomGenerator;

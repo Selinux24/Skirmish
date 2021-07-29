@@ -8,6 +8,8 @@ using System.Text;
 
 namespace Engine.Content.FmtObj
 {
+    using Engine.Content.Persistence;
+
     /// <summary>
     /// Loader for .obj files
     /// </summary>

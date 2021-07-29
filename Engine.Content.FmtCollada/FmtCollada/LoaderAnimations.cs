@@ -8,6 +8,7 @@ namespace Engine.Content.FmtCollada
     using Engine.Animation;
     using Engine.Collada;
     using Engine.Collada.Types;
+    using Engine.Content.Persistence;
 
     /// <summary>
     /// Animation loader

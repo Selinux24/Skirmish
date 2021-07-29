@@ -4,6 +4,7 @@ using System;
 namespace Engine
 {
     using Engine.Common;
+    using Engine.Content.Persistence;
 
     /// <summary>
     /// Particle emitter

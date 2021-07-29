@@ -4,6 +4,7 @@ using System.IO;
 namespace Engine.Content
 {
     using Engine.Common;
+    using Engine.Content.Persistence;
 
     /// <summary>
     /// Content description
@@ -124,7 +125,7 @@ namespace Engine.Content
                 string directory = Path.Combine(ContentFolder ?? "", Path.GetDirectoryName(ContentFilename));
                 string resource = Path.Combine(directory, fileName);
                 var contentDesc = SerializationHelper.DeserializeFromFile<ContentDataFile>(resource);
-                
+
                 var loader = GameResourceManager.GetLoaderForFile(contentDesc.ModelFileName);
                 return loader.Load(directory, contentDesc);
             }

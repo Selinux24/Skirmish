@@ -5,16 +5,19 @@ using System.Linq;
 
 namespace Engine.Content.OnePageDungeon
 {
+    using Engine.Modular;
+    using Engine.Modular.Persistence;
+
     public static class DungeonCreator
     {
-        public static ModularSceneryAssetConfiguration CreateAssets(Dungeon dungeon, DungeonAssetConfiguration configuration)
+        public static Configuration CreateAssets(Dungeon dungeon, DungeonAssetConfiguration configuration)
         {
-            ModularSceneryAssetConfiguration assets = new ModularSceneryAssetConfiguration
+            Configuration assets = new Configuration
             {
                 MaintainTextureDirection = true
             };
 
-            List<ModularSceneryAssetDescription> assetList = new List<ModularSceneryAssetDescription>();
+            List<ModularSceneryAsset> assetList = new List<ModularSceneryAsset>();
 
             assetList.AddRange(CreateRooms(dungeon, configuration));
 
@@ -111,9 +114,9 @@ namespace Engine.Content.OnePageDungeon
             return cDirs;
         }
 
-        private static IEnumerable<ModularSceneryAssetDescription> CreateRooms(Dungeon dungeon, DungeonAssetConfiguration configuration)
+        private static IEnumerable<ModularSceneryAsset> CreateRooms(Dungeon dungeon, DungeonAssetConfiguration configuration)
         {
-            List<ModularSceneryAssetDescription> assetList = new List<ModularSceneryAssetDescription>();
+            List<ModularSceneryAsset> assetList = new List<ModularSceneryAsset>();
 
             var walls = MarkWalls(dungeon);
 
@@ -125,7 +128,7 @@ namespace Engine.Content.OnePageDungeon
                 roomAssets.AddRange(CreateRoom(rect, walls, configuration));
                 roomAssets.AddRange(CreateColumns(rect, dungeon, configuration));
 
-                ModularSceneryAssetDescription room = new ModularSceneryAssetDescription()
+                ModularSceneryAsset room = new ModularSceneryAsset()
                 {
                     Name = $"{rectIndex++}",
                 };
@@ -195,7 +198,7 @@ namespace Engine.Content.OnePageDungeon
                     AssetName = configuration.GetRandonWall(),
                     Type = ModularSceneryAssetTypes.Wall,
                     Position = new Vector3(-vx, 0, vz - (configuration.PositionDelta * 0.5f)),
-                    RotationText = "Rot270",
+                    Rotation = "Rot270",
                 };
 
                 references.Add(wall);
@@ -208,7 +211,7 @@ namespace Engine.Content.OnePageDungeon
                     AssetName = configuration.GetRandonWall(),
                     Type = ModularSceneryAssetTypes.Wall,
                     Position = new Vector3(-vx, 0, vz + (configuration.PositionDelta * 0.5f)),
-                    RotationText = "Rot90",
+                    Rotation = "Rot90",
                 };
 
                 references.Add(wall);
@@ -233,7 +236,7 @@ namespace Engine.Content.OnePageDungeon
                     AssetName = configuration.GetRandonWall(),
                     Type = ModularSceneryAssetTypes.Wall,
                     Position = new Vector3(-vx + (configuration.PositionDelta * 0.5f), 0, vz),
-                    RotationText = "Rot180",
+                    Rotation = "Rot180",
                 };
 
                 references.Add(wall);
@@ -242,9 +245,9 @@ namespace Engine.Content.OnePageDungeon
             return references.ToArray();
         }
 
-        private static IEnumerable<ModularSceneryAssetDescriptionConnection> CreateConnections(Rect rect, Dungeon dungeon, DungeonAssetConfiguration configuration)
+        private static IEnumerable<ModularSceneryAssetConnection> CreateConnections(Rect rect, Dungeon dungeon, DungeonAssetConfiguration configuration)
         {
-            List<ModularSceneryAssetDescriptionConnection> res = new List<ModularSceneryAssetDescriptionConnection>();
+            List<ModularSceneryAssetConnection> res = new List<ModularSceneryAssetConnection>();
 
             var roomRect = rect.GetRectangle();
             roomRect.Inflate(1, 1);
@@ -271,9 +274,9 @@ namespace Engine.Content.OnePageDungeon
             return res.ToArray();
         }
 
-        private static IEnumerable<ModularSceneryAssetDescriptionConnection> CreateConnection(Rect one, Rect two, DungeonAssetConfiguration configuration)
+        private static IEnumerable<ModularSceneryAssetConnection> CreateConnection(Rect one, Rect two, DungeonAssetConfiguration configuration)
         {
-            List<ModularSceneryAssetDescriptionConnection> connections = new List<ModularSceneryAssetDescriptionConnection>();
+            List<ModularSceneryAssetConnection> connections = new List<ModularSceneryAssetConnection>();
 
             for (int x = 0; x < one.W; x++)
             {
@@ -289,9 +292,9 @@ namespace Engine.Content.OnePageDungeon
             return connections.ToArray();
         }
 
-        private static IEnumerable<ModularSceneryAssetDescriptionConnection> CreateConnection(Rect rect, RectangleF two, DungeonAssetConfiguration configuration)
+        private static IEnumerable<ModularSceneryAssetConnection> CreateConnection(Rect rect, RectangleF two, DungeonAssetConfiguration configuration)
         {
-            List<ModularSceneryAssetDescriptionConnection> connections = new List<ModularSceneryAssetDescriptionConnection>();
+            List<ModularSceneryAssetConnection> connections = new List<ModularSceneryAssetConnection>();
 
             float tvx = two.X * configuration.PositionDelta;
             float tvz = two.Y * configuration.PositionDelta;
@@ -315,22 +318,22 @@ namespace Engine.Content.OnePageDungeon
                     if (two.Intersects(r1))
                     {
                         //Connection
-                        connections.Add(new ModularSceneryAssetDescriptionConnection()
+                        connections.Add(new ModularSceneryAssetConnection()
                         {
                             Position = tposition,
                             Direction = -Vector3.Normalize(position - tposition),
-                            Type = ModularSceneryAssetDescriptionConnectionTypes.Open,
+                            Type = ModularSceneryAssetConnectionTypes.Open,
                         });
                     }
 
                     if (two.Intersects(r2))
                     {
                         //Connection
-                        connections.Add(new ModularSceneryAssetDescriptionConnection()
+                        connections.Add(new ModularSceneryAssetConnection()
                         {
                             Position = tposition,
                             Direction = Vector3.Normalize(position - tposition),
-                            Type = ModularSceneryAssetDescriptionConnectionTypes.Open,
+                            Type = ModularSceneryAssetConnectionTypes.Open,
                         });
                     }
                 }
@@ -450,7 +453,7 @@ namespace Engine.Content.OnePageDungeon
                     Name = "door",
                     Type = ModularSceneryObjectTypes.Door,
                     Position = new Vector3(-vx, 0, vz) - (dir * (configuration.PositionDelta * 0.5f)),
-                    RotationText = rot,
+                    Rotation = rot,
                     AnimationPlans = configuration.DoorAnimationPlans?.ToArray(),
                     Actions = configuration.DoorActions?.ToArray(),
                     States = configuration.DoorStates?.ToArray(),
@@ -464,7 +467,7 @@ namespace Engine.Content.OnePageDungeon
                         AssetName = asset,
                         Type = ModularSceneryObjectTypes.Default,
                         Position = new Vector3(-vx, 0, vz) - (dir * (configuration.PositionDelta * 0.5f)),
-                        RotationText = rot,
+                        Rotation = rot,
                     };
                     objs.Add(obj2);
                 }

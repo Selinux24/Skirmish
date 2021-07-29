@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Engine.Content
 {
-    using Engine.Animation;
+    using Engine.Content.Persistence;
     using Engine.Common;
 
     /// <summary>

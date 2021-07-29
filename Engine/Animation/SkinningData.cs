@@ -5,6 +5,8 @@ using System.Linq;
 
 namespace Engine.Animation
 {
+    using Engine.Content.Persistence;
+
     /// <summary>
     /// Skinning data
     /// </summary>
