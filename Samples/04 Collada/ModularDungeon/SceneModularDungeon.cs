@@ -311,7 +311,7 @@ namespace Collada.ModularDungeon
             pbLevels = await this.AddComponentUIProgressBar("PbLevels", UIProgressBarDescription.Default(Color.Transparent, Color.Green));
             pbLevels.Visible = false;
 
-            messages = await this.AddComponentUITextArea("Messages", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 48), TextForeColor = Color.Red, TextShadowColor = Color.DarkRed }, LayerUI + 1);
+            messages = await this.AddComponentUITextArea("Messages", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Viner Hand ITC, Microsoft Sans Serif", 48), TextForeColor = Color.Red, TextShadowColor = Color.DarkRed }, LayerUI + 1);
             messages.Text = null;
             messages.SetPosition(new Vector2(0, 0));
             messages.Visible = false;
