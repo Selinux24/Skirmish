@@ -1,0 +1,196 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProjectGuid>{F366139B-499B-4557-B1E6-3E74A8F64F74}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Shaders</RootNamespace>
+    <AssemblyName>Shaders</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+    <SonarQubeTestProject>False</SonarQubeTestProject>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>Shaders.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
+    <CodeAnalysisRuleSet>
+    </CodeAnalysisRuleSet>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>
+    </CodeAnalysisRuleSet>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders.snk" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Lib\IncCommon.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Lib\IncHelpers.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Lib\IncLights.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Lib\IncMaterials.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Lib\IncPostProcessing.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Lib\IncScattering.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Lib\IncTerrain.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Lib\IncVertexFormats.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Resources\ShaderDefaultBasic.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Resources\ShaderDefaultBillboard.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Resources\ShaderDefaultClouds.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Resources\ShaderDefaultCPUParticles.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Resources\ShaderDefaultCubemap.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Resources\ShaderDefaultDecal.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Resources\ShaderDefaultFoliage.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Resources\ShaderDefaultFont.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Resources\ShaderDefaultGPUParticles.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Resources\ShaderDefaultSkyScattering.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Resources\ShaderDefaultSprite.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Resources\ShaderDefaultTerrain.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Resources\ShaderDefaultTexture.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Resources\ShaderDefaultWater.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Resources\ShaderDeferredBasic.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Resources\ShaderDeferredComposer.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Resources\ShaderDeferredTerrain.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Resources\ShaderLightCapsule.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Resources\ShaderLightDirectional.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Resources\ShaderLightEmissive.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Resources\ShaderLightPoint.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Resources\ShaderLightSpot.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Resources\ShaderNull.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Resources\ShaderPostProcess.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Resources\ShaderShadowBasic.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Resources\ShaderShadowBillboard.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Resources\ShaderShadowCascade.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Resources\ShaderShadowFoliage.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Resources\ShaderShadowPoints.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Resources\ShaderShadowTerrain.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.HLSL.CSharpVB">
+      <Version>1.0.2</Version>
+    </PackageReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>del /Q /F "$(SolutionDir)Engine\Resources\*.*"
+mkdir "$(SolutionDir)Engine\Resources"
+copy /Y "$(ProjectDir)Resources\*.fx" "$(SolutionDir)Engine\Resources\*.fx"
+copy /Y "$(TargetDir)Resources\*.cso" "$(SolutionDir)Engine\Resources\*.cso"</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

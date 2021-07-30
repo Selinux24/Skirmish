@@ -3,7 +3,7 @@
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProjectGuid>{28391C85-9275-4E62-A159-3C67DFADC428}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -30,55 +30,6 @@
     <SonarQubeExclude>True</SonarQubeExclude>
     <SonarQubeTestProject>False</SonarQubeTestProject>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <CodeAnalysisRuleSet>
-    </CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <UseVSHostingProcess>true</UseVSHostingProcess>
-    <CodeAnalysisRuleSet>
-    </CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x64\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>
-    </CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
-    <UseVSHostingProcess>true</UseVSHostingProcess>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>bin\x64\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>
-    </CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\x86\Debug\</OutputPath>
@@ -90,6 +41,7 @@
     </CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
     <UseVSHostingProcess>true</UseVSHostingProcess>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <OutputPath>bin\x86\Release\</OutputPath>
@@ -101,6 +53,7 @@
     <CodeAnalysisRuleSet>
     </CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>
@@ -157,8 +110,8 @@
     <None Include="Blender\Furniture\Container\ikube azul.png" />
     <None Include="Blender\Buildings\Watch Tower\Wood.jpg" />
     <None Include="Blender\Buildings\Affgan\afghan_building.jpg" />
-    <Content Include="Blender\Characters\Rat\rat_run.png" />
-    <Content Include="Blender\Characters\Rat\Rat_uv.png" />
+    <None Include="Blender\Characters\Rat\rat_run.png" />
+    <None Include="Blender\Characters\Rat\Rat_uv.png" />
     <None Include="Blender\Environment\Trees\Tree0\Brown_Bark_1_diffuse.PNG" />
     <None Include="Blender\Environment\Trees\Tree0\Dead_Branch_diffuse.PNG" />
     <None Include="Blender\Environment\Trees\Tree1\Brown_Bark_1_diffuse.PNG" />
@@ -312,10 +265,10 @@
     <Content Include="Collada\Buildings\Watch Tower\Watch Tower.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <None Include="Collada\Characters\Human2\Human2.json">
+    <Content Include="Collada\Characters\Human2\Human2.json">
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    </Content>
     <Content Include="Collada\Characters\Human2\Human2.xml">
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -442,7 +395,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Furniture\Torch\torch.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\Clif\clif.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -935,10 +888,10 @@
     <Content Include="Collada\Scenery\TwoLevels\two_levels.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <None Include="Collada\Characters\Rat\Rat.json">
+    <Content Include="Collada\Characters\Rat\Rat.json">
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    </Content>
     <Content Include="Collada\Characters\Soldier\soldier_anim2.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -973,7 +926,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Furniture\Torch\torch.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\Clif\clif.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -987,9 +940,9 @@
     <Content Include="Collada\Scenery\TwoLevels\two_levels.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <None Include="Collada\UI\Background\SkyPlane.json">
+    <Content Include="Collada\UI\Background\SkyPlane.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    </Content>
     <Content Include="Collada\Vehicles\Bradley\Bradley.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -1085,7 +1038,6 @@
     <None Include="Blender\Scenery\TwoLevels\terrain_nmap.png" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

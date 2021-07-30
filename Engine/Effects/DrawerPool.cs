@@ -121,35 +121,35 @@ namespace Engine.Effects
         /// <param name="graphics">Device</param>
         public static void Initialize(Graphics graphics)
         {
-            EffectNull = CreateEffect<EffectNull>(graphics, Resources.ShaderNullFxo, Resources.ShaderNullFx);
+            EffectNull = CreateEffect<EffectNull>(graphics, Resources.ShaderNullCso, Resources.ShaderNullFx);
 
-            EffectDefaultSprite = CreateEffect<EffectDefaultSprite>(graphics, Resources.ShaderDefaultSpriteFxo, Resources.ShaderDefaultSpriteFxo);
-            EffectDefaultFont = CreateEffect<EffectDefaultFont>(graphics, Resources.ShaderDefaultFontFxo, Resources.ShaderDefaultFontFxo);
-            EffectDefaultCubemap = CreateEffect<EffectDefaultCubemap>(graphics, Resources.ShaderDefaultCubemapFxo, Resources.ShaderDefaultCubemapFx);
-            EffectDefaultTexture = CreateEffect<EffectDefaultTexture>(graphics, Resources.ShaderDefaultTextureFxo, Resources.ShaderDefaultTextureFx);
-            EffectDefaultBillboard = CreateEffect<EffectDefaultBillboard>(graphics, Resources.ShaderDefaultBillboardFxo, Resources.ShaderDefaultBillboardFx);
-            EffectDefaultFoliage = CreateEffect<EffectDefaultFoliage>(graphics, Resources.ShaderDefaultFoliageFxo, Resources.ShaderDefaultFoliageFx);
-            EffectDefaultClouds = CreateEffect<EffectDefaultClouds>(graphics, Resources.ShaderDefaultCloudsFxo, Resources.ShaderDefaultCloudsFx);
-            EffectDefaultBasic = CreateEffect<EffectDefaultBasic>(graphics, Resources.ShaderDefaultBasicFxo, Resources.ShaderDefaultBasicFx);
-            EffectDefaultTerrain = CreateEffect<EffectDefaultTerrain>(graphics, Resources.ShaderDefaultTerrainFxo, Resources.ShaderDefaultTerrainFx);
-            EffectDefaultSkyScattering = CreateEffect<EffectDefaultSkyScattering>(graphics, Resources.ShaderDefaultSkyScatteringFxo, Resources.ShaderDefaultSkyScatteringFx);
-            EffectDefaultCPUParticles = CreateEffect<EffectDefaultCpuParticles>(graphics, Resources.ShaderDefaultCPUParticlesFxo, Resources.ShaderDefaultCPUParticlesFx);
-            EffectDefaultGPUParticles = CreateEffect<EffectDefaultGpuParticles>(graphics, Resources.ShaderDefaultGPUParticlesFxo, Resources.ShaderDefaultGPUParticlesFx);
-            EffectDefaultWater = CreateEffect<EffectDefaultWater>(graphics, Resources.ShaderDefaultWaterFxo, Resources.ShaderDefaultWaterFx);
-            EffectDefaultDecals = CreateEffect<EffectDefaultDecals>(graphics, Resources.ShaderDefaultDecalsFxo, Resources.ShaderDefaultDecalsFx);
+            EffectDefaultSprite = CreateEffect<EffectDefaultSprite>(graphics, Resources.ShaderDefaultSpriteCso, Resources.ShaderDefaultSpriteCso);
+            EffectDefaultFont = CreateEffect<EffectDefaultFont>(graphics, Resources.ShaderDefaultFontCso, Resources.ShaderDefaultFontCso);
+            EffectDefaultCubemap = CreateEffect<EffectDefaultCubemap>(graphics, Resources.ShaderDefaultCubemapCso, Resources.ShaderDefaultCubemapFx);
+            EffectDefaultTexture = CreateEffect<EffectDefaultTexture>(graphics, Resources.ShaderDefaultTextureCso, Resources.ShaderDefaultTextureFx);
+            EffectDefaultBillboard = CreateEffect<EffectDefaultBillboard>(graphics, Resources.ShaderDefaultBillboardCso, Resources.ShaderDefaultBillboardFx);
+            EffectDefaultFoliage = CreateEffect<EffectDefaultFoliage>(graphics, Resources.ShaderDefaultFoliageCso, Resources.ShaderDefaultFoliageFx);
+            EffectDefaultClouds = CreateEffect<EffectDefaultClouds>(graphics, Resources.ShaderDefaultCloudsCso, Resources.ShaderDefaultCloudsFx);
+            EffectDefaultBasic = CreateEffect<EffectDefaultBasic>(graphics, Resources.ShaderDefaultBasicCso, Resources.ShaderDefaultBasicFx);
+            EffectDefaultTerrain = CreateEffect<EffectDefaultTerrain>(graphics, Resources.ShaderDefaultTerrainCso, Resources.ShaderDefaultTerrainFx);
+            EffectDefaultSkyScattering = CreateEffect<EffectDefaultSkyScattering>(graphics, Resources.ShaderDefaultSkyScatteringCso, Resources.ShaderDefaultSkyScatteringFx);
+            EffectDefaultCPUParticles = CreateEffect<EffectDefaultCpuParticles>(graphics, Resources.ShaderDefaultCPUParticlesCso, Resources.ShaderDefaultCPUParticlesFx);
+            EffectDefaultGPUParticles = CreateEffect<EffectDefaultGpuParticles>(graphics, Resources.ShaderDefaultGPUParticlesCso, Resources.ShaderDefaultGPUParticlesFx);
+            EffectDefaultWater = CreateEffect<EffectDefaultWater>(graphics, Resources.ShaderDefaultWaterCso, Resources.ShaderDefaultWaterFx);
+            EffectDefaultDecals = CreateEffect<EffectDefaultDecals>(graphics, Resources.ShaderDefaultDecalsCso, Resources.ShaderDefaultDecalsFx);
 
-            EffectDeferredComposer = CreateEffect<EffectDeferredComposer>(graphics, Resources.ShaderDeferredComposerFxo, Resources.ShaderDeferredComposerFx);
-            EffectDeferredBasic = CreateEffect<EffectDeferredBasic>(graphics, Resources.ShaderDeferredBasicFxo, Resources.ShaderDeferredBasicFxo);
-            EffectDeferredTerrain = CreateEffect<EffectDeferredTerrain>(graphics, Resources.ShaderDeferredTerrainFxo, Resources.ShaderDeferredTerrainFx);
+            EffectDeferredComposer = CreateEffect<EffectDeferredComposer>(graphics, Resources.ShaderDeferredComposerCso, Resources.ShaderDeferredComposerFx);
+            EffectDeferredBasic = CreateEffect<EffectDeferredBasic>(graphics, Resources.ShaderDeferredBasicCso, Resources.ShaderDeferredBasicCso);
+            EffectDeferredTerrain = CreateEffect<EffectDeferredTerrain>(graphics, Resources.ShaderDeferredTerrainCso, Resources.ShaderDeferredTerrainFx);
 
-            EffectShadowBillboard = CreateEffect<EffectShadowBillboard>(graphics, Resources.ShaderShadowBillboardFxo, Resources.ShaderShadowBillboardFx);
-            EffectShadowFoliage = CreateEffect<EffectShadowFoliage>(graphics, Resources.ShaderShadowFoliageFxo, Resources.ShaderShadowFoliageFx);
-            EffectShadowBasic = CreateEffect<EffectShadowBasic>(graphics, Resources.ShaderShadowBasicFxo, Resources.ShaderShadowBasicFx);
-            EffectShadowTerrain = CreateEffect<EffectShadowTerrain>(graphics, Resources.ShaderShadowTerrainFxo, Resources.ShaderShadowTerrainFx);
-            EffectShadowPoint = CreateEffect<EffectShadowPoint>(graphics, Resources.ShaderShadowPointFxo, Resources.ShaderShadowPointFx);
-            EffectShadowCascade = CreateEffect<EffectShadowCascade>(graphics, Resources.ShaderShadowCascadeFxo, Resources.ShaderShadowCascadeFx);
+            EffectShadowBillboard = CreateEffect<EffectShadowBillboard>(graphics, Resources.ShaderShadowBillboardCso, Resources.ShaderShadowBillboardFx);
+            EffectShadowFoliage = CreateEffect<EffectShadowFoliage>(graphics, Resources.ShaderShadowFoliageCso, Resources.ShaderShadowFoliageFx);
+            EffectShadowBasic = CreateEffect<EffectShadowBasic>(graphics, Resources.ShaderShadowBasicCso, Resources.ShaderShadowBasicFx);
+            EffectShadowTerrain = CreateEffect<EffectShadowTerrain>(graphics, Resources.ShaderShadowTerrainCso, Resources.ShaderShadowTerrainFx);
+            EffectShadowPoint = CreateEffect<EffectShadowPoint>(graphics, Resources.ShaderShadowPointCso, Resources.ShaderShadowPointFx);
+            EffectShadowCascade = CreateEffect<EffectShadowCascade>(graphics, Resources.ShaderShadowCascadeCso, Resources.ShaderShadowCascadeFx);
 
-            EffectPostProcess = CreateEffect<EffectPostProcess>(graphics, Resources.ShaderPostProcessFxo, Resources.ShaderPostProcessFx);
+            EffectPostProcess = CreateEffect<EffectPostProcess>(graphics, Resources.ShaderPostProcessCso, Resources.ShaderPostProcessFx);
         }
         /// <summary>
         /// Dispose of used resources
@@ -217,12 +217,12 @@ namespace Engine.Effects
         /// </summary>
         /// <typeparam name="T">Effect type</typeparam>
         /// <param name="graphics">Graphics device</param>
-        /// <param name="resFxo">Compiled resource</param>
+        /// <param name="resCso">Compiled resource</param>
         /// <param name="resFx">Source code resource</param>
         /// <returns>Returns the new generated effect instance</returns>
-        private static T CreateEffect<T>(Graphics graphics, byte[] resFxo, byte[] resFx) where T : Drawer
+        private static T CreateEffect<T>(Graphics graphics, byte[] resCso, byte[] resFx) where T : Drawer
         {
-            var res = resFxo ?? resFx;
+            var res = resCso ?? resFx;
 
             var effect = (T)Activator.CreateInstance(typeof(T), graphics, res, false);
 

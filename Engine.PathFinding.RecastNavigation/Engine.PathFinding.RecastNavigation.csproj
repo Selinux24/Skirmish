@@ -119,12 +119,6 @@
     <AssemblyOriginatorKeyFile>Engine.PathFinding.RecastNavigation.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="SharpDX, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpDX.4.2.0\lib\net45\SharpDX.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpDX.Mathematics, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpDX.Mathematics.4.2.0\lib\net45\SharpDX.Mathematics.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
   </ItemGroup>
@@ -290,7 +284,6 @@
     </EmbeddedResource>
     <None Include="Engine.PathFinding.RecastNavigation.ruleset" />
     <None Include="Engine.PathFinding.RecastNavigation.snk" />
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="engine.ico" />
@@ -301,7 +294,11 @@
       <Name>Engine</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <PackageReference Include="SharpDX.Mathematics">
+      <Version>4.2.0</Version>
+    </PackageReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

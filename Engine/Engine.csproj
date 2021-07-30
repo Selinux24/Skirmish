@@ -119,42 +119,6 @@
     <AssemblyOriginatorKeyFile>Engine.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpDX, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpDX.4.2.0\lib\net45\SharpDX.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpDX.D3DCompiler, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpDX.D3DCompiler.4.2.0\lib\net45\SharpDX.D3DCompiler.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpDX.Desktop, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpDX.Desktop.4.2.0\lib\net45\SharpDX.Desktop.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpDX.Direct2D1, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpDX.Direct2D1.4.2.0\lib\net45\SharpDX.Direct2D1.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpDX.Direct3D11, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpDX.Direct3D11.4.2.0\lib\net45\SharpDX.Direct3D11.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpDX.Direct3D11.Effects, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpDX.Direct3D11.Effects.4.2.0\lib\net45\SharpDX.Direct3D11.Effects.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpDX.Direct3D9, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpDX.Direct3D9.4.2.0\lib\net45\SharpDX.Direct3D9.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpDX.DXGI, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpDX.DXGI.4.2.0\lib\net45\SharpDX.DXGI.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpDX.Mathematics, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpDX.Mathematics.4.2.0\lib\net45\SharpDX.Mathematics.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpDX.MediaFoundation, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpDX.MediaFoundation.4.2.0\lib\net45\SharpDX.MediaFoundation.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpDX.XAudio2, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpDX.XAudio2.4.2.0\lib\net45\SharpDX.XAudio2.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.IO.Compression" />
@@ -217,7 +181,6 @@
     <Compile Include="Content\IAnimationLoader.cs" />
     <Compile Include="Content\Persistence\Direction3.cs" />
     <Compile Include="Content\Persistence\ColorRgba.cs" />
-    <Compile Include="Content\Persistence\ColorRGBA.cs" />
     <Compile Include="Content\Persistence\ParticleEmitterFile.cs" />
     <Compile Include="Content\Persistence\ParticleSystemFile.cs" />
     <Compile Include="Effects\EffectDefaultTexture.cs" />
@@ -695,77 +658,6 @@
     </EmbeddedResource>
     <None Include="Engine.ruleset" />
     <None Include="Engine.snk" />
-    <None Include="packages.config" />
-    <None Include="Resources\ShaderDefaultClouds.fxo" />
-    <None Include="Resources\ShaderDefaultDecal.fxo" />
-    <None Include="Resources\ShaderDefaultFoliage.fxo" />
-    <None Include="Resources\ShaderDefaultTexture.fxo" />
-    <None Include="Resources\ShaderDefaultWater.fxo" />
-    <None Include="Resources\ShaderLightCapsule.fxo" />
-    <None Include="Resources\ShaderLightDirectional.fxo" />
-    <None Include="Resources\ShaderLightEmissive.fxo" />
-    <None Include="Resources\ShaderLightPoint.fxo" />
-    <None Include="Resources\ShaderLightSpot.fxo" />
-    <None Include="Resources\ShaderPostProcess.fxo" />
-    <None Include="Resources\ShaderShadowBillboard.fxo" />
-    <None Include="Resources\ShaderShadowCascade.fxo" />
-    <None Include="Resources\ShaderShadowFoliage.fxo" />
-    <None Include="Resources\ShaderShadowPoints.fxo" />
-    <None Include="Resources\ShaderShadowTerrain.fxo" />
-    <None Include="Resources\ShaderDeferredTerrain.fxo" />
-    <None Include="Resources\ShaderDefaultBasic.fxo" />
-    <None Include="Resources\ShaderDefaultCPUParticles.fxo" />
-    <None Include="Resources\ShaderDeferredComposer.fxo" />
-    <None Include="Resources\ShaderDefaultBillboard.fxo" />
-    <None Include="Resources\ShaderDefaultCubemap.fxo" />
-    <None Include="Resources\ShaderDefaultFont.fxo" />
-    <None Include="Resources\ShaderDeferredBasic.fxo" />
-    <None Include="Resources\ShaderNull.fxo" />
-    <None Include="Resources\ShaderDefaultGPUParticles.fxo" />
-    <None Include="Resources\ShaderShadowBasic.fxo" />
-    <None Include="Resources\ShaderDefaultSkyScattering.fxo" />
-    <None Include="Resources\ShaderDefaultSprite.fxo" />
-    <None Include="Resources\ShaderDefaultTerrain.fxo" />
-  </ItemGroup>
-  <ItemGroup>
-    <EffectShader Include="Resources\IncVertexFormats.hlsl" />
-    <EffectShader Include="Resources\IncLights.hlsl" />
-    <EffectShader Include="Resources\IncPostProcessing.hlsl" />
-    <EffectShader Include="Resources\IncScattering.hlsl" />
-    <EffectShader Include="Resources\IncHelpers.hlsl" />
-    <EffectShader Include="Resources\IncMaterials.hlsl" />
-    <EffectShader Include="Resources\IncCommon.hlsl" />
-    <EffectShader Include="Resources\IncTerrain.hlsl" />
-    <EffectShader Include="Resources\ShaderPostProcess.fx" />
-    <EffectShader Include="Resources\ShaderShadowBillboard.fx" />
-    <EffectShader Include="Resources\ShaderShadowTerrain.fx" />
-    <EffectShader Include="Resources\ShaderDeferredTerrain.fx" />
-    <EffectShader Include="Resources\ShaderDefaultSkyScattering.fx" />
-    <EffectShader Include="Resources\ShaderDefaultCPUParticles.fx" />
-    <EffectShader Include="Resources\ShaderDeferredBasic.fx" />
-    <EffectShader Include="Resources\ShaderShadowBasic.fx" />
-    <EffectShader Include="Resources\ShaderDefaultBasic.fx" />
-    <EffectShader Include="Resources\ShaderDefaultBillboard.fx" />
-    <EffectShader Include="Resources\ShaderDefaultFont.fx" />
-    <EffectShader Include="Resources\ShaderDefaultCubemap.fx" />
-    <EffectShader Include="Resources\ShaderDefaultGPUParticles.fx" />
-    <EffectShader Include="Resources\ShaderDefaultFoliage.fx" />
-    <EffectShader Include="Resources\ShaderShadowFoliage.fx" />
-    <EffectShader Include="Resources\ShaderDefaultWater.fx" />
-    <EffectShader Include="Resources\ShaderShadowPoints.fx" />
-    <EffectShader Include="Resources\ShaderLightDirectional.fx" />
-    <EffectShader Include="Resources\ShaderLightPoint.fx" />
-    <EffectShader Include="Resources\ShaderLightSpot.fx" />
-    <EffectShader Include="Resources\ShaderLightCapsule.fx" />
-    <EffectShader Include="Resources\ShaderLightEmissive.fx" />
-    <EffectShader Include="Resources\ShaderDefaultDecal.fx" />
-    <EffectShader Include="Resources\ShaderDefaultTexture.fx" />
-    <EffectShader Include="Resources\ShaderShadowCascade.fx" />
-    <EffectShader Include="Resources\ShaderDeferredComposer.fx" />
-    <EffectShader Include="Resources\ShaderNull.fx" />
-    <EffectShader Include="Resources\ShaderDefaultSprite.fx" />
-    <EffectShader Include="Resources\ShaderDefaultTerrain.fx" />
-    <EffectShader Include="Resources\ShaderDefaultClouds.fx" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="engine.ico" />
@@ -782,15 +674,27 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>13.0.1</Version>
+    </PackageReference>
+    <PackageReference Include="SharpDX.Desktop">
+      <Version>4.2.0</Version>
+    </PackageReference>
+    <PackageReference Include="SharpDX.Direct2D1">
+      <Version>4.2.0</Version>
+    </PackageReference>
+    <PackageReference Include="SharpDX.Direct3D11.Effects">
+      <Version>4.2.0</Version>
+    </PackageReference>
+    <PackageReference Include="SharpDX.MediaFoundation">
+      <Version>4.2.0</Version>
+    </PackageReference>
+    <PackageReference Include="SharpDX.XAudio2">
+      <Version>4.2.0</Version>
+    </PackageReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\packages\Microsoft.HLSL.CSharpVB.1.0.2\build\Microsoft.HLSL.CSharpVB.targets" Condition="Exists('..\packages\Microsoft.HLSL.CSharpVB.1.0.2\build\Microsoft.HLSL.CSharpVB.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>Este proyecto hace referencia a los paquetes NuGet que faltan en este equipo. Use la restauración de paquetes NuGet para descargarlos. Para obtener más información, consulte http://go.microsoft.com/fwlink/?LinkID=322105. El archivo que falta es {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Microsoft.HLSL.CSharpVB.1.0.2\build\Microsoft.HLSL.CSharpVB.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.HLSL.CSharpVB.1.0.2\build\Microsoft.HLSL.CSharpVB.targets'))" />
-  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
