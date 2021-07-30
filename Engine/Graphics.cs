@@ -435,7 +435,9 @@ namespace Engine
 #endif
             using (var factory = tmpFactory.QueryInterface<Factory5>())
             {
-                using (var tmpAdapter = factory.GetAdapter1(0))
+                int adapterIndex = SelectBestAdapter(factory);
+
+                using (var tmpAdapter = factory.GetAdapter1(adapterIndex))
                 using (var adapter = tmpAdapter.QueryInterface<Adapter4>())
                 {
                     DeviceDescription = string.Format("{0}", adapter.Description2.Description);
@@ -509,6 +511,34 @@ namespace Engine
 
             #endregion
         }
+        /// <summary>
+        /// Selects the best adapter based in dedicated video memory
+        /// </summary>
+        /// <param name="factory">Factory</param>
+        /// <returns>Returns the best adapter index</returns>
+        private int SelectBestAdapter(Factory5 factory)
+        {
+            int bestIndex = 0;
+
+            int adapterCount = factory.GetAdapterCount1();
+
+            PointerSize bestSize = 0;
+            for (int i = 0; i < adapterCount; i++)
+            {
+                using (var adapter = factory.GetAdapter1(i))
+                {
+                    var size = adapter.Description1.DedicatedVideoMemory;
+                    if (size > bestSize)
+                    {
+                        bestSize = size;
+                        bestIndex = i;
+                    }
+                }
+            }
+
+            return bestIndex;
+        }
+
         /// <summary>
         /// Destructor
         /// </summary>
