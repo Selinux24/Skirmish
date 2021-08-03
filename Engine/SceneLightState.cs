@@ -44,6 +44,6 @@ namespace Engine
         /// <summary>
         /// Parent local transform matrix
         /// </summary>
-        public Matrix4x4 ParentTransform { get; set; }
+        public Matrix4X4 ParentTransform { get; set; }
     }
 }

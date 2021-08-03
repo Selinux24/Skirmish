@@ -288,9 +288,7 @@ namespace Engine
 
             if (!string.IsNullOrEmpty(cubemapState.OwnerId))
             {
-                Owner = Scene.GetComponents()
-                    .Where(c => c.Id == cubemapState.OwnerId)
-                    .FirstOrDefault();
+                Owner = Scene.GetComponents().FirstOrDefault(c => c.Id == cubemapState.OwnerId);
             }
 
             local = cubemapState.Local;

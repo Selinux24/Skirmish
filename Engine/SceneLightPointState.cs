@@ -9,7 +9,7 @@ namespace Engine
         /// <summary>
         /// Initial transform
         /// </summary>
-        public Matrix4x4 InitialTransform { get; set; }
+        public Matrix4X4 InitialTransform { get; set; }
         /// <summary>
         /// Initial radius
         /// </summary>

@@ -328,6 +328,7 @@ namespace Engine
                 while (!patchDictionary.TryAdd(node.Id, patch))
                 {
                     //None
+                    Logger.WriteWarning(nameof(Scenery), $"Error adding {node.Id} node patch.");
                 }
             });
 
@@ -557,11 +558,16 @@ namespace Engine
         /// <returns>Returns the created component</returns>
         public static async Task<Scenery> AddComponentScenery(this Scene scene, string id, string name, GroundDescription description, SceneObjectUsages usage = SceneObjectUsages.Ground, int layer = Scene.LayerDefault)
         {
-            Scenery component = new Scenery(id, name, scene, description);
+            Scenery component = null;
 
-            await component.IntializePatches();
+            await Task.Run(async () =>
+            {
+                component = new Scenery(id, name, scene, description);
 
-            scene.AddComponent(component, usage, layer);
+                await component.IntializePatches();
+
+                scene.AddComponent(component, usage, layer);
+            });
 
             return component;
         }

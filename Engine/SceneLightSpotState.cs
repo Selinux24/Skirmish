@@ -9,7 +9,7 @@ namespace Engine
         /// <summary>
         /// Initial transform
         /// </summary>
-        public Matrix4x4 InitialTransform { get; set; }
+        public Matrix4X4 InitialTransform { get; set; }
         /// <summary>
         /// Initial radius
         /// </summary>
@@ -45,6 +45,6 @@ namespace Engine
         /// <summary>
         /// From light view * projection matrix array
         /// </summary>
-        public Matrix4x4[] FromLightVP { get; set; }
+        public Matrix4X4[] FromLightVP { get; set; }
     }
 }

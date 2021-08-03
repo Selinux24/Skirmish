@@ -632,9 +632,7 @@ namespace Engine
 
             if (!string.IsNullOrEmpty(modelState.OwnerId))
             {
-                Owner = Scene.GetComponents()
-                    .Where(c => c.Id == modelState.OwnerId)
-                    .FirstOrDefault();
+                Owner = Scene.GetComponents().FirstOrDefault(c => c.Id == modelState.OwnerId);
             }
 
             Manipulator?.SetState(modelState.Manipulator);

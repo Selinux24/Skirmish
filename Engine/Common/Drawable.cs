@@ -5,7 +5,7 @@ namespace Engine.Common
     /// <summary>
     /// Drawable object
     /// </summary>
-    public abstract class Drawable : BaseSceneObject, IUpdatable, IDrawable, ICullable, ISceneObject, IDisposable
+    public abstract class Drawable : BaseSceneObject, IUpdatable, IDrawable, ICullable, IDisposable
     {
         /// <summary>
         /// Buffer manager
@@ -13,7 +13,7 @@ namespace Engine.Common
         protected BufferManager BufferManager { get { return Game.BufferManager; } }
 
         /// <inheritdoc/>
-        public virtual bool Visible { get; set; } = true;
+        public virtual bool Visible { get; set; }
         /// <inheritdoc/>
         public virtual bool CastShadow { get; protected set; }
         /// <inheritdoc/>

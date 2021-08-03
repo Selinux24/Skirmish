@@ -426,7 +426,6 @@ namespace Engine
                     {
                         var disposableCmp = internalComponents[i] as IDisposable;
                         disposableCmp?.Dispose();
-                        disposableCmp = null;
 
                         internalComponents[i] = null;
                     }
@@ -712,7 +711,7 @@ namespace Engine
 
             if (internalComponents.Any(c => component.Id == c.Id))
             {
-                throw new ArgumentException($"The specified component id {component.Id} already exists.", nameof(component.Id));
+                throw new EngineException($"The specified component id {component.Id} already exists.");
             }
 
             if (component is IDrawable drawable)
@@ -735,7 +734,7 @@ namespace Engine
                 int i = p1D.CompareTo(p2D);
                 if (i != 0) return i;
 
-                if (p1D == false || p2D == false)
+                if (!p1D || !p2D)
                 {
                     return 0;
                 }
@@ -1396,9 +1395,7 @@ namespace Engine
         /// <returns>Returns the scene volume</returns>
         public IIntersectionVolume GetSceneVolume()
         {
-            var ground = GetComponents<Ground>()
-                .Where(c => c.Usage.HasFlag(SceneObjectUsages.Ground))
-                .FirstOrDefault();
+            var ground = GetComponents<Ground>().FirstOrDefault(c => c.Usage.HasFlag(SceneObjectUsages.Ground));
 
             return ground?.GetCullingVolume();
         }

@@ -11,7 +11,7 @@ namespace Engine
         /// <summary>
         /// Local transform
         /// </summary>
-        public Matrix4x4 Local { get; set; }
+        public Matrix4X4 Local { get; set; }
         /// <summary>
         /// Manipulator
         /// </summary>

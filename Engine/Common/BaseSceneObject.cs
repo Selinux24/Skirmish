@@ -38,18 +38,27 @@ namespace Engine.Common
         /// <param name="description">Description</param>
         protected BaseSceneObject(string id, string name, Scene scene, SceneDrawableDescription description)
         {
-            if (string.IsNullOrEmpty(id))
+            if (string.IsNullOrWhiteSpace(id))
             {
-                throw new ArgumentNullException(nameof(id), $"An id must be specified.");
+                throw new ArgumentNullException(nameof(id), "An id must be specified.");
+            }
+
+            if (scene == null)
+            {
+                throw new ArgumentNullException(nameof(scene), "The scene must be specified");
+            }
+
+            if (description == null)
+            {
+                throw new ArgumentNullException(nameof(description), "The description must be specified");
             }
 
             Id = id;
             Name = name;
+            Scene = scene;
+            Game = scene.Game;
+            Description = description;
             Active = description.StartsActive;
-            Scene = scene ?? throw new ArgumentNullException(nameof(scene));
-            Description = description ?? throw new ArgumentNullException(nameof(description));
-
-            Game = scene?.Game;
         }
 
         /// <inheritdoc/>

@@ -252,7 +252,7 @@ namespace Engine
                 Radius = Radius,
                 Intensity = Intensity,
                 ShadowMapCount = ShadowMapCount,
-                FromLightVP = FromLightVP.Cast<Matrix4x4>().ToArray(),
+                FromLightVP = FromLightVP.Cast<Matrix4X4>().ToArray(),
             };
         }
         /// <inheritdoc/>

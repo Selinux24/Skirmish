@@ -6,16 +6,16 @@ namespace Engine
     /// <summary>
     /// 4x4 matrix
     /// </summary>
-    public struct Matrix4x4 : IEquatable<Matrix4x4>
+    public struct Matrix4X4 : IEquatable<Matrix4X4>
     {
         /// <summary>
         /// A <see cref="Matrix"/> with all of its components set to zero.
         /// </summary>
-        public static readonly Matrix4x4 Zero = new Matrix4x4();
+        public static readonly Matrix4X4 Zero = new Matrix4X4();
         /// <summary>
         /// The identity <see cref="Matrix"/>.
         /// </summary>
-        public static readonly Matrix4x4 Identity = new Matrix4x4() { M11 = 1.0f, M22 = 1.0f, M33 = 1.0f, M44 = 1.0f };
+        public static readonly Matrix4X4 Identity = new Matrix4X4() { M11 = 1.0f, M22 = 1.0f, M33 = 1.0f, M44 = 1.0f };
 
         /// <summary>
         /// Value at row 1 column 1 of the matrix.
@@ -83,10 +83,10 @@ namespace Engine
         public float M44 { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Matrix4x4"/> struct.
+        /// Initializes a new instance of the <see cref="Matrix4X4"/> struct.
         /// </summary>
         /// <param name="value">The value that will be assigned to all components.</param>
-        public Matrix4x4(float value)
+        public Matrix4X4(float value)
         {
             M11 = M12 = M13 = M14 =
             M21 = M22 = M23 = M24 =
@@ -94,42 +94,12 @@ namespace Engine
             M41 = M42 = M43 = M44 = value;
         }
         /// <summary>
-        /// Initializes a new instance of the <see cref="Matrix4x4"/> struct.
-        /// </summary>
-        /// <param name="M11">The value to assign at row 1 column 1 of the matrix.</param>
-        /// <param name="M12">The value to assign at row 1 column 2 of the matrix.</param>
-        /// <param name="M13">The value to assign at row 1 column 3 of the matrix.</param>
-        /// <param name="M14">The value to assign at row 1 column 4 of the matrix.</param>
-        /// <param name="M21">The value to assign at row 2 column 1 of the matrix.</param>
-        /// <param name="M22">The value to assign at row 2 column 2 of the matrix.</param>
-        /// <param name="M23">The value to assign at row 2 column 3 of the matrix.</param>
-        /// <param name="M24">The value to assign at row 2 column 4 of the matrix.</param>
-        /// <param name="M31">The value to assign at row 3 column 1 of the matrix.</param>
-        /// <param name="M32">The value to assign at row 3 column 2 of the matrix.</param>
-        /// <param name="M33">The value to assign at row 3 column 3 of the matrix.</param>
-        /// <param name="M34">The value to assign at row 3 column 4 of the matrix.</param>
-        /// <param name="M41">The value to assign at row 4 column 1 of the matrix.</param>
-        /// <param name="M42">The value to assign at row 4 column 2 of the matrix.</param>
-        /// <param name="M43">The value to assign at row 4 column 3 of the matrix.</param>
-        /// <param name="M44">The value to assign at row 4 column 4 of the matrix.</param>
-        public Matrix4x4(
-            float M11, float M12, float M13, float M14,
-            float M21, float M22, float M23, float M24,
-            float M31, float M32, float M33, float M34,
-            float M41, float M42, float M43, float M44)
-        {
-            this.M11 = M11; this.M12 = M12; this.M13 = M13; this.M14 = M14;
-            this.M21 = M21; this.M22 = M22; this.M23 = M23; this.M24 = M24;
-            this.M31 = M31; this.M32 = M32; this.M33 = M33; this.M34 = M34;
-            this.M41 = M41; this.M42 = M42; this.M43 = M43; this.M44 = M44;
-        }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Matrix4x4"/> struct.
+        /// Initializes a new instance of the <see cref="Matrix4X4"/> struct.
         /// </summary>
         /// <param name="values">The values to assign to the components of the matrix. This must be an array with sixteen elements.</param>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="values"/> is <c>null</c>.</exception>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="values"/> contains more or less than sixteen elements.</exception>
-        public Matrix4x4(float[] values)
+        public Matrix4X4(float[] values)
         {
             if (values == null)
                 throw new ArgumentNullException("values");
@@ -157,7 +127,7 @@ namespace Engine
             M44 = values[15];
         }
 
-        public static implicit operator Matrix(Matrix4x4 value)
+        public static implicit operator Matrix(Matrix4X4 value)
         {
             return new Matrix(
                 value.M11, value.M12, value.M13, value.M14,
@@ -165,9 +135,9 @@ namespace Engine
                 value.M31, value.M32, value.M33, value.M34,
                 value.M41, value.M42, value.M43, value.M44);
         }
-        public static implicit operator Matrix4x4(Matrix value)
+        public static implicit operator Matrix4X4(Matrix value)
         {
-            return new Matrix4x4(
+            return new Matrix4X4(
                 value.M11, value.M12, value.M13, value.M14,
                 value.M21, value.M22, value.M23, value.M24,
                 value.M31, value.M32, value.M33, value.M34,
@@ -175,23 +145,23 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public bool Equals(Matrix4x4 other)
+        public bool Equals(Matrix4X4 other)
         {
             return Equals(ref other);
         }
         /// <inheritdoc/>
         public override bool Equals(object obj)
         {
-            if (!(obj is Matrix4x4))
+            if (!(obj is Matrix4X4))
             {
                 return false;
             }
 
-            Matrix4x4 strongType = (Matrix4x4)obj;
+            Matrix4X4 strongType = (Matrix4X4)obj;
             return Equals(ref strongType);
         }
 
-        public bool Equals(ref Matrix4x4 other)
+        public bool Equals(ref Matrix4X4 other)
         {
             return (
                 MathUtil.NearEqual(other.M11, M11) &&

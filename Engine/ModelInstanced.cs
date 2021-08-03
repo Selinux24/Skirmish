@@ -617,9 +617,7 @@ namespace Engine
 
             if (!string.IsNullOrEmpty(modelInstancedState.OwnerId))
             {
-                Owner = Scene.GetComponents()
-                    .Where(c => c.Id == modelInstancedState.OwnerId)
-                    .FirstOrDefault();
+                Owner = Scene.GetComponents().FirstOrDefault(c => c.Id == modelInstancedState.OwnerId);
             }
 
             MaximumCount = modelInstancedState.MaximumCount;

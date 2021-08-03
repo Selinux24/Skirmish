@@ -114,15 +114,15 @@ namespace Engine
         /// <summary>
         /// Perspective view matrix
         /// </summary>
-        public Matrix4x4 View { get; set; }
+        public Matrix4X4 View { get; set; }
         /// <summary>
         /// Perspective projection matrix
         /// </summary>
-        public Matrix4x4 Projection { get; set; }
+        public Matrix4X4 Projection { get; set; }
         /// <summary>
         /// Camera frustum
         /// </summary>
-        public Matrix4x4 Frustum { get; set; }
+        public Matrix4X4 Frustum { get; set; }
         /// <summary>
         /// Following object id
         /// </summary>
