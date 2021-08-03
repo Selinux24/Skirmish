@@ -5,7 +5,7 @@ namespace Engine
     /// <summary>
     /// Hemispheric light interface
     /// </summary>
-    public interface ISceneLightHemispheric : ISceneLight
+    public interface ISceneLightHemispheric : ISceneLight, IHasGameState
     {
         /// <summary>
         /// Ambient down color

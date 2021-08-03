@@ -5,7 +5,7 @@ namespace Engine.UI
     /// <summary>
     /// User interface control description
     /// </summary>
-    public abstract class UIControlDescription : SceneObjectDescription
+    public abstract class UIControlDescription : SceneDrawableDescription
     {
         /// <summary>
         /// Content path

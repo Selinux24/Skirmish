@@ -4,12 +4,16 @@ namespace Engine
     /// <summary>
     /// Scene object description
     /// </summary>
-    public class SceneObjectDescription
+    public class SceneDrawableDescription
     {
         /// <summary>
         /// The object starts active
         /// </summary>
         public bool StartsActive { get; set; } = true;
+        /// <summary>
+        /// The object starts visible
+        /// </summary>
+        public bool StartsVisible { get; set; } = true;
         /// <summary>
         /// Gets or sets whether the object cast shadow
         /// </summary>

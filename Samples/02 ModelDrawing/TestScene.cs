@@ -74,18 +74,22 @@ namespace ModelDrawing
         }
         private async Task InitializeUI()
         {
-            text = await this.AddComponentUITextArea("Text", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 20), TextForeColor = Color.Yellow, TextShadowColor = Color.OrangeRed }, LayerUI);
+            var textDesc = new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 20), TextForeColor = Color.Yellow, TextShadowColor = Color.OrangeRed };
+            var statisticsDesc = new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 10), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue };
+            var text1Desc = new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 10), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue };
+            var text2Desc = new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 10), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue };
 
-            statistics = await this.AddComponentUITextArea("Statistics", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 10), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, LayerUI);
+            text = await this.AddComponentUITextArea("ui1", "Text", textDesc, LayerUI);
+            statistics = await this.AddComponentUITextArea("ui2", "Statistics", statisticsDesc, LayerUI);
+            text1 = await this.AddComponentUITextArea("ui3", "Text1", text1Desc, LayerUI);
+            text2 = await this.AddComponentUITextArea("ui4", "Text2", text2Desc, LayerUI);
 
-            text1 = await this.AddComponentUITextArea("Text1", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 10), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, LayerUI);
+            var backPanelDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
+            backPanel = await this.AddComponentSprite("ui5", "Backpanel", backPanelDesc, SceneObjectUsages.UI, LayerUI - 1);
 
-            text2 = await this.AddComponentUITextArea("Text2", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 10), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, LayerUI);
-
-            backPanel = await this.AddComponentSprite("Backpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), SceneObjectUsages.UI, LayerUI - 1);
-
-            console = await this.AddComponentUIConsole("Console", UIConsoleDescription.Default(Color.DarkSlateBlue), LayerUI + 1);
-            console.Visible = false;
+            var consoleDesc = UIConsoleDescription.Default(Color.DarkSlateBlue);
+            consoleDesc.StartsVisible = false;
+            console = await this.AddComponentUIConsole("ui6", "Console", consoleDesc, LayerUI + 1);
         }
         private async Task InitializeFloor()
         {
@@ -115,7 +119,7 @@ namespace ModelDrawing
                 Content = ContentDescription.FromContentData(vertices, indices, material),
             };
 
-            await this.AddComponentModel("Floor", desc, SceneObjectUsages.Ground);
+            await this.AddComponentModel("Floor", "Floor", desc, SceneObjectUsages.Ground);
         }
         private async Task InitializeModels()
         {
@@ -133,7 +137,7 @@ namespace ModelDrawing
             pDescriptions.Add("Explosion", pExplosion);
             pDescriptions.Add("SmokeExplosion", pSmokeExplosion);
 
-            pManager = await this.AddComponentParticleManager("ParticleManager", ParticleManagerDescription.Default());
+            pManager = await this.AddComponentParticleManager("ParticleManager", "ParticleManager", ParticleManagerDescription.Default());
         }
         private async Task InitializeParticleVolumeDrawer()
         {
@@ -142,8 +146,7 @@ namespace ModelDrawing
                 Count = 20000,
                 DepthEnabled = true,
             };
-            pManagerLineDrawer = await this.AddComponentPrimitiveListDrawer("DebugParticleDrawer", desc, SceneObjectUsages.None, LayerEffects);
-            pManagerLineDrawer.Visible = true;
+            pManagerLineDrawer = await this.AddComponentPrimitiveListDrawer("DebugParticleDrawer", "DebugParticleDrawer", desc, SceneObjectUsages.None, LayerEffects);
         }
 
         public override void Update(GameTime gameTime)

@@ -2,7 +2,7 @@
 using System;
 using System.Globalization;
 
-namespace Engine.Content.Persistence
+namespace Engine
 {
     /// <summary>
     /// Modular scenery extents helper class
@@ -14,7 +14,7 @@ namespace Engine.Content.Persistence
         /// </summary>
         /// <param name="value">String value</param>
         /// <returns>Returns parsed Position</returns>
-        public static Position3 ReadReservedWordsForPosition(string value)
+        public static Position3 ReadReservedWordsForPosition3(string value)
         {
             if (string.Equals(value, "Zero", StringComparison.OrdinalIgnoreCase))
             {
@@ -34,11 +34,35 @@ namespace Engine.Content.Persistence
             }
         }
         /// <summary>
+        /// Parse value for position reserved words
+        /// </summary>
+        /// <param name="value">String value</param>
+        /// <returns>Returns parsed Position</returns>
+        public static Position4 ReadReservedWordsForPosition4(string value)
+        {
+            if (string.Equals(value, "Zero", StringComparison.OrdinalIgnoreCase))
+            {
+                return Position4.Zero;
+            }
+            else if (string.Equals(value, "Max", StringComparison.OrdinalIgnoreCase))
+            {
+                return new Position4(float.MaxValue);
+            }
+            else if (string.Equals(value, "Min", StringComparison.OrdinalIgnoreCase))
+            {
+                return new Position4(float.MinValue);
+            }
+            else
+            {
+                return Position4.Zero;
+            }
+        }
+        /// <summary>
         /// Parse value for rotation reserved words
         /// </summary>
         /// <param name="value">String value</param>
         /// <returns>Returns parsed rotation</returns>
-        public static RotationQ ReadReservedWordsForRotation(string value)
+        public static RotationQ ReadReservedWordsForRotationQ(string value)
         {
             if (!string.IsNullOrEmpty(value))
             {
@@ -64,7 +88,7 @@ namespace Engine.Content.Persistence
         /// </summary>
         /// <param name="value">String value</param>
         /// <returns>Returns parsed scale</returns>
-        public static Scale3 ReadReservedWordsForScale(string value)
+        public static Scale3 ReadReservedWordsForScale3(string value)
         {
             if (string.Equals(value, "One", StringComparison.OrdinalIgnoreCase))
             {
@@ -100,7 +124,7 @@ namespace Engine.Content.Persistence
         /// </summary>
         /// <param name="value">String value</param>
         /// <returns>Returns parsed Direction</returns>
-        public static Direction3 ReadReservedWordsForDirection(string value)
+        public static Direction3 ReadReservedWordsForDirection3(string value)
         {
             if (string.Equals(value, "Up", StringComparison.OrdinalIgnoreCase))
             {
@@ -136,7 +160,7 @@ namespace Engine.Content.Persistence
         /// </summary>
         /// <param name="value">String value</param>
         /// <returns>Returns parsed Color</returns>
-        public static ColorRgba ReadReservedWordsForColor(string value)
+        public static ColorRgba ReadReservedWordsForColorRgba(string value)
         {
             if (string.Equals(value, "Transparent", StringComparison.OrdinalIgnoreCase))
             {

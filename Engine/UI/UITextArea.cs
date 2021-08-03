@@ -165,15 +165,21 @@ namespace Engine.UI
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        public UITextArea(string name, Scene scene, UITextAreaDescription description) :
-            base(name, scene, description)
+        public UITextArea(string id, string name, Scene scene, UITextAreaDescription description) :
+            base(id, name, scene, description)
         {
             growControlWithText = description.GrowControlWithText;
 
-            textDrawer = new TextDrawer($"{name}.TextDrawer", scene, this, description.Font)
+            textDrawer = new TextDrawer(
+                $"{id}.TextDrawer",
+                $"{name}.TextDrawer",
+                scene,
+                this,
+                description.Font)
             {
                 Text = description.Text,
                 ForeColor = description.TextForeColor,
@@ -287,17 +293,18 @@ namespace Engine.UI
         /// Adds a component to the scene
         /// </summary>
         /// <param name="scene">Scene</param>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="layer">Processing layer</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<UITextArea> AddComponentUITextArea(this Scene scene, string name, UITextAreaDescription description, int layer = Scene.LayerUI)
+        public static async Task<UITextArea> AddComponentUITextArea(this Scene scene, string id, string name, UITextAreaDescription description, int layer = Scene.LayerUI)
         {
             UITextArea component = null;
 
             await Task.Run(() =>
             {
-                component = new UITextArea(name, scene, description);
+                component = new UITextArea(id, name, scene, description);
 
                 scene.AddComponent(component, SceneObjectUsages.UI, layer);
             });

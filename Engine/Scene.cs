@@ -17,7 +17,7 @@ namespace Engine
     /// <summary>
     /// Render scene
     /// </summary>
-    public class Scene : IDisposable
+    public class Scene : IHasGameState, IDisposable
     {
         /// <summary>
         /// Ground usage enum for ground picking
@@ -199,7 +199,7 @@ namespace Engine
         /// <typeparam name="T">Primitive type</typeparam>
         /// <param name="obj">Scene object</param>
         /// <returns>Returns the triangle list</returns>
-        private static IEnumerable<T> GetTrianglesForNavigationGraph<T>(ISceneObject obj) where T : IRayIntersectable
+        private static IEnumerable<T> GetTrianglesForNavigationGraph<T>(IDrawable obj) where T : IRayIntersectable
         {
             List<T> tris = new List<T>();
 
@@ -352,7 +352,7 @@ namespace Engine
         /// <summary>
         /// Gets or sets if scene has to perform frustum culling with objects
         /// </summary>
-        public bool PerformFrustumCulling { get; set; }
+        public bool PerformFrustumCulling { get; protected set; }
 
         /// <summary>
         /// Constructor
@@ -424,7 +424,10 @@ namespace Engine
                 {
                     for (int i = 0; i < internalComponents.Count; i++)
                     {
-                        internalComponents[i]?.Dispose();
+                        var disposableCmp = internalComponents[i] as IDisposable;
+                        disposableCmp?.Dispose();
+                        disposableCmp = null;
+
                         internalComponents[i] = null;
                     }
 
@@ -636,7 +639,7 @@ namespace Engine
         {
             Renderer?.Resize();
 
-            var fittedComponents = GetComponents().OfType<IScreenFitted>();
+            var fittedComponents = GetComponents<IScreenFitted>();
             if (fittedComponents.Any())
             {
                 fittedComponents.ToList().ForEach(c => c.Resize());
@@ -707,27 +710,49 @@ namespace Engine
                 return;
             }
 
-            component.Usage |= usage;
-
-            if (layer != 0)
+            if (internalComponents.Any(c => component.Id == c.Id))
             {
-                component.Layer = layer;
+                throw new ArgumentException($"The specified component id {component.Id} already exists.", nameof(component.Id));
+            }
+
+            if (component is IDrawable drawable)
+            {
+                drawable.Usage |= usage;
+
+                if (layer != 0)
+                {
+                    drawable.Layer = layer;
+                }
             }
 
             Monitor.Enter(internalComponents);
             internalComponents.Add(component);
             internalComponents.Sort((p1, p2) =>
             {
+                //First by type
+                bool p1D = p1 is IDrawable;
+                bool p2D = p2 is IDrawable;
+                int i = p1D.CompareTo(p2D);
+                if (i != 0) return i;
+
+                if (p1D == false || p2D == false)
+                {
+                    return 0;
+                }
+
+                IDrawable drawable1 = (IDrawable)p1;
+                IDrawable drawable2 = (IDrawable)p2;
+
                 //First by order index
-                int i = p1.Layer.CompareTo(p2.Layer);
+                i = drawable1.Layer.CompareTo(drawable2.Layer);
                 if (i != 0) return i;
 
                 //Then opaques
-                i = p1.BlendMode.CompareTo(p2.BlendMode);
+                i = drawable1.BlendMode.CompareTo(drawable2.BlendMode);
                 if (i != 0) return i;
 
                 //Then z-buffer writers
-                i = p1.DepthEnabled.CompareTo(p2.DepthEnabled);
+                i = drawable1.DepthEnabled.CompareTo(drawable2.DepthEnabled);
 
                 return i;
             });
@@ -754,7 +779,10 @@ namespace Engine
             updateMaterialsPalette = true;
             updateAnimationsPalette = true;
 
-            component.Dispose();
+            if (component is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
         }
         /// <summary>
         /// Removes and disposes the specified component list
@@ -773,7 +801,10 @@ namespace Engine
                     updateAnimationsPalette = true;
                 }
 
-                component.Dispose();
+                if (component is IDisposable disposable)
+                {
+                    disposable.Dispose();
+                }
             }
             Monitor.Exit(internalComponents);
         }
@@ -785,6 +816,15 @@ namespace Engine
         public IEnumerable<ISceneObject> GetComponents()
         {
             return internalComponents.ToArray();
+        }
+        /// <summary>
+        /// Gets component collection of the specified type
+        /// </summary>
+        /// <typeparam name="T">Component type</typeparam>
+        /// <returns>Returns the component collection</returns>
+        public IEnumerable<T> GetComponents<T>()
+        {
+            return internalComponents.OfType<T>().ToArray();
         }
 
         /// <summary>
@@ -837,7 +877,7 @@ namespace Engine
                 MeshMaterial.DefaultBlinnPhong,
             };
 
-            var matComponents = GetComponents().OfType<IUseMaterials>();
+            var matComponents = GetComponents<IUseMaterials>();
 
             foreach (var component in matComponents)
             {
@@ -874,7 +914,7 @@ namespace Engine
         {
             List<SkinningData> skData = new List<SkinningData>();
 
-            var skComponents = GetComponents().OfType<IUseSkinningData>();
+            var skComponents = GetComponents<IUseSkinningData>();
 
             foreach (var component in skComponents)
             {
@@ -1002,7 +1042,12 @@ namespace Engine
         {
             model = null;
 
-            var cmpList = GetComponents().Where(c => c.Usage.HasFlag(usage));
+            var cmpList = GetComponents<IDrawable>();
+
+            if (usage != SceneObjectUsages.None)
+            {
+                cmpList = cmpList.Where(c => (c.Usage & usage) != SceneObjectUsages.None);
+            }
 
             var coarse = PickCoarse(ref ray, maxDistance, cmpList);
 
@@ -1046,7 +1091,7 @@ namespace Engine
                 Distance = float.MaxValue,
             };
 
-            IEnumerable<ISceneObject> cmpList = GetComponents();
+            var cmpList = GetComponents<IDrawable>();
 
             if (usage != SceneObjectUsages.None)
             {
@@ -1119,7 +1164,7 @@ namespace Engine
                 Distance = float.MaxValue,
             };
 
-            IEnumerable<ISceneObject> cmpList = GetComponents();
+            IEnumerable<IDrawable> cmpList = GetComponents<IDrawable>();
 
             if (usage != SceneObjectUsages.None)
             {
@@ -1180,7 +1225,7 @@ namespace Engine
         {
             results = null;
 
-            IEnumerable<ISceneObject> cmpList = GetComponents();
+            IEnumerable<IDrawable> cmpList = GetComponents<IDrawable>();
 
             if (usage != SceneObjectUsages.None)
             {
@@ -1309,7 +1354,7 @@ namespace Engine
             }
 
             //Try to get a bounding box from the current ground objects
-            var cmpList = GetComponents().Where(c => c.Usage.HasFlag(SceneObjectUsages.Ground));
+            var cmpList = GetComponents<IDrawable>().Where(c => c.Usage.HasFlag(SceneObjectUsages.Ground));
 
             if (cmpList.Any())
             {
@@ -1351,16 +1396,11 @@ namespace Engine
         /// <returns>Returns the scene volume</returns>
         public IIntersectionVolume GetSceneVolume()
         {
-            var ground = GetComponents()
+            var ground = GetComponents<Ground>()
                 .Where(c => c.Usage.HasFlag(SceneObjectUsages.Ground))
-                .OfType<Ground>()
                 .FirstOrDefault();
-            if (ground != null)
-            {
-                return ground.GetCullingVolume();
-            }
 
-            return null;
+            return ground?.GetCullingVolume();
         }
 
         /// <summary>
@@ -1369,7 +1409,7 @@ namespace Engine
         /// <typeparam name="T">Object type</typeparam>
         /// <param name="obj">Object</param>
         /// <param name="fullGeometryPathFinding">Sets whether use full triangle list or volumes for navigation graphs</param>
-        public void SetGround(ISceneObject obj, bool fullGeometryPathFinding)
+        public void SetGround(IDrawable obj, bool fullGeometryPathFinding)
         {
             groundBoundingBox = null;
 
@@ -1385,7 +1425,7 @@ namespace Engine
         /// <param name="z">Z position</param>
         /// <param name="transform">Transform</param>
         /// <param name="fullGeometryPathFinding">Sets whether use full triangle list or volumes for navigation graphs</param>
-        public void AttachToGround(ISceneObject obj, bool fullGeometryPathFinding)
+        public void AttachToGround(IDrawable obj, bool fullGeometryPathFinding)
         {
             obj.Usage |= fullGeometryPathFinding ? SceneObjectUsages.FullPathFinding : SceneObjectUsages.CoarsePathFinding;
         }
@@ -1491,13 +1531,14 @@ namespace Engine
         {
             List<Triangle> tris = new List<Triangle>();
 
-            var pfComponents = GetComponents().Where(c =>
-            {
-                return
-                    !c.HasOwner &&
-                    c.Visible &&
-                    (c.Usage.HasFlag(SceneObjectUsages.FullPathFinding) || c.Usage.HasFlag(SceneObjectUsages.CoarsePathFinding));
-            });
+            var pfComponents = GetComponents<IDrawable>()
+                .Where(c =>
+                {
+                    return
+                        !c.HasOwner &&
+                        c.Visible &&
+                        (c.Usage.HasFlag(SceneObjectUsages.FullPathFinding) || c.Usage.HasFlag(SceneObjectUsages.CoarsePathFinding));
+                });
 
             foreach (var cmp in pfComponents)
             {
@@ -1916,6 +1957,86 @@ namespace Engine
                     return r.Position + offset;
                 }
             }
+        }
+
+        /// <inheritdoc/>
+        public virtual IGameState GetState()
+        {
+            return new SceneState
+            {
+                GameTime = Game.GameTime.Ticks,
+
+                Active = Active,
+                Order = Order,
+                SceneMode = sceneMode,
+                GroundBoundingBoxMin = groundBoundingBox?.Minimum,
+                GroundBoundingBoxMax = groundBoundingBox?.Maximum,
+                NavigationBoundingBoxMin = navigationBoundingBox?.Minimum,
+                NavigationBoundingBoxMax = navigationBoundingBox?.Maximum,
+                GameEnvironment = GameEnvironment.GetState(),
+                SceneLights = Lights.GetState(),
+                Camera = Camera.GetState(),
+                Components = internalComponents.OfType<IHasGameState>().Select(c => c.GetState()).OfType<ISceneObjectState>().ToArray(),
+            };
+        }
+        /// <inheritdoc/>
+        public virtual void SetState(IGameState state)
+        {
+            if (!(state is SceneState sceneState))
+            {
+                return;
+            }
+
+            Game.GameTime.Reset(sceneState.GameTime);
+
+            Active = sceneState.Active;
+            Order = sceneState.Order;
+            sceneMode = sceneState.SceneMode;
+            if (sceneState.GroundBoundingBoxMin.HasValue && sceneState.GroundBoundingBoxMax.HasValue)
+            {
+                groundBoundingBox = new BoundingBox(
+                    sceneState.GroundBoundingBoxMin.Value,
+                    sceneState.GroundBoundingBoxMax.Value);
+            }
+            if (sceneState.NavigationBoundingBoxMin.HasValue && sceneState.NavigationBoundingBoxMax.HasValue)
+            {
+                navigationBoundingBox = new BoundingBox(
+                    sceneState.NavigationBoundingBoxMin.Value,
+                    sceneState.NavigationBoundingBoxMax.Value);
+            }
+            GameEnvironment.SetState(sceneState.GameEnvironment);
+            Lights.SetState(sceneState.SceneLights);
+            Camera.SetState(sceneState.Camera);
+            foreach (var componentState in sceneState.Components)
+            {
+                var component = internalComponents
+                    .Where(c => c.Id == componentState.Id)
+                    .OfType<IHasGameState>()
+                    .FirstOrDefault();
+
+                component?.SetState(componentState);
+            }
+        }
+
+        /// <summary>
+        /// Saves the scene into a file
+        /// </summary>
+        /// <param name="fileName">File name</param>
+        public void SaveScene(string fileName)
+        {
+            var state = GetState();
+
+            SerializationHelper.SerializeToFile(state, fileName);
+        }
+        /// <summary>
+        /// Loads a scene from a file
+        /// </summary>
+        /// <param name="filename">File name</param>
+        public void LoadScene(string filename)
+        {
+            var state = SerializationHelper.DeserializeFromFile<SceneState>(filename);
+
+            SetState(state);
         }
     }
 }

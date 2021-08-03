@@ -3,8 +3,6 @@ using Newtonsoft.Json.Converters;
 
 namespace Engine.Modular.Persistence
 {
-    using Engine.Content.Persistence;
-
     /// <summary>
     /// Asset reference
     /// </summary>

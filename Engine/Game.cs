@@ -672,7 +672,7 @@ namespace Engine
 
             FrameInput();
 
-            FrameBegin();
+            FrameBegin(activeScene);
 
             FrameSceneUpdate(activeScene);
 
@@ -731,13 +731,14 @@ namespace Engine
         /// <summary>
         /// Begin frame
         /// </summary>
-        private void FrameBegin()
+        /// <param name="scene">Scene</param>
+        private void FrameBegin(Scene scene)
         {
             try
             {
                 Stopwatch pSW = new Stopwatch();
                 pSW.Start();
-                Graphics.Begin();
+                Graphics.Begin(scene);
                 pSW.Stop();
                 GameStatus.Add("Begin", pSW);
             }

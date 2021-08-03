@@ -144,11 +144,12 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Sky plane description class</param>
-        public SkyPlane(string name, Scene scene, SkyPlaneDescription description)
-            : base(name, scene, description)
+        public SkyPlane(string id, string name, Scene scene, SkyPlaneDescription description)
+            : base(id, name, scene, description)
         {
             var img1 = ImageContent.Texture(description.ContentPath, description.Texture1Name);
             skyTexture1 = Game.ResourceManager.RequestResource(img1);
@@ -299,18 +300,19 @@ namespace Engine
         /// Adds a component to the scene
         /// </summary>
         /// <param name="scene">Scene</param>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="usage">Component usage</param>
         /// <param name="layer">Processing layer</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<SkyPlane> AddComponentSkyPlane(this Scene scene, string name, SkyPlaneDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int layer = Scene.LayerSky)
+        public static async Task<SkyPlane> AddComponentSkyPlane(this Scene scene, string id, string name, SkyPlaneDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int layer = Scene.LayerSky)
         {
             SkyPlane component = null;
 
             await Task.Run(() =>
             {
-                component = new SkyPlane(name, scene, description);
+                component = new SkyPlane(id, name, scene, description);
 
                 scene.AddComponent(component, usage, layer);
             });

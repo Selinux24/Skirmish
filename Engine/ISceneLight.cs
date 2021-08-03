@@ -1,5 +1,4 @@
-﻿
-using SharpDX;
+﻿using SharpDX;
 
 namespace Engine
 {

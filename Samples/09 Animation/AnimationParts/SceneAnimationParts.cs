@@ -68,14 +68,14 @@ namespace Animation.AnimationParts
 
         private async Task InitializeUI()
         {
-            title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White });
+            title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White });
 
             title.Text = "Model Parts Test";
 
-            backPanel = await this.AddComponentUIPanel("Backpanel", UIPanelDescription.Default(new Color4(0, 0, 0, 0.75f)), LayerUI - 1);
+            backPanel = await this.AddComponentUIPanel("Backpanel", "Backpanel", UIPanelDescription.Default(new Color4(0, 0, 0, 0.75f)), LayerUI - 1);
 
             var consoleDesc = UIConsoleDescription.Default(new Color4(0.35f, 0.35f, 0.35f, 1f));
-            console = await this.AddComponentUIConsole("Console", consoleDesc, LayerUI + 1);
+            console = await this.AddComponentUIConsole("Console", "Console", consoleDesc, LayerUI + 1);
             console.Visible = false;
 
             uiReady = true;
@@ -102,7 +102,7 @@ namespace Animation.AnimationParts
                 },
             };
 
-            tank = await this.AddComponentModel("Tanks", tDesc, SceneObjectUsages.Agent);
+            tank = await this.AddComponentModel("Tanks", "Tanks", tDesc, SceneObjectUsages.Agent);
             tank.Manipulator.SetScale(0.5f);
         }
         private async Task InitializeFloor()
@@ -138,14 +138,14 @@ namespace Animation.AnimationParts
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
-            await this.AddComponentModel("Floor", desc);
+            await this.AddComponentModel("Floor", "Floor", desc);
         }
         private async Task InitializeDebug()
         {
-            itemTris = await this.AddComponentPrimitiveListDrawer("DebugItemTris", new PrimitiveListDrawerDescription<Triangle>() { Count = 5000 });
+            itemTris = await this.AddComponentPrimitiveListDrawer("DebugItemTris", "DebugItemTris", new PrimitiveListDrawerDescription<Triangle>() { Count = 5000 });
             itemTris.Visible = false;
 
-            itemLines = await this.AddComponentPrimitiveListDrawer("DebugItemLines", new PrimitiveListDrawerDescription<Line3D>() { Count = 1000 });
+            itemLines = await this.AddComponentPrimitiveListDrawer("DebugItemLines", "DebugItemLines", new PrimitiveListDrawerDescription<Line3D>() { Count = 1000 });
             itemLines.Visible = false;
         }
 
@@ -272,20 +272,20 @@ namespace Animation.AnimationParts
         {
             if (Game.Input.KeyPressed(Keys.J))
             {
-                tank["Turret-mesh"].Manipulator.Rotate(-gameTime.ElapsedSeconds, 0, 0);
+                tank.GetModelPartByName("Turret-mesh").Manipulator.Rotate(-gameTime.ElapsedSeconds, 0, 0);
             }
             if (Game.Input.KeyPressed(Keys.L))
             {
-                tank["Turret-mesh"].Manipulator.Rotate(+gameTime.ElapsedSeconds, 0, 0);
+                tank.GetModelPartByName("Turret-mesh").Manipulator.Rotate(+gameTime.ElapsedSeconds, 0, 0);
             }
 
             if (Game.Input.KeyPressed(Keys.I))
             {
-                tank["Barrel-mesh"].Manipulator.Rotate(0, gameTime.ElapsedSeconds, 0);
+                tank.GetModelPartByName("Barrel-mesh").Manipulator.Rotate(0, gameTime.ElapsedSeconds, 0);
             }
             if (Game.Input.KeyPressed(Keys.K))
             {
-                tank["Barrel-mesh"].Manipulator.Rotate(0, -gameTime.ElapsedSeconds, 0);
+                tank.GetModelPartByName("Barrel-mesh").Manipulator.Rotate(0, -gameTime.ElapsedSeconds, 0);
             }
         }
         private void UpdateInputDebug()

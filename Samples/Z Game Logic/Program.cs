@@ -1,6 +1,5 @@
 ﻿using Engine;
 using Engine.Content.FmtCollada;
-using SharpDX;
 using System;
 using System.IO;
 
@@ -28,8 +27,6 @@ namespace GameLogic
                     game.LockMouse = false;
 
                     GameResourceManager.RegisterLoader<LoaderCollada>();
-
-                    GameEnvironment.Background = Color.CornflowerBlue;
 
                     game.SetScene<SceneObjects>();
 

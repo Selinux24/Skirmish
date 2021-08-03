@@ -691,11 +691,12 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Terrain description</param>
-        public Terrain(string name, Scene scene, GroundDescription description)
-            : base(name, scene, description)
+        public Terrain(string id, string name, Scene scene, GroundDescription description)
+            : base(id, name, scene, description)
         {
             useAnisotropic = description.UseAnisotropic;
 
@@ -963,18 +964,19 @@ namespace Engine
         /// Adds a component to the scene
         /// </summary>
         /// <param name="scene">Scene</param>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="usage">Component usage</param>
         /// <param name="layer">Processing layer</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<Terrain> AddComponentTerrain(this Scene scene, string name, GroundDescription description, SceneObjectUsages usage = SceneObjectUsages.Ground, int layer = Scene.LayerDefault)
+        public static async Task<Terrain> AddComponentTerrain(this Scene scene, string id, string name, GroundDescription description, SceneObjectUsages usage = SceneObjectUsages.Ground, int layer = Scene.LayerDefault)
         {
             Terrain component = null;
 
             await Task.Run(() =>
             {
-                component = new Terrain(name, scene, description);
+                component = new Terrain(id, name, scene, description);
 
                 scene.AddComponent(component, usage, layer);
             });

@@ -11,7 +11,7 @@ namespace Engine
     /// <summary>
     /// Model instance
     /// </summary>
-    public class ModelInstance : ITransformable3D, IRayPickable<Triangle>, IIntersectable, ICullable
+    public class ModelInstance : ITransformable3D, IRayPickable<Triangle>, IIntersectable, ICullable, IHasGameState, IModelHasParts<ModelPart>
     {
         /// <summary>
         /// Global id counter
@@ -42,20 +42,21 @@ namespace Engine
         /// Geometry helper
         /// </summary>
         private readonly GeometryHelper geometryHelper = new GeometryHelper();
-
         /// <summary>
         /// Model parts collection
         /// </summary>
-        protected List<ModelPart> ModelParts = new List<ModelPart>();
+        private readonly List<ModelPart> modelParts = new List<ModelPart>();
 
         /// <summary>
         /// Instance id
         /// </summary>
-        public readonly int Id;
-        /// <summary>
-        /// Manipulator
-        /// </summary>
+        public int Id { get; private set; }
+        /// <inheritdoc/>
         public Manipulator3D Manipulator { get; private set; }
+        /// <summary>
+        /// Animation controller
+        /// </summary>
+        public AnimationController AnimationController { get; private set; } = new AnimationController();
         /// <summary>
         /// Texture index
         /// </summary>
@@ -81,39 +82,21 @@ namespace Engine
             {
                 return levelOfDetail;
             }
-            set
+            private set
             {
                 levelOfDetail = model.GetLODNearest(value);
             }
         }
         /// <summary>
-        /// Animation controller
-        /// </summary>
-        public AnimationController AnimationController { get; set; } = new AnimationController();
-        /// <summary>
         /// Gets the current instance lights collection
         /// </summary>
-        public IEnumerable<ISceneLight> Lights { get; protected set; } = new ISceneLight[] { };
-        /// <summary>
-        /// Gets the model part by name
-        /// </summary>
-        /// <param name="name">Part name</param>
-        /// <returns>Returns the model part name</returns>
-        public ModelPart this[string name]
-        {
-            get
-            {
-                return GetModelPartByName(name);
-            }
-        }
-        /// <summary>
-        /// Gets the model part count
-        /// </summary>
+        public IEnumerable<ISceneLight> Lights { get; private set; } = new ISceneLight[] { };
+        /// <inheritdoc/>
         public int ModelPartCount
         {
             get
             {
-                return ModelParts.Count;
+                return modelParts.Count;
             }
         }
 
@@ -169,7 +152,7 @@ namespace Engine
 
             for (int i = 0; i < names.Length; i++)
             {
-                ModelParts.Add(new ModelPart(names[i]));
+                modelParts.Add(new ModelPart(names[i]));
             }
 
             for (int i = 0; i < names.Length; i++)
@@ -202,9 +185,9 @@ namespace Engine
         /// <param name="drawData">Drawing data</param>
         private void SetModelPartsTransforms(DrawingData drawData)
         {
-            for (int i = 0; i < ModelParts.Count; i++)
+            for (int i = 0; i < modelParts.Count; i++)
             {
-                var thisName = ModelParts[i].Name;
+                var thisName = modelParts[i].Name;
 
                 var mesh = drawData?.GetMeshByName(thisName);
                 if (mesh == null)
@@ -212,7 +195,7 @@ namespace Engine
                     continue;
                 }
 
-                var part = ModelParts.First(p => p.Name == thisName);
+                var part = modelParts.First(p => p.Name == thisName);
                 part.Manipulator.SetTransform(mesh.Transform);
             }
         }
@@ -225,9 +208,9 @@ namespace Engine
         {
             SetLOD(context.EyePosition);
 
-            if (ModelParts.Count > 0)
+            if (modelParts.Count > 0)
             {
-                ModelParts.ForEach(p => p.Manipulator.Update(context.GameTime));
+                modelParts.ForEach(p => p.Manipulator.Update(context.GameTime));
             }
             else
             {
@@ -276,14 +259,10 @@ namespace Engine
             InvalidateCache();
         }
 
-        /// <summary>
-        /// Gets the transform by transform name
-        /// </summary>
-        /// <param name="name">Transform name</param>
-        /// <returns>Retusn the transform of the specified transform name</returns>
+        /// <inheritdoc/>
         public Matrix GetTransformByName(string name)
         {
-            var part = ModelParts.Find(p => p.Name == name);
+            var part = modelParts.Find(p => p.Name == name);
             if (part != null)
             {
                 return part.Manipulator.FinalTransform;
@@ -293,13 +272,10 @@ namespace Engine
                 return Manipulator.FinalTransform;
             }
         }
-        /// <summary>
-        /// Gets the model part by name
-        /// </summary>
-        /// <param name="name">Name</param>
+        /// <inheritdoc/>
         public ModelPart GetModelPartByName(string name)
         {
-            return ModelParts.FirstOrDefault(p => p.Name == name);
+            return modelParts.FirstOrDefault(p => p.Name == name);
         }
 
         /// <summary>
@@ -338,104 +314,69 @@ namespace Engine
                 Manipulator,
                 refresh);
         }
-        /// <summary>
-        /// Gets bounding sphere
-        /// </summary>
-        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
-        /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
-        public BoundingSphere GetBoundingSphere(bool refresh = false)
-        {
-            return boundsHelper.GetBoundingSphere(Manipulator, refresh);
-        }
-        /// <summary>
-        /// Gets bounding box
-        /// </summary>
-        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
-        /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
-        public BoundingBox GetBoundingBox(bool refresh = false)
-        {
-            return boundsHelper.GetBoundingBox(Manipulator, refresh);
-        }
-        /// <summary>
-        /// Gets oriented bounding box
-        /// </summary>
-        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
-        /// <returns>Returns oriented bounding box. Empty if the vertex type hasn't position channel</returns>
-        public OrientedBoundingBox GetOrientedBoundingBox(bool refresh = false)
-        {
-            return boundsHelper.GetOrientedBoundingBox(Manipulator, refresh);
-        }
 
-        /// <summary>
-        /// Gets nearest picking position of giving ray
-        /// </summary>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="result">Picking result</param>
-        /// <returns>Returns true if ground position found</returns>
+        /// <inheritdoc/>
         public bool PickNearest(Ray ray, out PickingResult<Triangle> result)
         {
             return RayPickingHelper.PickNearest(this, ray, out result);
         }
-        /// <summary>
-        /// Gets nearest picking position of giving ray
-        /// </summary>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="rayPickingParams">Ray picking params</param>
-        /// <param name="result">Picking result</param>
-        /// <returns>Returns true if ground position found</returns>
+        /// <inheritdoc/>
         public bool PickNearest(Ray ray, RayPickingParams rayPickingParams, out PickingResult<Triangle> result)
         {
             return RayPickingHelper.PickNearest(this, ray, rayPickingParams, out result);
         }
-        /// <summary>
-        /// Gets first picking position of giving ray
-        /// </summary>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="result">Picking result</param>
-        /// <returns>Returns true if ground position found</returns>
+        /// <inheritdoc/>
         public bool PickFirst(Ray ray, out PickingResult<Triangle> result)
         {
             return RayPickingHelper.PickFirst(this, ray, out result);
         }
-        /// <summary>
-        /// Gets first picking position of giving ray
-        /// </summary>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="rayPickingParams">Ray picking params</param>
-        /// <param name="result">Picking result</param>
-        /// <returns>Returns true if ground position found</returns>
+        /// <inheritdoc/>
         public bool PickFirst(Ray ray, RayPickingParams rayPickingParams, out PickingResult<Triangle> result)
         {
             return RayPickingHelper.PickFirst(this, ray, rayPickingParams, out result);
         }
-        /// <summary>
-        /// Get all picking positions of giving ray
-        /// </summary>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="results">Picking results</param>
-        /// <returns>Returns true if ground position found</returns>
+        /// <inheritdoc/>
         public bool PickAll(Ray ray, out IEnumerable<PickingResult<Triangle>> results)
         {
             return RayPickingHelper.PickAll(this, ray, out results);
         }
-        /// <summary>
-        /// Gets all picking position of giving ray
-        /// </summary>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="rayPickingParams">Ray picking params</param>
-        /// <param name="results">Picking results</param>
-        /// <returns>Returns true if ground position found</returns>
+        /// <inheritdoc/>
         public bool PickAll(Ray ray, RayPickingParams rayPickingParams, out IEnumerable<PickingResult<Triangle>> results)
         {
             return RayPickingHelper.PickAll(this, ray, rayPickingParams, out results);
         }
 
-        /// <summary>
-        /// Performs culling test
-        /// </summary>
-        /// <param name="volume">Culling volume</param>
-        /// <param name="distance">If the object is inside the volume, returns the distance</param>
-        /// <returns>Returns true if the object is outside of the frustum</returns>
+        /// <inheritdoc/>
+        public BoundingSphere GetBoundingSphere(bool refresh = false)
+        {
+            return boundsHelper.GetBoundingSphere(Manipulator, refresh);
+        }
+        /// <inheritdoc/>
+        public BoundingBox GetBoundingBox(bool refresh = false)
+        {
+            return boundsHelper.GetBoundingBox(Manipulator, refresh);
+        }
+        /// <inheritdoc/>
+        public OrientedBoundingBox GetOrientedBoundingBox(bool refresh = false)
+        {
+            return boundsHelper.GetOrientedBoundingBox(Manipulator, refresh);
+        }
+
+        /// <inheritdoc/>
+        public IEnumerable<Triangle> GetVolume(bool full)
+        {
+            var drawingData = model.GetDrawingData(model.GetLODMinimum());
+            if (!full && drawingData?.VolumeMesh?.Any() == true)
+            {
+                //Transforms the volume mesh
+                return Triangle.Transform(drawingData.VolumeMesh, Manipulator.LocalTransform);
+            }
+
+            //Returns the actual triangles (yet transformed)
+            return GetTriangles();
+        }
+
+        /// <inheritdoc/>
         public virtual bool Cull(IIntersectionVolume volume, out float distance)
         {
             bool cull;
@@ -471,30 +412,7 @@ namespace Engine
                 Manipulator.FinalTransform);
         }
 
-        /// <summary>
-        /// Gets internal volume
-        /// </summary>
-        /// <param name="full"></param>
-        /// <returns>Returns internal volume</returns>
-        public IEnumerable<Triangle> GetVolume(bool full)
-        {
-            var drawingData = model.GetDrawingData(model.GetLODMinimum());
-            if (!full && drawingData?.VolumeMesh?.Any() == true)
-            {
-                //Transforms the volume mesh
-                return Triangle.Transform(drawingData.VolumeMesh, Manipulator.LocalTransform);
-            }
-
-            //Returns the actual triangles (yet transformed)
-            return GetTriangles();
-        }
-
-        /// <summary>
-        /// Gets whether the sphere intersects with the current object
-        /// </summary>
-        /// <param name="sphere">Sphere</param>
-        /// <param name="result">Picking results</param>
-        /// <returns>Returns true if intersects</returns>
+        /// <inheritdoc/>
         public bool Intersects(IntersectionVolumeSphere sphere, out PickingResult<Triangle> result)
         {
             result = new PickingResult<Triangle>()
@@ -519,33 +437,18 @@ namespace Engine
             return false;
         }
 
-        /// <summary>
-        /// Gets whether the actual object have intersection with the intersectable or not
-        /// </summary>
-        /// <param name="detectionModeThis">Detection mode for this object</param>
-        /// <param name="other">Other intersectable</param>
-        /// <param name="detectionModeOther">Detection mode for the other object</param>
-        /// <returns>Returns true if have intersection</returns>
+        /// <inheritdoc/>
         public bool Intersects(IntersectDetectionMode detectionModeThis, IIntersectable other, IntersectDetectionMode detectionModeOther)
         {
             return IntersectionHelper.Intersects(this, detectionModeThis, other, detectionModeOther);
         }
-        /// <summary>
-        /// Gets whether the actual object have intersection with the volume or not
-        /// </summary>
-        /// <param name="detectionModeThis">Detection mode for this object</param>
-        /// <param name="volume">Volume</param>
-        /// <returns>Returns true if have intersection</returns>
+        /// <inheritdoc/>
         public bool Intersects(IntersectDetectionMode detectionModeThis, IIntersectionVolume volume)
         {
             return IntersectionHelper.Intersects(this, detectionModeThis, volume);
         }
 
-        /// <summary>
-        /// Gets the intersection volume based on the specified detection mode
-        /// </summary>
-        /// <param name="detectionMode">Detection mode</param>
-        /// <returns>Returns an intersection volume</returns>
+        /// <inheritdoc/>
         public IIntersectionVolume GetIntersectionVolume(IntersectDetectionMode detectionMode)
         {
             if (detectionMode == IntersectDetectionMode.Box)
@@ -562,10 +465,36 @@ namespace Engine
             }
         }
 
-        /// <summary>
-        /// Gets the text representation of the current instance
-        /// </summary>
-        /// <returns>Returns the text representation of the current instance</returns>
+        /// <inheritdoc/>
+        public IGameState GetState()
+        {
+            return new ModelInstanceState
+            {
+                InstanceId = Id,
+                Active = Active,
+                Visible = Visible,
+                Manipulator = Manipulator.GetState(),
+                AnimationController = AnimationController.GetState(),
+                TextureIndex = TextureIndex,
+            };
+        }
+        /// <inheritdoc/>
+        public void SetState(IGameState state)
+        {
+            if (!(state is ModelInstanceState modelInstanceState))
+            {
+                return;
+            }
+
+            Id = modelInstanceState.InstanceId;
+            Active = modelInstanceState.Active;
+            Visible = modelInstanceState.Visible;
+            Manipulator.SetState(modelInstanceState.Manipulator);
+            AnimationController.SetState(modelInstanceState.AnimationController);
+            TextureIndex = modelInstanceState.TextureIndex;
+        }
+
+        /// <inheritdoc/>
         public override string ToString()
         {
             return $"Id: {Id}; LOD: {LevelOfDetail}; Active: {Active}; Visible: {Visible}";

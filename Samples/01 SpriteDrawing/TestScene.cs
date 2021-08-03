@@ -69,12 +69,12 @@ namespace SpriteDrawing
             var desc = UITextAreaDescription.Default();
             desc.Width = Game.Form.RenderWidth * 0.5f;
 
-            textDebug = await this.AddComponentUITextArea("Console", desc, LayerUI);
+            textDebug = await this.AddComponentUITextArea("Console", "Console", desc, LayerUI);
         }
         private async Task InitializeBackground()
         {
             var desc = SpriteDescription.Background("background.jpg");
-            await this.AddComponentSprite("Background", desc, SceneObjectUsages.UI, layerUIBackground);
+            await this.AddComponentSprite("Background", "Background", desc, SceneObjectUsages.UI, layerUIBackground);
         }
         private async Task InitializeProgressbar()
         {
@@ -86,7 +86,7 @@ namespace SpriteDrawing
             desc.BaseColor = new Color(0, 0, 0, 0.5f);
             desc.ProgressColor = Color.Green;
 
-            progressBar = await this.AddComponentUIProgressBar("ProgressBar", desc, LayerUI);
+            progressBar = await this.AddComponentUIProgressBar("ProgressBar", "ProgressBar", desc, LayerUI);
         }
 
         private async Task LoadControls()
@@ -121,7 +121,7 @@ namespace SpriteDrawing
             float size = Game.Form.RenderWidth * 0.3333f;
 
             var desc = SpriteDescription.Default("smiley.png", size, size);
-            spriteSmiley = await this.AddComponentSprite("SmileySprite", desc, SceneObjectUsages.None, layerUIObjects);
+            spriteSmiley = await this.AddComponentSprite("SmileySprite", "SmileySprite", desc, SceneObjectUsages.None, layerUIObjects);
             spriteSmiley.Visible = false;
         }
         private async Task InitializeStaticPan()
@@ -144,7 +144,7 @@ namespace SpriteDrawing
                     BaseColor = new Color(176, 77, 45),
                 },
             };
-            staticPan = await this.AddComponentUIPanel("StaticPanel", desc, LayerUI);
+            staticPan = await this.AddComponentUIPanel("StaticPanel", "StaticPanel", desc, LayerUI);
 
             var descText = new UITextAreaDescription()
             {
@@ -165,7 +165,7 @@ namespace SpriteDrawing
                 TextShadowColor = new Color4(0, 0, 0, 0.2f),
                 TextShadowDelta = new Vector2(8, 5),
             };
-            textArea = new UITextArea("StaticPanel.Text", this, descText);
+            textArea = new UITextArea("StaticPanel.Text", "StaticPanel.Text", this, descText);
 
             staticPan.AddChild(textArea);
             staticPan.Visible = false;
@@ -191,7 +191,7 @@ namespace SpriteDrawing
 
                 EventsEnabled = true,
             };
-            dynamicPan = await this.AddComponentUIPanel("DynamicPanel", descPan, layerUIDialogs);
+            dynamicPan = await this.AddComponentUIPanel("DynamicPanel", "DynamicPanel", descPan, layerUIDialogs);
 
             float w0 = 0.0f;
             float w1 = 0.324634656f;
@@ -212,7 +212,7 @@ namespace SpriteDrawing
             descButClose.TextVerticalAlign = VerticalTextAlign.Middle;
             descButClose.Text = "X";
 
-            var butClose = new UIButton("DynamicPanel.CloseButton", this, descButClose);
+            var butClose = new UIButton("DynamicPanel.CloseButton", "DynamicPanel.CloseButton", this, descButClose);
             butClose.MouseDoubleClick += ButDoubleClose_Click;
 
             var descText = UITextAreaDescription.DefaultFromMap("MaraFont.png", "MaraFont.txt");
@@ -227,7 +227,7 @@ namespace SpriteDrawing
             descText.TextHorizontalAlign = HorizontalTextAlign.Center;
             descText.TextVerticalAlign = VerticalTextAlign.Middle;
 
-            var textMapped = new UITextArea("DynamicPanel.MaraText", this, descText);
+            var textMapped = new UITextArea("DynamicPanel.MaraText", "DynamicPanel.MaraText", this, descText);
 
             dynamicPan.AddChild(textMapped);
             dynamicPan.AddChild(butClose, false);
@@ -246,13 +246,13 @@ namespace SpriteDrawing
             descButClose.TextHorizontalAlign = HorizontalTextAlign.Center;
             descButClose.TextVerticalAlign = VerticalTextAlign.Middle;
 
-            butTest2 = await this.AddComponentUIButton("ButtonTest2", descButClose, LayerUI);
+            butTest2 = await this.AddComponentUIButton("ButtonTest2", "ButtonTest2", descButClose, LayerUI);
             butTest2.MouseClick += ButTest2_Click;
             butTest2.MouseEnter += ButTest_MouseEnter;
             butTest2.MouseLeave += ButTest_MouseLeave;
             butTest2.Visible = false;
 
-            butTest1 = await this.AddComponentUIButton("ButtonTest1", descButClose, LayerUI);
+            butTest1 = await this.AddComponentUIButton("ButtonTest1", "ButtonTest1", descButClose, LayerUI);
             butTest1.MouseClick += ButTest1_Click;
             butTest1.MouseEnter += ButTest_MouseEnter;
             butTest1.MouseLeave += ButTest_MouseLeave;

@@ -1,7 +1,7 @@
 ﻿using SharpDX;
 using System;
 
-namespace Engine.Content.Persistence
+namespace Engine
 {
     /// <summary>
     /// 3D scale
@@ -109,7 +109,7 @@ namespace Engine.Content.Persistence
             }
             else
             {
-                return PersistenceHelpers.ReadReservedWordsForScale(value);
+                return PersistenceHelpers.ReadReservedWordsForScale3(value);
             }
         }
 

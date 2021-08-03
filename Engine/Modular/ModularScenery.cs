@@ -343,11 +343,12 @@ namespace Engine.Modular
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Scenery description</param>
-        public ModularScenery(string name, Scene scene, ModularSceneryDescription description)
-            : base(name, scene, description)
+        public ModularScenery(string id, string name, Scene scene, ModularSceneryDescription description)
+            : base(id, name, scene, description)
         {
             if (description.AssetsConfiguration != null)
             {
@@ -443,8 +444,11 @@ namespace Engine.Modular
         {
             if (Levels.ParticleSystems?.Any() == true)
             {
+                string modelId = $"{Name ?? nameof(ModularScenery)}.Particle Manager";
+
                 particleManager = await Scene.AddComponentParticleManager(
-                    $"{Name ?? nameof(ModularScenery)}.Particle Manager",
+                    modelId,
+                    Name,
                     ParticleManagerDescription.Default(),
                     SceneObjectUsages.None,
                     98);
@@ -524,13 +528,14 @@ namespace Engine.Modular
             var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
             var usage = hasVolumes ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding;
 
-            var modelName = $"{Name ?? nameof(ModularScenery)}.{assetName}.{level.Name}";
+            var modelId = $"{Name ?? nameof(ModularScenery)}.{assetName}.{level.Name}";
             ModelInstanced model = null;
 
             try
             {
                 model = await Scene.AddComponentModelInstanced(
-                    modelName,
+                    modelId,
+                    Name,
                     new ModelInstancedDescription()
                     {
                         CastShadow = Description.CastShadow,
@@ -546,7 +551,7 @@ namespace Engine.Modular
             }
             catch (Exception ex)
             {
-                Logger.WriteError($"{nameof(ModularScenery)}. Error loading asset {modelName}: {ex.Message}", ex);
+                Logger.WriteError($"{nameof(ModularScenery)}. Error loading asset {Name}: {ex.Message}", ex);
             }
 
             return model;
@@ -612,13 +617,14 @@ namespace Engine.Modular
                 usage = hasVolumes ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding;
             }
 
-            var modelName = $"{Name ?? nameof(ModularScenery)}.{assetName}.{level.Name}";
+            var modelId = $"{Name ?? nameof(ModularScenery)}.{assetName}.{level.Name}";
             ModelInstanced model = null;
 
             try
             {
                 model = await Scene.AddComponentModelInstanced(
-                    modelName,
+                    modelId,
+                    Name,
                     new ModelInstancedDescription()
                     {
                         CastShadow = Description.CastShadow,
@@ -650,7 +656,7 @@ namespace Engine.Modular
             }
             catch (Exception ex)
             {
-                Logger.WriteError($"{nameof(ModularScenery)}. Error loading object {modelName}: {ex.Message}", ex);
+                Logger.WriteError($"{nameof(ModularScenery)}. Error loading object {Name}: {ex.Message}", ex);
             }
 
             return model;
@@ -1937,18 +1943,19 @@ namespace Engine.Modular
         /// Adds a component to the scene
         /// </summary>
         /// <param name="scene">Scene</param>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="usage">Component usage</param>
         /// <param name="layer">Processing layer</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<ModularScenery> AddComponentModularScenery(this Scene scene, string name, ModularSceneryDescription description, SceneObjectUsages usage = SceneObjectUsages.Ground, int layer = Scene.LayerDefault)
+        public static async Task<ModularScenery> AddComponentModularScenery(this Scene scene, string id, string name, ModularSceneryDescription description, SceneObjectUsages usage = SceneObjectUsages.Ground, int layer = Scene.LayerDefault)
         {
             ModularScenery component = null;
 
             await Task.Run(() =>
             {
-                component = new ModularScenery(name, scene, description);
+                component = new ModularScenery(id, name, scene, description);
 
                 scene.AddComponent(component, usage, layer);
             });

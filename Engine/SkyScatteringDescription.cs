@@ -5,7 +5,7 @@ namespace Engine
     /// <summary>
     /// Sky scattering description
     /// </summary>
-    public class SkyScatteringDescription : SceneObjectDescription
+    public class SkyScatteringDescription : SceneDrawableDescription
     {
         /// <summary>
         /// Rayleigh scattering constant.

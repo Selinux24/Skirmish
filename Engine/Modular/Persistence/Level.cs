@@ -3,8 +3,6 @@ using System.Linq;
 
 namespace Engine.Modular.Persistence
 {
-    using Engine.Content.Persistence;
-
     /// <summary>
     /// Scenery level
     /// </summary>

@@ -6,7 +6,7 @@ namespace Engine
     /// <summary>
     /// Scene point light without direction
     /// </summary>
-    public interface ISceneLightPoint : ISceneLight
+    public interface ISceneLightPoint : ISceneLight, IHasGameState
     {
         /// <summary>
         /// Position

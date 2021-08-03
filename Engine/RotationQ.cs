@@ -1,7 +1,7 @@
 ﻿using SharpDX;
 using System;
 
-namespace Engine.Content.Persistence
+namespace Engine
 {
     /// <summary>
     /// 3D rotation
@@ -111,13 +111,17 @@ namespace Engine.Content.Persistence
         public static implicit operator RotationQ(string value)
         {
             var floats = value?.SplitFloats();
-            if (floats?.Length == 4)
+            if (floats?.Length == 1)
+            {
+                return new RotationQ(floats[0]);
+            }
+            else if (floats?.Length == 4)
             {
                 return new RotationQ(floats);
             }
             else
             {
-                return PersistenceHelpers.ReadReservedWordsForRotation(value);
+                return PersistenceHelpers.ReadReservedWordsForRotationQ(value);
             }
         }
 

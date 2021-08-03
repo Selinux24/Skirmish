@@ -205,5 +205,60 @@ namespace Engine
         {
             return distance * -2f * Direction;
         }
+
+        /// <inheritdoc/>
+        public IGameState GetState()
+        {
+            return new SceneLightDirectionalState
+            {
+                Name = Name,
+                Enabled = Enabled,
+                CastShadow = CastShadow,
+                CastShadowsMarked = CastShadowsMarked,
+                DiffuseColor = DiffuseColor,
+                SpecularColor = SpecularColor,
+                ShadowMapIndex = ShadowMapIndex,
+                State = State,
+                ParentTransform = ParentTransform,
+
+                InitialDirection = initialDirection,
+                Direction = Direction,
+                BaseBrightness = BaseBrightness,
+                Brightness = Brightness,
+                ShadowMapCount = ShadowMapCount,
+                ToShadowSpace = ToShadowSpace,
+                ToCascadeOffsetX = ToCascadeOffsetX,
+                ToCascadeOffsetY = ToCascadeOffsetY,
+                ToCascadeScale = ToCascadeScale,
+            };
+        }
+        /// <inheritdoc/>
+        public void SetState(IGameState state)
+        {
+            if (!(state is SceneLightDirectionalState sceneLightsState))
+            {
+                return;
+            }
+
+            Name = sceneLightsState.Name;
+            Enabled = sceneLightsState.Enabled;
+            CastShadow = sceneLightsState.CastShadow;
+            CastShadowsMarked = sceneLightsState.CastShadowsMarked;
+            DiffuseColor = sceneLightsState.DiffuseColor;
+            SpecularColor = sceneLightsState.SpecularColor;
+            ShadowMapIndex = sceneLightsState.ShadowMapIndex;
+            State = sceneLightsState.State;
+            ParentTransform = sceneLightsState.ParentTransform;
+
+            initialDirection = sceneLightsState.InitialDirection;
+            Direction = sceneLightsState.Direction;
+            BaseBrightness = sceneLightsState.BaseBrightness;
+            Brightness = sceneLightsState.Brightness;
+            ShadowMapCount = sceneLightsState.ShadowMapCount;
+            ToShadowSpace = sceneLightsState.ToShadowSpace;
+            ToCascadeOffsetX = sceneLightsState.ToCascadeOffsetX;
+            ToCascadeOffsetY = sceneLightsState.ToCascadeOffsetY;
+            ToCascadeScale = sceneLightsState.ToCascadeScale;
+        }
     }
 }

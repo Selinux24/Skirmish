@@ -4,7 +4,7 @@ namespace Engine.Animation
     /// <summary>
     /// Animation path item
     /// </summary>
-    public class AnimationPathItem
+    public class AnimationPathItem : IHasGameState
     {
         /// <summary>
         /// Clip name
@@ -38,7 +38,7 @@ namespace Engine.Animation
         {
             get
             {
-                return this.Duration * this.Repeats / this.TimeDelta;
+                return Duration * Repeats / TimeDelta;
             }
         }
 
@@ -52,11 +52,11 @@ namespace Engine.Animation
         /// <param name="isTransition">Is transition</param>
         public AnimationPathItem(string name, bool loop, int repeats, float delta, bool isTransition)
         {
-            this.ClipName = name;
-            this.Loop = loop;
-            this.Repeats = repeats;
-            this.TimeDelta = delta;
-            this.IsTranstition = isTransition;
+            ClipName = name;
+            Loop = loop;
+            Repeats = repeats;
+            TimeDelta = delta;
+            IsTranstition = isTransition;
         }
 
         /// <summary>
@@ -65,16 +65,16 @@ namespace Engine.Animation
         /// <param name="skData">Skinning data</param>
         public void UpdateSkinningData(SkinningData skData)
         {
-            int clipIndex = skData.GetClipIndex(this.ClipName);
-            this.Duration = skData.GetClipDuration(clipIndex);
+            int clipIndex = skData.GetClipIndex(ClipName);
+            Duration = skData.GetClipDuration(clipIndex);
         }
         /// <summary>
         /// Sets the item to finish current animation and end
         /// </summary>
         public void End()
         {
-            this.Loop = false;
-            this.Repeats = 1;
+            Loop = false;
+            Repeats = 1;
         }
 
         /// <summary>
@@ -83,20 +83,40 @@ namespace Engine.Animation
         /// <returns>Returns the path item copy instance</returns>
         public AnimationPathItem Clone()
         {
-            return new AnimationPathItem(this.ClipName, this.Loop, this.Repeats, this.TimeDelta, this.IsTranstition);
+            return new AnimationPathItem(ClipName, Loop, Repeats, TimeDelta, IsTranstition);
         }
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+
+        /// <inheritdoc/>
+        public IGameState GetState()
+        {
+            return new AnimationPathItemState
+            {
+                TimeDelta = TimeDelta,
+                Loop = Loop,
+                Repeats = Repeats,
+                IsTranstition = IsTranstition,
+                Duration = Duration,
+            };
+        }
+        /// <inheritdoc/>
+        public void SetState(IGameState state)
+        {
+            if (!(state is AnimationPathItemState animationPathItemState))
+            {
+                return;
+            }
+
+            TimeDelta = animationPathItemState.TimeDelta;
+            Loop = animationPathItemState.Loop;
+            Repeats = animationPathItemState.Repeats;
+            IsTranstition = animationPathItemState.IsTranstition;
+            Duration = animationPathItemState.Duration;
+        }
+
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("{0}: {1}; Loop {2}; Repeats: {3}; Delta: {4}",
-                this.IsTranstition ? "Transition" : "Clip",
-                this.ClipName,
-                this.Loop,
-                this.Repeats,
-                this.TimeDelta);
+            return $"{(IsTranstition ? "Transition" : "Clip")}: {ClipName}; Loop {Loop}; Repeats: {Repeats}; Delta: {TimeDelta}";
         }
     }
 }

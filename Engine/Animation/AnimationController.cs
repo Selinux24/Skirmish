@@ -8,7 +8,7 @@ namespace Engine.Animation
     /// <summary>
     /// Animation controller
     /// </summary>
-    public class AnimationController
+    public class AnimationController : IHasGameState
     {
         /// <summary>
         /// Controller clips
@@ -377,10 +377,42 @@ namespace Engine.Animation
             active = false;
         }
 
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+        /// <inheritdoc/>
+        public IGameState GetState()
+        {
+            return new AnimationControllerState
+            {
+                Active = active,
+                LastItemTime = lastItemTime,
+                LastClipName = lastClipName,
+                TimeDelta = TimeDelta,
+                Playing = Playing,
+                CurrentIndex = CurrentIndex,
+                AnimationPlan = animationPaths.Select(a => a.GetState()).ToArray(),
+            };
+        }
+        /// <inheritdoc/>
+        public void SetState(IGameState state)
+        {
+            if (!(state is AnimationControllerState animationControllerState))
+            {
+                return;
+            }
+
+            active = animationControllerState.Active;
+            lastItemTime = animationControllerState.LastItemTime;
+            lastClipName = animationControllerState.LastClipName;
+            TimeDelta = animationControllerState.TimeDelta;
+            Playing = animationControllerState.Playing;
+            CurrentIndex = animationControllerState.CurrentIndex;
+            for (int i = 0; i < animationControllerState.AnimationPlan.Count(); i++)
+            {
+                var pathState = animationControllerState.AnimationPlan.ElementAt(i);
+                animationPaths[i].SetState(pathState);
+            }
+        }
+
+        /// <inheritdoc/>
         public override string ToString()
         {
             StringBuilder res = new StringBuilder("Inactive");

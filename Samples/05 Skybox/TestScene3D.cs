@@ -189,15 +189,15 @@ namespace Skybox
 
             var cursorDesc = UICursorDescription.Default("target.png", 16, 16, true, Color.Purple);
 
-            await this.AddComponentUICursor("Cursor", cursorDesc);
+            await this.AddComponentUICursor("Cursor", "Cursor", cursorDesc);
 
             #endregion
 
             #region Text
 
-            title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White });
-            help = await this.AddComponentUITextArea("Help", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow });
-            fps = await this.AddComponentUITextArea("FPS", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow });
+            title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White });
+            help = await this.AddComponentUITextArea("Help", "Help", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 12), TextForeColor = Color.Yellow });
+            fps = await this.AddComponentUITextArea("FPS", "FPS", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 12), TextForeColor = Color.Yellow });
 
             title.Text = "Collada Scene with Skybox";
 #if DEBUG
@@ -208,7 +208,7 @@ namespace Skybox
             fps.Text = "";
 
             var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
-            panel = await this.AddComponentSprite("Backpanel", spDesc, SceneObjectUsages.UI, LayerUI - 1);
+            panel = await this.AddComponentSprite("Backpanel", "Backpanel", spDesc, SceneObjectUsages.UI, LayerUI - 1);
 
             #endregion
         }
@@ -218,7 +218,7 @@ namespace Skybox
             int faceSize = 512;
             var skydomDesc = SkydomDescription.Sphere(fileName, faceSize, Camera.FarPlaneDistance);
 
-            await this.AddComponentSkydom("Skydom", skydomDesc);
+            await this.AddComponentSkydom("Skydom", "Skydom", skydomDesc);
         }
         private async Task InitializeLakeBottom()
         {
@@ -254,7 +254,7 @@ namespace Skybox
             groundDesc.Heightmap.UseFalloff = true;
             groundDesc.Heightmap.Transform = Matrix.Translation(0, -terrainHeight * 0.33f, 0);
 
-            await this.AddComponentScenery("Lage Bottom", groundDesc);
+            await this.AddComponentScenery("Lage Bottom", "Lage Bottom", groundDesc);
         }
         private async Task InitializeTorchs()
         {
@@ -265,7 +265,7 @@ namespace Skybox
                 Content = ContentDescription.FromFile("Resources", "torch.json"),
             };
 
-            torchs = await this.AddComponentModelInstanced("Torchs", torchDesc);
+            torchs = await this.AddComponentModelInstanced("Torchs", "Torchs", torchDesc);
 
             AttachToGround(torchs, true);
         }
@@ -278,7 +278,7 @@ namespace Skybox
                 Content = ContentDescription.FromFile("Resources/obelisk", "obelisk.json"),
             };
 
-            obelisks = await this.AddComponentModelInstanced("Obelisks", obeliskDesc, SceneObjectUsages.Ground);
+            obelisks = await this.AddComponentModelInstanced("Obelisks", "Obelisks", obeliskDesc, SceneObjectUsages.Ground);
         }
         private async Task InitializeFountain()
         {
@@ -288,7 +288,7 @@ namespace Skybox
                 Content = ContentDescription.FromFile("Resources/Fountain", "Fountain.json"),
             };
 
-            fountain = await this.AddComponentModel("Fountain", fountainDesc, SceneObjectUsages.Ground);
+            fountain = await this.AddComponentModel("Fountain", "Fountain", fountainDesc, SceneObjectUsages.Ground);
 
             AttachToGround(fountain, true);
         }
@@ -296,7 +296,7 @@ namespace Skybox
         {
             var ruinsDesc = GroundDescription.FromFile("Resources", "ruins.json");
 
-            ruins = await this.AddComponentScenery("Ruins", ruinsDesc, SceneObjectUsages.Ground);
+            ruins = await this.AddComponentScenery("Ruins", "Ruins", ruinsDesc, SceneObjectUsages.Ground);
 
             SetGround(ruins, true);
         }
@@ -306,7 +306,7 @@ namespace Skybox
             waterDesc.BaseColor = new Color3(0.067f, 0.065f, 0.003f);
             waterDesc.WaterColor = new Color4(0.003f, 0.267f, 0.096f, 0.98f);
 
-            await this.AddComponentWater("Water", waterDesc);
+            await this.AddComponentWater("Water", "Water", waterDesc);
         }
         private async Task InitializeEmitter()
         {
@@ -323,13 +323,13 @@ namespace Skybox
                 Content = ContentDescription.FromContentData(sphere, mat),
             };
 
-            movingFire = await this.AddComponentModel("Emitter", mFireDesc);
+            movingFire = await this.AddComponentModel("Emitter", "Emitter", mFireDesc);
         }
         private async Task InitializeParticles()
         {
             var pManagerDesc = ParticleManagerDescription.Default();
 
-            pManager = await this.AddComponentParticleManager("ParticleManager", pManagerDesc);
+            pManager = await this.AddComponentParticleManager("ParticleManager", "ParticleManager", pManagerDesc);
 
             movingFireEmitter = new ParticleEmitter()
             {
@@ -350,14 +350,14 @@ namespace Skybox
                 RotateDecals = true,
             };
 
-            decalEmitter = await this.AddComponentDecalDrawer("Bullets", desc);
+            decalEmitter = await this.AddComponentDecalDrawer("Bullets", "Bullets", desc);
         }
         private async Task InitializeDebug()
         {
-            volumesDrawer = await this.AddComponentPrimitiveListDrawer("DebugVolumesDrawer", new PrimitiveListDrawerDescription<Line3D>() { Count = 10000 });
+            volumesDrawer = await this.AddComponentPrimitiveListDrawer("DebugVolumesDrawer", "DebugVolumesDrawer", new PrimitiveListDrawerDescription<Line3D>() { Count = 10000 });
             volumesDrawer.Visible = false;
 
-            graphDrawer = await this.AddComponentPrimitiveListDrawer("DebugGraphDrawer", new PrimitiveListDrawerDescription<Triangle>() { Count = 10000 });
+            graphDrawer = await this.AddComponentPrimitiveListDrawer("DebugGraphDrawer", "DebugGraphDrawer", new PrimitiveListDrawerDescription<Triangle>() { Count = 10000 });
             graphDrawer.Visible = false;
         }
 

@@ -221,12 +221,13 @@ namespace Engine.UI
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="parent">Parent control</param>
         /// <param name="description">Text description</param>
-        public TextDrawer(string name, Scene scene, UIControl parent, TextDrawerDescription description)
-            : base(name, scene, description)
+        public TextDrawer(string id, string name, Scene scene, UIControl parent, TextDrawerDescription description)
+            : base(id, name, scene, description)
         {
             this.parent = parent;
 

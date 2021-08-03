@@ -5,7 +5,7 @@ namespace Engine
     /// <summary>
     /// Directional light
     /// </summary>
-    public interface ISceneLightDirectional : ISceneLight
+    public interface ISceneLightDirectional : ISceneLight, IHasGameState
     {
         /// <summary>
         /// Light direction

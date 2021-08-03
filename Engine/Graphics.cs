@@ -634,7 +634,7 @@ namespace Engine
             #region Set Defaults
 
             SetDefaultViewport();
-            SetDefaultRenderTarget(true, true, true);
+            SetDefaultRenderTarget(true, Color4.Black, true, true);
 
             SetDepthStencilWRZEnabled();
             SetRasterizerDefault();
@@ -697,7 +697,7 @@ namespace Engine
         /// <summary>
         /// Begin frame
         /// </summary>
-        public void Begin()
+        public void Begin(Scene scene)
         {
             deviceContext.ClearDepthStencilView(
                 depthStencilView.GetDepthStencil(),
@@ -707,7 +707,7 @@ namespace Engine
 
             deviceContext.ClearRenderTargetView(
                 renderTargetView.GetRenderTarget(),
-                GameEnvironment.Background);
+                scene.GameEnvironment.Background);
         }
         /// <summary>
         /// End frame
@@ -736,19 +736,6 @@ namespace Engine
         public void SetDefaultViewport()
         {
             SetViewport(Viewport);
-        }
-        /// <summary>
-        /// Sets default render target
-        /// </summary>
-        /// <param name="clearRT">Indicates whether the render target must be cleared</param>
-        /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
-        /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
-        public void SetDefaultRenderTarget(bool clearRT, bool clearDepth, bool clearStencil)
-        {
-            SetRenderTargets(
-                renderTargetView, clearRT, GameEnvironment.Background,
-                depthStencilView, clearDepth, clearStencil,
-                false);
         }
         /// <summary>
         /// Sets default render target
@@ -802,20 +789,6 @@ namespace Engine
             deviceContext.Rasterizer.SetViewports(rawVpArray);
         }
 
-        /// <summary>
-        /// Set render targets
-        /// </summary>
-        /// <param name="renderTargets">Render targets</param>
-        /// <param name="clearRT">Indicates whether the target must be cleared</param>
-        /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
-        /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
-        public void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, bool clearDepth, bool clearStencil)
-        {
-            SetRenderTargets(
-                renderTargets, clearRT, GameEnvironment.Background,
-                DefaultDepthStencil, clearDepth, clearStencil,
-                false);
-        }
         /// <summary>
         /// Set render targets
         /// </summary>

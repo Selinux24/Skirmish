@@ -628,11 +628,12 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        public GroundGardener(string name, Scene scene, GroundGardenerDescription description) :
-            base(name, scene, description)
+        public GroundGardener(string id, string name, Scene scene, GroundGardenerDescription description) :
+            base(id, name, scene, description)
         {
             if (description == null)
             {
@@ -1228,19 +1229,20 @@ namespace Engine
         /// <summary>
         /// Adds a component to the scene
         /// </summary>
-        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
+        /// <param name="name">Name</param>
+        /// <param name="id">Id</param>
         /// <param name="description">Description</param>
         /// <param name="usage">Component usage</param>
         /// <param name="layer">Processing layer</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<GroundGardener> AddComponentGroundGardener(this Scene scene, string name, GroundGardenerDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int layer = Scene.LayerDefault)
+        public static async Task<GroundGardener> AddComponentGroundGardener(this Scene scene, string id, string name, GroundGardenerDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int layer = Scene.LayerDefault)
         {
             GroundGardener component = null;
 
             await Task.Run(() =>
             {
-                component = new GroundGardener(name, scene, description);
+                component = new GroundGardener(id, name, scene, description);
 
                 scene.AddComponent(component, usage, layer);
             });

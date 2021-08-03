@@ -5,59 +5,57 @@ namespace Engine.Common
     /// <summary>
     /// Base scene object class
     /// </summary>
-    public abstract class BaseSceneObject : IDisposable
+    public abstract class BaseSceneObject : ISceneObject
     {
         /// <summary>
-        /// Object name
+        /// Game instance
         /// </summary>
-        public string Name { get; set; }
-        /// <summary>
-        /// Game class
-        /// </summary>
-        public Scene Scene { get; private set; }
+        protected Game Game { get; private set; }
+
+        /// <inheritdoc/>
+        public virtual string Id { get; private set; }
+        /// <inheritdoc/>
+        public virtual string Name { get; set; }
+        /// <inheritdoc/>
+        public virtual bool Active { get; set; }
+        /// <inheritdoc/>
+        public virtual Scene Scene { get; protected set; }
+        /// <inheritdoc/>
+        public virtual bool HasOwner { get { return Owner != null; } }
+        /// <inheritdoc/>
+        public virtual ISceneObject Owner { get; set; } = null;
         /// <summary>
         /// Object description
         /// </summary>
-        public SceneObjectDescription Description { get; private set; }
+        public virtual SceneDrawableDescription Description { get; protected set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        protected BaseSceneObject(string name, Scene scene, SceneObjectDescription description)
+        protected BaseSceneObject(string id, string name, Scene scene, SceneDrawableDescription description)
         {
+            if (string.IsNullOrEmpty(id))
+            {
+                throw new ArgumentNullException(nameof(id), $"An id must be specified.");
+            }
+
+            Id = id;
             Name = name;
+            Active = description.StartsActive;
             Scene = scene ?? throw new ArgumentNullException(nameof(scene));
             Description = description ?? throw new ArgumentNullException(nameof(description));
+
+            Game = scene?.Game;
         }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~BaseSceneObject()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected abstract void Dispose(bool disposing);
 
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"{Name ?? base.ToString()}";
+            return $"Id: {Id}; Name: {Name ?? base.ToString()}";
         }
     }
 }

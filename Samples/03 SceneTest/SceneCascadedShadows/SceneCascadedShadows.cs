@@ -87,36 +87,36 @@ namespace SceneTest.SceneCascadedShadows
 
         private async Task InitializeUI()
         {
-            title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 20), TextForeColor = Color.Yellow, TextShadowColor = Color.OrangeRed }, LayerUI);
+            title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 20), TextForeColor = Color.Yellow, TextShadowColor = Color.OrangeRed }, LayerUI);
             title.Text = "Cascaded Shadows";
-            help = await this.AddComponentUITextArea("Help", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 14), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, LayerUI);
+            help = await this.AddComponentUITextArea("Help", "Help", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 14), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, LayerUI);
             help.Text = $"Press {Color.Red}F1";
-            backPanel = await this.AddComponentSprite("Backpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), SceneObjectUsages.UI, LayerUI - 1);
+            backPanel = await this.AddComponentSprite("Backpanel", "Backpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), SceneObjectUsages.UI, LayerUI - 1);
 
-            console = await this.AddComponentUIConsole("Console", UIConsoleDescription.Default(Color.DarkSlateBlue), LayerUI + 1);
+            console = await this.AddComponentUIConsole("Console", "Console", UIConsoleDescription.Default(Color.DarkSlateBlue), LayerUI + 1);
             console.Visible = false;
         }
         private async Task InitializeUILevelsControl()
         {
-            spLevel1 = await this.AddComponentSprite("High Level", SpriteDescription.Default(new Color(0x17, 0x3F, 0x5F, 0xFF)), SceneObjectUsages.UI, LayerUI);
-            spLevel2 = await this.AddComponentSprite("Medium Level", SpriteDescription.Default(new Color(0x20, 0x63, 0x9B, 0xFF)), SceneObjectUsages.UI, LayerUI);
-            spLevel3 = await this.AddComponentSprite("Low Level", SpriteDescription.Default(new Color(0x3C, 0xAE, 0xA3, 0xFF)), SceneObjectUsages.UI, LayerUI);
+            spLevel1 = await this.AddComponentSprite("High Level", "High Level", SpriteDescription.Default(new Color(0x17, 0x3F, 0x5F, 0xFF)), SceneObjectUsages.UI, LayerUI);
+            spLevel2 = await this.AddComponentSprite("Medium Level", "Medium Level", SpriteDescription.Default(new Color(0x20, 0x63, 0x9B, 0xFF)), SceneObjectUsages.UI, LayerUI);
+            spLevel3 = await this.AddComponentSprite("Low Level", "Low Level", SpriteDescription.Default(new Color(0x3C, 0xAE, 0xA3, 0xFF)), SceneObjectUsages.UI, LayerUI);
 
-            spSelect1 = await this.AddComponentSprite("First selector", SpriteDescription.Default(new Color(0xF6, 0xD5, 0x5C, 0xFF)), SceneObjectUsages.UI, LayerUI + 1);
+            spSelect1 = await this.AddComponentSprite("First selector", "First selector", SpriteDescription.Default(new Color(0xF6, 0xD5, 0x5C, 0xFF)), SceneObjectUsages.UI, LayerUI + 1);
             spSelect1.EventsEnabled = true;
             spSelect1.MouseJustPressed += PbJustPressed;
             spSelect1.MouseJustReleased += PbJustReleased;
 
-            spSelect2 = await this.AddComponentSprite("Second selector", SpriteDescription.Default(new Color(0xF6, 0xD5, 0x5C, 0xFF)), SceneObjectUsages.UI, LayerUI + 1);
+            spSelect2 = await this.AddComponentSprite("Second selector", "Second selector", SpriteDescription.Default(new Color(0xF6, 0xD5, 0x5C, 0xFF)), SceneObjectUsages.UI, LayerUI + 1);
             spSelect2.EventsEnabled = true;
             spSelect2.MouseJustPressed += PbJustPressed;
             spSelect2.MouseJustReleased += PbJustReleased;
         }
         private async Task InitializeUIDrawers()
         {
-            caption1 = await this.AddComponentUITextArea("Caption1", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 14), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, LayerUI);
-            caption2 = await this.AddComponentUITextArea("Caption2", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 14), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, LayerUI);
-            caption3 = await this.AddComponentUITextArea("Caption3", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 14), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, LayerUI);
+            caption1 = await this.AddComponentUITextArea("Caption1", "Caption1", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 14), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, LayerUI);
+            caption2 = await this.AddComponentUITextArea("Caption2", "Caption2", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 14), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, LayerUI);
+            caption3 = await this.AddComponentUITextArea("Caption3", "Caption3", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 14), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, LayerUI);
             caption1.Text = $"Hight Level Map";
             caption2.Text = $"Medium Level Map";
             caption3.Text = $"Low Level Map";
@@ -124,9 +124,9 @@ namespace SceneTest.SceneCascadedShadows
             caption2.GrowControlWithText = false;
             caption3.GrowControlWithText = false;
 
-            bufferDrawer1 = await this.AddComponentUITextureRenderer("DebugTextureRenderer1", UITextureRendererDescription.Default(), LayerEffects);
-            bufferDrawer2 = await this.AddComponentUITextureRenderer("DebugTextureRenderer2", UITextureRendererDescription.Default(), LayerEffects);
-            bufferDrawer3 = await this.AddComponentUITextureRenderer("DebugTextureRenderer3", UITextureRendererDescription.Default(), LayerEffects);
+            bufferDrawer1 = await this.AddComponentUITextureRenderer("DebugTextureRenderer1", "DebugTextureRenderer1", UITextureRendererDescription.Default(), LayerEffects);
+            bufferDrawer2 = await this.AddComponentUITextureRenderer("DebugTextureRenderer2", "DebugTextureRenderer2", UITextureRendererDescription.Default(), LayerEffects);
+            bufferDrawer3 = await this.AddComponentUITextureRenderer("DebugTextureRenderer3", "DebugTextureRenderer3", UITextureRendererDescription.Default(), LayerEffects);
 
             var shadowMap = Renderer.GetResource(SceneRendererResults.ShadowMapDirectional);
 
@@ -176,7 +176,7 @@ namespace SceneTest.SceneCascadedShadows
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
-            await this.AddComponentModel("Floor", desc);
+            await this.AddComponentModel("Floor", "Floor", desc);
         }
         private async Task InitializeBuildingObelisk()
         {
@@ -188,7 +188,7 @@ namespace SceneTest.SceneCascadedShadows
                 Content = ContentDescription.FromFile("SceneLights/buildings/obelisk", "Obelisk.json"),
             };
 
-            buildingObelisks = await this.AddComponentModelInstanced("Obelisk", desc);
+            buildingObelisks = await this.AddComponentModelInstanced("Obelisk", "Obelisk", desc);
         }
         private async Task InitializeTree()
         {
@@ -200,11 +200,11 @@ namespace SceneTest.SceneCascadedShadows
                 Content = ContentDescription.FromFile("SceneLights/trees", "Tree.json"),
             };
 
-            await this.AddComponentModel("Tree", desc);
+            await this.AddComponentModel("Tree", "Tree", desc);
         }
         private async Task InitializeSkyEffects()
         {
-            await this.AddComponentLensFlare("Flare", new LensFlareDescription()
+            await this.AddComponentLensFlare("Flare", "Flare", new LensFlareDescription()
             {
                 ContentPath = @"Common/lensFlare",
                 GlowTexture = "lfGlow.png",

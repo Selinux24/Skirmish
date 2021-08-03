@@ -371,7 +371,9 @@ namespace Engine.Common
             Scene.Lights.Cull(UpdateContext.CameraVolume, UpdateContext.EyePosition, Scene.GameEnvironment.LODDistanceLow);
 
             //Update active components
-            var updatables = Scene.GetComponents().Where(c => c.Active).OfType<IUpdatable>().ToList();
+            var updatables = Scene.GetComponents<IUpdatable>()
+                .Where(c => c.Active)
+                .ToList();
             if (updatables.Any())
             {
                 updatables.ForEach(EarlyUpdateCall);
@@ -428,7 +430,7 @@ namespace Engine.Common
         /// <param name="index">Cull index</param>
         /// <param name="components">Component list</param>
         /// <returns>Returns the opaque components</returns>
-        protected virtual List<ISceneObject> GetOpaques(int index, IEnumerable<ISceneObject> components)
+        protected virtual List<IDrawable> GetOpaques(int index, IEnumerable<IDrawable> components)
         {
             var opaques = components.Where(c =>
             {
@@ -453,7 +455,7 @@ namespace Engine.Common
         /// <param name="c1">First component</param>
         /// <param name="c2">Second component</param>
         /// <returns>Returns sorting order (nearest first)</returns>
-        protected virtual int SortOpaques(int index, ISceneObject c1, ISceneObject c2)
+        protected virtual int SortOpaques(int index, IDrawable c1, IDrawable c2)
         {
             int res = c1.Layer.CompareTo(c2.Layer);
 
@@ -493,7 +495,7 @@ namespace Engine.Common
         /// <param name="index">Cull index</param>
         /// <param name="components">Component list</param>
         /// <returns>Returns the transparent components</returns>
-        protected virtual List<ISceneObject> GetTransparents(int index, IEnumerable<ISceneObject> components)
+        protected virtual List<IDrawable> GetTransparents(int index, IEnumerable<IDrawable> components)
         {
             var transparents = components.Where(c =>
             {
@@ -518,7 +520,7 @@ namespace Engine.Common
         /// <param name="c1">First component</param>
         /// <param name="c2">Second component</param>
         /// <returns>Returns sorting order (far first)</returns>
-        protected virtual int SortTransparents(int index, ISceneObject c1, ISceneObject c2)
+        protected virtual int SortTransparents(int index, IDrawable c1, IDrawable c2)
         {
             int res = c1.Layer.CompareTo(c2.Layer);
 
@@ -558,7 +560,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="context">Drawing context</param>
         /// <param name="c">Component</param>
-        protected virtual void Draw(DrawContext context, ISceneObject c)
+        protected virtual void Draw(DrawContext context, IDrawable c)
         {
             if (c is IDrawable drawable)
             {
@@ -658,7 +660,8 @@ namespace Engine.Common
 #if DEBUG
             stopwatch.Restart();
 #endif
-            var shadowObjs = Scene.GetComponents().Where(c => c.Visible && c.CastShadow);
+            var shadowObjs = Scene.GetComponents<IDrawable>()
+                .Where(c => c.Visible && c.CastShadow);
 #if DEBUG
             stopwatch.Stop();
             dict.Add($"DoDirectionalShadowMapping Getting components", stopwatch.Elapsed.TotalMilliseconds);
@@ -773,7 +776,8 @@ namespace Engine.Common
 #if DEBUG
             stopwatch.Restart();
 #endif
-            var shadowObjs = Scene.GetComponents().Where(c => c.Visible && c.CastShadow);
+            var shadowObjs = Scene.GetComponents<IDrawable>()
+                .Where(c => c.Visible && c.CastShadow);
 #if DEBUG
             stopwatch.Stop();
             dict.Add($"DoPointShadowMapping Getting components", stopwatch.Elapsed.TotalMilliseconds);
@@ -884,7 +888,8 @@ namespace Engine.Common
 #if DEBUG
             stopwatch.Restart();
 #endif
-            var shadowObjs = Scene.GetComponents().Where(c => c.Visible && c.CastShadow);
+            var shadowObjs = Scene.GetComponents<IDrawable>()
+                .Where(c => c.Visible && c.CastShadow);
 #if DEBUG
             stopwatch.Stop();
             dict.Add($"DoSpotShadowMapping Getting components", stopwatch.Elapsed.TotalMilliseconds);
@@ -974,11 +979,12 @@ namespace Engine.Common
         /// <param name="context">Context</param>
         /// <param name="index">Culling index</param>
         /// <param name="components">Components to draw</param>
-        protected void DrawShadowComponents(DrawContextShadows context, int index, IEnumerable<ISceneObject> components)
+        protected void DrawShadowComponents(DrawContextShadows context, int index, IEnumerable<IDrawable> components)
         {
             var graphics = Scene.Game.Graphics;
 
-            var objects = components.Where(c => IsVisible(c, index)).ToList();
+            var objects = components
+                .Where(c => IsVisible(c, index)).ToList();
             if (objects.Any())
             {
                 objects.Sort((c1, c2) => Sort(c1, c2, index));
@@ -992,7 +998,7 @@ namespace Engine.Common
         /// <param name="c">Scene object</param>
         /// <param name="cullIndex">Cull index</param>
         /// <returns>Returns true if the object is not culled</returns>
-        private bool IsVisible(ISceneObject c, int cullIndex)
+        private bool IsVisible(IDrawable c, int cullIndex)
         {
             if (!(c is Drawable)) return false;
 
@@ -1010,7 +1016,7 @@ namespace Engine.Common
         /// <param name="c2">Scene object two</param>
         /// <param name="cullIndex">Cull index</param>
         /// <returns></returns>
-        private int Sort(ISceneObject c1, ISceneObject c2, int cullIndex)
+        private int Sort(IDrawable c1, IDrawable c2, int cullIndex)
         {
             int res = c1.DepthEnabled.CompareTo(c2.DepthEnabled);
             if (res == 0)
@@ -1043,7 +1049,7 @@ namespace Engine.Common
         /// <param name="graphics">Graphics</param>
         /// <param name="context">Context</param>
         /// <param name="c">Scene object</param>
-        private void DrawShadows(Graphics graphics, DrawContextShadows context, ISceneObject c)
+        private void DrawShadows(Graphics graphics, DrawContextShadows context, IDrawable c)
         {
             if (c is IDrawable drawable)
             {

@@ -92,17 +92,17 @@ namespace SceneTest.SceneMaterials
             {
                 BaseColor = new Color4(0, 0, 0, 0.75f),
             };
-            backpanel = await this.AddComponentSprite("Backpanel", spDesc, SceneObjectUsages.UI, LayerUI - 1);
+            backpanel = await this.AddComponentSprite("Backpanel", "Backpanel", spDesc, SceneObjectUsages.UI, LayerUI - 1);
 
-            title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White, TextShadowColor = Color.Orange });
-            runtime = await this.AddComponentUITextArea("Runtime", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 10), TextForeColor = Color.Yellow, TextShadowColor = Color.Orange });
+            title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White, TextShadowColor = Color.Orange });
+            runtime = await this.AddComponentUITextArea("Runtime", "Runtime", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 10), TextForeColor = Color.Yellow, TextShadowColor = Color.Orange });
 
             title.Text = "Scene Test - Materials";
             runtime.Text = "";
         }
         private async Task InitializeSkyEffects()
         {
-            await this.AddComponentLensFlare("LensFlare", new LensFlareDescription()
+            await this.AddComponentLensFlare("LensFlare", "LensFlare", new LensFlareDescription()
             {
                 ContentPath = @"Common/lensFlare",
                 GlowTexture = "lfGlow.png",
@@ -158,7 +158,7 @@ namespace SceneTest.SceneMaterials
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
-            await this.AddComponentModel("Floor", desc);
+            await this.AddComponentModel("Floor", "Floor", desc);
         }
         private async Task InitializeEmitters()
         {
@@ -175,8 +175,8 @@ namespace SceneTest.SceneMaterials
                 Content = ContentDescription.FromContentData(sphere, mat),
             };
 
-            lightEmitter1 = await this.AddComponentModel("Emitter1", desc);
-            lightEmitter2 = await this.AddComponentModel("Emitter2", desc);
+            lightEmitter1 = await this.AddComponentModel("Emitter1", "Emitter1", desc);
+            lightEmitter2 = await this.AddComponentModel("Emitter2", "Emitter2", desc);
         }
         private async Task InitializeColorGroups(string name)
         {
@@ -196,8 +196,8 @@ namespace SceneTest.SceneMaterials
             var materials1 = GenerateMaterials(n, colorCount, 0.1f, mapParams, true);
             var materials2 = GenerateMaterials(n, colorCount, 0.1f, mapParams, false);
 
-            spheres1 = await InitializeSphereInstanced(name, totalSpheres, materials1);
-            spheres2 = await InitializeSphereInstanced(name, totalSpheres, materials2);
+            spheres1 = await InitializeSphereInstanced($"{name}1", totalSpheres, materials1);
+            spheres2 = await InitializeSphereInstanced($"{name}2", totalSpheres, materials2);
 
             var position1 = new Vector3(-10, 0, -10);
             var position2 = new Vector3(-10.5f, 0, -10);
@@ -369,7 +369,7 @@ namespace SceneTest.SceneMaterials
                 Content = ContentDescription.FromContentData(vertices, indices, materials),
             };
 
-            var model = await this.AddComponentModelInstanced(name, desc);
+            var model = await this.AddComponentModelInstanced(name, name, desc);
 
             for (int i = 0; i < count; i++)
             {

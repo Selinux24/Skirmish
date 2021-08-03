@@ -140,21 +140,21 @@ namespace Animation.SimpleAnimation
 
         private async Task InitializeUI()
         {
-            title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White });
-            runtime = await this.AddComponentUITextArea("Runtime", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Yellow });
-            animText = await this.AddComponentUITextArea("AnimText", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 15), TextForeColor = Color.Orange });
-            messages = await this.AddComponentUITextArea("Messages", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 15), TextForeColor = Color.Orange });
+            title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White });
+            runtime = await this.AddComponentUITextArea("Runtime", "Runtime", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Yellow });
+            animText = await this.AddComponentUITextArea("AnimText", "AnimText", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 15), TextForeColor = Color.Orange });
+            messages = await this.AddComponentUITextArea("Messages", "Messages", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 15), TextForeColor = Color.Orange });
 
             title.Text = "Animation test";
             runtime.Text = "";
             animText.Text = "";
             messages.Text = "";
 
-            backPanel = await this.AddComponentSprite("Backpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), SceneObjectUsages.UI, LayerUI - 1);
+            backPanel = await this.AddComponentSprite("Backpanel", "Backpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), SceneObjectUsages.UI, LayerUI - 1);
 
             var consoleDesc = UIConsoleDescription.Default(new Color4(0.35f, 0.35f, 0.35f, 1f));
             consoleDesc.LogFilterFunc = (l) => l.LogLevel > LogLevel.Trace || (l.LogLevel == LogLevel.Trace && l.CallerTypeName == nameof(AnimationController));
-            console = await this.AddComponentUIConsole("Console", consoleDesc, LayerUI + 1);
+            console = await this.AddComponentUIConsole("Console", "Console", consoleDesc, LayerUI + 1);
             console.Visible = false;
 
             uiReady = true;
@@ -192,11 +192,12 @@ namespace Animation.SimpleAnimation
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
-            await this.AddComponentModel("Floor", desc);
+            await this.AddComponentModel("Floor", "Floor", desc);
         }
         private async Task InitializeLadder()
         {
             var ladder = await this.AddComponentModelInstanced(
+                "Ladder",
                 "Ladder",
                 new ModelInstancedDescription()
                 {
@@ -235,6 +236,7 @@ namespace Animation.SimpleAnimation
         {
             var ladder = await this.AddComponentModelInstanced(
                 "Ladder2",
+                "Ladder2",
                 new ModelInstancedDescription()
                 {
                     CastShadow = true,
@@ -244,6 +246,7 @@ namespace Animation.SimpleAnimation
                 });
 
             var ladder2 = await this.AddComponentModelInstanced(
+                "Ladder22",
                 "Ladder22",
                 new ModelInstancedDescription()
                 {
@@ -291,6 +294,7 @@ namespace Animation.SimpleAnimation
         private async Task InitializeSoldier()
         {
             var soldier = await this.AddComponentModelInstanced(
+                "Soldier",
                 "Soldier",
                 new ModelInstancedDescription()
                 {
@@ -341,6 +345,7 @@ namespace Animation.SimpleAnimation
         {
             var rat = await this.AddComponentModelInstanced(
                 "Rat",
+                "Rat",
                 new ModelInstancedDescription()
                 {
                     CastShadow = true,
@@ -366,6 +371,7 @@ namespace Animation.SimpleAnimation
         {
             var doors = await this.AddComponentModelInstanced(
                 "Doors",
+                "Doors",
                 new ModelInstancedDescription()
                 {
                     CastShadow = true,
@@ -375,7 +381,8 @@ namespace Animation.SimpleAnimation
                 });
 
             var walls = await this.AddComponentModelInstanced(
-                "Walls",
+                "DoorWalls",
+                "DoorWalls",
                 new ModelInstancedDescription()
                 {
                     CastShadow = true,
@@ -418,6 +425,7 @@ namespace Animation.SimpleAnimation
         {
             var walls = await this.AddComponentModelInstanced(
                 "Walls",
+                "Walls",
                 new ModelInstancedDescription()
                 {
                     CastShadow = true,
@@ -431,6 +439,7 @@ namespace Animation.SimpleAnimation
             walls[0].Manipulator.SetScale(2.5f);
 
             var doors = await this.AddComponentModelInstanced(
+                "Jails",
                 "Jails",
                 new ModelInstancedDescription()
                 {
@@ -468,8 +477,8 @@ namespace Animation.SimpleAnimation
         }
         private async Task InitializeDebug()
         {
-            itemTris = await this.AddComponentPrimitiveListDrawer("DebugItemTris", new PrimitiveListDrawerDescription<Triangle>() { Count = 5000, Color = itemTrisColor });
-            itemLines = await this.AddComponentPrimitiveListDrawer("DebugItemLines", new PrimitiveListDrawerDescription<Line3D>() { Count = 1000, Color = itemLinesColor });
+            itemTris = await this.AddComponentPrimitiveListDrawer("DebugItemTris", "DebugItemTris", new PrimitiveListDrawerDescription<Triangle>() { Count = 5000, Color = itemTrisColor });
+            itemLines = await this.AddComponentPrimitiveListDrawer("DebugItemLines", "DebugItemLines", new PrimitiveListDrawerDescription<Line3D>() { Count = 1000, Color = itemLinesColor });
         }
 
         private void InitializeEnvironment()

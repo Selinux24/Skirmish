@@ -52,11 +52,12 @@ namespace Engine.UI
         /// <summary>
         /// Contructor
         /// </summary>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Sprite texture description</param>
-        public UITextureRenderer(string name, Scene scene, UITextureRendererDescription description)
-            : base(name, scene, description)
+        public UITextureRenderer(string id, string name, Scene scene, UITextureRendererDescription description)
+            : base(id, name, scene, description)
         {
             var sprite = GeometryUtil.CreateUnitSprite();
 
@@ -164,18 +165,19 @@ namespace Engine.UI
         /// <summary>
         /// Adds a component to the scene
         /// </summary>
-        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="layer">Processing layer</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<UITextureRenderer> AddComponentUITextureRenderer(this Scene scene, string name, UITextureRendererDescription description, int layer = Scene.LayerUI)
+        public static async Task<UITextureRenderer> AddComponentUITextureRenderer(this Scene scene, string id, string name, UITextureRendererDescription description, int layer = Scene.LayerUI)
         {
             UITextureRenderer component = null;
 
             await Task.Run(() =>
             {
-                component = new UITextureRenderer(name, scene, description);
+                component = new UITextureRenderer(id, name, scene, description);
 
                 scene.AddComponent(component, SceneObjectUsages.UI, layer);
             });

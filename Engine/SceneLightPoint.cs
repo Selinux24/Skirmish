@@ -152,5 +152,54 @@ namespace Engine
         {
             return Line3D.CreateWiredSphere(BoundingSphere, sliceCount, stackCount);
         }
+
+        /// <inheritdoc/>
+        public IGameState GetState()
+        {
+            return new SceneLightPointState
+            {
+                Name = Name,
+                Enabled = Enabled,
+                CastShadow = CastShadow,
+                CastShadowsMarked = CastShadowsMarked,
+                DiffuseColor = DiffuseColor,
+                SpecularColor = SpecularColor,
+                ShadowMapIndex = ShadowMapIndex,
+                State = State,
+                ParentTransform = ParentTransform,
+
+                InitialTransform = initialTransform,
+                InitialRadius = initialRadius,
+                InitialIntensity = initialIntensity,
+                Position = Position,
+                Radius = Radius,
+                Intensity = Intensity,
+            };
+        }
+        /// <inheritdoc/>
+        public void SetState(IGameState state)
+        {
+            if (!(state is SceneLightPointState sceneLightsState))
+            {
+                return;
+            }
+
+            Name = sceneLightsState.Name;
+            Enabled = sceneLightsState.Enabled;
+            CastShadow = sceneLightsState.CastShadow;
+            CastShadowsMarked = sceneLightsState.CastShadowsMarked;
+            DiffuseColor = sceneLightsState.DiffuseColor;
+            SpecularColor = sceneLightsState.SpecularColor;
+            ShadowMapIndex = sceneLightsState.ShadowMapIndex;
+            State = sceneLightsState.State;
+            ParentTransform = sceneLightsState.ParentTransform;
+
+            initialTransform = sceneLightsState.InitialTransform;
+            initialRadius = sceneLightsState.InitialRadius;
+            initialIntensity = sceneLightsState.InitialIntensity;
+            Position = sceneLightsState.Position;
+            Radius = sceneLightsState.Radius;
+            Intensity = sceneLightsState.Intensity;
+        }
     }
 }

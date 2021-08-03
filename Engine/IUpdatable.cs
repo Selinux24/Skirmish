@@ -6,13 +6,8 @@ namespace Engine
     /// <summary>
     /// Updatable interface
     /// </summary>
-    public interface IUpdatable
+    public interface IUpdatable : ISceneObject
     {
-        /// <summary>
-        /// Active
-        /// </summary>
-        bool Active { get; set; }
-
         /// <summary>
         /// Updates object state before the Update call
         /// </summary>

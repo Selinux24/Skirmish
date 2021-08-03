@@ -299,10 +299,12 @@ namespace Engine.UI
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        public UITabPanel(string name, Scene scene, UITabPanelDescription description) : base(name, scene, description)
+        public UITabPanel(string id, string name, Scene scene, UITabPanelDescription description) :
+            base(id, name, scene, description)
         {
             tabButtonsAreaSize = description.TabButtonsAreaSize;
             tabButtonsPadding = description.TabButtonsPadding;
@@ -315,7 +317,11 @@ namespace Engine.UI
 
             if (description.Background != null)
             {
-                Background = new Sprite($"{name}.Background", scene, description.Background);
+                Background = new Sprite(
+                    $"{id}.Background",
+                    $"{name}.Background",
+                    scene,
+                    description.Background);
 
                 AddChild(Background);
             }
@@ -327,7 +333,11 @@ namespace Engine.UI
 
                 for (int i = 0; i < description.Tabs; i++)
                 {
-                    var button = new UIButton($"{name}.Button_{i}", scene, buttonDesc);
+                    var button = new UIButton(
+                        $"{id}.Button_{i}",
+                        $"{name}.Button_{i}",
+                        scene,
+                        buttonDesc);
                     button.Caption.Text = description.TabCaptions?.ElementAtOrDefault(i) ?? $"Button_{i}";
                     button.Caption.Padding = tabButtonPadding;
                     button.MousePressed += Button_Pressed;
@@ -337,7 +347,11 @@ namespace Engine.UI
 
                     tabButtons.Add(button);
 
-                    var panel = new UIPanel($"{name}.Panel_{i}", scene, panelDesc)
+                    var panel = new UIPanel(
+                        $"{id}.Panel_{i}",
+                        $"{name}.Panel_{i}",
+                        scene,
+                        panelDesc)
                     {
                         Padding = tabPanelPadding,
                         Spacing = tabPanelSpacing
@@ -435,7 +449,11 @@ namespace Engine.UI
         /// <param name="buttonDescription">Button description</param>
         public void SetTabButton(int index, UIButtonDescription buttonDescription)
         {
-            UIButton button = new UIButton($"{Name}.Button_{index}", Scene, buttonDescription);
+            UIButton button = new UIButton(
+                $"{Id}.Button_{index}",
+                $"{Name}.Button_{index}",
+                Scene,
+                buttonDescription);
 
             var oldButton = tabButtons[index];
             tabButtons[index] = button;
@@ -452,7 +470,11 @@ namespace Engine.UI
         /// <param name="panelDescription">Panel description</param>
         public void SetTabPanel(int index, UIPanelDescription panelDescription)
         {
-            UIPanel panel = new UIPanel($"{Name}.Panel_{index}", Scene, panelDescription);
+            UIPanel panel = new UIPanel(
+                $"{Id}.Panel_{index}",
+                $"{Name}.Panel_{index}",
+                Scene,
+                panelDescription);
 
             var oldPanel = tabPanels[index];
             tabPanels[index] = panel;
@@ -613,17 +635,18 @@ namespace Engine.UI
         /// Adds a component to the scene
         /// </summary>
         /// <param name="scene">Scene</param>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="layer">Processing layer</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<UITabPanel> AddComponentUITabPanel(this Scene scene, string name, UITabPanelDescription description, int layer = Scene.LayerUI)
+        public static async Task<UITabPanel> AddComponentUITabPanel(this Scene scene, string id, string name, UITabPanelDescription description, int layer = Scene.LayerUI)
         {
             UITabPanel component = null;
 
             await Task.Run(() =>
             {
-                component = new UITabPanel(name, scene, description);
+                component = new UITabPanel(id, name, scene, description);
 
                 scene.AddComponent(component, SceneObjectUsages.UI, layer);
             });

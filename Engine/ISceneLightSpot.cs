@@ -6,7 +6,7 @@ namespace Engine
     /// <summary>
     /// Spot light
     /// </summary>
-    public interface ISceneLightSpot : ISceneLight
+    public interface ISceneLightSpot : ISceneLight, IHasGameState
     {
         /// <summary>
         /// Position

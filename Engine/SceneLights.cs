@@ -8,7 +8,7 @@ namespace Engine
     /// <summary>
     /// Scene lights
     /// </summary>
-    public class SceneLights
+    public class SceneLights : IHasGameState
     {
         #region Preconfigured lights
 
@@ -138,7 +138,7 @@ namespace Engine
         /// <summary>
         /// Fog color
         /// </summary>
-        public Color4 FogColor { get; protected set; }
+        public Color4 FogColor { get; set; }
         /// <summary>
         /// Gets light by name
         /// </summary>
@@ -638,6 +638,46 @@ namespace Engine
             FogStart = 0;
             FogRange = 0;
             BaseFogColor = FogColor = Color.Black;
+        }
+
+        /// <inheritdoc/>
+        public IGameState GetState()
+        {
+            return new SceneLightsState
+            {
+                DirectionalLights = directionalLights.Select(l => l.GetState()).ToArray(),
+                PointLights = pointLights.Select(l => l.GetState()).ToArray(),
+                SpotLights = spotLights.Select(l => l.GetState()).ToArray(),
+                HemisphericLigth = HemisphericLigth.GetState(),
+            };
+        }
+        /// <inheritdoc/>
+        public void SetState(IGameState state)
+        {
+            if (!(state is SceneLightsState sceneLightsState))
+            {
+                return;
+            }
+
+            for (int i = 0; i < sceneLightsState.DirectionalLights.Count(); i++)
+            {
+                var lightState = sceneLightsState.DirectionalLights.ElementAt(i);
+                directionalLights[i].SetState(lightState);
+            }
+
+            for (int i = 0; i < sceneLightsState.PointLights.Count(); i++)
+            {
+                var lightState = sceneLightsState.PointLights.ElementAt(i);
+                PointLights[i].SetState(lightState);
+            }
+
+            for (int i = 0; i < sceneLightsState.SpotLights.Count(); i++)
+            {
+                var lightState = sceneLightsState.SpotLights.ElementAt(i);
+                spotLights[i].SetState(lightState);
+            }
+
+            HemisphericLigth.SetState(sceneLightsState.HemisphericLigth);
         }
     }
 }

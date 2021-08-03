@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Linq;
 
 namespace Engine
 {
@@ -10,7 +11,7 @@ namespace Engine
     /// <summary>
     /// Cube-map drawer
     /// </summary>
-    public class Cubemap : Drawable
+    public class Cubemap : Drawable, IHasGameState
     {
         /// <summary>
         /// Vertex buffer descriptor
@@ -70,11 +71,12 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        public Cubemap(string name, Scene scene, CubemapDescription description)
-            : base(name, scene, description)
+        public Cubemap(string id, string name, Scene scene, CubemapDescription description)
+            : base(id, name, scene, description)
         {
             Manipulator = new Manipulator3D();
 
@@ -251,6 +253,49 @@ namespace Engine
             var image = ImageContent.Array(textureFileNames);
 
             texture = Game.ResourceManager.RequestResource(image);
+        }
+
+        /// <inheritdoc/>
+        public IGameState GetState()
+        {
+            return new CubemapState
+            {
+                Name = Name,
+                Active = Active,
+                Visible = Visible,
+                Usage = Usage,
+                Layer = Layer,
+                OwnerId = Owner?.Name,
+
+                Local = local,
+                Manipulator = Manipulator.GetState(),
+                TextureIndex = TextureIndex,
+            };
+        }
+        /// <inheritdoc/>
+        public void SetState(IGameState state)
+        {
+            if (!(state is CubemapState cubemapState))
+            {
+                return;
+            }
+
+            Name = cubemapState.Name;
+            Active = cubemapState.Active;
+            Visible = cubemapState.Visible;
+            Usage = cubemapState.Usage;
+            Layer = cubemapState.Layer;
+
+            if (!string.IsNullOrEmpty(cubemapState.OwnerId))
+            {
+                Owner = Scene.GetComponents()
+                    .Where(c => c.Id == cubemapState.OwnerId)
+                    .FirstOrDefault();
+            }
+
+            local = cubemapState.Local;
+            Manipulator?.SetState(cubemapState.Manipulator);
+            TextureIndex = cubemapState.TextureIndex;
         }
     }
 }

@@ -224,11 +224,12 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Sky scattering description class</param>
-        public SkyScattering(string name, Scene scene, SkyScatteringDescription description)
-            : base(name, scene, description)
+        public SkyScattering(string id, string name, Scene scene, SkyScatteringDescription description)
+            : base(id, name, scene, description)
         {
             PlanetRadius = description.PlanetRadius;
             PlanetAtmosphereRadius = description.PlanetAtmosphereRadius;
@@ -517,18 +518,19 @@ namespace Engine
         /// Adds a component to the scene
         /// </summary>
         /// <param name="scene">Scene</param>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="usage">Component usage</param>
         /// <param name="layer">Processing layer</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<SkyScattering> AddComponentSkyScattering(this Scene scene, string name, SkyScatteringDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int layer = Scene.LayerSky)
+        public static async Task<SkyScattering> AddComponentSkyScattering(this Scene scene, string id, string name, SkyScatteringDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int layer = Scene.LayerSky)
         {
             SkyScattering component = null;
 
             await Task.Run(() =>
             {
-                component = new SkyScattering(name, scene, description);
+                component = new SkyScattering(id, name, scene, description);
 
                 scene.AddComponent(component, usage, layer);
             });

@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine
 {
@@ -225,6 +226,63 @@ namespace Engine
             Matrix trn = Helper.CreateWorld(Position, Direction, f == 1 ? Vector3.ForwardLH : Vector3.Up);
 
             return Line3D.Transform(coneLines, rot * trn);
+        }
+
+        /// <inheritdoc/>
+        public IGameState GetState()
+        {
+            return new SceneLightSpotState
+            {
+                Name = Name,
+                Enabled = Enabled,
+                CastShadow = CastShadow,
+                CastShadowsMarked = CastShadowsMarked,
+                DiffuseColor = DiffuseColor,
+                SpecularColor = SpecularColor,
+                ShadowMapIndex = ShadowMapIndex,
+                State = State,
+                ParentTransform = ParentTransform,
+
+                InitialTransform = initialTransform,
+                InitialRadius = initialRadius,
+                InitialIntensity = initialIntensity,
+                Position = Position,
+                Direction = Direction,
+                Angle = Angle,
+                Radius = Radius,
+                Intensity = Intensity,
+                ShadowMapCount = ShadowMapCount,
+                FromLightVP = FromLightVP.Cast<Matrix4x4>().ToArray(),
+            };
+        }
+        /// <inheritdoc/>
+        public void SetState(IGameState state)
+        {
+            if (!(state is SceneLightSpotState sceneLightsState))
+            {
+                return;
+            }
+
+            Name = sceneLightsState.Name;
+            Enabled = sceneLightsState.Enabled;
+            CastShadow = sceneLightsState.CastShadow;
+            CastShadowsMarked = sceneLightsState.CastShadowsMarked;
+            DiffuseColor = sceneLightsState.DiffuseColor;
+            SpecularColor = sceneLightsState.SpecularColor;
+            ShadowMapIndex = sceneLightsState.ShadowMapIndex;
+            State = sceneLightsState.State;
+            ParentTransform = sceneLightsState.ParentTransform;
+
+            initialTransform = sceneLightsState.InitialTransform;
+            initialRadius = sceneLightsState.InitialRadius;
+            initialIntensity = sceneLightsState.InitialIntensity;
+            Position = sceneLightsState.Position;
+            Direction = sceneLightsState.Direction;
+            Angle = sceneLightsState.Angle;
+            Radius = sceneLightsState.Radius;
+            Intensity = sceneLightsState.Intensity;
+            ShadowMapCount = sceneLightsState.ShadowMapCount;
+            FromLightVP = sceneLightsState.FromLightVP.Cast<Matrix>().ToArray();
         }
     }
 }

@@ -77,21 +77,22 @@ namespace Collada.DungeonWall
         }
         private async Task InitializeText()
         {
-            title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White });
+            title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White });
             title.Text = "Tiled Wall Test Scene";
 
-            fps = await this.AddComponentUITextArea("FPS", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow });
+            fps = await this.AddComponentUITextArea("FPS", "FPS", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 12), TextForeColor = Color.Yellow });
             fps.Text = null;
 
-            picks = await this.AddComponentUITextArea("Picks", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow });
+            picks = await this.AddComponentUITextArea("Picks", "Picks", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 12), TextForeColor = Color.Yellow });
             picks.Text = null;
 
             var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
-            panel = await this.AddComponentSprite("BackPanel", spDesc, SceneObjectUsages.UI, LayerUI - 1);
+            panel = await this.AddComponentSprite("BackPanel", "BackPanel", spDesc, SceneObjectUsages.UI, LayerUI - 1);
         }
         private async Task InitializeDungeon()
         {
             var wall = await this.AddComponentModelInstanced(
+                "Wall",
                 "Wall",
                 new ModelInstancedDescription()
                 {
@@ -131,7 +132,7 @@ namespace Collada.DungeonWall
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
-            lightEmitter = await this.AddComponentModel("Emitter", desc);
+            lightEmitter = await this.AddComponentModel("Emitter", "Emitter", desc);
         }
 
         public override void Update(GameTime gameTime)

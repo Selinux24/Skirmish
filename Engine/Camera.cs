@@ -8,7 +8,7 @@ namespace Engine
     /// <summary>
     /// Camera 3D
     /// </summary>
-    public class Camera : IManipulator, IIntersectable, IDisposable
+    public class Camera : IManipulator, IIntersectable, IHasGameState, IDisposable
     {
         /// <summary>
         /// Creates an isometric camera
@@ -1140,6 +1140,85 @@ namespace Engine
             {
                 return (IntersectionVolumeFrustum)Frustum;
             }
+        }
+
+        /// <inheritdoc/>
+        public IGameState GetState()
+        {
+            return new CameraState
+            {
+                Position = position,
+                Interest = interest,
+                FieldOfView = fieldOfView,
+                NearPlaneDistance = nearPlaneDistance,
+                FarPlaneDistance = farPlaneDistance,
+                AspectRelation = aspectRelation,
+                ViewportWidth = viewportWidth,
+                ViewportHeight = viewportHeight,
+                Mode = mode,
+                Velocity = Velocity,
+                IsometricAxis = isometricAxis,
+                IsoMetricForward = isoMetricForward,
+                IsoMetricBackward = isoMetricBackward,
+                IsoMetricLeft = isoMetricLeft,
+                IsoMetricRight = isoMetricRight,
+                TranslationMode = translationMode,
+                TranslationInterest = translationInterest,
+                MovementDelta = MovementDelta,
+                SlowMovementDelta = SlowMovementDelta,
+                RotationDelta = RotationDelta,
+                SlowRotationDelta = SlowRotationDelta,
+                ZoomMax = ZoomMax,
+                ZoomMin = ZoomMin,
+                ZoomDelta = ZoomDelta,
+                SlowZoomDelta = SlowZoomDelta,
+                View = View,
+                Projection = Projection,
+                Frustum = Frustum.Matrix,
+                Following = -1,
+                InvertY = InvertY,
+                CameraRadius = CameraRadius,
+            };
+        }
+        /// <inheritdoc/>
+        public void SetState(IGameState state)
+        {
+            if (!(state is CameraState cameraState))
+            {
+                return;
+            }
+
+            position = cameraState.Position;
+            interest = cameraState.Interest;
+            fieldOfView = cameraState.FieldOfView;
+            nearPlaneDistance = cameraState.NearPlaneDistance;
+            farPlaneDistance = cameraState.FarPlaneDistance;
+            aspectRelation = cameraState.AspectRelation;
+            viewportWidth = cameraState.ViewportWidth;
+            viewportHeight = cameraState.ViewportHeight;
+            mode = cameraState.Mode;
+            Velocity = cameraState.Velocity;
+            isometricAxis = cameraState.IsometricAxis;
+            isoMetricForward = cameraState.IsoMetricForward;
+            isoMetricBackward = cameraState.IsoMetricBackward;
+            isoMetricLeft = cameraState.IsoMetricLeft;
+            isoMetricRight = cameraState.IsoMetricRight;
+            translationMode = cameraState.TranslationMode;
+            translationInterest = cameraState.TranslationInterest;
+            MovementDelta = cameraState.MovementDelta;
+            SlowMovementDelta = cameraState.SlowMovementDelta;
+            RotationDelta = cameraState.RotationDelta;
+            SlowRotationDelta = cameraState.SlowRotationDelta;
+            ZoomMax = cameraState.ZoomMax;
+            ZoomMin = cameraState.ZoomMin;
+            ZoomDelta = cameraState.ZoomDelta;
+            SlowZoomDelta = cameraState.SlowZoomDelta;
+            View = cameraState.View;
+            Projection = cameraState.Projection;
+            Frustum = new BoundingFrustum(cameraState.Frustum);
+            Following = null;
+            InvertY = cameraState.InvertY;
+            CameraRadius = cameraState.CameraRadius;
         }
     }
 }

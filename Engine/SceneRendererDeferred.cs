@@ -188,7 +188,7 @@ namespace Engine
             Updated = false;
 
             //Select visible components
-            var visibleComponents = Scene.GetComponents().Where(c => c.Visible);
+            var visibleComponents = Scene.GetComponents<IDrawable>().Where(c => c.Visible);
             if (!visibleComponents.Any())
             {
                 return;
@@ -295,7 +295,7 @@ namespace Engine
         /// Do deferred rendering
         /// </summary>
         /// <param name="deferredEnabledComponents">Components</param>
-        private void DoDeferred(IEnumerable<ISceneObject> deferredEnabledComponents)
+        private void DoDeferred(IEnumerable<IDrawable> deferredEnabledComponents)
         {
 #if DEBUG
             Stopwatch swCull = Stopwatch.StartNew();
@@ -371,7 +371,7 @@ namespace Engine
         /// Do forward rendering (UI, transparents, etc.)
         /// </summary>
         /// <param name="deferredDisabledComponents">Components</param>
-        private void DoForward(IEnumerable<ISceneObject> deferredDisabledComponents)
+        private void DoForward(IEnumerable<IDrawable> deferredDisabledComponents)
         {
 #if DEBUG
             Stopwatch swCull = Stopwatch.StartNew();
@@ -664,7 +664,7 @@ namespace Engine
         /// </summary>
         /// <param name="context">Context</param>
         /// <param name="components">Components</param>
-        private void DrawResultComponents(DrawContext context, int index, IEnumerable<ISceneObject> components)
+        private void DrawResultComponents(DrawContext context, int index, IEnumerable<IDrawable> components)
         {
             //Save current drawing mode
             var mode = context.DrawerMode;

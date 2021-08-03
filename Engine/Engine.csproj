@@ -128,8 +128,14 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Animation\AnimationControllerState.cs" />
     <Compile Include="Animation\AnimationClip.cs" />
     <Compile Include="Animation\AnimationController.cs" />
+    <Compile Include="Animation\AnimationPathItemState.cs" />
+    <Compile Include="Animation\AnimationPathState.cs" />
+    <Compile Include="BasicManipulatorControllerState.cs" />
+    <Compile Include="Common\BaseSceneObjectState.cs" />
+    <Compile Include="Common\ManipulatorControllerState.cs" />
     <Compile Include="Content\Persistence\AnimationFile.cs" />
     <Compile Include="Animation\AnimationPath.cs" />
     <Compile Include="Animation\AnimationPathItem.cs" />
@@ -179,13 +185,34 @@
     <Compile Include="Content\BuiltInMaterial.cs" />
     <Compile Include="Content\BuiltInMaterials.cs" />
     <Compile Include="Content\IAnimationLoader.cs" />
-    <Compile Include="Content\Persistence\Direction3.cs" />
-    <Compile Include="Content\Persistence\ColorRgba.cs" />
+    <Compile Include="CubemapState.cs" />
+    <Compile Include="IGameState.cs" />
+    <Compile Include="IHasGameState.cs" />
+    <Compile Include="CameraState.cs" />
+    <Compile Include="Direction3.cs" />
+    <Compile Include="ColorRgba.cs" />
     <Compile Include="Content\Persistence\ParticleEmitterFile.cs" />
     <Compile Include="Content\Persistence\ParticleSystemFile.cs" />
     <Compile Include="Effects\EffectDefaultTexture.cs" />
     <Compile Include="Effects\IDrawerPostProcess.cs" />
-    <Compile Include="Content\Persistence\Position3.cs" />
+    <Compile Include="GameEnvironmentState.cs" />
+    <Compile Include="IModelHasParts.cs" />
+    <Compile Include="IModelPart.cs" />
+    <Compile Include="ISceneObjectState.cs" />
+    <Compile Include="Manipulator3DState.cs" />
+    <Compile Include="ModelInstancedState.cs" />
+    <Compile Include="ModelInstanceState.cs" />
+    <Compile Include="ModelState.cs" />
+    <Compile Include="Position4.cs" />
+    <Compile Include="Position3.cs" />
+    <Compile Include="Matrix4x4.cs" />
+    <Compile Include="SceneLightDirectionalState.cs" />
+    <Compile Include="SceneLightHemisphericState.cs" />
+    <Compile Include="SceneLightPointState.cs" />
+    <Compile Include="SceneLightSpotState.cs" />
+    <Compile Include="SceneLightsState.cs" />
+    <Compile Include="SceneLightState.cs" />
+    <Compile Include="SceneState.cs" />
     <Compile Include="PostProcessing\IDrawerPostProcessParams.cs" />
     <Compile Include="PostProcessing\PostProcessBlurVignetteParams.cs" />
     <Compile Include="PostProcessing\PostProcessToneMappingParams.cs" />
@@ -212,8 +239,8 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="RenderPass.cs" />
-    <Compile Include="Content\Persistence\RotationQ.cs" />
-    <Compile Include="Content\Persistence\Scale3.cs" />
+    <Compile Include="RotationQ.cs" />
+    <Compile Include="Scale3.cs" />
     <Compile Include="SpecularAlgorithms.cs" />
     <Compile Include="Common\VertexFont.cs" />
     <Compile Include="Content\MaterialBlinnPhongContent.cs" />
@@ -382,7 +409,7 @@
     <Compile Include="Modular\Persistence\AssetMap.cs" />
     <Compile Include="Modular\Persistence\Asset.cs" />
     <Compile Include="Modular\Persistence\AssetConnection.cs" />
-    <Compile Include="Content\Persistence\PersistenceHelpers.cs" />
+    <Compile Include="PersistenceHelpers.cs" />
     <Compile Include="Modular\ModularSceneryItem.cs" />
     <Compile Include="Modular\Persistence\ObjectReference.cs" />
     <Compile Include="Modular\Persistence\AssetReference.cs" />
@@ -412,7 +439,7 @@
     <Compile Include="PickingResult.cs" />
     <Compile Include="SceneCullManager.cs" />
     <Compile Include="SceneLightHemispheric.cs" />
-    <Compile Include="SceneObjectDescription.cs" />
+    <Compile Include="SceneDrawableDescription.cs" />
     <Compile Include="SceneObjectUsages.cs" />
     <Compile Include="SceneRendererDeferredLights.cs" />
     <Compile Include="Modular\ModularScenery.cs" />
@@ -428,6 +455,7 @@
     <Compile Include="SkyPlaneDescription.cs" />
     <Compile Include="SkyScatteringDescription.cs" />
     <Compile Include="SkyScatteringResolutions.cs" />
+    <Compile Include="SteerManipulatorControllerState.cs" />
     <Compile Include="TaskResult.cs" />
     <Compile Include="Tween\FloatTween.cs" />
     <Compile Include="Tween\ITweenCollection.cs" />
@@ -527,7 +555,7 @@
     <Compile Include="UI\UITextureRendererChannels.cs" />
     <Compile Include="UI\UITextureRendererDescription.cs" />
     <Compile Include="UI\TextDrawerDescription.cs" />
-    <Compile Include="Updatable.cs" />
+    <Compile Include="Common\Updatable.cs" />
     <Compile Include="Vector2Int.cs" />
     <Compile Include="Vector3Int.cs" />
     <Compile Include="HeightMap.cs" />

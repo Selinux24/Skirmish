@@ -1,7 +1,7 @@
 ﻿using SharpDX;
 using System;
 
-namespace Engine.Content.Persistence
+namespace Engine
 {
     /// <summary>
     /// 3D direction
@@ -125,7 +125,7 @@ namespace Engine.Content.Persistence
             }
             else
             {
-                return PersistenceHelpers.ReadReservedWordsForDirection(value);
+                return PersistenceHelpers.ReadReservedWordsForDirection3(value);
             }
         }
 

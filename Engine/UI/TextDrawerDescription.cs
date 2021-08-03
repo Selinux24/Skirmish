@@ -4,7 +4,7 @@ namespace Engine.UI
     /// <summary>
     /// Text drawer description
     /// </summary>
-    public class TextDrawerDescription : SceneObjectDescription
+    public class TextDrawerDescription : SceneDrawableDescription
     {
         /// <summary>
         /// Default font family name

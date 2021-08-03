@@ -54,11 +54,12 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Particle manager description</param>
-        public ParticleManager(string name, Scene scene, ParticleManagerDescription description)
-            : base(name, scene, description)
+        public ParticleManager(string id, string name, Scene scene, ParticleManagerDescription description)
+            : base(id, name, scene, description)
         {
 
         }
@@ -312,18 +313,19 @@ namespace Engine
         /// Adds a component to the scene
         /// </summary>
         /// <param name="scene">Scene</param>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="usage">Component usage</param>
         /// <param name="layer">Processing layer</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<ParticleManager> AddComponentParticleManager(this Scene scene, string name, ParticleManagerDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int layer = Scene.LayerEffects)
+        public static async Task<ParticleManager> AddComponentParticleManager(this Scene scene, string id, string name, ParticleManagerDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int layer = Scene.LayerEffects)
         {
             ParticleManager component = null;
 
             await Task.Run(() =>
             {
-                component = new ParticleManager(name, scene, description);
+                component = new ParticleManager(id, name, scene, description);
 
                 scene.AddComponent(component, usage, layer);
             });

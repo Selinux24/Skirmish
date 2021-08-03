@@ -86,11 +86,12 @@ namespace SceneTest.SceneStencilPass
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
-            await this.AddComponentModel("Floor", desc);
+            await this.AddComponentModel("Floor", "Floor", desc);
         }
         private async Task InitializeBuildingObelisk()
         {
             buildingObelisk = await this.AddComponentModel(
+                "Obelisk",
                 "Obelisk",
                 new ModelDescription()
                 {
@@ -117,8 +118,8 @@ namespace SceneTest.SceneStencilPass
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
-            lightEmitter1 = await this.AddComponentModel("Emitter1", desc);
-            lightEmitter2 = await this.AddComponentModel("Emitter2", desc);
+            lightEmitter1 = await this.AddComponentModel("Emitter1", "Emitter1", desc);
+            lightEmitter2 = await this.AddComponentModel("Emitter2", "Emitter2", desc);
         }
         private async Task InitializeLights()
         {
@@ -139,7 +140,7 @@ namespace SceneTest.SceneStencilPass
                 DepthEnabled = true,
                 Count = 5000
             };
-            lightsVolumeDrawer = await this.AddComponentPrimitiveListDrawer("DebugLightsDrawer", desc);
+            lightsVolumeDrawer = await this.AddComponentPrimitiveListDrawer("DebugLightsDrawer", "DebugLightsDrawer", desc);
         }
 
         public override void Update(GameTime gameTime)

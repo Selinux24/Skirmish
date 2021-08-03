@@ -48,7 +48,8 @@ namespace Engine
             Updated = false;
 
             //Select visible components
-            var visibleComponents = Scene.GetComponents().Where(c => c.Visible);
+            var visibleComponents = Scene.GetComponents<IDrawable>().Where(c => c.Visible);
+
             if (!visibleComponents.Any())
             {
                 return;
@@ -81,7 +82,7 @@ namespace Engine
             if (objectComponents.Any())
             {
                 //Binds the result target
-                SetTarget(Targets.Objects, true, GameEnvironment.Background, true, true);
+                SetTarget(Targets.Objects, true, Scene.GameEnvironment.Background, true, true);
                 //Render objects
                 DoRender(Scene, objectComponents);
                 //Post-processing
@@ -120,7 +121,7 @@ namespace Engine
         /// </summary>
         /// <param name="scene">Scene</param>
         /// <param name="components">Components</param>
-        private void DoRender(Scene scene, IEnumerable<ISceneObject> components)
+        private void DoRender(Scene scene, IEnumerable<IDrawable> components)
         {
             if (!components.Any())
             {
@@ -188,7 +189,7 @@ namespace Engine
         /// <param name="context">Context</param>
         /// <param name="index">Cull results index</param>
         /// <param name="components">Components</param>
-        private void DrawResultComponents(DrawContext context, int index, IEnumerable<ISceneObject> components)
+        private void DrawResultComponents(DrawContext context, int index, IEnumerable<IDrawable> components)
         {
             //Save current drawer mode
             var mode = context.DrawerMode;

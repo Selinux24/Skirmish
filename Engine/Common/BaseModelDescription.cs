@@ -6,7 +6,7 @@ namespace Engine.Common
     /// <summary>
     /// Model base description
     /// </summary>
-    public abstract class BaseModelDescription : SceneObjectDescription
+    public abstract class BaseModelDescription : SceneDrawableDescription
     {
         /// <summary>
         /// Optimize geometry

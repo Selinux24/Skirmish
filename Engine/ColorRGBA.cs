@@ -1,7 +1,7 @@
 ﻿using SharpDX;
 using System;
 
-namespace Engine.Content.Persistence
+namespace Engine
 {
     /// <summary>
     /// RGBA color
@@ -104,6 +104,24 @@ namespace Engine.Content.Persistence
             return new ColorRgba(value.R, value.G, value.B, value.A);
         }
 
+        public static implicit operator Color3(ColorRgba value)
+        {
+            return new Color3(value.R, value.G, value.B);
+        }
+        public static implicit operator ColorRgba(Color3 value)
+        {
+            return new ColorRgba(value.Red, value.Green, value.Blue, 1f);
+        }
+
+        public static implicit operator Color4(ColorRgba value)
+        {
+            return new Color4(value.R, value.G, value.B, value.A);
+        }
+        public static implicit operator ColorRgba(Color4 value)
+        {
+            return new ColorRgba(value.Red, value.Green, value.Blue, value.Alpha);
+        }
+
         public static implicit operator string(ColorRgba value)
         {
             return $"{value.R} {value.G} {value.B} {value.A}";
@@ -125,7 +143,7 @@ namespace Engine.Content.Persistence
             }
             else
             {
-                return PersistenceHelpers.ReadReservedWordsForColor(value);
+                return PersistenceHelpers.ReadReservedWordsForColorRgba(value);
             }
         }
 

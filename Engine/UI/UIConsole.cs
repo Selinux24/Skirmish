@@ -63,16 +63,22 @@ namespace Engine.UI
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        public UIConsole(string name, Scene scene, UIConsoleDescription description) : base(name, scene, description)
+        public UIConsole(string id, string name, Scene scene, UIConsoleDescription description) :
+            base(id, name, scene, description)
         {
             GrowControlWithText = false;
 
             if (description.Background != null)
             {
-                var background = new Sprite($"{name}.Background", scene, description.Background);
+                var background = new Sprite(
+                    $"{id}.Background",
+                    $"{name}.Background",
+                    scene,
+                    description.Background);
 
                 AddChild(background);
             }
@@ -183,17 +189,18 @@ namespace Engine.UI
         /// Adds a component to the scene
         /// </summary>
         /// <param name="scene">Scene</param>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="layer">Processing layer</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<UIConsole> AddComponentUIConsole(this Scene scene, string name, UIConsoleDescription description, int layer = Scene.LayerUI)
+        public static async Task<UIConsole> AddComponentUIConsole(this Scene scene, string id, string name, UIConsoleDescription description, int layer = Scene.LayerUI)
         {
             UIConsole component = null;
 
             await Task.Run(() =>
             {
-                component = new UIConsole(name, scene, description);
+                component = new UIConsole(id, name, scene, description);
 
                 scene.AddComponent(component, SceneObjectUsages.UI, layer);
             });

@@ -49,7 +49,7 @@ namespace Terrain.Start
             #region Cursor
 
             var cursorDesc = UICursorDescription.Default("Start/pointer.png", 48, 48, false, new Vector2(-14f, -7f));
-            await this.AddComponentUICursor("Cursor", cursorDesc, layerCursor);
+            await this.AddComponentUICursor("Cursor", "Cursor", cursorDesc, layerCursor);
 
             #endregion
 
@@ -57,9 +57,9 @@ namespace Terrain.Start
 
             var backGroundDesc = new ModelDescription()
             {
-                Content = ContentDescription.FromFile("Start", "SkyPlane.xml"),
+                Content = ContentDescription.FromFile("Start", "SkyPlane.json"),
             };
-            backGround = await this.AddComponentModel("Background", backGroundDesc, SceneObjectUsages.UI);
+            backGround = await this.AddComponentModel("Background", "Background", backGroundDesc, SceneObjectUsages.UI);
 
             #endregion
 
@@ -74,7 +74,7 @@ namespace Terrain.Start
             titleDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
             titleDesc.TextVerticalAlign = VerticalTextAlign.Middle;
 
-            title = await this.AddComponentUITextArea("Title", titleDesc, layerHUD);
+            title = await this.AddComponentUITextArea("Title", "Title", titleDesc, layerHUD);
             title.GrowControlWithText = false;
             title.Text = "Terrain Tests";
 
@@ -94,13 +94,13 @@ namespace Terrain.Start
             startButtonDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
             startButtonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
 
-            scenePerlinNoiseButton = await this.AddComponentUIButton("ButtonPerlinNoise", startButtonDesc, layerHUD);
+            scenePerlinNoiseButton = await this.AddComponentUIButton("ButtonPerlinNoise", "ButtonPerlinNoise", startButtonDesc, layerHUD);
             scenePerlinNoiseButton.MouseClick += SceneButtonClick;
             scenePerlinNoiseButton.MouseEnter += SceneButtonMouseEnter;
             scenePerlinNoiseButton.MouseLeave += SceneButtonMouseLeave;
             scenePerlinNoiseButton.Caption.Text = "Perlin Noise";
 
-            sceneRtsButton = await this.AddComponentUIButton("ButtonRts", startButtonDesc, layerHUD);
+            sceneRtsButton = await this.AddComponentUIButton("ButtonRts", "ButtonRts", startButtonDesc, layerHUD);
             sceneRtsButton.MouseClick += SceneButtonClick;
             sceneRtsButton.MouseEnter += SceneButtonMouseEnter;
             sceneRtsButton.MouseLeave += SceneButtonMouseLeave;
@@ -119,7 +119,7 @@ namespace Terrain.Start
             exitButtonDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
             exitButtonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
 
-            exitButton = await this.AddComponentUIButton("ButtonExit", exitButtonDesc, layerHUD);
+            exitButton = await this.AddComponentUIButton("ButtonExit", "ButtonExit", exitButtonDesc, layerHUD);
             exitButton.MouseClick += ExitButtonClick;
             exitButton.MouseEnter += SceneButtonMouseEnter;
             exitButton.MouseLeave += SceneButtonMouseLeave;

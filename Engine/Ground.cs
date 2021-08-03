@@ -25,11 +25,12 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Ground description</param>
-        protected Ground(string name, Scene scene, GroundDescription description)
-            : base(name, scene, description)
+        protected Ground(string id, string name, Scene scene, GroundDescription description)
+            : base(id, name, scene, description)
         {
             collisionDetection = description.CollisionDetection;
         }

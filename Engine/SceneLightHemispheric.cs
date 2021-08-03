@@ -85,5 +85,46 @@ namespace Engine
                 State = State,
             };
         }
+
+        /// <inheritdoc/>
+        public IGameState GetState()
+        {
+            return new SceneLightHemisphericState
+            {
+                Name = Name,
+                Enabled = Enabled,
+                CastShadow = CastShadow,
+                CastShadowsMarked = CastShadowsMarked,
+                DiffuseColor = DiffuseColor,
+                SpecularColor = SpecularColor,
+                ShadowMapIndex = ShadowMapIndex,
+                State = State,
+                ParentTransform = ParentTransform,
+
+                AmbientDown = AmbientDown,
+                AmbientUp = AmbientUp,
+            };
+        }
+        /// <inheritdoc/>
+        public void SetState(IGameState state)
+        {
+            if (!(state is SceneLightHemisphericState sceneLightsState))
+            {
+                return;
+            }
+
+            Name = sceneLightsState.Name;
+            Enabled = sceneLightsState.Enabled;
+            CastShadow = sceneLightsState.CastShadow;
+            CastShadowsMarked = sceneLightsState.CastShadowsMarked;
+            DiffuseColor = sceneLightsState.DiffuseColor;
+            SpecularColor = sceneLightsState.SpecularColor;
+            ShadowMapIndex = sceneLightsState.ShadowMapIndex;
+            State = sceneLightsState.State;
+            ParentTransform = sceneLightsState.ParentTransform;
+
+            AmbientDown = sceneLightsState.AmbientDown;
+            AmbientUp = sceneLightsState.AmbientUp;
+        }
     }
 }

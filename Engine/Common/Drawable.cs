@@ -1,106 +1,101 @@
-﻿
+﻿using System;
+
 namespace Engine.Common
 {
     /// <summary>
     /// Drawable object
     /// </summary>
-    public abstract class Drawable : Updatable, IDrawable, ICullable, ISceneObject
+    public abstract class Drawable : BaseSceneObject, IUpdatable, IDrawable, ICullable, ISceneObject, IDisposable
     {
-        /// <summary>
-        /// Game class
-        /// </summary>
-        protected Game Game { get { return Scene.Game; } }
         /// <summary>
         /// Buffer manager
         /// </summary>
         protected BufferManager BufferManager { get { return Game.BufferManager; } }
 
-        /// <summary>
-        /// Visible
-        /// </summary>
+        /// <inheritdoc/>
         public virtual bool Visible { get; set; } = true;
-        /// <summary>
-        /// Gets or sets whether the object cast shadow
-        /// </summary>
-        public virtual bool CastShadow { get; set; }
-        /// <summary>
-        /// Gets or sets whether the object is enabled to draw with the deferred renderer
-        /// </summary>
-        public virtual bool DeferredEnabled { get; set; }
-        /// <summary>
-        /// Uses depth info
-        /// </summary>
-        public virtual bool DepthEnabled { get; set; }
-        /// <summary>
-        /// Blend mode
-        /// </summary>
-        public virtual BlendModes BlendMode { get; set; }
-        /// <summary>
-        /// Object usage
-        /// </summary>
-        public virtual SceneObjectUsages Usage { get; set; } = SceneObjectUsages.None;
-        /// <summary>
-        /// Processing layer
-        /// </summary>
-        public virtual int Layer { get; set; } = 0;
-        /// <summary>
-        /// Gets whether the current object has owner or not
-        /// </summary>
-        public virtual bool HasOwner { get { return Owner != null; } }
-        /// <summary>
-        /// Gets or sets the current object's owner
-        /// </summary>
-        public virtual ISceneObject Owner { get; set; } = null;
-        /// <summary>
-        /// Maximum instance count
-        /// </summary>
-        public virtual int InstanceCount { get; protected set; } = 1;
+        /// <inheritdoc/>
+        public virtual bool CastShadow { get; protected set; }
+        /// <inheritdoc/>
+        public virtual bool DeferredEnabled { get; protected set; }
+        /// <inheritdoc/>
+        public virtual bool DepthEnabled { get; protected set; }
+        /// <inheritdoc/>
+        public virtual BlendModes BlendMode { get; protected set; }
+        /// <inheritdoc/>
+        public virtual SceneObjectUsages Usage { get; set; }
+        /// <inheritdoc/>
+        public virtual int Layer { get; set; }
+        /// <inheritdoc/>
+        public virtual int InstanceCount { get; protected set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        protected Drawable(string name, Scene scene, SceneObjectDescription description) :
-            base(name, scene, description)
+        protected Drawable(string id, string name, Scene scene, SceneDrawableDescription description) :
+            base(id, name, scene, description)
         {
+            Visible = description.StartsVisible;
             CastShadow = description.CastShadow;
             DeferredEnabled = description.DeferredEnabled;
             DepthEnabled = description.DepthEnabled;
             BlendMode = description.BlendMode;
+            Usage = SceneObjectUsages.None;
+            Layer = 0;
+            InstanceCount = 1;
         }
+        /// <summary>
+        /// Destructor
+        /// </summary>
+        ~Drawable()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected abstract void Dispose(bool disposing);
 
         /// <inheritdoc/>
-        public override void Update(UpdateContext context)
+        public virtual void EarlyUpdate(UpdateContext context)
+        {
+
+        }
+        /// <inheritdoc/>
+        public virtual void Update(UpdateContext context)
+        {
+
+        }
+        /// <inheritdoc/>
+        public virtual void LateUpdate(UpdateContext context)
         {
 
         }
 
-        /// <summary>
-        /// Draw shadows
-        /// </summary>
-        /// <param name="context">Context</param>
+        /// <inheritdoc/>
         public virtual void DrawShadows(DrawContextShadows context)
         {
 
         }
-        /// <summary>
-        /// Draw
-        /// </summary>
-        /// <param name="context">Context</param>
+        /// <inheritdoc/>
         public virtual void Draw(DrawContext context)
         {
 
         }
 
-        /// <summary>
-        /// Performs culling test
-        /// </summary>
-        /// <param name="volume">Volume</param>
-        /// <param name="distance">If the object is inside the volume, returns the distance</param>
-        /// <returns>Returns true if the object is outside of the frustum</returns>
-        /// <remarks>By default, returns true and distance = float.MaxValue</remarks>
+        /// <inheritdoc/>
         public virtual bool Cull(IIntersectionVolume volume, out float distance)
         {
             distance = float.MaxValue;

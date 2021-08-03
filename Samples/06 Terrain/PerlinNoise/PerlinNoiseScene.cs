@@ -127,24 +127,24 @@ namespace Terrain.PerlinNoise
             var butDesc = UIButtonDescription.DefaultTwoStateButton(bColor1, bColor2);
             butDesc.Font = font;
 
-            backGround = await this.AddComponentUIPanel("backGround", UIPanelDescription.Screen(this, Color.SandyBrown));
-            btnExit = await this.AddComponentUIButton("btnExit", butDesc);
+            backGround = await this.AddComponentUIPanel("backGround", "backGround", UIPanelDescription.Screen(this, Color.SandyBrown));
+            btnExit = await this.AddComponentUIButton("btnExit", "Exit", butDesc);
 
-            txtScale = await this.AddComponentUITextArea("txtScale", UITextAreaDescription.DefaultFromFamily(fontFamily, 16));
-            txtLacunarity = await this.AddComponentUITextArea("txtLacunarity", UITextAreaDescription.DefaultFromFamily(fontFamily, 16));
-            txtPersistance = await this.AddComponentUITextArea("txtPersistance", UITextAreaDescription.DefaultFromFamily(fontFamily, 16));
-            txtOctaves = await this.AddComponentUITextArea("txtOctaves", UITextAreaDescription.DefaultFromFamily(fontFamily, 16));
-            txtHelpOffset = await this.AddComponentUITextArea("txtHelpOffset", UITextAreaDescription.DefaultFromFamily(fontFamily, 12));
-            txtOffset = await this.AddComponentUITextArea("txtOffset", UITextAreaDescription.DefaultFromFamily(fontFamily, 14));
-            txtHelpSeed = await this.AddComponentUITextArea("txtHelpSeed", UITextAreaDescription.DefaultFromFamily(fontFamily, 12));
-            txtSeed = await this.AddComponentUITextArea("txtSeed", UITextAreaDescription.DefaultFromFamily(fontFamily, 14));
+            txtScale = await this.AddComponentUITextArea("txtScale", "Scale", UITextAreaDescription.DefaultFromFamily(fontFamily, 16));
+            txtLacunarity = await this.AddComponentUITextArea("txtLacunarity", "Lacunarity", UITextAreaDescription.DefaultFromFamily(fontFamily, 16));
+            txtPersistance = await this.AddComponentUITextArea("txtPersistance", "Persistance", UITextAreaDescription.DefaultFromFamily(fontFamily, 16));
+            txtOctaves = await this.AddComponentUITextArea("txtOctaves", "Octaves", UITextAreaDescription.DefaultFromFamily(fontFamily, 16));
+            txtHelpOffset = await this.AddComponentUITextArea("txtHelpOffset", "HelpOffset", UITextAreaDescription.DefaultFromFamily(fontFamily, 12));
+            txtOffset = await this.AddComponentUITextArea("txtOffset", "Offset", UITextAreaDescription.DefaultFromFamily(fontFamily, 14));
+            txtHelpSeed = await this.AddComponentUITextArea("txtHelpSeed", "HelpSeed", UITextAreaDescription.DefaultFromFamily(fontFamily, 12));
+            txtSeed = await this.AddComponentUITextArea("txtSeed", "Seed", UITextAreaDescription.DefaultFromFamily(fontFamily, 14));
 
-            pbScale = await this.AddComponentUIProgressBar("pbScale", UIProgressBarDescription.DefaultFromFamily(fontFamily, 12));
-            pbLacunarity = await this.AddComponentUIProgressBar("pbLacunarity", UIProgressBarDescription.DefaultFromFamily(fontFamily, 12));
-            pbPersistance = await this.AddComponentUIProgressBar("pbPersistance", UIProgressBarDescription.DefaultFromFamily(fontFamily, 12));
-            pbOctaves = await this.AddComponentUIProgressBar("pbOctaves", UIProgressBarDescription.DefaultFromFamily(fontFamily, 12));
+            pbScale = await this.AddComponentUIProgressBar("pbScale", "Scale", UIProgressBarDescription.DefaultFromFamily(fontFamily, 12));
+            pbLacunarity = await this.AddComponentUIProgressBar("pbLacunarity", "Lacunarity", UIProgressBarDescription.DefaultFromFamily(fontFamily, 12));
+            pbPersistance = await this.AddComponentUIProgressBar("pbPersistance", "Persistance", UIProgressBarDescription.DefaultFromFamily(fontFamily, 12));
+            pbOctaves = await this.AddComponentUIProgressBar("pbOctaves", "Octaves", UIProgressBarDescription.DefaultFromFamily(fontFamily, 12));
 
-            btnSave = await this.AddComponentUIButton("btnSave", butDesc);
+            btnSave = await this.AddComponentUIButton("btnSave", "Save", butDesc);
 
             btnExit.MouseClick += BtnExitClick;
 
@@ -190,7 +190,7 @@ namespace Terrain.PerlinNoise
         {
             texture = Game.ResourceManager.RequestResource(Guid.NewGuid(), new Color4[] { }, mapSize, true);
 
-            perlinRenderer = await this.AddComponentUITextureRenderer("perlinRenderer", UITextureRendererDescription.Default());
+            perlinRenderer = await this.AddComponentUITextureRenderer("perlinRenderer", "Renderer", UITextureRendererDescription.Default());
             perlinRenderer.Texture = texture;
         }
 

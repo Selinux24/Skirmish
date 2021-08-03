@@ -20,6 +20,16 @@ namespace Deferred
         /// </summary>
         private readonly T controller;
 
+        /// <inheritdoc/>
+        public string Id { get; private set; }
+        /// <inheritdoc/>
+        public string Name { get; set; }
+        /// <inheritdoc/>
+        public Scene Scene { get; private set; }
+        /// <inheritdoc/>
+        public bool HasOwner { get { return Owner != null; } }
+        /// <inheritdoc/>
+        public ISceneObject Owner { get; set; }
         /// <summary>
         /// Agent type
         /// </summary>
@@ -104,11 +114,18 @@ namespace Deferred
         /// <summary>
         /// Constructor
         /// </summary>
-        public GameAgent(AgentType agentType, ModelInstance model, T controller)
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        /// <param name="agentType">Agent type</param>
+        /// <param name="model">Model</param>
+        /// <param name="controller">Controller</param>
+        public GameAgent(string id, string name, AgentType agentType, ModelInstance model, T controller)
         {
+            Id = id;
+            Name = name;
+            AgentType = agentType;
             this.model = model;
             this.controller = controller;
-            this.AgentType = agentType;
         }
 
         /// <summary>
@@ -159,6 +176,27 @@ namespace Deferred
         public void Clear()
         {
             controller.Clear();
+        }
+
+        /// <inheritdoc/>
+        public IGameState GetState()
+        {
+            return new GameAgentState
+            {
+                Id = Id,
+                Controller = controller.GetState(),
+            };
+        }
+        /// <inheritdoc/>
+        public void SetState(IGameState state)
+        {
+            if (!(state is GameAgentState gameAgentState))
+            {
+                return;
+            }
+
+            Id = gameAgentState.Id;
+            controller?.SetState(gameAgentState.Controller);
         }
     }
 }

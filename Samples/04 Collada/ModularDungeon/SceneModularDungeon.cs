@@ -305,20 +305,20 @@ namespace Collada.ModularDungeon
         }
         private async Task InitializeUI()
         {
-            console = await this.AddComponentUIConsole("Console", UIConsoleDescription.Default(), LayerUI + 1);
+            console = await this.AddComponentUIConsole("ui1", "Console", UIConsoleDescription.Default(), LayerUI + 1);
             console.Visible = false;
 
-            pbLevels = await this.AddComponentUIProgressBar("PbLevels", UIProgressBarDescription.Default(Color.Transparent, Color.Green));
+            pbLevels = await this.AddComponentUIProgressBar("ui2", "PbLevels", UIProgressBarDescription.Default(Color.Transparent, Color.Green));
             pbLevels.Visible = false;
 
-            messages = await this.AddComponentUITextArea("Messages", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Viner Hand ITC, Microsoft Sans Serif", 48), TextForeColor = Color.Red, TextShadowColor = Color.DarkRed }, LayerUI + 1);
+            messages = await this.AddComponentUITextArea("ui3", "Messages", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Viner Hand ITC, Microsoft Sans Serif", 48), TextForeColor = Color.Red, TextShadowColor = Color.DarkRed }, LayerUI + 1);
             messages.Text = null;
             messages.SetPosition(new Vector2(0, 0));
             messages.Visible = false;
 
             var dialogDesc = UIDialogDescription.Default(Game.Form.RenderWidth * 0.5f, Game.Form.RenderHeight * 0.5f);
             dialogDesc.DialogButtons = UIDialogButtons.Accept;
-            dialog = await this.AddComponentUIDialog("Dialog", dialogDesc, LayerUI + 1);
+            dialog = await this.AddComponentUIDialog("ui4", "Dialog", dialogDesc, LayerUI + 1);
             dialog.OnAcceptHandler += (s, e) =>
             {
                 dialog.CloseDialog(async () =>
@@ -338,7 +338,7 @@ namespace Collada.ModularDungeon
                 Count = 50000,
                 BlendMode = BlendModes.Opaque | BlendModes.Additive,
             };
-            selectedItemDrawer = await this.AddComponentPrimitiveListDrawer("SelectedItemsDrawer", drawerDesc, SceneObjectUsages.UI, LayerUI);
+            selectedItemDrawer = await this.AddComponentPrimitiveListDrawer("ui5", "SelectedItemsDrawer", drawerDesc, SceneObjectUsages.UI, LayerUI);
             selectedItemDrawer.Visible = false;
         }
         private async Task InitializeMapTexture()
@@ -350,7 +350,7 @@ namespace Collada.ModularDungeon
 
             string onePageResourcesFolder = Path.Combine(resourcesFolder, "onepagedungeons");
 
-            dungeonMap = await this.AddComponentSprite("DungeonMap", SpriteDescription.Default(Path.Combine(onePageResourcesFolder, dungeonMapFile)), SceneObjectUsages.UI, LayerUI + 2);
+            dungeonMap = await this.AddComponentSprite("map1", "DungeonMap", SpriteDescription.Default(Path.Combine(onePageResourcesFolder, dungeonMapFile)), SceneObjectUsages.UI, LayerUI + 2);
             dungeonMap.Visible = false;
         }
 
@@ -406,7 +406,7 @@ namespace Collada.ModularDungeon
             {
                 Count = 50000,
             };
-            graphDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Graph", graphDrawerDesc);
+            graphDrawer = await this.AddComponentPrimitiveListDrawer("db1", "DEBUG++ Graph", graphDrawerDesc);
             graphDrawer.Visible = false;
 
             var bboxesDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
@@ -414,7 +414,7 @@ namespace Collada.ModularDungeon
                 Color = new Color4(1.0f, 0.0f, 0.0f, 0.25f),
                 Count = 10000,
             };
-            bboxesDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Bounding volumes", bboxesDrawerDesc);
+            bboxesDrawer = await this.AddComponentPrimitiveListDrawer("db2", "DEBUG++ Bounding volumes", bboxesDrawerDesc);
             bboxesDrawer.Visible = false;
 
             var ratDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
@@ -422,7 +422,7 @@ namespace Collada.ModularDungeon
                 Color = new Color4(0.0f, 1.0f, 1.0f, 0.25f),
                 Count = 10000,
             };
-            ratDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Rat", ratDrawerDesc);
+            ratDrawer = await this.AddComponentPrimitiveListDrawer("db3", "DEBUG++ Rat", ratDrawerDesc);
             ratDrawer.Visible = false;
 
             var obstacleDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
@@ -430,7 +430,7 @@ namespace Collada.ModularDungeon
                 DepthEnabled = false,
                 Count = 10000,
             };
-            obstacleDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Obstacles", obstacleDrawerDesc);
+            obstacleDrawer = await this.AddComponentPrimitiveListDrawer("db4", "DEBUG++ Obstacles", obstacleDrawerDesc);
             obstacleDrawer.Visible = false;
 
             var connectionDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
@@ -438,7 +438,7 @@ namespace Collada.ModularDungeon
                 Color = connectionColor,
                 Count = 10000,
             };
-            connectionDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Connections", connectionDrawerDesc);
+            connectionDrawer = await this.AddComponentPrimitiveListDrawer("db5", "DEBUG++ Connections", connectionDrawerDesc);
             connectionDrawer.Visible = false;
         }
         private async Task InitializeDungeon()
@@ -455,7 +455,7 @@ namespace Collada.ModularDungeon
                 desc = ModularSceneryDescription.FromFolder(Path.Combine(resourcesFolder, dungeonDefFile));
             }
 
-            scenery = await this.AddComponentModularScenery("Scenery", desc, SceneObjectUsages.Ground);
+            scenery = await this.AddComponentModularScenery("Scenery", "Scenery", desc, SceneObjectUsages.Ground);
             scenery.TriggerEnd += TriggerEnds;
 
             SetGround(scenery, true);
@@ -577,6 +577,7 @@ namespace Collada.ModularDungeon
         private async Task InitializeRat()
         {
             rat = await this.AddComponentModel(
+                "char1",
                 "Rat",
                 new ModelDescription()
                 {
@@ -614,6 +615,7 @@ namespace Collada.ModularDungeon
         private async Task InitializeHuman()
         {
             human = await this.AddComponentModelInstanced(
+                "char2",
                 "Human Instanced",
                 new ModelInstancedDescription()
                 {

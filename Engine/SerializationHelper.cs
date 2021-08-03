@@ -312,6 +312,7 @@ namespace Engine
             {
                 NullValueHandling = NullValueHandling.Ignore,
                 Formatting = Formatting.Indented,
+                TypeNameHandling = TypeNameHandling.Auto,
                 ContractResolver = new CamelCasePropertyNamesContractResolver()
             };
         }

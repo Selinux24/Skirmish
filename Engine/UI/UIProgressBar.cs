@@ -76,15 +76,17 @@ namespace Engine.UI
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Button description</param>
-        public UIProgressBar(string name, Scene scene, UIProgressBarDescription description)
-            : base(name, scene, description)
+        public UIProgressBar(string id, string name, Scene scene, UIProgressBarDescription description)
+            : base(id, name, scene, description)
         {
             ProgressValue = 0;
 
             spriteBase = new Sprite(
+                $"{id}.Base",
                 $"{name}.Base",
                 scene,
                 new SpriteDescription()
@@ -98,6 +100,7 @@ namespace Engine.UI
             AddChild(spriteBase, false);
 
             spriteProgress = new Sprite(
+                $"{id}.Progress",
                 $"{name}.Progress",
                 scene,
                 new SpriteDescription()
@@ -113,6 +116,7 @@ namespace Engine.UI
             if (description.Font != null)
             {
                 Caption = new UITextArea(
+                    $"{id}.Caption",
                     $"{name}.Caption",
                     scene,
                     new UITextAreaDescription
@@ -164,17 +168,18 @@ namespace Engine.UI
         /// Adds a component to the scene
         /// </summary>
         /// <param name="scene">Scene</param>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="layer">Processing layer</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<UIProgressBar> AddComponentUIProgressBar(this Scene scene, string name, UIProgressBarDescription description, int layer = Scene.LayerUI)
+        public static async Task<UIProgressBar> AddComponentUIProgressBar(this Scene scene, string id, string name, UIProgressBarDescription description, int layer = Scene.LayerUI)
         {
             UIProgressBar component = null;
 
             await Task.Run(() =>
             {
-                component = new UIProgressBar(name, scene, description);
+                component = new UIProgressBar(id, name, scene, description);
 
                 scene.AddComponent(component, SceneObjectUsages.UI, layer);
             });

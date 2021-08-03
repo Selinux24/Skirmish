@@ -53,11 +53,12 @@ namespace Engine.UI
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Button description</param>
-        public UIButton(string name, Scene scene, UIButtonDescription description)
-            : base(name, scene, description)
+        public UIButton(string id, string name, Scene scene, UIButtonDescription description)
+            : base(id, name, scene, description)
         {
             TwoStateButton = description.TwoStateButton;
 
@@ -73,7 +74,11 @@ namespace Engine.UI
                 spriteDesc.UVMap = description.TextureReleasedUVMap;
             }
 
-            buttonReleased = new Sprite($"{name}.ReleasedButton", scene, spriteDesc);
+            buttonReleased = new Sprite(
+                $"{id}.ReleasedButton",
+                $"{name}.ReleasedButton",
+                scene,
+                spriteDesc);
 
             AddChild(buttonReleased);
 
@@ -91,12 +96,17 @@ namespace Engine.UI
                     spriteDesc2.UVMap = description.TexturePressedUVMap;
                 }
 
-                buttonPressed = new Sprite($"{name}.PressedButton", scene, spriteDesc2);
+                buttonPressed = new Sprite(
+                    $"{id}.PressedButton",
+                    $"{name}.PressedButton",
+                    scene,
+                    spriteDesc2);
 
                 AddChild(buttonPressed);
             }
 
             Caption = new UITextArea(
+                $"{id}.Caption",
                 $"{name}.Caption",
                 scene,
                 new UITextAreaDescription
@@ -163,17 +173,18 @@ namespace Engine.UI
         /// Adds a component to the scene
         /// </summary>
         /// <param name="scene">Scene</param>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="layer">Processing layer</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<UIButton> AddComponentUIButton(this Scene scene, string name, UIButtonDescription description, int layer = Scene.LayerUI)
+        public static async Task<UIButton> AddComponentUIButton(this Scene scene, string id, string name, UIButtonDescription description, int layer = Scene.LayerUI)
         {
             UIButton component = null;
 
             await Task.Run(() =>
             {
-                component = new UIButton(name, scene, description);
+                component = new UIButton(id, name, scene, description);
 
                 scene.AddComponent(component, SceneObjectUsages.UI, layer);
             });

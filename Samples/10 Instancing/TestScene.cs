@@ -78,20 +78,20 @@ namespace Instancing
 
         private async Task InitializeTexts()
         {
-            title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White });
-            runtimeText = await this.AddComponentUITextArea("RuntimeText", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Yellow });
-            info = await this.AddComponentUITextArea("Information", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Yellow });
+            title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White });
+            runtimeText = await this.AddComponentUITextArea("RuntimeText", "RuntimeText", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Yellow });
+            info = await this.AddComponentUITextArea("Information", "Information", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Yellow });
 
             title.Text = "Instancing test";
             runtimeText.Text = "";
             info.Text = "Press F1 for Help.";
 
             var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.66f));
-            panel = await this.AddComponentSprite("Panel", spDesc, SceneObjectUsages.UI, LayerUI - 1);
+            panel = await this.AddComponentSprite("Panel", "Panel", spDesc, SceneObjectUsages.UI, LayerUI - 1);
 
-            help = await this.AddComponentUITextArea("Help", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Yellow });
+            help = await this.AddComponentUITextArea("Help", "Help", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Yellow });
             help.Visible = false;
-            helpPanel = await this.AddComponentSprite("Help panel", spDesc, SceneObjectUsages.UI, LayerUI - 1);
+            helpPanel = await this.AddComponentSprite("HelpPanel", "Help panel", spDesc, SceneObjectUsages.UI, LayerUI - 1);
             helpPanel.Visible = false;
 
             Color d = Color.Gray;
@@ -122,7 +122,7 @@ namespace Instancing
 
             var desc = SkydomDescription.Hemispheric(paths, Camera.FarPlaneDistance);
 
-            skydom = await this.AddComponentSkydom("Sky", desc);
+            skydom = await this.AddComponentSkydom("Sky", "Sky", desc);
         }
         private async Task InitializeFloor()
         {
@@ -158,7 +158,7 @@ namespace Instancing
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
-            var floor = await this.AddComponentModelInstanced("Floor", desc);
+            var floor = await this.AddComponentModelInstanced("Floor", "Floor", desc);
 
             Vector3 delta = new Vector3(l * side, 0, l * side) - new Vector3(l, 0, l);
             int x = 0;
@@ -189,7 +189,7 @@ namespace Instancing
                 UseAnisotropicFiltering = true,
                 Content = ContentDescription.FromFile(@"Resources/Trees", @"tree.json"),
             };
-            var trees = await this.AddComponentModelInstanced("Trees", treeDesc);
+            var trees = await this.AddComponentModelInstanced("Trees", "Trees", treeDesc);
 
             int side = instances / 4;
             float groundSide = 55f;
@@ -230,7 +230,7 @@ namespace Instancing
                 UseAnisotropicFiltering = true,
                 Content = ContentDescription.FromFile(@"Resources/Soldier", @"soldier_anim2.json"),
             };
-            troops = await this.AddComponentModelInstanced("Troops", tDesc, SceneObjectUsages.Agent);
+            troops = await this.AddComponentModelInstanced("Troops", "Troops", tDesc, SceneObjectUsages.Agent);
             troops.MaximumCount = -1;
 
             Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
@@ -277,7 +277,8 @@ namespace Instancing
         private async Task InitializeWall()
         {
             var wall = await this.AddComponentModelInstanced(
-                 "Wall",
+                "Wall",
+                "Wall",
                 new ModelInstancedDescription()
                 {
                     Instances = 40,

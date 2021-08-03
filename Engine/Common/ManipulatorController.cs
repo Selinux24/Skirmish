@@ -7,7 +7,7 @@ namespace Engine.Common
     /// <summary>
     /// Manipulator controller base class
     /// </summary>
-    public abstract class ManipulatorController : IControllable
+    public abstract class ManipulatorController : IControllable, IHasGameState
     {
         /// <summary>
         /// Following path
@@ -118,5 +118,10 @@ namespace Engine.Common
         {
             return path?.SamplePath(sampleTime) ?? new Vector3[] { };
         }
+
+        /// <inheritdoc/>
+        public abstract IGameState GetState();
+        /// <inheritdoc/>
+        public abstract void SetState(IGameState state);
     }
 }

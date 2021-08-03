@@ -1,7 +1,7 @@
 ﻿using SharpDX;
 using System;
 
-namespace Engine.Content.Persistence
+namespace Engine
 {
     /// <summary>
     /// 3D position
@@ -95,13 +95,17 @@ namespace Engine.Content.Persistence
         public static implicit operator Position3(string value)
         {
             var floats = value?.SplitFloats();
-            if (floats?.Length == 3)
+            if (floats?.Length == 1)
+            {
+                return new Position3(floats[0]);
+            }
+            else if (floats?.Length == 3)
             {
                 return new Position3(floats);
             }
             else
             {
-                return PersistenceHelpers.ReadReservedWordsForPosition(value);
+                return PersistenceHelpers.ReadReservedWordsForPosition3(value);
             }
         }
 

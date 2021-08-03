@@ -7,7 +7,7 @@ namespace Engine.Animation
     /// <summary>
     /// Animation path
     /// </summary>
-    public class AnimationPath
+    public class AnimationPath : IHasGameState
     {
         /// <summary>
         /// Animation path items list
@@ -339,10 +339,38 @@ namespace Engine.Animation
             };
         }
 
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+        /// <inheritdoc/>
+        public IGameState GetState()
+        {
+            return new AnimationPathState
+            {
+                CurrentIndex = currentIndex,
+                Playing = Playing,
+                Time = Time,
+                TotalItemTime = TotalItemTime,
+                PathItems = items.Select(i => i.GetState()).ToArray(),
+            };
+        }
+        /// <inheritdoc/>
+        public void SetState(IGameState state)
+        {
+            if (!(state is AnimationPathState animationPathState))
+            {
+                return;
+            }
+
+            currentIndex = animationPathState.CurrentIndex;
+            Playing = animationPathState.Playing;
+            Time = animationPathState.Time;
+            TotalItemTime = animationPathState.TotalItemTime;
+            for (int i = 0; i < animationPathState.PathItems.Count(); i++)
+            {
+                var itemState = animationPathState.PathItems.ElementAt(i);
+                items[i].SetState(itemState);
+            }
+        }
+
+        /// <inheritdoc/>
         public override string ToString()
         {
             return $"Items: {items.Count}; Time: {Time:00.00}; Item Time: {ItemTime:00.00}";

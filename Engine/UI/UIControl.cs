@@ -84,8 +84,7 @@ namespace Engine.UI
             var input = scene.Game.Input;
 
             //Gets all UIControl order by processing order
-            var evaluableCtrls = scene.GetComponents()
-                .OfType<UIControl>()
+            var evaluableCtrls = scene.GetComponents<UIControl>()
                 .Where(c => IsEvaluable(c))
                 .OrderBy(c => c.updateOrder)
                 .ToList();
@@ -871,11 +870,12 @@ namespace Engine.UI
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Button description</param>
-        protected UIControl(string name, Scene scene, UIControlDescription description)
-            : base(name, scene, description)
+        protected UIControl(string id, string name, Scene scene, UIControlDescription description)
+            : base(id, name, scene, description)
         {
             updateOrder = GetNextUpdateOrder();
 

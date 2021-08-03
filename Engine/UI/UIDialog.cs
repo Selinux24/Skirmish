@@ -45,20 +45,34 @@ namespace Engine.UI
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        public UIDialog(string name, Scene scene, UIDialogDescription description) : base(name, scene, description)
+        public UIDialog(string id, string name, Scene scene, UIDialogDescription description) :
+            base(id, name, scene, description)
         {
-            var backPanel = new UIPanel($"{name}.BackPanel", scene, description.Background);
+            var backPanel = new UIPanel(
+                $"{id}.BackPanel",
+                $"{name}.BackPanel",
+                scene,
+                description.Background);
             AddChild(backPanel);
 
-            dialogText = new UITextArea($"{name}.DialogText", scene, description.TextArea);
+            dialogText = new UITextArea(
+                $"{id}.DialogText",
+                $"{name}.DialogText",
+                scene,
+                description.TextArea);
             backPanel.AddChild(dialogText);
 
             if (description.DialogButtons.HasFlag(UIDialogButtons.Accept))
             {
-                butAccept = new UIButton($"{name}.AcceptButton", scene, description.Buttons);
+                butAccept = new UIButton(
+                    $"{id}.AcceptButton",
+                    $"{name}.AcceptButton",
+                    scene,
+                    description.Buttons);
                 butAccept.Caption.Text = "Accept";
                 butAccept.MouseClick += DialogAcceptClick;
                 backPanel.AddChild(butAccept, false);
@@ -70,14 +84,22 @@ namespace Engine.UI
             {
                 if (description.DialogButtons.HasFlag(UIDialogButtons.Cancel))
                 {
-                    butClose = new UIButton($"{name}.CancelButton", scene, description.Buttons);
+                    butClose = new UIButton(
+                        $"{id}.CancelButton",
+                        $"{name}.CancelButton",
+                        scene,
+                        description.Buttons);
                     butClose.Caption.Text = "Cancel";
                     butClose.MouseClick += DialogCancelClick;
                     backPanel.AddChild(butClose, false);
                 }
                 else
                 {
-                    butClose = new UIButton($"{name}.CloseButton", scene, description.Buttons);
+                    butClose = new UIButton(
+                        $"{id}.CloseButton",
+                        $"{name}.CloseButton",
+                        scene,
+                        description.Buttons);
                     butClose.Caption.Text = "Close";
                     butClose.MouseClick += DialogCloseClick;
                     backPanel.AddChild(butClose, false);
@@ -170,16 +192,17 @@ namespace Engine.UI
         /// </summary>
         /// <param name="scene">Scene</param>
         /// <param name="name">Name</param>
+        /// <param name="id">Id</param>
         /// <param name="description">Description</param>
         /// <param name="layer">Processing layer</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<UIDialog> AddComponentUIDialog(this Scene scene, string name, UIDialogDescription description, int layer = Scene.LayerUI)
+        public static async Task<UIDialog> AddComponentUIDialog(this Scene scene, string id, string name, UIDialogDescription description, int layer = Scene.LayerUI)
         {
             UIDialog component = null;
 
             await Task.Run(() =>
             {
-                component = new UIDialog(name, scene, description);
+                component = new UIDialog(id, name, scene, description);
 
                 scene.AddComponent(component, SceneObjectUsages.UI, layer);
             });

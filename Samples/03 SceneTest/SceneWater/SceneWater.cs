@@ -71,11 +71,11 @@ namespace SceneTest.SceneWater
                     new LensFlareDescription.Flare( 2.0f, 6.4f, new Color( 25,  50, 100), "lfFlare3.png"),
                 }
             };
-            await this.AddComponentLensFlare("Flares", lfDesc, SceneObjectUsages.None);
+            await this.AddComponentLensFlare("Flares", "Flares", lfDesc, SceneObjectUsages.None);
         }
         private async Task InitializeSky()
         {
-            await this.AddComponentSkyScattering("Sky", new SkyScatteringDescription()
+            await this.AddComponentSkyScattering("Sky", "Sky", new SkyScatteringDescription()
             {
                 Resolution = SkyScatteringResolutions.High
             });
@@ -84,7 +84,7 @@ namespace SceneTest.SceneWater
         {
             var wDesc = WaterDescription.CreateOcean(terrainSize, 0f);
 
-            await this.AddComponentWater("Water", wDesc);
+            await this.AddComponentWater("Water", "Water", wDesc);
         }
         private async Task InitializeSeaBottom()
         {
@@ -120,7 +120,7 @@ namespace SceneTest.SceneWater
             groundDesc.Heightmap.UseFalloff = true;
             groundDesc.Heightmap.Transform = Matrix.Translation(0, -terrainHeight * 0.99f, 0);
 
-            await this.AddComponentScenery("Sea Bottom", groundDesc);
+            await this.AddComponentScenery("SeaBottom", "Sea Bottom", groundDesc);
         }
 
         public override void Update(GameTime gameTime)

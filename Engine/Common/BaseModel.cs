@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Common
@@ -6,7 +7,6 @@ namespace Engine.Common
     using Engine.Animation;
     using Engine.Content;
     using Engine.Effects;
-    using System;
 
     /// <summary>
     /// Model basic implementation
@@ -55,7 +55,7 @@ namespace Engine.Common
         /// <summary>
         /// Use anisotropic filtering
         /// </summary>
-        public bool UseAnisotropicFiltering { get; set; }
+        public bool UseAnisotropicFiltering { get; private set; }
         /// <summary>
         /// Gets the skinning list used by the current drawing data
         /// </summary>
@@ -69,16 +69,17 @@ namespace Engine.Common
         /// <summary>
         /// Use spheric volume for culling test
         /// </summary>
-        public bool SphericVolume { get; set; }
+        public bool SphericVolume { get; private set; }
 
         /// <summary>
         /// Base model
         /// </summary>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Object description</param>
-        protected BaseModel(string name, Scene scene, BaseModelDescription description)
-            : base(name, scene, description)
+        protected BaseModel(string id, string name, Scene scene, BaseModelDescription description)
+            : base(id, name, scene, description)
         {
             if (description.Content == null)
             {

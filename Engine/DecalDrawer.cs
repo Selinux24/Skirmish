@@ -69,10 +69,12 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Decal description</param>
-        public DecalDrawer(string name, Scene scene, DecalDrawerDescription description) : base(name, scene, description)
+        public DecalDrawer(string id, string name, Scene scene, DecalDrawerDescription description) :
+            base(id, name, scene, description)
         {
             MaxDecalCount = description.MaxDecalCount;
             RotateDecals = description.RotateDecals;
@@ -263,18 +265,19 @@ namespace Engine
         /// Adds a component to the scene
         /// </summary>
         /// <param name="scene">Scene</param>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="usage">Component usage</param>
         /// <param name="layer">Processing layer</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<DecalDrawer> AddComponentDecalDrawer(this Scene scene, string name, DecalDrawerDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int layer = Scene.LayerEffects)
+        public static async Task<DecalDrawer> AddComponentDecalDrawer(this Scene scene, string id, string name, DecalDrawerDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int layer = Scene.LayerEffects)
         {
             DecalDrawer component = null;
 
             await Task.Run(() =>
             {
-                component = new DecalDrawer(name, scene, description);
+                component = new DecalDrawer(id, name, scene, description);
 
                 scene.AddComponent(component, usage, layer);
             });

@@ -52,8 +52,8 @@ namespace Terrain.Rts.AI.Behaviors
                         viewTarget = NextCheckPoint.Value;
                     }
 
-                    model["Turret-mesh"].Manipulator.RotateTo(viewTarget, Vector3.Up, Axis.Y, 0.01f);
-                    model["Barrel-mesh"].Manipulator.RotateTo(viewTarget + (model.GetBoundingBox().Height * 0.5f), Vector3.Up, Axis.X, 0.01f);
+                    model.GetModelPartByName("Turret-mesh").Manipulator.RotateTo(viewTarget, Vector3.Up, Axis.Y, 0.01f);
+                    model.GetModelPartByName("Barrel-mesh").Manipulator.RotateTo(viewTarget + (model.GetBoundingBox().Height * 0.5f), Vector3.Up, Axis.X, 0.01f);
                 }
             }
 

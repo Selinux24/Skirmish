@@ -137,21 +137,21 @@ namespace Collada.Dungeon
 
         private async Task InitializeUIComponents()
         {
-            title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White });
+            title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White });
             title.Text = "Collada Dungeon Scene";
 
-            fps = await this.AddComponentUITextArea("FPS", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow });
+            fps = await this.AddComponentUITextArea("FPS", "FPS", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 12), TextForeColor = Color.Yellow });
             fps.Text = null;
 
-            picks = await this.AddComponentUITextArea("Picks", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow });
+            picks = await this.AddComponentUITextArea("Picks", "Picks", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 12), TextForeColor = Color.Yellow });
             picks.Text = null;
 
             var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
-            panel = await this.AddComponentSprite("Backpanel", spDesc, SceneObjectUsages.UI, LayerUI - 1);
+            panel = await this.AddComponentSprite("Backpanel", "Backpanel", spDesc, SceneObjectUsages.UI, LayerUI - 1);
         }
         private async Task InitializeDungeon()
         {
-            dungeon = await this.AddComponentScenery("Dungeon", GroundDescription.FromFile(resourcesFolder, "Dungeon.json", 2));
+            dungeon = await this.AddComponentScenery("Dungeon", "Dungeon", GroundDescription.FromFile(resourcesFolder, "Dungeon.json", 2));
         }
 
         private void InitializeCamera()

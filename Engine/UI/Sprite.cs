@@ -53,11 +53,12 @@ namespace Engine.UI
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        public Sprite(string name, Scene scene, SpriteDescription description)
-            : base(name, scene, description)
+        public Sprite(string id, string name, Scene scene, SpriteDescription description)
+            : base(id, name, scene, description)
         {
             Textured = description.Textures?.Any() == true;
             TextureIndex = description.TextureIndex;
@@ -195,18 +196,19 @@ namespace Engine.UI
         /// Adds a component to the scene
         /// </summary>
         /// <param name="scene">Scene</param>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="usage">Component usage</param>
         /// <param name="layer">Processing layer</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<Sprite> AddComponentSprite(this Scene scene, string name, SpriteDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int layer = Scene.LayerDefault)
+        public static async Task<Sprite> AddComponentSprite(this Scene scene, string id, string name, SpriteDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int layer = Scene.LayerDefault)
         {
             Sprite component = null;
 
             await Task.Run(() =>
             {
-                component = new Sprite(name, scene, description);
+                component = new Sprite(id, name, scene, description);
 
                 scene.AddComponent(component, usage, layer);
             });

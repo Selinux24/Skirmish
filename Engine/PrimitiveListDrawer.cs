@@ -59,11 +59,12 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        public PrimitiveListDrawer(string name, Scene scene, PrimitiveListDrawerDescription<T> description)
-            : base(name, scene, description)
+        public PrimitiveListDrawer(string id, string name, Scene scene, PrimitiveListDrawerDescription<T> description)
+            : base(id, name, scene, description)
         {
             T tmp = default;
             stride = tmp.GetStride();
@@ -323,18 +324,19 @@ namespace Engine
         /// </summary>
         /// <typeparam name="T">Primitive type</typeparam>
         /// <param name="scene">Scene</param>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="usage">Component usage</param>
         /// <param name="layer">Processing layer</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<PrimitiveListDrawer<T>> AddComponentPrimitiveListDrawer<T>(this Scene scene, string name, PrimitiveListDrawerDescription<T> description, SceneObjectUsages usage = SceneObjectUsages.None, int layer = Scene.LayerDefault) where T : IVertexList
+        public static async Task<PrimitiveListDrawer<T>> AddComponentPrimitiveListDrawer<T>(this Scene scene, string id, string name, PrimitiveListDrawerDescription<T> description, SceneObjectUsages usage = SceneObjectUsages.None, int layer = Scene.LayerDefault) where T : IVertexList
         {
             PrimitiveListDrawer<T> component = null;
 
             await Task.Run(() =>
             {
-                component = new PrimitiveListDrawer<T>(name, scene, description);
+                component = new PrimitiveListDrawer<T>(id, name, scene, description);
 
                 scene.AddComponent(component, usage, layer);
             });

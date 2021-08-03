@@ -13,7 +13,7 @@ namespace Engine
     /// <summary>
     /// Instaced model
     /// </summary>
-    public class ModelInstanced : BaseModel, IComposed
+    public class ModelInstanced : BaseModel, IComposed, IHasGameState
     {
         /// <summary>
         /// Instancing data per instance
@@ -65,11 +65,12 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        public ModelInstanced(string name, Scene scene, ModelInstancedDescription description)
-            : base(name, scene, description)
+        public ModelInstanced(string id, string name, Scene scene, ModelInstancedDescription description)
+            : base(id, name, scene, description)
         {
             if (description.Instances <= 0)
             {
@@ -226,6 +227,7 @@ namespace Engine
         {
             return MaximumCount >= 0 ? Math.Min(MaximumCount, InstanceCount) : InstanceCount;
         }
+
         /// <inheritdoc/>
         public override void DrawShadows(DrawContextShadows context)
         {
@@ -555,21 +557,13 @@ namespace Engine
         {
             return new ReadOnlyCollection<ModelInstance>(instances);
         }
-        /// <summary>
-        /// Gets all components
-        /// </summary>
-        /// <returns>Returns a collection of components</returns>
+        /// <inheritdoc/>
         public IEnumerable<T> GetComponents<T>()
         {
             return new ReadOnlyCollection<T>(instances.Where(i => i.Visible).OfType<T>().ToArray());
         }
 
-        /// <summary>
-        /// Performs culling test
-        /// </summary>
-        /// <param name="volume">Culling volume</param>
-        /// <param name="distance">If any instance is inside the volume, returns zero</param>
-        /// <returns>Returns true if all of the instances were outside of the frustum</returns>
+        /// <inheritdoc/>
         public override bool Cull(IIntersectionVolume volume, out float distance)
         {
             distance = float.MaxValue;
@@ -590,6 +584,51 @@ namespace Engine
 
             return true;
         }
+
+        /// <inheritdoc/>
+        public IGameState GetState()
+        {
+            return new ModelInstancedState
+            {
+                Name = Name,
+                Active = Active,
+                Visible = Visible,
+                Usage = Usage,
+                Layer = Layer,
+                OwnerId = Owner?.Name,
+
+                MaximumCount = MaximumCount,
+                Instances = instances.Select(i => i.GetState()).ToArray(),
+            };
+        }
+        /// <inheritdoc/>
+        public void SetState(IGameState state)
+        {
+            if (!(state is ModelInstancedState modelInstancedState))
+            {
+                return;
+            }
+
+            Name = modelInstancedState.Name;
+            Active = modelInstancedState.Active;
+            Visible = modelInstancedState.Visible;
+            Usage = modelInstancedState.Usage;
+            Layer = modelInstancedState.Layer;
+
+            if (!string.IsNullOrEmpty(modelInstancedState.OwnerId))
+            {
+                Owner = Scene.GetComponents()
+                    .Where(c => c.Id == modelInstancedState.OwnerId)
+                    .FirstOrDefault();
+            }
+
+            MaximumCount = modelInstancedState.MaximumCount;
+            for (int i = 0; i < modelInstancedState.Instances.Count(); i++)
+            {
+                var instanceState = modelInstancedState.Instances.ElementAt(i);
+                instances[i].SetState(instanceState);
+            }
+        }
     }
 
     /// <summary>
@@ -601,18 +640,19 @@ namespace Engine
         /// Adds a component to the scene
         /// </summary>
         /// <param name="scene">Scene</param>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="usage">Component usage</param>
         /// <param name="layer">Processing layer</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<ModelInstanced> AddComponentModelInstanced(this Scene scene, string name, ModelInstancedDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int layer = Scene.LayerDefault)
+        public static async Task<ModelInstanced> AddComponentModelInstanced(this Scene scene, string id, string name, ModelInstancedDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int layer = Scene.LayerDefault)
         {
             ModelInstanced component = null;
 
             await Task.Run(() =>
             {
-                component = new ModelInstanced(name, scene, description);
+                component = new ModelInstanced(id, name, scene, description);
 
                 scene.AddComponent(component, usage, layer);
             });

@@ -28,20 +28,25 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        public LensFlare(string name, Scene scene, LensFlareDescription description)
-            : base(name, scene, description)
+        public LensFlare(string id, string name, Scene scene, LensFlareDescription description)
+            : base(id, name, scene, description)
         {
-            glowSprite = new Sprite($"{name}.Glow", scene, new SpriteDescription()
-            {
-                ContentPath = description.ContentPath,
-                Height = 100,
-                Width = 100,
-                Textures = new string[] { description.GlowTexture },
-                BlendMode = description.BlendMode,
-            });
+            glowSprite = new Sprite(
+                $"{id}.Glow",
+                $"{name}.Glow",
+                scene,
+                new SpriteDescription()
+                {
+                    ContentPath = description.ContentPath,
+                    Height = 100,
+                    Width = 100,
+                    Textures = new string[] { description.GlowTexture },
+                    BlendMode = description.BlendMode,
+                });
 
             if (description.Flares != null && description.Flares.Length > 0)
             {
@@ -62,7 +67,11 @@ namespace Engine
 
                     flares[i] = new Flare()
                     {
-                        FlareSprite = new Sprite($"{name}.Flare_{i}", scene, sprDesc),
+                        FlareSprite = new Sprite(
+                            $"{id}.Flare_{i}",
+                            $"{name}.Flare_{i}",
+                            scene,
+                            sprDesc),
                         Distance = flareDesc.Distance,
                         Scale = flareDesc.Scale,
                         Color = flareDesc.Color,
@@ -256,18 +265,19 @@ namespace Engine
         /// Adds a component to the scene
         /// </summary>
         /// <param name="scene">Scene</param>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="usage">Component usage</param>
         /// <param name="layer">Processing layer</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<LensFlare> AddComponentLensFlare(this Scene scene, string name, LensFlareDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int layer = Scene.LayerEffects)
+        public static async Task<LensFlare> AddComponentLensFlare(this Scene scene, string id, string name, LensFlareDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int layer = Scene.LayerEffects)
         {
             LensFlare component = null;
 
             await Task.Run(() =>
             {
-                component = new LensFlare(name, scene, description);
+                component = new LensFlare(id, name, scene, description);
 
                 scene.AddComponent(component, usage, layer);
             });

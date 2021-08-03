@@ -93,5 +93,36 @@ namespace Engine
                 }
             }
         }
+
+        /// <inheritdoc/>
+        public override IGameState GetState()
+        {
+            return new SteerManipulatorControllerState
+            {
+                Path = path,
+                PathTime = pathTime,
+                Velocity = Velocity,
+                MaximumSpeed = MaximumSpeed,
+                MaximumForce = MaximumForce,
+                ArrivingThreshold = ArrivingThreshold,
+                ArrivingRadius = ArrivingRadius,
+            };
+        }
+        /// <inheritdoc/>
+        public override void SetState(IGameState state)
+        {
+            if (!(state is SteerManipulatorControllerState steerManipulator))
+            {
+                return;
+            }
+
+            path = steerManipulator.Path;
+            pathTime = steerManipulator.PathTime;
+            Velocity = steerManipulator.Velocity;
+            MaximumForce = steerManipulator.MaximumForce;
+            MaximumSpeed = steerManipulator.MaximumSpeed;
+            ArrivingThreshold = steerManipulator.ArrivingThreshold;
+            ArrivingRadius = steerManipulator.ArrivingRadius;
+        }
     }
 }

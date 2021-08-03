@@ -53,11 +53,12 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        public Water(string name, Scene scene, WaterDescription description)
-            : base(name, scene, description)
+        public Water(string id, string name, Scene scene, WaterDescription description)
+            : base(id, name, scene, description)
         {
             WaterState = new WaterState
             {
@@ -231,18 +232,19 @@ namespace Engine
         /// Adds a component to the scene
         /// </summary>
         /// <param name="scene">Scene</param>
+        /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="usage">Component usage</param>
         /// <param name="layer">Processing layer</param>
         /// <returns>Returns the created component</returns>
-        public static async Task<Water> AddComponentWater(this Scene scene, string name, WaterDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int layer = Scene.LayerEffects)
+        public static async Task<Water> AddComponentWater(this Scene scene, string id, string name, WaterDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int layer = Scene.LayerEffects)
         {
             Water component = null;
 
             await Task.Run(() =>
             {
-                component = new Water(name, scene, description);
+                component = new Water(id, name, scene, description);
 
                 scene.AddComponent(component, usage, layer);
             });
