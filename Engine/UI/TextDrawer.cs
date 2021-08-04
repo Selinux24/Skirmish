@@ -217,6 +217,11 @@ namespace Engine.UI
                 return vertexBuffer?.Ready == true && indexBuffer?.Ready == true;
             }
         }
+        /// <summary>
+        /// Clipping rectangle
+        /// </summary>
+        /// <remarks>Defines an area outside wich all text is clipped</remarks>
+        public Rectangle? ClippingRectangle { get; set; } = null;
 
         /// <summary>
         /// Constructor
@@ -394,12 +399,26 @@ namespace Engine.UI
         /// <param name="count">Index count</param>
         private void DrawText(EffectDefaultFont effect, EngineEffectTechnique technique, Matrix local, bool useTextureColor, int index, int count)
         {
-            effect.UpdatePerFrame(
-                local,
-                viewProjection,
-                Alpha * AlphaMultplier,
-                useTextureColor,
-                fontMap.Texture);
+            if (ClippingRectangle.HasValue)
+            {
+                effect.UpdatePerFrame(
+                    local,
+                    viewProjection,
+                    Alpha * AlphaMultplier,
+                    useTextureColor,
+                    fontMap.Texture,
+                    Game.Form.RenderRectangle.BottomRight,
+                    ClippingRectangle.Value);
+            }
+            else
+            {
+                effect.UpdatePerFrame(
+                    local,
+                    viewProjection,
+                    Alpha * AlphaMultplier,
+                    useTextureColor,
+                    fontMap.Texture);
+            }
 
             var graphics = Game.Graphics;
 

@@ -704,6 +704,8 @@ namespace Engine
         /// <returns>Returns the added component</returns>
         public void AddComponent(ISceneObject component, SceneObjectUsages usage = SceneObjectUsages.None, int layer = LayerDefault)
         {
+            Monitor.Enter(internalComponents);
+            
             if (internalComponents.Contains(component))
             {
                 return;
@@ -724,7 +726,6 @@ namespace Engine
                 }
             }
 
-            Monitor.Enter(internalComponents);
             internalComponents.Add(component);
             internalComponents.Sort((p1, p2) =>
             {
@@ -755,6 +756,7 @@ namespace Engine
 
                 return i;
             });
+
             Monitor.Exit(internalComponents);
 
             updateMaterialsPalette = true;

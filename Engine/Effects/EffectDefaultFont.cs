@@ -35,6 +35,12 @@ namespace Engine.Effects
         /// </summary>
         private readonly EngineEffectVariableTexture textureVar = null;
 
+        private readonly EngineEffectVariableVector resolutionVar = null;
+
+        private readonly EngineEffectVariableVector rectangleVar = null;
+
+        private readonly EngineEffectVariableScalar useRectangleVar = null;
+
         /// <summary>
         /// Current font texture
         /// </summary>
@@ -118,6 +124,51 @@ namespace Engine.Effects
             }
         }
 
+        protected Vector2 Resolution
+        {
+            get
+            {
+                return resolutionVar.GetVector<Vector2>();
+            }
+            set
+            {
+                resolutionVar.Set(value);
+            }
+        }
+
+        protected Rectangle ClippingRectangle
+        {
+            get
+            {
+                Vector4 rect = rectangleVar.GetVector<Vector4>();
+
+                return new Rectangle()
+                {
+                    X = (int)rect.X,
+                    Y = (int)rect.Y,
+                    Width = (int)rect.Z,
+                    Height = (int)rect.W,
+                };
+            }
+            set
+            {
+                rectangleVar.Set(new Vector4(value.X, value.Y, value.Width, value.Height));
+            }
+        }
+
+        protected bool UseClipingRectangle
+        {
+            get
+            {
+                return useRectangleVar.GetBool();
+            }
+            set
+            {
+                useRectangleVar.Set(value);
+            }
+        }
+
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -134,6 +185,9 @@ namespace Engine.Effects
             alphaVar = Effect.GetVariableScalar("gAlpha");
             useTextureColorVar = Effect.GetVariableScalar("gUseColor");
             textureVar = Effect.GetVariableTexture("gTexture");
+            resolutionVar = Effect.GetVariableVector("gResolution");
+            rectangleVar = Effect.GetVariableVector("gRectangle");
+            useRectangleVar = Effect.GetVariableScalar("gUseRect");
         }
 
         /// <summary>
@@ -156,6 +210,37 @@ namespace Engine.Effects
             Alpha = alphaMult;
             UseTextureColor = useTextureColor;
             Texture = texture;
+
+            UseClipingRectangle = false;
+        }
+        /// <summary>
+        /// Update per frame data
+        /// </summary>
+        /// <param name="world">World matrix</param>
+        /// <param name="viewProjection">View * projection matrix</param>
+        /// <param name="alphaMult">Alpha multiplier</param>
+        /// <param name="useTextureColor">Use the texture color instead of the specified color</param>
+        /// <param name="texture">Font texture</param>
+        /// <param name="screenResolution">Screen resolution in pixels</param>
+        /// <param name="clippingRectangle">Clipping rectangle in pixels</param>
+        public void UpdatePerFrame(
+            Matrix world,
+            Matrix viewProjection,
+            float alphaMult,
+            bool useTextureColor,
+            EngineShaderResourceView texture,
+            Vector2 screenResolution,
+            Rectangle clippingRectangle)
+        {
+            World = world;
+            WorldViewProjection = world * viewProjection;
+            Alpha = alphaMult;
+            UseTextureColor = useTextureColor;
+            Texture = texture;
+            
+            Resolution = screenResolution;
+            ClippingRectangle = clippingRectangle;
+            UseClipingRectangle = true;
         }
     }
 }

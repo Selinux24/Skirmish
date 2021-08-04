@@ -137,11 +137,28 @@ namespace Engine
         }
         public static implicit operator Matrix4X4(Matrix value)
         {
-            return new Matrix4X4(
-                value.M11, value.M12, value.M13, value.M14,
-                value.M21, value.M22, value.M23, value.M24,
-                value.M31, value.M32, value.M33, value.M34,
-                value.M41, value.M42, value.M43, value.M44);
+            return new Matrix4X4
+            {
+                M11 = value.M11,
+                M12 = value.M12,
+                M13 = value.M13,
+                M14 = value.M14,
+
+                M21 = value.M21,
+                M22 = value.M22,
+                M23 = value.M23,
+                M24 = value.M24,
+                
+                M31 = value.M31,
+                M32 = value.M32,
+                M33 = value.M33,
+                M34 = value.M34,
+                
+                M41 = value.M41,
+                M42 = value.M42,
+                M43 = value.M43,
+                M44 = value.M44,
+            };
         }
 
         /// <inheritdoc/>
