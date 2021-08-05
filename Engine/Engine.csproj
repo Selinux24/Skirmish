@@ -467,6 +467,7 @@
     <Compile Include="UI\MouseEventHandler.cs" />
     <Compile Include="UI\Padding.cs" />
     <Compile Include="UI\PivotAnchors.cs" />
+    <Compile Include="UI\ScrollModes.cs" />
     <Compile Include="UI\Spacing.cs" />
     <Compile Include="UI\Tween\UIControlTweenCollection.cs" />
     <Compile Include="UI\Tween\UIControlTweenExtensions.cs" />

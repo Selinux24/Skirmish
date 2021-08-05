@@ -3,7 +3,7 @@
 
 SamplerState SamplerText
 {
-	Filter = MIN_MAG_MIP_LINEAR;
+	Filter = MIN_MAG_MIP_POINT;
 	AddressU = WRAP;
 	AddressV = WRAP;
 	AddressW = WRAP;
@@ -69,9 +69,9 @@ float2 MapScreenCoord(float2 positionWorld) {
 bool CoordIntoRectangle(float2 coord) {
 	return (
 		coord.x >= gRectangle.x &&
-		coord.x <= gRectangle.z &&
-		coord.y >= gRectangle.x + gRectangle.y &&
-		coord.y <= gRectangle.z + gRectangle.w);
+		coord.x <= gRectangle.x + gRectangle.z &&
+		coord.y >= gRectangle.y &&
+		coord.y <= gRectangle.y + gRectangle.w);
 }
 
 float4 PSFont(PSVertexFont input) : SV_TARGET

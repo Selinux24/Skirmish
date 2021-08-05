@@ -161,6 +161,10 @@ namespace Engine.UI
                 textDrawer.Alpha = value;
             }
         }
+        /// <summary>
+        /// Scroll
+        /// </summary>
+        public ScrollModes Scroll { get; set; }
 
         /// <summary>
         /// Constructor
@@ -173,6 +177,7 @@ namespace Engine.UI
             base(id, name, scene, description)
         {
             growControlWithText = description.GrowControlWithText;
+            Scroll = description.Scroll;
 
             textDrawer = new TextDrawer(
                 $"{id}.TextDrawer",

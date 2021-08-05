@@ -34,11 +34,17 @@ namespace Engine.Effects
         /// Texture effect variable
         /// </summary>
         private readonly EngineEffectVariableTexture textureVar = null;
-
+        /// <summary>
+        /// Resolution variable
+        /// </summary>
         private readonly EngineEffectVariableVector resolutionVar = null;
-
+        /// <summary>
+        /// Clipping rectangle variable
+        /// </summary>
         private readonly EngineEffectVariableVector rectangleVar = null;
-
+        /// <summary>
+        /// Use clipping rectangle variable
+        /// </summary>
         private readonly EngineEffectVariableScalar useRectangleVar = null;
 
         /// <summary>
@@ -123,7 +129,9 @@ namespace Engine.Effects
                 }
             }
         }
-
+        /// <summary>
+        /// Screen resolution in pixels
+        /// </summary>
         protected Vector2 Resolution
         {
             get
@@ -135,7 +143,9 @@ namespace Engine.Effects
                 resolutionVar.Set(value);
             }
         }
-
+        /// <summary>
+        /// Clipping rectangle in pixels
+        /// </summary>
         protected Rectangle ClippingRectangle
         {
             get
@@ -155,7 +165,9 @@ namespace Engine.Effects
                 rectangleVar.Set(new Vector4(value.X, value.Y, value.Width, value.Height));
             }
         }
-
+        /// <summary>
+        /// Use clipping rectangle
+        /// </summary>
         protected bool UseClipingRectangle
         {
             get
@@ -205,13 +217,15 @@ namespace Engine.Effects
             bool useTextureColor,
             EngineShaderResourceView texture)
         {
-            World = world;
-            WorldViewProjection = world * viewProjection;
-            Alpha = alphaMult;
-            UseTextureColor = useTextureColor;
-            Texture = texture;
-
-            UseClipingRectangle = false;
+            UpdatePerFrame(
+                world,
+                viewProjection,
+                alphaMult,
+                useTextureColor,
+                texture,
+                false,
+                Vector2.Zero,
+                Rectangle.Empty);
         }
         /// <summary>
         /// Update per frame data
@@ -232,15 +246,45 @@ namespace Engine.Effects
             Vector2 screenResolution,
             Rectangle clippingRectangle)
         {
+            UpdatePerFrame(
+                world,
+                viewProjection,
+                alphaMult,
+                useTextureColor,
+                texture,
+                true,
+                screenResolution,
+                clippingRectangle);
+        }
+        /// <summary>
+        /// Update per frame data
+        /// </summary>
+        /// <param name="world">World matrix</param>
+        /// <param name="viewProjection">View * projection matrix</param>
+        /// <param name="alphaMult">Alpha multiplier</param>
+        /// <param name="useTextureColor">Use the texture color instead of the specified color</param>
+        /// <param name="texture">Font texture</param>
+        /// <param name="useClippingRectangle">Use clipping rectangle</param>
+        /// <param name="screenResolution">Screen resolution in pixels</param>
+        /// <param name="clippingRectangle">Clipping rectangle in pixels</param>
+        private void UpdatePerFrame(
+            Matrix world,
+            Matrix viewProjection,
+            float alphaMult,
+            bool useTextureColor,
+            EngineShaderResourceView texture,
+            bool useClippingRectangle,
+            Vector2 screenResolution,
+            Rectangle clippingRectangle)
+        {
             World = world;
             WorldViewProjection = world * viewProjection;
             Alpha = alphaMult;
             UseTextureColor = useTextureColor;
             Texture = texture;
-            
+            UseClipingRectangle = useClippingRectangle;
             Resolution = screenResolution;
             ClippingRectangle = clippingRectangle;
-            UseClipingRectangle = true;
         }
     }
 }

@@ -124,6 +124,10 @@ namespace Engine.UI
         /// Text vertical alignement
         /// </summary>
         public VerticalTextAlign TextVerticalAlign { get; set; } = VerticalTextAlign.Top;
+        /// <summary>
+        /// Scroll
+        /// </summary>
+        public ScrollModes Scroll { get; set; } = ScrollModes.None;
 
         /// <summary>
         /// Constructor
