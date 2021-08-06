@@ -165,6 +165,14 @@ namespace Engine.UI
         /// Scroll
         /// </summary>
         public ScrollModes Scroll { get; set; }
+        /// <summary>
+        /// Gets or sets the vertical scroll offset
+        /// </summary>
+        public float VerticalScrollOffset { get; set; }
+        /// <summary>
+        /// Gets or sets the horizontal scroll offset
+        /// </summary>
+        public float HorizontalScrollOffset { get; set; }
 
         /// <summary>
         /// Constructor

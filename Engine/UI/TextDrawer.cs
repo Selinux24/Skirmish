@@ -312,6 +312,17 @@ namespace Engine.UI
             Vector2 pos = renderArea.Center;
             pos.Y += baseLineThr;
 
+            //TODO: IScrollable interface
+            if (parent is UITextArea ta)
+            {
+                if (ta.Scroll != ScrollModes.None)
+                {
+                    ClippingRectangle = (Rectangle)renderArea;
+                }
+                pos.Y -= ta.Scroll.HasFlag(ScrollModes.Vertical) ? ta.VerticalScrollOffset : 0f;
+                pos.X -= ta.Scroll.HasFlag(ScrollModes.Horizontal) ? ta.HorizontalScrollOffset : 0f;
+            }
+
             Vector2? parentPos = parent?.GetTransformationPivot();
 
             // Calculate new transforms

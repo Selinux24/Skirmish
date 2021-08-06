@@ -36,6 +36,8 @@ namespace SpriteDrawing
         private UIButton butTest1 = null;
         private UIButton butTest2 = null;
 
+        private UITextArea scrollTextArea = null;
+
         public TestScene(Game game)
             : base(game)
         {
@@ -98,6 +100,7 @@ namespace SpriteDrawing
                     InitializeStaticPan(),
                     InitializeDynamicPan(),
                     InitializeButtonTest(),
+                    InitializeScroll(),
                 },
                 async (res) =>
                 {
@@ -116,8 +119,6 @@ namespace SpriteDrawing
         }
         private async Task InitializeSmiley()
         {
-            await Task.Delay(500);
-
             float size = Game.Form.RenderWidth * 0.3333f;
 
             var desc = SpriteDescription.Default("smiley.png", size, size);
@@ -126,8 +127,6 @@ namespace SpriteDrawing
         }
         private async Task InitializeStaticPan()
         {
-            await Task.Delay(1000);
-
             float width = Game.Form.RenderWidth / 2.25f;
             float height = width * 0.6666f;
 
@@ -172,8 +171,6 @@ namespace SpriteDrawing
         }
         private async Task InitializeDynamicPan()
         {
-            await Task.Delay(1500);
-
             float width = Game.Form.RenderWidth / 1.5f;
             float height = width * 0.6666f;
 
@@ -258,6 +255,25 @@ namespace SpriteDrawing
             butTest1.MouseLeave += ButTest_MouseLeave;
             butTest1.Visible = false;
         }
+        private async Task InitializeScroll()
+        {
+            var panelDesc = UIPanelDescription.Default(Color.Gray);
+            panelDesc.Top = 100;
+            panelDesc.Left = 50;
+            panelDesc.Width = 500;
+            panelDesc.Height = 300;
+            var panel = await this.AddComponentUIPanel("scrollPanel", "Panel", panelDesc, LayerUI + 5);
+
+            var areaDesc = UITextAreaDescription.DefaultFromFamily("Tahoma", 20);
+            areaDesc.Scroll = ScrollModes.Vertical | ScrollModes.Horizontal;
+            areaDesc.GrowControlWithText = true;
+            scrollTextArea = new UITextArea("scroll", "Scroll", this, areaDesc)
+            {
+                Text = Properties.Resources.Lorem
+            };
+
+            panel.AddChild(scrollTextArea);
+        }
 
         public override void OnReportProgress(LoadResourceProgress value)
         {
@@ -309,6 +325,28 @@ Progress: {(int)(progressValue * 100f)}%";
             if (Game.Input.KeyJustReleased(Keys.Home))
             {
                 spriteSmiley.Anchor = Anchors.Center;
+            }
+
+            if (Game.Input.KeyPressed(Keys.Up))
+            {
+                scrollTextArea.VerticalScrollOffset -= 1f;
+                scrollTextArea.VerticalScrollOffset = Math.Max(0, scrollTextArea.VerticalScrollOffset);
+            }
+
+            if (Game.Input.KeyPressed(Keys.Down))
+            {
+                scrollTextArea.VerticalScrollOffset += 1f;
+            }
+
+            if (Game.Input.KeyPressed(Keys.Right))
+            {
+                scrollTextArea.HorizontalScrollOffset -= 1f;
+                scrollTextArea.HorizontalScrollOffset = Math.Max(0, scrollTextArea.HorizontalScrollOffset);
+            }
+
+            if (Game.Input.KeyPressed(Keys.Left))
+            {
+                scrollTextArea.HorizontalScrollOffset += 1f;
             }
         }
         private void UpdateSprite(GameTime gameTime)
