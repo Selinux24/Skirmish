@@ -1,18 +1,18 @@
 #include "..\Lib\IncLights.hlsl"
 #include "..\Lib\IncVertexFormats.hlsl"
 
-SamplerState SamplerText
+SamplerState SamplerPointText
 {
 	Filter = MIN_MAG_MIP_POINT;
-	AddressU = WRAP;
-	AddressV = WRAP;
-	AddressW = WRAP;
-	MipLODBias = 0;
-	MaxAnisotropy = 1;
-	ComparisonFunc = ALWAYS;
-	BorderColor = float4(0, 0, 0, 0);
-	MinLOD = 0;
-	MaxLOD = FLOAT_MAX;
+    AddressU = CLAMP;
+    AddressV = CLAMP;
+};
+
+SamplerState SamplerLinearText
+{
+    Filter = MIN_MAG_MIP_LINEAR;
+    AddressU = CLAMP;
+    AddressV = CLAMP;
 };
 
 cbuffer cbPerFrame : register(b0)
@@ -24,6 +24,7 @@ cbuffer cbPerFrame : register(b0)
 	float2 gResolution;
 	float4 gRectangle;
 	bool gUseRect;
+    bool gIsSmall;
 };
 
 Texture2D gTexture : register(t0);
@@ -76,18 +77,16 @@ bool CoordIntoRectangle(float2 coord) {
 
 float4 PSFont(PSVertexFont input) : SV_TARGET
 {
+    float4 litColor = gIsSmall ? gTexture.Sample(SamplerPointText, input.tex) : gTexture.Sample(SamplerLinearText, input.tex);
+	
 	if (!gUseRect)
 	{
-		float4 litColor = gTexture.Sample(SamplerText, input.tex);
-
 		return MapFont(litColor, input.color);
 	}
 
 	float2 coord = MapScreenCoord(input.positionWorld.xy);
 	if (CoordIntoRectangle(coord))
 	{
-		float4 litColor = gTexture.Sample(SamplerText, input.tex);
-
 		return MapFont(litColor, input.color);
 	}
 

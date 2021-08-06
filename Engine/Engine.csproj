@@ -462,6 +462,7 @@
     <Compile Include="UI\Anchors.cs" />
     <Compile Include="UI\GridFitTypes.cs" />
     <Compile Include="UI\GridLayout.cs" />
+    <Compile Include="UI\IScrollable.cs" />
     <Compile Include="UI\IWithTextDescription.cs" />
     <Compile Include="UI\MouseEventArgs.cs" />
     <Compile Include="UI\MouseEventHandler.cs" />

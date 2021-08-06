@@ -312,16 +312,8 @@ namespace Engine.UI
             Vector2 pos = renderArea.Center;
             pos.Y += baseLineThr;
 
-            //TODO: IScrollable interface
-            if (parent is UITextArea ta)
-            {
-                if (ta.Scroll != ScrollModes.None)
-                {
-                    ClippingRectangle = (Rectangle)renderArea;
-                }
-                pos.Y -= ta.Scroll.HasFlag(ScrollModes.Vertical) ? ta.VerticalScrollOffset : 0f;
-                pos.X -= ta.Scroll.HasFlag(ScrollModes.Horizontal) ? ta.HorizontalScrollOffset : 0f;
-            }
+            // Apply scroll if any
+            pos = ApplyScroll(pos, renderArea);
 
             Vector2? parentPos = parent?.GetTransformationPivot();
 
@@ -338,6 +330,30 @@ namespace Engine.UI
                 ShadowManipulator.SetPosition(pos + ShadowDelta);
                 ShadowManipulator.Update2D(parentPos);
             }
+        }
+        /// <summary>
+        /// Apply the scroll transformation to the text position
+        /// </summary>
+        /// <param name="pos">Text position</param>
+        /// <param name="renderArea">Text render area</param>
+        /// <returns>Returns the transformed position</returns>
+        private Vector2 ApplyScroll(Vector2 pos, RectangleF renderArea)
+        {
+            if (parent is IScrollable ta)
+            {
+                if (ta.Scroll != ScrollModes.None)
+                {
+                    ClippingRectangle = (Rectangle)renderArea;
+                }
+
+                pos.X -= ta.Scroll.HasFlag(ScrollModes.Horizontal) ? ta.HorizontalScrollOffset : 0f;
+                pos.X = (int)pos.X;
+
+                pos.Y -= ta.Scroll.HasFlag(ScrollModes.Vertical) ? ta.VerticalScrollOffset : 0f;
+                pos.Y = (int)pos.Y;
+            }
+
+            return pos;
         }
         /// <summary>
         /// Sets the update internals flag to true
@@ -410,26 +426,18 @@ namespace Engine.UI
         /// <param name="count">Index count</param>
         private void DrawText(EffectDefaultFont effect, EngineEffectTechnique technique, Matrix local, bool useTextureColor, int index, int count)
         {
-            if (ClippingRectangle.HasValue)
-            {
-                effect.UpdatePerFrame(
-                    local,
-                    viewProjection,
-                    Alpha * AlphaMultplier,
-                    useTextureColor,
-                    fontMap.Texture,
-                    Game.Form.RenderRectangle.BottomRight,
-                    ClippingRectangle.Value);
-            }
-            else
-            {
-                effect.UpdatePerFrame(
-                    local,
-                    viewProjection,
-                    Alpha * AlphaMultplier,
-                    useTextureColor,
-                    fontMap.Texture);
-            }
+            effect.UpdatePerFrame(
+                local,
+                viewProjection,
+                Alpha * AlphaMultplier,
+                useTextureColor,
+                fontMap.Size <= 12,
+                fontMap.Texture);
+
+            effect.UpdatePerFrame(
+                ClippingRectangle.HasValue,
+                Game.Form.RenderRectangle.BottomRight,
+                ClippingRectangle ?? Rectangle.Empty);
 
             var graphics = Game.Graphics;
 

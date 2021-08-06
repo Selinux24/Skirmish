@@ -258,7 +258,7 @@ namespace SpriteDrawing
         private async Task InitializeScroll()
         {
             var panelDesc = UIPanelDescription.Default(Color.Gray);
-            panelDesc.Top = 100;
+            panelDesc.Top = 400;
             panelDesc.Left = 50;
             panelDesc.Width = 500;
             panelDesc.Height = 300;
@@ -266,7 +266,7 @@ namespace SpriteDrawing
 
             var areaDesc = UITextAreaDescription.DefaultFromFamily("Tahoma", 20);
             areaDesc.Scroll = ScrollModes.Vertical | ScrollModes.Horizontal;
-            areaDesc.GrowControlWithText = true;
+            areaDesc.Padding = new Padding(10, 10, 10, 60);
             scrollTextArea = new UITextArea("scroll", "Scroll", this, areaDesc)
             {
                 Text = Properties.Resources.Lorem

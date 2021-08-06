@@ -386,6 +386,8 @@ namespace Collada.ModularDungeon
                         AudioManager.Start();
 
                         ChangeToLevel(null);
+
+                        pbLevels.Hide(5000);
                     }
                     catch (AggregateException ex)
                     {
@@ -767,7 +769,7 @@ namespace Collada.ModularDungeon
             Lights.FogRange = 10f;
             Lights.FogStart = maxDistance - 15f;
 
-            var desc = SceneLightPointDescription.Create(Vector3.Zero, 10f, 25f);
+            var desc = SceneLightPointDescription.Create(Vector3.Zero, 10f, 0.5f);
 
             torch = new SceneLightPoint("player_torch", true, agentTorchLight, agentTorchLight, true, desc);
             Lights.Add(torch);

@@ -522,12 +522,12 @@ namespace Engine
 
             int adapterCount = factory.GetAdapterCount1();
 
-            PointerSize bestSize = 0;
+            long bestSize = 0;
             for (int i = 0; i < adapterCount; i++)
             {
                 using (var adapter = factory.GetAdapter1(i))
                 {
-                    var size = adapter.Description1.DedicatedVideoMemory;
+                    long size = adapter.Description1.DedicatedVideoMemory;
                     if (size > bestSize)
                     {
                         bestSize = size;

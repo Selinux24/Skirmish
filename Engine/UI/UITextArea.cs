@@ -8,7 +8,7 @@ namespace Engine.UI
     /// <summary>
     /// Text area
     /// </summary>
-    public class UITextArea : UIControl
+    public class UITextArea : UIControl, IScrollable
     {
         /// <summary>
         /// Button text drawer
@@ -161,17 +161,11 @@ namespace Engine.UI
                 textDrawer.Alpha = value;
             }
         }
-        /// <summary>
-        /// Scroll
-        /// </summary>
+        /// <inheritdoc/>
         public ScrollModes Scroll { get; set; }
-        /// <summary>
-        /// Gets or sets the vertical scroll offset
-        /// </summary>
+        /// <inheritdoc/>
         public float VerticalScrollOffset { get; set; }
-        /// <summary>
-        /// Gets or sets the horizontal scroll offset
-        /// </summary>
+        /// <inheritdoc/>
         public float HorizontalScrollOffset { get; set; }
 
         /// <summary>

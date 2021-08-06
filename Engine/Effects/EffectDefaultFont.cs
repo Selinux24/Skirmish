@@ -31,6 +31,10 @@ namespace Engine.Effects
         /// </summary>
         private readonly EngineEffectVariableScalar useTextureColorVar = null;
         /// <summary>
+        /// Small size effect variable
+        /// </summary>
+        private readonly EngineEffectVariableScalar isSmallSizeVar = null;
+        /// <summary>
         /// Texture effect variable
         /// </summary>
         private readonly EngineEffectVariableTexture textureVar = null;
@@ -109,6 +113,20 @@ namespace Engine.Effects
             }
         }
         /// <summary>
+        /// Is small size
+        /// </summary>
+        protected bool IsSmallSize
+        {
+            get
+            {
+                return isSmallSizeVar.GetBool();
+            }
+            set
+            {
+                isSmallSizeVar.Set(value);
+            }
+        }
+        /// <summary>
         /// Texture
         /// </summary>
         protected EngineShaderResourceView Texture
@@ -168,7 +186,7 @@ namespace Engine.Effects
         /// <summary>
         /// Use clipping rectangle
         /// </summary>
-        protected bool UseClipingRectangle
+        protected bool UseClippingRectangle
         {
             get
             {
@@ -196,6 +214,7 @@ namespace Engine.Effects
             worldViewProjectionVar = Effect.GetVariableMatrix("gWorldViewProjection");
             alphaVar = Effect.GetVariableScalar("gAlpha");
             useTextureColorVar = Effect.GetVariableScalar("gUseColor");
+            isSmallSizeVar = Effect.GetVariableScalar("gIsSmall");
             textureVar = Effect.GetVariableTexture("gTexture");
             resolutionVar = Effect.GetVariableVector("gResolution");
             rectangleVar = Effect.GetVariableVector("gRectangle");
@@ -209,80 +228,35 @@ namespace Engine.Effects
         /// <param name="viewProjection">View * projection matrix</param>
         /// <param name="alphaMult">Alpha multiplier</param>
         /// <param name="useTextureColor">Use the texture color instead of the specified color</param>
+        /// <param name="isSmallSize">The font is a small size font</param>
         /// <param name="texture">Font texture</param>
         public void UpdatePerFrame(
             Matrix world,
             Matrix viewProjection,
             float alphaMult,
             bool useTextureColor,
+            bool isSmallSize,
             EngineShaderResourceView texture)
-        {
-            UpdatePerFrame(
-                world,
-                viewProjection,
-                alphaMult,
-                useTextureColor,
-                texture,
-                false,
-                Vector2.Zero,
-                Rectangle.Empty);
-        }
-        /// <summary>
-        /// Update per frame data
-        /// </summary>
-        /// <param name="world">World matrix</param>
-        /// <param name="viewProjection">View * projection matrix</param>
-        /// <param name="alphaMult">Alpha multiplier</param>
-        /// <param name="useTextureColor">Use the texture color instead of the specified color</param>
-        /// <param name="texture">Font texture</param>
-        /// <param name="screenResolution">Screen resolution in pixels</param>
-        /// <param name="clippingRectangle">Clipping rectangle in pixels</param>
-        public void UpdatePerFrame(
-            Matrix world,
-            Matrix viewProjection,
-            float alphaMult,
-            bool useTextureColor,
-            EngineShaderResourceView texture,
-            Vector2 screenResolution,
-            Rectangle clippingRectangle)
-        {
-            UpdatePerFrame(
-                world,
-                viewProjection,
-                alphaMult,
-                useTextureColor,
-                texture,
-                true,
-                screenResolution,
-                clippingRectangle);
-        }
-        /// <summary>
-        /// Update per frame data
-        /// </summary>
-        /// <param name="world">World matrix</param>
-        /// <param name="viewProjection">View * projection matrix</param>
-        /// <param name="alphaMult">Alpha multiplier</param>
-        /// <param name="useTextureColor">Use the texture color instead of the specified color</param>
-        /// <param name="texture">Font texture</param>
-        /// <param name="useClippingRectangle">Use clipping rectangle</param>
-        /// <param name="screenResolution">Screen resolution in pixels</param>
-        /// <param name="clippingRectangle">Clipping rectangle in pixels</param>
-        private void UpdatePerFrame(
-            Matrix world,
-            Matrix viewProjection,
-            float alphaMult,
-            bool useTextureColor,
-            EngineShaderResourceView texture,
-            bool useClippingRectangle,
-            Vector2 screenResolution,
-            Rectangle clippingRectangle)
         {
             World = world;
             WorldViewProjection = world * viewProjection;
             Alpha = alphaMult;
             UseTextureColor = useTextureColor;
             Texture = texture;
-            UseClipingRectangle = useClippingRectangle;
+            IsSmallSize = isSmallSize;
+        }
+        /// <summary>
+        /// Update per frame data
+        /// </summary>
+        /// <param name="useClippingRectangle">Use clipping</param>
+        /// <param name="screenResolution">Screen resolution in pixels</param>
+        /// <param name="clippingRectangle">Clipping rectangle in pixels</param>
+        public void UpdatePerFrame(
+            bool useClippingRectangle,
+            Vector2 screenResolution,
+            Rectangle clippingRectangle)
+        {
+            UseClippingRectangle = useClippingRectangle;
             Resolution = screenResolution;
             ClippingRectangle = clippingRectangle;
         }
