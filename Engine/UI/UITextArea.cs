@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 namespace Engine.UI
 {
     using Engine.Common;
+    using System;
 
     /// <summary>
     /// Text area
@@ -275,6 +276,31 @@ namespace Engine.UI
             if ((GrowControlWithText && !HasParent) || absRect.Height == 0) absRect.Height = Game.Form.RenderHeight - absRect.Top;
 
             return applyPadding ? Padding.Apply(absRect) : absRect;
+        }
+
+        /// <inheritdoc/>
+        public void ScrollUp(float amount)
+        {
+            VerticalScrollOffset -= amount * Game.GameTime.ElapsedSeconds;
+            VerticalScrollOffset = Math.Max(0, VerticalScrollOffset);
+        }
+        /// <inheritdoc/>
+        public void ScrollDown(float amount)
+        {
+            VerticalScrollOffset += amount * Game.GameTime.ElapsedSeconds;
+            VerticalScrollOffset = Math.Min(textDrawer.TextSize.Y - GetRenderArea(true).Height, VerticalScrollOffset);
+        }
+        /// <inheritdoc/>
+        public void ScrollLeft(float amount)
+        {
+            HorizontalScrollOffset += amount * Game.GameTime.ElapsedSeconds;
+            HorizontalScrollOffset = Math.Min(textDrawer.TextSize.X - GetRenderArea(true).Width, HorizontalScrollOffset);
+        }
+        /// <inheritdoc/>
+        public void ScrollRight(float amount)
+        {
+            HorizontalScrollOffset -= amount * Game.GameTime.ElapsedSeconds;
+            HorizontalScrollOffset = Math.Max(0, HorizontalScrollOffset);
         }
 
         /// <summary>

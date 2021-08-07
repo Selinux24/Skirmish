@@ -329,24 +329,22 @@ Progress: {(int)(progressValue * 100f)}%";
 
             if (Game.Input.KeyPressed(Keys.Up))
             {
-                scrollTextArea.VerticalScrollOffset -= 1f;
-                scrollTextArea.VerticalScrollOffset = Math.Max(0, scrollTextArea.VerticalScrollOffset);
+                scrollTextArea.ScrollUp(100f);
             }
 
             if (Game.Input.KeyPressed(Keys.Down))
             {
-                scrollTextArea.VerticalScrollOffset += 1f;
+                scrollTextArea.ScrollDown(100f);
             }
 
             if (Game.Input.KeyPressed(Keys.Right))
             {
-                scrollTextArea.HorizontalScrollOffset -= 1f;
-                scrollTextArea.HorizontalScrollOffset = Math.Max(0, scrollTextArea.HorizontalScrollOffset);
+                scrollTextArea.ScrollRight(100f);
             }
 
             if (Game.Input.KeyPressed(Keys.Left))
             {
-                scrollTextArea.HorizontalScrollOffset += 1f;
+                scrollTextArea.ScrollLeft(100f);
             }
         }
         private void UpdateSprite(GameTime gameTime)

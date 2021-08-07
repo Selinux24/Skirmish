@@ -154,6 +154,10 @@ namespace Engine.UI
             }
         }
         /// <summary>
+        /// Gets the text total mapped size
+        /// </summary>
+        public Vector2 TextSize { get; protected set; }
+        /// <summary>
         /// Use the texure color flag
         /// </summary>
         public bool UseTextureColor { get; set; } = false;
@@ -341,10 +345,12 @@ namespace Engine.UI
         {
             if (parent is IScrollable ta)
             {
-                if (ta.Scroll != ScrollModes.None)
+                if (ta.Scroll == ScrollModes.None)
                 {
-                    ClippingRectangle = (Rectangle)renderArea;
+                    return pos;
                 }
+
+                ClippingRectangle = (Rectangle)renderArea;
 
                 pos.X -= ta.Scroll.HasFlag(ScrollModes.Horizontal) ? ta.HorizontalScrollOffset : 0f;
                 pos.X = (int)pos.X;
@@ -507,6 +513,8 @@ namespace Engine.UI
                 renderArea,
                 horizontalAlign,
                 verticalAlign);
+
+            TextSize = colorW.Size;
 
             iList.AddRange(colorW.Indices);
             vList.AddRange(colorW.Vertices);
