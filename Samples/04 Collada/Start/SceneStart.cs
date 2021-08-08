@@ -179,8 +179,7 @@ namespace Collada.Start
             // Title text
             var titleFont = TextDrawerDescription.FromFamily(titleFontFamily, 90, FontMapStyles.Bold);
 
-            var titleDesc = UITextAreaDescription.Default();
-            titleDesc.Font = titleFont;
+            var titleDesc = UITextAreaDescription.Default(titleFont);
             titleDesc.TextForeColor = Color.IndianRed;
             titleDesc.TextShadowColor = new Color4(Color.Brown.RGB(), 0.25f);
             titleDesc.TextShadowDelta = new Vector2(4, 4);
@@ -222,8 +221,7 @@ namespace Collada.Start
             // Description text
             var tooltipFont = TextDrawerDescription.FromFile(Path.Combine(resourcesFolder, largeControlsFont), 12);
 
-            var tooltipDesc = UITextAreaDescription.Default();
-            tooltipDesc.Font = tooltipFont;
+            var tooltipDesc = UITextAreaDescription.Default(tooltipFont);
             tooltipDesc.TextForeColor = Color.LightGray;
             tooltipDesc.Width = 250;
             tooltipDesc.EventsEnabled = false;

@@ -150,12 +150,7 @@ namespace SpriteDrawing
 
             var descText = new UITextAreaDescription()
             {
-                Font = new TextDrawerDescription()
-                {
-                    FontFileName = "LeagueSpartan-Bold.otf",
-                    FontSize = 18,
-                    LineAdjust = true,
-                },
+                Font = TextDrawerDescription.FromFile("LeagueSpartan-Bold.otf", 18, true),
                 Padding = new Padding
                 {
                     Left = width * 0.1f,
@@ -268,7 +263,9 @@ namespace SpriteDrawing
 
             var panel = await this.AddComponentUIPanel("scrollPanel", "Panel", panelDesc, LayerUI + 5);
 
-            var areaDesc = UITextAreaDescription.DefaultFromFamily("Tahoma", 20);
+            var areaFont = TextDrawerDescription.FromFamily("Tahoma", 20, false);
+
+            var areaDesc = UITextAreaDescription.Default(areaFont);
             areaDesc.Scroll = ScrollModes.Vertical | ScrollModes.Horizontal;
             areaDesc.Padding = new Padding(10, 10, 10, 60);
 

@@ -131,8 +131,7 @@ namespace SceneTest.SceneTest
             defaultFont18.LineAdjust = true;
             defaultFont10.LineAdjust = true;
 
-            var titleDesc = UITextAreaDescription.Default();
-            titleDesc.Font = defaultFont18;
+            var titleDesc = UITextAreaDescription.Default(defaultFont18);
             titleDesc.TextForeColor = Color.Yellow;
             titleDesc.TextShadowColor = Color.Orange;
 
@@ -140,8 +139,7 @@ namespace SceneTest.SceneTest
             title.Text = "Scene Test - Textures";
             title.SetPosition(Vector2.Zero);
 
-            var runtimeDesc = UITextAreaDescription.Default();
-            runtimeDesc.Font = defaultFont10;
+            var runtimeDesc = UITextAreaDescription.Default(defaultFont10);
             runtimeDesc.TextForeColor = Color.Yellow;
             runtimeDesc.TextShadowColor = Color.Orange;
 

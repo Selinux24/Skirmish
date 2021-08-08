@@ -132,6 +132,7 @@ namespace Engine.UI
                     ImageFile = imageFileName,
                     MapFile = mapFileName,
                 },
+                UseTextureColor = true,
             };
         }
 

@@ -128,12 +128,9 @@ namespace Terrain.PerlinNoise
             var defaultFont14 = TextDrawerDescription.FromFamily(fontFamily, 14, false);
             var defaultFont12 = TextDrawerDescription.FromFamily(fontFamily, 12, false);
 
-            var defaultText16 = UITextAreaDescription.Default();
-            var defaultText14 = UITextAreaDescription.Default();
-            var defaultText12 = UITextAreaDescription.Default();
-            defaultText16.Font = defaultFont16;
-            defaultText14.Font = defaultFont14;
-            defaultText12.Font = defaultFont12;
+            var defaultText16 = UITextAreaDescription.Default(defaultFont16);
+            var defaultText14 = UITextAreaDescription.Default(defaultFont14);
+            var defaultText12 = UITextAreaDescription.Default(defaultFont12);
 
             var defaultButton = UIButtonDescription.DefaultTwoStateButton(bColor1, bColor2);
             defaultButton.Font = defaultFont16;

@@ -179,7 +179,7 @@ namespace SceneTest.SceneTanksGame
             fadePanel = await this.AddComponentUIPanel("FadePanel", "FadePanel", UIPanelDescription.Screen(this, Color4.Black * 0.3333f), LayerUIEffects);
             fadePanel.Visible = false;
 
-            loadingText = await this.AddComponentUITextArea("LoadingText", "LoadingText", UITextAreaDescription.DefaultFromFile(fontFilename, 40, true), LayerUIEffects + 1);
+            loadingText = await this.AddComponentUITextArea("LoadingText", "LoadingText", UITextAreaDescription.DefaultFromFile(fontFilename, 40, FontMapStyles.Regular, true), LayerUIEffects + 1);
             loadingText.TextForeColor = Color.Yellow;
             loadingText.TextShadowColor = Color.Orange;
             loadingText.TextHorizontalAlign = HorizontalTextAlign.Center;
@@ -187,7 +187,7 @@ namespace SceneTest.SceneTanksGame
             loadingText.GrowControlWithText = false;
             loadingText.Visible = false;
 
-            loadingBar = await this.AddComponentUIProgressBar("LoadingBar", "LoadingBar", UIProgressBarDescription.DefaultFromFile(fontFilename, 20, true), LayerUIEffects + 1);
+            loadingBar = await this.AddComponentUIProgressBar("LoadingBar", "LoadingBar", UIProgressBarDescription.DefaultFromFile(fontFilename, 20, FontMapStyles.Regular, true), LayerUIEffects + 1);
             loadingBar.ProgressColor = Color.Yellow;
             loadingBar.BaseColor = Color.CornflowerBlue;
             loadingBar.Caption.TextForeColor = Color.Black;
@@ -257,7 +257,7 @@ namespace SceneTest.SceneTanksGame
         }
         private async Task InitializeUIGameMessages()
         {
-            gameMessage = await this.AddComponentUITextArea("GameMessage", "GameMessage", UITextAreaDescription.DefaultFromFile(fontFilename, 120, false), LayerUIEffects + 1);
+            gameMessage = await this.AddComponentUITextArea("GameMessage", "GameMessage", UITextAreaDescription.DefaultFromFile(fontFilename, 120, FontMapStyles.Regular, false), LayerUIEffects + 1);
             gameMessage.TextForeColor = Color.Yellow;
             gameMessage.TextShadowColor = Color.Yellow * 0.5f;
             gameMessage.TextHorizontalAlign = HorizontalTextAlign.Center;
@@ -265,7 +265,7 @@ namespace SceneTest.SceneTanksGame
             gameMessage.GrowControlWithText = false;
             gameMessage.Visible = false;
 
-            gameKeyHelp = await this.AddComponentUITextArea("GameKeyHelp", "GameKeyHelp", UITextAreaDescription.DefaultFromFile(fontFilename, 25, true), LayerUIEffects + 1);
+            gameKeyHelp = await this.AddComponentUITextArea("GameKeyHelp", "GameKeyHelp", UITextAreaDescription.DefaultFromFile(fontFilename, 25, FontMapStyles.Regular, true), LayerUIEffects + 1);
             gameKeyHelp.TextForeColor = Color.Yellow;
             gameKeyHelp.Text = "Press space to exit";
             gameKeyHelp.TextHorizontalAlign = HorizontalTextAlign.Center;
@@ -305,42 +305,42 @@ namespace SceneTest.SceneTanksGame
         }
         private async Task InitializeUIPlayers()
         {
-            player1Name = await this.AddComponentUITextArea("Player1Name", "Player1Name", UITextAreaDescription.DefaultFromFile(fontFilename, 20, true));
+            player1Name = await this.AddComponentUITextArea("Player1Name", "Player1Name", UITextAreaDescription.DefaultFromFile(fontFilename, 20, FontMapStyles.Regular, true));
             player1Name.TextForeColor = player1Status.Color;
             player1Name.TextShadowColor = player1Status.Color * 0.5f;
             player1Name.GrowControlWithText = false;
             player1Name.TextHorizontalAlign = HorizontalTextAlign.Left;
             player1Name.Visible = false;
 
-            player1Points = await this.AddComponentUITextArea("Player1Points", "Player1Points", UITextAreaDescription.DefaultFromFile(fontFilename, 25, true));
+            player1Points = await this.AddComponentUITextArea("Player1Points", "Player1Points", UITextAreaDescription.DefaultFromFile(fontFilename, 25, FontMapStyles.Regular, true));
             player1Points.TextForeColor = player1Status.Color;
             player1Points.TextShadowColor = player1Status.Color * 0.5f;
             player1Points.GrowControlWithText = false;
             player1Points.TextHorizontalAlign = HorizontalTextAlign.Center;
             player1Points.Visible = false;
 
-            player1Life = await this.AddComponentUIProgressBar("Player1Life", "Player1Life", UIProgressBarDescription.DefaultFromFile(fontFilename, 10, true));
+            player1Life = await this.AddComponentUIProgressBar("Player1Life", "Player1Life", UIProgressBarDescription.DefaultFromFile(fontFilename, 10, FontMapStyles.Regular, true));
             player1Life.ProgressColor = player1Status.Color;
             player1Life.BaseColor = Color.Black;
             player1Life.Caption.TextForeColor = Color.White;
             player1Life.Caption.Text = "0%";
             player1Life.Visible = false;
 
-            player2Name = await this.AddComponentUITextArea("Player2Name", "Player2Name", UITextAreaDescription.DefaultFromFile(fontFilename, 20, true));
+            player2Name = await this.AddComponentUITextArea("Player2Name", "Player2Name", UITextAreaDescription.DefaultFromFile(fontFilename, 20, FontMapStyles.Regular, true));
             player2Name.TextForeColor = player2Status.Color;
             player2Name.TextShadowColor = player2Status.Color * 0.5f;
             player2Name.GrowControlWithText = false;
             player2Name.TextHorizontalAlign = HorizontalTextAlign.Right;
             player2Name.Visible = false;
 
-            player2Points = await this.AddComponentUITextArea("Player2Points", "Player2Points", UITextAreaDescription.DefaultFromFile(fontFilename, 25, true));
+            player2Points = await this.AddComponentUITextArea("Player2Points", "Player2Points", UITextAreaDescription.DefaultFromFile(fontFilename, 25, FontMapStyles.Regular, true));
             player2Points.TextForeColor = player2Status.Color;
             player2Points.TextShadowColor = player2Status.Color * 0.5f;
             player2Points.GrowControlWithText = false;
             player2Points.TextHorizontalAlign = HorizontalTextAlign.Center;
             player2Points.Visible = false;
 
-            player2Life = await this.AddComponentUIProgressBar("Player2Life", "Player2Life", UIProgressBarDescription.DefaultFromFile(fontFilename, 10, true));
+            player2Life = await this.AddComponentUIProgressBar("Player2Life", "Player2Life", UIProgressBarDescription.DefaultFromFile(fontFilename, 10, FontMapStyles.Regular, true));
             player2Life.ProgressColor = player2Status.Color;
             player2Life.BaseColor = Color.Black;
             player2Life.Caption.TextForeColor = Color.White;
@@ -349,7 +349,7 @@ namespace SceneTest.SceneTanksGame
         }
         private async Task InitializeUITurn()
         {
-            turnText = await this.AddComponentUITextArea("TurnText", "TurnText", UITextAreaDescription.DefaultFromFile(fontFilename, 40, true));
+            turnText = await this.AddComponentUITextArea("TurnText", "TurnText", UITextAreaDescription.DefaultFromFile(fontFilename, 40, FontMapStyles.Regular, true));
             turnText.TextForeColor = Color.Yellow;
             turnText.TextShadowColor = Color.Yellow * 0.5f;
             turnText.TextHorizontalAlign = HorizontalTextAlign.Center;
@@ -387,32 +387,32 @@ namespace SceneTest.SceneTanksGame
             KeyPitch.BaseColor = Color.Turquoise;
             KeyPitch.Visible = false;
 
-            keyRotateLeftText = await this.AddComponentUITextArea("KeyRotateLeftText", "KeyRotateLeftText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, true), layerKeys);
+            keyRotateLeftText = await this.AddComponentUITextArea("KeyRotateLeftText", "KeyRotateLeftText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, FontMapStyles.Regular, true), layerKeys);
             keyRotateLeftText.TextForeColor = Color.Yellow;
             keyRotateLeftText.Text = "A";
             keyRotateLeftText.Visible = false;
 
-            keyRotateRightText = await this.AddComponentUITextArea("KeyRotateRightText", "KeyRotateRightText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, true), layerKeys);
+            keyRotateRightText = await this.AddComponentUITextArea("KeyRotateRightText", "KeyRotateRightText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, FontMapStyles.Regular, true), layerKeys);
             keyRotateRightText.TextForeColor = Color.Yellow;
             keyRotateRightText.Text = "D";
             keyRotateRightText.Visible = false;
 
-            keyMoveForwardText = await this.AddComponentUITextArea("KeyMoveForwardText", "KeyMoveForwardText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, true), layerKeys);
+            keyMoveForwardText = await this.AddComponentUITextArea("KeyMoveForwardText", "KeyMoveForwardText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, FontMapStyles.Regular, true), layerKeys);
             keyMoveForwardText.TextForeColor = Color.Yellow;
             keyMoveForwardText.Text = "W";
             keyMoveForwardText.Visible = false;
 
-            keyMoveBackwardText = await this.AddComponentUITextArea("KeyMoveBackwardText", "KeyMoveBackwardText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, true), layerKeys);
+            keyMoveBackwardText = await this.AddComponentUITextArea("KeyMoveBackwardText", "KeyMoveBackwardText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, FontMapStyles.Regular, true), layerKeys);
             keyMoveBackwardText.TextForeColor = Color.Yellow;
             keyMoveBackwardText.Text = "S";
             keyMoveBackwardText.Visible = false;
 
-            keyPitchUpText = await this.AddComponentUITextArea("KeyPitchUpText", "KeyPitchUpText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, true), layerKeys);
+            keyPitchUpText = await this.AddComponentUITextArea("KeyPitchUpText", "KeyPitchUpText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, FontMapStyles.Regular, true), layerKeys);
             keyPitchUpText.TextForeColor = Color.Yellow;
             keyPitchUpText.Text = "Q";
             keyPitchUpText.Visible = false;
 
-            keyPitchDownText = await this.AddComponentUITextArea("KeyPitchDownText", "KeyPitchDownText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, true), layerKeys);
+            keyPitchDownText = await this.AddComponentUITextArea("KeyPitchDownText", "KeyPitchDownText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, FontMapStyles.Regular, true), layerKeys);
             keyPitchDownText.TextForeColor = Color.Yellow;
             keyPitchDownText.Text = "Z";
             keyPitchDownText.Visible = false;
@@ -425,7 +425,7 @@ namespace SceneTest.SceneTanksGame
             pbFire.BaseColor = new Color4(0, 0, 0, 0.5f);
             pbFire.Visible = false;
 
-            fireKeyText = await this.AddComponentUITextArea("FireKeyText", "FireKeyText", UITextAreaDescription.DefaultFromFile(fontFilename, 25, true));
+            fireKeyText = await this.AddComponentUITextArea("FireKeyText", "FireKeyText", UITextAreaDescription.DefaultFromFile(fontFilename, 25, FontMapStyles.Regular, true));
             fireKeyText.TextForeColor = Color.Yellow;
             fireKeyText.Text = "Press space to fire!";
             fireKeyText.TextHorizontalAlign = HorizontalTextAlign.Center;

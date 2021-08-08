@@ -133,16 +133,12 @@ namespace Engine.UI
         /// <param name="fontFamilyName">Font family name</param>
         /// <param name="size">Font size</param>
         /// <param name="fontStyle">Font style</param>
-        public static UIButtonDescription DefaultFromFamily(string fontFamilyName, int size, FontMapStyles fontStyle = FontMapStyles.Regular)
+        /// <param name="fineSampling">Fine sampling</param>
+        public static UIButtonDescription DefaultFromFamily(string fontFamilyName, int size, FontMapStyles fontStyle = FontMapStyles.Regular, bool fineSampling = true)
         {
             return new UIButtonDescription()
             {
-                Font = new TextDrawerDescription()
-                {
-                    FontFamily = fontFamilyName,
-                    FontSize = size,
-                    Style = fontStyle,
-                },
+                Font = TextDrawerDescription.FromFamily(fontFamilyName, size, fontStyle, fineSampling),
             };
         }
         /// <summary>
@@ -152,17 +148,11 @@ namespace Engine.UI
         /// <param name="size">Size</param>
         /// <param name="fontStyle">Font style</param>
         /// <param name="lineAdjust">Line adjust</param>
-        public static UIButtonDescription DefaultFromFile(string fileName, int size, bool lineAdjust = false, FontMapStyles fontStyle = FontMapStyles.Regular)
+        public static UIButtonDescription DefaultFromFile(string fileName, int size, FontMapStyles fontStyle = FontMapStyles.Regular, bool lineAdjust = false)
         {
             return new UIButtonDescription()
             {
-                Font = new TextDrawerDescription
-                {
-                    FontFileName = fileName,
-                    FontSize = size,
-                    LineAdjust = lineAdjust,
-                    Style = fontStyle,
-                },
+                Font = TextDrawerDescription.FromFile(fileName, size, fontStyle, lineAdjust),
             };
         }
         /// <summary>
@@ -174,15 +164,7 @@ namespace Engine.UI
         {
             return new UIButtonDescription
             {
-                Font = new TextDrawerDescription()
-                {
-                    FontMapping = new FontMapping
-                    {
-                        ImageFile = fontImageFileName,
-                        MapFile = fontMapFileName,
-                    },
-                    UseTextureColor = true,
-                },
+                Font = TextDrawerDescription.FromMap(fontImageFileName, fontMapFileName),
             };
         }
         /// <summary>
@@ -196,12 +178,7 @@ namespace Engine.UI
             return new UIButtonDescription()
             {
                 TwoStateButton = true,
-                Font = new TextDrawerDescription()
-                {
-                    FontFamily = fontFamilyName,
-                    FontSize = size,
-                    Style = fontStyle,
-                },
+                Font = TextDrawerDescription.FromFamily(fontFamilyName, size, fontStyle),
             };
         }
         /// <summary>
@@ -211,18 +188,12 @@ namespace Engine.UI
         /// <param name="size">Size</param>
         /// <param name="fontStyle">Font style</param>
         /// <param name="lineAdjust">Line adjust</param>
-        public static UIButtonDescription DefaultTwoStateButtonFromFile(string fileName, int size, bool lineAdjust = false, FontMapStyles fontStyle = FontMapStyles.Regular)
+        public static UIButtonDescription DefaultTwoStateButtonFromFile(string fileName, int size, FontMapStyles fontStyle = FontMapStyles.Regular, bool lineAdjust = false)
         {
             return new UIButtonDescription()
             {
                 TwoStateButton = true,
-                Font = new TextDrawerDescription
-                {
-                    FontFileName = fileName,
-                    FontSize = size,
-                    LineAdjust = lineAdjust,
-                    Style = fontStyle,
-                },
+                Font = TextDrawerDescription.FromFile(fileName, size, fontStyle, lineAdjust),
             };
         }
         /// <summary>
@@ -235,15 +206,7 @@ namespace Engine.UI
             return new UIButtonDescription
             {
                 TwoStateButton = true,
-                Font = new TextDrawerDescription()
-                {
-                    FontMapping = new FontMapping
-                    {
-                        ImageFile = fontImageFileName,
-                        MapFile = fontMapFileName,
-                    },
-                    UseTextureColor = true,
-                },
+                Font = TextDrawerDescription.FromMap(fontImageFileName, fontMapFileName),
             };
         }
 
