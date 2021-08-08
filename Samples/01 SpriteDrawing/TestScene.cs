@@ -71,7 +71,7 @@ namespace SpriteDrawing
             var desc = UITextAreaDescription.Default();
             desc.Width = Game.Form.RenderWidth * 0.5f;
 
-            textDebug = await this.AddComponentUITextArea("Console", "Console", desc, LayerUI);
+            textDebug = await this.AddComponentUITextArea("textDebug", "textDebug", desc, LayerUI);
         }
         private async Task InitializeBackground()
         {
@@ -80,13 +80,16 @@ namespace SpriteDrawing
         }
         private async Task InitializeProgressbar()
         {
-            var desc = UIProgressBarDescription.DefaultFromFile("LeagueSpartan-Bold.otf", 10, true);
+            var defaultFont = TextDrawerDescription.FromFile("LeagueSpartan-Bold.otf", 10, true);
+
+            var desc = UIProgressBarDescription.Default();
             desc.Top = Game.Form.RenderHeight - 20;
             desc.Left = 100;
             desc.Width = Game.Form.RenderWidth - 200;
             desc.Height = 15;
             desc.BaseColor = new Color(0, 0, 0, 0.5f);
             desc.ProgressColor = Color.Green;
+            desc.Font = defaultFont;
 
             progressBar = await this.AddComponentUIProgressBar("ProgressBar", "ProgressBar", desc, LayerUI);
         }
@@ -262,11 +265,13 @@ namespace SpriteDrawing
             panelDesc.Left = 50;
             panelDesc.Width = 500;
             panelDesc.Height = 300;
+
             var panel = await this.AddComponentUIPanel("scrollPanel", "Panel", panelDesc, LayerUI + 5);
 
             var areaDesc = UITextAreaDescription.DefaultFromFamily("Tahoma", 20);
             areaDesc.Scroll = ScrollModes.Vertical | ScrollModes.Horizontal;
             areaDesc.Padding = new Padding(10, 10, 10, 60);
+
             scrollTextArea = new UITextArea("scroll", "Scroll", this, areaDesc)
             {
                 Text = Properties.Resources.Lorem

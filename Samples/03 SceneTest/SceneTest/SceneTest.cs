@@ -126,7 +126,13 @@ namespace SceneTest.SceneTest
         }
         private async Task InitializeUI()
         {
-            var titleDesc = UITextAreaDescription.DefaultFromFamily("Tahoma", 18);
+            var defaultFont18 = TextDrawerDescription.FromFamily("Tahoma", 18, false);
+            var defaultFont10 = TextDrawerDescription.FromFamily("Tahoma", 10, false);
+            defaultFont18.LineAdjust = true;
+            defaultFont10.LineAdjust = true;
+
+            var titleDesc = UITextAreaDescription.Default();
+            titleDesc.Font = defaultFont18;
             titleDesc.TextForeColor = Color.Yellow;
             titleDesc.TextShadowColor = Color.Orange;
 
@@ -134,7 +140,8 @@ namespace SceneTest.SceneTest
             title.Text = "Scene Test - Textures";
             title.SetPosition(Vector2.Zero);
 
-            var runtimeDesc = UITextAreaDescription.DefaultFromFamily("Tahoma", 10);
+            var runtimeDesc = UITextAreaDescription.Default();
+            runtimeDesc.Font = defaultFont10;
             runtimeDesc.TextForeColor = Color.Yellow;
             runtimeDesc.TextShadowColor = Color.Orange;
 
@@ -145,11 +152,11 @@ namespace SceneTest.SceneTest
             spr = await this.AddComponentSprite("UIBackpanel", "Backpanel", new SpriteDescription()
             {
                 Width = Game.Form.RenderWidth,
-                Height = runtime.Top + runtime.Height + 3,
+                Height = runtime.Top + runtime.Height + 10,
                 BaseColor = new Color4(0, 0, 0, 0.75f),
             }, SceneObjectUsages.UI, LayerUI - 1);
 
-            var buttonFont = TextDrawerDescription.FromFamily("Lucida Console", 12);
+            var buttonFont = TextDrawerDescription.FromFamily("Lucida Console", 12, false);
 
             var buttonDesc = UIButtonDescription.DefaultTwoStateButton("SceneTest/UI/button_on.png", "SceneTest/UI/button_off.png");
             buttonDesc.Width = 100;
@@ -183,7 +190,10 @@ namespace SceneTest.SceneTest
                 Height = Game.Form.RenderHeight,
             }, LayerUI + 1);
 
-            var pbDesc = UIProgressBarDescription.DefaultFromFamily("Consolas", 18);
+            var pbFont = TextDrawerDescription.FromFamily("Consolas", 18, false);
+
+            var pbDesc = UIProgressBarDescription.Default();
+            pbDesc.Font = pbFont;
             pbDesc.Top = Game.Form.RenderHeight - 60;
             pbDesc.Left = 100;
             pbDesc.Width = Game.Form.RenderWidth - 200;
@@ -1065,7 +1075,7 @@ namespace SceneTest.SceneTest
             spr.Top = 0;
             spr.Left = 0;
             spr.Width = Game.Form.RenderWidth;
-            spr.Height = runtime.Top + runtime.Height + 3;
+            spr.Height = runtime.Top + runtime.Height + 10;
 
             butClose.Top = 1;
             butClose.Left = Game.Form.RenderWidth - butClose.Width - 1;

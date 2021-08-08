@@ -8,18 +8,29 @@ cbuffer cbPerFrame : register(b0)
 {
 	float4x4 gWorld;
 	float4x4 gWorldViewProjection;
+    float2 gResolution;
+    float2 gPAD01;
 };
 cbuffer cbPerObject : register(b1)
 {
 	float4 gColor;
-};
-cbuffer cbPerInstance : register(b2)
-{
-	float gTextureIndex;
-    float3 gPAD21;
+    float4 gSize;
+    float4 gColor2;
+    float gPct;
+    float gTextureIndex;
+    float2 gPAD11;
 };
 
 Texture2DArray gTextureArray : register(t0);
+
+float MapScreenCoord(float positionWorld)
+{
+    float x = 0.5 * positionWorld.x + 0.5;
+	
+    float left = gSize.x / gResolution.x;
+    float width = gSize.z / gResolution.x;
+    return clamp((x - left) / width, 0., 1.);
+}
 
 /**********************************************************************************************************
 POSITION COLOR
@@ -29,7 +40,7 @@ PSVertexPositionColor VSPositionColor(VSVertexPositionColor input)
 	PSVertexPositionColor output = (PSVertexPositionColor) 0;
 
 	output.positionHomogeneous = mul(float4(input.positionLocal, 1), gWorldViewProjection);
-	output.positionWorld = mul(float4(input.positionLocal, 1), gWorld).xyz;
+    output.positionWorld = output.positionHomogeneous.xyz;
 	output.color = input.color;
     
 	return output;
@@ -37,7 +48,14 @@ PSVertexPositionColor VSPositionColor(VSVertexPositionColor input)
 
 float4 PSPositionColor(PSVertexPositionColor input) : SV_TARGET
 {
-	return input.color * gColor;
+    return saturate(input.color * gColor);
+}
+float4 PSPositionColorPct(PSVertexPositionColor input) : SV_TARGET
+{
+    float x = MapScreenCoord(input.positionWorld.x);
+    float4 tintColor = x > gPct ? gColor : gColor2;
+	
+    return input.color * tintColor;
 }
 
 /**********************************************************************************************************
@@ -48,7 +66,7 @@ PSVertexPositionTexture VSPositionTexture(VSVertexPositionTexture input)
 	PSVertexPositionTexture output = (PSVertexPositionTexture) 0;
 
 	output.positionHomogeneous = mul(float4(input.positionLocal, 1), gWorldViewProjection);
-	output.positionWorld = mul(float4(input.positionLocal, 1), gWorld).xyz;
+    output.positionWorld = output.positionHomogeneous.xyz;
 	output.tex = input.tex;
 	output.textureIndex = gTextureIndex;
     
@@ -57,7 +75,9 @@ PSVertexPositionTexture VSPositionTexture(VSVertexPositionTexture input)
 
 float4 PSPositionTexture(PSVertexPositionTexture input) : SV_TARGET
 {
-    return saturate(gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex)) * gColor);
+    float4 color = gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
+	
+    return saturate(color * gColor);
 }
 float4 PSPositionTextureRED(PSVertexPositionTexture input) : SV_TARGET
 {
@@ -94,6 +114,15 @@ float4 PSPositionTextureNOALPHA(PSVertexPositionTexture input) : SV_TARGET
    	//Color channel
 	return float4(color.rgb, 1);
 }
+float4 PSPositionTexturePct(PSVertexPositionTexture input) : SV_TARGET
+{
+    float4 color = gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
+	
+    float x = input.tex.x;
+    float4 tintColor = x > gPct ? gColor : gColor2;
+	
+    return color * tintColor;
+}
 
 /**********************************************************************************************************
 EFFECTS
@@ -106,6 +135,15 @@ technique11 PositionColor
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionColor()));
 	}
+}
+technique11 PositionColorPct
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSPositionColor()));
+        SetGeometryShader(NULL);
+        SetPixelShader(CompileShader(ps_5_0, PSPositionColorPct()));
+    }
 }
 
 technique11 PositionTexture
@@ -161,4 +199,13 @@ technique11 PositionTextureNOALPHA
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionTextureNOALPHA()));
 	}
+}
+technique11 PositionTexturePct
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSPositionTexture()));
+        SetGeometryShader(NULL);
+        SetPixelShader(CompileShader(ps_5_0, PSPositionTexturePct()));
+    }
 }

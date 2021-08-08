@@ -14,10 +14,6 @@ namespace Engine.UI
         /// Progress sprite
         /// </summary>
         private readonly Sprite spriteProgress = null;
-        /// <summary>
-        /// Base sprite
-        /// </summary>
-        private readonly Sprite spriteBase = null;
 
         /// <summary>
         /// Gets or sets the progress value
@@ -51,11 +47,11 @@ namespace Engine.UI
         {
             get
             {
-                return spriteProgress.BaseColor;
+                return spriteProgress.TintColor;
             }
             set
             {
-                spriteProgress.BaseColor = value;
+                spriteProgress.TintColor = value;
             }
         }
         /// <summary>
@@ -65,11 +61,11 @@ namespace Engine.UI
         {
             get
             {
-                return spriteBase.BaseColor;
+                return spriteProgress.BaseColor;
             }
             set
             {
-                spriteBase.BaseColor = value;
+                spriteProgress.BaseColor = value;
             }
         }
 
@@ -85,33 +81,18 @@ namespace Engine.UI
         {
             ProgressValue = 0;
 
-            spriteBase = new Sprite(
-                $"{id}.Base",
-                $"{name}.Base",
-                scene,
-                new SpriteDescription()
-                {
-                    BaseColor = description.BaseColor,
-                    Width = description.Width,
-                    Height = description.Height,
-                    EventsEnabled = false,
-                });
-
-            AddChild(spriteBase, false);
-
             spriteProgress = new Sprite(
                 $"{id}.Progress",
                 $"{name}.Progress",
                 scene,
                 new SpriteDescription()
                 {
-                    BaseColor = description.ProgressColor,
-                    Width = description.Width,
-                    Height = description.Height,
+                    BaseColor = description.BaseColor,
+                    TintColor = description.ProgressColor,
                     EventsEnabled = false,
                 });
 
-            AddChild(spriteProgress, false);
+            AddChild(spriteProgress, true);
 
             if (description.Font != null)
             {
@@ -145,17 +126,8 @@ namespace Engine.UI
                 return;
             }
 
-            int width = (int)(ProgressValue * Width);
-
-            spriteProgress.Width = width;
-            spriteProgress.Height = Height;
-            spriteProgress.Left = 0;
-            spriteProgress.Top = 0;
-
-            spriteBase.Width = Width - width;
-            spriteBase.Height = Height;
-            spriteBase.Left = width;
-            spriteBase.Top = 0;
+            spriteProgress.UsePercentage = true;
+            spriteProgress.Percentage = ProgressValue;
         }
     }
 

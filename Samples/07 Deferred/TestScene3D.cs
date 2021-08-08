@@ -287,10 +287,17 @@ namespace Deferred
         }
         private async Task InitializeUI()
         {
-            var dTitle = new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White };
-            var dLoad = new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 12), TextForeColor = Color.Yellow };
-            var dHelp = new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 12), TextForeColor = Color.Yellow };
-            var dStats = new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 10), TextForeColor = Color.Red };
+            var defaultFont18 = TextDrawerDescription.FromFamily("Tahoma", 18, false);
+            var defaultFont12 = TextDrawerDescription.FromFamily("Tahoma", 12, false);
+            var defaultFont10 = TextDrawerDescription.FromFamily("Tahoma", 10, false);
+            defaultFont18.LineAdjust = true;
+            defaultFont12.LineAdjust = true;
+            defaultFont10.LineAdjust = true;
+
+            var dTitle = new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White };
+            var dLoad = new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow };
+            var dHelp = new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow };
+            var dStats = new UITextAreaDescription { Font = defaultFont10, TextForeColor = Color.Red };
 
             title = await this.AddComponentUITextArea("Title", "Title", dTitle);
             load = await this.AddComponentUITextArea("Load", "Load", dLoad);

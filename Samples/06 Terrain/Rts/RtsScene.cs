@@ -26,6 +26,8 @@ namespace Terrain.Rts
         private const int MaxPickingTest = 10000;
         private const int MaxGridDrawer = 10000;
 
+        readonly string fontFamily = "Microsoft Sans Serif";
+
         private bool walkMode = false;
         private readonly float walkerVelocity = 8f;
         private ISceneObject followTarget;
@@ -216,10 +218,14 @@ namespace Terrain.Rts
             Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
 
-            title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White });
-            stats = await this.AddComponentUITextArea("Stats", "Stats", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 12), TextForeColor = Color.Yellow });
-            counters1 = await this.AddComponentUITextArea("Counters1", "Counters1", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 10), TextForeColor = Color.GreenYellow });
-            counters2 = await this.AddComponentUITextArea("Counters2", "Counters2", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 10), TextForeColor = Color.GreenYellow });
+            var defaultFont18 = TextDrawerDescription.FromFamily(fontFamily, 18, false);
+            var defaultFont12 = TextDrawerDescription.FromFamily(fontFamily, 12, false);
+            var defaultFont10 = TextDrawerDescription.FromFamily(fontFamily, 10, false);
+
+            title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
+            stats = await this.AddComponentUITextArea("Stats", "Stats", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow });
+            counters1 = await this.AddComponentUITextArea("Counters1", "Counters1", new UITextAreaDescription { Font = defaultFont10, TextForeColor = Color.GreenYellow });
+            counters2 = await this.AddComponentUITextArea("Counters2", "Counters2", new UITextAreaDescription { Font = defaultFont10, TextForeColor = Color.GreenYellow });
 
             title.Text = "Terrain collision and trajectories test";
             stats.Text = "";

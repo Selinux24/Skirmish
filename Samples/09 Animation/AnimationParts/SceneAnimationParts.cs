@@ -68,7 +68,9 @@ namespace Animation.AnimationParts
 
         private async Task InitializeUI()
         {
-            title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White });
+            var defaultFont18 = TextDrawerDescription.FromFamily("Consolas", 18, false);
+
+            title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
 
             title.Text = "Model Parts Test";
 

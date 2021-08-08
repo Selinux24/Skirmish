@@ -219,26 +219,10 @@ namespace GameLogic
             SpriteDescription bkDesc = SpriteDescription.Background("Resources/HUD.png");
             await this.AddComponentSprite("HUD", "HUD", bkDesc, SceneObjectUsages.UI, LayerUI - 1);
 
-            var titleFont = new TextDrawerDescription
-            {
-                FontFileName = titleFontFileName,
-                FontSize = fontSize * 3,
-            };
-            var gameFont = new TextDrawerDescription()
-            {
-                FontFileName = fontFileName,
-                FontSize = (int)(fontSize * 1.25f),
-            };
-            var textFont = new TextDrawerDescription()
-            {
-                FontFileName = fontFileName,
-                FontSize = fontSize,
-            };
-            var buttonsFont = new TextDrawerDescription()
-            {
-                FontFileName = fontFileName,
-                FontSize = fontSize,
-            };
+            var titleFont = TextDrawerDescription.FromFamily(titleFontFileName, fontSize * 3);
+            var gameFont = TextDrawerDescription.FromFile(fontFileName, (int)(fontSize * 1.25f), false);
+            var textFont = TextDrawerDescription.FromFile(fontFileName, fontSize, false);
+            var buttonsFont = TextDrawerDescription.FromFile(fontFileName, fontSize, false);
 
             txtTitle = await this.AddComponentUITextArea("txtTitle", "txtTitle", new UITextAreaDescription { Font = titleFont });
             txtTitle.TextForeColor = Color.White;

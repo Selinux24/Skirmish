@@ -15,6 +15,10 @@ namespace Engine.Effects
         /// </summary>
         protected readonly EngineEffectTechnique PositionColor = null;
         /// <summary>
+        /// Position color by percentage drawing technique
+        /// </summary>
+        protected readonly EngineEffectTechnique PositionColorPct = null;
+        /// <summary>
         /// Position texture technique
         /// </summary>
         protected readonly EngineEffectTechnique PositionTexture = null;
@@ -38,6 +42,10 @@ namespace Engine.Effects
         /// Position texture without alpha channel
         /// </summary>
         protected readonly EngineEffectTechnique PositionTextureNOALPHA = null;
+        /// <summary>
+        /// Position texture by percentage technique
+        /// </summary>
+        protected readonly EngineEffectTechnique PositionTexturePct = null;
 
         /// <summary>
         /// World matrix effect variable
@@ -48,17 +56,33 @@ namespace Engine.Effects
         /// </summary>
         private readonly EngineEffectVariableMatrix worldViewProjectionVar = null;
         /// <summary>
-        /// Texture index effect variable
+        /// Screen resolution in pixels effect variable
         /// </summary>
-        private readonly EngineEffectVariableScalar textureIndexVar = null;
+        private readonly EngineEffectVariableVector resolutionVar = null;
         /// <summary>
         /// Color effect variable
         /// </summary>
         private readonly EngineEffectVariableVector colorVar = null;
         /// <summary>
+        /// Sprite size in pixels effect variable
+        /// </summary>
+        private readonly EngineEffectVariableVector sizeVar = null;
+        /// <summary>
+        /// Second color effect variable
+        /// </summary>
+        private readonly EngineEffectVariableVector color2Var = null;
+        /// <summary>
+        /// Percentage effect variable
+        /// </summary>
+        private readonly EngineEffectVariableScalar percentageVar = null;
+        /// <summary>
         /// Texture effect variable
         /// </summary>
         private readonly EngineEffectVariableTexture texturesVar = null;
+        /// <summary>
+        /// Texture index effect variable
+        /// </summary>
+        private readonly EngineEffectVariableScalar textureIndexVar = null;
 
         /// <summary>
         /// Current texture array
@@ -94,17 +118,17 @@ namespace Engine.Effects
             }
         }
         /// <summary>
-        /// Texture index
+        /// Screen resolution in pixels
         /// </summary>
-        protected int TextureIndex
+        protected Vector2 Resolution
         {
             get
             {
-                return textureIndexVar.GetInt();
+                return resolutionVar.GetVector<Vector2>();
             }
             set
             {
-                textureIndexVar.Set(value);
+                resolutionVar.Set(value);
             }
         }
         /// <summary>
@@ -119,6 +143,56 @@ namespace Engine.Effects
             set
             {
                 colorVar.Set(value);
+            }
+        }
+        /// <summary>
+        /// Clipping rectangle in pixels
+        /// </summary>
+        protected RectangleF Size
+        {
+            get
+            {
+                Vector4 rect = sizeVar.GetVector<Vector4>();
+
+                return new RectangleF()
+                {
+                    X = rect.X,
+                    Y = rect.Y,
+                    Width = rect.Z,
+                    Height = rect.W,
+                };
+            }
+            set
+            {
+                sizeVar.Set(new Vector4(value.X, value.Y, value.Width, value.Height));
+            }
+        }
+        /// <summary>
+        /// Second color
+        /// </summary>
+        protected Color4 Color2
+        {
+            get
+            {
+                return color2Var.GetVector<Color4>();
+            }
+            set
+            {
+                color2Var.Set(value);
+            }
+        }
+        /// <summary>
+        /// Percentage
+        /// </summary>
+        protected float Percentage
+        {
+            get
+            {
+                return percentageVar.GetFloat();
+            }
+            set
+            {
+                percentageVar.Set(value);
             }
         }
         /// <summary>
@@ -142,6 +216,20 @@ namespace Engine.Effects
                 }
             }
         }
+        /// <summary>
+        /// Texture index
+        /// </summary>
+        protected int TextureIndex
+        {
+            get
+            {
+                return textureIndexVar.GetInt();
+            }
+            set
+            {
+                textureIndexVar.Set(value);
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -153,18 +241,25 @@ namespace Engine.Effects
             : base(graphics, effect, compile)
         {
             PositionColor = Effect.GetTechniqueByName("PositionColor");
+            PositionColorPct = Effect.GetTechniqueByName("PositionColorPct");
             PositionTexture = Effect.GetTechniqueByName("PositionTexture");
             PositionTextureNOALPHA = Effect.GetTechniqueByName("PositionTextureNOALPHA");
             PositionTextureRED = Effect.GetTechniqueByName("PositionTextureRED");
             PositionTextureGREEN = Effect.GetTechniqueByName("PositionTextureGREEN");
             PositionTextureBLUE = Effect.GetTechniqueByName("PositionTextureBLUE");
             PositionTextureALPHA = Effect.GetTechniqueByName("PositionTextureALPHA");
+            PositionTexturePct = Effect.GetTechniqueByName("PositionTexturePct");
 
             worldVar = Effect.GetVariableMatrix("gWorld");
             worldViewProjectionVar = Effect.GetVariableMatrix("gWorldViewProjection");
-            textureIndexVar = Effect.GetVariableScalar("gTextureIndex");
+            resolutionVar = Effect.GetVariableVector("gResolution");
+
             colorVar = Effect.GetVariableVector("gColor");
+            sizeVar = Effect.GetVariableVector("gSize");
+            color2Var = Effect.GetVariableVector("gColor2");
+            percentageVar = Effect.GetVariableScalar("gPct");
             texturesVar = Effect.GetVariableTexture("gTextureArray");
+            textureIndexVar = Effect.GetVariableScalar("gTextureIndex");
         }
 
         /// <summary>
@@ -194,31 +289,77 @@ namespace Engine.Effects
                 throw new EngineException(string.Format("Bad vertex type for effect: {0}", vertexType));
             }
         }
+        /// <summary>
+        /// Get technique by vertex type
+        /// </summary>
+        /// <param name="vertexType">VertexType</param>
+        /// <returns>Returns the technique to process the specified vertex type</returns>
+        public EngineEffectTechnique GetTechniquePct(VertexTypes vertexType)
+        {
+            if (vertexType == VertexTypes.PositionColor)
+            {
+                return PositionColorPct;
+            }
+            else if (vertexType == VertexTypes.PositionTexture)
+            {
+                return PositionTexturePct;
+            }
+            else
+            {
+                throw new EngineException(string.Format("Bad vertex type for effect: {0}", vertexType));
+            }
+        }
 
         /// <summary>
         /// Update per frame data
         /// </summary>
         /// <param name="world">World</param>
         /// <param name="viewProjection">View * projection</param>
+        /// <param name="screenResolution">Screen resolution in pixels</param>
         public void UpdatePerFrame(
             Matrix world,
-            Matrix viewProjection)
+            Matrix viewProjection,
+            Vector2 screenResolution)
         {
             World = world;
             WorldViewProjection = world * viewProjection;
+            Resolution = screenResolution;
         }
         /// <summary>
         /// Update per model object data
         /// </summary>
-        /// <param name="color">Color</param>
+        /// <param name="tintColor">Color</param>
         /// <param name="texture">Texture</param>
         /// <param name="textureIndex">Texture index</param>
         public void UpdatePerObject(
-            Color4 color,
+            Color4 tintColor,
             EngineShaderResourceView texture,
             int textureIndex)
         {
-            Color = color;
+            Color = tintColor;
+            Textures = texture;
+            TextureIndex = textureIndex;
+        }
+        /// <summary>
+        /// Update per model object data
+        /// </summary>
+        /// <param name="leftColor">Left color</param>
+        /// <param name="rightColor">Right color</param>
+        /// <param name="pct">Percentage</param>
+        /// <param name="texture">Texture</param>
+        /// <param name="textureIndex">Texture index</param>
+        public void UpdatePerObjectPct(
+            RectangleF renderArea,
+            Color4 leftColor,
+            Color4 rightColor,
+            float pct,
+            EngineShaderResourceView texture,
+            int textureIndex)
+        {
+            Size = renderArea;
+            Color = leftColor;
+            Color2 = rightColor;
+            Percentage = pct;
             Textures = texture;
             TextureIndex = textureIndex;
         }

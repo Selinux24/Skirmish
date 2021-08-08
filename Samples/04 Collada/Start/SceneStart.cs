@@ -177,7 +177,10 @@ namespace Collada.Start
         private async Task InitializeControls()
         {
             // Title text
-            var titleDesc = UITextAreaDescription.DefaultFromFamily(titleFontFamily, 90, FontMapStyles.Bold);
+            var titleFont = TextDrawerDescription.FromFamily(titleFontFamily, 90, FontMapStyles.Bold);
+
+            var titleDesc = UITextAreaDescription.Default();
+            titleDesc.Font = titleFont;
             titleDesc.TextForeColor = Color.IndianRed;
             titleDesc.TextShadowColor = new Color4(Color.Brown.RGB(), 0.25f);
             titleDesc.TextShadowDelta = new Vector2(4, 4);
@@ -217,7 +220,10 @@ namespace Collada.Start
             exitButton = await this.AddComponentUIButton("ButtonExit", "ButtonExit", exitButtonDesc, layerHUD);
 
             // Description text
-            var tooltipDesc = UITextAreaDescription.DefaultFromFile(Path.Combine(resourcesFolder, largeControlsFont), 12);
+            var tooltipFont = TextDrawerDescription.FromFile(Path.Combine(resourcesFolder, largeControlsFont), 12);
+
+            var tooltipDesc = UITextAreaDescription.Default();
+            tooltipDesc.Font = tooltipFont;
             tooltipDesc.TextForeColor = Color.LightGray;
             tooltipDesc.Width = 250;
             tooltipDesc.EventsEnabled = false;

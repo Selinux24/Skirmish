@@ -24,7 +24,7 @@ cbuffer cbPerFrame : register(b0)
 	float2 gResolution;
 	float4 gRectangle;
 	bool gUseRect;
-    bool gIsSmall;
+    bool gFineSampling;
 };
 
 Texture2D gTexture : register(t0);
@@ -77,7 +77,9 @@ bool CoordIntoRectangle(float2 coord) {
 
 float4 PSFont(PSVertexFont input) : SV_TARGET
 {
-    float4 litColor = gIsSmall ? gTexture.Sample(SamplerPointText, input.tex) : gTexture.Sample(SamplerLinearText, input.tex);
+    float4 litColor = gFineSampling ? 
+		gTexture.Sample(SamplerLinearText, input.tex) :
+		gTexture.Sample(SamplerPointText, input.tex);
 	
 	if (!gUseRect)
 	{

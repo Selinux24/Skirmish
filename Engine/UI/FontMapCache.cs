@@ -29,7 +29,7 @@ namespace Engine.UI
         /// <returns>Returns the font map</returns>
         public static FontMap Get(string fontName)
         {
-            return gCache.FirstOrDefault(f => f != null && string.Equals(f.Font, fontName));
+            return gCache.FirstOrDefault(f => f != null && string.Equals(f.FontName, fontName));
         }
         /// <summary>
         /// Gets a font map by family, size and style
@@ -40,7 +40,7 @@ namespace Engine.UI
         /// <returns>Returns the font map</returns>
         public static FontMap Get(FontFamily family, float size, FontMapStyles style)
         {
-            return gCache.FirstOrDefault(f => f != null && string.Equals(f.Font, family.Name) && f.Size == size && f.Style == style);
+            return gCache.FirstOrDefault(f => f != null && string.Equals(f.FontName, family.Name) && f.FontSize == size && f.FontStyle == style);
         }
 
         /// <summary>

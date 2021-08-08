@@ -77,13 +77,18 @@ namespace Collada.DungeonWall
         }
         private async Task InitializeText()
         {
-            title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White });
+            var defaultFont18 = TextDrawerDescription.FromFamily("Tahoma", 18, false);
+            var defaultFont12 = TextDrawerDescription.FromFamily("Tahoma", 12, false);
+            defaultFont18.LineAdjust = true;
+            defaultFont12.LineAdjust = true;
+
+            title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
             title.Text = "Tiled Wall Test Scene";
 
-            fps = await this.AddComponentUITextArea("FPS", "FPS", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 12), TextForeColor = Color.Yellow });
+            fps = await this.AddComponentUITextArea("FPS", "FPS", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow });
             fps.Text = null;
 
-            picks = await this.AddComponentUITextArea("Picks", "Picks", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 12), TextForeColor = Color.Yellow });
+            picks = await this.AddComponentUITextArea("Picks", "Picks", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow });
             picks.Text = null;
 
             var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));

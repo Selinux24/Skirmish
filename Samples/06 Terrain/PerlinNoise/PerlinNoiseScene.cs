@@ -119,32 +119,48 @@ namespace Terrain.PerlinNoise
         }
         public async Task InitializeUI()
         {
+            Color4 pBackground = Color.RosyBrown;
             Color4 bColor1 = Color.Brown;
             Color4 bColor2 = Color4.AdjustSaturation(Color.Brown, 1.5f);
             Color4 pColor = Color.DeepSkyBlue;
 
-            var font = TextDrawerDescription.FromFamily(fontFamily, 16);
-            var butDesc = UIButtonDescription.DefaultTwoStateButton(bColor1, bColor2);
-            butDesc.Font = font;
+            var defaultFont16 = TextDrawerDescription.FromFamily(fontFamily, 16, false);
+            var defaultFont14 = TextDrawerDescription.FromFamily(fontFamily, 14, false);
+            var defaultFont12 = TextDrawerDescription.FromFamily(fontFamily, 12, false);
 
-            backGround = await this.AddComponentUIPanel("backGround", "backGround", UIPanelDescription.Screen(this, Color.SandyBrown));
-            btnExit = await this.AddComponentUIButton("btnExit", "Exit", butDesc);
+            var defaultText16 = UITextAreaDescription.Default();
+            var defaultText14 = UITextAreaDescription.Default();
+            var defaultText12 = UITextAreaDescription.Default();
+            defaultText16.Font = defaultFont16;
+            defaultText14.Font = defaultFont14;
+            defaultText12.Font = defaultFont12;
 
-            txtScale = await this.AddComponentUITextArea("txtScale", "Scale", UITextAreaDescription.DefaultFromFamily(fontFamily, 16));
-            txtLacunarity = await this.AddComponentUITextArea("txtLacunarity", "Lacunarity", UITextAreaDescription.DefaultFromFamily(fontFamily, 16));
-            txtPersistance = await this.AddComponentUITextArea("txtPersistance", "Persistance", UITextAreaDescription.DefaultFromFamily(fontFamily, 16));
-            txtOctaves = await this.AddComponentUITextArea("txtOctaves", "Octaves", UITextAreaDescription.DefaultFromFamily(fontFamily, 16));
-            txtHelpOffset = await this.AddComponentUITextArea("txtHelpOffset", "HelpOffset", UITextAreaDescription.DefaultFromFamily(fontFamily, 12));
-            txtOffset = await this.AddComponentUITextArea("txtOffset", "Offset", UITextAreaDescription.DefaultFromFamily(fontFamily, 14));
-            txtHelpSeed = await this.AddComponentUITextArea("txtHelpSeed", "HelpSeed", UITextAreaDescription.DefaultFromFamily(fontFamily, 12));
-            txtSeed = await this.AddComponentUITextArea("txtSeed", "Seed", UITextAreaDescription.DefaultFromFamily(fontFamily, 14));
+            var defaultButton = UIButtonDescription.DefaultTwoStateButton(bColor1, bColor2);
+            defaultButton.Font = defaultFont16;
 
-            pbScale = await this.AddComponentUIProgressBar("pbScale", "Scale", UIProgressBarDescription.DefaultFromFamily(fontFamily, 12));
-            pbLacunarity = await this.AddComponentUIProgressBar("pbLacunarity", "Lacunarity", UIProgressBarDescription.DefaultFromFamily(fontFamily, 12));
-            pbPersistance = await this.AddComponentUIProgressBar("pbPersistance", "Persistance", UIProgressBarDescription.DefaultFromFamily(fontFamily, 12));
-            pbOctaves = await this.AddComponentUIProgressBar("pbOctaves", "Octaves", UIProgressBarDescription.DefaultFromFamily(fontFamily, 12));
+            backGround = await this.AddComponentUIPanel("backGround", "backGround", UIPanelDescription.Screen(this, pBackground));
+            btnExit = await this.AddComponentUIButton("btnExit", "Exit", defaultButton);
 
-            btnSave = await this.AddComponentUIButton("btnSave", "Save", butDesc);
+            txtScale = await this.AddComponentUITextArea("txtScale", "Scale", defaultText16);
+            txtLacunarity = await this.AddComponentUITextArea("txtLacunarity", "Lacunarity", defaultText16);
+            txtPersistance = await this.AddComponentUITextArea("txtPersistance", "Persistance", defaultText16);
+            txtOctaves = await this.AddComponentUITextArea("txtOctaves", "Octaves", defaultText16);
+            txtHelpOffset = await this.AddComponentUITextArea("txtHelpOffset", "HelpOffset", defaultText12);
+            txtOffset = await this.AddComponentUITextArea("txtOffset", "Offset", defaultText14);
+            txtHelpSeed = await this.AddComponentUITextArea("txtHelpSeed", "HelpSeed", defaultText12);
+            txtSeed = await this.AddComponentUITextArea("txtSeed", "Seed", defaultText14);
+
+            var pbFont = TextDrawerDescription.FromFamily(fontFamily, 12, false);
+
+            var pbDescription = UIProgressBarDescription.Default();
+            pbDescription.Font = pbFont;
+
+            pbScale = await this.AddComponentUIProgressBar("pbScale", "Scale", pbDescription);
+            pbLacunarity = await this.AddComponentUIProgressBar("pbLacunarity", "Lacunarity", pbDescription);
+            pbPersistance = await this.AddComponentUIProgressBar("pbPersistance", "Persistance", pbDescription);
+            pbOctaves = await this.AddComponentUIProgressBar("pbOctaves", "Octaves", pbDescription);
+
+            btnSave = await this.AddComponentUIButton("btnSave", "Save", defaultButton);
 
             btnExit.MouseClick += BtnExitClick;
 

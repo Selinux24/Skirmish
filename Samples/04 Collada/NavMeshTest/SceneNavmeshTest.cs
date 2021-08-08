@@ -92,13 +92,18 @@ namespace Collada.NavmeshTest
         }
         private async Task InitializeText()
         {
-            title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White });
+            var defaultFont18 = TextDrawerDescription.FromFamily("Tahoma", 18, false);
+            var defaultFont12 = TextDrawerDescription.FromFamily("Tahoma", 12, false);
+            defaultFont18.LineAdjust = true;
+            defaultFont12.LineAdjust = true;
+
+            title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
             title.Text = "Navigation Mesh Test Scene";
 
-            debug = await this.AddComponentUITextArea("Debug", "Debug", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 12), TextForeColor = Color.Green });
+            debug = await this.AddComponentUITextArea("Debug", "Debug", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Green });
             debug.Text = null;
 
-            help = await this.AddComponentUITextArea("Help", "Help", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 12), TextForeColor = Color.Yellow });
+            help = await this.AddComponentUITextArea("Help", "Help", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow });
             help.Text = @"Camera: WASD+Mouse (Press right mouse in windowed mode to look). 
 B: Change Build Mode (SHIFT reverse).
 P: Change Partition Type (SHIFT reverse).

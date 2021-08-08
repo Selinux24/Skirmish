@@ -74,10 +74,13 @@ namespace ModelDrawing
         }
         private async Task InitializeUI()
         {
-            var textDesc = new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 20), TextForeColor = Color.Yellow, TextShadowColor = Color.OrangeRed };
-            var statisticsDesc = new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 10), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue };
-            var text1Desc = new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 10), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue };
-            var text2Desc = new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 10), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue };
+            var defaultFont20 = TextDrawerDescription.FromFamily("Arial", 20, false);
+            var defaultFont10 = TextDrawerDescription.FromFamily("Arial", 10, false);
+
+            var textDesc = new UITextAreaDescription { Font = defaultFont20, TextForeColor = Color.Yellow, TextShadowColor = Color.OrangeRed };
+            var statisticsDesc = new UITextAreaDescription { Font = defaultFont10, TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue };
+            var text1Desc = new UITextAreaDescription { Font = defaultFont10, TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue };
+            var text2Desc = new UITextAreaDescription { Font = defaultFont10, TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue };
 
             text = await this.AddComponentUITextArea("ui1", "Text", textDesc, LayerUI);
             statistics = await this.AddComponentUITextArea("ui2", "Statistics", statisticsDesc, LayerUI);

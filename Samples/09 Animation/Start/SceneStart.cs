@@ -77,6 +77,7 @@ namespace Animation.Start
             mainPanel.SetGridLayout(GridLayout.FixedRows(2));
 
             var buttonFont = TextDrawerDescription.FromFamily(buttonFonts, 36);
+
             Color4 highlightColor = new Color4(0.3333f, 0.3333f, 0.3333f, 0f);
             var buttonDesc = UIButtonDescription.DefaultTwoStateButton(Color.Red, Color.Red.ToColor4() + highlightColor);
             buttonDesc.Font = buttonFont;

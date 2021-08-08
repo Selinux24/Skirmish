@@ -13,6 +13,11 @@ namespace Engine.UI
     class TextDrawer : Drawable, IScreenFitted
     {
         /// <summary>
+        /// Maximum text length
+        /// </summary>
+        public const int MAXTEXTLENGTH = 1024 * 10;
+
+        /// <summary>
         /// Vertex buffer descriptor
         /// </summary>
         private readonly BufferDescriptor vertexBuffer = null;
@@ -103,12 +108,19 @@ namespace Engine.UI
             }
             set
             {
-                if (!string.Equals(text, value))
+                if (string.Equals(text, value))
                 {
-                    text = value;
-
-                    updateInternals = true;
+                    return;
                 }
+
+                text = value;
+
+                if (text?.Length > MAXTEXTLENGTH)
+                {
+                    text = text.Substring(0, MAXTEXTLENGTH);
+                }
+
+                updateInternals = true;
             }
         }
         /// <summary>
@@ -212,6 +224,14 @@ namespace Engine.UI
         /// </summary>
         public float AlphaMultplier { get; set; } = 1.2f;
         /// <summary>
+        /// Fine sampling
+        /// </summary>
+        /// <remarks>
+        /// If deactivated, the font will be drawn with a point sampler. Otherwise, a linear sampler will be used.
+        /// Deactivate for thin fonts.
+        /// </remarks>
+        public bool FineSampling { get; set; } = true;
+        /// <summary>
         /// Gets whether the internal buffers were ready or not
         /// </summary>
         public bool BuffersReady
@@ -247,9 +267,11 @@ namespace Engine.UI
 
             viewProjection = Game.Form.GetOrthoProjectionMatrix();
 
+            var generator = FontMapKeycodeGenerator.DefaultWithCustom(description.CustomKeycodes);
+
             if (!string.IsNullOrWhiteSpace(description.FontFileName) && !string.IsNullOrWhiteSpace(description.ContentPath))
             {
-                fontMap = FontMap.FromFile(Game, description.ContentPath, description.FontFileName, description.FontSize, description.Style);
+                fontMap = FontMap.FromFile(Game, description.ContentPath, generator, description.FontFileName, description.FontSize, description.Style);
             }
             else if (description.FontMapping != null)
             {
@@ -257,16 +279,17 @@ namespace Engine.UI
             }
             else if (!string.IsNullOrWhiteSpace(description.FontFamily))
             {
-                fontMap = FontMap.FromFamily(Game, description.FontFamily, description.FontSize, description.Style);
+                fontMap = FontMap.FromFamily(Game, generator, description.FontFamily, description.FontSize, description.Style);
             }
 
-            VertexFont[] verts = new VertexFont[FontMap.MAXTEXTLENGTH * 4];
-            uint[] idx = new uint[FontMap.MAXTEXTLENGTH * 6];
+            VertexFont[] verts = new VertexFont[MAXTEXTLENGTH * 4];
+            uint[] idx = new uint[MAXTEXTLENGTH * 6];
 
             vertexBuffer = BufferManager.AddVertexData(name, true, verts);
             indexBuffer = BufferManager.AddIndexData(name, true, idx);
 
             UseTextureColor = description.UseTextureColor;
+            FineSampling = description.FineSampling;
 
             if (description.LineAdjust)
             {
@@ -437,7 +460,7 @@ namespace Engine.UI
                 viewProjection,
                 Alpha * AlphaMultplier,
                 useTextureColor,
-                fontMap.Size <= 12,
+                FineSampling,
                 fontMap.Texture);
 
             effect.UpdatePerFrame(
@@ -499,17 +522,14 @@ namespace Engine.UI
             List<VertexFont> vList = new List<VertexFont>();
             List<uint> iList = new List<uint>();
 
-            ParsedText = FontMap.ParseSentence(
-                text,
-                textColor,
-                shadowColor,
-                out var words, out var colors, out var shadowColors);
+            var parsed = FontMapParser.ParseSentence(text, textColor, shadowColor);
+            ParsedText = parsed.Text;
 
             var renderArea = GetRenderArea();
 
             var colorW = fontMap.MapSentence(
-                words,
-                colors,
+                parsed,
+                false,
                 renderArea,
                 horizontalAlign,
                 verticalAlign);
@@ -522,8 +542,8 @@ namespace Engine.UI
             if (ShadowColor != Color.Transparent)
             {
                 var colorS = fontMap.MapSentence(
-                    words,
-                    shadowColors,
+                    parsed,
+                    true,
                     renderArea,
                     horizontalAlign,
                     verticalAlign);
@@ -560,13 +580,18 @@ namespace Engine.UI
                 return Vector2.Zero;
             }
 
-            FontMap.ParseSentence(text, ForeColor, ShadowColor, out var words, out _, out _);
+            if (string.IsNullOrEmpty(text))
+            {
+                return Vector2.Zero;
+            }
+
+            var parsed = FontMapParser.ParseSentence(text, ForeColor, ShadowColor);
 
             var renderArea = GetRenderArea();
 
             var w = fontMap.MapSentence(
-                words,
-                null,
+                parsed,
+                false,
                 renderArea,
                 horizontalAlign,
                 verticalAlign);
@@ -586,8 +611,8 @@ namespace Engine.UI
             string sampleChar = $"{fontMap.GetSampleCharacter()}";
 
             var w = fontMap.MapSentence(
-                new[] { sampleChar },
-                null,
+                FontMapParsedSentence.FromSample(sampleChar),
+                false,
                 Game.Form.RenderRectangle,
                 HorizontalTextAlign.Left,
                 VerticalTextAlign.Top);

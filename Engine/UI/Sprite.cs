@@ -40,6 +40,19 @@ namespace Engine.UI
         /// </summary>
         public bool Textured { get; private set; }
         /// <summary>
+        /// Use percentage drawing
+        /// </summary>
+        /// <remarks>
+        /// Uses the base color as left color, and tint color as right color.
+        /// The percentage value defines the amount of left color over the right color, in 0 to 1 magnitude.
+        /// </remarks>
+        public bool UsePercentage { get; set; }
+        /// <summary>
+        /// Percentage
+        /// </summary>
+        /// <remarks>View <see cref="UsePercentage"/></remarks>
+        public float Percentage { get; set; }
+        /// <summary>
         /// Gets whether the internal buffers were ready or not
         /// </summary>
         public bool BuffersReady
@@ -147,6 +160,20 @@ namespace Engine.UI
                 return;
             }
 
+            if (UsePercentage)
+            {
+                DrawPct();
+            }
+            else
+            {
+                Draw();
+            }
+        }
+        /// <summary>
+        /// Default sprite draw
+        /// </summary>
+        private void Draw()
+        {
             var effect = DrawerPool.EffectDefaultSprite;
             var technique = effect.GetTechnique(
                 Textured ? VertexTypes.PositionTexture : VertexTypes.PositionColor,
@@ -158,12 +185,60 @@ namespace Engine.UI
             BufferManager.SetIndexBuffer(indexBuffer);
             BufferManager.SetInputAssembler(technique, vertexBuffer, Topology.TriangleList);
 
-            effect.UpdatePerFrame(GetTransform(), viewProjection);
+            effect.UpdatePerFrame(
+                GetTransform(),
+                viewProjection,
+                Game.Form.RenderRectangle.BottomRight);
 
             var color = Color4.AdjustSaturation(BaseColor * TintColor, 1f);
             color.Alpha *= Alpha;
 
             effect.UpdatePerObject(color, spriteTexture, TextureIndex);
+
+            var graphics = Game.Graphics;
+
+            for (int p = 0; p < technique.PassCount; p++)
+            {
+                graphics.EffectPassApply(technique, p, 0);
+
+                graphics.DrawIndexed(
+                    indexBuffer.Count,
+                    indexBuffer.BufferOffset,
+                    vertexBuffer.BufferOffset);
+            }
+        }
+        /// <summary>
+        /// Percentage sprite draw
+        /// </summary>
+        private void DrawPct()
+        {
+            var effect = DrawerPool.EffectDefaultSprite;
+            var technique = effect.GetTechniquePct(
+                Textured ? VertexTypes.PositionTexture : VertexTypes.PositionColor);
+
+            Counters.InstancesPerFrame++;
+            Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
+
+            BufferManager.SetIndexBuffer(indexBuffer);
+            BufferManager.SetInputAssembler(technique, vertexBuffer, Topology.TriangleList);
+
+            effect.UpdatePerFrame(
+                GetTransform(),
+                viewProjection,
+                Game.Form.RenderRectangle.BottomRight);
+
+            var color = BaseColor;
+            color.Alpha *= Alpha;
+            var color2 = TintColor;
+            color2.Alpha *= Alpha;
+
+            effect.UpdatePerObjectPct(
+                GetRenderArea(true),
+                color,
+                color2,
+                Percentage,
+                spriteTexture,
+                TextureIndex);
 
             var graphics = Game.Graphics;
 

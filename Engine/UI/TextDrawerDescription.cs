@@ -1,4 +1,6 @@
-﻿
+﻿using System.Collections.Generic;
+using System.Linq;
+
 namespace Engine.UI
 {
     /// <summary>
@@ -18,39 +20,43 @@ namespace Engine.UI
         /// <summary>
         /// Generates a new description
         /// </summary>
+        /// <param name="fineSampling">Fine sampling</param>
         /// <returns>Returns the new generated description</returns>
-        public static TextDrawerDescription Default()
+        public static TextDrawerDescription Default(bool fineSampling = false)
         {
-            return FromFamily(DefaultFontFamily, DefaultSize, FontMapStyles.Regular);
+            return FromFamily(DefaultFontFamily, DefaultSize, FontMapStyles.Regular, fineSampling);
         }
         /// <summary>
         /// Generates a new description
         /// </summary>
         /// <param name="size">Size</param>
+        /// <param name="fineSampling">Fine sampling</param>
         /// <returns>Returns the new generated description</returns>
-        public static TextDrawerDescription Default(int size)
+        public static TextDrawerDescription Default(int size, bool fineSampling = true)
         {
-            return FromFamily(DefaultFontFamily, size, FontMapStyles.Regular);
+            return FromFamily(DefaultFontFamily, size, FontMapStyles.Regular, fineSampling);
         }
 
         /// <summary>
         /// Generates a new description
         /// </summary>
         /// <param name="fontFamilyName">Comma separated font family name list</param>
+        /// <param name="fineSampling">Fine sampling</param>
         /// <returns>Returns the new generated description</returns>
-        public static TextDrawerDescription FromFamily(string fontFamilyName)
+        public static TextDrawerDescription FromFamily(string fontFamilyName, bool fineSampling = false)
         {
-            return FromFamily(fontFamilyName, DefaultSize, FontMapStyles.Regular);
+            return FromFamily(fontFamilyName, DefaultSize, FontMapStyles.Regular, fineSampling);
         }
         /// <summary>
         /// Generates a new description
         /// </summary>
         /// <param name="fontFamilyName">Comma separated font family name list</param>
         /// <param name="size">Size</param>
+        /// <param name="fineSampling">Fine sampling</param>
         /// <returns>Returns the new generated description</returns>
-        public static TextDrawerDescription FromFamily(string fontFamilyName, int size)
+        public static TextDrawerDescription FromFamily(string fontFamilyName, int size, bool fineSampling = true)
         {
-            return FromFamily(fontFamilyName, size, FontMapStyles.Regular);
+            return FromFamily(fontFamilyName, size, FontMapStyles.Regular, fineSampling);
         }
         /// <summary>
         /// Generates a new description
@@ -58,14 +64,16 @@ namespace Engine.UI
         /// <param name="fontFamilyName">Comma separated font family name list</param>
         /// <param name="size">Size</param>
         /// <param name="style">Style</param>
+        /// <param name="fineSampling">Fine sampling</param>
         /// <returns>Returns the new generated description</returns>
-        public static TextDrawerDescription FromFamily(string fontFamilyName, int size, FontMapStyles style)
+        public static TextDrawerDescription FromFamily(string fontFamilyName, int size, FontMapStyles style, bool fineSampling = true)
         {
             return new TextDrawerDescription()
             {
                 FontFamily = fontFamilyName,
                 FontSize = size,
                 Style = style,
+                FineSampling = fineSampling,
             };
         }
 
@@ -160,6 +168,18 @@ namespace Engine.UI
         /// Perform line adjust
         /// </summary>
         public bool LineAdjust { get; set; } = false;
+        /// <summary>
+        /// Fine sampling
+        /// </summary>
+        /// <remarks>
+        /// If deactivated, the font will be drawn with a point sampler. Otherwise, a linear sampler will be used.
+        /// Deactivate for thin fonts.
+        /// </remarks>
+        public bool FineSampling { get; set; } = true;
+        /// <summary>
+        /// Custom key codes to add to the default key code collection
+        /// </summary>
+        public IEnumerable<char> CustomKeycodes { get; set; } = Enumerable.Empty<char>();
 
         /// <summary>
         /// Constructor

@@ -31,9 +31,9 @@ namespace Engine.Effects
         /// </summary>
         private readonly EngineEffectVariableScalar useTextureColorVar = null;
         /// <summary>
-        /// Small size effect variable
+        /// Fine sampling effect variable
         /// </summary>
-        private readonly EngineEffectVariableScalar isSmallSizeVar = null;
+        private readonly EngineEffectVariableScalar fineSamplingVar = null;
         /// <summary>
         /// Texture effect variable
         /// </summary>
@@ -85,6 +85,20 @@ namespace Engine.Effects
             }
         }
         /// <summary>
+        /// Screen resolution in pixels
+        /// </summary>
+        protected Vector2 Resolution
+        {
+            get
+            {
+                return resolutionVar.GetVector<Vector2>();
+            }
+            set
+            {
+                resolutionVar.Set(value);
+            }
+        }
+        /// <summary>
         /// Alpha value
         /// </summary>
         protected float Alpha
@@ -113,17 +127,17 @@ namespace Engine.Effects
             }
         }
         /// <summary>
-        /// Is small size
+        /// Fine sampling
         /// </summary>
-        protected bool IsSmallSize
+        protected bool FineSampling
         {
             get
             {
-                return isSmallSizeVar.GetBool();
+                return fineSamplingVar.GetBool();
             }
             set
             {
-                isSmallSizeVar.Set(value);
+                fineSamplingVar.Set(value);
             }
         }
         /// <summary>
@@ -145,20 +159,6 @@ namespace Engine.Effects
 
                     Counters.TextureUpdates++;
                 }
-            }
-        }
-        /// <summary>
-        /// Screen resolution in pixels
-        /// </summary>
-        protected Vector2 Resolution
-        {
-            get
-            {
-                return resolutionVar.GetVector<Vector2>();
-            }
-            set
-            {
-                resolutionVar.Set(value);
             }
         }
         /// <summary>
@@ -198,7 +198,6 @@ namespace Engine.Effects
             }
         }
 
-
         /// <summary>
         /// Constructor
         /// </summary>
@@ -214,7 +213,7 @@ namespace Engine.Effects
             worldViewProjectionVar = Effect.GetVariableMatrix("gWorldViewProjection");
             alphaVar = Effect.GetVariableScalar("gAlpha");
             useTextureColorVar = Effect.GetVariableScalar("gUseColor");
-            isSmallSizeVar = Effect.GetVariableScalar("gIsSmall");
+            fineSamplingVar = Effect.GetVariableScalar("gFineSampling");
             textureVar = Effect.GetVariableTexture("gTexture");
             resolutionVar = Effect.GetVariableVector("gResolution");
             rectangleVar = Effect.GetVariableVector("gRectangle");
@@ -228,14 +227,14 @@ namespace Engine.Effects
         /// <param name="viewProjection">View * projection matrix</param>
         /// <param name="alphaMult">Alpha multiplier</param>
         /// <param name="useTextureColor">Use the texture color instead of the specified color</param>
-        /// <param name="isSmallSize">The font is a small size font</param>
+        /// <param name="fineSampling">Fine sampling</param>
         /// <param name="texture">Font texture</param>
         public void UpdatePerFrame(
             Matrix world,
             Matrix viewProjection,
             float alphaMult,
             bool useTextureColor,
-            bool isSmallSize,
+            bool fineSampling,
             EngineShaderResourceView texture)
         {
             World = world;
@@ -243,7 +242,7 @@ namespace Engine.Effects
             Alpha = alphaMult;
             UseTextureColor = useTextureColor;
             Texture = texture;
-            IsSmallSize = isSmallSize;
+            FineSampling = fineSampling;
         }
         /// <summary>
         /// Update per frame data

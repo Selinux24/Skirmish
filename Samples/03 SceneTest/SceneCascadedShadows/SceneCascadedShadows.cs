@@ -87,9 +87,12 @@ namespace SceneTest.SceneCascadedShadows
 
         private async Task InitializeUI()
         {
-            title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 20), TextForeColor = Color.Yellow, TextShadowColor = Color.OrangeRed }, LayerUI);
+            var defaultFont20 = TextDrawerDescription.FromFamily("Arial", 20, false);
+            var defaultFont14 = TextDrawerDescription.FromFamily("Arial", 14, false);
+
+            title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = defaultFont20, TextForeColor = Color.Yellow, TextShadowColor = Color.OrangeRed }, LayerUI);
             title.Text = "Cascaded Shadows";
-            help = await this.AddComponentUITextArea("Help", "Help", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 14), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, LayerUI);
+            help = await this.AddComponentUITextArea("Help", "Help", new UITextAreaDescription { Font = defaultFont14, TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, LayerUI);
             help.Text = $"Press {Color.Red}F1";
             backPanel = await this.AddComponentSprite("Backpanel", "Backpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), SceneObjectUsages.UI, LayerUI - 1);
 
@@ -114,9 +117,11 @@ namespace SceneTest.SceneCascadedShadows
         }
         private async Task InitializeUIDrawers()
         {
-            caption1 = await this.AddComponentUITextArea("Caption1", "Caption1", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 14), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, LayerUI);
-            caption2 = await this.AddComponentUITextArea("Caption2", "Caption2", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 14), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, LayerUI);
-            caption3 = await this.AddComponentUITextArea("Caption3", "Caption3", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 14), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, LayerUI);
+            var defaultFont14 = TextDrawerDescription.FromFamily("Arial", 14, false);
+
+            caption1 = await this.AddComponentUITextArea("Caption1", "Caption1", new UITextAreaDescription { Font = defaultFont14, TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, LayerUI);
+            caption2 = await this.AddComponentUITextArea("Caption2", "Caption2", new UITextAreaDescription { Font = defaultFont14, TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, LayerUI);
+            caption3 = await this.AddComponentUITextArea("Caption3", "Caption3", new UITextAreaDescription { Font = defaultFont14, TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, LayerUI);
             caption1.Text = $"Hight Level Map";
             caption2.Text = $"Medium Level Map";
             caption3.Text = $"Low Level Map";

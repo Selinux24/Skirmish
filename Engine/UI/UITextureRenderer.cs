@@ -132,8 +132,15 @@ namespace Engine.UI
             BufferManager.SetIndexBuffer(indexBuffer);
             BufferManager.SetInputAssembler(technique, vertexBuffer, Topology.TriangleList);
 
-            effect.UpdatePerFrame(Manipulator.LocalTransform, viewProjection);
-            effect.UpdatePerObject(Color4.White, Texture, TextureIndex);
+            effect.UpdatePerFrame(
+                Manipulator.LocalTransform, 
+                viewProjection,
+                Game.Form.RenderRectangle.BottomRight);
+
+            effect.UpdatePerObject(
+                Color4.White, 
+                Texture, 
+                TextureIndex);
 
             var graphics = Game.Graphics;
 

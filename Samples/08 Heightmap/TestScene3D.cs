@@ -159,10 +159,15 @@ namespace Heightmap
 
             #region Texts
 
-            title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White });
-            stats = await this.AddComponentUITextArea("Stats", "Stats", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Yellow });
-            help = await this.AddComponentUITextArea("Help", "Help", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Yellow });
-            help2 = await this.AddComponentUITextArea("Help2", "Help2", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Orange });
+            var defaultFont18 = TextDrawerDescription.FromFamily("Tahoma", 18, false);
+            var defaultFont11 = TextDrawerDescription.FromFamily("Tahoma", 11, false);
+            defaultFont18.LineAdjust = true;
+            defaultFont11.LineAdjust = true;
+
+            title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
+            stats = await this.AddComponentUITextArea("Stats", "Stats", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow });
+            help = await this.AddComponentUITextArea("Help", "Help", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow });
+            help2 = await this.AddComponentUITextArea("Help2", "Help2", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Orange });
 
             title.Text = "Heightmap Terrain test";
             stats.Text = "";

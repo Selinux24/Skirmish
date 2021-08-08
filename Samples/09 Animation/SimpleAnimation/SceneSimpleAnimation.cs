@@ -140,10 +140,14 @@ namespace Animation.SimpleAnimation
 
         private async Task InitializeUI()
         {
-            title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White });
-            runtime = await this.AddComponentUITextArea("Runtime", "Runtime", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Yellow });
-            animText = await this.AddComponentUITextArea("AnimText", "AnimText", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 15), TextForeColor = Color.Orange });
-            messages = await this.AddComponentUITextArea("Messages", "Messages", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 15), TextForeColor = Color.Orange });
+            var defaultFont18 = TextDrawerDescription.FromFamily("Consolas", 18, false);
+            var defaultFont15 = TextDrawerDescription.FromFamily("Consolas", 15, false);
+            var defaultFont11 = TextDrawerDescription.FromFamily("Consolas", 11, false);
+
+            title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
+            runtime = await this.AddComponentUITextArea("Runtime", "Runtime", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow });
+            animText = await this.AddComponentUITextArea("AnimText", "AnimText", new UITextAreaDescription { Font = defaultFont15, TextForeColor = Color.Orange });
+            messages = await this.AddComponentUITextArea("Messages", "Messages", new UITextAreaDescription { Font = defaultFont15, TextForeColor = Color.Orange });
 
             title.Text = "Animation test";
             runtime.Text = "";

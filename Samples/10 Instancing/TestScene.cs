@@ -78,9 +78,12 @@ namespace Instancing
 
         private async Task InitializeTexts()
         {
-            title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White });
-            runtimeText = await this.AddComponentUITextArea("RuntimeText", "RuntimeText", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Yellow });
-            info = await this.AddComponentUITextArea("Information", "Information", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Yellow });
+            var defaultFont18 = TextDrawerDescription.FromFamily("Arial", 18, false);
+            var defaultFont11 = TextDrawerDescription.FromFamily("Arial", 11, false);
+
+            title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
+            runtimeText = await this.AddComponentUITextArea("RuntimeText", "RuntimeText", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow });
+            info = await this.AddComponentUITextArea("Information", "Information", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow });
 
             title.Text = "Instancing test";
             runtimeText.Text = "";
@@ -89,7 +92,7 @@ namespace Instancing
             var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.66f));
             panel = await this.AddComponentSprite("Panel", "Panel", spDesc, SceneObjectUsages.UI, LayerUI - 1);
 
-            help = await this.AddComponentUITextArea("Help", "Help", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Yellow });
+            help = await this.AddComponentUITextArea("Help", "Help", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow });
             help.Visible = false;
             helpPanel = await this.AddComponentSprite("HelpPanel", "Help panel", spDesc, SceneObjectUsages.UI, LayerUI - 1);
             helpPanel.Visible = false;

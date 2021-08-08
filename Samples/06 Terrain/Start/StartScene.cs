@@ -66,6 +66,7 @@ namespace Terrain.Start
             #region Title text
 
             var titleFont = TextDrawerDescription.FromFamily(titleFonts, 72, FontMapStyles.Bold);
+            titleFont.CustomKeycodes = new[] { '✌' };
 
             var titleDesc = UITextAreaDescription.Default(titleFont);
             titleDesc.TextForeColor = Color.Gold;
@@ -76,13 +77,14 @@ namespace Terrain.Start
 
             title = await this.AddComponentUITextArea("Title", "Title", titleDesc, layerHUD);
             title.GrowControlWithText = false;
-            title.Text = "Terrain Tests";
+            title.Text = "Terrain Tests ✌";
 
             #endregion
 
             #region Scene buttons
 
             var buttonsFont = TextDrawerDescription.FromFamily(buttonFonts, 20, FontMapStyles.Bold);
+            buttonsFont.CustomKeycodes = new[] { '➀', '➁' };
 
             var startButtonDesc = UIButtonDescription.DefaultTwoStateButton("Start/buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f);
             startButtonDesc.Width = 275;
@@ -98,13 +100,13 @@ namespace Terrain.Start
             scenePerlinNoiseButton.MouseClick += SceneButtonClick;
             scenePerlinNoiseButton.MouseEnter += SceneButtonMouseEnter;
             scenePerlinNoiseButton.MouseLeave += SceneButtonMouseLeave;
-            scenePerlinNoiseButton.Caption.Text = "Perlin Noise";
+            scenePerlinNoiseButton.Caption.Text = "➀ Perlin Noise";
 
             sceneRtsButton = await this.AddComponentUIButton("ButtonRts", "ButtonRts", startButtonDesc, layerHUD);
             sceneRtsButton.MouseClick += SceneButtonClick;
             sceneRtsButton.MouseEnter += SceneButtonMouseEnter;
             sceneRtsButton.MouseLeave += SceneButtonMouseLeave;
-            sceneRtsButton.Caption.Text = "Real Time Strategy Game";
+            sceneRtsButton.Caption.Text = "➁ Real Time Strategy Game";
 
             #endregion
 

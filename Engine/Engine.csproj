@@ -460,6 +460,10 @@
     <Compile Include="Tween\FloatTween.cs" />
     <Compile Include="Tween\ITweenCollection.cs" />
     <Compile Include="UI\Anchors.cs" />
+    <Compile Include="UI\FontMapKeycodeGenerator.cs" />
+    <Compile Include="UI\FontMapParser.cs" />
+    <Compile Include="UI\FontMapSentenceDescriptor.cs" />
+    <Compile Include="UI\FontMapWordDescriptor.cs" />
     <Compile Include="UI\GridFitTypes.cs" />
     <Compile Include="UI\GridLayout.cs" />
     <Compile Include="UI\IScrollable.cs" />
