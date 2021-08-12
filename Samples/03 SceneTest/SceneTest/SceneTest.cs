@@ -126,8 +126,8 @@ namespace SceneTest.SceneTest
         }
         private async Task InitializeUI()
         {
-            var defaultFont18 = TextDrawerDescription.FromFamily("Tahoma", 18, false);
-            var defaultFont10 = TextDrawerDescription.FromFamily("Tahoma", 10, false);
+            var defaultFont18 = TextDrawerDescription.FromFamily("Tahoma", 18);
+            var defaultFont10 = TextDrawerDescription.FromFamily("Tahoma", 10);
             defaultFont18.LineAdjust = true;
             defaultFont10.LineAdjust = true;
 
@@ -154,12 +154,11 @@ namespace SceneTest.SceneTest
                 BaseColor = new Color4(0, 0, 0, 0.75f),
             }, SceneObjectUsages.UI, LayerUI - 1);
 
-            var buttonFont = TextDrawerDescription.FromFamily("Lucida Console", 12, false);
+            var buttonFont = TextDrawerDescription.FromFamily("Lucida Console", 12);
 
-            var buttonDesc = UIButtonDescription.DefaultTwoStateButton("SceneTest/UI/button_on.png", "SceneTest/UI/button_off.png");
+            var buttonDesc = UIButtonDescription.DefaultTwoStateButton(buttonFont, "SceneTest/UI/button_on.png", "SceneTest/UI/button_off.png");
             buttonDesc.Width = 100;
             buttonDesc.Height = 40;
-            buttonDesc.Font = buttonFont;
             buttonDesc.Text = "Close";
             buttonDesc.TextForeColor = Color.Yellow;
             buttonDesc.TextShadowColor = Color.Orange;
@@ -188,16 +187,13 @@ namespace SceneTest.SceneTest
                 Height = Game.Form.RenderHeight,
             }, LayerUI + 1);
 
-            var pbFont = TextDrawerDescription.FromFamily("Consolas", 18, false);
+            var pbFont = TextDrawerDescription.FromFamily("Consolas", 18);
 
-            var pbDesc = UIProgressBarDescription.Default();
-            pbDesc.Font = pbFont;
+            var pbDesc = UIProgressBarDescription.Default(pbFont, new Color(0, 0, 0, 0.5f), Color.Green);
             pbDesc.Top = Game.Form.RenderHeight - 60;
             pbDesc.Left = 100;
             pbDesc.Width = Game.Form.RenderWidth - 200;
             pbDesc.Height = 30;
-            pbDesc.BaseColor = new Color(0, 0, 0, 0.5f);
-            pbDesc.ProgressColor = Color.Green;
 
             progressBar = await this.AddComponentUIProgressBar("UIProgressBar", "ProgressBar", pbDesc, LayerUI + 2);
 

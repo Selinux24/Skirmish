@@ -68,7 +68,7 @@ namespace Animation.AnimationParts
 
         private async Task InitializeUI()
         {
-            var defaultFont18 = TextDrawerDescription.FromFamily("Consolas", 18, false);
+            var defaultFont18 = TextDrawerDescription.FromFamily("Consolas", 18);
 
             title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
 

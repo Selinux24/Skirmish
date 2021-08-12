@@ -140,9 +140,9 @@ namespace Animation.SimpleAnimation
 
         private async Task InitializeUI()
         {
-            var defaultFont18 = TextDrawerDescription.FromFamily("Consolas", 18, false);
-            var defaultFont15 = TextDrawerDescription.FromFamily("Consolas", 15, false);
-            var defaultFont11 = TextDrawerDescription.FromFamily("Consolas", 11, false);
+            var defaultFont18 = TextDrawerDescription.FromFamily("Consolas", 18);
+            var defaultFont15 = TextDrawerDescription.FromFamily("Consolas", 15);
+            var defaultFont11 = TextDrawerDescription.FromFamily("Consolas", 11);
 
             title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
             runtime = await this.AddComponentUITextArea("Runtime", "Runtime", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow });

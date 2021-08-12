@@ -195,8 +195,8 @@ namespace Skybox
 
             #region Text
 
-            var defaultFont18 = TextDrawerDescription.FromFamily("Tahoma", 18, false);
-            var defaultFont12 = TextDrawerDescription.FromFamily("Tahoma", 12, false);
+            var defaultFont18 = TextDrawerDescription.FromFamily("Tahoma", 18);
+            var defaultFont12 = TextDrawerDescription.FromFamily("Tahoma", 12);
             defaultFont18.LineAdjust = true;
             defaultFont12.LineAdjust = true;
 

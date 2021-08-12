@@ -94,8 +94,8 @@ namespace SceneTest.SceneMaterials
             };
             backpanel = await this.AddComponentSprite("Backpanel", "Backpanel", spDesc, SceneObjectUsages.UI, LayerUI - 1);
 
-            var defaultFont18 = TextDrawerDescription.FromFamily("Arial", 18, false);
-            var defaultFont10 = TextDrawerDescription.FromFamily("Arial", 10, false);
+            var defaultFont18 = TextDrawerDescription.FromFamily("Arial", 18);
+            var defaultFont10 = TextDrawerDescription.FromFamily("Arial", 10);
 
             title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White, TextShadowColor = Color.Orange });
             runtime = await this.AddComponentUITextArea("Runtime", "Runtime", new UITextAreaDescription { Font = defaultFont10, TextForeColor = Color.Yellow, TextShadowColor = Color.Orange });

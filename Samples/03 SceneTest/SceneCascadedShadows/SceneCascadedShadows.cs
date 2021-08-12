@@ -87,8 +87,8 @@ namespace SceneTest.SceneCascadedShadows
 
         private async Task InitializeUI()
         {
-            var defaultFont20 = TextDrawerDescription.FromFamily("Arial", 20, false);
-            var defaultFont14 = TextDrawerDescription.FromFamily("Arial", 14, false);
+            var defaultFont20 = TextDrawerDescription.FromFamily("Arial", 20);
+            var defaultFont14 = TextDrawerDescription.FromFamily("Arial", 14);
 
             title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = defaultFont20, TextForeColor = Color.Yellow, TextShadowColor = Color.OrangeRed }, LayerUI);
             title.Text = "Cascaded Shadows";
@@ -117,7 +117,7 @@ namespace SceneTest.SceneCascadedShadows
         }
         private async Task InitializeUIDrawers()
         {
-            var defaultFont14 = TextDrawerDescription.FromFamily("Arial", 14, false);
+            var defaultFont14 = TextDrawerDescription.FromFamily("Arial", 14);
 
             caption1 = await this.AddComponentUITextArea("Caption1", "Caption1", new UITextAreaDescription { Font = defaultFont14, TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, LayerUI);
             caption2 = await this.AddComponentUITextArea("Caption2", "Caption2", new UITextAreaDescription { Font = defaultFont14, TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, LayerUI);

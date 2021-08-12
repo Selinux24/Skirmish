@@ -32,7 +32,7 @@ namespace Engine.UI
         /// <param name="size">Size</param>
         /// <param name="fineSampling">Fine sampling</param>
         /// <returns>Returns the new generated description</returns>
-        public static TextDrawerDescription Default(int size, bool fineSampling = true)
+        public static TextDrawerDescription Default(int size, bool fineSampling = false)
         {
             return FromFamily(DefaultFontFamily, size, FontMapStyles.Regular, fineSampling);
         }
@@ -54,7 +54,7 @@ namespace Engine.UI
         /// <param name="size">Size</param>
         /// <param name="fineSampling">Fine sampling</param>
         /// <returns>Returns the new generated description</returns>
-        public static TextDrawerDescription FromFamily(string fontFamilyName, int size, bool fineSampling = true)
+        public static TextDrawerDescription FromFamily(string fontFamilyName, int size, bool fineSampling = false)
         {
             return FromFamily(fontFamilyName, size, FontMapStyles.Regular, fineSampling);
         }
@@ -66,7 +66,7 @@ namespace Engine.UI
         /// <param name="style">Style</param>
         /// <param name="fineSampling">Fine sampling</param>
         /// <returns>Returns the new generated description</returns>
-        public static TextDrawerDescription FromFamily(string fontFamilyName, int size, FontMapStyles style, bool fineSampling = true)
+        public static TextDrawerDescription FromFamily(string fontFamilyName, int size, FontMapStyles style, bool fineSampling = false)
         {
             return new TextDrawerDescription()
             {

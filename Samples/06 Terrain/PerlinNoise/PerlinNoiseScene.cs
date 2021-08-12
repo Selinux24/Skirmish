@@ -124,16 +124,15 @@ namespace Terrain.PerlinNoise
             Color4 bColor2 = Color4.AdjustSaturation(Color.Brown, 1.5f);
             Color4 pColor = Color.DeepSkyBlue;
 
-            var defaultFont16 = TextDrawerDescription.FromFamily(fontFamily, 16, false);
-            var defaultFont14 = TextDrawerDescription.FromFamily(fontFamily, 14, false);
-            var defaultFont12 = TextDrawerDescription.FromFamily(fontFamily, 12, false);
+            var defaultFont16 = TextDrawerDescription.FromFamily(fontFamily, 16);
+            var defaultFont14 = TextDrawerDescription.FromFamily(fontFamily, 14);
+            var defaultFont12 = TextDrawerDescription.FromFamily(fontFamily, 12);
 
             var defaultText16 = UITextAreaDescription.Default(defaultFont16);
             var defaultText14 = UITextAreaDescription.Default(defaultFont14);
             var defaultText12 = UITextAreaDescription.Default(defaultFont12);
 
-            var defaultButton = UIButtonDescription.DefaultTwoStateButton(bColor1, bColor2);
-            defaultButton.Font = defaultFont16;
+            var defaultButton = UIButtonDescription.DefaultTwoStateButton(defaultFont16, bColor1, bColor2);
 
             backGround = await this.AddComponentUIPanel("backGround", "backGround", UIPanelDescription.Screen(this, pBackground));
             btnExit = await this.AddComponentUIButton("btnExit", "Exit", defaultButton);
@@ -147,10 +146,9 @@ namespace Terrain.PerlinNoise
             txtHelpSeed = await this.AddComponentUITextArea("txtHelpSeed", "HelpSeed", defaultText12);
             txtSeed = await this.AddComponentUITextArea("txtSeed", "Seed", defaultText14);
 
-            var pbFont = TextDrawerDescription.FromFamily(fontFamily, 12, false);
+            var pbFont = TextDrawerDescription.FromFamily(fontFamily, 12);
 
-            var pbDescription = UIProgressBarDescription.Default();
-            pbDescription.Font = pbFont;
+            var pbDescription = UIProgressBarDescription.Default(pbFont);
 
             pbScale = await this.AddComponentUIProgressBar("pbScale", "Scale", pbDescription);
             pbLacunarity = await this.AddComponentUIProgressBar("pbLacunarity", "Lacunarity", pbDescription);

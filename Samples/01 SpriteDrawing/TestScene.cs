@@ -82,14 +82,11 @@ namespace SpriteDrawing
         {
             var defaultFont = TextDrawerDescription.FromFile("LeagueSpartan-Bold.otf", 10, true);
 
-            var desc = UIProgressBarDescription.Default();
+            var desc = UIProgressBarDescription.Default(defaultFont, new Color(0, 0, 0, 0.5f), Color.Green);
             desc.Top = Game.Form.RenderHeight - 20;
             desc.Left = 100;
             desc.Width = Game.Form.RenderWidth - 200;
             desc.Height = 15;
-            desc.BaseColor = new Color(0, 0, 0, 0.5f);
-            desc.ProgressColor = Color.Green;
-            desc.Font = defaultFont;
 
             progressBar = await this.AddComponentUIProgressBar("ProgressBar", "ProgressBar", desc, LayerUI);
         }
@@ -197,12 +194,11 @@ namespace SpriteDrawing
 
             var font = TextDrawerDescription.FromFile("LeagueSpartan-Bold.otf", 16, true);
 
-            var descButClose = UIButtonDescription.DefaultTwoStateButton("buttons.png", releasedRect, pressedRect);
+            var descButClose = UIButtonDescription.DefaultTwoStateButton(font, "buttons.png", releasedRect, pressedRect);
             descButClose.Top = 10;
             descButClose.Left = dynamicPan.Width - 10 - 40;
             descButClose.Width = 40;
             descButClose.Height = 40;
-            descButClose.Font = font;
             descButClose.TextHorizontalAlign = HorizontalTextAlign.Center;
             descButClose.TextVerticalAlign = VerticalTextAlign.Middle;
             descButClose.Text = "X";
@@ -232,12 +228,11 @@ namespace SpriteDrawing
         {
             var font = TextDrawerDescription.FromFile("LeagueSpartan-Bold.otf", 16, true);
 
-            var descButClose = UIButtonDescription.DefaultTwoStateButton(Color.Blue, Color.Green);
+            var descButClose = UIButtonDescription.DefaultTwoStateButton(font, Color.Blue, Color.Green);
             descButClose.Top = 250;
             descButClose.Left = 150;
             descButClose.Width = 200;
             descButClose.Height = 55;
-            descButClose.Font = font;
             descButClose.TextHorizontalAlign = HorizontalTextAlign.Center;
             descButClose.TextVerticalAlign = VerticalTextAlign.Middle;
 
@@ -263,7 +258,7 @@ namespace SpriteDrawing
 
             var panel = await this.AddComponentUIPanel("scrollPanel", "Panel", panelDesc, LayerUI + 5);
 
-            var areaFont = TextDrawerDescription.FromFamily("Tahoma", 20, false);
+            var areaFont = TextDrawerDescription.FromFamily("Tahoma", 20);
 
             var areaDesc = UITextAreaDescription.Default(areaFont);
             areaDesc.Scroll = ScrollModes.Vertical | ScrollModes.Horizontal;

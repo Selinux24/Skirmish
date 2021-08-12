@@ -74,8 +74,8 @@ namespace ModelDrawing
         }
         private async Task InitializeUI()
         {
-            var defaultFont20 = TextDrawerDescription.FromFamily("Arial", 20, false);
-            var defaultFont10 = TextDrawerDescription.FromFamily("Arial", 10, false);
+            var defaultFont20 = TextDrawerDescription.FromFamily("Arial", 20);
+            var defaultFont10 = TextDrawerDescription.FromFamily("Arial", 10);
 
             var textDesc = new UITextAreaDescription { Font = defaultFont20, TextForeColor = Color.Yellow, TextShadowColor = Color.OrangeRed };
             var statisticsDesc = new UITextAreaDescription { Font = defaultFont10, TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue };

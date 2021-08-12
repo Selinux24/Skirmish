@@ -219,35 +219,34 @@ namespace GameLogic
             SpriteDescription bkDesc = SpriteDescription.Background("Resources/HUD.png");
             await this.AddComponentSprite("HUD", "HUD", bkDesc, SceneObjectUsages.UI, LayerUI - 1);
 
-            var titleFont = TextDrawerDescription.FromFamily(titleFontFileName, fontSize * 3);
-            var gameFont = TextDrawerDescription.FromFile(fontFileName, (int)(fontSize * 1.25f), false);
-            var textFont = TextDrawerDescription.FromFile(fontFileName, fontSize, false);
-            var buttonsFont = TextDrawerDescription.FromFile(fontFileName, fontSize, false);
+            var titleFont = TextDrawerDescription.FromFamily(titleFontFileName, fontSize * 3, true);
+            var gameFont = TextDrawerDescription.FromFile(fontFileName, (int)(fontSize * 1.25f));
+            var textFont = TextDrawerDescription.FromFile(fontFileName, fontSize);
+            var buttonsFont = TextDrawerDescription.FromFile(fontFileName, fontSize);
 
-            txtTitle = await this.AddComponentUITextArea("txtTitle", "txtTitle", new UITextAreaDescription { Font = titleFont });
+            txtTitle = await this.AddComponentUITextArea("txtTitle", "txtTitle", UITextAreaDescription.Default(titleFont));
             txtTitle.TextForeColor = Color.White;
             txtTitle.TextShadowColor = Color.Gray;
 
-            txtGame = await this.AddComponentUITextArea("txtGame", "txtGame", new UITextAreaDescription { Font = gameFont });
+            txtGame = await this.AddComponentUITextArea("txtGame", "txtGame", UITextAreaDescription.Default(gameFont));
             txtGame.TextForeColor = Color.LightBlue;
             txtGame.TextShadowColor = Color.DarkBlue;
 
-            txtTeam = await this.AddComponentUITextArea("txtTeam", "txtTeam", new UITextAreaDescription { Font = textFont });
+            txtTeam = await this.AddComponentUITextArea("txtTeam", "txtTeam", UITextAreaDescription.Default(textFont));
             txtTeam.TextForeColor = Color.Yellow;
 
-            txtSoldier = await this.AddComponentUITextArea("txtSoldier", "txtSoldier", new UITextAreaDescription { Font = textFont });
+            txtSoldier = await this.AddComponentUITextArea("txtSoldier", "txtSoldier", UITextAreaDescription.Default(textFont));
             txtSoldier.TextForeColor = Color.Yellow;
 
-            txtActionList = await this.AddComponentUITextArea("txtActionList", "txtActionList", new UITextAreaDescription { Font = textFont });
+            txtActionList = await this.AddComponentUITextArea("txtActionList", "txtActionList", UITextAreaDescription.Default(textFont));
             txtActionList.TextForeColor = Color.Yellow;
 
-            txtAction = await this.AddComponentUITextArea("txtAction", "txtAction", new UITextAreaDescription { Font = textFont });
+            txtAction = await this.AddComponentUITextArea("txtAction", "txtAction", UITextAreaDescription.Default(textFont));
             txtAction.TextForeColor = Color.Yellow;
 
-            var butCloseDesc = UIButtonDescription.DefaultTwoStateButton("button_on.png", "button_off.png");
+            var butCloseDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont, "button_on.png", "button_off.png");
             butCloseDesc.Width = 60;
             butCloseDesc.Height = 20;
-            butCloseDesc.Font = buttonsFont;
             butCloseDesc.TextForeColor = Color.Yellow;
             butCloseDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
             butCloseDesc.TextVerticalAlign = VerticalTextAlign.Middle;

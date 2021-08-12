@@ -177,7 +177,7 @@ namespace Collada.Start
         private async Task InitializeControls()
         {
             // Title text
-            var titleFont = TextDrawerDescription.FromFamily(titleFontFamily, 90, FontMapStyles.Bold);
+            var titleFont = TextDrawerDescription.FromFamily(titleFontFamily, 90, FontMapStyles.Bold, true);
 
             var titleDesc = UITextAreaDescription.Default(titleFont);
             titleDesc.TextForeColor = Color.IndianRed;
@@ -190,12 +190,11 @@ namespace Collada.Start
             var buttonFont = TextDrawerDescription.FromFile(Path.Combine(resourcesFolder, mediumControlsFont), 16);
 
             // Buttons
-            var buttonDesc = UIButtonDescription.DefaultTwoStateButton(Path.Combine(resourcesFolder, "buttons.png"), new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f);
+            var buttonDesc = UIButtonDescription.DefaultTwoStateButton(buttonFont, Path.Combine(resourcesFolder, "buttons.png"), new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f);
             buttonDesc.Width = 200;
             buttonDesc.Height = 36;
             buttonDesc.ColorReleased = SceneButtonColorBase;
             buttonDesc.ColorPressed = SceneButtonColorHighlight;
-            buttonDesc.Font = buttonFont;
             buttonDesc.TextForeColor = Color.Gold;
             buttonDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
             buttonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
@@ -206,12 +205,11 @@ namespace Collada.Start
             sceneModularDungeonButton = await this.AddComponentUIButton("ButtonModularDungeon", "ButtonModularDungeon", buttonDesc, layerHUD);
 
             // Exit button
-            var exitButtonDesc = UIButtonDescription.DefaultTwoStateButton(Path.Combine(resourcesFolder, "buttons.png"), new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f);
+            var exitButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonFont, Path.Combine(resourcesFolder, "buttons.png"), new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f);
             exitButtonDesc.Width = 200;
             exitButtonDesc.Height = 36;
             exitButtonDesc.ColorReleased = ExitButtonColorBase;
             exitButtonDesc.ColorPressed = ExitButtonColorHighlight;
-            exitButtonDesc.Font = buttonFont;
             exitButtonDesc.TextForeColor = Color.Gold;
             exitButtonDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
             exitButtonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
@@ -272,8 +270,7 @@ namespace Collada.Start
                 string mapFile = mapFiles[i];
                 string mapTexture = Path.ChangeExtension(mapFile, ".png");
 
-                var buttonDesc = UIButtonDescription.Default(mapTexture);
-                buttonDesc.Font = mediumClickFont;
+                var buttonDesc = UIButtonDescription.Default(mediumClickFont, mapTexture);
                 buttonDesc.Text = "Click image to load...";
                 buttonDesc.TextForeColor = Color.DarkGray;
                 buttonDesc.TextHorizontalAlign = HorizontalTextAlign.Right;
@@ -290,8 +287,7 @@ namespace Collada.Start
                 modularDungeonTabs.TabPanels[i].AddChild(button);
             }
 
-            var buttonBasicDesc = UIButtonDescription.Default("modulardungeon/resources/basicdungeon/basicdungeon.png");
-            buttonBasicDesc.Font = largeFont;
+            var buttonBasicDesc = UIButtonDescription.Default(largeFont, "modulardungeon/resources/basicdungeon/basicdungeon.png");
             buttonBasicDesc.Text = "Basic Dungeon";
             buttonBasicDesc.TextForeColor = Color.Gold;
             buttonBasicDesc.TextHorizontalAlign = HorizontalTextAlign.Center;

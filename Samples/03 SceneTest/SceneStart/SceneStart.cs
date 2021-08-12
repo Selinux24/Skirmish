@@ -81,7 +81,7 @@ namespace SceneTest.SceneStart
         }
         private async Task InitializeTitle()
         {
-            var titleFont = TextDrawerDescription.FromFamily(titleFonts, 72, FontMapStyles.Bold);
+            var titleFont = TextDrawerDescription.FromFamily(titleFonts, 72, FontMapStyles.Bold, true);
 
             var titleDesc = UITextAreaDescription.Default(titleFont);
             titleDesc.TextForeColor = Color.Gold;
@@ -100,14 +100,13 @@ namespace SceneTest.SceneStart
             buttonPanel.Spacing = 20;
             buttonPanel.EventsEnabled = true;
 
-            var buttonsFont = TextDrawerDescription.FromFamily(buttonFonts, 20, FontMapStyles.Bold);
+            var buttonsFont = TextDrawerDescription.FromFamily(buttonFonts, 20, FontMapStyles.Bold, true);
 
-            var startButtonDesc = UIButtonDescription.DefaultTwoStateButton("common/buttons.png", new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f);
+            var startButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont, "common/buttons.png", new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f);
             startButtonDesc.Width = 150;
             startButtonDesc.Height = 55;
             startButtonDesc.ColorReleased = new Color4(sceneButtonColor.RGB(), 0.8f);
             startButtonDesc.ColorPressed = new Color4(sceneButtonColor.RGB() * 1.2f, 0.9f);
-            startButtonDesc.Font = buttonsFont;
             startButtonDesc.TextForeColor = Color.Gold;
             startButtonDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
             startButtonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
@@ -138,12 +137,11 @@ namespace SceneTest.SceneStart
                 sceneButtons[i].MouseLeave += SceneButtonMouseLeave;
             }
 
-            var exitButtonDesc = UIButtonDescription.DefaultTwoStateButton("common/buttons.png", new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f);
+            var exitButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont, "common/buttons.png", new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f);
             exitButtonDesc.Width = 150;
             exitButtonDesc.Height = 55;
             exitButtonDesc.ColorReleased = new Color4(exitButtonColor.RGB(), 0.8f);
             exitButtonDesc.ColorPressed = new Color4(exitButtonColor.RGB() * 1.2f, 0.9f);
-            exitButtonDesc.Font = buttonsFont;
             exitButtonDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
             exitButtonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
 

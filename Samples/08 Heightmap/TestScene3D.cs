@@ -159,8 +159,8 @@ namespace Heightmap
 
             #region Texts
 
-            var defaultFont18 = TextDrawerDescription.FromFamily("Tahoma", 18, false);
-            var defaultFont11 = TextDrawerDescription.FromFamily("Tahoma", 11, false);
+            var defaultFont18 = TextDrawerDescription.FromFamily("Tahoma", 18);
+            var defaultFont11 = TextDrawerDescription.FromFamily("Tahoma", 11);
             defaultFont18.LineAdjust = true;
             defaultFont11.LineAdjust = true;
 

@@ -78,8 +78,8 @@ namespace Instancing
 
         private async Task InitializeTexts()
         {
-            var defaultFont18 = TextDrawerDescription.FromFamily("Arial", 18, false);
-            var defaultFont11 = TextDrawerDescription.FromFamily("Arial", 11, false);
+            var defaultFont18 = TextDrawerDescription.FromFamily("Arial", 18);
+            var defaultFont11 = TextDrawerDescription.FromFamily("Arial", 11);
 
             title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
             runtimeText = await this.AddComponentUITextArea("RuntimeText", "RuntimeText", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow });

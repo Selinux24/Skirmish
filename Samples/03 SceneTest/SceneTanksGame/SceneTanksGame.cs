@@ -179,7 +179,7 @@ namespace SceneTest.SceneTanksGame
             fadePanel = await this.AddComponentUIPanel("FadePanel", "FadePanel", UIPanelDescription.Screen(this, Color4.Black * 0.3333f), LayerUIEffects);
             fadePanel.Visible = false;
 
-            loadingText = await this.AddComponentUITextArea("LoadingText", "LoadingText", UITextAreaDescription.DefaultFromFile(fontFilename, 40, FontMapStyles.Regular, true), LayerUIEffects + 1);
+            loadingText = await this.AddComponentUITextArea("LoadingText", "LoadingText", UITextAreaDescription.DefaultFromFile(fontFilename, 40, true), LayerUIEffects + 1);
             loadingText.TextForeColor = Color.Yellow;
             loadingText.TextShadowColor = Color.Orange;
             loadingText.TextHorizontalAlign = HorizontalTextAlign.Center;
@@ -187,7 +187,7 @@ namespace SceneTest.SceneTanksGame
             loadingText.GrowControlWithText = false;
             loadingText.Visible = false;
 
-            loadingBar = await this.AddComponentUIProgressBar("LoadingBar", "LoadingBar", UIProgressBarDescription.DefaultFromFile(fontFilename, 20, FontMapStyles.Regular, true), LayerUIEffects + 1);
+            loadingBar = await this.AddComponentUIProgressBar("LoadingBar", "LoadingBar", UIProgressBarDescription.DefaultFromFile(fontFilename, 20, true), LayerUIEffects + 1);
             loadingBar.ProgressColor = Color.Yellow;
             loadingBar.BaseColor = Color.CornflowerBlue;
             loadingBar.Caption.TextForeColor = Color.Black;
@@ -280,8 +280,7 @@ namespace SceneTest.SceneTanksGame
 
             var font = TextDrawerDescription.FromFile(fontFilename, 20, true);
 
-            var descButton = UIButtonDescription.DefaultTwoStateButton(Color.DarkGray * 0.6666f, Color.DarkGray * 0.7777f);
-            descButton.Font = font;
+            var descButton = UIButtonDescription.DefaultTwoStateButton(font, Color.DarkGray * 0.6666f, Color.DarkGray * 0.7777f);
             descButton.TextHorizontalAlign = HorizontalTextAlign.Center;
             descButton.TextVerticalAlign = VerticalTextAlign.Middle;
 
@@ -305,42 +304,42 @@ namespace SceneTest.SceneTanksGame
         }
         private async Task InitializeUIPlayers()
         {
-            player1Name = await this.AddComponentUITextArea("Player1Name", "Player1Name", UITextAreaDescription.DefaultFromFile(fontFilename, 20, FontMapStyles.Regular, true));
+            player1Name = await this.AddComponentUITextArea("Player1Name", "Player1Name", UITextAreaDescription.DefaultFromFile(fontFilename, 20, true));
             player1Name.TextForeColor = player1Status.Color;
             player1Name.TextShadowColor = player1Status.Color * 0.5f;
             player1Name.GrowControlWithText = false;
             player1Name.TextHorizontalAlign = HorizontalTextAlign.Left;
             player1Name.Visible = false;
 
-            player1Points = await this.AddComponentUITextArea("Player1Points", "Player1Points", UITextAreaDescription.DefaultFromFile(fontFilename, 25, FontMapStyles.Regular, true));
+            player1Points = await this.AddComponentUITextArea("Player1Points", "Player1Points", UITextAreaDescription.DefaultFromFile(fontFilename, 25, true));
             player1Points.TextForeColor = player1Status.Color;
             player1Points.TextShadowColor = player1Status.Color * 0.5f;
             player1Points.GrowControlWithText = false;
             player1Points.TextHorizontalAlign = HorizontalTextAlign.Center;
             player1Points.Visible = false;
 
-            player1Life = await this.AddComponentUIProgressBar("Player1Life", "Player1Life", UIProgressBarDescription.DefaultFromFile(fontFilename, 10, FontMapStyles.Regular, true));
+            player1Life = await this.AddComponentUIProgressBar("Player1Life", "Player1Life", UIProgressBarDescription.DefaultFromFile(fontFilename, 10, true));
             player1Life.ProgressColor = player1Status.Color;
             player1Life.BaseColor = Color.Black;
             player1Life.Caption.TextForeColor = Color.White;
             player1Life.Caption.Text = "0%";
             player1Life.Visible = false;
 
-            player2Name = await this.AddComponentUITextArea("Player2Name", "Player2Name", UITextAreaDescription.DefaultFromFile(fontFilename, 20, FontMapStyles.Regular, true));
+            player2Name = await this.AddComponentUITextArea("Player2Name", "Player2Name", UITextAreaDescription.DefaultFromFile(fontFilename, 20, true));
             player2Name.TextForeColor = player2Status.Color;
             player2Name.TextShadowColor = player2Status.Color * 0.5f;
             player2Name.GrowControlWithText = false;
             player2Name.TextHorizontalAlign = HorizontalTextAlign.Right;
             player2Name.Visible = false;
 
-            player2Points = await this.AddComponentUITextArea("Player2Points", "Player2Points", UITextAreaDescription.DefaultFromFile(fontFilename, 25, FontMapStyles.Regular, true));
+            player2Points = await this.AddComponentUITextArea("Player2Points", "Player2Points", UITextAreaDescription.DefaultFromFile(fontFilename, 25, true));
             player2Points.TextForeColor = player2Status.Color;
             player2Points.TextShadowColor = player2Status.Color * 0.5f;
             player2Points.GrowControlWithText = false;
             player2Points.TextHorizontalAlign = HorizontalTextAlign.Center;
             player2Points.Visible = false;
 
-            player2Life = await this.AddComponentUIProgressBar("Player2Life", "Player2Life", UIProgressBarDescription.DefaultFromFile(fontFilename, 10, FontMapStyles.Regular, true));
+            player2Life = await this.AddComponentUIProgressBar("Player2Life", "Player2Life", UIProgressBarDescription.DefaultFromFile(fontFilename, 10, true));
             player2Life.ProgressColor = player2Status.Color;
             player2Life.BaseColor = Color.Black;
             player2Life.Caption.TextForeColor = Color.White;
@@ -349,7 +348,7 @@ namespace SceneTest.SceneTanksGame
         }
         private async Task InitializeUITurn()
         {
-            turnText = await this.AddComponentUITextArea("TurnText", "TurnText", UITextAreaDescription.DefaultFromFile(fontFilename, 40, FontMapStyles.Regular, true));
+            turnText = await this.AddComponentUITextArea("TurnText", "TurnText", UITextAreaDescription.DefaultFromFile(fontFilename, 40, true));
             turnText.TextForeColor = Color.Yellow;
             turnText.TextShadowColor = Color.Yellow * 0.5f;
             turnText.TextHorizontalAlign = HorizontalTextAlign.Center;

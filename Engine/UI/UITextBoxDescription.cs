@@ -30,6 +30,20 @@ namespace Engine.UI
                 Text = text,
             };
         }
+     
+        /// <summary>
+        /// Gets the default text box description from a font family name
+        /// </summary>
+        /// <param name="fontFamilyName">Font family name</param>
+        /// <param name="size">Font size</param>
+        /// <param name="fineSampling">Fine sampling</param>
+        public static new UITextBoxDescription DefaultFromFamily(string fontFamilyName, int size, bool fineSampling = false)
+        {
+            return new UITextBoxDescription
+            {
+                Font = TextDrawerDescription.FromFamily(fontFamilyName, size, fineSampling),
+            };
+        }
         /// <summary>
         /// Gets the default text box description from a font family name
         /// </summary>
@@ -37,11 +51,25 @@ namespace Engine.UI
         /// <param name="size">Font size</param>
         /// <param name="fontStyle">Font style</param>
         /// <param name="fineSampling">Fine sampling</param>
-        public static new UITextBoxDescription DefaultFromFamily(string fontFamilyName, int size, FontMapStyles fontStyle = FontMapStyles.Regular, bool fineSampling = true)
+        public static new UITextBoxDescription DefaultFromFamily(string fontFamilyName, int size, FontMapStyles fontStyle, bool fineSampling = false)
         {
             return new UITextBoxDescription
             {
                 Font = TextDrawerDescription.FromFamily(fontFamilyName, size, fontStyle, fineSampling),
+            };
+        }
+    
+        /// <summary>
+        /// Gets the default text box description from a font file
+        /// </summary>
+        /// <param name="fileName">File name</param>
+        /// <param name="size">Size</param>
+        /// <param name="lineAdjust">Line adjust</param>
+        public static new UITextBoxDescription DefaultFromFile(string fileName, int size, bool lineAdjust = false)
+        {
+            return new UITextBoxDescription()
+            {
+                Font = TextDrawerDescription.FromFile(fileName, size, lineAdjust),
             };
         }
         /// <summary>
@@ -51,13 +79,14 @@ namespace Engine.UI
         /// <param name="size">Size</param>
         /// <param name="fontStyle">Font style</param>
         /// <param name="lineAdjust">Line adjust</param>
-        public static new UITextBoxDescription DefaultFromFile(string fileName, int size, FontMapStyles fontStyle = FontMapStyles.Regular, bool lineAdjust = false)
+        public static new UITextBoxDescription DefaultFromFile(string fileName, int size, FontMapStyles fontStyle, bool lineAdjust = false)
         {
             return new UITextBoxDescription()
             {
                 Font = TextDrawerDescription.FromFile(fileName, size, fontStyle, lineAdjust),
             };
         }
+      
         /// <summary>
         /// Gets the default text box description from a font map 
         /// </summary>

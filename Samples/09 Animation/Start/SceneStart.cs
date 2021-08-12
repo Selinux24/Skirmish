@@ -58,7 +58,7 @@ namespace Animation.Start
         }
         private async Task InitializeTitle()
         {
-            var titleFont = TextDrawerDescription.FromFamily(titleFonts, 72);
+            var titleFont = TextDrawerDescription.FromFamily(titleFonts, 72, true);
 
             title = await this.AddComponentUITextArea("Title", "Title", UITextAreaDescription.Default(titleFont));
             title.GrowControlWithText = false;
@@ -76,16 +76,14 @@ namespace Animation.Start
             mainPanel.Padding = 15;
             mainPanel.SetGridLayout(GridLayout.FixedRows(2));
 
-            var buttonFont = TextDrawerDescription.FromFamily(buttonFonts, 36);
+            var buttonFont = TextDrawerDescription.FromFamily(buttonFonts, 36, true);
 
             Color4 highlightColor = new Color4(0.3333f, 0.3333f, 0.3333f, 0f);
-            var buttonDesc = UIButtonDescription.DefaultTwoStateButton(Color.Red, Color.Red.ToColor4() + highlightColor);
-            buttonDesc.Font = buttonFont;
+            var buttonDesc = UIButtonDescription.DefaultTwoStateButton(buttonFont, Color.Red, Color.Red.ToColor4() + highlightColor);
             buttonDesc.TextForeColor = Color.Gold;
             buttonDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
             buttonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
-            var exitDesc = UIButtonDescription.DefaultTwoStateButton(Color.Orange, Color.Orange.ToColor4() + highlightColor);
-            exitDesc.Font = buttonFont;
+            var exitDesc = UIButtonDescription.DefaultTwoStateButton(buttonFont, Color.Orange, Color.Orange.ToColor4() + highlightColor);
             exitDesc.TextForeColor = Color.Gold;
             exitDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
             exitDesc.TextVerticalAlign = VerticalTextAlign.Middle;

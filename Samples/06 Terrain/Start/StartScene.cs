@@ -65,7 +65,7 @@ namespace Terrain.Start
 
             #region Title text
 
-            var titleFont = TextDrawerDescription.FromFamily(titleFonts, 72, FontMapStyles.Bold);
+            var titleFont = TextDrawerDescription.FromFamily(titleFonts, 72, FontMapStyles.Bold, true);
             titleFont.CustomKeycodes = new[] { '✌' };
 
             var titleDesc = UITextAreaDescription.Default(titleFont);
@@ -83,15 +83,14 @@ namespace Terrain.Start
 
             #region Scene buttons
 
-            var buttonsFont = TextDrawerDescription.FromFamily(buttonFonts, 20, FontMapStyles.Bold);
+            var buttonsFont = TextDrawerDescription.FromFamily(buttonFonts, 20, FontMapStyles.Bold, true);
             buttonsFont.CustomKeycodes = new[] { '➀', '➁' };
 
-            var startButtonDesc = UIButtonDescription.DefaultTwoStateButton("Start/buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f);
+            var startButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont, "Start/buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f);
             startButtonDesc.Width = 275;
             startButtonDesc.Height = 65;
             startButtonDesc.ColorReleased = new Color4(sceneButtonColor.RGB(), 0.8f);
             startButtonDesc.ColorPressed = new Color4(sceneButtonColor.RGB() * 1.2f, 0.9f);
-            startButtonDesc.Font = buttonsFont;
             startButtonDesc.TextForeColor = Color.Gold;
             startButtonDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
             startButtonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
@@ -112,12 +111,11 @@ namespace Terrain.Start
 
             #region Exit button
 
-            var exitButtonDesc = UIButtonDescription.DefaultTwoStateButton("Start/buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f);
+            var exitButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont, "Start/buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f);
             exitButtonDesc.Width = 275;
             exitButtonDesc.Height = 65;
             exitButtonDesc.ColorReleased = new Color4(exitButtonColor.RGB(), 0.8f);
             exitButtonDesc.ColorPressed = new Color4(exitButtonColor.RGB() * 1.2f, 0.9f);
-            exitButtonDesc.Font = buttonsFont;
             exitButtonDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
             exitButtonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
 
