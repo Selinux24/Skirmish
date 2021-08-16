@@ -58,6 +58,19 @@ namespace Engine
         }
 
         /// <summary>
+        /// Gets the primary screen size
+        /// </summary>
+        public static Vector2 ScreenSize
+        {
+            get
+            {
+                var rect = Screen.PrimaryScreen.Bounds;
+
+                return new Vector2(rect.Width, rect.Height);
+            }
+        }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="name">Form name</param>

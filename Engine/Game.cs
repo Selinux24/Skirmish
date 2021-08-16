@@ -248,6 +248,20 @@ namespace Engine
             DrawerPool.Initialize(Graphics);
         }
         /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="name">Name, for the game form</param>
+        /// <param name="screenWidth">Window width</param>
+        /// <param name="screenHeight">Window height</param>
+        /// <param name="fullScreen">Full screen window</param>
+        /// <param name="refreshRate">Refresh rate</param>
+        /// <param name="multiSampling">Enable multi-sampling</param>
+        public Game(string name, bool fullScreen = true, float screenWidth = 0, float screenHeight = 0, bool vsyncEnabled = true, int refreshRate = 0, int multiSampling = 0) :
+            this(name, fullScreen, (int)screenWidth, (int)screenHeight, vsyncEnabled, refreshRate, multiSampling)
+        {
+
+        }
+        /// <summary>
         /// Destructor
         /// </summary>
         ~Game()

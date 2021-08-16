@@ -18,7 +18,7 @@ namespace Engine.UI
         /// <summary>
         /// Scroll mode
         /// </summary>
-        public ScrollModes ScrollMode { get; set; } = ScrollModes.None;
+        public ScrollModes ScrollMode { get; set; }
         /// <summary>
         /// Gets or sets the marker size
         /// </summary>

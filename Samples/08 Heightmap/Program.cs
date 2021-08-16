@@ -15,10 +15,9 @@ namespace Heightmap
                 Logger.LogLevel = LogLevel.Information;
                 Logger.LogStackSize = 0;
 
-                int sWidth = (int)(System.Windows.Forms.SystemInformation.VirtualScreen.Width * .8f);
-                int sHeight = (int)(System.Windows.Forms.SystemInformation.VirtualScreen.Height * .8f);
+                var screen = EngineForm.ScreenSize * 0.8f;
 
-                using (Game cl = new Game("8 Heightmap", false, sWidth, sHeight, true, 0, 0))
+                using (Game cl = new Game("8 Heightmap", false, screen.X, screen.Y, true, 0, 0))
 #else
                 Logger.LogLevel = LogLevel.Error;
 
