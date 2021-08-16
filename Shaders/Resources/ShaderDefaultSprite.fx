@@ -13,23 +13,41 @@ cbuffer cbPerFrame : register(b0)
 };
 cbuffer cbPerObject : register(b1)
 {
-	float4 gColor;
     float4 gSize;
+    float4 gColor1;
     float4 gColor2;
-    float gPct;
+    float4 gColor3;
+    float4 gColor4;
+    float3 gPct;
+    int gDirection;
     float gTextureIndex;
-    float2 gPAD11;
+    float3 gPAD11;
 };
 
 Texture2DArray gTextureArray : register(t0);
 
-float MapScreenCoord(float positionWorld)
+float MapScreenCoordX(float x, float4 rectPixels, float2 screenPixels)
 {
-    float x = 0.5 * positionWorld.x + 0.5;
+    float p = 0.5 * x + 0.5;
 	
-    float left = gSize.x / gResolution.x;
-    float width = gSize.z / gResolution.x;
-    return clamp((x - left) / width, 0., 1.);
+    float left = rectPixels.x / screenPixels.x;
+    float width = rectPixels.z / screenPixels.x;
+    return clamp((p - left) / width, 0., 1.);
+}
+float MapScreenCoordY(float y, float4 rectPixels, float2 screenPixels)
+{
+    float p = 0.5 * -y + 0.5;
+
+    float top = rectPixels.y / screenPixels.y;
+    float height = rectPixels.w / screenPixels.y;
+    return clamp((p - top) / height, 0., 1.);
+}
+float4 GetTintColor(float value)
+{
+    if (value <= gPct.x) return gColor1;
+    if (value <= gPct.y) return gColor2;
+    if (value <= gPct.z) return gColor3;
+    return gColor4;
 }
 
 /**********************************************************************************************************
@@ -48,14 +66,16 @@ PSVertexPositionColor VSPositionColor(VSVertexPositionColor input)
 
 float4 PSPositionColor(PSVertexPositionColor input) : SV_TARGET
 {
-    return saturate(input.color * gColor);
+    return saturate(input.color * gColor1);
 }
 float4 PSPositionColorPct(PSVertexPositionColor input) : SV_TARGET
 {
-    float x = MapScreenCoord(input.positionWorld.x);
-    float4 tintColor = x > gPct ? gColor : gColor2;
+    float pct = gDirection == 0 ? 
+		MapScreenCoordX(input.positionWorld.x, gSize, gResolution) : 
+		MapScreenCoordY(input.positionWorld.y, gSize, gResolution);
+    float4 tintColor = GetTintColor(pct);
 	
-    return input.color * tintColor;
+    return saturate(input.color * tintColor);
 }
 
 /**********************************************************************************************************
@@ -77,7 +97,7 @@ float4 PSPositionTexture(PSVertexPositionTexture input) : SV_TARGET
 {
     float4 color = gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
 	
-    return saturate(color * gColor);
+    return saturate(color * gColor1);
 }
 float4 PSPositionTextureRED(PSVertexPositionTexture input) : SV_TARGET
 {
@@ -118,10 +138,10 @@ float4 PSPositionTexturePct(PSVertexPositionTexture input) : SV_TARGET
 {
     float4 color = gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
 	
-    float x = input.tex.x;
-    float4 tintColor = x > gPct ? gColor : gColor2;
-	
-    return color * tintColor;
+    float pct = gDirection == 0 ? input.tex.x : input.tex.y;
+    float4 tintColor = GetTintColor(pct);
+
+    return saturate(color * tintColor);
 }
 
 /**********************************************************************************************************

@@ -60,21 +60,33 @@ namespace Engine.Effects
         /// </summary>
         private readonly EngineEffectVariableVector resolutionVar = null;
         /// <summary>
-        /// Color effect variable
-        /// </summary>
-        private readonly EngineEffectVariableVector colorVar = null;
-        /// <summary>
         /// Sprite size in pixels effect variable
         /// </summary>
         private readonly EngineEffectVariableVector sizeVar = null;
+        /// <summary>
+        /// First color effect variable
+        /// </summary>
+        private readonly EngineEffectVariableVector color1Var = null;
         /// <summary>
         /// Second color effect variable
         /// </summary>
         private readonly EngineEffectVariableVector color2Var = null;
         /// <summary>
+        /// Third color effect variable
+        /// </summary>
+        private readonly EngineEffectVariableVector color3Var = null;
+        /// <summary>
+        /// Fourth color effect variable
+        /// </summary>
+        private readonly EngineEffectVariableVector color4Var = null;
+        /// <summary>
         /// Percentage effect variable
         /// </summary>
-        private readonly EngineEffectVariableScalar percentageVar = null;
+        private readonly EngineEffectVariableVector percentageVar = null;
+        /// <summary>
+        /// Direction effect variable
+        /// </summary>
+        private readonly EngineEffectVariableScalar directionVar = null;
         /// <summary>
         /// Texture effect variable
         /// </summary>
@@ -132,20 +144,6 @@ namespace Engine.Effects
             }
         }
         /// <summary>
-        /// Color
-        /// </summary>
-        protected Color4 Color
-        {
-            get
-            {
-                return colorVar.GetVector<Color4>();
-            }
-            set
-            {
-                colorVar.Set(value);
-            }
-        }
-        /// <summary>
         /// Clipping rectangle in pixels
         /// </summary>
         protected RectangleF Size
@@ -168,6 +166,20 @@ namespace Engine.Effects
             }
         }
         /// <summary>
+        /// First Color
+        /// </summary>
+        protected Color4 Color1
+        {
+            get
+            {
+                return color1Var.GetVector<Color4>();
+            }
+            set
+            {
+                color1Var.Set(value);
+            }
+        }
+        /// <summary>
         /// Second color
         /// </summary>
         protected Color4 Color2
@@ -182,17 +194,59 @@ namespace Engine.Effects
             }
         }
         /// <summary>
-        /// Percentage
+        /// Third color
         /// </summary>
-        protected float Percentage
+        protected Color4 Color3
         {
             get
             {
-                return percentageVar.GetFloat();
+                return color3Var.GetVector<Color4>();
+            }
+            set
+            {
+                color3Var.Set(value);
+            }
+        }
+        /// <summary>
+        /// Fourth color
+        /// </summary>
+        protected Color4 Color4
+        {
+            get
+            {
+                return color4Var.GetVector<Color4>();
+            }
+            set
+            {
+                color4Var.Set(value);
+            }
+        }
+        /// <summary>
+        /// Percentage
+        /// </summary>
+        protected Vector3 Percentage
+        {
+            get
+            {
+                return percentageVar.GetVector<Vector3>();
             }
             set
             {
                 percentageVar.Set(value);
+            }
+        }
+        /// <summary>
+        /// Draw direction
+        /// </summary>
+        protected int Direction
+        {
+            get
+            {
+                return directionVar.GetInt();
+            }
+            set
+            {
+                directionVar.Set(value);
             }
         }
         /// <summary>
@@ -254,12 +308,15 @@ namespace Engine.Effects
             worldViewProjectionVar = Effect.GetVariableMatrix("gWorldViewProjection");
             resolutionVar = Effect.GetVariableVector("gResolution");
 
-            colorVar = Effect.GetVariableVector("gColor");
             sizeVar = Effect.GetVariableVector("gSize");
+            color1Var = Effect.GetVariableVector("gColor1");
             color2Var = Effect.GetVariableVector("gColor2");
-            percentageVar = Effect.GetVariableScalar("gPct");
-            texturesVar = Effect.GetVariableTexture("gTextureArray");
+            color3Var = Effect.GetVariableVector("gColor3");
+            color4Var = Effect.GetVariableVector("gColor4");
+            percentageVar = Effect.GetVariableVector("gPct");
+            directionVar = Effect.GetVariableScalar("gDirection");
             textureIndexVar = Effect.GetVariableScalar("gTextureIndex");
+            texturesVar = Effect.GetVariableTexture("gTextureArray");
         }
 
         /// <summary>
@@ -336,30 +393,33 @@ namespace Engine.Effects
             EngineShaderResourceView texture,
             int textureIndex)
         {
-            Color = tintColor;
+            Color1 = tintColor;
             Textures = texture;
             TextureIndex = textureIndex;
         }
         /// <summary>
         /// Update per model object data
         /// </summary>
-        /// <param name="leftColor">Left color</param>
-        /// <param name="rightColor">Right color</param>
-        /// <param name="pct">Percentage</param>
+        /// <param name="spriteParameters">Sprite parameters</param>
         /// <param name="texture">Texture</param>
         /// <param name="textureIndex">Texture index</param>
         public void UpdatePerObjectPct(
-            RectangleF renderArea,
-            Color4 leftColor,
-            Color4 rightColor,
-            float pct,
+            SpriteParameters spriteParameters,
             EngineShaderResourceView texture,
             int textureIndex)
         {
-            Size = renderArea;
-            Color = leftColor;
-            Color2 = rightColor;
-            Percentage = pct;
+            Size = spriteParameters.RenderArea;
+            Color1 = spriteParameters.Color1;
+            Color2 = spriteParameters.Color2;
+            Color3 = spriteParameters.Color3;
+            Color4 = spriteParameters.Color4;
+            Percentage = new Vector3
+            {
+                X = spriteParameters.Percentage1,
+                Y = spriteParameters.Percentage2,
+                Z = spriteParameters.Percentage3,
+            };
+            Direction = spriteParameters.Direction;
             Textures = texture;
             TextureIndex = textureIndex;
         }

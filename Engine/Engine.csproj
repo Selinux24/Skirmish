@@ -186,6 +186,7 @@
     <Compile Include="Content\BuiltInMaterials.cs" />
     <Compile Include="Content\IAnimationLoader.cs" />
     <Compile Include="CubemapState.cs" />
+    <Compile Include="Effects\SpriteParameters.cs" />
     <Compile Include="IGameState.cs" />
     <Compile Include="IHasGameState.cs" />
     <Compile Include="CameraState.cs" />
@@ -474,6 +475,7 @@
     <Compile Include="UI\PivotAnchors.cs" />
     <Compile Include="UI\ScrollModes.cs" />
     <Compile Include="UI\Spacing.cs" />
+    <Compile Include="UI\SpriteDrawDirections.cs" />
     <Compile Include="UI\Tween\UIControlTweenCollection.cs" />
     <Compile Include="UI\Tween\UIControlTweenExtensions.cs" />
     <Compile Include="Tween\FloatTweenManager.cs" />
@@ -487,6 +489,8 @@
     <Compile Include="UI\HorizontalTextAlign.cs" />
     <Compile Include="UI\UIConfiguration.cs" />
     <Compile Include="UI\UIConsole.cs" />
+    <Compile Include="UI\UIScrollBar.cs" />
+    <Compile Include="UI\UIScrollBarDescription.cs" />
     <Compile Include="UI\UITextBoxDescription.cs" />
     <Compile Include="UI\UIConsoleDescription.cs" />
     <Compile Include="UI\UICursorDescription.cs" />

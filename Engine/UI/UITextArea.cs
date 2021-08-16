@@ -19,6 +19,22 @@ namespace Engine.UI
         /// Grow control with text value
         /// </summary>
         private bool growControlWithText = false;
+        /// <summary>
+        /// Vertical scroll offset (in pixels)
+        /// </summary>
+        private float verticalScrollOffset = 0;
+        /// <summary>
+        /// Vertical scroll position (from 0 to 1)
+        /// </summary>
+        private float verticalScrollPosition = 0;
+        /// <summary>
+        /// Horizontal scroll offset (in pixels)
+        /// </summary>
+        private float horizontalScrollOffset = 0;
+        /// <summary>
+        /// Horizontal scroll position (from 0 to 1)
+        /// </summary>
+        private float horizontalScrollPosition = 0;
 
         /// <summary>
         /// Gets or sets the control text
@@ -165,9 +181,57 @@ namespace Engine.UI
         /// <inheritdoc/>
         public ScrollModes Scroll { get; set; }
         /// <inheritdoc/>
-        public float VerticalScrollOffset { get; set; }
+        public float VerticalScrollOffset
+        {
+            get
+            {
+                return verticalScrollOffset;
+            }
+            set
+            {
+                verticalScrollOffset = MathUtil.Clamp(value, 0f, GetMaximumVerticalOffset());
+                verticalScrollPosition = ConvertVerticalOffsetToPosition(verticalScrollOffset);
+            }
+        }
         /// <inheritdoc/>
-        public float HorizontalScrollOffset { get; set; }
+        public float HorizontalScrollOffset
+        {
+            get
+            {
+                return horizontalScrollOffset;
+            }
+            set
+            {
+                horizontalScrollOffset = MathUtil.Clamp(value, 0f, GetMaximumHorizontalOffset());
+                horizontalScrollPosition = ConvertHorizontalOffsetToPosition(horizontalScrollOffset);
+            }
+        }
+        /// <inheritdoc/>
+        public float VerticalScrollPosition
+        {
+            get
+            {
+                return verticalScrollPosition;
+            }
+            set
+            {
+                verticalScrollPosition = MathUtil.Clamp(value, 0f, 1f);
+                verticalScrollOffset = ConvertVerticalPositionToOffset(verticalScrollPosition);
+            }
+        }
+        /// <inheritdoc/>
+        public float HorizontalScrollPosition
+        {
+            get
+            {
+                return horizontalScrollPosition;
+            }
+            set
+            {
+                horizontalScrollPosition = MathUtil.Clamp(value, 0f, 1f);
+                horizontalScrollOffset = ConvertHorizontalPositionToOffset(horizontalScrollPosition);
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -287,20 +351,89 @@ namespace Engine.UI
         /// <inheritdoc/>
         public void ScrollDown(float amount)
         {
+            float maxOffset = GetMaximumVerticalOffset();
+
             VerticalScrollOffset += amount * Game.GameTime.ElapsedSeconds;
-            VerticalScrollOffset = Math.Min(textDrawer.TextSize.Y - GetRenderArea(true).Height, VerticalScrollOffset);
+            VerticalScrollOffset = Math.Min(maxOffset, VerticalScrollOffset);
         }
         /// <inheritdoc/>
         public void ScrollLeft(float amount)
         {
+            float maxOffset = GetMaximumHorizontalOffset();
+
             HorizontalScrollOffset += amount * Game.GameTime.ElapsedSeconds;
-            HorizontalScrollOffset = Math.Min(textDrawer.TextSize.X - GetRenderArea(true).Width, HorizontalScrollOffset);
+            HorizontalScrollOffset = Math.Min(maxOffset, HorizontalScrollOffset);
         }
         /// <inheritdoc/>
         public void ScrollRight(float amount)
         {
             HorizontalScrollOffset -= amount * Game.GameTime.ElapsedSeconds;
             HorizontalScrollOffset = Math.Max(0, HorizontalScrollOffset);
+        }
+
+        /// <summary>
+        /// Gets the maximum number of vertical pixels
+        /// </summary>
+        /// <returns>Returns the maximum number of vertical pixels</returns>
+        private float GetMaximumVerticalOffset()
+        {
+            var renderArea = GetRenderArea(true);
+            return textDrawer.TextSize.Y - renderArea.Height;
+        }
+        /// <summary>
+        /// Gets the maximum number of horizontal pixels
+        /// </summary>
+        /// <returns>Returns the maximum number of horizontal pixels</returns>
+        private float GetMaximumHorizontalOffset()
+        {
+            var renderArea = GetRenderArea(true);
+            return textDrawer.TextSize.X - renderArea.Width;
+        }
+
+        /// <summary>
+        /// Converts from vertical pixels to a 0 to 1 value
+        /// </summary>
+        /// <param name="offset">Vertical pixels</param>
+        /// <returns>Returns a value from 0 to 1</returns>
+        private float ConvertVerticalOffsetToPosition(float offset)
+        {
+            float maxOffset = GetMaximumVerticalOffset();
+
+            return offset / maxOffset;
+        }
+        /// <summary>
+        /// Converts from vertical position to pixels
+        /// </summary>
+        /// <param name="position">0 to 1 position value</param>
+        /// <returns>Returns the pixel offset</returns>
+        private float ConvertVerticalPositionToOffset(float position)
+        {
+            float maxOffset = GetMaximumVerticalOffset();
+
+            return position * maxOffset;
+        }
+
+        /// <summary>
+        /// Converts from horizontal pixels to a 0 to 1 value
+        /// </summary>
+        /// <param name="offset">Horizontal pixels</param>
+        /// <returns>Returns a value from 0 to 1</returns>
+        private float ConvertHorizontalOffsetToPosition(float offset)
+        {
+            float maxOffset = GetMaximumHorizontalOffset();
+
+            return offset / maxOffset;
+        }
+        /// <summary>
+        /// Converts from horizontal position to pixels
+        /// </summary>
+        /// <param name="position">0 to 1 position value</param>
+        /// <returns>Returns the pixel offset</returns>
+        private float ConvertHorizontalPositionToOffset(float position)
+        {
+            float maxOffset = GetMaximumHorizontalOffset();
+
+            return position * maxOffset;
         }
 
         /// <summary>

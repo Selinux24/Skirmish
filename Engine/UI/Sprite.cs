@@ -32,6 +32,22 @@ namespace Engine.UI
         private EngineShaderResourceView spriteTexture = null;
 
         /// <summary>
+        /// First color
+        /// </summary>
+        public Color4 Color1 { get; set; }
+        /// <summary>
+        /// Second color
+        /// </summary>
+        public Color4 Color2 { get; set; }
+        /// <summary>
+        /// Third color
+        /// </summary>
+        public Color4 Color3 { get; set; }
+        /// <summary>
+        /// Fourth color
+        /// </summary>
+        public Color4 Color4 { get; set; }
+        /// <summary>
         /// Gets or sets the texture index to render
         /// </summary>
         public int TextureIndex { get; set; }
@@ -40,18 +56,31 @@ namespace Engine.UI
         /// </summary>
         public bool Textured { get; private set; }
         /// <summary>
+        /// First percentage
+        /// </summary>
+        public float Percentage1 { get; set; }
+        /// <summary>
+        /// Second percentage
+        /// </summary>
+        public float Percentage2 { get; set; }
+        /// <summary>
+        /// Third percentage
+        /// </summary>
+        public float Percentage3 { get; set; }
+        /// <summary>
+        /// Draw direction
+        /// </summary>
+        public int DrawDirection { get;set;}
+        /// <summary>
         /// Use percentage drawing
         /// </summary>
-        /// <remarks>
-        /// Uses the base color as left color, and tint color as right color.
-        /// The percentage value defines the amount of left color over the right color, in 0 to 1 magnitude.
-        /// </remarks>
-        public bool UsePercentage { get; set; }
-        /// <summary>
-        /// Percentage
-        /// </summary>
-        /// <remarks>View <see cref="UsePercentage"/></remarks>
-        public float Percentage { get; set; }
+        public bool UsePercentage
+        {
+            get
+            {
+                return Percentage1 > 0f || Percentage2 > 0f || Percentage3 > 0f;
+            }
+        }
         /// <summary>
         /// Gets whether the internal buffers were ready or not
         /// </summary>
@@ -73,6 +102,14 @@ namespace Engine.UI
         public Sprite(string id, string name, Scene scene, SpriteDescription description)
             : base(id, name, scene, description)
         {
+            Color1 = description.Color1;
+            Color2 = description.Color2;
+            Color3 = description.Color3;
+            Color4 = description.Color4;
+            Percentage1 = description.Percentage1;
+            Percentage2 = description.Percentage2;
+            Percentage3 = description.Percentage3;
+            DrawDirection = (int)description.DrawDirection;
             Textured = description.Textures?.Any() == true;
             TextureIndex = description.TextureIndex;
 
@@ -232,11 +269,14 @@ namespace Engine.UI
             var color2 = TintColor;
             color2.Alpha *= Alpha;
 
+            var parameters = new SpriteParameters(
+                new[] { Color1, Color2, Color3, Color4 },
+                new[] { Percentage1, Percentage2, Percentage3 },
+                DrawDirection,
+                GetRenderArea(true));
+
             effect.UpdatePerObjectPct(
-                GetRenderArea(true),
-                color,
-                color2,
-                Percentage,
+                parameters,
                 spriteTexture,
                 TextureIndex);
 
@@ -259,6 +299,19 @@ namespace Engine.UI
             base.Resize();
 
             viewProjection = Game.Form.GetOrthoProjectionMatrix();
+        }
+
+        /// <summary>
+        /// Sets the percentage values
+        /// </summary>
+        /// <param name="percent1">First percentage</param>
+        /// <param name="percent2">Second percentage</param>
+        /// <param name="percent3">Third percentage</param>
+        public void SetPercentage(float percent1, float percent2 = 1.0f, float percent3 = 1.0f)
+        {
+            Percentage1 = percent1;
+            Percentage2 = percent2;
+            Percentage3 = percent3;
         }
     }
 

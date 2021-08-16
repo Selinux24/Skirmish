@@ -18,6 +18,14 @@ namespace Engine.UI
         /// Gets or sets the horizontal scroll offset
         /// </summary>
         float HorizontalScrollOffset { get; set; }
+        /// <summary>
+        /// Vertical Scroll position (0 to 1)
+        /// </summary>
+        float VerticalScrollPosition { get; set; }
+        /// <summary>
+        /// Horizontal Scroll position (0 to 1)
+        /// </summary>
+        float HorizontalScrollPosition { get; set; }
 
         /// <summary>
         /// Moves scroll up

@@ -37,6 +37,8 @@ namespace SpriteDrawing
         private UIButton butTest2 = null;
 
         private UITextArea scrollTextArea = null;
+        private UIScrollBar scrollBarV = null;
+        private UIScrollBar scrollBarH = null;
 
         public TestScene(Game game)
             : base(game)
@@ -270,6 +272,46 @@ namespace SpriteDrawing
             };
 
             panel.AddChild(scrollTextArea);
+
+            var scrollBarVDesc = UIScrollBarDescription.Default(Color.DarkGray, Color.LightGray, 10, ScrollModes.Vertical);
+            scrollBarV = await this.AddComponentUIScrollBar("scrollBarV", "scrollBarV", scrollBarVDesc, LayerUI + 6);
+            scrollBarV.Top = panel.Top;
+            scrollBarV.Left = panel.Left + panel.Width;
+            scrollBarV.Width = 15;
+            scrollBarV.Height = panel.Height;
+            scrollBarV.EventsEnabled = true;
+            scrollBarV.MouseOver += ScrollBar_MouseOver;
+
+            var scrollBarHDesc = UIScrollBarDescription.Default(Color.DarkGray, Color.LightGray, 10, ScrollModes.Horizontal);
+            scrollBarH = await this.AddComponentUIScrollBar("scrollBarH", "scrollBarH", scrollBarHDesc, LayerUI + 6);
+            scrollBarH.Top = panel.Top + panel.Height;
+            scrollBarH.Left = panel.Left;
+            scrollBarH.Width = panel.Width;
+            scrollBarH.Height = 15;
+            scrollBarH.EventsEnabled = true;
+            scrollBarH.MouseOver += ScrollBar_MouseOver;
+        }
+
+        private void ScrollBar_MouseOver(UIControl sender, MouseEventArgs e)
+        {
+            if (!e.Buttons.HasFlag(MouseButtons.Left))
+            {
+                return;
+            }
+
+            if (sender == scrollBarV)
+            {
+                float pct = (e.PointerPosition.Y - scrollBarV.Top) / scrollBarV.Height;
+
+                scrollTextArea.VerticalScrollPosition = pct;
+            }
+
+            if (sender == scrollBarH)
+            {
+                float pct = (e.PointerPosition.X - scrollBarH.Left) / scrollBarH.Width;
+
+                scrollTextArea.HorizontalScrollPosition = pct;
+            }
         }
 
         public override void OnReportProgress(LoadResourceProgress value)
@@ -294,9 +336,12 @@ namespace SpriteDrawing
                 return;
             }
 
-            UpdateInput();
+            UpdateInput(gameTime);
             UpdateLorem(gameTime);
             UpdateSprite(gameTime);
+
+            scrollBarV.MarkerPosition = scrollTextArea.VerticalScrollPosition;
+            scrollBarH.MarkerPosition = scrollTextArea.HorizontalScrollPosition;
         }
         private void UpdateDebugInfo()
         {
@@ -312,7 +357,7 @@ FormCenter: {Game.Form.RenderCenter} ScreenCenter: {Game.Form.ScreenCenter}
 Progress: {(int)(progressValue * 100f)}%";
             }
         }
-        private void UpdateInput()
+        private void UpdateInput(GameTime gameTime)
         {
             if (Game.Input.KeyJustReleased(Keys.Escape))
             {
@@ -322,6 +367,11 @@ Progress: {(int)(progressValue * 100f)}%";
             if (Game.Input.KeyJustReleased(Keys.Home))
             {
                 spriteSmiley.Anchor = Anchors.Center;
+            }
+
+            if (Game.Input.MouseWheelDelta != 0 && scrollTextArea.IsMouseOver)
+            {
+                scrollTextArea.VerticalScrollPosition -= Game.Input.MouseWheelDelta * gameTime.ElapsedSeconds * 0.01f;
             }
 
             if (Game.Input.KeyPressed(Keys.Up))

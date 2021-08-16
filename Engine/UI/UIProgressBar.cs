@@ -16,13 +16,39 @@ namespace Engine.UI
         private readonly Sprite spriteProgress = null;
 
         /// <summary>
+        /// Gets the caption
+        /// </summary>
+        public UITextArea Caption { get; } = null;
+        /// <summary>
         /// Gets or sets the progress value
         /// </summary>
         public float ProgressValue { get; set; }
         /// <summary>
-        /// Gets the caption
+        /// Gets or sets the progress color
         /// </summary>
-        public UITextArea Caption { get; } = null;
+        public Color4 ProgressColor
+        {
+            get
+            {
+                return spriteProgress.Color2;
+            }
+            set
+            {
+                spriteProgress.Color2 = value;
+            }
+        }
+        /// <inheritdoc/>
+        public override Color4 BaseColor
+        {
+            get
+            {
+                return spriteProgress.Color1;
+            }
+            set
+            {
+                spriteProgress.Color1 = value;
+            }
+        }
         /// <inheritdoc/>
         public override float Alpha
         {
@@ -40,34 +66,6 @@ namespace Engine.UI
                 }
             }
         }
-        /// <summary>
-        /// Gets or sets the progress color
-        /// </summary>
-        public Color4 ProgressColor
-        {
-            get
-            {
-                return spriteProgress.TintColor;
-            }
-            set
-            {
-                spriteProgress.TintColor = value;
-            }
-        }
-        /// <summary>
-        /// Gets or sets the back color
-        /// </summary>
-        public override Color4 BaseColor
-        {
-            get
-            {
-                return spriteProgress.BaseColor;
-            }
-            set
-            {
-                spriteProgress.BaseColor = value;
-            }
-        }
 
         /// <summary>
         /// Constructor
@@ -75,7 +73,7 @@ namespace Engine.UI
         /// <param name="id">Id</param>
         /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
-        /// <param name="description">Button description</param>
+        /// <param name="description">Progress bar description</param>
         public UIProgressBar(string id, string name, Scene scene, UIProgressBarDescription description)
             : base(id, name, scene, description)
         {
@@ -87,8 +85,9 @@ namespace Engine.UI
                 scene,
                 new SpriteDescription()
                 {
-                    BaseColor = description.BaseColor,
-                    TintColor = description.ProgressColor,
+                    Color1 = description.ProgressColor,
+                    Color2 = description.BaseColor,
+                    DrawDirection = SpriteDrawDirections.Horizontal,
                     EventsEnabled = false,
                 });
 
@@ -126,8 +125,7 @@ namespace Engine.UI
                 return;
             }
 
-            spriteProgress.UsePercentage = true;
-            spriteProgress.Percentage = ProgressValue;
+            spriteProgress.SetPercentage(ProgressValue);
         }
     }
 
