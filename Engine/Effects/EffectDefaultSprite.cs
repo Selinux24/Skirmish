@@ -3,7 +3,6 @@
 namespace Engine.Effects
 {
     using Engine.Common;
-    using Engine.UI;
 
     /// <summary>
     /// Basic effect
@@ -325,7 +324,7 @@ namespace Engine.Effects
         /// <param name="vertexType">VertexType</param>
         /// <param name="channel">Color channel</param>
         /// <returns>Returns the technique to process the specified vertex type</returns>
-        public EngineEffectTechnique GetTechnique(VertexTypes vertexType, UITextureRendererChannels channel)
+        public EngineEffectTechnique GetTechnique(VertexTypes vertexType, ColorChannels channel)
         {
             if (vertexType == VertexTypes.PositionColor)
             {
@@ -333,12 +332,12 @@ namespace Engine.Effects
             }
             else if (vertexType == VertexTypes.PositionTexture)
             {
-                if (channel == UITextureRendererChannels.All) return PositionTexture;
-                else if (channel == UITextureRendererChannels.Red) return PositionTextureRED;
-                else if (channel == UITextureRendererChannels.Green) return PositionTextureGREEN;
-                else if (channel == UITextureRendererChannels.Blue) return PositionTextureBLUE;
-                else if (channel == UITextureRendererChannels.Alpha) return PositionTextureALPHA;
-                else if (channel == UITextureRendererChannels.NoAlpha) return PositionTextureNOALPHA;
+                if (channel == ColorChannels.All) return PositionTexture;
+                else if (channel == ColorChannels.Red) return PositionTextureRED;
+                else if (channel == ColorChannels.Green) return PositionTextureGREEN;
+                else if (channel == ColorChannels.Blue) return PositionTextureBLUE;
+                else if (channel == ColorChannels.Alpha) return PositionTextureALPHA;
+                else if (channel == ColorChannels.NoAlpha) return PositionTextureNOALPHA;
                 else return PositionTexture;
             }
             else
@@ -404,7 +403,7 @@ namespace Engine.Effects
         /// <param name="texture">Texture</param>
         /// <param name="textureIndex">Texture index</param>
         public void UpdatePerObjectPct(
-            SpriteParameters spriteParameters,
+            SpriteEffectParameters spriteParameters,
             EngineShaderResourceView texture,
             int textureIndex)
         {

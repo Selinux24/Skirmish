@@ -137,15 +137,15 @@ namespace SceneTest.SceneCascadedShadows
 
             bufferDrawer1.Texture = shadowMap;
             bufferDrawer1.TextureIndex = 0;
-            bufferDrawer1.Channels = UITextureRendererChannels.Red;
+            bufferDrawer1.Channels = ColorChannels.Red;
 
             bufferDrawer2.Texture = shadowMap;
             bufferDrawer2.TextureIndex = 1;
-            bufferDrawer2.Channels = UITextureRendererChannels.Red;
+            bufferDrawer2.Channels = ColorChannels.Red;
 
             bufferDrawer3.Texture = shadowMap;
             bufferDrawer3.TextureIndex = 2;
-            bufferDrawer3.Channels = UITextureRendererChannels.Red;
+            bufferDrawer3.Channels = ColorChannels.Red;
         }
 
         private async Task InitializeFloorAsphalt()

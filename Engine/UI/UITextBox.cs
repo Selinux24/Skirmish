@@ -10,7 +10,9 @@ namespace Engine.UI
     /// </summary>
     public class UITextBox : UITextArea
     {
-
+        /// <summary>
+        /// Focus flag
+        /// </summary>
         private bool hasFocus = false;
 
         /// <summary>
@@ -83,7 +85,7 @@ namespace Engine.UI
 
             if (Game.Input.KeyJustReleased(Keys.Escape))
             {
-                ClearFocus();
+                SetFocusLost();
 
                 return;
             }

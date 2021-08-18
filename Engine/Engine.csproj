@@ -186,7 +186,7 @@
     <Compile Include="Content\BuiltInMaterials.cs" />
     <Compile Include="Content\IAnimationLoader.cs" />
     <Compile Include="CubemapState.cs" />
-    <Compile Include="Effects\SpriteParameters.cs" />
+    <Compile Include="Effects\SpriteEffectParameters.cs" />
     <Compile Include="IGameState.cs" />
     <Compile Include="IHasGameState.cs" />
     <Compile Include="CameraState.cs" />
@@ -473,6 +473,7 @@
     <Compile Include="UI\MouseEventHandler.cs" />
     <Compile Include="UI\Padding.cs" />
     <Compile Include="UI\PivotAnchors.cs" />
+    <Compile Include="UI\ScrollLayout.cs" />
     <Compile Include="UI\ScrollModes.cs" />
     <Compile Include="UI\Spacing.cs" />
     <Compile Include="UI\SpriteDrawDirections.cs" />
@@ -562,7 +563,7 @@
     <Compile Include="SkydomDescription.cs" />
     <Compile Include="UI\UIButtonDescription.cs" />
     <Compile Include="UI\SpriteDescription.cs" />
-    <Compile Include="UI\UITextureRendererChannels.cs" />
+    <Compile Include="ColorChannels.cs" />
     <Compile Include="UI\UITextureRendererDescription.cs" />
     <Compile Include="UI\TextDrawerDescription.cs" />
     <Compile Include="Common\Updatable.cs" />

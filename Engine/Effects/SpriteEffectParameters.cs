@@ -6,7 +6,7 @@ namespace Engine.Effects
     /// <summary>
     /// Effect spriteParameters
     /// </summary>
-    public struct SpriteParameters
+    public struct SpriteEffectParameters
     {
         /// <summary>
         /// First color
@@ -54,7 +54,7 @@ namespace Engine.Effects
         /// <param name="percentage">Percentage</param>
         /// <param name="renderArea">Render area in pixels</param>
         /// <param name="direction">Draw direction</param>
-        public SpriteParameters(Color4 leftColor, Color4 rightColor, float percentage, int direction, RectangleF renderArea)
+        public SpriteEffectParameters(Color4 leftColor, Color4 rightColor, float percentage, int direction, RectangleF renderArea)
         {
             Color1 = leftColor;
             Color2 = rightColor;
@@ -73,7 +73,7 @@ namespace Engine.Effects
         /// <param name="percentages">Percentage list</param>
         /// <param name="renderArea">Render area in pixels</param>
         /// <param name="direction">Draw direction</param>
-        public SpriteParameters(Color4[] colors, float[] percentages, int direction, RectangleF renderArea)
+        public SpriteEffectParameters(Color4[] colors, float[] percentages, int direction, RectangleF renderArea)
         {
             Color1 = colors?.ElementAtOrDefault(0) ?? Color.Transparent;
             Color2 = colors?.ElementAtOrDefault(1) ?? Color.Transparent;

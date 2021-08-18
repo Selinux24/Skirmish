@@ -70,7 +70,7 @@ namespace Engine.UI
         /// <summary>
         /// Draw direction
         /// </summary>
-        public int DrawDirection { get;set;}
+        public int DrawDirection { get; set; }
         /// <summary>
         /// Use percentage drawing
         /// </summary>
@@ -214,7 +214,7 @@ namespace Engine.UI
             var effect = DrawerPool.EffectDefaultSprite;
             var technique = effect.GetTechnique(
                 Textured ? VertexTypes.PositionTexture : VertexTypes.PositionColor,
-                UITextureRendererChannels.All);
+                ColorChannels.All);
 
             Counters.InstancesPerFrame++;
             Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
@@ -269,7 +269,7 @@ namespace Engine.UI
             var color2 = TintColor;
             color2.Alpha *= Alpha;
 
-            var parameters = new SpriteParameters(
+            var parameters = new SpriteEffectParameters(
                 new[] { Color1, Color2, Color3, Color4 },
                 new[] { Percentage1, Percentage2, Percentage3 },
                 DrawDirection,

@@ -25,293 +25,26 @@ namespace Engine.UI
             return ++UpdateOrderSeed;
         }
 
-        /// <summary>
-        /// Gets or sets the top most control in the UI hierarchy
-        /// </summary>
-        public static UIControl TopMostControl { get; private set; }
-        /// <summary>
-        /// Gets or sets the focused control the UI
-        /// </summary>
-        public static UIControl FocusedControl { get; private set; }
-
-        /// <summary>
-        /// Mouse over event
-        /// </summary>
+        /// <inheritdoc/>
         public event MouseEventHandler MouseOver;
-        /// <summary>
-        /// Mouse enter event
-        /// </summary>
+        /// <inheritdoc/>
         public event MouseEventHandler MouseEnter;
-        /// <summary>
-        /// Mouse leave event
-        /// </summary>
+        /// <inheritdoc/>
         public event MouseEventHandler MouseLeave;
-        /// <summary>
-        /// Mouse pressed
-        /// </summary>
+        /// <inheritdoc/>
         public event MouseEventHandler MousePressed;
-        /// <summary>
-        /// Mouse just pressed
-        /// </summary>
+        /// <inheritdoc/>
         public event MouseEventHandler MouseJustPressed;
-        /// <summary>
-        /// Mouse just released
-        /// </summary>
+        /// <inheritdoc/>
         public event MouseEventHandler MouseJustReleased;
-        /// <summary>
-        /// Mouse click
-        /// </summary>
+        /// <inheritdoc/>
         public event MouseEventHandler MouseClick;
-        /// <summary>
-        /// Mouse double click
-        /// </summary>
+        /// <inheritdoc/>
         public event MouseEventHandler MouseDoubleClick;
-        /// <summary>
-        /// Set focus event
-        /// </summary>
+        /// <inheritdoc/>
         public event EventHandler SetFocus;
-        /// <summary>
-        /// Lost focus event
-        /// </summary>
+        /// <inheritdoc/>
         public event EventHandler LostFocus;
-
-        /// <summary>
-        /// Evaluates input over the specified scene
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        public static void EvaluateInput(Scene scene)
-        {
-            var input = scene.Game.Input;
-
-            //Gets all UIControl order by processing order
-            var evaluableCtrls = scene.GetComponents<UIControl>()
-                .Where(c => IsEvaluable(c))
-                .OrderBy(c => c.updateOrder)
-                .ToList();
-
-            if (!evaluableCtrls.Any())
-            {
-                TopMostControl = null;
-
-                return;
-            }
-
-            //Initialize state of selected controls
-            evaluableCtrls.ForEach(c => InitControlState(input, c));
-
-            //Gets all controls with the mouse pointer into its bounds
-            var mouseOverCtrls = evaluableCtrls.Where(c => c.IsMouseOver);
-            if (!mouseOverCtrls.Any())
-            {
-                TopMostControl = null;
-
-                return;
-            }
-
-            //Reverse the order for processing. Top-most first
-            mouseOverCtrls = mouseOverCtrls.Reverse();
-
-            UIControl focusedControl = null;
-            foreach (var topMostControl in mouseOverCtrls)
-            {
-                //Evaluates all controls with the mouse pointer into its bounds
-                EvaluateTopMostControl(input, topMostControl, out var topControl, out focusedControl);
-                if (topControl != null)
-                {
-                    TopMostControl = topControl;
-
-                    break;
-                }
-            }
-
-            //Evaluate focused control
-            EvaluateFocus(input, focusedControl);
-        }
-        /// <summary>
-        /// Gets whether the specified UI control is event-evaluable or not
-        /// </summary>
-        /// <param name="ctrl">UI control</param>
-        /// <returns>Returns true if the control is evaluable for UI events</returns>
-        private static bool IsEvaluable(UIControl ctrl)
-        {
-            if (ctrl == null)
-            {
-                return false;
-            }
-
-            return ctrl.Active && ctrl.Visible;
-        }
-        /// <summary>
-        /// Initializes the UI state
-        /// </summary>
-        /// <param name="input">Input</param>
-        /// <param name="ctrl">Control</param>
-        private static void InitControlState(Input input, UIControl ctrl)
-        {
-            ctrl.IsMouseOver = ctrl.Contains(input.MousePosition);
-
-            if (ctrl.EventsEnabled)
-            {
-                var justReleasedButtons = ctrl.PressedState & ~input.MouseButtonsState;
-
-                //Evaluates mouse leave event
-                if (!ctrl.IsMouseOver && ctrl.prevIsMouseOver)
-                {
-                    //Update the control pressed state
-                    ctrl.PressedState = input.MouseButtonsState;
-
-                    ctrl.FireMouseLeaveEvent(input.MousePosition, input.MouseButtonsState);
-                    ctrl.prevIsMouseOver = false;
-                }
-
-                //Evaluate the just released event
-                if (!ctrl.IsMouseOver && justReleasedButtons != MouseButtons.None)
-                {
-                    //Update the control pressed state
-                    ctrl.PressedState = input.MouseButtonsState;
-
-                    ctrl.FireJustReleasedEvent(input.MousePosition, justReleasedButtons);
-                }
-            }
-            else
-            {
-                //This flag is only for events evaluation
-                ctrl.prevIsMouseOver = false;
-
-                //Update the control pressed state
-                ctrl.PressedState = MouseButtons.None;
-            }
-
-            if (!ctrl.Children.Any())
-            {
-                return;
-            }
-
-            foreach (var child in ctrl.Children)
-            {
-                InitControlState(input, child);
-            }
-        }
-        /// <summary>
-        /// Evaluates input over the specified scene control
-        /// </summary>
-        /// <param name="input">Input</param>
-        /// <param name="ctrl">Top most control</param>
-        /// <param name="topMostControl">Returns the last events enabled control in the control hierarchy</param>
-        /// <param name="focusedControl">Returns the last clicked control with any mouse button</param>
-        /// <remarks>Iterates over the control's children collection</remarks>
-        private static void EvaluateTopMostControl(Input input, UIControl ctrl, out UIControl topMostControl, out UIControl focusedControl)
-        {
-            topMostControl = null;
-            focusedControl = null;
-
-            var topControl = ctrl;
-            while (topControl != null)
-            {
-                if (topControl.EventsEnabled)
-                {
-                    topMostControl = topControl;
-
-                    EvaluateEventsEnabledControl(input, topControl, out var focusControl);
-                    if (focusControl != null)
-                    {
-                        focusedControl = focusControl;
-                    }
-                }
-
-                //Get the new evaluable top most control in the children list
-                topControl = topControl.Children.LastOrDefault(c => IsEvaluable(c) && c.IsMouseOver);
-            }
-        }
-        /// <summary>
-        /// Evaluate events enabled control
-        /// </summary>
-        /// <param name="input">Input</param>
-        /// <param name="ctrl">Control</param>
-        /// <param name="focusedControl">Returns the focused control (last clicked control with any mouse button)</param>
-        private static void EvaluateEventsEnabledControl(Input input, UIControl ctrl, out UIControl focusedControl)
-        {
-            focusedControl = null;
-
-            var justPressedButtons = input.MouseButtonsState & ~ctrl.PressedState;
-            var justReleasedButtons = ctrl.PressedState & ~input.MouseButtonsState;
-
-            //Update the control pressed state
-            ctrl.PressedState = input.MouseButtonsState;
-
-            //Mouse is over
-            ctrl.FireMouseOverEvent(input.MousePosition, input.MouseButtonsState);
-
-            //Evaluate mouse enter
-            if (!ctrl.prevIsMouseOver)
-            {
-                ctrl.FireMouseEnterEvent(input.MousePosition, input.MouseButtonsState);
-            }
-
-            //Only the top most control is considered the mouse-over control
-            ctrl.prevIsMouseOver = true;
-
-            //Evaluate the pressed state
-            if (input.MouseButtonsState != MouseButtons.None)
-            {
-                ctrl.FirePressedEvent(input.MousePosition, input.MouseButtonsState);
-            }
-
-            //Evaluate the just pressed event
-            if (justPressedButtons != MouseButtons.None)
-            {
-                ctrl.FireJustPressedEvent(input.MousePosition, justPressedButtons);
-            }
-
-            //Evaluate the just released event
-            if (justReleasedButtons != MouseButtons.None)
-            {
-                ctrl.FireJustReleasedEvent(input.MousePosition, justReleasedButtons);
-                ctrl.FireMouseClickEvent(input.MousePosition, justReleasedButtons);
-
-                //Focus changed
-                focusedControl = ctrl;
-            }
-        }
-        /// <summary>
-        /// Evaluates the current focus
-        /// </summary>
-        /// <param name="input">Input</param>
-        /// <param name="focusedControl">Current focused control</param>
-        /// <remarks>Fires set and lost focus events</remarks>
-        private static void EvaluateFocus(Input input, UIControl focusedControl)
-        {
-            if (FocusedControl != null)
-            {
-                bool mouseClicked = input.MouseButtonsState != MouseButtons.None;
-                bool overFocused = FocusedControl.Contains(input.MousePosition);
-                if (mouseClicked && !overFocused)
-                {
-                    //Clicked outside the current focused control
-
-                    //Lost focus
-                    FocusedControl.FireLostFocusEvent();
-                    FocusedControl = null;
-                }
-            }
-
-            if (focusedControl != null && FocusedControl != focusedControl)
-            {
-                //Clicked on control
-
-                //Set focus
-                focusedControl.FireSetFocusEvent();
-                FocusedControl = focusedControl;
-            }
-        }
-        /// <summary>
-        /// Clears the current control focus
-        /// </summary>
-        public static void ClearFocus()
-        {
-            FocusedControl?.FireLostFocusEvent();
-            FocusedControl = null;
-        }
 
         /// <summary>
         /// Update order value
@@ -320,7 +53,7 @@ namespace Engine.UI
         /// <summary>
         /// Children collection
         /// </summary>
-        private readonly List<UIControl> children = new List<UIControl>();
+        private readonly List<IUIControl> children = new List<IUIControl>();
         /// <summary>
         /// Top position
         /// </summary>
@@ -399,33 +132,22 @@ namespace Engine.UI
         /// </summary>
         protected bool UpdateInternals = false;
 
-        /// <summary>
-        /// Parent control
-        /// </summary>
-        /// <remarks>When a control has a parent, all the position, size, scale and rotation parameters, are relative to it.</remarks>
-        public UIControl Parent { get; protected set; }
-        /// <summary>
-        /// Root control
-        /// </summary>
-        public UIControl Root
+        /// <inheritdoc/>
+        public IUIControl Parent { get; set; }
+        /// <inheritdoc/>
+        public IUIControl Root
         {
             get
             {
                 return Parent?.Root ?? Parent;
             }
         }
-        /// <summary>
-        /// Gets whether the control has a parent or not
-        /// </summary>
+        /// <inheritdoc/>
         public bool HasParent { get { return Parent != null; } }
-        /// <summary>
-        /// Gets whether the control is the root control
-        /// </summary>
+        /// <inheritdoc/>
         public bool IsRoot { get { return Root == null; } }
-        /// <summary>
-        /// Children collection
-        /// </summary>
-        public IEnumerable<UIControl> Children
+        /// <inheritdoc/>
+        public IEnumerable<IUIControl> Children
         {
             get
             {
@@ -462,22 +184,14 @@ namespace Engine.UI
             }
         }
 
-        /// <summary>
-        /// Gets or sets whether the control is enabled for event processing
-        /// </summary>
+        /// <inheritdoc/>
         public bool EventsEnabled { get; set; } = true;
-        /// <summary>
-        /// Gets whether the mouse is over the button rectangle or not
-        /// </summary>
+        /// <inheritdoc/>
         public bool IsMouseOver { get; private set; }
-        /// <summary>
-        /// Pressed buttons state flags
-        /// </summary>
+        /// <inheritdoc/>
         public MouseButtons PressedState { get; private set; } = MouseButtons.None;
 
-        /// <summary>
-        /// Gets or sets the width
-        /// </summary>
+        /// <inheritdoc/>
         public virtual float Width
         {
             get
@@ -494,9 +208,7 @@ namespace Engine.UI
                 }
             }
         }
-        /// <summary>
-        /// Gets or sets the height
-        /// </summary>
+        /// <inheritdoc/>
         public virtual float Height
         {
             get
@@ -514,9 +226,7 @@ namespace Engine.UI
             }
         }
 
-        /// <summary>
-        /// Gets or sets the local scale
-        /// </summary>
+        /// <inheritdoc/>
         public virtual float Scale
         {
             get
@@ -533,9 +243,7 @@ namespace Engine.UI
                 }
             }
         }
-        /// <summary>
-        /// Gets or sets the absolute scale
-        /// </summary>
+        /// <inheritdoc/>
         public virtual float AbsoluteScale
         {
             get
@@ -543,9 +251,7 @@ namespace Engine.UI
                 return (Parent?.AbsoluteScale ?? 1) * Scale;
             }
         }
-        /// <summary>
-        /// Gets or sets the local rotation
-        /// </summary>
+        /// <inheritdoc/>
         public virtual float Rotation
         {
             get
@@ -563,9 +269,7 @@ namespace Engine.UI
                 }
             }
         }
-        /// <summary>
-        /// Gets or sets the absolute rotation
-        /// </summary>
+        /// <inheritdoc/>
         public virtual float AbsoluteRotation
         {
             get
@@ -573,9 +277,7 @@ namespace Engine.UI
                 return (Parent?.AbsoluteRotation ?? 0) + Rotation;
             }
         }
-        /// <summary>
-        /// Gets or sets the rotation and scale pivot anchor
-        /// </summary>
+        /// <inheritdoc/>
         public virtual PivotAnchors PivotAnchor
         {
             get
@@ -593,9 +295,7 @@ namespace Engine.UI
             }
         }
 
-        /// <summary>
-        /// Gets or sets the (local) left coordinate value from parent or the screen origin
-        /// </summary>
+        /// <inheritdoc/>
         public virtual float Left
         {
             get
@@ -612,9 +312,7 @@ namespace Engine.UI
                 }
             }
         }
-        /// <summary>
-        /// Gets the (absolute) left coordinate value the screen origin
-        /// </summary>
+        /// <inheritdoc/>
         public virtual float AbsoluteLeft
         {
             get
@@ -622,9 +320,7 @@ namespace Engine.UI
                 return (Parent?.AbsoluteLeft ?? 0) + Left;
             }
         }
-        /// <summary>
-        /// Gets or sets the (local) top coordinate value from parent or the screen origin
-        /// </summary>
+        /// <inheritdoc/>
         public virtual float Top
         {
             get
@@ -641,9 +337,7 @@ namespace Engine.UI
                 }
             }
         }
-        /// <summary>
-        /// Gets the (absolute) top coordinate value from the screen origin
-        /// </summary>
+        /// <inheritdoc/>
         public virtual float AbsoluteTop
         {
             get
@@ -652,9 +346,7 @@ namespace Engine.UI
             }
         }
 
-        /// <summary>
-        /// Gets the control's rectangle local coordinates
-        /// </summary>
+        /// <inheritdoc/>
         public virtual RectangleF LocalRectangle
         {
             get
@@ -662,9 +354,7 @@ namespace Engine.UI
                 return new RectangleF(0, 0, Width, Height);
             }
         }
-        /// <summary>
-        /// Gets the control's rectangle absolute coordinates from screen origin
-        /// </summary>
+        /// <inheritdoc/>
         public virtual RectangleF AbsoluteRectangle
         {
             get
@@ -672,9 +362,7 @@ namespace Engine.UI
                 return new RectangleF(AbsoluteLeft, AbsoluteTop, Width, Height);
             }
         }
-        /// <summary>
-        /// Gets the control's rectangle coordinates relative to inmediate parent control position
-        /// </summary>
+        /// <inheritdoc/>
         public virtual RectangleF RelativeToParentRectangle
         {
             get
@@ -682,9 +370,7 @@ namespace Engine.UI
                 return new RectangleF(Left, Top, Width, Height);
             }
         }
-        /// <summary>
-        /// Gets the control's rectangle coordinates relative to root control position
-        /// </summary>
+        /// <inheritdoc/>
         public virtual RectangleF RelativeToRootRectangle
         {
             get
@@ -706,9 +392,7 @@ namespace Engine.UI
             }
         }
 
-        /// <summary>
-        /// Gets the control's local center coordinates
-        /// </summary>
+        /// <inheritdoc/>
         public virtual Vector2 LocalCenter
         {
             get
@@ -716,9 +400,7 @@ namespace Engine.UI
                 return new Vector2(Width * 0.5f, Height * 0.5f);
             }
         }
-        /// <summary>
-        /// Gets the control's absolute center coordinates
-        /// </summary>
+        /// <inheritdoc/>
         public virtual Vector2 AbsoluteCenter
         {
             get
@@ -727,9 +409,7 @@ namespace Engine.UI
             }
         }
 
-        /// <summary>
-        /// Spacing
-        /// </summary>
+        /// <inheritdoc/>
         public virtual Spacing Spacing
         {
             get
@@ -746,9 +426,7 @@ namespace Engine.UI
                 }
             }
         }
-        /// <summary>
-        /// Padding
-        /// </summary>
+        /// <inheritdoc/>
         public virtual Padding Padding
         {
             get
@@ -765,9 +443,7 @@ namespace Engine.UI
                 }
             }
         }
-        /// <summary>
-        /// Indicates whether the control has to maintain proportion with parent size
-        /// </summary>
+        /// <inheritdoc/>
         public virtual bool FitWithParent
         {
             get
@@ -784,9 +460,7 @@ namespace Engine.UI
                 }
             }
         }
-        /// <summary>
-        /// Anchor
-        /// </summary>
+        /// <inheritdoc/>
         public virtual Anchors Anchor
         {
             get
@@ -804,9 +478,7 @@ namespace Engine.UI
             }
         }
 
-        /// <summary>
-        /// Gets or sets the base color
-        /// </summary>
+        /// <inheritdoc/>
         public virtual Color4 BaseColor
         {
             get
@@ -823,9 +495,7 @@ namespace Engine.UI
                 children.ForEach(c => c.BaseColor = value);
             }
         }
-        /// <summary>
-        /// Gets or sets the tint color
-        /// </summary>
+        /// <inheritdoc/>
         public virtual Color4 TintColor
         {
             get
@@ -842,9 +512,7 @@ namespace Engine.UI
                 children.ForEach(c => c.TintColor = value);
             }
         }
-        /// <summary>
-        /// Alpha color component
-        /// </summary>
+        /// <inheritdoc/>
         public virtual float Alpha
         {
             get
@@ -862,9 +530,7 @@ namespace Engine.UI
             }
         }
 
-        /// <summary>
-        /// Tooltip text
-        /// </summary>
+        /// <inheritdoc/>
         public string TooltipText { get; set; }
 
         /// <summary>
@@ -890,8 +556,8 @@ namespace Engine.UI
             {
                 top = 0;
                 left = 0;
-                width = Parent?.width ?? Game.Form.RenderWidth;
-                height = Parent?.height ?? Game.Form.RenderHeight;
+                width = Parent?.Width ?? Game.Form.RenderWidth;
+                height = Parent?.Height ?? Game.Form.RenderHeight;
             }
             else
             {
@@ -913,7 +579,10 @@ namespace Engine.UI
         {
             if (disposing)
             {
-                children.ForEach(c => c.Dispose());
+                children
+                    .OfType<IDisposable>()
+                    .ToList()
+                    .ForEach(c => c.Dispose());
                 children.Clear();
             }
         }
@@ -933,9 +602,10 @@ namespace Engine.UI
                 UpdateInternals = false;
             }
 
-            if (children.Any())
+            var updatables = children.OfType<IUpdatable>().ToList();
+            if (updatables.Any())
             {
-                children.ForEach(c => c.Update(context));
+                updatables.ForEach(c => c.Update(context));
             }
         }
         /// <summary>
@@ -965,7 +635,7 @@ namespace Engine.UI
 
             if (children.Any())
             {
-                children.ForEach(c => c.UpdateInternals = true);
+                children.ForEach(c => c.Invalidate());
             }
         }
         /// <summary>
@@ -1010,10 +680,17 @@ namespace Engine.UI
                 left = areaRect.Right - Width;
             }
         }
-        /// <summary>
-        /// Gets the rotation and scaling absolute pivot point
-        /// </summary>
-        /// <returns>Returns the control pivot point</returns>
+        /// <inheritdoc/>
+        public int GetUpdateOrder()
+        {
+            return updateOrder;
+        }
+        /// <inheritdoc/>
+        public virtual void Invalidate()
+        {
+            UpdateInternals = true;
+        }
+        /// <inheritdoc/>
         public virtual Vector2? GetTransformationPivot()
         {
             if (IsRoot)
@@ -1059,17 +736,14 @@ namespace Engine.UI
                 return;
             }
 
-            if (children.Any())
+            var drawables = children.OfType<IDrawable>().ToList();
+            if (drawables.Any())
             {
-                children.ForEach(c => c.Draw(context));
+                drawables.ForEach(c => c.Draw(context));
             }
         }
 
-        /// <summary>
-        /// Gets the current control's transform matrix
-        /// </summary>
-        /// <returns>Returns the transform matrix</returns>
-        /// <remarks>If the control is parent-fitted, returns the parent's transform</remarks>
+        /// <inheritdoc/>
         public virtual Matrix GetTransform()
         {
             return fitWithParent && HasParent ? Parent.GetTransform() : Manipulator.LocalTransform;
@@ -1211,9 +885,7 @@ namespace Engine.UI
             LostFocus?.Invoke(this, new EventArgs() { });
         }
 
-        /// <summary>
-        /// Resize
-        /// </summary>
+        /// <inheritdoc/>
         public virtual void Resize()
         {
             UpdateInternals = true;
@@ -1224,12 +896,8 @@ namespace Engine.UI
             }
         }
 
-        /// <summary>
-        /// Adds a child to the children collection
-        /// </summary>
-        /// <param name="ctrl">Control</param>
-        /// <param name="fitToParent">Fit control to parent</param>
-        public void AddChild(UIControl ctrl, bool fitToParent = true)
+        /// <inheritdoc/>
+        public void AddChild(IUIControl ctrl, bool fitToParent = true)
         {
             if (ctrl == null)
             {
@@ -1250,12 +918,8 @@ namespace Engine.UI
                 children.Add(ctrl);
             }
         }
-        /// <summary>
-        /// Adds a children list to the children collection
-        /// </summary>
-        /// <param name="controls">Control list</param>
-        /// <param name="fitToParent">Fit control to parent</param>
-        public void AddChildren(IEnumerable<UIControl> controls, bool fitToParent = true)
+        /// <inheritdoc/>
+        public void AddChildren(IEnumerable<IUIControl> controls, bool fitToParent = true)
         {
             if (!controls.Any())
             {
@@ -1267,12 +931,8 @@ namespace Engine.UI
                 AddChild(ctrl, fitToParent);
             }
         }
-        /// <summary>
-        /// Removes a child from the children collection
-        /// </summary>
-        /// <param name="ctrl">Control</param>
-        /// <param name="dispose">Removes from collection and disposes</param>
-        public void RemoveChild(UIControl ctrl, bool dispose = false)
+        /// <inheritdoc/>
+        public void RemoveChild(IUIControl ctrl, bool dispose = false)
         {
             if (ctrl == null)
             {
@@ -1286,15 +946,14 @@ namespace Engine.UI
 
                 children.Remove(ctrl);
 
-                if (dispose) ctrl.Dispose();
+                if (dispose && ctrl is IDisposable ctrlDisposable)
+                {
+                    ctrlDisposable.Dispose();
+                }
             }
         }
-        /// <summary>
-        /// Removes a children list from the children collection
-        /// </summary>
-        /// <param name="controls">Control list</param>
-        /// <param name="dispose">Removes from collection and disposes</param>
-        public void RemoveChildren(IEnumerable<UIControl> controls, bool dispose = false)
+        /// <inheritdoc/>
+        public void RemoveChildren(IEnumerable<IUIControl> controls, bool dispose = false)
         {
             if (!controls.Any())
             {
@@ -1306,13 +965,8 @@ namespace Engine.UI
                 RemoveChild(ctrl, dispose);
             }
         }
-        /// <summary>
-        /// Inserts a child at the specified index
-        /// </summary>
-        /// <param name="index">Index</param>
-        /// <param name="ctrl">Control</param>
-        /// <param name="fitToParent">Fit control to parent</param>
-        public void InsertChild(int index, UIControl ctrl, bool fitToParent = true)
+        /// <inheritdoc/>
+        public void InsertChild(int index, IUIControl ctrl, bool fitToParent = true)
         {
             if (ctrl == null)
             {
@@ -1333,11 +987,7 @@ namespace Engine.UI
             }
         }
 
-        /// <summary>
-        /// Gets whether the control contains the point or not
-        /// </summary>
-        /// <param name="point">Point to test</param>
-        /// <returns>Returns true if the point is contained into the control rectangle</returns>
+        /// <inheritdoc/>
         public virtual bool Contains(Point point)
         {
             var rect = GetRenderArea(false);
@@ -1347,49 +997,28 @@ namespace Engine.UI
             return contains;
         }
 
-        /// <summary>
-        /// Increments position component d distance along left vector
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="distance">Distance</param>
+        /// <inheritdoc/>
         public virtual void MoveLeft(GameTime gameTime, float distance = 1f)
         {
             Left -= (int)(1f * distance * gameTime.ElapsedSeconds);
         }
-        /// <summary>
-        /// Increments position component d distance along right vector
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="distance">Distance</param>
+        /// <inheritdoc/>
         public virtual void MoveRight(GameTime gameTime, float distance = 1f)
         {
             Left += (int)(1f * distance * gameTime.ElapsedSeconds);
         }
-        /// <summary>
-        /// Increments position component d distance along up vector
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="distance">Distance</param>
+        /// <inheritdoc/>
         public virtual void MoveUp(GameTime gameTime, float distance = 1f)
         {
             Top -= (int)(1f * distance * gameTime.ElapsedSeconds);
         }
-        /// <summary>
-        /// Increments position component d distance along down vector
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="distance">Distance</param>
+        /// <inheritdoc/>
         public virtual void MoveDown(GameTime gameTime, float distance = 1f)
         {
             Top += (int)(1f * distance * gameTime.ElapsedSeconds);
         }
 
-        /// <summary>
-        /// Sets the control left-top position
-        /// </summary>
-        /// <param name="x">Position X Component</param>
-        /// <param name="y">Position Y Component</param>
-        /// <remarks>Setting the position invalidates centering properties</remarks>
+        /// <inheritdoc/>
         public virtual void SetPosition(float x, float y)
         {
             left = x;
@@ -1398,20 +1027,12 @@ namespace Engine.UI
 
             UpdateInternals = true;
         }
-        /// <summary>
-        /// Sets the control left-top position
-        /// </summary>
-        /// <param name="position">Position</param>
-        /// <remarks>Setting the position invalidates centering properties</remarks>
+        /// <inheritdoc/>
         public virtual void SetPosition(Vector2 position)
         {
             SetPosition(position.X, position.Y);
         }
-        /// <summary>
-        /// Sets the control rectangle area
-        /// </summary>
-        /// <param name="rectangle">Rectangle</param>
-        /// <remarks>Adjust the control left-top position and with and height properties</remarks>
+        /// <inheritdoc/>
         public virtual void SetRectangle(RectangleF rectangle)
         {
             left = rectangle.Left;
@@ -1423,11 +1044,7 @@ namespace Engine.UI
             UpdateInternals = true;
         }
 
-        /// <summary>
-        /// Gets the render area in absolute coordinates from screen origin
-        /// </summary>
-        /// <param name="applyPadding">Apply the padding to the resulting reactangle, if any.</param>
-        /// <returns>Returns the render area</returns>
+        /// <inheritdoc/>
         public virtual RectangleF GetRenderArea(bool applyPadding)
         {
             RectangleF renderArea;
@@ -1442,6 +1059,147 @@ namespace Engine.UI
             }
 
             return applyPadding ? Padding.Apply(renderArea) : renderArea;
+        }
+        /// <inheritdoc/>
+        public virtual RectangleF GetControlArea()
+        {
+            return GetRenderArea(false);
+        }
+
+        /// <inheritdoc/>
+        public virtual bool IsEvaluable()
+        {
+            return Active && Visible;
+        }
+        /// <inheritdoc/>
+        public virtual void InitControlState(Input input)
+        {
+            IsMouseOver = Contains(input.MousePosition);
+
+            if (EventsEnabled)
+            {
+                var justReleasedButtons = PressedState & ~input.MouseButtonsState;
+
+                //Evaluates mouse leave event
+                if (!IsMouseOver && prevIsMouseOver)
+                {
+                    //Update the control pressed state
+                    PressedState = input.MouseButtonsState;
+
+                    FireMouseLeaveEvent(input.MousePosition, input.MouseButtonsState);
+                    prevIsMouseOver = false;
+                }
+
+                //Evaluate the just released event
+                if (!IsMouseOver && justReleasedButtons != MouseButtons.None)
+                {
+                    //Update the control pressed state
+                    PressedState = input.MouseButtonsState;
+
+                    FireJustReleasedEvent(input.MousePosition, justReleasedButtons);
+                }
+            }
+            else
+            {
+                //This flag is only for events evaluation
+                prevIsMouseOver = false;
+
+                //Update the control pressed state
+                PressedState = MouseButtons.None;
+            }
+
+            if (!Children.Any())
+            {
+                return;
+            }
+
+            foreach (var child in Children)
+            {
+                child.InitControlState(input);
+            }
+        }
+        /// <inheritdoc/>
+        public virtual void EvaluateTopMostControl(Input input, out IUIControl topMostControl, out IUIControl focusedControl)
+        {
+            topMostControl = null;
+            focusedControl = null;
+
+            IUIControl topControl = this;
+            while (topControl != null)
+            {
+                if (topControl.EventsEnabled)
+                {
+                    topMostControl = topControl;
+
+                    topControl.EvaluateEventsEnabledControl(input, out var focusControl);
+                    if (focusControl != null)
+                    {
+                        focusedControl = focusControl;
+                    }
+                }
+
+                //Get the new evaluable top most control in the children list
+                topControl = topControl.Children.LastOrDefault(c => c.IsEvaluable() && c.IsMouseOver);
+            }
+        }
+        /// <inheritdoc/>
+        public virtual void EvaluateEventsEnabledControl(Input input, out IUIControl focusedControl)
+        {
+            focusedControl = null;
+
+            var justPressedButtons = input.MouseButtonsState & ~PressedState;
+            var justReleasedButtons = PressedState & ~input.MouseButtonsState;
+
+            //Update the control pressed state
+            PressedState = input.MouseButtonsState;
+
+            //Mouse is over
+            FireMouseOverEvent(input.MousePosition, input.MouseButtonsState);
+
+            //Evaluate mouse enter
+            if (!prevIsMouseOver)
+            {
+                FireMouseEnterEvent(input.MousePosition, input.MouseButtonsState);
+            }
+
+            //Only the top most control is considered the mouse-over control
+            prevIsMouseOver = true;
+
+            //Evaluate the pressed state
+            if (input.MouseButtonsState != MouseButtons.None)
+            {
+                FirePressedEvent(input.MousePosition, input.MouseButtonsState);
+            }
+
+            //Evaluate the just pressed event
+            if (justPressedButtons != MouseButtons.None)
+            {
+                FireJustPressedEvent(input.MousePosition, justPressedButtons);
+            }
+
+            //Evaluate the just released event
+            if (justReleasedButtons != MouseButtons.None)
+            {
+                FireJustReleasedEvent(input.MousePosition, justReleasedButtons);
+                FireMouseClickEvent(input.MousePosition, justReleasedButtons);
+
+                //Focus changed
+                focusedControl = this;
+            }
+        }
+        /// <inheritdoc/>
+        public void SetFocusControl()
+        {
+            Scene.SetFocus(this);
+
+            FireSetFocusEvent();
+        }
+        /// <inheritdoc/>
+        public void SetFocusLost()
+        {
+            Scene.ClearFocus();
+
+            FireLostFocusEvent();
         }
     }
 }

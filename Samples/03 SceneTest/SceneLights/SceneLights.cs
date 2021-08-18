@@ -464,7 +464,7 @@ namespace SceneTest.SceneLights
 
             bufferDrawer.Texture = buffer;
             bufferDrawer.TextureIndex = 0;
-            bufferDrawer.Channels = UITextureRendererChannels.Red;
+            bufferDrawer.Channels = ColorChannels.Red;
             bufferDrawer.Visible = true;
         }
     }

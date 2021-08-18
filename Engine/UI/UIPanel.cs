@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using SharpDX;
+using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.UI
@@ -6,7 +8,7 @@ namespace Engine.UI
     /// <summary>
     /// User interface panel
     /// </summary>
-    public class UIPanel : UIControl
+    public class UIPanel : UIControl, IScrollable
     {
         /// <summary>
         /// Background
@@ -16,6 +18,77 @@ namespace Engine.UI
         /// Grid layout
         /// </summary>
         private GridLayout gridLayout;
+        /// <summary>
+        /// Vertical scroll offset (in pixels)
+        /// </summary>
+        private float verticalScrollOffset = 0;
+        /// <summary>
+        /// Vertical scroll position (from 0 to 1)
+        /// </summary>
+        private float verticalScrollPosition = 0;
+        /// <summary>
+        /// Horizontal scroll offset (in pixels)
+        /// </summary>
+        private float horizontalScrollOffset = 0;
+        /// <summary>
+        /// Horizontal scroll position (from 0 to 1)
+        /// </summary>
+        private float horizontalScrollPosition = 0;
+
+        /// <inheritdoc/>
+        public ScrollModes Scroll { get; set; }
+        /// <inheritdoc/>
+        public float VerticalScrollOffset
+        {
+            get
+            {
+                return verticalScrollOffset;
+            }
+            set
+            {
+                verticalScrollOffset = MathUtil.Clamp(value, 0f, this.GetMaximumVerticalOffset());
+                verticalScrollPosition = this.ConvertVerticalOffsetToPosition(verticalScrollOffset);
+            }
+        }
+        /// <inheritdoc/>
+        public float HorizontalScrollOffset
+        {
+            get
+            {
+                return horizontalScrollOffset;
+            }
+            set
+            {
+                horizontalScrollOffset = MathUtil.Clamp(value, 0f, this.GetMaximumHorizontalOffset());
+                horizontalScrollPosition = this.ConvertHorizontalOffsetToPosition(horizontalScrollOffset);
+            }
+        }
+        /// <inheritdoc/>
+        public float VerticalScrollPosition
+        {
+            get
+            {
+                return verticalScrollPosition;
+            }
+            set
+            {
+                verticalScrollPosition = MathUtil.Clamp(value, 0f, 1f);
+                verticalScrollOffset = this.ConvertVerticalPositionToOffset(verticalScrollPosition);
+            }
+        }
+        /// <inheritdoc/>
+        public float HorizontalScrollPosition
+        {
+            get
+            {
+                return horizontalScrollPosition;
+            }
+            set
+            {
+                horizontalScrollPosition = MathUtil.Clamp(value, 0f, 1f);
+                horizontalScrollOffset = this.ConvertHorizontalPositionToOffset(horizontalScrollPosition);
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -80,6 +153,55 @@ namespace Engine.UI
                 FitX = gridLayout.FitX,
                 FitY = gridLayout.FitY,
             };
+        }
+
+        /// <inheritdoc/>
+        public void ScrollUp(float amount)
+        {
+            VerticalScrollOffset -= amount * Game.GameTime.ElapsedSeconds;
+            VerticalScrollOffset = Math.Max(0, VerticalScrollOffset);
+        }
+        /// <inheritdoc/>
+        public void ScrollDown(float amount)
+        {
+            float maxOffset = this.GetMaximumVerticalOffset();
+
+            VerticalScrollOffset += amount * Game.GameTime.ElapsedSeconds;
+            VerticalScrollOffset = Math.Min(maxOffset, VerticalScrollOffset);
+        }
+        /// <inheritdoc/>
+        public void ScrollLeft(float amount)
+        {
+            float maxOffset = this.GetMaximumHorizontalOffset();
+
+            HorizontalScrollOffset += amount * Game.GameTime.ElapsedSeconds;
+            HorizontalScrollOffset = Math.Min(maxOffset, HorizontalScrollOffset);
+        }
+        /// <inheritdoc/>
+        public void ScrollRight(float amount)
+        {
+            HorizontalScrollOffset -= amount * Game.GameTime.ElapsedSeconds;
+            HorizontalScrollOffset = Math.Max(0, HorizontalScrollOffset);
+        }
+
+        /// <inheritdoc/>
+        public override RectangleF GetControlArea()
+        {
+            RectangleF rect = RectangleF.Empty;
+
+            foreach (var item in Children)
+            {
+                if (rect == RectangleF.Empty)
+                {
+                    rect = item.GetControlArea();
+
+                    continue;
+                }
+
+                rect = RectangleF.Union(rect, item.GetControlArea());
+            }
+
+            return rect;
         }
     }
 

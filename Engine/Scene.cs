@@ -355,6 +355,15 @@ namespace Engine
         public bool PerformFrustumCulling { get; protected set; }
 
         /// <summary>
+        /// Gets or sets the top most control in the UI hierarchy
+        /// </summary>
+        public IUIControl TopMostControl { get; private set; }
+        /// <summary>
+        /// Gets or sets the focused control the UI
+        /// </summary>
+        public IUIControl FocusedControl { get; private set; }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="game">Game class</param>
@@ -468,7 +477,7 @@ namespace Engine
 
                 NavigationGraph?.Update(gameTime);
 
-                UIControl.EvaluateInput(this);
+                EvaluateInput();
 
                 FloatTweenManager.Update(gameTime);
 
@@ -705,7 +714,7 @@ namespace Engine
         public void AddComponent(ISceneObject component, SceneObjectUsages usage = SceneObjectUsages.None, int layer = LayerDefault)
         {
             Monitor.Enter(internalComponents);
-            
+
             if (internalComponents.Contains(component))
             {
                 return;
@@ -2036,6 +2045,105 @@ namespace Engine
             var state = SerializationHelper.DeserializeFromFile<SceneState>(filename);
 
             SetState(state);
+        }
+
+        /// <summary>
+        /// Evaluates input over the specified scene
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        private void EvaluateInput()
+        {
+            var input = Game.Input;
+
+            //Gets all UIControl order by processing order
+            var evaluableCtrls = GetComponents<IUIControl>()
+                .Where(c => c.IsEvaluable())
+                .OrderBy(c => c.GetUpdateOrder())
+                .ToList();
+
+            if (!evaluableCtrls.Any())
+            {
+                TopMostControl = null;
+
+                return;
+            }
+
+            //Initialize state of selected controls
+            evaluableCtrls.ForEach(c => c.InitControlState(input));
+
+            //Gets all controls with the mouse pointer into its bounds
+            var mouseOverCtrls = evaluableCtrls.Where(c => c.IsMouseOver);
+            if (!mouseOverCtrls.Any())
+            {
+                TopMostControl = null;
+
+                return;
+            }
+
+            //Reverse the order for processing. Top-most first
+            mouseOverCtrls = mouseOverCtrls.Reverse();
+
+            IUIControl focusedControl = null;
+            foreach (var topMostControl in mouseOverCtrls)
+            {
+                //Evaluates all controls with the mouse pointer into its bounds
+                topMostControl.EvaluateTopMostControl(input, out var topControl, out focusedControl);
+                if (topControl != null)
+                {
+                    TopMostControl = topControl;
+
+                    break;
+                }
+            }
+
+            //Evaluate focused control
+            EvaluateFocus(input, focusedControl);
+        }
+        /// <summary>
+        /// Evaluates the current focus
+        /// </summary>
+        /// <param name="input">Input</param>
+        /// <param name="focusedControl">Current focused control</param>
+        /// <remarks>Fires set and lost focus events</remarks>
+        private void EvaluateFocus(Input input, IUIControl focusedControl)
+        {
+            if (FocusedControl != null)
+            {
+                bool mouseClicked = input.MouseButtonsState != MouseButtons.None;
+                bool overFocused = FocusedControl.Contains(input.MousePosition);
+                if (mouseClicked && !overFocused)
+                {
+                    //Clicked outside the current focused control
+
+                    //Lost focus
+                    FocusedControl.SetFocusLost();
+                    FocusedControl = null;
+                }
+            }
+
+            if (focusedControl != null && FocusedControl != focusedControl)
+            {
+                //Clicked on control
+
+                //Set focus
+                focusedControl.SetFocusControl();
+                FocusedControl = focusedControl;
+            }
+        }
+        /// <summary>
+        /// Sets the current focused control
+        /// </summary>
+        /// <param name="control">Control</param>
+        public void SetFocus(IUIControl control)
+        {
+            FocusedControl = control;
+        }
+        /// <summary>
+        /// Clears the current control focus
+        /// </summary>
+        public void ClearFocus()
+        {
+            FocusedControl = null;
         }
     }
 }

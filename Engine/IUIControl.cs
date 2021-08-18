@@ -1,4 +1,6 @@
 ﻿using SharpDX;
+using System;
+using System.Collections.Generic;
 
 namespace Engine
 {
@@ -41,6 +43,45 @@ namespace Engine
         /// Mouse double click
         /// </summary>
         event MouseEventHandler MouseDoubleClick;
+        /// <summary>
+        /// Set focus event
+        /// </summary>
+        event EventHandler SetFocus;
+        /// <summary>
+        /// Lost focus event
+        /// </summary>
+        event EventHandler LostFocus;
+
+        /// <summary>
+        /// Active
+        /// </summary>
+        bool Active { get; set; }
+        /// <summary>
+        /// Visible
+        /// </summary>
+        bool Visible { get; set; }
+
+        /// <summary>
+        /// Parent control
+        /// </summary>
+        /// <remarks>When a control has a parent, all the position, size, scale and rotation parameters, are relative to it.</remarks>
+        IUIControl Parent { get; set; }
+        /// <summary>
+        /// Root control
+        /// </summary>
+        IUIControl Root { get; }
+        /// <summary>
+        /// Gets whether the control has a parent or not
+        /// </summary>
+        bool HasParent { get; }
+        /// <summary>
+        /// Gets whether the control is the root control
+        /// </summary>
+        bool IsRoot { get; }
+        /// <summary>
+        /// Children collection
+        /// </summary>
+        IEnumerable<IUIControl> Children { get; }
 
         /// <summary>
         /// Gets or sets whether the control is enabled for event processing
@@ -56,11 +97,11 @@ namespace Engine
         MouseButtons PressedState { get; }
 
         /// <summary>
-        /// Gets or sets the height
+        /// Gets or sets the drawable height
         /// </summary>
         float Height { get; set; }
         /// <summary>
-        /// Gets or sets the width
+        /// Gets or sets the drawable width
         /// </summary>
         float Width { get; set; }
 
@@ -164,6 +205,55 @@ namespace Engine
         string TooltipText { get; set; }
 
         /// <summary>
+        /// Gets the rotation and scaling absolute pivot point
+        /// </summary>
+        /// <returns>Returns the control pivot point</returns>
+        Vector2? GetTransformationPivot();
+        /// <summary>
+        /// Gets the current control's transform matrix
+        /// </summary>
+        /// <returns>Returns the transform matrix</returns>
+        /// <remarks>If the control is parent-fitted, returns the parent's transform</remarks>
+        Matrix GetTransform();
+
+        /// <summary>
+        /// Resize
+        /// </summary>
+        void Resize();
+
+        /// <summary>
+        /// Adds a child to the children collection
+        /// </summary>
+        /// <param name="ctrl">Control</param>
+        /// <param name="fitToParent">Fit control to parent</param>
+        void AddChild(IUIControl ctrl, bool fitToParent = true);
+        /// <summary>
+        /// Adds a children list to the children collection
+        /// </summary>
+        /// <param name="controls">Control list</param>
+        /// <param name="fitToParent">Fit control to parent</param>
+        void AddChildren(IEnumerable<IUIControl> controls, bool fitToParent = true);
+        /// <summary>
+        /// Removes a child from the children collection
+        /// </summary>
+        /// <param name="ctrl">Control</param>
+        /// <param name="dispose">Removes from collection and disposes</param>
+        void RemoveChild(IUIControl ctrl, bool dispose = false);
+        /// <summary>
+        /// Removes a children list from the children collection
+        /// </summary>
+        /// <param name="controls">Control list</param>
+        /// <param name="dispose">Removes from collection and disposes</param>
+        void RemoveChildren(IEnumerable<IUIControl> controls, bool dispose = false);
+        /// <summary>
+        /// Inserts a child at the specified index
+        /// </summary>
+        /// <param name="index">Index</param>
+        /// <param name="ctrl">Control</param>
+        /// <param name="fitToParent">Fit control to parent</param>
+        void InsertChild(int index, IUIControl ctrl, bool fitToParent = true);
+
+        /// <summary>
         /// Gets whether the control contains the point or not
         /// </summary>
         /// <param name="point">Point to test</param>
@@ -198,6 +288,13 @@ namespace Engine
         /// <summary>
         /// Sets the control left-top position
         /// </summary>
+        /// <param name="x">Position X Component</param>
+        /// <param name="y">Position Y Component</param>
+        /// <remarks>Setting the position invalidates centering properties</remarks>
+        void SetPosition(float x, float y);
+        /// <summary>
+        /// Sets the control left-top position
+        /// </summary>
         /// <param name="position">Position</param>
         /// <remarks>Setting the position invalidates centering properties</remarks>
         void SetPosition(Vector2 position);
@@ -212,7 +309,57 @@ namespace Engine
         /// Gets the render area in absolute coordinates from screen origin
         /// </summary>
         /// <param name="applyPadding">Apply the padding to the resulting reactangle, if any.</param>
-        /// <returns>Returns the text render area</returns>
+        /// <returns>Returns the control render area</returns>
         RectangleF GetRenderArea(bool applyPadding);
+        /// <summary>
+        /// Gets the total control area in absolute coordinates from screen origin
+        /// </summary>
+        /// <returns>Returns the total control area</returns>
+        RectangleF GetControlArea();
+
+        /// <summary>
+        /// Sets the focus over the control
+        /// </summary>
+        void SetFocusControl();
+        /// <summary>
+        /// Lost focus over the control
+        /// </summary>
+        void SetFocusLost();
+
+        /// <summary>
+        /// Gets whether the specified UI control is event-evaluable or not
+        /// </summary>
+        /// <returns>Returns true if the control is evaluable for UI events</returns>
+        bool IsEvaluable();
+        /// <summary>
+        /// Initializes the UI state
+        /// </summary>
+        /// <param name="input">Input</param>
+        /// <param name="ctrl">Control</param>
+        void InitControlState(Input input);
+        /// <summary>
+        /// Evaluates input over the specified scene control
+        /// </summary>
+        /// <param name="input">Input</param>
+        /// <param name="ctrl">Top most control</param>
+        /// <param name="topMostControl">Returns the last events enabled control in the control hierarchy</param>
+        /// <param name="focusedControl">Returns the last clicked control with any mouse button</param>
+        /// <remarks>Iterates over the control's children collection</remarks>
+        void EvaluateTopMostControl(Input input, out IUIControl topMostControl, out IUIControl focusedControl);
+        /// <summary>
+        /// Evaluate events enabled control
+        /// </summary>
+        /// <param name="input">Input</param>
+        /// <param name="ctrl">Control</param>
+        /// <param name="focusedControl">Returns the focused control (last clicked control with any mouse button)</param>
+        void EvaluateEventsEnabledControl(Input input, out IUIControl focusedControl);
+        /// <summary>
+        /// Invalidates the internal state and forces an update in the next call
+        /// </summary>
+        void Invalidate();
+        /// <summary>
+        /// Gets the control update order
+        /// </summary>
+        int GetUpdateOrder();
     }
 }
