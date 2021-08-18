@@ -37,8 +37,6 @@ namespace SpriteDrawing
         private UIButton butTest2 = null;
 
         private UITextArea scrollTextArea = null;
-        private UIScrollBar scrollBarV = null;
-        private UIScrollBar scrollBarH = null;
 
         public TestScene(Game game)
             : base(game)
@@ -259,59 +257,20 @@ namespace SpriteDrawing
             panelDesc.Height = 300;
 
             var panel = await this.AddComponentUIPanel("scrollPanel", "Panel", panelDesc, LayerUI + 5);
+            panel.EventsEnabled = true;
 
             var areaFont = TextDrawerDescription.FromFamily("Tahoma", 20);
-
             var areaDesc = UITextAreaDescription.Default(areaFont);
             areaDesc.Scroll = ScrollModes.Vertical | ScrollModes.Horizontal;
-            areaDesc.Padding = new Padding(10, 10, 10, 60);
+            areaDesc.Padding = new Padding(5, 5, 20, 20);
 
             scrollTextArea = new UITextArea("scroll", "Scroll", this, areaDesc)
             {
-                Text = Properties.Resources.Lorem
+                Text = Properties.Resources.Lorem,
+                EventsEnabled = true,
             };
 
             panel.AddChild(scrollTextArea);
-
-            var scrollBarVDesc = UIScrollBarDescription.Default(Color.DarkGray, Color.LightGray, 10, ScrollModes.Vertical);
-            scrollBarV = await this.AddComponentUIScrollBar("scrollBarV", "scrollBarV", scrollBarVDesc, LayerUI + 6);
-            scrollBarV.Top = panel.Top;
-            scrollBarV.Left = panel.Left + panel.Width;
-            scrollBarV.Width = 15;
-            scrollBarV.Height = panel.Height;
-            scrollBarV.EventsEnabled = true;
-            scrollBarV.MouseOver += ScrollBar_MouseOver;
-
-            var scrollBarHDesc = UIScrollBarDescription.Default(Color.DarkGray, Color.LightGray, 10, ScrollModes.Horizontal);
-            scrollBarH = await this.AddComponentUIScrollBar("scrollBarH", "scrollBarH", scrollBarHDesc, LayerUI + 6);
-            scrollBarH.Top = panel.Top + panel.Height;
-            scrollBarH.Left = panel.Left;
-            scrollBarH.Width = panel.Width;
-            scrollBarH.Height = 15;
-            scrollBarH.EventsEnabled = true;
-            scrollBarH.MouseOver += ScrollBar_MouseOver;
-        }
-
-        private void ScrollBar_MouseOver(UIControl sender, MouseEventArgs e)
-        {
-            if (!e.Buttons.HasFlag(MouseButtons.Left))
-            {
-                return;
-            }
-
-            if (sender == scrollBarV)
-            {
-                float pct = (e.PointerPosition.Y - scrollBarV.Top) / scrollBarV.Height;
-
-                scrollTextArea.VerticalScrollPosition = pct;
-            }
-
-            if (sender == scrollBarH)
-            {
-                float pct = (e.PointerPosition.X - scrollBarH.Left) / scrollBarH.Width;
-
-                scrollTextArea.HorizontalScrollPosition = pct;
-            }
         }
 
         public override void OnReportProgress(LoadResourceProgress value)
@@ -339,9 +298,6 @@ namespace SpriteDrawing
             UpdateInput(gameTime);
             UpdateLorem(gameTime);
             UpdateSprite(gameTime);
-
-            scrollBarV.MarkerPosition = scrollTextArea.VerticalScrollPosition;
-            scrollBarH.MarkerPosition = scrollTextArea.HorizontalScrollPosition;
         }
         private void UpdateDebugInfo()
         {

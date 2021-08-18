@@ -11,6 +11,10 @@ namespace Engine.UI
         /// </summary>
         ScrollModes Scroll { get; set; }
         /// <summary>
+        /// Scroll bar size
+        /// </summary>
+        float ScrollbarSize { get; set; }
+        /// <summary>
         /// Gets or sets the vertical scroll offset
         /// </summary>
         float VerticalScrollOffset { get; set; }

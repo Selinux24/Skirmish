@@ -1,10 +1,10 @@
 ﻿using SharpDX;
+using System;
 using System.Threading.Tasks;
 
 namespace Engine.UI
 {
     using Engine.Common;
-    using System;
 
     /// <summary>
     /// Text area
@@ -15,6 +15,14 @@ namespace Engine.UI
         /// Button text drawer
         /// </summary>
         private readonly TextDrawer textDrawer = null;
+        /// <summary>
+        /// Vertical scroll bar
+        /// </summary>
+        private readonly UIScrollBar sbVertical = null;
+        /// <summary>
+        /// Horizontal scroll bar
+        /// </summary>
+        private readonly UIScrollBar sbHorizontal = null;
         /// <summary>
         /// Grow control with text value
         /// </summary>
@@ -181,6 +189,8 @@ namespace Engine.UI
         /// <inheritdoc/>
         public ScrollModes Scroll { get; set; }
         /// <inheritdoc/>
+        public float ScrollbarSize { get; set; }
+        /// <inheritdoc/>
         public float VerticalScrollOffset
         {
             get
@@ -245,6 +255,7 @@ namespace Engine.UI
         {
             growControlWithText = description.GrowControlWithText;
             Scroll = description.Scroll;
+            ScrollbarSize = description.ScrollbarSize;
 
             textDrawer = new TextDrawer(
                 $"{id}.TextDrawer",
@@ -261,7 +272,34 @@ namespace Engine.UI
                 VerticalAlign = description.TextVerticalAlign,
             };
 
+            if (Scroll.HasFlag(ScrollModes.Vertical))
+            {
+                sbVertical = AddScroll(id, name, scene, ScrollModes.Vertical);
+            }
+
+            if (Scroll.HasFlag(ScrollModes.Horizontal))
+            {
+                sbHorizontal = AddScroll(id, name, scene, ScrollModes.Horizontal);
+            }
+
             GrowControl();
+        }
+        /// <summary>
+        /// Adds a scroll controller to the control
+        /// </summary>
+        /// <param name="scroll">Scroll mode</param>
+        private UIScrollBar AddScroll(string id, string name, Scene scene, ScrollModes scroll)
+        {
+            var sb = new UIScrollBar($"{id}.Scroll.{scroll}", $"{name}.BackPanel", scene, UIScrollBarDescription.Default(scroll))
+            {
+                EventsEnabled = true
+            };
+
+            sb.MouseOver += ScrollBarMouseOver;
+
+            AddChild(sb, false);
+
+            return sb;
         }
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
@@ -285,6 +323,27 @@ namespace Engine.UI
             }
 
             textDrawer.Update(context);
+
+            float size = ScrollbarSize;
+            var renderArea = GetRenderArea(false);
+
+            if (sbVertical != null)
+            {
+                sbVertical.Left = renderArea.Width - size;
+                sbVertical.Top = 0;
+                sbVertical.Width = size;
+                sbVertical.Height = renderArea.Height - size;
+                sbVertical.MarkerPosition = VerticalScrollPosition;
+            }
+
+            if (sbHorizontal != null)
+            {
+                sbHorizontal.Left = 0;
+                sbHorizontal.Top = renderArea.Height - size;
+                sbHorizontal.Width = renderArea.Width - size;
+                sbHorizontal.Height = size;
+                sbHorizontal.MarkerPosition = HorizontalScrollPosition;
+            }
         }
 
         /// <inheritdoc/>
@@ -382,6 +441,28 @@ namespace Engine.UI
         {
             HorizontalScrollOffset -= amount * Game.GameTime.ElapsedSeconds;
             HorizontalScrollOffset = Math.Max(0, HorizontalScrollOffset);
+        }
+        /// <summary>
+        /// Scroll bar mouse over events
+        /// </summary>
+        /// <param name="sender">Sender control</param>
+        /// <param name="e">Event arguments</param>
+        private void ScrollBarMouseOver(UIControl sender, MouseEventArgs e)
+        {
+            if (!e.Buttons.HasFlag(MouseButtons.Left))
+            {
+                return;
+            }
+
+            if (sender == sbVertical)
+            {
+                VerticalScrollPosition = (e.PointerPosition.Y - sbVertical.AbsoluteTop) / sbVertical.Height;
+            }
+
+            if (sender == sbHorizontal)
+            {
+                HorizontalScrollPosition = (e.PointerPosition.X - sbHorizontal.AbsoluteLeft) / sbHorizontal.Width;
+            }
         }
 
         /// <summary>

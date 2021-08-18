@@ -38,6 +38,8 @@ namespace Engine.UI
         /// <inheritdoc/>
         public ScrollModes Scroll { get; set; }
         /// <inheritdoc/>
+        public float ScrollbarSize { get; set; }
+        /// <inheritdoc/>
         public float VerticalScrollOffset
         {
             get

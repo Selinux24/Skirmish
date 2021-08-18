@@ -31,7 +31,7 @@ namespace Engine.UI
                 Text = text,
             };
         }
-     
+
         /// <summary>
         /// Gets the default text area description from a font family name
         /// </summary>
@@ -59,7 +59,7 @@ namespace Engine.UI
                 Font = TextDrawerDescription.FromFamily(fontFamilyName, size, fontStyle, fineSampling),
             };
         }
-        
+
         /// <summary>
         /// Gets the default text area description from a font file
         /// </summary>
@@ -87,7 +87,7 @@ namespace Engine.UI
                 Font = TextDrawerDescription.FromFile(fileName, size, fontStyle, lineAdjust),
             };
         }
-        
+
         /// <summary>
         /// Gets the default text area description from a font map 
         /// </summary>
@@ -139,6 +139,10 @@ namespace Engine.UI
         /// Scroll
         /// </summary>
         public ScrollModes Scroll { get; set; } = ScrollModes.None;
+        /// <summary>
+        /// Scrollbar size
+        /// </summary>
+        public float ScrollbarSize { get; set; } = 15;
 
         /// <summary>
         /// Constructor
