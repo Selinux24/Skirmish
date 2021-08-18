@@ -37,7 +37,7 @@ namespace Engine.UI
         /// <summary>
         /// Drawing channels
         /// </summary>
-        public UITextureRendererChannels Channels { get; set; }
+        public ColorChannels Channels { get; set; }
         /// <summary>
         /// Gets whether the internal buffers were ready or not
         /// </summary>

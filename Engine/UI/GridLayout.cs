@@ -140,7 +140,7 @@ namespace Engine.UI
         /// <param name="bounds">Bounds</param>
         /// <param name="padding">Padding</param>
         /// <param name="spacing">Spacing</param>
-        public static void UpdateLayout(IEnumerable<UIControl> controls, GridLayout parameters, Size2F bounds, Padding padding, Spacing spacing)
+        public static void UpdateLayout(IEnumerable<IUIControl> controls, GridLayout parameters, Size2F bounds, Padding padding, Spacing spacing)
         {
             if (controls?.Any() != true)
             {

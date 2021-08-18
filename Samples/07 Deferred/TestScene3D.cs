@@ -798,7 +798,7 @@ namespace Deferred
 
             //Colors
             bufferDrawer.Texture = colorMap;
-            bufferDrawer.Channels = UITextureRendererChannels.NoAlpha;
+            bufferDrawer.Channels = ColorChannels.NoAlpha;
             help.Text = "Colors";
 
             bufferDrawer.Visible = true;
@@ -810,18 +810,18 @@ namespace Deferred
             var normalMap = Renderer.GetResource(bufferType);
 
             if (bufferDrawer.Texture == normalMap &&
-                bufferDrawer.Channels == UITextureRendererChannels.NoAlpha)
+                bufferDrawer.Channels == ColorChannels.NoAlpha)
             {
                 //Specular Power
                 bufferDrawer.Texture = normalMap;
-                bufferDrawer.Channels = UITextureRendererChannels.Alpha;
+                bufferDrawer.Channels = ColorChannels.Alpha;
                 help.Text = "Specular Power";
             }
             else
             {
                 //Normals
                 bufferDrawer.Texture = normalMap;
-                bufferDrawer.Channels = UITextureRendererChannels.NoAlpha;
+                bufferDrawer.Channels = ColorChannels.NoAlpha;
                 help.Text = "Normals";
             }
             bufferDrawer.Visible = true;
@@ -833,18 +833,18 @@ namespace Deferred
             var depthMap = Renderer.GetResource(bufferType);
 
             if (bufferDrawer.Texture == depthMap &&
-                bufferDrawer.Channels == UITextureRendererChannels.NoAlpha)
+                bufferDrawer.Channels == ColorChannels.NoAlpha)
             {
                 //Specular Factor
                 bufferDrawer.Texture = depthMap;
-                bufferDrawer.Channels = UITextureRendererChannels.Alpha;
+                bufferDrawer.Channels = ColorChannels.Alpha;
                 help.Text = "Specular Intensity";
             }
             else
             {
                 //Position
                 bufferDrawer.Texture = depthMap;
-                bufferDrawer.Channels = UITextureRendererChannels.NoAlpha;
+                bufferDrawer.Channels = ColorChannels.NoAlpha;
                 help.Text = "Position";
             }
             bufferDrawer.Visible = true;
@@ -862,7 +862,7 @@ namespace Deferred
                 {
                     bufferDrawer.Texture = shadowMap;
                     bufferDrawer.TextureIndex = 0;
-                    bufferDrawer.Channels = UITextureRendererChannels.Red;
+                    bufferDrawer.Channels = ColorChannels.Red;
                     bufferDrawer.Visible = true;
                 }
                 else
@@ -902,7 +902,7 @@ namespace Deferred
             {
                 //Light map
                 bufferDrawer.Texture = lightMap;
-                bufferDrawer.Channels = UITextureRendererChannels.NoAlpha;
+                bufferDrawer.Channels = ColorChannels.NoAlpha;
                 bufferDrawer.Visible = true;
                 help.Text = "Light map";
             }

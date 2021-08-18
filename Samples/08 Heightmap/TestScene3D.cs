@@ -1485,7 +1485,7 @@ namespace Heightmap
                 if (shadowMap != null)
                 {
                     bufferDrawer.Texture = shadowMap;
-                    bufferDrawer.Channels = UITextureRendererChannels.Red;
+                    bufferDrawer.Channels = ColorChannels.Red;
 
                     if (Game.Input.ShiftPressed)
                     {

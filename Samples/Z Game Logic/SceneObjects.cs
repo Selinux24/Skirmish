@@ -373,7 +373,7 @@ namespace GameLogic
             //HUD
             UpdateHUD();
 
-            if (UIControl.TopMostControl != null)
+            if (TopMostControl != null)
             {
                 return;
             }

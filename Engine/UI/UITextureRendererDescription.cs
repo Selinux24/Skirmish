@@ -2,6 +2,8 @@
 
 namespace Engine.UI
 {
+    using Engine.Effects;
+
     /// <summary>
     /// Minimap description
     /// </summary>
@@ -16,7 +18,7 @@ namespace Engine.UI
         {
             return new UITextureRendererDescription
             {
-                Channel = UITextureRendererChannels.NoAlpha,
+                Channel = ColorChannels.NoAlpha,
                 Width = width,
                 Height = height,
                 BaseColor = Color4.White,
@@ -33,7 +35,7 @@ namespace Engine.UI
             return new UITextureRendererDescription
             {
                 Textures = new[] { fileName },
-                Channel = UITextureRendererChannels.NoAlpha,
+                Channel = ColorChannels.NoAlpha,
                 Width = width,
                 Height = height,
                 BaseColor = Color4.White,
@@ -47,7 +49,7 @@ namespace Engine.UI
         {
             return new UITextureRendererDescription
             {
-                Channel = UITextureRendererChannels.NoAlpha,
+                Channel = ColorChannels.NoAlpha,
                 Left = bounds.Left,
                 Top = bounds.Top,
                 Width = bounds.Width,
@@ -65,7 +67,7 @@ namespace Engine.UI
             return new UITextureRendererDescription
             {
                 Textures = new[] { fileName },
-                Channel = UITextureRendererChannels.NoAlpha,
+                Channel = ColorChannels.NoAlpha,
                 Left = bounds.Left,
                 Top = bounds.Top,
                 Width = bounds.Width,
@@ -84,7 +86,7 @@ namespace Engine.UI
         {
             return new UITextureRendererDescription
             {
-                Channel = UITextureRendererChannels.NoAlpha,
+                Channel = ColorChannels.NoAlpha,
                 Left = left,
                 Top = top,
                 Width = width,
@@ -105,7 +107,7 @@ namespace Engine.UI
             return new UITextureRendererDescription
             {
                 Textures = new[] { fileName },
-                Channel = UITextureRendererChannels.NoAlpha,
+                Channel = ColorChannels.NoAlpha,
                 Left = left,
                 Top = top,
                 Width = width,
@@ -125,7 +127,7 @@ namespace Engine.UI
         /// <summary>
         /// Channel color
         /// </summary>
-        public UITextureRendererChannels Channel { get; set; } = UITextureRendererChannels.All;
+        public ColorChannels Channel { get; set; } = ColorChannels.All;
 
         /// <summary>
         /// Constructor
