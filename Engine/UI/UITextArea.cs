@@ -1,10 +1,10 @@
 ﻿using SharpDX;
+using System;
 using System.Threading.Tasks;
 
 namespace Engine.UI
 {
     using Engine.Common;
-    using System;
 
     /// <summary>
     /// Text area
@@ -15,6 +15,8 @@ namespace Engine.UI
         /// Button text drawer
         /// </summary>
         private readonly TextDrawer textDrawer = null;
+        private readonly UIScrollBar sbVertical = null;
+        private readonly UIScrollBar sbHorizontal = null;
         /// <summary>
         /// Grow control with text value
         /// </summary>
@@ -261,7 +263,33 @@ namespace Engine.UI
                 VerticalAlign = description.TextVerticalAlign,
             };
 
+            if (Scroll.HasFlag(ScrollModes.Vertical))
+            {
+                sbVertical = AddScroll(id, name, scene, ScrollModes.Vertical);
+            }
+
+            if (Scroll.HasFlag(ScrollModes.Horizontal))
+            {
+                sbHorizontal = AddScroll(id, name, scene, ScrollModes.Horizontal);
+            }
+
             GrowControl();
+        }
+        /// <summary>
+        /// Adds a scroll controller to the control
+        /// </summary>
+        /// <param name="scroll">Scroll mode</param>
+        private UIScrollBar AddScroll(string id, string name, Scene scene, ScrollModes scroll)
+        {
+            var sb = new UIScrollBar(
+                $"{id}.Scroll.{scroll}",
+                $"{name}.BackPanel",
+                scene,
+                UIScrollBarDescription.Default(scroll));
+
+            AddChild(sb, false);
+
+            return sb;
         }
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
@@ -285,6 +313,30 @@ namespace Engine.UI
             }
 
             textDrawer.Update(context);
+
+            float size = 15;
+
+            if (sbVertical != null)
+            {
+                sbVertical.Top = Top;
+                sbVertical.Left = Left + Width;
+                sbVertical.Width = size;
+                sbVertical.Height = Height;
+                sbVertical.EventsEnabled = true;
+                sbVertical.MouseOver += ScrollBarMouseOver;
+                sbVertical.MarkerPosition = VerticalScrollPosition;
+            }
+
+            if (sbHorizontal != null)
+            {
+                sbHorizontal.Top = Top + Height;
+                sbHorizontal.Left = Left;
+                sbHorizontal.Width = Width;
+                sbHorizontal.Height = size;
+                sbHorizontal.EventsEnabled = true;
+                sbHorizontal.MouseOver += ScrollBarMouseOver;
+                sbHorizontal.MarkerPosition = HorizontalScrollPosition;
+            }
         }
 
         /// <inheritdoc/>
@@ -382,6 +434,28 @@ namespace Engine.UI
         {
             HorizontalScrollOffset -= amount * Game.GameTime.ElapsedSeconds;
             HorizontalScrollOffset = Math.Max(0, HorizontalScrollOffset);
+        }
+        /// <summary>
+        /// Scroll bar mouse over events
+        /// </summary>
+        /// <param name="sender">Sender control</param>
+        /// <param name="e">Event arguments</param>
+        private void ScrollBarMouseOver(UIControl sender, MouseEventArgs e)
+        {
+            if (!e.Buttons.HasFlag(MouseButtons.Left))
+            {
+                return;
+            }
+
+            if (sender == sbVertical)
+            {
+                VerticalScrollPosition = (e.PointerPosition.Y - sbVertical.Top) / sbVertical.Height;
+            }
+
+            if (sender == sbHorizontal)
+            {
+                HorizontalScrollPosition = (e.PointerPosition.X - sbHorizontal.Left) / sbHorizontal.Width;
+            }
         }
 
         /// <summary>
