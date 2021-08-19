@@ -152,11 +152,11 @@ namespace Engine.UI
         /// <summary>
         /// Text horizontal alignement
         /// </summary>
-        public HorizontalAlign TextHorizontalAlign { get; set; } = HorizontalAlign.Center;
+        public TextHorizontalAlign TextHorizontalAlign { get; set; } = TextHorizontalAlign.Center;
         /// <summary>
         /// Text vertical alignement
         /// </summary>
-        public VerticalAlign TextVerticalAlign { get; set; } = VerticalAlign.Middle;
+        public TextVerticalAlign TextVerticalAlign { get; set; } = TextVerticalAlign.Middle;
 
         /// <summary>
         /// Constructor

@@ -15,9 +15,9 @@ namespace Engine.UI
         /// </summary>
         float ScrollbarSize { get; set; }
         /// <summary>
-        /// Vertical scroll bar position
+        /// Vertical scroll bar alignment
         /// </summary>
-        HorizontalAlign ScrollVerticalAlign { get; set; }
+        ScrollVerticalAlign ScrollVerticalAlign { get; set; }
         /// <summary>
         /// Gets or sets the vertical scroll offset
         /// </summary>
@@ -27,9 +27,9 @@ namespace Engine.UI
         /// </summary>
         float ScrollVerticalPosition { get; set; }
         /// <summary>
-        /// Horizontal scroll bar position
+        /// Horizontal scroll bar alignment
         /// </summary>
-        VerticalAlign ScrollHorizontalAlign { get; set; }
+        ScrollHorizontalAlign ScrollHorizontalAlign { get; set; }
         /// <summary>
         /// Gets or sets the horizontal scroll offset
         /// </summary>

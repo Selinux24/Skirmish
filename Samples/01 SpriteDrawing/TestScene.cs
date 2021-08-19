@@ -199,8 +199,8 @@ namespace SpriteDrawing
             descButClose.Left = dynamicPan.Width - 10 - 40;
             descButClose.Width = 40;
             descButClose.Height = 40;
-            descButClose.TextHorizontalAlign = HorizontalAlign.Center;
-            descButClose.TextVerticalAlign = VerticalAlign.Middle;
+            descButClose.TextHorizontalAlign = TextHorizontalAlign.Center;
+            descButClose.TextVerticalAlign = TextVerticalAlign.Middle;
             descButClose.Text = "X";
 
             var butClose = new UIButton("DynamicPanel.CloseButton", "DynamicPanel.CloseButton", this, descButClose);
@@ -215,8 +215,8 @@ namespace SpriteDrawing
                 Top = height * 0.1f,
                 Bottom = height * 0.1f,
             };
-            descText.TextHorizontalAlign = HorizontalAlign.Center;
-            descText.TextVerticalAlign = VerticalAlign.Middle;
+            descText.TextHorizontalAlign = TextHorizontalAlign.Center;
+            descText.TextVerticalAlign = TextVerticalAlign.Middle;
 
             var textMapped = new UITextArea("DynamicPanel.MaraText", "DynamicPanel.MaraText", this, descText);
 
@@ -233,8 +233,8 @@ namespace SpriteDrawing
             descButClose.Left = 150;
             descButClose.Width = 200;
             descButClose.Height = 55;
-            descButClose.TextHorizontalAlign = HorizontalAlign.Center;
-            descButClose.TextVerticalAlign = VerticalAlign.Middle;
+            descButClose.TextHorizontalAlign = TextHorizontalAlign.Center;
+            descButClose.TextVerticalAlign = TextVerticalAlign.Middle;
 
             butTest2 = await this.AddComponentUIButton("ButtonTest2", "ButtonTest2", descButClose, LayerUI);
             butTest2.MouseClick += ButTest2_Click;
@@ -260,8 +260,8 @@ namespace SpriteDrawing
 
             var areaFont = TextDrawerDescription.FromFamily("Tahoma", 20);
             var areaDesc = UITextAreaDescription.Default(areaFont);
-            areaDesc.Scroll = ScrollModes.Vertical | ScrollModes.Horizontal;
-            areaDesc.Padding = new Padding(5, 5, 20, 20);
+            areaDesc.Scroll = ScrollModes.Both;
+            areaDesc.Padding = new Padding(5, 1, 20, 20);
 
             scrollTextArea = new UITextArea("scroll", "Scroll", this, areaDesc)
             {

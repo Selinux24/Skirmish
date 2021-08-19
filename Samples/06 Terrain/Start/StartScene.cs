@@ -72,8 +72,8 @@ namespace Terrain.Start
             titleDesc.TextForeColor = Color.Gold;
             titleDesc.TextShadowColor = new Color4(Color.LightYellow.RGB(), 0.25f);
             titleDesc.TextShadowDelta = new Vector2(4, 4);
-            titleDesc.TextHorizontalAlign = HorizontalAlign.Center;
-            titleDesc.TextVerticalAlign = VerticalAlign.Middle;
+            titleDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
+            titleDesc.TextVerticalAlign = TextVerticalAlign.Middle;
 
             title = await this.AddComponentUITextArea("Title", "Title", titleDesc, layerHUD);
             title.GrowControlWithText = false;
@@ -92,8 +92,8 @@ namespace Terrain.Start
             startButtonDesc.ColorReleased = new Color4(sceneButtonColor.RGB(), 0.8f);
             startButtonDesc.ColorPressed = new Color4(sceneButtonColor.RGB() * 1.2f, 0.9f);
             startButtonDesc.TextForeColor = Color.Gold;
-            startButtonDesc.TextHorizontalAlign = HorizontalAlign.Center;
-            startButtonDesc.TextVerticalAlign = VerticalAlign.Middle;
+            startButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
+            startButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
 
             scenePerlinNoiseButton = await this.AddComponentUIButton("ButtonPerlinNoise", "ButtonPerlinNoise", startButtonDesc, layerHUD);
             scenePerlinNoiseButton.MouseClick += SceneButtonClick;
@@ -116,8 +116,8 @@ namespace Terrain.Start
             exitButtonDesc.Height = 65;
             exitButtonDesc.ColorReleased = new Color4(exitButtonColor.RGB(), 0.8f);
             exitButtonDesc.ColorPressed = new Color4(exitButtonColor.RGB() * 1.2f, 0.9f);
-            exitButtonDesc.TextHorizontalAlign = HorizontalAlign.Center;
-            exitButtonDesc.TextVerticalAlign = VerticalAlign.Middle;
+            exitButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
+            exitButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
 
             exitButton = await this.AddComponentUIButton("ButtonExit", "ButtonExit", exitButtonDesc, layerHUD);
             exitButton.MouseClick += ExitButtonClick;

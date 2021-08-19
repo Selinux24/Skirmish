@@ -130,27 +130,27 @@ namespace Engine.UI
         /// <summary>
         /// Text horizontal alignement
         /// </summary>
-        public HorizontalAlign TextHorizontalAlign { get; set; } = HorizontalAlign.Left;
+        public TextHorizontalAlign TextHorizontalAlign { get; set; } = TextHorizontalAlign.Left;
         /// <summary>
         /// Text vertical alignement
         /// </summary>
-        public VerticalAlign TextVerticalAlign { get; set; } = VerticalAlign.Top;
+        public TextVerticalAlign TextVerticalAlign { get; set; } = TextVerticalAlign.Top;
         /// <summary>
         /// Scroll
         /// </summary>
         public ScrollModes Scroll { get; set; } = ScrollModes.None;
         /// <summary>
-        /// Scrollbar size
+        /// Scroll bar size
         /// </summary>
         public float ScrollbarSize { get; set; } = 15;
         /// <summary>
-        /// Vertical scroll bar position
+        /// Vertical scroll bar alignment
         /// </summary>
-        public HorizontalAlign ScrollVerticalAlign { get; set; } = HorizontalAlign.Right;
+        public ScrollVerticalAlign ScrollVerticalAlign { get; set; } = ScrollVerticalAlign.Right;
         /// <summary>
-        /// Horizontal scroll bar position
+        /// Horizontal scroll bar alignment
         /// </summary>
-        public VerticalAlign ScrollHorizontalAlign { get; set; } = VerticalAlign.Bottom;
+        public ScrollHorizontalAlign ScrollHorizontalAlign { get; set; } = ScrollHorizontalAlign.Bottom;
 
         /// <summary>
         /// Constructor

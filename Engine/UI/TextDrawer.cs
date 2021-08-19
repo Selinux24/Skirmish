@@ -74,11 +74,11 @@ namespace Engine.UI
         /// <summary>
         /// Horizontal align
         /// </summary>
-        private HorizontalAlign horizontalAlign = HorizontalAlign.Left;
+        private TextHorizontalAlign horizontalAlign = TextHorizontalAlign.Left;
         /// <summary>
         /// Vertical align
         /// </summary>
-        private VerticalAlign verticalAlign = VerticalAlign.Middle;
+        private TextVerticalAlign verticalAlign = TextVerticalAlign.Middle;
         /// <summary>
         /// Update internals flag
         /// </summary>
@@ -130,7 +130,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets the horizontal align
         /// </summary>
-        public HorizontalAlign HorizontalAlign
+        public TextHorizontalAlign HorizontalAlign
         {
             get
             {
@@ -149,7 +149,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets the vertical align
         /// </summary>
-        public VerticalAlign VerticalAlign
+        public TextVerticalAlign VerticalAlign
         {
             get
             {
@@ -573,7 +573,7 @@ namespace Engine.UI
         /// <param name="horizontalAlign">Horizontal align</param>
         /// <param name="verticalAlign">Vertical align</param>
         /// <returns>Returns a size vector where X is the width, and Y is the height</returns>
-        public Vector2 MeasureText(string text, HorizontalAlign horizontalAlign, VerticalAlign verticalAlign)
+        public Vector2 MeasureText(string text, TextHorizontalAlign horizontalAlign, TextVerticalAlign verticalAlign)
         {
             if (fontMap == null)
             {
@@ -614,8 +614,8 @@ namespace Engine.UI
                 FontMapParsedSentence.FromSample(sampleChar),
                 false,
                 Game.Form.RenderRectangle,
-                HorizontalAlign.Left,
-                VerticalAlign.Top);
+                TextHorizontalAlign.Left,
+                TextVerticalAlign.Top);
 
             return w.Size.Y;
         }

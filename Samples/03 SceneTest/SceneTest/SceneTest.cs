@@ -162,8 +162,8 @@ namespace SceneTest.SceneTest
             buttonDesc.Text = "Close";
             buttonDesc.TextForeColor = Color.Yellow;
             buttonDesc.TextShadowColor = Color.Orange;
-            buttonDesc.TextHorizontalAlign = HorizontalAlign.Center;
-            buttonDesc.TextVerticalAlign = VerticalAlign.Middle;
+            buttonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
+            buttonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
 
             butClose = await this.AddComponentUIButton("UIButClose", "ButClose", buttonDesc, LayerUI);
             butClose.MouseClick += (sender, eventArgs) =>

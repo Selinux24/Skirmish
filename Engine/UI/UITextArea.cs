@@ -118,7 +118,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets the text horizontal align
         /// </summary>
-        public HorizontalAlign TextHorizontalAlign
+        public TextHorizontalAlign TextHorizontalAlign
         {
             get
             {
@@ -132,7 +132,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets the text vertical align
         /// </summary>
-        public VerticalAlign TextVerticalAlign
+        public TextVerticalAlign TextVerticalAlign
         {
             get
             {
@@ -191,7 +191,7 @@ namespace Engine.UI
         /// <inheritdoc/>
         public float ScrollbarSize { get; set; }
         /// <inheritdoc/>
-        public HorizontalAlign ScrollVerticalAlign { get; set; }
+        public ScrollVerticalAlign ScrollVerticalAlign { get; set; }
         /// <inheritdoc/>
         public float ScrollVerticalOffset
         {
@@ -219,7 +219,7 @@ namespace Engine.UI
             }
         }
         /// <inheritdoc/>
-        public VerticalAlign ScrollHorizontalAlign { get; set; }
+        public ScrollHorizontalAlign ScrollHorizontalAlign { get; set; }
         /// <inheritdoc/>
         public float ScrollHorizontalOffset
         {
@@ -337,58 +337,28 @@ namespace Engine.UI
         /// </summary>
         private void UpdateScrollBars()
         {
-            if (sbVertical == null || sbHorizontal == null)
+            if (sbVertical == null && sbHorizontal == null)
             {
                 return;
             }
 
-            var renderArea = GetRenderArea(false);
-
-            float size = ScrollbarSize;
-            float heightAdjust = sbHorizontal != null ? size : 0;
-            float widthAdjust = sbVertical != null ? size : 0;
-            var verticalAlign = sbVertical != null ? ScrollVerticalAlign : HorizontalAlign.None;
-            var horizontalAlign = sbHorizontal != null ? ScrollHorizontalAlign : VerticalAlign.None;
+            var barSize = ScrollbarSize;
+            var verticalAlign = sbVertical != null ? ScrollVerticalAlign : ScrollVerticalAlign.None;
+            var horizontalAlign = sbHorizontal != null ? ScrollHorizontalAlign : ScrollHorizontalAlign.None;
 
             if (sbVertical != null)
             {
-                float left = 0;
-                if (verticalAlign != HorizontalAlign.Right)
-                {
-                    left = renderArea.Width - size;
-                }
+                var rect = this.GetVerticalLayout(barSize, verticalAlign, horizontalAlign);
 
-                float top = 0;
-                if (horizontalAlign == VerticalAlign.Top)
-                {
-                    top = size;
-                }
-
-                sbVertical.Left = left;
-                sbVertical.Top = top;
-                sbVertical.Width = size;
-                sbVertical.Height = renderArea.Height - heightAdjust;
+                sbVertical.SetRectangle(rect);
                 sbVertical.MarkerPosition = ScrollVerticalPosition;
             }
 
             if (sbHorizontal != null)
             {
-                float top = 0;
-                if (horizontalAlign != VerticalAlign.Top)
-                {
-                    top = renderArea.Height - size;
-                }
+                var rect = this.GetHorizontalLayout(barSize, verticalAlign, horizontalAlign);
 
-                float left = 0;
-                if (verticalAlign == HorizontalAlign.Left)
-                {
-                    left = size;
-                }
-
-                sbHorizontal.Left = left;
-                sbHorizontal.Top = top;
-                sbHorizontal.Width = renderArea.Width - widthAdjust;
-                sbHorizontal.Height = size;
+                sbHorizontal.SetRectangle(rect);
                 sbHorizontal.MarkerPosition = ScrollHorizontalPosition;
             }
         }

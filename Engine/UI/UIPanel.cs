@@ -40,7 +40,7 @@ namespace Engine.UI
         /// <inheritdoc/>
         public float ScrollbarSize { get; set; }
         /// <inheritdoc/>
-        public HorizontalAlign ScrollVerticalAlign { get; set; }
+        public ScrollVerticalAlign ScrollVerticalAlign { get; set; }
         /// <inheritdoc/>
         public float ScrollVerticalOffset
         {
@@ -68,7 +68,7 @@ namespace Engine.UI
             }
         }
         /// <inheritdoc/>
-        public VerticalAlign ScrollHorizontalAlign { get; set; }
+        public ScrollHorizontalAlign ScrollHorizontalAlign { get; set; }
         /// <inheritdoc/>
         public float ScrollHorizontalOffset
         {

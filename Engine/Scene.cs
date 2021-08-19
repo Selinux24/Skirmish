@@ -309,14 +309,6 @@ namespace Engine
         private uint animationPaletteWidth;
 
         /// <summary>
-        /// Game class
-        /// </summary>
-        public Game Game { get; private set; }
-        /// <summary>
-        /// Game environment
-        /// </summary>
-        public GameEnvironment GameEnvironment { get; private set; } = new GameEnvironment();
-        /// <summary>
         /// Scene renderer
         /// </summary>
         protected ISceneRenderer Renderer = null;
@@ -333,6 +325,14 @@ namespace Engine
         /// </summary>
         protected GameAudioManager AudioManager { get; private set; }
 
+        /// <summary>
+        /// Game class
+        /// </summary>
+        public Game Game { get; private set; }
+        /// <summary>
+        /// Game environment
+        /// </summary>
+        public GameEnvironment GameEnvironment { get; private set; } = new GameEnvironment();
         /// <summary>
         /// Camera
         /// </summary>

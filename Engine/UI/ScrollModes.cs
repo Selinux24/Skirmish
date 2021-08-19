@@ -11,14 +11,18 @@ namespace Engine.UI
         /// <summary>
         /// No scroll
         /// </summary>
-        None,
+        None = 0,
         /// <summary>
         /// Vertical scroll
         /// </summary>
-        Vertical,
+        Vertical = 1,
         /// <summary>
         /// Horizontal scroll
         /// </summary>
-        Horizontal,
+        Horizontal = 2,
+        /// <summary>
+        /// Both scrolls
+        /// </summary>
+        Both = Vertical | Horizontal,
     }
 }

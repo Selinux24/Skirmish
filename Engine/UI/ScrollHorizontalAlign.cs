@@ -2,24 +2,20 @@
 namespace Engine.UI
 {
     /// <summary>
-    /// Vertical control align
+    /// Horizontal align
     /// </summary>
-    public enum VerticalAlign
+    public enum ScrollHorizontalAlign
     {
         /// <summary>
         /// None
         /// </summary>
         None,
         /// <summary>
-        /// Align top
+        /// Align Top
         /// </summary>
         Top,
         /// <summary>
-        /// Align middle
-        /// </summary>
-        Middle,
-        /// <summary>
-        /// Align bottom
+        /// Align right
         /// </summary>
         Bottom,
     }

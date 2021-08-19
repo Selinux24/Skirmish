@@ -1,4 +1,5 @@
-﻿
+﻿using SharpDX;
+
 namespace Engine.UI
 {
     /// <summary>
@@ -73,6 +74,75 @@ namespace Engine.UI
             float maxOffset = container.GetMaximumHorizontalOffset();
 
             return position * maxOffset;
+        }
+
+        /// <summary>
+        /// Gets the layout for a vertical scroll bar control
+        /// </summary>
+        /// <param name="container">Container control</param>
+        /// <param name="size">Scroll bar size</param>
+        /// <param name="verticalAlign">Vertical alignment of this scroll bar</param>
+        /// <param name="horizontalAlign">Horizontal aligment of the other container scroll bar, if any.</param>
+        /// <returns>Returns the layout rectangle for the scroll bar</returns>
+        public static RectangleF GetVerticalLayout(this IUIControl container, float size, ScrollVerticalAlign verticalAlign, ScrollHorizontalAlign horizontalAlign)
+        {
+            var renderArea = container.GetRenderArea(false);
+
+            float heightAdjust = horizontalAlign != ScrollHorizontalAlign.None ? size : 0;
+
+            float left = 0;
+            if (verticalAlign == ScrollVerticalAlign.Right)
+            {
+                left = renderArea.Width - size;
+            }
+
+            float top = 0;
+            if (horizontalAlign == ScrollHorizontalAlign.Top)
+            {
+                top = size;
+            }
+
+            return new RectangleF
+            {
+                Left = left,
+                Top = top,
+                Width = size,
+                Height = renderArea.Height - heightAdjust,
+            };
+        }
+        /// <summary>
+        /// Gets the layout for a horizontal scroll bar control
+        /// </summary>
+        /// <param name="container">Container control</param>
+        /// <param name="size">Scroll bar size</param>
+        /// <param name="verticalAlign">Vertical alignment of the other scroll bar, if any</param>
+        /// <param name="horizontalAlign">Horizontal aligment of this scroll bar</param>
+        /// <returns>Returns the layout rectangle for the scroll bar</returns>
+        public static RectangleF GetHorizontalLayout(this IUIControl container, float size, ScrollVerticalAlign verticalAlign, ScrollHorizontalAlign horizontalAlign)
+        {
+            var renderArea = container.GetRenderArea(false);
+
+            float widthAdjust = verticalAlign != ScrollVerticalAlign.None ? size : 0;
+
+            float top = 0;
+            if (horizontalAlign == ScrollHorizontalAlign.Bottom)
+            {
+                top = renderArea.Height - size;
+            }
+
+            float left = 0;
+            if (verticalAlign == ScrollVerticalAlign.Left)
+            {
+                left = size;
+            }
+
+            return new RectangleF
+            {
+                Left = left,
+                Top = top,
+                Width = renderArea.Width - widthAdjust,
+                Height = size,
+            };
         }
     }
 }
