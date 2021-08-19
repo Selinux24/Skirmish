@@ -350,7 +350,7 @@ namespace SceneTest.SceneStart
             tabsPanel.Hide(100);
         }
 
-        private void SceneButtonClick(UIControl sender, MouseEventArgs e)
+        private void SceneButtonClick(IUIControl sender, MouseEventArgs e)
         {
             if (!sceneReady)
             {
@@ -391,12 +391,12 @@ namespace SceneTest.SceneStart
                 Game.SetScene<SceneTanksGame.SceneTanksGame>();
             }
         }
-        private void SceneButtonMouseEnter(UIControl sender, MouseEventArgs e)
+        private void SceneButtonMouseEnter(IUIControl sender, MouseEventArgs e)
         {
             sender.PivotAnchor = PivotAnchors.Center;
             sender.ScaleInScaleOut(1.0f, 1.10f, 250);
         }
-        private void SceneButtonMouseLeave(UIControl sender, MouseEventArgs e)
+        private void SceneButtonMouseLeave(IUIControl sender, MouseEventArgs e)
         {
             sender.ClearTween();
             sender.TweenScale(sender.Scale, 1.0f, 500, ScaleFuncs.Linear);
@@ -405,7 +405,7 @@ namespace SceneTest.SceneStart
         {
             Logger.WriteDebug(this, $"Clicked button {e.TabButton.Caption.Text}");
         }
-        private void ExitButtonClick(UIControl sender, MouseEventArgs e)
+        private void ExitButtonClick(IUIControl sender, MouseEventArgs e)
         {
             if (!sceneReady)
             {
@@ -419,7 +419,7 @@ namespace SceneTest.SceneStart
 
             Game.Exit();
         }
-        private void OptsButtonClick(UIControl sender, MouseEventArgs e)
+        private void OptsButtonClick(IUIControl sender, MouseEventArgs e)
         {
             if (!e.Buttons.HasFlag(MouseButtons.Left))
             {

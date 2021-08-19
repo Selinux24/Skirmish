@@ -97,7 +97,7 @@ namespace Terrain.PerlinNoise
             }
         }
 
-        UIControl capturedCtrl = null;
+        IUIControl capturedCtrl = null;
 
         public PerlinNoiseScene(Game game) : base(game)
         {
@@ -403,7 +403,7 @@ namespace Terrain.PerlinNoise
             btnSave.Caption.Text = "Save to File";
         }
 
-        private void PbPressed(UIControl sender, MouseEventArgs e)
+        private void PbPressed(IUIControl sender, MouseEventArgs e)
         {
             if (sender is UIProgressBar pb && e.Buttons.HasFlag(MouseButtons.Left))
             {
@@ -425,7 +425,7 @@ namespace Terrain.PerlinNoise
                 }
             }
         }
-        private void PbJustPressed(UIControl sender, MouseEventArgs e)
+        private void PbJustPressed(IUIControl sender, MouseEventArgs e)
         {
             if (capturedCtrl != null)
             {
@@ -437,11 +437,11 @@ namespace Terrain.PerlinNoise
                 capturedCtrl = sender;
             }
         }
-        private void PbJustReleased(UIControl sender, MouseEventArgs e)
+        private void PbJustReleased(IUIControl sender, MouseEventArgs e)
         {
             capturedCtrl = null;
         }
-        private void BtnSaveClick(UIControl sender, MouseEventArgs e)
+        private void BtnSaveClick(IUIControl sender, MouseEventArgs e)
         {
             if (noiseMap == null)
             {
@@ -462,7 +462,7 @@ namespace Terrain.PerlinNoise
                 }
             }
         }
-        private void BtnExitClick(UIControl sender, MouseEventArgs e)
+        private void BtnExitClick(IUIControl sender, MouseEventArgs e)
         {
             if (e.Buttons.HasFlag(MouseButtons.Left))
             {

@@ -6,5 +6,5 @@ namespace Engine.UI
     /// </summary>
     /// <param name="sender">Sender</param>
     /// <param name="e">Event arguments</param>
-    public delegate void MouseEventHandler(UIControl sender, MouseEventArgs e);
+    public delegate void MouseEventHandler(IUIControl sender, MouseEventArgs e);
 }

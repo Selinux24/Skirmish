@@ -1072,8 +1072,10 @@ namespace Engine.UI
             return Active && Visible;
         }
         /// <inheritdoc/>
-        public virtual void InitControlState(Input input)
+        public virtual void InitControlState()
         {
+            var input = Game.Input;
+
             IsMouseOver = Contains(input.MousePosition);
 
             if (EventsEnabled)
@@ -1115,11 +1117,11 @@ namespace Engine.UI
 
             foreach (var child in Children)
             {
-                child.InitControlState(input);
+                child.InitControlState();
             }
         }
         /// <inheritdoc/>
-        public virtual void EvaluateTopMostControl(Input input, out IUIControl topMostControl, out IUIControl focusedControl)
+        public virtual void EvaluateTopMostControl(out IUIControl topMostControl, out IUIControl focusedControl)
         {
             topMostControl = null;
             focusedControl = null;
@@ -1131,7 +1133,7 @@ namespace Engine.UI
                 {
                     topMostControl = topControl;
 
-                    topControl.EvaluateEventsEnabledControl(input, out var focusControl);
+                    topControl.EvaluateEventsEnabledControl(out var focusControl);
                     if (focusControl != null)
                     {
                         focusedControl = focusControl;
@@ -1143,9 +1145,11 @@ namespace Engine.UI
             }
         }
         /// <inheritdoc/>
-        public virtual void EvaluateEventsEnabledControl(Input input, out IUIControl focusedControl)
+        public virtual void EvaluateEventsEnabledControl(out IUIControl focusedControl)
         {
             focusedControl = null;
+
+            var input = Game.Input;
 
             var justPressedButtons = input.MouseButtonsState & ~PressedState;
             var justReleasedButtons = PressedState & ~input.MouseButtonsState;

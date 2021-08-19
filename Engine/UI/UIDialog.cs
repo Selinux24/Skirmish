@@ -144,15 +144,15 @@ namespace Engine.UI
             }
         }
 
-        private void DialogAcceptClick(UIControl sender, MouseEventArgs e)
+        private void DialogAcceptClick(IUIControl sender, MouseEventArgs e)
         {
             OnAcceptHandler?.Invoke(this, e);
         }
-        private void DialogCancelClick(UIControl sender, MouseEventArgs e)
+        private void DialogCancelClick(IUIControl sender, MouseEventArgs e)
         {
             OnCancelHandler?.Invoke(this, e);
         }
-        private void DialogCloseClick(UIControl sender, MouseEventArgs e)
+        private void DialogCloseClick(IUIControl sender, MouseEventArgs e)
         {
             OnCloseHandler?.Invoke(this, e);
         }

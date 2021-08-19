@@ -519,7 +519,7 @@ namespace Collada.Start
             PlayAudio();
         }
 
-        private void SceneButtonClick(UIControl sender, MouseEventArgs e)
+        private void SceneButtonClick(IUIControl sender, MouseEventArgs e)
         {
             if (!e.Buttons.HasFlag(MouseButtons.Left))
             {
@@ -561,7 +561,7 @@ namespace Collada.Start
                 });
             }
         }
-        private void ExitButtonClick(UIControl sender, MouseEventArgs e)
+        private void ExitButtonClick(IUIControl sender, MouseEventArgs e)
         {
             if (!e.Buttons.HasFlag(MouseButtons.Left))
             {
@@ -589,7 +589,7 @@ namespace Collada.Start
                 but.Show(milliseconds);
             }
         }
-        private void HideAllButButton(UIButton button, long milliseconds)
+        private void HideAllButButton(IUIControl button, long milliseconds)
         {
             foreach (var but in sceneButtons)
             {
@@ -603,7 +603,7 @@ namespace Collada.Start
             }
         }
 
-        private void SceneButtonOver(UIControl sender, MouseEventArgs e)
+        private void SceneButtonOver(IUIControl sender, MouseEventArgs e)
         {
             if (sender is UIButton button)
             {

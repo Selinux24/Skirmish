@@ -12,7 +12,6 @@ namespace Engine
     using Engine.Effects;
     using Engine.PathFinding;
     using Engine.Tween;
-    using Engine.UI;
 
     /// <summary>
     /// Render scene
@@ -2053,8 +2052,6 @@ namespace Engine
         /// <param name="scene">Scene</param>
         private void EvaluateInput()
         {
-            var input = Game.Input;
-
             //Gets all UIControl order by processing order
             var evaluableCtrls = GetComponents<IUIControl>()
                 .Where(c => c.IsEvaluable())
@@ -2069,7 +2066,7 @@ namespace Engine
             }
 
             //Initialize state of selected controls
-            evaluableCtrls.ForEach(c => c.InitControlState(input));
+            evaluableCtrls.ForEach(c => c.InitControlState());
 
             //Gets all controls with the mouse pointer into its bounds
             var mouseOverCtrls = evaluableCtrls.Where(c => c.IsMouseOver);
@@ -2087,7 +2084,7 @@ namespace Engine
             foreach (var topMostControl in mouseOverCtrls)
             {
                 //Evaluates all controls with the mouse pointer into its bounds
-                topMostControl.EvaluateTopMostControl(input, out var topControl, out focusedControl);
+                topMostControl.EvaluateTopMostControl(out var topControl, out focusedControl);
                 if (topControl != null)
                 {
                     TopMostControl = topControl;
@@ -2097,18 +2094,19 @@ namespace Engine
             }
 
             //Evaluate focused control
-            EvaluateFocus(input, focusedControl);
+            EvaluateFocus(focusedControl);
         }
         /// <summary>
         /// Evaluates the current focus
         /// </summary>
-        /// <param name="input">Input</param>
         /// <param name="focusedControl">Current focused control</param>
         /// <remarks>Fires set and lost focus events</remarks>
-        private void EvaluateFocus(Input input, IUIControl focusedControl)
+        private void EvaluateFocus(IUIControl focusedControl)
         {
             if (FocusedControl != null)
             {
+                var input = Game.Input;
+
                 bool mouseClicked = input.MouseButtonsState != MouseButtons.None;
                 bool overFocused = FocusedControl.Contains(input.MousePosition);
                 if (mouseClicked && !overFocused)

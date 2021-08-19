@@ -260,8 +260,12 @@ namespace SpriteDrawing
 
             var areaFont = TextDrawerDescription.FromFamily("Tahoma", 20);
             var areaDesc = UITextAreaDescription.Default(areaFont);
-            areaDesc.Scroll = ScrollModes.Both;
-            areaDesc.Padding = new Padding(5, 1, 20, 20);
+            areaDesc.Scroll = ScrollModes.Vertical;
+            areaDesc.ScrollbarSize = 20;
+            areaDesc.ScrollbarMarkerSize = 100;
+            areaDesc.ScrollbarBaseColor = new Color4(0, 0, 0, 0.7f);
+            areaDesc.ScrollbarMarkerColor = Color.LightGray;
+            areaDesc.Padding = new Padding(5, 1, 1, 25);
 
             scrollTextArea = new UITextArea("scroll", "Scroll", this, areaDesc)
             {
@@ -419,7 +423,7 @@ Progress: {(int)(progressValue * 100f)}%";
             }
         }
 
-        private void ButDoubleClose_Click(UIControl sender, MouseEventArgs e)
+        private void ButDoubleClose_Click(IUIControl sender, MouseEventArgs e)
         {
             if (!e.Buttons.HasFlag(MouseButtons.Left))
             {
@@ -444,7 +448,7 @@ Progress: {(int)(progressValue * 100f)}%";
             butTest1.TweenBaseColorBounce(Color.Yellow, Color.Red, 2000, ScaleFuncs.Linear);
         }
 
-        private void ButTest1_Click(UIControl sender, MouseEventArgs e)
+        private void ButTest1_Click(IUIControl sender, MouseEventArgs e)
         {
             if (sender is UIButton button && e.Buttons.HasFlag(MouseButtons.Middle))
             {
@@ -455,7 +459,7 @@ Progress: {(int)(progressValue * 100f)}%";
                 button.Hide(500);
             }
         }
-        private void ButTest2_Click(UIControl sender, MouseEventArgs e)
+        private void ButTest2_Click(IUIControl sender, MouseEventArgs e)
         {
             if (sender is UIButton button && e.Buttons.HasFlag(MouseButtons.Right))
             {
@@ -475,7 +479,7 @@ Progress: {(int)(progressValue * 100f)}%";
                 });
             }
         }
-        private void ButTest_MouseLeave(UIControl sender, MouseEventArgs e)
+        private void ButTest_MouseLeave(IUIControl sender, MouseEventArgs e)
         {
             if (sender is UIButton button)
             {
@@ -484,7 +488,7 @@ Progress: {(int)(progressValue * 100f)}%";
                 button.TweenBaseColorBounce(Color.Yellow, Color.Red, 2000, ScaleFuncs.Linear);
             }
         }
-        private void ButTest_MouseEnter(UIControl sender, MouseEventArgs e)
+        private void ButTest_MouseEnter(IUIControl sender, MouseEventArgs e)
         {
             if (sender is UIButton button)
             {

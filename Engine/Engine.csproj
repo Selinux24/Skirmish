@@ -200,6 +200,7 @@
     <Compile Include="IModelHasParts.cs" />
     <Compile Include="IModelPart.cs" />
     <Compile Include="ISceneObjectState.cs" />
+    <Compile Include="IUIEventsEvaluable.cs" />
     <Compile Include="Manipulator3DState.cs" />
     <Compile Include="ModelInstancedState.cs" />
     <Compile Include="ModelInstanceState.cs" />

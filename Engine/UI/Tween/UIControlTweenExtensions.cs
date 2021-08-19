@@ -26,7 +26,7 @@ namespace Engine.UI.Tween
         /// Clears all tweens
         /// </summary>
         /// <param name="control">Control</param>
-        public static void ClearTween(this UIControl control)
+        public static void ClearTween(this IUIControl control)
         {
             collection.ClearTween(control);
         }
@@ -37,7 +37,7 @@ namespace Engine.UI.Tween
         /// <param name="control">Control</param>
         /// <param name="duration">Duration in milliseconds</param>
         /// <param name="fnc">Scale function</param>
-        public static void TweenScaleUp(this UIControl control, long duration, ScaleFunc fnc)
+        public static void TweenScaleUp(this IUIControl control, long duration, ScaleFunc fnc)
         {
             if (control == null)
             {
@@ -52,7 +52,7 @@ namespace Engine.UI.Tween
         /// <param name="control">Control</param>
         /// <param name="duration">Duration in milliseconds</param>
         /// <param name="fnc">Scale function</param>
-        public static void TweenScaleDown(this UIControl control, long duration, ScaleFunc fnc)
+        public static void TweenScaleDown(this IUIControl control, long duration, ScaleFunc fnc)
         {
             if (control == null)
             {
@@ -69,7 +69,7 @@ namespace Engine.UI.Tween
         /// <param name="to">End value</param>
         /// <param name="duration">Duration in milliseconds</param>
         /// <param name="fnc">Scale function</param>
-        public static void TweenScale(this UIControl control, float from, float to, long duration, ScaleFunc fnc)
+        public static void TweenScale(this IUIControl control, float from, float to, long duration, ScaleFunc fnc)
         {
             if (control == null)
             {
@@ -90,7 +90,7 @@ namespace Engine.UI.Tween
         /// <param name="to">End value</param>
         /// <param name="duration">Duration in milliseconds</param>
         /// <param name="fnc">Scale function</param>
-        public static void TweenScaleBounce(this UIControl control, float from, float to, long duration, ScaleFunc fnc)
+        public static void TweenScaleBounce(this IUIControl control, float from, float to, long duration, ScaleFunc fnc)
         {
             if (control == null)
             {
@@ -111,7 +111,7 @@ namespace Engine.UI.Tween
         /// <param name="targetAngle">Target angle</param>
         /// <param name="duration">Duration in milliseconds</param>
         /// <param name="fnc">Scale function</param>
-        public static void TweenRotate(this UIControl control, float targetAngle, long duration, ScaleFunc fnc)
+        public static void TweenRotate(this IUIControl control, float targetAngle, long duration, ScaleFunc fnc)
         {
             if (control == null)
             {
@@ -132,7 +132,7 @@ namespace Engine.UI.Tween
         /// <param name="to">End value</param>
         /// <param name="duration">Duration in milliseconds</param>
         /// <param name="fnc">Scale function</param>
-        public static void TweenRotateRepeat(this UIControl control, float from, float to, long duration, ScaleFunc fnc)
+        public static void TweenRotateRepeat(this IUIControl control, float from, float to, long duration, ScaleFunc fnc)
         {
             if (control == null)
             {
@@ -153,7 +153,7 @@ namespace Engine.UI.Tween
         /// <param name="to">End value</param>
         /// <param name="duration">Duration in milliseconds</param>
         /// <param name="fnc">Scale function</param>
-        public static void TweenRotateBounce(this UIControl control, float from, float to, long duration, ScaleFunc fnc)
+        public static void TweenRotateBounce(this IUIControl control, float from, float to, long duration, ScaleFunc fnc)
         {
             if (control == null)
             {
@@ -173,7 +173,7 @@ namespace Engine.UI.Tween
         /// <param name="control">Control</param>
         /// <param name="duration">Duration in milliseconds</param>
         /// <param name="fnc">Scale function</param>
-        public static void TweenShow(this UIControl control, long duration, ScaleFunc fnc)
+        public static void TweenShow(this IUIControl control, long duration, ScaleFunc fnc)
         {
             if (control == null)
             {
@@ -188,7 +188,7 @@ namespace Engine.UI.Tween
         /// <param name="control">Control</param>
         /// <param name="duration">Duration in milliseconds</param>
         /// <param name="fnc">Scale function</param>
-        public static void TweenHide(this UIControl control, long duration, ScaleFunc fnc)
+        public static void TweenHide(this IUIControl control, long duration, ScaleFunc fnc)
         {
             if (control == null)
             {
@@ -205,7 +205,7 @@ namespace Engine.UI.Tween
         /// <param name="to">End value</param>
         /// <param name="duration">Duration in milliseconds</param>
         /// <param name="fnc">Scale function</param>
-        public static void TweenAlpha(this UIControl control, float from, float to, long duration, ScaleFunc fnc)
+        public static void TweenAlpha(this IUIControl control, float from, float to, long duration, ScaleFunc fnc)
         {
             if (control == null)
             {
@@ -226,7 +226,7 @@ namespace Engine.UI.Tween
         /// <param name="to">End value</param>
         /// <param name="duration">Duration in milliseconds</param>
         /// <param name="fnc">Scale function</param>
-        public static void TweenAlphaBounce(this UIControl control, float from, float to, long duration, ScaleFunc fnc)
+        public static void TweenAlphaBounce(this IUIControl control, float from, float to, long duration, ScaleFunc fnc)
         {
             if (control == null)
             {
@@ -248,7 +248,7 @@ namespace Engine.UI.Tween
         /// <param name="to">End value</param>
         /// <param name="duration">Duration in milliseconds</param>
         /// <param name="fnc">Scale function</param>
-        public static void TweenBaseColor(this UIControl control, Color4 from, Color4 to, long duration, ScaleFunc fnc)
+        public static void TweenBaseColor(this IUIControl control, Color4 from, Color4 to, long duration, ScaleFunc fnc)
         {
             if (control == null)
             {
@@ -273,7 +273,7 @@ namespace Engine.UI.Tween
         /// <param name="to">End value</param>
         /// <param name="duration">Duration in milliseconds</param>
         /// <param name="fnc">Scale function</param>
-        public static void TweenBaseColorBounce(this UIControl control, Color4 from, Color4 to, long duration, ScaleFunc fnc)
+        public static void TweenBaseColorBounce(this IUIControl control, Color4 from, Color4 to, long duration, ScaleFunc fnc)
         {
             if (control == null)
             {
@@ -296,7 +296,7 @@ namespace Engine.UI.Tween
         /// </summary>
         /// <param name="control">Control</param>
         /// <param name="ftScale">Scale tween</param>
-        public static void AddScaleTween(this UIControl control, FloatTween ftScale)
+        public static void AddScaleTween(this IUIControl control, FloatTween ftScale)
         {
             control.Scale = ftScale.StartValue;
 
@@ -320,7 +320,7 @@ namespace Engine.UI.Tween
         /// </summary>
         /// <param name="control">Control</param>
         /// <param name="ftScale">Scale tween</param>
-        public static void AddScaleBounce(this UIControl control, FloatTween ftScale)
+        public static void AddScaleBounce(this IUIControl control, FloatTween ftScale)
         {
             control.Scale = ftScale.StartValue;
 
@@ -347,7 +347,7 @@ namespace Engine.UI.Tween
         /// </summary>
         /// <param name="control">Control</param>
         /// <param name="ftRotate">Rotation tween</param>
-        public static void AddRotateTween(this UIControl control, FloatTween ftRotate)
+        public static void AddRotateTween(this IUIControl control, FloatTween ftRotate)
         {
             control.Rotation = ftRotate.StartValue;
 
@@ -370,7 +370,7 @@ namespace Engine.UI.Tween
         /// </summary>
         /// <param name="control">Control</param>
         /// <param name="ftRotate">Rotation tween</param>
-        public static void AddRotateRepeat(this UIControl control, FloatTween ftRotate)
+        public static void AddRotateRepeat(this IUIControl control, FloatTween ftRotate)
         {
             control.Rotation = ftRotate.StartValue;
 
@@ -396,7 +396,7 @@ namespace Engine.UI.Tween
         /// </summary>
         /// <param name="control">Control</param>
         /// <param name="ftRotate">Rotation tween</param>
-        public static void AddRotateBounce(this UIControl control, FloatTween ftRotate)
+        public static void AddRotateBounce(this IUIControl control, FloatTween ftRotate)
         {
             control.Rotation = ftRotate.StartValue;
 
@@ -424,7 +424,7 @@ namespace Engine.UI.Tween
         /// <param name="ftColorR">Red tween</param>
         /// <param name="ftColorG">Green tween</param>
         /// <param name="ftColorB">Blue tween</param>
-        public static void AddBaseColorTween(this UIControl control, FloatTween ftColorR, FloatTween ftColorG, FloatTween ftColorB)
+        public static void AddBaseColorTween(this IUIControl control, FloatTween ftColorR, FloatTween ftColorG, FloatTween ftColorB)
         {
             control.BaseColor = new Color(ftColorR.StartValue, ftColorG.StartValue, ftColorB.StartValue);
 
@@ -451,7 +451,7 @@ namespace Engine.UI.Tween
         /// <param name="ftColorR">Red tween</param>
         /// <param name="ftColorG">Green tween</param>
         /// <param name="ftColorB">Blue tween</param>
-        public static void AddBaseColorBounce(this UIControl control, FloatTween ftColorR, FloatTween ftColorG, FloatTween ftColorB)
+        public static void AddBaseColorBounce(this IUIControl control, FloatTween ftColorR, FloatTween ftColorG, FloatTween ftColorB)
         {
             control.BaseColor = new Color(ftColorR.StartValue, ftColorG.StartValue, ftColorB.StartValue);
 
@@ -486,7 +486,7 @@ namespace Engine.UI.Tween
         /// </summary>
         /// <param name="control">Control</param>
         /// <param name="ftAlpha">Alpha tween</param>
-        public static void AddAlphaTween(this UIControl control, FloatTween ftAlpha)
+        public static void AddAlphaTween(this IUIControl control, FloatTween ftAlpha)
         {
             control.Alpha = ftAlpha.StartValue;
 
@@ -510,7 +510,7 @@ namespace Engine.UI.Tween
         /// </summary>
         /// <param name="control">Control</param>
         /// <param name="ftAlpha">Alpha tween</param>
-        public static void AddAlphaBounce(this UIControl control, FloatTween ftAlpha)
+        public static void AddAlphaBounce(this IUIControl control, FloatTween ftAlpha)
         {
             control.Alpha = ftAlpha.StartValue;
 

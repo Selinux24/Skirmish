@@ -70,7 +70,7 @@ namespace Engine.UI
         /// <summary>
         /// Parent control
         /// </summary>
-        private readonly UIControl parent = null;
+        private readonly IUIControl parent = null;
         /// <summary>
         /// Horizontal align
         /// </summary>
@@ -255,7 +255,7 @@ namespace Engine.UI
         /// <param name="scene">Scene</param>
         /// <param name="parent">Parent control</param>
         /// <param name="description">Text description</param>
-        public TextDrawer(string id, string name, Scene scene, UIControl parent, TextDrawerDescription description)
+        public TextDrawer(string id, string name, Scene scene, IUIControl parent, TextDrawerDescription description)
             : base(id, name, scene, description)
         {
             this.parent = parent;

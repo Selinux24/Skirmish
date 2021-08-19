@@ -43,6 +43,10 @@ namespace Engine.UI
         /// Horizontal scroll position (from 0 to 1)
         /// </summary>
         private float horizontalScrollPosition = 0;
+        /// <summary>
+        /// Current scrolls bar picked control
+        /// </summary>
+        private IUIControl currentPickedControl = null;
 
         /// <summary>
         /// Gets or sets the control text
@@ -280,12 +284,22 @@ namespace Engine.UI
 
             if (Scroll.HasFlag(ScrollModes.Vertical))
             {
-                sbVertical = AddScroll(id, name, scene, ScrollModes.Vertical);
+                var sbDescription = UIScrollBarDescription.Default(ScrollModes.Vertical);
+                sbDescription.BaseColor = description.ScrollbarBaseColor;
+                sbDescription.MarkerColor = description.ScrollbarMarkerColor;
+                sbDescription.MarkerSize = description.ScrollbarMarkerSize;
+
+                sbVertical = AddScroll(id, name, scene, sbDescription);
             }
 
             if (Scroll.HasFlag(ScrollModes.Horizontal))
             {
-                sbHorizontal = AddScroll(id, name, scene, ScrollModes.Horizontal);
+                var sbDescription = UIScrollBarDescription.Default(ScrollModes.Horizontal);
+                sbDescription.BaseColor = description.ScrollbarBaseColor;
+                sbDescription.MarkerColor = description.ScrollbarMarkerColor;
+                sbDescription.MarkerSize = description.ScrollbarMarkerSize;
+
+                sbHorizontal = AddScroll(id, name, scene, sbDescription);
             }
 
             GrowControl();
@@ -293,15 +307,19 @@ namespace Engine.UI
         /// <summary>
         /// Adds a scroll controller to the control
         /// </summary>
-        /// <param name="scroll">Scroll mode</param>
-        private UIScrollBar AddScroll(string id, string name, Scene scene, ScrollModes scroll)
+        /// <param name="id">Parent id</param>
+        /// <param name="name">Parent name</param>
+        /// <param name="scene">Scene</param>
+        /// <param name="description">Description</param>
+        private UIScrollBar AddScroll(string id, string name, Scene scene, UIScrollBarDescription description)
         {
-            var sb = new UIScrollBar($"{id}.Scroll.{scroll}", $"{name}.Scroll.{scroll}", scene, UIScrollBarDescription.Default(scroll))
+            var sb = new UIScrollBar($"{id}.Scroll.{description.ScrollMode}", $"{name}.Scroll.{description.ScrollMode}", scene, description)
             {
                 EventsEnabled = true
             };
 
-            sb.MouseOver += ScrollBarMouseOver;
+            sb.MouseJustPressed += PbJustPressed;
+            sb.MouseJustReleased += PbJustReleased;
 
             AddChild(sb, false);
 
@@ -330,12 +348,13 @@ namespace Engine.UI
 
             textDrawer.Update(context);
 
-            UpdateScrollBars();
+            UpdateScrollBarsLayout();
+            UpdateScrollBarsState();
         }
         /// <summary>
-        /// Updates the scroll bars state
+        /// Updates the scroll bars layout
         /// </summary>
-        private void UpdateScrollBars()
+        private void UpdateScrollBarsLayout()
         {
             if (sbVertical == null && sbHorizontal == null)
             {
@@ -360,6 +379,26 @@ namespace Engine.UI
 
                 sbHorizontal.SetRectangle(rect);
                 sbHorizontal.MarkerPosition = ScrollHorizontalPosition;
+            }
+        }
+        /// <summary>
+        /// Updates the scroll bars state
+        /// </summary>
+        private void UpdateScrollBarsState()
+        {
+            if (currentPickedControl == null)
+            {
+                return;
+            }
+
+            if (currentPickedControl == sbVertical)
+            {
+                ScrollVerticalPosition = (Game.Input.MousePosition.Y - sbVertical.AbsoluteTop) / sbVertical.Height;
+            }
+
+            if (currentPickedControl == sbHorizontal)
+            {
+                ScrollHorizontalPosition = (Game.Input.MousePosition.X - sbHorizontal.AbsoluteLeft) / sbHorizontal.Width;
             }
         }
 
@@ -460,26 +499,32 @@ namespace Engine.UI
             ScrollHorizontalOffset = Math.Max(0, ScrollHorizontalOffset);
         }
         /// <summary>
-        /// Scroll bar mouse over events
+        /// Scroll bar mouse just pressed event
         /// </summary>
         /// <param name="sender">Sender control</param>
         /// <param name="e">Event arguments</param>
-        private void ScrollBarMouseOver(UIControl sender, MouseEventArgs e)
+        private void PbJustPressed(IUIControl sender, MouseEventArgs e)
         {
             if (!e.Buttons.HasFlag(MouseButtons.Left))
             {
                 return;
             }
 
-            if (sender == sbVertical)
+            currentPickedControl = sender;
+        }
+        /// <summary>
+        /// Scroll bar mouse just released event
+        /// </summary>
+        /// <param name="sender">Sender control</param>
+        /// <param name="e">Event arguments</param>
+        private void PbJustReleased(IUIControl sender, MouseEventArgs e)
+        {
+            if (!e.Buttons.HasFlag(MouseButtons.Left))
             {
-                ScrollVerticalPosition = (e.PointerPosition.Y - sbVertical.AbsoluteTop) / sbVertical.Height;
+                return;
             }
 
-            if (sender == sbHorizontal)
-            {
-                ScrollHorizontalPosition = (e.PointerPosition.X - sbHorizontal.AbsoluteLeft) / sbHorizontal.Width;
-            }
+            currentPickedControl = null;
         }
 
         /// <summary>

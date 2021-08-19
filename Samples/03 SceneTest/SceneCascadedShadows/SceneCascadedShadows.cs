@@ -24,7 +24,7 @@ namespace SceneTest.SceneCascadedShadows
         private Sprite spLevel3 = null;
         private Sprite spSelect1 = null;
         private Sprite spSelect2 = null;
-        UIControl currentSelector = null;
+        IUIControl currentSelector = null;
         float min = 0;
         float max = 0;
 
@@ -442,7 +442,7 @@ namespace SceneTest.SceneCascadedShadows
             caption3.TextHorizontalAlign = TextHorizontalAlign.Center;
         }
 
-        private void PbJustPressed(UIControl sender, MouseEventArgs e)
+        private void PbJustPressed(IUIControl sender, MouseEventArgs e)
         {
             if (!e.Buttons.HasFlag(MouseButtons.Left))
             {
@@ -463,7 +463,7 @@ namespace SceneTest.SceneCascadedShadows
                 max = spLevel3.Left + spLevel3.Width;
             }
         }
-        private void PbJustReleased(UIControl sender, MouseEventArgs e)
+        private void PbJustReleased(IUIControl sender, MouseEventArgs e)
         {
             if (!e.Buttons.HasFlag(MouseButtons.Left))
             {

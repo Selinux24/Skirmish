@@ -9,49 +9,8 @@ namespace Engine
     /// <summary>
     /// Control interface
     /// </summary>
-    public interface IUIControl
+    public interface IUIControl : IUIEventsEvaluable
     {
-        /// <summary>
-        /// Mouse over event
-        /// </summary>
-        event MouseEventHandler MouseOver;
-        /// <summary>
-        /// Mouse enter event
-        /// </summary>
-        event MouseEventHandler MouseEnter;
-        /// <summary>
-        /// Mouse leave event
-        /// </summary>
-        event MouseEventHandler MouseLeave;
-        /// <summary>
-        /// Mouse pressed
-        /// </summary>
-        event MouseEventHandler MousePressed;
-        /// <summary>
-        /// Mouse just pressed
-        /// </summary>
-        event MouseEventHandler MouseJustPressed;
-        /// <summary>
-        /// Mouse just released
-        /// </summary>
-        event MouseEventHandler MouseJustReleased;
-        /// <summary>
-        /// Mouse click
-        /// </summary>
-        event MouseEventHandler MouseClick;
-        /// <summary>
-        /// Mouse double click
-        /// </summary>
-        event MouseEventHandler MouseDoubleClick;
-        /// <summary>
-        /// Set focus event
-        /// </summary>
-        event EventHandler SetFocus;
-        /// <summary>
-        /// Lost focus event
-        /// </summary>
-        event EventHandler LostFocus;
-
         /// <summary>
         /// Active
         /// </summary>
@@ -82,19 +41,6 @@ namespace Engine
         /// Children collection
         /// </summary>
         IEnumerable<IUIControl> Children { get; }
-
-        /// <summary>
-        /// Gets or sets whether the control is enabled for event processing
-        /// </summary>
-        bool EventsEnabled { get; set; }
-        /// <summary>
-        /// Gets whether the mouse is over the button rectangle or not
-        /// </summary>
-        bool IsMouseOver { get; }
-        /// <summary>
-        /// Pressed buttons state flags
-        /// </summary>
-        MouseButtons PressedState { get; }
 
         /// <summary>
         /// Gets or sets the drawable height
@@ -316,50 +262,5 @@ namespace Engine
         /// </summary>
         /// <returns>Returns the total control area</returns>
         RectangleF GetControlArea();
-
-        /// <summary>
-        /// Sets the focus over the control
-        /// </summary>
-        void SetFocusControl();
-        /// <summary>
-        /// Lost focus over the control
-        /// </summary>
-        void SetFocusLost();
-
-        /// <summary>
-        /// Gets whether the specified UI control is event-evaluable or not
-        /// </summary>
-        /// <returns>Returns true if the control is evaluable for UI events</returns>
-        bool IsEvaluable();
-        /// <summary>
-        /// Initializes the UI state
-        /// </summary>
-        /// <param name="input">Input</param>
-        /// <param name="ctrl">Control</param>
-        void InitControlState(Input input);
-        /// <summary>
-        /// Evaluates input over the specified scene control
-        /// </summary>
-        /// <param name="input">Input</param>
-        /// <param name="ctrl">Top most control</param>
-        /// <param name="topMostControl">Returns the last events enabled control in the control hierarchy</param>
-        /// <param name="focusedControl">Returns the last clicked control with any mouse button</param>
-        /// <remarks>Iterates over the control's children collection</remarks>
-        void EvaluateTopMostControl(Input input, out IUIControl topMostControl, out IUIControl focusedControl);
-        /// <summary>
-        /// Evaluate events enabled control
-        /// </summary>
-        /// <param name="input">Input</param>
-        /// <param name="ctrl">Control</param>
-        /// <param name="focusedControl">Returns the focused control (last clicked control with any mouse button)</param>
-        void EvaluateEventsEnabledControl(Input input, out IUIControl focusedControl);
-        /// <summary>
-        /// Invalidates the internal state and forces an update in the next call
-        /// </summary>
-        void Invalidate();
-        /// <summary>
-        /// Gets the control update order
-        /// </summary>
-        int GetUpdateOrder();
     }
 }

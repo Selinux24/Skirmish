@@ -488,7 +488,7 @@ namespace Engine.UI
         /// <summary>
         /// Button pressed event
         /// </summary>
-        private void Button_Pressed(UIControl sender, MouseEventArgs e)
+        private void Button_Pressed(IUIControl sender, MouseEventArgs e)
         {
             if (sender is UIButton button)
             {
@@ -502,7 +502,7 @@ namespace Engine.UI
         /// <summary>
         /// Button just pressed event
         /// </summary>
-        private void Button_JustPressed(UIControl sender, MouseEventArgs e)
+        private void Button_JustPressed(IUIControl sender, MouseEventArgs e)
         {
             if (sender is UIButton button)
             {
@@ -516,7 +516,7 @@ namespace Engine.UI
         /// <summary>
         /// Button just released event
         /// </summary>
-        private void Button_JustReleased(UIControl sender, MouseEventArgs e)
+        private void Button_JustReleased(IUIControl sender, MouseEventArgs e)
         {
             if (sender is UIButton button)
             {
@@ -530,7 +530,7 @@ namespace Engine.UI
         /// <summary>
         /// Button click event
         /// </summary>
-        private void Button_Click(UIControl sender, MouseEventArgs e)
+        private void Button_Click(IUIControl sender, MouseEventArgs e)
         {
             if (sender is UIButton button)
             {

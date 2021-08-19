@@ -144,6 +144,18 @@ namespace Engine.UI
         /// </summary>
         public float ScrollbarSize { get; set; } = 15;
         /// <summary>
+        /// Scroll bar base color
+        /// </summary>
+        public Color4 ScrollbarBaseColor { get; set; } = UIConfiguration.BaseColor;
+        /// <summary>
+        /// Scroll bar marker color
+        /// </summary>
+        public Color4 ScrollbarMarkerColor { get; set; } = UIConfiguration.HighlightColor;
+        /// <summary>
+        /// Scroll bar marker size
+        /// </summary>
+        public float ScrollbarMarkerSize { get; set; } = 50;
+        /// <summary>
         /// Vertical scroll bar alignment
         /// </summary>
         public ScrollVerticalAlign ScrollVerticalAlign { get; set; } = ScrollVerticalAlign.Right;
