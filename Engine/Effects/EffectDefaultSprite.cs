@@ -94,6 +94,14 @@ namespace Engine.Effects
         /// Texture index effect variable
         /// </summary>
         private readonly EngineEffectVariableScalar textureIndexVar = null;
+        /// <summary>
+        /// Clipping rectangle variable
+        /// </summary>
+        private readonly EngineEffectVariableVector rectangleVar = null;
+        /// <summary>
+        /// Use clipping rectangle variable
+        /// </summary>
+        private readonly EngineEffectVariableScalar useRectangleVar = null;
 
         /// <summary>
         /// Current texture array
@@ -283,6 +291,42 @@ namespace Engine.Effects
                 textureIndexVar.Set(value);
             }
         }
+        /// <summary>
+        /// Clipping rectangle in pixels
+        /// </summary>
+        protected Rectangle ClippingRectangle
+        {
+            get
+            {
+                Vector4 rect = rectangleVar.GetVector<Vector4>();
+
+                return new Rectangle()
+                {
+                    X = (int)rect.X,
+                    Y = (int)rect.Y,
+                    Width = (int)rect.Z,
+                    Height = (int)rect.W,
+                };
+            }
+            set
+            {
+                rectangleVar.Set(new Vector4(value.X, value.Y, value.Width, value.Height));
+            }
+        }
+        /// <summary>
+        /// Use clipping rectangle
+        /// </summary>
+        protected bool UseClippingRectangle
+        {
+            get
+            {
+                return useRectangleVar.GetBool();
+            }
+            set
+            {
+                useRectangleVar.Set(value);
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -306,6 +350,8 @@ namespace Engine.Effects
             worldVar = Effect.GetVariableMatrix("gWorld");
             worldViewProjectionVar = Effect.GetVariableMatrix("gWorldViewProjection");
             resolutionVar = Effect.GetVariableVector("gResolution");
+            rectangleVar = Effect.GetVariableVector("gRectangle");
+            useRectangleVar = Effect.GetVariableScalar("gUseRect");
 
             sizeVar = Effect.GetVariableVector("gSize");
             color1Var = Effect.GetVariableVector("gColor1");
@@ -377,9 +423,28 @@ namespace Engine.Effects
             Matrix viewProjection,
             Vector2 screenResolution)
         {
+            UpdatePerFrame(world, viewProjection, screenResolution, false, Rectangle.Empty);
+        }
+        /// <summary>
+        /// Update per frame data
+        /// </summary>
+        /// <param name="world">World</param>
+        /// <param name="viewProjection">View * projection</param>
+        /// <param name="screenResolution">Screen resolution in pixels</param>
+        /// <param name="useClippingRectangle">Use clipping</param>
+        /// <param name="clippingRectangle">Clipping rectangle in pixels</param>
+        public void UpdatePerFrame(
+            Matrix world,
+            Matrix viewProjection,
+            Vector2 screenResolution,
+            bool useClippingRectangle,
+            Rectangle clippingRectangle)
+        {
             World = world;
             WorldViewProjection = world * viewProjection;
             Resolution = screenResolution;
+            UseClippingRectangle = useClippingRectangle;
+            ClippingRectangle = clippingRectangle;
         }
         /// <summary>
         /// Update per model object data

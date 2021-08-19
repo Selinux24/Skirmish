@@ -203,3 +203,19 @@ inline float3 NormalSampleToWorldSpace(float3 normalMapSample, float3 normalW, f
 
     return normalize((normalT.x * tangentW) + (normalT.y * binormalW) + (normalT.z * normalW));
 }
+
+inline float2 MapUVToScreenPixel(float2 uv, float2 screen)
+{
+    float2 p = 0.5 * float2(uv.x, -uv.y) + 0.5f;
+
+    return float2(screen.x * p.x, screen.y * p.y);
+}
+
+inline bool PixelIntoRectangle(float2 pixel, float4 rectangle)
+{
+    return (
+		pixel.x >= rectangle.x &&
+		pixel.x <= rectangle.x + rectangle.z &&
+		pixel.y >= rectangle.y &&
+		pixel.y <= rectangle.y + rectangle.w);
+}

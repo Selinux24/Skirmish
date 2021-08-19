@@ -9,7 +9,9 @@ cbuffer cbPerFrame : register(b0)
 	float4x4 gWorld;
 	float4x4 gWorldViewProjection;
     float2 gResolution;
-    float2 gPAD01;
+    bool gUseRect;
+    float gPAD01;
+    float4 gRectangle;
 };
 cbuffer cbPerObject : register(b1)
 {
@@ -49,6 +51,21 @@ float4 GetTintColor(float value)
     if (value <= gPct.z) return gColor3;
     return gColor4;
 }
+float4 EvaluateRect(float2 uv, float4 color)
+{
+    if (!gUseRect)
+    {
+        return color;
+    }
+    
+    float2 pixel = MapUVToScreenPixel(uv, gResolution);
+    if (PixelIntoRectangle(pixel, gRectangle))
+    {
+        return color;
+    }
+	
+    return 0;
+}
 
 /**********************************************************************************************************
 POSITION COLOR
@@ -66,7 +83,7 @@ PSVertexPositionColor VSPositionColor(VSVertexPositionColor input)
 
 float4 PSPositionColor(PSVertexPositionColor input) : SV_TARGET
 {
-    return saturate(input.color * gColor1);
+    return EvaluateRect(input.positionWorld.xy, saturate(input.color * gColor1));
 }
 float4 PSPositionColorPct(PSVertexPositionColor input) : SV_TARGET
 {
@@ -75,7 +92,7 @@ float4 PSPositionColorPct(PSVertexPositionColor input) : SV_TARGET
 		MapScreenCoordY(input.positionWorld.y, gSize, gResolution);
     float4 tintColor = GetTintColor(pct);
 	
-    return saturate(input.color * tintColor);
+    return EvaluateRect(input.positionWorld.xy, saturate(input.color * tintColor));
 }
 
 /**********************************************************************************************************
@@ -97,42 +114,42 @@ float4 PSPositionTexture(PSVertexPositionTexture input) : SV_TARGET
 {
     float4 color = gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
 	
-    return saturate(color * gColor1);
+    return EvaluateRect(input.positionWorld.xy, saturate(color * gColor1));
 }
 float4 PSPositionTextureRED(PSVertexPositionTexture input) : SV_TARGET
 {
 	float4 color = gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
 	
 	//Grayscale of red channel
-	return float4(color.rrr, 1);
+    return EvaluateRect(input.positionWorld.xy, float4(color.rrr, 1));
 }
 float4 PSPositionTextureGREEN(PSVertexPositionTexture input) : SV_TARGET
 {
 	float4 color = gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
 	
 	//Grayscale of green channel
-	return float4(color.ggg, 1);
+    return EvaluateRect(input.positionWorld.xy, float4(color.ggg, 1));
 }
 float4 PSPositionTextureBLUE(PSVertexPositionTexture input) : SV_TARGET
 {
 	float4 color = gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
 	
    	//Grayscale of blue channel
-	return float4(color.bbb, 1);
+    return EvaluateRect(input.positionWorld.xy, float4(color.bbb, 1));
 }
 float4 PSPositionTextureALPHA(PSVertexPositionTexture input) : SV_TARGET
 {
 	float4 color = gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
 	
    	//Grayscale of alpha channel
-	return float4(color.aaa, 1);
+    return EvaluateRect(input.positionWorld.xy, float4(color.aaa, 1));
 }
 float4 PSPositionTextureNOALPHA(PSVertexPositionTexture input) : SV_TARGET
 {
 	float4 color = gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
 
    	//Color channel
-	return float4(color.rgb, 1);
+    return EvaluateRect(input.positionWorld.xy, float4(color.rgb, 1));
 }
 float4 PSPositionTexturePct(PSVertexPositionTexture input) : SV_TARGET
 {
@@ -141,7 +158,7 @@ float4 PSPositionTexturePct(PSVertexPositionTexture input) : SV_TARGET
     float pct = gDirection == 0 ? input.tex.x : input.tex.y;
     float4 tintColor = GetTintColor(pct);
 
-    return saturate(color * tintColor);
+    return EvaluateRect(input.positionWorld.xy, saturate(color * tintColor));
 }
 
 /**********************************************************************************************************

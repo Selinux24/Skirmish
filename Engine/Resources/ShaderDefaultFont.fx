@@ -29,6 +29,26 @@ cbuffer cbPerFrame : register(b0)
 
 Texture2D gTexture : register(t0);
 
+float4 MapFont(float4 litColor, float4 color)
+{
+
+    if (litColor.r == 0.0f)
+    {
+        litColor.a = 0.0f;
+    }
+    else if (gUseColor == true)
+    {
+        litColor.a *= gAlpha;
+    }
+    else
+    {
+        litColor.rgb = color.rgb;
+        litColor.a *= color.a * gAlpha;
+    }
+
+    return saturate(litColor);
+}
+
 PSVertexFont VSFont(VSVertexFont input)
 {
 	PSVertexFont output = (PSVertexFont)0;
@@ -39,40 +59,6 @@ PSVertexFont VSFont(VSVertexFont input)
 	output.color = input.color;
 
 	return output;
-}
-
-float4 MapFont(float4 litColor, float4 color) {
-
-	if (litColor.r == 0.0f)
-	{
-		litColor.a = 0.0f;
-	}
-	else if (gUseColor == true)
-	{
-		litColor.a *= gAlpha;
-	}
-	else
-	{
-		litColor.rgb = color.rgb;
-		litColor.a *= color.a * gAlpha;
-	}
-
-	return saturate(litColor);
-}
-
-float2 MapScreenCoord(float2 positionWorld) {
-
-	float2 p = 0.5 * float2(positionWorld.x, -positionWorld.y) + 0.5f;
-
-	return float2(gResolution.x * p.x, gResolution.y * p.y);
-}
-
-bool CoordIntoRectangle(float2 coord) {
-	return (
-		coord.x >= gRectangle.x &&
-		coord.x <= gRectangle.x + gRectangle.z &&
-		coord.y >= gRectangle.y &&
-		coord.y <= gRectangle.y + gRectangle.w);
 }
 
 float4 PSFont(PSVertexFont input) : SV_TARGET
@@ -86,8 +72,8 @@ float4 PSFont(PSVertexFont input) : SV_TARGET
 		return MapFont(litColor, input.color);
 	}
 
-	float2 coord = MapScreenCoord(input.positionWorld.xy);
-	if (CoordIntoRectangle(coord))
+    float2 pixel = MapUVToScreenPixel(input.positionWorld.xy, gResolution);
+    if (PixelIntoRectangle(pixel, gRectangle))
 	{
 		return MapFont(litColor, input.color);
 	}
