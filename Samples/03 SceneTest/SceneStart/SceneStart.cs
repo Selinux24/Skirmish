@@ -87,8 +87,8 @@ namespace SceneTest.SceneStart
             titleDesc.TextForeColor = Color.Gold;
             titleDesc.TextShadowColor = new Color4(Color.LightYellow.RGB(), 0.25f);
             titleDesc.TextShadowDelta = new Vector2(4, 4);
-            titleDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
-            titleDesc.TextVerticalAlign = VerticalTextAlign.Middle;
+            titleDesc.TextHorizontalAlign = HorizontalAlign.Center;
+            titleDesc.TextVerticalAlign = VerticalAlign.Middle;
 
             title = await this.AddComponentUITextArea("Title", "Title", titleDesc);
             title.GrowControlWithText = false;
@@ -108,8 +108,8 @@ namespace SceneTest.SceneStart
             startButtonDesc.ColorReleased = new Color4(sceneButtonColor.RGB(), 0.8f);
             startButtonDesc.ColorPressed = new Color4(sceneButtonColor.RGB() * 1.2f, 0.9f);
             startButtonDesc.TextForeColor = Color.Gold;
-            startButtonDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
-            startButtonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
+            startButtonDesc.TextHorizontalAlign = HorizontalAlign.Center;
+            startButtonDesc.TextVerticalAlign = VerticalAlign.Middle;
 
             sceneMaterialsButton = new UIButton("ButtonMaterials", "ButtonMaterials", this, startButtonDesc);
             sceneWaterButton = new UIButton("ButtonWater", "ButtonWater", this, startButtonDesc);
@@ -142,8 +142,8 @@ namespace SceneTest.SceneStart
             exitButtonDesc.Height = 55;
             exitButtonDesc.ColorReleased = new Color4(exitButtonColor.RGB(), 0.8f);
             exitButtonDesc.ColorPressed = new Color4(exitButtonColor.RGB() * 1.2f, 0.9f);
-            exitButtonDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
-            exitButtonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
+            exitButtonDesc.TextHorizontalAlign = HorizontalAlign.Center;
+            exitButtonDesc.TextVerticalAlign = VerticalAlign.Middle;
 
             exitButton = new UIButton("ButtonExit", "ButtonExit", this, exitButtonDesc);
             exitButton.MouseClick += ExitButtonClick;

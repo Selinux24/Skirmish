@@ -348,8 +348,8 @@ namespace Terrain.PerlinNoise
             btnExit.Width = 30;
             btnExit.Height = 30;
             btnExit.Caption.Text = "X";
-            btnExit.Caption.TextHorizontalAlign = HorizontalTextAlign.Center;
-            btnExit.Caption.TextVerticalAlign = VerticalTextAlign.Middle;
+            btnExit.Caption.TextHorizontalAlign = HorizontalAlign.Center;
+            btnExit.Caption.TextVerticalAlign = VerticalAlign.Middle;
 
             txtScale.SetPosition(marginLeft, marginTop + (separation * lineIndex++));
 
@@ -398,8 +398,8 @@ namespace Terrain.PerlinNoise
             btnSave.Width = 200;
             btnSave.Height = 50;
             btnSave.SetPosition(Game.Form.RenderCenter.X + (perlinRendererSize / 2) - btnSave.Width, Game.Form.RenderCenter.Y + (perlinRendererSize / 2));
-            btnSave.Caption.TextHorizontalAlign = HorizontalTextAlign.Center;
-            btnSave.Caption.TextVerticalAlign = VerticalTextAlign.Middle;
+            btnSave.Caption.TextHorizontalAlign = HorizontalAlign.Center;
+            btnSave.Caption.TextVerticalAlign = VerticalAlign.Middle;
             btnSave.Caption.Text = "Save to File";
         }
 

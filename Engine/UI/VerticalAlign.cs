@@ -2,10 +2,14 @@
 namespace Engine.UI
 {
     /// <summary>
-    /// Vertical text align
+    /// Vertical control align
     /// </summary>
-    public enum VerticalTextAlign
+    public enum VerticalAlign
     {
+        /// <summary>
+        /// None
+        /// </summary>
+        None,
         /// <summary>
         /// Align top
         /// </summary>

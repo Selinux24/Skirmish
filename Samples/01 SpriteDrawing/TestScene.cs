@@ -199,8 +199,8 @@ namespace SpriteDrawing
             descButClose.Left = dynamicPan.Width - 10 - 40;
             descButClose.Width = 40;
             descButClose.Height = 40;
-            descButClose.TextHorizontalAlign = HorizontalTextAlign.Center;
-            descButClose.TextVerticalAlign = VerticalTextAlign.Middle;
+            descButClose.TextHorizontalAlign = HorizontalAlign.Center;
+            descButClose.TextVerticalAlign = VerticalAlign.Middle;
             descButClose.Text = "X";
 
             var butClose = new UIButton("DynamicPanel.CloseButton", "DynamicPanel.CloseButton", this, descButClose);
@@ -215,8 +215,8 @@ namespace SpriteDrawing
                 Top = height * 0.1f,
                 Bottom = height * 0.1f,
             };
-            descText.TextHorizontalAlign = HorizontalTextAlign.Center;
-            descText.TextVerticalAlign = VerticalTextAlign.Middle;
+            descText.TextHorizontalAlign = HorizontalAlign.Center;
+            descText.TextVerticalAlign = VerticalAlign.Middle;
 
             var textMapped = new UITextArea("DynamicPanel.MaraText", "DynamicPanel.MaraText", this, descText);
 
@@ -233,8 +233,8 @@ namespace SpriteDrawing
             descButClose.Left = 150;
             descButClose.Width = 200;
             descButClose.Height = 55;
-            descButClose.TextHorizontalAlign = HorizontalTextAlign.Center;
-            descButClose.TextVerticalAlign = VerticalTextAlign.Middle;
+            descButClose.TextHorizontalAlign = HorizontalAlign.Center;
+            descButClose.TextVerticalAlign = VerticalAlign.Middle;
 
             butTest2 = await this.AddComponentUIButton("ButtonTest2", "ButtonTest2", descButClose, LayerUI);
             butTest2.MouseClick += ButTest2_Click;
@@ -257,7 +257,6 @@ namespace SpriteDrawing
             panelDesc.Height = 300;
 
             var panel = await this.AddComponentUIPanel("scrollPanel", "Panel", panelDesc, LayerUI + 5);
-            panel.EventsEnabled = true;
 
             var areaFont = TextDrawerDescription.FromFamily("Tahoma", 20);
             var areaDesc = UITextAreaDescription.Default(areaFont);
@@ -267,7 +266,6 @@ namespace SpriteDrawing
             scrollTextArea = new UITextArea("scroll", "Scroll", this, areaDesc)
             {
                 Text = Properties.Resources.Lorem,
-                EventsEnabled = true,
             };
 
             panel.AddChild(scrollTextArea);
@@ -327,7 +325,7 @@ Progress: {(int)(progressValue * 100f)}%";
 
             if (Game.Input.MouseWheelDelta != 0 && scrollTextArea.IsMouseOver)
             {
-                scrollTextArea.VerticalScrollPosition -= Game.Input.MouseWheelDelta * gameTime.ElapsedSeconds * 0.01f;
+                scrollTextArea.ScrollVerticalPosition -= Game.Input.MouseWheelDelta * gameTime.ElapsedSeconds * 0.01f;
             }
 
             if (Game.Input.KeyPressed(Keys.Up))

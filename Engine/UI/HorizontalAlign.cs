@@ -2,10 +2,14 @@
 namespace Engine.UI
 {
     /// <summary>
-    /// Horizontal text align
+    /// Horizontal control align
     /// </summary>
-    public enum HorizontalTextAlign
+    public enum HorizontalAlign
     {
+        /// <summary>
+        /// None
+        /// </summary>
+        None,
         /// <summary>
         /// Align left
         /// </summary>

@@ -74,11 +74,11 @@ namespace Engine.UI
         /// <summary>
         /// Horizontal align
         /// </summary>
-        private HorizontalTextAlign horizontalAlign = HorizontalTextAlign.Left;
+        private HorizontalAlign horizontalAlign = HorizontalAlign.Left;
         /// <summary>
         /// Vertical align
         /// </summary>
-        private VerticalTextAlign verticalAlign = VerticalTextAlign.Middle;
+        private VerticalAlign verticalAlign = VerticalAlign.Middle;
         /// <summary>
         /// Update internals flag
         /// </summary>
@@ -130,7 +130,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets the horizontal align
         /// </summary>
-        public HorizontalTextAlign HorizontalAlign
+        public HorizontalAlign HorizontalAlign
         {
             get
             {
@@ -149,7 +149,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets the vertical align
         /// </summary>
-        public VerticalTextAlign VerticalAlign
+        public VerticalAlign VerticalAlign
         {
             get
             {
@@ -375,10 +375,10 @@ namespace Engine.UI
 
                 ClippingRectangle = (Rectangle)renderArea;
 
-                pos.X -= ta.Scroll.HasFlag(ScrollModes.Horizontal) ? ta.HorizontalScrollOffset : 0f;
+                pos.X -= ta.Scroll.HasFlag(ScrollModes.Horizontal) ? ta.ScrollHorizontalOffset : 0f;
                 pos.X = (int)pos.X;
 
-                pos.Y -= ta.Scroll.HasFlag(ScrollModes.Vertical) ? ta.VerticalScrollOffset : 0f;
+                pos.Y -= ta.Scroll.HasFlag(ScrollModes.Vertical) ? ta.ScrollVerticalOffset : 0f;
                 pos.Y = (int)pos.Y;
             }
 
@@ -573,7 +573,7 @@ namespace Engine.UI
         /// <param name="horizontalAlign">Horizontal align</param>
         /// <param name="verticalAlign">Vertical align</param>
         /// <returns>Returns a size vector where X is the width, and Y is the height</returns>
-        public Vector2 MeasureText(string text, HorizontalTextAlign horizontalAlign, VerticalTextAlign verticalAlign)
+        public Vector2 MeasureText(string text, HorizontalAlign horizontalAlign, VerticalAlign verticalAlign)
         {
             if (fontMap == null)
             {
@@ -614,8 +614,8 @@ namespace Engine.UI
                 FontMapParsedSentence.FromSample(sampleChar),
                 false,
                 Game.Form.RenderRectangle,
-                HorizontalTextAlign.Left,
-                VerticalTextAlign.Top);
+                HorizontalAlign.Left,
+                VerticalAlign.Top);
 
             return w.Size.Y;
         }

@@ -66,8 +66,8 @@ namespace Animation.Start
             title.TextForeColor = Color.Gold;
             title.TextShadowColor = new Color4(Color.LightYellow.RGB(), 0.25f);
             title.TextShadowDelta = new Vector2(4, 4);
-            title.TextHorizontalAlign = HorizontalTextAlign.Center;
-            title.TextVerticalAlign = VerticalTextAlign.Middle;
+            title.TextHorizontalAlign = HorizontalAlign.Center;
+            title.TextVerticalAlign = VerticalAlign.Middle;
         }
         private async Task InitializeMainPanel()
         {
@@ -81,12 +81,12 @@ namespace Animation.Start
             Color4 highlightColor = new Color4(0.3333f, 0.3333f, 0.3333f, 0f);
             var buttonDesc = UIButtonDescription.DefaultTwoStateButton(buttonFont, Color.Red, Color.Red.ToColor4() + highlightColor);
             buttonDesc.TextForeColor = Color.Gold;
-            buttonDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
-            buttonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
+            buttonDesc.TextHorizontalAlign = HorizontalAlign.Center;
+            buttonDesc.TextVerticalAlign = VerticalAlign.Middle;
             var exitDesc = UIButtonDescription.DefaultTwoStateButton(buttonFont, Color.Orange, Color.Orange.ToColor4() + highlightColor);
             exitDesc.TextForeColor = Color.Gold;
-            exitDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
-            exitDesc.TextVerticalAlign = VerticalTextAlign.Middle;
+            exitDesc.TextHorizontalAlign = HorizontalAlign.Center;
+            exitDesc.TextVerticalAlign = VerticalAlign.Middle;
 
             var emptyDesc = SpriteDescription.Default("start/resources/empty.png");
 

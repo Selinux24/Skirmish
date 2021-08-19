@@ -437,9 +437,9 @@ namespace SceneTest.SceneCascadedShadows
             caption2.Top = Game.Form.RenderHeight - height;
             caption3.Top = Game.Form.RenderHeight - height;
 
-            caption1.TextHorizontalAlign = HorizontalTextAlign.Center;
-            caption2.TextHorizontalAlign = HorizontalTextAlign.Center;
-            caption3.TextHorizontalAlign = HorizontalTextAlign.Center;
+            caption1.TextHorizontalAlign = HorizontalAlign.Center;
+            caption2.TextHorizontalAlign = HorizontalAlign.Center;
+            caption3.TextHorizontalAlign = HorizontalAlign.Center;
         }
 
         private void PbJustPressed(UIControl sender, MouseEventArgs e)

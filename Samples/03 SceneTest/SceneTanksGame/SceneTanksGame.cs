@@ -182,8 +182,8 @@ namespace SceneTest.SceneTanksGame
             loadingText = await this.AddComponentUITextArea("LoadingText", "LoadingText", UITextAreaDescription.DefaultFromFile(fontFilename, 40, true), LayerUIEffects + 1);
             loadingText.TextForeColor = Color.Yellow;
             loadingText.TextShadowColor = Color.Orange;
-            loadingText.TextHorizontalAlign = HorizontalTextAlign.Center;
-            loadingText.TextVerticalAlign = VerticalTextAlign.Middle;
+            loadingText.TextHorizontalAlign = HorizontalAlign.Center;
+            loadingText.TextVerticalAlign = VerticalAlign.Middle;
             loadingText.GrowControlWithText = false;
             loadingText.Visible = false;
 
@@ -260,16 +260,16 @@ namespace SceneTest.SceneTanksGame
             gameMessage = await this.AddComponentUITextArea("GameMessage", "GameMessage", UITextAreaDescription.DefaultFromFile(fontFilename, 120, FontMapStyles.Regular, false), LayerUIEffects + 1);
             gameMessage.TextForeColor = Color.Yellow;
             gameMessage.TextShadowColor = Color.Yellow * 0.5f;
-            gameMessage.TextHorizontalAlign = HorizontalTextAlign.Center;
-            gameMessage.TextVerticalAlign = VerticalTextAlign.Middle;
+            gameMessage.TextHorizontalAlign = HorizontalAlign.Center;
+            gameMessage.TextVerticalAlign = VerticalAlign.Middle;
             gameMessage.GrowControlWithText = false;
             gameMessage.Visible = false;
 
             gameKeyHelp = await this.AddComponentUITextArea("GameKeyHelp", "GameKeyHelp", UITextAreaDescription.DefaultFromFile(fontFilename, 25, FontMapStyles.Regular, true), LayerUIEffects + 1);
             gameKeyHelp.TextForeColor = Color.Yellow;
             gameKeyHelp.Text = "Press space to exit";
-            gameKeyHelp.TextHorizontalAlign = HorizontalTextAlign.Center;
-            gameKeyHelp.TextVerticalAlign = VerticalTextAlign.Middle;
+            gameKeyHelp.TextHorizontalAlign = HorizontalAlign.Center;
+            gameKeyHelp.TextVerticalAlign = VerticalAlign.Middle;
             gameKeyHelp.GrowControlWithText = false;
             gameKeyHelp.Visible = false;
         }
@@ -281,8 +281,8 @@ namespace SceneTest.SceneTanksGame
             var font = TextDrawerDescription.FromFile(fontFilename, 20, true);
 
             var descButton = UIButtonDescription.DefaultTwoStateButton(font, Color.DarkGray * 0.6666f, Color.DarkGray * 0.7777f);
-            descButton.TextHorizontalAlign = HorizontalTextAlign.Center;
-            descButton.TextVerticalAlign = VerticalTextAlign.Middle;
+            descButton.TextHorizontalAlign = HorizontalAlign.Center;
+            descButton.TextVerticalAlign = VerticalAlign.Middle;
 
             dialogAccept = new UIButton("DialogAccept", "DialogAccept", this, descButton);
             dialogAccept.Caption.Text = "Ok";
@@ -291,8 +291,8 @@ namespace SceneTest.SceneTanksGame
             dialogCancel.Caption.Text = "Cancel";
 
             var descText = UITextAreaDescription.DefaultFromFile(fontFilename, 28);
-            descText.TextHorizontalAlign = HorizontalTextAlign.Center;
-            descText.TextVerticalAlign = VerticalTextAlign.Middle;
+            descText.TextHorizontalAlign = HorizontalAlign.Center;
+            descText.TextVerticalAlign = VerticalAlign.Middle;
 
             dialogText = new UITextArea("DialogText", "DialogText", this, descText);
 
@@ -308,14 +308,14 @@ namespace SceneTest.SceneTanksGame
             player1Name.TextForeColor = player1Status.Color;
             player1Name.TextShadowColor = player1Status.Color * 0.5f;
             player1Name.GrowControlWithText = false;
-            player1Name.TextHorizontalAlign = HorizontalTextAlign.Left;
+            player1Name.TextHorizontalAlign = HorizontalAlign.Left;
             player1Name.Visible = false;
 
             player1Points = await this.AddComponentUITextArea("Player1Points", "Player1Points", UITextAreaDescription.DefaultFromFile(fontFilename, 25, true));
             player1Points.TextForeColor = player1Status.Color;
             player1Points.TextShadowColor = player1Status.Color * 0.5f;
             player1Points.GrowControlWithText = false;
-            player1Points.TextHorizontalAlign = HorizontalTextAlign.Center;
+            player1Points.TextHorizontalAlign = HorizontalAlign.Center;
             player1Points.Visible = false;
 
             player1Life = await this.AddComponentUIProgressBar("Player1Life", "Player1Life", UIProgressBarDescription.DefaultFromFile(fontFilename, 10, true));
@@ -329,14 +329,14 @@ namespace SceneTest.SceneTanksGame
             player2Name.TextForeColor = player2Status.Color;
             player2Name.TextShadowColor = player2Status.Color * 0.5f;
             player2Name.GrowControlWithText = false;
-            player2Name.TextHorizontalAlign = HorizontalTextAlign.Right;
+            player2Name.TextHorizontalAlign = HorizontalAlign.Right;
             player2Name.Visible = false;
 
             player2Points = await this.AddComponentUITextArea("Player2Points", "Player2Points", UITextAreaDescription.DefaultFromFile(fontFilename, 25, true));
             player2Points.TextForeColor = player2Status.Color;
             player2Points.TextShadowColor = player2Status.Color * 0.5f;
             player2Points.GrowControlWithText = false;
-            player2Points.TextHorizontalAlign = HorizontalTextAlign.Center;
+            player2Points.TextHorizontalAlign = HorizontalAlign.Center;
             player2Points.Visible = false;
 
             player2Life = await this.AddComponentUIProgressBar("Player2Life", "Player2Life", UIProgressBarDescription.DefaultFromFile(fontFilename, 10, true));
@@ -351,7 +351,7 @@ namespace SceneTest.SceneTanksGame
             turnText = await this.AddComponentUITextArea("TurnText", "TurnText", UITextAreaDescription.DefaultFromFile(fontFilename, 40, true));
             turnText.TextForeColor = Color.Yellow;
             turnText.TextShadowColor = Color.Yellow * 0.5f;
-            turnText.TextHorizontalAlign = HorizontalTextAlign.Center;
+            turnText.TextHorizontalAlign = HorizontalAlign.Center;
             turnText.GrowControlWithText = false;
             turnText.Visible = false;
 
@@ -427,8 +427,8 @@ namespace SceneTest.SceneTanksGame
             fireKeyText = await this.AddComponentUITextArea("FireKeyText", "FireKeyText", UITextAreaDescription.DefaultFromFile(fontFilename, 25, FontMapStyles.Regular, true));
             fireKeyText.TextForeColor = Color.Yellow;
             fireKeyText.Text = "Press space to fire!";
-            fireKeyText.TextHorizontalAlign = HorizontalTextAlign.Center;
-            fireKeyText.TextVerticalAlign = VerticalTextAlign.Middle;
+            fireKeyText.TextHorizontalAlign = HorizontalAlign.Center;
+            fireKeyText.TextVerticalAlign = VerticalAlign.Middle;
             fireKeyText.GrowControlWithText = false;
             fireKeyText.Visible = false;
         }

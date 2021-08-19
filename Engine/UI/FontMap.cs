@@ -41,7 +41,7 @@ namespace Engine.UI
         /// <param name="horizontalAlign">Horizontal align</param>
         /// <param name="verticalAlign">Vertical align</param>
         /// <returns>Returns a new vertex list</returns>
-        private static IEnumerable<VertexFont> AlignVertices(IEnumerable<VertexFont> vertices, RectangleF rect, HorizontalTextAlign horizontalAlign, VerticalTextAlign verticalAlign)
+        private static IEnumerable<VertexFont> AlignVertices(IEnumerable<VertexFont> vertices, RectangleF rect, HorizontalAlign horizontalAlign, VerticalAlign verticalAlign)
         {
             //Separate lines
             var lines = SeparateLines(vertices.ToArray());
@@ -119,14 +119,14 @@ namespace Engine.UI
         /// <param name="horizontalAlign">Horizontal align</param>
         /// <param name="maxWidth">Maximum width</param>
         /// <param name="lineWidth">Line width</param>
-        private static float GetDeltaX(HorizontalTextAlign horizontalAlign, float maxWidth, float lineWidth)
+        private static float GetDeltaX(HorizontalAlign horizontalAlign, float maxWidth, float lineWidth)
         {
             float diffX;
-            if (horizontalAlign == HorizontalTextAlign.Center)
+            if (horizontalAlign == HorizontalAlign.Center)
             {
                 diffX = -lineWidth * 0.5f;
             }
-            else if (horizontalAlign == HorizontalTextAlign.Right)
+            else if (horizontalAlign == HorizontalAlign.Right)
             {
                 diffX = (maxWidth * 0.5f) - lineWidth;
             }
@@ -143,14 +143,14 @@ namespace Engine.UI
         /// <param name="verticalAlign">Vertical align</param>
         /// <param name="maxHeight">Maximum height</param>
         /// <param name="columnHeight">Column height</param>
-        private static float GetDeltaY(VerticalTextAlign verticalAlign, float maxHeight, float columnHeight)
+        private static float GetDeltaY(VerticalAlign verticalAlign, float maxHeight, float columnHeight)
         {
             float diffY;
-            if (verticalAlign == VerticalTextAlign.Middle)
+            if (verticalAlign == VerticalAlign.Middle)
             {
                 diffY = -columnHeight * 0.5f;
             }
-            else if (verticalAlign == VerticalTextAlign.Bottom)
+            else if (verticalAlign == VerticalAlign.Bottom)
             {
                 diffY = (maxHeight * 0.5f) - columnHeight;
             }
@@ -611,8 +611,8 @@ namespace Engine.UI
             FontMapParsedSentence sentenceDesc,
             bool processShadows,
             RectangleF rect,
-            HorizontalTextAlign horizontalAlign,
-            VerticalTextAlign verticalAlign)
+            HorizontalAlign horizontalAlign,
+            VerticalAlign verticalAlign)
         {
             if (sentenceDesc.Count() <= 0)
             {

@@ -118,7 +118,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets the text horizontal align
         /// </summary>
-        public HorizontalTextAlign TextHorizontalAlign
+        public HorizontalAlign TextHorizontalAlign
         {
             get
             {
@@ -132,7 +132,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets the text vertical align
         /// </summary>
-        public VerticalTextAlign TextVerticalAlign
+        public VerticalAlign TextVerticalAlign
         {
             get
             {
@@ -191,7 +191,9 @@ namespace Engine.UI
         /// <inheritdoc/>
         public float ScrollbarSize { get; set; }
         /// <inheritdoc/>
-        public float VerticalScrollOffset
+        public HorizontalAlign ScrollVerticalAlign { get; set; }
+        /// <inheritdoc/>
+        public float ScrollVerticalOffset
         {
             get
             {
@@ -204,20 +206,7 @@ namespace Engine.UI
             }
         }
         /// <inheritdoc/>
-        public float HorizontalScrollOffset
-        {
-            get
-            {
-                return horizontalScrollOffset;
-            }
-            set
-            {
-                horizontalScrollOffset = MathUtil.Clamp(value, 0f, this.GetMaximumHorizontalOffset());
-                horizontalScrollPosition = this.ConvertHorizontalOffsetToPosition(horizontalScrollOffset);
-            }
-        }
-        /// <inheritdoc/>
-        public float VerticalScrollPosition
+        public float ScrollVerticalPosition
         {
             get
             {
@@ -230,7 +219,22 @@ namespace Engine.UI
             }
         }
         /// <inheritdoc/>
-        public float HorizontalScrollPosition
+        public VerticalAlign ScrollHorizontalAlign { get; set; }
+        /// <inheritdoc/>
+        public float ScrollHorizontalOffset
+        {
+            get
+            {
+                return horizontalScrollOffset;
+            }
+            set
+            {
+                horizontalScrollOffset = MathUtil.Clamp(value, 0f, this.GetMaximumHorizontalOffset());
+                horizontalScrollPosition = this.ConvertHorizontalOffsetToPosition(horizontalScrollOffset);
+            }
+        }
+        /// <inheritdoc/>
+        public float ScrollHorizontalPosition
         {
             get
             {
@@ -256,6 +260,8 @@ namespace Engine.UI
             growControlWithText = description.GrowControlWithText;
             Scroll = description.Scroll;
             ScrollbarSize = description.ScrollbarSize;
+            ScrollVerticalAlign = description.ScrollVerticalAlign;
+            ScrollHorizontalAlign = description.ScrollHorizontalAlign;
 
             textDrawer = new TextDrawer(
                 $"{id}.TextDrawer",
@@ -290,7 +296,7 @@ namespace Engine.UI
         /// <param name="scroll">Scroll mode</param>
         private UIScrollBar AddScroll(string id, string name, Scene scene, ScrollModes scroll)
         {
-            var sb = new UIScrollBar($"{id}.Scroll.{scroll}", $"{name}.BackPanel", scene, UIScrollBarDescription.Default(scroll))
+            var sb = new UIScrollBar($"{id}.Scroll.{scroll}", $"{name}.Scroll.{scroll}", scene, UIScrollBarDescription.Default(scroll))
             {
                 EventsEnabled = true
             };
@@ -324,25 +330,66 @@ namespace Engine.UI
 
             textDrawer.Update(context);
 
-            float size = ScrollbarSize;
+            UpdateScrollBars();
+        }
+        /// <summary>
+        /// Updates the scroll bars state
+        /// </summary>
+        private void UpdateScrollBars()
+        {
+            if (sbVertical == null || sbHorizontal == null)
+            {
+                return;
+            }
+
             var renderArea = GetRenderArea(false);
+
+            float size = ScrollbarSize;
+            float heightAdjust = sbHorizontal != null ? size : 0;
+            float widthAdjust = sbVertical != null ? size : 0;
+            var verticalAlign = sbVertical != null ? ScrollVerticalAlign : HorizontalAlign.None;
+            var horizontalAlign = sbHorizontal != null ? ScrollHorizontalAlign : VerticalAlign.None;
 
             if (sbVertical != null)
             {
-                sbVertical.Left = renderArea.Width - size;
-                sbVertical.Top = 0;
+                float left = 0;
+                if (verticalAlign != HorizontalAlign.Right)
+                {
+                    left = renderArea.Width - size;
+                }
+
+                float top = 0;
+                if (horizontalAlign == VerticalAlign.Top)
+                {
+                    top = size;
+                }
+
+                sbVertical.Left = left;
+                sbVertical.Top = top;
                 sbVertical.Width = size;
-                sbVertical.Height = renderArea.Height - size;
-                sbVertical.MarkerPosition = VerticalScrollPosition;
+                sbVertical.Height = renderArea.Height - heightAdjust;
+                sbVertical.MarkerPosition = ScrollVerticalPosition;
             }
 
             if (sbHorizontal != null)
             {
-                sbHorizontal.Left = 0;
-                sbHorizontal.Top = renderArea.Height - size;
-                sbHorizontal.Width = renderArea.Width - size;
+                float top = 0;
+                if (horizontalAlign != VerticalAlign.Top)
+                {
+                    top = renderArea.Height - size;
+                }
+
+                float left = 0;
+                if (verticalAlign == HorizontalAlign.Left)
+                {
+                    left = size;
+                }
+
+                sbHorizontal.Left = left;
+                sbHorizontal.Top = top;
+                sbHorizontal.Width = renderArea.Width - widthAdjust;
                 sbHorizontal.Height = size;
-                sbHorizontal.MarkerPosition = HorizontalScrollPosition;
+                sbHorizontal.MarkerPosition = ScrollHorizontalPosition;
             }
         }
 
@@ -417,30 +464,30 @@ namespace Engine.UI
         /// <inheritdoc/>
         public void ScrollUp(float amount)
         {
-            VerticalScrollOffset -= amount * Game.GameTime.ElapsedSeconds;
-            VerticalScrollOffset = Math.Max(0, VerticalScrollOffset);
+            ScrollVerticalOffset -= amount * Game.GameTime.ElapsedSeconds;
+            ScrollVerticalOffset = Math.Max(0, ScrollVerticalOffset);
         }
         /// <inheritdoc/>
         public void ScrollDown(float amount)
         {
             float maxOffset = this.GetMaximumVerticalOffset();
 
-            VerticalScrollOffset += amount * Game.GameTime.ElapsedSeconds;
-            VerticalScrollOffset = Math.Min(maxOffset, VerticalScrollOffset);
+            ScrollVerticalOffset += amount * Game.GameTime.ElapsedSeconds;
+            ScrollVerticalOffset = Math.Min(maxOffset, ScrollVerticalOffset);
         }
         /// <inheritdoc/>
         public void ScrollLeft(float amount)
         {
             float maxOffset = this.GetMaximumHorizontalOffset();
 
-            HorizontalScrollOffset += amount * Game.GameTime.ElapsedSeconds;
-            HorizontalScrollOffset = Math.Min(maxOffset, HorizontalScrollOffset);
+            ScrollHorizontalOffset += amount * Game.GameTime.ElapsedSeconds;
+            ScrollHorizontalOffset = Math.Min(maxOffset, ScrollHorizontalOffset);
         }
         /// <inheritdoc/>
         public void ScrollRight(float amount)
         {
-            HorizontalScrollOffset -= amount * Game.GameTime.ElapsedSeconds;
-            HorizontalScrollOffset = Math.Max(0, HorizontalScrollOffset);
+            ScrollHorizontalOffset -= amount * Game.GameTime.ElapsedSeconds;
+            ScrollHorizontalOffset = Math.Max(0, ScrollHorizontalOffset);
         }
         /// <summary>
         /// Scroll bar mouse over events
@@ -456,12 +503,12 @@ namespace Engine.UI
 
             if (sender == sbVertical)
             {
-                VerticalScrollPosition = (e.PointerPosition.Y - sbVertical.AbsoluteTop) / sbVertical.Height;
+                ScrollVerticalPosition = (e.PointerPosition.Y - sbVertical.AbsoluteTop) / sbVertical.Height;
             }
 
             if (sender == sbHorizontal)
             {
-                HorizontalScrollPosition = (e.PointerPosition.X - sbHorizontal.AbsoluteLeft) / sbHorizontal.Width;
+                ScrollHorizontalPosition = (e.PointerPosition.X - sbHorizontal.AbsoluteLeft) / sbHorizontal.Width;
             }
         }
 

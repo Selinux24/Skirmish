@@ -248,8 +248,8 @@ namespace GameLogic
             butCloseDesc.Width = 60;
             butCloseDesc.Height = 20;
             butCloseDesc.TextForeColor = Color.Yellow;
-            butCloseDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
-            butCloseDesc.TextVerticalAlign = VerticalTextAlign.Middle;
+            butCloseDesc.TextHorizontalAlign = HorizontalAlign.Center;
+            butCloseDesc.TextVerticalAlign = VerticalAlign.Middle;
             butCloseDesc.Text = "Exit";
 
             butClose = await this.AddComponentUIButton("butClose", "butClose", butCloseDesc);

@@ -196,8 +196,8 @@ namespace Collada.Start
             buttonDesc.ColorReleased = SceneButtonColorBase;
             buttonDesc.ColorPressed = SceneButtonColorHighlight;
             buttonDesc.TextForeColor = Color.Gold;
-            buttonDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
-            buttonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
+            buttonDesc.TextHorizontalAlign = HorizontalAlign.Center;
+            buttonDesc.TextVerticalAlign = VerticalAlign.Middle;
 
             sceneDungeonWallButton = await this.AddComponentUIButton("ButtonDungeonWall", "ButtonDungeonWall", buttonDesc, layerHUD);
             sceneNavMeshTestButton = await this.AddComponentUIButton("ButtonNavMeshTest", "ButtonNavMeshTest", buttonDesc, layerHUD);
@@ -211,8 +211,8 @@ namespace Collada.Start
             exitButtonDesc.ColorReleased = ExitButtonColorBase;
             exitButtonDesc.ColorPressed = ExitButtonColorHighlight;
             exitButtonDesc.TextForeColor = Color.Gold;
-            exitButtonDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
-            exitButtonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
+            exitButtonDesc.TextHorizontalAlign = HorizontalAlign.Center;
+            exitButtonDesc.TextVerticalAlign = VerticalAlign.Middle;
 
             exitButton = await this.AddComponentUIButton("ButtonExit", "ButtonExit", exitButtonDesc, layerHUD);
 
@@ -251,8 +251,8 @@ namespace Collada.Start
 
             desc.ButtonDescription.Font = mediumFont;
             desc.ButtonDescription.TextForeColor = Color.LightGoldenrodYellow;
-            desc.ButtonDescription.TextHorizontalAlign = HorizontalTextAlign.Center;
-            desc.ButtonDescription.TextVerticalAlign = VerticalTextAlign.Middle;
+            desc.ButtonDescription.TextHorizontalAlign = HorizontalAlign.Center;
+            desc.ButtonDescription.TextVerticalAlign = VerticalAlign.Middle;
 
             desc.TabButtonsAreaSize *= 1.5f;
             desc.TabButtonsSpacing = new Spacing() { Horizontal = 10f };
@@ -273,8 +273,8 @@ namespace Collada.Start
                 var buttonDesc = UIButtonDescription.Default(mediumClickFont, mapTexture);
                 buttonDesc.Text = "Click image to load...";
                 buttonDesc.TextForeColor = Color.DarkGray;
-                buttonDesc.TextHorizontalAlign = HorizontalTextAlign.Right;
-                buttonDesc.TextVerticalAlign = VerticalTextAlign.Bottom;
+                buttonDesc.TextHorizontalAlign = HorizontalAlign.Right;
+                buttonDesc.TextVerticalAlign = VerticalAlign.Bottom;
                 var button = new UIButton($"ModularDungeonTabs.Button_{i}", $"ModularDungeonTabs.Button_{i}", this, buttonDesc);
                 button.MouseClick += (s, o) =>
                 {
@@ -290,8 +290,8 @@ namespace Collada.Start
             var buttonBasicDesc = UIButtonDescription.Default(largeFont, "modulardungeon/resources/basicdungeon/basicdungeon.png");
             buttonBasicDesc.Text = "Basic Dungeon";
             buttonBasicDesc.TextForeColor = Color.Gold;
-            buttonBasicDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
-            buttonBasicDesc.TextVerticalAlign = VerticalTextAlign.Middle;
+            buttonBasicDesc.TextHorizontalAlign = HorizontalAlign.Center;
+            buttonBasicDesc.TextVerticalAlign = VerticalAlign.Middle;
             var buttonBasic = new UIButton("ModularDungeonTabs.ButtonBasicDungeon", "ModularDungeonTabs.ButtonBasicDungeon", this, buttonBasicDesc);
             buttonBasic.MouseClick += (s, o) =>
             {
@@ -375,7 +375,7 @@ namespace Collada.Start
         }
         private void UpdateLayout()
         {
-            title.TextHorizontalAlign = HorizontalTextAlign.Center;
+            title.TextHorizontalAlign = HorizontalAlign.Center;
             title.Top = Game.Form.RenderHeight * 0.25f;
 
             sceneDungeonWallButton.Left = ((Game.Form.RenderWidth / 6) * 1) - (sceneDungeonWallButton.Width / 2);

@@ -15,21 +15,29 @@ namespace Engine.UI
         /// </summary>
         float ScrollbarSize { get; set; }
         /// <summary>
+        /// Vertical scroll bar position
+        /// </summary>
+        HorizontalAlign ScrollVerticalAlign { get; set; }
+        /// <summary>
         /// Gets or sets the vertical scroll offset
         /// </summary>
-        float VerticalScrollOffset { get; set; }
-        /// <summary>
-        /// Gets or sets the horizontal scroll offset
-        /// </summary>
-        float HorizontalScrollOffset { get; set; }
+        float ScrollVerticalOffset { get; set; }
         /// <summary>
         /// Vertical Scroll position (0 to 1)
         /// </summary>
-        float VerticalScrollPosition { get; set; }
+        float ScrollVerticalPosition { get; set; }
+        /// <summary>
+        /// Horizontal scroll bar position
+        /// </summary>
+        VerticalAlign ScrollHorizontalAlign { get; set; }
+        /// <summary>
+        /// Gets or sets the horizontal scroll offset
+        /// </summary>
+        float ScrollHorizontalOffset { get; set; }
         /// <summary>
         /// Horizontal Scroll position (0 to 1)
         /// </summary>
-        float HorizontalScrollPosition { get; set; }
+        float ScrollHorizontalPosition { get; set; }
 
         /// <summary>
         /// Moves scroll up

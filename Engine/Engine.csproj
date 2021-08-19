@@ -487,7 +487,7 @@
     <Compile Include="Tween\Tween.cs" />
     <Compile Include="Tween\TweenState.cs" />
     <Compile Include="UI\FontMapCache.cs" />
-    <Compile Include="UI\HorizontalTextAlign.cs" />
+    <Compile Include="UI\HorizontalAlign.cs" />
     <Compile Include="UI\UIConfiguration.cs" />
     <Compile Include="UI\UIConsole.cs" />
     <Compile Include="UI\UIScrollBar.cs" />
@@ -507,7 +507,7 @@
     <Compile Include="UI\UITextBox.cs" />
     <Compile Include="UI\UITextArea.cs" />
     <Compile Include="UI\UITextAreaDescription.cs" />
-    <Compile Include="UI\VerticalTextAlign.cs" />
+    <Compile Include="UI\VerticalAlign.cs" />
     <Compile Include="WaterDescription.cs" />
     <Compile Include="Water.cs" />
     <Compile Include="UI\UIProgressBar.cs" />
