@@ -106,7 +106,7 @@ namespace Engine.Common
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"{GetType()}.{Name ?? "NoName"}";
+            return $"{Id}";
         }
     }
 }

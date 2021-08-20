@@ -444,6 +444,13 @@ namespace Engine.UI
 
             textDrawer.Resize();
         }
+        /// <inheritdoc/>
+        public override void Invalidate()
+        {
+            GrowControl();
+
+            base.Invalidate();
+        }
 
         /// <inheritdoc/>
         public override RectangleF GetRenderArea(bool applyPadding)
@@ -532,6 +539,15 @@ namespace Engine.UI
         /// </summary>
         private void GrowControl()
         {
+            if (HasParent && FitWithParent)
+            {
+                var renderArea = GetRenderArea(true);
+                Width = renderArea.Width;
+                Height = renderArea.Height;
+
+                return;
+            }
+
             var size = textDrawer.MeasureText(Text, TextHorizontalAlign, TextVerticalAlign);
             var minHeight = textDrawer.GetLineHeight();
 

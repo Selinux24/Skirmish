@@ -916,6 +916,9 @@ namespace Engine.UI
             if (!children.Contains(ctrl))
             {
                 children.Add(ctrl);
+
+                Invalidate();
+                ctrl.Invalidate();
             }
         }
         /// <inheritdoc/>
@@ -950,6 +953,8 @@ namespace Engine.UI
                 {
                     ctrlDisposable.Dispose();
                 }
+
+                Invalidate();
             }
         }
         /// <inheritdoc/>
@@ -984,6 +989,9 @@ namespace Engine.UI
             if (!children.Contains(ctrl))
             {
                 children.Insert(index, ctrl);
+
+                Invalidate();
+                ctrl.Invalidate();
             }
         }
 

@@ -2052,6 +2052,8 @@ namespace Engine
         /// <param name="scene">Scene</param>
         private void EvaluateInput()
         {
+            TopMostControl = null;
+
             //Gets all UIControl order by processing order
             var evaluableCtrls = GetComponents<IUIControl>()
                 .Where(c => c.IsEvaluable())
@@ -2060,8 +2062,6 @@ namespace Engine
 
             if (!evaluableCtrls.Any())
             {
-                TopMostControl = null;
-
                 return;
             }
 
@@ -2072,8 +2072,6 @@ namespace Engine
             var mouseOverCtrls = evaluableCtrls.Where(c => c.IsMouseOver);
             if (!mouseOverCtrls.Any())
             {
-                TopMostControl = null;
-
                 return;
             }
 

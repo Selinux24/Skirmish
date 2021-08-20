@@ -267,9 +267,9 @@ namespace SpriteDrawing
             areaDesc.ScrollbarMarkerColor = Color.LightGray;
             areaDesc.Padding = new Padding(5, 1, 1, 25);
 
-            scrollTextArea = new UITextArea("scroll", "Scroll", this, areaDesc)
+            scrollTextArea = new UITextArea("scrollText", "scrollText", this, areaDesc)
             {
-                Text = Properties.Resources.Lorem,
+                Text = Properties.Resources.Lorem
             };
 
             panel.AddChild(scrollTextArea);
@@ -303,17 +303,21 @@ namespace SpriteDrawing
         }
         private void UpdateDebugInfo()
         {
-            if (textDebug != null)
+            if (textDebug == null)
             {
-                var mousePos = Cursor.ScreenPosition;
-                var but = dynamicPan?.Children.OfType<UIButton>().FirstOrDefault();
+                return;
+            }
 
-                textDebug.Text = $@"PanPressed: {dynamicPan?.PressedState ?? MouseButtons.None}; PanRect: {dynamicPan?.AbsoluteRectangle}; 
+            var mousePos = Cursor.ScreenPosition;
+            var but = dynamicPan?.Children.OfType<UIButton>().FirstOrDefault();
+
+            textDebug.Text = $@"PanPressed: {dynamicPan?.PressedState ?? MouseButtons.None}; PanRect: {dynamicPan?.AbsoluteRectangle}; 
 ButPressed: {but?.PressedState ?? MouseButtons.None}; ButRect: {but?.AbsoluteRectangle}; 
 MousePos: {mousePos}; InputMousePos: {Game.Input.MousePosition}; 
 FormCenter: {Game.Form.RenderCenter} ScreenCenter: {Game.Form.ScreenCenter}
+TopMostControl: {TopMostControl} {TopMostControl?.Width},{TopMostControl?.Height} - {TopMostControl?.GetRenderArea(true)}
+FocusedControl: {FocusedControl} {FocusedControl?.Width},{FocusedControl?.Height} - {FocusedControl?.GetRenderArea(true)}
 Progress: {(int)(progressValue * 100f)}%";
-            }
         }
         private void UpdateInput(GameTime gameTime)
         {
