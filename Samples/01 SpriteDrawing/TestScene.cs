@@ -122,7 +122,7 @@ namespace SpriteDrawing
             float size = Game.Form.RenderWidth * 0.3333f;
 
             var desc = SpriteDescription.Default("smiley.png", size, size);
-            spriteSmiley = await this.AddComponentSprite("SmileySprite", "SmileySprite", desc, SceneObjectUsages.None, layerUIObjects);
+            spriteSmiley = await this.AddComponentSprite("SmileySprite", "SmileySprite", desc, SceneObjectUsages.UI, layerUIObjects);
             spriteSmiley.Visible = false;
         }
         private async Task InitializeStaticPan()
