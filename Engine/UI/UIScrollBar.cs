@@ -95,8 +95,12 @@ namespace Engine.UI
                 return;
             }
 
-            float size = MarkerSize / (ScrollMode == ScrollModes.Horizontal ? Width : Height) * 0.5f;
-            spriteBar.SetPercentage(MarkerPosition - size, MarkerPosition + size);
+            float ctrlSize = ScrollMode == ScrollModes.Vertical ? Height : Width;
+            float t = ctrlSize - MarkerSize;
+            float p = MarkerPosition * t / ctrlSize;
+            float size = MarkerSize / ctrlSize;
+
+            spriteBar.SetPercentage(p, p + size);
         }
     }
 
