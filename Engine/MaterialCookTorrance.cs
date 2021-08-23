@@ -30,6 +30,26 @@ namespace Engine
                 };
             }
         }
+        /// <summary>
+        /// Gets a material from a built-in definition
+        /// </summary>
+        /// <param name="builtInMaterial">Built-in material</param>
+        /// <returns>Returns a material from a built-in definition</returns>
+        public static MaterialCookTorrance FromBuiltIn(BuiltInMaterial builtInMaterial)
+        {
+            MaterialCookTorranceContent content = builtInMaterial;
+
+            return new MaterialCookTorrance()
+            {
+                DiffuseColor = content.DiffuseColor,
+                EmissiveColor = content.EmissiveColor,
+                AmbientColor = content.AmbientColor,
+                SpecularColor = content.SpecularColor,
+                Metallic = content.Metallic,
+                Roughness = content.Roughness,
+                IsTransparent = false,
+            };
+        }
 
         /// <summary>
         /// Diffuse color

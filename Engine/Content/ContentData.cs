@@ -4,8 +4,8 @@ using System.Linq;
 
 namespace Engine.Content
 {
-    using Engine.Content.Persistence;
     using Engine.Common;
+    using Engine.Content.Persistence;
 
     /// <summary>
     /// Model content
@@ -52,7 +52,7 @@ namespace Engine.Content
         /// <summary>
         /// Animation dictionary
         /// </summary>
-        public Dictionary<string, AnimationContent[]> Animations { get; set; } = new Dictionary<string, AnimationContent[]>();
+        public Dictionary<string, IEnumerable<AnimationContent>> Animations { get; set; } = new Dictionary<string, IEnumerable<AnimationContent>>();
         /// <summary>
         /// Skinning information
         /// </summary>
@@ -338,7 +338,7 @@ namespace Engine.Content
                     continue;
                 }
 
-                if (animation.Value.Any(a => Array.Exists(jointNames, j => j == a.Joint)))
+                if (animation.Value.Any(a => jointNames.Any(j => j == a.Joint)))
                 {
                     result.Add(animation.Key);
                 }

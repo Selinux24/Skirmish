@@ -241,7 +241,7 @@ namespace Engine.Common
         /// <param name="boneTransforms">Bone transforms</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns null or position list</returns>
-        public IEnumerable<Vector3> GetPoints(Matrix[] boneTransforms, bool refresh = false)
+        public IEnumerable<Vector3> GetPoints(IEnumerable<Matrix> boneTransforms, bool refresh = false)
         {
             if (refresh || positionCache == null)
             {
@@ -301,7 +301,7 @@ namespace Engine.Common
         /// <param name="boneTransforms">Bone transforms</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns null or triangle list</returns>
-        public IEnumerable<Triangle> GetTriangles(Matrix[] boneTransforms, bool refresh = false)
+        public IEnumerable<Triangle> GetTriangles(IEnumerable<Matrix> boneTransforms, bool refresh = false)
         {
             if (refresh || triangleCache == null)
             {

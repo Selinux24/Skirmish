@@ -176,7 +176,7 @@
     <Compile Include="Common\BufferManagerIndices.cs" />
     <Compile Include="Common\BufferManagerInstances.cs" />
     <Compile Include="Common\GeometryHelper.cs" />
-    <Compile Include="Common\IInstacingData.cs" />
+    <Compile Include="IInstacingData.cs" />
     <Compile Include="Common\IntersectionHelper.cs" />
     <Compile Include="Common\IntersectionTriangle.cs" />
     <Compile Include="Common\VertexDecal.cs" />
@@ -200,6 +200,7 @@
     <Compile Include="IModelHasParts.cs" />
     <Compile Include="IModelPart.cs" />
     <Compile Include="ISceneObjectState.cs" />
+    <Compile Include="ISkinningData.cs" />
     <Compile Include="IUIEventsEvaluable.cs" />
     <Compile Include="Manipulator3DState.cs" />
     <Compile Include="ModelInstancedState.cs" />
@@ -290,8 +291,8 @@
     <Compile Include="Common\ShaderIncludeManager.cs" />
     <Compile Include="Common\TimerTick.cs" />
     <Compile Include="Common\UpdateContext.cs" />
-    <Compile Include="Common\IUseMaterials.cs" />
-    <Compile Include="Common\IUseSkinningData.cs" />
+    <Compile Include="IUseMaterials.cs" />
+    <Compile Include="IUseSkinningData.cs" />
     <Compile Include="Common\VertexCpuParticle.cs" />
     <Compile Include="Content\ContentDescription.cs" />
     <Compile Include="Content\ILoader.cs" />

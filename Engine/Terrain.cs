@@ -634,7 +634,7 @@ namespace Engine
         /// <summary>
         /// Terrain material
         /// </summary>
-        private readonly IMeshMaterial terrainMaterial;
+        private IMeshMaterial terrainMaterial;
 
         /// <summary>
         /// Gets or sets whether use alpha mapping or not
@@ -952,6 +952,19 @@ namespace Engine
                 colorTextures = Game.ResourceManager.RequestResource(colors);
                 alphaMap = Game.ResourceManager.RequestResource(aMap);
             }
+        }
+
+        /// <inheritdoc/>
+        public IMeshMaterial GetMaterial(string meshMaterialName)
+        {
+            return terrainMaterial;
+        }
+        /// <inheritdoc/>
+        public void ReplaceMaterial(string meshMaterialName, IMeshMaterial material)
+        {
+            terrainMaterial = material;
+
+            Scene.UpdateMaterialPalette();
         }
     }
 

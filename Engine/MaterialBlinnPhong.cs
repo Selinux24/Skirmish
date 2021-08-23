@@ -29,6 +29,25 @@ namespace Engine
                 };
             }
         }
+        /// <summary>
+        /// Gets a material from a built-in definition
+        /// </summary>
+        /// <param name="builtInMaterial">Built-in material</param>
+        /// <returns>Returns a material from a built-in definition</returns>
+        public static MaterialBlinnPhong FromBuiltIn(BuiltInMaterial builtInMaterial)
+        {
+            MaterialBlinnPhongContent content = builtInMaterial;
+
+            return new MaterialBlinnPhong()
+            {
+                DiffuseColor = content.DiffuseColor,
+                EmissiveColor = content.EmissiveColor,
+                AmbientColor = content.AmbientColor,
+                SpecularColor = content.SpecularColor,
+                Shininess = content.Shininess,
+                IsTransparent = false,
+            };
+        }
 
         /// <summary>
         /// Diffuse color

@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 
 namespace Engine
 {
-    using Engine.Animation;
     using Engine.Common;
     using Engine.Effects;
     using Engine.PathFinding;
@@ -875,6 +874,15 @@ namespace Engine
             }
         }
         /// <summary>
+        /// Updates the materials palette
+        /// </summary>
+        public virtual void UpdateMaterialPalette()
+        {
+            updateMaterialsPalette = true;
+
+            UpdateGlobals(false);
+        }
+        /// <summary>
         /// Updates the global material palette
         /// </summary>
         /// <param name="materialPalette">Material palette</param>
@@ -921,7 +929,7 @@ namespace Engine
         /// <param name="animationPaletteWidth">Animation palette width</param>
         private void UpdateAnimationPalette(out EngineShaderResourceView animationPalette, out uint animationPaletteWidth)
         {
-            List<SkinningData> skData = new List<SkinningData>();
+            List<ISkinningData> skData = new List<ISkinningData>();
 
             var skComponents = GetComponents<IUseSkinningData>();
 
@@ -934,7 +942,7 @@ namespace Engine
                 }
             }
 
-            List<SkinningData> addedSks = new List<SkinningData>();
+            List<ISkinningData> addedSks = new List<ISkinningData>();
 
             List<Vector4> values = new List<Vector4>();
 
@@ -946,7 +954,7 @@ namespace Engine
                 {
                     var skV = sk.Pack();
 
-                    sk.UpdateResource((uint)addedSks.Count, (uint)values.Count, (uint)skV.Length);
+                    sk.UpdateResource((uint)addedSks.Count, (uint)values.Count, (uint)skV.Count());
 
                     values.AddRange(skV);
 

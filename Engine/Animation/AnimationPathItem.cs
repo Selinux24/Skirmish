@@ -63,7 +63,7 @@ namespace Engine.Animation
         /// Updates internal state with specified skinning data
         /// </summary>
         /// <param name="skData">Skinning data</param>
-        public void UpdateSkinningData(SkinningData skData)
+        public void UpdateSkinningData(ISkinningData skData)
         {
             int clipIndex = skData.GetClipIndex(ClipName);
             Duration = skData.GetClipDuration(clipIndex);

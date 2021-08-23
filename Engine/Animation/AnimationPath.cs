@@ -211,7 +211,7 @@ namespace Engine.Animation
         /// <param name="skData">Skinning data</param>
         /// <param name="updated">Returns true when the internal path index change</param>
         /// <param name="atEnd">Returns true when the internal path ends</param>
-        public void Update(float delta, SkinningData skData, out bool updated, out bool atEnd)
+        public void Update(float delta, ISkinningData skData, out bool updated, out bool atEnd)
         {
             updated = false;
             atEnd = false;

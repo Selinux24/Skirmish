@@ -572,7 +572,7 @@ namespace Engine
         /// <summary>
         /// Material
         /// </summary>
-        private readonly IMeshMaterial material;
+        private IMeshMaterial foliageMaterial;
         /// <summary>
         /// Foliage visible sphere
         /// </summary>
@@ -608,7 +608,7 @@ namespace Engine
         {
             get
             {
-                return new[] { material };
+                return new[] { foliageMaterial };
             }
         }
         /// <summary>
@@ -645,7 +645,7 @@ namespace Engine
             foliageSphere = new BoundingSphere(Vector3.Zero, description.VisibleRadius);
 
             //Material
-            material = MeshMaterial.DefaultPhong;
+            foliageMaterial = MeshMaterial.DefaultPhong;
 
             //Read foliage textures
             string contentPath = description.ContentPath;
@@ -1137,7 +1137,7 @@ namespace Engine
                     StartRadius = channelData.StartRadius,
                     EndRadius = channelData.EndRadius,
                     RandomTexture = textureRandom,
-                    MaterialIndex = material.ResourceIndex,
+                    MaterialIndex = foliageMaterial.ResourceIndex,
                     TextureCount = channelData.TextureCount,
                     Texture = channelData.Textures,
                     NormalMapCount = channelData.NormalMapCount,
@@ -1218,6 +1218,19 @@ namespace Engine
             }
 
             return new QuadTreeNode[] { };
+        }
+
+        /// <inheritdoc/>
+        public IMeshMaterial GetMaterial(string meshMaterialName)
+        {
+            return foliageMaterial;
+        }
+        /// <inheritdoc/>
+        public void ReplaceMaterial(string meshMaterialName, IMeshMaterial material)
+        {
+            foliageMaterial = material;
+
+            Scene.UpdateMaterialPalette();
         }
     }
 

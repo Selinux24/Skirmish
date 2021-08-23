@@ -4,7 +4,6 @@ using System.Linq;
 
 namespace Engine.Common
 {
-    using Engine.Animation;
     using Engine.Content;
     using Engine.Effects;
 
@@ -38,18 +37,13 @@ namespace Engine.Common
         {
             get
             {
-                List<IMeshMaterial> matList = new List<IMeshMaterial>();
-
                 var drawingData = GetDrawingData(LevelOfDetail.High);
-                if (drawingData != null)
+                if (drawingData == null)
                 {
-                    foreach (var meshMaterial in drawingData.Materials.Keys)
-                    {
-                        matList.Add(drawingData.Materials[meshMaterial]);
-                    }
+                    return Enumerable.Empty<IMeshMaterial>();
                 }
 
-                return matList.ToArray();
+                return drawingData.Materials.Values.ToArray();
             }
         }
         /// <summary>
@@ -59,7 +53,7 @@ namespace Engine.Common
         /// <summary>
         /// Gets the skinning list used by the current drawing data
         /// </summary>
-        public SkinningData SkinningData
+        public ISkinningData SkinningData
         {
             get
             {
@@ -301,6 +295,49 @@ namespace Engine.Common
             }
 
             return null;
+        }
+
+        /// <inheritdoc/>
+        public IMeshMaterial GetMaterial(string meshMaterialName)
+        {
+            foreach (var drawingData in meshesByLOD.Values)
+            {
+                var meshMaterials = drawingData.Materials.Keys.ToArray();
+
+                foreach (var meshMaterial in meshMaterials)
+                {
+                    if (string.Equals(meshMaterial, meshMaterialName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return drawingData.Materials[meshMaterial];
+                    }
+                }
+            }
+
+            return null;
+        }
+        /// <inheritdoc/>
+        public void ReplaceMaterial(string meshMaterialName, IMeshMaterial material)
+        {
+            bool updated = false;
+
+            foreach (var drawingData in meshesByLOD.Values)
+            {
+                var meshMaterials = drawingData.Materials.Keys.ToArray();
+
+                foreach (var meshMaterial in meshMaterials)
+                {
+                    if (string.Equals(meshMaterial, meshMaterialName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        drawingData.Materials[meshMaterial] = material;
+                        updated = true;
+                    }
+                }
+            }
+
+            if (updated)
+            {
+                Scene.UpdateMaterialPalette();
+            }
         }
     }
 }

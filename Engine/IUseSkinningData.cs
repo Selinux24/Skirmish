@@ -1,5 +1,5 @@
 ﻿
-namespace Engine.Common
+namespace Engine
 {
     using Engine.Animation;
 
@@ -11,6 +11,6 @@ namespace Engine.Common
         /// <summary>
         /// Gets the skinning data used by the current drawing data
         /// </summary>
-        SkinningData SkinningData { get; }
+        ISkinningData SkinningData { get; }
     }
 }

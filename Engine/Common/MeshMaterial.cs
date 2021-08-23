@@ -2,6 +2,8 @@
 
 namespace Engine.Common
 {
+    using Engine.Content;
+
     /// <summary>
     /// Mesh material
     /// </summary>
@@ -45,6 +47,42 @@ namespace Engine.Common
                     Material = MaterialCookTorrance.Default,
                 };
             }
+        }
+        /// <summary>
+        /// Gets a phong material from a built-in definition
+        /// </summary>
+        /// <param name="builtInMaterial">Built-in material</param>
+        /// <returns>Returns a phong material from a built-in definition</returns>
+        public static MeshMaterial PhongFromBuiltIn(BuiltInMaterial builtInMaterial)
+        {
+            return new MeshMaterial
+            {
+                Material = MaterialPhong.FromBuiltIn(builtInMaterial),
+            };
+        }
+        /// <summary>
+        /// Gets a blinn-phong material from a built-in definition
+        /// </summary>
+        /// <param name="builtInMaterial">Built-in material</param>
+        /// <returns>Returns a blinn-phong material from a built-in definition</returns>
+        public static MeshMaterial BlinnPhongFromBuiltIn(BuiltInMaterial builtInMaterial)
+        {
+            return new MeshMaterial
+            {
+                Material = MaterialBlinnPhong.FromBuiltIn(builtInMaterial),
+            };
+        }
+        /// <summary>
+        /// Gets a cook-torrance material from a built-in definition
+        /// </summary>
+        /// <param name="builtInMaterial">Built-in material</param>
+        /// <returns>Returns a cook-torrance material from a built-in definition</returns>
+        public static MeshMaterial CookTorranceFromBuiltIn(BuiltInMaterial builtInMaterial)
+        {
+            return new MeshMaterial
+            {
+                Material = MaterialCookTorrance.FromBuiltIn(builtInMaterial),
+            };
         }
 
         /// <summary>

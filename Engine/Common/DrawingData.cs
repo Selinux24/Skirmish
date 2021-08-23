@@ -57,7 +57,7 @@ namespace Engine.Common
         /// <summary>
         /// Datos de animación
         /// </summary>
-        public SkinningData SkinningData { get; set; } = null;
+        public ISkinningData SkinningData { get; set; } = null;
         /// <summary>
         /// Lights collection
         /// </summary>
@@ -277,7 +277,7 @@ namespace Engine.Common
         /// <param name="weights">Resulting weights</param>
         /// <param name="jointNames">Resulting joints</param>
         /// <returns>Returns true if the model has skinnging data</returns>
-        private static bool ReadSkinningData(DrawingDataDescription description, ContentData modelContent, string meshName, out Matrix bindShapeMatrix, out Weight[] weights, out string[] jointNames)
+        private static bool ReadSkinningData(DrawingDataDescription description, ContentData modelContent, string meshName, out Matrix bindShapeMatrix, out IEnumerable<Weight> weights, out IEnumerable<string> jointNames)
         {
             bindShapeMatrix = Matrix.Identity;
             weights = null;
@@ -337,7 +337,7 @@ namespace Engine.Common
         /// <param name="modelContent">Model content</param>
         /// <param name="joint">Joint to initialize</param>
         /// <param name="animations">Animation list to feed</param>
-        private static JointAnimation[] InitializeJoints(ContentData modelContent, Joint joint, string[] skinController)
+        private static IEnumerable<JointAnimation> InitializeJoints(ContentData modelContent, Joint joint, IEnumerable<string> skinController)
         {
             List<JointAnimation> animations = new List<JointAnimation>();
 
@@ -345,13 +345,11 @@ namespace Engine.Common
 
             //Find keyframes for current bone
             var c = FindJointKeyframes(joint.Name, modelContent.Animations);
-            if (c != null && c.Length > 0)
+            if (c?.Any() == true)
             {
                 //Set bones
-                Array.ForEach(c, (a) =>
-                {
-                    boneAnimations.Add(new JointAnimation(a.Joint, a.Keyframes));
-                });
+                var ja = c.Select(a => new JointAnimation(a.Joint, a.Keyframes)).ToArray();
+                boneAnimations.AddRange(ja);
             }
 
             if (boneAnimations.Count > 0)
@@ -417,17 +415,17 @@ namespace Engine.Common
         /// <param name="jointName">Joint name</param>
         /// <param name="animations">Animation dictionary</param>
         /// <returns>Returns joint's animation content</returns>
-        private static AnimationContent[] FindJointKeyframes(string jointName, Dictionary<string, AnimationContent[]> animations)
+        private static IEnumerable<AnimationContent> FindJointKeyframes(string jointName, Dictionary<string, IEnumerable<AnimationContent>> animations)
         {
             foreach (string key in animations.Keys)
             {
-                if (Array.Exists(animations[key], a => a.Joint == jointName))
+                if (animations[key].Any(a => a.Joint == jointName))
                 {
-                    return Array.FindAll(animations[key], a => a.Joint == jointName);
+                    return animations[key].Where(a => a.Joint == jointName).ToArray();
                 }
             }
 
-            return new AnimationContent[] { };
+            return Enumerable.Empty<AnimationContent>();
         }
         /// <summary>
         /// Initialize lights
@@ -560,7 +558,7 @@ namespace Engine.Common
         /// <param name="boneTransforms">Bone transforms list</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's point list</returns>
-        public IEnumerable<Vector3> GetPoints(Matrix[] boneTransforms, bool refresh = false)
+        public IEnumerable<Vector3> GetPoints(IEnumerable<Matrix> boneTransforms, bool refresh = false)
         {
             return GetPoints(Matrix.Identity, boneTransforms, refresh);
         }
@@ -571,7 +569,7 @@ namespace Engine.Common
         /// <param name="boneTransforms">Bone transforms list</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's point list</returns>
-        public IEnumerable<Vector3> GetPoints(Matrix transform, Matrix[] boneTransforms, bool refresh = false)
+        public IEnumerable<Vector3> GetPoints(Matrix transform, IEnumerable<Matrix> boneTransforms, bool refresh = false)
         {
             List<Vector3> points = new List<Vector3>();
 
@@ -635,7 +633,7 @@ namespace Engine.Common
         /// <param name="boneTransforms">Bone transforms list</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's triangle list</returns>
-        public IEnumerable<Triangle> GetTriangles(Matrix[] boneTransforms, bool refresh = false)
+        public IEnumerable<Triangle> GetTriangles(IEnumerable<Matrix> boneTransforms, bool refresh = false)
         {
             return GetTriangles(Matrix.Identity, boneTransforms, refresh);
         }
@@ -646,7 +644,7 @@ namespace Engine.Common
         /// <param name="boneTransforms">Bone transforms list</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's triangle list</returns>
-        public IEnumerable<Triangle> GetTriangles(Matrix transform, Matrix[] boneTransforms, bool refresh = false)
+        public IEnumerable<Triangle> GetTriangles(Matrix transform, IEnumerable<Matrix> boneTransforms, bool refresh = false)
         {
             List<Triangle> triangles = new List<Triangle>();
 

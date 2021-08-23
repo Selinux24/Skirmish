@@ -335,26 +335,6 @@ Progress: {(int)(progressValue * 100f)}%";
             {
                 scrollTextArea.ScrollVerticalPosition -= Game.Input.MouseWheelDelta * gameTime.ElapsedSeconds * 0.01f;
             }
-
-            if (Game.Input.KeyPressed(Keys.Up))
-            {
-                scrollTextArea.ScrollUp(100f);
-            }
-
-            if (Game.Input.KeyPressed(Keys.Down))
-            {
-                scrollTextArea.ScrollDown(100f);
-            }
-
-            if (Game.Input.KeyPressed(Keys.Right))
-            {
-                scrollTextArea.ScrollRight(100f);
-            }
-
-            if (Game.Input.KeyPressed(Keys.Left))
-            {
-                scrollTextArea.ScrollLeft(100f);
-            }
         }
         private void UpdateSprite(GameTime gameTime)
         {

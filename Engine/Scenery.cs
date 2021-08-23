@@ -198,19 +198,49 @@ namespace Engine
             /// <returns>Returns the used materials array</returns>
             public IEnumerable<IMeshMaterial> GetMaterials()
             {
-                List<IMeshMaterial> matList = new List<IMeshMaterial>();
+                return DrawingData.Materials.Values.ToArray();
+            }
+            /// <summary>
+            /// Gets a material by mesh material name
+            /// </summary>
+            /// <param name="meshMaterialName">Name of the material</param>
+            /// <returns>Returns a material by mesh material name</returns>
+            public IMeshMaterial GetMaterial(string meshMaterialName)
+            {
+                var meshMaterials = DrawingData.Materials.Keys.ToArray();
 
-                foreach (string meshName in DrawingData.Meshes.Keys)
+                foreach (var meshMaterial in meshMaterials)
                 {
-                    var dictionary = DrawingData.Meshes[meshName];
-
-                    foreach (string material in dictionary.Keys)
+                    if (string.Equals(meshMaterial, meshMaterialName, StringComparison.OrdinalIgnoreCase))
                     {
-                        matList.Add(DrawingData.Materials[material]);
+                        return DrawingData.Materials[meshMaterial];
                     }
                 }
 
-                return matList;
+                return null;
+            }
+            /// <summary>
+            /// Replaces the material
+            /// </summary>
+            /// <param name="meshMaterialName">Name of the material to replace</param>
+            /// <param name="material">Material</param>
+            /// <returns>Returns true if any material were replaced</returns>
+            public bool ReplaceMaterial(string meshMaterialName, IMeshMaterial material)
+            {
+                bool updated = false;
+
+                var meshMaterials = DrawingData.Materials.Keys.ToArray();
+
+                foreach (var meshMaterial in meshMaterials)
+                {
+                    if (string.Equals(meshMaterial, meshMaterialName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        DrawingData.Materials[meshMaterial] = material;
+                        updated = true;
+                    }
+                }
+
+                return updated;
             }
         }
         /// <summary>
@@ -268,7 +298,7 @@ namespace Engine
         /// <summary>
         /// Gets the current model lights collection
         /// </summary>
-        public SceneLight[] Lights { get; protected set; }
+        public IEnumerable<SceneLight> Lights { get; protected set; }
 
         /// <summary>
         /// Constructor
@@ -538,6 +568,39 @@ namespace Engine
             };
 
             return res;
+        }
+
+        /// <inheritdoc/>
+        public IMeshMaterial GetMaterial(string meshMaterialName)
+        {
+            foreach (var v in patchDictionary.Values)
+            {
+                var m = v?.GetMaterial(meshMaterialName);
+                if (m != null)
+                {
+                    return m;
+                }
+            }
+
+            return null;
+        }
+        /// <inheritdoc/>
+        public void ReplaceMaterial(string name, IMeshMaterial material)
+        {
+            bool updated = false;
+
+            foreach (var v in patchDictionary.Values)
+            {
+                if (v?.ReplaceMaterial(name, material) == true)
+                {
+                    updated = true;
+                }
+            }
+
+            if (updated)
+            {
+                Scene.UpdateMaterialPalette();
+            }
         }
     }
 

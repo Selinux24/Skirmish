@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.Animation
 {
@@ -64,9 +65,9 @@ namespace Engine.Animation
         /// <param name="joint">Joint</param>
         /// <param name="time">Time</param>
         /// <param name="animations">Animation list</param>
-        private static void BuildTransforms(Joint joint, float time, JointAnimation[] animations)
+        private static void BuildTransforms(Joint joint, float time, IEnumerable<JointAnimation> animations)
         {
-            joint.LocalTransform = Array.Find(animations, a => a.Joint == joint.Name).Interpolate(time);
+            joint.LocalTransform = animations.First(a => a.Joint == joint.Name).Interpolate(time);
 
             if (joint.Childs != null && joint.Childs.Length > 0)
             {
@@ -85,10 +86,10 @@ namespace Engine.Animation
         /// <param name="time2">Time 2</param>
         /// <param name="animations2">Animation list 2</param>
         /// <param name="factor">Interpolation factor</param>
-        private static void BuildTransforms(Joint joint, float time1, JointAnimation[] animations1, float time2, JointAnimation[] animations2, float factor)
+        private static void BuildTransforms(Joint joint, float time1, IEnumerable<JointAnimation> animations1, float time2, IEnumerable<JointAnimation> animations2, float factor)
         {
-            Array.Find(animations1, a => a.Joint == joint.Name).Interpolate(time1, out Vector3 pos1, out Quaternion rot1, out Vector3 sca1);
-            Array.Find(animations2, a => a.Joint == joint.Name).Interpolate(time2, out Vector3 pos2, out Quaternion rot2, out Vector3 sca2);
+            animations1.First(a => a.Joint == joint.Name).Interpolate(time1, out Vector3 pos1, out Quaternion rot1, out Vector3 sca1);
+            animations2.First(a => a.Joint == joint.Name).Interpolate(time2, out Vector3 pos2, out Quaternion rot2, out Vector3 sca2);
 
             Vector3 translation = pos1 + (pos2 - pos1) * factor;
             Quaternion rotation = Quaternion.Slerp(rot1, rot2, factor);
@@ -156,7 +157,7 @@ namespace Engine.Animation
         /// <param name="time">Pose time</param>
         /// <param name="animations">Joint animations</param>
         /// <param name="transforms">Returns the transforms list of the pose at specified time</param>
-        public void GetPoseAtTime(float time, JointAnimation[] animations, ref Matrix[] transforms)
+        public void GetPoseAtTime(float time, IEnumerable<JointAnimation> animations, ref Matrix[] transforms)
         {
             BuildTransforms(Root, time, animations);
 
@@ -176,7 +177,7 @@ namespace Engine.Animation
         /// <param name="animations2">Second joint animation set</param>
         /// <param name="factor">Interpolation factor</param>
         /// <param name="transforms">Returns the transforms list of the pose at specified time</param>
-        public void GetPoseAtTime(float time1, JointAnimation[] animations1, float time2, JointAnimation[] animations2, float factor, ref Matrix[] transforms)
+        public void GetPoseAtTime(float time1, IEnumerable<JointAnimation> animations1, float time2, IEnumerable<JointAnimation> animations2, float factor, ref Matrix[] transforms)
         {
             BuildTransforms(Root, time1, animations1, time2, animations2, factor);
 
@@ -191,7 +192,7 @@ namespace Engine.Animation
         /// Gets the joint names list
         /// </summary>
         /// <returns>Returns the joint names list</returns>
-        public string[] GetJointNames()
+        public IEnumerable<string> GetJointNames()
         {
             return jointNames.ToArray();
         }

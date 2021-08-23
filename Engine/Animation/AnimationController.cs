@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -219,7 +220,7 @@ namespace Engine.Animation
         /// </summary>
         /// <param name="time">Time</param>
         /// <param name="skData">Skinning data</param>
-        public void Update(float time, SkinningData skData)
+        public void Update(float time, ISkinningData skData)
         {
             if (!active)
             {
@@ -274,7 +275,7 @@ namespace Engine.Animation
         /// <param name="skData">Skinning data</param>
         /// <param name="offset">Returns the current animation offset in skinning animation data</param>
         /// <returns>Returns true if the offset was recovered</returns>
-        protected bool GetAnimationOffset(SkinningData skData, out uint offset)
+        protected bool GetAnimationOffset(ISkinningData skData, out uint offset)
         {
             offset = 0;
 
@@ -297,7 +298,7 @@ namespace Engine.Animation
         /// </summary>
         /// <param name="skData">Skinning data</param>
         /// <returns>Returns the transformation matrix list at current time</returns>
-        public Matrix[] GetCurrentPose(SkinningData skData)
+        public IEnumerable<Matrix> GetCurrentPose(ISkinningData skData)
         {
             if (GetClipAndTime(out float time, out string clipName))
             {

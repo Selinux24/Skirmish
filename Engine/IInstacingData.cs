@@ -1,5 +1,5 @@
 ﻿
-namespace Engine.Common
+namespace Engine
 {
     /// <summary>
     /// Instancing data interface
