@@ -274,18 +274,6 @@ namespace Engine
         private PickingQuadTreeNode<Triangle>[] visibleNodes = new PickingQuadTreeNode<Triangle>[] { };
 
         /// <summary>
-        /// Gets the used material list
-        /// </summary>
-        public virtual IEnumerable<IMeshMaterial> Materials
-        {
-            get
-            {
-                var matList = patchDictionary.Values.SelectMany(v => v?.GetMaterials() ?? new IMeshMaterial[] { }).ToArray();
-
-                return matList;
-            }
-        }
-        /// <summary>
         /// Gets the visible node count
         /// </summary>
         public int VisiblePatchesCount
@@ -571,6 +559,11 @@ namespace Engine
         }
 
         /// <inheritdoc/>
+        public virtual IEnumerable<IMeshMaterial> GetMaterials()
+        {
+            return patchDictionary.Values.SelectMany(v => v?.GetMaterials() ?? Enumerable.Empty<IMeshMaterial>()).ToArray();
+        }
+        /// <inheritdoc/>
         public IMeshMaterial GetMaterial(string meshMaterialName)
         {
             foreach (var v in patchDictionary.Values)
@@ -585,13 +578,13 @@ namespace Engine
             return null;
         }
         /// <inheritdoc/>
-        public void ReplaceMaterial(string name, IMeshMaterial material)
+        public void ReplaceMaterial(string meshMaterialName, IMeshMaterial material)
         {
             bool updated = false;
 
             foreach (var v in patchDictionary.Values)
             {
-                if (v?.ReplaceMaterial(name, material) == true)
+                if (v?.ReplaceMaterial(meshMaterialName, material) == true)
                 {
                     updated = true;
                 }

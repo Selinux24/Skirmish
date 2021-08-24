@@ -678,17 +678,6 @@ namespace Engine
         private readonly Vector2 slopeRanges = Vector2.Zero;
 
         /// <summary>
-        /// Gets the used material list
-        /// </summary>
-        public virtual IEnumerable<IMeshMaterial> Materials
-        {
-            get
-            {
-                return new[] { terrainMaterial };
-            }
-        }
-
-        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="id">Id</param>
@@ -955,6 +944,11 @@ namespace Engine
         }
 
         /// <inheritdoc/>
+        public IEnumerable<IMeshMaterial> GetMaterials()
+        {
+            return terrainMaterial != null ? new[] { terrainMaterial } : Enumerable.Empty<IMeshMaterial>();
+        }
+        /// <inheritdoc/>
         public IMeshMaterial GetMaterial(string meshMaterialName)
         {
             return terrainMaterial;
@@ -962,6 +956,11 @@ namespace Engine
         /// <inheritdoc/>
         public void ReplaceMaterial(string meshMaterialName, IMeshMaterial material)
         {
+            if (terrainMaterial == material)
+            {
+                return;
+            }
+
             terrainMaterial = material;
 
             Scene.UpdateMaterialPalette();

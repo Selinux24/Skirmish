@@ -898,7 +898,7 @@ namespace Engine
 
             foreach (var component in matComponents)
             {
-                var matList = component.Materials;
+                var matList = component.GetMaterials();
                 if (matList.Any())
                 {
                     mats.AddRange(matList);

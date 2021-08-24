@@ -10,8 +10,8 @@ namespace Engine
         /// <summary>
         /// Gets the instance materials list
         /// </summary>
-        IEnumerable<IMeshMaterial> Materials { get; }
-
+        /// <returns>Returns a material list</returns>
+        IEnumerable<IMeshMaterial> GetMaterials();
         /// <summary>
         /// Gets a material by mesh material name
         /// </summary>

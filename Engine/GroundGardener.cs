@@ -602,16 +602,6 @@ namespace Engine
         }
 
         /// <summary>
-        /// Material
-        /// </summary>
-        public IEnumerable<IMeshMaterial> Materials
-        {
-            get
-            {
-                return new[] { foliageMaterial };
-            }
-        }
-        /// <summary>
         /// Current active planting tasks
         /// </summary>
         public int PlantingTasks { get; private set; }
@@ -1221,6 +1211,11 @@ namespace Engine
         }
 
         /// <inheritdoc/>
+        public IEnumerable<IMeshMaterial> GetMaterials()
+        {
+            return foliageMaterial != null ? new[] { foliageMaterial } : Enumerable.Empty<IMeshMaterial>();
+        }
+        /// <inheritdoc/>
         public IMeshMaterial GetMaterial(string meshMaterialName)
         {
             return foliageMaterial;
@@ -1228,6 +1223,11 @@ namespace Engine
         /// <inheritdoc/>
         public void ReplaceMaterial(string meshMaterialName, IMeshMaterial material)
         {
+            if (foliageMaterial == material)
+            {
+                return;
+            }
+
             foliageMaterial = material;
 
             Scene.UpdateMaterialPalette();

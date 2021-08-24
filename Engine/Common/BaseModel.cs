@@ -31,22 +31,6 @@ namespace Engine.Common
         /// </summary>
         public int TextureCount { get; private set; }
         /// <summary>
-        /// Gets the material list used by the current drawing data
-        /// </summary>
-        public IEnumerable<IMeshMaterial> Materials
-        {
-            get
-            {
-                var drawingData = GetDrawingData(LevelOfDetail.High);
-                if (drawingData == null)
-                {
-                    return Enumerable.Empty<IMeshMaterial>();
-                }
-
-                return drawingData.Materials.Values.ToArray();
-            }
-        }
-        /// <summary>
         /// Use anisotropic filtering
         /// </summary>
         public bool UseAnisotropicFiltering { get; private set; }
@@ -297,6 +281,17 @@ namespace Engine.Common
             return null;
         }
 
+        /// <inheritdoc/>
+        public IEnumerable<IMeshMaterial> GetMaterials()
+        {
+            var drawingData = GetDrawingData(LevelOfDetail.High);
+            if (drawingData == null)
+            {
+                return Enumerable.Empty<IMeshMaterial>();
+            }
+
+            return drawingData.Materials.Values.ToArray();
+        }
         /// <inheritdoc/>
         public IMeshMaterial GetMaterial(string meshMaterialName)
         {
