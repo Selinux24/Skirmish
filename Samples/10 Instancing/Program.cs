@@ -12,17 +12,25 @@ namespace Instancing
             try
             {
 #if DEBUG
-                var screen = EngineForm.ScreenSize * 0.8f;
+                Logger.LogLevel = LogLevel.Debug;
+                Logger.LogStackSize = 0;
+                Logger.EnableConsole = true;
+#else
+                Logger.LogLevel = LogLevel.Error;
+#endif
 
+#if DEBUG
+                var screen = EngineForm.ScreenSize * 0.8f;
                 using (Game cl = new Game("10 Instancing", false, screen.X, screen.Y, true, 0, 0))
 #else
                 using (Game cl = new Game("10 Instancing", true, 0, 0, true, 0, 0))
 #endif
                 {
-                    cl.VisibleMouse = false;
 #if DEBUG
+                    cl.VisibleMouse = false;
                     cl.LockMouse = false;
 #else
+                    cl.VisibleMouse = false;
                     cl.LockMouse = true;
 #endif
 

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -35,8 +36,11 @@ namespace Engine
             /// <param name="content">Content</param>
             /// <param name="node">Quadtree node</param>
             /// <returns>Returns the new generated patch</returns>
-            public static async Task<SceneryPatch> CreatePatch(Game game, string name, ContentData content, PickingQuadTreeNode<Triangle> node)
+            public static async Task<SceneryPatchTask> CreatePatch(Game game, string name, ContentData content, PickingQuadTreeNode<Triangle> node)
             {
+                Stopwatch watch = new Stopwatch();
+                watch.Start();
+
                 var desc = new DrawingDataDescription()
                 {
                     Instanced = false,
@@ -50,7 +54,14 @@ namespace Engine
 
                 var drawingData = await DrawingData.Build(game, name, content, desc);
 
-                return new SceneryPatch(game, drawingData);
+                watch.Stop();
+
+                return new SceneryPatchTask
+                {
+                    Id = node.Id,
+                    Duration = watch.Elapsed,
+                    Patch = new SceneryPatch(game, drawingData),
+                };
             }
 
             /// <summary>
@@ -61,6 +72,8 @@ namespace Engine
             /// Drawing data
             /// </summary>
             public DrawingData DrawingData = null;
+            public int CreationNodeId = -1;
+            public TimeSpan CreationDuration = TimeSpan.Zero;
 
             /// <summary>
             /// Cosntructor
@@ -242,6 +255,12 @@ namespace Engine
 
                 return updated;
             }
+
+            /// <inheritdoc/>
+            public override string ToString()
+            {
+                return $"{CreationNodeId} - {CreationDuration}";
+            }
         }
         /// <summary>
         /// Path load task helper
@@ -252,6 +271,10 @@ namespace Engine
             /// Node id
             /// </summary>
             public int Id { get; set; }
+            /// <summary>
+            /// Task duration
+            /// </summary>
+            public TimeSpan Duration { get; set; }
             /// <summary>
             /// Created patch
             /// </summary>
@@ -336,21 +359,36 @@ namespace Engine
         /// <returns></returns>
         internal async Task IntializePatches()
         {
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
+
             // Generate initial patches
             var nodes = groundPickingQuadtree.GetLeafNodes();
-
-            var tasks = nodes.Select(async node =>
+            if (!nodes.Any())
             {
-                var patch = await SceneryPatch.CreatePatch(Game, Name, content, node);
+                return;
+            }
 
-                while (!patchDictionary.TryAdd(node.Id, patch))
+            var tasks = nodes.Select(node => SceneryPatch.CreatePatch(Game, Name, content, node));
+            var taskResults = await Task.WhenAll(tasks);
+            if (!taskResults.Any())
+            {
+                return;
+            }
+
+            foreach (var taskResult in taskResults)
+            {
+                if (!Helper.Retry(() => patchDictionary.TryAdd(taskResult.Id, taskResult.Patch), 10))
                 {
-                    //None
-                    Logger.WriteWarning(nameof(Scenery), $"Error adding {node.Id} node patch.");
+                    Logger.WriteWarning(nameof(Scenery), $"The node {taskResult.Id} has no created patch.");
                 }
-            });
+            }
 
-            await Task.WhenAll(tasks);
+            watch.Stop();
+
+            var taskDuration = TimeSpan.FromMilliseconds(taskResults.Sum(p => p.Duration.TotalMilliseconds));
+            var maxTaskDuration = TimeSpan.FromMilliseconds(taskResults.Max(p => p.Duration.TotalMilliseconds));
+            Logger.WriteDebug(nameof(Scenery), $"Created {nodes.Count()} nodes in {watch.Elapsed}. Task sum = {taskDuration}. Task max = {maxTaskDuration}");
         }
 
         /// <inheritdoc/>
@@ -412,7 +450,7 @@ namespace Engine
                 patchDictionary.TryAdd(node.Id, null);
 
                 // Add creation task
-                taskList.Add(LoadPatch(node));
+                taskList.Add(SceneryPatch.CreatePatch(Game, Name, content, node));
             }
 
             // Launch creation tasks
@@ -539,23 +577,6 @@ namespace Engine
 
                 Logger.WriteTrace(this, "LoadPatches End.");
             });
-        }
-        /// <summary>
-        /// Loads a new patch
-        /// </summary>
-        /// <param name="node">Node to load in the patch</param>
-        private async Task<SceneryPatchTask> LoadPatch(PickingQuadTreeNode<Triangle> node)
-        {
-            // Create patch
-            var patch = await SceneryPatch.CreatePatch(Game, Name, content, node);
-
-            SceneryPatchTask res = new SceneryPatchTask
-            {
-                Id = node.Id,
-                Patch = patch,
-            };
-
-            return res;
         }
 
         /// <inheritdoc/>

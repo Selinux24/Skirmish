@@ -14,13 +14,15 @@ namespace Animation
 #if DEBUG
                 Logger.LogLevel = LogLevel.Debug;
                 Logger.LogStackSize = 0;
-
-                var screen = EngineForm.ScreenSize * 0.8f;
-
-                using (Game cl = new Game("9 Animation", false, screen.X, screen.Y, true, 0, 0))
+                Logger.EnableConsole = true;
 #else
                 Logger.LogLevel = LogLevel.Error;
+#endif
 
+#if DEBUG
+                var screen = EngineForm.ScreenSize * 0.8f;
+                using (Game cl = new Game("9 Animation", false, screen.X, screen.Y, true, 0, 0))
+#else
                 using (Game cl = new Game("9 Animation", true, 0, 0, true, 0, 4))
 #endif
                 {

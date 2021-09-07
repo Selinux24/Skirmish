@@ -28,6 +28,14 @@ namespace Engine
         /// </summary>
         public static LogLevel LogLevel { get; set; }
         /// <summary>
+        /// Enables the console log
+        /// </summary>
+        public static bool EnableConsole { get; set; } = false;
+        /// <summary>
+        /// Console log level
+        /// </summary>
+        public static LogLevel ConsoleLogLevel { get; set; } = LogLevel.Warning;
+        /// <summary>
         /// Log stack size
         /// </summary>
         public static int LogStackSize { get; set; }
@@ -182,7 +190,14 @@ namespace Engine
                 return;
             }
 
-            log.Enqueue(new LogEntry { EventDate = DateTime.Now, CallerTypeName = callerTypeName, LogLevel = logLevel, Text = text, Exception = ex });
+            var logEntry = new LogEntry { EventDate = DateTime.Now, CallerTypeName = callerTypeName, LogLevel = logLevel, Text = text, Exception = ex };
+            log.Enqueue(logEntry);
+
+            if (logLevel >= ConsoleLogLevel)
+            {
+                // Console logger
+                Console.Write(DefaultFormatter(logEntry));
+            }
 
             if (LogStackSize <= 0)
             {

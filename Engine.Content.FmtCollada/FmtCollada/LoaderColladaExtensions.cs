@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.Content.FmtCollada
 {
@@ -161,25 +162,9 @@ namespace Engine.Content.FmtCollada
         public static float[] ReadFloat(this Source source)
         {
             int stride = source.TechniqueCommon.Accessor.Stride;
-            if (stride != 1)
-            {
-                Logger.WriteWarning(nameof(LoaderCollada), $"Stride not supported for {stride}: {typeof(float)}");
-
-                return new float[] { };
-            }
-
             int length = source.TechniqueCommon.Accessor.Count;
 
-            List<float> n = new List<float>();
-
-            for (int i = 0; i < length * stride; i += stride)
-            {
-                float v = source.FloatArray[i];
-
-                n.Add(v);
-            }
-
-            return n.ToArray();
+            return ReadArray(source.FloatArray.Values, length, stride);
         }
         /// <summary>
         /// Reads a string array from a source
@@ -189,25 +174,9 @@ namespace Engine.Content.FmtCollada
         public static string[] ReadNames(this Source source)
         {
             int stride = source.TechniqueCommon.Accessor.Stride;
-            if (stride != 1)
-            {
-                Logger.WriteWarning(nameof(LoaderCollada), $"Stride not supported for {stride}: {typeof(string)}");
-
-                return new string[] { };
-            }
-
             int length = source.TechniqueCommon.Accessor.Count;
 
-            List<string> names = new List<string>();
-
-            for (int i = 0; i < length * stride; i += stride)
-            {
-                string v = source.NameArray[i];
-
-                names.Add(v);
-            }
-
-            return names.ToArray();
+            return ReadArray(source.NameArray.Values, length, stride);
         }
         /// <summary>
         /// Reads a string array from a source
@@ -217,25 +186,9 @@ namespace Engine.Content.FmtCollada
         public static string[] ReadIDRefs(this Source source)
         {
             int stride = source.TechniqueCommon.Accessor.Stride;
-            if (stride != 1)
-            {
-                Logger.WriteWarning(nameof(LoaderCollada), $"Stride not supported for {stride}: {typeof(string)}");
-
-                return new string[] { };
-            }
-
             int length = source.TechniqueCommon.Accessor.Count;
 
-            List<string> names = new List<string>();
-
-            for (int i = 0; i < length * stride; i += stride)
-            {
-                string v = source.IdRefArray[i];
-
-                names.Add(v);
-            }
-
-            return names.ToArray();
+            return ReadArray(source.IdRefArray.Values, length, stride);
         }
         /// <summary>
         /// Reads a Vector2 array from a source
@@ -478,6 +431,29 @@ namespace Engine.Content.FmtCollada
             }
 
             return mats.ToArray();
+        }
+        /// <summary>
+        /// Reads an array
+        /// </summary>
+        /// <typeparam name="T">Array type</typeparam>
+        /// <param name="array">Value array</param>
+        /// <param name="length">Length</param>
+        /// <param name="stride">Stride</param>
+        public static T[] ReadArray<T>(IEnumerable<T> array, int length, int stride)
+        {
+            List<T> n = new List<T>();
+
+            for (int i = 0; i < length * stride; i += stride)
+            {
+                for (int x = 0; x < stride; x++)
+                {
+                    T v = array.ElementAt(i + x);
+
+                    n.Add(v);
+                }
+            }
+
+            return n.ToArray();
         }
 
         /// <summary>

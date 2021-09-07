@@ -13,8 +13,15 @@ namespace Skybox
             try
             {
 #if DEBUG
-                var screen = EngineForm.ScreenSize * 0.8f;
+                Logger.LogLevel = LogLevel.Debug;
+                Logger.LogStackSize = 0;
+                Logger.EnableConsole = true;
+#else
+                Logger.LogLevel = LogLevel.Error;
+#endif
 
+#if DEBUG
+                var screen = EngineForm.ScreenSize * 0.8f;
                 using (Game cl = new Game("5 Skybox", false, screen.X, screen.Y, true, 0, 0))
 #else
                 using (Game cl = new Game("5 Skybox", true, 0, 0, true, 0, 4))

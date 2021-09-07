@@ -172,25 +172,25 @@ namespace Engine
         #region Actions & Functions
 
         /// <summary>
-        /// Executes especified action with attempts on exception
+        /// Executes the specified action a number of times
         /// </summary>
         /// <typeparam name="T">Input type</typeparam>
         /// <param name="action">Action</param>
         /// <param name="input">Input</param>
-        /// <param name="attempts">Number of attempts</param>
-        public static void Attempt<T>(Action<T> action, T input, int attempts)
+        /// <param name="retryCount">Retry count</param>
+        public static void Retry<T>(Action<T> action, T input, int retryCount)
         {
-            Attempt(action, input, attempts, TimeSpan.FromSeconds(0));
+            Retry(action, input, retryCount, TimeSpan.FromSeconds(0));
         }
         /// <summary>
-        /// Executes especified action with attempts on exception
+        /// Executes the specified action a number of times
         /// </summary>
         /// <typeparam name="T">Input type</typeparam>
         /// <param name="action">Action</param>
         /// <param name="input">Input</param>
-        /// <param name="attempts">Number of attempts</param>
+        /// <param name="retryCount">Retry count</param>
         /// <param name="delay">Delay between attempts</param>
-        public static void Attempt<T>(Action<T> action, T input, int attempts, TimeSpan delay)
+        public static void Retry<T>(Action<T> action, T input, int retryCount, TimeSpan delay)
         {
             Exception lastEx = null;
 
@@ -205,12 +205,12 @@ namespace Engine
                 catch (Exception ex)
                 {
                     lastEx = ex;
-                    attempts--;
+                    retryCount--;
                 }
 
                 Task.Delay(delay).Wait();
             }
-            while (attempts > 0);
+            while (retryCount > 0);
 
             if (lastEx != null)
             {
@@ -218,29 +218,29 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Executes especified function with attempts on exception
+        /// Executes the specified function a number of times
         /// </summary>
         /// <typeparam name="T">Input type</typeparam>
         /// <typeparam name="TResult">Result type</typeparam>
         /// <param name="func">Function</param>
         /// <param name="input">Input</param>
-        /// <param name="attempts">Number of attempts</param>
+        /// <param name="retryCount">Retry count</param>
         /// <returns>Returns the function execution result</returns>
-        public static TResult Attempt<T, TResult>(Func<T, TResult> func, T input, int attempts)
+        public static TResult Retry<T, TResult>(Func<T, TResult> func, T input, int retryCount)
         {
-            return Attempt(func, input, attempts, TimeSpan.FromSeconds(0));
+            return Retry(func, input, retryCount, TimeSpan.FromSeconds(0));
         }
         /// <summary>
-        /// Executes especified function with attempts on exception
+        /// Executes the specified function a number of times
         /// </summary>
         /// <typeparam name="T">Input type</typeparam>
         /// <typeparam name="TResult">Result type</typeparam>
         /// <param name="func">Function</param>
         /// <param name="input">Input</param>
-        /// <param name="attempts">Number of attempts</param>
+        /// <param name="retryCount">Retry count</param>
         /// <param name="delay">Delay between attempts</param>
         /// <returns>Returns the function execution result</returns>
-        public static TResult Attempt<T, TResult>(Func<T, TResult> func, T input, int attempts, TimeSpan delay)
+        public static TResult Retry<T, TResult>(Func<T, TResult> func, T input, int retryCount, TimeSpan delay)
         {
             Exception lastEx;
 
@@ -253,14 +253,49 @@ namespace Engine
                 catch (Exception ex)
                 {
                     lastEx = ex;
-                    attempts--;
+                    retryCount--;
                 }
 
                 Task.Delay(delay).Wait();
             }
-            while (attempts > 0);
+            while (retryCount > 0);
 
             throw lastEx;
+        }
+        /// <summary>
+        /// Executes the specified function a number of times
+        /// </summary>
+        /// <param name="func">Function</param>
+        /// <param name="retryCount">Retry count</param>
+        /// <returns>Returns the result of the function</returns>
+        /// <remarks>The method exits on exceptions</remarks>
+        public static bool Retry(Func<bool> func, int retryCount)
+        {
+            return Retry(func, retryCount, TimeSpan.FromSeconds(0));
+        }
+        /// <summary>
+        /// Executes the specified function a number of times
+        /// </summary>
+        /// <param name="func">Function</param>
+        /// <param name="retryCount">Retry count</param>
+        /// <param name="delay">Delay between attempts</param>
+        /// <returns>Returns the result of the function</returns>
+        /// <remarks>The method exits on exceptions</remarks>
+        public static bool Retry(Func<bool> func, int retryCount, TimeSpan delay)
+        {
+            int retry = retryCount;
+
+            bool res;
+            do
+            {
+                res = func();
+                retry--;
+
+                Task.Delay(delay).Wait();
+            }
+            while (retry > 0 && !res);
+
+            return res;
         }
 
         #endregion

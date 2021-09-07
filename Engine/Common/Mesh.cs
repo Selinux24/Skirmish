@@ -81,7 +81,7 @@ namespace Engine.Common
         {
             get
             {
-                return VertexBuffer.Ready && (IndexBuffer?.Ready ?? true);
+                return (VertexBuffer?.Ready ?? false) && (IndexBuffer?.Ready ?? true);
             }
         }
         /// <summary>
@@ -91,7 +91,7 @@ namespace Engine.Common
         {
             get
             {
-                int count = IndexBuffer?.Count > 0 ? IndexBuffer.Count : VertexBuffer.Count;
+                int count = IndexBuffer?.Count > 0 ? IndexBuffer.Count : VertexBuffer?.Count ?? 0;
                 switch (Topology)
                 {
                     case Topology.LineList:
