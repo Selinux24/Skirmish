@@ -125,6 +125,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SimpleAnimation\SceneSimpleAnimation.cs" />
+    <Compile Include="SmoothTransitions\SceneSmoothTransitions.cs" />
     <Compile Include="Start\SceneStart.cs" />
     <Content Include="AnimationParts\Resources\d_road_asphalt_stripes_diffuse.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -216,6 +217,21 @@
     <Content Include="SimpleAnimation\Resources\Soldier\Soldier1.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="SmoothTransitions\Resources\d_road_asphalt_stripes_diffuse.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SmoothTransitions\Resources\d_road_asphalt_stripes_normal.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SmoothTransitions\Resources\d_road_asphalt_stripes_specular.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SmoothTransitions\Resources\Soldier\soldier0.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SmoothTransitions\Resources\Soldier\Soldier1.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Start\Resources\anttisinstrumentals+keepshiningoninstrumental.mp3">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -270,6 +286,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Start\Resources\SkyPlane.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SmoothTransitions\Resources\Soldier\soldier_anim2.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SmoothTransitions\Resources\Soldier\soldier_anim2.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
