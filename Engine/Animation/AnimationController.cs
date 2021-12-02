@@ -131,6 +131,65 @@ namespace Engine.Animation
         }
 
         /// <summary>
+        /// Calculates an animation plan with initial and end clips, and with a central looping clip
+        /// </summary>
+        /// <param name="skData">Skinning data</param>
+        /// <param name="initClip">Initial clip name</param>
+        /// <param name="loopClip">Loop clip name</param>
+        /// <param name="endClip">End clip name</param>
+        /// <param name="planTime">Total time</param>
+        /// <returns>Returns the created animation plan</returns>
+        public AnimationPlan CalcPath(ISkinningData skData, string initClip, string loopClip, string endClip, float planTime)
+        {
+            AnimationPath path = new AnimationPath();
+
+            //Retrieve the clip data
+            float initTime = skData.GetClipDuration(skData.GetClipIndex(initClip));
+            float loopTime = skData.GetClipDuration(skData.GetClipIndex(loopClip));
+            float endTime = skData.GetClipDuration(skData.GetClipIndex(endClip));
+
+            if (initTime + endTime >= planTime)
+            {
+                float delta = planTime / (initTime + endTime);
+
+                path.Add(initClip, delta);
+                path.Add(endClip, delta);
+            }
+            else if (initTime + loopTime + endTime >= planTime)
+            {
+                float delta = planTime / (initTime + loopTime + endTime);
+
+                path.Add(initClip, delta);
+                path.Add(loopClip, delta);
+                path.Add(endClip, delta);
+            }
+            else if (initTime + (loopTime * 2) + endTime >= planTime)
+            {
+                float delta = planTime / (initTime + (loopTime * 2) + endTime);
+
+                path.Add(initClip, delta);
+                path.Add(loopClip, delta);
+                path.Add(loopClip, delta);
+                path.Add(endClip, delta);
+            }
+            else
+            {
+                int centralLoops = (int)((planTime - (initTime + (loopTime * 2) + endTime)) / loopTime);
+                float time = planTime - (loopTime * centralLoops);
+
+                float delta = time / (initTime + (loopTime * 2) + endTime);
+
+                path.Add(initClip, delta);
+                path.Add(loopClip, delta);
+                path.AddRepeat(loopClip, centralLoops);
+                path.Add(loopClip, delta);
+                path.Add(endClip, delta);
+            }
+
+            return new AnimationPlan(path);
+        }
+
+        /// <summary>
         /// Adds clips to the controller clips list
         /// </summary>
         /// <param name="paths">Animation path list</param>

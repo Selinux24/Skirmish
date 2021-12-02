@@ -18,13 +18,16 @@ namespace Animation.SmoothTransitions
         private Sprite backPanel = null;
         private UIConsole console = null;
 
+        private Model soldier = null;
+        private readonly Dictionary<string, AnimationPlan> soldierPaths = new Dictionary<string, AnimationPlan>();
+        float soldierVelocity = 1;
+
         private PrimitiveListDrawer<Triangle> itemTris = null;
         private PrimitiveListDrawer<Line3D> itemLines = null;
         private readonly Color itemTrisColor = new Color(Color.Yellow.ToColor3(), 0.6f);
         private readonly Color itemLinesColor = new Color(Color.Red.ToColor3(), 1f);
 
-        private readonly Dictionary<string, AnimationPlan> soldierPaths = new Dictionary<string, AnimationPlan>();
-       
+
         private bool uiReady = false;
         private bool gameReady = false;
 
@@ -45,6 +48,7 @@ namespace Animation.SmoothTransitions
                     new[]
                     {
                         InitializeFloor(),
+                        InitializeSoldier(),
                         InitializeDebug()
                     },
                     (res) =>
@@ -125,48 +129,30 @@ namespace Animation.SmoothTransitions
         }
         private async Task InitializeSoldier()
         {
-            var soldier = await this.AddComponentModelInstanced(
+            soldier = await this.AddComponentModel(
                 "Soldier",
                 "Soldier",
-                new ModelInstancedDescription()
+                new ModelDescription()
                 {
                     CastShadow = true,
-                    Instances = 2,
                     UseAnisotropicFiltering = true,
                     Content = ContentDescription.FromFile("SmoothTransitions/Resources/Soldier", "soldier_anim2.json"),
                 });
 
-            soldier[0].Manipulator.SetPosition(0, 0, 0, true);
-            soldier[1].Manipulator.SetPosition(0.5f, 0, 5, true);
+            soldier.Manipulator.SetPosition(0, 0, 0, true);
 
-            AnimationPath p0 = new AnimationPath();
-            p0.Add("idle1");
-            p0.AddRepeat("idle2", 5);
-            p0.Add("idle1");
-            p0.Add("stand");
-            p0.Add("idle1");
-            p0.AddRepeat("walk", 5);
-            p0.AddRepeat("run", 10);
-            p0.AddRepeat("walk", 1);
-            p0.AddRepeat("idle2", 5);
-            p0.Add("idle1");
+            AnimationPath pIdle = new AnimationPath();
+            pIdle.Add("idle1");
 
-            AnimationPath p1 = new AnimationPath();
-            p1.Add("idle1");
+            AnimationPath pWalk = new AnimationPath();
+            pWalk.Add("idle1");
+            pWalk.Add("walk");
+            pWalk.Add("idle1");
 
-            AnimationPath p2 = new AnimationPath();
-            p2.AddRepeat("idle2", 2);
+            soldierPaths.Add("idle", new AnimationPlan(pIdle));
+            soldierPaths.Add("walk", new AnimationPlan(pWalk));
 
-            AnimationPath p3 = new AnimationPath();
-            p3.AddRepeat("stand", 5);
-
-            soldierPaths.Add("complex", new AnimationPlan(p0));
-            soldierPaths.Add("idle1", new AnimationPlan(p1));
-            soldierPaths.Add("idle2", new AnimationPlan(p2));
-            soldierPaths.Add("stand", new AnimationPlan(p3));
-
-            soldier[0].AnimationController.AddPath(soldierPaths["complex"]);
-            soldier[1].AnimationController.AddPath(soldierPaths["complex"]);
+            soldier.AnimationController.AddPath(soldierPaths["idle"]);
         }
         private async Task InitializeDebug()
         {
@@ -187,8 +173,8 @@ namespace Animation.SmoothTransitions
 
             Camera.NearPlaneDistance = 0.1f;
             Camera.FarPlaneDistance = 500;
-            Camera.Goto(0, 1, -12f);
-            Camera.LookTo(0, 1 * 0.6f, 0);
+            Camera.Goto(10, 5, -12f);
+            Camera.LookTo(0, 5 * 0.6f, 0);
         }
 
         public override void Update(GameTime gameTime)
@@ -300,6 +286,28 @@ namespace Animation.SmoothTransitions
 
             console.Top = backPanel.AbsoluteRectangle.Bottom;
             console.Width = Game.Form.RenderWidth;
+        }
+
+        /// <summary>
+        /// Performs a linear move
+        /// </summary>
+        /// <param name="from">Position from</param>
+        /// <param name="to">Position to</param>
+        private void Move(Vector3 from, Vector3 to)
+        {
+            float distance = Vector3.Distance(from, to);
+            float totalTime = distance / soldierVelocity;
+
+            //Calculates the plan
+            var dd = soldier.GetDrawingData(LevelOfDetail.High);
+            var movePlan = soldier.AnimationController.CalcPath(dd.SkinningData, "idle1", "walk", "idle1", totalTime);
+            if (movePlan == null)
+            {
+                return;
+            }
+
+            //Sets the plan to the controller
+            soldier.AnimationController.SetPath(movePlan);
         }
     }
 }
