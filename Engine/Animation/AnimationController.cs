@@ -221,51 +221,48 @@ namespace Engine.Animation
         /// <param name="paths">Paths to append</param>
         private void AppendPaths(AppendFlagTypes flags, AnimationPlan paths)
         {
-            var clonedPaths = new AnimationPath[paths.Count];
+            var clonedPaths = paths?.Select(p => p.Clone()).ToArray();
 
-            for (int i = 0; i < paths.Count; i++)
+            if (!animationPaths.Any())
             {
-                clonedPaths[i] = paths[i].Clone();
+                animationPaths.AddRange(clonedPaths);
+
+                CurrentIndex = 0;
+
+                return;
             }
 
-            if (animationPaths.Count > 0)
+            AnimationPath last;
+
+            if (flags == AppendFlagTypes.ClearCurrent)
             {
-                AnimationPath last;
-                AnimationPath next;
+                last = animationPaths.Last();
 
-                if (flags == AppendFlagTypes.ClearCurrent)
-                {
-                    last = animationPaths[animationPaths.Count - 1];
-                    next = clonedPaths[0];
-
-                    //Clear all paths
-                    animationPaths.Clear();
-                }
-                else if (flags == AppendFlagTypes.EndsCurrent && CurrentIndex < animationPaths.Count)
-                {
-                    last = animationPaths[CurrentIndex];
-                    next = clonedPaths[0];
-
-                    //Remove all paths from current to end
-                    if (CurrentIndex + 1 < animationPaths.Count)
-                    {
-                        animationPaths.RemoveRange(
-                            CurrentIndex + 1,
-                            animationPaths.Count - (CurrentIndex + 1));
-                    }
-
-                    //Mark current path for ending
-                    last.End();
-                }
-                else
-                {
-                    last = animationPaths[animationPaths.Count - 1];
-                    next = clonedPaths[0];
-                }
-
-                //Adds transitions from current path item to the first added item
-                last.ConnectTo(next);
+                //Clear all paths
+                animationPaths.Clear();
             }
+            else if (flags == AppendFlagTypes.EndsCurrent && CurrentIndex < animationPaths.Count)
+            {
+                last = animationPaths.ElementAt(CurrentIndex);
+
+                //Remove all paths from current to end
+                if (CurrentIndex + 1 < animationPaths.Count)
+                {
+                    animationPaths.RemoveRange(
+                        CurrentIndex + 1,
+                        animationPaths.Count - (CurrentIndex + 1));
+                }
+
+                //Mark current path for ending
+                last.End();
+            }
+            else
+            {
+                last = animationPaths.Last();
+            }
+
+            //Adds transitions from current path item to the first added item
+            last.ConnectTo(clonedPaths.First());
 
             animationPaths.AddRange(clonedPaths);
 

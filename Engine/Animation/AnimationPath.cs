@@ -37,13 +37,13 @@ namespace Engine.Animation
         {
             get
             {
-                var item = CurrentItem;
-                if (item?.Duration > 0f)
+                float itemDuration = CurrentItem?.Duration ?? 0f;
+                if (itemDuration > 0f)
                 {
-                    return TotalItemTime % item.Duration;
+                    return TotalItemTime % itemDuration;
                 }
 
-                return 0;
+                return 0f;
             }
         }
         /// <summary>
@@ -53,14 +53,7 @@ namespace Engine.Animation
         {
             get
             {
-                float d = 0;
-
-                for (int i = 0; i < items.Count; i++)
-                {
-                    d += items[i].TotalDuration;
-                }
-
-                return d;
+                return items.Sum(i => i.TotalDuration);
             }
         }
         /// <summary>
@@ -138,20 +131,17 @@ namespace Engine.Animation
         /// <param name="timeDelta">Delta time to apply on this animation clip</param>
         private void Add(string clipName, bool loop, int repeats, float timeDelta)
         {
-            AnimationPathItem prev = null;
-            if (items.Count > 0)
+            //Gets last item
+            var prevItem = items.LastOrDefault();
+            if (prevItem != null)
             {
-                //Gets last item
-                prev = items[items.Count - 1];
-            }
-
-            if (prev != null)
-            {
-                var transition = new AnimationPathItem(prev.ClipName + clipName, false, 1, timeDelta, true);
+                //Adds a transition from the last item to the new item
+                var transition = new AnimationPathItem(prevItem.ClipName + clipName, false, 1, timeDelta, true);
 
                 items.Add(transition);
             }
 
+            //Adds the new item to the path
             var newItem = new AnimationPathItem(clipName, loop, repeats, timeDelta, false);
 
             items.Add(newItem);
@@ -161,14 +151,15 @@ namespace Engine.Animation
         /// Connects the specified path to the current path adding transitions between them
         /// </summary>
         /// <param name="animationPath">Animation path to connect with current path</param>
-        public void ConnectTo(AnimationPath animationPath)
+        /// <param name="timeDelta">Delta time to apply on this animation clip</param>
+        public void ConnectTo(AnimationPath animationPath, float timeDelta = 1f)
         {
-            var lastItem = items[items.Count - 1];
-            var nextItem = animationPath.items[0];
+            var lastItem = items.Last();
+            var nextItem = animationPath.items.First();
 
             if (lastItem.ClipName != nextItem.ClipName)
             {
-                var newItem = new AnimationPathItem(lastItem.ClipName + nextItem.ClipName, false, 1, 1f, true);
+                var newItem = new AnimationPathItem(lastItem.ClipName + nextItem.ClipName, false, 1, timeDelta, true);
 
                 animationPath.items.Insert(0, newItem);
             }
@@ -178,30 +169,40 @@ namespace Engine.Animation
         /// </summary>
         public void End()
         {
-            var index = currentIndex;
-            if (index >= 0)
+            if (currentIndex < 0)
             {
-                if (items[index].IsTranstition) index++;
-
-                var current = items[index];
-
-                //Remove items from current to end
-                if (items.Count > index + 1)
-                {
-                    items.RemoveRange(index + 1, items.Count - (index + 1));
-                }
-
-                //Calcs total time of all clips
-                float t = 0;
-                items.ForEach(i => t += i != current ? i.TotalDuration : 0f);
-
-                //Fix time and item time
-                Time = t + ItemTime;
-                TotalItemTime = ItemTime;
-
-                //Set current item for ending
-                current.End();
+                return;
             }
+
+            if (!items.Any())
+            {
+                return;
+            }
+
+            int index = currentIndex;
+
+            if (items[index].IsTranstition)
+            {
+                index++;
+            }
+
+            var current = items[index];
+
+            //Remove items from current to end
+            if (items.Count > index + 1)
+            {
+                items.RemoveRange(index + 1, items.Count - (index + 1));
+            }
+
+            //Calcs total time of all clips except current clip
+            float t = items.Where(i => i != current).Sum(i => i.TotalDuration);
+
+            //Fix time and item time
+            Time = t + ItemTime;
+            TotalItemTime = ItemTime;
+
+            //Set current item for ending
+            current.End();
         }
 
         /// <summary>
@@ -323,12 +324,7 @@ namespace Engine.Animation
         /// <returns>Returns the path copy instance</returns>
         public AnimationPath Clone()
         {
-            List<AnimationPathItem> clonedItems = new List<AnimationPathItem>();
-
-            foreach (var item in items)
-            {
-                clonedItems.Add(item.Clone());
-            }
+            var clonedItems = items.Select(i => i.Clone()).ToArray();
 
             return new AnimationPath(clonedItems)
             {
