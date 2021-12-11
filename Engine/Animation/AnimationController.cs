@@ -174,7 +174,8 @@ namespace Engine.Animation
             }
             else
             {
-                int centralLoops = (int)((planTime - (initTime + (loopTime * 2) + endTime)) / loopTime);
+                float centralTime = (planTime - (initTime + (loopTime * 2) + endTime)) / loopTime;
+                int centralLoops = (int)Math.Ceiling(centralTime);
                 float time = planTime - (loopTime * centralLoops);
 
                 float delta = time / (initTime + (loopTime * 2) + endTime);

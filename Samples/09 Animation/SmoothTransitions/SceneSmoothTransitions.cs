@@ -19,14 +19,14 @@ namespace Animation.SmoothTransitions
         private UIConsole console = null;
 
         private Model soldier = null;
-        private readonly Dictionary<string, AnimationPlan> soldierPaths = new Dictionary<string, AnimationPlan>();
-        float soldierVelocity = 1;
+        private readonly Dictionary<string, AnimationPlan> soldierAnimationPlans = new Dictionary<string, AnimationPlan>();
+        private readonly float soldierSpeed = 1;
+        private IControllerPath soldierPath;
 
         private PrimitiveListDrawer<Triangle> itemTris = null;
         private PrimitiveListDrawer<Line3D> itemLines = null;
         private readonly Color itemTrisColor = new Color(Color.Yellow.ToColor3(), 0.6f);
         private readonly Color itemLinesColor = new Color(Color.Red.ToColor3(), 1f);
-
 
         private bool uiReady = false;
         private bool gameReady = false;
@@ -137,6 +137,7 @@ namespace Animation.SmoothTransitions
                     CastShadow = true,
                     UseAnisotropicFiltering = true,
                     Content = ContentDescription.FromFile("SmoothTransitions/Resources/Soldier", "soldier_anim2.json"),
+                    TextureIndex = 1,
                 });
 
             soldier.Manipulator.SetPosition(0, 0, 0, true);
@@ -149,10 +150,10 @@ namespace Animation.SmoothTransitions
             pWalk.Add("walk");
             pWalk.Add("idle1");
 
-            soldierPaths.Add("idle", new AnimationPlan(pIdle));
-            soldierPaths.Add("walk", new AnimationPlan(pWalk));
+            soldierAnimationPlans.Add("idle", new AnimationPlan(pIdle));
+            soldierAnimationPlans.Add("walk", new AnimationPlan(pWalk));
 
-            soldier.AnimationController.AddPath(soldierPaths["idle"]);
+            soldier.AnimationController.AddPath(soldierAnimationPlans["idle"]);
         }
         private async Task InitializeDebug()
         {
@@ -200,11 +201,13 @@ namespace Animation.SmoothTransitions
             }
 
             UpdateInputCamera(gameTime);
+            UpdateInputAnimation();
             UpdateInputDebug();
 
             base.Update(gameTime);
 
-            UpdateDebugData();
+            UpdateSoldier(gameTime);
+            UpdateDebug();
 
             runtime.Text = Game.RuntimeText;
         }
@@ -245,6 +248,21 @@ namespace Animation.SmoothTransitions
                 Camera.MoveBackward(gameTime, Game.Input.ShiftPressed);
             }
         }
+        private void UpdateInputAnimation()
+        {
+            if (Game.Input.KeyJustReleased(Keys.M))
+            {
+                Vector3 from = soldier.Manipulator.Position;
+                Vector3 to = from + (Vector3.ForwardLH * 50f);
+
+                soldierPath = CalcPath(from, to);
+                var soldierAnim = CalcAnimation(from, to, soldierSpeed);
+
+                //Sets the plan to the animation controller
+                soldier.AnimationController.SetPath(soldierAnim);
+                soldier.AnimationController.Start();
+            }
+        }
         private void UpdateInputDebug()
         {
             if (Game.Input.KeyJustReleased(Keys.R))
@@ -259,7 +277,14 @@ namespace Animation.SmoothTransitions
                 Lights.DirectionalLights[0].CastShadow = !Lights.DirectionalLights[0].CastShadow;
             }
         }
-        private void UpdateDebugData()
+        private void UpdateSoldier(GameTime gameTime)
+        {
+            if (soldierPath == null)
+            {
+                return;
+            }
+        }
+        private void UpdateDebug()
         {
 
         }
@@ -289,25 +314,29 @@ namespace Animation.SmoothTransitions
         }
 
         /// <summary>
-        /// Performs a linear move
+        /// Calculates a controller path
         /// </summary>
         /// <param name="from">Position from</param>
         /// <param name="to">Position to</param>
-        private void Move(Vector3 from, Vector3 to)
+        /// <returns></returns>
+        private IControllerPath CalcPath(Vector3 from, Vector3 to)
+        {
+            return new SegmentPath(from, to);
+        }
+        /// <summary>
+        /// Calculates an animation plan
+        /// </summary>
+        /// <param name="from">Position from</param>
+        /// <param name="to">Position to</param>
+        /// <param name="speed">Speed</param>
+        private AnimationPlan CalcAnimation(Vector3 from, Vector3 to, float speed)
         {
             float distance = Vector3.Distance(from, to);
-            float totalTime = distance / soldierVelocity;
+            float totalTime = distance / speed;
 
             //Calculates the plan
             var dd = soldier.GetDrawingData(LevelOfDetail.High);
-            var movePlan = soldier.AnimationController.CalcPath(dd.SkinningData, "idle1", "walk", "idle1", totalTime);
-            if (movePlan == null)
-            {
-                return;
-            }
-
-            //Sets the plan to the controller
-            soldier.AnimationController.SetPath(movePlan);
+            return soldier.AnimationController.CalcPath(dd.SkinningData, "idle1", "walk", "idle1", totalTime);
         }
     }
 }
