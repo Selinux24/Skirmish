@@ -20,13 +20,10 @@ namespace Animation.SmoothTransitions
 
         private Model soldier = null;
         private readonly Dictionary<string, AnimationPlan> soldierAnimationPlans = new Dictionary<string, AnimationPlan>();
-        private readonly float soldierSpeed = 1;
+        private readonly float soldierSpeed = 2f;
         private IControllerPath soldierPath;
-
-        private PrimitiveListDrawer<Triangle> itemTris = null;
-        private PrimitiveListDrawer<Line3D> itemLines = null;
-        private readonly Color itemTrisColor = new Color(Color.Yellow.ToColor3(), 0.6f);
-        private readonly Color itemLinesColor = new Color(Color.Red.ToColor3(), 1f);
+        private float soldierPathStartTime;
+        private float soldierPathTotalTime;
 
         private bool uiReady = false;
         private bool gameReady = false;
@@ -49,7 +46,6 @@ namespace Animation.SmoothTransitions
                     {
                         InitializeFloor(),
                         InitializeSoldier(),
-                        InitializeDebug()
                     },
                     (res) =>
                     {
@@ -140,25 +136,22 @@ namespace Animation.SmoothTransitions
                     TextureIndex = 1,
                 });
 
-            soldier.Manipulator.SetPosition(0, 0, 0, true);
+            soldier.AnimationController.PathEnding += SoldierControllerPathEnding;
+
+            soldier.Manipulator.SetPosition(0, 0, 5, true);
 
             AnimationPath pIdle = new AnimationPath();
+            pIdle.Add("idle1", 2f);
             pIdle.Add("idle1");
 
             AnimationPath pWalk = new AnimationPath();
-            pWalk.Add("idle1");
             pWalk.Add("walk");
-            pWalk.Add("idle1");
 
             soldierAnimationPlans.Add("idle", new AnimationPlan(pIdle));
             soldierAnimationPlans.Add("walk", new AnimationPlan(pWalk));
 
             soldier.AnimationController.AddPath(soldierAnimationPlans["idle"]);
-        }
-        private async Task InitializeDebug()
-        {
-            itemTris = await this.AddComponentPrimitiveListDrawer("DebugItemTris", "DebugItemTris", new PrimitiveListDrawerDescription<Triangle>() { Count = 5000, Color = itemTrisColor });
-            itemLines = await this.AddComponentPrimitiveListDrawer("DebugItemLines", "DebugItemLines", new PrimitiveListDrawerDescription<Line3D>() { Count = 1000, Color = itemLinesColor });
+            soldier.AnimationController.Start(0);
         }
 
         private void InitializeEnvironment()
@@ -201,7 +194,7 @@ namespace Animation.SmoothTransitions
             }
 
             UpdateInputCamera(gameTime);
-            UpdateInputAnimation();
+            UpdateInputAnimation(gameTime);
             UpdateInputDebug();
 
             base.Update(gameTime);
@@ -248,19 +241,13 @@ namespace Animation.SmoothTransitions
                 Camera.MoveBackward(gameTime, Game.Input.ShiftPressed);
             }
         }
-        private void UpdateInputAnimation()
+        private void UpdateInputAnimation(GameTime gameTime)
         {
             if (Game.Input.KeyJustReleased(Keys.M))
             {
-                Vector3 from = soldier.Manipulator.Position;
-                Vector3 to = from + (Vector3.ForwardLH * 50f);
+                Vector3 to = soldier.Manipulator.Position - (Vector3.ForwardLH * 10f);
 
-                soldierPath = CalcPath(from, to);
-                var soldierAnim = CalcAnimation(from, to, soldierSpeed);
-
-                //Sets the plan to the animation controller
-                soldier.AnimationController.SetPath(soldierAnim);
-                soldier.AnimationController.Start();
+                MoveSoldierTo(gameTime, to);
             }
         }
         private void UpdateInputDebug()
@@ -283,6 +270,13 @@ namespace Animation.SmoothTransitions
             {
                 return;
             }
+
+            float currTime = gameTime.TotalSeconds - soldierPathStartTime;
+            float pathTime = currTime / soldierPathTotalTime * soldierPath.Length;
+
+            var pathPosition = soldierPath.GetPosition(pathTime);
+
+            soldier.Manipulator.SetPosition(pathPosition);
         }
         private void UpdateDebug()
         {
@@ -314,6 +308,33 @@ namespace Animation.SmoothTransitions
         }
 
         /// <summary>
+        /// Fires when the soldier animation controller ends a plan
+        /// </summary>
+        private void SoldierControllerPathEnding(object sender, EventArgs e)
+        {
+            if (sender is AnimationController controller)
+            {
+                controller.SetPath(soldierAnimationPlans["idle"]);
+                controller.Start(0);
+            }
+        }
+        /// <summary>
+        /// Moves the soldier to the specified position
+        /// </summary>
+        /// <param name="to">Position</param>
+        private void MoveSoldierTo(GameTime gameTime, Vector3 to)
+        {
+            Vector3 from = soldier.Manipulator.Position;
+
+            soldierPath = CalcPath(from, to);
+            soldierPathStartTime = gameTime.TotalSeconds;
+            var soldierAnim = CalcAnimation(from, to, soldierSpeed);
+
+            //Sets the plan to the animation controller
+            soldier.AnimationController.SetPath(soldierAnim);
+            soldier.AnimationController.Start();
+        }
+        /// <summary>
         /// Calculates a controller path
         /// </summary>
         /// <param name="from">Position from</param>
@@ -332,11 +353,11 @@ namespace Animation.SmoothTransitions
         private AnimationPlan CalcAnimation(Vector3 from, Vector3 to, float speed)
         {
             float distance = Vector3.Distance(from, to);
-            float totalTime = distance / speed;
+            soldierPathTotalTime = distance / speed;
 
             //Calculates the plan
             var dd = soldier.GetDrawingData(LevelOfDetail.High);
-            return soldier.AnimationController.CalcPath(dd.SkinningData, "idle1", "walk", "idle1", totalTime);
+            return soldier.AnimationController.CalcPath(dd.SkinningData, "walk", soldierPathTotalTime);
         }
     }
 }

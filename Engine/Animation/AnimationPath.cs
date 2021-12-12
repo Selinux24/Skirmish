@@ -219,12 +219,11 @@ namespace Engine.Animation
 
             int itemIndex = 0;
 
-            float nextTime = Time + delta;
-            float clipTime = nextTime;
-
             float time = 0;
+            float nextTime = 0;
+            float clipTime = 0;
 
-            if (nextTime > 0)
+            if (delta > 0)
             {
                 for (int i = 0; i < items.Count; i++)
                 {
@@ -234,8 +233,10 @@ namespace Engine.Animation
 
                     var current = items[i];
 
+                    clipTime = nextTime = Time + (delta * current.TimeDelta);
+
                     //Update current item
-                    current.UpdateSkinningData(skData);
+                    current.Update(skData);
 
                     bool? continuePath = UpdateItem(current, isLast, nextTime, ref time, out atEnd, out float t);
                     if (continuePath.HasValue)

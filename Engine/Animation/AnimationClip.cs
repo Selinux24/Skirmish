@@ -34,16 +34,7 @@ namespace Engine.Animation
 
             if (animations?.Any() == true)
             {
-                float max = float.MinValue;
-                foreach (var a in animations)
-                {
-                    if (a.Duration > max)
-                    {
-                        max = a.Duration;
-                    }
-                }
-
-                Duration = max;
+                Duration = animations.Max(a => a.Duration);
             }
         }
 

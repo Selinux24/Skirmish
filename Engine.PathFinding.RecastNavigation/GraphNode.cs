@@ -25,16 +25,15 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (mesh.TileCache != null)
             {
-                var tiles = mesh.TileCache.GetTiles();
+                var tileHeaders = mesh.TileCache
+                    .GetTiles()
+                    .Select(tile => tile.Header)
+                    .Where(header => header.Magic == DetourTileCache.DT_TILECACHE_MAGIC)
+                    .ToArray();
 
-                foreach (var tilec in tiles)
+                foreach (var header in tileHeaders)
                 {
-                    if (tilec.Header.Magic != DetourTileCache.DT_TILECACHE_MAGIC)
-                    {
-                        continue;
-                    }
-
-                    var tile = mesh.GetTileAt(tilec.Header.TX, tilec.Header.TY, tilec.Header.TLayer);
+                    var tile = mesh.GetTileAt(header.TX, header.TY, header.TLayer);
                     if (tile == null)
                     {
                         continue;

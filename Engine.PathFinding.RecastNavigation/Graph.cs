@@ -1016,24 +1016,25 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="gameTime">Game time</param>
         public void Update(GameTime gameTime)
         {
-            foreach (var agentQ in AgentQueries)
-            {
-                var nm = agentQ.NavMesh;
-                if (nm.TileCache != null)
-                {
-                    var status = nm.TileCache.Update(out bool upToDate);
-                    if (status.HasFlag(Status.DT_SUCCESS) && updated != upToDate)
-                    {
-                        updated = upToDate;
+            var agentNms = AgentQueries
+                .Select(agentQ => agentQ.NavMesh)
+                .Where(nm => nm.TileCache != null)
+                .ToArray();
 
-                        if (updated)
-                        {
-                            this.Updated?.Invoke(this, new EventArgs());
-                        }
-                        else
-                        {
-                            this.Updating?.Invoke(this, new EventArgs());
-                        }
+            foreach (var nm in agentNms)
+            {
+                var status = nm.TileCache.Update(out bool upToDate);
+                if (status.HasFlag(Status.DT_SUCCESS) && updated != upToDate)
+                {
+                    updated = upToDate;
+
+                    if (updated)
+                    {
+                        Updated?.Invoke(this, new EventArgs());
+                    }
+                    else
+                    {
+                        Updating?.Invoke(this, new EventArgs());
                     }
                 }
             }

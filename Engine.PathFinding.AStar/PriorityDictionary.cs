@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.PathFinding.AStar
 {
@@ -215,15 +216,7 @@ namespace Engine.PathFinding.AStar
         /// <returns>Returns true if the element is in the queue. False in all other cases</returns>
         public bool Contains(TValue item)
         {
-            foreach (PriorityDictionaryItem<TValue, TPriority> qItem in items)
-            {
-                if (qItem.Value.Equals(item))
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return items.Any(qItem => qItem.Value.Equals(item));
         }
         /// <summary>
         /// Copies the elements in a queue, starting from the specified index

@@ -230,7 +230,7 @@ namespace Engine.UI
         /// If deactivated, the font will be drawn with a point sampler. Otherwise, a linear sampler will be used.
         /// Deactivate for thin fonts.
         /// </remarks>
-        public bool FineSampling { get; set; } = true;
+        public bool FineSampling { get; set; }
         /// <summary>
         /// Gets whether the internal buffers were ready or not
         /// </summary>

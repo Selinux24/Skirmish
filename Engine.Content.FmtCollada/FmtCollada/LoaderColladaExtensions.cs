@@ -155,6 +155,29 @@ namespace Engine.Content.FmtCollada
         }
 
         /// <summary>
+        /// Reads an array
+        /// </summary>
+        /// <typeparam name="T">Array type</typeparam>
+        /// <param name="array">Value array</param>
+        /// <param name="length">Length</param>
+        /// <param name="stride">Stride</param>
+        public static T[] ReadArray<T>(IEnumerable<T> array, int length, int stride)
+        {
+            List<T> n = new List<T>();
+
+            for (int i = 0; i < length * stride; i += stride)
+            {
+                for (int x = 0; x < stride; x++)
+                {
+                    T v = array.ElementAt(i + x);
+
+                    n.Add(v);
+                }
+            }
+
+            return n.ToArray();
+        }
+        /// <summary>
         /// Reads a float array from a source
         /// </summary>
         /// <param name="source">Source</param>
@@ -431,29 +454,6 @@ namespace Engine.Content.FmtCollada
             }
 
             return mats.ToArray();
-        }
-        /// <summary>
-        /// Reads an array
-        /// </summary>
-        /// <typeparam name="T">Array type</typeparam>
-        /// <param name="array">Value array</param>
-        /// <param name="length">Length</param>
-        /// <param name="stride">Stride</param>
-        public static T[] ReadArray<T>(IEnumerable<T> array, int length, int stride)
-        {
-            List<T> n = new List<T>();
-
-            for (int i = 0; i < length * stride; i += stride)
-            {
-                for (int x = 0; x < stride; x++)
-                {
-                    T v = array.ElementAt(i + x);
-
-                    n.Add(v);
-                }
-            }
-
-            return n.ToArray();
         }
 
         /// <summary>

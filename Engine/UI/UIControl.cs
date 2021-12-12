@@ -185,7 +185,7 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public bool EventsEnabled { get; set; } = true;
+        public bool EventsEnabled { get; set; }
         /// <inheritdoc/>
         public bool IsMouseOver { get; private set; }
         /// <inheritdoc/>
