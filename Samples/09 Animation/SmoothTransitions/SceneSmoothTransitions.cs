@@ -2,6 +2,7 @@
 using Engine.Animation;
 using Engine.Common;
 using Engine.Content;
+using Engine.Tween;
 using Engine.UI;
 using SharpDX;
 using System;
@@ -20,10 +21,16 @@ namespace Animation.SmoothTransitions
 
         private Model soldier = null;
         private readonly Dictionary<string, AnimationPlan> soldierAnimationPlans = new Dictionary<string, AnimationPlan>();
-        private readonly float soldierSpeed = 2f;
+
+        private PrimitiveListDrawer<Triangle> itemTris = null;
+        private readonly Color itemTrisColor = new Color(Color.Yellow.ToColor3(), 0.25f);
+
         private IControllerPath soldierPath;
         private float soldierPathStartTime;
         private float soldierPathTotalTime;
+        private int pathIndex = 0;
+        private readonly float soldierSpeed = 5f;
+        private readonly float globalTimeDelta = 1f;
 
         private bool uiReady = false;
         private bool gameReady = false;
@@ -46,6 +53,7 @@ namespace Animation.SmoothTransitions
                     {
                         InitializeFloor(),
                         InitializeSoldier(),
+                        InitializeDebug(),
                     },
                     (res) =>
                     {
@@ -95,10 +103,10 @@ namespace Animation.SmoothTransitions
 
             VertexData[] vertices = new VertexData[]
             {
-                    new VertexData{ Position = new Vector3(-l, h, -l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 0.0f) },
-                    new VertexData{ Position = new Vector3(-l, h, +l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 1.0f) },
-                    new VertexData{ Position = new Vector3(+l, h, -l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 0.0f) },
-                    new VertexData{ Position = new Vector3(+l, h, +l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 1.0f) },
+                new VertexData{ Position = new Vector3(-l, h, -l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 0.0f) },
+                new VertexData{ Position = new Vector3(-l, h, +l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 1.0f) },
+                new VertexData{ Position = new Vector3(+l, h, -l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 0.0f) },
+                new VertexData{ Position = new Vector3(+l, h, +l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 1.0f) },
             };
 
             uint[] indices = new uint[]
@@ -112,16 +120,28 @@ namespace Animation.SmoothTransitions
             mat.NormalMapTexture = "SmoothTransitions/resources/d_road_asphalt_stripes_normal.dds";
             mat.SpecularTexture = "SmoothTransitions/resources/d_road_asphalt_stripes_specular.dds";
 
-            var desc = new ModelDescription()
+            var desc = new ModelInstancedDescription()
             {
                 CastShadow = true,
                 DeferredEnabled = true,
                 DepthEnabled = true,
                 UseAnisotropicFiltering = true,
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
+                Instances = 9,
             };
 
-            await this.AddComponentModel("Floor", "Floor", desc);
+            var floor = await this.AddComponentModelInstanced("Floor", "Floor", desc);
+
+            int i = 0;
+            for (int x = -1; x < 2; x++)
+            {
+                for (int z = -1; z < 2; z++)
+                {
+                    floor[i++].Manipulator.SetPosition(x * l * 2f, h, z * l * 2f);
+                }
+            }
+
+            SetGround(floor, true);
         }
         private async Task InitializeSoldier()
         {
@@ -153,6 +173,10 @@ namespace Animation.SmoothTransitions
             soldier.AnimationController.AddPath(soldierAnimationPlans["idle"]);
             soldier.AnimationController.Start(0);
         }
+        private async Task InitializeDebug()
+        {
+            itemTris = await this.AddComponentPrimitiveListDrawer("DebugItemTris", "DebugItemTris", new PrimitiveListDrawerDescription<Triangle>() { Count = 100000, Color = itemTrisColor });
+        }
 
         private void InitializeEnvironment()
         {
@@ -169,6 +193,9 @@ namespace Animation.SmoothTransitions
             Camera.FarPlaneDistance = 500;
             Camera.Goto(10, 5, -12f);
             Camera.LookTo(0, 5 * 0.6f, 0);
+
+            Game.VisibleMouse = true;
+            Game.LockMouse = false;
         }
 
         public override void Update(GameTime gameTime)
@@ -200,7 +227,6 @@ namespace Animation.SmoothTransitions
             base.Update(gameTime);
 
             UpdateSoldier(gameTime);
-            UpdateDebug();
 
             runtime.Text = Game.RuntimeText;
         }
@@ -243,9 +269,20 @@ namespace Animation.SmoothTransitions
         }
         private void UpdateInputAnimation(GameTime gameTime)
         {
+            if (Game.Input.MouseButtonJustReleased(MouseButtons.Left))
+            {
+                var pRay = GetPickingRay();
+                var rayPParams = RayPickingParams.FacingOnly | RayPickingParams.Perfect;
+
+                if (PickNearest<Triangle>(pRay, rayPParams, out var r))
+                {
+                    MoveSoldierTo(gameTime, r.Position);
+                }
+            }
+
             if (Game.Input.KeyJustReleased(Keys.M))
             {
-                Vector3 to = soldier.Manipulator.Position - (Vector3.ForwardLH * 10f);
+                Vector3 to = soldier.Manipulator.Position - (Vector3.ForwardLH * 20f);
 
                 MoveSoldierTo(gameTime, to);
             }
@@ -271,16 +308,52 @@ namespace Animation.SmoothTransitions
                 return;
             }
 
-            float currTime = gameTime.TotalSeconds - soldierPathStartTime;
-            float pathTime = currTime / soldierPathTotalTime * soldierPath.Length;
+            float currTime = (gameTime.TotalSeconds - soldierPathStartTime) * globalTimeDelta;
+            float gradient = ScaleFuncs.SineEaseInOut(currTime / soldierPathTotalTime);
+            float pathTime = gradient * soldierPath.Length;
 
             var pathPosition = soldierPath.GetPosition(pathTime);
 
             soldier.Manipulator.SetPosition(pathPosition);
-        }
-        private void UpdateDebug()
-        {
+            soldier.Manipulator.LookAt(soldierPath.Last, Axis.Y, 0.5f);
 
+            if (currTime >= pathIndex || soldierPath.Last == pathPosition)
+            {
+                var color = GetColor(pathTime, soldierPathTotalTime);
+
+                var tris = soldier.GetTriangles();
+                itemTris.AddPrimitives(color, tris);
+
+                pathIndex++;
+            }
+
+            if (Vector3.Distance(soldierPath.Last, pathPosition) < 0.1f)
+            {
+                soldierPath = null;
+            }
+        }
+
+        /// <summary>
+        /// Gets a gradient color
+        /// </summary>
+        /// <param name="value">Value</param>
+        /// <param name="max">Maximum value</param>
+        private Color4 GetColor(float value, float max)
+        {
+            var colorFrom = new Color(0f, 1f, 0f, 0.25f);
+            var colorMiddle = new Color(Color.LightYellow.ToColor3(), 0.25f);
+            var colorTo = new Color(1f, 0f, 0f, 0.25f);
+
+            float gradient = value / max;
+
+            if (gradient < 0.5f)
+            {
+                return Color4.Lerp(colorFrom, colorMiddle, gradient * 2f);
+            }
+            else
+            {
+                return Color4.Lerp(colorMiddle, colorTo, (gradient - 0.5f) * 2f);
+            }
         }
 
         public override void GameGraphicsResized()
@@ -324,6 +397,8 @@ namespace Animation.SmoothTransitions
         /// <param name="to">Position</param>
         private void MoveSoldierTo(GameTime gameTime, Vector3 to)
         {
+            soldier.AnimationController.TimeDelta = globalTimeDelta;
+
             Vector3 from = soldier.Manipulator.Position;
 
             soldierPath = CalcPath(from, to);
@@ -333,6 +408,9 @@ namespace Animation.SmoothTransitions
             //Sets the plan to the animation controller
             soldier.AnimationController.SetPath(soldierAnim);
             soldier.AnimationController.Start();
+
+            pathIndex = 0;
+            itemTris.Clear();
         }
         /// <summary>
         /// Calculates a controller path

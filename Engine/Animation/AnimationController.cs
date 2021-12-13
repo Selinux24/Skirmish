@@ -159,7 +159,10 @@ namespace Engine.Animation
                 float delta = clipTime / (time / (clipTime * 2));
 
                 path.Add(clip, delta);
-                path.AddRepeat(clip, centralLoops - 1);
+                if (centralLoops > 2)
+                {
+                    path.AddRepeat(clip, centralLoops - 2);
+                }
                 path.Add(clip, delta);
             }
 
