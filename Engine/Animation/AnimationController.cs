@@ -141,7 +141,7 @@ namespace Engine.Animation
         {
             if (skData == null)
             {
-                return null;
+                return new AnimationPlan();
             }
 
             AnimationPath path = new AnimationPath();

@@ -281,18 +281,15 @@ namespace Engine.Modular
                     continue;
                 }
 
-                foreach (var a in asset.References)
+                foreach (var a in asset.References.Where(a => string.Equals(a.AssetName, assetName, StringComparison.OrdinalIgnoreCase)))
                 {
-                    if (string.Equals(a.AssetName, assetName, StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(item.Id, levelAssetId, StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(a.Id, mapAssetId, StringComparison.OrdinalIgnoreCase))
                     {
-                        if (string.Equals(item.Id, levelAssetId, StringComparison.OrdinalIgnoreCase) &&
-                            string.Equals(a.Id, mapAssetId, StringComparison.OrdinalIgnoreCase))
-                        {
-                            return index;
-                        }
-
-                        index++;
+                        return index;
                     }
+
+                    index++;
                 }
             }
 

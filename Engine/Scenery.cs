@@ -220,17 +220,18 @@ namespace Engine
             /// <returns>Returns a material by mesh material name</returns>
             public IMeshMaterial GetMaterial(string meshMaterialName)
             {
-                var meshMaterials = DrawingData.Materials.Keys.ToArray();
-
-                foreach (var meshMaterial in meshMaterials)
+                if (!DrawingData.Materials.Any())
                 {
-                    if (string.Equals(meshMaterial, meshMaterialName, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return DrawingData.Materials[meshMaterial];
-                    }
+                    return null;
                 }
 
-                return null;
+                var meshMaterial = DrawingData.Materials.Keys.FirstOrDefault(m => string.Equals(m, meshMaterialName, StringComparison.OrdinalIgnoreCase));
+                if (meshMaterial == null)
+                {
+                    return null;
+                }
+
+                return DrawingData.Materials[meshMaterial];
             }
             /// <summary>
             /// Replaces the material
@@ -240,20 +241,20 @@ namespace Engine
             /// <returns>Returns true if any material were replaced</returns>
             public bool ReplaceMaterial(string meshMaterialName, IMeshMaterial material)
             {
-                bool updated = false;
-
-                var meshMaterials = DrawingData.Materials.Keys.ToArray();
-
-                foreach (var meshMaterial in meshMaterials)
+                if (!DrawingData.Materials.Any())
                 {
-                    if (string.Equals(meshMaterial, meshMaterialName, StringComparison.OrdinalIgnoreCase))
-                    {
-                        DrawingData.Materials[meshMaterial] = material;
-                        updated = true;
-                    }
+                    return false;
                 }
 
-                return updated;
+                var meshMaterial = DrawingData.Materials.Keys.FirstOrDefault(m => string.Equals(m, meshMaterialName, StringComparison.OrdinalIgnoreCase));
+                if (meshMaterial == null)
+                {
+                    return false;
+                }
+
+                DrawingData.Materials[meshMaterial] = material;
+
+                return true;
             }
 
             /// <inheritdoc/>
@@ -473,17 +474,18 @@ namespace Engine
 
             sceneryEffect.UpdatePerFrame(Matrix.Identity, context);
 
-            foreach (var node in visibleNodes)
+            var nodeIds = visibleNodes.Select(n => n.Id).ToArray();
+            foreach (var nodeId in nodeIds)
             {
-                if (patchDictionary.ContainsKey(node.Id))
+                if (patchDictionary.ContainsKey(nodeId))
                 {
-                    Logger.WriteTrace(this, $"Scenery DrawShadows {context.ShadowMap} {node.Id} patch.");
+                    Logger.WriteTrace(this, $"Scenery DrawShadows {context.ShadowMap} {nodeId} patch.");
 
-                    patchDictionary[node.Id]?.DrawSceneryShadows(sceneryEffect, BufferManager);
+                    patchDictionary[nodeId]?.DrawSceneryShadows(sceneryEffect, BufferManager);
                 }
                 else
                 {
-                    Logger.WriteWarning(this, $"Scenery DrawShadows {context.ShadowMap} {node.Id} without assigned patch. No draw method called");
+                    Logger.WriteWarning(this, $"Scenery DrawShadows {context.ShadowMap} {nodeId} without assigned patch. No draw method called");
                 }
             }
         }
@@ -503,17 +505,18 @@ namespace Engine
 
             sceneryEffect.UpdatePerFrameFull(Matrix.Identity, context);
 
-            foreach (var node in visibleNodes)
+            var nodeIds = visibleNodes.Select(n => n.Id).ToArray();
+            foreach (var nodeId in nodeIds)
             {
-                if (patchDictionary.ContainsKey(node.Id))
+                if (patchDictionary.ContainsKey(nodeId))
                 {
-                    Logger.WriteTrace(this, $"Scenery Draw {node.Id} patch.");
+                    Logger.WriteTrace(this, $"Scenery Draw {nodeId} patch.");
 
-                    patchDictionary[node.Id]?.DrawScenery(context, sceneryEffect, BufferManager);
+                    patchDictionary[nodeId]?.DrawScenery(context, sceneryEffect, BufferManager);
                 }
                 else
                 {
-                    Logger.WriteWarning(this, $"Scenery Draw {node.Id} without assigned patch. No draw method called");
+                    Logger.WriteWarning(this, $"Scenery Draw {nodeId} without assigned patch. No draw method called");
                 }
             }
         }
