@@ -7,6 +7,7 @@ using Engine.UI;
 using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Animation.SmoothTransitions
@@ -24,13 +25,14 @@ namespace Animation.SmoothTransitions
 
         private PrimitiveListDrawer<Triangle> itemTris = null;
         private readonly Color itemTrisColor = new Color(Color.Yellow.ToColor3(), 0.25f);
+        private readonly StringBuilder animLog = new StringBuilder();
 
         private IControllerPath soldierPath;
         private float soldierPathStartTime;
         private float soldierPathTotalTime;
         private int pathIndex = 0;
+        private float globalTimeDelta = 1f;
         private readonly float soldierSpeed = 5f;
-        private readonly float globalTimeDelta = 1f;
 
         private bool uiReady = false;
         private bool gameReady = false;
@@ -156,7 +158,10 @@ namespace Animation.SmoothTransitions
                     TextureIndex = 1,
                 });
 
+            soldier.AnimationController.PathChanged += SoldierControllerPathChanged;
+            soldier.AnimationController.PathUpdated += SoldierControllerPathUpdated;
             soldier.AnimationController.PathEnding += SoldierControllerPathEnding;
+            soldier.AnimationController.AnimationOffsetChanged += SoldierControllerAnimationOffsetChanged;
 
             soldier.Manipulator.SetPosition(0, 0, 5, true);
 
@@ -227,6 +232,7 @@ namespace Animation.SmoothTransitions
             base.Update(gameTime);
 
             UpdateSoldier(gameTime);
+            UpdateDebug();
 
             runtime.Text = Game.RuntimeText;
         }
@@ -276,6 +282,15 @@ namespace Animation.SmoothTransitions
 
                 if (PickNearest<Triangle>(pRay, rayPParams, out var r))
                 {
+                    if (Game.Input.KeyPressed(Keys.Shift))
+                    {
+                        globalTimeDelta = 0.25f;
+                    }
+                    else
+                    {
+                        globalTimeDelta = 1f;
+                    }
+
                     MoveSoldierTo(gameTime, r.Position);
                 }
             }
@@ -299,6 +314,11 @@ namespace Animation.SmoothTransitions
             if (Game.Input.KeyJustReleased(Keys.C))
             {
                 Lights.DirectionalLights[0].CastShadow = !Lights.DirectionalLights[0].CastShadow;
+            }
+
+            if (Game.Input.KeyJustReleased(Keys.L))
+            {
+                messages.Visible = !messages.Visible;
             }
         }
         private void UpdateSoldier(GameTime gameTime)
@@ -332,28 +352,14 @@ namespace Animation.SmoothTransitions
                 soldierPath = null;
             }
         }
-
-        /// <summary>
-        /// Gets a gradient color
-        /// </summary>
-        /// <param name="value">Value</param>
-        /// <param name="max">Maximum value</param>
-        private Color4 GetColor(float value, float max)
+        private void UpdateDebug()
         {
-            var colorFrom = new Color(0f, 1f, 0f, 0.25f);
-            var colorMiddle = new Color(Color.LightYellow.ToColor3(), 0.25f);
-            var colorTo = new Color(1f, 0f, 0f, 0.25f);
-
-            float gradient = value / max;
-
-            if (gradient < 0.5f)
+            if (!messages.Visible)
             {
-                return Color4.Lerp(colorFrom, colorMiddle, gradient * 2f);
+                return;
             }
-            else
-            {
-                return Color4.Lerp(colorMiddle, colorTo, (gradient - 0.5f) * 2f);
-            }
+
+            messages.Text = animLog.ToString();
         }
 
         public override void GameGraphicsResized()
@@ -381,17 +387,6 @@ namespace Animation.SmoothTransitions
         }
 
         /// <summary>
-        /// Fires when the soldier animation controller ends a plan
-        /// </summary>
-        private void SoldierControllerPathEnding(object sender, EventArgs e)
-        {
-            if (sender is AnimationController controller)
-            {
-                controller.SetPath(soldierAnimationPlans["idle"]);
-                controller.Start(0);
-            }
-        }
-        /// <summary>
         /// Moves the soldier to the specified position
         /// </summary>
         /// <param name="to">Position</param>
@@ -411,6 +406,7 @@ namespace Animation.SmoothTransitions
 
             pathIndex = 0;
             itemTris.Clear();
+            animLog.Clear();
         }
         /// <summary>
         /// Calculates a controller path
@@ -436,6 +432,60 @@ namespace Animation.SmoothTransitions
             //Calculates the plan
             var dd = soldier.GetDrawingData(LevelOfDetail.High);
             return soldier.AnimationController.CalcPath(dd.SkinningData, "walk", soldierPathTotalTime);
+        }
+        /// <summary>
+        /// Gets a gradient color
+        /// </summary>
+        /// <param name="value">Value</param>
+        /// <param name="max">Maximum value</param>
+        private Color4 GetColor(float value, float max)
+        {
+            var colorFrom = new Color(0f, 1f, 0f, 0.25f);
+            var colorMiddle = new Color(Color.LightYellow.ToColor3(), 0.25f);
+            var colorTo = new Color(1f, 0f, 0f, 0.25f);
+
+            float gradient = value / max;
+
+            if (gradient < 0.5f)
+            {
+                return Color4.Lerp(colorFrom, colorMiddle, gradient * 2f);
+            }
+            else
+            {
+                return Color4.Lerp(colorMiddle, colorTo, (gradient - 0.5f) * 2f);
+            }
+        }
+
+        private void SoldierControllerPathEnding(object sender, AnimationControllerEventArgs e)
+        {
+            if (sender is AnimationController controller)
+            {
+                Logger.WriteTrace(this, $"PathEnding -> {e}");
+
+                controller.SetPath(soldierAnimationPlans["idle"]);
+                controller.Start(0);
+            }
+        }
+        private void SoldierControllerPathChanged(object sender, AnimationControllerEventArgs e)
+        {
+            if (sender is AnimationController)
+            {
+                Logger.WriteTrace(this, $"PathChanged -> {e}");
+            }
+        }
+        private void SoldierControllerPathUpdated(object sender, AnimationControllerEventArgs e)
+        {
+            if (sender is AnimationController)
+            {
+                Logger.WriteTrace(this, $"PathUpdated -> {e}");
+            }
+        }
+        private void SoldierControllerAnimationOffsetChanged(object sender, AnimationControllerEventArgs e)
+        {
+            if (sender is AnimationController)
+            {
+                Logger.WriteTrace(this, $"AnimationOffsetChanged -> {e}");
+            }
         }
     }
 }

@@ -37,9 +37,9 @@ namespace Engine.Animation
         /// </summary>
         public bool Playing { get; private set; } = false;
         /// <summary>
-        /// Gets the current clip in the clip collection
+        /// Gets the current path index in the animation path collection
         /// </summary>
-        public int CurrentIndex { get; private set; } = 0;
+        public int CurrentPathIndex { get; private set; } = 0;
         /// <summary>
         /// Current animation path
         /// </summary>
@@ -47,7 +47,7 @@ namespace Engine.Animation
         {
             get
             {
-                return animationPaths.ElementAtOrDefault(CurrentIndex);
+                return animationPaths.ElementAtOrDefault(CurrentPathIndex);
             }
         }
         /// <summary>
@@ -57,7 +57,7 @@ namespace Engine.Animation
         {
             get
             {
-                return animationPaths.ElementAtOrDefault(CurrentIndex + 1);
+                return animationPaths.ElementAtOrDefault(CurrentPathIndex + 1);
             }
         }
         /// <summary>
@@ -108,19 +108,19 @@ namespace Engine.Animation
         /// <summary>
         /// On path ending event
         /// </summary>
-        public event EventHandler PathEnding;
+        public event AnimationControllerEventHandler PathEnding;
         /// <summary>
         /// On path changed event
         /// </summary>
-        public event EventHandler PathChanged;
+        public event AnimationControllerEventHandler PathChanged;
         /// <summary>
         /// On path updated event
         /// </summary>
-        public event EventHandler PathUpdated;
+        public event AnimationControllerEventHandler PathUpdated;
         /// <summary>
         /// On animation offset changed
         /// </summary>
-        public event EventHandler AnimationOffsetChanged;
+        public event AnimationControllerEventHandler AnimationOffsetChanged;
 
         /// <summary>
         /// Constructor
@@ -139,6 +139,11 @@ namespace Engine.Animation
         /// <returns>Returns the created animation plan</returns>
         public AnimationPlan CalcPath(ISkinningData skData, string clip, float planTime)
         {
+            if (skData == null)
+            {
+                return null;
+            }
+
             AnimationPath path = new AnimationPath();
 
             //Retrieve the clip data
@@ -206,7 +211,7 @@ namespace Engine.Animation
             {
                 animationPaths.AddRange(clonedPaths);
 
-                CurrentIndex = 0;
+                CurrentPathIndex = 0;
 
                 return;
             }
@@ -220,16 +225,16 @@ namespace Engine.Animation
                 //Clear all paths
                 animationPaths.Clear();
             }
-            else if (flags == AppendFlagTypes.EndsCurrent && CurrentIndex < animationPaths.Count)
+            else if (flags == AppendFlagTypes.EndsCurrent && CurrentPathIndex < animationPaths.Count)
             {
-                last = animationPaths.ElementAt(CurrentIndex);
+                last = animationPaths.ElementAt(CurrentPathIndex);
 
                 //Remove all paths from current to end
-                if (CurrentIndex + 1 < animationPaths.Count)
+                if (CurrentPathIndex + 1 < animationPaths.Count)
                 {
                     animationPaths.RemoveRange(
-                        CurrentIndex + 1,
-                        animationPaths.Count - (CurrentIndex + 1));
+                        CurrentPathIndex + 1,
+                        animationPaths.Count - (CurrentPathIndex + 1));
                 }
 
                 //Mark current path for ending
@@ -245,9 +250,9 @@ namespace Engine.Animation
 
             animationPaths.AddRange(clonedPaths);
 
-            if (CurrentIndex < 0)
+            if (CurrentPathIndex < 0)
             {
-                CurrentIndex = 0;
+                CurrentPathIndex = 0;
             }
         }
 
@@ -258,6 +263,11 @@ namespace Engine.Animation
         /// <param name="skData">Skinning data</param>
         public void Update(float time, ISkinningData skData)
         {
+            if (skData == null)
+            {
+                return;
+            }
+
             if (!active)
             {
                 if (GetAnimationOffset(skData, out uint offset))
@@ -273,36 +283,76 @@ namespace Engine.Animation
                 return;
             }
 
+            int prevIndex = CurrentPathIndex;
+            var prevPath = CurrentPath;
+            uint prevOffset = AnimationOffset;
             bool playing = CurrentPath.Playing;
+            float adjustedTime = time * TimeDelta;
 
-            if (playing && CurrentIndex < animationPaths.Count - 1)
+            if (playing && CurrentPathIndex < animationPaths.Count - 1)
             {
-                //Go to next path
-                CurrentIndex++;
+                //Goes to next animation path
+                CurrentPathIndex++;
+
                 Logger.WriteTrace(this, $"Move to next animation path: {CurrentPath}");
-                PathChanged?.Invoke(this, new EventArgs());
+                PathChanged?.Invoke(this, new AnimationControllerEventArgs()
+                {
+                    Time = adjustedTime,
+                    CurrentOffset = AnimationOffset,
+                    CurrentIndex = CurrentPathIndex,
+                    CurrentPath = CurrentPath,
+                    PreviousIndex = prevIndex,
+                    PreviousPath = prevPath,
+                });
             }
 
-            //Update current path
-            CurrentPath.Update(time * TimeDelta, skData, out bool updated, out bool atEnd);
+            //Updates current path
+            CurrentPath.Update(skData, adjustedTime, out bool updated, out bool atEnd);
             if (updated)
             {
-                Logger.WriteTrace(this, $"Current animation path index changed: {CurrentPath}");
-                PathUpdated?.Invoke(this, new EventArgs());
+                //Updated internal animation path item index
+
+                Logger.WriteTrace(this, $"Current animation path changed: {CurrentPath}");
+                PathUpdated?.Invoke(this, new AnimationControllerEventArgs()
+                {
+                    Time = adjustedTime,
+                    CurrentOffset = AnimationOffset,
+                    CurrentIndex = CurrentPathIndex,
+                    CurrentPath = CurrentPath,
+                    AtEnd = atEnd,
+                });
             }
 
             if (GetAnimationOffset(skData, out uint newOffset) && AnimationOffset != newOffset)
             {
-                Logger.WriteTrace(this, $"Animation offset changed: {newOffset}");
+                //The animation offset in the animation palette was updated
                 AnimationOffset = newOffset;
-                AnimationOffsetChanged?.Invoke(this, new EventArgs());
+
+                Logger.WriteTrace(this, $"Animation offset changed: {newOffset}");
+                AnimationOffsetChanged?.Invoke(this, new AnimationControllerEventArgs()
+                {
+                    Time = adjustedTime,
+                    CurrentOffset = AnimationOffset,
+                    CurrentIndex = CurrentPathIndex,
+                    CurrentPath = CurrentPath,
+                    PreviousOffset = prevOffset,
+                    AtEnd = atEnd,
+                });
             }
 
-            if (atEnd && playing != CurrentPath.Playing && CurrentIndex == animationPaths.Count - 1)
+            if (atEnd && playing != CurrentPath.Playing && CurrentPathIndex == animationPaths.Count - 1)
             {
                 //No paths to do
+
                 Logger.WriteTrace(this, "All animation paths done");
-                PathEnding?.Invoke(this, new EventArgs());
+                PathEnding?.Invoke(this, new AnimationControllerEventArgs()
+                {
+                    Time = adjustedTime,
+                    CurrentOffset = AnimationOffset,
+                    CurrentIndex = CurrentPathIndex,
+                    CurrentPath = CurrentPath,
+                    AtEnd = atEnd,
+                });
             }
         }
         /// <summary>
@@ -314,6 +364,11 @@ namespace Engine.Animation
         protected bool GetAnimationOffset(ISkinningData skData, out uint offset)
         {
             offset = 0;
+
+            if (skData == null)
+            {
+                return false;
+            }
 
             if (GetClipAndTime(out float time, out string clipName))
             {
@@ -336,6 +391,11 @@ namespace Engine.Animation
         /// <returns>Returns the transformation matrix list at current time</returns>
         public IEnumerable<Matrix> GetCurrentPose(ISkinningData skData)
         {
+            if (skData == null)
+            {
+                return Enumerable.Empty<Matrix>();
+            }
+
             if (GetClipAndTime(out float time, out string clipName))
             {
                 return skData.GetPoseAtTime(time, clipName);
@@ -385,7 +445,7 @@ namespace Engine.Animation
         {
             active = true;
 
-            CurrentIndex = 0;
+            CurrentPathIndex = 0;
 
             CurrentPath?.SetTime(time);
         }
@@ -424,7 +484,7 @@ namespace Engine.Animation
                 LastClipName = lastClipName,
                 TimeDelta = TimeDelta,
                 Playing = Playing,
-                CurrentIndex = CurrentIndex,
+                CurrentIndex = CurrentPathIndex,
                 AnimationPlan = animationPaths.Select(a => a.GetState()).ToArray(),
             };
         }
@@ -441,7 +501,7 @@ namespace Engine.Animation
             lastClipName = animationControllerState.LastClipName;
             TimeDelta = animationControllerState.TimeDelta;
             Playing = animationControllerState.Playing;
-            CurrentIndex = animationControllerState.CurrentIndex;
+            CurrentPathIndex = animationControllerState.CurrentIndex;
             for (int i = 0; i < animationControllerState.AnimationPlan.Count(); i++)
             {
                 var pathState = animationControllerState.AnimationPlan.ElementAt(i);

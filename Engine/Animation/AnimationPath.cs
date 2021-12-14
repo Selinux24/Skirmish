@@ -16,7 +16,7 @@ namespace Engine.Animation
         /// <summary>
         /// Current item index
         /// </summary>
-        private int currentIndex;
+        private int currentItemIndex;
 
         /// <summary>
         /// Gets if the animation path is running
@@ -64,7 +64,7 @@ namespace Engine.Animation
         {
             get
             {
-                return items.ElementAtOrDefault(currentIndex);
+                return items.ElementAtOrDefault(currentItemIndex);
             }
         }
 
@@ -169,7 +169,7 @@ namespace Engine.Animation
         /// </summary>
         public void End()
         {
-            if (currentIndex < 0)
+            if (currentItemIndex < 0)
             {
                 return;
             }
@@ -179,7 +179,7 @@ namespace Engine.Animation
                 return;
             }
 
-            int index = currentIndex;
+            int index = currentItemIndex;
 
             if (items[index].IsTranstition)
             {
@@ -208,14 +208,19 @@ namespace Engine.Animation
         /// <summary>
         /// Updates internal state
         /// </summary>
-        /// <param name="delta">Delta time</param>
         /// <param name="skData">Skinning data</param>
+        /// <param name="delta">Delta time</param>
         /// <param name="updated">Returns true when the internal path index change</param>
         /// <param name="atEnd">Returns true when the internal path ends</param>
-        public void Update(float delta, ISkinningData skData, out bool updated, out bool atEnd)
+        public void Update(ISkinningData skData, float delta, out bool updated, out bool atEnd)
         {
             updated = false;
             atEnd = false;
+
+            if (skData == null)
+            {
+                return;
+            }
 
             int itemIndex = 0;
 
@@ -257,9 +262,9 @@ namespace Engine.Animation
             Playing = !atEnd;
             TotalItemTime = Math.Max(0, clipTime);
 
-            if (currentIndex != itemIndex)
+            if (currentItemIndex != itemIndex)
             {
-                currentIndex = itemIndex;
+                currentItemIndex = itemIndex;
 
                 updated = true;
             }
@@ -329,7 +334,7 @@ namespace Engine.Animation
 
             return new AnimationPath(clonedItems)
             {
-                currentIndex = currentIndex,
+                currentItemIndex = currentItemIndex,
                 TotalItemTime = TotalItemTime,
                 Playing = Playing,
                 Time = Time,
@@ -341,7 +346,7 @@ namespace Engine.Animation
         {
             return new AnimationPathState
             {
-                CurrentIndex = currentIndex,
+                CurrentIndex = currentItemIndex,
                 Playing = Playing,
                 Time = Time,
                 TotalItemTime = TotalItemTime,
@@ -356,7 +361,7 @@ namespace Engine.Animation
                 return;
             }
 
-            currentIndex = animationPathState.CurrentIndex;
+            currentItemIndex = animationPathState.CurrentIndex;
             Playing = animationPathState.Playing;
             Time = animationPathState.Time;
             TotalItemTime = animationPathState.TotalItemTime;

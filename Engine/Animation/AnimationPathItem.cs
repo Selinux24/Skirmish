@@ -65,6 +65,11 @@ namespace Engine.Animation
         /// <param name="skData">Skinning data</param>
         public void Update(ISkinningData skData)
         {
+            if (skData == null)
+            {
+                return;
+            }
+
             int clipIndex = skData.GetClipIndex(ClipName);
             Duration = skData.GetClipDuration(clipIndex);
         }

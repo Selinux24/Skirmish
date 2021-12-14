@@ -549,7 +549,7 @@ namespace Animation.SimpleAnimation
                 "Paths: {0:00}; Delta: {1:0.0}; Index: {2}; Clip: {3}; Time: {4:0.00}; Item Time: {5:0.00}",
                 itemController.PathCount,
                 itemController.TimeDelta,
-                itemController.CurrentIndex,
+                itemController.CurrentPathIndex,
                 itemController.CurrentPathItemClip,
                 itemController.CurrentPathTime,
                 itemController.CurrentPathItemTime);

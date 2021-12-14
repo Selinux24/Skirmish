@@ -128,11 +128,13 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Animation\AnimationControllerEventHandler.cs" />
     <Compile Include="Animation\AnimationControllerState.cs" />
     <Compile Include="Animation\AnimationClip.cs" />
     <Compile Include="Animation\AnimationController.cs" />
     <Compile Include="Animation\AnimationPathItemState.cs" />
     <Compile Include="Animation\AnimationPathState.cs" />
+    <Compile Include="Animation\AnimationControllerEventArgs.cs" />
     <Compile Include="BasicManipulatorControllerState.cs" />
     <Compile Include="Common\BaseSceneObjectState.cs" />
     <Compile Include="Common\ManipulatorControllerState.cs" />
