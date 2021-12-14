@@ -2,6 +2,7 @@
 using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.PathFinding.AStar
@@ -71,17 +72,22 @@ namespace Engine.PathFinding.AStar
 
                     bool intersects = Intersection.IntersectAll(
                         ray, triangles, true,
-                        out Vector3[] pickedPoints,
-                        out Triangle[] pickedTriangles,
-                        out float[] pickedDistances);
+                        out var pickedPoints,
+                        out var pickedTriangles,
+                        out var pickedDistances);
 
                     if (intersects)
                     {
-                        info = new GridCollisionInfo[pickedPoints.Length];
+                        info = new GridCollisionInfo[pickedPoints.Count()];
 
-                        for (int i = 0; i < pickedPoints.Length; i++)
+                        for (int i = 0; i < pickedPoints.Count(); i++)
                         {
-                            info[i] = new GridCollisionInfo() { Point = pickedPoints[i], Triangle = pickedTriangles[i], Distance = pickedDistances[i] };
+                            info[i] = new GridCollisionInfo()
+                            {
+                                Point = pickedPoints.ElementAt(i),
+                                Triangle = pickedTriangles.ElementAt(i),
+                                Distance = pickedDistances.ElementAt(i)
+                            };
                         }
                     }
                     else

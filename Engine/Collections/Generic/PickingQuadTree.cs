@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Engine.Collections.Generic
 {
@@ -129,17 +130,17 @@ namespace Engine.Collections.Generic
             {
                 results = null;
 
-                if (this.Root.PickAll(ray, facingOnly, out Vector3[] positions, out T[] items, out float[] distances))
+                if (this.Root.PickAll(ray, facingOnly, out var positions, out var items, out var distances))
                 {
-                    results = new PickingResult<T>[positions.Length];
+                    results = new PickingResult<T>[positions.Count()];
 
                     for (int i = 0; i < results.Length; i++)
                     {
                         results[i] = new PickingResult<T>()
                         {
-                            Position = positions[i],
-                            Item = items[i],
-                            Distance = distances[i],
+                            Position = positions.ElementAt(i),
+                            Item = items.ElementAt(i),
+                            Distance = distances.ElementAt(i),
                         };
                     }
 

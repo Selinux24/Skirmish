@@ -168,15 +168,15 @@ namespace Engine.Common
             }
 
             // Add picks to the resulting collection
-            List<PickingResult<T>> picks = new List<PickingResult<T>>(pos.Length);
+            List<PickingResult<T>> picks = new List<PickingResult<T>>(pos.Count());
 
-            for (int i = 0; i < pos.Length; i++)
+            for (int i = 0; i < pos.Count(); i++)
             {
                 picks.Add(new PickingResult<T>
                 {
-                    Position = pos[i],
-                    Item = tri[i],
-                    Distance = ds[i]
+                    Position = pos.ElementAt(i),
+                    Item = tri.ElementAt(i),
+                    Distance = ds.ElementAt(i)
                 });
             }
 

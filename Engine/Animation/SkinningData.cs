@@ -65,21 +65,11 @@ namespace Engine.Animation
 
             foreach (var clip in animationDescription.Clips)
             {
-                JointAnimation[] ja = new JointAnimation[jointAnimations.Count()];
-                for (int c = 0; c < ja.Length; c++)
+                List<JointAnimation> ja = new List<JointAnimation>(jointAnimations.Count());
+
+                foreach (var j in jointAnimations)
                 {
-                    var j = jointAnimations.ElementAt(c);
-
-                    Keyframe[] kfs = new Keyframe[clip.To - clip.From + 1];
-                    Array.Copy(j.Keyframes, clip.From, kfs, 0, kfs.Length);
-
-                    float dTime = kfs[0].Time;
-                    for (int k = 0; k < kfs.Length; k++)
-                    {
-                        kfs[k].Time -= dTime;
-                    }
-
-                    ja[c] = new JointAnimation(j.Joint, kfs);
+                    ja.Add(j.Copy(clip.From, clip.To));
                 }
 
                 dictAnimations.Add(clip.Name, ja);

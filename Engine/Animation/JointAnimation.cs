@@ -1,5 +1,7 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.Animation
 {
@@ -15,7 +17,7 @@ namespace Engine.Animation
         /// <summary>
         /// Keyframe list
         /// </summary>
-        public readonly Keyframe[] Keyframes;
+        public readonly IReadOnlyCollection<Keyframe> Keyframes;
         /// <summary>
         /// Start time
         /// </summary>
@@ -41,15 +43,26 @@ namespace Engine.Animation
         public JointAnimation(string jointName, Keyframe[] keyframes)
         {
             Joint = jointName;
-            Keyframes = keyframes;
-            StartTime = keyframes[0].Time;
-            EndTime = keyframes[keyframes.Length - 1].Time;
+
+            if (keyframes?.Any() != true)
+            {
+                Keyframes = new Keyframe[] { };
+                StartTime = 0;
+                EndTime = 0;
+
+                return;
+            }
 
             //Pre-normalize rotations
-            for (int i = 0; i < Keyframes.Length; i++)
+            var tmp = new List<Keyframe>(keyframes);
+            for (int i = 0; i < tmp.Count; i++)
             {
-                Keyframes[i].Rotation.Normalize();
+                tmp[i].Rotation.Normalize();
             }
+
+            Keyframes = tmp;
+            StartTime = tmp.First().Time;
+            EndTime = tmp.Last().Time;
         }
 
         /// <summary>
@@ -89,24 +102,24 @@ namespace Engine.Animation
                 }
 
                 var currFrame = 0;
-                while (currFrame < Keyframes.Length - 1)
+                while (currFrame < Keyframes.Count - 1)
                 {
-                    if (deltaTime < Keyframes[currFrame + 1].Time)
+                    if (deltaTime < Keyframes.ElementAt(currFrame + 1).Time)
                     {
                         break;
                     }
                     currFrame++;
                 }
 
-                if (currFrame >= Keyframes.Length)
+                if (currFrame >= Keyframes.Count)
                 {
                     currFrame = 0;
                 }
 
-                var nextFrame = (currFrame + 1) % Keyframes.Length;
+                var nextFrame = (currFrame + 1) % Keyframes.Count;
 
-                var currKey = Keyframes[currFrame];
-                var nextKey = Keyframes[nextFrame];
+                var currKey = Keyframes.ElementAt(currFrame);
+                var nextKey = Keyframes.ElementAt(nextFrame);
 
                 var diffTime = nextKey.Time - currKey.Time;
                 if (diffTime < 0.0)
@@ -138,7 +151,7 @@ namespace Engine.Animation
         /// <returns>Returns text representation</returns>
         public override string ToString()
         {
-            return $"Start: {StartTime:0.00000}; End: {EndTime:0.00000}; Keyframes: {Keyframes.Length}";
+            return $"Start: {StartTime:0.00000}; End: {EndTime:0.00000}; Keyframes: {Keyframes.Count}";
         }
         /// <summary>
         /// Gets whether the current instance is equal to the other instance
@@ -152,6 +165,38 @@ namespace Engine.Animation
                 Helper.ListIsEqual(Keyframes, other.Keyframes) &&
                 StartTime == other.StartTime &&
                 EndTime == other.EndTime;
+        }
+
+        /// <summary>
+        /// Makes a copy of the instance keyframes
+        /// </summary>
+        /// <returns>Returns a copy of the instance keyframes</returns>
+        public JointAnimation Copy()
+        {
+            Keyframe[] kfs = new Keyframe[Keyframes.Count];
+            Array.Copy(Keyframes.ToArray(), kfs, kfs.Length);
+
+            return new JointAnimation(Joint, kfs);
+        }
+        /// <summary>
+        /// Makes a copy of a range of the instance keyframes
+        /// </summary>
+        /// <param name="indexFrom">Keyframe from</param>
+        /// <param name="indexTo">Keyframe to</param>
+        /// <returns>Returns a copy of the instance keyframes</returns>
+        public JointAnimation Copy(int indexFrom, int indexTo)
+        {
+            Keyframe[] kfs = new Keyframe[indexTo - indexFrom + 1];
+            Array.Copy(Keyframes.ToArray(), indexFrom, kfs, 0, kfs.Length);
+
+            //Adjust copy time
+            float dTime = kfs[0].Time;
+            for (int k = 0; k < kfs.Length; k++)
+            {
+                kfs[k].Time -= dTime;
+            }
+
+            return new JointAnimation(Joint, kfs);
         }
     }
 }

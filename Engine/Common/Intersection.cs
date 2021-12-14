@@ -96,7 +96,7 @@ namespace Engine.Common
         /// <param name="points">Returns the intersection point list</param>
         /// <param name="distances">Returns the distance list from the sphere center to the intersection points</param>
         /// <returns>Returns true if the sphere intersects the triangle mesh</returns>
-        public static bool SphereIntersectsMesh(BoundingSphere sphere, IEnumerable<Triangle> mesh, out Triangle[] triangles, out Vector3[] points, out float[] distances)
+        public static bool SphereIntersectsMesh(BoundingSphere sphere, IEnumerable<Triangle> mesh, out IEnumerable<Triangle> triangles, out IEnumerable<Vector3> points, out IEnumerable<float> distances)
         {
             List<Triangle> tris = new List<Triangle>();
             List<Vector3> pts = new List<Vector3>();
@@ -171,21 +171,13 @@ namespace Engine.Common
         /// <param name="mesh">Mesh</param>
         /// <param name="triangles">Returns the intersected triangle list</param>
         /// <returns>Returns true if the box intersects the mesh</returns>
-        public static bool BoxIntersectsMesh(BoundingBox box, IEnumerable<Triangle> mesh, out Triangle[] triangles)
+        public static bool BoxIntersectsMesh(BoundingBox box, IEnumerable<Triangle> mesh, out IEnumerable<Triangle> triangles)
         {
-            List<Triangle> tris = new List<Triangle>();
+            triangles = mesh
+                .Where(t => BoxIntersectsTriangle(box, t))
+                .ToArray();
 
-            foreach (var t in mesh)
-            {
-                if (BoxIntersectsTriangle(box, t))
-                {
-                    tris.Add(t);
-                }
-            }
-
-            triangles = tris.ToArray();
-
-            return tris.Count > 0;
+            return triangles.Any();
         }
 
         /// <summary>
@@ -208,14 +200,14 @@ namespace Engine.Common
         /// <param name="triangles">Returns the intersected triangles of the mesh two</param>
         /// <param name="segments">Returns the intersection segment list</param>
         /// <returns>Returns true if the mesh one intersects the mesh two</returns>
-        public static bool MeshIntersectsMesh(IEnumerable<Triangle> mesh1, IEnumerable<Triangle> mesh2, out Triangle[] triangles, out Line3D[] segments)
+        public static bool MeshIntersectsMesh(IEnumerable<Triangle> mesh1, IEnumerable<Triangle> mesh2, out IEnumerable<Triangle> triangles, out IEnumerable<Line3D> segments)
         {
             List<Triangle> tris = new List<Triangle>();
             List<Line3D> segs = new List<Line3D>();
 
             foreach (var t in mesh1)
             {
-                if (TriangleIntersectsMesh(t, mesh2, out Triangle[] mTris, out Line3D[] mSegs))
+                if (TriangleIntersectsMesh(t, mesh2, out var mTris, out var mSegs))
                 {
                     tris.AddRange(mTris);
                     segs.AddRange(mSegs);
@@ -294,21 +286,13 @@ namespace Engine.Common
         /// <param name="mesh">Mesh</param>
         /// <param name="triangles">Returns the intersected triangle list</param>
         /// <returns>Returns true if the triangle intersects the mesh</returns>
-        public static bool TriangleIntersectsMesh(Triangle triangle, IEnumerable<Triangle> mesh, out Triangle[] triangles)
+        public static bool TriangleIntersectsMesh(Triangle triangle, IEnumerable<Triangle> mesh, out IEnumerable<Triangle> triangles)
         {
-            List<Triangle> tris = new List<Triangle>();
+            triangles = mesh
+                .Where(t => TriangleIntersectsTriangle(triangle, t))
+                .ToArray();
 
-            foreach (var t in mesh)
-            {
-                if (TriangleIntersectsTriangle(triangle, t))
-                {
-                    tris.Add(t);
-                }
-            }
-
-            triangles = tris.ToArray();
-
-            return tris.Count > 0;
+            return triangles.Any();
         }
         /// <summary>
         /// Determines whether the triangle and the mesh intersects or not
@@ -318,7 +302,7 @@ namespace Engine.Common
         /// <param name="triangles">Returns the intersected triangle list</param>
         /// <param name="segments">Returns the intersection segment list</param>
         /// <returns>Returns true if the triangle intersects the mesh</returns>
-        public static bool TriangleIntersectsMesh(Triangle triangle, IEnumerable<Triangle> mesh, out Triangle[] triangles, out Line3D[] segments)
+        public static bool TriangleIntersectsMesh(Triangle triangle, IEnumerable<Triangle> mesh, out IEnumerable<Triangle> triangles, out IEnumerable<Line3D> segments)
         {
             List<Triangle> tris = new List<Triangle>();
             List<Line3D> segs = new List<Line3D>();
@@ -473,19 +457,19 @@ namespace Engine.Common
             item = default;
             distance = float.MaxValue;
 
-            if (IntersectAll(ray, items, facingOnly, out Vector3[] pickedPositions, out T[] pickedTriangles, out float[] pickedDistances))
+            if (IntersectAll(ray, items, facingOnly, out var pickedPositions, out var pickedTriangles, out var pickedDistances))
             {
                 float distanceMin = float.MaxValue;
 
-                for (int i = 0; i < pickedPositions.Length; i++)
+                for (int i = 0; i < pickedPositions.Count(); i++)
                 {
-                    float dist = pickedDistances[i];
+                    float dist = pickedDistances.ElementAt(i);
                     if (dist < distanceMin)
                     {
                         distanceMin = dist;
-                        position = pickedPositions[i];
-                        item = pickedTriangles[i];
-                        distance = pickedDistances[i];
+                        position = pickedPositions.ElementAt(i);
+                        item = pickedTriangles.ElementAt(i);
+                        distance = pickedDistances.ElementAt(i);
                     }
                 }
 
@@ -504,7 +488,7 @@ namespace Engine.Common
         /// <param name="pickedItems">Picked ray intersectable item list</param>
         /// <param name="pickedDistances">Distances to picked positions</param>
         /// <returns>Returns all intersections if exists</returns>
-        public static bool IntersectAll<T>(Ray ray, IEnumerable<T> items, bool facingOnly, out Vector3[] pickedPositions, out T[] pickedItems, out float[] pickedDistances) where T : IRayIntersectable
+        public static bool IntersectAll<T>(Ray ray, IEnumerable<T> items, bool facingOnly, out IEnumerable<Vector3> pickedPositions, out IEnumerable<T> pickedItems, out IEnumerable<float> pickedDistances) where T : IRayIntersectable
         {
             SortedDictionary<float, Vector3> pickedPositionList = new SortedDictionary<float, Vector3>();
             SortedDictionary<float, T> pickedTriangleList = new SortedDictionary<float, T>();
@@ -531,13 +515,17 @@ namespace Engine.Common
 
             if (pickedPositionList.Values.Count > 0)
             {
-                pickedPositions = new Vector3[pickedPositionList.Values.Count];
-                pickedItems = new T[pickedTriangleList.Values.Count];
-                pickedDistances = new float[pickedDistancesList.Values.Count];
+                var tmpPickedPositions = new Vector3[pickedPositionList.Values.Count];
+                var tmpPickedItems = new T[pickedTriangleList.Values.Count];
+                var tmpPickedDistances = new float[pickedDistancesList.Values.Count];
 
-                pickedPositionList.Values.CopyTo(pickedPositions, 0);
-                pickedTriangleList.Values.CopyTo(pickedItems, 0);
-                pickedDistancesList.Values.CopyTo(pickedDistances, 0);
+                pickedPositionList.Values.CopyTo(tmpPickedPositions, 0);
+                pickedTriangleList.Values.CopyTo(tmpPickedItems, 0);
+                pickedDistancesList.Values.CopyTo(tmpPickedDistances, 0);
+
+                pickedPositions = tmpPickedPositions;
+                pickedItems = tmpPickedItems;
+                pickedDistances = tmpPickedDistances;
 
                 return true;
             }

@@ -929,24 +929,16 @@ namespace Engine
         /// <param name="animationPaletteWidth">Animation palette width</param>
         private void UpdateAnimationPalette(out EngineShaderResourceView animationPalette, out uint animationPaletteWidth)
         {
-            List<ISkinningData> skData = new List<ISkinningData>();
-
-            var skComponents = GetComponents<IUseSkinningData>();
-
-            foreach (var component in skComponents)
-            {
-                var cmpSkData = component.SkinningData;
-                if (cmpSkData != null)
-                {
-                    skData.Add(cmpSkData);
-                }
-            }
+            var skData = GetComponents<IUseSkinningData>()
+                .Where(c => c.SkinningData != null)
+                .Select(c => c.SkinningData)
+                .ToArray();
 
             List<ISkinningData> addedSks = new List<ISkinningData>();
 
             List<Vector4> values = new List<Vector4>();
 
-            for (int i = 0; i < skData.Count; i++)
+            for (int i = 0; i < skData.Length; i++)
             {
                 var sk = skData[i];
 
@@ -1066,13 +1058,15 @@ namespace Engine
                 cmpList = cmpList.Where(c => (c.Usage & usage) != SceneObjectUsages.None);
             }
 
-            var coarse = PickCoarse(ref ray, maxDistance, cmpList);
+            var coarse = PickCoarse(ref ray, maxDistance, cmpList)
+                .Select(o => o.Item1)
+                .ToArray();
 
             foreach (var obj in coarse)
             {
-                if (obj.Item1 is IRayPickable<Triangle> pickable && pickable.PickNearest(ray, rayPickingParams, out _))
+                if (obj is IRayPickable<Triangle> pickable && pickable.PickNearest(ray, rayPickingParams, out _))
                 {
-                    model = obj.Item1;
+                    model = obj;
 
                     return true;
                 }
@@ -1188,11 +1182,13 @@ namespace Engine
                 cmpList = cmpList.Where(c => (c.Usage & usage) != SceneObjectUsages.None);
             }
 
-            var coarse = PickCoarse(ref ray, float.MaxValue, cmpList);
+            var coarse = PickCoarse(ref ray, float.MaxValue, cmpList)
+                .Select(o => o.Item1)
+                .ToArray();
 
             foreach (var obj in coarse)
             {
-                if (obj.Item1 is IComposed composed)
+                if (obj is IComposed composed)
                 {
                     var pickComponents = composed.GetComponents<IRayPickable<T>>();
                     foreach (var pickable in pickComponents)
@@ -1206,7 +1202,7 @@ namespace Engine
                     }
                 }
                 else if (
-                    obj.Item1 is IRayPickable<T> pickable &&
+                    obj is IRayPickable<T> pickable &&
                     pickable.PickFirst(ray, rayPickingParams, out var r))
                 {
                     result = r;
@@ -1249,13 +1245,15 @@ namespace Engine
                 cmpList = cmpList.Where(c => (c.Usage & usage) != SceneObjectUsages.None);
             }
 
-            var coarse = PickCoarse(ref ray, float.MaxValue, cmpList);
+            var coarse = PickCoarse(ref ray, float.MaxValue, cmpList)
+                .Select(o => o.Item1)
+                .ToArray();
 
             List<PickingResult<T>> lResults = new List<PickingResult<T>>();
 
             foreach (var obj in coarse)
             {
-                if (obj.Item1 is IComposed composed)
+                if (obj is IComposed composed)
                 {
                     var pickComponents = composed.GetComponents<IRayPickable<T>>();
                     foreach (var pickable in pickComponents)
@@ -1267,7 +1265,7 @@ namespace Engine
                     }
                 }
                 else if (
-                    obj.Item1 is IRayPickable<T> pickable &&
+                    obj is IRayPickable<T> pickable &&
                     pickable.PickAll(ray, rayPickingParams, out var r))
                 {
                     lResults.AddRange(r);
@@ -1766,11 +1764,13 @@ namespace Engine
                     .OrderBy(r => r.Distance).ToArray();
             }
 
-            foreach (var result in results)
+            var positions = results.Select(r => r.Position).ToArray();
+
+            foreach (var position in positions)
             {
-                if (IsWalkable(agent, result.Position, out Vector3? nearest))
+                if (IsWalkable(agent, position, out var nearest))
                 {
-                    finalPosition = GetPositionWalkable(agent, prevPosition, newPosition, result.Position, adjustHeight);
+                    finalPosition = GetPositionWalkable(agent, prevPosition, newPosition, position, adjustHeight);
 
                     return true;
                 }

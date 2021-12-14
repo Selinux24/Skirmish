@@ -174,9 +174,8 @@ namespace Engine.UI
             float minX = float.MaxValue;
             float minY = float.MaxValue;
 
-            foreach (var v in vertices)
+            foreach (var p in vertices.Select(v => v.Position))
             {
-                var p = v.Position;
                 maxX = Math.Max(maxX, p.X);
                 maxY = Math.Max(maxY, -p.Y);
 

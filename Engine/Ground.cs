@@ -247,14 +247,14 @@ namespace Engine
                 }
 
                 // Store results
-                List<PickingResult<Triangle>> picks = new List<PickingResult<Triangle>>(pos.Length);
-                for (int i = 0; i < pos.Length; i++)
+                List<PickingResult<Triangle>> picks = new List<PickingResult<Triangle>>(pos.Count());
+                for (int i = 0; i < pos.Count(); i++)
                 {
                     picks.Add(new PickingResult<Triangle>
                     {
-                        Position = pos[i],
-                        Item = tris[i],
-                        Distance = ds[i],
+                        Position = pos.ElementAt(i),
+                        Item = tris.ElementAt(i),
+                        Distance = ds.ElementAt(i),
                     });
                 }
 

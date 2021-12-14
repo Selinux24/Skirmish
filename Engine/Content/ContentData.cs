@@ -281,14 +281,10 @@ namespace Engine.Content
         /// <returns>Returns the skin name list</returns>
         public IEnumerable<string> GetControllerSkins()
         {
-            List<string> skins = new List<string>();
-
-            foreach (var item in Controllers.Values)
-            {
-                if (!skins.Contains(item.Skin)) skins.Add(item.Skin);
-            }
-
-            return skins.ToArray();
+            return Controllers.Values
+                .Select(item => item.Skin)
+                .Distinct()
+                .ToArray();
         }
         /// <summary>
         /// Get controller for mesh by mesh name
@@ -310,15 +306,7 @@ namespace Engine.Content
         /// <param name="jointName">Joint name</param>
         public bool SkinHasJointData(string jointName)
         {
-            foreach (var value in SkinningInfo.Values)
-            {
-                if (value.Skeleton.GetJointNames().Any(j => j == jointName))
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return SkinningInfo.Values.Any(value => value.Skeleton.GetJointNames().Any(j => j == jointName));
         }
         /// <summary>
         /// Gets the animation list for the specified skin content

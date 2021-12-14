@@ -738,7 +738,7 @@ namespace Engine.Collections.Generic
         /// <param name="items">Hit items</param>
         /// <returns>Returns true if picked position found</returns>
         /// <remarks>By default, result is constrained to front faces only</remarks>
-        public bool PickAll(Ray ray, out Vector3[] positions, out T[] items)
+        public bool PickAll(Ray ray, out IEnumerable<Vector3> positions, out IEnumerable<T> items)
         {
             return PickAll(ray, true, out positions, out items);
         }
@@ -750,7 +750,7 @@ namespace Engine.Collections.Generic
         /// <param name="positions">Hit positions</param>
         /// <param name="items">Hit items</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool PickAll(Ray ray, bool facingOnly, out Vector3[] positions, out T[] items)
+        public bool PickAll(Ray ray, bool facingOnly, out IEnumerable<Vector3> positions, out IEnumerable<T> items)
         {
             return PickAll(ray, facingOnly, out positions, out items, out _);
         }
@@ -763,7 +763,7 @@ namespace Engine.Collections.Generic
         /// <param name="items">Hit items</param>
         /// <param name="distances">Distances to hits</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool PickAll(Ray ray, bool facingOnly, out Vector3[] positions, out T[] items, out float[] distances)
+        public bool PickAll(Ray ray, bool facingOnly, out IEnumerable<Vector3> positions, out IEnumerable<T> items, out IEnumerable<float> distances)
         {
             positions = null;
             items = null;
@@ -803,7 +803,7 @@ namespace Engine.Collections.Generic
         /// <param name="items">Hit items</param>
         /// <param name="distances">Distances to hits</param>
         /// <returns>Returns true if picked position found</returns>
-        private bool PickAllItem(Ray ray, bool facingOnly, out Vector3[] positions, out T[] items, out float[] distances)
+        private bool PickAllItem(Ray ray, bool facingOnly, out IEnumerable<Vector3> positions, out IEnumerable<T> items, out IEnumerable<float> distances)
         {
             positions = null;
             items = null;
@@ -820,7 +820,7 @@ namespace Engine.Collections.Generic
                 return false;
             }
 
-            var inItem = Intersection.IntersectAll(ray, Items, facingOnly, out Vector3[] pos, out T[] tri, out float[] ds);
+            var inItem = Intersection.IntersectAll(ray, Items, facingOnly, out var pos, out var tri, out var ds);
             if (inItem)
             {
                 positions = pos;
@@ -841,7 +841,7 @@ namespace Engine.Collections.Generic
         /// <param name="items">Hit items</param>
         /// <param name="distances">Distances to hits</param>
         /// <returns>Returns true if picked position found</returns>
-        private bool PickAllNode(Ray ray, bool facingOnly, out Vector3[] positions, out T[] items, out float[] distances)
+        private bool PickAllNode(Ray ray, bool facingOnly, out IEnumerable<Vector3> positions, out IEnumerable<T> items, out IEnumerable<float> distances)
         {
             positions = null;
             items = null;
@@ -861,19 +861,19 @@ namespace Engine.Collections.Generic
                     continue;
                 }
 
-                var inItem = node.PickAll(ray, facingOnly, out Vector3[] thisHits, out T[] thisTris, out float[] thisDs);
+                var inItem = node.PickAll(ray, facingOnly, out var thisHits, out var thisTris, out var thisDs);
                 if (!inItem)
                 {
                     continue;
                 }
 
-                for (int i = 0; i < thisHits.Length; i++)
+                for (int i = 0; i < thisHits.Count(); i++)
                 {
-                    if (!hits.Contains(thisHits[i]))
+                    if (!hits.Contains(thisHits.ElementAt(i)))
                     {
-                        hits.Add(thisHits[i]);
-                        tris.Add(thisTris[i]);
-                        dists.Add(thisDs[i]);
+                        hits.Add(thisHits.ElementAt(i));
+                        tris.Add(thisTris.ElementAt(i));
+                        dists.Add(thisDs.ElementAt(i));
                     }
                 }
 
