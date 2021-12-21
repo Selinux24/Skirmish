@@ -550,9 +550,9 @@ namespace Animation.SimpleAnimation
                 itemController.PathCount,
                 itemController.TimeDelta,
                 itemController.CurrentPathIndex,
-                itemController.CurrentPathItemClip,
+                itemController.CurrentPathItemClipName,
                 itemController.CurrentPathTime,
-                itemController.CurrentPathItemTime);
+                itemController.CurrentPathItemDuration);
         }
         private void UpdateInputCamera(GameTime gameTime)
         {

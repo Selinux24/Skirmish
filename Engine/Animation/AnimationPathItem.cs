@@ -1,4 +1,5 @@
-﻿
+﻿using System;
+
 namespace Engine.Animation
 {
     /// <summary>
@@ -38,7 +39,7 @@ namespace Engine.Animation
         {
             get
             {
-                return Duration * Repeats / TimeDelta;
+                return Duration * Math.Max(1, Repeats);
             }
         }
 
@@ -121,7 +122,14 @@ namespace Engine.Animation
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"{(IsTranstition ? "Transition" : "Clip")}: {ClipName}; Loop {Loop}; Repeats: {Repeats}; Delta: {TimeDelta}";
+            if (Repeats > 1)
+            {
+                return $"{(IsTranstition ? "Transition" : "Clip")}: {ClipName}; Duration: {Duration:00.00}; Total Duration: {TotalDuration:00.00}; Loop {Loop}; Repeats: {Repeats}; Delta: {TimeDelta}";
+            }
+            else
+            {
+                return $"{(IsTranstition ? "Transition" : "Clip")}: {ClipName}; Duration: {Duration:00.00}; Loop {Loop}; Delta: {TimeDelta}";
+            }
         }
     }
 }

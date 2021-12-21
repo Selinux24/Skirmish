@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.Animation
 {
@@ -14,14 +15,7 @@ namespace Engine.Animation
         {
             get
             {
-                float d = 0;
-
-                for (int i = 0; i < this.Count; i++)
-                {
-                    d += this[i].TotalDuration;
-                }
-
-                return d;
+                return this.Sum(i => i.TotalDuration);
             }
         }
 

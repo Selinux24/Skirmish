@@ -8,10 +8,6 @@ namespace Engine.Animation
     public class AnimationControllerEventArgs : EventArgs
     {
         /// <summary>
-        /// Animation time
-        /// </summary>
-        public float Time { get; set; }
-        /// <summary>
         /// Animation is at the end
         /// </summary>
         public bool AtEnd { get; set; }

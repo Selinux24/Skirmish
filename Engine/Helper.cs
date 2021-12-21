@@ -470,11 +470,9 @@ namespace Engine
         /// <param name="list">Collection</param>
         /// <param name="separator">The string to use as a separator</param>
         /// <returns>A string that consists of the members of values delimited by the separator string</returns>
-        public static string Join<T>(this ICollection<T> list, string separator = "")
+        public static string Join<T>(this IEnumerable<T> list, string separator = "")
         {
-            List<string> res = new List<string>();
-
-            list.ToList().ForEach(a => res.Add(a.ToString()));
+            var res = list.Select(a=> $"{a}");
 
             return string.Join(separator, res);
         }

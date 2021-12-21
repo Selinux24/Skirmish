@@ -140,7 +140,7 @@ namespace Engine
                 uint animationOffset = 0;
                 if (drawingData?.SkinningData != null)
                 {
-                    current.AnimationController.Update(context.GameTime.ElapsedSeconds, drawingData.SkinningData);
+                    current.AnimationController.Update(drawingData.SkinningData, context.GameTime.ElapsedSeconds);
                     animationOffset = current.AnimationController.AnimationOffset;
                 }
 

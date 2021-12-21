@@ -9,6 +9,10 @@ namespace Engine.Animation
     public class AnimationPathState : IGameState
     {
         /// <summary>
+        /// Name
+        /// </summary>
+        public string Name { get; set; }
+        /// <summary>
         /// Current item index
         /// </summary>
         public int CurrentIndex { get; set; }

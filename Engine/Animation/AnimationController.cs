@@ -67,23 +67,23 @@ namespace Engine.Animation
         {
             get
             {
-                return CurrentPath?.Time ?? 0;
+                return CurrentPath?.PathElapsedTime ?? 0;
             }
         }
         /// <summary>
-        /// Current path item time
+        /// Current path item duration
         /// </summary>
-        public float CurrentPathItemTime
+        public float CurrentPathItemDuration
         {
             get
             {
-                return CurrentPath?.ItemTime ?? 0;
+                return CurrentPath?.PartialPathItemInterpolationValue ?? 0;
             }
         }
         /// <summary>
         /// Gets the current path item clip name
         /// </summary>
-        public string CurrentPathItemClip
+        public string CurrentPathItemClipName
         {
             get
             {
@@ -137,38 +137,41 @@ namespace Engine.Animation
         /// <param name="clip">Clip name</param>
         /// <param name="planTime">Total time</param>
         /// <returns>Returns the created animation plan</returns>
-        public AnimationPlan CalcPath(ISkinningData skData, string clip, float planTime)
+        public AnimationPlan CalcAnimationPath(ISkinningData skData, string clip, float planTime)
         {
             if (skData == null)
             {
                 return new AnimationPlan();
             }
 
-            AnimationPath path = new AnimationPath();
+            AnimationPath path = new AnimationPath()
+            {
+                Name = clip,
+            };
 
             //Retrieve the clip data
             float clipTime = skData.GetClipDuration(skData.GetClipIndex(clip));
 
             if (clipTime >= planTime)
             {
-                float delta = clipTime / (planTime / clipTime);
+                float delta = planTime / clipTime;
 
                 path.Add(clip, delta);
             }
             else
             {
-                float centralTime = (planTime - (clipTime * 2)) / clipTime;
-                int centralLoops = (int)Math.Ceiling(centralTime);
-                float time = planTime - (clipTime * centralLoops);
-
-                float delta = clipTime / (time / (clipTime * 2));
-
-                path.Add(clip, delta);
-                if (centralLoops > 2)
+                float loopTime = planTime;
+                int fullLoops = (int)Math.Ceiling(loopTime);
+                float loopDelta = 1f;
+                if (fullLoops - loopTime > 0f)
                 {
-                    path.AddRepeat(clip, centralLoops - 2);
+                    fullLoops--;
+                    loopDelta = loopTime / fullLoops;
                 }
-                path.Add(clip, delta);
+
+                path.AddRepeat(clip, Math.Max(1, fullLoops - 1), loopDelta);
+
+                path.UpdateItems(skData);
             }
 
             return new AnimationPlan(path);
@@ -220,7 +223,8 @@ namespace Engine.Animation
 
             if (flags == AppendFlagTypes.ClearCurrent)
             {
-                last = animationPaths.Last();
+                last = animationPaths.ElementAt(CurrentPathIndex);
+                //last = animationPaths.Last();
 
                 //Clear all paths
                 animationPaths.Clear();
@@ -259,11 +263,16 @@ namespace Engine.Animation
         /// <summary>
         /// Updates internal state
         /// </summary>
-        /// <param name="time">Time</param>
+        /// <param name="elapsedSeconds">Elapsed seconds</param>
         /// <param name="skData">Skinning data</param>
-        public void Update(float time, ISkinningData skData)
+        public void Update(ISkinningData skData, float elapsedSeconds)
         {
             if (skData == null)
+            {
+                return;
+            }
+
+            if (elapsedSeconds == 0f)
             {
                 return;
             }
@@ -283,39 +292,22 @@ namespace Engine.Animation
                 return;
             }
 
-            int prevIndex = CurrentPathIndex;
-            var prevPath = CurrentPath;
-            uint prevOffset = AnimationOffset;
             bool playing = CurrentPath.Playing;
-            float adjustedTime = time * TimeDelta;
 
             if (playing && CurrentPathIndex < animationPaths.Count - 1)
             {
-                //Goes to next animation path
-                CurrentPathIndex++;
-
-                Logger.WriteTrace(this, $"Move to next animation path: {CurrentPath}");
-                PathChanged?.Invoke(this, new AnimationControllerEventArgs()
-                {
-                    Time = adjustedTime,
-                    CurrentOffset = AnimationOffset,
-                    CurrentIndex = CurrentPathIndex,
-                    CurrentPath = CurrentPath,
-                    PreviousIndex = prevIndex,
-                    PreviousPath = prevPath,
-                });
+                MoveToNextPath();
             }
 
             //Updates current path
-            CurrentPath.Update(skData, adjustedTime, out bool updated, out bool atEnd);
+            float tunedElapsedTime = elapsedSeconds * TimeDelta;
+            CurrentPath.Integrate(skData, tunedElapsedTime, out bool updated, out bool atEnd);
             if (updated)
             {
                 //Updated internal animation path item index
-
                 Logger.WriteTrace(this, $"Current animation path changed: {CurrentPath}");
                 PathUpdated?.Invoke(this, new AnimationControllerEventArgs()
                 {
-                    Time = adjustedTime,
                     CurrentOffset = AnimationOffset,
                     CurrentIndex = CurrentPathIndex,
                     CurrentPath = CurrentPath,
@@ -326,35 +318,76 @@ namespace Engine.Animation
             if (GetAnimationOffset(skData, out uint newOffset) && AnimationOffset != newOffset)
             {
                 //The animation offset in the animation palette was updated
-                AnimationOffset = newOffset;
-
-                Logger.WriteTrace(this, $"Animation offset changed: {newOffset}");
-                AnimationOffsetChanged?.Invoke(this, new AnimationControllerEventArgs()
-                {
-                    Time = adjustedTime,
-                    CurrentOffset = AnimationOffset,
-                    CurrentIndex = CurrentPathIndex,
-                    CurrentPath = CurrentPath,
-                    PreviousOffset = prevOffset,
-                    AtEnd = atEnd,
-                });
+                UpdateOffset(newOffset);
             }
 
-            if (atEnd && playing != CurrentPath.Playing && CurrentPathIndex == animationPaths.Count - 1)
+            if (atEnd)
             {
-                //No paths to do
-
-                Logger.WriteTrace(this, "All animation paths done");
-                PathEnding?.Invoke(this, new AnimationControllerEventArgs()
+                if (playing != CurrentPath.Playing && CurrentPathIndex == animationPaths.Count - 1)
                 {
-                    Time = adjustedTime,
-                    CurrentOffset = AnimationOffset,
-                    CurrentIndex = CurrentPathIndex,
-                    CurrentPath = CurrentPath,
-                    AtEnd = atEnd,
-                });
+                    //No paths to do
+                    EndPath();
+                }
+                else
+                {
+                    //Moves to the next path
+                    MoveToNextPath();
+                }
             }
         }
+        /// <summary>
+        /// Updates the animation offset
+        /// </summary>
+        /// <param name="newOffset">Animation offset</param>
+        private void UpdateOffset(uint newOffset)
+        {
+            uint prevOffset = AnimationOffset;
+            AnimationOffset = newOffset;
+
+            Logger.WriteTrace(this, $"Animation offset changed: {newOffset}");
+            AnimationOffsetChanged?.Invoke(this, new AnimationControllerEventArgs()
+            {
+                CurrentOffset = AnimationOffset,
+                CurrentIndex = CurrentPathIndex,
+                CurrentPath = CurrentPath,
+                PreviousOffset = prevOffset,
+            });
+        }
+        /// <summary>
+        /// Moves to the next animation path
+        /// </summary>
+        private void MoveToNextPath()
+        {
+            int prevIndex = CurrentPathIndex;
+            var prevPath = CurrentPath;
+
+            CurrentPathIndex++;
+
+            Logger.WriteTrace(this, $"Move to next animation path: {CurrentPath}");
+            PathChanged?.Invoke(this, new AnimationControllerEventArgs()
+            {
+                CurrentOffset = AnimationOffset,
+                CurrentIndex = CurrentPathIndex,
+                CurrentPath = CurrentPath,
+                PreviousIndex = prevIndex,
+                PreviousPath = prevPath,
+            });
+        }
+        /// <summary>
+        /// Ends the animation path
+        /// </summary>
+        private void EndPath()
+        {
+            Logger.WriteTrace(this, "All animation paths done");
+            PathEnding?.Invoke(this, new AnimationControllerEventArgs()
+            {
+                CurrentOffset = AnimationOffset,
+                CurrentIndex = CurrentPathIndex,
+                CurrentPath = CurrentPath,
+                AtEnd = true,
+            });
+        }
+
         /// <summary>
         /// Gets the current animation offset from skinning animation data
         /// </summary>
@@ -423,7 +456,7 @@ namespace Engine.Animation
                 var pathItem = CurrentPath.CurrentItem;
                 if (pathItem != null)
                 {
-                    time = CurrentPath.ItemTime;
+                    time = CurrentPath.PartialPathItemInterpolationValue;
                     clipName = pathItem.ClipName;
 
                     Playing = true;
@@ -512,7 +545,12 @@ namespace Engine.Animation
         /// <inheritdoc/>
         public override string ToString()
         {
-            StringBuilder res = new StringBuilder("Inactive");
+            if (CurrentPath == null)
+            {
+                return "Inactive";
+            }
+
+            StringBuilder res = new StringBuilder();
 
             res.Append(CurrentPath?.GetItemList() ?? string.Empty);
             res.Append(NextPath?.GetItemList() ?? string.Empty);
