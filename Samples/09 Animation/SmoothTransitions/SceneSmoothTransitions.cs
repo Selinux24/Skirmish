@@ -30,11 +30,9 @@ namespace Animation.SmoothTransitions
         private IControllerPath soldierPath;
         private readonly float soldierPathArrival = 3.333f;
         private float soldierPathStartTime;
-        private float soldierPathTotalTime;
         private float globalTimeDelta = 1f;
         private readonly float pathStep = 0.5f;
         private float pathIndex = 0f;
-        private float speed = 0;
         private readonly float soldierSpeed = 5.3333f;
         private readonly StringBuilder animData = new StringBuilder();
         private readonly SteeringAgent steeringAgent = new SteeringAgent();
@@ -328,7 +326,6 @@ namespace Animation.SmoothTransitions
             steeringAgent.Update(gameTime.ElapsedSeconds * globalTimeDelta);
             var pathPosition = steeringAgent.Position;
 
-            speed = Vector3.Distance(soldier.Manipulator.Position, pathPosition) / gameTime.ElapsedSeconds;
             soldier.Manipulator.SetPosition(pathPosition);
             soldier.Manipulator.LookAt(soldierPath.Last, Axis.Y, 0.5f);
 
@@ -427,7 +424,7 @@ namespace Animation.SmoothTransitions
         private AnimationPlan CalcAnimation(Vector3 from, Vector3 to, float speed)
         {
             float distance = Vector3.Distance(from, to);
-            soldierPathTotalTime = distance / speed;
+            float soldierPathTotalTime = distance / speed;
 
             //Calculates the plan
             var dd = soldier.GetDrawingData(LevelOfDetail.High);

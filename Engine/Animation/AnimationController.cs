@@ -224,7 +224,6 @@ namespace Engine.Animation
             if (flags == AppendFlagTypes.ClearCurrent)
             {
                 last = animationPaths.ElementAt(CurrentPathIndex);
-                //last = animationPaths.Last();
 
                 //Clear all paths
                 animationPaths.Clear();
@@ -272,7 +271,8 @@ namespace Engine.Animation
                 return;
             }
 
-            if (elapsedSeconds == 0f)
+            float tunedElapsedTime = elapsedSeconds * TimeDelta;
+            if (tunedElapsedTime == 0f)
             {
                 return;
             }
@@ -293,29 +293,20 @@ namespace Engine.Animation
             }
 
             bool playing = CurrentPath.Playing;
-
-            if (playing && CurrentPathIndex < animationPaths.Count - 1)
+            if (playing)
             {
                 MoveToNextPath();
             }
 
             //Updates current path
-            float tunedElapsedTime = elapsedSeconds * TimeDelta;
-            CurrentPath.Integrate(skData, tunedElapsedTime, out bool updated, out bool atEnd);
+            bool updated = CurrentPath.Integrate(skData, tunedElapsedTime, out bool atEnd);
             if (updated)
             {
                 //Updated internal animation path item index
-                Logger.WriteTrace(this, $"Current animation path changed: {CurrentPath}");
-                PathUpdated?.Invoke(this, new AnimationControllerEventArgs()
-                {
-                    CurrentOffset = AnimationOffset,
-                    CurrentIndex = CurrentPathIndex,
-                    CurrentPath = CurrentPath,
-                    AtEnd = atEnd,
-                });
+                UpdatePath(atEnd);
             }
 
-            if (GetAnimationOffset(skData, out uint newOffset) && AnimationOffset != newOffset)
+            if (GetAnimationOffset(skData, out uint newOffset))
             {
                 //The animation offset in the animation palette was updated
                 UpdateOffset(newOffset);
@@ -323,7 +314,7 @@ namespace Engine.Animation
 
             if (atEnd)
             {
-                if (playing != CurrentPath.Playing && CurrentPathIndex == animationPaths.Count - 1)
+                if (playing != CurrentPath.Playing && CurrentPathIndex >= animationPaths.Count - 1)
                 {
                     //No paths to do
                     EndPath();
@@ -336,11 +327,16 @@ namespace Engine.Animation
             }
         }
         /// <summary>
-        /// Updates the animation offset
+        /// Updates the animation offset and fires the animation offset changed event
         /// </summary>
         /// <param name="newOffset">Animation offset</param>
         private void UpdateOffset(uint newOffset)
         {
+            if (AnimationOffset == newOffset)
+            {
+                return;
+            }
+
             uint prevOffset = AnimationOffset;
             AnimationOffset = newOffset;
 
@@ -354,10 +350,15 @@ namespace Engine.Animation
             });
         }
         /// <summary>
-        /// Moves to the next animation path
+        /// Moves to the next animation path and fires the path changed event
         /// </summary>
         private void MoveToNextPath()
         {
+            if (CurrentPathIndex >= animationPaths.Count - 1)
+            {
+                return;
+            }
+
             int prevIndex = CurrentPathIndex;
             var prevPath = CurrentPath;
 
@@ -374,7 +375,7 @@ namespace Engine.Animation
             });
         }
         /// <summary>
-        /// Ends the animation path
+        /// Fires the end animation path event
         /// </summary>
         private void EndPath()
         {
@@ -385,6 +386,21 @@ namespace Engine.Animation
                 CurrentIndex = CurrentPathIndex,
                 CurrentPath = CurrentPath,
                 AtEnd = true,
+            });
+        }
+        /// <summary>
+        /// Fires the updated path event
+        /// </summary>
+        /// <param name="atEnd">Animation is at end</param>
+        private void UpdatePath(bool atEnd)
+        {
+            Logger.WriteTrace(this, $"Current animation path changed: {CurrentPath}");
+            PathUpdated?.Invoke(this, new AnimationControllerEventArgs()
+            {
+                CurrentOffset = AnimationOffset,
+                CurrentIndex = CurrentPathIndex,
+                CurrentPath = CurrentPath,
+                AtEnd = atEnd,
             });
         }
 

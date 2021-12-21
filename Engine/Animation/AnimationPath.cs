@@ -223,21 +223,20 @@ namespace Engine.Animation
         /// </summary>
         /// <param name="skData">Skinning data</param>
         /// <param name="elapsedSeconds">Elapsed seconds</param>
-        /// <param name="updated">Returns true when the internal path index change</param>
         /// <param name="atEnd">Returns true when the internal path ends</param>
-        public void Integrate(ISkinningData skData, float elapsedSeconds, out bool updated, out bool atEnd)
+        /// <returns>Returns true when the internal path index changes</returns>
+        public bool Integrate(ISkinningData skData, float elapsedSeconds, out bool atEnd)
         {
-            updated = false;
             atEnd = false;
 
             if (skData == null)
             {
-                return;
+                return false;
             }
 
             if (elapsedSeconds == 0f)
             {
-                return;
+                return false;
             }
 
             int itemIndex = 0;
@@ -277,8 +276,10 @@ namespace Engine.Animation
             {
                 currentItemIndex = itemIndex;
 
-                updated = true;
+                return true;
             }
+
+            return false;
         }
         /// <summary>
         /// Finds whether the specified time is into the specified path item 
@@ -364,12 +365,26 @@ namespace Engine.Animation
         /// </summary>
         private struct TimeInItemData
         {
-            public static readonly TimeInItemData NotFound = new TimeInItemData() { Result = TimeInItemResults.NotFound };
-
+            /// <summary>
+            /// Look up result
+            /// </summary>
             public TimeInItemResults Result { get; set; }
+            /// <summary>
+            /// Processed path item duration
+            /// </summary>
             public float PathItemDuration { get; set; }
+            /// <summary>
+            /// Processed path item interpolation value
+            /// </summary>
             public float PathItemInterpolationValue { get; set; }
+            /// <summary>
+            /// Gets whether the path is at end or not
+            /// </summary>
+            /// <remarks>The processed path item is the last, and the time is greater of it's total duration</remarks>
             public bool AtEnd { get; set; }
+            /// <summary>
+            /// Processed path item loop count
+            /// </summary>
             public int LoopCount { get; set; }
         }
         private enum TimeInItemResults
