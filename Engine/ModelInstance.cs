@@ -11,7 +11,7 @@ namespace Engine
     /// <summary>
     /// Model instance
     /// </summary>
-    public class ModelInstance : ITransformable3D, IRayPickable<Triangle>, IIntersectable, ICullable, IHasGameState, IModelHasParts<ModelPart>
+    public class ModelInstance : ITransformable3D, IRayPickable<Triangle>, IIntersectable, ICullable, IHasGameState, IModelHasParts<ModelPart>, IUseSkinningData
     {
         /// <summary>
         /// Global id counter
@@ -56,7 +56,7 @@ namespace Engine
         /// <summary>
         /// Animation controller
         /// </summary>
-        public AnimationController AnimationController { get; private set; } = new AnimationController();
+        public AnimationController AnimationController { get; private set; }
         /// <summary>
         /// Texture index
         /// </summary>
@@ -99,6 +99,14 @@ namespace Engine
                 return modelParts.Count;
             }
         }
+        /// <inheritdoc/>
+        public ISkinningData SkinningData
+        {
+            get
+            {
+                return model.GetDrawingData(levelOfDetail)?.SkinningData;
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -128,6 +136,7 @@ namespace Engine
                 Lights = drawData.Lights.Select(l => l.Clone()).ToArray();
             }
 
+            AnimationController = new AnimationController(model);
             AnimationController.AnimationOffsetChanged += (s, a) => { InvalidateCache(); };
 
             boundsHelper.Initialize(GetPoints(true));

@@ -290,6 +290,12 @@ namespace Animation.SmoothTransitions
 
                 MoveSoldierTo(gameTime, to, Game.Input.KeyPressed(Keys.ShiftKey));
             }
+
+            if (Game.Input.KeyJustReleased(Keys.U))
+            {
+                soldier.AnimationController.TimeDelta = Game.Input.KeyPressed(Keys.ShiftKey) ? 0.1f : 1f;
+                soldier.AnimationController.SetPath(soldierAnimationPlans["walk"]);
+            }
         }
         private void UpdateInputDebug()
         {
@@ -390,6 +396,7 @@ namespace Animation.SmoothTransitions
             soldierPath = CalcPath(from, to);
             soldierPathStartTime = gameTime.TotalSeconds;
 
+            steeringAgent.Reset();
             steeringAgent.Position = from;
             steeringAgent.MaxSpeed = soldierSpeed;
             steeringAgent.MaxForce = 0.25f;
@@ -398,8 +405,8 @@ namespace Animation.SmoothTransitions
 
             //Sets the plan to the animation controller
             var soldierAnim = CalcAnimation(from, to, soldierSpeed);
-            soldier.AnimationController.TimeDelta = globalTimeDelta;
             soldier.AnimationController.SetPath(soldierAnim);
+            soldier.AnimationController.TimeDelta = globalTimeDelta;
 
             pathIndex = 0;
             itemTris.Clear();
@@ -427,8 +434,7 @@ namespace Animation.SmoothTransitions
             float soldierPathTotalTime = distance / speed;
 
             //Calculates the plan
-            var dd = soldier.GetDrawingData(LevelOfDetail.High);
-            return soldier.AnimationController.CalcAnimationPath(dd.SkinningData, "walk", soldierPathTotalTime);
+            return soldier.AnimationController.CalcAnimationPath("walk", soldierPathTotalTime);
         }
         /// <summary>
         /// Gets a gradient color

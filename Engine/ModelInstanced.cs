@@ -61,6 +61,15 @@ namespace Engine
         /// Gets or sets the maximum number of instances to draw
         /// </summary>
         public int MaximumCount { get; set; }
+        /// <inheritdoc/>
+        /// <remarks>Always uses the highest level of detail drawing data.</remarks>
+        public override ISkinningData SkinningData
+        {
+            get
+            {
+                return GetDrawingData(LevelOfDetail.High)?.SkinningData;
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -140,7 +149,7 @@ namespace Engine
                 uint animationOffset = 0;
                 if (drawingData?.SkinningData != null)
                 {
-                    current.AnimationController.Update(drawingData.SkinningData, context.GameTime.ElapsedSeconds);
+                    current.AnimationController.Update(context.GameTime.ElapsedSeconds);
                     animationOffset = current.AnimationController.AnimationOffset;
                 }
 

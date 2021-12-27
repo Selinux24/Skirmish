@@ -12,6 +12,10 @@ namespace Engine.Animation
     public class AnimationController : IHasGameState
     {
         /// <summary>
+        /// Skinning data object
+        /// </summary>
+        private readonly IUseSkinningData skinningDataObject;
+        /// <summary>
         /// Controller clips
         /// </summary>
         private readonly AnimationPlan animationPaths = new AnimationPlan();
@@ -27,6 +31,17 @@ namespace Engine.Animation
         /// Last clip name
         /// </summary>
         private string lastClipName = null;
+
+        /// <summary>
+        /// Gets the current skinning data
+        /// </summary>
+        protected ISkinningData SkinningData
+        {
+            get
+            {
+                return skinningDataObject?.SkinningData;
+            }
+        }
 
         /// <summary>
         /// Time delta to aply to controller time
@@ -125,21 +140,21 @@ namespace Engine.Animation
         /// <summary>
         /// Constructor
         /// </summary>
-        public AnimationController()
+        /// <param name="obj">Skinning data object</param>
+        public AnimationController(IUseSkinningData obj)
         {
-
+            skinningDataObject = obj;
         }
 
         /// <summary>
         /// Calculates an animation plan with initial and end clips, and with a central looping clip
         /// </summary>
-        /// <param name="skData">Skinning data</param>
         /// <param name="clip">Clip name</param>
         /// <param name="planTime">Total time</param>
         /// <returns>Returns the created animation plan</returns>
-        public AnimationPlan CalcAnimationPath(ISkinningData skData, string clip, float planTime)
+        public AnimationPlan CalcAnimationPath(string clip, float planTime)
         {
-            if (skData == null)
+            if (SkinningData == null)
             {
                 return new AnimationPlan();
             }
@@ -150,7 +165,7 @@ namespace Engine.Animation
             };
 
             //Retrieve the clip data
-            float clipTime = skData.GetClipDuration(skData.GetClipIndex(clip));
+            float clipTime = SkinningData.GetClipDuration(SkinningData.GetClipIndex(clip));
 
             if (clipTime >= planTime)
             {
@@ -171,7 +186,7 @@ namespace Engine.Animation
 
                 path.AddRepeat(clip, Math.Max(1, fullLoops - 1), loopDelta);
 
-                path.UpdateItems(skData);
+                path.UpdateItems(SkinningData);
             }
 
             return new AnimationPlan(path);
@@ -208,6 +223,11 @@ namespace Engine.Animation
         /// <param name="paths">Paths to append</param>
         private void AppendPaths(AppendFlagTypes flags, AnimationPlan paths)
         {
+            if (SkinningData == null)
+            {
+                return;
+            }
+
             var clonedPaths = paths?.Select(p => p.Clone()).ToArray();
 
             if (!animationPaths.Any())
@@ -249,9 +269,9 @@ namespace Engine.Animation
             }
 
             //Adds transitions from current path item to the first added item
-            last.ConnectTo(clonedPaths.First());
+            var resultPath = last.ConnectTo(SkinningData, clonedPaths.First());
 
-            animationPaths.AddRange(clonedPaths);
+            animationPaths.Add(resultPath);
 
             if (CurrentPathIndex < 0)
             {
@@ -263,10 +283,9 @@ namespace Engine.Animation
         /// Updates internal state
         /// </summary>
         /// <param name="elapsedSeconds">Elapsed seconds</param>
-        /// <param name="skData">Skinning data</param>
-        public void Update(ISkinningData skData, float elapsedSeconds)
+        public void Update(float elapsedSeconds)
         {
-            if (skData == null)
+            if (SkinningData == null)
             {
                 return;
             }
@@ -279,7 +298,7 @@ namespace Engine.Animation
 
             if (!active)
             {
-                if (GetAnimationOffset(skData, out uint offset))
+                if (GetAnimationOffset(out uint offset))
                 {
                     AnimationOffset = offset;
                 }
@@ -299,14 +318,14 @@ namespace Engine.Animation
             }
 
             //Updates current path
-            bool updated = CurrentPath.Integrate(skData, tunedElapsedTime, out bool atEnd);
+            bool updated = CurrentPath.Integrate(SkinningData, tunedElapsedTime, out bool atEnd);
             if (updated)
             {
                 //Updated internal animation path item index
                 UpdatePath(atEnd);
             }
 
-            if (GetAnimationOffset(skData, out uint newOffset))
+            if (GetAnimationOffset(out uint newOffset))
             {
                 //The animation offset in the animation palette was updated
                 UpdateOffset(newOffset);
@@ -407,14 +426,13 @@ namespace Engine.Animation
         /// <summary>
         /// Gets the current animation offset from skinning animation data
         /// </summary>
-        /// <param name="skData">Skinning data</param>
         /// <param name="offset">Returns the current animation offset in skinning animation data</param>
         /// <returns>Returns true if the offset was recovered</returns>
-        protected bool GetAnimationOffset(ISkinningData skData, out uint offset)
+        protected bool GetAnimationOffset(out uint offset)
         {
             offset = 0;
 
-            if (skData == null)
+            if (SkinningData == null)
             {
                 return false;
             }
@@ -424,7 +442,7 @@ namespace Engine.Animation
                 lastClipName = clipName;
                 lastItemTime = time;
 
-                skData.GetAnimationOffset(time, clipName, out uint newOffset);
+                SkinningData.GetAnimationOffset(time, clipName, out uint newOffset);
 
                 offset = newOffset;
 
@@ -436,22 +454,21 @@ namespace Engine.Animation
         /// <summary>
         /// Gets the transformation matrix list at current time
         /// </summary>
-        /// <param name="skData">Skinning data</param>
         /// <returns>Returns the transformation matrix list at current time</returns>
-        public IEnumerable<Matrix> GetCurrentPose(ISkinningData skData)
+        public IEnumerable<Matrix> GetCurrentPose()
         {
-            if (skData == null)
+            if (SkinningData == null)
             {
                 return Enumerable.Empty<Matrix>();
             }
 
             if (GetClipAndTime(out float time, out string clipName))
             {
-                return skData.GetPoseAtTime(time, clipName);
+                return SkinningData.GetPoseAtTime(time, clipName);
             }
             else
             {
-                return skData.GetPoseAtTime(lastItemTime, lastClipName);
+                return SkinningData.GetPoseAtTime(lastItemTime, lastClipName);
             }
         }
         /// <summary>

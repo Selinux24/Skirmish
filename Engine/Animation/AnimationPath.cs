@@ -32,6 +32,10 @@ namespace Engine.Animation
                 return items.Sum(i => i.TotalDuration);
             }
         }
+        /// <summary>
+        /// Gets whether the animation path's items were updated or not
+        /// </summary>
+        public bool Updated { get; private set; }
 
         /// <summary>
         /// Gets the current path item
@@ -152,21 +156,26 @@ namespace Engine.Animation
             var newItem = new AnimationPathItem(clipName, loop, repeats, timeDelta, false);
 
             items.Add(newItem);
+
+            Updated = false;
         }
 
         /// <summary>
         /// Connects the specified path to the current path adding transitions between them
         /// </summary>
+        /// <param name="skData">Skinning data</param>
         /// <param name="animationPath">Animation path to connect with current path</param>
-        public void ConnectTo(AnimationPath animationPath)
+        public AnimationPath ConnectTo(ISkinningData skData, AnimationPath animationPath)
         {
             if (animationPath?.items?.Any() != true)
             {
-                return;
+                return new AnimationPath();
             }
 
+            var clonedPath = animationPath.Clone();
+
             var prevItem = CurrentItem;
-            var nextItem = animationPath.items.First();
+            var nextItem = clonedPath.items.First();
 
             if (prevItem != null && !prevItem.IsTranstition && prevItem.ClipName != nextItem.ClipName)
             {
@@ -174,8 +183,12 @@ namespace Engine.Animation
 
                 var transition = new AnimationPathItem(prevItem.ClipName + nextItem.ClipName, false, 1, transitionDelta, true);
 
-                animationPath.items.Insert(0, transition);
+                clonedPath.items.Insert(0, transition);
             }
+
+            clonedPath.UpdateItems(skData);
+
+            return clonedPath;
         }
         /// <summary>
         /// Sets the items to terminate and end
@@ -234,6 +247,8 @@ namespace Engine.Animation
                 return false;
             }
 
+            UpdateItems(skData);
+
             if (elapsedSeconds == 0f)
             {
                 return false;
@@ -253,9 +268,6 @@ namespace Engine.Animation
                 bool isLast = i == items.Count - 1;
 
                 var current = items[i];
-
-                //Update current item
-                current.Update(skData);
 
                 var lookUpResult = TimeInItem(nextTime, acumDuration, current, isLast);
                 acumDuration += lookUpResult.PathItemDuration;
@@ -409,10 +421,17 @@ namespace Engine.Animation
         /// <param name="skData">Skinning data</param>
         public void UpdateItems(ISkinningData skData)
         {
+            if (Updated)
+            {
+                return;
+            }
+
             if (skData == null)
             {
                 return;
             }
+
+            Updated = true;
 
             if (!items.Any())
             {

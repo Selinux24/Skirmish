@@ -204,6 +204,13 @@ namespace Animation.SmoothTransitions
             Position += Velocity * elapsedTime;
             acceleration = Vector3.Zero;
         }
+
+        public void Reset()
+        {
+            acceleration = Vector3.Zero;
+
+            Velocity = Vector3.Zero;
+        }
     }
 
     public interface ISteeringAgent

@@ -34,16 +34,8 @@ namespace Engine.Common
         /// Use anisotropic filtering
         /// </summary>
         public bool UseAnisotropicFiltering { get; private set; }
-        /// <summary>
-        /// Gets the skinning list used by the current drawing data
-        /// </summary>
-        public ISkinningData SkinningData
-        {
-            get
-            {
-                return GetDrawingData(LevelOfDetail.High)?.SkinningData;
-            }
-        }
+        /// <inheritdoc/>
+        public abstract ISkinningData SkinningData { get; }
         /// <summary>
         /// Use spheric volume for culling test
         /// </summary>
@@ -223,6 +215,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="lod">Level of detail</param>
         /// <returns>Returns the drawing data object</returns>
+        /// <remarks>If the sepecified level of detail not exists, returns the first available drawing data.</remarks>
         public DrawingData GetDrawingData(LevelOfDetail lod)
         {
             if (meshesByLOD == null)
@@ -235,7 +228,7 @@ namespace Engine.Common
                 return meshesByLOD[lod];
             }
 
-            return null;
+            return GetFirstDrawingData(LevelOfDetail.Minimum);
         }
         /// <summary>
         /// Gets the first drawing data avaliable for the specified level of detail, from the specified one

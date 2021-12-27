@@ -42,7 +42,7 @@ namespace Engine
         /// <summary>
         /// Animation controller
         /// </summary>
-        public AnimationController AnimationController { get; private set; } = new AnimationController();
+        public AnimationController AnimationController { get; private set; }
         /// <summary>
         /// Texture index
         /// </summary>
@@ -64,6 +64,14 @@ namespace Engine
             {
                 levelOfDetail = GetLODNearest(value);
                 DrawingData = GetDrawingData(levelOfDetail);
+            }
+        }
+        /// <inheritdoc/>
+        public override ISkinningData SkinningData
+        {
+            get
+            {
+                return DrawingData?.SkinningData;
             }
         }
         /// <summary>
@@ -109,6 +117,7 @@ namespace Engine
                 Lights = drawData.Lights.Select(l => l.Clone()).ToArray();
             }
 
+            AnimationController = new AnimationController(this);
             AnimationController.AnimationOffsetChanged += (s, a) => { InvalidateCache(); };
 
             boundsHelper.Initialize(GetPoints(true));
@@ -186,11 +195,8 @@ namespace Engine
         {
             SetLOD(context.EyePosition);
 
-            if (DrawingData?.SkinningData != null)
-            {
-                AnimationController.Update(DrawingData.SkinningData, context.GameTime.ElapsedSeconds);
-                AnimationOffset = AnimationController.AnimationOffset;
-            }
+            AnimationController.Update(context.GameTime.ElapsedSeconds);
+            AnimationOffset = AnimationController.AnimationOffset;
 
             if (modelParts.Count > 0)
             {

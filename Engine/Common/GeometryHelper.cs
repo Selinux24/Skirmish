@@ -64,7 +64,7 @@ namespace Engine.Common
                 {
                     cache = drawingData.GetPoints(
                         manipulator.FinalTransform,
-                        controller.GetCurrentPose(drawingData.SkinningData),
+                        controller.GetCurrentPose(),
                         update);
                 }
                 else
@@ -112,7 +112,7 @@ namespace Engine.Common
                 {
                     cache = drawingData.GetTriangles(
                         manipulator.LocalTransform,
-                        controller.GetCurrentPose(drawingData.SkinningData),
+                        controller.GetCurrentPose(),
                         update);
                 }
                 else
