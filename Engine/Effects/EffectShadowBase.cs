@@ -154,9 +154,17 @@ namespace Engine.Effects
         /// </summary>
         protected readonly EngineEffectVariableMatrix WorldViewProjectionVariable = null;
         /// <summary>
-        /// Animation data effect variable
+        /// First animation offset effect variable
         /// </summary>
         protected readonly EngineEffectVariableScalar AnimationOffsetVariable = null;
+        /// <summary>
+        /// Second animation offset effect variable
+        /// </summary>
+        protected readonly EngineEffectVariableScalar AnimationOffset2Variable = null;
+        /// <summary>
+        /// Animation interpolation value between offsets
+        /// </summary>
+        protected readonly EngineEffectVariableScalar AnimationInterpolationVariable = null;
         /// <summary>
         /// Texture index effect variable
         /// </summary>
@@ -198,7 +206,7 @@ namespace Engine.Effects
             }
         }
         /// <summary>
-        /// Animation data
+        /// First animation offset
         /// </summary>
         protected uint AnimationOffset
         {
@@ -209,6 +217,34 @@ namespace Engine.Effects
             set
             {
                 AnimationOffsetVariable.Set(value);
+            }
+        }
+        /// <summary>
+        /// Second animation offset
+        /// </summary>
+        protected uint AnimationOffset2
+        {
+            get
+            {
+                return AnimationOffset2Variable.GetUInt();
+            }
+            set
+            {
+                AnimationOffset2Variable.Set(value);
+            }
+        }
+        /// <summary>
+        /// Animation interpolation between offsets
+        /// </summary>
+        protected float AnimationInterpolation
+        {
+            get
+            {
+                return AnimationInterpolationVariable.GetFloat();
+            }
+            set
+            {
+                AnimationInterpolationVariable.Set(value);
             }
         }
         /// <summary>
@@ -335,6 +371,8 @@ namespace Engine.Effects
             AnimationPaletteVariable = Effect.GetVariableTexture("gAnimationPalette");
             WorldViewProjectionVariable = Effect.GetVariableMatrix("gVSWorldViewProjection");
             AnimationOffsetVariable = Effect.GetVariableScalar("gVSAnimationOffset");
+            AnimationOffset2Variable = Effect.GetVariableScalar("gVSAnimationOffset2");
+            AnimationInterpolationVariable = Effect.GetVariableScalar("gVSAnimationInterpolation");
             DiffuseMapVariable = Effect.GetVariableTexture("gPSDiffuseMapArray");
             TextureIndexVariable = Effect.GetVariableScalar("gPSTextureIndex");
         }
@@ -511,30 +549,19 @@ namespace Engine.Effects
             }
         }
 
-        /// <summary>
-        /// Update effect globals
-        /// </summary>
-        /// <param name="animationPalette">Animation palette texture</param>
-        /// <param name="animationPaletteWith">Animation palette texture width</param>
+        /// <inheritdoc/>
         public abstract void UpdateGlobals(
             EngineShaderResourceView animationPalette,
             uint animationPaletteWidth);
-        /// <summary>
-        /// Update per frame data
-        /// </summary>
-        /// <param name="world">World matrix</param>
-        /// <param name="context">Context</param>
+        /// <inheritdoc/>
         public abstract void UpdatePerFrame(
             Matrix world,
             DrawContextShadows context);
-        /// <summary>
-        /// Update per model object data
-        /// </summary>
-        /// <param name="animationOffset">Animation index</param>
-        /// <param name="material">Material</param>
-        /// <param name="textureIndex">Texture index</param>
+        /// <inheritdoc/>
         public abstract void UpdatePerObject(
             uint animationOffset,
+            uint animationOffset2,
+            float animationInterpolation,
             IMeshMaterial material,
             uint textureIndex);
     }

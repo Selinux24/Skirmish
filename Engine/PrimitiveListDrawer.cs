@@ -139,7 +139,7 @@ namespace Engine
             BufferManager.SetInputAssembler(technique, vertexBuffer, topology);
 
             effect.UpdatePerFrameBasic(Matrix.Identity, context);
-            effect.UpdatePerObject(0, null, 0, false);
+            effect.UpdatePerObject(0, 0, 0f, null, 0, false);
 
             var graphics = Game.Graphics;
 

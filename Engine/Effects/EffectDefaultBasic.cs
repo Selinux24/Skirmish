@@ -175,9 +175,17 @@ namespace Engine.Effects
         /// </summary>
         private readonly EngineEffectVariableMatrix worldViewProjectionVar = null;
         /// <summary>
-        /// Animation data effect variable
+        /// First animation offset effect variable
         /// </summary>
         private readonly EngineEffectVariableScalar animationOffsetVar = null;
+        /// <summary>
+        /// Second animation offset effect variable
+        /// </summary>
+        private readonly EngineEffectVariableScalar animationOffset2Var = null;
+        /// <summary>
+        /// Animation interpolation value between offsets
+        /// </summary>
+        private readonly EngineEffectVariableScalar animationInterpolationVar = null;
         /// <summary>
         /// Material index effect variable
         /// </summary>
@@ -448,7 +456,7 @@ namespace Engine.Effects
             }
         }
         /// <summary>
-        /// Animation data
+        /// First animation offset
         /// </summary>
         protected uint AnimationOffset
         {
@@ -459,6 +467,34 @@ namespace Engine.Effects
             set
             {
                 animationOffsetVar.Set(value);
+            }
+        }
+        /// <summary>
+        /// Second animation offset
+        /// </summary>
+        protected uint AnimationOffset2
+        {
+            get
+            {
+                return animationOffset2Var.GetUInt();
+            }
+            set
+            {
+                animationOffset2Var.Set(value);
+            }
+        }
+        /// <summary>
+        /// Animation interpolation between offsets
+        /// </summary>
+        protected float AnimationInterpolation
+        {
+            get
+            {
+                return animationInterpolationVar.GetFloat();
+            }
+            set
+            {
+                animationInterpolationVar.Set(value);
             }
         }
         /// <summary>
@@ -788,6 +824,8 @@ namespace Engine.Effects
 
             //Per instance
             animationOffsetVar = Effect.GetVariableScalar("gVSAnimationOffset");
+            animationOffset2Var = Effect.GetVariableScalar("gVSAnimationOffset2");
+            animationInterpolationVar = Effect.GetVariableScalar("gVSAnimationInterpolation");
             materialIndexVar = Effect.GetVariableScalar("gPSMaterialIndex");
             textureIndexVar = Effect.GetVariableScalar("gPSTextureIndex");
 
@@ -925,11 +963,7 @@ namespace Engine.Effects
 
             LOD = new Vector3(lod1, lod2, lod3);
         }
-        /// <summary>
-        /// Update per frame data
-        /// </summary>
-        /// <param name="world">World</param>
-        /// <param name="context">Context</param>
+        /// <inheritdoc/>
         public void UpdatePerFrameBasic(
             Matrix world,
             DrawContext context)
@@ -943,11 +977,7 @@ namespace Engine.Effects
                 null,
                 null);
         }
-        /// <summary>
-        /// Update per frame full data
-        /// </summary>
-        /// <param name="world">World</param>
-        /// <param name="context">Context</param>
+        /// <inheritdoc/>
         public void UpdatePerFrameFull(
             Matrix world,
             DrawContext context)
@@ -961,15 +991,11 @@ namespace Engine.Effects
                 context.ShadowMapPoint,
                 context.ShadowMapSpot);
         }
-        /// <summary>
-        /// Update per model object data
-        /// </summary>
-        /// <param name="animationOffset">Animation index</param>
-        /// <param name="material">Material</param>
-        /// <param name="textureIndex">Texture index</param>
-        /// <param name="useAnisotropic">Use anisotropic filtering</param>
+        /// <inheritdoc/>
         public void UpdatePerObject(
             uint animationOffset,
+            uint animationOffset2,
+            float animationInterpolation,
             IMeshMaterial material,
             uint textureIndex,
             bool useAnisotropic)
@@ -993,6 +1019,8 @@ namespace Engine.Effects
             Anisotropic = useAnisotropic;
 
             AnimationOffset = animationOffset;
+            AnimationOffset2 = animationOffset2;
+            AnimationInterpolation = animationInterpolation;
         }
 
         /// <summary>

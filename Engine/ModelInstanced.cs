@@ -157,6 +157,8 @@ namespace Engine
                 instancingData[instanceIndex].TextureIndex = current.TextureIndex;
                 instancingData[instanceIndex].MaterialIndex = current.MaterialIndex;
                 instancingData[instanceIndex].AnimationOffset = animationOffset;
+                instancingData[instanceIndex].AnimationOffsetB = 0;
+                instancingData[instanceIndex].AnimationInterpolation = 0f;
 
                 instanceIndex++;
             }
@@ -349,7 +351,7 @@ namespace Engine
 
                 count += mesh.Count;
 
-                effect.UpdatePerObject(0, material, 0);
+                effect.UpdatePerObject(0, 0, 0f, material, 0);
 
                 BufferManager.SetIndexBuffer(mesh.IndexBuffer);
 
@@ -488,7 +490,7 @@ namespace Engine
 
                 count += mesh.Count;
 
-                effect.UpdatePerObject(0, material, 0, UseAnisotropicFiltering);
+                effect.UpdatePerObject(0, 0, 0f, material, 0, UseAnisotropicFiltering);
 
                 BufferManager.SetIndexBuffer(mesh.IndexBuffer);
 

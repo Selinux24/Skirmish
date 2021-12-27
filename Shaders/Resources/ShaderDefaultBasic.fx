@@ -25,9 +25,9 @@ cbuffer cbVSPerFrame : register(b1)
 cbuffer cbVSPerInstance : register(b2)
 {
 	uint gVSAnimationOffset;
+    uint gVSAnimationOffset2;
+    float gVSAnimationInterpolation;
 	uint PAD21;
-	uint PAD22;
-	uint PAD23;
 };
 
 cbuffer cbPSPerFrame : register(b3)
@@ -107,6 +107,8 @@ PSVertexPositionColor VSPositionColorSkinned(VSVertexPositionColorSkinned input)
 	ComputePositionWeights(
 		gAnimationPalette,
 		gVSAnimationOffset,
+		gVSAnimationOffset2,
+		gVSAnimationInterpolation,
 		gAnimationPaletteWidth,
 		input.weights,
 		input.boneIndices,
@@ -129,6 +131,8 @@ PSVertexPositionColor VSPositionColorSkinnedI(VSVertexPositionColorSkinnedI inpu
 	ComputePositionWeights(
 		gAnimationPalette,
 		input.animationOffset,
+		input.animationOffsetB,
+		input.animationInterpolation,
 		gAnimationPaletteWidth,
 		input.weights,
 		input.boneIndices,
@@ -201,6 +205,8 @@ PSVertexPositionNormalColor VSPositionNormalColorSkinned(VSVertexPositionNormalC
 	ComputePositionNormalWeights(
 		gAnimationPalette,
 		gVSAnimationOffset,
+		gVSAnimationOffset2,
+		gVSAnimationInterpolation,
 		gAnimationPaletteWidth,
 		input.weights,
 		input.boneIndices,
@@ -227,6 +233,8 @@ PSVertexPositionNormalColor VSPositionNormalColorSkinnedI(VSVertexPositionNormal
 	ComputePositionNormalWeights(
 		gAnimationPalette,
 		input.animationOffset,
+		input.animationOffsetB,
+		input.animationInterpolation,
 		gAnimationPaletteWidth,
 		input.weights,
 		input.boneIndices,
@@ -318,6 +326,8 @@ PSVertexPositionTexture VSPositionTextureSkinned(VSVertexPositionTextureSkinned 
 	ComputePositionWeights(
 		gAnimationPalette,
 		gVSAnimationOffset,
+		gVSAnimationOffset2,
+		gVSAnimationInterpolation,
 		gAnimationPaletteWidth,
 		input.weights,
 		input.boneIndices,
@@ -341,6 +351,8 @@ PSVertexPositionTexture VSPositionTextureSkinnedI(VSVertexPositionTextureSkinned
 	ComputePositionWeights(
 		gAnimationPalette,
 		input.animationOffset,
+		input.animationOffsetB,
+		input.animationInterpolation,
 		gAnimationPaletteWidth,
 		input.weights,
 		input.boneIndices,
@@ -449,6 +461,8 @@ PSVertexPositionNormalTexture VSPositionNormalTextureSkinned(VSVertexPositionNor
 	ComputePositionNormalWeights(
 		gAnimationPalette,
 		gVSAnimationOffset,
+		gVSAnimationOffset2,
+		gVSAnimationInterpolation,
 		gAnimationPaletteWidth,
 		input.weights,
 		input.boneIndices,
@@ -476,6 +490,8 @@ PSVertexPositionNormalTexture VSPositionNormalTextureSkinnedI(VSVertexPositionNo
 	ComputePositionNormalWeights(
 		gAnimationPalette,
 		input.animationOffset,
+		input.animationOffsetB,
+		input.animationInterpolation,
 		gAnimationPaletteWidth,
 		input.weights,
 		input.boneIndices,
@@ -582,6 +598,8 @@ PSVertexPositionNormalTextureTangent VSPositionNormalTextureTangentSkinned(VSVer
 	ComputePositionNormalTangentWeights(
 		gAnimationPalette,
 		gVSAnimationOffset,
+		gVSAnimationOffset2,
+		gVSAnimationInterpolation,
 		gAnimationPaletteWidth,
 		input.weights,
 		input.boneIndices,
@@ -613,6 +631,8 @@ PSVertexPositionNormalTextureTangent VSPositionNormalTextureTangentSkinnedI(VSVe
 	ComputePositionNormalTangentWeights(
 		gAnimationPalette,
 		input.animationOffset,
+		input.animationOffsetB,
+		input.animationInterpolation,
 		gAnimationPaletteWidth,
 		input.weights,
 		input.boneIndices,

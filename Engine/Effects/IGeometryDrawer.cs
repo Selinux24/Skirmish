@@ -32,12 +32,16 @@ namespace Engine.Effects
         /// <summary>
         /// Update per model object data
         /// </summary>
-        /// <param name="animationOffset">Animation index</param>
+        /// <param name="animationOffset">First animation index</param>
+        /// <param name="animationOffset2">Second animation index</param>
+        /// <param name="animationInterpolation">Animation interpolation value between the offsets</param>
         /// <param name="material">Material</param>
         /// <param name="textureIndex">Texture index</param>
         /// <param name="useAnisotropic">Use anisotropic filtering</param>
         void UpdatePerObject(
             uint animationOffset,
+            uint animationOffset2,
+            float animationInterpolation,
             IMeshMaterial material,
             uint textureIndex,
             bool useAnisotropic);

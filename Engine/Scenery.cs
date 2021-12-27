@@ -138,7 +138,7 @@ namespace Engine
 
                         var technique = sceneryEffect.GetTechnique(mesh.VertextType, false, material.Material.IsTransparent);
 
-                        sceneryEffect.UpdatePerObject(0, material, 0);
+                        sceneryEffect.UpdatePerObject(0, 0, 0f, material, 0);
 
                         bufferManager.SetIndexBuffer(mesh.IndexBuffer);
                         bufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
@@ -185,7 +185,7 @@ namespace Engine
 
                         var technique = sceneryEffect.GetTechnique(mesh.VertextType, false);
 
-                        sceneryEffect.UpdatePerObject(0, material, 0, true);
+                        sceneryEffect.UpdatePerObject(0, 0, 0f, material, 0, true);
 
                         bufferManager.SetIndexBuffer(mesh.IndexBuffer);
                         bufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);

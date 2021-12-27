@@ -62,8 +62,11 @@ namespace Engine
             }
             private set
             {
-                levelOfDetail = GetLODNearest(value);
-                DrawingData = GetDrawingData(levelOfDetail);
+                if (levelOfDetail != value)
+                {
+                    levelOfDetail = GetLODNearest(value);
+                    DrawingData = GetDrawingData(levelOfDetail);
+                }
             }
         }
         /// <inheritdoc/>
@@ -71,6 +74,11 @@ namespace Engine
         {
             get
             {
+                if (DrawingData == null)
+                {
+                    DrawingData = GetDrawingData(levelOfDetail);
+                }
+
                 return DrawingData?.SkinningData;
             }
         }
@@ -297,7 +305,7 @@ namespace Engine
 
                 var material = DrawingData.Materials[materialName];
 
-                effect.UpdatePerObject(AnimationOffset, material, TextureIndex);
+                effect.UpdatePerObject(AnimationOffset, 0, 0f, material, TextureIndex);
 
                 BufferManager.SetIndexBuffer(mesh.IndexBuffer);
 
@@ -351,7 +359,7 @@ namespace Engine
                     continue;
                 }
 
-                effect.UpdatePerObject(AnimationOffset, material, TextureIndex, UseAnisotropicFiltering);
+                effect.UpdatePerObject(AnimationOffset, 0, 0f, material, TextureIndex, UseAnisotropicFiltering);
 
                 BufferManager.SetIndexBuffer(mesh.IndexBuffer);
 

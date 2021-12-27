@@ -26,6 +26,8 @@ namespace Engine.Common
                 new InputElement("textureIndex", 0, Format.R32_UInt, 64, slot, InputClassification.PerInstanceData, 1),
                 new InputElement("materialIndex", 0, Format.R32_UInt, 68, slot, InputClassification.PerInstanceData, 1),
                 new InputElement("animationOffset", 0, Format.R32_UInt, 72, slot, InputClassification.PerInstanceData, 1),
+                new InputElement("animationOffsetB", 0, Format.R32_UInt, 76, slot, InputClassification.PerInstanceData, 1),
+                new InputElement("animationInterpolation", 0, Format.R32_Float, 80, slot, InputClassification.PerInstanceData, 1),
             };
         }
 
@@ -42,9 +44,17 @@ namespace Engine.Common
         /// </summary>
         public uint MaterialIndex;
         /// <summary>
-        /// Animation offset in current clip
+        /// First animation offset in current clip
         /// </summary>
         public uint AnimationOffset;
+        /// <summary>
+        /// Second animation offset in current clip
+        /// </summary>
+        public uint AnimationOffsetB;
+        /// <summary>
+        /// Animation interpolation between offsets
+        /// </summary>
+        public float AnimationInterpolation;
 
         /// <summary>
         /// Constructor
@@ -52,13 +62,17 @@ namespace Engine.Common
         /// <param name="local">Local transform</param>
         /// <param name="textureIndex">Texture index</param>
         /// <param name="materialIndex">Material index</param>
-        /// <param name="animationOffset">Animation offset</param>
-        public VertexInstancingData(Matrix local, uint textureIndex = 0, uint materialIndex = 0, uint animationOffset = 0)
+        /// <param name="animationOffset">First animation offset</param>
+        /// <param name="animationOffsetB">Second animation offset</param>
+        /// <param name="animationInterpolation">Animation interpolation value between the offsets</param>
+        public VertexInstancingData(Matrix local, uint textureIndex = 0, uint materialIndex = 0, uint animationOffset = 0, uint animationOffsetB = 0, float animationInterpolation = 0f)
         {
             Local = local;
             TextureIndex = textureIndex;
             MaterialIndex = materialIndex;
             AnimationOffset = animationOffset;
+            AnimationOffsetB = animationOffsetB;
+            AnimationInterpolation = animationInterpolation;
         }
 
         /// <summary>

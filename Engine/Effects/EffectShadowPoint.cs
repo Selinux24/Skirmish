@@ -48,11 +48,7 @@ namespace Engine.Effects
 
         }
 
-        /// <summary>
-        /// Update effect globals
-        /// </summary>
-        /// <param name="animationPalette">Animation palette texture</param>
-        /// <param name="animationPaletteWith">Animation palette texture width</param>
+        /// <inheritdoc/>
         public override void UpdateGlobals(
             EngineShaderResourceView animationPalette,
             uint animationPaletteWidth)
@@ -60,11 +56,7 @@ namespace Engine.Effects
             AnimationPalette = animationPalette;
             AnimationPaletteWidth = animationPaletteWidth;
         }
-        /// <summary>
-        /// Update per frame data
-        /// </summary>
-        /// <param name="world">World matrix</param>
-        /// <param name="context">Context</param>
+        /// <inheritdoc/>
         public override void UpdatePerFrame(
             Matrix world,
             DrawContextShadows context)
@@ -91,18 +83,17 @@ namespace Engine.Effects
                 WorldViewProjectionArray = null;
             }
         }
-        /// <summary>
-        /// Update per model object data
-        /// </summary>
-        /// <param name="animationOffset">Animation index</param>
-        /// <param name="material">Material</param>
-        /// <param name="textureIndex">Texture index</param>
+        /// <inheritdoc/>
         public override void UpdatePerObject(
             uint animationOffset,
+            uint animationOffset2,
+            float animationInterpolation,
             IMeshMaterial material,
             uint textureIndex)
         {
             AnimationOffset = animationOffset;
+            AnimationOffset2 = animationOffset2;
+            AnimationInterpolation = animationInterpolation;
             DiffuseMap = material?.DiffuseTexture;
             TextureIndex = textureIndex;
         }
