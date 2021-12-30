@@ -85,16 +85,16 @@ namespace Engine.Effects
         }
         /// <inheritdoc/>
         public override void UpdatePerObject(
-            uint animationOffset,
-            uint animationOffset2,
-            float animationInterpolation,
-            IMeshMaterial material,
+            AnimationShadowDrawInfo animation,
+            MaterialShadowDrawInfo material,
             uint textureIndex)
         {
-            AnimationOffset = animationOffset;
-            AnimationOffset2 = animationOffset2;
-            AnimationInterpolation = animationInterpolation;
-            DiffuseMap = material?.DiffuseTexture;
+            AnimationOffset = animation.Offset1;
+            AnimationOffset2 = animation.Offset2;
+            AnimationInterpolation = animation.InterpolationAmount;
+
+            DiffuseMap = material.Material?.DiffuseTexture;
+
             TextureIndex = textureIndex;
         }
     }

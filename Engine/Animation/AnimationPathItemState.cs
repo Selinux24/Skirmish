@@ -19,10 +19,6 @@ namespace Engine.Animation
         /// </summary>
         public int Repeats { get; set; }
         /// <summary>
-        /// Is transition
-        /// </summary>
-        public bool IsTranstition { get; set; }
-        /// <summary>
         /// Clip duration
         /// </summary>
         public float Duration { get; set; }

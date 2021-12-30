@@ -408,9 +408,8 @@ namespace Deferred
                 modelCount++;
             }
 
-            helicopter.AnimationController.AddPath(animations["default"]);
+            helicopter.AnimationController.Start(animations["default"]);
             helicopter.AnimationController.TimeDelta = 3f;
-            helicopter.AnimationController.Start();
 
             for (int i = 0; i < helicopters.InstanceCount; i++)
             {
@@ -424,9 +423,8 @@ namespace Deferred
                     modelCount++;
                 }
 
-                helicopters[i].AnimationController.AddPath(animations["default"]);
+                helicopters[i].AnimationController.Start(animations["default"]);
                 helicopters[i].AnimationController.TimeDelta = 3f;
-                helicopters[i].AnimationController.Start();
             }
         }
 

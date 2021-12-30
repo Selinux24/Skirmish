@@ -51,6 +51,8 @@ namespace Engine
         /// Animation palette offset
         /// </summary>
         public uint AnimationOffset { get; set; }
+        public uint TransitionOffset { get; set; }
+        public float TransitionInterpolation { get; set; }
         /// <summary>
         /// Level of detail
         /// </summary>
@@ -205,6 +207,8 @@ namespace Engine
 
             AnimationController.Update(context.GameTime.ElapsedSeconds);
             AnimationOffset = AnimationController.AnimationOffset;
+            TransitionOffset = AnimationController.TransitionOffset;
+            TransitionInterpolation = AnimationController.TransitionInterpolationAmount;
 
             if (modelParts.Count > 0)
             {
@@ -305,7 +309,19 @@ namespace Engine
 
                 var material = DrawingData.Materials[materialName];
 
-                effect.UpdatePerObject(AnimationOffset, 0, 0f, material, TextureIndex);
+                var animationInfo = new AnimationShadowDrawInfo
+                {
+                    Offset1 = AnimationOffset,
+                    Offset2 = TransitionOffset,
+                    InterpolationAmount = TransitionInterpolation,
+                };
+
+                var materialInfo = new MaterialShadowDrawInfo
+                {
+                    Material = material,
+                };
+
+                effect.UpdatePerObject(animationInfo, materialInfo, TextureIndex);
 
                 BufferManager.SetIndexBuffer(mesh.IndexBuffer);
 
@@ -359,7 +375,20 @@ namespace Engine
                     continue;
                 }
 
-                effect.UpdatePerObject(AnimationOffset, 0, 0f, material, TextureIndex, UseAnisotropicFiltering);
+                var animationInfo = new AnimationDrawInfo
+                {
+                    Offset1 = AnimationOffset,
+                    Offset2 = TransitionOffset,
+                    InterpolationAmount = TransitionInterpolation,
+                };
+
+                var materialInfo = new MaterialDrawInfo
+                {
+                    Material = material,
+                    UseAnisotropic = UseAnisotropicFiltering,
+                };
+
+                effect.UpdatePerObject(animationInfo, materialInfo, TextureIndex);
 
                 BufferManager.SetIndexBuffer(mesh.IndexBuffer);
 

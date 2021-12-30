@@ -128,8 +128,6 @@ namespace Engine
 
             SortInstances(context.EyePosition);
 
-            LevelOfDetail lastLod = LevelOfDetail.None;
-            DrawingData drawingData = null;
             int instanceIndex = 0;
 
             for (int i = 0; i < instancesTmp.Length; i++)
@@ -140,25 +138,14 @@ namespace Engine
                     continue;
                 }
 
-                if (lastLod != current.LevelOfDetail)
-                {
-                    lastLod = current.LevelOfDetail;
-                    drawingData = GetDrawingData(lastLod);
-                }
-
-                uint animationOffset = 0;
-                if (drawingData?.SkinningData != null)
-                {
-                    current.AnimationController.Update(context.GameTime.ElapsedSeconds);
-                    animationOffset = current.AnimationController.AnimationOffset;
-                }
+                current.AnimationController.Update(context.GameTime.ElapsedSeconds);
 
                 instancingData[instanceIndex].Local = current.Manipulator.LocalTransform;
                 instancingData[instanceIndex].TextureIndex = current.TextureIndex;
                 instancingData[instanceIndex].MaterialIndex = current.MaterialIndex;
-                instancingData[instanceIndex].AnimationOffset = animationOffset;
-                instancingData[instanceIndex].AnimationOffsetB = 0;
-                instancingData[instanceIndex].AnimationInterpolation = 0f;
+                instancingData[instanceIndex].AnimationOffset = current.AnimationController.AnimationOffset;
+                instancingData[instanceIndex].AnimationOffsetB = current.AnimationController.TransitionOffset;
+                instancingData[instanceIndex].AnimationInterpolation = current.AnimationController.TransitionInterpolationAmount;
 
                 instanceIndex++;
             }
@@ -351,7 +338,12 @@ namespace Engine
 
                 count += mesh.Count;
 
-                effect.UpdatePerObject(0, 0, 0f, material, 0);
+                var materialInfo = new MaterialShadowDrawInfo
+                {
+                    Material = material,
+                };
+
+                effect.UpdatePerObject(AnimationShadowDrawInfo.Empty, materialInfo, 0);
 
                 BufferManager.SetIndexBuffer(mesh.IndexBuffer);
 
@@ -490,7 +482,13 @@ namespace Engine
 
                 count += mesh.Count;
 
-                effect.UpdatePerObject(0, 0, 0f, material, 0, UseAnisotropicFiltering);
+                var materialInfo = new MaterialDrawInfo
+                {
+                    Material = material,
+                    UseAnisotropic = UseAnisotropicFiltering,
+                };
+
+                effect.UpdatePerObject(AnimationDrawInfo.Empty, materialInfo, 0);
 
                 BufferManager.SetIndexBuffer(mesh.IndexBuffer);
 

@@ -1012,8 +1012,7 @@ namespace Heightmap
                     helicopterI[i].Manipulator.SetNormal(r.Item.Normal);
 
                     helicopterI[i].AnimationController.TimeDelta = 0.5f * (i + 1);
-                    helicopterI[i].AnimationController.AddPath(animations["m24_roll"]);
-                    helicopterI[i].AnimationController.Start();
+                    helicopterI[i].AnimationController.Start(animations["m24_roll"]);
                 }
             }
 
@@ -1089,8 +1088,7 @@ namespace Heightmap
                 soldier.Manipulator.SetRotation(MathUtil.Pi, 0, 0, true);
             }
 
-            soldier.AnimationController.AddPath(animations["soldier_idle"]);
-            soldier.AnimationController.Start();
+            soldier.AnimationController.Start(animations["soldier_idle"]);
 
             await Task.CompletedTask;
         }
@@ -1113,8 +1111,7 @@ namespace Heightmap
                     troops[i].TextureIndex = 1;
 
                     troops[i].AnimationController.TimeDelta = (i + 1) * 0.2f;
-                    troops[i].AnimationController.AddPath(animations["soldier_idle"]);
-                    troops[i].AnimationController.Start(Helper.RandomGenerator.NextFloat(0f, 8f));
+                    troops[i].AnimationController.Start(animations["soldier_idle"], Helper.RandomGenerator.NextFloat(0f, 8f));
                 }
             }
 

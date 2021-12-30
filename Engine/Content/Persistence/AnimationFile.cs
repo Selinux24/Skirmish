@@ -14,10 +14,6 @@ namespace Engine.Content.Persistence
         /// </summary>
         public List<AnimationClipFile> Clips { get; set; } = new List<AnimationClipFile>();
         /// <summary>
-        /// Transitions
-        /// </summary>
-        public List<TransitionFile> Transitions { get; set; } = new List<TransitionFile>();
-        /// <summary>
         /// Time step
         /// </summary>
         public float TimeStep { get; set; }
@@ -35,23 +31,6 @@ namespace Engine.Content.Persistence
                 Name = clipName,
                 From = startTime,
                 To = endTime,
-            });
-        }
-        /// <summary>
-        /// Adds a transition between two clips into de transition list
-        /// </summary>
-        /// <param name="clipFrom">Clip from name</param>
-        /// <param name="clipTo">Clip to name</param>
-        /// <param name="startFrom">Start time of the "from" clip</param>
-        /// <param name="startTo">Start time of the "to" clip</param>
-        public void AddTransition(string clipFrom, string clipTo, float startFrom, float startTo)
-        {
-            Transitions.Add(new TransitionFile()
-            {
-                ClipFrom = clipFrom,
-                ClipTo = clipTo,
-                StartFrom = startFrom,
-                StartTo = startTo,
             });
         }
     }

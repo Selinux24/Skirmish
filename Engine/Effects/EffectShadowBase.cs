@@ -558,11 +558,14 @@ namespace Engine.Effects
             Matrix world,
             DrawContextShadows context);
         /// <inheritdoc/>
+        public virtual void UpdatePerObject()
+        {
+            UpdatePerObject(AnimationShadowDrawInfo.Empty, MaterialShadowDrawInfo.Empty, 0);
+        }
+        /// <inheritdoc/>
         public abstract void UpdatePerObject(
-            uint animationOffset,
-            uint animationOffset2,
-            float animationInterpolation,
-            IMeshMaterial material,
+            AnimationShadowDrawInfo animation,
+            MaterialShadowDrawInfo material,
             uint textureIndex);
     }
 }

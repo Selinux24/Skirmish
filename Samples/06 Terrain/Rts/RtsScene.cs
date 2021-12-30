@@ -1276,7 +1276,7 @@ namespace Terrain.Rts
                 animations.Add("default", new AnimationPlan(ap));
 
                 // Set animation
-                helicopter.AnimationController.SetPath(animations["heli_default"]);
+                helicopter.AnimationController.ReplacePlan(animations["heli_default"]);
                 helicopter.AnimationController.TimeDelta = 3f;
                 helicopter.AnimationController.Start();
 
@@ -1851,7 +1851,7 @@ namespace Terrain.Rts
             if (Game.Input.KeyJustReleased(Keys.Home))
             {
                 Curve3D curve = GenerateHelicopterPath();
-                helicopter.AnimationController.SetPath(animations["heli_default"]);
+                helicopter.AnimationController.ReplacePlan(animations["heli_default"]);
                 DEBUGDrawHelicopterPath(curve);
             }
 

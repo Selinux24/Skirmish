@@ -162,7 +162,7 @@ namespace Animation.SmoothTransitions
                 });
 
             soldier.AnimationController.PathUpdated += SoldierControllerPathUpdated;
-            soldier.AnimationController.PathEnding += SoldierControllerPathEnding;
+            soldier.AnimationController.PlanEnding += SoldierControllerPathEnding;
             soldier.AnimationController.PathChanged += SoldierControllerPathChanged;
             soldier.AnimationController.AnimationOffsetChanged += SoldierControllerAnimationOffsetChanged;
 
@@ -178,8 +178,7 @@ namespace Animation.SmoothTransitions
             soldierAnimationPlans.Add("idle", new AnimationPlan(pIdle));
             soldierAnimationPlans.Add("walk", new AnimationPlan(pWalk));
 
-            soldier.AnimationController.AddPath(soldierAnimationPlans["idle"]);
-            soldier.AnimationController.Start(0);
+            soldier.AnimationController.Start(soldierAnimationPlans["idle"], 0);
         }
         private async Task InitializeDebug()
         {
@@ -294,7 +293,7 @@ namespace Animation.SmoothTransitions
             if (Game.Input.KeyJustReleased(Keys.U))
             {
                 soldier.AnimationController.TimeDelta = Game.Input.KeyPressed(Keys.ShiftKey) ? 0.1f : 1f;
-                soldier.AnimationController.SetPath(soldierAnimationPlans["walk"]);
+                soldier.AnimationController.TransitionToPlan(soldierAnimationPlans["walk"]);
             }
         }
         private void UpdateInputDebug()
@@ -354,7 +353,7 @@ namespace Animation.SmoothTransitions
         }
         private void UpdateDebug()
         {
-            messages.Text = $"{soldier.AnimationController.CurrentPath}";
+            messages.Text = $"{soldier.AnimationController}";
         }
 
         public override void GameGraphicsResized()
@@ -405,7 +404,7 @@ namespace Animation.SmoothTransitions
 
             //Sets the plan to the animation controller
             var soldierAnim = CalcAnimation(from, to, soldierSpeed);
-            soldier.AnimationController.SetPath(soldierAnim);
+            soldier.AnimationController.TransitionToPlan(soldierAnim);
             soldier.AnimationController.TimeDelta = globalTimeDelta;
 
             pathIndex = 0;
@@ -464,7 +463,7 @@ namespace Animation.SmoothTransitions
         {
             if (sender is AnimationController controller)
             {
-                controller.SetPath(soldierAnimationPlans["idle"]);
+                controller.TransitionToPlan(soldierAnimationPlans["idle"]);
 
                 if (soldierPath == null)
                 {

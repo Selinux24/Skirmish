@@ -33,16 +33,56 @@ namespace Engine.Effects
         /// <summary>
         /// Update per model object data
         /// </summary>
-        /// <param name="animationOffset">First animation index</param>
-        /// <param name="animationOffset2">Second animation index</param>
-        /// <param name="animationInterpolation">Animation interpolation value between the offsets</param>
-        /// <param name="material">Material</param>
+        void UpdatePerObject();
+        /// <summary>
+        /// Update per model object data
+        /// </summary>
+        /// <param name="animation">Animation information</param>
+        /// <param name="material">Material information</param>
         /// <param name="textureIndex">Texture index</param>
         void UpdatePerObject(
-            uint animationOffset,
-            uint animationOffset2,
-            float animationInterpolation,
-            IMeshMaterial material,
+            AnimationShadowDrawInfo animation,
+            MaterialShadowDrawInfo material,
             uint textureIndex);
+    }
+
+    /// <summary>
+    /// Material draw information
+    /// </summary>
+    public struct MaterialShadowDrawInfo
+    {
+        /// <summary>
+        /// Empty
+        /// </summary>
+        public static readonly MaterialShadowDrawInfo Empty = new MaterialShadowDrawInfo();
+
+        /// <summary>
+        /// Material
+        /// </summary>
+        public IMeshMaterial Material { get; set; }
+    }
+
+    /// <summary>
+    /// Animation draw information
+    /// </summary>
+    public struct AnimationShadowDrawInfo
+    {
+        /// <summary>
+        /// Empty
+        /// </summary>
+        public static readonly AnimationShadowDrawInfo Empty = new AnimationShadowDrawInfo();
+
+        /// <summary>
+        /// First offset in the animation palette
+        /// </summary>
+        public uint Offset1 { get; set; }
+        /// <summary>
+        /// Second offset in the animation palette
+        /// </summary>
+        public uint Offset2 { get; set; }
+        /// <summary>
+        /// Interpolation amount between the offsets
+        /// </summary>
+        public float InterpolationAmount { get; set; }
     }
 }

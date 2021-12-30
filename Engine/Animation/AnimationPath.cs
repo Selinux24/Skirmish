@@ -139,21 +139,8 @@ namespace Engine.Animation
         /// <param name="timeDelta">Delta time to apply on this animation clip</param>
         private void Add(string clipName, bool loop, int repeats, float timeDelta)
         {
-            //Gets last item
-            var prevItem = items.LastOrDefault();
-
-            if (prevItem != null && !prevItem.IsTranstition && prevItem.ClipName != clipName)
-            {
-                //Adds a transition from the last item to the new item
-                float transitionDelta = (prevItem.TimeDelta + timeDelta) * 0.5f;
-
-                var transition = new AnimationPathItem(prevItem.ClipName + clipName, false, 1, transitionDelta, true);
-
-                items.Add(transition);
-            }
-
             //Adds the new item to the path
-            var newItem = new AnimationPathItem(clipName, loop, repeats, timeDelta, false);
+            var newItem = new AnimationPathItem(clipName, loop, repeats, timeDelta);
 
             items.Add(newItem);
 
@@ -173,18 +160,6 @@ namespace Engine.Animation
             }
 
             var clonedPath = animationPath.Clone();
-
-            var prevItem = CurrentItem;
-            var nextItem = clonedPath.items.First();
-
-            if (prevItem != null && !prevItem.IsTranstition && prevItem.ClipName != nextItem.ClipName)
-            {
-                float transitionDelta = (prevItem.TimeDelta + nextItem.TimeDelta) * 0.5f;
-
-                var transition = new AnimationPathItem(prevItem.ClipName + nextItem.ClipName, false, 1, transitionDelta, true);
-
-                clonedPath.items.Insert(0, transition);
-            }
 
             clonedPath.UpdateItems(skData);
 
@@ -206,11 +181,6 @@ namespace Engine.Animation
             }
 
             int index = currentItemIndex;
-
-            if (items[index].IsTranstition)
-            {
-                index++;
-            }
 
             var current = items[index];
 

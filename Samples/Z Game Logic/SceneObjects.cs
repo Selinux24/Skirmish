@@ -653,8 +653,7 @@ namespace GameLogic
                     var soldier = troops[instanceIndex++];
 
                     soldier.TextureIndex = teamIndex;
-                    soldier.AnimationController.AddPath(animations["stand"]);
-                    soldier.AnimationController.Start(soldierIndex);
+                    soldier.AnimationController.Start(animations["stand"], soldierIndex);
                     soldier.AnimationController.TimeDelta = 0.20f;
 
                     float x = (soldierIndex * soldierSeparation) - (teamWidth * 0.5f);
@@ -694,7 +693,7 @@ namespace GameLogic
             {
                 if (item.Value == instance)
                 {
-                    soldierModels[item.Key].AnimationController.ContinuePath(animations["stand"]);
+                    soldierModels[item.Key].AnimationController.AppendPlan(animations["stand"]);
                 }
             }
         }
@@ -860,7 +859,7 @@ namespace GameLogic
                 if (path != null)
                 {
                     //Set move animation clip
-                    model.AnimationController.SetPath(animations["walk"]);
+                    model.AnimationController.ReplacePlan(animations["walk"]);
 
                     //Folow
                     controller.Follow(path);
@@ -901,7 +900,7 @@ namespace GameLogic
                 if (path != null)
                 {
                     //Set move animation clip
-                    model.AnimationController.SetPath(animations["run"]);
+                    model.AnimationController.ReplacePlan(animations["run"]);
 
                     //Folow
                     controller.Follow(path);

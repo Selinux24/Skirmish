@@ -136,9 +136,14 @@ namespace Engine
 
                         var material = DrawingData.Materials[materialName];
 
-                        var technique = sceneryEffect.GetTechnique(mesh.VertextType, false, material.Material.IsTransparent);
+                        var materialInfo = new MaterialShadowDrawInfo
+                        {
+                            Material = material
+                        };
 
-                        sceneryEffect.UpdatePerObject(0, 0, 0f, material, 0);
+                        sceneryEffect.UpdatePerObject(AnimationShadowDrawInfo.Empty, materialInfo, 0);
+
+                        var technique = sceneryEffect.GetTechnique(mesh.VertextType, false, material.Material.IsTransparent);
 
                         bufferManager.SetIndexBuffer(mesh.IndexBuffer);
                         bufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
@@ -185,7 +190,7 @@ namespace Engine
 
                         var technique = sceneryEffect.GetTechnique(mesh.VertextType, false);
 
-                        sceneryEffect.UpdatePerObject(0, 0, 0f, material, 0, true);
+                        sceneryEffect.UpdatePerObject();
 
                         bufferManager.SetIndexBuffer(mesh.IndexBuffer);
                         bufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);

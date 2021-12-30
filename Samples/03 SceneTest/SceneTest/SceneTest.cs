@@ -452,8 +452,7 @@ namespace SceneTest.SceneTest
 
             characterSoldier.Manipulator.SetPosition((+s - 10) + xDelta, baseHeight + yDelta, -s + zDelta);
             characterSoldier.Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
-            characterSoldier.AnimationController.AddPath(animations["default"]);
-            characterSoldier.AnimationController.Start(0);
+            characterSoldier.AnimationController.Start(animations["default"]);
 
             characterSoldierI[0].Manipulator.SetPosition((-spaceSize * 2 + s) + xDelta, baseHeight + yDelta, -s + zDelta);
             characterSoldierI[1].Manipulator.SetPosition((+spaceSize * 2 + s) + xDelta, baseHeight + yDelta, -s + zDelta);
@@ -465,15 +464,10 @@ namespace SceneTest.SceneTest
             characterSoldierI[2].Manipulator.SetRotation(MathUtil.PiOverTwo * 2, 0, 0);
             characterSoldierI[3].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
 
-            characterSoldierI[0].AnimationController.AddPath(animations["default"]);
-            characterSoldierI[1].AnimationController.AddPath(animations["default"]);
-            characterSoldierI[2].AnimationController.AddPath(animations["default"]);
-            characterSoldierI[3].AnimationController.AddPath(animations["default"]);
-
-            characterSoldierI[0].AnimationController.Start(1);
-            characterSoldierI[1].AnimationController.Start(2);
-            characterSoldierI[2].AnimationController.Start(3);
-            characterSoldierI[3].AnimationController.Start(4);
+            characterSoldierI[0].AnimationController.Start(animations["default"], 1);
+            characterSoldierI[1].AnimationController.Start(animations["default"], 2);
+            characterSoldierI[2].AnimationController.Start(animations["default"], 3);
+            characterSoldierI[3].AnimationController.Start(animations["default"], 4);
         }
         private async Task InitializeVehicles()
         {

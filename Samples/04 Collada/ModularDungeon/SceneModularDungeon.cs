@@ -615,7 +615,7 @@ namespace Collada.ModularDungeon
             p0.AddLoop("walk");
             ratPaths.Add("walk", new AnimationPlan(p0));
 
-            rat.AnimationController.AddPath(ratPaths["walk"]);
+            rat.AnimationController.Start(ratPaths["walk"]);
             rat.AnimationController.TimeDelta = 1.5f;
         }
         private async Task InitializeHuman()
@@ -1563,8 +1563,7 @@ namespace Collada.ModularDungeon
                 human[i].Manipulator.SetPosition(31, 0, i == 0 ? -31 : -29, true);
                 human[i].Manipulator.SetRotation(-MathUtil.PiOverTwo, 0, 0, true);
 
-                human[i].AnimationController.AddPath(new AnimationPlan(p0));
-                human[i].AnimationController.Start(i * 1f);
+                human[i].AnimationController.Start(new AnimationPlan(p0), i * 1f);
                 human[i].AnimationController.TimeDelta = 0.5f + (i * 0.1f);
             }
 

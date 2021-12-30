@@ -992,35 +992,27 @@ namespace Engine.Effects
                 context.ShadowMapSpot);
         }
         /// <inheritdoc/>
-        public void UpdatePerObject(
-            uint animationOffset,
-            uint animationOffset2,
-            float animationInterpolation,
-            IMeshMaterial material,
-            uint textureIndex,
-            bool useAnisotropic)
+        public void UpdatePerObject()
         {
-            if (material != null)
-            {
-                DiffuseMap = material.DiffuseTexture;
-                NormalMap = material.NormalMap;
-                UseColorDiffuse = material.DiffuseTexture != null;
-                MaterialIndex = material.ResourceIndex;
-            }
-            else
-            {
-                DiffuseMap = null;
-                NormalMap = null;
-                UseColorDiffuse = false;
-                MaterialIndex = 0;
-            }
+            UpdatePerObject(AnimationDrawInfo.Empty, MaterialDrawInfo.Empty, 0);
+        }
+        /// <inheritdoc/>
+        public void UpdatePerObject(
+            AnimationDrawInfo animation,
+            MaterialDrawInfo material,
+            uint textureIndex)
+        {
+            AnimationOffset = animation.Offset1;
+            AnimationOffset2 = animation.Offset2;
+            AnimationInterpolation = animation.InterpolationAmount;
+
+            DiffuseMap = material.Material?.DiffuseTexture;
+            NormalMap = material.Material?.NormalMap;
+            UseColorDiffuse = material.Material?.DiffuseTexture != null;
+            MaterialIndex = material.Material?.ResourceIndex ?? 0;
+            Anisotropic = material.UseAnisotropic;
 
             TextureIndex = textureIndex;
-            Anisotropic = useAnisotropic;
-
-            AnimationOffset = animationOffset;
-            AnimationOffset2 = animationOffset2;
-            AnimationInterpolation = animationInterpolation;
         }
 
         /// <summary>

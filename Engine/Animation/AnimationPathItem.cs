@@ -24,10 +24,6 @@ namespace Engine.Animation
         /// </summary>
         public int Repeats { get; private set; }
         /// <summary>
-        /// Is transition
-        /// </summary>
-        public bool IsTranstition { get; private set; }
-        /// <summary>
         /// Clip duration
         /// </summary>
         public float Duration { get; private set; }
@@ -50,14 +46,12 @@ namespace Engine.Animation
         /// <param name="loop">Loop</param>
         /// <param name="repeats">Number of repeats</param>
         /// <param name="delta">Time delta</param>
-        /// <param name="isTransition">Is transition</param>
-        public AnimationPathItem(string name, bool loop, int repeats, float delta, bool isTransition)
+        public AnimationPathItem(string name, bool loop, int repeats, float delta)
         {
             ClipName = name;
             Loop = loop;
             Repeats = repeats;
             TimeDelta = delta;
-            IsTranstition = isTransition;
         }
 
         /// <summary>
@@ -89,7 +83,7 @@ namespace Engine.Animation
         /// <returns>Returns the path item copy instance</returns>
         public AnimationPathItem Clone()
         {
-            return new AnimationPathItem(ClipName, Loop, Repeats, TimeDelta, IsTranstition);
+            return new AnimationPathItem(ClipName, Loop, Repeats, TimeDelta);
         }
 
         /// <inheritdoc/>
@@ -100,7 +94,6 @@ namespace Engine.Animation
                 TimeDelta = TimeDelta,
                 Loop = Loop,
                 Repeats = Repeats,
-                IsTranstition = IsTranstition,
                 Duration = Duration,
             };
         }
@@ -115,7 +108,6 @@ namespace Engine.Animation
             TimeDelta = animationPathItemState.TimeDelta;
             Loop = animationPathItemState.Loop;
             Repeats = animationPathItemState.Repeats;
-            IsTranstition = animationPathItemState.IsTranstition;
             Duration = animationPathItemState.Duration;
         }
 
@@ -124,11 +116,11 @@ namespace Engine.Animation
         {
             if (Repeats > 1)
             {
-                return $"{(IsTranstition ? "Transition" : "Clip")}: {ClipName}; Duration: {Duration:00.00}; Total Duration: {TotalDuration:00.00}; Loop {Loop}; Repeats: {Repeats}; Delta: {TimeDelta}";
+                return $"{ClipName}; Duration: {Duration:00.00}; Total Duration: {TotalDuration:00.00}; Loop {Loop}; Repeats: {Repeats}; Delta: {TimeDelta}";
             }
             else
             {
-                return $"{(IsTranstition ? "Transition" : "Clip")}: {ClipName}; Duration: {Duration:00.00}; Loop {Loop}; Delta: {TimeDelta}";
+                return $"{ClipName}; Duration: {Duration:00.00}; Loop {Loop}; Delta: {TimeDelta}";
             }
         }
     }

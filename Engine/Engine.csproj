@@ -146,7 +146,6 @@
     <Compile Include="Animation\Armature.cs" />
     <Compile Include="Animation\KeyframeInterpolations.cs" />
     <Compile Include="Animation\Skeleton.cs" />
-    <Compile Include="Animation\Transition.cs" />
     <Compile Include="Audio\AudioSpeakers.cs" />
     <Compile Include="Audio\AudioState.cs" />
     <Compile Include="Audio\GameAudioConeDescription.cs" />

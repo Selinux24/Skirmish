@@ -231,8 +231,8 @@ namespace Animation.SimpleAnimation
                 { "push", new AnimationPlan(push) }
             };
 
-            ladder[0].AnimationController.AddPath(ladderPaths["pull"]);
-            ladder[1].AnimationController.AddPath(ladderPaths["pull"]);
+            ladder[0].AnimationController.ReplacePlan(ladderPaths["pull"]);
+            ladder[1].AnimationController.ReplacePlan(ladderPaths["pull"]);
 
             animObjects.Add(ladder);
         }
@@ -286,11 +286,11 @@ namespace Animation.SimpleAnimation
                 { "push", new AnimationPlan(push) }
             };
 
-            ladder[0].AnimationController.AddPath(ladder2Paths["pull"]);
-            ladder[1].AnimationController.AddPath(ladder2Paths["pull"]);
+            ladder[0].AnimationController.ReplacePlan(ladder2Paths["pull"]);
+            ladder[1].AnimationController.ReplacePlan(ladder2Paths["pull"]);
 
-            ladder2[0].AnimationController.AddPath(ladder2Paths["push"]);
-            ladder2[1].AnimationController.AddPath(ladder2Paths["push"]);
+            ladder2[0].AnimationController.ReplacePlan(ladder2Paths["push"]);
+            ladder2[1].AnimationController.ReplacePlan(ladder2Paths["push"]);
 
             animObjects.Add(ladder);
             animObjects.Add(ladder2);
@@ -311,8 +311,8 @@ namespace Animation.SimpleAnimation
             soldier[0].Manipulator.SetPosition(0, 0, 0, true);
             soldier[1].Manipulator.SetPosition(0.5f, 0, 5, true);
 
-            soldier[0].AnimationController.PathEnding += SoldierControllerPathEnding;
-            soldier[1].AnimationController.PathEnding += SoldierControllerPathEnding;
+            soldier[0].AnimationController.PlanEnding += SoldierControllerPathEnding;
+            soldier[1].AnimationController.PlanEnding += SoldierControllerPathEnding;
 
             AnimationPath p0 = new AnimationPath();
             p0.Add("idle1");
@@ -340,8 +340,8 @@ namespace Animation.SimpleAnimation
             soldierPaths.Add("idle2", new AnimationPlan(p2));
             soldierPaths.Add("stand", new AnimationPlan(p3));
 
-            soldier[0].AnimationController.AddPath(soldierPaths["complex"]);
-            soldier[1].AnimationController.AddPath(soldierPaths["complex"]);
+            soldier[0].AnimationController.ReplacePlan(soldierPaths["complex"]);
+            soldier[1].AnimationController.ReplacePlan(soldierPaths["complex"]);
 
             animObjects.Add(soldier);
         }
@@ -366,8 +366,8 @@ namespace Animation.SimpleAnimation
 
             ratPaths.Add("walk", new AnimationPlan(p0));
 
-            rat[0].AnimationController.AddPath(ratPaths["walk"]);
-            rat[1].AnimationController.AddPath(ratPaths["walk"]);
+            rat[0].AnimationController.ReplacePlan(ratPaths["walk"]);
+            rat[1].AnimationController.ReplacePlan(ratPaths["walk"]);
 
             animObjects.Add(rat);
         }
@@ -421,7 +421,7 @@ namespace Animation.SimpleAnimation
                 { "rep", new AnimationPlan(rep) }
             };
 
-            doors[0].AnimationController.AddPath(doorsPaths["rep"]);
+            doors[0].AnimationController.ReplacePlan(doorsPaths["rep"]);
 
             animObjects.Add(doors);
         }
@@ -475,7 +475,7 @@ namespace Animation.SimpleAnimation
                 { "rep", new AnimationPlan(rep) }
             };
 
-            doors[0].AnimationController.AddPath(jailsPaths["rep"]);
+            doors[0].AnimationController.ReplacePlan(jailsPaths["rep"]);
 
             animObjects.Add(doors);
         }
@@ -545,14 +545,7 @@ namespace Animation.SimpleAnimation
             var itemController = animObjects[itemIndex][0].AnimationController;
 
             runtime.Text = Game.RuntimeText;
-            animText.Text = string.Format(
-                "Paths: {0:00}; Delta: {1:0.0}; Index: {2}; Clip: {3}; Time: {4:0.00}; Item Time: {5:0.00}",
-                itemController.PathCount,
-                itemController.TimeDelta,
-                itemController.CurrentPathIndex,
-                itemController.CurrentPathItemClipName,
-                itemController.CurrentPathTime,
-                itemController.CurrentPathItemDuration);
+            animText.Text = $"Paths: {itemController}";
         }
         private void UpdateInputCamera(GameTime gameTime)
         {
@@ -704,7 +697,7 @@ namespace Animation.SimpleAnimation
 
                 var key = keys[index];
 
-                controller.SetPath(soldierPaths[key]);
+                controller.ReplacePlan(soldierPaths[key]);
                 controller.Start(0);
             }
         }

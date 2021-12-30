@@ -738,7 +738,7 @@ namespace Engine.Modular
                         AnimationPath path = new AnimationPath();
                         path.Add(dPath.Name);
 
-                        plan.Add(path);
+                        plan.AddItem(path);
                     }
 
                     animationDict.Add(dPlan.Name, plan);
@@ -754,7 +754,7 @@ namespace Engine.Modular
                 AnimationPath def = new AnimationPath();
                 def.Add(defaultPlan);
 
-                instance.AnimationController.SetPath(new AnimationPlan(def));
+                instance.AnimationController.ReplacePlan(new AnimationPlan(def));
                 instance.InvalidateCache();
             }
 
@@ -1471,7 +1471,7 @@ namespace Engine.Modular
             {
                 var plan = animations[item.Item]?[trigger.AnimationPlan];
 
-                item.Item.AnimationController.SetPath(plan);
+                item.Item.AnimationController.ReplacePlan(plan);
                 item.Item.AnimationController.Start();
                 item.Item.InvalidateCache();
             }

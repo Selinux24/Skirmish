@@ -26,19 +26,7 @@ namespace Engine.Animation
         {
             get
             {
-                return jointNames.Count;
-            }
-        }
-        /// <summary>
-        /// Gets joint by name
-        /// </summary>
-        /// <param name="jointName">Joint name</param>
-        /// <returns>Returns the joint with the specified name</returns>
-        public Joint this[string jointName]
-        {
-            get
-            {
-                return FindJoint(Root, jointName);
+                return jointNames.Count();
             }
         }
 
@@ -51,12 +39,14 @@ namespace Engine.Animation
         {
             names.Add(joint.Name);
 
-            if (joint.Childs != null && joint.Childs.Length > 0)
+            if (joint?.Childs?.Any() != true)
             {
-                for (int i = 0; i < joint.Childs.Length; i++)
-                {
-                    FlattenSkeleton(joint.Childs[i], names);
-                }
+                return;
+            }
+
+            foreach (var child in joint.Childs)
+            {
+                FlattenSkeleton(child, names);
             }
         }
         /// <summary>
@@ -69,12 +59,14 @@ namespace Engine.Animation
         {
             joint.LocalTransform = animations.First(a => a.Joint == joint.Name).Interpolate(time);
 
-            if (joint.Childs != null && joint.Childs.Length > 0)
+            if (joint?.Childs?.Any() != true)
             {
-                for (int i = 0; i < joint.Childs.Length; i++)
-                {
-                    BuildTransforms(joint.Childs[i], time, animations);
-                }
+                return;
+            }
+
+            foreach (var child in joint.Childs)
+            {
+                BuildTransforms(child, time, animations);
             }
         }
         /// <summary>
@@ -100,12 +92,14 @@ namespace Engine.Animation
                 Matrix.RotationQuaternion(rotation) *
                 Matrix.Translation(translation);
 
-            if (joint.Childs != null && joint.Childs.Length > 0)
+            if (joint?.Childs?.Any() != true)
             {
-                for (int i = 0; i < joint.Childs.Length; i++)
-                {
-                    BuildTransforms(joint.Childs[i], time1, animations1, time2, animations2, factor);
-                }
+                return;
+            }
+
+            foreach (var child in joint.Childs)
+            {
+                BuildTransforms(child, time1, animations1, time2, animations2, factor);
             }
         }
         /// <summary>
@@ -116,12 +110,14 @@ namespace Engine.Animation
         {
             UpdateToWorldTransform(joint);
 
-            if (joint.Childs != null && joint.Childs.Length > 0)
+            if (joint?.Childs?.Any() != true)
             {
-                for (int i = 0; i < joint.Childs.Length; i++)
-                {
-                    UpdateTransforms(joint.Childs[i]);
-                }
+                return;
+            }
+
+            foreach (var child in joint.Childs)
+            {
+                UpdateTransforms(child);
             }
         }
         /// <summary>
@@ -130,6 +126,11 @@ namespace Engine.Animation
         /// <param name="joint">Joint</param>
         public static void UpdateToWorldTransform(Joint joint)
         {
+            if (joint == null)
+            {
+                return;
+            }
+
             joint.GlobalTransform = joint.LocalTransform;
 
             var parent = joint.Parent;
@@ -163,10 +164,7 @@ namespace Engine.Animation
 
             UpdateTransforms(Root);
 
-            for (int i = 0; i < jointNames.Count; i++)
-            {
-                transforms[i] = this[jointNames[i]].Offset * this[jointNames[i]].GlobalTransform;
-            }
+            ApplyTranforms(ref transforms);
         }
         /// <summary>
         /// Gets the transforms list of tow poses at specified time
@@ -183,11 +181,28 @@ namespace Engine.Animation
 
             UpdateTransforms(Root);
 
-            for (int i = 0; i < jointNames.Count; i++)
+            ApplyTranforms(ref transforms);
+        }
+        /// <summary>
+        /// Applies joint transforms
+        /// </summary>
+        /// <param name="transforms">Returns the transforms list of the pose</param>
+        private void ApplyTranforms(ref Matrix[] transforms)
+        {
+            if (!jointNames.Any())
             {
-                transforms[i] = this[jointNames[i]].Offset * this[jointNames[i]].GlobalTransform;
+                return;
+            }
+
+            for (int i = 0; i < jointNames.Count(); i++)
+            {
+                var jointName = jointNames.ElementAt(i);
+                var joint = FindJoint(Root, jointName);
+
+                transforms[i] = joint.Offset * joint.GlobalTransform;
             }
         }
+
         /// <summary>
         /// Gets the joint names list
         /// </summary>
@@ -205,14 +220,23 @@ namespace Engine.Animation
         /// <returns>Returns the joint with the specified name</returns>
         private Joint FindJoint(Joint joint, string jointName)
         {
-            if (joint.Name == jointName) return joint;
-
-            if (joint.Childs == null || joint.Childs.Length == 0) return null;
-
-            for (int i = 0; i < joint.Childs.Length; i++)
+            if (string.Equals(joint.Name, jointName, StringComparison.Ordinal))
             {
-                var j = FindJoint(joint.Childs[i], jointName);
-                if (j != null) return j;
+                return joint;
+            }
+
+            if (joint?.Childs?.Any() != true)
+            {
+                return null;
+            }
+
+            foreach (var child in joint.Childs)
+            {
+                var j = FindJoint(child, jointName);
+                if (j != null)
+                {
+                    return j;
+                }
             }
 
             return null;

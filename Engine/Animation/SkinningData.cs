@@ -27,10 +27,6 @@ namespace Engine.Animation
         /// </summary>
         private readonly List<AnimationClip> animations = new List<AnimationClip>();
         /// <summary>
-        /// Transition between animations list
-        /// </summary>
-        private readonly List<Transition> transitions = new List<Transition>();
-        /// <summary>
         /// Animation clip names collection
         /// </summary>
         private readonly List<string> clips = new List<string>();
@@ -101,15 +97,6 @@ namespace Engine.Animation
                     animations.Add(new AnimationClip(key, dictAnimations[key]));
                     clips.Add(key);
                 }
-
-                foreach (var transition in animationDescription.Transitions)
-                {
-                    AddTransition(
-                        transition.ClipFrom,
-                        transition.ClipTo,
-                        transition.StartFrom,
-                        transition.StartTo);
-                }
             }
             else
             {
@@ -121,49 +108,6 @@ namespace Engine.Animation
             InitializeOffsets();
         }
 
-        /// <summary>
-        /// Adds a transition between two clips to the internal collection
-        /// </summary>
-        /// <param name="clipFrom">Clip from</param>
-        /// <param name="clipTo">Clip to</param>
-        /// <param name="startTimeFrom">Starting time in clipFrom to begin to interpolate</param>
-        /// <param name="startTimeTo">Starting time in clipTo to begin to interpolate</param>
-        private void AddTransition(string clipFrom, string clipTo, float startTimeFrom, float startTimeTo)
-        {
-            int indexFrom = animations.FindIndex(c => c.Name == clipFrom);
-            int indexTo = animations.FindIndex(c => c.Name == clipTo);
-
-            float durationFrom = GetClipDuration(indexFrom);
-            float durationTo = GetClipDuration(indexTo);
-
-            float total = 0;
-            float inter = 0;
-            if (durationFrom == durationTo)
-            {
-                total = inter = durationFrom;
-            }
-            else if (durationFrom > durationTo)
-            {
-                total = inter = durationTo;
-            }
-            else
-            {
-                inter = durationFrom;
-                total = durationTo;
-            }
-
-            var transition = new Transition(
-                indexFrom,
-                indexTo,
-                startTimeFrom,
-                startTimeTo,
-                total,
-                inter);
-
-            transitions.Add(transition);
-
-            clips.Add(clipFrom + clipTo);
-        }
         /// <summary>
         /// Initialize animation offsets
         /// </summary>
@@ -181,30 +125,6 @@ namespace Engine.Animation
                 for (int t = 0; t < clipLength; t++)
                 {
                     var mat = GetPoseAtTime(t * TimeStep, i);
-
-                    offset += mat.Count() * 4;
-                }
-            }
-
-            foreach (var transition in transitions)
-            {
-                offsets.Add(offset);
-
-                float totalDuration = transition.TotalDuration;
-                float interDuration = transition.InterpolationDuration;
-
-                int clipLength = (int)(totalDuration / TimeStep);
-
-                for (int t = 0; t < clipLength; t++)
-                {
-                    float time = t * TimeStep;
-                    float factor = Math.Min(time / interDuration, 1f);
-
-                    var mat = GetPoseAtTime(
-                        time,
-                        transition.ClipFrom, transition.ClipTo,
-                        transition.StartFrom, transition.StartTo,
-                        factor);
 
                     offset += mat.Count() * 4;
                 }
@@ -254,18 +174,12 @@ namespace Engine.Animation
         /// <inheritdoc/>
         public float GetClipDuration(int clipIndex)
         {
-            if (clipIndex < 0)
-            {
-                return 0;
-            }
-            else if (clipIndex < animations.Count)
+            if (clipIndex < animations.Count)
             {
                 return animations[clipIndex].Duration;
             }
-            else
-            {
-                return transitions[clipIndex - animations.Count].TotalDuration;
-            }
+
+            return 0;
         }
 
         /// <inheritdoc/>
@@ -285,22 +199,12 @@ namespace Engine.Animation
         {
             int clipIndex = GetClipIndex(clipName);
 
-            if (clipIndex < 0)
-            {
-                return GetPoseBase();
-            }
-            else if (clipIndex < animations.Count)
+            if (clipIndex < animations.Count)
             {
                 return GetPoseAtTime(time, clipIndex);
             }
-            else
-            {
-                var transition = transitions[clipIndex - animations.Count];
 
-                float factor = Math.Min(time / transition.InterpolationDuration, 1f);
-
-                return GetPoseAtTime(time, transition.ClipFrom, transition.ClipTo, transition.StartFrom, transition.StartTo, factor);
-            }
+            return GetPoseBase();
         }
         /// <inheritdoc/>
         public IEnumerable<Matrix> GetPoseAtTime(float time, int clipIndex)
@@ -362,36 +266,6 @@ namespace Engine.Animation
                 }
             }
 
-            foreach (var transition in transitions)
-            {
-                float totalDuration = transition.TotalDuration;
-                float interDuration = transition.InterpolationDuration;
-
-                int clipLength = (int)(totalDuration / TimeStep);
-
-                for (int t = 0; t < clipLength; t++)
-                {
-                    float time = (float)t * TimeStep;
-                    float factor = Math.Min(time / interDuration, 1f);
-
-                    var mat = GetPoseAtTime(
-                        time,
-                        transition.ClipFrom, transition.ClipTo,
-                        transition.StartFrom, transition.StartTo,
-                        factor);
-
-                    for (int m = 0; m < mat.Count(); m++)
-                    {
-                        var matr = mat.ElementAt(m);
-
-                        values.Add(new Vector4(matr.Row1.X, matr.Row1.Y, matr.Row1.Z, matr.Row4.X));
-                        values.Add(new Vector4(matr.Row2.X, matr.Row2.Y, matr.Row2.Z, matr.Row4.Y));
-                        values.Add(new Vector4(matr.Row3.X, matr.Row3.Y, matr.Row3.Z, matr.Row4.Z));
-                        values.Add(new Vector4(0, 0, 0, 0));
-                    }
-                }
-            }
-
             return values.ToArray();
         }
 
@@ -404,7 +278,6 @@ namespace Engine.Animation
         {
             return
                 animations.ListIsEqual(other.animations) &&
-                transitions.ListIsEqual(other.transitions) &&
                 clips.ListIsEqual(other.clips) &&
                 offsets.ListIsEqual(other.offsets) &&
                 skeleton.Equals(other.skeleton);

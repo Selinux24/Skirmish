@@ -266,7 +266,7 @@ namespace Instancing
                 troops[i].TextureIndex = (uint)(i % 3);
 
                 troops[i].AnimationController.TimeDelta = 0.4f + (0.1f * (i % 2));
-                troops[i].AnimationController.AddPath(animations[anim[i % anim.Length]]);
+                troops[i].AnimationController.AppendPlan(animations[anim[i % anim.Length]]);
                 troops[i].AnimationController.Start(rnd.NextFloat(0f, 8f));
 
                 x++;
