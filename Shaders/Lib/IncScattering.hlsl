@@ -1,3 +1,5 @@
+#ifndef __SCATTERING_INCLUDED__
+#define __SCATTERING_INCLUDED__
 
 float vernierScale(float fCos)
 {
@@ -102,3 +104,5 @@ float4 pixelPhase(float3 lightDirection, float3 viewDirection, float4 colorR, fl
 
 	return color;
 }
+
+#endif

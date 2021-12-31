@@ -209,14 +209,12 @@ namespace Engine.Animation
         /// <inheritdoc/>
         public IEnumerable<Matrix> GetPoseAtTime(float time, int clipIndex)
         {
-            var res = new Matrix[skeleton.JointCount];
-
-            if (clipIndex >= 0)
+            if (clipIndex < 0)
             {
-                skeleton.GetPoseAtTime(time, animations[clipIndex].Animations, ref res);
+                return new Matrix[skeleton.JointCount];
             }
 
-            return res;
+            return skeleton.GetPoseAtTime(time, animations[clipIndex].Animations);
         }
         /// <inheritdoc/>
         public IEnumerable<Matrix> GetPoseAtTime(float time, string clipName1, string clipName2, float offset1, float offset2, float factor)
@@ -252,16 +250,14 @@ namespace Engine.Animation
 
                 for (int t = 0; t < clipLength; t++)
                 {
-                    var mat = GetPoseAtTime(t * TimeStep, i);
+                    var poseMatrices = GetPoseAtTime(t * TimeStep, i);
 
-                    for (int m = 0; m < mat.Count(); m++)
+                    foreach (var mat in poseMatrices)
                     {
-                        var matr = mat.ElementAt(m);
-
-                        values.Add(new Vector4(matr.Row1.X, matr.Row1.Y, matr.Row1.Z, matr.Row4.X));
-                        values.Add(new Vector4(matr.Row2.X, matr.Row2.Y, matr.Row2.Z, matr.Row4.Y));
-                        values.Add(new Vector4(matr.Row3.X, matr.Row3.Y, matr.Row3.Z, matr.Row4.Z));
-                        values.Add(new Vector4(0, 0, 0, 0));
+                        values.Add(new Vector4(mat.Row1.XYZ(), mat.Row4.X));
+                        values.Add(new Vector4(mat.Row2.XYZ(), mat.Row4.Y));
+                        values.Add(new Vector4(mat.Row3.XYZ(), mat.Row4.Z));
+                        values.Add(Vector4.Zero);
                     }
                 }
             }

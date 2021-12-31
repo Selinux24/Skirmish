@@ -1,4 +1,4 @@
-#include "..\Lib\IncCommon.hlsl"
+#include "..\Lib\IncGBufferLights.hlsl"
 
 TextureCube<float> PointShadowMapTexture : register(t4);
 

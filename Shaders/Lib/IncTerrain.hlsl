@@ -1,3 +1,6 @@
+#ifndef __TERRAIN_INCLUDED__
+#define __TERRAIN_INCLUDED__
+
 #include "IncLights.hlsl"
 #include "IncVertexFormats.hlsl"
 
@@ -124,3 +127,5 @@ inline float4 Full(PSVertexTerrain input, float prop, float slope1, float slope2
 
 	return saturate(((color1 * prop) + (color2 * (1.0f - prop))) * input.color);
 }
+
+#endif

@@ -1,6 +1,21 @@
-#define PI          3.14159265
-#define TWO_PI      6.28318530
-#define FLOAT_MAX   3.402823466e+38F
+#ifndef __HELPERS_INCLUDED__
+#define __HELPERS_INCLUDED__
+
+#ifndef FLOAT_ZEROTOLERANCE
+#define FLOAT_ZEROTOLERANCE 1E-06f
+#endif
+
+#ifndef FLOAT_MAX
+#define FLOAT_MAX 3.402823466e+38F
+#endif
+
+#ifndef PI
+#define PI 3.14159265
+#endif
+
+#ifndef TWO_PI
+#define TWO_PI 6.28318530
+#endif
 
 SamplerState SamplerPoint
 {
@@ -219,3 +234,5 @@ inline bool PixelIntoRectangle(float2 pixel, float4 rectangle)
 		pixel.y >= rectangle.y &&
 		pixel.y <= rectangle.y + rectangle.w);
 }
+
+#endif

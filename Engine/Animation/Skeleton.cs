@@ -26,7 +26,7 @@ namespace Engine.Animation
         {
             get
             {
-                return jointNames.Count();
+                return jointNames.Count;
             }
         }
 
@@ -37,9 +37,14 @@ namespace Engine.Animation
         /// <param name="names">Joint names</param>
         private static void FlattenSkeleton(Joint joint, List<string> names)
         {
+            if (joint == null)
+            {
+                return;
+            }
+
             names.Add(joint.Name);
 
-            if (joint?.Childs?.Any() != true)
+            if (joint.Childs?.Any() != true)
             {
                 return;
             }
@@ -57,9 +62,14 @@ namespace Engine.Animation
         /// <param name="animations">Animation list</param>
         private static void BuildTransforms(Joint joint, float time, IEnumerable<JointAnimation> animations)
         {
+            if (joint == null)
+            {
+                return;
+            }
+
             joint.LocalTransform = animations.First(a => a.Joint == joint.Name).Interpolate(time);
 
-            if (joint?.Childs?.Any() != true)
+            if (joint.Childs?.Any() != true)
             {
                 return;
             }
@@ -80,19 +90,24 @@ namespace Engine.Animation
         /// <param name="factor">Interpolation factor</param>
         private static void BuildTransforms(Joint joint, float time1, IEnumerable<JointAnimation> animations1, float time2, IEnumerable<JointAnimation> animations2, float factor)
         {
+            if (joint == null)
+            {
+                return;
+            }
+
             animations1.First(a => a.Joint == joint.Name).Interpolate(time1, out Vector3 pos1, out Quaternion rot1, out Vector3 sca1);
             animations2.First(a => a.Joint == joint.Name).Interpolate(time2, out Vector3 pos2, out Quaternion rot2, out Vector3 sca2);
 
-            Vector3 translation = pos1 + (pos2 - pos1) * factor;
+            Vector3 translation = Vector3.Lerp(pos1, pos2, factor);
             Quaternion rotation = Quaternion.Slerp(rot1, rot2, factor);
-            Vector3 scale = sca1 + (sca2 - sca1) * factor;
+            Vector3 scale = Vector3.Lerp(sca1, sca2, factor);
 
             joint.LocalTransform =
                 Matrix.Scaling(scale) *
                 Matrix.RotationQuaternion(rotation) *
                 Matrix.Translation(translation);
 
-            if (joint?.Childs?.Any() != true)
+            if (joint.Childs?.Any() != true)
             {
                 return;
             }
@@ -147,7 +162,7 @@ namespace Engine.Animation
         /// <param name="root">Root joint</param>
         public Skeleton(Joint root)
         {
-            Root = root;
+            Root = root ?? throw new ArgumentNullException(nameof(root), "A skeleton must have a root Joint");
 
             FlattenSkeleton(root, jointNames);
         }
@@ -157,14 +172,18 @@ namespace Engine.Animation
         /// </summary>
         /// <param name="time">Pose time</param>
         /// <param name="animations">Joint animations</param>
-        /// <param name="transforms">Returns the transforms list of the pose at specified time</param>
-        public void GetPoseAtTime(float time, IEnumerable<JointAnimation> animations, ref Matrix[] transforms)
+        /// <returns>Returns the transforms list of the pose at specified time</returns>
+        public IEnumerable<Matrix> GetPoseAtTime(float time, IEnumerable<JointAnimation> animations)
         {
+            Matrix[] transforms = new Matrix[JointCount];
+
             BuildTransforms(Root, time, animations);
 
             UpdateTransforms(Root);
 
             ApplyTranforms(ref transforms);
+
+            return transforms;
         }
         /// <summary>
         /// Gets the transforms list of tow poses at specified time
@@ -194,7 +213,7 @@ namespace Engine.Animation
                 return;
             }
 
-            for (int i = 0; i < jointNames.Count(); i++)
+            for (int i = 0; i < jointNames.Count; i++)
             {
                 var jointName = jointNames.ElementAt(i);
                 var joint = FindJoint(Root, jointName);
@@ -220,12 +239,17 @@ namespace Engine.Animation
         /// <returns>Returns the joint with the specified name</returns>
         private Joint FindJoint(Joint joint, string jointName)
         {
+            if (joint == null)
+            {
+                return null;
+            }
+
             if (string.Equals(joint.Name, jointName, StringComparison.Ordinal))
             {
                 return joint;
             }
 
-            if (joint?.Childs?.Any() != true)
+            if (joint.Childs?.Any() != true)
             {
                 return null;
             }

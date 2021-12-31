@@ -240,10 +240,8 @@ namespace Engine.Animation
             AnimationPlanIntegrationResults results = AnimationPlanIntegrationResults.None;
 
             bool playing = CurrentPath.Playing;
-            if (playing)
-            {
-                if (UpdatePathIndex()) results |= AnimationPlanIntegrationResults.PathChanged;
-            }
+
+            if (playing && UpdatePathIndex()) results |= AnimationPlanIntegrationResults.PathChanged;
 
             //Updates current path
             bool updated = CurrentPath.Integrate(skinningData, elapsedTime, out bool atPathEnd);

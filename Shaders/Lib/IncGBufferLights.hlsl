@@ -1,3 +1,6 @@
+#ifndef __GBUFFERLIGHTS_INCLUDED__
+#define __GBUFFERLIGHTS_INCLUDED__
+
 /////////////////////////////////////////////////////////////////////////////
 // GBuffer textures and Samplers
 /////////////////////////////////////////////////////////////////////////////
@@ -105,3 +108,5 @@ float4 DebugLightPS() : SV_TARGET
 {
     return float4(1.0, 1.0, 1.0, 1.0);
 }
+
+#endif

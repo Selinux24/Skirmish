@@ -1,8 +1,19 @@
-#define SPECULAR_ALGORITHM_PHONG 		0
-#define SPECULAR_ALGORITHM_BLINNPHONG 	1
-#define SPECULAR_ALGORITHM_COOKTORRANCE	2
+#ifndef __MATERIALS_INCLUDED__
+#define __MATERIALS_INCLUDED__
 
+#ifndef SPECULAR_ALGORITHM_PHONG
+#define SPECULAR_ALGORITHM_PHONG 		0
+#endif
+#ifndef SPECULAR_ALGORITHM_BLINNPHONG
+#define SPECULAR_ALGORITHM_BLINNPHONG 	1
+#endif
+#ifndef SPECULAR_ALGORITHM_COOKTORRANCE
+#define SPECULAR_ALGORITHM_COOKTORRANCE	2
+#endif
+
+#ifndef MATERIAL_STRIDE
 #define MATERIAL_STRIDE 8
+#endif
 
 struct Material
 {
@@ -58,3 +69,5 @@ inline Material GetMaterialData(Texture2D materialsTexture, uint materialIndex, 
 
     return mat;
 }
+
+#endif

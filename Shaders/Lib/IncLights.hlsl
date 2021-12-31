@@ -1,3 +1,6 @@
+#ifndef __LIGHTS_INCLUDED__
+#define __LIGHTS_INCLUDED__
+
 #include "IncHelpers.hlsl"
 #include "IncMaterials.hlsl"
 
@@ -830,3 +833,5 @@ inline float4 ComputeLights(ComputeLightsInput input)
     
     return color;
 }
+
+#endif

@@ -105,7 +105,7 @@ namespace Engine.Animation
         /// <param name="clip">Clip name</param>
         /// <param name="planTime">Total time</param>
         /// <returns>Returns the created animation plan</returns>
-        public AnimationPlan CalcAnimationPath(string clip, float planTime)
+        public AnimationPlan CalcAnimationPlan(string clip, float planTime)
         {
             if (SkinningData == null)
             {
@@ -137,7 +137,7 @@ namespace Engine.Animation
                     loopDelta = loopTime / fullLoops;
                 }
 
-                path.AddRepeat(clip, Math.Max(1, fullLoops - 1), loopDelta);
+                path.AddRepeat(clip, Math.Max(1, fullLoops), loopDelta);
 
                 path.UpdateItems(SkinningData);
             }

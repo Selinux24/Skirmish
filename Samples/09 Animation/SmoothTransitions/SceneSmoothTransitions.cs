@@ -28,7 +28,7 @@ namespace Animation.SmoothTransitions
         private readonly Color itemTrisColor = new Color(Color.Yellow.ToColor3(), 0.25f);
 
         private IControllerPath soldierPath;
-        private readonly float soldierPathArrival = 3.333f;
+        private readonly float soldierPathArrival = 5.333f;
         private float soldierPathStartTime;
         private float globalTimeDelta = 1f;
         private readonly float pathStep = 0.5f;
@@ -398,8 +398,8 @@ namespace Animation.SmoothTransitions
             steeringAgent.Reset();
             steeringAgent.Position = from;
             steeringAgent.MaxSpeed = soldierSpeed;
-            steeringAgent.MaxForce = 0.25f;
-            steeringAgent.WaitTime = 0.25f;
+            steeringAgent.MaxForce = 1f;
+            steeringAgent.WaitTime = 0.33f;
             steeringAgent.Arrival(soldierPath.Last, soldierPathArrival);
 
             //Sets the plan to the animation controller
@@ -433,7 +433,7 @@ namespace Animation.SmoothTransitions
             float soldierPathTotalTime = distance / speed;
 
             //Calculates the plan
-            return soldier.AnimationController.CalcAnimationPath("walk", soldierPathTotalTime);
+            return soldier.AnimationController.CalcAnimationPlan("walk", soldierPathTotalTime);
         }
         /// <summary>
         /// Gets a gradient color

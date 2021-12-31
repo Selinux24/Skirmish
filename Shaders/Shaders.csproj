@@ -61,7 +61,7 @@
     <None Include="Shaders.snk" />
   </ItemGroup>
   <ItemGroup>
-    <EffectShader Include="Lib\IncCommon.hlsl" />
+    <EffectShader Include="Lib\IncGBufferLights.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <EffectShader Include="Lib\IncHelpers.hlsl" />
@@ -178,6 +178,15 @@
     <PackageReference Include="Microsoft.HLSL.CSharpVB">
       <Version>1.0.2</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Lib\IncAnimation.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Lib\IncMatrix.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <EffectShader Include="Lib\IncQuaternion.hlsl" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

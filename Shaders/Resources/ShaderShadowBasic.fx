@@ -1,5 +1,6 @@
-#include "..\Lib\IncLights.hlsl"
 #include "..\Lib\IncVertexFormats.hlsl"
+#include "..\Lib\IncLights.hlsl"
+#include "..\Lib\IncAnimation.hlsl"
 
 cbuffer cbGlobals : register(b0)
 {

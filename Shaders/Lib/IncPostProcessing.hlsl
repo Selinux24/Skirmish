@@ -1,6 +1,11 @@
+#ifndef __POSTPROCESSING_INCLUDED__
+#define __POSTPROCESSING_INCLUDED__
+
 #include "IncLights.hlsl"
 
+#ifndef GAMMA_INVERSE
 #define GAMMA_INVERSE 1.0/2.2
+#endif
 
 float3 inverseGamma = GAMMA_INVERSE.rrr;
 
@@ -132,3 +137,5 @@ float CalcGrain(float2 uv, float iTime)
 {
     return frac(sin(dot(uv, float2(17.0, 180.))) * 2500. + iTime);
 }
+
+#endif
