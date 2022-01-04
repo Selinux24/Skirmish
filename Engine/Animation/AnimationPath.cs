@@ -369,6 +369,9 @@ namespace Engine.Animation
             /// </summary>
             public int LoopCount { get; set; }
         }
+        /// <summary>
+        /// Time in item results
+        /// </summary>
         private enum TimeInItemResults
         {
             /// <summary>

@@ -108,15 +108,23 @@ namespace Engine.Content.FmtCollada
         /// <returns>Retuns animation content list</returns>
         public static IEnumerable<AnimationContent> ProcessAnimation(Animation animationLibrary)
         {
+            if (animationLibrary?.Channels?.Any() != true)
+            {
+                return Enumerable.Empty<AnimationContent>();
+            }
+
             List<AnimationContent> res = new List<AnimationContent>();
 
             foreach (var channel in animationLibrary.Channels)
             {
-                string jointName = channel.Target.Split("/".ToCharArray())[0];
+                var targetParts = channel.Target.Split("/".ToCharArray());
+
+                string jointName = targetParts.ElementAtOrDefault(0) ?? animationLibrary.Id ?? animationLibrary.Name;
+                string transformType = targetParts.ElementAtOrDefault(1) ?? "transform";
 
                 foreach (var sampler in animationLibrary.Samplers)
                 {
-                    var info = BuildAnimationContent(jointName, sampler, animationLibrary);
+                    var info = BuildAnimationContent(jointName, transformType, sampler, animationLibrary);
 
                     res.Add(info);
                 }
@@ -128,10 +136,11 @@ namespace Engine.Content.FmtCollada
         /// Reads animation data from the specified sampler and builds an AnimationContent instance
         /// </summary>
         /// <param name="jointName">Joint name</param>
+        /// <param name="jointTransformType">Transform type</param>
         /// <param name="sampler">Sampler</param>
         /// <param name="animationLibrary">Animation library</param>
         /// <returns>Returns an AnimationContent instance for the Joint</returns>
-        private static AnimationContent BuildAnimationContent(string jointName, Sampler sampler, Animation animationLibrary)
+        private static AnimationContent BuildAnimationContent(string jointName, string jointTransformType, Sampler sampler, Animation animationLibrary)
         {
             //Keyframe times
             var times = ReadTime(sampler, animationLibrary);
@@ -179,7 +188,8 @@ namespace Engine.Content.FmtCollada
 
             return new AnimationContent()
             {
-                Joint = jointName,
+                JointName = jointName,
+                TransformType = jointTransformType,
                 Keyframes = keyframes.ToArray(),
             };
         }

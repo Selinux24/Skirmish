@@ -11,6 +11,10 @@ namespace Engine.Animation
         /// Animation is at the end
         /// </summary>
         public bool AtEnd { get; set; }
+        /// <summary>
+        /// Gets whether then plan is transition or not
+        /// </summary>
+        public bool IsTransition { get; set; }
 
         /// <summary>
         /// Current animation offset in the animation palette
@@ -24,19 +28,6 @@ namespace Engine.Animation
         /// Current animation path
         /// </summary>
         public AnimationPath CurrentPath { get; set; }
-
-        /// <summary>
-        /// Previous animation offset in the animation palette
-        /// </summary>
-        public uint PreviousOffset { get; set; }
-        /// <summary>
-        /// Previous path index in the animation path collection
-        /// </summary>
-        public int PreviousIndex { get; set; }
-        /// <summary>
-        /// Previous animation path
-        /// </summary>
-        public AnimationPath PreviousPath { get; set; }
 
         /// <summary>
         /// Constructor

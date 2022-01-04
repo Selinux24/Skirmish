@@ -326,7 +326,7 @@ namespace Engine.Content
                     continue;
                 }
 
-                if (animation.Value.Any(a => jointNames.Any(j => j == a.Joint)))
+                if (animation.Value.Any(a => jointNames.Any(j => j == a.JointName)))
                 {
                     result.Add(animation.Key);
                 }
@@ -996,7 +996,7 @@ namespace Engine.Content
             if (SkinningInfo != null)
             {
                 //Filter content by existing joints
-                Animations[animationLib] = animationContent.Where(a => SkinHasJointData(a.Joint)).ToArray();
+                Animations[animationLib] = animationContent.Where(a => SkinHasJointData(a.JointName)).ToArray();
             }
             else
             {
@@ -1009,7 +1009,7 @@ namespace Engine.Content
         /// <param name="animationContent">Animation content</param>
         public void AddAnimationContent(AnimationLibContentData animationContent)
         {
-            if (animationContent?.Animations.Any() != true)
+            if (animationContent?.Animations?.Any() != true)
             {
                 return;
             }

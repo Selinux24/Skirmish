@@ -14,7 +14,15 @@ namespace Engine.Animation
         /// Joint names list
         /// </summary>
         private readonly List<string> jointNames = new List<string>();
+        /// <summary>
+        /// Bone names list
+        /// </summary>
+        private readonly List<string> boneNames = new List<string>();
 
+        /// <summary>
+        /// Skeleton name
+        /// </summary>
+        public string Name { get; private set; }
         /// <summary>
         /// Root joint
         /// </summary>
@@ -35,14 +43,15 @@ namespace Engine.Animation
         /// </summary>
         /// <param name="joint">Joint</param>
         /// <param name="names">Joint names</param>
-        private static void FlattenSkeleton(Joint joint, List<string> names)
+        private static void FlattenSkeleton(Joint joint, List<string> joints, List<string> bones)
         {
             if (joint == null)
             {
                 return;
             }
 
-            names.Add(joint.Name);
+            joints.Add(joint.Name);
+            bones.Add(joint.Bone);
 
             if (joint.Childs?.Any() != true)
             {
@@ -51,7 +60,7 @@ namespace Engine.Animation
 
             foreach (var child in joint.Childs)
             {
-                FlattenSkeleton(child, names);
+                FlattenSkeleton(child, joints, bones);
             }
         }
         /// <summary>
@@ -63,6 +72,11 @@ namespace Engine.Animation
         private static void BuildTransforms(Joint joint, float time, IEnumerable<JointAnimation> animations)
         {
             if (joint == null)
+            {
+                return;
+            }
+
+            if (!animations.Any(a => a.Joint == joint.Name))
             {
                 return;
             }
@@ -159,12 +173,14 @@ namespace Engine.Animation
         /// <summary>
         /// Contructor
         /// </summary>
+        /// <param name="name">Skeleton name</param>
         /// <param name="root">Root joint</param>
-        public Skeleton(Joint root)
+        public Skeleton(string name, Joint root)
         {
+            Name = name ?? throw new ArgumentNullException(nameof(name), "A skeleton must have a name");
             Root = root ?? throw new ArgumentNullException(nameof(root), "A skeleton must have a root Joint");
 
-            FlattenSkeleton(root, jointNames);
+            FlattenSkeleton(root, jointNames, boneNames);
         }
 
         /// <summary>
@@ -208,15 +224,15 @@ namespace Engine.Animation
         /// <param name="transforms">Returns the transforms list of the pose</param>
         private void ApplyTranforms(ref Matrix[] transforms)
         {
-            if (!jointNames.Any())
+            if (!boneNames.Any())
             {
                 return;
             }
 
-            for (int i = 0; i < jointNames.Count; i++)
+            for (int i = 0; i < boneNames.Count; i++)
             {
-                var jointName = jointNames.ElementAt(i);
-                var joint = FindJoint(Root, jointName);
+                var boneName = boneNames.ElementAt(i);
+                var joint = FindJoint(Root, boneName);
 
                 transforms[i] = joint.Offset * joint.GlobalTransform;
             }
@@ -230,21 +246,29 @@ namespace Engine.Animation
         {
             return jointNames.ToArray();
         }
+        /// <summary>
+        /// Gets the bone names list
+        /// </summary>
+        /// <returns>Returns the bone names list</returns>
+        public IEnumerable<string> GetBoneNames()
+        {
+            return boneNames.ToArray();
+        }
 
         /// <summary>
         /// Finds a joint by name recursively
         /// </summary>
         /// <param name="joint">Joint</param>
-        /// <param name="jointName">Joint name</param>
+        /// <param name="boneName">Bone name</param>
         /// <returns>Returns the joint with the specified name</returns>
-        private Joint FindJoint(Joint joint, string jointName)
+        private Joint FindJoint(Joint joint, string boneName)
         {
             if (joint == null)
             {
                 return null;
             }
 
-            if (string.Equals(joint.Name, jointName, StringComparison.Ordinal))
+            if (string.Equals(joint.Bone, boneName, StringComparison.Ordinal))
             {
                 return joint;
             }
@@ -256,7 +280,7 @@ namespace Engine.Animation
 
             foreach (var child in joint.Childs)
             {
-                var j = FindJoint(child, jointName);
+                var j = FindJoint(child, boneName);
                 if (j != null)
                 {
                     return j;
@@ -265,11 +289,7 @@ namespace Engine.Animation
 
             return null;
         }
-        /// <summary>
-        /// Gets whether the current instance is equal to the other instance
-        /// </summary>
-        /// <param name="other">The other instance</param>
-        /// <returns>Returns true if both instances are equal</returns>
+        /// <inheritdoc/>
         public bool Equals(Skeleton other)
         {
             return

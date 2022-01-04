@@ -199,7 +199,7 @@ namespace Engine.Animation
         {
             int clipIndex = GetClipIndex(clipName);
 
-            if (clipIndex < animations.Count)
+            if (clipIndex >= 0 && clipIndex < animations.Count)
             {
                 return GetPoseAtTime(time, clipIndex);
             }

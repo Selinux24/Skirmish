@@ -231,8 +231,8 @@ namespace Animation.SimpleAnimation
                 { "push", new AnimationPlan(push) }
             };
 
-            ladder[0].AnimationController.ReplacePlan(ladderPaths["pull"]);
-            ladder[1].AnimationController.ReplacePlan(ladderPaths["pull"]);
+            ladder[0].AnimationController.AppendPlan(ladderPaths["pull"]);
+            ladder[1].AnimationController.AppendPlan(ladderPaths["pull"]);
 
             animObjects.Add(ladder);
         }
@@ -286,11 +286,11 @@ namespace Animation.SimpleAnimation
                 { "push", new AnimationPlan(push) }
             };
 
-            ladder[0].AnimationController.ReplacePlan(ladder2Paths["pull"]);
-            ladder[1].AnimationController.ReplacePlan(ladder2Paths["pull"]);
+            ladder[0].AnimationController.AppendPlan(ladder2Paths["pull"]);
+            ladder[1].AnimationController.AppendPlan(ladder2Paths["pull"]);
 
-            ladder2[0].AnimationController.ReplacePlan(ladder2Paths["push"]);
-            ladder2[1].AnimationController.ReplacePlan(ladder2Paths["push"]);
+            ladder2[0].AnimationController.AppendPlan(ladder2Paths["push"]);
+            ladder2[1].AnimationController.AppendPlan(ladder2Paths["push"]);
 
             animObjects.Add(ladder);
             animObjects.Add(ladder2);
@@ -314,34 +314,29 @@ namespace Animation.SimpleAnimation
             soldier[0].AnimationController.PlanEnding += SoldierControllerPathEnding;
             soldier[1].AnimationController.PlanEnding += SoldierControllerPathEnding;
 
-            AnimationPath p0 = new AnimationPath();
-            p0.Add("idle1");
-            p0.AddRepeat("idle2", 5);
-            p0.Add("idle1");
-            p0.Add("stand");
-            p0.Add("idle1");
-            p0.AddRepeat("walk", 5);
-            p0.AddRepeat("run", 10);
-            p0.AddRepeat("walk", 1);
-            p0.AddRepeat("idle2", 5);
-            p0.Add("idle1");
-
             AnimationPath p1 = new AnimationPath();
             p1.Add("idle1");
 
             AnimationPath p2 = new AnimationPath();
-            p2.AddRepeat("idle2", 2);
+            p2.Add("idle2");
 
             AnimationPath p3 = new AnimationPath();
-            p3.AddRepeat("stand", 5);
+            p3.Add("stand");
 
-            soldierPaths.Add("complex", new AnimationPlan(p0));
+            AnimationPath p4 = new AnimationPath();
+            p4.Add("walk");
+
+            AnimationPath p5 = new AnimationPath();
+            p5.Add("run");
+
             soldierPaths.Add("idle1", new AnimationPlan(p1));
             soldierPaths.Add("idle2", new AnimationPlan(p2));
             soldierPaths.Add("stand", new AnimationPlan(p3));
+            soldierPaths.Add("walk", new AnimationPlan(p4));
+            soldierPaths.Add("run", new AnimationPlan(p5));
 
-            soldier[0].AnimationController.ReplacePlan(soldierPaths["complex"]);
-            soldier[1].AnimationController.ReplacePlan(soldierPaths["complex"]);
+            soldier[0].AnimationController.AppendPlan(soldierPaths["idle1"]);
+            soldier[1].AnimationController.AppendPlan(soldierPaths["idle1"]);
 
             animObjects.Add(soldier);
         }
@@ -366,8 +361,8 @@ namespace Animation.SimpleAnimation
 
             ratPaths.Add("walk", new AnimationPlan(p0));
 
-            rat[0].AnimationController.ReplacePlan(ratPaths["walk"]);
-            rat[1].AnimationController.ReplacePlan(ratPaths["walk"]);
+            rat[0].AnimationController.AppendPlan(ratPaths["walk"]);
+            rat[1].AnimationController.AppendPlan(ratPaths["walk"]);
 
             animObjects.Add(rat);
         }
@@ -421,7 +416,7 @@ namespace Animation.SimpleAnimation
                 { "rep", new AnimationPlan(rep) }
             };
 
-            doors[0].AnimationController.ReplacePlan(doorsPaths["rep"]);
+            doors[0].AnimationController.AppendPlan(doorsPaths["rep"]);
 
             animObjects.Add(doors);
         }
@@ -475,7 +470,7 @@ namespace Animation.SimpleAnimation
                 { "rep", new AnimationPlan(rep) }
             };
 
-            doors[0].AnimationController.ReplacePlan(jailsPaths["rep"]);
+            doors[0].AnimationController.AppendPlan(jailsPaths["rep"]);
 
             animObjects.Add(doors);
         }
@@ -687,18 +682,41 @@ namespace Animation.SimpleAnimation
             }
         }
 
-        private void SoldierControllerPathEnding(object sender, EventArgs e)
+        private void SoldierControllerPathEnding(object sender, AnimationControllerEventArgs e)
         {
             if (sender is AnimationController controller)
             {
+                var transitionPlan = controller.GetTransitionPlan();
+                var currentPlan = controller.GetCurrentPlan();
+
+                if (!e.IsTransition && (transitionPlan?.Active ?? true))
+                {
+                    //Current plan ends, transition plan continues
+                    return;
+                }
+
+                if (e.IsTransition && currentPlan.Active)
+                {
+                    //Transition ends, current plan continues
+                    return;
+                }
+
                 var keys = soldierPaths.Keys.ToArray();
 
-                int index = Math.Min(Helper.RandomGenerator.Next(1, 3), keys.Length - 1);
+                while (true)
+                {
+                    int index = Helper.RandomGenerator.Next(0, 100) % keys.Length;
 
-                var key = keys[index];
+                    string planName = keys[index];
+                    var newPlan = soldierPaths[planName];
 
-                controller.ReplacePlan(soldierPaths[key]);
-                controller.Start(0);
+                    if (newPlan.CurrentPath?.CurrentItem?.ClipName != currentPlan.CurrentPath?.CurrentItem?.ClipName)
+                    {
+                        controller.TransitionToPlan(newPlan);
+
+                        break;
+                    }
+                }
             }
         }
 

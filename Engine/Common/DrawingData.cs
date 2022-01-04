@@ -292,7 +292,7 @@ namespace Engine.Common
                     vertexType,
                     vertices,
                     skinningInfo.Value.Weights,
-                    skinningInfo.Value.JointNames);
+                    skinningInfo.Value.BoneNames);
             }
             else
             {
@@ -391,14 +391,19 @@ namespace Engine.Common
             var weights = cInfo.Weights;
 
             //Find skeleton for controller
+            if (!modelContent.SkinningInfo.ContainsKey(cInfo.Armature))
+            {
+                return null;
+            }
+
             var sInfo = modelContent.SkinningInfo[cInfo.Armature];
-            var jointNames = sInfo.Skeleton.GetJointNames();
+            var boneNames = sInfo.Skeleton.GetBoneNames();
 
             return new SkinningInfo
             {
                 BindShapeMatrix = bindShapeMatrix,
                 Weights = weights,
-                JointNames = jointNames,
+                BoneNames = boneNames,
             };
         }
         /// <summary>
@@ -441,11 +446,11 @@ namespace Engine.Common
             List<JointAnimation> boneAnimations = new List<JointAnimation>();
 
             //Find keyframes for current bone
-            var c = modelContent.Animations.Values.FirstOrDefault(a => a.Any(ac => ac.Joint == joint.Name)).ToArray();
+            var c = modelContent.Animations.Values.FirstOrDefault(a => a.Any(ac => ac.JointName == joint.Name))?.ToArray();
             if (c?.Any() == true)
             {
                 //Set bones
-                var ja = c.Select(a => new JointAnimation(a.Joint, a.Keyframes)).ToArray();
+                var ja = c.Select(a => new JointAnimation(a.JointName, a.Keyframes)).ToArray();
                 boneAnimations.AddRange(ja);
             }
 
@@ -461,9 +466,9 @@ namespace Engine.Common
 
                 Matrix ibm = Matrix.Identity;
 
-                if (controller.InverseBindMatrix.ContainsKey(joint.Name))
+                if (controller.InverseBindMatrix.ContainsKey(joint.Bone))
                 {
-                    ibm = controller.InverseBindMatrix[joint.Name];
+                    ibm = controller.InverseBindMatrix[joint.Bone];
                 }
 
                 joint.Offset = ibm;
@@ -792,9 +797,9 @@ namespace Engine.Common
             /// </summary>
             public IEnumerable<Weight> Weights;
             /// <summary>
-            /// Joint names
+            /// Bone names
             /// </summary>
-            public IEnumerable<string> JointNames;
+            public IEnumerable<string> BoneNames;
         }
         /// <summary>
         /// Mesh information

@@ -50,9 +50,29 @@ namespace Engine.Animation
             }
         }
         /// <summary>
+        /// Gets whether the animation plan was initialized or not
+        /// </summary>
+        public bool Initialized
+        {
+            get
+            {
+                return lastClipName != null;
+            }
+        }
+        /// <summary>
         /// Plan is at end
         /// </summary>
         public bool AtEnd { get; private set; }
+        /// <summary>
+        /// Plan is active
+        /// </summary>
+        public bool Active
+        {
+            get
+            {
+                return Initialized && animationPaths.Any() && !AtEnd;
+            }
+        }
 
         /// <summary>
         /// Constructor

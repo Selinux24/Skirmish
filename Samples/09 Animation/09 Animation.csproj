@@ -295,6 +295,12 @@
     <Content Include="SmoothTransitions\Resources\Soldier\soldier_anim2.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="SmoothTransitions\Resources\Mixamo\TestModel.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SmoothTransitions\Resources\Mixamo\TestModel.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Engine.Content.FmtCollada\Engine.Content.FmtCollada.csproj">

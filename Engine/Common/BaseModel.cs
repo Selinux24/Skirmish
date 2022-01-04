@@ -73,6 +73,11 @@ namespace Engine.Common
             }
 
             var geo = description.Content.ReadModelContent();
+            if (!geo.Any())
+            {
+                throw new ArgumentException(nameof(description), "Bad content description file. The resource file does not generate any geometry.");
+            }
+
             if (geo.Count() == 1)
             {
                 var iGeo = geo.First();

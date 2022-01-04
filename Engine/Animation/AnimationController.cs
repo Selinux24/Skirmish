@@ -1,7 +1,6 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace Engine.Animation
@@ -223,6 +222,21 @@ namespace Engine.Animation
         }
 
         /// <summary>
+        /// Gets the current animation plan
+        /// </summary>
+        public AnimationPlan GetCurrentPlan()
+        {
+            return animationPlan;
+        }
+        /// <summary>
+        /// Gets the current transition plan
+        /// </summary>
+        public AnimationPlan GetTransitionPlan()
+        {
+            return transitionPlan;
+        }
+
+        /// <summary>
         /// Updates internal state
         /// </summary>
         /// <param name="elapsedSeconds">Elapsed seconds</param>
@@ -241,6 +255,8 @@ namespace Engine.Animation
 
             if (!active)
             {
+                animationPlan.Update(SkinningData, 0);
+
                 TransitionInterpolationAmount = 0f;
 
                 return;
@@ -250,7 +266,7 @@ namespace Engine.Animation
 
             if (!transitionPlan.Any())
             {
-                FireEvents(animRes, animationPlan);
+                FireEvents(animRes, animationPlan, false);
 
                 TransitionInterpolationAmount = 0f;
 
@@ -271,14 +287,15 @@ namespace Engine.Animation
                 TransitionInterpolationAmount = 0f;
             }
 
-            FireEvents(tranRes, transitionPlan);
+            FireEvents(tranRes, transitionPlan, true);
         }
         /// <summary>
         /// Fires integration results
         /// </summary>
         /// <param name="result">Result</param>
         /// <param name="plan">Animation plan</param>
-        private void FireEvents(AnimationPlanIntegrationResults result, AnimationPlan plan)
+        /// <param name="isTransition">Sets whether then plan is transition or not</param>
+        private void FireEvents(AnimationPlanIntegrationResults result, AnimationPlan plan, bool isTransition)
         {
             if (result.HasFlag(AnimationPlanIntegrationResults.PathChanged))
             {
@@ -288,6 +305,7 @@ namespace Engine.Animation
                     CurrentOffset = plan.AnimationOffset,
                     CurrentIndex = plan.CurrentPathIndex,
                     CurrentPath = plan.CurrentPath,
+                    IsTransition = isTransition,
                 });
             }
 
@@ -299,6 +317,7 @@ namespace Engine.Animation
                     CurrentOffset = plan.AnimationOffset,
                     CurrentIndex = plan.CurrentPathIndex,
                     CurrentPath = plan.CurrentPath,
+                    IsTransition = isTransition,
                 });
             }
 
@@ -310,6 +329,7 @@ namespace Engine.Animation
                     CurrentOffset = plan.AnimationOffset,
                     CurrentIndex = plan.CurrentPathIndex,
                     CurrentPath = plan.CurrentPath,
+                    IsTransition = isTransition,
                 });
             }
 
@@ -322,6 +342,7 @@ namespace Engine.Animation
                     CurrentIndex = plan.CurrentPathIndex,
                     CurrentPath = plan.CurrentPath,
                     AtEnd = true,
+                    IsTransition = isTransition,
                 });
             }
         }

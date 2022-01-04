@@ -83,7 +83,7 @@ namespace Engine.Content.FmtCollada
                     ProcessLibraryLights(dae, modelContent);
                     ProcessLibraryImages(dae, modelContent, contentFolder);
                     ProcessLibraryMaterial(dae, modelContent);
-                    ProcessLibraryGeometries(dae, modelContent, volumes);
+                    ProcessLibraryGeometries(dae, modelContent, volumes, transform);
                     ProcessLibraryControllers(dae, modelContent);
 
                     //Scene Relations
@@ -96,7 +96,8 @@ namespace Engine.Content.FmtCollada
                     }
 
                     //Filter the resulting model content
-                    res.AddRange(FilterGeometry(modelContent, armatureName, meshesByLOD));
+                    var filteredModelContent = FilterGeometry(modelContent, armatureName, meshesByLOD);
+                    res.AddRange(filteredModelContent);
 
                     //Release the stream
                     model.Flush();
@@ -169,51 +170,49 @@ namespace Engine.Content.FmtCollada
         /// <param name="modelContent">Model content</param>
         private static void ProcessLibraryLights(Collada dae, ContentData modelContent)
         {
-            if (dae.LibraryLights?.Length > 0)
+            if (dae.LibraryLights?.Any() != true)
             {
-                foreach (var light in dae.LibraryLights)
+                return;
+            }
+
+            foreach (var light in dae.LibraryLights)
+            {
+                var dirTechnique = light.LightTechniqueCommon?.FirstOrDefault(l => l.Directional != null);
+                if (dirTechnique != null)
                 {
-                    LightContent info = null;
-
-                    var dirTechnique = Array.Find(light.LightTechniqueCommon, l => l.Directional != null);
-                    if (dirTechnique != null)
+                    modelContent.Lights[light.Id] = new LightContent()
                     {
-                        info = new LightContent()
-                        {
-                            LightType = LightContentTypes.Directional,
-                            Color = dirTechnique.Directional.Color.ToColor3(),
-                        };
-                    }
+                        LightType = LightContentTypes.Directional,
+                        Color = dirTechnique.Directional.Color.ToColor3(),
+                    };
+                }
 
-                    var pointTechnique = Array.Find(light.LightTechniqueCommon, l => l.Point != null);
-                    if (pointTechnique != null)
+                var pointTechnique = light.LightTechniqueCommon?.FirstOrDefault(l => l.Point != null);
+                if (pointTechnique != null)
+                {
+                    modelContent.Lights[light.Id] = new LightContent()
                     {
-                        info = new LightContent()
-                        {
-                            LightType = LightContentTypes.Point,
-                            Color = pointTechnique.Point.Color.ToColor3(),
-                            ConstantAttenuation = pointTechnique.Point.ConstantAttenuation.Value,
-                            LinearAttenuation = pointTechnique.Point.LinearAttenuation.Value,
-                            QuadraticAttenuation = pointTechnique.Point.QuadraticAttenuation.Value,
-                        };
-                    }
+                        LightType = LightContentTypes.Point,
+                        Color = pointTechnique.Point.Color.ToColor3(),
+                        ConstantAttenuation = pointTechnique.Point.ConstantAttenuation.Value,
+                        LinearAttenuation = pointTechnique.Point.LinearAttenuation.Value,
+                        QuadraticAttenuation = pointTechnique.Point.QuadraticAttenuation.Value,
+                    };
+                }
 
-                    var spotTechnique = Array.Find(light.LightTechniqueCommon, l => l.Spot != null);
-                    if (spotTechnique != null)
+                var spotTechnique = light.LightTechniqueCommon?.FirstOrDefault(l => l.Spot != null);
+                if (spotTechnique != null)
+                {
+                    modelContent.Lights[light.Id] = new LightContent()
                     {
-                        info = new LightContent()
-                        {
-                            LightType = LightContentTypes.Spot,
-                            Color = spotTechnique.Spot.Color.ToColor3(),
-                            ConstantAttenuation = spotTechnique.Spot.ConstantAttenuation.Value,
-                            LinearAttenuation = spotTechnique.Spot.LinearAttenuation.Value,
-                            QuadraticAttenuation = spotTechnique.Spot.QuadraticAttenuation.Value,
-                            FallOffAngle = spotTechnique.Spot.FalloffAngle.Value,
-                            FallOffExponent = spotTechnique.Spot.FalloffExponent.Value,
-                        };
-                    }
-
-                    modelContent.Lights[light.Id] = info;
+                        LightType = LightContentTypes.Spot,
+                        Color = spotTechnique.Spot.Color.ToColor3(),
+                        ConstantAttenuation = spotTechnique.Spot.ConstantAttenuation.Value,
+                        LinearAttenuation = spotTechnique.Spot.LinearAttenuation.Value,
+                        QuadraticAttenuation = spotTechnique.Spot.QuadraticAttenuation.Value,
+                        FallOffAngle = spotTechnique.Spot.FalloffAngle.Value,
+                        FallOffExponent = spotTechnique.Spot.FalloffExponent.Value,
+                    };
                 }
             }
         }
@@ -225,22 +224,20 @@ namespace Engine.Content.FmtCollada
         /// <param name="contentFolder">Content folder</param>
         private static void ProcessLibraryImages(Collada dae, ContentData modelContent, string contentFolder)
         {
-            if (dae.LibraryImages?.Length > 0)
+            if (dae.LibraryImages?.Any() != true)
             {
-                foreach (var image in dae.LibraryImages)
+                return;
+            }
+
+            foreach (var image in dae.LibraryImages)
+            {
+                if (image.Data != null)
                 {
-                    ImageContent info = null;
-
-                    if (image.Data != null)
-                    {
-                        info = ImageContent.Texture(new MemoryStream((byte[])image.Data));
-                    }
-                    else if (!string.IsNullOrEmpty(image.InitFrom))
-                    {
-                        info = ImageContent.Texture(contentFolder, Uri.UnescapeDataString(image.InitFrom));
-                    }
-
-                    modelContent.Images[image.Id] = info;
+                    modelContent.Images[image.Id] = ImageContent.Texture(new MemoryStream((byte[])image.Data));
+                }
+                else if (!string.IsNullOrEmpty(image.InitFrom))
+                {
+                    modelContent.Images[image.Id] = ImageContent.Texture(contentFolder, Uri.UnescapeDataString(image.InitFrom));
                 }
             }
         }
@@ -251,35 +248,37 @@ namespace Engine.Content.FmtCollada
         /// <param name="modelContent">Model content</param>
         private static void ProcessLibraryMaterial(Collada dae, ContentData modelContent)
         {
-            if (dae.LibraryMaterials?.Length > 0 && dae.LibraryEffects?.Length > 0)
+            if (dae.LibraryMaterials?.Any() != true || dae.LibraryEffects?.Any() != true)
             {
-                foreach (var material in dae.LibraryMaterials)
+                return;
+            }
+
+            foreach (var material in dae.LibraryMaterials)
+            {
+                var info = MaterialBlinnPhongContent.Default;
+
+                //Find effect
+                var effect = dae.LibraryEffects?.FirstOrDefault(e => e.Id == material.InstanceEffect.Url.Replace("#", ""));
+                if (effect == null)
                 {
-                    var info = MaterialBlinnPhongContent.Default;
+                    continue;
+                }
 
-                    //Find effect
-                    var effect = Array.Find(dae.LibraryEffects, e => e.Id == material.InstanceEffect.Url.Replace("#", ""));
-                    if (effect != null)
-                    {
-                        if (effect.ProfileCG != null)
-                        {
-                            throw new NotImplementedException();
-                        }
-                        else if (effect.ProfileGles != null)
-                        {
-                            throw new NotImplementedException();
-                        }
-                        else if (effect.ProfileGlsl != null)
-                        {
-                            throw new NotImplementedException();
-                        }
-                        else if (effect.ProfileCommon != null)
-                        {
-                            info = ProcessTechniqueFX(effect.ProfileCommon);
-                        }
-                    }
-
-                    modelContent.Materials[material.Id] = info;
+                if (effect.ProfileCG != null)
+                {
+                    throw new NotImplementedException();
+                }
+                else if (effect.ProfileGles != null)
+                {
+                    throw new NotImplementedException();
+                }
+                else if (effect.ProfileGlsl != null)
+                {
+                    throw new NotImplementedException();
+                }
+                else if (effect.ProfileCommon != null)
+                {
+                    modelContent.Materials[material.Id] = ProcessTechniqueFX(effect.ProfileCommon);
                 }
             }
         }
@@ -289,31 +288,35 @@ namespace Engine.Content.FmtCollada
         /// <param name="dae">Dae object</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="volumes">Volume mesh names</param>
-        private static void ProcessLibraryGeometries(Collada dae, ContentData modelContent, IEnumerable<string> volumes)
+        private static void ProcessLibraryGeometries(Collada dae, ContentData modelContent, IEnumerable<string> volumes, Matrix transform)
         {
-            if (dae.LibraryGeometries?.Length > 0)
+            if (dae.LibraryGeometries?.Any() != true)
             {
-                foreach (var geometry in dae.LibraryGeometries)
+                return;
+            }
+
+            foreach (var geometry in dae.LibraryGeometries)
+            {
+                bool isVolume = IsVolume(geometry.Name, volumes);
+
+                var info = ProcessGeometry(geometry, isVolume, transform);
+                if (info?.Any() != true)
                 {
-                    bool isVolume = IsVolume(geometry.Name, volumes);
+                    continue;
+                }
 
-                    var info = ProcessGeometry(geometry, isVolume);
-                    if (info?.Length > 0)
+                foreach (var subMesh in info)
+                {
+                    string materialName = FindMaterialTarget(subMesh.Material, dae.LibraryVisualScenes);
+                    if (!string.IsNullOrWhiteSpace(materialName) && modelContent.Materials.ContainsKey(materialName))
                     {
-                        foreach (var subMesh in info)
-                        {
-                            string materialName = FindMaterialTarget(subMesh.Material, dae.LibraryVisualScenes);
-                            if (!string.IsNullOrWhiteSpace(materialName))
-                            {
-                                var mat = modelContent.Materials[materialName];
+                        var mat = modelContent.Materials[materialName];
 
-                                subMesh.Material = materialName;
-                                subMesh.SetTextured(mat.DiffuseTexture != null);
-                            }
-
-                            modelContent.ImportMaterial(geometry.Id, subMesh.Material, subMesh);
-                        }
+                        subMesh.Material = materialName;
+                        subMesh.SetTextured(mat.DiffuseTexture != null);
                     }
+
+                    modelContent.ImportMaterial(geometry.Id, subMesh.Material, subMesh);
                 }
             }
         }
@@ -324,15 +327,17 @@ namespace Engine.Content.FmtCollada
         /// <param name="modelContent">Model content</param>
         private static void ProcessLibraryControllers(Collada dae, ContentData modelContent)
         {
-            if (dae.LibraryControllers?.Length > 0)
+            if (dae.LibraryControllers?.Any() != true)
             {
-                foreach (var controller in dae.LibraryControllers)
+                return;
+            }
+
+            foreach (var controller in dae.LibraryControllers)
+            {
+                var info = ProcessController(controller);
+                if (info != null)
                 {
-                    var info = ProcessController(controller);
-                    if (info != null)
-                    {
-                        modelContent.Controllers[controller.Id] = info;
-                    }
+                    modelContent.Controllers[controller.Id] = info;
                 }
             }
         }
@@ -344,19 +349,19 @@ namespace Engine.Content.FmtCollada
         /// <param name="animation">Animation description</param>
         private static void ProcessLibraryAnimations(Collada dae, ContentData modelContent, AnimationFile animation)
         {
-            if (dae.LibraryAnimations?.Length > 0)
+            if (dae.LibraryAnimations?.Any() != true)
             {
-                for (int i = 0; i < dae.LibraryAnimations.Length; i++)
-                {
-                    var animationLib = dae.LibraryAnimations[i];
-
-                    var info = LoaderAnimations.ProcessAnimation(animationLib);
-
-                    modelContent.AddAnimationContent(animationLib.Id, info);
-                }
-
-                modelContent.AnimationDefinition = animation;
+                return;
             }
+
+            foreach (var animationLib in dae.LibraryAnimations)
+            {
+                var info = LoaderAnimations.ProcessAnimation(animationLib);
+
+                modelContent.AddAnimationContent(animationLib.Id, info);
+            }
+
+            modelContent.AnimationDefinition = animation;
         }
 
         #endregion
@@ -369,24 +374,22 @@ namespace Engine.Content.FmtCollada
         /// <param name="geometry">Geometry info</param>
         /// <param name="isVolume">Current geometry is a volume mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessGeometry(Geometry geometry, bool isVolume)
+        private static IEnumerable<SubMeshContent> ProcessGeometry(Geometry geometry, bool isVolume, Matrix transform)
         {
-            SubMeshContent[] info = null;
-
             if (geometry.Mesh != null)
             {
-                info = ProcessMesh(geometry.Mesh, isVolume);
+                return ProcessMesh(geometry.Mesh, isVolume, transform);
             }
             else if (geometry.Spline != null)
             {
-                info = ProcessSpline(geometry.Spline, isVolume);
+                return ProcessSpline(geometry.Spline, isVolume);
             }
             else if (geometry.ConvexMesh != null)
             {
-                info = ProcessConvexMesh(geometry.ConvexMesh, isVolume);
+                return ProcessConvexMesh(geometry.ConvexMesh, isVolume);
             }
 
-            return info;
+            return null;
         }
         /// <summary>
         /// Process mesh
@@ -394,41 +397,39 @@ namespace Engine.Content.FmtCollada
         /// <param name="mesh">Mesh</param>
         /// <param name="isVolume">Current geometry is a volume mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessMesh(Engine.Collada.Mesh mesh, bool isVolume)
+        private static IEnumerable<SubMeshContent> ProcessMesh(Engine.Collada.Mesh mesh, bool isVolume, Matrix transform)
         {
-            SubMeshContent[] res = null;
-
             //Procesar por topología
-            if (mesh.Lines?.Length > 0)
+            if (mesh.Lines?.Any() == true)
             {
-                res = ProcessLines(mesh.Lines, mesh.Sources, isVolume);
+                return ProcessLines(mesh.Lines, mesh.Sources, isVolume);
             }
-            else if (mesh.LineStrips?.Length > 0)
+            else if (mesh.LineStrips?.Any() == true)
             {
-                res = ProcessLineStrips(mesh.LineStrips, mesh.Sources, isVolume);
+                return ProcessLineStrips(mesh.LineStrips, mesh.Sources, isVolume);
             }
-            else if (mesh.Triangles?.Length > 0)
+            else if (mesh.Triangles?.Any() == true)
             {
-                res = ProcessTriangles(mesh.Triangles, mesh.Sources, isVolume);
+                return ProcessTriangles(mesh.Triangles, mesh.Sources, isVolume);
             }
-            else if (mesh.TriFans?.Length > 0)
+            else if (mesh.TriFans?.Any() == true)
             {
-                res = ProcessTriFans(mesh.TriFans, mesh.Sources, isVolume);
+                return ProcessTriFans(mesh.TriFans, mesh.Sources, isVolume);
             }
-            else if (mesh.TriStrips?.Length > 0)
+            else if (mesh.TriStrips?.Any() == true)
             {
-                res = ProcessTriStrips(mesh.TriStrips, mesh.Sources, isVolume);
+                return ProcessTriStrips(mesh.TriStrips, mesh.Sources, isVolume);
             }
-            else if (mesh.PolyList?.Length > 0)
+            else if (mesh.PolyList?.Any() == true)
             {
-                res = ProcessPolyLists(mesh.PolyList, mesh.Sources, isVolume);
+                return ProcessPolyLists(mesh.PolyList, mesh.Sources, isVolume, transform);
             }
-            else if (mesh.Polygons?.Length > 0)
+            else if (mesh.Polygons?.Any() == true)
             {
-                res = ProcessPolygons(mesh.Polygons, mesh.Sources, isVolume);
+                return ProcessPolygons(mesh.Polygons, mesh.Sources, isVolume, transform);
             }
 
-            return res;
+            return null;
         }
         /// <summary>
         /// Process spline
@@ -436,7 +437,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="mesh">Mesh</param>
         /// <param name="isVolume">Current geometry is a volume mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessSpline(Spline spline, bool isVolume)
+        private static IEnumerable<SubMeshContent> ProcessSpline(Spline spline, bool isVolume)
         {
             throw new NotImplementedException();
         }
@@ -446,7 +447,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="mesh">Mesh</param>
         /// <param name="isVolume">Current geometry is a volume mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessConvexMesh(ConvexMesh convexMesh, bool isVolume)
+        private static IEnumerable<SubMeshContent> ProcessConvexMesh(ConvexMesh convexMesh, bool isVolume)
         {
             throw new NotImplementedException();
         }
@@ -457,7 +458,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="meshSources">Mesh sources</param>
         /// <param name="isVolume">Current geometry is a volume mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessLines(Lines[] lines, Source[] meshSources, bool isVolume)
+        private static IEnumerable<SubMeshContent> ProcessLines(IEnumerable<Lines> lines, IEnumerable<Source> meshSources, bool isVolume)
         {
             throw new NotImplementedException();
         }
@@ -468,7 +469,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="meshSources">Mesh sources</param>
         /// <param name="isVolume">Current geometry is a volume mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessLineStrips(LineStrips[] lines, Source[] meshSources, bool isVolume)
+        private static IEnumerable<SubMeshContent> ProcessLineStrips(IEnumerable<LineStrips> lines, IEnumerable<Source> meshSources, bool isVolume)
         {
             throw new NotImplementedException();
         }
@@ -479,21 +480,30 @@ namespace Engine.Content.FmtCollada
         /// <param name="meshSources">Mesh sources</param>
         /// <param name="isVolume">Current geometry is a volume mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessTriangles(Triangles[] triangles, Source[] meshSources, bool isVolume)
+        private static IEnumerable<SubMeshContent> ProcessTriangles(IEnumerable<Triangles> triangles, IEnumerable<Source> meshSources, bool isVolume)
         {
+            if (triangles?.Any() != true)
+            {
+                return Enumerable.Empty<SubMeshContent>();
+            }
+
             List<SubMeshContent> res = new List<SubMeshContent>();
 
             foreach (var triangle in triangles)
             {
                 var verts = ProcessTriangle(triangle, meshSources);
+                if (!verts.Any())
+                {
+                    continue;
+                }
 
                 //Reorder vertices
-                VertexData[] data = new VertexData[verts.Length];
+                VertexData[] data = new VertexData[verts.Count()];
                 for (int i = 0; i < data.Length; i += 3)
                 {
-                    data[i + 0] = verts[i + 0];
-                    data[i + 1] = verts[i + 2];
-                    data[i + 2] = verts[i + 1];
+                    data[i + 0] = verts.ElementAt(i + 0);
+                    data[i + 1] = verts.ElementAt(i + 2);
+                    data[i + 2] = verts.ElementAt(i + 1);
                 }
 
                 SubMeshContent meshInfo = new SubMeshContent(Topology.TriangleList, triangle.Material, false, isVolume);
@@ -511,17 +521,17 @@ namespace Engine.Content.FmtCollada
         /// <param name="triangle">Triangle</param>
         /// <param name="meshSources">Mesh sources</param>
         /// <returns>Returns vertex data</returns>
-        private static VertexData[] ProcessTriangle(Triangles triangle, Source[] meshSources)
+        private static IEnumerable<VertexData> ProcessTriangle(Triangles triangle, IEnumerable<Source> meshSources)
         {
             List<VertexData> verts = new List<VertexData>();
 
-            Input vertexInput = triangle[EnumSemantics.Vertex];
-            Input normalInput = triangle[EnumSemantics.Normal];
-            Input texCoordInput = triangle[EnumSemantics.TexCoord];
+            var vertexInput = triangle[EnumSemantics.Vertex];
+            var normalInput = triangle[EnumSemantics.Normal];
+            var texCoordInput = triangle[EnumSemantics.TexCoord];
 
-            Vector3[] positions = vertexInput != null ? meshSources[vertexInput.Offset].ReadVector3() : null;
-            Vector3[] normals = normalInput != null ? meshSources[normalInput.Offset].ReadVector3() : null;
-            Vector2[] texCoords = texCoordInput != null ? meshSources[texCoordInput.Offset].ReadVector2() : null;
+            var positions = vertexInput != null ? meshSources.ElementAt(vertexInput.Offset).ReadVector3() : null;
+            var normals = normalInput != null ? meshSources.ElementAt(normalInput.Offset).ReadVector3() : null;
+            var texCoords = texCoordInput != null ? meshSources.ElementAt(texCoordInput.Offset).ReadVector2() : null;
 
             int inputCount = triangle.Inputs.Length;
 
@@ -554,7 +564,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="meshSources">Mesh sources</param>
         /// <param name="isVolume">Current geometry is a volume mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessTriFans(TriFans[] triFans, Source[] meshSources, bool isVolume)
+        private static IEnumerable<SubMeshContent> ProcessTriFans(IEnumerable<TriFans> triFans, IEnumerable<Source> meshSources, bool isVolume)
         {
             throw new NotImplementedException();
         }
@@ -565,7 +575,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="meshSources">Mesh sources</param>
         /// <param name="isVolume">Current geometry is a volume mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessTriStrips(TriStrips[] triStrips, Source[] meshSources, bool isVolume)
+        private static IEnumerable<SubMeshContent> ProcessTriStrips(IEnumerable<TriStrips> triStrips, IEnumerable<Source> meshSources, bool isVolume)
         {
             throw new NotImplementedException();
         }
@@ -576,26 +586,40 @@ namespace Engine.Content.FmtCollada
         /// <param name="meshSources">Mesh sources</param>
         /// <param name="isVolume">Current geometry is a volume mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessPolyLists(PolyList[] polyLists, Source[] meshSources, bool isVolume)
+        private static IEnumerable<SubMeshContent> ProcessPolyLists(IEnumerable<PolyList> polyLists, IEnumerable<Source> meshSources, bool isVolume, Matrix transform)
         {
+            if (polyLists?.Any() != true)
+            {
+                return Enumerable.Empty<SubMeshContent>();
+            }
+
             List<SubMeshContent> res = new List<SubMeshContent>();
 
             foreach (var polyList in polyLists)
             {
                 var verts = ProcessPolyList(polyList, meshSources);
+                if (!verts.Any())
+                {
+                    continue;
+                }
 
                 //Reorder vertices
-                VertexData[] data = new VertexData[verts.Length];
+                VertexData[] data = new VertexData[verts.Count()];
                 for (int i = 0; i < data.Length; i += 3)
                 {
-                    data[i + 0] = verts[i + 0];
-                    data[i + 1] = verts[i + 2];
-                    data[i + 2] = verts[i + 1];
+                    data[i + 0] = verts.ElementAt(i + 0);
+                    data[i + 1] = verts.ElementAt(i + 2);
+                    data[i + 2] = verts.ElementAt(i + 1);
                 }
 
                 SubMeshContent meshInfo = new SubMeshContent(Topology.TriangleList, polyList.Material, false, isVolume);
 
                 meshInfo.SetVertices(data);
+
+                if (!transform.IsIdentity)
+                {
+                    meshInfo.ApplyTransform(transform);
+                }
 
                 res.Add(meshInfo);
             }
@@ -608,19 +632,19 @@ namespace Engine.Content.FmtCollada
         /// <param name="polyList">Polygon list</param>
         /// <param name="meshSources">Mesh sources</param>
         /// <returns>Return vertext data</returns>
-        private static VertexData[] ProcessPolyList(PolyList polyList, Source[] meshSources)
+        private static IEnumerable<VertexData> ProcessPolyList(PolyList polyList, IEnumerable<Source> meshSources)
         {
             List<VertexData> verts = new List<VertexData>();
 
-            Input vertexInput = polyList[EnumSemantics.Vertex];
-            Input normalInput = polyList[EnumSemantics.Normal];
-            Input texCoordInput = polyList[EnumSemantics.TexCoord];
-            Input colorsInput = polyList[EnumSemantics.Color];
+            var vertexInput = polyList[EnumSemantics.Vertex];
+            var normalInput = polyList[EnumSemantics.Normal];
+            var texCoordInput = polyList[EnumSemantics.TexCoord];
+            var colorsInput = polyList[EnumSemantics.Color];
 
-            Vector3[] positions = vertexInput != null ? meshSources[vertexInput.Offset].ReadVector3() : null;
-            Vector3[] normals = normalInput != null ? meshSources[normalInput.Offset].ReadVector3() : null;
-            Vector2[] texCoords = texCoordInput != null ? meshSources[texCoordInput.Offset].ReadVector2() : null;
-            Color3[] colors = colorsInput != null ? meshSources[colorsInput.Offset].ReadColor3() : null;
+            var positions = vertexInput != null ? meshSources.ElementAt(vertexInput.Offset).ReadVector3() : null;
+            var normals = normalInput != null ? meshSources.ElementAt(normalInput.Offset).ReadVector3() : null;
+            var texCoords = texCoordInput != null ? meshSources.ElementAt(texCoordInput.Offset).ReadVector2() : null;
+            var colors = colorsInput != null ? meshSources.ElementAt(colorsInput.Offset).ReadColor3() : null;
 
             int index = 0;
             int inputCount = polyList.Inputs.Length;
@@ -657,26 +681,40 @@ namespace Engine.Content.FmtCollada
         /// <param name="meshSources">Mesh sources</param>
         /// <param name="isVolume">Current geometry is a volume mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessPolygons(Polygons[] polygons, Source[] meshSources, bool isVolume)
+        private static IEnumerable<SubMeshContent> ProcessPolygons(IEnumerable<Polygons> polygons, IEnumerable<Source> meshSources, bool isVolume, Matrix transform)
         {
+            if (polygons?.Any() != true)
+            {
+                return Enumerable.Empty<SubMeshContent>();
+            }
+
             List<SubMeshContent> res = new List<SubMeshContent>();
 
             foreach (var polygon in polygons)
             {
                 var verts = ProcessPolygon(polygon, meshSources);
+                if (!verts.Any())
+                {
+                    continue;
+                }
 
                 //Reorder vertices
-                VertexData[] data = new VertexData[verts.Length];
+                VertexData[] data = new VertexData[verts.Count()];
                 for (int i = 0; i < data.Length; i += 3)
                 {
-                    data[i + 0] = verts[i + 0];
-                    data[i + 1] = verts[i + 2];
-                    data[i + 2] = verts[i + 1];
+                    data[i + 0] = verts.ElementAt(i + 0);
+                    data[i + 1] = verts.ElementAt(i + 2);
+                    data[i + 2] = verts.ElementAt(i + 1);
                 }
 
                 SubMeshContent meshInfo = new SubMeshContent(Topology.TriangleList, polygon.Material, false, isVolume);
 
                 meshInfo.SetVertices(data);
+
+                if (!transform.IsIdentity)
+                {
+                    meshInfo.ApplyTransform(transform);
+                }
 
                 res.Add(meshInfo);
             }
@@ -689,17 +727,17 @@ namespace Engine.Content.FmtCollada
         /// <param name="polygon">Polygon</param>
         /// <param name="meshSources">Mesh sources</param>
         /// <returns>Returns vertex data</returns>
-        private static VertexData[] ProcessPolygon(Polygons polygon, Source[] meshSources)
+        private static IEnumerable<VertexData> ProcessPolygon(Polygons polygon, IEnumerable<Source> meshSources)
         {
             List<VertexData> verts = new List<VertexData>();
 
-            Input vertexInput = polygon[EnumSemantics.Vertex];
-            Input normalInput = polygon[EnumSemantics.Normal];
-            Input texCoordInput = polygon[EnumSemantics.TexCoord];
+            var vertexInput = polygon[EnumSemantics.Vertex];
+            var normalInput = polygon[EnumSemantics.Normal];
+            var texCoordInput = polygon[EnumSemantics.TexCoord];
 
-            Vector3[] positions = vertexInput != null ? meshSources[vertexInput.Offset].ReadVector3() : null;
-            Vector3[] normals = normalInput != null ? meshSources[normalInput.Offset].ReadVector3() : null;
-            Vector2[] texCoords = texCoordInput != null ? meshSources[texCoordInput.Offset].ReadVector2() : null;
+            var positions = vertexInput != null ? meshSources.ElementAt(vertexInput.Offset).ReadVector3() : null;
+            var normals = normalInput != null ? meshSources.ElementAt(normalInput.Offset).ReadVector3() : null;
+            var texCoords = texCoordInput != null ? meshSources.ElementAt(texCoordInput.Offset).ReadVector2() : null;
 
             int inputCount = polygon.Inputs.Length;
 
@@ -733,8 +771,13 @@ namespace Engine.Content.FmtCollada
 
         #region Materials
 
-        private static string FindMaterialTarget(string material, VisualScene[] libraryVisualScenes)
+        private static string FindMaterialTarget(string material, IEnumerable<VisualScene> libraryVisualScenes)
         {
+            if (libraryVisualScenes?.Any() != true)
+            {
+                return material;
+            }
+
             foreach (var vs in libraryVisualScenes)
             {
                 string res = FindMaterialTarget(material, vs.Nodes);
@@ -745,14 +788,27 @@ namespace Engine.Content.FmtCollada
             return material;
         }
 
-        private static string FindMaterialTarget(string material, Node[] nodes)
+        private static string FindMaterialTarget(string material, IEnumerable<Node> nodes)
         {
+            if (nodes?.Any() != true)
+            {
+                return null;
+            }
+
             foreach (var node in nodes)
             {
                 if (node.HasGeometry)
                 {
                     //Look up on geometry
                     string res = FindMaterialTarget(material, node.InstanceGeometry);
+
+                    if (res != null) return res;
+                }
+
+                if (node.InstanceController != null)
+                {
+                    //Look up on instance controller
+                    string res = FindMaterialTarget(material, node.InstanceController);
 
                     if (res != null) return res;
                 }
@@ -769,7 +825,17 @@ namespace Engine.Content.FmtCollada
             return null;
         }
 
-        private static string FindMaterialTarget(string material, InstanceGeometry[] instances)
+        private static string FindMaterialTarget(string material, IEnumerable<InstanceGeometry> instances)
+        {
+            var instanceMaterial = instances
+                .Where(g => g.BindMaterial?.TechniqueCommon?.Any(t => t.InstanceMaterial?.Any() == true) == true)
+                .Select(g => g.BindMaterial.TechniqueCommon[0].InstanceMaterial[0])
+                .FirstOrDefault(i => string.Equals(material, i.Symbol, StringComparison.OrdinalIgnoreCase));
+
+            return instanceMaterial?.Target.Replace("#", "");
+        }
+
+        private static string FindMaterialTarget(string material, IEnumerable<InstanceController> instances)
         {
             var instanceMaterial = instances
                 .Where(g => g.BindMaterial?.TechniqueCommon?.Any(t => t.InstanceMaterial?.Any() == true) == true)
@@ -790,42 +856,36 @@ namespace Engine.Content.FmtCollada
         /// <returns>Returns controller content</returns>
         private static ControllerContent ProcessController(Controller controller)
         {
-            ControllerContent res = null;
-
-            string armatureName = controller.Name.Replace(".", "_");
-
             if (controller.Skin != null)
             {
-                res = ProcessSkin(armatureName, controller.Skin);
+                return ProcessSkin(controller.Skin);
             }
             else if (controller.Morph != null)
             {
-                res = ProcessMorph(armatureName, controller.Morph);
+                return ProcessMorph(controller.Morph);
             }
 
-            return res;
+            return null;
         }
         /// <summary>
         /// Process skin
         /// </summary>
-        /// <param name="name">Skin name</param>
         /// <param name="skin">Skin information</param>
         /// <returns>Returns controller content</returns>
-        private static ControllerContent ProcessSkin(string name, Skin skin)
+        private static ControllerContent ProcessSkin(Skin skin)
         {
             ControllerContent res = new ControllerContent
             {
                 BindShapeMatrix = Matrix.Transpose(skin.BindShapeMatrix.ToMatrix()),
                 Skin = skin.SourceUri.Replace("#", ""),
-                Armature = name,
             };
 
             if (skin.VertexWeights != null)
             {
-                ProcessVertexWeights(name, skin, out Dictionary<string, Matrix> ibmList, out Weight[] wgList);
+                ProcessVertexWeights(skin, out var ibmList, out var wgList);
 
                 res.InverseBindMatrix = ibmList;
-                res.Weights = wgList;
+                res.Weights = wgList.ToArray();
             }
 
             return res;
@@ -833,30 +893,25 @@ namespace Engine.Content.FmtCollada
         /// <summary>
         /// Process morph
         /// </summary>
-        /// <param name="name">Morph name</param>
         /// <param name="morph">Morph information</param>
         /// <returns>Returns controller content</returns>
-        private static ControllerContent ProcessMorph(string name, Morph morph)
+        private static ControllerContent ProcessMorph(Morph morph)
         {
-            ControllerContent res = new ControllerContent()
-            {
-                Armature = name,
-            };
+            ControllerContent res = new ControllerContent();
 
-            ProcessVertexWeights(morph, out Weight[] wgList);
+            ProcessVertexWeights(morph, out var wgList);
 
-            res.Weights = wgList;
+            res.Weights = wgList.ToArray();
 
             return res;
         }
         /// <summary>
         /// Process vertext weight information
         /// </summary>
-        /// <param name="name">Armature name</param>
         /// <param name="skin">Skin information</param>
         /// <param name="inverseBindMatrixList">Inverse bind matrix list result</param>
         /// <param name="weightList">Weight list result</param>
-        private static void ProcessVertexWeights(string name, Skin skin, out Dictionary<string, Matrix> inverseBindMatrixList, out Weight[] weightList)
+        private static void ProcessVertexWeights(Skin skin, out Dictionary<string, Matrix> inverseBindMatrixList, out IEnumerable<Weight> weightList)
         {
             //Joints & matrices
             int jointsOffset = -1;
@@ -893,30 +948,34 @@ namespace Engine.Content.FmtCollada
                 weights = skin[weightsInput.Source].ReadFloat();
             }
 
-            weightList = BuildVertexWeigths(name, skin, jointsOffset, joints, weightsOffset, weights);
-            inverseBindMatrixList = BuildInverseBindMatrixList(name, joints, mats);
+            weightList = BuildVertexWeigths(skin, jointsOffset, joints, weightsOffset, weights);
+            inverseBindMatrixList = BuildInverseBindMatrixList(joints, mats);
         }
         /// <summary>
         /// Process vertext weight information
         /// </summary>
         /// <param name="morph">Morph information</param>
         /// <param name="weightList">Weight list result</param>
-        private static void ProcessVertexWeights(Morph morph, out Weight[] weightList)
+        private static void ProcessVertexWeights(Morph morph, out IEnumerable<Weight> weightList)
         {
             throw new NotImplementedException();
         }
         /// <summary>
         /// Creates the vertex weights list
         /// </summary>
-        /// <param name="name">Armature name</param>
         /// <param name="skin">Skin data</param>
         /// <param name="jointsOffset">Joints offset</param>
         /// <param name="joints">Joints names list</param>
         /// <param name="weightsOffset">Weights offset</param>
         /// <param name="weights">Weight values list</param>
         /// <returns>Returns the weights list</returns>
-        private static Weight[] BuildVertexWeigths(string name, Skin skin, int jointsOffset, string[] joints, int weightsOffset, float[] weights)
+        private static IEnumerable<Weight> BuildVertexWeigths(Skin skin, int jointsOffset, IEnumerable<string> joints, int weightsOffset, IEnumerable<float> weights)
         {
+            if (skin?.VertexWeights?.Count <= 0)
+            {
+                return Enumerable.Empty<Weight>();
+            }
+
             var wgList = new List<Weight>();
 
             int index = 0;
@@ -933,12 +992,12 @@ namespace Engine.Content.FmtCollada
 
                     if (jointsOffset >= 0 && joints != null)
                     {
-                        jointName = name + "_" + joints[skin.VertexWeights.V[index + jointsOffset]];
+                        jointName = joints.ElementAt(skin.VertexWeights.V[index + jointsOffset]);
                     }
 
                     if (weightsOffset >= 0 && weights != null)
                     {
-                        weightValue = weights[skin.VertexWeights.V[index + weightsOffset]];
+                        weightValue = weights.ElementAt(skin.VertexWeights.V[index + weightsOffset]);
                     }
 
                     if (weightValue != 0.0f)
@@ -963,57 +1022,29 @@ namespace Engine.Content.FmtCollada
         /// <summary>
         /// Creates the inverse bind matrix dictionary
         /// </summary>
-        /// <param name="name">Armature name</param>
         /// <param name="joints">Joint names list</param>
         /// <param name="mats">Inverse bind matrix list</param>
         /// <returns>Returns the inverse bind matrix by joint name dictionary</returns>
-        private static Dictionary<string, Matrix> BuildInverseBindMatrixList(string name, string[] joints, Matrix[] mats)
+        private static Dictionary<string, Matrix> BuildInverseBindMatrixList(IEnumerable<string> joints, IEnumerable<Matrix> mats)
         {
+            if (mats?.Any() != true || joints?.Any() != true)
+            {
+                return new Dictionary<string, Matrix>();
+            }
+
+            if (mats.Count() != joints.Count())
+            {
+                return new Dictionary<string, Matrix>();
+            }
+
             var ibmList = new Dictionary<string, Matrix>();
 
-            if (mats != null)
+            for (int i = 0; i < joints.Count(); i++)
             {
-                for (int i = 0; i < joints?.Length; i++)
-                {
-                    ibmList.Add(name + "_" + joints[i], mats[i]);
-                }
+                ibmList.Add(joints.ElementAt(i), mats.ElementAt(i));
             }
 
             return ibmList;
-        }
-
-        #endregion
-
-        #region Armatures
-
-        /// <summary>
-        /// Process skeleton
-        /// </summary>
-        /// <param name="skeletonName">Skeleton name</param>
-        /// <param name="parent">Parent joint</param>
-        /// <param name="node">Armature node</param>
-        /// <returns>Return skeleton joint hierarchy</returns>
-        private static Joint ProcessJoints(string skeletonName, Joint parent, Node node)
-        {
-            Matrix localTransform = node.ReadMatrix();
-
-            Joint jt = new Joint(skeletonName + "_" + node.SId, parent, localTransform, Matrix.Identity);
-
-            Skeleton.UpdateToWorldTransform(jt);
-
-            if (node.Nodes?.Length > 0)
-            {
-                List<Joint> childs = new List<Joint>();
-
-                foreach (Node child in node.Nodes)
-                {
-                    childs.Add(ProcessJoints(skeletonName, jt, child));
-                }
-
-                jt.Childs = childs.ToArray();
-            }
-
-            return jt;
         }
 
         #endregion
@@ -1212,19 +1243,21 @@ namespace Engine.Content.FmtCollada
         /// <returns>Returns texture name</returns>
         private static string FindBumpMap(ProfileCommon profile, TechniqueCommon technique)
         {
-            if (technique.Extras?.Length > 0)
+            if (technique.Extras?.Any() != true)
             {
-                for (int i = 0; i < technique.Extras.Length; i++)
+                return null;
+            }
+
+            for (int i = 0; i < technique.Extras.Length; i++)
+            {
+                var techniques = technique.Extras[i].Techniques;
+                if (techniques?.Length > 0)
                 {
-                    var techniques = technique.Extras[i].Techniques;
-                    if (techniques?.Length > 0)
+                    for (int t = 0; t < techniques.Length; t++)
                     {
-                        for (int t = 0; t < techniques.Length; t++)
+                        if (techniques[t].BumpMaps?.Length > 0)
                         {
-                            if (techniques[t].BumpMaps?.Length > 0)
-                            {
-                                return FindTexture(profile, techniques[t].BumpMaps[0].Texture);
-                            }
+                            return FindTexture(profile, techniques[t].BumpMaps[0].Texture);
                         }
                     }
                 }
@@ -1260,16 +1293,47 @@ namespace Engine.Content.FmtCollada
                 return;
             }
 
+            ProcessSceneNodesArmature(vScene.Nodes, (int)dae.Asset.UpAxis, out var skeletons);
+
+            if (skeletons.Any())
+            {
+                ProcessSceneNodesController(vScene.Nodes, out var instanceControllers);
+
+                foreach (var skeleton in skeletons)
+                {
+                    var skeletonControllers = instanceControllers
+                        .Where(ic => string.Equals(ic.Skeleton.FirstOrDefault()?.Replace("#", ""), skeleton.Name))?
+                        .ToArray();
+
+                    if (skeletonControllers?.Any() != true)
+                    {
+                        continue;
+                    }
+
+                    var controllerNames = skeletonControllers.Select(sc => sc.Url.Replace("#", "")).ToArray();
+                    foreach (var controller in controllerNames)
+                    {
+                        modelContent.Controllers[controller].Armature = skeleton.Name;
+                    }
+
+                    modelContent.SkinningInfo.Add(
+                        skeleton.Name,
+                        new SkinningContent
+                        {
+                            Skeleton = skeleton,
+                            Controllers = controllerNames,
+                        });
+                }
+
+                //return;
+            }
+
+            var otherNodes = vScene.Nodes.Where(n => !n.IsArmature && !n.HasController).ToArray();
             ProcessSceneNodes(
-                vScene.Nodes.Where(n => !n.IsArmature && !n.HasController),
+                otherNodes,
                 transform,
                 useControllerTransform,
                 bakeTransforms,
-                modelContent);
-
-            ProcessSceneNodesArmature(
-                vScene.Nodes.Where(n => n.IsArmature),
-                vScene.Nodes.Where(n => n.HasController),
                 modelContent);
         }
         /// <summary>
@@ -1368,12 +1432,12 @@ namespace Engine.Content.FmtCollada
         /// <param name="bakeTransforms">Bake transforms into sub-meshes</param>
         private static void ProcessSceneNodesGeometry(Matrix trn, IEnumerable<InstanceGeometry> geometry, ContentData modelContent, bool bakeTransforms)
         {
-            if (trn.IsIdentity)
+            if (geometry?.Any() != true)
             {
                 return;
             }
 
-            if (geometry?.Any() != true)
+            if (trn.IsIdentity)
             {
                 return;
             }
@@ -1395,62 +1459,188 @@ namespace Engine.Content.FmtCollada
                 }
             }
         }
-        /// <summary>
-        /// Process a node from a visual scene node list
-        /// </summary>
-        /// <param name="armatureNodes">Armature node list</param>
-        /// <param name="controllerNodes">Controller node list</param>
-        /// <param name="modelContent">Nodel content</param>
-        /// <returns>Returns the resulting skinning content</returns>
-        private static void ProcessSceneNodesArmature(IEnumerable<Node> armatureNodes, IEnumerable<Node> controllerNodes, ContentData modelContent)
+
+        private static void ProcessSceneNodesArmature(IEnumerable<Node> nodes, int axis, out IEnumerable<Skeleton> skeletons)
         {
-            if (armatureNodes?.Any() != true || controllerNodes?.Any() != true)
+            if (nodes?.Any() != true)
             {
+                //No child nodes
+                skeletons = Enumerable.Empty<Skeleton>();
+
                 return;
             }
 
-            foreach (var node in armatureNodes)
+            List<Skeleton> res = new List<Skeleton>();
+
+            foreach (var node in nodes)
             {
-                //Armatures (Skeletons)
-                var skeleton = CreateSkeleton(node.Id, node.Nodes);
-                if (skeleton == null)
+                ProcessSceneNodesArmature(node, axis, out var nodeSkeletons);
+                if (nodeSkeletons.Any())
                 {
-                    continue;
+                    res.AddRange(nodeSkeletons);
+                }
+            }
+
+            skeletons = res.ToArray();
+        }
+        private static void ProcessSceneNodesArmature(Node node, int axis, out IEnumerable<Skeleton> skeletons)
+        {
+            if (!node.IsArmature)
+            {
+                List<Skeleton> res = new List<Skeleton>();
+
+                ProcessSceneNodesArmature(node.Nodes, axis, out var childSkeletons);
+                if (childSkeletons.Any())
+                {
+                    res.AddRange(childSkeletons);
                 }
 
-                string skeletonName = $"#{skeleton.Root.Name}";
+                skeletons = res.ToArray();
 
-                //Armature controllers
-                var lControllers = controllerNodes
-                    .Where(n => n.HasController && string.Equals(n.SkeletonId, skeletonName, StringComparison.OrdinalIgnoreCase))
-                    .SelectMany(controller => controller.InstanceController.Select(c => c.Url.Replace("#", "")))
-                    .ToArray();
+                return;
+            }
 
+            skeletons = new[] { CreateSkeleton(node) };
+        }
+
+
+        private static void ProcessSceneNodesController(IEnumerable<Node> nodes, out IEnumerable<InstanceController> instanceControllers)
+        {
+            if (nodes?.Any() != true)
+            {
+                //No child nodes
+                instanceControllers = Enumerable.Empty<InstanceController>();
+
+                return;
+            }
+
+            List<InstanceController> res = new List<InstanceController>();
+
+            foreach (var node in nodes)
+            {
+                ProcessSceneNodesController(node, out var nodeInstanceControllers);
+                if (nodeInstanceControllers.Any())
+                {
+                    res.AddRange(nodeInstanceControllers);
+                }
+            }
+
+            instanceControllers = res.ToArray();
+        }
+        private static void ProcessSceneNodesController(Node node, out IEnumerable<InstanceController> instanceControllers)
+        {
+            if (!node.HasController)
+            {
+                List<InstanceController> res = new List<InstanceController>();
+
+                ProcessSceneNodesController(node.Nodes, out var childInstanceControllers);
+                if (childInstanceControllers.Any())
+                {
+                    res.AddRange(childInstanceControllers);
+                }
+
+                instanceControllers = res.ToArray();
+
+                return;
+            }
+
+            instanceControllers = new[] { node.InstanceController.First() };
+        }
+
+
+
+        private static void ProcessSceneNodesController(IEnumerable<Node> nodes, IEnumerable<Skeleton> skeletons, ContentData modelContent)
+        {
+            if (nodes?.Any() != true)
+            {
+                //No child nodes
+                return;
+            }
+
+            foreach (var node in nodes)
+            {
+                ProcessSceneNodesController(node, skeletons, modelContent);
+            }
+        }
+        private static void ProcessSceneNodesController(Node node, IEnumerable<Skeleton> skeletons, ContentData modelContent)
+        {
+            if (!node.HasController)
+            {
+                ProcessSceneNodesController(node.Nodes, skeletons, modelContent);
+
+                return;
+            }
+
+            //Get the instance controller
+            var instaceController = node.InstanceController.First();
+
+            //Get the referenced controller name
+            var controllerName = instaceController.Url.Replace("#", "");
+
+            //Get the referenced skeleton name
+            var skeletonName = instaceController.Skeleton.FirstOrDefault()?.Replace("#", "");
+
+            foreach (var skeleton in skeletons.Where(s => s.Name == skeletonName))
+            {
                 modelContent.SkinningInfo.Add(
-                    node.Id,
+                    controllerName,
                     new SkinningContent
                     {
                         Skeleton = skeleton,
-                        Controllers = lControllers,
+                        Controllers = new[] { controllerName },
                     });
             }
         }
         /// <summary>
-        /// Creates a skeleton from an armature node list
+        /// Creates a skeleton from an armature node
         /// </summary>
-        /// <param name="skeletonName">Skeleton name</param>
-        /// <param name="armatureNodes">Armature node list</param>
+        /// <param name="armatureNode">Armature node</param>
         /// <returns>Returns the resulting skeleton</returns>
-        private static Skeleton CreateSkeleton(string skeletonName, IEnumerable<Node> armatureNodes)
+        private static Skeleton CreateSkeleton(Node armatureNode)
         {
-            if (armatureNodes?.Any() != true)
+            if (armatureNode == null)
             {
                 return null;
             }
 
-            var root = ProcessJoints(skeletonName, null, armatureNodes.First());
+            var root = ProcessJoints(null, armatureNode);
 
-            return new Skeleton(root);
+            return new Skeleton(armatureNode.Id, root);
+        }
+
+        #endregion
+
+        #region Armatures
+
+        /// <summary>
+        /// Process skeleton
+        /// </summary>
+        /// <param name="parent">Parent joint</param>
+        /// <param name="node">Armature node</param>
+        /// <returns>Return skeleton joint hierarchy</returns>
+        private static Joint ProcessJoints(Joint parent, Node node)
+        {
+            Matrix localTransform = node.ReadMatrix();
+
+            Joint jt = new Joint(node.Id, node.SId, parent, localTransform, Matrix.Identity);
+
+            Skeleton.UpdateToWorldTransform(jt);
+
+            if (node.Nodes?.Any() != true)
+            {
+                return jt;
+            }
+
+            List<Joint> childs = new List<Joint>();
+
+            foreach (var child in node.Nodes)
+            {
+                childs.Add(ProcessJoints(jt, child));
+            }
+
+            jt.Childs = childs.ToArray();
+
+            return jt;
         }
 
         #endregion
