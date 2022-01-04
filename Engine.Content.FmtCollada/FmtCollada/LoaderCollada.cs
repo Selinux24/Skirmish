@@ -255,8 +255,6 @@ namespace Engine.Content.FmtCollada
 
             foreach (var material in dae.LibraryMaterials)
             {
-                var info = MaterialBlinnPhongContent.Default;
-
                 //Find effect
                 var effect = dae.LibraryEffects?.FirstOrDefault(e => e.Id == material.InstanceEffect.Url.Replace("#", ""));
                 if (effect == null)
@@ -389,7 +387,7 @@ namespace Engine.Content.FmtCollada
                 return ProcessConvexMesh(geometry.ConvexMesh, isVolume);
             }
 
-            return null;
+            return Enumerable.Empty<SubMeshContent>();
         }
         /// <summary>
         /// Process mesh
@@ -429,7 +427,7 @@ namespace Engine.Content.FmtCollada
                 return ProcessPolygons(mesh.Polygons, mesh.Sources, isVolume, transform);
             }
 
-            return null;
+            return Enumerable.Empty<SubMeshContent>();
         }
         /// <summary>
         /// Process spline
@@ -780,69 +778,104 @@ namespace Engine.Content.FmtCollada
 
             foreach (var vs in libraryVisualScenes)
             {
-                string res = FindMaterialTarget(material, vs.Nodes);
-
-                if (res != null) return res;
+                if (FindMaterialTarget(material, vs.Nodes, out var target))
+                {
+                    return target;
+                }
             }
 
             return material;
         }
 
-        private static string FindMaterialTarget(string material, IEnumerable<Node> nodes)
+        private static bool FindMaterialTarget(string material, IEnumerable<Node> nodes, out string target)
         {
+            target = null;
+
             if (nodes?.Any() != true)
             {
-                return null;
+                return false;
             }
 
             foreach (var node in nodes)
             {
-                if (node.HasGeometry)
+                if (FindMaterialTarget(material, node, out var nodeTarget))
                 {
-                    //Look up on geometry
-                    string res = FindMaterialTarget(material, node.InstanceGeometry);
+                    target = nodeTarget;
 
-                    if (res != null) return res;
-                }
-
-                if (node.InstanceController != null)
-                {
-                    //Look up on instance controller
-                    string res = FindMaterialTarget(material, node.InstanceController);
-
-                    if (res != null) return res;
-                }
-
-                if (node.Nodes != null)
-                {
-                    //Look up on child nodes
-                    string res = FindMaterialTarget(material, node.Nodes);
-
-                    if (res != null) return res;
+                    return true;
                 }
             }
 
-            return null;
+            return false;
         }
 
-        private static string FindMaterialTarget(string material, IEnumerable<InstanceGeometry> instances)
+        private static bool FindMaterialTarget(string material, Node node, out string target)
         {
-            var instanceMaterial = instances
-                .Where(g => g.BindMaterial?.TechniqueCommon?.Any(t => t.InstanceMaterial?.Any() == true) == true)
-                .Select(g => g.BindMaterial.TechniqueCommon[0].InstanceMaterial[0])
-                .FirstOrDefault(i => string.Equals(material, i.Symbol, StringComparison.OrdinalIgnoreCase));
+            //Look up on geometry
+            if (FindMaterialTarget(material, node.InstanceGeometry, out var geomTarget))
+            {
+                target = geomTarget;
 
-            return instanceMaterial?.Target.Replace("#", "");
+                return true;
+            }
+
+            //Look up on instance controller
+            if (FindMaterialTarget(material, node.InstanceController, out var instanceTarget))
+            {
+                target = instanceTarget;
+
+                return true;
+            }
+
+            //Look up on child nodes
+            if (FindMaterialTarget(material, node.Nodes, out var nodesTarget))
+            {
+                target = nodesTarget;
+
+                return true;
+            }
+
+            target = null;
+
+            return false;
         }
 
-        private static string FindMaterialTarget(string material, IEnumerable<InstanceController> instances)
+        private static bool FindMaterialTarget(string material, IEnumerable<InstanceGeometry> instances, out string target)
         {
+            if (instances?.Any() != true)
+            {
+                target = null;
+
+                return false;
+            }
+
             var instanceMaterial = instances
                 .Where(g => g.BindMaterial?.TechniqueCommon?.Any(t => t.InstanceMaterial?.Any() == true) == true)
-                .Select(g => g.BindMaterial.TechniqueCommon[0].InstanceMaterial[0])
+                .Select(g => g.BindMaterial.TechniqueCommon.First().InstanceMaterial.First())
                 .FirstOrDefault(i => string.Equals(material, i.Symbol, StringComparison.OrdinalIgnoreCase));
 
-            return instanceMaterial?.Target.Replace("#", "");
+            target = instanceMaterial?.Target?.Replace("#", "");
+
+            return target != null;
+        }
+
+        private static bool FindMaterialTarget(string material, IEnumerable<InstanceController> instances, out string target)
+        {
+            if (instances?.Any() != true)
+            {
+                target = null;
+
+                return false;
+            }
+
+            var instanceMaterial = instances
+                .Where(g => g.BindMaterial?.TechniqueCommon?.Any(t => t.InstanceMaterial?.Any() == true) == true)
+                .Select(g => g.BindMaterial.TechniqueCommon.First().InstanceMaterial.First())
+                .FirstOrDefault(i => string.Equals(material, i.Symbol, StringComparison.OrdinalIgnoreCase));
+
+            target = instanceMaterial?.Target?.Replace("#", "");
+
+            return target != null;
         }
 
         #endregion
@@ -971,7 +1004,12 @@ namespace Engine.Content.FmtCollada
         /// <returns>Returns the weights list</returns>
         private static IEnumerable<Weight> BuildVertexWeigths(Skin skin, int jointsOffset, IEnumerable<string> joints, int weightsOffset, IEnumerable<float> weights)
         {
-            if (skin?.VertexWeights?.Count <= 0)
+            if (skin?.VertexWeights == null)
+            {
+                return Enumerable.Empty<Weight>();
+            }
+
+            if (skin.VertexWeights.Count <= 0)
             {
                 return Enumerable.Empty<Weight>();
             }
@@ -1325,7 +1363,7 @@ namespace Engine.Content.FmtCollada
                         });
                 }
 
-                //return;
+                return;
             }
 
             var otherNodes = vScene.Nodes.Where(n => !n.IsArmature && !n.HasController).ToArray();
