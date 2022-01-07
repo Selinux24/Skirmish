@@ -151,12 +151,12 @@ namespace Engine
 
                 //Populate nodes dictionary
                 var nodes = drawingQuadTree.GetLeafNodes();
-                foreach (var node in nodes)
+                Parallel.ForEach(nodes, (node) =>
                 {
-                    var data = VertexData.Convert(VertexTypes.Terrain, node.Items, null, null);
+                    var data = VertexData.Convert(VertexTypes.Terrain, node.Items, null, null).GetAwaiter().GetResult();
 
                     dictVB.Add(node.Id, game.BufferManager.AddVertexData(mapName, false, data));
-                }
+                });
             }
             /// <summary>
             /// Destructor

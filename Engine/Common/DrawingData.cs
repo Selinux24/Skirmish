@@ -59,16 +59,6 @@ namespace Engine.Common
         /// Datos de animación
         /// </summary>
         public ISkinningData SkinningData { get; set; } = null;
-        /// <summary>
-        /// Lights collection
-        /// </summary>
-        public IEnumerable<ISceneLight> Lights
-        {
-            get
-            {
-                return lights.ToArray();
-            }
-        }
 
         /// <summary>
         /// Model initialization
@@ -104,7 +94,7 @@ namespace Engine.Common
             //Lights
             await InitializeLights(res, modelContent);
 
-            return await Task.FromResult(res);
+            return res;
         }
         /// <summary>
         /// Initialize textures
@@ -190,17 +180,38 @@ namespace Engine.Common
                 return;
             }
 
-            var taskList = modelContent.Geometry.Select(mesh =>
+            var taskList = modelContent.Geometry
+                .Select(mesh =>
+                {
+                    //Get the mesh geometry
+                    var submeshes = modelContent.Geometry[mesh.Key];
+
+                    //Get the mesh skinning info
+                    var skinningInfo = ReadSkinningData(description, modelContent, mesh.Key);
+
+                    return InitializeGeometryMesh(drw, description, skinningInfo, mesh.Key, submeshes);
+                })
+                .ToList();
+
+            List<Exception> ex = new List<Exception>();
+
+            while (taskList.Any())
             {
-                //Get the mesh geometry
-                var submeshes = modelContent.Geometry[mesh.Key];
+                var t = await Task.WhenAny(taskList);
 
-                //Get the mesh skinning info
-                var skinningInfo = ReadSkinningData(description, modelContent, mesh.Key);
+                taskList.Remove(t);
 
-                return InitializeGeometryMesh(drw, description, skinningInfo, mesh.Key, submeshes);
-            });
-            await Task.WhenAll(taskList);
+                bool completedOk = t.Status == TaskStatus.RanToCompletion;
+                if (!completedOk)
+                {
+                    ex.Add(t.Exception);
+                }
+            }
+
+            if (ex.Any())
+            {
+                throw new AggregateException(ex);
+            }
         }
         /// <summary>
         /// Initialize geometry mesh
@@ -288,7 +299,7 @@ namespace Engine.Common
                 }
 
                 //Convert the vertex data to final mesh data
-                vertexList = VertexData.Convert(
+                vertexList = await VertexData.Convert(
                     vertexType,
                     vertices,
                     skinningInfo.Value.Weights,
@@ -296,7 +307,7 @@ namespace Engine.Common
             }
             else
             {
-                vertexList = VertexData.Convert(
+                vertexList = await VertexData.Convert(
                     vertexType,
                     vertices,
                     Enumerable.Empty<Weight>(),
@@ -537,21 +548,32 @@ namespace Engine.Common
                 return;
             }
 
-            var taskList = modelContent.Lights.Values.Select(l =>
-            {
-                return Task.Run(() =>
+            var taskList = modelContent.Lights.Values
+                .Select(async l =>
                 {
-                    if (l.LightType == LightContentTypes.Point)
+                    await Task.Run(async () =>
                     {
-                        drw.lights.Add(l.CreatePointLight());
-                    }
-                    else if (l.LightType == LightContentTypes.Spot)
-                    {
-                        drw.lights.Add(l.CreateSpotLight());
-                    }
+                        if (l.LightType == LightContentTypes.Point)
+                        {
+                            drw.lights.Add(l.CreatePointLight());
+                        }
+                        else if (l.LightType == LightContentTypes.Spot)
+                        {
+                            drw.lights.Add(l.CreateSpotLight());
+                        }
+
+                        await Task.CompletedTask;
+                    });
                 });
-            });
+
             await Task.WhenAll(taskList);
+        }
+        /// <summary>
+        /// Lights collection
+        /// </summary>
+        public IEnumerable<ISceneLight> GetLights()
+        {
+            return lights.Select(l => l.Clone()).ToArray();
         }
 
         /// <summary>

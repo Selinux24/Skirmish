@@ -117,15 +117,25 @@ namespace Animation.Start
 
                 Game.SetScene<SmoothTransitions.SceneSmoothTransitions>();
             });
+            var panMixamo = AddButtonPanel(buttonDesc, "Mixamo Models", (sender, args) =>
+            {
+                if (!args.Buttons.HasFlag(MouseButtons.Left))
+                {
+                    return;
+                }
+
+                Game.SetScene<Mixamo.SceneMixamo>();
+            });
             var panExit = AddButtonPanel(exitDesc, "Exit", (sender, args) => { Game.Exit(); });
 
-            mainPanel.AddChild(panSimpleAnimation, false);
             mainPanel.AddChild(new Sprite("Empty1", "Empty", this, emptyDesc), false);
-            mainPanel.AddChild(new Sprite("Empty2", "Empty", this, emptyDesc), false);
-            mainPanel.AddChild(panSmoothTransitions, false);
+            mainPanel.AddChild(panSimpleAnimation, false);
             mainPanel.AddChild(new Sprite("Empty3", "Empty", this, emptyDesc), false);
-            mainPanel.AddChild(panAnimationParts, false);
+            mainPanel.AddChild(panMixamo, false);
+
+            mainPanel.AddChild(panSmoothTransitions, false);
             mainPanel.AddChild(new Sprite("Empty4", "Empty", this, emptyDesc), false);
+            mainPanel.AddChild(panAnimationParts, false);
             mainPanel.AddChild(panExit, false);
         }
         private UIPanel AddButtonPanel(UIButtonDescription desc, string text, MouseEventHandler buttonJustReleased)

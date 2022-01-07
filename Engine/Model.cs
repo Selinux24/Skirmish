@@ -124,7 +124,7 @@ namespace Engine
             {
                 SetModelPartsTransforms(drawData);
 
-                Lights = drawData.Lights.Select(l => l.Clone()).ToArray();
+                Lights = drawData.GetLights();
             }
 
             AnimationController = new AnimationController(this);
