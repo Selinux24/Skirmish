@@ -190,7 +190,13 @@ namespace Engine
 
                         var technique = sceneryEffect.GetTechnique(mesh.VertextType, false);
 
-                        sceneryEffect.UpdatePerObject();
+                        var materialInfo = new MaterialDrawInfo
+                        {
+                            Material = material,
+                            UseAnisotropic = true,
+                        };
+
+                        sceneryEffect.UpdatePerObject(AnimationDrawInfo.Empty, materialInfo, 0);
 
                         bufferManager.SetIndexBuffer(mesh.IndexBuffer);
                         bufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
@@ -375,7 +381,7 @@ namespace Engine
                 return;
             }
 
-            var tasks = nodes.Select(node => SceneryPatch.CreatePatch(Game, Name, content, node));
+            var tasks = nodes.Select(async node => await SceneryPatch.CreatePatch(Game, Name, content, node));
             var taskResults = await Task.WhenAll(tasks);
             if (!taskResults.Any())
             {
