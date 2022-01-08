@@ -17,10 +17,6 @@ namespace Engine.Animation
         /// </summary>
         public float TimeDelta { get; set; }
         /// <summary>
-        /// Gets whether the controller is currently playing an animation
-        /// </summary>
-        public bool Playing { get; set; }
-        /// <summary>
         /// Animation plan
         /// </summary>
         public IEnumerable<IGameState> AnimationPlan { get; set; } = Enumerable.Empty<IGameState>();

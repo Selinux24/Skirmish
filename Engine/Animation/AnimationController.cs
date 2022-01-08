@@ -45,7 +45,13 @@ namespace Engine.Animation
         /// <summary>
         /// Gets whether the controller is currently playing an animation
         /// </summary>
-        public bool Playing { get; private set; } = false;
+        public bool Playing
+        {
+            get
+            {
+                return animationPlan.Active || (transitionPlan?.Active ?? false);
+            }
+        }
 
         /// <summary>
         /// Animation offset in the animation palette
@@ -420,7 +426,6 @@ namespace Engine.Animation
             {
                 Active = active,
                 TimeDelta = TimeDelta,
-                Playing = Playing,
                 AnimationPlan = animationPlan.GetState(),
             };
         }
@@ -434,7 +439,6 @@ namespace Engine.Animation
 
             active = animationControllerState.Active;
             TimeDelta = animationControllerState.TimeDelta;
-            Playing = animationControllerState.Playing;
             animationPlan.SetState(animationControllerState.AnimationPlan);
         }
 
