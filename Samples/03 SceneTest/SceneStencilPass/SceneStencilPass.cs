@@ -11,7 +11,6 @@ namespace SceneTest.SceneStencilPass
     {
         private readonly float spaceSize = 10;
 
-        private Model buildingObelisk = null;
         private Model lightEmitter1 = null;
         private Model lightEmitter2 = null;
 
@@ -90,7 +89,7 @@ namespace SceneTest.SceneStencilPass
         }
         private async Task InitializeBuildingObelisk()
         {
-            buildingObelisk = await this.AddComponentModel(
+            var buildingObelisk = await this.AddComponentModel(
                 "Obelisk",
                 "Obelisk",
                 new ModelDescription()

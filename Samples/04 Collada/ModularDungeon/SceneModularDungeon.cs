@@ -1243,7 +1243,11 @@ namespace Collada.ModularDungeon
         }
         private void SetSelectedItemTrigger(ModularSceneryItem item)
         {
-            var triggers = scenery.GetTriggersByObject(item);
+            var triggers = scenery
+                .GetTriggersByObject(item)
+                .Where(t => t.Actions.Any())
+                .ToArray();
+
             if (triggers.Any())
             {
                 int index = 1;
@@ -1308,6 +1312,7 @@ namespace Collada.ModularDungeon
         {
             var triggers = scenery
                 .GetTriggersByObject(item)
+                .Where(t => t.Actions.Any())
                 .ToArray();
 
             if (triggers.Any())
@@ -1691,10 +1696,8 @@ namespace Collada.ModularDungeon
         {
             obstacleDrawer.Clear(obstacleColor);
 
-            foreach (var item in obstacles)
+            foreach (var obstacle in obstacles.Select(o => o.Obstacle))
             {
-                var obstacle = item.Obstacle;
-
                 IEnumerable<Triangle> obstacleTris = null;
 
                 if (obstacle is BoundingCylinder bc)

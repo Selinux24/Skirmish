@@ -317,6 +317,11 @@ namespace SceneTest.SceneCascadedShadows
                 bufferDrawer3.Visible = visible;
                 caption3.Visible = visible;
             }
+
+            if (Game.Input.KeyJustReleased(Keys.Oem5))
+            {
+                console.Toggle();
+            }
         }
         private void UpdateSelector()
         {

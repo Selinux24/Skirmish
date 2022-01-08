@@ -293,16 +293,12 @@ namespace Engine.Common
         /// <inheritdoc/>
         public IMeshMaterial GetMaterial(string meshMaterialName)
         {
-            foreach (var drawingData in meshesByLOD.Values)
+            foreach (var meshMaterials in meshesByLOD.Values.Select(d => d.Materials))
             {
-                var meshMaterials = drawingData.Materials.Keys.ToArray();
-
-                foreach (var meshMaterial in meshMaterials)
+                var meshMaterial = meshMaterials.Keys.FirstOrDefault(m => string.Equals(m, meshMaterialName, StringComparison.OrdinalIgnoreCase));
+                if (meshMaterial != null)
                 {
-                    if (string.Equals(meshMaterial, meshMaterialName, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return drawingData.Materials[meshMaterial];
-                    }
+                    return meshMaterials[meshMaterial];
                 }
             }
 
@@ -313,17 +309,13 @@ namespace Engine.Common
         {
             bool updated = false;
 
-            foreach (var drawingData in meshesByLOD.Values)
+            foreach (var meshMaterials in meshesByLOD.Values.Select(d => d.Materials))
             {
-                var meshMaterials = drawingData.Materials.Keys.ToArray();
-
-                foreach (var meshMaterial in meshMaterials)
+                var meshMaterial = meshMaterials.Keys.FirstOrDefault(m => string.Equals(m, meshMaterialName, StringComparison.OrdinalIgnoreCase));
+                if (meshMaterial != null)
                 {
-                    if (string.Equals(meshMaterial, meshMaterialName, StringComparison.OrdinalIgnoreCase))
-                    {
-                        drawingData.Materials[meshMaterial] = material;
-                        updated = true;
-                    }
+                    meshMaterials[meshMaterial] = material;
+                    updated = true;
                 }
             }
 

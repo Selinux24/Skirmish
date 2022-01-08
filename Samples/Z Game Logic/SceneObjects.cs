@@ -643,12 +643,12 @@ namespace GameLogic
             float soldierSeparation = 12f;
             int instanceIndex = 0;
             uint teamIndex = 0;
-            foreach (Team team in skirmishGame.Teams)
+            foreach (var teamSoldiers in skirmishGame.Teams.Select(t => t.Soldiers))
             {
-                float teamWidth = team.Soldiers.Length * soldierSeparation;
+                float teamWidth = teamSoldiers.Length * soldierSeparation;
 
                 int soldierIndex = 0;
-                foreach (var soldierC in team.Soldiers)
+                foreach (var soldierC in teamSoldiers)
                 {
                     var soldier = troops[instanceIndex++];
 
@@ -778,22 +778,22 @@ namespace GameLogic
                 ActionSpecification[] actions = ActionsManager.GetActions(skirmishGame.CurrentPhase, soldierC.Team, soldierC, melee != null, ActionTypes.Automatic);
                 if (actions.Length > 0)
                 {
-                    foreach (ActionSpecification ac in actions)
+                    foreach (var action in actions.Select(a => a.Action))
                     {
                         //TODO: Need of standar method
-                        if (ac.Action == Actions.FindCover)
+                        if (action == Actions.FindCover)
                         {
                             Vector3 point = GetRandomPoint();
 
                             FindCover(soldierC, point);
                         }
-                        else if (ac.Action == Actions.RunAway)
+                        else if (action == Actions.RunAway)
                         {
                             Vector3 point = GetRandomPoint();
 
                             RunAway(soldierC, point);
                         }
-                        else if (ac.Action == Actions.TakeControl)
+                        else if (action == Actions.TakeControl)
                         {
                             TakeControl(soldierC);
                         }

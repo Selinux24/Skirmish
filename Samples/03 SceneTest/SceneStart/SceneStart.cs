@@ -17,7 +17,6 @@ namespace SceneTest.SceneStart
     {
         private Model backGround = null;
         private UITextArea title = null;
-        private UIButton[] sceneButtons = null;
         private UIButton sceneMaterialsButton = null;
         private UIButton sceneWaterButton = null;
         private UIButton sceneStencilPassButton = null;
@@ -119,7 +118,7 @@ namespace SceneTest.SceneStart
             sceneTestButton = new UIButton("ButtonTest", "ButtonTest", this, startButtonDesc);
             sceneTanksGameButton = new UIButton("ButtonTanksGame", "ButtonTanksGame", this, startButtonDesc);
 
-            sceneButtons = new[]
+            var sceneButtons = new[]
             {
                 sceneMaterialsButton,
                 sceneWaterButton,

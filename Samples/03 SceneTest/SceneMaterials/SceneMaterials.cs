@@ -22,8 +22,6 @@ namespace SceneTest.SceneMaterials
 
         private ModelInstanced spheres1 = null;
         private ModelInstanced spheres2 = null;
-        private ModelInstanced spheres3 = null;
-        private ModelInstanced spheres4 = null;
         private Model lightEmitter1 = null;
         private Model lightEmitter2 = null;
         private SceneLightPoint movingLight1 = null;
@@ -241,12 +239,12 @@ namespace SceneTest.SceneMaterials
             //Cook-torrance
             var ctMaterials = materials.Select(m => (MaterialCookTorranceContent)m).OfType<IMaterialContent>();
 
-            spheres3 = await InitializeSphereInstanced("Built-in materials test", materials.Count, ctMaterials);
+            var spheres = await InitializeSphereInstanced("Built-in materials test", materials.Count, ctMaterials);
 
             float sep = 2f;
-            float x = sep * spheres3.InstanceCount * 0.5f;
+            float x = sep * spheres.InstanceCount * 0.5f;
             int index = 0;
-            foreach (var item in spheres3.GetInstances())
+            foreach (var item in spheres.GetInstances())
             {
                 item.Manipulator.SetPosition(x - (sep * index++), 5, 20);
             }
@@ -285,13 +283,13 @@ namespace SceneTest.SceneMaterials
                 materials.Add(mat);
             }
 
-            spheres4 = await InitializeSphereInstanced("Cook-Torrance Metallics", materials.Count, materials);
+            var spheres = await InitializeSphereInstanced("Cook-Torrance Metallics", materials.Count, materials);
 
             float sep = 2f;
             float x = sep * itemsPerRow * 0.5f;
             float y = 8f;
             int index = 0;
-            foreach (var item in spheres4.GetInstances())
+            foreach (var item in spheres.GetInstances())
             {
                 item.Manipulator.SetPosition(x - (sep * index++), y, 20);
                 if (index >= itemsPerRow)
