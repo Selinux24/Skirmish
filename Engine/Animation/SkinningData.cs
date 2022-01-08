@@ -145,6 +145,11 @@ namespace Engine.Animation
         public void GetAnimationOffset(float time, string clipName, out uint animationOffset)
         {
             int clipIndex = GetClipIndex(clipName);
+            if (clipIndex < 0)
+            {
+                Logger.WriteWarning(this, $"The specified clip not exists in the collection: {clipName}");
+            }
+
             uint offset = GetClipOffset(clipIndex);
             float duration = GetClipDuration(clipIndex);
             int clipLength = (int)(duration / TimeStep);
@@ -164,22 +169,12 @@ namespace Engine.Animation
         /// <inheritdoc/>
         public uint GetClipOffset(int clipIndex)
         {
-            if (clipIndex >= 0)
-            {
-                return (uint)offsets[clipIndex];
-            }
-
-            return 0;
+            return (uint)offsets.ElementAtOrDefault(clipIndex);
         }
         /// <inheritdoc/>
         public float GetClipDuration(int clipIndex)
         {
-            if (clipIndex < animations.Count)
-            {
-                return animations[clipIndex].Duration;
-            }
-
-            return 0;
+            return animations.ElementAtOrDefault(clipIndex)?.Duration ?? 0;
         }
 
         /// <inheritdoc/>

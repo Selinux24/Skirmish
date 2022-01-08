@@ -52,23 +52,11 @@ namespace Engine.Content.FmtCollada
         /// <returns>Returns the loaded contents</returns>
         public IEnumerable<ContentData> Load(string contentFolder, ContentDataFile content)
         {
-            Matrix transform = Matrix.Identity;
-
-            if (content.Scale != 1f)
-            {
-                transform = Matrix.Scaling(content.Scale);
-            }
-
             string fileName = content.ModelFileName;
-            string armatureName = content.ArmatureName;
-            string[] volumes = content.VolumeMeshes;
-            string[] meshesByLOD = content.LODMeshes;
-            var animation = content.Animation;
-            bool useControllerTransform = content.UseControllerTransform;
-            bool bakeTransforms = content.BakeTransforms;
-            bool readAnimations = content.ReadAnimations;
 
+#if DEBUG
             System.Threading.Thread.CurrentThread.Name = $"LoaderCollada_{contentFolder}/{fileName}";
+#endif
 
             var modelList = ContentManager.FindContent(contentFolder, fileName);
             if (modelList?.Any() == true)
@@ -78,28 +66,7 @@ namespace Engine.Content.FmtCollada
                 foreach (var model in modelList)
                 {
                     var dae = Collada.Load(model);
-
-                    ContentData modelContent = new ContentData();
-
-                    //Scene Objects
-                    ProcessLibraryLights(dae, modelContent);
-                    ProcessLibraryImages(dae, modelContent, contentFolder);
-                    ProcessLibraryMaterial(dae, modelContent);
-                    ProcessLibraryGeometries(dae, modelContent, volumes);
-                    ProcessLibraryControllers(dae, modelContent);
-
-                    //Scene Relations
-                    ProcessVisualScene(dae, transform, useControllerTransform, bakeTransforms, modelContent);
-
-                    if (readAnimations)
-                    {
-                        //Animations
-                        ProcessLibraryAnimations(dae, modelContent, animation);
-                    }
-
-                    //Filter the resulting model content
-                    var filteredModelContent = FilterGeometry(modelContent, armatureName, meshesByLOD);
-                    res.AddRange(filteredModelContent);
+                    res.AddRange(ReadContentData(dae, contentFolder, content));
 
                     //Release the stream
                     model.Flush();
@@ -112,6 +79,50 @@ namespace Engine.Content.FmtCollada
             {
                 throw new EngineException(string.Format("Model not found: {0}", fileName));
             }
+        }
+        /// <summary>
+        /// Reads the collada file into a content data instance
+        /// </summary>
+        /// <param name="dae">Collada file</param>
+        /// <param name="contentFolder">Content folder</param>
+        /// <param name="content">Content data file</param>
+        /// <returns>Returns a collection of content data instances</returns>
+        private static IEnumerable<ContentData> ReadContentData(Collada dae, string contentFolder, ContentDataFile content)
+        {
+            ContentData modelContent = new ContentData();
+
+            Matrix transform = Matrix.Identity;
+            if (content.Scale != 1f)
+            {
+                transform = Matrix.Scaling(content.Scale);
+            }
+
+            string armatureName = content.ArmatureName;
+            var volumes = content.VolumeMeshes;
+            var meshesByLOD = content.LODMeshes;
+            var animation = content.Animation;
+            bool useControllerTransform = content.UseControllerTransform;
+            bool bakeTransforms = content.BakeTransforms;
+            bool readAnimations = content.ReadAnimations;
+
+            //Scene Objects
+            ProcessLibraryLights(dae, modelContent);
+            ProcessLibraryImages(dae, modelContent, contentFolder);
+            ProcessLibraryMaterial(dae, modelContent);
+            ProcessLibraryGeometries(dae, modelContent, volumes);
+            ProcessLibraryControllers(dae, modelContent);
+
+            //Scene Relations
+            ProcessVisualScene(dae, transform, useControllerTransform, bakeTransforms, modelContent);
+
+            if (readAnimations)
+            {
+                //Animations
+                ProcessLibraryAnimations(dae, modelContent, animation);
+            }
+
+            //Filter the resulting model content
+            return FilterGeometry(modelContent, armatureName, meshesByLOD);
         }
         /// <summary>
         /// Filters the loaded geometry by armature name and level of detail meshes (if any)
@@ -1322,8 +1333,6 @@ namespace Engine.Content.FmtCollada
             if (skeletons.Any())
             {
                 ProcessVisualSceneSkins(vScene, modelContent, skeletons);
-
-                return;
             }
 
             var otherNodes = vScene.Nodes.Where(n => !n.IsArmature && !n.HasController).ToArray();
