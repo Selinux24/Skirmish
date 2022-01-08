@@ -1006,7 +1006,7 @@ namespace Engine.Content.FmtCollada
                 return Enumerable.Empty<Weight>();
             }
 
-            if (weightsOffset < 0 || weights.Any() != true)
+            if (weightsOffset < 0 || weights?.Any() != true)
             {
                 return Enumerable.Empty<Weight>();
             }
