@@ -72,7 +72,7 @@ namespace Engine.Common
                 InstancingBuffer = BufferManager.AddInstancingData($"{Name}.Instances", true, desc.Instances);
             }
 
-            var geo = description.Content.ReadModelContent();
+            var geo = description.Content.ReadModelContent().GetAwaiter().GetResult();
             if (!geo.Any())
             {
                 throw new ArgumentException("Bad content description file. The resource file does not generate any geometry.", nameof(description));

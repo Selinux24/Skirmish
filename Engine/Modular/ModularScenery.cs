@@ -424,7 +424,7 @@ namespace Engine.Modular
 
             CurrentLevel = level;
 
-            var content = Description.ReadModelContent();
+            var content = await Description.ReadModelContent();
 
             await InitializeParticles(progress);
             await InitializeAssets(level, content, progress);

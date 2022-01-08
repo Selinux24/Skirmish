@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Engine.Content.FmtCollada
 {
@@ -50,7 +51,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="contentFolder">Content folder</param>
         /// <param name="content">Conten description</param>
         /// <returns>Returns the loaded contents</returns>
-        public IEnumerable<ContentData> Load(string contentFolder, ContentDataFile content)
+        public async Task<IEnumerable<ContentData>> Load(string contentFolder, ContentDataFile content)
         {
             string fileName = content.ModelFileName;
 
@@ -63,26 +64,41 @@ namespace Engine.Content.FmtCollada
 #endif
 
             var modelList = ContentManager.FindContent(contentFolder, fileName);
-            if (modelList?.Any() == true)
-            {
-                List<ContentData> res = new List<ContentData>();
-
-                foreach (var model in modelList)
-                {
-                    var dae = Collada.Load(model);
-                    res.AddRange(ReadContentData(dae, contentFolder, content));
-
-                    //Release the stream
-                    model.Flush();
-                    model.Dispose();
-                }
-
-                return res.ToArray();
-            }
-            else
+            if (modelList?.Any() != true)
             {
                 throw new EngineException(string.Format("Model not found: {0}", fileName));
             }
+
+            var taskList = modelList
+                .Select(model =>
+                {
+                    return Task.Run(() =>
+                    {
+                        var dae = Collada.Load(model);
+
+                        return ReadContentData(dae, contentFolder, content);
+                    });
+                })
+                .ToList();
+
+            List<ContentData> res = new List<ContentData>();
+
+            while (taskList.Any())
+            {
+                var t = await Task.WhenAny(taskList);
+
+                taskList.Remove(t);
+
+                res.AddRange(await t);
+            }
+
+            foreach (var model in modelList)
+            {
+                model.Flush();
+                model.Dispose();
+            }
+
+            return res.ToArray();
         }
         /// <summary>
         /// Reads the collada file into a content data instance

@@ -9,6 +9,7 @@ namespace Engine
 {
     using Engine.Common;
     using Engine.Content;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Height map
@@ -283,9 +284,9 @@ namespace Engine
         {
             get
             {
-                if (this.m_HeightData != null)
+                if (m_HeightData != null)
                 {
-                    return this.m_HeightData.GetLongLength(0);
+                    return m_HeightData.GetLongLength(0);
                 }
 
                 return 0;
@@ -298,9 +299,9 @@ namespace Engine
         {
             get
             {
-                if (this.m_HeightData != null)
+                if (m_HeightData != null)
                 {
-                    return this.m_HeightData.GetLongLength(1);
+                    return m_HeightData.GetLongLength(1);
                 }
 
                 return 0;
@@ -313,9 +314,9 @@ namespace Engine
         {
             get
             {
-                if (this.m_HeightData != null)
+                if (m_HeightData != null)
                 {
-                    return this.m_HeightData.LongLength;
+                    return m_HeightData.LongLength;
                 }
 
                 return 0;
@@ -330,23 +331,23 @@ namespace Engine
         /// <param name="falloffData">Falloff map data</param>
         public HeightMap(float[,] heightData, Color4[,] colorData, float[,] falloffData)
         {
-            this.m_HeightData = heightData;
-            this.m_ColorData = colorData;
-            this.m_FalloffData = falloffData;
+            m_HeightData = heightData;
+            m_ColorData = colorData;
+            m_FalloffData = falloffData;
 
-            this.Min = float.MaxValue;
-            this.Max = float.MinValue;
+            Min = float.MaxValue;
+            Max = float.MinValue;
 
             foreach (var height in heightData)
             {
-                if (height < this.Min)
+                if (height < Min)
                 {
-                    this.Min = height;
+                    Min = height;
                 }
 
-                if (height > this.Max)
+                if (height > Max)
                 {
-                    this.Max = height;
+                    Max = height;
                 }
             }
         }
@@ -374,9 +375,9 @@ namespace Engine
         {
             if (disposing)
             {
-                this.m_ColorData = null;
-                this.m_HeightData = null;
-                this.m_FalloffData = null;
+                m_ColorData = null;
+                m_HeightData = null;
+                m_FalloffData = null;
             }
         }
 
@@ -388,75 +389,115 @@ namespace Engine
         /// <param name="heightCurve">Height curve</param>
         /// <param name="textureScale">Texture scale</param>
         /// <param name="textureDisplacement">Texture displacement</param>
-        /// <param name="vertices">Result vertices</param>
-        /// <param name="indices">Result indices</param>
-        public void BuildGeometry(float cellSize, float cellHeight, Curve heightCurve, float textureScale, Vector2 textureDisplacement, out IEnumerable<VertexData> vertices, out IEnumerable<uint> indices)
+        /// <returns>Returns a vertex list, and a index list</returns>
+        public async Task<(IEnumerable<VertexData> Vertices, IEnumerable<uint> Indices)> BuildGeometry(float cellSize, float cellHeight, Curve heightCurve, float textureScale, Vector2 textureDisplacement)
         {
-            float totalWidth = cellSize * (this.Width - 1);
-            float totalDepth = cellSize * (this.Depth - 1);
-
-            long vertexCountX = this.Width;
-            long vertexCountZ = this.Depth;
-
-            VertexData[] vertArray = new VertexData[vertexCountX * vertexCountZ];
-
-            long vertexCount = 0;
-
-            for (long depth = 0; depth < vertexCountZ; depth++)
+            var vertTask = Task.Run(() =>
             {
-                for (long width = 0; width < vertexCountX; width++)
+                VertexData[] vertArray = new VertexData[Width * Depth];
+
+                Parallel.For(0, Depth, (depth) =>
                 {
-                    float h = heightCurve.Evaluate(this.m_HeightData[depth, width]);
-                    if (m_FalloffData != null)
+                    for (long width = 0; width < Width; width++)
                     {
-                        h = MathUtil.Clamp(h - this.m_FalloffData[depth, width], 0, 1);
+                        var (Index, Vertex) = BuildVertex(depth, width, cellSize, cellHeight, heightCurve, textureScale, textureDisplacement);
+
+                        vertArray[Index] = Vertex;
                     }
+                });
 
-                    Color4 c = this.m_ColorData != null ? this.m_ColorData[depth, width] : Color4.Lerp(Color4.Black, Color4.White, h);
+                ComputeHeightMapNormals(vertArray, Width, Depth);
 
-                    float posX = (depth * cellSize) - (totalDepth * 0.5f);
-                    float posY = h * cellHeight;
-                    float posZ = (width * cellSize) - (totalWidth * 0.5f);
+                return vertArray;
+            });
 
-                    float tu = width * cellSize / totalWidth;
-                    float tv = depth * cellSize / totalDepth;
-
-                    VertexData newVertex = new VertexData()
-                    {
-                        Position = new Vector3(posX, posY, posZ),
-                        Texture = (new Vector2(tu, tv) + textureDisplacement) / textureScale,
-                        Color = c,
-                    };
-
-                    vertArray[vertexCount++] = newVertex;
-                }
-            }
-
-            List<uint> indexList = new List<uint>();
-
-            for (long depth = 0; depth < vertexCountZ - 1; depth++)
+            var indexTask = Task.Run(() =>
             {
-                for (long width = 0; width < vertexCountX - 1; width++)
+                uint[] indexArray = new uint[(Width - 1) * (Depth - 1) * 6];
+
+                Parallel.For(0, Depth - 1, (depth) =>
                 {
-                    long index1 = (vertexCountZ * (depth + 0)) + (width + 0); // top left
-                    long index2 = (vertexCountZ * (depth + 0)) + (width + 1); // top right
-                    long index3 = (vertexCountZ * (depth + 1)) + (width + 0); // bottom left
-                    long index4 = (vertexCountZ * (depth + 1)) + (width + 1); // bottom right
+                    for (long width = 0; width < Width - 1; width++)
+                    {
+                        var (Index, Quad) = BuildQuad(depth, width);
 
-                    indexList.Add((uint)index1);
-                    indexList.Add((uint)index2);
-                    indexList.Add((uint)index3);
+                        Array.Copy(Quad, 0, indexArray, Index, 6);
+                    }
+                });
 
-                    indexList.Add((uint)index2);
-                    indexList.Add((uint)index4);
-                    indexList.Add((uint)index3);
-                }
+                return indexArray;
+            });
+
+            return (await vertTask, await indexTask);
+        }
+        /// <summary>
+        /// Builds a vertex
+        /// </summary>
+        /// <param name="depth">Depth</param>
+        /// <param name="width">Width</param>
+        /// <param name="cellSize">Cell size</param>
+        /// <param name="cellHeight">Cell height</param>
+        /// <param name="heightCurve">Height curve</param>
+        /// <param name="textureScale">Texture scale</param>
+        /// <param name="textureDisplacement">Texture displacement</param>
+        /// <returns>Returns a vertex</returns>
+        private (long Index, VertexData Vertex) BuildVertex(long depth, long width, float cellSize, float cellHeight, Curve heightCurve, float textureScale, Vector2 textureDisplacement)
+        {
+            float totalWidth = cellSize * (Width - 1);
+            float totalDepth = cellSize * (Depth - 1);
+
+            long vertexIndex = (depth * Depth) + width;
+
+            float h = heightCurve.Evaluate(m_HeightData[depth, width]);
+            if (m_FalloffData != null)
+            {
+                h = MathUtil.Clamp(h - m_FalloffData[depth, width], 0, 1);
             }
 
-            ComputeHeightMapNormals(vertArray, this.Width, this.Depth);
+            Color4 c = m_ColorData != null ? m_ColorData[depth, width] : Color4.Lerp(Color4.Black, Color4.White, h);
 
-            vertices = vertArray;
-            indices = indexList;
+            float posX = (depth * cellSize) - (totalDepth * 0.5f);
+            float posY = h * cellHeight;
+            float posZ = (width * cellSize) - (totalWidth * 0.5f);
+
+            float tu = width * cellSize / totalWidth;
+            float tv = depth * cellSize / totalDepth;
+
+            VertexData newVertex = new VertexData()
+            {
+                Position = new Vector3(posX, posY, posZ),
+                Texture = (new Vector2(tu, tv) + textureDisplacement) / textureScale,
+                Color = c,
+            };
+
+            return (vertexIndex, newVertex);
+        }
+        /// <summary>
+        /// Builds a quad of indexes
+        /// </summary>
+        /// <param name="depth">Depth</param>
+        /// <param name="width">Width</param>
+        /// <returns>Returns a quad</returns>
+        private (long Index, uint[] Quad) BuildQuad(long depth, long width)
+        {
+            long vertexIndex = ((depth * (Depth - 1)) + width) * 6;
+
+            long index1 = (Depth * (depth + 0)) + (width + 0); // top left
+            long index2 = (Depth * (depth + 0)) + (width + 1); // top right
+            long index3 = (Depth * (depth + 1)) + (width + 0); // bottom left
+            long index4 = (Depth * (depth + 1)) + (width + 1); // bottom right
+
+            uint[] quad = new[]
+            {
+                (uint)index1,
+                (uint)index2,
+                (uint)index3,
+                (uint)index2,
+                (uint)index4,
+                (uint)index3,
+            };
+
+            return (vertexIndex, quad);
         }
         /// <summary>
         /// Gets the number of triangles of the note for the specified partition level
@@ -465,7 +506,7 @@ namespace Engine
         /// <returns>Returns the number of triangles of the note for the specified partition level</returns>
         public int CalcTrianglesPerNode(int partitionLevel)
         {
-            int side = ((int)Math.Sqrt(this.DataLength) - 1) / ((int)Math.Pow(2, partitionLevel));
+            int side = ((int)Math.Sqrt(DataLength) - 1) / ((int)Math.Pow(2, partitionLevel));
 
             return side * side * 2;
         }

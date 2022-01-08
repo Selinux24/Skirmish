@@ -334,7 +334,7 @@ namespace Engine
             : base(id, name, scene, description)
         {
             // Generate model content
-            content = description.ReadModelContent();
+            content = description.ReadModelContent().GetAwaiter().GetResult();
 
             // Generate quadtree
             groundPickingQuadtree = description.ReadQuadTree(content.GetTriangles());

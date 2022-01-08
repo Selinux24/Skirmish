@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Engine.Content
 {
@@ -117,7 +118,7 @@ namespace Engine.Content
         /// Reads the model content file
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<ContentData> ReadModelContent()
+        public async Task<IEnumerable<ContentData>> ReadModelContent()
         {
             if (!string.IsNullOrEmpty(ContentFilename))
             {
@@ -127,11 +128,11 @@ namespace Engine.Content
                 var contentDesc = SerializationHelper.DeserializeFromFile<ContentDataFile>(resource);
 
                 var loader = GameResourceManager.GetLoaderForFile(contentDesc.ModelFileName);
-                return loader.Load(directory, contentDesc);
+                return await loader.Load(directory, contentDesc);
             }
             else if (ContentData != null)
             {
-                return new[] { ContentData };
+                return await Task.FromResult(new[] { ContentData });
             }
             else
             {

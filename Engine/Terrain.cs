@@ -720,26 +720,25 @@ namespace Engine
             terrainMaterial = MeshMaterial.DefaultBlinnPhong;
 
             // Get vertices and indices from heightmap
-            heightMap.BuildGeometry(
+            var (Vertices, Indices) = heightMap.BuildGeometry(
                 heightMapCellSize,
                 heightMapHeight,
                 heightMapCurve,
                 uvScale,
-                uvDisplacement,
-                out var vertices, out var indices);
+                uvDisplacement).GetAwaiter().GetResult();
 
             // Compute triangles for ray - mesh picking
             var tris = Triangle.ComputeTriangleList(
                 Topology.TriangleList,
-                vertices.Select(v => v.Position.Value).ToArray(),
-                indices.ToArray());
+                Vertices.Select(v => v.Position.Value).ToArray(),
+                Indices.ToArray());
 
             // Initialize quadtree for ray picking
             groundPickingQuadtree = description.ReadQuadTree(tris);
 
             //Initialize map
             int trianglesPerNode = heightMap.CalcTrianglesPerNode(MapGrid.LODLevels);
-            mapGrid = new MapGrid(Game, $"Terrain.{Name}", vertices, trianglesPerNode);
+            mapGrid = new MapGrid(Game, $"Terrain.{Name}", Vertices, trianglesPerNode);
         }
         /// <summary>
         /// Destructor

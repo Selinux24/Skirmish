@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Engine.Content.FmtObj
 {
@@ -52,7 +53,7 @@ namespace Engine.Content.FmtObj
         /// <param name="contentFolder">Content folder</param>
         /// <param name="content">Content description</param>
         /// <returns>Returns a list of model contents</returns>
-        public IEnumerable<ContentData> Load(string contentFolder, ContentDataFile content)
+        public async Task<IEnumerable<ContentData>> Load(string contentFolder, ContentDataFile content)
         {
             Matrix transform = Matrix.Identity;
 
@@ -62,25 +63,32 @@ namespace Engine.Content.FmtObj
             }
 
             var meshList = Load(contentFolder, content.ModelFileName, transform, out var materials);
-            if (meshList.Any())
+            if (!meshList.Any())
             {
-                ContentData m = new ContentData();
+                return new ContentData[] { };
+            }
 
+            ContentData m = new ContentData();
+
+            await Task.Run(() =>
+            {
                 foreach (var mat in materials)
                 {
-                    if (!m.Materials.ContainsKey(mat.Name))
+                    if (m.Materials.ContainsKey(mat.Name))
                     {
-                        var matContent = mat.CreateContent();
-
-                        m.Materials.Add(mat.Name, matContent);
-
-                        m.TryAddTexture(contentFolder, mat.MapKa);
-                        m.TryAddTexture(contentFolder, mat.MapKd);
-                        m.TryAddTexture(contentFolder, mat.MapKs);
-                        m.TryAddTexture(contentFolder, mat.MapNs);
-                        m.TryAddTexture(contentFolder, mat.MapD);
-                        m.TryAddTexture(contentFolder, mat.MapBump);
+                        continue;
                     }
+
+                    var matContent = mat.CreateContent();
+
+                    m.Materials.Add(mat.Name, matContent);
+
+                    m.TryAddTexture(contentFolder, mat.MapKa);
+                    m.TryAddTexture(contentFolder, mat.MapKd);
+                    m.TryAddTexture(contentFolder, mat.MapKs);
+                    m.TryAddTexture(contentFolder, mat.MapNs);
+                    m.TryAddTexture(contentFolder, mat.MapD);
+                    m.TryAddTexture(contentFolder, mat.MapBump);
                 }
 
                 for (int i = 0; i < meshList.Count(); i++)
@@ -88,11 +96,9 @@ namespace Engine.Content.FmtObj
                     var mesh = meshList.ElementAt(i);
                     m.ImportMaterial($"Mesh{i + 1}", mesh.Material ?? ContentData.NoMaterial, mesh);
                 }
+            });
 
-                return new[] { m };
-            }
-
-            return new ContentData[] { };
+            return new[] { m };
         }
         /// <summary>
         /// Loads a model content list from resources

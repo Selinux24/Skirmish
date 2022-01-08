@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -99,57 +100,62 @@ namespace Engine
         /// Generates a new model content from an height map description
         /// </summary>
         /// <returns>Returns a new model content</returns>
-        public ContentData ReadModelContent()
+        public async Task<ContentData> ReadModelContent()
         {
             HeightMap hm = HeightMap.FromDescription(this);
-            hm.BuildGeometry(
+            var (Vertices, Indices) = await hm.BuildGeometry(
                 CellSize,
                 MaximumHeight,
                 HeightCurve,
                 Textures.Scale,
-                Textures.Displacement,
-                out var vertices, out var indices);
-
-            if (!Transform.IsIdentity)
-            {
-                vertices = VertexData.Transform(vertices, Transform);
-            }
+                Textures.Displacement);
 
             ContentData modelContent = new ContentData();
 
-            string materialName = "material";
-            string geoName = "geometry";
-
-            MaterialBlinnPhongContent material = MaterialBlinnPhongContent.Default;
-
-            SubMeshContent geo = new SubMeshContent(Topology.TriangleList, materialName, true, false);
-            geo.SetVertices(vertices);
-            geo.SetIndices(indices);
-
-            if (Textures?.TexturesLR?.Any() == true)
+            await Task.Run(() =>
             {
-                string diffuseTexureName = "diffuse";
+                var vertices = Vertices;
+                var indices = Indices;
 
-                material.DiffuseTexture = diffuseTexureName;
+                if (!Transform.IsIdentity)
+                {
+                    vertices = VertexData.Transform(vertices, Transform);
+                }
 
-                var diffuseImage = ImageContent.Array(Textures.ContentPath, Textures.TexturesLR);
+                string materialName = "material";
+                string geoName = "geometry";
 
-                modelContent.Images.Add(diffuseTexureName, diffuseImage);
-            }
+                MaterialBlinnPhongContent material = MaterialBlinnPhongContent.Default;
 
-            if (Textures?.NormalMaps?.Any() == true)
-            {
-                string nmapTexureName = "normal";
+                SubMeshContent geo = new SubMeshContent(Topology.TriangleList, materialName, true, false);
+                geo.SetVertices(vertices);
+                geo.SetIndices(indices);
 
-                material.NormalMapTexture = nmapTexureName;
+                if (Textures?.TexturesLR?.Any() == true)
+                {
+                    string diffuseTexureName = "diffuse";
 
-                var nmapImage = ImageContent.Array(Textures.ContentPath, Textures.NormalMaps);
+                    material.DiffuseTexture = diffuseTexureName;
 
-                modelContent.Images.Add(nmapTexureName, nmapImage);
-            }
+                    var diffuseImage = ImageContent.Array(Textures.ContentPath, Textures.TexturesLR);
 
-            modelContent.Materials.Add(materialName, material);
-            modelContent.ImportMaterial(geoName, materialName, geo);
+                    modelContent.Images.Add(diffuseTexureName, diffuseImage);
+                }
+
+                if (Textures?.NormalMaps?.Any() == true)
+                {
+                    string nmapTexureName = "normal";
+
+                    material.NormalMapTexture = nmapTexureName;
+
+                    var nmapImage = ImageContent.Array(Textures.ContentPath, Textures.NormalMaps);
+
+                    modelContent.Images.Add(nmapTexureName, nmapImage);
+                }
+
+                modelContent.Materials.Add(materialName, material);
+                modelContent.ImportMaterial(geoName, materialName, geo);
+            });
 
             return modelContent;
         }

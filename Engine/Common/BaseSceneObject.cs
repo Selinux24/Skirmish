@@ -43,21 +43,11 @@ namespace Engine.Common
                 throw new ArgumentNullException(nameof(id), "An id must be specified.");
             }
 
-            if (scene == null)
-            {
-                throw new ArgumentNullException(nameof(scene), "The scene must be specified");
-            }
-
-            if (description == null)
-            {
-                throw new ArgumentNullException(nameof(description), "The description must be specified");
-            }
-
             Id = id;
             Name = name;
-            Scene = scene;
+            Scene = scene ?? throw new ArgumentNullException(nameof(scene), "The scene must be specified");
             Game = scene.Game;
-            Description = description;
+            Description = description ?? throw new ArgumentNullException(nameof(description), "The description must be specified");
             Active = description.StartsActive;
         }
 

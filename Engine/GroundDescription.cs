@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -89,16 +90,18 @@ namespace Engine
         /// <summary>
         /// Reads a model content from description
         /// </summary>
-        public ContentData ReadModelContent()
+        public async Task<ContentData> ReadModelContent()
         {
             // Read model content
             if (Heightmap != null)
             {
-                return Heightmap.ReadModelContent();
+                return await Heightmap.ReadModelContent();
             }
             else if (Content != null)
             {
-                return Content.ReadModelContent().FirstOrDefault();
+                var modelContent = await Content.ReadModelContent();
+
+                return modelContent.FirstOrDefault();
             }
             else
             {
